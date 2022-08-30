@@ -1,0 +1,17 @@
+{
+  "name": "rabby-desktop",
+  "version": "4.6.0",
+  "description": "Rabby's desktop application, for WEB3 users",
+  "license": "MIT",
+  "author": {
+    "name": "Rabby",
+    "url": "https://github.com/RabbyHub/RabbyDesktop"
+  },
+  "main": "./dist/main/main.js",
+  "scripts": {
+    "electron-rebuild": "node -r ts-node/register ../../.erb/scripts/electron-rebuild.js",
+    "postinstall": "npm run electron-rebuild && npm run link-modules",
+    "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.ts"
+  },
+  "dependencies": {}
+}
