@@ -3,6 +3,9 @@
  *        See https://github.com/webpack-contrib/sass-loader#imports
  */
 body {
+  margin: 0;
+}
+/* body {
   position: relative;
   color: white;
   height: 100vh;
@@ -59,4 +62,4 @@ a:hover {
   justify-content: center;
   align-items: center;
   margin: 20px 0;
-}
+} */

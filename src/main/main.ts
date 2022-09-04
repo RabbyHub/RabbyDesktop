@@ -14,6 +14,7 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import { FRAME_DEFAULT_SIZE, FRAME_MAX_SIZE, FRAME_MIN_SIZE } from '../isomorphic/const-size';
 
 class AppUpdater {
   constructor() {
@@ -46,7 +47,8 @@ if (isDebug) {
 const installExtensions = async () => {
   const installer = require('electron-devtools-installer');
   const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
-  const extensions = ['REACT_DEVELOPER_TOOLS'];
+  // const extensions = ['REACT_DEVELOPER_TOOLS'];
+  const extensions: string[] = [];
 
   return installer
     .default(
@@ -71,14 +73,19 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1024,
-    height: 728,
+    /* TODO: configure w/h */
+    ...FRAME_DEFAULT_SIZE,
+    ...FRAME_MAX_SIZE,
+    ...FRAME_MIN_SIZE,
+    // resizable: false,
+    // autoHideMenuBar: process.env.NODE_ENV === 'production',
     icon: getAssetPath('icon.png'),
     webPreferences: {
       sandbox: false,
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
+      webviewTag: true
     },
   });
 

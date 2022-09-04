@@ -100,12 +100,16 @@
     }
   },
   "dependencies": {
+    "@types/sortablejs": "^1.13.0",
+    "classnames": "^2.3.1",
     "electron-debug": "^3.2.0",
     "electron-log": "^4.4.8",
+    "electron-tabs": "^1.0.1",
     "electron-updater": "^5.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.3.0"
+    "react-router-dom": "^6.3.0",
+    "sortablejs": "^1.15.0"
   },
   "devDependencies": {
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.7",
@@ -175,8 +179,8 @@
     "webpack-merge": "^5.8.0"
   },
   "build": {
-    "productName": "ElectronReact",
-    "appId": "org.erb.ElectronReact",
+    "productName": "RabbyDesktop",
+    "appId": "org.erb.RabbyDesktop",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [
