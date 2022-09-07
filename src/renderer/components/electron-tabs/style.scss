@@ -1,0 +1,183 @@
+/* CUSTOM PROPERTIES */
+/* ================= */
+@import "../../css/theme/default.css";
+
+:root {
+  --rabby-tab-tabgroup-background: #e7eaed;
+  --rabby-tab-font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --rabby-tab-font-size: 13px;
+
+  --rabby-tab-background: #e7eaed;
+  --rabby-tab-color: var(--color-purewhite);
+  --rabby-tab-hover-color: var(--color-purewhite);
+  --rabby-tab-hover-background: rgba(255, 255, 255, 0.1);
+  --rabby-tab-active-color: var(--color-title);
+  --rabby-tab-active-background: var(--color-purewhite);
+
+  --rabby-tab-transition: background-color 200ms ease-out, color 200ms ease-out;
+
+  --rabby-tab-button-font-size: 15px;
+  --rabby-tab-button-background: none;
+  --rabby-tab-button-color: var(--color-purewhite);
+  --rabby-tab-button-hover-background: #dadce0;
+  --rabby-tab-button-hover-color: #383a3e;
+
+  --rabby-tab-close-button-visibility: visible;
+
+  --rabby-tab-h: 44px;
+}
+
+/* STYLES */
+/* ====== */
+
+.rabby-tab-etabs {
+  font-family: var(--rabby-tab-font-family);
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'liga', 'clig', 'kern';
+  overflow: hidden;
+  height: 100vh;
+
+  .rabby-tab-view {
+    overflow: auto;
+    height: calc(100vh - var(--rabby-tab-h));
+  }
+}
+
+.rabby-tab-etabs > nav {
+  background: var(--rabby-tab-tabgroup-background);
+  font-size: var(--rabby-tab-font-size);
+  width: 100%;
+  height: 32px;
+  cursor: default;
+  -webkit-user-select: none;
+  user-select: none;
+  display: flex;
+  height: var(--rabby-tab-h);
+  background-color: var(--color-primary);
+}
+
+.rabby-tab-navs {
+  display: flex;
+  flex-wrap: nowrap;
+  height: 100%;
+}
+
+.rabby-tab {
+  box-shadow: inset 0 -1px var(--rabby-tab-border-color);
+  color: var(--rabby-tab-color);
+  background-color: transparent;
+  cursor: pointer;
+  font-size: var(--rabby-tab-font-size);
+  transition: var(--rabby-tab-transition);
+  position: relative;
+  box-sizing: border-box;
+  height: 100%;
+  padding: 5px 9px;
+  align-items: center;
+  font-weight: 500;
+  width: 240px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  opacity: 0.6;
+
+
+  &.active, &:hover {
+    opacity: 1;
+  }
+
+  &.active {
+    color: var(--rabby-tab-active-color);
+    background: var(--rabby-tab-active-background);
+    box-shadow: none;
+  }
+
+  &:not(.active):hover {
+    background: var(--rabby-tab-hover-background);
+    color: var(--rabby-tab-hover-color);
+  }
+
+  .rabby-tab-close {
+    display: none;
+    margin-left: 10px;
+    outline: none;
+  }
+  &.active .rabby-tab-close,
+  &:hover .rabby-tab-close {
+    visibility: visible;
+    display: inline-block;
+  }
+
+  .rabby-tab-close button {
+    // color: var(--color-purewhite);
+    background: var(--rabby-tab-button-background);
+    border-radius: 50%;
+    color: var(--rabby-tab-button-color);
+    cursor: pointer;
+    font-size: var(--rabby-tab-button-font-size);
+    display: inline-block;
+    border: none;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    padding: 1px 0 0 0;
+    visibility: var(--rabby-tab-close-button-visibility);
+    outline: none;
+
+    &:hover {
+      color: var(--rabby-tab-button-hover-color);
+      background: var(--rabby-tab-button-hover-background);
+    }
+  }
+}
+
+.rabby-tab-icon-img {
+  height: 20px;
+  width: 20px;
+}
+
+.rabby-tab-icon {
+  height: 20px;
+
+  img {
+    height: 20px;
+    width: 20px;
+  }
+}
+
+.rabby-tab-inner-left, .rabby-tab-inner-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.rabby-tab-title {
+  display: inline-block;
+  margin-left: 10px;
+}
+
+.rabby-tab.active .tab-close button {
+  visibility: visible;
+}
+
+.rabby-tab-buttons {
+  display: flex;
+  padding: 5px;
+  // border-left: 1px solid var(--rabby-tab-border-color);
+}
+
+.rabby-tab-view {
+  position: relative;
+  height: calc(100vh - 33px);
+  display: none;
+
+  &.visible {
+    display: block;
+  }
+}
+
+.rabby-tab-webview {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}

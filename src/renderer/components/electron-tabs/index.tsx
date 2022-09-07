@@ -2,7 +2,8 @@ import React, { memo, useEffect, useMemo } from "react";
 import Sortable from "sortablejs";
 import classnames from "classnames";
 
-import "./style.css";
+import "./style.scss";
+import useSortable from "./useSortable";
 
 interface TabGroupProps {
   activeIndex?: number;
@@ -13,7 +14,7 @@ interface TabGroupProps {
 
   defaultTab?: string,
   visibilityThreshold?: number,
-  
+
   closeButtonText?: string,
   /* implement it as NewTab */
   newTabButton?: boolean,
@@ -22,6 +23,8 @@ interface TabGroupProps {
   /* TODO: implement it */
   sortable?: boolean,
   sortableOptions?: Sortable.Options
+
+  navClassname?: string
 }
 
 interface Badge {
@@ -35,6 +38,7 @@ export default function TabGroup ({
   tabs,
   onActiveTabChange,
   onCloseTab,
+  navClassname,
   ...props
 }: React.PropsWithChildren<TabGroupProps>) {
   const {
@@ -42,12 +46,6 @@ export default function TabGroup ({
   } = useMemo(() => {
     const tabChildren = [] as TabRenderContent[];
     tabs.forEach((tab, index) => {
-      // const t = typeof child;
-      // const rt = (child as React.ReactElement)?.type;
-      // if (typeof child !== "object" || (rt as Function)?.name !== TabGroup.Tab.name) {
-      //   console.warn(`TabGroup children must be Tab, but child ${index} is ${t}, with react type ${rt}`);
-      //   return ;
-      // }
       let ele: React.ReactNode = null;
       if (tab.prerender) {
         ele = tab.render(tab);
@@ -57,9 +55,9 @@ export default function TabGroup ({
         ...tab,
         index,
         title: tab.title ?? `Tab ${index}`,
-        icon: tab.icon || '',
-        iconURL: tab.iconURL || '',
+        icon: tab.icon || null,
         closable: tab.closable === false,
+        draggable: tab.draggable !== false,
         ele,
       });
     });
@@ -67,23 +65,29 @@ export default function TabGroup ({
     return {
       tabChildren
     }
-  }, [ children ]);
+  }, [ tabs ]);
 
   const [ activeTabIndex, setActiveTabIndex ] = React.useState(_activeIndex);
   useEffect(() => {
     setActiveTabIndex?.(_activeIndex);
   }, [ _activeIndex ]);
 
+  const sortContainerRef = useSortable({
+    draggable: '.draggable-tab'
+  });
+
   return (
     <div className="rabby-tab-etabs">
-      <nav className="rabby-tab-nav visible">
-        <div className="rabby-tab-navs">
+      <nav className={classnames('rabby-tab-nav', navClassname)}>
+        <div className="rabby-tab-navs" ref={sortContainerRef}>
           {tabChildren.map((tab, idx) => {
             const isActive = activeTabIndex === tab.index;
+            const draggable = tab.draggable;
+
             return (
               <div
-                key={`rabby-tabs-nav-${idx}`}
-                className={classnames('rabby-tab visible', isActive && 'active')}
+                key={`rabby-tabs-nav-${tab.title}-${idx}`}
+                className={classnames('rabby-tab', isActive && 'active', draggable && 'draggable-tab')}
                 onClick={() => {
                   const tabIndex = tab.index;
                   setActiveTabIndex(tabIndex);
@@ -91,15 +95,19 @@ export default function TabGroup ({
                   onActiveTabChange?.(tabIndex);
                 }}
               >
-                {/* TODO: allow tab.icon as React.ReactNode */}
-                {tab.icon && <span className="rabby-tab-icon"></span>}
-                <span className="rabby-tab-title" title="electron-tabs on NPM">{tab.title}</span>
-                {/* <span className="rabby-tab-badge hidden"></span> */}
-                {!tab.closable && (
-                  <span className="rabby-tab-close" onClick={() => onCloseTab?.(tab)}>
-                    <button>×</button>
+                <div className="rabby-tab-inner-left">
+                  <span className="rabby-tab-icon">
+                    {tab.icon}
                   </span>
-                )}
+                  <span className="rabby-tab-title" title="electron-tabs on NPM">{tab.title}</span>
+                </div>
+                <div className="rabby-tab-inner-right">
+                  {!tab.closable && (
+                    <span className="rabby-tab-close" onClick={() => onCloseTab?.(tab)}>
+                      <button>×</button>
+                    </span>
+                  )}
+                </div>
               </div>
             )
           })}
@@ -107,9 +115,9 @@ export default function TabGroup ({
         <div className="rabby-tab-buttons"></div>
       </nav>
       {tabChildren.map((tab) => {
-        const key = `rabby-tab-${tab.index}`;
+        const key = `rabby-tab-${tab.title}-${tab.index}`;
         const isActive = activeTabIndex === tab.index;
-        
+
         return (
           <Tab key={key} __active={isActive} visible={!tab.prerender || isActive}>
             {!tab.ele && !tab.prerender ? tab.render(tab) : (tab.ele || null)}
@@ -122,14 +130,14 @@ export default function TabGroup ({
 
 interface TabProps {
   badge?: Badge;
+  draggable?: boolean;
   closable?: boolean;
-  icon?: string;
-  iconURL?: string;
+  icon?: React.ReactNode;
   // ready?: ((el: HTMLDivElement) => void);
   title?: string;
 }
 
-type TabOptions = TabProps & {
+export type TabOptions = TabProps & {
   prerender?: boolean
   render: (opt: TabOptions) => React.ReactNode;
   /* inner property */

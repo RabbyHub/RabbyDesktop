@@ -8,9 +8,10 @@
   --font-paragraph2: 13px;
   --font-comment: 12px;
 
-  --color-primary: #0078d4;
-  --color-primary-gradient: linear-gradient(97.59deg, #8BA8FF 0%, #8C96FF 99.49%);
-  --color-disabled: linear-gradient(0deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), #8697FF;
+  /* --color-primary: #0078d4; */
+  --color-primary: #8697ff;
+  --color-primary-gradient: linear-gradient(97.59deg, #8BA8FF 0%, #8c96ff 99.49%);
+  --color-disabled: linear-gradient(0deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), #8697ff;
   --color-green: #27c193;
   --color-orange: #ffb020;
   --color-red: #ec5151;

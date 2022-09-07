@@ -9,11 +9,13 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, session, BrowserView } from 'electron';
+import { ElectronChromeExtensions } from 'electron-chrome-extensions';
+
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
-import { resolveHtmlPath } from './util';
+import { getAssetPath, resolveHtmlPath } from './util';
 import { FRAME_DEFAULT_SIZE, FRAME_MAX_SIZE, FRAME_MIN_SIZE } from '../isomorphic/const-size';
 
 class AppUpdater {
@@ -44,32 +46,76 @@ if (isDebug) {
   require('electron-debug')();
 }
 
-const installExtensions = async () => {
+const installExtensions = async (
+  sessionObj: Electron.Session = session.defaultSession
+) => {
+  // TODO: only debug on dev or prodev
   const installer = require('electron-devtools-installer');
   const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
   // const extensions = ['REACT_DEVELOPER_TOOLS'];
   const extensions: string[] = [];
 
-  return installer
-    .default(
+  let rabbyExtension: Electron.Extension | null = null;
+
+  return Promise.allSettled(([
+    isDebug ? installer.default(
       extensions.map((name) => installer[name]),
       forceDownload
-    )
-    .catch(console.log);
+    ) : Promise.resolve(null),
+    sessionObj.loadExtension(
+      // getAssetPath(`chrome_plugins/rabby_v0.45.0`), { allowFileAccess: true }
+      `C:\\Users\\richa\\projects\\RabbyHub\\Rabby\\dist`, { allowFileAccess: true }
+    ).then(ext => {
+      console.warn('[feat] rabby ext id is', ext.id);
+      return ext;
+    }).then(ext => {
+      return rabbyExtension = ext;
+    })
+  ])).then(() => {
+    return {
+      // devTools,
+      rabbyExtension
+    }
+  });
 };
 
 const createWindow = async () => {
-  if (isDebug) {
-    await installExtensions();
-  }
+  const browserSession = session.fromPartition('persist:rabby-desktop', {})
+  const { rabbyExtension } = await installExtensions(browserSession);
 
-  const RESOURCES_PATH = app.isPackaged
-    ? path.join(process.resourcesPath, 'assets')
-    : path.join(__dirname, '../../assets');
+  const extensions = new ElectronChromeExtensions({
+    session: browserSession,
+    // async createTab (details) {
+    //   const tab = myTabApi.createTab()
+    //   if (details.url) {
+    //     tab.webContents.loadURL(details.url)
+    //   }
+    //   return [tab.webContents, tab.browserWindow]
+    // },
+    async selectTab (tab, browserWindow) {
+      // Optionally implemented for chrome.tabs.update support
+      console.warn('[feat] selectTab', tab.getTitle(), tab.isLoadingMainFrame(), tab, browserWindow);
+      return [tab, browserWindow];
+    },
+    async removeTab (tab, browserWindow) {
+      // Optionally implemented for chrome.tabs.remove support
+      console.warn('[feat] removeTab', tab, browserWindow);
+    },
+    async createWindow (details) {
+      const window = new BrowserWindow({
+        webPreferences: {
+          sandbox: true,
+          nodeIntegration: false,
+          contextIsolation: true,
+        },
+      })
+      return window
+    }
+  });
 
-  const getAssetPath = (...paths: string[]): string => {
-    return path.join(RESOURCES_PATH, ...paths);
-  };
+  const preloadPath = app.isPackaged
+  ? path.join(__dirname, 'preload.js')
+  : path.join(__dirname, '../../.erb/dll/preload.js');
 
   mainWindow = new BrowserWindow({
     show: false,
@@ -81,15 +127,22 @@ const createWindow = async () => {
     // autoHideMenuBar: process.env.NODE_ENV === 'production',
     icon: getAssetPath('icon.png'),
     webPreferences: {
+      session: browserSession,
+      preload: preloadPath,
+      webviewTag: true,
       sandbox: false,
-      preload: app.isPackaged
-        ? path.join(__dirname, 'preload.js')
-        : path.join(__dirname, '../../.erb/dll/preload.js'),
-      webviewTag: true
+      nodeIntegration: false,
     },
   });
 
-  mainWindow.loadURL(resolveHtmlPath('index.html'));
+  // Adds the active tab of the browser
+  extensions.addTab(mainWindow.webContents, mainWindow)
+
+  mainWindow.loadURL(resolveHtmlPath('index.html')).then(() => {
+    if (isDebug) {
+      mainWindow?.webContents.openDevTools();
+    }
+  });
 
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {
@@ -100,6 +153,11 @@ const createWindow = async () => {
     } else {
       mainWindow.show();
     }
+
+    mainWindow.webContents.send('chrome-extension-loaded', {
+      name: 'rabby',
+      extension: rabbyExtension
+    });
   });
 
   mainWindow.on('closed', () => {
@@ -118,6 +176,8 @@ const createWindow = async () => {
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();
+
+  return { rabbyExtension }
 };
 
 /**
@@ -136,6 +196,7 @@ app
   .whenReady()
   .then(() => {
     createWindow();
+
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
