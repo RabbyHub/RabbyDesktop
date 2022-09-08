@@ -1,8 +1,8 @@
 import path from 'path';
 import { promises as fs } from 'fs';
-import { app, session, BrowserWindow } from 'electron';
+import { app, session, BrowserWindow, ipcMain, ipcRenderer } from 'electron';
 
-import { Tabs } from './browser/tabs';
+import { Tab, Tabs } from './browser/tabs';
 import { ElectronChromeExtensions } from 'electron-chrome-extensions';
 import { setupMenu } from './browser/menu';
 import { buildChromeContextMenu } from 'electron-chrome-context-menu';
@@ -88,6 +88,8 @@ type TabbedBrowserWindowOptions = {
   window?: Electron.BrowserWindowConstructorOptions,
   session?: Electron.Session,
   extensions: ElectronChromeExtensions
+
+  isTopbar?: boolean
 }
 class TabbedBrowserWindow {
   window: BrowserWindow
@@ -124,9 +126,23 @@ class TabbedBrowserWindow {
       self.extensions.addTab(tab.webContents, tab.window)
     })
 
-    this.tabs.on('tab-selected', function onTabSelected(tab) {
-      self.extensions.selectTab(tab.webContents)
-    })
+    this.tabs.on('tab-selected', function onTabSelected(tab: Tab) {
+      self.extensions.selectTab(tab.webContents!)
+    });
+
+    ipcMain.on('rabby-nav-info', async (event, tabId: number) => {
+      // console.log('[feat] rabby-nav-info:: tabId', tabId);
+      // console.log('[feat] rabby-nav-info:: this.tabs ids', this.tabs.tabList.map(tab => tab.id));
+      const tab = this.tabs.get(tabId);
+      // const tab = this.tabs.selected;
+      if (!tab) return ;
+
+      event.reply('rabby-nav-info', {
+        tabExists: !!tab,
+        canGoBack: tab?.webContents?.canGoBack(),
+        canGoForward: tab?.webContents?.canGoForward(),
+      });
+    });
 
     queueMicrotask(() => {
       // Create initial tab

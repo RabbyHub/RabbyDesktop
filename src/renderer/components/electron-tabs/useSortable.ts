@@ -17,7 +17,6 @@ export default function useSortable (
     }, sortableOptions);
     const vm = new Sortable(domRef.current, options);
 
-    // console.log('[feat] vm', vm);
     return () => {
       vm.destroy();
     }

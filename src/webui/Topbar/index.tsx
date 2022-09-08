@@ -174,7 +174,25 @@ function useTabs () {
   }
 }
 
-function ussAddressUrl (updatedUrl?: string) {
+function useSelectedTabInfo (activeTab?: ChromeTab | null) {
+  const [selectedTabInfo, setSelectedTabInfo] = useState<ChannelMessagePayload['rabby-nav-info']['response'][0]>();
+  useEffect(() => {
+    if (!activeTab?.id) return;
+    const dispose = window.rabbyDesktop.ipcRenderer.on('rabby-nav-info', (payload) => {
+      // console.log('[feat] ipcRenderer rabby-nav-info:: payload', payload);
+      setSelectedTabInfo(payload);
+    })
+    window.rabbyDesktop.ipcRenderer.sendMessage('rabby-nav-info', [ activeTab.id ]);
+
+    return () => {
+      dispose?.();
+    }
+  }, [ activeTab?.id, activeTab?.url ]);
+
+  return selectedTabInfo;
+}
+
+function useAddressUrl (updatedUrl?: string) {
   const [ addressUrl, setAddressUrl ] = useState(updatedUrl || '');
   const onAddressUrlChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setAddressUrl(e.target.value);
@@ -200,7 +218,9 @@ export default function Topbar () {
     tabActions,
   } = useTabs();
 
-  const { addressUrl, onAddressUrlChange } = ussAddressUrl(activeTab?.url);
+  const selectedTabInfo = useSelectedTabInfo(activeTab);
+
+  const { addressUrl, onAddressUrlChange } = useAddressUrl(activeTab?.url);
 
   return (
     <>
@@ -246,11 +266,21 @@ export default function Topbar () {
       <div className="toolbar">
         <div className="page-controls">
           {/* TODO: support canGoback */}
-          <button id="goback" className="nav-control control" onClick={winButtonActions.onGoBackButtonClick}>
+          <button
+            id="goback"
+            className="nav-control control"
+            onClick={winButtonActions.onGoBackButtonClick}
+            disabled={!selectedTabInfo?.canGoBack}
+          >
             <img src={IconNavGoback} alt="close" />
           </button>
           {/* TODO: support canGoforward */}
-          <button id="goforward" className="nav-control control" onClick={winButtonActions.onGoForwardButtonClick}>
+          <button
+            id="goforward"
+            className="nav-control control"
+            onClick={winButtonActions.onGoForwardButtonClick}
+            disabled={!selectedTabInfo?.canGoForward}
+          >
             {/* <img src={IconNavGoforward} alt="close" /> */}
             <img src={IconNavGoback} style={{ transform: 'rotate(180deg)' }} alt="close" />
           </button>

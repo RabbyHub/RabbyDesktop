@@ -1,10 +1,21 @@
 import { NATIVE_HEADER_SIZE } from '../../isomorphic/const-size'
 
-const { EventEmitter } = require('events')
-const { BrowserView } = require('electron')
+import { EventEmitter } from 'events';
+import { BrowserView, BrowserWindow } from 'electron';
 
 export class Tab {
-  constructor(parentWindow, { toolbarHeight = NATIVE_HEADER_SIZE } = {}) {
+  id: BrowserView['webContents']['id'];
+  view?: BrowserView;
+  window?: BrowserWindow;
+  webContents?: BrowserView['webContents'];
+  toolbarHeight: number
+
+  destroyed: boolean = false
+
+  constructor(
+    parentWindow: BrowserWindow,
+    { toolbarHeight = NATIVE_HEADER_SIZE } = {}
+  ) {
     this.view = new BrowserView()
     this.id = this.view.webContents.id
     this.window = parentWindow
@@ -20,51 +31,52 @@ export class Tab {
 
     this.hide()
 
-    this.window.removeBrowserView(this.view)
+    this.window!.removeBrowserView(this.view!)
     this.window = undefined
 
-    if (this.webContents.isDevToolsOpened()) {
-      this.webContents.closeDevTools()
+    if (this.webContents!.isDevToolsOpened()) {
+      this.webContents!.closeDevTools()
     }
 
     // TODO: why is this no longer called?
-    this.webContents.emit('destroyed')
+    this.webContents!.emit('destroyed')
 
-    this.webContents.destroy()
+    this.webContents!.destroy?.()
     this.webContents = undefined
 
     this.view = undefined
   }
 
-  loadURL(url) {
-    return this.view.webContents.loadURL(url)
+  loadURL(url: string) {
+    return this.view?.webContents.loadURL(url)
   }
 
   show() {
-    const [width, height] = this.window.getSize()
+    const [width, height] = this.window!.getSize()
 
-    this.view.setBounds({ x: 0, y: this.toolbarHeight, width: width, height: height - this.toolbarHeight })
-    this.view.setAutoResize({ width: true, height: true })
+    this.view!.setBounds({ x: 0, y: this.toolbarHeight, width: width, height: height - this.toolbarHeight })
+    this.view!.setAutoResize({ width: true, height: true })
     // this.window.addBrowserView(this.view)
   }
 
   hide() {
-    this.view.setAutoResize({ width: false, height: false })
-    this.view.setBounds({ x: -1000, y: 0, width: 0, height: 0 })
+    this.view!.setAutoResize({ width: false, height: false })
+    this.view!.setBounds({ x: -1000, y: 0, width: 0, height: 0 })
     // TODO: can't remove from window otherwise we lose track of which window it belongs to
     // this.window.removeBrowserView(this.view)
   }
 
   reload() {
-    this.view.webContents.reload()
+    this.view!.webContents.reload()
   }
 }
 
 export class Tabs extends EventEmitter {
-  tabList = []
-  selected = null
+  tabList: Tab[] = []
+  selected?: Tab
+  window?: BrowserWindow
 
-  constructor(browserWindow) {
+  constructor(browserWindow: BrowserWindow) {
     super()
     this.window = browserWindow
   }
@@ -81,12 +93,12 @@ export class Tabs extends EventEmitter {
     }
   }
 
-  get(tabId) {
+  get(tabId: chrome.tabs.Tab['id']) {
     return this.tabList.find((tab) => tab.id === tabId)
   }
 
   create() {
-    const tab = new Tab(this.window)
+    const tab = new Tab(this.window!)
     this.tabList.push(tab)
     if (!this.selected) this.selected = tab
     tab.show() // must be attached to window
@@ -95,7 +107,7 @@ export class Tabs extends EventEmitter {
     return tab
   }
 
-  remove(tabId) {
+  remove(tabId: chrome.tabs.Tab['id']) {
     const tabIndex = this.tabList.findIndex((tab) => tab.id === tabId)
     if (tabIndex < 0) {
       throw new Error(`Tabs.remove: unable to find tab.id = ${tabId}`)
@@ -114,7 +126,7 @@ export class Tabs extends EventEmitter {
     }
   }
 
-  select(tabId) {
+  select(tabId: chrome.tabs.Tab['id']) {
     const tab = this.get(tabId)
     if (!tab) return
     if (this.selected) this.selected.hide()

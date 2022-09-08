@@ -26,12 +26,12 @@ const configuration: webpack.Configuration = {
   target: ['web', 'electron-renderer'],
 
   entry: {
-    // webui: [
-    //   `webpack-dev-server/client?http://localhost:${port}/dist`,
-    //   'webpack/hot/only-dev-server',
-    //   path.join(webpackPaths.srcShellPath, 'webui.tsx'),
-    // ]
-    webui: path.join(webpackPaths.srcShellPath, 'webui.tsx'),
+    webui: [
+      `webpack-dev-server/client?http://localhost:${port}/dist`,
+      'webpack/hot/only-dev-server',
+      path.join(webpackPaths.srcShellPath, 'webui.tsx'),
+    ]
+    // webui: path.join(webpackPaths.srcShellPath, 'webui.tsx'),
   },
 
   output: {
