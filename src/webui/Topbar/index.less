@@ -1,8 +1,39 @@
 
+@import "../../ui-common/css-theme/index.css";
+
+@rem-unit: 14px;
+
 :root {
-  --bg-color: #39375b;
+  /* 1rem --> 8px */
+  font-size: @rem-unit;
+
+  --rabby-tab-tabgroup-background: #e7eaed;
+  --rabby-tab-font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --rabby-tab-font-size: 13px;
+
+  // --rabby-tab-background: #e7eaed;
+  --rabby-tab-background: var(--color-primary);
+  --rabby-tab-color: var(--color-purewhite);
+  --rabby-tab-hover-color: var(--color-purewhite);
+  --rabby-tab-hover-background: rgba(255, 255, 255, 0.1);
+  --rabby-tab-active-color: var(--color-title);
+  --rabby-tab-active-background: var(--color-purewhite);
+
+  --rabby-tab-transition: background-color 200ms ease-out, color 200ms ease-out;
+
+  --rabby-tab-button-font-size: 15px;
+  --rabby-tab-button-background: none;
+  --rabby-tab-button-color: var(--color-purewhite);
+  --rabby-tab-button-hover-background: #dadce0;
+  --rabby-tab-button-hover-color: #383a3e;
+
+  --rabby-tab-close-button-visibility: visible;
+
+  --rabby-tab-h: 44px;
+  --rabby-toolbar-h: 44px;
+
   --text-color: #ececec;
-  --tab-color: #745c97;
+  --tab-color: var(--rabby-tab-active-background);
   --toolbar-control-color: #d597ce;
 
   /* electron-chrome-extensions colors */
@@ -24,8 +55,8 @@ html {
 body {
   padding: 0;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif;
-  font-size: 16px;
+  font-family: var(--rabby-tab-font-family);
+  font-size: 14px;
   color: var(--text-color);
 }
 
@@ -36,15 +67,15 @@ ul {
 }
 
 .topbar {
-  background: var(--bg-color);
-  height: 2rem;
+  background: var(--color-primary);
+  height: calc(var(--rabby-tab-h) + var(--rabby-toolbar-h));
 }
 
 /*----- TABS -----*/
 
 #tabstrip {
   width: 100%;
-  height: 2rem;
+  height: var(--rabby-tab-h);
   display: flex;
   flex-direction: row;
 }
@@ -69,18 +100,24 @@ ul {
 }
 
 .tab {
-  padding: 0.2rem 0.4rem;
+  // padding: 0.2rem 0.4rem;
+  padding: 8px 12px;
   height: 100%;
   overflow: hidden;
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  width: 12rem;
-  box-shadow: inset -1px 0 0 0 rgba(0,0,0,0.33);
-}
+  // width: 12rem;
+  width: (204rem / @rem-unit);
+  // box-shadow: inset -1px 0 0 0 rgba(0,0,0,0.33);
+  color: var(--rabby-tab-color);
+  opacity: .6;
 
-.tab[data-active] {
-  background: var(--tab-color);
+  &[data-active=true] {
+    opacity: 1;
+    background: var(--tab-color);
+    color: var(--rabby-tab-active-color);
+  }
 }
 
 .tab .favicon[src] {
@@ -96,7 +133,7 @@ ul {
   min-width: 0;
   text-overflow: ellipsis;
   overflow: hidden;
-  font-size: 0.725rem;
+  font-size: (14rem / @rem-unit);
   user-select: none;
 }
 
@@ -110,13 +147,28 @@ ul {
   border: none;
   border-radius: 50%;
   padding: 0;
-  margin-left: 0.2rem;
+  // margin-left: 0.2rem;
   width: 1rem;
   height: 1rem;
   color: #aaa;
   font-size: 0.7rem;
   vertical-align: middle;
   line-height: 0;
+
+  &.close {
+    cursor: pointer;
+    padding: 0;
+    box-sizing: border-box;
+    height: 16px;
+    width: 16px;
+    background-color: transparent;
+
+    > img {
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+  }
 }
 
 .tab .controls .control:disabled {
@@ -155,11 +207,40 @@ ul {
   background-color: var(--tab-color);
   display: flex;
   align-items: center;
-  padding: 0.2rem 0.5rem;
+  padding: 8px 16px;
+  height: var(--rabby-toolbar-h);
 }
 
 .toolbar .page-controls {
-  margin-right: 0.5rem;
+  padding-right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .nav-control {
+    background: none;
+    border: none;
+    outline: none;
+    font-size: 20px;
+    padding: 0;
+    margin: 0;
+    width: 20px;
+    height: 20px;
+    line-height: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-control > img {
+    width: 100%;
+    height: 100%;
+  }
+
+  .nav-control + .nav-control {
+    margin-left: 12px;
+  }
 }
 
 .address-bar {
@@ -171,11 +252,11 @@ ul {
 .address-bar input {
   width: 100%;
   height: 100%;
-  background: var(--bg-color);
-  color: var(--text-color);
+  background: var(--color-bg);
+  color: var(--color-paragraph);
   border: none;
-  border-radius: 2rem;
-  padding: 0 0.5rem;
+  border-radius: 18px;
+  padding: 7px 16px;
   outline: none;
 }
 
@@ -186,4 +267,8 @@ ul {
   height: 1.5rem;
   padding: 0;
   line-height: 0;
+}
+
+browser-action-list {
+  padding-left: 16px;
 }

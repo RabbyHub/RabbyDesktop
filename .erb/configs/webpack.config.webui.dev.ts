@@ -36,7 +36,7 @@ const configuration: webpack.Configuration = {
 
   output: {
     path: webpackPaths.distShellPath,
-    publicPath: '/webui/',
+    publicPath: '/',
     filename: 'webui.js',
     library: {
       type: 'umd',

@@ -12,3 +12,7 @@ export const FRAME_MIN_SIZE = {
   minWidth: 1024,
   minHeight: 728,
 }
+
+const TABS_SIZE = 44;
+const TOOLBAR_SIZE = 44;
+export const NATIVE_HEADER_SIZE = TABS_SIZE + TOOLBAR_SIZE;

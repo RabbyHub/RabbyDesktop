@@ -1,15 +1,16 @@
+import { NATIVE_HEADER_SIZE } from '../../isomorphic/const-size'
+
 const { EventEmitter } = require('events')
 const { BrowserView } = require('electron')
 
-const toolbarHeight = 62
-
 export class Tab {
-  constructor(parentWindow) {
+  constructor(parentWindow, { toolbarHeight = NATIVE_HEADER_SIZE } = {}) {
     this.view = new BrowserView()
     this.id = this.view.webContents.id
     this.window = parentWindow
     this.webContents = this.view.webContents
     this.window.addBrowserView(this.view)
+    this.toolbarHeight = toolbarHeight
   }
 
   destroy() {
@@ -41,7 +42,8 @@ export class Tab {
 
   show() {
     const [width, height] = this.window.getSize()
-    this.view.setBounds({ x: 0, y: toolbarHeight, width: width, height: height - toolbarHeight })
+
+    this.view.setBounds({ x: 0, y: this.toolbarHeight, width: width, height: height - this.toolbarHeight })
     this.view.setAutoResize({ width: true, height: true })
     // this.window.addBrowserView(this.view)
   }

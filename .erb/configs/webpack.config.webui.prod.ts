@@ -15,7 +15,7 @@ import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
 import deleteSourceMaps from '../scripts/delete-source-maps';
-import { getProdStyleLoaders } from './common';
+import { getProdStyleLoaders, getWebpackAliases } from './common';
 
 checkNodeEnv('production');
 deleteSourceMaps();
@@ -38,6 +38,12 @@ const configuration: webpack.Configuration = {
     library: {
       type: 'umd',
     },
+  },
+
+  resolve: {
+    alias: {
+      ...getWebpackAliases()
+    }
   },
 
   module: {

@@ -2,6 +2,12 @@
 /// <reference types="chrome" />
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+// import IconTabClose from '~/assets/icons/native-tabs/icon-tab-close.svg';
+import IconTabClose from '../../../assets/icons/native-tabs/icon-tab-close.svg';
+
+import IconNavGoback from '../../../assets/icons/native-tabs/icon-navigation-back.svg';
+import IconNavGoforward from '../../../assets/icons/native-tabs/icon-navigation-forward.svg';
+import IconNavRefresh from '../../../assets/icons/native-tabs/icon-navigation-refresh.svg';
 import "./index.less";
 
 const isDebug = process.env.NODE_ENV !== 'production';
@@ -33,6 +39,7 @@ function useTabs () {
 
     return { tabList, activeTab }
   }, [ _tabList, activeTabId ]);
+
 
   const updateActiveTab = useCallback((activeTab: ChromeTab | chrome.tabs.TabActiveInfo) => {
     const activeTabId = (activeTab as ChromeTab).id || (activeTab as chrome.tabs.TabActiveInfo).tabId;
@@ -167,6 +174,22 @@ function useTabs () {
   }
 }
 
+function ussAddressUrl (updatedUrl?: string) {
+  const [ addressUrl, setAddressUrl ] = useState(updatedUrl || '');
+  const onAddressUrlChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setAddressUrl(e.target.value);
+  }, []);
+
+  useEffect(() => {
+    setAddressUrl(updatedUrl || '');
+  }, [ updatedUrl ]);
+
+  return {
+    addressUrl,
+    onAddressUrlChange
+  }
+}
+
 export default function Topbar () {
   const {
     tabListDomRef,
@@ -177,27 +200,33 @@ export default function Topbar () {
     tabActions,
   } = useTabs();
 
+  const { addressUrl, onAddressUrlChange } = ussAddressUrl(activeTab?.url);
+
   return (
     <>
       <div id="tabstrip">
         <ul className="tab-list" ref={tabListDomRef}>
           {tabList.map((tab: ChromeTab, idx) => {
+            const key=`topbar-tab-${tab.id}-${idx}`;
+
             return (
               <li
                 className="tab"
                 {...tab.active ? { 'data-active': true } : {}}
                 data-tab-id={`${tab.id}`}
-                key={`topbar-tab-${tab.id}-${idx}`}
+                key={key}
                 onClick={() => tabActions.onTabClick(tab)}
               >
                 <img className="favicon" src={tab.favIconUrl || undefined} />
                 <span className="title">{tab.title}</span>
                 <div className="controls">
-                  <button className="control audio" disabled={!tab.audible}>🔊</button>
+                  {/* <button className="control audio" disabled={tab.audible && !tab.mutedInfo?.muted}>🔊</button> */}
                   <button className="control close" onClick={(evt) => {
                     evt.stopPropagation();
                     tabActions.onTabClose(tab)
-                  }}>x</button>
+                  }}>
+                    <img src={IconTabClose} alt="close" />
+                  </button>
                 </div>
               </li>
             )
@@ -216,17 +245,27 @@ export default function Topbar () {
       </div>
       <div className="toolbar">
         <div className="page-controls">
-          <button id="goback" className="control" onClick={winButtonActions.onGoBackButtonClick}>⬅️</button>
-          <button id="goforward" className="control" onClick={winButtonActions.onGoBackButtonClick}>➡️</button>
-          <button id="reload" className="control" onClick={winButtonActions.onReloadButtonClick}>🔄</button>
+          {/* TODO: support canGoback */}
+          <button id="goback" className="nav-control control" onClick={winButtonActions.onGoBackButtonClick}>
+            <img src={IconNavGoback} alt="close" />
+          </button>
+          {/* TODO: support canGoforward */}
+          <button id="goforward" className="nav-control control" onClick={winButtonActions.onGoForwardButtonClick}>
+            {/* <img src={IconNavGoforward} alt="close" /> */}
+            <img src={IconNavGoback} style={{ transform: 'rotate(180deg)' }} alt="close" />
+          </button>
+          <button id="reload" className="nav-control control" onClick={winButtonActions.onReloadButtonClick}>
+            <img src={IconNavRefresh} alt="close" />
+          </button>
         </div>
         <div className="address-bar">
           <input
             id="addressurl"
             spellCheck={false}
-            defaultValue={activeTab?.url || ''}
+            value={addressUrl}
+            // defaultValue={activeTab?.url || ''}
             onKeyUp={onAddressUrlKeyUp}
-            // onChange={}
+            onChange={onAddressUrlChange}
           />
         </div>
         {/* @ts-ignore */}

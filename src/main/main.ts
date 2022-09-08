@@ -237,6 +237,7 @@ class Browser {
 
       createWindow: async (details) => {
         const win = this.createWindow({
+          // TODO: support more then one urls from details.url
           initialUrl: details.url || newTabUrl,
         })
         // if (details.active) tabs.select(tab.id)
@@ -249,8 +250,8 @@ class Browser {
     })
 
     const webuiExtension = await this.session.loadExtension(
-      // getAssetPath('builtin_exts/ui')
-      resolveReleasePath('webui')
+      resolveReleasePath('webui'),
+      { allowFileAccess: true }
     )
     webuiExtensionId = webuiExtension.id
 

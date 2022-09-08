@@ -1,3 +1,4 @@
+import path from 'path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
 export function getDevStyleLoaders () {
@@ -92,4 +93,13 @@ export function getProdStyleLoaders () {
       exclude: /\.module\.s?(c|a)ss$/,
     },
   ]
+}
+
+const ROOT = path.resolve(__dirname, '../../');
+
+export function getWebpackAliases () {
+  return {
+    '@': path.resolve(ROOT, 'src'),
+    '@root': path.resolve(ROOT),
+  } as Exclude<import('webpack').Configuration['resolve'], void>['alias']
 }
