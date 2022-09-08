@@ -169,15 +169,22 @@ const configuration: webpack.Configuration = {
       })
         .on('close', (code: number) => process.exit(code!))
         .on('error', (spawnError) => console.error(spawnError));
+        
+      console.log('Starting WebUI dev server...');
+      spawn('npm', ['run', 'start:webui'], {
+        shell: true,
+        stdio: 'inherit',
+      })
+        .on('error', (spawnError) => console.error(spawnError));
 
       console.log('Starting Main Process...');
-      let args = ['run', 'start:main'];
+      let mainArgs = ['run', 'start:main'];
       if (process.env.MAIN_ARGS) {
-        args = args.concat(
+        mainArgs = mainArgs.concat(
           ['--', ...process.env.MAIN_ARGS.matchAll(/"[^"]+"|[^\s"]+/g)].flat()
         );
       }
-      spawn('npm', args, {
+      spawn('npm', mainArgs, {
         shell: true,
         stdio: 'inherit',
       })
@@ -186,6 +193,7 @@ const configuration: webpack.Configuration = {
           process.exit(code!);
         })
         .on('error', (spawnError) => console.error(spawnError));
+        
       return middlewares;
     },
   },

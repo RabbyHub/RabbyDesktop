@@ -6,7 +6,7 @@ import { Tabs } from './browser/tabs';
 import { ElectronChromeExtensions } from 'electron-chrome-extensions';
 import { setupMenu } from './browser/menu';
 import { buildChromeContextMenu } from 'electron-chrome-context-menu';
-import { getAssetPath } from './util';
+import { getAssetPath, resolveReleasePath } from './util';
 
 const preloadPath = app.isPackaged
 ? path.join(__dirname, 'preload.js')
@@ -180,7 +180,7 @@ class Browser {
     return window ? this.getWindowFromBrowserWindow(window) : null
   }
 
-  getIpcWindow(event) {
+  getIpcWindow(event: Electron.NewWindowWebContentsEvent) {
     let win = null
 
     if (event.sender) {
@@ -249,7 +249,8 @@ class Browser {
     })
 
     const webuiExtension = await this.session.loadExtension(
-      getAssetPath('builtin_exts/ui')
+      // getAssetPath('builtin_exts/ui')
+      resolveReleasePath('webui')
     )
     webuiExtensionId = webuiExtension.id
 
@@ -283,7 +284,8 @@ class Browser {
         height: 720,
         frame: false,
         webPreferences: {
-          sandbox: true,
+          // sandbox: true,
+          sandbox: false,
           nodeIntegration: false,
           // enableRemoteModule: false,
           contextIsolation: true,
@@ -317,8 +319,8 @@ class Browser {
         case 'background-tab':
         case 'new-window':
           const win = this.getIpcWindow(event)
-          const tab = win.tabs.create()
-          tab.loadURL(url)
+          const tab = win?.tabs.create()
+          tab?.loadURL(url)
           break
       }
     })

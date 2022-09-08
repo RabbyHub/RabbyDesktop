@@ -26,9 +26,11 @@
   },
   "main": "./src/main/main.ts",
   "scripts": {
-    "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
+    "build": "concurrently \"npm run build:webui\" \"npm run build:main\" \"npm run build:renderer\"",
     "build:main": "cross-env-shell NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.main.prod.ts",
     "build:renderer": "cross-env-shell NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
+    "build:webui": "npm run clean:webui && cross-env-shell NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.webui.prod.ts",
+    "clean:webui": "rimraf release/app/dist/webui",
     "postinstall": "ts-node .erb/scripts/check-native-dep.js && electron-builder install-app-deps && cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.dev.dll.ts",
     "lint": "cross-env-shell NODE_ENV=development eslint . --ext .js,.jsx,.ts,.tsx",
     "package": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --publish never",
@@ -38,6 +40,7 @@
     "start:main": "cross-env-shell NODE_ENV=development electronmon -r ts-node/register/transpile-only .",
     "start:preload": "cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
     "start:renderer": "cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
+    "start:webui": "npm run clean:webui && cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.webui.dev.ts",
     "test": "jest"
   },
   "lint-staged": {
@@ -130,6 +133,7 @@
     "browserslist-config-erb": "^0.0.3",
     "chalk": "^4.1.2",
     "concurrently": "^7.3.0",
+    "copy-webpack-plugin": "^11.0.0",
     "core-js": "^3.24.1",
     "cross-env": "^7.0.3",
     "css-loader": "^6.7.1",
