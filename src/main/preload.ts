@@ -16,7 +16,7 @@ export type Channels = keyof ChannelMessagePayload
 // Inject <browser-action-list> element into WebUI
 if (location.protocol === 'chrome-extension:' && location.pathname === '/webui.html') {
   injectBrowserAction()
-} else {
+} else if (!window.electron) {
   contextBridge.exposeInMainWorld('electron', {
     ipcRenderer: {
       sendMessage<T extends Channels>(channel: T, args: ChannelMessagePayload[T]) {

@@ -10,6 +10,7 @@ import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
+import { getDevStyleLoaders } from './common';
 
 // When an ESLint server is running, we can't set the NODE_ENV so we'll check if it's
 // at the dev webpack config is not accidentally run in a production environment
@@ -62,27 +63,7 @@ const configuration: webpack.Configuration = {
 
   module: {
     rules: [
-      {
-        test: /\.s?css$/,
-        use: [
-          'style-loader',
-          {
-            loader: 'css-loader',
-            options: {
-              modules: true,
-              sourceMap: true,
-              importLoaders: 1,
-            },
-          },
-          'sass-loader',
-        ],
-        include: /\.module\.s?(c|a)ss$/,
-      },
-      {
-        test: /\.s?css$/,
-        use: ['style-loader', 'css-loader', 'sass-loader'],
-        exclude: /\.module\.s?(c|a)ss$/,
-      },
+      ...getDevStyleLoaders(),
       // Fonts
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,
@@ -162,14 +143,6 @@ const configuration: webpack.Configuration = {
       verbose: true,
     },
     setupMiddlewares(middlewares) {
-      console.log('Starting preload.js builder...');
-      const preloadProcess = spawn('npm', ['run', 'start:preload'], {
-        shell: true,
-        stdio: 'inherit',
-      })
-        .on('close', (code: number) => process.exit(code!))
-        .on('error', (spawnError) => console.error(spawnError));
-        
       console.log('Starting WebUI dev server...');
       spawn('npm', ['run', 'start:webui'], {
         shell: true,
@@ -177,23 +150,34 @@ const configuration: webpack.Configuration = {
       })
         .on('error', (spawnError) => console.error(spawnError));
 
-      console.log('Starting Main Process...');
-      let mainArgs = ['run', 'start:main'];
-      if (process.env.MAIN_ARGS) {
-        mainArgs = mainArgs.concat(
-          ['--', ...process.env.MAIN_ARGS.matchAll(/"[^"]+"|[^\s"]+/g)].flat()
-        );
-      }
-      spawn('npm', mainArgs, {
+      console.log('Starting preload.js builder...');
+      const preloadProcess = spawn('npm', ['run', 'start:preload'], {
         shell: true,
         stdio: 'inherit',
       })
-        .on('close', (code: number) => {
-          preloadProcess.kill();
-          process.exit(code!);
-        })
+        .on('close', (code: number) => process.exit(code!))
         .on('error', (spawnError) => console.error(spawnError));
-        
+
+      main_process: {
+        console.log('Starting Main Process...');
+        let mainArgs = ['run', 'start:main'];
+        if (process.env.MAIN_ARGS) {
+          mainArgs = mainArgs.concat(
+            ['--', ...process.env.MAIN_ARGS.matchAll(/"[^"]+"|[^\s"]+/g)].flat()
+          );
+        }
+        setTimeout(() => {
+          spawn('npm', mainArgs, {
+            shell: true,
+            stdio: 'inherit',
+          })
+            .on('close', (code: number) => {
+              preloadProcess.kill();
+              process.exit(code!);
+            })
+            .on('error', (spawnError) => console.error(spawnError));
+        }, 8000);
+      }
       return middlewares;
     },
   },

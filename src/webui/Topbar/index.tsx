@@ -1,0 +1,237 @@
+
+/// <reference types="chrome" />
+
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import "./index.less";
+
+const isDebug = process.env.NODE_ENV !== 'production';
+
+type ChromeTab = chrome.tabs.Tab;
+type TabId = ChromeTab["id"];
+// type ChromeTabLike = { id?: ChromeTab["id"] };
+
+// type GetListenerParams<T> = T extends (...args: infer A) => any ? A : never;
+type GetListenerFirstParams<T> = T extends (...args: infer A) => any ? A[0] : never;
+
+function useTabs () {
+  const [ _tabList, setTabList ] = useState<(ChromeTab)[]>([]);
+  const [ activeTabId, setActiveId ] = useState<ChromeTab['id']>(-1);
+  const [ windowId, setWindowId ] = useState<number | undefined>(undefined);
+
+  const { tabList, activeTab } = useMemo(() => {
+    let activeTab = null as ChromeTab | null;
+    const tabList: ChromeTab[] = _tabList.map(tab => {
+      tab = Object.assign({}, tab);
+      if (tab.id === activeTabId) {
+        tab.active = true;
+        activeTab = tab;
+      } else {
+        tab.active = false
+      }
+      return tab;
+    });
+
+    return { tabList, activeTab }
+  }, [ _tabList, activeTabId ]);
+
+  const updateActiveTab = useCallback((activeTab: ChromeTab | chrome.tabs.TabActiveInfo) => {
+    const activeTabId = (activeTab as ChromeTab).id || (activeTab as chrome.tabs.TabActiveInfo).tabId;
+
+    setWindowId(activeTab.windowId);
+    setActiveId(activeTabId);
+  }, [ tabList ]);
+
+  useEffect(() => {
+    (async () => {
+      const tabs = await new Promise<ChromeTab[]>((resolve) => chrome.tabs.query({ windowId: -2 }, resolve))
+      const _tabList = [...tabs];
+
+      setTabList(_tabList);
+
+      const _activeTab = _tabList.find((tab) => tab.active)
+      if (_activeTab) {
+        updateActiveTab(_activeTab);
+      }
+    })();
+  }, []);
+
+  const tabListDomRef = useRef<HTMLUListElement>(null);
+
+  useEffect(() => {
+    if (!chrome.tabs.onCreated) {
+      throw new Error(`chrome global not setup. Did the extension preload not get run?`)
+    }
+
+    const onCreated: GetListenerFirstParams<typeof chrome.tabs.onCreated.addListener> = (tabCreation) => {
+      if (tabCreation.windowId !== windowId) return
+
+      setTabList(prev => {
+        let matched = false;
+        const ret = prev.map(tab => {
+          if (tab.id === tabCreation.id) {
+            matched = true;
+            return Object.assign({ id: tabCreation.id }, tab, tabCreation)
+          }
+          return tab
+        });
+        if (!matched) ret.push(Object.assign({ id: tabCreation.id }, tabCreation));
+
+        return ret;
+      });
+    };
+
+    const onUpdated: GetListenerFirstParams<typeof chrome.tabs.onUpdated.addListener> = (tabId, _, details) => {
+      setTabList(prev => prev.map(tab => {
+        return tab.id === tabId ? Object.assign({}, tab, details) : tab
+      }));
+    };
+
+    const onRemoved: GetListenerFirstParams<typeof chrome.tabs.onRemoved.addListener> = (tabId: TabId) => {
+      setTabList(prev => {
+        const tabIndex = prev.findIndex((tab) => tab.id === tabId)
+        if (tabIndex > -1) {
+          prev.splice(tabIndex, 1)
+          return [...prev]
+        }
+        return prev;
+      });
+    }
+    chrome.tabs.onCreated.addListener(onCreated)
+    chrome.tabs.onUpdated.addListener(onUpdated);
+    chrome.tabs.onRemoved.addListener(onRemoved)
+
+    return () => {
+      chrome.tabs.onCreated.removeListener(onCreated)
+      chrome.tabs.onUpdated.removeListener(onUpdated);
+      chrome.tabs.onRemoved.removeListener(onRemoved)
+    }
+  }, [ _tabList]);
+
+  useEffect(() => {
+    const onActived: GetListenerFirstParams<typeof chrome.tabs.onActivated.addListener> = (activeInfo) => {
+      if (activeInfo.windowId !== windowId) return
+
+      updateActiveTab(activeInfo)
+    };
+
+    chrome.tabs.onActivated.addListener(onActived);
+    return () => {
+      chrome.tabs.onActivated.removeListener(onActived);
+    }
+  }, [ updateActiveTab ]);
+
+  const onAddressUrlKeyUp = useCallback((event: GetListenerFirstParams<React.HTMLAttributes<HTMLInputElement>['onKeyUp']>) => {
+    if (event.key === 'Enter') {
+      const url = (event.target as HTMLInputElement).value;
+      chrome.tabs.update({ url })
+    }
+  }, []);
+
+  const winButtonActions = {
+    onCreateTabButtonClick: useCallback(() => chrome.tabs.create(undefined as any), []),
+    onGoBackButtonClick: useCallback(() => chrome.tabs.goBack(), []),
+    onGoForwardButtonClick: useCallback(() => chrome.tabs.goForward(), []),
+    onReloadButtonClick: useCallback(() => chrome.tabs.reload(), []),
+
+    onMinimizeButton: useCallback(() => {
+      chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, (win) => {
+        chrome.windows.update(win.id!, { state: win.state === 'minimized' ? 'normal' : 'minimized' })
+      })
+    }, []),
+    onMaximizeButton: useCallback(() => {
+      chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, (win) => {
+        chrome.windows.update(win.id!, { state: win.state === 'maximized' ? 'normal' : 'maximized' })
+      })
+    }, []),
+    onCloseButton: useCallback(() => {
+      chrome.windows.remove(undefined as any)
+    }, [])
+  }
+
+  const tabActions = {
+    onTabClick: useCallback((tab: ChromeTab) => { chrome.tabs.update(tab.id!, { active: true }) }, []) ,
+    onTabClose: useCallback((tab: ChromeTab) => {
+      if (tab.id) {
+        chrome.tabs.remove(tab.id)
+      }
+    }, [])
+  }
+
+  return {
+    tabListDomRef,
+    tabList,
+    activeTab,
+    onAddressUrlKeyUp,
+    winButtonActions,
+    tabActions
+  }
+}
+
+export default function Topbar () {
+  const {
+    tabListDomRef,
+    tabList,
+    activeTab,
+    onAddressUrlKeyUp,
+    winButtonActions,
+    tabActions,
+  } = useTabs();
+
+  return (
+    <>
+      <div id="tabstrip">
+        <ul className="tab-list" ref={tabListDomRef}>
+          {tabList.map((tab: ChromeTab, idx) => {
+            return (
+              <li
+                className="tab"
+                {...tab.active ? { 'data-active': true } : {}}
+                data-tab-id={`${tab.id}`}
+                key={`topbar-tab-${tab.id}-${idx}`}
+                onClick={() => tabActions.onTabClick(tab)}
+              >
+                <img className="favicon" src={tab.favIconUrl || undefined} />
+                <span className="title">{tab.title}</span>
+                <div className="controls">
+                  <button className="control audio" disabled={!tab.audible}>🔊</button>
+                  <button className="control close" onClick={(evt) => {
+                    evt.stopPropagation();
+                    tabActions.onTabClose(tab)
+                  }}>x</button>
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+        {isDebug && (
+          <button id="createtab" onClick={winButtonActions.onCreateTabButtonClick}>+</button>
+        )}
+        <div className="app-drag"></div>
+        {/* vary Windows & macOS */}
+        <div className="window-controls">
+          <button id="minimize" className="control" onClick={winButtonActions.onMinimizeButton}>🗕</button>
+          <button id="maximize" className="control" onClick={winButtonActions.onMaximizeButton}>🗖</button>
+          <button id="close" className="control" onClick={winButtonActions.onCloseButton}>🗙</button>
+        </div>
+      </div>
+      <div className="toolbar">
+        <div className="page-controls">
+          <button id="goback" className="control" onClick={winButtonActions.onGoBackButtonClick}>⬅️</button>
+          <button id="goforward" className="control" onClick={winButtonActions.onGoBackButtonClick}>➡️</button>
+          <button id="reload" className="control" onClick={winButtonActions.onReloadButtonClick}>🔄</button>
+        </div>
+        <div className="address-bar">
+          <input
+            id="addressurl"
+            spellCheck={false}
+            defaultValue={activeTab?.url || ''}
+            onKeyUp={onAddressUrlKeyUp}
+            // onChange={}
+          />
+        </div>
+        {/* @ts-ignore */}
+        <browser-action-list id="actions"></browser-action-list>
+      </div>
+    </>
+  )
+}
