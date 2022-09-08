@@ -8,6 +8,8 @@ import { setupMenu } from './browser/menu';
 import { buildChromeContextMenu } from 'electron-chrome-context-menu';
 import { getAssetPath, resolveReleasePath } from './util';
 
+const pkgjson = require('../../package.json');
+
 const preloadPath = app.isPackaged
 ? path.join(__dirname, 'preload.js')
 : path.join(__dirname, '../../.erb/dll/preload.js');
@@ -222,6 +224,7 @@ class Browser {
     setupMenu(this)
 
     this.session.setPreloads([preloadPath])
+    this.session.setUserAgent(`${this.session.getUserAgent()} RabbyDesktop/v${pkgjson.version}`)
 
     this.extensions = new ElectronChromeExtensions({
       session: this.session,
@@ -252,9 +255,19 @@ class Browser {
       },
 
       createWindow: async (details) => {
+        console.log('[feat] ::createWindow details', details);
         const win = this.createWindow({
           // TODO: support more then one urls from details.url
           initialUrl: details.url || newTabUrl,
+          window: {
+            width: details.width,
+            height: details.width,
+            type: details.type,
+            // top: details.top,
+            // left: details.left,
+            // focused: details.focused,
+            // url: details.url,
+          }
         })
         // if (details.active) tabs.select(tab.id)
         return win.window
