@@ -1,19 +1,15 @@
-import path from 'path';
-import { promises as fs } from 'fs';
-import { app, session, BrowserWindow } from 'electron';
+const path = require('path')
+const { promises: fs } = require('fs')
+const { app, session, BrowserWindow } = require('electron')
 
-import { Tabs } from './browser/tabs';
-import { ElectronChromeExtensions } from 'electron-chrome-extensions';
-import { setupMenu } from './browser/menu';
-import { buildChromeContextMenu } from 'electron-chrome-context-menu';
-import { getAssetPath } from './util';
+const { Tabs } = require('./tabs')
+const { ElectronChromeExtensions } = require('electron-chrome-extensions')
+const { setupMenu } = require('./menu')
+const { buildChromeContextMenu } = require('electron-chrome-context-menu')
 
-const preloadPath = app.isPackaged
-? path.join(__dirname, 'preload.js')
-: path.join(__dirname, '../../.erb/dll/preload.js');
-let webuiExtensionId: Electron.Extension['id'] = ''
+let webuiExtensionId
 
-const manifestExists = async (dirPath: string) => {
+const manifestExists = async (dirPath) => {
   if (!dirPath) return false
   const manifestPath = path.join(dirPath, 'manifest.json')
   try {
@@ -23,7 +19,7 @@ const manifestExists = async (dirPath: string) => {
   }
 }
 
-async function loadExtensions(session: Electron.Session, extensionsPath: string) {
+async function loadExtensions(session, extensionsPath) {
   const subDirectories = await fs.readdir(extensionsPath, {
     withFileTypes: true,
   })
@@ -47,7 +43,7 @@ async function loadExtensions(session: Electron.Session, extensionsPath: string)
             ? path.join(extPath, extSubDirs[0].name)
             : null
 
-        if (versionDirPath && await manifestExists(versionDirPath)) {
+        if (await manifestExists(versionDirPath)) {
           return versionDirPath
         }
       })
@@ -58,7 +54,6 @@ async function loadExtensions(session: Electron.Session, extensionsPath: string)
   for (const extPath of extensionDirectories.filter(Boolean)) {
     console.log(`Loading extension from ${extPath}`)
     try {
-      if (!extPath) continue ;
       const extensionInfo = await session.loadExtension(extPath)
       results.push(extensionInfo)
     } catch (e) {
@@ -69,7 +64,7 @@ async function loadExtensions(session: Electron.Session, extensionsPath: string)
   return results
 }
 
-const getParentWindowOfTab = (tab: Electron.WebContents) => {
+const getParentWindowOfTab = (tab) => {
   switch (tab.getType()) {
     case 'window':
       return BrowserWindow.fromWebContents(tab)
@@ -83,24 +78,8 @@ const getParentWindowOfTab = (tab: Electron.WebContents) => {
   }
 }
 
-type TabbedBrowserWindowOptions = {
-  initialUrl?: string
-  window?: Electron.BrowserWindowConstructorOptions,
-  session?: Electron.Session,
-  extensions: ElectronChromeExtensions
-}
 class TabbedBrowserWindow {
-  window: BrowserWindow
-  id: TabbedBrowserWindow['window']['id']
-  webContents: TabbedBrowserWindow['window']['webContents']
-
-  session: Electron.Session
-  // @ts-ignore
-  extensions: TabbedBrowserWindowOptions['extensions']
-
-  tabs: Tabs
-
-  constructor(options: TabbedBrowserWindowOptions) {
+  constructor(options) {
     this.session = options.session || session.defaultSession
     this.extensions = options.extensions
 
@@ -145,11 +124,7 @@ class TabbedBrowserWindow {
 }
 
 class Browser {
-  windows: TabbedBrowserWindow[] = [];
-  // @ts-ignore
-  session: Electron.Session;
-  // @ts-ignore
-  extensions: ElectronChromeExtensions;
+  windows = []
 
   constructor() {
     app.whenReady().then(this.init.bind(this))
@@ -171,11 +146,11 @@ class Browser {
     return this.windows.find((w) => w.window.isFocused()) || this.windows[0]
   }
 
-  getWindowFromBrowserWindow(window: BrowserWindow) {
+  getWindowFromBrowserWindow(window) {
     return !window.isDestroyed() ? this.windows.find((win) => win.id === window.id) : null
   }
 
-  getWindowFromWebContents(webContents: BrowserWindow['webContents']) {
+  getWindowFromWebContents(webContents) {
     const window = getParentWindowOfTab(webContents)
     return window ? this.getWindowFromBrowserWindow(window) : null
   }
@@ -205,7 +180,8 @@ class Browser {
     this.initSession()
     setupMenu(this)
 
-    this.session.setPreloads([preloadPath])
+    const browserPreload = path.join(__dirname, '../preload.js')
+    this.session.setPreloads([browserPreload])
 
     this.extensions = new ElectronChromeExtensions({
       session: this.session,
@@ -224,7 +200,7 @@ class Browser {
         if (details.url) tab.loadURL(details.url || newTabUrl)
         if (typeof details.active === 'boolean' ? details.active : true) win.tabs.select(tab.id)
 
-        return [tab.webContents, tab.window] as any
+        return [tab.webContents, tab.window]
       },
       selectTab: (tab, browserWindow) => {
         const win = this.getWindowFromBrowserWindow(browserWindow)
@@ -235,7 +211,7 @@ class Browser {
         win?.tabs.remove(tab.id)
       },
 
-      createWindow: async (details) => {
+      createWindow: (details) => {
         const win = this.createWindow({
           initialUrl: details.url || newTabUrl,
         })
@@ -248,16 +224,14 @@ class Browser {
       },
     })
 
-    const webuiExtension = await this.session.loadExtension(
-      getAssetPath('builtin_exts/ui')
-    )
+    const webuiExtension = await this.session.loadExtension(path.join(__dirname, 'ui'))
     webuiExtensionId = webuiExtension.id
 
     const newTabUrl = path.join('chrome-extension://', webuiExtensionId, 'new-tab.html')
 
     const installedExtensions = await loadExtensions(
       this.session,
-      getAssetPath('chrome_plugins'),
+      path.join(__dirname, '../../../extensions')
     )
 
     this.createWindow({ initialUrl: newTabUrl })
@@ -274,7 +248,7 @@ class Browser {
     this.session.setUserAgent(userAgent)
   }
 
-  createWindow(options: Partial<TabbedBrowserWindowOptions>) {
+  createWindow(options) {
     const win = new TabbedBrowserWindow({
       ...options,
       extensions: this.extensions,
@@ -285,9 +259,9 @@ class Browser {
         webPreferences: {
           sandbox: true,
           nodeIntegration: false,
-          // enableRemoteModule: false,
+          enableRemoteModule: false,
           contextIsolation: true,
-          // worldSafeExecuteJavaScript: true,
+          worldSafeExecuteJavaScript: true,
         },
       },
     })
@@ -300,7 +274,7 @@ class Browser {
     return win
   }
 
-  async onWebContentsCreated(event, webContents: BrowserWindow['webContents']) {
+  async onWebContentsCreated(event, webContents) {
     const type = webContents.getType()
     const url = webContents.getURL()
     console.log(`'web-contents-created' event [type:${type}, url:${url}]`)
@@ -347,4 +321,4 @@ class Browser {
   }
 }
 
-new Browser();
+module.exports = Browser

@@ -29,4 +29,5 @@ npm-debug.log.*
 *.scss.d.ts
 
 */chrome_plugins/*
+*/chrome_exts/*
 assets/*.zip
