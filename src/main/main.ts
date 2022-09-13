@@ -202,6 +202,17 @@ class Browser {
         win?.tabs.remove(tab.id);
       },
 
+      windowsGetCurrent: async (currentWin, { lastFocusedWindow, event }) => {
+        if (!currentWin) {
+          return (
+            this.getWindowFromWebContents(event.sender)?.window ||
+            lastFocusedWindow
+          );
+        }
+
+        return currentWin;
+      },
+
       createWindow: async (details) => {
         const tabUrl = firstEl(details.url || '') || newTabUrl;
 

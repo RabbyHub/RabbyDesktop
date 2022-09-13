@@ -106,8 +106,8 @@
     }
   },
   "dependencies": {
-    "@rabby-wallet/electron-chrome-context-menu": "^1.1.0",
-    "@rabby-wallet/electron-chrome-extensions": "^3.9.0",
+    "@rabby-wallet/electron-chrome-context-menu": "^1.1.1",
+    "@rabby-wallet/electron-chrome-extensions": "^3.9.2",
     "@types/chrome": "^0.0.196",
     "@types/sortablejs": "^1.13.0",
     "classnames": "^2.3.1",
