@@ -1,27 +1,58 @@
-import { NATIVE_HEADER_SIZE } from '../../isomorphic/const-size'
+import { NATIVE_HEADER_H, NATIVE_HEADER_WITH_NAV_H } from '../../isomorphic/const-size'
 
 import { EventEmitter } from 'events';
-import { BrowserView, BrowserWindow } from 'electron';
+import { BrowserView, BrowserWindow, ipcMain } from 'electron';
 
+type ITabOptions = {
+  tabs: Tabs;
+  hasNavigationBar?: boolean;
+}
 export class Tab {
   id: BrowserView['webContents']['id'];
   view?: BrowserView;
   window?: BrowserWindow;
   webContents?: BrowserView['webContents'];
-  toolbarHeight: number
+  hasNavigationBar?: boolean
 
   destroyed: boolean = false
+  tabs: Tabs;
 
   constructor(
     parentWindow: BrowserWindow,
-    { toolbarHeight = NATIVE_HEADER_SIZE } = {}
+    {
+      tabs,
+      hasNavigationBar = true
+    }: ITabOptions
   ) {
+    this.tabs = tabs;
     this.view = new BrowserView()
     this.id = this.view.webContents.id
     this.window = parentWindow
     this.webContents = this.view.webContents
     this.window.addBrowserView(this.view)
-    this.toolbarHeight = toolbarHeight
+    this.hasNavigationBar = !!hasNavigationBar;
+
+    const onClose = (
+      _: Electron.IpcMainEvent,
+      winId: Exclude<this['window'], void>['id'],
+      webContentsId: Exclude<this['webContents'], void>['id']
+    ) => {
+      if (winId === this.window?.id && this.webContents?.id === webContentsId) {
+        this.destroy();
+      }
+      ipcMain.off('webui-window-close', onClose);
+    };
+
+    ipcMain.on('webui-window-close', onClose);
+
+    // TODO: only inject it for tab in extensions
+    this.webContents?.executeJavaScript(`
+      var origWinClose = window.close.bind(window);
+      window.close = function (...args) {
+        window.rabbyDesktop.ipcRenderer.sendMessage('webui-window-close', ${this.window?.id}, ${this.webContents.id});
+        origWinClose(args);
+      }
+    `);
   }
 
   destroy() {
@@ -41,20 +72,26 @@ export class Tab {
     // TODO: why is this no longer called?
     this.webContents!.emit('destroyed')
 
-    this.webContents!.destroy?.()
+    // this.webContents!.destroy?.()
     this.webContents = undefined
 
     this.view = undefined
   }
 
-  loadURL(url: string) {
-    return this.view?.webContents.loadURL(url)
+  async loadURL(url: string) {
+    return this.view?.webContents.loadURL(url);
+  }
+
+  reload() {
+    this.view!.webContents.reload()
   }
 
   show() {
     const [width, height] = this.window!.getSize()
 
-    this.view!.setBounds({ x: 0, y: this.toolbarHeight, width: width, height: height - this.toolbarHeight })
+    const topbarHeight = this.hasNavigationBar ? NATIVE_HEADER_WITH_NAV_H : NATIVE_HEADER_H;
+
+    this.view!.setBounds({ x: 0, y: topbarHeight, width: width, height: height - topbarHeight })
     this.view!.setAutoResize({ width: true, height: true })
     // this.window.addBrowserView(this.view)
   }
@@ -64,10 +101,6 @@ export class Tab {
     this.view!.setBounds({ x: -1000, y: 0, width: 0, height: 0 })
     // TODO: can't remove from window otherwise we lose track of which window it belongs to
     // this.window.removeBrowserView(this.view)
-  }
-
-  reload() {
-    this.view!.webContents.reload()
   }
 }
 
@@ -97,8 +130,8 @@ export class Tabs extends EventEmitter {
     return this.tabList.find((tab) => tab.id === tabId)
   }
 
-  create() {
-    const tab = new Tab(this.window!)
+  create(options?: Omit<ITabOptions, 'tabs'>) {
+    const tab = new Tab(this.window!, {...options, tabs: this})
     this.tabList.push(tab)
     if (!this.selected) this.selected = tab
     tab.show() // must be attached to window

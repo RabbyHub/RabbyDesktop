@@ -9,12 +9,17 @@ import IconNavGoback from '../../../assets/icons/native-tabs/icon-navigation-bac
 import IconNavGoforward from '../../../assets/icons/native-tabs/icon-navigation-forward.svg';
 import IconNavRefresh from '../../../assets/icons/native-tabs/icon-navigation-refresh.svg';
 import "./index.less";
+import { parseQueryString } from "../../isomorphic/url";
 
 const isDebug = process.env.NODE_ENV !== 'production';
 
 type ChromeTab = chrome.tabs.Tab;
 type TabId = ChromeTab["id"];
 // type ChromeTabLike = { id?: ChromeTab["id"] };
+
+const WITH_NAV_BAR = parseQueryString().__withNavigationbar === 'true';
+const CLOSABLE = parseQueryString().__webuiClosable === 'true';
+console.log('[feat] WITH_NAV_BAR, parseQueryString()', WITH_NAV_BAR, parseQueryString());
 
 // type GetListenerParams<T> = T extends (...args: infer A) => any ? A : never;
 type GetListenerFirstParams<T> = T extends (...args: infer A) => any ? A[0] : never;
@@ -39,7 +44,6 @@ function useTabs () {
 
     return { tabList, activeTab }
   }, [ _tabList, activeTabId ]);
-
 
   const updateActiveTab = useCallback((activeTab: ChromeTab | chrome.tabs.TabActiveInfo) => {
     const activeTabId = (activeTab as ChromeTab).id || (activeTab as chrome.tabs.TabActiveInfo).tabId;
@@ -182,7 +186,7 @@ function useSelectedTabInfo (activeTab?: ChromeTab | null) {
       // console.log('[feat] ipcRenderer rabby-nav-info:: payload', payload);
       setSelectedTabInfo(payload);
     })
-    window.rabbyDesktop.ipcRenderer.sendMessage('rabby-nav-info', [ activeTab.id ]);
+    window.rabbyDesktop.ipcRenderer.sendMessage('rabby-nav-info', activeTab.id);
 
     return () => {
       dispose?.();
@@ -241,12 +245,14 @@ export default function Topbar () {
                 <span className="title">{tab.title}</span>
                 <div className="controls">
                   {/* <button className="control audio" disabled={tab.audible && !tab.mutedInfo?.muted}>🔊</button> */}
-                  <button className="control close" onClick={(evt) => {
-                    evt.stopPropagation();
-                    tabActions.onTabClose(tab)
-                  }}>
-                    <img src={IconTabClose} alt="close" />
-                  </button>
+                  {CLOSABLE && (
+                    <button className="control close" onClick={(evt) => {
+                      evt.stopPropagation();
+                      tabActions.onTabClose(tab)
+                    }}>
+                      <img src={IconTabClose} alt="close" />
+                    </button>
+                  )}
                 </div>
               </li>
             )
@@ -263,7 +269,7 @@ export default function Topbar () {
           <button id="close" className="control" onClick={winButtonActions.onCloseButton}>🗙</button>
         </div>
       </div>
-      <div className="toolbar">
+      {WITH_NAV_BAR && <div className="toolbar">
         <div className="page-controls">
           {/* TODO: support canGoback */}
           <button
@@ -300,7 +306,7 @@ export default function Topbar () {
         </div>
         {/* @ts-ignore */}
         <browser-action-list id="actions"></browser-action-list>
-      </div>
+      </div>}
     </>
   )
 }

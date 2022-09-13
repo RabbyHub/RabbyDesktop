@@ -1,19 +1,21 @@
 import path from 'path';
 import { promises as fs } from 'fs';
-import { app, session, BrowserWindow, ipcMain, ipcRenderer } from 'electron';
+import { app, session, BrowserWindow } from 'electron';
 
-import { Tab, Tabs } from './browser/tabs';
-import { ElectronChromeExtensions } from 'electron-chrome-extensions';
+import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { setupMenu } from './browser/menu';
-import { buildChromeContextMenu } from 'electron-chrome-context-menu';
+import { buildChromeContextMenu } from '@rabby-wallet/electron-chrome-context-menu';
 import { getAssetPath, resolveReleasePath } from './util';
+import { firstEl } from '../isomorphic/array';
+import TabbedBrowserWindow, { TabbedBrowserWindowOptions } from './browser/browsers';
 
 const pkgjson = require('../../package.json');
 
 const preloadPath = app.isPackaged
 ? path.join(__dirname, 'preload.js')
 : path.join(__dirname, '../../.erb/dll/preload.js');
-let webuiExtensionId: Electron.Extension['id'] = ''
+let webuiExtensionId: Electron.Extension['id'] = '';
+let rabbyExtensionId: Electron.Extension['id'] = '';
 
 const manifestExists = async (dirPath: string) => {
   if (!dirPath) return false
@@ -61,7 +63,7 @@ async function loadExtensions(session: Electron.Session, extensionsPath: string)
     console.log(`Loading extension from ${extPath}`)
     try {
       if (!extPath) continue ;
-      const extensionInfo = await session.loadExtension(extPath)
+      const extensionInfo = await session.loadExtension(extPath, { allowFileAccess: true })
       results.push(extensionInfo)
     } catch (e) {
       console.error(e)
@@ -82,83 +84,6 @@ const getParentWindowOfTab = (tab: Electron.WebContents) => {
       return BrowserWindow.getFocusedWindow()
     default:
       throw new Error(`Unable to find parent window of '${tab.getType()}'`)
-  }
-}
-
-type TabbedBrowserWindowOptions = {
-  initialUrl?: string
-  window?: Electron.BrowserWindowConstructorOptions,
-  session?: Electron.Session,
-  extensions: ElectronChromeExtensions
-
-  isTopbar?: boolean
-}
-class TabbedBrowserWindow {
-  window: BrowserWindow
-  id: TabbedBrowserWindow['window']['id']
-  webContents: TabbedBrowserWindow['window']['webContents']
-
-  session: Electron.Session
-  // @ts-ignore
-  extensions: TabbedBrowserWindowOptions['extensions']
-
-  tabs: Tabs
-
-  constructor(options: TabbedBrowserWindowOptions) {
-    this.session = options.session || session.defaultSession
-    this.extensions = options.extensions
-
-    // Can't inheret BrowserWindow
-    // https://github.com/electron/electron/issues/23#issuecomment-19613241
-    this.window = new BrowserWindow(options.window)
-    this.id = this.window.id
-    this.webContents = this.window.webContents
-
-    const webuiUrl = path.join('chrome-extension://', webuiExtensionId, '/webui.html')
-    this.webContents.loadURL(webuiUrl)
-
-    this.tabs = new Tabs(this.window)
-
-    const self = this
-
-    this.tabs.on('tab-created', function onTabCreated(tab) {
-      if (options.initialUrl) tab.webContents.loadURL(options.initialUrl)
-
-      // Track tab that may have been created outside of the extensions API.
-      self.extensions.addTab(tab.webContents, tab.window)
-    })
-
-    this.tabs.on('tab-selected', function onTabSelected(tab: Tab) {
-      self.extensions.selectTab(tab.webContents!)
-    });
-
-    ipcMain.on('rabby-nav-info', async (event, tabId: number) => {
-      // console.log('[feat] rabby-nav-info:: tabId', tabId);
-      // console.log('[feat] rabby-nav-info:: this.tabs ids', this.tabs.tabList.map(tab => tab.id));
-      const tab = this.tabs.get(tabId);
-      // const tab = this.tabs.selected;
-      if (!tab) return ;
-
-      event.reply('rabby-nav-info', {
-        tabExists: !!tab,
-        canGoBack: tab?.webContents?.canGoBack(),
-        canGoForward: tab?.webContents?.canGoForward(),
-      });
-    });
-
-    queueMicrotask(() => {
-      // Create initial tab
-      this.tabs.create()
-    })
-  }
-
-  destroy() {
-    this.tabs.destroy()
-    this.window.destroy()
-  }
-
-  getFocusedTab() {
-    return this.tabs.selected
   }
 }
 
@@ -238,7 +163,7 @@ class Browser {
           throw new Error(`Unable to find windowId=${details.windowId}`)
         }
 
-        const tab = win.tabs.create()
+        const tab = win.tabs.create({ hasNavigationBar: win.hasNavigationBar })
 
         if (details.url) tab.loadURL(details.url || newTabUrl)
         if (typeof details.active === 'boolean' ? details.active : true) win.tabs.select(tab.id)
@@ -250,23 +175,23 @@ class Browser {
         win?.tabs.select(tab.id)
       },
       removeTab: (tab, browserWindow) => {
+        // console.log('[feat] ::removeTab tab, browserWindow', tab, browserWindow);
+        console.log('[feat] ::removeTab browserWindow.id', browserWindow.id);
         const win = this.getWindowFromBrowserWindow(browserWindow)
         win?.tabs.remove(tab.id)
       },
 
       createWindow: async (details) => {
         console.log('[feat] ::createWindow details', details);
+        const tabUrl = firstEl(details.url || '') || newTabUrl;
+
         const win = this.createWindow({
-          // TODO: support more then one urls from details.url
-          initialUrl: details.url || newTabUrl,
+          initialUrl: tabUrl,
+          hasNavigationBar: details.type === 'normal',
           window: {
             width: details.width,
-            height: details.width,
+            height: details.height,
             type: details.type,
-            // top: details.top,
-            // left: details.left,
-            // focused: details.focused,
-            // url: details.url,
           }
         })
         // if (details.active) tabs.select(tab.id)
@@ -284,14 +209,22 @@ class Browser {
     )
     webuiExtensionId = webuiExtension.id
 
-    const newTabUrl = path.join('chrome-extension://', webuiExtensionId, 'new-tab.html')
-
-    const installedExtensions = await loadExtensions(
+    const loadedExtensions = await loadExtensions(
       this.session,
       getAssetPath('chrome_plugins'),
     )
 
-    this.createWindow({ initialUrl: newTabUrl })
+    loadedExtensions.forEach((ext) => {
+      if (ext.name.toLowerCase().includes('rabby')) {
+        rabbyExtensionId = ext.id;
+      }
+    });
+
+    const newTabUrl = `chrome-extension://${webuiExtensionId}/new-tab.html`;
+    this.createWindow({
+      initialUrl: newTabUrl,
+      hasNavigationBar: true,
+    })
   }
 
   initSession() {
@@ -306,13 +239,19 @@ class Browser {
   }
 
   createWindow(options: Partial<TabbedBrowserWindowOptions>) {
+    if (!webuiExtensionId) {
+      throw new Error('[createWindow] webuiExtensionId is not set');
+    }
     const win = new TabbedBrowserWindow({
       ...options,
+      webuiExtensionId,
       extensions: this.extensions,
       window: {
         width: 1280,
         height: 720,
         frame: false,
+        resizable: false,
+        ...options.window,
         webPreferences: {
           // sandbox: true,
           sandbox: false,
@@ -320,6 +259,7 @@ class Browser {
           // enableRemoteModule: false,
           contextIsolation: true,
           // worldSafeExecuteJavaScript: true,
+          ...options.window?.webPreferences,
         },
       },
     })

@@ -12,4 +12,4 @@ window.rabbyDesktop.ipcRenderer.once('ipc-example', (arg) => {
   // eslint-disable-next-line no-console
   console.log(arg);
 });
-window.rabbyDesktop.ipcRenderer.sendMessage('ipc-example', ['ping']);
+window.rabbyDesktop.ipcRenderer.sendMessage('ipc-example', 'ping');

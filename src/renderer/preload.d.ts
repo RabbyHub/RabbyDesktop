@@ -33,7 +33,7 @@ interface Window {
   rabbyDesktop: {
     ipcRenderer: {
       /* send message to main process */
-      sendMessage<T extends Channels>(channel: T, args: ChannelMessagePayload[T]['send']): void;
+      sendMessage<T extends Channels>(channel: T, ...args: ChannelMessagePayload[T]['send']): void;
       on<T extends Channels>(
         channel: T,
         func: (...args: ChannelMessagePayload[T]['response']) => void
