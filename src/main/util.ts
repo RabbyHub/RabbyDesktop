@@ -14,18 +14,17 @@ export function resolveHtmlPath(htmlFileName: string) {
 }
 
 const RESOURCES_PATH = app.isPackaged
-? path.join(process.resourcesPath, 'assets')
-: path.join(__dirname, '../../assets');
+  ? path.join(process.resourcesPath, 'assets')
+  : path.join(__dirname, '../../assets');
 
 const RELEASE_PATH = path.join(__dirname, '../../release/app/dist');
-export function resolveReleasePath (file: string) {
+export function resolveReleasePath(file: string) {
   if (process.env.NODE_ENV === 'development') {
     return path.resolve(RELEASE_PATH, file);
   }
 
   return `file://${path.resolve(__dirname, '../', file)}`;
 }
-
 
 export const getAssetPath = (...paths: string[]): string => {
   return path.join(RESOURCES_PATH, ...paths);
@@ -35,15 +34,15 @@ export const getReleasePath = (...paths: string[]): string => {
   return path.join(RESOURCES_PATH, ...paths);
 };
 
-export async function addBrowserView (
+export async function addBrowserView(
   browser: Electron.BrowserWindow,
   webPreferences?: Electron.WebPreferences
 ) {
   const view = new BrowserView({
-    webPreferences: webPreferences
-  })
-  browser.addBrowserView(view)
+    webPreferences,
+  });
+  browser.addBrowserView(view);
 
-  await view.webContents.loadURL('https://baidu.com')
+  await view.webContents.loadURL('https://baidu.com');
   view.webContents.openDevTools({ mode: 'detach' });
 }

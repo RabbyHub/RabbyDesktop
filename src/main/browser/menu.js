@@ -1,10 +1,10 @@
-const { Menu } = require('electron')
+const { Menu } = require('electron');
 
 const setupMenu = (browser) => {
-  const isMac = process.platform === 'darwin'
+  const isMac = process.platform === 'darwin';
 
-  const tab = () => browser.getFocusedWindow().getFocusedTab()
-  const tabWc = () => tab().webContents
+  const tab = () => browser.getFocusedWindow().getFocusedTab();
+  const tabWc = () => tab().webContents;
 
   const template = [
     ...(isMac ? [{ role: 'appMenu' }] : []),
@@ -40,12 +40,12 @@ const setupMenu = (browser) => {
       ],
     },
     { role: 'windowMenu' },
-  ]
+  ];
 
-  const menu = Menu.buildFromTemplate(template)
-  Menu.setApplicationMenu(menu)
-}
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
+};
 
 module.exports = {
   setupMenu,
-}
+};

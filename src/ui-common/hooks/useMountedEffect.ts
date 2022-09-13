@@ -1,9 +1,10 @@
-import { MutableRefObject, useEffect, useRef } from "react"
+import { MutableRefObject, useEffect, useRef } from 'react';
 
-export default function useMountedEffect <
+export default function useMountedEffect<
   T extends (isMountedRef: MutableRefObject<boolean>) => any
-> (effect?: T, deps: any[] = []) {
-  const isMounted = useRef(false)
+>(effect?: T, deps: any[] = []) {
+  const isMounted = useRef(false);
+  const depsRef = useRef(deps || []);
 
   useEffect(() => {
     isMounted.current = true;
@@ -12,8 +13,9 @@ export default function useMountedEffect <
 
     return () => {
       isMounted.current = false;
-    }
-  }, [...deps])
+    };
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, depsRef.current);
 
-  return isMounted
+  return isMounted;
 }
