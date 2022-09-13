@@ -9,8 +9,7 @@ export type TabbedBrowserWindowOptions = {
   window?: Electron.BrowserWindowConstructorOptions;
   session?: Electron.Session;
   extensions: ElectronChromeExtensions;
-
-  hasNavigationBar?: boolean;
+  windowType?: Exclude<chrome.windows.CreateData, void>['type'];
 };
 
 export default class TabbedBrowserWindow {
@@ -26,10 +25,13 @@ export default class TabbedBrowserWindow {
 
   tabs: Tabs;
 
-  hasNavigationBar?: Exclude<
-    TabbedBrowserWindowOptions['hasNavigationBar'],
-    void
-  > = false;
+  // TODO: develop style for popup window
+  // - [x] NO Close button
+  // - [ ] No Tab Style, just transparent
+  // - [x] No Navigation Bar
+  windowType: Exclude<TabbedBrowserWindowOptions['windowType'], void>;
+
+  hasNavigationBar: boolean = false;
 
   constructor(options: TabbedBrowserWindowOptions) {
     this.session = options.session || session.defaultSession;
@@ -38,14 +40,17 @@ export default class TabbedBrowserWindow {
     // Can't inheret BrowserWindow
     // https://github.com/electron/electron/issues/23#issuecomment-19613241
     this.window = new BrowserWindow(options.window);
+    this.windowType = options.windowType || 'normal';
     this.id = this.window.id;
     this.topbarWebContents = this.window.webContents;
-    this.hasNavigationBar = !!options.hasNavigationBar;
+    this.hasNavigationBar = this.windowType !== 'popup';
 
     const origUrl = `chrome-extension://${options.webuiExtensionId}/webui.html`;
     /* eslint-disable @typescript-eslint/naming-convention */
     const webuiUrl = integrateQueryToUrl(origUrl, {
       ...(this.hasNavigationBar && { __withNavigationbar: 'true' }),
+      // TODO: set 'false' for 'popup' window
+      __webuiClosable: this.windowType !== 'popup' ? 'true' : 'false',
       __webuiWindowsId: `${this.id}`,
     });
     /* eslint-enable @typescript-eslint/naming-convention */

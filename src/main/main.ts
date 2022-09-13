@@ -196,8 +196,6 @@ class Browser {
         win?.tabs.select(tab.id);
       },
       removeTab: (tab, browserWindow) => {
-        // console.log('[feat] ::removeTab tab, browserWindow', tab, browserWindow);
-        console.log('[feat] ::removeTab browserWindow.id', browserWindow.id);
         const win = this.getWindowFromBrowserWindow(browserWindow);
         win?.tabs.remove(tab.id);
       },
@@ -218,7 +216,7 @@ class Browser {
 
         const win = this.createWindow({
           initialUrl: tabUrl,
-          hasNavigationBar: details.type === 'normal',
+          windowType: details.type,
           window: {
             width: details.width,
             height: details.height,
@@ -245,9 +243,9 @@ class Browser {
       }
     });
 
+    // init window
     this.createWindow({
       initialUrl: newTabUrl,
-      hasNavigationBar: true,
     });
   }
 
