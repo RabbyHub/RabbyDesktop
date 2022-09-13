@@ -1,7 +1,7 @@
-<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src chrome-extension: 'unsafe-eval' 'unsafe-inline'; img-src chrome-extension: *; child-src 'none';">
     <title>New Tab</title>
     <style>
       body {
@@ -23,10 +23,20 @@
       <li>
         <a href="https://app.uniswap.org" target="_blank">https://app.uniswap.org</a>
       </li>
-      <li>
-        <a href="chrome-extension://mglefamdkakheglkejompkgkmkinolcp/background.html" target="_blank">chrome-extension://mglefamdkakheglkejompkgkmkinolcp/background.html</a>
+      <li id="rabby-item">
+        rabby wallet:&nbsp;
+        <a href="#" target="_blank"></a>
       </li>
-
     </ul>
+    <script>
+      window.rabbyDesktop.ipcRenderer.on('rabby-extension-id', function (event) {
+        const anchor = document.querySelector('#rabby-item > a');
+        const extId = event.rabbyExtensionId;
+        anchor.href = `chrome-extension://${extId}/background.html`;
+        anchor.innerHTML = `chrome-extension://${extId}/background.html`;
+      });
+
+      window.rabbyDesktop.ipcRenderer.sendMessage('rabby-extension-id');
+    </script>
   </body>
 </html>

@@ -1,6 +1,6 @@
 import path from 'path';
 import { promises as fs } from 'fs';
-import { app, session, BrowserWindow } from 'electron';
+import { app, session, BrowserWindow, ipcMain } from 'electron';
 
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { buildChromeContextMenu } from '@rabby-wallet/electron-chrome-context-menu';
@@ -236,6 +236,12 @@ class Browser {
       this.session!,
       getAssetPath('chrome_plugins')
     );
+
+    ipcMain.on('rabby-extension-id', (event) => {
+      event.reply('rabby-extension-id', {
+        rabbyExtensionId,
+      });
+    });
 
     loadedExtensions.forEach((ext) => {
       if (ext.name.toLowerCase().includes('rabby')) {
