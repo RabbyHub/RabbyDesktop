@@ -7,6 +7,7 @@ import chalk from 'chalk';
 import { merge } from 'webpack-merge';
 import { execSync, spawn } from 'child_process';
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
 import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
@@ -20,7 +21,7 @@ if (isProduction) {
   checkNodeEnv('development');
 }
 
-const port = process.env.PORT || 1212;
+const port = process.env.PORT || 1213;
 const manifest = path.resolve(webpackPaths.dllPath, 'renderer.json');
 const skipDLLs =
   module.parent?.filename.includes('webpack.config.renderer.dev.dll') ||
@@ -49,15 +50,16 @@ const configuration: webpack.Configuration = {
   target: ['web', 'electron-renderer'],
 
   entry: {
-    'renderer': [
+    'shell-webui': [
       `webpack-dev-server/client?http://localhost:${port}/dist`,
       'webpack/hot/only-dev-server',
-      path.join(webpackPaths.srcRendererPath, 'index.tsx'),
+      path.join(webpackPaths.srcRendererPath, 'shell-webui.tsx'),
     ],
+    'shell-new-tab': path.join(webpackPaths.srcRendererPath, 'shell-new-tab.tsx'),
   },
 
   output: {
-    path: webpackPaths.distRendererPath,
+    path: webpackPaths.distShellPath,
     publicPath: '/',
     filename: '[name].js',
     assetModuleFilename: 'assets/[name].[hash][ext]',
@@ -122,7 +124,7 @@ const configuration: webpack.Configuration = {
 
     new ReactRefreshWebpackPlugin(),
 
-    ...webpackPaths.rendererEntries.map(({ name, target, htmlFile }) => {
+    ...webpackPaths.shellEntries.map(({ name, target, htmlFile }) => {
       return new HtmlWebpackPlugin({
         filename: target,
         template: htmlFile,
@@ -144,6 +146,12 @@ const configuration: webpack.Configuration = {
         nodeModules: webpackPaths.appNodeModulesPath,
       });
     }),
+
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: path.join(webpackPaths.srcRendererPath, 'shell-manifest.json'), to: path.join(webpackPaths.distShellPath, 'manifest.json') },
+      ],
+    })
   ],
 
   node: {
@@ -166,46 +174,6 @@ const configuration: webpack.Configuration = {
       writeToDisk: (targetpath) => {
         return true
       }
-    },
-    setupMiddlewares(middlewares) {
-      console.log('Starting shell builder...');
-      const shellProcess = spawn('npm', ['run', 'start:shell'], {
-        shell: true,
-        stdio: 'inherit',
-      })
-        .on('close', (code: number) => process.exit(code!))
-        .on('error', (spawnError) => console.error(spawnError));
-
-      console.log('Starting preload.js builder...');
-      const preloadProcess = spawn('npm', ['run', 'start:preload'], {
-        shell: true,
-        stdio: 'inherit',
-      })
-        .on('close', (code: number) => process.exit(code!))
-        .on('error', (spawnError) => console.error(spawnError));
-
-      main_process: {
-        console.log('Starting Main Process...');
-        let mainArgs = ['run', 'start:main'];
-        if (process.env.MAIN_ARGS) {
-          mainArgs = mainArgs.concat(
-            ['--', ...process.env.MAIN_ARGS.matchAll(/"[^"]+"|[^\s"]+/g)].flat()
-          );
-        }
-        setTimeout(() => {
-          spawn('npm', mainArgs, {
-            shell: true,
-            stdio: 'inherit',
-          })
-            .on('close', (code: number) => {
-              shellProcess.kill();
-              preloadProcess.kill();
-              process.exit(code!);
-            })
-            .on('error', (spawnError) => console.error(spawnError));
-        }, 8000);
-      }
-      return middlewares;
     },
   },
 };

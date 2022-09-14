@@ -27,6 +27,9 @@ const rendererEntries = [
     target: 'index.html',
     htmlFile: path.join(srcRendererPath, `index.ejs`)
   },
+] as const;
+
+const shellEntries = [
   {
     name: 'shell-webui',
     target: 'shell-webui.html',
@@ -56,4 +59,5 @@ export default {
   distShellPath,
   buildPath,
   rendererEntries,
+  shellEntries,
 };
