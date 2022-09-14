@@ -47,16 +47,16 @@
     "test": "jest"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
+    "src/*.{js,jsx,ts,tsx}": [
       "cross-env-shell NODE_ENV=development eslint --cache"
     ],
-    "*.json,.{eslintrc,prettierrc}": [
+    "src/*.json,.{eslintrc,prettierrc}": [
       "prettier --ignore-path .eslintignore --parser json --write"
     ],
-    "*.{css,scss}": [
+    "src/*.{css,scss}": [
       "prettier --ignore-path .eslintignore --single-quote --write"
     ],
-    "*.{html,md,yml}": [
+    "src/*.{html,md,yml}": [
       "prettier --ignore-path .eslintignore --single-quote --write"
     ]
   },

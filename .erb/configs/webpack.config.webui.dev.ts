@@ -30,14 +30,14 @@ const configuration: webpack.Configuration = {
       `webpack-dev-server/client?http://localhost:${port}/dist`,
       'webpack/hot/only-dev-server',
       path.join(webpackPaths.srcShellPath, 'webui.tsx'),
-    ]
-    // webui: path.join(webpackPaths.srcShellPath, 'webui.tsx'),
+    ],
+    'new-tab': path.join(webpackPaths.srcShellPath, 'new-tab.tsx'),
   },
 
   output: {
     path: webpackPaths.distShellPath,
     publicPath: '/',
-    filename: 'webui.js',
+    filename: '[name].js',
     library: {
       type: 'umd',
     },
@@ -92,7 +92,8 @@ const configuration: webpack.Configuration = {
           removeAttributeQuotes: true,
           removeComments: true,
         },
-        inject: html === 'webui',
+        chunks: [html],
+        inject: false,
         isBrowser: false,
         env: process.env.NODE_ENV,
         isDevelopment: process.env.NODE_ENV !== 'production',

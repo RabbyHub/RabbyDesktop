@@ -22,6 +22,14 @@ type ChannelMessagePayload = {
       }
     ];
   };
+  'rabby-extension-id': {
+    send: [];
+    response: [
+      {
+        rabbyExtensionId: Electron.Extension['id'];
+      }
+    ];
+  };
 };
 
 type Channels = keyof ChannelMessagePayload;
