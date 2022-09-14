@@ -10,13 +10,13 @@ import React, {
   useState,
 } from 'react';
 // import IconTabClose from '~/assets/icons/native-tabs/icon-tab-close.svg';
-import IconTabClose from '../../../assets/icons/native-tabs/icon-tab-close.svg';
+import IconTabClose from '../../../../assets/icons/native-tabs/icon-tab-close.svg';
 
-import IconNavGoback from '../../../assets/icons/native-tabs/icon-navigation-back.svg';
-import IconNavGoforward from '../../../assets/icons/native-tabs/icon-navigation-forward.svg';
-import IconNavRefresh from '../../../assets/icons/native-tabs/icon-navigation-refresh.svg';
+import IconNavGoback from '../../../../assets/icons/native-tabs/icon-navigation-back.svg';
+import IconNavGoforward from '../../../../assets/icons/native-tabs/icon-navigation-forward.svg';
+import IconNavRefresh from '../../../../assets/icons/native-tabs/icon-navigation-refresh.svg';
 import './index.less';
-import { parseQueryString } from '../../isomorphic/url';
+import { parseQueryString } from '../../../isomorphic/url';
 
 const isDebug = process.env.NODE_ENV !== 'production';
 

@@ -6,7 +6,7 @@ import { injectBrowserAction } from '@rabby-wallet/electron-chrome-extensions/di
 // Inject <browser-action-list> element into WebUI
 if (
   window.location.protocol === 'chrome-extension:' &&
-  window.location.pathname === '/webui.html'
+  window.location.pathname === '/shell-webui.html'
 ) {
   injectBrowserAction();
 }

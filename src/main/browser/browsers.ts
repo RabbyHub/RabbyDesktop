@@ -45,7 +45,7 @@ export default class TabbedBrowserWindow {
     this.topbarWebContents = this.window.webContents;
     this.hasNavigationBar = this.windowType !== 'popup';
 
-    const origUrl = `chrome-extension://${options.webuiExtensionId}/webui.html`;
+    const origUrl = `chrome-extension://${options.webuiExtensionId}/shell-webui.html`;
     /* eslint-disable @typescript-eslint/naming-convention */
     const webuiUrl = integrateQueryToUrl(origUrl, {
       ...(this.hasNavigationBar && { __withNavigationbar: 'true' }),

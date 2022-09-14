@@ -7,14 +7,17 @@ import chalk from 'chalk';
 import { merge } from 'webpack-merge';
 import { execSync, spawn } from 'child_process';
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
 import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
 import { getDevStyleLoaders, getWebpackAliases } from './common';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 // When an ESLint server is running, we can't set the NODE_ENV so we'll check if it's
 // at the dev webpack config is not accidentally run in a production environment
-if (process.env.NODE_ENV === 'production') {
+if (isProduction) {
   checkNodeEnv('development');
 }
 
@@ -46,16 +49,27 @@ const configuration: webpack.Configuration = {
 
   target: ['web', 'electron-renderer'],
 
-  entry: [
-    `webpack-dev-server/client?http://localhost:${port}/dist`,
-    'webpack/hot/only-dev-server',
-    path.join(webpackPaths.srcRendererPath, 'index.tsx'),
-  ],
+  entry: {
+    'renderer': [
+      `webpack-dev-server/client?http://localhost:${port}/dist`,
+      'webpack/hot/only-dev-server',
+      path.join(webpackPaths.srcRendererPath, 'index.tsx'),
+    ],
+    'shell-webui': [
+      `webpack-dev-server/client?http://localhost:${port}/dist`,
+      'webpack/hot/only-dev-server',
+      path.join(webpackPaths.srcRendererPath, 'shell-webui.tsx'),
+    ],
+    'shell-new-tab': path.join(webpackPaths.srcRendererPath, 'shell-new-tab.tsx'),
+  },
 
   output: {
     path: webpackPaths.distRendererPath,
     publicPath: '/',
-    filename: 'renderer.dev.js',
+    filename: '[name].js',
+    assetModuleFilename: (pathData, assetInfo) => {
+      return 'assets/[name].[hash][ext]'
+    },
     library: {
       type: 'umd',
     },
@@ -117,19 +131,34 @@ const configuration: webpack.Configuration = {
 
     new ReactRefreshWebpackPlugin(),
 
-    new HtmlWebpackPlugin({
-      filename: path.join('index.html'),
-      template: path.join(webpackPaths.srcRendererPath, 'index.ejs'),
-      minify: {
-        collapseWhitespace: true,
-        removeAttributeQuotes: true,
-        removeComments: true,
-      },
-      isBrowser: false,
-      env: process.env.NODE_ENV,
-      isDevelopment: process.env.NODE_ENV !== 'production',
-      nodeModules: webpackPaths.appNodeModulesPath,
+    ...webpackPaths.rendererEntries.map(({ name, target, htmlFile }) => {
+      return new HtmlWebpackPlugin({
+        filename: target,
+        template: htmlFile,
+        minify: {
+          collapseWhitespace: true,
+          removeAttributeQuotes: true,
+          removeComments: true,
+        },
+        chunks: [name],
+        // templateParameters (compilation, files, tags) {
+        //   return {
+        //   }
+        // },
+        hash: !isProduction,
+        inject: 'body',
+        isBrowser: false,
+        env: process.env.NODE_ENV,
+        isDevelopment: !isProduction,
+        nodeModules: webpackPaths.appNodeModulesPath,
+      });
     }),
+
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: path.join(webpackPaths.srcRendererPath, 'shell-manifest.json'), to: path.join(webpackPaths.distRendererPath, 'manifest.json') },
+      ],
+    })
   ],
 
   node: {
@@ -148,14 +177,12 @@ const configuration: webpack.Configuration = {
     historyApiFallback: {
       verbose: true,
     },
+    devMiddleware: {
+      writeToDisk: (targetpath) => {
+        return true
+      }
+    },
     setupMiddlewares(middlewares) {
-      console.log('Starting WebUI dev server...');
-      spawn('npm', ['run', 'start:webui'], {
-        shell: true,
-        stdio: 'inherit',
-      })
-        .on('error', (spawnError) => console.error(spawnError));
-
       console.log('Starting preload.js builder...');
       const preloadProcess = spawn('npm', ['run', 'start:preload'], {
         shell: true,

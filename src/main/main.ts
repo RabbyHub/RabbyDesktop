@@ -5,11 +5,12 @@ import { app, session, BrowserWindow, ipcMain } from 'electron';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { buildChromeContextMenu } from '@rabby-wallet/electron-chrome-context-menu';
 import { setupMenu } from './browser/menu';
-import { getAssetPath, resolveReleasePath } from './util';
+import { getAssetPath, resolveRendererPath } from './util';
 import { firstEl } from '../isomorphic/array';
 import TabbedBrowserWindow, {
   TabbedBrowserWindowOptions,
 } from './browser/browsers';
+import { FRAME_DEFAULT_SIZE, FRAME_MAX_SIZE, FRAME_MIN_SIZE } from '../isomorphic/const-size';
 
 const pkgjson = require('../../package.json');
 
@@ -164,11 +165,11 @@ class Browser {
     );
 
     const webuiExtension = await this.session!.loadExtension(
-      resolveReleasePath('webui'),
+      resolveRendererPath(''),
       { allowFileAccess: true }
     );
     webuiExtensionId = webuiExtension.id;
-    const newTabUrl = `chrome-extension://${webuiExtensionId}/new-tab.html`;
+    const newTabUrl = `chrome-extension://${webuiExtensionId}/shell-new-tab.html`;
 
     // @notice: make sure all customized plugins loaded after ElectronChromeExtensions initialized
     this.extensions = new ElectronChromeExtensions({
@@ -275,9 +276,13 @@ class Browser {
       webuiExtensionId,
       extensions: this.extensions,
       window: {
+        ...FRAME_DEFAULT_SIZE,
+        ...FRAME_MAX_SIZE,
+        ...FRAME_MIN_SIZE,
         width: 1280,
         height: 720,
         frame: false,
+        icon: getAssetPath('icon.png'),
         resizable: false,
         ...options.window,
         webPreferences: {

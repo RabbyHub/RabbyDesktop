@@ -26,6 +26,10 @@ export function resolveReleasePath(file: string) {
   return `file://${path.resolve(__dirname, '../', file)}`;
 }
 
+export function resolveRendererPath(file: string) {
+  return resolveReleasePath(path.join('renderer', file));
+}
+
 export const getAssetPath = (...paths: string[]): string => {
   return path.join(RESOURCES_PATH, ...paths);
 };
