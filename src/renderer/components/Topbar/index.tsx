@@ -1,6 +1,7 @@
 /* eslint-disable no-underscore-dangle, @typescript-eslint/no-shadow */
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/alt-text */
 /// <reference types="chrome" />
+/// <reference path="../../preload.d.ts" />
 
 import React, {
   useCallback,
@@ -9,14 +10,33 @@ import React, {
   useRef,
   useState,
 } from 'react';
-// import IconTabClose from '~/assets/icons/native-tabs/icon-tab-close.svg';
-import IconTabClose from '../../../../assets/icons/native-tabs/icon-tab-close.svg';
+import {
+  IconTabCloseHover,
+  IconTabClose,
+  IconNavGoback,
+  IconNavGoforward,
+  IconNavRefresh,
+} from '../../../../assets/icons/native-tabs'
 
-import IconNavGoback from '../../../../assets/icons/native-tabs/icon-navigation-back.svg';
-import IconNavGoforward from '../../../../assets/icons/native-tabs/icon-navigation-forward.svg';
-import IconNavRefresh from '../../../../assets/icons/native-tabs/icon-navigation-refresh.svg';
+import {
+  IconWin32TripleClose,
+  IconWin32TripleMaxmize,
+  IconWin32TripleRecover,
+  IconWin32TripleMinimize,
+
+  IconDarwinTripleClose,
+  IconDarwinTripleMinimize,
+  IconDarwinTripleFullscreen,
+  IconDarwinTripleHoverClose,
+  IconDarwinTripleHoverMinimize,
+  IconDarwinTripleHoverFullscreen,
+  IconDarwinTripleHoverRecover,
+} from '../../../../assets/icons/native-tabs-triples'
+
 import './index.less';
 import { parseQueryString } from '../../../isomorphic/url';
+
+import { useWindowState } from '../../hooks/useWindowState';
 
 const isDebug = process.env.NODE_ENV !== 'production';
 
@@ -43,7 +63,38 @@ type GetListenerFirstParams<T> = T extends (...args: infer A) => any
   ? A[0]
   : never;
 
-function useTabs() {
+function useWinTriples() {
+  const {
+    osType,
+    winState,
+    onMinimizeButton,
+    onMaximizeButton,
+    onFullscreenButton,
+    onCloseButton
+  } = useWindowState();
+
+  const winButtonActions = {
+    onCreateTabButtonClick: useCallback(
+      () => chrome.tabs.create(undefined as any),
+      []
+    ),
+    onGoBackButtonClick: useCallback(() => chrome.tabs.goBack(), []),
+    onGoForwardButtonClick: useCallback(() => chrome.tabs.goForward(), []),
+    onReloadButtonClick: useCallback(() => chrome.tabs.reload(), []),
+    onMinimizeButton,
+    onMaximizeButton,
+    onCloseButton,
+    onFullscreenButton,
+  };
+
+  return {
+    winOSType: osType,
+    winState,
+    winButtonActions,
+  }
+}
+
+function useTopbar() {
   const [origTabList, setTabList] = useState<ChromeTab[]>([]);
   const [activeTabId, setActiveId] = useState<ChromeTab['id']>(-1);
   const [windowId, setWindowId] = useState<number | undefined>(undefined);
@@ -183,34 +234,6 @@ function useTabs() {
     []
   );
 
-  const winButtonActions = {
-    onCreateTabButtonClick: useCallback(
-      () => chrome.tabs.create(undefined as any),
-      []
-    ),
-    onGoBackButtonClick: useCallback(() => chrome.tabs.goBack(), []),
-    onGoForwardButtonClick: useCallback(() => chrome.tabs.goForward(), []),
-    onReloadButtonClick: useCallback(() => chrome.tabs.reload(), []),
-
-    onMinimizeButton: useCallback(() => {
-      chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, (win) => {
-        chrome.windows.update(win.id!, {
-          state: win.state === 'minimized' ? 'normal' : 'minimized',
-        });
-      });
-    }, []),
-    onMaximizeButton: useCallback(() => {
-      chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, (win) => {
-        chrome.windows.update(win.id!, {
-          state: win.state === 'maximized' ? 'normal' : 'maximized',
-        });
-      });
-    }, []),
-    onCloseButton: useCallback(() => {
-      chrome.windows.remove(undefined as any);
-    }, []),
-  };
-
   const tabActions = {
     onTabClick: useCallback((tab: ChromeTab) => {
       chrome.tabs.update(tab.id!, { active: true });
@@ -227,7 +250,6 @@ function useTabs() {
     tabList,
     activeTab,
     onAddressUrlKeyUp,
-    winButtonActions,
     tabActions,
   };
 }
@@ -277,9 +299,14 @@ export default function Topbar() {
     tabList,
     activeTab,
     onAddressUrlKeyUp,
-    winButtonActions,
     tabActions,
-  } = useTabs();
+  } = useTopbar();
+
+  const {
+    winOSType,
+    winState,
+    winButtonActions,
+  } = useWinTriples();
 
   const selectedTabInfo = useSelectedTabInfo(activeTab);
 
@@ -288,6 +315,43 @@ export default function Topbar() {
   return (
     <>
       <div id="tabstrip">
+        {winOSType === 'darwin' && (
+          <div className="macos-controls">
+            <button
+              type="button"
+              className="control triple-close"
+              onClick={winButtonActions.onCloseButton}
+            >
+              <img src={IconDarwinTripleClose} alt="close" />
+              <img className='hover-show' src={IconDarwinTripleHoverClose} alt="close" />
+            </button>
+            <button
+              type="button"
+              className="control triple-minimize"
+              onClick={winButtonActions.onMinimizeButton}
+            >
+              <img src={IconDarwinTripleMinimize} alt="minimize" />
+              <img className='hover-show' src={IconDarwinTripleHoverMinimize} alt="minimize" />
+            </button>
+            <button
+              type="button"
+              className="control triple-fullscreen"
+              onClick={winButtonActions.onFullscreenButton}
+            >
+              {winState === 'fullscreen' ? (
+                <>
+                  <img src={IconDarwinTripleFullscreen} alt="fullscreen" />
+                  <img className='hover-show' src={IconDarwinTripleHoverRecover} alt="fullscreen" />
+                </>
+              ) : (
+                <>
+                  <img src={IconDarwinTripleFullscreen} alt="fullscreen" />
+                  <img className='hover-show' src={IconDarwinTripleHoverFullscreen} alt="fullscreen" />
+                </>
+              )}
+            </button>
+          </div>
+        )}
         <ul className="tab-list" ref={tabListDomRef}>
           {tabList.map((tab: ChromeTab, idx) => {
             const key = `topbar-tab-${tab.id}-${idx}`;
@@ -314,7 +378,8 @@ export default function Topbar() {
                         tabActions.onTabClose(tab);
                       }}
                     >
-                      <img src={IconTabClose} alt="close" />
+                      <img src={IconTabClose} className="normal" alt="close" />
+                      <img src={IconTabCloseHover} className="inactive-hover" alt="close" />
                     </button>
                   )}
                 </div>
@@ -332,33 +397,31 @@ export default function Topbar() {
           </button>
         )}
         <div className="app-drag" />
-        {/* vary Windows & macOS */}
-        <div className="window-controls">
-          <button
-            id="minimize"
-            type="button"
-            className="control"
-            onClick={winButtonActions.onMinimizeButton}
-          >
-            🗕
-          </button>
-          <button
-            id="maximize"
-            type="button"
-            className="control"
-            onClick={winButtonActions.onMaximizeButton}
-          >
-            🗖
-          </button>
-          <button
-            id="close"
-            type="button"
-            className="control"
-            onClick={winButtonActions.onCloseButton}
-          >
-            🗙
-          </button>
-        </div>
+        {winOSType === 'win32' && (
+          <div className="window-controls">
+            <button
+              type="button"
+              className="control triple-minimize"
+              onClick={winButtonActions.onMinimizeButton}
+            >
+              <img src={IconWin32TripleMinimize} alt="minimize" />
+            </button>
+            <button
+              type="button"
+              className="control triple-maximize"
+              onClick={winButtonActions.onMaximizeButton}
+            >
+              <img src={winState === 'maximized' ? IconWin32TripleRecover : IconWin32TripleMaxmize} alt="maximize" />
+            </button>
+            <button
+              type="button"
+              className="control triple-close"
+              onClick={winButtonActions.onCloseButton}
+            >
+              <img src={IconWin32TripleClose} alt="close" />
+            </button>
+          </div>
+        )}
       </div>
       {WITH_NAV_BAR && (
         <div className="toolbar">

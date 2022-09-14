@@ -112,12 +112,70 @@ ul {
   // box-shadow: inset -1px 0 0 0 rgba(0,0,0,0.33);
   color: var(--rabby-tab-color);
   opacity: .6;
+  cursor: pointer;
 
-  &[data-active=true] {
+  &[data-active=true], &.active, &:hover {
     opacity: 1;
     background: var(--tab-color);
     color: var(--rabby-tab-active-color);
   }
+
+  &[data-active=true], &.active {
+    color: var(--rabby-tab-active-color);
+    background: var(--rabby-tab-active-background);
+    box-shadow: none;
+  }
+
+  img.inactive-hover {
+    display: none;
+  }
+  &[data-active=false]:hover {
+    background: var(--rabby-tab-hover-background);
+    color: var(--rabby-tab-hover-color);
+
+    img.inactive-hover {
+      display: block;
+    }
+    img.normal {
+      display: none;
+    }
+  }
+
+  .control.close {
+    display: none;
+    margin-left: 10px;
+    outline: none;
+  }
+  &.active .control.close,
+  &:hover .control.close {
+    visibility: visible;
+    display: inline-block;
+
+    svg {
+      fill: red;
+    }
+  }
+
+  // .control.close button {
+  //   background: var(--rabby-tab-button-background);
+  //   border-radius: 50%;
+  //   color: var(--rabby-tab-button-color);
+  //   cursor: pointer;
+  //   font-size: var(--rabby-tab-button-font-size);
+  //   display: inline-block;
+  //   border: none;
+  //   width: 20px;
+  //   height: 20px;
+  //   text-align: center;
+  //   padding: 1px 0 0 0;
+  //   visibility: var(--rabby-tab-close-button-visibility);
+  //   outline: none;
+
+  //   &:hover {
+  //     color: var(--rabby-tab-button-hover-color);
+  //     background: var(--rabby-tab-button-hover-background);
+  //   }
+  // }
 }
 
 .tab .favicon[src] {
@@ -187,17 +245,75 @@ ul {
   display: flex;
   flex-direction: row;
   flex: 0 0 auto;
+
+  .control {
+    cursor: pointer;
+    /* macOS */
+    width: 44px;
+    box-sizing: border-box;
+    background: none;
+    border: none;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .control > img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .control:hover.triple-minimize {
+    background: rgba(255, 255, 255, 0.3);
+  }
+  .control:hover.triple-maximize {
+    background: transparent;
+  }
+  .control:hover.triple-close {
+    background: var(--color-red);
+  }
 }
 
-.window-controls .control {
-  width: 2.5rem;
-  background: none;
-  border: none;
-  color: #fff;
-}
+.macos-controls {
+  display: flex;
+  width: 84px;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 16px;
+  padding-right: 16px;
+  box-sizing: border-box;
 
-.window-controls .control:hover {
-  background: rgba(255, 255, 255, 0.2);
+  .control {
+    cursor: pointer;
+    border: none;
+    background-color: transparent;
+    display: flex;
+    width: 12px;
+    height: 12px;
+    padding: 0;
+    & + .control {
+      margin-left: 8px;
+    }
+  }
+
+  .control > img {
+    width: 100%;
+    height: 100%;
+    display: block;
+
+    &.hover-show {
+      display: none;
+    }
+  }
+
+  .control:hover > img {
+    display: none;
+  }
+
+  .control:hover > img.hover-show {
+    display: block;
+  }
 }
 
 /*----- TOOLBAR -----*/

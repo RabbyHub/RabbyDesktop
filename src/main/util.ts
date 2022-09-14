@@ -1,6 +1,6 @@
 /* eslint import/prefer-default-export: off */
 import path from 'path';
-import { app, BrowserView } from 'electron';
+import { app } from 'electron';
 
 function resolveReleasePath(file: string) {
   if (process.env.NODE_ENV === 'development') {
