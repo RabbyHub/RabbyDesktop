@@ -28,6 +28,6 @@ npm-debug.log.*
 *.sass.d.ts
 *.scss.d.ts
 
-*/chrome_plugins/*
+*/desktop_shell/*
 */chrome_exts/*
 assets/*.zip

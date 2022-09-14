@@ -34,7 +34,7 @@ const configuration: webpack.Configuration = {
   },
 
   output: {
-    path: webpackPaths.distRendererPath,
+    path: webpackPaths.distShellPath,
     publicPath: './',
     filename: '[name].js',
     library: {
@@ -117,7 +117,7 @@ const configuration: webpack.Configuration = {
 
     new CopyWebpackPlugin({
       patterns: [
-        { from: path.join(webpackPaths.srcRendererPath, 'shell-manifest.json'), to: path.join(webpackPaths.distRendererPath, 'manifest.json') },
+        { from: path.join(webpackPaths.srcRendererPath, 'shell-manifest.json'), to: path.join(webpackPaths.distShellPath, 'manifest.json') },
       ],
     }),
 

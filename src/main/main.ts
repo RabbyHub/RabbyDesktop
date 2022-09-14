@@ -5,7 +5,7 @@ import { app, session, BrowserWindow, ipcMain } from 'electron';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { buildChromeContextMenu } from '@rabby-wallet/electron-chrome-context-menu';
 import { setupMenu } from './browser/menu';
-import { getAssetPath, resolveRendererPath } from './util';
+import { getAssetPath, preloadPath, resolveMainPath } from './util';
 import { firstEl } from '../isomorphic/array';
 import TabbedBrowserWindow, {
   TabbedBrowserWindowOptions,
@@ -14,9 +14,6 @@ import { FRAME_DEFAULT_SIZE, FRAME_MAX_SIZE, FRAME_MIN_SIZE } from '../isomorphi
 
 const pkgjson = require('../../package.json');
 
-const preloadPath = app.isPackaged
-  ? path.join(__dirname, 'preload.js')
-  : path.join(__dirname, '../../.erb/dll/preload.js');
 let webuiExtensionId: Electron.Extension['id'] = '';
 let rabbyExtensionId: Electron.Extension['id'] = '';
 
@@ -165,7 +162,7 @@ class Browser {
     );
 
     const webuiExtension = await this.session!.loadExtension(
-      resolveRendererPath(''),
+      getAssetPath('desktop_shell'),
       { allowFileAccess: true }
     );
     webuiExtensionId = webuiExtension.id;
@@ -174,6 +171,8 @@ class Browser {
     // @notice: make sure all customized plugins loaded after ElectronChromeExtensions initialized
     this.extensions = new ElectronChromeExtensions({
       session: this.session,
+
+      preloadPath,
 
       createTab: (details) => {
         const win =
@@ -235,7 +234,7 @@ class Browser {
 
     const loadedExtensions = await loadExtensions(
       this.session!,
-      getAssetPath('chrome_plugins')
+      getAssetPath('chrome_exts')
     );
 
     ipcMain.on('rabby-extension-id', (event) => {

@@ -29,19 +29,21 @@
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:main": "cross-env-shell NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.main.prod.ts",
-    "build:renderer": "npm run clean:renderer && cross-env-shell NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
+    "build:renderer": "npm run clean:shell && cross-env-shell NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
     "clean:renderer": "rimraf release/app/dist/renderer",
-    "postinstall": "patch-package && npm run depcheck",
+    "clean:shell": "rimraf assets/desktop_shell",
+    "postinstall": "npm run depcheck",
     "depcheck": "ts-node .erb/scripts/check-native-dep.js && electron-builder install-app-deps && cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.dev.dll.ts",
     "lint": "cross-env-shell NODE_ENV=development eslint --ext .js,.jsx,.ts,.tsx ./src",
     "lint-fix": "cross-env-shell NODE_ENV=development eslint --fix --ext .js,.jsx,.ts,.tsx ./src",
+    "prepackage": "rimraf release/build",
     "package": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --publish never",
     "prepare": "husky install",
     "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
     "start": "ts-node ./.erb/scripts/check-port-in-use.js && npm run start:renderer",
     "start:main": "cross-env-shell NODE_ENV=development electronmon -r ts-node/register/transpile-only .",
     "start:preload": "cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
-    "start:renderer": "npm run clean:renderer && cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
+    "start:renderer": "npm run clean:shell && cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
     "test": "jest"
   },
   "lint-staged": {
@@ -105,7 +107,7 @@
   },
   "dependencies": {
     "@rabby-wallet/electron-chrome-context-menu": "^1.1.1",
-    "@rabby-wallet/electron-chrome-extensions": "^3.9.2",
+    "@rabby-wallet/electron-chrome-extensions": "^3.9.3",
     "@types/chrome": "^0.0.196",
     "@types/sortablejs": "^1.13.0",
     "classnames": "^2.3.1",

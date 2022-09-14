@@ -17,6 +17,7 @@ const srcNodeModulesPath = path.join(srcPath, 'node_modules');
 const distPath = path.join(appPath, 'dist');
 const distMainPath = path.join(distPath, 'main');
 const distRendererPath = path.join(distPath, 'renderer');
+const distShellPath = path.join(rootPath, 'assets/desktop_shell');
 
 const buildPath = path.join(releasePath, 'build');
 
@@ -52,6 +53,7 @@ export default {
   distPath,
   distMainPath,
   distRendererPath,
+  distShellPath,
   buildPath,
   rendererEntries,
 };

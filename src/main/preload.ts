@@ -2,14 +2,15 @@
 
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 import { injectBrowserAction } from '@rabby-wallet/electron-chrome-extensions/dist/browser-action';
-
-// Inject <browser-action-list> element into WebUI
 if (
-  window.location.protocol === 'chrome-extension:' &&
-  window.location.pathname === '/shell-webui.html'
+  window.location.protocol === 'chrome-extension:' && window.location.pathname === '/shell-webui.html'
 ) {
+  // Inject <browser-action-list> element into WebUI
   injectBrowserAction();
 }
+
+// to injectExtensionAPIs on chrome-extension://
+import '@rabby-wallet/electron-chrome-extensions/dist/preload';
 
 if (!(window as any).rabbyDesktop) {
   contextBridge.exposeInMainWorld('rabbyDesktop', {
