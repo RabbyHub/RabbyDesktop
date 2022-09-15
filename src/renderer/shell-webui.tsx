@@ -1,5 +1,5 @@
 import React from 'react';
-import '../renderer/css/theme/index.css';
+import './css/theme/index.css';
 
 import { createRoot } from 'react-dom/client';
 

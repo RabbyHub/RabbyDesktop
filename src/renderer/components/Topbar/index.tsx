@@ -10,20 +10,22 @@ import React, {
   useRef,
   useState,
 } from 'react';
+
+import classnames from 'classnames';
+
 import {
   IconTabCloseHover,
   IconTabClose,
   IconNavGoback,
   IconNavGoforward,
   IconNavRefresh,
-} from '../../../../assets/icons/native-tabs'
+} from '../../../../assets/icons/native-tabs';
 
 import {
   IconWin32TripleClose,
   IconWin32TripleMaxmize,
   IconWin32TripleRecover,
   IconWin32TripleMinimize,
-
   IconDarwinTripleClose,
   IconDarwinTripleMinimize,
   IconDarwinTripleFullscreen,
@@ -31,12 +33,16 @@ import {
   IconDarwinTripleHoverMinimize,
   IconDarwinTripleHoverFullscreen,
   IconDarwinTripleHoverRecover,
-} from '../../../../assets/icons/native-tabs-triples'
+} from '../../../../assets/icons/native-tabs-triples';
 
 import './index.less';
 import { parseQueryString } from '../../../isomorphic/url';
 
 import { useWindowState } from '../../hooks/useWindowState';
+import {
+  RABBY_HOMEPAGE_URL,
+  RABBY_INTERNAL_PROTOCOL,
+} from '../../../isomorphic/constants';
 
 const isDebug = process.env.NODE_ENV !== 'production';
 
@@ -58,6 +64,25 @@ declare global {
 const WITH_NAV_BAR = parseQueryString().__withNavigationbar === 'true';
 const CLOSABLE = parseQueryString().__webuiClosable === 'true';
 
+function isInternalProtocol(url: string) {
+  return [
+    `${RABBY_INTERNAL_PROTOCOL}//`,
+    'chrome-extension://',
+    'chrome://',
+  ].some((protocol) => url.startsWith(protocol));
+}
+
+function specialFavIcon(url?: string, isActiveTab = false) {
+  // homepage
+  if (url?.startsWith(RABBY_HOMEPAGE_URL)) {
+    return isActiveTab
+      ? 'rabby-internal://assets/icons/internal-homepage/icon-home.svg'
+      : 'rabby-internal://assets/icons/internal-homepage/icon-home-blur.svg';
+  }
+
+  return null;
+}
+
 // type GetListenerParams<T> = T extends (...args: infer A) => any ? A : never;
 type GetListenerFirstParams<T> = T extends (...args: infer A) => any
   ? A[0]
@@ -70,7 +95,7 @@ function useWinTriples() {
     onMinimizeButton,
     onMaximizeButton,
     onFullscreenButton,
-    onCloseButton
+    onCloseButton,
   } = useWindowState();
 
   const winButtonActions = {
@@ -91,7 +116,7 @@ function useWinTriples() {
     winOSType: osType,
     winState,
     winButtonActions,
-  }
+  };
 }
 
 function useTopbar() {
@@ -289,28 +314,22 @@ function useAddressUrl(updatedUrl?: string) {
 
   return {
     addressUrl,
+    isInternalUrl: useMemo(() => isInternalProtocol(addressUrl), [addressUrl]),
     onAddressUrlChange,
   };
 }
 
 export default function Topbar() {
-  const {
-    tabListDomRef,
-    tabList,
-    activeTab,
-    onAddressUrlKeyUp,
-    tabActions,
-  } = useTopbar();
+  const { tabListDomRef, tabList, activeTab, onAddressUrlKeyUp, tabActions } =
+    useTopbar();
 
-  const {
-    winOSType,
-    winState,
-    winButtonActions,
-  } = useWinTriples();
+  const { winOSType, winState, winButtonActions } = useWinTriples();
 
   const selectedTabInfo = useSelectedTabInfo(activeTab);
 
-  const { addressUrl, onAddressUrlChange } = useAddressUrl(activeTab?.url);
+  const { addressUrl, isInternalUrl, onAddressUrlChange } = useAddressUrl(
+    activeTab?.url
+  );
 
   return (
     <>
@@ -323,7 +342,11 @@ export default function Topbar() {
               onClick={winButtonActions.onCloseButton}
             >
               <img src={IconDarwinTripleClose} alt="close" />
-              <img className='hover-show' src={IconDarwinTripleHoverClose} alt="close" />
+              <img
+                className="hover-show"
+                src={IconDarwinTripleHoverClose}
+                alt="close"
+              />
             </button>
             <button
               type="button"
@@ -331,7 +354,11 @@ export default function Topbar() {
               onClick={winButtonActions.onMinimizeButton}
             >
               <img src={IconDarwinTripleMinimize} alt="minimize" />
-              <img className='hover-show' src={IconDarwinTripleHoverMinimize} alt="minimize" />
+              <img
+                className="hover-show"
+                src={IconDarwinTripleHoverMinimize}
+                alt="minimize"
+              />
             </button>
             <button
               type="button"
@@ -341,12 +368,20 @@ export default function Topbar() {
               {winState === 'fullscreen' ? (
                 <>
                   <img src={IconDarwinTripleFullscreen} alt="fullscreen" />
-                  <img className='hover-show' src={IconDarwinTripleHoverRecover} alt="fullscreen" />
+                  <img
+                    className="hover-show"
+                    src={IconDarwinTripleHoverRecover}
+                    alt="fullscreen"
+                  />
                 </>
               ) : (
                 <>
                   <img src={IconDarwinTripleFullscreen} alt="fullscreen" />
-                  <img className='hover-show' src={IconDarwinTripleHoverFullscreen} alt="fullscreen" />
+                  <img
+                    className="hover-show"
+                    src={IconDarwinTripleHoverFullscreen}
+                    alt="fullscreen"
+                  />
                 </>
               )}
             </button>
@@ -355,6 +390,9 @@ export default function Topbar() {
         <ul className="tab-list" ref={tabListDomRef}>
           {tabList.map((tab: ChromeTab, idx) => {
             const key = `topbar-tab-${tab.id}-${idx}`;
+
+            const faviconUrl =
+              specialFavIcon(tab.url, tab.active) || tab.favIconUrl;
 
             return (
               /* eslint-disable-next-line jsx-a11y/click-events-have-key-events */
@@ -365,7 +403,7 @@ export default function Topbar() {
                 key={key}
                 onClick={() => tabActions.onTabClick(tab)}
               >
-                <img className="favicon" src={tab.favIconUrl || undefined} />
+                <img className="favicon" src={faviconUrl || undefined} />
                 <span className="title">{tab.title}</span>
                 <div className="controls">
                   {/* <button className="control audio" disabled={tab.audible && !tab.mutedInfo?.muted}>🔊</button> */}
@@ -379,7 +417,11 @@ export default function Topbar() {
                       }}
                     >
                       <img src={IconTabClose} className="normal" alt="close" />
-                      <img src={IconTabCloseHover} className="inactive-hover" alt="close" />
+                      <img
+                        src={IconTabCloseHover}
+                        className="inactive-hover"
+                        alt="close"
+                      />
                     </button>
                   )}
                 </div>
@@ -411,7 +453,14 @@ export default function Topbar() {
               className="control triple-maximize"
               onClick={winButtonActions.onMaximizeButton}
             >
-              <img src={winState === 'maximized' ? IconWin32TripleRecover : IconWin32TripleMaxmize} alt="maximize" />
+              <img
+                src={
+                  winState === 'maximized'
+                    ? IconWin32TripleRecover
+                    : IconWin32TripleMaxmize
+                }
+                alt="maximize"
+              />
             </button>
             <button
               type="button"
@@ -424,9 +473,10 @@ export default function Topbar() {
         )}
       </div>
       {WITH_NAV_BAR && (
-        <div className="toolbar">
+        <div
+          className={classnames('toolbar', isInternalUrl && 'internal-page')}
+        >
           <div className="page-controls">
-            {/* TODO: support canGoback */}
             <button
               id="goback"
               type="button"
@@ -436,7 +486,6 @@ export default function Topbar() {
             >
               <img src={IconNavGoback} alt="close" />
             </button>
-            {/* TODO: support canGoforward */}
             <button
               id="goforward"
               type="button"
@@ -444,7 +493,6 @@ export default function Topbar() {
               onClick={winButtonActions.onGoForwardButtonClick}
               disabled={!selectedTabInfo?.canGoForward}
             >
-              {/* <img src={IconNavGoforward} alt="close" /> */}
               <img
                 src={IconNavGoback}
                 style={{ transform: 'rotate(180deg)' }}
@@ -461,14 +509,18 @@ export default function Topbar() {
             </button>
           </div>
           <div className="address-bar">
-            <input
-              id="addressurl"
-              spellCheck={false}
-              value={addressUrl}
-              // defaultValue={activeTab?.url || ''}
-              onKeyUp={onAddressUrlKeyUp}
-              onChange={onAddressUrlChange}
-            />
+            {isInternalUrl ? (
+              <div className="hidden-address" />
+            ) : (
+              <input
+                id="addressurl"
+                spellCheck={false}
+                value={addressUrl}
+                // defaultValue={activeTab?.url || ''}
+                onKeyUp={onAddressUrlKeyUp}
+                onChange={onAddressUrlChange}
+              />
+            )}
           </div>
           <browser-action-list id="actions" />
         </div>

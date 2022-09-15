@@ -1,11 +1,7 @@
-import classnames from 'classnames';
-import { ensureSuffix } from 'isomorphic/string';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
-import IconRabby from '../../assets/icon.svg';
-import IconHome from '../../assets/icons/native-tabs/icon-home.svg';
-import './App.css';
-import useRabbyLoaded from './hooks/useRabbyLoaded';
+import './App.less';
+import DApps from './routes/Dapps';
 
 function useTabs(rabbyExt: Electron.Extension | null) {
   return useMemo(() => {
@@ -18,7 +14,7 @@ export default function App() {
     <Router initialEntries={['/dapps']}>
       <Routes>
         {/* <Route path="/" element={<DApps />} /> */}
-        {/* <Route path="/dapps" element={<DApps />} /> */}
+        <Route path="/dapps" element={<DApps />} />
       </Routes>
     </Router>
   );

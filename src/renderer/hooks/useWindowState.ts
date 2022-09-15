@@ -3,13 +3,14 @@ import { detectOS } from '../../isomorphic/os';
 
 const OS_TYPE = detectOS();
 
-export function useWindowState () {
-  const [winState, setWinState] = useState<chrome.windows.windowStateEnum | void>();
+export function useWindowState() {
+  const [winState, setWinState] =
+    useState<chrome.windows.windowStateEnum | void>();
 
   useEffect(() => {
     chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, (win) => {
       setWinState(win.state);
-    })
+    });
   }, []);
 
   const onMinimizeButton = useCallback(() => {
@@ -52,5 +53,5 @@ export function useWindowState () {
     onMaximizeButton,
     onFullscreenButton,
     onCloseButton,
-  }
+  };
 }

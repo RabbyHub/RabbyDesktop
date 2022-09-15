@@ -30,6 +30,14 @@ type ChannelMessagePayload = {
       }
     ];
   };
+  'get-app-version': {
+    send: [];
+    response: [
+      {
+        version: ReturnType<Electron.App['getVersion']>;
+      }
+    ];
+  };
 };
 
 type Channels = keyof ChannelMessagePayload;

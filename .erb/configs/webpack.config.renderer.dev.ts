@@ -49,11 +49,12 @@ const configuration: webpack.Configuration = {
   target: ['web', 'electron-renderer'],
 
   entry: {
-    'renderer': [
-      `webpack-dev-server/client?http://localhost:${port}/dist`,
-      'webpack/hot/only-dev-server',
-      path.join(webpackPaths.srcRendererPath, 'index.tsx'),
-    ],
+    // 'renderer': [
+    //   `webpack-dev-server/client?http://localhost:${port}/dist`,
+    //   'webpack/hot/only-dev-server',
+    //   path.join(webpackPaths.srcRendererPath, 'index.tsx'),
+    // ],
+    renderer: path.join(webpackPaths.srcRendererPath, 'index.tsx'),
   },
 
   output: {
@@ -154,7 +155,9 @@ const configuration: webpack.Configuration = {
   devServer: {
     port,
     compress: true,
-    hot: true,
+    hot: false,
+    liveReload: false,
+    client: false,
     headers: { 'Access-Control-Allow-Origin': '*' },
     static: {
       publicPath: '/',

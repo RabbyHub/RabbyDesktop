@@ -1,5 +1,5 @@
 
-@import "../../../ui-common/css-theme/index.css";
+@import "../../css/theme/index.css";
 
 @rem-unit: 14px;
 
@@ -33,11 +33,10 @@
   --rabby-toolbar-h: 44px;
 
   --text-color: #ececec;
-  --tab-color: var(--rabby-tab-active-background);
   --toolbar-control-color: #d597ce;
 
   /* electron-chrome-extensions colors */
-  --browser-action-badge-outline: var(--tab-color);
+  --browser-action-badge-outline: var(--color-purewhite);
 }
 
 *, *:before, *:after {
@@ -116,8 +115,8 @@ ul {
 
   &[data-active=true], &.active, &:hover {
     opacity: 1;
-    background: var(--tab-color);
     color: var(--rabby-tab-active-color);
+    background: var(--rabby-tab-active-background);
   }
 
   &[data-active=true], &.active {
@@ -320,11 +319,24 @@ ul {
 
 .toolbar {
   height: 1.875rem;
-  background-color: var(--tab-color);
+  background-color: var(--color-bg);
   display: flex;
   align-items: center;
   padding: 8px 16px;
   height: var(--rabby-toolbar-h);
+
+  &.internal-page {
+    background-color: var(--color-purewhite);
+  }
+
+  .control {
+    background: none;
+    border: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    line-height: 0;
+  }
 }
 
 .toolbar .page-controls {
@@ -367,26 +379,27 @@ ul {
   flex: 1 0 auto;
   line-height: 0;
   height: 100%;
-}
+  .address-bar-input-style() {
+    background: var(--color-bg);
+    color: var(--color-paragraph);
+    border: none;
+    border-radius: 18px;
+    padding: 7px 16px;
+    outline: none;
+  }
 
-.address-bar input {
-  width: 100%;
-  height: 100%;
-  background: var(--color-bg);
-  color: var(--color-paragraph);
-  border: none;
-  border-radius: 18px;
-  padding: 7px 16px;
-  outline: none;
-}
+  input {
+    width: 100%;
+    height: 100%;
+    .address-bar-input-style();
+    background-color: white;
+  }
 
-.toolbar .control {
-  background: none;
-  border: none;
-  width: 1.5rem;
-  height: 1.5rem;
-  padding: 0;
-  line-height: 0;
+  .hidden-address {
+    width: 100%;
+    height: 100%;
+    .address-bar-input-style();
+  }
 }
 
 browser-action-list {

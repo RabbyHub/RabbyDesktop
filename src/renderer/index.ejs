@@ -4,9 +4,13 @@
     <meta charset="utf-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="script-src 'self' 'unsafe-inline'"
+      content="
+        default-src rabby-internal: 'self' 'unsafe-inline' http: https: ws: wss:;
+        script-src rabby-internal: 'self' 'unsafe-inline' http: https: ws: wss:;
+      "
     />
-    <title>Rabby Wallet Desktop</title>
+    <link rel="icon" href="rabby-internal://assets/icons/internal-homepage/icon-home.svg">
+    <title>Home</title>
   </head>
   <body>
     <div id="root"></div>

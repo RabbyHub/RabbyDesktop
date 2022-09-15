@@ -10,6 +10,8 @@ module.exports = {
     'consistent-return': 'off',
     'import/prefer-default-export': 'off',
     '@typescript-eslint/triple-slash-reference': 'off',
+    'no-underscore-dangle': 'off',
+    'class-methods-use-this': 'off'
     // '@typescript-eslint/naming-convention': [
     //   'error',
     //   {

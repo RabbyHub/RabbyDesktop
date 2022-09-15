@@ -5,14 +5,24 @@ import { app, session, BrowserWindow, ipcMain } from 'electron';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { buildChromeContextMenu } from '@rabby-wallet/electron-chrome-context-menu';
 import { setupMenu } from './browser/menu';
-import { getAssetPath, preloadPath, resolveMainPath } from './util';
+import { getAssetPath, preloadPath, getRendererPath } from './util';
 import { firstEl } from '../isomorphic/array';
 import TabbedBrowserWindow, {
   TabbedBrowserWindowOptions,
 } from './browser/browsers';
-import { FRAME_DEFAULT_SIZE, FRAME_MAX_SIZE, FRAME_MIN_SIZE } from '../isomorphic/const-size';
+import {
+  FRAME_DEFAULT_SIZE,
+  FRAME_MAX_SIZE,
+  FRAME_MIN_SIZE,
+} from '../isomorphic/const-size';
+import {
+  RABBY_HOMEPAGE_URL,
+  RABBY_INTERNAL_PROTOCOL,
+} from '../isomorphic/constants';
 
 const pkgjson = require('../../package.json');
+
+const isProd = process.env.NODE_ENV === 'production';
 
 let webuiExtensionId: Electron.Extension['id'] = '';
 let rabbyExtensionId: Electron.Extension['id'] = '';
@@ -153,13 +163,11 @@ class Browser {
   }
 
   async init() {
+    app.setName('RabbyDesktop');
     this.initSession();
     setupMenu(this);
 
     this.session.setPreloads([preloadPath]);
-    this.session.setUserAgent(
-      `${this.session.getUserAgent()} RabbyDesktop/v${pkgjson.version}`
-    );
 
     const webuiExtension = await this.session!.loadExtension(
       getAssetPath('desktop_shell'),
@@ -237,33 +245,77 @@ class Browser {
       getAssetPath('chrome_exts')
     );
 
-    ipcMain.on('rabby-extension-id', (event) => {
-      event.reply('rabby-extension-id', {
-        rabbyExtensionId,
-      });
-    });
-
     loadedExtensions.forEach((ext) => {
       if (ext.name.toLowerCase().includes('rabby')) {
         rabbyExtensionId = ext.id;
       }
     });
 
+    this._setupBridge();
+
     // init window
     this.createWindow({
-      initialUrl: newTabUrl,
+      initialUrl: isProd ? RABBY_HOMEPAGE_URL : newTabUrl,
     });
   }
 
   initSession() {
     this.session = session.defaultSession;
 
-    // Remove Electron and App details to closer emulate Chrome's UA
+    // // Remove Electron and App details to closer emulate Chrome's UA
     const userAgent = this.session
       .getUserAgent()
-      .replace(/\sElectron\/\S+/, '')
-      .replace(new RegExp(`\\s${app.getName()}/\\S+`), '');
+      .replace(/\sElectron\/\S+/, '');
     this.session.setUserAgent(userAgent);
+
+    if (
+      !this.session.protocol.registerFileProtocol(
+        RABBY_INTERNAL_PROTOCOL.slice(0, -1),
+        (request, callback) => {
+          const pathnameWithQuery = request.url.slice(
+            `${RABBY_INTERNAL_PROTOCOL}//`.length
+          );
+
+          const pathname = pathnameWithQuery.split('?')?.[0] || '';
+
+          if (pathname.startsWith('assets/')) {
+            callback({ path: getAssetPath(pathname.slice('assets/'.length)) });
+          } else if (pathname.startsWith('local/')) {
+            callback({
+              path: getRendererPath(pathname.slice('local/'.length)),
+            });
+          } else {
+            // TODO: give one 404 page
+            callback({
+              data: 'Not found',
+              mimeType: 'text/plain',
+            });
+          }
+        }
+      )
+    ) {
+      if (!isProd) {
+        throw new Error(
+          `[initSession] Failed to register protocol rabby-local`
+        );
+      } else {
+        console.error(`Failed to register protocol`);
+      }
+    }
+  }
+
+  _setupBridge() {
+    ipcMain.on('rabby-extension-id', (event) => {
+      event.reply('rabby-extension-id', {
+        rabbyExtensionId,
+      });
+    });
+
+    ipcMain.on('get-app-version', (event) => {
+      event.reply('get-app-version', {
+        version: app.getVersion(),
+      });
+    });
   }
 
   createWindow(options: Partial<TabbedBrowserWindowOptions>) {

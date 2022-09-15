@@ -10,15 +10,19 @@ function resolveReleasePath(file: string) {
   return `file://${path.resolve(__dirname, '../', file)}`;
 }
 
-export function resolveMainPath (file: string) {
+export function getMainPath(file: string) {
+  if (process.env.NODE_ENV === 'development') {
+    return path.resolve(
+      path.join(__dirname, '../../release/app/dist/main'),
+      file
+    );
+  }
+
   return path.join(__dirname, file);
 }
 
-export function resolveRendererPath(file: string) {
-  if (process.env.NODE_ENV === 'development') {
-    return resolveReleasePath(path.join('renderer', file));
-  }
-  return `file://${path.resolve(__dirname, '../renderer/', file)}`;
+export function getRendererPath(file: string) {
+  return getMainPath(`../renderer/${file}`);
 }
 
 const RESOURCES_PATH = app.isPackaged

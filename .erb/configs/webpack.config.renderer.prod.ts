@@ -29,12 +29,10 @@ const configuration: webpack.Configuration = {
 
   entry: {
     'renderer': path.join(webpackPaths.srcRendererPath, 'index.tsx'),
-    'shell-webui': path.join(webpackPaths.srcRendererPath, 'shell-webui.tsx'),
-    'shell-new-tab': path.join(webpackPaths.srcRendererPath, 'shell-new-tab.tsx'),
   },
 
   output: {
-    path: webpackPaths.distShellPath,
+    path: webpackPaths.distRendererPath,
     publicPath: './',
     filename: '[name].js',
     library: {
@@ -113,12 +111,6 @@ const configuration: webpack.Configuration = {
         isDevelopment: process.env.NODE_ENV !== 'production',
         nodeModules: webpackPaths.appNodeModulesPath,
       });
-    }),
-
-    new CopyWebpackPlugin({
-      patterns: [
-        { from: path.join(webpackPaths.srcRendererPath, 'shell-manifest.json'), to: path.join(webpackPaths.distShellPath, 'manifest.json') },
-      ],
     }),
 
     new webpack.DefinePlugin({
