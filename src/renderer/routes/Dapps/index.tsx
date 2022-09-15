@@ -94,6 +94,9 @@ function DAppBlock({
         >
           <div
             className="menu-entry"
+            style={{
+              backgroundImage: `url(rabby-internal://assets/icons/internal-homepage/icon-dapps-menu.svg)`
+            }}
             onClickCapture={(evt) => {
               evt.stopPropagation();
             }}
