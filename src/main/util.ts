@@ -1,5 +1,6 @@
 /* eslint import/prefer-default-export: off */
 import path from 'path';
+// import url from 'url';
 import { app } from 'electron';
 
 function resolveReleasePath(file: string) {
@@ -22,6 +23,9 @@ export function getMainPath(file: string) {
 }
 
 export function getRendererPath(file: string) {
+  // trim search(query, hash, etc)
+  // const { pathname } = url.parse(file);
+  // return getMainPath(`../renderer/${pathname}`);
   return getMainPath(`../renderer/${file}`);
 }
 

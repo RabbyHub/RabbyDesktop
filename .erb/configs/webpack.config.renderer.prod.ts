@@ -54,10 +54,28 @@ const configuration: webpack.Configuration = {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,
         type: 'asset/resource',
       },
+      {
+        test: /\.svg$/,
+        issuer: /\.[jt]sx?$/,
+        resourceQuery: /rc/, // *.svg?rc
+        use: [
+          {
+            loader: 'babel-loader',
+          },
+          {
+            loader: '@svgr/webpack',
+            options: {
+              icon: true,
+              babel: true,
+            },
+          },
+        ],
+      },
       // Images
       {
         test: /\.(png|svg|jpg|jpeg|gif)$/i,
         type: 'asset/resource',
+        resourceQuery: { not: [/rc/] },
       },
     ],
   },
