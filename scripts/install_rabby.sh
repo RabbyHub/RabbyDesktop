@@ -13,7 +13,7 @@ curl -sL https://github.com/RabbyHub/Rabby/releases/download/v${RABBY_VER}/Rabby
 mkdir -p $assets_dir/chrome_exts/
 echo "[install_rabby] clean old rabby plugin..."
 rm -rf $assets_dir/chrome_exts/rabby_*;
-unzip $assets_dir/rabby_v${RABBY_VER}.zip -d $assets_dir/chrome_exts/rabby_v${RABBY_VER}
+unzip $assets_dir/rabby_v${RABBY_VER}.zip -d $assets_dir/chrome_exts/rabby
 
 echo "[install_rabby] clean..."
 rm -f $assets_dir/rabby_v${RABBY_VER}.zip;
