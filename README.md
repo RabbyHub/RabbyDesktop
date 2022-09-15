@@ -29,6 +29,12 @@ npm install
 
 ## Starting Development
 
+Before start run electron app, you need to install rabby plugin:
+
+```bash
+sh scripts/install-rabby.sh
+```
+
 Start the app in the `dev` environment:
 
 ```bash
