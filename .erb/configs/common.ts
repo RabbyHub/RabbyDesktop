@@ -31,19 +31,42 @@ export function getDevStyleLoaders () {
         {
           loader: 'css-loader',
           options: {
-            modules: true,
+            modules: {
+              mode: "local",
+              auto: true,
+              // @see https://www.npmjs.com/package/css-loader#modules
+              localIdentName: "[local]--[hash:base64:5]",
+            },
             sourceMap: true,
             importLoaders: 1,
           },
         },
-        'less-loader',
+        {
+          loader: 'less-loader',
+          options: {
+            lessOptions: {
+              javascriptEnabled: true,
+            },
+          },
+        },
       ],
-      include: /\.module\.s?(c|a)ss$/,
+      include: /\.module\.less$/,
     },
     {
       test: /\.less$/,
-      use: ['style-loader', 'css-loader', 'less-loader'],
-      exclude: /\.module\.s?(c|a)ss$/,
+      use: [
+        'style-loader',
+        'css-loader',
+        {
+          loader: 'less-loader',
+          options: {
+            lessOptions: {
+              javascriptEnabled: true,
+            },
+          },
+        }
+      ],
+      exclude: /\.module\.less$/,
     },
   ]
 }
@@ -85,12 +108,12 @@ export function getProdStyleLoaders () {
         },
         'less-loader',
       ],
-      include: /\.module\.s?(c|a)ss$/,
+      include: /\.module\.less$/,
     },
     {
       test: /\.less$/,
       use: [MiniCssExtractPlugin.loader, 'css-loader', 'less-loader'],
-      exclude: /\.module\.s?(c|a)ss$/,
+      exclude: /\.module\.less$/,
     },
   ]
 }

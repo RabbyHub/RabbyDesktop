@@ -1,0 +1,35 @@
+@import '~antd/lib/style/themes/default.less';
+@import '~antd/dist/antd.less';
+@import './vars.less';
+@import "./overwrite-antd.less";
+
+html,
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+.modal-dapp-mngr {
+  .ant-modal-close-x {
+    @size: 54px;
+
+    width: @size;
+    height: @size;
+    line-height: @size;
+  }
+
+  .ant-modal-header {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    border-bottom: 0;
+  }
+
+  .ant-modal-content {
+    background: var(--color-purewhite);
+    box-shadow: 0px 8px 80px rgba(19, 20, 26, 0.21);
+    border-radius: 12px;
+  }
+}

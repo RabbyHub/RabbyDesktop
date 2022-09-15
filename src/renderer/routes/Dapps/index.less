@@ -2,6 +2,7 @@
 
 #homepage {
   padding: 0 @HOME_PADDING;
+  padding-top: 56px;
   width: 100%;
   box-sizing: border-box;
 
@@ -55,7 +56,6 @@
   .dapp-block-wrapper {
     width: (1 / 3) * 100%;
     max-width: 330px;
-    height: 100px;
     box-sizing: border-box;
     padding-left: 24px;
     padding-top: 24px;
@@ -63,6 +63,10 @@
     &.J_add .dapp-block {
       cursor: pointer;
       justify-content: flex-start;
+
+      .dapp-favicon {
+        margin-right: 24px;
+      }
 
       .text {
         font-weight: 700;
@@ -74,24 +78,59 @@
   }
 
   .dapp-block {
-    /* size normal */
+    position: relative;
+    cursor: pointer;
     width: 100%;
     box-sizing: border-box;
-    height: 100%;
+    height: 100px;
 
     background: rgba(134, 151, 255, 0.2);
     border-radius: 8px;
 
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     padding: 24px;
 
-    .icon, .favicon {
+    .dapp-favicon {
       width: 52px;
       height: 52px;
-
-      margin-right: 24px;
+      margin-right: 16px;
     }
+  }
+
+  .dapp-block .infos {
+    .dapp-alias {
+      font-weight: 700;
+      font-size: 18px;
+      line-height: 21px;
+      color: var(--color-title);
+      margin-bottom: 0;
+    }
+    .dapp-url {
+      font-style: normal;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 16px;
+      color: var(--color-paragraph);
+    }
+
+    .dapp-alias + .dapp-url {
+      margin-top: 4px;
+    }
+  }
+
+  .dapp-block .menu-entry {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    display: block;
+    background-image: url('rabby-internal://assets/icons/internal-homepage/icon-dapps-menu.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 2px;
+    background-color: var(--color-bg);
   }
 }

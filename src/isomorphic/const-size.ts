@@ -4,13 +4,13 @@ export const FRAME_MAX_SIZE = {
 };
 
 export const FRAME_DEFAULT_SIZE = {
-  width: 1366,
-  height: 768,
+  width: 1440,
+  height: 900,
 };
 
 export const FRAME_MIN_SIZE = {
-  minWidth: 1024,
-  minHeight: 728,
+  minWidth: 1280,
+  minHeight: 768,
 };
 
 const TABS_LINE_HEIGHT_MACOS = 44;

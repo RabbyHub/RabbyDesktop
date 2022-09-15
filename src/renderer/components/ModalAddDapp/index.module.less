@@ -1,0 +1,87 @@
+.modal {
+  :global(.ant-modal-body) {
+    padding: 64px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+.stepAdd {
+  .addTitle {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 28px;
+    letter-spacing: 0px;
+    text-align: center;
+    color: var(--color-title);
+
+    & + .addUrlInput {
+      margin-top: 50px;
+    }
+  }
+
+  .addUrlInput {
+    background: var(--color-bg);
+    border: 1px solid var(--color-primary);
+    border-radius: 8px;
+    height: 64px;
+    padding: 16px 24px;
+
+    & + .addConfirmBtn {
+      margin-top: 195px;
+    }
+  }
+
+  .addConfirmBtn {
+    width: 240px;
+    height: 56px;
+    border-radius: 8px;
+  }
+}
+
+.stepChecked {
+  .checkedFavicon {
+    width: 80px;
+    height: 80px;
+    display: block;
+    margin: 0 auto;
+
+    & + .checkedDappUrl {
+      margin-top: 24px;
+    }
+  }
+
+  .checkedDappUrl {
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 19px;
+
+    text-align: center;
+    color: var(--color-title);
+  }
+
+  .checkedDappUrl + .checkedInput {
+    margin-top: 24px;
+  }
+
+  .checkedInput {
+    background: var(--color-bg);
+    border: 1px solid var(--color-primary);
+    border-radius: 8px;
+    height: 64px;
+    padding: 16px 24px;
+
+    & + .checkedConfirmBtn {
+      margin-top: 195px;
+    }
+  }
+
+  .checkedConfirmBtn {
+    width: 240px;
+    height: 56px;
+    border-radius: 8px;
+  }
+}

@@ -1,3 +1,5 @@
+/// <reference path="../renderer/preload.d.ts" />
+
 import path from 'path';
 import { promises as fs } from 'fs';
 import { app, session, BrowserWindow, ipcMain } from 'electron';
@@ -16,11 +18,14 @@ import {
   FRAME_MIN_SIZE,
 } from '../isomorphic/const-size';
 import {
+  APP_NAME,
   RABBY_HOMEPAGE_URL,
   RABBY_INTERNAL_PROTOCOL,
 } from '../isomorphic/constants';
 
-const pkgjson = require('../../package.json');
+import { dappStore } from './store/dapps';
+
+// const pkgjson = require('../../package.json');
 
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -163,7 +168,17 @@ class Browser {
   }
 
   async init() {
-    app.setName('RabbyDesktop');
+    app.setPath('userData', app.getPath('userData').replace('Electron', APP_NAME));
+    if (!isProd) {
+      // we just need to modify it for development, because `APP_NAME` in production is from package.json
+      app.setName(APP_NAME);
+    }
+
+    // TODO: use colorful logs
+    console.debug('[init] app ready, paths:');
+    console.debug(`[init] desktop's home: ${app.getPath('home')}`);
+    console.debug(`[init] desktop's appData: ${app.getPath('appData')}`);
+    console.debug(`[init] desktop's userData: ${app.getPath('userData')}`);
     this.initSession();
     setupMenu(this);
 
@@ -315,6 +330,33 @@ class Browser {
       event.reply('get-app-version', {
         version: app.getVersion(),
       });
+    });
+
+    ipcMain.on('dapps-fetch', (event, reqid: string) => {
+      event.reply('dapps-fetch', {
+        reqid,
+        dapps: dappStore.get('dapps'),
+      })
+    });
+
+    ipcMain.on('dapps-put', (event, reqid: string, dapp: IDapp) => {
+      // TODO: is there mutex?
+      const allDapps = dappStore.get('dapps') || [];
+      const existedDapp = allDapps.find((d) => d.url === dapp.url);
+      if (existedDapp) {
+        Object.assign(existedDapp, dapp);
+      } else {
+        allDapps.push(dapp);
+      }
+
+      dappStore.set('dapps', allDapps);
+
+      // console.log('[feat] allDapps', allDapps);
+
+      event.reply('dapps-put', {
+        reqid,
+        dapps: allDapps
+      })
     });
   }
 

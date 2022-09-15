@@ -3,6 +3,8 @@
  */
 
 import webpack from 'webpack';
+import tsImportPluginFactory from 'ts-import-plugin';
+
 import webpackPaths from './webpack.paths';
 import { dependencies as externals } from '../../release/app/package.json';
 
@@ -13,6 +15,31 @@ const configuration: webpack.Configuration = {
 
   module: {
     rules: [
+      {
+        test: /\.[jt]sx?$/,
+        include: /src\/renderer/,
+        use: {
+          loader: 'ts-loader',
+          options: {
+            // Remove this line to enable type checking in webpack builds
+            transpileOnly: false,
+            getCustomTransformers: () => ({
+              before: [
+                tsImportPluginFactory([
+                  {
+                    libraryName: 'antd',
+                    style: true,
+                    // libraryDirectory: 'es'
+                  }
+                ])
+              ],
+            }),
+            compilerOptions: {
+              module: 'es2015'
+            }
+          },
+        },
+      },
       {
         test: /\.[jt]sx?$/,
         exclude: /node_modules/,

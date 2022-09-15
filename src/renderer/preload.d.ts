@@ -1,3 +1,6 @@
+/// <reference types="electron" />
+/// <reference path="../isomorphic/types.d.ts" />
+
 type ChannelMessagePayload = {
   'ipc-example': {
     send: [string];
@@ -38,6 +41,24 @@ type ChannelMessagePayload = {
       }
     ];
   };
+  'dapps-fetch': {
+    send: [reqid: string];
+    response: [
+      {
+        reqid: string;
+        dapps: IDapp[];
+      }
+    ]
+  },
+  'dapps-put': {
+    send: [reqid: string, dapp: IDapp];
+    response: [
+      {
+        reqid: string;
+        dapps: IDapp[];
+      }
+    ]
+  }
 };
 
 type Channels = keyof ChannelMessagePayload;
