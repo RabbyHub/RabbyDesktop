@@ -1,0 +1,101 @@
+.modal {
+  :global(.ant-modal-body) {
+    padding: 64px;
+  }
+}
+
+.deletingDapp {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  :global {
+    .dapp-block-wrapper {
+      width: 100%;
+      max-width: 330px;
+      height: 100px;
+      box-sizing: border-box;
+      border: 1px solid var(--color-line);
+      border-radius: 8px;
+
+      margin-bottom: 24px;
+    }
+
+    .dapp-block {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 24px;
+
+      .dapp-favicon {
+        width: 52px;
+        height: 52px;
+        margin-right: 16px;
+      }
+    }
+
+    .dapp-block .anchor {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    .dapp-block .anchor .infos {
+      .dapp-alias {
+        font-weight: 700;
+        font-size: 18px;
+        line-height: 21px;
+        color: var(--color-title);
+        margin-bottom: 0;
+      }
+      .dapp-url {
+        font-style: normal;
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 16px;
+        color: var(--color-paragraph);
+      }
+
+      .dapp-alias + .dapp-url {
+        margin-top: 4px;
+      }
+    }
+  }
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 28px;
+  letter-spacing: 0px;
+  text-align: center;
+  color: var(--color-title);
+}
+
+.tips {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 16px;
+  text-align: center;
+
+  color: var(--color-paragraph);
+
+  & + .confirmBtn {
+    margin-top: 48px;
+  }
+}
+
+.confirmBtn {
+  width: 240px;
+  height: 56px;
+  border-radius: 8px;
+}

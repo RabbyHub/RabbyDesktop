@@ -4,6 +4,9 @@ import { Input, Modal, ModalProps, Button } from 'antd';
 
 import styles from './index.module.less';
 import { useDapps } from 'renderer/hooks/usePersistData';
+import { isValidDappAlias } from '../../../isomorphic/dapp';
+import { IS_RUNTIME_PRODUCTION } from '../../../isomorphic/constants';
+import { RCIconDappsModalClose } from '../../../../assets/icons/internal-homepage';
 
 type IStep = 'add' | 'checked'
 
@@ -18,8 +21,10 @@ type ICheckResult = {
 };
 
 function useAddStep (onChecking: (result: ICheckResult) => void) {
-  // const [addUrl, setAddUrl] = useState('https://');
-  const [addUrl, setAddUrl] = useState<string>(UNISWAP_INFO.url);
+  const [addUrl, setAddUrl] = useState(
+    IS_RUNTIME_PRODUCTION ? 'https://' : UNISWAP_INFO.url
+  );
+  // const [addUrl, setAddUrl] = useState<string>(UNISWAP_INFO.url);
 
   const onChangeAddUrl = useCallback((evt: React.ChangeEvent<HTMLInputElement>) => {
     setAddUrl(evt.target.value);
@@ -66,8 +71,6 @@ function useCheckedStep () {
     url: '',
     faviconUrl: ''
   });
-  // const [dappAlias, setAlias] = useState('uniswap');
-
   const onChangeDappAlias = useCallback((evt: React.ChangeEvent<HTMLInputElement>) => {
     setDappInfo(prev => {
       return { ...prev, alias: evt.target.value }
@@ -78,7 +81,7 @@ function useCheckedStep () {
     dappInfo,
     setDappInfo,
     onChangeDappAlias,
-    isValidAlias: /[\w\d]+/.test(dappInfo.alias),
+    isValidAlias: isValidDappAlias(dappInfo.alias),
   }
 }
 
@@ -89,7 +92,6 @@ export default function ModalAddDapp ({
   onAddedDapp?: () => void
 }>) {
   const [step, setStep] = useState<IStep>('add');
-  // const [step, setStep] = useState<IStep>('checked');
 
   const onChecking = useCallback((payload: ICheckResult) => {
     if (payload.result) {
@@ -118,14 +120,12 @@ export default function ModalAddDapp ({
   return (
     <Modal
       centered
-      // title="Basic Modal"
       {...modalProps}
       title={null}
       footer={null}
+      closeIcon={<RCIconDappsModalClose />}
       className={classnames(styles.modal, modalProps.className)}
       wrapClassName={classnames('modal-dapp-mngr', modalProps.wrapClassName)}
-      // onOk={handleOk}
-      // onCancel={handleCancel}
     >
       {step === 'add' && (
         <div className={styles.stepAdd}>

@@ -4,6 +4,10 @@ declare module '*.svg' {
   const content: string;
   export default content;
 }
+declare module '*.svg?rc' {
+  const RC: React.FC<any>;
+  export default RC;
+}
 
 declare module '*.png' {
   const content: string;

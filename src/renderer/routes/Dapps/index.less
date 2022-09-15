@@ -99,7 +99,15 @@
     }
   }
 
-  .dapp-block .infos {
+  .dapp-block .anchor {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .dapp-block .anchor .infos {
     .dapp-alias {
       font-weight: 700;
       font-size: 18px;
@@ -121,6 +129,7 @@
   }
 
   .dapp-block .menu-entry {
+    visibility: hidden;
     position: absolute;
     top: 8px;
     right: 8px;
@@ -132,5 +141,38 @@
     background-position: center;
     border-radius: 2px;
     background-color: var(--color-bg);
+  }
+
+  .dapp-block:hover .menu-entry {
+    visibility: visible;
+  }
+}
+
+.dapps-dropdown-operations {
+  .ant-dropdown-menu {
+    background: var(--color-purewhite);
+    box-shadow: 0px 8px 32px rgba(19, 20, 26, 0.08);
+    border-radius: 8px;
+    padding: 8px;
+    user-select: none;
+  }
+
+  .dapp-dropdown-item {
+    border-radius: 4px;
+    &.J_delete:hover {
+      background-color: rgba(236, 81, 81, 0.1);
+    }
+    .text {
+      font-style: normal;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 16px;
+
+      color: var(--color-title);
+    }
+
+    &.J_delete .text {
+      color: var(--color-red);
+    }
   }
 }

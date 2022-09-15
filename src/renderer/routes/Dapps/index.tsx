@@ -1,27 +1,156 @@
 import React, { useEffect, useState } from 'react';
+import { Menu, Dropdown, message } from 'antd';
+
+import {
+  RCIconDappsEdit,
+  RCIconDappsDelete
+} from '../../../../assets/icons/internal-homepage'
+
 import { useDapps } from '../../hooks/usePersistData';
-import { default as ModalAddDapp } from '../../components/ModalAddDapp';
+import ModalAddDapp from '../../components/ModalAddDapp';
+import ModalRenameDapp from '../../components/ModalRenameDapp';
+import ModalDeleteDapp from '../../components/ModalDeleteDapp';
 
 import { useAppVersion } from '../../hooks/useMainBridge';
 
 import './index.less';
+
+function DAppBlock ({
+  dapp,
+  onAdd,
+  onOpDapp,
+}: React.PropsWithoutRef<{
+  dapp?: IDapp
+  onAdd?: () => void
+  onOpDapp?: (op: 'rename' | 'delete', dapp: IDapp) => void
+}>) {
+  if (onAdd) {
+    return (
+      <div className="dapp-block-wrapper J_add">
+        <div
+          className="dapp-block"
+          onClick={() => {
+            onAdd();
+          }}
+        >
+          <img
+            className="dapp-favicon"
+            src="rabby-internal://assets/icons/internal-homepage/icon-dapps-add.svg"
+            alt="add"
+          />
+          <div className="text">Add a Dapp</div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!dapp) return null;
+
+  return (
+    <div className="dapp-block-wrapper">
+      <div className="dapp-block">
+        <a
+          className='anchor'
+          href={dapp.url}
+          target='_blank'
+        >
+          {/* TODO: robust about load image */}
+          <img
+            className="dapp-favicon"
+            src={dapp.faviconUrl}
+            alt="add"
+          />
+          <div className="infos">
+            <h4 className='dapp-alias'>{dapp.alias}</h4>
+            <span className='dapp-url'>{dapp.url}</span>
+          </div>
+        </a>
+        <Dropdown
+          overlayClassName='dapps-dropdown-operations'
+          // open
+          overlay={(
+            <Menu
+              onClick={({ key }) => {
+                switch (key) {
+                  case 'dapp-rename':
+                    onOpDapp?.('rename', dapp);
+                    break;
+                  case 'dapp-delete':
+                    onOpDapp?.('delete', dapp);
+                    break;
+                }
+              }}
+              items={[
+                {
+                  key: 'dapp-rename',
+                  className: 'dapp-dropdown-item',
+                  label: (
+                    <span className='text'>
+                      Rename
+                    </span>
+                  ),
+                  icon: <RCIconDappsEdit />,
+                },
+                {
+                  key: 'dapp-delete',
+                  className: 'dapp-dropdown-item J_delete',
+                  label: (
+                    <span className='text'>
+                      Delete
+                    </span>
+                  ),
+                  icon: <RCIconDappsDelete />,
+                },
+              ]}
+            />
+          )}
+        >
+          <div className='menu-entry' onClickCapture={(evt) => {
+            evt.stopPropagation();
+          }} />
+        </Dropdown>
+      </div>
+    </div>
+  )
+}
 
 export default function DApps() {
   const appVersion = useAppVersion();
 
   const { dapps } = useDapps();
 
-  const [ isModalOpen, setIsModalOpen ] = useState(false);
+  const [ isAdding, setIsAdding ] = useState(false);
+
+  const [ renamingDapp, setRenamingDapp ] = useState<IDapp | null>(null);
+  const [ deletingDapp, setDeletingDapp ] = useState<IDapp | null>(null);
+
+  // useEffect(() => {
+  //   // TODO: just for test
+  //   setDeletingDapp(dapps[0] || null);
+  // }, [ dapps[0] ]);
 
   return (
     <div id="homepage">
-      <ModalAddDapp
-        open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
+      {isAdding && <ModalAddDapp
+        open
+        onCancel={() => setIsAdding(false)}
         onAddedDapp={() => {
-          setIsModalOpen(false)
+          message.success('Added successfully');
+          setIsAdding(false)
         }}
-      />
+      />}
+      {renamingDapp && <ModalRenameDapp
+        open
+        dapp={renamingDapp}
+        onCancel={() => setRenamingDapp(null)}
+        onRenamedDapp={() => setRenamingDapp(null)}
+      />}
+      {deletingDapp && <ModalDeleteDapp
+        open
+        dapp={deletingDapp}
+        onCancel={() => setDeletingDapp(null)}
+        onDeletedDapp={() => setDeletingDapp(null)}
+      />}
       <header>
         <h2 className="title">My Dapps</h2>
       </header>
@@ -30,41 +159,30 @@ export default function DApps() {
           <div className="dapp-matrix">
             {dapps.map((dapp, idx) => {
               return (
-                <div
+                <DAppBlock
                   key={`${dapp.url}-${dapp.alias}-${idx}`}
-                  className="dapp-block-wrapper"
-                >
-                  <div className="dapp-block">
-                    {/* TODO: robust about load image */}
-                    <img
-                      className="dapp-favicon"
-                      src={dapp.faviconUrl}
-                      alt="add"
-                    />
-                    <div className="infos">
-                      <h4 className='dapp-alias'>{dapp.alias}</h4>
-                      <span className='dapp-url'>{dapp.url}</span>
-                    </div>
-                    <div className='menu-entry'></div>
-                  </div>
-                </div>
-              )
-            })}
-            <div
-              className="dapp-block-wrapper J_add"
-              onClick={() => {
-                setIsModalOpen(true);
-              }}
-            >
-              <div className="dapp-block">
-                <img
-                  className="dapp-favicon"
-                  src="rabby-internal://assets/icons/internal-homepage/icon-dapps-add.svg"
-                  alt="add"
+                  dapp={dapp}
+                  onOpDapp={(op) => {
+                    switch (op) {
+                      case 'delete': {
+                        setDeletingDapp(dapp);
+                        break;
+                      }
+                      case 'rename': {
+                        setRenamingDapp(dapp);
+                        break;
+                      }
+                    }
+                  }}
                 />
-                <div className="text">Add a Dapp</div>
-              </div>
-            </div>
+              );
+            })}
+            <DAppBlock
+              key={'J_add'}
+              onAdd={() => {
+                setIsAdding(true);
+              }}
+            />
           </div>
         </div>
       </main>

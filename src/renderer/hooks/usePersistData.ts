@@ -35,6 +35,20 @@ async function putDapp(dapp: IDapp) {
   });
 }
 
+async function deleteDapp(dapp: IDapp) {
+  const reqid = randString();
+
+  return new Promise<IDapp[]>((resolve, reject) => {
+    const dispose = window.rabbyDesktop.ipcRenderer.on('dapps-delete', (event) => {
+      if (event.reqid === reqid) {
+        resolve(event.dapps);
+        dispose?.();
+      }
+    });
+    window.rabbyDesktop.ipcRenderer.sendMessage('dapps-delete', reqid, dapp);
+  });
+}
+
 const dappsAtomic = atom(null as any as IDapp[]);
 
 export function useDapps() {
@@ -45,14 +59,30 @@ export function useDapps() {
     getAll().then((newVal) => {
       setDapps(newVal);
     })
-  }, [ dapps ])
+  }, [ dapps ]);
+
+  const updateDapp = useCallback(async (dapp: IDapp) => {
+    return putDapp(dapp).then((dapps) => {
+      setDapps(dapps);
+    });
+  }, [putDapp]);
+
+  const renameDapp = useCallback(async (dapp: IDapp, alias: string) => {
+    updateDapp({ ...dapp, alias })
+  }, [
+    updateDapp
+  ])
+
+  const removeDapp = useCallback(async (dapp: IDapp) => {
+    return deleteDapp(dapp).then((dapps) => {
+      setDapps(dapps);
+    });
+  }, [putDapp]);
 
   return {
     dapps: dapps || [],
-    updateDapp: useCallback(async (dapp: IDapp) => {
-      return putDapp(dapp).then((dapps) => {
-        setDapps(dapps);
-      });
-    }, [putDapp]),
+    updateDapp,
+    renameDapp,
+    removeDapp,
   };
 }

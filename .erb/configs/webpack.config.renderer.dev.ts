@@ -83,8 +83,35 @@ const configuration: webpack.Configuration = {
       },
       // Images
       {
+        test: /\.svg$/,
+        issuer: /\.[jt]sx?$/,
+        resourceQuery: /rc/, // *.svg?rc
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              presets: [
+                // ["@babel/typescript", {
+                //   allExtensions: true,
+                //   isTSX: true,
+                // }]
+              ],
+            }
+          },
+          {
+            loader: '@svgr/webpack',
+            options: {
+              icon: true,
+              babel: true,
+              // typescript: true
+            },
+          },
+        ],
+      },
+      {
         test: /\.(png|svg|jpg|jpeg|gif)$/i,
         type: 'asset/resource',
+        resourceQuery: { not: [/rc/] },
       },
     ],
   },

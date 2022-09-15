@@ -351,9 +351,23 @@ class Browser {
 
       dappStore.set('dapps', allDapps);
 
-      // console.log('[feat] allDapps', allDapps);
-
       event.reply('dapps-put', {
+        reqid,
+        dapps: allDapps
+      })
+    });
+
+    ipcMain.on('dapps-delete', (event, reqid: string, dapp: IDapp) => {
+      const allDapps = dappStore.get('dapps') || [];
+      const idx = allDapps.findIndex((d) => d.url === dapp.url);
+      if (idx > -1) {
+        dappStore.set('dapps', allDapps);
+        allDapps.splice(idx, 1);
+      }
+
+      console.log('[feat] allDapps', allDapps);
+
+      event.reply('dapps-delete', {
         reqid,
         dapps: allDapps
       })

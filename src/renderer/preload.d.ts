@@ -58,6 +58,15 @@ type ChannelMessagePayload = {
         dapps: IDapp[];
       }
     ]
+  },
+  'dapps-delete': {
+    send: [reqid: string, dapp: IDapp];
+    response: [
+      {
+        reqid: string;
+        dapps: IDapp[];
+      }
+    ]
   }
 };
 
