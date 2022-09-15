@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+/* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
+import React, { useState } from 'react';
 import { Menu, Dropdown, message } from 'antd';
 
 import {
   RCIconDappsEdit,
-  RCIconDappsDelete
-} from '../../../../assets/icons/internal-homepage'
+  RCIconDappsDelete,
+} from '../../../../assets/icons/internal-homepage';
 
 import { useDapps } from '../../hooks/usePersistData';
 import ModalAddDapp from '../../components/ModalAddDapp';
@@ -15,14 +16,14 @@ import { useAppVersion } from '../../hooks/useMainBridge';
 
 import './index.less';
 
-function DAppBlock ({
+function DAppBlock({
   dapp,
   onAdd,
   onOpDapp,
 }: React.PropsWithoutRef<{
-  dapp?: IDapp
-  onAdd?: () => void
-  onOpDapp?: (op: 'rename' | 'delete', dapp: IDapp) => void
+  dapp?: IDapp;
+  onAdd?: () => void;
+  onOpDapp?: (op: 'rename' | 'delete', dapp: IDapp) => void;
 }>) {
   if (onAdd) {
     return (
@@ -41,7 +42,7 @@ function DAppBlock ({
           <div className="text">Add a Dapp</div>
         </div>
       </div>
-    )
+    );
   }
 
   if (!dapp) return null;
@@ -49,26 +50,18 @@ function DAppBlock ({
   return (
     <div className="dapp-block-wrapper">
       <div className="dapp-block">
-        <a
-          className='anchor'
-          href={dapp.url}
-          target='_blank'
-        >
+        <a className="anchor" href={dapp.url} target="_blank" rel="noreferrer">
           {/* TODO: robust about load image */}
-          <img
-            className="dapp-favicon"
-            src={dapp.faviconUrl}
-            alt="add"
-          />
+          <img className="dapp-favicon" src={dapp.faviconUrl} alt="add" />
           <div className="infos">
-            <h4 className='dapp-alias'>{dapp.alias}</h4>
-            <span className='dapp-url'>{dapp.url}</span>
+            <h4 className="dapp-alias">{dapp.alias}</h4>
+            <span className="dapp-url">{dapp.url}</span>
           </div>
         </a>
         <Dropdown
-          overlayClassName='dapps-dropdown-operations'
+          overlayClassName="dapps-dropdown-operations"
           // open
-          overlay={(
+          overlay={
             <Menu
               onClick={({ key }) => {
                 switch (key) {
@@ -78,40 +71,37 @@ function DAppBlock ({
                   case 'dapp-delete':
                     onOpDapp?.('delete', dapp);
                     break;
+                  default:
+                    break;
                 }
               }}
               items={[
                 {
                   key: 'dapp-rename',
                   className: 'dapp-dropdown-item',
-                  label: (
-                    <span className='text'>
-                      Rename
-                    </span>
-                  ),
+                  label: <span className="text">Rename</span>,
                   icon: <RCIconDappsEdit />,
                 },
                 {
                   key: 'dapp-delete',
                   className: 'dapp-dropdown-item J_delete',
-                  label: (
-                    <span className='text'>
-                      Delete
-                    </span>
-                  ),
+                  label: <span className="text">Delete</span>,
                   icon: <RCIconDappsDelete />,
                 },
               ]}
             />
-          )}
+          }
         >
-          <div className='menu-entry' onClickCapture={(evt) => {
-            evt.stopPropagation();
-          }} />
+          <div
+            className="menu-entry"
+            onClickCapture={(evt) => {
+              evt.stopPropagation();
+            }}
+          />
         </Dropdown>
       </div>
     </div>
-  )
+  );
 }
 
 export default function DApps() {
@@ -119,10 +109,10 @@ export default function DApps() {
 
   const { dapps } = useDapps();
 
-  const [ isAdding, setIsAdding ] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
 
-  const [ renamingDapp, setRenamingDapp ] = useState<IDapp | null>(null);
-  const [ deletingDapp, setDeletingDapp ] = useState<IDapp | null>(null);
+  const [renamingDapp, setRenamingDapp] = useState<IDapp | null>(null);
+  const [deletingDapp, setDeletingDapp] = useState<IDapp | null>(null);
 
   // useEffect(() => {
   //   // TODO: just for test
@@ -131,26 +121,32 @@ export default function DApps() {
 
   return (
     <div id="homepage">
-      {isAdding && <ModalAddDapp
-        open
-        onCancel={() => setIsAdding(false)}
-        onAddedDapp={() => {
-          message.success('Added successfully');
-          setIsAdding(false)
-        }}
-      />}
-      {renamingDapp && <ModalRenameDapp
-        open
-        dapp={renamingDapp}
-        onCancel={() => setRenamingDapp(null)}
-        onRenamedDapp={() => setRenamingDapp(null)}
-      />}
-      {deletingDapp && <ModalDeleteDapp
-        open
-        dapp={deletingDapp}
-        onCancel={() => setDeletingDapp(null)}
-        onDeletedDapp={() => setDeletingDapp(null)}
-      />}
+      {isAdding && (
+        <ModalAddDapp
+          open
+          onCancel={() => setIsAdding(false)}
+          onAddedDapp={() => {
+            message.success('Added successfully');
+            setIsAdding(false);
+          }}
+        />
+      )}
+      {renamingDapp && (
+        <ModalRenameDapp
+          open
+          dapp={renamingDapp}
+          onCancel={() => setRenamingDapp(null)}
+          onRenamedDapp={() => setRenamingDapp(null)}
+        />
+      )}
+      {deletingDapp && (
+        <ModalDeleteDapp
+          open
+          dapp={deletingDapp}
+          onCancel={() => setDeletingDapp(null)}
+          onDeletedDapp={() => setDeletingDapp(null)}
+        />
+      )}
       <header>
         <h2 className="title">My Dapps</h2>
       </header>
@@ -160,6 +156,7 @@ export default function DApps() {
             {dapps.map((dapp, idx) => {
               return (
                 <DAppBlock
+                  /* eslint-disable-next-line react/no-array-index-key */
                   key={`${dapp.url}-${dapp.alias}-${idx}`}
                   dapp={dapp}
                   onOpDapp={(op) => {
@@ -172,13 +169,15 @@ export default function DApps() {
                         setRenamingDapp(dapp);
                         break;
                       }
+                      default:
+                        break;
                     }
                   }}
                 />
               );
             })}
             <DAppBlock
-              key={'J_add'}
+              key="J_add"
               onAdd={() => {
                 setIsAdding(true);
               }}

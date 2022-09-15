@@ -48,8 +48,8 @@ type ChannelMessagePayload = {
         reqid: string;
         dapps: IDapp[];
       }
-    ]
-  },
+    ];
+  };
   'dapps-put': {
     send: [reqid: string, dapp: IDapp];
     response: [
@@ -57,8 +57,8 @@ type ChannelMessagePayload = {
         reqid: string;
         dapps: IDapp[];
       }
-    ]
-  },
+    ];
+  };
   'dapps-delete': {
     send: [reqid: string, dapp: IDapp];
     response: [
@@ -66,8 +66,8 @@ type ChannelMessagePayload = {
         reqid: string;
         dapps: IDapp[];
       }
-    ]
-  }
+    ];
+  };
 };
 
 type Channels = keyof ChannelMessagePayload;

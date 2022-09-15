@@ -1,121 +1,122 @@
 import React, { useCallback, useState } from 'react';
 import classnames from 'classnames';
-import { Input, Modal, ModalProps, Button } from 'antd';
+import { Input, Modal, ModalProps, Button, message } from 'antd';
 
-import styles from './index.module.less';
 import { useDapps } from 'renderer/hooks/usePersistData';
+import styles from './index.module.less';
 import { isValidDappAlias } from '../../../isomorphic/dapp';
 import { IS_RUNTIME_PRODUCTION } from '../../../isomorphic/constants';
 import { RCIconDappsModalClose } from '../../../../assets/icons/internal-homepage';
 
-type IStep = 'add' | 'checked'
+type IStep = 'add' | 'checked';
 
 const UNISWAP_INFO = {
   faviconUrl: 'rabby-internal://assets/icons/samples/icon-sample-uniswap.svg',
-  url: 'https://app.uniswap.org'
-} as const
+  url: 'https://app.uniswap.org',
+} as const;
 
 type ICheckResult = {
-  result: { faviconUrl: string, url: string } | null
+  result: { faviconUrl: string; url: string } | null;
   errorMessage: string | null;
 };
 
-function useAddStep (onChecking: (result: ICheckResult) => void) {
+function useAddStep() {
   const [addUrl, setAddUrl] = useState(
     IS_RUNTIME_PRODUCTION ? 'https://' : UNISWAP_INFO.url
   );
   // const [addUrl, setAddUrl] = useState<string>(UNISWAP_INFO.url);
 
-  const onChangeAddUrl = useCallback((evt: React.ChangeEvent<HTMLInputElement>) => {
-    setAddUrl(evt.target.value);
-  }, []);
+  const onChangeAddUrl = useCallback(
+    (evt: React.ChangeEvent<HTMLInputElement>) => {
+      setAddUrl(evt.target.value);
+    },
+    []
+  );
 
   const [isCheckingUrl, setIsChecking] = useState(false);
   // mock
-  const doCheckUrl = useCallback(() => {
+  const checkUrl = useCallback(async () => {
     setIsChecking(true);
 
-    const timer = setTimeout(() => {
-      setIsChecking(false);
-      onChecking({
-        result: {
-          url: addUrl,
-          faviconUrl: 'rabby-internal://assets/icons/samples/icon-sample-uniswap.svg'
-        },
-        // TODO:
-        // The HTTPS protocol for this URL has expired
-        // This Dapp is inaccessible. It may be an invalid URL
-        // Dapp with protocols other than HTTPS is not supported
-        errorMessage: null
-      });
-    }, 500);
-
-    // return dispose
-    return () => {
-      clearTimeout(timer);
-    }
-  }, [ addUrl, onChecking ])
+    return new Promise<ICheckResult>((resolve) => {
+      setTimeout(() => {
+        setIsChecking(false);
+        resolve({
+          result: {
+            url: addUrl,
+            faviconUrl:
+              'rabby-internal://assets/icons/samples/icon-sample-uniswap.svg',
+          },
+          // TODO:
+          // The HTTPS protocol for this URL has expired
+          // This Dapp is inaccessible. It may be an invalid URL
+          // Dapp with protocols other than HTTPS is not supported
+          errorMessage: null,
+        });
+      }, 500);
+    });
+  }, [addUrl]);
 
   return {
     isCheckingUrl,
-    doCheckUrl,
+    checkUrl,
     addUrl,
     onChangeAddUrl,
     isValidAddUrl: /https:\/\/.+/.test(addUrl),
-  }
+  };
 }
 
-function useCheckedStep () {
+function useCheckedStep() {
   const [dappInfo, setDappInfo] = useState<IDapp>({
     alias: '',
     url: '',
-    faviconUrl: ''
+    faviconUrl: '',
   });
-  const onChangeDappAlias = useCallback((evt: React.ChangeEvent<HTMLInputElement>) => {
-    setDappInfo(prev => {
-      return { ...prev, alias: evt.target.value }
-    });
-  }, []);
+  const onChangeDappAlias = useCallback(
+    (evt: React.ChangeEvent<HTMLInputElement>) => {
+      setDappInfo((prev) => {
+        return { ...prev, alias: evt.target.value };
+      });
+    },
+    []
+  );
 
   return {
     dappInfo,
     setDappInfo,
     onChangeDappAlias,
     isValidAlias: isValidDappAlias(dappInfo.alias),
-  }
+  };
 }
 
-export default function ModalAddDapp ({
+export default function ModalAddDapp({
   onAddedDapp,
   ...modalProps
-}: React.PropsWithChildren<ModalProps & {
-  onAddedDapp?: () => void
-}>) {
+}: React.PropsWithChildren<
+  ModalProps & {
+    onAddedDapp?: () => void;
+  }
+>) {
   const [step, setStep] = useState<IStep>('add');
 
-  const onChecking = useCallback((payload: ICheckResult) => {
-    if (payload.result) {
-      setStep('checked');
-      setDappInfo({ alias: '', ...payload.result })
-    }
-  }, [])
+  const { addUrl, onChangeAddUrl, isValidAddUrl, isCheckingUrl, checkUrl } =
+    useAddStep();
 
-  const {
-    addUrl,
-    onChangeAddUrl,
-    isValidAddUrl,
-    isCheckingUrl,
-    doCheckUrl,
-  } = useAddStep(onChecking);
-
-  const {
-    dappInfo,
-    setDappInfo,
-    onChangeDappAlias,
-    isValidAlias,
-  } = useCheckedStep();
+  const { dappInfo, setDappInfo, onChangeDappAlias, isValidAlias } =
+    useCheckedStep();
 
   const { updateDapp } = useDapps();
+
+  const doCheck = useCallback(async () => {
+    const payload = await checkUrl();
+
+    if (payload.result) {
+      setStep('checked');
+      setDappInfo({ alias: '', ...payload.result });
+    } else {
+      message.error(payload.errorMessage);
+    }
+  }, [checkUrl, setDappInfo]);
 
   return (
     <Modal
@@ -129,9 +130,7 @@ export default function ModalAddDapp ({
     >
       {step === 'add' && (
         <div className={styles.stepAdd}>
-          <h3 className={styles.addTitle}>
-            Enter or copy the Dapp URL
-          </h3>
+          <h3 className={styles.addTitle}>Enter or copy the Dapp URL</h3>
           <Input
             className={styles.addUrlInput}
             value={addUrl}
@@ -143,7 +142,7 @@ export default function ModalAddDapp ({
             type="primary"
             disabled={!isValidAddUrl}
             className={styles.addConfirmBtn}
-            onClick={() => doCheckUrl()}
+            onClick={doCheck}
           >
             Check
           </Button>
@@ -151,8 +150,12 @@ export default function ModalAddDapp ({
       )}
       {step === 'checked' && (
         <div className={styles.stepChecked}>
-          <img className={styles.checkedFavicon} src={UNISWAP_INFO.faviconUrl} />
-          <span className={styles.checkedDappUrl}>{UNISWAP_INFO.url}</span>
+          <img
+            className={styles.checkedFavicon}
+            src={dappInfo.faviconUrl}
+            alt={dappInfo.faviconUrl}
+          />
+          <span className={styles.checkedDappUrl}>{dappInfo.url}</span>
 
           <Input
             className={styles.checkedInput}
@@ -164,9 +167,8 @@ export default function ModalAddDapp ({
             type="primary"
             className={styles.checkedConfirmBtn}
             onClick={async () => {
-              await updateDapp(dappInfo).then(() => {
-                onAddedDapp?.()
-              })
+              await updateDapp(dappInfo);
+              onAddedDapp?.();
             }}
             disabled={!isValidAlias}
           >
@@ -175,5 +177,5 @@ export default function ModalAddDapp ({
         </div>
       )}
     </Modal>
-  )
+  );
 }

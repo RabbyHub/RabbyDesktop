@@ -21,7 +21,7 @@ export const dappStore = new Store<{
           // stricted canonical url, only includes protocols, hostname(without port), pathname
           url: { type: 'string' },
           faviconUrl: { type: 'string' },
-        }
+        },
       },
       default: [] as IDapp[],
     },

@@ -168,7 +168,10 @@ class Browser {
   }
 
   async init() {
-    app.setPath('userData', app.getPath('userData').replace('Electron', APP_NAME));
+    app.setPath(
+      'userData',
+      app.getPath('userData').replace('Electron', APP_NAME)
+    );
     if (!isProd) {
       // we just need to modify it for development, because `APP_NAME` in production is from package.json
       app.setName(APP_NAME);
@@ -336,7 +339,7 @@ class Browser {
       event.reply('dapps-fetch', {
         reqid,
         dapps: dappStore.get('dapps'),
-      })
+      });
     });
 
     ipcMain.on('dapps-put', (event, reqid: string, dapp: IDapp) => {
@@ -353,8 +356,8 @@ class Browser {
 
       event.reply('dapps-put', {
         reqid,
-        dapps: allDapps
-      })
+        dapps: allDapps,
+      });
     });
 
     ipcMain.on('dapps-delete', (event, reqid: string, dapp: IDapp) => {
@@ -369,8 +372,8 @@ class Browser {
 
       event.reply('dapps-delete', {
         reqid,
-        dapps: allDapps
-      })
+        dapps: allDapps,
+      });
     });
   }
 

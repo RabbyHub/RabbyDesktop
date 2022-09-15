@@ -10,8 +10,12 @@ module.exports = {
     'consistent-return': 'off',
     'import/prefer-default-export': 'off',
     '@typescript-eslint/triple-slash-reference': 'off',
+    'no-plusplus': 'off',
     'no-underscore-dangle': 'off',
-    'class-methods-use-this': 'off'
+    'class-methods-use-this': 'off',
+    'react/prop-types': 'off',
+    'react/require-default-props': 'off',
+    'react/jsx-props-no-spreading': 'off',
     // '@typescript-eslint/naming-convention': [
     //   'error',
     //   {

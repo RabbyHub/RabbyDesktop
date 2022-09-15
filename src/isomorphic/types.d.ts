@@ -4,4 +4,4 @@ type IDapp = {
   alias: string;
   url: string | `https://${string}${string}`;
   faviconUrl: string;
-}
+};

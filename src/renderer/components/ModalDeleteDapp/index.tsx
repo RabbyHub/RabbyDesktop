@@ -2,11 +2,11 @@ import React, { useCallback, useState } from 'react';
 import classnames from 'classnames';
 import { Modal, ModalProps, Button } from 'antd';
 
-import styles from './index.module.less';
 import { useDapps } from 'renderer/hooks/usePersistData';
+import styles from './index.module.less';
 import { RCIconDappsModalClose } from '../../../../assets/icons/internal-homepage';
 
-function useDelete (dapp: IDapp | null) {
+function useDelete(dapp: IDapp | null) {
   const { removeDapp } = useDapps();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -17,26 +17,25 @@ function useDelete (dapp: IDapp | null) {
     }
     setIsLoading(true);
     await removeDapp(dapp).finally(() => setIsLoading(false));
-  }, [ removeDapp, dapp ]);
+  }, [removeDapp, dapp]);
 
   return {
     doDelete,
     isLoading,
-  }
+  };
 }
 
-export default function ModalDeleteDapp ({
+export default function ModalDeleteDapp({
   dapp,
   onDeletedDapp,
   ...modalProps
-}: React.PropsWithChildren<ModalProps & {
-  dapp: IDapp,
-  onDeletedDapp?: () => void
-}>) {
-  const {
-    doDelete,
-    isLoading,
-  } = useDelete(dapp);
+}: React.PropsWithChildren<
+  ModalProps & {
+    dapp: IDapp;
+    onDeletedDapp?: () => void;
+  }
+>) {
+  const { doDelete, isLoading } = useDelete(dapp);
 
   return (
     <Modal
@@ -49,25 +48,20 @@ export default function ModalDeleteDapp ({
       wrapClassName={classnames('modal-dapp-mngr', modalProps.wrapClassName)}
     >
       <div className={styles.deletingDapp}>
-        <h3 className={styles.title}>
-          Delete the Dapp?
-        </h3>
+        <h3 className={styles.title}>Delete the Dapp?</h3>
         <div className="dapp-block-wrapper">
           <div className="dapp-block">
             <a
-              className='anchor'
+              className="anchor"
               href={dapp.url}
-              target='_blank'
+              target="_blank"
+              rel="noreferrer"
             >
               {/* TODO: robust about load image */}
-              <img
-                className="dapp-favicon"
-                src={dapp.faviconUrl}
-                alt="add"
-              />
+              <img className="dapp-favicon" src={dapp.faviconUrl} alt="add" />
               <div className="infos">
-                <h4 className='dapp-alias'>{dapp.alias}</h4>
-                <span className='dapp-url'>{dapp.url}</span>
+                <h4 className="dapp-alias">{dapp.alias}</h4>
+                <span className="dapp-url">{dapp.url}</span>
               </div>
             </a>
           </div>
@@ -80,7 +74,7 @@ export default function ModalDeleteDapp ({
           type="primary"
           className={styles.confirmBtn}
           onClick={async () => {
-            await doDelete()
+            await doDelete();
             onDeletedDapp?.();
           }}
         >
@@ -88,5 +82,5 @@ export default function ModalDeleteDapp ({
         </Button>
       </div>
     </Modal>
-  )
+  );
 }

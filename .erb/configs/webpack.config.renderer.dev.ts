@@ -193,7 +193,7 @@ const configuration: webpack.Configuration = {
       verbose: true,
     },
     devMiddleware: {
-      writeToDisk: (targetpath) => {
+      writeToDisk: () => {
         return true
       }
     },
