@@ -5,7 +5,7 @@ import { promises as fs } from 'fs';
 import { app, session, BrowserWindow, ipcMain } from 'electron';
 
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
-import { buildChromeContextMenu } from '@rabby-wallet/electron-chrome-context-menu';
+import { buildChromeContextMenu } from './browser/context-menu';
 import { setupMenu } from './browser/menu';
 import { getAssetPath, preloadPath, getRendererPath } from './util';
 import { firstEl } from '../isomorphic/array';
@@ -19,9 +19,11 @@ import {
 } from '../isomorphic/const-size';
 import {
   APP_NAME,
+  IS_RUNTIME_PRODUCTION,
   RABBY_HOMEPAGE_URL,
   RABBY_INTERNAL_PROTOCOL,
 } from '../isomorphic/constants';
+import { isRabbyShellURL } from '../isomorphic/url';
 
 import { dappStore } from './store/dapps';
 
@@ -183,7 +185,9 @@ class Browser {
     console.debug(`[init] desktop's appData: ${app.getPath('appData')}`);
     console.debug(`[init] desktop's userData: ${app.getPath('userData')}`);
     this.initSession();
-    setupMenu(this);
+    setupMenu(() => {
+      return this.getFocusedWindow().getFocusedTab()?.webContents;
+    });
 
     this.session.setPreloads([preloadPath]);
 
@@ -403,11 +407,13 @@ class Browser {
           contextIsolation: true,
           // worldSafeExecuteJavaScript: true,
           ...options.window?.webPreferences,
+          devTools: isProd,
         },
       },
     });
     this.windows.push(win);
 
+    // TODO: use other params to activate
     if (process.env.SHELL_DEBUG) {
       win.topbarWebContents.openDevTools({ mode: 'detach' });
     }
@@ -420,6 +426,7 @@ class Browser {
     const url = webContents.getURL();
     console.log(`'web-contents-created' event [type:${type}, url:${url}]`);
 
+    // TODO: use other params to activate
     if (process.env.SHELL_DEBUG && webContents.getType() === 'backgroundPage') {
       webContents.openDevTools({ mode: 'detach', activate: true });
     }
@@ -446,6 +453,10 @@ class Browser {
     );
 
     webContents.on('context-menu', (_, params) => {
+      const pageURL = params.pageURL || ''
+      // it's shell
+      if (isRabbyShellURL(pageURL) && IS_RUNTIME_PRODUCTION) return ;
+
       const menu = buildChromeContextMenu({
         params,
         webContents,

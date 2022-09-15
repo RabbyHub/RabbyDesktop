@@ -44,3 +44,7 @@ export function integrateQueryToUrl(
   const queryStr2 = new URLSearchParams(query);
   return `${urlWithoutQuery}?${queryStr2}`;
 }
+
+export function isRabbyShellURL (url: string) {
+  return url.startsWith('chrome-extension://') && url.includes('/shell-webui.html')
+}
