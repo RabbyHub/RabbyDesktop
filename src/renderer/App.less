@@ -1,22 +1,29 @@
+@import "./css/theme/index.css";
+
+@HOME_PADDING: 200px;
+@DASHBOARD_W: 1280px - 2 * @HOME_PADDING;
+
 /*
  * @NOTE: Prepend a `~` to css file paths that are in your node_modules
  *        See https://github.com/webpack-contrib/sass-loader#imports
  */
 body {
+  margin: 0;
+  font-family: 'Roboto';
   position: relative;
   color: white;
   height: 100vh;
-  background: linear-gradient(
-    200.96deg,
-    #fedc2a -29.09%,
-    #dd5789 51.77%,
-    #7a2c9e 129.35%
-  );
+  background: var(--color-purewhite);
   font-family: sans-serif;
   overflow-y: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
 }
 
 button {
@@ -52,11 +59,4 @@ a {
 a:hover {
   opacity: 1;
   text-decoration: none;
-}
-
-.Hello {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 20px 0;
 }

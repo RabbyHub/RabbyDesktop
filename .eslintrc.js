@@ -6,6 +6,28 @@ module.exports = {
     'import/no-unresolved': 'error',
     // Since React 17 and typescript 4.1 you can safely disable the rule
     'react/react-in-jsx-scope': 'off',
+    'max-classes-per-file': 'off',
+    'consistent-return': 'off',
+    'import/prefer-default-export': 'off',
+    '@typescript-eslint/triple-slash-reference': 'off',
+    'no-underscore-dangle': 'off',
+    'class-methods-use-this': 'off'
+    // '@typescript-eslint/naming-convention': [
+    //   'error',
+    //   {
+    //     format: [
+    //       'camelCase',
+    //       'strictCamelCase',
+    //       'PascalCase',
+    //       'StrictPascalCase',
+    //       'snake_case',
+    //       'UPPER_CASE',
+    //     ],
+    //     selector: 'default',
+    //     leadingUnderscore: 'allow',
+    //     trailingUnderscore: 'allow',
+    //   }
+    // ]
   },
   parserOptions: {
     ecmaVersion: 2020,

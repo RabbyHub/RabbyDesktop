@@ -17,8 +17,30 @@ const srcNodeModulesPath = path.join(srcPath, 'node_modules');
 const distPath = path.join(appPath, 'dist');
 const distMainPath = path.join(distPath, 'main');
 const distRendererPath = path.join(distPath, 'renderer');
+const distShellPath = path.join(rootPath, 'assets/desktop_shell');
 
 const buildPath = path.join(releasePath, 'build');
+
+const rendererEntries = [
+  {
+    name: 'renderer',
+    target: 'index.html',
+    htmlFile: path.join(srcRendererPath, `index.ejs`)
+  },
+] as const;
+
+const shellEntries = [
+  {
+    name: 'shell-webui',
+    target: 'shell-webui.html',
+    htmlFile: path.join(srcRendererPath, `shell-webui.ejs`)
+  },
+  {
+    name: 'shell-new-tab',
+    target: 'shell-new-tab.html',
+    htmlFile: path.join(srcRendererPath, `shell-new-tab.ejs`)
+  }
+] as const;
 
 export default {
   rootPath,
@@ -34,5 +56,8 @@ export default {
   distPath,
   distMainPath,
   distRendererPath,
+  distShellPath,
   buildPath,
+  rendererEntries,
+  shellEntries,
 };

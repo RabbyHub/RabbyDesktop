@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Rabby Wallet Desktop</title>
+  </head>
+  <body>
+    <!-- skeleton -->
+    <div id="topbar" class="topbar">
+      <div id="tabstrip" style="display: none;">
+        <ul class="tab-list">
+          <template id="tabtemplate">
+            <li class="tab">
+              <img class="favicon" />
+              <span class="title"></span>
+              <div class="controls">
+                <button class="control audio" disabled>🔊</button>
+                <button class="control close">🗙</button>
+              </div>
+            </li>
+          </template>
+        </ul>
+        <button id="createtab">+</button>
+        <div class="app-drag"></div>
+        <div class="window-controls">
+          <button id="minimize" class="control">🗕</button>
+          <button id="maximize" class="control">🗖</button>
+          <button id="close" class="control">🗙</button>
+        </div>
+      </div>
+      <div class="toolbar" style="display: none;">
+        <div class="page-controls">
+          <button id="goback" class="control">⬅️</button>
+          <button id="goforward" class="control">➡️</button>
+          <button id="reload" class="control">🔄</button>
+        </div>
+        <div class="address-bar">
+          <input id="addressurl" spellcheck="false" />
+        </div>
+        <browser-action-list id="actions"></browser-action-list>
+      </div>
+    </div>
+  </div>
+  </body>
+</html>

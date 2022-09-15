@@ -11,6 +11,7 @@ import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
 import deleteSourceMaps from '../scripts/delete-source-maps';
+import { getWebpackAliases } from './common';
 
 checkNodeEnv('production');
 deleteSourceMaps();
@@ -30,6 +31,12 @@ const configuration: webpack.Configuration = {
   output: {
     path: webpackPaths.distMainPath,
     filename: '[name].js',
+  },
+
+  resolve: {
+    alias: {
+      ...getWebpackAliases()
+    }
   },
 
   optimization: {

@@ -1,4 +1,5 @@
 {
+  "version": "0.1.0",
   "description": "Rabby's desktop application, for WEB3 users",
   "keywords": [
     "electron",
@@ -26,31 +27,38 @@
   },
   "main": "./src/main/main.ts",
   "scripts": {
-    "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
+    "build": "concurrently \"npm run build:main\" \"npm run build:shell\" \"npm run build:renderer\"",
     "build:main": "cross-env-shell NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.main.prod.ts",
-    "build:renderer": "cross-env-shell NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
-    "postinstall": "ts-node .erb/scripts/check-native-dep.js && electron-builder install-app-deps && cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.dev.dll.ts",
-    "lint": "cross-env-shell NODE_ENV=development eslint . --ext .js,.jsx,.ts,.tsx",
+    "build:renderer": "npm run clean:renderer && cross-env-shell NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
+    "build:shell": "npm run clean:shell && cross-env-shell NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.shell.prod.ts",
+    "clean:renderer": "rimraf release/app/dist/renderer",
+    "clean:shell": "rimraf assets/desktop_shell",
+    "postinstall": "npm run depcheck",
+    "depcheck": "ts-node .erb/scripts/check-native-dep.js && electron-builder install-app-deps && cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.dev.dll.ts",
+    "lint": "cross-env-shell NODE_ENV=development eslint --ext .js,.jsx,.ts,.tsx ./src",
+    "lint-fix": "cross-env-shell NODE_ENV=development eslint --fix --ext .js,.jsx,.ts,.tsx ./src",
+    "prepackage": "rimraf release/build",
     "package": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --publish never",
     "prepare": "husky install",
     "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
     "start": "ts-node ./.erb/scripts/check-port-in-use.js && npm run start:renderer",
     "start:main": "cross-env-shell NODE_ENV=development electronmon -r ts-node/register/transpile-only .",
     "start:preload": "cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
-    "start:renderer": "cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
+    "start:renderer": "npm run clean:renderer && cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
+    "start:shell": "npm run clean:shell && cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.shell.dev.ts",
     "test": "jest"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
+    "src/*.{js,jsx,ts,tsx}": [
       "cross-env-shell NODE_ENV=development eslint --cache"
     ],
-    "*.json,.{eslintrc,prettierrc}": [
+    "src/*.json,.{eslintrc,prettierrc}": [
       "prettier --ignore-path .eslintignore --parser json --write"
     ],
-    "*.{css,scss}": [
+    "src/*.{css,scss}": [
       "prettier --ignore-path .eslintignore --single-quote --write"
     ],
-    "*.{html,md,yml}": [
+    "src/*.{html,md,yml}": [
       "prettier --ignore-path .eslintignore --single-quote --write"
     ]
   },
@@ -100,12 +108,19 @@
     }
   },
   "dependencies": {
+    "@rabby-wallet/electron-chrome-context-menu": "^1.1.1",
+    "@rabby-wallet/electron-chrome-extensions": "^3.9.3",
+    "@types/chrome": "^0.0.196",
+    "@types/sortablejs": "^1.13.0",
+    "classnames": "^2.3.1",
     "electron-debug": "^3.2.0",
     "electron-log": "^4.4.8",
+    "electron-tabs": "^1.0.1",
     "electron-updater": "^5.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.3.0"
+    "react-router-dom": "^6.3.0",
+    "sortablejs": "^1.15.0"
   },
   "devDependencies": {
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.7",
@@ -124,6 +139,7 @@
     "browserslist-config-erb": "^0.0.3",
     "chalk": "^4.1.2",
     "concurrently": "^7.3.0",
+    "copy-webpack-plugin": "^11.0.0",
     "core-js": "^3.24.1",
     "cross-env": "^7.0.3",
     "css-loader": "^6.7.1",
@@ -153,8 +169,11 @@
     "identity-obj-proxy": "^3.0.0",
     "jest": "^28.1.3",
     "jest-environment-jsdom": "^28.1.3",
+    "less": "^4.1.3",
+    "less-loader": "^11.0.0",
     "lint-staged": "^13.0.3",
     "mini-css-extract-plugin": "^2.6.1",
+    "patch-package": "^6.4.7",
     "prettier": "^2.7.1",
     "react-refresh": "^0.14.0",
     "react-test-renderer": "^18.2.0",
@@ -175,8 +194,8 @@
     "webpack-merge": "^5.8.0"
   },
   "build": {
-    "productName": "ElectronReact",
-    "appId": "org.erb.ElectronReact",
+    "productName": "RabbyDesktop",
+    "appId": "org.erb.RabbyDesktop",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [
