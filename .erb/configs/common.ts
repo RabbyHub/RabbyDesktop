@@ -106,13 +106,31 @@ export function getProdStyleLoaders () {
             importLoaders: 1,
           },
         },
-        'less-loader',
+        {
+          loader: 'less-loader',
+          options: {
+            lessOptions: {
+              javascriptEnabled: true,
+            },
+          },
+        }
       ],
       include: /\.module\.less$/,
     },
     {
       test: /\.less$/,
-      use: [MiniCssExtractPlugin.loader, 'css-loader', 'less-loader'],
+      use: [
+        MiniCssExtractPlugin.loader,
+        'css-loader',
+        {
+          loader: 'less-loader',
+          options: {
+            lessOptions: {
+              javascriptEnabled: true,
+            },
+          },
+        }
+      ],
       exclude: /\.module\.less$/,
     },
   ]
