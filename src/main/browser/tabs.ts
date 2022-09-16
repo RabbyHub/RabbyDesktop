@@ -4,6 +4,7 @@ import {
   NATIVE_HEADER_H,
   NATIVE_HEADER_WITH_NAV_H,
 } from '../../isomorphic/const-size';
+import { canoicalizeDappUrl } from '../../isomorphic/url';
 
 type ITabOptions = {
   tabs: Tabs;
@@ -187,5 +188,14 @@ export class Tabs extends EventEmitter {
     tab.show();
     this.selected = tab;
     this.emit('tab-selected', tab);
+  }
+
+  findByOrigin(url: string) {
+    const inputOrigin = canoicalizeDappUrl(url).origin;
+    if (!inputOrigin) return null;
+
+    return this.tabList.find((tab) =>
+      canoicalizeDappUrl(tab.webContents?.getURL() || '').origin === inputOrigin
+    );
   }
 }

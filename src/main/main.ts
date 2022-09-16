@@ -23,7 +23,7 @@ import {
   RABBY_HOMEPAGE_URL,
   RABBY_INTERNAL_PROTOCOL,
 } from '../isomorphic/constants';
-import { isRabbyShellURL } from '../isomorphic/url';
+import { isRabbyShellURL, isUrlFromDapp } from '../isomorphic/url';
 
 import { dappStore } from './store/dapps';
 
@@ -391,8 +391,6 @@ class Browser {
         allDapps.splice(idx, 1);
       }
 
-      console.log('[feat] allDapps', allDapps);
-
       event.reply('dapps-delete', {
         reqid,
         dapps: allDapps,
@@ -451,26 +449,32 @@ class Browser {
       webContents.openDevTools({ mode: 'detach', activate: true });
     }
 
-    webContents.on(
-      'new-window',
-      (ev, winURL, frameName, disposition, options) => {
-        ev.preventDefault();
+    webContents.setWindowOpenHandler((details) => {
+      const isFromDapp = isUrlFromDapp(details.url);
 
-        switch (disposition) {
-          case 'foreground-tab':
-          case 'background-tab':
-          case 'new-window': {
-            const win = this.getIpcWindow(ev);
+      switch (details.disposition) {
+        case 'foreground-tab':
+        case 'background-tab':
+        case 'new-window': {
+          const win = this.getWindowFromWebContents(webContents);
+          const openedTab = isFromDapp ? win?.tabs.findByOrigin(details.url) : null;
+          if (openedTab) {
+            openedTab.loadURL(details.url);
+          } else {
             const tab = win?.tabs.create();
-            tab?.loadURL(winURL);
-            break;
+            tab?.loadURL(details.url);
           }
-          default: {
-            break;
-          }
+          break;
+        }
+        default: {
+          break;
         }
       }
-    );
+
+      return {
+        action: 'deny',
+      }
+    })
 
     webContents.on('context-menu', (_, params) => {
       const pageURL = params.pageURL || ''
