@@ -193,7 +193,7 @@ class Browser {
 
       if (getMainPlatform() === 'darwin') {
         app.dock.setIcon(getAssetPath('icon.png'))
-        this.appTray = new Tray(getAssetPath('app-icons/macos-menu-logo@2x.png'))
+        this.appTray = new Tray(getAssetPath('app-icons/macos-menu-logo-light@2x.png'))
         // do quit on context menu
         this.appTray.addListener('click', () => {
           this.windows[0]?.window.show();
@@ -417,6 +417,7 @@ class Browser {
         frame: false,
         icon: getMainPlatform() === 'darwin' ? getAssetPath('icons/256x256.png') : getAssetPath('icon.ico'),
         resizable: true,
+        fullscreenable: true,
         ...options.window,
         webPreferences: {
           // sandbox: true,
