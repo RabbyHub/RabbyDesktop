@@ -31,3 +31,5 @@ npm-debug.log.*
 */desktop_shell/*
 */chrome_exts/*
 assets/*.zip
+
+tmp.iconset

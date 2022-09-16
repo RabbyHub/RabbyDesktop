@@ -2,12 +2,12 @@
 
 import path from 'path';
 import { promises as fs } from 'fs';
-import { app, session, BrowserWindow, ipcMain } from 'electron';
+import { app, session, BrowserWindow, ipcMain, Tray } from 'electron';
 
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { buildChromeContextMenu } from './browser/context-menu';
 import { setupMenu } from './browser/menu';
-import { getAssetPath, preloadPath, getRendererPath } from './util';
+import { getAssetPath, preloadPath, getRendererPath, getMainPlatform } from './util';
 import { firstEl } from '../isomorphic/array';
 import TabbedBrowserWindow, {
   TabbedBrowserWindowOptions,
@@ -116,6 +116,8 @@ class Browser {
 
   extensions: ElectronChromeExtensions = undefined as any;
 
+  appTray: Tray = undefined as any;
+
   constructor() {
     // eslint-disable-next-line promise/catch-or-return
     app.whenReady().then(this.init.bind(this));
@@ -186,9 +188,17 @@ class Browser {
     console.debug(`[init] desktop's appData: ${app.getPath('appData')}`);
     console.debug(`[init] desktop's userData: ${app.getPath('userData')}`);
     this.initSession();
-    setupMenu(() => {
-      return this.getFocusedWindow().getFocusedTab()?.webContents;
-    });
+
+    set_menu_and_icons: {
+      setupMenu(() => {
+        return this.getFocusedWindow().getFocusedTab()?.webContents;
+      });
+
+      if (getMainPlatform() === 'darwin') {
+        app.dock.setIcon(getAssetPath('icon.png'))
+        this.appTray = new Tray(getAssetPath('app-icons/macos-menu-logo@2x.png'))
+      }
+    }
 
     this.session.setPreloads([preloadPath]);
 
@@ -397,7 +407,7 @@ class Browser {
         width: FRAME_MIN_SIZE.minWidth,
         height: FRAME_MIN_SIZE.minHeight,
         frame: false,
-        icon: getAssetPath('icon.png'),
+        icon: getMainPlatform() === 'darwin' ? getAssetPath('icons/256x256.png') : getAssetPath('icon.ico'),
         resizable: true,
         ...options.window,
         webPreferences: {

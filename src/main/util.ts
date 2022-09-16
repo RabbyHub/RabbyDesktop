@@ -3,6 +3,10 @@ import path from 'path';
 // import url from 'url';
 import { app } from 'electron';
 
+export function getMainPlatform () {
+  return process.platform as 'win32' | 'darwin'
+}
+
 function resolveReleasePath(file: string) {
   if (process.env.NODE_ENV === 'development') {
     return path.resolve(path.join(__dirname, '../../release/app/dist'), file);
