@@ -72,7 +72,7 @@ function isInternalProtocol(url: string) {
   ].some((protocol) => url.startsWith(protocol));
 }
 
-function specialFavIcon(url?: string, isActiveTab = false) {
+function filterFavIcon(url?: string, isActiveTab = false) {
   // homepage
   if (url?.startsWith(RABBY_HOMEPAGE_URL)) {
     return isActiveTab
@@ -81,6 +81,15 @@ function specialFavIcon(url?: string, isActiveTab = false) {
   }
 
   return null;
+}
+
+function filterClosable(url?: string, isClosable = CLOSABLE) {
+  // home page
+  if (url?.includes(`${RABBY_INTERNAL_PROTOCOL}//local/index.html`)) {
+    return false
+  }
+
+  return isClosable;
 }
 
 // type GetListenerParams<T> = T extends (...args: infer A) => any ? A : never;
@@ -392,7 +401,8 @@ export default function Topbar() {
             const key = `topbar-tab-${tab.id}-${idx}`;
 
             const faviconUrl =
-              specialFavIcon(tab.url, tab.active) || tab.favIconUrl;
+              filterFavIcon(tab.url, tab.active) || tab.favIconUrl;
+            const closable = filterClosable(tab.url, CLOSABLE);
 
             return (
               /* eslint-disable-next-line jsx-a11y/click-events-have-key-events */
@@ -407,7 +417,7 @@ export default function Topbar() {
                 <span className="title">{tab.title}</span>
                 <div className="controls">
                   {/* <button className="control audio" disabled={tab.audible && !tab.mutedInfo?.muted}>🔊</button> */}
-                  {CLOSABLE && (
+                  {closable && (
                     <button
                       type="button"
                       className="control close"
