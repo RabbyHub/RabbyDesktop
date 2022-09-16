@@ -1,7 +1,10 @@
 #!/bin/sh
 
 # cp to aws
-BUILD_BUCKET="debank-app-build-artifacts"
+if [ -z $RABBY_BUILD_BUCKET ]; then
+  echo "[release_windows] RABBY_BUILD_BUCKET is empty, exit";
+  exit 1;
+fi
 
 echo "[release_windows] start packaging...";
 npm run package
@@ -40,17 +43,17 @@ echo "[release_windows] latest: https://download.debank.com/downloads/rabby-desk
 
 echo "[release_windows] start uploading...";
 
-S3_LATEST_EXE=s3://${BUILD_BUCKET}/${LATEST_EXE_PATH}
-S3_LATEST_YML=s3://${BUILD_BUCKET}/${LATEST_YML_PATH}
+S3_LATEST_EXE=s3://${RABBY_BUILD_BUCKET}/${LATEST_EXE_PATH}
+S3_LATEST_YML=s3://${RABBY_BUILD_BUCKET}/${LATEST_YML_PATH}
 
 # backup
 aws s3 cp "$export_path/${INSTALLER_SOURCE}" $S3_LATEST_EXE --acl public-read --profile debankbuild
 aws s3 cp $export_path/latest.yml $S3_LATEST_YML --acl public-read --profile debankbuild
-aws s3 cp "$S3_LATEST_EXE" s3://${BUILD_BUCKET}/downloads/rabby-desktop/win32/${INSTALLER_BASENAME}.exe --acl public-read --profile debankbuild
-aws s3 cp "$S3_LATEST_YML" s3://${BUILD_BUCKET}/downloads/rabby-desktop/win32/${INSTALLER_BASENAME}.yml --acl public-read --profile debankbuild
+aws s3 cp "$S3_LATEST_EXE" s3://${RABBY_BUILD_BUCKET}/downloads/rabby-desktop/win32/${INSTALLER_BASENAME}.exe --acl public-read --profile debankbuild
+aws s3 cp "$S3_LATEST_YML" s3://${RABBY_BUILD_BUCKET}/downloads/rabby-desktop/win32/${INSTALLER_BASENAME}.yml --acl public-read --profile debankbuild
 
 # update latest
-aws s3 cp "$S3_LATEST_EXE" s3://${BUILD_BUCKET}/downloads/rabby-desktop/rabby-desktop-setup-latest-win32.exe --acl public-read --profile debankbuild;
-aws s3 cp "$S3_LATEST_YML" s3://${BUILD_BUCKET}/downloads/rabby-desktop/rabby-desktop-setup-latest-win32.yml --acl public-read --profile debankbuild
+aws s3 cp "$S3_LATEST_EXE" s3://${RABBY_BUILD_BUCKET}/downloads/rabby-desktop/rabby-desktop-setup-latest-win32.exe --acl public-read --profile debankbuild;
+aws s3 cp "$S3_LATEST_YML" s3://${RABBY_BUILD_BUCKET}/downloads/rabby-desktop/rabby-desktop-setup-latest-win32.yml --acl public-read --profile debankbuild
 
 echo "[release_windows] uploaded...";

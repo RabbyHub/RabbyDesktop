@@ -1,5 +1,5 @@
 const { notarize } = require('electron-notarize');
-const { build } = require('../../package.json');
+const { appId } = require('../../electron-builder');
 
 exports.default = async function notarizeMacos(context) {
   const { electronPlatformName, appOutDir } = context;
@@ -12,19 +12,25 @@ exports.default = async function notarizeMacos(context) {
     return;
   }
 
-  if (!('APPLE_ID' in process.env && 'APPLE_ID_PASS' in process.env)) {
+  if (!('RABBY_APPLE_ID' in process.env && 'RABBY_APPLE_ID_PASS' in process.env)) {
     console.warn(
-      'Skipping notarizing step. APPLE_ID and APPLE_ID_PASS env variables must be set'
+      'Skipping notarizing step. RABBY_APPLE_ID and RABBY_APPLE_ID_PASS env variables must be set'
     );
     return;
   }
 
   const appName = context.packager.appInfo.productFilename;
 
+  console.log(`Notarizing app ${appName}...`);
+
   await notarize({
-    appBundleId: build.appId,
+    tool: 'notarytool',
+    appBundleId: appId,
+    teamId: process.env.RABBY_APPLE_TEAM_ID,
     appPath: `${appOutDir}/${appName}.app`,
-    appleId: process.env.APPLE_ID,
-    appleIdPassword: process.env.APPLE_ID_PASS,
+    appleId: process.env.RABBY_APPLE_ID,
+    appleIdPassword: process.env.RABBY_APPLE_ID_PASS,
   });
+
+  console.log(`Notarizied app ${appName}...`);
 };
