@@ -70,6 +70,7 @@
 
   header {
     height: @header-h;
+    flex-shrink: 0;
 
     .title {
       font-style: normal;
@@ -81,10 +82,9 @@
   }
 
   main {
-    // @center-h-offset: @header-h + @main-padding-v + @footer-h;
-    // max-height: calc(100% - @center-h-offset);
+    @center-h-offset: @header-h + @main-padding-v + @footer-h;
+    min-height: calc(100% - @center-h-offset);
 
-    height: 100%;
     padding: @main-padding-v 0;
 
     > .dapps {
@@ -93,6 +93,7 @@
   }
 
   footer {
+    flex-shrink: 0;
     height: @footer-h;
     box-sizing: border-box;
 
