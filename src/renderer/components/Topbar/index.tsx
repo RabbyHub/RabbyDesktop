@@ -526,6 +526,7 @@ export default function Topbar() {
                 id="addressurl"
                 spellCheck={false}
                 value={addressUrl}
+                disabled
                 // defaultValue={activeTab?.url || ''}
                 onKeyUp={onAddressUrlKeyUp}
                 onChange={onAddressUrlChange}
