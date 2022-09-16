@@ -8,9 +8,12 @@ import {
 type ITabOptions = {
   tabs: Tabs;
   hasNavigationBar?: boolean;
+  initialUrl?: string;
 };
 export class Tab {
   id: BrowserView['webContents']['id'];
+
+  initialUrl: string = '';
 
   view?: BrowserView;
 
@@ -26,7 +29,7 @@ export class Tab {
 
   constructor(
     parentWindow: BrowserWindow,
-    { tabs, hasNavigationBar = true }: ITabOptions
+    { tabs, hasNavigationBar = true, initialUrl }: ITabOptions
   ) {
     this.tabs = tabs;
     this.view = new BrowserView();
@@ -35,6 +38,7 @@ export class Tab {
     this.webContents = this.view.webContents;
     this.window.addBrowserView(this.view);
     this.hasNavigationBar = !!hasNavigationBar;
+    this.initialUrl = initialUrl || '';
 
     const onClose = (
       _: Electron.IpcMainEvent,
@@ -133,6 +137,7 @@ export class Tabs extends EventEmitter {
 
     this.selected = undefined;
 
+    // TODO: allow to customize behavior on destroy()
     if (this.window) {
       this.window.destroy();
       this.window = undefined;
@@ -144,7 +149,10 @@ export class Tabs extends EventEmitter {
   }
 
   create(options?: Omit<ITabOptions, 'tabs'>) {
-    const tab = new Tab(this.window!, { ...options, tabs: this });
+    const tab = new Tab(this.window!, {
+      ...options,
+      tabs: this
+    });
     this.tabList.push(tab);
     if (!this.selected) this.selected = tab;
     tab.show(); // must be attached to window

@@ -5,7 +5,7 @@ import { Tab, Tabs } from './tabs';
 
 export type TabbedBrowserWindowOptions = {
   webuiExtensionId: string;
-  initialUrl?: string;
+  defaultTabUrl?: string;
   window?: Electron.BrowserWindowConstructorOptions;
   session?: Electron.Session;
   extensions: ElectronChromeExtensions;
@@ -59,13 +59,14 @@ export default class TabbedBrowserWindow {
 
     this.tabs = new Tabs(this.window);
 
-    this.tabs.on('tab-created', (tab) => {
-      if (options.initialUrl) {
-        tab.webContents.loadURL(options.initialUrl);
+    this.tabs.on('tab-created', (tab: Tab) => {
+      const url = tab.initialUrl || options.defaultTabUrl;
+      if (url) {
+        tab.webContents!.loadURL(url);
       }
 
       // Track tab that may have been created outside of the extensions API.
-      this.extensions.addTab(tab.webContents, tab.window);
+      this.extensions.addTab(tab.webContents!, tab.window!);
     });
 
     this.tabs.on('tab-selected', (tab: Tab) => {

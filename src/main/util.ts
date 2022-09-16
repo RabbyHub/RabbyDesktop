@@ -44,3 +44,13 @@ export const getAssetPath = (...paths: string[]): string => {
 export const preloadPath = app.isPackaged
   ? path.join(__dirname, 'preload.js')
   : path.join(__dirname, '../../.erb/dll/preload.js');
+
+export function getShellPageUrl (type: 'webui' | 'debug-new-tab', webuiExtensionId: string) {
+    switch (type) {
+      case 'debug-new-tab':
+      default:
+        return `chrome-extension://${webuiExtensionId}/shell-new-tab.html`;
+      case 'webui':
+        return `chrome-extension://${webuiExtensionId}/shell-webui.html`;
+    }
+}

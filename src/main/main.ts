@@ -7,7 +7,7 @@ import { app, session, BrowserWindow, ipcMain, Tray } from 'electron';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { buildChromeContextMenu } from './browser/context-menu';
 import { setupMenu } from './browser/menu';
-import { getAssetPath, preloadPath, getRendererPath, getMainPlatform } from './util';
+import { getAssetPath, preloadPath, getRendererPath, getMainPlatform, getShellPageUrl } from './util';
 import { firstEl } from '../isomorphic/array';
 import TabbedBrowserWindow, {
   TabbedBrowserWindowOptions,
@@ -29,9 +29,6 @@ import { dappStore } from './store/dapps';
 
 // const pkgjson = require('../../package.json');
 
-const isProd = process.env.NODE_ENV === 'production';
-
-let webuiExtensionId: Electron.Extension['id'] = '';
 let rabbyExtensionId: Electron.Extension['id'] = '';
 
 const manifestExists = async (dirPath: string) => {
@@ -116,6 +113,8 @@ class Browser {
 
   extensions: ElectronChromeExtensions = undefined as any;
 
+  webuiExtensionId: Electron.Extension['id'] = '';
+
   appTray: Tray = undefined as any;
 
   constructor() {
@@ -123,9 +122,7 @@ class Browser {
     app.whenReady().then(this.init.bind(this));
 
     app.on('window-all-closed', () => {
-      if (process.platform !== 'darwin') {
-        this.destroy();
-      }
+      this.destroy();
     });
 
     app.on('web-contents-created', this.onWebContentsCreated.bind(this));
@@ -177,7 +174,7 @@ class Browser {
       'userData',
       app.getPath('userData').replace('Electron', APP_NAME)
     );
-    if (!isProd) {
+    if (!IS_RUNTIME_PRODUCTION) {
       // we just need to modify it for development, because `APP_NAME` in production is from package.json
       app.setName(APP_NAME);
     }
@@ -197,6 +194,10 @@ class Browser {
       if (getMainPlatform() === 'darwin') {
         app.dock.setIcon(getAssetPath('icon.png'))
         this.appTray = new Tray(getAssetPath('app-icons/macos-menu-logo@2x.png'))
+        // do quit on context menu
+        this.appTray.addListener('click', () => {
+          this.windows[0]?.window.show();
+        });
       }
     }
 
@@ -206,8 +207,7 @@ class Browser {
       getAssetPath('desktop_shell'),
       { allowFileAccess: true }
     );
-    webuiExtensionId = webuiExtension.id;
-    const newTabUrl = `chrome-extension://${webuiExtensionId}/shell-new-tab.html`;
+    this.webuiExtensionId = webuiExtension.id;
 
     // @notice: make sure all customized plugins loaded after ElectronChromeExtensions initialized
     this.extensions = new ElectronChromeExtensions({
@@ -226,7 +226,7 @@ class Browser {
 
         const tab = win.tabs.create({ hasNavigationBar: win.hasNavigationBar });
 
-        if (details.url) tab.loadURL(details.url || newTabUrl);
+        if (details.url) tab.loadURL(details.url);
         if (typeof details.active === 'boolean' ? details.active : true)
           win.tabs.select(tab.id);
 
@@ -253,10 +253,10 @@ class Browser {
       },
 
       createWindow: async (details) => {
-        const tabUrl = firstEl(details.url || '') || newTabUrl;
+        const tabUrl = firstEl(details.url || '') || getShellPageUrl('debug-new-tab', this.webuiExtensionId);
 
         const win = this.createWindow({
-          initialUrl: tabUrl,
+          defaultTabUrl: tabUrl,
           windowType: details.type,
           window: {
             width: details.width,
@@ -288,8 +288,16 @@ class Browser {
 
     // init window
     this.createWindow({
-      initialUrl: isProd ? RABBY_HOMEPAGE_URL : newTabUrl,
+      defaultTabUrl: RABBY_HOMEPAGE_URL,
     });
+    if (!IS_RUNTIME_PRODUCTION) {
+      setTimeout(() => {
+        this.windows[0].tabs.create({
+          initialUrl: getShellPageUrl('debug-new-tab', this.webuiExtensionId)
+        })
+      }, 600)
+    }
+
   }
 
   initSession() {
@@ -327,7 +335,7 @@ class Browser {
         }
       )
     ) {
-      if (!isProd) {
+      if (!IS_RUNTIME_PRODUCTION) {
         throw new Error(
           `[initSession] Failed to register protocol rabby-local`
         );
@@ -393,12 +401,12 @@ class Browser {
   }
 
   createWindow(options: Partial<TabbedBrowserWindowOptions>) {
-    if (!webuiExtensionId) {
+    if (!this.webuiExtensionId) {
       throw new Error('[createWindow] webuiExtensionId is not set');
     }
     const win = new TabbedBrowserWindow({
       ...options,
-      webuiExtensionId,
+      webuiExtensionId: this.webuiExtensionId,
       extensions: this.extensions,
       window: {
         ...FRAME_DEFAULT_SIZE,
@@ -418,7 +426,7 @@ class Browser {
           contextIsolation: true,
           // worldSafeExecuteJavaScript: true,
           ...options.window?.webPreferences,
-          devTools: isProd,
+          devTools: IS_RUNTIME_PRODUCTION,
         },
       },
     });
@@ -480,7 +488,7 @@ class Browser {
 
           switch (disposition) {
             case 'new-window':
-              this.createWindow({ initialUrl: winURL });
+              this.createWindow({ defaultTabUrl: winURL });
               break;
             default: {
               const tab = win.tabs.create();
