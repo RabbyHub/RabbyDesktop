@@ -426,7 +426,7 @@ class Browser {
           contextIsolation: true,
           // worldSafeExecuteJavaScript: true,
           ...options.window?.webPreferences,
-          devTools: IS_RUNTIME_PRODUCTION,
+          devTools: !IS_RUNTIME_PRODUCTION,
         },
       },
     });
