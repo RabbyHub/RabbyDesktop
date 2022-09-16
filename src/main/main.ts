@@ -100,7 +100,8 @@ const getParentWindowOfTab = (tab: Electron.WebContents) => {
       return BrowserWindow.fromWebContents(tab);
     case 'browserView':
     case 'webview':
-      return tab.getOwnerBrowserWindow();
+      // return tab.getOwnerBrowserWindow();
+      return BrowserWindow.fromWebContents(tab);
     case 'backgroundPage':
       return BrowserWindow.getFocusedWindow();
     default:
@@ -151,12 +152,12 @@ class Browser {
   getIpcWindow(event: Electron.NewWindowWebContentsEvent) {
     let win = null;
 
-    if (event.sender) {
-      win = this.getWindowFromWebContents(event.sender);
+    if ((event as any).sender) {
+      win = this.getWindowFromWebContents((event as any).sender);
 
       // If sent from a popup window, we may need to get the parent window of the popup.
       if (!win) {
-        const browserWindow = getParentWindowOfTab(event.sender);
+        const browserWindow = getParentWindowOfTab((event as any).sender);
         if (browserWindow && !browserWindow.isDestroyed()) {
           const parentWindow = browserWindow.getParentWindow();
           if (parentWindow) {
@@ -421,7 +422,7 @@ class Browser {
     return win;
   }
 
-  async onWebContentsCreated(event, webContents: BrowserWindow['webContents']) {
+  async onWebContentsCreated(event: Electron.Event, webContents: BrowserWindow['webContents']) {
     const type = webContents.getType();
     const url = webContents.getURL();
     console.log(`'web-contents-created' event [type:${type}, url:${url}]`);

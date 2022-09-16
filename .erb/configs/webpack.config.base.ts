@@ -22,7 +22,7 @@ const configuration: webpack.Configuration = {
           loader: 'ts-loader',
           options: {
             // Remove this line to enable type checking in webpack builds
-            transpileOnly: false,
+            transpileOnly: process.platform === 'darwin',
             getCustomTransformers: () => ({
               before: [
                 tsImportPluginFactory([
@@ -42,7 +42,7 @@ const configuration: webpack.Configuration = {
       },
       {
         test: /\.[jt]sx?$/,
-        exclude: /node_modules/,
+        exclude: [/node_modules/, /src\/renderer/],
         use: {
           loader: 'ts-loader',
           options: {
