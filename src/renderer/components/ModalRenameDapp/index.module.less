@@ -28,6 +28,9 @@
 
     text-align: center;
     color: var(--color-title);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .dappUrl + .modifyWrapper {
@@ -47,7 +50,11 @@
       border-radius: 8px;
       height: 100%;
       padding: 18px 16px;
-      padding-left: @min-alias-w;
+
+      font-weight: 500;
+      font-size: 16px;
+      color: var(--color-title);
+      height: 56px;
     }
 
     .oldAlias {

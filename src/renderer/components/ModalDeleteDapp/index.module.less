@@ -48,13 +48,22 @@
       align-items: center;
     }
 
+    .truncate() {
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
     .dapp-block .anchor .infos {
+      overflow: hidden;
       .dapp-alias {
         font-weight: 700;
         font-size: 18px;
         line-height: 21px;
         color: var(--color-title);
         margin-bottom: 0;
+        text-align: left;
+        .truncate;
       }
       .dapp-url {
         font-style: normal;
@@ -62,6 +71,7 @@
         font-size: 14px;
         line-height: 16px;
         color: var(--color-paragraph);
+        .truncate;
       }
 
       .dapp-alias + .dapp-url {

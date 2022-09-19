@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import classnames from 'classnames';
 import { Input, Modal, ModalProps, Button } from 'antd';
 import { useDapps } from 'renderer/hooks/usePersistData';
@@ -31,6 +31,12 @@ function useRename(dapp: IDapp | null) {
     await renameDapp(dapp, alias).finally(() => setIsLoading(false));
   }, [renameDapp, dapp, alias]);
 
+  useEffect(() => {
+    if (dapp) {
+      setAlias(dapp.alias || '');
+    }
+  }, [dapp]);
+
   return {
     alias,
     onAliasChange,
@@ -49,19 +55,12 @@ export default function ModalRenameDapp({
   ...modalProps
 }: React.PropsWithChildren<
   ModalProps & {
-    dapp: IDapp;
+    dapp: IDapp | null;
     onRenamedDapp?: () => void;
   }
 >) {
   const { alias, onAliasChange, isValidAlias, doRename, isLoading } =
     useRename(dapp);
-
-  // dynamic styles
-  const nameRef: React.MutableRefObject<HTMLSpanElement | null> =
-    useRef<HTMLSpanElement>(null);
-  const [oldNameW, setOldNameW] = useState(0);
-
-  if (!dapp) return null;
 
   return (
     <Modal
@@ -79,23 +78,12 @@ export default function ModalRenameDapp({
           src={dapp?.faviconUrl}
           alt={dapp?.faviconUrl}
         />
-        <span className={styles.dappUrl}>{dapp?.url}</span>
+        <div className={styles.dappUrl} title={dapp?.url}>
+          {dapp?.url}
+        </div>
         <div className={styles.modifyWrapper}>
-          <span
-            ref={(el) => {
-              nameRef.current = el;
-              setOldNameW(el?.getBoundingClientRect().width || 0);
-              return el;
-            }}
-            className={styles.oldAlias}
-          >
-            {dapp?.alias}
-          </span>
           <Input
             className={styles.aliasInput}
-            style={{
-              ...(oldNameW && { paddingLeft: oldNameW }),
-            }}
             value={alias}
             onChange={onAliasChange}
             // placeholder="https://somedapp.xyz"

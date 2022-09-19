@@ -31,7 +31,7 @@ export default function ModalDeleteDapp({
   ...modalProps
 }: React.PropsWithChildren<
   ModalProps & {
-    dapp: IDapp;
+    dapp: IDapp | null;
     onDeletedDapp?: () => void;
   }
 >) {
@@ -53,15 +53,19 @@ export default function ModalDeleteDapp({
           <div className="dapp-block">
             <a
               className="anchor"
-              href={dapp.url}
+              href={dapp?.url}
               target="_blank"
               rel="noreferrer"
             >
               {/* TODO: robust about load image */}
-              <img className="dapp-favicon" src={dapp.faviconUrl} alt="add" />
+              <img className="dapp-favicon" src={dapp?.faviconUrl} alt="add" />
               <div className="infos">
-                <h4 className="dapp-alias">{dapp.alias}</h4>
-                <span className="dapp-url">{dapp.url}</span>
+                <h4 className="dapp-alias" title={dapp?.alias}>
+                  {dapp?.alias}
+                </h4>
+                <div className="dapp-url" title={dapp?.url}>
+                  {dapp?.url}
+                </div>
               </div>
             </a>
           </div>

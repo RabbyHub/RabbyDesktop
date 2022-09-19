@@ -1,11 +1,18 @@
 @import '~antd/lib/style/themes/default.less';
 @import '~antd/dist/antd.less';
 @import './vars.less';
-@import "./overwrite-antd.less";
+@import './overwrite-antd.less';
+
+*,
+*::after,
+*::before {
+  box-sizing: inherit;
+}
 
 html,
 body {
   font-family: 'Roboto', sans-serif;
+  box-sizing: border-box;
 }
 
 body {
