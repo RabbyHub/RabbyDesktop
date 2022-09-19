@@ -54,8 +54,10 @@ const configuration: webpack.Configuration = {
     //   'webpack/hot/only-dev-server',
     //   path.join(webpackPaths.srcRendererPath, 'index.tsx'),
     // ],
-    'home': webpackPaths.rendererEntries['home'].jsEntry,
-    'splash': webpackPaths.rendererEntries['splash'].jsEntry,
+    ...Object.values(webpackPaths.rendererEntries).reduce((accu, cur) => {
+      accu[cur.name] = cur.jsEntry;
+      return accu;
+    }, {})
   },
 
   output: {

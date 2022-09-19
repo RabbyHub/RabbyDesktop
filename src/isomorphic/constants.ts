@@ -10,4 +10,5 @@ export const PERSIS_STORE_PREFIX = 'rabby-store-';
 
 export const RABBY_INTERNAL_PROTOCOL = 'rabby-internal:';
 export const RABBY_HOMEPAGE_URL = `${RABBY_INTERNAL_PROTOCOL}//local/home.html`;
+export const RABBY_GETTING_STARTED_URL = `${RABBY_INTERNAL_PROTOCOL}//local/getting-started.html`;
 export const RABBY_SPALSH_URL = `${RABBY_INTERNAL_PROTOCOL}//local/splash.html`;

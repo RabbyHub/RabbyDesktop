@@ -5,3 +5,7 @@ type IDapp = {
   url: string | `https://${string}${string}`;
   faviconUrl: string;
 };
+
+type IDesktopAppState = {
+  firstStartApp: boolean
+}

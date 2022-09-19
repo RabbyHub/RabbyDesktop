@@ -28,8 +28,10 @@ const configuration: webpack.Configuration = {
   target: ['web', 'electron-renderer'],
 
   entry: {
-    'home': webpackPaths.rendererEntries['home'].jsEntry,
-    'splash': webpackPaths.rendererEntries['splash'].jsEntry,
+    ...Object.values(webpackPaths.rendererEntries).reduce((accu, cur) => {
+      accu[cur.name] = cur.jsEntry;
+      return accu;
+    }, {})
   },
 
   output: {

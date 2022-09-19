@@ -2,6 +2,8 @@
 import path from 'path';
 // import url from 'url';
 import { app } from 'electron';
+import { FRAME_DEFAULT_SIZE, FRAME_MAX_SIZE, FRAME_MIN_SIZE } from '../isomorphic/const-size';
+import { IS_RUNTIME_PRODUCTION } from '../isomorphic/constants';
 
 export function getMainPlatform () {
   return process.platform as 'win32' | 'darwin'
@@ -55,10 +57,35 @@ export function getShellPageUrl (type: 'webui' | 'debug-new-tab', webuiExtension
     }
 }
 
-export function getWindowIconOpts (): {
+function getWindowIconOpts (): {
   icon: Electron.BrowserWindowConstructorOptions['icon']
 } {
   return {
     icon: getMainPlatform() === 'darwin' ? getAssetPath('icons/256x256.png') : getAssetPath('icon.ico'),
+  }
+}
+
+export function getBrowserWindowOpts(opts?: Electron.BrowserWindowConstructorOptions): Electron.BrowserWindowConstructorOptions {
+  return {
+    ...FRAME_DEFAULT_SIZE,
+    ...FRAME_MAX_SIZE,
+    ...FRAME_MIN_SIZE,
+    width: FRAME_MIN_SIZE.minWidth,
+    height: FRAME_MIN_SIZE.minHeight,
+    frame: false,
+    icon: getWindowIconOpts().icon,
+    resizable: true,
+    fullscreenable: true,
+    ...opts,
+    webPreferences: {
+      // sandbox: true,
+      sandbox: false,
+      nodeIntegration: false,
+      // enableRemoteModule: false,
+      contextIsolation: true,
+      // worldSafeExecuteJavaScript: true,
+      devTools: !IS_RUNTIME_PRODUCTION,
+      ...opts?.webPreferences
+    },
   }
 }

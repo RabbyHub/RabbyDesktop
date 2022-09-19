@@ -68,6 +68,27 @@ type ChannelMessagePayload = {
       }
     ];
   };
+  'redirect-mainWindow': {
+    send: [],
+    response: []
+  };
+  'get-desktopAppState': {
+    send: [reqid: string];
+    response: [
+      {
+        reqid: string;
+        state: IDesktopAppState;
+      }
+    ]
+  },
+  'put-desktopAppState-hasStarted': {
+    send: [reqid: string];
+    response: [
+      {
+        reqid: string
+      }
+    ]
+  }
 };
 
 type Channels = keyof ChannelMessagePayload;
