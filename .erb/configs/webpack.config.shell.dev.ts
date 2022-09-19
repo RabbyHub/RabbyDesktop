@@ -34,9 +34,9 @@ const configuration: webpack.Configuration = {
     'shell-webui': [
       `webpack-dev-server/client?http://localhost:${port}/dist`,
       'webpack/hot/only-dev-server',
-      path.join(webpackPaths.srcRendererPath, 'shell-webui.tsx'),
+      webpackPaths.shellEntries['shell-webui'].jsEntry,
     ],
-    'shell-new-tab': path.join(webpackPaths.srcRendererPath, 'shell-new-tab.tsx'),
+    'shell-new-tab': webpackPaths.shellEntries['shell-new-tab'].jsEntry,
   },
 
   output: {
@@ -95,7 +95,7 @@ const configuration: webpack.Configuration = {
 
     new ReactRefreshWebpackPlugin(),
 
-    ...webpackPaths.shellEntries.map(({ name, target, htmlFile }) => {
+    ...Object.values(webpackPaths.shellEntries).map(({ name, target, htmlFile }) => {
       return new HtmlWebpackPlugin({
         filename: target,
         template: htmlFile,

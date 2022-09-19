@@ -54,3 +54,11 @@ export function getShellPageUrl (type: 'webui' | 'debug-new-tab', webuiExtension
         return `chrome-extension://${webuiExtensionId}/shell-webui.html`;
     }
 }
+
+export function getWindowIconOpts (): {
+  icon: Electron.BrowserWindowConstructorOptions['icon']
+} {
+  return {
+    icon: getMainPlatform() === 'darwin' ? getAssetPath('icons/256x256.png') : getAssetPath('icon.ico'),
+  }
+}

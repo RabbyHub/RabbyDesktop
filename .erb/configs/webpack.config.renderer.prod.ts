@@ -28,7 +28,8 @@ const configuration: webpack.Configuration = {
   target: ['web', 'electron-renderer'],
 
   entry: {
-    'renderer': path.join(webpackPaths.srcRendererPath, 'index.tsx'),
+    'home': webpackPaths.rendererEntries['home'].jsEntry,
+    'splash': webpackPaths.rendererEntries['splash'].jsEntry,
   },
 
   output: {
@@ -113,7 +114,7 @@ const configuration: webpack.Configuration = {
       analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
     }),
 
-    ...webpackPaths.rendererEntries.map(({ name, target, htmlFile }) => {
+    ...Object.values(webpackPaths.rendererEntries).map(({ name, target, htmlFile }) => {
       return new HtmlWebpackPlugin({
         filename: target,
         template: htmlFile,

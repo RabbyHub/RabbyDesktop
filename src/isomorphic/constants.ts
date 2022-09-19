@@ -9,4 +9,5 @@ export const APP_UA_NAME = 'RabbyDesktop';
 export const PERSIS_STORE_PREFIX = 'rabby-store-';
 
 export const RABBY_INTERNAL_PROTOCOL = 'rabby-internal:';
-export const RABBY_HOMEPAGE_URL = `${RABBY_INTERNAL_PROTOCOL}//local/index.html`;
+export const RABBY_HOMEPAGE_URL = `${RABBY_INTERNAL_PROTOCOL}//local/home.html`;
+export const RABBY_SPALSH_URL = `${RABBY_INTERNAL_PROTOCOL}//local/splash.html`;

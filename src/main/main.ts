@@ -7,7 +7,7 @@ import { app, session, BrowserWindow, ipcMain, Tray } from 'electron';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { buildChromeContextMenu } from './browser/context-menu';
 import { setupMenu } from './browser/menu';
-import { getAssetPath, preloadPath, getRendererPath, getMainPlatform, getShellPageUrl } from './util';
+import { getAssetPath, preloadPath, getRendererPath, getMainPlatform, getShellPageUrl, getWindowIconOpts } from './util';
 import { firstEl } from '../isomorphic/array';
 import TabbedBrowserWindow, {
   TabbedBrowserWindowOptions,
@@ -22,6 +22,7 @@ import {
   IS_RUNTIME_PRODUCTION,
   RABBY_HOMEPAGE_URL,
   RABBY_INTERNAL_PROTOCOL,
+  RABBY_SPALSH_URL,
 } from '../isomorphic/constants';
 import { isRabbyShellURL } from '../isomorphic/url';
 
@@ -196,6 +197,7 @@ class Browser {
         this.appTray = new Tray(getAssetPath('app-icons/macos-menu-logo-light@2x.png'))
         // do quit on context menu
         this.appTray.addListener('click', () => {
+          // TODO: use specific `mainWindow`
           this.windows[0]?.window.show();
         });
       }
@@ -286,18 +288,44 @@ class Browser {
 
     this._setupBridge();
 
-    // init window
-    this.createWindow({
-      defaultTabUrl: RABBY_HOMEPAGE_URL,
-    });
     if (!IS_RUNTIME_PRODUCTION) {
+      // init window
+      const mainWin = this.createWindow({
+        defaultTabUrl: RABBY_HOMEPAGE_URL,
+        window: {
+          show: true,
+        }
+      });
       setTimeout(() => {
-        this.windows[0].tabs.create({
+        mainWin.tabs.create({
           initialUrl: getShellPageUrl('debug-new-tab', this.webuiExtensionId)
         })
       }, 600)
-    }
+    } else {
+      // init window
+      const mainWin = this.createWindow({
+        defaultTabUrl: RABBY_HOMEPAGE_URL,
+        window: {
+          show: false,
+        }
+      });
+      const splash = new BrowserWindow({
+        width: 500,
+        height: 300,
+        transparent: true,
+        frame: false,
+        icon: getWindowIconOpts().icon,
+        alwaysOnTop: true,
+      });
+      splash.webContents.loadURL(`${RABBY_SPALSH_URL}`);
 
+      // do this work on mainWin.window postMessage('homePageLoaded') until timeout
+      setTimeout(() => {
+        splash.destroy();
+        mainWin.window.show();
+        mainWin.window.moveTop();
+      }, 3000);
+    }
   }
 
   initSession() {
@@ -415,7 +443,7 @@ class Browser {
         width: FRAME_MIN_SIZE.minWidth,
         height: FRAME_MIN_SIZE.minHeight,
         frame: false,
-        icon: getMainPlatform() === 'darwin' ? getAssetPath('icons/256x256.png') : getAssetPath('icon.ico'),
+        icon: getWindowIconOpts().icon,
         resizable: true,
         fullscreenable: true,
         ...options.window,

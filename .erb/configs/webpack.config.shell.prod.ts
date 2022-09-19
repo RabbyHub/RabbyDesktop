@@ -28,8 +28,8 @@
    target: ['web', 'electron-renderer'],
 
    entry: {
-     'shell-webui': path.join(webpackPaths.srcRendererPath, 'shell-webui.tsx'),
-     'shell-new-tab': path.join(webpackPaths.srcRendererPath, 'shell-new-tab.tsx'),
+     'shell-webui': webpackPaths.shellEntries['shell-webui'].jsEntry,
+     'shell-new-tab': webpackPaths.shellEntries['shell-new-tab'].jsEntry,
    },
 
    output: {
@@ -96,7 +96,7 @@
        analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
      }),
 
-     ...webpackPaths.shellEntries.map(({ name, target, htmlFile }) => {
+     ...Object.values(webpackPaths.shellEntries).map(({ name, target, htmlFile }) => {
        return new HtmlWebpackPlugin({
          filename: target,
          template: htmlFile,
