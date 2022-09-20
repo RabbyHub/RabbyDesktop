@@ -2,7 +2,7 @@
 
 import path from 'path';
 import { promises as fs } from 'fs';
-import { app, session, BrowserWindow, ipcMain, Tray } from 'electron';
+import { app, session, BrowserWindow, Tray } from 'electron';
 
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { buildChromeContextMenu } from './browser/context-menu';
@@ -12,11 +12,8 @@ import { firstEl } from '../isomorphic/array';
 import TabbedBrowserWindow, {
   TabbedBrowserWindowOptions,
 } from './browser/browsers';
-import {
-  FRAME_DEFAULT_SIZE,
-  FRAME_MAX_SIZE,
-  FRAME_MIN_SIZE,
-} from '../isomorphic/const-size';
+import { onIpcMainEvent } from './utils/ipcMainEvents';
+
 import {
   APP_NAME,
   IS_RUNTIME_PRODUCTION,
@@ -316,7 +313,8 @@ class Browser {
     splashWin.webContents.loadURL(`${RABBY_SPALSH_URL}`);
 
     let gettingStartedWin: BrowserWindow | null = null;
-    ipcMain.on('redirect-mainWindow', () => {
+
+    onIpcMainEvent('redirect-mainWindow', () => {
       if (!gettingStartedWin) return ;
 
       gettingStartedWin.destroy();
@@ -387,26 +385,26 @@ class Browser {
   }
 
   _setupBridge() {
-    ipcMain.on('rabby-extension-id', (event) => {
+    onIpcMainEvent('rabby-extension-id', (event) => {
       event.reply('rabby-extension-id', {
         rabbyExtensionId,
       });
     });
 
-    ipcMain.on('get-app-version', (event) => {
+    onIpcMainEvent('get-app-version', (event) => {
       event.reply('get-app-version', {
         version: app.getVersion(),
       });
     });
 
-    ipcMain.on('dapps-fetch', (event, reqid: string) => {
+    onIpcMainEvent('dapps-fetch', (event, reqid) => {
       event.reply('dapps-fetch', {
         reqid,
         dapps: dappStore.get('dapps'),
       });
-    });
+    })
 
-    ipcMain.on('dapps-put', (event, reqid: string, dapp: IDapp) => {
+    onIpcMainEvent('dapps-put', (event, reqid: string, dapp: IDapp) => {
       // TODO: is there mutex?
       const allDapps = dappStore.get('dapps') || [];
       const existedDapp = allDapps.find((d) => d.url === dapp.url);
@@ -424,7 +422,7 @@ class Browser {
       });
     });
 
-    ipcMain.on('dapps-delete', (event, reqid: string, dapp: IDapp) => {
+    onIpcMainEvent('dapps-delete', (event, reqid: string, dapp: IDapp) => {
       const allDapps = dappStore.get('dapps') || [];
       const idx = allDapps.findIndex((d) => d.url === dapp.url);
       if (idx > -1) {
@@ -438,7 +436,7 @@ class Browser {
       });
     });
 
-    ipcMain.on('get-desktopAppState', (event, reqid: string) => {
+    onIpcMainEvent('get-desktopAppState', (event, reqid: string) => {
       desktopAppStore.set('firstStartApp', false);
 
       event.reply('get-desktopAppState', {
@@ -449,12 +447,11 @@ class Browser {
       });
     })
 
-    ipcMain.on('put-desktopAppState-hasStarted', (event, reqid: string) => {
+    onIpcMainEvent('put-desktopAppState-hasStarted', (event, reqid: string) => {
       desktopAppStore.set('firstStartApp', false);
 
       event.reply('put-desktopAppState-hasStarted', {
         reqid,
-        firstStartApp: false,
       });
     })
   }
