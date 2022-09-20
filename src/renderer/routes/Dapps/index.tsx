@@ -15,6 +15,7 @@ import ModalDeleteDapp from '../../components/ModalDeleteDapp';
 import { useAppVersion } from '../../hooks/useMainBridge';
 
 import './index.less';
+import { AutoUpdate } from './components/AutoUpdate';
 
 function DAppBlock({
   dapp,
@@ -129,6 +130,7 @@ export default function DApps() {
             "url('rabby-internal://assets/icons/common/logo-op-5.svg') no-repeat bottom 80px right",
         }}
       >
+        <AutoUpdate />
         <header>
           <h2 className="title">My Dapps</h2>
         </header>
