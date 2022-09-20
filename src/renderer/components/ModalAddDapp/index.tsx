@@ -56,9 +56,12 @@ function useAddStep() {
     }
   }, [addUrl, detectDapps]);
 
+  const resetChecking = useCallback(() => { setIsChecking(false) }, [])
+
   return {
     isCheckingUrl,
     checkUrl,
+    resetChecking,
     addUrl,
     onChangeAddUrl,
     isValidAddUrl: /https:\/\/.+/.test(addUrl),
@@ -100,7 +103,7 @@ export default function ModalAddDapp({
   const { open } = modalProps;
   const [step, setStep] = useState<IStep>('add');
 
-  const { addUrl, onChangeAddUrl, isValidAddUrl, isCheckingUrl, checkUrl } =
+  const { addUrl, onChangeAddUrl, isValidAddUrl, isCheckingUrl, resetChecking, checkUrl } =
     useAddStep();
 
   const { dappInfo, setDappInfo, onChangeDappAlias, isValidAlias } =
@@ -136,6 +139,10 @@ export default function ModalAddDapp({
       width={800}
       centered
       {...modalProps}
+      onCancel={(e) => {
+        resetChecking();
+        modalProps.onCancel?.(e);
+      }}
       title={null}
       footer={null}
       closeIcon={<RCIconDappsModalClose />}
@@ -170,7 +177,7 @@ export default function ModalAddDapp({
         <div className={styles.stepChecked}>
           <img
             className={styles.checkedFavicon}
-            src={dappInfo.faviconUrl}
+            src={dappInfo.faviconBase64 ? dappInfo.faviconBase64 : dappInfo.faviconUrl}
             alt={dappInfo.faviconUrl}
           />
           <span className={styles.checkedDappUrl}>{dappInfo.origin}</span>

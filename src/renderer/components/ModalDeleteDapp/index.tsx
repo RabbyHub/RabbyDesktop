@@ -37,6 +37,8 @@ export default function ModalDeleteDapp({
 >) {
   const { doDelete, isLoading } = useDelete(dapp);
 
+  if (!dapp) return null;
+
   return (
     <Modal
       width={560}
@@ -54,15 +56,15 @@ export default function ModalDeleteDapp({
           <div className="dapp-block">
             <a
               className="anchor"
-              href={dapp?.origin}
+              href={dapp.origin}
               target="_blank"
               rel="noreferrer"
             >
               {/* TODO: robust about load image */}
-              <img className="dapp-favicon" src={dapp?.faviconUrl} alt="add" />
+              <img className="dapp-favicon" src={dapp.faviconBase64 ? dapp.faviconBase64 : dapp.faviconUrl} alt="add" />
               <div className="infos">
-                <h4 className="dapp-alias">{dapp?.alias}</h4>
-                <span className="dapp-url">{dapp?.origin}</span>
+                <h4 className="dapp-alias">{dapp.alias}</h4>
+                <span className="dapp-url">{dapp.origin}</span>
               </div>
             </a>
           </div>

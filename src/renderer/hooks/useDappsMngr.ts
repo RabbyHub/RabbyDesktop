@@ -24,6 +24,7 @@ async function getAll() {
   });
 }
 
+// TODO: use timeout mechanism
 async function detectDapps(dappUrl: string) {
   const reqid = randString();
 

@@ -104,7 +104,7 @@ export async function parseWebsiteFavicon (websiteBaseURL: string) {
           const urlInfo = canoicalizeDappUrl(icon.url).urlInfo;
 
           faviconUrl = urlInfo?.protocol ? icon.url : `${websiteBaseURL}${icon.url}`;
-          faviconBase64 = reqIconUrlBufs[icon.url];
+          faviconBase64 = `data:${icon.type};base64,${reqIconUrlBufs[icon.url]}`;
           resolve(icon);
         },
         error: err => {

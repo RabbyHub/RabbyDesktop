@@ -51,7 +51,7 @@ function DAppBlock({
     <div className="dapp-block" ref={ref}>
       <a className="anchor" href={dapp.origin} target="_blank" rel="noreferrer">
         {/* TODO: robust about load image */}
-        <img className="dapp-favicon" src={dapp.faviconUrl} alt="add" />
+        <img className="dapp-favicon" src={dapp.faviconBase64 ? dapp.faviconBase64 : dapp.faviconUrl} alt="add" />
         <div className="infos">
           <h4 className="dapp-alias">{dapp.alias}</h4>
           <div className="dapp-url">{dapp.origin}</div>
@@ -141,7 +141,7 @@ export default function DApps() {
                 return (
                   <DAppBlock
                     /* eslint-disable-next-line react/no-array-index-key */
-                    key={`${dapp.url}-${dapp.alias}-${idx}`}
+                    key={`${dapp.origin}-${dapp.alias}-${idx}`}
                     dapp={dapp}
                     onOpDapp={(op) => {
                       switch (op) {
