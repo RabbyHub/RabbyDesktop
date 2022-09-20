@@ -137,6 +137,7 @@ export async function detectDapps(
   }
 
   const { iconInfo, faviconUrl, faviconBase64 } = await parseWebsiteFavicon(origin);
+  console.log('[feat] faviconUrl', faviconUrl);
 
   return {
     data: {

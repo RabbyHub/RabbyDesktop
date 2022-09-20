@@ -1,6 +1,7 @@
 import url from 'url';
 import { Icon as IconInfo, parseFavicon } from 'parse-favicon';
 import { net } from 'electron';
+import { canoicalizeDappUrl } from '../../isomorphic/url';
 
 // TODO: add test about it
 export async function fetchUrl(inputURL: string) {
@@ -66,27 +67,27 @@ function resolveUrl(url: string, base: string) {
 export async function parseWebsiteFavicon (websiteBaseURL: string) {
   websiteBaseURL = websiteBaseURL.replace(/\/$/, '');
 
-  const relurlBufs: Record<string, string> = {};
+  const reqIconUrlBufs: Record<string, string> = {};
 
-  async function textFetcher(relurl: string) {
+  async function textFetcher(url: string) {
     // leave here for debug
-    // console.log('[feat] textFetcher:: relurl', relurl);
+    // console.log('[feat] textFetcher:: url', url);
     return await fetchUrl(
-      resolveUrl(relurl, websiteBaseURL)
+      resolveUrl(url, websiteBaseURL)
     )
     .then(res => Buffer.from(res.body || []).toString() || '')
   }
 
-  async function bufferFetcher(relurl: string) {
+  async function bufferFetcher(url: string) {
     // leave here for debug
-    // console.log('[feat] bufferFetcher:: relurl', relurl);
+    // console.log('[feat] bufferFetcher:: url', url);
     return await fetchUrl(
-      resolveUrl(relurl, websiteBaseURL)
+      resolveUrl(url, websiteBaseURL)
     )
     .then(res => {
       const arrBuf = res.body || new Uint8Array();
 
-      relurlBufs[relurl] = Buffer.from(arrBuf).toString('base64');
+      reqIconUrlBufs[url] = Buffer.from(arrBuf).toString('base64');
 
       return arrBuf;
     })
@@ -100,8 +101,10 @@ export async function parseWebsiteFavicon (websiteBaseURL: string) {
     const obs = parseFavicon(websiteBaseURL, textFetcher, bufferFetcher)
       .subscribe({
         next: icon => {
-          faviconUrl = `${websiteBaseURL}${icon.url}`;
-          faviconBase64 = relurlBufs[icon.url];
+          const urlInfo = canoicalizeDappUrl(icon.url).urlInfo;
+
+          faviconUrl = urlInfo?.protocol ? icon.url : `${websiteBaseURL}${icon.url}`;
+          faviconBase64 = reqIconUrlBufs[icon.url];
           resolve(icon);
         },
         error: err => {
