@@ -54,7 +54,10 @@ const configuration: webpack.Configuration = {
     //   'webpack/hot/only-dev-server',
     //   path.join(webpackPaths.srcRendererPath, 'index.tsx'),
     // ],
-    renderer: path.join(webpackPaths.srcRendererPath, 'index.tsx'),
+    ...Object.values(webpackPaths.rendererEntries).reduce((accu, cur) => {
+      accu[cur.name] = cur.jsEntry;
+      return accu;
+    }, {})
   },
 
   output: {
@@ -150,7 +153,7 @@ const configuration: webpack.Configuration = {
 
     new ReactRefreshWebpackPlugin(),
 
-    ...webpackPaths.rendererEntries.map(({ name, target, htmlFile }) => {
+    ...Object.values(webpackPaths.rendererEntries).map(({ name, target, htmlFile }) => {
       return new HtmlWebpackPlugin({
         filename: target,
         template: htmlFile,

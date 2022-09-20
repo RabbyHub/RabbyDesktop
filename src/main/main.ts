@@ -7,7 +7,7 @@ import { app, session, BrowserWindow, ipcMain, Tray } from 'electron';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { buildChromeContextMenu } from './browser/context-menu';
 import { setupMenu } from './browser/menu';
-import { getAssetPath, preloadPath, getRendererPath, getMainPlatform, getShellPageUrl } from './util';
+import { getAssetPath, preloadPath, getRendererPath, getMainPlatform, getShellPageUrl, getBrowserWindowOpts } from './util';
 import { firstEl } from '../isomorphic/array';
 import TabbedBrowserWindow, {
   TabbedBrowserWindowOptions,
@@ -20,12 +20,15 @@ import {
 import {
   APP_NAME,
   IS_RUNTIME_PRODUCTION,
+  RABBY_GETTING_STARTED_URL,
   RABBY_HOMEPAGE_URL,
   RABBY_INTERNAL_PROTOCOL,
+  RABBY_SPALSH_URL,
 } from '../isomorphic/constants';
 import { isRabbyShellURL } from '../isomorphic/url';
 
 import { dappStore } from './store/dapps';
+import { desktopAppStore } from './store/desktopApp';
 
 // const pkgjson = require('../../package.json');
 
@@ -196,6 +199,7 @@ class Browser {
         this.appTray = new Tray(getAssetPath('app-icons/macos-menu-logo-light@2x.png'))
         // do quit on context menu
         this.appTray.addListener('click', () => {
+          // TODO: use specific `mainWindow`
           this.windows[0]?.window.show();
         });
       }
@@ -224,7 +228,11 @@ class Browser {
           throw new Error(`Unable to find windowId=${details.windowId}`);
         }
 
-        const tab = win.tabs.create({ hasNavigationBar: win.hasNavigationBar });
+        const tab = win.tabs.create({
+          topbarStacks: {
+            navigation: win.hasNavigationBar,
+          }
+        });
 
         if (details.url) tab.loadURL(details.url);
         if (typeof details.active === 'boolean' ? details.active : true)
@@ -287,17 +295,50 @@ class Browser {
     this._setupBridge();
 
     // init window
-    this.createWindow({
+    const mainWin = this.createWindow({
       defaultTabUrl: RABBY_HOMEPAGE_URL,
+      window: {
+        show: false,
+      }
     });
-    if (!IS_RUNTIME_PRODUCTION) {
-      setTimeout(() => {
-        this.windows[0].tabs.create({
-          initialUrl: getShellPageUrl('debug-new-tab', this.webuiExtensionId)
-        })
-      }, 600)
-    }
 
+    const showMainWin = () => {
+      mainWin.window.show();
+      mainWin.window.moveTop();
+    };
+
+    const splashWin = new BrowserWindow({
+      ...getBrowserWindowOpts(),
+      transparent: true,
+      frame: false,
+      alwaysOnTop: true,
+    });
+    splashWin.webContents.loadURL(`${RABBY_SPALSH_URL}`);
+
+    let gettingStartedWin: BrowserWindow | null = null;
+    ipcMain.on('redirect-mainWindow', () => {
+      if (!gettingStartedWin) return ;
+
+      gettingStartedWin.destroy();
+      showMainWin();
+      gettingStartedWin = null;
+    });
+
+    // do this work on mainWin.window postMessage('homePageLoaded') until timeout
+    setTimeout(() => {
+      splashWin.destroy();
+
+      if (desktopAppStore.get('firstStartApp')) {
+        gettingStartedWin = new BrowserWindow({
+          ...getBrowserWindowOpts(),
+          transparent: true,
+          frame: false,
+        });
+        gettingStartedWin.webContents.loadURL(RABBY_GETTING_STARTED_URL);
+      } else {
+        showMainWin();
+      }
+    }, IS_RUNTIME_PRODUCTION ? 3000 : 200);
   }
 
   initSession() {
@@ -391,13 +432,31 @@ class Browser {
         allDapps.splice(idx, 1);
       }
 
-      console.log('[feat] allDapps', allDapps);
-
       event.reply('dapps-delete', {
         reqid,
         dapps: allDapps,
       });
     });
+
+    ipcMain.on('get-desktopAppState', (event, reqid: string) => {
+      desktopAppStore.set('firstStartApp', false);
+
+      event.reply('get-desktopAppState', {
+        reqid,
+        state: {
+          firstStartApp: desktopAppStore.get('firstStartApp')
+        },
+      });
+    })
+
+    ipcMain.on('put-desktopAppState-hasStarted', (event, reqid: string) => {
+      desktopAppStore.set('firstStartApp', false);
+
+      event.reply('put-desktopAppState-hasStarted', {
+        reqid,
+        firstStartApp: false,
+      });
+    })
   }
 
   createWindow(options: Partial<TabbedBrowserWindowOptions>) {
@@ -408,28 +467,7 @@ class Browser {
       ...options,
       webuiExtensionId: this.webuiExtensionId,
       extensions: this.extensions,
-      window: {
-        ...FRAME_DEFAULT_SIZE,
-        ...FRAME_MAX_SIZE,
-        ...FRAME_MIN_SIZE,
-        width: FRAME_MIN_SIZE.minWidth,
-        height: FRAME_MIN_SIZE.minHeight,
-        frame: false,
-        icon: getMainPlatform() === 'darwin' ? getAssetPath('icons/256x256.png') : getAssetPath('icon.ico'),
-        resizable: true,
-        fullscreenable: true,
-        ...options.window,
-        webPreferences: {
-          // sandbox: true,
-          sandbox: false,
-          nodeIntegration: false,
-          // enableRemoteModule: false,
-          contextIsolation: true,
-          // worldSafeExecuteJavaScript: true,
-          ...options.window?.webPreferences,
-          devTools: !IS_RUNTIME_PRODUCTION,
-        },
-      },
+      window: getBrowserWindowOpts(options.window),
     });
     this.windows.push(win);
 

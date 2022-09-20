@@ -7,9 +7,17 @@ import {
 
 type ITabOptions = {
   tabs: Tabs;
-  hasNavigationBar?: boolean;
+  topbarStacks?: {
+    tabs?: boolean;
+    navigation?: boolean;
+  };
   initialUrl?: string;
 };
+
+const DEFAULT_TOPBAR_STACKS = {
+  tabs: true,
+  navigation: true,
+}
 export class Tab {
   id: BrowserView['webContents']['id'];
 
@@ -21,7 +29,7 @@ export class Tab {
 
   webContents?: BrowserView['webContents'];
 
-  hasNavigationBar?: boolean;
+  topbarStacks: ITabOptions['topbarStacks'] = { ...DEFAULT_TOPBAR_STACKS };
 
   destroyed: boolean = false;
 
@@ -29,7 +37,7 @@ export class Tab {
 
   constructor(
     parentWindow: BrowserWindow,
-    { tabs, hasNavigationBar = true, initialUrl }: ITabOptions
+    { tabs, topbarStacks, initialUrl }: ITabOptions
   ) {
     this.tabs = tabs;
     this.view = new BrowserView();
@@ -37,8 +45,9 @@ export class Tab {
     this.window = parentWindow;
     this.webContents = this.view.webContents;
     this.window.addBrowserView(this.view);
-    this.hasNavigationBar = !!hasNavigationBar;
     this.initialUrl = initialUrl || '';
+
+    this.topbarStacks = {...DEFAULT_TOPBAR_STACKS, ...topbarStacks};
 
     const onClose = (
       _: Electron.IpcMainEvent,
@@ -97,7 +106,11 @@ export class Tab {
   show() {
     const [width, height] = this.window!.getSize();
 
-    const topbarHeight = this.hasNavigationBar
+    const hideTopbar = !this.topbarStacks?.tabs && !this.topbarStacks?.navigation;
+    const hasNavigationBar = !!this.topbarStacks?.navigation;
+
+    const topbarHeight = hideTopbar
+      ? 0 : hasNavigationBar
       ? NATIVE_HEADER_WITH_NAV_H
       : NATIVE_HEADER_H;
 

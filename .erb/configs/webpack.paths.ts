@@ -21,26 +21,41 @@ const distShellPath = path.join(rootPath, 'assets/desktop_shell');
 
 const buildPath = path.join(releasePath, 'build');
 
-const rendererEntries = [
-  {
-    name: 'renderer',
-    target: 'index.html',
-    htmlFile: path.join(srcRendererPath, `index.ejs`)
+const rendererEntries = {
+  'home': {
+    name: 'home',
+    target: 'home.html',
+    htmlFile: path.join(srcRendererPath, `index.ejs`),
+    jsEntry: path.join(srcRendererPath, 'index.tsx'),
   },
-] as const;
+  'splash': {
+    name: 'splash',
+    target: 'splash.html',
+    htmlFile: path.join(srcRendererPath, `splash.ejs`),
+    jsEntry: path.join(srcRendererPath, 'splash.tsx'),
+  },
+  'getting-started': {
+    name: 'getting-started',
+    target: 'getting-started.html',
+    htmlFile: path.join(srcRendererPath, `pages/getting-started.ejs`),
+    jsEntry: path.join(srcRendererPath, 'pages/getting-started.tsx'),
+  },
+} as const;
 
-const shellEntries = [
-  {
+const shellEntries = {
+  'shell-webui': {
     name: 'shell-webui',
     target: 'shell-webui.html',
-    htmlFile: path.join(srcRendererPath, `shell-webui.ejs`)
+    htmlFile: path.join(srcRendererPath, `shell-webui.ejs`),
+    jsEntry: path.join(srcRendererPath, 'shell-webui.tsx'),
   },
-  {
+  'shell-new-tab': {
     name: 'shell-new-tab',
     target: 'shell-new-tab.html',
-    htmlFile: path.join(srcRendererPath, `shell-new-tab.ejs`)
-  }
-] as const;
+    htmlFile: path.join(srcRendererPath, `shell-new-tab.ejs`),
+    jsEntry: path.join(srcRendererPath, 'shell-new-tab.tsx'),
+  },
+} as const;
 
 export default {
   rootPath,
