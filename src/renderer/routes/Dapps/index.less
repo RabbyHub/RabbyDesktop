@@ -1,4 +1,5 @@
-@import "../../css//vars.less";
+// @import '../../css//vars.less';
+// @import '../../css/mixins.less';
 
 @scrollbar-w: 8px;
 @scrollbar-max-w: 10px;
@@ -9,7 +10,7 @@
 
 .hover-wider-scollbar() {
   &::-webkit-scrollbar {
-    transition: width .3s;
+    transition: width 0.3s;
   }
   &:hover::-webkit-scrollbar {
     width: @scrollbar-max-w;
@@ -18,12 +19,12 @@
 
 ::-webkit-scrollbar-thumb {
   border-radius: 1em;
-  background-color: rgba(var(--color-comment1-rgb), .5);
+  background-color: rgba(var(--color-comment1-rgb), 0.5);
 }
 
 ::-webkit-scrollbar-track {
   border-radius: 1em;
-  background-color: rgba(var(--color-comment2-rgb), .5);
+  background-color: rgba(var(--color-comment2-rgb), 0.5);
 }
 
 .scrollbar-hover-style() {
@@ -53,20 +54,39 @@
 }
 
 #homepage {
+  background: linear-gradient(
+    180deg,
+    rgba(242, 249, 255, 0.096) 50%,
+    rgba(236, 246, 255, 0.64) 100%
+  );
+  height: 100%;
+  overflow: overlay;
+}
+
+.page-content {
   @header-h: 28px;
   @footer-h: 60px;
   @main-padding-v: 20px;
-  overflow: overlay;
+  // overflow: overlay;
 
-  padding: 0 @HOME_PADDING;
+  // padding: 0 @HOME_PADDING;
   padding-top: 56px;
   width: 100%;
   height: 100%;
   box-sizing: border-box;
 
-  > * {
-    .row-full-flex();
+  width: 1038px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  main {
+    flex: 1;
   }
+
+  // > * {
+  //   .row-full-flex();
+  // }
 
   header {
     height: @header-h;
@@ -83,7 +103,7 @@
 
   main {
     @center-h-offset: @header-h + @main-padding-v + @footer-h;
-    min-height: calc(100% - @center-h-offset);
+    // min-height: calc(100% - @center-h-offset);
 
     padding: @main-padding-v 0;
 
@@ -93,13 +113,17 @@
   }
 
   footer {
-    flex-shrink: 0;
     height: @footer-h;
     box-sizing: border-box;
-
-    justify-content: space-between;
-    padding-top: 8px;
     border-top: 1px solid var(--color-line);
+    padding-top: 8px;
+
+    .container {
+      display: flex;
+      align-items: center;
+
+      justify-content: space-between;
+    }
   }
 
   img.logo {
@@ -117,22 +141,48 @@
   }
 }
 
+@media screen and (min-width: 1600px) {
+  .page-content {
+    width: 1392px;
+  }
+}
+
+@media screen and (min-width: 1920px) {
+  .page-content {
+    width: 1746px;
+  }
+}
+
 .dapps {
   user-select: none;
   .dapp-matrix {
     display: flex;
     flex-wrap: wrap;
-    margin-left: -24px;
+    gap: 24px;
   }
 
-  .dapp-block-wrapper {
-    width: (1 / 3) * 100%;
-    max-width: 330px;
-    box-sizing: border-box;
-    padding-left: 24px;
-    padding-bottom: 24px;
+  // &.J_add
 
-    &.J_add .dapp-block {
+  .dapp-block {
+    position: relative;
+    cursor: pointer;
+    width: 330px;
+
+    background: rgba(134, 151, 255, 0.2);
+    border-radius: 8px;
+
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 24px;
+
+    .dapp-favicon {
+      width: 52px;
+      height: 52px;
+      margin-right: 16px;
+    }
+
+    &.is-add {
       cursor: pointer;
       justify-content: flex-start;
 
@@ -149,28 +199,6 @@
     }
   }
 
-  .dapp-block {
-    position: relative;
-    cursor: pointer;
-    width: 100%;
-    box-sizing: border-box;
-    height: 100px;
-
-    background: rgba(134, 151, 255, 0.2);
-    border-radius: 8px;
-
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    padding: 24px;
-
-    .dapp-favicon {
-      width: 52px;
-      height: 52px;
-      margin-right: 16px;
-    }
-  }
-
   .dapp-block .anchor {
     width: 100%;
     height: 100%;
@@ -179,13 +207,20 @@
     align-items: center;
   }
 
+  .trancute {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
   .dapp-block .anchor .infos {
+    overflow: hidden;
     .dapp-alias {
       font-weight: 700;
       font-size: 18px;
       line-height: 21px;
       color: var(--color-title);
       margin-bottom: 0;
+      .trancute;
     }
     .dapp-url {
       font-style: normal;
@@ -193,6 +228,7 @@
       font-size: 14px;
       line-height: 16px;
       color: var(--color-paragraph);
+      .trancute;
     }
 
     .dapp-alias + .dapp-url {

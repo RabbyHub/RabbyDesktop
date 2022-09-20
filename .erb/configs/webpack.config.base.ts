@@ -28,15 +28,15 @@ const configuration: webpack.Configuration = {
                 tsImportPluginFactory([
                   {
                     libraryName: 'antd',
-                    style: true,
+                    style: false,
                     // libraryDirectory: 'es'
-                  }
-                ])
+                  },
+                ]),
               ],
             }),
             compilerOptions: {
-              module: 'es2015'
-            }
+              module: 'es2015',
+            },
           },
         },
       },

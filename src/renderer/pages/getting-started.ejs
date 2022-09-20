@@ -1,18 +1,19 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta http-equiv="Content-Security-Policy" content="
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
       default-src rabby-internal: 'self' 'unsafe-inline' http: https: ws: wss:;
       script-src rabby-internal: 'self' 'unsafe-inline' http: https: ws: wss:;
-    ">
+    "
+    />
     <title>Rabby Wallet Desktop</title>
     <style>
-      .splash-background {
-        width: 100%;
-        height: 100%;
-        display: block;
-        -webkit-user-select: none;
-        -webkit-app-region: drag;
+      body {
+        background: url('rabby-internal://assets/icons/common/logo-op-30.svg')
+            no-repeat bottom 74px right 94px,
+          linear-gradient(97.59deg, #7b9cff 0%, #786cff 99.49%);
       }
     </style>
   </head>
