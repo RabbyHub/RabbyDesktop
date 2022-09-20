@@ -1,6 +1,7 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import classnames from 'classnames';
-import { Input, Modal, ModalProps, Button, message } from 'antd';
+import { Input, Modal, ModalProps, Button, message, Form } from 'antd';
+import { ExclamationCircleFilled } from '@ant-design/icons';
 
 import { useDapps } from 'renderer/hooks/usePersistData';
 import styles from './index.module.less';
@@ -8,7 +9,7 @@ import { isValidDappAlias } from '../../../isomorphic/dapp';
 import { IS_RUNTIME_PRODUCTION } from '../../../isomorphic/constants';
 import { RCIconDappsModalClose } from '../../../../assets/icons/internal-homepage';
 
-type IStep = 'add' | 'checked';
+type IStep = 'add' | 'checked' | 'duplicated';
 
 const UNISWAP_INFO = {
   faviconUrl: 'rabby-internal://assets/icons/samples/icon-sample-uniswap.svg',
@@ -97,6 +98,7 @@ export default function ModalAddDapp({
     onAddedDapp?: () => void;
   }
 >) {
+  const { open } = modalProps;
   const [step, setStep] = useState<IStep>('add');
 
   const { addUrl, onChangeAddUrl, isValidAddUrl, isCheckingUrl, checkUrl } =
@@ -118,36 +120,50 @@ export default function ModalAddDapp({
     }
   }, [checkUrl, setDappInfo]);
 
+  useEffect(() => {
+    if (!open) {
+      setStep('add');
+    }
+  }, [open]);
+
+  // todo
+  const dapp: any = { ...UNISWAP_INFO, alias: 'abc' };
+
   return (
     <Modal
+      width={800}
       centered
       {...modalProps}
       title={null}
       footer={null}
       closeIcon={<RCIconDappsModalClose />}
-      className={classnames(styles.modal, modalProps.className)}
+      className={classnames(styles.addModal, modalProps.className)}
       wrapClassName={classnames('modal-dapp-mngr', modalProps.wrapClassName)}
     >
       {step === 'add' && (
-        <div className={styles.stepAdd}>
+        <Form className={styles.stepAdd} onFinish={doCheck}>
           <h3 className={styles.addTitle}>Enter or copy the Dapp URL</h3>
-          <Input
-            className={styles.addUrlInput}
-            value={addUrl}
-            onChange={onChangeAddUrl}
-            placeholder="https://somedapp.xyz"
-          />
+          <Form.Item name="url" rules={[{ required: true }]}>
+            <Input
+              className={styles.addUrlInput}
+              value={addUrl}
+              onChange={onChangeAddUrl}
+              placeholder="https://somedapp.xyz"
+              allowClear
+            />
+          </Form.Item>
           <Button
             loading={isCheckingUrl}
             type="primary"
+            htmlType="submit"
             disabled={!isValidAddUrl}
             className={styles.addConfirmBtn}
-            onClick={doCheck}
           >
             Check
           </Button>
-        </div>
+        </Form>
       )}
+
       {step === 'checked' && (
         <div className={styles.stepChecked}>
           <img
@@ -162,6 +178,7 @@ export default function ModalAddDapp({
             value={dappInfo.alias}
             onChange={onChangeDappAlias}
             placeholder="Please name the dapp"
+            allowClear
           />
           <Button
             type="primary"
@@ -172,6 +189,36 @@ export default function ModalAddDapp({
             }}
             disabled={!isValidAlias}
           >
+            Confirm
+          </Button>
+        </div>
+      )}
+      {step === 'duplicated' && (
+        <div className={styles.stepDuplicated}>
+          <div className={styles.stepDuplicatedTips}>
+            <ExclamationCircleFilled />
+            You have added the dapp
+          </div>
+          <div className="dapp-block">
+            <a
+              className="anchor"
+              href={dapp?.url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {/* TODO: robust about load image */}
+              <img className="dapp-favicon" src={dapp?.faviconUrl} alt="add" />
+              <div className="infos">
+                <h4 className="dapp-alias" title={dapp?.alias}>
+                  {dapp?.alias}
+                </h4>
+                <div className="dapp-url" title={dapp?.url}>
+                  {dapp?.url}
+                </div>
+              </div>
+            </a>
+          </div>
+          <Button type="primary" disabled className={styles.stepDuplicatedBtn}>
             Confirm
           </Button>
         </div>

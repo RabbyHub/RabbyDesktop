@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 import React, { useRef, useState } from 'react';
-import { Menu, Dropdown, message, Row, Col } from 'antd';
+import { Menu, Dropdown, message, Row, Col, Button } from 'antd';
 
 import {
   RCIconDappsEdit,
@@ -58,7 +58,7 @@ function DAppBlock({
       </a>
       <Dropdown
         overlayClassName="dapps-dropdown-operations"
-        getPopupContainer={() => ref.current}
+        getPopupContainer={() => ref.current || document.body}
         // open
         overlay={
           <Menu
@@ -122,82 +122,80 @@ export default function DApps() {
 
   return (
     <div id="homepage">
-      <header>
-        <h2 className="title">My Dapps</h2>
-      </header>
-      <main>
-        <div className="dapps">
-          <div className="dapp-matrix">
-            <Row gutter={[24, 24]}>
+      <div className="page-content">
+        <header>
+          <h2 className="title">My Dapps</h2>
+        </header>
+        <main>
+          <div className="dapps">
+            <div className="dapp-matrix">
               {dapps.map((dapp, idx) => {
                 return (
-                  <Col span={8}>
-                    <DAppBlock
-                      /* eslint-disable-next-line react/no-array-index-key */
-                      key={`${dapp.url}-${dapp.alias}-${idx}`}
-                      dapp={dapp}
-                      onOpDapp={(op) => {
-                        switch (op) {
-                          case 'delete': {
-                            setDeletingDapp(dapp);
-                            break;
-                          }
-                          case 'rename': {
-                            setRenamingDapp(dapp);
-                            break;
-                          }
-                          default:
-                            break;
+                  <DAppBlock
+                    /* eslint-disable-next-line react/no-array-index-key */
+                    key={`${dapp.url}-${dapp.alias}-${idx}`}
+                    dapp={dapp}
+                    onOpDapp={(op) => {
+                      switch (op) {
+                        case 'delete': {
+                          setDeletingDapp(dapp);
+                          break;
                         }
-                      }}
-                    />
-                  </Col>
+                        case 'rename': {
+                          setRenamingDapp(dapp);
+                          break;
+                        }
+                        default:
+                          break;
+                      }
+                    }}
+                  />
                 );
               })}
-              <Col span={8}>
-                <DAppBlock
-                  key="J_add"
-                  onAdd={() => {
-                    setIsAdding(true);
-                  }}
-                />
-              </Col>
-            </Row>
+              <DAppBlock
+                key="J_add"
+                onAdd={() => {
+                  setIsAdding(true);
+                }}
+              />
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
 
-      <footer>
-        <img
-          className="logo"
-          src="rabby-internal://assets/icons/internal-homepage/logo.svg"
-          alt="logo"
+        <footer>
+          <div className="container">
+            <img
+              className="logo"
+              src="rabby-internal://assets/icons/internal-homepage/logo.svg"
+              alt="logo"
+            />
+            <div className="version-text">Version: {appVersion}</div>
+          </div>
+        </footer>
+        <ModalAddDapp
+          destroyOnClose
+          open={isAdding}
+          onCancel={() => setIsAdding(false)}
+          onAddedDapp={() => {
+            message.success('Added successfully');
+            setIsAdding(false);
+          }}
         />
-        <div className="version-text">Version: {appVersion}</div>
-      </footer>
-      <ModalAddDapp
-        destroyOnClose
-        open={isAdding}
-        onCancel={() => setIsAdding(false)}
-        onAddedDapp={() => {
-          message.success('Added successfully');
-          setIsAdding(false);
-        }}
-      />
-      <ModalRenameDapp
-        destroyOnClose
-        open={!!renamingDapp}
-        dapp={renamingDapp}
-        onCancel={() => setRenamingDapp(null)}
-        onRenamedDapp={() => setRenamingDapp(null)}
-      />
-      <ModalDeleteDapp
-        destroyOnClose
-        open={!!deletingDapp}
-        dapp={deletingDapp}
-        onCancel={() => setDeletingDapp(null)}
-        onDeletedDapp={() => setDeletingDapp(null)}
-      />
+        <ModalRenameDapp
+          destroyOnClose
+          open={!!renamingDapp}
+          dapp={renamingDapp}
+          onCancel={() => setRenamingDapp(null)}
+          onRenamedDapp={() => setRenamingDapp(null)}
+        />
+        <ModalDeleteDapp
+          destroyOnClose
+          open={!!deletingDapp}
+          dapp={deletingDapp}
+          onCancel={() => setDeletingDapp(null)}
+          onDeletedDapp={() => setDeletingDapp(null)}
+        />
+      </div>
     </div>
   );
 }

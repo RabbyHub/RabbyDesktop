@@ -64,12 +64,13 @@ export default function ModalRenameDapp({
 
   return (
     <Modal
+      width={560}
       centered
       {...modalProps}
       title={null}
       footer={null}
       closeIcon={<RCIconDappsModalClose />}
-      className={classnames(styles.modal, modalProps.className)}
+      className={classnames(styles.renameModal, modalProps.className)}
       wrapClassName={classnames('modal-dapp-mngr', modalProps.wrapClassName)}
     >
       <div className={styles.renameDapp}>
