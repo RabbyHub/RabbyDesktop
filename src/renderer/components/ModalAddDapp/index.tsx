@@ -40,13 +40,20 @@ function useAddStep() {
   const checkUrl = useCallback(async () => {
     setIsChecking(true);
 
-    const result = await detectDapps(addUrl);
+    try {
+      const result = await detectDapps(addUrl);
 
-    if (result.error) {
-      throw new Error(result.error.message);
+      if (result.error) {
+        message.error(result.error.message);
+      }
+
+      return result;
+    } catch (e: any) {
+      message.error(e.message);
+      return ;
+    } finally {
+      setIsChecking(false);
     }
-
-    return result;
   }, [addUrl, detectDapps]);
 
   return {
@@ -104,7 +111,7 @@ export default function ModalAddDapp({
   const doCheck = useCallback(async () => {
     const payload = await checkUrl();
 
-    if (payload.data) {
+    if (payload?.data) {
       setStep('checked');
       setDappInfo({
         alias: '',
@@ -112,8 +119,6 @@ export default function ModalAddDapp({
         faviconUrl: payload.data.faviconUrl,
         faviconBase64: payload.data.faviconBase64
       });
-    } else if (payload.error) {
-      message.error(payload.error.message);
     }
   }, [checkUrl, setDappInfo]);
 
