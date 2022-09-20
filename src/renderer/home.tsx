@@ -1,5 +1,6 @@
 /// <reference path="preload.d.ts" />
 
+import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './css/style.less';
 

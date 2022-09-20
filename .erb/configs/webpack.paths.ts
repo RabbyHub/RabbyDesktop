@@ -25,8 +25,8 @@ const rendererEntries = {
   'home': {
     name: 'home',
     target: 'home.html',
-    htmlFile: path.join(srcRendererPath, `index.ejs`),
-    jsEntry: path.join(srcRendererPath, 'index.tsx'),
+    htmlFile: path.join(srcRendererPath, `home.ejs`),
+    jsEntry: path.join(srcRendererPath, 'home.tsx'),
   },
   'splash': {
     name: 'splash',
