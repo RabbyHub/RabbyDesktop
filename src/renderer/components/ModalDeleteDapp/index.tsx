@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import classnames from 'classnames';
 import { Modal, ModalProps, Button } from 'antd';
 
-import { useDapps } from 'renderer/hooks/usePersistData';
+import { useDapps } from 'renderer/hooks/useDappsMngr';
 import styles from './index.module.less';
 import { RCIconDappsModalClose } from '../../../../assets/icons/internal-homepage';
 

@@ -7,7 +7,7 @@ import {
   RCIconDappsDelete,
 } from '../../../../assets/icons/internal-homepage';
 
-import { useDapps } from '../../hooks/usePersistData';
+import { useDapps } from '../../hooks/useDappsMngr';
 import ModalAddDapp from '../../components/ModalAddDapp';
 import ModalRenameDapp from '../../components/ModalRenameDapp';
 import ModalDeleteDapp from '../../components/ModalDeleteDapp';

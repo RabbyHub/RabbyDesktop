@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import classnames from 'classnames';
 import { Input, Modal, ModalProps, Button, message } from 'antd';
 
-import { useDapps } from 'renderer/hooks/usePersistData';
+import { useDapps } from 'renderer/hooks/useDappsMngr';
 import styles from './index.module.less';
 import { isValidDappAlias } from '../../../isomorphic/dapp';
 import { IS_RUNTIME_PRODUCTION } from '../../../isomorphic/constants';
