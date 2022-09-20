@@ -26,6 +26,7 @@ import { isRabbyShellURL, isUrlFromDapp } from '../isomorphic/url';
 
 import { dappStore } from './store/dapps';
 import { desktopAppStore } from './store/desktopApp';
+import { detectDapps } from './utils/dapps';
 
 // const pkgjson = require('../../package.json');
 
@@ -397,6 +398,15 @@ class Browser {
       });
     });
 
+    onIpcMainEvent('detect-dapp', async (event, reqid, dappUrl) => {
+      const result = await detectDapps(dappUrl);
+
+      event.reply('detect-dapp', {
+        reqid,
+        result,
+      });
+    })
+
     onIpcMainEvent('dapps-fetch', (event, reqid) => {
       event.reply('dapps-fetch', {
         reqid,
@@ -407,7 +417,7 @@ class Browser {
     onIpcMainEvent('dapps-put', (event, reqid: string, dapp: IDapp) => {
       // TODO: is there mutex?
       const allDapps = dappStore.get('dapps') || [];
-      const existedDapp = allDapps.find((d) => d.url === dapp.url);
+      const existedDapp = allDapps.find((d) => d.origin === dapp.origin);
       if (existedDapp) {
         Object.assign(existedDapp, dapp);
       } else {
@@ -424,7 +434,7 @@ class Browser {
 
     onIpcMainEvent('dapps-delete', (event, reqid: string, dapp: IDapp) => {
       const allDapps = dappStore.get('dapps') || [];
-      const idx = allDapps.findIndex((d) => d.url === dapp.url);
+      const idx = allDapps.findIndex((d) => d.origin === dapp.origin);
       if (idx > -1) {
         dappStore.set('dapps', allDapps);
         allDapps.splice(idx, 1);

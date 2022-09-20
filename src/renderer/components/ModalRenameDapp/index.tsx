@@ -79,7 +79,7 @@ export default function ModalRenameDapp({
           src={dapp?.faviconUrl}
           alt={dapp?.faviconUrl}
         />
-        <span className={styles.dappUrl}>{dapp?.url}</span>
+        <span className={styles.dappUrl}>{dapp?.origin}</span>
         <div className={styles.modifyWrapper}>
           <span
             ref={(el) => {

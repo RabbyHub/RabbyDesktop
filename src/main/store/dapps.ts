@@ -18,9 +18,11 @@ export const dappStore = new Store<{
         type: 'object',
         properties: {
           alias: { type: 'string' },
-          // stricted canonical url, only includes protocols, hostname(without port), pathname
-          url: { type: 'string' },
+          // url: { type: 'string' },
+          // stricted canonical url, only includes protocols, host(maybe with port), pathname
+          origin: { type: 'string' },
           faviconUrl: { type: 'string' },
+          faviconBase64: { type: 'string' }
         },
       },
       default: [] as IDapp[],

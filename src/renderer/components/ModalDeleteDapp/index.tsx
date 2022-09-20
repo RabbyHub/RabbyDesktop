@@ -61,7 +61,7 @@ export default function ModalDeleteDapp({
               <img className="dapp-favicon" src={dapp.faviconUrl} alt="add" />
               <div className="infos">
                 <h4 className="dapp-alias">{dapp.alias}</h4>
-                <span className="dapp-url">{dapp.url}</span>
+                <span className="dapp-url">{dapp.origin}</span>
               </div>
             </a>
           </div>

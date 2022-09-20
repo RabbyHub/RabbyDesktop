@@ -51,11 +51,11 @@ export function isUrlFromDapp (url: string) {
   return !url.startsWith(RABBY_INTERNAL_PROTOCOL) && !url.startsWith('chrome-extension://')
 }
 
-function getRootDomain (hostname: string) {
-  const parts = hostname.split('.');
+// function getRootDomain (hostname: string) {
+//   const parts = hostname.split('.');
 
-  return parts.length >= 2 ? parts.slice(-2).join('.') : null;
-}
+//   return parts.length >= 2 ? parts.slice(-2).join('.') : null;
+// }
 
 export function canoicalizeDappUrl (url: string) {
   let urlInfo: Partial<URL> | null = null;
@@ -67,12 +67,72 @@ export function canoicalizeDappUrl (url: string) {
 
   const hostname = urlInfo?.hostname || '';
   const isDapp = urlInfo?.protocol === 'https://';
-  const baseURL = isDapp ? `${urlInfo?.protocol}//${hostname}` : null;
-  const origin = getRootDomain(hostname) || hostname;
+
+  // protcol://hostname[:port]
+  const origin = `${urlInfo?.protocol}//${hostname}${urlInfo?.port ? `:${urlInfo?.port}` : ''}`;
 
   return {
+    urlInfo,
     isDapp,
-    baseURL,
     origin,
   }
+}
+
+export function hasSameOrigin(url1: string, url2: string) {
+  return canoicalizeDappUrl(url1).origin === canoicalizeDappUrl(url2).origin;
+}
+
+function removeOptionalTrailingDot(str: string, allowTrailingDot: boolean) {
+  if (allowTrailingDot && str[str.length - 1] === ".") {
+    return str.substring(0, str.length - 1);
+  }
+
+  return str;
+}
+
+/**
+ * @see https://github.com/parro-it/is-fqdn/blob/master/index.js
+ */
+export function isFQDN(
+  _str: string,
+  { requireTld = true, allowUnderscores = false, allowTrailingDot = false } = {}
+) {
+  if (typeof _str !== "string") {
+    return false;
+  }
+
+  const str = removeOptionalTrailingDot(_str, allowTrailingDot);
+  const parts = str.split(".");
+
+  if (requireTld) {
+    const tld = parts.pop();
+    if (!tld) return false;
+    if (
+      !parts.length ||
+      !/^([a-z\u00a1-\uffff]{2,}|xn[a-z0-9-]{2,})$/i.test(tld)
+    ) {
+      return false;
+    }
+  }
+
+  for (let part: string, i = 0; i < parts.length; i++) {
+    part = parts[i];
+    if (allowUnderscores) {
+      if (part.indexOf("__") >= 0) {
+        return false;
+      }
+      part = part.replace(/_/g, "");
+    }
+    if (!/^[a-z\u00a1-\uffff0-9-]+$/i.test(part)) {
+      return false;
+    }
+    if (/[\uff01-\uff5e]/.test(part)) {
+      // disallow full-width chars
+      return false;
+    }
+    if (part[0] === "-" || part[part.length - 1] === "-") {
+      return false;
+    }
+  }
+  return true;
 }

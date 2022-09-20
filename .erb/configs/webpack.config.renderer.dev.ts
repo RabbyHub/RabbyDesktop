@@ -55,6 +55,7 @@ const configuration: webpack.Configuration = {
     //   path.join(webpackPaths.srcRendererPath, 'index.tsx'),
     // ],
     ...Object.values(webpackPaths.rendererEntries).reduce((accu, cur) => {
+      // @ts-ignore
       accu[cur.name] = cur.jsEntry;
       return accu;
     }, {})

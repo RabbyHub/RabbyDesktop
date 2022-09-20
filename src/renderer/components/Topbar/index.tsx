@@ -296,7 +296,6 @@ function useSelectedTabInfo(activeTab?: ChromeTab | null) {
     const dispose = window.rabbyDesktop.ipcRenderer.on(
       'rabby-nav-info',
       (payload) => {
-        // console.log('[feat] ipcRenderer rabby-nav-info:: payload', payload);
         setSelectedTabInfo(payload);
       }
     );

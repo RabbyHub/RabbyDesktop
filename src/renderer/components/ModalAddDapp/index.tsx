@@ -21,8 +21,9 @@ type ICheckResult = {
 };
 
 function useAddStep() {
+  const { detectDapps } = useDapps();
   const [addUrl, setAddUrl] = useState(
-    IS_RUNTIME_PRODUCTION ? 'https://' : UNISWAP_INFO.url
+    IS_RUNTIME_PRODUCTION ? 'https://' : 'https://debank.com'
   );
   // const [addUrl, setAddUrl] = useState<string>(UNISWAP_INFO.url);
 
@@ -38,24 +39,14 @@ function useAddStep() {
   const checkUrl = useCallback(async () => {
     setIsChecking(true);
 
-    return new Promise<ICheckResult>((resolve) => {
-      setTimeout(() => {
-        setIsChecking(false);
-        resolve({
-          result: {
-            url: addUrl,
-            faviconUrl:
-              'rabby-internal://assets/icons/samples/icon-sample-uniswap.svg',
-          },
-          // TODO:
-          // The HTTPS protocol for this URL has expired
-          // This Dapp is inaccessible. It may be an invalid URL
-          // Dapp with protocols other than HTTPS is not supported
-          errorMessage: null,
-        });
-      }, 500);
-    });
-  }, [addUrl]);
+    const result = await detectDapps(addUrl);
+
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
+
+    return result;
+  }, [addUrl, detectDapps]);
 
   return {
     isCheckingUrl,
@@ -69,8 +60,9 @@ function useAddStep() {
 function useCheckedStep() {
   const [dappInfo, setDappInfo] = useState<IDapp>({
     alias: '',
-    url: '',
+    origin: '',
     faviconUrl: '',
+    faviconBase64: ''
   });
   const onChangeDappAlias = useCallback(
     (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,11 +102,16 @@ export default function ModalAddDapp({
   const doCheck = useCallback(async () => {
     const payload = await checkUrl();
 
-    if (payload.result) {
+    if (payload.data) {
       setStep('checked');
-      setDappInfo({ alias: '', ...payload.result });
-    } else {
-      message.error(payload.errorMessage);
+      setDappInfo({
+        alias: '',
+        origin: payload.data.origin,
+        faviconUrl: payload.data.faviconUrl,
+        faviconBase64: payload.data.faviconBase64
+      });
+    } else if (payload.error) {
+      message.error(payload.error.message);
     }
   }, [checkUrl, setDappInfo]);
 
@@ -155,7 +152,7 @@ export default function ModalAddDapp({
             src={dappInfo.faviconUrl}
             alt={dappInfo.faviconUrl}
           />
-          <span className={styles.checkedDappUrl}>{dappInfo.url}</span>
+          <span className={styles.checkedDappUrl}>{dappInfo.origin}</span>
 
           <Input
             className={styles.checkedInput}

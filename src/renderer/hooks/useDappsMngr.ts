@@ -3,6 +3,7 @@
 
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
+import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 import { randString } from '../../isomorphic/string';
 
 async function getAll() {
@@ -20,6 +21,20 @@ async function getAll() {
       }
     );
     window.rabbyDesktop.ipcRenderer.sendMessage('dapps-fetch', reqid);
+  });
+}
+
+async function detectDapps(dappUrl: string) {
+  const reqid = randString();
+
+  return new Promise<IDappsDetectResult>((resolve, reject) => {
+    const dispose = window.rabbyDesktop.ipcRenderer.on('detect-dapp', (event) => {
+      if (event.reqid === reqid) {
+        resolve(event.result);
+        dispose?.();
+      }
+    });
+    window.rabbyDesktop.ipcRenderer.sendMessage('detect-dapp', reqid, dappUrl);
   });
 }
 
@@ -95,8 +110,21 @@ export function useDapps() {
     [setDapps]
   );
 
+  useEffect(() => {
+    if (IS_RUNTIME_PRODUCTION) return ;
+    // TODO: just for test
+    ;(async () => {
+      // const result = await detectDapps('http://www.google.com');
+      // const result = await detectDapps('https://debank.com');
+      const result = await detectDapps('https://app.uniswap.org');
+
+      console.log('[feat] useDappsMngr: favicon parse result ', result);
+    })();
+  }, [])
+
   return {
     dapps: dapps || [],
+    detectDapps,
     updateDapp,
     renameDapp,
     removeDapp,

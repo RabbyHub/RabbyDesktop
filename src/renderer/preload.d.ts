@@ -41,6 +41,15 @@ type ChannelMessagePayload = {
       }
     ];
   };
+  'detect-dapp': {
+    send: [reqid: string, dappUrl: string];
+    response: [
+      {
+        reqid: string;
+        result: IDappsDetectResult
+      }
+    ]
+  };
   'dapps-fetch': {
     send: [reqid: string];
     response: [
