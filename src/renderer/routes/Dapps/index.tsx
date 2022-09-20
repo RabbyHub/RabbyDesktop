@@ -122,7 +122,13 @@ export default function DApps() {
 
   return (
     <div id="homepage">
-      <div className="page-content">
+      <div
+        className="page-content"
+        style={{
+          background:
+            "url('rabby-internal://assets/icons/common/logo-op-5.svg') no-repeat bottom 80px right",
+        }}
+      >
         <header>
           <h2 className="title">My Dapps</h2>
         </header>
