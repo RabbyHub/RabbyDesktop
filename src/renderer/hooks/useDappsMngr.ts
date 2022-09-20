@@ -60,7 +60,7 @@ async function deleteDapp(dapp: IDapp) {
       'dapps-delete',
       (event) => {
         if (event.reqid === reqid) {
-          resolve(event.dapps);
+          event.error ? reject(new Error(event.error)) : resolve(event.dapps);
           dispose?.();
         }
       }

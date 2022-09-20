@@ -73,6 +73,7 @@ type ChannelMessagePayload = {
     response: [
       {
         reqid: string;
+        error?: string;
         dapps: IDapp[];
       }
     ];

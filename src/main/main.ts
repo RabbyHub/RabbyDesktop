@@ -434,15 +434,22 @@ class Browser {
 
     onIpcMainEvent('dapps-delete', (event, reqid: string, dapp: IDapp) => {
       const allDapps = dappStore.get('dapps') || [];
-      const idx = allDapps.findIndex((d) => d.origin === dapp.origin);
+      const idx = allDapps.findIndex((d) => {
+        return d.origin === dapp.origin;
+      });
+
+      let error: string = '';
       if (idx > -1) {
-        dappStore.set('dapps', allDapps);
         allDapps.splice(idx, 1);
+        dappStore.set('dapps', allDapps);
+      } else {
+        error = 'Not found';
       }
 
       event.reply('dapps-delete', {
         reqid,
         dapps: allDapps,
+        error,
       });
     });
 
