@@ -18,6 +18,7 @@ export default function GettingStarted() {
         <div className="slogan">Rabby Wallet Desktop</div>
       </div>
       <Button
+        className='btn-start'
         onClick={() => {
           putHasStarted();
           redirectToMainWindow();
