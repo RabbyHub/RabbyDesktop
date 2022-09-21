@@ -110,6 +110,7 @@
     }
   },
   "dependencies": {
+    "@debank/parse-favicon": "^0.1.0",
     "@rabby-wallet/electron-chrome-extensions": "^3.9.5",
     "@types/chrome": "^0.0.196",
     "@types/sortablejs": "^1.13.0",
@@ -121,7 +122,6 @@
     "electron-tabs": "^1.0.1",
     "electron-updater": "^5.2.1",
     "jotai": "^1.8.3",
-    "parse-favicon": "^5.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.3.0",

@@ -1,5 +1,5 @@
 import url from 'url';
-import { Icon as IconInfo, parseFavicon } from 'parse-favicon';
+import { Icon as IconInfo, parseFavicon } from '@debank/parse-favicon';
 import { net } from 'electron';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 

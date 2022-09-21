@@ -15,7 +15,7 @@ type IDappsDetectResult<T extends string = string> = {
   data: null | {
     urlInfo: Partial<URL> | null;
     origin: string;
-    icon: import('parse-favicon').Icon;
+    icon: import('@debank/parse-favicon').Icon;
     faviconUrl: string;
     faviconBase64?: string; // base64
   }
