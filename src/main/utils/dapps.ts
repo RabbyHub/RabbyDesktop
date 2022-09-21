@@ -1,14 +1,20 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 
+import { Subject, firstValueFrom, of } from 'rxjs';
+import { timeout, catchError } from 'rxjs/operators';
 import url from 'url';
-import { canoicalizeDappUrl, isFQDN } from '../../isomorphic/url';
+
+import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { parseWebsiteFavicon } from './fetch';
 import { BrowserView } from 'electron';
+
+const DFLT_TIMEOUT = 8 * 1e3;
 
 const enum DETECT_ERR_CODES {
   NOT_HTTPS = 'NOT_HTTPS',
   INACCESSIBLE = 'INACCESSIBLE',
   HTTPS_CERT_INVALID = 'HTTPS_CERT_INVALID',
+  TIMEOUT = 'TIMEOUT',
 }
 
 const enum CHROMIUM_LOADURL_ERR_CODE {
@@ -31,18 +37,10 @@ const enum CHROMIUM_LOADURL_ERR_CODE {
 type CHROMIUM_NET_ERR_DESC = `net::${CHROMIUM_LOADURL_ERR_CODE}`
   | `net::ERR_CONNECTION_CLOSED`
 
-function getInaccessibleResult() {
-  return {
-    data: null,
-    error: {
-      type: DETECT_ERR_CODES.INACCESSIBLE,
-      message: 'This Dapp is inaccessible. It may be an invalid URL'
-    }
-  }
-};
-
 // TODO: use RxJS to handle multiple events
-async function checkUrlViaBrowserView (dappUrl: string) {
+async function checkUrlViaBrowserView (dappUrl: string, opts?: {
+  timeout?: number,
+}) {
   const view = new BrowserView({
     webPreferences: {
       sandbox: true,
@@ -52,51 +50,59 @@ async function checkUrlViaBrowserView (dappUrl: string) {
 
   type Result = {
     valid: boolean
+    isTimeout?: boolean
     errorDesc?: CHROMIUM_LOADURL_ERR_CODE | string
     certErrorDesc?: CHROMIUM_NET_ERR_DESC
   };
 
-  let res: Result = { valid: false };
+  const checkResult = new Subject<Result>();
 
-  // TODO: add timeout mechanism
-  return new Promise<Result>((resolve, reject) => {
-    try {
-      view.webContents.loadURL(dappUrl);
+  view.webContents.on('did-finish-load', () => {
+    checkResult.next({
+      valid: true
+    })
+  });
 
-      view.webContents.on('did-finish-load', () => {
-        resolve({
-          ...res,
-          valid: true
-        })
+  view.webContents.on('did-fail-load', (_, errorCode, errorDesc, validatedURL) => {
+    if (errorDesc === CHROMIUM_LOADURL_ERR_CODE.ERR_NAME_NOT_RESOLVED) {
+      checkResult.next({
+        valid: false,
+        errorDesc: errorDesc
       });
-
-      view.webContents.on('did-fail-load', (_, errorCode, errorDesc, validatedURL) => {
-        if (errorDesc === CHROMIUM_LOADURL_ERR_CODE.ERR_NAME_NOT_RESOLVED) {
-          resolve({
-            valid: false,
-            errorDesc: errorDesc
-          });
-        } else if (errorDesc.startsWith('ERR_CERT_')) {
-          // wait for 'certificate-error' event
-        } else {
-          resolve({
-            valid: false,
-            errorDesc: errorDesc
-          });
-        }
+    } else if (errorDesc.startsWith('ERR_CERT_')) {
+      // wait for 'certificate-error' event
+    } else {
+      checkResult.next({
+        valid: false,
+        errorDesc: errorDesc
       });
-
-      view.webContents.on('certificate-error', (_, url, cert) => {
-        resolve({
-          valid: false,
-          errorDesc: cert.slice('net::'.length),
-          certErrorDesc: cert as CHROMIUM_NET_ERR_DESC,
-        });
-      });
-    } catch (e) {
-      reject(e);
     }
-  }).finally(() => {
+  });
+
+  view.webContents.on('certificate-error', (_, url, cert) => {
+    checkResult.next({
+      valid: false,
+      errorDesc: cert.slice('net::'.length),
+      certErrorDesc: cert as CHROMIUM_NET_ERR_DESC,
+    });
+  });
+
+  view.webContents.loadURL(dappUrl);
+
+  let obs = checkResult.asObservable();
+  const { timeout: duration = DFLT_TIMEOUT } = opts || {};
+  if (duration && duration > 0) {
+    obs = obs.pipe(
+      timeout(duration),
+      catchError(() => of({
+        valid: false,
+        isTimeout: true,
+      }))
+    );
+  }
+
+  return firstValueFrom(obs).finally(() => {
+    checkResult.complete();
     // undocumented behaviors
     (view.webContents as any)?.destroyed?.();
     (view as any)?.destroyed?.();
@@ -133,7 +139,23 @@ export async function detectDapps(
       }
     };
   } else if (!checkResult.valid) {
-    return getInaccessibleResult();
+    if (checkResult.isTimeout) {
+      return {
+        data: null,
+        error: {
+          type: DETECT_ERR_CODES.TIMEOUT,
+          message: 'Checking the Dapp timed out, please try again later'
+        }
+      };
+    }
+
+    return {
+      data: null,
+      error: {
+        type: DETECT_ERR_CODES.INACCESSIBLE,
+        message: 'This Dapp is inaccessible. It may be an invalid URL'
+      }
+    };
   }
 
   const { iconInfo, faviconUrl, faviconBase64 } = await parseWebsiteFavicon(origin);
