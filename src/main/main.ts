@@ -317,13 +317,17 @@ class Browser {
       mainWin.window.moveTop();
     };
 
-    const splashWin = new BrowserWindow({
-      ...getBrowserWindowOpts(),
+    const splashWin = new BrowserWindow(getBrowserWindowOpts({
+      width: 500,
+      height: 300,
+      minHeight: undefined,
+      minWidth: undefined,
+      resizable: false,
       transparent: true,
       frame: false,
       alwaysOnTop: true,
-    });
-    splashWin.webContents.loadURL(`${RABBY_SPALSH_URL}`);
+    }, { zeroMinSize: true }));
+    splashWin.webContents.loadURL(RABBY_SPALSH_URL);
 
     let gettingStartedWin: BrowserWindow | null = null;
 

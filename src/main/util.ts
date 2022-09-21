@@ -65,18 +65,23 @@ function getWindowIconOpts (): {
   }
 }
 
-export function getBrowserWindowOpts(opts?: Electron.BrowserWindowConstructorOptions): Electron.BrowserWindowConstructorOptions {
+export function getBrowserWindowOpts(
+  windowOpts?: Electron.BrowserWindowConstructorOptions,
+  opts?: { zeroMinSize?: boolean }
+): Electron.BrowserWindowConstructorOptions {
+  const isPopup = windowOpts?.type === 'popup';
+
   return {
     ...FRAME_DEFAULT_SIZE,
     ...FRAME_MAX_SIZE,
-    ...FRAME_MIN_SIZE,
+    ...!isPopup && !opts?.zeroMinSize ? FRAME_MIN_SIZE : {},
     width: FRAME_MIN_SIZE.minWidth,
     height: FRAME_MIN_SIZE.minHeight,
     frame: false,
     icon: getWindowIconOpts().icon,
     resizable: true,
     fullscreenable: true,
-    ...opts,
+    ...windowOpts,
     webPreferences: {
       // sandbox: true,
       sandbox: false,
@@ -85,7 +90,7 @@ export function getBrowserWindowOpts(opts?: Electron.BrowserWindowConstructorOpt
       contextIsolation: true,
       // worldSafeExecuteJavaScript: true,
       devTools: !IS_RUNTIME_PRODUCTION,
-      ...opts?.webPreferences
+      ...windowOpts?.webPreferences
     },
   }
 }
