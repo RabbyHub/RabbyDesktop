@@ -1,9 +1,13 @@
 import { Menu } from 'electron';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 
-export const setupMenu = (
+export const setupMenu = ({
+  getFocusedWebContents,
+  topbarExtId
+} : {
   getFocusedWebContents: () => Electron.WebContents | void,
-) => {
+  topbarExtId: string,
+}) => {
   const isMac = process.platform === 'darwin';
 
   const template = [
@@ -26,10 +30,18 @@ export const setupMenu = (
           click: () => getFocusedWebContents()?.reloadIgnoringCache(),
         },
         !IS_RUNTIME_PRODUCTION ? {
-          label: 'Toggle Developer Tool asdf',
+          label: 'Toggle Developer Tool',
           accelerator: isMac ? 'Alt+Command+I' : 'Ctrl+Shift+I',
           nonNativeMacOSRole: true,
-          click: () => getFocusedWebContents()?.toggleDevTools(),
+          click: () => {
+            const win = getFocusedWebContents();
+            if (!win) return ;
+            if (!win.isDevToolsOpened() && win.getURL().includes(`chrome-extension://${topbarExtId}`)) {
+              win.openDevTools({ mode: 'detach' });
+            } else {
+              win.toggleDevTools()
+            }
+          },
         } : null,
         { type: 'separator' },
         { role: 'resetZoom' },

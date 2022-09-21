@@ -188,8 +188,11 @@ class Browser {
     this.initSession();
 
     set_menu_and_icons: {
-      setupMenu(() => {
-        return this.getFocusedWindow().getFocusedTab()?.webContents;
+      setupMenu({
+        getFocusedWebContents: () => {
+          return this.getFocusedWindow().getFocusedTab()?.webContents;
+        },
+        topbarExtId: this.webuiExtensionId,
       });
 
       if (getMainPlatform() === 'darwin') {
@@ -233,6 +236,10 @@ class Browser {
         });
 
         if (details.url) tab.loadURL(details.url);
+        else if (!IS_RUNTIME_PRODUCTION) {
+          tab.loadURL(getShellPageUrl('debug-new-tab', this.webuiExtensionId));
+        }
+
         if (typeof details.active === 'boolean' ? details.active : true)
           win.tabs.select(tab.id);
 
@@ -556,6 +563,10 @@ class Browser {
             }
           }
         },
+      }, {
+        isUrlNeedDevToolsDetached: (url) => {
+          return url.includes(`chrome-extension://${this.webuiExtensionId}`)
+        }
       });
 
       menu.popup();

@@ -290,16 +290,16 @@ function useTopbar() {
 
 function useSelectedTabInfo(activeTab?: ChromeTab | null) {
   const [selectedTabInfo, setSelectedTabInfo] =
-    useState<ChannelMessagePayload['rabby-nav-info']['response'][0]>();
+    useState<ChannelMessagePayload['webui-ext-navinfo']['response'][0]>();
   useEffect(() => {
     if (!activeTab?.id) return;
     const dispose = window.rabbyDesktop.ipcRenderer.on(
-      'rabby-nav-info',
+      'webui-ext-navinfo',
       (payload) => {
         setSelectedTabInfo(payload);
       }
     );
-    window.rabbyDesktop.ipcRenderer.sendMessage('rabby-nav-info', activeTab.id);
+    window.rabbyDesktop.ipcRenderer.sendMessage('webui-ext-navinfo', activeTab.id);
 
     return () => dispose?.();
   }, [activeTab?.id, activeTab?.url]);
