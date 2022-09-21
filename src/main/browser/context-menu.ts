@@ -70,7 +70,14 @@ interface ChromeContextMenuOptions {
   strings?: ChromeContextMenuLabels
 }
 
-export const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
+export const buildChromeContextMenu = (
+  opts: ChromeContextMenuOptions,
+  {
+    isUrlNeedDevToolsDetached
+  }: {
+    isUrlNeedDevToolsDetached: (url: string) => boolean
+  }
+): Menu => {
   const { params, webContents, openLink, extensionMenuItems } = opts
 
   const labels = opts.labels || opts.strings || LABELS
@@ -237,7 +244,12 @@ export const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => 
     append({
       label: labels.inspect,
       click: () => {
-        webContents.inspectElement(params.x, params.y)
+        if (webContents && !webContents.isDevToolsOpened() && isUrlNeedDevToolsDetached(webContents.getURL())) {
+          webContents.openDevTools({ mode: 'detach' });
+          webContents.inspectElement(params.x, params.y)
+        } else {
+          webContents.inspectElement(params.x, params.y)
+        }
 
         if (!webContents.isDevToolsFocused()) {
           webContents.devToolsWebContents?.focus()
