@@ -1,5 +1,5 @@
 const { notarize } = require('electron-notarize');
-const { appId } = require('../../electron-builder');
+const { appId } = require('../../electron-builder.config');
 
 exports.default = async function notarizeMacos(context) {
   const { electronPlatformName, appOutDir } = context;
