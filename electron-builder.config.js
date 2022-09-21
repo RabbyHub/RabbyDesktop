@@ -43,6 +43,10 @@ module.exports = {
       "nsis"
     ]
   },
+  "nsis": {
+    "artifactName": "rabby-wallet-desktop.setup.${version}.${ext}",
+    "uninstallDisplayName": "Rabby Wallet"
+  },
   "linux": {
     "target": [
       "AppImage"
