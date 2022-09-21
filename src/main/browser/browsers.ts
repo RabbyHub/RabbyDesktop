@@ -1,6 +1,7 @@
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
-import { BrowserWindow, ipcMain, session } from 'electron';
+import { BrowserWindow, session } from 'electron';
 import { integrateQueryToUrl } from '../../isomorphic/url';
+import { onIpcMainEvent } from '../utils/ipcMainEvents';
 import { Tab, Tabs } from './tabs';
 
 export type TabbedBrowserWindowOptions = {
@@ -73,12 +74,12 @@ export default class TabbedBrowserWindow {
       this.extensions.selectTab(tab.webContents!);
     });
 
-    ipcMain.on('rabby-nav-info', async (event, tabId: number) => {
+    onIpcMainEvent('webui-ext-navinfo', async (event, tabId) => {
       const tab = this.tabs.get(tabId);
       // const tab = this.tabs.selected;
       if (!tab) return;
 
-      event.reply('rabby-nav-info', {
+      event.reply('webui-ext-navinfo', {
         tabExists: !!tab,
         canGoBack: tab?.webContents?.canGoBack(),
         canGoForward: tab?.webContents?.canGoForward(),

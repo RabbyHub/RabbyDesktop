@@ -15,7 +15,7 @@ type ChannelMessagePayload = {
       }
     ];
   };
-  'rabby-nav-info': {
+  'webui-ext-navinfo': {
     send: [tabId: number];
     response: [
       {
@@ -98,6 +98,10 @@ type ChannelMessagePayload = {
         reqid: string
       }
     ]
+  },
+  '__internal_webui-window-close': {
+    send: [ winId: number, webContentsId: number ],
+    response: []
   }
 };
 

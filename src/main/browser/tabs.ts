@@ -5,6 +5,7 @@ import {
   NATIVE_HEADER_WITH_NAV_H,
 } from '../../isomorphic/const-size';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
+import { onIpcMainEvent } from '../utils/ipcMainEvents';
 
 type ITabOptions = {
   tabs: Tabs;
@@ -48,28 +49,24 @@ export class Tab {
     this.window.addBrowserView(this.view);
     this.initialUrl = initialUrl || '';
 
-    this.topbarStacks = {...DEFAULT_TOPBAR_STACKS, ...topbarStacks};
+    this.topbarStacks = {...DEFAULT_TOPBAR_STACKS, ...topbarStacks};;
 
-    const onClose = (
-      _: Electron.IpcMainEvent,
-      winId: Exclude<this['window'], void>['id'],
-      webContentsId: Exclude<this['webContents'], void>['id']
-    ) => {
+    const dispose = onIpcMainEvent('__internal_webui-window-close', ( _, winId, webContentsId,) => {
       if (winId === this.window?.id && this.webContents?.id === webContentsId) {
         this.destroy();
       }
-      ipcMain.off('webui-window-close', onClose);
-    };
+      dispose();
+    });
 
-    ipcMain.on('webui-window-close', onClose);
-
-    // TODO: only inject it for tab in extensions
     this.webContents?.executeJavaScript(`
-      var origWinClose = window.close.bind(window);
-      window.close = function (...args) {
-        window.rabbyDesktop.ipcRenderer.sendMessage('webui-window-close', ${this.window?.id}, ${this.webContents.id});
-        origWinClose(args);
-      }
+      ;(function () {
+        if (window.location.protocol !== 'chrome-extension:') return ;
+        var origWinClose = window.close.bind(window);
+        window.close = function (...args) {
+          window.rabbyDesktop.ipcRenderer.sendMessage('__internal_webui-window-close', ${this.window?.id}, ${this.webContents.id});
+          origWinClose(args);
+        }
+      })();
     `);
   }
 

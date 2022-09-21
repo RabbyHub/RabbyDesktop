@@ -111,18 +111,6 @@ export function useDapps() {
     [setDapps]
   );
 
-  useEffect(() => {
-    if (IS_RUNTIME_PRODUCTION) return ;
-    // TODO: just for test
-    ;(async () => {
-      // const result = await detectDapps('http://www.google.com');
-      // const result = await detectDapps('https://debank.com');
-      const result = await detectDapps('https://app.uniswap.org');
-
-      console.log('[feat] useDappsMngr: favicon parse result ', result);
-    })();
-  }, [])
-
   return {
     dapps: dapps || [],
     detectDapps,
