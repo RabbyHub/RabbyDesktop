@@ -344,6 +344,7 @@ class Browser {
           ...getBrowserWindowOpts(),
           transparent: true,
           frame: false,
+          resizable: false,
         });
         gettingStartedWin.webContents.loadURL(RABBY_GETTING_STARTED_URL);
       } else {
