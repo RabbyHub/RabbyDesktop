@@ -24,7 +24,7 @@ import {
 } from '../isomorphic/constants';
 import { isRabbyShellURL, isUrlFromDapp } from '../isomorphic/url';
 
-import { dappStore } from './store/dapps';
+import { dappStore, formatDapps } from './store/dapps';
 import { desktopAppStore } from './store/desktopApp';
 import { detectDapps } from './utils/dapps';
 import { getWebuiExtId } from './streams/webui';
@@ -423,13 +423,13 @@ class Browser {
     onIpcMainEvent('dapps-fetch', (event, reqid) => {
       event.reply('dapps-fetch', {
         reqid,
-        dapps: dappStore.get('dapps'),
+        dapps: formatDapps(dappStore.get('dapps')),
       });
     })
 
     onIpcMainEvent('dapps-put', (event, reqid: string, dapp: IDapp) => {
       // TODO: is there mutex?
-      const allDapps = dappStore.get('dapps') || [];
+      const allDapps = formatDapps(dappStore.get('dapps'));
       const existedDapp = allDapps.find((d) => d.origin === dapp.origin);
       if (existedDapp) {
         Object.assign(existedDapp, dapp);

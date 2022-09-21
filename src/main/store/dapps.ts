@@ -3,6 +3,7 @@
 import { app } from 'electron';
 import Store from 'electron-store';
 import { APP_NAME, PERSIS_STORE_PREFIX } from '../../isomorphic/constants';
+import { safeParse, shortStringify } from '../../isomorphic/json';
 
 export const dappStore = new Store<{
   dapps: IDapp[];
@@ -18,7 +19,6 @@ export const dappStore = new Store<{
         type: 'object',
         properties: {
           alias: { type: 'string' },
-          // url: { type: 'string' },
           // stricted canonical url, only includes protocols, host(maybe with port), pathname
           origin: { type: 'string' },
           faviconUrl: { type: 'string' },
@@ -36,9 +36,34 @@ export const dappStore = new Store<{
   // TODO: if want to obfuscat, uncomment it
   // encryptionKey: 'rabby-desktop'
 
-  // TODO: if you want to customize the searializer, uncomment it
-  // serialize: (data) => JSON.stringify(value, null, '\t')
-  // deserialize: JSON.parse
+  serialize: shortStringify,
+
+  deserialize: (data) => safeParse(data, {}),
 
   watch: true,
 });
+
+export function formatDapp (input: any) {
+  if (!input?.origin) return null
+
+  return {
+    alias: input?.alias || '',
+    origin: input.origin,
+    faviconUrl: input?.faviconUrl || '',
+    faviconBase64: input?.faviconBase64 || '',
+  };
+}
+
+export function formatDapps(input = dappStore.get('dapps')): IDapp[] {
+  if (!Array.isArray(input)) return [];
+
+  const result: IDapp[] = [];
+
+  input.forEach(item => {
+    const f = formatDapp(item);
+    if (!f) return ;
+    result.push(f);
+  });
+
+  return result;
+}

@@ -3,6 +3,7 @@
 import { app } from 'electron';
 import Store from 'electron-store';
 import { APP_NAME, PERSIS_STORE_PREFIX } from '../../isomorphic/constants';
+import { safeParse, shortStringify } from '../../isomorphic/json';
 
 export const desktopAppStore = new Store<{
   firstStartApp: boolean;
@@ -17,6 +18,10 @@ export const desktopAppStore = new Store<{
       default: true
     },
   },
+
+  serialize: shortStringify,
+
+  deserialize: (data) => safeParse(data, {}),
 
   watch: true,
 });
