@@ -8,21 +8,15 @@ import styles from './index.module.less';
 import { isValidDappAlias } from '../../../isomorphic/dapp';
 import { IS_RUNTIME_PRODUCTION } from '../../../isomorphic/constants';
 import { RCIconDappsModalClose } from '../../../../assets/icons/internal-homepage';
+import { DappFavicon } from '../DappFavicon';
 
 type IStep = 'add' | 'checked' | 'duplicated';
 
-const UNISWAP_INFO = {
-  faviconUrl: 'rabby-internal://assets/icons/samples/icon-sample-uniswap.svg',
-  url: 'https://app.uniswap.org',
-} as const;
-
-type ICheckResult = {
-  result: { faviconUrl: string; url: string } | null;
-  errorMessage: string | null;
-};
-
 function useAddStep() {
   const { detectDapps } = useDapps();
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const [_checkError, setCheckError] = useState<string | null>(null);
+
   const [addUrl, setAddUrl] = useState(
     IS_RUNTIME_PRODUCTION ? 'https://' : 'https://debank.com'
   );
@@ -42,21 +36,24 @@ function useAddStep() {
 
     try {
       const result = await detectDapps(addUrl);
-
-      if (result.error) {
-        message.error(result.error.message);
-      }
-
       return result;
     } catch (e: any) {
       message.error(e.message);
-      return ;
+      return;
     } finally {
       setIsChecking(false);
     }
   }, [addUrl, detectDapps]);
 
-  const resetChecking = useCallback(() => { setIsChecking(false) }, [])
+  const resetChecking = useCallback(() => {
+    setIsChecking(false);
+  }, []);
+
+  const isValidAddUrl = /https:\/\/.+/.test(addUrl);
+  // const checkError = !isValidAddUrl
+  //   ? 'Dapp with protocols other than HTTPS is not supported'
+  //   : _checkError;
+  const checkError = _checkError;
 
   return {
     isCheckingUrl,
@@ -64,7 +61,10 @@ function useAddStep() {
     resetChecking,
     addUrl,
     onChangeAddUrl,
-    isValidAddUrl: /https:\/\/.+/.test(addUrl),
+    isValidAddUrl,
+    checkError,
+    setCheckError,
+    setAddUrl,
   };
 }
 
@@ -73,7 +73,7 @@ function useCheckedStep() {
     alias: '',
     origin: '',
     faviconUrl: '',
-    faviconBase64: ''
+    faviconBase64: '',
   });
   const onChangeDappAlias = useCallback(
     (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,27 +92,60 @@ function useCheckedStep() {
   };
 }
 
-export default function ModalAddDapp({
+const useDuplicateStep = () => {
+  const { getDapp } = useDapps();
+  const [duplicatedDapp, setDuplicatedDapp] = useState<IDapp | null>(null);
+  const checkDuplicate = useCallback(
+    (url: string) => {
+      const { origin } = new URL(url);
+      const dapp = getDapp(origin);
+      setDuplicatedDapp(dapp || null);
+      return !!dapp;
+    },
+    [getDapp]
+  );
+  return {
+    duplicatedDapp,
+    checkDuplicate,
+  } as const;
+};
+
+function AddDapp({
   onAddedDapp,
   ...modalProps
-}: React.PropsWithChildren<
-  ModalProps & {
-    onAddedDapp?: () => void;
-  }
->) {
-  const { open } = modalProps;
+}: ModalProps & {
+  onAddedDapp?: () => void;
+}) {
   const [step, setStep] = useState<IStep>('add');
 
-  const { addUrl, onChangeAddUrl, isValidAddUrl, isCheckingUrl, resetChecking, checkUrl } =
-    useAddStep();
+  const {
+    addUrl,
+    onChangeAddUrl,
+    isValidAddUrl,
+    isCheckingUrl,
+    checkUrl,
+    checkError,
+    setCheckError,
+  } = useAddStep();
 
   const { dappInfo, setDappInfo, onChangeDappAlias, isValidAlias } =
     useCheckedStep();
 
+  const { duplicatedDapp, checkDuplicate } = useDuplicateStep();
+
   const { updateDapp } = useDapps();
 
   const doCheck = useCallback(async () => {
+    if (checkDuplicate(addUrl)) {
+      setStep('duplicated');
+      return;
+    }
+
+    setCheckError(null);
+
     const payload = await checkUrl();
+
+    setCheckError(payload?.error?.message || null);
 
     if (payload?.data) {
       setStep('checked');
@@ -120,39 +153,29 @@ export default function ModalAddDapp({
         alias: '',
         origin: payload.data.origin,
         faviconUrl: payload.data.faviconUrl,
-        faviconBase64: payload.data.faviconBase64
+        faviconBase64: payload.data.faviconBase64,
       });
     }
-  }, [checkUrl, setDappInfo]);
-
-  useEffect(() => {
-    if (!open) {
-      setStep('add');
-    }
-  }, [open]);
-
-  // todo
-  const dapp: any = { ...UNISWAP_INFO, alias: 'abc' };
+  }, [addUrl, checkDuplicate, checkUrl, setCheckError, setDappInfo]);
 
   return (
-    <Modal
-      width={800}
-      centered
-      {...modalProps}
-      onCancel={(e) => {
-        resetChecking();
-        modalProps.onCancel?.(e);
-      }}
-      title={null}
-      footer={null}
-      closeIcon={<RCIconDappsModalClose />}
-      className={classnames(styles.addModal, modalProps.className)}
-      wrapClassName={classnames('modal-dapp-mngr', modalProps.wrapClassName)}
-    >
+    <>
       {step === 'add' && (
         <Form className={styles.stepAdd} onFinish={doCheck}>
           <h3 className={styles.addTitle}>Enter or copy the Dapp URL</h3>
-          <Form.Item name="url" rules={[{ required: true }]}>
+          <Form.Item
+            name="url"
+            validateStatus={checkError ? 'error' : undefined}
+            help={checkError}
+            // validateTrigger="onBlur"
+            rules={[
+              {
+                pattern: /^https:\/\/.+/,
+                message:
+                  'Dapp with protocols other than HTTPS is not supported',
+              },
+            ]}
+          >
             <Input
               className={styles.addUrlInput}
               value={addUrl}
@@ -175,9 +198,14 @@ export default function ModalAddDapp({
 
       {step === 'checked' && (
         <div className={styles.stepChecked}>
-          <img
+          <DappFavicon
+            origin={dappInfo.origin}
             className={styles.checkedFavicon}
-            src={dappInfo.faviconBase64 ? dappInfo.faviconBase64 : dappInfo.faviconUrl}
+            src={
+              dappInfo.faviconBase64
+                ? dappInfo.faviconBase64
+                : dappInfo.faviconUrl
+            }
             alt={dappInfo.faviconUrl}
           />
           <span className={styles.checkedDappUrl}>{dappInfo.origin}</span>
@@ -202,7 +230,7 @@ export default function ModalAddDapp({
           </Button>
         </div>
       )}
-      {step === 'duplicated' && (
+      {step === 'duplicated' && duplicatedDapp && (
         <div className={styles.stepDuplicated}>
           <div className={styles.stepDuplicatedTips}>
             <ExclamationCircleFilled />
@@ -211,27 +239,69 @@ export default function ModalAddDapp({
           <div className="dapp-block">
             <a
               className="anchor"
-              href={dapp?.origin}
+              href={duplicatedDapp?.origin}
               target="_blank"
               rel="noreferrer"
             >
               {/* TODO: robust about load image */}
-              <img className="dapp-favicon" src={dapp?.faviconUrl} alt="add" />
+              <DappFavicon
+                origin={duplicatedDapp?.origin}
+                className="dapp-favicon"
+                src={
+                  duplicatedDapp?.faviconBase64 || duplicatedDapp?.faviconUrl
+                }
+                alt="duplicatedDapp?.origin"
+              />
               <div className="infos">
-                <h4 className="dapp-alias" title={dapp?.alias}>
-                  {dapp?.alias}
+                <h4 className="dapp-alias" title={duplicatedDapp?.alias}>
+                  {duplicatedDapp?.alias}
                 </h4>
-                <div className="dapp-url" title={dapp?.origin}>
-                  {dapp?.origin}
+                <div className="dapp-url" title={duplicatedDapp?.origin}>
+                  {duplicatedDapp?.origin}
                 </div>
               </div>
             </a>
           </div>
-          <Button type="primary" disabled className={styles.stepDuplicatedBtn}>
+          <Button
+            type="primary"
+            onClick={(e) => {
+              modalProps.onCancel?.(e);
+            }}
+            className={styles.stepDuplicatedBtn}
+            disabled
+          >
             Confirm
           </Button>
         </div>
       )}
+    </>
+  );
+}
+
+export default function ModalAddDapp({
+  onAddedDapp,
+  ...modalProps
+}: React.PropsWithChildren<
+  ModalProps & {
+    onAddedDapp?: () => void;
+  }
+>) {
+  return (
+    <Modal
+      width={800}
+      centered
+      {...modalProps}
+      onCancel={(e) => {
+        modalProps.onCancel?.(e);
+      }}
+      title={null}
+      footer={null}
+      closeIcon={<RCIconDappsModalClose />}
+      className={classnames(styles.addModal, modalProps.className)}
+      wrapClassName={classnames('modal-dapp-mngr', modalProps.wrapClassName)}
+      destroyOnClose
+    >
+      <AddDapp onAddedDapp={onAddedDapp} {...modalProps} />
     </Modal>
   );
 }

@@ -29,12 +29,15 @@ async function detectDapps(dappUrl: string) {
   const reqid = randString();
 
   return new Promise<IDappsDetectResult>((resolve, reject) => {
-    const dispose = window.rabbyDesktop.ipcRenderer.on('detect-dapp', (event) => {
-      if (event.reqid === reqid) {
-        resolve(event.result);
-        dispose?.();
+    const dispose = window.rabbyDesktop.ipcRenderer.on(
+      'detect-dapp',
+      (event) => {
+        if (event.reqid === reqid) {
+          resolve(event.result);
+          dispose?.();
+        }
       }
-    });
+    );
     window.rabbyDesktop.ipcRenderer.sendMessage('detect-dapp', reqid, dappUrl);
   });
 }
@@ -111,17 +114,24 @@ export function useDapps() {
     [setDapps]
   );
 
+  const getDapp = useCallback(
+    (origin: string) => {
+      return dapps.find((dapp) => dapp.origin === origin);
+    },
+    [dapps]
+  );
+
   useEffect(() => {
-    if (IS_RUNTIME_PRODUCTION) return ;
+    if (IS_RUNTIME_PRODUCTION) return;
     // TODO: just for test
-    ;(async () => {
+    (async () => {
       // const result = await detectDapps('http://www.google.com');
       // const result = await detectDapps('https://debank.com');
       const result = await detectDapps('https://app.uniswap.org');
 
       console.log('[feat] useDappsMngr: favicon parse result ', result);
     })();
-  }, [])
+  }, []);
 
   return {
     dapps: dapps || [],
@@ -129,5 +139,6 @@ export function useDapps() {
     updateDapp,
     renameDapp,
     removeDapp,
+    getDapp,
   };
 }

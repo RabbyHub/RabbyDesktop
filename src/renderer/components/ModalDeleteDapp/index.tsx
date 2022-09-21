@@ -5,6 +5,7 @@ import { Modal, ModalProps, Button } from 'antd';
 import { useDapps } from 'renderer/hooks/useDappsMngr';
 import styles from './index.module.less';
 import { RCIconDappsModalClose } from '../../../../assets/icons/internal-homepage';
+import { DappFavicon } from '../DappFavicon';
 
 function useDelete(dapp: IDapp | null) {
   const { removeDapp } = useDapps();
@@ -60,8 +61,12 @@ export default function ModalDeleteDapp({
               target="_blank"
               rel="noreferrer"
             >
-              {/* TODO: robust about load image */}
-              <img className="dapp-favicon" src={dapp.faviconBase64 ? dapp.faviconBase64 : dapp.faviconUrl} alt="add" />
+              <DappFavicon
+                origin={dapp.origin}
+                className="dapp-favicon"
+                src={dapp.faviconBase64 ? dapp.faviconBase64 : dapp.faviconUrl}
+                alt="add"
+              />
               <div className="infos">
                 <h4 className="dapp-alias">{dapp.alias}</h4>
                 <span className="dapp-url">{dapp.origin}</span>

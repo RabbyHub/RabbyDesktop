@@ -16,6 +16,7 @@ import { useAppVersion } from '../../hooks/useMainBridge';
 
 import './index.less';
 import { AutoUpdate } from './components/AutoUpdate';
+import { DappFavicon } from '../../components/DappFavicon';
 
 function DAppBlock({
   dapp,
@@ -50,8 +51,11 @@ function DAppBlock({
   return (
     <div className="dapp-block" ref={ref}>
       <a className="anchor" href={dapp.origin} target="_blank" rel="noreferrer">
-        {/* TODO: robust about load image */}
-        <img className="dapp-favicon" src={dapp.faviconBase64 ? dapp.faviconBase64 : dapp.faviconUrl} alt="add" />
+        <DappFavicon
+          className="dapp-favicon"
+          origin={dapp.origin}
+          src={dapp.faviconBase64 ? dapp.faviconBase64 : dapp.faviconUrl}
+        />
         <div className="infos">
           <h4 className="dapp-alias">{dapp.alias}</h4>
           <div className="dapp-url">{dapp.origin}</div>

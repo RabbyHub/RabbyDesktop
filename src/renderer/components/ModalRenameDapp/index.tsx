@@ -6,6 +6,7 @@ import { isValidDappAlias } from '../../../isomorphic/dapp';
 
 import styles from './index.module.less';
 import { RCIconDappsModalClose } from '../../../../assets/icons/internal-homepage';
+import { DappFavicon } from '../DappFavicon';
 
 const ALIAS_LIMIT = 15;
 
@@ -73,36 +74,39 @@ export default function ModalRenameDapp({
       className={classnames(styles.renameModal, modalProps.className)}
       wrapClassName={classnames('modal-dapp-mngr', modalProps.wrapClassName)}
     >
-      <div className={styles.renameDapp}>
-        <img
-          className={styles.dappFavicon}
-          src={dapp?.faviconUrl}
-          alt={dapp?.faviconUrl}
-        />
-        <div className={styles.dappUrl} title={dapp?.origin}>
-          {dapp?.origin}
-        </div>
-        <div className={styles.modifyWrapper}>
-          <Input
-            className={styles.aliasInput}
-            value={alias}
-            onChange={onAliasChange}
-            // placeholder="https://somedapp.xyz"
+      {dapp ? (
+        <div className={styles.renameDapp}>
+          <DappFavicon
+            origin={dapp?.origin}
+            className={styles.dappFavicon}
+            src={dapp?.faviconUrl}
+            alt={dapp?.faviconUrl}
           />
+          <div className={styles.dappUrl} title={dapp?.origin}>
+            {dapp?.origin}
+          </div>
+          <div className={styles.modifyWrapper}>
+            <Input
+              className={styles.aliasInput}
+              value={alias}
+              onChange={onAliasChange}
+              // placeholder="https://somedapp.xyz"
+            />
+          </div>
+          <Button
+            loading={isLoading}
+            type="primary"
+            disabled={!isValidAlias}
+            className={styles.confirmBtn}
+            onClick={async () => {
+              await doRename();
+              onRenamedDapp?.();
+            }}
+          >
+            Confirm
+          </Button>
         </div>
-        <Button
-          loading={isLoading}
-          type="primary"
-          disabled={!isValidAlias}
-          className={styles.confirmBtn}
-          onClick={async () => {
-            await doRename();
-            onRenamedDapp?.();
-          }}
-        >
-          Confirm
-        </Button>
-      </div>
+      ) : null}
     </Modal>
   );
 }
