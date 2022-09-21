@@ -1,3 +1,4 @@
+import path from 'path';
 import url from 'url';
 import { Icon as IconInfo, parseFavicon } from '@debank/parse-favicon';
 import { net } from 'electron';
@@ -105,7 +106,7 @@ export async function parseWebsiteFavicon (websiteBaseURL: string) {
 
           const isData = icon.url?.startsWith('data:');
 
-          faviconUrl = urlInfo?.protocol ? icon.url : `${websiteBaseURL}${icon.url}`;
+          faviconUrl = urlInfo?.protocol ? icon.url : path.posix.join(websiteBaseURL, icon.url);
           faviconBase64 = isData ? icon.url : `data:${icon?.type || 'image/png'};base64,${reqIconUrlBufs[icon.url]}`;
           resolve(icon);
         },
