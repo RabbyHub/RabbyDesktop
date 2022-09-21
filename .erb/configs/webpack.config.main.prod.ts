@@ -72,7 +72,7 @@ const configuration: webpack.Configuration = {
     }),
 
     new webpack.IgnorePlugin({
-      resourceRegExp: /canvas|jsdom/,
+      resourceRegExp: /canvas/,
     })
   ],
 
