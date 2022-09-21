@@ -1,5 +1,6 @@
 import { app, BrowserWindow, clipboard, Menu, MenuItem } from 'electron'
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants'
+import { getWebuiExtId } from '../streams/webui'
 
 const LABELS = {
   openInNewTab: (type: 'link' | Electron.ContextMenuParams['mediaType']) =>
@@ -71,12 +72,7 @@ interface ChromeContextMenuOptions {
 }
 
 export const buildChromeContextMenu = (
-  opts: ChromeContextMenuOptions,
-  {
-    isUrlNeedDevToolsDetached
-  }: {
-    isUrlNeedDevToolsDetached: (url: string) => boolean
-  }
+  opts: ChromeContextMenuOptions
 ): Menu => {
   const { params, webContents, openLink, extensionMenuItems } = opts
 
@@ -243,8 +239,11 @@ export const buildChromeContextMenu = (
   if (!IS_RUNTIME_PRODUCTION) {
     append({
       label: labels.inspect,
-      click: () => {
-        if (webContents && !webContents.isDevToolsOpened() && isUrlNeedDevToolsDetached(webContents.getURL())) {
+      click: async () => {
+        // TODO non blocking if webui not inited
+        const webuiExtensionId = await getWebuiExtId();
+
+        if (webContents && !webContents.isDevToolsOpened() && webContents.getURL().includes(`chrome-extension://${webuiExtensionId}`)) {
           webContents.openDevTools({ mode: 'detach' });
           webContents.inspectElement(params.x, params.y)
         } else {

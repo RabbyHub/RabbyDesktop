@@ -27,10 +27,14 @@ import { isRabbyShellURL, isUrlFromDapp } from '../isomorphic/url';
 import { dappStore } from './store/dapps';
 import { desktopAppStore } from './store/desktopApp';
 import { detectDapps } from './utils/dapps';
+import { getWebuiExtId } from './streams/webui';
+import { getRabbyExtId } from './streams/rabbyExt';
+import { valueToMainSubject } from './streams/_init';
+import { getBindLog } from './utils/log';
+
+const mainLog = getBindLog('main', 'bgGrey');
 
 // const pkgjson = require('../../package.json');
-
-let rabbyExtensionId: Electron.Extension['id'] = '';
 
 const manifestExists = async (dirPath: string) => {
   if (!dirPath) return false;
@@ -76,13 +80,16 @@ async function loadExtensions(sess: Electron.Session, extensionsPath: string) {
 
   await Promise.allSettled(
     extensionDirectories.filter(Boolean).map(async (extPath) => {
-      console.log(`Loading extension from ${extPath}`);
+      mainLog('loadExtensions', `Loading extension from ${extPath}`);
       try {
         if (!extPath) return;
-        const extensionInfo = await sess.loadExtension(extPath, {
+        const ext = await sess.loadExtension(extPath, {
           allowFileAccess: true,
         });
-        results.push(extensionInfo);
+        results.push(ext);
+        if (ext.name.toLowerCase().includes('rabby')) {
+          valueToMainSubject('rabbyExtension', ext);
+        }
       } catch (e) {
         console.error(e);
       }
@@ -114,7 +121,7 @@ class Browser {
 
   extensions: ElectronChromeExtensions = undefined as any;
 
-  webuiExtensionId: Electron.Extension['id'] = '';
+  // webuiExtensionId: Electron.Extension['id'] = '';
 
   appTray: Tray = undefined as any;
 
@@ -180,20 +187,21 @@ class Browser {
       app.setName(APP_NAME);
     }
 
-    // TODO: use colorful logs
-    console.debug('[init] app ready, paths:');
-    console.debug(`[init] desktop's home: ${app.getPath('home')}`);
-    console.debug(`[init] desktop's appData: ${app.getPath('appData')}`);
-    console.debug(`[init] desktop's userData: ${app.getPath('userData')}`);
+    mainLog('::init', 'app ready, paths:');
+    mainLog('::init', `desktop's home: ${app.getPath('home')}`);
+    mainLog('::init', `desktop's appData: ${app.getPath('appData')}`);
+    mainLog('::init', `desktop's userData: ${app.getPath('userData')}`);
     this.initSession();
 
     set_menu_and_icons: {
-      setupMenu({
-        getFocusedWebContents: () => {
-          return this.getFocusedWindow().getFocusedTab()?.webContents;
-        },
-        topbarExtId: this.webuiExtensionId,
-      });
+      getWebuiExtId().then(id => {
+        setupMenu({
+          getFocusedWebContents: () => {
+            return this.getFocusedWindow().getFocusedTab()?.webContents;
+          },
+          topbarExtId: id,
+        });
+      })
 
       if (getMainPlatform() === 'darwin') {
         app.dock.setIcon(getAssetPath('icon.png'))
@@ -208,11 +216,12 @@ class Browser {
 
     this.session.setPreloads([preloadPath]);
 
-    const webuiExtension = await this.session!.loadExtension(
+    await this.session!.loadExtension(
       getAssetPath('desktop_shell'),
       { allowFileAccess: true }
-    );
-    this.webuiExtensionId = webuiExtension.id;
+    ).then((webuiExtension) => {
+      valueToMainSubject('webuiExtension', webuiExtension);
+    });
 
     // @notice: make sure all customized plugins loaded after ElectronChromeExtensions initialized
     this.extensions = new ElectronChromeExtensions({
@@ -237,7 +246,9 @@ class Browser {
 
         if (details.url) tab.loadURL(details.url);
         else if (!IS_RUNTIME_PRODUCTION) {
-          tab.loadURL(getShellPageUrl('debug-new-tab', this.webuiExtensionId));
+          getWebuiExtId().then((webuiExtensionId) => {
+            tab.loadURL(getShellPageUrl('debug-new-tab', webuiExtensionId));
+          });
         }
 
         if (typeof details.active === 'boolean' ? details.active : true)
@@ -266,9 +277,9 @@ class Browser {
       },
 
       createWindow: async (details) => {
-        const tabUrl = firstEl(details.url || '') || getShellPageUrl('debug-new-tab', this.webuiExtensionId);
+        const tabUrl = firstEl(details.url || '') || getShellPageUrl('debug-new-tab', await getWebuiExtId());
 
-        const win = this.createWindow({
+        const win = await this.createWindow({
           defaultTabUrl: tabUrl,
           windowType: details.type,
           window: {
@@ -286,21 +297,15 @@ class Browser {
       },
     });
 
-    const loadedExtensions = await loadExtensions(
+    await loadExtensions(
       this.session!,
       getAssetPath('chrome_exts')
     );
 
-    loadedExtensions.forEach((ext) => {
-      if (ext.name.toLowerCase().includes('rabby')) {
-        rabbyExtensionId = ext.id;
-      }
-    });
-
     this._setupBridge();
 
     // init window
-    const mainWin = this.createWindow({
+    const mainWin = await this.createWindow({
       defaultTabUrl: RABBY_HOMEPAGE_URL,
       window: {
         show: false,
@@ -393,9 +398,9 @@ class Browser {
   }
 
   _setupBridge() {
-    onIpcMainEvent('rabby-extension-id', (event) => {
+    onIpcMainEvent('rabby-extension-id', async (event) => {
       event.reply('rabby-extension-id', {
-        rabbyExtensionId,
+        rabbyExtensionId: await getRabbyExtId(),
       });
     });
 
@@ -480,13 +485,14 @@ class Browser {
     })
   }
 
-  createWindow(options: Partial<TabbedBrowserWindowOptions>) {
-    if (!this.webuiExtensionId) {
+  async createWindow(options: Partial<TabbedBrowserWindowOptions>) {
+    const webuiExtensionId = await getWebuiExtId();
+    if (!webuiExtensionId) {
       throw new Error('[createWindow] webuiExtensionId is not set');
     }
     const win = new TabbedBrowserWindow({
       ...options,
-      webuiExtensionId: this.webuiExtensionId,
+      webuiExtensionId: webuiExtensionId,
       extensions: this.extensions,
       window: getBrowserWindowOpts(options.window),
     });
@@ -563,10 +569,6 @@ class Browser {
             }
           }
         },
-      }, {
-        isUrlNeedDevToolsDetached: (url) => {
-          return url.includes(`chrome-extension://${this.webuiExtensionId}`)
-        }
       });
 
       menu.popup();
