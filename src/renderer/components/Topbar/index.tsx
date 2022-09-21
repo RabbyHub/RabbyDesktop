@@ -85,7 +85,7 @@ function filterFavIcon(url?: string, isActiveTab = false) {
 
 function filterClosable(url?: string, isClosable = CLOSABLE) {
   // home page
-  if (url?.includes(`${RABBY_INTERNAL_PROTOCOL}//local/index.html`)) {
+  if (url?.includes(RABBY_HOMEPAGE_URL)) {
     return false;
   }
 
