@@ -1,7 +1,7 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 
 import url from 'url';
-import { canoicalizeDappUrl } from '../../isomorphic/url';
+import { canoicalizeDappUrl, isFQDN } from '../../isomorphic/url';
 import { parseWebsiteFavicon } from './fetch';
 import { BrowserView } from 'electron';
 
@@ -29,6 +29,7 @@ const enum CHROMIUM_LOADURL_ERR_CODE {
 }
 
 type CHROMIUM_NET_ERR_DESC = `net::${CHROMIUM_LOADURL_ERR_CODE}`
+  | `net::ERR_CONNECTION_CLOSED`
 
 function getInaccessibleResult() {
   return {
@@ -121,7 +122,6 @@ export async function detectDapps(
   const formatedUrl = url.format(urlInfo);
 
   const checkResult = await checkUrlViaBrowserView(formatedUrl);
-  const isNotFound = checkResult.errorDesc === CHROMIUM_LOADURL_ERR_CODE.ERR_NAME_NOT_RESOLVED;
   const isCertErr = !!checkResult.certErrorDesc;
 
   if (isCertErr) {
@@ -132,12 +132,11 @@ export async function detectDapps(
         message: 'The certificate of the Dapp has expired'
       }
     };
-  } else if (isNotFound) {
+  } else if (!checkResult.valid) {
     return getInaccessibleResult();
   }
 
   const { iconInfo, faviconUrl, faviconBase64 } = await parseWebsiteFavicon(origin);
-  console.log('[feat] faviconUrl', faviconUrl);
 
   return {
     data: {
