@@ -1,5 +1,5 @@
 import { app, BrowserWindow, Tray } from "electron";
-import { firstValueFrom, lastValueFrom } from "rxjs";
+import { firstValueFrom } from "rxjs";
 
 import { APP_NAME, IS_RUNTIME_PRODUCTION, RABBY_GETTING_STARTED_URL, RABBY_HOMEPAGE_URL, RABBY_SPALSH_URL } from "../../isomorphic/constants";
 import { isRabbyShellURL, isUrlFromDapp } from "../../isomorphic/url";
@@ -27,7 +27,8 @@ app.on('web-contents-created', (evt, webContents) => {
   }
 
   webContents.setWindowOpenHandler((details) => {
-    const isFromDapp = isUrlFromDapp(details.url);
+    const currentUrl = webContents.getURL();
+    const isFromDapp = isUrlFromDapp(currentUrl);
 
     switch (details.disposition) {
       case 'foreground-tab':
@@ -128,9 +129,7 @@ export default function bootstrap () {
       )
       // do quit on context menu
       appTray.addListener('click', () => {
-        // TODO: use specific `mainWindow`
         showMainWin();
-        // this.windows[0]?.window.show();
       });
     }
 
