@@ -1,5 +1,5 @@
 module.exports = {
-  "productName": "RabbyDesktop",
+  "productName": "Rabby Wallet",
   "appId": "com.debank.RabbyDesktop",
   "asar": true,
   "asarUnpack": "**\\*.{node,dll}",
