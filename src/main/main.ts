@@ -203,15 +203,18 @@ class Browser {
         });
       })
 
-      if (getMainPlatform() === 'darwin') {
+      const isDarwin = getMainPlatform() === 'darwin';
+      if (isDarwin) {
         app.dock.setIcon(getAssetPath('icon.png'))
-        this.appTray = new Tray(getAssetPath('app-icons/macos-menu-logo-light@2x.png'))
-        // do quit on context menu
-        this.appTray.addListener('click', () => {
-          // TODO: use specific `mainWindow`
-          this.windows[0]?.window.show();
-        });
       }
+      this.appTray = new Tray(
+        isDarwin ? getAssetPath('app-icons/macos-menu-logo-light@2x.png') : getAssetPath('app-icons/win32-tray-logo.png')
+      )
+      // do quit on context menu
+      this.appTray.addListener('click', () => {
+        // TODO: use specific `mainWindow`
+        this.windows[0]?.window.show();
+      });
     }
 
     this.session.setPreloads([preloadPath]);
