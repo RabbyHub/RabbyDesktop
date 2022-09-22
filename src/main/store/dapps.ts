@@ -50,10 +50,10 @@ export function formatDapp (input: any) {
   if (!input?.origin) return null
 
   return {
-    alias: input?.alias || '',
-    origin: input.origin,
-    faviconUrl: input?.faviconUrl || '',
-    faviconBase64: input?.faviconBase64 || '',
+    alias: input?.alias || '' as IDapp['alias'],
+    origin: input.origin as IDapp['origin'],
+    faviconUrl: input?.faviconUrl || ''  as IDapp['faviconUrl'],
+    faviconBase64: input?.faviconBase64 || '' as IDapp['faviconBase64'],
   };
 }
 
@@ -71,17 +71,17 @@ export function formatDapps(input = dappStore.get('dapps')): IDapp[] {
   return result;
 }
 
-export function isExistedOrigin(url: string) {
+export function parseDappUrl(url: string) {
   const { isDapp, origin } = canoicalizeDappUrl(url);
-  if (!isDapp) return false;
 
-  const existedOrigin = dappStore.get('dapps').some((item: IDapp) => {
+  const existedOrigin = !isDapp ? false : dappStore.get('dapps').some((item: IDapp) => {
     const formatted = formatDapp(item);
     return formatted?.origin && formatted.origin === origin;
   });
 
   return {
     isDapp,
+    origin,
     existedOrigin,
   }
 }

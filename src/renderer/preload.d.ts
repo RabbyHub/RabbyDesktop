@@ -123,6 +123,19 @@ type ChannelMessagePayload = {
       }
     ]
   },
+  '__internal_alert-security-url': {
+    send: [];
+    response: [
+      {
+        url: string
+        isExisted: boolean
+      }
+    ]
+  }
+  '__internal_close-alert-insecure-content': {
+    send: [];
+    response: []
+  },
   '__internal_webui-window-close': {
     send: [ winId: number, webContentsId: number ],
     response: []

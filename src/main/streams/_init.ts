@@ -1,4 +1,5 @@
 import { Subject, ReplaySubject, Observable } from 'rxjs';
+import TabbedBrowserWindow from '../browser/browsers';
 import { cLog } from '../utils/log';
 
 type IConf<T extends Subject<any>> = {
@@ -18,6 +19,9 @@ const CONF = {
   rabbyExtension: {
     subject: new ReplaySubject(1),
   } as IConf<ReplaySubject<Electron.Extension>>,
+  mainWindowReady: {
+    subject: new ReplaySubject(1),
+  } as IConf<ReplaySubject<TabbedBrowserWindow>>,
 }
 
 type IMainSubjects = typeof CONF;
