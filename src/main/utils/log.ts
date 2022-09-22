@@ -6,17 +6,18 @@ type AllFuncKey = { [P in keyof ChalkKeys]: ChalkKeys[P] extends (input: string)
 export function getBindLog(prefix: string, prefixColor: AllFuncKey, opts?: {
   logColor?: AllFuncKey
 }) {
-  return (subPreifx: string, log?: any) => {
-    if (!log) {
-      log = subPreifx;
+  return (subPreifx: string, ...logs: any[]) => {
+    if (!logs.length) {
+      logs = [subPreifx];
       subPreifx = '';
     }
     console.debug(
       ...[
         `${chalk.gray('[mainprocess]')} `,
         `${chalk[prefixColor](`[${subPreifx || prefix}]`)} `,
-        opts?.logColor ? `${chalk[opts?.logColor](JSON.stringify(log, null, 2))}` : log
-      ]
+      ].concat(logs.map(log => {
+        return opts?.logColor ? `${chalk[opts?.logColor](JSON.stringify(log, null, 2))}` : log
+      }))
     );
   }
 }

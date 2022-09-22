@@ -46,6 +46,12 @@ const rendererEntries = {
     htmlFile: path.join(srcRendererPath, `pages/loading.ejs`),
     jsEntry: path.join(srcRendererPath, 'pages/loading.tsx'),
   },
+  'alert-insecurity': {
+    name: 'alert-insecurity',
+    target: 'alert-insecurity.html',
+    htmlFile: path.join(srcRendererPath, `pages/alert-insecurity.ejs`),
+    jsEntry: path.join(srcRendererPath, 'pages/alert-insecurity.tsx'),
+  },
 } as const;
 
 const shellEntries = {

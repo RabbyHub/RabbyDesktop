@@ -7,6 +7,7 @@ import url from 'url';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { parseWebsiteFavicon } from './fetch';
 import { BrowserView } from 'electron';
+import { destroyBrowserWebview } from './browser';
 
 const DFLT_TIMEOUT = 8 * 1e3;
 
@@ -103,9 +104,7 @@ async function checkUrlViaBrowserView (dappUrl: string, opts?: {
 
   return firstValueFrom(obs).finally(() => {
     checkResult.complete();
-    // undocumented behaviors
-    (view.webContents as any)?.destroyed?.();
-    (view as any)?.destroyed?.();
+    destroyBrowserWebview(view);
   });
 }
 

@@ -34,7 +34,7 @@ export function parseUrlQuery(_url: string) {
 
 export function integrateQueryToUrl(
   url: string,
-  extQuery: Record<string, string>
+  extQuery: Record<string, string | number | boolean>
 ) {
   const { url: urlWithoutQuery, query: query1 } = parseUrlQuery(url);
   const query = { ...query1, ...extQuery };
@@ -48,14 +48,8 @@ export function isRabbyShellURL (url: string) {
 }
 
 export function isUrlFromDapp (url: string) {
-  return !url.startsWith(RABBY_INTERNAL_PROTOCOL) && !url.startsWith('chrome-extension://')
+  return !url.startsWith(RABBY_INTERNAL_PROTOCOL) && !url.startsWith('chrome-extension:') && url.startsWith('https:')
 }
-
-// function getRootDomain (hostname: string) {
-//   const parts = hostname.split('.');
-
-//   return parts.length >= 2 ? parts.slice(-2).join('.') : null;
-// }
 
 export function canoicalizeDappUrl (url: string) {
   let urlInfo: Partial<URL> | null = null;
@@ -66,7 +60,7 @@ export function canoicalizeDappUrl (url: string) {
   }
 
   const hostname = urlInfo?.hostname || '';
-  const isDapp = urlInfo?.protocol === 'https://';
+  const isDapp = urlInfo?.protocol === 'https:';
 
   // protcol://hostname[:port]
   const origin = `${urlInfo?.protocol}//${hostname}${urlInfo?.port ? `:${urlInfo?.port}` : ''}`;

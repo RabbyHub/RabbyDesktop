@@ -1,7 +1,7 @@
-import { app, BrowserWindow, Tray } from "electron";
+import { app, BrowserView, BrowserWindow, Tray } from "electron";
 import { firstValueFrom } from "rxjs";
 
-import { APP_NAME, IS_RUNTIME_PRODUCTION, RABBY_GETTING_STARTED_URL, RABBY_HOMEPAGE_URL, RABBY_SPALSH_URL } from "../../isomorphic/constants";
+import { APP_NAME, IS_RUNTIME_PRODUCTION, RABBY_ALERT_INSECURITY_URL, RABBY_GETTING_STARTED_URL, RABBY_HOMEPAGE_URL, RABBY_SPALSH_URL } from "../../isomorphic/constants";
 import { isRabbyShellURL, isUrlFromDapp } from "../../isomorphic/url";
 import buildChromeContextMenu from "../browser/context-menu";
 import { setupMenu } from '../browser/menu';
@@ -10,11 +10,54 @@ import { getAssetPath, getBrowserWindowOpts } from "../utils/app";
 import { onIpcMainEvent } from "../utils/ipcMainEvents";
 import { getBindLog } from "../utils/log";
 import { geChromeExtensions } from "./session";
-import { createWindow, getFocusedWindow, getWindowFromWebContents } from "./tabbedBrowserWindow";
+import { createWindow, getFocusedWindow, getMainWindow, getWindowFromWebContents } from "./tabbedBrowserWindow";
 import { getWebuiExtId } from "./session";
 import { fromMainSubject, valueToMainSubject } from "./_init";
+import { parseDappUrl } from '../store/dapps';
 
 const appLog = getBindLog('appStream', 'bgGrey');
+
+let alertView: BrowserView;
+export async function attachAlertBrowserView (
+  url: string, isExisted = false, targetWin?: BrowserWindow
+) {
+  if (!alertView) {
+    // TODO: use standalone session open it
+    alertView = new BrowserView({
+      webPreferences: {
+        webviewTag: true,
+        sandbox: true,
+        nodeIntegration: false,
+        allowRunningInsecureContent: false,
+        autoplayPolicy: 'user-gesture-required'
+      }
+    });
+    alertView.webContents.loadURL(`${RABBY_ALERT_INSECURITY_URL}?__init_url__=${encodeURIComponent(url)}`);
+  }
+
+  alertView.webContents.send('__internal_alert-security-url', { url, isExisted });
+
+  targetWin = targetWin || (await getMainWindow()).window;
+
+  const dispose = onIpcMainEvent('__internal_close-alert-insecure-content', () => {
+    targetWin?.removeBrowserView(alertView);
+    // destroyBrowserWebview(alertView);
+
+    dispose?.();
+  });
+
+  targetWin.addBrowserView(alertView);
+
+  const [width, height] = targetWin.getSize();
+
+  alertView!.setBounds({
+    x: 0,
+    y: 0,
+    width,
+    height,
+  });
+  alertView!.setAutoResize({ width: true, height: true });
+}
 
 app.on('web-contents-created', (evt, webContents) => {
   const type = webContents.getType();
@@ -30,22 +73,30 @@ app.on('web-contents-created', (evt, webContents) => {
     const currentUrl = webContents.getURL();
     const isFromDapp = isUrlFromDapp(currentUrl);
 
-    switch (details.disposition) {
-      case 'foreground-tab':
-      case 'background-tab':
-      case 'new-window': {
-        const win = getWindowFromWebContents(webContents);
-        const openedTab = isFromDapp ? win?.tabs.findByOrigin(details.url) : null;
-        if (openedTab) {
-          openedTab.loadURL(details.url);
-        } else {
-          const tab = win?.tabs.create();
-          tab?.loadURL(details.url);
+    const currentInfo = parseDappUrl(currentUrl);
+    const targetInfo = parseDappUrl(details.url);
+    const sameOrigin = currentInfo.origin === targetInfo.origin
+
+    if (isFromDapp && !sameOrigin) {
+      attachAlertBrowserView(details.url, targetInfo.existedOrigin, getWindowFromWebContents(webContents)?.window);
+    } else {
+      switch (details.disposition) {
+        case 'foreground-tab':
+        case 'background-tab':
+        case 'new-window': {
+          const win = getWindowFromWebContents(webContents);
+          const openedTab = isFromDapp ? win?.tabs.findByOrigin(details.url) : null;
+          if (openedTab) {
+            openedTab!.loadURL(details.url);
+          } else {
+            const tab = win?.tabs.create();
+            tab?.loadURL(details.url);
+          }
+          break;
         }
-        break;
-      }
-      default: {
-        break;
+        default: {
+          break;
+        }
       }
     }
 

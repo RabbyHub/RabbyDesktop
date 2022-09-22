@@ -1,13 +1,14 @@
 import { EventEmitter } from 'events';
-import { BrowserView, BrowserWindow, ipcMain } from 'electron';
+import { BrowserView, BrowserWindow } from 'electron';
 import {
   NATIVE_HEADER_H,
   NATIVE_HEADER_WITH_NAV_H,
 } from '../../isomorphic/const-size';
-import { canoicalizeDappUrl } from '../../isomorphic/url';
+import { canoicalizeDappUrl, isUrlFromDapp } from '../../isomorphic/url';
 import { onIpcMainEvent } from '../utils/ipcMainEvents';
 import { RABBY_LOADING_URL } from '../../isomorphic/constants';
 import { dappStore } from '../store/dapps';
+import { attachAlertBrowserView } from '../streams/app';
 
 type ITabOptions = {
   tabs: Tabs;
@@ -77,6 +78,7 @@ export class Tab {
       }
     );
 
+    // polyfill for window.close
     this.webContents?.executeJavaScript(`
       ;(function () {
         if (window.location.protocol !== 'chrome-extension:') return ;
@@ -87,6 +89,16 @@ export class Tab {
         }
       })();
     `);
+
+    this.webContents.on('will-redirect', (evt) => {
+      const sender = (evt as any).sender as BrowserView['webContents'];
+
+      const url = sender.getURL();
+      if (isUrlFromDapp(url)) {
+        evt.preventDefault();
+        attachAlertBrowserView(url);
+      }
+    })
   }
 
   destroy() {
