@@ -181,7 +181,7 @@ export default function DApps() {
               src="rabby-internal://assets/icons/internal-homepage/logo.svg"
               alt="logo"
             />
-            <div className="version-text">Version: {appVersion}</div>
+            <div className="version-text">Version: {appVersion || '-'}</div>
           </div>
         </footer>
         <ModalAddDapp

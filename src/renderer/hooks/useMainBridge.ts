@@ -5,20 +5,22 @@
 /// <reference path="../preload.d.ts" />
 
 import { useEffect, useState } from 'react';
+import { randString } from '../../isomorphic/string';
 
 export function useAppVersion() {
-  const [version, setVersion] = useState<string>('-');
+  const reqid = randString();
+  const [version, setVersion] = useState<string>('');
 
   useEffect(() => {
-    const dispose = window.rabbyDesktop.ipcRenderer.once(
+    window.rabbyDesktop.ipcRenderer.on(
       'get-app-version',
-      ({ version: v }) => {
-        setVersion(v);
+      (event) => {
+        if (event.reqid === reqid) {
+          setVersion(event.version);
+        }
       }
     );
-    window.rabbyDesktop.ipcRenderer.sendMessage('get-app-version');
-
-    return dispose;
+    window.rabbyDesktop.ipcRenderer.sendMessage('get-app-version', reqid);
   }, []);
 
   return version;

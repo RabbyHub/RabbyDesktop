@@ -1,6 +1,13 @@
 /// <reference types="electron" />
 /// <reference path="../isomorphic/types.d.ts" />
 
+type M2RChanneMessagePayload = {
+  'download-release-progress-updated': {
+    originReqId: string;
+    download: IAppUpdatorDownloadProgress
+  }
+}
+
 type ChannelMessagePayload = {
   'ipc-example': {
     send: [string];
@@ -34,9 +41,10 @@ type ChannelMessagePayload = {
     ];
   };
   'get-app-version': {
-    send: [];
+    send: [reqid: string];
     response: [
       {
+        reqid: string;
         version: ReturnType<Electron.App['getVersion']>;
       }
     ];
@@ -99,6 +107,22 @@ type ChannelMessagePayload = {
       }
     ]
   },
+  'check-if-new-release': {
+    send: [reqid: string];
+    response: [
+      {
+        reqid: string,
+      } & IAppUpdatorCheckResult
+    ]
+  },
+  'start-download': {
+    send: [reqid: string];
+    response: [
+      {
+        reqid: string,
+      }
+    ]
+  },
   '__internal_webui-window-close': {
     send: [ winId: number, webContentsId: number ],
     response: []
@@ -115,14 +139,26 @@ interface Window {
         channel: T,
         ...args: ChannelMessagePayload[T]['send']
       ): void;
-      on<T extends Channels>(
-        channel: T,
-        func: (...args: ChannelMessagePayload[T]['response']) => void
-      ): (() => void) | undefined;
-      once<T extends Channels>(
-        channel: T,
-        func: (...args: ChannelMessagePayload[T]['response']) => void
-      ): void;
+      on: {
+        <T extends Channels>(
+          channel: T,
+          func: (...args: ChannelMessagePayload[T]['response']) => void
+        ): (() => void) | undefined;
+        <T extends keyof M2RChanneMessagePayload>(
+          channel: T,
+          func: (event: M2RChanneMessagePayload[T]) => void
+        ): (() => void) | undefined;
+      }
+      once: {
+        <T extends Channels>(
+          channel: T,
+          func: (...args: ChannelMessagePayload[T]['response']) => void
+        ): (() => void) | undefined;
+        <T extends keyof M2RChanneMessagePayload>(
+          channel: T,
+          func: (event: M2RChanneMessagePayload[T]) => void
+        ): (() => void) | undefined;
+      }
     };
   };
 }

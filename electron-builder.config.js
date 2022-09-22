@@ -1,8 +1,11 @@
+const MINIO_TEST = process.env.MINIO_TEST === 'true'
+
 module.exports = {
   "productName": "Rabby Wallet",
   "appId": "com.debank.RabbyDesktop",
   "asar": true,
   "asarUnpack": "**\\*.{node,dll}",
+  "copyright": "Copyright © 2022 rabby.io",
   "files": [
     "dist",
     "node_modules",
@@ -25,6 +28,7 @@ module.exports = {
     "gatekeeperAssess": false
   },
   "dmg": {
+    "artifactName": "rabby-wallet-desktop-installer-${arch}-${version}.${ext}",
     "contents": [
       {
         "x": 130,
@@ -44,8 +48,9 @@ module.exports = {
     ]
   },
   "nsis": {
-    "artifactName": "rabby-wallet-desktop.setup.${version}.${ext}",
-    "uninstallDisplayName": "Rabby Wallet"
+    "artifactName": "rabby-wallet-desktop-installer-${arch}-${version}.${ext}",
+    "uninstallDisplayName": "${productName}",
+    "deleteAppDataOnUninstall": true,
   },
   "linux": {
     "target": [
@@ -61,9 +66,11 @@ module.exports = {
   "extraResources": [
     "./assets/**"
   ],
-  "publish": {
-    "provider": "github",
-    "owner": "RabbyHub",
-    "repo": "RabbyHubDesktop"
-  }
+  "publish": [
+    {
+      "provider": "generic",
+      // pointless now
+      "url": `https://download.rabby.io/wallet-desktop/${process.platform === 'win32' ? 'win32' : 'mac'}/`,
+    },
+  ]
 }

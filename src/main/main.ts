@@ -13,6 +13,7 @@ import TabbedBrowserWindow, {
   TabbedBrowserWindowOptions,
 } from './browser/browsers';
 import { onIpcMainEvent } from './utils/ipcMainEvents';
+import "./streams/updater";
 
 import {
   APP_NAME,
@@ -412,8 +413,9 @@ class Browser {
       });
     });
 
-    onIpcMainEvent('get-app-version', (event) => {
+    onIpcMainEvent('get-app-version', (event, reqid) => {
       event.reply('get-app-version', {
+        reqid,
         version: app.getVersion(),
       });
     });
