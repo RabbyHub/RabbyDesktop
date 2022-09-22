@@ -14,9 +14,8 @@ async function getDesktopAppState() {
       (event) => {
         if (event.reqid === reqid) {
           resolve(event.state);
+          dispose?.();
         }
-
-        dispose?.();
       }
     );
     window.rabbyDesktop.ipcRenderer.sendMessage('get-desktopAppState', reqid);
@@ -32,9 +31,8 @@ async function _putHasStarted() {
       (event) => {
         if (event.reqid === reqid) {
           resolve();
+          dispose?.();
         }
-
-        dispose?.();
       }
     );
     window.rabbyDesktop.ipcRenderer.sendMessage('put-desktopAppState-hasStarted', reqid);

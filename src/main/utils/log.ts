@@ -12,11 +12,11 @@ export function getBindLog(prefix: string, prefixColor: AllFuncKey, opts?: {
       subPreifx = '';
     }
     console.debug(
-      [
+      ...[
         `${chalk.gray('[mainprocess]')} `,
         `${chalk[prefixColor](`[${subPreifx || prefix}]`)} `,
-        `${opts?.logColor ? chalk[opts?.logColor](log) : log}`
-      ].join('')
+        opts?.logColor ? `${chalk[opts?.logColor](JSON.stringify(log, null, 2))}` : log
+      ]
     );
   }
 }

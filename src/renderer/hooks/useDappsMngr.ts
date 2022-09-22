@@ -15,9 +15,8 @@ async function getAll() {
       (event) => {
         if (event.reqid === reqid) {
           resolve(event.dapps);
+          dispose?.();
         }
-
-        dispose?.();
       }
     );
     window.rabbyDesktop.ipcRenderer.sendMessage('dapps-fetch', reqid);
@@ -124,13 +123,11 @@ export function useDapps() {
   useEffect(() => {
     if (IS_RUNTIME_PRODUCTION) return;
     // TODO: just for test
-    (async () => {
-      // const result = await detectDapps('http://www.google.com');
-      // const result = await detectDapps('https://debank.com');
-      const result = await detectDapps('https://app.uniswap.org');
-
-      console.log('[feat] useDappsMngr: favicon parse result ', result);
-    })();
+    // (async () => {
+    //   // const result = await detectDapps('http://www.google.com');
+    //   // const result = await detectDapps('https://debank.com');
+    //   const result = await detectDapps('https://app.uniswap.org');
+    // })();
   }, []);
 
   return {

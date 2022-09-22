@@ -1,3 +1,13 @@
+/* from builder-util-runtime/out/ProgressCallbackTransform.d.ts */
+interface ProgressInfo {
+  total: number;
+  delta: number;
+  transferred: number;
+  percent: number;
+  bytesPerSecond: number;
+}
+
+
 type IDapp = {
   // TODO: implement it;
   id?: string;
@@ -23,4 +33,20 @@ type IDappsDetectResult<T extends string = string> = {
     type: T;
     message?: string;
   }
+}
+
+type IAppUpdatorCheckResult = {
+  hasNewRelease: true,
+  releaseVersion: string
+} | {
+  hasNewRelease: false,
+  releaseVersion: null
+}
+
+type IAppUpdatorDownloadProgress = {
+  progress: ProgressInfo
+  isEnd: false
+} | {
+  progress: null
+  isEnd: true
 }
