@@ -6,7 +6,7 @@ type AllFuncKey = { [P in keyof ChalkKeys]: ChalkKeys[P] extends (input: string)
 export function getBindLog(prefix: string, prefixColor: AllFuncKey, opts?: {
   logColor?: AllFuncKey
 }) {
-  return (subPreifx: string, log?: string) => {
+  return (subPreifx: string, log?: any) => {
     if (!log) {
       log = subPreifx;
       subPreifx = '';
