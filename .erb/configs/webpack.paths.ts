@@ -22,13 +22,13 @@ const distShellPath = path.join(rootPath, 'assets/desktop_shell');
 const buildPath = path.join(releasePath, 'build');
 
 const rendererEntries = {
-  'home': {
+  home: {
     name: 'home',
     target: 'home.html',
     htmlFile: path.join(srcRendererPath, `home.ejs`),
     jsEntry: path.join(srcRendererPath, 'home.tsx'),
   },
-  'splash': {
+  splash: {
     name: 'splash',
     target: 'splash.html',
     htmlFile: path.join(srcRendererPath, `splash.ejs`),
@@ -39,6 +39,12 @@ const rendererEntries = {
     target: 'getting-started.html',
     htmlFile: path.join(srcRendererPath, `pages/getting-started.ejs`),
     jsEntry: path.join(srcRendererPath, 'pages/getting-started.tsx'),
+  },
+  loading: {
+    name: 'loading',
+    target: 'loading.html',
+    htmlFile: path.join(srcRendererPath, `pages/loading.ejs`),
+    jsEntry: path.join(srcRendererPath, 'pages/loading.tsx'),
   },
 } as const;
 

@@ -6,6 +6,8 @@ import {
 } from '../../isomorphic/const-size';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { onIpcMainEvent } from '../utils/ipcMainEvents';
+import { RABBY_LOADING_URL } from '../../isomorphic/constants';
+import { dappStore } from '../store/dapps';
 
 type ITabOptions = {
   tabs: Tabs;
@@ -19,7 +21,7 @@ type ITabOptions = {
 const DEFAULT_TOPBAR_STACKS = {
   tabs: true,
   navigation: true,
-}
+};
 export class Tab {
   id: BrowserView['webContents']['id'];
 
@@ -28,6 +30,8 @@ export class Tab {
   view?: BrowserView;
 
   window?: BrowserWindow;
+
+  loadingView?: BrowserView;
 
   webContents?: BrowserView['webContents'];
 
@@ -49,14 +53,29 @@ export class Tab {
     this.window.addBrowserView(this.view);
     this.initialUrl = initialUrl || '';
 
-    this.topbarStacks = {...DEFAULT_TOPBAR_STACKS, ...topbarStacks};;
+    this.loadingView = new BrowserView();
+    this.loadingView.webContents.loadURL(RABBY_LOADING_URL);
+    this.window.addBrowserView(this.loadingView);
 
-    const dispose = onIpcMainEvent('__internal_webui-window-close', ( _, winId, webContentsId,) => {
-      if (winId === this.window?.id && this.webContents?.id === webContentsId) {
-        this.destroy();
-      }
-      dispose();
+    this.view.webContents.on('did-finish-load', (e) => {
+      this.loadingView?.webContents.send('did-finish-load', e);
+      this.window?.removeBrowserView(this.loadingView!);
     });
+
+    this.topbarStacks = { ...DEFAULT_TOPBAR_STACKS, ...topbarStacks };
+
+    const dispose = onIpcMainEvent(
+      '__internal_webui-window-close',
+      (_, winId, webContentsId) => {
+        if (
+          winId === this.window?.id &&
+          this.webContents?.id === webContentsId
+        ) {
+          this.destroy();
+        }
+        dispose();
+      }
+    );
 
     this.webContents?.executeJavaScript(`
       ;(function () {
@@ -78,6 +97,7 @@ export class Tab {
     this.hide();
 
     this.window!.removeBrowserView(this.view!);
+    this.window!.removeBrowserView(this.loadingView!);
     this.window = undefined;
 
     if (this.webContents!.isDevToolsOpened()) {
@@ -94,6 +114,14 @@ export class Tab {
   }
 
   async loadURL(url: string) {
+    const dapps = dappStore.get('dapps') || [];
+    const { origin } = new URL(url);
+    const dapp = dapps.find((item) => item.origin === origin);
+    if (dapp) {
+      setTimeout(() => {
+        this.loadingView?.webContents.send('load-dapp', dapp);
+      }, 200);
+    }
     return this.view?.webContents.loadURL(url);
   }
 
@@ -104,13 +132,24 @@ export class Tab {
   show() {
     const [width, height] = this.window!.getSize();
 
-    const hideTopbar = !this.topbarStacks?.tabs && !this.topbarStacks?.navigation;
+    const hideTopbar =
+      !this.topbarStacks?.tabs && !this.topbarStacks?.navigation;
     const hasNavigationBar = !!this.topbarStacks?.navigation;
 
     const topbarHeight = hideTopbar
-      ? 0 : hasNavigationBar
+      ? 0
+      : hasNavigationBar
       ? NATIVE_HEADER_WITH_NAV_H
       : NATIVE_HEADER_H;
+
+    this.loadingView!.setBounds({
+      x: 0,
+      y: topbarHeight,
+      width,
+      height: height - topbarHeight,
+    });
+    this.loadingView!.setAutoResize({ width: true, height: true });
+    // this.window.addBrowserView(this.view)
 
     this.view!.setBounds({
       x: 0,
@@ -119,12 +158,13 @@ export class Tab {
       height: height - topbarHeight,
     });
     this.view!.setAutoResize({ width: true, height: true });
-    // this.window.addBrowserView(this.view)
   }
 
   hide() {
     this.view!.setAutoResize({ width: false, height: false });
     this.view!.setBounds({ x: -1000, y: 0, width: 0, height: 0 });
+    this.loadingView!.setAutoResize({ width: false, height: false });
+    this.loadingView!.setBounds({ x: -1000, y: 0, width: 0, height: 0 });
     // TODO: can't remove from window otherwise we lose track of which window it belongs to
     // this.window.removeBrowserView(this.view)
   }
@@ -162,7 +202,7 @@ export class Tabs extends EventEmitter {
   create(options?: Omit<ITabOptions, 'tabs'>) {
     const tab = new Tab(this.window!, {
       ...options,
-      tabs: this
+      tabs: this,
     });
     this.tabList.push(tab);
     if (!this.selected) this.selected = tab;
@@ -204,8 +244,10 @@ export class Tabs extends EventEmitter {
     const inputOrigin = canoicalizeDappUrl(url).origin;
     if (!inputOrigin) return null;
 
-    return this.tabList.find((tab) =>
-      canoicalizeDappUrl(tab.webContents?.getURL() || '').origin === inputOrigin
+    return this.tabList.find(
+      (tab) =>
+        canoicalizeDappUrl(tab.webContents?.getURL() || '').origin ===
+        inputOrigin
     );
   }
 }
