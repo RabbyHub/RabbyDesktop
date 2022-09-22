@@ -7,7 +7,7 @@ import { app, session, BrowserWindow, Tray } from 'electron';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { buildChromeContextMenu } from './browser/context-menu';
 import { setupMenu } from './browser/menu';
-import { getAssetPath, preloadPath, getRendererPath, getMainPlatform, getShellPageUrl, getBrowserWindowOpts } from './util';
+import { getAssetPath, preloadPath, getRendererPath, getMainPlatform, getShellPageUrl, getBrowserWindowOpts } from './utils/app';
 import { firstEl } from '../isomorphic/array';
 import TabbedBrowserWindow, {
   TabbedBrowserWindowOptions,
