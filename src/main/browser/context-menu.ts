@@ -1,6 +1,6 @@
 import { app, BrowserWindow, clipboard, Menu, MenuItem } from 'electron'
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants'
-import { getWebuiExtId } from '../streams/webui'
+import { getWebuiExtId } from '../streams/session'
 
 const LABELS = {
   openInNewTab: (type: 'link' | Electron.ContextMenuParams['mediaType']) =>

@@ -6,7 +6,13 @@ type IConf<T extends Subject<any>> = {
   once?: boolean;
 }
 const CONF = {
-  webuiExtension: {
+  userAppReady: {
+    subject: new ReplaySubject(1),
+  } as IConf<ReplaySubject<void>>,
+  sessionReady: {
+    subject: new ReplaySubject(1),
+  } as IConf<ReplaySubject<void>>,
+  webuiExtensionReady: {
     subject: new ReplaySubject(1),
   } as IConf<ReplaySubject<Electron.Extension>>,
   rabbyExtension: {
@@ -15,28 +21,26 @@ const CONF = {
 }
 
 type IMainSubjects = typeof CONF;
-type IMainSubjectValues = {
-  [K in keyof IMainSubjects]:
-    IMainSubjects[K]['subject'] extends Subject<infer V> ? V
-    : IMainSubjects[K]['subject'] extends ReplaySubject<infer V> ? V
-    : never;
-};
+type IMainSubjectValues<K extends keyof IMainSubjects> =
+  IMainSubjects[K]['subject'] extends ReplaySubject<infer V> ? V
+  : IMainSubjects[K]['subject'] extends Subject<infer V> ? V
+  : never;
 
 const store = (Object.keys(CONF) as (keyof IMainSubjects)[]).reduce((acc, type) => {
   acc[type] = {
     initialized: false,
-    observable: CONF[type].subject.asObservable(),
+    observable: CONF[type].subject.asObservable() as Observable<Exclude<IMainSubjectValues<typeof type>, void>>,
   }
 
   return acc;
 }, {} as {
   [K in keyof IMainSubjects]: {
     initialized: boolean;
-    observable: Observable<IMainSubjectValues[keyof IMainSubjects]>;
+    observable: Observable<Exclude<IMainSubjectValues<keyof IMainSubjects>, void>>;
   }
 });
 
-export function valueToMainSubject<T extends keyof IMainSubjects> (type: T, value: IMainSubjectValues[T]) {
+export function valueToMainSubject<T extends keyof IMainSubjects> (type: T, value: IMainSubjectValues<T>) {
   if (CONF[type].once && store[type].initialized) {
     throw new Error(`[valueToMainSubject] '${type}' already initialized`);
   }
@@ -44,9 +48,9 @@ export function valueToMainSubject<T extends keyof IMainSubjects> (type: T, valu
   cLog('valueToMainSubject', `Subject '${type}' initialized`);
 
   store[type].initialized = true;
-  CONF[type].subject.next(value);
+  CONF[type].subject.next(value as never);
 }
 
 export function fromMainSubject<T extends keyof IMainSubjects> (type: T) {
-  return store[type].observable;
+  return store[type].observable as Observable<IMainSubjectValues<T>>;
 }

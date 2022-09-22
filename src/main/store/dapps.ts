@@ -2,8 +2,11 @@
 
 import { app } from 'electron';
 import Store from 'electron-store';
+import { onIpcMainEvent } from '../utils/ipcMainEvents';
 import { APP_NAME, PERSIS_STORE_PREFIX } from '../../isomorphic/constants';
 import { safeParse, shortStringify } from '../../isomorphic/json';
+import { canoicalizeDappUrl } from '../../isomorphic/url';
+import { detectDapps } from '../utils/dapps';
 
 export const dappStore = new Store<{
   dapps: IDapp[];
@@ -67,3 +70,73 @@ export function formatDapps(input = dappStore.get('dapps')): IDapp[] {
 
   return result;
 }
+
+export function isExistedOrigin(url: string) {
+  const { isDapp, origin } = canoicalizeDappUrl(url);
+  if (!isDapp) return false;
+
+  const existedOrigin = dappStore.get('dapps').some((item: IDapp) => {
+    const formatted = formatDapp(item);
+    return formatted?.origin && formatted.origin === origin;
+  });
+
+  return {
+    isDapp,
+    existedOrigin,
+  }
+}
+
+onIpcMainEvent('detect-dapp', async (event, reqid, dappUrl) => {
+  const result = await detectDapps(dappUrl);
+
+  event.reply('detect-dapp', {
+    reqid,
+    result,
+  });
+})
+
+onIpcMainEvent('dapps-fetch', (event, reqid) => {
+  event.reply('dapps-fetch', {
+    reqid,
+    dapps: formatDapps(dappStore.get('dapps')),
+  });
+})
+
+onIpcMainEvent('dapps-put', (event, reqid: string, dapp: IDapp) => {
+  // TODO: is there mutex?
+  const allDapps = formatDapps(dappStore.get('dapps'));
+  const existedDapp = allDapps.find((d) => d.origin === dapp.origin);
+  if (existedDapp) {
+    Object.assign(existedDapp, dapp);
+  } else {
+    allDapps.push(dapp);
+  }
+
+  dappStore.set('dapps', allDapps);
+
+  event.reply('dapps-put', {
+    reqid,
+    dapps: allDapps,
+  });
+});
+
+onIpcMainEvent('dapps-delete', (event, reqid: string, dapp: IDapp) => {
+  const allDapps = dappStore.get('dapps') || [];
+  const idx = allDapps.findIndex((d) => {
+    return d.origin === dapp.origin;
+  });
+
+  let error: string = '';
+  if (idx > -1) {
+    allDapps.splice(idx, 1);
+    dappStore.set('dapps', allDapps);
+  } else {
+    error = 'Not found';
+  }
+
+  event.reply('dapps-delete', {
+    reqid,
+    dapps: allDapps,
+    error,
+  });
+});
