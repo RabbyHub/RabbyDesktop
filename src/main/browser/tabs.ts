@@ -58,8 +58,8 @@ export class Tab {
     this.loadingView.webContents.loadURL(RABBY_LOADING_URL);
     this.window.addBrowserView(this.loadingView);
 
-    this.view.webContents.on('did-finish-load', (e) => {
-      this.loadingView?.webContents.send('did-finish-load', e);
+    this.view.webContents.on('did-finish-load', () => {
+      this.loadingView?.webContents.send('did-finish-load', null);
       this.window?.removeBrowserView(this.loadingView!);
     });
 
@@ -98,7 +98,7 @@ export class Tab {
         evt.preventDefault();
         attachAlertBrowserView(url);
       }
-    })
+    });
   }
 
   destroy() {
