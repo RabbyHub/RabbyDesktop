@@ -13,7 +13,7 @@ async function checkIfNewRelease() {
     const dispose = window.rabbyDesktop.ipcRenderer.on(
       'check-if-new-release',
       (event) => {
-        const { reqid: _reqid, ...rest } = event
+        const { reqid: _reqid, ...rest } = event;
         if (_reqid === reqid) {
           resolve(rest);
           dispose?.();
@@ -27,18 +27,21 @@ async function checkIfNewRelease() {
 type OnDownloadFunc = (payload: IAppUpdatorDownloadProgress) => void;
 async function startDownload({
   onDownload,
-} : {
-  onDownload?: OnDownloadFunc
+}: {
+  onDownload?: OnDownloadFunc;
 } = {}) {
   const reqid = randString();
 
   return new Promise<void>((resolve, reject) => {
-    const disposePending = window.rabbyDesktop.ipcRenderer.on('download-release-progress-updated', (event) => {
-      onDownload?.(event.download)
-      if (event.download.isEnd) {
-        disposePending?.();
+    const disposePending = window.rabbyDesktop.ipcRenderer.on(
+      'download-release-progress-updated',
+      (event) => {
+        onDownload?.(event.download);
+        if (event.download.isEnd) {
+          disposePending?.();
+        }
       }
-    });
+    );
 
     const dispose = window.rabbyDesktop.ipcRenderer.on(
       'start-download',
@@ -55,19 +58,21 @@ async function startDownload({
 }
 
 export function useAppUpdator() {
-  const [releaseCheckInfo, setReleaseCheckInfo] = useState<IAppUpdatorCheckResult>({
-    hasNewRelease: false,
-    releaseVersion: null,
-  });
+  const [releaseCheckInfo, setReleaseCheckInfo] =
+    useState<IAppUpdatorCheckResult>({
+      hasNewRelease: false,
+      releaseVersion: null,
+    });
 
-  const [downloadInfo, setDownloadInfo] = useState<null | IAppUpdatorDownloadProgress>(null);
+  const [downloadInfo, setDownloadInfo] =
+    useState<null | IAppUpdatorDownloadProgress>(null);
   const onDownload: OnDownloadFunc = useCallback((info) => {
     setDownloadInfo(info);
   }, []);
 
   const requestDownload = useCallback(async () => {
     await startDownload({ onDownload });
-  }, [ onDownload ]);
+  }, [onDownload]);
 
   useEffect(() => {
     const fetchReleaseInfo = () => {
@@ -76,7 +81,7 @@ export function useAppUpdator() {
         setReleaseCheckInfo(newVal);
         return newVal;
       });
-    }
+    };
     fetchReleaseInfo();
     const timer = setInterval(() => {
       fetchReleaseInfo();
@@ -84,7 +89,7 @@ export function useAppUpdator() {
 
     return () => {
       clearInterval(timer);
-    }
+    };
   }, []);
 
   console.log('[feat] releaseCheckInfo', releaseCheckInfo);
@@ -92,7 +97,9 @@ export function useAppUpdator() {
   return {
     releaseCheckInfo,
     isDownloading: !!downloadInfo && !downloadInfo.isEnd,
-    isDownloaded: releaseCheckInfo.hasNewRelease && !!downloadInfo && downloadInfo.isEnd,
+    isDownloaded:
+      releaseCheckInfo.hasNewRelease && !!downloadInfo && downloadInfo.isEnd,
+    progress: downloadInfo?.progress,
     requestDownload,
     downloadInfo,
   };

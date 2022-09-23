@@ -10,11 +10,8 @@ import { DappFavicon } from '../components/DappFavicon';
 
 export default function App() {
   const [percent, setPercent] = React.useState(10);
-  const [dapp, setDapp] = React.useState<IDapp | null>(
-    (window as any).dapp || null
-  );
+  const [dapp, setDapp] = React.useState<IDapp | null>(null);
 
-  console.log((window as any).dapp);
   const ref = useRef<any>(null);
 
   useEffect(() => {
@@ -39,7 +36,6 @@ export default function App() {
       clearInterval(ref.current);
     });
     window.rabbyDesktop.ipcRenderer.on('load-dapp' as any, (dapp: IDapp) => {
-      console.log('???');
       setDapp(dapp);
     });
   }, []);
