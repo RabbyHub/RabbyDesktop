@@ -123,6 +123,14 @@ type ChannelMessagePayload = {
       }
     ]
   },
+  'quit-and-upgrade': {
+    send: [reqid: string];
+    response: [
+      {
+        reqid: string,
+      }
+    ]
+  },
   '__internal_alert-security-url': {
     send: [];
     response: [

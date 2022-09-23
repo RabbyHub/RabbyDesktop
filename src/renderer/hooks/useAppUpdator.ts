@@ -4,8 +4,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { randString } from '../../isomorphic/string';
 
-import { useAppVersion } from './useMainBridge';
-
 async function checkIfNewRelease() {
   const reqid = randString();
 
@@ -21,6 +19,24 @@ async function checkIfNewRelease() {
       }
     );
     window.rabbyDesktop.ipcRenderer.sendMessage('check-if-new-release', reqid);
+  });
+}
+
+async function quitAndUpgrade() {
+  const reqid = randString();
+
+  return new Promise<void>((resolve, reject) => {
+    const dispose = window.rabbyDesktop.ipcRenderer.on(
+      'quit-and-upgrade',
+      (event) => {
+        const { reqid: _reqid } = event;
+        if (_reqid === reqid) {
+          resolve();
+          dispose?.();
+        }
+      }
+    );
+    window.rabbyDesktop.ipcRenderer.sendMessage('quit-and-upgrade', reqid);
   });
 }
 
@@ -102,5 +118,6 @@ export function useAppUpdator() {
     progress: downloadInfo?.progress,
     requestDownload,
     downloadInfo,
+    quitAndUpgrade,
   };
 }

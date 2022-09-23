@@ -1,7 +1,9 @@
 import { app } from "electron";
 import { AppUpdaterWin32, AppUpdaterDarwin } from "../updater/updater";
 import { onIpcMainEvent } from "../utils/ipcMainEvents";
-import { cLog } from "../utils/log";
+import { getBindLog } from "../utils/log";
+
+const log = getBindLog('updater', 'bgGrey');
 
 let autoUpdater: AppUpdaterWin32 | AppUpdaterDarwin;
 
@@ -21,16 +23,16 @@ async function getAutoUpdater() {
     }
 
     // autoUpdater.on('checking-for-update', () => {
-    //   cLog('autoUpdater:: checking-for-update', 'checking-for-update');
+    //   log('autoUpdater:: checking-for-update', 'checking-for-update');
     // });
     // autoUpdater.on('update-available', (info) => {
-    //   cLog('autoUpdater:: update-available', info);
+    //   log('autoUpdater:: update-available', info);
     // });
     // autoUpdater.on('update-not-available', (info) => {
-    //   cLog('autoUpdater:: update-not-available', info);
+    //   log('autoUpdater:: update-not-available', info);
     // });
     // autoUpdater.on('update-cancelled', (info) => {
-    //   cLog('autoUpdater:: update-cancelled', info);
+    //   log('autoUpdater:: update-cancelled', info);
     // });
   }
 
@@ -71,7 +73,7 @@ onIpcMainEvent('start-download', async (event, reqid) => {
   event.reply('start-download', { reqid });
 
   autoUpdater.on('download-progress', (info) => {
-    cLog('autoUpdater:: download-progress', info);
+    log('autoUpdater:: download-progress', info);
 
     event.reply('download-release-progress-updated', {
       originReqId: reqid,
@@ -83,7 +85,7 @@ onIpcMainEvent('start-download', async (event, reqid) => {
   });
 
   autoUpdater.on('update-downloaded', (info) => {
-    cLog('autoUpdater:: update-downloaded', info);
+    log('autoUpdater:: update-downloaded', info);
 
     event.reply('download-release-progress-updated', {
       originReqId: reqid,
@@ -101,3 +103,12 @@ onIpcMainEvent('start-download', async (event, reqid) => {
   await state.downloadP;
   state.downloadP = null;
 })
+
+onIpcMainEvent('quit-and-upgrade', async (event, reqid) => {
+  const autoUpdater = await getAutoUpdater();
+  log('autoUpdater:: quit-and-upgrade', reqid);
+
+  event.reply('quit-and-upgrade', { reqid });
+
+  autoUpdater.quitAndInstall();
+});

@@ -8,6 +8,7 @@ export const AutoUpdate = () => {
     isDownloaded,
     requestDownload,
     progress,
+    quitAndUpgrade
   } = useAppUpdator();
 
   if (!releaseCheckInfo.hasNewRelease) {
@@ -48,10 +49,10 @@ export const AutoUpdate = () => {
               href="#/"
               onClick={(e) => {
                 e.preventDefault();
-                // todo restart dapp
+                quitAndUpgrade();
               }}
             >
-              Inastall Now
+              Install Now
             </a>
           </div>
         </div>
