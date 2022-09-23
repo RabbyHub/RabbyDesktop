@@ -1,4 +1,4 @@
-import { app, BrowserView, BrowserWindow, Tray } from "electron";
+import { app, BrowserView, BrowserWindow, nativeTheme, Tray } from "electron";
 import { firstValueFrom } from "rxjs";
 
 import { APP_NAME, IS_RUNTIME_PRODUCTION, RABBY_ALERT_INSECURITY_URL, RABBY_GETTING_STARTED_URL, RABBY_HOMEPAGE_URL, RABBY_SPALSH_URL } from "../../isomorphic/constants";
@@ -16,6 +16,18 @@ import { fromMainSubject, valueToMainSubject } from "./_init";
 import { parseDappUrl } from '../store/dapps';
 
 const appLog = getBindLog('appStream', 'bgGrey');
+
+const isDarwin = process.platform === 'darwin';
+const getTrayIconByTheme = () => {
+  if (!isDarwin)
+    return getAssetPath('app-icons/win32-tray-logo.png')
+
+  if (!nativeTheme.shouldUseDarkColors) {
+    return getAssetPath('app-icons/macos-menu-logo-dark@2x.png');
+  } else {
+    return getAssetPath('app-icons/macos-menu-logo-light@2x.png');
+  }
+}
 
 let alertView: BrowserView;
 export async function attachAlertBrowserView (
@@ -172,17 +184,19 @@ export default function bootstrap () {
         });
       })
 
-      const isDarwin = process.platform === 'darwin';
       if (isDarwin) {
         app.dock.setIcon(getAssetPath('icon.png'))
       }
 
-      const appTray = new Tray(
-        isDarwin ? getAssetPath('app-icons/macos-menu-logo-light@2x.png') : getAssetPath('app-icons/win32-tray-logo.png')
-      )
+      const appTray = new Tray(getTrayIconByTheme());
       // do quit on context menu
       appTray.addListener('click', () => {
         showMainWin();
+      });
+
+      nativeTheme.on('updated', () => {
+        if (isDarwin)
+          appTray.setImage(getTrayIconByTheme());
       });
     }
 
