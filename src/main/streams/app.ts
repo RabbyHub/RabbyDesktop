@@ -85,8 +85,10 @@ app.on('web-contents-created', (evt, webContents) => {
         case 'background-tab':
         case 'new-window': {
           const win = getWindowFromWebContents(webContents);
-          const openedTab = isFromDapp ? win?.tabs.findByOrigin(details.url) : null;
+
+          const openedTab = win?.tabs.findByOrigin(details.url) || null;
           if (openedTab) {
+            win?.tabs.select(openedTab!['id'])
             openedTab!.loadURL(details.url);
           } else {
             const tab = win?.tabs.create();
