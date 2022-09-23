@@ -1,9 +1,9 @@
 import { app } from "electron";
-import AppUpdater from "../updater/updater";
+import { AppUpdaterWin32, AppUpdaterDarwin } from "../updater/updater";
 import { onIpcMainEvent } from "../utils/ipcMainEvents";
 import { cLog } from "../utils/log";
 
-let autoUpdater: AppUpdater;
+let autoUpdater: AppUpdaterWin32 | AppUpdaterDarwin;
 
 const state = {
   downloadP: null as null | Promise<any>
@@ -14,7 +14,11 @@ async function getAutoUpdater() {
   await app.whenReady();
 
   if (!autoUpdater) {
-    autoUpdater = new AppUpdater();
+    if (process.platform === 'darwin') {
+      autoUpdater = new AppUpdaterDarwin();
+    } else {
+      autoUpdater = new AppUpdaterWin32();
+    }
 
     // autoUpdater.on('checking-for-update', () => {
     //   cLog('autoUpdater:: checking-for-update', 'checking-for-update');

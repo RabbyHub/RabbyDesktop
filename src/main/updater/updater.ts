@@ -1,4 +1,4 @@
-import { NsisUpdater } from "electron-updater"
+import { NsisUpdater, MacUpdater } from "electron-updater"
 import eLog from "electron-log";
 
 import type { GenericServerOptions } from "builder-util-runtime";
@@ -19,7 +19,28 @@ function getAppUpdaterURL (): string {
   return `https://download.rabby.io/wallet-desktop/${process.platform === 'win32' ? 'win32' : 'mac'}/`;
 }
 
-export default class AppUpdater extends NsisUpdater {
+export class AppUpdaterWin32 extends NsisUpdater {
+  constructor(options?: GenericServerOptions) {
+    super({
+      provider: "generic",
+      url: getAppUpdaterURL(),
+      ...options,
+      logger: eLog,
+    } as GenericServerOptions);
+
+    // disable autoDownload, manually call `this.downloadUpdate(cancellationToken)` and `new (require('builder-util-runtime').CancellationToken)()` instead
+    this.autoDownload = false;
+  }
+
+  // always enable updater, even in development mode, because we want customize the update behavior
+  // see more details on `node_modules/electron-updater/out/AppUpdater.js`
+  isUpdaterActive () {
+    return true;
+  }
+}
+
+
+export class AppUpdaterDarwin extends MacUpdater {
   constructor(options?: GenericServerOptions) {
     super({
       provider: "generic",
