@@ -17,6 +17,7 @@ import { useAppVersion } from '../../hooks/useMainBridge';
 import './index.less';
 import { AutoUpdate } from './components/AutoUpdate';
 import { DappFavicon } from '../../components/DappFavicon';
+import { ReleaseNote } from './components/ReleaseNote';
 
 function DAppBlock({
   dapp,
@@ -207,6 +208,7 @@ export default function DApps() {
           onCancel={() => setDeletingDapp(null)}
           onDeletedDapp={() => setDeletingDapp(null)}
         />
+        <ReleaseNote />
       </div>
     </div>
   );

@@ -124,7 +124,9 @@
     "jotai": "^1.8.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-markdown": "^8.0.3",
     "react-router-dom": "^6.3.0",
+    "remark-gfm": "^3.0.1",
     "rxjs": "^7.5.6",
     "sortablejs": "^1.15.0"
   },
