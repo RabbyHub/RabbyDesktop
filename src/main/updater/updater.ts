@@ -7,16 +7,21 @@ eLog.transports.file.level = "debug"
 
 import { IS_RUNTIME_PRODUCTION } from "../../isomorphic/constants";
 
+const buildchannel = (process as any).buildchannel || 'reg';
+const ARCH = (process as any).buildarch || process.arch;
+const PLATFORM = process.platform;
+
 function getAppUpdaterURL (): string {
+  if (!IS_RUNTIME_PRODUCTION)
+    return `https://download.rabby.io/wallet-desktop-updater-test/${PLATFORM}-${ARCH}/`;
+
   // if you wanna test the effect, set UPDATER_TEST_URL as a valid url, ask your mate for help.
-  if (process.env.UPDATER_TEST_URL) {
+  if (buildchannel !== 'prod' && process.env.UPDATER_TEST_URL) {
     return process.env.UPDATER_TEST_URL;
   }
 
-  if (!IS_RUNTIME_PRODUCTION)
-    return `https://download.rabby.io/wallet-desktop-updater-test/${process.platform === 'win32' ? 'win32' : 'mac'}/`;
-
-  return `https://download.rabby.io/wallet-desktop/${process.platform === 'win32' ? 'win32' : 'mac'}/`;
+  const remoteBaseDir = buildchannel === 'prod' ? 'wallet-desktop' : `wallet-desktop-${buildchannel}`;
+  return `https://download.rabby.io/${remoteBaseDir}/${PLATFORM}-${ARCH}/`;
 }
 
 export class AppUpdaterWin32 extends NsisUpdater {

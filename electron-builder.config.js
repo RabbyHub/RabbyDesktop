@@ -1,4 +1,6 @@
-const MINIO_TEST = process.env.MINIO_TEST === 'true'
+// prod, reg
+const buildchannel = process.env.buildchannel || 'reg';
+const PLATFORM = process.platform;
 
 module.exports = {
   "productName": "Rabby Wallet",
@@ -17,8 +19,7 @@ module.exports = {
     "target": {
       "target": "default",
       "arch": [
-        "arm64",
-        "x64"
+        process.env.BUILD_ARCH || process.arch
       ]
     },
     "type": "distribution",
@@ -44,7 +45,10 @@ module.exports = {
   },
   "win": {
     "target": [
-      "nsis"
+      {
+        "target": "nsis",
+        "arch": process.env.BUILD_ARCH || process.arch
+      }
     ]
   },
   "nsis": {
@@ -61,7 +65,7 @@ module.exports = {
   "directories": {
     "app": "release/app",
     "buildResources": "assets",
-    "output": "release/build"
+    "output": `release/build-${PLATFORM}-\${arch}-${buildchannel}`
   },
   "extraResources": [
     "./assets/**"
@@ -70,7 +74,7 @@ module.exports = {
     {
       "provider": "generic",
       // pointless now
-      "url": `https://download.rabby.io/wallet-desktop/${process.platform === 'win32' ? 'win32' : 'mac'}/`,
+      "url": `https://download.rabby.io/wallet-desktop/${PLATFORM}-\${arch}-${buildchannel}/`,
     },
   ]
 }

@@ -69,6 +69,9 @@ const configuration: webpack.Configuration = {
 
     new webpack.DefinePlugin({
       'process.type': '"main"',
+      // reg, prod
+      'process.buildchannel': JSON.stringify(process.env.buildchannel || 'reg'),
+      'process.buildarch': JSON.stringify(process.env.buildarch || '')
     }),
 
     new webpack.IgnorePlugin({
