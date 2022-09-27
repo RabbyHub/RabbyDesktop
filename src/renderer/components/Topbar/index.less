@@ -1,5 +1,4 @@
-
-@import "../../css/theme/index.css";
+@import '../../css/theme/index.css';
 
 @rem-unit: 14px;
 
@@ -8,7 +7,9 @@
   font-size: @rem-unit;
 
   --rabby-tab-tabgroup-background: #e7eaed;
-  --rabby-tab-font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --rabby-tab-font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
   --rabby-tab-font-size: 13px;
 
   // --rabby-tab-background: #e7eaed;
@@ -39,7 +40,9 @@
   --browser-action-badge-outline: var(--color-purewhite);
 }
 
-*, *:before, *:after {
+*,
+*:before,
+*:after {
   box-sizing: border-box;
   user-select: none;
 }
@@ -95,7 +98,7 @@ ul {
 }
 
 #createtab:hover {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .tab {
@@ -110,16 +113,20 @@ ul {
   width: (204rem / @rem-unit);
   // box-shadow: inset -1px 0 0 0 rgba(0,0,0,0.33);
   color: var(--rabby-tab-color);
-  opacity: .6;
+  opacity: 0.6;
   cursor: pointer;
+  gap: 8px;
 
-  &[data-active=true], &.active, &:hover {
+  &[data-active='true'],
+  &.active,
+  &:hover {
     opacity: 1;
     color: var(--rabby-tab-active-color);
     background: var(--rabby-tab-active-background);
   }
 
-  &[data-active=true], &.active {
+  &[data-active='true'],
+  &.active {
     color: var(--rabby-tab-active-color);
     background: var(--rabby-tab-active-background);
     box-shadow: none;
@@ -128,7 +135,7 @@ ul {
   img.inactive-hover {
     display: none;
   }
-  &[data-active=false]:hover {
+  &[data-active='false']:hover {
     background: var(--rabby-tab-hover-background);
     color: var(--rabby-tab-hover-color);
 
@@ -179,9 +186,8 @@ ul {
 
 .tab .favicon[src] {
   display: block;
-  width: 16px;
-  height: 16px;
-  margin-right: 0.2rem;
+  width: 20px;
+  height: 20px;
 }
 
 .tab .title {
@@ -192,6 +198,49 @@ ul {
   overflow: hidden;
   font-size: (14rem / @rem-unit);
   user-select: none;
+
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 16px;
+  color: var(--color-title);
+}
+
+.tab {
+  .content {
+    overflow: hidden;
+  }
+  .chain {
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+    color: #27c193;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    &::before {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 4px;
+      border-radius: 4px;
+      background-color: var(--color-green);
+    }
+  }
+  &[data-active='false'] {
+    .title {
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 14px;
+      color: #fff;
+    }
+    .chain {
+      display: none;
+    }
+  }
+  .controls {
+    margin-left: auto;
+  }
 }
 
 .tab .controls {
@@ -200,7 +249,7 @@ ul {
 }
 
 .tab .controls .control {
-  background: rgba(0,0,0,0.2);
+  background: rgba(0, 0, 0, 0.2);
   border: none;
   border-radius: 50%;
   padding: 0;

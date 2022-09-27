@@ -43,6 +43,7 @@ import {
   RABBY_HOMEPAGE_URL,
   RABBY_INTERNAL_PROTOCOL,
 } from '../../../isomorphic/constants';
+import { CHAINS, CHAINS_LIST } from '@debank/common';
 
 const isDebug = process.env.NODE_ENV !== 'production';
 
@@ -125,6 +126,44 @@ function useWinTriples() {
     winOSType: osType,
     winState,
     winButtonActions,
+  };
+}
+
+function useConnectedSite() {
+  type ConnectedSite = {
+    origin: string;
+    chainId: string;
+    isConnected: boolean;
+  };
+  const [connectedSiteMap, setConnectedSiteMap] = useState<
+    Record<string, ConnectedSite & { chainName: string }>
+  >({});
+
+  useEffect(() => {
+    // todo ts
+    const dispose = window.rabbyDesktop.ipcRenderer.on(
+      'rabby:connect' as any,
+      (data: ConnectedSite) => {
+        setConnectedSiteMap((prev) => ({
+          ...prev,
+          [data.origin]: {
+            ...data,
+            chainName:
+              CHAINS_LIST.find(
+                (item) => item.hex.toLowerCase() === data.chainId.toLowerCase()
+              )?.name || '',
+          },
+        }));
+      }
+    );
+    return () => {
+      dispose?.();
+    };
+  }, []);
+
+  return {
+    connectedSiteMap,
+    setConnectedSiteMap,
   };
 }
 
@@ -299,7 +338,10 @@ function useSelectedTabInfo(activeTab?: ChromeTab | null) {
         setSelectedTabInfo(payload);
       }
     );
-    window.rabbyDesktop.ipcRenderer.sendMessage('webui-ext-navinfo', activeTab.id);
+    window.rabbyDesktop.ipcRenderer.sendMessage(
+      'webui-ext-navinfo',
+      activeTab.id
+    );
 
     return () => dispose?.();
   }, [activeTab?.id, activeTab?.url]);
@@ -338,6 +380,8 @@ export default function Topbar() {
   const { addressUrl, isInternalUrl, onAddressUrlChange } = useAddressUrl(
     activeTab?.url
   );
+
+  const { connectedSiteMap } = useConnectedSite();
 
   return (
     <>
@@ -413,7 +457,15 @@ export default function Topbar() {
                 onClick={() => tabActions.onTabClick(tab)}
               >
                 <img className="favicon" src={faviconUrl || undefined} />
-                <span className="title">{tab.title}</span>
+                <div className="content">
+                  <div className="title">{tab.title}</div>
+                  {tab.url &&
+                  connectedSiteMap[new URL(tab.url).origin]?.isConnected ? (
+                    <div className="chain">
+                      {connectedSiteMap[new URL(tab.url).origin]?.chainName}
+                    </div>
+                  ) : null}
+                </div>
                 <div className="controls">
                   {/* <button className="control audio" disabled={tab.audible && !tab.mutedInfo?.muted}>🔊</button> */}
                   {closable && (
