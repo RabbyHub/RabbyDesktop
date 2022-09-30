@@ -22,11 +22,7 @@ const getTrayIconByTheme = () => {
   if (!isDarwin)
     return getAssetPath('app-icons/win32-tray-logo.png')
 
-  if (!nativeTheme.shouldUseDarkColors) {
-    return getAssetPath('app-icons/macos-menu-logo-dark@2x.png');
-  } else {
-    return getAssetPath('app-icons/macos-menu-logo-light@2x.png');
-  }
+  return getAssetPath('app-icons/macosIconTemplate@2x.png');
 }
 
 let alertView: BrowserView;
@@ -192,11 +188,6 @@ export default function bootstrap () {
       // do quit on context menu
       appTray.addListener('click', () => {
         showMainWin();
-      });
-
-      nativeTheme.on('updated', () => {
-        if (isDarwin)
-          appTray.setImage(getTrayIconByTheme());
       });
     }
 
