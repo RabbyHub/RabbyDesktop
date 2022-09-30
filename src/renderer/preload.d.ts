@@ -157,12 +157,17 @@ type ChannelMessagePayload = {
   '__internal_webui-window-close': {
     send: [ winId: number, webContentsId: number ],
     response: []
+  },
+  '__internal__rabby:connect': {
+    send: [ IConnectedSite ],
+    response: [ IConnectedSite ]
   }
 };
 
 type Channels = keyof ChannelMessagePayload;
 
 interface Window {
+  // for built-in webview
   rabbyDesktop: {
     ipcRenderer: {
       /* send message to main process */
@@ -192,4 +197,12 @@ interface Window {
       }
     };
   };
+
+  // for dapp webview
+  __rD?: {
+    tellConnection (info: IConnectedSite): void
+  }
+
+  // from dapp
+  ethereum?: any
 }

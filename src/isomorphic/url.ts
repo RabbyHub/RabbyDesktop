@@ -51,6 +51,10 @@ export function isUrlFromDapp (url: string) {
   return !url.startsWith(RABBY_INTERNAL_PROTOCOL) && !url.startsWith('chrome-extension:') && url.startsWith('https:')
 }
 
+export function isDappProtocol (protocolOrUrl: string) {
+  return protocolOrUrl.startsWith('https:')
+}
+
 export function canoicalizeDappUrl (url: string) {
   let urlInfo: Partial<URL> | null = null;
   try {

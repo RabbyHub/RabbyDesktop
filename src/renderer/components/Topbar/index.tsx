@@ -130,19 +130,14 @@ function useWinTriples() {
 }
 
 function useConnectedSite() {
-  type ConnectedSite = {
-    origin: string;
-    chainId: string;
-    isConnected: boolean;
-  };
   const [connectedSiteMap, setConnectedSiteMap] = useState<
-    Record<string, ConnectedSite & { chainName: string }>
+    Record<string, IConnectedSite & { chainName: string }>
   >({});
 
   useEffect(() => {
     const dispose = window.rabbyDesktop.ipcRenderer.on(
-      'rabby:connect',
-      (data: ConnectedSite) => {
+      '__internal__rabby:connect',
+      (data) => {
         setConnectedSiteMap((prev) => ({
           ...prev,
           [data.origin]: {
