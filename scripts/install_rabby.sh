@@ -4,7 +4,7 @@ scripts_dir="$( cd "$( dirname "$0"  )" && pwd  )"
 assets_dir="$( dirname "$scripts_dir"  )/assets"
 
 if [ -z $RABBY_VER ]; then
-  RABBY_VER=0.47.1
+  RABBY_VER=0.49.2
 fi
 
 echo "[install_rabby] try to download rabby plugin zip..."
