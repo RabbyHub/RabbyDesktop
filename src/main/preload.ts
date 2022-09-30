@@ -5,6 +5,7 @@ import { injectBrowserAction } from '@rabby-wallet/electron-chrome-extensions/di
 
 // to injectExtensionAPIs on chrome-extension://
 import '@rabby-wallet/electron-chrome-extensions/dist/preload';
+import { RABBY_INTERNAL_PROTOCOL } from 'isomorphic/constants';
 
 if (
   window.location.protocol === 'chrome-extension:' &&
@@ -14,7 +15,8 @@ if (
   injectBrowserAction();
 }
 
-if (!(window as any).rabbyDesktop) {
+const IS_SAFE_WEBVIEW = ['chrome-extension:', RABBY_INTERNAL_PROTOCOL].includes(window.location.protocol);
+if (IS_SAFE_WEBVIEW && !(window as any).rabbyDesktop) {
   contextBridge.exposeInMainWorld('rabbyDesktop', {
     ipcRenderer: {
       sendMessage<T extends Channels>(
