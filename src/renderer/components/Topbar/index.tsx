@@ -140,9 +140,8 @@ function useConnectedSite() {
   >({});
 
   useEffect(() => {
-    // todo ts
     const dispose = window.rabbyDesktop.ipcRenderer.on(
-      'rabby:connect' as any,
+      'rabby:connect',
       (data: ConnectedSite) => {
         setConnectedSiteMap((prev) => ({
           ...prev,

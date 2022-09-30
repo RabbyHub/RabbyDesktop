@@ -62,7 +62,6 @@ if (isDapp) {
       });
     }
     Promise.all([window.ethereum.request({ method: 'eth_accounts' }), window.ethereum.request({ method: 'eth_chainId' })]).then(([accounts, chainId]) => {
-      console.log('accounts', accounts, chainId);
       detectConnect({
         chainId,
         address: accounts[0]
