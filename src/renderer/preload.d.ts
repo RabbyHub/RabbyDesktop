@@ -131,6 +131,16 @@ type ChannelMessagePayload = {
       }
     ]
   },
+  'rabby:connect': {
+    send: [reqid: string];
+    response: [
+      {
+        origin: string;
+        chainId: string;
+        isConnected: boolean;
+      }
+    ]
+  },
   '__internal_alert-security-url': {
     send: [];
     response: [
