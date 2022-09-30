@@ -5,6 +5,8 @@ import { injectBrowserAction } from '@rabby-wallet/electron-chrome-extensions/di
 
 // to injectExtensionAPIs on chrome-extension://
 import '@rabby-wallet/electron-chrome-extensions/dist/preload';
+import { RABBY_INTERNAL_PROTOCOL } from 'isomorphic/constants';
+import { isDappProtocol } from 'isomorphic/url';
 
 if (
   window.location.protocol === 'chrome-extension:' &&
@@ -14,7 +16,8 @@ if (
   injectBrowserAction();
 }
 
-if (!(window as any).rabbyDesktop) {
+const IS_SAFE_WEBVIEW = ['chrome-extension:', RABBY_INTERNAL_PROTOCOL].includes(window.location.protocol);
+if (IS_SAFE_WEBVIEW && !window.rabbyDesktop) {
   contextBridge.exposeInMainWorld('rabbyDesktop', {
     ipcRenderer: {
       sendMessage<T extends Channels>(
@@ -41,39 +44,37 @@ if (!(window as any).rabbyDesktop) {
       },
     },
   });
-}
-
-const isDapp = window.location.protocol === 'https:';
-
-if (isDapp) {
-  // TODO: content script 抽成单独文件。origin 传递方式修改。ipc 通信修改。
-  const script = document.createElement('script');
-  script.innerHTML = `
-  {
-    function detectConnect(params) {
+} else if (isDappProtocol(window.location.href) && !window.__rD) {
+  contextBridge.exposeInMainWorld('__rD', {
+    detectConnect: (params: any) => {
       params = params || {};
       const address = params.address || window.ethereum.selectedAddress;
       const chainId = params.chainId || window.ethereum.chainId || '0x1';
 
-      window.rabbyDesktop.ipcRenderer.sendMessage('rabby:connect', {
+      ipcRenderer.send('__internal__rabby:connect', {
         origin: window.location.origin,
         isConnected: !!address,
         chainId: chainId || '0x1'
       });
     }
+  });
+  // TODO: content script 抽成单独文件。origin 传递方式修改。ipc 通信修改。
+  const script = document.createElement('script');
+  script.innerHTML = `
+  {
     Promise.all([window.ethereum.request({ method: 'eth_accounts' }), window.ethereum.request({ method: 'eth_chainId' })]).then(([accounts, chainId]) => {
-      detectConnect({
+      window.__rD.detectConnect({
         chainId,
         address: accounts[0]
       });
     });
     window.ethereum.on('accountsChanged', (accounts) => {
-      detectConnect({
+      window.__rD.detectConnect({
         address: accounts?.[0]
       });
     });
     window.ethereum.on('chainChanged', (chain) => {
-      detectConnect({
+      window.__rD.detectConnect({
         chainId: chain
       });
     });

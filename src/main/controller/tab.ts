@@ -1,9 +1,9 @@
-import { ipcMain } from 'electron';
+import { onIpcMainEvent } from '../utils/ipcMainEvents';
 import { getMainWindow } from '../streams/tabbedBrowserWindow';
 
-ipcMain.on('rabby:connect', async (event, arg) => {
+onIpcMainEvent('__internal__rabby:connect', async (_, arg) => {
   const win = await getMainWindow();
   if (win) {
-    win.window.webContents.send('rabby:connect', arg);
+    win.window.webContents.send('__internal__rabby:connect', arg);
   }
 });

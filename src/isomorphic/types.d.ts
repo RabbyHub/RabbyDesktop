@@ -50,3 +50,9 @@ type IAppUpdatorDownloadProgress = {
   progress: null
   isEnd: true
 }
+
+type IConnectedSite = {
+  origin: string,
+  isConnected: boolean,
+  chainId: string | '0x1'
+}
