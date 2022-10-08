@@ -39,14 +39,14 @@ export const DappFavicon = (props: FaviconProps) => {
   return (
     <Image
       preview={false}
-      placeholder={
-        <img
-          src={fallbackImage}
-          alt={origin}
-          style={rest.style}
-          className={rest.className}
-        />
-      }
+      // placeholder={
+      //   <img
+      //     src={fallbackImage}
+      //     alt={origin}
+      //     style={rest.style}
+      //     className={rest.className}
+      //   />
+      // }
       fallback={fallbackImage}
       {...rest}
     />
