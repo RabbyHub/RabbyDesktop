@@ -116,7 +116,7 @@
   "dependencies": {
     "@debank/common": "^0.2.13",
     "@debank/parse-favicon": "^0.1.0",
-    "@rabby-wallet/electron-chrome-extensions": "^3.9.6",
+    "@rabby-wallet/electron-chrome-extensions": "^3.9.7",
     "@types/chrome": "^0.0.196",
     "@types/sortablejs": "^1.13.0",
     "antd": "^4.23.1",

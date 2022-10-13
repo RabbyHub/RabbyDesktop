@@ -204,7 +204,8 @@ function useTopbar() {
       fetchingRef.current = true;
       const [tabs, dapps] = await Promise.all([
         new Promise<ChromeTab[]>((resolve) =>
-          chrome.tabs.query({ windowId: -2 }, resolve)
+          // we can also use queryInfo { windowId: chrome.windows.WINDOW_ID_CURRENT } here
+          chrome.tabs.query({ currentWindow: true }, resolve)
         ),
         // array to object group by origin
         getAllDapps().then(dapps =>
