@@ -92,24 +92,6 @@ function useCheckedStep() {
   };
 }
 
-const useDuplicateStep = () => {
-  const { getDapp } = useDapps();
-  const [duplicatedDapp, setDuplicatedDapp] = useState<IDapp | null>(null);
-  const checkDuplicate = useCallback(
-    (url: string) => {
-      const { origin } = new URL(url);
-      const dapp = getDapp(origin);
-      setDuplicatedDapp(dapp || null);
-      return !!dapp;
-    },
-    [getDapp]
-  );
-  return {
-    duplicatedDapp,
-    checkDuplicate,
-  } as const;
-};
-
 function AddDapp({
   onAddedDapp,
   ...modalProps
@@ -131,19 +113,26 @@ function AddDapp({
   const { dappInfo, setDappInfo, onChangeDappAlias, isValidAlias } =
     useCheckedStep();
 
-  const { duplicatedDapp, checkDuplicate } = useDuplicateStep();
+  const [duplicatedDapp, setDuplicatedDapp] = useState<IDapp | null>(null);
 
   const { updateDapp } = useDapps();
 
   const doCheck = useCallback(async () => {
-    if (checkDuplicate(addUrl)) {
-      setStep('duplicated');
-      return;
-    }
-
     setCheckError(null);
 
     const payload = await checkUrl();
+
+    if (payload?.error?.type === 'REPEAT') {
+      setStep('duplicated');
+
+      setDuplicatedDapp({
+        alias: '',
+        origin: payload.data!.origin,
+        faviconUrl: payload.data!.faviconUrl,
+        faviconBase64: payload.data!.faviconBase64,
+      });
+      return ;
+    }
 
     setCheckError(payload?.error?.message || null);
 
@@ -156,7 +145,7 @@ function AddDapp({
         faviconBase64: payload.data.faviconBase64,
       });
     }
-  }, [addUrl, checkDuplicate, checkUrl, setCheckError, setDappInfo]);
+  }, [addUrl, checkUrl, setCheckError, setDappInfo]);
 
   return (
     <>

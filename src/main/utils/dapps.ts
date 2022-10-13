@@ -16,6 +16,8 @@ const enum DETECT_ERR_CODES {
   INACCESSIBLE = 'INACCESSIBLE',
   HTTPS_CERT_INVALID = 'HTTPS_CERT_INVALID',
   TIMEOUT = 'TIMEOUT',
+
+  REPEAT = 'REPEAT'
 }
 
 const enum CHROMIUM_LOADURL_ERR_CODE {
@@ -38,7 +40,6 @@ const enum CHROMIUM_LOADURL_ERR_CODE {
 type CHROMIUM_NET_ERR_DESC = `net::${CHROMIUM_LOADURL_ERR_CODE}`
   | `net::ERR_CONNECTION_CLOSED`
 
-// TODO: use RxJS to handle multiple events
 async function checkUrlViaBrowserView (dappUrl: string, opts?: {
   timeout?: number,
 }) {
@@ -50,7 +51,11 @@ async function checkUrlViaBrowserView (dappUrl: string, opts?: {
   })
 
   type Result = {
-    valid: boolean
+    valid: true
+    // some website would redirec to another origin, such as https://binance.com -> https://www.binance.com
+    finalUrl: string
+  } | {
+    valid: false
     isTimeout?: boolean
     errorDesc?: CHROMIUM_LOADURL_ERR_CODE | string
     certErrorDesc?: CHROMIUM_NET_ERR_DESC
@@ -60,7 +65,8 @@ async function checkUrlViaBrowserView (dappUrl: string, opts?: {
 
   view.webContents.on('did-finish-load', () => {
     checkResult.next({
-      valid: true
+      valid: true,
+      finalUrl: view.webContents.getURL(),
     })
   });
 
@@ -96,7 +102,7 @@ async function checkUrlViaBrowserView (dappUrl: string, opts?: {
     obs = obs.pipe(
       timeout(duration),
       catchError(() => of({
-        valid: false,
+        valid: false as false,
         isTimeout: true,
       }))
     );
@@ -109,12 +115,13 @@ async function checkUrlViaBrowserView (dappUrl: string, opts?: {
 }
 
 export async function detectDapps(
-  dappsUrl: string
+  dappsUrl: string,
+  existedDapps: IDapp[],
 ): Promise<IDappsDetectResult<DETECT_ERR_CODES>> {
   // TODO: process void url;
-  const { urlInfo, origin } = canoicalizeDappUrl(dappsUrl);
+  const { urlInfo: inputUrlInfo } = canoicalizeDappUrl(dappsUrl);
 
-  if (urlInfo?.protocol !== 'https:') {
+  if (inputUrlInfo?.protocol !== 'https:') {
     return {
       data: null,
       error: {
@@ -124,10 +131,10 @@ export async function detectDapps(
     };
   }
 
-  const formatedUrl = url.format(urlInfo);
+  const formatedUrl = url.format(inputUrlInfo);
 
   const checkResult = await checkUrlViaBrowserView(formatedUrl);
-  const isCertErr = !!checkResult.certErrorDesc;
+  const isCertErr = !checkResult.valid && !!checkResult.certErrorDesc;
 
   if (isCertErr) {
     return {
@@ -157,15 +164,28 @@ export async function detectDapps(
     };
   }
 
+  const { urlInfo, origin } = canoicalizeDappUrl(checkResult.finalUrl);
   const { iconInfo, faviconUrl, faviconBase64 } = await parseWebsiteFavicon(origin);
 
-  return {
-    data: {
-      urlInfo,
-      icon: iconInfo,
-      origin,
-      faviconUrl,
-      faviconBase64
+  const repeatedDapp = existedDapps.find((item) => item.origin === origin);
+
+  const data = {
+    urlInfo,
+    icon: iconInfo,
+    origin,
+    faviconUrl,
+    faviconBase64
+  }
+
+  if (repeatedDapp) {
+    return {
+      data,
+      error: {
+        type: DETECT_ERR_CODES.REPEAT,
+        message: 'This Dapp has been added'
+      }
     }
   }
+
+  return { data }
 }

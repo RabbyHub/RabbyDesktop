@@ -87,7 +87,8 @@ export function parseDappUrl(url: string) {
 }
 
 onIpcMainEvent('detect-dapp', async (event, reqid, dappUrl) => {
-  const result = await detectDapps(dappUrl);
+  const allDapps = formatDapps(dappStore.get('dapps'));
+  const result = await detectDapps(dappUrl, allDapps);
 
   event.reply('detect-dapp', {
     reqid,

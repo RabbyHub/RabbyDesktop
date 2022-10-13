@@ -36,7 +36,7 @@ import {
 } from '../../../../assets/icons/native-tabs-triples';
 
 import './index.less';
-import { parseQueryString } from '../../../isomorphic/url';
+import { canoicalizeDappUrl, parseQueryString } from '../../../isomorphic/url';
 
 import { useWindowState } from '../../hooks/useWindowState';
 import {
@@ -44,10 +44,12 @@ import {
   RABBY_INTERNAL_PROTOCOL,
 } from '../../../isomorphic/constants';
 import { CHAINS, CHAINS_LIST } from '@debank/common';
+import { getAllDapps } from 'renderer/ipcRequest/dapps';
 
 const isDebug = process.env.NODE_ENV !== 'production';
 
 type ChromeTab = chrome.tabs.Tab;
+type ChromeTabWithLocalFavicon = ChromeTab & { localFavIconUrl?: string };
 type TabId = ChromeTab['id'];
 // type ChromeTabLike = { id?: ChromeTab["id"] };
 
@@ -162,13 +164,13 @@ function useConnectedSite() {
 }
 
 function useTopbar() {
-  const [origTabList, setTabList] = useState<ChromeTab[]>([]);
+  const [origTabList, setTabList] = useState<(ChromeTabWithLocalFavicon)[]>([]);
   const [activeTabId, setActiveId] = useState<ChromeTab['id']>(-1);
   const [windowId, setWindowId] = useState<number | undefined>(undefined);
 
   const { tabList, activeTab } = useMemo(() => {
-    let activeTab = null as ChromeTab | null;
-    const tabList: ChromeTab[] = origTabList.map((_tab) => {
+    let activeTab = null as ChromeTabWithLocalFavicon | null;
+    const tabList: ChromeTabWithLocalFavicon[] = origTabList.map((_tab) => {
       const tab = { ..._tab };
       if (tab.id === activeTabId) {
         tab.active = true;
@@ -194,12 +196,33 @@ function useTopbar() {
     []
   );
 
-  useEffect(() => {
-    (async () => {
-      const tabs = await new Promise<ChromeTab[]>((resolve) =>
-        chrome.tabs.query({ windowId: -2 }, resolve)
-      );
-      const origTabList = [...tabs];
+  const fetchingRef = useRef(false);
+  const fetchTabListState = useCallback(
+    async () => {
+      if (fetchingRef.current) return ;
+
+      fetchingRef.current = true;
+      const [tabs, dapps] = await Promise.all([
+        new Promise<ChromeTab[]>((resolve) =>
+          chrome.tabs.query({ windowId: -2 }, resolve)
+        ),
+        // array to object group by origin
+        getAllDapps().then(dapps =>
+          dapps.reduce((acc, dapp) => {
+            acc[dapp.origin] = dapp;
+            return acc;
+          }, {} as Record<IDapp['origin'], IDapp>)
+        )
+      ]).finally(() => {
+        fetchingRef.current = false
+      });
+      const origTabList = tabs.map((tab) => {
+        const origin = tab.url ? canoicalizeDappUrl(tab.url).origin : '';
+        return {
+          ...tab,
+          ...origin && dapps[origin] && { localFavIconUrl: dapps[origin].faviconBase64 },
+        }
+      });
 
       setTabList(origTabList);
 
@@ -207,8 +230,24 @@ function useTopbar() {
       if (activeTab) {
         updateActiveTab(activeTab);
       }
-    })();
-  }, [updateActiveTab]);
+    },
+    [ updateActiveTab ]
+  )
+
+  useEffect(() => {
+    fetchTabListState();
+
+    const onUpdate: Parameters<typeof chrome.tabs.onUpdated.addListener>[0] = (tabId, changeInfo) => {
+      if (changeInfo.status === 'complete' || !changeInfo.favIconUrl) {
+        fetchTabListState();
+      }
+    };
+    chrome.tabs.onUpdated.addListener(onUpdate);
+
+    return () => {
+      chrome.tabs.onUpdated.removeListener(onUpdate);
+    }
+  }, [fetchTabListState]);
 
   const tabListDomRef = useRef<HTMLUListElement>(null);
 
@@ -434,11 +473,10 @@ export default function Topbar() {
           </div>
         )}
         <ul className="tab-list" ref={tabListDomRef}>
-          {tabList.map((tab: ChromeTab, idx) => {
+          {tabList.map((tab: ChromeTabWithLocalFavicon, idx) => {
             const key = `topbar-tab-${tab.id}-${idx}`;
 
-            const faviconUrl =
-              filterFavIcon(tab.url, tab.active) || tab.favIconUrl;
+            const faviconUrl = tab.localFavIconUrl || filterFavIcon(tab.url, tab.active) || tab.favIconUrl;
             const closable = filterClosable(tab.url, CLOSABLE);
 
             return (

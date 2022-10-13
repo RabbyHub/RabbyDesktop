@@ -67,12 +67,14 @@ export function canoicalizeDappUrl (url: string) {
   const isDapp = urlInfo?.protocol === 'https:';
 
   // protcol://hostname[:port]
-  const origin = `${urlInfo?.protocol}//${hostname}${urlInfo?.port ? `:${urlInfo?.port}` : ''}`;
+  const origin = urlInfo?.origin || (`${urlInfo?.protocol}//${hostname}${urlInfo?.port ? `:${urlInfo?.port}` : ''}`);
+  const domain = hostname.split('.').slice(-2).join('.');
 
   return {
     urlInfo,
     isDapp,
     origin,
+    domain,
   }
 }
 

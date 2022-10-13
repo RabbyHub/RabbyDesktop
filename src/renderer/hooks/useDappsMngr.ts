@@ -3,74 +3,7 @@
 
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
-import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
-import { randString } from '../../isomorphic/string';
-
-async function getAll() {
-  const reqid = randString();
-
-  return new Promise<IDapp[]>((resolve, reject) => {
-    const dispose = window.rabbyDesktop.ipcRenderer.on(
-      'dapps-fetch',
-      (event) => {
-        if (event.reqid === reqid) {
-          resolve(event.dapps);
-          dispose?.();
-        }
-      }
-    );
-    window.rabbyDesktop.ipcRenderer.sendMessage('dapps-fetch', reqid);
-  });
-}
-
-// TODO: use timeout mechanism
-async function detectDapps(dappUrl: string) {
-  const reqid = randString();
-
-  return new Promise<IDappsDetectResult>((resolve, reject) => {
-    const dispose = window.rabbyDesktop.ipcRenderer.on(
-      'detect-dapp',
-      (event) => {
-        if (event.reqid === reqid) {
-          resolve(event.result);
-          dispose?.();
-        }
-      }
-    );
-    window.rabbyDesktop.ipcRenderer.sendMessage('detect-dapp', reqid, dappUrl);
-  });
-}
-
-async function putDapp(dapp: IDapp) {
-  const reqid = randString();
-
-  return new Promise<IDapp[]>((resolve, reject) => {
-    const dispose = window.rabbyDesktop.ipcRenderer.on('dapps-put', (event) => {
-      if (event.reqid === reqid) {
-        resolve(event.dapps);
-        dispose?.();
-      }
-    });
-    window.rabbyDesktop.ipcRenderer.sendMessage('dapps-put', reqid, dapp);
-  });
-}
-
-async function deleteDapp(dapp: IDapp) {
-  const reqid = randString();
-
-  return new Promise<IDapp[]>((resolve, reject) => {
-    const dispose = window.rabbyDesktop.ipcRenderer.on(
-      'dapps-delete',
-      (event) => {
-        if (event.reqid === reqid) {
-          event.error ? reject(new Error(event.error)) : resolve(event.dapps);
-          dispose?.();
-        }
-      }
-    );
-    window.rabbyDesktop.ipcRenderer.sendMessage('dapps-delete', reqid, dapp);
-  });
-}
+import { getAllDapps, detectDapps, putDapp, deleteDapp } from '../ipcRequest/dapps';
 
 const dappsAtomic = atom(null as any as IDapp[]);
 
@@ -80,7 +13,7 @@ export function useDapps() {
   useEffect(() => {
     if (dapps) return;
     // eslint-disable-next-line promise/catch-or-return
-    getAll().then((newVal) => {
+    getAllDapps().then((newVal) => {
       setDapps(newVal);
       return newVal;
     });
@@ -119,16 +52,6 @@ export function useDapps() {
     },
     [dapps]
   );
-
-  useEffect(() => {
-    if (IS_RUNTIME_PRODUCTION) return;
-    // TODO: just for test
-    // (async () => {
-    //   // const result = await detectDapps('http://www.google.com');
-    //   // const result = await detectDapps('https://debank.com');
-    //   const result = await detectDapps('https://app.uniswap.org');
-    // })();
-  }, []);
 
   return {
     dapps: dapps || [],
