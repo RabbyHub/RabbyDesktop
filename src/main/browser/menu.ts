@@ -11,9 +11,9 @@ export const setupMenu = ({
   const isMac = process.platform === 'darwin';
 
   const template = [
-    ...(isMac ? [{ role: 'appMenu' }] : []),
-    { role: 'fileMenu' },
-    { role: 'editMenu' },
+    // ...(isMac ? [{ role: 'appMenu' }] : []),
+    // { role: 'fileMenu' },
+    // { role: 'editMenu' },
     {
       label: 'View',
       submenu: [
@@ -42,7 +42,7 @@ export const setupMenu = ({
               win.toggleDevTools()
             }
           },
-        } : null,
+        } : null as any,
         { type: 'separator' },
         { role: 'resetZoom' },
         { role: 'zoomIn' },
@@ -51,7 +51,7 @@ export const setupMenu = ({
         { role: 'togglefullscreen' },
       ].filter(Boolean),
     },
-    { role: 'windowMenu' },
+    // { role: 'windowMenu' },
   ];
 
   const menu = Menu.buildFromTemplate(template);

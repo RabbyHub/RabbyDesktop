@@ -1,4 +1,4 @@
-import { app, BrowserView, BrowserWindow, nativeTheme, Tray } from "electron";
+import { app, BrowserView, BrowserWindow, Tray } from "electron";
 import { firstValueFrom } from "rxjs";
 
 import { APP_NAME, IS_RUNTIME_PRODUCTION, RABBY_ALERT_INSECURITY_URL, RABBY_GETTING_STARTED_URL, RABBY_HOMEPAGE_URL, RABBY_SPALSH_URL } from "../../isomorphic/constants";
@@ -9,11 +9,11 @@ import { desktopAppStore } from "../store/desktopApp";
 import { getAssetPath, getBrowserWindowOpts } from "../utils/app";
 import { onIpcMainEvent } from "../utils/ipcMainEvents";
 import { getBindLog } from "../utils/log";
-import { geChromeExtensions } from "./session";
+import { getChromeExtensions } from "./session";
 import { createWindow, getFocusedWindow, getMainWindow, getWindowFromWebContents } from "./tabbedBrowserWindow";
 import { getWebuiExtId } from "./session";
 import { fromMainSubject, valueToMainSubject } from "./_init";
-import { parseDappUrl } from '../store/dapps';
+import { dappStore, formatDapps, parseDappUrl } from '../store/dapps';
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
@@ -33,6 +33,7 @@ export async function attachAlertBrowserView (
     // TODO: use standalone session open it
     alertView = new BrowserView({
       webPreferences: {
+        // session: await getTemporarySession(),
         webviewTag: true,
         sandbox: true,
         nodeIntegration: false,
@@ -80,9 +81,10 @@ app.on('web-contents-created', (evt, webContents) => {
   webContents.setWindowOpenHandler((details) => {
     const currentUrl = webContents.getURL();
     const isFromDapp = isUrlFromDapp(currentUrl);
+    const dapps = formatDapps(dappStore.get('dapps'));
 
-    const currentInfo = parseDappUrl(currentUrl);
-    const targetInfo = parseDappUrl(details.url);
+    const currentInfo = parseDappUrl(currentUrl, dapps);
+    const targetInfo = parseDappUrl(details.url, dapps);
     const sameOrigin = currentInfo.origin === targetInfo.origin
 
     if (isFromDapp && !sameOrigin) {
@@ -123,7 +125,7 @@ app.on('web-contents-created', (evt, webContents) => {
     const menu = buildChromeContextMenu({
       params,
       webContents,
-      extensionMenuItems: (await geChromeExtensions()).getContextMenuItems(
+      extensionMenuItems: (await getChromeExtensions()).getContextMenuItems(
         webContents,
         params
       ),

@@ -71,10 +71,13 @@ export function formatDapps(input = dappStore.get('dapps')): IDapp[] {
   return result;
 }
 
-export function parseDappUrl(url: string) {
+export function parseDappUrl(
+  url: string,
+  existedDapps = formatDapps(dappStore.get('dapps'))
+) {
   const { isDapp, origin } = canoicalizeDappUrl(url);
 
-  const existedOrigin = !isDapp ? false : dappStore.get('dapps').some((item: IDapp) => {
+  const existedOrigin = !isDapp ? false : existedDapps.some((item: IDapp) => {
     const formatted = formatDapp(item);
     return formatted?.origin && formatted.origin === origin;
   });

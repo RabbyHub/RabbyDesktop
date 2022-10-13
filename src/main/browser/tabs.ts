@@ -94,6 +94,7 @@ export class Tab {
       const sender = (evt as any).sender as BrowserView['webContents'];
 
       const url = sender.getURL();
+      // this tabs is render as app's self UI, such as topbar.
       if (isUrlFromDapp(url)) {
         evt.preventDefault();
         attachAlertBrowserView(url);

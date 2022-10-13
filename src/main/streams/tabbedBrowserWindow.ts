@@ -1,7 +1,7 @@
 import { BrowserWindow } from "electron";
 import TabbedBrowserWindow, { TabbedBrowserWindowOptions } from "../browser/browsers";
 import { getBrowserWindowOpts } from "../utils/app";
-import { geChromeExtensions, getWebuiExtId } from "./session";
+import { getChromeExtensions, getWebuiExtId } from "./session";
 import { valueToMainSubject } from "./_init";
 
 const getParentWindowOfTab = (tab: Electron.WebContents) => {
@@ -72,7 +72,7 @@ export async function createWindow(options: Partial<TabbedBrowserWindowOptions>)
   const win = new TabbedBrowserWindow({
     ...options,
     webuiExtensionId: webuiExtensionId,
-    extensions: await geChromeExtensions(),
+    extensions: await getChromeExtensions(),
     window: getBrowserWindowOpts(options.window),
   });
   windows.push(win);

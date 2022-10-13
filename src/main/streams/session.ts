@@ -77,7 +77,7 @@ async function loadExtensions(sess: Electron.Session, extensionsPath: string) {
 }
 
 let chromeExtensions: ElectronChromeExtensions;
-export async function geChromeExtensions () {
+export async function getChromeExtensions () {
   await firstValueFrom(fromMainSubject('webuiExtensionReady'));
   return chromeExtensions;
 }
@@ -137,8 +137,6 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
 
   valueToMainSubject('sessionReady', void 0);
   sessionIns.setPreloads([preloadPath]);
-
-  // @notice: make sure all customized plugins loaded after ElectronChromeExtensions initialized
 
   // @notice: make sure all customized plugins loaded after ElectronChromeExtensions initialized
   chromeExtensions = new ElectronChromeExtensions({
