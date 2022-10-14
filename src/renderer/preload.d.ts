@@ -154,6 +154,10 @@ type ChannelMessagePayload = {
     send: [];
     response: []
   },
+  '__internal_close-security-check-content': {
+    send: [];
+    response: []
+  },
   '__internal_webui-window-close': {
     send: [ winId: number, webContentsId: number ],
     response: []

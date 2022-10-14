@@ -10,10 +10,11 @@ import { getAssetPath, getBrowserWindowOpts } from "../utils/app";
 import { onIpcMainEvent } from "../utils/ipcMainEvents";
 import { getBindLog } from "../utils/log";
 import { getChromeExtensions } from "./session";
-import { createWindow, getFocusedWindow, getMainWindow, getWindowFromWebContents } from "./tabbedBrowserWindow";
+import { createWindow, getFocusedWindow, getWindowFromWebContents } from "./tabbedBrowserWindow";
 import { getWebuiExtId } from "./session";
 import { fromMainSubject, valueToMainSubject } from "./_init";
 import { dappStore, formatDapps, parseDappUrl } from '../store/dapps';
+import { attachAlertBrowserView, attachPopupBrowserView } from "./popupView";
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
@@ -23,49 +24,6 @@ const getTrayIconByTheme = () => {
     return getAssetPath('app-icons/win32-tray-logo.png')
 
   return getAssetPath('app-icons/macosIconTemplate@2x.png');
-}
-
-let alertView: BrowserView;
-export async function attachAlertBrowserView (
-  url: string, isExisted = false, targetWin?: BrowserWindow
-) {
-  if (!alertView) {
-    // TODO: use standalone session open it
-    alertView = new BrowserView({
-      webPreferences: {
-        // session: await getTemporarySession(),
-        webviewTag: true,
-        sandbox: true,
-        nodeIntegration: false,
-        allowRunningInsecureContent: false,
-        autoplayPolicy: 'user-gesture-required'
-      }
-    });
-    alertView.webContents.loadURL(`${RABBY_ALERT_INSECURITY_URL}?__init_url__=${encodeURIComponent(url)}`);
-  }
-
-  alertView.webContents.send('__internal_alert-security-url', { url, isExisted });
-
-  targetWin = targetWin || (await getMainWindow()).window;
-
-  const dispose = onIpcMainEvent('__internal_close-alert-insecure-content', () => {
-    targetWin?.removeBrowserView(alertView);
-    // destroyBrowserWebview(alertView);
-
-    dispose?.();
-  });
-
-  targetWin.addBrowserView(alertView);
-
-  const [width, height] = targetWin.getSize();
-
-  alertView!.setBounds({
-    x: 0,
-    y: 0,
-    width,
-    height,
-  });
-  alertView!.setAutoResize({ width: true, height: true });
 }
 
 app.on('web-contents-created', (evt, webContents) => {
@@ -101,8 +59,10 @@ app.on('web-contents-created', (evt, webContents) => {
             win?.tabs.select(openedTab!['id'])
             openedTab!.loadURL(details.url);
           } else {
-            const tab = win?.tabs.create();
-            tab?.loadURL(details.url);
+            // TODO: do security check
+            attachPopupBrowserView(details.url, targetInfo.existedOrigin, getWindowFromWebContents(webContents)?.window);
+            // const tab = win?.tabs.create();
+            // tab?.loadURL(details.url);
           }
           break;
         }

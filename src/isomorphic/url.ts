@@ -26,7 +26,11 @@ export function parseUrlQuery(_url: string) {
 
   const query: Record<string, any> = parseQueryString(queryString);
 
-  const { pathname } = new URL(url);
+  let pathname: string = '';
+  try {
+    pathname = new URL(url).pathname;
+  } catch (e) {
+  }
   const canoicalPath = pathname.replace(/\/$/, '');
 
   return { url, canoicalPath, query, queryString };
