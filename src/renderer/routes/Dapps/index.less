@@ -1,6 +1,33 @@
 // @import '../../css//vars.less';
 // @import '../../css/mixins.less';
 
+@import "../../css/theme/index.css";
+
+@HOME_PADDING: 200px;
+@DASHBOARD_W: 1280px - 2 * @HOME_PADDING;
+
+/*
+ * @NOTE: Prepend a `~` to css file paths that are in your node_modules
+ *        See https://github.com/webpack-contrib/sass-loader#imports
+ */
+body {
+  margin: 0;
+  font-family: var(--default-font);
+  position: relative;
+  color: white;
+  height: 100vh;
+  background: var(--color-purewhite);
+  overflow-y: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+}
+
 @scrollbar-w: 8px;
 @scrollbar-max-w: 10px;
 

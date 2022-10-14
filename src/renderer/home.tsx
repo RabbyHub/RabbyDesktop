@@ -2,9 +2,20 @@
 
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './css/style.less';
 
-import App from './App';
+import DApps from './routes/Dapps';
+
+function App() {
+  return (
+    <Router initialEntries={['/dapps']}>
+      <Routes>
+        <Route path="/dapps" element={<DApps />} />
+      </Routes>
+    </Router>
+  );
+}
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
