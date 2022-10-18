@@ -25,6 +25,8 @@ export default function ModalSecurityCheck() {
 
     checkItemViewHttps,
     checkItemViewLatestUpdateInfo,
+
+    hideView,
   } = useCheckDapp();
 
   if (!checkingUrl) return null;
@@ -41,7 +43,7 @@ export default function ModalSecurityCheck() {
       centered
       closable={false}
       onCancel={() => {
-        window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:security-check:close-view')
+        hideView();
       }}
       footer={null}
     >
