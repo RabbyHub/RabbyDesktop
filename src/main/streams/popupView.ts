@@ -1,14 +1,51 @@
 import { BrowserView, BrowserWindow } from "electron";
+import { firstValueFrom } from "rxjs";
+
 import { canoicalizeDappUrl, integrateQueryToUrl } from "../../isomorphic/url";
-import { RABBY_ALERT_INSECURITY_URL, RABBY_SECURITY_CHECK_URL } from "../../isomorphic/constants";
+import { IS_RUNTIME_PRODUCTION, RABBY_ALERT_INSECURITY_URL, RABBY_POPUP_GHOST_VIEW_URL } from "../../isomorphic/constants";
 import { onIpcMainEvent } from "../utils/ipcMainEvents";
-import { getMainWindow } from "./tabbedBrowserWindow";
+import { getMainWindow, onMainWindowReady } from "./tabbedBrowserWindow";
 import { dappStore, formatDapp } from "../store/dapps";
 import { checkDappHttpsCert, queryDappLatestUpdateInfo } from "../utils/dapps";
 import { randString } from "../../isomorphic/string";
 import { AxiosError } from "axios";
+import { fromMainSubject, valueToMainSubject } from "./_init";
 
-let securityCheckPopup: BrowserView;
+firstValueFrom(fromMainSubject('mainWindowReady')).then(async (mainWin) => {
+  const targetWin = mainWin.window;
+  const [width, height] = targetWin.getSize();
+
+  const mainWinGhostView = new BrowserView({
+    webPreferences: {
+      // session: await getTemporarySession(),
+      webviewTag: true,
+      sandbox: true,
+      nodeIntegration: false,
+      allowRunningInsecureContent: false,
+      autoplayPolicy: 'user-gesture-required'
+    }
+  });
+
+  mainWinGhostView.setBounds({
+    x: 0,
+    y: 0,
+    width,
+    height,
+  });
+  mainWinGhostView.setAutoResize({ width: true, height: true });
+
+  // add to main window then remove
+  targetWin.addBrowserView(mainWinGhostView);
+  mainWinGhostView.webContents.loadURL(RABBY_POPUP_GHOST_VIEW_URL);
+  targetWin.removeBrowserView(mainWinGhostView);
+
+  if (!IS_RUNTIME_PRODUCTION) {
+    mainWinGhostView.webContents.openDevTools({ mode: 'detach' });
+  }
+
+  valueToMainSubject('mainPopupGhostViewReady', mainWinGhostView);
+})
+
 export async function attachDappSecurityCheckView (
   url: string,
   targetWin?: BrowserWindow
@@ -16,44 +53,22 @@ export async function attachDappSecurityCheckView (
   targetWin = targetWin || (await getMainWindow()).window;
   const continualOpenId = randString();
 
-  if (!securityCheckPopup) {
-    securityCheckPopup = new BrowserView({
-      webPreferences: {
-        // session: await getTemporarySession(),
-        webviewTag: true,
-        sandbox: true,
-        nodeIntegration: false,
-        allowRunningInsecureContent: false,
-        autoplayPolicy: 'user-gesture-required'
-      }
-    });
-    securityCheckPopup.webContents.loadURL(
-      integrateQueryToUrl(RABBY_SECURITY_CHECK_URL, {
-        __checking_url__: url,
-        __open_id__: continualOpenId
-      })
-    );
+  const securityCheckPopup = await firstValueFrom(fromMainSubject('mainPopupGhostViewReady'));
 
-    onIpcMainEvent('__internal_rpc:security-check:close-view', () => {
-      targetWin?.removeBrowserView(securityCheckPopup);
-    });
-
-    targetWin.addBrowserView(securityCheckPopup);
-
-    const [width, height] = targetWin.getSize();
-
-    securityCheckPopup!.setBounds({
-      x: 0,
-      y: 0,
-      width,
-      height,
-    });
-    securityCheckPopup!.setAutoResize({ width: true, height: true });
-  } else {
-    targetWin.addBrowserView(securityCheckPopup);
+  // dispatch custom event with url, continualOpenId
+  securityCheckPopup.webContents.executeJavaScript(`
+document.dispatchEvent(new CustomEvent('__set_checking_info__', ${JSON.stringify({
+  detail: {
+    url, continualOpenId
   }
+})}));
+`);
 
-  securityCheckPopup.webContents.send('__internal_rpc:security-check:new-dapp', { url, continualOpenId });
+  onIpcMainEvent('__internal_rpc:security-check:close-view', () => {
+    targetWin?.removeBrowserView(securityCheckPopup);
+  });
+
+  targetWin.addBrowserView(securityCheckPopup);
 
   return { continualOpenId }
 }

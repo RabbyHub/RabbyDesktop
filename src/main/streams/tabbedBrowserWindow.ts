@@ -1,8 +1,9 @@
 import { BrowserWindow } from "electron";
+import { firstValueFrom } from "rxjs";
 import TabbedBrowserWindow, { TabbedBrowserWindowOptions } from "../browser/browsers";
 import { getBrowserWindowOpts } from "../utils/app";
 import { getChromeExtensions, getWebuiExtId } from "./session";
-import { valueToMainSubject } from "./_init";
+import { fromMainSubject, valueToMainSubject } from "./_init";
 
 const getParentWindowOfTab = (tab: Electron.WebContents) => {
   switch (tab.getType()) {
@@ -19,10 +20,18 @@ const getParentWindowOfTab = (tab: Electron.WebContents) => {
   }
 };
 
+export async function onMainWindowReady() {
+  return firstValueFrom(fromMainSubject('mainWindowReady'));
+}
+
 const windows: TabbedBrowserWindow[] = [];
 
 let mainWindow: TabbedBrowserWindow;
-export async function getMainWindow () { return mainWindow };
+export async function getMainWindow () {
+  await onMainWindowReady();
+
+  return mainWindow;
+};
 
 export function getFocusedWindow() {
   return windows.find((w) => w.window.isFocused()) || windows[0];

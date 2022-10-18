@@ -15,4 +15,4 @@ export const RABBY_SPALSH_URL = `${RABBY_INTERNAL_PROTOCOL}//local/splash.html`;
 export const RABBY_LOADING_URL = `${RABBY_INTERNAL_PROTOCOL}//local/loading.html`;
 
 export const RABBY_ALERT_INSECURITY_URL = `${RABBY_INTERNAL_PROTOCOL}//local/alert-insecurity.html`;
-export const RABBY_SECURITY_CHECK_URL = `${RABBY_INTERNAL_PROTOCOL}//local/popup-view.html?__type__=security-check&__mask__=true`;
+export const RABBY_POPUP_GHOST_VIEW_URL = `${RABBY_INTERNAL_PROTOCOL}//local/popup-view.html?__type__=security-check&__mask__=true`;

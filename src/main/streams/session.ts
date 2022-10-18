@@ -90,6 +90,10 @@ export async function getWebuiExtId () {
   return ext.id;
 };
 
+export async function defaultSessionReadyThen () {
+  return firstValueFrom(fromMainSubject('sessionReady'));
+}
+
 firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   // sub.unsubscribe();
   const sessionIns = session.defaultSession;

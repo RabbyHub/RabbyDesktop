@@ -1,3 +1,4 @@
+import { BrowserView } from 'electron';
 import { Subject, ReplaySubject, Observable } from 'rxjs';
 import TabbedBrowserWindow from '../browser/browsers';
 import { cLog } from '../utils/log';
@@ -22,6 +23,9 @@ const CONF = {
   mainWindowReady: {
     subject: new ReplaySubject(1),
   } as IConf<ReplaySubject<TabbedBrowserWindow>>,
+  mainPopupGhostViewReady: {
+    subject: new ReplaySubject(1),
+  } as IConf<ReplaySubject<BrowserView>>,
 }
 
 type IMainSubjects = typeof CONF;

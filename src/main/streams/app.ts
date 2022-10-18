@@ -1,7 +1,6 @@
-import { app, BrowserView, BrowserWindow, Tray } from "electron";
-import { firstValueFrom } from "rxjs";
+import { app, BrowserWindow, Tray } from "electron";
 
-import { APP_NAME, IS_RUNTIME_PRODUCTION, RABBY_ALERT_INSECURITY_URL, RABBY_GETTING_STARTED_URL, RABBY_HOMEPAGE_URL, RABBY_SPALSH_URL } from "../../isomorphic/constants";
+import { APP_NAME, IS_RUNTIME_PRODUCTION, RABBY_GETTING_STARTED_URL, RABBY_HOMEPAGE_URL, RABBY_SPALSH_URL } from "../../isomorphic/constants";
 import { isRabbyShellURL, isUrlFromDapp } from "../../isomorphic/url";
 import buildChromeContextMenu from "../browser/context-menu";
 import { setupMenu } from '../browser/menu';
@@ -9,10 +8,10 @@ import { desktopAppStore } from "../store/desktopApp";
 import { getAssetPath, getBrowserWindowOpts } from "../utils/app";
 import { onIpcMainEvent } from "../utils/ipcMainEvents";
 import { getBindLog } from "../utils/log";
-import { getChromeExtensions } from "./session";
-import { createWindow, getFocusedWindow, getWindowFromBrowserWindow, getWindowFromWebContents } from "./tabbedBrowserWindow";
+import { getChromeExtensions, defaultSessionReadyThen } from "./session";
+import { createWindow, getFocusedWindow, getWindowFromWebContents } from "./tabbedBrowserWindow";
 import { getWebuiExtId } from "./session";
-import { fromMainSubject, valueToMainSubject } from "./_init";
+import { valueToMainSubject } from "./_init";
 import { dappStore, formatDapps, parseDappUrl } from '../store/dapps';
 import { attachAlertBrowserView, attachDappSecurityCheckView } from "./popupView";
 
@@ -166,7 +165,7 @@ export default function bootstrap () {
     }
 
     // wait main subject ready
-    await firstValueFrom(fromMainSubject('sessionReady'));
+    await defaultSessionReadyThen();
 
     // init window
     const mainWin = await createWindow({

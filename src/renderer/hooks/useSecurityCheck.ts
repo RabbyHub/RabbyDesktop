@@ -15,10 +15,10 @@ const DEFAULT_DAPP_UPDATE_INFO_RESULT: ISecurityCheckResult['checkLatestUpdate']
   dappUpdateInfo: null as null | IDappUpdateDetectionItem,
 };
 
-export function useCheckDapp(initUrl: string, initOpenId: string) {
+export function useCheckDapp() {
   const [ checkingInfo, setCheckingInfo ] = useState({
-    url: initUrl,
-    continualOpenId: initOpenId
+    url: '',
+    continualOpenId: '',
   });
   const [ dappInfo, setDappInfo ] = useState(null as null | IDapp);
 
@@ -31,12 +31,19 @@ export function useCheckDapp(initUrl: string, initOpenId: string) {
   });
 
   useEffect(() => {
-    window.rabbyDesktop.ipcRenderer.on('__internal_rpc:security-check:new-dapp', ({ url, continualOpenId }) => {
-      setCheckingInfo({ url, continualOpenId });
-    })
+    const listener = (evt: EventListenerObject & { detail: { url: string, continualOpenId: string } }) => {
+      setCheckingInfo({ url: evt.detail.url, continualOpenId: evt.detail.continualOpenId });
+    };
+    document.addEventListener('__set_checking_info__', listener as any);
+
+    return () => {
+      document.removeEventListener('__set_checking_info__', listener as any);
+    }
   }, []);
 
   useEffect(() => {
+    if (!checkingInfo.url) return ;
+
     securityCheckGetDappInfo(checkingInfo.url)
       .then((dappInfo) => {
         setDappInfo(dappInfo);

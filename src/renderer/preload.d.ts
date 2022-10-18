@@ -6,10 +6,6 @@ type M2RChanneMessagePayload = {
     originReqId: string;
     download: IAppUpdatorDownloadProgress
   },
-  '__internal_rpc:security-check:new-dapp': {
-    continualOpenId: string
-    url: string
-  }
 }
 
 type ChannelMessagePayload = {

@@ -6,11 +6,7 @@ import '../css/style.less';
 
 import './popup-view.less';
 import { Modal } from 'antd';
-import { parseQueryString } from '../../isomorphic/url';
 import { useCheckDapp } from 'renderer/hooks/useSecurityCheck';
-
-const INIT_URL = decodeURIComponent(parseQueryString().__checking_url__ || '');
-const INIT_OPENID = decodeURIComponent(parseQueryString().__open_id__ || '');
 
 const ICON_LOADING = 'rabby-internal://assets/icons/security-check/icon-loading.svg';
 
@@ -30,7 +26,7 @@ export default function SecurityCheck() {
 
     checkItemViewHttps,
     checkItemViewLatestUpdateInfo,
-  } = useCheckDapp(INIT_URL, INIT_OPENID);
+  } = useCheckDapp();
 
   if (!checkingUrl) return null;
 
@@ -39,7 +35,7 @@ export default function SecurityCheck() {
       className='modal-security-check'
       wrapClassName='modal-security-check-wrap'
       width={560}
-      open
+      open={!!checkingUrl}
       // enable on debug
       maskClosable={!isProd}
       mask
