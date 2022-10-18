@@ -1,16 +1,22 @@
 import { BrowserView, BrowserWindow } from "electron";
+import { canoicalizeDappUrl, integrateQueryToUrl } from "../../isomorphic/url";
 import { RABBY_ALERT_INSECURITY_URL, RABBY_SECURITY_CHECK_URL } from "../../isomorphic/constants";
 import { onIpcMainEvent } from "../utils/ipcMainEvents";
 import { getMainWindow } from "./tabbedBrowserWindow";
+import { dappStore, formatDapp } from "../store/dapps";
+import { checkDappHttpsCert, queryDappLatestUpdateInfo } from "../utils/dapps";
+import { randString } from "../../isomorphic/string";
+import { AxiosError } from "axios";
 
 let securityCheckPopup: BrowserView;
-export async function attachPopupBrowserView (
+export async function attachDappSecurityCheckView (
   url: string,
-  isExisted = false,
   targetWin?: BrowserWindow
 ) {
+  targetWin = targetWin || (await getMainWindow()).window;
+  const continualOpenId = randString();
+
   if (!securityCheckPopup) {
-    // TODO: use standalone session open it
     securityCheckPopup = new BrowserView({
       webPreferences: {
         // session: await getTemporarySession(),
@@ -21,32 +27,114 @@ export async function attachPopupBrowserView (
         autoplayPolicy: 'user-gesture-required'
       }
     });
-    securityCheckPopup.webContents.loadURL(`${RABBY_SECURITY_CHECK_URL}`);
+    securityCheckPopup.webContents.loadURL(
+      integrateQueryToUrl(RABBY_SECURITY_CHECK_URL, {
+        __checking_url__: url,
+        __open_id__: continualOpenId
+      })
+    );
+
+    onIpcMainEvent('__internal_rpc:security-check:close-view', () => {
+      targetWin?.removeBrowserView(securityCheckPopup);
+    });
+
+    targetWin.addBrowserView(securityCheckPopup);
+
+    const [width, height] = targetWin.getSize();
+
+    securityCheckPopup!.setBounds({
+      x: 0,
+      y: 0,
+      width,
+      height,
+    });
+    securityCheckPopup!.setAutoResize({ width: true, height: true });
+  } else {
+    targetWin.addBrowserView(securityCheckPopup);
   }
 
-  securityCheckPopup.webContents.send('__internal_alert-security-url', { url, isExisted });
+  securityCheckPopup.webContents.send('__internal_rpc:security-check:new-dapp', { url, continualOpenId });
 
-  targetWin = targetWin || (await getMainWindow()).window;
-
-  const dispose = onIpcMainEvent('__internal_close-security-check-content', () => {
-    targetWin?.removeBrowserView(securityCheckPopup);
-    // destroyBrowserWebview(securityCheckPopup);
-
-    dispose?.();
-  });
-
-  targetWin.addBrowserView(securityCheckPopup);
-
-  const [width, height] = targetWin.getSize();
-
-  securityCheckPopup!.setBounds({
-    x: 0,
-    y: 0,
-    width,
-    height,
-  });
-  securityCheckPopup!.setAutoResize({ width: true, height: true });
+  return { continualOpenId }
 }
+
+onIpcMainEvent('__internal_rpc:security-check:get-dapp', (evt, reqid, dappUrl) => {
+  const dapp = dappStore.get('dapps').find((item) => item.origin === canoicalizeDappUrl(dappUrl).origin);
+  evt.reply('__internal_rpc:security-check:get-dapp', {
+    reqid,
+    dappInfo: dapp ? formatDapp(dapp) : null
+  });
+});
+
+onIpcMainEvent('__internal_rpc:security-check:batch', async (evt, reqid, dappUrl) => {
+  const origin = canoicalizeDappUrl(dappUrl).origin;
+  const [
+    checkResult,
+    latestUpdateResult
+  ] = await Promise.all([
+    checkDappHttpsCert(origin),
+    queryDappLatestUpdateInfo({
+      dapp_origin: origin,
+    })
+    .then((json) => {
+      const latestItem = json.detect_list?.[0] || null;
+      return {
+        timeout: false,
+        dappUpdateInfo: latestItem || null
+      }
+    })
+    .catch(err => {
+      if ((err as AxiosError).code === 'timeout') {
+        return {
+          timeout: true,
+          dappUpdateInfo: null,
+          error: err.message
+        }
+      } else {
+        return {
+          timeout: false,
+          dappUpdateInfo: null,
+          error: 'unknown'
+        }
+      }
+    })
+  ]);
+
+  const httpsResult = checkResult?.type === 'HTTPS_CERT_INVALID' ? {
+    httpsError: true,
+    chromeErrorCode: checkResult.errorCode
+  } : {
+    httpsError: false,
+    timeout: checkResult?.type === 'TIMEOUT'
+  }
+
+  // normalize result
+  let countIssues = 0, countDangerIssues = 0;
+  let resultLevel = undefined as any as 'ok' | 'warning' | 'danger';
+
+  if (latestUpdateResult.dappUpdateInfo?.create_at && latestUpdateResult.dappUpdateInfo?.is_changed) {
+    countIssues++;
+    resultLevel = resultLevel || 'warning';
+  }
+
+  if (httpsResult.httpsError) {
+    countIssues++;
+    countDangerIssues++;
+    resultLevel = 'danger';
+  }
+
+  resultLevel = resultLevel || 'ok';
+
+  evt.reply('__internal_rpc:security-check:batch', {
+    reqid,
+    countIssues,
+    countDangerIssues,
+    resultLevel,
+    timeout: !!(httpsResult.timeout || latestUpdateResult.timeout),
+    checkHttps: httpsResult,
+    checkLatestUpdate: latestUpdateResult,
+  })
+});
 
 let alertView: BrowserView;
 export async function attachAlertBrowserView (

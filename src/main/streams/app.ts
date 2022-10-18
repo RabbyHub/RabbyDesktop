@@ -10,11 +10,11 @@ import { getAssetPath, getBrowserWindowOpts } from "../utils/app";
 import { onIpcMainEvent } from "../utils/ipcMainEvents";
 import { getBindLog } from "../utils/log";
 import { getChromeExtensions } from "./session";
-import { createWindow, getFocusedWindow, getWindowFromWebContents } from "./tabbedBrowserWindow";
+import { createWindow, getFocusedWindow, getWindowFromBrowserWindow, getWindowFromWebContents } from "./tabbedBrowserWindow";
 import { getWebuiExtId } from "./session";
 import { fromMainSubject, valueToMainSubject } from "./_init";
 import { dappStore, formatDapps, parseDappUrl } from '../store/dapps';
-import { attachAlertBrowserView, attachPopupBrowserView } from "./popupView";
+import { attachAlertBrowserView, attachDappSecurityCheckView } from "./popupView";
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
@@ -52,17 +52,29 @@ app.on('web-contents-created', (evt, webContents) => {
         case 'foreground-tab':
         case 'background-tab':
         case 'new-window': {
-          const win = getWindowFromWebContents(webContents);
+          const tabbedWin = getWindowFromWebContents(webContents);
 
-          const openedTab = win?.tabs.findByOrigin(details.url) || null;
+          const openedTab = tabbedWin?.tabs.findByOrigin(details.url) || null;
           if (openedTab) {
-            win?.tabs.select(openedTab!['id'])
+            tabbedWin?.tabs.select(openedTab!['id'])
             openedTab!.loadURL(details.url);
           } else {
+            const targetWin = tabbedWin?.window;
             // TODO: do security check
-            attachPopupBrowserView(details.url, targetInfo.existedOrigin, getWindowFromWebContents(webContents)?.window);
-            // const tab = win?.tabs.create();
-            // tab?.loadURL(details.url);
+            attachDappSecurityCheckView(details.url, targetWin)
+              .then(({ continualOpenId }) => {
+                const disposeContinueOpenDapp = onIpcMainEvent('__internal_rpc:security-check:continue-open-dapp', (_evt, _openId, _openUrl) => {
+                  if (targetWin && _openId === continualOpenId) {
+                    disposeContinueOpenDapp?.();
+                    const tab = tabbedWin?.tabs.create();
+                    tab?.loadURL(details.url);
+                  }
+                });
+
+                targetWin?.once('closed', () => {
+                  disposeContinueOpenDapp?.();
+                });
+              });
           }
           break;
         }

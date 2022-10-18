@@ -5,6 +5,10 @@ type M2RChanneMessagePayload = {
   'download-release-progress-updated': {
     originReqId: string;
     download: IAppUpdatorDownloadProgress
+  },
+  '__internal_rpc:security-check:new-dapp': {
+    continualOpenId: string
+    url: string
   }
 }
 
@@ -154,7 +158,28 @@ type ChannelMessagePayload = {
     send: [];
     response: []
   },
-  '__internal_close-security-check-content': {
+  '__internal_rpc:security-check:get-dapp': {
+    send: [reqid: string, dappUrl: string];
+    response: [
+      {
+        reqid: string
+        dappInfo: IDapp | null
+      }
+    ]
+  },
+  '__internal_rpc:security-check:batch': {
+    send: [reqid: string, dappUrl: string];
+    response: [
+      ISecurityCheckResult & {
+        reqid: string
+      }
+    ]
+  },
+  '__internal_rpc:security-check:continue-open-dapp': {
+    send: [continualOpenId: string, dappUrl: string];
+    response: []
+  },
+  '__internal_rpc:security-check:close-view': {
     send: [];
     response: []
   },

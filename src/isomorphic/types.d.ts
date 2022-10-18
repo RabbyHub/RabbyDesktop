@@ -56,3 +56,28 @@ type IConnectedSite = {
   isConnected: boolean,
   chainId: string | '0x1'
 }
+
+type IDappUpdateDetectionItem = {
+  dapp_id: string
+  version: string
+  is_changed: boolean
+  new_detected_address_list: string[]
+  create_at: number
+}
+
+type ISecurityCheckResult = {
+  countIssues: number
+  countDangerIssues: number
+  resultLevel: 'ok' | 'warning' | 'danger'
+  timeout: boolean
+  checkHttps: {
+    timeout?: boolean
+    httpsError: boolean
+    chromeErrorCode?: string
+  }
+  checkLatestUpdate: {
+    timeout?: boolean
+    dappUpdateInfo?: IDappUpdateDetectionItem | null
+    error?: string
+  }
+}
