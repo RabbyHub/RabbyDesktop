@@ -1,0 +1,126 @@
+/// <reference path="../../preload.d.ts" />
+
+import { Modal } from 'antd';
+import classNames from 'classnames';
+import '../../css/style.less';
+
+import './SecurityCheck.less';
+import { useCheckDapp } from 'renderer/hooks/useSecurityCheck';
+
+const ICON_LOADING = 'rabby-internal://assets/icons/security-check/icon-loading.svg';
+
+const ICON_SHILED_OK = 'rabby-internal://assets/icons/security-check/icon-shield-ok.svg';
+const ICON_SHILED_WARNING = 'rabby-internal://assets/icons/security-check/icon-shield-warning.svg';
+const ICON_SHILED_DANGER = 'rabby-internal://assets/icons/security-check/icon-shield-danger.svg';
+
+const isProd = process.env.NODE_ENV === 'production';
+
+export default function ModalSecurityCheck() {
+  const {
+    dappInfo,
+
+    isChecking,
+    checkingUrl,
+    checkResult,
+
+    checkItemViewHttps,
+    checkItemViewLatestUpdateInfo,
+  } = useCheckDapp();
+
+  if (!checkingUrl) return null;
+
+  return (
+    <Modal
+      className='modal-security-check'
+      wrapClassName='modal-security-check-wrap'
+      width={560}
+      open={!!checkingUrl}
+      // enable on debug
+      maskClosable={!isProd}
+      mask
+      centered
+      closable={false}
+      onCancel={() => {
+        window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:security-check:close-view')
+      }}
+      footer={null}
+    >
+      <img className='modal-bg-logo' src="rabby-internal://assets/icons/security-check/modal-bg-logo.svg" />
+      <div className={classNames('check-header', `J_check_level-${checkResult.resultLevel}`)}>
+        {isChecking ? (
+          <img className='bg-placeholder' src="rabby-internal://assets/icons/security-check/modal-header-ok.svg" />
+        ) : (
+          <>
+            {checkResult.resultLevel === 'ok' && <img className='bg-placeholder' src="rabby-internal://assets/icons/security-check/modal-header-ok.svg" />}
+            {checkResult.resultLevel === 'warning' && <img className='bg-placeholder' src="rabby-internal://assets/icons/security-check/modal-header-warning.svg" />}
+            {checkResult.resultLevel === 'danger' && <img className='bg-placeholder' src="rabby-internal://assets/icons/security-check/modal-header-danger.svg" />}
+          </>
+        )}
+
+        <div className='header-info'>
+          <div className='inner'>
+            <div className='check-status-text'>
+              {isChecking ? (
+                <>Dapp Security Engine is scanning ...</>
+              ) : (
+                checkResult.countDangerIssues ? <>Dapp Security Engine found {checkResult.countDangerIssues} danger(s)<br/>Unable to proceed</>
+                : checkResult.countIssues ? <>Dapp Security Engine found {checkResult.countIssues} warning(s)</>
+                // TODO: just close this modal on no issues
+                : <>Dapp Security Engine found no risks and will continue to scan as you use the dapp</>
+              )}
+            </div>
+            {!dappInfo ? null : (
+              <div className='checking-dapp'>
+                <span className='dapp-icon'>
+                  <img src={
+                    dappInfo.faviconBase64 || `https://www.google.com/s2/favicons?domain=${dappInfo.origin}`
+                  } />
+                </span>
+                <span>
+                  {dappInfo.origin}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className='check-main-wrapper'>
+        <div className='check-item'>
+          <div className={classNames('check-icon', checkResult.latestUpdate.checking && 'loading')}>
+            <img src={checkResult.latestUpdate.checking ? ICON_LOADING
+              : checkItemViewLatestUpdateInfo.warning ? ICON_SHILED_WARNING
+              : ICON_SHILED_OK
+            } />
+          </div>
+          <div className='desc'>
+            <div className='title'>Web page last updated time</div>
+            {/* TODO: show failure result */}
+            <div className='checking-status'>
+              {checkResult.latestUpdate.checking ? 'Checking...'
+                : checkItemViewLatestUpdateInfo.resultText
+              }
+            </div>
+          </div>
+        </div>
+
+        <div className='check-item'>
+          <div className={classNames('check-icon', checkResult.https.checking && 'loading')}>
+            <img src={checkResult.https.checking ? ICON_LOADING
+              : checkResult.https.httpsError ? ICON_SHILED_DANGER
+              : ICON_SHILED_OK
+            } />
+          </div>
+          <div className='desc'>
+            <div className='title'>HTTPS certificate validation</div>
+            {/* TODO: show failure result */}
+            <div className='checking-status'>
+              {checkResult.https.checking
+                ? 'Checking...'
+                : checkItemViewHttps.resultText}
+            </div>
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
+}

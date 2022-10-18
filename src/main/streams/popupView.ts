@@ -1,10 +1,10 @@
 import { BrowserView, BrowserWindow } from "electron";
 import { firstValueFrom } from "rxjs";
 
-import { canoicalizeDappUrl, integrateQueryToUrl } from "../../isomorphic/url";
+import { canoicalizeDappUrl } from "../../isomorphic/url";
 import { IS_RUNTIME_PRODUCTION, RABBY_ALERT_INSECURITY_URL, RABBY_POPUP_GHOST_VIEW_URL } from "../../isomorphic/constants";
 import { onIpcMainEvent } from "../utils/ipcMainEvents";
-import { getMainWindow, onMainWindowReady } from "./tabbedBrowserWindow";
+import { getMainWindow } from "./tabbedBrowserWindow";
 import { dappStore, formatDapp } from "../store/dapps";
 import { checkDappHttpsCert, queryDappLatestUpdateInfo } from "../utils/dapps";
 import { randString } from "../../isomorphic/string";
@@ -36,7 +36,7 @@ firstValueFrom(fromMainSubject('mainWindowReady')).then(async (mainWin) => {
 
   // add to main window then remove
   targetWin.addBrowserView(mainWinGhostView);
-  mainWinGhostView.webContents.loadURL(RABBY_POPUP_GHOST_VIEW_URL);
+  mainWinGhostView.webContents.loadURL(`${RABBY_POPUP_GHOST_VIEW_URL}#/security-check`);
   targetWin.removeBrowserView(mainWinGhostView);
 
   if (!IS_RUNTIME_PRODUCTION) {

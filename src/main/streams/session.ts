@@ -113,12 +113,13 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
         );
 
         const pathname = pathnameWithQuery.split('?')?.[0] || '';
+        const pathnameWithoutHash = pathname.split('#')?.[0] || '';
 
-        if (pathname.startsWith('assets/')) {
-          callback({ path: getAssetPath(pathname.slice('assets/'.length)) });
-        } else if (pathname.startsWith('local/')) {
+        if (pathnameWithoutHash.startsWith('assets/')) {
+          callback({ path: getAssetPath(pathnameWithoutHash.slice('assets/'.length)) });
+        } else if (pathnameWithoutHash.startsWith('local/')) {
           callback({
-            path: getRendererPath(pathname.slice('local/'.length)),
+            path: getRendererPath(pathnameWithoutHash.slice('local/'.length)),
           });
         } else {
           // TODO: give one 404 page
