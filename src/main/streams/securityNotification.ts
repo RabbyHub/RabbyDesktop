@@ -1,6 +1,5 @@
-import { app, BrowserWindow, clipboard } from "electron";
-import { firstValueFrom, interval, Subscription } from "rxjs";
-import { distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { BrowserWindow } from "electron";
+import { firstValueFrom} from "rxjs";
 
 import { IS_RUNTIME_PRODUCTION, RABBY_POPUP_GHOST_VIEW_URL } from "../../isomorphic/constants";
 import { NATIVE_HEADER_WITH_NAV_H, SECURITY_NOTIFICATION_VIEW_SIZE } from "../../isomorphic/const-size";
@@ -49,9 +48,10 @@ onMainWindowReady().then(async (mainWin) => {
 
   await secNotifications.webContents.loadURL(`${RABBY_POPUP_GHOST_VIEW_URL}#/security-notifications`);
 
-  // if (!IS_RUNTIME_PRODUCTION) {
-  //   secNotifications.webContents.openDevTools({ mode: 'detach' });
-  // }
+  // debug-only
+  if (!IS_RUNTIME_PRODUCTION) {
+    secNotifications.webContents.openDevTools({ mode: 'detach' });
+  }
 
   // show but opacity is 0
   secNotifications.show();
@@ -89,22 +89,22 @@ function updateSubWindowPosition(
   window.setBounds({ ...selfViewBounds, x, y })
 }
 
-export async function attachClipboardSecurityNotificationView (
-  web3Addr: string,
-  targetWin?: BrowserWindow
-) {
-  targetWin = targetWin || (await getMainWindow()).window;
+export async function openSecurityNotificationView (payload: ISecurityNotificationPayload) {
+  const targetWin = (await getMainWindow()).window;
 
   const securityNotifyPopup = await firstValueFrom(fromMainSubject('securityNotificationsWindowReady'));
 
-  securityNotifyPopup.webContents.send('__internal_rpc:clipboard:full-web3-addr', { web3Address: web3Addr });
+  securityNotifyPopup.webContents.send('__internal_rpc:security-notification', payload);
 
-  onIpcMainEvent('__internal_rpc:clipboard:close-view', () => {
-    securityNotifyPopup.setOpacity(0);
-  });
   updateSubWindowPosition(targetWin, securityNotifyPopup);
   securityNotifyPopup.setOpacity(1);
 }
+
+onIpcMainEvent('__internal_rpc:clipboard:close-view', async () => {
+  const securityNotifyPopup = await firstValueFrom(fromMainSubject('securityNotificationsWindowReady'));
+
+  securityNotifyPopup.setOpacity(0);
+});
 
 onIpcMainEvent('__internal_rpc:browser:set-ignore-mouse-events', (event, ...args) => {
   const win = BrowserWindow.fromWebContents(event.sender)

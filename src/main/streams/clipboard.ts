@@ -1,54 +1,60 @@
 import { app, clipboard } from "electron";
+import { cLog } from "../utils/log";
 import { interval, Subscription } from "rxjs";
-import { distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, pairwise } from 'rxjs/operators';
 
-import { attachClipboardSecurityNotificationView } from "./securityNotification";
+import { openSecurityNotificationView } from "./securityNotification";
 
-const clipboardText$ = interval(300).pipe(
-  map(() => clipboard.readText('clipboard'))
+const trimedClipboardText$ = interval(300).pipe(
+  map(() => ({
+    text: clipboard.readText('clipboard').trim(),
+    time: Date.now()
+  }))
 );
 
-const clipboardChanged$ = clipboardText$.pipe(
-  distinctUntilChanged((prev, cur) => prev === cur)
+const clipboardChanged$ = trimedClipboardText$.pipe(
+  distinctUntilChanged((prev, cur) => prev.text === cur.text)
 );
 
-const WEB3_ADDR_REGEX = /(0x[a-fA-F0-9]{40})/;
-// checkout one web3 ens address
-const clipboardTextWithWeb3Addrs$ = clipboardChanged$.pipe(
-  filter((text) => {
-    return !WEB3_ADDR_FULL_REGEX.test(text) && WEB3_ADDR_REGEX.test(text);
-  }),
-  map(text => {
-    return {
-      fullText: text,
-      web3Addr: text.match(WEB3_ADDR_REGEX)![0]
-    }
-  })
-)
+// const WEB3_ADDR_REGEX = /(0x[a-fA-F0-9]{40})/;
 
 const WEB3_ADDR_FULL_REGEX = /^0x[a-fA-F0-9]{40}$/;
-const clipboardFullWeb3Addrs$ = clipboardChanged$.pipe(
-  filter((text) => {
-    return WEB3_ADDR_FULL_REGEX.test(text.trim());
+const inContinuousWeb3Addrs$ = clipboardChanged$.pipe(
+  pairwise(),
+  filter(([prev, cur]) => {
+    const prevIsWeb3Addr = WEB3_ADDR_FULL_REGEX.test(prev.text);
+    const curIsWeb3Addr = WEB3_ADDR_FULL_REGEX.test(cur.text);
+    // return !!(prevIsWeb3Addr ^ curIsWeb3Addr)
+
+    return !prevIsWeb3Addr && curIsWeb3Addr;
+  }),
+)
+const continuousWeb3Addrs$ = clipboardChanged$.pipe(
+  pairwise(),
+  filter(([prev, cur]) => {
+    return WEB3_ADDR_FULL_REGEX.test(prev.text) && WEB3_ADDR_FULL_REGEX.test(cur.text);
   })
 )
 
 let subs: Subscription[] = []
 
 subs = subs.concat(
-  clipboardChanged$.subscribe(async (text) => {
-    // cLog('[feat] latestValue is', text);
+  clipboardChanged$.subscribe(async (ref) => {
+    // cLog('[feat] latestValue is', ref);
   }),
-
-  // clipboardTextWithWeb3Addrs$.subscribe(async ({ fullText, web3Addr }) => {
-  //   cLog('[feat] with web3Addr is', web3Addr);
-  // }),
-
-  clipboardFullWeb3Addrs$.subscribe(async (web3Addr) => {
-    // cLog('[feat] full web3Addr is', web3Addr);
-
-    attachClipboardSecurityNotificationView(web3Addr);
+  inContinuousWeb3Addrs$.subscribe(async ([, cur]) => {
+    openSecurityNotificationView({
+      type: 'full-web3-addr',
+      web3Addr: cur.text
+    });
   }),
+  continuousWeb3Addrs$.subscribe(async ([prev, cur]) => {
+    openSecurityNotificationView({
+      type: cur.time - prev.time >= 1e3 ? 'full-web3-addr-changed' : 'full-web3-addr-quick-changed',
+      prevAddr: prev.text,
+      curAddr: cur.text,
+    });
+  })
 );
 
 app.on('will-quit', () => {

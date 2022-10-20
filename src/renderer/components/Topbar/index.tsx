@@ -364,12 +364,12 @@ export default function Topbar() {
   const { connectedSiteMap } = useConnectedSite();
 
   useEffect(() => {
-    // for debug
+    // debug-only
     if (!IS_RUNTIME_PRODUCTION && isMainWinShellWebUI(window.location.href)) {
-      window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:browser-dev:openDevTools');
+      // window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:browser-dev:openDevTools');
 
       // window.open('https://app.uniswap.org');
-      window.open('https://debank.com');
+      // window.open('https://debank.com');
     }
   }, []);
 

@@ -84,3 +84,15 @@ type ISecurityCheckResult = {
     error?: string
   }
 }
+
+type ISecurityNotificationPayload = {
+  type: 'full-web3-addr',
+  web3Addr: string,
+} | {
+  type: 'full-web3-addr-changed' | 'full-web3-addr-quick-changed',
+  prevAddr: string,
+  curAddr: string,
+} | {
+  type: 'text-with-ens',
+  ensDomain: string,
+}

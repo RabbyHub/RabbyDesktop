@@ -7,13 +7,7 @@ type M2RChanneMessagePayload = {
     originReqId: string;
     download: IAppUpdatorDownloadProgress
   },
-  '__internal_rpc:clipboard:full-web3-addr': {
-    web3Address: string;
-  },
-  '__internal_rpc:clipboard:full-web3-addr:changed': {
-    prevAddr: string;
-    curAddr: string;
-  },
+  '__internal_rpc:security-notification': ISecurityNotificationPayload,
 }
 
 type ChannelMessagePayload = {
