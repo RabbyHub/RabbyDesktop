@@ -1,6 +1,7 @@
 import classNames from 'classnames';
-import { isInternalProtocol } from 'isomorphic/url';
+import { isInternalProtocol, isUrlFromDapp } from 'isomorphic/url';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { queryLatestDappSecurityCheckResult } from 'renderer/ipcRequest/security-check';
 import styles from './DappAddressBar.module.less';
 
 function useAddressUrl(updatedUrl?: string) {
@@ -47,12 +48,44 @@ export default function DappAddressBar ({
     url
   );
 
+  const [ checkResult, setCheckResult ] = useState<ISecurityCheckResult | null>(null);
+
+  useEffect(() => {
+    if (!url || !isUrlFromDapp(url)) {
+      setCheckResult(null);
+      return ;
+    }
+
+    queryLatestDappSecurityCheckResult(url)
+      .then(cR => {
+        setCheckResult(cR)
+      })
+      .catch(() => {
+        setCheckResult(null);
+      });
+  }, [ url ]);
+
   return (
-    <div className={classNames(styles['address-bar'], isInternalUrl && styles.forInternalUrl)}>
-      {!isInternalUrl && (
-        <div className={styles.securityInfo}>
-          <img src="rabby-internal://assets/icons/native-tabs/icon-shield-default.svg" />
-          <div className={styles.summaryText}>No risk fonud</div>
+    <div className={classNames(
+      styles['address-bar'],
+      isInternalUrl && styles.forInternalUrl,
+    )}>
+      {checkResult && (
+        <div className={classNames(styles.securityInfo, `J_security_level-${checkResult.resultLevel}`)}>
+          {checkResult.resultLevel === 'ok' && (
+            <>
+              <img src="rabby-internal://assets/icons/native-tabs/icon-shield-default.svg" />
+              <div className={styles.summaryText}>No risk fonud</div>
+            </>
+          )}
+          {checkResult.resultLevel === 'warning' && (
+            <>
+              <img src="rabby-internal://assets/icons/native-tabs/icon-shield-warning.svg" />
+              <div className={styles.summaryText}>Found {checkResult.countWarnings} Warning(s)</div>
+            </>
+          )}
+
+
         </div>
       )}
       {isInternalUrl ? (

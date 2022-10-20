@@ -1,9 +1,10 @@
 import { BrowserView, BrowserWindow } from "electron";
-
 import { firstValueFrom } from "rxjs";
+import LruCache from 'lru-cache';
+
 import { IS_RUNTIME_PRODUCTION, RABBY_POPUP_GHOST_VIEW_URL } from "../../isomorphic/constants";
 
-import { canoicalizeDappUrl } from "../../isomorphic/url";
+import { canoicalizeDappUrl, isUrlFromDapp } from "../../isomorphic/url";
 
 import { dappStore, formatDapp } from "../store/dapps";
 import { checkDappHttpsCert, queryDappLatestUpdateInfo } from "../utils/dapps";
@@ -12,6 +13,12 @@ import { AxiosError } from "axios";
 import { fromMainSubject, valueToMainSubject } from "./_init";
 import { getMainWindow } from "./tabbedBrowserWindow";
 import { onIpcMainEvent } from "../utils/ipcMainEvents";
+
+const securityCheckResults = new LruCache<IDapp['origin'], ISecurityCheckResult>({
+  max: 500,
+  // maxSize: 5000,
+  ttl: 1000 * 90,
+})
 
 firstValueFrom(fromMainSubject('mainWindowReady')).then(async (mainWin) => {
   const targetWin = mainWin.window;
@@ -100,11 +107,10 @@ function getMockedChanged (dapp_id: string) {
   }
 }
 
-onIpcMainEvent('__internal_rpc:security-check:check-dapp', async (evt, reqid, dappUrl) => {
-  const origin = canoicalizeDappUrl(dappUrl).origin;
+export async function doCheckDappOrigin (origin: string) {
   // TODO: catch error here
   const [
-    checkResult,
+    httpsCheckResult,
     latestUpdateResult
   ] = await Promise.all([
     checkDappHttpsCert(origin),
@@ -143,38 +149,65 @@ onIpcMainEvent('__internal_rpc:security-check:check-dapp', async (evt, reqid, da
     })
   ]);
 
-  const httpsResult = checkResult?.type === 'HTTPS_CERT_INVALID' ? {
+  const httpsResult = httpsCheckResult?.type === 'HTTPS_CERT_INVALID' ? {
     httpsError: true,
-    chromeErrorCode: checkResult.errorCode
+    chromeErrorCode: httpsCheckResult.errorCode
   } : {
     httpsError: false,
-    timeout: checkResult?.type === 'TIMEOUT'
+    timeout: httpsCheckResult?.type === 'TIMEOUT'
   }
 
   // normalize result
-  let countIssues = 0, countDangerIssues = 0;
+  let countWarnings = 0, countDangerIssues = 0;
   let resultLevel = undefined as any as 'ok' | 'warning' | 'danger';
 
   if (latestUpdateResult.latestChangedItemIn24Hr?.create_at && latestUpdateResult.latestChangedItemIn24Hr?.is_changed) {
-    countIssues++;
+    countWarnings++;
     resultLevel = resultLevel || 'warning';
   }
 
   if (httpsResult.httpsError) {
-    countIssues++;
     countDangerIssues++;
     resultLevel = 'danger';
   }
 
   resultLevel = resultLevel || 'ok';
 
-  evt.reply('__internal_rpc:security-check:check-dapp', {
-    reqid,
-    countIssues,
+  const checkResult: ISecurityCheckResult = {
+    origin,
+    countWarnings,
     countDangerIssues,
+    countIssues: countWarnings + countDangerIssues,
     resultLevel,
     timeout: !!(httpsResult.timeout || latestUpdateResult.timeout),
     checkHttps: httpsResult,
     checkLatestUpdate: latestUpdateResult,
+  };
+
+  return checkResult;
+}
+
+onIpcMainEvent('__internal_rpc:security-check:request-check-dapp', async (evt, reqid, dappUrl) => {
+  if (!isUrlFromDapp(dappUrl)) {
+    evt.reply('__internal_rpc:security-check:request-check-dapp', {
+      reqid,
+      result: null,
+      error: new Error(`Invalid dapp url: ${dappUrl}`)
+    })
+  }
+
+  const origin = canoicalizeDappUrl(dappUrl).origin;
+
+  let checkResult = securityCheckResults.get(origin);
+
+  if (!checkResult)
+    checkResult = await doCheckDappOrigin(origin);
+
+  securityCheckResults.set(origin, checkResult);
+
+  evt.reply('__internal_rpc:security-check:request-check-dapp', {
+    reqid,
+    result: checkResult,
+    error: null
   })
 });

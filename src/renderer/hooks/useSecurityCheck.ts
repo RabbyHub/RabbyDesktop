@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dayjs from 'dayjs';
 
-import { securityCheckGetDappInfo, securityCheckDappBeforeOpen, continueOpenDapp } from "../ipcRequest/security-check";
-import { randString } from "isomorphic/string";
+import { securityCheckGetDappInfo, queryLatestDappSecurityCheckResult, continueOpenDapp } from "../ipcRequest/security-check";
 
 const DEFAULT_HTTPS_RESULT: ISecurityCheckResult['checkHttps'] & { checking: boolean } = {
   checking: false,
@@ -82,9 +81,8 @@ export function useCheckDapp() {
       https: {...DEFAULT_HTTPS_RESULT, checking: true},
       latestUpdate: {...DEFAULT_DAPP_UPDATE_INFO_RESULT, checking: true},
     }));
-    securityCheckDappBeforeOpen(checkingInfo.url)
+    queryLatestDappSecurityCheckResult(checkingInfo.url)
       .then(newVal => {
-        // console.log('[feat] securityCheckDappBeforeOpen:: newVal', newVal);
         setCheckResult(prev => {
           return {
             ...prev,

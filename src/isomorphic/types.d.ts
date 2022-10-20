@@ -66,6 +66,8 @@ type IDappUpdateDetectionItem = {
 }
 
 type ISecurityCheckResult = {
+  origin: string
+  countWarnings: number
   countIssues: number
   countDangerIssues: number
   resultLevel: 'ok' | 'warning' | 'danger'

@@ -171,12 +171,18 @@ type ChannelMessagePayload = {
       }
     ]
   },
-  '__internal_rpc:security-check:check-dapp': {
+  '__internal_rpc:security-check:request-check-dapp': {
     send: [reqid: string, dappUrl: string];
     response: [
-      ISecurityCheckResult & {
-        reqid: string
-      }
+      {
+        reqid: string,
+      } & ({
+        result: null
+        error: Error
+      } | {
+        result: ISecurityCheckResult
+        error?: null
+      })
     ]
   },
   '__internal_rpc:security-check:continue-open-dapp': {
