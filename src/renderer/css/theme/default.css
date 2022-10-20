@@ -13,6 +13,7 @@
   --color-disabled-bg: linear-gradient(0deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), var(--color-primary);
   --color-green: #27c193;
   --color-orange: #ffb020;
+  --color-orange-rgb: 255, 176, 32;
   --color-red: #ec5151;
   --color-forbidden: #af160e;
 

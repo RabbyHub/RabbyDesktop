@@ -1,6 +1,6 @@
 /// <reference path="../../preload.d.ts" />
 
-import { Modal } from 'antd';
+import { Button, Modal } from 'antd';
 import classNames from 'classnames';
 import '../../css/style.less';
 
@@ -26,19 +26,22 @@ export default function ModalSecurityCheck() {
     checkItemViewHttps,
     checkItemViewLatestUpdateInfo,
 
+    viewOperationData,
     hideView,
+
+    confirmOpenDappManually,
+    closeNewTabAndThisView,
   } = useCheckDapp();
 
   if (!checkingUrl) return null;
 
   return (
     <Modal
-      className='modal-security-check'
+      className={classNames('modal-security-check', `J_check_level-${checkResult.resultLevel}`)}
       wrapClassName='modal-security-check-wrap'
       width={560}
       open={!!checkingUrl}
-      // enable on debug
-      maskClosable={!isProd}
+      maskClosable={!isChecking && !viewOperationData.reconfirmRequired}
       mask
       centered
       closable={false}
@@ -122,6 +125,12 @@ export default function ModalSecurityCheck() {
             </div>
           </div>
         </div>
+        {checkResult.resultLevel === 'warning' && (
+          <div className='operations'>
+            <Button type="default" className="J_op J_op_cancel" onClick={() => confirmOpenDappManually()}>Continue to use</Button>
+            <Button type="primary" className="J_op J_op_warning" onClick={() => closeNewTabAndThisView()}>Close Dapp</Button>
+          </div>
+        )}
       </div>
     </Modal>
   );

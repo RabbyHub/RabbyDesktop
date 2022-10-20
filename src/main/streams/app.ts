@@ -15,6 +15,7 @@ import { valueToMainSubject } from "./_init";
 import { dappStore, formatDapps, parseDappUrl } from '../store/dapps';
 import { attachAlertBrowserView } from "./dappAlert";
 import { attachDappSecurityCheckView } from "./securityCheck";
+import type { Tab } from "../browser/tabs";
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
@@ -60,19 +61,30 @@ app.on('web-contents-created', (evt, webContents) => {
             openedTab!.loadURL(details.url);
           } else {
             const targetWin = tabbedWin?.window;
-            // TODO: do security check
+
+            let openedTab: Tab | undefined = undefined
+            const open = (url: string = details.url) => {
+              openedTab = tabbedWin?.tabs.create();
+              openedTab?.loadURL(url);
+            }
+
+            const closeOpenedTab = () => {
+              openedTab?.destroy();
+            }
+
             attachDappSecurityCheckView(details.url, targetWin)
               .then(({ continualOpenId }) => {
-                const disposeContinueOpenDapp = onIpcMainEvent('__internal_rpc:security-check:continue-open-dapp', (_evt, _openId, _openUrl) => {
+                const dispose1 = onIpcMainEvent('__internal_rpc:security-check:continue-open-dapp', (_evt, _openId, _openUrl) => {
                   if (targetWin && _openId === continualOpenId) {
-                    disposeContinueOpenDapp?.();
-                    const tab = tabbedWin?.tabs.create();
-                    tab?.loadURL(details.url);
+                    dispose1?.();
+                    open(_openUrl);
                   }
                 });
-
-                targetWin?.once('closed', () => {
-                  disposeContinueOpenDapp?.();
+                const dispose2 = onIpcMainEvent('__internal_rpc:security-check:continue-close-dapp', (_evt, _openId) => {
+                  if (targetWin && _openId === continualOpenId) {
+                    dispose2?.();
+                    closeOpenedTab();
+                  }
                 });
               });
           }

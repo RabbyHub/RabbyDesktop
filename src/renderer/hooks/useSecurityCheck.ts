@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dayjs from 'dayjs';
 
-import { securityCheckGetDappInfo, securityCheckDappBeforeOpen } from "../ipcRequest/security-check";
+import { securityCheckGetDappInfo, securityCheckDappBeforeOpen, continueOpenDapp } from "../ipcRequest/security-check";
+import { randString } from "isomorphic/string";
 
 const DEFAULT_HTTPS_RESULT: ISecurityCheckResult['checkHttps'] & { checking: boolean } = {
   checking: false,
@@ -14,6 +15,16 @@ const DEFAULT_DAPP_UPDATE_INFO_RESULT: ISecurityCheckResult['checkLatestUpdate']
   timeout: false,
   latestChangedItemIn24Hr: null as null | IDappUpdateDetectionItem,
 };
+
+function getViewOpData (checkResult: Pick<ISecurityCheckResult, 'countIssues' | 'countDangerIssues'>) {
+  const couldOpenByDefault = !checkResult.countIssues || !checkResult.countDangerIssues;
+  const reconfirmRequired = checkResult.countIssues && !checkResult.countDangerIssues;
+
+  return {
+    couldOpenByDefault,
+    reconfirmRequired,
+  }
+}
 
 export function useCheckDapp() {
   const [ checkingInfo, setCheckingInfo ] = useState({
@@ -32,6 +43,7 @@ export function useCheckDapp() {
 
   useEffect(() => {
     const listener = (evt: EventListenerObject & { detail: { url: string, continualOpenId: string } }) => {
+      resetState();
       setCheckingInfo({ url: evt.detail.url, continualOpenId: evt.detail.continualOpenId });
     };
     document.addEventListener('__set_checking_info__', listener as any);
@@ -39,6 +51,22 @@ export function useCheckDapp() {
     return () => {
       document.removeEventListener('__set_checking_info__', listener as any);
     }
+  }, []);
+
+  const resetState = useCallback(() => {
+    setCheckingInfo({ url: '', continualOpenId: '' });
+    setCheckResult({
+      https: {...DEFAULT_HTTPS_RESULT},
+      latestUpdate: {...DEFAULT_DAPP_UPDATE_INFO_RESULT},
+      countIssues: 0 as ISecurityCheckResult['countIssues'],
+      countDangerIssues: 0 as ISecurityCheckResult['countDangerIssues'],
+      resultLevel: 'ok' as ISecurityCheckResult['resultLevel'],
+    });
+  }, []);
+
+  const hideView = useCallback(() => {
+    window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:security-check:close-view')
+    resetState();
   }, []);
 
   useEffect(() => {
@@ -66,13 +94,14 @@ export function useCheckDapp() {
           }
         });
 
-        // // open by default
-        if (!newVal.countIssues) {
+        const { couldOpenByDefault, reconfirmRequired } = getViewOpData(newVal);
+        if (couldOpenByDefault) {
           setTimeout(() => {
-            window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:security-check:close-view');
-            window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:security-check:continue-open-dapp', checkingInfo.continualOpenId, checkingInfo.url);
+            continueOpenDapp(checkingInfo.continualOpenId, checkingInfo.url, newVal.resultLevel);
 
-            resetState();
+            if (!reconfirmRequired) {
+              hideView();
+            }
           }, 500);
         }
       })
@@ -83,13 +112,19 @@ export function useCheckDapp() {
           latestUpdate: {...prev.latestUpdate, checking: false},
         }));
       })
-  }, [ checkingInfo.url ]);
+  }, [ checkingInfo.url, hideView ]);
 
   const isChecking = checkResult.https.checking || checkResult.latestUpdate.checking;
 
-  const couldOpenManually = useMemo(() => {
-    return checkResult.countIssues && !checkResult.countDangerIssues
+  const confirmOpenDappManually = useCallback(() => {
+    // continueOpenDapp(checkingInfo.continualOpenId, checkingInfo.url);
+    hideView();
   }, [checkResult])
+
+  const closeNewTabAndThisView = useCallback(() => {
+    window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:security-check:continue-close-dapp', checkingInfo.continualOpenId)
+    window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:security-check:close-view');
+  }, [ checkingInfo.continualOpenId ]);
 
   const checkItemViewLatestUpdateInfo = useMemo(() => {
     const changedIn24Hr = checkResult.latestUpdate.latestChangedItemIn24Hr?.create_at && checkResult.latestUpdate.latestChangedItemIn24Hr?.is_changed;
@@ -110,21 +145,7 @@ export function useCheckDapp() {
     checkResult.https,
   ]);
 
-  const resetState = useCallback(() => {
-    setCheckingInfo({ url: '', continualOpenId: '' });
-    setCheckResult({
-      https: {...DEFAULT_HTTPS_RESULT},
-      latestUpdate: {...DEFAULT_DAPP_UPDATE_INFO_RESULT},
-      countIssues: 0 as ISecurityCheckResult['countIssues'],
-      countDangerIssues: 0 as ISecurityCheckResult['countDangerIssues'],
-      resultLevel: 'ok' as ISecurityCheckResult['resultLevel'],
-    });
-  }, []);
-
-  const hideView = useCallback(() => {
-    window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:security-check:close-view')
-    resetState();
-  }, []);
+  const viewOperationData = getViewOpData(checkResult);
 
   return {
     dappInfo,
@@ -136,7 +157,9 @@ export function useCheckDapp() {
     checkItemViewHttps,
     checkItemViewLatestUpdateInfo,
 
-    couldOpenManually,
+    confirmOpenDappManually,
+    closeNewTabAndThisView,
+    viewOperationData,
 
     hideView,
   }

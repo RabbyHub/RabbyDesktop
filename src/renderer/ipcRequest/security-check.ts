@@ -35,3 +35,17 @@ export async function securityCheckDappBeforeOpen(dappUrl: string) {
     window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:security-check:check-dapp', reqid, dappUrl);
   });
 }
+
+export async function continueOpenDapp(continualOpenId: string, url: string, dappSafeLevel: ISecurityCheckResult['resultLevel']) {
+  window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:security-check:continue-open-dapp', continualOpenId, url);
+
+  switch (dappSafeLevel) {
+    case 'ok':
+    case 'danger':
+    default:
+      return ;
+    case 'warning': {
+      window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:security-check:set-view-top');
+    }
+  }
+}

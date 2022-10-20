@@ -1,4 +1,6 @@
 import { net } from 'electron'
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { integrateQueryToUrl } from '../../isomorphic/url';
 
 /**
  * @from axios/lib/core/settle
@@ -18,14 +20,12 @@ function settle(resolve: any, reject: any, response: AxiosResponse) {
   }
 }
 
-import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-
-function StringLTrim(str: string, symbol: string){
+function trimLeft(str: string, symbol: string){
   while(str.startsWith(symbol)) str = str.slice(1);
   return str
 }
 
-function StringRTrim(str: string, symbol: string){
+function trimRight(str: string, symbol: string){
   while(str.endsWith(symbol)) str = str.slice(0, str.length - 1);
   return str
 }
@@ -35,19 +35,27 @@ function StringRTrim(str: string, symbol: string){
  * Usage:
  * @code AxiosStatic.defaults.adapter = ElectronAdapter
  */
+// TODO: add test about it and publish as standalone package
 export async function AxiosElectronAdapter (config: AxiosRequestConfig) {
   return Promise.race([
     new Promise<any>((resolve, reject) => {
+      const method = config.method?.toUpperCase() || 'GET';
+
       let baseUrl = config.baseURL? config.baseURL : '';
       let configUrl = config.url ? config.url : '';
 
-      baseUrl = StringRTrim(baseUrl, '/');
-      configUrl = StringLTrim(configUrl, '/');
-      const FullUrl = `${baseUrl}/${configUrl}`;
+      baseUrl = trimRight(baseUrl, '/');
+      configUrl = trimLeft(configUrl, '/');
+      let fullUrl = `${baseUrl}/${configUrl}`;
+
+      if (method === 'GET' && config.params) {
+        fullUrl = integrateQueryToUrl(fullUrl, config.params);
+      }
 
       const clientReq = net.request({
         method: config.method,
-        url: FullUrl
+        url: fullUrl,
+        redirect: 'follow'
       });
 
       if (config.headers){

@@ -183,6 +183,14 @@ type ChannelMessagePayload = {
     send: [continualOpenId: string, dappUrl: string];
     response: []
   },
+  '__internal_rpc:security-check:continue-close-dapp': {
+    send: [continualOpenId: string];
+    response: []
+  },
+  '__internal_rpc:security-check:set-view-top': {
+    send: [];
+    response: []
+  },
   '__internal_rpc:security-check:close-view': {
     send: [];
     response: []

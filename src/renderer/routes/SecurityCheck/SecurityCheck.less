@@ -1,9 +1,7 @@
 @import '~antd/lib/style/themes/default.less';
 
 @body-padding-top: 44px;
-
 @hd-height: 44px;
-
 @pull-top-offset: 44px;
 
 .modal-security-check-wrap {
@@ -87,48 +85,8 @@
     line-height: 18px;
     color: var(--color-comment1);
   }
-}
 
-.modal-security-check.ant-modal {
-  width: 560px;
-  height: 440px;
-  // top: 0 !important;
-  // padding: 0;
-
-  .ant-modal-content {
-    height: 100%;
-    background-color: transparent;
-    box-shadow: none;
-  }
-
-  .ant-modal-body {
-    background: #fff;
-    padding: 0;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-    border-radius: 14px;
-    border-top-left-radius: 28px;
-    border-top-right-radius: 28px;
-    position: relative;
-
-    box-shadow: @shadow-2;
-  }
-
-  .ant-modal-content .ant-modal-body {
-    overflow: visible;
-  }
-
-  .ant-modal-content .ant-modal-body .modal-bg-logo {
-    position: absolute;
-    bottom: 24px;
-    right: 24px;
-    width: 92px;
-    height: 78px;
-    z-index: 0;
-  }
-
-  .ant-modal-content .ant-modal-body .check-header {
+  .check-header {
     color: white;
     line-height: @hd-height;
     width: 100%;
@@ -199,5 +157,90 @@
         height: 100%;
       }
     }
+  }
+
+  .operations {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .operations .J_op {
+    border-radius: 4px;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 18px;
+    text-align: center;
+    width: 212px;
+    height: 48px;
+
+    &.J_op_cancel {
+      background-color: var(--color-line);
+      border-color: var(--color-line);
+      color: var(--color-comment1);
+    }
+
+    &.J_op_warning {
+      background-color: var(--color-orange);
+      border: 0px;
+      color: white;
+
+      &:hover {
+        background-color: rgba(var(--color-orange-rgb), .6);
+      }
+    }
+  }
+
+  .operations .J_op + .J_op {
+    margin-left: 16px;
+  }
+}
+
+.modal-security-check {
+  width: 560px;
+  height: 440px;
+
+  &.J_check_level-warning {
+    height: 534px;
+  }
+
+  &.J_check_level-warning .check-main-wrapper {
+    padding-left: 64px;
+    padding-right: 38px;
+  }
+
+  .ant-modal-content {
+    height: 100%;
+    background-color: transparent;
+    box-shadow: none;
+  }
+
+  .ant-modal-body {
+    background: #fff;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 14px;
+    border-top-left-radius: 28px;
+    border-top-right-radius: 28px;
+    position: relative;
+
+    box-shadow: @shadow-2;
+  }
+
+  .ant-modal-content .ant-modal-body {
+    overflow: visible;
+  }
+
+  .ant-modal-content .ant-modal-body .modal-bg-logo {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    width: 92px;
+    height: 78px;
+    z-index: 0;
   }
 }

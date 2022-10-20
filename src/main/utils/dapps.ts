@@ -252,7 +252,7 @@ export async function queryDappLatestUpdateInfo ({
     total: boolean,
     detect_list: IDappUpdateDetectionItem[]
   }>(`/cloud/dapp/${dapp_id}/detect`, {
-    data: {
+    params: {
       limit,
       start,
       is_changed

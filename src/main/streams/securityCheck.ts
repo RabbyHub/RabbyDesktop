@@ -1,7 +1,7 @@
 import { BrowserView, BrowserWindow } from "electron";
 
 import { firstValueFrom } from "rxjs";
-import { RABBY_POPUP_GHOST_VIEW_URL } from "../../isomorphic/constants";
+import { IS_RUNTIME_PRODUCTION, RABBY_POPUP_GHOST_VIEW_URL } from "../../isomorphic/constants";
 
 import { canoicalizeDappUrl } from "../../isomorphic/url";
 
@@ -75,6 +75,13 @@ document.dispatchEvent(new CustomEvent('__set_checking_info__', ${JSON.stringify
   return { continualOpenId }
 }
 
+onIpcMainEvent('__internal_rpc:security-check:set-view-top', async () => {
+  const win = (await getMainWindow()).window;
+  const securityCheckPopupView = await firstValueFrom(fromMainSubject('securityCheckPopupViewReady'));
+  win.removeBrowserView(securityCheckPopupView);
+  win.addBrowserView(securityCheckPopupView);
+});
+
 onIpcMainEvent('__internal_rpc:security-check:get-dapp', (evt, reqid, dappUrl) => {
   const dapp = dappStore.get('dapps').find((item) => item.origin === canoicalizeDappUrl(dappUrl).origin);
   evt.reply('__internal_rpc:security-check:get-dapp', {
@@ -82,6 +89,16 @@ onIpcMainEvent('__internal_rpc:security-check:get-dapp', (evt, reqid, dappUrl) =
     dappInfo: dapp ? formatDapp(dapp) : null
   });
 });
+
+function getMockedChanged (dapp_id: string) {
+  return {
+    "dapp_id": dapp_id,
+    "version": "482edf6719d385a4362f28f86d19025a",
+    "is_changed": true,
+    "new_detected_address_list": [ ],
+    "create_at": Date.now() - 30 * 1e3
+  }
+}
 
 onIpcMainEvent('__internal_rpc:security-check:check-dapp', async (evt, reqid, dappUrl) => {
   const origin = canoicalizeDappUrl(dappUrl).origin;
@@ -103,7 +120,8 @@ onIpcMainEvent('__internal_rpc:security-check:check-dapp', async (evt, reqid, da
       return {
         timeout: false,
         latestItem: latestItem || null,
-        latestChangedItemIn24Hr
+        latestChangedItemIn24Hr,
+        // latestChangedItemIn24Hr: getMockedChanged(latestItem?.dapp_id)
       }
     })
     .catch(err => {
