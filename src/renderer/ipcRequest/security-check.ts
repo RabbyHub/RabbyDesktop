@@ -40,12 +40,16 @@ export async function continueOpenDapp(continualOpenId: string, url: string, dap
   window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:security-check:continue-open-dapp', continualOpenId, url);
 
   switch (dappSafeLevel) {
-    case 'ok':
+    case 'ok': {
+      window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:security-check:close-view');
+      break;
+    }
     case 'danger':
     default:
       return ;
     case 'warning': {
       window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:security-check:set-view-top');
+      break;
     }
   }
 }

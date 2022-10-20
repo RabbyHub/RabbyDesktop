@@ -369,6 +369,7 @@ export default function Topbar() {
       // window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:browser-dev:openDevTools');
 
       // window.open('https://app.uniswap.org');
+      window.open('https://debank.com');
     }
   }, []);
 

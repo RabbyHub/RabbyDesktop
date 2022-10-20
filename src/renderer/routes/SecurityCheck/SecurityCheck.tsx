@@ -29,7 +29,6 @@ export default function ModalSecurityCheck() {
     viewOperationData,
     hideView,
 
-    confirmOpenDappManually,
     closeNewTabAndThisView,
   } = useCheckDapp();
 
@@ -127,7 +126,7 @@ export default function ModalSecurityCheck() {
         </div>
         {checkResult.resultLevel === 'warning' && (
           <div className='operations'>
-            <Button type="default" className="J_op J_op_cancel" onClick={() => confirmOpenDappManually()}>Continue to use</Button>
+            <Button type="default" className="J_op J_op_cancel" onClick={() => hideView()}>Continue to use</Button>
             <Button type="primary" className="J_op J_op_warning" onClick={() => closeNewTabAndThisView()}>Close Dapp</Button>
           </div>
         )}
