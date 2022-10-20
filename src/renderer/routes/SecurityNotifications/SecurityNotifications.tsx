@@ -1,6 +1,7 @@
 import { notification } from 'antd'
+import { NotificationApi, NotificationInstance } from 'antd/lib/notification';
 import { IS_RUNTIME_PRODUCTION } from 'isomorphic/constants';
-import { useEffect, useLayoutEffect } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 
 import styles from './SecurityNotifications.module.less';
 
@@ -12,17 +13,23 @@ const ICON_SHILED_DANGER = 'rabby-internal://assets/icons/security-notifications
 
 const DEFAULT_DURACTION_SEC = 3;
 
-notification.config({ maxCount: 3 });
+const ROOT_EL = document.querySelector('#root')! as HTMLDivElement;
+notification.config({
+  maxCount: 5,
+  top: 2,
+});
 
 let notiCount = 0;
 let closeTimer = -1;
 
 function notify(payload: {
+  container?: HTMLElement,
   web3Address: string,
   balance?: number | string
-}) {
+}, api: NotificationInstance | NotificationApi = notification) {
   notiCount++;
-  notification.open({
+  api.open({
+    getContainer: () => payload.container || ROOT_EL,
     className: styles.J_notification,
     placement: 'topRight',
     message: (
@@ -56,32 +63,69 @@ function notify(payload: {
   })
 }
 
+function toggleClickThrough(enable = true) {
+  if (enable)
+    window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:browser:set-ignore-mouse-events', true, { forward: true });
+  else
+    window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:browser:set-ignore-mouse-events', false, { forward: true });
+}
+
 export default function SecurityNotifications() {
+  const [notifyApi, contextHolder] = notification.useNotification();
+  const notificationWrapperRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     window.rabbyDesktop.ipcRenderer.on('__internal_rpc:clipboard:full-web3-addr', ({ web3Address }) => {
       notify({
         web3Address,
-      })
+        container: notificationWrapperRef.current!,
+      }, notifyApi)
     });
+  }, [ notifyApi ]);
+
+  useLayoutEffect(() => {
+    const wrapperNode = notificationWrapperRef.current!;
+
+    const onEnter = () => {
+      // const allContentNodes = Array.from(wrapperNode.querySelectorAll('.ant-notification-notice-content, .ant-notification-notice-close'));
+      toggleClickThrough(false);
+    }
+
+    const onLeave = () => {
+      // const allContentNodes = Array.from(wrapperNode.querySelectorAll('.ant-notification-notice-content, .ant-notification-notice-close'));
+      toggleClickThrough(true);
+    }
+
+    wrapperNode.addEventListener('mouseenter', onEnter);
+    wrapperNode.addEventListener('mouseleave', onLeave);
+
+    return () => {
+      toggleClickThrough(false);
+      wrapperNode.removeEventListener('mouseenter', onEnter);
+      wrapperNode.removeEventListener('mouseleave', onLeave);
+    }
   }, []);
 
   useLayoutEffect(() => {
     // // just for test
     if (!IS_RUNTIME_PRODUCTION) {
-      // notify({
-      //   web3Address: '0x5853ed4f26a3fcea565b3fbc698bb19cdf6deb85',
-      //   balance: '32,435'
-      // });
+      notify({
+        web3Address: '0x5853ed4f26a3fcea565b3fbc698bb19cdf6deb85',
+        balance: '32,435',
+        container: notificationWrapperRef.current!,
+      }, notifyApi);
 
+      // // show highlight background for debug
       // document.body.classList.add('highlight-bg');
     }
-  }, []);
+  }, [ notifyApi ]);
 
-  if (IS_RUNTIME_PRODUCTION) {
-
-  }
-
-  return <div className={styles.debugContent}>
-    Nothing
-  </div>
+  return (
+    <div ref={notificationWrapperRef} className='notification-wrapper'>
+      <div className={styles.debugContent}>
+        Nothing
+      </div>
+      {contextHolder}
+    </div>
+  )
 }

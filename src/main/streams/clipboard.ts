@@ -1,9 +1,9 @@
-import { app, BrowserView, BrowserWindow, clipboard } from "electron";
+import { app, BrowserWindow, clipboard } from "electron";
 import { firstValueFrom, interval, Subscription } from "rxjs";
 import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 
 import { IS_RUNTIME_PRODUCTION, RABBY_POPUP_GHOST_VIEW_URL } from "../../isomorphic/constants";
-import { NATIVE_HEADER_WITH_NAV_H, SECURITY_NOTIFICATION_VIEW_WIDTH } from "../../isomorphic/const-size";
+import { NATIVE_HEADER_WITH_NAV_H, SECURITY_NOTIFICATION_VIEW_SIZE } from "../../isomorphic/const-size";
 import { cLog } from '../utils/log';
 import { onIpcMainEvent } from "../utils/ipcMainEvents";
 import { getMainWindow, onMainWindowReady } from "./tabbedBrowserWindow";
@@ -45,9 +45,9 @@ subs = subs.concat(
     // cLog('[feat] latestValue is', text);
   }),
 
-  clipboardTextWithWeb3Addrs$.subscribe(async ({ fullText, web3Addr }) => {
-    // cLog('[feat] with web3Addr is', web3Addr);
-  }),
+  // clipboardTextWithWeb3Addrs$.subscribe(async ({ fullText, web3Addr }) => {
+  //   cLog('[feat] with web3Addr is', web3Addr);
+  // }),
 
   clipboardFullWeb3Addrs$.subscribe(async (web3Addr) => {
     // cLog('[feat] full web3Addr is', web3Addr);
@@ -60,38 +60,89 @@ app.on('will-quit', () => {
   subs.forEach(sub => sub.unsubscribe());
 });
 
+function updateSubWindowPosition(
+  parentWin: BrowserWindow,
+  window: BrowserWindow,
+) {
+  const [width, height] = parentWin.getSize();
+
+  const popupRect = {
+    x: width - SECURITY_NOTIFICATION_VIEW_SIZE.width,
+    y: NATIVE_HEADER_WITH_NAV_H,
+    width: SECURITY_NOTIFICATION_VIEW_SIZE.width,
+    height: height - NATIVE_HEADER_WITH_NAV_H,
+  }
+
+  window.setSize(popupRect.width, popupRect.height);
+
+  // get bounds
+  const pWinBounds = parentWin.getBounds()
+  const selfViewBounds = window.getBounds()
+
+  // top-right
+  let x = pWinBounds.x + popupRect.x + popupRect.width - selfViewBounds.width
+  let y = pWinBounds.y + popupRect.y + /* padding */1
+
+  // Convert to ints
+  x = Math.floor(x)
+  y = Math.floor(y)
+
+  window.setBounds({ ...selfViewBounds, x, y })
+}
+
 onMainWindowReady().then(async (mainWin) => {
   const targetWin = mainWin.window;
-  const [width, height] = targetWin.getSize();
 
-  const secNotifications = new BrowserView({
+  const secNotifications = new BrowserWindow({
+    show: false,
+    frame: false,
+    parent: mainWin.window,
+    movable: false,
+    maximizable: false,
+    minimizable: false,
+    resizable: false,
+    skipTaskbar: true,
+    hasShadow: false,
+    opacity: 0,
+    titleBarStyle: 'hidden',
+    transparent: true,
     webPreferences: {
       webviewTag: true,
       sandbox: true,
       nodeIntegration: false,
+      nodeIntegrationInWorker: false,
       allowRunningInsecureContent: false,
-      autoplayPolicy: 'user-gesture-required'
+      autoplayPolicy: 'user-gesture-required',
+      contextIsolation: true,
     }
   });
 
-  secNotifications.setBounds({
-    x: width - SECURITY_NOTIFICATION_VIEW_WIDTH,
-    y: NATIVE_HEADER_WITH_NAV_H,
-    width: SECURITY_NOTIFICATION_VIEW_WIDTH,
-    height: height - NATIVE_HEADER_WITH_NAV_H,
-  });
-  secNotifications.setAutoResize({ width: true, height: true });
+  updateSubWindowPosition(mainWin.window, secNotifications);
+  targetWin.on('show', () => {
+    if (!secNotifications.isVisible()) return ;
+    updateSubWindowPosition(mainWin.window, secNotifications);
+  })
 
-  // add to main window then remove
-  targetWin.addBrowserView(secNotifications);
-  secNotifications.webContents.loadURL(`${RABBY_POPUP_GHOST_VIEW_URL}#/security-notifications`);
-  targetWin.removeBrowserView(secNotifications);
+  targetWin.on('move', () => {
+    if (!secNotifications.isVisible()) return ;
+    updateSubWindowPosition(mainWin.window, secNotifications);
+  })
+
+  await secNotifications.webContents.loadURL(`${RABBY_POPUP_GHOST_VIEW_URL}#/security-notifications`);
 
   if (!IS_RUNTIME_PRODUCTION) {
     secNotifications.webContents.openDevTools({ mode: 'detach' });
   }
 
-  valueToMainSubject('securityNotificationsViewReady', secNotifications);
+  // show but opacity is 0
+  secNotifications.show();
+
+  valueToMainSubject('securityNotificationsWindowReady', secNotifications);
+})
+
+onIpcMainEvent('__internal_rpc:browser:set-ignore-mouse-events', (event, ...args) => {
+  const win = BrowserWindow.fromWebContents(event.sender)
+  win?.setIgnoreMouseEvents(...args)
 })
 
 async function attachClipboardSecurityNotificationView (
@@ -99,14 +150,14 @@ async function attachClipboardSecurityNotificationView (
   targetWin?: BrowserWindow
 ) {
   targetWin = targetWin || (await getMainWindow()).window;
-  // const continualOpenId = randString();
 
-  const securityNotifyPopup = await firstValueFrom(fromMainSubject('securityNotificationsViewReady'));
+  const securityNotifyPopup = await firstValueFrom(fromMainSubject('securityNotificationsWindowReady'));
 
   securityNotifyPopup.webContents.send('__internal_rpc:clipboard:full-web3-addr', { web3Address: web3Addr });
 
   onIpcMainEvent('__internal_rpc:clipboard:close-view', () => {
-    targetWin?.removeBrowserView(securityNotifyPopup);
+    securityNotifyPopup.setOpacity(0);
   });
-  targetWin.addBrowserView(securityNotifyPopup);
+  updateSubWindowPosition(targetWin, securityNotifyPopup);
+  securityNotifyPopup.setOpacity(1);
 }

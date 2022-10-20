@@ -190,6 +190,10 @@ type ChannelMessagePayload = {
     send: [];
     response: []
   },
+  '__internal_rpc:browser:set-ignore-mouse-events': {
+    send: [ignore: boolean, options?: Electron.IgnoreMouseEventsOptions];
+    response: []
+  },
   '__internal_webui-window-close': {
     send: [ winId: number, webContentsId: number ],
     response: []

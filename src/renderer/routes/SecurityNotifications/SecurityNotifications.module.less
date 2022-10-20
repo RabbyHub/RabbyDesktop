@@ -6,6 +6,16 @@
       display: block;
     }
   }
+
+  .notification-wrapper {
+    height: initial;
+    width: 100%;
+    top: 0;
+    left: 0;
+    position: fixed;
+
+    user-select: none;
+  }
 }
 
 .debugContent {
@@ -22,6 +32,18 @@
   padding: 0;
   background: var(--color-purewhite);
   border-radius: 8px;
+
+  &:global.ant-notification-notice {
+    /* override style of .ant-notification-notice */
+    max-width: 330px;
+    box-shadow: 0px 0px 6px rgb(19 20 26 / 21%);
+
+    .ant-notification-notice-content {
+      border-radius: 8px;
+      cursor: default;
+      user-select: none;
+    }
+  }
 
   .header {
     height: @header-height;
@@ -76,10 +98,6 @@
       padding: @padding-v @padding-h;
     }
   }
-}
-
-.closeIcon {
-
 }
 
 .typedFulltextWeb3addr {
