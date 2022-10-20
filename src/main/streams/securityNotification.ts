@@ -8,6 +8,8 @@ import { onIpcMainEvent } from "../utils/ipcMainEvents";
 import { getMainWindow, onMainWindowReady } from "./tabbedBrowserWindow";
 import { fromMainSubject, valueToMainSubject } from "./_init";
 
+const IS_DARWIN = process.platform === 'darwin';
+
 onMainWindowReady().then(async (mainWin) => {
   const targetWin = mainWin.window;
 
@@ -19,10 +21,12 @@ onMainWindowReady().then(async (mainWin) => {
     maximizable: false,
     minimizable: false,
     resizable: false,
+    ...IS_DARWIN && { closable: false, },
+    fullscreenable: false,
     skipTaskbar: true,
     hasShadow: false,
     opacity: 0,
-    titleBarStyle: 'hidden',
+    titleBarStyle: 'hiddenInset',
     transparent: true,
     webPreferences: {
       webviewTag: true,
@@ -52,9 +56,6 @@ onMainWindowReady().then(async (mainWin) => {
   if (!IS_RUNTIME_PRODUCTION) {
     secNotifications.webContents.openDevTools({ mode: 'detach' });
   }
-
-  // show but opacity is 0
-  secNotifications.show();
 
   valueToMainSubject('securityNotificationsWindowReady', secNotifications);
 })
@@ -97,6 +98,7 @@ export async function openSecurityNotificationView (payload: ISecurityNotificati
   securityNotifyPopup.webContents.send('__internal_rpc:security-notification', payload);
 
   updateSubWindowPosition(targetWin, securityNotifyPopup);
+  securityNotifyPopup.show();
   securityNotifyPopup.setOpacity(1);
 }
 
@@ -104,6 +106,7 @@ onIpcMainEvent('__internal_rpc:clipboard:close-view', async () => {
   const securityNotifyPopup = await firstValueFrom(fromMainSubject('securityNotificationsWindowReady'));
 
   securityNotifyPopup.setOpacity(0);
+  securityNotifyPopup.hide();
 });
 
 onIpcMainEvent('__internal_rpc:browser:set-ignore-mouse-events', (event, ...args) => {

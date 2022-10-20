@@ -24,6 +24,14 @@ notification.config({
 
 let notiCount = 0;
 let closeTimer = -1;
+function checkNotiCount () {
+  if (notiCount === 0) {
+    if (closeTimer) clearTimeout(closeTimer);
+    closeTimer = setTimeout(() => {
+      window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:clipboard:close-view');
+    }, 300) as any as number;
+  }
+}
 
 function CardHeader ({
   iconUrl = ICON_SHILED_DEFAULT,
@@ -67,14 +75,7 @@ function notify({
     duration: DEFAULT_DURACTION_SEC,
     onClose: () => {
       notiCount = Math.max(notiCount - 1, 0);
-
-      if (notiCount === 0) {
-        if (closeTimer) clearTimeout(closeTimer);
-        closeTimer = setTimeout(() => {
-          window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:clipboard:close-view');
-        }, 300) as any as number;
-
-      }
+      checkNotiCount();
     },
     message: (
       <CardHeader />
@@ -161,6 +162,15 @@ export default function SecurityNotifications() {
   useLayoutEffect(() => {
     const wrapperNode = notificationWrapperRef.current!;
 
+    // TODO: only use this in darwin
+    const correctCounter = setInterval(() => {
+      const allContentNodes = Array.from(wrapperNode.querySelectorAll('.ant-notification-notice-content, .ant-notification-notice-close'));
+      if (allContentNodes.length < notiCount) {
+        notiCount = allContentNodes.length;
+        checkNotiCount();
+      }
+    }, 1000);
+
     const onEnter = () => {
       // const allContentNodes = Array.from(wrapperNode.querySelectorAll('.ant-notification-notice-content, .ant-notification-notice-close'));
       toggleClickThrough(false);
@@ -175,6 +185,7 @@ export default function SecurityNotifications() {
     wrapperNode.addEventListener('mouseleave', onLeave);
 
     return () => {
+      clearInterval(correctCounter);
       toggleClickThrough(false);
       wrapperNode.removeEventListener('mouseenter', onEnter);
       wrapperNode.removeEventListener('mouseleave', onLeave);
