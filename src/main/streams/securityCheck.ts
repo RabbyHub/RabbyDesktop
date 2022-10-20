@@ -85,6 +85,7 @@ onIpcMainEvent('__internal_rpc:security-check:get-dapp', (evt, reqid, dappUrl) =
 
 onIpcMainEvent('__internal_rpc:security-check:check-dapp', async (evt, reqid, dappUrl) => {
   const origin = canoicalizeDappUrl(dappUrl).origin;
+  // TODO: catch error here
   const [
     checkResult,
     latestUpdateResult
@@ -95,22 +96,29 @@ onIpcMainEvent('__internal_rpc:security-check:check-dapp', async (evt, reqid, da
     })
     .then((json) => {
       const latestItem = json.detect_list?.[0] || null;
+      const latestChangedItemIn24Hr = json.detect_list?.find((item) =>
+        item.is_changed && (Date.now() - item.create_at * 1e3) < 24 * 60 * 60 * 1e3
+      ) || null;
+
       return {
         timeout: false,
-        dappUpdateInfo: latestItem || null
+        latestItem: latestItem || null,
+        latestChangedItemIn24Hr
       }
     })
     .catch(err => {
       if ((err as AxiosError).code === 'timeout') {
         return {
           timeout: true,
-          dappUpdateInfo: null,
+          latestItem: null,
+          latestChangedItemIn24Hr: null,
           error: err.message
         }
       } else {
         return {
           timeout: false,
-          dappUpdateInfo: null,
+          latestItem: null,
+          latestChangedItemIn24Hr: null,
           error: 'unknown'
         }
       }
@@ -129,7 +137,7 @@ onIpcMainEvent('__internal_rpc:security-check:check-dapp', async (evt, reqid, da
   let countIssues = 0, countDangerIssues = 0;
   let resultLevel = undefined as any as 'ok' | 'warning' | 'danger';
 
-  if (latestUpdateResult.dappUpdateInfo?.create_at && latestUpdateResult.dappUpdateInfo?.is_changed) {
+  if (latestUpdateResult.latestChangedItemIn24Hr?.create_at && latestUpdateResult.latestChangedItemIn24Hr?.is_changed) {
     countIssues++;
     resultLevel = resultLevel || 'warning';
   }

@@ -12,7 +12,7 @@ const DEFAULT_HTTPS_RESULT: ISecurityCheckResult['checkHttps'] & { checking: boo
 const DEFAULT_DAPP_UPDATE_INFO_RESULT: ISecurityCheckResult['checkLatestUpdate'] & { checking: boolean } = {
   checking: false,
   timeout: false,
-  dappUpdateInfo: null as null | IDappUpdateDetectionItem,
+  latestChangedItemIn24Hr: null as null | IDappUpdateDetectionItem,
 };
 
 export function useCheckDapp() {
@@ -92,10 +92,10 @@ export function useCheckDapp() {
   }, [checkResult])
 
   const checkItemViewLatestUpdateInfo = useMemo(() => {
-    const changedIn24Hr = checkResult.latestUpdate.dappUpdateInfo?.create_at && checkResult.latestUpdate.dappUpdateInfo?.is_changed;
+    const changedIn24Hr = checkResult.latestUpdate.latestChangedItemIn24Hr?.create_at && checkResult.latestUpdate.latestChangedItemIn24Hr?.is_changed;
     return {
       warning: changedIn24Hr,
-      resultText: !changedIn24Hr ? 'Updated more than 24 hours' : `The web page was updated within 24 hours at ${dayjs((checkResult.latestUpdate.dappUpdateInfo?.create_at || 0) * 1e3).format('YYYY/MM/DD HH:MM')}. To help you avoid potential code tampering and system bugs, we recommend using it 24 hours after the updates.`,
+      resultText: !changedIn24Hr ? 'Updated more than 24 hours' : `The web page was updated within 24 hours at ${dayjs((checkResult.latestUpdate.latestChangedItemIn24Hr?.create_at || 0) * 1e3).format('YYYY/MM/DD HH:MM')}. To help you avoid potential code tampering and system bugs, we recommend using it 24 hours after the updates.`,
     };
   }, [
     checkResult.latestUpdate,

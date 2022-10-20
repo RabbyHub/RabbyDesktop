@@ -77,7 +77,8 @@ type ISecurityCheckResult = {
   }
   checkLatestUpdate: {
     timeout?: boolean
-    dappUpdateInfo?: IDappUpdateDetectionItem | null
+    latestChangedItemIn24Hr?: IDappUpdateDetectionItem | null
+    latestItem?: IDappUpdateDetectionItem | null
     error?: string
   }
 }
