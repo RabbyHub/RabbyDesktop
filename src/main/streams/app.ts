@@ -14,7 +14,7 @@ import { getWebuiExtId } from "./session";
 import { valueToMainSubject } from "./_init";
 import { dappStore, formatDapps, parseDappUrl } from '../store/dapps';
 import { attachAlertBrowserView } from "./dappAlert";
-import { attachDappSecurityCheckView } from "./securityCheck";
+import { openDappSecurityCheckView } from "./securityCheck";
 import type { Tab } from "../browser/tabs";
 
 const appLog = getBindLog('appStream', 'bgGrey');
@@ -72,7 +72,7 @@ app.on('web-contents-created', (evt, webContents) => {
               openedTab?.destroy();
             }
 
-            attachDappSecurityCheckView(details.url, targetWin)
+            openDappSecurityCheckView(details.url, targetWin)
               .then(({ continualOpenId }) => {
                 const dispose1 = onIpcMainEvent('__internal_rpc:security-check:continue-open-dapp', (_evt, _openId, _openUrl) => {
                   if (targetWin && _openId === continualOpenId) {

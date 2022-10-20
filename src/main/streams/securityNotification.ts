@@ -3,61 +3,44 @@ import { firstValueFrom} from "rxjs";
 
 import { IS_RUNTIME_PRODUCTION, RABBY_POPUP_GHOST_VIEW_URL } from "../../isomorphic/constants";
 import { NATIVE_HEADER_WITH_NAV_H, SECURITY_NOTIFICATION_VIEW_SIZE } from "../../isomorphic/const-size";
-import { cLog } from '../utils/log';
 import { onIpcMainEvent } from "../utils/ipcMainEvents";
 import { getMainWindow, onMainWindowReady } from "./tabbedBrowserWindow";
 import { fromMainSubject, valueToMainSubject } from "./_init";
+import { createPopupWindow } from "../utils/browser";
 
-const IS_DARWIN = process.platform === 'darwin';
 
 onMainWindowReady().then(async (mainWin) => {
   const targetWin = mainWin.window;
 
-  const secNotifications = new BrowserWindow({
-    show: false,
-    frame: false,
-    parent: mainWin.window,
-    movable: false,
-    maximizable: false,
-    minimizable: false,
-    resizable: false,
-    ...IS_DARWIN && { closable: false, },
-    fullscreenable: false,
-    skipTaskbar: true,
-    hasShadow: false,
-    opacity: 0,
-    titleBarStyle: 'hiddenInset',
-    transparent: true,
-    webPreferences: {
-      webviewTag: true,
-      sandbox: true,
-      nodeIntegration: false,
-      nodeIntegrationInWorker: false,
-      allowRunningInsecureContent: false,
-      autoplayPolicy: 'user-gesture-required',
-      contextIsolation: true,
-    }
-  });
+  const popupWin = createPopupWindow({ parent: mainWin.window });
 
-  updateSubWindowPosition(mainWin.window, secNotifications);
+  updateSubWindowPosition(mainWin.window, popupWin);
   targetWin.on('show', () => {
-    if (!secNotifications.isVisible()) return ;
-    updateSubWindowPosition(mainWin.window, secNotifications);
+    // if (!popupWin.isVisible()) return ;
+    updateSubWindowPosition(mainWin.window, popupWin);
   })
 
   targetWin.on('move', () => {
-    if (!secNotifications.isVisible()) return ;
-    updateSubWindowPosition(mainWin.window, secNotifications);
+    // if (!popupWin.isVisible()) return ;
+    updateSubWindowPosition(mainWin.window, popupWin);
   })
 
-  await secNotifications.webContents.loadURL(`${RABBY_POPUP_GHOST_VIEW_URL}#/security-notifications`);
+  await popupWin.webContents.loadURL(`${RABBY_POPUP_GHOST_VIEW_URL}#/security-notifications`);
 
   // debug-only
   if (!IS_RUNTIME_PRODUCTION) {
-    secNotifications.webContents.openDevTools({ mode: 'detach' });
+    popupWin.webContents.openDevTools({ mode: 'detach' });
   }
 
-  valueToMainSubject('securityNotificationsWindowReady', secNotifications);
+  popupWin.hide();
+  popupWin.setOpacity(0);
+
+  valueToMainSubject('securityNotificationsWindowReady', popupWin);
+
+  // TODO: deal with popupWin close, recreate it as needed
+  // targetWin.on('close', () => {
+  //   popupWin?.close();
+  // });
 })
 
 function updateSubWindowPosition(
@@ -92,21 +75,21 @@ function updateSubWindowPosition(
 
 export async function openSecurityNotificationView (payload: ISecurityNotificationPayload) {
   const targetWin = (await getMainWindow()).window;
+  const popupWin = await firstValueFrom(fromMainSubject('securityNotificationsWindowReady'));
 
-  const securityNotifyPopup = await firstValueFrom(fromMainSubject('securityNotificationsWindowReady'));
+  popupWin.webContents.send('__internal_rpc:security-notification', payload);
 
-  securityNotifyPopup.webContents.send('__internal_rpc:security-notification', payload);
-
-  updateSubWindowPosition(targetWin, securityNotifyPopup);
-  securityNotifyPopup.show();
-  securityNotifyPopup.setOpacity(1);
+  updateSubWindowPosition(targetWin, popupWin);
+  popupWin.show();
+  popupWin.setOpacity(1);
+  popupWin.moveTop();
 }
 
 onIpcMainEvent('__internal_rpc:clipboard:close-view', async () => {
-  const securityNotifyPopup = await firstValueFrom(fromMainSubject('securityNotificationsWindowReady'));
-
-  securityNotifyPopup.setOpacity(0);
-  securityNotifyPopup.hide();
+  // const targetWin = (await getMainWindow()).window;
+  const popupWin = await firstValueFrom(fromMainSubject('securityNotificationsWindowReady'));
+  popupWin.setOpacity(0);
+  popupWin.hide();
 });
 
 onIpcMainEvent('__internal_rpc:browser:set-ignore-mouse-events', (event, ...args) => {

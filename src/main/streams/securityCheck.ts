@@ -1,4 +1,4 @@
-import { BrowserView, BrowserWindow } from "electron";
+import { BrowserWindow } from "electron";
 import { firstValueFrom } from "rxjs";
 import LruCache from 'lru-cache';
 
@@ -13,6 +13,8 @@ import { AxiosError } from "axios";
 import { fromMainSubject, valueToMainSubject } from "./_init";
 import { getMainWindow } from "./tabbedBrowserWindow";
 import { onIpcMainEvent } from "../utils/ipcMainEvents";
+import { NATIVE_HEADER_WITH_NAV_H } from "../../isomorphic/const-size";
+import { createPopupWindow } from "../utils/browser";
 
 const securityCheckResults = new LruCache<IDapp['origin'], ISecurityCheckResult>({
   max: 500,
@@ -22,50 +24,80 @@ const securityCheckResults = new LruCache<IDapp['origin'], ISecurityCheckResult>
 
 firstValueFrom(fromMainSubject('mainWindowReady')).then(async (mainWin) => {
   const targetWin = mainWin.window;
-  const [width, height] = targetWin.getSize();
 
-  const securityCheckPopupView = new BrowserView({
-    webPreferences: {
-      // session: await getTemporarySession(),
-      webviewTag: true,
-      sandbox: true,
-      nodeIntegration: false,
-      allowRunningInsecureContent: false,
-      autoplayPolicy: 'user-gesture-required'
-    }
+  const popupWin = createPopupWindow({ parent: mainWin.window });
+
+  updateSubWindowPosition(mainWin.window, popupWin);
+  targetWin.on('show', () => {
+    if (!popupWin.isVisible()) return ;
+    updateSubWindowPosition(mainWin.window, popupWin);
+  })
+
+  targetWin.on('move', () => {
+    if (!popupWin.isVisible()) return ;
+    updateSubWindowPosition(mainWin.window, popupWin);
+  })
+
+  await popupWin.webContents.loadURL(`${RABBY_POPUP_GHOST_VIEW_URL}#/security-check`);
+
+  // debug-only
+  if (!IS_RUNTIME_PRODUCTION) {
+    // popupWin.webContents.openDevTools({ mode: 'detach' });
+  }
+
+  popupWin.hide();
+  popupWin.setOpacity(0);
+
+  valueToMainSubject('securityCheckPopupWindowReady', popupWin);
+
+  targetWin.on('close', () => {
+    popupWin?.close();
   });
-
-  securityCheckPopupView.setBounds({
-    x: 0,
-    y: 0,
-    width,
-    height,
-  });
-  securityCheckPopupView.setAutoResize({ width: true, height: true });
-
-  // add to main window then remove
-  targetWin.addBrowserView(securityCheckPopupView);
-  securityCheckPopupView.webContents.loadURL(`${RABBY_POPUP_GHOST_VIEW_URL}#/security-check`);
-  targetWin.removeBrowserView(securityCheckPopupView);
-
-  // if (!IS_RUNTIME_PRODUCTION) {
-  //   securityCheckPopupView.webContents.openDevTools({ mode: 'detach' });
-  // }
-
-  valueToMainSubject('securityCheckPopupViewReady', securityCheckPopupView);
 })
 
-export async function attachDappSecurityCheckView (
+
+function updateSubWindowPosition(
+  parentWin: BrowserWindow,
+  window: BrowserWindow,
+) {
+  const [width, height] = parentWin.getSize();
+
+  const popupRect = {
+    x: 0,
+    y: NATIVE_HEADER_WITH_NAV_H,
+    width: width,
+    height: height - NATIVE_HEADER_WITH_NAV_H,
+  }
+
+  window.setSize(popupRect.width, popupRect.height);
+
+  // get bounds
+  const pWinBounds = parentWin.getBounds()
+  const selfViewBounds = window.getBounds()
+
+  // top-right
+  let x = pWinBounds.x + popupRect.x + popupRect.width - selfViewBounds.width
+  let y = pWinBounds.y + popupRect.y + /* padding */1
+
+  // Convert to ints
+  x = Math.floor(x)
+  y = Math.floor(y)
+
+  window.setBounds({ ...selfViewBounds, x, y })
+}
+
+export async function openDappSecurityCheckView (
   url: string,
   targetWin?: BrowserWindow
 ) {
   targetWin = targetWin || (await getMainWindow()).window;
   const continualOpenId = randString();
 
-  const securityCheckPopupView = await firstValueFrom(fromMainSubject('securityCheckPopupViewReady'));
+  const popupWin = await firstValueFrom(fromMainSubject('securityCheckPopupWindowReady'));
+  updateSubWindowPosition(targetWin, popupWin);
 
   // dispatch custom event with url, continualOpenId
-  securityCheckPopupView.webContents.executeJavaScript(`
+  popupWin.webContents.executeJavaScript(`
 document.dispatchEvent(new CustomEvent('__set_checking_info__', ${JSON.stringify({
   detail: {
     url, continualOpenId
@@ -73,20 +105,24 @@ document.dispatchEvent(new CustomEvent('__set_checking_info__', ${JSON.stringify
 })}));
 `);
 
-  onIpcMainEvent('__internal_rpc:security-check:close-view', () => {
-    targetWin?.removeBrowserView(securityCheckPopupView);
-  });
-
-  targetWin.addBrowserView(securityCheckPopupView);
+  popupWin.show();
+  popupWin.setOpacity(1);
+  popupWin.moveTop();
 
   return { continualOpenId }
 }
 
+onIpcMainEvent('__internal_rpc:security-check:close-view', async () => {
+  const popupWin = await firstValueFrom(fromMainSubject('securityCheckPopupWindowReady'));
+  popupWin.setOpacity(0);
+  popupWin.hide();
+  // const targetWin = (await getMainWindow()).window;
+  // targetWin.moveTop();
+});
+
 onIpcMainEvent('__internal_rpc:security-check:set-view-top', async () => {
-  const win = (await getMainWindow()).window;
-  const securityCheckPopupView = await firstValueFrom(fromMainSubject('securityCheckPopupViewReady'));
-  win.removeBrowserView(securityCheckPopupView);
-  win.addBrowserView(securityCheckPopupView);
+  const popupWin = await firstValueFrom(fromMainSubject('securityCheckPopupWindowReady'));
+  popupWin.moveTop();
 });
 
 onIpcMainEvent('__internal_rpc:security-check:get-dapp', (evt, reqid, dappUrl) => {

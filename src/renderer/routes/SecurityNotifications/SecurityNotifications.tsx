@@ -2,6 +2,7 @@ import { Divider, notification } from 'antd'
 import { NotificationApi, NotificationInstance } from 'antd/lib/notification';
 import classNames from 'classnames';
 import { IS_RUNTIME_PRODUCTION } from 'isomorphic/constants';
+import { detectOS } from 'isomorphic/os';
 import React, { useEffect, useLayoutEffect, useRef } from 'react'
 
 import styles from './SecurityNotifications.module.less';
@@ -15,6 +16,8 @@ const ICON_SHILED_WARNING = 'rabby-internal://assets/icons/security-notification
 const ICON_SHILED_DANGER = 'rabby-internal://assets/icons/security-notifications/icon-shield-danger.svg';
 
 const DEFAULT_DURACTION_SEC = IS_RUNTIME_PRODUCTION ? 3 : 0;
+
+const IS_MACOS = detectOS() === 'darwin';
 
 const ROOT_EL = document.querySelector('#root')! as HTMLDivElement;
 notification.config({
@@ -140,10 +143,13 @@ function notify({
 }
 
 function toggleClickThrough(enable = true) {
+  // don't really toggle click through on macos
+  if (IS_MACOS) return ;
+
   if (enable)
     window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:browser:set-ignore-mouse-events', true, { forward: true });
   else
-    window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:browser:set-ignore-mouse-events', false, { forward: true });
+    window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:browser:set-ignore-mouse-events', false);
 }
 
 export default function SecurityNotifications() {
@@ -164,7 +170,7 @@ export default function SecurityNotifications() {
 
     // TODO: only use this in darwin
     const correctCounter = setInterval(() => {
-      const allContentNodes = Array.from(wrapperNode.querySelectorAll('.ant-notification-notice-content, .ant-notification-notice-close'));
+      const allContentNodes = Array.from(wrapperNode.querySelectorAll('.ant-notification-notice-content'));
       if (allContentNodes.length < notiCount) {
         notiCount = allContentNodes.length;
         checkNotiCount();
