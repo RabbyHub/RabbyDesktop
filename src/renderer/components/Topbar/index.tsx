@@ -36,7 +36,7 @@ import {
 } from '../../../../assets/icons/native-tabs-triples';
 
 import './index.less';
-import { canoicalizeDappUrl, isInternalProtocol, parseQueryString } from '../../../isomorphic/url';
+import { canoicalizeDappUrl, isInternalProtocol, isMainWinShellWebUI, parseQueryString } from '../../../isomorphic/url';
 
 import { useWindowState } from '../../hooks/useWindowState';
 import { IS_RUNTIME_PRODUCTION, RABBY_HOMEPAGE_URL, } from '../../../isomorphic/constants';
@@ -365,7 +365,7 @@ export default function Topbar() {
 
   useEffect(() => {
     // for debug
-    if (!IS_RUNTIME_PRODUCTION) {
+    if (!IS_RUNTIME_PRODUCTION && isMainWinShellWebUI(window.location.href)) {
       window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:browser-dev:openDevTools');
 
       window.open('https://app.uniswap.org');

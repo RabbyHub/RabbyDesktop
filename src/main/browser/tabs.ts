@@ -8,7 +8,7 @@ import { canoicalizeDappUrl, isUrlFromDapp } from '../../isomorphic/url';
 import { onIpcMainEvent } from '../utils/ipcMainEvents';
 import { RABBY_LOADING_URL } from '../../isomorphic/constants';
 import { dappStore } from '../store/dapps';
-import { attachAlertBrowserView } from '../streams/popupView';
+import { attachAlertBrowserView } from '../streams/dappAlert';
 
 type ITabOptions = {
   tabs: Tabs;

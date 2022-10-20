@@ -59,6 +59,10 @@ export function isUrlFromDapp (url: string) {
   return !url.startsWith(RABBY_INTERNAL_PROTOCOL) && !url.startsWith('chrome-extension:') && url.startsWith('https:')
 }
 
+export function isMainWinShellWebUI (url: string) {
+  return url.startsWith('chrome-extension:') && url.includes('__webuiWindowsId=1')
+}
+
 export function isDappProtocol (protocolOrUrl: string) {
   return protocolOrUrl.startsWith('https:')
 }

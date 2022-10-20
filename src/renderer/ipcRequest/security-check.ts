@@ -23,7 +23,7 @@ export async function securityCheckDappBeforeOpen(dappUrl: string) {
 
   return new Promise<ISecurityCheckResult>((resolve, reject) => {
     const dispose = window.rabbyDesktop.ipcRenderer.on(
-      '__internal_rpc:security-check:batch',
+      '__internal_rpc:security-check:check-dapp',
       (event) => {
         const { reqid: _reqid, ...rest } = event;
         if (_reqid === reqid) {
@@ -32,6 +32,6 @@ export async function securityCheckDappBeforeOpen(dappUrl: string) {
         }
       }
     );
-    window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:security-check:batch', reqid, dappUrl);
+    window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:security-check:check-dapp', reqid, dappUrl);
   });
 }

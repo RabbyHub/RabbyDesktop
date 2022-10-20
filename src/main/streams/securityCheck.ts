@@ -1,21 +1,23 @@
 import { BrowserView, BrowserWindow } from "electron";
+
 import { firstValueFrom } from "rxjs";
+import { RABBY_POPUP_GHOST_VIEW_URL } from "../../isomorphic/constants";
 
 import { canoicalizeDappUrl } from "../../isomorphic/url";
-import { IS_RUNTIME_PRODUCTION, RABBY_ALERT_INSECURITY_URL, RABBY_POPUP_GHOST_VIEW_URL } from "../../isomorphic/constants";
-import { onIpcMainEvent } from "../utils/ipcMainEvents";
-import { getMainWindow } from "./tabbedBrowserWindow";
+
 import { dappStore, formatDapp } from "../store/dapps";
 import { checkDappHttpsCert, queryDappLatestUpdateInfo } from "../utils/dapps";
 import { randString } from "../../isomorphic/string";
 import { AxiosError } from "axios";
 import { fromMainSubject, valueToMainSubject } from "./_init";
+import { getMainWindow } from "./tabbedBrowserWindow";
+import { onIpcMainEvent } from "../utils/ipcMainEvents";
 
 firstValueFrom(fromMainSubject('mainWindowReady')).then(async (mainWin) => {
   const targetWin = mainWin.window;
   const [width, height] = targetWin.getSize();
 
-  const mainWinGhostView = new BrowserView({
+  const securityCheckPopupView = new BrowserView({
     webPreferences: {
       // session: await getTemporarySession(),
       webviewTag: true,
@@ -26,24 +28,24 @@ firstValueFrom(fromMainSubject('mainWindowReady')).then(async (mainWin) => {
     }
   });
 
-  mainWinGhostView.setBounds({
+  securityCheckPopupView.setBounds({
     x: 0,
     y: 0,
     width,
     height,
   });
-  mainWinGhostView.setAutoResize({ width: true, height: true });
+  securityCheckPopupView.setAutoResize({ width: true, height: true });
 
   // add to main window then remove
-  targetWin.addBrowserView(mainWinGhostView);
-  mainWinGhostView.webContents.loadURL(`${RABBY_POPUP_GHOST_VIEW_URL}#/security-check`);
-  targetWin.removeBrowserView(mainWinGhostView);
+  targetWin.addBrowserView(securityCheckPopupView);
+  securityCheckPopupView.webContents.loadURL(`${RABBY_POPUP_GHOST_VIEW_URL}#/security-check`);
+  targetWin.removeBrowserView(securityCheckPopupView);
 
   // if (!IS_RUNTIME_PRODUCTION) {
-  //   mainWinGhostView.webContents.openDevTools({ mode: 'detach' });
+  //   securityCheckPopupView.webContents.openDevTools({ mode: 'detach' });
   // }
 
-  valueToMainSubject('mainPopupGhostViewReady', mainWinGhostView);
+  valueToMainSubject('securityCheckPopupViewReady', securityCheckPopupView);
 })
 
 export async function attachDappSecurityCheckView (
@@ -53,10 +55,10 @@ export async function attachDappSecurityCheckView (
   targetWin = targetWin || (await getMainWindow()).window;
   const continualOpenId = randString();
 
-  const securityCheckPopup = await firstValueFrom(fromMainSubject('mainPopupGhostViewReady'));
+  const securityCheckPopupView = await firstValueFrom(fromMainSubject('securityCheckPopupViewReady'));
 
   // dispatch custom event with url, continualOpenId
-  securityCheckPopup.webContents.executeJavaScript(`
+  securityCheckPopupView.webContents.executeJavaScript(`
 document.dispatchEvent(new CustomEvent('__set_checking_info__', ${JSON.stringify({
   detail: {
     url, continualOpenId
@@ -65,10 +67,10 @@ document.dispatchEvent(new CustomEvent('__set_checking_info__', ${JSON.stringify
 `);
 
   onIpcMainEvent('__internal_rpc:security-check:close-view', () => {
-    targetWin?.removeBrowserView(securityCheckPopup);
+    targetWin?.removeBrowserView(securityCheckPopupView);
   });
 
-  targetWin.addBrowserView(securityCheckPopup);
+  targetWin.addBrowserView(securityCheckPopupView);
 
   return { continualOpenId }
 }
@@ -81,7 +83,7 @@ onIpcMainEvent('__internal_rpc:security-check:get-dapp', (evt, reqid, dappUrl) =
   });
 });
 
-onIpcMainEvent('__internal_rpc:security-check:batch', async (evt, reqid, dappUrl) => {
+onIpcMainEvent('__internal_rpc:security-check:check-dapp', async (evt, reqid, dappUrl) => {
   const origin = canoicalizeDappUrl(dappUrl).origin;
   const [
     checkResult,
@@ -140,7 +142,7 @@ onIpcMainEvent('__internal_rpc:security-check:batch', async (evt, reqid, dappUrl
 
   resultLevel = resultLevel || 'ok';
 
-  evt.reply('__internal_rpc:security-check:batch', {
+  evt.reply('__internal_rpc:security-check:check-dapp', {
     reqid,
     countIssues,
     countDangerIssues,
@@ -150,46 +152,3 @@ onIpcMainEvent('__internal_rpc:security-check:batch', async (evt, reqid, dappUrl
     checkLatestUpdate: latestUpdateResult,
   })
 });
-
-let alertView: BrowserView;
-export async function attachAlertBrowserView (
-  url: string, isExisted = false, targetWin?: BrowserWindow
-) {
-  if (!alertView) {
-    // TODO: use standalone session open it
-    alertView = new BrowserView({
-      webPreferences: {
-        // session: await getTemporarySession(),
-        webviewTag: true,
-        sandbox: true,
-        nodeIntegration: false,
-        allowRunningInsecureContent: false,
-        autoplayPolicy: 'user-gesture-required'
-      }
-    });
-    alertView.webContents.loadURL(`${RABBY_ALERT_INSECURITY_URL}?__init_url__=${encodeURIComponent(url)}`);
-  }
-
-  alertView.webContents.send('__internal_alert-security-url', { url, isExisted });
-
-  targetWin = targetWin || (await getMainWindow()).window;
-
-  const dispose = onIpcMainEvent('__internal_close-alert-insecure-content', () => {
-    targetWin?.removeBrowserView(alertView);
-    // destroyBrowserWebview(alertView);
-
-    dispose?.();
-  });
-
-  targetWin.addBrowserView(alertView);
-
-  const [width, height] = targetWin.getSize();
-
-  alertView!.setBounds({
-    x: 0,
-    y: 0,
-    width,
-    height,
-  });
-  alertView!.setAutoResize({ width: true, height: true });
-}

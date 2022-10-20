@@ -13,7 +13,8 @@ import { createWindow, getFocusedWindow, getWindowFromWebContents } from "./tabb
 import { getWebuiExtId } from "./session";
 import { valueToMainSubject } from "./_init";
 import { dappStore, formatDapps, parseDappUrl } from '../store/dapps';
-import { attachAlertBrowserView, attachDappSecurityCheckView } from "./popupView";
+import { attachAlertBrowserView } from "./dappAlert";
+import { attachDappSecurityCheckView } from "./securityCheck";
 
 const appLog = getBindLog('appStream', 'bgGrey');
 

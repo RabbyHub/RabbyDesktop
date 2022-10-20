@@ -171,7 +171,7 @@ type ChannelMessagePayload = {
       }
     ]
   },
-  '__internal_rpc:security-check:batch': {
+  '__internal_rpc:security-check:check-dapp': {
     send: [reqid: string, dappUrl: string];
     response: [
       ISecurityCheckResult & {
