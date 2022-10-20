@@ -6,6 +6,13 @@ type M2RChanneMessagePayload = {
     originReqId: string;
     download: IAppUpdatorDownloadProgress
   },
+  '__internal_rpc:clipboard:full-web3-addr': {
+    web3Address: string;
+  },
+  '__internal_rpc:clipboard:full-web3-addr:changed': {
+    prevAddr: string;
+    curAddr: string;
+  },
 }
 
 type ChannelMessagePayload = {
@@ -176,6 +183,10 @@ type ChannelMessagePayload = {
     response: []
   },
   '__internal_rpc:security-check:close-view': {
+    send: [];
+    response: []
+  },
+  '__internal_rpc:clipboard:close-view': {
     send: [];
     response: []
   },

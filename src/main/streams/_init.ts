@@ -26,6 +26,9 @@ const CONF = {
   mainPopupGhostViewReady: {
     subject: new ReplaySubject(1),
   } as IConf<ReplaySubject<BrowserView>>,
+  securityNotificationsViewReady: {
+    subject: new ReplaySubject(1),
+  } as IConf<ReplaySubject<BrowserView>>,
 }
 
 type IMainSubjects = typeof CONF;

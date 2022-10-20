@@ -10,6 +10,7 @@ import './streams/rabbyExt';
 import './streams/updater';
 import './streams/session';
 import './streams/popupView';
+import './streams/clipboard';
 
 import bootstrap from './streams/app';
 

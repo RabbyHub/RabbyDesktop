@@ -39,9 +39,9 @@ firstValueFrom(fromMainSubject('mainWindowReady')).then(async (mainWin) => {
   mainWinGhostView.webContents.loadURL(`${RABBY_POPUP_GHOST_VIEW_URL}#/security-check`);
   targetWin.removeBrowserView(mainWinGhostView);
 
-  if (!IS_RUNTIME_PRODUCTION) {
-    mainWinGhostView.webContents.openDevTools({ mode: 'detach' });
-  }
+  // if (!IS_RUNTIME_PRODUCTION) {
+  //   mainWinGhostView.webContents.openDevTools({ mode: 'detach' });
+  // }
 
   valueToMainSubject('mainPopupGhostViewReady', mainWinGhostView);
 })

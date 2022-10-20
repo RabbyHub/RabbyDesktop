@@ -8,12 +8,14 @@ import './popup-view.less';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 
 import SecurityCheck from '../routes/SecurityCheck/SecurityCheck';
+import SecurityNotifications from '../routes/SecurityNotifications/SecurityNotifications';
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/security-check" element={<SecurityCheck />} />
+        <Route path="/security-notifications" element={<SecurityNotifications />} />
       </Routes>
     </Router>
   );
