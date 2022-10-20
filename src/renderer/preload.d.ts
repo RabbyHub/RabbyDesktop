@@ -1,5 +1,6 @@
 /// <reference types="electron" />
 /// <reference path="../isomorphic/types.d.ts" />
+/// <reference path="../isomorphic/type-helpers.d.ts" />
 
 type M2RChanneMessagePayload = {
   'download-release-progress-updated': {
@@ -192,6 +193,10 @@ type ChannelMessagePayload = {
   },
   '__internal_rpc:browser:set-ignore-mouse-events': {
     send: [ignore: boolean, options?: Electron.IgnoreMouseEventsOptions];
+    response: []
+  },
+  '__internal_rpc:browser-dev:openDevTools': {
+    send: [];
     response: []
   },
   '__internal_webui-window-close': {

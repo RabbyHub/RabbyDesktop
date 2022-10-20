@@ -130,9 +130,9 @@ onMainWindowReady().then(async (mainWin) => {
 
   await secNotifications.webContents.loadURL(`${RABBY_POPUP_GHOST_VIEW_URL}#/security-notifications`);
 
-  if (!IS_RUNTIME_PRODUCTION) {
-    secNotifications.webContents.openDevTools({ mode: 'detach' });
-  }
+  // if (!IS_RUNTIME_PRODUCTION) {
+  //   secNotifications.webContents.openDevTools({ mode: 'detach' });
+  // }
 
   // show but opacity is 0
   secNotifications.show();

@@ -1,4 +1,6 @@
 import { BrowserWindow } from "electron";
+import { IS_RUNTIME_PRODUCTION } from "../../isomorphic/constants";
+import { onIpcMainEvent } from "../utils/ipcMainEvents";
 import { firstValueFrom } from "rxjs";
 import TabbedBrowserWindow, { TabbedBrowserWindowOptions } from "../browser/browsers";
 import { getBrowserWindowOpts } from "../utils/app";
@@ -97,3 +99,10 @@ export async function createWindow(options: Partial<TabbedBrowserWindowOptions>)
 
   return win;
 }
+
+onIpcMainEvent('__internal_rpc:browser-dev:openDevTools', (evt) => {
+  if (!IS_RUNTIME_PRODUCTION) {
+    const webContents = evt.sender;
+    webContents.openDevTools({ mode: 'detach' });
+  }
+})

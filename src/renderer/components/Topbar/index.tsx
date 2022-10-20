@@ -36,15 +36,13 @@ import {
 } from '../../../../assets/icons/native-tabs-triples';
 
 import './index.less';
-import { canoicalizeDappUrl, parseQueryString } from '../../../isomorphic/url';
+import { canoicalizeDappUrl, isInternalProtocol, parseQueryString } from '../../../isomorphic/url';
 
 import { useWindowState } from '../../hooks/useWindowState';
-import {
-  RABBY_HOMEPAGE_URL,
-  RABBY_INTERNAL_PROTOCOL,
-} from '../../../isomorphic/constants';
+import { IS_RUNTIME_PRODUCTION, RABBY_HOMEPAGE_URL, } from '../../../isomorphic/constants';
 import { CHAINS, CHAINS_LIST } from '@debank/common';
 import { getAllDapps } from 'renderer/ipcRequest/dapps';
+import DappAddressBar from './DappAddressBar';
 
 const isDebug = process.env.NODE_ENV !== 'production';
 
@@ -67,14 +65,6 @@ declare global {
 const WITH_NAV_BAR = parseQueryString().__withNavigationbar === 'true';
 const CLOSABLE = parseQueryString().__webuiClosable === 'true';
 
-function isInternalProtocol(url: string) {
-  return [
-    `${RABBY_INTERNAL_PROTOCOL}//`,
-    'chrome-extension://',
-    'chrome://',
-  ].some((protocol) => url.startsWith(protocol));
-}
-
 function filterFavIcon(url?: string, isActiveTab = false) {
   // homepage
   if (url?.startsWith(RABBY_HOMEPAGE_URL)) {
@@ -94,11 +84,6 @@ function filterClosable(url?: string, isClosable = CLOSABLE) {
 
   return isClosable;
 }
-
-// type GetListenerParams<T> = T extends (...args: infer A) => any ? A : never;
-type GetListenerFirstParams<T> = T extends (...args: infer A) => any
-  ? A[0]
-  : never;
 
 function useWinTriples() {
   const {
@@ -327,20 +312,6 @@ function useTopbar() {
     };
   }, [updateActiveTab, windowId]);
 
-  const onAddressUrlKeyUp = useCallback(
-    (
-      event: GetListenerFirstParams<
-        React.HTMLAttributes<HTMLInputElement>['onKeyUp']
-      >
-    ) => {
-      if (event.key === 'Enter') {
-        const url = (event.target as HTMLInputElement).value;
-        chrome.tabs.update({ url });
-      }
-    },
-    []
-  );
-
   const tabActions = {
     onTabClick: useCallback((tab: ChromeTab) => {
       chrome.tabs.update(tab.id!, { active: true });
@@ -356,7 +327,6 @@ function useTopbar() {
     tabListDomRef,
     tabList,
     activeTab,
-    onAddressUrlKeyUp,
     tabActions,
   };
 }
@@ -383,39 +353,24 @@ function useSelectedTabInfo(activeTab?: ChromeTab | null) {
   return selectedTabInfo;
 }
 
-function useAddressUrl(updatedUrl?: string) {
-  const [addressUrl, setAddressUrl] = useState(updatedUrl || '');
-  const onAddressUrlChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setAddressUrl(e.target.value);
-    },
-    []
-  );
-
-  useEffect(() => {
-    setAddressUrl(updatedUrl || '');
-  }, [updatedUrl]);
-
-  return {
-    addressUrl,
-    isInternalUrl: useMemo(() => isInternalProtocol(addressUrl), [addressUrl]),
-    onAddressUrlChange,
-  };
-}
-
 export default function Topbar() {
-  const { tabListDomRef, tabList, activeTab, onAddressUrlKeyUp, tabActions } =
+  const { tabListDomRef, tabList, activeTab, tabActions } =
     useTopbar();
 
   const { winOSType, winState, winButtonActions } = useWinTriples();
 
   const selectedTabInfo = useSelectedTabInfo(activeTab);
 
-  const { addressUrl, isInternalUrl, onAddressUrlChange } = useAddressUrl(
-    activeTab?.url
-  );
-
   const { connectedSiteMap } = useConnectedSite();
+
+  useEffect(() => {
+    // for debug
+    if (!IS_RUNTIME_PRODUCTION) {
+      window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:browser-dev:openDevTools');
+
+      window.open('https://app.uniswap.org');
+    }
+  }, []);
 
   return (
     <>
@@ -568,7 +523,7 @@ export default function Topbar() {
       </div>
       {WITH_NAV_BAR && (
         <div
-          className={classnames('toolbar', isInternalUrl && 'internal-page')}
+          className={classnames('toolbar', activeTab?.url && isInternalProtocol(activeTab?.url) && 'internal-page')}
         >
           <div className="page-controls">
             <button
@@ -602,21 +557,8 @@ export default function Topbar() {
               <img src={IconNavRefresh} alt="close" />
             </button>
           </div>
-          <div className="address-bar">
-            {isInternalUrl ? (
-              <div className="hidden-address" />
-            ) : (
-              <input
-                id="addressurl"
-                spellCheck={false}
-                value={addressUrl}
-                disabled
-                // defaultValue={activeTab?.url || ''}
-                onKeyUp={onAddressUrlKeyUp}
-                onChange={onAddressUrlChange}
-              />
-            )}
-          </div>
+          <DappAddressBar url={activeTab?.url} />
+
           <browser-action-list id="actions" />
         </div>
       )}
