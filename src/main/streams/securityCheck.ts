@@ -14,7 +14,7 @@ import { fromMainSubject, valueToMainSubject } from "./_init";
 import { getMainWindow } from "./tabbedBrowserWindow";
 import { onIpcMainEvent } from "../utils/ipcMainEvents";
 import { NATIVE_HEADER_WITH_NAV_H } from "../../isomorphic/const-size";
-import { createPopupWindow } from "../utils/browser";
+import { createPopupWindow, hidePopupWindow, showPopupWindow } from "../utils/browser";
 
 const securityCheckResults = new LruCache<IDapp['origin'], ISecurityCheckResult>({
   max: 500,
@@ -45,8 +45,7 @@ firstValueFrom(fromMainSubject('mainWindowReady')).then(async (mainWin) => {
     // popupWin.webContents.openDevTools({ mode: 'detach' });
   }
 
-  popupWin.hide();
-  popupWin.setOpacity(0);
+  hidePopupWindow(popupWin);
 
   valueToMainSubject('securityCheckPopupWindowReady', popupWin);
 
@@ -105,8 +104,7 @@ document.dispatchEvent(new CustomEvent('__set_checking_info__', ${JSON.stringify
 })}));
 `);
 
-  popupWin.show();
-  popupWin.setOpacity(1);
+  showPopupWindow(popupWin);
   popupWin.moveTop();
 
   return { continualOpenId }
@@ -114,8 +112,7 @@ document.dispatchEvent(new CustomEvent('__set_checking_info__', ${JSON.stringify
 
 onIpcMainEvent('__internal_rpc:security-check:close-view', async () => {
   const popupWin = await firstValueFrom(fromMainSubject('securityCheckPopupWindowReady'));
-  popupWin.setOpacity(0);
-  popupWin.hide();
+  hidePopupWindow(popupWin);
   // const targetWin = (await getMainWindow()).window;
   // targetWin.moveTop();
 });

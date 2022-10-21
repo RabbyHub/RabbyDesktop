@@ -8,6 +8,8 @@ export function destroyBrowserWebview(view?: BrowserView | null) {
   (view as any)?.destroyed?.();
 }
 
+const IS_DARWIN = process.platform === 'darwin';
+
 export function createPopupWindow (
   opts?: Electron.BrowserWindowConstructorOptions,
 ) {
@@ -16,17 +18,26 @@ export function createPopupWindow (
     show: false,
     frame: false,
     parent: opts?.parent,
+    modal: false,
     movable: false,
     maximizable: false,
     minimizable: false,
     resizable: false,
-    ...process.platform === 'darwin' && { closable: false, },
     fullscreenable: false,
     skipTaskbar: true,
     hasShadow: false,
-    opacity: 1,
-    // titleBarStyle: 'hiddenInset',
-    transparent: true,
+    titleBarStyle: 'hiddenInset',
+    ...IS_DARWIN ? {
+      opacity: 1,
+      closable: true,
+      trafficLightPosition: { x: -9999, y: -9999 },
+      transparent: true,
+      backgroundColor: '#00ffffff',
+    } : {
+      opacity: 0,
+      show: true,
+      transparent: true
+    },
     webPreferences: {
       ...opts?.webPreferences,
       // session: await getTemporarySession(),
@@ -39,4 +50,26 @@ export function createPopupWindow (
       contextIsolation: true,
     }
   })
+}
+
+/**
+ * @description on windows, we assume the popupWin has been shown by calling `window.show()` or set `show: true` on constucting,
+ * you sure make sure the window is visiblebefore calling this.
+ *
+ * The same requirement applies to hidePopupWindow
+ */
+export function showPopupWindow (popupWin: BrowserWindow) {
+  if (process.platform === 'win32') {
+    popupWin.setOpacity(1);
+  } else {
+    popupWin.show();
+  }
+}
+
+export function hidePopupWindow (popupWin: BrowserWindow) {
+  if (process.platform === 'win32') {
+    popupWin.setOpacity(0);
+  } else {
+    popupWin.hide();
+  }
 }

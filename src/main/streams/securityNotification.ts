@@ -6,7 +6,7 @@ import { NATIVE_HEADER_WITH_NAV_H, SECURITY_NOTIFICATION_VIEW_SIZE } from "../..
 import { onIpcMainEvent } from "../utils/ipcMainEvents";
 import { getMainWindow, onMainWindowReady } from "./tabbedBrowserWindow";
 import { fromMainSubject, valueToMainSubject } from "./_init";
-import { createPopupWindow } from "../utils/browser";
+import { createPopupWindow, hidePopupWindow, showPopupWindow } from "../utils/browser";
 
 
 onMainWindowReady().then(async (mainWin) => {
@@ -29,11 +29,10 @@ onMainWindowReady().then(async (mainWin) => {
 
   // debug-only
   if (!IS_RUNTIME_PRODUCTION) {
-    popupWin.webContents.openDevTools({ mode: 'detach' });
+    // popupWin.webContents.openDevTools({ mode: 'detach' });
   }
 
-  popupWin.hide();
-  popupWin.setOpacity(0);
+  hidePopupWindow(popupWin);
 
   valueToMainSubject('securityNotificationsWindowReady', popupWin);
 
@@ -80,16 +79,14 @@ export async function openSecurityNotificationView (payload: ISecurityNotificati
   popupWin.webContents.send('__internal_rpc:security-notification', payload);
 
   updateSubWindowPosition(targetWin, popupWin);
-  popupWin.show();
-  popupWin.setOpacity(1);
+  showPopupWindow(popupWin)
   popupWin.moveTop();
 }
 
 onIpcMainEvent('__internal_rpc:clipboard:close-view', async () => {
   // const targetWin = (await getMainWindow()).window;
   const popupWin = await firstValueFrom(fromMainSubject('securityNotificationsWindowReady'));
-  popupWin.setOpacity(0);
-  popupWin.hide();
+  hidePopupWindow(popupWin);
 });
 
 onIpcMainEvent('__internal_rpc:browser:set-ignore-mouse-events', (event, ...args) => {
