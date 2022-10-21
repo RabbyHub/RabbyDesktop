@@ -11,7 +11,7 @@ import { checkDappHttpsCert, queryDappLatestUpdateInfo } from "../utils/dapps";
 import { randString } from "../../isomorphic/string";
 import { AxiosError } from "axios";
 import { fromMainSubject, valueToMainSubject } from "./_init";
-import { getMainWindow } from "./tabbedBrowserWindow";
+import { getMainWindow, onMainWindowReady } from "./tabbedBrowserWindow";
 import { onIpcMainEvent } from "../utils/ipcMainEvents";
 import { NATIVE_HEADER_WITH_NAV_H } from "../../isomorphic/const-size";
 import { createPopupWindow, hidePopupWindow, showPopupWindow } from "../utils/browser";
@@ -22,21 +22,21 @@ const securityCheckResults = new LruCache<IDapp['origin'], ISecurityCheckResult>
   ttl: 1000 * 90,
 })
 
-firstValueFrom(fromMainSubject('mainWindowReady')).then(async (mainWin) => {
+onMainWindowReady().then(async (mainWin) => {
   const targetWin = mainWin.window;
 
-  const popupWin = createPopupWindow({ parent: mainWin.window });
+  const popupWin = createPopupWindow({ parent: targetWin });
 
-  updateSubWindowPosition(mainWin.window, popupWin);
-  targetWin.on('show', () => {
-    if (!popupWin.isVisible()) return ;
-    updateSubWindowPosition(mainWin.window, popupWin);
-  })
+  updateSubWindowPosition(targetWin, popupWin);
+  const onTargetWinUpdate = () => {
+    updateSubWindowPosition(targetWin, popupWin);
+  };
 
-  targetWin.on('move', () => {
-    if (!popupWin.isVisible()) return ;
-    updateSubWindowPosition(mainWin.window, popupWin);
-  })
+  targetWin.on('show', onTargetWinUpdate);
+  targetWin.on('move', onTargetWinUpdate);
+  targetWin.on('resize', onTargetWinUpdate);
+  targetWin.on('unmaximize', onTargetWinUpdate);
+  targetWin.on('restore', onTargetWinUpdate);
 
   await popupWin.webContents.loadURL(`${RABBY_POPUP_GHOST_VIEW_URL}#/security-check`);
 
@@ -53,7 +53,6 @@ firstValueFrom(fromMainSubject('mainWindowReady')).then(async (mainWin) => {
     popupWin?.close();
   });
 })
-
 
 function updateSubWindowPosition(
   parentWin: BrowserWindow,
@@ -82,7 +81,7 @@ function updateSubWindowPosition(
   x = Math.floor(x)
   y = Math.floor(y)
 
-  window.setBounds({ ...selfViewBounds, x, y })
+  window.setBounds({ ...popupRect, x, y }, true)
 }
 
 export async function openDappSecurityCheckView (
