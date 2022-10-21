@@ -15,15 +15,14 @@ onMainWindowReady().then(async (mainWin) => {
   const popupWin = createPopupWindow({ parent: mainWin.window });
 
   updateSubWindowPosition(mainWin.window, popupWin);
-  targetWin.on('show', () => {
-    // if (!popupWin.isVisible()) return ;
+  const onTargetWinUpdate = () => {
     updateSubWindowPosition(mainWin.window, popupWin);
-  })
-
-  targetWin.on('move', () => {
-    // if (!popupWin.isVisible()) return ;
-    updateSubWindowPosition(mainWin.window, popupWin);
-  })
+  };
+  targetWin.on('show', onTargetWinUpdate);
+  targetWin.on('move', onTargetWinUpdate);
+  targetWin.on('resized', onTargetWinUpdate);
+  targetWin.on('unmaximize', onTargetWinUpdate);
+  targetWin.on('restore', onTargetWinUpdate);
 
   await popupWin.webContents.loadURL(`${RABBY_POPUP_GHOST_VIEW_URL}#/security-notifications`);
 
@@ -69,7 +68,7 @@ function updateSubWindowPosition(
   x = Math.floor(x)
   y = Math.floor(y)
 
-  window.setBounds({ ...selfViewBounds, x, y })
+  window.setBounds({ ...popupRect, x, y }, true)
 }
 
 export async function openSecurityNotificationView (payload: ISecurityNotificationPayload) {
