@@ -365,7 +365,7 @@ export default function Topbar() {
 
   useEffect(() => {
     hideDappAddressbarSecurityPopupView();
-  }, [ selectedTabInfo?.tabUrl ]);
+  }, [ canoicalizeDappUrl(selectedTabInfo?.tabUrl || '').origin ]);
 
   useEffect(() => {
     const dispose = window.rabbyDesktop.ipcRenderer.on('__internal_rpc:webui-extension:switch-active-dapp', ({ tabId }) => {
