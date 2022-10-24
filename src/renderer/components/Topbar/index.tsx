@@ -355,8 +355,7 @@ function useSelectedTabInfo(activeTab?: ChromeTab | null) {
 }
 
 export default function Topbar() {
-  const { tabListDomRef, tabList, activeTab, tabActions } =
-    useTopbar();
+  const { tabListDomRef, tabList, activeTab, tabActions } = useTopbar();
 
   const { winOSType, winState, winButtonActions } = useWinTriples();
 
@@ -367,6 +366,14 @@ export default function Topbar() {
   useEffect(() => {
     hideDappAddressbarSecurityPopupView();
   }, [ activeTab?.url ]);
+
+  useEffect(() => {
+    const dispose = window.rabbyDesktop.ipcRenderer.on('__internal_rpc:webui-extension:switch-active-dapp', ({ tabId }) => {
+      chrome.tabs.update(tabId, { active: true });
+    });
+
+    return dispose;
+  }, []);
 
   useEffect(() => {
     // debug-only

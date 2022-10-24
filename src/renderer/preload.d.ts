@@ -7,6 +7,9 @@ type M2RChanneMessagePayload = {
     originReqId: string;
     download: IAppUpdatorDownloadProgress
   },
+  '__internal_rpc:webui-extension:switch-active-dapp': {
+    tabId: number;
+  },
   '__internal_rpc:security-notification': ISecurityNotificationPayload,
   '__internal_rpc:security-addressbarpopup:on-show': {
     origin: string;

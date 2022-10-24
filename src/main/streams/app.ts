@@ -58,7 +58,11 @@ app.on('web-contents-created', (evt, webContents) => {
           const openedTab = tabbedWin?.tabs.findByOrigin(details.url) || null;
           if (openedTab) {
             tabbedWin?.tabs.select(openedTab!['id'])
-            openedTab!.loadURL(details.url);
+            // webuiExtension's webContents is just the webContents of tabbedWin its belongs to
+            tabbedWin?.topbarWebContents.send('__internal_rpc:webui-extension:switch-active-dapp', {
+              tabId: openedTab['id']
+            });
+
           } else {
             const targetWin = tabbedWin?.window;
 
