@@ -4,12 +4,14 @@ import dayjs from 'dayjs';
 import { securityCheckGetDappInfo, queryLatestDappSecurityCheckResult, continueOpenDapp } from "../ipcRequest/security-check";
 
 const DEFAULT_HTTPS_RESULT: ISecurityCheckResult['checkHttps'] & { checking: boolean } = {
+  level: 'ok',
   checking: false,
   timeout: false,
   httpsError: false,
 };
 
 const DEFAULT_DAPP_UPDATE_INFO_RESULT: ISecurityCheckResult['checkLatestUpdate'] & { checking: boolean } = {
+  level: 'ok',
   checking: false,
   timeout: false,
   latestChangedItemIn24Hr: null as null | IDappUpdateDetectionItem,
@@ -66,7 +68,7 @@ export function useCheckDapp() {
   const hideView = useCallback(() => {
     window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:security-check:close-view')
     resetState();
-  }, [ resetState ]);
+  }, [ resetState, checkingInfo.url ]);
 
   useEffect(() => {
     if (!checkingInfo.url) return ;

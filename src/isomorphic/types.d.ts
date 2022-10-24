@@ -73,11 +73,13 @@ type ISecurityCheckResult = {
   resultLevel: 'ok' | 'warning' | 'danger'
   timeout: boolean
   checkHttps: {
+    level: ISecurityCheckResult['resultLevel']
     timeout?: boolean
     httpsError: boolean
     chromeErrorCode?: string
   }
   checkLatestUpdate: {
+    level: ISecurityCheckResult['resultLevel']
     timeout?: boolean
     latestChangedItemIn24Hr?: IDappUpdateDetectionItem | null
     latestItem?: IDappUpdateDetectionItem | null
@@ -96,3 +98,11 @@ type ISecurityNotificationPayload = {
   type: 'text-with-ens',
   ensDomain: string,
 }
+
+type IFocusedDetailedType = 'checkHttps' | 'checkLatestUpdate';
+type ISecurityAddrbarPopupState = {
+  page: 'entry',
+} | {
+  page: 'detail-item',
+  focusingItem: IFocusedDetailedType
+};

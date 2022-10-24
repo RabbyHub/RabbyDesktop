@@ -8,6 +8,11 @@ type M2RChanneMessagePayload = {
     download: IAppUpdatorDownloadProgress
   },
   '__internal_rpc:security-notification': ISecurityNotificationPayload,
+  '__internal_rpc:security-addressbarpopup:on-show': {
+    origin: string;
+    checkResult: ISecurityCheckResult;
+  },
+  '__internal_rpc:loading-view:dapp-did-finish-load': {},
 }
 
 type ChannelMessagePayload = {
@@ -206,6 +211,26 @@ type ChannelMessagePayload = {
   '__internal_rpc:browser-dev:openDevTools': {
     send: [];
     response: []
+  },
+  '__internal_rpc:security-addressbarpopup:show': {
+    send: [
+      dappUrl: string,
+    ];
+    response: []
+  },
+  '__internal_rpc:security-addressbarpopup:switch-pageview': {
+    send: [
+      state: ISecurityAddrbarPopupState
+    ];
+    response: [
+      {
+        state: ISecurityAddrbarPopupState,
+      }
+    ]
+  },
+  '__internal_rpc:security-addressbarpopup:hide': {
+    send: [];
+    response: [];
   },
   '__internal_webui-window-close': {
     send: [ winId: number, webContentsId: number ],

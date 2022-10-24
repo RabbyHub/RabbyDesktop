@@ -1,6 +1,8 @@
 import classNames from 'classnames';
-import { isInternalProtocol, isUrlFromDapp } from 'isomorphic/url';
+import { IS_RUNTIME_PRODUCTION } from 'isomorphic/constants';
+import { isInternalProtocol, isMainWinShellWebUI, isUrlFromDapp } from 'isomorphic/url';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { openDappAddressbarSecurityPopupView } from 'renderer/ipcRequest/security-addressbarpopup';
 import { queryLatestDappSecurityCheckResult } from 'renderer/ipcRequest/security-check';
 import styles from './DappAddressBar.module.less';
 
@@ -39,6 +41,8 @@ function useAddressUrl(updatedUrl?: string) {
   };
 }
 
+const IS_MAIN_SHELL = isMainWinShellWebUI(window.location.href);
+
 export default function DappAddressBar ({
   url
 } : {
@@ -49,6 +53,13 @@ export default function DappAddressBar ({
   );
 
   const [ checkResult, setCheckResult ] = useState<ISecurityCheckResult | null>(null);
+
+  const openSecurityAddressbarpopup = useCallback(() => {
+    if (!IS_MAIN_SHELL) return ;
+    if (!url) return ;
+
+    openDappAddressbarSecurityPopupView(url);
+  }, [ url ]);
 
   useEffect(() => {
     if (!url || !isUrlFromDapp(url)) {
@@ -65,13 +76,28 @@ export default function DappAddressBar ({
       });
   }, [ url ]);
 
+  // useEffect(() => {
+  //     // window.open('https://app.uniswap.org');
+  //     // window.open('https://debank.com');
+  //   // just for debug
+  //   if (!IS_RUNTIME_PRODUCTION) {
+  //     openSecurityAddressbarpopup();
+  //   }
+  // }, [ openSecurityAddressbarpopup ]);
+
   return (
     <div className={classNames(
       styles['address-bar'],
       isInternalUrl && styles.forInternalUrl,
     )}>
       {checkResult && (
-        <div className={classNames(styles.securityInfo, `J_security_level-${checkResult.resultLevel}`)}>
+        <div
+          className={classNames(styles.securityInfo, `J_security_level-${checkResult.resultLevel}`)}
+          onClick={() => {
+            if (!url) return ;
+            openSecurityAddressbarpopup();
+          }}
+        >
           {checkResult.resultLevel === 'ok' && (
             <>
               <img src="rabby-internal://assets/icons/native-tabs/icon-shield-default.svg" />
@@ -84,8 +110,6 @@ export default function DappAddressBar ({
               <div className={styles.summaryText}>Found {checkResult.countWarnings} Warning(s)</div>
             </>
           )}
-
-
         </div>
       )}
       {isInternalUrl ? (

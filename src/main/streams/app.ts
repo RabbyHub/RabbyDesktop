@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Tray } from "electron";
+import { app, BrowserWindow, ipcMain, Tray } from "electron";
 
 import { APP_NAME, IS_RUNTIME_PRODUCTION, RABBY_GETTING_STARTED_URL, RABBY_HOMEPAGE_URL, RABBY_SPALSH_URL } from "../../isomorphic/constants";
 import { isRabbyShellURL, isUrlFromDapp } from "../../isomorphic/url";

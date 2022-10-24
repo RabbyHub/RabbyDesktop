@@ -29,6 +29,9 @@ const CONF = {
   securityNotificationsWindowReady: {
     subject: new ReplaySubject(1),
   } as IConf<ReplaySubject<BrowserWindow>>,
+  securityAddressbarPopup: {
+    subject: new ReplaySubject(1),
+  } as IConf<ReplaySubject<BrowserWindow>>,
 }
 
 type IMainSubjects = typeof CONF;

@@ -38,6 +38,7 @@ export function createPopupWindow (
       show: true,
       transparent: true
     },
+    ...opts?.transparent !== undefined && { transparent: !!opts?.transparent },
     webPreferences: {
       ...opts?.webPreferences,
       // session: await getTemporarySession(),

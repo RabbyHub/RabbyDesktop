@@ -59,7 +59,7 @@ export class Tab {
     this.window.addBrowserView(this.loadingView);
 
     this.view.webContents.on('did-finish-load', () => {
-      this.loadingView?.webContents.send('did-finish-load', null);
+      this.loadingView?.webContents.send('__internal_rpc:loading-view:dapp-did-finish-load', null);
       this.window?.removeBrowserView(this.loadingView!);
     });
 

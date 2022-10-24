@@ -139,7 +139,7 @@ function getMockedChanged (dapp_id: string) {
   }
 }
 
-export async function doCheckDappOrigin (origin: string) {
+async function doCheckDappOrigin (origin: string) {
   // TODO: catch error here
   const [
     httpsCheckResult,
@@ -181,17 +181,19 @@ export async function doCheckDappOrigin (origin: string) {
     })
   ]);
 
-  const httpsResult = httpsCheckResult?.type === 'HTTPS_CERT_INVALID' ? {
+  const httpsResult: ISecurityCheckResult['checkHttps'] = httpsCheckResult?.type === 'HTTPS_CERT_INVALID' ? {
+    level: 'danger',
     httpsError: true,
     chromeErrorCode: httpsCheckResult.errorCode
   } : {
+    level: httpsCheckResult?.type === 'TIMEOUT' ? 'danger' : 'ok',
     httpsError: false,
     timeout: httpsCheckResult?.type === 'TIMEOUT'
   }
 
   // normalize result
   let countWarnings = 0, countDangerIssues = 0;
-  let resultLevel = undefined as any as 'ok' | 'warning' | 'danger';
+  let resultLevel = undefined as any as ISecurityCheckResult['resultLevel'];
 
   if (latestUpdateResult.latestChangedItemIn24Hr?.create_at && latestUpdateResult.latestChangedItemIn24Hr?.is_changed) {
     countWarnings++;
@@ -213,8 +215,28 @@ export async function doCheckDappOrigin (origin: string) {
     resultLevel,
     timeout: !!(httpsResult.timeout || latestUpdateResult.timeout),
     checkHttps: httpsResult,
-    checkLatestUpdate: latestUpdateResult,
+    checkLatestUpdate: {
+      ...latestUpdateResult,
+      level: latestUpdateResult.timeout ? 'danger' : latestUpdateResult.latestChangedItemIn24Hr ? 'warning' : 'ok'
+    },
   };
+
+  return checkResult;
+}
+
+export async function getOrPutCheckResult (dappUrl: string, updateOnSet: boolean = false) {
+  const origin = canoicalizeDappUrl(dappUrl).origin;
+
+  let checkResult = securityCheckResults.get(origin);
+
+  if (!checkResult) {
+    checkResult = await doCheckDappOrigin(origin);
+    securityCheckResults.set(origin, checkResult);
+  } else if (updateOnSet) {
+    doCheckDappOrigin(origin).then(newVal => {
+      securityCheckResults.set(origin, newVal);
+    });
+  }
 
   return checkResult;
 }
@@ -228,14 +250,7 @@ onIpcMainEvent('__internal_rpc:security-check:request-check-dapp', async (evt, r
     })
   }
 
-  const origin = canoicalizeDappUrl(dappUrl).origin;
-
-  let checkResult = securityCheckResults.get(origin);
-
-  if (!checkResult)
-    checkResult = await doCheckDappOrigin(origin);
-
-  securityCheckResults.set(origin, checkResult);
+  const checkResult = await getOrPutCheckResult(dappUrl);
 
   evt.reply('__internal_rpc:security-check:request-check-dapp', {
     reqid,

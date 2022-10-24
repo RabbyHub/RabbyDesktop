@@ -43,6 +43,7 @@ import { IS_RUNTIME_PRODUCTION, RABBY_HOMEPAGE_URL, } from '../../../isomorphic/
 import { CHAINS, CHAINS_LIST } from '@debank/common';
 import { getAllDapps } from 'renderer/ipcRequest/dapps';
 import DappAddressBar from './DappAddressBar';
+import { hideDappAddressbarSecurityPopupView } from 'renderer/ipcRequest/security-addressbarpopup';
 
 const isDebug = process.env.NODE_ENV !== 'production';
 
@@ -362,6 +363,10 @@ export default function Topbar() {
   const selectedTabInfo = useSelectedTabInfo(activeTab);
 
   const { connectedSiteMap } = useConnectedSite();
+
+  useEffect(() => {
+    hideDappAddressbarSecurityPopupView();
+  }, [ activeTab?.url ]);
 
   useEffect(() => {
     // debug-only

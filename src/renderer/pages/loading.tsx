@@ -7,6 +7,8 @@ import { Progress } from 'antd';
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import './loading.less';
 import { DappFavicon } from '../components/DappFavicon';
+import { openDappAddressbarSecurityPopupView } from '../ipcRequest/security-addressbarpopup';
+import { isUrlFromDapp } from '@/isomorphic/url';
 
 export default function App() {
   const [percent, setPercent] = React.useState(10);
@@ -31,14 +33,17 @@ export default function App() {
   }, []);
 
   useLayoutEffect(() => {
-    window.rabbyDesktop.ipcRenderer.on('did-finish-load' as any, () => {
+    window.rabbyDesktop.ipcRenderer.on('__internal_rpc:loading-view:dapp-did-finish-load' as any, () => {
       setPercent(100);
       clearInterval(ref.current);
+
+      if (dapp?.origin && isUrlFromDapp(dapp?.origin))
+        openDappAddressbarSecurityPopupView(dapp?.origin);
     });
     window.rabbyDesktop.ipcRenderer.on('load-dapp' as any, (dapp: IDapp) => {
       setDapp(dapp);
     });
-  }, []);
+  }, [ dapp?.origin ]);
 
   return (
     <div className={`page-loading ${percent >= 100 ? 'hide' : ''}`}>

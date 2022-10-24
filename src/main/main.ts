@@ -11,6 +11,7 @@ import './streams/updater';
 import './streams/session';
 import './streams/dappAlert';
 import './streams/securityCheck';
+import './streams/securityAddressbarPopup';
 import './streams/securityNotification';
 import './streams/clipboard';
 import './streams/browser';

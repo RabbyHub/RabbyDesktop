@@ -32,3 +32,13 @@ export const SECURITY_NOTIFICATION_VIEW_SIZE = {
   offsetTop: 2,
   // paddingVOffset: 24,
 };
+
+const ADDRBAR_CHECKITEMS_COUNT = 2
+export const SECURITY_ADDRBAR_VIEW_SIZE = {
+  headerHeight: 56,
+  width: 330,
+  // 56px per checkitems, 2 check items
+  height: 56 + 56 * ADDRBAR_CHECKITEMS_COUNT,
+
+  detailedHeight: 44/* header */ + 236/* main */,
+};
