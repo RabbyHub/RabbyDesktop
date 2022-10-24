@@ -264,7 +264,8 @@ export async function queryDappLatestUpdateInfo ({
 const securityCheckResults = new LRUCache<IDapp['origin'], ISecurityCheckResult>({
   max: 500,
   // maxSize: 5000,
-  ttl: 1000 * 90,
+  // one day
+  ttl: 1000 * 60 * 60 * 24,
 })
 
 async function doCheckDappOrigin (origin: string) {
