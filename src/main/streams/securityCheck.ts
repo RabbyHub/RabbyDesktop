@@ -33,7 +33,7 @@ onMainWindowReady().then(async (mainWin) => {
 
   // debug-only
   if (!IS_RUNTIME_PRODUCTION) {
-    popupWin.webContents.openDevTools({ mode: 'detach' });
+    // popupWin.webContents.openDevTools({ mode: 'detach' });
   }
 
   hidePopupWindow(popupWin);
