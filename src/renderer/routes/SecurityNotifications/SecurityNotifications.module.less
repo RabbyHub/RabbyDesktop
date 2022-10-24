@@ -1,0 +1,179 @@
+@header-height: 36px;
+// @header-height-warning: 52px;
+// @header-height-danger: 64px;
+@close-width: 20px;
+@padding-v: 12px;
+@padding-h: 12px;
+@close-icon-right: @padding-h - 6px;
+
+:global {
+  body.highlight-bg {
+    background: rgba(blue, 0.1);
+
+    .debugContent {
+      display: block;
+    }
+  }
+
+  .notification-wrapper {
+    height: initial;
+    width: 100%;
+    top: 0;
+    left: 0;
+    position: fixed;
+
+    user-select: none;
+  }
+}
+
+.debugContent {
+  display: none;
+}
+
+.J_notification {
+  &:global.ant-notification-notice {
+    /* override style of .ant-notification-notice */
+    max-width: 330px;
+    box-shadow: 0px 0px 6px rgb(19 20 26 / 21%);
+
+    .ant-notification-notice-content {
+      border-radius: 8px;
+      cursor: default;
+      user-select: none;
+    }
+  }
+
+  :global {
+    .ant-notification-notice-message {
+      padding-right: 0;
+      margin-bottom: 0;
+    }
+
+    .ant-notification-notice-close {
+      right: @close-icon-right;
+      top: 0;
+      height: @header-height;
+      display: flex;
+      align-items: center;
+      width: @close-width;
+    }
+
+    .ant-notification-notice-description {
+      padding: @padding-v @padding-h;
+    }
+  }
+}
+
+.J_notification {
+  padding: 0;
+  background: var(--color-purewhite);
+  border-radius: 8px;
+
+  .header {
+    min-height: @header-height;
+    line-height: @header-height;
+    position: relative;
+
+    padding-top: 11px;
+    padding-bottom: 11px;
+    padding-left: @padding-h;
+    padding-right: 36px;
+
+    box-sizing: border-box;
+    color: white;
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 15px;
+    width: 100%;
+
+    display: flex;
+    align-items: flex-start;
+    background: var(--color-primary);
+  }
+
+  .headerLogoBg {
+    position: absolute;
+    right: 28px;
+    top: 9px;
+    width: 33px;
+    height: 27px;
+    z-index: 0;
+  }
+
+  .headerIcon {
+    margin-right: 10px;
+  }
+
+  .headerText {
+    display: block;
+    margin: 0;
+    height: 100%;
+    text-align: left;
+  }
+}
+
+.J_notification.evtWeb3AddrDetected {
+  .securityNotifyContent {
+    height: 40px;
+  }
+
+  .headerText {
+    line-height: 1.4;
+  }
+}
+
+.J_notification.evtWeb3AddrChanged {
+  .header {
+    height: initial;
+    background: var(--color-orange);
+    // padding: 16px @padding-h;
+  }
+
+  &.isDanger .header {
+    background: var(--color-red);
+  }
+
+  .descriptionInner {
+    .label {
+      font-style: normal;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 14px;
+      color: var(--color-comment1);
+    }
+
+    .label + .addr {
+      margin-top: 6px;
+    }
+
+    .divider {
+      margin-top: 12px;
+      margin-bottom: 12px;
+    }
+  }
+}
+
+.securityNotifyContent {
+  position: relative;
+  white-space: normal;
+
+  .addr {
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 20px;
+    color: var(--color-title);
+    margin-bottom: 0;
+  }
+
+  .balance {
+    display: block;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+    color: var(--color-comment1);
+  }
+}

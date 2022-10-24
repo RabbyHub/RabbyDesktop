@@ -52,6 +52,12 @@ const rendererEntries = {
     htmlFile: path.join(srcRendererPath, `pages/alert-insecurity.ejs`),
     jsEntry: path.join(srcRendererPath, 'pages/alert-insecurity.tsx'),
   },
+  'popup-view': {
+    name: 'popup-view',
+    target: 'popup-view.html',
+    htmlFile: path.join(srcRendererPath, `pages/popup-view.ejs`),
+    jsEntry: path.join(srcRendererPath, 'pages/popup-view.tsx'),
+  },
 } as const;
 
 const shellEntries = {

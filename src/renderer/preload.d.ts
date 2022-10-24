@@ -1,11 +1,18 @@
 /// <reference types="electron" />
 /// <reference path="../isomorphic/types.d.ts" />
+/// <reference path="../isomorphic/type-helpers.d.ts" />
 
 type M2RChanneMessagePayload = {
   'download-release-progress-updated': {
     originReqId: string;
     download: IAppUpdatorDownloadProgress
-  }
+  },
+  '__internal_rpc:security-notification': ISecurityNotificationPayload,
+  '__internal_rpc:security-addressbarpopup:on-show': {
+    origin: string;
+    checkResult: ISecurityCheckResult;
+  },
+  '__internal_rpc:loading-view:dapp-did-finish-load': {},
 }
 
 type ChannelMessagePayload = {
@@ -153,6 +160,77 @@ type ChannelMessagePayload = {
   '__internal_close-alert-insecure-content': {
     send: [];
     response: []
+  },
+  '__internal_rpc:security-check:get-dapp': {
+    send: [reqid: string, dappUrl: string];
+    response: [
+      {
+        reqid: string
+        dappInfo: IDapp | null
+      }
+    ]
+  },
+  '__internal_rpc:security-check:request-check-dapp': {
+    send: [reqid: string, dappUrl: string];
+    response: [
+      {
+        reqid: string,
+      } & ({
+        result: null
+        error: Error
+      } | {
+        result: ISecurityCheckResult
+        error?: null
+      })
+    ]
+  },
+  '__internal_rpc:security-check:continue-open-dapp': {
+    send: [continualOpenId: string, dappUrl: string];
+    response: []
+  },
+  '__internal_rpc:security-check:continue-close-dapp': {
+    send: [continualOpenId: string];
+    response: []
+  },
+  '__internal_rpc:security-check:set-view-top': {
+    send: [];
+    response: []
+  },
+  '__internal_rpc:security-check:close-view': {
+    send: [];
+    response: []
+  },
+  '__internal_rpc:clipboard:close-view': {
+    send: [];
+    response: []
+  },
+  '__internal_rpc:browser:set-ignore-mouse-events': {
+    send: [ignore: boolean, options?: Electron.IgnoreMouseEventsOptions];
+    response: []
+  },
+  '__internal_rpc:browser-dev:openDevTools': {
+    send: [];
+    response: []
+  },
+  '__internal_rpc:security-addressbarpopup:show': {
+    send: [
+      dappUrl: string,
+    ];
+    response: []
+  },
+  '__internal_rpc:security-addressbarpopup:switch-pageview': {
+    send: [
+      state: ISecurityAddrbarPopupState
+    ];
+    response: [
+      {
+        state: ISecurityAddrbarPopupState,
+      }
+    ]
+  },
+  '__internal_rpc:security-addressbarpopup:hide': {
+    send: [];
+    response: [];
   },
   '__internal_webui-window-close': {
     send: [ winId: number, webContentsId: number ],

@@ -8,7 +8,7 @@ import { canoicalizeDappUrl, isUrlFromDapp } from '../../isomorphic/url';
 import { onIpcMainEvent } from '../utils/ipcMainEvents';
 import { RABBY_LOADING_URL } from '../../isomorphic/constants';
 import { dappStore } from '../store/dapps';
-import { attachAlertBrowserView } from '../streams/app';
+import { attachAlertBrowserView } from '../streams/dappAlert';
 
 type ITabOptions = {
   tabs: Tabs;
@@ -59,7 +59,7 @@ export class Tab {
     this.window.addBrowserView(this.loadingView);
 
     this.view.webContents.on('did-finish-load', () => {
-      this.loadingView?.webContents.send('did-finish-load', null);
+      this.loadingView?.webContents.send('__internal_rpc:loading-view:dapp-did-finish-load', null);
       this.window?.removeBrowserView(this.loadingView!);
     });
 

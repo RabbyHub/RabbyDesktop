@@ -21,26 +21,34 @@ export function parseQueryString(input?: string) {
 /**
  * @description try to parse url, separate url and query
  */
-export function parseUrlQuery(_url: string) {
-  const [url, queryString = ''] = _url.split('?');
+function parseUrl(_url: string) {
+  const [url, _queryString = ''] = _url.split('?');
+  const [queryString, hashFragment = ''] = _queryString.split('#');
 
   const query: Record<string, any> = parseQueryString(queryString);
 
-  const { pathname } = new URL(url);
+  let pathname: string = '';
+  try {
+    pathname = new URL(url).pathname;
+  } catch (e) {
+  }
   const canoicalPath = pathname.replace(/\/$/, '');
 
-  return { url, canoicalPath, query, queryString };
+  return { url, canoicalPath, query, queryString, hashFragment };
 }
 
 export function integrateQueryToUrl(
   url: string,
   extQuery: Record<string, string | number | boolean>
 ) {
-  const { url: urlWithoutQuery, query: query1 } = parseUrlQuery(url);
+  const { url: urlWithoutQuery, query: query1, hashFragment } = parseUrl(url);
   const query = { ...query1, ...extQuery };
 
   const queryStr2 = new URLSearchParams(query);
-  return `${urlWithoutQuery}?${queryStr2}`;
+  return [
+    `${urlWithoutQuery}?${queryStr2}`,
+    hashFragment ? `#${hashFragment}` : '',
+  ].join('');
 }
 
 export function isRabbyShellURL (url: string) {
@@ -51,8 +59,20 @@ export function isUrlFromDapp (url: string) {
   return !url.startsWith(RABBY_INTERNAL_PROTOCOL) && !url.startsWith('chrome-extension:') && url.startsWith('https:')
 }
 
+export function isMainWinShellWebUI (url: string) {
+  return url.startsWith('chrome-extension:') && url.includes('__webuiWindowsId=1')
+}
+
 export function isDappProtocol (protocolOrUrl: string) {
   return protocolOrUrl.startsWith('https:')
+}
+
+export function isInternalProtocol(url: string) {
+  return [
+    `${RABBY_INTERNAL_PROTOCOL}//`,
+    'chrome-extension://',
+    'chrome://',
+  ].some((protocol) => url.startsWith(protocol));
 }
 
 export function canoicalizeDappUrl (url: string) {

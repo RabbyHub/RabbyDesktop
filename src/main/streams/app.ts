@@ -1,7 +1,6 @@
-import { app, BrowserView, BrowserWindow, Tray } from "electron";
-import { firstValueFrom } from "rxjs";
+import { app, BrowserWindow, ipcMain, Tray } from "electron";
 
-import { APP_NAME, IS_RUNTIME_PRODUCTION, RABBY_ALERT_INSECURITY_URL, RABBY_GETTING_STARTED_URL, RABBY_HOMEPAGE_URL, RABBY_SPALSH_URL } from "../../isomorphic/constants";
+import { APP_NAME, IS_RUNTIME_PRODUCTION, RABBY_GETTING_STARTED_URL, RABBY_HOMEPAGE_URL, RABBY_SPALSH_URL } from "../../isomorphic/constants";
 import { isRabbyShellURL, isUrlFromDapp } from "../../isomorphic/url";
 import buildChromeContextMenu from "../browser/context-menu";
 import { setupMenu } from '../browser/menu';
@@ -9,11 +8,14 @@ import { desktopAppStore } from "../store/desktopApp";
 import { getAssetPath, getBrowserWindowOpts } from "../utils/app";
 import { onIpcMainEvent } from "../utils/ipcMainEvents";
 import { getBindLog } from "../utils/log";
-import { getChromeExtensions } from "./session";
-import { createWindow, getFocusedWindow, getMainWindow, getWindowFromWebContents } from "./tabbedBrowserWindow";
+import { getChromeExtensions, defaultSessionReadyThen } from "./session";
+import { createWindow, getFocusedWindow, getWindowFromWebContents } from "./tabbedBrowserWindow";
 import { getWebuiExtId } from "./session";
-import { fromMainSubject, valueToMainSubject } from "./_init";
+import { valueToMainSubject } from "./_init";
 import { dappStore, formatDapps, parseDappUrl } from '../store/dapps';
+import { attachAlertBrowserView } from "./dappAlert";
+import { openDappSecurityCheckView } from "./securityCheck";
+import type { Tab } from "../browser/tabs";
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
@@ -23,49 +25,6 @@ const getTrayIconByTheme = () => {
     return getAssetPath('app-icons/win32-tray-logo.png')
 
   return getAssetPath('app-icons/macosIconTemplate@2x.png');
-}
-
-let alertView: BrowserView;
-export async function attachAlertBrowserView (
-  url: string, isExisted = false, targetWin?: BrowserWindow
-) {
-  if (!alertView) {
-    // TODO: use standalone session open it
-    alertView = new BrowserView({
-      webPreferences: {
-        // session: await getTemporarySession(),
-        webviewTag: true,
-        sandbox: true,
-        nodeIntegration: false,
-        allowRunningInsecureContent: false,
-        autoplayPolicy: 'user-gesture-required'
-      }
-    });
-    alertView.webContents.loadURL(`${RABBY_ALERT_INSECURITY_URL}?__init_url__=${encodeURIComponent(url)}`);
-  }
-
-  alertView.webContents.send('__internal_alert-security-url', { url, isExisted });
-
-  targetWin = targetWin || (await getMainWindow()).window;
-
-  const dispose = onIpcMainEvent('__internal_close-alert-insecure-content', () => {
-    targetWin?.removeBrowserView(alertView);
-    // destroyBrowserWebview(alertView);
-
-    dispose?.();
-  });
-
-  targetWin.addBrowserView(alertView);
-
-  const [width, height] = targetWin.getSize();
-
-  alertView!.setBounds({
-    x: 0,
-    y: 0,
-    width,
-    height,
-  });
-  alertView!.setAutoResize({ width: true, height: true });
 }
 
 app.on('web-contents-created', (evt, webContents) => {
@@ -94,15 +53,40 @@ app.on('web-contents-created', (evt, webContents) => {
         case 'foreground-tab':
         case 'background-tab':
         case 'new-window': {
-          const win = getWindowFromWebContents(webContents);
+          const tabbedWin = getWindowFromWebContents(webContents);
 
-          const openedTab = win?.tabs.findByOrigin(details.url) || null;
+          const openedTab = tabbedWin?.tabs.findByOrigin(details.url) || null;
           if (openedTab) {
-            win?.tabs.select(openedTab!['id'])
+            tabbedWin?.tabs.select(openedTab!['id'])
             openedTab!.loadURL(details.url);
           } else {
-            const tab = win?.tabs.create();
-            tab?.loadURL(details.url);
+            const targetWin = tabbedWin?.window;
+
+            let openedTab: Tab | undefined = undefined
+            const open = (url: string = details.url) => {
+              openedTab = tabbedWin?.tabs.create();
+              openedTab?.loadURL(url);
+            }
+
+            const closeOpenedTab = () => {
+              openedTab?.destroy();
+            }
+
+            openDappSecurityCheckView(details.url, targetWin)
+              .then(({ continualOpenId }) => {
+                const dispose1 = onIpcMainEvent('__internal_rpc:security-check:continue-open-dapp', (_evt, _openId, _openUrl) => {
+                  if (targetWin && _openId === continualOpenId) {
+                    dispose1?.();
+                    open(_openUrl);
+                  }
+                });
+                const dispose2 = onIpcMainEvent('__internal_rpc:security-check:continue-close-dapp', (_evt, _openId) => {
+                  if (targetWin && _openId === continualOpenId) {
+                    dispose2?.();
+                    closeOpenedTab();
+                  }
+                });
+              });
           }
           break;
         }
@@ -194,7 +178,7 @@ export default function bootstrap () {
     }
 
     // wait main subject ready
-    await firstValueFrom(fromMainSubject('sessionReady'));
+    await defaultSessionReadyThen();
 
     // init window
     const mainWin = await createWindow({

@@ -1,0 +1,290 @@
+:global {
+  body.security-addressbarpopup {
+    background: #fff;
+  }
+
+  body.security-addressbarpopup #root {
+    height: 100%;
+  }
+}
+
+.entryWrapper.debugHighlight {
+  background-color: rgba(blue, 0.2);
+}
+
+.entryWrapper {
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0px 8px 80px rgba(19, 20, 26, 0.21);
+  height: 100%;
+  cursor: default;
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 40px 12px 16px;
+    height: 40px;
+    border-bottom: 1px solid #e8e8e8;
+    position: relative;
+
+    .title {
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 16px;
+      color: #FFFFFF;
+    }
+
+    .closeIcon {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      top: 12px;
+      right: 6px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      box-sizing: border-box;
+      cursor: pointer;
+      color: white;
+      z-index: 1;
+    }
+
+    .iconSvg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  header {
+    background-color: var(--color-primary);
+  }
+
+  &:global.J_check_level-ok header {
+    height: 56px;
+  }
+
+  &:global.J_check_level-warning header {
+    background-color: var(--color-orange);
+  }
+
+  &:global.J_check_level-danger header {
+    background-color: var(--color-red);
+  }
+}
+
+.checkItemRow {
+  height: 56px;
+  box-sizing: border-box;
+  padding-left: 18px;
+  padding-right: 18px;
+  cursor: default;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .left {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.checkItemRow .JLevelIcon {
+  margin-right: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  > .iconSvg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.checkItemRow .right .iconSvg {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.checkItemRow {
+  .text .title {
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 15px;
+    color: var(--color-title);
+
+    & + .desc {
+      margin-top: 4px;
+    }
+  }
+
+  .text .desc {
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+    color: var(--color-green);
+  }
+
+  &.JCheckItemLevelWarning {
+    .text .desc {
+      color: var(--color-orange);
+    }
+  }
+
+  &.JCheckItemLevelDanger {
+    .text .desc {
+      color: var(--color-red);
+    }
+  }
+}
+
+.detailWrapper {
+  cursor: default;
+  overflow: hidden;
+  height: 100vh;
+
+  header {
+    height: 44px;
+    padding-left: 12px;
+    padding-right: 12px;
+    background-color: var(--color-bg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--color-title);
+  }
+
+  header .left {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    .backIconSvg {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .title {
+      margin: 0;
+      margin-left: 4px;
+    }
+  }
+
+  header .right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .closeIconSvg {
+      color: var(--color-title);
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+  }
+
+  main {
+    padding-top: 16px;
+    padding-bottom: 16px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .markedInfo {
+    align-items: center;
+  }
+
+  .markedInfo .centerIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin: 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    position: relative;
+    background-color: var(--color-bg);
+
+    .iconSvg {
+      width: 26px;
+      height: 26px;
+    }
+
+    .levelIconSvg {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      right: -2px;
+      bottom: 0;
+    }
+  }
+
+  .markedInfo .summaryText {
+    text-align: center;
+    margin: 0 auto;
+    margin-top: 6px;
+
+    &:global(.j-summary-ok) :local(.text) {
+      color: var(--color-green);
+    }
+    &:global(.j-summary-warning) :local(.text) {
+        color: var(--color-orange);
+      }
+    &:global(.j-summary-danger) :local(.text) {
+        color: var(--color-red);
+    }
+
+    .text {
+      font-style: normal;
+      font-weight: 700;
+      font-size: 13px;
+      line-height: 15px;
+      text-align: center;
+      margin-bottom: 0;
+      padding-bottom: 6px;
+    }
+
+    .text + .lastUpdate {
+      margin-bottom: 0;
+      font-style: normal;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 14px;
+      color: var(--color-comment1);
+    }
+  }
+
+  .divider {
+    margin-top: 16px;
+    margin-bottom: 16px;
+  }
+
+  .details {
+    .title {
+      font-style: normal;
+      font-weight: 700;
+      font-size: 12px;
+      line-height: 14px;
+      color: var(--color-title);
+      margin-bottom: 4px;
+    }
+
+    .paragraph {
+      font-style: normal;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 18px;
+      color: var(--color-paragragh);
+    }
+
+    .paragraph ul {
+      padding: 0 1em;
+    }
+  }
+}

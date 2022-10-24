@@ -1,13 +1,15 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 
+import Axios from 'axios';
+import { BrowserView } from 'electron';
 import { Subject, firstValueFrom, of } from 'rxjs';
 import { timeout, catchError } from 'rxjs/operators';
 import url from 'url';
 
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { parseWebsiteFavicon } from './fetch';
-import { BrowserView } from 'electron';
 import { destroyBrowserWebview } from './browser';
+import { AxiosElectronAdapter } from './axios';
 
 const DFLT_TIMEOUT = 8 * 1e3;
 
@@ -114,6 +116,29 @@ async function checkUrlViaBrowserView (dappUrl: string, opts?: {
   });
 }
 
+export async function checkDappHttpsCert (dappOrigin: string, opts?: Parameters<typeof checkUrlViaBrowserView>[1]): Promise<
+  {
+    type: DETECT_ERR_CODES.HTTPS_CERT_INVALID
+    errorCode: CHROMIUM_NET_ERR_DESC
+  } | {
+    type: DETECT_ERR_CODES.TIMEOUT
+    errorCode?: null
+  } | null
+> {
+  const checkResult = await checkUrlViaBrowserView(dappOrigin, opts);
+
+  if (checkResult.valid) return null;
+
+  if (checkResult.isTimeout) return {
+    type: DETECT_ERR_CODES.TIMEOUT,
+  }
+
+  return {
+    type: DETECT_ERR_CODES.HTTPS_CERT_INVALID,
+    errorCode: checkResult.certErrorDesc!,
+  }
+}
+
 export async function detectDapps(
   dappsUrl: string,
   existedDapps: IDapp[],
@@ -188,4 +213,49 @@ export async function detectDapps(
   }
 
   return { data }
+}
+
+const isProd = process.env.NODE_ENV === 'production';
+
+const OPENAPI_BASEURL = !isProd ? 'https://alpha-pro-openapi.debank.com' : 'https://pro-openapi.debank.com';
+
+const openApiClient = Axios.create({
+  baseURL: OPENAPI_BASEURL,
+  adapter: AxiosElectronAdapter
+})
+
+async function createDappDetection ({
+  dapp_origin = ''
+}) {
+  return openApiClient.post<{
+    is_success: boolean
+    id: string
+  }>('/cloud/dapp', {
+    origin: dapp_origin
+  })
+}
+
+export async function queryDappLatestUpdateInfo ({
+  dapp_origin = '',
+  dapp_id = '',
+  limit = 10,
+  start = 0,
+  is_changed = true
+}) {
+  if (!dapp_id) {
+    const resp = await createDappDetection({ dapp_origin });
+
+    dapp_id = resp.data.id;
+  }
+
+  return openApiClient.get<{
+    total: boolean,
+    detect_list: IDappUpdateDetectionItem[]
+  }>(`/cloud/dapp/${dapp_id}/detect`, {
+    params: {
+      limit,
+      start,
+      is_changed
+    }
+  }).then(res => res.data)
 }

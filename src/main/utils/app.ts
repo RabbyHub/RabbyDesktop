@@ -92,3 +92,5 @@ export function getBrowserWindowOpts(
     },
   }
 }
+
+export const IS_REG_BUILD = (process as any).buildchannel === 'reg';

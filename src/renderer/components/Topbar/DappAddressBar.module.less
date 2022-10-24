@@ -1,0 +1,85 @@
+.securityInfo {
+  // background-color: ;
+  color: var(--color-primary);
+
+  background: linear-gradient(0deg, rgba(134, 151, 255, 0.2), rgba(134, 151, 255, 0.2)), #ffffff;
+
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 6px 14px;
+  border-radius: 18px;
+
+  cursor: pointer;
+
+  &:hover .summaryText {
+    width: initial;
+    opacity: 1;
+    margin-left: 4px;
+    visibility: visible;
+  }
+
+  &:global.J_security_level-warning {
+    color: #fff;
+    background-color: var(--color-orange);
+  }
+}
+
+.summaryText {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 14px;
+  white-space: nowrap;
+
+  width: 0;
+  margin-left: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: width ease-in 0.2s, opacity ease-out 0.2s;
+}
+
+.address-bar {
+  flex: 1 0 auto;
+  line-height: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  background-color: #fff;
+  border-radius: 18px;
+  height: 100%;
+  width: initial;
+  overflow: hidden;
+
+  .address-bar-input-style() {
+    // background: var(--color-bg);
+    // color: var(--color-paragraph);
+    border: none;
+    // border-radius: 18px;
+    padding: 7px 16px;
+    outline: none;
+  }
+
+  input {
+    width: 100%;
+    height: 100%;
+    .address-bar-input-style();
+    background-color: white;
+  }
+
+  .hidden-address {
+    width: 100%;
+    height: 100%;
+    .address-bar-input-style();
+  }
+
+  &.forInternalUrl {
+    background: var(--color-bg);
+    color: var(--color-paragraph);
+  }
+
+}

@@ -1,8 +1,11 @@
 import { BrowserWindow } from "electron";
+import { IS_RUNTIME_PRODUCTION } from "../../isomorphic/constants";
+import { onIpcMainEvent } from "../utils/ipcMainEvents";
+import { firstValueFrom } from "rxjs";
 import TabbedBrowserWindow, { TabbedBrowserWindowOptions } from "../browser/browsers";
 import { getBrowserWindowOpts } from "../utils/app";
 import { getChromeExtensions, getWebuiExtId } from "./session";
-import { valueToMainSubject } from "./_init";
+import { fromMainSubject, valueToMainSubject } from "./_init";
 
 const getParentWindowOfTab = (tab: Electron.WebContents) => {
   switch (tab.getType()) {
@@ -19,10 +22,18 @@ const getParentWindowOfTab = (tab: Electron.WebContents) => {
   }
 };
 
+export async function onMainWindowReady() {
+  return firstValueFrom(fromMainSubject('mainWindowReady'));
+}
+
 const windows: TabbedBrowserWindow[] = [];
 
 let mainWindow: TabbedBrowserWindow;
-export async function getMainWindow () { return mainWindow };
+export async function getMainWindow () {
+  await onMainWindowReady();
+
+  return mainWindow;
+};
 
 export function getFocusedWindow() {
   return windows.find((w) => w.window.isFocused()) || windows[0];
@@ -88,3 +99,10 @@ export async function createWindow(options: Partial<TabbedBrowserWindowOptions>)
 
   return win;
 }
+
+onIpcMainEvent('__internal_rpc:browser-dev:openDevTools', (evt) => {
+  if (!IS_RUNTIME_PRODUCTION) {
+    const webContents = evt.sender;
+    webContents.openDevTools({ mode: 'detach' });
+  }
+})
