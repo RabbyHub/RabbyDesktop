@@ -2,6 +2,8 @@
 
 import Electron, { ipcMain } from "electron";
 
+ipcMain.setMaxListeners(Infinity);
+
 export function onIpcMainEvent<T extends Channels = Channels>(
   eventName: T,
   handler: (
