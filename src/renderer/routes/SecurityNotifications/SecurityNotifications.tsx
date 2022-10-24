@@ -21,7 +21,7 @@ const IS_MACOS = detectOS() === 'darwin';
 
 const ROOT_EL = document.querySelector('#root')! as HTMLDivElement;
 notification.config({
-  maxCount: 2,
+  maxCount: 1,
   top: 2,
 });
 
