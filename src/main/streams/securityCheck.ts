@@ -33,7 +33,7 @@ onMainWindowReady().then(async (mainWin) => {
 
   // debug-only
   if (!IS_RUNTIME_PRODUCTION) {
-    // popupWin.webContents.openDevTools({ mode: 'detach' });
+    popupWin.webContents.openDevTools({ mode: 'detach' });
   }
 
   hidePopupWindow(popupWin);
@@ -85,14 +85,9 @@ export async function openDappSecurityCheckView (
   const popupWin = await firstValueFrom(fromMainSubject('securityCheckPopupWindowReady'));
   updateSubWindowPosition(targetWin, popupWin);
 
-  // dispatch custom event with url, continualOpenId
-  popupWin.webContents.executeJavaScript(`
-document.dispatchEvent(new CustomEvent('__set_checking_info__', ${JSON.stringify({
-  detail: {
+  popupWin.webContents.send('__internal_rpc:security-check:start-check-dapp', {
     url, continualOpenId
-  }
-})}));
-`);
+  })
 
   showPopupWindow(popupWin);
   popupWin.moveTop();
@@ -139,7 +134,7 @@ onIpcMainEvent('__internal_rpc:security-check:check-dapp-and-put', async (evt, r
     })
   }
 
-  const checkResult = await getOrPutCheckResult(dappUrl, true);
+  const checkResult = await getOrPutCheckResult(dappUrl, { updateOnSet: true, wait: true });
 
   evt.reply('__internal_rpc:security-check:check-dapp-and-put', {
     reqid,

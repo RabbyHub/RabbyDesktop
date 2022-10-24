@@ -3,18 +3,33 @@ import dayjs from 'dayjs';
 
 import { securityCheckGetDappInfo, queryAndPutDappSecurityCheckResult, continueOpenDapp } from "../ipcRequest/security-check";
 
-const DEFAULT_HTTPS_RESULT: ISecurityCheckResult['checkHttps'] & { checking: boolean } = {
+const DEFAULT_HTTPS_RESULT: ISecurityCheckResult['checkHttps'] = {
   level: 'ok',
-  checking: false,
   timeout: false,
   httpsError: false,
 };
 
-const DEFAULT_DAPP_UPDATE_INFO_RESULT: ISecurityCheckResult['checkLatestUpdate'] & { checking: boolean } = {
+const DEFAULT_DAPP_UPDATE_INFO_RESULT: ISecurityCheckResult['checkLatestUpdate'] = {
   level: 'ok',
-  checking: false,
   timeout: false,
   latestChangedItemIn24Hr: null as null | IDappUpdateDetectionItem,
+};
+
+const DEFAULT_CHECKING_INFO = {
+  url: '',
+  continualOpenId: '',
+  checkingHttps: false,
+  checkingLastUpdate: false,
+};
+
+function makeDefaultCheckResult () {
+  return {
+    https: {...DEFAULT_HTTPS_RESULT},
+    latestUpdate: {...DEFAULT_DAPP_UPDATE_INFO_RESULT},
+    countIssues: 0 as ISecurityCheckResult['countIssues'],
+    countDangerIssues: 0 as ISecurityCheckResult['countDangerIssues'],
+    resultLevel: 'ok' as ISecurityCheckResult['resultLevel'],
+  };
 };
 
 function getViewOpData (checkResult: Pick<ISecurityCheckResult, 'countIssues' | 'countDangerIssues'>) {
@@ -28,89 +43,72 @@ function getViewOpData (checkResult: Pick<ISecurityCheckResult, 'countIssues' | 
 }
 
 export function useCheckDapp() {
-  const [ checkingInfo, setCheckingInfo ] = useState({
-    url: '',
-    continualOpenId: '',
-  });
+  const [ checkingInfo, setCheckingInfo ] = useState<typeof DEFAULT_CHECKING_INFO>({ ...DEFAULT_CHECKING_INFO });
   const [ dappInfo, setDappInfo ] = useState(null as null | IDapp);
 
-  const [ checkResult, setCheckResult ] = useState({
-    https: {...DEFAULT_HTTPS_RESULT},
-    latestUpdate: {...DEFAULT_DAPP_UPDATE_INFO_RESULT},
-    countIssues: 0 as ISecurityCheckResult['countIssues'],
-    countDangerIssues: 0 as ISecurityCheckResult['countDangerIssues'],
-    resultLevel: 'ok' as ISecurityCheckResult['resultLevel'],
-  });
+  const [ checkResult, setCheckResult ] = useState(makeDefaultCheckResult());
 
-  const resetState = useCallback(() => {
-    setCheckingInfo({ url: '', continualOpenId: '' });
-    setCheckResult({
-      https: {...DEFAULT_HTTPS_RESULT},
-      latestUpdate: {...DEFAULT_DAPP_UPDATE_INFO_RESULT},
-      countIssues: 0 as ISecurityCheckResult['countIssues'],
-      countDangerIssues: 0 as ISecurityCheckResult['countDangerIssues'],
-      resultLevel: 'ok' as ISecurityCheckResult['resultLevel'],
-    });
+  const resetState = useCallback((nextCheckingInfo?: Partial<typeof DEFAULT_CHECKING_INFO>) => {
+    setCheckingInfo({ ...DEFAULT_CHECKING_INFO, ...nextCheckingInfo });
+    setCheckResult(makeDefaultCheckResult());
   }, []);
-
-  useEffect(() => {
-    const listener = (evt: EventListenerObject & { detail: { url: string, continualOpenId: string } }) => {
-      resetState();
-      setCheckingInfo({ url: evt.detail.url, continualOpenId: evt.detail.continualOpenId });
-    };
-    document.addEventListener('__set_checking_info__', listener as any);
-
-    return () => {
-      document.removeEventListener('__set_checking_info__', listener as any);
-    }
-  }, [ resetState ]);
 
   const hideView = useCallback(() => {
     window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:security-check:close-view')
     resetState();
-  }, [ resetState, checkingInfo.url ]);
+  }, [ resetState ]);
 
-  useEffect(() => {
-    if (!checkingInfo.url) return ;
+  const doFetch = useCallback(async (url: string, continualOpenId: string) => {
+    if (!url) return ;
 
-    securityCheckGetDappInfo(checkingInfo.url)
+    securityCheckGetDappInfo(url)
       .then((dappInfo) => {
         setDappInfo(dappInfo);
       });
 
-    setCheckResult((prev) => ({
+    setCheckingInfo((prev) => ({
       ...prev,
-      https: {...DEFAULT_HTTPS_RESULT, checking: true},
-      latestUpdate: {...DEFAULT_DAPP_UPDATE_INFO_RESULT, checking: true},
+      checkingHttps: true,
+      checkingLastUpdate: true,
     }));
-    queryAndPutDappSecurityCheckResult(checkingInfo.url)
+    queryAndPutDappSecurityCheckResult(url)
       .then(newVal => {
         setCheckResult(prev => {
           return {
             ...prev,
             ...newVal,
-            https: {...newVal.checkHttps, checking: false},
-            latestUpdate: {...newVal.checkLatestUpdate, checking: false},
+            https: {...newVal.checkHttps},
+            latestUpdate: {...newVal.checkLatestUpdate},
           }
         });
 
         const { couldOpenByDefault } = getViewOpData(newVal);
         setTimeout(() => {
           if (couldOpenByDefault) {
-            continueOpenDapp(checkingInfo.continualOpenId, checkingInfo.url, newVal.resultLevel);
+            continueOpenDapp(continualOpenId, url, newVal.resultLevel);
           }
         }, 500);
       })
-      .catch(() => {
-        setCheckResult((prev) => ({
+      .finally(() => {
+        setCheckingInfo((prev) => ({
           ...prev,
-          https: {...prev.https, checking: false},
-          latestUpdate: {...prev.latestUpdate, checking: false},
+          checkingHttps: false,
+          checkingLastUpdate: false,
         }));
       })
-  }, [ checkingInfo.url, hideView ]);
+  }, []);
 
-  const isChecking = checkResult.https.checking || checkResult.latestUpdate.checking;
+  useEffect(() => {
+    const dispose = window.rabbyDesktop.ipcRenderer.on('__internal_rpc:security-check:start-check-dapp', ({ url, continualOpenId }) => {
+      resetState({ url: url, continualOpenId: continualOpenId });
+      doFetch(url, continualOpenId);
+    })
+
+    return dispose;
+
+  }, [ resetState ]);
+
+  const isChecking = checkingInfo.checkingHttps || checkingInfo.checkingLastUpdate;
 
   const closeNewTabAndThisView = useCallback(() => {
     window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:security-check:continue-close-dapp', checkingInfo.continualOpenId)
@@ -141,6 +139,7 @@ export function useCheckDapp() {
   return {
     dappInfo,
 
+    checkingInfo,
     isChecking,
     checkingUrl: checkingInfo.url,
     checkResult,

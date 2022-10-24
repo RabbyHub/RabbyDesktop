@@ -10,6 +10,10 @@ type M2RChanneMessagePayload = {
   '__internal_rpc:webui-extension:switch-active-dapp': {
     tabId: number;
   },
+  '__internal_rpc:security-check:start-check-dapp': {
+    url: string;
+    continualOpenId: string;
+  },
   '__internal_rpc:security-notification': ISecurityNotificationPayload,
   '__internal_rpc:security-addressbarpopup:on-show': {
     origin: string;

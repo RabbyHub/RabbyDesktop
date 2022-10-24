@@ -355,7 +355,10 @@ async function doCheckDappOrigin (origin: string) {
   return checkResult;
 }
 
-export async function getOrPutCheckResult (dappUrl: string, updateOnSet: boolean = false) {
+export async function getOrPutCheckResult (dappUrl: string, options?: {
+  wait?: boolean
+  updateOnSet?: boolean
+}) {
   const origin = canoicalizeDappUrl(dappUrl).origin;
 
   let checkResult = securityCheckResults.get(origin);
@@ -363,10 +366,16 @@ export async function getOrPutCheckResult (dappUrl: string, updateOnSet: boolean
   if (!checkResult) {
     checkResult = await doCheckDappOrigin(origin);
     securityCheckResults.set(origin, checkResult);
-  } else if (updateOnSet) {
-    doCheckDappOrigin(origin).then(newVal => {
-      securityCheckResults.set(origin, newVal);
-    });
+  } else if (options?.updateOnSet) {
+    const p = doCheckDappOrigin(origin);
+
+    if (options?.wait) {
+      try {
+        securityCheckResults.set(origin, await p);
+      } catch (e) {
+        console.error(e);
+      }
+    }
   }
 
   return checkResult;

@@ -13,12 +13,11 @@ const ICON_SHILED_OK = 'rabby-internal://assets/icons/security-check/icon-shield
 const ICON_SHILED_WARNING = 'rabby-internal://assets/icons/security-check/icon-shield-warning.svg';
 const ICON_SHILED_DANGER = 'rabby-internal://assets/icons/security-check/icon-shield-danger.svg';
 
-const isProd = process.env.NODE_ENV === 'production';
-
 export default function ModalSecurityCheck() {
   const {
     dappInfo,
 
+    checkingInfo,
     isChecking,
     checkingUrl,
     checkResult,
@@ -90,8 +89,8 @@ export default function ModalSecurityCheck() {
       </div>
       <div className='check-main-wrapper'>
         <div className='check-item'>
-          <div className={classNames('check-icon', checkResult.latestUpdate.checking && 'loading')}>
-            <img src={checkResult.latestUpdate.checking ? ICON_LOADING
+          <div className={classNames('check-icon', checkingInfo.checkingLastUpdate && 'loading')}>
+            <img src={checkingInfo.checkingLastUpdate ? ICON_LOADING
               : checkItemViewLatestUpdateInfo.warning ? ICON_SHILED_WARNING
               : ICON_SHILED_OK
             } />
@@ -100,7 +99,7 @@ export default function ModalSecurityCheck() {
             <div className='title'>Web page last updated time</div>
             {/* TODO: show failure result */}
             <div className='checking-status'>
-              {checkResult.latestUpdate.checking ? 'Checking...'
+              {checkingInfo.checkingLastUpdate ? 'Checking...'
                 : checkItemViewLatestUpdateInfo.resultText
               }
             </div>
@@ -108,8 +107,8 @@ export default function ModalSecurityCheck() {
         </div>
 
         <div className='check-item'>
-          <div className={classNames('check-icon', checkResult.https.checking && 'loading')}>
-            <img src={checkResult.https.checking ? ICON_LOADING
+          <div className={classNames('check-icon', checkingInfo.checkingHttps && 'loading')}>
+            <img src={checkingInfo.checkingHttps ? ICON_LOADING
               : checkResult.https.httpsError ? ICON_SHILED_DANGER
               : ICON_SHILED_OK
             } />
@@ -118,7 +117,7 @@ export default function ModalSecurityCheck() {
             <div className='title'>HTTPS certificate validation</div>
             {/* TODO: show failure result */}
             <div className='checking-status'>
-              {checkResult.https.checking
+              {checkingInfo.checkingHttps
                 ? 'Checking...'
                 : checkItemViewHttps.resultText}
             </div>
