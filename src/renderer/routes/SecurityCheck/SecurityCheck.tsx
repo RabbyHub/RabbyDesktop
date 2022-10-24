@@ -91,13 +91,13 @@ export default function ModalSecurityCheck() {
         <div className='check-item'>
           <div className={classNames('check-icon', checkingInfo.checkingLastUpdate && 'loading')}>
             <img src={checkingInfo.checkingLastUpdate ? ICON_LOADING
-              : checkItemViewLatestUpdateInfo.warning ? ICON_SHILED_WARNING
+              : checkResult.checkLatestUpdate.level === 'danger' ? ICON_SHILED_DANGER
+              : checkResult.checkLatestUpdate.level === 'warning' ? ICON_SHILED_WARNING
               : ICON_SHILED_OK
             } />
           </div>
           <div className='desc'>
             <div className='title'>Web page last updated time</div>
-            {/* TODO: show failure result */}
             <div className='checking-status'>
               {checkingInfo.checkingLastUpdate ? 'Checking...'
                 : checkItemViewLatestUpdateInfo.resultText
@@ -109,13 +109,13 @@ export default function ModalSecurityCheck() {
         <div className='check-item'>
           <div className={classNames('check-icon', checkingInfo.checkingHttps && 'loading')}>
             <img src={checkingInfo.checkingHttps ? ICON_LOADING
-              : checkResult.https.httpsError ? ICON_SHILED_DANGER
+              : checkResult.checkHttps.level === 'danger' ? ICON_SHILED_DANGER
+              : checkResult.checkHttps.level === 'warning' ? ICON_SHILED_WARNING
               : ICON_SHILED_OK
             } />
           </div>
           <div className='desc'>
             <div className='title'>HTTPS certificate validation</div>
-            {/* TODO: show failure result */}
             <div className='checking-status'>
               {checkingInfo.checkingHttps
                 ? 'Checking...'

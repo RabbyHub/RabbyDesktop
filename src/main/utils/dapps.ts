@@ -117,7 +117,7 @@ async function checkUrlViaBrowserView (dappUrl: string, opts?: {
   });
 }
 
-export async function checkDappHttpsCert (dappOrigin: string, opts?: Parameters<typeof checkUrlViaBrowserView>[1]): Promise<
+async function checkDappHttpsCert (dappOrigin: string, opts?: Parameters<typeof checkUrlViaBrowserView>[1]): Promise<
   {
     type: DETECT_ERR_CODES.HTTPS_CERT_INVALID
     errorCode: CHROMIUM_NET_ERR_DESC

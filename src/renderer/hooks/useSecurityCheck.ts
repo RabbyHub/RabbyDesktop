@@ -24,8 +24,8 @@ const DEFAULT_CHECKING_INFO = {
 
 function makeDefaultCheckResult () {
   return {
-    https: {...DEFAULT_HTTPS_RESULT},
-    latestUpdate: {...DEFAULT_DAPP_UPDATE_INFO_RESULT},
+    checkHttps: {...DEFAULT_HTTPS_RESULT},
+    checkLatestUpdate: {...DEFAULT_DAPP_UPDATE_INFO_RESULT},
     countIssues: 0 as ISecurityCheckResult['countIssues'],
     countDangerIssues: 0 as ISecurityCheckResult['countDangerIssues'],
     resultLevel: 'ok' as ISecurityCheckResult['resultLevel'],
@@ -77,8 +77,6 @@ export function useCheckDapp() {
           return {
             ...prev,
             ...newVal,
-            https: {...newVal.checkHttps},
-            latestUpdate: {...newVal.checkLatestUpdate},
           }
         });
 
@@ -116,22 +114,41 @@ export function useCheckDapp() {
   }, [ checkingInfo.continualOpenId ]);
 
   const checkItemViewLatestUpdateInfo = useMemo(() => {
-    const changedIn24Hr = checkResult.latestUpdate.latestChangedItemIn24Hr?.create_at && checkResult.latestUpdate.latestChangedItemIn24Hr?.is_changed;
+    if (checkResult.checkLatestUpdate.latestChangedItemIn24Hr?.create_at && checkResult.checkLatestUpdate.latestChangedItemIn24Hr?.is_changed) {
+      return {
+        resultText: `The web page was updated within 24 hours at ${dayjs((checkResult.checkLatestUpdate.latestChangedItemIn24Hr.create_at || 0) * 1e3).format('YYYY/MM/DD HH:MM')}. To help you avoid potential code tampering and system bugs, we recommend using it 24 hours after the updates.`
+      }
+    } else if (checkResult.checkLatestUpdate.timeout) {
+      return {
+        resultText: 'Check Timeout'
+      }
+    }
+
     return {
-      warning: changedIn24Hr,
-      resultText: !changedIn24Hr ? 'Updated more than 24 hours' : `The web page was updated within 24 hours at ${dayjs((checkResult.latestUpdate.latestChangedItemIn24Hr?.create_at || 0) * 1e3).format('YYYY/MM/DD HH:MM')}. To help you avoid potential code tampering and system bugs, we recommend using it 24 hours after the updates.`,
+      resultText: 'Updated more than 24 hours'
     };
   }, [
-    checkResult.latestUpdate,
+    checkResult.checkLatestUpdate,
   ]);
 
   const checkItemViewHttps = useMemo(() => {
-    return {
-      danger: checkResult.https.httpsError,
-      resultText: !checkResult.https.httpsError ? 'Valid and Verified' : `The website HTTPS certificate has expired or failed to verify. The link is no longer private. Your information (such as private key) is at risk of being attacked.`,
+    if (checkResult.checkHttps.httpsError) {
+      return {
+        resultText: `The website HTTPS certificate has expired or failed to verify. The link is no longer private. Your information (such as private key) is at risk of being attacked.`
+      }
     };
+
+    if (checkResult.checkHttps.timeout) {
+      return {
+        resultText: 'Check Timeout'
+      }
+    }
+
+    return {
+      resultText: 'Valid and Verified',
+    }
   }, [
-    checkResult.https,
+    checkResult.checkHttps,
   ]);
 
   const viewOperationData = getViewOpData(checkResult);
