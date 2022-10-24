@@ -1,9 +1,7 @@
 import classNames from 'classnames';
-import { IS_RUNTIME_PRODUCTION } from 'isomorphic/constants';
 import { isInternalProtocol, isMainWinShellWebUI, isUrlFromDapp } from 'isomorphic/url';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { openDappAddressbarSecurityPopupView } from 'renderer/ipcRequest/security-addressbarpopup';
-import { queryLatestDappSecurityCheckResult } from 'renderer/ipcRequest/security-check';
 import styles from './DappAddressBar.module.less';
 
 function useAddressUrl(updatedUrl?: string) {
@@ -44,15 +42,15 @@ function useAddressUrl(updatedUrl?: string) {
 const IS_MAIN_SHELL = isMainWinShellWebUI(window.location.href);
 
 export default function DappAddressBar ({
-  url
+  url,
+  checkResult,
 } : {
-  url?: string
+  url?: string,
+  checkResult?: ISecurityCheckResult | null;
 }) {
   const { addressUrl, isInternalUrl, onAddressUrlChange, onAddressUrlKeyUp } = useAddressUrl(
     url
   );
-
-  const [ checkResult, setCheckResult ] = useState<ISecurityCheckResult | null>(null);
 
   const openSecurityAddressbarpopup = useCallback(() => {
     if (!IS_MAIN_SHELL) return ;
@@ -60,30 +58,6 @@ export default function DappAddressBar ({
 
     openDappAddressbarSecurityPopupView(url);
   }, [ url ]);
-
-  useEffect(() => {
-    if (!url || !isUrlFromDapp(url)) {
-      setCheckResult(null);
-      return ;
-    }
-
-    queryLatestDappSecurityCheckResult(url)
-      .then(cR => {
-        setCheckResult(cR)
-      })
-      .catch(() => {
-        setCheckResult(null);
-      });
-  }, [ url ]);
-
-  // useEffect(() => {
-  //     // window.open('https://app.uniswap.org');
-  //     // window.open('https://debank.com');
-  //   // just for debug
-  //   if (!IS_RUNTIME_PRODUCTION) {
-  //     openSecurityAddressbarpopup();
-  //   }
-  // }, [ openSecurityAddressbarpopup ]);
 
   return (
     <div className={classNames(
@@ -93,10 +67,7 @@ export default function DappAddressBar ({
       {checkResult && (
         <div
           className={classNames(styles.securityInfo, `J_security_level-${checkResult.resultLevel}`)}
-          onClick={() => {
-            if (!url) return ;
-            openSecurityAddressbarpopup();
-          }}
+          onClick={openSecurityAddressbarpopup}
         >
           {checkResult.resultLevel === 'ok' && (
             <>

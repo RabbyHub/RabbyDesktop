@@ -1,26 +1,17 @@
 import { BrowserWindow } from "electron";
 import { firstValueFrom } from "rxjs";
-import LruCache from 'lru-cache';
 
 import { IS_RUNTIME_PRODUCTION, RABBY_POPUP_GHOST_VIEW_URL } from "../../isomorphic/constants";
 
 import { canoicalizeDappUrl, isUrlFromDapp } from "../../isomorphic/url";
 
 import { dappStore, formatDapp } from "../store/dapps";
-import { checkDappHttpsCert, queryDappLatestUpdateInfo } from "../utils/dapps";
 import { randString } from "../../isomorphic/string";
-import { AxiosError } from "axios";
 import { fromMainSubject, valueToMainSubject } from "./_init";
 import { getMainWindow, onMainWindowReady } from "./tabbedBrowserWindow";
 import { onIpcMainEvent } from "../utils/ipcMainEvents";
-import { NATIVE_HEADER_WITH_NAV_H } from "../../isomorphic/const-size";
 import { createPopupWindow, hidePopupWindow, showPopupWindow } from "../utils/browser";
-
-const securityCheckResults = new LruCache<IDapp['origin'], ISecurityCheckResult>({
-  max: 500,
-  // maxSize: 5000,
-  ttl: 1000 * 90,
-})
+import { getOrPutCheckResult } from "../utils/dapps";
 
 onMainWindowReady().then(async (mainWin) => {
   const targetWin = mainWin.window;
@@ -62,9 +53,9 @@ function updateSubWindowPosition(
 
   const popupRect = {
     x: 0,
-    y: NATIVE_HEADER_WITH_NAV_H,
+    y: 0,
     width: width,
-    height: height - NATIVE_HEADER_WITH_NAV_H,
+    height: height,
   }
 
   window.setSize(popupRect.width, popupRect.height);
@@ -139,120 +130,18 @@ function getMockedChanged (dapp_id: string) {
   }
 }
 
-async function doCheckDappOrigin (origin: string) {
-  // TODO: catch error here
-  const [
-    httpsCheckResult,
-    latestUpdateResult
-  ] = await Promise.all([
-    checkDappHttpsCert(origin),
-    queryDappLatestUpdateInfo({
-      dapp_origin: origin,
-    })
-    .then((json) => {
-      const latestItem = json.detect_list?.[0] || null;
-      const latestChangedItemIn24Hr = json.detect_list?.find((item) =>
-        item.is_changed && (Date.now() - item.create_at * 1e3) < 24 * 60 * 60 * 1e3
-      ) || null;
-
-      return {
-        timeout: false,
-        latestItem: latestItem || null,
-        latestChangedItemIn24Hr,
-        // latestChangedItemIn24Hr: getMockedChanged(latestItem?.dapp_id)
-      }
-    })
-    .catch(err => {
-      if ((err as AxiosError).code === 'timeout') {
-        return {
-          timeout: true,
-          latestItem: null,
-          latestChangedItemIn24Hr: null,
-          error: err.message
-        }
-      } else {
-        return {
-          timeout: false,
-          latestItem: null,
-          latestChangedItemIn24Hr: null,
-          error: 'unknown'
-        }
-      }
-    })
-  ]);
-
-  const httpsResult: ISecurityCheckResult['checkHttps'] = httpsCheckResult?.type === 'HTTPS_CERT_INVALID' ? {
-    level: 'danger',
-    httpsError: true,
-    chromeErrorCode: httpsCheckResult.errorCode
-  } : {
-    level: httpsCheckResult?.type === 'TIMEOUT' ? 'danger' : 'ok',
-    httpsError: false,
-    timeout: httpsCheckResult?.type === 'TIMEOUT'
-  }
-
-  // normalize result
-  let countWarnings = 0, countDangerIssues = 0;
-  let resultLevel = undefined as any as ISecurityCheckResult['resultLevel'];
-
-  if (latestUpdateResult.latestChangedItemIn24Hr?.create_at && latestUpdateResult.latestChangedItemIn24Hr?.is_changed) {
-    countWarnings++;
-    resultLevel = resultLevel || 'warning';
-  }
-
-  if (httpsResult.httpsError) {
-    countDangerIssues++;
-    resultLevel = 'danger';
-  }
-
-  resultLevel = resultLevel || 'ok';
-
-  const checkResult: ISecurityCheckResult = {
-    origin,
-    countWarnings,
-    countDangerIssues,
-    countIssues: countWarnings + countDangerIssues,
-    resultLevel,
-    timeout: !!(httpsResult.timeout || latestUpdateResult.timeout),
-    checkHttps: httpsResult,
-    checkLatestUpdate: {
-      ...latestUpdateResult,
-      level: latestUpdateResult.timeout ? 'danger' : latestUpdateResult.latestChangedItemIn24Hr ? 'warning' : 'ok'
-    },
-  };
-
-  return checkResult;
-}
-
-export async function getOrPutCheckResult (dappUrl: string, updateOnSet: boolean = false) {
-  const origin = canoicalizeDappUrl(dappUrl).origin;
-
-  let checkResult = securityCheckResults.get(origin);
-
-  if (!checkResult) {
-    checkResult = await doCheckDappOrigin(origin);
-    securityCheckResults.set(origin, checkResult);
-  } else if (updateOnSet) {
-    doCheckDappOrigin(origin).then(newVal => {
-      securityCheckResults.set(origin, newVal);
-    });
-  }
-
-  return checkResult;
-}
-
-onIpcMainEvent('__internal_rpc:security-check:request-check-dapp', async (evt, reqid, dappUrl) => {
+onIpcMainEvent('__internal_rpc:security-check:check-dapp-and-put', async (evt, reqid, dappUrl) => {
   if (!isUrlFromDapp(dappUrl)) {
-    evt.reply('__internal_rpc:security-check:request-check-dapp', {
+    evt.reply('__internal_rpc:security-check:check-dapp-and-put', {
       reqid,
       result: null,
       error: new Error(`Invalid dapp url: ${dappUrl}`)
     })
   }
 
-  const checkResult = await getOrPutCheckResult(dappUrl);
+  const checkResult = await getOrPutCheckResult(dappUrl, true);
 
-  evt.reply('__internal_rpc:security-check:request-check-dapp', {
+  evt.reply('__internal_rpc:security-check:check-dapp-and-put', {
     reqid,
     result: checkResult,
     error: null

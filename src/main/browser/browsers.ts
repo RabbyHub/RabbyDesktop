@@ -1,6 +1,7 @@
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { BrowserWindow, session } from 'electron';
-import { integrateQueryToUrl } from '../../isomorphic/url';
+import { getOrPutCheckResult } from '../utils/dapps';
+import { integrateQueryToUrl, isUrlFromDapp } from '../../isomorphic/url';
 import { onIpcMainEvent } from '../utils/ipcMainEvents';
 import { Tab, Tabs } from './tabs';
 
@@ -76,11 +77,16 @@ export default class TabbedBrowserWindow {
 
     onIpcMainEvent('webui-ext-navinfo', async (event, tabId) => {
       const tab = this.tabs.get(tabId);
-      // const tab = this.tabs.selected;
+      // TODO: always respond message
       if (!tab) return;
+
+      const tabUrl = tab.webContents!.getURL();
+      const checkResult = isUrlFromDapp(tabUrl) ? await getOrPutCheckResult(tabUrl) : null;
 
       event.reply('webui-ext-navinfo', {
         tabExists: !!tab,
+        tabUrl,
+        dappSecurityCheckResult: checkResult,
         canGoBack: tab?.webContents?.canGoBack(),
         canGoForward: tab?.webContents?.canGoForward(),
       });

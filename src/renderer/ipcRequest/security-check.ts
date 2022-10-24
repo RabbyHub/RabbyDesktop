@@ -18,12 +18,12 @@ export async function securityCheckGetDappInfo(dappUrl: string) {
   });
 }
 
-export async function queryLatestDappSecurityCheckResult(dappUrl: string) {
+export async function queryAndPutDappSecurityCheckResult(dappUrl: string) {
   const reqid = randString();
 
   return new Promise<ISecurityCheckResult>((resolve, reject) => {
     const dispose = window.rabbyDesktop.ipcRenderer.on(
-      '__internal_rpc:security-check:request-check-dapp',
+      '__internal_rpc:security-check:check-dapp-and-put',
       (event) => {
         const { reqid: _reqid, result, error } = event;
         if (_reqid === reqid) {
@@ -37,7 +37,7 @@ export async function queryLatestDappSecurityCheckResult(dappUrl: string) {
         }
       }
     );
-    window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:security-check:request-check-dapp', reqid, dappUrl);
+    window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:security-check:check-dapp-and-put', reqid, dappUrl);
   });
 }
 

@@ -39,6 +39,10 @@ type ChannelMessagePayload = {
         tabExists: boolean;
         canGoForward?: boolean;
         canGoBack?: boolean;
+
+        tabUrl: string;
+
+        dappSecurityCheckResult: ISecurityCheckResult | null;
       }
     ];
   };
@@ -173,7 +177,7 @@ type ChannelMessagePayload = {
       }
     ]
   },
-  '__internal_rpc:security-check:request-check-dapp': {
+  '__internal_rpc:security-check:check-dapp-and-put': {
     send: [reqid: string, dappUrl: string];
     response: [
       {

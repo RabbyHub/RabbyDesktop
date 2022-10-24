@@ -365,7 +365,7 @@ export default function Topbar() {
 
   useEffect(() => {
     hideDappAddressbarSecurityPopupView();
-  }, [ activeTab?.url ]);
+  }, [ selectedTabInfo?.tabUrl ]);
 
   useEffect(() => {
     const dispose = window.rabbyDesktop.ipcRenderer.on('__internal_rpc:webui-extension:switch-active-dapp', ({ tabId }) => {
@@ -378,7 +378,7 @@ export default function Topbar() {
   useEffect(() => {
     // debug-only
     if (!IS_RUNTIME_PRODUCTION && isMainWinShellWebUI(window.location.href)) {
-      // window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:browser-dev:openDevTools');
+      window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:browser-dev:openDevTools');
 
       // window.open('https://app.uniswap.org');
       // window.open('https://debank.com');
@@ -536,7 +536,7 @@ export default function Topbar() {
       </div>
       {WITH_NAV_BAR && (
         <div
-          className={classnames('toolbar', activeTab?.url && isInternalProtocol(activeTab?.url) && 'internal-page')}
+          className={classnames('toolbar', selectedTabInfo?.tabUrl && isInternalProtocol(selectedTabInfo?.tabUrl) && 'internal-page')}
         >
           <div className="page-controls">
             <button
@@ -570,7 +570,10 @@ export default function Topbar() {
               <img src={IconNavRefresh} alt="close" />
             </button>
           </div>
-          <DappAddressBar url={activeTab?.url} />
+          <DappAddressBar
+            url={selectedTabInfo?.tabUrl}
+            checkResult={selectedTabInfo?.dappSecurityCheckResult}
+          />
 
           <browser-action-list id="actions" />
         </div>

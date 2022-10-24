@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dayjs from 'dayjs';
 
-import { securityCheckGetDappInfo, queryLatestDappSecurityCheckResult, continueOpenDapp } from "../ipcRequest/security-check";
+import { securityCheckGetDappInfo, queryAndPutDappSecurityCheckResult, continueOpenDapp } from "../ipcRequest/security-check";
 
 const DEFAULT_HTTPS_RESULT: ISecurityCheckResult['checkHttps'] & { checking: boolean } = {
   level: 'ok',
@@ -83,7 +83,7 @@ export function useCheckDapp() {
       https: {...DEFAULT_HTTPS_RESULT, checking: true},
       latestUpdate: {...DEFAULT_DAPP_UPDATE_INFO_RESULT, checking: true},
     }));
-    queryLatestDappSecurityCheckResult(checkingInfo.url)
+    queryAndPutDappSecurityCheckResult(checkingInfo.url)
       .then(newVal => {
         setCheckResult(prev => {
           return {

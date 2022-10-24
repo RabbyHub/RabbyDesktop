@@ -1,7 +1,8 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 
-import Axios from 'axios';
+import Axios, { AxiosError } from 'axios';
 import { BrowserView } from 'electron';
+import LRUCache from 'lru-cache';
 import { Subject, firstValueFrom, of } from 'rxjs';
 import { timeout, catchError } from 'rxjs/operators';
 import url from 'url';
@@ -258,4 +259,112 @@ export async function queryDappLatestUpdateInfo ({
       is_changed
     }
   }).then(res => res.data)
+}
+
+const securityCheckResults = new LRUCache<IDapp['origin'], ISecurityCheckResult>({
+  max: 500,
+  // maxSize: 5000,
+  ttl: 1000 * 90,
+})
+
+async function doCheckDappOrigin (origin: string) {
+  // TODO: catch error here
+  const [
+    httpsCheckResult,
+    latestUpdateResult
+  ] = await Promise.all([
+    checkDappHttpsCert(origin),
+    queryDappLatestUpdateInfo({
+      dapp_origin: origin,
+    })
+    .then((json) => {
+      const latestItem = json.detect_list?.[0] || null;
+      const latestChangedItemIn24Hr = json.detect_list?.find((item) =>
+        item.is_changed && (Date.now() - item.create_at * 1e3) < 24 * 60 * 60 * 1e3
+      ) || null;
+
+      return {
+        timeout: false,
+        latestItem: latestItem || null,
+        latestChangedItemIn24Hr,
+        // latestChangedItemIn24Hr: getMockedChanged(latestItem?.dapp_id)
+      }
+    })
+    .catch(err => {
+      if ((err as AxiosError).code === 'timeout') {
+        return {
+          timeout: true,
+          latestItem: null,
+          latestChangedItemIn24Hr: null,
+          error: err.message
+        }
+      } else {
+        return {
+          timeout: false,
+          latestItem: null,
+          latestChangedItemIn24Hr: null,
+          error: 'unknown'
+        }
+      }
+    })
+  ]);
+
+  const httpsResult: ISecurityCheckResult['checkHttps'] = httpsCheckResult?.type === 'HTTPS_CERT_INVALID' ? {
+    level: 'danger',
+    httpsError: true,
+    chromeErrorCode: httpsCheckResult.errorCode
+  } : {
+    level: httpsCheckResult?.type === 'TIMEOUT' ? 'danger' : 'ok',
+    httpsError: false,
+    timeout: httpsCheckResult?.type === 'TIMEOUT'
+  }
+
+  // normalize result
+  let countWarnings = 0, countDangerIssues = 0;
+  let resultLevel = undefined as any as ISecurityCheckResult['resultLevel'];
+
+  if (latestUpdateResult.latestChangedItemIn24Hr?.create_at && latestUpdateResult.latestChangedItemIn24Hr?.is_changed) {
+    countWarnings++;
+    resultLevel = resultLevel || 'warning';
+  }
+
+  if (httpsResult.httpsError) {
+    countDangerIssues++;
+    resultLevel = 'danger';
+  }
+
+  resultLevel = resultLevel || 'ok';
+
+  const checkResult: ISecurityCheckResult = {
+    origin,
+    countWarnings,
+    countDangerIssues,
+    countIssues: countWarnings + countDangerIssues,
+    resultLevel,
+    timeout: !!(httpsResult.timeout || latestUpdateResult.timeout),
+    checkHttps: httpsResult,
+    checkLatestUpdate: {
+      ...latestUpdateResult,
+      level: latestUpdateResult.timeout ? 'danger' : latestUpdateResult.latestChangedItemIn24Hr ? 'warning' : 'ok'
+    },
+  };
+
+  return checkResult;
+}
+
+export async function getOrPutCheckResult (dappUrl: string, updateOnSet: boolean = false) {
+  const origin = canoicalizeDappUrl(dappUrl).origin;
+
+  let checkResult = securityCheckResults.get(origin);
+
+  if (!checkResult) {
+    checkResult = await doCheckDappOrigin(origin);
+    securityCheckResults.set(origin, checkResult);
+  } else if (updateOnSet) {
+    doCheckDappOrigin(origin).then(newVal => {
+      securityCheckResults.set(origin, newVal);
+    });
+  }
+
+  return checkResult;
 }

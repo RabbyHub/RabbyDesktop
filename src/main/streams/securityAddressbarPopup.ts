@@ -7,7 +7,7 @@ import { onIpcMainEvent } from "../utils/ipcMainEvents";
 import { getMainWindow, onMainWindowReady } from "./tabbedBrowserWindow";
 import { fromMainSubject, valueToMainSubject } from "./_init";
 import { createPopupWindow, hidePopupWindow, showPopupWindow } from "../utils/browser";
-import { getOrPutCheckResult } from "./securityCheck";
+import { getOrPutCheckResult } from "../utils/dapps";
 
 const currentPageState: ISecurityAddrbarPopupState = {
   page: 'entry',
