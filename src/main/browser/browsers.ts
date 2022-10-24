@@ -81,7 +81,7 @@ export default class TabbedBrowserWindow {
       if (!tab) return;
 
       const tabUrl = tab.webContents!.getURL();
-      const checkResult = isUrlFromDapp(tabUrl) ? await getOrPutCheckResult(tabUrl) : null;
+      const checkResult = isUrlFromDapp(tabUrl) ? await getOrPutCheckResult(tabUrl, false) : null;
 
       event.reply('webui-ext-navinfo', {
         tabExists: !!tab,

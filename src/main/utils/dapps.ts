@@ -309,7 +309,7 @@ async function doCheckDappOrigin (origin: string) {
     })
   ]);
 
-  const httpsResult: ISecurityCheckResult['checkHttps'] = httpsCheckResult?.type === 'HTTPS_CERT_INVALID' ? {
+  const checkHttps: ISecurityCheckResult['checkHttps'] = httpsCheckResult?.type === 'HTTPS_CERT_INVALID' ? {
     level: 'danger',
     httpsError: true,
     chromeErrorCode: httpsCheckResult.errorCode
@@ -323,12 +323,17 @@ async function doCheckDappOrigin (origin: string) {
   let countWarnings = 0, countDangerIssues = 0;
   let resultLevel = undefined as any as ISecurityCheckResult['resultLevel'];
 
-  if (latestUpdateResult.latestChangedItemIn24Hr?.create_at && latestUpdateResult.latestChangedItemIn24Hr?.is_changed) {
+  const checkLatestUpdate: ISecurityCheckResult['checkLatestUpdate'] = { ...latestUpdateResult, level: 'ok' };
+  if (
+    (latestUpdateResult.latestChangedItemIn24Hr?.create_at && latestUpdateResult.latestChangedItemIn24Hr?.is_changed)
+    || latestUpdateResult.timeout
+  ) {
     countWarnings++;
-    resultLevel = resultLevel || 'warning';
+    checkLatestUpdate.level = 'warning';
+    resultLevel = resultLevel || checkLatestUpdate.level;
   }
 
-  if (httpsResult.httpsError) {
+  if (checkHttps.httpsError || checkHttps.timeout) {
     countDangerIssues++;
     resultLevel = 'danger';
   }
@@ -341,12 +346,9 @@ async function doCheckDappOrigin (origin: string) {
     countDangerIssues,
     countIssues: countWarnings + countDangerIssues,
     resultLevel,
-    timeout: !!(httpsResult.timeout || latestUpdateResult.timeout),
-    checkHttps: httpsResult,
-    checkLatestUpdate: {
-      ...latestUpdateResult,
-      level: latestUpdateResult.timeout ? 'danger' : latestUpdateResult.latestChangedItemIn24Hr ? 'warning' : 'ok'
-    },
+    timeout: !!(checkHttps.timeout || latestUpdateResult.timeout),
+    checkHttps,
+    checkLatestUpdate,
   };
 
   return checkResult;
