@@ -1,7 +1,27 @@
 
-v0.1.1 / 2022-09-30
+v0.1.2 / 2022-10-25
 ==================
 
+  * chore: code clean.
+  * feat: display timeout message on security check.
+  * fix: no trigger check if start checking dapp last open.
+  * fix: set dapp check results ttl as 1 day.
+  * chore: code robust change.
+  * feat: integrate `dappSecurityCheckResult` to response of `webui-ext-navinfo`
+  * feat: never reload dapp's page on clicking from dapps home.
+  * feat: tuning dapps home page.
+  * feat: support security check/notification/addressbarPopup (#9)
+  * chore: code clean.
+  * chore: code clean.
+  * fix: `chrome.tabs.query` behavior on getting current window
+  * feat: robust change about dapp detection.
+  * chore: upgrade electron-chrome-extensions
+  * fix: dapp favicon first load (#8)
+
+v0.1.1 / 2022-09-30
+===================
+
+  * Release v0.1.1
   * feat: restrain exposed apis for different webviews. (#7)
   * feat: add rabby connect ts (#6)
   * fix: use Template image for macos's menubar icon
