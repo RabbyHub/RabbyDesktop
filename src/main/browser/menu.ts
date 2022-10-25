@@ -16,7 +16,7 @@ export const setupMenu = ({
     // { role: 'editMenu' },
     {
       label: 'View',
-      submenu: [
+      submenu: <Electron.MenuItemConstructorOptions['submenu']>[
         {
           label: 'Reload',
           accelerator: 'CmdOrCtrl+R',
@@ -44,14 +44,20 @@ export const setupMenu = ({
           },
         } : null as any,
         { type: 'separator' },
-        { role: 'resetZoom' },
-        { role: 'zoomIn' },
-        { role: 'zoomOut' },
+        // { role: 'resetZoom' },
+        // { role: 'zoomIn' },
+        // { role: 'zoomOut' },
+        // { type: 'separator' },
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'delete' },
+        { role: 'selectAll' },
         { type: 'separator' },
         { role: 'togglefullscreen' },
+        { type: 'separator' },
+        { role: 'quit' },
       ].filter(Boolean),
     },
-    // { role: 'windowMenu' },
   ];
 
   const menu = Menu.buildFromTemplate(template);
