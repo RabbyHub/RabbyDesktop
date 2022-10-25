@@ -1,7 +1,17 @@
 
-v0.1.2 / 2022-10-25
+v0.1.3 / 2022-10-25
 ==================
 
+  * fix: recover common shortcuts on macos.
+  * chore: tuning for security addressbar popup
+  * chore: robust change for sub windows
+  * feat: allow ipcMain use infinite listeners.
+  * feat: tuning.
+
+v0.1.2 / 2022-10-25
+===================
+
+  * Release v0.1.2
   * chore: code clean.
   * feat: display timeout message on security check.
   * fix: no trigger check if start checking dapp last open.
