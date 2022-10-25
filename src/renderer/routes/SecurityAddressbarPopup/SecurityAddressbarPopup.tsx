@@ -146,10 +146,7 @@ function CheckItemDetailedExplanation ({
           )}
         </div>
         <div className={styles.right}>
-          <RcIconAddrbarPopupCloseDark
-            className={styles.closeIconSvg}
-            onClick={() => hideDappAddressbarSecurityPopupView()}
-          />
+          <RcIconAddrbarPopupCloseDark className={styles.closeIconSvg} onClick={() => hideDappAddressbarSecurityPopupView()} />
         </div>
       </header>
 
@@ -253,11 +250,18 @@ export default function SecurityAddressbarPopup() {
       </header>
       <main>
         {/* check-item: last update time */}
-        <div className={classNames(
-          styles.checkItemRow,
-          checkResult.checkLatestUpdate.level === 'danger' && styles.JCheckItemLevelDanger,
-          checkResult.checkLatestUpdate.level === 'warning' && styles.JCheckItemLevelWarning,
-        )}>
+        <div
+          className={classNames(
+            styles.checkItemRow,
+            !checkResult.checkLatestUpdate.timeout && styles.clickable,
+            checkResult.checkLatestUpdate.level === 'danger' && styles.JCheckItemLevelDanger,
+            checkResult.checkLatestUpdate.level === 'warning' && styles.JCheckItemLevelWarning,
+          )}
+          onClick={() => {
+            if (checkResult.checkLatestUpdate.timeout) return ;
+            switchPageTo({ page: 'detail-item', focusingItem: 'checkLatestUpdate' })
+          }}
+        >
           <div className={styles.left}>
             <div className={styles.JLevelIcon}>
               {checkResult.checkLatestUpdate.level === 'danger' && <RcIconAddrbarPopupShieldDanger className={styles.iconSvg} />}
@@ -274,17 +278,24 @@ export default function SecurityAddressbarPopup() {
             </div>
           </div>
 
-          <div className={styles.right} onClick={() => switchPageTo({ page: 'detail-item', focusingItem: 'checkLatestUpdate' })}>
+          <div className={styles.right}>
             {!checkResult.checkLatestUpdate.timeout && <RcIconAddrbarPopupChevronRight className={styles.iconSvg} />}
           </div>
         </div>
 
         {/* check-item: https verifications */}
-        <div className={classNames(
-          styles.checkItemRow,
-          checkResult.checkHttps.level === 'danger' && styles.JCheckItemLevelDanger,
-          checkResult.checkHttps.level === 'warning' && styles.JCheckItemLevelWarning,
-        )}>
+        <div
+          className={classNames(
+            styles.checkItemRow,
+            !checkResult.checkHttps.timeout && styles.clickable,
+            checkResult.checkHttps.level === 'danger' && styles.JCheckItemLevelDanger,
+            checkResult.checkHttps.level === 'warning' && styles.JCheckItemLevelWarning,
+          )}
+          onClick={() => {
+            if (checkResult.checkHttps.timeout) return ;
+            switchPageTo({ page: 'detail-item', focusingItem: 'checkHttps' })
+          }}
+        >
           <div className={styles.left}>
             <div className={styles.JLevelIcon}>
               {checkResult.checkHttps.level === 'danger' && <RcIconAddrbarPopupShieldDanger className={styles.iconSvg} />}
@@ -301,7 +312,7 @@ export default function SecurityAddressbarPopup() {
             </div>
           </div>
 
-          <div className={styles.right} onClick={() => switchPageTo({ page: 'detail-item', focusingItem: 'checkHttps' })}>
+          <div className={styles.right}>
             {!checkResult.checkHttps.timeout && <RcIconAddrbarPopupChevronRight className={styles.iconSvg} />}
           </div>
         </div>
