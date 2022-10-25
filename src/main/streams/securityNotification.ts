@@ -45,6 +45,8 @@ function updateSubWindowPosition(
   parentWin: BrowserWindow,
   window: BrowserWindow,
 ) {
+  if (window.isDestroyed()) return ;
+
   const [width, height] = parentWin.getSize();
 
   const popupRect = {

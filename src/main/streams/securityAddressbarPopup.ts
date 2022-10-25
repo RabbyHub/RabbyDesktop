@@ -19,7 +19,6 @@ onMainWindowReady().then(async (mainWin) => {
   const popupWin = createPopupWindow({
     parent: mainWin.window,
     transparent: false,
-    alwaysOnTop: true,
   });
 
   updateSubWindowPosition(mainWin.window, popupWin);
@@ -48,6 +47,8 @@ function updateSubWindowPosition(
   parentWin: BrowserWindow,
   window: BrowserWindow,
 ) {
+  if (window.isDestroyed()) return ;
+
   const [, height] = parentWin.getSize();
 
   const popupRect = {
