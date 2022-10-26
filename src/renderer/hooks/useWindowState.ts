@@ -43,7 +43,7 @@ export function useWindowState() {
   }, []);
 
   const onCloseButton = useCallback(() => {
-    chrome.windows.remove(undefined as any);
+    window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:main-window:click-close');
   }, []);
 
   return {

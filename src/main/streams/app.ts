@@ -141,6 +141,14 @@ app.on('window-all-closed', () => {
   app.quit();
 });
 
+onIpcMainEvent('__internal_rpc:main-window:click-close', () => {
+  if (isDarwin) {
+    app.hide();
+  } else {
+    app.quit();
+  }
+});
+
 export default function bootstrap () {
   // eslint-disable-next-line promise/catch-or-return
   app.whenReady().then(async () => {

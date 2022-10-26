@@ -159,6 +159,10 @@ type ChannelMessagePayload = {
       }
     ]
   },
+  '__internal_rpc:main-window:click-close': {
+    send: [];
+    response: [];
+  },
   '__internal_alert-security-url': {
     send: [];
     response: [
