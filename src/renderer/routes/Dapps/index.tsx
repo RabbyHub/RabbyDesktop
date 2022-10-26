@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 import React, { useRef, useState } from 'react';
-import { Menu, Dropdown, message, Row, Col, Button } from 'antd';
+import { Menu, Dropdown, message } from 'antd';
 
 import {
   RCIconDappsEdit,
@@ -137,7 +137,18 @@ export default function DApps() {
       >
         <AutoUpdate />
         <header>
-          <h2 className="title">My Dapps</h2>
+          <div className="title">
+            <h2 className="title-text">
+              My Dapps
+            </h2>
+            <span className="security-description">
+              <img className="shield-icon" src="rabby-internal://assets/icons/security-check/icon-shield-in-home.svg" />
+              Being protected by Dapp Security Engine
+            </span>
+          </div>
+          <p className="subtitle">
+            Dapp Security Engine, provided by Rabby Wallet Desktop, offers better security for your Dapp use.
+          </p>
         </header>
         <main>
           <div className="dapps">

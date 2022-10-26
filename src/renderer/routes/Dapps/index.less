@@ -91,7 +91,7 @@ body {
 }
 
 .page-content {
-  @header-h: 28px;
+  @header-h: 64px;
   @footer-h: 60px;
   @main-padding-v: 20px;
   // overflow: overlay;
@@ -120,11 +120,54 @@ body {
     flex-shrink: 0;
 
     .title {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .title-text {
       font-style: normal;
       font-weight: 700;
       font-size: 24px;
-      line-height: @header-h;
+      line-height: 28px;
       color: var(--color-title);
+      margin-bottom: 0;
+    }
+
+    .security-description {
+      margin-left: 12px;
+      height: 28px;
+      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+
+      background: rgba(134, 151, 255, 0.2);
+
+      color: var(--color-primary);
+      border: 0.5px solid var(--color-primary);
+      border-radius: 4px;
+
+      font-style: normal;
+      font-weight: 500;
+      font-size: 13px;
+      line-height: 15px;
+
+      .shield-icon {
+        width: 16px;
+        height: 16px;
+        margin-right: 8px;
+      }
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      font-style: normal;
+      font-weight: 500;
+      font-size: 13px;
+      line-height: 15px;
+
+      color: var(--color-paragraph);
     }
   }
 
@@ -158,7 +201,6 @@ body {
   }
 
   .version-text {
-    font-family: 'Roboto';
     font-style: normal;
     font-weight: 500;
     font-size: 12px;
