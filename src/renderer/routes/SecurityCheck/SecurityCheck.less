@@ -34,7 +34,8 @@
   .check-main-wrapper {
     width: 100%;
     position: relative;
-    padding-left: 100px;
+    padding-left: 60px;
+    padding-right: 60px;
   }
 
   .check-main-wrapper .check-item {
@@ -160,7 +161,7 @@
   }
 
   .operations {
-    margin-top: 24px;
+    margin-top: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -191,6 +192,16 @@
         background-color: rgba(var(--color-orange-rgb), .6);
       }
     }
+
+    &.J_op_danger {
+      background-color: var(--color-red);
+      border: 0px;
+      color: white;
+
+      &:hover {
+        background-color: rgba(var(--color-red-rgb), .6);
+      }
+    }
   }
 
   .operations .J_op + .J_op {
@@ -202,13 +213,9 @@
   width: 560px;
   height: 440px;
 
-  &.J_check_level-warning {
-    height: 534px;
-  }
-
-  &.J_check_level-warning .check-main-wrapper {
-    padding-left: 64px;
-    padding-right: 38px;
+  &.J_check_level-warning,
+  &.J_check_level-danger {
+    height: 504px;
   }
 
   .ant-modal-content {

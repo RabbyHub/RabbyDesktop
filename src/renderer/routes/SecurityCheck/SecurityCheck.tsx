@@ -210,6 +210,17 @@ export default function ModalSecurityCheck() {
             </Button>
           </div>
         )}
+        {checkResult.resultLevel === 'danger' && (
+          <div className="operations">
+            <Button
+              type="primary"
+              className="J_op J_op_danger"
+              onClick={() => closeNewTabAndThisView()}
+            >
+              Close
+            </Button>
+          </div>
+        )}
       </div>
     </Modal>
   );
