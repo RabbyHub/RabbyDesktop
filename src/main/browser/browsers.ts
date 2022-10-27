@@ -12,6 +12,9 @@ export type TabbedBrowserWindowOptions = {
   session?: Electron.Session;
   extensions: ElectronChromeExtensions;
   windowType?: Exclude<chrome.windows.CreateData, void>['type'];
+  queryStringArgs?: {
+    [key: `__webui${string}`]: string | number | boolean;
+  };
 };
 
 export default class TabbedBrowserWindow {
@@ -50,6 +53,7 @@ export default class TabbedBrowserWindow {
     const origUrl = `chrome-extension://${options.webuiExtensionId}/shell-webui.html`;
     /* eslint-disable @typescript-eslint/naming-convention */
     const webuiUrl = integrateQueryToUrl(origUrl, {
+      ...options.queryStringArgs,
       ...(this.hasNavigationBar && { __withNavigationbar: 'true' }),
       // TODO: set 'false' for 'popup' window
       __webuiClosable: this.windowType !== 'popup' ? 'true' : 'false',

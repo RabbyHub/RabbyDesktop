@@ -65,9 +65,11 @@ export function isUrlFromDapp(url: string) {
   );
 }
 
+// TODO: use better flag to check if it's main window's shell ui
 export function isMainWinShellWebUI(url: string) {
   return (
-    url.startsWith('chrome-extension:') && url.includes('__webuiWindowsId=1')
+    url.startsWith('chrome-extension:') &&
+    url.includes('__webuiIsMainWindow=true')
   );
 }
 

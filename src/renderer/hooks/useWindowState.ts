@@ -1,3 +1,4 @@
+import { isMainWinShellWebUI } from '@/isomorphic/url';
 import { useCallback, useEffect, useState } from 'react';
 import { detectOS } from '../../isomorphic/os';
 
@@ -43,6 +44,11 @@ export function useWindowState() {
   }, []);
 
   const onCloseButton = useCallback(() => {
+    if (!isMainWinShellWebUI(window.location.href)) {
+      chrome.windows.remove(chrome.windows.WINDOW_ID_CURRENT);
+      return;
+    }
+
     window.rabbyDesktop.ipcRenderer.sendMessage(
       '__internal_rpc:main-window:click-close'
     );

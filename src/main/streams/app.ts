@@ -185,12 +185,19 @@ app.on('window-all-closed', () => {
   app.quit();
 });
 
-onIpcMainEvent('__internal_rpc:main-window:click-close', () => {
-  if (isDarwin) {
-    app.hide();
-  } else {
-    app.quit();
+onIpcMainEvent('__internal_rpc:main-window:click-close', async (evt) => {
+  const { sender } = evt;
+  const tabbedWin = getWindowFromWebContents(sender);
+  if (tabbedWin === (await onMainWindowReady())) {
+    if (isDarwin) {
+      tabbedWin.window.hide();
+    } else {
+      app.quit();
+    }
+    return;
   }
+
+  tabbedWin?.destroy();
 });
 
 export default function bootstrap() {
@@ -225,6 +232,9 @@ export default function bootstrap() {
         height: lastMainWinPos.height,
         x: lastMainWinPos.x,
         y: lastMainWinPos.y,
+      },
+      queryStringArgs: {
+        __webuiIsMainWindow: true,
       },
     });
 
@@ -275,6 +285,10 @@ export default function bootstrap() {
       // do quit on context menu
       appTray.addListener('click', () => {
         showMainWin();
+      });
+      app.on('activate', (_, hasVisibleWindows) => {
+        if (!hasVisibleWindows)
+          showMainWin();
       });
     }
 
