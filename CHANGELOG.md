@@ -1,7 +1,19 @@
 
-v0.1.3 / 2022-10-25
+v0.1.4 / 2022-10-28
 ==================
 
+  * feat: memory last position of main window.
+  * chore: style tuning.
+  * fix: don't move hidden main window top on coping sensitive information.
+  * feat: tuning security check view, add close button for danger status.
+  * feat: eslint fix.
+  * feat: add security tips on dapps home.
+  * fix: only hide window on clicking traffic close button on darwin.
+
+v0.1.3 / 2022-10-25
+===================
+
+  * Release v0.1.3
   * fix: recover common shortcuts on macos.
   * chore: tuning for security addressbar popup
   * chore: robust change for sub windows
