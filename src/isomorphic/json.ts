@@ -1,8 +1,8 @@
-export function safeParse<T extends any = any>(input: any, defaultValue: T = null as any) {
+export function safeParse<T = any>(input: any, defaultValue: T = null as any) {
   try {
     return JSON.parse(input);
   } catch (e) {
-    return defaultValue
+    return defaultValue;
   }
 }
 

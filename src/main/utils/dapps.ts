@@ -1,11 +1,11 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 
+import { format as urlFormat } from 'url';
 import Axios, { AxiosError } from 'axios';
 import { BrowserView } from 'electron';
 import LRUCache from 'lru-cache';
 import { Subject, firstValueFrom, of } from 'rxjs';
 import { timeout, catchError } from 'rxjs/operators';
-import url from 'url';
 
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { parseWebsiteFavicon } from './fetch';
@@ -14,15 +14,17 @@ import { AxiosElectronAdapter } from './axios';
 
 const DFLT_TIMEOUT = 8 * 1e3;
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const enum DETECT_ERR_CODES {
   NOT_HTTPS = 'NOT_HTTPS',
   INACCESSIBLE = 'INACCESSIBLE',
   HTTPS_CERT_INVALID = 'HTTPS_CERT_INVALID',
   TIMEOUT = 'TIMEOUT',
 
-  REPEAT = 'REPEAT'
+  REPEAT = 'REPEAT',
 }
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const enum CHROMIUM_LOADURL_ERR_CODE {
   // https://host.not.existe
   ERR_NAME_NOT_RESOLVED = 'ERR_NAME_NOT_RESOLVED',
@@ -40,29 +42,36 @@ const enum CHROMIUM_LOADURL_ERR_CODE {
   ERR_CERT_REVOKED = 'ERR_CERT_REVOKED',
 }
 
-type CHROMIUM_NET_ERR_DESC = `net::${CHROMIUM_LOADURL_ERR_CODE}`
-  | `net::ERR_CONNECTION_CLOSED`
+// eslint-disable-next-line @typescript-eslint/naming-convention
+type CHROMIUM_NET_ERR_DESC =
+  | `net::${CHROMIUM_LOADURL_ERR_CODE}`
+  | `net::ERR_CONNECTION_CLOSED`;
 
-async function checkUrlViaBrowserView (dappUrl: string, opts?: {
-  timeout?: number,
-}) {
+async function checkUrlViaBrowserView(
+  dappUrl: string,
+  opts?: {
+    timeout?: number;
+  }
+) {
   const view = new BrowserView({
     webPreferences: {
       sandbox: true,
       nodeIntegration: false,
-    }
-  })
+    },
+  });
 
-  type Result = {
-    valid: true
-    // some website would redirec to another origin, such as https://binance.com -> https://www.binance.com
-    finalUrl: string
-  } | {
-    valid: false
-    isTimeout?: boolean
-    errorDesc?: CHROMIUM_LOADURL_ERR_CODE | string
-    certErrorDesc?: CHROMIUM_NET_ERR_DESC
-  };
+  type Result =
+    | {
+        valid: true;
+        // some website would redirec to another origin, such as https://binance.com -> https://www.binance.com
+        finalUrl: string;
+      }
+    | {
+        valid: false;
+        isTimeout?: boolean;
+        errorDesc?: CHROMIUM_LOADURL_ERR_CODE | string;
+        certErrorDesc?: CHROMIUM_NET_ERR_DESC;
+      };
 
   const checkResult = new Subject<Result>();
 
@@ -70,24 +79,27 @@ async function checkUrlViaBrowserView (dappUrl: string, opts?: {
     checkResult.next({
       valid: true,
       finalUrl: view.webContents.getURL(),
-    })
+    });
   });
 
-  view.webContents.on('did-fail-load', (_, errorCode, errorDesc, validatedURL) => {
-    if (errorDesc === CHROMIUM_LOADURL_ERR_CODE.ERR_NAME_NOT_RESOLVED) {
-      checkResult.next({
-        valid: false,
-        errorDesc: errorDesc
-      });
-    } else if (errorDesc.startsWith('ERR_CERT_')) {
-      // wait for 'certificate-error' event
-    } else {
-      checkResult.next({
-        valid: false,
-        errorDesc: errorDesc
-      });
+  view.webContents.on(
+    'did-fail-load',
+    (_, errorCode, errorDesc, validatedURL) => {
+      if (errorDesc === CHROMIUM_LOADURL_ERR_CODE.ERR_NAME_NOT_RESOLVED) {
+        checkResult.next({
+          valid: false,
+          errorDesc,
+        });
+      } else if (errorDesc.startsWith('ERR_CERT_')) {
+        // wait for 'certificate-error' event
+      } else {
+        checkResult.next({
+          valid: false,
+          errorDesc,
+        });
+      }
     }
-  });
+  );
 
   view.webContents.on('certificate-error', (_, url, cert) => {
     checkResult.next({
@@ -104,10 +116,12 @@ async function checkUrlViaBrowserView (dappUrl: string, opts?: {
   if (duration && duration > 0) {
     obs = obs.pipe(
       timeout(duration),
-      catchError(() => of({
-        valid: false as false,
-        isTimeout: true,
-      }))
+      catchError(() =>
+        of({
+          valid: false as const,
+          isTimeout: true,
+        })
+      )
     );
   }
 
@@ -117,32 +131,38 @@ async function checkUrlViaBrowserView (dappUrl: string, opts?: {
   });
 }
 
-async function checkDappHttpsCert (dappOrigin: string, opts?: Parameters<typeof checkUrlViaBrowserView>[1]): Promise<
-  {
-    type: DETECT_ERR_CODES.HTTPS_CERT_INVALID
-    errorCode: CHROMIUM_NET_ERR_DESC
-  } | {
-    type: DETECT_ERR_CODES.TIMEOUT
-    errorCode?: null
-  } | null
+async function checkDappHttpsCert(
+  dappOrigin: string,
+  opts?: Parameters<typeof checkUrlViaBrowserView>[1]
+): Promise<
+  | {
+      type: DETECT_ERR_CODES.HTTPS_CERT_INVALID;
+      errorCode: CHROMIUM_NET_ERR_DESC;
+    }
+  | {
+      type: DETECT_ERR_CODES.TIMEOUT;
+      errorCode?: null;
+    }
+  | null
 > {
   const checkResult = await checkUrlViaBrowserView(dappOrigin, opts);
 
   if (checkResult.valid) return null;
 
-  if (checkResult.isTimeout) return {
-    type: DETECT_ERR_CODES.TIMEOUT,
-  }
+  if (checkResult.isTimeout)
+    return {
+      type: DETECT_ERR_CODES.TIMEOUT,
+    };
 
   return {
     type: DETECT_ERR_CODES.HTTPS_CERT_INVALID,
     errorCode: checkResult.certErrorDesc!,
-  }
+  };
 }
 
 export async function detectDapps(
   dappsUrl: string,
-  existedDapps: IDapp[],
+  existedDapps: IDapp[]
 ): Promise<IDappsDetectResult<DETECT_ERR_CODES>> {
   // TODO: process void url;
   const { urlInfo: inputUrlInfo } = canoicalizeDappUrl(dappsUrl);
@@ -152,12 +172,12 @@ export async function detectDapps(
       data: null,
       error: {
         type: DETECT_ERR_CODES.NOT_HTTPS,
-        message: 'Dapp with protocols other than HTTPS is not supported'
-      }
+        message: 'Dapp with protocols other than HTTPS is not supported',
+      },
     };
   }
 
-  const formatedUrl = url.format(inputUrlInfo);
+  const formatedUrl = urlFormat(inputUrlInfo);
 
   const checkResult = await checkUrlViaBrowserView(formatedUrl);
   const isCertErr = !checkResult.valid && !!checkResult.certErrorDesc;
@@ -167,17 +187,18 @@ export async function detectDapps(
       data: null,
       error: {
         type: DETECT_ERR_CODES.HTTPS_CERT_INVALID,
-        message: 'The certificate of the Dapp has expired'
-      }
+        message: 'The certificate of the Dapp has expired',
+      },
     };
-  } else if (!checkResult.valid) {
+  }
+  if (!checkResult.valid) {
     if (checkResult.isTimeout) {
       return {
         data: null,
         error: {
           type: DETECT_ERR_CODES.TIMEOUT,
-          message: 'Checking the Dapp timed out, please try again later'
-        }
+          message: 'Checking the Dapp timed out, please try again later',
+        },
       };
     }
 
@@ -185,13 +206,15 @@ export async function detectDapps(
       data: null,
       error: {
         type: DETECT_ERR_CODES.INACCESSIBLE,
-        message: 'This Dapp is inaccessible. It may be an invalid URL'
-      }
+        message: 'This Dapp is inaccessible. It may be an invalid URL',
+      },
     };
   }
 
   const { urlInfo, origin } = canoicalizeDappUrl(checkResult.finalUrl);
-  const { iconInfo, faviconUrl, faviconBase64 } = await parseWebsiteFavicon(origin);
+  const { iconInfo, faviconUrl, faviconBase64 } = await parseWebsiteFavicon(
+    origin
+  );
 
   const repeatedDapp = existedDapps.find((item) => item.origin === origin);
 
@@ -200,134 +223,147 @@ export async function detectDapps(
     icon: iconInfo,
     origin,
     faviconUrl,
-    faviconBase64
-  }
+    faviconBase64,
+  };
 
   if (repeatedDapp) {
     return {
       data,
       error: {
         type: DETECT_ERR_CODES.REPEAT,
-        message: 'This Dapp has been added'
-      }
-    }
+        message: 'This Dapp has been added',
+      },
+    };
   }
 
-  return { data }
+  return { data };
 }
 
 const isProd = process.env.NODE_ENV === 'production';
 
-const OPENAPI_BASEURL = !isProd ? 'https://alpha-pro-openapi.debank.com' : 'https://pro-openapi.debank.com';
+const OPENAPI_BASEURL = !isProd
+  ? 'https://alpha-pro-openapi.debank.com'
+  : 'https://pro-openapi.debank.com';
 
 const openApiClient = Axios.create({
   baseURL: OPENAPI_BASEURL,
-  adapter: AxiosElectronAdapter
-})
+  adapter: AxiosElectronAdapter,
+});
 
-async function createDappDetection ({
-  dapp_origin = ''
-}) {
+async function createDappDetection({ dapp_origin = '' }) {
   return openApiClient.post<{
-    is_success: boolean
-    id: string
+    is_success: boolean;
+    id: string;
   }>('/cloud/dapp', {
-    origin: dapp_origin
-  })
+    origin: dapp_origin,
+  });
 }
 
-export async function queryDappLatestUpdateInfo ({
+export async function queryDappLatestUpdateInfo({
   dapp_origin = '',
   dapp_id = '',
   limit = 10,
   start = 0,
-  is_changed = true
+  is_changed = true,
 }) {
-  if (!dapp_id) {
+  let dappId = dapp_id;
+  if (!dappId) {
     const resp = await createDappDetection({ dapp_origin });
 
-    dapp_id = resp.data.id;
+    dappId = resp.data.id;
   }
 
-  return openApiClient.get<{
-    total: boolean,
-    detect_list: IDappUpdateDetectionItem[]
-  }>(`/cloud/dapp/${dapp_id}/detect`, {
-    params: {
-      limit,
-      start,
-      is_changed
-    }
-  }).then(res => res.data)
+  return openApiClient
+    .get<{
+      total: boolean;
+      detect_list: IDappUpdateDetectionItem[];
+    }>(`/cloud/dapp/${dappId}/detect`, {
+      params: {
+        limit,
+        start,
+        is_changed,
+      },
+    })
+    .then((res) => res.data);
 }
 
-const securityCheckResults = new LRUCache<IDapp['origin'], ISecurityCheckResult>({
+const securityCheckResults = new LRUCache<
+  IDapp['origin'],
+  ISecurityCheckResult
+>({
   max: 500,
   // maxSize: 5000,
   // one day
   ttl: 1000 * 60 * 60 * 24,
-})
+});
 
-async function doCheckDappOrigin (origin: string) {
+async function doCheckDappOrigin(origin: string) {
   // TODO: catch error here
-  const [
-    httpsCheckResult,
-    latestUpdateResult
-  ] = await Promise.all([
+  const [httpsCheckResult, latestUpdateResult] = await Promise.all([
     checkDappHttpsCert(origin),
     queryDappLatestUpdateInfo({
       dapp_origin: origin,
     })
-    .then((json) => {
-      const latestItem = json.detect_list?.[0] || null;
-      const latestChangedItemIn24Hr = json.detect_list?.find((item) =>
-        item.is_changed && (Date.now() - item.create_at * 1e3) < 24 * 60 * 60 * 1e3
-      ) || null;
+      .then((json) => {
+        const latestItem = json.detect_list?.[0] || null;
+        const latestChangedItemIn24Hr =
+          json.detect_list?.find(
+            (item) =>
+              item.is_changed &&
+              Date.now() - item.create_at * 1e3 < 24 * 60 * 60 * 1e3
+          ) || null;
 
-      return {
-        timeout: false,
-        latestItem: latestItem || null,
-        latestChangedItemIn24Hr,
-        // latestChangedItemIn24Hr: getMockedChanged(latestItem?.dapp_id)
-      }
-    })
-    .catch(err => {
-      if ((err as AxiosError).code === 'timeout') {
         return {
-          timeout: true,
-          latestItem: null,
-          latestChangedItemIn24Hr: null,
-          error: err.message
+          timeout: false,
+          latestItem: latestItem || null,
+          latestChangedItemIn24Hr,
+          // latestChangedItemIn24Hr: getMockedChanged(latestItem?.dapp_id)
+        };
+      })
+      .catch((err) => {
+        if ((err as AxiosError).code === 'timeout') {
+          return {
+            timeout: true,
+            latestItem: null,
+            latestChangedItemIn24Hr: null,
+            error: err.message,
+          };
         }
-      } else {
         return {
           timeout: false,
           latestItem: null,
           latestChangedItemIn24Hr: null,
-          error: 'unknown'
-        }
-      }
-    })
+          error: 'unknown',
+        };
+      }),
   ]);
 
-  const checkHttps: ISecurityCheckResult['checkHttps'] = httpsCheckResult?.type === 'HTTPS_CERT_INVALID' ? {
-    level: 'danger',
-    httpsError: true,
-    chromeErrorCode: httpsCheckResult.errorCode
-  } : {
-    level: httpsCheckResult?.type === 'TIMEOUT' ? 'danger' : 'ok',
-    httpsError: false,
-    timeout: httpsCheckResult?.type === 'TIMEOUT'
-  }
+  const checkHttps: ISecurityCheckResult['checkHttps'] =
+    httpsCheckResult?.type === 'HTTPS_CERT_INVALID'
+      ? {
+          level: 'danger',
+          httpsError: true,
+          chromeErrorCode: httpsCheckResult.errorCode,
+        }
+      : {
+          level: httpsCheckResult?.type === 'TIMEOUT' ? 'danger' : 'ok',
+          httpsError: false,
+          timeout: httpsCheckResult?.type === 'TIMEOUT',
+        };
 
   // normalize result
-  let countWarnings = 0, countDangerIssues = 0;
+  let countWarnings = 0;
+  let countDangerIssues = 0;
   let resultLevel = undefined as any as ISecurityCheckResult['resultLevel'];
 
-  const checkLatestUpdate: ISecurityCheckResult['checkLatestUpdate'] = { ...latestUpdateResult, level: 'ok' };
+  const checkLatestUpdate: ISecurityCheckResult['checkLatestUpdate'] = {
+    ...latestUpdateResult,
+    level: 'ok',
+  };
   if (
-    (latestUpdateResult.latestChangedItemIn24Hr?.create_at && latestUpdateResult.latestChangedItemIn24Hr?.is_changed)
-    || latestUpdateResult.timeout
+    (latestUpdateResult.latestChangedItemIn24Hr?.create_at &&
+      latestUpdateResult.latestChangedItemIn24Hr?.is_changed) ||
+    latestUpdateResult.timeout
   ) {
     countWarnings++;
     checkLatestUpdate.level = 'warning';
@@ -355,11 +391,14 @@ async function doCheckDappOrigin (origin: string) {
   return checkResult;
 }
 
-export async function getOrPutCheckResult (dappUrl: string, options?: {
-  wait?: boolean
-  updateOnSet?: boolean
-}) {
-  const origin = canoicalizeDappUrl(dappUrl).origin;
+export async function getOrPutCheckResult(
+  dappUrl: string,
+  options?: {
+    wait?: boolean;
+    updateOnSet?: boolean;
+  }
+) {
+  const { origin } = canoicalizeDappUrl(dappUrl);
 
   let checkResult = securityCheckResults.get(origin);
 

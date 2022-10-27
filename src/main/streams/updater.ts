@@ -1,42 +1,42 @@
-import { app } from "electron";
-import { AppUpdaterWin32, AppUpdaterDarwin } from "../updater/updater";
-import { onIpcMainEvent } from "../utils/ipcMainEvents";
-import { getBindLog } from "../utils/log";
+import { app } from 'electron';
+import { AppUpdaterWin32, AppUpdaterDarwin } from '../updater/updater';
+import { onIpcMainEvent } from '../utils/ipcMainEvents';
+import { getBindLog } from '../utils/log';
 
 const log = getBindLog('updater', 'bgGrey');
 
-let autoUpdater: AppUpdaterWin32 | AppUpdaterDarwin;
+let gAutoUpdater: AppUpdaterWin32 | AppUpdaterDarwin;
 
 const state = {
-  downloadP: null as null | Promise<any>
-}
+  downloadP: null as null | Promise<any>,
+};
 
 async function getAutoUpdater() {
   // TODO: use better custom event 'app-setup'
   await app.whenReady();
 
-  if (!autoUpdater) {
+  if (!gAutoUpdater) {
     if (process.platform === 'darwin') {
-      autoUpdater = new AppUpdaterDarwin();
+      gAutoUpdater = new AppUpdaterDarwin();
     } else {
-      autoUpdater = new AppUpdaterWin32();
+      gAutoUpdater = new AppUpdaterWin32();
     }
 
-    // autoUpdater.on('checking-for-update', () => {
-    //   log('autoUpdater:: checking-for-update', 'checking-for-update');
+    // gAutoUpdater.on('checking-for-update', () => {
+    //   log('gAutoUpdater:: checking-for-update', 'checking-for-update');
     // });
-    // autoUpdater.on('update-available', (info) => {
-    //   log('autoUpdater:: update-available', info);
+    // gAutoUpdater.on('update-available', (info) => {
+    //   log('gAutoUpdater:: update-available', info);
     // });
-    // autoUpdater.on('update-not-available', (info) => {
-    //   log('autoUpdater:: update-not-available', info);
+    // gAutoUpdater.on('update-not-available', (info) => {
+    //   log('gAutoUpdater:: update-not-available', info);
     // });
-    // autoUpdater.on('update-cancelled', (info) => {
-    //   log('autoUpdater:: update-cancelled', info);
+    // gAutoUpdater.on('update-cancelled', (info) => {
+    //   log('gAutoUpdater:: update-cancelled', info);
     // });
   }
 
-  return autoUpdater;
+  return gAutoUpdater;
 }
 
 onIpcMainEvent('check-if-new-release', async (event, reqid) => {
@@ -45,20 +45,22 @@ onIpcMainEvent('check-if-new-release', async (event, reqid) => {
   autoUpdater.once('update-available', (info) => {
     event.reply('check-if-new-release', {
       reqid,
-      ...info ? {
-        hasNewRelease: true,
-        releaseVersion: info.version
-      } : {
-        hasNewRelease: false,
-        releaseVersion: null
-      }
+      ...(info
+        ? {
+            hasNewRelease: true,
+            releaseVersion: info.version,
+          }
+        : {
+            hasNewRelease: false,
+            releaseVersion: null,
+          }),
     });
   });
   autoUpdater.once('update-not-available', (info) => {
     event.reply('check-if-new-release', {
       reqid,
       hasNewRelease: false,
-      releaseVersion: null
+      releaseVersion: null,
     });
   });
 
@@ -80,7 +82,7 @@ onIpcMainEvent('start-download', async (event, reqid) => {
       download: {
         progress: info,
         isEnd: false,
-      }
+      },
     });
   });
 
@@ -91,8 +93,8 @@ onIpcMainEvent('start-download', async (event, reqid) => {
       originReqId: reqid,
       download: {
         progress: null,
-        isEnd: true
-      }
+        isEnd: true,
+      },
     });
   });
 
@@ -102,7 +104,7 @@ onIpcMainEvent('start-download', async (event, reqid) => {
 
   await state.downloadP;
   state.downloadP = null;
-})
+});
 
 onIpcMainEvent('quit-and-upgrade', async (event, reqid) => {
   const autoUpdater = await getAutoUpdater();

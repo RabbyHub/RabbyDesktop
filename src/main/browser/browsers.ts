@@ -81,7 +81,9 @@ export default class TabbedBrowserWindow {
       if (!tab) return;
 
       const tabUrl = tab.webContents!.getURL();
-      const checkResult = isUrlFromDapp(tabUrl) ? await getOrPutCheckResult(tabUrl, { updateOnSet: false }) : null;
+      const checkResult = isUrlFromDapp(tabUrl)
+        ? await getOrPutCheckResult(tabUrl, { updateOnSet: false })
+        : null;
 
       event.reply('webui-ext-navinfo', {
         tabExists: !!tab,
@@ -98,7 +100,7 @@ export default class TabbedBrowserWindow {
         topbarStacks: {
           tabs: true,
           navigation: this.hasNavigationBar,
-        }
+        },
       });
     });
   }

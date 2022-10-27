@@ -1,7 +1,7 @@
-import { BrowserView, BrowserWindow } from "electron";
+import { BrowserView, BrowserWindow } from 'electron';
 
 export function destroyBrowserWebview(view?: BrowserView | null) {
-  if (!view) return ;
+  if (!view) return;
 
   // undocumented behaviors
   (view.webContents as any)?.destroyed?.();
@@ -10,8 +10,8 @@ export function destroyBrowserWebview(view?: BrowserView | null) {
 
 const IS_DARWIN = process.platform === 'darwin';
 
-export function createPopupWindow (
-  opts?: Electron.BrowserWindowConstructorOptions,
+export function createPopupWindow(
+  opts?: Electron.BrowserWindowConstructorOptions
 ) {
   return new BrowserWindow({
     ...opts,
@@ -27,18 +27,22 @@ export function createPopupWindow (
     skipTaskbar: true,
     hasShadow: false,
     titleBarStyle: 'hiddenInset',
-    ...IS_DARWIN ? {
-      opacity: 1,
-      closable: true,
-      trafficLightPosition: { x: -9999, y: -9999 },
-      transparent: true,
-      backgroundColor: '#00ffffff',
-    } : {
-      opacity: 0,
-      show: true,
-      transparent: true
-    },
-    ...opts?.transparent !== undefined && { transparent: !!opts?.transparent },
+    ...(IS_DARWIN
+      ? {
+          opacity: 1,
+          closable: true,
+          trafficLightPosition: { x: -9999, y: -9999 },
+          transparent: true,
+          backgroundColor: '#00ffffff',
+        }
+      : {
+          opacity: 0,
+          show: true,
+          transparent: true,
+        }),
+    ...(opts?.transparent !== undefined && {
+      transparent: !!opts?.transparent,
+    }),
     webPreferences: {
       ...opts?.webPreferences,
       // session: await getTemporarySession(),
@@ -49,8 +53,8 @@ export function createPopupWindow (
       allowRunningInsecureContent: false,
       autoplayPolicy: 'user-gesture-required',
       contextIsolation: true,
-    }
-  })
+    },
+  });
 }
 
 /**
@@ -59,7 +63,7 @@ export function createPopupWindow (
  *
  * The same requirement applies to hidePopupWindow
  */
-export function showPopupWindow (popupWin: BrowserWindow) {
+export function showPopupWindow(popupWin: BrowserWindow) {
   if (process.platform === 'win32') {
     popupWin.setOpacity(1);
   } else {
@@ -67,7 +71,7 @@ export function showPopupWindow (popupWin: BrowserWindow) {
   }
 }
 
-export function hidePopupWindow (popupWin: BrowserWindow) {
+export function hidePopupWindow(popupWin: BrowserWindow) {
   if (process.platform === 'win32') {
     popupWin.setOpacity(0);
   } else {

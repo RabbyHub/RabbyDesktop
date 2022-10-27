@@ -1,17 +1,17 @@
-import { NsisUpdater, MacUpdater } from "electron-updater"
-import eLog from "electron-log";
+import { NsisUpdater, MacUpdater } from 'electron-updater';
+import eLog from 'electron-log';
 
-import type { GenericServerOptions } from "builder-util-runtime";
+import type { GenericServerOptions } from 'builder-util-runtime';
 
-eLog.transports.file.level = "debug"
+import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 
-import { IS_RUNTIME_PRODUCTION } from "../../isomorphic/constants";
+eLog.transports.file.level = 'debug';
 
 const buildchannel = (process as any).buildchannel || 'reg';
 const ARCH = (process as any).buildarch || process.arch;
 const PLATFORM = process.platform;
 
-function getAppUpdaterURL (): string {
+function getAppUpdaterURL(): string {
   if (!IS_RUNTIME_PRODUCTION)
     return `https://download.rabby.io/wallet-desktop-updater-test/${PLATFORM}-${ARCH}/`;
 
@@ -20,14 +20,17 @@ function getAppUpdaterURL (): string {
     return process.env.UPDATER_TEST_URL;
   }
 
-  const remoteBaseDir = buildchannel === 'prod' ? 'wallet-desktop' : `wallet-desktop-${buildchannel}`;
+  const remoteBaseDir =
+    buildchannel === 'prod'
+      ? 'wallet-desktop'
+      : `wallet-desktop-${buildchannel}`;
   return `https://download.rabby.io/${remoteBaseDir}/${PLATFORM}-${ARCH}/`;
 }
 
 export class AppUpdaterWin32 extends NsisUpdater {
   constructor(options?: GenericServerOptions) {
     super({
-      provider: "generic",
+      provider: 'generic',
       url: getAppUpdaterURL(),
       ...options,
       logger: eLog,
@@ -39,16 +42,15 @@ export class AppUpdaterWin32 extends NsisUpdater {
 
   // always enable updater, even in development mode, because we want customize the update behavior
   // see more details on `node_modules/electron-updater/out/AppUpdater.js`
-  isUpdaterActive () {
+  isUpdaterActive() {
     return true;
   }
 }
 
-
 export class AppUpdaterDarwin extends MacUpdater {
   constructor(options?: GenericServerOptions) {
     super({
-      provider: "generic",
+      provider: 'generic',
       url: getAppUpdaterURL(),
       ...options,
       logger: eLog,
@@ -60,7 +62,7 @@ export class AppUpdaterDarwin extends MacUpdater {
 
   // always enable updater, even in development mode, because we want customize the update behavior
   // see more details on `node_modules/electron-updater/out/AppUpdater.js`
-  isUpdaterActive () {
+  isUpdaterActive() {
     return true;
   }
 }

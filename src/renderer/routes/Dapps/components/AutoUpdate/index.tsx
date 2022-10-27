@@ -8,7 +8,7 @@ export const AutoUpdate = () => {
     isDownloaded,
     requestDownload,
     progress,
-    quitAndUpgrade
+    quitAndUpgrade,
   } = useAppUpdator();
 
   if (!releaseCheckInfo.hasNewRelease) {

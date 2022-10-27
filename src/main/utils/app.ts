@@ -1,13 +1,17 @@
 /* eslint import/prefer-default-export: off */
 import path from 'path';
 import { app } from 'electron';
-import { FRAME_DEFAULT_SIZE, FRAME_MAX_SIZE, FRAME_MIN_SIZE } from '../../isomorphic/const-size';
+import {
+  FRAME_DEFAULT_SIZE,
+  FRAME_MAX_SIZE,
+  FRAME_MIN_SIZE,
+} from '../../isomorphic/const-size';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 
 const PROJ_ROOT = path.join(__dirname, '../../../');
 
-export function getMainPlatform () {
-  return process.platform as 'win32' | 'darwin'
+export function getMainPlatform() {
+  return process.platform as 'win32' | 'darwin';
 }
 
 function resolveReleasePath(file: string) {
@@ -45,22 +49,28 @@ export const preloadPath = app.isPackaged
   ? path.join(__dirname, 'preload.js')
   : path.join(PROJ_ROOT, './.erb/dll/preload.js');
 
-export function getShellPageUrl (type: 'webui' | 'debug-new-tab', webuiExtensionId: string) {
-    switch (type) {
-      case 'debug-new-tab':
-      default:
-        return `chrome-extension://${webuiExtensionId}/shell-new-tab.html`;
-      case 'webui':
-        return `chrome-extension://${webuiExtensionId}/shell-webui.html`;
-    }
+export function getShellPageUrl(
+  type: 'webui' | 'debug-new-tab',
+  webuiExtensionId: string
+) {
+  switch (type) {
+    case 'debug-new-tab':
+    default:
+      return `chrome-extension://${webuiExtensionId}/shell-new-tab.html`;
+    case 'webui':
+      return `chrome-extension://${webuiExtensionId}/shell-webui.html`;
+  }
 }
 
-function getWindowIconOpts (): {
-  icon: Electron.BrowserWindowConstructorOptions['icon']
+function getWindowIconOpts(): {
+  icon: Electron.BrowserWindowConstructorOptions['icon'];
 } {
   return {
-    icon: getMainPlatform() === 'darwin' ? getAssetPath('icons/256x256.png') : getAssetPath('icon.ico'),
-  }
+    icon:
+      getMainPlatform() === 'darwin'
+        ? getAssetPath('icons/256x256.png')
+        : getAssetPath('icon.ico'),
+  };
 }
 
 export function getBrowserWindowOpts(
@@ -72,7 +82,7 @@ export function getBrowserWindowOpts(
   return {
     ...FRAME_DEFAULT_SIZE,
     ...FRAME_MAX_SIZE,
-    ...!isPopup && !opts?.zeroMinSize ? FRAME_MIN_SIZE : {},
+    ...(!isPopup && !opts?.zeroMinSize ? FRAME_MIN_SIZE : {}),
     width: FRAME_MIN_SIZE.minWidth,
     height: FRAME_MIN_SIZE.minHeight,
     frame: false,
@@ -88,9 +98,9 @@ export function getBrowserWindowOpts(
       contextIsolation: true,
       // worldSafeExecuteJavaScript: true,
       devTools: !IS_RUNTIME_PRODUCTION,
-      ...windowOpts?.webPreferences
+      ...windowOpts?.webPreferences,
     },
-  }
+  };
 }
 
 export const IS_REG_BUILD = (process as any).buildchannel === 'reg';

@@ -16,9 +16,14 @@ function App() {
     <Router>
       <Routes>
         <Route path="/security-check" element={<SecurityCheck />} />
-        <Route path="/security-notifications" element={<SecurityNotifications />} />
-        <Route path="/security-addressbarpopup" element={<SecurityAddressbarPopup />} />
-
+        <Route
+          path="/security-notifications"
+          element={<SecurityNotifications />}
+        />
+        <Route
+          path="/security-addressbarpopup"
+          element={<SecurityAddressbarPopup />}
+        />
       </Routes>
     </Router>
   );

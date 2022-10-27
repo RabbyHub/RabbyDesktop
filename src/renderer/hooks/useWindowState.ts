@@ -43,7 +43,9 @@ export function useWindowState() {
   }, []);
 
   const onCloseButton = useCallback(() => {
-    window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:main-window:click-close');
+    window.rabbyDesktop.ipcRenderer.sendMessage(
+      '__internal_rpc:main-window:click-close'
+    );
   }, []);
 
   return {

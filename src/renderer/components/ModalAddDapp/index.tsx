@@ -131,7 +131,7 @@ function AddDapp({
         faviconUrl: payload.data!.faviconUrl,
         faviconBase64: payload.data!.faviconBase64,
       });
-      return ;
+      return;
     }
 
     setCheckError(payload?.error?.message || null);
@@ -145,7 +145,7 @@ function AddDapp({
         faviconBase64: payload.data.faviconBase64,
       });
     }
-  }, [addUrl, checkUrl, setCheckError, setDappInfo]);
+  }, [checkUrl, setCheckError, setDappInfo]);
 
   return (
     <>

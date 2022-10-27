@@ -1,15 +1,29 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 
-import { session } from "electron";
-import { firstValueFrom } from "rxjs";
-import { IS_RUNTIME_PRODUCTION, RABBY_INTERNAL_PROTOCOL } from "../../isomorphic/constants";
-import { getAssetPath, getRendererPath, getShellPageUrl, preloadPath } from "../utils/app";
-import { getBindLog } from "../utils/log";
-import { fromMainSubject, valueToMainSubject } from "./_init";
+import { session } from 'electron';
+import { firstValueFrom } from 'rxjs';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
-import { createWindow, findByWindowId, getWindowFromBrowserWindow, getWindowFromWebContents } from './tabbedBrowserWindow';
+import {
+  IS_RUNTIME_PRODUCTION,
+  RABBY_INTERNAL_PROTOCOL,
+} from '../../isomorphic/constants';
+import {
+  getAssetPath,
+  getRendererPath,
+  getShellPageUrl,
+  preloadPath,
+} from '../utils/app';
+import { getBindLog } from '../utils/log';
+import { fromMainSubject, valueToMainSubject } from './_init';
+import {
+  createWindow,
+  findByWindowId,
+  getWindowFromBrowserWindow,
+  getWindowFromWebContents,
+} from './tabbedBrowserWindow';
 import { firstEl } from '../../isomorphic/array';
+import { getWebuiExtId } from '../utils/stream-helpers';
 
 const sesLog = getBindLog('session', 'bgGrey');
 
@@ -76,21 +90,7 @@ async function loadExtensions(sess: Electron.Session, extensionsPath: string) {
   return results;
 }
 
-let chromeExtensions: ElectronChromeExtensions;
-export async function getChromeExtensions () {
-  await firstValueFrom(fromMainSubject('webuiExtensionReady'));
-  return chromeExtensions;
-}
-
-export async function getWebuiExtId () {
-  const ext = (await firstValueFrom(fromMainSubject('webuiExtensionReady')));
-
-  sesLog('getWebuiExtId', ext.id);
-
-  return ext.id;
-};
-
-export async function defaultSessionReadyThen () {
+export async function defaultSessionReadyThen() {
   return firstValueFrom(fromMainSubject('sessionReady'));
 }
 
@@ -99,9 +99,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   const sessionIns = session.defaultSession;
 
   // // Remove Electron and App details to closer emulate Chrome's UA
-  const userAgent = sessionIns
-    .getUserAgent()
-    .replace(/\sElectron\/\S+/, '');
+  const userAgent = sessionIns.getUserAgent().replace(/\sElectron\/\S+/, '');
   sessionIns.setUserAgent(userAgent);
 
   if (
@@ -116,7 +114,9 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
         const pathnameWithoutHash = pathname.split('#')?.[0] || '';
 
         if (pathnameWithoutHash.startsWith('assets/')) {
-          callback({ path: getAssetPath(pathnameWithoutHash.slice('assets/'.length)) });
+          callback({
+            path: getAssetPath(pathnameWithoutHash.slice('assets/'.length)),
+          });
         } else if (pathnameWithoutHash.startsWith('local/')) {
           callback({
             path: getRendererPath(pathnameWithoutHash.slice('local/'.length)),
@@ -132,25 +132,25 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
     )
   ) {
     if (!IS_RUNTIME_PRODUCTION) {
-      throw new Error(
-        `[initSession] Failed to register protocol rabby-local`
-      );
+      throw new Error(`[initSession] Failed to register protocol rabby-local`);
     } else {
       console.error(`Failed to register protocol`);
     }
   }
 
-  valueToMainSubject('sessionReady', void 0);
+  valueToMainSubject('sessionReady', undefined);
   sessionIns.setPreloads([preloadPath]);
 
   // @notice: make sure all customized plugins loaded after ElectronChromeExtensions initialized
-  chromeExtensions = new ElectronChromeExtensions({
+  const chromeExtensions = new ElectronChromeExtensions({
     session: sessionIns,
 
     preloadPath,
 
     createTab: (details) => {
-      const win = typeof details.windowId === 'number' && findByWindowId(details.windowId);
+      const win =
+        typeof details.windowId === 'number' &&
+        findByWindowId(details.windowId);
 
       if (!win) {
         throw new Error(`Unable to find windowId=${details.windowId}`);
@@ -159,7 +159,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
       const tab = win.tabs.create({
         topbarStacks: {
           navigation: win.hasNavigationBar,
-        }
+        },
       });
 
       if (details.url) tab.loadURL(details.url);
@@ -186,8 +186,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
     windowsGetCurrent: async (currentWin, { lastFocusedWindow, event }) => {
       if (!currentWin) {
         return (
-          getWindowFromWebContents(event.sender)?.window ||
-          lastFocusedWindow
+          getWindowFromWebContents(event.sender)?.window || lastFocusedWindow
         );
       }
 
@@ -195,7 +194,9 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
     },
 
     createWindow: async (details) => {
-      const tabUrl = firstEl(details.url || '') || getShellPageUrl('debug-new-tab', await getWebuiExtId());
+      const tabUrl =
+        firstEl(details.url || '') ||
+        getShellPageUrl('debug-new-tab', await getWebuiExtId());
 
       const win = await createWindow({
         defaultTabUrl: tabUrl,
@@ -215,11 +216,13 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
     },
   });
 
-  const webuiExtension = await sessionIns.loadExtension(getAssetPath('desktop_shell'), { allowFileAccess: true });
+  valueToMainSubject('electronChromeExtensionsReady', chromeExtensions);
+
+  const webuiExtension = await sessionIns.loadExtension(
+    getAssetPath('desktop_shell'),
+    { allowFileAccess: true }
+  );
   valueToMainSubject('webuiExtensionReady', webuiExtension);
 
-  await loadExtensions(
-    sessionIns!,
-    getAssetPath('chrome_exts')
-  );
-})
+  await loadExtensions(sessionIns!, getAssetPath('chrome_exts'));
+});

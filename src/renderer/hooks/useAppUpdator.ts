@@ -11,8 +11,8 @@ async function checkIfNewRelease() {
     const dispose = window.rabbyDesktop.ipcRenderer.on(
       'check-if-new-release',
       (event) => {
-        const { reqid: _reqid, ...rest } = event;
-        if (_reqid === reqid) {
+        const { reqid: reqId, ...rest } = event;
+        if (reqId === reqid) {
           resolve(rest);
           dispose?.();
         }
@@ -29,8 +29,8 @@ async function quitAndUpgrade() {
     const dispose = window.rabbyDesktop.ipcRenderer.on(
       'quit-and-upgrade',
       (event) => {
-        const { reqid: _reqid } = event;
-        if (_reqid === reqid) {
+        const { reqid: reqId } = event;
+        if (reqId === reqid) {
           resolve();
           dispose?.();
         }

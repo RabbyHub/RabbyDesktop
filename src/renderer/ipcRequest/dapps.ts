@@ -1,4 +1,4 @@
-import { randString } from "isomorphic/string";
+import { randString } from 'isomorphic/string';
 
 export async function getAllDapps() {
   const reqid = randString();
@@ -59,7 +59,12 @@ export async function deleteDapp(dapp: IDapp) {
       'dapps-delete',
       (event) => {
         if (event.reqid === reqid) {
-          event.error ? reject(new Error(event.error)) : resolve(event.dapps);
+          if (event.error) {
+            reject(new Error(event.error));
+          } else {
+            resolve(event.dapps);
+          }
+
           dispose?.();
         }
       }

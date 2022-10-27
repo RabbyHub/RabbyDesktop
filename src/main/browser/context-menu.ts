@@ -1,13 +1,14 @@
-import { app, BrowserWindow, clipboard, Menu, MenuItem } from 'electron'
-import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants'
-import { getWebuiExtId } from '../streams/session'
+import { app, BrowserWindow, clipboard, Menu, MenuItem } from 'electron';
+import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
+import { getWebuiExtId } from '../utils/stream-helpers';
 
 const LABELS = {
   openInNewTab: (type: 'link' | Electron.ContextMenuParams['mediaType']) =>
     `Open ${type} in new tab`,
   openInNewWindow: (type: 'link' | Electron.ContextMenuParams['mediaType']) =>
     `Open ${type} in new window`,
-  copyAddress: (type: 'link' | Electron.ContextMenuParams['mediaType']) => `Copy ${type} address`,
+  copyAddress: (type: 'link' | Electron.ContextMenuParams['mediaType']) =>
+    `Copy ${type} address`,
   undo: 'Undo',
   redo: 'Redo',
   cut: 'Cut',
@@ -22,119 +23,122 @@ const LABELS = {
   addToDictionary: 'Add to dictionary',
   exitFullScreen: 'Exit full screen',
   emoji: 'Emoji',
-}
+};
 
 const getBrowserWindowFromWebContents = (webContents: Electron.WebContents) => {
   return BrowserWindow.getAllWindows().find((win) => {
-    if (win.webContents === webContents) return true
+    if (win.webContents === webContents) return true;
 
-    let browserViews: Electron.BrowserView[]
+    let browserViews: Electron.BrowserView[];
 
     if ('getBrowserViews' in win) {
-      browserViews = win.getBrowserViews()
+      browserViews = win.getBrowserViews();
     } else if ('getBrowserView' in win) {
       // @ts-ignore
-      browserViews = [win.getBrowserView()]
+      browserViews = [win.getBrowserView()];
     } else {
-      browserViews = []
+      browserViews = [];
     }
 
-    return browserViews.some((view) => view.webContents === webContents)
-  })
-}
+    return browserViews.some((view) => view.webContents === webContents);
+  });
+};
 
-type ChromeContextMenuLabels = typeof LABELS
+type ChromeContextMenuLabels = typeof LABELS;
 
 interface ChromeContextMenuOptions {
   /** Context menu parameters emitted from the WebContents 'context-menu' event. */
-  params: Electron.ContextMenuParams
+  params: Electron.ContextMenuParams;
 
   /** WebContents which emitted the 'context-menu' event. */
-  webContents: Electron.WebContents
+  webContents: Electron.WebContents;
 
   /** Handler for opening links. */
   openLink: (
     url: string,
     disposition: 'default' | 'foreground-tab' | 'background-tab' | 'new-window',
     params: Electron.ContextMenuParams
-  ) => void
+  ) => void;
 
   /** Chrome extension menu items. */
-  extensionMenuItems?: MenuItem[]
+  extensionMenuItems?: MenuItem[];
 
   /** Labels used to create menu items. Replace this if localization is needed. */
-  labels?: ChromeContextMenuLabels
+  labels?: ChromeContextMenuLabels;
 
   /**
    * @deprecated Use 'labels' instead.
    */
-  strings?: ChromeContextMenuLabels
+  strings?: ChromeContextMenuLabels;
 }
 
-export const buildChromeContextMenu = (
-  opts: ChromeContextMenuOptions
-): Menu => {
-  const { params, webContents, openLink, extensionMenuItems } = opts
+const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
+  const { params, webContents, openLink, extensionMenuItems } = opts;
 
-  const labels = opts.labels || opts.strings || LABELS
+  const labels = opts.labels || opts.strings || LABELS;
 
-  const menu = new Menu()
-  const append = (opts: Electron.MenuItemConstructorOptions) => menu.append(new MenuItem(opts))
-  const appendSeparator = () => menu.append(new MenuItem({ type: 'separator' }))
+  const menu = new Menu();
+  const append = (newOpts: Electron.MenuItemConstructorOptions) =>
+    menu.append(new MenuItem(newOpts));
+  const appendSeparator = () =>
+    menu.append(new MenuItem({ type: 'separator' }));
 
   if (params.linkURL) {
     append({
       label: labels.openInNewTab('link'),
       click: () => {
-        openLink(params.linkURL, 'default', params)
+        openLink(params.linkURL, 'default', params);
       },
-    })
+    });
     append({
       label: labels.openInNewWindow('link'),
       click: () => {
-        openLink(params.linkURL, 'new-window', params)
+        openLink(params.linkURL, 'new-window', params);
       },
-    })
-    appendSeparator()
+    });
+    appendSeparator();
     append({
       label: labels.copyAddress('link'),
       click: () => {
-        clipboard.writeText(params.linkURL)
+        clipboard.writeText(params.linkURL);
       },
-    })
-    appendSeparator()
+    });
+    appendSeparator();
   } else if (params.mediaType !== 'none') {
     // TODO: Loop, Show controls
     append({
       label: labels.openInNewTab(params.mediaType),
       click: () => {
-        openLink(params.srcURL, 'default', params)
+        openLink(params.srcURL, 'default', params);
       },
-    })
+    });
     append({
       label: labels.copyAddress(params.mediaType),
       click: () => {
-        clipboard.writeText(params.srcURL)
+        clipboard.writeText(params.srcURL);
       },
-    })
-    appendSeparator()
+    });
+    appendSeparator();
   }
 
   if (params.isEditable) {
     if (params.misspelledWord) {
-      for (const suggestion of params.dictionarySuggestions) {
+      params.dictionarySuggestions.forEach((suggestion) => {
         append({
           label: suggestion,
           click: () => webContents.replaceMisspelling(suggestion),
-        })
-      }
+        });
+      });
 
-      if (params.dictionarySuggestions.length > 0) appendSeparator()
+      if (params.dictionarySuggestions.length > 0) appendSeparator();
 
       append({
         label: labels.addToDictionary,
-        click: () => webContents.session.addWordToSpellCheckerDictionary(params.misspelledWord),
-      })
+        click: () =>
+          webContents.session.addWordToSpellCheckerDictionary(
+            params.misspelledWord
+          ),
+      });
     } else {
       if (
         app.isEmojiPanelSupported() &&
@@ -143,64 +147,64 @@ export const buildChromeContextMenu = (
         append({
           label: labels.emoji,
           click: () => app.showEmojiPanel(),
-        })
-        appendSeparator()
+        });
+        appendSeparator();
       }
 
       append({
         label: labels.redo,
         enabled: params.editFlags.canRedo,
         click: () => webContents.redo(),
-      })
+      });
       append({
         label: labels.undo,
         enabled: params.editFlags.canUndo,
         click: () => webContents.undo(),
-      })
+      });
     }
 
-    appendSeparator()
+    appendSeparator();
 
     append({
       label: labels.cut,
       enabled: params.editFlags.canCut,
       click: () => webContents.cut(),
-    })
+    });
     append({
       label: labels.copy,
       enabled: params.editFlags.canCopy,
       click: () => webContents.copy(),
-    })
+    });
     append({
       label: labels.paste,
       enabled: params.editFlags.canPaste,
       click: () => webContents.paste(),
-    })
+    });
     append({
       label: labels.delete,
       enabled: params.editFlags.canDelete,
       click: () => webContents.delete(),
-    })
-    appendSeparator()
+    });
+    appendSeparator();
     if (params.editFlags.canSelectAll) {
       append({
         label: labels.selectAll,
         click: () => webContents.selectAll(),
-      })
-      appendSeparator()
+      });
+      appendSeparator();
     }
   } else if (params.selectionText) {
     append({
       label: labels.copy,
       click: () => {
-        clipboard.writeText(params.selectionText)
+        clipboard.writeText(params.selectionText);
       },
-    })
-    appendSeparator()
+    });
+    appendSeparator();
   }
 
   if (menu.items.length === 0) {
-    const browserWindow = getBrowserWindowFromWebContents(webContents)
+    const browserWindow = getBrowserWindowFromWebContents(webContents);
 
     // TODO: Electron needs a way to detect whether we're in HTML5 full screen.
     // Also need to properly exit full screen in Blink rather than just exiting
@@ -209,31 +213,31 @@ export const buildChromeContextMenu = (
       append({
         label: labels.exitFullScreen,
         click: () => browserWindow.setFullScreen(false),
-      })
+      });
 
-      appendSeparator()
+      appendSeparator();
     }
 
     append({
       label: labels.back,
       enabled: webContents.canGoBack(),
       click: () => webContents.goBack(),
-    })
+    });
     append({
       label: labels.forward,
       enabled: webContents.canGoForward(),
       click: () => webContents.goForward(),
-    })
+    });
     append({
       label: labels.reload,
       click: () => webContents.reload(),
-    })
-    appendSeparator()
+    });
+    appendSeparator();
   }
 
   if (extensionMenuItems) {
-    extensionMenuItems.forEach((item) => menu.append(item))
-    if (extensionMenuItems.length > 0) appendSeparator()
+    extensionMenuItems.forEach((item) => menu.append(item));
+    if (extensionMenuItems.length > 0) appendSeparator();
   }
 
   if (!IS_RUNTIME_PRODUCTION) {
@@ -243,21 +247,27 @@ export const buildChromeContextMenu = (
         // TODO non blocking if webui not inited
         const webuiExtensionId = await getWebuiExtId();
 
-        if (webContents && !webContents.isDevToolsOpened() && webContents.getURL().includes(`chrome-extension://${webuiExtensionId}`)) {
+        if (
+          webContents &&
+          !webContents.isDevToolsOpened() &&
+          webContents
+            .getURL()
+            .includes(`chrome-extension://${webuiExtensionId}`)
+        ) {
           webContents.openDevTools({ mode: 'detach' });
-          webContents.inspectElement(params.x, params.y)
+          webContents.inspectElement(params.x, params.y);
         } else {
-          webContents.inspectElement(params.x, params.y)
+          webContents.inspectElement(params.x, params.y);
         }
 
         if (!webContents.isDevToolsFocused()) {
-          webContents.devToolsWebContents?.focus()
+          webContents.devToolsWebContents?.focus();
         }
       },
-    })
+    });
   }
 
-  return menu
-}
+  return menu;
+};
 
-export default buildChromeContextMenu
+export default buildChromeContextMenu;

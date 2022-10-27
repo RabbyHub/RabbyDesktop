@@ -10,8 +10,11 @@ module.exports = {
     'consistent-return': 'off',
     'import/prefer-default-export': 'off',
     '@typescript-eslint/triple-slash-reference': 'off',
+    '@typescript-eslint/ban-ts-comment': 'off',
     'no-plusplus': 'off',
     'no-underscore-dangle': 'off',
+    'no-nested-ternary': 'off',
+    'no-param-reassign': 'off',
     'class-methods-use-this': 'off',
     'react/prop-types': 'off',
     'react/require-default-props': 'off',
@@ -31,7 +34,13 @@ module.exports = {
     //     leadingUnderscore: 'allow',
     //     trailingUnderscore: 'allow',
     //   }
-    // ]
+    // ],
+    'jsx-a11y/click-events-have-key-events': 'off',
+    'jsx-a11y/alt-text': 'off',
+    'jsx-a11y/no-static-element-interactions': 'off',
+    'react/no-unescaped-entities': 'off',
+    'promise/always-return': 'off',
+    'promise/catch-or-return': 'off'
   },
   parserOptions: {
     ecmaVersion: 2020,

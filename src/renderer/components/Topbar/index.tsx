@@ -13,6 +13,9 @@ import React, {
 
 import classnames from 'classnames';
 
+import { hideDappAddressbarSecurityPopupView } from 'renderer/ipcRequest/security-addressbarpopup';
+import { getAllDapps } from 'renderer/ipcRequest/dapps';
+import { CHAINS, CHAINS_LIST } from '@debank/common';
 import {
   IconTabCloseHover,
   IconTabClose,
@@ -36,14 +39,19 @@ import {
 } from '../../../../assets/icons/native-tabs-triples';
 
 import './index.less';
-import { canoicalizeDappUrl, isInternalProtocol, isMainWinShellWebUI, parseQueryString } from '../../../isomorphic/url';
+import {
+  canoicalizeDappUrl,
+  isInternalProtocol,
+  isMainWinShellWebUI,
+  parseQueryString,
+} from '../../../isomorphic/url';
 
 import { useWindowState } from '../../hooks/useWindowState';
-import { IS_RUNTIME_PRODUCTION, RABBY_HOMEPAGE_URL, } from '../../../isomorphic/constants';
-import { CHAINS, CHAINS_LIST } from '@debank/common';
-import { getAllDapps } from 'renderer/ipcRequest/dapps';
+import {
+  IS_RUNTIME_PRODUCTION,
+  RABBY_HOMEPAGE_URL,
+} from '../../../isomorphic/constants';
 import DappAddressBar from './DappAddressBar';
-import { hideDappAddressbarSecurityPopupView } from 'renderer/ipcRequest/security-addressbarpopup';
 
 const isDebug = process.env.NODE_ENV !== 'production';
 
@@ -150,7 +158,7 @@ function useConnectedSite() {
 }
 
 function useTopbar() {
-  const [origTabList, setTabList] = useState<(ChromeTabWithLocalFavicon)[]>([]);
+  const [origTabList, setTabList] = useState<ChromeTabWithLocalFavicon[]>([]);
   const [activeTabId, setActiveId] = useState<ChromeTab['id']>(-1);
   const [windowId, setWindowId] = useState<number | undefined>(undefined);
 
@@ -183,48 +191,49 @@ function useTopbar() {
   );
 
   const fetchingRef = useRef(false);
-  const fetchTabListState = useCallback(
-    async () => {
-      if (fetchingRef.current) return ;
+  const fetchTabListState = useCallback(async () => {
+    if (fetchingRef.current) return;
 
-      fetchingRef.current = true;
-      const [tabs, dapps] = await Promise.all([
-        new Promise<ChromeTab[]>((resolve) =>
-          // we can also use queryInfo { windowId: chrome.windows.WINDOW_ID_CURRENT } here
-          chrome.tabs.query({ currentWindow: true }, resolve)
-        ),
-        // array to object group by origin
-        getAllDapps().then(dapps =>
-          dapps.reduce((acc, dapp) => {
-            acc[dapp.origin] = dapp;
-            return acc;
-          }, {} as Record<IDapp['origin'], IDapp>)
-        )
-      ]).finally(() => {
-        fetchingRef.current = false
-      });
-      const origTabList = tabs.map((tab) => {
-        const origin = tab.url ? canoicalizeDappUrl(tab.url).origin : '';
-        return {
-          ...tab,
-          ...origin && dapps[origin] && { localFavIconUrl: dapps[origin].faviconBase64 },
-        }
-      });
+    fetchingRef.current = true;
+    const [tabs, dapps] = await Promise.all([
+      new Promise<ChromeTab[]>((resolve) =>
+        // we can also use queryInfo { windowId: chrome.windows.WINDOW_ID_CURRENT } here
+        chrome.tabs.query({ currentWindow: true }, resolve)
+      ),
+      // array to object group by origin
+      getAllDapps().then((dapps) =>
+        dapps.reduce((acc, dapp) => {
+          acc[dapp.origin] = dapp;
+          return acc;
+        }, {} as Record<IDapp['origin'], IDapp>)
+      ),
+    ]).finally(() => {
+      fetchingRef.current = false;
+    });
+    const origTabList = tabs.map((tab) => {
+      const origin = tab.url ? canoicalizeDappUrl(tab.url).origin : '';
+      return {
+        ...tab,
+        ...(origin &&
+          dapps[origin] && { localFavIconUrl: dapps[origin].faviconBase64 }),
+      };
+    });
 
-      setTabList(origTabList);
+    setTabList(origTabList);
 
-      const activeTab = origTabList.find((tab) => tab.active);
-      if (activeTab) {
-        updateActiveTab(activeTab);
-      }
-    },
-    [ updateActiveTab ]
-  )
+    const activeTab = origTabList.find((tab) => tab.active);
+    if (activeTab) {
+      updateActiveTab(activeTab);
+    }
+  }, [updateActiveTab]);
 
   useEffect(() => {
     fetchTabListState();
 
-    const onUpdate: Parameters<typeof chrome.tabs.onUpdated.addListener>[0] = (tabId, changeInfo) => {
+    const onUpdate: Parameters<typeof chrome.tabs.onUpdated.addListener>[0] = (
+      tabId,
+      changeInfo
+    ) => {
       if (changeInfo.status === 'complete' || !changeInfo.favIconUrl) {
         fetchTabListState();
       }
@@ -233,7 +242,7 @@ function useTopbar() {
 
     return () => {
       chrome.tabs.onUpdated.removeListener(onUpdate);
-    }
+    };
   }, [fetchTabListState]);
 
   const tabListDomRef = useRef<HTMLUListElement>(null);
@@ -363,14 +372,20 @@ export default function Topbar() {
 
   const { connectedSiteMap } = useConnectedSite();
 
-  useEffect(() => {
-    hideDappAddressbarSecurityPopupView();
-  }, [ canoicalizeDappUrl(selectedTabInfo?.tabUrl || '').origin ]);
+  const selectedOrigin =
+    canoicalizeDappUrl(selectedTabInfo?.tabUrl || '').origin || '';
 
   useEffect(() => {
-    const dispose = window.rabbyDesktop.ipcRenderer.on('__internal_rpc:webui-extension:switch-active-dapp', ({ tabId }) => {
-      chrome.tabs.update(tabId, { active: true });
-    });
+    hideDappAddressbarSecurityPopupView();
+  }, [selectedOrigin]);
+
+  useEffect(() => {
+    const dispose = window.rabbyDesktop.ipcRenderer.on(
+      '__internal_rpc:webui-extension:switch-active-dapp',
+      ({ tabId }) => {
+        chrome.tabs.update(tabId, { active: true });
+      }
+    );
 
     return dispose;
   }, []);
@@ -379,7 +394,6 @@ export default function Topbar() {
     // debug-only
     if (!IS_RUNTIME_PRODUCTION && isMainWinShellWebUI(window.location.href)) {
       // window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:browser-dev:openDevTools');
-
       // window.open('https://app.uniswap.org');
       // window.open('https://debank.com');
     }
@@ -445,7 +459,10 @@ export default function Topbar() {
           {tabList.map((tab: ChromeTabWithLocalFavicon, idx) => {
             const key = `topbar-tab-${tab.id}-${idx}`;
 
-            const faviconUrl = tab.localFavIconUrl || filterFavIcon(tab.url, tab.active) || tab.favIconUrl;
+            const faviconUrl =
+              tab.localFavIconUrl ||
+              filterFavIcon(tab.url, tab.active) ||
+              tab.favIconUrl;
             const closable = filterClosable(tab.url, CLOSABLE);
 
             return (
@@ -536,7 +553,12 @@ export default function Topbar() {
       </div>
       {WITH_NAV_BAR && (
         <div
-          className={classnames('toolbar', selectedTabInfo?.tabUrl && isInternalProtocol(selectedTabInfo?.tabUrl) && 'internal-page')}
+          className={classnames(
+            'toolbar',
+            selectedTabInfo?.tabUrl &&
+              isInternalProtocol(selectedTabInfo?.tabUrl) &&
+              'internal-page'
+          )}
         >
           <div className="page-controls">
             <button

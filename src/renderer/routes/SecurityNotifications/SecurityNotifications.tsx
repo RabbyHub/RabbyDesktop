@@ -1,19 +1,24 @@
-import { Divider, notification } from 'antd'
+import { Divider, notification } from 'antd';
 import { NotificationApi, NotificationInstance } from 'antd/lib/notification';
 import classNames from 'classnames';
 import { IS_RUNTIME_PRODUCTION } from 'isomorphic/constants';
 import { detectOS } from 'isomorphic/os';
-import React, { useEffect, useLayoutEffect, useRef } from 'react'
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 import styles from './SecurityNotifications.module.less';
 
-const ICON_CLOSE = 'rabby-internal://assets/icons/security-notifications/icon-close.svg';
+const ICON_CLOSE =
+  'rabby-internal://assets/icons/security-notifications/icon-close.svg';
 
-const ICON_HEADER_BG_LOGO = 'rabby-internal://assets/icons/security-notifications/header-bg-logo.svg';
+const ICON_HEADER_BG_LOGO =
+  'rabby-internal://assets/icons/security-notifications/header-bg-logo.svg';
 
-const ICON_SHILED_DEFAULT = 'rabby-internal://assets/icons/security-notifications/icon-shield-default.svg';
-const ICON_SHILED_WARNING = 'rabby-internal://assets/icons/security-notifications/icon-shield-warning.svg';
-const ICON_SHILED_DANGER = 'rabby-internal://assets/icons/security-notifications/icon-shield-danger.svg';
+const ICON_SHILED_DEFAULT =
+  'rabby-internal://assets/icons/security-notifications/icon-shield-default.svg';
+const ICON_SHILED_WARNING =
+  'rabby-internal://assets/icons/security-notifications/icon-shield-warning.svg';
+const ICON_SHILED_DANGER =
+  'rabby-internal://assets/icons/security-notifications/icon-shield-danger.svg';
 
 const DEFAULT_DURACTION_SEC = IS_RUNTIME_PRODUCTION ? 3 : 0;
 
@@ -27,66 +32,76 @@ notification.config({
 
 let notiCount = 0;
 let closeTimer = -1;
-function checkNotiCount () {
+function checkNotiCount() {
   if (notiCount === 0) {
     if (closeTimer) clearTimeout(closeTimer);
     closeTimer = setTimeout(() => {
-      window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:clipboard:close-view');
+      window.rabbyDesktop.ipcRenderer.sendMessage(
+        '__internal_rpc:clipboard:close-view'
+      );
     }, 300) as any as number;
   }
 }
 
-function CardHeader ({
+function CardHeader({
   iconUrl = ICON_SHILED_DEFAULT,
   text = '',
   children,
-} : React.PropsWithChildren<{
+}: React.PropsWithChildren<{
   iconUrl?: string;
-  text?: React.ReactNode
+  text?: React.ReactNode;
 }>) {
   return (
     <div className={styles.header}>
-      <img className={styles.headerLogoBg} src={ICON_HEADER_BG_LOGO} alt="background" />
+      <img
+        className={styles.headerLogoBg}
+        src={ICON_HEADER_BG_LOGO}
+        alt="background"
+      />
       <img className={styles.headerIcon} src={iconUrl} alt="icon" />
       {children || text || null}
     </div>
-  )
+  );
 }
 
-function notify({
-  container,
-  notificationEvent
-}: {
-  container?: HTMLElement,
-  notificationEvent: ISecurityNotificationPayload
-}, api: NotificationInstance | NotificationApi = notification) {
+function notify(
+  {
+    container,
+    notificationEvent,
+  }: {
+    container?: HTMLElement;
+    notificationEvent: ISecurityNotificationPayload;
+  },
+  api: NotificationInstance | NotificationApi = notification
+) {
   notiCount++;
   api.open({
     getContainer: () => container || ROOT_EL,
     className: classNames(
       styles.J_notification,
       notificationEvent.type === 'full-web3-addr' && styles.evtWeb3AddrDetected,
-      notificationEvent.type === 'full-web3-addr-changed' && styles.evtWeb3AddrChanged,
+      notificationEvent.type === 'full-web3-addr-changed' &&
+        styles.evtWeb3AddrChanged,
 
-      notificationEvent.type === 'full-web3-addr-quick-changed' && styles.evtWeb3AddrChanged,
-      notificationEvent.type === 'full-web3-addr-quick-changed' && styles.isDanger,
+      notificationEvent.type === 'full-web3-addr-quick-changed' &&
+        styles.evtWeb3AddrChanged,
+      notificationEvent.type === 'full-web3-addr-quick-changed' &&
+        styles.isDanger
     ),
     placement: 'topRight',
-    closeIcon: (
-      <img src={ICON_CLOSE} className={styles.closeIcon} />
-    ),
+    closeIcon: <img src={ICON_CLOSE} className={styles.closeIcon} />,
     duration: DEFAULT_DURACTION_SEC,
     onClose: () => {
       notiCount = Math.max(notiCount - 1, 0);
       checkNotiCount();
     },
-    message: (
-      <CardHeader />
-    ),
-    ...notificationEvent.type === 'full-web3-addr' && {
+    message: <CardHeader />,
+    ...(notificationEvent.type === 'full-web3-addr' && {
       message: (
         <CardHeader>
-          <span className={styles.headerText}>Address copied. Please check carefully.</span>
+          <span className={styles.headerText}>
+            Address copied. Please check carefully.
+          </span>
         </CardHeader>
       ),
       // btn: <button>Click me!</button>,
@@ -96,11 +111,14 @@ function notify({
           {/* {notificationEvent.balance && <span className={styles.balance}>Balance: ${notificationEvent.balance}</span>} */}
         </div>
       ),
-    },
-    ...notificationEvent.type === 'full-web3-addr-changed' && {
+    }),
+    ...(notificationEvent.type === 'full-web3-addr-changed' && {
       message: (
         <CardHeader iconUrl={ICON_SHILED_WARNING}>
-          <span className={styles.headerText}>Sensitive information in your clipboard has been changed. Please compare carefully.</span>
+          <span className={styles.headerText}>
+            Sensitive information in your clipboard has been changed. Please
+            compare carefully.
+          </span>
         </CardHeader>
       ),
       // btn: <button>Click me!</button>,
@@ -117,11 +135,14 @@ function notify({
           </div>
         </div>
       ),
-    },
-    ...notificationEvent.type === 'full-web3-addr-quick-changed' && {
+    }),
+    ...(notificationEvent.type === 'full-web3-addr-quick-changed' && {
       message: (
         <CardHeader iconUrl={ICON_SHILED_WARNING}>
-          <span className={styles.headerText}>Found sensitive information changes in clipboard in a second , beware of malicious tampering.</span>
+          <span className={styles.headerText}>
+            Found sensitive information changes in clipboard in a second ,
+            beware of malicious tampering.
+          </span>
         </CardHeader>
       ),
       // btn: <button>Click me!</button>,
@@ -138,18 +159,25 @@ function notify({
           </div>
         </div>
       ),
-    }
-  })
+    }),
+  });
 }
 
 function toggleClickThrough(enable = true) {
   // don't really toggle click through on macos
-  if (IS_MACOS) return ;
+  if (IS_MACOS) return;
 
   if (enable)
-    window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:browser:set-ignore-mouse-events', true, { forward: true });
+    window.rabbyDesktop.ipcRenderer.sendMessage(
+      '__internal_rpc:browser:set-ignore-mouse-events',
+      true,
+      { forward: true }
+    );
   else
-    window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:browser:set-ignore-mouse-events', false);
+    window.rabbyDesktop.ipcRenderer.sendMessage(
+      '__internal_rpc:browser:set-ignore-mouse-events',
+      false
+    );
 }
 
 export default function SecurityNotifications() {
@@ -157,20 +185,28 @@ export default function SecurityNotifications() {
   const notificationWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    window.rabbyDesktop.ipcRenderer.on('__internal_rpc:security-notification', (notificationEvent) => {
-      notify({
-        notificationEvent,
-        container: notificationWrapperRef.current!,
-      }, notifyApi)
-    });
-  }, [ notifyApi ]);
+    window.rabbyDesktop.ipcRenderer.on(
+      '__internal_rpc:security-notification',
+      (notificationEvent) => {
+        notify(
+          {
+            notificationEvent,
+            container: notificationWrapperRef.current!,
+          },
+          notifyApi
+        );
+      }
+    );
+  }, [notifyApi]);
 
   useLayoutEffect(() => {
     const wrapperNode = notificationWrapperRef.current!;
 
     // TODO: only use this in darwin
     const correctCounter = setInterval(() => {
-      const allContentNodes = Array.from(wrapperNode.querySelectorAll('.ant-notification-notice-content'));
+      const allContentNodes = Array.from(
+        wrapperNode.querySelectorAll('.ant-notification-notice-content')
+      );
       if (allContentNodes.length < notiCount) {
         notiCount = allContentNodes.length;
         checkNotiCount();
@@ -180,12 +216,12 @@ export default function SecurityNotifications() {
     const onEnter = () => {
       // const allContentNodes = Array.from(wrapperNode.querySelectorAll('.ant-notification-notice-content, .ant-notification-notice-close'));
       toggleClickThrough(false);
-    }
+    };
 
     const onLeave = () => {
       // const allContentNodes = Array.from(wrapperNode.querySelectorAll('.ant-notification-notice-content, .ant-notification-notice-close'));
       toggleClickThrough(true);
-    }
+    };
 
     wrapperNode.addEventListener('mouseenter', onEnter);
     wrapperNode.addEventListener('mouseleave', onLeave);
@@ -195,7 +231,7 @@ export default function SecurityNotifications() {
       toggleClickThrough(false);
       wrapperNode.removeEventListener('mouseenter', onEnter);
       wrapperNode.removeEventListener('mouseleave', onLeave);
-    }
+    };
   }, []);
 
   useLayoutEffect(() => {
@@ -206,18 +242,15 @@ export default function SecurityNotifications() {
       //   balance: '32,435',
       //   container: notificationWrapperRef.current!,
       // }, notifyApi);
-
       // // show highlight background for debug
       // document.body.classList.add('highlight-bg');
     }
-  }, [ notifyApi ]);
+  }, [notifyApi]);
 
   return (
-    <div ref={notificationWrapperRef} className='notification-wrapper'>
-      <div className={styles.debugContent}>
-        Nothing
-      </div>
+    <div ref={notificationWrapperRef} className="notification-wrapper">
+      <div className={styles.debugContent}>Nothing</div>
       {contextHolder}
     </div>
-  )
+  );
 }

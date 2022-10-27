@@ -1,5 +1,5 @@
 import path from 'path';
-import url from 'url';
+import { parse as parseUrl } from 'url';
 import { Icon as IconInfo, parseFavicon } from '@debank/parse-favicon';
 import { net } from 'electron';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
@@ -8,21 +8,21 @@ import { canoicalizeDappUrl } from '../../isomorphic/url';
 export async function fetchUrl(inputURL: string) {
   // leave here for debug
   // console.log('[feat] inputURL', inputURL);
-  const uinfo = url.parse(inputURL);
+  const uinfo = parseUrl(inputURL);
   type Result = {
-    statusCode: number,
-    statusMessage: string,
+    statusCode: number;
+    statusMessage: string;
     // body: Buffer | null,
-    body: Uint8Array | null,
-  }
+    body: Uint8Array | null;
+  };
 
   const data = [] as Buffer[];
   return new Promise<Result>((resolve, reject) => {
     const result: Result = {
       statusCode: 404,
       statusMessage: 'Not Found',
-      body: null
-    }
+      body: null,
+    };
     const req = net.request({
       method: 'GET',
       protocol: uinfo.protocol!,
@@ -46,7 +46,7 @@ export async function fetchUrl(inputURL: string) {
         result.body = bodyBuf;
 
         resolve(result);
-      })
+      });
     });
 
     req.on('error', (err) => {
@@ -58,14 +58,14 @@ export async function fetchUrl(inputURL: string) {
 }
 
 function resolveUrl(url: string, base: string) {
-  return new URL(url, base).href
+  return new URL(url, base).href;
 }
 
 /**
  *
  * @param websiteBaseURL assume it is a valid baseURL like `${protocol}://${host}` without suffix
  */
-export async function parseWebsiteFavicon (websiteBaseURL: string) {
+export async function parseWebsiteFavicon(websiteBaseURL: string) {
   websiteBaseURL = websiteBaseURL.replace(/\/$/, '');
 
   const reqIconUrlBufs: Record<string, string> = {};
@@ -73,25 +73,21 @@ export async function parseWebsiteFavicon (websiteBaseURL: string) {
   async function textFetcher(url: string) {
     // leave here for debug
     // console.log('[feat] textFetcher:: url', url);
-    return await fetchUrl(
-      resolveUrl(url, websiteBaseURL)
-    )
-    .then(res => Buffer.from(res.body || []).toString() || '')
+    return fetchUrl(resolveUrl(url, websiteBaseURL)).then(
+      (res) => Buffer.from(res.body || []).toString() || ''
+    );
   }
 
   async function bufferFetcher(url: string) {
     // leave here for debug
     // console.log('[feat] bufferFetcher:: url', url);
-    return await fetchUrl(
-      resolveUrl(url, websiteBaseURL)
-    )
-    .then(res => {
+    return fetchUrl(resolveUrl(url, websiteBaseURL)).then((res) => {
       const arrBuf = res.body || new Uint8Array();
 
       reqIconUrlBufs[url] = Buffer.from(arrBuf).toString('base64');
 
       return arrBuf;
-    })
+    });
   }
 
   let faviconUrl = '';
@@ -99,24 +95,33 @@ export async function parseWebsiteFavicon (websiteBaseURL: string) {
 
   // TODO: use timeout mechanism
   const iconInfo = await new Promise<IconInfo>((resolve, reject) => {
-    const obs = parseFavicon(websiteBaseURL, textFetcher, bufferFetcher)
-      .subscribe({
-        next: icon => {
-          const urlInfo = canoicalizeDappUrl(icon.url).urlInfo;
+    const obs = parseFavicon(
+      websiteBaseURL,
+      textFetcher,
+      bufferFetcher
+    ).subscribe({
+      next: (icon) => {
+        const { urlInfo } = canoicalizeDappUrl(icon.url);
 
-          const isData = icon.url?.startsWith('data:');
+        const isData = icon.url?.startsWith('data:');
 
-          faviconUrl = urlInfo?.protocol ? icon.url : path.posix.join(websiteBaseURL, icon.url);
-          faviconBase64 = isData ? icon.url : `data:${icon?.type || 'image/png'};base64,${reqIconUrlBufs[icon.url]}`;
-          resolve(icon);
-        },
-        error: err => {
-          reject(err);
-        },
-        complete: () => {
-          obs.unsubscribe();
-        }
-      });
+        faviconUrl = urlInfo?.protocol
+          ? icon.url
+          : path.posix.join(websiteBaseURL, icon.url);
+        faviconBase64 = isData
+          ? icon.url
+          : `data:${icon?.type || 'image/png'};base64,${
+              reqIconUrlBufs[icon.url]
+            }`;
+        resolve(icon);
+      },
+      error: (err) => {
+        reject(err);
+      },
+      complete: () => {
+        obs.unsubscribe();
+      },
+    });
   });
 
   return {

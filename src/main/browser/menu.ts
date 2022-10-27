@@ -3,10 +3,10 @@ import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 
 export const setupMenu = ({
   getFocusedWebContents,
-  topbarExtId
-} : {
-  getFocusedWebContents: () => Electron.WebContents | void,
-  topbarExtId: string,
+  topbarExtId,
+}: {
+  getFocusedWebContents: () => Electron.WebContents | void;
+  topbarExtId: string;
 }) => {
   const isMac = process.platform === 'darwin';
 
@@ -29,20 +29,25 @@ export const setupMenu = ({
           nonNativeMacOSRole: true,
           click: () => getFocusedWebContents()?.reloadIgnoringCache(),
         },
-        !IS_RUNTIME_PRODUCTION ? {
-          label: 'Toggle Developer Tool',
-          accelerator: isMac ? 'Alt+Command+I' : 'Ctrl+Shift+I',
-          nonNativeMacOSRole: true,
-          click: () => {
-            const win = getFocusedWebContents();
-            if (!win) return ;
-            if (!win.isDevToolsOpened() && win.getURL().includes(`chrome-extension://${topbarExtId}`)) {
-              win.openDevTools({ mode: 'detach' });
-            } else {
-              win.toggleDevTools()
+        !IS_RUNTIME_PRODUCTION
+          ? {
+              label: 'Toggle Developer Tool',
+              accelerator: isMac ? 'Alt+Command+I' : 'Ctrl+Shift+I',
+              nonNativeMacOSRole: true,
+              click: () => {
+                const win = getFocusedWebContents();
+                if (!win) return;
+                if (
+                  !win.isDevToolsOpened() &&
+                  win.getURL().includes(`chrome-extension://${topbarExtId}`)
+                ) {
+                  win.openDevTools({ mode: 'detach' });
+                } else {
+                  win.toggleDevTools();
+                }
+              },
             }
-          },
-        } : null as any,
+          : (null as any),
         { type: 'separator' },
         // { role: 'resetZoom' },
         // { role: 'zoomIn' },

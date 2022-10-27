@@ -1,6 +1,6 @@
 /// <reference path="../../renderer/preload.d.ts" />
 
-import Electron, { ipcMain } from "electron";
+import Electron, { ipcMain } from 'electron';
 
 ipcMain.setMaxListeners(Infinity);
 
@@ -9,9 +9,12 @@ export function onIpcMainEvent<T extends Channels = Channels>(
   handler: (
     event: Electron.IpcMainEvent & {
       reply: {
-        (eventName: T, response: ChannelMessagePayload[T]['response'][0]): any
-        <T2 extends keyof M2RChanneMessagePayload>(eventName: T2, response: M2RChanneMessagePayload[T2]): any
-      }
+        (eventName: T, response: ChannelMessagePayload[T]['response'][0]): any;
+        <T2 extends keyof M2RChanneMessagePayload>(
+          eventName: T2,
+          response: M2RChanneMessagePayload[T2]
+        ): any;
+      };
     },
     ...args: ChannelMessagePayload[T]['send']
   ) => any
@@ -21,5 +24,5 @@ export function onIpcMainEvent<T extends Channels = Channels>(
   // dispose
   return () => {
     return ipcMain.off(eventName, handler as any);
-  }
+  };
 }

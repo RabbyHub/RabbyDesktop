@@ -16,7 +16,9 @@ if (
   injectBrowserAction();
 }
 
-const IS_SAFE_WEBVIEW = ['chrome-extension:', RABBY_INTERNAL_PROTOCOL].includes(window.location.protocol);
+const IS_SAFE_WEBVIEW = ['chrome-extension:', RABBY_INTERNAL_PROTOCOL].includes(
+  window.location.protocol
+);
 if (IS_SAFE_WEBVIEW && !window.rabbyDesktop) {
   contextBridge.exposeInMainWorld('rabbyDesktop', {
     ipcRenderer: {
@@ -46,17 +48,17 @@ if (IS_SAFE_WEBVIEW && !window.rabbyDesktop) {
   });
 } else if (isDappProtocol(window.location.href) && !window.__rD) {
   contextBridge.exposeInMainWorld('__rD', {
-    detectConnect: (params: any) => {
-      params = params || {};
+    detectConnect: (inputParams: any) => {
+      const params = inputParams || {};
       const address = params.address || window.ethereum.selectedAddress;
       const chainId = params.chainId || window.ethereum.chainId || '0x1';
 
       ipcRenderer.send('__internal__rabby:connect', {
         origin: window.location.origin,
         isConnected: !!address,
-        chainId: chainId || '0x1'
+        chainId: chainId || '0x1',
       });
-    }
+    },
   });
   // TODO: content script 抽成单独文件。origin 传递方式修改。ipc 通信修改。
   const script = document.createElement('script');

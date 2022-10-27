@@ -1,4 +1,4 @@
-import { RABBY_INTERNAL_PROTOCOL } from "./constants";
+import { RABBY_INTERNAL_PROTOCOL } from './constants';
 
 export function parseQueryString(input?: string) {
   const result: Record<string, string> = {};
@@ -22,16 +22,16 @@ export function parseQueryString(input?: string) {
  * @description try to parse url, separate url and query
  */
 function parseUrl(_url: string) {
-  const [url, _queryString = ''] = _url.split('?');
-  const [queryString, hashFragment = ''] = _queryString.split('#');
+  const [url, searchStr = ''] = _url.split('?');
+  const [queryString, hashFragment = ''] = searchStr.split('#');
 
   const query: Record<string, any> = parseQueryString(queryString);
 
-  let pathname: string = '';
+  let pathname = '';
   try {
     pathname = new URL(url).pathname;
-  } catch (e) {
-  }
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
   const canoicalPath = pathname.replace(/\/$/, '');
 
   return { url, canoicalPath, query, queryString, hashFragment };
@@ -51,20 +51,28 @@ export function integrateQueryToUrl(
   ].join('');
 }
 
-export function isRabbyShellURL (url: string) {
-  return url.startsWith('chrome-extension://') && url.includes('/shell-webui.html')
+export function isRabbyShellURL(url: string) {
+  return (
+    url.startsWith('chrome-extension://') && url.includes('/shell-webui.html')
+  );
 }
 
-export function isUrlFromDapp (url: string) {
-  return !url.startsWith(RABBY_INTERNAL_PROTOCOL) && !url.startsWith('chrome-extension:') && url.startsWith('https:')
+export function isUrlFromDapp(url: string) {
+  return (
+    !url.startsWith(RABBY_INTERNAL_PROTOCOL) &&
+    !url.startsWith('chrome-extension:') &&
+    url.startsWith('https:')
+  );
 }
 
-export function isMainWinShellWebUI (url: string) {
-  return url.startsWith('chrome-extension:') && url.includes('__webuiWindowsId=1')
+export function isMainWinShellWebUI(url: string) {
+  return (
+    url.startsWith('chrome-extension:') && url.includes('__webuiWindowsId=1')
+  );
 }
 
-export function isDappProtocol (protocolOrUrl: string) {
-  return protocolOrUrl.startsWith('https:')
+export function isDappProtocol(protocolOrUrl: string) {
+  return protocolOrUrl.startsWith('https:');
 }
 
 export function isInternalProtocol(url: string) {
@@ -75,7 +83,7 @@ export function isInternalProtocol(url: string) {
   ].some((protocol) => url.startsWith(protocol));
 }
 
-export function canoicalizeDappUrl (url: string) {
+export function canoicalizeDappUrl(url: string) {
   let urlInfo: Partial<URL> | null = null;
   try {
     urlInfo = new URL(url);
@@ -87,7 +95,11 @@ export function canoicalizeDappUrl (url: string) {
   const isDapp = urlInfo?.protocol === 'https:';
 
   // protcol://hostname[:port]
-  const origin = urlInfo?.origin || (`${urlInfo?.protocol}//${hostname}${urlInfo?.port ? `:${urlInfo?.port}` : ''}`);
+  const origin =
+    urlInfo?.origin ||
+    `${urlInfo?.protocol}//${hostname}${
+      urlInfo?.port ? `:${urlInfo?.port}` : ''
+    }`;
   const domain = hostname.split('.').slice(-2).join('.');
 
   return {
@@ -95,7 +107,7 @@ export function canoicalizeDappUrl (url: string) {
     isDapp,
     origin,
     domain,
-  }
+  };
 }
 
 export function hasSameOrigin(url1: string, url2: string) {
@@ -103,7 +115,7 @@ export function hasSameOrigin(url1: string, url2: string) {
 }
 
 function removeOptionalTrailingDot(str: string, allowTrailingDot: boolean) {
-  if (allowTrailingDot && str[str.length - 1] === ".") {
+  if (allowTrailingDot && str[str.length - 1] === '.') {
     return str.substring(0, str.length - 1);
   }
 
@@ -117,12 +129,12 @@ export function isFQDN(
   _str: string,
   { requireTld = true, allowUnderscores = false, allowTrailingDot = false } = {}
 ) {
-  if (typeof _str !== "string") {
+  if (typeof _str !== 'string') {
     return false;
   }
 
   const str = removeOptionalTrailingDot(_str, allowTrailingDot);
-  const parts = str.split(".");
+  const parts = str.split('.');
 
   if (requireTld) {
     const tld = parts.pop();
@@ -138,10 +150,10 @@ export function isFQDN(
   for (let part: string, i = 0; i < parts.length; i++) {
     part = parts[i];
     if (allowUnderscores) {
-      if (part.indexOf("__") >= 0) {
+      if (part.indexOf('__') >= 0) {
         return false;
       }
-      part = part.replace(/_/g, "");
+      part = part.replace(/_/g, '');
     }
     if (!/^[a-z\u00a1-\uffff0-9-]+$/i.test(part)) {
       return false;
@@ -150,7 +162,7 @@ export function isFQDN(
       // disallow full-width chars
       return false;
     }
-    if (part[0] === "-" || part[part.length - 1] === "-") {
+    if (part[0] === '-' || part[part.length - 1] === '-') {
       return false;
     }
   }

@@ -1,5 +1,9 @@
 import classNames from 'classnames';
-import { isInternalProtocol, isMainWinShellWebUI, isUrlFromDapp } from 'isomorphic/url';
+import {
+  isInternalProtocol,
+  isMainWinShellWebUI,
+  isUrlFromDapp,
+} from 'isomorphic/url';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { openDappAddressbarSecurityPopupView } from 'renderer/ipcRequest/security-addressbarpopup';
 import styles from './DappAddressBar.module.less';
@@ -41,32 +45,36 @@ function useAddressUrl(updatedUrl?: string) {
 
 const IS_MAIN_SHELL = isMainWinShellWebUI(window.location.href);
 
-export default function DappAddressBar ({
+export default function DappAddressBar({
   url,
   checkResult,
-} : {
-  url?: string,
+}: {
+  url?: string;
   checkResult?: ISecurityCheckResult | null;
 }) {
-  const { addressUrl, isInternalUrl, onAddressUrlChange, onAddressUrlKeyUp } = useAddressUrl(
-    url
-  );
+  const { addressUrl, isInternalUrl, onAddressUrlChange, onAddressUrlKeyUp } =
+    useAddressUrl(url);
 
   const openSecurityAddressbarpopup = useCallback(() => {
-    if (!IS_MAIN_SHELL) return ;
-    if (!url) return ;
+    if (!IS_MAIN_SHELL) return;
+    if (!url) return;
 
     openDappAddressbarSecurityPopupView(url);
-  }, [ url ]);
+  }, [url]);
 
   return (
-    <div className={classNames(
-      styles['address-bar'],
-      isInternalUrl && styles.forInternalUrl,
-    )}>
+    <div
+      className={classNames(
+        styles['address-bar'],
+        isInternalUrl && styles.forInternalUrl
+      )}
+    >
       {checkResult && (
         <div
-          className={classNames(styles.securityInfo, `J_security_level-${checkResult.resultLevel}`)}
+          className={classNames(
+            styles.securityInfo,
+            `J_security_level-${checkResult.resultLevel}`
+          )}
           onClick={openSecurityAddressbarpopup}
         >
           {checkResult.resultLevel === 'ok' && (
@@ -78,7 +86,9 @@ export default function DappAddressBar ({
           {checkResult.resultLevel === 'warning' && (
             <>
               <img src="rabby-internal://assets/icons/native-tabs/icon-shield-warning.svg" />
-              <div className={styles.summaryText}>Found {checkResult.countWarnings} Warning(s)</div>
+              <div className={styles.summaryText}>
+                Found {checkResult.countWarnings} Warning(s)
+              </div>
             </>
           )}
         </div>

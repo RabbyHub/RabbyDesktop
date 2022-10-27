@@ -5,22 +5,23 @@
 type M2RChanneMessagePayload = {
   'download-release-progress-updated': {
     originReqId: string;
-    download: IAppUpdatorDownloadProgress
-  },
+    download: IAppUpdatorDownloadProgress;
+  };
   '__internal_rpc:webui-extension:switch-active-dapp': {
     tabId: number;
-  },
+  };
   '__internal_rpc:security-check:start-check-dapp': {
     url: string;
     continualOpenId: string;
-  },
-  '__internal_rpc:security-notification': ISecurityNotificationPayload,
+  };
+  '__internal_rpc:security-notification': ISecurityNotificationPayload;
   '__internal_rpc:security-addressbarpopup:on-show': {
     origin: string;
     checkResult: ISecurityCheckResult;
-  },
-  '__internal_rpc:loading-view:dapp-did-finish-load': {},
-}
+  };
+  /* eslint-disable-next-line @typescript-eslint/ban-types */
+  '__internal_rpc:loading-view:dapp-did-finish-load': {};
+};
 
 type ChannelMessagePayload = {
   'ipc-example': {
@@ -72,9 +73,9 @@ type ChannelMessagePayload = {
     response: [
       {
         reqid: string;
-        result: IDappsDetectResult
+        result: IDappsDetectResult;
       }
-    ]
+    ];
   };
   'dapps-fetch': {
     send: [reqid: string];
@@ -105,8 +106,8 @@ type ChannelMessagePayload = {
     ];
   };
   'redirect-mainWindow': {
-    send: [],
-    response: []
+    send: [];
+    response: [];
   };
   'get-desktopAppState': {
     send: [reqid: string];
@@ -115,40 +116,40 @@ type ChannelMessagePayload = {
         reqid: string;
         state: IDesktopAppState;
       }
-    ]
-  },
+    ];
+  };
   'put-desktopAppState-hasStarted': {
     send: [reqid: string];
     response: [
       {
-        reqid: string
+        reqid: string;
       }
-    ]
-  },
+    ];
+  };
   'check-if-new-release': {
     send: [reqid: string];
     response: [
       {
-        reqid: string,
+        reqid: string;
       } & IAppUpdatorCheckResult
-    ]
-  },
+    ];
+  };
   'start-download': {
     send: [reqid: string];
     response: [
       {
-        reqid: string,
+        reqid: string;
       }
-    ]
-  },
+    ];
+  };
   'quit-and-upgrade': {
     send: [reqid: string];
     response: [
       {
-        reqid: string,
+        reqid: string;
       }
-    ]
-  },
+    ];
+  };
   'rabby:connect': {
     send: [reqid: string];
     response: [
@@ -157,104 +158,103 @@ type ChannelMessagePayload = {
         chainId: string;
         isConnected: boolean;
       }
-    ]
-  },
+    ];
+  };
   '__internal_rpc:main-window:click-close': {
     send: [];
     response: [];
-  },
+  };
   '__internal_alert-security-url': {
     send: [];
     response: [
       {
-        url: string
-        isExisted: boolean
+        url: string;
+        isExisted: boolean;
       }
-    ]
-  }
+    ];
+  };
   '__internal_close-alert-insecure-content': {
     send: [];
-    response: []
-  },
+    response: [];
+  };
   '__internal_rpc:security-check:get-dapp': {
     send: [reqid: string, dappUrl: string];
     response: [
       {
-        reqid: string
-        dappInfo: IDapp | null
+        reqid: string;
+        dappInfo: IDapp | null;
       }
-    ]
-  },
+    ];
+  };
   '__internal_rpc:security-check:check-dapp-and-put': {
     send: [reqid: string, dappUrl: string];
     response: [
       {
-        reqid: string,
-      } & ({
-        result: null
-        error: Error
-      } | {
-        result: ISecurityCheckResult
-        error?: null
-      })
-    ]
-  },
+        reqid: string;
+      } & (
+        | {
+            result: null;
+            error: Error;
+          }
+        | {
+            result: ISecurityCheckResult;
+            error?: null;
+          }
+      )
+    ];
+  };
   '__internal_rpc:security-check:continue-open-dapp': {
     send: [continualOpenId: string, dappUrl: string];
-    response: []
-  },
+    response: [];
+  };
   '__internal_rpc:security-check:continue-close-dapp': {
     send: [continualOpenId: string];
-    response: []
-  },
+    response: [];
+  };
   '__internal_rpc:security-check:set-view-top': {
     send: [];
-    response: []
-  },
+    response: [];
+  };
   '__internal_rpc:security-check:close-view': {
     send: [];
-    response: []
-  },
+    response: [];
+  };
   '__internal_rpc:clipboard:close-view': {
     send: [];
-    response: []
-  },
+    response: [];
+  };
   '__internal_rpc:browser:set-ignore-mouse-events': {
     send: [ignore: boolean, options?: Electron.IgnoreMouseEventsOptions];
-    response: []
-  },
+    response: [];
+  };
   '__internal_rpc:browser-dev:openDevTools': {
     send: [];
-    response: []
-  },
+    response: [];
+  };
   '__internal_rpc:security-addressbarpopup:show': {
-    send: [
-      dappUrl: string,
-    ];
-    response: []
-  },
+    send: [dappUrl: string];
+    response: [];
+  };
   '__internal_rpc:security-addressbarpopup:switch-pageview': {
-    send: [
-      state: ISecurityAddrbarPopupState
-    ];
+    send: [state: ISecurityAddrbarPopupState];
     response: [
       {
-        state: ISecurityAddrbarPopupState,
+        state: ISecurityAddrbarPopupState;
       }
-    ]
-  },
+    ];
+  };
   '__internal_rpc:security-addressbarpopup:hide': {
     send: [];
     response: [];
-  },
+  };
   '__internal_webui-window-close': {
-    send: [ winId: number, webContentsId: number ],
-    response: []
-  },
+    send: [winId: number, webContentsId: number];
+    response: [];
+  };
   '__internal__rabby:connect': {
-    send: [ IConnectedSite ],
-    response: [ IConnectedSite ]
-  }
+    send: [IConnectedSite];
+    response: [IConnectedSite];
+  };
 };
 
 type Channels = keyof ChannelMessagePayload;
@@ -277,7 +277,7 @@ interface Window {
           channel: T,
           func: (event: M2RChanneMessagePayload[T]) => void
         ): (() => void) | undefined;
-      }
+      };
       once: {
         <T extends Channels>(
           channel: T,
@@ -287,15 +287,15 @@ interface Window {
           channel: T,
           func: (event: M2RChanneMessagePayload[T]) => void
         ): (() => void) | undefined;
-      }
+      };
     };
   };
 
   // for dapp webview
   __rD?: {
-    tellConnection (info: IConnectedSite): void
-  }
+    tellConnection(info: IConnectedSite): void;
+  };
 
   // from dapp
-  ethereum?: any
+  ethereum?: any;
 }

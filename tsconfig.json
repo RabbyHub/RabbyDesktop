@@ -22,7 +22,7 @@
     "allowJs": true,
     "outDir": "release/app/dist",
     "paths": {
-      // "@/*": ["./*"],
+      "@/*": ["./*"],
       // "@root": ["./*"]
     }
   },

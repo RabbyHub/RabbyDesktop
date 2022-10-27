@@ -22,7 +22,7 @@ async function getDesktopAppState() {
   });
 }
 
-async function _putHasStarted() {
+async function origPutHasStarted() {
   const reqid = randString();
 
   return new Promise<void>((resolve, reject) => {
@@ -35,17 +35,19 @@ async function _putHasStarted() {
         }
       }
     );
-    window.rabbyDesktop.ipcRenderer.sendMessage('put-desktopAppState-hasStarted', reqid);
+    window.rabbyDesktop.ipcRenderer.sendMessage(
+      'put-desktopAppState-hasStarted',
+      reqid
+    );
   });
 }
 
-async function _redirectToMainWindow() {
+async function redirectToMainWindow() {
   window.rabbyDesktop.ipcRenderer.sendMessage('redirect-mainWindow');
 }
 
-
 const getStarted = atom({
-  firstStartApp: true
+  firstStartApp: true,
 } as IDesktopAppState);
 
 export function useDesktopAppState() {
@@ -60,19 +62,16 @@ export function useDesktopAppState() {
     });
   }, [appState, setAppState]);
 
-  const putHasStarted = useCallback(
-    async () => {
-      return _putHasStarted().then(() => {
-        setAppState((old) => ({ ...old, firstStartApp: false }));
-        _redirectToMainWindow();
-      });
-    },
-    [setAppState]
-  );
+  const putHasStarted = useCallback(async () => {
+    return origPutHasStarted().then(() => {
+      setAppState((old) => ({ ...old, firstStartApp: false }));
+      redirectToMainWindow();
+    });
+  }, [setAppState]);
 
   return {
     appState,
     putHasStarted,
-    redirectToMainWindow: _redirectToMainWindow,
+    redirectToMainWindow,
   };
 }

@@ -16,7 +16,7 @@ export const desktopAppStore = new Store<{
   schema: {
     firstStartApp: {
       type: 'boolean',
-      default: true
+      default: true,
     },
   },
 
@@ -33,10 +33,10 @@ onIpcMainEvent('get-desktopAppState', (event, reqid: string) => {
   event.reply('get-desktopAppState', {
     reqid,
     state: {
-      firstStartApp: desktopAppStore.get('firstStartApp')
+      firstStartApp: desktopAppStore.get('firstStartApp'),
     },
   });
-})
+});
 
 onIpcMainEvent('put-desktopAppState-hasStarted', (event, reqid: string) => {
   desktopAppStore.set('firstStartApp', false);
@@ -44,4 +44,4 @@ onIpcMainEvent('put-desktopAppState-hasStarted', (event, reqid: string) => {
   event.reply('put-desktopAppState-hasStarted', {
     reqid,
   });
-})
+});

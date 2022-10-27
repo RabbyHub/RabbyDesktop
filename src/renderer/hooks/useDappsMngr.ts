@@ -3,7 +3,12 @@
 
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
-import { getAllDapps, detectDapps, putDapp, deleteDapp } from '../ipcRequest/dapps';
+import {
+  getAllDapps,
+  detectDapps,
+  putDapp,
+  deleteDapp,
+} from '../ipcRequest/dapps';
 
 const dappsAtomic = atom(null as any as IDapp[]);
 

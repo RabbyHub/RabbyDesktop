@@ -4,11 +4,10 @@ import {
   NATIVE_HEADER_H,
   NATIVE_HEADER_WITH_NAV_H,
 } from '../../isomorphic/const-size';
-import { canoicalizeDappUrl, isUrlFromDapp } from '../../isomorphic/url';
+import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { onIpcMainEvent } from '../utils/ipcMainEvents';
 import { RABBY_LOADING_URL } from '../../isomorphic/constants';
 import { dappStore } from '../store/dapps';
-import { attachAlertBrowserView } from '../streams/dappAlert';
 
 type ITabOptions = {
   tabs: Tabs;
@@ -59,7 +58,10 @@ export class Tab {
     this.window.addBrowserView(this.loadingView);
 
     this.view.webContents.on('did-finish-load', () => {
-      this.loadingView?.webContents.send('__internal_rpc:loading-view:dapp-did-finish-load', null);
+      this.loadingView?.webContents.send(
+        '__internal_rpc:loading-view:dapp-did-finish-load',
+        null
+      );
       this.window?.removeBrowserView(this.loadingView!);
     });
 
@@ -89,17 +91,6 @@ export class Tab {
         }
       })();
     `);
-
-    this.webContents.on('will-redirect', (evt) => {
-      const sender = (evt as any).sender as BrowserView['webContents'];
-
-      const url = sender.getURL();
-      // this tabs is render as app's self UI, such as topbar.
-      if (isUrlFromDapp(url)) {
-        evt.preventDefault();
-        attachAlertBrowserView(url);
-      }
-    });
   }
 
   destroy() {

@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Menu, Dropdown, message } from 'antd';
 
 import {
@@ -19,6 +19,8 @@ import { AutoUpdate } from './components/AutoUpdate';
 import { DappFavicon } from '../../components/DappFavicon';
 import { ReleaseNote } from './components/ReleaseNote';
 
+type IOnOpDapp = (op: 'rename' | 'delete', dapp: IDapp) => void;
+
 function DAppBlock({
   dapp,
   onAdd,
@@ -26,7 +28,7 @@ function DAppBlock({
 }: React.PropsWithoutRef<{
   dapp?: IDapp;
   onAdd?: () => void;
-  onOpDapp?: (op: 'rename' | 'delete', dapp: IDapp) => void;
+  onOpDapp?: IOnOpDapp;
 }>) {
   const ref = useRef<HTMLDivElement>(null);
   if (onAdd) {
@@ -121,6 +123,21 @@ export default function DApps() {
   const [renamingDapp, setRenamingDapp] = useState<IDapp | null>(null);
   const [deletingDapp, setDeletingDapp] = useState<IDapp | null>(null);
 
+  const onClickDapp: IOnOpDapp = useCallback((op, dapp: IDapp) => {
+    switch (op) {
+      case 'delete': {
+        setDeletingDapp(dapp);
+        break;
+      }
+      case 'rename': {
+        setRenamingDapp(dapp);
+        break;
+      }
+      default:
+        break;
+    }
+  }, []);
+
   // useEffect(() => {
   //   // TODO: just for test
   //   setDeletingDapp(dapps[0] || null);
@@ -138,16 +155,18 @@ export default function DApps() {
         <AutoUpdate />
         <header>
           <div className="title">
-            <h2 className="title-text">
-              My Dapps
-            </h2>
+            <h2 className="title-text">My Dapps</h2>
             <span className="security-description">
-              <img className="shield-icon" src="rabby-internal://assets/icons/security-check/icon-shield-in-home.svg" />
+              <img
+                className="shield-icon"
+                src="rabby-internal://assets/icons/security-check/icon-shield-in-home.svg"
+              />
               Being protected by Dapp Security Engine
             </span>
           </div>
           <p className="subtitle">
-            Dapp Security Engine, provided by Rabby Wallet Desktop, offers better security for your Dapp use.
+            Dapp Security Engine, provided by Rabby Wallet Desktop, offers
+            better security for your Dapp use.
           </p>
         </header>
         <main>
@@ -159,20 +178,7 @@ export default function DApps() {
                     /* eslint-disable-next-line react/no-array-index-key */
                     key={`${dapp.origin}-${dapp.alias}-${idx}`}
                     dapp={dapp}
-                    onOpDapp={(op) => {
-                      switch (op) {
-                        case 'delete': {
-                          setDeletingDapp(dapp);
-                          break;
-                        }
-                        case 'rename': {
-                          setRenamingDapp(dapp);
-                          break;
-                        }
-                        default:
-                          break;
-                      }
-                    }}
+                    onOpDapp={onClickDapp}
                   />
                 );
               })}

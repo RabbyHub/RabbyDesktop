@@ -25,7 +25,7 @@ export const dappStore = new Store<{
           // stricted canonical url, only includes protocols, host(maybe with port), pathname
           origin: { type: 'string' },
           faviconUrl: { type: 'string' },
-          faviconBase64: { type: 'string' }
+          faviconBase64: { type: 'string' },
         },
       },
       default: [] as IDapp[],
@@ -46,14 +46,14 @@ export const dappStore = new Store<{
   watch: true,
 });
 
-export function formatDapp (input: any) {
-  if (!input?.origin) return null
+export function formatDapp(input: any) {
+  if (!input?.origin) return null;
 
   return {
-    alias: input?.alias || '' as IDapp['alias'],
+    alias: input?.alias || ('' as IDapp['alias']),
     origin: input.origin as IDapp['origin'],
-    faviconUrl: input?.faviconUrl || ''  as IDapp['faviconUrl'],
-    faviconBase64: input?.faviconBase64 || '' as IDapp['faviconBase64'],
+    faviconUrl: input?.faviconUrl || ('' as IDapp['faviconUrl']),
+    faviconBase64: input?.faviconBase64 || ('' as IDapp['faviconBase64']),
   };
 }
 
@@ -62,9 +62,9 @@ export function formatDapps(input = dappStore.get('dapps')): IDapp[] {
 
   const result: IDapp[] = [];
 
-  input.forEach(item => {
+  input.forEach((item) => {
     const f = formatDapp(item);
-    if (!f) return ;
+    if (!f) return;
     result.push(f);
   });
 
@@ -77,16 +77,18 @@ export function parseDappUrl(
 ) {
   const { isDapp, origin } = canoicalizeDappUrl(url);
 
-  const existedOrigin = !isDapp ? false : existedDapps.some((item: IDapp) => {
-    const formatted = formatDapp(item);
-    return formatted?.origin && formatted.origin === origin;
-  });
+  const existedOrigin = !isDapp
+    ? false
+    : existedDapps.some((item: IDapp) => {
+        const formatted = formatDapp(item);
+        return formatted?.origin && formatted.origin === origin;
+      });
 
   return {
     isDapp,
     origin,
     existedOrigin,
-  }
+  };
 }
 
 onIpcMainEvent('detect-dapp', async (event, reqid, dappUrl) => {
@@ -97,14 +99,14 @@ onIpcMainEvent('detect-dapp', async (event, reqid, dappUrl) => {
     reqid,
     result,
   });
-})
+});
 
 onIpcMainEvent('dapps-fetch', (event, reqid) => {
   event.reply('dapps-fetch', {
     reqid,
     dapps: formatDapps(dappStore.get('dapps')),
   });
-})
+});
 
 onIpcMainEvent('dapps-put', (event, reqid: string, dapp: IDapp) => {
   // TODO: is there mutex?
@@ -130,7 +132,7 @@ onIpcMainEvent('dapps-delete', (event, reqid: string, dapp: IDapp) => {
     return d.origin === dapp.origin;
   });
 
-  let error: string = '';
+  let error = '';
   if (idx > -1) {
     allDapps.splice(idx, 1);
     dappStore.set('dapps', allDapps);
