@@ -95,11 +95,16 @@ export async function openSecurityNotificationView(
   popupWin.webContents.send('__internal_rpc:security-notification', payload);
 
   updateSubWindowPosition(targetWin, popupWin);
-  showPopupWindow(popupWin);
-  popupWin.moveTop();
+
+  const pullTop = targetWin.isVisible();
+  showPopupWindow(popupWin, pullTop);
+
+  if (pullTop) {
+    popupWin.moveTop();
+  }
 }
 
-onIpcMainEvent('__internal_rpc:clipboard:close-view', async () => {
+onIpcMainEvent('__internal_rpc:security-notification:close-view', async () => {
   // const targetWin = (await onMainWindowReady()).window;
   const popupWin = await firstValueFrom(
     fromMainSubject('securityNotificationsWindowReady')

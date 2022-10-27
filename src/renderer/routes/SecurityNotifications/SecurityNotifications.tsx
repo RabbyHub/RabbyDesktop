@@ -37,7 +37,7 @@ function checkNotiCount() {
     if (closeTimer) clearTimeout(closeTimer);
     closeTimer = setTimeout(() => {
       window.rabbyDesktop.ipcRenderer.sendMessage(
-        '__internal_rpc:clipboard:close-view'
+        '__internal_rpc:security-notification:close-view'
       );
     }, 300) as any as number;
   }

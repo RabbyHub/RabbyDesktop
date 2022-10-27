@@ -219,7 +219,7 @@ type ChannelMessagePayload = {
     send: [];
     response: [];
   };
-  '__internal_rpc:clipboard:close-view': {
+  '__internal_rpc:security-notification:close-view': {
     send: [];
     response: [];
   };
