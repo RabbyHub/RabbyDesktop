@@ -1,4 +1,4 @@
-import { app, BrowserView, BrowserWindow, ipcMain, Tray } from 'electron';
+import { app, BrowserView, BrowserWindow, Tray } from 'electron';
 
 import {
   APP_NAME,
@@ -10,7 +10,11 @@ import {
 import { isRabbyShellURL, isUrlFromDapp } from '../../isomorphic/url';
 import buildChromeContextMenu from '../browser/context-menu';
 import { setupMenu } from '../browser/menu';
-import { desktopAppStore } from '../store/desktopApp';
+import {
+  desktopAppStore,
+  getOrInitMainWinPosition,
+  storeMainWinPosition,
+} from '../store/desktopApp';
 import { getAssetPath, getBrowserWindowOpts } from '../utils/app';
 import { onIpcMainEvent } from '../utils/ipcMainEvents';
 import { getBindLog } from '../utils/log';
@@ -211,17 +215,46 @@ export default function bootstrap() {
     // wait main subject ready
     await defaultSessionReadyThen();
 
+    const lastMainWinPos = getOrInitMainWinPosition();
     // init window
-    const mainWin = await createWindow({
+    const mainWindow = await createWindow({
       defaultTabUrl: RABBY_HOMEPAGE_URL,
       window: {
         show: false,
+        width: lastMainWinPos.width,
+        height: lastMainWinPos.height,
+        x: lastMainWinPos.x,
+        y: lastMainWinPos.y,
       },
     });
 
+    const mainWin = mainWindow.window;
+    mainWin.on('ready-to-show', () => {
+      const bounds = mainWin.getBounds();
+      if (
+        bounds.x !== lastMainWinPos.x ||
+        bounds.y !== lastMainWinPos.y ||
+        bounds.width !== lastMainWinPos.width ||
+        bounds.height !== lastMainWinPos.height
+      ) {
+        getOrInitMainWinPosition(mainWin);
+      }
+    });
+    mainWin.on('moved', () => {
+      storeMainWinPosition(mainWin);
+    });
+
+    mainWin.on('resized', () => {
+      storeMainWinPosition(mainWin);
+    });
+
+    mainWin.on('close', () => {
+      storeMainWinPosition(mainWin);
+    });
+
     const showMainWin = () => {
-      mainWin.window.show();
-      mainWin.window.moveTop();
+      mainWindow.window.show();
+      mainWindow.window.moveTop();
     };
 
     {

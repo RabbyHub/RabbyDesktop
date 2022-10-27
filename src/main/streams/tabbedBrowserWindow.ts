@@ -1,5 +1,4 @@
 import { BrowserWindow } from 'electron';
-import { firstValueFrom } from 'rxjs';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 import { onIpcMainEvent } from '../utils/ipcMainEvents';
 import TabbedBrowserWindow, {
@@ -10,7 +9,6 @@ import { valueToMainSubject } from './_init';
 import {
   getElectronChromeExtensions,
   getWebuiExtension,
-  onMainWindowReady,
 } from '../utils/stream-helpers';
 
 const getParentWindowOfTab = (tab: Electron.WebContents) => {
