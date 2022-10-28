@@ -4,8 +4,8 @@ import dayjs from 'dayjs';
 import {
   securityCheckGetDappInfo,
   queryAndPutDappSecurityCheckResult,
-  continueOpenDapp,
 } from '../ipcRequest/security-check';
+import { openDappAddressbarSecurityPopupView } from '../ipcRequest/security-addressbarpopup';
 
 const DEFAULT_HTTPS_RESULT: ISecurityCheckResult['checkHttps'] = {
   level: 'ok',
@@ -22,7 +22,7 @@ const DEFAULT_DAPP_UPDATE_INFO_RESULT: ISecurityCheckResult['checkLatestUpdate']
 
 const DEFAULT_CHECKING_INFO = {
   url: '',
-  continualOpenId: '',
+  continualOpId: '',
   checkingHttps: false,
   checkingLastUpdate: false,
 };
@@ -34,20 +34,6 @@ function makeDefaultCheckResult() {
     countIssues: 0 as ISecurityCheckResult['countIssues'],
     countDangerIssues: 0 as ISecurityCheckResult['countDangerIssues'],
     resultLevel: 'ok' as ISecurityCheckResult['resultLevel'],
-  };
-}
-
-function getViewOpData(
-  checkResult: Pick<ISecurityCheckResult, 'countIssues' | 'countDangerIssues'>
-) {
-  const couldOpenByDefault =
-    !checkResult.countIssues || !checkResult.countDangerIssues;
-  const reconfirmRequired =
-    checkResult.countIssues && !checkResult.countDangerIssues;
-
-  return {
-    couldOpenByDefault,
-    reconfirmRequired,
   };
 }
 
@@ -67,56 +53,62 @@ export function useCheckDapp() {
     []
   );
 
-  const hideView = useCallback(() => {
-    window.rabbyDesktop.ipcRenderer.sendMessage(
-      '__internal_rpc:security-check:close-view'
-    );
-    resetState();
-  }, [resetState]);
+  const hideViewAndPopupSecurityInfo = useCallback(
+    (dappUrl: string) => {
+      window.rabbyDesktop.ipcRenderer.sendMessage(
+        '__internal_rpc:security-check:close-view'
+      );
+      openDappAddressbarSecurityPopupView(dappUrl);
+      resetState();
+    },
+    [resetState]
+  );
 
-  const doFetch = useCallback(async (url: string, continualOpenId: string) => {
-    if (!url) return;
+  const doFetch = useCallback(
+    async (url: string) => {
+      if (!url) return;
 
-    securityCheckGetDappInfo(url).then((newVal) => {
-      setDappInfo(newVal);
-    });
-
-    setCheckingInfo((prev) => ({
-      ...prev,
-      checkingHttps: true,
-      checkingLastUpdate: true,
-    }));
-    queryAndPutDappSecurityCheckResult(url)
-      .then((newVal) => {
-        setCheckResult((prev) => {
-          return {
-            ...prev,
-            ...newVal,
-          };
-        });
-
-        const { couldOpenByDefault } = getViewOpData(newVal);
-        setTimeout(() => {
-          if (couldOpenByDefault) {
-            continueOpenDapp(continualOpenId, url, newVal.resultLevel);
-          }
-        }, 500);
-      })
-      .finally(() => {
-        setCheckingInfo((prev) => ({
-          ...prev,
-          checkingHttps: false,
-          checkingLastUpdate: false,
-        }));
+      securityCheckGetDappInfo(url).then((newVal) => {
+        setDappInfo(newVal);
       });
-  }, []);
+
+      setCheckingInfo((prev) => ({
+        ...prev,
+        checkingHttps: true,
+        checkingLastUpdate: true,
+      }));
+      queryAndPutDappSecurityCheckResult(url)
+        .then((newVal) => {
+          setCheckResult((prev) => {
+            return {
+              ...prev,
+              ...newVal,
+            };
+          });
+
+          setTimeout(() => {
+            if (newVal.resultLevel === 'ok') {
+              hideViewAndPopupSecurityInfo(url);
+            }
+          }, 500);
+        })
+        .finally(() => {
+          setCheckingInfo((prev) => ({
+            ...prev,
+            checkingHttps: false,
+            checkingLastUpdate: false,
+          }));
+        });
+    },
+    [hideViewAndPopupSecurityInfo]
+  );
 
   useEffect(() => {
     const dispose = window.rabbyDesktop.ipcRenderer.on(
       '__internal_rpc:security-check:start-check-dapp',
-      ({ url, continualOpenId }) => {
-        resetState({ url, continualOpenId });
-        doFetch(url, continualOpenId);
+      ({ url, continualOpId }) => {
+        resetState({ url, continualOpId });
+        doFetch(url);
       }
     );
 
@@ -126,15 +118,19 @@ export function useCheckDapp() {
   const isChecking =
     checkingInfo.checkingHttps || checkingInfo.checkingLastUpdate;
 
-  const closeNewTabAndThisView = useCallback(() => {
-    window.rabbyDesktop.ipcRenderer.sendMessage(
-      '__internal_rpc:security-check:continue-close-dapp',
-      checkingInfo.continualOpenId
-    );
-    window.rabbyDesktop.ipcRenderer.sendMessage(
-      '__internal_rpc:security-check:close-view'
-    );
-  }, [checkingInfo.continualOpenId]);
+  const closeNewTabAndPopupSecurityInfo = useCallback(
+    (dappUrl: string) => {
+      window.rabbyDesktop.ipcRenderer.sendMessage(
+        '__internal_rpc:security-check:continue-close-dapp',
+        checkingInfo.continualOpId
+      );
+      window.rabbyDesktop.ipcRenderer.sendMessage(
+        '__internal_rpc:security-check:close-view'
+      );
+      openDappAddressbarSecurityPopupView(dappUrl);
+    },
+    [checkingInfo.continualOpId]
+  );
 
   const checkItemViewLatestUpdateInfo = useMemo(() => {
     if (
@@ -179,8 +175,6 @@ export function useCheckDapp() {
     };
   }, [checkResult.checkHttps]);
 
-  const viewOperationData = getViewOpData(checkResult);
-
   return {
     dappInfo,
 
@@ -192,9 +186,8 @@ export function useCheckDapp() {
     checkItemViewHttps,
     checkItemViewLatestUpdateInfo,
 
-    closeNewTabAndThisView,
-    viewOperationData,
+    closeNewTabAndPopupSecurityInfo,
 
-    hideView,
+    hideViewAndPopupSecurityInfo,
   };
 }

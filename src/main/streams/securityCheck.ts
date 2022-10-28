@@ -91,7 +91,7 @@ export async function openDappSecurityCheckView(
   targetWin?: BrowserWindow
 ) {
   targetWin = targetWin || (await onMainWindowReady()).window;
-  const continualOpenId = randString();
+  const continualOpId = randString();
 
   const popupWin = await firstValueFrom(
     fromMainSubject('securityCheckPopupWindowReady')
@@ -100,13 +100,13 @@ export async function openDappSecurityCheckView(
 
   popupWin.webContents.send('__internal_rpc:security-check:start-check-dapp', {
     url,
-    continualOpenId,
+    continualOpId,
   });
 
   showPopupWindow(popupWin);
   popupWin.moveTop();
 
-  return { continualOpenId };
+  return { continualOpId };
 }
 
 onIpcMainEvent('__internal_rpc:security-check:close-view', async () => {

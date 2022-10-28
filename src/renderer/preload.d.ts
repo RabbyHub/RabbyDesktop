@@ -12,7 +12,7 @@ type M2RChanneMessagePayload = {
   };
   '__internal_rpc:security-check:start-check-dapp': {
     url: string;
-    continualOpenId: string;
+    continualOpId: string;
   };
   '__internal_rpc:security-notification': ISecurityNotificationPayload;
   '__internal_rpc:security-addressbarpopup:on-show': {
@@ -203,12 +203,8 @@ type ChannelMessagePayload = {
       )
     ];
   };
-  '__internal_rpc:security-check:continue-open-dapp': {
-    send: [continualOpenId: string, dappUrl: string];
-    response: [];
-  };
   '__internal_rpc:security-check:continue-close-dapp': {
-    send: [continualOpenId: string];
+    send: [continualOpId: string];
     response: [];
   };
   '__internal_rpc:security-check:set-view-top': {

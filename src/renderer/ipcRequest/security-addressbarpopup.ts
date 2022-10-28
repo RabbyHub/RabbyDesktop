@@ -1,7 +1,7 @@
-export function openDappAddressbarSecurityPopupView(url: string) {
+export function openDappAddressbarSecurityPopupView(dappUrl: string) {
   window.rabbyDesktop.ipcRenderer.sendMessage(
     '__internal_rpc:security-addressbarpopup:show',
-    url
+    dappUrl
   );
 }
 

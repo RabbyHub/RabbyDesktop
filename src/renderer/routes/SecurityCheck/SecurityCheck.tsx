@@ -6,6 +6,7 @@ import '../../css/style.less';
 
 import './SecurityCheck.less';
 import { useCheckDapp } from 'renderer/hooks/useSecurityCheck';
+import { useLayoutEffect } from 'react';
 
 const ICON_LOADING =
   'rabby-internal://assets/icons/security-check/icon-loading.svg';
@@ -29,10 +30,9 @@ export default function ModalSecurityCheck() {
     checkItemViewHttps,
     checkItemViewLatestUpdateInfo,
 
-    viewOperationData,
-    hideView,
+    hideViewAndPopupSecurityInfo,
 
-    closeNewTabAndThisView,
+    closeNewTabAndPopupSecurityInfo,
   } = useCheckDapp();
 
   if (!checkingUrl) return null;
@@ -46,12 +46,12 @@ export default function ModalSecurityCheck() {
       wrapClassName="modal-security-check-wrap"
       width={560}
       open={!!checkingUrl}
-      maskClosable={!isChecking && !viewOperationData.reconfirmRequired}
+      maskClosable={false}
       mask
       centered
       closable={false}
       onCancel={() => {
-        hideView();
+        hideViewAndPopupSecurityInfo(checkingUrl);
       }}
       footer={null}
     >
@@ -197,14 +197,14 @@ export default function ModalSecurityCheck() {
             <Button
               type="default"
               className="J_op J_op_cancel"
-              onClick={() => hideView()}
+              onClick={() => hideViewAndPopupSecurityInfo(checkingUrl)}
             >
               Continue to use
             </Button>
             <Button
               type="primary"
               className="J_op J_op_warning"
-              onClick={() => closeNewTabAndThisView()}
+              onClick={() => closeNewTabAndPopupSecurityInfo(checkingUrl)}
             >
               Close Dapp
             </Button>
@@ -215,9 +215,9 @@ export default function ModalSecurityCheck() {
             <Button
               type="primary"
               className="J_op J_op_danger"
-              onClick={() => closeNewTabAndThisView()}
+              onClick={() => closeNewTabAndPopupSecurityInfo(checkingUrl)}
             >
-              Close
+              Close Dapp
             </Button>
           </div>
         )}

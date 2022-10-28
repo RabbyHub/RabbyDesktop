@@ -44,7 +44,7 @@ const getTrayIconByTheme = () => {
   return getAssetPath('app-icons/macosIconTemplate@2x.png');
 };
 
-app.on('web-contents-created', (evtApp, webContents) => {
+app.on('web-contents-created', async (evtApp, webContents) => {
   const type = webContents.getType();
   const wcUrl = webContents.getURL();
   appLog(`'web-contents-created' event [type:${type}, url:${wcUrl}]`);
@@ -54,7 +54,9 @@ app.on('web-contents-created', (evtApp, webContents) => {
     webContents.openDevTools({ mode: 'detach', activate: true });
   }
 
-  webContents.on('will-redirect', async (evt) => {
+  const mainTabbedWin = await onMainWindowReady();
+
+  webContents.on('will-redirect', (evt) => {
     const sender = (evt as any).sender as BrowserView['webContents'];
     const url = sender.getURL();
 
@@ -63,7 +65,7 @@ app.on('web-contents-created', (evtApp, webContents) => {
 
     const tabbedWin = getWindowFromWebContents(sender);
     if (!tabbedWin) return;
-    if (tabbedWin !== (await onMainWindowReady())) return;
+    if (tabbedWin !== mainTabbedWin) return;
 
     evt.preventDefault();
     attachAlertBrowserView(url);
@@ -101,35 +103,24 @@ app.on('web-contents-created', (evtApp, webContents) => {
                 tabId: openedTab.id,
               }
             );
-          } else {
-            const targetWin = tabbedWin?.window;
+          } else if (mainTabbedWin === tabbedWin) {
+            const mainWindow = tabbedWin.window;
 
-            let continualOpenedTab: Tab | undefined;
-            const open = (url: string = details.url) => {
-              continualOpenedTab = tabbedWin?.tabs.create();
-              continualOpenedTab?.loadURL(url);
-            };
+            const continualOpenedTab = tabbedWin.tabs.create();
+            continualOpenedTab?.loadURL(details.url);
 
             const closeOpenedTab = () => {
               continualOpenedTab?.destroy();
             };
 
-            openDappSecurityCheckView(details.url, targetWin).then(
-              ({ continualOpenId }) => {
-                const dispose1 = onIpcMainEvent(
-                  '__internal_rpc:security-check:continue-open-dapp',
-                  (_evt, _openId, _openUrl) => {
-                    if (targetWin && _openId === continualOpenId) {
-                      dispose1?.();
-                      open(_openUrl);
-                    }
-                  }
-                );
-                const dispose2 = onIpcMainEvent(
+            openDappSecurityCheckView(details.url, mainWindow).then(
+              ({ continualOpId }) => {
+                // TODO: use timeout mechanism to avoid memory leak
+                const dispose = onIpcMainEvent(
                   '__internal_rpc:security-check:continue-close-dapp',
                   (_evt, _openId) => {
-                    if (targetWin && _openId === continualOpenId) {
-                      dispose2?.();
+                    if (mainWindow && _openId === continualOpId) {
+                      dispose?.();
                       closeOpenedTab();
                     }
                   }
@@ -287,8 +278,7 @@ export default function bootstrap() {
         showMainWin();
       });
       app.on('activate', (_, hasVisibleWindows) => {
-        if (!hasVisibleWindows)
-          showMainWin();
+        if (!hasVisibleWindows) showMainWin();
       });
     }
 

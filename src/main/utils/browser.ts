@@ -84,9 +84,7 @@ export function hidePopupWindow(popupWin: BrowserWindow) {
   }
 }
 
-export function createPopupView(
-  opts?: Electron.BrowserViewConstructorOptions
-) {
+export function createPopupView(opts?: Electron.BrowserViewConstructorOptions) {
   return new BrowserView({
     ...opts,
     webPreferences: {
