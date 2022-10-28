@@ -83,3 +83,21 @@ export function hidePopupWindow(popupWin: BrowserWindow) {
     popupWin.setOpacity(0);
   }
 }
+
+export function createPopupView(
+  opts?: Electron.BrowserViewConstructorOptions
+) {
+  return new BrowserView({
+    ...opts,
+    webPreferences: {
+      ...opts?.webPreferences,
+      webviewTag: true,
+      sandbox: true,
+      nodeIntegration: false,
+      nodeIntegrationInWorker: false,
+      allowRunningInsecureContent: false,
+      autoplayPolicy: 'user-gesture-required',
+      contextIsolation: true,
+    },
+  });
+}
