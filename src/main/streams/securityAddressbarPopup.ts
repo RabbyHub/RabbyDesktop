@@ -77,6 +77,7 @@ onMainWindowReady().then(async (mainWin) => {
   const popupWin = createPopupWindow({
     parent: mainWin.window,
     transparent: false,
+    hasShadow: true,
   });
 
   updateSubWindowPosition(mainWin.window, popupWin);

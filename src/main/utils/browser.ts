@@ -14,6 +14,7 @@ export function createPopupWindow(
   opts?: Electron.BrowserWindowConstructorOptions
 ) {
   return new BrowserWindow({
+    hasShadow: false,
     ...opts,
     show: false,
     frame: false,
@@ -25,7 +26,6 @@ export function createPopupWindow(
     resizable: false,
     fullscreenable: false,
     skipTaskbar: true,
-    hasShadow: false,
     titleBarStyle: 'hiddenInset',
     ...(IS_DARWIN
       ? {
