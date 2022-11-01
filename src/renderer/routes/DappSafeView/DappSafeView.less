@@ -1,0 +1,119 @@
+@import '~antd/lib/style/themes/default.less';
+
+@body-padding-top: 44px;
+
+@hd-height: 44px;
+@top-radius: 12px;
+
+.modal-alert-insecurity-wrap {
+  padding-top: @body-padding-top;
+  padding-left: 52px;
+  padding-right: 52px;
+  min-width: calc(100vw - 52px * 2);
+  overflow: hidden;
+
+  .alert-header {
+    background-color: var(--color-paragraph);
+    color: white;
+    height: @hd-height;
+    line-height: @hd-height;
+    width: 100%;
+    text-align: center;
+    user-select: none;
+    white-space: nowrap;
+    cursor: default;
+  }
+
+  .alert-header > .inner {
+    font-size: 14px;
+
+    .allowed-url {
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .icon {
+      display: inline-block;
+      text-decoration: underline;
+    }
+  }
+
+  .ant-modal-close {
+    height: @hd-height;
+  }
+
+  .ant-modal-close-x {
+    height: @hd-height;
+    width: @hd-height;
+    line-height: @hd-height;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    > img.close-icon {
+      width: 24px;
+      height: 24px;
+    }
+  }
+}
+
+.modal-alert-insecurity.ant-modal {
+  width: 100% !important;
+  height: 100%;
+  top: 0 !important;
+  padding: 0;
+  background: #fff;
+  border-top-left-radius: @top-radius;
+  border-top-right-radius: @top-radius;
+
+  .webview-loading {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .webview-loading .icon-wrapper {
+    width: 96px;
+    height: 96px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: -32px;
+
+    > img.icon-shield {
+      height: 100%;
+      width: 100%;
+    }
+    > img.icon-loading {
+      animation: rotate 1s linear infinite;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      background: transparent;
+      border-radius: 50%;
+    }
+  }
+
+  .ant-modal-content {
+    height: 100%;
+    background-color: transparent;
+    box-shadow: none;
+  }
+
+  .ant-modal-body {
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    border-top-left-radius: @top-radius;
+    border-top-right-radius: @top-radius;
+
+    box-shadow: @shadow-2;
+  }
+}

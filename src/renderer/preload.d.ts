@@ -24,6 +24,7 @@ type M2RChanneMessagePayload = {
   '__internal_rpc:dapp-tabs:open-safe-view': {
     url: string;
     isExisted: boolean;
+    status: 'start-loading' | 'loaded';
   };
 };
 
