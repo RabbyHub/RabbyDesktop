@@ -54,6 +54,7 @@ export const setupMenu = ({
         // { role: 'zoomOut' },
         // { type: 'separator' },
         { role: 'copy' },
+        { role: 'cut' },
         { role: 'paste' },
         { role: 'delete' },
         { role: 'selectAll' },
