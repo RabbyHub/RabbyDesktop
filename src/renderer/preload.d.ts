@@ -21,6 +21,10 @@ type M2RChanneMessagePayload = {
   };
   /* eslint-disable-next-line @typescript-eslint/ban-types */
   '__internal_rpc:loading-view:dapp-did-finish-load': {};
+  '__internal_rpc:dapp-tabs:open-safe-view': {
+    url: string;
+    isExisted: boolean;
+  };
 };
 
 type ChannelMessagePayload = {
@@ -164,16 +168,7 @@ type ChannelMessagePayload = {
     send: [];
     response: [];
   };
-  '__internal_alert-security-url': {
-    send: [];
-    response: [
-      {
-        url: string;
-        isExisted: boolean;
-      }
-    ];
-  };
-  '__internal_close-alert-insecure-content': {
+  '__internal_rpc:dapp-tabs:close-safe-view': {
     send: [];
     response: [];
   };

@@ -8,6 +8,7 @@ body {
 @body-padding-top: 44px;
 
 @hd-height: 44px;
+@top-radius: 12px;
 
 .modal-alert-insecurity-wrap {
   padding-top: @body-padding-top;
@@ -88,6 +89,9 @@ body {
   height: 100%;
   top: 0 !important;
   padding: 0;
+  background: #fff;
+  border-top-left-radius: @top-radius;
+  border-top-right-radius: @top-radius;
 
   .ant-modal-content {
     height: 100%;
@@ -100,8 +104,8 @@ body {
     height: 100%;
     width: 100%;
     overflow: hidden;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
+    border-top-left-radius: @top-radius;
+    border-top-right-radius: @top-radius;
 
     box-shadow: @shadow-2;
   }

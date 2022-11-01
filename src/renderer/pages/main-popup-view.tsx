@@ -3,7 +3,7 @@
 import { createRoot } from 'react-dom/client';
 import '../css/style.less';
 
-import './alert-insecurity.less';
+import './main-popup-view.less';
 import { Modal } from 'antd';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -11,6 +11,7 @@ import {
   integrateQueryToUrl,
   parseQueryString,
 } from 'isomorphic/url';
+import useDragHeadbar from '../hooks/useDragheadbar';
 
 const INIT_URL = decodeURIComponent(parseQueryString().__init_url__ || '');
 
@@ -35,12 +36,14 @@ export default function AlertInsecurity() {
   >(null);
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_alert-security-url',
+      '__internal_rpc:dapp-tabs:open-safe-view',
       ({ url, isExisted }) => {
         setUrlInfo({ url, isExisted });
       }
     );
   }, []);
+
+  useDragHeadbar();
 
   if (!urlInfo.url) return null;
 
@@ -48,12 +51,12 @@ export default function AlertInsecurity() {
     <Modal
       className="modal-alert-insecurity"
       wrapClassName="modal-alert-insecurity-wrap"
-      open
-      maskClosable
+      open={!!urlInfo.url}
+      maskClosable={false}
       mask
       onCancel={() => {
         window.rabbyDesktop.ipcRenderer.sendMessage(
-          '__internal_close-alert-insecure-content'
+          '__internal_rpc:dapp-tabs:close-safe-view'
         );
       }}
       closeIcon={

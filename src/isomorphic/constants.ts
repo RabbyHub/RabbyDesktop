@@ -14,5 +14,5 @@ export const RABBY_GETTING_STARTED_URL = `${RABBY_INTERNAL_PROTOCOL}//local/gett
 export const RABBY_SPALSH_URL = `${RABBY_INTERNAL_PROTOCOL}//local/splash.html`;
 export const RABBY_LOADING_URL = `${RABBY_INTERNAL_PROTOCOL}//local/loading.html`;
 
-export const RABBY_ALERT_INSECURITY_URL = `${RABBY_INTERNAL_PROTOCOL}//local/alert-insecurity.html`;
+export const RABBY_MAIN_POPUP_VIEW = `${RABBY_INTERNAL_PROTOCOL}//local/main-popup-view.html`;
 export const RABBY_POPUP_GHOST_VIEW_URL = `${RABBY_INTERNAL_PROTOCOL}//local/popup-view.html`;

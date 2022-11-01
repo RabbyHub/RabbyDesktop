@@ -46,11 +46,11 @@ const rendererEntries = {
     htmlFile: path.join(srcRendererPath, `pages/loading.ejs`),
     jsEntry: path.join(srcRendererPath, 'pages/loading.tsx'),
   },
-  'alert-insecurity': {
-    name: 'alert-insecurity',
-    target: 'alert-insecurity.html',
-    htmlFile: path.join(srcRendererPath, `pages/alert-insecurity.ejs`),
-    jsEntry: path.join(srcRendererPath, 'pages/alert-insecurity.tsx'),
+  'main-popup-view': {
+    name: 'main-popup-view',
+    target: 'main-popup-view.html',
+    htmlFile: path.join(srcRendererPath, `pages/main-popup-view.ejs`),
+    jsEntry: path.join(srcRendererPath, 'pages/main-popup-view.tsx'),
   },
   'popup-view': {
     name: 'popup-view',

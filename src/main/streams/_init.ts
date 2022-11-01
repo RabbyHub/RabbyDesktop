@@ -29,6 +29,9 @@ const CONF = {
   mainWindowReady: {
     subject: new ReplaySubject(1),
   } as IConf<ReplaySubject<TabbedBrowserWindow>>,
+  dappSafeModeView: {
+    subject: new ReplaySubject(1),
+  } as IConf<ReplaySubject<BrowserView>>,
   securityCheckPopupWindowReady: {
     subject: new ReplaySubject(1),
   } as IConf<ReplaySubject<BrowserWindow>>,
