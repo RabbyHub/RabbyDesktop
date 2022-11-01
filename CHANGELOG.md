@@ -1,7 +1,20 @@
 
-v0.1.4 / 2022-10-28
+v0.1.5 / 2022-11-01
 ==================
 
+  * feat: support debug menu for reg build.
+  * fix: robust change about window.__rD.detectConnect
+  * feat: upgrade embeded rabby extension to 0.54.0
+  * feat: only popup security-addressbar-popup on security-check closed.
+  * chore: add util
+  * feat: tuning style of security addressbar popup.
+  * feat: upgrade embeded rabby extension to 0.53.0
+  * fix: behavior on click non-mainwindow's close button
+
+v0.1.4 / 2022-10-28
+===================
+
+  * Release v0.1.4
   * feat: memory last position of main window.
   * chore: style tuning.
   * fix: don't move hidden main window top on coping sensitive information.
@@ -19,10 +32,6 @@ v0.1.3 / 2022-10-25
   * chore: robust change for sub windows
   * feat: allow ipcMain use infinite listeners.
   * feat: tuning.
-
-v0.1.2 / 2022-10-25
-===================
-
   * Release v0.1.2
   * chore: code clean.
   * feat: display timeout message on security check.
@@ -36,6 +45,11 @@ v0.1.2 / 2022-10-25
   * chore: code clean.
   * chore: code clean.
   * fix: `chrome.tabs.query` behavior on getting current window
+
+v0.1.2 / 2022-10-13
+===================
+
+  * Release v0.1.2
   * feat: robust change about dapp detection.
   * chore: upgrade electron-chrome-extensions
   * fix: dapp favicon first load (#8)
