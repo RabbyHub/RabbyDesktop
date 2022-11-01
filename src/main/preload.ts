@@ -50,8 +50,8 @@ if (IS_SAFE_WEBVIEW && !window.rabbyDesktop) {
   contextBridge.exposeInMainWorld('__rD', {
     detectConnect: (inputParams: any) => {
       const params = inputParams || {};
-      const address = params.address || window.ethereum.selectedAddress;
-      const chainId = params.chainId || window.ethereum.chainId || '0x1';
+      const address = params.address || window.ethereum?.selectedAddress;
+      const chainId = params.chainId || window.ethereum?.chainId || '0x1';
 
       ipcRenderer.send('__internal__rabby:connect', {
         origin: window.location.origin,
