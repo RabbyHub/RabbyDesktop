@@ -18,6 +18,7 @@ import './index.less';
 import { AutoUpdate } from './components/AutoUpdate';
 import { DappFavicon } from '../../components/DappFavicon';
 import { ReleaseNote } from './components/ReleaseNote';
+import { useClickToPopupDebugMenu } from '@/renderer/hooks/useRegChannelTools';
 
 type IOnOpDapp = (op: 'rename' | 'delete', dapp: IDapp) => void;
 
@@ -113,6 +114,63 @@ function DAppBlock({
   );
 }
 
+function Footer ({
+  appVersion = ''
+}) {
+  const {
+    onClick5TimesFooterVersion,
+    closeDebugMenu,
+    showDebugMenu
+  } = useClickToPopupDebugMenu()
+
+  return (
+    <footer>
+      <div className="container">
+        <img
+          className="logo"
+          src="rabby-internal://assets/icons/internal-homepage/logo.svg"
+          alt="logo"
+        />
+        <Dropdown
+          open={showDebugMenu}
+          onOpenChange={(nextOpen) => {
+            if (!nextOpen) {
+              closeDebugMenu();
+            }
+          }}
+          overlay={(
+            <Menu
+              items={[
+                {
+                  key: 'add-debug-insecure-dapps',
+                  label: 'Add Debug Insecure Dapps',
+                  onClick: () => {
+                    window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:debug-tools:operate-debug-insecure-dapps', 'add');
+                  },
+                },
+                {
+                  key: 'trim-debug-insecure-dapps',
+                  label: 'Trim Debug Insecure Dapps',
+                  onClick: () => {
+                    window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:debug-tools:operate-debug-insecure-dapps', 'trim');
+                  },
+                }
+              ]}
+            />
+          )}
+        >
+          <div
+            className="version-text"
+            onClick={onClick5TimesFooterVersion}
+          >
+            Version: {appVersion || '-'}
+          </div>
+        </Dropdown>
+      </div>
+    </footer>
+  )
+}
+
 export default function DApps() {
   const appVersion = useAppVersion();
 
@@ -192,16 +250,7 @@ export default function DApps() {
           </div>
         </main>
 
-        <footer>
-          <div className="container">
-            <img
-              className="logo"
-              src="rabby-internal://assets/icons/internal-homepage/logo.svg"
-              alt="logo"
-            />
-            <div className="version-text">Version: {appVersion || '-'}</div>
-          </div>
-        </footer>
+        <Footer appVersion={appVersion} />
         <ModalAddDapp
           destroyOnClose
           open={isAdding}

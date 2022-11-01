@@ -243,6 +243,10 @@ type ChannelMessagePayload = {
     send: [];
     response: [];
   };
+  '__internal_rpc:debug-tools:operate-debug-insecure-dapps': {
+    send: [ type: 'add' | 'trim'];
+    response: [];
+  };
   '__internal_webui-window-close': {
     send: [winId: number, webContentsId: number];
     response: [];
