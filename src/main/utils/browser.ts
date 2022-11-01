@@ -64,9 +64,11 @@ const isDarwin = process.platform === 'darwin';
  *
  * The same requirement applies to hidePopupWindow
  */
-export function showPopupWindow(popupWin: BrowserWindow, isInActive = false) {
-  if (isDarwin || isInActive) {
-    if (isInActive) {
+export function showPopupWindow(popupWin: BrowserWindow, opts?: {
+  isInActiveOnDarwin: boolean
+}) {
+  if (isDarwin) {
+    if (opts?.isInActiveOnDarwin) {
       popupWin.showInactive();
     } else {
       popupWin.show();
