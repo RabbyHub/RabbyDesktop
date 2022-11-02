@@ -1,7 +1,17 @@
 
-v0.1.5 / 2022-11-01
+v0.1.6 / 2022-11-02
 ==================
 
+  * feat: style fix.
+  * fix: allow cut hotkey on darwin.
+  * feat: better dapp safe view, replace webview tag with BrowserView.
+  * feat: normalize management for dappAlert.
+  * fix: on win32, fix invisible security notification, and never pull it top if main window minimized
+
+v0.1.5 / 2022-11-01
+===================
+
+  * Release v0.1.5
   * feat: support debug menu for reg build.
   * fix: robust change about window.__rD.detectConnect
   * feat: upgrade embeded rabby extension to 0.54.0
@@ -32,6 +42,10 @@ v0.1.3 / 2022-10-25
   * chore: robust change for sub windows
   * feat: allow ipcMain use infinite listeners.
   * feat: tuning.
+
+v0.1.2 / 2022-10-25
+===================
+
   * Release v0.1.2
   * chore: code clean.
   * feat: display timeout message on security check.
@@ -45,11 +59,6 @@ v0.1.3 / 2022-10-25
   * chore: code clean.
   * chore: code clean.
   * fix: `chrome.tabs.query` behavior on getting current window
-
-v0.1.2 / 2022-10-13
-===================
-
-  * Release v0.1.2
   * feat: robust change about dapp detection.
   * chore: upgrade electron-chrome-extensions
   * fix: dapp favicon first load (#8)
