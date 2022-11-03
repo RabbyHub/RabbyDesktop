@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import classNames from 'classnames';
-import dayjs from 'dayjs';
 
-import { hideDappAddressbarSecurityPopupView } from 'renderer/ipcRequest/security-addressbarpopup';
+import { hideDappAddressbarSecurityPopupView } from '@/renderer/ipcRequest/security-addressbarpopup';
+import { formatSeconds } from '@/isomorphic/date';
 import { Divider } from 'antd';
 import styles from './SecurityAddressbarPopup.module.less';
 
@@ -58,7 +58,7 @@ function formatLastUpdateTime(sec?: number) {
 
   if (!second) return '-';
 
-  return dayjs(second * 1e3).format('YYYY/MM/DD HH:mm');
+  return formatSeconds(second, 'YYYY/MM/DD HH:mm');
 }
 
 function usePageState() {

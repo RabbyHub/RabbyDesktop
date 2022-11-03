@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import dayjs from 'dayjs';
 
+import { formatSeconds } from '@/isomorphic/date';
 import {
   securityCheckGetDappInfo,
   queryAndPutDappSecurityCheckResult,
@@ -138,11 +138,8 @@ export function useCheckDapp() {
       checkResult.checkLatestUpdate.latestChangedItemIn24Hr?.is_changed
     ) {
       return {
-        resultText: `The web page was updated within 24 hours at ${dayjs(
-          (checkResult.checkLatestUpdate.latestChangedItemIn24Hr.create_at ||
-            0) * 1e3
-        ).format(
-          'YYYY/MM/DD HH:MM'
+        resultText: `The web page was updated within 24 hours at ${formatSeconds(
+          checkResult.checkLatestUpdate.latestChangedItemIn24Hr.create_at || 0, 'YYYY/MM/DD HH:mm'
         )}. To help you avoid potential code tampering and system bugs, we recommend using it 24 hours after the updates.`,
       };
     }
