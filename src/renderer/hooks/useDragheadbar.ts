@@ -1,7 +1,7 @@
-import { NATIVE_HEADER_H } from "@/isomorphic/const-size";
-import { useLayoutEffect } from "react";
+import { NATIVE_HEADER_H } from '@/isomorphic/const-size';
+import { useLayoutEffect } from 'react';
 
-export default function useDragHeadbar () {
+export default function useDragHeadbar() {
   useLayoutEffect(() => {
     const div = document.createElement('div');
     div.className = 'global-dragheadbar';
@@ -12,8 +12,6 @@ export default function useDragHeadbar () {
 
     return () => {
       document.body.removeChild(div);
-    }
+    };
   }, []);
-
-  return ;
 }

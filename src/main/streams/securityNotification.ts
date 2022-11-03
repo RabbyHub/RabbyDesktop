@@ -96,7 +96,10 @@ export async function openSecurityNotificationView(
 
   updateSubWindowPosition(targetWin, popupWin);
 
-  const pullTop = process.platform === 'darwin' ? targetWin.isVisible() : (targetWin.isVisible() && !targetWin.isMinimized());
+  const pullTop =
+    process.platform === 'darwin'
+      ? targetWin.isVisible()
+      : targetWin.isVisible() && !targetWin.isMinimized();
   showPopupWindow(popupWin, { isInActiveOnDarwin: true });
 
   if (pullTop) {

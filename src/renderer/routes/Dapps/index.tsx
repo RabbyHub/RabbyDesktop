@@ -2,6 +2,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { Menu, Dropdown, message } from 'antd';
 
+import { useClickToPopupDebugMenu } from '@/renderer/hooks/useRegChannelTools';
 import {
   RCIconDappsEdit,
   RCIconDappsDelete,
@@ -18,7 +19,6 @@ import './index.less';
 import { AutoUpdate } from './components/AutoUpdate';
 import { DappFavicon } from '../../components/DappFavicon';
 import { ReleaseNote } from './components/ReleaseNote';
-import { useClickToPopupDebugMenu } from '@/renderer/hooks/useRegChannelTools';
 
 type IOnOpDapp = (op: 'rename' | 'delete', dapp: IDapp) => void;
 
@@ -114,14 +114,9 @@ function DAppBlock({
   );
 }
 
-function Footer ({
-  appVersion = ''
-}) {
-  const {
-    onClick5TimesFooterVersion,
-    closeDebugMenu,
-    showDebugMenu
-  } = useClickToPopupDebugMenu()
+function Footer({ appVersion = '' }) {
+  const { onClick5TimesFooterVersion, closeDebugMenu, showDebugMenu } =
+    useClickToPopupDebugMenu();
 
   return (
     <footer>
@@ -138,37 +133,40 @@ function Footer ({
               closeDebugMenu();
             }
           }}
-          overlay={(
+          overlay={
             <Menu
               items={[
                 {
                   key: 'add-debug-insecure-dapps',
                   label: 'Add Debug Insecure Dapps',
                   onClick: () => {
-                    window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:debug-tools:operate-debug-insecure-dapps', 'add');
+                    window.rabbyDesktop.ipcRenderer.sendMessage(
+                      '__internal_rpc:debug-tools:operate-debug-insecure-dapps',
+                      'add'
+                    );
                   },
                 },
                 {
                   key: 'trim-debug-insecure-dapps',
                   label: 'Trim Debug Insecure Dapps',
                   onClick: () => {
-                    window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:debug-tools:operate-debug-insecure-dapps', 'trim');
+                    window.rabbyDesktop.ipcRenderer.sendMessage(
+                      '__internal_rpc:debug-tools:operate-debug-insecure-dapps',
+                      'trim'
+                    );
                   },
-                }
+                },
               ]}
             />
-          )}
+          }
         >
-          <div
-            className="version-text"
-            onClick={onClick5TimesFooterVersion}
-          >
+          <div className="version-text" onClick={onClick5TimesFooterVersion}>
             Version: {appVersion || '-'}
           </div>
         </Dropdown>
       </div>
     </footer>
-  )
+  );
 }
 
 export default function DApps() {

@@ -1,6 +1,6 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState } from 'react';
 
-const IS_REG_CHANNEL = process.env.BUILD_CHANNEL === "reg";
+const IS_REG_CHANNEL = process.env.BUILD_CHANNEL === 'reg';
 
 export function useClickToPopupDebugMenu() {
   const clickCountRef = useRef(0);
@@ -8,10 +8,9 @@ export function useClickToPopupDebugMenu() {
   const [showDebugMenu, setShowDebugMenu] = useState(false);
 
   const onClick5TimesFooterVersion = useCallback(() => {
-    if (!IS_REG_CHANNEL) return ;
+    if (!IS_REG_CHANNEL) return;
 
-    if (timerRef.current)
-      clearTimeout(timerRef.current);
+    if (timerRef.current) clearTimeout(timerRef.current);
 
     clickCountRef.current++;
     if (clickCountRef.current === 5) {
@@ -31,6 +30,6 @@ export function useClickToPopupDebugMenu() {
   return {
     showDebugMenu: IS_REG_CHANNEL && showDebugMenu,
     closeDebugMenu,
-    onClick5TimesFooterVersion
-  }
+    onClick5TimesFooterVersion,
+  };
 }

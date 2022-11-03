@@ -147,37 +147,40 @@ onIpcMainEvent('dapps-delete', (event, reqid: string, dapp: IDapp) => {
   });
 });
 
-onIpcMainEvent('__internal_rpc:debug-tools:operate-debug-insecure-dapps', (event, opType) => {
-  const dappToAdd: IDapp[] = [
-    {
-      "alias": "badssl",
-      "origin": "https://expired.badssl.com",
-      "faviconUrl": "",
-      "faviconBase64": ""
-    },
-    {
-      "alias": "self-signed",
-      "origin": "https://self-signed.badssl.com",
-      "faviconUrl": "",
-      "faviconBase64": ""
-    },
-  ];
+onIpcMainEvent(
+  '__internal_rpc:debug-tools:operate-debug-insecure-dapps',
+  (event, opType) => {
+    const dappToAdd: IDapp[] = [
+      {
+        alias: 'badssl',
+        origin: 'https://expired.badssl.com',
+        faviconUrl: '',
+        faviconBase64: '',
+      },
+      {
+        alias: 'self-signed',
+        origin: 'https://self-signed.badssl.com',
+        faviconUrl: '',
+        faviconBase64: '',
+      },
+    ];
 
-  let allDapps = formatDapps(dappStore.get('dapps'));
+    let allDapps = formatDapps(dappStore.get('dapps'));
 
-  if (opType === 'add') {
-    dappToAdd.forEach(dapp => {
-      if (allDapps.some(d => d.origin === dapp.origin)) return;
+    if (opType === 'add') {
+      dappToAdd.forEach((dapp) => {
+        if (allDapps.some((d) => d.origin === dapp.origin)) return;
 
-      allDapps.push(dapp);
-    });
-  } else if (opType === 'trim') {
-    allDapps = allDapps.filter(dapp => {
-      if (dapp.origin.indexOf('badssl.com') > -1) return false;
-      return true;
-    });
+        allDapps.push(dapp);
+      });
+    } else if (opType === 'trim') {
+      allDapps = allDapps.filter((dapp) => {
+        if (dapp.origin.indexOf('badssl.com') > -1) return false;
+        return true;
+      });
+    }
+
+    dappStore.set('dapps', allDapps);
+    event.sender.reload();
   }
-
-  dappStore.set('dapps', allDapps);
-  event.sender.reload();
-});
+);

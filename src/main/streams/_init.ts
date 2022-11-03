@@ -31,10 +31,12 @@ const CONF = {
   } as IConf<ReplaySubject<TabbedBrowserWindow>>,
   dappSafeModeViews: {
     subject: new ReplaySubject(1),
-  } as IConf<ReplaySubject<{
-    baseView: BrowserView;
-    safeView: BrowserView;
-  }>>,
+  } as IConf<
+    ReplaySubject<{
+      baseView: BrowserView;
+      safeView: BrowserView;
+    }>
+  >,
   securityCheckPopupWindowReady: {
     subject: new ReplaySubject(1),
   } as IConf<ReplaySubject<BrowserWindow>>,

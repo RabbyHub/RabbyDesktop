@@ -1,8 +1,14 @@
 import { BrowserView, BrowserWindow } from 'electron';
 import { firstValueFrom } from 'rxjs';
 
-import { IS_RUNTIME_PRODUCTION, RABBY_MAIN_POPUP_VIEW } from '../../isomorphic/constants';
-import { DAPP_SAFE_VIEW_SIZES, NATIVE_HEADER_H } from '../../isomorphic/const-size';
+import {
+  IS_RUNTIME_PRODUCTION,
+  RABBY_MAIN_POPUP_VIEW,
+} from '../../isomorphic/constants';
+import {
+  DAPP_SAFE_VIEW_SIZES,
+  NATIVE_HEADER_H,
+} from '../../isomorphic/const-size';
 import { randString } from '../../isomorphic/string';
 import { integrateQueryToUrl, parseQueryString } from '../../isomorphic/url';
 
@@ -27,11 +33,13 @@ function updateSubWindowPosition(
     height,
   });
 
-  const safeTopOffset = NATIVE_HEADER_H + DAPP_SAFE_VIEW_SIZES.alertHeaderHeight;
+  const safeTopOffset =
+    NATIVE_HEADER_H + DAPP_SAFE_VIEW_SIZES.alertHeaderHeight;
   views.safeView.setBounds({
     x: DAPP_SAFE_VIEW_SIZES.horizontalPadding,
     y: safeTopOffset,
-    width: width - DAPP_SAFE_VIEW_SIZES.horizontalPadding * 2 - 1/* padding-left */,
+    width:
+      width - DAPP_SAFE_VIEW_SIZES.horizontalPadding * 2 - 1 /* padding-left */,
     height: height - safeTopOffset,
   });
 }
@@ -48,7 +56,7 @@ onMainWindowReady().then((mainWin) => {
       nodeIntegration: false,
       allowRunningInsecureContent: false,
       autoplayPolicy: 'user-gesture-required',
-    }
+    },
   });
 
   updateSubWindowPosition(mainWin.window, { baseView, safeView });
@@ -84,15 +92,14 @@ export async function attachAlertBrowserView(
 ) {
   const dappSafeViewLoadId = randString(6);
   const targetWin = _targetwin || (await onMainWindowReady()).window;
-  const {
-    baseView,
-    safeView,
-  } = await firstValueFrom(fromMainSubject('dappSafeModeViews'));
+  const { baseView, safeView } = await firstValueFrom(
+    fromMainSubject('dappSafeModeViews')
+  );
 
   baseView.webContents.send('__internal_rpc:dapp-tabs:open-safe-view', {
     url,
     isExisted,
-    status: 'start-loading'
+    status: 'start-loading',
   });
 
   if (!IS_RUNTIME_PRODUCTION && !safeView.webContents.isDevToolsOpened()) {
@@ -108,7 +115,7 @@ export async function attachAlertBrowserView(
     baseView.webContents.send('__internal_rpc:dapp-tabs:open-safe-view', {
       url,
       isExisted,
-      status: 'loaded'
+      status: 'loaded',
     });
     targetWin.addBrowserView(safeView);
     targetWin.setTopBrowserView(safeView);
@@ -121,7 +128,9 @@ export async function attachAlertBrowserView(
 
 onIpcMainEvent('__internal_rpc:dapp-tabs:close-safe-view', async () => {
   const targetWin = (await onMainWindowReady()).window;
-  const dappSafeModeViews = await firstValueFrom(fromMainSubject('dappSafeModeViews'));
+  const dappSafeModeViews = await firstValueFrom(
+    fromMainSubject('dappSafeModeViews')
+  );
 
   targetWin.removeBrowserView(dappSafeModeViews.safeView);
   targetWin.removeBrowserView(dappSafeModeViews.baseView);

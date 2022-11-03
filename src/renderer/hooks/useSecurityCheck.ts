@@ -139,7 +139,8 @@ export function useCheckDapp() {
     ) {
       return {
         resultText: `The web page was updated within 24 hours at ${formatSeconds(
-          checkResult.checkLatestUpdate.latestChangedItemIn24Hr.create_at || 0, 'YYYY/MM/DD HH:mm'
+          checkResult.checkLatestUpdate.latestChangedItemIn24Hr.create_at || 0,
+          'YYYY/MM/DD HH:mm'
         )}. To help you avoid potential code tampering and system bugs, we recommend using it 24 hours after the updates.`,
       };
     }

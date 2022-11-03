@@ -240,7 +240,7 @@ type ChannelMessagePayload = {
     response: [];
   };
   '__internal_rpc:debug-tools:operate-debug-insecure-dapps': {
-    send: [ type: 'add' | 'trim'];
+    send: [type: 'add' | 'trim'];
     response: [];
   };
   '__internal_webui-window-close': {

@@ -1,17 +1,14 @@
-
 /// <reference path="../../preload.d.ts" />
 
 import './DappSafeView.less';
 
 import { Modal } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
-import {
-  canoicalizeDappUrl,
-} from 'isomorphic/url';
-import useDragHeadbar from '../../hooks/useDragheadbar';
+import { canoicalizeDappUrl } from 'isomorphic/url';
 import classNames from 'classnames';
+import useDragHeadbar from '../../hooks/useDragheadbar';
 
-function closeView () {
+function closeView() {
   window.rabbyDesktop.ipcRenderer.sendMessage(
     '__internal_rpc:dapp-tabs:close-safe-view'
   );
@@ -91,9 +88,15 @@ export default function DappSafeView() {
         )}
       </div>
       <div className="webview-loading">
-        <div className='icon-wrapper'>
-          <img className='icon-shield' src="rabby-internal://assets/icons/alert-insecurity/icon-shield.svg" />
-          <img className='icon-loading' src="rabby-internal://assets/icons/alert-insecurity/icon-loading.svg" />
+        <div className="icon-wrapper">
+          <img
+            className="icon-shield"
+            src="rabby-internal://assets/icons/alert-insecurity/icon-shield.svg"
+          />
+          <img
+            className="icon-loading"
+            src="rabby-internal://assets/icons/alert-insecurity/icon-loading.svg"
+          />
         </div>
       </div>
     </Modal>
