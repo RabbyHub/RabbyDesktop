@@ -1,7 +1,19 @@
 
-v0.1.6 / 2022-11-02
+v0.1.7 / 2022-11-06
 ==================
 
+  * chore: lint fix.
+  * feat: hide view in SecurityCheck UI on first render for security check for safety.
+  * feat: tuning style for security check
+  * chore: lint fix.
+  * fix: format seconds on security check work flow
+  * feat: tuning style.
+  * fix: style for dapp address bar
+
+v0.1.6 / 2022-11-02
+===================
+
+  * Release v0.1.6
   * feat: style fix.
   * fix: allow cut hotkey on darwin.
   * feat: better dapp safe view, replace webview tag with BrowserView.
