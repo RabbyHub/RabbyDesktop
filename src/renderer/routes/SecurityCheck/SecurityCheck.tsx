@@ -38,6 +38,7 @@ export default function ModalSecurityCheck() {
 
   useLayoutEffect(() => {
     resetView();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!checkingUrl) return null;
@@ -101,7 +102,9 @@ export default function ModalSecurityCheck() {
         <div className="header-info">
           <div className="inner">
             {isChecking ? (
-              <div className="check-status-text">Dapp Security Engine is scanning ...</div>
+              <div className="check-status-text">
+                Dapp Security Engine is scanning ...
+              </div>
             ) : checkResult.countDangerIssues ? (
               <div className="check-status-text">
                 Dapp Security Engine found {checkResult.countDangerIssues}{' '}
@@ -111,14 +114,13 @@ export default function ModalSecurityCheck() {
               </div>
             ) : checkResult.countIssues ? (
               <div className="check-status-text">
-                Dapp Security Engine found {checkResult.countIssues}{' '}
-                warning(s)
+                Dapp Security Engine found {checkResult.countIssues} warning(s)
               </div>
             ) : (
               // TODO: just close this modal on no issues
               <div className="check-status-text two-lines">
-                Dapp Security Engine found no risks and will continue to scan
-                as you use the dapp
+                Dapp Security Engine found no risks and will continue to scan as
+                you use the dapp
               </div>
             )}
             {!dappInfo ? null : (

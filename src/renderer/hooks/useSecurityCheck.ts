@@ -65,16 +65,13 @@ export function useSecurityCheckForDapp() {
     [resetState]
   );
 
-  const resetView = useCallback(
-    () => {
-      window.rabbyDesktop.ipcRenderer.sendMessage(
-        '__internal_rpc:security-check:close-view'
-      );
+  const resetView = useCallback(() => {
+    window.rabbyDesktop.ipcRenderer.sendMessage(
+      '__internal_rpc:security-check:close-view'
+    );
 
-      resetState();
-    },
-    [resetState]
-  );
+    resetState();
+  }, [resetState]);
 
   const doFetch = useCallback(
     async (url: string) => {
