@@ -287,6 +287,16 @@ export async function queryDappLatestUpdateInfo({
     .then((res) => res.data);
 }
 
+function getMockedChanged(dapp_id: string) {
+  return {
+    dapp_id,
+    version: '482edf6719d385a4362f28f86d19025a',
+    is_changed: true,
+    new_detected_address_list: [],
+    create_at: Date.now() - 30 * 1e3,
+  };
+}
+
 const securityCheckResults = new LRUCache<
   IDapp['origin'],
   ISecurityCheckResult
@@ -317,6 +327,9 @@ async function doCheckDappOrigin(origin: string) {
           timeout: false,
           latestItem: latestItem || null,
           latestChangedItemIn24Hr,
+          /**
+           * leave here to mock the result
+           */
           // latestChangedItemIn24Hr: getMockedChanged(latestItem?.dapp_id)
         };
       })
@@ -337,6 +350,12 @@ async function doCheckDappOrigin(origin: string) {
         };
       }),
   ]);
+
+  /**
+   * leave here to mock cert invalid error
+   */
+  // httpsCheckResult = httpsCheckResult || {} as any;
+  // httpsCheckResult!.type = DETECT_ERR_CODES.HTTPS_CERT_INVALID;
 
   const checkHttps: ISecurityCheckResult['checkHttps'] =
     httpsCheckResult?.type === 'HTTPS_CERT_INVALID'

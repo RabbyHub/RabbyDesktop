@@ -138,16 +138,6 @@ onIpcMainEvent(
   }
 );
 
-function getMockedChanged(dapp_id: string) {
-  return {
-    dapp_id,
-    version: '482edf6719d385a4362f28f86d19025a',
-    is_changed: true,
-    new_detected_address_list: [],
-    create_at: Date.now() - 30 * 1e3,
-  };
-}
-
 onIpcMainEvent(
   '__internal_rpc:security-check:check-dapp-and-put',
   async (evt, reqid, dappUrl) => {

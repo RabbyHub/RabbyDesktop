@@ -46,7 +46,7 @@ export default function ModalSecurityCheck() {
       wrapClassName="modal-security-check-wrap"
       width={560}
       open={!!checkingUrl}
-      maskClosable={false}
+      maskClosable={!isChecking && checkResult.resultLevel === 'ok'}
       mask
       centered
       closable={false}
@@ -68,7 +68,7 @@ export default function ModalSecurityCheck() {
         {isChecking ? (
           <img
             className="bg-placeholder"
-            src="rabby-internal://assets/icons/security-check/modal-header-ok.svg"
+            src="rabby-internal://assets/icons/security-check/modal-header-ok-short.svg"
           />
         ) : (
           <>
@@ -95,29 +95,27 @@ export default function ModalSecurityCheck() {
 
         <div className="header-info">
           <div className="inner">
-            <div className="check-status-text">
-              {isChecking ? (
-                <>Dapp Security Engine is scanning ...</>
-              ) : checkResult.countDangerIssues ? (
-                <>
-                  Dapp Security Engine found {checkResult.countDangerIssues}{' '}
-                  danger(s)
-                  <br />
-                  Unable to proceed
-                </>
-              ) : checkResult.countIssues ? (
-                <>
-                  Dapp Security Engine found {checkResult.countIssues}{' '}
-                  warning(s)
-                </>
-              ) : (
-                // TODO: just close this modal on no issues
-                <>
-                  Dapp Security Engine found no risks and will continue to scan
-                  as you use the dapp
-                </>
-              )}
-            </div>
+            {isChecking ? (
+              <div className="check-status-text">Dapp Security Engine is scanning ...</div>
+            ) : checkResult.countDangerIssues ? (
+              <div className="check-status-text">
+                Dapp Security Engine found {checkResult.countDangerIssues}{' '}
+                danger(s)
+                <br />
+                Unable to proceed
+              </div>
+            ) : checkResult.countIssues ? (
+              <div className="check-status-text">
+                Dapp Security Engine found {checkResult.countIssues}{' '}
+                warning(s)
+              </div>
+            ) : (
+              // TODO: just close this modal on no issues
+              <div className="check-status-text two-lines">
+                Dapp Security Engine found no risks and will continue to scan
+                as you use the dapp
+              </div>
+            )}
             {!dappInfo ? null : (
               <div className="checking-dapp">
                 <span className="dapp-icon">
