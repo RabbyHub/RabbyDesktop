@@ -37,7 +37,7 @@ function makeDefaultCheckResult() {
   };
 }
 
-export function useCheckDapp() {
+export function useSecurityCheckForDapp() {
   const [checkingInfo, setCheckingInfo] = useState<
     typeof DEFAULT_CHECKING_INFO
   >({ ...DEFAULT_CHECKING_INFO });
@@ -59,6 +59,18 @@ export function useCheckDapp() {
         '__internal_rpc:security-check:close-view'
       );
       openDappAddressbarSecurityPopupView(dappUrl);
+
+      resetState();
+    },
+    [resetState]
+  );
+
+  const resetView = useCallback(
+    () => {
+      window.rabbyDesktop.ipcRenderer.sendMessage(
+        '__internal_rpc:security-check:close-view'
+      );
+
       resetState();
     },
     [resetState]
@@ -187,5 +199,6 @@ export function useCheckDapp() {
     closeNewTabAndPopupSecurityInfo,
 
     hideViewAndPopupSecurityInfo,
+    resetView,
   };
 }

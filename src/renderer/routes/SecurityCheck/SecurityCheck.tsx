@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import '../../css/style.less';
 
 import './SecurityCheck.less';
-import { useCheckDapp } from 'renderer/hooks/useSecurityCheck';
+import { useSecurityCheckForDapp } from 'renderer/hooks/useSecurityCheck';
 import { useLayoutEffect } from 'react';
 
 const ICON_LOADING =
@@ -31,9 +31,14 @@ export default function ModalSecurityCheck() {
     checkItemViewLatestUpdateInfo,
 
     hideViewAndPopupSecurityInfo,
+    resetView,
 
     closeNewTabAndPopupSecurityInfo,
-  } = useCheckDapp();
+  } = useSecurityCheckForDapp();
+
+  useLayoutEffect(() => {
+    resetView();
+  }, []);
 
   if (!checkingUrl) return null;
 
