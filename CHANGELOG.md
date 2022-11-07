@@ -1,7 +1,13 @@
 
-v0.1.7 / 2022-11-06
+v0.1.8 / 2022-11-07
 ==================
 
+  * feat: stability of security popup on address bar.
+
+v0.1.7 / 2022-11-06
+===================
+
+  * Release v0.1.7
   * chore: lint fix.
   * feat: hide view in SecurityCheck UI on first render for security check for safety.
   * feat: tuning style for security check
