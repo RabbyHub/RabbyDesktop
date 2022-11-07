@@ -26,6 +26,8 @@ type M2RChanneMessagePayload = {
     isExisted: boolean;
     status: 'start-loading' | 'loaded';
   };
+  /* eslint-disable-next-line @typescript-eslint/ban-types */
+  '__internal_rpc:loading-view:load-dapp': {};
 };
 
 type ChannelMessagePayload = {

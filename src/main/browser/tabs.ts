@@ -25,8 +25,6 @@ const DEFAULT_TOPBAR_STACKS = {
 export class Tab {
   id: BrowserView['webContents']['id'];
 
-  initialUrl: string = '';
-
   view?: BrowserView;
 
   window?: BrowserWindow;
@@ -35,11 +33,17 @@ export class Tab {
 
   webContents?: BrowserView['webContents'];
 
-  topbarStacks: ITabOptions['topbarStacks'] = { ...DEFAULT_TOPBAR_STACKS };
-
   destroyed: boolean = false;
 
   tabs: Tabs;
+
+  private $meta: {
+    initialUrl: ITabOptions['initialUrl'];
+    topbarStacks: ITabOptions['topbarStacks'];
+  } = {
+    initialUrl: '',
+    topbarStacks: { ...DEFAULT_TOPBAR_STACKS },
+  }
 
   constructor(
     ofWindow: BrowserWindow,
@@ -52,7 +56,6 @@ export class Tab {
 
     this.webContents = this.view.webContents;
     this.window.addBrowserView(this.view);
-    this.initialUrl = initialUrl || '';
 
     this.loadingView = new BrowserView();
     this.loadingView.webContents.loadURL(RABBY_LOADING_URL);
@@ -66,7 +69,8 @@ export class Tab {
       this.window?.removeBrowserView(this.loadingView!);
     });
 
-    this.topbarStacks = { ...DEFAULT_TOPBAR_STACKS, ...topbarStacks };
+    this.$meta.initialUrl = initialUrl || '';
+    this.$meta.topbarStacks = { ...DEFAULT_TOPBAR_STACKS, ...topbarStacks };
 
     const dispose = onIpcMainEvent(
       '__internal_webui-window-close',
@@ -118,15 +122,23 @@ export class Tab {
     this.view = undefined;
   }
 
+  getInitialUrl() {
+    return this.$meta.initialUrl;
+  }
+
   async loadURL(url: string) {
     const dapps = dappStore.get('dapps') || [];
     const { origin } = new URL(url);
     const dapp = dapps.find((item) => item.origin === origin);
     if (dapp) {
       setTimeout(() => {
-        this.loadingView?.webContents.send('load-dapp', dapp);
+        this.loadingView?.webContents.send(
+          '__internal_rpc:loading-view:load-dapp',
+          dapp
+        );
       }, 200);
     }
+
     return this.view?.webContents.loadURL(url);
   }
 
@@ -138,8 +150,8 @@ export class Tab {
     const [width, height] = this.window!.getSize();
 
     const hideTopbar =
-      !this.topbarStacks?.tabs && !this.topbarStacks?.navigation;
-    const hasNavigationBar = !!this.topbarStacks?.navigation;
+      !this.$meta.topbarStacks?.tabs && !this.$meta.topbarStacks?.navigation;
+    const hasNavigationBar = !!this.$meta.topbarStacks?.navigation;
 
     const topbarHeight = hideTopbar
       ? 0

@@ -97,7 +97,7 @@ app.on('web-contents-created', async (evtApp, webContents) => {
           if (openedTab) {
             tabbedWin?.tabs.select(openedTab!.id);
             // webuiExtension's webContents is just the webContents of tabbedWin its belongs to
-            tabbedWin?.topbarWebContents.send(
+            tabbedWin?.sendMessageToShellUI(
               '__internal_rpc:webui-extension:switch-active-dapp',
               {
                 tabId: openedTab.id,
@@ -224,9 +224,7 @@ export default function bootstrap() {
         x: lastMainWinPos.x,
         y: lastMainWinPos.y,
       },
-      queryStringArgs: {
-        __webuiIsMainWindow: true,
-      },
+      isMainWindow: true,
     });
 
     const mainWin = mainWindow.window;

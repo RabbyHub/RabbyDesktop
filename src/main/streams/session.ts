@@ -159,7 +159,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
       const tab = win.createTab({
         topbarStacks: {
           navigation: win.hasNavigationBar,
-        }
+        },
       });
 
       if (details.url) tab.loadURL(details.url);

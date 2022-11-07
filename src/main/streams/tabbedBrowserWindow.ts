@@ -91,11 +91,6 @@ export async function createWindow(
     valueToMainSubject('mainWindowReady', mainWindow);
   }
 
-  // TODO: use other params to activate
-  if (process.env.SHELL_DEBUG) {
-    win.topbarWebContents.openDevTools({ mode: 'detach' });
-  }
-
   return win;
 }
 

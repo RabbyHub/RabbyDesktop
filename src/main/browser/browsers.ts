@@ -4,6 +4,7 @@ import { getOrPutCheckResult } from '../utils/dapps';
 import { integrateQueryToUrl, isUrlFromDapp } from '../../isomorphic/url';
 import { onIpcMainEvent } from '../utils/ipcMainEvents';
 import { Tab, Tabs } from './tabs';
+import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 
 export type TabbedBrowserWindowOptions = {
   webuiExtensionId: string;
@@ -15,14 +16,14 @@ export type TabbedBrowserWindowOptions = {
   queryStringArgs?: {
     [key: `__webui${string}`]: string | number | boolean;
   };
+
+  isMainWindow?: boolean;
 };
 
 export default class TabbedBrowserWindow {
   window: BrowserWindow;
 
   id: TabbedBrowserWindow['window']['id'];
-
-  topbarWebContents: TabbedBrowserWindow['window']['webContents'];
 
   session: Electron.Session;
 
@@ -36,7 +37,13 @@ export default class TabbedBrowserWindow {
   // - [x] No Navigation Bar
   windowType: Exclude<TabbedBrowserWindowOptions['windowType'], void>;
 
-  hasNavigationBar: boolean = false;
+  private $meta: {
+    hasNavigationBar: boolean;
+    isMainWindow: boolean;
+  } = {
+    hasNavigationBar: false,
+    isMainWindow: false,
+  };
 
   constructor(options: TabbedBrowserWindowOptions) {
     this.session = options.session || session.defaultSession;
@@ -47,28 +54,32 @@ export default class TabbedBrowserWindow {
     this.window = new BrowserWindow(options.window);
     this.windowType = options.windowType || 'normal';
     this.id = this.window.id;
-    this.topbarWebContents = this.window.webContents;
-    this.hasNavigationBar = this.windowType !== 'popup';
+
+    this.$meta.hasNavigationBar = this.windowType !== 'popup';
+    this.$meta.isMainWindow = !!options.isMainWindow;
 
     const origUrl = `chrome-extension://${options.webuiExtensionId}/shell-webui.html`;
     /* eslint-disable @typescript-eslint/naming-convention */
     const webuiUrl = integrateQueryToUrl(origUrl, {
       ...options.queryStringArgs,
-      ...(this.hasNavigationBar && { __withNavigationbar: 'true' }),
+      ...(this.$meta.hasNavigationBar && { __withNavigationbar: 'true' }),
+      ...(this.$meta.isMainWindow && { __webuiIsMainWindow: 'true' }),
       // TODO: set 'false' for 'popup' window
       __webuiClosable: this.windowType !== 'popup' ? 'true' : 'false',
-      __webuiWindowsId: `${this.id}`,
+      ...(!IS_RUNTIME_PRODUCTION && {
+        __webuiWindowsId: `${this.id}`,
+      }),
     });
     /* eslint-enable @typescript-eslint/naming-convention */
 
-    this.topbarWebContents.loadURL(webuiUrl);
+    this.window.webContents.loadURL(webuiUrl);
 
     this.tabs = new Tabs(this.window);
 
     this.tabs.on('tab-created', (tab: Tab) => {
-      const url = tab.initialUrl || options.defaultTabUrl;
+      const url = tab.getInitialUrl() || options.defaultTabUrl;
       if (url) {
-        tab.webContents!.loadURL(url);
+        tab.webContents?.loadURL(url);
       }
 
       // Track tab that may have been created outside of the extensions API.
@@ -103,7 +114,7 @@ export default class TabbedBrowserWindow {
       this.createTab({
         topbarStacks: {
           tabs: true,
-          navigation: this.hasNavigationBar,
+          navigation: this.$meta.hasNavigationBar,
         },
       });
     });
@@ -122,5 +133,9 @@ export default class TabbedBrowserWindow {
     return this.tabs.create({
       ...options,
     });
+  }
+
+  sendMessageToShellUI(message: string, ...args: any[]) {
+    this.window.webContents.send(message, ...args);
   }
 }

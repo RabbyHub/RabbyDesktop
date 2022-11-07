@@ -38,9 +38,12 @@ export default function App() {
         clearInterval(ref.current);
       }
     );
-    window.rabbyDesktop.ipcRenderer.on('load-dapp' as any, (newVal: IDapp) => {
-      setDapp(newVal);
-    });
+    window.rabbyDesktop.ipcRenderer.on(
+      '__internal_rpc:loading-view:load-dapp' as any,
+      (newVal: IDapp) => {
+        setDapp(newVal);
+      }
+    );
   }, [dapp?.origin]);
 
   return (
