@@ -223,8 +223,12 @@ type ChannelMessagePayload = {
     send: [];
     response: [];
   };
-  '__internal_rpc:security-addressbarpopup:show': {
+  '__internal_rpc:security-addressbarpopup:request-show': {
     send: [dappUrl: string];
+    response: [];
+  };
+  '__internal_rpc:security-addressbarpopup:do-show': {
+    send: [];
     response: [];
   };
   '__internal_rpc:security-addressbarpopup:switch-pageview': {

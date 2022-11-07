@@ -105,7 +105,7 @@ onMainWindowReady().then(async (mainWin) => {
 });
 
 onIpcMainEvent(
-  '__internal_rpc:security-addressbarpopup:show',
+  '__internal_rpc:security-addressbarpopup:request-show',
   async (_evt, dappUrl) => {
     const targetWin = (await onMainWindowReady()).window;
     const popupWin = await firstValueFrom(
@@ -124,10 +124,17 @@ onIpcMainEvent(
     );
 
     updateSubWindowPosition(targetWin, popupWin);
-    showPopupWindow(popupWin);
-    popupWin.moveTop();
   }
 );
+
+onIpcMainEvent('__internal_rpc:security-addressbarpopup:do-show', async () => {
+  const popupWin = await firstValueFrom(
+    fromMainSubject('securityAddressbarPopup')
+  );
+  popupWin.moveTop();
+  showPopupWindow(popupWin);
+  popupWin.focus();
+});
 
 onIpcMainEvent('__internal_rpc:security-addressbarpopup:hide', async () => {
   // const targetWin = (await onMainWindowReady()).window;

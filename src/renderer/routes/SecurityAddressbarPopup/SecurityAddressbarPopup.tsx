@@ -78,6 +78,10 @@ function usePageState() {
       (evt) => {
         setCheckResult(evt.checkResult);
         setPageState({ page: 'entry' });
+
+        window.rabbyDesktop.ipcRenderer.sendMessage(
+          '__internal_rpc:security-addressbarpopup:do-show'
+        );
       }
     );
 

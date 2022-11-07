@@ -91,6 +91,14 @@ export default function DappAddressBar({
               </div>
             </>
           )}
+          {checkResult.resultLevel === 'danger' && (
+            <>
+              <img src="rabby-internal://assets/icons/native-tabs/icon-shield-danger.svg" />
+              <div className={styles.summaryText}>
+                Found {checkResult.countDangerIssues} Danger Risk(s)
+              </div>
+            </>
+          )}
         </div>
       )}
       {isInternalUrl ? (

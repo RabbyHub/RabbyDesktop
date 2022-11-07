@@ -30,16 +30,10 @@ export default function ModalSecurityCheck() {
     checkItemViewHttps,
     checkItemViewLatestUpdateInfo,
 
-    hideViewAndPopupSecurityInfo,
-    resetView,
-
-    closeNewTabAndPopupSecurityInfo,
+    popupSecurityInfoOnAddressbar,
+    closeNewTab,
+    hideView,
   } = useSecurityCheckForDapp();
-
-  useLayoutEffect(() => {
-    resetView();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   if (!checkingUrl) return null;
 
@@ -57,7 +51,7 @@ export default function ModalSecurityCheck() {
       centered
       closable={false}
       onCancel={() => {
-        hideViewAndPopupSecurityInfo(checkingUrl);
+        hideView();
       }}
       footer={null}
     >
@@ -202,14 +196,20 @@ export default function ModalSecurityCheck() {
             <Button
               type="default"
               className="J_op J_op_cancel"
-              onClick={() => hideViewAndPopupSecurityInfo(checkingUrl)}
+              onClick={() => {
+                hideView();
+                popupSecurityInfoOnAddressbar(checkingUrl);
+              }}
             >
               Continue to use
             </Button>
             <Button
               type="primary"
               className="J_op J_op_warning"
-              onClick={() => closeNewTabAndPopupSecurityInfo(checkingUrl)}
+              onClick={() => {
+                closeNewTab();
+                hideView();
+              }}
             >
               Close Dapp
             </Button>
@@ -220,7 +220,10 @@ export default function ModalSecurityCheck() {
             <Button
               type="primary"
               className="J_op J_op_danger"
-              onClick={() => closeNewTabAndPopupSecurityInfo(checkingUrl)}
+              onClick={() => {
+                closeNewTab();
+                hideView();
+              }}
             >
               Close Dapp
             </Button>

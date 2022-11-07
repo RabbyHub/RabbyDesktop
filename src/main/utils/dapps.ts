@@ -293,7 +293,7 @@ function getMockedChanged(dapp_id: string) {
     version: '482edf6719d385a4362f28f86d19025a',
     is_changed: true,
     new_detected_address_list: [],
-    create_at: Date.now() - 30 * 1e3,
+    create_at: (Date.now() - 30 * 1e3) / 1e3,
   };
 }
 

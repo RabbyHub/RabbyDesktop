@@ -18,13 +18,17 @@
     visibility: visible;
   }
 
+  &:global.J_security_level-ok {
+    background: linear-gradient(0deg, rgba(134, 151, 255, 0.2), rgba(134, 151, 255, 0.2)), #ffffff;
+  }
+
   &:global.J_security_level-warning {
     color: #fff;
     background-color: var(--color-orange);
   }
 
-  &:global.J_security_level-ok {
-    background: linear-gradient(0deg, rgba(134, 151, 255, 0.2), rgba(134, 151, 255, 0.2)), #ffffff;
+  &:global.J_security_level-danger {
+    background-color: var(--color-red);
   }
 }
 

@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 import { formatSeconds } from '@/isomorphic/date';
 import {
@@ -53,25 +59,19 @@ export function useSecurityCheckForDapp() {
     []
   );
 
-  const hideViewAndPopupSecurityInfo = useCallback(
-    (dappUrl: string) => {
-      window.rabbyDesktop.ipcRenderer.sendMessage(
-        '__internal_rpc:security-check:close-view'
-      );
-      openDappAddressbarSecurityPopupView(dappUrl);
-
-      resetState();
-    },
-    [resetState]
-  );
-
-  const resetView = useCallback(() => {
+  const hideView = useCallback(() => {
     window.rabbyDesktop.ipcRenderer.sendMessage(
       '__internal_rpc:security-check:close-view'
     );
-
     resetState();
   }, [resetState]);
+
+  const closeNewTab = useCallback(() => {
+    window.rabbyDesktop.ipcRenderer.sendMessage(
+      '__internal_rpc:security-check:continue-close-dapp',
+      checkingInfo.continualOpId
+    );
+  }, [checkingInfo.continualOpId]);
 
   const doFetch = useCallback(
     async (url: string) => {
@@ -97,7 +97,8 @@ export function useSecurityCheckForDapp() {
 
           setTimeout(() => {
             if (newVal.resultLevel === 'ok') {
-              hideViewAndPopupSecurityInfo(url);
+              hideView();
+              openDappAddressbarSecurityPopupView(url);
             }
           }, 500);
         })
@@ -109,7 +110,7 @@ export function useSecurityCheckForDapp() {
           }));
         });
     },
-    [hideViewAndPopupSecurityInfo]
+    [hideView]
   );
 
   useEffect(() => {
@@ -127,19 +128,14 @@ export function useSecurityCheckForDapp() {
   const isChecking =
     checkingInfo.checkingHttps || checkingInfo.checkingLastUpdate;
 
-  const closeNewTabAndPopupSecurityInfo = useCallback(
-    (dappUrl: string) => {
-      window.rabbyDesktop.ipcRenderer.sendMessage(
-        '__internal_rpc:security-check:continue-close-dapp',
-        checkingInfo.continualOpId
-      );
-      window.rabbyDesktop.ipcRenderer.sendMessage(
-        '__internal_rpc:security-check:close-view'
-      );
-      openDappAddressbarSecurityPopupView(dappUrl);
-    },
-    [checkingInfo.continualOpId]
-  );
+  useLayoutEffect(() => {
+    window.rabbyDesktop.ipcRenderer.sendMessage(
+      '__internal_rpc:security-check:close-view'
+    );
+
+    resetState();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const checkItemViewLatestUpdateInfo = useMemo(() => {
     if (
@@ -193,9 +189,8 @@ export function useSecurityCheckForDapp() {
     checkItemViewHttps,
     checkItemViewLatestUpdateInfo,
 
-    closeNewTabAndPopupSecurityInfo,
-
-    hideViewAndPopupSecurityInfo,
-    resetView,
+    popupSecurityInfoOnAddressbar: openDappAddressbarSecurityPopupView,
+    closeNewTab,
+    hideView,
   };
 }
