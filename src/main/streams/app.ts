@@ -106,7 +106,7 @@ app.on('web-contents-created', async (evtApp, webContents) => {
           } else if (mainTabbedWin === tabbedWin) {
             const mainWindow = tabbedWin.window;
 
-            const continualOpenedTab = tabbedWin.tabs.create();
+            const continualOpenedTab = tabbedWin.createTab();
             continualOpenedTab?.loadURL(details.url);
 
             const closeOpenedTab = () => {
@@ -160,7 +160,7 @@ app.on('web-contents-created', async (evtApp, webContents) => {
             createWindow({ defaultTabUrl: winURL });
             break;
           default: {
-            const tab = win.tabs.create();
+            const tab = win.createTab();
             tab.loadURL(winURL);
             break;
           }

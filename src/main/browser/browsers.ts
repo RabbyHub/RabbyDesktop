@@ -100,7 +100,7 @@ export default class TabbedBrowserWindow {
 
     queueMicrotask(() => {
       // Create initial tab
-      this.tabs.create({
+      this.createTab({
         topbarStacks: {
           tabs: true,
           navigation: this.hasNavigationBar,
@@ -116,5 +116,11 @@ export default class TabbedBrowserWindow {
 
   getFocusedTab() {
     return this.tabs.selected;
+  }
+
+  createTab(options?: Parameters<Tabs['create']>[0]) {
+    return this.tabs.create({
+      ...options,
+    });
   }
 }

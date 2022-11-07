@@ -42,13 +42,14 @@ export class Tab {
   tabs: Tabs;
 
   constructor(
-    parentWindow: BrowserWindow,
+    ofWindow: BrowserWindow,
     { tabs, topbarStacks, initialUrl }: ITabOptions
   ) {
     this.tabs = tabs;
     this.view = new BrowserView();
     this.id = this.view.webContents.id;
-    this.window = parentWindow;
+    this.window = ofWindow;
+
     this.webContents = this.view.webContents;
     this.window.addBrowserView(this.view);
     this.initialUrl = initialUrl || '';

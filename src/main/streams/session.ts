@@ -156,10 +156,10 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
         throw new Error(`Unable to find windowId=${details.windowId}`);
       }
 
-      const tab = win.tabs.create({
+      const tab = win.createTab({
         topbarStacks: {
           navigation: win.hasNavigationBar,
-        },
+        }
       });
 
       if (details.url) tab.loadURL(details.url);
