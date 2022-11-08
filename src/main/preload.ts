@@ -10,7 +10,7 @@ import { isDappProtocol } from 'isomorphic/url';
 
 if (
   window.location.protocol === 'chrome-extension:' &&
-  window.location.pathname === '/shell-webui.html'
+  window.location.pathname === '/webui.html'
 ) {
   // Inject <browser-action-list> element into WebUI
   injectBrowserAction();

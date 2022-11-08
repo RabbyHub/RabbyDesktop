@@ -53,7 +53,7 @@ export function integrateQueryToUrl(
 
 export function isRabbyShellURL(url: string) {
   return (
-    url.startsWith('chrome-extension://') && url.includes('/shell-webui.html')
+    url.startsWith('chrome-extension://') && url.includes('/webui.html')
   );
 }
 

@@ -28,7 +28,7 @@ const configuration: webpack.Configuration = {
   target: ['web', 'electron-renderer'],
 
   entry: {
-    ...Object.values(webpackPaths.rendererEntries).reduce((accu, cur) => {
+    ...Object.values(webpackPaths.entriesRenderer).reduce((accu, cur) => {
       accu[cur.name] = cur.jsEntry;
       return accu;
     }, {})
@@ -116,7 +116,7 @@ const configuration: webpack.Configuration = {
       analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
     }),
 
-    ...Object.values(webpackPaths.rendererEntries).map(({ name, target, htmlFile }) => {
+    ...Object.values(webpackPaths.entriesRenderer).map(({ name, target, htmlFile }) => {
       return new HtmlWebpackPlugin({
         filename: target,
         template: htmlFile,

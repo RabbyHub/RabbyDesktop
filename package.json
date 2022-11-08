@@ -32,7 +32,7 @@
     "build:renderer": "npm run clean:renderer && cross-env-shell NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
     "build:shell": "npm run clean:shell && cross-env-shell NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.shell.prod.ts",
     "clean:renderer": "rimraf release/app/dist/renderer",
-    "clean:shell": "rimraf assets/desktop_shell",
+    "clean:shell": "rimraf assets/desktop_shell && rimraf assets/chrome_exts/*",
     "postinstall": "npm run depcheck",
     "depcheck": "ts-node .erb/scripts/check-native-dep.js && electron-builder install-app-deps && cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.dev.dll.ts",
     "lint": "cross-env-shell NODE_ENV=development eslint --ext .js,.jsx,.ts,.tsx ./src",

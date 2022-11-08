@@ -56,9 +56,9 @@ export function getShellPageUrl(
   switch (type) {
     case 'debug-new-tab':
     default:
-      return `chrome-extension://${webuiExtensionId}/shell-new-tab.html`;
+      return `chrome-extension://${webuiExtensionId}/new-tab.html`;
     case 'webui':
-      return `chrome-extension://${webuiExtensionId}/shell-webui.html`;
+      return `chrome-extension://${webuiExtensionId}/webui.html`;
   }
 }
 

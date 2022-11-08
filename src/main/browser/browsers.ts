@@ -58,7 +58,7 @@ export default class TabbedBrowserWindow {
     this.$meta.hasNavigationBar = this.windowType !== 'popup';
     this.$meta.isMainWindow = !!options.isMainWindow;
 
-    const origUrl = `chrome-extension://${options.webuiExtensionId}/shell-webui.html`;
+    const origUrl = `chrome-extension://${options.webuiExtensionId}/webui.html`;
     /* eslint-disable @typescript-eslint/naming-convention */
     const webuiUrl = integrateQueryToUrl(origUrl, {
       ...options.queryStringArgs,
@@ -127,6 +127,10 @@ export default class TabbedBrowserWindow {
 
   getFocusedTab() {
     return this.tabs.selected;
+  }
+
+  getMeta () {
+    return Object.assign({}, this.$meta);
   }
 
   createTab(options?: Parameters<Tabs['create']>[0]) {

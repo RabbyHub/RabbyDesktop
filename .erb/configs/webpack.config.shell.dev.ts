@@ -1,11 +1,8 @@
 import 'webpack-dev-server';
 import path from 'path';
-import fs from 'fs';
 import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-import chalk from 'chalk';
 import { merge } from 'webpack-merge';
-import { execSync, spawn } from 'child_process';
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import baseConfig from './webpack.config.base';
@@ -30,17 +27,7 @@ const configuration: webpack.Configuration = {
 
   target: ['web', 'electron-renderer'],
 
-  entry: {
-    'shell-webui': [
-      `webpack-dev-server/client?http://localhost:${port}/dist`,
-      'webpack/hot/only-dev-server',
-      webpackPaths.shellEntries['shell-webui'].jsEntry,
-    ],
-    'shell-new-tab': webpackPaths.shellEntries['shell-new-tab'].jsEntry,
-  },
-
   output: {
-    path: webpackPaths.distShellPath,
     publicPath: '/',
     filename: '[name].js',
     assetModuleFilename: 'assets/[name].[hash][ext]',
@@ -94,8 +81,28 @@ const configuration: webpack.Configuration = {
     }),
 
     new ReactRefreshWebpackPlugin(),
+  ],
 
-    ...Object.values(webpackPaths.shellEntries).map(({ name, target, htmlFile }) => {
+  node: {
+    __dirname: false,
+    __filename: false,
+  },
+};
+
+const configurationShell: webpack.Configuration = {
+  entry: {
+    [webpackPaths.entriesShell['_shell-webui'].name]: [
+      `webpack-dev-server/client?http://localhost:${port}/dist`,
+      'webpack/hot/only-dev-server',
+      webpackPaths.entriesShell['_shell-webui'].jsEntry,
+    ],
+    [webpackPaths.entriesShell['_shell-new-tab'].name]: webpackPaths.entriesShell['_shell-new-tab'].jsEntry,
+  },
+  output: {
+    path: path.join(webpackPaths.assetsPath, 'desktop_shell'),
+  },
+  plugins: [
+    ...Object.values(webpackPaths.entriesShell).filter(item => !!item.htmlFile).map(({ name, target, htmlFile }) => {
       return new HtmlWebpackPlugin({
         filename: target,
         template: htmlFile,
@@ -105,10 +112,6 @@ const configuration: webpack.Configuration = {
           removeComments: true,
         },
         chunks: [name],
-        // templateParameters (compilation, files, tags) {
-        //   return {
-        //   }
-        // },
         hash: !isProduction,
         inject: 'body',
         isBrowser: false,
@@ -120,16 +123,10 @@ const configuration: webpack.Configuration = {
 
     new CopyWebpackPlugin({
       patterns: [
-        { from: path.join(webpackPaths.srcRendererPath, 'shell-manifest.json'), to: path.join(webpackPaths.distShellPath, 'manifest.json') },
+        { from: path.join(webpackPaths.srcPath, 'extension-shell/manifest.json'), to: path.join(webpackPaths.assetsPath, 'desktop_shell/manifest.json') },
       ],
     })
   ],
-
-  node: {
-    __dirname: false,
-    __filename: false,
-  },
-
   devServer: {
     port,
     compress: true,
@@ -151,4 +148,56 @@ const configuration: webpack.Configuration = {
   },
 };
 
-export default merge(baseConfig, configuration);
+const configurationRabby: webpack.Configuration = {
+  entry: {
+    [webpackPaths.entriesRabby['rabby-background'].name]: webpackPaths.entriesRabby['rabby-background'].jsEntry,
+    [webpackPaths.entriesRabby['rabby-content-script'].name]: webpackPaths.entriesRabby['rabby-content-script'].jsEntry,
+  },
+  output: {
+    path: path.join(webpackPaths.distExtsPath, 'rabby'),
+  },
+  plugins: [
+    ...Object.values(webpackPaths.entriesRabby).filter(item => !!item.htmlFile).map(({ name, target, htmlFile }) => {
+      return new HtmlWebpackPlugin({
+        filename: target,
+        template: htmlFile,
+        minify: {
+          collapseWhitespace: true,
+          removeAttributeQuotes: true,
+          removeComments: true,
+        },
+        chunks: [name],
+        hash: !isProduction,
+        inject: 'body',
+        isBrowser: false,
+        env: process.env.NODE_ENV,
+        isDevelopment: !isProduction,
+        nodeModules: webpackPaths.appNodeModulesPath,
+      });
+    }),
+
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: path.join(webpackPaths.rootPath, 'assets/_raw/'), to: path.join(webpackPaths.distExtsPath, './rabby/') },
+      ],
+    })
+  ],
+
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        'webextension-polyfill': {
+          minSize: 0,
+          test: /[\\/]node_modules[\\/]webextension-polyfill/,
+          name: 'webextension-polyfill',
+          chunks: 'all',
+        },
+      },
+    },
+  },
+};
+
+export default [
+  merge(baseConfig, configuration, configurationShell),
+  // merge(baseConfig, configuration, configurationRabby),
+];

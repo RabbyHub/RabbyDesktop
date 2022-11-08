@@ -158,7 +158,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
 
       const tab = win.createTab({
         topbarStacks: {
-          navigation: win.hasNavigationBar,
+          navigation: win.getMeta().hasNavigationBar,
         },
       });
 

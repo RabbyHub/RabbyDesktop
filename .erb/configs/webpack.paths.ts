@@ -17,11 +17,19 @@ const srcNodeModulesPath = path.join(srcPath, 'node_modules');
 const distPath = path.join(appPath, 'dist');
 const distMainPath = path.join(distPath, 'main');
 const distRendererPath = path.join(distPath, 'renderer');
-const distShellPath = path.join(rootPath, 'assets/desktop_shell');
+const assetsPath = path.join(rootPath, 'assets');
+const distExtsPath = path.join(rootPath, 'assets/chrome_exts');
 
 const buildPath = path.join(releasePath, 'build');
 
-const rendererEntries = {
+type IEntry = {
+  name: string;
+  jsEntry: string;
+  target?: string;
+  htmlFile?: string;
+}
+
+const entriesRenderer = {
   home: {
     name: 'home',
     target: 'home.html',
@@ -60,19 +68,32 @@ const rendererEntries = {
   },
 } as const;
 
-const shellEntries = {
-  'shell-webui': {
-    name: 'shell-webui',
-    target: 'shell-webui.html',
-    htmlFile: path.join(srcRendererPath, `shell-webui.ejs`),
-    jsEntry: path.join(srcRendererPath, 'shell-webui.tsx'),
-  },
-  'shell-new-tab': {
-    name: 'shell-new-tab',
-    target: 'shell-new-tab.html',
-    htmlFile: path.join(srcRendererPath, `shell-new-tab.ejs`),
-    jsEntry: path.join(srcRendererPath, 'shell-new-tab.tsx'),
-  },
+const entriesShell = {
+  '_shell-webui': {
+    name: 'webui',
+    target: 'webui.html',
+    htmlFile: path.join(srcPath, `extension-shell/webui.ejs`),
+    jsEntry: path.join(srcPath, 'extension-shell/webui.tsx'),
+  } as IEntry,
+  '_shell-new-tab': {
+    name: 'new-tab',
+    target: 'new-tab.html',
+    htmlFile: path.join(srcPath, `extension-shell/new-tab.ejs`),
+    jsEntry: path.join(srcPath, 'extension-shell/new-tab.tsx'),
+  } as IEntry,
+} as const;
+
+const entriesRabby = {
+  'rabby-background': {
+    name: 'background',
+    target: 'background.html',
+    htmlFile: path.join(srcPath, `extension-wallet/background/background.html`),
+    jsEntry: path.join(srcPath, 'extension-wallet/background/index.ts'),
+  } as IEntry,
+  'rabby-content-script': {
+    name: 'content-script',
+    jsEntry: path.join(srcPath, 'extension-wallet/content-script/index.ts'),
+  } as IEntry,
 } as const;
 
 export default {
@@ -89,8 +110,10 @@ export default {
   distPath,
   distMainPath,
   distRendererPath,
-  distShellPath,
+  distExtsPath,
+  assetsPath,
   buildPath,
-  rendererEntries,
-  shellEntries,
+  entriesRenderer,
+  entriesShell,
+  entriesRabby,
 };
