@@ -66,6 +66,7 @@ declare global {
 const INIT_QS = parseQueryString();
 
 const WITH_NAV_BAR = INIT_QS.__withNavigationbar === 'true';
+const IS_MAINWIN_SHELL = INIT_QS.__webuiIsMainWindow === 'true';
 const CLOSABLE = INIT_QS.__webuiClosable === 'true';
 
 function filterFavIcon(url?: string, isActiveTab = false) {
@@ -282,7 +283,8 @@ export default function Topbar() {
             'toolbar',
             selectedTabInfo?.tabUrl &&
               isInternalProtocol(selectedTabInfo?.tabUrl) &&
-              'internal-page'
+              'internal-page',
+            IS_MAINWIN_SHELL && 'mainwin-shell'
           )}
         >
           <div className="page-controls">
