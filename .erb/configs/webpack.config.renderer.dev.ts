@@ -232,7 +232,7 @@ const configuration: webpack.Configuration = {
             stdio: 'inherit',
           })
             .on('close', (code: number) => {
-              // shellProcess.kill();
+              shellProcess.kill();
               preloadProcess.kill();
               process.exit(code!);
             })
