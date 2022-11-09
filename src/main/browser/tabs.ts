@@ -275,4 +275,19 @@ export class Tabs extends EventEmitter {
       return tabUrlInfo.origin === inputUrlInfo.origin;
     });
   }
+
+  findByUrlbase(url: string) {
+    const { urlInfo } = canoicalizeDappUrl(url);
+    if (!urlInfo?.origin) return null;
+
+    return this.tabList.find((tab) => {
+      if (!tab.webContents) return false;
+      const { urlInfo: tabUrlInfo } = canoicalizeDappUrl(tab.webContents.getURL());
+      return tabUrlInfo && (
+        tabUrlInfo.protocol === urlInfo.protocol
+        && tabUrlInfo.host === urlInfo.host
+        && tabUrlInfo.pathname === urlInfo.pathname
+      );
+    });
+  }
 }

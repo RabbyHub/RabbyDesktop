@@ -104,3 +104,17 @@ export function createPopupView(opts?: Electron.BrowserViewConstructorOptions) {
     },
   });
 }
+
+export function switchToBrowserTab (
+  tabId: chrome.tabs.Tab['id'],
+  tabbedWin: import('../browser/browsers').default,
+) {
+  tabbedWin?.tabs.select(tabId);
+  // webuiExtension's webContents is just the webContents of tabbedWin its belongs to
+  tabbedWin?.sendMessageToShellUI(
+    '__internal_rpc:webui-extension:switch-active-dapp',
+    {
+      tabId,
+    }
+  );
+}

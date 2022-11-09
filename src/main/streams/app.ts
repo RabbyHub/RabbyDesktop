@@ -26,19 +26,19 @@ import { defaultSessionReadyThen } from './session';
 import {
   createWindow,
   getFocusedWindow,
-  getWindowFromWebContents,
+  getTabbedWindowFromWebContents,
 } from './tabbedBrowserWindow';
 import { valueToMainSubject } from './_init';
 import { dappStore, formatDapps, parseDappUrl } from '../store/dapps';
 import { attachAlertBrowserView } from './dappAlert';
 import { openDappSecurityCheckView } from './securityCheck';
-import type { Tab } from '../browser/tabs';
 import {
   getElectronChromeExtensions,
   getWebuiExtId,
   onMainWindowReady,
 } from '../utils/stream-helpers';
 import { getRabbyExtId } from './rabbyExt';
+import { switchToBrowserTab } from '../utils/browser';
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
@@ -69,7 +69,7 @@ app.on('web-contents-created', async (evtApp, webContents) => {
     // this tabs is render as app's self UI, such as topbar.
     if (!isUrlFromDapp(url)) return;
 
-    const tabbedWin = getWindowFromWebContents(sender);
+    const tabbedWin = getTabbedWindowFromWebContents(sender);
     if (!tabbedWin) return;
     if (tabbedWin !== mainTabbedWin) return;
 
@@ -90,27 +90,21 @@ app.on('web-contents-created', async (evtApp, webContents) => {
       attachAlertBrowserView(
         details.url,
         targetInfo.existedOrigin,
-        getWindowFromWebContents(webContents)?.window
+        getTabbedWindowFromWebContents(webContents)?.window
       );
     } else {
       const isFromExt = currentUrl.startsWith('chrome-extension://');
+      const isToExt = details.url.startsWith('chrome-extension://');
 
       switch (details.disposition) {
         case 'foreground-tab':
         case 'background-tab':
         case 'new-window': {
-          const tabbedWin = getWindowFromWebContents(webContents);
+          const tabbedWin = getTabbedWindowFromWebContents(webContents);
 
-          const openedDapp = tabbedWin?.tabs.findByOrigin(details.url) || null;
-          if (!isFromExt && openedDapp) {
-            tabbedWin?.tabs.select(openedDapp!.id);
-            // webuiExtension's webContents is just the webContents of tabbedWin its belongs to
-            tabbedWin?.sendMessageToShellUI(
-              '__internal_rpc:webui-extension:switch-active-dapp',
-              {
-                tabId: openedDapp.id,
-              }
-            );
+          const openedDapp = !isToExt ? tabbedWin?.tabs.findByOrigin(details.url) : tabbedWin?.tabs.findByUrlbase(details.url);
+          if (openedDapp) {
+            switchToBrowserTab(openedDapp!.id, tabbedWin!);
           } else if (mainTabbedWin === tabbedWin) {
             const mainWindow = tabbedWin.window;
 
@@ -198,7 +192,7 @@ app.on('window-all-closed', () => {
 
 onIpcMainEvent('__internal_rpc:main-window:click-close', async (evt) => {
   const { sender } = evt;
-  const tabbedWin = getWindowFromWebContents(sender);
+  const tabbedWin = getTabbedWindowFromWebContents(sender);
   if (tabbedWin === (await onMainWindowReady())) {
     if (isDarwin) {
       tabbedWin.window.hide();
