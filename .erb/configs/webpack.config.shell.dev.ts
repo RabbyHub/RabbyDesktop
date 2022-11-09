@@ -6,6 +6,7 @@ import { merge } from 'webpack-merge';
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import baseConfig from './webpack.config.base';
+import tsImportPluginFactory from 'ts-import-plugin';
 import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
 import { getDevStyleLoaders, getWebpackAliases } from './common';
@@ -150,11 +151,59 @@ const configurationShell: webpack.Configuration = {
 
 const configurationRabby: webpack.Configuration = {
   entry: {
-    [webpackPaths.entriesRabby['rabby-background'].name]: webpackPaths.entriesRabby['rabby-background'].jsEntry,
-    [webpackPaths.entriesRabby['rabby-content-script'].name]: webpackPaths.entriesRabby['rabby-content-script'].jsEntry,
+    // [webpackPaths.entriesRabby['rabby-background'].name]: webpackPaths.entriesRabby['rabby-background'].jsEntry,
+    // [webpackPaths.entriesRabby['rabby-content-script'].name]: webpackPaths.entriesRabby['rabby-content-script'].jsEntry,
+    [webpackPaths.entriesRabby['rabby-popup'].name]: webpackPaths.entriesRabby['rabby-popup'].jsEntry,
   },
   output: {
     path: path.join(webpackPaths.distExtsPath, 'rabby'),
+  },
+  module: {
+    rules: [{ oneOf: [
+      {
+        test: /src\/extension-wallet/,
+        use: [
+          {
+            loader: 'ts-loader',
+            options: {
+              transpileOnly: true,
+              getCustomTransformers: () => ({
+                before: [
+                  tsImportPluginFactory({
+                    libraryName: 'antd',
+                    libraryDirectory: 'lib',
+                    style: true,
+                  }),
+                ],
+              }),
+              compilerOptions: {
+                module: 'es2015',
+              },
+            },
+          },
+          {
+            loader: path.resolve(
+              webpackPaths.rootPath,
+              'node_modules/antd-dayjs-webpack-plugin/src/init-loader'
+            ),
+            options: {
+              plugins: [
+                'isSameOrBefore',
+                'isSameOrAfter',
+                'advancedFormat',
+                'customParseFormat',
+                'weekday',
+                'weekYear',
+                'weekOfYear',
+                'isMoment',
+                'localeData',
+                'localizedFormat',
+              ],
+            },
+          },
+        ],
+      }
+    ]}]
   },
   plugins: [
     ...Object.values(webpackPaths.entriesRabby).filter(item => !!item.htmlFile).map(({ name, target, htmlFile }) => {
@@ -176,11 +225,11 @@ const configurationRabby: webpack.Configuration = {
       });
     }),
 
-    new CopyWebpackPlugin({
-      patterns: [
-        { from: path.join(webpackPaths.rootPath, 'assets/_raw/'), to: path.join(webpackPaths.distExtsPath, './rabby/') },
-      ],
-    })
+    // new CopyWebpackPlugin({
+    //   patterns: [
+    //     { from: path.join(webpackPaths.rootPath, 'assets/_raw/'), to: path.join(webpackPaths.distExtsPath, './rabby/') },
+    //   ],
+    // })
   ],
 
   optimization: {

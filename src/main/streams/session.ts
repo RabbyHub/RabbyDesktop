@@ -44,6 +44,8 @@ async function loadExtensions(sess: Electron.Session, extensionsPath: string) {
 
   const extensionDirectories = await Promise.all(
     subDirectories
+      // // TODO: block on hybrid compilation stage
+      // .filter((dirEnt) => !dirEnt.name.includes('rabby'))
       .filter((dirEnt) => dirEnt.isDirectory())
       .map(async (dirEnt) => {
         const extPath = path.join(extensionsPath, dirEnt.name);
@@ -225,4 +227,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   valueToMainSubject('webuiExtensionReady', webuiExtension);
 
   await loadExtensions(sessionIns!, getAssetPath('chrome_exts'));
+  // // TODO: block on hybrid compilation stage
+  // const rabbyExt = await sessionIns!.loadExtension(path.resolve(process.env.RD_DEV_EXTPATH!));
+  // valueToMainSubject('rabbyExtension', rabbyExt);
 });

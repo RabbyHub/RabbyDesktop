@@ -15,8 +15,8 @@ describe.only('rabby extension capabilities', () => {
     
     partitionName: 'extension-rabby',
     // extensionName: 'rpc'
-    // extensionName: path.resolve(__dirname, '../assets/chrome_exts/rabby'),
-    extensionName: path.resolve(process.env.RD_DEV_EXTPATH!),
+    extensionName: path.resolve(__dirname, '../assets/chrome_exts/rabby'),
+    // extensionName: path.resolve(process.env.RD_DEV_EXTPATH!),
     openDevTools: true,
   })
 

@@ -3,6 +3,7 @@ import { BrowserView, BrowserWindow } from 'electron';
 import {
   NATIVE_HEADER_H,
   NATIVE_HEADER_WITH_NAV_H,
+  RABBY_PANEL_SIZE,
 } from '../../isomorphic/const-size';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { onIpcMainEvent } from '../utils/ipcMainEvents';
@@ -16,6 +17,7 @@ type ITabOptions = {
     navigation?: boolean;
   };
   initialUrl?: string;
+  isOfMainWindow?: boolean;
 };
 
 const DEFAULT_TOPBAR_STACKS = {
@@ -40,14 +42,16 @@ export class Tab {
   private $meta: {
     initialUrl: ITabOptions['initialUrl'];
     topbarStacks: ITabOptions['topbarStacks'];
+    isOfMainWindow: boolean;
   } = {
     initialUrl: '',
     topbarStacks: { ...DEFAULT_TOPBAR_STACKS },
+    isOfMainWindow: false,
   };
 
   constructor(
     ofWindow: BrowserWindow,
-    { tabs, topbarStacks, initialUrl }: ITabOptions
+    { tabs, topbarStacks, initialUrl, isOfMainWindow }: ITabOptions
   ) {
     this.tabs = tabs;
     this.view = new BrowserView();
@@ -71,6 +75,7 @@ export class Tab {
 
     this.$meta.initialUrl = initialUrl || '';
     this.$meta.topbarStacks = { ...DEFAULT_TOPBAR_STACKS, ...topbarStacks };
+    this.$meta.isOfMainWindow = !!isOfMainWindow;
 
     const dispose = onIpcMainEvent(
       '__internal_webui-window-close',
@@ -172,6 +177,9 @@ export class Tab {
       x: 0,
       y: topbarHeight,
       width,
+      ...this.$meta.isOfMainWindow && {
+        width: width - RABBY_PANEL_SIZE.width,
+      },
       height: height - topbarHeight,
     });
     this.view!.setAutoResize({ width: true, height: true });

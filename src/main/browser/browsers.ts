@@ -136,6 +136,7 @@ export default class TabbedBrowserWindow {
   createTab(options?: Parameters<Tabs['create']>[0]) {
     return this.tabs.create({
       ...options,
+      isOfMainWindow: this.$meta.isMainWindow,
     });
   }
 

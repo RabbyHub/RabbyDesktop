@@ -1,10 +1,14 @@
+export const RABBY_PANEL_SIZE = {
+  width: 300,
+}
+
 export const FRAME_MAX_SIZE = {
-  maxWidth: 1920,
+  maxWidth: 1920 - RABBY_PANEL_SIZE.width,
   maxHeight: 1080,
 };
 
 export const FRAME_DEFAULT_SIZE = {
-  width: 1440,
+  width: 1440 - RABBY_PANEL_SIZE.width,
   height: 900,
 };
 

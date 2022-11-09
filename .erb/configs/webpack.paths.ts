@@ -84,15 +84,21 @@ const entriesShell = {
 } as const;
 
 const entriesRabby = {
-  'rabby-background': {
-    name: 'background',
-    target: 'background.html',
-    htmlFile: path.join(srcPath, `extension-wallet/background/background.html`),
-    jsEntry: path.join(srcPath, 'extension-wallet/background/index.ts'),
-  } as IEntry,
-  'rabby-content-script': {
-    name: 'content-script',
-    jsEntry: path.join(srcPath, 'extension-wallet/content-script/index.ts'),
+  // 'rabby-background': {
+  //   name: 'background',
+  //   target: 'background.html',
+  //   htmlFile: path.join(srcPath, `extension-wallet/background/background.html`),
+  //   jsEntry: path.join(srcPath, 'extension-wallet/background/index.ts'),
+  // } as IEntry,
+  // 'rabby-content-script': {
+  //   name: 'content-script',
+  //   jsEntry: path.join(srcPath, 'extension-wallet/content-script/index.ts'),
+  // } as IEntry,
+  'rabby-popup': {
+    name: 'rabby-popup',
+    target: 'popup.html',
+    htmlFile: path.join(srcPath, `extension-wallet/popup/index.ejs`),
+    jsEntry: path.join(srcPath, 'extension-wallet/popup/index.ts'),
   } as IEntry,
 } as const;
 
