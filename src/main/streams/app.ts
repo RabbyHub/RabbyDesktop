@@ -7,7 +7,11 @@ import {
   RABBY_HOMEPAGE_URL,
   RABBY_SPALSH_URL,
 } from '../../isomorphic/constants';
-import { isRabbyShellURL, isUrlFromDapp } from '../../isomorphic/url';
+import {
+  isRabbyExtBackgroundPage,
+  isRabbyShellURL,
+  isUrlFromDapp,
+} from '../../isomorphic/url';
 import buildChromeContextMenu from '../browser/context-menu';
 import { setupMenu } from '../browser/menu';
 import {
@@ -34,6 +38,7 @@ import {
   getWebuiExtId,
   onMainWindowReady,
 } from '../utils/stream-helpers';
+import { getRabbyExtId } from './rabbyExt';
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
@@ -55,6 +60,7 @@ app.on('web-contents-created', async (evtApp, webContents) => {
   }
 
   const mainTabbedWin = await onMainWindowReady();
+  const rabbyExtId = await getRabbyExtId();
 
   webContents.on('will-redirect', (evt) => {
     const sender = (evt as any).sender as BrowserView['webContents'];
@@ -87,24 +93,38 @@ app.on('web-contents-created', async (evtApp, webContents) => {
         getWindowFromWebContents(webContents)?.window
       );
     } else {
+      const isFromExt = currentUrl.startsWith('chrome-extension://');
+
       switch (details.disposition) {
         case 'foreground-tab':
         case 'background-tab':
         case 'new-window': {
           const tabbedWin = getWindowFromWebContents(webContents);
 
-          const openedTab = tabbedWin?.tabs.findByOrigin(details.url) || null;
-          if (openedTab) {
-            tabbedWin?.tabs.select(openedTab!.id);
+          const openedDapp = tabbedWin?.tabs.findByOrigin(details.url) || null;
+          if (!isFromExt && openedDapp) {
+            tabbedWin?.tabs.select(openedDapp!.id);
             // webuiExtension's webContents is just the webContents of tabbedWin its belongs to
             tabbedWin?.sendMessageToShellUI(
               '__internal_rpc:webui-extension:switch-active-dapp',
               {
-                tabId: openedTab.id,
+                tabId: openedDapp.id,
               }
             );
           } else if (mainTabbedWin === tabbedWin) {
             const mainWindow = tabbedWin.window;
+
+            if (isFromExt) {
+              const tab = tabbedWin!.createTab();
+              tab?.loadURL(details.url);
+              if (isRabbyExtBackgroundPage(details.url, rabbyExtId)) {
+                tab?.webContents!.openDevTools({
+                  mode: 'bottom',
+                  activate: true,
+                });
+              }
+              break;
+            }
 
             const continualOpenedTab = tabbedWin.createTab();
             continualOpenedTab?.loadURL(details.url);

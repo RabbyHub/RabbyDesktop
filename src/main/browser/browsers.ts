@@ -129,8 +129,8 @@ export default class TabbedBrowserWindow {
     return this.tabs.selected;
   }
 
-  getMeta () {
-    return Object.assign({}, this.$meta);
+  getMeta() {
+    return { ...this.$meta };
   }
 
   createTab(options?: Parameters<Tabs['create']>[0]) {

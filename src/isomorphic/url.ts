@@ -52,9 +52,11 @@ export function integrateQueryToUrl(
 }
 
 export function isRabbyShellURL(url: string) {
-  return (
-    url.startsWith('chrome-extension://') && url.includes('/webui.html')
-  );
+  return url.startsWith('chrome-extension://') && url.includes('/webui.html');
+}
+
+export function isRabbyExtBackgroundPage(url: string, extid: string) {
+  return url.startsWith(`chrome-extension://${extid}/background.html`);
 }
 
 export function isUrlFromDapp(url: string) {

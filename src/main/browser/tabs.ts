@@ -43,7 +43,7 @@ export class Tab {
   } = {
     initialUrl: '',
     topbarStacks: { ...DEFAULT_TOPBAR_STACKS },
-  }
+  };
 
   constructor(
     ofWindow: BrowserWindow,
@@ -258,13 +258,13 @@ export class Tabs extends EventEmitter {
   }
 
   findByOrigin(url: string) {
-    const inputOrigin = canoicalizeDappUrl(url).origin;
-    if (!inputOrigin) return null;
+    const inputUrlInfo = canoicalizeDappUrl(url);
+    if (!inputUrlInfo.origin) return null;
 
-    return this.tabList.find(
-      (tab) =>
-        canoicalizeDappUrl(tab.webContents?.getURL() || '').origin ===
-        inputOrigin
-    );
+    return this.tabList.find((tab) => {
+      if (!tab.webContents) return false;
+      const tabUrlInfo = canoicalizeDappUrl(tab.webContents.getURL());
+      return tabUrlInfo.origin === inputUrlInfo.origin;
+    });
   }
 }
