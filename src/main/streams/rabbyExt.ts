@@ -1,6 +1,6 @@
 import { firstValueFrom } from 'rxjs';
-import { app, BrowserView } from 'electron';
-import { fromMainSubject } from './_init';
+import { app } from 'electron';
+import { fromMainSubject, valueToMainSubject } from './_init';
 
 import { cLog } from '../utils/log';
 import { onIpcMainEvent } from '../utils/ipcMainEvents';
@@ -8,6 +8,7 @@ import { createPopupView } from '../utils/browser';
 import { onMainWindowReady } from '../utils/stream-helpers';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 import { RABBY_PANEL_SIZE, NATIVE_HEADER_WITH_NAV_H } from '../../isomorphic/const-size';
+import { walletController } from './rabbyIpcQuery';
 
 export async function getRabbyExtId() {
   const ext = await firstValueFrom(fromMainSubject('rabbyExtension'));
@@ -54,11 +55,34 @@ getRabbyExtId().then(async (extId) => {
   if (mainWin.isDestroyed()) return;
 
   const rabbyView = createPopupView();
+  const rabbyBgHostView = createPopupView();
+
   mainWin.addBrowserView(rabbyView);
+  mainWin.addBrowserView(rabbyBgHostView);
 
   updateViewPosition(rabbyView, mainWin);
 
-  rabbyView.webContents.loadURL(`chrome-extension://${extId}/popup.html`);
+  rabbyBgHostView.setBounds({ x: -9999, y: -1000, width: 1, height: 1 });
+  rabbyBgHostView.webContents.loadURL(`chrome-extension://${extId}/background.html`);
+
+  // const bgTab = tabbedWin.createTab({
+  //   initialUrl: `chrome-extension://${extId}/background.html`,
+  // });
+  rabbyBgHostView.webContents.on('did-finish-load', () => {
+    valueToMainSubject('rabbyExtBackgroundHost', rabbyBgHostView.webContents!);
+  });
+
+  if (!IS_RUNTIME_PRODUCTION) {
+    rabbyBgHostView.webContents.openDevTools({ mode: 'detach' });
+
+    rabbyView.webContents.openDevTools({ mode: 'detach' });
+
+    // tabbedWin.createTab({
+    //   initialUrl: `https://metamask.github.io/test-dapp/`,
+    // }).webContents!
+    //   .openDevTools({ mode: 'bottom', activate: false });
+  }
+
   const onTargetWinUpdate = () => {
     updateViewPosition(rabbyView, mainWin);
   }
@@ -69,17 +93,12 @@ getRabbyExtId().then(async (extId) => {
   mainWin.on('unmaximize', onTargetWinUpdate);
   mainWin.on('restore', onTargetWinUpdate);
 
-  if (!IS_RUNTIME_PRODUCTION) {
-    rabbyView.webContents.openDevTools({ mode: 'detach' });
+  // wait for extension background initialized.
+  setTimeout(() => {
+    rabbyView.webContents.loadURL(`chrome-extension://${extId}/popup.html`);
+    // rabbyView.webContents.loadURL(`chrome-extension://${extId}/panel.html`);
+  }, 5000);
 
-    tabbedWin.createTab({
-      initialUrl: `chrome-extension://${extId}/background.html`,
-    }).webContents!
-      .openDevTools({ mode: 'bottom', activate: false });
-
-      tabbedWin.createTab({
-        initialUrl: `https://metamask.github.io/test-dapp/`,
-      }).webContents!
-        .openDevTools({ mode: 'bottom', activate: false });
-  }
+  const isBooted = await walletController.isBooted();
+  console.log('[debug] isBooted', isBooted);
 });

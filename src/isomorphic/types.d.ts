@@ -114,3 +114,14 @@ type ISecurityAddrbarPopupState =
       page: 'detail-item';
       focusingItem: IFocusedDetailedType;
     };
+
+type IRabbyxRpcQuery = {
+  rpcId: string;
+  method: string;
+  params: any[];
+};
+
+type IRabbyxRpcResponse = {
+  rpcId: string,
+  result: any,
+};

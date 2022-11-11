@@ -324,7 +324,8 @@ export default function Topbar() {
             checkResult={selectedTabInfo?.dappSecurityCheckResult}
           />
 
-          <browser-action-list id="actions" />
+          {/* <browser-action-list id="actions" /> */}
+          <div className={'rabbyExtPanelPlaceHolder'} />
         </div>
       )}
     </>

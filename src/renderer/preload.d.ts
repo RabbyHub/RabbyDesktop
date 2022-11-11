@@ -28,6 +28,8 @@ type M2RChanneMessagePayload = {
   };
   /* eslint-disable-next-line @typescript-eslint/ban-types */
   '__internal_rpc:loading-view:load-dapp': {};
+
+  [`rabbyx-rpc-query`]: IRabbyxRpcQuery;
 };
 
 type ChannelMessagePayload = {
@@ -257,6 +259,11 @@ type ChannelMessagePayload = {
     send: [IConnectedSite];
     response: [IConnectedSite];
   };
+
+  [`rabbyx-rpc-respond`]: {
+    send: [IRabbyxRpcResponse];
+    response: [];
+  }
 };
 
 type Channels = keyof ChannelMessagePayload;
