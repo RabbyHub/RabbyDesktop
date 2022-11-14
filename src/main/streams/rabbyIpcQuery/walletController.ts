@@ -1,6 +1,6 @@
-import { rabbyxQuery } from "./_base";
+import { rabbyxQuery } from './_base';
 
-export async function isBooted () {
+export async function isBooted() {
   const result = await rabbyxQuery('walletController.isBooted');
 
   return result;

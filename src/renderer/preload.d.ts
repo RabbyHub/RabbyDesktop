@@ -68,9 +68,7 @@ type ChannelMessagePayload = {
   };
   '__internal_rpc:webui-ext:get-connected-sites': {
     send: [reqid: string];
-    response: [
-      { reqid: string; sites: IConnectedSiteInfo[] }
-    ]
+    response: [{ reqid: string; sites: IConnectedSiteInfo[] }];
   };
   'rabby-extension-id': {
     send: [];
@@ -276,9 +274,9 @@ type ChannelMessagePayload = {
   '__internal_rpc:rabbyx:on-session-broadcast': {
     send: [
       {
-        event: string,
-        data?: any,
-        origin?: string,
+        event: string;
+        data?: any;
+        origin?: string;
       }
     ];
     response: [];

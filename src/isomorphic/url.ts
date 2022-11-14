@@ -118,7 +118,7 @@ export function canoicalizeDappUrl(url: string) {
   };
 }
 
-export function parseOrigin (url: string) {
+export function parseOrigin(url: string) {
   return canoicalizeDappUrl(url).origin;
 }
 

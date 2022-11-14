@@ -106,7 +106,7 @@ export default function Topbar() {
     fetchConnectedSite();
 
     hideDappAddressbarSecurityPopupView();
-  }, [selectedOrigin]);
+  }, [selectedOrigin, fetchConnectedSite]);
 
   useEffect(() => {
     const dispose = window.rabbyDesktop.ipcRenderer.on(
@@ -207,8 +207,7 @@ export default function Topbar() {
                 <img className="favicon" src={faviconUrl || undefined} />
                 <div className="content">
                   <div className="title">{tab.title}</div>
-                  {tab.url &&
-                  connectedSiteMap[origin]?.isConnected ? (
+                  {tab.url && connectedSiteMap[origin]?.isConnected ? (
                     <div className="chain">
                       {connectedSiteMap[origin]?.chainName}
                     </div>
@@ -329,7 +328,7 @@ export default function Topbar() {
           />
 
           {/* <browser-action-list id="actions" /> */}
-          <div className={'rabbyExtPanelPlaceHolder'} />
+          <div className="rabbyExtPanelPlaceHolder" />
         </div>
       )}
     </>

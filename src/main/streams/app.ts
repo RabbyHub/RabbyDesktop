@@ -102,7 +102,9 @@ app.on('web-contents-created', async (evtApp, webContents) => {
         case 'new-window': {
           const tabbedWin = getTabbedWindowFromWebContents(webContents);
 
-          const openedDapp = !isToExt ? tabbedWin?.tabs.findByOrigin(details.url) : tabbedWin?.tabs.findByUrlbase(details.url);
+          const openedDapp = !isToExt
+            ? tabbedWin?.tabs.findByOrigin(details.url)
+            : tabbedWin?.tabs.findByUrlbase(details.url);
           if (openedDapp) {
             switchToBrowserTab(openedDapp!.id, tabbedWin!);
           } else if (mainTabbedWin === tabbedWin) {

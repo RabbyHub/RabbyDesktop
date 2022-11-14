@@ -73,7 +73,6 @@ export function useConnectedSite() {
       }
     );
 
-
     return () => {
       dispose?.();
     };
@@ -277,7 +276,9 @@ export function useTopbarTabs() {
 
 export function useSelectedTabInfo(activeTab?: ChromeTab | null) {
   const [selectedTabInfo, setSelectedTabInfo] =
-    useState<ChannelMessagePayload['__internal_rpc:webui-ext:navinfo']['response'][0]>();
+    useState<
+      ChannelMessagePayload['__internal_rpc:webui-ext:navinfo']['response'][0]
+    >();
   useEffect(() => {
     if (!activeTab?.id) return;
     const dispose = window.rabbyDesktop.ipcRenderer.on(

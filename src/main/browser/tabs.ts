@@ -177,9 +177,9 @@ export class Tab {
       x: 0,
       y: topbarHeight,
       width,
-      ...this.$meta.isOfMainWindow && {
+      ...(this.$meta.isOfMainWindow && {
         width: width - RABBY_PANEL_SIZE.width,
-      },
+      }),
       height: height - topbarHeight,
     });
     this.view!.setAutoResize({ width: true, height: true });
@@ -282,11 +282,14 @@ export class Tabs extends EventEmitter {
 
     return this.tabList.find((tab) => {
       if (!tab.webContents) return false;
-      const { urlInfo: tabUrlInfo } = canoicalizeDappUrl(tab.webContents.getURL());
-      return tabUrlInfo && (
-        tabUrlInfo.protocol === urlInfo.protocol
-        && tabUrlInfo.host === urlInfo.host
-        && tabUrlInfo.pathname === urlInfo.pathname
+      const { urlInfo: tabUrlInfo } = canoicalizeDappUrl(
+        tab.webContents.getURL()
+      );
+      return (
+        tabUrlInfo &&
+        tabUrlInfo.protocol === urlInfo.protocol &&
+        tabUrlInfo.host === urlInfo.host &&
+        tabUrlInfo.pathname === urlInfo.pathname
       );
     });
   }

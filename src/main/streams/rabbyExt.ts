@@ -7,7 +7,10 @@ import { onIpcMainEvent } from '../utils/ipcMainEvents';
 import { createPopupView } from '../utils/browser';
 import { onMainWindowReady } from '../utils/stream-helpers';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
-import { RABBY_PANEL_SIZE, NATIVE_HEADER_WITH_NAV_H } from '../../isomorphic/const-size';
+import {
+  RABBY_PANEL_SIZE,
+  NATIVE_HEADER_WITH_NAV_H,
+} from '../../isomorphic/const-size';
 import { walletController } from './rabbyIpcQuery';
 import { Tab } from '../browser/tabs';
 import { rabbyxQuery } from './rabbyIpcQuery/_base';
@@ -37,33 +40,41 @@ onIpcMainEvent('get-app-version', (event, reqid) => {
   });
 });
 
-onIpcMainEvent('__internal_rpc:rabbyx:on-session-broadcast', async (_, payload) => {
-  const tabbedWin = await onMainWindowReady();
+onIpcMainEvent(
+  '__internal_rpc:rabbyx:on-session-broadcast',
+  async (_, payload) => {
+    const tabbedWin = await onMainWindowReady();
 
-  if (payload.event === 'rabby:chainChanged') {
-    // TODO: leave here for debug
-    // console.log('[debug] payload', payload);
-    tabbedWin.window.webContents.send('__internal_push:rabby:chainChanged', {
-      origin: payload.origin,
-      isConnected: !!payload.data?.hex,
-      chainId: payload.data?.hex || '0x1',
-      chainName: payload.data?.name || '',
-    } as IConnectedSiteToDisplay);
+    if (payload.event === 'rabby:chainChanged') {
+      // TODO: leave here for debug
+      // console.log('[debug] payload', payload);
+      tabbedWin.window.webContents.send('__internal_push:rabby:chainChanged', {
+        origin: payload.origin,
+        isConnected: !!payload.data?.hex,
+        chainId: payload.data?.hex || '0x1',
+        chainName: payload.data?.name || '',
+      } as IConnectedSiteToDisplay);
+    }
   }
-});
+);
 
-onIpcMainEvent('__internal_rpc:webui-ext:get-connected-sites', async (event, reqid) => {
-  const connectedSites = await rabbyxQuery<IConnectedSiteInfo[]>('walletController.getConnectedSites');
+onIpcMainEvent(
+  '__internal_rpc:webui-ext:get-connected-sites',
+  async (event, reqid) => {
+    const connectedSites = await rabbyxQuery<IConnectedSiteInfo[]>(
+      'walletController.getConnectedSites'
+    );
 
-  event.reply('__internal_rpc:webui-ext:get-connected-sites', {
-    reqid,
-    sites: connectedSites,
-  })
-});
+    event.reply('__internal_rpc:webui-ext:get-connected-sites', {
+      reqid,
+      sites: connectedSites,
+    });
+  }
+);
 
 async function updateViewPosition(
   rabbyView: Electron.BrowserView,
-  mainWin: Electron.BrowserWindow,
+  mainWin: Electron.BrowserWindow
 ) {
   const [width, height] = mainWin.getSize();
 
@@ -80,7 +91,7 @@ async function updateViewPosition(
 }
 
 getRabbyExtId().then(async (extId) => {
-  const tabbedWin = (await onMainWindowReady());
+  const tabbedWin = await onMainWindowReady();
   const mainWin = tabbedWin.window;
   if (mainWin.isDestroyed()) return;
 
@@ -93,7 +104,9 @@ getRabbyExtId().then(async (extId) => {
   updateViewPosition(rabbyView, mainWin);
 
   rabbyBgHostView.setBounds({ x: -9999, y: -1000, width: 1, height: 1 });
-  rabbyBgHostView.webContents.loadURL(`chrome-extension://${extId}/background.html`);
+  rabbyBgHostView.webContents.loadURL(
+    `chrome-extension://${extId}/background.html`
+  );
 
   rabbyBgHostView.webContents.on('did-finish-load', () => {
     valueToMainSubject('rabbyExtViews', {
@@ -104,9 +117,7 @@ getRabbyExtId().then(async (extId) => {
 
   if (!IS_RUNTIME_PRODUCTION) {
     // rabbyBgHostView.webContents.openDevTools({ mode: 'detach' });
-
     // rabbyView.webContents.openDevTools({ mode: 'detach' });
-
     // tabbedWin.createTab({
     //   initialUrl: `https://metamask.github.io/test-dapp/`,
     // }).webContents!
@@ -115,7 +126,7 @@ getRabbyExtId().then(async (extId) => {
 
   const onTargetWinUpdate = () => {
     updateViewPosition(rabbyView, mainWin);
-  }
+  };
 
   mainWin.on('show', onTargetWinUpdate);
   mainWin.on('move', onTargetWinUpdate);
@@ -139,13 +150,13 @@ getRabbyExtViews().then(async (views) => {
 
   let previousUrl = '';
   tabbedWin.tabs.on('tab-selected', async (tab: Tab) => {
-    if (!tab.webContents) return ;
+    if (!tab.webContents) return;
 
     // const previousUrl = previous?.webContents?.getURL() || '';
     let currentUrl = tab.webContents.getURL() || tab.getInitialUrl() || '';
 
     await new Promise((resolve) => {
-      currentUrl = tab.webContents!.getURL() || ''
+      currentUrl = tab.webContents!.getURL() || '';
 
       tab.webContents!.on('did-finish-load', () => {
         if (!currentUrl) {
@@ -154,18 +165,16 @@ getRabbyExtViews().then(async (views) => {
         }
       });
 
-      if (currentUrl)
-        resolve(currentUrl);
+      if (currentUrl) resolve(currentUrl);
     });
 
-    if (!previousUrl)
-      previousUrl = currentUrl;
+    if (!previousUrl) previousUrl = currentUrl;
 
     // panelView.webContents.openDevTools({ mode: 'detach' });
 
     panelView.webContents.send('__internal_push:rabbyx:focusing-dapp-changed', {
       previousUrl,
-      currentUrl
-    })
+      currentUrl,
+    });
   });
 });

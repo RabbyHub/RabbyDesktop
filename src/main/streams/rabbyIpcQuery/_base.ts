@@ -5,9 +5,11 @@ import { fromMainSubject } from '../_init';
 import { randString } from '../../../isomorphic/string';
 import { IS_RUNTIME_PRODUCTION } from '../../../isomorphic/constants';
 
-export async function getRabbyxHost () {
-  return firstValueFrom(fromMainSubject('rabbyExtViews')).then(views => views.backgroundHost);
-};
+export async function getRabbyxHost() {
+  return firstValueFrom(fromMainSubject('rabbyExtViews')).then(
+    (views) => views.backgroundHost
+  );
+}
 
 const rabbyXRpcResponse = new Subject<IRabbyxRpcResponse>();
 const obs = rabbyXRpcResponse.asObservable();
@@ -21,15 +23,13 @@ onIpcMainEvent('rabbyx-rpc-respond', (_, { rpcId, result }) => {
   rabbyXRpcResponse.next({ rpcId, result });
 });
 
-export async function rabbyxQuery<T = any> (method: string, params: any[] = []) {
+export async function rabbyxQuery<T = any>(method: string, params: any[] = []) {
   const host = await getRabbyxHost();
 
   const rpcId = randString(10);
 
   const promise = firstValueFrom(
-    obs.pipe(
-      filter((payload) => rpcId === payload.rpcId),
-    )
+    obs.pipe(filter((payload) => rpcId === payload.rpcId))
   );
 
   host.send('rabbyx-rpc-query', {
@@ -38,5 +38,5 @@ export async function rabbyxQuery<T = any> (method: string, params: any[] = []) 
     params,
   });
 
-  return promise.then(res => res.result as T);
+  return promise.then((res) => res.result as T);
 }

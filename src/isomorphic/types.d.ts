@@ -62,13 +62,13 @@ type IConnectedSiteToDisplay = {
 };
 
 type IConnectedSiteInfo = {
-  chain: string
-  icon: string
-  isConnected: boolean
-  isSigned: boolean
-  isTop: boolean
-  name: string
-  origin: string
+  chain: string;
+  icon: string;
+  isConnected: boolean;
+  isSigned: boolean;
+  isTop: boolean;
+  name: string;
+  origin: string;
 };
 
 type IDappUpdateDetectionItem = {
@@ -133,6 +133,6 @@ type IRabbyxRpcQuery = {
 };
 
 type IRabbyxRpcResponse = {
-  rpcId: string,
-  result: any,
+  rpcId: string;
+  result: any;
 };

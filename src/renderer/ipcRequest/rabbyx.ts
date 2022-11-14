@@ -10,21 +10,25 @@ export async function getConnectedSites() {
       '__internal_rpc:webui-ext:get-connected-sites',
       (event) => {
         if (event.reqid === reqid) {
-
-        const sites = event.sites.map((site) => {
-          const chain = CHAINS_LIST.find((chain) => chain.enum === site.chain)!;
-          return {
-            origin: site.origin,
-            isConnected: site.isConnected,
-            chainName: chain.name,
-            chainId: chain.hex,
-          } as IConnectedSiteToDisplay;
-        });
+          const sites = event.sites.map((site) => {
+            const chain = CHAINS_LIST.find(
+              (ochain) => ochain.enum === site.chain
+            )!;
+            return {
+              origin: site.origin,
+              isConnected: site.isConnected,
+              chainName: chain.name,
+              chainId: chain.hex,
+            } as IConnectedSiteToDisplay;
+          });
           resolve(sites);
           dispose?.();
         }
       }
     );
-    window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:webui-ext:get-connected-sites', reqid);
+    window.rabbyDesktop.ipcRenderer.sendMessage(
+      '__internal_rpc:webui-ext:get-connected-sites',
+      reqid
+    );
   });
 }

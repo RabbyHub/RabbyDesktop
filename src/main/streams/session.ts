@@ -160,7 +160,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
         throw new Error(`Unable to find windowId=${details.windowId}`);
       }
 
-      const sender = ctx.event.sender;
+      const { sender } = ctx.event;
       const fromWc = sender.hostWebContents || sender;
       const fromWindow = getTabbedWindowFromWebContents(ctx.event.sender);
 
@@ -174,7 +174,10 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
         case 'activate-tab': {
           switchToBrowserTab(actionInfo.tabId, win);
 
-          return [actionInfo.openedTab!.webContents!, actionInfo.openedTab!.window!];
+          return [
+            actionInfo.openedTab!.webContents!,
+            actionInfo.openedTab!.window!,
+          ];
         }
         case 'deny': {
           return [fromWc, fromWindow];
@@ -193,7 +196,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
               tab.loadURL(getShellPageUrl('debug-new-tab', webuiExtensionId));
             });
           }
-      
+
           if (typeof details.active === 'boolean' ? details.active : true)
             win.tabs.select(tab.id);
 
@@ -213,7 +216,8 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
     windowsGetCurrent: async (currentWin, { lastFocusedWindow, event }) => {
       if (!currentWin) {
         return (
-          getTabbedWindowFromWebContents(event.sender)?.window || lastFocusedWindow
+          getTabbedWindowFromWebContents(event.sender)?.window ||
+          lastFocusedWindow
         );
       }
 
