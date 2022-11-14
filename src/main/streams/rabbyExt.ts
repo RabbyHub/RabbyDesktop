@@ -3,7 +3,7 @@ import { app } from 'electron';
 import { fromMainSubject, valueToMainSubject } from './_init';
 
 import { cLog } from '../utils/log';
-import { onIpcMainEvent } from '../utils/ipcMainEvents';
+import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { createPopupView } from '../utils/browser';
 import { onMainWindowReady } from '../utils/stream-helpers';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
@@ -48,12 +48,16 @@ onIpcMainEvent(
     if (payload.event === 'rabby:chainChanged') {
       // TODO: leave here for debug
       // console.log('[debug] payload', payload);
-      tabbedWin.window.webContents.send('__internal_push:rabby:chainChanged', {
-        origin: payload.origin,
-        isConnected: !!payload.data?.hex,
-        chainId: payload.data?.hex || '0x1',
-        chainName: payload.data?.name || '',
-      } as IConnectedSiteToDisplay);
+      sendToWebContents(
+        tabbedWin.window.webContents,
+        '__internal_push:rabby:chainChanged',
+        {
+          origin: payload.origin,
+          isConnected: !!payload.data?.hex,
+          chainId: payload.data?.hex || '0x1',
+          chainName: payload.data?.name || '',
+        } as IConnectedSiteToDisplay
+      );
     }
   }
 );
@@ -172,9 +176,13 @@ getRabbyExtViews().then(async (views) => {
 
     // panelView.webContents.openDevTools({ mode: 'detach' });
 
-    panelView.webContents.send('__internal_push:rabbyx:focusing-dapp-changed', {
-      previousUrl,
-      currentUrl,
-    });
+    sendToWebContents(
+      panelView.webContents,
+      '__internal_push:rabbyx:focusing-dapp-changed',
+      {
+        previousUrl,
+        currentUrl,
+      }
+    );
   });
 });

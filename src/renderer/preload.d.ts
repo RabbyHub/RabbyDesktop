@@ -38,6 +38,8 @@ type M2RChanneMessagePayload = {
   '__internal_push:rabby:chainChanged': IConnectedSiteToDisplay;
 };
 
+type IPushEvents = keyof M2RChanneMessagePayload;
+
 type ChannelMessagePayload = {
   'ipc-example': {
     send: [string];

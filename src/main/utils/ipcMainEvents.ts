@@ -26,3 +26,13 @@ export function onIpcMainEvent<T extends Channels = Channels>(
     return ipcMain.off(eventName, handler as any);
   };
 }
+
+export function sendToWebContents<T extends IPushEvents = IPushEvents>(
+  webContents: Electron.WebContents | null | undefined,
+  eventName: T,
+  payload: M2RChanneMessagePayload[T] extends void
+    ? null
+    : M2RChanneMessagePayload[T]
+) {
+  webContents?.send(eventName, payload);
+}

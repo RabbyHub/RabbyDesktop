@@ -58,8 +58,8 @@
     "test:main": "node ./scripts/spec-runner.js"
   },
   "lint-staged": {
-    "src/*.{js,jsx,ts,tsx}": [
-      "cross-env-shell NODE_ENV=development eslint --cache"
+    "src/**/*.{js,jsx,ts,tsx}": [
+      "cross-env-shell NODE_ENV=development eslint --quiet --fix"
     ],
     "src/*.json,.{eslintrc,prettierrc}": [
       "prettier --ignore-path .eslintignore --parser json --write"

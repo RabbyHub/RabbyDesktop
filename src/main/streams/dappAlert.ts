@@ -13,7 +13,7 @@ import { randString } from '../../isomorphic/string';
 import { integrateQueryToUrl, parseQueryString } from '../../isomorphic/url';
 
 import { createPopupView } from '../utils/browser';
-import { onIpcMainEvent } from '../utils/ipcMainEvents';
+import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { onMainWindowReady } from '../utils/stream-helpers';
 import { fromMainSubject, valueToMainSubject } from './_init';
 
@@ -96,11 +96,15 @@ export async function attachAlertBrowserView(
     fromMainSubject('dappSafeModeViews')
   );
 
-  baseView.webContents.send('__internal_push:dapp-tabs:open-safe-view', {
-    url,
-    isExisted,
-    status: 'start-loading',
-  });
+  sendToWebContents(
+    baseView.webContents,
+    '__internal_push:dapp-tabs:open-safe-view',
+    {
+      url,
+      isExisted,
+      status: 'start-loading',
+    }
+  );
 
   if (!IS_RUNTIME_PRODUCTION && !safeView.webContents.isDevToolsOpened()) {
     // safeView.webContents.openDevTools({ mode: 'detach' });
@@ -112,11 +116,15 @@ export async function attachAlertBrowserView(
   const targetUrl = integrateQueryToUrl(url, { _dsv_: dappSafeViewLoadId });
   try {
     await safeView.webContents.loadURL(targetUrl);
-    baseView.webContents.send('__internal_push:dapp-tabs:open-safe-view', {
-      url,
-      isExisted,
-      status: 'loaded',
-    });
+    sendToWebContents(
+      baseView.webContents,
+      '__internal_push:dapp-tabs:open-safe-view',
+      {
+        url,
+        isExisted,
+        status: 'loaded',
+      }
+    );
     targetWin.addBrowserView(safeView);
     targetWin.setTopBrowserView(safeView);
   } catch (e) {

@@ -9,7 +9,7 @@ import {
   NATIVE_HEADER_WITH_NAV_H,
   SECURITY_NOTIFICATION_VIEW_SIZE,
 } from '../../isomorphic/const-size';
-import { onIpcMainEvent } from '../utils/ipcMainEvents';
+import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { fromMainSubject, valueToMainSubject } from './_init';
 import {
   createPopupWindow,
@@ -92,7 +92,11 @@ export async function openSecurityNotificationView(
     fromMainSubject('securityNotificationsWindowReady')
   );
 
-  popupWin.webContents.send('__internal_push:security-notification', payload);
+  sendToWebContents(
+    popupWin.webContents,
+    '__internal_push:security-notification',
+    payload
+  );
 
   updateSubWindowPosition(targetWin, popupWin);
 

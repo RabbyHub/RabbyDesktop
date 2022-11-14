@@ -6,7 +6,7 @@ import {
   RABBY_PANEL_SIZE,
 } from '../../isomorphic/const-size';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
-import { onIpcMainEvent } from '../utils/ipcMainEvents';
+import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { RABBY_LOADING_URL } from '../../isomorphic/constants';
 import { dappStore } from '../store/dapps';
 
@@ -66,9 +66,10 @@ export class Tab {
     this.window.addBrowserView(this.loadingView);
 
     this.view.webContents.on('did-finish-load', () => {
-      this.loadingView?.webContents.send(
+      sendToWebContents(
+        this.view!.webContents,
         '__internal_push:loading-view:dapp-did-finish-load',
-        null
+        {}
       );
       this.window?.removeBrowserView(this.loadingView!);
     });
@@ -137,7 +138,8 @@ export class Tab {
     const dapp = dapps.find((item) => item.origin === origin);
     if (dapp) {
       setTimeout(() => {
-        this.loadingView?.webContents.send(
+        sendToWebContents(
+          this.view!.webContents,
           '__internal_push:loading-view:load-dapp',
           dapp
         );
