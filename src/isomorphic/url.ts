@@ -118,6 +118,10 @@ export function canoicalizeDappUrl(url: string) {
   };
 }
 
+export function parseOrigin (url: string) {
+  return canoicalizeDappUrl(url).origin;
+}
+
 export function hasSameOrigin(url1: string, url2: string) {
   return canoicalizeDappUrl(url1).origin === canoicalizeDappUrl(url2).origin;
 }

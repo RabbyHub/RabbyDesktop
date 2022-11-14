@@ -6,11 +6,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { getAllDapps } from 'renderer/ipcRequest/dapps';
-import { CHAINS_LIST } from '@debank/common';
 
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 
 import { useWindowState } from './useWindowState';
+import { getConnectedSites } from '../ipcRequest/rabbyx';
 
 export function useWinTriples() {
   const {
@@ -45,25 +45,35 @@ export function useWinTriples() {
 
 export function useConnectedSite() {
   const [connectedSiteMap, setConnectedSiteMap] = useState<
-    Record<string, IConnectedSite & { chainName: string }>
+    Record<string, IConnectedSiteToDisplay & { chainName: string }>
   >({});
+
+  const fetchConnectedSite = useCallback(async () => {
+    const sites = await getConnectedSites();
+
+    setConnectedSiteMap((prev) => {
+      return sites.reduce((acc, site) => {
+        acc[site.origin] = {
+          ...prev[site.origin],
+          ...site,
+        };
+        return acc;
+      }, prev);
+    });
+  }, []);
 
   useEffect(() => {
     const dispose = window.rabbyDesktop.ipcRenderer.on(
-      '__internal__rabby:connect',
+      '__internal_push:rabby:chainChanged',
       (data) => {
         setConnectedSiteMap((prev) => ({
           ...prev,
-          [data.origin]: {
-            ...data,
-            chainName:
-              CHAINS_LIST.find(
-                (item) => item.hex.toLowerCase() === data.chainId.toLowerCase()
-              )?.name || '',
-          },
+          [data.origin]: { ...data },
         }));
       }
     );
+
+
     return () => {
       dispose?.();
     };
@@ -71,7 +81,7 @@ export function useConnectedSite() {
 
   return {
     connectedSiteMap,
-    setConnectedSiteMap,
+    fetchConnectedSite,
   };
 }
 
@@ -267,17 +277,17 @@ export function useTopbarTabs() {
 
 export function useSelectedTabInfo(activeTab?: ChromeTab | null) {
   const [selectedTabInfo, setSelectedTabInfo] =
-    useState<ChannelMessagePayload['webui-ext-navinfo']['response'][0]>();
+    useState<ChannelMessagePayload['__internal_rpc:webui-ext:navinfo']['response'][0]>();
   useEffect(() => {
     if (!activeTab?.id) return;
     const dispose = window.rabbyDesktop.ipcRenderer.on(
-      'webui-ext-navinfo',
+      '__internal_rpc:webui-ext:navinfo',
       (payload) => {
         setSelectedTabInfo(payload);
       }
     );
     window.rabbyDesktop.ipcRenderer.sendMessage(
-      'webui-ext-navinfo',
+      '__internal_rpc:webui-ext:navinfo',
       activeTab.id
     );
 

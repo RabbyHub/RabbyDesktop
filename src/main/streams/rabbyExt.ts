@@ -10,6 +10,7 @@ import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 import { RABBY_PANEL_SIZE, NATIVE_HEADER_WITH_NAV_H } from '../../isomorphic/const-size';
 import { walletController } from './rabbyIpcQuery';
 import { Tab } from '../browser/tabs';
+import { rabbyxQuery } from './rabbyIpcQuery/_base';
 
 export async function getRabbyExtId() {
   const ext = await firstValueFrom(fromMainSubject('rabbyExtension'));
@@ -34,6 +35,30 @@ onIpcMainEvent('get-app-version', (event, reqid) => {
     reqid,
     version: app.getVersion(),
   });
+});
+
+onIpcMainEvent('__internal_rpc:rabbyx:on-session-broadcast', async (_, payload) => {
+  const tabbedWin = await onMainWindowReady();
+
+  if (payload.event === 'rabby:chainChanged') {
+    // TODO: leave here for debug
+    // console.log('[debug] payload', payload);
+    tabbedWin.window.webContents.send('__internal_push:rabby:chainChanged', {
+      origin: payload.origin,
+      isConnected: !!payload.data?.hex,
+      chainId: payload.data?.hex || '0x1',
+      chainName: payload.data?.name || '',
+    } as IConnectedSiteToDisplay);
+  }
+});
+
+onIpcMainEvent('__internal_rpc:webui-ext:get-connected-sites', async (event, reqid) => {
+  const connectedSites = await rabbyxQuery<IConnectedSiteInfo[]>('walletController.getConnectedSites');
+
+  event.reply('__internal_rpc:webui-ext:get-connected-sites', {
+    reqid,
+    sites: connectedSites,
+  })
 });
 
 async function updateViewPosition(
@@ -136,7 +161,7 @@ getRabbyExtViews().then(async (views) => {
     if (!previousUrl)
       previousUrl = currentUrl;
 
-    panelView.webContents.openDevTools({ mode: 'detach' });
+    // panelView.webContents.openDevTools({ mode: 'detach' });
 
     panelView.webContents.send('__internal_rpc:rabbyx:focusing-dapp-changed', {
       previousUrl,

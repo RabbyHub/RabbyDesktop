@@ -108,8 +108,6 @@ export function useAppUpdator() {
     };
   }, []);
 
-  console.log('[feat] releaseCheckInfo', releaseCheckInfo);
-
   return {
     releaseCheckInfo,
     isDownloading: !!downloadInfo && !downloadInfo.isEnd,

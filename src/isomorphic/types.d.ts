@@ -54,10 +54,21 @@ type IAppUpdatorDownloadProgress =
       isEnd: true;
     };
 
-type IConnectedSite = {
+type IConnectedSiteToDisplay = {
   origin: string;
   isConnected: boolean;
-  chainId: string | '0x1';
+  chainId: `0x${number}`;
+  chainName: string;
+};
+
+type IConnectedSiteInfo = {
+  chain: string
+  icon: string
+  isConnected: boolean
+  isSigned: boolean
+  isTop: boolean
+  name: string
+  origin: string
 };
 
 type IDappUpdateDetectionItem = {

@@ -35,6 +35,7 @@ type M2RChanneMessagePayload = {
     previousUrl: string;
     currentUrl: string;
   };
+  '__internal_push:rabby:chainChanged': IConnectedSiteToDisplay;
 };
 
 type ChannelMessagePayload = {
@@ -51,7 +52,7 @@ type ChannelMessagePayload = {
       }
     ];
   };
-  'webui-ext-navinfo': {
+  '__internal_rpc:webui-ext:navinfo': {
     send: [tabId: number];
     response: [
       {
@@ -64,6 +65,12 @@ type ChannelMessagePayload = {
         dappSecurityCheckResult: ISecurityCheckResult | null;
       }
     ];
+  };
+  '__internal_rpc:webui-ext:get-connected-sites': {
+    send: [reqid: string];
+    response: [
+      { reqid: string; sites: IConnectedSiteInfo[] }
+    ]
   };
   'rabby-extension-id': {
     send: [];
@@ -260,15 +267,22 @@ type ChannelMessagePayload = {
     send: [winId: number, webContentsId: number];
     response: [];
   };
-  '__internal__rabby:connect': {
-    send: [IConnectedSite];
-    response: [IConnectedSite];
-  };
 
   [`rabbyx-rpc-respond`]: {
     send: [IRabbyxRpcResponse];
     response: [];
-  }
+  };
+
+  '__internal_rpc:rabbyx:on-session-broadcast': {
+    send: [
+      {
+        event: string,
+        data?: any,
+        origin?: string,
+      }
+    ];
+    response: [];
+  };
 };
 
 type Channels = keyof ChannelMessagePayload;
@@ -307,7 +321,7 @@ interface Window {
 
   // for dapp webview
   __rD?: {
-    tellConnection(info: IConnectedSite): void;
+    tellConnection(info: IConnectedSiteToDisplay): void;
   };
 
   // from dapp

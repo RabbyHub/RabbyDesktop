@@ -21,7 +21,7 @@ onIpcMainEvent('rabbyx-rpc-respond', (_, { rpcId, result }) => {
   rabbyXRpcResponse.next({ rpcId, result });
 });
 
-export async function rabbyxQuery (method: string, params: any[] = []) {
+export async function rabbyxQuery<T = any> (method: string, params: any[] = []) {
   const host = await getRabbyxHost();
 
   const rpcId = randString(10);
@@ -38,5 +38,5 @@ export async function rabbyxQuery (method: string, params: any[] = []) {
     params,
   });
 
-  return promise.then(res => res.result);
+  return promise.then(res => res.result as T);
 }

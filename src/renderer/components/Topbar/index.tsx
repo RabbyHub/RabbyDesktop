@@ -42,6 +42,7 @@ import {
   canoicalizeDappUrl,
   isInternalProtocol,
   isMainWinShellWebUI,
+  parseOrigin,
   parseQueryString,
 } from '../../../isomorphic/url';
 
@@ -96,12 +97,14 @@ export default function Topbar() {
 
   const selectedTabInfo = useSelectedTabInfo(activeTab);
 
-  const { connectedSiteMap } = useConnectedSite();
+  const { connectedSiteMap, fetchConnectedSite } = useConnectedSite();
 
   const selectedOrigin =
     canoicalizeDappUrl(selectedTabInfo?.tabUrl || '').origin || '';
 
   useEffect(() => {
+    fetchConnectedSite();
+
     hideDappAddressbarSecurityPopupView();
   }, [selectedOrigin]);
 
@@ -190,6 +193,7 @@ export default function Topbar() {
               filterFavIcon(tab.url, tab.active) ||
               tab.favIconUrl;
             const closable = filterClosable(tab.url, CLOSABLE);
+            const origin = parseOrigin(tab.url || '');
 
             return (
               /* eslint-disable-next-line jsx-a11y/click-events-have-key-events */
@@ -204,9 +208,9 @@ export default function Topbar() {
                 <div className="content">
                   <div className="title">{tab.title}</div>
                   {tab.url &&
-                  connectedSiteMap[new URL(tab.url).origin]?.isConnected ? (
+                  connectedSiteMap[origin]?.isConnected ? (
                     <div className="chain">
-                      {connectedSiteMap[new URL(tab.url).origin]?.chainName}
+                      {connectedSiteMap[origin]?.chainName}
                     </div>
                   ) : null}
                 </div>

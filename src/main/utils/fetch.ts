@@ -7,7 +7,7 @@ import { canoicalizeDappUrl } from '../../isomorphic/url';
 // TODO: add test about it
 export async function fetchUrl(inputURL: string) {
   // leave here for debug
-  // console.log('[feat] inputURL', inputURL);
+  // console.log('[debug] inputURL', inputURL);
   const uinfo = parseUrl(inputURL);
   type Result = {
     statusCode: number;
@@ -72,7 +72,7 @@ export async function parseWebsiteFavicon(websiteBaseURL: string) {
 
   async function textFetcher(url: string) {
     // leave here for debug
-    // console.log('[feat] textFetcher:: url', url);
+    // console.log('[debug] textFetcher:: url', url);
     return fetchUrl(resolveUrl(url, websiteBaseURL)).then(
       (res) => Buffer.from(res.body || []).toString() || ''
     );
@@ -80,7 +80,7 @@ export async function parseWebsiteFavicon(websiteBaseURL: string) {
 
   async function bufferFetcher(url: string) {
     // leave here for debug
-    // console.log('[feat] bufferFetcher:: url', url);
+    // console.log('[debug] bufferFetcher:: url', url);
     return fetchUrl(resolveUrl(url, websiteBaseURL)).then((res) => {
       const arrBuf = res.body || new Uint8Array();
 

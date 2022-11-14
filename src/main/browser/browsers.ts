@@ -90,7 +90,7 @@ export default class TabbedBrowserWindow {
       this.extensions.selectTab(tab.webContents!);
     });
 
-    onIpcMainEvent('webui-ext-navinfo', async (event, tabId) => {
+    onIpcMainEvent('__internal_rpc:webui-ext:navinfo', async (event, tabId) => {
       const tab = this.tabs.get(tabId);
       // TODO: always respond message
       if (!tab) return;
@@ -100,7 +100,7 @@ export default class TabbedBrowserWindow {
         ? await getOrPutCheckResult(tabUrl, { updateOnSet: false })
         : null;
 
-      event.reply('webui-ext-navinfo', {
+      event.reply('__internal_rpc:webui-ext:navinfo', {
         tabExists: !!tab,
         tabUrl,
         dappSecurityCheckResult: checkResult,
