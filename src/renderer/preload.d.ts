@@ -30,6 +30,11 @@ type M2RChanneMessagePayload = {
   '__internal_rpc:loading-view:load-dapp': {};
 
   [`rabbyx-rpc-query`]: IRabbyxRpcQuery;
+
+  '__internal_rpc:rabbyx:focusing-dapp-changed': {
+    previousUrl: string;
+    currentUrl: string;
+  };
 };
 
 type ChannelMessagePayload = {

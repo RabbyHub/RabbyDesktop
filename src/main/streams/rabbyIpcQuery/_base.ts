@@ -6,7 +6,7 @@ import { randString } from '../../../isomorphic/string';
 import { IS_RUNTIME_PRODUCTION } from '../../../isomorphic/constants';
 
 export async function getRabbyxHost () {
-  return firstValueFrom(fromMainSubject('rabbyExtBackgroundHost'));
+  return firstValueFrom(fromMainSubject('rabbyExtViews')).then(views => views.backgroundHost);
 };
 
 const rabbyXRpcResponse = new Subject<IRabbyxRpcResponse>();
