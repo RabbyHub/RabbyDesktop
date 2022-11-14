@@ -92,7 +92,7 @@ export async function openSecurityNotificationView(
     fromMainSubject('securityNotificationsWindowReady')
   );
 
-  popupWin.webContents.send('__internal_rpc:security-notification', payload);
+  popupWin.webContents.send('__internal_push:security-notification', payload);
 
   updateSubWindowPosition(targetWin, popupWin);
 

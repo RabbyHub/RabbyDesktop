@@ -112,7 +112,7 @@ export function switchToBrowserTab (
   tabbedWin?.tabs.select(tabId);
   // webuiExtension's webContents is just the webContents of tabbedWin its belongs to
   tabbedWin?.sendMessageToShellUI(
-    '__internal_rpc:webui-extension:switch-active-dapp',
+    '__internal_push:webui-extension:switch-active-dapp',
     {
       tabId,
     }

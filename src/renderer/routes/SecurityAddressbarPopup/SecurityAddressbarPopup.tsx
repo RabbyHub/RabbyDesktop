@@ -74,7 +74,7 @@ function usePageState() {
 
   useEffect(() => {
     const dispose = window.rabbyDesktop.ipcRenderer.on(
-      '__internal_rpc:security-addressbarpopup:on-show',
+      '__internal_push:security-addressbarpopup:on-show',
       (evt) => {
         setCheckResult(evt.checkResult);
         setPageState({ page: 'entry' });

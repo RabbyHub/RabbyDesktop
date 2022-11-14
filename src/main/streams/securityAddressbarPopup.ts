@@ -116,7 +116,7 @@ onIpcMainEvent(
     hidePopupWindow(popupWin);
 
     popupWin.webContents.send(
-      '__internal_rpc:security-addressbarpopup:on-show',
+      '__internal_push:security-addressbarpopup:on-show',
       {
         origin: checkResult.origin,
         checkResult,

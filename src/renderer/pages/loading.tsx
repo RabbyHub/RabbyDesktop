@@ -32,14 +32,14 @@ export default function App() {
 
   useLayoutEffect(() => {
     window.rabbyDesktop.ipcRenderer.on(
-      '__internal_rpc:loading-view:dapp-did-finish-load' as any,
+      '__internal_push:loading-view:dapp-did-finish-load',
       () => {
         setPercent(100);
         clearInterval(ref.current);
       }
     );
     window.rabbyDesktop.ipcRenderer.on(
-      '__internal_rpc:loading-view:load-dapp' as any,
+      '__internal_push:loading-view:load-dapp',
       (newVal: IDapp) => {
         setDapp(newVal);
       }

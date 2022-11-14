@@ -98,7 +98,7 @@ export async function openDappSecurityCheckView(
   );
   updateSubWindowPosition(targetWin, popupWin);
 
-  popupWin.webContents.send('__internal_rpc:security-check:start-check-dapp', {
+  popupWin.webContents.send('__internal_push:security-check:start-check-dapp', {
     url,
     continualOpId,
   });

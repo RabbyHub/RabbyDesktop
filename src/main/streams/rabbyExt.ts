@@ -163,7 +163,7 @@ getRabbyExtViews().then(async (views) => {
 
     // panelView.webContents.openDevTools({ mode: 'detach' });
 
-    panelView.webContents.send('__internal_rpc:rabbyx:focusing-dapp-changed', {
+    panelView.webContents.send('__internal_push:rabbyx:focusing-dapp-changed', {
       previousUrl,
       currentUrl
     })

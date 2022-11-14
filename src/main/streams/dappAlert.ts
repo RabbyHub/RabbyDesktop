@@ -96,7 +96,7 @@ export async function attachAlertBrowserView(
     fromMainSubject('dappSafeModeViews')
   );
 
-  baseView.webContents.send('__internal_rpc:dapp-tabs:open-safe-view', {
+  baseView.webContents.send('__internal_push:dapp-tabs:open-safe-view', {
     url,
     isExisted,
     status: 'start-loading',
@@ -112,7 +112,7 @@ export async function attachAlertBrowserView(
   const targetUrl = integrateQueryToUrl(url, { _dsv_: dappSafeViewLoadId });
   try {
     await safeView.webContents.loadURL(targetUrl);
-    baseView.webContents.send('__internal_rpc:dapp-tabs:open-safe-view', {
+    baseView.webContents.send('__internal_push:dapp-tabs:open-safe-view', {
       url,
       isExisted,
       status: 'loaded',

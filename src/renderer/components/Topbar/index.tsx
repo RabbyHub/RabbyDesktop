@@ -110,7 +110,7 @@ export default function Topbar() {
 
   useEffect(() => {
     const dispose = window.rabbyDesktop.ipcRenderer.on(
-      '__internal_rpc:webui-extension:switch-active-dapp',
+      '__internal_push:webui-extension:switch-active-dapp',
       ({ tabId }) => {
         chrome.tabs.update(tabId, { active: true });
       }

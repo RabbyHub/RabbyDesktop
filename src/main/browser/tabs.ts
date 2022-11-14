@@ -67,7 +67,7 @@ export class Tab {
 
     this.view.webContents.on('did-finish-load', () => {
       this.loadingView?.webContents.send(
-        '__internal_rpc:loading-view:dapp-did-finish-load',
+        '__internal_push:loading-view:dapp-did-finish-load',
         null
       );
       this.window?.removeBrowserView(this.loadingView!);
@@ -138,7 +138,7 @@ export class Tab {
     if (dapp) {
       setTimeout(() => {
         this.loadingView?.webContents.send(
-          '__internal_rpc:loading-view:load-dapp',
+          '__internal_push:loading-view:load-dapp',
           dapp
         );
       }, 200);
