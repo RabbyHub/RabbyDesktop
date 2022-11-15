@@ -115,7 +115,7 @@ export function useSecurityCheckForDapp() {
 
   useEffect(() => {
     const dispose = window.rabbyDesktop.ipcRenderer.on(
-      '__internal_rpc:security-check:start-check-dapp',
+      '__internal_push:security-check:start-check-dapp',
       ({ url, continualOpId }) => {
         resetState({ url, continualOpId });
         doFetch(url);

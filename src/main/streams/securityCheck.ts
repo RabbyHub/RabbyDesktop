@@ -11,7 +11,7 @@ import { canoicalizeDappUrl, isUrlFromDapp } from '../../isomorphic/url';
 import { dappStore, formatDapp } from '../store/dapps';
 import { randString } from '../../isomorphic/string';
 import { fromMainSubject, valueToMainSubject } from './_init';
-import { onIpcMainEvent } from '../utils/ipcMainEvents';
+import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import {
   createPopupWindow,
   hidePopupWindow,
@@ -98,10 +98,14 @@ export async function openDappSecurityCheckView(
   );
   updateSubWindowPosition(targetWin, popupWin);
 
-  popupWin.webContents.send('__internal_rpc:security-check:start-check-dapp', {
-    url,
-    continualOpId,
-  });
+  sendToWebContents(
+    popupWin.webContents,
+    '__internal_push:security-check:start-check-dapp',
+    {
+      url,
+      continualOpId,
+    }
+  );
 
   showPopupWindow(popupWin);
   popupWin.moveTop();

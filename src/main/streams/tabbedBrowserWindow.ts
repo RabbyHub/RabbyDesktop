@@ -44,7 +44,7 @@ export function findByWindowId(windowId: BrowserWindow['id']) {
   return windows.find((w) => w.id === windowId);
 }
 
-export function getWindowFromWebContents(
+export function getTabbedWindowFromWebContents(
   webContents: BrowserWindow['webContents']
 ) {
   const window = getParentWindowOfTab(webContents);
@@ -55,7 +55,7 @@ export function getWindowFromWebContents(
 //   let win = null;
 
 //   if ((event as any).sender) {
-//     win = getWindowFromWebContents((event as any).sender);
+//     win = getTabbedWindowFromWebContents((event as any).sender);
 
 //     // If sent from a popup window, we may need to get the parent window of the popup.
 //     if (!win) {
@@ -63,7 +63,7 @@ export function getWindowFromWebContents(
 //       if (browserWindow && !browserWindow.isDestroyed()) {
 //         const parentWindow = browserWindow.getParentWindow();
 //         if (parentWindow) {
-//           win = getWindowFromWebContents(parentWindow.webContents);
+//           win = getTabbedWindowFromWebContents(parentWindow.webContents);
 //         }
 //       }
 //     }
@@ -89,11 +89,6 @@ export async function createWindow(
   if (!mainWindow) {
     mainWindow = win;
     valueToMainSubject('mainWindowReady', mainWindow);
-  }
-
-  // TODO: use other params to activate
-  if (process.env.SHELL_DEBUG) {
-    win.topbarWebContents.openDevTools({ mode: 'detach' });
   }
 
   return win;

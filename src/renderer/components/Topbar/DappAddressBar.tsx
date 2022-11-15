@@ -65,6 +65,7 @@ export default function DappAddressBar({
   return (
     <div
       className={classNames(
+        'address-bar',
         styles['address-bar'],
         isInternalUrl && styles.forInternalUrl
       )}

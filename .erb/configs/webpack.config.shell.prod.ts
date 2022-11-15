@@ -2,128 +2,195 @@
  * Build config for electron renderer process
  */
 
- import path from 'path';
- import webpack from 'webpack';
- import HtmlWebpackPlugin from 'html-webpack-plugin';
- import MiniCssExtractPlugin from 'mini-css-extract-plugin';
- import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
- import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
- import { merge } from 'webpack-merge';
- import TerserPlugin from 'terser-webpack-plugin';
- import CopyWebpackPlugin from 'copy-webpack-plugin';
- import baseConfig from './webpack.config.base';
- import webpackPaths from './webpack.paths';
- import checkNodeEnv from '../scripts/check-node-env';
- import deleteSourceMaps from '../scripts/delete-source-maps';
- import { getProdStyleLoaders, getWebpackAliases } from './common';
+import path from 'path';
+import webpack from 'webpack';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
+import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
+import { merge } from 'webpack-merge';
+import TerserPlugin from 'terser-webpack-plugin';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
+import baseConfig from './webpack.config.base';
+import webpackPaths from './webpack.paths';
+import checkNodeEnv from '../scripts/check-node-env';
+import deleteSourceMaps from '../scripts/delete-source-maps';
+import { getProdStyleLoaders, getWebpackAliases } from './common';
 
- checkNodeEnv('production');
- deleteSourceMaps();
+checkNodeEnv('production');
+deleteSourceMaps();
 
- const configuration: webpack.Configuration = {
-   devtool: 'source-map',
+const configuration: webpack.Configuration = {
+  devtool: 'source-map',
 
-   mode: 'production',
+  mode: 'production',
 
-   target: ['web', 'electron-renderer'],
+  target: ['web', 'electron-renderer'],
 
-   entry: {
-     'shell-webui': webpackPaths.shellEntries['shell-webui'].jsEntry,
-     'shell-new-tab': webpackPaths.shellEntries['shell-new-tab'].jsEntry,
-   },
+  output: {
+    publicPath: './',
+    filename: '[name].js',
+    library: {
+      type: 'umd',
+    },
+  },
 
-   output: {
-     path: webpackPaths.distShellPath,
-     publicPath: './',
-     filename: '[name].js',
-     library: {
-       type: 'umd',
-     },
-   },
+  resolve: {
+    alias: {
+      ...getWebpackAliases()
+    }
+  },
 
-   resolve: {
-     alias: {
-       ...getWebpackAliases()
-     }
-   },
+  module: {
+    rules: [
+      ...getProdStyleLoaders(),
+      // Fonts
+      {
+        test: /\.(woff|woff2|eot|ttf|otf)$/i,
+        type: 'asset/resource',
+      },
+      // Images
+      {
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: 'asset/resource',
+      },
+    ],
+  },
 
-   module: {
-     rules: [
-       ...getProdStyleLoaders(),
-       // Fonts
-       {
-         test: /\.(woff|woff2|eot|ttf|otf)$/i,
-         type: 'asset/resource',
-       },
-       // Images
-       {
-         test: /\.(png|svg|jpg|jpeg|gif)$/i,
-         type: 'asset/resource',
-       },
-     ],
-   },
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        parallel: true,
+      }),
+      new CssMinimizerPlugin(),
+    ],
+  },
 
-   optimization: {
-     minimize: true,
-     minimizer: [
-       new TerserPlugin({
-         parallel: true,
-       }),
-       new CssMinimizerPlugin(),
-     ],
-   },
+  plugins: [
+    /**
+    * Create global constants which can be configured at compile time.
+    *
+    * Useful for allowing different behaviour between development builds and
+    * release builds
+    *
+    * NODE_ENV should be production so that modules do not perform certain
+    * development checks
+    */
+    new webpack.EnvironmentPlugin({
+      NODE_ENV: 'production',
+      DEBUG_PROD: false,
+    }),
 
-   plugins: [
-     /**
-      * Create global constants which can be configured at compile time.
-      *
-      * Useful for allowing different behaviour between development builds and
-      * release builds
-      *
-      * NODE_ENV should be production so that modules do not perform certain
-      * development checks
-      */
-     new webpack.EnvironmentPlugin({
-       NODE_ENV: 'production',
-       DEBUG_PROD: false,
-     }),
+    new MiniCssExtractPlugin({
+      filename: '[name].css',
+    }),
 
-     new MiniCssExtractPlugin({
-       filename: '[name].css',
-     }),
+    new BundleAnalyzerPlugin({
+      analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
+    }),
 
-     new BundleAnalyzerPlugin({
-       analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
-     }),
+    new webpack.DefinePlugin({
+      'process.type': '"renderer"',
+    }),
+  ],
+};
 
-     ...Object.values(webpackPaths.shellEntries).map(({ name, target, htmlFile }) => {
-       return new HtmlWebpackPlugin({
-         filename: target,
-         template: htmlFile,
-         minify: {
-           collapseWhitespace: true,
-           removeAttributeQuotes: true,
-           removeComments: true,
-         },
-         chunks: [name],
-         inject: true,
-         isBrowser: false,
-         env: process.env.NODE_ENV,
-         isDevelopment: process.env.NODE_ENV !== 'production',
-         nodeModules: webpackPaths.appNodeModulesPath,
-       });
-     }),
+const configurationShell: webpack.Configuration = {
+  entry: {
+    [webpackPaths.entriesShell['_shell-webui'].name]: webpackPaths.entriesShell['_shell-webui'].jsEntry,
+    [webpackPaths.entriesShell['_shell-new-tab'].name]: webpackPaths.entriesShell['_shell-new-tab'].jsEntry,
+  },
 
-     new CopyWebpackPlugin({
-       patterns: [
-         { from: path.join(webpackPaths.srcRendererPath, 'shell-manifest.json'), to: path.join(webpackPaths.distShellPath, 'manifest.json') },
-       ],
-     }),
+  output: {
+    path: path.join(webpackPaths.assetsPath, './desktop_shell'),
+  },
 
-     new webpack.DefinePlugin({
-       'process.type': '"renderer"',
-     }),
-   ],
- };
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        parallel: true,
+      }),
+      new CssMinimizerPlugin(),
+    ],
+  },
 
- export default merge(baseConfig, configuration);
+  plugins: [
+    ...Object.values(webpackPaths.entriesShell).filter(item => !!item.htmlFile).map(({ name, target, htmlFile }) => {
+      return new HtmlWebpackPlugin({
+        filename: target,
+        template: htmlFile,
+        minify: {
+          collapseWhitespace: true,
+          removeAttributeQuotes: true,
+          removeComments: true,
+        },
+        chunks: [name],
+        inject: true,
+        isBrowser: false,
+        env: process.env.NODE_ENV,
+        isDevelopment: process.env.NODE_ENV !== 'production',
+        nodeModules: webpackPaths.appNodeModulesPath,
+      });
+    }),
+
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: path.join(webpackPaths.srcPath, 'extension-shell/manifest.json'), to: path.join(webpackPaths.assetsPath, 'desktop_shell/manifest.json') },
+      ],
+    })
+  ],
+};
+
+const configurationRabby: webpack.Configuration = {
+  entry: {
+    // [webpackPaths.entriesRabby['rabby-background'].name]: webpackPaths.entriesRabby['rabby-background'].jsEntry,
+    // [webpackPaths.entriesRabby['rabby-content-script'].name]: webpackPaths.entriesRabby['rabby-content-script'].jsEntry,
+  },
+
+  output: {
+    path: path.join(webpackPaths.distExtsPath, './rabby'),
+  },
+
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        parallel: true,
+      }),
+      new CssMinimizerPlugin(),
+    ],
+  },
+
+  plugins: [
+    ...Object.values(webpackPaths.entriesRabby).filter(item => !!item.htmlFile).map(({ name, target, htmlFile }) => {
+      return new HtmlWebpackPlugin({
+        filename: target,
+        template: htmlFile,
+        minify: {
+          collapseWhitespace: true,
+          removeAttributeQuotes: true,
+          removeComments: true,
+        },
+        chunks: [name],
+        inject: true,
+        isBrowser: false,
+        env: process.env.NODE_ENV,
+        isDevelopment: process.env.NODE_ENV !== 'production',
+        nodeModules: webpackPaths.appNodeModulesPath,
+      });
+    }),
+
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: path.join(webpackPaths.rootPath, 'assets/_raw/'), to: path.join(webpackPaths.distExtsPath, './rabby/') },
+      ],
+    })
+  ],
+};
+
+export default [
+  merge(baseConfig, configuration, configurationShell),
+  // merge(baseConfig, configuration, configurationRabby),
+];

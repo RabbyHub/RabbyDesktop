@@ -9,7 +9,7 @@ import {
   NATIVE_HEADER_WITH_NAV_H,
   SECURITY_ADDRBAR_VIEW_SIZE,
 } from '../../isomorphic/const-size';
-import { onIpcMainEvent } from '../utils/ipcMainEvents';
+import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { fromMainSubject, valueToMainSubject } from './_init';
 import {
   createPopupWindow,
@@ -115,8 +115,9 @@ onIpcMainEvent(
     const checkResult = await getOrPutCheckResult(dappUrl);
     hidePopupWindow(popupWin);
 
-    popupWin.webContents.send(
-      '__internal_rpc:security-addressbarpopup:on-show',
+    sendToWebContents(
+      popupWin.webContents,
+      '__internal_push:security-addressbarpopup:on-show',
       {
         origin: checkResult.origin,
         checkResult,

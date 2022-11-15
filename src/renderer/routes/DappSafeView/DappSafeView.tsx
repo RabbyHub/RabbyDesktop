@@ -25,7 +25,7 @@ export default function DappSafeView() {
     closeView();
 
     return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_rpc:dapp-tabs:open-safe-view',
+      '__internal_push:dapp-tabs:open-safe-view',
       ({ url, isExisted, status }) => {
         setUrlInfo({ url, isExisted, status });
       }

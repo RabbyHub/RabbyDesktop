@@ -186,7 +186,7 @@ export default function SecurityNotifications() {
 
   useEffect(() => {
     window.rabbyDesktop.ipcRenderer.on(
-      '__internal_rpc:security-notification',
+      '__internal_push:security-notification',
       (notificationEvent) => {
         notify(
           {

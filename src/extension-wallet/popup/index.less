@@ -1,0 +1,43 @@
+// @import 'tailwindcss/base';
+// @import 'tailwindcss/components';
+// @import 'tailwindcss/utilities';
+@import '~antd/lib/style/themes/default.less';
+@import '~antd/dist/antd.less';
+@import '@/renderer/css/overwrite-antd.less';
+
+html,
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+body.debug-panel {
+  background: rgba(var(--color-primary-rgb), 0.5);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+}
+
+h1 {
+  font-size: 20px;
+  line-height: 23px;
+  font-weight: 500;
+}
+
+button:focus {
+  outline: none;
+}
+
+.subtitle {
+  color: var(--color-comment1);
+  font-size: 14px;
+  line-height: 14px;
+}
+
+.font-roboto-mono {
+  font-family: 'Roboto', sans-serif;
+  font-family: 'Roboto Mono', monospace;
+}

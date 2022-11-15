@@ -378,6 +378,15 @@ ul {
     background-color: var(--color-purewhite);
   }
 
+  &.internal-page.mainwin-shell {
+    border-bottom: 1px solid #eee;
+
+    .page-controls,
+    .address-bar {
+      visibility: hidden;
+    }
+  }
+
   .control {
     background: none;
     border: none;
@@ -426,4 +435,8 @@ ul {
 
 browser-action-list {
   padding-left: 16px;
+}
+
+.rabbyExtPanelPlaceHolder {
+  width: 400px;
 }

@@ -7,7 +7,11 @@ import {
   RABBY_HOMEPAGE_URL,
   RABBY_SPALSH_URL,
 } from '../../isomorphic/constants';
-import { isRabbyShellURL, isUrlFromDapp } from '../../isomorphic/url';
+import {
+  isRabbyExtBackgroundPage,
+  isRabbyShellURL,
+  isUrlFromDapp,
+} from '../../isomorphic/url';
 import buildChromeContextMenu from '../browser/context-menu';
 import { setupMenu } from '../browser/menu';
 import {
@@ -22,18 +26,19 @@ import { defaultSessionReadyThen } from './session';
 import {
   createWindow,
   getFocusedWindow,
-  getWindowFromWebContents,
+  getTabbedWindowFromWebContents,
 } from './tabbedBrowserWindow';
 import { valueToMainSubject } from './_init';
 import { dappStore, formatDapps, parseDappUrl } from '../store/dapps';
 import { attachAlertBrowserView } from './dappAlert';
 import { openDappSecurityCheckView } from './securityCheck';
-import type { Tab } from '../browser/tabs';
 import {
   getElectronChromeExtensions,
   getWebuiExtId,
   onMainWindowReady,
 } from '../utils/stream-helpers';
+import { getRabbyExtId, getRabbyExtViews } from './rabbyExt';
+import { switchToBrowserTab } from '../utils/browser';
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
@@ -55,6 +60,7 @@ app.on('web-contents-created', async (evtApp, webContents) => {
   }
 
   const mainTabbedWin = await onMainWindowReady();
+  const rabbyExtId = await getRabbyExtId();
 
   webContents.on('will-redirect', (evt) => {
     const sender = (evt as any).sender as BrowserView['webContents'];
@@ -63,7 +69,7 @@ app.on('web-contents-created', async (evtApp, webContents) => {
     // this tabs is render as app's self UI, such as topbar.
     if (!isUrlFromDapp(url)) return;
 
-    const tabbedWin = getWindowFromWebContents(sender);
+    const tabbedWin = getTabbedWindowFromWebContents(sender);
     if (!tabbedWin) return;
     if (tabbedWin !== mainTabbedWin) return;
 
@@ -84,29 +90,39 @@ app.on('web-contents-created', async (evtApp, webContents) => {
       attachAlertBrowserView(
         details.url,
         targetInfo.existedOrigin,
-        getWindowFromWebContents(webContents)?.window
+        getTabbedWindowFromWebContents(webContents)?.window
       );
     } else {
+      const isFromExt = currentUrl.startsWith('chrome-extension://');
+      const isToExt = details.url.startsWith('chrome-extension://');
+
       switch (details.disposition) {
         case 'foreground-tab':
         case 'background-tab':
         case 'new-window': {
-          const tabbedWin = getWindowFromWebContents(webContents);
+          const tabbedWin = getTabbedWindowFromWebContents(webContents);
 
-          const openedTab = tabbedWin?.tabs.findByOrigin(details.url) || null;
-          if (openedTab) {
-            tabbedWin?.tabs.select(openedTab!.id);
-            // webuiExtension's webContents is just the webContents of tabbedWin its belongs to
-            tabbedWin?.topbarWebContents.send(
-              '__internal_rpc:webui-extension:switch-active-dapp',
-              {
-                tabId: openedTab.id,
-              }
-            );
+          const openedDapp = !isToExt
+            ? tabbedWin?.tabs.findByOrigin(details.url)
+            : tabbedWin?.tabs.findByUrlbase(details.url);
+          if (openedDapp) {
+            switchToBrowserTab(openedDapp!.id, tabbedWin!);
           } else if (mainTabbedWin === tabbedWin) {
             const mainWindow = tabbedWin.window;
 
-            const continualOpenedTab = tabbedWin.tabs.create();
+            if (isFromExt) {
+              const tab = tabbedWin!.createTab();
+              tab?.loadURL(details.url);
+              if (isRabbyExtBackgroundPage(details.url, rabbyExtId)) {
+                tab?.webContents!.openDevTools({
+                  mode: 'bottom',
+                  activate: true,
+                });
+              }
+              break;
+            }
+
+            const continualOpenedTab = tabbedWin.createTab();
             continualOpenedTab?.loadURL(details.url);
 
             const closeOpenedTab = () => {
@@ -160,7 +176,7 @@ app.on('web-contents-created', async (evtApp, webContents) => {
             createWindow({ defaultTabUrl: winURL });
             break;
           default: {
-            const tab = win.tabs.create();
+            const tab = win.createTab();
             tab.loadURL(winURL);
             break;
           }
@@ -178,7 +194,7 @@ app.on('window-all-closed', () => {
 
 onIpcMainEvent('__internal_rpc:main-window:click-close', async (evt) => {
   const { sender } = evt;
-  const tabbedWin = getWindowFromWebContents(sender);
+  const tabbedWin = getTabbedWindowFromWebContents(sender);
   if (tabbedWin === (await onMainWindowReady())) {
     if (isDarwin) {
       tabbedWin.window.hide();
@@ -224,9 +240,7 @@ export default function bootstrap() {
         x: lastMainWinPos.x,
         y: lastMainWinPos.y,
       },
-      queryStringArgs: {
-        __webuiIsMainWindow: true,
-      },
+      isMainWindow: true,
     });
 
     const mainWin = mainWindow.window;
@@ -253,7 +267,8 @@ export default function bootstrap() {
       storeMainWinPosition(mainWin);
     });
 
-    const showMainWin = () => {
+    const showMainWin = async () => {
+      await getRabbyExtViews();
       mainWindow.window.show();
       mainWindow.window.moveTop();
     };
@@ -310,23 +325,20 @@ export default function bootstrap() {
     });
 
     // do this work on mainWin.window postMessage('homePageLoaded') until timeout
-    setTimeout(
-      () => {
-        splashWin.destroy();
+    setTimeout(() => {
+      splashWin.destroy();
 
-        if (desktopAppStore.get('firstStartApp')) {
-          gettingStartedWin = new BrowserWindow({
-            ...getBrowserWindowOpts(),
-            transparent: true,
-            frame: false,
-            resizable: false,
-          });
-          gettingStartedWin.webContents.loadURL(RABBY_GETTING_STARTED_URL);
-        } else {
-          showMainWin();
-        }
-      },
-      IS_RUNTIME_PRODUCTION ? 3000 : 200
-    );
+      if (desktopAppStore.get('firstStartApp')) {
+        gettingStartedWin = new BrowserWindow({
+          ...getBrowserWindowOpts(),
+          transparent: true,
+          frame: false,
+          resizable: false,
+        });
+        gettingStartedWin.webContents.loadURL(RABBY_GETTING_STARTED_URL);
+      } else {
+        showMainWin();
+      }
+    }, 500);
   });
 }

@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "spec/fixtures",
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "skipLibCheck": true,
+    "module": "commonjs",
+    "moduleResolution": "node"
+  },
+  "include": [
+    "spec/fixtures/crx-test-preload.ts"
+  ]
+}

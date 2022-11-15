@@ -52,9 +52,11 @@ export function integrateQueryToUrl(
 }
 
 export function isRabbyShellURL(url: string) {
-  return (
-    url.startsWith('chrome-extension://') && url.includes('/shell-webui.html')
-  );
+  return url.startsWith('chrome-extension://') && url.includes('/webui.html');
+}
+
+export function isRabbyExtBackgroundPage(url: string, extid: string) {
+  return url.startsWith(`chrome-extension://${extid}/background.html`);
 }
 
 export function isUrlFromDapp(url: string) {
@@ -63,6 +65,10 @@ export function isUrlFromDapp(url: string) {
     !url.startsWith('chrome-extension:') &&
     url.startsWith('https:')
   );
+}
+
+export function isInternalTabUrl(url: string) {
+  return url.startsWith(RABBY_INTERNAL_PROTOCOL);
 }
 
 // TODO: use better flag to check if it's main window's shell ui
@@ -110,6 +116,10 @@ export function canoicalizeDappUrl(url: string) {
     origin,
     domain,
   };
+}
+
+export function parseOrigin(url: string) {
+  return canoicalizeDappUrl(url).origin;
 }
 
 export function hasSameOrigin(url1: string, url2: string) {

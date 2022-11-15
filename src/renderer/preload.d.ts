@@ -7,26 +7,38 @@ type M2RChanneMessagePayload = {
     originReqId: string;
     download: IAppUpdatorDownloadProgress;
   };
-  '__internal_rpc:webui-extension:switch-active-dapp': {
+  '__internal_push:webui-extension:switch-active-dapp': {
     tabId: number;
   };
-  '__internal_rpc:security-check:start-check-dapp': {
+  '__internal_push:security-check:start-check-dapp': {
     url: string;
     continualOpId: string;
   };
-  '__internal_rpc:security-notification': ISecurityNotificationPayload;
-  '__internal_rpc:security-addressbarpopup:on-show': {
+  '__internal_push:security-notification': ISecurityNotificationPayload;
+  '__internal_push:security-addressbarpopup:on-show': {
     origin: string;
     checkResult: ISecurityCheckResult;
   };
   /* eslint-disable-next-line @typescript-eslint/ban-types */
-  '__internal_rpc:loading-view:dapp-did-finish-load': {};
-  '__internal_rpc:dapp-tabs:open-safe-view': {
+  '__internal_push:loading-view:dapp-did-finish-load': {};
+  '__internal_push:dapp-tabs:open-safe-view': {
     url: string;
     isExisted: boolean;
     status: 'start-loading' | 'loaded';
   };
+  /* eslint-disable-next-line @typescript-eslint/ban-types */
+  '__internal_push:loading-view:load-dapp': IDapp;
+
+  [`rabbyx-rpc-query`]: IRabbyxRpcQuery;
+
+  '__internal_push:rabbyx:focusing-dapp-changed': {
+    previousUrl: string;
+    currentUrl: string;
+  };
+  '__internal_push:rabby:chainChanged': IConnectedSiteToDisplay;
 };
+
+type IPushEvents = keyof M2RChanneMessagePayload;
 
 type ChannelMessagePayload = {
   'ipc-example': {
@@ -42,7 +54,7 @@ type ChannelMessagePayload = {
       }
     ];
   };
-  'webui-ext-navinfo': {
+  '__internal_rpc:webui-ext:navinfo': {
     send: [tabId: number];
     response: [
       {
@@ -55,6 +67,10 @@ type ChannelMessagePayload = {
         dappSecurityCheckResult: ISecurityCheckResult | null;
       }
     ];
+  };
+  '__internal_rpc:webui-ext:get-connected-sites': {
+    send: [reqid: string];
+    response: [{ reqid: string; sites: IConnectedSiteInfo[] }];
   };
   'rabby-extension-id': {
     send: [];
@@ -251,9 +267,21 @@ type ChannelMessagePayload = {
     send: [winId: number, webContentsId: number];
     response: [];
   };
-  '__internal__rabby:connect': {
-    send: [IConnectedSite];
-    response: [IConnectedSite];
+
+  [`rabbyx-rpc-respond`]: {
+    send: [IRabbyxRpcResponse];
+    response: [];
+  };
+
+  '__internal_rpc:rabbyx:on-session-broadcast': {
+    send: [
+      {
+        event: string;
+        data?: any;
+        origin?: string;
+      }
+    ];
+    response: [];
   };
 };
 
@@ -293,7 +321,7 @@ interface Window {
 
   // for dapp webview
   __rD?: {
-    tellConnection(info: IConnectedSite): void;
+    tellConnection(info: IConnectedSiteToDisplay): void;
   };
 
   // from dapp

@@ -3,9 +3,10 @@ import { BrowserView, BrowserWindow } from 'electron';
 import {
   NATIVE_HEADER_H,
   NATIVE_HEADER_WITH_NAV_H,
+  RABBY_PANEL_SIZE,
 } from '../../isomorphic/const-size';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
-import { onIpcMainEvent } from '../utils/ipcMainEvents';
+import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { RABBY_LOADING_URL } from '../../isomorphic/constants';
 import { dappStore } from '../store/dapps';
 
@@ -16,6 +17,7 @@ type ITabOptions = {
     navigation?: boolean;
   };
   initialUrl?: string;
+  isOfMainWindow?: boolean;
 };
 
 const DEFAULT_TOPBAR_STACKS = {
@@ -25,8 +27,6 @@ const DEFAULT_TOPBAR_STACKS = {
 export class Tab {
   id: BrowserView['webContents']['id'];
 
-  initialUrl: string = '';
-
   view?: BrowserView;
 
   window?: BrowserWindow;
@@ -35,37 +35,48 @@ export class Tab {
 
   webContents?: BrowserView['webContents'];
 
-  topbarStacks: ITabOptions['topbarStacks'] = { ...DEFAULT_TOPBAR_STACKS };
-
   destroyed: boolean = false;
 
   tabs: Tabs;
 
+  private $meta: {
+    initialUrl: ITabOptions['initialUrl'];
+    topbarStacks: ITabOptions['topbarStacks'];
+    isOfMainWindow: boolean;
+  } = {
+    initialUrl: '',
+    topbarStacks: { ...DEFAULT_TOPBAR_STACKS },
+    isOfMainWindow: false,
+  };
+
   constructor(
-    parentWindow: BrowserWindow,
-    { tabs, topbarStacks, initialUrl }: ITabOptions
+    ofWindow: BrowserWindow,
+    { tabs, topbarStacks, initialUrl, isOfMainWindow }: ITabOptions
   ) {
     this.tabs = tabs;
     this.view = new BrowserView();
     this.id = this.view.webContents.id;
-    this.window = parentWindow;
+    this.window = ofWindow;
+
     this.webContents = this.view.webContents;
     this.window.addBrowserView(this.view);
-    this.initialUrl = initialUrl || '';
 
     this.loadingView = new BrowserView();
     this.loadingView.webContents.loadURL(RABBY_LOADING_URL);
     this.window.addBrowserView(this.loadingView);
 
     this.view.webContents.on('did-finish-load', () => {
-      this.loadingView?.webContents.send(
-        '__internal_rpc:loading-view:dapp-did-finish-load',
-        null
+      sendToWebContents(
+        this.view!.webContents,
+        '__internal_push:loading-view:dapp-did-finish-load',
+        {}
       );
       this.window?.removeBrowserView(this.loadingView!);
     });
 
-    this.topbarStacks = { ...DEFAULT_TOPBAR_STACKS, ...topbarStacks };
+    this.$meta.initialUrl = initialUrl || '';
+    this.$meta.topbarStacks = { ...DEFAULT_TOPBAR_STACKS, ...topbarStacks };
+    this.$meta.isOfMainWindow = !!isOfMainWindow;
 
     const dispose = onIpcMainEvent(
       '__internal_webui-window-close',
@@ -117,15 +128,24 @@ export class Tab {
     this.view = undefined;
   }
 
+  getInitialUrl() {
+    return this.$meta.initialUrl;
+  }
+
   async loadURL(url: string) {
     const dapps = dappStore.get('dapps') || [];
     const { origin } = new URL(url);
     const dapp = dapps.find((item) => item.origin === origin);
     if (dapp) {
       setTimeout(() => {
-        this.loadingView?.webContents.send('load-dapp', dapp);
+        sendToWebContents(
+          this.view!.webContents,
+          '__internal_push:loading-view:load-dapp',
+          dapp
+        );
       }, 200);
     }
+
     return this.view?.webContents.loadURL(url);
   }
 
@@ -137,8 +157,8 @@ export class Tab {
     const [width, height] = this.window!.getSize();
 
     const hideTopbar =
-      !this.topbarStacks?.tabs && !this.topbarStacks?.navigation;
-    const hasNavigationBar = !!this.topbarStacks?.navigation;
+      !this.$meta.topbarStacks?.tabs && !this.$meta.topbarStacks?.navigation;
+    const hasNavigationBar = !!this.$meta.topbarStacks?.navigation;
 
     const topbarHeight = hideTopbar
       ? 0
@@ -159,6 +179,9 @@ export class Tab {
       x: 0,
       y: topbarHeight,
       width,
+      ...(this.$meta.isOfMainWindow && {
+        width: width - RABBY_PANEL_SIZE.width,
+      }),
       height: height - topbarHeight,
     });
     this.view!.setAutoResize({ width: true, height: true });
@@ -245,13 +268,31 @@ export class Tabs extends EventEmitter {
   }
 
   findByOrigin(url: string) {
-    const inputOrigin = canoicalizeDappUrl(url).origin;
-    if (!inputOrigin) return null;
+    const inputUrlInfo = canoicalizeDappUrl(url);
+    if (!inputUrlInfo.origin) return null;
 
-    return this.tabList.find(
-      (tab) =>
-        canoicalizeDappUrl(tab.webContents?.getURL() || '').origin ===
-        inputOrigin
-    );
+    return this.tabList.find((tab) => {
+      if (!tab.webContents) return false;
+      const tabUrlInfo = canoicalizeDappUrl(tab.webContents.getURL());
+      return tabUrlInfo.origin === inputUrlInfo.origin;
+    });
+  }
+
+  findByUrlbase(url: string) {
+    const { urlInfo } = canoicalizeDappUrl(url);
+    if (!urlInfo?.origin) return null;
+
+    return this.tabList.find((tab) => {
+      if (!tab.webContents) return false;
+      const { urlInfo: tabUrlInfo } = canoicalizeDappUrl(
+        tab.webContents.getURL()
+      );
+      return (
+        tabUrlInfo &&
+        tabUrlInfo.protocol === urlInfo.protocol &&
+        tabUrlInfo.host === urlInfo.host &&
+        tabUrlInfo.pathname === urlInfo.pathname
+      );
+    });
   }
 }
