@@ -108,15 +108,22 @@ onIpcMainEvent(
 
     switch (payload.event) {
       case 'rabby:chainChanged': {
+        const { panelView } = await getRabbyExtViews();
+        const data: IConnectedSiteToDisplay = {
+          origin: payload.origin!,
+          isConnected: !!payload.data?.hex,
+          chainId: payload.data?.hex || '0x1',
+          chainName: payload.data?.name || '',
+        };
         sendToWebContents(
           tabbedWin.window.webContents,
           '__internal_push:rabby:chainChanged',
-          {
-            origin: payload.origin,
-            isConnected: !!payload.data?.hex,
-            chainId: payload.data?.hex || '0x1',
-            chainName: payload.data?.name || '',
-          } as IConnectedSiteToDisplay
+          data
+        );
+        sendToWebContents(
+          panelView.webContents,
+          '__internal_push:rabby:chainChanged',
+          data
         );
         break;
       }
