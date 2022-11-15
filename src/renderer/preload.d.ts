@@ -19,15 +19,13 @@ type M2RChanneMessagePayload = {
     origin: string;
     checkResult: ISecurityCheckResult;
   };
-  /* eslint-disable-next-line @typescript-eslint/ban-types */
-  '__internal_push:loading-view:dapp-did-finish-load': {};
   '__internal_push:dapp-tabs:open-safe-view': {
     url: string;
     isExisted: boolean;
     status: 'start-loading' | 'loaded';
   };
   /* eslint-disable-next-line @typescript-eslint/ban-types */
-  '__internal_push:loading-view:load-dapp': IDapp;
+  '__internal_push:loading-view:toggle': MainInternalsMessagePayload['__internal_main:loading-view:toggle']['send'][0];
 
   [`rabbyx-rpc-query`]: IRabbyxRpcQuery;
 
@@ -286,6 +284,23 @@ type ChannelMessagePayload = {
 };
 
 type Channels = keyof ChannelMessagePayload;
+
+type MainInternalsMessagePayload = {
+  '__internal_main:loading-view:toggle': {
+    send: [
+      | {
+          type: 'start';
+          dapp: IDapp;
+        }
+      | {
+          type: 'did-finish-load';
+        }
+    ];
+    response: [];
+  };
+};
+
+type MainInternals = keyof MainInternalsMessagePayload;
 
 interface Window {
   // for built-in webview

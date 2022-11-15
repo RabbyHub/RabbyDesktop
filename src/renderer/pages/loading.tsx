@@ -4,44 +4,72 @@ import { createRoot } from 'react-dom/client';
 import '../css/style.less';
 
 import { Progress } from 'antd';
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import './loading.less';
 import { DappFavicon } from '../components/DappFavicon';
 
 export default function App() {
-  const [percent, setPercent] = React.useState(10);
-  const [dapp, setDapp] = React.useState<IDapp | null>(null);
+  const [loadingInfo, setLoadingInfo] = React.useState<{
+    dapp: IDapp | null;
+    percent: number;
+  }>({
+    dapp: null,
+    percent: 0,
+  });
 
-  const ref = useRef<any>(null);
+  const timerRef = useRef<any>(null);
+  const loadingRef = useRef<boolean>(false);
 
-  useEffect(() => {
-    ref.current = setInterval(() => {
+  const resetTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    timerRef.current = setInterval(() => {
+      if (!loadingRef.current) {
+        setLoadingInfo((prev) => {
+          if (prev.percent === 0) return prev;
+
+          return { ...prev, percent: 0 };
+        });
+        return;
+      }
+
       // eslint-disable-next-line @typescript-eslint/no-shadow
-      setPercent((percent) => {
-        if (percent > 98) {
-          clearInterval(ref.current);
-          return 98;
+      setLoadingInfo((prev) => {
+        if (prev.percent > 98) {
+          clearInterval(timerRef.current);
+          prev.percent = 98;
+        } else if (prev.percent > 80) {
+          prev.percent += 0.5;
+        } else {
+          prev.percent += Math.random() * 10;
         }
-        if (percent > 80) {
-          return percent + 0.5;
-        }
-        return percent + Math.random() * 10;
+
+        return {
+          ...prev,
+        };
       });
     }, 500);
   }, []);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
+    resetTimer();
+  }, [resetTimer]);
+
+  const { percent, dapp } = loadingInfo;
+
+  useEffect(() => {
     window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:loading-view:dapp-did-finish-load',
-      () => {
-        setPercent(100);
-        clearInterval(ref.current);
-      }
-    );
-    window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:loading-view:load-dapp',
-      (newVal: IDapp) => {
-        setDapp(newVal);
+      '__internal_push:loading-view:toggle',
+      (payload) => {
+        if (payload.type === 'start') {
+          setLoadingInfo((prev) => {
+            return { dapp: payload.dapp, percent: Math.max(prev.percent, 5) };
+          });
+          loadingRef.current = true;
+        } else {
+          setLoadingInfo({ dapp: null, percent: 0 });
+          loadingRef.current = false;
+        }
       }
     );
   }, [dapp?.origin]);
@@ -49,7 +77,7 @@ export default function App() {
   return (
     <div className={`page-loading ${percent >= 100 ? 'hide' : ''}`}>
       <Progress
-        percent={percent}
+        percent={loadingRef.current ? percent : 0}
         status="active"
         showInfo={false}
         size="small"

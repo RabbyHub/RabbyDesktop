@@ -6,8 +6,11 @@ import {
   RABBY_PANEL_SIZE,
 } from '../../isomorphic/const-size';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
-import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
-import { RABBY_LOADING_URL } from '../../isomorphic/constants';
+import {
+  emitIpcMainEvent,
+  onIpcMainEvent,
+  sendToWebContents,
+} from '../utils/ipcMainEvents';
 import { dappStore } from '../store/dapps';
 
 type ITabOptions = {
@@ -30,8 +33,6 @@ export class Tab {
   view?: BrowserView;
 
   window?: BrowserWindow;
-
-  loadingView?: BrowserView;
 
   webContents?: BrowserView['webContents'];
 
@@ -61,17 +62,10 @@ export class Tab {
     this.webContents = this.view.webContents;
     this.window.addBrowserView(this.view);
 
-    this.loadingView = new BrowserView();
-    this.loadingView.webContents.loadURL(RABBY_LOADING_URL);
-    this.window.addBrowserView(this.loadingView);
-
     this.view.webContents.on('did-finish-load', () => {
-      sendToWebContents(
-        this.view!.webContents,
-        '__internal_push:loading-view:dapp-did-finish-load',
-        {}
-      );
-      this.window?.removeBrowserView(this.loadingView!);
+      emitIpcMainEvent('__internal_main:loading-view:toggle', {
+        type: 'did-finish-load',
+      });
     });
 
     this.$meta.initialUrl = initialUrl || '';
@@ -112,7 +106,6 @@ export class Tab {
     this.hide();
 
     this.window!.removeBrowserView(this.view!);
-    this.window!.removeBrowserView(this.loadingView!);
     this.window = undefined;
 
     if (this.webContents!.isDevToolsOpened()) {
@@ -138,11 +131,10 @@ export class Tab {
     const dapp = dapps.find((item) => item.origin === origin);
     if (dapp) {
       setTimeout(() => {
-        sendToWebContents(
-          this.view!.webContents,
-          '__internal_push:loading-view:load-dapp',
-          dapp
-        );
+        emitIpcMainEvent('__internal_main:loading-view:toggle', {
+          type: 'start',
+          dapp,
+        });
       }, 200);
     }
 
@@ -166,15 +158,6 @@ export class Tab {
       ? NATIVE_HEADER_WITH_NAV_H
       : NATIVE_HEADER_H;
 
-    this.loadingView!.setBounds({
-      x: 0,
-      y: topbarHeight,
-      width,
-      height: height - topbarHeight,
-    });
-    this.loadingView!.setAutoResize({ width: true, height: true });
-    // this.window.addBrowserView(this.view)
-
     this.view!.setBounds({
       x: 0,
       y: topbarHeight,
@@ -190,8 +173,10 @@ export class Tab {
   hide() {
     this.view!.setAutoResize({ width: false, height: false });
     this.view!.setBounds({ x: -1000, y: 0, width: 0, height: 0 });
-    this.loadingView!.setAutoResize({ width: false, height: false });
-    this.loadingView!.setBounds({ x: -1000, y: 0, width: 0, height: 0 });
+
+    emitIpcMainEvent('__internal_main:loading-view:toggle', {
+      type: 'did-finish-load',
+    });
     // TODO: can't remove from window otherwise we lose track of which window it belongs to
     // this.window.removeBrowserView(this.view)
   }

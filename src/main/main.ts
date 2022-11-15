@@ -8,6 +8,7 @@ import './streams/rabbyExt';
 import './streams/updater';
 import './streams/session';
 import './streams/dappAlert';
+import './streams/dappLoadingView';
 import './streams/securityCheck';
 import './streams/securityAddressbarPopup';
 import './streams/securityNotification';

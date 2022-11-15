@@ -29,3 +29,7 @@ export async function getRabbyExtId() {
 export async function getRabbyExtViews() {
   return firstValueFrom(fromMainSubject('rabbyExtViews'));
 }
+
+export async function getDappLoadingView() {
+  return firstValueFrom(fromMainSubject('dappLoadingView'));
+}
