@@ -1,5 +1,6 @@
 import { firstValueFrom } from 'rxjs';
 import { fromMainSubject } from '../streams/_init';
+import { cLog } from './log';
 
 export async function getElectronChromeExtensions() {
   return firstValueFrom(fromMainSubject('electronChromeExtensionsReady'));
@@ -15,4 +16,16 @@ export async function getWebuiExtId() {
 
 export async function onMainWindowReady() {
   return firstValueFrom(fromMainSubject('mainWindowReady'));
+}
+
+export async function getRabbyExtId() {
+  const ext = await firstValueFrom(fromMainSubject('rabbyExtension'));
+
+  cLog('getRabbyExtId', ext.id);
+
+  return ext.id;
+}
+
+export async function getRabbyExtViews() {
+  return firstValueFrom(fromMainSubject('rabbyExtViews'));
 }

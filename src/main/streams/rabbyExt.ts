@@ -1,11 +1,14 @@
-import { firstValueFrom } from 'rxjs';
 import { app } from 'electron';
-import { fromMainSubject, valueToMainSubject } from './_init';
+import { valueToMainSubject } from './_init';
 
 import { cLog } from '../utils/log';
 import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { createPopupView } from '../utils/browser';
-import { onMainWindowReady } from '../utils/stream-helpers';
+import {
+  getRabbyExtId,
+  getRabbyExtViews,
+  onMainWindowReady,
+} from '../utils/stream-helpers';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 import {
   RABBY_PANEL_SIZE,
@@ -14,18 +17,6 @@ import {
 import { walletController } from './rabbyIpcQuery';
 import { Tab } from '../browser/tabs';
 import { rabbyxQuery } from './rabbyIpcQuery/_base';
-
-export async function getRabbyExtId() {
-  const ext = await firstValueFrom(fromMainSubject('rabbyExtension'));
-
-  cLog('getRabbyExtId', ext.id);
-
-  return ext.id;
-}
-
-export async function getRabbyExtViews() {
-  return firstValueFrom(fromMainSubject('rabbyExtViews'));
-}
 
 onIpcMainEvent('rabby-extension-id', async (event) => {
   event.reply('rabby-extension-id', {

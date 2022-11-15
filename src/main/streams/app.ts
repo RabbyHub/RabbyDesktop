@@ -36,8 +36,9 @@ import {
   getElectronChromeExtensions,
   getWebuiExtId,
   onMainWindowReady,
+  getRabbyExtId,
+  getRabbyExtViews,
 } from '../utils/stream-helpers';
-import { getRabbyExtId, getRabbyExtViews } from './rabbyExt';
 import { switchToBrowserTab } from '../utils/browser';
 
 const appLog = getBindLog('appStream', 'bgGrey');
