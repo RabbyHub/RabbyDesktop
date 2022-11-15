@@ -45,17 +45,17 @@ onIpcMainEvent(
   }
 );
 
+let currentType: 'side' | 'full' = 'full';
 async function updateViewPosition(
   rabbyView: Electron.BrowserView,
-  mainWin: Electron.BrowserWindow,
-  type: 'side' | 'center' = 'side'
+  mainWin: Electron.BrowserWindow
 ) {
   const [width, height] = mainWin.getSize();
 
   const popupRect =
-    type === 'center'
+    currentType === 'full'
       ? {
-          x: Math.floor((width - RABBY_PANEL_SIZE.width) / 2),
+          x: 0,
           y: NATIVE_HEADER_WITH_NAV_H,
           width,
           height: height - NATIVE_HEADER_WITH_NAV_H,
@@ -76,11 +76,8 @@ async function onLockStatusChange(nextLocked: boolean) {
   const tabbedWin = await onMainWindowReady();
   const { panelView } = await getRabbyExtViews();
 
-  updateViewPosition(
-    panelView,
-    tabbedWin.window,
-    nextLocked ? 'center' : 'side'
-  );
+  currentType = nextLocked ? 'full' : 'side';
+  updateViewPosition(panelView, tabbedWin.window);
 
   if (nextLocked) {
     tabbedWin.tabs.selected?.hide();
@@ -203,7 +200,7 @@ getRabbyExtViews().then(async (views) => {
 
       tab.webContents!.on('did-finish-load', () => {
         if (!currentUrl) {
-          currentUrl = tab.webContents!.getURL();
+          currentUrl = tab.webContents?.getURL() || '';
           resolve(currentUrl);
         }
       });
