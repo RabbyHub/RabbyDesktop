@@ -14,7 +14,7 @@ import {
   getShellPageUrl,
   preloadPath,
 } from '../utils/app';
-import { cLog, getBindLog } from '../utils/log';
+import { getBindLog } from '../utils/log';
 import { fromMainSubject, valueToMainSubject } from './_init';
 import {
   createWindow,

@@ -37,7 +37,7 @@ import {
   getWebuiExtId,
   onMainWindowReady,
 } from '../utils/stream-helpers';
-import { getRabbyExtId } from './rabbyExt';
+import { getRabbyExtId, getRabbyExtViews } from './rabbyExt';
 import { switchToBrowserTab } from '../utils/browser';
 
 const appLog = getBindLog('appStream', 'bgGrey');
@@ -267,7 +267,8 @@ export default function bootstrap() {
       storeMainWinPosition(mainWin);
     });
 
-    const showMainWin = () => {
+    const showMainWin = async () => {
+      await getRabbyExtViews();
       mainWindow.window.show();
       mainWindow.window.moveTop();
     };
@@ -324,23 +325,20 @@ export default function bootstrap() {
     });
 
     // do this work on mainWin.window postMessage('homePageLoaded') until timeout
-    setTimeout(
-      () => {
-        splashWin.destroy();
+    setTimeout(() => {
+      splashWin.destroy();
 
-        if (desktopAppStore.get('firstStartApp')) {
-          gettingStartedWin = new BrowserWindow({
-            ...getBrowserWindowOpts(),
-            transparent: true,
-            frame: false,
-            resizable: false,
-          });
-          gettingStartedWin.webContents.loadURL(RABBY_GETTING_STARTED_URL);
-        } else {
-          showMainWin();
-        }
-      },
-      IS_RUNTIME_PRODUCTION ? 3000 : 200
-    );
+      if (desktopAppStore.get('firstStartApp')) {
+        gettingStartedWin = new BrowserWindow({
+          ...getBrowserWindowOpts(),
+          transparent: true,
+          frame: false,
+          resizable: false,
+        });
+        gettingStartedWin.webContents.loadURL(RABBY_GETTING_STARTED_URL);
+      } else {
+        showMainWin();
+      }
+    }, 500);
   });
 }

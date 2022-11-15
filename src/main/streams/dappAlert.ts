@@ -10,7 +10,7 @@ import {
   NATIVE_HEADER_H,
 } from '../../isomorphic/const-size';
 import { randString } from '../../isomorphic/string';
-import { integrateQueryToUrl, parseQueryString } from '../../isomorphic/url';
+import { integrateQueryToUrl } from '../../isomorphic/url';
 
 import { createPopupView } from '../utils/browser';
 import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';

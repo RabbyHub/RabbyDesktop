@@ -41,28 +41,6 @@ onIpcMainEvent('get-app-version', (event, reqid) => {
 });
 
 onIpcMainEvent(
-  '__internal_rpc:rabbyx:on-session-broadcast',
-  async (_, payload) => {
-    const tabbedWin = await onMainWindowReady();
-
-    if (payload.event === 'rabby:chainChanged') {
-      // TODO: leave here for debug
-      // console.log('[debug] payload', payload);
-      sendToWebContents(
-        tabbedWin.window.webContents,
-        '__internal_push:rabby:chainChanged',
-        {
-          origin: payload.origin,
-          isConnected: !!payload.data?.hex,
-          chainId: payload.data?.hex || '0x1',
-          chainName: payload.data?.name || '',
-        } as IConnectedSiteToDisplay
-      );
-    }
-  }
-);
-
-onIpcMainEvent(
   '__internal_rpc:webui-ext:get-connected-sites',
   async (event, reqid) => {
     const connectedSites = await rabbyxQuery<IConnectedSiteInfo[]>(
@@ -78,21 +56,83 @@ onIpcMainEvent(
 
 async function updateViewPosition(
   rabbyView: Electron.BrowserView,
-  mainWin: Electron.BrowserWindow
+  mainWin: Electron.BrowserWindow,
+  type: 'side' | 'center' = 'side'
 ) {
   const [width, height] = mainWin.getSize();
 
-  const popupRect = {
-    x: width - RABBY_PANEL_SIZE.width,
-    y: NATIVE_HEADER_WITH_NAV_H,
-    width: RABBY_PANEL_SIZE.width,
-    height: height - NATIVE_HEADER_WITH_NAV_H,
-  };
+  const popupRect =
+    type === 'center'
+      ? {
+          x: Math.floor((width - RABBY_PANEL_SIZE.width) / 2),
+          y: NATIVE_HEADER_WITH_NAV_H,
+          width,
+          height: height - NATIVE_HEADER_WITH_NAV_H,
+        }
+      : {
+          x: width - RABBY_PANEL_SIZE.width,
+          y: NATIVE_HEADER_WITH_NAV_H,
+          width: RABBY_PANEL_SIZE.width,
+          height: height - NATIVE_HEADER_WITH_NAV_H,
+        };
 
   rabbyView.setBounds({ ...popupRect });
 
   mainWin.setTopBrowserView(rabbyView);
 }
+
+async function onLockStatusChange(nextLocked: boolean) {
+  const tabbedWin = await onMainWindowReady();
+  const { panelView } = await getRabbyExtViews();
+
+  updateViewPosition(
+    panelView,
+    tabbedWin.window,
+    nextLocked ? 'center' : 'side'
+  );
+
+  if (nextLocked) {
+    tabbedWin.tabs.selected?.hide();
+  } else {
+    const nextSelected = tabbedWin.tabs.selected || tabbedWin.tabs.tabList[0];
+    tabbedWin.tabs.select(nextSelected.id);
+  }
+}
+
+onIpcMainEvent(
+  '__internal_rpc:rabbyx:on-session-broadcast',
+  async (_, payload) => {
+    const tabbedWin = await onMainWindowReady();
+    // TODO: leave here for debug
+    // console.log('[debug] payload', payload);
+
+    switch (payload.event) {
+      case 'rabby:chainChanged': {
+        sendToWebContents(
+          tabbedWin.window.webContents,
+          '__internal_push:rabby:chainChanged',
+          {
+            origin: payload.origin,
+            isConnected: !!payload.data?.hex,
+            chainId: payload.data?.hex || '0x1',
+            chainName: payload.data?.name || '',
+          } as IConnectedSiteToDisplay
+        );
+        break;
+      }
+      case 'lock': {
+        onLockStatusChange(true);
+        break;
+      }
+      case 'unlock': {
+        onLockStatusChange(false);
+        break;
+      }
+      default:
+        break;
+    }
+  }
+);
 
 getRabbyExtId().then(async (extId) => {
   const tabbedWin = await onMainWindowReady();
@@ -113,6 +153,7 @@ getRabbyExtId().then(async (extId) => {
   );
 
   rabbyBgHostView.webContents.on('did-finish-load', () => {
+    cLog('rabbyExtViews loaded');
     valueToMainSubject('rabbyExtViews', {
       panelView: rabbyView,
       backgroundHost: rabbyBgHostView.webContents,
@@ -144,8 +185,8 @@ getRabbyExtId().then(async (extId) => {
     rabbyView.webContents.loadURL(`chrome-extension://${extId}/popup.html`);
   }, 5000);
 
-  const isBooted = await walletController.isBooted();
-  console.log('[debug] isBooted', isBooted);
+  const isUnlocked = await walletController.isUnlocked();
+  onLockStatusChange(!isUnlocked);
 });
 
 getRabbyExtViews().then(async (views) => {
