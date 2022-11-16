@@ -31,7 +31,11 @@ const configuration: webpack.Configuration = {
   module: require('./webpack.config.renderer.dev').default.module,
 
   entry: {
-    renderer: Object.keys(dependencies || {}).filter(dep => !dep.startsWith('@types/')),
+    renderer: Object.keys(dependencies || {})
+      .filter(dep => !dep.startsWith('@types/'))
+      .filter(dep => ![
+        '@debank/common'
+      ].includes(dep)),
   },
 
   output: {
