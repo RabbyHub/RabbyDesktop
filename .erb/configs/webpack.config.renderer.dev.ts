@@ -7,6 +7,9 @@ import chalk from 'chalk';
 import { merge } from 'webpack-merge';
 import { execSync, spawn } from 'child_process';
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
+import tsImportPluginFactory from 'ts-import-plugin';
+
 import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
@@ -48,21 +51,7 @@ const configuration: webpack.Configuration = {
 
   target: ['web', 'electron-renderer'],
 
-  entry: {
-    // 'renderer': [
-    //   `webpack-dev-server/client?http://localhost:${port}/dist`,
-    //   'webpack/hot/only-dev-server',
-    //   path.join(webpackPaths.srcRendererPath, 'index.tsx'),
-    // ],
-    ...Object.values(webpackPaths.entriesRenderer).reduce((accu, cur) => {
-      // @ts-ignore
-      accu[cur.name] = cur.jsEntry;
-      return accu;
-    }, {})
-  },
-
   output: {
-    path: webpackPaths.distRendererPath,
     publicPath: '/',
     filename: '[name].js',
     assetModuleFilename: 'assets/[name].[hash][ext]',
@@ -153,7 +142,28 @@ const configuration: webpack.Configuration = {
     }),
 
     new ReactRefreshWebpackPlugin(),
+  ],
 
+  node: {
+    __dirname: false,
+    __filename: false,
+  },
+};
+
+const configurationRenderer: webpack.Configuration = {
+  entry: {
+    ...Object.values(webpackPaths.entriesRenderer).reduce((accu, cur) => {
+      // @ts-ignore
+      accu[cur.name] = cur.jsEntry;
+      return accu;
+    }, {})
+  },
+
+  output: {
+    path: webpackPaths.distRendererPath,
+  },
+
+  plugins: [
     ...Object.values(webpackPaths.entriesRenderer).map(({ name, target, htmlFile }) => {
       return new HtmlWebpackPlugin({
         filename: target,
@@ -178,11 +188,6 @@ const configuration: webpack.Configuration = {
     }),
   ],
 
-  node: {
-    __dirname: false,
-    __filename: false,
-  },
-
   devServer: {
     port,
     compress: true,
@@ -202,14 +207,6 @@ const configuration: webpack.Configuration = {
       }
     },
     setupMiddlewares(middlewares) {
-      console.log('Starting shell builder...');
-      const shellProcess = spawn('npm', ['run', 'start:shell'], {
-        shell: true,
-        stdio: 'inherit',
-      })
-        .on('close', (code: number) => process.exit(code!))
-        .on('error', (spawnError) => console.error(spawnError));
-
       console.log('Starting preload.js builder...');
       const preloadProcess = spawn('npm', ['run', 'start:preload'], {
         shell: true,
@@ -232,7 +229,6 @@ const configuration: webpack.Configuration = {
             stdio: 'inherit',
           })
             .on('close', (code: number) => {
-              shellProcess.kill();
               preloadProcess.kill();
               process.exit(code!);
             })
@@ -244,4 +240,141 @@ const configuration: webpack.Configuration = {
   },
 };
 
-export default merge(baseConfig, configuration);
+const configurationShell: webpack.Configuration = {
+  entry: {
+    [webpackPaths.entriesShell['_shell-webui'].name]: webpackPaths.entriesShell['_shell-webui'].jsEntry,
+    [webpackPaths.entriesShell['_shell-new-tab'].name]: webpackPaths.entriesShell['_shell-new-tab'].jsEntry,
+  },
+  output: {
+    path: path.join(webpackPaths.assetsPath, 'desktop_shell'),
+  },
+  plugins: [
+    ...Object.values(webpackPaths.entriesShell).filter(item => !!item.htmlFile).map(({ name, target, htmlFile }) => {
+      return new HtmlWebpackPlugin({
+        filename: target,
+        template: htmlFile,
+        minify: {
+          collapseWhitespace: true,
+          removeAttributeQuotes: true,
+          removeComments: true,
+        },
+        chunks: [name],
+        hash: !isProduction,
+        inject: 'body',
+        isBrowser: false,
+        env: process.env.NODE_ENV,
+        isDevelopment: !isProduction,
+        nodeModules: webpackPaths.appNodeModulesPath,
+      });
+    }),
+
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: path.join(webpackPaths.srcPath, 'extension-shell/manifest.json'), to: path.join(webpackPaths.assetsPath, 'desktop_shell/manifest.json') },
+      ],
+    })
+  ],
+};
+
+const configurationRabby: webpack.Configuration = {
+  entry: {
+    // [webpackPaths.entriesRabby['rabby-background'].name]: webpackPaths.entriesRabby['rabby-background'].jsEntry,
+    // [webpackPaths.entriesRabby['rabby-content-script'].name]: webpackPaths.entriesRabby['rabby-content-script'].jsEntry,
+    [webpackPaths.entriesRabby['rabby-popup'].name]: webpackPaths.entriesRabby['rabby-popup'].jsEntry,
+  },
+  output: {
+    path: path.join(webpackPaths.distExtsPath, 'rabby'),
+  },
+  module: {
+    rules: [{ oneOf: [
+      {
+        test: /src\/extension-wallet/,
+        use: [
+          {
+            loader: 'ts-loader',
+            options: {
+              transpileOnly: true,
+              getCustomTransformers: () => ({
+                before: [
+                  tsImportPluginFactory({
+                    libraryName: 'antd',
+                    libraryDirectory: 'lib',
+                    style: true,
+                  }),
+                ],
+              }),
+              compilerOptions: {
+                module: 'es2015',
+              },
+            },
+          },
+          {
+            loader: path.resolve(
+              webpackPaths.rootPath,
+              'node_modules/antd-dayjs-webpack-plugin/src/init-loader'
+            ),
+            options: {
+              plugins: [
+                'isSameOrBefore',
+                'isSameOrAfter',
+                'advancedFormat',
+                'customParseFormat',
+                'weekday',
+                'weekYear',
+                'weekOfYear',
+                'isMoment',
+                'localeData',
+                'localizedFormat',
+              ],
+            },
+          },
+        ],
+      }
+    ]}]
+  },
+  plugins: [
+    ...Object.values(webpackPaths.entriesRabby).filter(item => !!item.htmlFile).map(({ name, target, htmlFile }) => {
+      return new HtmlWebpackPlugin({
+        filename: target,
+        template: htmlFile,
+        minify: {
+          collapseWhitespace: true,
+          removeAttributeQuotes: true,
+          removeComments: true,
+        },
+        chunks: [name],
+        hash: !isProduction,
+        inject: 'body',
+        isBrowser: false,
+        env: process.env.NODE_ENV,
+        isDevelopment: !isProduction,
+        nodeModules: webpackPaths.appNodeModulesPath,
+      });
+    }),
+
+    // new CopyWebpackPlugin({
+    //   patterns: [
+    //     { from: path.join(webpackPaths.rootPath, 'assets/_raw/'), to: path.join(webpackPaths.distExtsPath, './rabby/') },
+    //   ],
+    // })
+  ],
+
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        'webextension-polyfill': {
+          minSize: 0,
+          test: /[\\/]node_modules[\\/]webextension-polyfill/,
+          name: 'webextension-polyfill',
+          chunks: 'all',
+        },
+      },
+    },
+  },
+};
+
+export default [
+  merge(baseConfig, configuration, configurationRenderer),
+  merge(baseConfig, configuration, configurationShell),
+  // merge(baseConfig, configuration, configuration, configurationRabby),
+];

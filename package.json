@@ -27,12 +27,10 @@
   },
   "main": "./src/main/main.ts",
   "scripts": {
-    "build": "concurrently \"npm run build:main\" \"npm run build:shell\" \"npm run build:renderer\"",
+    "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:main": "cross-env-shell NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.main.prod.ts",
     "build:renderer": "npm run clean:renderer && cross-env-shell NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
-    "build:shell": "npm run clean:shell && cross-env-shell NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.shell.prod.ts",
-    "clean:renderer": "rimraf release/app/dist/renderer",
-    "clean:shell": "rimraf assets/desktop_shell",
+    "clean:renderer": "rimraf release/app/dist/renderer && rimraf assets/desktop_shell",
     "postinstall": "npm run depcheck",
     "depcheck": "ts-node .erb/scripts/check-native-dep.js && electron-builder install-app-deps && cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.dev.dll.ts",
     "lint": "cross-env-shell NODE_ENV=development eslint --ext .js,.jsx,.ts,.tsx ./src",
@@ -52,7 +50,6 @@
     "start:main": "cross-env-shell NODE_ENV=development electronmon -r ts-node/register/transpile-only .",
     "start:preload": "cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
     "start:renderer": "npm run clean:renderer && cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
-    "start:shell": "npm run clean:shell && cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.shell.dev.ts",
     "test": "jest",
     "pretest:main": "tsc --project ./tsconfig.fixtures.json",
     "test:main": "node ./scripts/spec-runner.js"
