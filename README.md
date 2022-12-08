@@ -54,6 +54,12 @@ Start the RabbyX Project's build process in a separate terminal:
 
 ```bash
 cd /path/to/RabbyX;
+
+# before build, we ensure the commit is correct
+git fetch --all --prune;
+git reset --hard origin/feat/for_desktop;
+
+# run build
 yarn build:dev
 ```
 
