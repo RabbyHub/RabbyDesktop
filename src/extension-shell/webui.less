@@ -1,0 +1,93 @@
+@import '~antd/lib/style/themes/default.less';
+@import '~antd/dist/antd.less';
+@import '@/renderer/css/overwrite-antd.less';
+
+html,
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+body {
+  background: linear-gradient(112.9deg, #6f7584 0%, #3b404d 100%);
+  -webkit-app-region: none;
+  user-select: none;
+  margin: 0;
+  font-family: var(--default-font);
+  position: relative;
+  color: white;
+  height: 100vh;
+  overflow-y: hidden;
+  // display: flex;
+  // justify-content: center;
+  // align-items: center;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+}
+
+h1 {
+  font-size: 20px;
+  line-height: 23px;
+  font-weight: 500;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+}
+
+@scrollbar-w: 8px;
+@scrollbar-max-w: 10px;
+
+::-webkit-scrollbar {
+  width: @scrollbar-w;
+}
+
+.hover-wider-scollbar() {
+  &::-webkit-scrollbar {
+    transition: width 0.3s;
+  }
+  &:hover::-webkit-scrollbar {
+    width: @scrollbar-max-w;
+  }
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 1em;
+  background-color: rgba(var(--color-comment1-rgb), 0.5);
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 1em;
+  background-color: rgba(var(--color-comment2-rgb), 0.5);
+}
+
+.scrollbar-hover-style() {
+  -webkit-mask-image: linear-gradient(to top, transparent, black),
+    linear-gradient(to left, transparent 17px, black 17px);
+  -webkit-mask-size: 100% 20000px;
+  -webkit-mask-position: left bottom;
+  transition: -webkit-mask-position 0.3s;
+}
+
+.row-full-flex() {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.column-space-flex() {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+
+  > * {
+    .row-full-flex();
+    flex-shrink: 1;
+  }
+}

@@ -6,86 +6,13 @@
 @HOME_PADDING: 200px;
 @DASHBOARD_W: 1280px - 2 * @HOME_PADDING;
 
-/*
- * @NOTE: Prepend a `~` to css file paths that are in your node_modules
- *        See https://github.com/webpack-contrib/sass-loader#imports
- */
-body {
-  margin: 0;
-  font-family: var(--default-font);
-  position: relative;
-  color: white;
-  height: 100vh;
-  background: var(--color-purewhite);
-  overflow-y: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-#root {
-  width: 100vw;
-  height: 100vh;
-}
-
-@scrollbar-w: 8px;
-@scrollbar-max-w: 10px;
-
-::-webkit-scrollbar {
-  width: @scrollbar-w;
-}
-
-.hover-wider-scollbar() {
-  &::-webkit-scrollbar {
-    transition: width 0.3s;
-  }
-  &:hover::-webkit-scrollbar {
-    width: @scrollbar-max-w;
-  }
-}
-
-::-webkit-scrollbar-thumb {
-  border-radius: 1em;
-  background-color: rgba(var(--color-comment1-rgb), 0.5);
-}
-
-::-webkit-scrollbar-track {
-  border-radius: 1em;
-  background-color: rgba(var(--color-comment2-rgb), 0.5);
-}
-
-.scrollbar-hover-style() {
-  -webkit-mask-image: linear-gradient(to top, transparent, black),
-    linear-gradient(to left, transparent 17px, black 17px);
-  -webkit-mask-size: 100% 20000px;
-  -webkit-mask-position: left bottom;
-  transition: -webkit-mask-position 0.3s;
-}
-
-.row-full-flex() {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-}
-
-.column-space-flex() {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
-
-  > * {
-    .row-full-flex();
-    flex-shrink: 1;
-  }
-}
-
 #homepage {
-  background: linear-gradient(
-    180deg,
-    rgba(242, 249, 255, 0.096) 50%,
-    rgba(236, 246, 255, 0.64) 100%
-  );
+  // background: linear-gradient(
+  //   180deg,
+  //   rgba(242, 249, 255, 0.096) 50%,
+  //   rgba(236, 246, 255, 0.64) 100%
+  // );
+  background: #fff;
   height: 100%;
   overflow: overlay;
 }

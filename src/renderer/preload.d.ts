@@ -265,9 +265,22 @@ type ChannelMessagePayload = {
     send: [winId: number, webContentsId: number];
     response: [];
   };
+  '__internal_webui-hideAllTabs': {
+    send: [winId: number];
+    response: [];
+  };
+  '__internal_webui-selectTab': {
+    send: [winId: number, tabId: number];
+    response: [];
+  };
 
   [`rabbyx-rpc-respond`]: {
     send: [IRabbyxRpcResponse];
+    response: [];
+  };
+
+  '__internal_rpc:rabbyx:toggleShow': {
+    send: [nextShow: boolean];
     response: [];
   };
 

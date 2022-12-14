@@ -5,3 +5,11 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.global-draggable(@could: true) {
+  -webkit-app-region: if(@could = false, none, drag);;
+}
+
+.global-nodrag() {
+  -webkit-app-region: none;
+}

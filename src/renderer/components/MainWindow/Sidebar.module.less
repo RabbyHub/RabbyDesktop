@@ -1,0 +1,107 @@
+@import '../../css/mixins.less';
+
+@route-item-h: 52px;
+
+@pt: 124px;
+
+.Sidebar {
+  position: relative;
+  // padding-top: @pt;
+
+  width: var(--mainwin-sidebar-w);
+}
+
+.logoWrapper {
+  // position: absolute;
+  width: 100%;
+  height: @pt;
+
+  .global-draggable();
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  > .logo {
+    width: 64px;
+    height: 64px;
+  }
+}
+
+.routeList {
+  list-style-type: none;
+  padding-left: 0;
+  .global-draggable();
+
+  @active-border-w: 4px;
+
+  .routeItem {
+    height: @route-item-h;
+    cursor: pointer;
+    padding-left: 32px;
+    width: 100%;
+    box-sizing: border-box;
+
+    font-size: 14px;
+    color: #fff;
+    .global-draggable(false);
+  }
+
+  .routeItem.active,
+  .routeItem:hover {
+    padding-left: 32px - @active-border-w;
+    // TODO: finish that
+    background: rgba(0, 0, 0, 0.2);
+    border-left: @active-border-w solid var(--color-primary);
+  }
+
+  img.routeLogo {
+    width: 20px;
+    height: 20px;
+
+    & + .routeTitle {
+      margin-left: 13px;
+    }
+  }
+
+  &.isDapp img.routeLogo {
+    border-radius: 50%;
+  }
+
+  .routeItemInner {
+    width: 100%;
+    box-sizing: border-box;
+    height: @route-item-h;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .routeTitle {
+    -webkit-line-clamp: 1;
+    line-height: 1;
+
+    word-break: break-all;
+    height: 14px;
+    // overflow: hidden;
+    overflow: visible;
+    max-width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .routeItemInner {
+    position: relative;
+    img.iconClose {
+      cursor: pointer;
+      position: absolute;
+      top: calc(50% - 10px);
+      right: 8px;
+      visibility: hidden;
+    }
+
+    &:hover img.iconClose {
+      visibility: visible;
+    }
+  }
+}

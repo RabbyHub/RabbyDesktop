@@ -8,7 +8,7 @@ import {
 import {
   DAPP_SAFE_VIEW_SIZES,
   NATIVE_HEADER_H,
-} from '../../isomorphic/const-size';
+} from '../../isomorphic/const-size-classical';
 import { randString } from '../../isomorphic/string';
 import { integrateQueryToUrl } from '../../isomorphic/url';
 

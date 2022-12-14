@@ -1,5 +1,7 @@
 @import './default.css';
 
+@import './size.css';
+
 :root {
   --default-font: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";;
 }

@@ -74,9 +74,7 @@ export default class TabbedBrowserWindow {
 
     this.window.webContents.loadURL(webuiUrl);
 
-    this.tabs = new Tabs(this.window, {
-      isOfMainWindow: this.$meta.isMainWindow,
-    });
+    this.tabs = new Tabs(this.window);
 
     this.tabs.on('tab-created', (tab: Tab) => {
       const url = tab.getInitialUrl() || options.defaultTabUrl;
@@ -91,28 +89,6 @@ export default class TabbedBrowserWindow {
     this.tabs.on('tab-selected', (tab: Tab) => {
       this.extensions.selectTab(tab.webContents!);
     });
-
-    if (this.$meta.isMainWindow) {
-      let dispose = onIpcMainEvent(
-        '__internal_webui-hideAllTabs',
-        (_, winId) => {
-          if (winId !== this.window?.id) return;
-
-          this.tabs.unSelectAll();
-        }
-      );
-      this.window.on('close', dispose);
-
-      dispose = onIpcMainEvent(
-        '__internal_webui-selectTab',
-        (_, winId, tabId) => {
-          if (winId !== this.window?.id) return;
-
-          this.tabs.select(tabId);
-        }
-      );
-      this.window.on('close', dispose);
-    }
 
     onIpcMainEvent('__internal_rpc:webui-ext:navinfo', async (event, tabId) => {
       const tab = this.tabs.get(tabId);
@@ -135,24 +111,18 @@ export default class TabbedBrowserWindow {
 
     queueMicrotask(() => {
       // Create initial tab
-      if (!this.$meta.isMainWindow) {
-        this.createTab({
-          topbarStacks: {
-            tabs: true,
-            navigation: this.$meta.hasNavigationBar,
-          },
-        });
-      }
+      this.createTab({
+        topbarStacks: {
+          tabs: true,
+          navigation: this.$meta.hasNavigationBar,
+        },
+      });
     });
   }
 
   destroy() {
     this.tabs.destroy();
     this.window.destroy();
-  }
-
-  isMainWindow() {
-    return this.$meta.isMainWindow;
   }
 
   getFocusedTab() {
