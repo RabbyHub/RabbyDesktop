@@ -203,11 +203,15 @@ export class Tabs extends EventEmitter {
     this.$meta.isOfMainWindow = !!opts?.isOfMainWindow;
   }
 
+  private _cleanup() {
+    this.selected = undefined;
+  }
+
   destroy() {
     this.tabList.forEach((tab) => tab.destroy());
     this.tabList = [];
 
-    this.selected = undefined;
+    this._cleanup();
 
     // TODO: allow to customize behavior on destroy()
     if (this.window) {
@@ -247,8 +251,13 @@ export class Tabs extends EventEmitter {
       if (nextTab) this.select(nextTab.id);
     }
     this.emit('tab-destroyed', tab);
-    if (this.tabList.length === 0 && !this.$meta.isOfMainWindow) {
-      this.destroy();
+    if (this.tabList.length === 0) {
+      this.emit('all-tabs-destroyed');
+      if (!this.$meta.isOfMainWindow) {
+        this.destroy();
+      } else {
+        this._cleanup();
+      }
     }
   }
 

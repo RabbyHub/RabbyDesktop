@@ -35,7 +35,7 @@ export function getFocusedWindow() {
 }
 
 export function getWindowFromBrowserWindow(window: BrowserWindow) {
-  return !window.isDestroyed()
+  return !window?.isDestroyed()
     ? windows.find((win) => win.id === window.id)
     : null;
 }

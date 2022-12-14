@@ -2,7 +2,7 @@ import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensio
 import { BrowserWindow, session } from 'electron';
 import { getOrPutCheckResult } from '../utils/dapps';
 import { integrateQueryToUrl, isUrlFromDapp } from '../../isomorphic/url';
-import { onIpcMainEvent } from '../utils/ipcMainEvents';
+import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { Tab, Tabs } from './tabs';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 
@@ -112,6 +112,16 @@ export default class TabbedBrowserWindow {
         }
       );
       this.window.on('close', dispose);
+
+      this.tabs.on('all-tabs-destroyed', () => {
+        sendToWebContents(
+          this.window.webContents,
+          '__internal_push:mainwindow:all-tabs-closed',
+          {
+            windowId: this.window.id,
+          }
+        );
+      });
     }
 
     onIpcMainEvent('__internal_rpc:webui-ext:navinfo', async (event, tabId) => {

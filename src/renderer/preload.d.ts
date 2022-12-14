@@ -24,6 +24,9 @@ type M2RChanneMessagePayload = {
     isExisted: boolean;
     status: 'start-loading' | 'loaded';
   };
+  '__internal_push:mainwindow:all-tabs-closed': {
+    windowId: number;
+  };
   /* eslint-disable-next-line @typescript-eslint/ban-types */
   '__internal_push:loading-view:toggle': MainInternalsMessagePayload['__internal_main:loading-view:toggle']['send'][0];
 

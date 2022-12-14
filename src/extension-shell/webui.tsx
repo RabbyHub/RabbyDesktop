@@ -13,6 +13,7 @@ const isMainWindow = isMainWinShellWebUI(window.location.href);
 
 if (isMainWindow) {
   const container = document.createElement('div');
+  container.id = 'root';
   document.body.appendChild(container);
   // const container = document.getElementById('root')!;
   const root = createRoot(container);

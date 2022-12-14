@@ -86,6 +86,7 @@ export function useConnectedSite() {
 
 export type ChromeTab = chrome.tabs.Tab;
 export type ChromeTabWithLocalFavicon = ChromeTab & {
+  dappOrigin: string;
   localFavIconUrl?: string;
   dappAlias?: string;
 };
@@ -149,6 +150,7 @@ export function useTopbarTabs() {
       const origin = tab.url ? canoicalizeDappUrl(tab.url).origin : '';
       return {
         ...tab,
+        dappOrigin: origin,
         ...(origin &&
           dapps[origin] && {
             localFavIconUrl: dapps[origin].faviconBase64,
@@ -206,7 +208,12 @@ export function useTopbarTabs() {
           }
           return tab;
         });
-        if (!matched) ret.push({ id: tabCreation.id, ...tabCreation });
+        if (!matched)
+          ret.push({
+            id: tabCreation.id,
+            dappOrigin: canoicalizeDappUrl(tabCreation.url || '').origin,
+            ...tabCreation,
+          });
 
         return ret;
       });
