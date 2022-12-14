@@ -1,6 +1,7 @@
 import { BrowserView, BrowserWindow } from 'electron';
 import { firstValueFrom } from 'rxjs';
 
+import { NativeAppSizes } from '@/isomorphic/const-size-next';
 import {
   IS_RUNTIME_PRODUCTION,
   RABBY_MAIN_POPUP_VIEW,
@@ -36,10 +37,15 @@ function updateSubWindowPosition(
   const safeTopOffset =
     NATIVE_HEADER_H + DAPP_SAFE_VIEW_SIZES.alertHeaderHeight;
   views.safeView.setBounds({
-    x: DAPP_SAFE_VIEW_SIZES.horizontalPadding,
+    x:
+      DAPP_SAFE_VIEW_SIZES.horizontalPadding +
+      NativeAppSizes.dappsViewLeftOffset,
     y: safeTopOffset,
     width:
-      width - DAPP_SAFE_VIEW_SIZES.horizontalPadding * 2 - 1 /* padding-left */,
+      width -
+      DAPP_SAFE_VIEW_SIZES.horizontalPadding * 2 -
+      1 /* padding-left */ -
+      NativeAppSizes.dappsViewLeftOffset,
     height: height - safeTopOffset,
   });
 }
