@@ -2,6 +2,7 @@
 
 import { RABBY_HOMEPAGE_URL } from '@/isomorphic/constants';
 import { useTopbarTabs } from '@/renderer/hooks/useWindowTopbar';
+import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
 import classNames from 'classnames';
 import { useLayoutEffect, useMemo } from 'react';
 import {
@@ -26,23 +27,24 @@ function filterFavIcon(url?: string, isActiveTab = false) {
 
 const StaticEntries = [
   {
-    path: '/home',
+    path: '/mainwin/home',
     title: 'Home',
     logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/sidebar-logo.svg',
   },
   {
-    path: '/swap',
+    path: '/mainwin/swap',
     title: 'Swap',
     logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/sidebar-logo.svg',
   },
 ] as const;
 
-const DappRoutePatter = '/dapps/:origin';
+const DappRoutePatter = '/mainwin/dapps/:origin';
 
 export default function MainWindowSidebar() {
   const { activeTab, tabList, tabActions } = useTopbarTabs();
 
   const navigate = useNavigate();
+  const navigateTo = useNavigateToDappRoute();
   const location = useLocation();
 
   const { matchedSE } = useMemo(() => {
@@ -118,7 +120,7 @@ export default function MainWindowSidebar() {
                   styles.active
               )}
               onClick={() => {
-                navigate(`/dapps/${encodeURIComponent(tab.dappOrigin!)}`);
+                navigateTo(tab.dappOrigin!);
                 tabActions.onTabClick(tab);
               }}
             >

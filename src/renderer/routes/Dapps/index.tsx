@@ -3,7 +3,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { Menu, Dropdown, message } from 'antd';
 
 import { useClickToPopupDebugMenu } from '@/renderer/hooks/useRegChannelTools';
-import { useNavigate } from 'react-router-dom';
+import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
 import {
   RCIconDappsEdit,
   RCIconDappsDelete,
@@ -33,7 +33,7 @@ function DAppBlock({
   onOpDapp?: IOnOpDapp;
 }>) {
   const ref = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
+  const navigateTo = useNavigateToDappRoute();
 
   if (onAdd) {
     return (
@@ -63,7 +63,7 @@ function DAppBlock({
         target="_blank"
         rel="noreferrer"
         onClick={() => {
-          navigate(`/dapps/${encodeURIComponent(dapp.origin)}`);
+          navigateTo(dapp?.origin);
         }}
       >
         <DappFavicon
