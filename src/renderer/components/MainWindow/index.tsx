@@ -10,6 +10,11 @@ import GettingStarted from '@/renderer/routes/Welcome/GettingStarted';
 import { useEffect, useLayoutEffect } from 'react';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { hideContextMenuPopup } from '@/renderer/ipcRequest/contextmenu-popup';
+import ImportHome from '@/renderer/routes/Import/ImportHome';
+import ImportByPrivateKey from '@/renderer/routes/ImportBy/ImportByPrivateKey';
+import ImportSetPassword from '@/renderer/routes/Import/ImportSetPassword';
+import ImportSuccessful from '@/renderer/routes/Import/ImportSuccessful';
+import ImportByContainer from '@/renderer/routes/ImportBy/ImportByContainer';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -18,8 +23,8 @@ import MainWindowSidebar from './Sidebar';
 const router = createRouter([
   {
     path: '/',
-    element: <Navigate to="/mainWindow/home" />,
-    // element: <Navigate to="/welcome/getting-started" />,
+    // element: <Navigate to="/mainWindow/home" />,
+    element: <Navigate to="/welcome/getting-started" />,
   },
   {
     path: '/welcome',
@@ -75,6 +80,46 @@ const router = createRouter([
     ],
   },
   {
+    path: '/import',
+    id: 'import',
+    element: (
+      <div className={styles.ImportPage}>
+        <Outlet />
+      </div>
+    ),
+    children: [
+      {
+        path: 'home',
+        element: <ImportHome />,
+      },
+      {
+        path: 'set-password',
+        element: <ImportSetPassword />,
+      },
+      {
+        path: 'successful',
+        element: <ImportSuccessful />,
+      },
+    ],
+  },
+  {
+    path: '/import-by',
+    id: 'import-by',
+    element: (
+      <div className={styles.ImportPage}>
+        <ImportByContainer>
+          <Outlet />
+        </ImportByContainer>
+      </div>
+    ),
+    children: [
+      {
+        path: 'private-key',
+        element: <ImportByPrivateKey />,
+      },
+    ],
+  },
+  {
     path: '*',
     element: <Navigate to="/mainwin/home" />,
   },
@@ -96,9 +141,18 @@ export function MainWindow() {
       var isUnlocked = await walletController.isBooted();
       console.debug('[debug] MainWindow isUnlocked [2]', isUnlocked);
 
-      console.debug('[debug] MainWindow walletController.boot', walletController.boot);
-      console.debug('[debug] MainWindow walletController.lockWallet', walletController.lockWallet);
-      console.debug('[debug] MainWindow walletController.importPrivateKey', walletController.importPrivateKey);
+      console.debug(
+        '[debug] MainWindow walletController.boot',
+        walletController.boot
+      );
+      console.debug(
+        '[debug] MainWindow walletController.lockWallet',
+        walletController.lockWallet
+      );
+      console.debug(
+        '[debug] MainWindow walletController.importPrivateKey',
+        walletController.importPrivateKey
+      );
     })();
     /* eslint-enable */
   }, []);

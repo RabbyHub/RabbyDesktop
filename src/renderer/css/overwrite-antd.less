@@ -21,3 +21,40 @@
 @btn-disable-border: transparent;
 
 @item-hover-bg: var(--color-bg);
+
+
+.ant-input {
+  border-radius: 6px;
+
+  &[type="password"] {
+    letter-spacing: 4px;
+
+    &::placeholder {
+      letter-spacing: normal;
+    }
+  }
+}
+
+
+/*---------------------
+      Checkbox
+---------------------*/
+.ant-checkbox {
+  border-radius: 100%;
+  overflow: hidden;
+
+  .ant-checkbox-inner {
+    border: none;
+    background-color: var(--color-border);
+  }
+}
+
+.ant-checkbox-checked {
+  .ant-checkbox-inner {
+    background-color: #8697ff;
+  }
+
+  &::after {
+    border-color: #8697ff;
+  }
+}
