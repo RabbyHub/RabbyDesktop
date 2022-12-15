@@ -48,27 +48,32 @@
 }
 
 html {
-  background: #ececec;
   height: 100%;
   margin: 0;
   padding: 0;
 }
 
-body {
+body.popup-win {
+  background: #ececec;
   padding: 0;
   margin: 0;
   font-family: var(--rabby-tab-font-family);
   font-size: 14px;
   color: var(--text-color);
-}
 
-ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .topbar {
+    display: block;
+  }
 }
 
 .topbar {
+  display: none;
   background: var(--color-primary);
   height: calc(var(--rabby-tab-h) + var(--rabby-toolbar-h));
 }

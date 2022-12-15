@@ -84,19 +84,19 @@ const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
     menu.append(new MenuItem({ type: 'separator' }));
 
   if (params.linkURL) {
-    append({
-      label: labels.openInNewTab('link'),
-      click: () => {
-        openLink(params.linkURL, 'default', params);
-      },
-    });
-    append({
-      label: labels.openInNewWindow('link'),
-      click: () => {
-        openLink(params.linkURL, 'new-window', params);
-      },
-    });
-    appendSeparator();
+    // append({
+    //   label: labels.openInNewTab('link'),
+    //   click: () => {
+    //     openLink(params.linkURL, 'default', params);
+    //   },
+    // });
+    // append({
+    //   label: labels.openInNewWindow('link'),
+    //   click: () => {
+    //     openLink(params.linkURL, 'new-window', params);
+    //   },
+    // });
+    // appendSeparator();
     append({
       label: labels.copyAddress('link'),
       click: () => {

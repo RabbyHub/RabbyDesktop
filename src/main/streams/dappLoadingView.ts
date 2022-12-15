@@ -1,7 +1,5 @@
-import {
-  NATIVE_HEADER_WITH_NAV_H,
-  RABBY_PANEL_SIZE,
-} from '../../isomorphic/const-size';
+import { NativeAppSizes } from '@/isomorphic/const-size-next';
+import { NATIVE_HEADER_H } from '../../isomorphic/const-size-classical';
 import {
   IS_RUNTIME_PRODUCTION,
   RABBY_LOADING_URL,
@@ -23,10 +21,10 @@ async function updateViewPosition(
   const [width, height] = mainWin.getSize();
 
   const popupRect = {
-    x: 0,
-    y: NATIVE_HEADER_WITH_NAV_H,
-    width: width - RABBY_PANEL_SIZE.width,
-    height: height - NATIVE_HEADER_WITH_NAV_H,
+    x: NativeAppSizes.dappsViewLeftOffset,
+    y: NATIVE_HEADER_H,
+    width: width - NativeAppSizes.dappsViewLeftOffset,
+    height: height - NATIVE_HEADER_H,
   };
 
   if (isLoading) {

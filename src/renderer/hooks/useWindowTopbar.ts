@@ -86,7 +86,9 @@ export function useConnectedSite() {
 
 export type ChromeTab = chrome.tabs.Tab;
 export type ChromeTabWithLocalFavicon = ChromeTab & {
+  dappOrigin: string;
   localFavIconUrl?: string;
+  dappAlias?: string;
 };
 export type TabId = ChromeTab['id'];
 
@@ -143,12 +145,17 @@ export function useTopbarTabs() {
     ]).finally(() => {
       fetchingRef.current = false;
     });
+
     const origTabList = tabs.map((tab) => {
       const origin = tab.url ? canoicalizeDappUrl(tab.url).origin : '';
       return {
         ...tab,
+        dappOrigin: origin,
         ...(origin &&
-          dapps[origin] && { localFavIconUrl: dapps[origin].faviconBase64 }),
+          dapps[origin] && {
+            localFavIconUrl: dapps[origin].faviconBase64,
+            dappAlias: dapps[origin].alias,
+          }),
       };
     });
 
@@ -201,7 +208,12 @@ export function useTopbarTabs() {
           }
           return tab;
         });
-        if (!matched) ret.push({ id: tabCreation.id, ...tabCreation });
+        if (!matched)
+          ret.push({
+            id: tabCreation.id,
+            dappOrigin: canoicalizeDappUrl(tabCreation.url || '').origin,
+            ...tabCreation,
+          });
 
         return ret;
       });
@@ -258,12 +270,29 @@ export function useTopbarTabs() {
   const tabActions = {
     onTabClick: useCallback((tab: ChromeTab) => {
       chrome.tabs.update(tab.id!, { active: true });
+      window.rabbyDesktop.ipcRenderer.sendMessage(
+        '__internal_webui-selectTab',
+        tab.windowId,
+        tab.id!
+      );
     }, []),
     onTabClose: useCallback((tab: ChromeTab) => {
       if (tab.id) {
         chrome.tabs.remove(tab.id);
       }
     }, []),
+    onHideAllTab: useCallback(() => {
+      const activeTid = activeTabId || activeTab?.id;
+      if (!activeTid) {
+        console.warn('[onHideAllTab] no active tab');
+        return;
+      }
+      chrome.tabs.update(activeTid!, { active: false });
+      window.rabbyDesktop.ipcRenderer.sendMessage(
+        '__internal_webui-hideAllTabs',
+        windowId!
+      );
+    }, [activeTabId, activeTab, windowId]),
   };
 
   return {

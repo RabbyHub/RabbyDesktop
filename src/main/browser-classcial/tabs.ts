@@ -1,6 +1,5 @@
 import { EventEmitter } from 'events';
 import { BrowserView, BrowserWindow } from 'electron';
-import { NativeAppSizes } from '@/isomorphic/const-size-next';
 import {
   NATIVE_HEADER_H,
   NATIVE_HEADER_WITH_NAV_H,
@@ -147,22 +146,23 @@ export class Tab {
 
     const hideTopbar =
       !this.$meta.topbarStacks?.tabs && !this.$meta.topbarStacks?.navigation;
+    const hasNavigationBar = !!this.$meta.topbarStacks?.navigation;
 
-    const topbarHeight = hideTopbar ? 0 : NATIVE_HEADER_H;
+    const topbarHeight = hideTopbar
+      ? 0
+      : hasNavigationBar
+      ? NATIVE_HEADER_WITH_NAV_H
+      : NATIVE_HEADER_H;
 
     this.view!.setBounds({
       x: 0,
       y: topbarHeight,
       width,
-      ...(this.$meta.isOfMainWindow
-        ? {
-            x: NativeAppSizes.dappsViewLeftOffset,
-            width: width - NativeAppSizes.dappsViewLeftOffset,
-          }
-        : {}),
+      ...(this.$meta.isOfMainWindow && {
+        width: width - RABBY_PANEL_SIZE.width,
+      }),
       height: height - topbarHeight,
     });
-
     this.view!.setAutoResize({ width: true, height: true });
   }
 
@@ -185,33 +185,16 @@ export class Tabs extends EventEmitter {
 
   window?: BrowserWindow;
 
-  private $meta: {
-    isOfMainWindow: boolean;
-  } = {
-    isOfMainWindow: false,
-  };
-
-  constructor(
-    browserWindow: BrowserWindow,
-    opts: {
-      isOfMainWindow?: boolean;
-    }
-  ) {
+  constructor(browserWindow: BrowserWindow) {
     super();
     this.window = browserWindow;
-
-    this.$meta.isOfMainWindow = !!opts?.isOfMainWindow;
-  }
-
-  private _cleanup() {
-    this.selected = undefined;
   }
 
   destroy() {
     this.tabList.forEach((tab) => tab.destroy());
     this.tabList = [];
 
-    this._cleanup();
+    this.selected = undefined;
 
     // TODO: allow to customize behavior on destroy()
     if (this.window) {
@@ -252,12 +235,7 @@ export class Tabs extends EventEmitter {
     }
     this.emit('tab-destroyed', tab);
     if (this.tabList.length === 0) {
-      this.emit('all-tabs-destroyed');
-      if (!this.$meta.isOfMainWindow) {
-        this.destroy();
-      } else {
-        this._cleanup();
-      }
+      this.destroy();
     }
   }
 
@@ -268,11 +246,6 @@ export class Tabs extends EventEmitter {
     tab.show();
     this.selected = tab;
     this.emit('tab-selected', tab);
-  }
-
-  unSelectAll() {
-    if (this.selected) this.selected.hide();
-    this.selected = undefined;
   }
 
   findByOrigin(url: string) {

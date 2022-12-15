@@ -233,7 +233,8 @@ export default function bootstrap() {
     const lastMainWinPos = getOrInitMainWinPosition();
     // init window
     const mainWindow = await createWindow({
-      defaultTabUrl: RABBY_HOMEPAGE_URL,
+      // defaultTabUrl: RABBY_HOMEPAGE_URL,
+      defaultTabUrl: '',
       window: {
         show: false,
         width: lastMainWinPos.width,
@@ -329,14 +330,14 @@ export default function bootstrap() {
     setTimeout(() => {
       splashWin.destroy();
 
-      if (desktopAppStore.get('firstStartApp')) {
+      if (false && desktopAppStore.get('firstStartApp')) {
         gettingStartedWin = new BrowserWindow({
           ...getBrowserWindowOpts(),
           transparent: true,
           frame: false,
           resizable: false,
         });
-        gettingStartedWin.webContents.loadURL(RABBY_GETTING_STARTED_URL);
+        gettingStartedWin!.webContents.loadURL(RABBY_GETTING_STARTED_URL);
       } else {
         showMainWin();
       }

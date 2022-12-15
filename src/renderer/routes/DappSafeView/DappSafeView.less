@@ -7,9 +7,9 @@
 
 .modal-alert-insecurity-wrap {
   padding-top: @body-padding-top;
-  padding-left: 52px;
+  padding-left: calc(52px + var(--mainwin-sidebar-w));
   padding-right: 52px;
-  min-width: calc(100vw - 52px * 2);
+  min-width: calc(100vw - 52px * 2 - var(--mainwin-sidebar-w));
   overflow: hidden;
 
   .alert-header {

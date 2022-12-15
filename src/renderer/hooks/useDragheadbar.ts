@@ -1,4 +1,4 @@
-import { NATIVE_HEADER_H } from '@/isomorphic/const-size';
+import { NATIVE_HEADER_H } from '@/isomorphic/const-size-classical';
 import { useLayoutEffect } from 'react';
 
 export default function useDragHeadbar() {

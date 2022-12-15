@@ -2,7 +2,7 @@ import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensio
 import { BrowserWindow, session } from 'electron';
 import { getOrPutCheckResult } from '../utils/dapps';
 import { integrateQueryToUrl, isUrlFromDapp } from '../../isomorphic/url';
-import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
+import { onIpcMainEvent } from '../utils/ipcMainEvents';
 import { Tab, Tabs } from './tabs';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 
@@ -74,9 +74,7 @@ export default class TabbedBrowserWindow {
 
     this.window.webContents.loadURL(webuiUrl);
 
-    this.tabs = new Tabs(this.window, {
-      isOfMainWindow: this.$meta.isMainWindow,
-    });
+    this.tabs = new Tabs(this.window);
 
     this.tabs.on('tab-created', (tab: Tab) => {
       const url = tab.getInitialUrl() || options.defaultTabUrl;
@@ -91,38 +89,6 @@ export default class TabbedBrowserWindow {
     this.tabs.on('tab-selected', (tab: Tab) => {
       this.extensions.selectTab(tab.webContents!);
     });
-
-    if (this.$meta.isMainWindow) {
-      let dispose = onIpcMainEvent(
-        '__internal_webui-hideAllTabs',
-        (_, winId) => {
-          if (winId !== this.window?.id) return;
-
-          this.tabs.unSelectAll();
-        }
-      );
-      this.window.on('close', dispose);
-
-      dispose = onIpcMainEvent(
-        '__internal_webui-selectTab',
-        (_, winId, tabId) => {
-          if (winId !== this.window?.id) return;
-
-          this.tabs.select(tabId);
-        }
-      );
-      this.window.on('close', dispose);
-
-      this.tabs.on('all-tabs-destroyed', () => {
-        sendToWebContents(
-          this.window.webContents,
-          '__internal_push:mainwindow:all-tabs-closed',
-          {
-            windowId: this.window.id,
-          }
-        );
-      });
-    }
 
     onIpcMainEvent('__internal_rpc:webui-ext:navinfo', async (event, tabId) => {
       const tab = this.tabs.get(tabId);
@@ -145,24 +111,18 @@ export default class TabbedBrowserWindow {
 
     queueMicrotask(() => {
       // Create initial tab
-      if (!this.$meta.isMainWindow) {
-        this.createTab({
-          topbarStacks: {
-            tabs: true,
-            navigation: this.$meta.hasNavigationBar,
-          },
-        });
-      }
+      this.createTab({
+        topbarStacks: {
+          tabs: true,
+          navigation: this.$meta.hasNavigationBar,
+        },
+      });
     });
   }
 
   destroy() {
     this.tabs.destroy();
     this.window.destroy();
-  }
-
-  isMainWindow() {
-    return this.$meta.isMainWindow;
   }
 
   getFocusedTab() {

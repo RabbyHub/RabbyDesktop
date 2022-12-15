@@ -8,7 +8,7 @@ import {
 import {
   NATIVE_HEADER_WITH_NAV_H,
   SECURITY_NOTIFICATION_VIEW_SIZE,
-} from '../../isomorphic/const-size';
+} from '../../isomorphic/const-size-classical';
 import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { fromMainSubject, valueToMainSubject } from './_init';
 import {

@@ -3,6 +3,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { Menu, Dropdown, message } from 'antd';
 
 import { useClickToPopupDebugMenu } from '@/renderer/hooks/useRegChannelTools';
+import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
 import {
   RCIconDappsEdit,
   RCIconDappsDelete,
@@ -32,6 +33,8 @@ function DAppBlock({
   onOpDapp?: IOnOpDapp;
 }>) {
   const ref = useRef<HTMLDivElement>(null);
+  const navigateTo = useNavigateToDappRoute();
+
   if (onAdd) {
     return (
       <div
@@ -54,7 +57,15 @@ function DAppBlock({
 
   return (
     <div className="dapp-block" ref={ref}>
-      <a className="anchor" href={dapp.origin} target="_blank" rel="noreferrer">
+      <a
+        className="anchor"
+        href={dapp.origin}
+        target="_blank"
+        rel="noreferrer"
+        onClick={() => {
+          navigateTo(dapp?.origin);
+        }}
+      >
         <DappFavicon
           className="dapp-favicon"
           origin={dapp.origin}

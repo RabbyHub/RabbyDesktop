@@ -10,10 +10,8 @@ import {
   onMainWindowReady,
 } from '../utils/stream-helpers';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
-import {
-  RABBY_PANEL_SIZE,
-  NATIVE_HEADER_WITH_NAV_H,
-} from '../../isomorphic/const-size';
+import { RABBY_PANEL_SIZE } from '../../isomorphic/const-size';
+import { NATIVE_HEADER_H } from '../../isomorphic/const-size-classical';
 import { walletController } from './rabbyIpcQuery';
 import { Tab } from '../browser/tabs';
 import { rabbyxQuery } from './rabbyIpcQuery/_base';
@@ -45,7 +43,7 @@ onIpcMainEvent(
   }
 );
 
-let currentType: 'side' | 'full' = 'full';
+let currentType: 'hide' | 'show' = 'hide';
 async function updateViewPosition(
   rabbyView: Electron.BrowserView,
   mainWin: Electron.BrowserWindow
@@ -53,39 +51,54 @@ async function updateViewPosition(
   const [width, height] = mainWin.getSize();
 
   const popupRect =
-    currentType === 'full'
+    currentType === 'hide'
       ? {
-          x: 0,
-          y: NATIVE_HEADER_WITH_NAV_H,
+          x: -9999,
+          y: NATIVE_HEADER_H,
           width,
-          height: height - NATIVE_HEADER_WITH_NAV_H,
+          height: height - NATIVE_HEADER_H,
         }
       : {
           x: width - RABBY_PANEL_SIZE.width,
-          y: NATIVE_HEADER_WITH_NAV_H,
+          y: NATIVE_HEADER_H,
           width: RABBY_PANEL_SIZE.width,
-          height: height - NATIVE_HEADER_WITH_NAV_H,
+          height: height - NATIVE_HEADER_H,
         };
 
   rabbyView.setBounds({ ...popupRect });
-
-  mainWin.setTopBrowserView(rabbyView);
 }
 
-async function onLockStatusChange(nextLocked: boolean) {
-  const tabbedWin = await onMainWindowReady();
+async function toggleRabbyPopup(nextShow: boolean) {
   const { panelView } = await getRabbyExtViews();
+  const tabbedWin = await onMainWindowReady();
+  const mainWin = tabbedWin.window;
 
-  currentType = nextLocked ? 'full' : 'side';
-  updateViewPosition(panelView, tabbedWin.window);
+  currentType = nextShow ? 'show' : 'hide';
+  updateViewPosition(panelView, mainWin);
 
-  if (nextLocked) {
-    tabbedWin.tabs.selected?.hide();
-  } else {
-    const nextSelected = tabbedWin.tabs.selected || tabbedWin.tabs.tabList[0];
-    tabbedWin.tabs.select(nextSelected.id);
+  if (nextShow) {
+    mainWin.setTopBrowserView(panelView);
   }
 }
+
+async function onLockStatusChange(_nextLocked: boolean) {
+  // const tabbedWin = await onMainWindowReady();
+  // const { panelView } = await getRabbyExtViews();
+  // currentType = nextLocked ? 'full' : 'side';
+  // updateViewPosition(panelView, tabbedWin.window);
+  // if (nextLocked) {
+  //   tabbedWin.tabs.selected?.hide();
+  // } else {
+  //   const nextSelected = tabbedWin.tabs.selected || tabbedWin.tabs.tabList[0];
+  //   tabbedWin.tabs.select(nextSelected.id);
+  // }
+}
+
+// const eventsShouldPopup = [
+//   'chainChanged',
+//   'rabby:chainChanged',
+//   'accountsChanged',
+// ]
 
 onIpcMainEvent(
   '__internal_rpc:rabbyx:on-session-broadcast',
@@ -128,6 +141,10 @@ onIpcMainEvent(
     }
   }
 );
+
+onIpcMainEvent('__internal_rpc:rabbyx:toggleShow', async (_, nextShow) => {
+  await toggleRabbyPopup(nextShow);
+});
 
 getRabbyExtId().then(async (extId) => {
   const tabbedWin = await onMainWindowReady();

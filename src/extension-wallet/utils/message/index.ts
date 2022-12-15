@@ -9,7 +9,9 @@ abstract class Message extends EventEmitter {
   // avaiable id list
   // max concurrent request limit
   private _requestIdPool = [...Array(1000).keys()];
+
   protected _EVENT_PRE = 'ETH_WALLET_';
+
   protected listenCallback: any;
 
   private _waitingMap = new Map<
@@ -55,7 +57,8 @@ abstract class Message extends EventEmitter {
 
   onRequest = async ({ ident, data }) => {
     if (this.listenCallback) {
-      let res, err;
+      let res;
+      let err;
 
       try {
         res = await this.listenCallback(data);
