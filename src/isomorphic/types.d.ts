@@ -134,5 +134,6 @@ type IRabbyxRpcQuery = {
 
 type IRabbyxRpcResponse = {
   rpcId: string;
-  result: any;
+  result: any | null;
+  error?: Error;
 };

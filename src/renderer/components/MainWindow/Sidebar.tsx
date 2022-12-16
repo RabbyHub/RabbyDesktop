@@ -69,10 +69,6 @@ export default function MainWindowSidebar() {
     return dispose;
   }, [navigate, matchedSE]);
 
-  // console.log('[feat] matchedSE', matchedSE);
-  // console.log('[feat] matchedDapp', matchedDapp);
-  // console.log('[feat] activeTab?.dappOrigin', activeTab?.dappOrigin);
-
   return (
     <div className={styles.Sidebar}>
       <div className={styles.logoWrapper}>

@@ -7,6 +7,8 @@ import {
 
 import DApps from '@/renderer/routes/Dapps';
 import GettingStarted from '@/renderer/routes/Welcome/GettingStarted';
+import { useEffect } from 'react';
+import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -78,5 +80,23 @@ const router = createRouter([
 ]);
 
 export function MainWindow() {
+  useEffect(() => {
+    /* eslint-disable */
+    // TODO: remove this on production, this is just for testing & communicating
+    (async () => {
+      var isUnlocked = await walletController.isUnlocked();
+      console.debug('[debug] MainWindow isUnlocked', isUnlocked);
+
+      const isBooted = await walletController.isBooted();
+      console.debug('[debug] MainWindow isBooted', isBooted);
+
+      await walletController.unlock('qa111111');
+
+      var isUnlocked = await walletController.isBooted();
+      console.debug('[debug] MainWindow isUnlocked [2]', isUnlocked);
+    })();
+    /* eslint-enable */
+  }, []);
+
   return <RouterProvider router={router} />;
 }

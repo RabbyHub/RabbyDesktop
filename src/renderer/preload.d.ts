@@ -277,8 +277,19 @@ type ChannelMessagePayload = {
     response: [];
   };
 
+  [`__internal_rpc:rabbyx-rpc:query`]: {
+    send: [reqId: string, query: Omit<IRabbyxRpcQuery, 'rpcId'>];
+    response: [
+      {
+        reqId: string;
+        result: any;
+        error?: Error;
+      }
+    ];
+  };
+
   [`rabbyx-rpc-respond`]: {
-    send: [IRabbyxRpcResponse];
+    send: [string | IRabbyxRpcResponse];
     response: [];
   };
 

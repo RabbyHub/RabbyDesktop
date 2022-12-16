@@ -12,7 +12,6 @@ import {
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 import { RABBY_PANEL_SIZE } from '../../isomorphic/const-size';
 import { NATIVE_HEADER_H } from '../../isomorphic/const-size-classical';
-import { walletController } from './rabbyIpcQuery';
 import { Tab } from '../browser/tabs';
 import { rabbyxQuery } from './rabbyIpcQuery/_base';
 
@@ -32,7 +31,7 @@ onIpcMainEvent('get-app-version', (event, reqid) => {
 onIpcMainEvent(
   '__internal_rpc:webui-ext:get-connected-sites',
   async (event, reqid) => {
-    const connectedSites = await rabbyxQuery<IConnectedSiteInfo[]>(
+    const connectedSites = await rabbyxQuery(
       'walletController.getConnectedSites'
     );
 
@@ -151,13 +150,13 @@ getRabbyExtId().then(async (extId) => {
   const mainWin = tabbedWin.window;
   if (mainWin.isDestroyed()) return;
 
-  const rabbyView = createPopupView();
+  // const rabbyView = createPopupView();
   const rabbyBgHostView = createPopupView();
 
-  mainWin.addBrowserView(rabbyView);
+  // mainWin.addBrowserView(rabbyView);
   mainWin.addBrowserView(rabbyBgHostView);
 
-  updateViewPosition(rabbyView, mainWin);
+  // updateViewPosition(rabbyView, mainWin);
 
   rabbyBgHostView.setBounds({ x: -9999, y: -1000, width: 1, height: 1 });
   rabbyBgHostView.webContents.loadURL(
@@ -167,13 +166,14 @@ getRabbyExtId().then(async (extId) => {
   rabbyBgHostView.webContents.on('did-finish-load', () => {
     cLog('rabbyExtViews loaded');
     valueToMainSubject('rabbyExtViews', {
-      panelView: rabbyView,
+      // panelView: rabbyView,
+      panelView: null as any,
       backgroundHost: rabbyBgHostView.webContents,
     });
   });
 
   if (!IS_RUNTIME_PRODUCTION) {
-    // rabbyBgHostView.webContents.openDevTools({ mode: 'detach' });
+    rabbyBgHostView.webContents.openDevTools({ mode: 'detach' });
     // rabbyView.webContents.openDevTools({ mode: 'detach' });
     // tabbedWin.createTab({
     //   initialUrl: `https://metamask.github.io/test-dapp/`,
@@ -182,7 +182,7 @@ getRabbyExtId().then(async (extId) => {
   }
 
   const onTargetWinUpdate = () => {
-    updateViewPosition(rabbyView, mainWin);
+    // updateViewPosition(rabbyView, mainWin);
   };
 
   mainWin.on('show', onTargetWinUpdate);
@@ -194,10 +194,10 @@ getRabbyExtId().then(async (extId) => {
   // wait for extension background initialized.
   // TODO: use specific event instead of timeout.
   setTimeout(() => {
-    rabbyView.webContents.loadURL(`chrome-extension://${extId}/popup.html`);
+    // rabbyView.webContents.loadURL(`chrome-extension://${extId}/popup.html`);
   }, 5000);
 
-  const isUnlocked = await walletController.isUnlocked();
+  const isUnlocked = await rabbyxQuery('walletController.isUnlocked');
   onLockStatusChange(!isUnlocked);
 });
 
