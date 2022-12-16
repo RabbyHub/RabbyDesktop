@@ -1,33 +1,26 @@
-import { Checkbox, Input } from 'antd';
+import { Form, Input } from 'antd';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import ImportView from '../Import/components/ImportView/ImportView';
 import BlockButton from '../Import/components/BlockButton/BlockButton';
 import styles from './ImportByPrivateKey.module.less';
 
+interface FormData {
+  privateKey: string;
+}
+
 const ImportByPrivateKey = () => {
   const nav = useNavigate();
-
-  const [privateKey, setPrivateKey] = React.useState('');
-  const [errorMessage, setErrorMessage] = React.useState('');
-  const disabledNextButton = !privateKey;
+  const [form] = Form.useForm<FormData>();
 
   const onNext = React.useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!privateKey) {
-        setErrorMessage('the private key is invalid');
-        return;
-      }
+    (values: FormData) => {
+      // todo import private key
 
       nav('/import/successful');
     },
-    [nav, privateKey]
+    [nav]
   );
-
-  React.useEffect(() => {
-    setErrorMessage('');
-  }, [privateKey]);
 
   return (
     <ImportView
@@ -44,23 +37,32 @@ const ImportByPrivateKey = () => {
         },
       ]}
     >
-      <form onSubmit={onNext}>
+      <Form form={form} onFinish={onNext}>
         <div className={styles.inputGroup}>
-          <Input.TextArea
-            className={styles.input}
-            placeholder="Enter your Private Key"
-            status={errorMessage ? 'error' : undefined}
-            onChange={(e) => setPrivateKey(e.target.value)}
-            autoSize={{ minRows: 10, maxRows: 10 }}
-          />
-
-          {errorMessage && <div className={styles.error}>{errorMessage}</div>}
+          <Form.Item
+            name="privateKey"
+            rules={[
+              { required: true, message: 'Please input Private key' },
+              {
+                // do not allow whitespace characters
+                pattern: /^\S*$/,
+                message: 'The private key is invalid',
+              },
+            ]}
+          >
+            <Input.TextArea
+              className={styles.input}
+              spellCheck={false}
+              placeholder="Enter your Private Key"
+              autoSize={{ minRows: 10, maxRows: 10 }}
+            />
+          </Form.Item>
         </div>
 
-        <BlockButton htmlType="submit" disabled={disabledNextButton}>
-          Next
-        </BlockButton>
-      </form>
+        <Form.Item>
+          <BlockButton htmlType="submit">Next</BlockButton>
+        </Form.Item>
+      </Form>
     </ImportView>
   );
 };

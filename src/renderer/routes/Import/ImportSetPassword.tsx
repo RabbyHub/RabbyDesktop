@@ -1,9 +1,17 @@
-import { Checkbox, Input } from 'antd';
+import { Checkbox, Input, Form } from 'antd';
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import BlockButton from './components/BlockButton/BlockButton';
 import ImportView from './components/ImportView/ImportView';
 import styles from './ImportSetPassword.module.less';
+
+const MINIMUM_PASSWORD_LENGTH = 8;
+
+interface FormData {
+  password: string;
+  confirmPassword: string;
+  agreement: boolean;
+}
 
 const ImportSetPassword = () => {
   const nav = useNavigate();
@@ -12,17 +20,12 @@ const ImportSetPassword = () => {
     const query = new URLSearchParams(location.search);
     return query.get('from');
   }, [location]);
-  const [password, setPassword] = React.useState('');
-  const [confirm, setConfirm] = React.useState('');
-  const [agreement, setAgreement] = React.useState(false);
-  const [errorMessage, setErrorMessage] = React.useState('');
-  const disabledNextButton = !password || !confirm || !agreement;
+  const [form] = Form.useForm<FormData>();
 
   const onNext = React.useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      if (password !== confirm) {
-        setErrorMessage('Password does not match');
+    (values: FormData) => {
+      //  todo set password
+      if (!values.agreement) {
         return;
       }
 
@@ -30,12 +33,8 @@ const ImportSetPassword = () => {
         nav(fromPath);
       }
     },
-    [confirm, fromPath, nav, password]
+    [fromPath, nav]
   );
-
-  React.useEffect(() => {
-    setErrorMessage('');
-  }, [password, confirm, agreement]);
 
   if (!fromPath) {
     nav('/import/home', { replace: true });
@@ -57,42 +56,72 @@ const ImportSetPassword = () => {
         },
       ]}
     >
-      <form onSubmit={onNext}>
+      <Form form={form} onFinish={onNext}>
         <div className={styles.inputGroup}>
-          <Input
-            className={styles.input}
-            placeholder="Set Password"
-            type="password"
-            status={errorMessage ? 'error' : undefined}
-            onChange={(e) => setPassword(e.target.value)}
-            minLength={8}
-          />
-          <Input
-            className={styles.input}
-            placeholder="Confirm"
-            type="password"
-            status={errorMessage ? 'error' : undefined}
-            onChange={(e) => setConfirm(e.target.value)}
-            minLength={8}
-          />
-          {errorMessage && <div className={styles.error}>{errorMessage}</div>}
+          <Form.Item
+            name="password"
+            rules={[
+              {
+                required: true,
+                message: 'Please input Password',
+              },
+              {
+                min: MINIMUM_PASSWORD_LENGTH,
+                message: 'Password must be at least 8 characters long',
+              },
+            ]}
+          >
+            <Input
+              className={styles.input}
+              placeholder="Set Password"
+              type="password"
+              autoFocus
+              spellCheck={false}
+            />
+          </Form.Item>
+          <Form.Item
+            name="confirmPassword"
+            rules={[
+              {
+                required: true,
+                message: 'Please Confirm Password',
+              },
+              ({ getFieldValue }) => ({
+                validator(_, value: string) {
+                  if (!value || getFieldValue('password') === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error('Passwords do not match'));
+                },
+              }),
+            ]}
+          >
+            <Input
+              className={styles.input}
+              placeholder="Confirm"
+              type="password"
+              spellCheck={false}
+            />
+          </Form.Item>
         </div>
 
-        <div className={styles.agreement}>
-          <Checkbox
-            onChange={(e) => setAgreement(e.target.checked)}
-            className={styles.checkbox}
-          >
+        <Form.Item
+          name="agreement"
+          required
+          valuePropName="checked"
+          className={styles.agreement}
+        >
+          <Checkbox className={styles.checkbox}>
             <span className={styles.text}>
               I have read and agree to the <a href="1">Terms of Use</a>
             </span>
           </Checkbox>
-        </div>
+        </Form.Item>
 
-        <BlockButton htmlType="submit" disabled={disabledNextButton}>
-          Next
-        </BlockButton>
-      </form>
+        <Form.Item>
+          <BlockButton htmlType="submit">Next</BlockButton>
+        </Form.Item>
+      </Form>
     </ImportView>
   );
 };
