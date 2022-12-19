@@ -68,10 +68,11 @@ function makeRabbyXController<T extends RabbyXContollerNS>(namespace: T) {
           const dispose = window.rabbyDesktop?.ipcRenderer.on(
             '__internal_rpc:rabbyx-rpc:query',
             (event) => {
-              console.debug(
-                '[debug] __internal_rpc:rabbyx-rpc:query event back',
-                event
-              );
+              // leave here for debug
+              // console.debug(
+              //   '[debug] __internal_rpc:rabbyx-rpc:query event back',
+              //   event
+              // );
               if (event.reqId === reqId) {
                 dispose?.();
 

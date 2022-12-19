@@ -137,3 +137,8 @@ type IRabbyxRpcResponse = {
   result: any | null;
   error?: Error;
 };
+
+type IContextMenuPageInfo = {
+  type: 'sidebar-dapp';
+  dappTabInfo: chrome.tabs.Tab;
+};

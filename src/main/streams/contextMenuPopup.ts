@@ -9,7 +9,7 @@ import {
   NATIVE_HEADER_WITH_NAV_H,
   SECURITY_ADDRBAR_VIEW_SIZE,
 } from '../../isomorphic/const-size-classical';
-import { onIpcMainEvent } from '../utils/ipcMainEvents';
+import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { fromMainSubject, valueToMainSubject } from './_init';
 import {
   createPopupWindow,
@@ -63,6 +63,7 @@ onMainWindowReady().then(async (mainWin) => {
     parent: mainWin.window,
     transparent: false,
     hasShadow: true,
+    closable: false,
   });
 
   updateSubWindowPosition(mainWin.window, popupWin);
@@ -81,7 +82,6 @@ onMainWindowReady().then(async (mainWin) => {
   });
 
   mainWin.window.on('focus', () => {
-    console.debug('[debug] main window focused');
     hidePopupWindow(popupWin);
   });
 
@@ -91,7 +91,7 @@ onMainWindowReady().then(async (mainWin) => {
 
   // debug-only
   if (!IS_RUNTIME_PRODUCTION) {
-    // popupWin.webContents.openDevTools({ mode: 'detach' });
+    popupWin.webContents.openDevTools({ mode: 'detach' });
   }
 
   hidePopupWindow(popupWin);
@@ -112,6 +112,13 @@ onIpcMainEvent(
         x: payload.pos.x,
         y: payload.pos.y,
       });
+      sendToWebContents(
+        popupWin.webContents,
+        '__internal_push:context-meunu-popup:on-show',
+        {
+          pageInfo: payload.pageInfo,
+        }
+      );
       showPopupWindow(popupWin);
     } else {
       hidePopupWindow(popupWin);

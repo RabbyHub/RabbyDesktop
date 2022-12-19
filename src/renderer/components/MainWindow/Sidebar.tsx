@@ -67,7 +67,17 @@ export default function MainWindowSidebar() {
       }
     );
 
-    return dispose;
+    const dispose2 = window.rabbyDesktop.ipcRenderer.on(
+      '__internal_forward:main-window:close-tab',
+      (tabId) => {
+        chrome.tabs.remove(tabId);
+      }
+    );
+
+    return () => {
+      dispose?.();
+      dispose2?.();
+    };
   }, [navigate, matchedSE]);
 
   return (
@@ -125,7 +135,10 @@ export default function MainWindowSidebar() {
 
                 const x = event.clientX;
                 const y = event.clientY;
-                showContextMenuPopup({ x, y });
+                showContextMenuPopup(
+                  { x, y },
+                  { type: 'sidebar-dapp', dappTabInfo: tab }
+                );
               }}
             >
               <div className={styles.routeItemInner}>

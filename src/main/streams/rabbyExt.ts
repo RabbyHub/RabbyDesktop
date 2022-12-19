@@ -173,7 +173,7 @@ getRabbyExtId().then(async (extId) => {
   });
 
   if (!IS_RUNTIME_PRODUCTION) {
-    rabbyBgHostView.webContents.openDevTools({ mode: 'detach' });
+    // rabbyBgHostView.webContents.openDevTools({ mode: 'detach' });
     // rabbyView.webContents.openDevTools({ mode: 'detach' });
     // tabbedWin.createTab({
     //   initialUrl: `https://metamask.github.io/test-dapp/`,
@@ -229,7 +229,7 @@ getRabbyExtViews().then(async (views) => {
 
     // panelView.webContents.openDevTools({ mode: 'detach' });
 
-    if (panelView.webContents)
+    if (panelView?.webContents)
       sendToWebContents(
         panelView.webContents,
         '__internal_push:rabbyx:focusing-dapp-changed',

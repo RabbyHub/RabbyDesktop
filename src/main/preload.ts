@@ -21,13 +21,13 @@ const IS_SAFE_WEBVIEW = ['chrome-extension:', RABBY_INTERNAL_PROTOCOL].includes(
 if (IS_SAFE_WEBVIEW && !window.rabbyDesktop) {
   contextBridge.exposeInMainWorld('rabbyDesktop', {
     ipcRenderer: {
-      sendMessage<T extends Channels>(
+      sendMessage<T extends IChannelsKey>(
         channel: T,
         ...args: ChannelMessagePayload[T]['send']
       ) {
         ipcRenderer.send(channel, ...args);
       },
-      on<T extends Channels>(
+      on<T extends IChannelsKey>(
         channel: T,
         func: (...args: ChannelMessagePayload[T]['response']) => void
       ) {
@@ -37,7 +37,7 @@ if (IS_SAFE_WEBVIEW && !window.rabbyDesktop) {
 
         return () => ipcRenderer.removeListener(channel, subscription);
       },
-      once<T extends Channels>(
+      once<T extends IChannelsKey>(
         channel: T,
         func: (...args: ChannelMessagePayload[T]['response']) => void
       ) {
