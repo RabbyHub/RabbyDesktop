@@ -1,7 +1,15 @@
 export type RabbyXMethod = {
+  'walletController.boot': (password: string) => void;
   'walletController.isBooted': () => boolean;
+  'walletController.lockWallet': () => boolean;
   'walletController.isUnlocked': () => boolean;
   'walletController.unlock': (password: string) => void;
+
+  'walletController.importPrivateKey': (data: string) => {
+    address: string;
+    type: string;
+    brandName: string;
+  };
 
   'walletController.getConnectedSites': () => IConnectedSiteInfo[];
 };

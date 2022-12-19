@@ -95,6 +95,10 @@ export function MainWindow() {
 
       var isUnlocked = await walletController.isBooted();
       console.debug('[debug] MainWindow isUnlocked [2]', isUnlocked);
+
+      console.debug('[debug] MainWindow walletController.boot', walletController.boot);
+      console.debug('[debug] MainWindow walletController.lockWallet', walletController.lockWallet);
+      console.debug('[debug] MainWindow walletController.importPrivateKey', walletController.importPrivateKey);
     })();
     /* eslint-enable */
   }, []);
