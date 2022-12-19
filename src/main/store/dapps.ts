@@ -2,6 +2,7 @@
 
 import { app } from 'electron';
 import Store from 'electron-store';
+import { formatDapp, formatDapps } from '@/isomorphic/dapp';
 import { onIpcMainEvent } from '../utils/ipcMainEvents';
 import { APP_NAME, PERSIS_STORE_PREFIX } from '../../isomorphic/constants';
 import { safeParse, shortStringify } from '../../isomorphic/json';
@@ -10,6 +11,7 @@ import { detectDapps } from '../utils/dapps';
 
 export const dappStore = new Store<{
   dapps: IDapp[];
+  pinnedList: string[];
 }>({
   name: `${PERSIS_STORE_PREFIX}dapps`,
 
@@ -30,6 +32,13 @@ export const dappStore = new Store<{
       },
       default: [] as IDapp[],
     },
+    pinnedList: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      default: [] as string[],
+    },
     // dappsConnectioned: {
     //   type: 'object',
     //   properties: {}
@@ -45,31 +54,6 @@ export const dappStore = new Store<{
 
   watch: true,
 });
-
-export function formatDapp(input: any) {
-  if (!input?.origin) return null;
-
-  return {
-    alias: input?.alias || ('' as IDapp['alias']),
-    origin: input.origin as IDapp['origin'],
-    faviconUrl: input?.faviconUrl || ('' as IDapp['faviconUrl']),
-    faviconBase64: input?.faviconBase64 || ('' as IDapp['faviconBase64']),
-  };
-}
-
-export function formatDapps(input = dappStore.get('dapps')): IDapp[] {
-  if (!Array.isArray(input)) return [];
-
-  const result: IDapp[] = [];
-
-  input.forEach((item) => {
-    const f = formatDapp(item);
-    if (!f) return;
-    result.push(f);
-  });
-
-  return result;
-}
 
 export function parseDappUrl(
   url: string,
@@ -102,9 +86,13 @@ onIpcMainEvent('detect-dapp', async (event, reqid, dappUrl) => {
 });
 
 onIpcMainEvent('dapps-fetch', (event, reqid) => {
+  const dapps = formatDapps(dappStore.get('dapps'));
+  const pinnedList = dappStore.get('pinnedList');
+
   event.reply('dapps-fetch', {
     reqid,
-    dapps: formatDapps(dappStore.get('dapps')),
+    dapps,
+    pinnedList,
   });
 });
 
@@ -144,6 +132,28 @@ onIpcMainEvent('dapps-delete', (event, reqid: string, dapp: IDapp) => {
     reqid,
     dapps: allDapps,
     error,
+  });
+});
+
+onIpcMainEvent('dapps-togglepin', (event, reqid, dappOrigins, nextPinned) => {
+  // const dapps = dappStore.get('dapps') || [];
+  const pinnedList = dappStore.get('pinnedList') || [];
+
+  dappOrigins.forEach((origin) => {
+    const idx = pinnedList.findIndex((o) => o === origin);
+    if (idx > -1) {
+      pinnedList.splice(idx, 1);
+    }
+    if (nextPinned) {
+      pinnedList.unshift(origin);
+    }
+  });
+
+  dappStore.set('pinnedList', pinnedList);
+
+  event.reply('dapps-togglepin', {
+    reqid,
+    pinnedList,
   });
 });
 

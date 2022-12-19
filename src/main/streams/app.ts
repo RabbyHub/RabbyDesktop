@@ -1,10 +1,10 @@
 import { app, BrowserView, BrowserWindow, Tray } from 'electron';
 
+import { formatDapps } from '@/isomorphic/dapp';
 import {
   APP_NAME,
   IS_RUNTIME_PRODUCTION,
   RABBY_GETTING_STARTED_URL,
-  RABBY_HOMEPAGE_URL,
   RABBY_SPALSH_URL,
 } from '../../isomorphic/constants';
 import {
@@ -29,7 +29,7 @@ import {
   getTabbedWindowFromWebContents,
 } from './tabbedBrowserWindow';
 import { valueToMainSubject } from './_init';
-import { dappStore, formatDapps, parseDappUrl } from '../store/dapps';
+import { dappStore, parseDappUrl } from '../store/dapps';
 import { attachAlertBrowserView } from './dappAlert';
 import { openDappSecurityCheckView } from './securityCheck';
 import {

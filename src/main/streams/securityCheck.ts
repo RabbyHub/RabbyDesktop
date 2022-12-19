@@ -1,6 +1,7 @@
 import { BrowserWindow } from 'electron';
 import { firstValueFrom } from 'rxjs';
 
+import { formatDapp } from '@/isomorphic/dapp';
 import {
   IS_RUNTIME_PRODUCTION,
   RABBY_POPUP_GHOST_VIEW_URL,
@@ -8,7 +9,7 @@ import {
 
 import { canoicalizeDappUrl, isUrlFromDapp } from '../../isomorphic/url';
 
-import { dappStore, formatDapp } from '../store/dapps';
+import { dappStore } from '../store/dapps';
 import { randString } from '../../isomorphic/string';
 import { fromMainSubject, valueToMainSubject } from './_init';
 import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';

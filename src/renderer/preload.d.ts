@@ -108,6 +108,7 @@ type ChannelMessagePayload = {
       {
         reqid: string;
         dapps: IDapp[];
+        pinnedList: IDapp['origin'][];
       }
     ];
   };
@@ -127,6 +128,16 @@ type ChannelMessagePayload = {
         reqid: string;
         error?: string;
         dapps: IDapp[];
+      }
+    ];
+  };
+  'dapps-togglepin': {
+    send: [reqid: string, dappOrigins: IDapp['origin'][], nextPinned: boolean];
+    response: [
+      {
+        reqid: string;
+        error?: string;
+        pinnedList: IDapp['origin'][];
       }
     ];
   };

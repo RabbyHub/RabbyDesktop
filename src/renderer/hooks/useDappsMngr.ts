@@ -4,25 +4,29 @@
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
 import {
-  getAllDapps,
+  getDappsInfo,
   detectDapps,
   putDapp,
   deleteDapp,
+  toggleDappPinned,
 } from '../ipcRequest/dapps';
 
 const dappsAtomic = atom(null as any as IDapp[]);
+const pinnedListAtomic = atom(null as any as IDapp['origin'][]);
 
 export function useDapps() {
   const [dapps, setDapps] = useAtom(dappsAtomic);
+  const [pinnedList, setPinnedList] = useAtom(pinnedListAtomic);
 
   useEffect(() => {
     if (dapps) return;
     // eslint-disable-next-line promise/catch-or-return
-    getAllDapps().then((newVal) => {
-      setDapps(newVal);
+    getDappsInfo().then((newVal) => {
+      setDapps(newVal.dapps);
+      setPinnedList(newVal.pinnedList);
       return newVal;
     });
-  }, [dapps, setDapps]);
+  }, [dapps, setDapps, setPinnedList]);
 
   const updateDapp = useCallback(
     async (dapp: IDapp) => {
@@ -58,12 +62,33 @@ export function useDapps() {
     [dapps]
   );
 
+  const pinDapp = useCallback(
+    (origin: string) => {
+      toggleDappPinned([origin], true).then((newVal) => {
+        setPinnedList(newVal);
+      });
+    },
+    [setPinnedList]
+  );
+
+  const unpinDapp = useCallback(
+    (origin: string) => {
+      toggleDappPinned([origin], false).then((newVal) => {
+        setPinnedList(newVal);
+      });
+    },
+    [setPinnedList]
+  );
+
   return {
+    pinnedList,
     dapps: dapps || [],
     detectDapps,
     updateDapp,
     renameDapp,
     removeDapp,
     getDapp,
+    pinDapp,
+    unpinDapp,
   };
 }

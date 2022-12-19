@@ -1,15 +1,21 @@
 import { randString } from 'isomorphic/string';
 
-export async function getAllDapps() {
+export async function getDappsInfo() {
   const reqid = randString();
 
   // TODO: use timeout mechanism
-  return new Promise<IDapp[]>((resolve, reject) => {
+  return new Promise<{
+    dapps: IDapp[];
+    pinnedList: IDapp['origin'][];
+  }>((resolve, reject) => {
     const dispose = window.rabbyDesktop.ipcRenderer.on(
       'dapps-fetch',
       (event) => {
         if (event.reqid === reqid) {
-          resolve(event.dapps);
+          resolve({
+            dapps: event.dapps,
+            pinnedList: event.pinnedList,
+          });
           dispose?.();
         }
       }
@@ -70,5 +76,31 @@ export async function deleteDapp(dapp: IDapp) {
       }
     );
     window.rabbyDesktop.ipcRenderer.sendMessage('dapps-delete', reqid, dapp);
+  });
+}
+
+export async function toggleDappPinned(
+  dappOrigins: string[],
+  nextPinned = true
+) {
+  const reqid = randString();
+
+  // TODO: use timeout mechanism
+  return new Promise<IDapp['origin'][]>((resolve, reject) => {
+    const dispose = window.rabbyDesktop.ipcRenderer.on(
+      'dapps-togglepin',
+      (event) => {
+        if (event.reqid === reqid) {
+          resolve(event.pinnedList);
+          dispose?.();
+        }
+      }
+    );
+    window.rabbyDesktop.ipcRenderer.sendMessage(
+      'dapps-togglepin',
+      reqid,
+      dappOrigins,
+      nextPinned
+    );
   });
 }
