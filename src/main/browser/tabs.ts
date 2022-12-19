@@ -1,11 +1,7 @@
 import { EventEmitter } from 'events';
 import { BrowserView, BrowserWindow } from 'electron';
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
-import {
-  NATIVE_HEADER_H,
-  NATIVE_HEADER_WITH_NAV_H,
-} from '../../isomorphic/const-size-classical';
-import { RABBY_PANEL_SIZE } from '../../isomorphic/const-size';
+import { NATIVE_HEADER_H } from '../../isomorphic/const-size-classical';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { emitIpcMainEvent, onIpcMainEvent } from '../utils/ipcMainEvents';
 import { dappStore } from '../store/dapps';
@@ -81,6 +77,10 @@ export class Tab {
         dispose();
       }
     );
+
+    this.webContents?.on('focus', () => {
+      this.tabs.emit('tab-focused');
+    });
 
     // polyfill for window.close
     this.webContents?.executeJavaScript(`

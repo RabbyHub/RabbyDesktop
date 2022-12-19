@@ -260,6 +260,21 @@ type ChannelMessagePayload = {
     send: [];
     response: [];
   };
+  '__internal_rpc:context-meunu-popup:toggle-show': {
+    send: [
+      | {
+          nextShow: true;
+          pos: {
+            x: Electron.Point['x'];
+            y: Electron.Point['y'];
+          };
+        }
+      | {
+          nextShow: false;
+        }
+    ];
+    response: [];
+  };
   '__internal_rpc:debug-tools:operate-debug-insecure-dapps': {
     send: [type: 'add' | 'trim'];
     response: [];

@@ -24,6 +24,7 @@ function App() {
           path="/security-addressbarpopup"
           element={<SecurityAddressbarPopup />}
         />
+        <Route path="/context-menu-popup" element={<>Context Menu Popup</>} />
       </Routes>
     </Router>
   );

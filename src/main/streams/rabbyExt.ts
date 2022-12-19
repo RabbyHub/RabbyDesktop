@@ -229,13 +229,14 @@ getRabbyExtViews().then(async (views) => {
 
     // panelView.webContents.openDevTools({ mode: 'detach' });
 
-    sendToWebContents(
-      panelView.webContents,
-      '__internal_push:rabbyx:focusing-dapp-changed',
-      {
-        previousUrl,
-        currentUrl,
-      }
-    );
+    if (panelView.webContents)
+      sendToWebContents(
+        panelView.webContents,
+        '__internal_push:rabbyx:focusing-dapp-changed',
+        {
+          previousUrl,
+          currentUrl,
+        }
+      );
   });
 });

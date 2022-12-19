@@ -7,8 +7,9 @@ import {
 
 import DApps from '@/renderer/routes/Dapps';
 import GettingStarted from '@/renderer/routes/Welcome/GettingStarted';
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { hideContextMenuPopup } from '@/renderer/ipcRequest/contextmenu-popup';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -96,6 +97,17 @@ export function MainWindow() {
       console.debug('[debug] MainWindow isUnlocked [2]', isUnlocked);
     })();
     /* eslint-enable */
+  }, []);
+
+  useLayoutEffect(() => {
+    const listener = () => {
+      hideContextMenuPopup();
+    };
+    document.body.addEventListener('click', listener);
+
+    return () => {
+      document.body.removeEventListener('click', listener);
+    };
   }, []);
 
   return <RouterProvider router={router} />;

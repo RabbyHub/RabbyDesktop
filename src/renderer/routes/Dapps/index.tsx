@@ -1,9 +1,10 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
-import React, { useCallback, useRef, useState } from 'react';
-import { Menu, Dropdown, message } from 'antd';
+import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { Menu, Dropdown, message, Button } from 'antd';
 
 import { useClickToPopupDebugMenu } from '@/renderer/hooks/useRegChannelTools';
 import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
+import { showContextMenuPopup } from '@/renderer/ipcRequest/contextmenu-popup';
 import {
   RCIconDappsEdit,
   RCIconDappsDelete,
@@ -210,6 +211,17 @@ export default function DApps() {
   //   setDeletingDapp(dapps[0] || null);
   // }, [ dapps[0] ]);
 
+  // useLayoutEffect(() => {
+  //   const listener: GetIpcRequestListenerFirstParams<typeof document.body.addEventListener, 'contextmenu'> = evt => {
+
+  //   };
+  //   document.body.addEventListener('contextmenu', listener);
+
+  //   return () => {
+  //     document.body.removeEventListener('contextmenu', listener);
+  //   }
+  // }, []);
+
   return (
     <div id="homepage">
       <div
@@ -234,6 +246,17 @@ export default function DApps() {
           <p className="subtitle">
             Dapp Security Engine, provided by Rabby Wallet Desktop, offers
             better security for your Dapp use.
+            <Button
+              onContextMenu={(event) => {
+                event?.preventDefault();
+
+                const x = event.clientX;
+                const y = event.clientY;
+                showContextMenuPopup({ x, y });
+              }}
+            >
+              right click here to Test ContextMenu
+            </Button>
           </p>
         </header>
         <main>

@@ -2,6 +2,7 @@
 
 import { RABBY_HOMEPAGE_URL } from '@/isomorphic/constants';
 import { useTopbarTabs } from '@/renderer/hooks/useWindowTopbar';
+import { showContextMenuPopup } from '@/renderer/ipcRequest/contextmenu-popup';
 import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
 import classNames from 'classnames';
 import { useLayoutEffect, useMemo } from 'react';
@@ -118,6 +119,13 @@ export default function MainWindowSidebar() {
               onClick={() => {
                 navigateTo(tab.dappOrigin!);
                 tabActions.onTabClick(tab);
+              }}
+              onContextMenu={(event) => {
+                event?.preventDefault();
+
+                const x = event.clientX;
+                const y = event.clientY;
+                showContextMenuPopup({ x, y });
               }}
             >
               <div className={styles.routeItemInner}>
