@@ -1,8 +1,13 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
+import {
+  RCIconDappsEdit,
+  RCIconPin,
+} from '@/../assets/icons/internal-homepage';
 import { RABBY_HOMEPAGE_URL } from '@/isomorphic/constants';
 import { useTopbarTabs } from '@/renderer/hooks/useWindowTopbar';
 import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
+import { Button, Dropdown, Menu } from 'antd';
 import classNames from 'classnames';
 import { useLayoutEffect, useMemo } from 'react';
 import {
@@ -29,12 +34,12 @@ const StaticEntries = [
   {
     path: '/mainwin/home',
     title: 'Home',
-    logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/sidebar-logo.svg',
+    logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/home.svg',
   },
   {
     path: '/mainwin/swap',
     title: 'Swap',
-    logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/sidebar-logo.svg',
+    logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/swap.svg',
   },
 ] as const;
 
@@ -107,6 +112,86 @@ export default function MainWindowSidebar() {
             tab.favIconUrl;
 
           return (
+            <Dropdown
+              overlayClassName="dapps-dropdown-operations"
+              getPopupContainer={() => document.body}
+              trigger={['contextMenu']}
+              key={tab.id}
+              // open
+              overlay={
+                <Menu
+                  onClick={({ key }) => {
+                    switch (key) {
+                      case 'dapp-pin':
+                        break;
+                      case 'dapp-close':
+                        break;
+                      default:
+                        break;
+                    }
+                  }}
+                  items={[
+                    {
+                      key: 'dapp-pin',
+                      className: 'dapp-dropdown-item',
+                      label: <span className="text">Pin</span>,
+                      icon: <RCIconPin />,
+                      // todo
+                    },
+                    {
+                      key: 'dapp-close',
+                      className: 'dapp-dropdown-item',
+                      label: <span className="text">Close</span>,
+                      icon: <RCIconDappsEdit />,
+                    },
+                  ]}
+                />
+              }
+            >
+              <li
+                className={classNames(
+                  styles.routeItem,
+                  matchPath(DappRoutePatter, location.pathname) &&
+                    activeTab?.id === tab.id &&
+                    styles.active
+                )}
+                onClick={() => {
+                  navigateTo(tab.dappOrigin!);
+                  tabActions.onTabClick(tab);
+                }}
+              >
+                <div className={styles.routeItemInner}>
+                  <div className={styles.indicator} />
+                  <img
+                    className={classNames(styles.routeLogo, styles.isDapp)}
+                    src={faviconUrl}
+                  />
+                  <span className={styles.routeTitle}>
+                    {tab.dappAlias || tab.title}
+                  </span>
+
+                  {/* <img
+                  onClick={() => {
+                    tabActions.onTabClose(tab);
+                  }}
+                  className={styles.iconClose}
+                  src="rabby-internal://assets/icons/mainwin-sidebar/icon-close-white.svg"
+                /> */}
+                </div>
+              </li>
+            </Dropdown>
+          );
+        })}
+      </ul>
+      <div className={styles.divider} />
+      <ul className={styles.routeList}>
+        {tabList.map((tab) => {
+          const faviconUrl =
+            tab.localFavIconUrl ||
+            filterFavIcon(tab.url, tab.active) ||
+            tab.favIconUrl;
+
+          return (
             <li
               key={tab.id}
               className={classNames(
@@ -121,23 +206,47 @@ export default function MainWindowSidebar() {
               }}
             >
               <div className={styles.routeItemInner}>
-                <img className={styles.routeLogo} src={faviconUrl} />
+                <div className={styles.indicator} />
+                <img
+                  className={classNames(styles.routeLogo, styles.isDapp)}
+                  src={faviconUrl}
+                />
                 <span className={styles.routeTitle}>
                   {tab.dappAlias || tab.title}
                 </span>
-
-                <img
-                  onClick={() => {
-                    tabActions.onTabClose(tab);
-                  }}
-                  className={styles.iconClose}
-                  src="rabby-internal://assets/icons/mainwin-sidebar/icon-close-white.svg"
-                />
               </div>
             </li>
           );
         })}
       </ul>
+      <div className={styles.navFooter}>
+        <div className={styles.update}>
+          <Button type="primary" block>
+            <img src="rabby-internal://assets/icons/mainwin-sidebar/download.svg" />
+            Update Rabby
+          </Button>
+        </div>
+        <ul className={styles.routeList}>
+          <li
+            className={classNames(
+              styles.routeItem,
+              matchPath('/settings', location.pathname) && styles.active
+            )}
+            onClick={() => {
+              navigateTo('/mainwin/swap');
+              tabActions.onHideAllTab();
+            }}
+          >
+            <div className={styles.routeItemInner}>
+              <img
+                className={styles.routeLogo}
+                src="rabby-internal://assets/icons/mainwin-sidebar/setting.svg"
+              />
+              <span className={styles.routeTitle}>Settings</span>
+            </div>
+          </li>
+        </ul>
+      </div>
     </div>
   );
 }

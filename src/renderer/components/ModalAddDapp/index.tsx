@@ -277,7 +277,7 @@ export default function ModalAddDapp({
 >) {
   return (
     <Modal
-      width={800}
+      width={1000}
       centered
       {...modalProps}
       onCancel={(e) => {
