@@ -22,6 +22,8 @@ release/app/dist
 release/build
 release/build-*
 release/mac-*
+release/rabbyx
+
 .erb/dll
 
 .idea
