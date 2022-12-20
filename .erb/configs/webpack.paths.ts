@@ -42,12 +42,12 @@ const entriesRenderer = {
     htmlFile: path.join(srcRendererPath, `splash.ejs`),
     jsEntry: path.join(srcRendererPath, 'splash.tsx'),
   },
-  'getting-started': {
-    name: 'getting-started',
-    target: 'getting-started.html',
-    htmlFile: path.join(srcRendererPath, `pages/getting-started.ejs`),
-    jsEntry: path.join(srcRendererPath, 'pages/getting-started.tsx'),
-  },
+  // 'getting-started': {
+  //   name: 'getting-started',
+  //   target: 'getting-started.html',
+  //   htmlFile: path.join(srcRendererPath, `pages/getting-started.ejs`),
+  //   jsEntry: path.join(srcRendererPath, 'pages/getting-started.tsx'),
+  // },
   loading: {
     name: 'loading',
     target: 'loading.html',
