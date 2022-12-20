@@ -1,6 +1,7 @@
-import { Checkbox, Input, Form } from 'antd';
+import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { Checkbox, Input, Form, message } from 'antd';
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 import BlockButton from './components/BlockButton/BlockButton';
 import ImportView from './components/ImportView/ImportView';
 import styles from './ImportSetPassword.module.less';
@@ -23,21 +24,25 @@ const ImportSetPassword = () => {
   const [form] = Form.useForm<FormData>();
 
   const onNext = React.useCallback(
-    (values: FormData) => {
-      //  todo set password
-      if (!values.agreement) {
+    async ({ agreement, password }: FormData) => {
+      if (!agreement) {
         return;
       }
 
-      if (fromPath) {
-        nav(fromPath);
+      try {
+        await walletController.boot(password);
+        if (fromPath) {
+          nav(fromPath);
+        }
+      } catch (e: any) {
+        message.error('Error:', e.message);
       }
     },
     [fromPath, nav]
   );
 
   if (!fromPath) {
-    nav('/import/home', { replace: true });
+    nav('/welcome/import/home', { replace: true });
     return null;
   }
 
@@ -68,6 +73,10 @@ const ImportSetPassword = () => {
               {
                 min: MINIMUM_PASSWORD_LENGTH,
                 message: 'Password must be at least 8 characters long',
+              },
+              {
+                pattern: /^\S*$/,
+                message: 'Password cannot contain spaces',
               },
             ]}
           >

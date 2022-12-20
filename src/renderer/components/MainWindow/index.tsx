@@ -15,6 +15,8 @@ import ImportByPrivateKey from '@/renderer/routes/ImportBy/ImportByPrivateKey';
 import ImportSetPassword from '@/renderer/routes/Import/ImportSetPassword';
 import ImportSuccessful from '@/renderer/routes/Import/ImportSuccessful';
 import ImportByContainer from '@/renderer/routes/ImportBy/ImportByContainer';
+import { Unlock } from '@/renderer/routes/Unlock/Unlock';
+import { RequireUnlock } from '@/renderer/routes/RequireUnlock';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -22,32 +24,39 @@ import MainWindowSidebar from './Sidebar';
 
 const router = createRouter([
   {
-    path: '/',
-    // element: <Navigate to="/mainWindow/home" />,
-    element: <Navigate to="/welcome/getting-started" />,
-  },
-  {
     path: '/welcome',
     id: 'welcome',
-    // errorElement: <ErrorBoundary />,
-    element: (
-      <div className={styles.welcomeScreen}>
-        <Outlet />
-      </div>
-    ),
-    // loader: rootLoader,
+    element: <Outlet />,
     children: [
       {
         path: 'getting-started',
-        element: <GettingStarted />,
+        element: (
+          <div className={styles.welcomeScreen}>
+            <GettingStarted />
+          </div>
+        ),
       },
       {
-        path: 'add-address',
-        element: <>Unimplemented</>,
-      },
-      {
-        path: 'set-password',
-        element: <>Unimplemented</>,
+        path: 'import',
+        element: (
+          <div className={styles.ImportPage}>
+            <Outlet />
+          </div>
+        ),
+        children: [
+          {
+            path: 'home',
+            element: <ImportHome />,
+          },
+          {
+            path: 'set-password',
+            element: <ImportSetPassword />,
+          },
+          {
+            path: 'successful',
+            element: <ImportSuccessful />,
+          },
+        ],
       },
     ],
   },
@@ -56,14 +65,15 @@ const router = createRouter([
     id: 'mainwin',
     // errorElement: <ErrorBoundary />,
     element: (
-      <div className={styles.mainWindow}>
-        <MainWindowSidebar />
-        <MainRoute>
-          <Outlet />
-        </MainRoute>
-      </div>
+      <RequireUnlock>
+        <div className={styles.mainWindow}>
+          <MainWindowSidebar />
+          <MainRoute>
+            <Outlet />
+          </MainRoute>
+        </div>
+      </RequireUnlock>
     ),
-    // loader: rootLoader,
     children: [
       {
         path: 'home',
@@ -80,27 +90,8 @@ const router = createRouter([
     ],
   },
   {
-    path: '/import',
-    id: 'import',
-    element: (
-      <div className={styles.ImportPage}>
-        <Outlet />
-      </div>
-    ),
-    children: [
-      {
-        path: 'home',
-        element: <ImportHome />,
-      },
-      {
-        path: 'set-password',
-        element: <ImportSetPassword />,
-      },
-      {
-        path: 'successful',
-        element: <ImportSuccessful />,
-      },
-    ],
+    path: '/unlock',
+    element: <Unlock />,
   },
   {
     path: '/import-by',

@@ -1,6 +1,7 @@
-import { Form, Input } from 'antd';
+import { Form, Input, message } from 'antd';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import ImportView from '../Import/components/ImportView/ImportView';
 import BlockButton from '../Import/components/BlockButton/BlockButton';
 import styles from './ImportByPrivateKey.module.less';
@@ -14,10 +15,16 @@ const ImportByPrivateKey = () => {
   const [form] = Form.useForm<FormData>();
 
   const onNext = React.useCallback(
-    (values: FormData) => {
-      // todo import private key
+    async ({ privateKey }: FormData) => {
+      try {
+        const data = await walletController.importPrivateKey(privateKey);
 
-      nav('/import/successful');
+        nav('/import/successful', {
+          state: data,
+        });
+      } catch (e: any) {
+        message.error(e.message);
+      }
     },
     [nav]
   );

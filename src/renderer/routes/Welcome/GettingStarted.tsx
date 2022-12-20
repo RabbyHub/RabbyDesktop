@@ -20,7 +20,7 @@ export default function GettingStarted() {
       <Button
         className={styles['btn-start']}
         onClick={() => {
-          nav('/import/home');
+          nav('/welcome/import/home');
         }}
       >
         Getting Started

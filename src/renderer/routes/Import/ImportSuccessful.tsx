@@ -1,9 +1,12 @@
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import BlockButton from './components/BlockButton/BlockButton';
 import styles from './ImportSuccessful.module.less';
 
 const ImportSuccessful = () => {
   const nav = useNavigate();
+  const { state } = useLocation();
+
+  console.log(state);
 
   return (
     <div className={styles.ImportSuccessful}>
@@ -19,12 +22,12 @@ const ImportSuccessful = () => {
 
         <div className={styles.card}>
           <div className={styles.name}>Private Key 1</div>
-          <div className={styles.address}>0x84d3…7b83</div>
+          <div className={styles.address}>{state.address}</div>
         </div>
 
         <BlockButton
           onClick={() => {
-            nav('/mainWindow/home');
+            nav('/');
           }}
         >
           Done
