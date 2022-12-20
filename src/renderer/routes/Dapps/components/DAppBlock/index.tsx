@@ -13,7 +13,10 @@ import {
 import { DappFavicon } from '../../../../components/DappFavicon';
 // import './index.less';
 
-type IOnOpDapp = (op: 'rename' | 'delete', dapp: IDapp) => void;
+type IOnOpDapp = (
+  op: 'rename' | 'delete' | 'pin' | 'unpin',
+  dapp: IDapp
+) => void;
 
 export const DAppBlock = ({
   dapp,
@@ -57,6 +60,12 @@ export const DAppBlock = ({
         <Menu
           onClick={({ key }) => {
             switch (key) {
+              case 'dapp-pin':
+                onOpDapp?.('pin', dapp);
+                break;
+              case 'dapp-unpin':
+                onOpDapp?.('unpin', dapp);
+                break;
               case 'dapp-rename':
                 onOpDapp?.('rename', dapp);
                 break;
@@ -68,13 +77,20 @@ export const DAppBlock = ({
             }
           }}
           items={[
-            {
-              key: 'dapp-pin',
-              className: 'dapp-dropdown-item',
-              label: <span className="text">Pin</span>,
-              icon: <RCIconPin />,
-              // todo
-            },
+            dapp.isPinned
+              ? {
+                  key: 'dapp-unpin',
+                  className: 'dapp-dropdown-item',
+                  label: <span className="text">Unpin</span>,
+                  // icon: <RCIconPinFill />,
+                  icon: <RCIconPin />,
+                }
+              : {
+                  key: 'dapp-pin',
+                  className: 'dapp-dropdown-item',
+                  label: <span className="text">Pin</span>,
+                  icon: <RCIconPin />,
+                },
             {
               key: 'dapp-rename',
               className: 'dapp-dropdown-item',
@@ -117,11 +133,12 @@ export const DAppBlock = ({
           style={{
             // todo
             backgroundImage: `url(rabby-internal://assets/icons/internal-homepage/${
-              Math.random() > 0.5 ? 'icon-pin.svg' : 'icon-pin-fill.svg'
+              dapp.isPinned ? 'icon-pin-fill.svg' : 'icon-pin.svg'
             })`,
           }}
           onClickCapture={(evt) => {
             evt.stopPropagation();
+            onOpDapp?.(dapp.isPinned ? 'unpin' : 'pin', dapp);
           }}
         />
       </div>

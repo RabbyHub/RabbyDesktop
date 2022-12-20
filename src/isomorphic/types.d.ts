@@ -14,6 +14,7 @@ type IDapp = {
   origin: string | `https://${string}${string}`;
   faviconUrl: string;
   faviconBase64?: string;
+  isPinned?: boolean;
 };
 
 type IDesktopAppState = {

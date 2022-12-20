@@ -1,8 +1,8 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 /// <reference path="../../renderer/preload.d.ts" />
-
+import { keyBy } from 'lodash';
 import { atom, useAtom } from 'jotai';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import {
   getDappsInfo,
   detectDapps,
@@ -80,9 +80,27 @@ export function useDapps() {
     [setPinnedList]
   );
 
+  const list = useMemo(() => {
+    const dappMap = keyBy(dapps || [], 'origin');
+    const result: IDapp[] = [];
+    (pinnedList || []).forEach((origin) => {
+      if (dappMap[origin]) {
+        result.push({
+          ...dappMap[origin],
+          isPinned: true,
+        });
+      }
+    });
+
+    return result.concat(
+      (dapps || []).filter((dapp) => !pinnedList.includes(dapp.origin))
+    );
+  }, [dapps, pinnedList]);
+
   return {
     pinnedList,
-    dapps: dapps || [],
+    dapps: list,
+    all: dapps || [],
     detectDapps,
     updateDapp,
     renameDapp,

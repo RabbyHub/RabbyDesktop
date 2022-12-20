@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 import { message } from 'antd';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import ModalAddDapp from '../../components/ModalAddDapp';
 import ModalDeleteDapp from '../../components/ModalDeleteDapp';
@@ -16,32 +16,55 @@ import './index.less';
 
 import style from './index.module.less';
 
-type IOnOpDapp = (op: 'rename' | 'delete', dapp: IDapp) => void;
+type IOnOpDapp = (
+  op: 'rename' | 'delete' | 'pin' | 'unpin',
+  dapp: IDapp
+) => void;
 
 export default function DApps() {
   const appVersion = useAppVersion();
 
-  const { dapps } = useDapps();
+  const { dapps, pinnedList, pinDapp, unpinDapp } = useDapps();
+
+  // const list = useMemo(() => {
+  //   return dapps.map((item) => {
+  //     return {
+  //       ...item,
+  //       isPinned: pinnedList.includes(item.origin),
+  //     };
+  //   });
+  // }, [dapps, pinnedList]);
 
   const [isAdding, setIsAdding] = useState(false);
 
   const [renamingDapp, setRenamingDapp] = useState<IDapp | null>(null);
   const [deletingDapp, setDeletingDapp] = useState<IDapp | null>(null);
 
-  const onClickDapp: IOnOpDapp = useCallback((op, dapp: IDapp) => {
-    switch (op) {
-      case 'delete': {
-        setDeletingDapp(dapp);
-        break;
+  const onClickDapp: IOnOpDapp = useCallback(
+    (op, dapp: IDapp) => {
+      switch (op) {
+        case 'unpin': {
+          unpinDapp(dapp.origin);
+          break;
+        }
+        case 'pin': {
+          pinDapp(dapp.origin);
+          break;
+        }
+        case 'delete': {
+          setDeletingDapp(dapp);
+          break;
+        }
+        case 'rename': {
+          setRenamingDapp(dapp);
+          break;
+        }
+        default:
+          break;
       }
-      case 'rename': {
-        setRenamingDapp(dapp);
-        break;
-      }
-      default:
-        break;
-    }
-  }, []);
+    },
+    [pinDapp, unpinDapp]
+  );
 
   // useEffect(() => {
   //   // TODO: just for test
@@ -61,14 +84,7 @@ export default function DApps() {
 
   return (
     <div className={style.page}>
-      <div
-        className={style.container}
-        // style={{
-        //   background:
-        //     "url('rabby-internal://assets/icons/common/logo-op-5.svg') no-repeat bottom 80px right",
-        // }}
-      >
-        {/* <AutoUpdate /> */}
+      <div className={style.container}>
         <header className={style.header}>
           <h2 className={style.title}>My Dapps</h2>
           <div className={style.desc}>
