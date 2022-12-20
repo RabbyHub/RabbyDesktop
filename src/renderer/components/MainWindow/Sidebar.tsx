@@ -6,6 +6,7 @@ import {
 } from '@/../assets/icons/internal-homepage';
 import { RABBY_HOMEPAGE_URL } from '@/isomorphic/constants';
 import { useTopbarTabs } from '@/renderer/hooks/useWindowTopbar';
+import { AutoUpdate } from '@/renderer/routes/Dapps/components/AutoUpdate';
 import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
 import { Button, Dropdown, Menu } from 'antd';
 import classNames from 'classnames';
@@ -221,10 +222,11 @@ export default function MainWindowSidebar() {
       </ul>
       <div className={styles.navFooter}>
         <div className={styles.update}>
-          <Button type="primary" block>
+          {/* <Button type="primary" block>
             <img src="rabby-internal://assets/icons/mainwin-sidebar/download.svg" />
             Update Rabby
-          </Button>
+          </Button> */}
+          <AutoUpdate />
         </div>
         <ul className={styles.routeList}>
           <li

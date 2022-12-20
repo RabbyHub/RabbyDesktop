@@ -20,12 +20,11 @@ export const AutoUpdate = () => {
       <div className={style.autoUpdate}>
         <div className="auto-update is-downloading">
           <img
-            src="rabby-internal://assets/icons/internal-homepage/icon-update-loading.svg"
+            src="rabby-internal://assets/icons/update/downloading.svg"
             className="auto-update-icon animate"
             alt=""
           />
-          <div className="auto-update-content">Downloading</div>
-          <div className="auto-update-action">
+          <div className="auto-update-content">
             {(progress?.percent || 0).toFixed(0)}% completed
           </div>
         </div>
@@ -35,53 +34,36 @@ export const AutoUpdate = () => {
   if (isDownloaded) {
     return (
       <div className={style.autoUpdate}>
-        <div className="auto-update is-downloaded">
+        <div
+          className="auto-update is-downloaded"
+          onClick={() => {
+            quitAndUpgrade();
+          }}
+        >
           <img
-            src="rabby-internal://assets/icons/internal-homepage/icon-update-success.svg"
+            src="rabby-internal://assets/icons/update/install.svg"
             className="auto-update-icon"
             alt=""
           />
-          <div className="auto-update-content">
-            Update installation is ready
-          </div>
-          <div className="auto-update-action">
-            <a
-              href="#/"
-              onClick={(e) => {
-                e.preventDefault();
-                quitAndUpgrade();
-              }}
-            >
-              Install Now
-            </a>
-          </div>
+          <div className="auto-update-content">Install Now</div>
         </div>
       </div>
     );
   }
   return (
     <div className={style.autoUpdate}>
-      <div className="auto-update">
+      <div
+        className="auto-update"
+        onClick={() => {
+          requestDownload();
+        }}
+      >
         <img
-          src="rabby-internal://assets/icons/internal-homepage/icon-update-loading.svg"
+          src="rabby-internal://assets/icons/update/download.svg"
           className="auto-update-icon"
           alt=""
         />
-        <div className="auto-update-content">
-          Update Rabby Wallet Desktop. The new version{' '}
-          {releaseCheckInfo.releaseVersion} is available.{' '}
-        </div>
-        <div className="auto-update-action">
-          <a
-            href="#/"
-            onClick={(e) => {
-              e.preventDefault();
-              requestDownload();
-            }}
-          >
-            Download
-          </a>
-        </div>
+        <div className="auto-update-content">Update Rabby</div>
       </div>
     </div>
   );
