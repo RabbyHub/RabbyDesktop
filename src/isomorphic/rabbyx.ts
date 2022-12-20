@@ -12,6 +12,11 @@ export type RabbyXMethod = {
   };
 
   'walletController.getConnectedSites': () => IConnectedSiteInfo[];
+  'walletController.updateAlianName': (
+    addr: string,
+    name: string
+  ) => IConnectedSiteInfo[];
+  'walletController.getAlianName': (addr: string) => IConnectedSiteInfo[];
 };
 
 export type RabbyXMethods = {

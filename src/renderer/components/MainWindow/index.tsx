@@ -127,10 +127,9 @@ export function MainWindow() {
       const isBooted = await walletController.isBooted();
       console.debug('[debug] MainWindow isBooted', isBooted);
 
-      await walletController.unlock('qa111111');
-
-      var isUnlocked = await walletController.isBooted();
-      console.debug('[debug] MainWindow isUnlocked [2]', isUnlocked);
+      // await walletController.unlock('qa111111');
+      // var isUnlocked = await walletController.isUnlocked();
+      // console.debug('[debug] MainWindow isUnlocked [2]', isUnlocked);
 
       console.debug(
         '[debug] MainWindow walletController.boot',
