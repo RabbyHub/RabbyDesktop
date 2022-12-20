@@ -1,6 +1,6 @@
 import { app, BrowserWindow, clipboard, Menu, MenuItem } from 'electron';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
-import { getWebuiExtId } from '../utils/stream-helpers';
+import { getRabbyExtViews, getWebuiExtId } from '../utils/stream-helpers';
 
 const LABELS = {
   openInNewTab: (type: 'link' | Electron.ContextMenuParams['mediaType']) =>
@@ -263,6 +263,17 @@ const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
         if (!webContents.isDevToolsFocused()) {
           webContents.devToolsWebContents?.focus();
         }
+      },
+    });
+
+    appendSeparator();
+
+    append({
+      label: 'Open RabbyX Background',
+      click: () => {
+        getRabbyExtViews().then((views) => {
+          views.backgroundHost.openDevTools({ mode: 'detach' });
+        });
       },
     });
   }
