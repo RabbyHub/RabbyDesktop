@@ -1,3 +1,5 @@
+import { ChromeTabWithLocalFavicon } from '@/renderer/hooks/useWindowTopbar';
+
 /* from builder-util-runtime/out/ProgressCallbackTransform.d.ts */
 interface ProgressInfo {
   total: number;
@@ -142,4 +144,5 @@ type IRabbyxRpcResponse = {
 type IContextMenuPageInfo = {
   type: 'sidebar-dapp';
   dappTabInfo: chrome.tabs.Tab;
+  // dappTabInfo: ChromeTabWithLocalFavicon;
 };

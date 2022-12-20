@@ -13,6 +13,7 @@ import SecurityAddressbarPopup from '../routes/SecurityAddressbarPopup/SecurityA
 import { useContextMenuPageInfo } from '../hooks/useContextMenuPage';
 import { closeTabFromInternalPage } from '../ipcRequest/mainwin';
 import { hideContextMenuPopup } from '../ipcRequest/contextmenu-popup';
+import { SidebarContextMenu } from '../components/MainWindow/SidebarContextMenu';
 
 function App() {
   const pageInfo = useContextMenuPageInfo();
@@ -33,18 +34,7 @@ function App() {
           path="/context-menu-popup"
           element={
             <>
-              Context Menu Popup tabId: {pageInfo?.dappTabInfo.id}
-              <button
-                type="button"
-                onClick={() => {
-                  if (pageInfo?.dappTabInfo.id) {
-                    closeTabFromInternalPage(pageInfo?.dappTabInfo.id);
-                    hideContextMenuPopup();
-                  }
-                }}
-              >
-                close tab
-              </button>
+              <SidebarContextMenu data={pageInfo} />
             </>
           }
         />

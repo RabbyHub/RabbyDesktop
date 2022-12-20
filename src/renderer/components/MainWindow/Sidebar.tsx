@@ -5,7 +5,10 @@ import {
   RCIconPin,
 } from '@/../assets/icons/internal-homepage';
 import { RABBY_HOMEPAGE_URL } from '@/isomorphic/constants';
-import { useTopbarTabs } from '@/renderer/hooks/useWindowTopbar';
+import {
+  ChromeTabWithLocalFavicon,
+  useTopbarTabs,
+} from '@/renderer/hooks/useWindowTopbar';
 import { AutoUpdate } from '@/renderer/routes/Dapps/components/AutoUpdate';
 import { showContextMenuPopup } from '@/renderer/ipcRequest/contextmenu-popup';
 import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
@@ -20,6 +23,7 @@ import {
 } from 'react-router-dom';
 
 import styles from './Sidebar.module.less';
+import { useDapps } from '@/renderer/hooks/useDappsMngr';
 
 function filterFavIcon(url?: string, isActiveTab = false) {
   // homepage
@@ -46,6 +50,69 @@ const StaticEntries = [
 ] as const;
 
 const DappRoutePatter = '/mainwin/dapps/:origin';
+
+const TabList = ({
+  data,
+  activeTab,
+  tabActions,
+}: {
+  data: ChromeTabWithLocalFavicon[];
+  activeTab: ChromeTabWithLocalFavicon | null;
+  tabActions: ReturnType<typeof useTopbarTabs>['tabActions'];
+}) => {
+  const navigateTo = useNavigateToDappRoute();
+  const location = useLocation();
+  if (!data?.length) {
+    return null;
+  }
+  return (
+    <ul className={styles.routeList}>
+      {data.map((tab) => {
+        const faviconUrl =
+          tab.localFavIconUrl ||
+          filterFavIcon(tab.url, tab.active) ||
+          tab.favIconUrl;
+
+        return (
+          <li
+            key={tab.id}
+            className={classNames(
+              styles.routeItem,
+              matchPath(DappRoutePatter, location.pathname) &&
+                activeTab?.id === tab.id &&
+                styles.active
+            )}
+            onClick={() => {
+              navigateTo(tab.dappOrigin!);
+              tabActions.onTabClick(tab);
+            }}
+            onContextMenu={(event) => {
+              event?.preventDefault();
+
+              const x = event.clientX;
+              const y = event.clientY;
+              showContextMenuPopup(
+                { x, y },
+                { type: 'sidebar-dapp', dappTabInfo: tab }
+              );
+            }}
+          >
+            <div className={styles.routeItemInner}>
+              <div className={styles.indicator} />
+              <img
+                className={classNames(styles.routeLogo, styles.isDapp)}
+                src={faviconUrl}
+              />
+              <span className={styles.routeTitle}>
+                {tab.dappAlias || tab.title}
+              </span>
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  );
+};
 
 export default function MainWindowSidebar() {
   const { activeTab, tabList, tabActions } = useTopbarTabs();
@@ -86,6 +153,20 @@ export default function MainWindowSidebar() {
     };
   }, [navigate, matchedSE]);
 
+  const { pinnedList } = useDapps();
+
+  const pinnedTabList = useMemo(() => {
+    return tabList.filter((tab) => {
+      return (pinnedList || []).includes(tab.dappOrigin!);
+    });
+  }, [pinnedList, tabList]);
+
+  const unpinnedTabList = useMemo(() => {
+    return tabList.filter((tab) => {
+      return !(pinnedList || []).includes(tab.dappOrigin!);
+    });
+  }, [pinnedList, tabList]);
+
   return (
     <div className={styles.Sidebar}>
       <div className={styles.logoWrapper}>
@@ -94,7 +175,6 @@ export default function MainWindowSidebar() {
           src="rabby-internal://assets/icons/mainwin-sidebar/sidebar-logo.svg"
         />
       </div>
-
       <ul className={styles.routeList}>
         {StaticEntries.map((sE) => {
           return (
@@ -116,131 +196,19 @@ export default function MainWindowSidebar() {
             </li>
           );
         })}
-
-        {tabList.map((tab) => {
-          const faviconUrl =
-            tab.localFavIconUrl ||
-            filterFavIcon(tab.url, tab.active) ||
-            tab.favIconUrl;
-
-          return (
-            <Dropdown
-              overlayClassName="dapps-dropdown-operations"
-              getPopupContainer={() => document.body}
-              trigger={['contextMenu']}
-              key={tab.id}
-              // open
-              overlay={
-                <Menu
-                  onClick={({ key }) => {
-                    switch (key) {
-                      case 'dapp-pin':
-                        break;
-                      case 'dapp-close':
-                        break;
-                      default:
-                        break;
-                    }
-                  }}
-                  items={[
-                    {
-                      key: 'dapp-pin',
-                      className: 'dapp-dropdown-item',
-                      label: <span className="text">Pin</span>,
-                      icon: <RCIconPin />,
-                      // todo
-                    },
-                    {
-                      key: 'dapp-close',
-                      className: 'dapp-dropdown-item',
-                      label: <span className="text">Close</span>,
-                      icon: <RCIconDappsEdit />,
-                    },
-                  ]}
-                />
-              }
-            >
-              <li
-                className={classNames(
-                  styles.routeItem,
-                  matchPath(DappRoutePatter, location.pathname) &&
-                    activeTab?.id === tab.id &&
-                    styles.active
-                )}
-                onClick={() => {
-                  navigateTo(tab.dappOrigin!);
-                  tabActions.onTabClick(tab);
-                }}
-              >
-                <div className={styles.routeItemInner}>
-                  <div className={styles.indicator} />
-                  <img
-                    className={classNames(styles.routeLogo, styles.isDapp)}
-                    src={faviconUrl}
-                  />
-                  <span className={styles.routeTitle}>
-                    {tab.dappAlias || tab.title}
-                  </span>
-
-                  {/* <img
-                  onClick={() => {
-                    tabActions.onTabClose(tab);
-                  }}
-                  className={styles.iconClose}
-                  src="rabby-internal://assets/icons/mainwin-sidebar/icon-close-white.svg"
-                /> */}
-                </div>
-              </li>
-            </Dropdown>
-          );
-        })}
       </ul>
-      <div className={styles.divider} />
-      <ul className={styles.routeList}>
-        {tabList.map((tab) => {
-          const faviconUrl =
-            tab.localFavIconUrl ||
-            filterFavIcon(tab.url, tab.active) ||
-            tab.favIconUrl;
 
-          return (
-            <li
-              key={tab.id}
-              className={classNames(
-                styles.routeItem,
-                matchPath(DappRoutePatter, location.pathname) &&
-                  activeTab?.id === tab.id &&
-                  styles.active
-              )}
-              onClick={() => {
-                navigateTo(tab.dappOrigin!);
-                tabActions.onTabClick(tab);
-              }}
-              onContextMenu={(event) => {
-                event?.preventDefault();
-
-                const x = event.clientX;
-                const y = event.clientY;
-                showContextMenuPopup(
-                  { x, y },
-                  { type: 'sidebar-dapp', dappTabInfo: tab }
-                );
-              }}
-            >
-              <div className={styles.routeItemInner}>
-                <div className={styles.indicator} />
-                <img
-                  className={classNames(styles.routeLogo, styles.isDapp)}
-                  src={faviconUrl}
-                />
-                <span className={styles.routeTitle}>
-                  {tab.dappAlias || tab.title}
-                </span>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+      <TabList
+        tabActions={tabActions}
+        data={pinnedTabList}
+        activeTab={activeTab}
+      />
+      {unpinnedTabList?.length ? <div className={styles.divider} /> : null}
+      <TabList
+        tabActions={tabActions}
+        data={unpinnedTabList}
+        activeTab={activeTab}
+      />
       <div className={styles.navFooter}>
         <div className={styles.update}>
           <AutoUpdate />

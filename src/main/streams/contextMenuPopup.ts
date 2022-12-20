@@ -21,7 +21,7 @@ import { onMainWindowReady } from '../utils/stream-helpers';
 function updateSubWindowPosition(
   parentWin: BrowserWindow,
   window: BrowserWindow,
-  triggerPoint?: Electron.Point
+  triggerPoint?: Electron.Point | { width?: number; height?: number }
 ) {
   if (window.isDestroyed()) return;
 
@@ -31,12 +31,12 @@ function updateSubWindowPosition(
     // TODO: use dynamic position
     x: 5,
     y: 5,
-    ...triggerPoint,
     width: SECURITY_ADDRBAR_VIEW_SIZE.width,
     height: Math.min(
       SECURITY_ADDRBAR_VIEW_SIZE.height,
       height - NATIVE_HEADER_WITH_NAV_H
     ),
+    ...triggerPoint,
   };
 
   window.setSize(popupRect.width, popupRect.height);
@@ -111,6 +111,8 @@ onIpcMainEvent(
       updateSubWindowPosition(targetWin, popupWin, {
         x: payload.pos.x,
         y: payload.pos.y,
+        width: 140,
+        height: 100,
       });
       sendToWebContents(
         popupWin.webContents,
