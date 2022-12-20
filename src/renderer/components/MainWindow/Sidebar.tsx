@@ -7,6 +7,7 @@ import {
 import { RABBY_HOMEPAGE_URL } from '@/isomorphic/constants';
 import { useTopbarTabs } from '@/renderer/hooks/useWindowTopbar';
 import { AutoUpdate } from '@/renderer/routes/Dapps/components/AutoUpdate';
+import { showContextMenuPopup } from '@/renderer/ipcRequest/contextmenu-popup';
 import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
 import { Button, Dropdown, Menu } from 'antd';
 import classNames from 'classnames';
@@ -72,7 +73,17 @@ export default function MainWindowSidebar() {
       }
     );
 
-    return dispose;
+    const dispose2 = window.rabbyDesktop.ipcRenderer.on(
+      '__internal_forward:main-window:close-tab',
+      (tabId) => {
+        chrome.tabs.remove(tabId);
+      }
+    );
+
+    return () => {
+      dispose?.();
+      dispose2?.();
+    };
   }, [navigate, matchedSE]);
 
   return (
@@ -205,6 +216,16 @@ export default function MainWindowSidebar() {
                 navigateTo(tab.dappOrigin!);
                 tabActions.onTabClick(tab);
               }}
+              onContextMenu={(event) => {
+                event?.preventDefault();
+
+                const x = event.clientX;
+                const y = event.clientY;
+                showContextMenuPopup(
+                  { x, y },
+                  { type: 'sidebar-dapp', dappTabInfo: tab }
+                );
+              }}
             >
               <div className={styles.routeItemInner}>
                 <div className={styles.indicator} />
@@ -222,10 +243,6 @@ export default function MainWindowSidebar() {
       </ul>
       <div className={styles.navFooter}>
         <div className={styles.update}>
-          {/* <Button type="primary" block>
-            <img src="rabby-internal://assets/icons/mainwin-sidebar/download.svg" />
-            Update Rabby
-          </Button> */}
           <AutoUpdate />
         </div>
         <ul className={styles.routeList}>

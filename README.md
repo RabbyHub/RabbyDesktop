@@ -27,7 +27,7 @@ cd RabbyDesktop;
 npm install
 ```
 
-### Setup RabbyX repo's location
+<!-- ### Setup RabbyX repo's location
 
 Before start run electron app, make sure you setup RabbyX repository and run it locally.
 
@@ -46,11 +46,17 @@ The fallback value of `RABBY_DESKTOP_REPO` is the relative path `../RabbyDesktop
 ```
 ~/Documents/RabbyX
 ~/Documents/RabbyDesktop
-```
+``` -->
 
 ## Starting Development
 
-Start the RabbyX Project's build process in a separate terminal:
+Before start run electron app, you need to install rabbyx plugin:
+
+```bash
+sh scripts/install_rabbyx.sh
+```
+
+<!-- Start the RabbyX Project's build process in a separate terminal:
 
 ```bash
 cd /path/to/RabbyX;
@@ -61,7 +67,7 @@ git reset --hard origin/feat/for_desktop;
 
 # run build
 yarn build:dev
-```
+``` -->
 
 Then start the app in the `dev` environment:
 

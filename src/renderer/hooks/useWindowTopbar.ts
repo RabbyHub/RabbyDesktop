@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { getAllDapps } from 'renderer/ipcRequest/dapps';
+import { getDappsInfo } from 'renderer/ipcRequest/dapps';
 
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 
@@ -136,7 +136,7 @@ export function useTopbarTabs() {
         chrome.tabs.query({ currentWindow: true }, resolve)
       ),
       // array to object group by origin
-      getAllDapps().then((dapps) =>
+      getDappsInfo().then(({ dapps }) =>
         dapps.reduce((acc, dapp) => {
           acc[dapp.origin] = dapp;
           return acc;

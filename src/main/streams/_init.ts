@@ -57,6 +57,10 @@ const CONF = {
   securityAddressbarPopup: {
     subject: new ReplaySubject(1),
   } as IConf<ReplaySubject<BrowserWindow>>,
+
+  contextMenuPopupWindowReady: {
+    subject: new ReplaySubject(1),
+  } as IConf<ReplaySubject<BrowserWindow>>,
 };
 
 type IMainSubjects = typeof CONF;

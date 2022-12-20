@@ -27,6 +27,9 @@ type M2RChanneMessagePayload = {
   '__internal_push:mainwindow:all-tabs-closed': {
     windowId: number;
   };
+  '__internal_push:context-meunu-popup:on-show': {
+    pageInfo: IContextMenuPageInfo;
+  };
   /* eslint-disable-next-line @typescript-eslint/ban-types */
   '__internal_push:loading-view:toggle': MainInternalsMessagePayload['__internal_main:loading-view:toggle']['send'][0];
 
@@ -105,6 +108,7 @@ type ChannelMessagePayload = {
       {
         reqid: string;
         dapps: IDapp[];
+        pinnedList: IDapp['origin'][];
       }
     ];
   };
@@ -124,6 +128,16 @@ type ChannelMessagePayload = {
         reqid: string;
         error?: string;
         dapps: IDapp[];
+      }
+    ];
+  };
+  'dapps-togglepin': {
+    send: [reqid: string, dappOrigins: IDapp['origin'][], nextPinned: boolean];
+    response: [
+      {
+        reqid: string;
+        error?: string;
+        pinnedList: IDapp['origin'][];
       }
     ];
   };
@@ -185,6 +199,10 @@ type ChannelMessagePayload = {
   '__internal_rpc:main-window:click-close': {
     send: [];
     response: [];
+  };
+  '__internal_forward:main-window:close-tab': {
+    send: [tabId: number];
+    response: [tabId: number];
   };
   '__internal_rpc:dapp-tabs:close-safe-view': {
     send: [];
@@ -260,6 +278,26 @@ type ChannelMessagePayload = {
     send: [];
     response: [];
   };
+  '__internal_rpc:context-meunu-popup:toggle-show': {
+    send: [
+      | {
+          nextShow: true;
+          pos: {
+            x: Electron.Point['x'];
+            y: Electron.Point['y'];
+          };
+          pageInfo: IContextMenuPageInfo;
+        }
+      | {
+          nextShow: false;
+        }
+    ];
+    response: [];
+  };
+  '__internal_rpc:context-meunu-popup:send-message': {
+    send: [message: any];
+    response: [];
+  };
   '__internal_rpc:debug-tools:operate-debug-insecure-dapps': {
     send: [type: 'add' | 'trim'];
     response: [];
@@ -310,7 +348,7 @@ type ChannelMessagePayload = {
   };
 };
 
-type Channels = keyof ChannelMessagePayload;
+type IChannelsKey = keyof ChannelMessagePayload;
 
 type MainInternalsMessagePayload = {
   '__internal_main:loading-view:toggle': {
@@ -334,12 +372,12 @@ interface Window {
   rabbyDesktop: {
     ipcRenderer: {
       /* send message to main process */
-      sendMessage<T extends Channels>(
+      sendMessage<T extends IChannelsKey>(
         channel: T,
         ...args: ChannelMessagePayload[T]['send']
       ): void;
       on: {
-        <T extends Channels>(
+        <T extends IChannelsKey>(
           channel: T,
           func: (...args: ChannelMessagePayload[T]['response']) => void
         ): (() => void) | undefined;
@@ -349,7 +387,7 @@ interface Window {
         ): (() => void) | undefined;
       };
       once: {
-        <T extends Channels>(
+        <T extends IChannelsKey>(
           channel: T,
           func: (...args: ChannelMessagePayload[T]['response']) => void
         ): (() => void) | undefined;

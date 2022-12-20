@@ -48,6 +48,17 @@ export default function DApps() {
   //   setDeletingDapp(dapps[0] || null);
   // }, [ dapps[0] ]);
 
+  // useLayoutEffect(() => {
+  //   const listener: GetIpcRequestListenerFirstParams<typeof document.body.addEventListener, 'contextmenu'> = evt => {
+
+  //   };
+  //   document.body.addEventListener('contextmenu', listener);
+
+  //   return () => {
+  //     document.body.removeEventListener('contextmenu', listener);
+  //   }
+  // }, []);
+
   return (
     <div className={style.page}>
       <div

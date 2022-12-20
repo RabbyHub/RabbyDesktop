@@ -3,7 +3,9 @@
 import * as Rx from 'rxjs';
 import { ipcMain } from 'electron';
 
-export function fromIpcMainEvent<T extends Channels = Channels>(eventName: T) {
+export function fromIpcMainEvent<T extends IChannelsKey = IChannelsKey>(
+  eventName: T
+) {
   type TReqArgs = ChannelMessagePayload[T]['send'];
   type TResponse = ChannelMessagePayload[T]['response'];
 
