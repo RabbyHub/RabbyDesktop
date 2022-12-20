@@ -1,22 +1,21 @@
 @import '../../css/mixins.less';
+@import '../../css/vars.less';
 
 @route-item-h: 52px;
 
-@pt: 124px;
-
 .Sidebar {
   position: relative;
-  // padding-top: @pt;
+  padding-top: @TITLEBAR_H;
 
   width: var(--mainwin-sidebar-w);
 }
 
 .logoWrapper {
-  // position: absolute;
   width: 100%;
-  height: @pt;
-
+  // leave space for titlebar, avoid draggable region overlap
+  height: 124px - @TITLEBAR_H;
   .global-draggable();
+
   display: flex;
   align-items: center;
   justify-content: center;

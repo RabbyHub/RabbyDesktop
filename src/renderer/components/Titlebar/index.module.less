@@ -1,0 +1,113 @@
+@import '../../css/theme/index.css';
+
+@rem-unit: 14px;
+
+:global {
+  :root {
+    --rabby-titlebar-h: 32px;
+  }
+}
+
+.tabstrip {
+  width: 100%;
+  height: var(--rabby-titlebar-h);
+  display: flex;
+  flex-direction: row;
+  background-color: transparent;
+
+  &.os-darwin {
+    width: var(--mainwin-sidebar-w);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    -webkit-app-region: none;
+  }
+
+  &.os-win32 {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+}
+
+.app-drag {
+  flex: 1 0 auto;
+  -webkit-app-region: drag;
+  min-width: 2rem;
+  align-self: flex-end;
+  height: 100%;
+}
+
+.window-controls {
+  display: flex;
+  flex-direction: row;
+  flex: 0 0 auto;
+
+  .control {
+    cursor: pointer;
+    /* macOS */
+    width: 44px;
+    box-sizing: border-box;
+    background: none;
+    border: none;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .control > img {
+    width: 10px;
+    height: 10px;
+  }
+
+  .control:hover.triple-minimize {
+    background: rgba(255, 255, 255, 0.3);
+  }
+  .control:hover.triple-maximize {
+    background: transparent;
+  }
+  .control:hover.triple-close {
+    background: var(--color-red);
+  }
+}
+
+.macos-controls {
+  display: flex;
+  width: 84px;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 16px;
+  padding-right: 16px;
+  box-sizing: border-box;
+
+  .control {
+    cursor: pointer;
+    border: none;
+    background-color: transparent;
+    display: flex;
+    width: 12px;
+    height: 12px;
+    padding: 0;
+    & + .control {
+      margin-left: 8px;
+    }
+  }
+
+  .control > img {
+    width: 100%;
+    height: 100%;
+    display: block;
+
+    &.hover-show {
+      display: none;
+    }
+  }
+
+  .control:hover > img {
+    display: none;
+  }
+
+  .control:hover > img.hover-show {
+    display: block;
+  }
+}

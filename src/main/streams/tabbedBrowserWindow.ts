@@ -40,7 +40,9 @@ export function getWindowFromBrowserWindow(window: BrowserWindow) {
     : null;
 }
 
-export function findByWindowId(windowId: BrowserWindow['id']) {
+export function findByWindowId(
+  windowId: BrowserWindow['id']
+): TabbedBrowserWindow | undefined {
   return windows.find((w) => w.id === windowId);
 }
 

@@ -14,6 +14,7 @@ import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
 import MainWindowSidebar from './Sidebar';
+import Titlebar from '../Titlebar';
 
 const router = createRouter([
   {
@@ -114,5 +115,10 @@ export function MainWindow() {
     };
   }, []);
 
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <Titlebar />
+      <RouterProvider router={router} />
+    </>
+  );
 }
