@@ -260,13 +260,15 @@ export default function bootstrap() {
     mainWin.on('moved', () => {
       storeMainWinPosition(mainWin);
     });
-
     mainWin.on('resized', () => {
       storeMainWinPosition(mainWin);
     });
-
     mainWin.on('close', () => {
       storeMainWinPosition(mainWin);
+    });
+
+    await getElectronChromeExtensions().then((exts) => {
+      exts.addWindow(mainWin);
     });
 
     const showMainWin = async () => {
