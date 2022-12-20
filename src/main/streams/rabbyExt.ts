@@ -173,7 +173,7 @@ getRabbyExtId().then(async (extId) => {
   });
 
   if (!IS_RUNTIME_PRODUCTION) {
-    rabbyBgHostView.webContents.openDevTools({ mode: 'detach' });
+    // rabbyBgHostView.webContents.openDevTools({ mode: 'detach' });
     // rabbyView.webContents.openDevTools({ mode: 'detach' });
     // tabbedWin.createTab({
     //   initialUrl: `https://metamask.github.io/test-dapp/`,

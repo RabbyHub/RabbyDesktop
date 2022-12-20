@@ -13,15 +13,13 @@ export const Unlock: React.FC = () => {
   const [form] = Form.useForm<FormData>();
 
   const onNext = React.useCallback(
-    ({ password }: FormData) => {
-      walletController
-        .boot(password)
-        .then(() => {
-          nav('/mainWindow/home', { replace: true });
-        })
-        .catch(() => {
-          message.error('Password is incorrect');
-        });
+    async ({ password }: FormData) => {
+      try {
+        await walletController.unlock(password);
+        nav('/', { replace: true });
+      } catch (e) {
+        message.error('Password is incorrect');
+      }
     },
     [nav]
   );
