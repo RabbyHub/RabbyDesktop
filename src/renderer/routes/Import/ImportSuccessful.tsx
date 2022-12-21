@@ -1,3 +1,4 @@
+import { AddressItem } from '@/renderer/components/AddressItem/AddressItem';
 import { useLocation, useNavigate } from 'react-router-dom';
 import BlockButton from './components/BlockButton/BlockButton';
 import styles from './ImportSuccessful.module.less';
@@ -5,8 +6,7 @@ import styles from './ImportSuccessful.module.less';
 const ImportSuccessful = () => {
   const nav = useNavigate();
   const { state } = useLocation();
-
-  console.log(state);
+  const { accounts } = state;
 
   return (
     <div className={styles.ImportSuccessful}>
@@ -20,9 +20,10 @@ const ImportSuccessful = () => {
         </div>
         <h1 className={styles.title}>Imported Successfully</h1>
 
-        <div className={styles.card}>
-          <div className={styles.name}>Private Key 1</div>
-          <div className={styles.address}>{state.address}</div>
+        <div className={styles.addressList}>
+          {accounts.map((account: any) => (
+            <AddressItem {...account} key={account.address} />
+          ))}
         </div>
 
         <BlockButton
