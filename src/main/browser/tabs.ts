@@ -16,6 +16,10 @@ type ITabOptions = {
   isOfMainWindow?: boolean;
 };
 
+const dappViewTopOffset =
+  NativeAppSizes.mainWindowDappTopOffset +
+  (process.platform === 'darwin' ? 0 : NativeAppSizes.windowTitlebarHeight);
+
 const DEFAULT_TOPBAR_STACKS = {
   tabs: true,
   navigation: true,
@@ -148,19 +152,21 @@ export class Tab {
     const hideTopbar =
       !this.$meta.topbarStacks?.tabs && !this.$meta.topbarStacks?.navigation;
 
-    const topbarHeight = hideTopbar ? 0 : NATIVE_HEADER_H;
+    const topOffset = hideTopbar ? 0 : NATIVE_HEADER_H;
 
     this.view!.setBounds({
       x: 0,
-      y: topbarHeight,
+      y: topOffset,
       width,
+      height: height - topOffset,
       ...(this.$meta.isOfMainWindow
         ? {
             x: NativeAppSizes.dappsViewLeftOffset,
             width: width - NativeAppSizes.dappsViewLeftOffset,
+            y: dappViewTopOffset,
+            height: height - dappViewTopOffset,
           }
         : {}),
-      height: height - topbarHeight,
     });
 
     this.view!.setAutoResize({ width: true, height: true });

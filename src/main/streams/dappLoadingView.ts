@@ -1,9 +1,5 @@
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
-import { NATIVE_HEADER_H } from '../../isomorphic/const-size-classical';
-import {
-  IS_RUNTIME_PRODUCTION,
-  RABBY_LOADING_URL,
-} from '../../isomorphic/constants';
+import { RABBY_LOADING_URL } from '../../isomorphic/constants';
 import { createPopupView } from '../utils/browser';
 import { getDappLoadingView, onMainWindowReady } from '../utils/stream-helpers';
 import { valueToMainSubject } from './_init';
@@ -11,6 +7,10 @@ import {
   onIpcMainInternalEvent,
   sendToWebContents,
 } from '../utils/ipcMainEvents';
+
+const dappTopOffset =
+  NativeAppSizes.mainWindowDappTopOffset +
+  (process.platform === 'darwin' ? 0 : NativeAppSizes.windowTitlebarHeight);
 
 async function updateViewPosition(
   loadingView: Electron.BrowserView,
@@ -22,9 +22,9 @@ async function updateViewPosition(
 
   const popupRect = {
     x: NativeAppSizes.dappsViewLeftOffset,
-    y: NATIVE_HEADER_H,
+    y: dappTopOffset,
     width: width - NativeAppSizes.dappsViewLeftOffset,
-    height: height - NATIVE_HEADER_H,
+    height: height - dappTopOffset,
   };
 
   if (isLoading) {
