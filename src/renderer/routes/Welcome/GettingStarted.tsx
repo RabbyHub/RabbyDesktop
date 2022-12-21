@@ -3,11 +3,11 @@
 import '@/renderer/css/style.less';
 
 import { Button } from 'antd';
-import { useDesktopAppState } from '@/renderer/hooks/useDesktopAppState';
+import { useNavigate } from 'react-router-dom';
 import styles from './GettingStarted.module.less';
 
 export default function GettingStarted() {
-  const { redirectToMainWindow, putHasStarted } = useDesktopAppState();
+  const nav = useNavigate();
 
   return (
     <div className={styles['page-welcome']}>
@@ -20,8 +20,7 @@ export default function GettingStarted() {
       <Button
         className={styles['btn-start']}
         onClick={() => {
-          putHasStarted();
-          redirectToMainWindow();
+          nav('/welcome/import/home');
         }}
       >
         Getting Started

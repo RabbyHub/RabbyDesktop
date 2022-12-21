@@ -1,0 +1,26 @@
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  margin-bottom: 68px;
+}
+
+.input {
+  padding: 16px;
+  font-size: 16px;
+  color: var(--color-title);
+  width: 400px;
+  font-weight: 500;
+  height: 280px;
+
+  &::placeholder {
+    color: var(--color-comment1);
+  }
+}
+
+.error {
+  position: absolute;
+  bottom: -16px;
+  color: var(--color-red);
+  font-size: 14px;
+}
