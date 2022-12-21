@@ -79,6 +79,10 @@ const router = createRouter([
     children: [
       {
         path: 'home',
+        element: <>Unimplemented Home</>,
+      },
+      {
+        path: 'my-dapps',
         element: <DApps />,
       },
       {

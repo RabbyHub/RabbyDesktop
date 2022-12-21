@@ -24,6 +24,11 @@ const StaticEntries = [
     title: 'Swap',
     logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/swap.svg',
   },
+  {
+    path: '/mainwin/my-dapps',
+    title: 'My Dapp',
+    logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/dapps.svg',
+  },
 ] as const;
 
 const DappRoutePatter = '/mainwin/dapps/:origin';
@@ -124,7 +129,7 @@ export default function MainWindowSidebar() {
       '__internal_push:mainwindow:all-tabs-closed',
       () => {
         if (!matchedSE) {
-          navigate(`/home`);
+          navigate(`/my-dapps`);
         }
       }
     );
