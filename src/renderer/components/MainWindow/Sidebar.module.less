@@ -8,6 +8,12 @@
   padding-top: @TITLEBAR_H;
 
   width: var(--mainwin-sidebar-w);
+  height: 100vh;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+
+  display: flex;
+  flex-direction: column;
+  overflow: overlay;
 }
 
 .logoWrapper {
@@ -19,6 +25,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 
   > .logo {
     width: 64px;
@@ -30,35 +37,40 @@
   list-style-type: none;
   padding-left: 0;
   .global-draggable();
+  margin-bottom: 0;
 
   @active-border-w: 4px;
 
   .routeItem {
     height: @route-item-h;
     cursor: pointer;
-    padding-left: 32px;
     width: 100%;
     box-sizing: border-box;
+    border-left: 4px solid transparent;
+    padding-left: 28px;
 
     font-size: 14px;
     color: #fff;
     .global-draggable(false);
-  }
 
-  .routeItem.active,
-  .routeItem:hover {
-    padding-left: 32px - @active-border-w;
-    // TODO: finish that
-    background: rgba(0, 0, 0, 0.2);
-    border-left: @active-border-w solid var(--color-primary);
+    &.active {
+      background: rgba(0, 0, 0, 0.2);
+      border-left-color: var(--color-primary);
+    }
+    &:not(.active):hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
   }
 
   img.routeLogo {
     width: 20px;
     height: 20px;
+    &.isDapp {
+      border-radius: 50%;
+    }
 
     & + .routeTitle {
-      margin-left: 13px;
+      margin-left: 12px;
     }
   }
 
@@ -82,15 +94,24 @@
 
     word-break: break-all;
     height: 14px;
-    // overflow: hidden;
-    overflow: visible;
+    overflow: hidden;
     max-width: 100%;
     text-overflow: ellipsis;
     white-space: nowrap;
+    padding-right: 32px;
   }
 
   .routeItemInner {
     position: relative;
+    .indicator {
+      position: absolute;
+      top: 23px;
+      left: -19px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-purewhite);
+    }
     img.iconClose {
       cursor: pointer;
       position: absolute;
@@ -101,6 +122,36 @@
 
     &:hover img.iconClose {
       visibility: visible;
+    }
+  }
+}
+
+.divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 8px 32px;
+}
+
+.navFooter {
+  margin-top: auto;
+  padding-bottom: 40px;
+
+  .update {
+    padding: 8px 16px;
+    :global {
+      .ant-btn {
+        height: 52px;
+        border-radius: 8px;
+        font-weight: 510;
+        font-size: 14px;
+        line-height: 17px;
+        display: flex;
+        align-items: center;
+
+        img {
+          margin-right: 12px;
+        }
+      }
     }
   }
 }
