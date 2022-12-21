@@ -2,7 +2,6 @@ import {
   RCIconDappsEdit,
   RCIconPin,
 } from '@/../assets/icons/internal-homepage';
-import { IContextMenuPageInfo } from '@/isomorphic/types';
 import { useDapps } from '@/renderer/hooks/useDappsMngr';
 import { hideContextMenuPopup } from '@/renderer/ipcRequest/contextmenu-popup';
 import { closeTabFromInternalPage } from '@/renderer/ipcRequest/mainwin';
