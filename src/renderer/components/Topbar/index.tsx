@@ -14,7 +14,7 @@ import {
   useSelectedTabInfo,
   useTopbarTabs,
   useWinTriples,
-} from '@/renderer/hooks/useWindowTopbar';
+} from '@/renderer/hooks-shell/useWindowTopbar';
 
 import {
   IconTabCloseHover,

@@ -7,7 +7,7 @@ import React from 'react';
 
 import classNames from 'classnames';
 
-import { useWindowState } from '@/renderer/hooks/useWindowState';
+import { useWindowState } from '@/renderer/hooks-shell/useWindowState';
 
 import {
   IconDarwinTripleClose,

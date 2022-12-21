@@ -1,6 +1,6 @@
 import { isMainWinShellWebUI } from '@/isomorphic/url';
+import { detectOS } from '@/isomorphic/os';
 import { useCallback, useEffect, useState } from 'react';
-import { detectOS } from '../../isomorphic/os';
 
 const OS_TYPE = detectOS();
 

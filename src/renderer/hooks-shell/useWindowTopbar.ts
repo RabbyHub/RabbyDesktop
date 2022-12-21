@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { fetchDapps } from 'renderer/ipcRequest/dapps';
+import { fetchDapps } from '@/renderer/ipcRequest/dapps';
 
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 
