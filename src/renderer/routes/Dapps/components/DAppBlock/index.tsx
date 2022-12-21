@@ -5,9 +5,7 @@ import React, { useRef } from 'react';
 import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
 import {
   RCIconDappsDelete,
-  RCIconDappsEdit,
   RCIconPin,
-  RCIconPinFill,
 } from '../../../../../../assets/icons/internal-homepage';
 
 import { DappFavicon } from '../../../../components/DappFavicon';
@@ -23,7 +21,7 @@ export const DAppBlock = ({
   onAdd,
   onOpDapp,
 }: React.PropsWithoutRef<{
-  dapp?: IDapp;
+  dapp?: IMergedDapp;
   onAdd?: () => void;
   onOpDapp?: IOnOpDapp;
 }>) => {
@@ -95,7 +93,7 @@ export const DAppBlock = ({
               key: 'dapp-rename',
               className: 'dapp-dropdown-item',
               label: <span className="text">Rename</span>,
-              icon: <RCIconDappsEdit />,
+              icon: <></>,
             },
             {
               key: 'dapp-delete',

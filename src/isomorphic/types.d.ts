@@ -14,8 +14,9 @@ type IDapp = {
   origin: string | `https://${string}${string}`;
   faviconUrl: string;
   faviconBase64?: string;
-  isPinned?: boolean;
 };
+
+type IMergedDapp = IDapp & { isPinned: boolean };
 
 type IDesktopAppState = {
   firstStartApp: boolean;
@@ -141,6 +142,9 @@ type IRabbyxRpcResponse = {
 
 type IContextMenuPageInfo = {
   type: 'sidebar-dapp';
-  dappTabInfo: chrome.tabs.Tab;
+  dappTabInfo: {
+    origin: string;
+    id: chrome.tabs.Tab['id'];
+  };
   // dappTabInfo: ChromeTabWithLocalFavicon;
 };

@@ -13,3 +13,12 @@ export function useNavigateToDappRoute() {
     [navigate]
   );
 }
+
+export function navigateToDappRoute(
+  navigate: ReturnType<
+    typeof import('react-router-dom').createMemoryRouter
+  >['navigate'],
+  origin: string
+) {
+  navigate(`/mainwin/dapps/${encodeURIComponent(origin)}`);
+}

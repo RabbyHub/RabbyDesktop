@@ -3,7 +3,11 @@
 import { app } from 'electron';
 import Store from 'electron-store';
 import { formatDapp, formatDapps } from '@/isomorphic/dapp';
-import { onIpcMainEvent } from '../utils/ipcMainEvents';
+import {
+  emitIpcMainEvent,
+  onIpcMainEvent,
+  sendToWebContents,
+} from '../utils/ipcMainEvents';
 import { APP_NAME, PERSIS_STORE_PREFIX } from '../../isomorphic/constants';
 import { safeParse, shortStringify } from '../../isomorphic/json';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
@@ -85,6 +89,18 @@ onIpcMainEvent('detect-dapp', async (event, reqid, dappUrl) => {
   });
 });
 
+onIpcMainEvent('get-dapp', (event, reqid, dappOrigin) => {
+  const dapp =
+    dappStore.get('dapps').find((d) => d.origin === dappOrigin) || null;
+  const isPinned = !!dappStore.get('pinnedList').find((d) => d === dappOrigin);
+
+  event.reply('get-dapp', {
+    reqid,
+    dapp,
+    isPinned,
+  });
+});
+
 onIpcMainEvent('dapps-fetch', (event, reqid) => {
   const dapps = formatDapps(dappStore.get('dapps'));
   const pinnedList = dappStore.get('pinnedList');
@@ -135,27 +151,32 @@ onIpcMainEvent('dapps-delete', (event, reqid: string, dapp: IDapp) => {
   });
 });
 
-onIpcMainEvent('dapps-togglepin', (event, reqid, dappOrigins, nextPinned) => {
-  // const dapps = dappStore.get('dapps') || [];
-  const pinnedList = dappStore.get('pinnedList') || [];
+onIpcMainEvent(
+  'dapps-togglepin',
+  async (event, reqid, dappOrigins, nextPinned) => {
+    // const dapps = dappStore.get('dapps') || [];
+    const pinnedList = dappStore.get('pinnedList') || [];
 
-  dappOrigins.forEach((origin) => {
-    const idx = pinnedList.findIndex((o) => o === origin);
-    if (idx > -1) {
-      pinnedList.splice(idx, 1);
-    }
-    if (nextPinned) {
-      pinnedList.unshift(origin);
-    }
-  });
+    dappOrigins.forEach((origin) => {
+      const idx = pinnedList.findIndex((o) => o === origin);
+      if (idx > -1) {
+        pinnedList.splice(idx, 1);
+      }
+      if (nextPinned) {
+        pinnedList.unshift(origin);
+      }
+    });
 
-  dappStore.set('pinnedList', pinnedList);
+    dappStore.set('pinnedList', pinnedList);
 
-  event.reply('dapps-togglepin', {
-    reqid,
-    pinnedList,
-  });
-});
+    event.reply('dapps-togglepin', {
+      reqid,
+      pinnedList,
+    });
+
+    emitIpcMainEvent('__internal_main:dapps:pinnedListChanged', pinnedList);
+  }
+);
 
 onIpcMainEvent(
   '__internal_rpc:debug-tools:operate-debug-insecure-dapps',

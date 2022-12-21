@@ -25,3 +25,5 @@ type IndexNSAndMember<T> = T extends `${infer NS}.${infer Member}`
   : never;
 
 // type IndexNSAndMember<T> = T extends `${infer NS}.${infer Member}` ? Record<NS, Member> : never;
+
+type ExtractPromiseValue<T> = T extends Promise<infer R> ? R : never;

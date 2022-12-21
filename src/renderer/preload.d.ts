@@ -27,9 +27,17 @@ type M2RChanneMessagePayload = {
   '__internal_push:mainwindow:all-tabs-closed': {
     windowId: number;
   };
-  '__internal_push:context-meunu-popup:on-show': {
-    pageInfo: IContextMenuPageInfo;
+  '__internal_push:*:pinnedListChanged': {
+    pinnedList: string[];
   };
+  '__internal_push:context-meunu-popup:on-visiblechange':
+    | {
+        visible: true;
+        pageInfo: IContextMenuPageInfo;
+      }
+    | {
+        visible: false;
+      };
   /* eslint-disable-next-line @typescript-eslint/ban-types */
   '__internal_push:loading-view:toggle': MainInternalsMessagePayload['__internal_main:loading-view:toggle']['send'][0];
 
@@ -109,6 +117,16 @@ type ChannelMessagePayload = {
         reqid: string;
         dapps: IDapp[];
         pinnedList: IDapp['origin'][];
+      }
+    ];
+  };
+  'get-dapp': {
+    send: [reqid: string, origin: IDapp['origin']];
+    response: [
+      {
+        reqid: string;
+        dapp: IDapp | null;
+        isPinned: boolean;
       }
     ];
   };
@@ -203,6 +221,10 @@ type ChannelMessagePayload = {
   '__internal_forward:main-window:close-tab': {
     send: [tabId: number];
     response: [tabId: number];
+  };
+  '__internal_forward:main-window:open-dapp': {
+    send: [origin: IDapp['origin']];
+    response: [origin: IDapp['origin']];
   };
   '__internal_rpc:dapp-tabs:close-safe-view': {
     send: [];
@@ -361,6 +383,10 @@ type MainInternalsMessagePayload = {
           type: 'did-finish-load';
         }
     ];
+    response: [];
+  };
+  '__internal_main:dapps:pinnedListChanged': {
+    send: [pinnedList: IDapp['origin'][]];
     response: [];
   };
 };

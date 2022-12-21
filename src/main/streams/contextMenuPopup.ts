@@ -116,13 +116,21 @@ onIpcMainEvent(
       });
       sendToWebContents(
         popupWin.webContents,
-        '__internal_push:context-meunu-popup:on-show',
+        '__internal_push:context-meunu-popup:on-visiblechange',
         {
+          visible: true,
           pageInfo: payload.pageInfo,
         }
       );
       showPopupWindow(popupWin);
     } else {
+      sendToWebContents(
+        popupWin.webContents,
+        '__internal_push:context-meunu-popup:on-visiblechange',
+        {
+          visible: false,
+        }
+      );
       hidePopupWindow(popupWin);
     }
   }

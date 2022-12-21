@@ -17,6 +17,7 @@ import ImportSuccessful from '@/renderer/routes/Import/ImportSuccessful';
 import ImportByContainer from '@/renderer/routes/ImportBy/ImportByContainer';
 import { Unlock } from '@/renderer/routes/Unlock/Unlock';
 import { RequireUnlock } from '@/renderer/routes/RequireUnlock';
+import { useForwardFromInternalPage } from '@/renderer/hooks-shell/useMainWindow';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -78,6 +79,10 @@ const router = createRouter([
     children: [
       {
         path: 'home',
+        element: <>Unimplemented Home</>,
+      },
+      {
+        path: 'my-dapps',
         element: <DApps />,
       },
       {
@@ -158,6 +163,8 @@ export function MainWindow() {
       document.body.removeEventListener('click', listener);
     };
   }, []);
+
+  useForwardFromInternalPage(router);
 
   return (
     <>

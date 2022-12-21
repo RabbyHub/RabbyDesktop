@@ -6,3 +6,10 @@ export function closeTabFromInternalPage(
     tabId
   );
 }
+
+export function openDappFromInternalPage(origin: IDapp['origin']) {
+  window.rabbyDesktop.ipcRenderer.sendMessage(
+    '__internal_forward:main-window:open-dapp',
+    origin
+  );
+}
