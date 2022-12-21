@@ -1,105 +1,30 @@
-/* eslint-disable no-underscore-dangle, @typescript-eslint/no-shadow */
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/alt-text */
-/// <reference types="chrome" />
-/// <reference path="../preload.d.ts" />
-
+import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useDapps } from '../hooks/useDappsMngr';
+import { fetchDapps } from '../ipcRequest/dapps';
+import { navigateToDappRoute } from '../utils/react-router';
 
-import { fetchDapps } from 'renderer/ipcRequest/dapps';
-
-import { canoicalizeDappUrl } from '../../isomorphic/url';
-
-import { useWindowState } from './useWindowState';
-import { getConnectedSites } from '../ipcRequest/rabbyx';
-
-export function useWinTriples() {
-  const {
-    osType,
-    winState,
-    onMinimizeButton,
-    onMaximizeButton,
-    onFullscreenButton,
-    onCloseButton,
-  } = useWindowState();
-
-  const winButtonActions = {
-    onCreateTabButtonClick: useCallback(
-      () => chrome.tabs.create(undefined as any),
-      []
-    ),
-    onGoBackButtonClick: useCallback(() => chrome.tabs.goBack(), []),
-    onGoForwardButtonClick: useCallback(() => chrome.tabs.goForward(), []),
-    onReloadButtonClick: useCallback(() => chrome.tabs.reload(), []),
-    onMinimizeButton,
-    onMaximizeButton,
-    onCloseButton,
-    onFullscreenButton,
-  };
-
-  return {
-    winOSType: osType,
-    winState,
-    winButtonActions,
-  };
-}
-
-export function useConnectedSite() {
-  const [connectedSiteMap, setConnectedSiteMap] = useState<
-    Record<string, IConnectedSiteToDisplay & { chainName: string }>
-  >({});
-
-  const fetchConnectedSite = useCallback(async () => {
-    const sites = await getConnectedSites();
-
-    setConnectedSiteMap((prev) => {
-      return sites.reduce((acc, site) => {
-        acc[site.origin] = {
-          ...prev[site.origin],
-          ...site,
-        };
-        return acc;
-      }, prev);
-    });
-  }, []);
-
-  useEffect(() => {
-    const dispose = window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:rabby:chainChanged',
-      (data) => {
-        setConnectedSiteMap((prev) => ({
-          ...prev,
-          [data.origin]: { ...data },
-        }));
-      }
-    );
-
-    return () => {
-      dispose?.();
-    };
-  }, []);
-
-  return {
-    connectedSiteMap,
-    fetchConnectedSite,
-  };
-}
-
-export type ChromeTab = chrome.tabs.Tab;
-export type ChromeTabWithLocalFavicon = ChromeTab & {
+type ChromeTabWithOrigin = chrome.tabs.Tab & {
   dappOrigin: string;
-  localFavIconUrl?: string;
-  dappAlias?: string;
 };
-export type TabId = ChromeTab['id'];
 
-export function useTopbarTabs() {
-  const [origTabList, setTabList] = useState<ChromeTabWithLocalFavicon[]>([]);
-  const [activeTabId, setActiveId] = useState<ChromeTab['id']>(-1);
+export type IDappWithTabInfo = IMergedDapp & {
+  tab?: chrome.tabs.Tab;
+};
+
+export function useSidebarDapps() {
+  const { pinnedDapps, unpinnedDapps } = useDapps();
+
+  const [origTabList, setTabList] = useState<ChromeTabWithOrigin[]>([]);
+  const [activeTabId, setActiveId] = useState<chrome.tabs.Tab['id']>(-1);
   const [windowId, setWindowId] = useState<number | undefined>(undefined);
 
-  const { tabList, activeTab } = useMemo(() => {
-    let activeTab = null as ChromeTabWithLocalFavicon | null;
-    const tabList: ChromeTabWithLocalFavicon[] = origTabList.map((_tab) => {
+  /* eslint-disable @typescript-eslint/no-shadow */
+  const { tabMap, activeTab } = useMemo(() => {
+    let activeTab = null as ChromeTabWithOrigin | null;
+    const tabMap: Map<ChromeTabWithOrigin['dappOrigin'], ChromeTabWithOrigin> =
+      new Map();
+    origTabList.forEach((_tab) => {
       const tab = { ..._tab };
       if (tab.id === activeTabId) {
         tab.active = true;
@@ -107,20 +32,23 @@ export function useTopbarTabs() {
       } else {
         tab.active = false;
       }
+
+      tabMap.set(tab.dappOrigin, tab);
+
       return tab;
     });
 
-    return { tabList, activeTab };
+    return { tabMap, activeTab };
   }, [origTabList, activeTabId]);
+  /* eslint-enable @typescript-eslint/no-shadow */
 
   const updateActiveTab = useCallback(
-    (activeTab: ChromeTab | chrome.tabs.TabActiveInfo) => {
-      const activeTabId =
-        (activeTab as ChromeTab).id ||
-        (activeTab as chrome.tabs.TabActiveInfo).tabId;
+    (tab: chrome.tabs.Tab | chrome.tabs.TabActiveInfo) => {
+      const tabId =
+        (tab as chrome.tabs.Tab).id || (tab as chrome.tabs.TabActiveInfo).tabId;
 
-      setWindowId(activeTab.windowId);
-      setActiveId(activeTabId);
+      setWindowId(tab.windowId);
+      setActiveId(tabId);
     },
     []
   );
@@ -131,13 +59,13 @@ export function useTopbarTabs() {
 
     fetchingRef.current = true;
     const [tabs, dapps] = await Promise.all([
-      new Promise<ChromeTab[]>((resolve) =>
+      new Promise<chrome.tabs.Tab[]>((resolve) =>
         // we can also use queryInfo { windowId: chrome.windows.WINDOW_ID_CURRENT } here
         chrome.tabs.query({ currentWindow: true }, resolve)
       ),
       // array to object group by origin
-      fetchDapps().then(({ dapps }) =>
-        dapps.reduce((acc, dapp) => {
+      fetchDapps().then(({ dapps: _dapps }) =>
+        _dapps.reduce((acc, dapp) => {
           acc[dapp.origin] = dapp;
           return acc;
         }, {} as Record<IDapp['origin'], IDapp>)
@@ -146,7 +74,7 @@ export function useTopbarTabs() {
       fetchingRef.current = false;
     });
 
-    const origTabList = tabs.map((tab) => {
+    const tabList = tabs.map((tab) => {
       const origin = tab.url ? canoicalizeDappUrl(tab.url).origin : '';
       return {
         ...tab,
@@ -159,11 +87,11 @@ export function useTopbarTabs() {
       };
     });
 
-    setTabList(origTabList);
+    setTabList(tabList);
 
-    const activeTab = origTabList.find((tab) => tab.active);
-    if (activeTab) {
-      updateActiveTab(activeTab);
+    const aTab = tabList.find((tab) => tab.active);
+    if (aTab) {
+      updateActiveTab(aTab);
     }
   }, [updateActiveTab]);
 
@@ -184,8 +112,6 @@ export function useTopbarTabs() {
       chrome.tabs.onUpdated.removeListener(onUpdate);
     };
   }, [fetchTabListState]);
-
-  const tabListDomRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
     if (!chrome.tabs.onCreated) {
@@ -231,7 +157,7 @@ export function useTopbarTabs() {
 
     const onRemoved: GetListenerFirstParams<
       typeof chrome.tabs.onRemoved.addListener
-    > = (tabId: TabId) => {
+    > = (tabId: chrome.tabs.Tab['id']) => {
       setTabList((prev) => {
         const tabIndex = prev.findIndex((tab) => tab.id === tabId);
         if (tabIndex > -1) {
@@ -267,8 +193,31 @@ export function useTopbarTabs() {
     };
   }, [updateActiveTab, windowId]);
 
-  const tabActions = {
-    onTabClick: useCallback((tab: ChromeTab) => {
+  const dappsInSidebar = useMemo(() => {
+    const unpinnedOpenedDapps: IDappWithTabInfo[] = [];
+    unpinnedDapps.forEach((dapp) => {
+      const tab = tabMap.get(dapp.origin);
+      if (tab) {
+        unpinnedOpenedDapps.push({
+          ...dapp,
+          tab,
+        });
+      }
+    });
+
+    return {
+      pinnedDapps: pinnedDapps.map((dapp) => {
+        return {
+          ...dapp,
+          tab: tabMap.get(dapp.origin),
+        };
+      }),
+      unpinnedOpenedDapps,
+    };
+  }, [pinnedDapps, unpinnedDapps, tabMap]);
+
+  const dappActions = {
+    onTabClick: useCallback((tab: chrome.tabs.Tab) => {
       chrome.tabs.update(tab.id!, { active: true });
       window.rabbyDesktop.ipcRenderer.sendMessage(
         '__internal_webui-selectTab',
@@ -276,7 +225,7 @@ export function useTopbarTabs() {
         tab.id!
       );
     }, []),
-    onTabClose: useCallback((tab: ChromeTab) => {
+    onTabClose: useCallback((tab: chrome.tabs.Tab) => {
       if (tab.id) {
         chrome.tabs.remove(tab.id);
       }
@@ -296,33 +245,36 @@ export function useTopbarTabs() {
   };
 
   return {
-    tabListDomRef,
-    tabList,
+    pinnedDapps: dappsInSidebar.pinnedDapps,
+    unpinnedOpenedDapps: dappsInSidebar.unpinnedOpenedDapps,
     activeTab,
-    tabActions,
+    dappActions,
   };
 }
 
-export function useSelectedTabInfo(activeTab?: ChromeTab | null) {
-  const [selectedTabInfo, setSelectedTabInfo] =
-    useState<
-      ChannelMessagePayload['__internal_rpc:webui-ext:navinfo']['response'][0]
-    >();
+/**
+ * @warning only use this hooks once in whole app, and only use it in main window's shell
+ */
+export function useForwardFromInternalPage(
+  router: ReturnType<typeof import('react-router-dom').createMemoryRouter>
+) {
   useEffect(() => {
-    if (!activeTab?.id) return;
-    const dispose = window.rabbyDesktop.ipcRenderer.on(
-      '__internal_rpc:webui-ext:navinfo',
-      (payload) => {
-        setSelectedTabInfo(payload);
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_forward:main-window:close-tab',
+      (tabId) => {
+        chrome.tabs.remove(tabId);
       }
     );
-    window.rabbyDesktop.ipcRenderer.sendMessage(
-      '__internal_rpc:webui-ext:navinfo',
-      activeTab.id
+  }, []);
+
+  useEffect(() => {
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_forward:main-window:open-dapp',
+      (dappOrigin) => {
+        chrome.tabs.create({ url: dappOrigin, active: true });
+
+        navigateToDappRoute(router.navigate, dappOrigin);
+      }
     );
-
-    return () => dispose?.();
-  }, [activeTab?.id, activeTab?.url]);
-
-  return selectedTabInfo;
+  }, [router.navigate]);
 }

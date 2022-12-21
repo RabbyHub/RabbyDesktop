@@ -1,6 +1,30 @@
+import { arraify } from '@/isomorphic/array';
 import { randString } from 'isomorphic/string';
 
-export async function getDappsInfo() {
+export async function getDapp(origin: string) {
+  const reqid = randString();
+
+  // TODO: use timeout mechanism
+  return new Promise<IMergedDapp | null>((resolve, reject) => {
+    const dispose = window.rabbyDesktop.ipcRenderer.on('get-dapp', (event) => {
+      if (event.reqid === reqid) {
+        resolve(
+          event.dapp
+            ? {
+                ...event.dapp,
+                isPinned: event.dapp ? event.isPinned : false,
+              }
+            : null
+        );
+
+        dispose?.();
+      }
+    });
+    window.rabbyDesktop.ipcRenderer.sendMessage('get-dapp', reqid, origin);
+  });
+}
+
+export async function fetchDapps() {
   const reqid = randString();
 
   // TODO: use timeout mechanism
@@ -80,10 +104,11 @@ export async function deleteDapp(dapp: IDapp) {
 }
 
 export async function toggleDappPinned(
-  dappOrigins: string[],
+  dappOrigin: string | string[],
   nextPinned = true
 ) {
   const reqid = randString();
+  const dappOrigins = arraify(dappOrigin);
 
   // TODO: use timeout mechanism
   return new Promise<IDapp['origin'][]>((resolve, reject) => {

@@ -1,15 +1,13 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 import { message } from 'antd';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import ModalAddDapp from '../../components/ModalAddDapp';
 import ModalDeleteDapp from '../../components/ModalDeleteDapp';
 import ModalRenameDapp from '../../components/ModalRenameDapp';
 import { useDapps } from '../../hooks/useDappsMngr';
 
-import { useAppVersion } from '../../hooks/useMainBridge';
 import { DAppBlock } from './components/DAppBlock';
-import { Footer } from './components/Footer';
 
 import { ReleaseNote } from './components/ReleaseNote';
 import './index.less';
@@ -22,18 +20,7 @@ type IOnOpDapp = (
 ) => void;
 
 export default function DApps() {
-  const appVersion = useAppVersion();
-
-  const { dapps, pinnedList, pinDapp, unpinDapp } = useDapps();
-
-  // const list = useMemo(() => {
-  //   return dapps.map((item) => {
-  //     return {
-  //       ...item,
-  //       isPinned: pinnedList.includes(item.origin),
-  //     };
-  //   });
-  // }, [dapps, pinnedList]);
+  const { dapps, pinDapp, unpinDapp } = useDapps();
 
   const [isAdding, setIsAdding] = useState(false);
 
@@ -65,22 +52,6 @@ export default function DApps() {
     },
     [pinDapp, unpinDapp]
   );
-
-  // useEffect(() => {
-  //   // TODO: just for test
-  //   setDeletingDapp(dapps[0] || null);
-  // }, [ dapps[0] ]);
-
-  // useLayoutEffect(() => {
-  //   const listener: GetIpcRequestListenerFirstParams<typeof document.body.addEventListener, 'contextmenu'> = evt => {
-
-  //   };
-  //   document.body.addEventListener('contextmenu', listener);
-
-  //   return () => {
-  //     document.body.removeEventListener('contextmenu', listener);
-  //   }
-  // }, []);
 
   return (
     <div className={style.page}>

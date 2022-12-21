@@ -1,40 +1,17 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
-import {
-  RCIconDappsEdit,
-  RCIconPin,
-} from '@/../assets/icons/internal-homepage';
-import { RABBY_HOMEPAGE_URL } from '@/isomorphic/constants';
-import {
-  ChromeTabWithLocalFavicon,
-  useTopbarTabs,
-} from '@/renderer/hooks/useWindowTopbar';
 import { AutoUpdate } from '@/renderer/routes/Dapps/components/AutoUpdate';
 import { showContextMenuPopup } from '@/renderer/ipcRequest/contextmenu-popup';
 import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
-import { Button, Dropdown, Menu } from 'antd';
 import classNames from 'classnames';
 import { useLayoutEffect, useMemo } from 'react';
+import { useNavigate, useLocation, matchPath } from 'react-router-dom';
+
 import {
-  useNavigate,
-  useLocation,
-  matchPath,
-  useMatches,
-} from 'react-router-dom';
-
+  IDappWithTabInfo,
+  useSidebarDapps,
+} from '@/renderer/hooks-shell/useMainWindow';
 import styles from './Sidebar.module.less';
-import { useDapps } from '@/renderer/hooks/useDappsMngr';
-
-function filterFavIcon(url?: string, isActiveTab = false) {
-  // homepage
-  if (url?.startsWith(RABBY_HOMEPAGE_URL)) {
-    return isActiveTab
-      ? 'rabby-internal://assets/icons/internal-homepage/icon-home.svg'
-      : 'rabby-internal://assets/icons/internal-homepage/icon-home-blur.svg';
-  }
-
-  return null;
-}
 
 const StaticEntries = [
   {
@@ -52,39 +29,47 @@ const StaticEntries = [
 const DappRoutePatter = '/mainwin/dapps/:origin';
 
 const TabList = ({
-  data,
-  activeTab,
-  tabActions,
+  dapps,
+  activeTabId,
+  dappActions,
 }: {
-  data: ChromeTabWithLocalFavicon[];
-  activeTab: ChromeTabWithLocalFavicon | null;
-  tabActions: ReturnType<typeof useTopbarTabs>['tabActions'];
+  dapps: IDappWithTabInfo[];
+  activeTabId?: chrome.tabs.Tab['id'];
+  dappActions: ReturnType<typeof useSidebarDapps>['dappActions'];
 }) => {
   const navigateTo = useNavigateToDappRoute();
   const location = useLocation();
-  if (!data?.length) {
+  if (!dapps?.length) {
     return null;
   }
+
   return (
     <ul className={styles.routeList}>
-      {data.map((tab) => {
+      {dapps.map((dapp) => {
+        const { tab } = dapp;
         const faviconUrl =
-          tab.localFavIconUrl ||
-          filterFavIcon(tab.url, tab.active) ||
-          tab.favIconUrl;
+          dapp?.faviconBase64 || dapp?.faviconUrl || dapp.tab?.favIconUrl;
 
         return (
           <li
-            key={tab.id}
+            key={`dapp-${dapp.origin}`}
             className={classNames(
               styles.routeItem,
               matchPath(DappRoutePatter, location.pathname) &&
-                activeTab?.id === tab.id &&
+                activeTabId &&
+                activeTabId === tab?.id &&
                 styles.active
             )}
             onClick={() => {
-              navigateTo(tab.dappOrigin!);
-              tabActions.onTabClick(tab);
+              navigateTo(dapp.origin);
+              if (dapp.tab) {
+                dappActions.onTabClick(dapp.tab);
+              } else {
+                chrome.tabs.create({
+                  url: dapp.origin,
+                  active: true,
+                });
+              }
             }}
             onContextMenu={(event) => {
               event?.preventDefault();
@@ -93,18 +78,21 @@ const TabList = ({
               const y = event.clientY;
               showContextMenuPopup(
                 { x, y },
-                { type: 'sidebar-dapp', dappTabInfo: tab }
+                {
+                  type: 'sidebar-dapp',
+                  dappTabInfo: { origin: dapp.origin, id: tab?.id },
+                }
               );
             }}
           >
             <div className={styles.routeItemInner}>
-              <div className={styles.indicator} />
+              {!!tab && <div className={styles.indicator} />}
               <img
                 className={classNames(styles.routeLogo, styles.isDapp)}
                 src={faviconUrl}
               />
               <span className={styles.routeTitle}>
-                {tab.dappAlias || tab.title}
+                {dapp.alias || dapp.origin}
               </span>
             </div>
           </li>
@@ -115,7 +103,8 @@ const TabList = ({
 };
 
 export default function MainWindowSidebar() {
-  const { activeTab, tabList, tabActions } = useTopbarTabs();
+  const { pinnedDapps, unpinnedOpenedDapps, activeTab, dappActions } =
+    useSidebarDapps();
 
   const navigate = useNavigate();
   const navigateTo = useNavigateToDappRoute();
@@ -140,32 +129,10 @@ export default function MainWindowSidebar() {
       }
     );
 
-    const dispose2 = window.rabbyDesktop.ipcRenderer.on(
-      '__internal_forward:main-window:close-tab',
-      (tabId) => {
-        chrome.tabs.remove(tabId);
-      }
-    );
-
     return () => {
       dispose?.();
-      dispose2?.();
     };
   }, [navigate, matchedSE]);
-
-  const { pinnedList } = useDapps();
-
-  const pinnedTabList = useMemo(() => {
-    return tabList.filter((tab) => {
-      return (pinnedList || []).includes(tab.dappOrigin!);
-    });
-  }, [pinnedList, tabList]);
-
-  const unpinnedTabList = useMemo(() => {
-    return tabList.filter((tab) => {
-      return !(pinnedList || []).includes(tab.dappOrigin!);
-    });
-  }, [pinnedList, tabList]);
 
   return (
     <div className={styles.Sidebar}>
@@ -186,7 +153,7 @@ export default function MainWindowSidebar() {
               )}
               onClick={() => {
                 navigate(sE.path);
-                tabActions.onHideAllTab();
+                dappActions.onHideAllTab();
               }}
             >
               <div className={styles.routeItemInner}>
@@ -199,15 +166,15 @@ export default function MainWindowSidebar() {
       </ul>
 
       <TabList
-        tabActions={tabActions}
-        data={pinnedTabList}
-        activeTab={activeTab}
+        dappActions={dappActions}
+        dapps={pinnedDapps}
+        activeTabId={activeTab?.id}
       />
-      {unpinnedTabList?.length ? <div className={styles.divider} /> : null}
+      {unpinnedOpenedDapps?.length ? <div className={styles.divider} /> : null}
       <TabList
-        tabActions={tabActions}
-        data={unpinnedTabList}
-        activeTab={activeTab}
+        dappActions={dappActions}
+        dapps={unpinnedOpenedDapps}
+        activeTabId={activeTab?.id}
       />
       <div className={styles.navFooter}>
         <div className={styles.update}>
@@ -221,7 +188,7 @@ export default function MainWindowSidebar() {
             )}
             onClick={() => {
               navigateTo('/mainwin/swap');
-              tabActions.onHideAllTab();
+              dappActions.onHideAllTab();
             }}
           >
             <div className={styles.routeItemInner}>

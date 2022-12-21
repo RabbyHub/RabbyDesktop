@@ -10,14 +10,9 @@ import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import SecurityCheck from '../routes/SecurityCheck/SecurityCheck';
 import SecurityNotifications from '../routes/SecurityNotifications/SecurityNotifications';
 import SecurityAddressbarPopup from '../routes/SecurityAddressbarPopup/SecurityAddressbarPopup';
-import { useContextMenuPageInfo } from '../hooks/useContextMenuPage';
-import { closeTabFromInternalPage } from '../ipcRequest/mainwin';
-import { hideContextMenuPopup } from '../ipcRequest/contextmenu-popup';
 import { SidebarContextMenu } from '../components/MainWindow/SidebarContextMenu';
 
 function App() {
-  const pageInfo = useContextMenuPageInfo();
-
   return (
     <Router>
       <Routes>
@@ -30,14 +25,7 @@ function App() {
           path="/security-addressbarpopup"
           element={<SecurityAddressbarPopup />}
         />
-        <Route
-          path="/context-menu-popup"
-          element={
-            <>
-              <SidebarContextMenu data={pageInfo} />
-            </>
-          }
-        />
+        <Route path="/context-menu-popup" element={<SidebarContextMenu />} />
       </Routes>
     </Router>
   );

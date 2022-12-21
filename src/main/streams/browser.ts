@@ -1,6 +1,10 @@
 import { BrowserWindow } from 'electron';
 
-import { onIpcMainEvent } from '../utils/ipcMainEvents';
+import {
+  onIpcMainEvent,
+  onIpcMainInternalEvent,
+  sendToWebContents,
+} from '../utils/ipcMainEvents';
 import { onMainWindowReady } from '../utils/stream-helpers';
 
 onIpcMainEvent(
@@ -25,5 +29,25 @@ onIpcMainEvent(
   '__internal_forward:main-window:close-tab',
   async (_, tabId: number) => {
     forwardToMainWebContents('__internal_forward:main-window:close-tab', tabId);
+  }
+);
+
+onIpcMainEvent(
+  '__internal_forward:main-window:open-dapp',
+  async (_, dappOrigin: string) => {
+    forwardToMainWebContents(
+      '__internal_forward:main-window:open-dapp',
+      dappOrigin
+    );
+  }
+);
+
+onIpcMainInternalEvent(
+  '__internal_main:dapps:pinnedListChanged',
+  async (pinnedList) => {
+    const mainContents = (await onMainWindowReady()).window.webContents;
+    sendToWebContents(mainContents, '__internal_push:*:pinnedListChanged', {
+      pinnedList,
+    });
   }
 );

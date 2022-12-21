@@ -1,67 +1,94 @@
 import {
   RCIconDappsEdit,
   RCIconPin,
+  RCIconUnpinFill,
+  RCIconClose,
 } from '@/../assets/icons/internal-homepage';
-import { useDapps } from '@/renderer/hooks/useDappsMngr';
+import { useContextMenuPageInfo } from '@/renderer/hooks/useContextMenuPage';
+import { useDapp } from '@/renderer/hooks/useDappsMngr';
 import { hideContextMenuPopup } from '@/renderer/ipcRequest/contextmenu-popup';
-import { closeTabFromInternalPage } from '@/renderer/ipcRequest/mainwin';
+import { toggleDappPinned } from '@/renderer/ipcRequest/dapps';
+import {
+  closeTabFromInternalPage,
+  openDappFromInternalPage,
+} from '@/renderer/ipcRequest/mainwin';
 import { Menu } from 'antd';
-import { useMemo } from 'react';
 
-interface SidebarContextMenuProps {
-  data?: IContextMenuPageInfo | null;
-}
-export const SidebarContextMenu = ({ data }: SidebarContextMenuProps) => {
-  const { pinnedList, pinDapp, unpinDapp } = useDapps();
-  const origin = useMemo(() => {
-    return data?.dappTabInfo?.url ? new URL(data?.dappTabInfo?.url).origin : '';
-  }, [data?.dappTabInfo?.url]);
+import styles from './index.module.less';
 
-  const isPinned = useMemo(() => {
-    return (pinnedList || []).includes(origin);
-  }, [pinnedList, origin]);
+export const SidebarContextMenu = () => {
+  const pageInfo = useContextMenuPageInfo();
+
+  const origin = pageInfo?.dappTabInfo?.origin || '';
+  const dappInfo = useDapp(origin);
+
+  if (!origin) return null;
+  if (pageInfo?.type !== 'sidebar-dapp') return null;
 
   return (
     <div>
       <Menu
         onClick={({ key }) => {
-          if (data?.dappTabInfo?.id) {
-            switch (key) {
-              case 'dapp-pin':
-                pinDapp(origin);
-                break;
-              case 'dapp-unpin':
-                unpinDapp(origin);
-                break;
-              case 'dapp-close':
-                closeTabFromInternalPage(data?.dappTabInfo?.id);
-                break;
-              default:
-                break;
-            }
-            hideContextMenuPopup();
+          switch (key) {
+            case 'dapp-pin':
+              toggleDappPinned(origin, true);
+              break;
+            case 'dapp-unpin':
+              toggleDappPinned(origin, false);
+              break;
+            case 'dapp-close':
+              if (pageInfo?.dappTabInfo?.id)
+                closeTabFromInternalPage(pageInfo?.dappTabInfo?.id);
+              break;
+            case 'dapp-open':
+              if (origin) {
+                openDappFromInternalPage(origin);
+              }
+              break;
+            default:
+              break;
           }
+          hideContextMenuPopup();
         }}
         items={[
-          isPinned
+          dappInfo?.isPinned
             ? {
                 key: 'dapp-unpin',
-                className: 'dapp-dropdown-item',
+                className: styles['dapp-dropdown-item'],
                 label: <span className="text">Unpin</span>,
-                icon: <RCIconPin />,
+                icon: (
+                  <RCIconUnpinFill
+                    className={styles['dapp-dropdown-item-icon']}
+                  />
+                ),
               }
             : {
                 key: 'dapp-pin',
-                className: 'dapp-dropdown-item',
+                className: styles['dapp-dropdown-item'],
                 label: <span className="text">Pin</span>,
-                icon: <RCIconPin />,
+                icon: (
+                  <RCIconPin className={styles['dapp-dropdown-item-icon']} />
+                ),
               },
-          {
-            key: 'dapp-close',
-            className: 'dapp-dropdown-item',
-            label: <span className="text">Close</span>,
-            icon: <RCIconDappsEdit />,
-          },
+          !pageInfo?.dappTabInfo?.id
+            ? {
+                key: 'dapp-open',
+                className: styles['dapp-dropdown-item'],
+                label: <span className="text">Open</span>,
+                icon: (
+                  <RCIconDappsEdit
+                    className={styles['dapp-dropdown-item-icon']}
+                  />
+                ),
+              }
+            : {
+                key: 'dapp-close',
+                className: styles['dapp-dropdown-item'],
+                label: <span className="text">Close</span>,
+                icon: (
+                  <RCIconClose className={styles['dapp-dropdown-item-icon']} />
+                ),
+              },
         ]}
       />
     </div>
