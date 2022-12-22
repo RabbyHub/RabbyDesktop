@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CHAINS } from '@debank/common';
 import { getConnectedSites, walletController } from '../ipcRequest/rabbyx';
 
 export function useCurrentAccount() {
@@ -31,7 +32,19 @@ export function useCurrentAccount() {
   return currentAccount;
 }
 
-export function useConnectedSite() {
+function transformConnectInfo(
+  input: IConnectedSiteInfo
+): IConnectedSiteToDisplay {
+  return {
+    origin: input.origin,
+    isConnected: input.isConnected,
+    chain: input.chain,
+    chainId: (CHAINS[input.chain]?.hex || '0x1') as HexValue,
+    chainName: CHAINS[input.chain]?.name || '',
+  };
+}
+
+export function useConnectedSite(currentOrigin?: string) {
   const [connectedSiteMap, setConnectedSiteMap] = useState<
     Record<string, IConnectedSiteToDisplay & { chainName: string }>
   >({});
@@ -43,7 +56,7 @@ export function useConnectedSite() {
       return sites.reduce((acc, site) => {
         acc[site.origin] = {
           ...prev[site.origin],
-          ...site,
+          ...transformConnectInfo(site),
         };
         return acc;
       }, prev);
@@ -63,6 +76,7 @@ export function useConnectedSite() {
             const data: IConnectedSiteToDisplay = {
               origin: payload.origin!,
               isConnected: !!payload.data?.hex,
+              chain: payload.data?.chain || 'ETH',
               chainId: payload.data?.hex || '0x1',
               chainName: payload.data?.name || '',
             };
@@ -76,7 +90,12 @@ export function useConnectedSite() {
     );
   }, [fetchConnectedSite]);
 
+  const currentConnectedSite = useMemo(() => {
+    return connectedSiteMap?.[currentOrigin!] || null;
+  }, [connectedSiteMap, currentOrigin]);
+
   return {
+    currentConnectedSite,
     connectedSiteMap,
     fetchConnectedSite,
   };
