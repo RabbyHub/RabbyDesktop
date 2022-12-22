@@ -1,10 +1,18 @@
-import { app, BrowserWindow, clipboard, Menu, MenuItem } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  clipboard,
+  Menu,
+  MenuItem,
+  dialog,
+} from 'electron';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import {
   getContextMenuPopupWindow,
   getRabbyExtViews,
   getWebuiExtId,
+  onMainWindowReady,
 } from '../utils/stream-helpers';
 
 const LABELS = {
@@ -258,15 +266,33 @@ const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
     append({
       label: 'Inspect ContextMenu | SwitchMain Popup',
       click: () => {
-        // getContextMenuPopupWindow().then((wins) => {
-        //   emitIpcMainEvent('__internal_main:context-menu-popup:toggle-show', {
-        //     type: 'switch-chain',
-        //     nextShow: true,
-        //     pos: { x: 100, y: 100 },
-        //     pageInfo: { type: 'switch-chain' },
-        //   });
-        //   wins.switchChain.webContents.openDevTools({ mode: 'detach' });
-        // });
+        getContextMenuPopupWindow().then(async (wins) => {
+          const mainWin = await onMainWindowReady();
+          wins.switchChain.webContents.openDevTools({ mode: 'detach' });
+
+          const firstTab = mainWin.tabs.tabList[0];
+
+          if (!firstTab) {
+            dialog.showErrorBox(
+              'No Tab Found',
+              `You wanna quick debug the first tab's switchChain popup but no any dapp opened, Please open a tab and try again.`
+            );
+            return;
+          }
+
+          emitIpcMainEvent('__internal_main:context-menu-popup:toggle-show', {
+            type: 'switch-chain',
+            nextShow: true,
+            pos: { x: 100, y: 100 },
+            pageInfo: {
+              type: 'switch-chain',
+              dappTabInfo: {
+                id: firstTab.id,
+                url: firstTab.webContents?.getURL(),
+              },
+            },
+          });
+        });
       },
     });
 
