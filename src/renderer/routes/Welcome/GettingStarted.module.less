@@ -1,5 +1,5 @@
 .page-welcome {
-  padding: 193px 200px;
+  height: 100vh;
 
   .slogan {
     font-weight: 700;
@@ -16,19 +16,23 @@
     margin-bottom: 100px;
   }
 
+  .container {
+    margin-top: -82px;
+  }
+
   .btn-start {
-    -webkit-app-region: none;
     height: 72px;
-    padding: 22px 80px;
     border-radius: 8px;
     font-weight: 700;
     font-size: 24px;
     line-height: 28px;
-    color: var(--color-primary);
     border: none;
+    width: 280px;
+  }
 
-    &:hover {
-      color: var(--color-primary);
-    }
+  .logo {
+    position: absolute;
+    right: 85px;
+    bottom: 70px;
   }
 }
