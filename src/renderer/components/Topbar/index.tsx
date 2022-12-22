@@ -14,7 +14,7 @@ import {
   useTopbarTabs,
   useWinTriples,
 } from '@/renderer/hooks-shell/useWindowTopbar';
-import { useConnectedSite } from '@/renderer/hooks-shell/useRabbyx';
+import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
 
 import {
   IconTabCloseHover,
