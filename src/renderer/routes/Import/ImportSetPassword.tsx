@@ -1,7 +1,7 @@
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { Checkbox, Input, Form, message } from 'antd';
 import React from 'react';
-import { useLocation, useMatch, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import BlockButton from './components/BlockButton/BlockButton';
 import ImportView from './components/ImportView/ImportView';
 import styles from './ImportSetPassword.module.less';

@@ -9,14 +9,11 @@ export type RabbyXMethod = {
     address: string;
     type: string;
     brandName: string;
-  };
+  }[];
 
   'walletController.getConnectedSites': () => IConnectedSiteInfo[];
-  'walletController.updateAlianName': (
-    addr: string,
-    name: string
-  ) => IConnectedSiteInfo[];
-  'walletController.getAlianName': (addr: string) => IConnectedSiteInfo[];
+  'walletController.updateAlianName': (addr: string, name: string) => void;
+  'walletController.getAlianName': (addr: string) => string;
 };
 
 export type RabbyXMethods = {

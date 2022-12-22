@@ -19,8 +19,10 @@ const ImportByPrivateKey = () => {
       try {
         const data = await walletController.importPrivateKey(privateKey);
 
-        nav('/import/successful', {
-          state: data,
+        nav('/welcome/import/successful', {
+          state: {
+            accounts: data,
+          },
         });
       } catch (e: any) {
         message.error(e.message);
