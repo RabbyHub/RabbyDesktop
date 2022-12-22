@@ -22,9 +22,13 @@ export function onIpcMainEvent<T extends IChannelsKey = IChannelsKey>(
   ipcMain.on(eventName, handler as any);
 
   // dispose
-  return () => {
+  const dispose = () => {
     return ipcMain.off(eventName, handler as any);
   };
+
+  dispose.handler = handler;
+
+  return dispose;
 }
 
 export function emitIpcMainEvent<T extends MainInternals = MainInternals>(

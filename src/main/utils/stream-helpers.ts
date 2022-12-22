@@ -33,3 +33,7 @@ export async function getRabbyExtViews() {
 export async function getDappLoadingView() {
   return firstValueFrom(fromMainSubject('dappLoadingView'));
 }
+
+export async function getContextMenuPopupWindow() {
+  return firstValueFrom(fromMainSubject('contextMenuPopupWindowReady'));
+}

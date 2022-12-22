@@ -1,6 +1,11 @@
 import { app, BrowserWindow, clipboard, Menu, MenuItem } from 'electron';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
-import { getRabbyExtViews, getWebuiExtId } from '../utils/stream-helpers';
+import { emitIpcMainEvent } from '../utils/ipcMainEvents';
+import {
+  getContextMenuPopupWindow,
+  getRabbyExtViews,
+  getWebuiExtId,
+} from '../utils/stream-helpers';
 
 const LABELS = {
   openInNewTab: (type: 'link' | Electron.ContextMenuParams['mediaType']) =>
@@ -242,6 +247,32 @@ const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
 
   if (!IS_RUNTIME_PRODUCTION) {
     append({
+      label: 'Open RabbyX Background',
+      click: () => {
+        getRabbyExtViews().then((views) => {
+          views.backgroundHost.openDevTools({ mode: 'detach' });
+        });
+      },
+    });
+
+    append({
+      label: 'Inspect ContextMenu | SwitchMain Popup',
+      click: () => {
+        getContextMenuPopupWindow().then((wins) => {
+          emitIpcMainEvent('__internal_main:context-meunu-popup:toggle-show', {
+            type: 'switch-chain',
+            nextShow: true,
+            pos: { x: 100, y: 100 },
+            pageInfo: { type: 'switch-chain' },
+          });
+          wins.switchChain.webContents.openDevTools({ mode: 'detach' });
+        });
+      },
+    });
+
+    appendSeparator();
+
+    append({
       label: labels.inspect,
       click: async () => {
         // TODO non blocking if webui not inited
@@ -263,17 +294,6 @@ const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
         if (!webContents.isDevToolsFocused()) {
           webContents.devToolsWebContents?.focus();
         }
-      },
-    });
-
-    appendSeparator();
-
-    append({
-      label: 'Open RabbyX Background',
-      click: () => {
-        getRabbyExtViews().then((views) => {
-          views.backgroundHost.openDevTools({ mode: 'detach' });
-        });
       },
     });
   }

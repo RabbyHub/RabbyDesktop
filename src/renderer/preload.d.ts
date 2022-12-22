@@ -384,6 +384,7 @@ type MainInternalsMessagePayload = {
     send: [pinnedList: IDapp['origin'][]];
     response: [];
   };
+  '__internal_main:context-meunu-popup:toggle-show': ChannelMessagePayload['__internal_rpc:context-meunu-popup:toggle-show'];
 };
 
 type MainInternals = keyof MainInternalsMessagePayload;

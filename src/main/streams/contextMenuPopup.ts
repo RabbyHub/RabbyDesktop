@@ -5,7 +5,11 @@ import {
   IS_RUNTIME_PRODUCTION,
   RABBY_POPUP_GHOST_VIEW_URL,
 } from '../../isomorphic/constants';
-import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
+import {
+  onIpcMainEvent,
+  onIpcMainInternalEvent,
+  sendToWebContents,
+} from '../utils/ipcMainEvents';
 import { fromMainSubject, valueToMainSubject } from './_init';
 import {
   createPopupWindow,
@@ -157,9 +161,9 @@ const SIZE_MAP: Record<
   },
 };
 
-onIpcMainEvent(
+const { handler } = onIpcMainEvent(
   '__internal_rpc:context-meunu-popup:toggle-show',
-  async (_evt, payload) => {
+  async (_, payload) => {
     const mainWindow = (await onMainWindowReady()).window;
     const { sidebar, switchChain } = await firstValueFrom(
       fromMainSubject('contextMenuPopupWindowReady')
@@ -203,3 +207,12 @@ onIpcMainEvent(
     }
   }
 );
+
+if (!IS_RUNTIME_PRODUCTION) {
+  onIpcMainInternalEvent(
+    '__internal_main:context-meunu-popup:toggle-show',
+    (payload) => {
+      handler(null as any, payload);
+    }
+  );
+}
