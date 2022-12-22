@@ -258,15 +258,15 @@ const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
     append({
       label: 'Inspect ContextMenu | SwitchMain Popup',
       click: () => {
-        getContextMenuPopupWindow().then((wins) => {
-          emitIpcMainEvent('__internal_main:context-meunu-popup:toggle-show', {
-            type: 'switch-chain',
-            nextShow: true,
-            pos: { x: 100, y: 100 },
-            pageInfo: { type: 'switch-chain' },
-          });
-          wins.switchChain.webContents.openDevTools({ mode: 'detach' });
-        });
+        // getContextMenuPopupWindow().then((wins) => {
+        //   emitIpcMainEvent('__internal_main:context-menu-popup:toggle-show', {
+        //     type: 'switch-chain',
+        //     nextShow: true,
+        //     pos: { x: 100, y: 100 },
+        //     pageInfo: { type: 'switch-chain' },
+        //   });
+        //   wins.switchChain.webContents.openDevTools({ mode: 'detach' });
+        // });
       },
     });
 

@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/naming-convention
+type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
+
 export type RabbyXMethod = {
   // getCurrentAccount
   'walletController.getCurrentAccount': () => RabbyAccount;
@@ -19,6 +22,10 @@ export type RabbyXMethod = {
   'walletController.updateAlianName': (addr: string, name: string) => void;
   'walletController.getAlianName': (addr: string) => string;
 
+  'walletController.getSavedChains': () => CHAINS_ENUM[];
+  'walletController.saveChain': (id: string) => void;
+  'walletController.updateChain': (list: string[]) => CHAINS_ENUM[];
+
   'walletController.getConnectedSite': (key: string) => IConnectedSiteInfo;
   'walletController.topConnectedSite': (origin: string, order?: number) => void;
   'walletController.unpinConnectedSite': (origin: string) => void;
@@ -32,10 +39,20 @@ export type RabbyXMethod = {
 
   'walletController.setSite': (siteInfo: ConnectedSite) => void;
   'walletController.getSite': (origin: string) => ConnectedSite;
+  'walletController.getCurrentSite': (
+    tabId: number,
+    domain: string
+  ) => ConnectedSite | null;
   'walletController.getCurrentConnectedSite': (
     tabId: number,
     domain: string
   ) => ConnectedSite | null;
+
+  'walletController.getPreference': (
+    k?: keyof PreferenceState
+  ) => typeof k extends void
+    ? PreferenceState
+    : PreferenceState[keyof PreferenceState];
 };
 
 export type RabbyXMethods = {

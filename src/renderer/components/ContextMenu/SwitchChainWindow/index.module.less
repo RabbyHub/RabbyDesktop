@@ -1,0 +1,33 @@
+@import "@/renderer/css/mixins.less";
+
+:global {
+  body.switch-chain-page {
+    .chrome-like-scrollbar();
+    overflow-y: visible;
+    overflow-x: hidden;
+  }
+}
+
+.SwitchChainPage {
+  padding: 2px 8px;
+  height: 100vh;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.chainItem {
+  display: inline-flex;
+  width: 100%;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
+
+  .actionPin {
+    cursor: pointer;
+    margin-left: 4px;
+
+    color: var(--color-primary);
+  }
+}

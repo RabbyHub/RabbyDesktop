@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CHAINS } from '@debank/common';
-import { getConnectedSites, walletController } from '../ipcRequest/rabbyx';
+import { CHAINS, CHAINS_LIST } from '@debank/common';
+import { atom, useAtom } from 'jotai';
+import { walletController } from '../ipcRequest/rabbyx';
 
 export function useCurrentAccount() {
   const [currentAccount, setCurrentAccount] = useState<RabbyAccount | null>(
@@ -42,25 +43,31 @@ export function useCurrentAccount() {
   return currentAccount;
 }
 
+const DEFAULT_ETH_CHAIN = CHAINS_LIST.find((chain) => chain.enum === 'ETH')!;
+
 function transformConnectInfo(
   input: IConnectedSiteInfo
 ): IConnectedSiteToDisplay {
+  const chain = CHAINS[input.chain] || DEFAULT_ETH_CHAIN;
+
   return {
     origin: input.origin,
     isConnected: input.isConnected,
     chain: input.chain,
-    chainId: (CHAINS[input.chain]?.hex || '0x1') as HexValue,
-    chainName: CHAINS[input.chain]?.name || '',
+    chainHex: chain.hex,
+    chainName: chain.name,
   };
 }
 
+const connectedSiteMapAtom = atom(
+  {} as Record<string, IConnectedSiteToDisplay>
+);
+
 export function useConnectedSite(currentOrigin?: string) {
-  const [connectedSiteMap, setConnectedSiteMap] = useState<
-    Record<string, IConnectedSiteToDisplay & { chainName: string }>
-  >({});
+  const [connectedSiteMap, setConnectedSiteMap] = useAtom(connectedSiteMapAtom);
 
   const fetchConnectedSite = useCallback(async () => {
-    const sites = await getConnectedSites();
+    const sites = await walletController.getConnectedSites();
 
     setConnectedSiteMap((prev) => {
       return sites.reduce((acc, site) => {
@@ -71,7 +78,7 @@ export function useConnectedSite(currentOrigin?: string) {
         return acc;
       }, prev);
     });
-  }, []);
+  }, [setConnectedSiteMap]);
 
   useEffect(() => {
     fetchConnectedSite();
@@ -83,12 +90,20 @@ export function useConnectedSite(currentOrigin?: string) {
           default:
             break;
           case 'rabby:chainChanged': {
+            const chain =
+              CHAINS_LIST.find(
+                (chainItem) =>
+                  chainItem.hex === payload.data?.hex ||
+                  chainItem.name === payload.data?.name ||
+                  chainItem.enum === payload.data?.enum
+              ) || DEFAULT_ETH_CHAIN;
+
             const data: IConnectedSiteToDisplay = {
               origin: payload.origin!,
               isConnected: !!payload.data?.hex,
-              chain: payload.data?.chain || 'ETH',
-              chainId: payload.data?.hex || '0x1',
-              chainName: payload.data?.name || '',
+              chain: chain.enum,
+              chainHex: chain.hex,
+              chainName: chain.name,
             };
             setConnectedSiteMap((prev) => ({
               ...prev,
@@ -98,7 +113,7 @@ export function useConnectedSite(currentOrigin?: string) {
         }
       }
     );
-  }, [fetchConnectedSite]);
+  }, [setConnectedSiteMap, fetchConnectedSite]);
 
   const currentConnectedSite = useMemo(() => {
     return connectedSiteMap?.[currentOrigin!] || null;

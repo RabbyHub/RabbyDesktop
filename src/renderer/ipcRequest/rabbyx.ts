@@ -84,7 +84,3 @@ function makeRabbyXController<T extends RabbyXContollerNS>(namespace: T) {
 }
 
 export const walletController = makeRabbyXController('walletController');
-
-export async function getConnectedSites() {
-  return walletController.getConnectedSites();
-}

@@ -64,7 +64,7 @@ type IConnectedSiteToDisplay = {
   origin: IConnectedSiteInfo['origin'];
   isConnected: IConnectedSiteInfo['isConnected'];
   chain: IConnectedSiteInfo['chain'];
-  chainId: HexValue;
+  chainHex: import('@debank/common').Chain['hex'];
   chainName: string;
 };
 
@@ -145,6 +145,10 @@ type IContextMenuPageInfo =
     }
   | {
       type: 'switch-chain';
+      dappTabInfo: {
+        id: chrome.tabs.Tab['id'];
+        url: chrome.tabs.Tab['url'];
+      };
     };
 
 type IShellNavInfo = {

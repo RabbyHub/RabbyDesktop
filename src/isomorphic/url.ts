@@ -122,6 +122,14 @@ export function parseOrigin(url: string) {
   return canoicalizeDappUrl(url).origin;
 }
 
+export const getOriginFromUrl = (url: string) => {
+  return canoicalizeDappUrl(url).origin;
+};
+
+export const getMainDomain = (url: string) => {
+  return canoicalizeDappUrl(url).domain;
+};
+
 export function hasSameOrigin(url1: string, url2: string) {
   return canoicalizeDappUrl(url1).origin === canoicalizeDappUrl(url2).origin;
 }

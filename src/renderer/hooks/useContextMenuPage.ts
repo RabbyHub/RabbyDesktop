@@ -13,7 +13,7 @@ export function useContextMenuPageInfo<T extends IContextMenuPageInfo['type']>(
 
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:context-meunu-popup:on-visiblechange',
+      '__internal_push:context-menu-popup:on-visiblechange',
       (payload) => {
         if (payload.type !== type) return;
 

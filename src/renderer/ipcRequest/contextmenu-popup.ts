@@ -3,7 +3,7 @@ export function showContextMenuPopup(
   pageInfo: IContextMenuPageInfo
 ) {
   return window.rabbyDesktop.ipcRenderer.sendMessage(
-    '__internal_rpc:context-meunu-popup:toggle-show',
+    '__internal_rpc:context-menu-popup:toggle-show',
     {
       nextShow: true,
       pos: position,
@@ -15,7 +15,7 @@ export function showContextMenuPopup(
 
 export function hideContextMenuPopup(type: IContextMenuPageInfo['type']) {
   return window.rabbyDesktop.ipcRenderer.sendMessage(
-    '__internal_rpc:context-meunu-popup:toggle-show',
+    '__internal_rpc:context-menu-popup:toggle-show',
     {
       nextShow: false,
       type,

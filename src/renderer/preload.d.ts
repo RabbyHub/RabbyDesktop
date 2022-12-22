@@ -30,7 +30,7 @@ type M2RChanneMessagePayload = {
   '__internal_push:*:pinnedListChanged': {
     pinnedList: string[];
   };
-  '__internal_push:context-meunu-popup:on-visiblechange':
+  '__internal_push:context-menu-popup:on-visiblechange':
     | {
         type: IContextMenuPageInfo['type'];
         visible: true;
@@ -201,19 +201,13 @@ type ChannelMessagePayload = {
       }
     ];
   };
-  'rabby:connect': {
-    send: [reqid: string];
-    response: [
-      {
-        origin: string;
-        chainId: string;
-        isConnected: boolean;
-      }
-    ];
-  };
   '__internal_rpc:main-window:click-close': {
     send: [];
     response: [];
+  };
+  '__internal_forward:main-window:getCurrentTab': {
+    send: [];
+    response: [chrome.tabs.Tab];
   };
   '__internal_forward:main-window:close-tab': {
     send: [tabId: number];
@@ -297,7 +291,7 @@ type ChannelMessagePayload = {
     send: [];
     response: [];
   };
-  '__internal_rpc:context-meunu-popup:toggle-show': {
+  '__internal_rpc:context-menu-popup:toggle-show': {
     send: [
       | {
           type: IContextMenuPageInfo['type'];
@@ -384,7 +378,7 @@ type MainInternalsMessagePayload = {
     send: [pinnedList: IDapp['origin'][]];
     response: [];
   };
-  '__internal_main:context-meunu-popup:toggle-show': ChannelMessagePayload['__internal_rpc:context-meunu-popup:toggle-show'];
+  '__internal_main:context-menu-popup:toggle-show': ChannelMessagePayload['__internal_rpc:context-menu-popup:toggle-show'];
 };
 
 type MainInternals = keyof MainInternalsMessagePayload;

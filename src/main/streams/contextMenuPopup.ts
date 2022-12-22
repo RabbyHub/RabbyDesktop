@@ -162,7 +162,7 @@ const SIZE_MAP: Record<
 };
 
 const { handler } = onIpcMainEvent(
-  '__internal_rpc:context-meunu-popup:toggle-show',
+  '__internal_rpc:context-menu-popup:toggle-show',
   async (_, payload) => {
     const mainWindow = (await onMainWindowReady()).window;
     const { sidebar, switchChain } = await firstValueFrom(
@@ -186,7 +186,7 @@ const { handler } = onIpcMainEvent(
       });
       sendToWebContents(
         targetWin.webContents,
-        '__internal_push:context-meunu-popup:on-visiblechange',
+        '__internal_push:context-menu-popup:on-visiblechange',
         {
           type: payload.type,
           visible: true,
@@ -197,7 +197,7 @@ const { handler } = onIpcMainEvent(
     } else {
       sendToWebContents(
         targetWin.webContents,
-        '__internal_push:context-meunu-popup:on-visiblechange',
+        '__internal_push:context-menu-popup:on-visiblechange',
         {
           type: payload.type,
           visible: false,
@@ -210,7 +210,7 @@ const { handler } = onIpcMainEvent(
 
 if (!IS_RUNTIME_PRODUCTION) {
   onIpcMainInternalEvent(
-    '__internal_main:context-meunu-popup:toggle-show',
+    '__internal_main:context-menu-popup:toggle-show',
     (payload) => {
       handler(null as any, payload);
     }

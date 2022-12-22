@@ -1,4 +1,5 @@
-import { MutableRefObject, useEffect, useRef } from 'react';
+import { arraify } from '@/isomorphic/array';
+import { MutableRefObject, useEffect, useLayoutEffect, useRef } from 'react';
 
 export default function useMountedEffect<
   T extends (isMountedRef: MutableRefObject<boolean>) => any
@@ -18,4 +19,20 @@ export default function useMountedEffect<
   }, depsRef.current);
 
   return isMounted;
+}
+
+export function useBodyClassNameOnMounted(className: string | string[]) {
+  const classNames = arraify(className).join(' ');
+
+  useLayoutEffect(() => {
+    classNames.split(' ').forEach((name) => {
+      document.body.classList.add(name);
+    });
+
+    return () => {
+      classNames.split(' ').forEach((name) => {
+        document.body.classList.remove(name);
+      });
+    };
+  }, [classNames]);
 }

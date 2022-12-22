@@ -91,6 +91,10 @@ export const TopNavBar = () => {
                 { x: rect.x, y: rect.bottom + 10 },
                 {
                   type: 'switch-chain',
+                  dappTabInfo: {
+                    id: activeTab?.id,
+                    url: activeTab?.url,
+                  },
                 }
               );
             }}

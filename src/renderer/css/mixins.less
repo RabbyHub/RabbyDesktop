@@ -13,3 +13,31 @@
 .global-nodrag() {
   -webkit-app-region: none;
 }
+
+@chromelike-scrollbar-w: 8px;
+@chromelike-scrollbar-max-w: 10px;
+
+.chrome-like-scrollbar() {
+  &::-webkit-scrollbar {
+    width: @chromelike-scrollbar-w;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 1em;
+    background-color: rgba(var(--color-comment1-rgb), 0.5);
+  }
+
+  &::-webkit-scrollbar-track {
+    border-radius: 1em;
+    background-color: rgba(var(--color-comment2-rgb), 0.5);
+  }
+}
+
+.chrome-like-scollbar-hover-wider() {
+  &::-webkit-scrollbar {
+    transition: width 0.3s;
+  }
+  &:hover::-webkit-scrollbar {
+    width: @chromelike-scrollbar-max-w;
+  }
+}
