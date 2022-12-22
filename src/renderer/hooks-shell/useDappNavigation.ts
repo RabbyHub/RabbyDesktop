@@ -51,7 +51,7 @@ export function useDappNavigation() {
       if (activeTab && tab.windowId !== activeTab?.windowId) return;
       if (activeTab && tabId !== activeTab?.id) return;
 
-      setActiveTab(tab);
+      fetchActiveTab();
     };
 
     chrome.tabs.onCreated.addListener(onCreated);
