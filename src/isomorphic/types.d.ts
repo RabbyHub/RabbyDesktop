@@ -1,3 +1,5 @@
+/// <reference path="types-rabbyx.d.ts" />
+
 /* from builder-util-runtime/out/ProgressCallbackTransform.d.ts */
 interface ProgressInfo {
   total: number;
@@ -147,4 +149,12 @@ type IContextMenuPageInfo = {
     id: chrome.tabs.Tab['id'];
   };
   // dappTabInfo: ChromeTabWithLocalFavicon;
+};
+
+type IShellNavInfo = {
+  tabExists: boolean;
+  canGoForward?: boolean;
+  canGoBack?: boolean;
+  tabUrl: string;
+  dappSecurityCheckResult: ISecurityCheckResult | null;
 };

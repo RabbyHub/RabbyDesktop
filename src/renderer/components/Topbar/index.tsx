@@ -10,11 +10,11 @@ import classnames from 'classnames';
 import { hideDappAddressbarSecurityPopupView } from '@/renderer/ipcRequest/security-addressbarpopup';
 import {
   ChromeTabWithLocalFavicon,
-  useConnectedSite,
   useSelectedTabInfo,
   useTopbarTabs,
   useWinTriples,
 } from '@/renderer/hooks-shell/useWindowTopbar';
+import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
 
 import {
   IconTabCloseHover,

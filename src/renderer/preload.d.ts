@@ -47,7 +47,7 @@ type M2RChanneMessagePayload = {
     previousUrl: string;
     currentUrl: string;
   };
-  '__internal_push:rabby:chainChanged': IConnectedSiteToDisplay;
+  '__internal_push:rabbyx:session-broadcast-forward-to-main': RabbyEvent;
 };
 
 type IPushEvents = keyof M2RChanneMessagePayload;
@@ -67,16 +67,11 @@ type ChannelMessagePayload = {
     ];
   };
   '__internal_rpc:webui-ext:navinfo': {
-    send: [tabId: number];
+    send: [reqid: string, tabId: number];
     response: [
       {
-        tabExists: boolean;
-        canGoForward?: boolean;
-        canGoBack?: boolean;
-
-        tabUrl: string;
-
-        dappSecurityCheckResult: ISecurityCheckResult | null;
+        reqid: string;
+        tabNavInfo: IShellNavInfo;
       }
     ];
   };

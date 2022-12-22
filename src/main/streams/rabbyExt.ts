@@ -106,25 +106,14 @@ onIpcMainEvent(
     // TODO: leave here for debug
     // console.log('[debug] payload', payload);
 
+    sendToWebContents(
+      tabbedWin.window.webContents,
+      '__internal_push:rabbyx:session-broadcast-forward-to-main',
+      payload
+    );
+
     switch (payload.event) {
       case 'rabby:chainChanged': {
-        const { panelView } = await getRabbyExtViews();
-        const data: IConnectedSiteToDisplay = {
-          origin: payload.origin!,
-          isConnected: !!payload.data?.hex,
-          chainId: payload.data?.hex || '0x1',
-          chainName: payload.data?.name || '',
-        };
-        sendToWebContents(
-          tabbedWin.window.webContents,
-          '__internal_push:rabby:chainChanged',
-          data
-        );
-        sendToWebContents(
-          panelView.webContents,
-          '__internal_push:rabby:chainChanged',
-          data
-        );
         break;
       }
       case 'lock': {

@@ -11,6 +11,7 @@ import { canoicalizeDappUrl } from '../../isomorphic/url';
 
 import { useWindowState } from './useWindowState';
 import { getConnectedSites } from '../ipcRequest/rabbyx';
+import { getNavInfoByTabId } from '../ipcRequest/mainwin';
 
 export function useWinTriples() {
   const {
@@ -40,47 +41,6 @@ export function useWinTriples() {
     winOSType: osType,
     winState,
     winButtonActions,
-  };
-}
-
-export function useConnectedSite() {
-  const [connectedSiteMap, setConnectedSiteMap] = useState<
-    Record<string, IConnectedSiteToDisplay & { chainName: string }>
-  >({});
-
-  const fetchConnectedSite = useCallback(async () => {
-    const sites = await getConnectedSites();
-
-    setConnectedSiteMap((prev) => {
-      return sites.reduce((acc, site) => {
-        acc[site.origin] = {
-          ...prev[site.origin],
-          ...site,
-        };
-        return acc;
-      }, prev);
-    });
-  }, []);
-
-  useEffect(() => {
-    const dispose = window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:rabby:chainChanged',
-      (data) => {
-        setConnectedSiteMap((prev) => ({
-          ...prev,
-          [data.origin]: { ...data },
-        }));
-      }
-    );
-
-    return () => {
-      dispose?.();
-    };
-  }, []);
-
-  return {
-    connectedSiteMap,
-    fetchConnectedSite,
   };
 }
 
@@ -304,24 +264,12 @@ export function useTopbarTabs() {
 }
 
 export function useSelectedTabInfo(activeTab?: ChromeTab | null) {
-  const [selectedTabInfo, setSelectedTabInfo] =
-    useState<
-      ChannelMessagePayload['__internal_rpc:webui-ext:navinfo']['response'][0]
-    >();
+  const [selectedTabInfo, setSelectedTabInfo] = useState<IShellNavInfo>();
   useEffect(() => {
     if (!activeTab?.id) return;
-    const dispose = window.rabbyDesktop.ipcRenderer.on(
-      '__internal_rpc:webui-ext:navinfo',
-      (payload) => {
-        setSelectedTabInfo(payload);
-      }
-    );
-    window.rabbyDesktop.ipcRenderer.sendMessage(
-      '__internal_rpc:webui-ext:navinfo',
-      activeTab.id
-    );
-
-    return () => dispose?.();
+    getNavInfoByTabId(activeTab.id).then((info) => {
+      setSelectedTabInfo(info);
+    });
   }, [activeTab?.id, activeTab?.url]);
 
   return selectedTabInfo;
