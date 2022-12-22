@@ -8,6 +8,8 @@ import tsImportPluginFactory from 'ts-import-plugin';
 import webpackPaths from './webpack.paths';
 import { dependencies as externals } from '../../release/app/package.json';
 
+const isDevelopment = process.env.NODE_ENV !== 'production';
+
 const configuration: webpack.Configuration = {
   externals: [...Object.keys(externals || {})],
 
@@ -25,6 +27,7 @@ const configuration: webpack.Configuration = {
             transpileOnly: process.platform === 'darwin',
             getCustomTransformers: () => ({
               before: [
+                isDevelopment && require('react-refresh-typescript')(),
                 tsImportPluginFactory([
                   {
                     libraryName: 'antd',
@@ -32,7 +35,7 @@ const configuration: webpack.Configuration = {
                     // libraryDirectory: 'es'
                   },
                 ]),
-              ],
+              ].filter(Boolean),
             }),
             compilerOptions: {
               module: 'es2015',
@@ -73,7 +76,7 @@ const configuration: webpack.Configuration = {
   plugins: [
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'production',
-      BUILD_CHANNEL: process.env.buildchannel || 'reg'
+      BUILD_CHANNEL: process.env.buildchannel || 'reg',
     }),
   ],
 };
