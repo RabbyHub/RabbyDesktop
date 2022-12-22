@@ -47,7 +47,7 @@ type M2RChanneMessagePayload = {
     previousUrl: string;
     currentUrl: string;
   };
-  '__internal_push:rabby:chainChanged': IConnectedSiteToDisplay;
+  '__internal_push:rabbyx:session-broadcast-forward-to-main': RabbyEvent;
 };
 
 type IPushEvents = keyof M2RChanneMessagePayload;

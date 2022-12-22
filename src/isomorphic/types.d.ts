@@ -1,3 +1,5 @@
+/// <reference path="types-rabbyx.d.ts" />
+
 /* from builder-util-runtime/out/ProgressCallbackTransform.d.ts */
 interface ProgressInfo {
   total: number;

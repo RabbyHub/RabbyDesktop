@@ -1,4 +1,9 @@
 export type RabbyXMethod = {
+  // getCurrentAccount
+  'walletController.getCurrentAccount': () => RabbyAccount;
+  'walletController.syncGetCurrentAccount': () => RabbyAccount | null;
+  'walletController.getAccounts': () => RabbyAccount[];
+
   'walletController.boot': (password: string) => void;
   'walletController.isBooted': () => boolean;
   'walletController.lockWallet': () => boolean;
