@@ -148,3 +148,11 @@ type IContextMenuPageInfo = {
   };
   // dappTabInfo: ChromeTabWithLocalFavicon;
 };
+
+type IShellNavInfo = {
+  tabExists: boolean;
+  canGoForward?: boolean;
+  canGoBack?: boolean;
+  tabUrl: string;
+  dappSecurityCheckResult: ISecurityCheckResult | null;
+};

@@ -90,24 +90,30 @@ export default class TabbedBrowserWindow {
       this.extensions.selectTab(tab.webContents!);
     });
 
-    onIpcMainEvent('__internal_rpc:webui-ext:navinfo', async (event, tabId) => {
-      const tab = this.tabs.get(tabId);
-      // TODO: always respond message
-      if (!tab) return;
+    onIpcMainEvent(
+      '__internal_rpc:webui-ext:navinfo',
+      async (event, reqid, tabId) => {
+        const tab = this.tabs.get(tabId);
+        // TODO: always respond message
+        if (!tab) return;
 
-      const tabUrl = tab.webContents!.getURL();
-      const checkResult = isUrlFromDapp(tabUrl)
-        ? await getOrPutCheckResult(tabUrl, { updateOnSet: false })
-        : null;
+        const tabUrl = tab.webContents!.getURL();
+        const checkResult = isUrlFromDapp(tabUrl)
+          ? await getOrPutCheckResult(tabUrl, { updateOnSet: false })
+          : null;
 
-      event.reply('__internal_rpc:webui-ext:navinfo', {
-        tabExists: !!tab,
-        tabUrl,
-        dappSecurityCheckResult: checkResult,
-        canGoBack: tab?.webContents?.canGoBack(),
-        canGoForward: tab?.webContents?.canGoForward(),
-      });
-    });
+        event.reply('__internal_rpc:webui-ext:navinfo', {
+          reqid,
+          tabNavInfo: {
+            tabExists: !!tab,
+            tabUrl,
+            dappSecurityCheckResult: checkResult,
+            canGoBack: tab?.webContents?.canGoBack(),
+            canGoForward: tab?.webContents?.canGoForward(),
+          },
+        });
+      }
+    );
 
     queueMicrotask(() => {
       // Create initial tab

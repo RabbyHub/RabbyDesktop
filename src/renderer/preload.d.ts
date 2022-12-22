@@ -67,16 +67,11 @@ type ChannelMessagePayload = {
     ];
   };
   '__internal_rpc:webui-ext:navinfo': {
-    send: [tabId: number];
+    send: [reqid: string, tabId: number];
     response: [
       {
-        tabExists: boolean;
-        canGoForward?: boolean;
-        canGoBack?: boolean;
-
-        tabUrl: string;
-
-        dappSecurityCheckResult: ISecurityCheckResult | null;
+        reqid: string;
+        tabNavInfo: IShellNavInfo;
       }
     ];
   };
