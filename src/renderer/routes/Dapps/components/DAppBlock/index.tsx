@@ -5,6 +5,7 @@ import React, { useRef } from 'react';
 import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
 import {
   RCIconDappsDelete,
+  RCIconDappsEdit,
   RCIconPin,
 } from '../../../../../../assets/icons/internal-homepage';
 
@@ -93,7 +94,7 @@ export const DAppBlock = ({
               key: 'dapp-rename',
               className: 'dapp-dropdown-item',
               label: <span className="text">Rename</span>,
-              icon: <></>,
+              icon: <RCIconDappsEdit />,
             },
             {
               key: 'dapp-delete',

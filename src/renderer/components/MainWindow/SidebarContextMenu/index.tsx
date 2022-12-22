@@ -1,5 +1,4 @@
 import {
-  RCIconDappsEdit,
   RCIconPin,
   RCIconUnpinFill,
   RCIconClose,
@@ -76,7 +75,8 @@ export const SidebarContextMenu = () => {
                 className: styles['dapp-dropdown-item'],
                 label: <span className="text">Open</span>,
                 icon: (
-                  <RCIconDappsEdit
+                  <RCIconClose
+                    style={{ visibility: 'hidden' }}
                     className={styles['dapp-dropdown-item-icon']}
                   />
                 ),
