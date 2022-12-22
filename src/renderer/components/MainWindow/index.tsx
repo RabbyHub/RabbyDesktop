@@ -3,11 +3,12 @@ import {
   RouterProvider,
   Outlet,
   Navigate,
+  useMatches,
 } from 'react-router-dom';
 
 import DApps from '@/renderer/routes/Dapps';
 import GettingStarted from '@/renderer/routes/Welcome/GettingStarted';
-import { useEffect, useLayoutEffect } from 'react';
+import React, { useEffect, useLayoutEffect } from 'react';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { hideContextMenuPopup } from '@/renderer/ipcRequest/contextmenu-popup';
 import ImportHome from '@/renderer/routes/Import/ImportHome';
@@ -17,7 +18,10 @@ import ImportSuccessful from '@/renderer/routes/Import/ImportSuccessful';
 import ImportByContainer from '@/renderer/routes/ImportBy/ImportByContainer';
 import { Unlock } from '@/renderer/routes/Unlock/Unlock';
 import { RequireUnlock } from '@/renderer/routes/RequireUnlock';
-import { useForwardFromInternalPage } from '@/renderer/hooks-shell/useMainWindow';
+import {
+  hideAllTabs,
+  useForwardFromInternalPage,
+} from '@/renderer/hooks-shell/useMainWindow';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -25,11 +29,36 @@ import MainWindowSidebar from './Sidebar';
 import Titlebar from '../Titlebar';
 import { TopNavBar } from '../TopNavBar';
 
+function RootWrapper({
+  children,
+}: // eslint-disable-next-line @typescript-eslint/ban-types
+React.PropsWithChildren<{}>) {
+  const matches = useMatches();
+
+  const matchedDapps = matches.find((match) =>
+    match.pathname.startsWith('/mainwin/dapps/')
+  );
+
+  useEffect(() => {
+    if (!matchedDapps) {
+      hideAllTabs(1);
+    } else if (matchedDapps.params.origin) {
+      chrome.tabs.create({ url: matchedDapps.params.origin, active: true });
+    }
+  }, [matchedDapps]);
+
+  return <>{children || null}</>;
+}
+
 const router = createRouter([
   {
     path: '/welcome',
     id: 'welcome',
-    element: <Outlet />,
+    element: (
+      <RootWrapper>
+        <Outlet />
+      </RootWrapper>
+    ),
     children: [
       {
         path: 'getting-started',
@@ -68,14 +97,16 @@ const router = createRouter([
     id: 'mainwin',
     // errorElement: <ErrorBoundary />,
     element: (
-      <RequireUnlock>
-        <div className={styles.mainWindow}>
-          <MainWindowSidebar />
-          <MainRoute>
-            <Outlet />
-          </MainRoute>
-        </div>
-      </RequireUnlock>
+      <RootWrapper>
+        <RequireUnlock>
+          <div className={styles.mainWindow}>
+            <MainWindowSidebar />
+            <MainRoute>
+              <Outlet />
+            </MainRoute>
+          </div>
+        </RequireUnlock>
+      </RootWrapper>
     ),
     children: [
       {
@@ -98,17 +129,23 @@ const router = createRouter([
   },
   {
     path: '/unlock',
-    element: <Unlock />,
+    element: (
+      <RootWrapper>
+        <Unlock />
+      </RootWrapper>
+    ),
   },
   {
     path: '/import-by',
     id: 'import-by',
     element: (
-      <div className={styles.ImportPage}>
-        <ImportByContainer>
-          <Outlet />
-        </ImportByContainer>
-      </div>
+      <RootWrapper>
+        <div className={styles.ImportPage}>
+          <ImportByContainer>
+            <Outlet />
+          </ImportByContainer>
+        </div>
+      </RootWrapper>
     ),
     children: [
       {

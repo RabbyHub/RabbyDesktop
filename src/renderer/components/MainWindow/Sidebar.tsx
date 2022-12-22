@@ -158,7 +158,7 @@ export default function MainWindowSidebar() {
               )}
               onClick={() => {
                 navigate(sE.path);
-                dappActions.onHideAllTab();
+                // dappActions.onHideAllTab();
               }}
             >
               <div className={styles.routeItemInner}>
@@ -193,7 +193,7 @@ export default function MainWindowSidebar() {
             )}
             onClick={() => {
               navigateTo('/mainwin/swap');
-              dappActions.onHideAllTab();
+              // dappActions.onHideAllTab();
             }}
           >
             <div className={styles.routeItemInner}>

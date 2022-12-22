@@ -12,6 +12,19 @@ export type IDappWithTabInfo = IMergedDapp & {
   tab?: chrome.tabs.Tab;
 };
 
+export function hideAllTabs(
+  windowId: number | undefined,
+  activeTabId?: chrome.tabs.Tab['id']
+) {
+  if (activeTabId) {
+    chrome.tabs.update(activeTabId!, { active: false });
+  }
+  window.rabbyDesktop.ipcRenderer.sendMessage(
+    '__internal_webui-hideAllTabs',
+    windowId!
+  );
+}
+
 export function useSidebarDapps() {
   const { pinnedDapps, unpinnedDapps } = useDapps();
 
@@ -236,11 +249,7 @@ export function useSidebarDapps() {
         console.warn('[onHideAllTab] no active tab');
         return;
       }
-      chrome.tabs.update(activeTid!, { active: false });
-      window.rabbyDesktop.ipcRenderer.sendMessage(
-        '__internal_webui-hideAllTabs',
-        windowId!
-      );
+      hideAllTabs(activeTid, windowId);
     }, [activeTabId, activeTab, windowId]),
   };
 

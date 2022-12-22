@@ -4,6 +4,9 @@ import { CHAINS, CHAINS_ENUM } from '@debank/common';
 import { IconArrowDown } from '@/../assets/icons/top-bar';
 
 import { Divider } from 'antd';
+import { useDappNavigation } from '@/renderer/hooks-shell/useDappNavigation';
+import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
+import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 
 const RiskArea = () => {
@@ -62,8 +65,9 @@ const CurrentAccount = ({
 };
 
 const AddNewAccount = () => {
+  const navigate = useNavigate();
   const gotoAddNewAccount = () => {
-    throw new Error('Function not implemented.');
+    navigate('/import-by/private-key');
   };
   return (
     <div className={styles.addNewAccount} onClick={gotoAddNewAccount}>
@@ -80,6 +84,10 @@ const tmpData = {
 };
 
 export const TopNavBar = () => {
+  const { tabOrigin, navActions, selectedTabInfo, activeTab } =
+    useDappNavigation();
+  const { currentConnectedSite } = useConnectedSite(tabOrigin);
+
   const handleCloseTab = () => {
     // TODO
     throw new Error('Function not implemented.');
@@ -95,8 +103,10 @@ export const TopNavBar = () => {
       <div className={styles.left}>
         <RiskArea />
         <Divider type="vertical" className={styles.divider} />
-        <div className={styles.url}>{tmpData.url}</div>
-        <ConnectedChain className="" chain={tmpData.chain} />
+        <div className={styles.url}>{activeTab?.url || ''}</div>
+        {currentConnectedSite && (
+          <ConnectedChain className="" chain={currentConnectedSite.chain} />
+        )}
         <div className={styles.close} onClick={handleCloseTab}>
           <img src="rabby-internal://assets/icons/top-bar/close.svg" />
         </div>
