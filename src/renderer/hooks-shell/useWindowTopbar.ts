@@ -241,18 +241,6 @@ export function useTopbarTabs() {
         chrome.tabs.remove(tab.id);
       }
     }, []),
-    onHideAllTab: useCallback(() => {
-      const activeTid = activeTabId || activeTab?.id;
-      if (!activeTid) {
-        console.warn('[onHideAllTab] no active tab');
-        return;
-      }
-      chrome.tabs.update(activeTid!, { active: false });
-      window.rabbyDesktop.ipcRenderer.sendMessage(
-        '__internal_webui-hideAllTabs',
-        windowId!
-      );
-    }, [activeTabId, activeTab, windowId]),
   };
 
   return {

@@ -1,0 +1,59 @@
+@import './../../css/mixins.less';
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 10px;
+  background: var(--color-primary);
+  backdrop-filter: blur(20px);
+  border-radius: 6px;
+  cursor: pointer;
+
+  font-weight: 510;
+  font-size: 15px;
+  line-height: 18px;
+
+  color: #ffffff;
+
+  .logo {
+    width: 20px;
+    height: 20px;
+  }
+
+  .aliasName {
+    max-width: 80px;
+    .truncate();
+  }
+
+  .addr {
+    display: inline-flex;
+    justify-items: center;
+    align-items: center;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+
+    color: rgba(255, 255, 255, 0.8);
+  }
+}
+
+.addNewAccount {
+  width: 40px;
+  height: 40px;
+  padding: 10px;
+  padding-top: 8px;
+  cursor: pointer;
+
+  background: var(--color-primary);
+  backdrop-filter: blur(20px);
+
+  border-radius: 6px;
+}

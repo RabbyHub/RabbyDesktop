@@ -2,6 +2,7 @@ type RabbyAccount = {
   address: string;
   type: string;
   brandName: string;
+  alianName?: string;
 };
 
 type RabbyEvent = {

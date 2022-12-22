@@ -3,11 +3,12 @@ import {
   RouterProvider,
   Outlet,
   Navigate,
+  useMatches,
 } from 'react-router-dom';
 
 import DApps from '@/renderer/routes/Dapps';
 import GettingStarted from '@/renderer/routes/Welcome/GettingStarted';
-import { useEffect, useLayoutEffect } from 'react';
+import React, { useEffect, useLayoutEffect } from 'react';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { hideContextMenuPopup } from '@/renderer/ipcRequest/contextmenu-popup';
 import ImportHome from '@/renderer/routes/Import/ImportHome';
@@ -17,12 +18,30 @@ import ImportSuccessful from '@/renderer/routes/Import/ImportSuccessful';
 import ImportByContainer from '@/renderer/routes/ImportBy/ImportByContainer';
 import { Unlock } from '@/renderer/routes/Unlock/Unlock';
 import { RequireUnlock } from '@/renderer/routes/RequireUnlock';
-import { useForwardFromInternalPage } from '@/renderer/hooks-shell/useMainWindow';
+import {
+  hideAllTabs,
+  useForwardFromInternalPage,
+} from '@/renderer/hooks-shell/useMainWindow';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
 import MainWindowSidebar from './Sidebar';
 import Titlebar from '../Titlebar';
+import { TopNavBar } from '../TopNavBar';
+
+function DappViewWrapper({
+  children,
+}: // eslint-disable-next-line @typescript-eslint/ban-types
+React.PropsWithChildren<{}>) {
+  useEffect(() => {
+    return () => {
+      console.debug('[debug] DappViewWrapper:: unmount');
+      hideAllTabs(1);
+    };
+  }, []);
+
+  return <>{children || null}</>;
+}
 
 const router = createRouter([
   {
@@ -91,7 +110,11 @@ const router = createRouter([
       },
       {
         path: 'dapps/:origin',
-        element: <>Dapps Base Outlets</>,
+        element: (
+          <DappViewWrapper>
+            <TopNavBar />
+          </DappViewWrapper>
+        ),
       },
     ],
   },

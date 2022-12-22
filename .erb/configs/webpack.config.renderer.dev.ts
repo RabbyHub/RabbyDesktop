@@ -61,8 +61,8 @@ const configuration: webpack.Configuration = {
 
   resolve: {
     alias: {
-      ...getWebpackAliases()
-    }
+      ...getWebpackAliases(),
+    },
   },
 
   module: {
@@ -88,7 +88,7 @@ const configuration: webpack.Configuration = {
                 //   isTSX: true,
                 // }]
               ],
-            }
+            },
           },
           {
             loader: '@svgr/webpack',
@@ -155,7 +155,7 @@ const configurationRenderer: webpack.Configuration = {
       // @ts-ignore
       accu[cur.name] = cur.jsEntry;
       return accu;
-    }, {})
+    }, {}),
   },
 
   output: {
@@ -163,36 +163,38 @@ const configurationRenderer: webpack.Configuration = {
   },
 
   plugins: [
-    ...Object.values(webpackPaths.entriesRenderer).map(({ name, target, htmlFile }) => {
-      return new HtmlWebpackPlugin({
-        filename: target,
-        template: htmlFile,
-        minify: {
-          collapseWhitespace: true,
-          removeAttributeQuotes: true,
-          removeComments: true,
-        },
-        chunks: [name],
-        // templateParameters (compilation, files, tags) {
-        //   return {
-        //   }
-        // },
-        hash: !isProduction,
-        inject: 'body',
-        isBrowser: false,
-        env: process.env.NODE_ENV,
-        isDevelopment: !isProduction,
-        nodeModules: webpackPaths.appNodeModulesPath,
-      });
-    }),
+    ...Object.values(webpackPaths.entriesRenderer).map(
+      ({ name, target, htmlFile }) => {
+        return new HtmlWebpackPlugin({
+          filename: target,
+          template: htmlFile,
+          minify: {
+            collapseWhitespace: true,
+            removeAttributeQuotes: true,
+            removeComments: true,
+          },
+          chunks: [name],
+          // templateParameters (compilation, files, tags) {
+          //   return {
+          //   }
+          // },
+          hash: !isProduction,
+          inject: 'body',
+          isBrowser: false,
+          env: process.env.NODE_ENV,
+          isDevelopment: !isProduction,
+          nodeModules: webpackPaths.appNodeModulesPath,
+        });
+      }
+    ),
   ],
 
   devServer: {
     port,
     compress: true,
-    hot: false,
-    liveReload: false,
-    client: false,
+    hot: true,
+    // liveReload: false,
+    // client: false,
     headers: { 'Access-Control-Allow-Origin': '*' },
     static: {
       publicPath: '/',
@@ -202,8 +204,8 @@ const configurationRenderer: webpack.Configuration = {
     },
     devMiddleware: {
       writeToDisk: () => {
-        return true
-      }
+        return true;
+      },
     },
     setupMiddlewares(middlewares) {
       console.log('Starting preload.js builder...');
@@ -241,37 +243,47 @@ const configurationRenderer: webpack.Configuration = {
 
 const configurationShell: webpack.Configuration = {
   entry: {
-    [webpackPaths.entriesShell['_shell-webui'].name]: webpackPaths.entriesShell['_shell-webui'].jsEntry,
-    [webpackPaths.entriesShell['_shell-new-tab'].name]: webpackPaths.entriesShell['_shell-new-tab'].jsEntry,
+    [webpackPaths.entriesShell['_shell-webui'].name]:
+      webpackPaths.entriesShell['_shell-webui'].jsEntry,
+    [webpackPaths.entriesShell['_shell-new-tab'].name]:
+      webpackPaths.entriesShell['_shell-new-tab'].jsEntry,
   },
   output: {
     path: path.join(webpackPaths.assetsPath, 'desktop_shell'),
   },
   plugins: [
-    ...Object.values(webpackPaths.entriesShell).filter(item => !!item.htmlFile).map(({ name, target, htmlFile }) => {
-      return new HtmlWebpackPlugin({
-        filename: target,
-        template: htmlFile,
-        minify: {
-          collapseWhitespace: true,
-          removeAttributeQuotes: true,
-          removeComments: true,
-        },
-        chunks: [name],
-        hash: !isProduction,
-        inject: 'body',
-        isBrowser: false,
-        env: process.env.NODE_ENV,
-        isDevelopment: !isProduction,
-        nodeModules: webpackPaths.appNodeModulesPath,
-      });
-    }),
+    ...Object.values(webpackPaths.entriesShell)
+      .filter((item) => !!item.htmlFile)
+      .map(({ name, target, htmlFile }) => {
+        return new HtmlWebpackPlugin({
+          filename: target,
+          template: htmlFile,
+          minify: {
+            collapseWhitespace: true,
+            removeAttributeQuotes: true,
+            removeComments: true,
+          },
+          chunks: [name],
+          hash: !isProduction,
+          inject: 'body',
+          isBrowser: false,
+          env: process.env.NODE_ENV,
+          isDevelopment: !isProduction,
+          nodeModules: webpackPaths.appNodeModulesPath,
+        });
+      }),
 
     new CopyWebpackPlugin({
       patterns: [
-        { from: path.join(webpackPaths.srcPath, 'extension-shell/manifest.json'), to: path.join(webpackPaths.assetsPath, 'desktop_shell/manifest.json') },
+        {
+          from: path.join(
+            webpackPaths.srcPath,
+            'extension-shell/manifest.json'
+          ),
+          to: path.join(webpackPaths.assetsPath, 'desktop_shell/manifest.json'),
+        },
       ],
-    })
+    }),
   ],
 };
 

@@ -1,0 +1,141 @@
+@import './../../css//mixins.less';
+
+.main {
+  --margin-left: 22px;
+  margin: 0 16px;
+  margin-top: 16px;
+  margin-left: var(--margin-left);
+  display: flex;
+  justify-content: space-between;
+
+  img {
+    -webkit-user-drag: none;
+  }
+
+  .left {
+    position: relative;
+    width: 740px;
+    height: 48px;
+    padding-right: 12px;
+
+    background: #ffeef9;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+
+    display: flex;
+    align-items: center;
+
+    .divider {
+      height: 24px;
+      margin: 0 12px;
+      border-color: rgba(19, 20, 26, 0.1);
+    }
+
+    .url {
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 17px;
+
+      color: var(--color-paragraph);
+      .truncate;
+    }
+
+    .close {
+      position: absolute;
+      top: 14px;
+      right: -32px;
+      cursor: pointer;
+      img {
+        width: 20px;
+        height: 20px;
+      }
+    }
+    .historyBar {
+      opacity: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      & > * {
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+      }
+
+      .goBack,
+      .goForward {
+        opacity: 0.3;
+        cursor: not-allowed;
+        &.active {
+          opacity: 1;
+          cursor: pointer;
+        }
+      }
+      .goForward {
+        transform: rotate(180deg);
+      }
+    }
+
+    &:hover .historyBar {
+      opacity: 1;
+      margin-left: auto;
+    }
+    .chain {
+      margin-left: auto;
+    }
+
+    &:hover .chain {
+      margin-left: 12px;
+    }
+  }
+
+  .right {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+.risk {
+  min-width: fit-content;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding-left: 20px;
+
+  font-weight: 510;
+  font-size: 14px;
+  line-height: 17px;
+  color: var(--color-paragraph);
+
+  .icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.chain {
+  display: flex;
+  align-items: center;
+
+  cursor: pointer;
+  height: 36px;
+  padding: 8px;
+  padding-left: 8px;
+  background: var(--color-primary);
+  border-radius: 4px;
+
+  font-size: 15px;
+  line-height: 18px;
+
+  color: #fff;
+
+  .logo {
+    width: 20px;
+    height: 20px;
+    border-radius: 100%;
+    margin-right: 4px;
+    border-radius: 100%;
+  }
+}
