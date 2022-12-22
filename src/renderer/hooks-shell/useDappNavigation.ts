@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { getNavInfoByTabId } from '../ipcRequest/mainwin';
 
 export function useDappNavigation() {
@@ -87,6 +88,9 @@ export function useDappNavigation() {
   };
 
   return {
+    tabOrigin: activeTab?.url
+      ? canoicalizeDappUrl(activeTab.url)?.origin || ''
+      : '',
     activeTab,
     navActions,
     selectedTabInfo,

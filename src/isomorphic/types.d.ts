@@ -58,21 +58,14 @@ type IAppUpdatorDownloadProgress =
       isEnd: true;
     };
 
-type IConnectedSiteToDisplay = {
-  origin: string;
-  isConnected: boolean;
-  chainId: `0x${number}`;
-  chainName: string;
-};
+type HexValue = `0x${number}`;
 
-type IConnectedSiteInfo = {
-  chain: string;
-  icon: string;
-  isConnected: boolean;
-  isSigned: boolean;
-  isTop: boolean;
-  name: string;
-  origin: string;
+type IConnectedSiteToDisplay = {
+  origin: IConnectedSiteInfo['origin'];
+  isConnected: IConnectedSiteInfo['isConnected'];
+  chain: IConnectedSiteInfo['chain'];
+  chainId: HexValue;
+  chainName: string;
 };
 
 type IDappUpdateDetectionItem = {
