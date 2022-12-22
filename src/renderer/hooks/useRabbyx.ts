@@ -7,9 +7,19 @@ export function useCurrentAccount() {
     null
   );
 
+  useMemo(() => {
+    if (currentAccount?.address) {
+      walletController
+        .getAlianName(currentAccount?.address)
+        .then((alianName) => {
+          setCurrentAccount((pre) => (pre ? { ...pre, alianName } : pre));
+        });
+    }
+  }, [currentAccount?.address]);
+
   useEffect(() => {
     walletController.getCurrentAccount().then((account) => {
-      setCurrentAccount(account);
+      setCurrentAccount((pre) => ({ ...pre, ...account }));
     });
 
     return window.rabbyDesktop.ipcRenderer.on(
@@ -21,7 +31,7 @@ export function useCurrentAccount() {
           case 'unlock':
           case 'rabby:chainChanged': {
             walletController.getCurrentAccount().then((account) => {
-              setCurrentAccount(account);
+              setCurrentAccount((pre) => ({ ...pre, ...account }));
             });
           }
         }

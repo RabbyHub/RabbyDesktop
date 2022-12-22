@@ -1,11 +1,12 @@
+@import './../../css//mixins.less';
+
 .main {
   --margin-left: 22px;
   margin: 0 16px;
-  // margin-top: 16px;
+  margin-top: 16px;
   margin-left: var(--margin-left);
   display: flex;
   justify-content: space-between;
-  align-items: center;
 
   img {
     -webkit-user-drag: none;
@@ -36,6 +37,7 @@
       line-height: 17px;
 
       color: var(--color-paragraph);
+      .truncate;
     }
 
     .close {
@@ -48,16 +50,54 @@
         height: 20px;
       }
     }
+    .historyBar {
+      opacity: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      & > * {
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+      }
+
+      .goBack,
+      .goForward {
+        opacity: 0.3;
+        cursor: not-allowed;
+        &.active {
+          opacity: 1;
+          cursor: pointer;
+        }
+      }
+      .goForward {
+        transform: rotate(180deg);
+      }
+    }
+
+    &:hover .historyBar {
+      opacity: 1;
+      margin-left: auto;
+    }
+    .chain {
+      margin-left: auto;
+    }
+
+    &:hover .chain {
+      margin-left: 12px;
+    }
   }
 
   .right {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
   }
 }
 
 .risk {
+  min-width: fit-content;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -76,8 +116,6 @@
 }
 
 .chain {
-  margin-left: auto;
-
   display: flex;
   align-items: center;
 
@@ -100,49 +138,4 @@
     margin-right: 4px;
     border-radius: 100%;
   }
-}
-
-.account {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 40px;
-  padding: 10px;
-  background: var(--color-primary);
-  backdrop-filter: blur(20px);
-  border-radius: 6px;
-  cursor: pointer;
-
-  font-weight: 510;
-  font-size: 15px;
-  line-height: 18px;
-
-  color: #ffffff;
-
-  .logo {
-    width: 20px;
-    height: 20px;
-  }
-
-  .addr {
-    display: inline-flex;
-    justify-items: center;
-    align-items: center;
-    font-weight: 400;
-    font-size: 12px;
-    line-height: 14px;
-
-    color: rgba(255, 255, 255, 0.8);
-  }
-}
-
-.addNewAccount {
-  width: 40px;
-  height: 40px;
-  padding: 10px;
-
-  background: var(--color-primary);
-  backdrop-filter: blur(20px);
-
-  border-radius: 6px;
 }

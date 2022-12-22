@@ -1,4 +1,5 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
+import { CurrentAccountAndNewAccount } from '@/renderer/components/CurrentAccount';
 import { message } from 'antd';
 import { useCallback, useState } from 'react';
 
@@ -55,6 +56,7 @@ export default function DApps() {
 
   return (
     <div className={style.page}>
+      <CurrentAccountAndNewAccount className={style.right} />
       <div className={style.container}>
         <header className={style.header}>
           <h2 className={style.title}>My Dapps</h2>
