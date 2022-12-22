@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 
-export function useContextMenuPageInfo() {
+export function useContextMenuPageInfo<T extends IContextMenuPageInfo['type']>(
+  type: T
+) {
   const [{ pageInfo }, setInfo] = useState<{
     visible: boolean;
-    pageInfo: IContextMenuPageInfo | null;
+    pageInfo: (IContextMenuPageInfo & { type: typeof type }) | null;
   }>({
     visible: false,
     pageInfo: null,
@@ -13,10 +15,12 @@ export function useContextMenuPageInfo() {
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:context-meunu-popup:on-visiblechange',
       (payload) => {
+        if (payload.type !== type) return;
+
         if (payload.visible) {
           setInfo({
             visible: true,
-            pageInfo: payload.pageInfo,
+            pageInfo: payload.pageInfo as any,
           });
         } else {
           setInfo({
@@ -26,7 +30,7 @@ export function useContextMenuPageInfo() {
         }
       }
     );
-  }, []);
+  }, [type]);
 
   return pageInfo;
 }

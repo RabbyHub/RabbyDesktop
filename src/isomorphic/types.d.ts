@@ -135,14 +135,17 @@ type IRabbyxRpcResponse = {
   error?: Error;
 };
 
-type IContextMenuPageInfo = {
-  type: 'sidebar-dapp';
-  dappTabInfo: {
-    origin: string;
-    id: chrome.tabs.Tab['id'];
-  };
-  // dappTabInfo: ChromeTabWithLocalFavicon;
-};
+type IContextMenuPageInfo =
+  | {
+      type: 'sidebar-dapp';
+      dappTabInfo: {
+        origin: string;
+        id: chrome.tabs.Tab['id'];
+      };
+    }
+  | {
+      type: 'switch-chain';
+    };
 
 type IShellNavInfo = {
   tabExists: boolean;

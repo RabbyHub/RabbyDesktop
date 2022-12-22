@@ -16,7 +16,7 @@ import { Menu } from 'antd';
 import styles from './index.module.less';
 
 export const SidebarContextMenu = () => {
-  const pageInfo = useContextMenuPageInfo();
+  const pageInfo = useContextMenuPageInfo('sidebar-dapp');
 
   const origin = pageInfo?.dappTabInfo?.origin || '';
   const dappInfo = useDapp(origin);
@@ -35,10 +35,11 @@ export const SidebarContextMenu = () => {
             case 'dapp-unpin':
               toggleDappPinned(origin, false);
               break;
-            case 'dapp-close':
-              if (pageInfo?.dappTabInfo?.id)
-                closeTabFromInternalPage(pageInfo?.dappTabInfo?.id);
+            case 'dapp-close': {
+              const tabId = pageInfo?.dappTabInfo?.id;
+              if (tabId) closeTabFromInternalPage(tabId);
               break;
+            }
             case 'dapp-open':
               if (origin) {
                 openDappFromInternalPage(origin);
@@ -47,7 +48,7 @@ export const SidebarContextMenu = () => {
             default:
               break;
           }
-          hideContextMenuPopup();
+          hideContextMenuPopup('sidebar-dapp');
         }}
         items={[
           dappInfo?.isPinned

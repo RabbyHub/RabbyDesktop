@@ -56,7 +56,7 @@ function updateSubWindowPosition(
   window.setBounds({ ...popupRect, x, y }, true);
 }
 
-onMainWindowReady().then(async (mainWin) => {
+const sidebarReady = onMainWindowReady().then(async (mainWin) => {
   const targetWin = mainWin.window;
 
   const popupWin = createPopupWindow({
@@ -96,42 +96,103 @@ onMainWindowReady().then(async (mainWin) => {
 
   hidePopupWindow(popupWin);
 
-  valueToMainSubject('contextMenuPopupWindowReady', popupWin);
+  return popupWin;
+});
+
+const switchChainReady = onMainWindowReady().then(async (mainWin) => {
+  const targetWin = mainWin.window;
+
+  const popupWin = createPopupWindow({
+    parent: mainWin.window,
+    transparent: false,
+    hasShadow: true,
+    closable: false,
+  });
+
+  updateSubWindowPosition(mainWin.window, popupWin);
+  const onTargetWinUpdate = () => {
+    // updateSubWindowPosition(mainWin.window, popupWin);
+    hidePopupWindow(popupWin);
+  };
+  targetWin.on('show', onTargetWinUpdate);
+  targetWin.on('move', onTargetWinUpdate);
+  targetWin.on('resized', onTargetWinUpdate);
+  targetWin.on('unmaximize', onTargetWinUpdate);
+  targetWin.on('restore', onTargetWinUpdate);
+
+  mainWin.tabs.on('tab-focused', () => {
+    hidePopupWindow(popupWin);
+  });
+
+  mainWin.window.on('focus', () => {
+    hidePopupWindow(popupWin);
+  });
+
+  await popupWin.webContents.loadURL(
+    `${RABBY_POPUP_GHOST_VIEW_URL}#/switch-chain-popup`
+  );
+
+  // debug-only
+  if (!IS_RUNTIME_PRODUCTION) {
+    // popupWin.webContents.openDevTools({ mode: 'detach' });
+  }
+
+  hidePopupWindow(popupWin);
+
+  return popupWin;
+});
+
+Promise.all([sidebarReady, switchChainReady]).then((wins) => {
+  valueToMainSubject('contextMenuPopupWindowReady', {
+    sidebar: wins[0],
+    switchChain: wins[1],
+  });
 });
 
 onIpcMainEvent(
   '__internal_rpc:context-meunu-popup:toggle-show',
   async (_evt, payload) => {
-    const targetWin = (await onMainWindowReady()).window;
-    const popupWin = await firstValueFrom(
+    const mainWindow = (await onMainWindowReady()).window;
+    const { sidebar, switchChain } = await firstValueFrom(
       fromMainSubject('contextMenuPopupWindowReady')
     );
 
+    const targetWin =
+      payload.type === 'sidebar-dapp'
+        ? sidebar
+        : payload.type === 'switch-chain'
+        ? switchChain
+        : null;
+
+    if (!targetWin) return;
+
     if (payload.nextShow) {
-      updateSubWindowPosition(targetWin, popupWin, {
+      updateSubWindowPosition(mainWindow, targetWin, {
         x: payload.pos.x,
         y: payload.pos.y,
         width: 140,
         height: 100,
       });
       sendToWebContents(
-        popupWin.webContents,
+        targetWin.webContents,
         '__internal_push:context-meunu-popup:on-visiblechange',
         {
+          type: payload.type,
           visible: true,
           pageInfo: payload.pageInfo,
         }
       );
-      showPopupWindow(popupWin);
+      showPopupWindow(targetWin);
     } else {
       sendToWebContents(
-        popupWin.webContents,
+        targetWin.webContents,
         '__internal_push:context-meunu-popup:on-visiblechange',
         {
+          type: payload.type,
           visible: false,
         }
       );
-      hidePopupWindow(popupWin);
+      hidePopupWindow(targetWin);
     }
   }
 );

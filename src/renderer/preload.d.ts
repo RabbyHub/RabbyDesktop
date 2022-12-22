@@ -32,10 +32,12 @@ type M2RChanneMessagePayload = {
   };
   '__internal_push:context-meunu-popup:on-visiblechange':
     | {
+        type: IContextMenuPageInfo['type'];
         visible: true;
         pageInfo: IContextMenuPageInfo;
       }
     | {
+        type: IContextMenuPageInfo['type'];
         visible: false;
       };
   /* eslint-disable-next-line @typescript-eslint/ban-types */
@@ -298,6 +300,7 @@ type ChannelMessagePayload = {
   '__internal_rpc:context-meunu-popup:toggle-show': {
     send: [
       | {
+          type: IContextMenuPageInfo['type'];
           nextShow: true;
           pos: {
             x: Electron.Point['x'];
@@ -307,12 +310,9 @@ type ChannelMessagePayload = {
         }
       | {
           nextShow: false;
+          type: IContextMenuPageInfo['type'];
         }
     ];
-    response: [];
-  };
-  '__internal_rpc:context-meunu-popup:send-message': {
-    send: [message: any];
     response: [];
   };
   '__internal_rpc:debug-tools:operate-debug-insecure-dapps': {

@@ -155,7 +155,7 @@ export function MainWindow() {
 
   useLayoutEffect(() => {
     const listener = () => {
-      hideContextMenuPopup();
+      hideContextMenuPopup('sidebar-dapp');
     };
     document.body.addEventListener('click', listener);
 

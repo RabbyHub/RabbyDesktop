@@ -7,25 +7,18 @@ export function showContextMenuPopup(
     {
       nextShow: true,
       pos: position,
+      type: pageInfo.type,
       pageInfo,
     }
   );
 }
 
-export function hideContextMenuPopup() {
+export function hideContextMenuPopup(type: IContextMenuPageInfo['type']) {
   return window.rabbyDesktop.ipcRenderer.sendMessage(
     '__internal_rpc:context-meunu-popup:toggle-show',
     {
       nextShow: false,
-    }
-  );
-}
-
-export function sendMessageToContextMenuPopup<T extends object = any>(msg: T) {
-  return window.rabbyDesktop.ipcRenderer.sendMessage(
-    '__internal_rpc:context-meunu-popup:send-message',
-    {
-      msg,
+      type,
     }
   );
 }

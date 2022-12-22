@@ -60,7 +60,12 @@ const CONF = {
 
   contextMenuPopupWindowReady: {
     subject: new ReplaySubject(1),
-  } as IConf<ReplaySubject<BrowserWindow>>,
+  } as IConf<
+    ReplaySubject<{
+      sidebar: BrowserWindow;
+      switchChain: BrowserWindow;
+    }>
+  >,
 };
 
 type IMainSubjects = typeof CONF;
