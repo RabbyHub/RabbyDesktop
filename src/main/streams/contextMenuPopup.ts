@@ -5,10 +5,6 @@ import {
   IS_RUNTIME_PRODUCTION,
   RABBY_POPUP_GHOST_VIEW_URL,
 } from '../../isomorphic/constants';
-import {
-  NATIVE_HEADER_WITH_NAV_H,
-  SECURITY_ADDRBAR_VIEW_SIZE,
-} from '../../isomorphic/const-size-classical';
 import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { fromMainSubject, valueToMainSubject } from './_init';
 import {
@@ -21,21 +17,16 @@ import { onMainWindowReady } from '../utils/stream-helpers';
 function updateSubWindowPosition(
   parentWin: BrowserWindow,
   window: BrowserWindow,
-  triggerPoint?: Electron.Point | { width?: number; height?: number }
+  triggerPoint?: Electron.Point & { width?: number; height?: number }
 ) {
   if (window.isDestroyed()) return;
-
-  const [, height] = parentWin.getSize();
 
   const popupRect = {
     // TODO: use dynamic position
     x: 5,
     y: 5,
-    width: SECURITY_ADDRBAR_VIEW_SIZE.width,
-    height: Math.min(
-      SECURITY_ADDRBAR_VIEW_SIZE.height,
-      height - NATIVE_HEADER_WITH_NAV_H
-    ),
+    width: 100,
+    height: 100,
     ...triggerPoint,
   };
 
@@ -86,7 +77,7 @@ const sidebarReady = onMainWindowReady().then(async (mainWin) => {
   });
 
   await popupWin.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}#/context-menu-popup`
+    `${RABBY_POPUP_GHOST_VIEW_URL}#/context-menu-popup__sidebar-dapp`
   );
 
   // debug-only
@@ -129,7 +120,7 @@ const switchChainReady = onMainWindowReady().then(async (mainWin) => {
   });
 
   await popupWin.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}#/switch-chain-popup`
+    `${RABBY_POPUP_GHOST_VIEW_URL}#/context-menu-popup__switch-chain`
   );
 
   // debug-only
@@ -148,6 +139,23 @@ Promise.all([sidebarReady, switchChainReady]).then((wins) => {
     switchChain: wins[1],
   });
 });
+
+const SIZE_MAP: Record<
+  IContextMenuPageInfo['type'],
+  {
+    width: number;
+    height: number;
+  }
+> = {
+  'sidebar-dapp': {
+    width: 140,
+    height: 100,
+  },
+  'switch-chain': {
+    width: 272,
+    height: 400,
+  },
+};
 
 onIpcMainEvent(
   '__internal_rpc:context-meunu-popup:toggle-show',
@@ -170,8 +178,7 @@ onIpcMainEvent(
       updateSubWindowPosition(mainWindow, targetWin, {
         x: payload.pos.x,
         y: payload.pos.y,
-        width: 140,
-        height: 100,
+        ...SIZE_MAP[payload.type],
       });
       sendToWebContents(
         targetWin.webContents,

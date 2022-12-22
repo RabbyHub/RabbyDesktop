@@ -20,3 +20,8 @@ type IConnectedSiteInfo = {
   name: string;
   origin: string;
 };
+
+interface ConnectedSite extends IConnectedSiteInfo {
+  e?: number;
+  order?: number;
+}

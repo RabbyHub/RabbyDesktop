@@ -146,36 +146,6 @@ const router = createRouter([
 ]);
 
 export function MainWindow() {
-  useEffect(() => {
-    /* eslint-disable */
-    // TODO: remove this on production, this is just for testing & communicating
-    (async () => {
-      var isUnlocked = await walletController.isUnlocked();
-      console.debug('[debug] MainWindow isUnlocked', isUnlocked);
-
-      const isBooted = await walletController.isBooted();
-      console.debug('[debug] MainWindow isBooted', isBooted);
-
-      // await walletController.unlock('qa111111');
-      // var isUnlocked = await walletController.isUnlocked();
-      // console.debug('[debug] MainWindow isUnlocked [2]', isUnlocked);
-
-      console.debug(
-        '[debug] MainWindow walletController.boot',
-        walletController.boot
-      );
-      console.debug(
-        '[debug] MainWindow walletController.lockWallet',
-        walletController.lockWallet
-      );
-      console.debug(
-        '[debug] MainWindow walletController.importPrivateKey',
-        walletController.importPrivateKey
-      );
-    })();
-    /* eslint-enable */
-  }, []);
-
   useLayoutEffect(() => {
     const listener = () => {
       hideContextMenuPopup('sidebar-dapp');

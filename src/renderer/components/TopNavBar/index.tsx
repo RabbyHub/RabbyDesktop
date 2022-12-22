@@ -11,6 +11,7 @@ import { Divider } from 'antd';
 import { useDappNavigation } from '@/renderer/hooks-shell/useDappNavigation';
 import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
 import { useCallback } from 'react';
+import { showContextMenuPopup } from '@/renderer/ipcRequest/contextmenu-popup';
 import styles from './index.module.less';
 import { CurrentAccountAndNewAccount } from '../CurrentAccount';
 
@@ -33,7 +34,7 @@ const ConnectedChain = ({
 }: {
   chain: CHAINS_ENUM;
   className?: string;
-  onClick?: () => void;
+  onClick?: React.DOMAttributes<HTMLDivElement>['onClick'];
 }) => {
   return (
     <div className={clsx(styles.chain, className)} onClick={onClick}>
@@ -79,10 +80,22 @@ export const TopNavBar = () => {
           />
           <RcIconReload onClick={navActions.onReloadButtonClick} />
         </div>
-        {!!currentConnectedSite?.isConnected &&
-          !!currentConnectedSite?.chain && (
-            <ConnectedChain chain={currentConnectedSite.chain} />
-          )}
+        {!!currentConnectedSite?.isConnected && !!currentConnectedSite?.chain && (
+          <ConnectedChain
+            chain={currentConnectedSite.chain}
+            onClick={(event) => {
+              const el = event.currentTarget as HTMLDivElement;
+              const rect = el.getBoundingClientRect();
+
+              showContextMenuPopup(
+                { x: rect.x, y: rect.bottom + 10 },
+                {
+                  type: 'switch-chain',
+                }
+              );
+            }}
+          />
+        )}
         <div className={styles.close} onClick={handleCloseTab}>
           <img src="rabby-internal://assets/icons/top-bar/close.svg" />
         </div>

@@ -16,9 +16,26 @@ export type RabbyXMethod = {
     brandName: string;
   }[];
 
-  'walletController.getConnectedSites': () => IConnectedSiteInfo[];
   'walletController.updateAlianName': (addr: string, name: string) => void;
   'walletController.getAlianName': (addr: string) => string;
+
+  'walletController.getConnectedSite': (key: string) => IConnectedSiteInfo;
+  'walletController.topConnectedSite': (origin: string, order?: number) => void;
+  'walletController.unpinConnectedSite': (origin: string) => void;
+  'walletController.removeConnectedSite': (origin: string) => void;
+  'walletController.getSitesByDefaultChain': (
+    chain: IConnectedSiteInfo['chain']
+  ) => void;
+  'walletController.getConnectedSites': () => IConnectedSiteInfo[];
+  'walletController.setRecentConnectedSites': (sites: ConnectedSite[]) => void;
+  'walletController.getRecentConnectedSites': () => ConnectedSite[];
+
+  'walletController.setSite': (siteInfo: ConnectedSite) => void;
+  'walletController.getSite': (origin: string) => ConnectedSite;
+  'walletController.getCurrentConnectedSite': (
+    tabId: number,
+    domain: string
+  ) => ConnectedSite | null;
 };
 
 export type RabbyXMethods = {

@@ -11,6 +11,7 @@ import SecurityCheck from '../routes/SecurityCheck/SecurityCheck';
 import SecurityNotifications from '../routes/SecurityNotifications/SecurityNotifications';
 import SecurityAddressbarPopup from '../routes/SecurityAddressbarPopup/SecurityAddressbarPopup';
 import { SidebarContextMenu } from '../components/MainWindow/SidebarContextMenu';
+import SwitchChainWindow from '../components/ContextMenu/SwitchChainWindow';
 
 function App() {
   return (
@@ -25,7 +26,14 @@ function App() {
           path="/security-addressbarpopup"
           element={<SecurityAddressbarPopup />}
         />
-        <Route path="/context-menu-popup" element={<SidebarContextMenu />} />
+        <Route
+          path="/context-menu-popup__sidebar-dapp"
+          element={<SidebarContextMenu />}
+        />
+        <Route
+          path="/context-menu-popup__switch-chain"
+          element={<SwitchChainWindow />}
+        />
       </Routes>
     </Router>
   );
