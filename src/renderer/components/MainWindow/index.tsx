@@ -29,23 +29,16 @@ import MainWindowSidebar from './Sidebar';
 import Titlebar from '../Titlebar';
 import { TopNavBar } from '../TopNavBar';
 
-function RootWrapper({
+function DappViewWrapper({
   children,
 }: // eslint-disable-next-line @typescript-eslint/ban-types
 React.PropsWithChildren<{}>) {
-  const matches = useMatches();
-
-  const matchedDapps = matches.find((match) =>
-    match.pathname.startsWith('/mainwin/dapps/')
-  );
-
   useEffect(() => {
-    if (!matchedDapps) {
+    return () => {
+      console.debug('[debug] DappViewWrapper:: unmount');
       hideAllTabs(1);
-    } else if (matchedDapps.params.origin) {
-      chrome.tabs.create({ url: matchedDapps.params.origin, active: true });
-    }
-  }, [matchedDapps]);
+    };
+  }, []);
 
   return <>{children || null}</>;
 }
@@ -54,11 +47,7 @@ const router = createRouter([
   {
     path: '/welcome',
     id: 'welcome',
-    element: (
-      <RootWrapper>
-        <Outlet />
-      </RootWrapper>
-    ),
+    element: <Outlet />,
     children: [
       {
         path: 'getting-started',
@@ -97,16 +86,14 @@ const router = createRouter([
     id: 'mainwin',
     // errorElement: <ErrorBoundary />,
     element: (
-      <RootWrapper>
-        <RequireUnlock>
-          <div className={styles.mainWindow}>
-            <MainWindowSidebar />
-            <MainRoute>
-              <Outlet />
-            </MainRoute>
-          </div>
-        </RequireUnlock>
-      </RootWrapper>
+      <RequireUnlock>
+        <div className={styles.mainWindow}>
+          <MainWindowSidebar />
+          <MainRoute>
+            <Outlet />
+          </MainRoute>
+        </div>
+      </RequireUnlock>
     ),
     children: [
       {
@@ -123,29 +110,27 @@ const router = createRouter([
       },
       {
         path: 'dapps/:origin',
-        element: <TopNavBar />,
+        element: (
+          <DappViewWrapper>
+            <TopNavBar />
+          </DappViewWrapper>
+        ),
       },
     ],
   },
   {
     path: '/unlock',
-    element: (
-      <RootWrapper>
-        <Unlock />
-      </RootWrapper>
-    ),
+    element: <Unlock />,
   },
   {
     path: '/import-by',
     id: 'import-by',
     element: (
-      <RootWrapper>
-        <div className={styles.ImportPage}>
-          <ImportByContainer>
-            <Outlet />
-          </ImportByContainer>
-        </div>
-      </RootWrapper>
+      <div className={styles.ImportPage}>
+        <ImportByContainer>
+          <Outlet />
+        </ImportByContainer>
+      </div>
     ),
     children: [
       {

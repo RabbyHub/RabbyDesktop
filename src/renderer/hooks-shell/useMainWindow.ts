@@ -243,14 +243,6 @@ export function useSidebarDapps() {
         chrome.tabs.remove(tab.id);
       }
     }, []),
-    onHideAllTab: useCallback(() => {
-      const activeTid = activeTabId || activeTab?.id;
-      if (!activeTid) {
-        console.warn('[onHideAllTab] no active tab');
-        return;
-      }
-      hideAllTabs(activeTid, windowId);
-    }, [activeTabId, activeTab, windowId]),
   };
 
   return {
@@ -270,11 +262,12 @@ export function useForwardFromInternalPage(
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_forward:main-window:close-tab',
-      (tabId) => {
-        chrome.tabs.remove(tabId);
+      async (tabId) => {
+        await chrome.tabs.remove(tabId);
+        router.navigate('/mainwin/my-dapps', { replace: true });
       }
     );
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
