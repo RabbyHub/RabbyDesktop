@@ -77,10 +77,6 @@ type ChannelMessagePayload = {
       }
     ];
   };
-  '__internal_rpc:webui-ext:get-connected-sites': {
-    send: [reqid: string];
-    response: [{ reqid: string; sites: IConnectedSiteInfo[] }];
-  };
   'rabby-extension-id': {
     send: [];
     response: [
@@ -155,10 +151,6 @@ type ChannelMessagePayload = {
         pinnedList: IDapp['origin'][];
       }
     ];
-  };
-  'redirect-mainWindow': {
-    send: [];
-    response: [];
   };
   'get-desktopAppState': {
     send: [reqid: string];
@@ -326,6 +318,16 @@ type ChannelMessagePayload = {
     response: [];
   };
 
+  '__internal_rpc:rabbyx:waitExtBgGhostLoaded': {
+    send: [reqid: string];
+    response: [
+      {
+        reqid: string;
+        rabbyxExtId: string;
+      }
+    ];
+  };
+
   [`__internal_rpc:rabbyx-rpc:query`]: {
     send: [reqId: string, query: Omit<IRabbyxRpcQuery, 'rpcId'>];
     response: [
@@ -339,11 +341,6 @@ type ChannelMessagePayload = {
 
   [`rabbyx-rpc-respond`]: {
     send: [string | IRabbyxRpcResponse];
-    response: [];
-  };
-
-  '__internal_rpc:rabbyx:toggleShow': {
-    send: [nextShow: boolean];
     response: [];
   };
 

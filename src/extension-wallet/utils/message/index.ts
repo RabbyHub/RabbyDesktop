@@ -25,7 +25,7 @@ abstract class Message extends EventEmitter {
 
   abstract send(type: string, data: any): void;
 
-  request = (data) => {
+  request = (data: any) => {
     if (!this._requestIdPool.length) {
       throw ethErrors.rpc.limitExceeded();
     }
@@ -55,7 +55,7 @@ abstract class Message extends EventEmitter {
     err ? reject(err) : resolve(res);
   };
 
-  onRequest = async ({ ident, data }) => {
+  onRequest = async ({ ident, data }: any) => {
     if (this.listenCallback) {
       let res;
       let err;
@@ -66,7 +66,7 @@ abstract class Message extends EventEmitter {
         err = {
           message: e.message,
           stack: e.stack,
-        };
+        } as any;
         e.code && (err.code = e.code);
         e.data && (err.data = e.data);
       }

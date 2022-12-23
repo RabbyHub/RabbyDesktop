@@ -10,32 +10,16 @@ import {
   getElectronChromeExtensions,
   getWebuiExtension,
 } from '../utils/stream-helpers';
-
-const getParentWindowOfTab = (tab: Electron.WebContents) => {
-  switch (tab.getType()) {
-    case 'window':
-      return BrowserWindow.fromWebContents(tab);
-    case 'browserView':
-    case 'webview':
-      // return tab.getOwnerBrowserWindow();
-      return BrowserWindow.fromWebContents(tab);
-    case 'backgroundPage':
-      return BrowserWindow.getFocusedWindow();
-    default:
-      throw new Error(`Unable to find parent window of '${tab.getType()}'`);
-  }
-};
+import { getWindowFromWebContents } from '../utils/browser';
 
 const windows: TabbedBrowserWindow[] = [];
-
-let mainWindow: TabbedBrowserWindow;
 
 export function getFocusedWindow() {
   return windows.find((w) => w.window.isFocused()) || windows[0];
 }
 
 export function getWindowFromBrowserWindow(window: BrowserWindow) {
-  return !window?.isDestroyed()
+  return window && !window.isDestroyed()
     ? windows.find((win) => win.id === window.id)
     : null;
 }
@@ -46,10 +30,16 @@ export function findByWindowId(
   return windows.find((w) => w.id === windowId);
 }
 
+export function findExistedRabbyxNotificationWin():
+  | TabbedBrowserWindow
+  | undefined {
+  return windows.find((w) => w.isRabbyXNotificationWindow());
+}
+
 export function getTabbedWindowFromWebContents(
   webContents: BrowserWindow['webContents']
-) {
-  const window = getParentWindowOfTab(webContents);
+): TabbedBrowserWindow | null | undefined {
+  const window = getWindowFromWebContents(webContents);
   return window ? getWindowFromBrowserWindow(window) : null;
 }
 
@@ -88,12 +78,15 @@ export async function createWindow(
     window: getBrowserWindowOpts(options.window),
   });
   windows.push(win);
-  if (!mainWindow) {
-    mainWindow = win;
-    valueToMainSubject('mainWindowReady', mainWindow);
-  }
 
   return win;
+}
+
+export function removeWindow(tabbedWin: TabbedBrowserWindow) {
+  const index = windows.indexOf(tabbedWin);
+  if (index >= 0) {
+    windows.splice(index, 1);
+  }
 }
 
 onIpcMainEvent('__internal_rpc:browser-dev:openDevTools', (evt) => {

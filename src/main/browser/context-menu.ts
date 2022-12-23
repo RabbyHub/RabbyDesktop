@@ -7,6 +7,7 @@ import {
   dialog,
 } from 'electron';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
+import { getWindowFromWebContents } from '../utils/browser';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import {
   getContextMenuPopupWindow,
@@ -255,11 +256,16 @@ const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
 
   if (!IS_RUNTIME_PRODUCTION) {
     append({
-      label: 'Open RabbyX Background',
-      click: () => {
-        getRabbyExtViews().then((views) => {
-          views.backgroundHost.openDevTools({ mode: 'detach' });
-        });
+      label: 'Inspect RabbyX Background',
+      click: async () => {
+        const { backgroundWebContents } = await getRabbyExtViews();
+
+        if (!backgroundWebContents.isDevToolsOpened()) {
+          backgroundWebContents.openDevTools({ mode: 'detach' });
+        } else if (!backgroundWebContents.isDevToolsFocused()) {
+          backgroundWebContents.focus();
+          getWindowFromWebContents(backgroundWebContents)?.moveTop();
+        }
       },
     });
 
@@ -283,7 +289,7 @@ const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
           emitIpcMainEvent('__internal_main:context-menu-popup:toggle-show', {
             type: 'switch-chain',
             nextShow: true,
-            pos: { x: 100, y: 100 },
+            pos: { x: params.x, y: params.y },
             pageInfo: {
               type: 'switch-chain',
               dappTabInfo: {

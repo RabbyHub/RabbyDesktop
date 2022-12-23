@@ -18,31 +18,46 @@ if (
 const IS_SAFE_WEBVIEW = ['chrome-extension:', RABBY_INTERNAL_PROTOCOL].includes(
   window.location.protocol
 );
-if (IS_SAFE_WEBVIEW && !window.rabbyDesktop) {
-  contextBridge.exposeInMainWorld('rabbyDesktop', {
-    ipcRenderer: {
-      sendMessage<T extends IChannelsKey>(
-        channel: T,
-        ...args: ChannelMessagePayload[T]['send']
-      ) {
-        ipcRenderer.send(channel, ...args);
-      },
-      on<T extends IChannelsKey>(
-        channel: T,
-        func: (...args: ChannelMessagePayload[T]['response']) => void
-      ) {
-        const subscription = (_event: IpcRendererEvent, ...args: unknown[]) =>
-          func(...(args as any));
-        ipcRenderer.on(channel, subscription);
+const ipcRendererObj = {
+  sendMessage<T extends IChannelsKey>(
+    channel: T,
+    ...args: ChannelMessagePayload[T]['send']
+  ) {
+    ipcRenderer.send(channel, ...args);
+  },
+  on<T extends IChannelsKey>(
+    channel: T,
+    func: (...args: ChannelMessagePayload[T]['response']) => void
+  ) {
+    const subscription = (_event: IpcRendererEvent, ...args: unknown[]) =>
+      func(...(args as any));
+    ipcRenderer.on(channel, subscription);
 
-        return () => ipcRenderer.removeListener(channel, subscription);
+    return () => ipcRenderer.removeListener(channel, subscription);
+  },
+  once<T extends IChannelsKey>(
+    channel: T,
+    func: (...args: ChannelMessagePayload[T]['response']) => void
+  ) {
+    ipcRenderer.once(channel, (_event, ...args) => func(...(args as any)));
+  },
+};
+if (IS_SAFE_WEBVIEW && !window.rabbyDesktop) {
+  try {
+    contextBridge.exposeInMainWorld('rabbyDesktop', {
+      ipcRenderer: ipcRendererObj,
+    });
+  } catch (e) {
+    console.error(e);
+
+    /**
+     * some main world is set as { contextIsolation: false },
+     * for those context, we can only receive message from main world
+     */
+    window.rabbyDesktop = {
+      ipcRenderer: {
+        sendMessage: ipcRendererObj.sendMessage,
       },
-      once<T extends IChannelsKey>(
-        channel: T,
-        func: (...args: ChannelMessagePayload[T]['response']) => void
-      ) {
-        ipcRenderer.once(channel, (_event, ...args) => func(...(args as any)));
-      },
-    },
-  });
+    } as any;
+  }
 }
