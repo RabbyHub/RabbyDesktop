@@ -29,7 +29,7 @@ const CONF = {
     subject: new ReplaySubject(1),
   } as IConf<
     ReplaySubject<{
-      panelView: null;
+      globalMaskView: Electron.BrowserView;
       backgroundWebContents: Electron.WebContents;
     }>
   >,

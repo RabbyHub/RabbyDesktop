@@ -1,14 +1,17 @@
 import { BrowserWindow } from 'electron';
+import { NativeAppSizes } from '@/isomorphic/const-size-next';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
-import { onIpcMainEvent } from '../utils/ipcMainEvents';
+import { onIpcMainEvent, onIpcMainInternalEvent } from '../utils/ipcMainEvents';
 import TabbedBrowserWindow, {
   TabbedBrowserWindowOptions,
 } from '../browser/browsers';
 import { getBrowserWindowOpts } from '../utils/app';
-import { valueToMainSubject } from './_init';
 import {
   getElectronChromeExtensions,
   getWebuiExtension,
+  onMainWindowReady,
+  RABBYX_WINDOWID_S,
+  toggleMaskViaOpenedRabbyxNotificationWindow,
 } from '../utils/stream-helpers';
 import { getWindowFromWebContents } from '../utils/browser';
 
@@ -82,11 +85,44 @@ export async function createWindow(
   return win;
 }
 
-export function removeWindow(tabbedWin: TabbedBrowserWindow) {
+export async function removeWindowRecord(win: Electron.BrowserWindow) {
+  const tabbedWin = getWindowFromBrowserWindow(win);
+  if (!tabbedWin) return;
+
   const index = windows.indexOf(tabbedWin);
   if (index >= 0) {
     windows.splice(index, 1);
   }
+
+  return tabbedWin;
+}
+
+export async function createRabbyxNotificationWindow(tabUrl: string) {
+  const mainWin = await onMainWindowReady();
+
+  const mainBounds = mainWin.window.getBounds();
+  const topOffset =
+    NativeAppSizes.windowTitlebarHeight +
+    NativeAppSizes.mainWindowDappTopOffset;
+  const win = await createWindow({
+    defaultTabUrl: tabUrl,
+    windowType: 'popup',
+    isRabbyXNotificationWindow: true,
+    window: {
+      resizable: false,
+      parent: mainWin.window,
+      width: 400,
+      height: mainBounds.height - topOffset,
+      x: mainBounds.x + mainBounds.width - 400,
+      y: mainBounds.y + topOffset,
+      type: 'popup',
+    },
+  });
+
+  RABBYX_WINDOWID_S.add(win.id);
+  toggleMaskViaOpenedRabbyxNotificationWindow();
+
+  return win.window as BrowserWindow;
 }
 
 onIpcMainEvent('__internal_rpc:browser-dev:openDevTools', (evt) => {
@@ -94,4 +130,23 @@ onIpcMainEvent('__internal_rpc:browser-dev:openDevTools', (evt) => {
     const webContents = evt.sender;
     webContents.openDevTools({ mode: 'detach' });
   }
+});
+
+onIpcMainEvent('__internal_webui-window-close', (_, winId, webContentsId) => {
+  const tabbedWindow = findByWindowId(winId);
+  const tabToClose = tabbedWindow?.tabs.tabList.find((tab) => {
+    if (tab.view && tab.view?.webContents.id === webContentsId) {
+      return true;
+    }
+    return false;
+  });
+  tabToClose?.destroy();
+});
+
+onIpcMainInternalEvent('__internal_main:tabbed-window:destroyed', (winId) => {
+  if (RABBYX_WINDOWID_S.has(winId)) {
+    RABBYX_WINDOWID_S.delete(winId);
+  }
+
+  toggleMaskViaOpenedRabbyxNotificationWindow();
 });

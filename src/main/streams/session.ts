@@ -1,11 +1,10 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 
-import { BrowserWindow, session } from 'electron';
+import { session } from 'electron';
 import { firstValueFrom } from 'rxjs';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { isRabbyXPage } from '@/isomorphic/url';
-import { NativeAppSizes } from '@/isomorphic/const-size-next';
 import {
   IS_RUNTIME_PRODUCTION,
   RABBY_INTERNAL_PROTOCOL,
@@ -23,14 +22,11 @@ import {
   findByWindowId,
   getWindowFromBrowserWindow,
   getTabbedWindowFromWebContents,
-  removeWindow,
+  removeWindowRecord,
+  createRabbyxNotificationWindow,
 } from './tabbedBrowserWindow';
 import { firstEl } from '../../isomorphic/array';
-import {
-  getRabbyExtId,
-  getWebuiExtId,
-  onMainWindowReady,
-} from '../utils/stream-helpers';
+import { getRabbyExtId, getWebuiExtId } from '../utils/stream-helpers';
 import { checkOpenAction } from '../utils/tabs';
 import { switchToBrowserTab } from '../utils/browser';
 
@@ -237,7 +233,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
       return currentWin;
     },
 
-    createWindow: async (details, ctx) => {
+    createWindow: async (details) => {
       const inputUrl = firstEl(details.url || '');
       const tabUrl =
         inputUrl || getShellPageUrl('debug-new-tab', await getWebuiExtId());
@@ -245,52 +241,25 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
       const rabbyExtId = await getRabbyExtId();
       const isNotification = isRabbyXPage(inputUrl, rabbyExtId, 'notification');
 
-      sesLog(
-        '[debug] createWindow:: details, isNotification',
-        details,
-        isNotification
-      );
-
-      if (!isNotification) {
-        const win = await createWindow({
-          defaultTabUrl: tabUrl,
-          windowType: details.type,
-          window: {
-            width: details.width,
-            height: details.height,
-            type: details.type,
-          },
-        });
-        return win.window;
+      if (isNotification) {
+        return createRabbyxNotificationWindow(tabUrl);
       }
 
-      const mainWin = await onMainWindowReady();
-
-      const mainBounds = mainWin.window.getBounds();
-      const topOffset =
-        NativeAppSizes.windowTitlebarHeight +
-        NativeAppSizes.mainWindowDappTopOffset;
       const win = await createWindow({
         defaultTabUrl: tabUrl,
         windowType: details.type,
-        isRabbyXNotificationWindow: true,
         window: {
-          resizable: false,
-          parent: mainWin.window,
-          width: 400,
-          height: mainBounds.height - topOffset,
-          x: mainBounds.x + mainBounds.width - 400,
-          y: mainBounds.y + topOffset,
+          width: details.width,
+          height: details.height,
           type: details.type,
         },
       });
-      return win.window as BrowserWindow;
+      return win.window;
     },
-    removeWindow: (browserWindow) => {
-      const win = getWindowFromBrowserWindow(browserWindow);
-      win?.destroy();
-
-      if (win) removeWindow(win);
+    removeWindow: async (browserWindow) => {
+      removeWindowRecord(browserWindow).then((tabbedWin) =>
+        tabbedWin?.destroy()
+      );
     },
   });
 

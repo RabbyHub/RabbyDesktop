@@ -12,6 +12,7 @@ import SecurityNotifications from '@/renderer/routes/SecurityNotifications/Secur
 import SecurityAddressbarPopup from '@/renderer/routes/SecurityAddressbarPopup/SecurityAddressbarPopup';
 import { SidebarContextMenu } from '@/renderer/components/MainWindow/SidebarContextMenu';
 import SwitchChainWindow from '@/renderer/components/ContextMenu/SwitchChainWindow';
+import GlobalMask from '@/renderer/components/MainWindow/GlobalMask';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
           path="/context-menu-popup__switch-chain"
           element={<SwitchChainWindow />}
         />
+        <Route path="/global-mask" element={<GlobalMask />} />
       </Routes>
     </Router>
   );

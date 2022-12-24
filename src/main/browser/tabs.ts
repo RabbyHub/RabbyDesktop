@@ -69,16 +69,6 @@ export class Tab {
     this.$meta.topbarStacks = { ...DEFAULT_TOPBAR_STACKS, ...topbarStacks };
     this.$meta.isOfMainWindow = !!isOfMainWindow;
 
-    const dispose = onIpcMainEvent(
-      '__internal_webui-window-close',
-      (_, winId, webContentsId) => {
-        if (winId === this.windowId && this.id === webContentsId) {
-          this.destroy();
-        }
-        dispose();
-      }
-    );
-
     this.view?.webContents.on('focus', () => {
       this.tabs.emit('tab-focused');
     });
@@ -218,9 +208,12 @@ export class Tabs extends EventEmitter {
 
     this._cleanup();
 
-    // TODO: allow to customize behavior on destroy()
     if (this.window) {
-      this.window.destroy();
+      if (!this.window.isDestroyed()) {
+        const winId = this.window.id;
+        this.window.destroy();
+        emitIpcMainEvent('__internal_main:tabbed-window:destroyed', winId);
+      }
       this.window = undefined;
     }
   }
