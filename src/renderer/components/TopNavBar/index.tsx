@@ -52,7 +52,7 @@ const ConnectedChain = ({
       ref={divRef}
     >
       <img className={styles.logo} src={CHAINS[chain].logo} alt={chain} />
-      <span>{CHAINS[chain].name}</span>
+      <span className={styles.chainName}>{CHAINS[chain].name}</span>
       <img src={IconArrowDown} alt="" />
     </div>
   );
@@ -76,43 +76,46 @@ export const TopNavBar = () => {
         <RiskArea />
         <Divider type="vertical" className={styles.divider} />
         <div className={styles.url}>{activeTab?.url || ''}</div>
-        <div className={styles.historyBar}>
-          <RcIconHistoryGoBack
-            className={clsx(
-              styles.goBack,
-              selectedTabInfo?.canGoBack && styles.active
-            )}
-            onClick={navActions.onGoBackButtonClick}
-          />
-          <RcIconHistoryGoBack
-            className={clsx(
-              styles.goForward,
-              selectedTabInfo?.canGoForward && styles.active
-            )}
-            onClick={navActions.onGoForwardButtonClick}
-          />
-          <RcIconReload onClick={navActions.onReloadButtonClick} />
-        </div>
-        {!!currentConnectedSite?.isConnected && !!currentConnectedSite?.chain && (
-          <ConnectedChain
-            chain={currentConnectedSite.chain}
-            onClick={(event) => {
-              const el = event.currentTarget as HTMLDivElement;
-              const rect = el.getBoundingClientRect();
+        <div className={styles.dockRight}>
+          <div className={styles.historyBar}>
+            <RcIconHistoryGoBack
+              className={clsx(
+                styles.goBack,
+                selectedTabInfo?.canGoBack && styles.active
+              )}
+              onClick={navActions.onGoBackButtonClick}
+            />
+            <RcIconHistoryGoBack
+              className={clsx(
+                styles.goForward,
+                selectedTabInfo?.canGoForward && styles.active
+              )}
+              onClick={navActions.onGoForwardButtonClick}
+            />
+            <RcIconReload onClick={navActions.onReloadButtonClick} />
+          </div>
+          {!!currentConnectedSite?.isConnected &&
+            !!currentConnectedSite?.chain && (
+              <ConnectedChain
+                chain={currentConnectedSite.chain}
+                onClick={(event) => {
+                  const el = event.currentTarget as HTMLDivElement;
+                  const rect = el.getBoundingClientRect();
 
-              showContextMenuPopup(
-                { x: rect.x, y: rect.bottom + 10 },
-                {
-                  type: 'switch-chain',
-                  dappTabInfo: {
-                    id: activeTab?.id,
-                    url: activeTab?.url,
-                  },
-                }
-              );
-            }}
-          />
-        )}
+                  showContextMenuPopup(
+                    { x: rect.x, y: rect.bottom + 10 },
+                    {
+                      type: 'switch-chain',
+                      dappTabInfo: {
+                        id: activeTab?.id,
+                        url: activeTab?.url,
+                      },
+                    }
+                  );
+                }}
+              />
+            )}
+        </div>
         <div className={styles.close} onClick={handleCloseTab}>
           <img src="rabby-internal://assets/icons/top-bar/close.svg" />
         </div>

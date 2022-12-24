@@ -271,6 +271,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
         windowType: details.type,
         isRabbyXNotificationWindow: true,
         window: {
+          resizable: false,
           parent: mainWin.window,
           width: 400,
           height: mainBounds.height - topOffset,
