@@ -3,14 +3,11 @@ import {
   RouterProvider,
   Outlet,
   Navigate,
-  useMatches,
 } from 'react-router-dom';
 
 import DApps from '@/renderer/routes/Dapps';
 import GettingStarted from '@/renderer/routes/Welcome/GettingStarted';
-import React, { useEffect, useLayoutEffect } from 'react';
-import { walletController } from '@/renderer/ipcRequest/rabbyx';
-import { hideContextMenuPopup } from '@/renderer/ipcRequest/contextmenu-popup';
+import React, { useEffect } from 'react';
 import ImportHome from '@/renderer/routes/Import/ImportHome';
 import ImportByPrivateKey from '@/renderer/routes/ImportBy/ImportByPrivateKey';
 import ImportSetPassword from '@/renderer/routes/Import/ImportSetPassword';
@@ -22,6 +19,7 @@ import {
   hideAllTabs,
   useForwardFromInternalPage,
 } from '@/renderer/hooks-shell/useMainWindow';
+import { useClickMainWindowHideContextMenu } from '@/renderer/hooks/useClick';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -146,17 +144,7 @@ const router = createRouter([
 ]);
 
 export function MainWindow() {
-  useLayoutEffect(() => {
-    const listener = () => {
-      hideContextMenuPopup('sidebar-dapp');
-    };
-    document.body.addEventListener('click', listener);
-
-    return () => {
-      document.body.removeEventListener('click', listener);
-    };
-  }, []);
-
+  useClickMainWindowHideContextMenu();
   useForwardFromInternalPage(router);
 
   return (

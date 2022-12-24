@@ -10,8 +10,12 @@ import {
 import { Divider } from 'antd';
 import { useDappNavigation } from '@/renderer/hooks-shell/useDappNavigation';
 import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
-import { useCallback } from 'react';
-import { showContextMenuPopup } from '@/renderer/ipcRequest/contextmenu-popup';
+import { useCallback, useRef } from 'react';
+import {
+  hideContextMenuPopup,
+  showContextMenuPopup,
+} from '@/renderer/ipcRequest/contextmenu-popup';
+import { useClickOutSide } from '@/renderer/hooks/useClick';
 import styles from './index.module.less';
 import { CurrentAccountAndNewAccount } from '../CurrentAccount';
 
@@ -36,8 +40,17 @@ const ConnectedChain = ({
   className?: string;
   onClick?: React.DOMAttributes<HTMLDivElement>['onClick'];
 }) => {
+  const divRef = useRef<HTMLDivElement>(null);
+
+  useClickOutSide(divRef, () => {
+    hideContextMenuPopup('switch-chain');
+  });
   return (
-    <div className={clsx(styles.chain, className)} onClick={onClick}>
+    <div
+      className={clsx(styles.chain, className)}
+      onClick={onClick}
+      ref={divRef}
+    >
       <img className={styles.logo} src={CHAINS[chain].logo} alt={chain} />
       <span>{CHAINS[chain].name}</span>
       <img src={IconArrowDown} alt="" />
