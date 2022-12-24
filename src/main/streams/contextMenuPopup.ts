@@ -61,9 +61,15 @@ const sidebarReady = onMainWindowReady().then(async (mainWin) => {
     closable: false,
   });
 
+  // disable close by shortcut
+  popupWin.on('close', (evt) => {
+    evt.preventDefault();
+
+    return false;
+  });
+
   updateSubWindowPosition(mainWin.window, popupWin);
   const onTargetWinUpdate = () => {
-    // updateSubWindowPosition(mainWin.window, popupWin);
     hidePopupWindow(popupWin);
   };
   targetWin.on('show', onTargetWinUpdate);
@@ -104,9 +110,15 @@ const switchChainReady = onMainWindowReady().then(async (mainWin) => {
     closable: false,
   });
 
+  // disable close by shortcut
+  popupWin.on('close', (evt) => {
+    evt.preventDefault();
+
+    return false;
+  });
+
   updateSubWindowPosition(mainWin.window, popupWin);
   const onTargetWinUpdate = () => {
-    // updateSubWindowPosition(mainWin.window, popupWin);
     hidePopupWindow(popupWin);
   };
   targetWin.on('show', onTargetWinUpdate);

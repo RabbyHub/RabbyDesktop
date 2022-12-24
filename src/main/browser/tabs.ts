@@ -31,6 +31,8 @@ export class Tab {
 
   window?: BrowserWindow;
 
+  windowId?: BrowserWindow['id'];
+
   webContents?: BrowserView['webContents'];
 
   destroyed: boolean = false;
@@ -55,6 +57,7 @@ export class Tab {
     this.view = new BrowserView();
     this.id = this.view.webContents.id;
     this.window = ofWindow;
+    this.windowId = ofWindow.id;
 
     this.webContents = this.view.webContents;
     this.window.addBrowserView(this.view);
@@ -72,10 +75,7 @@ export class Tab {
     const dispose = onIpcMainEvent(
       '__internal_webui-window-close',
       (_, winId, webContentsId) => {
-        if (
-          winId === this.window?.id &&
-          this.webContents?.id === webContentsId
-        ) {
+        if (winId === this.windowId && this.webContents?.id === webContentsId) {
           this.destroy();
         }
         dispose();
@@ -106,19 +106,22 @@ export class Tab {
 
     this.hide();
 
-    this.window!.removeBrowserView(this.view!);
-    this.window = undefined;
+    if (!this.webContents?.isDestroyed()) {
+      if (this.webContents!.isDevToolsOpened()) {
+        this.webContents!.closeDevTools();
+      }
 
-    if (this.webContents!.isDevToolsOpened()) {
-      this.webContents!.closeDevTools();
+      // TODO: why is this no longer called?
+      this.webContents!.emit('destroyed');
+      // this.webContents!.destroy?.()
     }
 
-    // TODO: why is this no longer called?
-    this.webContents!.emit('destroyed');
+    if (!this.window?.isDestroyed()) {
+      this.window!.removeBrowserView(this.view!);
+    }
 
-    // this.webContents!.destroy?.()
+    this.window = undefined;
     this.webContents = undefined;
-
     this.view = undefined;
   }
 
