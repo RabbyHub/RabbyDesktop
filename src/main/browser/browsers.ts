@@ -90,15 +90,15 @@ export default class TabbedBrowserWindow {
     this.tabs.on('tab-created', (tab: Tab) => {
       const url = tab.getInitialUrl() || options.defaultTabUrl;
       if (url) {
-        tab.webContents?.loadURL(url);
+        tab.view!.webContents.loadURL(url);
       }
 
       // Track tab that may have been created outside of the extensions API.
-      this.extensions.addTab(tab.webContents!, tab.window!);
+      this.extensions.addTab(tab.view!.webContents, tab.window!);
     });
 
     this.tabs.on('tab-selected', (tab: Tab) => {
-      this.extensions.selectTab(tab.webContents!);
+      this.extensions.selectTab(tab.view!.webContents);
     });
 
     if (this.$meta.isMainWindow) {
@@ -138,9 +138,9 @@ export default class TabbedBrowserWindow {
       async (event, reqid, tabId) => {
         const tab = this.tabs.get(tabId);
         // TODO: always respond message
-        if (!tab) return;
+        if (!tab || !tab.view) return;
 
-        const tabUrl = tab.webContents!.getURL();
+        const tabUrl = tab.view.webContents!.getURL();
         const checkResult = isUrlFromDapp(tabUrl)
           ? await getOrPutCheckResult(tabUrl, { updateOnSet: false })
           : null;
@@ -151,8 +151,8 @@ export default class TabbedBrowserWindow {
             tabExists: !!tab,
             tabUrl,
             dappSecurityCheckResult: checkResult,
-            canGoBack: tab?.webContents?.canGoBack(),
-            canGoForward: tab?.webContents?.canGoForward(),
+            canGoBack: tab.view.webContents?.canGoBack(),
+            canGoForward: tab.view.webContents?.canGoForward(),
           },
         });
       }

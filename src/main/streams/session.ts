@@ -183,8 +183,9 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
         case 'activate-tab': {
           switchToBrowserTab(actionInfo.tabId, win);
 
+          // TODO: make sure actionInfo.openedTab existed
           return [
-            actionInfo.openedTab!.webContents!,
+            actionInfo.openedTab!.view!.webContents!,
             actionInfo.openedTab!.window!,
           ];
         }
@@ -209,7 +210,10 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
           if (typeof details.active === 'boolean' ? details.active : true)
             win.tabs.select(tab.id);
 
-          return [tab.webContents, tab.window] as any;
+          return [
+            tab.view?.webContents as Electron.WebContents,
+            tab.window,
+          ] as any;
         }
       }
     },

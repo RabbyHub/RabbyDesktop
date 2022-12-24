@@ -33,8 +33,6 @@ export class Tab {
 
   windowId?: BrowserWindow['id'];
 
-  webContents?: BrowserView['webContents'];
-
   destroyed: boolean = false;
 
   tabs: Tabs;
@@ -59,7 +57,6 @@ export class Tab {
     this.window = ofWindow;
     this.windowId = ofWindow.id;
 
-    this.webContents = this.view.webContents;
     this.window.addBrowserView(this.view);
 
     this.view.webContents.on('did-finish-load', () => {
@@ -75,24 +72,24 @@ export class Tab {
     const dispose = onIpcMainEvent(
       '__internal_webui-window-close',
       (_, winId, webContentsId) => {
-        if (winId === this.windowId && this.webContents?.id === webContentsId) {
+        if (winId === this.windowId && this.id === webContentsId) {
           this.destroy();
         }
         dispose();
       }
     );
 
-    this.webContents?.on('focus', () => {
+    this.view?.webContents.on('focus', () => {
       this.tabs.emit('tab-focused');
     });
 
     // polyfill for window.close
-    this.webContents?.executeJavaScript(`
+    this.view?.webContents.executeJavaScript(`
       ;(function () {
         if (window.location.protocol !== 'chrome-extension:') return ;
         var origWinClose = window.close.bind(window);
         window.close = function (...args) {
-          window.rabbyDesktop.ipcRenderer.sendMessage('__internal_webui-window-close', ${this.window?.id}, ${this.webContents.id});
+          window.rabbyDesktop.ipcRenderer.sendMessage('__internal_webui-window-close', ${this.window?.id}, ${this.view?.webContents.id});
           origWinClose(args);
         }
       })();
@@ -106,14 +103,14 @@ export class Tab {
 
     this.hide();
 
-    if (!this.webContents?.isDestroyed()) {
-      if (this.webContents!.isDevToolsOpened()) {
-        this.webContents!.closeDevTools();
+    if (!this.view?.webContents.isDestroyed()) {
+      if (this.view?.webContents!.isDevToolsOpened()) {
+        this.view?.webContents!.closeDevTools();
       }
 
       // TODO: why is this no longer called?
-      this.webContents!.emit('destroyed');
-      // this.webContents!.destroy?.()
+      this.view?.webContents!.emit('destroyed');
+      // this.view?.webContents!.destroy?.()
     }
 
     if (!this.window?.isDestroyed()) {
@@ -121,7 +118,6 @@ export class Tab {
     }
 
     this.window = undefined;
-    this.webContents = undefined;
     this.view = undefined;
   }
 
@@ -289,8 +285,8 @@ export class Tabs extends EventEmitter {
     if (!inputUrlInfo.origin) return null;
 
     return this.tabList.find((tab) => {
-      if (!tab.webContents) return false;
-      const tabUrlInfo = canoicalizeDappUrl(tab.webContents.getURL());
+      if (!tab.view?.webContents) return false;
+      const tabUrlInfo = canoicalizeDappUrl(tab.view?.webContents.getURL());
       return tabUrlInfo.origin === inputUrlInfo.origin;
     });
   }
@@ -300,9 +296,9 @@ export class Tabs extends EventEmitter {
     if (!urlInfo?.origin) return null;
 
     return this.tabList.find((tab) => {
-      if (!tab.webContents) return false;
+      if (!tab.view?.webContents) return false;
       const { urlInfo: tabUrlInfo } = canoicalizeDappUrl(
-        tab.webContents.getURL()
+        tab.view?.webContents.getURL()
       );
       return (
         tabUrlInfo &&
