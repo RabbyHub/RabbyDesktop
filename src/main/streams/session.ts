@@ -242,7 +242,11 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
       const isNotification = isRabbyXPage(inputUrl, rabbyExtId, 'notification');
 
       if (isNotification) {
-        return createRabbyxNotificationWindow(tabUrl);
+        return createRabbyxNotificationWindow({
+          url: tabUrl,
+          width: details.width,
+          height: details.height,
+        });
       }
 
       const win = await createWindow({

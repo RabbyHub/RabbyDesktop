@@ -97,22 +97,30 @@ export async function removeWindowRecord(win: Electron.BrowserWindow) {
   return tabbedWin;
 }
 
-export async function createRabbyxNotificationWindow(tabUrl: string) {
+export async function createRabbyxNotificationWindow({
+  url,
+  width,
+  height,
+}: {
+  url: string
+  width?: number,
+  height?: number,
+}) {
   const mainWin = await onMainWindowReady();
 
   const mainBounds = mainWin.window.getBounds();
   const topOffset =
-    NativeAppSizes.windowTitlebarHeight +
+    (process.platform === 'win32' ? NativeAppSizes.windowTitlebarHeight : 0) +
     NativeAppSizes.mainWindowDappTopOffset;
   const win = await createWindow({
-    defaultTabUrl: tabUrl,
+    defaultTabUrl: url,
     windowType: 'popup',
     isRabbyXNotificationWindow: true,
     window: {
       resizable: false,
       parent: mainWin.window,
-      width: 400,
-      height: mainBounds.height - topOffset,
+      width: width || 400,
+      height: height || (mainBounds.height - topOffset),
       x: mainBounds.x + mainBounds.width - 400,
       y: mainBounds.y + topOffset,
       type: 'popup',
