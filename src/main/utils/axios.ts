@@ -1,6 +1,7 @@
 /* eslint-disable no-restricted-syntax, no-prototype-builtins */
 import { net } from 'electron';
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { safeParse } from '@/isomorphic/json';
 import { integrateQueryToUrl } from '../../isomorphic/url';
 
 /**
@@ -82,7 +83,7 @@ export async function AxiosElectronAdapter(config: AxiosRequestConfig) {
                 'application/json; charset=utf-8';
               const data =
                 contentType.indexOf('application/json') !== -1
-                  ? JSON.parse(chunk.toString('utf8'))
+                  ? safeParse(chunk.toString('utf8'))
                   : chunk.toString();
               const axiosResp = {
                 status: response.statusCode,
