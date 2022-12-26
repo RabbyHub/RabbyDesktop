@@ -40,7 +40,8 @@ module.exports = {
     'jsx-a11y/no-static-element-interactions': 'off',
     'react/no-unescaped-entities': 'off',
     'promise/always-return': 'off',
-    'promise/catch-or-return': 'off'
+    'promise/catch-or-return': 'off',
+    'jsx-a11y/no-noninteractive-element-interactions': 'off',
   },
   parserOptions: {
     ecmaVersion: 2020,
