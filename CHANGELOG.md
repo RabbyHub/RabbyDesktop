@@ -1,7 +1,16 @@
 
-v0.2.0 / 2022-12-26
+v0.2.1 / 2022-12-26
 ==================
 
+  * feat: tuning style on create rabbyx's notification window.
+  * fix: app crash on axios fetch failure
+  * chore: change some styles (#21)
+  * chore: lockfile version fix.
+
+v0.2.0 / 2022-12-26
+===================
+
+  * Release v0.2.0
   * chore: code cleanup & normalization.
   * feat: add switch account popup.
   * fix: hide context popup after switched chain.
