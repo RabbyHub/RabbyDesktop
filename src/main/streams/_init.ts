@@ -22,15 +22,15 @@ const CONF = {
   webuiExtensionReady: {
     subject: new ReplaySubject(1),
   } as IConf<ReplaySubject<Electron.Extension>>,
-  rabbyExtension: {
+  rabbyExtensionReady: {
     subject: new ReplaySubject(1),
   } as IConf<ReplaySubject<Electron.Extension>>,
   rabbyExtViews: {
     subject: new ReplaySubject(1),
   } as IConf<
     ReplaySubject<{
-      panelView: Electron.BrowserView;
-      backgroundHost: Electron.WebContents;
+      panelView: null;
+      backgroundWebContents: Electron.WebContents;
     }>
   >,
 

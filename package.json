@@ -116,7 +116,7 @@
   "dependencies": {
     "@debank/common": "^0.2.13",
     "@debank/parse-favicon": "^0.1.0",
-    "@rabby-wallet/electron-chrome-extensions": "^3.9.9",
+    "@rabby-wallet/electron-chrome-extensions": "^3.9.10",
     "@types/chrome": "^0.0.196",
     "@types/sortablejs": "^1.13.0",
     "antd": "^4.23.1",
@@ -128,6 +128,7 @@
     "electron-store": "^8.1.0",
     "electron-tabs": "^1.0.1",
     "electron-updater": "^5.2.1",
+    "eth-rpc-errors": "^4.0.3",
     "jotai": "^1.8.3",
     "lodash": "^4.17.21",
     "lru-cache": "^7.14.0",
@@ -137,7 +138,8 @@
     "react-router-dom": "^6.4.5",
     "remark-gfm": "^3.0.1",
     "rxjs": "^7.5.6",
-    "sortablejs": "^1.15.0"
+    "sortablejs": "^1.15.0",
+    "webextension-polyfill-ts": "^0.25.0"
   },
   "devDependencies": {
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.7",

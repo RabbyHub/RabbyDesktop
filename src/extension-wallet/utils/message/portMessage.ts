@@ -1,21 +1,25 @@
-import { Runtime, browser } from 'webextension-polyfill-ts';
 import Message from './index';
 
 class PortMessage extends Message {
-  port: Runtime.Port | null = null;
+  port: chrome.runtime.Port | null = null;
+  rabbyxExtId: string = '';
 
   listenCallback: any;
 
-  constructor(port?: Runtime.Port) {
+  constructor(opts: {
+    rabbyxExtId: string;
+    port?: chrome.runtime.Port,
+  }) {
     super();
 
-    if (port) {
-      this.port = port;
+    if (opts.port) {
+      this.port = opts.port;
     }
+    this.rabbyxExtId = opts.rabbyxExtId || '';
   }
 
-  connect = (name?: string) => {
-    this.port = browser.runtime.connect(undefined, name ? { name } : undefined);
+  connect = (name: string) => {
+    this.port = chrome.runtime.connect(this.rabbyxExtId, { name });
     this.port.onMessage.addListener(({ _type_, data }) => {
       if (_type_ === `${this._EVENT_PRE}message`) {
         this.emit('message', data);
@@ -42,7 +46,7 @@ class PortMessage extends Message {
     return this;
   };
 
-  send = (type, data) => {
+  send = (type: string, data: any) => {
     if (!this.port) return;
     try {
       this.port.postMessage({ _type_: `${this._EVENT_PRE}${type}`, data });

@@ -19,6 +19,26 @@ function fixArgs(
   return newArgs;
 }
 
+export function waitRabbyXGhostBgLoaded() {
+  const reqid = randString(16);
+  return new Promise<{ rabbyxExtId: string }>((resolve) => {
+    const dispose = window.rabbyDesktop?.ipcRenderer.on(
+      '__internal_rpc:rabbyx:waitExtBgGhostLoaded',
+      (event) => {
+        if (event.reqid === reqid) {
+          dispose?.();
+          resolve({ rabbyxExtId: event.rabbyxExtId });
+        }
+      }
+    );
+
+    window.rabbyDesktop?.ipcRenderer.sendMessage(
+      '__internal_rpc:rabbyx:waitExtBgGhostLoaded',
+      reqid
+    );
+  });
+}
+
 /**
  * @description make etch rpc client, based on fetch(by default), or Axios Client
  */

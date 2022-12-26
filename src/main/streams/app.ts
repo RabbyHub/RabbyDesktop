@@ -4,25 +4,22 @@ import { formatDapps } from '@/isomorphic/dapp';
 import {
   APP_NAME,
   IS_RUNTIME_PRODUCTION,
-  RABBY_GETTING_STARTED_URL,
   RABBY_SPALSH_URL,
 } from '../../isomorphic/constants';
 import {
-  isRabbyExtBackgroundPage,
+  isRabbyXPage,
   isRabbyShellURL,
   isUrlFromDapp,
 } from '../../isomorphic/url';
 import buildChromeContextMenu from '../browser/context-menu';
 import { setupMenu } from '../browser/menu';
 import {
-  desktopAppStore,
   getOrInitMainWinPosition,
   storeMainWinPosition,
 } from '../store/desktopApp';
 import { getAssetPath, getBrowserWindowOpts } from '../utils/app';
 import { onIpcMainEvent } from '../utils/ipcMainEvents';
 import { getBindLog } from '../utils/log';
-import { defaultSessionReadyThen } from './session';
 import {
   createWindow,
   getFocusedWindow,
@@ -54,11 +51,6 @@ app.on('web-contents-created', async (evtApp, webContents) => {
   const type = webContents.getType();
   const wcUrl = webContents.getURL();
   appLog(`'web-contents-created' event [type:${type}, url:${wcUrl}]`);
-
-  // TODO: use other params to activate
-  if (process.env.SHELL_DEBUG && webContents.getType() === 'backgroundPage') {
-    webContents.openDevTools({ mode: 'detach', activate: true });
-  }
 
   const mainTabbedWin = await onMainWindowReady();
   const rabbyExtId = await getRabbyExtId();
@@ -114,7 +106,7 @@ app.on('web-contents-created', async (evtApp, webContents) => {
             if (isFromExt) {
               const tab = tabbedWin!.createTab();
               tab?.loadURL(details.url);
-              if (isRabbyExtBackgroundPage(details.url, rabbyExtId)) {
+              if (isRabbyXPage(details.url, rabbyExtId, 'background')) {
                 tab?.webContents!.openDevTools({
                   mode: 'bottom',
                   activate: true,
@@ -228,7 +220,16 @@ export default function bootstrap() {
     appLog('::init', `desktop's userData: ${app.getPath('userData')}`);
 
     // wait main subject ready
-    await defaultSessionReadyThen();
+    /**
+     * orders:
+     * sessionReady
+     * -> webuiExtensionReady
+     * -> rabbyExtensionReady
+     * -> electronChromeExtensionsReady
+     *
+     * so we just need to wait electronChromeExtensionsReady ready
+     */
+    const shellExts = await getElectronChromeExtensions();
 
     const lastMainWinPos = getOrInitMainWinPosition();
     // init window
@@ -267,9 +268,8 @@ export default function bootstrap() {
       storeMainWinPosition(mainWin);
     });
 
-    await getElectronChromeExtensions().then((exts) => {
-      exts.addWindow(mainWin);
-    });
+    shellExts.addWindow(mainWin);
+    valueToMainSubject('mainWindowReady', mainWindow);
 
     const showMainWin = async () => {
       await getRabbyExtViews();
@@ -318,31 +318,10 @@ export default function bootstrap() {
     );
     splashWin.webContents.loadURL(RABBY_SPALSH_URL);
 
-    let gettingStartedWin: BrowserWindow | null = null;
-
-    onIpcMainEvent('redirect-mainWindow', () => {
-      if (!gettingStartedWin) return;
-
-      gettingStartedWin.destroy();
-      showMainWin();
-      gettingStartedWin = null;
-    });
-
     // do this work on mainWin.window postMessage('homePageLoaded') until timeout
     setTimeout(() => {
       splashWin.destroy();
-
-      if (false && desktopAppStore.get('firstStartApp')) {
-        gettingStartedWin = new BrowserWindow({
-          ...getBrowserWindowOpts(),
-          transparent: true,
-          frame: false,
-          resizable: false,
-        });
-        gettingStartedWin!.webContents.loadURL(RABBY_GETTING_STARTED_URL);
-      } else {
-        showMainWin();
-      }
+      showMainWin();
     }, 500);
   });
 }

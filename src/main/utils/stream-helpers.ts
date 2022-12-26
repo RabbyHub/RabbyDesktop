@@ -14,12 +14,14 @@ export async function getWebuiExtId() {
   return (await getWebuiExtension()).id;
 }
 
-export async function onMainWindowReady() {
+export async function onMainWindowReady(): Promise<
+  import('../browser/browsers').default
+> {
   return firstValueFrom(fromMainSubject('mainWindowReady'));
 }
 
 export async function getRabbyExtId() {
-  const ext = await firstValueFrom(fromMainSubject('rabbyExtension'));
+  const ext = await firstValueFrom(fromMainSubject('rabbyExtensionReady'));
 
   cLog('getRabbyExtId', ext.id);
 

@@ -1,5 +1,22 @@
 import { BrowserView, BrowserWindow } from 'electron';
 
+export function getWindowFromWebContents(tab: Electron.WebContents) {
+  switch (tab.getType()) {
+    case 'window':
+      return BrowserWindow.fromWebContents(tab);
+    case 'browserView':
+    case 'webview':
+      // return tab.getOwnerBrowserWindow();
+      return BrowserWindow.fromWebContents(tab);
+    case 'backgroundPage':
+      return (
+        BrowserWindow.fromWebContents(tab) || BrowserWindow.getFocusedWindow()
+      );
+    default:
+      throw new Error(`Unable to find parent window of '${tab.getType()}'`);
+  }
+}
+
 export function destroyBrowserWebview(view?: BrowserView | null) {
   if (!view) return;
 

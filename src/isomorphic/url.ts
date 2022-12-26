@@ -55,8 +55,23 @@ export function isRabbyShellURL(url: string) {
   return url.startsWith('chrome-extension://') && url.includes('/webui.html');
 }
 
-export function isRabbyExtBackgroundPage(url: string, extid: string) {
-  return url.startsWith(`chrome-extension://${extid}/background.html`);
+export function isRabbyXPage(
+  url: string,
+  extid: string,
+  type: 'background' | 'notification'
+) {
+  switch (type) {
+    default:
+    case 'notification':
+      return url.startsWith(`chrome-extension://${extid}/notification.html`);
+    case 'background':
+      return (
+        url.startsWith(`chrome-extension://${extid}/background.html`) ||
+        url.startsWith(
+          `chrome-extension://${extid}/_generated_background_page.html`
+        )
+      );
+  }
 }
 
 export function isUrlFromDapp(url: string) {

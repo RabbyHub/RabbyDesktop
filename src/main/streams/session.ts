@@ -1,9 +1,11 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 
-import { session } from 'electron';
+import { BrowserWindow, session } from 'electron';
 import { firstValueFrom } from 'rxjs';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
+import { isRabbyXPage } from '@/isomorphic/url';
+import { NativeAppSizes } from '@/isomorphic/const-size-next';
 import {
   IS_RUNTIME_PRODUCTION,
   RABBY_INTERNAL_PROTOCOL,
@@ -21,9 +23,14 @@ import {
   findByWindowId,
   getWindowFromBrowserWindow,
   getTabbedWindowFromWebContents,
+  removeWindow,
 } from './tabbedBrowserWindow';
 import { firstEl } from '../../isomorphic/array';
-import { getWebuiExtId } from '../utils/stream-helpers';
+import {
+  getRabbyExtId,
+  getWebuiExtId,
+  onMainWindowReady,
+} from '../utils/stream-helpers';
 import { checkOpenAction } from '../utils/tabs';
 import { switchToBrowserTab } from '../utils/browser';
 
@@ -71,7 +78,8 @@ async function loadExtensions(sess: Electron.Session, extensionsPath: string) {
       })
   );
 
-  const results: Electron.Extension[] = [];
+  const extensions: Electron.Extension[] = [];
+  let rabbyExt: Electron.Extension = undefined as any;
 
   await Promise.allSettled(
     extensionDirectories.filter(Boolean).map(async (extPath) => {
@@ -81,9 +89,10 @@ async function loadExtensions(sess: Electron.Session, extensionsPath: string) {
         const ext = await sess.loadExtension(extPath, {
           allowFileAccess: true,
         });
-        results.push(ext);
+        extensions.push(ext);
         if (ext.name.toLowerCase().includes('rabby')) {
-          valueToMainSubject('rabbyExtension', ext);
+          valueToMainSubject('rabbyExtensionReady', ext);
+          rabbyExt = ext;
         }
       } catch (e) {
         console.error(e);
@@ -91,7 +100,7 @@ async function loadExtensions(sess: Electron.Session, extensionsPath: string) {
     })
   );
 
-  return results;
+  return extensions;
 }
 
 export async function defaultSessionReadyThen() {
@@ -224,30 +233,61 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
       return currentWin;
     },
 
-    createWindow: async (details) => {
+    createWindow: async (details, ctx) => {
+      const inputUrl = firstEl(details.url || '');
       const tabUrl =
-        firstEl(details.url || '') ||
-        getShellPageUrl('debug-new-tab', await getWebuiExtId());
+        inputUrl || getShellPageUrl('debug-new-tab', await getWebuiExtId());
 
+      const rabbyExtId = await getRabbyExtId();
+      const isNotification = isRabbyXPage(inputUrl, rabbyExtId, 'notification');
+
+      sesLog(
+        '[debug] createWindow:: details, isNotification',
+        details,
+        isNotification
+      );
+
+      if (!isNotification) {
+        const win = await createWindow({
+          defaultTabUrl: tabUrl,
+          windowType: details.type,
+          window: {
+            width: details.width,
+            height: details.height,
+            type: details.type,
+          },
+        });
+        return win.window;
+      }
+
+      const mainWin = await onMainWindowReady();
+
+      const mainBounds = mainWin.window.getBounds();
+      const topOffset =
+        NativeAppSizes.windowTitlebarHeight +
+        NativeAppSizes.mainWindowDappTopOffset;
       const win = await createWindow({
         defaultTabUrl: tabUrl,
         windowType: details.type,
+        isRabbyXNotificationWindow: true,
         window: {
-          width: details.width,
-          height: details.height,
+          parent: mainWin.window,
+          width: 400,
+          height: mainBounds.height - topOffset,
+          x: mainBounds.x + mainBounds.width - 400,
+          y: mainBounds.y + topOffset,
           type: details.type,
         },
       });
-      // if (details.active) tabs.select(tab.id)
-      return win.window;
+      return win.window as BrowserWindow;
     },
     removeWindow: (browserWindow) => {
       const win = getWindowFromBrowserWindow(browserWindow);
       win?.destroy();
+
+      if (win) removeWindow(win);
     },
   });
-
-  valueToMainSubject('electronChromeExtensionsReady', chromeExtensions);
 
   const webuiExtension = await sessionIns.loadExtension(
     getAssetPath('desktop_shell'),
@@ -256,4 +296,6 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   valueToMainSubject('webuiExtensionReady', webuiExtension);
 
   await loadExtensions(sessionIns!, getAssetPath('chrome_exts'));
+
+  valueToMainSubject('electronChromeExtensionsReady', chromeExtensions);
 });

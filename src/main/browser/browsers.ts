@@ -17,7 +17,9 @@ export type TabbedBrowserWindowOptions = {
     [key: `__webui${string}`]: string | number | boolean;
   };
 
+  defaultOpen?: boolean;
   isMainWindow?: boolean;
+  isRabbyXNotificationWindow?: boolean;
 };
 
 export default class TabbedBrowserWindow {
@@ -39,10 +41,14 @@ export default class TabbedBrowserWindow {
 
   private $meta: {
     hasNavigationBar: boolean;
+    defaultOpen: boolean;
     isMainWindow: boolean;
+    isRabbyXNotificationWindow: boolean;
   } = {
     hasNavigationBar: false,
+    defaultOpen: true,
     isMainWindow: false,
+    isRabbyXNotificationWindow: false,
   };
 
   constructor(options: TabbedBrowserWindowOptions) {
@@ -56,7 +62,10 @@ export default class TabbedBrowserWindow {
     this.id = this.window.id;
 
     this.$meta.hasNavigationBar = this.windowType !== 'popup';
+    this.$meta.defaultOpen = options.defaultOpen !== false;
     this.$meta.isMainWindow = !!options.isMainWindow;
+    this.$meta.isRabbyXNotificationWindow =
+      !!options.isRabbyXNotificationWindow;
 
     const origUrl = `chrome-extension://${options.webuiExtensionId}/webui.html`;
     /* eslint-disable @typescript-eslint/naming-convention */
@@ -151,12 +160,17 @@ export default class TabbedBrowserWindow {
 
     queueMicrotask(() => {
       // Create initial tab
-      if (!this.$meta.isMainWindow) {
+      if (!this.$meta.isMainWindow && this.$meta.defaultOpen) {
         this.createTab({
-          topbarStacks: {
-            tabs: true,
-            navigation: this.$meta.hasNavigationBar,
-          },
+          topbarStacks: this.$meta.isRabbyXNotificationWindow
+            ? {
+                tabs: false,
+                navigation: false,
+              }
+            : {
+                tabs: true,
+                navigation: this.$meta.hasNavigationBar,
+              },
         });
       }
     });
@@ -169,6 +183,10 @@ export default class TabbedBrowserWindow {
 
   isMainWindow() {
     return this.$meta.isMainWindow;
+  }
+
+  isRabbyXNotificationWindow() {
+    return this.$meta.isRabbyXNotificationWindow;
   }
 
   getFocusedTab() {
