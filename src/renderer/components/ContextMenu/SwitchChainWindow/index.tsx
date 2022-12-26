@@ -1,8 +1,9 @@
 import { useCurrentConnection } from '@/renderer/hooks/rabbyx/useConnection';
 import { useContextMenuPageInfo } from '@/renderer/hooks/useContextMenuPage';
 import { useBodyClassNameOnMounted } from '@/renderer/hooks/useMountedEffect';
-import { Divider, Input } from 'antd';
+import { Input } from 'antd';
 import { useCallback } from 'react';
+import clsx from 'clsx';
 import styles from './index.module.less';
 
 type OnPinnedChanged = (
@@ -15,24 +16,39 @@ function ChainItem({
   pinned,
   onClick,
   onPinnedChange,
+  checked,
 }: {
   chain: import('@debank/common').Chain;
   pinned: boolean;
+  checked: boolean;
   onClick?: React.DOMAttributes<HTMLDivElement>['onClick'];
   onPinnedChange?: OnPinnedChanged;
 }) {
   return (
     <div className={styles.chainItem} onClick={onClick}>
-      {chain.name}
-      <span
-        className={styles.actionPin}
+      <div className={styles.chainItemLeft}>
+        <img src={chain.logo} className={styles.chainItemIcon} />
+        <div className={styles.chainItemName}>{chain.name}</div>
+      </div>
+      <img
+        className={clsx(styles.chainItemStar, pinned ? styles.block : '')}
+        src={
+          pinned
+            ? 'rabby-internal://assets/icons/select-chain/icon-pinned-fill.svg'
+            : 'rabby-internal://assets/icons/select-chain/icon-pinned.svg'
+        }
         onClick={(evt) => {
           evt.stopPropagation();
           onPinnedChange?.(chain.enum, !pinned);
         }}
-      >
-        {!pinned ? 'Pin' : '⭐'}
-      </span>
+        alt=""
+      />
+      {checked && (
+        <img
+          className={styles.chainItemChecked}
+          src="rabby-internal://assets/icons/select-chain/checked.svg"
+        />
+      )}
     </div>
   );
 }
@@ -57,6 +73,7 @@ function SwitchChainPage({
     searchedPinned,
     searchedUnpinned,
     searchedChains,
+    currentSite,
   } = useCurrentConnection(tab);
 
   const onPinnedChange: OnPinnedChanged = useCallback(
@@ -70,25 +87,22 @@ function SwitchChainPage({
     <div className={styles.SwitchChainPage}>
       <Input
         value={searchInput}
-        placeholder="input search keyword"
+        placeholder="Search chain"
+        size="large"
+        className={styles.searchChainInput}
         onChange={(evt) => {
           setSearchInput(evt.target.value || '');
         }}
       />
-      <Divider />
       {searchedChains.length > 0 ? (
-        <>
-          <h3>Summary</h3>
-          <pre>searchedPinned.length: {searchedPinned.length}</pre>
-          <pre>searchedUnpinned.length: {searchedUnpinned.length}</pre>
-          <pre>searchedChains.length: {searchedChains.length}</pre>
-          <Divider />
+        <div className={styles.chainList}>
           {searchedPinned.map((chain) => {
             return (
               <ChainItem
                 key={`searched-chain-${chain.id}`}
                 chain={chain}
                 pinned
+                checked={currentSite?.chain === chain.enum}
                 onClick={() => {
                   switchChain(chain.enum);
                 }}
@@ -96,7 +110,6 @@ function SwitchChainPage({
               />
             );
           })}
-          {searchedUnpinned.length ? <Divider /> : null}
           {searchedUnpinned.map((chain) => {
             return (
               <ChainItem
@@ -107,43 +120,45 @@ function SwitchChainPage({
                   switchChain(chain.enum);
                 }}
                 onPinnedChange={onPinnedChange}
+                checked={currentSite?.chain === chain.enum}
               />
             );
           })}
-        </>
+        </div>
       ) : (
         <>
-          <h3>Summary</h3>
-          <pre>pinnedChains.length: {pinnedChains.length}</pre>
-          <pre>unpinnedChains.length: {unpinnedChains.length}</pre>
-          <Divider />
-          {pinnedChains.map((chain) => {
-            return (
-              <ChainItem
-                key={`chain-${chain.id}`}
-                chain={chain}
-                pinned
-                onClick={() => {
-                  switchChain(chain.enum);
-                }}
-                onPinnedChange={onPinnedChange}
-              />
-            );
-          })}
-          {unpinnedChains.length ? <Divider /> : null}
-          {unpinnedChains.map((chain) => {
-            return (
-              <ChainItem
-                key={`chain-${chain.id}`}
-                chain={chain}
-                pinned={false}
-                onClick={() => {
-                  switchChain(chain.enum);
-                }}
-                onPinnedChange={onPinnedChange}
-              />
-            );
-          })}
+          <div className={styles.chainList}>
+            {pinnedChains.map((chain) => {
+              return (
+                <ChainItem
+                  key={`chain-${chain.id}`}
+                  chain={chain}
+                  pinned
+                  onClick={() => {
+                    switchChain(chain.enum);
+                  }}
+                  onPinnedChange={onPinnedChange}
+                  checked={currentSite?.chain === chain.enum}
+                />
+              );
+            })}
+          </div>
+          <div className={styles.chainList}>
+            {unpinnedChains.map((chain) => {
+              return (
+                <ChainItem
+                  key={`chain-${chain.id}`}
+                  chain={chain}
+                  pinned={false}
+                  onClick={() => {
+                    switchChain(chain.enum);
+                  }}
+                  onPinnedChange={onPinnedChange}
+                  checked={currentSite?.chain === chain.enum}
+                />
+              );
+            })}
+          </div>
         </>
       )}
     </div>
