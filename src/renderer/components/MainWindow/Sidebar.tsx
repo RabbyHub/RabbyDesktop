@@ -12,6 +12,7 @@ import {
   useSidebarDapps,
 } from '@/renderer/hooks-shell/useMainWindow';
 import styles from './Sidebar.module.less';
+import { DappFavicon } from '../DappFavicon';
 
 const StaticEntries = [
   {
@@ -92,9 +93,10 @@ const TabList = ({
           >
             <div className={styles.routeItemInner}>
               {!!tab && <div className={styles.indicator} />}
-              <img
-                className={classNames(styles.routeLogo, styles.isDapp)}
+              <DappFavicon
+                origin={dapp.origin}
                 src={faviconUrl}
+                className={classNames(styles.routeLogo, styles.isDapp)}
               />
               <span className={styles.routeTitle}>
                 {dapp.alias || dapp.origin}
