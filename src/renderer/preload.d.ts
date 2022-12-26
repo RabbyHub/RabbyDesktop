@@ -376,6 +376,10 @@ type MainInternalsMessagePayload = {
     response: [];
   };
   '__internal_main:context-menu-popup:toggle-show': ChannelMessagePayload['__internal_rpc:context-menu-popup:toggle-show'];
+  '__internal_main:tabbed-window:destroyed': {
+    send: [windowId: Electron.BrowserWindow['id']];
+    response: [];
+  };
 };
 
 type MainInternals = keyof MainInternalsMessagePayload;

@@ -1,6 +1,5 @@
 import { firstValueFrom } from 'rxjs';
 import { fromMainSubject } from '../streams/_init';
-import { cLog } from './log';
 
 export async function getElectronChromeExtensions() {
   return firstValueFrom(fromMainSubject('electronChromeExtensionsReady'));
@@ -23,8 +22,6 @@ export async function onMainWindowReady(): Promise<
 export async function getRabbyExtId() {
   const ext = await firstValueFrom(fromMainSubject('rabbyExtensionReady'));
 
-  cLog('getRabbyExtId', ext.id);
-
   return ext.id;
 }
 
@@ -38,4 +35,23 @@ export async function getDappLoadingView() {
 
 export async function getContextMenuPopupWindow() {
   return firstValueFrom(fromMainSubject('contextMenuPopupWindowReady'));
+}
+
+export const RABBYX_WINDOWID_S = new Set<number>();
+export async function toggleMaskViaOpenedRabbyxNotificationWindow() {
+  const { window: mainWin } = await onMainWindowReady();
+  const { globalMaskView } = await getRabbyExtViews();
+
+  if (!mainWin.isDestroyed()) {
+    const [width, height] = mainWin.getSize();
+
+    if (RABBYX_WINDOWID_S.size) {
+      mainWin.addBrowserView(globalMaskView);
+      mainWin.setTopBrowserView(globalMaskView);
+      globalMaskView.setBounds({ x: 0, y: 0, width, height });
+    } else {
+      globalMaskView.setBounds({ x: -100, y: -100, width: 1, height: 1 });
+      mainWin.removeBrowserView(globalMaskView);
+    }
+  }
 }

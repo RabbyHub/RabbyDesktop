@@ -1,5 +1,8 @@
 import { app } from 'electron';
-import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import {
+  IS_RUNTIME_PRODUCTION,
+  RABBY_POPUP_GHOST_VIEW_URL,
+} from '@/isomorphic/constants';
 import { isRabbyXPage } from '@/isomorphic/url';
 import { valueToMainSubject } from './_init';
 
@@ -7,6 +10,7 @@ import { cLog } from '../utils/log';
 import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { getRabbyExtId, onMainWindowReady } from '../utils/stream-helpers';
 import { rabbyxQuery } from './rabbyIpcQuery/_base';
+import { createPopupView } from '../utils/browser';
 
 onIpcMainEvent('rabby-extension-id', async (event) => {
   event.reply('rabby-extension-id', {
@@ -68,6 +72,21 @@ onIpcMainEvent(
   }
 );
 
+const maskReady = getRabbyExtId().then(async () => {
+  const globalMaskView = createPopupView();
+  globalMaskView.setBounds({ x: -100, y: -100, width: 1, height: 1 });
+
+  await globalMaskView.webContents.loadURL(
+    `${RABBY_POPUP_GHOST_VIEW_URL}#/global-mask`
+  );
+
+  if (!IS_RUNTIME_PRODUCTION) {
+    // globalMaskView.webContents.openDevTools({ mode: 'detach' });
+  }
+
+  return globalMaskView;
+});
+
 const bgWcReady = new Promise<Electron.WebContents>((resolve) => {
   app.on('web-contents-created', async (_, webContents) => {
     const type = webContents.getType();
@@ -97,12 +116,16 @@ const bgWcReady = new Promise<Electron.WebContents>((resolve) => {
       resolve(webContents);
     }
   });
-}).then((backgroundWebContents) => {
-  valueToMainSubject('rabbyExtViews', {
-    panelView: null,
-    backgroundWebContents,
-  });
 });
+
+Promise.all([maskReady, bgWcReady]).then(
+  ([globalMaskView, backgroundWebContents]) => {
+    valueToMainSubject('rabbyExtViews', {
+      globalMaskView: globalMaskView!,
+      backgroundWebContents,
+    });
+  }
+);
 
 onIpcMainEvent(
   '__internal_rpc:rabbyx:waitExtBgGhostLoaded',
