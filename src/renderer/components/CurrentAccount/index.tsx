@@ -1,17 +1,24 @@
-import { useCurrentAccount } from '@/renderer/hooks/useRabbyx';
+import {
+  useAccounts,
+  useCurrentAccount,
+} from '@/renderer/hooks/rabbyx/useAccount';
+import { useClickOutSide } from '@/renderer/hooks/useClick';
+import {
+  hideContextMenuPopup,
+  showContextMenuPopup,
+} from '@/renderer/ipcRequest/contextmenu-popup';
 import clsx from 'clsx';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import styles from './index.module.less';
 
-export const CurrentAccount = ({
-  onClick,
-  className,
-}: {
-  onClick?: () => void;
-  className?: string;
-}) => {
-  const currentAccount = useCurrentAccount();
+export const CurrentAccount = ({ className }: { className?: string }) => {
+  const divRef = useRef<HTMLDivElement>(null);
+  useClickOutSide(divRef, () => {
+    hideContextMenuPopup('switch-account');
+  });
+  const { currentAccount } = useCurrentAccount();
+  const { accounts } = useAccounts();
 
   const displayAddr = useMemo(
     () =>
@@ -27,17 +34,40 @@ export const CurrentAccount = ({
     return null;
   }
   return (
-    <div className={clsx(styles.account, className)} onClick={onClick}>
-      <img
-        className={styles.logo}
-        src="rabby-internal://assets/icons/import/key.svg"
-        alt="key"
-      />
-      <span className={styles.aliasName}>{currentAccount?.alianName}</span>
-      <span className={styles.addr}>
-        {displayAddr}
-        <img src="rabby-internal://assets/icons/top-bar/select.svg" />
-      </span>
+    <div
+      className={clsx(styles.account, className)}
+      ref={divRef}
+      onClick={(event) => {
+        const el = event.currentTarget as HTMLDivElement;
+        const rect = el.getBoundingClientRect();
+
+        showContextMenuPopup(
+          {
+            x: rect.x,
+            y: rect.bottom + 10,
+            height: Math.min(accounts.length, 6) * (60 + 3) - 1,
+          },
+          {
+            type: 'switch-account',
+          }
+        );
+      }}
+    >
+      <div className={styles.content}>
+        <img
+          className={styles.logo}
+          src="rabby-internal://assets/icons/import/key.svg"
+          alt="key"
+        />
+        <span className={styles.aliasName}>{currentAccount?.alianName}</span>
+      </div>
+      <div className={styles.dockRight}>
+        <span className={styles.addr}>{displayAddr}</span>
+        <img
+          className={styles.dropdownIcon}
+          src="rabby-internal://assets/icons/top-bar/select.svg"
+        />
+      </div>
     </div>
   );
 };

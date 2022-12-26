@@ -62,8 +62,9 @@ const CONF = {
     subject: new ReplaySubject(1),
   } as IConf<
     ReplaySubject<{
-      sidebar: BrowserWindow;
+      sidebarContext: BrowserWindow;
       switchChain: BrowserWindow;
+      switchAccount: BrowserWindow;
     }>
   >,
 };

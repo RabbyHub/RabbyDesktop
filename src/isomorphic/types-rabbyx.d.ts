@@ -7,6 +7,12 @@ type RabbyAccount = {
   alianName?: string;
 };
 
+type Account = RabbyAccount & {
+  displayBrandName?: string;
+  index?: number;
+  balance?: number;
+};
+
 type RabbyEvent = {
   event: string;
   data?: any;

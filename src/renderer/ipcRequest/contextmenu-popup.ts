@@ -1,12 +1,12 @@
 export function showContextMenuPopup(
-  position: { x: number; y: number },
+  rect: { x: number; y: number; width?: number; height?: number },
   pageInfo: IContextMenuPageInfo
 ) {
   return window.rabbyDesktop.ipcRenderer.sendMessage(
     '__internal_rpc:context-menu-popup:toggle-show',
     {
       nextShow: true,
-      pos: position,
+      rect,
       type: pageInfo.type,
       pageInfo,
     }

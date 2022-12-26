@@ -18,10 +18,10 @@ import {
 } from '../utils/browser';
 import { onMainWindowReady } from '../utils/stream-helpers';
 
-function updateSubWindowPosition(
+function updateSubWindowRect(
   parentWin: BrowserWindow,
   window: BrowserWindow,
-  triggerPoint?: Electron.Point & { width?: number; height?: number }
+  windowRect?: Electron.Point & { width?: number; height?: number }
 ) {
   if (window.isDestroyed()) return;
 
@@ -31,7 +31,7 @@ function updateSubWindowPosition(
     y: 5,
     width: 100,
     height: 100,
-    ...triggerPoint,
+    ...windowRect,
   };
 
   window.setSize(popupRect.width, popupRect.height);
@@ -54,7 +54,7 @@ function updateSubWindowPosition(
 const sidebarReady = onMainWindowReady().then(async (mainWin) => {
   const targetWin = mainWin.window;
 
-  const popupWin = createPopupWindow({
+  const sidebarAppPopup = createPopupWindow({
     parent: mainWin.window,
     transparent: false,
     hasShadow: true,
@@ -62,15 +62,15 @@ const sidebarReady = onMainWindowReady().then(async (mainWin) => {
   });
 
   // disable close by shortcut
-  popupWin.on('close', (evt) => {
+  sidebarAppPopup.on('close', (evt) => {
     evt.preventDefault();
 
     return false;
   });
 
-  updateSubWindowPosition(mainWin.window, popupWin);
+  updateSubWindowRect(mainWin.window, sidebarAppPopup);
   const onTargetWinUpdate = () => {
-    hidePopupWindow(popupWin);
+    hidePopupWindow(sidebarAppPopup);
   };
   targetWin.on('show', onTargetWinUpdate);
   targetWin.on('move', onTargetWinUpdate);
@@ -79,31 +79,31 @@ const sidebarReady = onMainWindowReady().then(async (mainWin) => {
   targetWin.on('restore', onTargetWinUpdate);
 
   mainWin.tabs.on('tab-focused', () => {
-    hidePopupWindow(popupWin);
+    hidePopupWindow(sidebarAppPopup);
   });
 
   mainWin.window.on('focus', () => {
-    hidePopupWindow(popupWin);
+    hidePopupWindow(sidebarAppPopup);
   });
 
-  await popupWin.webContents.loadURL(
+  await sidebarAppPopup.webContents.loadURL(
     `${RABBY_POPUP_GHOST_VIEW_URL}#/context-menu-popup__sidebar-dapp`
   );
 
   // debug-only
   if (!IS_RUNTIME_PRODUCTION) {
-    // popupWin.webContents.openDevTools({ mode: 'detach' });
+    // sidebarAppPopup.webContents.openDevTools({ mode: 'detach' });
   }
 
-  hidePopupWindow(popupWin);
+  hidePopupWindow(sidebarAppPopup);
 
-  return popupWin;
+  return sidebarAppPopup;
 });
 
 const switchChainReady = onMainWindowReady().then(async (mainWin) => {
   const targetWin = mainWin.window;
 
-  const popupWin = createPopupWindow({
+  const switchChainPopup = createPopupWindow({
     parent: mainWin.window,
     transparent: false,
     hasShadow: true,
@@ -111,15 +111,15 @@ const switchChainReady = onMainWindowReady().then(async (mainWin) => {
   });
 
   // disable close by shortcut
-  popupWin.on('close', (evt) => {
+  switchChainPopup.on('close', (evt) => {
     evt.preventDefault();
 
     return false;
   });
 
-  updateSubWindowPosition(mainWin.window, popupWin);
+  updateSubWindowRect(mainWin.window, switchChainPopup);
   const onTargetWinUpdate = () => {
-    hidePopupWindow(popupWin);
+    hidePopupWindow(switchChainPopup);
   };
   targetWin.on('show', onTargetWinUpdate);
   targetWin.on('move', onTargetWinUpdate);
@@ -128,39 +128,91 @@ const switchChainReady = onMainWindowReady().then(async (mainWin) => {
   targetWin.on('restore', onTargetWinUpdate);
 
   mainWin.tabs.on('tab-focused', () => {
-    hidePopupWindow(popupWin);
+    hidePopupWindow(switchChainPopup);
   });
 
   mainWin.window.on('focus', () => {
-    hidePopupWindow(popupWin);
+    hidePopupWindow(switchChainPopup);
   });
 
-  await popupWin.webContents.loadURL(
+  await switchChainPopup.webContents.loadURL(
     `${RABBY_POPUP_GHOST_VIEW_URL}#/context-menu-popup__switch-chain`
   );
 
   // debug-only
   if (!IS_RUNTIME_PRODUCTION) {
-    // popupWin.webContents.openDevTools({ mode: 'detach' });
+    // switchChainPopup.webContents.openDevTools({ mode: 'detach' });
   }
 
-  hidePopupWindow(popupWin);
+  hidePopupWindow(switchChainPopup);
 
-  return popupWin;
+  return switchChainPopup;
 });
 
-Promise.all([sidebarReady, switchChainReady]).then((wins) => {
-  valueToMainSubject('contextMenuPopupWindowReady', {
-    sidebar: wins[0],
-    switchChain: wins[1],
+const switchAccountReady = onMainWindowReady().then(async (mainWin) => {
+  const targetWin = mainWin.window;
+
+  const switchAccountPopup = createPopupWindow({
+    parent: mainWin.window,
+    transparent: false,
+    hasShadow: true,
+    closable: false,
   });
+
+  // disable close by shortcut
+  switchAccountPopup.on('close', (evt) => {
+    evt.preventDefault();
+
+    return false;
+  });
+
+  updateSubWindowRect(mainWin.window, switchAccountPopup);
+  const onTargetWinUpdate = () => {
+    hidePopupWindow(switchAccountPopup);
+  };
+  targetWin.on('show', onTargetWinUpdate);
+  targetWin.on('move', onTargetWinUpdate);
+  targetWin.on('resized', onTargetWinUpdate);
+  targetWin.on('unmaximize', onTargetWinUpdate);
+  targetWin.on('restore', onTargetWinUpdate);
+
+  mainWin.tabs.on('tab-focused', () => {
+    hidePopupWindow(switchAccountPopup);
+  });
+
+  mainWin.window.on('focus', () => {
+    hidePopupWindow(switchAccountPopup);
+  });
+
+  await switchAccountPopup.webContents.loadURL(
+    `${RABBY_POPUP_GHOST_VIEW_URL}#/popup__switch-account`
+  );
+
+  // debug-only
+  if (!IS_RUNTIME_PRODUCTION) {
+    // switchAccountPopup.webContents.openDevTools({ mode: 'detach' });
+  }
+
+  hidePopupWindow(switchAccountPopup);
+
+  return switchAccountPopup;
 });
+
+Promise.all([sidebarReady, switchChainReady, switchAccountReady]).then(
+  (wins) => {
+    valueToMainSubject('contextMenuPopupWindowReady', {
+      sidebarContext: wins[0],
+      switchChain: wins[1],
+      switchAccount: wins[2],
+    });
+  }
+);
 
 const SIZE_MAP: Record<
   IContextMenuPageInfo['type'],
   {
-    width: number;
-    height: number;
+    width?: number;
+    height?: number;
   }
 > = {
   'sidebar-dapp': {
@@ -171,30 +223,37 @@ const SIZE_MAP: Record<
     width: 272,
     height: 400,
   },
+  'switch-account': {
+    width: 200,
+    height: 60 * 2 + 1,
+  },
 };
 
 const { handler } = onIpcMainEvent(
   '__internal_rpc:context-menu-popup:toggle-show',
   async (_, payload) => {
     const mainWindow = (await onMainWindowReady()).window;
-    const { sidebar, switchChain } = await firstValueFrom(
+    const { sidebarContext, switchChain, switchAccount } = await firstValueFrom(
       fromMainSubject('contextMenuPopupWindowReady')
     );
 
     const targetWin =
       payload.type === 'sidebar-dapp'
-        ? sidebar
+        ? sidebarContext
         : payload.type === 'switch-chain'
         ? switchChain
+        : payload.type === 'switch-account'
+        ? switchAccount
         : null;
 
     if (!targetWin) return;
 
     if (payload.nextShow) {
-      updateSubWindowPosition(mainWindow, targetWin, {
-        x: payload.pos.x,
-        y: payload.pos.y,
-        ...SIZE_MAP[payload.type],
+      updateSubWindowRect(mainWindow, targetWin, {
+        x: payload.rect.x,
+        y: payload.rect.y,
+        width: payload.rect.width || SIZE_MAP[payload.type].width,
+        height: payload.rect.height || SIZE_MAP[payload.type].height,
       });
       sendToWebContents(
         targetWin.webContents,

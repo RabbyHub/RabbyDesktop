@@ -149,6 +149,9 @@ type IContextMenuPageInfo =
         id: chrome.tabs.Tab['id'];
         url: chrome.tabs.Tab['url'];
       };
+    }
+  | {
+      type: 'switch-account';
     };
 
 type IShellNavInfo = {

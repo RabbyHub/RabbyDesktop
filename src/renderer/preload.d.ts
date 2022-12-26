@@ -288,9 +288,11 @@ type ChannelMessagePayload = {
       | {
           type: IContextMenuPageInfo['type'];
           nextShow: true;
-          pos: {
+          rect: {
             x: Electron.Point['x'];
             y: Electron.Point['y'];
+            width?: number;
+            height?: number;
           };
           pageInfo: IContextMenuPageInfo;
         }

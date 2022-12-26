@@ -9,6 +9,7 @@
 .account {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 6px;
   height: 40px;
   padding: 10px;
@@ -16,32 +17,61 @@
   backdrop-filter: blur(20px);
   border-radius: 6px;
   cursor: pointer;
+  width: var(--switch-account-button-w);
 
-  font-weight: 510;
+  font-weight: 500;
   font-size: 15px;
   line-height: 18px;
-
   color: #ffffff;
 
-  .logo {
-    width: 20px;
-    height: 20px;
-  }
-
-  .aliasName {
-    max-width: 80px;
-    .truncate();
-  }
-
-  .addr {
-    display: inline-flex;
-    justify-items: center;
+  .content {
+    display: flex;
     align-items: center;
-    font-weight: 400;
-    font-size: 12px;
-    line-height: 14px;
 
-    color: rgba(255, 255, 255, 0.8);
+    > * {
+      flex-shrink: 0;
+    }
+
+    .logo {
+      width: 20px;
+      height: 20px;
+    }
+
+    .aliasName {
+      flex-shrink: 1;
+      max-width: 60px;
+      width: 100%;
+      line-height: 2;
+      margin-left: 4px;
+      margin-right: 4px;
+      position: relative;
+      top: -1px;
+      .truncate();
+    }
+  }
+
+  .dockRight {
+    display: flex;
+    align-items: center;
+
+    .addr {
+      flex-shrink: 1;
+      width: 100%;
+      display: inline-flex;
+      justify-items: center;
+      align-items: center;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 14px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .dropdownIcon {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      margin-left: 4px;
+    }
   }
 }
 

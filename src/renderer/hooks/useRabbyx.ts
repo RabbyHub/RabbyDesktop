@@ -1,47 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { CHAINS, CHAINS_LIST } from '@debank/common';
 import { atom, useAtom } from 'jotai';
 import { walletController } from '../ipcRequest/rabbyx';
-
-export function useCurrentAccount() {
-  const [currentAccount, setCurrentAccount] = useState<RabbyAccount | null>(
-    null
-  );
-
-  useMemo(() => {
-    if (currentAccount?.address) {
-      walletController
-        .getAlianName(currentAccount?.address)
-        .then((alianName) => {
-          setCurrentAccount((pre) => (pre ? { ...pre, alianName } : pre));
-        });
-    }
-  }, [currentAccount?.address]);
-
-  useEffect(() => {
-    walletController.getCurrentAccount().then((account) => {
-      setCurrentAccount((pre) => ({ ...pre, ...account }));
-    });
-
-    return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:rabbyx:session-broadcast-forward-to-main',
-      (payload) => {
-        switch (payload.event) {
-          default:
-            break;
-          case 'unlock':
-          case 'rabby:chainChanged': {
-            walletController.getCurrentAccount().then((account) => {
-              setCurrentAccount((pre) => ({ ...pre, ...account }));
-            });
-          }
-        }
-      }
-    );
-  }, []);
-
-  return currentAccount;
-}
 
 const DEFAULT_ETH_CHAIN = CHAINS_LIST.find((chain) => chain.enum === 'ETH')!;
 
