@@ -1,13 +1,13 @@
 @import "@/renderer/css/mixins.less";
 
-::-webkit-scrollbar {
-  display: none;
-}
-
 :global {
   body.switch-chain-page {
     overflow-y: visible;
     overflow-x: hidden;
+
+    &::-webkit-scrollbar, *::-webkit-scrollbar {
+      display: none;
+    }
   }
 }
 
@@ -78,7 +78,7 @@
     border: 1px solid #8697ff;
     &::after {
       display: none;
-    } 
+    }
   }
   &:hover &Star {
     display: block;
