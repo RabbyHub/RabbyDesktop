@@ -25,7 +25,7 @@ const useFallbackImage = (origin: string) => {
   }, [origin]);
   const src = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x="0" y="0" width="32" height="32" fill="${encodeURIComponent(
     bgColor
-  )}"/><text x='50%' y='50%' dominant-baseline="middle" text-anchor='middle' fill='white' font-size='15' font-weight='500'>${originName?.[0]?.toUpperCase()}</text></svg>`;
+  )}"/><text x='16' y='18' dominant-baseline="middle" text-anchor='middle' fill='white' font-size='15' font-weight='500'>${originName?.[0]?.toUpperCase()}</text></svg>`;
   return src;
 };
 
