@@ -1,7 +1,62 @@
 
-v0.1.8 / 2022-11-07
+v0.2.0 / 2022-12-26
 ==================
 
+  * chore: code cleanup & normalization.
+  * feat: add switch account popup.
+  * fix: hide context popup after switched chain.
+  * feat: switch chain context menu (#20)
+  * feat: add global mask view, used for rabbyx. (#19)
+  * chore: robust change.
+  * fix: app crash on close some windows.
+  * feat: tuning style of dapp view's navigation bar.
+  * feat: hide switch-chain popup window on click outside its trigger-button.
+  * style: tuning style of dapp view's navbar.
+  * fix: use REAL background runtime of rabbyx, add `useShellWallet` as backup capability.
+  * chore: inspection helpers change.
+  * feat: add hooks about current connection.
+  * feat: add quick entry to inspect SwitchChainWindow
+  * feat: add `SwitchChainWindow`.
+  * feat: add dapp's view nav bar (#18)
+  * feat: add new type `IContextMenuPageInfo`
+  * fix: `useConnectedSite`.
+  * chore: move `useRabbyx.ts`
+  * feat: add `useCurrentAccount`
+  * feat: add `useDappNavigation`, adjust location of `useConnectedSite`.
+  * fix: get started (#17)
+  * fix: dapps context menu style
+  * feat: edit alias name (#15)
+  * feat: leave space enough for dapp's navigation view.
+  * chore: cleanup code about hooks-shell
+  * feat: adjust app's frame size const
+  * feat: simplify dapp get in context-menu window, improve dapps management. (#16)
+  * chore: type clean.
+  * feat: init import pages (#13)
+  * wip: dapps (#12)
+  * chore: remove scripts/install_rabby.sh
+  * feat: add titlebar for mainWindow. (#14)
+  * feat: add rabbyx methods about alias name.
+  * feat: add rabbyx background entry on context menu.
+  * feat: remove entry getting-started
+  * feat: support dapp pin/unpin
+  * feat: use packed rabbyx rather than development
+  * feat: add method on walletController
+  * feat: add necessary utils for context-menu on sidebar.
+  * feat: support context menu popup.
+  * feat: communicate to with latest rabbyx.
+  * feat: basic scaffold for next layout. (#11)
+  * chore: update README
+  * fix: build for renderer.dev.dll
+  * feat: merge webpack config for client bundles.
+  * feat: tuning locked window style.
+  * feat: use static dappLoadingView.
+  * feat: code normalization.
+  * feat: basic scaffold of desktop wallet with rabbyx (#10)
+
+v0.1.8 / 2022-11-07
+===================
+
+  * Release v0.1.8
   * feat: stability of security popup on address bar.
 
 v0.1.7 / 2022-11-06
