@@ -278,7 +278,7 @@ const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
 
           const firstTab = mainWin.tabs.tabList[0];
 
-          if (!firstTab) {
+          if (!firstTab.view) {
             dialog.showErrorBox(
               'No Tab Found',
               `You wanna quick debug the first tab's switchChain popup but no any dapp opened, Please open a tab and try again.`
@@ -286,15 +286,15 @@ const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
             return;
           }
 
-          emitIpcMainEvent('__internal_main:context-menu-popup:toggle-show', {
+          emitIpcMainEvent('__internal_main:popupwin-on-mainwin:toggle-show', {
             type: 'switch-chain',
             nextShow: true,
-            pos: { x: params.x, y: params.y },
+            rect: { x: params.x, y: params.y },
             pageInfo: {
               type: 'switch-chain',
               dappTabInfo: {
                 id: firstTab.id,
-                url: firstTab.webContents?.getURL(),
+                url: firstTab.view.webContents.getURL(),
               },
             },
           });

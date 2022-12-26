@@ -7,12 +7,12 @@ import './popup-view.less';
 
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 
-import SecurityCheck from '@/renderer/routes/SecurityCheck/SecurityCheck';
-import SecurityNotifications from '@/renderer/routes/SecurityNotifications/SecurityNotifications';
-import SecurityAddressbarPopup from '@/renderer/routes/SecurityAddressbarPopup/SecurityAddressbarPopup';
-import { SidebarContextMenu } from '@/renderer/components/MainWindow/SidebarContextMenu';
-import SwitchChainWindow from '@/renderer/components/ContextMenu/SwitchChainWindow';
-import SwitchAccount from '@/renderer/routes/SwitchAccount';
+import SecurityCheck from '@/renderer/routes-popup/SecurityCheck/SecurityCheck';
+import SecurityNotifications from '@/renderer/routes-popup/SecurityNotifications/SecurityNotifications';
+import SecurityAddressbarPopup from '@/renderer/routes-popup/SecurityAddressbarPopup/SecurityAddressbarPopup';
+import { SidebarContextMenu } from '@/renderer/routes-popup/SidebarContextMenu';
+import SwitchChainWindow from '@/renderer/routes-popup/SwitchChainWindow';
+import SwitchAccountWindow from '@/renderer/routes-popup/SwitchAccountWindow';
 import GlobalMask from '@/renderer/components/MainWindow/GlobalMask';
 
 function App() {
@@ -28,15 +28,12 @@ function App() {
           path="/security-addressbarpopup"
           element={<SecurityAddressbarPopup />}
         />
+        <Route path="/popup__sidebar-dapp" element={<SidebarContextMenu />} />
+        <Route path="/popup__switch-chain" element={<SwitchChainWindow />} />
         <Route
-          path="/context-menu-popup__sidebar-dapp"
-          element={<SidebarContextMenu />}
+          path="/popup__switch-account"
+          element={<SwitchAccountWindow />}
         />
-        <Route
-          path="/context-menu-popup__switch-chain"
-          element={<SwitchChainWindow />}
-        />
-        <Route path="/popup__switch-account" element={<SwitchAccount />} />
         <Route path="/global-mask" element={<GlobalMask />} />
       </Routes>
     </Router>

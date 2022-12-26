@@ -14,7 +14,7 @@ import './streams/securityAddressbarPopup';
 import './streams/securityNotification';
 import './streams/clipboard';
 import './streams/browser';
-import './streams/contextMenuPopup';
+import './streams/popupOnMainwin';
 
 import bootstrap from './streams/app';
 

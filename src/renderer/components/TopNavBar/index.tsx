@@ -12,9 +12,9 @@ import { useDappNavigation } from '@/renderer/hooks-shell/useDappNavigation';
 import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
 import { useCallback, useRef } from 'react';
 import {
-  hideContextMenuPopup,
-  showContextMenuPopup,
-} from '@/renderer/ipcRequest/contextmenu-popup';
+  hideMainwinPopup,
+  showMainwinPopup,
+} from '@/renderer/ipcRequest/mainwin-popup';
 import { useClickOutSide } from '@/renderer/hooks/useClick';
 import styles from './index.module.less';
 import { CurrentAccountAndNewAccount } from '../CurrentAccount';
@@ -43,7 +43,7 @@ const ConnectedChain = ({
   const divRef = useRef<HTMLDivElement>(null);
 
   useClickOutSide(divRef, () => {
-    hideContextMenuPopup('switch-chain');
+    hideMainwinPopup('switch-chain');
   });
   return (
     <div
@@ -102,7 +102,7 @@ export const TopNavBar = () => {
                   const el = event.currentTarget as HTMLDivElement;
                   const rect = el.getBoundingClientRect();
 
-                  showContextMenuPopup(
+                  showMainwinPopup(
                     { x: rect.x, y: rect.bottom + 10 },
                     {
                       type: 'switch-chain',

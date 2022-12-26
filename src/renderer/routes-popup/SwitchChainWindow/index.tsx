@@ -1,5 +1,5 @@
 import { useCurrentConnection } from '@/renderer/hooks/rabbyx/useConnection';
-import { useContextMenuPageInfo } from '@/renderer/hooks/useContextMenuPage';
+import { usePopupWinInfo } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { useBodyClassNameOnMounted } from '@/renderer/hooks/useMountedEffect';
 import { Input } from 'antd';
 import { useCallback } from 'react';
@@ -166,7 +166,7 @@ function SwitchChainPage({
 }
 
 export default function SwitchChainWindow() {
-  const pageInfo = useContextMenuPageInfo('switch-chain');
+  const pageInfo = usePopupWinInfo('switch-chain');
 
   if (!pageInfo?.dappTabInfo?.url) return null;
 

@@ -4,7 +4,7 @@ import { getOriginFromUrl } from '@/isomorphic/url';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { hideContextMenuPopup } from '@/renderer/ipcRequest/contextmenu-popup';
+import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import { usePreference } from './usePreference';
 import useDebounceValue from '../useDebounceValue';
 
@@ -38,7 +38,7 @@ export function useCurrentConnection(tab: Pick<chrome.tabs.Tab, 'id' | 'url'>) {
       });
       getCurrentSite();
 
-      hideContextMenuPopup('switch-chain');
+      hideMainwinPopup('switch-chain');
     },
     [currentSite, getCurrentSite]
   );

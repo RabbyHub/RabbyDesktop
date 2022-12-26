@@ -1,5 +1,5 @@
 import { RefObject, useCallback, useEffect, useLayoutEffect } from 'react';
-import { hideContextMenuPopup } from '../ipcRequest/contextmenu-popup';
+import { hideMainwinPopup } from '../ipcRequest/mainwin-popup';
 
 export function useClickOutSide(
   ref: RefObject<HTMLElement>,
@@ -25,7 +25,7 @@ export function useClickOutSide(
 export function useClickMainWindowHideContextMenu() {
   useLayoutEffect(() => {
     const listener = () => {
-      hideContextMenuPopup('sidebar-dapp');
+      hideMainwinPopup('sidebar-dapp');
     };
     document.body.addEventListener('click', listener);
 

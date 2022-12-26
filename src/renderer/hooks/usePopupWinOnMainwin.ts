@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export function useContextMenuPageInfo<T extends IContextMenuPageInfo['type']>(
+export function usePopupWinInfo<T extends IContextMenuPageInfo['type']>(
   type: T
 ) {
   const [{ pageInfo }, setInfo] = useState<{
@@ -13,7 +13,7 @@ export function useContextMenuPageInfo<T extends IContextMenuPageInfo['type']>(
 
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:context-menu-popup:on-visiblechange',
+      '__internal_push:popupwin-on-mainwin:on-visiblechange',
       (payload) => {
         if (payload.type !== type) return;
 

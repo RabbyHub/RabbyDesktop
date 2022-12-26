@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
 import { AutoUpdate } from '@/renderer/routes/Dapps/components/AutoUpdate';
-import { showContextMenuPopup } from '@/renderer/ipcRequest/contextmenu-popup';
+import { showMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
 import classNames from 'classnames';
 import { useLayoutEffect, useMemo } from 'react';
@@ -81,7 +81,7 @@ const TabList = ({
 
               const x = event.clientX;
               const y = event.clientY;
-              showContextMenuPopup(
+              showMainwinPopup(
                 { x, y },
                 {
                   type: 'sidebar-dapp',

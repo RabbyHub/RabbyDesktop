@@ -87,7 +87,7 @@ const sidebarReady = onMainWindowReady().then(async (mainWin) => {
   });
 
   await sidebarAppPopup.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}#/context-menu-popup__sidebar-dapp`
+    `${RABBY_POPUP_GHOST_VIEW_URL}#/popup__sidebar-dapp`
   );
 
   // debug-only
@@ -136,7 +136,7 @@ const switchChainReady = onMainWindowReady().then(async (mainWin) => {
   });
 
   await switchChainPopup.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}#/context-menu-popup__switch-chain`
+    `${RABBY_POPUP_GHOST_VIEW_URL}#/popup__switch-chain`
   );
 
   // debug-only
@@ -230,7 +230,7 @@ const SIZE_MAP: Record<
 };
 
 const { handler } = onIpcMainEvent(
-  '__internal_rpc:context-menu-popup:toggle-show',
+  '__internal_rpc:popupwin-on-mainwin:toggle-show',
   async (_, payload) => {
     const mainWindow = (await onMainWindowReady()).window;
     const { sidebarContext, switchChain, switchAccount } = await firstValueFrom(
@@ -257,7 +257,7 @@ const { handler } = onIpcMainEvent(
       });
       sendToWebContents(
         targetWin.webContents,
-        '__internal_push:context-menu-popup:on-visiblechange',
+        '__internal_push:popupwin-on-mainwin:on-visiblechange',
         {
           type: payload.type,
           visible: true,
@@ -268,7 +268,7 @@ const { handler } = onIpcMainEvent(
     } else {
       sendToWebContents(
         targetWin.webContents,
-        '__internal_push:context-menu-popup:on-visiblechange',
+        '__internal_push:popupwin-on-mainwin:on-visiblechange',
         {
           type: payload.type,
           visible: false,
@@ -281,7 +281,7 @@ const { handler } = onIpcMainEvent(
 
 if (!IS_RUNTIME_PRODUCTION) {
   onIpcMainInternalEvent(
-    '__internal_main:context-menu-popup:toggle-show',
+    '__internal_main:popupwin-on-mainwin:toggle-show',
     (payload) => {
       handler(null as any, payload);
     }

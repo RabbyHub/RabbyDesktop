@@ -4,9 +4,9 @@ import {
 } from '@/renderer/hooks/rabbyx/useAccount';
 import { useClickOutSide } from '@/renderer/hooks/useClick';
 import {
-  hideContextMenuPopup,
-  showContextMenuPopup,
-} from '@/renderer/ipcRequest/contextmenu-popup';
+  hideMainwinPopup,
+  showMainwinPopup,
+} from '@/renderer/ipcRequest/mainwin-popup';
 import clsx from 'clsx';
 import { useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router';
@@ -15,7 +15,7 @@ import styles from './index.module.less';
 export const CurrentAccount = ({ className }: { className?: string }) => {
   const divRef = useRef<HTMLDivElement>(null);
   useClickOutSide(divRef, () => {
-    hideContextMenuPopup('switch-account');
+    hideMainwinPopup('switch-account');
   });
   const { currentAccount } = useCurrentAccount();
   const { accounts } = useAccounts();
@@ -41,7 +41,7 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
         const el = event.currentTarget as HTMLDivElement;
         const rect = el.getBoundingClientRect();
 
-        showContextMenuPopup(
+        showMainwinPopup(
           {
             x: rect.x,
             y: rect.bottom + 10,

@@ -2,16 +2,16 @@ import {
   useAccounts,
   useCurrentAccount,
 } from '@/renderer/hooks/rabbyx/useAccount';
-import { useContextMenuPageInfo } from '@/renderer/hooks/useContextMenuPage';
+import { usePopupWinInfo } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { useBodyClassNameOnMounted } from '@/renderer/hooks/useMountedEffect';
-import { hideContextMenuPopup } from '@/renderer/ipcRequest/contextmenu-popup';
+import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import classNames from 'classnames';
 import { useEffect } from 'react';
 import styles from './index.module.less';
 
-export default function SwitchAccountPopup() {
+export default function SwitchAccountWindow() {
   useBodyClassNameOnMounted('switch-account-popup');
-  const pageInfo = useContextMenuPageInfo('switch-account');
+  const pageInfo = usePopupWinInfo('switch-account');
 
   const { currentAccount, switchAccount } = useCurrentAccount();
   const { accounts, fetchAccounts } = useAccounts();
@@ -25,7 +25,7 @@ export default function SwitchAccountPopup() {
   if (!accounts.length) return null;
 
   return (
-    <div className={styles.SwitchAccountPopup}>
+    <div className={styles.SwitchAccountWindow}>
       {accounts.map((account) => {
         return (
           <div
@@ -36,7 +36,7 @@ export default function SwitchAccountPopup() {
             )}
             onClick={() => {
               switchAccount(account);
-              hideContextMenuPopup('switch-account');
+              hideMainwinPopup('switch-account');
             }}
           >
             <div className={styles.accountTypeIcon}>

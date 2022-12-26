@@ -3,9 +3,9 @@ import {
   RCIconUnpinFill,
   RCIconClose,
 } from '@/../assets/icons/internal-homepage';
-import { useContextMenuPageInfo } from '@/renderer/hooks/useContextMenuPage';
+import { usePopupWinInfo } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { useDapp } from '@/renderer/hooks/useDappsMngr';
-import { hideContextMenuPopup } from '@/renderer/ipcRequest/contextmenu-popup';
+import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import { toggleDappPinned } from '@/renderer/ipcRequest/dapps';
 import {
   closeTabFromInternalPage,
@@ -16,7 +16,7 @@ import { Menu } from 'antd';
 import styles from './index.module.less';
 
 export const SidebarContextMenu = () => {
-  const pageInfo = useContextMenuPageInfo('sidebar-dapp');
+  const pageInfo = usePopupWinInfo('sidebar-dapp');
 
   const origin = pageInfo?.dappTabInfo?.origin || '';
   const dappInfo = useDapp(origin);
@@ -48,7 +48,7 @@ export const SidebarContextMenu = () => {
             default:
               break;
           }
-          hideContextMenuPopup('sidebar-dapp');
+          hideMainwinPopup('sidebar-dapp');
         }}
         items={[
           dappInfo?.isPinned

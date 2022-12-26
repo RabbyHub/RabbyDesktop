@@ -30,7 +30,7 @@ type M2RChanneMessagePayload = {
   '__internal_push:*:pinnedListChanged': {
     pinnedList: string[];
   };
-  '__internal_push:context-menu-popup:on-visiblechange':
+  '__internal_push:popupwin-on-mainwin:on-visiblechange':
     | {
         type: IContextMenuPageInfo['type'];
         visible: true;
@@ -283,7 +283,7 @@ type ChannelMessagePayload = {
     send: [];
     response: [];
   };
-  '__internal_rpc:context-menu-popup:toggle-show': {
+  '__internal_rpc:popupwin-on-mainwin:toggle-show': {
     send: [
       | {
           type: IContextMenuPageInfo['type'];
@@ -377,7 +377,7 @@ type MainInternalsMessagePayload = {
     send: [pinnedList: IDapp['origin'][]];
     response: [];
   };
-  '__internal_main:context-menu-popup:toggle-show': ChannelMessagePayload['__internal_rpc:context-menu-popup:toggle-show'];
+  '__internal_main:popupwin-on-mainwin:toggle-show': ChannelMessagePayload['__internal_rpc:popupwin-on-mainwin:toggle-show'];
   '__internal_main:tabbed-window:destroyed': {
     send: [windowId: Electron.BrowserWindow['id']];
     response: [];
