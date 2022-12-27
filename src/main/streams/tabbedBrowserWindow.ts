@@ -102,9 +102,9 @@ export async function createRabbyxNotificationWindow({
   width,
   height,
 }: {
-  url: string
-  width?: number,
-  height?: number,
+  url: string;
+  width?: number;
+  height?: number;
 }) {
   const mainWin = await onMainWindowReady();
 
@@ -120,7 +120,7 @@ export async function createRabbyxNotificationWindow({
       resizable: false,
       parent: mainWin.window,
       width: width || 400,
-      height: height || (mainBounds.height - topOffset),
+      height: height || mainBounds.height - topOffset,
       x: mainBounds.x + mainBounds.width - 400,
       y: mainBounds.y + topOffset,
       type: 'popup',

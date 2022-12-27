@@ -193,6 +193,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
             topbarStacks: {
               navigation: win.getMeta().hasNavigationBar,
             },
+            initDetails: details,
           });
 
           if (details.url) tab.loadURL(details.url);
@@ -213,6 +214,15 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
         }
       }
     },
+
+    assignTabDetails: (details, tab) => {
+      if (!details.url) {
+        const window = findByWindowId(details.windowId);
+        const foundTab = window?.tabs.get(tab.id);
+        details.url = foundTab?.getInitialUrl() || '';
+      }
+    },
+
     selectTab: (tab, browserWindow) => {
       const win = getWindowFromBrowserWindow(browserWindow);
       win?.tabs.select(tab.id);

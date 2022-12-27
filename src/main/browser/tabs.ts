@@ -3,7 +3,7 @@ import { BrowserView, BrowserWindow } from 'electron';
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
 import { NATIVE_HEADER_H } from '../../isomorphic/const-size-classical';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
-import { emitIpcMainEvent, onIpcMainEvent } from '../utils/ipcMainEvents';
+import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import { dappStore } from '../store/dapps';
 
 type ITabOptions = {
@@ -12,7 +12,7 @@ type ITabOptions = {
     tabs?: boolean;
     navigation?: boolean;
   };
-  initialUrl?: string;
+  initDetails?: Partial<chrome.tabs.CreateProperties>;
   isOfMainWindow?: boolean;
 };
 
@@ -38,18 +38,18 @@ export class Tab {
   tabs: Tabs;
 
   private $meta: {
-    initialUrl: ITabOptions['initialUrl'];
+    initDetails: ITabOptions['initDetails'];
     topbarStacks: ITabOptions['topbarStacks'];
     isOfMainWindow: boolean;
   } = {
-    initialUrl: '',
+    initDetails: {},
     topbarStacks: { ...DEFAULT_TOPBAR_STACKS },
     isOfMainWindow: false,
   };
 
   constructor(
     ofWindow: BrowserWindow,
-    { tabs, topbarStacks, initialUrl, isOfMainWindow }: ITabOptions
+    { tabs, topbarStacks, initDetails, isOfMainWindow }: ITabOptions
   ) {
     this.tabs = tabs;
     this.view = new BrowserView();
@@ -65,7 +65,7 @@ export class Tab {
       });
     });
 
-    this.$meta.initialUrl = initialUrl || '';
+    this.$meta.initDetails = { ...initDetails };
     this.$meta.topbarStacks = { ...DEFAULT_TOPBAR_STACKS, ...topbarStacks };
     this.$meta.isOfMainWindow = !!isOfMainWindow;
 
@@ -112,7 +112,7 @@ export class Tab {
   }
 
   getInitialUrl() {
-    return this.$meta.initialUrl;
+    return this.$meta.initDetails?.url;
   }
 
   async loadURL(url: string) {

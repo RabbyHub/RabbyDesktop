@@ -104,10 +104,12 @@ app.on('web-contents-created', async (evtApp, webContents) => {
             const mainWindow = tabbedWin.window;
 
             if (isFromExt) {
-              const tab = tabbedWin!.createTab();
+              const tab = tabbedWin!.createTab({
+                initDetails: details,
+              });
               tab?.loadURL(details.url);
               if (isRabbyXPage(details.url, rabbyExtId, 'background')) {
-                tab?.webContents!.openDevTools({
+                tab?.view?.webContents!.openDevTools({
                   mode: 'bottom',
                   activate: true,
                 });
@@ -115,7 +117,9 @@ app.on('web-contents-created', async (evtApp, webContents) => {
               break;
             }
 
-            const continualOpenedTab = tabbedWin.createTab();
+            const continualOpenedTab = tabbedWin.createTab({
+              initDetails: details,
+            });
             continualOpenedTab?.loadURL(details.url);
 
             const closeOpenedTab = () => {
@@ -281,7 +285,7 @@ export default function bootstrap() {
       getWebuiExtId().then((id) => {
         setupMenu({
           getFocusedWebContents: () => {
-            return getFocusedWindow().getFocusedTab()?.webContents;
+            return getFocusedWindow().getFocusedTab()?.view?.webContents;
           },
           topbarExtId: id,
         });
