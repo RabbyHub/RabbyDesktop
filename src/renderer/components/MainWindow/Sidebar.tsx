@@ -144,7 +144,7 @@ export default function MainWindowSidebar() {
       '__internal_push:mainwindow:all-tabs-closed',
       () => {
         if (!matchedSE) {
-          navigate(`/my-dapps`);
+          navigate(`/mainwin/my-dapps`, { replace: true });
         }
       }
     );

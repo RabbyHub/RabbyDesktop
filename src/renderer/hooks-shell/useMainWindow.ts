@@ -264,7 +264,6 @@ export function useForwardFromInternalPage(
       '__internal_forward:main-window:close-tab',
       async (tabId) => {
         await chrome.tabs.remove(tabId);
-        router.navigate('/mainwin/my-dapps', { replace: true });
       }
     );
   }, [router]);
