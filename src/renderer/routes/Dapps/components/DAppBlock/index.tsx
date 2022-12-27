@@ -27,7 +27,7 @@ export const DAppBlock = ({
   onOpDapp?: IOnOpDapp;
 }>) => {
   const ref = useRef<HTMLDivElement>(null);
-  const navigateTo = useNavigateToDappRoute();
+  const navigateToDapp = useNavigateToDappRoute();
 
   if (onAdd) {
     return (
@@ -113,7 +113,7 @@ export const DAppBlock = ({
           target="_blank"
           rel="noreferrer"
           onClick={() => {
-            navigateTo(dapp?.origin);
+            navigateToDapp(dapp?.origin);
           }}
         >
           <DappFavicon

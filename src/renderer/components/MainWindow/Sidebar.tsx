@@ -57,7 +57,7 @@ const TabList = ({
   activeTabId?: chrome.tabs.Tab['id'];
   dappActions: ReturnType<typeof useSidebarDapps>['dappActions'];
 }) => {
-  const navigateTo = useNavigateToDappRoute();
+  const navigateToDapp = useNavigateToDappRoute();
   const location = useLocation();
   if (!dapps?.length) {
     return null;
@@ -81,7 +81,7 @@ const TabList = ({
                 styles.active
             )}
             onClick={() => {
-              navigateTo(dapp.origin);
+              navigateToDapp(dapp.origin);
               if (dapp.tab) {
                 dappActions.onTabClick(dapp.tab);
               } else {
