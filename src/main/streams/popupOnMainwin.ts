@@ -18,6 +18,24 @@ import {
 } from '../utils/browser';
 import { onMainWindowReady } from '../utils/stream-helpers';
 
+async function hidePopupOnMainWindow(
+  targetWin: BrowserWindow | null,
+  type: IContextMenuPageInfo['type']
+) {
+  if (!targetWin) return;
+
+  sendToWebContents(
+    targetWin.webContents,
+    '__internal_push:popupwin-on-mainwin:on-visiblechange',
+    {
+      type,
+      visible: false,
+    }
+  );
+
+  hidePopupWindow(targetWin);
+}
+
 function updateSubWindowRect(
   parentWin: BrowserWindow,
   window: BrowserWindow,
@@ -70,7 +88,8 @@ const sidebarReady = onMainWindowReady().then(async (mainWin) => {
 
   updateSubWindowRect(mainWin.window, sidebarAppPopup);
   const onTargetWinUpdate = () => {
-    hidePopupWindow(sidebarAppPopup);
+    if (sidebarAppPopup.isVisible())
+      hidePopupOnMainWindow(sidebarAppPopup, 'sidebar-dapp');
   };
   targetWin.on('show', onTargetWinUpdate);
   targetWin.on('move', onTargetWinUpdate);
@@ -79,11 +98,11 @@ const sidebarReady = onMainWindowReady().then(async (mainWin) => {
   targetWin.on('restore', onTargetWinUpdate);
 
   mainWin.tabs.on('tab-focused', () => {
-    hidePopupWindow(sidebarAppPopup);
+    hidePopupOnMainWindow(sidebarAppPopup, 'sidebar-dapp');
   });
 
   mainWin.window.on('focus', () => {
-    hidePopupWindow(sidebarAppPopup);
+    hidePopupOnMainWindow(sidebarAppPopup, 'sidebar-dapp');
   });
 
   await sidebarAppPopup.webContents.loadURL(
@@ -119,7 +138,8 @@ const switchChainReady = onMainWindowReady().then(async (mainWin) => {
 
   updateSubWindowRect(mainWin.window, switchChainPopup);
   const onTargetWinUpdate = () => {
-    hidePopupWindow(switchChainPopup);
+    if (switchChainPopup.isVisible())
+      hidePopupOnMainWindow(switchChainPopup, 'switch-chain');
   };
   targetWin.on('show', onTargetWinUpdate);
   targetWin.on('move', onTargetWinUpdate);
@@ -128,11 +148,11 @@ const switchChainReady = onMainWindowReady().then(async (mainWin) => {
   targetWin.on('restore', onTargetWinUpdate);
 
   mainWin.tabs.on('tab-focused', () => {
-    hidePopupWindow(switchChainPopup);
+    hidePopupOnMainWindow(switchChainPopup, 'switch-chain');
   });
 
   mainWin.window.on('focus', () => {
-    hidePopupWindow(switchChainPopup);
+    hidePopupOnMainWindow(switchChainPopup, 'switch-chain');
   });
 
   await switchChainPopup.webContents.loadURL(
@@ -168,7 +188,8 @@ const switchAccountReady = onMainWindowReady().then(async (mainWin) => {
 
   updateSubWindowRect(mainWin.window, switchAccountPopup);
   const onTargetWinUpdate = () => {
-    hidePopupWindow(switchAccountPopup);
+    if (switchAccountPopup.isVisible())
+      hidePopupOnMainWindow(switchAccountPopup, 'switch-account');
   };
   targetWin.on('show', onTargetWinUpdate);
   targetWin.on('move', onTargetWinUpdate);
@@ -177,11 +198,11 @@ const switchAccountReady = onMainWindowReady().then(async (mainWin) => {
   targetWin.on('restore', onTargetWinUpdate);
 
   mainWin.tabs.on('tab-focused', () => {
-    hidePopupWindow(switchAccountPopup);
+    hidePopupOnMainWindow(switchAccountPopup, 'switch-account');
   });
 
   mainWin.window.on('focus', () => {
-    hidePopupWindow(switchAccountPopup);
+    hidePopupOnMainWindow(switchAccountPopup, 'switch-account');
   });
 
   await switchAccountPopup.webContents.loadURL(
@@ -193,7 +214,7 @@ const switchAccountReady = onMainWindowReady().then(async (mainWin) => {
     // switchAccountPopup.webContents.openDevTools({ mode: 'detach' });
   }
 
-  hidePopupWindow(switchAccountPopup);
+  hidePopupOnMainWindow(switchAccountPopup, 'switch-account');
 
   return switchAccountPopup;
 });
@@ -266,15 +287,7 @@ const { handler } = onIpcMainEvent(
       );
       showPopupWindow(targetWin);
     } else {
-      sendToWebContents(
-        targetWin.webContents,
-        '__internal_push:popupwin-on-mainwin:on-visiblechange',
-        {
-          type: payload.type,
-          visible: false,
-        }
-      );
-      hidePopupWindow(targetWin);
+      hidePopupOnMainWindow(targetWin, payload.type);
     }
   }
 );
