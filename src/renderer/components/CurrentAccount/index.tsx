@@ -25,7 +25,7 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
       currentAccount?.address
         ? `${currentAccount?.address.slice(
             0,
-            4
+            6
           )}...${currentAccount?.address.slice(-4)}`
         : '',
     [currentAccount?.address]
@@ -56,7 +56,7 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
       <div className={styles.content}>
         <img
           className={styles.logo}
-          src="rabby-internal://assets/icons/import/key.svg"
+          src="rabby-internal://assets/icons/wallet/private-key.svg"
           alt="key"
         />
         <span className={styles.aliasName}>{currentAccount?.alianName}</span>
