@@ -220,10 +220,10 @@ export default function MainWindowSidebar() {
           <li
             className={classNames(
               styles.routeItem,
-              matchPath('/settings', location.pathname) && styles.active
+              matchPath('/mainwin/settings', location.pathname) && styles.active
             )}
             onClick={() => {
-              navigateTo('/mainwin/swap');
+              navigate('/mainwin/settings');
             }}
           >
             <div className={styles.routeItemInner}>

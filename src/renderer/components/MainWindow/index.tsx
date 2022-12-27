@@ -20,6 +20,7 @@ import {
   useForwardFromInternalPage,
 } from '@/renderer/hooks-shell/useMainWindow';
 import { useClickMainWindowHideContextMenu } from '@/renderer/hooks/useClick';
+import ComingSoon from '@/renderer/routes/ComingSoon';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -96,7 +97,7 @@ const router = createRouter([
     children: [
       {
         path: 'home',
-        element: <>Unimplemented Home</>,
+        element: <ComingSoon pageName="Home" />,
       },
       {
         path: 'my-dapps',
@@ -104,7 +105,7 @@ const router = createRouter([
       },
       {
         path: 'swap',
-        element: <>Unimplemented Swap</>,
+        element: <ComingSoon pageName="Swap" />,
       },
       {
         path: 'dapps/:origin',
@@ -113,6 +114,10 @@ const router = createRouter([
             <TopNavBar />
           </DappViewWrapper>
         ),
+      },
+      {
+        path: 'settings',
+        element: <ComingSoon pageName="Settings" />,
       },
     ],
   },
