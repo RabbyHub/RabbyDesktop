@@ -2,6 +2,10 @@
 
 @import './size.css';
 
+@font-face {
+  font-family: 'SF Pro';
+  src: url('rabby-internal://assets/fonts/SF-Pro.ttf');
+}
 :root {
-  --default-font: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";;
+  --default-font: SF Pro, Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
