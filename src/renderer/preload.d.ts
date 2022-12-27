@@ -283,6 +283,10 @@ type ChannelMessagePayload = {
     send: [];
     response: [];
   };
+  '__internal_rpc:mainwindow:make-sure-dapp-opened': {
+    send: [dappOrigin: string];
+    response: [];
+  };
   '__internal_rpc:popupwin-on-mainwin:toggle-show': {
     send: [
       | {

@@ -4,7 +4,7 @@ import { AutoUpdate } from '@/renderer/routes/Dapps/components/AutoUpdate';
 import { showMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
 import classNames from 'classnames';
-import React, { useLayoutEffect, useMemo } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo } from 'react';
 import { useNavigate, useLocation, matchPath } from 'react-router-dom';
 
 import {
@@ -12,6 +12,7 @@ import {
   useSidebarDapps,
 } from '@/renderer/hooks-shell/useMainWindow';
 import { useHasNewRelease } from '@/renderer/hooks/useAppUpdator';
+import { makeSureDappOpened } from '@/renderer/ipcRequest/mainwin';
 import styles from './Sidebar.module.less';
 import { DappFavicon } from '../DappFavicon';
 
@@ -127,10 +128,9 @@ export default function MainWindowSidebar() {
     useSidebarDapps();
 
   const navigate = useNavigate();
-  const navigateTo = useNavigateToDappRoute();
   const location = useLocation();
 
-  const { matchedSE } = useMemo(() => {
+  const { matchedSE, matchedDapp } = useMemo(() => {
     return {
       matchedSE: StaticEntries.find((sE) =>
         matchPath(sE.path, location.pathname)
@@ -153,6 +153,12 @@ export default function MainWindowSidebar() {
       dispose?.();
     };
   }, [navigate, matchedSE]);
+
+  useEffect(() => {
+    if (matchedDapp) {
+      makeSureDappOpened(matchedDapp.params.origin!);
+    }
+  }, [matchedDapp]);
 
   const hasNewRelease = useHasNewRelease();
 

@@ -151,6 +151,19 @@ onIpcMainEvent('__internal_webui-window-close', (_, winId, webContentsId) => {
   tabToClose?.destroy();
 });
 
+onIpcMainEvent(
+  '__internal_rpc:mainwindow:make-sure-dapp-opened',
+  async (evt, dappOrigin) => {
+    const tabbedWin = await onMainWindowReady();
+
+    const foundTab = tabbedWin.tabs.findByOrigin(dappOrigin);
+
+    if (foundTab?.id && tabbedWin.tabs.selected?.id !== foundTab.id) {
+      tabbedWin.tabs.select(foundTab.id);
+    }
+  }
+);
+
 onIpcMainInternalEvent('__internal_main:tabbed-window:destroyed', (winId) => {
   if (RABBYX_WINDOWID_S.has(winId)) {
     RABBYX_WINDOWID_S.delete(winId);

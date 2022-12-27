@@ -37,3 +37,10 @@ export function getNavInfoByTabId(tabId: Exclude<chrome.tabs.Tab['id'], void>) {
     );
   });
 }
+
+export function makeSureDappOpened(origin: IDapp['origin']) {
+  window.rabbyDesktop.ipcRenderer.sendMessage(
+    '__internal_rpc:mainwindow:make-sure-dapp-opened',
+    origin
+  );
+}
