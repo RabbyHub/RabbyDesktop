@@ -55,20 +55,22 @@
       }
     }
 
-    .dockRight {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      height: 100%;
-      padding-left: 8px;
-      padding-right: 12px;
-      flex-shrink: 0;
+    &:hover .historyBar {
+      opacity: 1;
+      transition: opacity 0.2s;
     }
 
-    .dockRight .historyBar {
-      display: none;
+    .historyBar {
+      opacity: 0;
+      display: flex;
       align-items: center;
       gap: 12px;
+      margin-left: auto;
+      padding: 0 12px;
+
+      &.hidden {
+        opacity: 0;
+      }
 
       & > * {
         cursor: pointer;
@@ -90,17 +92,11 @@
       }
     }
 
-    .dockRight .chain {
-      margin-left: auto;
-    }
-
-    &:hover .historyBar {
+    .connectChainBox {
+      height: 100%;
+      padding-right: 12px;
       display: flex;
-      margin-left: auto;
-
-      & + .chain {
-        margin-left: 12px;
-      }
+      align-items: center;
     }
   }
 
