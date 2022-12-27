@@ -4,15 +4,24 @@ import { AutoUpdate } from '@/renderer/routes/Dapps/components/AutoUpdate';
 import { showMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
 import classNames from 'classnames';
-import { useLayoutEffect, useMemo } from 'react';
+import React, { useLayoutEffect, useMemo } from 'react';
 import { useNavigate, useLocation, matchPath } from 'react-router-dom';
 
 import {
   IDappWithTabInfo,
   useSidebarDapps,
 } from '@/renderer/hooks-shell/useMainWindow';
+import { useHasNewRelease } from '@/renderer/hooks/useAppUpdator';
 import styles from './Sidebar.module.less';
 import { DappFavicon } from '../DappFavicon';
+
+// keep in sync with css
+const RouteItemH = 52;
+const DividerSizes = {
+  height: 1,
+  marginTop: 8,
+  marginBottom: 8,
+};
 
 const StaticEntries = [
   {
@@ -35,10 +44,14 @@ const StaticEntries = [
 const DappRoutePatter = '/mainwin/dapps/:origin';
 
 const TabList = ({
+  className,
   dapps,
   activeTabId,
   dappActions,
+  style,
 }: {
+  style?: React.CSSProperties;
+  className?: string;
   dapps: IDappWithTabInfo[];
   activeTabId?: chrome.tabs.Tab['id'];
   dappActions: ReturnType<typeof useSidebarDapps>['dappActions'];
@@ -50,7 +63,7 @@ const TabList = ({
   }
 
   return (
-    <ul className={styles.routeList}>
+    <ul className={classNames(styles.routeList, className)} style={style}>
       {dapps.map((dapp) => {
         const { tab } = dapp;
         const faviconUrl =
@@ -141,47 +154,64 @@ export default function MainWindowSidebar() {
     };
   }, [navigate, matchedSE]);
 
+  const hasNewRelease = useHasNewRelease();
+
   return (
-    <div className={styles.Sidebar}>
+    <div
+      className={classNames(
+        styles.Sidebar,
+        hasNewRelease && styles.hasNewRelease
+      )}
+    >
       <div className={styles.logoWrapper}>
         <img
           className={styles.logo}
           src="rabby-internal://assets/icons/mainwin-sidebar/sidebar-logo.svg"
         />
       </div>
-      <ul className={styles.routeList}>
-        {StaticEntries.map((sE) => {
-          return (
-            <li
-              key={`sE-${sE.path}`}
-              className={classNames(
-                styles.routeItem,
-                matchPath(sE.path, location.pathname) && styles.active
-              )}
-              onClick={() => {
-                navigate(sE.path);
-              }}
-            >
-              <div className={styles.routeItemInner}>
-                <img className={styles.routeLogo} src={sE.logoSrc} />
-                <span className={styles.routeTitle}>{sE.title}</span>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+      <div className={styles.dappsRouteList}>
+        <ul className={styles.routeList}>
+          {StaticEntries.map((sE) => {
+            return (
+              <li
+                key={`sE-${sE.path}`}
+                className={classNames(
+                  styles.routeItem,
+                  matchPath(sE.path, location.pathname) && styles.active
+                )}
+                onClick={() => {
+                  navigate(sE.path);
+                }}
+              >
+                <div className={styles.routeItemInner}>
+                  <img className={styles.routeLogo} src={sE.logoSrc} />
+                  <span className={styles.routeTitle}>{sE.title}</span>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
 
-      <TabList
-        dappActions={dappActions}
-        dapps={pinnedDapps}
-        activeTabId={activeTab?.id}
-      />
-      {unpinnedOpenedDapps?.length ? <div className={styles.divider} /> : null}
-      <TabList
-        dappActions={dappActions}
-        dapps={unpinnedOpenedDapps}
-        activeTabId={activeTab?.id}
-      />
+        <TabList
+          className={styles.pinnedList}
+          style={{
+            maxHeight: `calc(100% - ${StaticEntries.length * RouteItemH}px)`,
+            // height: `${pinnedDapps.length * 84}px`,
+          }}
+          dappActions={dappActions}
+          dapps={pinnedDapps}
+          activeTabId={activeTab?.id}
+        />
+        {unpinnedOpenedDapps?.length ? (
+          <div className={styles.divider} style={DividerSizes} />
+        ) : null}
+        <TabList
+          className={styles.unpinnedList}
+          dappActions={dappActions}
+          dapps={unpinnedOpenedDapps}
+          activeTabId={activeTab?.id}
+        />
+      </div>
       <div className={styles.navFooter}>
         <div className={styles.update}>
           <AutoUpdate />

@@ -1,7 +1,8 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 /// <reference path="../../renderer/preload.d.ts" />
 
-import { useCallback, useEffect, useState } from 'react';
+import { atom, useAtom } from 'jotai';
+import { useCallback, useEffect } from 'react';
 import { randString } from '../../isomorphic/string';
 
 async function checkIfNewRelease() {
@@ -73,18 +74,27 @@ async function startDownload({
   });
 }
 
-export function useAppUpdator() {
-  const [releaseCheckInfo, setReleaseCheckInfo] =
-    useState<IAppUpdatorCheckResult>({
-      hasNewRelease: false,
-      releaseVersion: null,
-    });
+const releaseCheckInfoAtom = atom({
+  hasNewRelease: false,
+  releaseVersion: null,
+} as IAppUpdatorCheckResult);
+const downloadInfoAtom = atom(null as null | IAppUpdatorDownloadProgress);
 
-  const [downloadInfo, setDownloadInfo] =
-    useState<null | IAppUpdatorDownloadProgress>(null);
-  const onDownload: OnDownloadFunc = useCallback((info) => {
-    setDownloadInfo(info);
-  }, []);
+export function useHasNewRelease() {
+  const [releaseCheckInfo] = useAtom(releaseCheckInfoAtom);
+  return releaseCheckInfo.hasNewRelease;
+}
+
+export function useAppUpdator() {
+  const [releaseCheckInfo, setReleaseCheckInfo] = useAtom(releaseCheckInfoAtom);
+  const [downloadInfo, setDownloadInfo] = useAtom(downloadInfoAtom);
+
+  const onDownload: OnDownloadFunc = useCallback(
+    (info) => {
+      setDownloadInfo(info);
+    },
+    [setDownloadInfo]
+  );
 
   const requestDownload = useCallback(async () => {
     await startDownload({ onDownload });
@@ -106,7 +116,7 @@ export function useAppUpdator() {
     return () => {
       clearInterval(timer);
     };
-  }, []);
+  }, [setReleaseCheckInfo]);
 
   return {
     releaseCheckInfo,
