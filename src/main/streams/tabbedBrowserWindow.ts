@@ -112,6 +112,9 @@ export async function createRabbyxNotificationWindow({
   const topOffset =
     (process.platform === 'win32' ? NativeAppSizes.windowTitlebarHeight : 0) +
     NativeAppSizes.mainWindowDappTopOffset;
+
+  const maxHeight = mainBounds.height - topOffset;
+
   const win = await createWindow({
     defaultTabUrl: url,
     windowType: 'popup',
@@ -119,8 +122,8 @@ export async function createRabbyxNotificationWindow({
     window: {
       resizable: false,
       parent: mainWin.window,
-      width: width || 400,
-      height: height || mainBounds.height - topOffset,
+      width: Math.min(width || 400, 400),
+      height: Math.min(height || maxHeight, maxHeight),
       x: mainBounds.x + mainBounds.width - 400,
       y: mainBounds.y + topOffset,
       type: 'popup',
