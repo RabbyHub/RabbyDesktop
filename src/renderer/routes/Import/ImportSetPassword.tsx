@@ -118,6 +118,12 @@ const ImportSetPassword = () => {
           name="agreement"
           required
           valuePropName="checked"
+          rules={[
+            {
+              required: true,
+              message: 'Should accept agreement',
+            },
+          ]}
           className={styles.agreement}
         >
           <Checkbox className={styles.checkbox}>
