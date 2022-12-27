@@ -1,7 +1,24 @@
 
-v0.2.1 / 2022-12-26
+v0.2.2 / 2022-12-27
 ==================
 
+  * chore: tuning size of rabbyx's notification window.
+  * fix: should switch to last tab on close one tab, or switch to /my-dapps on all tabs closed.
+  * chore: tuning for next release.
+  * fix: make sure dapp view opened on route matched.
+  * feat: for mainWindow, use ComingSoon as unimplement routes.
+  * chore: improve close behavior for popup windows
+  * feat: make settings area in sidebar sticky. (#26)
+  * fix: accept agreenment tip (#24)
+  * fix: sidebar context menu style (#23)
+  * fix: TopNavBat style (#25)
+  * feat: use embeded font file. (#22)
+  * fix: assign details.url for loading tab webContents.
+
+v0.2.1 / 2022-12-26
+===================
+
+  * Release v0.2.1
   * feat: tuning style on create rabbyx's notification window.
   * fix: app crash on axios fetch failure
   * chore: change some styles (#21)
