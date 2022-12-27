@@ -50,6 +50,7 @@ export const SidebarContextMenu = () => {
           }
           hideMainwinPopup('sidebar-dapp');
         }}
+        className={styles.dappDropdownMenu}
         items={[
           dappInfo?.isPinned
             ? {
