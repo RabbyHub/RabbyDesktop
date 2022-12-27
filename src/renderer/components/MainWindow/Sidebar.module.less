@@ -2,24 +2,29 @@
 @import '../../css/vars.less';
 
 @route-item-h: 52px;
+@sidebar-footer-h: 100px;
+@sidebar-footer-with-releaseinfo-h: 160px;
+
+@logoWrapper-height: 124px - @TITLEBAR_H;
 
 .Sidebar {
   position: relative;
   padding-top: @TITLEBAR_H;
+  padding-bottom: @sidebar-footer-h;
 
   width: var(--mainwin-sidebar-w);
   height: 100vh;
   border-right: 1px solid rgba(255, 255, 255, 0.1);
 
-  display: flex;
-  flex-direction: column;
-  overflow: overlay;
+  .navFooter .update {
+    display: none;
+  }
 }
 
 .logoWrapper {
   width: 100%;
   // leave space for titlebar, avoid draggable region overlap
-  height: 124px - @TITLEBAR_H;
+  height: @logoWrapper-height;
   .global-draggable();
 
   display: flex;
@@ -123,15 +128,54 @@
   }
 }
 
-.divider {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.1);
-  margin: 8px 32px;
+.dappsRouteList {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100% - @logoWrapper-height);
+  height: 100%;
+
+  .divider {
+    height: 1px;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 8px 32px;
+    box-sizing: border-box;
+    flex-shrink: 0;
+  }
+
+  > .pinnedList {
+    flex-shrink: 3;
+    height: 100%;
+    padding-right: 0;
+    overflow: overlay;
+  }
+
+  > .unpinnedList {
+    flex-shrink: 4;
+    padding-right: 0;
+    overflow: overlay;
+    height: 100%;
+  }
 }
 
 .navFooter {
   margin-top: auto;
   padding-bottom: 40px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: @sidebar-footer-h;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  // fallback solution, in case .navFooter must have a background
+  // background-image: linear-gradient(108.92deg, #636876 5.96%, #5E6371 90.79%);
+
+  > * {
+    width: 100%;
+  }
 
   .update {
     padding: 8px 16px;
@@ -149,6 +193,18 @@
           margin-right: 12px;
         }
       }
+    }
+  }
+}
+
+.Sidebar.hasNewRelease {
+  padding-bottom: @sidebar-footer-with-releaseinfo-h;
+
+  .navFooter {
+    height: @sidebar-footer-with-releaseinfo-h;
+
+    .update {
+      display: block;
     }
   }
 }
