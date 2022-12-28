@@ -377,6 +377,16 @@ type MainInternalsMessagePayload = {
     ];
     response: [];
   };
+  '__internal_main:tabbed-window:view-added': {
+    send: [
+      {
+        webContents: Electron.WebContents;
+        window: Electron.BrowserWindow;
+        tabbedWindow?: any;
+      }
+    ];
+    response: [];
+  };
   '__internal_main:dapps:pinnedListChanged': {
     send: [pinnedList: IDapp['origin'][]];
     response: [];

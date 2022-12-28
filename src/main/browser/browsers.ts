@@ -2,7 +2,11 @@ import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensio
 import { BrowserWindow, session } from 'electron';
 import { getOrPutCheckResult } from '../utils/dapps';
 import { integrateQueryToUrl, isUrlFromDapp } from '../../isomorphic/url';
-import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
+import {
+  emitIpcMainEvent,
+  onIpcMainEvent,
+  sendToWebContents,
+} from '../utils/ipcMainEvents';
 import { Tab, Tabs } from './tabs';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 
@@ -157,6 +161,12 @@ export default class TabbedBrowserWindow {
         });
       }
     );
+
+    emitIpcMainEvent('__internal_main:tabbed-window:view-added', {
+      webContents: this.window.webContents,
+      window: this.window,
+      tabbedWindow: this,
+    });
 
     queueMicrotask(() => {
       // Create initial tab

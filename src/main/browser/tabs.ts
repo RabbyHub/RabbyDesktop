@@ -51,6 +51,10 @@ export class Tab {
     ofWindow: BrowserWindow,
     { tabs, topbarStacks, initDetails, isOfMainWindow }: ITabOptions
   ) {
+    this.$meta.initDetails = { ...initDetails };
+    this.$meta.topbarStacks = { ...DEFAULT_TOPBAR_STACKS, ...topbarStacks };
+    this.$meta.isOfMainWindow = !!isOfMainWindow;
+
     this.tabs = tabs;
     this.view = new BrowserView();
     this.id = this.view.webContents.id;
@@ -58,16 +62,16 @@ export class Tab {
     this.windowId = ofWindow.id;
 
     this.window.addBrowserView(this.view);
+    emitIpcMainEvent('__internal_main:tabbed-window:view-added', {
+      webContents: this.view!.webContents,
+      window: ofWindow,
+    });
 
     this.view.webContents.on('did-finish-load', () => {
       emitIpcMainEvent('__internal_main:loading-view:toggle', {
         type: 'did-finish-load',
       });
     });
-
-    this.$meta.initDetails = { ...initDetails };
-    this.$meta.topbarStacks = { ...DEFAULT_TOPBAR_STACKS, ...topbarStacks };
-    this.$meta.isOfMainWindow = !!isOfMainWindow;
 
     this.view?.webContents.on('focus', () => {
       this.tabs.emit('tab-focused');

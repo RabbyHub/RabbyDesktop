@@ -6,6 +6,8 @@ import {
   sendToWebContents,
 } from '../utils/ipcMainEvents';
 import { onMainWindowReady } from '../utils/stream-helpers';
+import { getWindowFromBrowserWindow } from './tabbedBrowserWindow';
+import { setListeners, setOpenHandlerForWebContents } from './webContents';
 
 onIpcMainEvent(
   '__internal_rpc:browser:set-ignore-mouse-events',
@@ -48,6 +50,23 @@ onIpcMainInternalEvent(
     const mainContents = (await onMainWindowReady()).window.webContents;
     sendToWebContents(mainContents, '__internal_push:*:pinnedListChanged', {
       pinnedList,
+    });
+  }
+);
+
+onIpcMainInternalEvent(
+  '__internal_main:tabbed-window:view-added',
+  ({ webContents, window, tabbedWindow }) => {
+    // const isMainContentsForTabbedWindow = !!tabbedWindow;
+    const tabbedWin = tabbedWindow || getWindowFromBrowserWindow(window);
+    if (!tabbedWin) return;
+
+    setListeners['will-redirect'](webContents);
+    setListeners['will-navigate'](webContents, window);
+
+    setOpenHandlerForWebContents({
+      webContents,
+      parentTabbedWin: tabbedWin,
     });
   }
 );

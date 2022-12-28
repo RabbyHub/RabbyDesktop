@@ -46,6 +46,10 @@ export function getTabbedWindowFromWebContents(
   return window ? getWindowFromBrowserWindow(window) : null;
 }
 
+export function isTabbedWebContents(webContents: Electron.WebContents) {
+  return !!getTabbedWindowFromWebContents(webContents);
+}
+
 // export function getIpcWindow(event: Electron.NewWindowWebContentsEvent) {
 //   let win = null;
 
