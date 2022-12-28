@@ -2,6 +2,7 @@ import path from 'path';
 import { parse as parseUrl } from 'url';
 import { Icon as IconInfo, parseFavicon } from '@debank/parse-favicon';
 import { net } from 'electron';
+import { catchError, firstValueFrom, map, of, timeout } from 'rxjs';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 
 // TODO: add test about it
@@ -65,7 +66,13 @@ function resolveUrl(url: string, base: string) {
  *
  * @param websiteBaseURL assume it is a valid baseURL like `${protocol}://${host}` without suffix
  */
-export async function parseWebsiteFavicon(websiteBaseURL: string) {
+export async function parseWebsiteFavicon(
+  websiteBaseURL: string,
+  options?: {
+    timeout?: number;
+  }
+) {
+  const { timeout: tmout = 2 * 1e3 } = options || {};
   websiteBaseURL = websiteBaseURL.replace(/\/$/, '');
 
   const reqIconUrlBufs: Record<string, string> = {};
@@ -93,40 +100,40 @@ export async function parseWebsiteFavicon(websiteBaseURL: string) {
   let faviconUrl = '';
   let faviconBase64 = '';
 
-  // TODO: use timeout mechanism
-  const iconInfo = await new Promise<IconInfo>((resolve, reject) => {
-    const obs = parseFavicon(
-      websiteBaseURL,
-      textFetcher,
-      bufferFetcher
-    ).subscribe({
-      next: (icon) => {
-        const { urlInfo } = canoicalizeDappUrl(icon.url);
+  const obs = parseFavicon(websiteBaseURL, textFetcher, bufferFetcher).pipe(
+    timeout(tmout),
+    map((icon) => {
+      const { urlInfo } = canoicalizeDappUrl(icon.url);
 
-        const isData = icon.url?.startsWith('data:');
+      const isData = icon.url?.startsWith('data:');
 
-        faviconUrl = urlInfo?.protocol
-          ? icon.url
-          : path.posix.join(websiteBaseURL, icon.url);
-        faviconBase64 = isData
-          ? icon.url
-          : `data:${icon?.type || 'image/png'};base64,${
-              reqIconUrlBufs[icon.url]
-            }`;
-        resolve(icon);
-      },
-      error: (err) => {
-        reject(err);
-      },
-      complete: () => {
-        obs.unsubscribe();
-      },
-    });
-  });
+      faviconUrl = urlInfo?.protocol
+        ? icon.url
+        : path.posix.join(websiteBaseURL, icon.url);
+      faviconBase64 = isData
+        ? icon.url
+        : `data:${icon?.type || 'image/png'};base64,${
+            reqIconUrlBufs[icon.url]
+          }`;
+
+      return icon;
+    }),
+    catchError((err) => {
+      console.error(err);
+      return of(null);
+    })
+  );
+
+  let iconInfo: IconInfo | null = null;
+  try {
+    iconInfo = await firstValueFrom(obs);
+  } catch (err) {
+    console.error(err);
+  }
 
   return {
     iconInfo,
-    faviconUrl,
-    faviconBase64,
+    faviconUrl: faviconUrl || undefined,
+    faviconBase64: faviconBase64 || undefined,
   };
 }

@@ -165,7 +165,8 @@ export async function detectDapps(
   existedDapps: IDapp[]
 ): Promise<IDappsDetectResult<DETECT_ERR_CODES>> {
   // TODO: process void url;
-  const { urlInfo: inputUrlInfo } = canoicalizeDappUrl(dappsUrl);
+  const dappOrigin = canoicalizeDappUrl(dappsUrl).origin;
+  const { urlInfo: inputUrlInfo } = canoicalizeDappUrl(dappOrigin);
 
   if (inputUrlInfo?.protocol !== 'https:') {
     return {
@@ -213,17 +214,18 @@ export async function detectDapps(
 
   const { urlInfo, origin } = canoicalizeDappUrl(checkResult.finalUrl);
   const { iconInfo, faviconUrl, faviconBase64 } = await parseWebsiteFavicon(
-    origin
+    origin,
+    { timeout: DFLT_TIMEOUT }
   );
 
   const repeatedDapp = existedDapps.find((item) => item.origin === origin);
 
   const data = {
     urlInfo,
-    icon: iconInfo,
     origin,
-    faviconUrl,
-    faviconBase64,
+    icon: iconInfo || null,
+    faviconUrl: faviconUrl || undefined,
+    faviconBase64: faviconBase64 || undefined,
   };
 
   if (repeatedDapp) {

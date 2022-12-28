@@ -14,7 +14,7 @@ type IDapp = {
   id?: string;
   alias: string;
   origin: string | `https://${string}${string}`;
-  faviconUrl: string;
+  faviconUrl?: string;
   faviconBase64?: string;
 };
 
@@ -28,8 +28,8 @@ type IDappsDetectResult<T extends string = string> = {
   data: null | {
     urlInfo: Partial<URL> | null;
     origin: string;
-    icon: import('@debank/parse-favicon').Icon;
-    faviconUrl: string;
+    icon: import('@debank/parse-favicon').Icon | null;
+    faviconUrl?: string;
     faviconBase64?: string; // base64
   };
   error?: {
