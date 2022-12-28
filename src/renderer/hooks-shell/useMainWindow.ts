@@ -230,7 +230,7 @@ export function useSidebarDapps() {
   }, [pinnedDapps, unpinnedDapps, tabMap]);
 
   const dappActions = {
-    onTabClick: useCallback((tab: chrome.tabs.Tab) => {
+    onSelectDapp: useCallback((tab: chrome.tabs.Tab) => {
       chrome.tabs.update(tab.id!, { active: true });
       window.rabbyDesktop.ipcRenderer.sendMessage(
         '__internal_rpc:mainwindow:select-tab',
@@ -238,10 +238,11 @@ export function useSidebarDapps() {
         tab.id!
       );
     }, []),
-    onTabClose: useCallback((tab: chrome.tabs.Tab) => {
-      if (tab.id) {
-        chrome.tabs.remove(tab.id);
-      }
+    onOpenDapp: useCallback((dappOrigin: string) => {
+      window.rabbyDesktop.ipcRenderer.sendMessage(
+        '__internal_rpc:mainwindow:open-tab',
+        dappOrigin
+      );
     }, []),
   };
 

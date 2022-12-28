@@ -21,12 +21,12 @@ import { onIpcMainEvent } from '../utils/ipcMainEvents';
 import { getBindLog } from '../utils/log';
 import {
   createWindow,
+  findOpenedDappTab,
   getFocusedWindow,
   getTabbedWindowFromWebContents,
   isTabbedWebContents,
 } from './tabbedBrowserWindow';
 import { valueToMainSubject } from './_init';
-import { openDappSecurityCheckView } from './securityCheck';
 import {
   getElectronChromeExtensions,
   getWebuiExtId,
@@ -35,6 +35,7 @@ import {
   getRabbyExtViews,
 } from '../utils/stream-helpers';
 import { switchToBrowserTab } from '../utils/browser';
+import { createDappTab } from './webContents';
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
@@ -72,16 +73,15 @@ app.on('web-contents-created', async (evtApp, webContents) => {
         case 'new-window': {
           const tabbedWin = getTabbedWindowFromWebContents(webContents);
 
-          const openedDapp = !isToExt
-            ? tabbedWin?.tabs.findByOrigin(details.url)
-            : tabbedWin?.tabs.findByUrlbase(details.url);
-          if (openedDapp) {
-            switchToBrowserTab(openedDapp!.id, tabbedWin!);
+          const dappTab =
+            tabbedWin && findOpenedDappTab(tabbedWin, details.url, isToExt);
+          if (dappTab) {
+            switchToBrowserTab(dappTab!.id, tabbedWin!);
           } else if (mainTabbedWin === tabbedWin) {
-            const mainWindow = tabbedWin.window;
-
-            if (isFromExt) {
-              const tab = tabbedWin!.createTab({
+            if (!isFromExt) {
+              createDappTab(tabbedWin, details.url);
+            } else {
+              const tab = mainTabbedWin.createTab({
                 initDetails: details,
               });
               tab?.loadURL(details.url);
@@ -91,32 +91,7 @@ app.on('web-contents-created', async (evtApp, webContents) => {
                   activate: true,
                 });
               }
-              break;
             }
-
-            const continualOpenedTab = tabbedWin.createTab({
-              initDetails: details,
-            });
-            continualOpenedTab?.loadURL(details.url);
-
-            const closeOpenedTab = () => {
-              continualOpenedTab?.destroy();
-            };
-
-            openDappSecurityCheckView(details.url, mainWindow).then(
-              ({ continualOpId }) => {
-                // TODO: use timeout mechanism to avoid memory leak
-                const dispose = onIpcMainEvent(
-                  '__internal_rpc:security-check:continue-close-dapp',
-                  (_evt, _openId) => {
-                    if (mainWindow && _openId === continualOpId) {
-                      dispose?.();
-                      closeOpenedTab();
-                    }
-                  }
-                );
-              }
-            );
           }
           break;
         }

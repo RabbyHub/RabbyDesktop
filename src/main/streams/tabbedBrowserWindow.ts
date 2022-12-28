@@ -20,6 +20,7 @@ import {
 } from '../utils/stream-helpers';
 import { getWindowFromWebContents } from '../utils/browser';
 import { getOrPutCheckResult } from '../utils/dapps';
+import { createDappTab } from './webContents';
 
 const windows: TabbedBrowserWindow[] = [];
 
@@ -37,6 +38,16 @@ export function findByWindowId(
   windowId: BrowserWindow['id']
 ): TabbedBrowserWindow | undefined {
   return windows.find((w) => w.id === windowId);
+}
+
+export function findOpenedDappTab(
+  tabbedWin: TabbedBrowserWindow,
+  url: string,
+  byUrlbase = false
+) {
+  return !byUrlbase
+    ? tabbedWin?.tabs.findByOrigin(url)
+    : tabbedWin?.tabs.findByUrlbase(url);
 }
 
 export function findExistedRabbyxNotificationWin():
@@ -170,6 +181,12 @@ onIpcMainEvent('__internal_webui-window-close', (_, winId, webContentsId) => {
     return false;
   });
   tabToClose?.destroy();
+});
+
+onIpcMainEvent('__internal_rpc:mainwindow:open-tab', async (_, dappOrigin) => {
+  const mainTabbedWin = await onMainWindowReady();
+
+  createDappTab(mainTabbedWin, dappOrigin);
 });
 
 onIpcMainEvent(

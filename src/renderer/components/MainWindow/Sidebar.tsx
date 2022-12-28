@@ -82,12 +82,9 @@ const TabList = ({
             )}
             onClick={() => {
               if (dapp.tab) {
-                dappActions.onTabClick(dapp.tab);
+                dappActions.onSelectDapp(dapp.tab);
               } else {
-                chrome.tabs.create({
-                  url: dapp.origin,
-                  active: true,
-                });
+                dappActions.onOpenDapp(dapp.origin);
               }
               navigateToDapp(dapp.origin);
             }}

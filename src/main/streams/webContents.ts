@@ -7,6 +7,32 @@ import { onIpcMainEvent } from '../utils/ipcMainEvents';
 import { attachAlertBrowserView } from './dappAlert';
 import { openDappSecurityCheckView } from './securityCheck';
 
+export function createDappTab(mainTabbedWin: TabbedBrowserWindow, url: string) {
+  const continualOpenedTab = mainTabbedWin.createTab({
+    initDetails: { url },
+  });
+  continualOpenedTab?.loadURL(url);
+
+  const closeOpenedTab = () => {
+    continualOpenedTab?.destroy();
+  };
+
+  openDappSecurityCheckView(url, mainTabbedWin.window).then(
+    ({ continualOpId }) => {
+      // TODO: use timeout mechanism to avoid memory leak
+      const dispose = onIpcMainEvent(
+        '__internal_rpc:security-check:continue-close-dapp',
+        (_evt, _openId) => {
+          if (mainTabbedWin.window && _openId === continualOpId) {
+            dispose?.();
+            closeOpenedTab();
+          }
+        }
+      );
+    }
+  );
+}
+
 /**
  * @see https://www.electronjs.org/docs/latest/api/window-open
  *
@@ -51,29 +77,7 @@ export function setOpenHandlerForWebContents({
           if (openedDapp) {
             switchToBrowserTab(openedDapp!.id, parentTabbedWin!);
           } else {
-            const continualOpenedTab = parentTabbedWin.createTab({
-              initDetails: details,
-            });
-            continualOpenedTab?.loadURL(details.url);
-
-            const closeOpenedTab = () => {
-              continualOpenedTab?.destroy();
-            };
-
-            openDappSecurityCheckView(details.url, parentTabbedWin.window).then(
-              ({ continualOpId }) => {
-                // TODO: use timeout mechanism to avoid memory leak
-                const dispose = onIpcMainEvent(
-                  '__internal_rpc:security-check:continue-close-dapp',
-                  (_evt, _openId) => {
-                    if (parentTabbedWin.window && _openId === continualOpId) {
-                      dispose?.();
-                      closeOpenedTab();
-                    }
-                  }
-                );
-              }
-            );
+            createDappTab(parentTabbedWin, details.url);
           }
           break;
         }
