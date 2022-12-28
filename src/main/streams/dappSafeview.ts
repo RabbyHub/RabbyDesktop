@@ -104,6 +104,7 @@ export async function attachDappSafeview(
 
   targetWin.addBrowserView(baseView);
   targetWin.setTopBrowserView(baseView);
+  updateSubWindowPosition(targetWin, { baseView, safeView });
 
   const targetUrl = integrateQueryToUrl(url, { _dsv_: dappSafeViewLoadId });
   try {
