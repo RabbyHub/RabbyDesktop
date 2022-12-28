@@ -124,12 +124,10 @@ export class Tab {
     const { origin } = new URL(url);
     const dapp = dapps.find((item) => item.origin === origin);
     if (dapp) {
-      setTimeout(() => {
-        emitIpcMainEvent('__internal_main:loading-view:toggle', {
-          type: 'start',
-          dapp,
-        });
-      }, 200);
+      emitIpcMainEvent('__internal_main:loading-view:toggle', {
+        type: 'start',
+        dapp,
+      });
     }
 
     return this.view?.webContents.loadURL(url);
