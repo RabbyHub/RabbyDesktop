@@ -49,6 +49,18 @@ type MainInternalsMessagePayload = {
     send: [windowId: Electron.BrowserWindow['id']];
     response: [];
   };
+  '__internal_main:dev': {
+    send: [
+      | {
+          type: 'dapp-safe-view:open';
+        }
+      | {
+          type: 'dapp-safe-view:inspect';
+          viewType: 'base' | 'safe';
+        }
+    ];
+    response: [];
+  };
 };
 
 type MainInternals = keyof MainInternalsMessagePayload;

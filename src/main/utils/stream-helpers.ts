@@ -29,6 +29,10 @@ export async function getRabbyExtViews() {
   return firstValueFrom(fromMainSubject('rabbyExtViews'));
 }
 
+export async function getDappSafeView() {
+  return firstValueFrom(fromMainSubject('dappSafeModeViews'));
+}
+
 export async function getDappLoadingView() {
   return firstValueFrom(fromMainSubject('dappLoadingView'));
 }
