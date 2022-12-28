@@ -39,7 +39,12 @@ React.PropsWithChildren<{}>) {
     };
   }, []);
 
-  return <>{children || null}</>;
+  return (
+    <>
+      {children || null}
+      <div className={styles.dappViewGasket} />
+    </>
+  );
 }
 
 const router = createRouter([

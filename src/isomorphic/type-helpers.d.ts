@@ -7,6 +7,11 @@ type GetIpcRequestListenerFirstParams<
   E extends GetListenerFirstParams<T>
 > = T extends (evt: E, ...args: infer A) => any ? A[0] : never;
 
+type GetListenerEventParams<
+  T,
+  E extends GetListenerFirstParams<T>
+> = T extends (evt: E, listener: (...args: infer A) => any) => any ? A : never;
+
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
   k: infer I
 ) => void
