@@ -37,13 +37,11 @@ function updateSubWindowPosition(
   const safeTopOffset =
     NATIVE_HEADER_H + DAPP_SAFE_VIEW_SIZES.alertHeaderHeight;
   views.safeView.setBounds({
-    x:
-      DAPP_SAFE_VIEW_SIZES.horizontalPadding +
-      NativeAppSizes.dappsViewLeftOffset,
+    x: NativeAppSizes.dappsViewLeftOffset,
     y: safeTopOffset,
     width:
       width -
-      DAPP_SAFE_VIEW_SIZES.horizontalPadding * 2 -
+      NativeAppSizes.dappViewPaddingOffsetToSidebar -
       1 /* padding-left */ -
       NativeAppSizes.dappsViewLeftOffset,
     height: height - safeTopOffset,

@@ -3,4 +3,9 @@
   --mainwin-rabbyx-popup-w: 400px;
 
   --switch-account-button-w: 200px;
+
+  --dappViewPaddingOffsetToSidebar: 22px;
+
+  /* 222px - 50px */
+  --dappsViewLeftOffset: 222px;
 }
