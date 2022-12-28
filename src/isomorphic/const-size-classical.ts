@@ -6,12 +6,11 @@ const NAVIGATION_HEIGHT = 44;
 export const NATIVE_HEADER_H = TABS_LINE_HEIGHT;
 export const NATIVE_HEADER_WITH_NAV_H = TABS_LINE_HEIGHT + NAVIGATION_HEIGHT;
 
-export const DAPP_SAFE_VIEW_SIZES = {
-  horizontalPadding: 52,
-  alertHeaderHeight: 44,
-};
-
 const SECURITY_NOTIFICATION_PADDING_RIGHT = 30;
+
+export const DAPP_SAFE_VIEW_SIZES = {
+  alertHeaderHeight: 40,
+};
 
 export const SECURITY_NOTIFICATION_VIEW_SIZE = {
   width: 330 + SECURITY_NOTIFICATION_PADDING_RIGHT,

@@ -1,15 +1,15 @@
 @import '~antd/lib/style/themes/default.less';
 
-@body-padding-top: 44px;
+@body-padding-top: 40px;
 
 @hd-height: 44px;
 @top-radius: 12px;
 
 .modal-alert-insecurity-wrap {
   padding-top: @body-padding-top;
-  padding-left: calc(52px + var(--mainwin-sidebar-w));
-  padding-right: 52px;
-  min-width: calc(100vw - 52px * 2 - var(--mainwin-sidebar-w));
+  padding-left: var(--dappsViewLeftOffset);
+  padding-right: var(--dappViewPaddingOffsetToSidebar);
+  min-width: calc(100vw - var(--dappViewPaddingOffsetToSidebar) * 2 - var(--dappsViewLeftOffset));
   overflow: hidden;
 
   .alert-header {

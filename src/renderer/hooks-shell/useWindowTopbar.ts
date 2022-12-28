@@ -10,7 +10,6 @@ import { fetchDapps } from '@/renderer/ipcRequest/dapps';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 
 import { useWindowState } from './useWindowState';
-import { getConnectedSites } from '../ipcRequest/rabbyx';
 import { getNavInfoByTabId } from '../ipcRequest/mainwin';
 
 export function useWinTriples() {
@@ -231,7 +230,7 @@ export function useTopbarTabs() {
     onTabClick: useCallback((tab: ChromeTab) => {
       chrome.tabs.update(tab.id!, { active: true });
       window.rabbyDesktop.ipcRenderer.sendMessage(
-        '__internal_webui-selectTab',
+        '__internal_rpc:mainwindow:select-tab',
         tab.windowId,
         tab.id!
       );

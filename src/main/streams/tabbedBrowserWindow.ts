@@ -1,7 +1,12 @@
 import { BrowserWindow } from 'electron';
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
+import { isUrlFromDapp } from '@/isomorphic/url';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
-import { onIpcMainEvent, onIpcMainInternalEvent } from '../utils/ipcMainEvents';
+import {
+  onIpcMainEvent,
+  onIpcMainInternalEvent,
+  sendToWebContents,
+} from '../utils/ipcMainEvents';
 import TabbedBrowserWindow, {
   TabbedBrowserWindowOptions,
 } from '../browser/browsers';
@@ -14,6 +19,8 @@ import {
   toggleMaskViaOpenedRabbyxNotificationWindow,
 } from '../utils/stream-helpers';
 import { getWindowFromWebContents } from '../utils/browser';
+import { getOrPutCheckResult } from '../utils/dapps';
+import { createDappTab } from './webContents';
 
 const windows: TabbedBrowserWindow[] = [];
 
@@ -33,6 +40,16 @@ export function findByWindowId(
   return windows.find((w) => w.id === windowId);
 }
 
+export function findOpenedDappTab(
+  tabbedWin: TabbedBrowserWindow,
+  url: string,
+  byUrlbase = false
+) {
+  return !byUrlbase
+    ? tabbedWin?.tabs.findByOrigin(url)
+    : tabbedWin?.tabs.findByUrlbase(url);
+}
+
 export function findExistedRabbyxNotificationWin():
   | TabbedBrowserWindow
   | undefined {
@@ -46,26 +63,9 @@ export function getTabbedWindowFromWebContents(
   return window ? getWindowFromBrowserWindow(window) : null;
 }
 
-// export function getIpcWindow(event: Electron.NewWindowWebContentsEvent) {
-//   let win = null;
-
-//   if ((event as any).sender) {
-//     win = getTabbedWindowFromWebContents((event as any).sender);
-
-//     // If sent from a popup window, we may need to get the parent window of the popup.
-//     if (!win) {
-//       const browserWindow = getParentWindowOfTab((event as any).sender);
-//       if (browserWindow && !browserWindow.isDestroyed()) {
-//         const parentWindow = browserWindow.getParentWindow();
-//         if (parentWindow) {
-//           win = getTabbedWindowFromWebContents(parentWindow.webContents);
-//         }
-//       }
-//     }
-//   }
-
-//   return win;
-// }
+export function isTabbedWebContents(webContents: Electron.WebContents) {
+  return !!getTabbedWindowFromWebContents(webContents);
+}
 
 export async function createWindow(
   options: Partial<TabbedBrowserWindowOptions>
@@ -136,6 +136,35 @@ export async function createRabbyxNotificationWindow({
   return win.window as BrowserWindow;
 }
 
+onIpcMainEvent(
+  '__internal_rpc:webui-ext:navinfo',
+  async (event, reqid, tabId) => {
+    const webContents = event.sender;
+    const tabbedWin = getTabbedWindowFromWebContents(webContents);
+    if (!tabbedWin) return;
+
+    const tab = tabbedWin.tabs.get(tabId);
+    // TODO: always respond message
+    if (!tab || !tab.view) return;
+
+    const tabUrl = tab.view.webContents!.getURL();
+    const checkResult = isUrlFromDapp(tabUrl)
+      ? await getOrPutCheckResult(tabUrl, { updateOnSet: false })
+      : null;
+
+    event.reply('__internal_rpc:webui-ext:navinfo', {
+      reqid,
+      tabNavInfo: {
+        tabExists: !!tab,
+        tabUrl,
+        dappSecurityCheckResult: checkResult,
+        canGoBack: tab.view.webContents?.canGoBack(),
+        canGoForward: tab.view.webContents?.canGoForward(),
+      },
+    });
+  }
+);
+
 onIpcMainEvent('__internal_rpc:browser-dev:openDevTools', (evt) => {
   if (!IS_RUNTIME_PRODUCTION) {
     const webContents = evt.sender;
@@ -154,9 +183,32 @@ onIpcMainEvent('__internal_webui-window-close', (_, winId, webContentsId) => {
   tabToClose?.destroy();
 });
 
+onIpcMainEvent('__internal_rpc:mainwindow:open-tab', async (_, dappOrigin) => {
+  const mainTabbedWin = await onMainWindowReady();
+
+  createDappTab(mainTabbedWin, dappOrigin);
+});
+
+onIpcMainEvent(
+  '__internal_rpc:mainwindow:select-tab',
+  async (_, winId, tabId) => {
+    const mainTabbedWin = await onMainWindowReady();
+    if (mainTabbedWin.window.id !== winId) return;
+
+    mainTabbedWin?.tabs.select(tabId);
+  }
+);
+
+onIpcMainEvent('__internal_rpc:mainwindow:hide-all-tabs', async (_, winId) => {
+  const mainTabbedWin = await onMainWindowReady();
+  if (mainTabbedWin.window.id !== winId) return;
+
+  mainTabbedWin.tabs.unSelectAll();
+});
+
 onIpcMainEvent(
   '__internal_rpc:mainwindow:make-sure-dapp-opened',
-  async (evt, dappOrigin) => {
+  async (_, dappOrigin) => {
     const tabbedWin = await onMainWindowReady();
 
     const foundTab = tabbedWin.tabs.findByOrigin(dappOrigin);
@@ -166,6 +218,18 @@ onIpcMainEvent(
     }
   }
 );
+
+onMainWindowReady().then((mainTabbedWin) => {
+  mainTabbedWin.tabs.on('all-tabs-destroyed', () => {
+    sendToWebContents(
+      mainTabbedWin.window.webContents,
+      '__internal_push:mainwindow:all-tabs-closed',
+      {
+        windowId: mainTabbedWin.window.id,
+      }
+    );
+  });
+});
 
 onIpcMainInternalEvent('__internal_main:tabbed-window:destroyed', (winId) => {
   if (RABBYX_WINDOWID_S.has(winId)) {

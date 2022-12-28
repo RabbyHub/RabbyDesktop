@@ -1,8 +1,7 @@
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { BrowserWindow, session } from 'electron';
-import { getOrPutCheckResult } from '../utils/dapps';
-import { integrateQueryToUrl, isUrlFromDapp } from '../../isomorphic/url';
-import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
+import { integrateQueryToUrl } from '../../isomorphic/url';
+import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import { Tab, Tabs } from './tabs';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 
@@ -101,62 +100,11 @@ export default class TabbedBrowserWindow {
       this.extensions.selectTab(tab.view!.webContents);
     });
 
-    if (this.$meta.isMainWindow) {
-      let dispose = onIpcMainEvent(
-        '__internal_webui-hideAllTabs',
-        (_, winId) => {
-          if (winId !== this.window?.id) return;
-
-          this.tabs.unSelectAll();
-        }
-      );
-      this.window.on('close', dispose);
-
-      dispose = onIpcMainEvent(
-        '__internal_webui-selectTab',
-        (_, winId, tabId) => {
-          if (winId !== this.window?.id) return;
-
-          this.tabs.select(tabId);
-        }
-      );
-      this.window.on('close', dispose);
-
-      this.tabs.on('all-tabs-destroyed', () => {
-        sendToWebContents(
-          this.window.webContents,
-          '__internal_push:mainwindow:all-tabs-closed',
-          {
-            windowId: this.window.id,
-          }
-        );
-      });
-    }
-
-    onIpcMainEvent(
-      '__internal_rpc:webui-ext:navinfo',
-      async (event, reqid, tabId) => {
-        const tab = this.tabs.get(tabId);
-        // TODO: always respond message
-        if (!tab || !tab.view) return;
-
-        const tabUrl = tab.view.webContents!.getURL();
-        const checkResult = isUrlFromDapp(tabUrl)
-          ? await getOrPutCheckResult(tabUrl, { updateOnSet: false })
-          : null;
-
-        event.reply('__internal_rpc:webui-ext:navinfo', {
-          reqid,
-          tabNavInfo: {
-            tabExists: !!tab,
-            tabUrl,
-            dappSecurityCheckResult: checkResult,
-            canGoBack: tab.view.webContents?.canGoBack(),
-            canGoForward: tab.view.webContents?.canGoForward(),
-          },
-        });
-      }
-    );
+    emitIpcMainEvent('__internal_main:tabbed-window:view-added', {
+      webContents: this.window.webContents,
+      window: this.window,
+      tabbedWindow: this,
+    });
 
     queueMicrotask(() => {
       // Create initial tab

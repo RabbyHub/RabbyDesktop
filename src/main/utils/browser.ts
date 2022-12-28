@@ -1,19 +1,21 @@
 import { BrowserView, BrowserWindow } from 'electron';
 
-export function getWindowFromWebContents(tab: Electron.WebContents) {
-  switch (tab.getType()) {
+export function getWindowFromWebContents(webContents: Electron.WebContents) {
+  switch (webContents.getType()) {
+    case 'remote':
     case 'window':
-      return BrowserWindow.fromWebContents(tab);
     case 'browserView':
     case 'webview':
-      // return tab.getOwnerBrowserWindow();
-      return BrowserWindow.fromWebContents(tab);
+      return BrowserWindow.fromWebContents(webContents);
     case 'backgroundPage':
       return (
-        BrowserWindow.fromWebContents(tab) || BrowserWindow.getFocusedWindow()
+        BrowserWindow.fromWebContents(webContents) ||
+        BrowserWindow.getFocusedWindow()
       );
     default:
-      throw new Error(`Unable to find parent window of '${tab.getType()}'`);
+      throw new Error(
+        `Unable to find parent window of '${webContents.getType()}'`
+      );
   }
 }
 

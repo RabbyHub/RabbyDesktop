@@ -86,6 +86,99 @@ interface ChromeContextMenuOptions {
   strings?: ChromeContextMenuLabels;
 }
 
+const appendMenu = (
+  targetMenu: Menu,
+  newOpts: Electron.MenuItemConstructorOptions | MenuItem
+) =>
+  targetMenu.append(
+    newOpts instanceof MenuItem ? newOpts : new MenuItem(newOpts)
+  );
+const appendMenuSeparator = (targetMenu: Menu) =>
+  targetMenu.append(new MenuItem({ type: 'separator' }));
+
+function buildDebugKitsMenu(opts: ChromeContextMenuOptions) {
+  const { params } = opts;
+
+  const debugKitsMenu = new Menu();
+  appendMenu(debugKitsMenu, {
+    label: 'Open RabbyX Background',
+    click: async () => {
+      const { backgroundWebContents } = await getRabbyExtViews();
+
+      if (!backgroundWebContents.isDevToolsOpened()) {
+        backgroundWebContents.openDevTools({ mode: 'detach' });
+      } else if (!backgroundWebContents.isDevToolsFocused()) {
+        backgroundWebContents.focus();
+        getWindowFromWebContents(backgroundWebContents)?.moveTop();
+      }
+    },
+  });
+
+  appendMenuSeparator(debugKitsMenu);
+  appendMenu(debugKitsMenu, {
+    label: 'Open SwitchChain Popup',
+    click: () => {
+      getContextMenuPopupWindow().then(async (wins) => {
+        const mainWin = await onMainWindowReady();
+        wins.switchChain.webContents.openDevTools({ mode: 'detach' });
+
+        const firstTab = mainWin.tabs.tabList[0];
+
+        if (!firstTab.view) {
+          dialog.showErrorBox(
+            'No Tab Found',
+            `You wanna quick debug the first tab's switchChain popup but no any dapp opened, Please open a tab and try again.`
+          );
+          return;
+        }
+
+        emitIpcMainEvent('__internal_main:popupwin-on-mainwin:toggle-show', {
+          type: 'switch-chain',
+          nextShow: true,
+          rect: { x: params.x, y: params.y },
+          pageInfo: {
+            type: 'switch-chain',
+            dappTabInfo: {
+              id: firstTab.id,
+              url: firstTab.view.webContents.getURL(),
+            },
+          },
+        });
+      });
+    },
+  });
+
+  appendMenuSeparator(debugKitsMenu);
+  appendMenu(debugKitsMenu, {
+    label: `Open DappSafeView's Content`,
+    click: () => {
+      emitIpcMainEvent('__internal_main:dev', {
+        type: 'dapp-safe-view:open',
+      });
+    },
+  });
+  appendMenu(debugKitsMenu, {
+    label: `Inspect DappSafeView's Content`,
+    click: () => {
+      emitIpcMainEvent('__internal_main:dev', {
+        type: 'dapp-safe-view:inspect',
+        viewType: 'safe',
+      });
+    },
+  });
+  appendMenu(debugKitsMenu, {
+    label: `Inspect DappSafeView's Wrapper`,
+    click: () => {
+      emitIpcMainEvent('__internal_main:dev', {
+        type: 'dapp-safe-view:inspect',
+        viewType: 'base',
+      });
+    },
+  });
+
+  return debugKitsMenu;
+}
+
 const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
   const { params, webContents, openLink, extensionMenuItems } = opts;
 
@@ -93,9 +186,8 @@ const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
 
   const menu = new Menu();
   const append = (newOpts: Electron.MenuItemConstructorOptions) =>
-    menu.append(new MenuItem(newOpts));
-  const appendSeparator = () =>
-    menu.append(new MenuItem({ type: 'separator' }));
+    appendMenu(menu, new MenuItem(newOpts));
+  const appendSeparator = () => appendMenuSeparator(menu);
 
   if (params.linkURL) {
     // append({
@@ -246,7 +338,6 @@ const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
       label: labels.reload,
       click: () => webContents.reload(),
     });
-    appendSeparator();
   }
 
   if (extensionMenuItems) {
@@ -255,55 +346,15 @@ const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
   }
 
   if (!IS_RUNTIME_PRODUCTION) {
+    appendSeparator();
+
+    const debugKitsMenu = buildDebugKitsMenu(opts);
     append({
-      label: 'Inspect RabbyX Background',
-      click: async () => {
-        const { backgroundWebContents } = await getRabbyExtViews();
-
-        if (!backgroundWebContents.isDevToolsOpened()) {
-          backgroundWebContents.openDevTools({ mode: 'detach' });
-        } else if (!backgroundWebContents.isDevToolsFocused()) {
-          backgroundWebContents.focus();
-          getWindowFromWebContents(backgroundWebContents)?.moveTop();
-        }
-      },
-    });
-
-    append({
-      label: 'Inspect ContextMenu | SwitchMain Popup',
-      click: () => {
-        getContextMenuPopupWindow().then(async (wins) => {
-          const mainWin = await onMainWindowReady();
-          wins.switchChain.webContents.openDevTools({ mode: 'detach' });
-
-          const firstTab = mainWin.tabs.tabList[0];
-
-          if (!firstTab.view) {
-            dialog.showErrorBox(
-              'No Tab Found',
-              `You wanna quick debug the first tab's switchChain popup but no any dapp opened, Please open a tab and try again.`
-            );
-            return;
-          }
-
-          emitIpcMainEvent('__internal_main:popupwin-on-mainwin:toggle-show', {
-            type: 'switch-chain',
-            nextShow: true,
-            rect: { x: params.x, y: params.y },
-            pageInfo: {
-              type: 'switch-chain',
-              dappTabInfo: {
-                id: firstTab.id,
-                url: firstTab.view.webContents.getURL(),
-              },
-            },
-          });
-        });
-      },
+      label: 'Debug Kits',
+      submenu: debugKitsMenu,
     });
 
     appendSeparator();
-
     append({
       label: labels.inspect,
       click: async () => {

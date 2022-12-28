@@ -1,6 +1,5 @@
-import { app, BrowserView, BrowserWindow, Tray } from 'electron';
+import { app, BrowserWindow, Tray } from 'electron';
 
-import { formatDapps } from '@/isomorphic/dapp';
 import {
   APP_NAME,
   IS_RUNTIME_PRODUCTION,
@@ -22,13 +21,12 @@ import { onIpcMainEvent } from '../utils/ipcMainEvents';
 import { getBindLog } from '../utils/log';
 import {
   createWindow,
+  findOpenedDappTab,
   getFocusedWindow,
   getTabbedWindowFromWebContents,
+  isTabbedWebContents,
 } from './tabbedBrowserWindow';
 import { valueToMainSubject } from './_init';
-import { dappStore, parseDappUrl } from '../store/dapps';
-import { attachAlertBrowserView } from './dappAlert';
-import { openDappSecurityCheckView } from './securityCheck';
 import {
   getElectronChromeExtensions,
   getWebuiExtId,
@@ -37,6 +35,7 @@ import {
   getRabbyExtViews,
 } from '../utils/stream-helpers';
 import { switchToBrowserTab } from '../utils/browser';
+import { createDappTab } from './webContents';
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
@@ -47,6 +46,8 @@ const getTrayIconByTheme = () => {
   return getAssetPath('app-icons/macosIconTemplate@2x.png');
 };
 
+const DENY_ACTION = { action: 'deny' } as const;
+
 app.on('web-contents-created', async (evtApp, webContents) => {
   const type = webContents.getType();
   const wcUrl = webContents.getURL();
@@ -55,37 +56,14 @@ app.on('web-contents-created', async (evtApp, webContents) => {
   const mainTabbedWin = await onMainWindowReady();
   const rabbyExtId = await getRabbyExtId();
 
-  webContents.on('will-redirect', (evt) => {
-    const sender = (evt as any).sender as BrowserView['webContents'];
-    const url = sender.getURL();
+  if (!isTabbedWebContents(webContents)) {
+    webContents.setWindowOpenHandler((details) => {
+      const currentUrl = webContents.getURL();
 
-    // this tabs is render as app's self UI, such as topbar.
-    if (!isUrlFromDapp(url)) return;
+      // actually, it's always false
+      const isFromDapp = isUrlFromDapp(currentUrl);
+      if (isFromDapp) return { ...DENY_ACTION };
 
-    const tabbedWin = getTabbedWindowFromWebContents(sender);
-    if (!tabbedWin) return;
-    if (tabbedWin !== mainTabbedWin) return;
-
-    evt.preventDefault();
-    attachAlertBrowserView(url);
-  });
-
-  webContents.setWindowOpenHandler((details) => {
-    const currentUrl = webContents.getURL();
-    const isFromDapp = isUrlFromDapp(currentUrl);
-    const dapps = formatDapps(dappStore.get('dapps'));
-
-    const currentInfo = parseDappUrl(currentUrl, dapps);
-    const targetInfo = parseDappUrl(details.url, dapps);
-    const sameOrigin = currentInfo.origin === targetInfo.origin;
-
-    if (isFromDapp && !sameOrigin) {
-      attachAlertBrowserView(
-        details.url,
-        targetInfo.existedOrigin,
-        getTabbedWindowFromWebContents(webContents)?.window
-      );
-    } else {
       const isFromExt = currentUrl.startsWith('chrome-extension://');
       const isToExt = details.url.startsWith('chrome-extension://');
 
@@ -95,16 +73,15 @@ app.on('web-contents-created', async (evtApp, webContents) => {
         case 'new-window': {
           const tabbedWin = getTabbedWindowFromWebContents(webContents);
 
-          const openedDapp = !isToExt
-            ? tabbedWin?.tabs.findByOrigin(details.url)
-            : tabbedWin?.tabs.findByUrlbase(details.url);
-          if (openedDapp) {
-            switchToBrowserTab(openedDapp!.id, tabbedWin!);
+          const dappTab =
+            tabbedWin && findOpenedDappTab(tabbedWin, details.url, isToExt);
+          if (dappTab) {
+            switchToBrowserTab(dappTab!.id, tabbedWin!);
           } else if (mainTabbedWin === tabbedWin) {
-            const mainWindow = tabbedWin.window;
-
-            if (isFromExt) {
-              const tab = tabbedWin!.createTab({
+            if (!isFromExt) {
+              createDappTab(tabbedWin, details.url);
+            } else {
+              const tab = mainTabbedWin.createTab({
                 initDetails: details,
               });
               tab?.loadURL(details.url);
@@ -114,32 +91,7 @@ app.on('web-contents-created', async (evtApp, webContents) => {
                   activate: true,
                 });
               }
-              break;
             }
-
-            const continualOpenedTab = tabbedWin.createTab({
-              initDetails: details,
-            });
-            continualOpenedTab?.loadURL(details.url);
-
-            const closeOpenedTab = () => {
-              continualOpenedTab?.destroy();
-            };
-
-            openDappSecurityCheckView(details.url, mainWindow).then(
-              ({ continualOpId }) => {
-                // TODO: use timeout mechanism to avoid memory leak
-                const dispose = onIpcMainEvent(
-                  '__internal_rpc:security-check:continue-close-dapp',
-                  (_evt, _openId) => {
-                    if (mainWindow && _openId === continualOpId) {
-                      dispose?.();
-                      closeOpenedTab();
-                    }
-                  }
-                );
-              }
-            );
           }
           break;
         }
@@ -147,12 +99,10 @@ app.on('web-contents-created', async (evtApp, webContents) => {
           break;
         }
       }
-    }
 
-    return {
-      action: 'deny',
-    };
-  });
+      return { ...DENY_ACTION };
+    });
+  }
 
   webContents.on('context-menu', async (_, params) => {
     const pageURL = params.pageURL || '';
