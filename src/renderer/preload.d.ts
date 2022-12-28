@@ -1,4 +1,5 @@
 /// <reference types="electron" />
+/// <reference path="../main/internal.d.ts" />
 /// <reference path="../isomorphic/types.d.ts" />
 /// <reference path="../isomorphic/type-helpers.d.ts" />
 
@@ -283,44 +284,25 @@ type ChannelMessagePayload = {
     send: [];
     response: [];
   };
+  '__internal_rpc:mainwindow:hide-all-tabs': {
+    send: [winId: number];
+    response: [];
+  };
+  '__internal_rpc:mainwindow:select-tab': {
+    send: [winId: number, tabId: number];
+    response: [];
+  };
   '__internal_rpc:mainwindow:make-sure-dapp-opened': {
     send: [dappOrigin: string];
     response: [];
   };
-  '__internal_rpc:popupwin-on-mainwin:toggle-show': {
-    send: [
-      | {
-          type: IContextMenuPageInfo['type'];
-          nextShow: true;
-          rect: {
-            x: Electron.Point['x'];
-            y: Electron.Point['y'];
-            width?: number;
-            height?: number;
-          };
-          pageInfo: IContextMenuPageInfo;
-        }
-      | {
-          nextShow: false;
-          type: IContextMenuPageInfo['type'];
-        }
-    ];
-    response: [];
-  };
+  '__internal_rpc:popupwin-on-mainwin:toggle-show': MainInternalsMessagePayload['__internal_main:popupwin-on-mainwin:toggle-show'];
   '__internal_rpc:debug-tools:operate-debug-insecure-dapps': {
     send: [type: 'add' | 'trim'];
     response: [];
   };
   '__internal_webui-window-close': {
     send: [winId: number, webContentsId: number];
-    response: [];
-  };
-  '__internal_webui-hideAllTabs': {
-    send: [winId: number];
-    response: [];
-  };
-  '__internal_webui-selectTab': {
-    send: [winId: number, tabId: number];
     response: [];
   };
 
@@ -363,42 +345,6 @@ type ChannelMessagePayload = {
 };
 
 type IChannelsKey = keyof ChannelMessagePayload;
-
-type MainInternalsMessagePayload = {
-  '__internal_main:loading-view:toggle': {
-    send: [
-      | {
-          type: 'start';
-          dapp: IDapp;
-        }
-      | {
-          type: 'did-finish-load';
-        }
-    ];
-    response: [];
-  };
-  '__internal_main:tabbed-window:view-added': {
-    send: [
-      {
-        webContents: Electron.WebContents;
-        window: Electron.BrowserWindow;
-        tabbedWindow?: any;
-      }
-    ];
-    response: [];
-  };
-  '__internal_main:dapps:pinnedListChanged': {
-    send: [pinnedList: IDapp['origin'][]];
-    response: [];
-  };
-  '__internal_main:popupwin-on-mainwin:toggle-show': ChannelMessagePayload['__internal_rpc:popupwin-on-mainwin:toggle-show'];
-  '__internal_main:tabbed-window:destroyed': {
-    send: [windowId: Electron.BrowserWindow['id']];
-    response: [];
-  };
-};
-
-type MainInternals = keyof MainInternalsMessagePayload;
 
 interface Window {
   // for built-in webview

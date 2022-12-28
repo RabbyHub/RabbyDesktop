@@ -20,7 +20,7 @@ export function hideAllTabs(
     chrome.tabs.update(activeTabId!, { active: false });
   }
   window.rabbyDesktop.ipcRenderer.sendMessage(
-    '__internal_webui-hideAllTabs',
+    '__internal_rpc:mainwindow:hide-all-tabs',
     windowId!
   );
 }
@@ -233,7 +233,7 @@ export function useSidebarDapps() {
     onTabClick: useCallback((tab: chrome.tabs.Tab) => {
       chrome.tabs.update(tab.id!, { active: true });
       window.rabbyDesktop.ipcRenderer.sendMessage(
-        '__internal_webui-selectTab',
+        '__internal_rpc:mainwindow:select-tab',
         tab.windowId,
         tab.id!
       );

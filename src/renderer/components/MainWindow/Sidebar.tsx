@@ -81,7 +81,6 @@ const TabList = ({
                 styles.active
             )}
             onClick={() => {
-              navigateToDapp(dapp.origin);
               if (dapp.tab) {
                 dappActions.onTabClick(dapp.tab);
               } else {
@@ -90,6 +89,7 @@ const TabList = ({
                   active: true,
                 });
               }
+              navigateToDapp(dapp.origin);
             }}
             onContextMenu={(event) => {
               event?.preventDefault();
