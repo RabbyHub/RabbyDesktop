@@ -13,24 +13,24 @@ export function createDappTab(mainTabbedWin: TabbedBrowserWindow, url: string) {
   });
   continualOpenedTab?.loadURL(url);
 
-  const closeOpenedTab = () => {
-    continualOpenedTab?.destroy();
-  };
+  // const closeOpenedTab = () => {
+  //   continualOpenedTab?.destroy();
+  // };
 
-  openDappSecurityCheckView(url, mainTabbedWin.window).then(
-    ({ continualOpId }) => {
-      // TODO: use timeout mechanism to avoid memory leak
-      const dispose = onIpcMainEvent(
-        '__internal_rpc:security-check:continue-close-dapp',
-        (_evt, _openId) => {
-          if (mainTabbedWin.window && _openId === continualOpId) {
-            dispose?.();
-            closeOpenedTab();
-          }
-        }
-      );
-    }
-  );
+  // openDappSecurityCheckView(url, mainTabbedWin.window).then(
+  //   ({ continualOpId }) => {
+  //     // TODO: use timeout mechanism to avoid memory leak
+  //     const dispose = onIpcMainEvent(
+  //       '__internal_rpc:security-check:continue-close-dapp',
+  //       (_evt, _openId) => {
+  //         if (mainTabbedWin.window && _openId === continualOpId) {
+  //           dispose?.();
+  //           closeOpenedTab();
+  //         }
+  //       }
+  //     );
+  //   }
+  // );
 }
 
 /**
