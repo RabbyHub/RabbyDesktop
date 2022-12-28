@@ -1,5 +1,5 @@
 import { formatDapps } from '@/isomorphic/dapp';
-import { isUrlFromDapp } from '@/isomorphic/url';
+import { getBaseHref, isUrlFromDapp } from '@/isomorphic/url';
 import TabbedBrowserWindow from '../browser/browsers';
 import { dappStore, parseDappUrl } from '../store/dapps';
 import { switchToBrowserTab } from '../utils/browser';
@@ -56,15 +56,16 @@ export function setOpenHandlerForWebContents({
     const isFromDapp = isUrlFromDapp(currentUrl);
     const dapps = formatDapps(dappStore.get('dapps'));
 
+    const targetURL = details.url;
     const currentInfo = parseDappUrl(currentUrl, dapps);
-    const targetInfo = parseDappUrl(details.url, dapps);
+    const targetInfo = parseDappUrl(targetURL, dapps);
     const sameOrigin = currentInfo.origin === targetInfo.origin;
 
-    const isToExt = details.url.startsWith('chrome-extension://');
+    const isToExt = targetURL.startsWith('chrome-extension://');
 
     if (isFromDapp && !sameOrigin) {
       attachDappSafeview(
-        details.url,
+        targetURL,
         targetInfo.existedOrigin,
         parentTabbedWin.window
       );
@@ -73,11 +74,27 @@ export function setOpenHandlerForWebContents({
         case 'foreground-tab':
         case 'background-tab':
         case 'new-window': {
-          const openedDapp = parentTabbedWin?.tabs.findByOrigin(details.url);
+          const openedDapp = parentTabbedWin?.tabs.findByOrigin(targetURL);
           if (openedDapp) {
             switchToBrowserTab(openedDapp!.id, parentTabbedWin!);
+
+            /**
+             * sometimes, targetURL has same origin with currentURL.
+             *
+             * for SPA, we don't set new url for it.
+             * But for static redirect url, we need to set new url.
+             */
+            setTimeout(() => {
+              if (webContents.isDestroyed()) return;
+
+              if (
+                getBaseHref(webContents.getURL()) !== getBaseHref(targetURL)
+              ) {
+                webContents.loadURL(targetURL);
+              }
+            }, 200);
           } else {
-            createDappTab(parentTabbedWin, details.url);
+            createDappTab(parentTabbedWin, targetURL);
           }
           break;
         }

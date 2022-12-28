@@ -145,6 +145,15 @@ export const getMainDomain = (url: string) => {
   return canoicalizeDappUrl(url).domain;
 };
 
+export function getBaseHref(url: string) {
+  const urlInfo = new URL(url);
+
+  urlInfo.hash = '';
+  urlInfo.search = '';
+
+  return urlInfo.toString();
+}
+
 export function hasSameOrigin(url1: string, url2: string) {
   return canoicalizeDappUrl(url1).origin === canoicalizeDappUrl(url2).origin;
 }
