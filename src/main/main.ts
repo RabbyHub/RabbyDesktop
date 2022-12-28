@@ -7,7 +7,7 @@ import './streams/tabbedBrowserWindow';
 import './streams/rabbyExt';
 import './streams/updater';
 import './streams/session';
-import './streams/dappAlert';
+import './streams/dappSafeview';
 import './streams/dappLoadingView';
 import './streams/securityCheck';
 import './streams/securityAddressbarPopup';

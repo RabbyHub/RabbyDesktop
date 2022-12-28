@@ -82,7 +82,7 @@ onMainWindowReady().then((mainWin) => {
   if (!IS_RUNTIME_PRODUCTION) {
     // baseView.webContents.openDevTools({ mode: 'detach' });
     // setTimeout(() => {
-    //   attachAlertBrowserView('https://help.uniswap.org/en', false);
+    //   attachDappSafeview('https://help.uniswap.org/en', false);
     // }, 1000);
   }
 
@@ -91,7 +91,7 @@ onMainWindowReady().then((mainWin) => {
   valueToMainSubject('dappSafeModeViews', { baseView, safeView });
 });
 
-export async function attachAlertBrowserView(
+export async function attachDappSafeview(
   url: string,
   isExisted = false,
   _targetwin?: BrowserWindow

@@ -4,7 +4,7 @@ import TabbedBrowserWindow from '../browser/browsers';
 import { dappStore, parseDappUrl } from '../store/dapps';
 import { switchToBrowserTab } from '../utils/browser';
 import { onIpcMainEvent } from '../utils/ipcMainEvents';
-import { attachAlertBrowserView } from './dappAlert';
+import { attachDappSafeview } from './dappSafeview';
 import { openDappSecurityCheckView } from './securityCheck';
 
 export function createDappTab(mainTabbedWin: TabbedBrowserWindow, url: string) {
@@ -63,7 +63,7 @@ export function setOpenHandlerForWebContents({
     const isToExt = details.url.startsWith('chrome-extension://');
 
     if (isFromDapp && !sameOrigin) {
-      attachAlertBrowserView(
+      attachDappSafeview(
         details.url,
         targetInfo.existedOrigin,
         parentTabbedWin.window
@@ -108,7 +108,7 @@ export const setListeners = {
       if (!isUrlFromDapp(currentURL)) return;
 
       evt.preventDefault();
-      attachAlertBrowserView(targetURL);
+      attachDappSafeview(targetURL);
     });
   },
 
@@ -141,11 +141,7 @@ export const setListeners = {
 
         if (isFromDapp && !sameOrigin) {
           evt.preventDefault();
-          attachAlertBrowserView(
-            targetURL,
-            targetInfo.existedOrigin,
-            parentWindow
-          );
+          attachDappSafeview(targetURL, targetInfo.existedOrigin, parentWindow);
 
           return false;
         }
