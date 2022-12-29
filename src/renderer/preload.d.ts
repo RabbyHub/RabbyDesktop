@@ -382,6 +382,7 @@ interface Window {
     };
   };
 
+  __RD_isDappSafeView?: boolean;
   // for dapp webview
   __rD?: {
     tellConnection(info: IConnectedSiteToDisplay): void;

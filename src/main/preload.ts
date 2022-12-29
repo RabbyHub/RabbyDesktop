@@ -15,9 +15,10 @@ if (
   injectBrowserAction();
 }
 
-const IS_SAFE_WEBVIEW = ['chrome-extension:', RABBY_INTERNAL_PROTOCOL].includes(
-  window.location.protocol
-);
+const IS_BUILTIN_WEBVIEW = [
+  'chrome-extension:',
+  RABBY_INTERNAL_PROTOCOL,
+].includes(window.location.protocol);
 const ipcRendererObj = {
   sendMessage<T extends IChannelsKey>(
     channel: T,
@@ -42,7 +43,7 @@ const ipcRendererObj = {
     ipcRenderer.once(channel, (_event, ...args) => func(...(args as any)));
   },
 };
-if (IS_SAFE_WEBVIEW && !window.rabbyDesktop) {
+if (IS_BUILTIN_WEBVIEW && !window.rabbyDesktop) {
   try {
     contextBridge.exposeInMainWorld('rabbyDesktop', {
       ipcRenderer: ipcRendererObj,

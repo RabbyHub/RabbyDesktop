@@ -1,7 +1,10 @@
 import { BrowserView, BrowserWindow } from 'electron';
 
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
-import { RABBY_MAIN_POPUP_VIEW } from '../../isomorphic/constants';
+import {
+  IS_RUNTIME_PRODUCTION,
+  RABBY_MAIN_POPUP_VIEW,
+} from '../../isomorphic/constants';
 import {
   DAPP_SAFE_VIEW_SIZES,
   NATIVE_HEADER_H,
@@ -17,6 +20,7 @@ import {
 } from '../utils/ipcMainEvents';
 import { getDappSafeView, onMainWindowReady } from '../utils/stream-helpers';
 import { valueToMainSubject } from './_init';
+import { getAssetPath } from '../utils/app';
 
 function updateSubWindowPosition(
   parentWin: BrowserWindow,
@@ -58,8 +62,13 @@ onMainWindowReady().then((mainWin) => {
     webPreferences: {
       sandbox: true,
       nodeIntegration: false,
+      contextIsolation: true,
       allowRunningInsecureContent: false,
       autoplayPolicy: 'user-gesture-required',
+      preload: getAssetPath(`./preloads/dappSafeViewPreload.js`),
+      safeDialogs: true,
+      disableDialogs: true,
+      devTools: !IS_RUNTIME_PRODUCTION,
     },
   });
 
