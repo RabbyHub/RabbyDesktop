@@ -6,6 +6,7 @@ import { injectBrowserAction } from '@rabby-wallet/electron-chrome-extensions/di
 // to injectExtensionAPIs on chrome-extension://
 import '@rabby-wallet/electron-chrome-extensions/dist/preload';
 import { RABBY_INTERNAL_PROTOCOL } from 'isomorphic/constants';
+import { setupClass } from '../preloads/setup-class';
 
 if (
   window.location.protocol === 'chrome-extension:' &&
@@ -61,4 +62,8 @@ if (IS_BUILTIN_WEBVIEW && !window.rabbyDesktop) {
       },
     } as any;
   }
+}
+
+if (IS_BUILTIN_WEBVIEW) {
+  setupClass();
 }

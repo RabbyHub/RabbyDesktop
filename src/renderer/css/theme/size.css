@@ -7,4 +7,11 @@
   --dappViewPaddingOffsetToSidebar: 22px;
 
   --dappsViewLeftOffset: 222px;
+
+  --mainwin-mainarea-topoffset: 0;
+}
+
+html.os-win32,
+body.os-win32 {
+  --mainwin-mainarea-topoffset: 32px;
 }
