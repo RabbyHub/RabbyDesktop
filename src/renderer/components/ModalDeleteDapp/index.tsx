@@ -3,6 +3,7 @@ import classnames from 'classnames';
 import { Modal, ModalProps, Button } from 'antd';
 
 import { useDapps } from 'renderer/hooks/useDappsMngr';
+import { permissionService } from '@/renderer/ipcRequest/rabbyx';
 import styles from './index.module.less';
 import { RCIconDappsModalClose } from '../../../../assets/icons/internal-homepage';
 import { DappFavicon } from '../DappFavicon';
@@ -17,6 +18,7 @@ function useDelete(dapp: IDapp | null) {
       throw new Error('[doDelete] dapp is null');
     }
     setIsLoading(true);
+    await permissionService.removeConnectedSite(dapp.origin);
     await removeDapp(dapp).finally(() => setIsLoading(false));
   }, [removeDapp, dapp]);
 

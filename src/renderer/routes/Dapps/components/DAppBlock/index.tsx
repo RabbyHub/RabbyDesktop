@@ -3,6 +3,7 @@ import { Dropdown, Menu } from 'antd';
 import React, { useRef } from 'react';
 
 import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
+import clsx from 'clsx';
 import {
   RCIconDappsDelete,
   RCIconDappsEdit,
@@ -10,7 +11,6 @@ import {
 } from '../../../../../../assets/icons/internal-homepage';
 
 import { DappFavicon } from '../../../../components/DappFavicon';
-import clsx from 'clsx';
 // import './index.less';
 
 type IOnOpDapp = (

@@ -128,17 +128,22 @@ onIpcMainEvent('dapps-put', (event, reqid: string, dapp: IDapp) => {
 
 onIpcMainEvent('dapps-delete', (event, reqid: string, dapp: IDapp) => {
   const allDapps = dappStore.get('dapps') || [];
-  const idx = allDapps.findIndex((d) => {
+  const dappIdx = allDapps.findIndex((d) => {
     return d.origin === dapp.origin;
   });
 
   let error = '';
-  if (idx > -1) {
-    allDapps.splice(idx, 1);
+  if (dappIdx > -1) {
+    allDapps.splice(dappIdx, 1);
     dappStore.set('dapps', allDapps);
   } else {
     error = 'Not found';
   }
+  const pinnedList = dappStore
+    .get('pinnedList')
+    .filter((o) => o !== dapp.origin);
+  dappStore.set('pinnedList', pinnedList);
+  emitIpcMainEvent('__internal_main:dapps:pinnedListChanged', pinnedList);
 
   event.reply('dapps-delete', {
     reqid,

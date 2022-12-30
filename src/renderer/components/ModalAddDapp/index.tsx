@@ -4,6 +4,7 @@ import { Input, Modal, ModalProps, Button, message, Form } from 'antd';
 import { ExclamationCircleFilled } from '@ant-design/icons';
 
 import { useDapps } from 'renderer/hooks/useDappsMngr';
+import { makeSureDappAddedToConnectedSite } from '@/renderer/ipcRequest/connected-site';
 import styles from './index.module.less';
 import { isValidDappAlias } from '../../../isomorphic/dapp';
 import { IS_RUNTIME_PRODUCTION } from '../../../isomorphic/constants';
@@ -210,6 +211,7 @@ function AddDapp({
             type="primary"
             className={styles.checkedConfirmBtn}
             onClick={async () => {
+              await makeSureDappAddedToConnectedSite(dappInfo);
               await updateDapp(dappInfo);
               onAddedDapp?.();
             }}

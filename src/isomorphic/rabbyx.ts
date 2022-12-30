@@ -53,6 +53,23 @@ export type RabbyXMethod = {
   ) => typeof k extends void
     ? PreferenceState
     : PreferenceState[keyof PreferenceState];
+
+  'permissionService.addConnectedSite': (
+    origin: string,
+    name: string,
+    icon: string,
+    defaultChain: CHAINS_ENUM,
+    isSigned?: boolean
+  ) => void;
+  'permissionService.updateConnectSite': (
+    origin: string,
+    value: Partial<ConnectedSite>,
+    partialUpdate?: boolean
+  ) => void;
+  'permissionService.getConnectedSite': (
+    origin: string
+  ) => ConnectedSite | void;
+  'permissionService.removeConnectedSite': (origin: string) => void;
 };
 
 export type RabbyXMethods = {
@@ -63,18 +80,22 @@ export type RabbyXMethods = {
 
 // extract `walletController.` from keyof walletController.
 export type RabbyXContollerNS = ExtractNS<keyof RabbyXMethods>;
+
 export type RabbyXContollerMeththodNames = {
   [P in RabbyXContollerNS]: ExtractMember<keyof RabbyXMethods, P> & string;
 };
 
+type GetRabbyXMethods<
+  NS extends RabbyXContollerNS,
+  METHOD extends RabbyXContollerMeththodNames[NS]
+> = {
+  [K in keyof RabbyXMethods]: K extends `${NS}.${METHOD}`
+    ? RabbyXMethods[K]
+    : never;
+}[keyof RabbyXMethods];
+
 export type RabbyXContollerMethods = {
   [P in RabbyXContollerNS]: {
-    [K in RabbyXContollerMeththodNames[P]]: RabbyXMethods[`${P}.${K}`];
-  };
-};
-
-export type RabbyXContollerMethodsPromise = {
-  [P in RabbyXContollerNS]: {
-    [K in RabbyXContollerMeththodNames[P]]: RabbyXMethods[`${P}.${K}`];
+    [K in RabbyXContollerMeththodNames[P]]: GetRabbyXMethods<P, K>;
   };
 };

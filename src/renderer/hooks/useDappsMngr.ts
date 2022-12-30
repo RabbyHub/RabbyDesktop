@@ -2,6 +2,7 @@
 /// <reference path="../../renderer/preload.d.ts" />
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { makeSureDappAddedToConnectedSite } from '../ipcRequest/connected-site';
 import {
   fetchDapps,
   detectDapps,
@@ -28,12 +29,18 @@ export function useDapps() {
   const [originDapps, setDapps] = useAtom(dappsAtomic);
   const [pinnedList, setPinnedList] = useAtom(pinnedListAtomic);
 
+  // only fetch dapps once
   useEffect(() => {
     if (originDapps) return;
     // eslint-disable-next-line promise/catch-or-return
     fetchDapps().then((newVal) => {
       setDapps(newVal.dapps);
       setPinnedList(newVal.pinnedList);
+
+      // guard logic
+      newVal.dapps.forEach((dapp) => {
+        makeSureDappAddedToConnectedSite(dapp, false);
+      });
 
       return newVal;
     });
