@@ -1,7 +1,32 @@
 
-v0.2.2 / 2022-12-27
+v0.2.3 / 2022-12-31
 ==================
 
+  * fix: store the position when maxmizing mainWindow on darwin.
+  * feat: for macos, set larger draggble are on top.
+  * fix: little fix.
+  * fix: nav to corresponding route on clicking dapp to removed.
+  * fix: mismatch rabbyx version.
+  * feat: allow copy dapp's url on navbar.
+  * fix: nav to corresponding route on clicking duplicated dapp.
+  * fix: main area top offset on dapps' page. (#29)
+  * feat: auto connect dapp to wallet on add.
+  * fix: make sure object refresh on `fetchConnectedSite`.
+  * fix: dapps pages scroll (#28)
+  * feat: better loading interaction for active tab.
+  * chore: code robust.
+  * chore: code cleanup.
+  * fix: disable rabby wallet injection for dappSafeView.
+  * chore: tuning style, and add helper types.
+  * fix: avoid left loadingView for pages loading too quick.
+  * fix: add timeout mechanism on `parseWebsiteFavicon`.
+  * fix: fix redirect non-SPA behavior on same origin.
+  * feat: fix/tuning/adjust for opening dapp. (#27)
+
+v0.2.2 / 2022-12-27
+===================
+
+  * Release v0.2.2
   * chore: tuning size of rabbyx's notification window.
   * fix: should switch to last tab on close one tab, or switch to /my-dapps on all tabs closed.
   * chore: tuning for next release.
