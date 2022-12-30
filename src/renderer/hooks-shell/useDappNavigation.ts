@@ -85,6 +85,13 @@ export function useDappNavigation() {
     onGoBackButtonClick: useCallback(() => chrome.tabs.goBack(), []),
     onGoForwardButtonClick: useCallback(() => chrome.tabs.goForward(), []),
     onReloadButtonClick: useCallback(() => chrome.tabs.reload(), []),
+    onStopLoadingButtonClick: useCallback(() => {
+      if (!activeTab?.id) return;
+      window.rabbyDesktop.ipcRenderer.sendMessage(
+        '__internal_rpc:mainwindow:stop-tab-loading',
+        activeTab?.id
+      );
+    }, [activeTab?.id]),
   };
 
   return {

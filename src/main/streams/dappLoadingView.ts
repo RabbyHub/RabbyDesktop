@@ -3,10 +3,7 @@ import { RABBY_LOADING_URL } from '../../isomorphic/constants';
 import { createPopupView } from '../utils/browser';
 import { getDappLoadingView, onMainWindowReady } from '../utils/stream-helpers';
 import { valueToMainSubject } from './_init';
-import {
-  onIpcMainInternalEvent,
-  sendToWebContents,
-} from '../utils/ipcMainEvents';
+import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 
 const dappTopOffset =
   NativeAppSizes.mainWindowDappTopOffset +
@@ -50,18 +47,14 @@ onMainWindowReady().then((tabbedWin) => {
 
   dappLoadingView.webContents.loadURL(RABBY_LOADING_URL);
 
-  // if (!IS_RUNTIME_PRODUCTION) {
-  //   dappLoadingView.webContents.openDevTools({ mode: 'detach' });
-  // }
-
   valueToMainSubject('dappLoadingView', dappLoadingView);
 
   updateViewPosition(dappLoadingView, false);
 });
 
-onIpcMainInternalEvent(
-  '__internal_main:loading-view:toggle',
-  async (payload) => {
+onIpcMainEvent(
+  '__internal_rpc:mainwindow:toggle-loading-view',
+  async (_, payload) => {
     const dappLoadingView = await getDappLoadingView();
 
     switch (payload.type) {

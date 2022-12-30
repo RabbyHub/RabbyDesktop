@@ -5,6 +5,7 @@ import {
   IconArrowDown,
   RcIconHistoryGoBack,
   RcIconReload,
+  RcIconStopload,
 } from '@/../assets/icons/top-bar';
 
 import { Divider } from 'antd';
@@ -86,6 +87,12 @@ export const TopNavBar = () => {
       <div className={styles.left}>
         <RiskArea />
         <Divider type="vertical" className={styles.divider} />
+        {activeTab?.status === 'loading' && (
+          <img
+            className={styles.loadingIcon}
+            src="rabby-internal://assets/icons/top-bar/icon-dapp-nav-loading.svg"
+          />
+        )}
         <div className={styles.url}>{activeTab?.url || ''}</div>
         <div className={clsx(styles.historyBar, chainHover && styles.hidden)}>
           <RcIconHistoryGoBack
@@ -102,7 +109,11 @@ export const TopNavBar = () => {
             )}
             onClick={navActions.onGoForwardButtonClick}
           />
-          <RcIconReload onClick={navActions.onReloadButtonClick} />
+          {activeTab?.status === 'loading' ? (
+            <RcIconStopload onClick={navActions.onStopLoadingButtonClick} />
+          ) : (
+            <RcIconReload onClick={navActions.onReloadButtonClick} />
+          )}
         </div>
         {!!currentConnectedSite?.isConnected && !!currentConnectedSite?.chain && (
           <div className={styles.connectChainBox} {...hiddenHistoryOnMouseOver}>

@@ -45,9 +45,13 @@ export function onIpcMainInternalEvent<T extends MainInternals = MainInternals>(
   ipcMain.on(eventName, handler as any);
 
   // dispose
-  return () => {
+  const dispose = () => {
     return ipcMain.off(eventName, handler as any);
   };
+
+  dispose.handler = handler as any;
+
+  return dispose;
 }
 
 export function sendToWebContents<T extends IPushEvents = IPushEvents>(

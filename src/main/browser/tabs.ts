@@ -67,12 +67,6 @@ export class Tab {
       window: ofWindow,
     });
 
-    this.view.webContents.on('did-finish-load', () => {
-      emitIpcMainEvent('__internal_main:loading-view:toggle', {
-        type: 'did-finish-load',
-      });
-    });
-
     this.view?.webContents.on('focus', () => {
       this.tabs.emit('tab-focused');
     });
@@ -120,16 +114,6 @@ export class Tab {
   }
 
   async loadURL(url: string) {
-    const dapps = dappStore.get('dapps') || [];
-    const { origin } = new URL(url);
-    const dapp = dapps.find((item) => item.origin === origin);
-    if (dapp) {
-      emitIpcMainEvent('__internal_main:loading-view:toggle', {
-        type: 'start',
-        dapp,
-      });
-    }
-
     return this.view?.webContents.loadURL(url);
   }
 
@@ -166,12 +150,6 @@ export class Tab {
   hide() {
     this.view!.setAutoResize({ width: false, height: false });
     this.view!.setBounds({ x: -1000, y: 0, width: 0, height: 0 });
-
-    emitIpcMainEvent('__internal_main:loading-view:toggle', {
-      type: 'did-finish-load',
-    });
-    // TODO: can't remove from window otherwise we lose track of which window it belongs to
-    // this.window.removeBrowserView(this.view)
   }
 }
 

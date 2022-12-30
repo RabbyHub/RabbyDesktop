@@ -42,7 +42,7 @@ type M2RChanneMessagePayload = {
         visible: false;
       };
   /* eslint-disable-next-line @typescript-eslint/ban-types */
-  '__internal_push:loading-view:toggle': MainInternalsMessagePayload['__internal_main:loading-view:toggle']['send'][0];
+  '__internal_push:loading-view:toggle': ChannelMessagePayload['__internal_rpc:mainwindow:toggle-loading-view']['send'][0];
 
   [`rabbyx-rpc-query`]: IRabbyxRpcQuery;
 
@@ -296,8 +296,27 @@ type ChannelMessagePayload = {
     send: [winId: number, tabId: number];
     response: [];
   };
+  '__internal_rpc:mainwindow:stop-tab-loading': {
+    send: [tabId: number];
+    response: [];
+  };
   '__internal_rpc:mainwindow:make-sure-dapp-opened': {
     send: [dappOrigin: string];
+    response: [];
+  };
+  '__internal_rpc:mainwindow:toggle-loading-view': {
+    send: [
+      payload:
+        | {
+            type: 'start';
+            tabId?: number;
+            dapp: IDapp;
+          }
+        | {
+            type: 'did-finish-load';
+            tabId?: number;
+          }
+    ];
     response: [];
   };
   '__internal_rpc:popupwin-on-mainwin:toggle-show': MainInternalsMessagePayload['__internal_main:popupwin-on-mainwin:toggle-show'];

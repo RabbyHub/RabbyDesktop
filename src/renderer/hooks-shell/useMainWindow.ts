@@ -26,7 +26,7 @@ export function hideAllTabs(
 }
 
 export function useSidebarDapps() {
-  const { pinnedDapps, unpinnedDapps } = useDapps();
+  const { dapps: allDapps, pinnedDapps, unpinnedDapps } = useDapps();
 
   const [origTabList, setTabList] = useState<ChromeTabWithOrigin[]>([]);
   const [activeTabId, setActiveId] = useState<chrome.tabs.Tab['id']>(-1);
@@ -247,6 +247,7 @@ export function useSidebarDapps() {
   };
 
   return {
+    allDapps,
     pinnedDapps: dappsInSidebar.pinnedDapps,
     unpinnedOpenedDapps: dappsInSidebar.unpinnedOpenedDapps,
     activeTab,

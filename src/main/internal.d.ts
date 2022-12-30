@@ -1,16 +1,4 @@
 type MainInternalsMessagePayload = {
-  '__internal_main:loading-view:toggle': {
-    send: [
-      | {
-          type: 'start';
-          dapp: IDapp;
-        }
-      | {
-          type: 'did-finish-load';
-        }
-    ];
-    response: [];
-  };
   '__internal_main:tabbed-window:view-added': {
     send: [
       {

@@ -199,6 +199,18 @@ onIpcMainEvent(
   }
 );
 
+onIpcMainEvent(
+  '__internal_rpc:mainwindow:stop-tab-loading',
+  async (_, tabId) => {
+    const mainTabbedWin = await onMainWindowReady();
+
+    const tab = mainTabbedWin.tabs.get(tabId);
+    if (!tab) return;
+
+    tab.view?.webContents.stop();
+  }
+);
+
 onIpcMainEvent('__internal_rpc:mainwindow:hide-all-tabs', async (_, winId) => {
   const mainTabbedWin = await onMainWindowReady();
   if (mainTabbedWin.window.id !== winId) return;

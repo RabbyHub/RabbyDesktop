@@ -4,9 +4,25 @@ import { createRoot } from 'react-dom/client';
 import '../css/style.less';
 
 import { Progress } from 'antd';
-import React, { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import './loading.less';
 import { DappFavicon } from '../components/DappFavicon';
+import { useInterval } from '../hooks/useTimer';
+
+function LoadingText() {
+  const [dotCount, setDotCount] = useState(0);
+
+  useInterval(() => {
+    setDotCount((prev) => (prev + 1) % 4);
+  }, 250);
+
+  return (
+    <div className="text">
+      Loading
+      <span className="loading-dots">{'.'.repeat(dotCount)}</span>
+    </div>
+  );
+}
 
 export default function App() {
   const [loadingInfo, setLoadingInfo] = React.useState<{
@@ -95,7 +111,7 @@ export default function App() {
               alt=""
             />
           ) : null}
-          <div className="text">Loading ...</div>
+          <LoadingText />
         </div>
       </div>
     </div>

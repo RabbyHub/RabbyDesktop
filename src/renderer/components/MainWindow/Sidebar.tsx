@@ -13,6 +13,7 @@ import {
 } from '@/renderer/hooks-shell/useMainWindow';
 import { useHasNewRelease } from '@/renderer/hooks/useAppUpdator';
 import { makeSureDappOpened } from '@/renderer/ipcRequest/mainwin';
+import { canoicalizeDappUrl } from '@/isomorphic/url';
 import styles from './Sidebar.module.less';
 import { DappFavicon } from '../DappFavicon';
 
@@ -103,7 +104,15 @@ const TabList = ({
             }}
           >
             <div className={styles.routeItemInner}>
-              {!!tab && <div className={styles.indicator} />}
+              {!!tab &&
+                (tab?.status === 'loading' ? (
+                  <img
+                    className={styles.loadingIcon}
+                    src="rabby-internal://assets/icons/mainwin-sidebar/sidebar-dapp-loading.svg"
+                  />
+                ) : (
+                  <div className={classNames(styles.indicator)} />
+                ))}
               <DappFavicon
                 origin={dapp.origin}
                 src={faviconUrl}
@@ -121,7 +130,7 @@ const TabList = ({
 };
 
 export default function MainWindowSidebar() {
-  const { pinnedDapps, unpinnedOpenedDapps, activeTab, dappActions } =
+  const { allDapps, pinnedDapps, unpinnedOpenedDapps, activeTab, dappActions } =
     useSidebarDapps();
 
   const navigate = useNavigate();
@@ -156,6 +165,32 @@ export default function MainWindowSidebar() {
       makeSureDappOpened(matchedDapp.params.origin!);
     }
   }, [matchedDapp]);
+
+  useEffect(() => {
+    if (!activeTab?.id) return;
+
+    if (!matchedDapp || activeTab?.status === 'complete') {
+      window.rabbyDesktop.ipcRenderer.sendMessage(
+        '__internal_rpc:mainwindow:toggle-loading-view',
+        {
+          type: 'did-finish-load',
+          tabId: activeTab.id,
+        }
+      );
+    } else if (matchedDapp && activeTab?.status === 'loading') {
+      const foundDapp = allDapps.find((dapp) => {
+        return dapp.origin === canoicalizeDappUrl(activeTab.url || '')?.origin;
+      });
+      window.rabbyDesktop.ipcRenderer.sendMessage(
+        '__internal_rpc:mainwindow:toggle-loading-view',
+        {
+          type: 'start',
+          tabId: activeTab.id,
+          dapp: foundDapp!,
+        }
+      );
+    }
+  }, [matchedDapp, activeTab?.status, activeTab?.id, activeTab?.url, allDapps]);
 
   const hasNewRelease = useHasNewRelease();
 

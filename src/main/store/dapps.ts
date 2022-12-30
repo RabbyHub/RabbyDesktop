@@ -3,11 +3,7 @@
 import { app } from 'electron';
 import Store from 'electron-store';
 import { formatDapp, formatDapps } from '@/isomorphic/dapp';
-import {
-  emitIpcMainEvent,
-  onIpcMainEvent,
-  sendToWebContents,
-} from '../utils/ipcMainEvents';
+import { emitIpcMainEvent, onIpcMainEvent } from '../utils/ipcMainEvents';
 import { APP_NAME, PERSIS_STORE_PREFIX } from '../../isomorphic/constants';
 import { safeParse, shortStringify } from '../../isomorphic/json';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
