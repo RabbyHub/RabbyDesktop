@@ -5,6 +5,8 @@ import { ExclamationCircleFilled } from '@ant-design/icons';
 
 import { useDapps } from 'renderer/hooks/useDappsMngr';
 import { makeSureDappAddedToConnectedSite } from '@/renderer/ipcRequest/connected-site';
+import { useNavigate } from 'react-router-dom';
+import { navigateToDappRoute } from '@/renderer/utils/react-router';
 import styles from './index.module.less';
 import { isValidDappAlias } from '../../../isomorphic/dapp';
 import { IS_RUNTIME_PRODUCTION } from '../../../isomorphic/constants';
@@ -100,6 +102,7 @@ function AddDapp({
   onAddedDapp?: () => void;
 }) {
   const [step, setStep] = useState<IStep>('add');
+  const navigate = useNavigate();
 
   const {
     addUrl,
@@ -233,6 +236,9 @@ function AddDapp({
               href={duplicatedDapp?.origin}
               target="_blank"
               rel="noreferrer"
+              onClick={() => {
+                navigateToDappRoute(navigate, duplicatedDapp.origin);
+              }}
             >
               {/* TODO: robust about load image */}
               <DappFavicon
