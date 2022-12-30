@@ -1,10 +1,7 @@
 import { CHAINS_ENUM } from '@debank/common';
 import { permissionService } from './rabbyx';
 
-export async function makeSureDappAddedToConnectedSite(
-  dappInfo: IDapp,
-  updateExisted = true
-) {
+export async function makeSureDappAddedToConnectedSite(dappInfo: IDapp) {
   const existed = await permissionService.getConnectedSite(dappInfo.origin);
 
   if (!existed) {
@@ -15,12 +12,11 @@ export async function makeSureDappAddedToConnectedSite(
       CHAINS_ENUM.ETH,
       false
     );
-  } else if (updateExisted) {
+  } else {
     await permissionService.updateConnectSite(
       dappInfo.origin,
       {
         isConnected: true,
-        isTop: false,
       },
       true
     );

@@ -39,7 +39,7 @@ export function useDapps() {
 
       // guard logic
       newVal.dapps.forEach((dapp) => {
-        makeSureDappAddedToConnectedSite(dapp, false);
+        makeSureDappAddedToConnectedSite(dapp);
       });
 
       return newVal;
