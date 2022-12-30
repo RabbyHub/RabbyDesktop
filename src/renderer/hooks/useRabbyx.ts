@@ -30,13 +30,16 @@ export function useConnectedSite(currentOrigin?: string) {
     const sites = await walletController.getConnectedSites();
 
     setConnectedSiteMap((prev) => {
-      return sites.reduce((acc, site) => {
-        acc[site.origin] = {
-          ...prev[site.origin],
-          ...transformConnectInfo(site),
-        };
-        return acc;
-      }, prev);
+      return sites.reduce(
+        (acc, site) => {
+          acc[site.origin] = {
+            ...prev[site.origin],
+            ...transformConnectInfo(site),
+          };
+          return acc;
+        },
+        { ...prev }
+      );
     });
   }, [setConnectedSiteMap]);
 
