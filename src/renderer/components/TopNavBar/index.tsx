@@ -8,7 +8,7 @@ import {
   RcIconStopload,
 } from '@/../assets/icons/top-bar';
 
-import { Divider } from 'antd';
+import { Divider, message } from 'antd';
 import { useDappNavigation } from '@/renderer/hooks-shell/useDappNavigation';
 import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
 import { useCallback, useRef, useState, useMemo } from 'react';
@@ -93,7 +93,22 @@ export const TopNavBar = () => {
             src="rabby-internal://assets/icons/top-bar/icon-dapp-nav-loading.svg"
           />
         )}
-        <div className={styles.url}>{activeTab?.url || ''}</div>
+        <div className={styles.url}>
+          <span
+            className={styles.urlText}
+            onClick={async () => {
+              if (!activeTab?.url) return;
+              await window.navigator.clipboard.writeText(activeTab.url);
+              message.open({
+                type: 'success',
+                content: 'Copied url',
+                duration: 1,
+              });
+            }}
+          >
+            {activeTab?.url || ''}
+          </span>
+        </div>
         <div className={clsx(styles.historyBar, chainHover && styles.hidden)}>
           <RcIconHistoryGoBack
             className={clsx(
