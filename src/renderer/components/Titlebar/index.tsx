@@ -48,6 +48,7 @@ export default function Titlebar(
     winState,
     onMinimizeButton,
     onMaximizeButton,
+    onToggleMaxmize,
     onFullscreenButton,
     onCloseButton,
   } = useWindowState();
@@ -113,7 +114,10 @@ export default function Titlebar(
           </button>
         </div>
       )}
-      <div className={styles['app-drag']} />
+      <div
+        className={styles['app-drag']}
+        onDoubleClick={winOSType === 'darwin' ? onToggleMaxmize : undefined}
+      />
       {winOSType === 'win32' && (
         <div className={styles['window-controls']}>
           <button
