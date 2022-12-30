@@ -4,6 +4,8 @@ import { Modal, ModalProps, Button } from 'antd';
 
 import { useDapps } from 'renderer/hooks/useDappsMngr';
 import { permissionService } from '@/renderer/ipcRequest/rabbyx';
+import { navigateToDappRoute } from '@/renderer/utils/react-router';
+import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 import { RCIconDappsModalClose } from '../../../../assets/icons/internal-homepage';
 import { DappFavicon } from '../DappFavicon';
@@ -39,6 +41,7 @@ export default function ModalDeleteDapp({
   }
 >) {
   const { doDelete, isLoading } = useDelete(dapp);
+  const navigate = useNavigate();
 
   if (!dapp) return null;
 
@@ -62,6 +65,9 @@ export default function ModalDeleteDapp({
               href={dapp.origin}
               target="_blank"
               rel="noreferrer"
+              onClick={() => {
+                navigateToDappRoute(navigate, dapp.origin);
+              }}
             >
               <DappFavicon
                 origin={dapp.origin}
