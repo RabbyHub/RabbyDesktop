@@ -2,9 +2,6 @@
   position: relative;
   height: 100vh;
   overflow: overlay;
-  .container {
-    padding: 24px 48px;
-  }
 
   .right {
     position: absolute;
@@ -13,7 +10,7 @@
   }
 
   .header {
-    margin-bottom: 44px;
+    padding: 24px 48px;
     .title {
       font-weight: 510;
       font-size: 28px;
@@ -34,5 +31,10 @@
       align-items: center;
       gap: 6px;
     }
+  }
+  .main {
+    height: calc(100vh - 112px);
+    padding: 20px 48px;
+    overflow: overlay;
   }
 }

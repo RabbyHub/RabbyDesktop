@@ -69,7 +69,7 @@ export default function DApps() {
             better security for your Dapp use.
           </div>
         </header>
-        <main>
+        <main className={style.main}>
           <div className="dapps">
             <div className="dapp-matrix">
               {dapps.map((dapp, idx) => {

@@ -10,6 +10,7 @@ import {
 } from '../../../../../../assets/icons/internal-homepage';
 
 import { DappFavicon } from '../../../../components/DappFavicon';
+import clsx from 'clsx';
 // import './index.less';
 
 type IOnOpDapp = (
@@ -128,7 +129,7 @@ export const DAppBlock = ({
         </a>
 
         <div
-          className="menu-entry"
+          className={clsx('menu-entry', dapp.isPinned && 'is-pinned')}
           style={{
             // todo
             backgroundImage: `url(rabby-internal://assets/icons/internal-homepage/${
