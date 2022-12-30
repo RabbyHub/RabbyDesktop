@@ -90,7 +90,10 @@ const sub = mainWinPositionSubject
   .subscribe((mainWin) => {
     if (mainWin.isDestroyed()) return;
 
-    if (mainWin.isMaximized() || mainWin.isFullScreen()) {
+    if (
+      mainWin.isFullScreen() ||
+      (mainWin.isMaximized() && process.platform === 'win32')
+    ) {
       return;
     }
 
@@ -100,6 +103,7 @@ const sub = mainWinPositionSubject
       height: bounds.height,
       x: bounds.x,
       y: bounds.y,
+      isMaximized: mainWin.isMaximized(),
     });
     const lastWindowPosition = {
       ...FRAME_DEFAULT_SIZE,
@@ -107,6 +111,7 @@ const sub = mainWinPositionSubject
       height: bounds.height ?? prevValue.height,
       x: bounds.x ?? prevValue.x,
       y: bounds.y ?? prevValue.y,
+      isMaximized: mainWin.isMaximized(),
     };
 
     const scr = screen.getDisplayMatching({

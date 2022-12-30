@@ -3,6 +3,7 @@ import { detectOS } from '@/isomorphic/os';
 import { useCallback, useEffect, useState } from 'react';
 
 const OS_TYPE = detectOS();
+const isDarwin = OS_TYPE === 'darwin';
 
 export function useWindowState() {
   const [winState, setWinState] =
@@ -25,7 +26,15 @@ export function useWindowState() {
   }, []);
   const onMaximizeButton = useCallback(() => {
     chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, (win) => {
-      const nextState = win.state === 'maximized' ? 'normal' : 'maximized';
+      /**
+       * on darwin, you can not restore a maximized window by
+       * clicking the maximize button, or programatically by default,
+       * except program rememeber the previous window size and restore it later,
+       * we don't implement it for now.
+       */
+      const nextState =
+        win.state === 'maximized' && !isDarwin ? 'normal' : 'maximized';
+
       setWinState(nextState);
       chrome.windows.update(win.id!, {
         state: nextState,
@@ -59,6 +68,7 @@ export function useWindowState() {
     winState,
     onMinimizeButton,
     onMaximizeButton,
+    onToggleMaxmize: onMaximizeButton,
     onFullscreenButton,
     onCloseButton,
   };
