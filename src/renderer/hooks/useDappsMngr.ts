@@ -46,7 +46,7 @@ export function useDapps() {
         setPinnedList(event.pinnedList);
       }
     );
-  });
+  }, [setPinnedList]);
 
   const updateDapp = useCallback(
     async (dapp: IDapp) => {
