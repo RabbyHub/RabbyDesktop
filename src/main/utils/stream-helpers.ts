@@ -52,7 +52,12 @@ export async function toggleMaskViaOpenedRabbyxNotificationWindow() {
     if (RABBYX_WINDOWID_S.size) {
       mainWin.addBrowserView(rabbyNotificationGasket);
       mainWin.setTopBrowserView(rabbyNotificationGasket);
-      rabbyNotificationGasket.setBounds({ x: 0, y: 0, width, height });
+      rabbyNotificationGasket.setBounds({
+        x: 0,
+        y: 0,
+        width,
+        height,
+      });
     } else {
       rabbyNotificationGasket.setBounds({
         x: -99999,

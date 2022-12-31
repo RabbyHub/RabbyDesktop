@@ -1,6 +1,11 @@
 .maskInGasket {
   left: 0;
-  width: calc(100vw - 400px);
-  -webkit-app-region: drag;
-  z-index: 1;
+}
+
+html.__rabbyx-shell-page.os-darwin {
+  .maskInGasket {
+    -webkit-app-region: drag;
+    z-index: 1;
+    width: calc(100vw - 400px);
+  }
 }

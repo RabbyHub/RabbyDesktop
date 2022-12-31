@@ -12,4 +12,6 @@ export const NativeAppSizes = {
   mainWinSidebarWidth,
   dappViewPaddingOffsetToSidebar,
   dappsViewLeftOffset: mainWinSidebarWidth + dappViewPaddingOffsetToSidebar,
+
+  rabbyxNotificationWindowWidth: 400,
 };
