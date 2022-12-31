@@ -7,6 +7,13 @@ type GetIpcRequestListenerFirstParams<
   E extends GetListenerFirstParams<T>
 > = T extends (evt: E, ...args: infer A) => any ? A[0] : never;
 
+type GetListenerByEvent<T, E extends string> = T extends (
+  evt: E,
+  listener: infer U
+) => any
+  ? U
+  : never;
+
 type GetListenerEventParams<
   T,
   E extends GetListenerFirstParams<T>
@@ -32,3 +39,42 @@ type IndexNSAndMember<T> = T extends `${infer NS}.${infer Member}`
 // type IndexNSAndMember<T> = T extends `${infer NS}.${infer Member}` ? Record<NS, Member> : never;
 
 type ExtractPromiseValue<T> = T extends Promise<infer R> ? R : never;
+
+type EventTypeOfBrowserOn = [
+  'page-title-updated',
+  'close',
+  'closed',
+  'session-end',
+  'unresponsive',
+  'responsive',
+  'blur',
+  'focus',
+  'show',
+  'hide',
+  'ready-to-show',
+  'maximize',
+  'unmaximize',
+  'minimize',
+  'restore',
+  'will-resize',
+  'resize',
+  'resized',
+  'will-move',
+  'move',
+  'moved',
+  'enter-full-screen',
+  'leave-full-screen',
+  'enter-html-full-screen',
+  'leave-html-full-screen',
+  'always-on-top-changed',
+  'app-command',
+  'scroll-touch-begin',
+  'scroll-touch-end',
+  'scroll-touch-edge',
+  'swipe',
+  'rotate-gesture',
+  'sheet-begin',
+  'sheet-end',
+  'new-window-for-tab',
+  'system-context-menu'
+][number];

@@ -1,4 +1,6 @@
 import { BrowserWindow } from 'electron';
+import { bufferTime, fromEvent, map } from 'rxjs';
+
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
 import { isUrlFromDapp } from '@/isomorphic/url';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
@@ -260,6 +262,39 @@ onMainWindowReady().then((mainTabbedWin) => {
     );
   });
 });
+
+// performance optimization
+if (process.platform === 'win32') {
+  onMainWindowReady().then((mainTabbedWin) => {
+    const mainWindow = mainTabbedWin.window;
+
+    const sub = fromEvent(mainWindow, 'move')
+      .pipe(
+        bufferTime(200),
+        map((events) => events.length)
+      )
+      .subscribe((count) => {
+        const activeTab = mainTabbedWin.tabs.selected;
+        if (!mainWindow) return;
+        if (!activeTab?.view || activeTab.view.webContents.isDestroyed())
+          return;
+
+        if (count > 1) {
+          if (!activeTab?.view) return;
+          if (activeTab.view.webContents.isLoading()) return;
+
+          activeTab.hide();
+        } else {
+          if (!activeTab?.view) return;
+          activeTab.show();
+        }
+      });
+
+    mainWindow.on('close', () => {
+      sub.unsubscribe();
+    });
+  });
+}
 
 onIpcMainInternalEvent('__internal_main:tabbed-window:destroyed', (winId) => {
   if (RABBYX_WINDOWID_S.has(winId)) {

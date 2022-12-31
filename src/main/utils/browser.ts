@@ -108,6 +108,10 @@ export function hidePopupWindow(popupWin: BrowserWindow) {
   }
 }
 
+export function isPopupWindowHidden(popupWin: BrowserWindow) {
+  return !popupWin.isVisible() || popupWin.getOpacity() <= 0.1;
+}
+
 export function createPopupView(opts?: Electron.BrowserViewConstructorOptions) {
   return new BrowserView({
     ...opts,
@@ -136,4 +140,22 @@ export function switchToBrowserTab(
       tabId,
     }
   );
+}
+
+export function browserWindowOn<T extends EventTypeOfBrowserOn>(
+  win: BrowserWindow,
+  event: T,
+  listener: GetListenerByEvent<BrowserWindow['on'], T>
+) {
+  win.on(event as any, listener);
+
+  let disposed = false;
+  const dispose = () => {
+    if (disposed) return;
+
+    disposed = true;
+    win.off(event, listener);
+  };
+
+  return dispose;
 }

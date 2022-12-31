@@ -16,6 +16,7 @@ import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import {
   createPopupWindow,
   hidePopupWindow,
+  isPopupWindowHidden,
   showPopupWindow,
 } from '../utils/browser';
 import { getOrPutCheckResult } from '../utils/dapps';
@@ -60,7 +61,8 @@ onMainWindowReady().then(async (mainWin) => {
 
   updateSubWindowPosition(targetWin, popupWin);
   const onTargetWinUpdate = () => {
-    updateSubWindowPosition(targetWin, popupWin);
+    if (isPopupWindowHidden(popupWin))
+      updateSubWindowPosition(targetWin, popupWin);
   };
 
   targetWin.on('show', onTargetWinUpdate);

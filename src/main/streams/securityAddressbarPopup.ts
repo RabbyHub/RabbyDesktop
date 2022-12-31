@@ -14,6 +14,7 @@ import { fromMainSubject, valueToMainSubject } from './_init';
 import {
   createPopupWindow,
   hidePopupWindow,
+  isPopupWindowHidden,
   showPopupWindow,
 } from '../utils/browser';
 import { getOrPutCheckResult } from '../utils/dapps';
@@ -82,7 +83,8 @@ onMainWindowReady().then(async (mainWin) => {
 
   updateSubWindowPosition(mainWin.window, popupWin);
   const onTargetWinUpdate = () => {
-    updateSubWindowPosition(mainWin.window, popupWin);
+    if (isPopupWindowHidden(popupWin))
+      updateSubWindowPosition(mainWin.window, popupWin);
   };
   targetWin.on('show', onTargetWinUpdate);
   targetWin.on('move', onTargetWinUpdate);
