@@ -1,3 +1,4 @@
+import { NativeAppSizes } from '@/isomorphic/const-size-next';
 import { BrowserView, BrowserWindow } from 'electron';
 
 export function getWindowFromWebContents(webContents: Electron.WebContents) {
@@ -161,4 +162,24 @@ export function browserWindowOn<T extends EventTypeOfBrowserOn>(
   };
 
   return dispose;
+}
+
+const isWin32 = process.platform === 'win32';
+const rWinWidth = NativeAppSizes.rabbyxNotificationWindowWidth;
+
+export function getRabbyxNotificationBounds(
+  mainWindow: BrowserWindow
+): Electron.Rectangle {
+  const mainBounds = mainWindow.getBounds();
+  const topOffset = isWin32 ? NativeAppSizes.windowTitlebarHeight : 0;
+
+  const maxHeight = mainBounds.height - topOffset;
+  const maxWith = isWin32 ? rWinWidth - 1 : rWinWidth;
+
+  return {
+    width: maxWith,
+    height: maxHeight - 1,
+    x: mainBounds.x + mainBounds.width - rWinWidth,
+    y: mainBounds.y + topOffset,
+  };
 }
