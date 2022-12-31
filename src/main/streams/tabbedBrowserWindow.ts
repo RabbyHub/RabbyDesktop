@@ -121,7 +121,15 @@ export async function createRabbyxNotificationWindow({
     isRabbyXNotificationWindow: true,
     window: {
       frame: false,
-      transparent: isWin32,
+      /**
+       * @notice by default, set transparent to true will
+       * lead all click behavior to be ignored (passthrough),
+       *
+       * but in this case, we provide a popup-view as gasket, which is
+       * under this window and above the main window, so we can set
+       * transparent to true and make borderless-style window.
+       */
+      transparent: true,
       resizable: false,
       parent: mainWin.window,
       width: Math.min(width || maxWith, maxWith),
