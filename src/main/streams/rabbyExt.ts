@@ -73,18 +73,14 @@ onIpcMainEvent(
 );
 
 const maskReady = getRabbyExtId().then(async () => {
-  const globalMaskView = createPopupView();
-  globalMaskView.setBounds({ x: -100, y: -100, width: 1, height: 1 });
+  const rabbyNotificationGasket = createPopupView();
+  rabbyNotificationGasket.setBounds({ x: -100, y: -100, width: 1, height: 1 });
 
-  await globalMaskView.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}#/global-mask`
+  await rabbyNotificationGasket.webContents.loadURL(
+    `${RABBY_POPUP_GHOST_VIEW_URL}#/rabby-notification-gasket`
   );
 
-  if (!IS_RUNTIME_PRODUCTION) {
-    // globalMaskView.webContents.openDevTools({ mode: 'detach' });
-  }
-
-  return globalMaskView;
+  return rabbyNotificationGasket;
 });
 
 const bgWcReady = new Promise<Electron.WebContents>((resolve) => {
@@ -119,9 +115,9 @@ const bgWcReady = new Promise<Electron.WebContents>((resolve) => {
 });
 
 Promise.all([maskReady, bgWcReady]).then(
-  ([globalMaskView, backgroundWebContents]) => {
+  ([rabbyNotificationGasket, backgroundWebContents]) => {
     valueToMainSubject('rabbyExtViews', {
-      globalMaskView: globalMaskView!,
+      rabbyNotificationGasket: rabbyNotificationGasket!,
       backgroundWebContents,
     });
   }

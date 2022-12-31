@@ -29,7 +29,7 @@ const CONF = {
     subject: new ReplaySubject(1),
   } as IConf<
     ReplaySubject<{
-      globalMaskView: Electron.BrowserView;
+      rabbyNotificationGasket: Electron.BrowserView;
       backgroundWebContents: Electron.WebContents;
     }>
   >,

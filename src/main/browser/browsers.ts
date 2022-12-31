@@ -72,6 +72,9 @@ export default class TabbedBrowserWindow {
       ...options.queryStringArgs,
       ...(this.$meta.hasNavigationBar && { __withNavigationbar: 'true' }),
       ...(this.$meta.isMainWindow && { __webuiIsMainWindow: 'true' }),
+      ...(this.$meta.isRabbyXNotificationWindow && {
+        __webuiIsRabbyXNotificationWindow: 'true',
+      }),
       // TODO: set 'false' for 'popup' window
       __webuiClosable: this.windowType !== 'popup' ? 'true' : 'false',
       ...(!IS_RUNTIME_PRODUCTION && {

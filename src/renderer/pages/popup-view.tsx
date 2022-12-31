@@ -13,7 +13,7 @@ import SecurityAddressbarPopup from '@/renderer/routes-popup/SecurityAddressbarP
 import { SidebarContextMenu } from '@/renderer/routes-popup/SidebarContextMenu';
 import SwitchChainWindow from '@/renderer/routes-popup/SwitchChainWindow';
 import SwitchAccountWindow from '@/renderer/routes-popup/SwitchAccountWindow';
-import GlobalMask from '@/renderer/components/MainWindow/GlobalMask';
+import RabbyNotificationGasket from '../routes-popup/RabbyNotificationGasket';
 
 function App() {
   return (
@@ -34,7 +34,10 @@ function App() {
           path="/popup__switch-account"
           element={<SwitchAccountWindow />}
         />
-        <Route path="/global-mask" element={<GlobalMask />} />
+        <Route
+          path="/rabby-notification-gasket"
+          element={<RabbyNotificationGasket />}
+        />
       </Routes>
     </Router>
   );

@@ -97,10 +97,11 @@ export async function removeWindowRecord(win: Electron.BrowserWindow) {
   return tabbedWin;
 }
 
+const isWin32 = process.platform === 'win32';
+
 export async function createRabbyxNotificationWindow({
   url,
   width,
-  height,
 }: {
   url: string;
   width?: number;
@@ -109,21 +110,37 @@ export async function createRabbyxNotificationWindow({
   const mainWin = await onMainWindowReady();
 
   const mainBounds = mainWin.window.getBounds();
-  const topOffset =
-    (process.platform === 'win32' ? NativeAppSizes.windowTitlebarHeight : 0) +
-    NativeAppSizes.mainWindowDappTopOffset;
+  const topOffset = isWin32 ? NativeAppSizes.windowTitlebarHeight : 0;
 
   const maxHeight = mainBounds.height - topOffset;
+  const maxWith = isWin32 ? 399 : 400;
 
   const win = await createWindow({
     defaultTabUrl: url,
     windowType: 'popup',
     isRabbyXNotificationWindow: true,
     window: {
+      frame: false,
+      /**
+       * @notice by default, set transparent to true will
+       * lead all click behavior to be ignored (passthrough),
+       *
+       * but in this case, we provide a popup-view as gasket, which is
+       * under this window and above the main window, so we can set
+       * transparent to true and make borderless-style window.
+       */
+      transparent: true,
+      ...!isWin32 && {
+        roundedCorners: true,
+        hasShadow: false,
+      },
+      maximizable: false,
+      minimizable: false,
+      fullscreenable: false,
       resizable: false,
       parent: mainWin.window,
-      width: Math.min(width || 400, 400),
-      height: Math.min(height || maxHeight, maxHeight),
+      width: Math.min(width || maxWith, maxWith),
+      height: maxHeight - 1,
       x: mainBounds.x + mainBounds.width - 400,
       y: mainBounds.y + topOffset,
       type: 'popup',
