@@ -130,6 +130,13 @@ export async function createRabbyxNotificationWindow({
        * transparent to true and make borderless-style window.
        */
       transparent: true,
+      ...!isWin32 && {
+        roundedCorners: true,
+        hasShadow: false,
+      },
+      maximizable: false,
+      minimizable: false,
+      fullscreenable: false,
       resizable: false,
       parent: mainWin.window,
       width: Math.min(width || maxWith, maxWith),
