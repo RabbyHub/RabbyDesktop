@@ -1,7 +1,14 @@
 
-v0.2.3 / 2022-12-31
+v0.2.4 / 2022-12-31
 ==================
 
+  * feat: styled rabbyx's notification window. (#30)
+  * fix: only check url on redirect in spa.
+
+v0.2.3 / 2022-12-31
+===================
+
+  * Release v0.2.3
   * fix: store the position when maxmizing mainWindow on darwin.
   * feat: for macos, set larger draggble are on top.
   * fix: little fix.
