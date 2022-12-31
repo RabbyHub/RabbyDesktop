@@ -93,6 +93,12 @@ export function isMainWinShellWebUI(url: string) {
     url.includes('__webuiIsMainWindow=true')
   );
 }
+export function isRabbyXNotificationWinShellWebUI(url: string) {
+  return (
+    url.startsWith('chrome-extension:') &&
+    url.includes('__webuiIsRabbyXNotificationWindow=true')
+  );
+}
 
 export function isDappProtocol(protocolOrUrl: string) {
   return protocolOrUrl.startsWith('https:');

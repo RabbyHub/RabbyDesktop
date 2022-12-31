@@ -44,18 +44,23 @@ export async function getContextMenuPopupWindow() {
 export const RABBYX_WINDOWID_S = new Set<number>();
 export async function toggleMaskViaOpenedRabbyxNotificationWindow() {
   const { window: mainWin } = await onMainWindowReady();
-  const { globalMaskView } = await getRabbyExtViews();
+  const { rabbyNotificationGasket } = await getRabbyExtViews();
 
   if (!mainWin.isDestroyed()) {
     const [width, height] = mainWin.getSize();
 
     if (RABBYX_WINDOWID_S.size) {
-      mainWin.addBrowserView(globalMaskView);
-      mainWin.setTopBrowserView(globalMaskView);
-      globalMaskView.setBounds({ x: 0, y: 0, width, height });
+      mainWin.addBrowserView(rabbyNotificationGasket);
+      mainWin.setTopBrowserView(rabbyNotificationGasket);
+      rabbyNotificationGasket.setBounds({ x: 0, y: 0, width, height });
     } else {
-      globalMaskView.setBounds({ x: -100, y: -100, width: 1, height: 1 });
-      mainWin.removeBrowserView(globalMaskView);
+      rabbyNotificationGasket.setBounds({
+        x: -99999,
+        y: -99999,
+        width,
+        height,
+      });
+      mainWin.removeBrowserView(rabbyNotificationGasket);
     }
   }
 }
