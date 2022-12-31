@@ -3,9 +3,7 @@ import { getBaseHref, isUrlFromDapp } from '@/isomorphic/url';
 import TabbedBrowserWindow from '../browser/browsers';
 import { dappStore, parseDappUrl } from '../store/dapps';
 import { switchToBrowserTab } from '../utils/browser';
-import { onIpcMainEvent } from '../utils/ipcMainEvents';
 import { attachDappSafeview } from './dappSafeview';
-import { openDappSecurityCheckView } from './securityCheck';
 
 export function createDappTab(mainTabbedWin: TabbedBrowserWindow, url: string) {
   const continualOpenedTab = mainTabbedWin.createTab({
@@ -52,18 +50,18 @@ export function setOpenHandlerForWebContents({
     if (!webContents) return { action: 'deny' };
 
     const currentUrl = webContents.getURL();
-    // actually, it's always from dapp on isMainContentsForTabbedWindow=false
     const isFromDapp = isUrlFromDapp(currentUrl);
     const dapps = formatDapps(dappStore.get('dapps'));
 
     const targetURL = details.url;
     const currentInfo = parseDappUrl(currentUrl, dapps);
     const targetInfo = parseDappUrl(targetURL, dapps);
-    const sameOrigin = currentInfo.origin === targetInfo.origin;
+    const toSameOrigin = currentInfo.origin === targetInfo.origin;
+    const maybeRedirectInSPA = isFromDapp && toSameOrigin;
 
     const isToExt = targetURL.startsWith('chrome-extension://');
 
-    if (isFromDapp && !sameOrigin) {
+    if (isFromDapp && !toSameOrigin) {
       attachDappSafeview(
         targetURL,
         targetInfo.existedOrigin,
@@ -84,15 +82,17 @@ export function setOpenHandlerForWebContents({
              * for SPA, we don't set new url for it.
              * But for static redirect url, we need to set new url.
              */
-            setTimeout(() => {
-              if (webContents.isDestroyed()) return;
+            if (maybeRedirectInSPA) {
+              setTimeout(() => {
+                if (webContents.isDestroyed()) return;
 
-              if (
-                getBaseHref(webContents.getURL()) !== getBaseHref(targetURL)
-              ) {
-                webContents.loadURL(targetURL);
-              }
-            }, 200);
+                if (
+                  getBaseHref(webContents.getURL()) !== getBaseHref(targetURL)
+                ) {
+                  webContents.loadURL(targetURL);
+                }
+              }, 200);
+            }
           } else {
             createDappTab(parentTabbedWin, targetURL);
           }
@@ -154,9 +154,9 @@ export const setListeners = {
 
         const currentInfo = parseDappUrl(currentUrl, dapps);
         const targetInfo = parseDappUrl(targetURL, dapps);
-        const sameOrigin = currentInfo.origin === targetInfo.origin;
+        const toSameOrigin = currentInfo.origin === targetInfo.origin;
 
-        if (isFromDapp && !sameOrigin) {
+        if (isFromDapp && !toSameOrigin) {
           evt.preventDefault();
           attachDappSafeview(targetURL, targetInfo.existedOrigin, parentWindow);
 
