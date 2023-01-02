@@ -2,10 +2,14 @@
   left: 0;
 }
 
-html.__rabbyx-shell-page.os-darwin {
-  .maskInGasket {
-    -webkit-app-region: drag;
-    z-index: 1;
-    width: calc(100vw - 400px);
+:global {
+  html.__rabbyx-shell-page.os-darwin {
+    :local {
+      .maskInGasket {
+        -webkit-app-region: drag;
+        z-index: 1;
+        width: calc(100vw - 400px);
+      }
+    }
   }
 }
