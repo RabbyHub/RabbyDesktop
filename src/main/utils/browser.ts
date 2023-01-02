@@ -79,7 +79,7 @@ export function createPopupWindow(
 const isDarwin = process.platform === 'darwin';
 /**
  * @description on windows, we assume the popupWin has been shown by calling `window.show()` or set `show: true` on constucting,
- * you sure make sure the window is visiblebefore calling this.
+ * you need to make sure the window is visible before calling this.
  *
  * The same requirement applies to hidePopupWindow
  */
@@ -96,6 +96,9 @@ export function showPopupWindow(
       popupWin.show();
     }
   } else {
+    if (!popupWin.isVisible()) {
+      popupWin.show();
+    }
     popupWin.setOpacity(1);
   }
 }

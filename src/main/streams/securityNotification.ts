@@ -13,7 +13,6 @@ import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { fromMainSubject, valueToMainSubject } from './_init';
 import {
   createPopupWindow,
-  hidePopupWindow,
   isPopupWindowHidden,
   showPopupWindow,
 } from '../utils/browser';
@@ -76,7 +75,7 @@ onMainWindowReady().then(async (mainWin) => {
     // popupWin.webContents.openDevTools({ mode: 'detach' });
   }
 
-  hidePopupWindow(popupWin);
+  popupWin.hide();
 
   valueToMainSubject('securityNotificationsWindowReady', popupWin);
 
@@ -118,7 +117,7 @@ onIpcMainEvent('__internal_rpc:security-notification:close-view', async () => {
   const popupWin = await firstValueFrom(
     fromMainSubject('securityNotificationsWindowReady')
   );
-  hidePopupWindow(popupWin);
+  popupWin.hide();
 });
 
 onIpcMainEvent(

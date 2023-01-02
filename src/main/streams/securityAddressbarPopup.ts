@@ -13,7 +13,6 @@ import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { fromMainSubject, valueToMainSubject } from './_init';
 import {
   createPopupWindow,
-  hidePopupWindow,
   isPopupWindowHidden,
   showPopupWindow,
 } from '../utils/browser';
@@ -101,7 +100,7 @@ onMainWindowReady().then(async (mainWin) => {
     // popupWin.webContents.openDevTools({ mode: 'detach' });
   }
 
-  hidePopupWindow(popupWin);
+  popupWin.hide();
 
   valueToMainSubject('securityAddressbarPopup', popupWin);
 });
@@ -115,7 +114,7 @@ onIpcMainEvent(
     );
 
     const checkResult = await getOrPutCheckResult(dappUrl);
-    hidePopupWindow(popupWin);
+    popupWin.hide();
 
     sendToWebContents(
       popupWin.webContents,
@@ -144,7 +143,7 @@ onIpcMainEvent('__internal_rpc:security-addressbarpopup:hide', async () => {
   const popupWin = await firstValueFrom(
     fromMainSubject('securityAddressbarPopup')
   );
-  hidePopupWindow(popupWin);
+  popupWin.hide();
 });
 
 onIpcMainEvent(
