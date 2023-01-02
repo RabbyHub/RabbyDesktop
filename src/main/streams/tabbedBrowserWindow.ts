@@ -1,7 +1,6 @@
 import { BrowserWindow } from 'electron';
 import { bufferTime, fromEvent, map } from 'rxjs';
 
-import { NativeAppSizes } from '@/isomorphic/const-size-next';
 import { isUrlFromDapp } from '@/isomorphic/url';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 import {
@@ -20,7 +19,11 @@ import {
   RABBYX_WINDOWID_S,
   toggleMaskViaOpenedRabbyxNotificationWindow,
 } from '../utils/stream-helpers';
-import { getWindowFromWebContents } from '../utils/browser';
+import {
+  getRabbyxNotificationBounds,
+  getWindowFromWebContents,
+  isPopupWindowHidden,
+} from '../utils/browser';
 import { getOrPutCheckResult } from '../utils/dapps';
 import { createDappTab } from './webContents';
 
@@ -100,7 +103,6 @@ export async function removeWindowRecord(win: Electron.BrowserWindow) {
 }
 
 const isWin32 = process.platform === 'win32';
-const rWinWidth = NativeAppSizes.rabbyxNotificationWindowWidth;
 
 export async function createRabbyxNotificationWindow({
   url,
@@ -112,11 +114,7 @@ export async function createRabbyxNotificationWindow({
 }) {
   const mainWin = await onMainWindowReady();
 
-  const mainBounds = mainWin.window.getBounds();
-  const topOffset = isWin32 ? NativeAppSizes.windowTitlebarHeight : 0;
-
-  const maxHeight = mainBounds.height - topOffset;
-  const maxWith = isWin32 ? rWinWidth - 1 : rWinWidth;
+  const expectedBounds = getRabbyxNotificationBounds(mainWin.window);
 
   const win = await createWindow({
     defaultTabUrl: url,
@@ -142,10 +140,10 @@ export async function createRabbyxNotificationWindow({
       fullscreenable: false,
       resizable: false,
       parent: mainWin.window,
-      width: Math.min(width || maxWith, maxWith),
-      height: maxHeight - 1,
-      x: mainBounds.x + mainBounds.width - rWinWidth,
-      y: mainBounds.y + topOffset,
+      width: Math.min(width || expectedBounds.width, expectedBounds.width),
+      height: expectedBounds.height,
+      x: expectedBounds.x,
+      y: expectedBounds.y,
       type: 'popup',
     },
   });
@@ -295,6 +293,27 @@ if (process.platform === 'win32') {
     });
   });
 }
+onMainWindowReady().then((mainTabbedWin) => {
+  if (!isWin32) return;
+
+  const onTargetWinUpdate = () => {
+    if (mainTabbedWin.window.isDestroyed()) return;
+
+    RABBYX_WINDOWID_S.forEach((winId) => {
+      const win = findByWindowId(winId)?.window;
+      if (!win || win?.isDestroyed()) return;
+      if (isPopupWindowHidden(win)) return ;
+
+      win.setBounds(getRabbyxNotificationBounds(mainTabbedWin.window));
+    });
+  };
+
+  mainTabbedWin.window.on('show', onTargetWinUpdate);
+  mainTabbedWin.window.on('move', onTargetWinUpdate);
+  mainTabbedWin.window.on('resize', onTargetWinUpdate);
+  mainTabbedWin.window.on('unmaximize', onTargetWinUpdate);
+  mainTabbedWin.window.on('restore', onTargetWinUpdate);
+});
 
 onIpcMainInternalEvent('__internal_main:tabbed-window:destroyed', (winId) => {
   if (RABBYX_WINDOWID_S.has(winId)) {
