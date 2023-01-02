@@ -27,6 +27,12 @@ const ipcRendererObj = {
   ) {
     ipcRenderer.send(channel, ...args);
   },
+  invoke<T extends IChannelsKey>(
+    channel: T,
+    ...args: ChannelMessagePayload[T]['send']
+  ) {
+    return ipcRenderer.invoke(channel, ...args);
+  },
   on<T extends IChannelsKey>(
     channel: T,
     func: (...args: ChannelMessagePayload[T]['response']) => void

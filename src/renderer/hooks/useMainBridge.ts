@@ -12,15 +12,13 @@ export function useAppVersion() {
   const [version, setVersion] = useState<string>('');
 
   useEffect(() => {
-    window.rabbyDesktop.ipcRenderer.on('get-app-version', (event) => {
-      if (event.reqid === reqIdRef.current) {
-        setVersion(event.version);
-      }
-    });
-    window.rabbyDesktop.ipcRenderer.sendMessage(
-      'get-app-version',
-      reqIdRef.current
-    );
+    window.rabbyDesktop.ipcRenderer
+      .invoke('get-app-version', reqIdRef.current)
+      .then((event) => {
+        if (event.reqid === reqIdRef.current) {
+          setVersion(event.version);
+        }
+      });
   }, []);
 
   return version;

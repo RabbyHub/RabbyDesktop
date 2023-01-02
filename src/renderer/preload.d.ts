@@ -86,15 +86,6 @@ type ChannelMessagePayload = {
       }
     ];
   };
-  'get-app-version': {
-    send: [reqid: string];
-    response: [
-      {
-        reqid: string;
-        version: ReturnType<Electron.App['getVersion']>;
-      }
-    ];
-  };
   'detect-dapp': {
     send: [reqid: string, dappUrl: string];
     response: [
@@ -320,6 +311,10 @@ type ChannelMessagePayload = {
     response: [];
   };
   '__internal_rpc:popupwin-on-mainwin:toggle-show': MainInternalsMessagePayload['__internal_main:popupwin-on-mainwin:toggle-show'];
+  '__internal_rpc:app:open-external-url': {
+    send: [externalURL: string];
+    response: [];
+  };
   '__internal_rpc:debug-tools:operate-debug-insecure-dapps': {
     send: [type: 'add' | 'trim'];
     response: [];
@@ -369,6 +364,17 @@ type ChannelMessagePayload = {
 
 type IChannelsKey = keyof ChannelMessagePayload;
 
+type ChannelInvokePayload = {
+  'get-app-version': {
+    send: [reqid: string];
+    response: {
+      reqid: string;
+      version: ReturnType<Electron.App['getVersion']>;
+    };
+  };
+};
+type IInvokesKey = keyof ChannelInvokePayload;
+
 interface Window {
   // for built-in webview
   rabbyDesktop: {
@@ -378,6 +384,10 @@ interface Window {
         channel: T,
         ...args: ChannelMessagePayload[T]['send']
       ): void;
+      invoke<T extends IInvokesKey>(
+        channel: T,
+        ...args: ChannelInvokePayload[T]['send']
+      ): Promise<ChannelInvokePayload[T]['response']>;
       on: {
         <T extends IChannelsKey>(
           channel: T,

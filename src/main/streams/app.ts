@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Tray } from 'electron';
+import { app, BrowserWindow, shell, Tray } from 'electron';
 
 import {
   APP_NAME,
@@ -17,7 +17,7 @@ import {
   storeMainWinPosition,
 } from '../store/desktopApp';
 import { getAssetPath, getBrowserWindowOpts } from '../utils/app';
-import { onIpcMainEvent } from '../utils/ipcMainEvents';
+import { handleIpcMainInvoke, onIpcMainEvent } from '../utils/ipcMainEvents';
 import { getBindLog } from '../utils/log';
 import {
   createWindow,
@@ -153,6 +153,24 @@ onIpcMainEvent('__internal_rpc:main-window:click-close', async (evt) => {
 
   tabbedWin?.destroy();
 });
+
+handleIpcMainInvoke('get-app-version', (_, reqid) => {
+  return {
+    reqid,
+    version: app.getVersion(),
+  };
+});
+
+onIpcMainEvent(
+  '__internal_rpc:app:open-external-url',
+  async (evt, externalURL) => {
+    const currentUrl = evt.sender.getURL();
+    const isFromDapp = isUrlFromDapp(currentUrl);
+    if (isFromDapp) return;
+
+    shell.openExternal(externalURL);
+  }
+);
 
 export default function bootstrap() {
   // eslint-disable-next-line promise/catch-or-return

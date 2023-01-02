@@ -302,7 +302,7 @@ onMainWindowReady().then((mainTabbedWin) => {
     RABBYX_WINDOWID_S.forEach((winId) => {
       const win = findByWindowId(winId)?.window;
       if (!win || win?.isDestroyed()) return;
-      if (isPopupWindowHidden(win)) return ;
+      if (isPopupWindowHidden(win)) return;
 
       win.setBounds(getRabbyxNotificationBounds(mainTabbedWin.window));
     });

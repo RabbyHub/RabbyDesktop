@@ -63,3 +63,13 @@ export function sendToWebContents<T extends IPushEvents = IPushEvents>(
 ) {
   webContents?.send(eventName, payload);
 }
+
+export function handleIpcMainInvoke<T extends IInvokesKey = IInvokesKey>(
+  eventName: T,
+  handler: (
+    event: Electron.IpcMainEvent,
+    ...args: ChannelInvokePayload[T]['send']
+  ) => ItOrItsPromise<ChannelInvokePayload[T]['response']>
+) {
+  ipcMain.handle(eventName, handler as any);
+}

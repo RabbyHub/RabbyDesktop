@@ -18,13 +18,6 @@ onIpcMainEvent('rabby-extension-id', async (event) => {
   });
 });
 
-onIpcMainEvent('get-app-version', (event, reqid) => {
-  event.reply('get-app-version', {
-    reqid,
-    version: app.getVersion(),
-  });
-});
-
 onIpcMainEvent('__internal_rpc:rabbyx-rpc:query', async (evt, reqId, query) => {
   rabbyxQuery(query.method as any, query.params, reqId)
     .then((result) => {

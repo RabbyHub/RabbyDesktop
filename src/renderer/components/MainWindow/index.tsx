@@ -21,6 +21,7 @@ import {
 } from '@/renderer/hooks-shell/useMainWindow';
 import { useClickMainWindowHideContextMenu } from '@/renderer/hooks/useClick';
 import ComingSoon from '@/renderer/routes/ComingSoon';
+import { MainWindowSettings } from '@/renderer/routes/Settings';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -122,7 +123,7 @@ const router = createRouter([
       },
       {
         path: 'settings',
-        element: <ComingSoon pageName="Settings" />,
+        element: <MainWindowSettings />,
       },
     ],
   },
@@ -149,7 +150,7 @@ const router = createRouter([
   },
   {
     path: '*',
-    element: <Navigate to="/mainwin/home" />,
+    element: <Navigate to="/mainwin/settings" />,
   },
 ]);
 

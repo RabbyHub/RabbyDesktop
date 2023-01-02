@@ -40,6 +40,10 @@ type IndexNSAndMember<T> = T extends `${infer NS}.${infer Member}`
 
 type ExtractPromiseValue<T> = T extends Promise<infer R> ? R : never;
 
+type ItOrItsPromise<T> = T extends Promise<any>
+  ? ExtractPromiseValue<T> | T
+  : T | Promise<T>;
+
 type EventTypeOfBrowserOn = [
   'page-title-updated',
   'close',
