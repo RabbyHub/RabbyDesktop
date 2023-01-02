@@ -22,6 +22,15 @@ import { getDappSafeView, onMainWindowReady } from '../utils/stream-helpers';
 import { valueToMainSubject } from './_init';
 import { getAssetPath } from '../utils/app';
 
+function hideView(view: BrowserView, parentWin: BrowserWindow) {
+  parentWin.removeBrowserView(view);
+}
+
+function isViewHidden(view: BrowserView) {
+  const win = BrowserWindow.fromBrowserView(view);
+  return !win;
+}
+
 function updateSubWindowPosition(
   parentWin: BrowserWindow,
   views: {
@@ -74,6 +83,8 @@ onMainWindowReady().then((mainWin) => {
 
   updateSubWindowPosition(mainWin.window, { baseView, safeView });
   const onTargetWinUpdate = () => {
+    if (isViewHidden(baseView)) return;
+    if (isViewHidden(safeView)) return;
     updateSubWindowPosition(mainWin.window, { baseView, safeView });
   };
   targetWin.on('show', onTargetWinUpdate);
@@ -85,7 +96,7 @@ onMainWindowReady().then((mainWin) => {
 
   baseView.webContents.loadURL(`${RABBY_MAIN_POPUP_VIEW}#/dapp-safe-view`);
 
-  targetWin.removeBrowserView(baseView);
+  hideView(baseView, targetWin);
 
   valueToMainSubject('dappSafeModeViews', { baseView, safeView });
 });
@@ -138,8 +149,9 @@ onIpcMainEvent('__internal_rpc:dapp-tabs:close-safe-view', async () => {
   const targetWin = (await onMainWindowReady()).window;
   const dappSafeModeViews = await getDappSafeView();
 
-  targetWin.removeBrowserView(dappSafeModeViews.safeView);
-  targetWin.removeBrowserView(dappSafeModeViews.baseView);
+  hideView(dappSafeModeViews.baseView, targetWin);
+  hideView(dappSafeModeViews.safeView, targetWin);
+
   dappSafeModeViews.safeView.webContents.loadURL('about:blank');
 });
 
