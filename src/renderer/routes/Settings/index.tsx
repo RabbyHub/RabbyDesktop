@@ -3,8 +3,14 @@ import classNames from 'classnames';
 import { openExternalUrl, requestResetApp } from '@/renderer/ipcRequest/app';
 
 import { useAppVersion } from '@/renderer/hooks/useMainBridge';
-import { IconChevronRight, IconLink } from '@/../assets/icons/mainwin-settings';
+import {
+  IconChevronRight,
+  IconLink,
+  IconTooltipInfo,
+} from '@/../assets/icons/mainwin-settings';
 
+import { Modal, Switch, SwitchProps, Tooltip } from 'antd';
+import { useSettings } from '@/renderer/hooks/useSettings';
 import styles from './index.module.less';
 
 type TypedProps = {
@@ -22,14 +28,14 @@ type TypedProps = {
       onClick?: () => void;
     }
   | {
+      type: 'switch';
+      checked: SwitchProps['checked'];
+      onChange?: SwitchProps['onChange'];
+    }
+  | {
       type: 'link';
       link: string;
       useChevron?: boolean;
-    }
-  | {
-      type: 'switch';
-      value: boolean;
-      onChange: (value: boolean) => void;
     }
 );
 
@@ -91,8 +97,23 @@ function ItemAction({
   );
 }
 
+function ItemSwitch({
+  children,
+  ...props
+}: React.PropsWithChildren<Omit<TypedProps & { type: 'switch' }, 'type'>>) {
+  return (
+    <div className={classNames(styles.typedItem, props.className)}>
+      <ItemPartialLeft name={props.name} icon={props.icon} />
+      <div className={styles.itemRight}>
+        <Switch checked={props.checked} onChange={props.onChange} />
+      </div>
+    </div>
+  );
+}
+
 export function MainWindowSettings() {
   const appVerison = useAppVersion();
+  const { settings, toggleEnableContentProtection } = useSettings();
 
   return (
     <div className={styles.settingsPage}>
@@ -100,12 +121,45 @@ export function MainWindowSettings() {
       <div />
 
       <div className={styles.settingBlock}>
+        <h4 className={styles.blockTitle}>Security</h4>
         <div className={styles.itemList}>
-          <ItemAction
-            name={<span className={styles.dangerText}>Reset App</span>}
-            icon="rabby-internal://assets/icons/mainwin-settings/reset.svg"
-            onClick={() => {
-              requestResetApp();
+          <ItemSwitch
+            checked={settings.enableContentProtected}
+            name={
+              <>
+                <Tooltip
+                  trigger="hover"
+                  title="When Enabling this feature, Rabby App would be transparent on Screen Recording/Capturing."
+                >
+                  <span style={{ display: 'flex', alignItems: 'center' }}>
+                    Content Protection
+                    <img
+                      className={styles.nameTooltipIcon}
+                      src={IconTooltipInfo}
+                      style={{
+                        position: 'relative',
+                        top: 1,
+                      }}
+                    />
+                  </span>
+                </Tooltip>
+              </>
+            }
+            icon="rabby-internal://assets/icons/mainwin-settings/content-protection.svg"
+            onChange={(nextEnabled: boolean) => {
+              Modal.confirm({
+                title: 'Restart Confirmation',
+                content: (
+                  <>
+                    It's required to restart Rabby App to apply this change.{' '}
+                    <br />
+                    Do you confirm to {nextEnabled ? 'enable' : 'disable'} it?
+                  </>
+                ),
+                onOk: () => {
+                  toggleEnableContentProtection(nextEnabled);
+                },
+              });
             }}
           />
         </div>
@@ -140,6 +194,18 @@ export function MainWindowSettings() {
             name="Twitter"
             link="https://twitter.com/Rabby_io"
             icon="rabby-internal://assets/icons/mainwin-settings/twitter.svg"
+          />
+        </div>
+      </div>
+
+      <div className={styles.settingBlock}>
+        <div className={styles.itemList}>
+          <ItemAction
+            name={<span className={styles.dangerText}>Reset App</span>}
+            icon="rabby-internal://assets/icons/mainwin-settings/reset.svg"
+            onClick={() => {
+              requestResetApp();
+            }}
           />
         </div>
       </div>

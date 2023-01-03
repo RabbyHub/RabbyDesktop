@@ -26,6 +26,7 @@ import {
 } from '../utils/browser';
 import { getOrPutCheckResult } from '../utils/dapps';
 import { createDappTab } from './webContents';
+import { isEnableContentProtected } from '../store/desktopApp';
 
 const windows: TabbedBrowserWindow[] = [];
 
@@ -86,7 +87,7 @@ export async function createWindow(
     window: getBrowserWindowOpts(options.window),
   });
 
-  if (IS_RUNTIME_PRODUCTION) {
+  if (isEnableContentProtected()) {
     win.window.setContentProtection(true);
   }
 

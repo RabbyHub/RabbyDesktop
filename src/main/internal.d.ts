@@ -53,6 +53,10 @@ type MainInternalsMessagePayload = {
     send: [];
     response: [];
   };
+  '__internal_main:app:relaunch': {
+    send: [];
+    response: [];
+  };
 };
 
 type MainInternals = keyof MainInternalsMessagePayload;

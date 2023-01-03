@@ -215,16 +215,17 @@ onIpcMainInternalEvent('__internal_main:app:reset-app', async () => {
         ? 'Rabby has been reset. save entry file to restart program.'
         : 'Rabby has been reset. click OK to relaunch Rabby.',
     });
-
-    if (IS_RUNTIME_PRODUCTION) {
-      relaunchApp();
-    } else {
-      app.exit(0);
-    }
   }
 });
 onIpcMainEvent('__internal_rpc:app:reset-app', () => {
   emitIpcMainEvent('__internal_main:app:reset-app');
+});
+onIpcMainInternalEvent('__internal_main:app:relaunch', () => {
+  if (IS_RUNTIME_PRODUCTION) {
+    relaunchApp();
+  } else {
+    app.exit(0);
+  }
 });
 
 export default function bootstrap() {

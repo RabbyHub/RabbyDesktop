@@ -1,6 +1,6 @@
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
-import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { BrowserView, BrowserWindow } from 'electron';
+import { isEnableContentProtected } from '../store/desktopApp';
 
 export function getWindowFromWebContents(webContents: Electron.WebContents) {
   switch (webContents.getType()) {
@@ -77,7 +77,7 @@ export function createPopupWindow(
     },
   });
 
-  if (IS_RUNTIME_PRODUCTION) {
+  if (isEnableContentProtected()) {
     window.setContentProtection(true);
   }
 

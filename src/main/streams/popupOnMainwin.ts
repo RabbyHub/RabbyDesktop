@@ -22,7 +22,7 @@ async function hidePopupOnMainWindow(
   targetWin: BrowserWindow | null,
   type: IContextMenuPageInfo['type']
 ) {
-  if (!targetWin) return;
+  if (!targetWin || targetWin.isDestroyed()) return;
 
   sendToWebContents(
     targetWin.webContents,

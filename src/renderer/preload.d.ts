@@ -144,23 +144,6 @@ type ChannelMessagePayload = {
       }
     ];
   };
-  'get-desktopAppState': {
-    send: [reqid: string];
-    response: [
-      {
-        reqid: string;
-        state: IDesktopAppState;
-      }
-    ];
-  };
-  'put-desktopAppState-hasStarted': {
-    send: [reqid: string];
-    response: [
-      {
-        reqid: string;
-      }
-    ];
-  };
   'check-if-new-release': {
     send: [reqid: string];
     response: [
@@ -375,6 +358,22 @@ type ChannelInvokePayload = {
     response: {
       reqid: string;
       version: ReturnType<Electron.App['getVersion']>;
+    };
+  };
+  'get-desktopAppState': {
+    send: [];
+    response: {
+      state: IDesktopAppState;
+    };
+  };
+  'put-desktopAppState': {
+    send: [
+      partialPayload: {
+        [K in keyof IDesktopAppState]?: IDesktopAppState[K];
+      }
+    ];
+    response: {
+      state: IDesktopAppState;
     };
   };
 };

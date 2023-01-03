@@ -6,7 +6,11 @@ import Store from 'electron-store';
 import { APP_NAME, PERSIS_STORE_PREFIX } from '../../isomorphic/constants';
 import { safeParse, shortStringify } from '../../isomorphic/json';
 import { FRAME_DEFAULT_SIZE } from '../../isomorphic/const-size';
-import { onIpcMainEvent } from '../utils/ipcMainEvents';
+import {
+  emitIpcMainEvent,
+  handleIpcMainInvoke,
+  onIpcMainEvent,
+} from '../utils/ipcMainEvents';
 
 export const desktopAppStore = new Store<{
   firstStartApp: boolean;
@@ -17,6 +21,7 @@ export const desktopAppStore = new Store<{
     y?: number;
     isMaximized?: boolean;
   };
+  enableContentProtected: boolean;
 }>({
   name: `${PERSIS_STORE_PREFIX}desktopApp`,
 
@@ -55,6 +60,10 @@ export const desktopAppStore = new Store<{
         ...FRAME_DEFAULT_SIZE,
       },
     },
+    enableContentProtected: {
+      type: 'boolean',
+      default: true,
+    },
   },
 
   serialize: shortStringify,
@@ -64,23 +73,42 @@ export const desktopAppStore = new Store<{
   watch: true,
 });
 
-onIpcMainEvent('get-desktopAppState', (event, reqid: string) => {
+function getState() {
+  return {
+    firstStartApp: desktopAppStore.get('firstStartApp'),
+    enableContentProtected:
+      desktopAppStore.get('enableContentProtected') !== false,
+  };
+}
+
+export function isEnableContentProtected() {
+  return desktopAppStore.get('enableContentProtected') !== false;
+}
+
+handleIpcMainInvoke('get-desktopAppState', () => {
   desktopAppStore.set('firstStartApp', false);
 
-  event.reply('get-desktopAppState', {
-    reqid,
-    state: {
-      firstStartApp: desktopAppStore.get('firstStartApp'),
-    },
-  });
+  return {
+    state: getState(),
+  };
 });
 
-onIpcMainEvent('put-desktopAppState-hasStarted', (event, reqid: string) => {
-  desktopAppStore.set('firstStartApp', false);
-
-  event.reply('put-desktopAppState-hasStarted', {
-    reqid,
+handleIpcMainInvoke('put-desktopAppState', (_, partialPayload) => {
+  Object.entries(partialPayload).forEach(([key, value]) => {
+    switch (key) {
+      case 'enableContentProtected': {
+        desktopAppStore.set('enableContentProtected', value !== false);
+        emitIpcMainEvent('__internal_main:app:relaunch');
+        break;
+      }
+      default:
+        break;
+    }
   });
+
+  return {
+    state: getState(),
+  };
 });
 
 const mainWinPositionSubject = new Subject<BrowserWindow>();
