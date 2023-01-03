@@ -1,36 +1,44 @@
 .settingsPage {
-  padding: 20px 0;
+  padding: 24px 0;
   height: calc(100vh - var(--mainwin-mainarea-topoffset));
   box-sizing: border-box;
-  background: #fff;
+  padding-left: 48px;
+  padding-right: 48px;
+}
+
+.pageTitle {
+  font-weight: 500;
+  font-size: 28px;
+  color: white;
+  margin-bottom: 0;
 }
 
 .settingBlock {
-  width: 600px;
+  width: 100%;
   margin: 0 auto;
   overflow: hidden;
-
-  padding-top: 20px;
+  padding-top: 44px;
 }
 
 .blockTitle {
-  font-weight: 500;
-  font-size: 16px;
+  font-weight: bolder;
+  font-size: 20px;
   line-height: 24px;
-  color: var(--color-title);
+  color: var(--color-purewhite);
   margin-bottom: 4px;
 }
 
-@listRadius: 4px;
+@listRadius: 6px;
+@borderColor: rgba(255, 255, 255, 0.1);
 
 .typedItem {
-  height: 48px;
-  padding: 0 12px;
+  height: 64px;
+  padding-right: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: var(--color-paragraph);
-  border: 1px solid #e6e6e6;
+  color: var(--color-purewhite);
+  border: 1px solid @borderColor;
   border-top: none;
 
   &.pointer {
@@ -38,12 +46,13 @@
   }
 
   &:hover {
-    background-color: #e6e6e6;
-    color: black;
+    background: rgba(0, 0, 0, 0.1);
+    border-color: @borderColor;
+    border-color: transparent;
   }
 
   &:first-child {
-    border-top: 1px solid #e6e6e6;
+    border-top: 1px solid @borderColor;
     border-top-left-radius: @listRadius;
     border-top-right-radius: @listRadius;
   }
@@ -51,5 +60,28 @@
   &:last-child {
     border-bottom-left-radius: @listRadius;
     border-bottom-right-radius: @listRadius;
+  }
+
+  .itemArrow {
+    > img {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+.itemLeft {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 12px;
+
+  .itemIcon + .itemName {
+    margin-left: 12px;
+  }
+
+  .itemIcon {
+    width: 20px;
+    height: 20px;
   }
 }
