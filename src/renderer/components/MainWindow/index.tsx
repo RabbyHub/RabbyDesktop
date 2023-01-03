@@ -163,7 +163,7 @@ const router = createRouter([
   },
   {
     path: '*',
-    element: <Navigate to="/mainwin/settings" />,
+    element: <Navigate to="/mainwin/home" />,
   },
 ]);
 
