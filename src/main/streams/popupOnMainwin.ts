@@ -245,7 +245,7 @@ const SIZE_MAP: Record<
     height: 400,
   },
   'switch-account': {
-    width: 200,
+    width: 240,
     height: 60 * 2 + 1,
   },
 };
