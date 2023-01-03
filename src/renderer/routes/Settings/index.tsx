@@ -1,6 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
-import { openExternalUrl } from '@/renderer/ipcRequest/app';
+import { openExternalUrl, requestResetApp } from '@/renderer/ipcRequest/app';
 
 import { useAppVersion } from '@/renderer/hooks/useMainBridge';
 import { IconChevronRight, IconLink } from '@/../assets/icons/mainwin-settings';
@@ -16,6 +16,10 @@ type TypedProps = {
   | {
       type: 'text';
       text?: string;
+    }
+  | {
+      type: 'action';
+      onClick?: () => void;
     }
   | {
       type: 'link';
@@ -72,6 +76,21 @@ function ItemText({
   );
 }
 
+function ItemAction({
+  children,
+  ...props
+}: React.PropsWithChildren<Omit<TypedProps & { type: 'action' }, 'type'>>) {
+  return (
+    <div
+      className={classNames(styles.typedItem, styles.pointer, props.className)}
+      onClick={props.onClick}
+    >
+      <ItemPartialLeft name={props.name} icon={props.icon} />
+      <div className={styles.itemRight}>{children}</div>
+    </div>
+  );
+}
+
 export function MainWindowSettings() {
   const appVerison = useAppVersion();
 
@@ -79,6 +98,18 @@ export function MainWindowSettings() {
     <div className={styles.settingsPage}>
       {/* TODO: implement Update Area */}
       <div />
+
+      <div className={styles.settingBlock}>
+        <div className={styles.itemList}>
+          <ItemAction
+            name={<span className={styles.dangerText}>Reset App</span>}
+            icon="rabby-internal://assets/icons/mainwin-settings/reset.svg"
+            onClick={() => {
+              requestResetApp();
+            }}
+          />
+        </div>
+      </div>
 
       <div className={styles.settingBlock}>
         <h4 className={styles.blockTitle}>About</h4>

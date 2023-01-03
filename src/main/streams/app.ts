@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, Tray } from 'electron';
+import { app, BrowserWindow, dialog, shell, Tray } from 'electron';
 
 import {
   APP_NAME,
@@ -16,8 +16,13 @@ import {
   getOrInitMainWinPosition,
   storeMainWinPosition,
 } from '../store/desktopApp';
-import { getAssetPath, getBrowserWindowOpts } from '../utils/app';
-import { handleIpcMainInvoke, onIpcMainEvent } from '../utils/ipcMainEvents';
+import { getAssetPath, getBrowserWindowOpts, relaunchApp } from '../utils/app';
+import {
+  emitIpcMainEvent,
+  handleIpcMainInvoke,
+  onIpcMainEvent,
+  onIpcMainInternalEvent,
+} from '../utils/ipcMainEvents';
 import { getBindLog } from '../utils/log';
 import {
   createWindow,
@@ -36,6 +41,7 @@ import {
 } from '../utils/stream-helpers';
 import { switchToBrowserTab } from '../utils/browser';
 import { createDappTab } from './webContents';
+import { clearAllStoreData, clearAllUserData } from '../utils/security';
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
@@ -171,6 +177,55 @@ onIpcMainEvent(
     shell.openExternal(externalURL);
   }
 );
+
+const ResetDialogButtons = ['Cancel', 'Confirm'] as const;
+onIpcMainInternalEvent('__internal_main:app:reset-app', async () => {
+  const cancleId = ResetDialogButtons.findIndex((x) => x === 'Cancel');
+  const confirmId = ResetDialogButtons.findIndex((x) => x === 'Confirm');
+
+  const mainWin = await onMainWindowReady();
+  const result = await dialog.showMessageBox(mainWin.window, {
+    type: 'question',
+    title: 'Reset Rabby',
+    message: 'Are you sure to reset Rabby?',
+    defaultId: cancleId,
+    cancelId: cancleId,
+    noLink: true,
+    buttons: ResetDialogButtons as any as string[],
+  });
+
+  appLog('reset app response:', result.response);
+  if (result.response === confirmId) {
+    clearAllStoreData();
+    clearAllUserData(mainWin.window.webContents.session);
+
+    try {
+      const { backgroundWebContents } = await getRabbyExtViews();
+      await backgroundWebContents.executeJavaScript(
+        `chrome.storage.local.clear();`
+      );
+    } catch (e: any) {
+      dialog.showErrorBox('Error', `Failed to clear Rabby extension data.`);
+    }
+
+    await dialog.showMessageBox(mainWin.window, {
+      title: 'Reset Rabby',
+      type: 'info',
+      message: !IS_RUNTIME_PRODUCTION
+        ? 'Rabby has been reset. save entry file to restart program.'
+        : 'Rabby has been reset. click OK to relaunch Rabby.',
+    });
+
+    if (IS_RUNTIME_PRODUCTION) {
+      relaunchApp();
+    } else {
+      app.exit(0);
+    }
+  }
+});
+onIpcMainEvent('__internal_rpc:app:reset-app', () => {
+  emitIpcMainEvent('__internal_main:app:reset-app');
+});
 
 export default function bootstrap() {
   // eslint-disable-next-line promise/catch-or-return

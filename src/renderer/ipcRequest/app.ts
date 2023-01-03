@@ -4,3 +4,7 @@ export function openExternalUrl(url: string) {
     url
   );
 }
+
+export function requestResetApp() {
+  window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:app:reset-app');
+}

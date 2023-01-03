@@ -49,6 +49,10 @@ type MainInternalsMessagePayload = {
     ];
     response: [];
   };
+  '__internal_main:app:reset-app': {
+    send: [];
+    response: [];
+  };
 };
 
 type MainInternals = keyof MainInternalsMessagePayload;

@@ -176,6 +176,14 @@ function buildDebugKitsMenu(opts: ChromeContextMenuOptions) {
     },
   });
 
+  appendMenuSeparator(debugKitsMenu);
+  appendMenu(debugKitsMenu, {
+    label: `Reset App`,
+    click: () => {
+      emitIpcMainEvent('__internal_main:app:reset-app');
+    },
+  });
+
   return debugKitsMenu;
 }
 

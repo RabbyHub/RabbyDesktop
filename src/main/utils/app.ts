@@ -104,3 +104,19 @@ export function getBrowserWindowOpts(
 }
 
 export const IS_REG_BUILD = (process as any).buildchannel === 'reg';
+
+export function relaunchApp() {
+  const relaunchOptions = {
+    execPath: process.execPath,
+    args: process.argv,
+  };
+  /**
+   * Fix for AppImage on Linux.
+   */
+  if (process.env.APPIMAGE) {
+    relaunchOptions.execPath = process.env.APPIMAGE;
+    relaunchOptions.args.unshift('--appimage-extract-and-run');
+  }
+  app.relaunch(relaunchOptions);
+  app.exit();
+}
