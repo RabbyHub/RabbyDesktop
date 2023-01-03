@@ -349,6 +349,10 @@ type ChannelMessagePayload = {
     send: [string | IRabbyxRpcResponse];
     response: [];
   };
+  [`rabbyx-initialized`]: {
+    send: [time: number];
+    response: [];
+  };
 
   '__internal_rpc:rabbyx:on-session-broadcast': {
     send: [

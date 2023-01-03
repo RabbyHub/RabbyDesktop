@@ -76,6 +76,14 @@ const maskReady = getRabbyExtId().then(async () => {
   return rabbyNotificationGasket;
 });
 
+const rabbyxInitialized = new Promise<number>((resolve) => {
+  const dispose = onIpcMainEvent('rabbyx-initialized', (_, time) => {
+    dispose();
+    cLog('rabbyx-initialized', time);
+    resolve(time);
+  });
+});
+
 const bgWcReady = new Promise<Electron.WebContents>((resolve) => {
   app.on('web-contents-created', async (_, webContents) => {
     const type = webContents.getType();
@@ -107,7 +115,7 @@ const bgWcReady = new Promise<Electron.WebContents>((resolve) => {
   });
 });
 
-Promise.all([maskReady, bgWcReady]).then(
+Promise.all([maskReady, bgWcReady, rabbyxInitialized]).then(
   ([rabbyNotificationGasket, backgroundWebContents]) => {
     valueToMainSubject('rabbyExtViews', {
       rabbyNotificationGasket: rabbyNotificationGasket!,
