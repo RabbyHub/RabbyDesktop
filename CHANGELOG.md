@@ -1,7 +1,29 @@
 
-v0.2.4 / 2022-12-31
+v0.2.5 / 2023-01-03
 ==================
 
+  * style: tuning switchAccount popup's width
+  * feat: support setting `enableContentProtected`.
+  * fix: default route on mainWindow.
+  * feat: support reset-app.
+  * security: enable content protection on production.
+  * fix: wait rabbyx initialized.
+  * feat: control header of mainWindow's page in route's loader. (#36)
+  * chore: fix mainwin-mainarea-topoffset (#35)
+  * feat: adjust style of Settings Page.
+  * fix: sidebar nav opacity (#34)
+  * fix: TopNavBar close button position (#33)
+  * feat: introduce ipc invoke mechanism, apply in Settings of MainWindow.
+  * feat: on win32, make rabbyx notification window locked to main window. (#32)
+  * fix: style for RabbyNotificationWindow on darwin.
+  * perf: optimize fps of mainWindow rendering on windows. (#31)
+  * perf: hide Dapp's views on mainWindow moving.
+  * chore: code robust
+
+v0.2.4 / 2022-12-31
+===================
+
+  * Release v0.2.4
   * feat: styled rabbyx's notification window. (#30)
   * fix: only check url on redirect in spa.
 
