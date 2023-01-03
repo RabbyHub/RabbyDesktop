@@ -28,6 +28,7 @@ import MainRoute from './MainRoute';
 import MainWindowSidebar from './Sidebar';
 import Titlebar from '../Titlebar';
 import { TopNavBar } from '../TopNavBar';
+import { MainWindowRouteData } from './type';
 
 function DappViewWrapper({
   children,
@@ -108,6 +109,12 @@ const router = createRouter([
       {
         path: 'my-dapps',
         element: <DApps />,
+        loader: () => {
+          return {
+            title: 'My Dapps',
+            useAccountComponent: true,
+          } as MainWindowRouteData;
+        },
       },
       {
         path: 'swap',
@@ -124,6 +131,12 @@ const router = createRouter([
       {
         path: 'settings',
         element: <MainWindowSettings />,
+        loader: () => {
+          return {
+            title: 'Settings',
+            useAccountComponent: true,
+          } as MainWindowRouteData;
+        },
       },
     ],
   },

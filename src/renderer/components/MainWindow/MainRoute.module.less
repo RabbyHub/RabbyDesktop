@@ -5,3 +5,33 @@
   width: calc(100% - var(--mainwin-sidebar-w));
   height: 100%;
 }
+
+@headerBlockHeight: 64px;
+@headerBlockContentHeight: 48px;
+
+.headerBlock {
+  margin-top: @headerBlockHeight - @headerBlockContentHeight;
+  height: @headerBlockContentHeight;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 0;
+  padding-right: 0;
+
+  .pageTitle {
+    align-self: flex-start;
+    padding-left: 48px;
+  }
+
+  .accountComponent {
+    padding-right: 16px;
+    align-self: flex-start;
+  }
+}
+
+.pageTitle {
+  font-weight: 500;
+  font-size: 28px;
+  color: white;
+  margin-bottom: 0;
+}
