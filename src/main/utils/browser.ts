@@ -1,4 +1,5 @@
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { BrowserView, BrowserWindow } from 'electron';
 
 export function getWindowFromWebContents(webContents: Electron.WebContents) {
@@ -33,7 +34,7 @@ const IS_DARWIN = process.platform === 'darwin';
 export function createPopupWindow(
   opts?: Electron.BrowserWindowConstructorOptions
 ) {
-  return new BrowserWindow({
+  const window = new BrowserWindow({
     hasShadow: false,
     ...opts,
     show: false,
@@ -75,6 +76,12 @@ export function createPopupWindow(
       contextIsolation: true,
     },
   });
+
+  if (IS_RUNTIME_PRODUCTION) {
+    window.setContentProtection(true);
+  }
+
+  return window;
 }
 
 const isDarwin = process.platform === 'darwin';

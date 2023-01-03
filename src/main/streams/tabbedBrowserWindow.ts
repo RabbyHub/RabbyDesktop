@@ -85,6 +85,11 @@ export async function createWindow(
     extensions: await getElectronChromeExtensions(),
     window: getBrowserWindowOpts(options.window),
   });
+
+  if (IS_RUNTIME_PRODUCTION) {
+    win.window.setContentProtection(true);
+  }
+
   windows.push(win);
 
   return win;
