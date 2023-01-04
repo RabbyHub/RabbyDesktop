@@ -57,13 +57,13 @@ export function useDappNavigation() {
     chrome.tabs.onCreated.addListener(onCreated);
     chrome.tabs.onRemoved.addListener(onRemoved);
     chrome.tabs.onActivated.addListener(onActivated);
-    chrome.tabs.onUpdated.addListener(onUpdated);
+    // chrome.tabs.onUpdated.addListener(onUpdated);
 
     return () => {
       chrome.tabs.onCreated.removeListener(onCreated);
       chrome.tabs.onRemoved.removeListener(onRemoved);
       chrome.tabs.onActivated.removeListener(onActivated);
-      chrome.tabs.onUpdated.removeListener(onUpdated);
+      // chrome.tabs.onUpdated.removeListener(onUpdated);
     };
   }, [activeTab]);
 
