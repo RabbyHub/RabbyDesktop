@@ -1,6 +1,8 @@
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
+import { RABBY_BLANKPAGE_RELATIVE_URL } from '@/isomorphic/constants';
 import { BrowserView, BrowserWindow } from 'electron';
 import { isEnableContentProtected } from '../store/desktopApp';
+import { getAssetPath } from './app';
 
 export function getWindowFromWebContents(webContents: Electron.WebContents) {
   switch (webContents.getType()) {
@@ -19,6 +21,14 @@ export function getWindowFromWebContents(webContents: Electron.WebContents) {
         `Unable to find parent window of '${webContents.getType()}'`
       );
   }
+}
+
+export function redirectToAboutBlank(webContents: Electron.WebContents) {
+  webContents.loadURL('about:blank');
+}
+
+export function redirectToBlankPage(webContents: Electron.WebContents) {
+  webContents.loadURL(getAssetPath(RABBY_BLANKPAGE_RELATIVE_URL));
 }
 
 export function destroyBrowserWebview(view?: BrowserView | null) {

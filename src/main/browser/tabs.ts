@@ -4,7 +4,7 @@ import { NativeAppSizes } from '@/isomorphic/const-size-next';
 import { NATIVE_HEADER_H } from '../../isomorphic/const-size-classical';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
-import { dappStore } from '../store/dapps';
+import { redirectToAboutBlank } from '../utils/browser';
 
 type ITabOptions = {
   tabs: Tabs;
@@ -56,7 +56,12 @@ export class Tab {
     this.$meta.isOfMainWindow = !!isOfMainWindow;
 
     this.tabs = tabs;
-    this.view = new BrowserView();
+    this.view = new BrowserView({
+      webPreferences: {
+        safeDialogs: true,
+        safeDialogsMessage: 'Stop consecutive dialogs',
+      },
+    });
     this.id = this.view.webContents.id;
     this.window = ofWindow;
     this.windowId = ofWindow.id;
@@ -102,6 +107,7 @@ export class Tab {
     }
 
     if (!this.window?.isDestroyed()) {
+      redirectToAboutBlank(this.view!.webContents);
       this.window!.removeBrowserView(this.view!);
     }
 

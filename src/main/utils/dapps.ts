@@ -9,8 +9,9 @@ import { timeout, catchError } from 'rxjs/operators';
 
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { parseWebsiteFavicon } from './fetch';
-import { destroyBrowserWebview } from './browser';
 import { AxiosElectronAdapter } from './axios';
+import { getSessionInsts } from './stream-helpers';
+import { redirectToBlankPage } from './browser';
 
 const DFLT_TIMEOUT = 8 * 1e3;
 
@@ -47,18 +48,27 @@ type CHROMIUM_NET_ERR_DESC =
   | `net::${CHROMIUM_LOADURL_ERR_CODE}`
   | `net::ERR_CONNECTION_CLOSED`;
 
+// TODO: use BrowserView pool to manage
+const originViews: Record<string, BrowserView> = {};
+
 async function checkUrlViaBrowserView(
   dappUrl: string,
   opts?: {
     timeout?: number;
   }
 ) {
-  const view = new BrowserView({
-    webPreferences: {
-      sandbox: true,
-      nodeIntegration: false,
-    },
-  });
+  const { checkingViewSession } = await getSessionInsts();
+  const view = originViews[dappUrl]
+    ? originViews[dappUrl]
+    : new BrowserView({
+        webPreferences: {
+          session: checkingViewSession,
+          sandbox: true,
+          nodeIntegration: false,
+        },
+      });
+
+  originViews[dappUrl] = view;
 
   type Result =
     | {
@@ -127,7 +137,7 @@ async function checkUrlViaBrowserView(
 
   return firstValueFrom(obs).finally(() => {
     checkResult.complete();
-    destroyBrowserWebview(view);
+    redirectToBlankPage(view.webContents);
   });
 }
 
