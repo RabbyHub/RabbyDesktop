@@ -176,14 +176,18 @@ onIpcMainEvent(
       ? await getOrPutCheckResult(tabUrl, { updateOnSet: false })
       : null;
 
+    const isDestroyed = !tab.view || tab.view.webContents.isDestroyed();
+
     event.reply('__internal_rpc:webui-ext:navinfo', {
       reqid,
       tabNavInfo: {
         tabExists: !!tab,
         tabUrl,
         dappSecurityCheckResult: checkResult,
-        canGoBack: tab.view.webContents?.canGoBack(),
-        canGoForward: tab.view.webContents?.canGoForward(),
+        canGoBack: isDestroyed ? false : !!tab.view?.webContents?.canGoBack(),
+        canGoForward: isDestroyed
+          ? false
+          : !!tab.view?.webContents?.canGoForward(),
       },
     });
   }

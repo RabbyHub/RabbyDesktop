@@ -1,10 +1,18 @@
 import { EventEmitter } from 'events';
+
 import { BrowserView, BrowserWindow } from 'electron';
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
 import { NATIVE_HEADER_H } from '../../isomorphic/const-size-classical';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
-import { redirectToAboutBlank } from '../utils/browser';
+import { BrowserViewManager } from '../utils/browserView';
+
+const viewMngr = new BrowserViewManager({
+  webPreferences: {
+    safeDialogs: true,
+    safeDialogsMessage: 'Stop consecutive dialogs',
+  },
+});
 
 type ITabOptions = {
   tabs: Tabs;
@@ -56,12 +64,7 @@ export class Tab {
     this.$meta.isOfMainWindow = !!isOfMainWindow;
 
     this.tabs = tabs;
-    this.view = new BrowserView({
-      webPreferences: {
-        safeDialogs: true,
-        safeDialogsMessage: 'Stop consecutive dialogs',
-      },
-    });
+    this.view = viewMngr.allocateView();
     this.id = this.view.webContents.id;
     this.window = ofWindow;
     this.windowId = ofWindow.id;
@@ -101,14 +104,20 @@ export class Tab {
         this.view?.webContents!.closeDevTools();
       }
 
+      if (this.view!.webContents.isLoading()) {
+        this.view!.webContents.stop();
+      }
       // TODO: why is this no longer called?
-      this.view?.webContents!.emit('destroyed');
+      this.view!.webContents!.emit('destroyed');
       // this.view?.webContents!.destroy?.()
     }
 
-    if (!this.window?.isDestroyed()) {
-      redirectToAboutBlank(this.view!.webContents);
-      this.window!.removeBrowserView(this.view!);
+    if (this.view) {
+      if (!this.window?.isDestroyed()) {
+        this.window!.removeBrowserView(this.view);
+      }
+
+      viewMngr.recycleView(this.view!);
     }
 
     this.window = undefined;

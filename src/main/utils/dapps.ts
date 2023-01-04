@@ -2,7 +2,6 @@
 
 import { format as urlFormat } from 'url';
 import Axios, { AxiosError } from 'axios';
-import { BrowserView } from 'electron';
 import LRUCache from 'lru-cache';
 import { Subject, firstValueFrom, of } from 'rxjs';
 import { timeout, catchError } from 'rxjs/operators';
@@ -11,7 +10,7 @@ import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { parseWebsiteFavicon } from './fetch';
 import { AxiosElectronAdapter } from './axios';
 import { getSessionInsts } from './stream-helpers';
-import { redirectToBlankPage } from './browser';
+import { BrowserViewManager } from './browserView';
 
 const DFLT_TIMEOUT = 8 * 1e3;
 
@@ -48,8 +47,7 @@ type CHROMIUM_NET_ERR_DESC =
   | `net::${CHROMIUM_LOADURL_ERR_CODE}`
   | `net::ERR_CONNECTION_CLOSED`;
 
-// TODO: use BrowserView pool to manage
-const originViews: Record<string, BrowserView> = {};
+let viewMngr: BrowserViewManager;
 
 async function checkUrlViaBrowserView(
   dappUrl: string,
@@ -58,17 +56,16 @@ async function checkUrlViaBrowserView(
   }
 ) {
   const { checkingViewSession } = await getSessionInsts();
-  const view = originViews[dappUrl]
-    ? originViews[dappUrl]
-    : new BrowserView({
-        webPreferences: {
-          session: checkingViewSession,
-          sandbox: true,
-          nodeIntegration: false,
-        },
-      });
-
-  originViews[dappUrl] = view;
+  if (!viewMngr) {
+    viewMngr = new BrowserViewManager({
+      webPreferences: {
+        session: checkingViewSession,
+        sandbox: true,
+        nodeIntegration: false,
+      },
+    });
+  }
+  const view = viewMngr.allocateView();
 
   type Result =
     | {
@@ -137,7 +134,7 @@ async function checkUrlViaBrowserView(
 
   return firstValueFrom(obs).finally(() => {
     checkResult.complete();
-    redirectToBlankPage(view.webContents);
+    viewMngr.recycleView(view);
   });
 }
 
