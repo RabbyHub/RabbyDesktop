@@ -26,8 +26,8 @@ import {
   IconTrafficWin32Minimize,
 } from '@/../assets/icons/titlebar-triples';
 
-import styles from './index.module.less';
 import { useSettings } from '@/renderer/hooks/useSettings';
+import styles from './index.module.less';
 
 type CustomElement<T> = Partial<T & React.DOMAttributes<T> & { children: any }>;
 declare global {

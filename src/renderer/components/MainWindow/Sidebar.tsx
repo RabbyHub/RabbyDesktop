@@ -4,7 +4,7 @@ import { AutoUpdate } from '@/renderer/routes/Dapps/components/AutoUpdate';
 import { showMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
 import classNames from 'classnames';
-import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo } from 'react';
 import { useNavigate, useLocation, matchPath } from 'react-router-dom';
 
 import {
@@ -14,9 +14,9 @@ import {
 import { useHasNewRelease } from '@/renderer/hooks/useAppUpdator';
 import { makeSureDappOpened } from '@/renderer/ipcRequest/mainwin';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
+import { useSettings } from '@/renderer/hooks/useSettings';
 import styles from './Sidebar.module.less';
 import { DappFavicon } from '../DappFavicon';
-import { useSettings } from '@/renderer/hooks/useSettings';
 
 // keep in sync with css
 const RouteItemH = 52;
