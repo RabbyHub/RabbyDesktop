@@ -70,6 +70,12 @@ export type RabbyXMethod = {
     origin: string
   ) => ConnectedSite | void;
   'permissionService.removeConnectedSite': (origin: string) => void;
+
+  'sessionService.broadcastEvent': (
+    ev: string,
+    data?: any,
+    origin?: string
+  ) => void;
 };
 
 export type RabbyXMethods = {

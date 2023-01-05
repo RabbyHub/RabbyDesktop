@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 
-import { session } from 'electron';
+import { session, shell } from 'electron';
 import { firstValueFrom } from 'rxjs';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { isRabbyXPage } from '@/isomorphic/url';
@@ -162,7 +162,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
 
     preloadPath,
 
-    createTab: (details, ctx) => {
+    createTab: async (details, ctx) => {
       const win =
         typeof details.windowId === 'number' &&
         findByWindowId(details.windowId);
@@ -175,10 +175,14 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
       const fromWc = sender.hostWebContents || sender;
       const fromWindow = getWindowFromWebContents(ctx.event.sender);
 
+      const fromURL = fromWc.getURL();
+      const rabbyExtId = await getRabbyExtId();
+
       const actionInfo = checkOpenAction(win.tabs, {
-        fromUrl: fromWc.getURL() || '',
+        fromUrl: fromURL || '',
         toUrl: details.url || '',
         fromSameWindow: fromWindow === win.window,
+        rabbyExtId,
       });
 
       switch (actionInfo.action) {
@@ -191,8 +195,12 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
             actionInfo.openedTab!.window!,
           ];
         }
+        case 'open-external': {
+          shell.openExternal(actionInfo.externalUrl);
+          return false;
+        }
         case 'deny': {
-          return [fromWc, fromWindow];
+          return false;
         }
         default: {
           const tab = win.createTab({
