@@ -207,6 +207,7 @@ export default function MainWindowSidebar() {
           src="rabby-internal://assets/icons/mainwin-sidebar/sidebar-logo.svg"
         />
       </div>
+      <div className={styles.menuFold} />
       <div className={styles.dappsRouteList}>
         <ul className={styles.routeList}>
           {StaticEntries.map((sE) => {

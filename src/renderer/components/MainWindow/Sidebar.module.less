@@ -15,6 +15,8 @@
   width: var(--mainwin-sidebar-w);
   height: 100vh;
   border-right: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
 
   .navFooter .update {
     display: none;
@@ -51,7 +53,7 @@
     width: 100%;
     box-sizing: border-box;
     border-left: 4px solid transparent;
-    padding-left: 28px;
+    padding-left: 16px;
     opacity: 0.8;
 
     font-size: 14px;
@@ -108,12 +110,13 @@
     position: relative;
     .indicator {
       position: absolute;
-      top: 23px;
-      left: -19px;
-      width: 6px;
-      height: 6px;
+      top: 50%;
+      left: -10px;
+      width: 4px;
+      height: 4px;
       border-radius: 50%;
       background: var(--color-purewhite);
+      transform: translate(-50%, -50%);
     }
 
     .loadingIcon {
@@ -121,7 +124,8 @@
 
       position: absolute;
       top: calc(50% - @iconSize / 2);
-      left: -24px;
+      left: calc(-2px - @iconSize / 2);
+      transform: translateX(-50%);
       width: @iconSize;
       height: @iconSize;
     }
@@ -140,33 +144,51 @@
   }
 }
 
+.menuFold {
+  background: url(rabby-internal://assets/icons/mainwin-sidebar/arrow-left.svg)
+    center 100% no-repeat;
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  right: 0;
+  top: 40px - @TITLEBAR_H;
+  transform: translate(50%);
+  cursor: pointer;
+  // &:hover {
+  //   background-image: url(rabby-internal://assets/icons/mainwin-sidebar/arrow-left-active.svg);
+  // }
+
+  // &.isFold {
+  //   background-image: url(rabby-internal://assets/icons/mainwin-sidebar/arrow-right.svg);
+  //   &:hover {
+  //     background-image: url(rabby-internal://assets/icons/mainwin-sidebar/arrow-right-active.svg);
+  //   }
+  // }
+}
+
 .dappsRouteList {
   display: flex;
   flex-direction: column;
-  max-height: calc(100% - @logoWrapper-height);
-  height: 100%;
+  // max-height: calc(100% - @logoWrapper-height);
+  // height: 100%;
+  overflow: overlay;
+  flex: 1;
 
   .divider {
     height: 1px;
     flex-shrink: 0;
     background: rgba(255, 255, 255, 0.1);
-    margin: 8px 32px;
+    margin: 8px 20px;
     box-sizing: border-box;
     flex-shrink: 0;
   }
 
   > .pinnedList {
-    flex-shrink: 3;
-    height: 100%;
     padding-right: 0;
-    overflow: overlay;
   }
 
   > .unpinnedList {
-    flex-shrink: 4;
     padding-right: 0;
-    overflow: overlay;
-    height: 100%;
   }
 }
 
