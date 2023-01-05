@@ -8,7 +8,7 @@ export class BrowserViewManager {
 
   constructor(private viewOpts: BrowserViewConstructorOptions) {}
 
-  allocateView() {
+  allocateView(loadBlank = true) {
     let view = Object.values(this.idleViews)[0];
 
     if (!view || view.webContents.isDestroyed()) {
@@ -19,7 +19,9 @@ export class BrowserViewManager {
 
     delete this.idleViews[view.webContents.id];
     this.busyViews[view.webContents.id] = view;
-    view.webContents.loadURL('about:blank');
+    if (loadBlank) {
+      view.webContents.loadURL('about:blank');
+    }
 
     return view;
   }

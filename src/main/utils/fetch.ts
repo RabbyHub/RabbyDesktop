@@ -58,8 +58,12 @@ export async function fetchUrl(inputURL: string) {
   });
 }
 
-function resolveUrl(url: string, base: string) {
-  return new URL(url, base).href;
+function getHref(url: string, base: string) {
+  try {
+    return new URL(url, base).href;
+  } catch (error) {
+    return '';
+  }
 }
 
 /**
@@ -79,16 +83,22 @@ export async function parseWebsiteFavicon(
 
   async function textFetcher(url: string) {
     // leave here for debug
-    // console.log('[debug] textFetcher:: url', url);
-    return fetchUrl(resolveUrl(url, websiteBaseURL)).then(
+    // console.debug('[debug] textFetcher:: websiteBaseURL, url', websiteBaseURL, url);
+
+    const href = getHref(url, websiteBaseURL);
+    if (!href) return '';
+    return fetchUrl(href).then(
       (res) => Buffer.from(res.body || []).toString() || ''
     );
   }
 
   async function bufferFetcher(url: string) {
     // leave here for debug
-    // console.log('[debug] bufferFetcher:: url', url);
-    return fetchUrl(resolveUrl(url, websiteBaseURL)).then((res) => {
+    // console.debug('[debug] bufferFetcher:: websiteBaseURL, url', websiteBaseURL, url);
+
+    const href = getHref(url, websiteBaseURL);
+    if (!href) return Buffer.from([]);
+    return fetchUrl(href).then((res) => {
       const arrBuf = res.body || new Uint8Array();
 
       reqIconUrlBufs[url] = Buffer.from(arrBuf).toString('base64');

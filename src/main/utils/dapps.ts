@@ -65,7 +65,7 @@ async function checkUrlViaBrowserView(
       },
     });
   }
-  const view = viewMngr.allocateView();
+  const view = viewMngr.allocateView(false);
 
   type Result =
     | {
@@ -87,6 +87,7 @@ async function checkUrlViaBrowserView(
       valid: true,
       finalUrl: view.webContents.getURL(),
     });
+    checkResult.complete();
   });
 
   view.webContents.on(
@@ -97,6 +98,7 @@ async function checkUrlViaBrowserView(
           valid: false,
           errorDesc,
         });
+        checkResult.complete();
       } else if (errorDesc.startsWith('ERR_CERT_')) {
         // wait for 'certificate-error' event
       } else {
@@ -104,6 +106,7 @@ async function checkUrlViaBrowserView(
           valid: false,
           errorDesc,
         });
+        checkResult.complete();
       }
     }
   );
@@ -114,6 +117,7 @@ async function checkUrlViaBrowserView(
       errorDesc: cert.slice('net::'.length),
       certErrorDesc: cert as CHROMIUM_NET_ERR_DESC,
     });
+    checkResult.complete();
   });
 
   view.webContents.loadURL(dappUrl);
@@ -133,7 +137,6 @@ async function checkUrlViaBrowserView(
   }
 
   return firstValueFrom(obs).finally(() => {
-    checkResult.complete();
     viewMngr.recycleView(view);
   });
 }
