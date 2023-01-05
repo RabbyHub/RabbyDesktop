@@ -16,3 +16,5 @@ export const RABBY_LOADING_URL = `${RABBY_INTERNAL_PROTOCOL}//local/loading.html
 
 export const RABBY_MAIN_POPUP_VIEW = `${RABBY_INTERNAL_PROTOCOL}//local/main-popup-view.html`;
 export const RABBY_POPUP_GHOST_VIEW_URL = `${RABBY_INTERNAL_PROTOCOL}//local/popup-view.html`;
+
+export const RABBY_BLANKPAGE_RELATIVE_URL = `preloads/blank.html`;
