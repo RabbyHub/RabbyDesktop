@@ -28,7 +28,7 @@ import {
 import { firstEl } from '../../isomorphic/array';
 import { getRabbyExtId, getWebuiExtId } from '../utils/stream-helpers';
 import { checkOpenAction } from '../utils/tabs';
-import { switchToBrowserTab } from '../utils/browser';
+import { getWindowFromWebContents, switchToBrowserTab } from '../utils/browser';
 
 const sesLog = getBindLog('session', 'bgGrey');
 
@@ -147,7 +147,13 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
     }
   }
 
-  valueToMainSubject('sessionReady', undefined);
+  const dappSafeViewSession = session.fromPartition('dappSafeView');
+  const checkingViewSession = session.fromPartition('checkingView');
+  valueToMainSubject('sessionReady', {
+    mainSession: sessionIns,
+    dappSafeViewSession,
+    checkingViewSession,
+  });
   sessionIns.setPreloads([preloadPath]);
 
   // @notice: make sure all customized plugins loaded after ElectronChromeExtensions initialized
@@ -167,12 +173,12 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
 
       const { sender } = ctx.event;
       const fromWc = sender.hostWebContents || sender;
-      const fromWindow = getTabbedWindowFromWebContents(ctx.event.sender);
+      const fromWindow = getWindowFromWebContents(ctx.event.sender);
 
       const actionInfo = checkOpenAction(win.tabs, {
         fromUrl: fromWc.getURL() || '',
         toUrl: details.url || '',
-        fromSameWindow: fromWindow?.window === win.window,
+        fromSameWindow: fromWindow === win.window,
       });
 
       switch (actionInfo.action) {

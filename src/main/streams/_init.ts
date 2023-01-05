@@ -1,5 +1,5 @@
 import type { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
-import { BrowserView, BrowserWindow } from 'electron';
+import { BrowserView, BrowserWindow, Session } from 'electron';
 import { Subject, ReplaySubject, Observable } from 'rxjs';
 import TabbedBrowserWindow from '../browser/browsers';
 import { cLog } from '../utils/log';
@@ -14,7 +14,13 @@ const CONF = {
   } as IConf<ReplaySubject<void>>,
   sessionReady: {
     subject: new ReplaySubject(1),
-  } as IConf<ReplaySubject<void>>,
+  } as IConf<
+    ReplaySubject<{
+      mainSession: Session;
+      dappSafeViewSession: Session;
+      checkingViewSession: Session;
+    }>
+  >,
   electronChromeExtensionsReady: {
     subject: new ReplaySubject(1),
   } as IConf<ReplaySubject<ElectronChromeExtensions>>,
