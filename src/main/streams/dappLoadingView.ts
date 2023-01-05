@@ -11,6 +11,7 @@ import {
   sendToWebContents,
 } from '../utils/ipcMainEvents';
 import { dappStore } from '../store/dapps';
+import { pickMainWindowLayouts } from '../utils/browserView';
 
 const dappTopOffset =
   NativeAppSizes.mainWindowDappTopOffset +
@@ -24,10 +25,12 @@ async function updateViewPosition(
   const mainWin = tabbedWin.window;
   const [width, height] = mainWin.getSize();
 
+  const layouts = pickMainWindowLayouts();
+
   const popupRect = {
-    x: NativeAppSizes.dappsViewLeftOffset,
+    x: layouts.dappsViewLeftOffset,
     y: dappTopOffset,
-    width: width - NativeAppSizes.dappsViewLeftOffset,
+    width: width - layouts.dappsViewLeftOffset,
     height: height - dappTopOffset,
   };
 

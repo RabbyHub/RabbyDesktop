@@ -6,11 +6,16 @@
 @top-radius: 12px;
 
 .modal-alert-insecurity-wrap {
+  --left-offset: calc(var(--dappViewPaddingOffsetToSidebar) + var(--mainwin-sidebar-w));
   padding-top: @body-padding-top;
-  padding-left: var(--dappsViewLeftOffset);
+  padding-left: var(--left-offset);
   padding-right: var(--dappViewPaddingOffsetToSidebar);
-  min-width: calc(100vw - var(--dappViewPaddingOffsetToSidebar) * 2 - var(--dappsViewLeftOffset));
+  min-width: calc(100vw - var(--dappViewPaddingOffsetToSidebar) * 2 - var(--left-offset));
   overflow: hidden;
+
+  &.mainwin-sidebar-collapsed {
+    --left-offset: calc(var(--dappViewPaddingOffsetToSidebar) + var(--mainwin-sidebar-collapsed-w));
+  }
 
   .alert-header {
     background-color: var(--color-paragraph);

@@ -6,6 +6,7 @@ import { Modal } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { canoicalizeDappUrl } from 'isomorphic/url';
 import classNames from 'classnames';
+import { useSettings } from '@/renderer/hooks/useSettings';
 import useDragHeadbar from '../../hooks/useDragheadbar';
 
 function closeView() {
@@ -20,6 +21,10 @@ export default function DappSafeView() {
     isExisted: false,
     status: 'loading' as 'start-loading' | 'loaded',
   });
+  const {
+    settings: { sidebarCollapsed },
+    fetchState,
+  } = useSettings();
   useEffect(() => {
     // close it by default
     closeView();
@@ -27,10 +32,11 @@ export default function DappSafeView() {
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:dapp-tabs:open-safe-view',
       ({ url, isExisted, status }) => {
+        fetchState();
         setUrlInfo({ url, isExisted, status });
       }
     );
-  }, []);
+  }, [fetchState]);
 
   const { origin } = useMemo(() => {
     return canoicalizeDappUrl(urlInfo.url);
@@ -46,7 +52,10 @@ export default function DappSafeView() {
         'modal-alert-insecurity',
         urlInfo.status === 'start-loading' && 'is-loading'
       )}
-      wrapClassName="modal-alert-insecurity-wrap"
+      wrapClassName={classNames(
+        'modal-alert-insecurity-wrap',
+        sidebarCollapsed && 'mainwin-sidebar-collapsed'
+      )}
       open={!!urlInfo.url}
       maskClosable={false}
       mask

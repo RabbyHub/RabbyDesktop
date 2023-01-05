@@ -25,6 +25,7 @@ import {
 } from '../utils/stream-helpers';
 import { valueToMainSubject } from './_init';
 import { getAssetPath } from '../utils/app';
+import { pickMainWindowLayouts } from '../utils/browserView';
 
 function hideView(view: BrowserView, parentWin: BrowserWindow) {
   parentWin.removeBrowserView(view);
@@ -51,16 +52,18 @@ function updateSubWindowPosition(
     height,
   });
 
+  const layouts = pickMainWindowLayouts();
+
   const safeTopOffset =
     NATIVE_HEADER_H + DAPP_SAFE_VIEW_SIZES.alertHeaderHeight;
   views.safeView.setBounds({
-    x: NativeAppSizes.dappsViewLeftOffset,
+    x: layouts.dappsViewLeftOffset,
     y: safeTopOffset,
     width:
       width -
       NativeAppSizes.dappViewPaddingOffsetToSidebar -
       1 /* padding-left */ -
-      NativeAppSizes.dappsViewLeftOffset,
+      layouts.dappsViewLeftOffset,
     height: height - safeTopOffset,
   });
 }

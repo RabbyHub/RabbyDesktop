@@ -1,4 +1,9 @@
+import {
+  NativeLayouts,
+  NativeLayoutsCollapsed,
+} from '@/isomorphic/const-size-next';
 import { BrowserView, BrowserViewConstructorOptions } from 'electron';
+import { desktopAppStore } from '../store/desktopApp';
 import { redirectToAboutBlank } from './browser';
 
 export class BrowserViewManager {
@@ -34,4 +39,10 @@ export class BrowserViewManager {
       this.idleViews[view.webContents.id] = view;
     }
   }
+}
+
+export function pickMainWindowLayouts() {
+  const sidebarCollapsed = desktopAppStore.get('sidebarCollapsed');
+
+  return sidebarCollapsed ? NativeLayoutsCollapsed : NativeLayouts;
 }
