@@ -134,7 +134,23 @@ export class Tab {
   }
 
   async loadURL(url: string) {
-    return this.view?.webContents.loadURL(url);
+    const isMain = this.$meta.isOfMainWindow;
+    if (isMain) {
+      emitIpcMainEvent('__internal_main:mainwindow:tab-loading-changed', {
+        type: 'before-load',
+        url,
+        tabId: this.id,
+      });
+    }
+    const result = await this.view?.webContents.loadURL(url);
+    if (isMain) {
+      emitIpcMainEvent('__internal_main:mainwindow:tab-loading-changed', {
+        type: 'did-finish-load',
+        tabId: this.id,
+      });
+    }
+
+    return result;
   }
 
   reload() {

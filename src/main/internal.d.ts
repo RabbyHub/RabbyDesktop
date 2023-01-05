@@ -13,6 +13,35 @@ type MainInternalsMessagePayload = {
     send: [pinnedList: IDapp['origin'][]];
     response: [];
   };
+  '__internal_main:mainwindow:tab-loading-changed': {
+    send: [
+      payload:
+        | {
+            type: 'before-load';
+            url: string;
+            tabId: number;
+          }
+        | {
+            type: 'did-finish-load';
+            tabId: number;
+          }
+    ];
+  };
+  '__internal_main:mainwindow:toggle-loading-view': {
+    send: [
+      payload:
+        | {
+            type: 'start';
+            tabId?: number;
+            dapp: IDapp;
+          }
+        | {
+            type: 'did-finish-load';
+            tabId?: number;
+          }
+    ];
+    response: [];
+  };
   '__internal_main:mainwindow:sidebar-collapsed-changed': {
     send: [collapsed: boolean];
     response: [];
@@ -49,6 +78,9 @@ type MainInternalsMessagePayload = {
       | {
           type: 'dapp-safe-view:inspect';
           viewType: 'base' | 'safe';
+        }
+      | {
+          type: 'loading-view:inspect';
         }
     ];
     response: [];
