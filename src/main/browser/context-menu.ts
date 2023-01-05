@@ -160,7 +160,7 @@ function buildRabbyXDebugMenu(opts: ChromeContextMenuOptions) {
       const { backgroundWebContents } = await getRabbyExtViews();
 
       backgroundWebContents.executeJavaScript(`
-        chrome.notifications.create(undefined, {
+        chrome.notifications.create({
           "type": "basic",
           "title": "Transaction push failed",
           "iconUrl": chrome.extension.getURL('images/icon-64.png'),

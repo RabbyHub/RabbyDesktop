@@ -30,8 +30,8 @@ async function updateViewPosition(
   const popupRect = {
     x: layouts.dappsViewLeftOffset,
     y: dappTopOffset,
-    width: width - layouts.dappsViewLeftOffset,
-    height: height - dappTopOffset,
+    width: width - layouts.dappsViewLeftOffset - layouts.dappsViewRightOffset,
+    height: height - dappTopOffset - layouts.dappsViewBottomOffset,
   };
 
   if (isLoading) {

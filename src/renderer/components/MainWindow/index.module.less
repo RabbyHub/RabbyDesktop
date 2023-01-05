@@ -25,7 +25,7 @@
   flex-shrink: 1;
   border-radius: 0 6px 6px 6px;
   height: 100%;
-  max-height: calc(100% - var(--dappViewPaddingOffsetToSidebar) - 70px);
+  max-height: calc(100% - var(--dappViewPaddingOffset) - 70px);
 }
 
 :global {
@@ -34,5 +34,13 @@
     color: white;
     box-shadow: 0px 24px 40px rgba(0, 0, 0, 0.12);
     border-radius: 8px;
+  }
+
+  html.os-darwin {
+    :local {
+      .dappViewGasket {
+        max-height: calc(100% - var(--dappViewPaddingOffset) - 10px);
+      }
+    }
   }
 }
