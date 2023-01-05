@@ -4,6 +4,7 @@ import './store/dapps';
 import './store/desktopApp';
 
 import './streams/tabbedBrowserWindow';
+import './streams/mainWindow';
 import './streams/rabbyExt';
 import './streams/updater';
 import './streams/session';

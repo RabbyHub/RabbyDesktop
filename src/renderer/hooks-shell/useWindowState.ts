@@ -1,29 +1,31 @@
 import { isMainWinShellWebUI } from '@/isomorphic/url';
 import { detectOS } from '@/isomorphic/os';
 import { useCallback, useEffect, useState } from 'react';
+import { atom, useAtom } from 'jotai';
 
 const OS_TYPE = detectOS();
 const isDarwin = OS_TYPE === 'darwin';
 
+const winStateAtom = atom<chrome.windows.windowStateEnum | void>(undefined);
+
 export function useWindowState() {
-  const [winState, setWinState] =
-    useState<chrome.windows.windowStateEnum | void>();
+  const [winState, setWinState] = useAtom(winStateAtom);
 
   useEffect(() => {
     chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, (win) => {
       setWinState(win.state);
     });
-  }, []);
+  }, [setWinState]);
 
   const onMinimizeButton = useCallback(() => {
     chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, (win) => {
-      const nextState = win.state === 'minimized' ? 'normal' : 'minimized';
+      const nextState = 'normal';
       setWinState(nextState);
       chrome.windows.update(win.id!, {
         state: nextState,
       });
     });
-  }, []);
+  }, [setWinState]);
   const onMaximizeButton = useCallback(() => {
     chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, (win) => {
       /**
@@ -40,7 +42,7 @@ export function useWindowState() {
         state: nextState,
       });
     });
-  }, []);
+  }, [setWinState]);
 
   const onFullscreenButton = useCallback(() => {
     chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, (win) => {
@@ -50,7 +52,7 @@ export function useWindowState() {
         state: nextState,
       });
     });
-  }, []);
+  }, [setWinState]);
 
   const onCloseButton = useCallback(() => {
     if (!isMainWinShellWebUI(window.location.href)) {
@@ -72,4 +74,20 @@ export function useWindowState() {
     onFullscreenButton,
     onCloseButton,
   };
+}
+
+/**
+ * @description make sure ONLY call this hook in the top level of whole page-level app
+ */
+export function useMainWindowEvents() {
+  const [, setWinState] = useAtom(winStateAtom);
+
+  useEffect(() => {
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_push:mainwindow:state-changed',
+      ({ windowState }) => {
+        setWinState(windowState);
+      }
+    );
+  }, [setWinState]);
 }

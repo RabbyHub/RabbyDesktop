@@ -24,6 +24,7 @@ import ComingSoon from '@/renderer/routes/ComingSoon';
 import { MainWindowSettings } from '@/renderer/routes/Settings';
 import { useChromeTabsEvents } from '@/renderer/hooks-shell/useWindowTabs';
 import { useTransactionChanged } from '@/renderer/hooks/rabbyx/useTransaction';
+import { useMainWindowEvents } from '@/renderer/hooks-shell/useWindowState';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -175,6 +176,7 @@ export function MainWindow() {
 
   useTransactionChanged();
 
+  useMainWindowEvents();
   useChromeTabsEvents();
 
   return (
