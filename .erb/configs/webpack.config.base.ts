@@ -4,6 +4,7 @@
 
 import webpack from 'webpack';
 import tsImportPluginFactory from 'ts-import-plugin';
+import createStyledComponentsTransformer from 'typescript-plugin-styled-components';
 
 import webpackPaths from './webpack.paths';
 import { dependencies as externals } from '../../release/app/package.json';
@@ -35,6 +36,13 @@ const configuration: webpack.Configuration = {
                     // libraryDirectory: 'es'
                   },
                 ]),
+                // @see https://github.com/Igorbek/typescript-plugin-styled-components#ts-loader
+                createStyledComponentsTransformer({
+                  ssr: true, // always enable it to make all styled generated component has id.
+                  displayName: isDevelopment,
+                  minify: false, // it's still an experimental feature
+                  componentIdPrefix: 'rd-',
+                }),
               ].filter(Boolean),
             }),
             compilerOptions: {
