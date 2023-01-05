@@ -10,7 +10,7 @@
 .Sidebar {
   position: relative;
   padding-top: @TITLEBAR_H;
-  padding-bottom: @sidebar-footer-h;
+  // padding-bottom: @sidebar-footer-h;
 
   width: var(--mainwin-sidebar-w);
   height: 100vh;
@@ -195,6 +195,7 @@
   // height: 100%;
   // overflow: overlay;
   flex: 1;
+  overflow: hidden;
 
   .divider {
     height: 1px;
@@ -221,12 +222,13 @@
 
 .navFooter {
   margin-top: auto;
+  padding-top: 8px;
   padding-bottom: 40px;
-  position: absolute;
+  // position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: @sidebar-footer-h;
+  // height: @sidebar-footer-h;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -240,10 +242,10 @@
 }
 
 .Sidebar.hasNewRelease {
-  padding-bottom: @sidebar-footer-with-releaseinfo-h;
+  // padding-bottom: @sidebar-footer-with-releaseinfo-h;
 
   .navFooter {
-    height: @sidebar-footer-with-releaseinfo-h;
+    // height: @sidebar-footer-with-releaseinfo-h;
 
     .update {
       display: flex;
