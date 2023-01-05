@@ -2,9 +2,6 @@
 
 :global {
   body.switch-chain-page {
-    overflow-y: visible;
-    overflow-x: hidden;
-
     &::-webkit-scrollbar, *::-webkit-scrollbar {
       display: none;
     }
@@ -13,10 +10,27 @@
 
 .SwitchChainPage {
   padding: 10px 16px;
-  min-height: 100vh;
+  height: 100vh;
   box-sizing: border-box;
   width: 100%;
   background-color: #fff;
+  overflow-y: visible;
+  overflow-x: hidden;
+}
+
+.inputWrapper {
+  transform: translateY(-50px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  transition: transform .3s;
+  padding: 10px 16px;
+  z-index: 100;
+  &.show {
+    transform: translateY(0);
+  }
 }
 
 .chainList {
@@ -28,8 +42,11 @@
   }
 }
 
+.searchChainList {
+  padding-top: 46px; 
+}
+
 .searchChainInput {
-  margin-bottom: 12px;
   height: 36px;
   font-size: 12px;
   line-height: 14px;
