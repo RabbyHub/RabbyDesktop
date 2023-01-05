@@ -12,15 +12,15 @@ export async function tryAutoUnlockRabbyX() {
       RABBY_DESKTOP_KR_PWD,
     ]);
     useBuiltInPwd = true;
+
+    const isUnlocked = await rabbyxQuery('walletController.isUnlocked', []);
+    if (!isUnlocked) {
+      await rabbyxQuery('walletController.unlock', [RABBY_DESKTOP_KR_PWD]);
+    }
   } catch (e) {
     console.error('[tryAutoUnlockRabbyX]');
     console.error(e);
     useBuiltInPwd = false;
-  }
-
-  const isUnlocked = await rabbyxQuery('walletController.isUnlocked', []);
-  if (!isUnlocked) {
-    await rabbyxQuery('walletController.unlock', [RABBY_DESKTOP_KR_PWD]);
   }
 
   return {
