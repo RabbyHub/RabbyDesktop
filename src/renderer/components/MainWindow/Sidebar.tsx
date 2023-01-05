@@ -170,13 +170,11 @@ export default function MainWindowSidebar() {
   }, [matchedDapp]);
 
   useEffect(() => {
-    if (!activeTab?.id) return;
-
     // guard for loading view
-    if (!matchedDapp || activeTab?.status === 'complete') {
+    if (!activeTab?.id || !matchedDapp || activeTab?.status === 'complete') {
       toggleLoadingView({
         type: 'did-finish-load',
-        tabId: activeTab.id,
+        tabId: activeTab?.id,
       });
     }
   }, [matchedDapp, activeTab?.status, activeTab?.id, activeTab?.url, allDapps]);
