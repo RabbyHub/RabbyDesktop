@@ -13,6 +13,6 @@ export const FRAME_DEFAULT_SIZE = {
 };
 
 export const FRAME_MIN_SIZE = {
-  minWidth: 1280,
+  minWidth: 1366,
   minHeight: 768,
 };
