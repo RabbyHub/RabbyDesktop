@@ -21,6 +21,35 @@
   .navFooter .update {
     display: none;
   }
+  &.isFold {
+    --mainwin-sidebar-w: 66px;
+
+    .logo {
+      width: 40px;
+      height: 40px;
+    }
+    .routeItem {
+      padding-left: 19px;
+    }
+    .routeLogo {
+      margin-right: 0;
+    }
+    .routeTitle {
+      display: none;
+    }
+
+    .divider {
+      margin-left: 23px;
+      margin-right: 23px;
+    }
+
+    .menuFold {
+      background-image: url(rabby-internal://assets/icons/mainwin-sidebar/arrow-right.svg);
+      &:hover {
+        background-image: url(rabby-internal://assets/icons/mainwin-sidebar/arrow-right-active.svg);
+      }
+    }
+  }
 }
 
 .logoWrapper {
@@ -146,24 +175,17 @@
 
 .menuFold {
   background: url(rabby-internal://assets/icons/mainwin-sidebar/arrow-left.svg)
-    center 100% no-repeat;
-  width: 16px;
-  height: 16px;
+    center / 16px no-repeat;
+  width: 20px;
+  height: 20px;
   position: absolute;
-  right: 0;
-  top: 40px - @TITLEBAR_H;
-  transform: translate(50%);
+  right: 0px;
+  top: 48px;
+  transform: translate(50%, -50%);
   cursor: pointer;
-  // &:hover {
-  //   background-image: url(rabby-internal://assets/icons/mainwin-sidebar/arrow-left-active.svg);
-  // }
-
-  // &.isFold {
-  //   background-image: url(rabby-internal://assets/icons/mainwin-sidebar/arrow-right.svg);
-  //   &:hover {
-  //     background-image: url(rabby-internal://assets/icons/mainwin-sidebar/arrow-right-active.svg);
-  //   }
-  // }
+  &:hover {
+    background-image: url(rabby-internal://assets/icons/mainwin-sidebar/arrow-left-active.svg);
+  }
 }
 
 .dappsRouteList {
@@ -171,7 +193,7 @@
   flex-direction: column;
   // max-height: calc(100% - @logoWrapper-height);
   // height: 100%;
-  overflow: overlay;
+  // overflow: overlay;
   flex: 1;
 
   .divider {
@@ -185,10 +207,15 @@
 
   > .pinnedList {
     padding-right: 0;
+    overflow: overlay;
+    max-height: 312px;
+    flex: 1;
   }
 
   > .unpinnedList {
     padding-right: 0;
+    overflow: overlay;
+    flex: 1;
   }
 }
 

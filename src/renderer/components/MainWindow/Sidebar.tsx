@@ -4,7 +4,7 @@ import { AutoUpdate } from '@/renderer/routes/Dapps/components/AutoUpdate';
 import { showMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
 import classNames from 'classnames';
-import React, { useEffect, useLayoutEffect, useMemo } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useNavigate, useLocation, matchPath } from 'react-router-dom';
 
 import {
@@ -194,10 +194,14 @@ export default function MainWindowSidebar() {
 
   const hasNewRelease = useHasNewRelease();
 
+  // todo 记住上次操作
+  const [isFold, setIsFold] = useState(false);
+
   return (
     <div
       className={classNames(
         styles.Sidebar,
+        isFold && styles.isFold,
         hasNewRelease && styles.hasNewRelease
       )}
     >
@@ -207,7 +211,7 @@ export default function MainWindowSidebar() {
           src="rabby-internal://assets/icons/mainwin-sidebar/sidebar-logo.svg"
         />
       </div>
-      <div className={styles.menuFold} />
+      <div className={styles.menuFold} onClick={() => setIsFold((v) => !v)} />
       <div className={styles.dappsRouteList}>
         <ul className={styles.routeList}>
           {StaticEntries.map((sE) => {
@@ -233,10 +237,12 @@ export default function MainWindowSidebar() {
 
         <TabList
           className={styles.pinnedList}
-          style={{
-            maxHeight: `calc(100% - ${StaticEntries.length * RouteItemH}px)`,
-            // height: `${pinnedDapps.length * 84}px`,
-          }}
+          style={
+            {
+              // maxHeight: `calc(100% - ${StaticEntries.length * RouteItemH}px)`,
+              // height: `${pinnedDapps.length * 84}px`,
+            }
+          }
           dappActions={dappActions}
           dapps={pinnedDapps}
           activeTabId={activeTab?.id}
