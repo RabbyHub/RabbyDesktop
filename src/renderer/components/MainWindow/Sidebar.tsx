@@ -259,7 +259,7 @@ export default function MainWindowSidebar() {
       </div>
       <div className={styles.navFooter}>
         <div className={styles.update}>
-          <AutoUpdate />
+          <AutoUpdate isFold={isFold} />
         </div>
         <ul className={styles.routeList}>
           <li

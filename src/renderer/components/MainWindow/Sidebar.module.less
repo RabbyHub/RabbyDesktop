@@ -237,25 +237,6 @@
   > * {
     width: 100%;
   }
-
-  .update {
-    padding: 8px 16px;
-    :global {
-      .ant-btn {
-        height: 52px;
-        border-radius: 8px;
-        font-weight: 510;
-        font-size: 14px;
-        line-height: 17px;
-        display: flex;
-        align-items: center;
-
-        img {
-          margin-right: 12px;
-        }
-      }
-    }
-  }
 }
 
 .Sidebar.hasNewRelease {
@@ -265,7 +246,9 @@
     height: @sidebar-footer-with-releaseinfo-h;
 
     .update {
-      display: block;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 8px;
     }
   }
 }

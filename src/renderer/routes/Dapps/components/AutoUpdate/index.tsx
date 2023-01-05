@@ -1,7 +1,11 @@
+import classNames from 'classnames';
 import { useAppUpdator } from '../../../../hooks/useAppUpdator';
 import style from './index.module.less';
 
-export const AutoUpdate = () => {
+interface AutoUpdateProps {
+  isFold?: boolean;
+}
+export const AutoUpdate = ({ isFold }: AutoUpdateProps) => {
   const {
     releaseCheckInfo,
     isDownloading,
@@ -17,7 +21,7 @@ export const AutoUpdate = () => {
 
   if (isDownloading) {
     return (
-      <div className={style.autoUpdate}>
+      <div className={classNames(style.autoUpdate, isFold && style.isFold)}>
         <div className="auto-update is-downloading">
           <img
             src="rabby-internal://assets/icons/update/downloading.svg"
@@ -25,7 +29,7 @@ export const AutoUpdate = () => {
             alt=""
           />
           <div className="auto-update-content">
-            {(progress?.percent || 0).toFixed(0)}% completed
+            {(progress?.percent || 0).toFixed(0)}% {isFold ? '' : 'completed'}
           </div>
         </div>
       </div>
@@ -33,7 +37,7 @@ export const AutoUpdate = () => {
   }
   if (isDownloaded) {
     return (
-      <div className={style.autoUpdate}>
+      <div className={classNames(style.autoUpdate, isFold && style.isFold)}>
         <div
           className="auto-update is-downloaded"
           onClick={() => {
@@ -51,7 +55,7 @@ export const AutoUpdate = () => {
     );
   }
   return (
-    <div className={style.autoUpdate}>
+    <div className={classNames(style.autoUpdate, isFold && style.isFold)}>
       <div
         className="auto-update"
         onClick={() => {
