@@ -17,6 +17,7 @@
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
 
   .navFooter .update {
     display: none;
@@ -183,6 +184,7 @@
   top: 48px;
   transform: translate(50%, -50%);
   cursor: pointer;
+  z-index: 100;
   &:hover {
     background-image: url(rabby-internal://assets/icons/mainwin-sidebar/arrow-left-active.svg);
   }

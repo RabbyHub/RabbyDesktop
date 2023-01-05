@@ -16,6 +16,7 @@ import { makeSureDappOpened } from '@/renderer/ipcRequest/mainwin';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
 import styles from './Sidebar.module.less';
 import { DappFavicon } from '../DappFavicon';
+import { useSettings } from '@/renderer/hooks/useSettings';
 
 // keep in sync with css
 const RouteItemH = 52;
@@ -194,14 +195,13 @@ export default function MainWindowSidebar() {
 
   const hasNewRelease = useHasNewRelease();
 
-  // todo 记住上次操作
-  const [isFold, setIsFold] = useState(false);
+  const { settings, toggleSidebarCollapsed } = useSettings();
 
   return (
     <div
       className={classNames(
         styles.Sidebar,
-        isFold && styles.isFold,
+        settings.sidebarCollapsed && styles.isFold,
         hasNewRelease && styles.hasNewRelease
       )}
     >
@@ -211,7 +211,10 @@ export default function MainWindowSidebar() {
           src="rabby-internal://assets/icons/mainwin-sidebar/sidebar-logo.svg"
         />
       </div>
-      <div className={styles.menuFold} onClick={() => setIsFold((v) => !v)} />
+      <div
+        className={styles.menuFold}
+        onClick={() => toggleSidebarCollapsed(!settings.sidebarCollapsed)}
+      />
       <div className={styles.dappsRouteList}>
         <ul className={styles.routeList}>
           {StaticEntries.map((sE) => {
@@ -259,7 +262,7 @@ export default function MainWindowSidebar() {
       </div>
       <div className={styles.navFooter}>
         <div className={styles.update}>
-          <AutoUpdate isFold={isFold} />
+          <AutoUpdate isFold={settings.sidebarCollapsed} />
         </div>
         <ul className={styles.routeList}>
           <li
