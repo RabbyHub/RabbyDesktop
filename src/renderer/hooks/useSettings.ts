@@ -33,6 +33,25 @@ export function useSettings() {
     [setDesktopAppState]
   );
 
+  const toggleSidebarCollapsed = useCallback(
+    async (nextVal: boolean) => {
+      const result = await window.rabbyDesktop.ipcRenderer.invoke(
+        'put-desktopAppState',
+        {
+          sidebarCollapsed: nextVal,
+        }
+      );
+
+      setDesktopAppState((prev) => {
+        return {
+          ...(prev as IDesktopAppState & object),
+          sidebarCollapsed: result.state.sidebarCollapsed,
+        };
+      });
+    },
+    [setDesktopAppState]
+  );
+
   useEffect(() => {
     fetchState();
   }, [fetchState]);
@@ -40,8 +59,10 @@ export function useSettings() {
   return {
     settings: {
       enableContentProtected: desktopAppState?.enableContentProtected !== false,
+      sidebarCollapsed: !!desktopAppState?.sidebarCollapsed,
     },
     fetchState,
     toggleEnableContentProtection,
+    toggleSidebarCollapsed,
   };
 }

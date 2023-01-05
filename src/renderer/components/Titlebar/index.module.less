@@ -16,7 +16,6 @@
   background-color: transparent;
 
   &.os-darwin {
-    width: var(--mainwin-sidebar-w);
     position: fixed;
     top: 0;
     left: 0;
@@ -79,15 +78,19 @@
     background: var(--color-red);
   }
 }
-
+&.isFold {
+  .macos-controls {
+    padding-left: 7px;
+    padding-right: 7px;
+  }
+}
 .macos-controls {
   display: flex;
-  width: 84px;
   align-items: center;
-  justify-content: space-between;
   padding-left: 16px;
   padding-right: 16px;
   box-sizing: border-box;
+  gap: 7px;
 
   .control {
     cursor: pointer;
@@ -97,9 +100,6 @@
     width: 12px;
     height: 12px;
     padding: 0;
-    & + .control {
-      margin-left: 8px;
-    }
   }
 
   .control > img {

@@ -26,6 +26,7 @@ import {
   IconTrafficWin32Minimize,
 } from '@/../assets/icons/titlebar-triples';
 
+import { useSettings } from '@/renderer/hooks/useSettings';
 import styles from './index.module.less';
 
 type CustomElement<T> = Partial<T & React.DOMAttributes<T> & { children: any }>;
@@ -53,10 +54,13 @@ export default function Titlebar(
     onCloseButton,
   } = useWindowState();
 
+  const { settings } = useSettings();
+
   return (
     <div
       className={classNames(
         styles.tabstrip,
+        settings.sidebarCollapsed && styles.isFold,
         winOSType === 'darwin' && styles['os-darwin'],
         winOSType === 'win32' && styles['os-win32']
       )}

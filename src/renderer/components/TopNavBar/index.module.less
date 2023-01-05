@@ -1,9 +1,6 @@
 @import './../../css/mixins.less';
 
 .main {
-  margin: 0 16px;
-  margin-top: 16px;
-  margin-left: var(--dappViewPaddingOffsetToSidebar);
   display: flex;
   justify-content: space-between;
 
@@ -14,12 +11,11 @@
   .left {
     position: relative;
     width: 740px;
-    max-width: calc(100% - var(--mainwin-rabbyx-popup-w));
     height: 48px;
 
     background: #ffeef9;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
 
     display: flex;
     align-items: center;
@@ -119,7 +115,6 @@
     align-items: flex-start;
     gap: 12px;
     flex-shrink: 0;
-    width: var(--mainwin-rabbyx-popup-w);
     justify-content: flex-end;
   }
 }

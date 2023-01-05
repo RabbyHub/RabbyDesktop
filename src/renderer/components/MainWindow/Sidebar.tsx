@@ -16,6 +16,7 @@ import {
   makeSureDappOpened,
   toggleLoadingView,
 } from '@/renderer/ipcRequest/mainwin';
+import { useSettings } from '@/renderer/hooks/useSettings';
 import styles from './Sidebar.module.less';
 import { DappFavicon } from '../DappFavicon';
 
@@ -182,10 +183,13 @@ export default function MainWindowSidebar() {
 
   const hasNewRelease = useHasNewRelease();
 
+  const { settings, toggleSidebarCollapsed } = useSettings();
+
   return (
     <div
       className={classNames(
         styles.Sidebar,
+        settings.sidebarCollapsed && styles.isFold,
         hasNewRelease && styles.hasNewRelease
       )}
     >
@@ -195,6 +199,10 @@ export default function MainWindowSidebar() {
           src="rabby-internal://assets/icons/mainwin-sidebar/sidebar-logo.svg"
         />
       </div>
+      <div
+        className={styles.menuFold}
+        onClick={() => toggleSidebarCollapsed(!settings.sidebarCollapsed)}
+      />
       <div className={styles.dappsRouteList}>
         <ul className={styles.routeList}>
           {StaticEntries.map((sE) => {
@@ -221,8 +229,9 @@ export default function MainWindowSidebar() {
         <TabList
           className={styles.pinnedList}
           style={{
-            maxHeight: `calc(100% - ${StaticEntries.length * RouteItemH}px)`,
+            // maxHeight: `calc(100% - ${StaticEntries.length * RouteItemH}px)`,
             // height: `${pinnedDapps.length * 84}px`,
+            flexShrink: pinnedDapps.length < 5 ? 0 : 1,
           }}
           dappActions={dappActions}
           dapps={pinnedDapps}
@@ -240,7 +249,7 @@ export default function MainWindowSidebar() {
       </div>
       <div className={styles.navFooter}>
         <div className={styles.update}>
-          <AutoUpdate />
+          <AutoUpdate isFold={settings.sidebarCollapsed} />
         </div>
         <ul className={styles.routeList}>
           <li

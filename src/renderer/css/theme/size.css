@@ -1,10 +1,10 @@
 :root {
-  --mainwin-sidebar-w: 200px;
+  --mainwin-sidebar-w: 160px;
   --mainwin-rabbyx-popup-w: 400px;
 
   --switch-account-button-w: 200px;
 
-  --dappViewPaddingOffsetToSidebar: 22px;
+  --dappViewPaddingOffsetToSidebar: 10px;
 
   --dappsViewLeftOffset: 222px;
 

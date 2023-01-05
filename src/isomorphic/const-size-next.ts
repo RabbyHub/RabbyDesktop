@@ -1,17 +1,29 @@
 const dappNavigationLineHeight = 48;
-const dappNavigationTopOffset = 16;
 
-const mainWinSidebarWidth = 200;
-const dappViewPaddingOffsetToSidebar = 22;
+const dappViewOffest = 10;
+const dappNavigationTopOffset = dappViewOffest;
+const dappViewPaddingOffsetToSidebar = dappViewOffest;
 
 export const NativeAppSizes = {
   windowTitlebarHeight: 32,
 
   mainWindowDappTopOffset: dappNavigationLineHeight + dappNavigationTopOffset,
 
-  mainWinSidebarWidth,
   dappViewPaddingOffsetToSidebar,
-  dappsViewLeftOffset: mainWinSidebarWidth + dappViewPaddingOffsetToSidebar,
 
   rabbyxNotificationWindowWidth: 400,
+};
+
+const sidebarWidth = 160;
+export const NativeLayouts = {
+  dappsViewLeftOffset: sidebarWidth + dappViewPaddingOffsetToSidebar,
+  dappsViewRightOffset: dappViewOffest,
+  dappsViewBottomOffset: dappViewOffest,
+};
+
+const sidebarWidthShort = 66;
+export const NativeLayoutsCollapsed = {
+  dappsViewLeftOffset: sidebarWidthShort + dappViewPaddingOffsetToSidebar,
+  dappsViewRightOffset: dappViewOffest,
+  dappsViewBottomOffset: dappViewOffest,
 };

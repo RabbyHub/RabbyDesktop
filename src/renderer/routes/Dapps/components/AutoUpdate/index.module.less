@@ -1,17 +1,41 @@
 .autoUpdate {
+  &.isFold {
+    :global {
+      .auto-update {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        justify-content: center;
+        &-content {
+          display: none;
+        }
+        &.is-downloading {
+          .auto-update-icon {
+            display: none;
+          }
+          .auto-update-content {
+            display: block;
+            font-size: 12px;
+            line-height: 14px;
+          }
+        }
+      }
+    }
+  }
   :global {
     .auto-update {
       background: var(--color-primary);
       border-radius: 8px;
-      padding: 16px;
+      padding: 14px 12px;
       padding-right: 0;
       display: flex;
-      gap: 12px;
+      gap: 6px;
       align-items: center;
       font-weight: 510;
-      font-size: 14px;
-      line-height: 17px;
+      font-size: 11px;
+      line-height: 13px;
       color: var(--color-purewhite);
+      width: 132px;
       cursor: pointer;
       &:hover {
         opacity: 0.9;

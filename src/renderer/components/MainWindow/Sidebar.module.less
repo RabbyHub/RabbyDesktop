@@ -10,14 +10,67 @@
 .Sidebar {
   position: relative;
   padding-top: @TITLEBAR_H;
-  padding-bottom: @sidebar-footer-h;
+  // padding-bottom: @sidebar-footer-h;
 
   width: var(--mainwin-sidebar-w);
   height: 100vh;
   border-right: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
 
   .navFooter .update {
     display: none;
+  }
+  &.isFold {
+    --mainwin-sidebar-w: 66px;
+
+    .logo {
+      width: 40px;
+      height: 40px;
+    }
+    .routeItem {
+      padding-left: 19px;
+    }
+    .routeLogo {
+      margin-right: 0;
+    }
+    .routeTitle {
+      display: none;
+    }
+
+    .divider {
+      margin-left: 23px;
+      margin-right: 23px;
+    }
+
+    .menuFold {
+      background-image: url(rabby-internal://assets/icons/mainwin-sidebar/arrow-right.svg);
+      &:hover {
+        background-image: url(rabby-internal://assets/icons/mainwin-sidebar/arrow-right-active.svg);
+      }
+    }
+  }
+}
+
+:global {
+  html.os-win32.__rabbyx-shell-page {
+    :local {
+      .logoWrapper {
+        position: relative;
+
+        &::after {
+          content: " ";
+          display: block;
+          position: absolute;
+          right: 0;
+          top: 0;
+          height: 100%;
+          width: 12px;
+          -webkit-app-region: none;
+        }
+      }
+    }
   }
 }
 
@@ -51,7 +104,7 @@
     width: 100%;
     box-sizing: border-box;
     border-left: 4px solid transparent;
-    padding-left: 28px;
+    padding-left: 16px;
     opacity: 0.8;
 
     font-size: 14px;
@@ -108,12 +161,13 @@
     position: relative;
     .indicator {
       position: absolute;
-      top: 23px;
-      left: -19px;
-      width: 6px;
-      height: 6px;
+      top: 50%;
+      left: -10px;
+      width: 4px;
+      height: 4px;
       border-radius: 50%;
       background: var(--color-purewhite);
+      transform: translate(-50%, -50%);
     }
 
     .loadingIcon {
@@ -121,7 +175,8 @@
 
       position: absolute;
       top: calc(50% - @iconSize / 2);
-      left: -24px;
+      left: calc(-2px - @iconSize / 2);
+      transform: translateX(-50%);
       width: @iconSize;
       height: @iconSize;
     }
@@ -140,44 +195,64 @@
   }
 }
 
+.menuFold {
+  background: url(rabby-internal://assets/icons/mainwin-sidebar/arrow-left.svg)
+    center / 16px no-repeat;
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  right: 0px;
+  top: 48px;
+  transform: translate(50%, -50%);
+  cursor: pointer;
+  z-index: 100;
+  &:hover {
+    background-image: url(rabby-internal://assets/icons/mainwin-sidebar/arrow-left-active.svg);
+  }
+}
+
 .dappsRouteList {
   display: flex;
   flex-direction: column;
-  max-height: calc(100% - @logoWrapper-height);
-  height: 100%;
+  // max-height: calc(100% - @logoWrapper-height);
+  // height: 100%;
+  // overflow: overlay;
+  flex: 1;
+  overflow: hidden;
 
   .divider {
     height: 1px;
     flex-shrink: 0;
     background: rgba(255, 255, 255, 0.1);
-    margin: 8px 32px;
+    margin: 8px 20px;
     box-sizing: border-box;
     flex-shrink: 0;
   }
 
   > .pinnedList {
-    flex-shrink: 3;
-    height: 100%;
     padding-right: 0;
     overflow: overlay;
+    // max-height: 312px;
+    // flex: 1;
   }
 
   > .unpinnedList {
-    flex-shrink: 4;
     padding-right: 0;
     overflow: overlay;
-    height: 100%;
+    // min-height: 156px;
+    // flex: 1;
   }
 }
 
 .navFooter {
   margin-top: auto;
+  padding-top: 8px;
   padding-bottom: 40px;
-  position: absolute;
+  // position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: @sidebar-footer-h;
+  // height: @sidebar-footer-h;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -188,35 +263,18 @@
   > * {
     width: 100%;
   }
-
-  .update {
-    padding: 8px 16px;
-    :global {
-      .ant-btn {
-        height: 52px;
-        border-radius: 8px;
-        font-weight: 510;
-        font-size: 14px;
-        line-height: 17px;
-        display: flex;
-        align-items: center;
-
-        img {
-          margin-right: 12px;
-        }
-      }
-    }
-  }
 }
 
 .Sidebar.hasNewRelease {
-  padding-bottom: @sidebar-footer-with-releaseinfo-h;
+  // padding-bottom: @sidebar-footer-with-releaseinfo-h;
 
   .navFooter {
-    height: @sidebar-footer-with-releaseinfo-h;
+    // height: @sidebar-footer-with-releaseinfo-h;
 
     .update {
-      display: block;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 8px;
     }
   }
 }

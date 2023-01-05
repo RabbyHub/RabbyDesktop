@@ -43,10 +43,10 @@ React.PropsWithChildren<{}>) {
   }, []);
 
   return (
-    <>
+    <div className={styles.dappViewWrapper}>
       {children || null}
       <div className={styles.dappViewGasket} />
-    </>
+    </div>
   );
 }
 
