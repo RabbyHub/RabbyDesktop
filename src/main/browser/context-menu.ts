@@ -7,6 +7,7 @@ import {
   dialog,
 } from 'electron';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
+import { rabbyxQuery } from '../streams/rabbyIpcQuery/_base';
 import { getWindowFromWebContents } from '../utils/browser';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import {
@@ -96,11 +97,9 @@ const appendMenu = (
 const appendMenuSeparator = (targetMenu: Menu) =>
   targetMenu.append(new MenuItem({ type: 'separator' }));
 
-function buildDebugKitsMenu(opts: ChromeContextMenuOptions) {
-  const { params } = opts;
-
-  const debugKitsMenu = new Menu();
-  appendMenu(debugKitsMenu, {
+function buildRabbyXDebugMenu(opts: ChromeContextMenuOptions) {
+  const menu = new Menu();
+  appendMenu(menu, {
     label: 'Open RabbyX Background',
     click: async () => {
       const { backgroundWebContents } = await getRabbyExtViews();
@@ -114,7 +113,77 @@ function buildDebugKitsMenu(opts: ChromeContextMenuOptions) {
     },
   });
 
-  appendMenuSeparator(debugKitsMenu);
+  appendMenuSeparator(menu);
+  appendMenu(menu, {
+    label: `Trigger notification: Tx completed`,
+    click: async () => {
+      const { backgroundWebContents } = await getRabbyExtViews();
+
+      backgroundWebContents.executeJavaScript(`
+        chrome.notifications.create('https://polygonscan.com/tx/0x9c9d39c5e99074552c7caa33e2c3cedd25c9a21ed4190b7c9b48be3ea0111776_randomId_=1672918371781', {
+          "type": "basic",
+          "title": "🎉 Transaction completed",
+          "iconUrl": chrome.extension.getURL('images/icon-64.png'),
+          "message": "click to view more information",
+          "priority": 2
+        });
+      `);
+
+      rabbyxQuery('sessionService.broadcastEvent', [
+        'transactionChanged',
+        { type: 'finished', success: true },
+      ]);
+    },
+  });
+  appendMenu(menu, {
+    label: `Trigger notification: Tx push-failed`,
+    click: async () => {
+      const { backgroundWebContents } = await getRabbyExtViews();
+
+      backgroundWebContents.executeJavaScript(`
+        chrome.notifications.create(undefined, {
+          "type": "basic",
+          "title": "Transaction push failed",
+          "iconUrl": chrome.extension.getURL('images/icon-64.png'),
+          "message": "Transaction push failed",
+        });
+      `);
+
+      rabbyxQuery('sessionService.broadcastEvent', [
+        'transactionChanged',
+        { type: 'push-failed' },
+      ]);
+    },
+  });
+  appendMenu(menu, {
+    label: `Trigger notification: Tx submitted`,
+    click: async () => {
+      const { backgroundWebContents } = await getRabbyExtViews();
+
+      backgroundWebContents.executeJavaScript(`
+        chrome.notifications.create('https://polygonscan.com/tx/0x9c9d39c5e99074552c7caa33e2c3cedd25c9a21ed4190b7c9b48be3ea0111776_randomId_=1672918371781', {
+          "type": "basic",
+          "title": "Transaction submitted",
+          "iconUrl": chrome.extension.getURL('images/icon-64.png'),
+          "message": "click to view more information",
+        });
+      `);
+
+      rabbyxQuery('sessionService.broadcastEvent', [
+        'transactionChanged',
+        { type: 'submitted' },
+      ]);
+    },
+  });
+
+  return menu;
+}
+
+function buildDebugKitsMenu(opts: ChromeContextMenuOptions) {
+  const { params } = opts;
+
+  const debugKitsMenu = new Menu();
+
   appendMenu(debugKitsMenu, {
     label: 'Open SwitchChain Popup',
     click: () => {
@@ -365,10 +434,14 @@ const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
   if (!IS_RUNTIME_PRODUCTION) {
     appendSeparator();
 
-    const debugKitsMenu = buildDebugKitsMenu(opts);
+    append({
+      label: 'RabbyX Debug Kits',
+      submenu: buildRabbyXDebugMenu(opts),
+    });
+
     append({
       label: 'Debug Kits',
-      submenu: debugKitsMenu,
+      submenu: buildDebugKitsMenu(opts),
     });
 
     appendSeparator();
