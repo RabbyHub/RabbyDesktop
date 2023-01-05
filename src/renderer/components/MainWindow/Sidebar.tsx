@@ -240,12 +240,11 @@ export default function MainWindowSidebar() {
 
         <TabList
           className={styles.pinnedList}
-          style={
-            {
-              // maxHeight: `calc(100% - ${StaticEntries.length * RouteItemH}px)`,
-              // height: `${pinnedDapps.length * 84}px`,
-            }
-          }
+          style={{
+            // maxHeight: `calc(100% - ${StaticEntries.length * RouteItemH}px)`,
+            // height: `${pinnedDapps.length * 84}px`,
+            flexShrink: pinnedDapps.length < 5 ? 0 : 1,
+          }}
           dappActions={dappActions}
           dapps={pinnedDapps}
           activeTabId={activeTab?.id}
