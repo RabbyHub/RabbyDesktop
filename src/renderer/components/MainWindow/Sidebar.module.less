@@ -53,6 +53,27 @@
   }
 }
 
+:global {
+  html.os-win32.__rabbyx-shell-page {
+    :local {
+      .logoWrapper {
+        position: relative;
+
+        &::after {
+          content: " ";
+          display: block;
+          position: absolute;
+          right: 0;
+          top: 0;
+          height: 100%;
+          width: 12px;
+          -webkit-app-region: none;
+        }
+      }
+    }
+  }
+}
+
 .logoWrapper {
   width: 100%;
   // leave space for titlebar, avoid draggable region overlap
