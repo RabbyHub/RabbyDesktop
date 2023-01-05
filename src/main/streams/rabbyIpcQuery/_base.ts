@@ -2,10 +2,10 @@ import { filter, firstValueFrom, Subject } from 'rxjs';
 
 import { RabbyXMethod } from '@/isomorphic/rabbyx';
 import { safeParse } from '@/isomorphic/json';
+import { randString } from '@/isomorphic/string';
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { onIpcMainEvent } from '../../utils/ipcMainEvents';
 import { fromMainSubject } from '../_init';
-import { randString } from '../../../isomorphic/string';
-import { IS_RUNTIME_PRODUCTION } from '../../../isomorphic/constants';
 
 async function getRabbyxBgWebContents() {
   return firstValueFrom(fromMainSubject('rabbyExtViews')).then(
@@ -63,4 +63,13 @@ export async function rabbyxQuery<T extends keyof RabbyXMethod>(
   }
 
   return result;
+}
+
+// export const RABBY_DESKTOP_KR_PWD = '<set password here>';
+export const RABBY_DESKTOP_KR_PWD = IS_RUNTIME_PRODUCTION
+  ? (process as any).RABBY_DESKTOP_KR_PWD!
+  : process.env.RABBY_DESKTOP_KR_PWD;
+
+if (!RABBY_DESKTOP_KR_PWD) {
+  throw new Error('RABBY_DESKTOP_KR_PWD is required but not defined');
 }

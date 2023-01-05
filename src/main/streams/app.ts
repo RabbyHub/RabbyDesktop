@@ -5,11 +5,7 @@ import {
   IS_RUNTIME_PRODUCTION,
   RABBY_SPALSH_URL,
 } from '../../isomorphic/constants';
-import {
-  isRabbyXPage,
-  isRabbyShellURL,
-  isUrlFromDapp,
-} from '../../isomorphic/url';
+import { isRabbyShellURL, isUrlFromDapp } from '../../isomorphic/url';
 import buildChromeContextMenu from '../browser/context-menu';
 import { setupMenu } from '../browser/menu';
 import {
@@ -36,12 +32,13 @@ import {
   getElectronChromeExtensions,
   getWebuiExtId,
   onMainWindowReady,
-  getRabbyExtId,
   getRabbyExtViews,
 } from '../utils/stream-helpers';
 import { switchToBrowserTab } from '../utils/browser';
 import { createDappTab } from './webContents';
 import { clearAllStoreData, clearAllUserData } from '../utils/security';
+import { tryAutoUnlockRabbyX } from './rabbyIpcQuery/autoUnlock';
+import { alertAutoUnlockFailed } from './mainWindow';
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
@@ -210,6 +207,8 @@ onIpcMainInternalEvent('__internal_main:app:reset-app', async () => {
         ? 'Rabby has been reset. save entry file to restart program.'
         : 'Rabby has been reset. click OK to relaunch Rabby.',
     });
+
+    emitIpcMainEvent('__internal_main:app:relaunch');
   }
 });
 onIpcMainEvent('__internal_rpc:app:reset-app', () => {
@@ -341,10 +340,17 @@ export default function bootstrap() {
     );
     splashWin.webContents.loadURL(RABBY_SPALSH_URL);
 
-    // do this work on mainWin.window postMessage('homePageLoaded') until timeout
-    setTimeout(() => {
-      splashWin.destroy();
-      showMainWin();
-    }, 500);
+    await getRabbyExtViews();
+    const { useBuiltInPwd } = await tryAutoUnlockRabbyX();
+    appLog(`autoUnlock ${useBuiltInPwd ? 'success' : 'failed'}`);
+
+    splashWin.destroy();
+    showMainWin();
+
+    if (!useBuiltInPwd) {
+      alertAutoUnlockFailed();
+    } else {
+      mainWin.webContents.reload();
+    }
   });
 }

@@ -2,6 +2,7 @@
 type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
 
 export type RabbyXMethod = {
+  'walletController.verifyPassword': (password: string) => void;
   'walletController.changeAccount': (account: Account) => void;
   'walletController.getCurrentAccount': () => RabbyAccount;
   'walletController.syncGetCurrentAccount': () => RabbyAccount | null;

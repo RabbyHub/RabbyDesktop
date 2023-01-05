@@ -7,7 +7,10 @@ import {
   dialog,
 } from 'electron';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
-import { rabbyxQuery } from '../streams/rabbyIpcQuery/_base';
+import {
+  rabbyxQuery,
+  RABBY_DESKTOP_KR_PWD,
+} from '../streams/rabbyIpcQuery/_base';
 import { getWindowFromWebContents } from '../utils/browser';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import {
@@ -114,6 +117,22 @@ function buildRabbyXDebugMenu(opts: ChromeContextMenuOptions) {
   });
 
   appendMenuSeparator(menu);
+  appendMenu(menu, {
+    label: 'Verify RabbyX Password',
+    click: async () => {
+      const correct = await rabbyxQuery('walletController.verifyPassword', [
+        RABBY_DESKTOP_KR_PWD,
+      ])
+        .then(() => true)
+        .catch(() => false);
+
+      dialog.showMessageBox({
+        type: correct ? 'info' : 'warning',
+        title: 'Verify Password',
+        message: `Password is ${correct ? 'correct' : 'incorrect'}`,
+      });
+    },
+  });
   appendMenu(menu, {
     label: `Trigger notification: Tx completed`,
     click: async () => {

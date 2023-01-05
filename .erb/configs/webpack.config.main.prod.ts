@@ -71,7 +71,8 @@ const configuration: webpack.Configuration = {
       'process.type': '"main"',
       // reg, prod
       'process.buildchannel': JSON.stringify(process.env.buildchannel || 'reg'),
-      'process.buildarch': JSON.stringify(process.env.buildarch || '')
+      'process.buildarch': JSON.stringify(process.env.buildarch || ''),
+      'process.RABBY_DESKTOP_KR_PWD': JSON.stringify(process.env.RABBY_DESKTOP_KR_PWD),
     }),
 
     new webpack.IgnorePlugin({
