@@ -332,3 +332,15 @@ onIpcMainInternalEvent('__internal_main:tabbed-window:destroyed', (winId) => {
 
   toggleMaskViaOpenedRabbyxNotificationWindow();
 });
+
+onIpcMainInternalEvent(
+  '__internal_main:mainwindow:sidebar-collapsed-changed',
+  async () => {
+    const mainWin = await onMainWindowReady();
+
+    if (mainWin.tabs.selected) {
+      // trigger re draw
+      mainWin.tabs.selected.show();
+    }
+  }
+);
