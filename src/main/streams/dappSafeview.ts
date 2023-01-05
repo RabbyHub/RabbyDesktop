@@ -18,7 +18,11 @@ import {
   onIpcMainInternalEvent,
   sendToWebContents,
 } from '../utils/ipcMainEvents';
-import { getDappSafeView, onMainWindowReady } from '../utils/stream-helpers';
+import {
+  getDappSafeView,
+  getSessionInsts,
+  onMainWindowReady,
+} from '../utils/stream-helpers';
 import { valueToMainSubject } from './_init';
 import { getAssetPath } from '../utils/app';
 
@@ -61,14 +65,17 @@ function updateSubWindowPosition(
   });
 }
 
-onMainWindowReady().then((mainWin) => {
+onMainWindowReady().then(async (mainWin) => {
   const targetWin = mainWin.window;
 
   const baseView = createPopupView({});
 
+  const { dappSafeViewSession } = await getSessionInsts();
+
   // TODO: stop it interacting with wallet by default
   const safeView = createPopupView({
     webPreferences: {
+      session: dappSafeViewSession,
       sandbox: true,
       nodeIntegration: false,
       contextIsolation: true,

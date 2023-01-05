@@ -57,20 +57,21 @@ const DENY_ACTION = { action: 'deny' } as const;
 app.on('web-contents-created', async (evtApp, webContents) => {
   const type = webContents.getType();
   const wcUrl = webContents.getURL();
-  appLog(`'web-contents-created' event [type:${type}, url:${wcUrl}]`);
+  appLog(
+    `'web-contents-created' webContents [id:${webContents.id}, type:${type}, url:${wcUrl}]`
+  );
 
   const mainTabbedWin = await onMainWindowReady();
-  const rabbyExtId = await getRabbyExtId();
 
   if (!isTabbedWebContents(webContents)) {
     webContents.setWindowOpenHandler((details) => {
-      const currentUrl = webContents.getURL();
+      const currentURL = webContents.getURL();
 
       // actually, it's always false
-      const isFromDapp = isUrlFromDapp(currentUrl);
+      const isFromDapp = isUrlFromDapp(currentURL);
       if (isFromDapp) return { ...DENY_ACTION };
 
-      const isFromExt = currentUrl.startsWith('chrome-extension://');
+      const isFromExt = currentURL.startsWith('chrome-extension://');
       const isToExt = details.url.startsWith('chrome-extension://');
 
       switch (details.disposition) {
@@ -91,12 +92,6 @@ app.on('web-contents-created', async (evtApp, webContents) => {
                 initDetails: details,
               });
               tab?.loadURL(details.url);
-              if (isRabbyXPage(details.url, rabbyExtId, 'background')) {
-                tab?.view?.webContents!.openDevTools({
-                  mode: 'bottom',
-                  activate: true,
-                });
-              }
             }
           }
           break;
@@ -170,8 +165,8 @@ handleIpcMainInvoke('get-app-version', (_, reqid) => {
 onIpcMainEvent(
   '__internal_rpc:app:open-external-url',
   async (evt, externalURL) => {
-    const currentUrl = evt.sender.getURL();
-    const isFromDapp = isUrlFromDapp(currentUrl);
+    const currentURL = evt.sender.getURL();
+    const isFromDapp = isUrlFromDapp(currentURL);
     if (isFromDapp) return;
 
     shell.openExternal(externalURL);

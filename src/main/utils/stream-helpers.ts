@@ -29,6 +29,10 @@ export async function getRabbyExtViews() {
   return firstValueFrom(fromMainSubject('rabbyExtViews'));
 }
 
+export async function getSessionInsts() {
+  return firstValueFrom(fromMainSubject('sessionReady'));
+}
+
 export async function getDappSafeView() {
   return firstValueFrom(fromMainSubject('dappSafeModeViews'));
 }

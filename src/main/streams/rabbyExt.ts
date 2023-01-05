@@ -89,7 +89,7 @@ const bgWcReady = new Promise<Electron.WebContents>((resolve) => {
     const type = webContents.getType();
     const wcUrl = webContents.getURL();
     cLog(
-      `'web-contents-created' event [type:${type}, url:${wcUrl}, id: ${webContents.id}]`
+      `'web-contents-created' event [id: ${webContents.id}, type:${type}, url:${wcUrl}]`
     );
 
     if (type !== 'backgroundPage') return;
