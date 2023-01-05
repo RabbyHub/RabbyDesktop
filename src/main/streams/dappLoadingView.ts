@@ -1,9 +1,16 @@
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
+import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { RABBY_LOADING_URL } from '../../isomorphic/constants';
 import { createPopupView } from '../utils/browser';
 import { getDappLoadingView, onMainWindowReady } from '../utils/stream-helpers';
 import { valueToMainSubject } from './_init';
-import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
+import {
+  emitIpcMainEvent,
+  onIpcMainEvent,
+  onIpcMainInternalEvent,
+  sendToWebContents,
+} from '../utils/ipcMainEvents';
+import { dappStore } from '../store/dapps';
 
 const dappTopOffset =
   NativeAppSizes.mainWindowDappTopOffset +
@@ -52,9 +59,40 @@ onMainWindowReady().then((tabbedWin) => {
   updateViewPosition(dappLoadingView, false);
 });
 
-onIpcMainEvent(
-  '__internal_rpc:mainwindow:toggle-loading-view',
-  async (_, payload) => {
+onIpcMainInternalEvent(
+  '__internal_main:mainwindow:tab-loading-changed',
+  async (payload) => {
+    switch (payload.type) {
+      case 'before-load': {
+        const dapps = dappStore.get('dapps') || [];
+        const dappOrigin = canoicalizeDappUrl(payload.url).origin;
+        const dapp = dapps.find((item) => item.origin === dappOrigin);
+
+        if (dapp) {
+          emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
+            type: 'start',
+            tabId: payload.tabId,
+            dapp,
+          });
+        }
+        break;
+      }
+      case 'did-finish-load': {
+        // emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
+        //   type: 'did-finish-load',
+        //   tabId: payload.tabId,
+        // });
+        break;
+      }
+      default:
+        break;
+    }
+  }
+);
+
+const dispose = onIpcMainInternalEvent(
+  '__internal_main:mainwindow:toggle-loading-view',
+  async (payload) => {
     const dappLoadingView = await getDappLoadingView();
 
     switch (payload.type) {
@@ -76,3 +114,22 @@ onIpcMainEvent(
     );
   }
 );
+
+onIpcMainEvent(
+  '__internal_rpc:mainwindow:toggle-loading-view',
+  async (_, payload) => {
+    dispose.handler(payload);
+  }
+);
+
+onIpcMainInternalEvent('__internal_main:dev', async (payload) => {
+  switch (payload.type) {
+    case 'loading-view:inspect': {
+      const loadingView = await getDappLoadingView();
+      loadingView.webContents.openDevTools({ mode: 'detach' });
+      break;
+    }
+    default:
+      break;
+  }
+});

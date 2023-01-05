@@ -61,17 +61,19 @@ export function parseDappUrl(
 ) {
   const { isDapp, origin } = canoicalizeDappUrl(url);
 
-  const existedOrigin = !isDapp
-    ? false
-    : existedDapps.some((item: IDapp) => {
+  const foundDapp = !isDapp
+    ? null
+    : existedDapps.find((item: IDapp) => {
         const formatted = formatDapp(item);
         return formatted?.origin && formatted.origin === origin;
       });
+  const existedOrigin = !isDapp ? false : !!foundDapp;
 
   return {
     isDapp,
     origin,
     existedOrigin,
+    foundDapp,
   };
 }
 

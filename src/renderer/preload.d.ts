@@ -278,21 +278,7 @@ type ChannelMessagePayload = {
     send: [dappOrigin: string];
     response: [];
   };
-  '__internal_rpc:mainwindow:toggle-loading-view': {
-    send: [
-      payload:
-        | {
-            type: 'start';
-            tabId?: number;
-            dapp: IDapp;
-          }
-        | {
-            type: 'did-finish-load';
-            tabId?: number;
-          }
-    ];
-    response: [];
-  };
+  '__internal_rpc:mainwindow:toggle-loading-view': MainInternalsMessagePayload['__internal_main:mainwindow:toggle-loading-view'];
   '__internal_rpc:popupwin-on-mainwin:toggle-show': MainInternalsMessagePayload['__internal_main:popupwin-on-mainwin:toggle-show'];
   '__internal_rpc:app:open-external-url': {
     send: [externalURL: string];
