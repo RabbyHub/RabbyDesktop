@@ -162,15 +162,27 @@ export class Tab {
         ? !isCollapsedMainWindow
           ? {
               x: NativeLayouts.dappsViewLeftOffset,
-              width: width - NativeLayouts.dappsViewLeftOffset,
+              width:
+                width -
+                NativeLayouts.dappsViewLeftOffset -
+                NativeLayouts.dappsViewRightOffset,
               y: dappViewTopOffset,
-              height: height - dappViewTopOffset,
+              height:
+                height -
+                dappViewTopOffset -
+                NativeLayouts.dappsViewBottomOffset,
             }
           : {
               x: NativeLayoutsCollapsed.dappsViewLeftOffset,
-              width: width - NativeLayoutsCollapsed.dappsViewLeftOffset,
+              width:
+                width -
+                NativeLayoutsCollapsed.dappsViewLeftOffset -
+                NativeLayoutsCollapsed.dappsViewRightOffset,
               y: dappViewTopOffset,
-              height: height - dappViewTopOffset,
+              height:
+                height -
+                dappViewTopOffset -
+                NativeLayoutsCollapsed.dappsViewBottomOffset,
             }
         : {}),
     });
