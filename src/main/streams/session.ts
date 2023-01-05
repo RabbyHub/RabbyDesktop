@@ -226,6 +226,11 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
         const window = findByWindowId(details.windowId);
         const foundTab = window?.tabs.get(tab.id);
         details.url = foundTab?.getInitialUrl() || '';
+        if (foundTab && foundTab.view?.webContents) {
+          details.status = foundTab.view.webContents.isLoading()
+            ? 'loading'
+            : 'complete';
+        }
       }
     },
 

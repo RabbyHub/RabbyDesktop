@@ -26,7 +26,7 @@ export function onIpcMainEvent<T extends IChannelsKey = IChannelsKey>(
     return ipcMain.off(eventName, handler as any);
   };
 
-  dispose.handler = handler as any;
+  dispose.handler = handler;
 
   return dispose;
 }
@@ -49,7 +49,7 @@ export function onIpcMainInternalEvent<T extends MainInternals = MainInternals>(
     return ipcMain.off(eventName, handler as any);
   };
 
-  dispose.handler = handler as any;
+  dispose.handler = handler;
 
   return dispose;
 }

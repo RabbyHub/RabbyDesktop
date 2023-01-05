@@ -12,8 +12,10 @@ import {
   useSidebarDapps,
 } from '@/renderer/hooks-shell/useMainWindow';
 import { useHasNewRelease } from '@/renderer/hooks/useAppUpdator';
-import { makeSureDappOpened } from '@/renderer/ipcRequest/mainwin';
-import { canoicalizeDappUrl } from '@/isomorphic/url';
+import {
+  makeSureDappOpened,
+  toggleLoadingView,
+} from '@/renderer/ipcRequest/mainwin';
 import styles from './Sidebar.module.less';
 import { DappFavicon } from '../DappFavicon';
 
@@ -169,26 +171,12 @@ export default function MainWindowSidebar() {
   useEffect(() => {
     if (!activeTab?.id) return;
 
+    // guard for loading view
     if (!matchedDapp || activeTab?.status === 'complete') {
-      window.rabbyDesktop.ipcRenderer.sendMessage(
-        '__internal_rpc:mainwindow:toggle-loading-view',
-        {
-          type: 'did-finish-load',
-          tabId: activeTab.id,
-        }
-      );
-    } else if (matchedDapp && activeTab?.status === 'loading') {
-      const foundDapp = allDapps.find((dapp) => {
-        return dapp.origin === canoicalizeDappUrl(activeTab.url || '')?.origin;
+      toggleLoadingView({
+        type: 'did-finish-load',
+        tabId: activeTab.id,
       });
-      window.rabbyDesktop.ipcRenderer.sendMessage(
-        '__internal_rpc:mainwindow:toggle-loading-view',
-        {
-          type: 'start',
-          tabId: activeTab.id,
-          dapp: foundDapp!,
-        }
-      );
     }
   }, [matchedDapp, activeTab?.status, activeTab?.id, activeTab?.url, allDapps]);
 

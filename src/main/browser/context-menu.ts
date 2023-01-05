@@ -175,6 +175,15 @@ function buildDebugKitsMenu(opts: ChromeContextMenuOptions) {
       });
     },
   });
+  appendMenuSeparator(debugKitsMenu);
+  appendMenu(debugKitsMenu, {
+    label: `Inspect LoadingView`,
+    click: () => {
+      emitIpcMainEvent('__internal_main:dev', {
+        type: 'loading-view:inspect',
+      });
+    },
+  });
 
   appendMenuSeparator(debugKitsMenu);
   appendMenu(debugKitsMenu, {

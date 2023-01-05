@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useDapps } from '../hooks/useDappsMngr';
+import { toggleLoadingView } from '../ipcRequest/mainwin';
 import { navigateToDappRoute } from '../utils/react-router';
 import { useWindowTabs } from './useWindowTabs';
 
@@ -50,12 +51,29 @@ export function useSidebarDapps() {
         tab.id!
       );
     }, []),
-    onOpenDapp: useCallback((dappOrigin: string) => {
-      window.rabbyDesktop.ipcRenderer.sendMessage(
-        '__internal_rpc:mainwindow:open-tab',
-        dappOrigin
-      );
-    }, []),
+    onOpenDapp: useCallback(
+      (dappOrigin: string) => {
+        const foundDapp = !dappOrigin
+          ? null
+          : allDapps.find((dapp) => {
+              return dapp.origin === dappOrigin;
+            });
+
+        if (activeTab && foundDapp) {
+          toggleLoadingView({
+            type: 'start',
+            tabId: activeTab.id,
+            dapp: foundDapp,
+          });
+        }
+
+        window.rabbyDesktop.ipcRenderer.sendMessage(
+          '__internal_rpc:mainwindow:open-tab',
+          dappOrigin
+        );
+      },
+      [activeTab, allDapps]
+    ),
   };
 
   return {
