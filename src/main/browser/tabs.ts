@@ -1,11 +1,16 @@
 import { EventEmitter } from 'events';
 
 import { BrowserView, BrowserWindow } from 'electron';
-import { NativeAppSizes } from '@/isomorphic/const-size-next';
+import {
+  NativeAppSizes,
+  NativeLayouts,
+  NativeLayoutsCollapsed,
+} from '@/isomorphic/const-size-next';
 import { NATIVE_HEADER_H } from '../../isomorphic/const-size-classical';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import { BrowserViewManager } from '../utils/browserView';
+import { desktopAppStore } from '../store/desktopApp';
 
 const viewMngr = new BrowserViewManager({
   webPreferences: {
@@ -142,6 +147,10 @@ export class Tab {
     const hideTopbar =
       !this.$meta.topbarStacks?.tabs && !this.$meta.topbarStacks?.navigation;
 
+    const { isOfMainWindow } = this.$meta;
+    const isCollapsedMainWindow =
+      isOfMainWindow && desktopAppStore.get('sidebarCollapsed');
+
     const topOffset = hideTopbar ? 0 : NATIVE_HEADER_H;
 
     this.view!.setBounds({
@@ -149,13 +158,20 @@ export class Tab {
       y: topOffset,
       width,
       height: height - topOffset,
-      ...(this.$meta.isOfMainWindow
-        ? {
-            x: NativeAppSizes.dappsViewLeftOffset,
-            width: width - NativeAppSizes.dappsViewLeftOffset,
-            y: dappViewTopOffset,
-            height: height - dappViewTopOffset,
-          }
+      ...(isOfMainWindow
+        ? !isCollapsedMainWindow
+          ? {
+              x: NativeLayouts.dappsViewLeftOffset,
+              width: width - NativeLayouts.dappsViewLeftOffset,
+              y: dappViewTopOffset,
+              height: height - dappViewTopOffset,
+            }
+          : {
+              x: NativeLayoutsCollapsed.dappsViewLeftOffset,
+              width: width - NativeLayoutsCollapsed.dappsViewLeftOffset,
+              y: dappViewTopOffset,
+              height: height - dappViewTopOffset,
+            }
         : {}),
     });
 

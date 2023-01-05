@@ -23,6 +23,7 @@ type IMergedDapp = IDapp & { isPinned: boolean };
 type IDesktopAppState = {
   firstStartApp: boolean;
   enableContentProtected: boolean;
+  sidebarCollapsed: boolean;
 };
 
 type IDappsDetectResult<T extends string = string> = {

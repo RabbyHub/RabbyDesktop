@@ -6,14 +6,10 @@ import Store from 'electron-store';
 import { APP_NAME, PERSIS_STORE_PREFIX } from '../../isomorphic/constants';
 import { safeParse, shortStringify } from '../../isomorphic/json';
 import { FRAME_DEFAULT_SIZE } from '../../isomorphic/const-size';
-import {
-  emitIpcMainEvent,
-  handleIpcMainInvoke,
-  onIpcMainEvent,
-} from '../utils/ipcMainEvents';
+import { emitIpcMainEvent, handleIpcMainInvoke } from '../utils/ipcMainEvents';
 
 export const desktopAppStore = new Store<{
-  firstStartApp: boolean;
+  firstStartApp: IDesktopAppState['firstStartApp'];
   lastWindowPosition: {
     width: number;
     height: number;
@@ -21,7 +17,8 @@ export const desktopAppStore = new Store<{
     y?: number;
     isMaximized?: boolean;
   };
-  enableContentProtected: boolean;
+  enableContentProtected: IDesktopAppState['enableContentProtected'];
+  sidebarCollapsed: IDesktopAppState['sidebarCollapsed'];
 }>({
   name: `${PERSIS_STORE_PREFIX}desktopApp`,
 
@@ -64,6 +61,10 @@ export const desktopAppStore = new Store<{
       type: 'boolean',
       default: true,
     },
+    sidebarCollapsed: {
+      type: 'boolean',
+      default: false,
+    },
   },
 
   serialize: shortStringify,
@@ -78,6 +79,7 @@ function getState() {
     firstStartApp: desktopAppStore.get('firstStartApp'),
     enableContentProtected:
       desktopAppStore.get('enableContentProtected') !== false,
+    sidebarCollapsed: desktopAppStore.get('sidebarCollapsed', false),
   };
 }
 
@@ -99,6 +101,15 @@ handleIpcMainInvoke('put-desktopAppState', (_, partialPayload) => {
       case 'enableContentProtected': {
         desktopAppStore.set('enableContentProtected', value !== false);
         emitIpcMainEvent('__internal_main:app:relaunch');
+        break;
+      }
+      case 'sidebarCollapsed': {
+        const collapsed = !!value;
+        desktopAppStore.set('sidebarCollapsed', !!value);
+        emitIpcMainEvent(
+          '__internal_main:mainwindow:sidebar-collapsed-changed',
+          collapsed
+        );
         break;
       }
       default:
