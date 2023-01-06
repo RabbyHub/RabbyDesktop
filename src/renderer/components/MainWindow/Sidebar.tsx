@@ -32,7 +32,7 @@ const DividerSizes = {
 const Sidebar = styled.div`
   .${styles.menuFold} {
     background: url('rabby-internal://assets/icons/mainwin-sidebar/arrow-left.svg')
-        center / 16px no-repeat;
+      center / 20px no-repeat;
     &:hover {
       background-image: url('rabby-internal://assets/icons/mainwin-sidebar/arrow-left-active.svg');
     }
