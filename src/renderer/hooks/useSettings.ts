@@ -35,6 +35,7 @@ export function useSettings() {
 
   const toggleSidebarCollapsed = useCallback(
     async (nextVal: boolean) => {
+      localStorage.setItem('sidebarCollapsed', JSON.stringify(nextVal));
       const result = await window.rabbyDesktop.ipcRenderer.invoke(
         'put-desktopAppState',
         {
@@ -59,7 +60,10 @@ export function useSettings() {
   return {
     settings: {
       enableContentProtected: desktopAppState?.enableContentProtected !== false,
-      sidebarCollapsed: !!desktopAppState?.sidebarCollapsed,
+      sidebarCollapsed: Boolean(
+        desktopAppState?.sidebarCollapsed ??
+          JSON.parse(localStorage.getItem('sidebarCollapsed') || 'false')
+      ),
     },
     fetchState,
     toggleEnableContentProtection,
