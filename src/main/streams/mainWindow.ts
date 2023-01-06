@@ -1,10 +1,15 @@
 import { dialog } from 'electron';
 import {
   emitIpcMainEvent,
+  handleIpcMainInvoke,
   onIpcMainEvent,
   sendToWebContents,
 } from '../utils/ipcMainEvents';
-import { onMainWindowReady } from '../utils/stream-helpers';
+import {
+  onMainWindowReady,
+  updateMainWindowActiveTabRect,
+} from '../utils/stream-helpers';
+import { fromMainSubject } from './_init';
 
 const ResetDialogButtons = ['Cancel', 'Confirm'] as const;
 const cancleId = ResetDialogButtons.findIndex((x) => x === 'Cancel');
@@ -119,3 +124,40 @@ onIpcMainEvent('__internal_rpc:mainwindow:reload-tab', async (_, tabId) => {
 
   tab.reload();
 });
+
+handleIpcMainInvoke('toggle-activetab-animating', async (_, animating) => {
+  const mainWin = await onMainWindowReady();
+
+  const activeTab = mainWin.tabs.selected;
+  if (!activeTab) return;
+
+  activeTab.toggleAnimating(animating);
+});
+
+onIpcMainEvent(
+  '__internal_rpc:mainwindow:report-activeDapp-rect',
+  async (_, reports) => {
+    const mainTabbedWin = await onMainWindowReady();
+    const activeTab = mainTabbedWin.tabs.selected;
+
+    if (reports.dappViewState === 'mounted') {
+      reports.rect.x = Math.round(reports.rect.x);
+      reports.rect.y = Math.round(reports.rect.y);
+      reports.rect.width = Math.round(reports.rect.width);
+      reports.rect.height = Math.round(reports.rect.height);
+
+      updateMainWindowActiveTabRect(reports);
+      if (activeTab) activeTab.setAnimatedMainWindowTabRect(reports.rect);
+    } else if (reports.dappViewState === 'unmounted') {
+      updateMainWindowActiveTabRect({
+        dappViewState: 'unmounted',
+      });
+      mainTabbedWin.tabs.unSelectAll();
+      if (activeTab)
+        emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
+          type: 'hide',
+          tabId: activeTab.id,
+        });
+    }
+  }
+);

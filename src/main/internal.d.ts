@@ -33,6 +33,10 @@ type MainInternalsMessagePayload = {
     send: [collapsed: boolean];
     response: [];
   };
+  '__internal_main:mainwindow:toggle-animating': {
+    send: [animating: boolean];
+    response: [];
+  };
   '__internal_main:popupwin-on-mainwin:toggle-show': {
     send: [
       | {

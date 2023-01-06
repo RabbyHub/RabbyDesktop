@@ -1,3 +1,4 @@
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import type { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { BrowserView, BrowserWindow, Session } from 'electron';
 import { Subject, ReplaySubject, Observable } from 'rxjs';
@@ -11,9 +12,11 @@ type IConf<T extends Subject<any>> = {
 const CONF = {
   userAppReady: {
     subject: new ReplaySubject(1),
+    once: true,
   } as IConf<ReplaySubject<void>>,
   sessionReady: {
     subject: new ReplaySubject(1),
+    once: true,
   } as IConf<
     ReplaySubject<{
       mainSession: Session;
@@ -23,16 +26,20 @@ const CONF = {
   >,
   electronChromeExtensionsReady: {
     subject: new ReplaySubject(1),
+    once: true,
   } as IConf<ReplaySubject<ElectronChromeExtensions>>,
 
   webuiExtensionReady: {
     subject: new ReplaySubject(1),
+    once: true,
   } as IConf<ReplaySubject<Electron.Extension>>,
   rabbyExtensionReady: {
     subject: new ReplaySubject(1),
+    once: true,
   } as IConf<ReplaySubject<Electron.Extension>>,
   rabbyExtViews: {
     subject: new ReplaySubject(1),
+    once: true,
   } as IConf<
     ReplaySubject<{
       rabbyNotificationGasket: Electron.BrowserView;
@@ -42,12 +49,21 @@ const CONF = {
 
   mainWindowReady: {
     subject: new ReplaySubject(1),
+    once: true,
   } as IConf<ReplaySubject<TabbedBrowserWindow>>,
+  mainWindowActiveTabRect: {
+    subject: new Subject(),
+  } as IConf<Subject<IMainWindowActiveTabRect>>,
+  mainWindowActiveAnimating: {
+    subject: new Subject(),
+  } as IConf<Subject<boolean>>,
   dappLoadingView: {
     subject: new ReplaySubject(1),
+    once: true,
   } as IConf<ReplaySubject<BrowserView>>,
   dappSafeModeViews: {
     subject: new ReplaySubject(1),
+    once: true,
   } as IConf<
     ReplaySubject<{
       baseView: BrowserView;
@@ -56,16 +72,20 @@ const CONF = {
   >,
   securityCheckPopupWindowReady: {
     subject: new ReplaySubject(1),
+    once: true,
   } as IConf<ReplaySubject<BrowserWindow>>,
   securityNotificationsWindowReady: {
     subject: new ReplaySubject(1),
+    once: true,
   } as IConf<ReplaySubject<BrowserWindow>>,
   securityAddressbarPopup: {
     subject: new ReplaySubject(1),
+    once: true,
   } as IConf<ReplaySubject<BrowserWindow>>,
 
   contextMenuPopupWindowReady: {
     subject: new ReplaySubject(1),
+    once: true,
   } as IConf<
     ReplaySubject<{
       sidebarContext: BrowserWindow;
@@ -112,7 +132,9 @@ export function valueToMainSubject<T extends keyof IMainSubjects>(
     throw new Error(`[valueToMainSubject] '${type}' already initialized`);
   }
 
-  cLog('valueToMainSubject', `Subject '${type}' initialized`);
+  if (!IS_RUNTIME_PRODUCTION) {
+    cLog('valueToMainSubject', `Subject '${type}' initialized`);
+  }
 
   store[type].initialized = true;
   CONF[type].subject.next(value as never);

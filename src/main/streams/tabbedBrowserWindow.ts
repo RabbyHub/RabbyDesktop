@@ -240,13 +240,6 @@ onIpcMainEvent(
   }
 );
 
-onIpcMainEvent('__internal_rpc:mainwindow:hide-all-tabs', async (_, winId) => {
-  const mainTabbedWin = await onMainWindowReady();
-  if (mainTabbedWin.window.id !== winId) return;
-
-  mainTabbedWin.tabs.unSelectAll();
-});
-
 onIpcMainEvent(
   '__internal_rpc:mainwindow:make-sure-dapp-opened',
   async (_, dappOrigin) => {

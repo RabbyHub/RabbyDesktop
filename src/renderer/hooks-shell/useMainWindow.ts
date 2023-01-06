@@ -8,13 +8,6 @@ export type IDappWithTabInfo = IMergedDapp & {
   tab?: chrome.tabs.Tab;
 };
 
-export function hideAllTabs(windowId: number | undefined) {
-  window.rabbyDesktop.ipcRenderer.sendMessage(
-    '__internal_rpc:mainwindow:hide-all-tabs',
-    windowId!
-  );
-}
-
 export function useSidebarDapps() {
   const { tabMap, activeTab } = useWindowTabs();
   const { dapps: allDapps, pinnedDapps, unpinnedDapps } = useDapps();

@@ -60,6 +60,8 @@ export class Tab {
     isOfMainWindow: false,
   };
 
+  private _isAnimating: boolean = false;
+
   constructor(
     ofWindow: BrowserWindow,
     { tabs, topbarStacks, initDetails, isOfMainWindow }: ITabOptions
@@ -181,6 +183,11 @@ export class Tab {
 
     const topOffset = hideTopbar ? 0 : NATIVE_HEADER_H;
 
+    if (this._isAnimating) {
+      this.view!.setAutoResize({ width: true, height: true });
+      return;
+    }
+
     this.view!.setBounds({
       x: 0,
       y: topOffset,
@@ -214,8 +221,36 @@ export class Tab {
             }
         : {}),
     });
-
     this.view!.setAutoResize({ width: true, height: true });
+  }
+
+  setAnimatedMainWindowTabRect(rect?: Electron.Rectangle) {
+    if (!this.$meta.isOfMainWindow) return;
+    if (!this.view) return;
+
+    if (!this._isAnimating) return;
+
+    if (rect?.x) rect.x = Math.round(rect.x);
+    if (rect?.y) rect.y = Math.round(rect.y);
+    if (rect?.width) rect.width = Math.round(rect.width);
+    if (rect?.height) rect.height = Math.round(rect.height);
+
+    const currentBounds = this.view!.getBounds();
+    this.view!.setBounds({
+      ...currentBounds,
+      x: -99999,
+      y: -99999,
+      ...rect,
+    });
+  }
+
+  toggleAnimating(enabled = false) {
+    this._isAnimating = enabled;
+    if (enabled) {
+      this.setAnimatedMainWindowTabRect();
+    } else {
+      this.show();
+    }
   }
 
   hide() {
