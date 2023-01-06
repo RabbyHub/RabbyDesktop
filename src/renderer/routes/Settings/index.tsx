@@ -178,7 +178,6 @@ export function MainWindowSettings() {
             name="Privacy Policy"
             link="https://rabby.io/docs/privacy/"
             icon="rabby-internal://assets/icons/mainwin-settings/privacy.svg"
-            useChevron
           />
           <ItemLink
             name="Website"
