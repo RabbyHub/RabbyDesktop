@@ -1,7 +1,16 @@
 
-v0.2.6 / 2023-01-06
+v0.2.7 / 2023-01-06
 ==================
 
+  * feat: keep sign window dock on right of main window.
+  * feat: disallow resize on wallet sign
+  * chore: tuning style.
+  * fix: specify `rabby-internal` as standard schema to enable its storage access.
+
+v0.2.6 / 2023-01-06
+===================
+
+  * Release v0.2.6
   * fix: redraw loadingView on sidebar collapsed.
   * feat: add animation (#48)
   * feat: better drag interaction on macos dapp topNavbar (#49)
