@@ -1,7 +1,32 @@
 
-v0.2.5 / 2023-01-03
+v0.2.6 / 2023-01-06
 ==================
 
+  * fix: redraw loadingView on sidebar collapsed.
+  * feat: add animation (#48)
+  * feat: better drag interaction on macos dapp topNavbar (#49)
+  * chore: tuning settings page. (#47)
+  * feat: change sidebar width (#45)
+  * fix: allow 301 redirect from dapp.
+  * feat: provide reactive winState by pushing event. (#44)
+  * feat: support cssinjs. (#43)
+  * chore: style tuning.
+  * fix: only auto unlock after verified password.
+  * fix: content's width of loadingView & safeView.
+  * fix: loadingView still open on stop one loading dapp.
+  * fix: always get null icon on first add dapp after launch app.
+  * feat: use built-in password.
+  * feat: support `chrome.notification.create` on rabby ext, toast on tx status changed. (#42)
+  * feat: adjust sidebar's width on mainWindow. (#39)
+  * feat: only expand search input when scroll down (#40)
+  * feat: only show loading view on open/reload tab, ignore in-page loading. (#41)
+  * feat: adjust hooks-shell. (#38)
+  * feat: improve BrowserView resources allocation/recycle. (#37)
+
+v0.2.5 / 2023-01-03
+===================
+
+  * Release v0.2.5
   * style: tuning switchAccount popup's width
   * feat: support setting `enableContentProtected`.
   * fix: default route on mainWindow.
