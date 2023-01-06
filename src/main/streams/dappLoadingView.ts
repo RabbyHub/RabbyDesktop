@@ -17,10 +17,16 @@ const dappTopOffset =
   NativeAppSizes.mainWindowDappTopOffset +
   (process.platform === 'darwin' ? 0 : NativeAppSizes.windowTitlebarHeight);
 
+const currentState = {
+  isLoading: false,
+};
+
 async function updateViewPosition(
   loadingView: Electron.BrowserView,
-  isLoading = true
+  isLoading = currentState.isLoading
 ) {
+  currentState.isLoading = isLoading;
+
   const tabbedWin = await onMainWindowReady();
   const mainWin = tabbedWin.window;
   const [width, height] = mainWin.getSize();
@@ -136,3 +142,12 @@ onIpcMainInternalEvent('__internal_main:dev', async (payload) => {
       break;
   }
 });
+
+onIpcMainInternalEvent(
+  '__internal_main:mainwindow:sidebar-collapsed-changed',
+  async () => {
+    const loadingView = await getDappLoadingView();
+
+    updateViewPosition(loadingView);
+  }
+);
