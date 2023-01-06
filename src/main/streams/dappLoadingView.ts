@@ -10,7 +10,7 @@ import {
   onIpcMainInternalEvent,
   sendToWebContents,
 } from '../utils/ipcMainEvents';
-import { dappStore } from '../store/dapps';
+import { dappStore, findDappByOrigin } from '../store/dapps';
 import { pickMainWindowLayouts } from '../utils/browserView';
 
 const dappTopOffset =
@@ -68,48 +68,20 @@ onMainWindowReady().then((tabbedWin) => {
   updateViewPosition(dappLoadingView, false);
 });
 
-onIpcMainInternalEvent(
-  '__internal_main:mainwindow:tab-loading-changed',
-  async (payload) => {
-    switch (payload.type) {
-      case 'before-load': {
-        const dapps = dappStore.get('dapps') || [];
-        const dappOrigin = canoicalizeDappUrl(payload.url).origin;
-        const dapp = dapps.find((item) => item.origin === dappOrigin);
-
-        if (dapp) {
-          emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-            type: 'start',
-            tabId: payload.tabId,
-            dapp,
-          });
-        }
-        break;
-      }
-      case 'did-finish-load': {
-        // emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-        //   type: 'did-finish-load',
-        //   tabId: payload.tabId,
-        // });
-        break;
-      }
-      default:
-        break;
-    }
-  }
-);
-
 const dispose = onIpcMainInternalEvent(
   '__internal_main:mainwindow:toggle-loading-view',
   async (payload) => {
     const dappLoadingView = await getDappLoadingView();
 
     switch (payload.type) {
-      case 'start': {
-        updateViewPosition(dappLoadingView, true);
+      case 'show': {
+        const dapp = findDappByOrigin(payload.tabURL);
+        payload.dapp = dapp;
+
+        updateViewPosition(dappLoadingView, !!dapp);
         break;
       }
-      case 'did-finish-load': {
+      case 'hide': {
         updateViewPosition(dappLoadingView, false);
         break;
       }

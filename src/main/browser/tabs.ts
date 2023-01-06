@@ -69,7 +69,7 @@ export class Tab {
     this.$meta.isOfMainWindow = !!isOfMainWindow;
 
     this.tabs = tabs;
-    this.view = viewMngr.allocateView();
+    this.view = viewMngr.allocateView(false);
     this.id = this.view.webContents.id;
     this.window = ofWindow;
     this.windowId = ofWindow.id;
@@ -82,6 +82,13 @@ export class Tab {
 
     this.view?.webContents.on('focus', () => {
       this.tabs.emit('tab-focused');
+    });
+
+    this.view!.webContents.on('did-stop-loading', () => {
+      emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
+        type: 'hide',
+        tabId: this.id,
+      });
     });
 
     // polyfill for window.close
@@ -136,16 +143,16 @@ export class Tab {
   async loadURL(url: string) {
     const isMain = this.$meta.isOfMainWindow;
     if (isMain) {
-      emitIpcMainEvent('__internal_main:mainwindow:tab-loading-changed', {
-        type: 'before-load',
-        url,
+      emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
+        type: 'show',
+        tabURL: url,
         tabId: this.id,
       });
     }
     const result = await this.view?.webContents.loadURL(url);
     if (isMain) {
-      emitIpcMainEvent('__internal_main:mainwindow:tab-loading-changed', {
-        type: 'did-finish-load',
+      emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
+        type: 'hide',
         tabId: this.id,
       });
     }
@@ -154,6 +161,11 @@ export class Tab {
   }
 
   reload() {
+    emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
+      type: 'show',
+      tabURL: this.view!.webContents.getURL(),
+      tabId: this.id,
+    });
     this.view!.webContents.reload();
   }
 

@@ -1,5 +1,9 @@
 import { dialog } from 'electron';
-import { emitIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
+import {
+  emitIpcMainEvent,
+  onIpcMainEvent,
+  sendToWebContents,
+} from '../utils/ipcMainEvents';
 import { onMainWindowReady } from '../utils/stream-helpers';
 
 const ResetDialogButtons = ['Cancel', 'Confirm'] as const;
@@ -105,4 +109,13 @@ onMainWindowReady().then(async (mainWin) => {
       }
     );
   });
+});
+
+onIpcMainEvent('__internal_rpc:mainwindow:reload-tab', async (_, tabId) => {
+  const mainTabbedWin = await onMainWindowReady();
+
+  const tab = mainTabbedWin.tabs.get(tabId);
+  if (!tab) return;
+
+  tab.reload();
 });

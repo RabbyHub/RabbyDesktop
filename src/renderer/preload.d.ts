@@ -273,6 +273,10 @@ type ChannelMessagePayload = {
     send: [winId: number, tabId: number];
     response: [];
   };
+  '__internal_rpc:mainwindow:reload-tab': {
+    send: [tabId: number];
+    response: [];
+  };
   '__internal_rpc:mainwindow:stop-tab-loading': {
     send: [tabId: number];
     response: [];

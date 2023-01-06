@@ -13,7 +13,7 @@ export class BrowserViewManager {
 
   constructor(private viewOpts: BrowserViewConstructorOptions) {}
 
-  allocateView(loadBlank = true) {
+  allocateView(loadBlank = false) {
     let view = Object.values(this.idleViews)[0];
 
     if (!view || view.webContents.isDestroyed()) {

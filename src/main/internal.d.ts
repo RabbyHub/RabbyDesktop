@@ -13,31 +13,18 @@ type MainInternalsMessagePayload = {
     send: [pinnedList: IDapp['origin'][]];
     response: [];
   };
-  '__internal_main:mainwindow:tab-loading-changed': {
-    send: [
-      payload:
-        | {
-            type: 'before-load';
-            url: string;
-            tabId: number;
-          }
-        | {
-            type: 'did-finish-load';
-            tabId: number;
-          }
-    ];
-  };
   '__internal_main:mainwindow:toggle-loading-view': {
     send: [
       payload:
         | {
-            type: 'start';
-            tabId?: number;
-            dapp: IDapp;
+            type: 'show';
+            tabId: number;
+            tabURL: string;
+            dapp?: IDapp | null;
           }
         | {
-            type: 'did-finish-load';
-            tabId?: number;
+            type: 'hide';
+            tabId: number;
           }
     ];
     response: [];
