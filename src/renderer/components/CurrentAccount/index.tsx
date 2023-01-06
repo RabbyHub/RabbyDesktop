@@ -93,7 +93,7 @@ export const CurrentAccountAndNewAccount = ({
   className?: string;
 }) => {
   return (
-    <div className={clsx(styles.row, className)}>
+    <div className={clsx(styles.row, className)} data-nodrag>
       <CurrentAccount />
       <AddNewAccount />
     </div>

@@ -1,6 +1,6 @@
 import { isMainWinShellWebUI } from '@/isomorphic/url';
 import { detectOS } from '@/isomorphic/os';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { atom, useAtom } from 'jotai';
 
 const OS_TYPE = detectOS();
@@ -44,6 +44,12 @@ export function useWindowState() {
     });
   }, [setWinState]);
 
+  const onDarwinToggleMaxmize = useCallback(() => {
+    if (!isDarwin) return;
+
+    onMaximizeButton();
+  }, [onMaximizeButton]);
+
   const onFullscreenButton = useCallback(() => {
     chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, (win) => {
       const nextState = win.state === 'fullscreen' ? 'normal' : 'fullscreen';
@@ -70,7 +76,7 @@ export function useWindowState() {
     winState,
     onMinimizeButton,
     onMaximizeButton,
-    onToggleMaxmize: onMaximizeButton,
+    onDarwinToggleMaxmize,
     onFullscreenButton,
     onCloseButton,
   };
