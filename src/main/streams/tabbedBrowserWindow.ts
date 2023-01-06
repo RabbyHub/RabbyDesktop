@@ -141,6 +141,7 @@ export async function createRabbyxNotificationWindow({
         roundedCorners: true,
         hasShadow: false,
       }),
+      movable: false,
       maximizable: false,
       minimizable: false,
       fullscreenable: false,
@@ -304,8 +305,6 @@ if (process.platform === 'win32') {
   });
 }
 onMainWindowReady().then((mainTabbedWin) => {
-  if (!isWin32) return;
-
   const onTargetWinUpdate = () => {
     if (mainTabbedWin.window.isDestroyed()) return;
 
