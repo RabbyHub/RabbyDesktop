@@ -77,7 +77,7 @@ export function setOpenHandlerForWebContents({
             switchToBrowserTab(openedDapp!.id, parentTabbedWin!);
 
             /**
-             * sometimes, targetURL has same origin with currentURL.
+             * sometimes, targetURL has same origin with currentUrl.
              *
              * for SPA, we don't set new url for it.
              * But for static redirect url, we need to set new url.
@@ -119,13 +119,25 @@ export const setListeners = {
   'will-redirect': (webContents: Electron.WebContents) => {
     webContents.on('will-redirect', (evt, targetURL) => {
       if (!webContents) return;
-      const currentURL = webContents.getURL();
+      const evtWebContents = (evt as any).sender as Electron.WebContents;
+      const currentUrl = evtWebContents.getURL();
+      const isFromDapp = isUrlFromDapp(currentUrl);
+
+      const dapps = formatDapps(dappStore.get('dapps'));
+
+      const currentInfo = parseDappUrl(currentUrl, dapps);
+      const targetInfo = parseDappUrl(targetURL, dapps);
+      const toSameOrigin = currentInfo.origin === targetInfo.origin;
 
       // this tabs is render as app's self UI, such as topbar.
-      if (!isUrlFromDapp(currentURL)) return;
+      if (isFromDapp && !toSameOrigin) {
+        evt.preventDefault();
+        attachDappSafeview(targetURL);
 
-      evt.preventDefault();
-      attachDappSafeview(targetURL);
+        return false;
+      }
+
+      return true;
     });
   },
 
