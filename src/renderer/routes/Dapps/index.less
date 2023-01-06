@@ -1,21 +1,9 @@
-@media screen and (min-width: 1600px) {
-  .page-content {
-    width: 1392px;
-  }
-}
-
-@media screen and (min-width: 1920px) {
-  .page-content {
-    width: 1746px;
-  }
-}
-
 .dapps {
   user-select: none;
   .dapp-matrix {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
+    display: grid;
+    grid-gap: 20px;
+    grid-template-columns: 1fr 1fr 1fr;
   }
 
   // &.J_add
@@ -23,7 +11,8 @@
   .dapp-block {
     position: relative;
     cursor: pointer;
-    width: 270px;
+    min-width: 270px;
+    width: 100%;
 
     background: linear-gradient(91.8deg, #fefefe 0%, #e2e4ed 100%);
     box-shadow: 0px 24px 32px -10px rgba(0, 0, 0, 0.1);
@@ -162,6 +151,51 @@
 
     &.J_delete .text {
       color: var(--color-red);
+    }
+  }
+}
+
+@media screen and (min-width: 1150px) {
+  .dapps {
+    .dapp-matrix {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+  }
+}
+
+@media screen and (min-width: 1400px) {
+  .dapps {
+    .dapp-matrix {
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+    }
+  }
+}
+
+@media screen and (min-width: 1690px) {
+  .dapps {
+    .dapp-matrix {
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    }
+  }
+}
+
+@media screen and (min-width: 1980px) {
+  .dapps {
+    .dapp-matrix {
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    }
+  }
+}
+
+@media screen and (min-width: 2270px) {
+  .dapps {
+    .dapp-matrix {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .dapp-block {
+      width: 270px;
     }
   }
 }
