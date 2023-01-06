@@ -6,6 +6,7 @@ import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useMemo } from 'react';
 import { useNavigate, useLocation, matchPath } from 'react-router-dom';
+import styled from 'styled-components';
 
 import {
   IDappWithTabInfo,
@@ -27,6 +28,25 @@ const DividerSizes = {
   marginTop: 8,
   marginBottom: 8,
 };
+
+const Sidebar = styled.div`
+  .${styles.menuFold} {
+    background: url('rabby-internal://assets/icons/mainwin-sidebar/arrow-left.svg')
+        center / 16px no-repeat;
+    &:hover {
+      background-image: url('rabby-internal://assets/icons/mainwin-sidebar/arrow-left-active.svg');
+    }
+  }
+
+  &.${styles.isFold} {
+    .${styles.menuFold} {
+      background-image: url('rabby-internal://assets/icons/mainwin-sidebar/arrow-right.svg');
+      &:hover {
+        background-image: url('rabby-internal://assets/icons/mainwin-sidebar/arrow-right-active.svg');
+      }
+    }
+  }
+`;
 
 const StaticEntries = [
   {
@@ -184,7 +204,7 @@ export default function MainWindowSidebar() {
   const { settings, toggleSidebarCollapsed } = useSettings();
 
   return (
-    <div
+    <Sidebar
       className={classNames(
         styles.Sidebar,
         settings.sidebarCollapsed && styles.isFold,
@@ -269,6 +289,6 @@ export default function MainWindowSidebar() {
           </li>
         </ul>
       </div>
-    </div>
+    </Sidebar>
   );
 }
