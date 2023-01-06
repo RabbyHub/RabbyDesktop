@@ -108,6 +108,7 @@ export const TopNavBar = () => {
               message.open({
                 type: 'success',
                 content: 'Copied url',
+                className: 'mainwindow-default-tip',
                 duration: 1,
               });
             }}
