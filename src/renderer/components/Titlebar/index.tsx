@@ -49,7 +49,7 @@ export default function Titlebar(
     winState,
     onMinimizeButton,
     onMaximizeButton,
-    onToggleMaxmize,
+    onDarwinToggleMaxmize,
     onFullscreenButton,
     onCloseButton,
   } = useWindowState();
@@ -59,14 +59,17 @@ export default function Titlebar(
   return (
     <div
       className={classNames(
-        styles.tabstrip,
+        styles.titlebar,
         settings.sidebarCollapsed && styles.isFold,
         winOSType === 'darwin' && styles['os-darwin'],
         winOSType === 'win32' && styles['os-win32']
       )}
     >
       {winOSType === 'darwin' && (
-        <div className={styles['macos-controls']}>
+        <div
+          className={styles['macos-controls']}
+          onDoubleClick={onDarwinToggleMaxmize}
+        >
           <button
             type="button"
             className={classNames(styles.control, styles['triple-close'])}
@@ -120,7 +123,7 @@ export default function Titlebar(
       )}
       <div
         className={styles['app-drag']}
-        onDoubleClick={winOSType === 'darwin' ? onToggleMaxmize : undefined}
+        onDoubleClick={onDarwinToggleMaxmize}
       />
       {winOSType === 'win32' && (
         <div className={styles['window-controls']}>

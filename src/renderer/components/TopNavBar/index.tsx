@@ -17,8 +17,12 @@ import {
   showMainwinPopup,
 } from '@/renderer/ipcRequest/mainwin-popup';
 import { useClickOutSide } from '@/renderer/hooks/useClick';
-import styles from './index.module.less';
+import { detectOS } from '@/isomorphic/os';
+import classNames from 'classnames';
 import { CurrentAccountAndNewAccount } from '../CurrentAccount';
+import styles from './index.module.less';
+
+const isDarwin = detectOS() === 'darwin';
 
 const RiskArea = () => {
   return (
@@ -84,7 +88,9 @@ export const TopNavBar = () => {
 
   return (
     <div className={styles.main}>
-      <div className={styles.left}>
+      {/* keep this element in first to make it bottom, or move it last to make it top */}
+      {isDarwin && <div className={classNames(styles.macOSGasket)} />}
+      <div className={styles.left} data-nodrag>
         <RiskArea />
         <Divider type="vertical" className={styles.divider} />
         {activeTab?.status === 'loading' && (
