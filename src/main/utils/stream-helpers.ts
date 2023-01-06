@@ -56,6 +56,7 @@ export async function toggleMaskViaOpenedRabbyxNotificationWindow() {
     if (RABBYX_WINDOWID_S.size) {
       mainWin.addBrowserView(rabbyNotificationGasket);
       mainWin.setTopBrowserView(rabbyNotificationGasket);
+      mainWin.setResizable(false);
       rabbyNotificationGasket.setBounds({
         x: 0,
         y: 0,
@@ -69,6 +70,7 @@ export async function toggleMaskViaOpenedRabbyxNotificationWindow() {
         width,
         height,
       });
+      mainWin.setResizable(true);
       mainWin.removeBrowserView(rabbyNotificationGasket);
     }
   }
