@@ -28,6 +28,9 @@ type M2RChanneMessagePayload = {
   '__internal_push:mainwindow:all-tabs-closed': {
     windowId: number;
   };
+  '__internal_push:mainwindow:state-changed': {
+    windowState: chrome.windows.windowStateEnum;
+  };
   '__internal_push:*:pinnedListChanged': {
     pinnedList: string[];
   };

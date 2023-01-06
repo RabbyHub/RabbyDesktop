@@ -1,5 +1,5 @@
 import { dialog } from 'electron';
-import { emitIpcMainEvent } from '../utils/ipcMainEvents';
+import { emitIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { onMainWindowReady } from '../utils/stream-helpers';
 
 const ResetDialogButtons = ['Cancel', 'Confirm'] as const;
@@ -22,3 +22,87 @@ export async function alertAutoUnlockFailed() {
     emitIpcMainEvent('__internal_main:app:reset-app');
   }
 }
+
+const isDarwin = process.platform === 'darwin';
+
+onMainWindowReady().then(async (mainWin) => {
+  const mainWindow = mainWin.window;
+  let prevWindowState:
+    | 'normal'
+    | 'maximized'
+    | 'minimized'
+    | 'fullscreen'
+    | void;
+
+  // mainWindow.on('resize', () => {
+  //   if (isDarwin && prevWindowState === 'maximized') {
+  //     sendToWebContents(mainWindow.webContents, '__internal_push:mainwindow:state-changed', {
+  //       windowState: (prevWindowState = 'normal'),
+  //     });
+  //   }
+  // })
+
+  mainWindow.on('maximize', () => {
+    sendToWebContents(
+      mainWindow.webContents,
+      '__internal_push:mainwindow:state-changed',
+      {
+        windowState: (prevWindowState = 'maximized'),
+      }
+    );
+  });
+  mainWindow.on('unmaximize', () => {
+    sendToWebContents(
+      mainWindow.webContents,
+      '__internal_push:mainwindow:state-changed',
+      {
+        windowState: (prevWindowState = 'normal'),
+      }
+    );
+  });
+
+  mainWindow.on('minimize', () => {
+    sendToWebContents(
+      mainWindow.webContents,
+      '__internal_push:mainwindow:state-changed',
+      {
+        windowState: (prevWindowState = 'minimized'),
+      }
+    );
+  });
+
+  mainWindow.on('restore', () => {
+    sendToWebContents(
+      mainWindow.webContents,
+      '__internal_push:mainwindow:state-changed',
+      {
+        windowState: (prevWindowState =
+          isDarwin && prevWindowState === 'maximized'
+            ? prevWindowState
+            : 'normal'),
+      }
+    );
+  });
+
+  mainWindow.on('enter-full-screen', () => {
+    sendToWebContents(
+      mainWindow.webContents,
+      '__internal_push:mainwindow:state-changed',
+      {
+        windowState: (prevWindowState = 'fullscreen'),
+      }
+    );
+  });
+  mainWindow.on('leave-full-screen', () => {
+    sendToWebContents(
+      mainWindow.webContents,
+      '__internal_push:mainwindow:state-changed',
+      {
+        windowState: (prevWindowState =
+          isDarwin && prevWindowState === 'maximized'
+            ? prevWindowState
+            : 'normal'),
+      }
+    );
+  });
+});
