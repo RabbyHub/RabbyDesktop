@@ -76,13 +76,19 @@
       }
     }
   }
+  html.os-darwin.__rabbyx-shell-page {
+    :local {
+      .logoWrapper {
+        .global-draggable();
+      }
+    }
+  }
 }
 
 .logoWrapper {
   width: 100%;
   // leave space for titlebar, avoid draggable region overlap
   height: @logoWrapper-height;
-  .global-draggable();
 
   display: flex;
   align-items: center;
