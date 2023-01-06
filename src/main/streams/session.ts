@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 
-import { session, shell } from 'electron';
+import { protocol, session, shell } from 'electron';
 import { firstValueFrom } from 'rxjs';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { isRabbyXPage } from '@/isomorphic/url';
@@ -102,6 +102,10 @@ async function loadExtensions(sess: Electron.Session, extensionsPath: string) {
 export async function defaultSessionReadyThen() {
   return firstValueFrom(fromMainSubject('sessionReady'));
 }
+
+protocol.registerSchemesAsPrivileged([
+  { scheme: 'rabby-internal', privileges: { standard: true } },
+]);
 
 firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   // sub.unsubscribe();
