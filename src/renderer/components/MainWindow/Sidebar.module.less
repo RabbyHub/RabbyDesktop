@@ -19,12 +19,15 @@
   flex-direction: column;
   flex-shrink: 0;
 
+  transition: width 0.3s;
+
   .navFooter .update {
     display: none;
   }
   &:hover {
     .menuFold {
-      display: block;
+      // display: block;
+      opacity: 1;
     }
   }
   &.isFold {
@@ -47,7 +50,9 @@
       margin-right: 0;
     }
     .routeTitle {
-      display: none;
+      // display: none;
+      opacity: 0;
+      transition: none;
     }
 
     .divider {
@@ -116,6 +121,7 @@
     border-left: 4px solid transparent;
     padding-left: 16px;
     opacity: 0.8;
+    overflow: hidden;
 
     font-size: 14px;
     color: #fff;
@@ -165,6 +171,9 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     padding-right: 32px;
+    opacity: 1;
+
+    transition: opacity 0.3s;
   }
 
   .routeItemInner {
@@ -213,7 +222,9 @@
   top: 40px;
   cursor: pointer;
   z-index: 100;
-  display: none;
+  // display: none;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
 .dappsRouteList {
