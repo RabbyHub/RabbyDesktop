@@ -26,7 +26,7 @@ function LoadingText() {
 
 export default function App() {
   const [loadingInfo, setLoadingInfo] = React.useState<{
-    dapp: IDapp | null;
+    dapp?: IDapp | null;
     percent: number;
   }>({
     dapp: null,
@@ -77,7 +77,7 @@ export default function App() {
     window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:loading-view:toggle',
       (payload) => {
-        if (payload.type === 'start') {
+        if (payload.type === 'show') {
           setLoadingInfo((prev) => {
             return { dapp: payload.dapp, percent: Math.max(prev.percent, 5) };
           });

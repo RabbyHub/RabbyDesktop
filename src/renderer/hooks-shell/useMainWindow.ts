@@ -61,9 +61,9 @@ export function useSidebarDapps() {
 
         if (activeTab && foundDapp) {
           toggleLoadingView({
-            type: 'start',
-            tabId: activeTab.id,
-            dapp: foundDapp,
+            type: 'show',
+            tabId: activeTab.id!,
+            tabURL: dappOrigin,
           });
         }
 

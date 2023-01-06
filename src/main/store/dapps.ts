@@ -55,15 +55,23 @@ export const dappStore = new Store<{
   watch: true,
 });
 
+export function findDappByOrigin(
+  url: string,
+  dapps = formatDapps(dappStore.get('dapps'))
+) {
+  const dappOrigin = canoicalizeDappUrl(url).origin;
+  return dapps.find((item) => item.origin === dappOrigin) || null;
+}
+
 export function parseDappUrl(
   url: string,
-  existedDapps = formatDapps(dappStore.get('dapps'))
+  dapps = formatDapps(dappStore.get('dapps'))
 ) {
   const { isDapp, origin } = canoicalizeDappUrl(url);
 
   const foundDapp = !isDapp
     ? null
-    : existedDapps.find((item: IDapp) => {
+    : dapps.find((item: IDapp) => {
         const formatted = formatDapp(item);
         return formatted?.origin && formatted.origin === origin;
       });

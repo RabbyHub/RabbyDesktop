@@ -13,16 +13,11 @@ import {
   useSidebarDapps,
 } from '@/renderer/hooks-shell/useMainWindow';
 import { useHasNewRelease } from '@/renderer/hooks/useAppUpdator';
-import {
-  makeSureDappOpened,
-  toggleLoadingView,
-} from '@/renderer/ipcRequest/mainwin';
+import { makeSureDappOpened } from '@/renderer/ipcRequest/mainwin';
 import { useSettings } from '@/renderer/hooks/useSettings';
 import styles from './Sidebar.module.less';
 import { DappFavicon } from '../DappFavicon';
 
-// keep in sync with css
-const RouteItemH = 52;
 const DividerSizes = {
   height: 1,
   marginTop: 8,
@@ -188,16 +183,6 @@ export default function MainWindowSidebar() {
       makeSureDappOpened(matchedDapp.params.origin!);
     }
   }, [matchedDapp]);
-
-  useEffect(() => {
-    // guard for loading view
-    if (!activeTab?.id || !matchedDapp || activeTab?.status === 'complete') {
-      toggleLoadingView({
-        type: 'did-finish-load',
-        tabId: activeTab?.id,
-      });
-    }
-  }, [matchedDapp, activeTab?.status, activeTab?.id, activeTab?.url, allDapps]);
 
   const hasNewRelease = useHasNewRelease();
 
