@@ -1,3 +1,4 @@
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { useLatestDappScreenshot } from '@/renderer/hooks-shell/useMainWindow';
 import classNames from 'classnames';
 import { useLayoutEffect, useRef } from 'react';
@@ -55,6 +56,7 @@ function ActiveDappView() {
       ref={divRef}
       className={classNames(
         styles.activeDappView,
+        // IS_RUNTIME_PRODUCTION && styles.debug,
         imageDataURL && styles.withScreenshot
       )}
     >
