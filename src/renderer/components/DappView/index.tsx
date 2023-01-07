@@ -1,3 +1,5 @@
+import { useLatestDappScreenshot } from '@/renderer/hooks-shell/useMainWindow';
+import classNames from 'classnames';
 import { useLayoutEffect, useRef } from 'react';
 import styles from './index.module.less';
 
@@ -45,7 +47,27 @@ function ActiveDappView() {
       );
     };
   }, []);
-  return <div ref={divRef} className={styles.activeDappView} />;
+
+  const imageDataURL = useLatestDappScreenshot();
+
+  return (
+    <div
+      ref={divRef}
+      className={classNames(
+        styles.activeDappView,
+        imageDataURL && styles.withScreenshot
+      )}
+    >
+      {/* disabled now */}
+      {imageDataURL && (
+        <img
+          className={styles.activeDappScreenshot}
+          src={imageDataURL}
+          alt="screenshot"
+        />
+      )}
+    </div>
+  );
 }
 
 export function DappViewWrapper({

@@ -1,15 +1,18 @@
+import { randString } from '@/isomorphic/string';
 import { dialog } from 'electron';
+import { filter, firstValueFrom } from 'rxjs';
 import {
   emitIpcMainEvent,
   handleIpcMainInvoke,
   onIpcMainEvent,
+  onIpcMainInternalEvent,
   sendToWebContents,
 } from '../utils/ipcMainEvents';
 import {
   onMainWindowReady,
   updateMainWindowActiveTabRect,
 } from '../utils/stream-helpers';
-import { fromMainSubject } from './_init';
+import { fromMainSubject, valueToMainSubject } from './_init';
 
 const ResetDialogButtons = ['Cancel', 'Confirm'] as const;
 const cancleId = ResetDialogButtons.findIndex((x) => x === 'Cancel');
@@ -161,3 +164,59 @@ onIpcMainEvent(
     }
   }
 );
+
+onIpcMainEvent(
+  '__internal_rpc:rabbyx:get-dapp-screenshot',
+  async (_, payload) => {
+    if (payload.type === 'captured') {
+      valueToMainSubject('mainWindowActiveScreenshot', {
+        reqid: payload.reqid,
+        image: payload.image,
+      });
+
+      const mainWindow = await onMainWindowReady();
+      sendToWebContents(
+        mainWindow.window.webContents,
+        '__internal_push:mainwindow:got-dapp-screenshot',
+        {
+          imageDataURL: payload.image.toDataURL(),
+        }
+      );
+    }
+  }
+);
+
+/**
+ * @description useless now, it's cost too much time to capture the whole page on animating
+ */
+async function captureWebContents(webContents: Electron.WebContents) {
+  if (webContents.isDestroyed()) {
+    return null;
+  }
+
+  const reqid = randString();
+  const imageP = firstValueFrom(
+    fromMainSubject('mainWindowActiveScreenshot').pipe(
+      filter(({ reqid: _reqid }) => reqid === _reqid)
+    )
+  );
+
+  webContents.send('__internal_rpc:rabbyx:get-dapp-screenshot', {
+    type: 'capture',
+    reqid,
+  });
+
+  return imageP.then(({ image }) => image);
+}
+
+onIpcMainInternalEvent('__internal_main:dev', async (payload) => {
+  if (payload.type !== 'capture-tab-screenshot') return;
+
+  const mainWin = await onMainWindowReady();
+
+  const activeTab = mainWin.tabs.selected;
+  if (!activeTab?.view) return;
+
+  const image = await captureWebContents(activeTab.view.webContents);
+  console.debug('[debug] tab captured', image);
+});

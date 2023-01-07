@@ -92,3 +92,7 @@ export function updateMainWindowActiveTabRect(
 ) {
   valueToMainSubject('mainWindowActiveTabRect', rectState);
 }
+
+export async function getLatestMainWindowActiveTabScreenshot() {
+  return lastValueFrom(fromMainSubject('mainWindowActiveScreenshot'));
+}

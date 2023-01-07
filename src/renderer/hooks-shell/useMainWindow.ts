@@ -1,3 +1,4 @@
+import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useDapps } from '../hooks/useDappsMngr';
 import { toggleLoadingView } from '../ipcRequest/mainwin';
@@ -103,4 +104,22 @@ export function useForwardFromInternalPage(
       }
     );
   }, [router.navigate]);
+}
+
+const latestDappScreenshotAtom = atom<string | null>(null);
+export function useLatestDappScreenshot() {
+  const [latestDappScreenshot, setLatestDappScreenshot] = useAtom(
+    latestDappScreenshotAtom
+  );
+
+  useEffect(() => {
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_push:mainwindow:got-dapp-screenshot',
+      (payload) => {
+        setLatestDappScreenshot(payload.imageDataURL);
+      }
+    );
+  }, [setLatestDappScreenshot]);
+
+  return latestDappScreenshot;
 }

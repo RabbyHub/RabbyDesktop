@@ -31,6 +31,9 @@ type M2RChanneMessagePayload = {
   '__internal_push:mainwindow:state-changed': {
     windowState: chrome.windows.windowStateEnum;
   };
+  '__internal_push:mainwindow:got-dapp-screenshot': {
+    imageDataURL: string;
+  };
   '__internal_push:*:pinnedListChanged': {
     pinnedList: string[];
   };
@@ -54,6 +57,10 @@ type M2RChanneMessagePayload = {
     currentUrl: string;
   };
   '__internal_push:rabbyx:session-broadcast-forward-to-main': RabbyEvent;
+
+  '__internal_push:rabbyx:get-dapp-screenshot': {
+    reqId: string;
+  };
 };
 
 type IPushEvents = keyof M2RChanneMessagePayload;
@@ -307,6 +314,21 @@ type ChannelMessagePayload = {
       {
         reqid: string;
         rabbyxExtId: string;
+      }
+    ];
+  };
+  '__internal_rpc:rabbyx:get-dapp-screenshot': {
+    send: [
+      {
+        type: 'captured';
+        reqid: string;
+        image: Electron.NativeImage;
+      }
+    ];
+    response: [
+      {
+        type: 'request-capture';
+        reqid: string;
       }
     ];
   };

@@ -73,6 +73,9 @@ type MainInternalsMessagePayload = {
       | {
           type: 'loading-view:inspect';
         }
+      | {
+          type: 'capture-tab-screenshot';
+        }
     ];
     response: [];
   };

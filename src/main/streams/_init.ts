@@ -54,9 +54,14 @@ const CONF = {
   mainWindowActiveTabRect: {
     subject: new Subject(),
   } as IConf<Subject<IMainWindowActiveTabRect>>,
-  mainWindowActiveAnimating: {
+  mainWindowActiveScreenshot: {
     subject: new Subject(),
-  } as IConf<Subject<boolean>>,
+  } as IConf<
+    Subject<{
+      reqid: string;
+      image: Electron.NativeImage;
+    }>
+  >,
   dappLoadingView: {
     subject: new ReplaySubject(1),
     once: true,

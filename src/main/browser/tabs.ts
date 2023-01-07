@@ -240,7 +240,7 @@ export class Tab {
       ...currentBounds,
       x: -99999,
       y: -99999,
-      ...rect,
+      // ...rect,
     });
   }
 
