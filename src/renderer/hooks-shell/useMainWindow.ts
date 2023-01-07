@@ -116,10 +116,23 @@ export function useLatestDappScreenshot() {
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:mainwindow:got-dapp-screenshot',
       (payload) => {
-        setLatestDappScreenshot(payload.imageDataURL);
+        if (latestDappScreenshot) {
+          URL.revokeObjectURL(latestDappScreenshot);
+        }
+
+        if (payload.imageBuf) {
+          const url = URL.createObjectURL(
+            new Blob([payload.imageBuf], {
+              type: 'image/png',
+            })
+          );
+          setLatestDappScreenshot(url);
+        } else {
+          setLatestDappScreenshot(null);
+        }
       }
     );
-  }, [setLatestDappScreenshot]);
+  }, [latestDappScreenshot, setLatestDappScreenshot]);
 
   return latestDappScreenshot;
 }

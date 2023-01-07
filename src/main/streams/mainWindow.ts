@@ -1,6 +1,5 @@
-import { randString } from '@/isomorphic/string';
 import { dialog } from 'electron';
-import { filter, firstValueFrom } from 'rxjs';
+import { captureWebContents } from '../utils/browser';
 import {
   emitIpcMainEvent,
   handleIpcMainInvoke,
@@ -8,11 +7,11 @@ import {
   onIpcMainInternalEvent,
   sendToWebContents,
 } from '../utils/ipcMainEvents';
+import { resizeImage } from '../utils/nativeImage';
 import {
   onMainWindowReady,
   updateMainWindowActiveTabRect,
 } from '../utils/stream-helpers';
-import { fromMainSubject, valueToMainSubject } from './_init';
 
 const ResetDialogButtons = ['Cancel', 'Confirm'] as const;
 const cancleId = ResetDialogButtons.findIndex((x) => x === 'Cancel');
@@ -128,6 +127,79 @@ onIpcMainEvent('__internal_rpc:mainwindow:reload-tab', async (_, tabId) => {
   tab.reload();
 });
 
+const captureState = {
+  image: null as Electron.NativeImage | null,
+};
+async function clearCaptureState() {
+  const mainWin = await onMainWindowReady();
+
+  captureState.image = null;
+  sendToWebContents(
+    mainWin.window.webContents,
+    '__internal_push:mainwindow:got-dapp-screenshot',
+    {
+      imageBuf: null,
+    }
+  );
+}
+async function getLatestCapturedActiveTab() {
+  const mainWin = await onMainWindowReady();
+
+  const activeTab = mainWin.tabs.selected;
+  if (!activeTab?.view) return null;
+
+  let latestOne = captureState.image;
+  const imageP = captureWebContents(activeTab.view.webContents).then(
+    (image) => {
+      captureState.image = image ? resizeImage(image, 0.1) : null;
+
+      return image;
+    }
+  );
+
+  if (!latestOne) {
+    latestOne = await imageP;
+  }
+
+  if (latestOne) {
+    sendToWebContents(
+      mainWin.window.webContents,
+      '__internal_push:mainwindow:got-dapp-screenshot',
+      {
+        imageBuf: latestOne.toPNG(),
+      }
+    );
+  }
+
+  return latestOne;
+}
+
+/**
+ * @description useless now, it's cost too much time to capture the whole page on animating
+ */
+onIpcMainInternalEvent(
+  '__internal_main:mainwindow:capture-tab',
+  async (payload) => {
+    if (payload?.type === 'clear') {
+      clearCaptureState();
+    } else {
+      getLatestCapturedActiveTab();
+    }
+  }
+);
+
+onIpcMainEvent(
+  '__internal_rpc:mainwindow:select-tab',
+  async (_, winId, tabId) => {
+    const mainTabbedWin = await onMainWindowReady();
+    if (mainTabbedWin.window.id !== winId) return;
+
+    await clearCaptureState();
+    mainTabbedWin?.tabs.select(tabId);
+    getLatestCapturedActiveTab();
+  }
+);
+
 handleIpcMainInvoke('toggle-activetab-animating', async (_, animating) => {
   const mainWin = await onMainWindowReady();
 
@@ -135,8 +207,14 @@ handleIpcMainInvoke('toggle-activetab-animating', async (_, animating) => {
   if (!activeTab) return;
 
   activeTab.toggleAnimating(animating);
-
   const isLoading = !!activeTab.view?.webContents.isLoading();
+
+  if (!isLoading) {
+    await getLatestCapturedActiveTab();
+  } else {
+    captureState.image = null;
+  }
+
   if (animating && isLoading) {
     emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
       type: 'hide',
@@ -178,59 +256,3 @@ onIpcMainEvent(
     }
   }
 );
-
-onIpcMainEvent(
-  '__internal_rpc:rabbyx:get-dapp-screenshot',
-  async (_, payload) => {
-    if (payload.type === 'captured') {
-      valueToMainSubject('mainWindowActiveScreenshot', {
-        reqid: payload.reqid,
-        image: payload.image,
-      });
-
-      const mainWindow = await onMainWindowReady();
-      sendToWebContents(
-        mainWindow.window.webContents,
-        '__internal_push:mainwindow:got-dapp-screenshot',
-        {
-          imageDataURL: payload.image.toDataURL(),
-        }
-      );
-    }
-  }
-);
-
-/**
- * @description useless now, it's cost too much time to capture the whole page on animating
- */
-async function captureWebContents(webContents: Electron.WebContents) {
-  if (webContents.isDestroyed()) {
-    return null;
-  }
-
-  const reqid = randString();
-  const imageP = firstValueFrom(
-    fromMainSubject('mainWindowActiveScreenshot').pipe(
-      filter(({ reqid: _reqid }) => reqid === _reqid)
-    )
-  );
-
-  webContents.send('__internal_rpc:rabbyx:get-dapp-screenshot', {
-    type: 'capture',
-    reqid,
-  });
-
-  return imageP.then(({ image }) => image);
-}
-
-onIpcMainInternalEvent('__internal_main:dev', async (payload) => {
-  if (payload.type !== 'capture-tab-screenshot') return;
-
-  const mainWin = await onMainWindowReady();
-
-  const activeTab = mainWin.tabs.selected;
-  if (!activeTab?.view) return;
-
-  const image = await captureWebContents(activeTab.view.webContents);
-  console.debug('[debug] tab captured', image);
-});

@@ -130,7 +130,6 @@
     "electron-tabs": "^1.0.1",
     "electron-updater": "^5.2.1",
     "eth-rpc-errors": "^4.0.3",
-    "html2canvas": "^1.4.1",
     "jotai": "^1.8.3",
     "lodash": "^4.17.21",
     "lru-cache": "^7.14.0",

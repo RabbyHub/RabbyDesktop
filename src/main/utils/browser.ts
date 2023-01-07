@@ -200,3 +200,11 @@ export function getRabbyxNotificationBounds(
     y: mainBounds.y + topOffset,
   };
 }
+
+export async function captureWebContents(webContents: Electron.WebContents) {
+  if (webContents.isDestroyed()) {
+    return null;
+  }
+
+  return webContents.capturePage();
+}

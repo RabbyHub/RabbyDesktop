@@ -60,10 +60,11 @@ function ActiveDappView() {
     >
       {/* disabled now */}
       {imageDataURL && (
-        <img
+        <div
           className={styles.activeDappScreenshot}
-          src={imageDataURL}
-          alt="screenshot"
+          style={{
+            backgroundImage: `url(${imageDataURL})`,
+          }}
         />
       )}
     </div>

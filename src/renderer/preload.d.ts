@@ -32,7 +32,7 @@ type M2RChanneMessagePayload = {
     windowState: chrome.windows.windowStateEnum;
   };
   '__internal_push:mainwindow:got-dapp-screenshot': {
-    imageDataURL: string;
+    imageBuf: Buffer | null;
   };
   '__internal_push:*:pinnedListChanged': {
     pinnedList: string[];
@@ -314,21 +314,6 @@ type ChannelMessagePayload = {
       {
         reqid: string;
         rabbyxExtId: string;
-      }
-    ];
-  };
-  '__internal_rpc:rabbyx:get-dapp-screenshot': {
-    send: [
-      {
-        type: 'captured';
-        reqid: string;
-        image: Electron.NativeImage;
-      }
-    ];
-    response: [
-      {
-        type: 'request-capture';
-        reqid: string;
       }
     ];
   };

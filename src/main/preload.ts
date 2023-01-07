@@ -9,7 +9,6 @@ import { RABBY_INTERNAL_PROTOCOL } from 'isomorphic/constants';
 import { ipcRendererObj } from '../preloads/base';
 
 import { setupClass } from '../preloads/setup-class';
-import { setupScreenCapture } from '../preloads/setupScreenCapture';
 
 if (
   window.location.protocol === 'chrome-extension:' &&
@@ -47,5 +46,3 @@ if (IS_BUILTIN_WEBVIEW && !window.rabbyDesktop) {
 if (IS_BUILTIN_WEBVIEW) {
   setupClass();
 }
-
-setupScreenCapture();

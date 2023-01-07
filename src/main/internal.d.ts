@@ -37,6 +37,14 @@ type MainInternalsMessagePayload = {
     send: [animating: boolean];
     response: [];
   };
+  '__internal_main:mainwindow:capture-tab': {
+    send: [
+      payload?: {
+        type?: 'clear';
+      }
+    ];
+    response: [];
+  };
   '__internal_main:popupwin-on-mainwin:toggle-show': {
     send: [
       | {
@@ -72,9 +80,6 @@ type MainInternalsMessagePayload = {
         }
       | {
           type: 'loading-view:inspect';
-        }
-      | {
-          type: 'capture-tab-screenshot';
         }
     ];
     response: [];

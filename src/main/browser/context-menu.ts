@@ -268,9 +268,7 @@ function buildDebugKitsMenu(opts: ChromeContextMenuOptions) {
   appendMenu(debugKitsMenu, {
     label: `Capture Active Tab's Screenshot`,
     click: async () => {
-      emitIpcMainEvent('__internal_main:dev', {
-        type: 'capture-tab-screenshot',
-      });
+      emitIpcMainEvent('__internal_main:mainwindow:capture-tab');
     },
   });
 
