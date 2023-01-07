@@ -135,6 +135,20 @@ handleIpcMainInvoke('toggle-activetab-animating', async (_, animating) => {
   if (!activeTab) return;
 
   activeTab.toggleAnimating(animating);
+
+  const isLoading = !!activeTab.view?.webContents.isLoading();
+  if (animating && isLoading) {
+    emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
+      type: 'hide',
+      tabId: activeTab.id,
+    });
+  } else if (!animating && isLoading) {
+    emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
+      type: 'show',
+      tabURL: activeTab.view!.webContents.getURL(),
+      tabId: activeTab.id,
+    });
+  }
 });
 
 onIpcMainEvent(
