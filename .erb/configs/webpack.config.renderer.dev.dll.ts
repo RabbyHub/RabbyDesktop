@@ -34,7 +34,8 @@ const configuration: webpack.Configuration = {
     renderer: Object.keys(dependencies || {})
       .filter(dep => !dep.startsWith('@types/'))
       .filter(dep => ![
-        '@debank/common'
+        '@debank/common',
+        '@debank/rabby-api'
       ].includes(dep)),
   },
 
