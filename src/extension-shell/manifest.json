@@ -3,5 +3,5 @@
   "version": "1.0.0",
   "manifest_version": 2,
   "permissions": [],
-  "content_security_policy": "script-src 'self' 'sha256-8Zy8bySdt4i88OYlIlTig6BkBDweTarYAqrO2SzrLig='; object-src 'self'"
+  "content_security_policy": "script-src 'self' 'sha256-8Zy8bySdt4i88OYlIlTig6BkBDweTarYAqrO2SzrLig=' 'wasm-unsafe-eval'; object-src 'self'"
 }

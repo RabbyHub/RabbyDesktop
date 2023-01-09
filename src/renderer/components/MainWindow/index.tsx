@@ -25,6 +25,9 @@ import { MainWindowSettings } from '@/renderer/routes/Settings';
 import { useChromeTabsEvents } from '@/renderer/hooks-shell/useWindowTabs';
 import { useTransactionChanged } from '@/renderer/hooks/rabbyx/useTransaction';
 import { useMainWindowEvents } from '@/renderer/hooks-shell/useWindowState';
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import openApi from '@/renderer/utils/openapi';
+import { CHAINS_ENUM } from '@debank/common';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -178,6 +181,13 @@ export function MainWindow() {
 
   useMainWindowEvents();
   useChromeTabsEvents();
+
+  useEffect(() => {
+    if (!IS_RUNTIME_PRODUCTION) {
+      const host = openApi.getHost();
+      console.debug('[debug] getHost', host);
+    }
+  }, []);
 
   return (
     <>
