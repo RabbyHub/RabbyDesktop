@@ -25,6 +25,7 @@ import { MainWindowSettings } from '@/renderer/routes/Settings';
 import { useChromeTabsEvents } from '@/renderer/hooks-shell/useWindowTabs';
 import { useTransactionChanged } from '@/renderer/hooks/rabbyx/useTransaction';
 import { useMainWindowEvents } from '@/renderer/hooks-shell/useWindowState';
+import { useAppUnlockEvents } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import openApi from '@/renderer/utils/openapi';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
@@ -178,6 +179,8 @@ export function MainWindow() {
   useForwardFromInternalPage(router);
 
   useTransactionChanged();
+
+  useAppUnlockEvents();
 
   useMainWindowEvents();
   useChromeTabsEvents();
