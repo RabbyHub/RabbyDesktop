@@ -1,26 +1,31 @@
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
-import { atom, useAtom, useSetAtom } from 'jotai';
+import { atom, useAtom } from 'jotai';
 import { useEffect } from 'react';
 
 const isUnlockedAtom = atom(false);
 
-export function useUnlocked() {
+export function useUnlocked(isTop = false) {
   const [isUnlocked, setIsUnlocked] = useAtom(isUnlockedAtom);
 
   useEffect(() => {
+    if (isTop) return;
+
     walletController.isUnlocked().then((nextVal) => {
       setIsUnlocked(nextVal);
     });
-  }, [setIsUnlocked]);
+  }, [isTop, setIsUnlocked]);
 
-  return isUnlocked;
+  return {
+    isUnlocked,
+    setIsUnlocked,
+  };
 }
 
 /**
  * @description make sure ONLY call this hook in the top level of whole page-level app
  */
 export function useAppUnlockEvents() {
-  const setIsUnlocked = useSetAtom(isUnlockedAtom);
+  const { setIsUnlocked } = useUnlocked(false);
 
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
