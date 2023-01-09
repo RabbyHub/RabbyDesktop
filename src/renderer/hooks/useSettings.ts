@@ -5,7 +5,7 @@ import { toggleMainWinTabAnimating } from '../ipcRequest/mainwin';
 const desktopAppStateAtom = atom(null as IDesktopAppState | null);
 
 // keep sync with css animation var --mainwin-sidebar-animation-second
-const SIDEBAR_WIDTH_ANIMATION_SECOND = 0.3;
+const SIDEBAR_WIDTH_ANIMATION_SECOND = 0.5;
 
 export function useSettings() {
   const [desktopAppState, setDesktopAppState] = useAtom(desktopAppStateAtom);
