@@ -41,3 +41,5 @@ assets/*.zip
 tmp.iconset
 
 minio-root
+
+macos/vendor/*
