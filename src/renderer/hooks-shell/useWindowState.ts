@@ -19,7 +19,7 @@ export function useWindowState() {
 
   const onMinimizeButton = useCallback(() => {
     chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, (win) => {
-      const nextState = 'normal';
+      const nextState = 'minimized';
       setWinState(nextState);
       chrome.windows.update(win.id!, {
         state: nextState,
