@@ -2,7 +2,7 @@ import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { atom, useAtom } from 'jotai';
 import { useEffect } from 'react';
 
-const isUnlockedAtom = atom(false);
+const isUnlockedAtom = atom(true);
 
 export function useUnlocked(isTop = false) {
   const [isUnlocked, setIsUnlocked] = useAtom(isUnlockedAtom);
