@@ -1,5 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/naming-convention
 type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
+type OpenApiService = import('@debank/rabby-api').OpenApiService;
 
 export type RabbyXMethod = {
   'walletController.verifyPassword': (password: string) => void;
@@ -77,6 +78,50 @@ export type RabbyXMethod = {
     data?: any,
     origin?: string
   ) => void;
+} & {
+  'openapi.setHost': OpenApiService['setHost'];
+  'openapi.getHost': OpenApiService['getHost'];
+  'openapi.ethRpc': OpenApiService['ethRpc'];
+  'openapi.init': OpenApiService['init'];
+  'openapi.getRecommendChains': OpenApiService['getRecommendChains'];
+  'openapi.getTotalBalance': OpenApiService['getTotalBalance'];
+  'openapi.getPendingCount': OpenApiService['getPendingCount'];
+  'openapi.checkOrigin': OpenApiService['checkOrigin'];
+  'openapi.checkText': OpenApiService['checkText'];
+  'openapi.checkTx': OpenApiService['checkTx'];
+  'openapi.preExecTx': OpenApiService['preExecTx'];
+  'openapi.historyGasUsed': OpenApiService['historyGasUsed'];
+  'openapi.pendingTxList': OpenApiService['pendingTxList'];
+  'openapi.traceTx': OpenApiService['traceTx'];
+  'openapi.pushTx': OpenApiService['pushTx'];
+  'openapi.explainText': OpenApiService['explainText'];
+  'openapi.gasMarket': OpenApiService['gasMarket'];
+  'openapi.getTx': OpenApiService['getTx'];
+  'openapi.getEnsAddressByName': OpenApiService['getEnsAddressByName'];
+  'openapi.searchToken': OpenApiService['searchToken'];
+  'openapi.searchSwapToken': OpenApiService['searchSwapToken'];
+  'openapi.getToken': OpenApiService['getToken'];
+  'openapi.listToken': OpenApiService['listToken'];
+  'openapi.customListToken': OpenApiService['customListToken'];
+  'openapi.listChainAssets': OpenApiService['listChainAssets'];
+  'openapi.listNFT': OpenApiService['listNFT'];
+  'openapi.listCollection': OpenApiService['listCollection'];
+  'openapi.listTxHisotry': OpenApiService['listTxHisotry'];
+  'openapi.tokenPrice': OpenApiService['tokenPrice'];
+  'openapi.tokenAuthorizedList': OpenApiService['tokenAuthorizedList'];
+  'openapi.userNFTAuthorizedList': OpenApiService['userNFTAuthorizedList'];
+  'openapi.getDEXList': OpenApiService['getDEXList'];
+  'openapi.getSwapQuote': OpenApiService['getSwapQuote'];
+  'openapi.getSwapTokenList': OpenApiService['getSwapTokenList'];
+  'openapi.postGasStationOrder': OpenApiService['postGasStationOrder'];
+  'openapi.getGasStationChainBalance': OpenApiService['getGasStationChainBalance'];
+  'openapi.getGasStationTokenList': OpenApiService['getGasStationTokenList'];
+  'openapi.explainTypedData': OpenApiService['explainTypedData'];
+  'openapi.checkTypedData': OpenApiService['checkTypedData'];
+  'openapi.approvalStatus': OpenApiService['approvalStatus'];
+  'openapi.usedChainList': OpenApiService['usedChainList'];
+  'openapi.getLatestVersion': OpenApiService['getLatestVersion'];
+  'openapi.addOriginFeedback': OpenApiService['addOriginFeedback'];
 };
 
 export type RabbyXMethods = {

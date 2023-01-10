@@ -345,12 +345,12 @@ export default function bootstrap() {
     appLog(`autoUnlock ${useBuiltInPwd ? 'success' : 'failed'}`);
 
     splashWin.destroy();
-    showMainWin();
+    setTimeout(() => {
+      showMainWin();
+    }, 200);
 
     if (!useBuiltInPwd) {
       alertAutoUnlockFailed();
-    } else {
-      mainWin.webContents.reload();
     }
   });
 }
