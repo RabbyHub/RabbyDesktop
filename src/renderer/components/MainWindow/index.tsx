@@ -25,6 +25,7 @@ import { useAppUnlockEvents } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import openApi from '@/renderer/utils/openapi';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import { useEffect } from 'react';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
