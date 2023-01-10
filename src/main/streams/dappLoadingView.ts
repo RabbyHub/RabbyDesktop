@@ -1,16 +1,14 @@
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
-import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { RABBY_LOADING_URL } from '../../isomorphic/constants';
 import { createPopupView } from '../utils/browser';
 import { getDappLoadingView, onMainWindowReady } from '../utils/stream-helpers';
 import { valueToMainSubject } from './_init';
 import {
-  emitIpcMainEvent,
   onIpcMainEvent,
   onIpcMainInternalEvent,
   sendToWebContents,
 } from '../utils/ipcMainEvents';
-import { dappStore, findDappByOrigin } from '../store/dapps';
+import { findDappByOrigin } from '../store/dapps';
 import { pickMainWindowLayouts } from '../utils/browserView';
 
 const dappTopOffset =

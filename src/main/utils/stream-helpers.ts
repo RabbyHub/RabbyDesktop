@@ -1,5 +1,5 @@
-import { firstValueFrom } from 'rxjs';
-import { fromMainSubject } from '../streams/_init';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
+import { fromMainSubject, valueToMainSubject } from '../streams/_init';
 
 export async function getElectronChromeExtensions() {
   return firstValueFrom(fromMainSubject('electronChromeExtensionsReady'));
@@ -74,4 +74,21 @@ export async function toggleMaskViaOpenedRabbyxNotificationWindow() {
       mainWin.removeBrowserView(rabbyNotificationGasket);
     }
   }
+}
+
+const INIT_ACTIVE_TAB_RECT: IMainWindowActiveTabRect = {
+  dappViewState: 'unmounted',
+};
+
+export async function getMainWindowActiveTabRect() {
+  return (
+    lastValueFrom(fromMainSubject('mainWindowActiveTabRect')) ||
+    INIT_ACTIVE_TAB_RECT
+  );
+}
+
+export function updateMainWindowActiveTabRect(
+  rectState: IMainWindowActiveTabRect
+) {
+  valueToMainSubject('mainWindowActiveTabRect', rectState);
 }

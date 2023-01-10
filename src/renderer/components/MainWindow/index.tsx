@@ -7,7 +7,6 @@ import {
 
 import DApps from '@/renderer/routes/Dapps';
 import GettingStarted from '@/renderer/routes/Welcome/GettingStarted';
-import React, { useEffect } from 'react';
 import ImportHome from '@/renderer/routes/Import/ImportHome';
 import ImportByPrivateKey from '@/renderer/routes/ImportBy/ImportByPrivateKey';
 import ImportSetPassword from '@/renderer/routes/Import/ImportSetPassword';
@@ -15,10 +14,7 @@ import ImportSuccessful from '@/renderer/routes/Import/ImportSuccessful';
 import ImportByContainer from '@/renderer/routes/ImportBy/ImportByContainer';
 import { Unlock } from '@/renderer/routes/Unlock/Unlock';
 import { RequireUnlock } from '@/renderer/routes/RequireUnlock';
-import {
-  hideAllTabs,
-  useForwardFromInternalPage,
-} from '@/renderer/hooks-shell/useMainWindow';
+import { useForwardFromInternalPage } from '@/renderer/hooks-shell/useMainWindow';
 import { useClickMainWindowHideContextMenu } from '@/renderer/hooks/useClick';
 import ComingSoon from '@/renderer/routes/ComingSoon';
 import { MainWindowSettings } from '@/renderer/routes/Settings';
@@ -29,6 +25,7 @@ import { useAppUnlockEvents } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import openApi from '@/renderer/utils/openapi';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import { useEffect } from 'react';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -36,25 +33,7 @@ import MainWindowSidebar from './Sidebar';
 import Titlebar from '../Titlebar';
 import { TopNavBar } from '../TopNavBar';
 import { MainWindowRouteData } from './type';
-
-function DappViewWrapper({
-  children,
-}: // eslint-disable-next-line @typescript-eslint/ban-types
-React.PropsWithChildren<{}>) {
-  useEffect(() => {
-    return () => {
-      console.debug('[debug] DappViewWrapper:: unmount');
-      hideAllTabs(1);
-    };
-  }, []);
-
-  return (
-    <div className={styles.dappViewWrapper}>
-      {children || null}
-      <div className={styles.dappViewGasket} />
-    </div>
-  );
-}
+import { DappViewWrapper } from '../DappView';
 
 const router = createRouter([
   {

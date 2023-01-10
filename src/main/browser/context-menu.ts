@@ -263,6 +263,15 @@ function buildDebugKitsMenu(opts: ChromeContextMenuOptions) {
       });
     },
   });
+
+  appendMenuSeparator(debugKitsMenu);
+  appendMenu(debugKitsMenu, {
+    label: `Capture Active Tab's Screenshot`,
+    click: async () => {
+      emitIpcMainEvent('__internal_main:mainwindow:capture-tab');
+    },
+  });
+
   appendMenuSeparator(debugKitsMenu);
   appendMenu(debugKitsMenu, {
     label: `Inspect LoadingView`,

@@ -9,6 +9,23 @@ interface ProgressInfo {
   bytesPerSecond: number;
 }
 
+type DappViewRect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+type IMainWindowActiveTabRect =
+  | {
+      dappViewState: 'mounted';
+      rect: DappViewRect;
+    }
+  | {
+      dappViewState: 'unmounted';
+      rect?: null | DappViewRect;
+    };
+
 type IDapp = {
   // TODO: implement it;
   id?: string;

@@ -9,6 +9,15 @@ export function toggleLoadingView(
   );
 }
 
+export async function toggleMainWinTabAnimating(
+  payload: ChannelInvokePayload['toggle-activetab-animating']['send'][0]
+) {
+  return window.rabbyDesktop.ipcRenderer.invoke(
+    'toggle-activetab-animating',
+    payload
+  );
+}
+
 export function closeTabFromInternalPage(
   tabId: Exclude<chrome.tabs.Tab['id'], void>
 ) {
