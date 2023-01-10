@@ -179,7 +179,8 @@ onIpcMainInternalEvent('__internal_main:app:reset-app', async () => {
   const result = await dialog.showMessageBox(mainWin.window, {
     type: 'question',
     title: 'Reset Rabby',
-    message: 'Are you sure to reset Rabby?',
+    message:
+      'All data about Rabby Wallet would be clear. Do you confirm to reset Rabby?',
     defaultId: cancleId,
     cancelId: cancleId,
     noLink: true,
