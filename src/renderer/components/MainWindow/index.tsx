@@ -26,6 +26,7 @@ import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import openApi from '@/renderer/utils/openapi';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { useEffect } from 'react';
+import { useAccounts } from '@/renderer/hooks/rabbyx/useAccount';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -35,11 +36,40 @@ import { TopNavBar } from '../TopNavBar';
 import { MainWindowRouteData } from './type';
 import { DappViewWrapper } from '../DappView';
 
+function WelcomeWrapper() {
+  const { hasFetched, accounts } = useAccounts();
+
+  if (hasFetched && accounts.length) {
+    return <Navigate to="/mainwin/home" />;
+  }
+
+  return <Outlet />;
+}
+
+function MainWrapper() {
+  const { hasFetched, accounts } = useAccounts();
+
+  if (hasFetched && !accounts.length) {
+    return <Navigate to="/welcome/getting-started" />;
+  }
+
+  return (
+    <RequireUnlock>
+      <div className={styles.mainWindow}>
+        <MainWindowSidebar />
+        <MainRoute>
+          <Outlet />
+        </MainRoute>
+      </div>
+    </RequireUnlock>
+  );
+}
+
 const router = createRouter([
   {
     path: '/welcome',
     id: 'welcome',
-    element: <Outlet />,
+    element: <WelcomeWrapper />,
     children: [
       {
         path: 'getting-started',
@@ -77,16 +107,7 @@ const router = createRouter([
     path: '/mainwin',
     id: 'mainwin',
     // errorElement: <ErrorBoundary />,
-    element: (
-      <RequireUnlock>
-        <div className={styles.mainWindow}>
-          <MainWindowSidebar />
-          <MainRoute>
-            <Outlet />
-          </MainRoute>
-        </div>
-      </RequireUnlock>
-    ),
+    element: <MainWrapper />,
     children: [
       {
         path: 'home',
