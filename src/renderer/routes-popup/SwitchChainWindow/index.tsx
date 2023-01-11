@@ -176,7 +176,7 @@ function SwitchChainPage({
 }
 
 export default function SwitchChainWindow() {
-  const pageInfo = usePopupWinInfo('switch-chain');
+  const { pageInfo } = usePopupWinInfo('switch-chain');
 
   if (!pageInfo?.dappTabInfo?.url) return null;
 

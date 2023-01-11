@@ -3,7 +3,9 @@ import { useEffect, useState } from 'react';
 export function usePopupWinInfo<T extends IContextMenuPageInfo['type']>(
   type: T
 ) {
-  const [{ pageInfo }, setInfo] = useState<{
+  const [localVisible, setLocalVisible] = useState(false);
+
+  const [info, setInfo] = useState<{
     visible: boolean;
     pageInfo: (IContextMenuPageInfo & { type: typeof type }) | null;
   }>({
@@ -22,7 +24,9 @@ export function usePopupWinInfo<T extends IContextMenuPageInfo['type']>(
             visible: true,
             pageInfo: payload.pageInfo as any,
           });
+          setLocalVisible(true);
         } else {
+          setLocalVisible(false);
           setInfo({
             visible: false,
             pageInfo: null,
@@ -32,5 +36,10 @@ export function usePopupWinInfo<T extends IContextMenuPageInfo['type']>(
     );
   }, [type]);
 
-  return pageInfo;
+  return {
+    localVisible,
+    setLocalVisible,
+    visible: info.visible,
+    pageInfo: info.pageInfo,
+  };
 }
