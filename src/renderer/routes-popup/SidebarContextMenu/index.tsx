@@ -16,7 +16,7 @@ import { Menu } from 'antd';
 import styles from './index.module.less';
 
 export const SidebarContextMenu = () => {
-  const pageInfo = usePopupWinInfo('sidebar-dapp');
+  const { pageInfo } = usePopupWinInfo('sidebar-dapp');
 
   const origin = pageInfo?.dappTabInfo?.origin || '';
   const dappInfo = useDapp(origin);
