@@ -13,6 +13,10 @@ type MainInternalsMessagePayload = {
     send: [pinnedList: IDapp['origin'][]];
     response: [];
   };
+  '__internal_main:mainwindow:show': {
+    send: [];
+    response: [];
+  };
   '__internal_main:mainwindow:toggle-loading-view': {
     send: [
       payload:

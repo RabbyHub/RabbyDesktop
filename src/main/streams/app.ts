@@ -39,15 +39,11 @@ import { createDappTab } from './webContents';
 import { clearAllStoreData, clearAllUserData } from '../utils/security';
 import { tryAutoUnlockRabbyX } from './rabbyIpcQuery/autoUnlock';
 import { alertAutoUnlockFailed } from './mainWindow';
+import { setupAppTray } from './appTray';
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
 const isDarwin = process.platform === 'darwin';
-const getTrayIconByTheme = () => {
-  if (!isDarwin) return getAssetPath('app-icons/win32-tray-logo.png');
-
-  return getAssetPath('app-icons/macosIconTemplate@2x.png');
-};
 
 const DENY_ACTION = { action: 'deny' } as const;
 
@@ -135,6 +131,10 @@ app.on('web-contents-created', async (evtApp, webContents) => {
 
 app.on('window-all-closed', () => {
   app.quit();
+});
+
+app.on('activate', (_, hasVisibleWindows) => {
+  if (!hasVisibleWindows) emitIpcMainEvent('__internal_main:mainwindow:show');
 });
 
 onIpcMainEvent('__internal_rpc:main-window:click-close', async (evt) => {
@@ -294,35 +294,20 @@ export default function bootstrap() {
     shellExts.addWindow(mainWin);
     valueToMainSubject('mainWindowReady', mainWindow);
 
-    const showMainWin = async () => {
-      await getRabbyExtViews();
-      mainWindow.window.show();
-      mainWindow.window.moveTop();
-    };
-
-    {
-      getWebuiExtId().then((id) => {
-        setupMenu({
-          getFocusedWebContents: () => {
-            return getFocusedWindow().getFocusedTab()?.view?.webContents;
-          },
-          topbarExtId: id,
-        });
+    getWebuiExtId().then((id) => {
+      setupMenu({
+        getFocusedWebContents: () => {
+          return getFocusedWindow().getFocusedTab()?.view?.webContents;
+        },
+        topbarExtId: id,
       });
+    });
 
-      if (isDarwin) {
-        app.dock.setIcon(getAssetPath('icon.png'));
-      }
-
-      const appTray = new Tray(getTrayIconByTheme());
-      // do quit on context menu
-      appTray.addListener('click', () => {
-        showMainWin();
-      });
-      app.on('activate', (_, hasVisibleWindows) => {
-        if (!hasVisibleWindows) showMainWin();
-      });
+    if (isDarwin) {
+      app.dock.setIcon(getAssetPath('icon.png'));
     }
+
+    setupAppTray();
 
     const splashWin = new BrowserWindow(
       getBrowserWindowOpts(
@@ -347,7 +332,7 @@ export default function bootstrap() {
 
     splashWin.destroy();
     setTimeout(() => {
-      showMainWin();
+      emitIpcMainEvent('__internal_main:mainwindow:show');
     }, 200);
 
     if (!useBuiltInPwd) {
