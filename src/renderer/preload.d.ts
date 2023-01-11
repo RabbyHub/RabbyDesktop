@@ -31,6 +31,9 @@ type M2RChanneMessagePayload = {
   '__internal_push:mainwindow:state-changed': {
     windowState: chrome.windows.windowStateEnum;
   };
+  '__internal_push:mainwindow:got-dapp-screenshot': {
+    imageBuf: Buffer | null;
+  };
   '__internal_push:*:pinnedListChanged': {
     pinnedList: string[];
   };
@@ -54,6 +57,10 @@ type M2RChanneMessagePayload = {
     currentUrl: string;
   };
   '__internal_push:rabbyx:session-broadcast-forward-to-main': RabbyEvent;
+
+  '__internal_push:rabbyx:get-dapp-screenshot': {
+    reqId: string;
+  };
 };
 
 type IPushEvents = keyof M2RChanneMessagePayload;
@@ -261,10 +268,6 @@ type ChannelMessagePayload = {
     send: [];
     response: [];
   };
-  '__internal_rpc:mainwindow:hide-all-tabs': {
-    send: [winId: number];
-    response: [];
-  };
   '__internal_rpc:mainwindow:open-tab': {
     send: [dappOrigin: string];
     response: [];
@@ -283,6 +286,10 @@ type ChannelMessagePayload = {
   };
   '__internal_rpc:mainwindow:make-sure-dapp-opened': {
     send: [dappOrigin: string];
+    response: [];
+  };
+  '__internal_rpc:mainwindow:report-activeDapp-rect': {
+    send: [rect: IMainWindowActiveTabRect];
     response: [];
   };
   '__internal_rpc:mainwindow:toggle-loading-view': MainInternalsMessagePayload['__internal_main:mainwindow:toggle-loading-view'];
@@ -368,6 +375,10 @@ type ChannelInvokePayload = {
     response: {
       state: IDesktopAppState;
     };
+  };
+  'toggle-activetab-animating': {
+    send: [visible: boolean];
+    response: void;
   };
 };
 type IInvokesKey = keyof ChannelInvokePayload;

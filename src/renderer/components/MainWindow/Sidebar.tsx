@@ -7,6 +7,7 @@ import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useMemo } from 'react';
 import { useNavigate, useLocation, matchPath } from 'react-router-dom';
 import styled from 'styled-components';
+import { Transition, TransitionStatus } from 'react-transition-group';
 
 import {
   IDappWithTabInfo,
@@ -17,6 +18,7 @@ import { makeSureDappOpened } from '@/renderer/ipcRequest/mainwin';
 import { useSettings } from '@/renderer/hooks/useSettings';
 import styles from './Sidebar.module.less';
 import { DappFavicon } from '../DappFavicon';
+import Hide from './Hide';
 
 const DividerSizes = {
   height: 1,
@@ -69,12 +71,14 @@ const TabList = ({
   activeTabId,
   dappActions,
   style,
+  isFold,
 }: {
   style?: React.CSSProperties;
   className?: string;
   dapps: IDappWithTabInfo[];
   activeTabId?: chrome.tabs.Tab['id'];
   dappActions: ReturnType<typeof useSidebarDapps>['dappActions'];
+  isFold?: boolean;
 }) => {
   const navigateToDapp = useNavigateToDappRoute();
   const location = useLocation();
@@ -136,9 +140,9 @@ const TabList = ({
                 src={faviconUrl}
                 className={classNames(styles.routeLogo, styles.isDapp)}
               />
-              <span className={styles.routeTitle}>
+              <Hide visible={!isFold} className={styles.routeTitle}>
                 {dapp.alias || dapp.origin}
-              </span>
+              </Hide>
             </div>
           </li>
         );
@@ -189,91 +193,108 @@ export default function MainWindowSidebar() {
   const { settings, toggleSidebarCollapsed } = useSettings();
 
   return (
-    <Sidebar
-      className={classNames(
-        styles.Sidebar,
-        settings.sidebarCollapsed && styles.isFold,
-        hasNewRelease && styles.hasNewRelease
-      )}
-    >
-      <div className={styles.logoWrapper}>
-        <img
-          className={styles.logo}
-          src="rabby-internal://assets/icons/mainwin-sidebar/sidebar-logo.svg"
-        />
-      </div>
-      <div
-        className={styles.menuFold}
-        onClick={() => toggleSidebarCollapsed(!settings.sidebarCollapsed)}
-      />
-      <div className={styles.dappsRouteList}>
-        <ul className={styles.routeList}>
-          {StaticEntries.map((sE) => {
-            return (
-              <li
-                key={`sE-${sE.path}`}
-                className={classNames(
-                  styles.routeItem,
-                  matchPath(sE.path, location.pathname) && styles.active
-                )}
-                onClick={() => {
-                  navigate(sE.path);
-                }}
-              >
-                <div className={styles.routeItemInner}>
-                  <img className={styles.routeLogo} src={sE.logoSrc} />
-                  <span className={styles.routeTitle}>{sE.title}</span>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-
-        <TabList
-          className={styles.pinnedList}
-          style={{
-            // maxHeight: `calc(100% - ${StaticEntries.length * RouteItemH}px)`,
-            // height: `${pinnedDapps.length * 84}px`,
-            flexShrink: pinnedDapps.length < 5 ? 0 : 1,
-          }}
-          dappActions={dappActions}
-          dapps={pinnedDapps}
-          activeTabId={activeTab?.id}
-        />
-        {unpinnedOpenedDapps?.length ? (
-          <div className={styles.divider} style={DividerSizes} />
-        ) : null}
-        <TabList
-          className={styles.unpinnedList}
-          dappActions={dappActions}
-          dapps={unpinnedOpenedDapps}
-          activeTabId={activeTab?.id}
-        />
-      </div>
-      <div className={styles.navFooter}>
-        <div className={styles.update}>
-          <AutoUpdate isFold={settings.sidebarCollapsed} />
-        </div>
-        <ul className={styles.routeList}>
-          <li
+    <Transition in={!settings.sidebarCollapsed} timeout={500}>
+      {(state) => {
+        const secondAnim = !(state === 'entered' && !settings.sidebarCollapsed);
+        return (
+          <Sidebar
             className={classNames(
-              styles.routeItem,
-              matchPath('/mainwin/settings', location.pathname) && styles.active
+              styles.Sidebar,
+              ['exiting', 'exited'].includes(state) && styles.isFold,
+              hasNewRelease && styles.hasNewRelease
             )}
-            onClick={() => {
-              navigate('/mainwin/settings');
-            }}
           >
-            <div className={styles.routeItemInner}>
+            <div className={styles.logoWrapper}>
               <img
-                className={styles.routeLogo}
-                src="rabby-internal://assets/icons/mainwin-sidebar/setting.svg"
+                className={styles.logo}
+                src="rabby-internal://assets/icons/mainwin-sidebar/sidebar-logo.svg"
               />
-              <span className={styles.routeTitle}>Settings</span>
             </div>
-          </li>
-        </ul>
-      </div>
-    </Sidebar>
+            <div
+              className={styles.menuFold}
+              onClick={() => toggleSidebarCollapsed(!settings.sidebarCollapsed)}
+            />
+            <div className={styles.dappsRouteList}>
+              <ul className={styles.routeList}>
+                {StaticEntries.map((sE) => {
+                  return (
+                    <li
+                      key={`sE-${sE.path}`}
+                      className={classNames(
+                        styles.routeItem,
+                        matchPath(sE.path, location.pathname) && styles.active
+                      )}
+                      onClick={() => {
+                        navigate(sE.path);
+                      }}
+                    >
+                      <div className={styles.routeItemInner}>
+                        <img className={styles.routeLogo} src={sE.logoSrc} />
+                        <Hide
+                          visible={!secondAnim}
+                          className={styles.routeTitle}
+                        >
+                          {sE.title}
+                        </Hide>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              <TabList
+                className={styles.pinnedList}
+                style={{
+                  // maxHeight: `calc(100% - ${StaticEntries.length * RouteItemH}px)`,
+                  // height: `${pinnedDapps.length * 84}px`,
+                  flexShrink: pinnedDapps.length < 5 ? 0 : 1,
+                }}
+                dappActions={dappActions}
+                dapps={pinnedDapps}
+                activeTabId={activeTab?.id}
+                isFold={secondAnim}
+              />
+              {unpinnedOpenedDapps?.length ? (
+                <div className={styles.divider} style={DividerSizes} />
+              ) : null}
+              <TabList
+                className={styles.unpinnedList}
+                dappActions={dappActions}
+                dapps={unpinnedOpenedDapps}
+                activeTabId={activeTab?.id}
+                isFold={secondAnim}
+              />
+            </div>
+            <div className={styles.navFooter}>
+              <div className={styles.update}>
+                <AutoUpdate isFold={settings.sidebarCollapsed} />
+              </div>
+              <ul className={styles.routeList}>
+                <li
+                  className={classNames(
+                    styles.routeItem,
+                    matchPath('/mainwin/settings', location.pathname) &&
+                      styles.active
+                  )}
+                  onClick={() => {
+                    navigate('/mainwin/settings');
+                  }}
+                >
+                  <div className={styles.routeItemInner}>
+                    <img
+                      className={styles.routeLogo}
+                      src="rabby-internal://assets/icons/mainwin-sidebar/setting.svg"
+                    />
+                    <Hide visible={!secondAnim} className={styles.routeTitle}>
+                      Settings
+                    </Hide>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </Sidebar>
+        );
+      }}
+    </Transition>
   );
 }

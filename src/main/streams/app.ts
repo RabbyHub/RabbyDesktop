@@ -39,15 +39,11 @@ import { createDappTab } from './webContents';
 import { clearAllStoreData, clearAllUserData } from '../utils/security';
 import { tryAutoUnlockRabbyX } from './rabbyIpcQuery/autoUnlock';
 import { alertAutoUnlockFailed } from './mainWindow';
+import { setupAppTray } from './appTray';
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
 const isDarwin = process.platform === 'darwin';
-const getTrayIconByTheme = () => {
-  if (!isDarwin) return getAssetPath('app-icons/win32-tray-logo.png');
-
-  return getAssetPath('app-icons/macosIconTemplate@2x.png');
-};
 
 const DENY_ACTION = { action: 'deny' } as const;
 
@@ -137,6 +133,10 @@ app.on('window-all-closed', () => {
   app.quit();
 });
 
+app.on('activate', (_, hasVisibleWindows) => {
+  if (!hasVisibleWindows) emitIpcMainEvent('__internal_main:mainwindow:show');
+});
+
 onIpcMainEvent('__internal_rpc:main-window:click-close', async (evt) => {
   const { sender } = evt;
   const tabbedWin = getTabbedWindowFromWebContents(sender);
@@ -179,7 +179,8 @@ onIpcMainInternalEvent('__internal_main:app:reset-app', async () => {
   const result = await dialog.showMessageBox(mainWin.window, {
     type: 'question',
     title: 'Reset Rabby',
-    message: 'Are you sure to reset Rabby?',
+    message:
+      'All data about Rabby Wallet would be clear. Do you confirm to reset Rabby?',
     defaultId: cancleId,
     cancelId: cancleId,
     noLink: true,
@@ -293,35 +294,20 @@ export default function bootstrap() {
     shellExts.addWindow(mainWin);
     valueToMainSubject('mainWindowReady', mainWindow);
 
-    const showMainWin = async () => {
-      await getRabbyExtViews();
-      mainWindow.window.show();
-      mainWindow.window.moveTop();
-    };
-
-    {
-      getWebuiExtId().then((id) => {
-        setupMenu({
-          getFocusedWebContents: () => {
-            return getFocusedWindow().getFocusedTab()?.view?.webContents;
-          },
-          topbarExtId: id,
-        });
+    getWebuiExtId().then((id) => {
+      setupMenu({
+        getFocusedWebContents: () => {
+          return getFocusedWindow().getFocusedTab()?.view?.webContents;
+        },
+        topbarExtId: id,
       });
+    });
 
-      if (isDarwin) {
-        app.dock.setIcon(getAssetPath('icon.png'));
-      }
-
-      const appTray = new Tray(getTrayIconByTheme());
-      // do quit on context menu
-      appTray.addListener('click', () => {
-        showMainWin();
-      });
-      app.on('activate', (_, hasVisibleWindows) => {
-        if (!hasVisibleWindows) showMainWin();
-      });
+    if (isDarwin) {
+      app.dock.setIcon(getAssetPath('icon.png'));
     }
+
+    setupAppTray();
 
     const splashWin = new BrowserWindow(
       getBrowserWindowOpts(
@@ -345,12 +331,12 @@ export default function bootstrap() {
     appLog(`autoUnlock ${useBuiltInPwd ? 'success' : 'failed'}`);
 
     splashWin.destroy();
-    showMainWin();
+    setTimeout(() => {
+      emitIpcMainEvent('__internal_main:mainwindow:show');
+    }, 200);
 
     if (!useBuiltInPwd) {
       alertAutoUnlockFailed();
-    } else {
-      mainWin.webContents.reload();
     }
   });
 }

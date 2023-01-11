@@ -36,7 +36,7 @@
       line-height: 13px;
       color: var(--color-purewhite);
       width: 132px;
-      // transition: 0.3s;
+      transition: width var(--mainwin-sidebar-animation-second);
       cursor: pointer;
       &:hover {
         opacity: 0.9;
@@ -51,8 +51,11 @@
         }
       }
 
-      // &-content {
-      // }
+      &-content {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
       &-action {
         margin-left: auto;
       }

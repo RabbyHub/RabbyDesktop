@@ -1,7 +1,22 @@
 
-v0.2.7 / 2023-01-06
+v0.2.8 / 2023-01-10
 ==================
 
+  * chore: update tip message on reset app.
+  * feat: make sure importing at least one account. (#54)
+  * feat: better animation on toggle sidebar collapsed. (#52)
+  * fix: avoid flashing Unlock page on launch (#53)
+  * fix: pre check webpack build, and version of `@debank/common` depedent by rabby-api.
+  * feat: add walletOpenapi.
+  * feat: add openapi capability.
+  * fix: `onMinimizeButton`.
+  * feat: simplify workflow of show/hide loadingView. (#50)
+  * dev 0.2.8
+
+v0.2.7 / 2023-01-06
+===================
+
+  * Release v0.2.7
   * feat: keep sign window dock on right of main window.
   * feat: disallow resize on wallet sign
   * chore: tuning style.

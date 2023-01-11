@@ -1,13 +1,13 @@
 :root {
   --mainwin-sidebar-w: 160px;
   --mainwin-rabbyx-popup-w: 400px;
-
   --switch-account-button-w: 200px;
 
   --dappViewPaddingOffsetToSidebar: 10px;
   --dappViewPaddingOffset: 10px;
 
   --mainwin-sidebar-collapsed-w: 66px;
+  --mainwin-sidebar-animation-second: 0.5s;
 
   --mainwin-mainarea-topoffset: 0px;
 }

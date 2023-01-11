@@ -219,16 +219,6 @@ onIpcMainEvent('__internal_rpc:mainwindow:open-tab', async (_, dappOrigin) => {
 });
 
 onIpcMainEvent(
-  '__internal_rpc:mainwindow:select-tab',
-  async (_, winId, tabId) => {
-    const mainTabbedWin = await onMainWindowReady();
-    if (mainTabbedWin.window.id !== winId) return;
-
-    mainTabbedWin?.tabs.select(tabId);
-  }
-);
-
-onIpcMainEvent(
   '__internal_rpc:mainwindow:stop-tab-loading',
   async (_, tabId) => {
     const mainTabbedWin = await onMainWindowReady();
@@ -239,13 +229,6 @@ onIpcMainEvent(
     tab.view?.webContents.stop();
   }
 );
-
-onIpcMainEvent('__internal_rpc:mainwindow:hide-all-tabs', async (_, winId) => {
-  const mainTabbedWin = await onMainWindowReady();
-  if (mainTabbedWin.window.id !== winId) return;
-
-  mainTabbedWin.tabs.unSelectAll();
-});
 
 onIpcMainEvent(
   '__internal_rpc:mainwindow:make-sure-dapp-opened',

@@ -1,6 +1,6 @@
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { atom, useAtom } from 'jotai';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 type AccountWithName = Account & { alianName: string };
 const currentAccountAtom = atom<null | (RabbyAccount & { alianName: string })>(
@@ -69,6 +69,7 @@ export function useCurrentAccount() {
 export function useAccounts() {
   const [accounts, setAccounts] = useAtom(accountsAtom);
 
+  const hasFetchedRef = useRef(false);
   const fetchAccounts = useCallback(() => {
     walletController.getAccounts().then(async (newVal) => {
       const nextAccounts = await Promise.all(
@@ -81,6 +82,7 @@ export function useAccounts() {
         })
       );
 
+      hasFetchedRef.current = true;
       setAccounts(nextAccounts);
     });
   }, [setAccounts]);
@@ -92,5 +94,6 @@ export function useAccounts() {
   return {
     accounts,
     fetchAccounts,
+    hasFetched: hasFetchedRef.current,
   };
 }

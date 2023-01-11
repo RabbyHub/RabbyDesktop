@@ -16,18 +16,17 @@ import ImportSuccessful from '@/renderer/routes/Import/ImportSuccessful';
 import ImportByContainer from '@/renderer/routes/ImportBy/ImportByContainer';
 import { Unlock } from '@/renderer/routes/Unlock/Unlock';
 import { RequireUnlock } from '@/renderer/routes/RequireUnlock';
-import {
-  hideAllTabs,
-  useForwardFromInternalPage,
-} from '@/renderer/hooks-shell/useMainWindow';
+import { useForwardFromInternalPage } from '@/renderer/hooks-shell/useMainWindow';
 import { useClickMainWindowHideContextMenu } from '@/renderer/hooks/useClick';
 import ComingSoon from '@/renderer/routes/ComingSoon';
 import { MainWindowSettings } from '@/renderer/routes/Settings';
 import { useChromeTabsEvents } from '@/renderer/hooks-shell/useWindowTabs';
 import { useTransactionChanged } from '@/renderer/hooks/rabbyx/useTransaction';
 import { useMainWindowEvents } from '@/renderer/hooks-shell/useWindowState';
+import { useAppUnlockEvents } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import { useAccounts } from '@/renderer/hooks/rabbyx/useAccount';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -35,23 +34,34 @@ import MainWindowSidebar from './Sidebar';
 import Titlebar from '../Titlebar';
 import { TopNavBar } from '../TopNavBar';
 import { MainWindowRouteData } from './type';
+import { DappViewWrapper } from '../DappView';
 
-function DappViewWrapper({
-  children,
-}: // eslint-disable-next-line @typescript-eslint/ban-types
-React.PropsWithChildren<{}>) {
-  useEffect(() => {
-    return () => {
-      console.debug('[debug] DappViewWrapper:: unmount');
-      hideAllTabs(1);
-    };
-  }, []);
+function WelcomeWrapper() {
+  const { hasFetched, accounts } = useAccounts();
+
+  if (hasFetched && accounts.length) {
+    return <Navigate to="/mainwin/home" />;
+  }
+
+  return <Outlet />;
+}
+
+function MainWrapper() {
+  const { hasFetched, accounts } = useAccounts();
+
+  if (hasFetched && !accounts.length) {
+    return <Navigate to="/welcome/getting-started" />;
+  }
 
   return (
-    <div className={styles.dappViewWrapper}>
-      {children || null}
-      <div className={styles.dappViewGasket} />
-    </div>
+    <RequireUnlock>
+      <div className={styles.mainWindow}>
+        <MainWindowSidebar />
+        <MainRoute>
+          <Outlet />
+        </MainRoute>
+      </div>
+    </RequireUnlock>
   );
 }
 
@@ -59,7 +69,7 @@ const router = createRouter([
   {
     path: '/welcome',
     id: 'welcome',
-    element: <Outlet />,
+    element: <WelcomeWrapper />,
     children: [
       {
         path: 'getting-started',
@@ -97,16 +107,7 @@ const router = createRouter([
     path: '/mainwin',
     id: 'mainwin',
     // errorElement: <ErrorBoundary />,
-    element: (
-      <RequireUnlock>
-        <div className={styles.mainWindow}>
-          <MainWindowSidebar />
-          <MainRoute>
-            <Outlet />
-          </MainRoute>
-        </div>
-      </RequireUnlock>
-    ),
+    element: <MainWrapper />,
     children: [
       {
         path: 'home',
@@ -178,6 +179,8 @@ export function MainWindow() {
   useForwardFromInternalPage(router);
 
   useTransactionChanged();
+
+  useAppUnlockEvents();
 
   useMainWindowEvents();
   useChromeTabsEvents();

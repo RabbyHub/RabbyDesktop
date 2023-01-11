@@ -1,3 +1,4 @@
+import { useUnlocked } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { Button, Col, Input, message, Row, Form } from 'antd';
 import React from 'react';
@@ -11,6 +12,7 @@ interface FormData {
 export const Unlock: React.FC = () => {
   const nav = useNavigate();
   const [form] = Form.useForm<FormData>();
+  const { isUnlocked } = useUnlocked();
 
   const onNext = React.useCallback(
     async ({ password }: FormData) => {
@@ -23,6 +25,12 @@ export const Unlock: React.FC = () => {
     },
     [nav]
   );
+
+  React.useEffect(() => {
+    if (isUnlocked) {
+      nav('/', { replace: true });
+    }
+  }, [isUnlocked, nav]);
 
   return (
     <div className={styles.unlock}>

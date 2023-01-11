@@ -1,3 +1,4 @@
+import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useDapps } from '../hooks/useDappsMngr';
 import { toggleLoadingView } from '../ipcRequest/mainwin';
@@ -7,13 +8,6 @@ import { useWindowTabs } from './useWindowTabs';
 export type IDappWithTabInfo = IMergedDapp & {
   tab?: chrome.tabs.Tab;
 };
-
-export function hideAllTabs(windowId: number | undefined) {
-  window.rabbyDesktop.ipcRenderer.sendMessage(
-    '__internal_rpc:mainwindow:hide-all-tabs',
-    windowId!
-  );
-}
 
 export function useSidebarDapps() {
   const { tabMap, activeTab } = useWindowTabs();
@@ -110,4 +104,35 @@ export function useForwardFromInternalPage(
       }
     );
   }, [router.navigate]);
+}
+
+const latestDappScreenshotAtom = atom<string | null>(null);
+export function useLatestDappScreenshot() {
+  const [latestDappScreenshot, setLatestDappScreenshot] = useAtom(
+    latestDappScreenshotAtom
+  );
+
+  useEffect(() => {
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_push:mainwindow:got-dapp-screenshot',
+      (payload) => {
+        if (latestDappScreenshot) {
+          URL.revokeObjectURL(latestDappScreenshot);
+        }
+
+        if (payload.imageBuf) {
+          const url = URL.createObjectURL(
+            new Blob([payload.imageBuf], {
+              type: 'image/png',
+            })
+          );
+          setLatestDappScreenshot(url);
+        } else {
+          setLatestDappScreenshot(null);
+        }
+      }
+    );
+  }, [latestDappScreenshot, setLatestDappScreenshot]);
+
+  return latestDappScreenshot;
 }

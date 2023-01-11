@@ -19,7 +19,7 @@
   flex-direction: column;
   flex-shrink: 0;
 
-  transition: width 0.3s;
+  transition: width var(--mainwin-sidebar-animation-second);
 
   .navFooter .update {
     display: none;
@@ -46,13 +46,8 @@
     .routeItem {
       padding-left: 19px;
     }
-    .routeLogo {
-      margin-right: 0;
-    }
     .routeTitle {
-      // display: none;
       opacity: 0;
-      transition: none;
     }
 
     .divider {
@@ -140,7 +135,6 @@
   .routeLogo {
     width: 20px;
     height: 20px;
-    margin-right: 12px;
     &.isDapp {
       border-radius: 50%;
     }
@@ -158,6 +152,7 @@
     display: flex;
     align-items: center;
     justify-content: flex-start;
+    gap: 12px;
   }
 
   .routeTitle {
@@ -173,7 +168,7 @@
     padding-right: 32px;
     opacity: 1;
 
-    transition: opacity 0.3s;
+    transition: opacity var(--mainwin-sidebar-animation-second);
   }
 
   .routeItemInner {
@@ -224,7 +219,7 @@
   z-index: 100;
   // display: none;
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity var(--mainwin-sidebar-animation-second);
 }
 
 .dappsRouteList {

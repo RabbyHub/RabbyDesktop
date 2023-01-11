@@ -13,6 +13,10 @@ type MainInternalsMessagePayload = {
     send: [pinnedList: IDapp['origin'][]];
     response: [];
   };
+  '__internal_main:mainwindow:show': {
+    send: [];
+    response: [];
+  };
   '__internal_main:mainwindow:toggle-loading-view': {
     send: [
       payload:
@@ -31,6 +35,18 @@ type MainInternalsMessagePayload = {
   };
   '__internal_main:mainwindow:sidebar-collapsed-changed': {
     send: [collapsed: boolean];
+    response: [];
+  };
+  '__internal_main:mainwindow:toggle-animating': {
+    send: [animating: boolean];
+    response: [];
+  };
+  '__internal_main:mainwindow:capture-tab': {
+    send: [
+      payload?: {
+        type?: 'clear';
+      }
+    ];
     response: [];
   };
   '__internal_main:popupwin-on-mainwin:toggle-show': {
