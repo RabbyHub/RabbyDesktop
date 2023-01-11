@@ -61,6 +61,7 @@ type MainInternalsMessagePayload = {
             height?: number;
           };
           pageInfo: IContextMenuPageInfo;
+          openDevTools?: boolean;
         }
       | {
           nextShow: false;

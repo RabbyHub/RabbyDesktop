@@ -14,6 +14,7 @@ import useHistoryTokenList from '@/renderer/hooks/useHistoryTokenList';
 import ChainList from './components/ChainList';
 import Curve from './components/Curve';
 import PortfolioView from './components/PortfolioView';
+import RightToolbar from './components/RightToolbar';
 
 const HomeWrapper = styled.div`
   padding-top: 76px;
@@ -175,6 +176,8 @@ const Home = () => {
         tokenList={displayTokenList.defaultTokenList}
         historyTokenMap={historyTokenMap}
       />
+
+      <RightToolbar />
     </HomeWrapper>
   );
 };

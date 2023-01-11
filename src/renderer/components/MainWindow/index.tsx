@@ -27,6 +27,7 @@ import { useAppUnlockEvents } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { useAccounts } from '@/renderer/hooks/rabbyx/useAccount';
+import RightToolbar from '@/renderer/routes/Home/components/RightToolbar';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -111,7 +112,27 @@ const router = createRouter([
     children: [
       {
         path: 'home',
-        element: <Home />,
+        loader: () => {
+          return {
+            title: '',
+            useAccountComponent: true,
+          } as MainWindowRouteData;
+        },
+        element: (
+          <>
+            {/* <Home /> */}
+            {/* TODO: just avoid mismatch rabby-api on Home, integrate it into Home later */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                justifyContent: 'flex-end',
+              }}
+            >
+              <RightToolbar />
+            </div>
+          </>
+        ),
       },
       {
         path: 'my-dapps',

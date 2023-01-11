@@ -88,6 +88,8 @@ const CONF = {
       sidebarContext: BrowserWindow;
       switchChain: BrowserWindow;
       switchAccount: BrowserWindow;
+
+      quickSwap: BrowserWindow;
     }>
   >,
 };

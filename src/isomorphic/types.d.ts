@@ -171,7 +171,12 @@ type IContextMenuPageInfo =
     }
   | {
       type: 'switch-account';
+    }
+  | {
+      type: 'quick-swap';
     };
+
+type PopupWinType = IContextMenuPageInfo['type'];
 
 type IShellNavInfo = {
   tabExists: boolean;

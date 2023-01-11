@@ -14,6 +14,7 @@ import { SidebarContextMenu } from '@/renderer/routes-popup/SidebarContextMenu';
 import SwitchChainWindow from '@/renderer/routes-popup/SwitchChainWindow';
 import SwitchAccountWindow from '@/renderer/routes-popup/SwitchAccountWindow';
 import RabbyNotificationGasket from '../routes-popup/RabbyNotificationGasket';
+import QuickSwapWindow from '../routes-popup/QuickSwapWindow';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
           path="/popup__switch-account"
           element={<SwitchAccountWindow />}
         />
+        <Route path="/popup__quick-swap" element={<QuickSwapWindow />} />
         <Route
           path="/rabby-notification-gasket"
           element={<RabbyNotificationGasket />}
