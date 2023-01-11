@@ -8,8 +8,8 @@ import {
   showMainwinPopup,
 } from '@/renderer/ipcRequest/mainwin-popup';
 import clsx from 'clsx';
-import { useMemo, useRef } from 'react';
-import { useNavigate } from 'react-router';
+import { useMemo, useRef, useState } from 'react';
+import { AddAddressModal } from '../AddAddressModal/AddAddressModal';
 import styles from './index.module.less';
 
 export const CurrentAccount = ({ className }: { className?: string }) => {
@@ -73,17 +73,18 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
 };
 
 export const AddNewAccount = ({ className }: { className?: string }) => {
-  const navigate = useNavigate();
-  const gotoAddNewAccount = () => {
-    navigate('/import-by/private-key');
-  };
+  const [visible, setVisible] = useState(false);
+
   return (
-    <div
-      className={clsx(styles.addNewAccount, className)}
-      onClick={gotoAddNewAccount}
-    >
-      <img src="rabby-internal://assets/icons/top-bar/add-address.svg" />
-    </div>
+    <>
+      <div
+        className={clsx(styles.addNewAccount, className)}
+        onClick={() => setVisible(true)}
+      >
+        <img src="rabby-internal://assets/icons/top-bar/add-address.svg" />
+      </div>
+      <AddAddressModal visible={visible} onClose={() => setVisible(false)} />
+    </>
   );
 };
 
