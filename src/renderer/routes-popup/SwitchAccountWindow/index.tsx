@@ -11,7 +11,7 @@ import styles from './index.module.less';
 
 export default function SwitchAccountWindow() {
   useBodyClassNameOnMounted('switch-account-popup');
-  const pageInfo = usePopupWinInfo('switch-account');
+  const { pageInfo } = usePopupWinInfo('switch-account');
 
   const { currentAccount, switchAccount } = useCurrentAccount();
   const { accounts, fetchAccounts } = useAccounts();
