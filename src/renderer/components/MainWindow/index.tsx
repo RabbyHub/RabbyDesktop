@@ -8,6 +8,7 @@ import {
 import DApps from '@/renderer/routes/Dapps';
 import GettingStarted from '@/renderer/routes/Welcome/GettingStarted';
 import React, { useEffect } from 'react';
+import Home from '@/renderer/routes/Home';
 import ImportHome from '@/renderer/routes/Import/ImportHome';
 import ImportByPrivateKey from '@/renderer/routes/ImportBy/ImportByPrivateKey';
 import ImportSetPassword from '@/renderer/routes/Import/ImportSetPassword';
@@ -26,7 +27,6 @@ import { useChromeTabsEvents } from '@/renderer/hooks-shell/useWindowTabs';
 import { useTransactionChanged } from '@/renderer/hooks/rabbyx/useTransaction';
 import { useMainWindowEvents } from '@/renderer/hooks-shell/useWindowState';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
-import openApi from '@/renderer/utils/openapi';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import styles from './index.module.less';
 
@@ -110,7 +110,7 @@ const router = createRouter([
     children: [
       {
         path: 'home',
-        element: <ComingSoon pageName="Home" />,
+        element: <Home />,
       },
       {
         path: 'my-dapps',
@@ -184,10 +184,10 @@ export function MainWindow() {
 
   useEffect(() => {
     if (!IS_RUNTIME_PRODUCTION) {
-      const host = openApi.getHost();
-      console.debug('[debug] getHost', host);
+      // const host = openApi.getHost();
+      // console.debug('[debug] getHost', host);
 
-      walletOpenapi.getHost().then((hostInWallet) => {
+      walletOpenapi.getLatestVersion().then((hostInWallet) => {
         console.debug('[debug] walletOpenapi', hostInWallet);
       });
     }
