@@ -12,6 +12,7 @@ import {
   RABBY_DESKTOP_KR_PWD,
 } from '../streams/rabbyIpcQuery/_base';
 import { getWindowFromWebContents } from '../utils/browser';
+import { appendMenu, appendMenuSeparator } from '../utils/context-menu';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import {
   getContextMenuPopupWindow,
@@ -89,16 +90,6 @@ interface ChromeContextMenuOptions {
    */
   strings?: ChromeContextMenuLabels;
 }
-
-const appendMenu = (
-  targetMenu: Menu,
-  newOpts: Electron.MenuItemConstructorOptions | MenuItem
-) =>
-  targetMenu.append(
-    newOpts instanceof MenuItem ? newOpts : new MenuItem(newOpts)
-  );
-const appendMenuSeparator = (targetMenu: Menu) =>
-  targetMenu.append(new MenuItem({ type: 'separator' }));
 
 function buildRabbyXDebugMenu(opts: ChromeContextMenuOptions) {
   const menu = new Menu();
