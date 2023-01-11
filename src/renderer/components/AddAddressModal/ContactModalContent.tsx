@@ -6,7 +6,9 @@ import { isValidAddress } from 'ethereumjs-util';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { useWalletRequest } from '@/renderer/hooks/useWalletRequest';
 import { useNavigate } from 'react-router-dom';
+import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import styles from './AddAddressModal.module.less';
+import { useResetToCurrentPage } from '../PopupViewUtils';
 
 type ENS = Awaited<ReturnType<OpenApiService['getEnsAddressByName']>>;
 
@@ -63,13 +65,17 @@ export const ContactModalContent: React.FC = () => {
     []
   );
 
+  const resetPage = useResetToCurrentPage();
+
   const [run, loading] = useWalletRequest(walletController.importWatchAddress, {
     onSuccess(accounts) {
-      nav('/welcome/import/successful', {
-        state: {
-          accounts,
-        },
-      });
+      // nav('/welcome/import/successful', {
+      //   state: {
+      //     accounts,
+      //   },
+      // });
+      hideMainwinPopupview('add-address');
+      resetPage();
     },
     onError(err) {
       setErrorMessage(err.message ?? 'Not a valid address');

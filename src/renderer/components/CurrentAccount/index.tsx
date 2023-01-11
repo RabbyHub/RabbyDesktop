@@ -7,9 +7,9 @@ import {
   hideMainwinPopup,
   showMainwinPopup,
 } from '@/renderer/ipcRequest/mainwin-popup';
+import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import clsx from 'clsx';
-import { useMemo, useRef, useState } from 'react';
-import { AddAddressModal } from '../AddAddressModal/AddAddressModal';
+import { useMemo, useRef } from 'react';
 import styles from './index.module.less';
 
 export const CurrentAccount = ({ className }: { className?: string }) => {
@@ -73,18 +73,15 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
 };
 
 export const AddNewAccount = ({ className }: { className?: string }) => {
-  const [visible, setVisible] = useState(false);
-
   return (
-    <>
-      <div
-        className={clsx(styles.addNewAccount, className)}
-        onClick={() => setVisible(true)}
-      >
-        <img src="rabby-internal://assets/icons/top-bar/add-address.svg" />
-      </div>
-      <AddAddressModal visible={visible} onClose={() => setVisible(false)} />
-    </>
+    <div
+      className={clsx(styles.addNewAccount, className)}
+      onClick={() => {
+        showMainwinPopupview({ type: 'add-address' }, { openDevTools: false });
+      }}
+    >
+      <img src="rabby-internal://assets/icons/top-bar/add-address.svg" />
+    </div>
   );
 };
 

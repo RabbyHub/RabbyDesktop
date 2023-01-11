@@ -173,6 +173,10 @@ type IContextMenuPageInfo =
       type: 'switch-account';
     };
 
+type PopupViewOnMainwinInfo = {
+  type: 'add-address';
+};
+
 type IShellNavInfo = {
   tabExists: boolean;
   canGoForward?: boolean;
