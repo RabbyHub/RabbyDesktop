@@ -3,11 +3,19 @@ import chalk from 'chalk';
 import { execSync } from 'child_process';
 import { dependencies } from '../../package.json';
 
+const depsWhilteList = [
+  // depent by 'ethereumjs-util'
+  'keccak',
+  'lzma-native',
+  'secp256k1'
+]
+
 if (dependencies) {
   const dependenciesKeys = Object.keys(dependencies);
   const nativeDeps = fs
     .readdirSync('node_modules')
-    .filter((folder) => fs.existsSync(`node_modules/${folder}/binding.gyp`));
+    .filter((folder) => fs.existsSync(`node_modules/${folder}/binding.gyp`))
+    .filter((folder) => !depsWhilteList.includes(folder));
   if (nativeDeps.length === 0) {
     process.exit(0);
   }
