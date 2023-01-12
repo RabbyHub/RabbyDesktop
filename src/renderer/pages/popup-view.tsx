@@ -40,7 +40,7 @@ function App() {
           path="/popup__switch-account"
           element={<SwitchAccountWindow />}
         />
-        <Route path="/popup__quick-swap" element={<QuickSwapWindow />} />
+        <Route path="/popupview__quick-swap" element={<QuickSwapWindow />} />
         <Route
           path="/popupview__add-address"
           element={<MainWindowAddAddress />}

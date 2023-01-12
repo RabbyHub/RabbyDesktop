@@ -19,6 +19,9 @@ const viewsState: Record<
   'add-address': {
     visible: false,
   },
+  'quick-swap': {
+    visible: false,
+  },
 };
 
 async function hidePopupViewOnMainWindow(
@@ -93,9 +96,41 @@ const addAddressReady = onMainWindowReady().then(async (mainWin) => {
   return addAddressPopup;
 });
 
-Promise.all([addAddressReady]).then((wins) => {
+const quickSwapReady = onMainWindowReady().then(async (mainWin) => {
+  const mainWindow = mainWin.window;
+
+  const addAddressPopup = createPopupView({});
+
+  mainWindow.addBrowserView(addAddressPopup);
+
+  const onTargetWinUpdate = () => {
+    if (viewsState['quick-swap'].visible)
+      updateSubviewPos(mainWindow, addAddressPopup);
+  };
+  mainWindow.on('show', onTargetWinUpdate);
+  mainWindow.on('move', onTargetWinUpdate);
+  mainWindow.on('resized', onTargetWinUpdate);
+  mainWindow.on('unmaximize', onTargetWinUpdate);
+  mainWindow.on('restore', onTargetWinUpdate);
+
+  await addAddressPopup.webContents.loadURL(
+    `${RABBY_POPUP_GHOST_VIEW_URL}?view=quick-swap#/popupview__quick-swap`
+  );
+
+  // debug-only
+  if (!IS_RUNTIME_PRODUCTION) {
+    // addAddressPopup.webContents.openDevTools({ mode: 'detach' });
+  }
+
+  hidePopupView(addAddressPopup);
+
+  return addAddressPopup;
+});
+
+Promise.all([addAddressReady, quickSwapReady]).then((wins) => {
   valueToMainSubject('popupViewsOnMainwinReady', {
     addAddress: wins[0],
+    quickSwap: wins[1],
   });
 });
 
@@ -103,11 +138,16 @@ onIpcMainEvent(
   '__internal_rpc:popupview-on-mainwin:toggle-show',
   async (_, payload) => {
     const mainWindow = (await onMainWindowReady()).window;
-    const { addAddress } = await firstValueFrom(
+    const { addAddress, quickSwap } = await firstValueFrom(
       fromMainSubject('popupViewsOnMainwinReady')
     );
 
-    const targetView = payload.type === 'add-address' ? addAddress : null;
+    const targetView =
+      payload.type === 'add-address'
+        ? addAddress
+        : payload.type === 'quick-swap'
+        ? quickSwap
+        : null;
 
     if (!targetView) return;
 

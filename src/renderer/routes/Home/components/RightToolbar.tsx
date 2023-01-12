@@ -5,6 +5,7 @@ import { styledId } from '@/renderer/utils/styled';
 import { GasketPopupWin } from '@/renderer/components/GasketPopupWin';
 import GlobalMask from '@/renderer/components/MainWindow/GlobalMask';
 import { usePopupWinInfo } from '@/renderer/hooks/usePopupWinOnMainwin';
+import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 
 const Tools = styled.div`
   display: flex;
@@ -47,35 +48,19 @@ const ToolbarContainer = styled.div`
 `;
 
 export default function RightToolbar() {
-  const { localVisible, setLocalVisible } = usePopupWinInfo('quick-swap');
-
   return (
     <ToolbarContainer>
       <Tools>
         <IconToolSwap
           className="icon-entry"
           onClick={() => {
-            setLocalVisible(true);
+            showMainwinPopupview(
+              { type: 'quick-swap' },
+              { openDevTools: false }
+            );
           }}
         />
       </Tools>
-
-      {localVisible && (
-        <>
-          <GlobalMask
-            onClick={() => {
-              setLocalVisible(false);
-            }}
-          />
-          <GasketPopupWin
-            pageInfo={{
-              type: 'quick-swap',
-            }}
-            /* TODO: open dev tools by default for convince */
-            openDevTools
-          />
-        </>
-      )}
     </ToolbarContainer>
   );
 }

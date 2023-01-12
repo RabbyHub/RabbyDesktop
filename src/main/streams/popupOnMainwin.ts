@@ -219,71 +219,15 @@ const switchAccountReady = onMainWindowReady().then(async (mainWin) => {
   return switchAccountPopup;
 });
 
-const quickSwapReady = onMainWindowReady().then(async (mainWin) => {
-  const targetWin = mainWin.window;
-
-  const quickSwap = createPopupWindow({
-    parent: mainWin.window,
-    transparent: false,
-    hasShadow: false,
-    closable: false,
-    movable: false,
-    alwaysOnTop: true,
-  });
-
-  // disable close by shortcut
-  quickSwap.on('close', (evt) => {
-    evt.preventDefault();
-
-    return false;
-  });
-
-  updateSubWindowRect(mainWin.window, quickSwap);
-  const onTargetWinUpdate = () => {
-    if (quickSwap.isVisible()) hidePopupOnMainWindow(quickSwap, 'quick-swap');
-  };
-  targetWin.on('show', onTargetWinUpdate);
-  targetWin.on('move', onTargetWinUpdate);
-  targetWin.on('resized', onTargetWinUpdate);
-  targetWin.on('unmaximize', onTargetWinUpdate);
-  targetWin.on('restore', onTargetWinUpdate);
-
-  mainWin.tabs.on('tab-focused', () => {
-    hidePopupOnMainWindow(quickSwap, 'quick-swap');
-  });
-
-  mainWin.window.on('focus', () => {
-    hidePopupOnMainWindow(quickSwap, 'quick-swap');
-  });
-
-  await quickSwap.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}#/popup__quick-swap`
-  );
-
-  // debug-only
-  if (!IS_RUNTIME_PRODUCTION) {
-    // quickSwap.webContents.openDevTools({ mode: 'detach' });
+Promise.all([sidebarReady, switchChainReady, switchAccountReady]).then(
+  (wins) => {
+    valueToMainSubject('contextMenuPopupWindowReady', {
+      sidebarContext: wins[0],
+      switchChain: wins[1],
+      switchAccount: wins[2],
+    });
   }
-
-  hidePopupOnMainWindow(quickSwap, 'quick-swap');
-
-  return quickSwap;
-});
-
-Promise.all([
-  sidebarReady,
-  switchChainReady,
-  switchAccountReady,
-  quickSwapReady,
-]).then((wins) => {
-  valueToMainSubject('contextMenuPopupWindowReady', {
-    sidebarContext: wins[0],
-    switchChain: wins[1],
-    switchAccount: wins[2],
-
-    quickSwap: wins[3],
-  });
-});
+);
 
 const SIZE_MAP: Record<
   IContextMenuPageInfo['type'],
@@ -303,10 +247,6 @@ const SIZE_MAP: Record<
   'switch-account': {
     width: 240,
     height: 60 * 2 + 1,
-  },
-  'quick-swap': {
-    width: 337,
-    height: 626,
   },
 };
 
@@ -337,8 +277,9 @@ const { handler } = onIpcMainEvent(
   '__internal_rpc:popupwin-on-mainwin:toggle-show',
   async (_, payload) => {
     const mainWindow = (await onMainWindowReady()).window;
-    const { sidebarContext, switchChain, switchAccount, quickSwap } =
-      await firstValueFrom(fromMainSubject('contextMenuPopupWindowReady'));
+    const { sidebarContext, switchChain, switchAccount } = await firstValueFrom(
+      fromMainSubject('contextMenuPopupWindowReady')
+    );
 
     const targetWin =
       payload.type === 'sidebar-dapp'
@@ -347,8 +288,6 @@ const { handler } = onIpcMainEvent(
         ? switchChain
         : payload.type === 'switch-account'
         ? switchAccount
-        : payload.type === 'quick-swap'
-        ? quickSwap
         : null;
 
     if (!targetWin) return;

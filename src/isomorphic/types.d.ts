@@ -171,14 +171,15 @@ type IContextMenuPageInfo =
     }
   | {
       type: 'switch-account';
+    };
+
+type PopupViewOnMainwinInfo =
+  | {
+      type: 'add-address';
     }
   | {
       type: 'quick-swap';
     };
-
-type PopupViewOnMainwinInfo = {
-  type: 'add-address';
-};
 
 type IShellNavInfo = {
   tabExists: boolean;
