@@ -1,20 +1,43 @@
-import { AddressManagementDrawer } from '@/renderer/components/AddressManagementDrawer/AddressManagementDrawer';
+import {
+  createHashRouter as createRouter,
+  RouterProvider,
+  Navigate,
+} from 'react-router-dom';
+
+import { AddAddressModal } from '@/renderer/components/AddAddressModal/AddAddressModal';
 import { useResetToCurrentPage } from '@/renderer/components/PopupViewUtils';
 import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import styles from './index.module.less';
 
-export default function MainWindowAddressManagement() {
+function App() {
   const resetPage = useResetToCurrentPage();
 
   return (
-    <div className={styles.MainWindowAddressManagement}>
-      <AddressManagementDrawer
-        visible
-        onClose={() => {
-          hideMainwinPopupview('address-management');
-          resetPage();
-        }}
-      />
-    </div>
+    <AddAddressModal
+      visible
+      onClose={() => {
+        hideMainwinPopupview('add-address');
+        resetPage();
+      }}
+    />
   );
+}
+
+const router = createRouter([
+  {
+    path: '/',
+    element: (
+      <div className={styles.MainWindowAddAddress}>
+        <App />
+      </div>
+    ),
+  },
+  {
+    path: '*',
+    element: <Navigate to="/" />,
+  },
+]);
+
+export default function MainWindowAddAddress() {
+  return <RouterProvider router={router} />;
 }

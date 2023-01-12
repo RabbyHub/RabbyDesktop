@@ -69,7 +69,7 @@ export const MainContainer: React.FC = () => {
     }
     return accountList.findIndex((e) =>
       (['address', 'brandName', 'type'] as const).every(
-        (key) => e[key].toLowerCase() === currentAccount[key].toLowerCase()
+        (key) => e[key].toLowerCase() === currentAccount[key]?.toLowerCase()
       )
     );
   }, [accountList, currentAccount]);

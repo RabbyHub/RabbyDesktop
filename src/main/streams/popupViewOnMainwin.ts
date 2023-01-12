@@ -5,7 +5,7 @@ import {
   IS_RUNTIME_PRODUCTION,
   RABBY_POPUP_GHOST_VIEW_URL,
 } from '../../isomorphic/constants';
-import { onIpcMainEvent } from '../utils/ipcMainEvents';
+import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { fromMainSubject, valueToMainSubject } from './_init';
 import { createPopupView, hidePopupView } from '../utils/browser';
 import { onMainWindowReady } from '../utils/stream-helpers';
@@ -30,14 +30,14 @@ async function hidePopupViewOnMainWindow(
 ) {
   if (!targetView || targetView.webContents.isDestroyed()) return;
 
-  // sendToWebContents(
-  //   targetView.webContents,
-  //   '__internal_push:popupview-on-mainwin:on-visiblechange',
-  //   {
-  //     type,
-  //     visible: false,
-  //   }
-  // );
+  sendToWebContents(
+    targetView.webContents,
+    '__internal_push:popupview-on-mainwin:on-visiblechange',
+    {
+      type,
+      visible: false,
+    }
+  );
 
   hidePopupView(targetView);
   viewsState[type].visible = false;
@@ -83,7 +83,7 @@ const addAddressReady = onMainWindowReady().then(async (mainWin) => {
   mainWindow.on('restore', onTargetWinUpdate);
 
   await addAddressPopup.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}?view=add-address#/popupview__add-address`
+    `${RABBY_POPUP_GHOST_VIEW_URL}?view=add-address#/`
   );
 
   // debug-only
@@ -114,7 +114,7 @@ const addressManagementReady = onMainWindowReady().then(async (mainWin) => {
   mainWindow.on('restore', onTargetWinUpdate);
 
   await addressManagementPopup.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}?view=address-management#/popupview__address-management`
+    `${RABBY_POPUP_GHOST_VIEW_URL}?view=address-management#/`
   );
 
   // debug-only
@@ -155,15 +155,15 @@ onIpcMainEvent(
       viewsState[payload.type].visible = true;
       updateSubviewPos(mainWindow, targetView);
       targetView.webContents.focus();
-      // sendToWebContents(
-      //   targetView.webContents,
-      //   '__internal_push:popupview-on-mainwin:on-visiblechange',
-      //   {
-      //     type: payload.type,
-      //     visible: true,
-      //     pageInfo: payload.pageInfo,
-      //   }
-      // );
+      sendToWebContents(
+        targetView.webContents,
+        '__internal_push:popupview-on-mainwin:on-visiblechange',
+        {
+          type: payload.type,
+          visible: true,
+          pageInfo: payload.pageInfo,
+        }
+      );
       if (
         !IS_RUNTIME_PRODUCTION &&
         payload.openDevTools &&
