@@ -213,8 +213,13 @@ const configurationRenderer: webpack.Configuration = {
       verbose: true,
     },
     devMiddleware: {
-      writeToDisk: () => {
-        return true;
+      writeToDisk: !process.env.HTTP_INSTEAD_OF_CUSTOM ? true : (targetPath) => {
+        const normalizedPath = targetPath
+          .replace(/^([a-z])\:\\/gi, (_, matched) => `/${matched.toLowerCase()}/`)
+          .replace(/\\/g, '/');
+
+        const isTargetShell = normalizedPath.includes('assets/desktop_shell');
+        return isTargetShell;
       },
     },
     setupMiddlewares(middlewares) {
