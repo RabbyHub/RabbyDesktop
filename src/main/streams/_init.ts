@@ -90,6 +90,14 @@ const CONF = {
       switchAccount: BrowserWindow;
     }>
   >,
+  popupViewsOnMainwinReady: {
+    subject: new ReplaySubject(1),
+    once: true,
+  } as IConf<
+    ReplaySubject<{
+      addAddress: BrowserView;
+    }>
+  >,
 };
 
 type IMainSubjects = typeof CONF;

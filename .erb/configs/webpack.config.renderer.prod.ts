@@ -37,8 +37,13 @@ const configuration: webpack.Configuration = {
 
   resolve: {
     alias: {
-      ...getWebpackAliases()
-    }
+      ...getWebpackAliases(),
+    },
+    fallback: {
+      stream: require.resolve('stream-browserify'),
+      crypto: require.resolve('crypto-browserify'),
+      assert: false,
+    },
   },
 
   module: {
@@ -87,14 +92,14 @@ const configuration: webpack.Configuration = {
 
   plugins: [
     /**
-    * Create global constants which can be configured at compile time.
-    *
-    * Useful for allowing different behaviour between development builds and
-    * release builds
-    *
-    * NODE_ENV should be production so that modules do not perform certain
-    * development checks
-    */
+     * Create global constants which can be configured at compile time.
+     *
+     * Useful for allowing different behaviour between development builds and
+     * release builds
+     *
+     * NODE_ENV should be production so that modules do not perform certain
+     * development checks
+     */
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'production',
       DEBUG_PROD: false,
@@ -119,7 +124,7 @@ const configurationRenderer: webpack.Configuration = {
     ...Object.values(webpackPaths.entriesRenderer).reduce((accu, cur) => {
       accu[cur.name] = cur.jsEntry;
       return accu;
-    }, {})
+    }, {}),
   },
 
   output: {
@@ -127,30 +132,34 @@ const configurationRenderer: webpack.Configuration = {
   },
 
   plugins: [
-    ...Object.values(webpackPaths.entriesRenderer).map(({ name, target, htmlFile }) => {
-      return new HtmlWebpackPlugin({
-        filename: target,
-        template: htmlFile,
-        minify: {
-          collapseWhitespace: true,
-          removeAttributeQuotes: true,
-          removeComments: true,
-        },
-        chunks: [name],
-        inject: true,
-        isBrowser: false,
-        env: process.env.NODE_ENV,
-        isDevelopment: process.env.NODE_ENV !== 'production',
-        nodeModules: webpackPaths.appNodeModulesPath,
-      });
-    }),
+    ...Object.values(webpackPaths.entriesRenderer).map(
+      ({ name, target, htmlFile }) => {
+        return new HtmlWebpackPlugin({
+          filename: target,
+          template: htmlFile,
+          minify: {
+            collapseWhitespace: true,
+            removeAttributeQuotes: true,
+            removeComments: true,
+          },
+          chunks: [name],
+          inject: true,
+          isBrowser: false,
+          env: process.env.NODE_ENV,
+          isDevelopment: process.env.NODE_ENV !== 'production',
+          nodeModules: webpackPaths.appNodeModulesPath,
+        });
+      }
+    ),
   ],
 };
 
 const configurationShell: webpack.Configuration = {
   entry: {
-    [webpackPaths.entriesShell['_shell-webui'].name]: webpackPaths.entriesShell['_shell-webui'].jsEntry,
-    [webpackPaths.entriesShell['_shell-new-tab'].name]: webpackPaths.entriesShell['_shell-new-tab'].jsEntry,
+    [webpackPaths.entriesShell['_shell-webui'].name]:
+      webpackPaths.entriesShell['_shell-webui'].jsEntry,
+    [webpackPaths.entriesShell['_shell-new-tab'].name]:
+      webpackPaths.entriesShell['_shell-new-tab'].jsEntry,
   },
 
   output: {
@@ -158,29 +167,37 @@ const configurationShell: webpack.Configuration = {
   },
 
   plugins: [
-    ...Object.values(webpackPaths.entriesShell).filter(item => !!item.htmlFile).map(({ name, target, htmlFile }) => {
-      return new HtmlWebpackPlugin({
-        filename: target,
-        template: htmlFile,
-        minify: {
-          collapseWhitespace: true,
-          removeAttributeQuotes: true,
-          removeComments: true,
-        },
-        chunks: [name],
-        inject: true,
-        isBrowser: false,
-        env: process.env.NODE_ENV,
-        isDevelopment: process.env.NODE_ENV !== 'production',
-        nodeModules: webpackPaths.appNodeModulesPath,
-      });
-    }),
+    ...Object.values(webpackPaths.entriesShell)
+      .filter((item) => !!item.htmlFile)
+      .map(({ name, target, htmlFile }) => {
+        return new HtmlWebpackPlugin({
+          filename: target,
+          template: htmlFile,
+          minify: {
+            collapseWhitespace: true,
+            removeAttributeQuotes: true,
+            removeComments: true,
+          },
+          chunks: [name],
+          inject: true,
+          isBrowser: false,
+          env: process.env.NODE_ENV,
+          isDevelopment: process.env.NODE_ENV !== 'production',
+          nodeModules: webpackPaths.appNodeModulesPath,
+        });
+      }),
 
     new CopyWebpackPlugin({
       patterns: [
-        { from: path.join(webpackPaths.srcPath, 'extension-shell/manifest.json'), to: path.join(webpackPaths.assetsPath, 'desktop_shell/manifest.json') },
+        {
+          from: path.join(
+            webpackPaths.srcPath,
+            'extension-shell/manifest.json'
+          ),
+          to: path.join(webpackPaths.assetsPath, 'desktop_shell/manifest.json'),
+        },
       ],
-    })
+    }),
   ],
 };
 
@@ -195,29 +212,34 @@ const configurationRabby: webpack.Configuration = {
   },
 
   plugins: [
-    ...Object.values(webpackPaths.entriesRabby).filter(item => !!item.htmlFile).map(({ name, target, htmlFile }) => {
-      return new HtmlWebpackPlugin({
-        filename: target,
-        template: htmlFile,
-        minify: {
-          collapseWhitespace: true,
-          removeAttributeQuotes: true,
-          removeComments: true,
-        },
-        chunks: [name],
-        inject: true,
-        isBrowser: false,
-        env: process.env.NODE_ENV,
-        isDevelopment: process.env.NODE_ENV !== 'production',
-        nodeModules: webpackPaths.appNodeModulesPath,
-      });
-    }),
+    ...Object.values(webpackPaths.entriesRabby)
+      .filter((item) => !!item.htmlFile)
+      .map(({ name, target, htmlFile }) => {
+        return new HtmlWebpackPlugin({
+          filename: target,
+          template: htmlFile,
+          minify: {
+            collapseWhitespace: true,
+            removeAttributeQuotes: true,
+            removeComments: true,
+          },
+          chunks: [name],
+          inject: true,
+          isBrowser: false,
+          env: process.env.NODE_ENV,
+          isDevelopment: process.env.NODE_ENV !== 'production',
+          nodeModules: webpackPaths.appNodeModulesPath,
+        });
+      }),
 
     new CopyWebpackPlugin({
       patterns: [
-        { from: path.join(webpackPaths.rootPath, 'assets/_raw/'), to: path.join(webpackPaths.distExtsPath, './rabby/') },
+        {
+          from: path.join(webpackPaths.rootPath, 'assets/_raw/'),
+          to: path.join(webpackPaths.distExtsPath, './rabby/'),
+        },
       ],
-    })
+    }),
   ],
 };
 

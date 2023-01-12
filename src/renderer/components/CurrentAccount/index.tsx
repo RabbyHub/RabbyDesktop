@@ -7,9 +7,9 @@ import {
   hideMainwinPopup,
   showMainwinPopup,
 } from '@/renderer/ipcRequest/mainwin-popup';
+import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import clsx from 'clsx';
 import { useMemo, useRef } from 'react';
-import { useNavigate } from 'react-router';
 import styles from './index.module.less';
 
 export const CurrentAccount = ({ className }: { className?: string }) => {
@@ -73,14 +73,12 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
 };
 
 export const AddNewAccount = ({ className }: { className?: string }) => {
-  const navigate = useNavigate();
-  const gotoAddNewAccount = () => {
-    navigate('/import-by/private-key');
-  };
   return (
     <div
       className={clsx(styles.addNewAccount, className)}
-      onClick={gotoAddNewAccount}
+      onClick={() => {
+        showMainwinPopupview({ type: 'add-address' }, { openDevTools: false });
+      }}
     >
       <img src="rabby-internal://assets/icons/top-bar/add-address.svg" />
     </div>

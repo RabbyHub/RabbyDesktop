@@ -49,6 +49,21 @@ type MainInternalsMessagePayload = {
     ];
     response: [];
   };
+  '__internal_main:popupview-on-mainwin:toggle-show': {
+    send: [
+      | {
+          type: PopupViewOnMainwinInfo['type'];
+          nextShow: true;
+          pageInfo: PopupViewOnMainwinInfo;
+          openDevTools?: boolean;
+        }
+      | {
+          nextShow: false;
+          type: PopupViewOnMainwinInfo['type'];
+        }
+    ];
+    response: [];
+  };
   '__internal_main:popupwin-on-mainwin:toggle-show': {
     send: [
       | {
@@ -61,6 +76,7 @@ type MainInternalsMessagePayload = {
             height?: number;
           };
           pageInfo: IContextMenuPageInfo;
+          openDevTools?: boolean;
         }
       | {
           nextShow: false;

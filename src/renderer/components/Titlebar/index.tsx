@@ -11,22 +11,21 @@ import { useWindowState } from '@/renderer/hooks-shell/useWindowState';
 
 import {
   IconDarwinTripleClose,
-  IconDarwinTripleMinimize,
   IconDarwinTripleFullscreen,
   IconDarwinTripleHoverClose,
-  IconDarwinTripleHoverMinimize,
   IconDarwinTripleHoverFullscreen,
+  IconDarwinTripleHoverMinimize,
   IconDarwinTripleHoverRecover,
+  IconDarwinTripleMinimize,
 } from '@/../assets/icons/native-tabs-triples';
 
 import {
   IconTrafficWin32Close,
   IconTrafficWin32Maxmize,
-  IconTrafficWin32Recover,
   IconTrafficWin32Minimize,
+  IconTrafficWin32Recover,
 } from '@/../assets/icons/titlebar-triples';
 
-import { useSettings } from '@/renderer/hooks/useSettings';
 import styles from './index.module.less';
 
 type CustomElement<T> = Partial<T & React.DOMAttributes<T> & { children: any }>;
@@ -54,13 +53,10 @@ export default function Titlebar(
     onCloseButton,
   } = useWindowState();
 
-  const { settings } = useSettings();
-
   return (
     <div
       className={classNames(
         styles.titlebar,
-        settings.sidebarCollapsed && styles.isFold,
         winOSType === 'darwin' && styles['os-darwin'],
         winOSType === 'win32' && styles['os-win32']
       )}

@@ -149,6 +149,15 @@ export function createPopupView(opts?: Electron.BrowserViewConstructorOptions) {
   });
 }
 
+export function hidePopupView(view: BrowserView) {
+  const bounds = view.getBounds();
+  view.setBounds({
+    ...bounds,
+    x: -99999,
+    y: -99999,
+  });
+}
+
 export function switchToBrowserTab(
   tabId: chrome.tabs.Tab['id'],
   tabbedWin: import('../browser/browsers').default

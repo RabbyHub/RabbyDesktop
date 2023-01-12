@@ -63,6 +63,11 @@ const configuration: webpack.Configuration = {
     alias: {
       ...getWebpackAliases(),
     },
+    fallback: {
+      stream: require.resolve('stream-browserify'),
+      crypto: require.resolve('crypto-browserify'),
+      assert: false,
+    },
   },
 
   module: {
@@ -192,9 +197,14 @@ const configurationRenderer: webpack.Configuration = {
   devServer: {
     port,
     compress: true,
+    host: 'localhost',
     hot: true,
     // liveReload: false,
     // client: false,
+    client: {
+      webSocketTransport: 'ws',
+    },
+    webSocketServer: 'ws',
     headers: { 'Access-Control-Allow-Origin': '*' },
     static: {
       publicPath: '/',
@@ -203,8 +213,13 @@ const configurationRenderer: webpack.Configuration = {
       verbose: true,
     },
     devMiddleware: {
-      writeToDisk: () => {
-        return true;
+      writeToDisk: !process.env.HTTP_INSTEAD_OF_CUSTOM ? true : (targetPath) => {
+        const normalizedPath = targetPath
+          .replace(/^([a-z])\:\\/gi, (_, matched) => `/${matched.toLowerCase()}/`)
+          .replace(/\\/g, '/');
+
+        const isTargetShell = normalizedPath.includes('assets/desktop_shell');
+        return isTargetShell;
       },
     },
     setupMiddlewares(middlewares) {
