@@ -197,9 +197,14 @@ const configurationRenderer: webpack.Configuration = {
   devServer: {
     port,
     compress: true,
+    host: 'localhost',
     hot: true,
     // liveReload: false,
     // client: false,
+    client: {
+      webSocketTransport: 'ws',
+    },
+    webSocketServer: 'ws',
     headers: { 'Access-Control-Allow-Origin': '*' },
     static: {
       publicPath: '/',

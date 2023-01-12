@@ -29,6 +29,7 @@ import { firstEl } from '../../isomorphic/array';
 import { getRabbyExtId, getWebuiExtId } from '../utils/stream-helpers';
 import { checkOpenAction } from '../utils/tabs';
 import { getWindowFromWebContents, switchToBrowserTab } from '../utils/browser';
+import { supportHmrOnDev } from '../utils/webRequest';
 
 const sesLog = getBindLog('session', 'bgGrey');
 
@@ -104,7 +105,10 @@ export async function defaultSessionReadyThen() {
 }
 
 protocol.registerSchemesAsPrivileged([
-  { scheme: 'rabby-internal', privileges: { standard: true } },
+  {
+    scheme: 'rabby-internal',
+    privileges: { standard: true, supportFetchAPI: true },
+  },
 ]);
 
 firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
@@ -145,7 +149,9 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
     )
   ) {
     if (!IS_RUNTIME_PRODUCTION) {
-      throw new Error(`[initSession] Failed to register protocol rabby-local`);
+      throw new Error(
+        `[initSession] Failed to register protocol ${RABBY_INTERNAL_PROTOCOL}`
+      );
     } else {
       console.error(`Failed to register protocol`);
     }
@@ -158,6 +164,8 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
     dappSafeViewSession,
     checkingViewSession,
   });
+  supportHmrOnDev(sessionIns);
+
   sessionIns.setPreloads([preloadPath]);
 
   // @notice: make sure all customized plugins loaded after ElectronChromeExtensions initialized
