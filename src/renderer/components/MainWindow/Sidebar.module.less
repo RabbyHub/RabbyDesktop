@@ -54,6 +54,10 @@
       margin-left: 23px;
       margin-right: 23px;
     }
+
+    .addDapp {
+      padding: 12px;
+    }
   }
 }
 
@@ -276,16 +280,26 @@
   }
 }
 
-.Sidebar.hasNewRelease {
-  // padding-bottom: @sidebar-footer-with-releaseinfo-h;
+.addDapp {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 12px 10px;
 
-  .navFooter {
-    // height: @sidebar-footer-with-releaseinfo-h;
+  color: #fff;
+  opacity: 0.8;
 
-    .update {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 8px;
-    }
+  font-size: 13px;
+  line-height: 16px;
+
+  white-space: nowrap;
+  overflow: hidden;
+
+  &Container {
+    padding: 0 12px;
+    margin-bottom: 8px;
   }
 }

@@ -3,9 +3,35 @@
   height: 100vh;
   overflow: overlay;
 
+  .account {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+
+  .addDapp {
+    position: fixed;
+    right: 48px;
+    bottom: 68px;
+    cursor: pointer;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    box-shadow: 0px 8px 24px rgba(54, 67, 145, 0.21);
+    z-index: 99;
+  }
+
   .header {
     padding: 24px 48px;
-    padding-top: 0;
+
+    .title {
+      font-weight: 510;
+      font-size: 28px;
+      line-height: 33px;
+
+      color: #ffffff;
+      margin-bottom: 11px;
+    }
 
     .desc {
       font-weight: 400;

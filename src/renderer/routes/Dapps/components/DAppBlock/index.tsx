@@ -1,5 +1,6 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
-import { Dropdown, Menu } from 'antd';
+import { Divider, Dropdown, Menu } from 'antd';
 import React, { useRef } from 'react';
 
 import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
@@ -11,6 +12,7 @@ import {
 } from '../../../../../../assets/icons/internal-homepage';
 
 import { DappFavicon } from '../../../../components/DappFavicon';
+import { javascript } from 'webpack';
 // import './index.less';
 
 type IOnOpDapp = (
@@ -108,12 +110,14 @@ export const DAppBlock = ({
       }
     >
       <div className="dapp-block" ref={ref}>
-        <a
+        <div
           className="anchor"
-          href={dapp.origin}
-          target="_blank"
-          rel="noreferrer"
-          onClick={() => {
+          // href="#"
+          // target="_blank"
+          // rel="noreferrer"
+          onClick={(e) => {
+            e.preventDefault();
+            console.log(dapp.origin);
             navigateToDapp(dapp?.origin);
           }}
         >
@@ -126,7 +130,7 @@ export const DAppBlock = ({
             <h4 className="dapp-alias">{dapp.alias}</h4>
             <div className="dapp-url">{dapp.origin}</div>
           </div>
-        </a>
+        </div>
 
         <div
           className={clsx('menu-entry', dapp.isPinned && 'is-pinned')}

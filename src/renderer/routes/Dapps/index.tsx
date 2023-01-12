@@ -1,4 +1,5 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
+import { CurrentAccountAndNewAccount } from '@/renderer/components/CurrentAccount';
 import { message } from 'antd';
 import { useCallback, useState } from 'react';
 
@@ -10,6 +11,7 @@ import { useDapps } from '../../hooks/useDappsMngr';
 import { DAppBlock } from './components/DAppBlock';
 
 import { ReleaseNote } from './components/ReleaseNote';
+import { SortableList } from './components/SortableList';
 import './index.less';
 
 import style from './index.module.less';
@@ -53,10 +55,22 @@ export default function DApps() {
     [pinDapp, unpinDapp]
   );
 
+  const [_data, setData] = useState(dapps);
+
   return (
     <div className={style.page}>
+      <CurrentAccountAndNewAccount className={style.account} />
+      <img
+        className={style.addDapp}
+        src="rabby-internal://assets/icons/internal-homepage/icon-dapps-add.svg"
+        alt=""
+        onClick={() => {
+          setIsAdding(true);
+        }}
+      />
       <div className={style.container}>
         <header className={style.header}>
+          <h2 className={style.title}>My Dapps</h2>
           <div className={style.desc}>
             <img
               className={style.icon}
@@ -69,27 +83,25 @@ export default function DApps() {
         <main className={style.main}>
           <div className="dapps">
             <div className="dapp-matrix">
-              {dapps.map((dapp, idx) => {
-                return (
-                  <DAppBlock
-                    /* eslint-disable-next-line react/no-array-index-key */
-                    key={`${dapp.origin}-${dapp.alias}-${idx}`}
-                    dapp={dapp}
-                    onOpDapp={onClickDapp}
-                  />
-                );
-              })}
-              <DAppBlock
-                key="J_add"
-                onAdd={() => {
-                  setIsAdding(true);
+              <SortableList
+                data={_data}
+                onChange={(v) => {
+                  setData(v);
+                }}
+                renderItem={(dapp) => {
+                  return (
+                    <DAppBlock
+                      key={dapp.origin}
+                      dapp={dapp}
+                      onOpDapp={onClickDapp}
+                    />
+                  );
                 }}
               />
             </div>
           </div>
         </main>
 
-        {/* <Footer appVersion={appVersion} /> */}
         <ModalAddDapp
           destroyOnClose
           open={isAdding}
