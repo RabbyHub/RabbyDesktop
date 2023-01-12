@@ -112,6 +112,11 @@ const router = createRouter([
       {
         path: 'home',
         element: <Home />,
+        loader: () => {
+          return {
+            useAccountComponent: true,
+          } as MainWindowRouteData;
+        },
       },
       {
         path: 'my-dapps',
@@ -184,17 +189,6 @@ export function MainWindow() {
 
   useMainWindowEvents();
   useChromeTabsEvents();
-
-  useEffect(() => {
-    if (!IS_RUNTIME_PRODUCTION) {
-      // const host = openApi.getHost();
-      // console.debug('[debug] getHost', host);
-
-      walletOpenapi.getLatestVersion().then((hostInWallet) => {
-        console.debug('[debug] walletOpenapi', hostInWallet);
-      });
-    }
-  }, []);
 
   return (
     <>

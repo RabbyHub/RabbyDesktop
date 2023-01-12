@@ -5,6 +5,7 @@ import { TokenItem } from '@debank/rabby-api/dist/types';
 
 const TokenWithChainWrapper = styled.div`
   position: relative;
+  line-height: 0;
   .token-logo,
   .chain-logo {
     border-radius: 100%;

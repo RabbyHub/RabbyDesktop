@@ -4,21 +4,24 @@ import styled from 'styled-components';
 import classNames from 'classnames';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import { sortBy } from 'lodash';
-import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
-import useCurrentBalance from '@/renderer/hooks/useCurrentBalance';
 import { ellipsis } from '@/renderer/utils/address';
 import { formatNumber } from '@/renderer/utils/number';
+import useCurrentBalance from '@/renderer/hooks/useCurrentBalance';
+import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import useCurve from '@/renderer/hooks/useCurve';
 import useHistoryTokenList from '@/renderer/hooks/useHistoryTokenList';
+import useHistoryProtocol, {
+  DisplayProtocol,
+} from '@/renderer/hooks/useHistoryProtocol';
 import ChainList from './components/ChainList';
 import Curve from './components/Curve';
 import PortfolioView from './components/PortfolioView';
 
 const HomeWrapper = styled.div`
   padding-top: 76px;
-  padding-left: 50px;
-  padding-right: 336px;
+  padding-left: 28px;
+  padding-right: 358px;
   color: #fff;
   .header {
     width: 100%;
@@ -26,12 +29,26 @@ const HomeWrapper = styled.div`
     .top {
       display: flex;
       margin-bottom: 20px;
+      max-width: 1375px;
       .left {
         margin-right: 40px;
       }
       .right {
         flex: 1;
         position: relative;
+        .balance-change {
+          position: absolute;
+          right: 28px;
+          top: 77px;
+          font-weight: 500;
+          font-size: 18px;
+          line-height: 21px;
+          margin-left: 6px;
+          color: #2ed4a3;
+          &.is-loss {
+            color: #ff6060;
+          }
+        }
       }
     }
     .current-address {
@@ -51,16 +68,6 @@ const HomeWrapper = styled.div`
       font-weight: 590;
       font-size: 46px;
       line-height: 55px;
-      .balance-change {
-        font-weight: 500;
-        font-size: 18px;
-        line-height: 21px;
-        margin-left: 6px;
-        color: #2ed4a3;
-        &.is-loss {
-          color: #ff6060;
-        }
-      }
     }
   }
 `;
@@ -130,6 +137,60 @@ const Home = () => {
       ).reverse(),
     };
   }, [tokenList, selectChainServerId]);
+  const { protocolList, historyProtocolMap, tokenHistoryPriceMap } =
+    useHistoryProtocol(currentAccount?.address);
+
+  const displayProtocolList = useMemo(() => {
+    const list: DisplayProtocol[] = [];
+    const smallList: DisplayProtocol[] = [];
+    const l = selectChainServerId
+      ? protocolList.filter(
+          (protocol) => protocol.chain === selectChainServerId
+        )
+      : protocolList;
+    const totalUsdValue = l.reduce((sum, item) => {
+      return sum + (item.usd_value || 0);
+    }, 0);
+    l.forEach((item) => {
+      if (new BigNumber(item.usd_value || 0).div(totalUsdValue).gte(0.001)) {
+        list.push(item);
+      } else {
+        smallList.push(item);
+      }
+    });
+    return {
+      defaultProtocolList: sortBy(
+        sortBy(
+          list.map((item) => {
+            return {
+              ...item,
+              portfolio_item_list: sortBy(item.portfolio_item_list, (i) => {
+                return (i.detail.supply_token_list || []).reduce(
+                  (sum, j) => sum + j.price * j.amount,
+                  0
+                );
+              }).reverse(),
+            };
+          })
+        ),
+        (i) => i.usd_value || 0
+      ).reverse(),
+      smallBalanceProtocolList: sortBy(
+        smallList.map((item) => {
+          return {
+            ...item,
+            portfolio_item_list: sortBy(item.portfolio_item_list, (i) => {
+              return (i.detail.supply_token_list || []).reduce(
+                (sum, j) => sum + j.price * j.amount,
+                0
+              );
+            }).reverse(),
+          };
+        }),
+        (i) => i.usd_value || 0
+      ).reverse(),
+    };
+  }, [protocolList, selectChainServerId]);
 
   const init = async () => {
     if (!currentAccount) return;
@@ -153,16 +214,14 @@ const Home = () => {
                 src="rabby-internal://assets/icons/home/copy.svg"
               />
             </div>
-            <div className="balance">
-              {formatNumber(balance || 0)}
-              <span
-                className={classNames('balance-change', { 'is-loss': isLoss })}
-              >{`${isLoss ? '-' : '+'}${formatNumber(
-                usdValueChange
-              )} (${percentChange}%)`}</span>
-            </div>
+            <div className="balance">{formatNumber(balance || 0)}</div>
           </div>
           <div className="right">
+            <div
+              className={classNames('balance-change', { 'is-loss': isLoss })}
+            >{`${isLoss ? '-' : '+'}${formatNumber(
+              usdValueChange
+            )} (${percentChange}%)`}</div>
             <Curve data={curveData} />
           </div>
         </div>
@@ -174,6 +233,9 @@ const Home = () => {
       <PortfolioView
         tokenList={displayTokenList.defaultTokenList}
         historyTokenMap={historyTokenMap}
+        protocolList={displayProtocolList.defaultProtocolList}
+        historyProtocolMap={historyProtocolMap}
+        protocolHistoryTokenPriceMap={tokenHistoryPriceMap}
       />
     </HomeWrapper>
   );

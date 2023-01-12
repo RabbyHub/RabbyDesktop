@@ -93,6 +93,8 @@ export default (address: string | undefined) => {
 
   useEffect(() => {
     if (!address) return;
+    setTokenList([]);
+    setHistoryTokenMap({});
     fetchData(address);
   }, [address]);
 

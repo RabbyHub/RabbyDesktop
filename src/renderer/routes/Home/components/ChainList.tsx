@@ -13,7 +13,7 @@ const ChainListWrapper = styled.ul`
     cursor: pointer;
     opacity: 0.8;
     transition: opacity 0.3s;
-    /* margin-right: 4px; */
+    margin-right: 4px;
     display: flex;
     align-items: center;
     img {

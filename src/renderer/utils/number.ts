@@ -68,6 +68,9 @@ export const formatNumber = (
   };
   // hide the after-point part if number is more than 1000000
   if (n.isGreaterThan(1000000)) {
+    if (n.gte(1e9)) {
+      return `${n.div(1e9).toFormat(decimal, format)}B`;
+    }
     return n.decimalPlaces(0).toFormat(format);
   }
   return n.toFormat(decimal, format);
