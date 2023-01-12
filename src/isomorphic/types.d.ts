@@ -176,7 +176,9 @@ type IContextMenuPageInfo =
       type: 'quick-swap';
     };
 
-type PopupWinType = IContextMenuPageInfo['type'];
+type PopupViewOnMainwinInfo = {
+  type: 'add-address';
+};
 
 type IShellNavInfo = {
   tabExists: boolean;

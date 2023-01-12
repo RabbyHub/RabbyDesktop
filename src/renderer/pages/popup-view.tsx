@@ -7,12 +7,17 @@ import './popup-view.less';
 
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 
+import { PopupViewClose, ResetTo } from '@/renderer/components/PopupViewUtils';
+
 import SecurityCheck from '@/renderer/routes-popup/SecurityCheck/SecurityCheck';
 import SecurityNotifications from '@/renderer/routes-popup/SecurityNotifications/SecurityNotifications';
 import SecurityAddressbarPopup from '@/renderer/routes-popup/SecurityAddressbarPopup/SecurityAddressbarPopup';
+
 import { SidebarContextMenu } from '@/renderer/routes-popup/SidebarContextMenu';
 import SwitchChainWindow from '@/renderer/routes-popup/SwitchChainWindow';
 import SwitchAccountWindow from '@/renderer/routes-popup/SwitchAccountWindow';
+import MainWindowAddAddress from '../routes-popup/MainWindowAddAddress';
+
 import RabbyNotificationGasket from '../routes-popup/RabbyNotificationGasket';
 import QuickSwapWindow from '../routes-popup/QuickSwapWindow';
 
@@ -37,9 +42,15 @@ function App() {
         />
         <Route path="/popup__quick-swap" element={<QuickSwapWindow />} />
         <Route
+          path="/popupview__add-address"
+          element={<MainWindowAddAddress />}
+        />
+        <Route
           path="/rabby-notification-gasket"
           element={<RabbyNotificationGasket />}
         />
+        <Route path="/popupview-reset-to/:resetTo" element={<ResetTo />} />
+        <Route path="*" element={<PopupViewClose />} />
       </Routes>
     </Router>
   );
