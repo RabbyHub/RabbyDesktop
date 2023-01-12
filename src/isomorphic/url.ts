@@ -82,10 +82,6 @@ export function isUrlFromDapp(url: string) {
   );
 }
 
-export function isInternalTabUrl(url: string) {
-  return url.startsWith(RABBY_INTERNAL_PROTOCOL);
-}
-
 // TODO: use better flag to check if it's main window's shell ui
 export function isMainWinShellWebUI(url: string) {
   return (

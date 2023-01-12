@@ -9,12 +9,25 @@ export const APP_UA_NAME = 'RabbyDesktop';
 export const PERSIS_STORE_PREFIX = 'rabby-store-';
 
 export const RABBY_INTERNAL_PROTOCOL = 'rabby-internal:';
-export const RABBY_HOMEPAGE_URL = `${RABBY_INTERNAL_PROTOCOL}//local/home.html`;
-export const RABBY_GETTING_STARTED_URL = `${RABBY_INTERNAL_PROTOCOL}//local/getting-started.html`;
-export const RABBY_SPALSH_URL = `${RABBY_INTERNAL_PROTOCOL}//local/splash.html`;
-export const RABBY_LOADING_URL = `${RABBY_INTERNAL_PROTOCOL}//local/loading.html`;
 
-export const RABBY_MAIN_POPUP_VIEW = `${RABBY_INTERNAL_PROTOCOL}//local/main-popup-view.html`;
-export const RABBY_POPUP_GHOST_VIEW_URL = `${RABBY_INTERNAL_PROTOCOL}//local/popup-view.html`;
+// only useful in dev mode
+let DEV_SERVER_PORT = 1212;
+try {
+  const port = parseInt(process.env.PORT as any, 10);
+  if (port && !Number.isNaN(port)) DEV_SERVER_PORT = port;
+  // eslint-disable-next-line no-empty
+} catch (e) {}
+export const RABBY_LOCAL_URLBASE =
+  IS_RUNTIME_PRODUCTION || !process.env.HTTP_INSTEAD_OF_CUSTOM
+    ? `${RABBY_INTERNAL_PROTOCOL}//local`
+    : `http://localhost:${DEV_SERVER_PORT}`;
+
+export const RABBY_HOMEPAGE_URL = `${RABBY_LOCAL_URLBASE}/home.html`;
+export const RABBY_GETTING_STARTED_URL = `${RABBY_LOCAL_URLBASE}/getting-started.html`;
+export const RABBY_SPALSH_URL = `${RABBY_LOCAL_URLBASE}/splash.html`;
+export const RABBY_LOADING_URL = `${RABBY_LOCAL_URLBASE}/loading.html`;
+
+export const RABBY_MAIN_POPUP_VIEW = `${RABBY_LOCAL_URLBASE}/main-popup-view.html`;
+export const RABBY_POPUP_GHOST_VIEW_URL = `${RABBY_LOCAL_URLBASE}/popup-view.html`;
 
 export const RABBY_BLANKPAGE_RELATIVE_URL = `preloads/blank.html`;
