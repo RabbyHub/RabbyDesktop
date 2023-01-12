@@ -44,6 +44,10 @@ function App() {
           element={<MainWindowAddAddress />}
         />
         <Route
+          path="/popupview__address-management"
+          element={<MainWindowAddAddress />}
+        />
+        <Route
           path="/rabby-notification-gasket"
           element={<RabbyNotificationGasket />}
         />

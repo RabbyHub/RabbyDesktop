@@ -173,9 +173,13 @@ type IContextMenuPageInfo =
       type: 'switch-account';
     };
 
-type PopupViewOnMainwinInfo = {
-  type: 'add-address';
-};
+type PopupViewOnMainwinInfo =
+  | {
+      type: 'add-address';
+    }
+  | {
+      type: 'address-management';
+    };
 
 type IShellNavInfo = {
   tabExists: boolean;

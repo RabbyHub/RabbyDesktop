@@ -1,17 +1,17 @@
-import { AddressManagementDrawer } from '@/renderer/components/AddressManagementDrawer/AddressManagementDrawer';
+import { AddAddressModal } from '@/renderer/components/AddAddressModal/AddAddressModal';
 import { useResetToCurrentPage } from '@/renderer/components/PopupViewUtils';
 import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import styles from './index.module.less';
 
-export default function MainWindowAddressManagement() {
+export default function MainWindowAddAddress() {
   const resetPage = useResetToCurrentPage();
 
   return (
-    <div className={styles.MainWindowAddressManagement}>
-      <AddressManagementDrawer
+    <div className={styles.MainWindowAddAddress}>
+      <AddAddressModal
         visible
         onClose={() => {
-          hideMainwinPopupview('address-management');
+          hideMainwinPopupview('add-address');
           resetPage();
         }}
       />
