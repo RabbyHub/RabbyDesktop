@@ -9,17 +9,13 @@ import {
 } from '@/renderer/ipcRequest/mainwin-popup';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import clsx from 'clsx';
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import { AddressManagementDrawer } from '../AddressManagementDrawer/AddressManagementDrawer';
 import styles from './index.module.less';
 
 export const CurrentAccount = ({ className }: { className?: string }) => {
-  const divRef = useRef<HTMLDivElement>(null);
-  useClickOutSide(divRef, () => {
-    hideMainwinPopup('switch-account');
-  });
+  const [visible, setVisible] = useState(false);
   const { currentAccount } = useCurrentAccount();
-  const { accounts } = useAccounts();
-
   const displayAddr = useMemo(
     () =>
       currentAccount?.address
@@ -34,41 +30,34 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
     return null;
   }
   return (
-    <div
-      className={clsx(styles.account, className)}
-      ref={divRef}
-      onClick={(event) => {
-        const el = event.currentTarget as HTMLDivElement;
-        const rect = el.getBoundingClientRect();
-
-        showMainwinPopup(
-          {
-            x: rect.x,
-            y: rect.bottom + 10,
-            height: Math.min(accounts.length, 6) * (60 + 3) - 1,
-          },
-          {
-            type: 'switch-account',
-          }
-        );
-      }}
-    >
-      <div className={styles.content}>
-        <img
-          className={styles.logo}
-          src="rabby-internal://assets/icons/wallet/private-key.svg"
-          alt="key"
-        />
-        <span className={styles.aliasName}>{currentAccount?.alianName}</span>
+    <>
+      <div
+        className={clsx(styles.account, className)}
+        onClick={(event) => {
+          setVisible(true);
+        }}
+      >
+        <div className={styles.content}>
+          <img
+            className={styles.logo}
+            src="rabby-internal://assets/icons/wallet/private-key.svg"
+            alt="key"
+          />
+          <span className={styles.aliasName}>{currentAccount?.alianName}</span>
+        </div>
+        <div className={styles.dockRight}>
+          <span className={styles.addr}>{displayAddr}</span>
+          <img
+            className={styles.dropdownIcon}
+            src="rabby-internal://assets/icons/top-bar/select.svg"
+          />
+        </div>
       </div>
-      <div className={styles.dockRight}>
-        <span className={styles.addr}>{displayAddr}</span>
-        <img
-          className={styles.dropdownIcon}
-          src="rabby-internal://assets/icons/top-bar/select.svg"
-        />
-      </div>
-    </div>
+      <AddressManagementDrawer
+        visible={visible}
+        onClose={() => setVisible(false)}
+      />
+    </>
   );
 };
 
