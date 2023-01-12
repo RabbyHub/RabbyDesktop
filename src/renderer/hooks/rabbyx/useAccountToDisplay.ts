@@ -61,5 +61,22 @@ export const useAccountToDisplay = () => {
     }
   }, [setAccountsList, setLoading]);
 
+  React.useEffect(() => {
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_push:rabbyx:session-broadcast-forward-to-main',
+      (payload) => {
+        switch (payload.event) {
+          default:
+            break;
+          case 'unlock':
+          case 'accountsChanged':
+          case 'rabby:chainChanged': {
+            console.log('init');
+          }
+        }
+      }
+    );
+  }, []);
+
   return { accountsList, loadingAccounts, getAllAccountsToDisplay };
 };

@@ -39,6 +39,13 @@
     padding: 0 20px;
     overflow-y: auto;
     flex: 1;
+
+    .group {
+      margin-bottom: 32px;
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
   }
   .footer {
     padding-top: 24px;
@@ -62,12 +69,16 @@
   }
 }
 
-.AddressItem {
+.AccountItem {
   display: flex;
   align-items: center;
   padding: 12px 16px;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 6px;
+  margin-bottom: 8px;
+  &:last-child {
+    margin-bottom: 0;
+  }
 
   .icon {
     margin-right: 12px;

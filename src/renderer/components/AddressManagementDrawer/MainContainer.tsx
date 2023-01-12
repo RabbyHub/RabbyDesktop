@@ -1,11 +1,17 @@
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-import { useAccountToDisplay } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
+import {
+  IDisplayedAccountWithBalance,
+  useAccountToDisplay,
+} from '@/renderer/hooks/rabbyx/useAccountToDisplay';
 import { useAddressManagement } from '@/renderer/hooks/rabbyx/useAddressManagement';
 import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
+import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { sortAccountsByBalance } from '@/renderer/utils/account';
 import { KEYRING_CLASS } from '@/renderer/utils/keyring';
 import { groupBy } from 'lodash';
 import React from 'react';
+import { useResetToCurrentPage } from '../PopupViewUtils';
+import { AccountDetail } from './AccountDetail';
 import styles from './AddressManagementDrawer.module.less';
 import { Body } from './Body';
 import { Footer } from './Footer';
@@ -17,7 +23,9 @@ export const MainContainer: React.FC = () => {
   const { getAllAccountsToDisplay, accountsList, loadingAccounts } =
     useAccountToDisplay();
   const { init: whitelistInit } = useWhitelist();
-  const { currentAccount } = useCurrentAccount();
+  const { currentAccount, switchAccount } = useCurrentAccount();
+  const [selectedAccount, setSelectedAccount] =
+    React.useState<IDisplayedAccountWithBalance>();
 
   const [sortedAccountsList, watchSortedAccountsList] = React.useMemo(() => {
     const restAccounts = [...accountsList];
@@ -74,6 +82,19 @@ export const MainContainer: React.FC = () => {
     );
   }, [accountList, currentAccount]);
 
+  const currentDisplayAccount = accountList[currentAccountIndex];
+
+  const resetPage = useResetToCurrentPage();
+
+  const handleSwitchAccount = React.useCallback(
+    (account: IDisplayedAccountWithBalance) => {
+      switchAccount(account);
+      hideMainwinPopupview('address-management');
+      resetPage();
+    },
+    [resetPage, switchAccount]
+  );
+
   React.useEffect(() => {
     getHighlightedAddressesAsync().then(getAllAccountsToDisplay);
   }, [getHighlightedAddressesAsync, getAllAccountsToDisplay]);
@@ -82,10 +103,26 @@ export const MainContainer: React.FC = () => {
     whitelistInit();
   }, [whitelistInit]);
 
+  if (selectedAccount) {
+    return (
+      <div className={styles.MainContainer}>
+        <AccountDetail
+          account={selectedAccount}
+          onClose={() => setSelectedAccount(undefined)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={styles.MainContainer}>
-      <Header />
-      <Body />
+      <Header currentAccount={currentDisplayAccount} />
+      <Body
+        onSelect={setSelectedAccount}
+        onSwitchAccount={handleSwitchAccount}
+        accounts={sortedAccountsList}
+        contacts={watchSortedAccountsList}
+      />
       <Footer />
     </div>
   );

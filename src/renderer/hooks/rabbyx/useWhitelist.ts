@@ -2,12 +2,6 @@ import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
 
-type IDisplayedAccount = Required<DisplayedKeyring['accounts'][number]>;
-export type IDisplayedAccountWithBalance = IDisplayedAccount & {
-  balance: number;
-  byImport?: boolean;
-};
-
 const whitelistAtom = atom<string[]>([]);
 const enableAtom = atom<boolean>(false);
 

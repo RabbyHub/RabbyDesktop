@@ -1,7 +1,12 @@
+import { IDisplayedAccountWithBalance } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
 import React from 'react';
 import styles from './AddressManagementDrawer.module.less';
 
-export const Header: React.FC = () => {
+interface Props {
+  currentAccount: IDisplayedAccountWithBalance;
+}
+
+export const Header: React.FC<Props> = ({ currentAccount }) => {
   return (
     <section className={styles.header}>
       <div>current account</div>
