@@ -70,7 +70,7 @@ export const CurrentAccountAndNewAccount = ({
   return (
     <div className={clsx(styles.row, className)} data-nodrag>
       <CurrentAccount />
-      <AddNewAccount />
+      {/* <AddNewAccount /> */}
     </div>
   );
 };

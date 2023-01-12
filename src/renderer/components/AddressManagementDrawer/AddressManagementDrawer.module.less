@@ -1,3 +1,100 @@
 .MainContainer {
   color: #fff;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 40px 20px 24px;
+  height: 100%;
+
+  .header {
+    .divider {
+      color: #FFFFFF;
+      opacity: 0.3;
+      text-align: center;
+
+      .text {
+        position: relative;
+        font-size: 12px;
+
+        &::after,
+        &::before {
+          content: '';
+          border-bottom: 1px solid #E5E9EF;
+          position: absolute;
+          width: 52px;
+          top: 50%;
+        }
+
+        &::after {
+          left: -66px;
+        }
+
+        &::before {
+          right: -66px;
+        }
+      }
+    }
+  }
+  .body {
+    padding: 0 20px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .footer {
+    padding-top: 24px;
+
+    .button {
+      margin: auto;
+      height: 44px;
+      width: 240px;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      place-content: center;
+      border: none;
+      border-radius: 4px;
+
+      .icon {
+        margin-right: 6px;
+      }
+    }
+  }
+}
+
+.AddressItem {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+
+  .icon {
+    margin-right: 12px;
+    width: 24px;
+    height: 24px;
+  }
+
+  .content {
+    flex: 1;
+    font-size: 13px;
+    color: #fff;
+    word-break: break-all;
+    display: flex;
+    flex-direction: column;
+
+    .part {
+      margin-bottom: 6px;
+      display: flex;
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .partAddress {
+        font-size: 12px;
+      }
+
+      .partName {}
+    }
+  }
 }

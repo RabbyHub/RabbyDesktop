@@ -71,6 +71,8 @@ export type RabbyXMethod = {
     type: string,
     brand?: string | undefined
   ) => void;
+  'walletController.getWhitelist': () => string[];
+  'walletController.isWhitelistEnabled': () => boolean;
 
   'permissionService.addConnectedSite': (
     origin: string,
