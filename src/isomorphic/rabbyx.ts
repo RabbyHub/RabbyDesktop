@@ -56,6 +56,8 @@ export type RabbyXMethod = {
     ? PreferenceState
     : PreferenceState[keyof PreferenceState];
 
+  'walletController.importWatchAddress': (address: string) => RabbyAccount[];
+
   'permissionService.addConnectedSite': (
     origin: string,
     name: string,

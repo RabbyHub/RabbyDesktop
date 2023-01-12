@@ -16,6 +16,7 @@ import './streams/securityNotification';
 import './streams/clipboard';
 import './streams/browser';
 import './streams/popupOnMainwin';
+import './streams/popupViewOnMainwin';
 import './streams/webContents';
 
 import bootstrap from './streams/app';

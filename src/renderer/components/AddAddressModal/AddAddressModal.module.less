@@ -1,0 +1,154 @@
+.SelectModalContent {
+  height: 485px;
+
+  .panel {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-top: 32px;
+    padding: 24px;
+    color: #fff;
+    margin-left: 240px;
+    margin-right: 240px;
+    &:first-child {
+      margin-top: 0;
+    }
+    &.panelContact {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+
+      .title {
+        margin-left: 12px;
+        font-size: 15px;
+        font-weight: 500;
+      }
+    }
+
+    .body {
+      margin-top: 16px;
+      background: rgba(0, 0, 0, 0.04);
+      border-radius: 4px;
+      padding: 0 10px;
+      display: flex;
+    }
+
+    .device {
+      margin-left: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      padding: 20px;
+      &:first-child {
+        margin-left: 0;
+      }
+
+      .deviceLogo {
+        width: 32px;
+      }
+
+      .deviceName {
+        margin-top: 8px;
+        font-size: 13px;;
+        line-height: 1;
+        font-weight: 500;
+      }
+    }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      font-weight: 500;
+      flex: 1;
+      margin-left: 12px;
+    }
+
+    .title {
+      font-size: 15px;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      font-size: 13px;
+    }
+  }
+}
+
+.ContactModalContent {
+  margin: 0 180px 0;
+  height: 463px;
+  padding-top: 15px;
+
+  .input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 22px 24px;
+    font-size: 15px;
+    color: #fff;
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.5)
+    }
+  }
+
+  .inputWrap {
+    margin-bottom: 200px;
+  }
+
+  .footer {
+    position: absolute;
+    bottom: 120px;
+    left: 0;
+    right: 0;
+  }
+
+  .button {
+    margin: auto;
+    height: 52px;
+    width: 200px;
+    display: block;
+  }
+
+  .tagGroup {
+    display: flex;
+    margin-top: 20px;
+
+    .tag {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13px;
+      color: #fff;
+      margin-right: 10px;
+
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+  }
+
+  .ens {
+    margin-top: 12px;
+    display: flex;
+    padding: 18px 12px;
+    font-size: 13px;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    align-items: center;
+
+    .text  {
+      flex: 1;
+    }
+  }
+
+  .error {
+    margin-top: 12px;
+    font-size: 13px;
+    color: #FF6F6F;
+  }
+}

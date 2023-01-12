@@ -63,6 +63,11 @@ const configuration: webpack.Configuration = {
     alias: {
       ...getWebpackAliases(),
     },
+    fallback: {
+      stream: require.resolve('stream-browserify'),
+      crypto: require.resolve('crypto-browserify'),
+      assert: false,
+    },
   },
 
   module: {
