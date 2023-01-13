@@ -27,6 +27,7 @@ import { useAppUnlockEvents } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { useAccounts } from '@/renderer/hooks/rabbyx/useAccount';
+import { useMessageForwardToMainwin } from '@/renderer/hooks/useMessageToMainwin';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -35,7 +36,6 @@ import Titlebar from '../Titlebar';
 import { TopNavBar } from '../TopNavBar';
 import { MainWindowRouteData } from './type';
 import { DappViewWrapper } from '../DappView';
-import { useMessageForwardToMainwin } from '@/renderer/hooks/useMessageToMainwin';
 
 function WelcomeWrapper() {
   const { hasFetched, accounts } = useAccounts();

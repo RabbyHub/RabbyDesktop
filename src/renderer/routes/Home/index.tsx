@@ -14,6 +14,7 @@ import useHistoryTokenList from '@/renderer/hooks/useHistoryTokenList';
 import useHistoryProtocol, {
   DisplayProtocol,
 } from '@/renderer/hooks/useHistoryProtocol';
+import { message } from 'antd';
 import ChainList from './components/ChainList';
 import Curve from './components/Curve';
 import PortfolioView from './components/PortfolioView';
@@ -210,7 +211,22 @@ const Home = () => {
       <div className="header">
         <div className="top">
           <div className="left">
-            <div className="current-address">
+            <div
+              className="current-address"
+              onClick={async () => {
+                if (!currentAccount?.address) return;
+
+                await window.navigator.clipboard.writeText(
+                  currentAccount.address
+                );
+                message.open({
+                  type: 'success',
+                  content: 'Copied Address',
+                  className: 'mainwindow-default-tip',
+                  duration: 1,
+                });
+              }}
+            >
               {ellipsis(currentAccount?.address || '')}
               <img
                 className="icon-copy"

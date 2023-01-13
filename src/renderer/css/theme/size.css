@@ -10,6 +10,8 @@
   --mainwin-sidebar-animation-second: 0.5s;
 
   --mainwin-mainarea-topoffset: 0px;
+
+  --mainwin-headerblock-offset: 64px;
 }
 
 html.os-win32,
