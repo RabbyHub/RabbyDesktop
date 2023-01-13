@@ -116,7 +116,10 @@ export const MainContainer: React.FC = () => {
 
   return (
     <div className={styles.MainContainer}>
-      <Header currentAccount={currentDisplayAccount} />
+      <Header
+        onSelect={setSelectedAccount}
+        currentAccount={currentDisplayAccount}
+      />
       <Body
         onSelect={setSelectedAccount}
         onSwitchAccount={handleSwitchAccount}
