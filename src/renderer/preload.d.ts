@@ -194,6 +194,18 @@ type ChannelMessagePayload = {
     send: [origin: IDapp['origin']];
     response: [origin: IDapp['origin']];
   };
+  '__internal_forward:main-window:client-message': {
+    send: [
+      {
+        type: 'route-navigate';
+        data: {
+          pathname: string;
+          params?: Record<string, string>;
+        };
+      }
+    ];
+    response: ChannelMessagePayload['__internal_forward:main-window:client-message']['send'];
+  };
   '__internal_rpc:dapp-tabs:close-safe-view': {
     send: [];
     response: [];

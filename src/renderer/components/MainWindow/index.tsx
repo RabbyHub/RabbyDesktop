@@ -35,6 +35,7 @@ import Titlebar from '../Titlebar';
 import { TopNavBar } from '../TopNavBar';
 import { MainWindowRouteData } from './type';
 import { DappViewWrapper } from '../DappView';
+import { useMessageForwardToMainwin } from '@/renderer/hooks/useMessageToMainwin';
 
 function WelcomeWrapper() {
   const { hasFetched, accounts } = useAccounts();
@@ -189,6 +190,10 @@ export function MainWindow() {
 
   useMainWindowEvents();
   useChromeTabsEvents();
+
+  useMessageForwardToMainwin('route-navigate', (payload) => {
+    router.navigate(payload.data);
+  });
 
   return (
     <>
