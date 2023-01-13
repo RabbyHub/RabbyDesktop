@@ -12,6 +12,7 @@ import {
 import { Modal, Switch, SwitchProps, Tooltip } from 'antd';
 import { useSettings } from '@/renderer/hooks/useSettings';
 import styles from './index.module.less';
+import ModalProxySetting from './components/ModalProxySetting';
 
 type TypedProps = {
   name: React.ReactNode;
@@ -120,6 +121,8 @@ export function MainWindowSettings() {
       {/* TODO: implement Update Area */}
       <div />
 
+      <ModalProxySetting />
+
       <div className={styles.settingBlock}>
         <h4 className={styles.blockTitle}>Security</h4>
         <div className={styles.itemList}>
@@ -161,6 +164,16 @@ export function MainWindowSettings() {
                 },
               });
             }}
+          />
+        </div>
+      </div>
+
+      <div className={styles.settingBlock}>
+        <h4 className={styles.blockTitle}>Network</h4>
+        <div className={styles.itemList}>
+          <ItemAction
+            name="Proxy"
+            icon="rabby-internal://assets/icons/mainwin-settings/proxy.svg"
           />
         </div>
       </div>

@@ -159,10 +159,12 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
 
   const dappSafeViewSession = session.fromPartition('dappSafeView');
   const checkingViewSession = session.fromPartition('checkingView');
+  const checkingProxySession = session.fromPartition('checkingProxy');
   valueToMainSubject('sessionReady', {
     mainSession: sessionIns,
     dappSafeViewSession,
     checkingViewSession,
+    checkingProxySession,
   });
   supportHmrOnDev(sessionIns);
 

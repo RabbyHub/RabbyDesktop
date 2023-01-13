@@ -18,6 +18,7 @@ import './streams/browser';
 import './streams/popupOnMainwin';
 import './streams/popupViewOnMainwin';
 import './streams/webContents';
+import './streams/appProxy';
 
 import bootstrap from './streams/app';
 

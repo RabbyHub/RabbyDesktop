@@ -1,4 +1,5 @@
 import { Modal as AntdModal, ModalProps } from 'antd';
+import classNames from 'classnames';
 import './modal.less';
 
 interface Props extends ModalProps {
@@ -18,7 +19,7 @@ export const Modal: React.FC<Props> = ({
     <AntdModal
       width={1000}
       {...props}
-      className="RabbyModal"
+      className={classNames('RabbyModal', props.className)}
       destroyOnClose
       footer={null}
       closeIcon={
