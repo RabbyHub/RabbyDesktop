@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PQueue from 'p-queue';
 import { CHAINS, CHAINS_ENUM } from '@debank/common';
 import { ComplexProtocol } from '@debank/rabby-api/dist/types';
@@ -80,6 +80,7 @@ const getNoHistoryPriceTokensFromProtocolList = (
 };
 
 export default (address: string | undefined) => {
+  const addressRef = useRef(address);
   const [protocolList, setProtocolList] = useState<DisplayProtocol[]>([]);
   const [historyProtocolMap, setHistoryProtocolMap] = useState<
     Record<string, DisplayProtocol>
@@ -124,7 +125,9 @@ export default (address: string | undefined) => {
     };
     await waitQueueFinished(queue);
     const historyQueue = new PQueue({ concurrency: 20 });
-    setProtocolList(result);
+    if (addr === addressRef.current) {
+      setProtocolList(result);
+    }
     result.forEach((item) => {
       if (LOAD_HISTORY_CHAIN_WHITELIST.includes(item.chain)) {
         historyQueue.add(async () => {
@@ -153,7 +156,9 @@ export default (address: string | undefined) => {
       },
       {}
     );
-    setHistoryProtocolMap(map);
+    if (addr === addressRef.current) {
+      setHistoryProtocolMap(map);
+    }
     const noHistoryPriceTokenList = getNoHistoryPriceTokensFromProtocolList(
       result,
       map
@@ -189,11 +194,14 @@ export default (address: string | undefined) => {
       }
     );
     await waitQueueFinished(tokenHistoryPriceQueue);
-    setTokenHistoryPriceMap(tmap);
+    if (addr === addressRef.current) {
+      setTokenHistoryPriceMap(tmap);
+    }
   };
 
   useEffect(() => {
     if (!address) return;
+    addressRef.current = address;
     setProtocolList([]);
     setHistoryProtocolMap({});
     fetchData(address);

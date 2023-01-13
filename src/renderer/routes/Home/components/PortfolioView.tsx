@@ -1,6 +1,8 @@
+import { useMemo } from 'react';
 import styled from 'styled-components';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
+import { DisplayChainWithWhiteLogo } from '@/renderer/hooks/useCurrentBalance';
 import TokenItemComp from './TokenItem';
 import ProtocolItem from './ProtocolItem';
 
@@ -10,6 +12,14 @@ const PortfolioWrapper = styled.div`
   padding: 46px 27px;
   border-radius: 8px;
   max-width: 1375px;
+  position: relative;
+  flex: 1;
+  .icon-asset-arrow {
+    position: absolute;
+    top: -8px;
+    width: 15px;
+    left: 0;
+  }
   .assets-list {
     margin: 0;
     padding: 0;
@@ -48,6 +58,8 @@ const PortfolioView = ({
   protocolList,
   historyProtocolMap,
   protocolHistoryTokenPriceMap,
+  chainBalances,
+  selectChainServerId,
 }: {
   tokenList: TokenItem[];
   historyTokenMap: Record<string, TokenItem>;
@@ -57,9 +69,27 @@ const PortfolioView = ({
     string,
     { id: string; price: number; chain: string }
   >;
+  chainBalances: DisplayChainWithWhiteLogo[];
+  selectChainServerId: string | null;
 }) => {
+  const assetArrowLeft = useMemo(() => {
+    if (!selectChainServerId) return 65;
+    const el: HTMLLIElement | null = document.querySelector(
+      `#chain-icon-${selectChainServerId}`
+    );
+    if (!el) return 65;
+    return el.offsetLeft + el.offsetWidth / 2 - 7;
+  }, [chainBalances, selectChainServerId]);
+
   return (
     <PortfolioWrapper>
+      <img
+        src="rabby-internal://assets/icons/home/asset-arrow.svg"
+        className="icon-asset-arrow"
+        style={{
+          transform: `translateX(${assetArrowLeft}px)`,
+        }}
+      />
       <ul className="assets-list">
         <li className="th">
           <div>Asset</div>

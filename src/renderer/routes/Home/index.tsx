@@ -23,6 +23,9 @@ const HomeWrapper = styled.div`
   padding-left: 28px;
   padding-right: 358px;
   color: #fff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   .header {
     width: 100%;
     margin-bottom: 20px;
@@ -91,22 +94,22 @@ const Home = () => {
     if (!balance || netCurve.length <= 0)
       return { usdValueChange: '0', percentChange: '0' };
     const balanceBn = new BigNumber(balance);
-    const yestordayBalanceBn = new BigNumber(netCurve[0].usd_value);
-    const gap = balanceBn.minus(yestordayBalanceBn);
+    const yesterdayBalanceBn = new BigNumber(netCurve[0].usd_value);
+    const gap = balanceBn.minus(yesterdayBalanceBn);
     let changePercent = 0;
-    if (yestordayBalanceBn.eq(0)) {
+    if (yesterdayBalanceBn.eq(0)) {
       if (balanceBn.eq(0)) {
         changePercent = 0;
       } else {
         changePercent = 1;
       }
     } else {
-      changePercent = gap.div(yestordayBalanceBn).toNumber();
+      changePercent = gap.div(yesterdayBalanceBn).toNumber();
     }
     return {
       usdValueChange: gap.abs().toFixed(2),
       percentChange: Math.abs(changePercent * 100).toFixed(2),
-      isLoss: balanceBn.lt(yestordayBalanceBn),
+      isLoss: balanceBn.lt(yesterdayBalanceBn),
     };
   }, [netCurve, balance]);
   const curveData = useCurve(balance || 0, Date.now(), netCurve);
@@ -193,7 +196,7 @@ const Home = () => {
   }, [protocolList, selectChainServerId]);
 
   const init = async () => {
-    if (!currentAccount) return;
+    if (!currentAccount?.address) return;
     const curve = await walletOpenapi.getNetCurve(currentAccount.address);
     setNetCurve(curve);
   };
@@ -214,12 +217,12 @@ const Home = () => {
                 src="rabby-internal://assets/icons/home/copy.svg"
               />
             </div>
-            <div className="balance">{formatNumber(balance || 0)}</div>
+            <div className="balance">${formatNumber(balance || 0)}</div>
           </div>
           <div className="right">
             <div
               className={classNames('balance-change', { 'is-loss': isLoss })}
-            >{`${isLoss ? '-' : '+'}${formatNumber(
+            >{`${isLoss ? '-' : '+'}$${formatNumber(
               usdValueChange
             )} (${percentChange}%)`}</div>
             <Curve data={curveData} />
@@ -236,6 +239,8 @@ const Home = () => {
         protocolList={displayProtocolList.defaultProtocolList}
         historyProtocolMap={historyProtocolMap}
         protocolHistoryTokenPriceMap={tokenHistoryPriceMap}
+        chainBalances={chainBalances}
+        selectChainServerId={selectChainServerId}
       />
     </HomeWrapper>
   );

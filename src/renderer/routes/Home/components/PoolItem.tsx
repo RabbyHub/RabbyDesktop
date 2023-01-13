@@ -226,7 +226,7 @@ const TokenItemComp = ({
       <div className="token-amount">
         {tokenHistory && (
           <div className="number-change">
-            {formatNumber(tokenHistory.amount)}{' '}
+            {formatNumber(tokenHistory.amount, 4)}{' '}
             {ellipsisTokenSymbol(tokenHistory.symbol)}
             <img
               className="icon-numer-change-arrow"
@@ -234,7 +234,7 @@ const TokenItemComp = ({
             />
           </div>
         )}
-        {`${formatNumber(token.amount, 2)}`} {ellipsisTokenSymbol(token.symbol)}
+        {`${formatNumber(token.amount, 4)}`} {ellipsisTokenSymbol(token.symbol)}
         {amountChange !== 0 && (
           <div
             className={classNames('price-change', {
@@ -242,7 +242,7 @@ const TokenItemComp = ({
             })}
           >
             {amountChange > 0 ? '+' : '-'}
-            {`${Math.abs(amountChange).toFixed(4)}`}{' '}
+            {`${formatNumber(amountChange, 4)}`}{' '}
             <span className="symbol">{ellipsisTokenSymbol(token.symbol)}</span>
           </div>
         )}
