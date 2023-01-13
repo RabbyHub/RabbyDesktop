@@ -23,7 +23,7 @@ export const Body: React.FC<Props> = ({
           <AccountItem
             onClickAction={() => onSelect(account)}
             onClick={() => onSwitchAccount(account)}
-            {...account}
+            account={account}
             key={account.address + account.type}
           />
         ))}
@@ -33,7 +33,7 @@ export const Body: React.FC<Props> = ({
           <AccountItem
             onClickAction={() => onSelect(contact)}
             onClick={() => onSwitchAccount(contact)}
-            {...contact}
+            account={contact}
             key={contact.address + contact.type}
           />
         ))}

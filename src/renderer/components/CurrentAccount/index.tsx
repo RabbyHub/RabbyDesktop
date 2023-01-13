@@ -23,7 +23,7 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
   return (
     <div
       className={clsx(styles.account, className)}
-      onClick={(event) => {
+      onClick={() => {
         showMainwinPopupview(
           { type: 'address-management' },
           { openDevTools: false }

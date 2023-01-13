@@ -1,4 +1,5 @@
 import { IDisplayedAccountWithBalance } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
+import { ellipsis } from '@/renderer/utils/address';
 import {
   KEYRING_ICONS,
   WALLET_BRAND_CONTENT,
@@ -8,7 +9,8 @@ import clsx from 'clsx';
 import React from 'react';
 import styles from './AddressManagementDrawer.module.less';
 
-interface Props extends IDisplayedAccountWithBalance {
+interface Props {
+  account: IDisplayedAccountWithBalance;
   onClickAction: () => void;
   onClick: React.MouseEventHandler<HTMLDivElement>;
 }
@@ -16,7 +18,7 @@ interface Props extends IDisplayedAccountWithBalance {
 export const AccountItem: React.FC<Props> = ({
   onClickAction,
   onClick,
-  ...account
+  account,
 }) => {
   const addressTypeIcon = React.useMemo(
     () =>
@@ -38,7 +40,7 @@ export const AccountItem: React.FC<Props> = ({
           <div className={styles.pin}>pin</div>
         </div>
         <div className={clsx(styles.part, styles.partAddress)}>
-          <div className={styles.address}>{account.address}</div>
+          <div className={styles.address}>{ellipsis(account.address)}</div>
           <div className={styles.copy}>copy</div>
           <div className={styles.balance}>{account.balance}</div>
         </div>
