@@ -6,6 +6,8 @@ import { isValidAddress } from 'ethereumjs-util';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { useWalletRequest } from '@/renderer/hooks/useWalletRequest';
 import styles from './AddAddressModal.module.less';
+import { useAccountToDisplay } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
+import { useAddressManagement } from '@/renderer/hooks/rabbyx/useAddressManagement';
 
 type ENS = Awaited<ReturnType<OpenApiService['getEnsAddressByName']>>;
 
@@ -64,10 +66,15 @@ export const ContactModalContent: React.FC<Props> = ({ onSuccess }) => {
     },
     []
   );
-
+  const { getAllAccountsToDisplay } = useAccountToDisplay();
+  const { getHighlightedAddressesAsync } = useAddressManagement();
   const [run, loading] = useWalletRequest(walletController.importWatchAddress, {
-    onSuccess(accounts) {
+    async onSuccess(accounts) {
+      setLocked(true);
+      await getHighlightedAddressesAsync();
+      await getAllAccountsToDisplay();
       onSuccess(accounts[0].address);
+      setLocked(false);
     },
     onError(err) {
       setErrorMessage(err.message ?? 'Not a valid address');

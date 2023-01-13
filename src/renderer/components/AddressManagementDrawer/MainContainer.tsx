@@ -90,10 +90,11 @@ export const MainContainer: React.FC = () => {
   );
 
   const handleDelete = React.useCallback(
-    (account: IDisplayedAccountWithBalance) => {
-      return removeAddress([account.address, account.type, account.brandName]);
+    async (account: IDisplayedAccountWithBalance) => {
+      await removeAddress([account.address, account.type, account.brandName]);
+      getHighlightedAddressesAsync();
     },
-    [removeAddress]
+    [removeAddress, getHighlightedAddressesAsync]
   );
 
   React.useEffect(() => {
