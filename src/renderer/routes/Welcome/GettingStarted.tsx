@@ -19,7 +19,6 @@ export default function GettingStarted() {
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:rabbyx:session-broadcast-forward-to-main',
       (payload) => {
-        console.log('payload', payload);
         if (payload.event === 'accountsChanged') {
           fetchAccounts();
         }
