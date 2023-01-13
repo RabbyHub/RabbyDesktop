@@ -23,7 +23,7 @@ const HomeWrapper = styled.div`
   padding-left: 28px;
   padding-right: 358px;
   color: #fff;
-  min-height: 100vh;
+  min-height: calc(100vh - 64px);
   display: flex;
   flex-direction: column;
   .header {
