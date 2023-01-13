@@ -8,6 +8,7 @@ interface Props {
   contacts: IDisplayedAccountWithBalance[];
   onSelect: (account: IDisplayedAccountWithBalance) => void;
   onSwitchAccount: (account: IDisplayedAccountWithBalance) => void;
+  onDelete: (account: IDisplayedAccountWithBalance) => void;
 }
 
 export const Body: React.FC<Props> = ({
@@ -15,29 +16,36 @@ export const Body: React.FC<Props> = ({
   contacts,
   onSelect,
   onSwitchAccount,
+  onDelete,
 }) => {
+  const renderAccountItem = React.useCallback(
+    (account: IDisplayedAccountWithBalance) => {
+      return (
+        <AccountItem
+          onClickAction={(e) => {
+            e.stopPropagation();
+            onSelect(account);
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSwitchAccount(account);
+          }}
+          onClickDelete={(e) => {
+            e.stopPropagation();
+            onDelete(account);
+          }}
+          account={account}
+          key={account.address + account.type}
+        />
+      );
+    },
+    [onDelete, onSelect, onSwitchAccount]
+  );
+
   return (
     <section className={styles.body}>
-      <div className={styles.group}>
-        {accounts.map((account) => (
-          <AccountItem
-            onClickAction={() => onSelect(account)}
-            onClick={() => onSwitchAccount(account)}
-            account={account}
-            key={account.address + account.type}
-          />
-        ))}
-      </div>
-      <div className={styles.group}>
-        {contacts.map((contact) => (
-          <AccountItem
-            onClickAction={() => onSelect(contact)}
-            onClick={() => onSwitchAccount(contact)}
-            account={contact}
-            key={contact.address + contact.type}
-          />
-        ))}
-      </div>
+      <div className={styles.group}>{accounts.map(renderAccountItem)}</div>
+      <div className={styles.group}>{contacts.map(renderAccountItem)}</div>
     </section>
   );
 };

@@ -13,7 +13,10 @@ export const Header: React.FC<Props> = ({ currentAccount, onSelect }) => {
     <section className={styles.header}>
       {currentAccount && (
         <CurrentAccount
-          onClick={() => onSelect(currentAccount)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect(currentAccount);
+          }}
           account={currentAccount}
         />
       )}

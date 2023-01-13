@@ -5,12 +5,10 @@ import {
 } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
 import { useAddressManagement } from '@/renderer/hooks/rabbyx/useAddressManagement';
 import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
-import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { sortAccountsByBalance } from '@/renderer/utils/account';
 import { KEYRING_CLASS } from '@/renderer/utils/keyring';
 import { groupBy } from 'lodash';
 import React from 'react';
-import { useResetToCurrentPage } from '../PopupViewUtils';
 import { AccountDetail } from './AccountDetail';
 import styles from './AddressManagementDrawer.module.less';
 import { Body } from './Body';
@@ -18,7 +16,7 @@ import { Footer } from './Footer';
 import { Header } from './Header';
 
 export const MainContainer: React.FC = () => {
-  const { getHighlightedAddressesAsync, highlightedAddresses } =
+  const { getHighlightedAddressesAsync, removeAddress, highlightedAddresses } =
     useAddressManagement();
   const { getAllAccountsToDisplay, accountsList, loadingAccounts } =
     useAccountToDisplay();
@@ -84,15 +82,18 @@ export const MainContainer: React.FC = () => {
 
   const currentDisplayAccount = accountList[currentAccountIndex];
 
-  const resetPage = useResetToCurrentPage();
-
   const handleSwitchAccount = React.useCallback(
     (account: IDisplayedAccountWithBalance) => {
       switchAccount(account);
-      hideMainwinPopupview('address-management');
-      resetPage();
     },
-    [resetPage, switchAccount]
+    [switchAccount]
+  );
+
+  const handleDelete = React.useCallback(
+    (account: IDisplayedAccountWithBalance) => {
+      return removeAddress([account.address, account.type, account.brandName]);
+    },
+    [removeAddress]
   );
 
   React.useEffect(() => {
@@ -109,6 +110,10 @@ export const MainContainer: React.FC = () => {
         <AccountDetail
           account={selectedAccount}
           onClose={() => setSelectedAccount(undefined)}
+          onDelete={(account) => {
+            setSelectedAccount(undefined);
+            handleDelete(account);
+          }}
         />
       </div>
     );
@@ -123,6 +128,7 @@ export const MainContainer: React.FC = () => {
       <Body
         onSelect={setSelectedAccount}
         onSwitchAccount={handleSwitchAccount}
+        onDelete={handleDelete}
         accounts={sortedAccountsList}
         contacts={watchSortedAccountsList}
       />
