@@ -47,6 +47,17 @@ type M2RChanneMessagePayload = {
         type: IContextMenuPageInfo['type'];
         visible: false;
       };
+  '__internal_push:popupview-on-mainwin:on-visiblechange':
+    | {
+        type: PopupViewOnMainwinInfo['type'];
+        visible: true;
+        pageInfo: PopupViewOnMainwinInfo;
+      }
+    | {
+        type: PopupViewOnMainwinInfo['type'];
+        visible: false;
+      };
+
   /* eslint-disable-next-line @typescript-eslint/ban-types */
   '__internal_push:loading-view:toggle': ChannelMessagePayload['__internal_rpc:mainwindow:toggle-loading-view']['send'][0];
 
@@ -193,6 +204,18 @@ type ChannelMessagePayload = {
   '__internal_forward:main-window:open-dapp': {
     send: [origin: IDapp['origin']];
     response: [origin: IDapp['origin']];
+  };
+  '__internal_forward:main-window:client-message': {
+    send: [
+      {
+        type: 'route-navigate';
+        data: {
+          pathname: string;
+          params?: Record<string, string>;
+        };
+      }
+    ];
+    response: ChannelMessagePayload['__internal_forward:main-window:client-message']['send'];
   };
   '__internal_rpc:dapp-tabs:close-safe-view': {
     send: [];
