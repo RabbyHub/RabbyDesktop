@@ -1,15 +1,10 @@
-import { TotalBalanceResponse } from '@debank/rabby-api/dist/types';
 // eslint-disable-next-line @typescript-eslint/naming-convention
+import type { TotalBalanceResponse } from '@debank/rabby-api/dist/types';
+
 type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
 type OpenApiService = import('@debank/rabby-api').OpenApiService;
 
 export type RabbyXMethod = {
-  'walletController.getAddressBalance': (
-    address: string
-  ) => TotalBalanceResponse;
-  'walletController.getAddressCacheBalance': (
-    address: string
-  ) => TotalBalanceResponse | null;
   'walletController.verifyPassword': (password: string) => void;
   'walletController.changeAccount': (account: Account) => void;
   'walletController.getCurrentAccount': () => RabbyAccount;
@@ -67,8 +62,12 @@ export type RabbyXMethod = {
 
   'walletController.getAllVisibleAccounts': () => DisplayedKeyring[];
   'walletController.getAllAlianNameByMap': () => Record<string, any>;
-  'walletController.getAddressCacheBalance': OpenApiService['getTotalBalance'];
-  'walletController.getAddressBalance': OpenApiService['getTotalBalance'];
+  'walletController.getAddressBalance': (
+    address: string
+  ) => TotalBalanceResponse;
+  'walletController.getAddressCacheBalance': (
+    address: string
+  ) => TotalBalanceResponse | null;
   'walletController.getHighlightedAddresses': () => IHighlightedAddress[];
   'walletController.updateHighlightedAddresses': (
     list: IHighlightedAddress[]
