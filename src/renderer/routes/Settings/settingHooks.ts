@@ -7,6 +7,7 @@ import {
   getPersistedProxyConfig,
   validateProxyConfig,
 } from '@/renderer/ipcRequest/app';
+import { formatProxyServerURL } from '@/isomorphic/url';
 
 const defaulAppProxyConf: IAppProxyConf = {
   proxyType: 'none',
@@ -19,11 +20,16 @@ const defaulAppProxyConf: IAppProxyConf = {
 const appProxyConfAtom = atom<IAppProxyConf>(defaulAppProxyConf);
 const isSettingProxyAtom = atom(false);
 
-export function useIsSettingProxy() {
-  const [isSettingProxy, setIsSettingProxy] = useAtom(isSettingProxyAtom);
+export function useProxyStateOnSettingPage() {
+  const [appProxyConf] = useAtom(appProxyConfAtom);
+  const [, setIsSettingProxy] = useAtom(isSettingProxyAtom);
+
+  const isUsingProxy = appProxyConf.proxyType !== 'none';
 
   return {
-    isSettingProxy,
+    proxyType: appProxyConf.proxyType,
+    customProxyServer: formatProxyServerURL(appProxyConf.proxySettings),
+    isUsingProxy,
     setIsSettingProxy,
   };
 }
@@ -33,17 +39,7 @@ export function useSettingProxyModal() {
   const [appProxyConf, setAppProxyConf] = useAtom(appProxyConfAtom);
   const [isSettingProxy, setIsSettingProxy] = useAtom(isSettingProxyAtom);
 
-  const setProxyType = useCallback(
-    (proxyType: IAppProxyConf['proxyType']) => {
-      setAppProxyConf((prev) => {
-        return {
-          ...prev,
-          proxyType,
-        };
-      });
-    },
-    [setAppProxyConf]
-  );
+  const [localProxyType, setLocalProxyType] = useState(appProxyConf.proxyType);
 
   const fetchProxyConf = useCallback(() => {
     getPersistedProxyConfig().then((result) => {
@@ -55,6 +51,7 @@ export function useSettingProxyModal() {
             ...result.proxySettings,
           },
         };
+        setLocalProxyType(nextVal.proxyType);
         proxyCustomForm.setFieldsValue(nextVal.proxySettings);
 
         return nextVal;
@@ -64,10 +61,10 @@ export function useSettingProxyModal() {
 
   const applyProxyAndRelaunch = useCallback(() => {
     applyProxyConfig({
-      proxyType: appProxyConf.proxyType,
+      proxyType: localProxyType,
       proxySettings: proxyCustomForm.getFieldsValue(),
     });
-  }, [appProxyConf, proxyCustomForm]);
+  }, [localProxyType, proxyCustomForm]);
 
   useEffect(() => {
     fetchProxyConf();
@@ -77,8 +74,10 @@ export function useSettingProxyModal() {
     isSettingProxy,
     setIsSettingProxy,
 
+    localProxyType,
+    setLocalProxyType,
+
     proxyType: appProxyConf.proxyType,
-    setProxyType,
     proxyCustomForm,
 
     applyProxyAndRelaunch,

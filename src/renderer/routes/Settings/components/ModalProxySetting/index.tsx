@@ -132,14 +132,14 @@ export default function ModalProxySetting() {
     setIsSettingProxy,
 
     proxyCustomForm,
-    proxyType,
-    setProxyType,
+    localProxyType,
+    setLocalProxyType,
 
     applyProxyAndRelaunch,
   } = useSettingProxyModal();
   const { onValidateProxy, isCheckingProxy } = useCheckProxy();
 
-  const isUsingCustomProxy = proxyType === 'custom';
+  const isUsingCustomProxy = localProxyType === 'custom';
 
   return (
     <RModal
@@ -159,10 +159,10 @@ export default function ModalProxySetting() {
               { label: 'System', value: 'system' },
               { label: 'Custom', value: 'custom' },
             ]}
-            value={proxyType}
+            value={localProxyType}
             optionType="button"
             onChange={(e) => {
-              setProxyType(e.target.value!);
+              setLocalProxyType(e.target.value!);
             }}
           />
         </Form.Item>

@@ -229,6 +229,12 @@ export function filterProxyProtocol(
   }
 }
 
+export function formatProxyServerURL(settings: IAppProxyConf['proxySettings']) {
+  return `${filterProxyProtocol(settings.protocol)}://${settings.hostname}:${
+    settings.port
+  }`;
+}
+
 export function coercePort(input: any) {
   let result = Number.parseInt(input, 10);
   if (Number.isNaN(result)) {

@@ -2,7 +2,7 @@ import {
   IS_RUNTIME_PRODUCTION,
   RABBY_INTERNAL_PROTOCOL,
 } from '@/isomorphic/constants';
-import { filterProxyProtocol } from '@/isomorphic/url';
+import { formatProxyServerURL } from '@/isomorphic/url';
 import { BrowserView } from 'electron';
 import { catchError, firstValueFrom, of, Subject, timeout } from 'rxjs';
 import { BrowserViewManager } from './browserView';
@@ -150,20 +150,6 @@ export async function checkUrlViaBrowserView(
   return firstValueFrom(obs).finally(() => {
     viewMngr.recycleView(view);
   });
-}
-
-export function formatProxyServerURL(settings: IAppProxyConf['proxySettings']) {
-  // return urlFormat({
-  //   protocol: `${filterProxyProtocol(settings.protocol)}:`,
-  //   hostname: settings.hostname,
-  //   port: settings.port,
-  //   // // @ts-ignore
-  //   // username: settings.username,
-  //   // password: settings.password,
-  // })
-  return `${filterProxyProtocol(settings.protocol)}://${settings.hostname}:${
-    settings.port
-  }`;
 }
 
 export function setSessionProxy(
