@@ -5,13 +5,17 @@ import useDebounceValue from '@/renderer/hooks/useDebounceValue';
 import { isValidAddress } from 'ethereumjs-util';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { useWalletRequest } from '@/renderer/hooks/useWalletRequest';
-import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import styles from './AddAddressModal.module.less';
-import { useResetToCurrentPage } from '../PopupViewUtils';
+import { useAccountToDisplay } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
+import { useAddressManagement } from '@/renderer/hooks/rabbyx/useAddressManagement';
 
 type ENS = Awaited<ReturnType<OpenApiService['getEnsAddressByName']>>;
 
-export const ContactModalContent: React.FC = () => {
+interface Props {
+  onSuccess: (address: string) => void;
+}
+
+export const ContactModalContent: React.FC<Props> = ({ onSuccess }) => {
   const [ens, setEns] = React.useState<ENS>();
   const [input, setInput] = React.useState<string>();
   const [value, setValue] = React.useState<string>();
@@ -62,18 +66,15 @@ export const ContactModalContent: React.FC = () => {
     },
     []
   );
-
-  const resetPage = useResetToCurrentPage();
-
+  const { getAllAccountsToDisplay } = useAccountToDisplay();
+  const { getHighlightedAddressesAsync } = useAddressManagement();
   const [run, loading] = useWalletRequest(walletController.importWatchAddress, {
-    onSuccess(accounts) {
-      // nav('/welcome/import/successful', {
-      //   state: {
-      //     accounts,
-      //   },
-      // });
-      hideMainwinPopupview('add-address');
-      resetPage();
+    async onSuccess(accounts) {
+      setLocked(true);
+      await getHighlightedAddressesAsync();
+      await getAllAccountsToDisplay();
+      onSuccess(accounts[0].address);
+      setLocked(false);
     },
     onError(err) {
       setErrorMessage(err.message ?? 'Not a valid address');

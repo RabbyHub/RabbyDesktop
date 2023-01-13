@@ -1,25 +1,12 @@
-import {
-  useAccounts,
-  useCurrentAccount,
-} from '@/renderer/hooks/rabbyx/useAccount';
-import { useClickOutSide } from '@/renderer/hooks/useClick';
-import {
-  hideMainwinPopup,
-  showMainwinPopup,
-} from '@/renderer/ipcRequest/mainwin-popup';
+import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
+
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import clsx from 'clsx';
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import styles from './index.module.less';
 
 export const CurrentAccount = ({ className }: { className?: string }) => {
-  const divRef = useRef<HTMLDivElement>(null);
-  useClickOutSide(divRef, () => {
-    hideMainwinPopup('switch-account');
-  });
   const { currentAccount } = useCurrentAccount();
-  const { accounts } = useAccounts();
-
   const displayAddr = useMemo(
     () =>
       currentAccount?.address
@@ -36,20 +23,10 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
   return (
     <div
       className={clsx(styles.account, className)}
-      ref={divRef}
-      onClick={(event) => {
-        const el = event.currentTarget as HTMLDivElement;
-        const rect = el.getBoundingClientRect();
-
-        showMainwinPopup(
-          {
-            x: rect.x,
-            y: rect.bottom + 10,
-            height: Math.min(accounts.length, 6) * (60 + 3) - 1,
-          },
-          {
-            type: 'switch-account',
-          }
+      onClick={() => {
+        showMainwinPopupview(
+          { type: 'address-management' },
+          { openDevTools: false }
         );
       }}
     >
@@ -93,7 +70,7 @@ export const CurrentAccountAndNewAccount = ({
   return (
     <div className={clsx(styles.row, className)} data-nodrag>
       <CurrentAccount />
-      <AddNewAccount />
+      {/* <AddNewAccount /> */}
     </div>
   );
 };

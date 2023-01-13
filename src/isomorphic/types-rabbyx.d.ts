@@ -63,3 +63,30 @@ interface PreferenceState {
   tokenApprovalChain: Record<string, import('@debank/common').CHAINS_ENUM>;
   nftApprovalChain: Record<string, import('@debank/common').CHAINS_ENUM>;
 }
+
+interface DisplayKeyring {
+  unlock: () => Promise<void>;
+  getFirstPage: () => Promise<string[]>;
+  getNextPage: () => Promise<string[]>;
+  getAccounts: () => Promise<string[]>;
+  getAccountsWithBrand: () => Promise<Account[]>;
+  activeAccounts: (indexes: number[]) => Promise<string[]>;
+}
+
+interface DisplayedKeyring {
+  type: string;
+  accounts: {
+    address: string;
+    brandName: string;
+    type?: string;
+    keyring?: DisplayKeyring;
+    alianName?: string;
+  }[];
+  keyring: DisplayKeyring;
+  byImport?: boolean;
+}
+
+type IHighlightedAddress = {
+  brandName: Account['brandName'];
+  address: Account['address'];
+};

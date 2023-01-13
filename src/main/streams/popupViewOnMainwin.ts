@@ -5,7 +5,7 @@ import {
   IS_RUNTIME_PRODUCTION,
   RABBY_POPUP_GHOST_VIEW_URL,
 } from '../../isomorphic/constants';
-import { onIpcMainEvent } from '../utils/ipcMainEvents';
+import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { fromMainSubject, valueToMainSubject } from './_init';
 import { createPopupView, hidePopupView } from '../utils/browser';
 import { onMainWindowReady } from '../utils/stream-helpers';
@@ -19,6 +19,9 @@ const viewsState: Record<
   'add-address': {
     visible: false,
   },
+  'address-management': {
+    visible: false,
+  },
 };
 
 async function hidePopupViewOnMainWindow(
@@ -27,14 +30,14 @@ async function hidePopupViewOnMainWindow(
 ) {
   if (!targetView || targetView.webContents.isDestroyed()) return;
 
-  // sendToWebContents(
-  //   targetView.webContents,
-  //   '__internal_push:popupview-on-mainwin:on-visiblechange',
-  //   {
-  //     type,
-  //     visible: false,
-  //   }
-  // );
+  sendToWebContents(
+    targetView.webContents,
+    '__internal_push:popupview-on-mainwin:on-visiblechange',
+    {
+      type,
+      visible: false,
+    }
+  );
 
   hidePopupView(targetView);
   viewsState[type].visible = false;
@@ -80,7 +83,7 @@ const addAddressReady = onMainWindowReady().then(async (mainWin) => {
   mainWindow.on('restore', onTargetWinUpdate);
 
   await addAddressPopup.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}?view=add-address#/popupview__add-address`
+    `${RABBY_POPUP_GHOST_VIEW_URL}?view=add-address#/`
   );
 
   // debug-only
@@ -93,9 +96,41 @@ const addAddressReady = onMainWindowReady().then(async (mainWin) => {
   return addAddressPopup;
 });
 
-Promise.all([addAddressReady]).then((wins) => {
+const addressManagementReady = onMainWindowReady().then(async (mainWin) => {
+  const mainWindow = mainWin.window;
+
+  const addressManagementPopup = createPopupView({});
+
+  mainWindow.addBrowserView(addressManagementPopup);
+
+  const onTargetWinUpdate = () => {
+    if (viewsState['address-management'].visible)
+      updateSubviewPos(mainWindow, addressManagementPopup);
+  };
+  mainWindow.on('show', onTargetWinUpdate);
+  mainWindow.on('move', onTargetWinUpdate);
+  mainWindow.on('resized', onTargetWinUpdate);
+  mainWindow.on('unmaximize', onTargetWinUpdate);
+  mainWindow.on('restore', onTargetWinUpdate);
+
+  await addressManagementPopup.webContents.loadURL(
+    `${RABBY_POPUP_GHOST_VIEW_URL}?view=address-management#/`
+  );
+
+  // debug-only
+  if (!IS_RUNTIME_PRODUCTION) {
+    // addressManagementPopup.webContents.openDevTools({ mode: 'detach' });
+  }
+
+  hidePopupView(addressManagementPopup);
+
+  return addressManagementPopup;
+});
+
+Promise.all([addAddressReady, addressManagementReady]).then((wins) => {
   valueToMainSubject('popupViewsOnMainwinReady', {
     addAddress: wins[0],
+    addressManagement: wins[1],
   });
 });
 
@@ -103,11 +138,16 @@ onIpcMainEvent(
   '__internal_rpc:popupview-on-mainwin:toggle-show',
   async (_, payload) => {
     const mainWindow = (await onMainWindowReady()).window;
-    const { addAddress } = await firstValueFrom(
+    const { addAddress, addressManagement } = await firstValueFrom(
       fromMainSubject('popupViewsOnMainwinReady')
     );
 
-    const targetView = payload.type === 'add-address' ? addAddress : null;
+    const targetView =
+      payload.type === 'add-address'
+        ? addAddress
+        : payload.type === 'address-management'
+        ? addressManagement
+        : null;
 
     if (!targetView) return;
 
@@ -115,15 +155,15 @@ onIpcMainEvent(
       viewsState[payload.type].visible = true;
       updateSubviewPos(mainWindow, targetView);
       targetView.webContents.focus();
-      // sendToWebContents(
-      //   targetView.webContents,
-      //   '__internal_push:popupview-on-mainwin:on-visiblechange',
-      //   {
-      //     type: payload.type,
-      //     visible: true,
-      //     pageInfo: payload.pageInfo,
-      //   }
-      // );
+      sendToWebContents(
+        targetView.webContents,
+        '__internal_push:popupview-on-mainwin:on-visiblechange',
+        {
+          type: payload.type,
+          visible: true,
+          pageInfo: payload.pageInfo,
+        }
+      );
       if (
         !IS_RUNTIME_PRODUCTION &&
         payload.openDevTools &&
