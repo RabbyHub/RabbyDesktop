@@ -5,7 +5,6 @@ import useDebounceValue from '@/renderer/hooks/useDebounceValue';
 import { isValidAddress } from 'ethereumjs-util';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { useWalletRequest } from '@/renderer/hooks/useWalletRequest';
-import { useNavigate } from 'react-router-dom';
 import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import styles from './AddAddressModal.module.less';
 import { useResetToCurrentPage } from '../PopupViewUtils';
@@ -20,7 +19,6 @@ export const ContactModalContent: React.FC = () => {
   const [tags, setTags] = React.useState<string[]>([]);
   const [errorMessage, setErrorMessage] = React.useState<string>();
   const [locked, setLocked] = React.useState<boolean>(false);
-  const nav = useNavigate();
 
   const handleInput = React.useCallback(async (address?: string) => {
     setTags([]);
