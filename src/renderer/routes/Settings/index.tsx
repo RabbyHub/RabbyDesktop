@@ -115,6 +115,10 @@ function ItemSwitch({
 }
 
 const ProxyText = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
   > img {
     margin-left: 4px;
   }
@@ -147,10 +151,10 @@ export function MainWindowSettings() {
               <>
                 <Tooltip
                   trigger="hover"
-                  title="When Enabling this feature, Rabby App would be transparent on Screen Recording/Capturing."
+                  title="Once enabled, content in Rabby will be hidden during screen recording."
                 >
                   <span style={{ display: 'flex', alignItems: 'center' }}>
-                    Content Protection
+                    Screen Capture Protection
                     <img
                       className={styles.nameTooltipIcon}
                       src={IconTooltipInfo}
@@ -187,19 +191,23 @@ export function MainWindowSettings() {
         <h4 className={styles.blockTitle}>Network</h4>
         <div className={styles.itemList}>
           <ItemAction
-            name="Proxy"
+            name={
+              <ProxyText>
+                {proxyType === 'custom' && (
+                  <Tooltip title={customProxyServer}>
+                    <span>Proxy: Custom</span>
+                  </Tooltip>
+                )}
+                {proxyType === 'system' && <span>Proxy: System</span>}
+                {proxyType === 'none' && <span>Proxy: None</span>}
+              </ProxyText>
+            }
             onClick={() => {
               setIsSettingProxy(true);
             }}
             icon="rabby-internal://assets/icons/mainwin-settings/proxy.svg"
           >
-            <ProxyText>
-              {proxyType === 'custom' && (
-                <Tooltip title={customProxyServer}>Proxy: Custom</Tooltip>
-              )}
-              {proxyType === 'system' && <>Proxy: System</>}
-              <img src={IconChevronRight} />
-            </ProxyText>
+            <img src={IconChevronRight} />
           </ItemAction>
         </div>
       </div>
@@ -208,8 +216,8 @@ export function MainWindowSettings() {
         <h4 className={styles.blockTitle}>About</h4>
         <div className={styles.itemList}>
           <ItemText
-            name="Version"
-            text={appVerison || '-'}
+            name={`Version: ${appVerison || '-'}`}
+            text=""
             icon="rabby-internal://assets/icons/mainwin-settings/info.svg"
           />
           {/* <ItemLink name='User Agreement' /> */}
