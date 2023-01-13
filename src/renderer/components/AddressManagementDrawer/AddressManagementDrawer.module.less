@@ -293,7 +293,13 @@
   }
   .address {
     font-size: 12px;
-    margin-right: 6px;
+    display: flex;
+    width: 100%;
+
+    .text {
+      flex: 1;
+      display: block;
+    }
   }
   .copy {
     cursor: pointer;
@@ -305,6 +311,13 @@
   .editNote {
     display: flex;
     align-items: center;
+  }
+  .source {
+    display: flex;
+    align-items: center;
+    .text {
+      margin-left: 4px;
+    }
   }
 }
 
@@ -329,5 +342,8 @@
   .description {
     display: flex;
     align-items: center;
+  }
+  .headline {
+    flex: 1;
   }
 }

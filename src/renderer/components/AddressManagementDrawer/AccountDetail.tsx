@@ -2,6 +2,12 @@ import React from 'react';
 import { IDisplayedAccountWithBalance } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
 import { useCopyToClipboard } from 'react-use';
 import { splitNumberByStep } from '@/renderer/utils/number';
+import {
+  KEYRING_ICONS,
+  WALLET_BRAND_CONTENT,
+  WALLET_BRAND_TYPES,
+} from '@/renderer/utils/constant';
+import { useAddressSource } from '@/renderer/hooks/rabbyx/useAddressSource';
 import styles from './AddressManagementDrawer.module.less';
 import { AccountDetailItem } from './AccountDetailItem';
 
@@ -16,10 +22,17 @@ export const AccountDetail: React.FC<Props> = ({
   onDelete,
   account,
 }) => {
+  const brandName = account.brandName as WALLET_BRAND_TYPES;
   const [, copyToClipboard] = useCopyToClipboard();
   const onCopy = React.useCallback(() => {
     copyToClipboard(account.address);
   }, [account.address, copyToClipboard]);
+
+  const source = useAddressSource({
+    type: account.type,
+    brandName,
+    byImport: !!account.byImport,
+  });
 
   return (
     <div className={styles.AccountDetail}>
@@ -33,8 +46,8 @@ export const AccountDetail: React.FC<Props> = ({
         <AccountDetailItem
           headline="Address"
           description={
-            <div>
-              <span className={styles.address}>{account.address}</span>
+            <div className={styles.address}>
+              <span className={styles.text}>{account.address}</span>
               <img
                 className={styles.copy}
                 onClick={onCopy}
@@ -55,7 +68,17 @@ export const AccountDetail: React.FC<Props> = ({
         <AccountDetailItem headline="QR Code">
           <img src="rabby-internal://assets/icons/address-management/qrcode.svg" />
         </AccountDetailItem>
-        <AccountDetailItem headline="Source">Source</AccountDetailItem>
+        <AccountDetailItem headline="Source">
+          <div className={styles.source}>
+            <img
+              src={
+                KEYRING_ICONS[account.type] ||
+                WALLET_BRAND_CONTENT[brandName]?.image
+              }
+            />
+            <span className={styles.text}>{source}</span>
+          </div>
+        </AccountDetailItem>
         <AccountDetailItem headline="HD Path">HD Path</AccountDetailItem>
       </section>
       <section className={styles.part}>
