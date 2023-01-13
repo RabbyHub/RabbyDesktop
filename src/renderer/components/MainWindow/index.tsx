@@ -198,7 +198,6 @@ export function MainWindow() {
   }, []);
 
   useMessageForwardToMainwin('route-navigate', (payload) => {
-    console.log(payload);
     router.navigate(payload.data);
   });
 

@@ -3,7 +3,6 @@ import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { KEYRING_CLASS } from '@/renderer/utils/keyring';
 import clsx from 'clsx';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import styles from './AddAddressModal.module.less';
 
 const HARDWARE_MAP = [
