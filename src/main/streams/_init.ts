@@ -96,6 +96,7 @@ const CONF = {
   } as IConf<
     ReplaySubject<{
       addAddress: BrowserView;
+      addressManagement: BrowserView;
     }>
   >,
 };

@@ -16,9 +16,11 @@ import SecurityAddressbarPopup from '@/renderer/routes-popup/SecurityAddressbarP
 import { SidebarContextMenu } from '@/renderer/routes-popup/SidebarContextMenu';
 import SwitchChainWindow from '@/renderer/routes-popup/SwitchChainWindow';
 import SwitchAccountWindow from '@/renderer/routes-popup/SwitchAccountWindow';
-import MainWindowAddAddress from '../routes-popup/MainWindowAddAddress';
 
+import { parseQueryString } from '@/isomorphic/url';
 import RabbyNotificationGasket from '../routes-popup/RabbyNotificationGasket';
+import MainWindowAddressManagement from '../routes-popup/MainWindowAddressManagement';
+import MainWindowAddAddress from '../routes-popup/MainWindowAddAddress';
 
 function App() {
   return (
@@ -40,10 +42,6 @@ function App() {
           element={<SwitchAccountWindow />}
         />
         <Route
-          path="/popupview__add-address"
-          element={<MainWindowAddAddress />}
-        />
-        <Route
           path="/rabby-notification-gasket"
           element={<RabbyNotificationGasket />}
         />
@@ -56,4 +54,15 @@ function App() {
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
-root.render(<App />);
+
+switch (parseQueryString().view) {
+  case 'address-management':
+    root.render(<MainWindowAddressManagement />);
+    break;
+  case 'add-address':
+    root.render(<MainWindowAddAddress />);
+    break;
+  default:
+    root.render(<App />);
+    break;
+}

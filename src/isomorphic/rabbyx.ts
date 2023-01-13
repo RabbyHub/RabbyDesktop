@@ -58,6 +58,22 @@ export type RabbyXMethod = {
 
   'walletController.importWatchAddress': (address: string) => RabbyAccount[];
 
+  'walletController.getAllVisibleAccounts': () => DisplayedKeyring[];
+  'walletController.getAllAlianNameByMap': () => Record<string, any>;
+  'walletController.getAddressCacheBalance': OpenApiService['getTotalBalance'];
+  'walletController.getAddressBalance': OpenApiService['getTotalBalance'];
+  'walletController.getHighlightedAddresses': () => IHighlightedAddress[];
+  'walletController.updateHighlightedAddresses': (
+    list: IHighlightedAddress[]
+  ) => void;
+  'walletController.removeAddress': (
+    address: string,
+    type: string,
+    brand?: string | undefined
+  ) => void;
+  'walletController.getWhitelist': () => string[];
+  'walletController.isWhitelistEnabled': () => boolean;
+
   'permissionService.addConnectedSite': (
     origin: string,
     name: string,
