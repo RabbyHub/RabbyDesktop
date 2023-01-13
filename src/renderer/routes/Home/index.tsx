@@ -19,7 +19,7 @@ import Curve from './components/Curve';
 import PortfolioView from './components/PortfolioView';
 
 const HomeWrapper = styled.div`
-  padding-top: 76px;
+  padding-top: 12px;
   padding-left: 28px;
   padding-right: 358px;
   color: #fff;
@@ -75,6 +75,91 @@ const HomeWrapper = styled.div`
   }
 `;
 
+const calcFilterPrice = (tokens: { usd_value?: number }[]) => {
+  const total = tokens.reduce((t, item) => (item.usd_value || 0) + t, 0);
+  return Math.min(total / 100, 1000);
+};
+const calcIsShowExpand = (tokens: { usd_value?: number }[]) => {
+  const filterPrice = calcFilterPrice(tokens);
+  if (tokens.length < 15) {
+    return false;
+  }
+  if (tokens.filter((item) => (item.usd_value || 0) < filterPrice).length < 3) {
+    return false;
+  }
+  return true;
+};
+const useExpandList = (tokens: TokenItem[]) => {
+  const [isExpand, setIsExpand] = useState(false);
+  const filterPrice = useMemo(() => calcFilterPrice(tokens), [tokens]);
+  const isShowExpand = useMemo(() => calcIsShowExpand(tokens), [tokens]);
+
+  const totalHidden = useMemo(
+    () =>
+      tokens.reduce((t, item) => {
+        const price = item.amount * item.price || 0;
+        if (price < filterPrice) {
+          return t + price;
+        }
+        return t;
+      }, 0),
+    [tokens, filterPrice]
+  );
+  const filterList = useMemo(() => {
+    if (!isShowExpand) {
+      return tokens;
+    }
+    const result = isExpand
+      ? tokens
+      : tokens.filter((item) => (item.amount * item.price || 0) >= filterPrice);
+    return result;
+  }, [isExpand, tokens, isShowExpand, filterPrice]);
+
+  return {
+    isExpand,
+    setIsExpand,
+    filterList,
+    filterPrice,
+    isShowExpand,
+    totalHidden,
+  };
+};
+const useExpandProtocolList = (protocols: DisplayProtocol[]) => {
+  const [isExpand, setIsExpand] = useState(false);
+  const filterPrice = useMemo(() => calcFilterPrice(protocols), [protocols]);
+  const isShowExpand = useMemo(() => calcIsShowExpand(protocols), [protocols]);
+
+  const totalHidden = useMemo(
+    () =>
+      protocols.reduce((t, item) => {
+        const price = item.usd_value || 0;
+        if (price < filterPrice) {
+          return t + price;
+        }
+        return t;
+      }, 0),
+    [protocols, filterPrice]
+  );
+  const filterList = useMemo(() => {
+    if (!isShowExpand) {
+      return protocols;
+    }
+    const result = isExpand
+      ? protocols
+      : protocols.filter((item) => (item.usd_value || 0) >= filterPrice);
+    return result;
+  }, [isExpand, protocols, isShowExpand, filterPrice]);
+
+  return {
+    isExpand,
+    setIsExpand,
+    filterList,
+    filterPrice,
+    isShowExpand,
+    totalHidden,
+  };
+};
+
 const Home = () => {
   const { currentAccount } = useCurrentAccount();
   const [balance, chainBalances] = useCurrentBalance(
@@ -116,70 +201,25 @@ const Home = () => {
   const { tokenList, historyTokenMap } = useHistoryTokenList(
     currentAccount?.address
   );
-  const displayTokenList = useMemo(() => {
-    const list: TokenItem[] = [];
-    const smallList: TokenItem[] = [];
-    const l = selectChainServerId
+  const filterTokenList = useMemo(() => {
+    const list: TokenItem[] = selectChainServerId
       ? tokenList.filter((token) => token.chain === selectChainServerId)
       : tokenList;
-    const totalUsdValue = l.reduce((sum, item) => {
-      return sum + (item.usd_value || 0);
-    }, 0);
-    l.forEach((item) => {
-      if (new BigNumber(item.usd_value || 0).div(totalUsdValue).gte(0.001)) {
-        list.push(item);
-      } else {
-        smallList.push(item);
-      }
-    });
-    return {
-      defaultTokenList: sortBy(list, (i) => i.usd_value || 0).reverse(),
-      smallBalanceTokenList: sortBy(
-        smallList,
-        (i) => i.usd_value || 0
-      ).reverse(),
-    };
+    return sortBy(list, (i) => i.usd_value || 0).reverse();
   }, [tokenList, selectChainServerId]);
   const { protocolList, historyProtocolMap, tokenHistoryPriceMap } =
     useHistoryProtocol(currentAccount?.address);
+  const { filterList: displayTokenList } = useExpandList(filterTokenList);
 
-  const displayProtocolList = useMemo(() => {
-    const list: DisplayProtocol[] = [];
-    const smallList: DisplayProtocol[] = [];
-    const l = selectChainServerId
+  const filterProtocolList = useMemo(() => {
+    const list: DisplayProtocol[] = selectChainServerId
       ? protocolList.filter(
           (protocol) => protocol.chain === selectChainServerId
         )
       : protocolList;
-    const totalUsdValue = l.reduce((sum, item) => {
-      return sum + (item.usd_value || 0);
-    }, 0);
-    l.forEach((item) => {
-      if (new BigNumber(item.usd_value || 0).div(totalUsdValue).gte(0.001)) {
-        list.push(item);
-      } else {
-        smallList.push(item);
-      }
-    });
-    return {
-      defaultProtocolList: sortBy(
-        sortBy(
-          list.map((item) => {
-            return {
-              ...item,
-              portfolio_item_list: sortBy(item.portfolio_item_list, (i) => {
-                return (i.detail.supply_token_list || []).reduce(
-                  (sum, j) => sum + j.price * j.amount,
-                  0
-                );
-              }).reverse(),
-            };
-          })
-        ),
-        (i) => i.usd_value || 0
-      ).reverse(),
-      smallBalanceProtocolList: sortBy(
-        smallList.map((item) => {
+    return sortBy(
+      sortBy(
+        list.map((item) => {
           return {
             ...item,
             portfolio_item_list: sortBy(item.portfolio_item_list, (i) => {
@@ -189,11 +229,13 @@ const Home = () => {
               );
             }).reverse(),
           };
-        }),
-        (i) => i.usd_value || 0
-      ).reverse(),
-    };
+        })
+      ),
+      (i) => i.usd_value || 0
+    ).reverse();
   }, [protocolList, selectChainServerId]);
+  const { filterList: displayProtocolList } =
+    useExpandProtocolList(filterProtocolList);
 
   const init = async () => {
     if (!currentAccount?.address) return;
@@ -234,9 +276,9 @@ const Home = () => {
         />
       </div>
       <PortfolioView
-        tokenList={displayTokenList.defaultTokenList}
+        tokenList={displayTokenList}
         historyTokenMap={historyTokenMap}
-        protocolList={displayProtocolList.defaultProtocolList}
+        protocolList={displayProtocolList}
         historyProtocolMap={historyProtocolMap}
         protocolHistoryTokenPriceMap={tokenHistoryPriceMap}
         chainBalances={chainBalances}
