@@ -7,6 +7,8 @@ import {
 
 import DApps from '@/renderer/routes/Dapps';
 import GettingStarted from '@/renderer/routes/Welcome/GettingStarted';
+import React, { useEffect } from 'react';
+import Home from '@/renderer/routes/Home';
 import ImportHome from '@/renderer/routes/Import/ImportHome';
 import ImportByPrivateKey from '@/renderer/routes/ImportBy/ImportByPrivateKey';
 import ImportSetPassword from '@/renderer/routes/Import/ImportSetPassword';
@@ -23,9 +25,7 @@ import { useTransactionChanged } from '@/renderer/hooks/rabbyx/useTransaction';
 import { useMainWindowEvents } from '@/renderer/hooks-shell/useWindowState';
 import { useAppUnlockEvents } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
-import openApi from '@/renderer/utils/openapi';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
-import { useEffect } from 'react';
 import { useAccounts } from '@/renderer/hooks/rabbyx/useAccount';
 import styles from './index.module.less';
 
@@ -112,7 +112,12 @@ const router = createRouter([
     children: [
       {
         path: 'home',
-        element: <ComingSoon pageName="Home" />,
+        element: <Home />,
+        loader: () => {
+          return {
+            useAccountComponent: true,
+          } as MainWindowRouteData;
+        },
       },
       {
         path: 'my-dapps',
@@ -185,17 +190,6 @@ export function MainWindow() {
 
   useMainWindowEvents();
   useChromeTabsEvents();
-
-  useEffect(() => {
-    if (!IS_RUNTIME_PRODUCTION) {
-      const host = openApi.getHost();
-      console.debug('[debug] getHost', host);
-
-      walletOpenapi.getHost().then((hostInWallet) => {
-        console.debug('[debug] walletOpenapi', hostInWallet);
-      });
-    }
-  }, []);
 
   useMessageForwardToMainwin('route-navigate', (payload) => {
     router.navigate(payload.data);
