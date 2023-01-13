@@ -43,6 +43,21 @@ type IDesktopAppState = {
   sidebarCollapsed: boolean;
 };
 
+type IAppProxyConf = {
+  proxyType: 'none' | 'system' | 'custom';
+  proxySettings: {
+    protocol: 'socks5' | 'http';
+    hostname: string;
+    port: number;
+    username?: string;
+    password?: string;
+  };
+};
+
+type ISensitiveConfig = {
+  enableContentProtected: boolean;
+} & IAppProxyConf;
+
 type IDappsDetectResult<T extends string = string> = {
   data: null | {
     urlInfo: Partial<URL> | null;

@@ -11,7 +11,10 @@ import {
 
 import { Modal, Switch, SwitchProps, Tooltip } from 'antd';
 import { useSettings } from '@/renderer/hooks/useSettings';
+import styled from 'styled-components';
 import styles from './index.module.less';
+import ModalProxySetting from './components/ModalProxySetting';
+import { useProxyStateOnSettingPage } from './settingHooks';
 
 type TypedProps = {
   name: React.ReactNode;
@@ -111,14 +114,29 @@ function ItemSwitch({
   );
 }
 
+const ProxyText = styled.div`
+  > img {
+    margin-left: 4px;
+  }
+
+  .custom-proxy-server {
+    text-decoration: underline;
+  }
+`;
+
 export function MainWindowSettings() {
   const appVerison = useAppVersion();
   const { settings, toggleEnableContentProtection } = useSettings();
+
+  const { setIsSettingProxy, customProxyServer, proxyType } =
+    useProxyStateOnSettingPage();
 
   return (
     <div className={styles.settingsPage}>
       {/* TODO: implement Update Area */}
       <div />
+
+      <ModalProxySetting />
 
       <div className={styles.settingBlock}>
         <h4 className={styles.blockTitle}>Security</h4>
@@ -162,6 +180,27 @@ export function MainWindowSettings() {
               });
             }}
           />
+        </div>
+      </div>
+
+      <div className={styles.settingBlock}>
+        <h4 className={styles.blockTitle}>Network</h4>
+        <div className={styles.itemList}>
+          <ItemAction
+            name="Proxy"
+            onClick={() => {
+              setIsSettingProxy(true);
+            }}
+            icon="rabby-internal://assets/icons/mainwin-settings/proxy.svg"
+          >
+            <ProxyText>
+              {proxyType === 'custom' && (
+                <Tooltip title={customProxyServer}>Proxy: Custom</Tooltip>
+              )}
+              {proxyType === 'system' && <>Proxy: System</>}
+              <img src={IconChevronRight} />
+            </ProxyText>
+          </ItemAction>
         </div>
       </div>
 
