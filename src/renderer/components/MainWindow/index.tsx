@@ -122,12 +122,6 @@ const router = createRouter([
       {
         path: 'my-dapps',
         element: <DApps />,
-        loader: () => {
-          return {
-            title: 'My Dapps',
-            useAccountComponent: true,
-          } as MainWindowRouteData;
-        },
       },
       {
         path: 'swap',

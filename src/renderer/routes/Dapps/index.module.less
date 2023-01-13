@@ -1,11 +1,25 @@
 .page {
   position: relative;
-  height: 100vh;
+  height: calc(100vh - var(--mainwin-mainarea-topoffset));
   overflow: overlay;
+
+  .account {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
 
   .header {
     padding: 24px 48px;
-    padding-top: 0;
+
+    .title {
+      font-weight: 510;
+      font-size: 28px;
+      line-height: 33px;
+
+      color: #ffffff;
+      margin-bottom: 11px;
+    }
 
     .desc {
       font-weight: 400;
