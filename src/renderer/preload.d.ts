@@ -393,6 +393,17 @@ type ChannelInvokePayload = {
       errMsg: string;
     };
   };
+  'get-proxyConfig': {
+    send: [];
+    response: {
+      proxyType: IAppProxyConf['proxyType'];
+      proxySettings: IAppProxyConf['proxySettings'];
+    };
+  };
+  'apply-proxyConfig': {
+    send: [conf: IAppProxyConf];
+    response: void;
+  };
 };
 type IInvokesKey = keyof ChannelInvokePayload;
 

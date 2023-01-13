@@ -214,3 +214,26 @@ export function isFQDN(
   }
   return true;
 }
+
+export function filterProxyProtocol(
+  input: IAppProxyConf['proxySettings']['protocol'] & any
+) {
+  switch (input) {
+    default:
+    case 'http':
+    case 'http:':
+      return 'http';
+    case 'socks5':
+    case 'socks5:':
+      return 'socks5';
+  }
+}
+
+export function coercePort(input: any) {
+  let result = Number.parseInt(input, 10);
+  if (Number.isNaN(result)) {
+    result = 80;
+  }
+
+  return result || 80;
+}

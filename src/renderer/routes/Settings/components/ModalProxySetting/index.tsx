@@ -1,5 +1,5 @@
 import { Modal as RabbyModal } from '@/renderer/components/Modal/Modal';
-import { Button, Form, Input, Modal, Radio, Space, Switch } from 'antd';
+import { Button, Form, Input, Modal, Radio } from 'antd';
 import classNames from 'classnames';
 import styled from 'styled-components';
 import { useCheckProxy, useSettingProxyModal } from '../../settingHooks';
@@ -47,6 +47,22 @@ const RModal = styled(RabbyModal)`
     .ant-input {
       height: 52px;
     }
+
+    .ant-input {
+      background: transparent;
+      color: white;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  .one-line-items {
+    display: flex;
+    align-items: center;
+
+    .ant-form-item + .ant-form-item {
+      margin-top: 0;
+      margin-left: 12px;
+    }
   }
 
   .ant-radio-group {
@@ -88,7 +104,7 @@ const RModal = styled(RabbyModal)`
       }
 
       opacity: 0.7;
-      &:hover {
+      &:not([disabled]):hover {
         opacity: 1;
       }
     }
@@ -113,21 +129,26 @@ const RModal = styled(RabbyModal)`
 export default function ModalProxySetting() {
   const {
     isSettingProxy,
+    setIsSettingProxy,
 
-    setProxySettings,
-    proxySettings,
+    proxyCustomForm,
     proxyType,
     setProxyType,
+
+    applyProxyAndRelaunch,
   } = useSettingProxyModal();
   const { onValidateProxy, isCheckingProxy } = useCheckProxy();
 
   const isUsingCustomProxy = proxyType === 'custom';
 
-  // console.log('[feat] formValues', formValues);
-  // console.log('[feat] proxyType', proxyType);
-
   return (
-    <RModal visible={isSettingProxy} width={400} onCancel={() => {}}>
+    <RModal
+      visible={isSettingProxy}
+      width={400}
+      onCancel={() => {
+        setIsSettingProxy(false);
+      }}
+    >
       <h2 className="form-title">Proxy Settings</h2>
 
       <div className="ant-form ant-form-vertical">
@@ -148,11 +169,11 @@ export default function ModalProxySetting() {
       </div>
 
       <Form
-        onValuesChange={(changedValues, allValues) => {
-          setProxySettings(allValues);
-        }}
+        form={proxyCustomForm}
+        // onValuesChange={(changedValues, allValues) => {
+        //   setProxySettings(allValues);
+        // }}
         layout="vertical"
-        initialValues={{ ...proxySettings }}
         className={classNames(
           'proxy-custom-form',
           !isUsingCustomProxy && 'disabled'
@@ -175,6 +196,7 @@ export default function ModalProxySetting() {
         <Form.Item
           name="hostname"
           className="input-field"
+          // style={{ flexShrink: 1 }}
           label={<span className="form-item-label">Hostname: </span>}
           rules={[]}
         >
@@ -188,6 +210,7 @@ export default function ModalProxySetting() {
         <Form.Item
           name="port"
           className="input-field"
+          // style={{ flexShrink: 0, width: 80 }}
           label={<span className="form-item-label">Port: </span>}
           rules={[]}
         >
@@ -197,6 +220,37 @@ export default function ModalProxySetting() {
             placeholder="Port"
           />
         </Form.Item>
+
+        {/* <div className='one-line-items'>
+          <Form.Item
+            name="username"
+            className="input-field"
+            style={{ flexShrink: 1 }}
+            label={<span className="form-item-label">(optional) Username: </span>}
+            rules={[]}
+          >
+            <Input
+              disabled={!isUsingCustomProxy}
+              spellCheck={false}
+              placeholder="Proxy Server Username"
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="password"
+            className="input-field"
+            style={{ flexShrink: 1 }}
+            label={<span className="form-item-label">(optional) Password: </span>}
+            rules={[]}
+          >
+            <Input
+              disabled={!isUsingCustomProxy}
+              spellCheck={false}
+              type="password"
+              placeholder="Proxy Server Password"
+            />
+          </Form.Item>
+        </div> */}
       </Form>
 
       <div className="operations">
@@ -207,10 +261,11 @@ export default function ModalProxySetting() {
             disabled={!isUsingCustomProxy}
             type="link"
             onClick={() => {
+              const values = proxyCustomForm.getFieldsValue();
               onValidateProxy({
-                protocol: proxySettings.protocol,
-                hostname: proxySettings.hostname,
-                port: proxySettings.port,
+                protocol: values.protocol,
+                hostname: values.hostname,
+                port: values.port,
               });
             }}
           >
@@ -227,7 +282,9 @@ export default function ModalProxySetting() {
               Modal.confirm({
                 title: 'Apply Proxy Settings',
                 content: `It's required to restart the app to apply the proxy settings, do you want to restart now?`,
-                onOk: () => {},
+                onOk: () => {
+                  applyProxyAndRelaunch();
+                },
                 onCancel: () => {},
               });
             }}

@@ -13,6 +13,7 @@ import { Modal, Switch, SwitchProps, Tooltip } from 'antd';
 import { useSettings } from '@/renderer/hooks/useSettings';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
+import { useIsSettingProxy } from './settingHooks';
 
 type TypedProps = {
   name: React.ReactNode;
@@ -116,6 +117,8 @@ export function MainWindowSettings() {
   const appVerison = useAppVersion();
   const { settings, toggleEnableContentProtection } = useSettings();
 
+  const { setIsSettingProxy } = useIsSettingProxy();
+
   return (
     <div className={styles.settingsPage}>
       {/* TODO: implement Update Area */}
@@ -173,6 +176,9 @@ export function MainWindowSettings() {
         <div className={styles.itemList}>
           <ItemAction
             name="Proxy"
+            onClick={() => {
+              setIsSettingProxy(true);
+            }}
             icon="rabby-internal://assets/icons/mainwin-settings/proxy.svg"
           />
         </div>

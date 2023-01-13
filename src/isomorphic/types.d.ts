@@ -49,6 +49,8 @@ type IAppProxyConf = {
     protocol: 'socks5' | 'http';
     hostname: string;
     port: number;
+    username?: string;
+    password?: string;
   };
 };
 

@@ -1,4 +1,8 @@
-import { RABBY_INTERNAL_PROTOCOL } from '@/isomorphic/constants';
+import {
+  IS_RUNTIME_PRODUCTION,
+  RABBY_INTERNAL_PROTOCOL,
+} from '@/isomorphic/constants';
+import { filterProxyProtocol } from '@/isomorphic/url';
 import { BrowserView } from 'electron';
 import { catchError, firstValueFrom, of, Subject, timeout } from 'rxjs';
 import { BrowserViewManager } from './browserView';
@@ -148,41 +152,70 @@ export async function checkUrlViaBrowserView(
   });
 }
 
-function filterProxyProtocol(
-  input: IAppProxyConf['proxySettings']['protocol'] & any
+export function formatProxyServerURL(settings: IAppProxyConf['proxySettings']) {
+  // return urlFormat({
+  //   protocol: `${filterProxyProtocol(settings.protocol)}:`,
+  //   hostname: settings.hostname,
+  //   port: settings.port,
+  //   // // @ts-ignore
+  //   // username: settings.username,
+  //   // password: settings.password,
+  // })
+  return `${filterProxyProtocol(settings.protocol)}://${settings.hostname}:${
+    settings.port
+  }`;
+}
+
+export function setSessionProxy(
+  session: Electron.Session,
+  conf: IAppProxyConf
 ) {
-  switch (input) {
-    default:
-    case 'http':
-    case 'http:':
-      return 'http';
-    case 'socks5':
-    case 'socks5:':
-      return 'socks5';
+  const proxyServer = formatProxyServerURL(conf.proxySettings);
+
+  const proxyBypassRules = [
+    '<local>',
+    `${RABBY_INTERNAL_PROTOCOL}//*`,
+    'chrome-extension://*',
+    'chrome://*',
+  ].join(',');
+
+  session.clearHostResolverCache();
+
+  if (conf.proxyType === 'custom') {
+    session.setProxy({
+      mode: 'fixed_servers',
+      proxyRules: [proxyServer].join(','),
+      proxyBypassRules,
+    });
+  } else if (conf.proxyType === 'system') {
+    session.setProxy({
+      mode: 'system',
+      proxyRules: '',
+      proxyBypassRules,
+    });
+  } else {
+    session.setProxy({
+      proxyRules: '',
+      proxyBypassRules,
+    });
   }
+
+  return proxyServer;
 }
 
 export async function checkProxyViaBrowserView(
   targetURL: string,
-  proxySettings: IAppProxyConf['proxySettings']
+  conf: IAppProxyConf
 ) {
   const view = await checkingProxyViewReady;
 
-  view.webContents.session.clearHostResolverCache();
-  view.webContents.session.setProxy({
-    mode: 'fixed_servers',
-    proxyRules: [
-      `${filterProxyProtocol(proxySettings.protocol)}://${
-        proxySettings.hostname
-      }:${proxySettings.port}`,
-    ].join(','),
-    proxyBypassRules: [
-      '<local>',
-      `${RABBY_INTERNAL_PROTOCOL}//*`,
-      'chrome-extension://*',
-      'chrome://*',
-    ].join(','),
-  });
+  const proxyServer = setSessionProxy(view.webContents.session, conf);
+
+  if (!IS_RUNTIME_PRODUCTION) {
+    console.debug(
+      `[checkProxyViaBrowserView] targetURL: ${targetURL}; proxyType: ${conf.proxyType}; proxyServer: ${proxyServer}`
+    );
+  }
 
   return checkUrlViaBrowserView(targetURL, { view, timeout: 3000 });
 }

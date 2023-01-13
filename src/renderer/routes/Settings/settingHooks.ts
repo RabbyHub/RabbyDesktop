@@ -1,8 +1,12 @@
-import { useCallback, useState } from 'react';
-import { message } from 'antd';
+import { useCallback, useEffect, useState } from 'react';
+import { Form, message } from 'antd';
 import { atom, useAtom } from 'jotai';
 
-import { validateProxyConfig } from '@/renderer/ipcRequest/app';
+import {
+  applyProxyConfig,
+  getPersistedProxyConfig,
+  validateProxyConfig,
+} from '@/renderer/ipcRequest/app';
 
 const defaulAppProxyConf: IAppProxyConf = {
   proxyType: 'none',
@@ -13,9 +17,19 @@ const defaulAppProxyConf: IAppProxyConf = {
   },
 };
 const appProxyConfAtom = atom<IAppProxyConf>(defaulAppProxyConf);
-const isSettingProxyAtom = atom(true);
+const isSettingProxyAtom = atom(false);
+
+export function useIsSettingProxy() {
+  const [isSettingProxy, setIsSettingProxy] = useAtom(isSettingProxyAtom);
+
+  return {
+    isSettingProxy,
+    setIsSettingProxy,
+  };
+}
 
 export function useSettingProxyModal() {
+  const [proxyCustomForm] = Form.useForm();
   const [appProxyConf, setAppProxyConf] = useAtom(appProxyConfAtom);
   const [isSettingProxy, setIsSettingProxy] = useAtom(isSettingProxyAtom);
 
@@ -31,20 +45,33 @@ export function useSettingProxyModal() {
     [setAppProxyConf]
   );
 
-  const setProxySettings = useCallback(
-    (proxySettings: Partial<IAppProxyConf['proxySettings']>) => {
+  const fetchProxyConf = useCallback(() => {
+    getPersistedProxyConfig().then((result) => {
       setAppProxyConf((prev) => {
-        return {
-          ...prev,
+        const nextVal = {
+          proxyType: result.proxyType,
           proxySettings: {
             ...prev.proxySettings,
-            ...proxySettings,
+            ...result.proxySettings,
           },
         };
+        proxyCustomForm.setFieldsValue(nextVal.proxySettings);
+
+        return nextVal;
       });
-    },
-    [setAppProxyConf]
-  );
+    });
+  }, [setAppProxyConf, proxyCustomForm]);
+
+  const applyProxyAndRelaunch = useCallback(() => {
+    applyProxyConfig({
+      proxyType: appProxyConf.proxyType,
+      proxySettings: proxyCustomForm.getFieldsValue(),
+    });
+  }, [appProxyConf, proxyCustomForm]);
+
+  useEffect(() => {
+    fetchProxyConf();
+  }, [fetchProxyConf]);
 
   return {
     isSettingProxy,
@@ -52,8 +79,9 @@ export function useSettingProxyModal() {
 
     proxyType: appProxyConf.proxyType,
     setProxyType,
-    proxySettings: appProxyConf.proxySettings,
-    setProxySettings,
+    proxyCustomForm,
+
+    applyProxyAndRelaunch,
   };
 }
 
