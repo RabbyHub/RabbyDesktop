@@ -2,7 +2,11 @@ import React from 'react';
 
 export type MainWindowRouteData =
   | {
+      noDefaultHeader?: boolean;
+
       title?: React.ReactNode;
-      useAccountComponent?: boolean;
+      floatingAccountComponent?: boolean;
+
+      routeCSSKeyword?: string;
     }
   | undefined;

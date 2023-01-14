@@ -20,7 +20,7 @@ import Curve from './components/Curve';
 import PortfolioView from './components/PortfolioView';
 
 const HomeWrapper = styled.div`
-  padding-top: 12px;
+  padding-top: 24px;
   padding-left: 28px;
   padding-right: 358px;
   color: #fff;

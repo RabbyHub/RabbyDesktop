@@ -56,10 +56,8 @@ export default function DApps() {
 
   return (
     <div className={style.page}>
-      <CurrentAccountAndNewAccount className={style.account} />
       <div className={style.container}>
         <header className={style.header}>
-          <h2 className={style.title}>My Dapps</h2>
           <div className={style.desc}>
             <img
               className={style.icon}
