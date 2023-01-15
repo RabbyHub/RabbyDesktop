@@ -10,7 +10,12 @@ type MainInternalsMessagePayload = {
     response: [];
   };
   '__internal_main:dapps:pinnedListChanged': {
-    send: [pinnedList: IDapp['origin'][]];
+    send: [
+      {
+        pinnedList: IDapp['origin'][];
+        unpinnedList: IDapp['origin'][];
+      }
+    ];
     response: [];
   };
   '__internal_main:mainwindow:show': {

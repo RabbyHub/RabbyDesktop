@@ -1,7 +1,6 @@
-import { formatDapps } from '@/isomorphic/dapp';
 import { getBaseHref, isUrlFromDapp } from '@/isomorphic/url';
 import TabbedBrowserWindow from '../browser/browsers';
-import { dappStore, parseDappUrl } from '../store/dapps';
+import { getAllDapps, parseDappUrl } from '../store/dapps';
 import { switchToBrowserTab } from '../utils/browser';
 import { attachDappSafeview } from './dappSafeview';
 
@@ -51,7 +50,7 @@ export function setOpenHandlerForWebContents({
 
     const currentUrl = webContents.getURL();
     const isFromDapp = isUrlFromDapp(currentUrl);
-    const dapps = formatDapps(dappStore.get('dapps'));
+    const dapps = getAllDapps();
 
     const targetURL = details.url;
     const currentInfo = parseDappUrl(currentUrl, dapps);
@@ -123,7 +122,7 @@ export const setListeners = {
       const currentUrl = evtWebContents.getURL();
       const isFromDapp = isUrlFromDapp(currentUrl);
 
-      const dapps = formatDapps(dappStore.get('dapps'));
+      const dapps = getAllDapps();
 
       const currentInfo = parseDappUrl(currentUrl, dapps);
       const targetInfo = parseDappUrl(targetURL, dapps);
@@ -162,7 +161,7 @@ export const setListeners = {
         // actually, it's always from dapp on isMainContentsForTabbedWindow=false
         const isFromDapp = isUrlFromDapp(currentUrl);
 
-        const dapps = formatDapps(dappStore.get('dapps'));
+        const dapps = getAllDapps();
 
         const currentInfo = parseDappUrl(currentUrl, dapps);
         const targetInfo = parseDappUrl(targetURL, dapps);

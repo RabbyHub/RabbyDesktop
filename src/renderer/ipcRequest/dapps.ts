@@ -16,6 +16,7 @@ export async function fetchDapps() {
     return {
       dapps: event.dapps,
       pinnedList: event.pinnedList,
+      unpinnedList: event.unpinnedList,
     };
   });
 }
@@ -56,7 +57,5 @@ export async function toggleDappPinned(
 
   return window.rabbyDesktop.ipcRenderer
     .invoke('dapps-togglepin', dappOrigins, nextPinned)
-    .then((event) => {
-      return event.pinnedList;
-    });
+    .then(() => {});
 }

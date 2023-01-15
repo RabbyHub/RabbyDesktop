@@ -34,8 +34,9 @@ type M2RChanneMessagePayload = {
   '__internal_push:mainwindow:got-dapp-screenshot': {
     imageBuf: Buffer | null;
   };
-  '__internal_push:*:pinnedListChanged': {
+  '__internal_push:dapps:pinnedListChanged': {
     pinnedList: string[];
+    unpinnedList: string[];
   };
   '__internal_push:popupwin-on-mainwin:on-visiblechange':
     | {
@@ -336,6 +337,7 @@ type ChannelInvokePayload = {
     response: {
       dapps: IDapp[];
       pinnedList: IDapp['origin'][];
+      unpinnedList: IDapp['origin'][];
     };
   };
   'get-dapp': {
@@ -363,6 +365,7 @@ type ChannelInvokePayload = {
     response: {
       error?: string;
       pinnedList: IDapp['origin'][];
+      unpinnedList: IDapp['origin'][];
     };
   };
   'get-desktopAppState': {

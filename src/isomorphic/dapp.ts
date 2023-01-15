@@ -45,3 +45,58 @@ export function varyDappPinned(dapps: IDapp[], pinnedList: string[]) {
     unpinnedDapps,
   };
 }
+
+export function fillUnpinnedList(
+  dapps: Record<IDapp['origin'], IDapp> | IDapp[],
+  pinnedList: string[],
+  unpinnedList: string[]
+) {
+  const pinnedSet = new Set(pinnedList);
+  const unpinnedSet = new Set(unpinnedList);
+
+  const otherUnpinnedList: IDapp['origin'][] = [];
+
+  const dappList = Array.isArray(dapps) ? dapps : Object.values(dapps);
+  dappList.forEach((dapp) => {
+    const dappOrigin = dapp.origin;
+    if (!pinnedSet.has(dappOrigin) && !unpinnedSet.has(dappOrigin)) {
+      otherUnpinnedList.push(dappOrigin);
+    }
+  });
+
+  return {
+    pinnedList: [...pinnedSet],
+    unpinnedList: unpinnedList.concat(otherUnpinnedList),
+  };
+}
+
+export function sortDappsBasedPinned(
+  dapps: IDapp[],
+  pinnedList: string[],
+  unpinnedList: string[]
+) {
+  const pinnedSet = new Set(pinnedList);
+  const unpinnedSet = new Set(unpinnedList);
+
+  const pinnedDapps: IMergedDapp[] = [];
+  const unpinnedDapps: IMergedDapp[] = [];
+  dapps.forEach((dapp) => {
+    if (pinnedSet.has(dapp.origin)) {
+      pinnedDapps.push({
+        ...dapp,
+        isPinned: true,
+      });
+    } else if (unpinnedSet.has(dapp.origin)) {
+      unpinnedDapps.push({
+        ...dapp,
+        isPinned: false,
+      });
+    }
+  });
+
+  return {
+    allDapps: pinnedDapps.concat(unpinnedDapps),
+    pinnedDapps,
+    unpinnedDapps,
+  };
+}
