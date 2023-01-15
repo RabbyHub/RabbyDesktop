@@ -193,10 +193,25 @@ handleIpcMainInvoke('dapps-fetch', () => {
 handleIpcMainInvoke('dapps-put', (_, dapp: IDapp) => {
   // TODO: is there mutex?
   const dappsMap = dappStore.get('dappsMap');
+  const pinnedList = dappStore.get('pinnedList');
+  const unpinnedList = dappStore.get('unpinnedList');
 
   dappsMap[dapp.origin] = dapp;
-
   dappStore.set('dappsMap', dappsMap);
+
+  const pinnedIdx = pinnedList.indexOf(dapp.origin);
+  if (pinnedIdx > -1) {
+    pinnedList.splice(pinnedIdx, 1);
+    dappStore.set('pinnedList', pinnedList);
+  }
+
+  unpinnedList.push(dapp.origin);
+  dappStore.set('unpinnedList', unpinnedList);
+
+  emitIpcMainEvent('__internal_main:dapps:pinnedListChanged', {
+    pinnedList,
+    unpinnedList,
+  });
 
   return {
     dapps: getAllDapps(),
