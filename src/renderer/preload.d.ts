@@ -404,6 +404,29 @@ type ChannelInvokePayload = {
     send: [visible: boolean];
     response: void;
   };
+  'check-proxyConfig': {
+    send: [
+      {
+        detectURL: string;
+        proxyConfig: IAppProxyConf['proxySettings'];
+      }
+    ];
+    response: {
+      valid: boolean;
+      errMsg: string;
+    };
+  };
+  'get-proxyConfig': {
+    send: [];
+    response: {
+      proxyType: IAppProxyConf['proxyType'];
+      proxySettings: IAppProxyConf['proxySettings'];
+    };
+  };
+  'apply-proxyConfig': {
+    send: [conf: IAppProxyConf];
+    response: void;
+  };
 };
 type IInvokesKey = keyof ChannelInvokePayload;
 

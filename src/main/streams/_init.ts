@@ -22,6 +22,7 @@ const CONF = {
       mainSession: Session;
       dappSafeViewSession: Session;
       checkingViewSession: Session;
+      checkingProxySession: Session;
     }>
   >,
   electronChromeExtensionsReady: {

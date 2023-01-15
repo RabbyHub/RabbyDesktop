@@ -25,7 +25,7 @@ const TokenItemWrapper = styled.li`
     flex-wrap: wrap;
     .token-symbol {
       font-weight: 700;
-      font-size: 15px;
+      font-size: 14px;
       line-height: 18px;
       margin-left: 18px;
       white-space: nowrap;

@@ -30,6 +30,8 @@ import { getRabbyExtId, getWebuiExtId } from '../utils/stream-helpers';
 import { checkOpenAction } from '../utils/tabs';
 import { getWindowFromWebContents, switchToBrowserTab } from '../utils/browser';
 import { supportHmrOnDev } from '../utils/webRequest';
+import { checkProxyViaBrowserView, setSessionProxy } from '../utils/appNetwork';
+import { desktopAppStore } from '../store/desktopApp';
 
 const sesLog = getBindLog('session', 'bgGrey');
 
@@ -104,6 +106,32 @@ export async function defaultSessionReadyThen() {
   return firstValueFrom(fromMainSubject('sessionReady'));
 }
 
+export async function checkProxyValidOnBootstrap() {
+  const appProxyConf = {
+    proxyType: desktopAppStore.get('proxyType'),
+    proxySettings: desktopAppStore.get('proxySettings'),
+  };
+
+  if (appProxyConf.proxyType === 'none') {
+    return {
+      valid: true,
+      shouldProxy: false,
+      appProxyConf,
+    };
+  }
+
+  const result = await checkProxyViaBrowserView(
+    'https://google.com',
+    appProxyConf
+  );
+
+  return {
+    valid: result.valid,
+    shouldProxy: result.valid,
+    appProxyConf,
+  };
+}
+
 protocol.registerSchemesAsPrivileged([
   {
     scheme: 'rabby-internal',
@@ -159,11 +187,35 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
 
   const dappSafeViewSession = session.fromPartition('dappSafeView');
   const checkingViewSession = session.fromPartition('checkingView');
+  const checkingProxySession = session.fromPartition('checkingProxy');
   valueToMainSubject('sessionReady', {
     mainSession: sessionIns,
     dappSafeViewSession,
     checkingViewSession,
+    checkingProxySession,
   });
+
+  // must after sessionReady
+  const result = await checkProxyValidOnBootstrap();
+  sesLog(
+    `[checkProxyValidOnBootstrap] valid: ${result.valid}; shouldProxy: ${result.shouldProxy}`
+  );
+  if (result.shouldProxy) {
+    setSessionProxy(sessionIns, result.appProxyConf);
+    setSessionProxy(dappSafeViewSession, result.appProxyConf);
+    setSessionProxy(checkingViewSession, result.appProxyConf);
+  } else if (!result.valid) {
+    sesLog('proxy config invalid! no applied');
+    setSessionProxy(sessionIns, { ...result.appProxyConf, proxyType: 'none' });
+    setSessionProxy(dappSafeViewSession, {
+      ...result.appProxyConf,
+      proxyType: 'none',
+    });
+    setSessionProxy(checkingViewSession, {
+      ...result.appProxyConf,
+      proxyType: 'none',
+    });
+  }
   supportHmrOnDev(sessionIns);
 
   sessionIns.setPreloads([preloadPath]);

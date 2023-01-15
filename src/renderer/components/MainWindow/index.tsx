@@ -7,7 +7,6 @@ import {
 
 import DApps from '@/renderer/routes/Dapps';
 import GettingStarted from '@/renderer/routes/Welcome/GettingStarted';
-import React, { useEffect } from 'react';
 import Home from '@/renderer/routes/Home';
 import ImportHome from '@/renderer/routes/Import/ImportHome';
 import ImportByPrivateKey from '@/renderer/routes/ImportBy/ImportByPrivateKey';
@@ -24,9 +23,8 @@ import { useChromeTabsEvents } from '@/renderer/hooks-shell/useWindowTabs';
 import { useTransactionChanged } from '@/renderer/hooks/rabbyx/useTransaction';
 import { useMainWindowEvents } from '@/renderer/hooks-shell/useWindowState';
 import { useAppUnlockEvents } from '@/renderer/hooks/rabbyx/useUnlocked';
-import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
-import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { useAccounts } from '@/renderer/hooks/rabbyx/useAccount';
+import { useMessageForwardToMainwin } from '@/renderer/hooks/useMessageToMainwin';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -35,7 +33,6 @@ import Titlebar from '../Titlebar';
 import { TopNavBar } from '../TopNavBar';
 import { MainWindowRouteData } from './type';
 import { DappViewWrapper } from '../DappView';
-import { useMessageForwardToMainwin } from '@/renderer/hooks/useMessageToMainwin';
 
 function WelcomeWrapper() {
   const { hasFetched, accounts } = useAccounts();
@@ -115,13 +112,18 @@ const router = createRouter([
         element: <Home />,
         loader: () => {
           return {
-            useAccountComponent: true,
+            routeCSSKeyword: 'home_assets',
           } as MainWindowRouteData;
         },
       },
       {
         path: 'my-dapps',
         element: <DApps />,
+        loader: () => {
+          return {
+            title: 'My Dapps',
+          } as MainWindowRouteData;
+        },
       },
       {
         path: 'swap',
@@ -134,6 +136,11 @@ const router = createRouter([
             <TopNavBar />
           </DappViewWrapper>
         ),
+        loader: () => {
+          return {
+            floatingAccountComponent: true,
+          } as MainWindowRouteData;
+        },
       },
       {
         path: 'settings',
@@ -141,7 +148,6 @@ const router = createRouter([
         loader: () => {
           return {
             title: 'Settings',
-            useAccountComponent: true,
           } as MainWindowRouteData;
         },
       },

@@ -21,6 +21,8 @@ node_modules
 release/app/dist
 release/build
 release/build-*
+release/*.exe*
+release/*.dmg*
 release/mac-*
 release/rabbyx
 

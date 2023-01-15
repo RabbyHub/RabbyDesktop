@@ -18,6 +18,9 @@ export const desktopAppStore = new Store<{
     isMaximized?: boolean;
   };
   enableContentProtected: IDesktopAppState['enableContentProtected'];
+  proxyType: ISensitiveConfig['proxyType'];
+  proxySettings: ISensitiveConfig['proxySettings'];
+
   sidebarCollapsed: IDesktopAppState['sidebarCollapsed'];
 }>({
   name: `${PERSIS_STORE_PREFIX}desktopApp`,
@@ -64,6 +67,40 @@ export const desktopAppStore = new Store<{
     sidebarCollapsed: {
       type: 'boolean',
       default: false,
+    },
+    proxyType: {
+      type: 'string',
+      enum: ['none', 'system', 'custom'],
+      default: 'none',
+    },
+    proxySettings: {
+      type: 'object',
+      properties: {
+        protocol: {
+          type: 'string',
+          enum: ['socks5', 'http'],
+        },
+        hostname: {
+          type: 'string',
+        },
+        port: {
+          type: 'number',
+        },
+        username: {
+          type: 'string',
+        },
+        password: {
+          type: 'string',
+        },
+      },
+      required: ['protocol', 'hostname', 'port'],
+      default: {
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        port: 1080,
+        username: '',
+        password: '',
+      },
     },
   },
 

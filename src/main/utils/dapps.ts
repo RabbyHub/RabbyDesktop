@@ -3,14 +3,11 @@
 import { format as urlFormat } from 'url';
 import Axios, { AxiosError } from 'axios';
 import LRUCache from 'lru-cache';
-import { Subject, firstValueFrom, of } from 'rxjs';
-import { timeout, catchError } from 'rxjs/operators';
 
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { parseWebsiteFavicon } from './fetch';
 import { AxiosElectronAdapter } from './axios';
-import { getSessionInsts } from './stream-helpers';
-import { BrowserViewManager } from './browserView';
+import { checkUrlViaBrowserView, CHROMIUM_NET_ERR_DESC } from './appNetwork';
 
 const DFLT_TIMEOUT = 8 * 1e3;
 
@@ -22,123 +19,6 @@ const enum DETECT_ERR_CODES {
   TIMEOUT = 'TIMEOUT',
 
   REPEAT = 'REPEAT',
-}
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const enum CHROMIUM_LOADURL_ERR_CODE {
-  // https://host.not.existe
-  ERR_NAME_NOT_RESOLVED = 'ERR_NAME_NOT_RESOLVED',
-  // https://expired.badssl.com
-  // https://no-common-name.badssl.com
-  // https://no-subject.badssl.com
-  // https://incomplete-chain.badssl.com
-  ERR_CERT_DATE_INVALID = 'ERR_CERT_DATE_INVALID',
-  // https://wrong.host.badssl.com
-  ERR_CERT_COMMON_NAME_INVALID = 'ERR_CERT_COMMON_NAME_INVALID',
-  // https://self-signed.badssl.com
-  // https://untrusted-root.badssl.com
-  ERR_CERT_AUTHORITY_INVALID = 'ERR_CERT_AUTHORITY_INVALID',
-  // https://revoked.badssl.com
-  ERR_CERT_REVOKED = 'ERR_CERT_REVOKED',
-}
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
-type CHROMIUM_NET_ERR_DESC =
-  | `net::${CHROMIUM_LOADURL_ERR_CODE}`
-  | `net::ERR_CONNECTION_CLOSED`;
-
-let viewMngr: BrowserViewManager;
-
-async function checkUrlViaBrowserView(
-  dappUrl: string,
-  opts?: {
-    timeout?: number;
-  }
-) {
-  const { checkingViewSession } = await getSessionInsts();
-  if (!viewMngr) {
-    viewMngr = new BrowserViewManager({
-      webPreferences: {
-        session: checkingViewSession,
-        sandbox: true,
-        nodeIntegration: false,
-      },
-    });
-  }
-  const view = viewMngr.allocateView(false);
-
-  type Result =
-    | {
-        valid: true;
-        // some website would redirec to another origin, such as https://binance.com -> https://www.binance.com
-        finalUrl: string;
-      }
-    | {
-        valid: false;
-        isTimeout?: boolean;
-        errorDesc?: CHROMIUM_LOADURL_ERR_CODE | string;
-        certErrorDesc?: CHROMIUM_NET_ERR_DESC;
-      };
-
-  const checkResult = new Subject<Result>();
-
-  view.webContents.on('did-finish-load', () => {
-    checkResult.next({
-      valid: true,
-      finalUrl: view.webContents.getURL(),
-    });
-    checkResult.complete();
-  });
-
-  view.webContents.on(
-    'did-fail-load',
-    (_, errorCode, errorDesc, validatedURL) => {
-      if (errorDesc === CHROMIUM_LOADURL_ERR_CODE.ERR_NAME_NOT_RESOLVED) {
-        checkResult.next({
-          valid: false,
-          errorDesc,
-        });
-        checkResult.complete();
-      } else if (errorDesc.startsWith('ERR_CERT_')) {
-        // wait for 'certificate-error' event
-      } else {
-        checkResult.next({
-          valid: false,
-          errorDesc,
-        });
-        checkResult.complete();
-      }
-    }
-  );
-
-  view.webContents.on('certificate-error', (_, url, cert) => {
-    checkResult.next({
-      valid: false,
-      errorDesc: cert.slice('net::'.length),
-      certErrorDesc: cert as CHROMIUM_NET_ERR_DESC,
-    });
-    checkResult.complete();
-  });
-
-  view.webContents.loadURL(dappUrl);
-
-  let obs = checkResult.asObservable();
-  const { timeout: duration = DFLT_TIMEOUT } = opts || {};
-  if (duration && duration > 0) {
-    obs = obs.pipe(
-      timeout(duration),
-      catchError(() =>
-        of({
-          valid: false as const,
-          isTimeout: true,
-        })
-      )
-    );
-  }
-
-  return firstValueFrom(obs).finally(() => {
-    viewMngr.recycleView(view);
-  });
 }
 
 async function checkDappHttpsCert(

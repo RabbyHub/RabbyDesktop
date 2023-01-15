@@ -1,32 +1,46 @@
 @import '../../css/mixins.less';
 
-.Main {
+.MainWindowRoute {
   position: relative;
-  // width: calc(100% - var(--mainwin-sidebar-w));
   height: 100%;
+  max-height: var(--mainwin-mainroute-height);
   width: 100%;
-  overflow: auto;
+  overflow-y: overlay;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-@headerBlockHeight: 64px;
-@headerBlockContentHeight: 48px;
+@headerBlockOffset: 10px;
 
 .headerBlock {
-  margin-top: @headerBlockHeight - @headerBlockContentHeight;
-  height: @headerBlockContentHeight;
+  padding-top: @headerBlockOffset;
+  height: var(--mainwin-headerblock-offset);
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding-left: 0;
   padding-right: 0;
 
+  &.titleLess {
+    position: absolute;
+    width: 100%;
+
+    .accountComponent {
+      position: absolute;
+      top: 10px;
+      right: 0;
+    }
+  }
+
   .pageTitle {
-    align-self: flex-start;
+    align-self: flex-end;
     padding-left: 48px;
   }
 
   .accountComponent {
-    padding-right: 16px;
+    padding-right: @headerBlockOffset;
     align-self: flex-start;
   }
 }

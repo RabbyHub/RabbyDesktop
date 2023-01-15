@@ -1,7 +1,32 @@
 
-v0.2.8 / 2023-01-10
+v0.3.0 / 2023-01-13
 ==================
 
+  * style: tuning settings page.
+  * feat: support set proxy server for whole app. (#66)
+  * chore: add build helper script.
+  * fix: small assets hidden logic (#65)
+  * fix: upgrade rabbyx to avoid set headers null error on background from `@debank/rabby-api`.
+  * feat: fix dapp style (#64)
+  * chore: style tuning.
+  * fix: home page style
+  * feat: portfolio page (#57)
+  * feat: init: address management (#59)
+  * feat: import by private key (#63)
+  * feat: support custom forwarding message from other views.
+  * fix: add account (#62)
+  * feat: upgrade rabbyx version with new rabby-api support
+  * build: support hmr on custom protocol (#61)
+  * feat: change macos-controls style (#55)
+  * feat: add contacts (#58)
+  * chore: prepare for more popup window.
+  * feat: support exit from appTray. (#56)
+  * chore: code cleanup.
+
+v0.2.8 / 2023-01-10
+===================
+
+  * Release v0.2.8
   * chore: update tip message on reset app.
   * feat: make sure importing at least one account. (#54)
   * feat: better animation on toggle sidebar collapsed. (#52)

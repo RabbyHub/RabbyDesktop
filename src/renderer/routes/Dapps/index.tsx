@@ -59,7 +59,6 @@ export default function DApps() {
 
   return (
     <div className={style.page}>
-      <CurrentAccountAndNewAccount className={style.account} />
       <img
         className={style.addDapp}
         src="rabby-internal://assets/icons/internal-homepage/icon-dapps-add.svg"
@@ -70,7 +69,6 @@ export default function DApps() {
       />
       <div className={style.container}>
         <header className={style.header}>
-          <h2 className={style.title}>My Dapps</h2>
           <div className={style.desc}>
             <img
               className={style.icon}

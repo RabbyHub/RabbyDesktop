@@ -5,9 +5,9 @@ import useDebounceValue from '@/renderer/hooks/useDebounceValue';
 import { isValidAddress } from 'ethereumjs-util';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { useWalletRequest } from '@/renderer/hooks/useWalletRequest';
-import styles from './AddAddressModal.module.less';
 import { useAccountToDisplay } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
 import { useAddressManagement } from '@/renderer/hooks/rabbyx/useAddressManagement';
+import styles from './AddAddressModal.module.less';
 
 type ENS = Awaited<ReturnType<OpenApiService['getEnsAddressByName']>>;
 

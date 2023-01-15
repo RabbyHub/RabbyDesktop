@@ -11,7 +11,10 @@ import {
 
 import { Modal, Switch, SwitchProps, Tooltip } from 'antd';
 import { useSettings } from '@/renderer/hooks/useSettings';
+import styled from 'styled-components';
 import styles from './index.module.less';
+import ModalProxySetting from './components/ModalProxySetting';
+import { useProxyStateOnSettingPage } from './settingHooks';
 
 type TypedProps = {
   name: React.ReactNode;
@@ -111,14 +114,33 @@ function ItemSwitch({
   );
 }
 
+const ProxyText = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  > img {
+    margin-left: 4px;
+  }
+
+  .custom-proxy-server {
+    text-decoration: underline;
+  }
+`;
+
 export function MainWindowSettings() {
   const appVerison = useAppVersion();
   const { settings, toggleEnableContentProtection } = useSettings();
+
+  const { setIsSettingProxy, customProxyServer, proxyType } =
+    useProxyStateOnSettingPage();
 
   return (
     <div className={styles.settingsPage}>
       {/* TODO: implement Update Area */}
       <div />
+
+      <ModalProxySetting />
 
       <div className={styles.settingBlock}>
         <h4 className={styles.blockTitle}>Security</h4>
@@ -129,10 +151,10 @@ export function MainWindowSettings() {
               <>
                 <Tooltip
                   trigger="hover"
-                  title="When Enabling this feature, Rabby App would be transparent on Screen Recording/Capturing."
+                  title="Once enabled, content in Rabby will be hidden during screen recording."
                 >
                   <span style={{ display: 'flex', alignItems: 'center' }}>
-                    Content Protection
+                    Screen Capture Protection
                     <img
                       className={styles.nameTooltipIcon}
                       src={IconTooltipInfo}
@@ -166,11 +188,36 @@ export function MainWindowSettings() {
       </div>
 
       <div className={styles.settingBlock}>
+        <h4 className={styles.blockTitle}>Network</h4>
+        <div className={styles.itemList}>
+          <ItemAction
+            name={
+              <ProxyText>
+                {proxyType === 'custom' && (
+                  <Tooltip title={customProxyServer}>
+                    <span>Proxy: Custom</span>
+                  </Tooltip>
+                )}
+                {proxyType === 'system' && <span>Proxy: System</span>}
+                {proxyType === 'none' && <span>Proxy: None</span>}
+              </ProxyText>
+            }
+            onClick={() => {
+              setIsSettingProxy(true);
+            }}
+            icon="rabby-internal://assets/icons/mainwin-settings/proxy.svg"
+          >
+            <img src={IconChevronRight} />
+          </ItemAction>
+        </div>
+      </div>
+
+      <div className={styles.settingBlock}>
         <h4 className={styles.blockTitle}>About</h4>
         <div className={styles.itemList}>
           <ItemText
-            name="Version"
-            text={appVerison || '-'}
+            name={`Version: ${appVerison || '-'}`}
+            text=""
             icon="rabby-internal://assets/icons/mainwin-settings/info.svg"
           />
           {/* <ItemLink name='User Agreement' /> */}
