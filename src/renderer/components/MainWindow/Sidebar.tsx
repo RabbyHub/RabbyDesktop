@@ -15,6 +15,7 @@ import {
 import { useHasNewRelease } from '@/renderer/hooks/useAppUpdator';
 import { useSettings } from '@/renderer/hooks/useSettings';
 import { makeSureDappOpened } from '@/renderer/ipcRequest/mainwin';
+import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { DappFavicon } from '../DappFavicon';
 import Hide from './Hide';
 import styles from './Sidebar.module.less';
@@ -265,7 +266,12 @@ export default function MainWindowSidebar() {
               />
             </div>
             <div className={styles.navFooter}>
-              <div className={styles.addDappContainer}>
+              <div
+                className={styles.addDappContainer}
+                onClick={() => {
+                  showMainwinPopupview({ type: 'dapps-management' });
+                }}
+              >
                 <div className={styles.addDapp}>
                   <img
                     className={styles.addDappIcon}

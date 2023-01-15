@@ -194,6 +194,9 @@ type PopupViewOnMainwinInfo =
     }
   | {
       type: 'address-management';
+    }
+  | {
+      type: 'dapps-management';
     };
 
 type IShellNavInfo = {

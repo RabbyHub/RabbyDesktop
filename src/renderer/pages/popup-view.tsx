@@ -21,6 +21,7 @@ import { parseQueryString } from '@/isomorphic/url';
 import RabbyNotificationGasket from '../routes-popup/RabbyNotificationGasket';
 import MainWindowAddressManagement from '../routes-popup/MainWindowAddressManagement';
 import MainWindowAddAddress from '../routes-popup/MainWindowAddAddress';
+import MainWindowDappManagement from '../routes-popup/MainWindowDappManagement';
 
 function App() {
   return (
@@ -61,6 +62,9 @@ switch (parseQueryString().view) {
     break;
   case 'add-address':
     root.render(<MainWindowAddAddress />);
+    break;
+  case 'dapps-management':
+    root.render(<MainWindowDappManagement />);
     break;
   default:
     root.render(<App />);

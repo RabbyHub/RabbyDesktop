@@ -22,6 +22,9 @@ const viewsState: Record<
   'address-management': {
     visible: false,
   },
+  'dapps-management': {
+    visible: false,
+  },
 };
 
 async function hidePopupViewOnMainWindow(
@@ -127,10 +130,46 @@ const addressManagementReady = onMainWindowReady().then(async (mainWin) => {
   return addressManagementPopup;
 });
 
-Promise.all([addAddressReady, addressManagementReady]).then((wins) => {
+const dappsManagementReady = onMainWindowReady().then(async (mainWin) => {
+  const mainWindow = mainWin.window;
+
+  const addressManagementPopup = createPopupView({});
+
+  mainWindow.addBrowserView(addressManagementPopup);
+
+  const onTargetWinUpdate = () => {
+    if (viewsState['dapps-management'].visible)
+      updateSubviewPos(mainWindow, addressManagementPopup);
+  };
+  mainWindow.on('show', onTargetWinUpdate);
+  mainWindow.on('move', onTargetWinUpdate);
+  mainWindow.on('resized', onTargetWinUpdate);
+  mainWindow.on('unmaximize', onTargetWinUpdate);
+  mainWindow.on('restore', onTargetWinUpdate);
+
+  await addressManagementPopup.webContents.loadURL(
+    `${RABBY_POPUP_GHOST_VIEW_URL}?view=dapps-management#/`
+  );
+
+  // debug-only
+  if (!IS_RUNTIME_PRODUCTION) {
+    // addressManagementPopup.webContents.openDevTools({ mode: 'detach' });
+  }
+
+  hidePopupView(addressManagementPopup);
+
+  return addressManagementPopup;
+});
+
+Promise.all([
+  addAddressReady,
+  addressManagementReady,
+  dappsManagementReady,
+]).then((wins) => {
   valueToMainSubject('popupViewsOnMainwinReady', {
     addAddress: wins[0],
     addressManagement: wins[1],
+    dappsManagement: wins[2],
   });
 });
 
@@ -138,15 +177,16 @@ onIpcMainEvent(
   '__internal_rpc:popupview-on-mainwin:toggle-show',
   async (_, payload) => {
     const mainWindow = (await onMainWindowReady()).window;
-    const { addAddress, addressManagement } = await firstValueFrom(
-      fromMainSubject('popupViewsOnMainwinReady')
-    );
+    const { addAddress, addressManagement, dappsManagement } =
+      await firstValueFrom(fromMainSubject('popupViewsOnMainwinReady'));
 
     const targetView =
       payload.type === 'add-address'
         ? addAddress
         : payload.type === 'address-management'
         ? addressManagement
+        : payload.type === 'dapps-management'
+        ? dappsManagement
         : null;
 
     if (!targetView) return;
@@ -155,15 +195,19 @@ onIpcMainEvent(
       viewsState[payload.type].visible = true;
       updateSubviewPos(mainWindow, targetView);
       targetView.webContents.focus();
-      sendToWebContents(
-        targetView.webContents,
-        '__internal_push:popupview-on-mainwin:on-visiblechange',
-        {
-          type: payload.type,
-          visible: true,
-          pageInfo: payload.pageInfo,
-        }
-      );
+
+      setTimeout(() => {
+        sendToWebContents(
+          targetView.webContents,
+          '__internal_push:popupview-on-mainwin:on-visiblechange',
+          {
+            type: payload.type,
+            visible: true,
+            pageInfo: payload.pageInfo,
+          }
+        );
+      }, 50);
+
       if (
         !IS_RUNTIME_PRODUCTION &&
         payload.openDevTools &&
