@@ -107,64 +107,6 @@ type ChannelMessagePayload = {
       }
     ];
   };
-  'detect-dapp': {
-    send: [reqid: string, dappUrl: string];
-    response: [
-      {
-        reqid: string;
-        result: IDappsDetectResult;
-      }
-    ];
-  };
-  'dapps-fetch': {
-    send: [reqid: string];
-    response: [
-      {
-        reqid: string;
-        dapps: IDapp[];
-        pinnedList: IDapp['origin'][];
-      }
-    ];
-  };
-  'get-dapp': {
-    send: [reqid: string, origin: IDapp['origin']];
-    response: [
-      {
-        reqid: string;
-        dapp: IDapp | null;
-        isPinned: boolean;
-      }
-    ];
-  };
-  'dapps-put': {
-    send: [reqid: string, dapp: IDapp];
-    response: [
-      {
-        reqid: string;
-        dapps: IDapp[];
-      }
-    ];
-  };
-  'dapps-delete': {
-    send: [reqid: string, dapp: IDapp];
-    response: [
-      {
-        reqid: string;
-        error?: string;
-        dapps: IDapp[];
-      }
-    ];
-  };
-  'dapps-togglepin': {
-    send: [reqid: string, dappOrigins: IDapp['origin'][], nextPinned: boolean];
-    response: [
-      {
-        reqid: string;
-        error?: string;
-        pinnedList: IDapp['origin'][];
-      }
-    ];
-  };
   'check-if-new-release': {
     send: [reqid: string];
     response: [
@@ -378,10 +320,49 @@ type IChannelsKey = keyof ChannelMessagePayload;
 
 type ChannelInvokePayload = {
   'get-app-version': {
-    send: [reqid: string];
+    send: [];
     response: {
-      reqid: string;
       version: ReturnType<Electron.App['getVersion']>;
+    };
+  };
+  'detect-dapp': {
+    send: [dappUrl: string];
+    response: {
+      result: IDappsDetectResult;
+    };
+  };
+  'dapps-fetch': {
+    send: [];
+    response: {
+      dapps: IDapp[];
+      pinnedList: IDapp['origin'][];
+    };
+  };
+  'get-dapp': {
+    send: [origin: IDapp['origin']];
+    response: {
+      dapp: IDapp | null;
+      isPinned: boolean;
+    };
+  };
+  'dapps-put': {
+    send: [dapp: IDapp];
+    response: {
+      dapps: IDapp[];
+    };
+  };
+  'dapps-delete': {
+    send: [dapp: IDapp];
+    response: {
+      error?: string;
+      dapps: IDapp[];
+    };
+  };
+  'dapps-togglepin': {
+    send: [dappOrigins: IDapp['origin'][], nextPinned: boolean];
+    response: {
+      error?: string;
+      pinnedList: IDapp['origin'][];
     };
   };
   'get-desktopAppState': {
