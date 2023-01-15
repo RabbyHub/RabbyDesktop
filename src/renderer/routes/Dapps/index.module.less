@@ -1,16 +1,9 @@
 .page {
   position: relative;
-  height: calc(100vh - var(--mainwin-mainarea-topoffset));
   overflow: overlay;
 
-  .account {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-  }
-
   .header {
-    padding: 24px 48px;
+    padding: 4px 48px 24px;
 
     .title {
       font-weight: 510;
@@ -34,7 +27,7 @@
     }
   }
   .main {
-    height: calc(100vh - 112px - var(--mainwin-mainarea-topoffset));
+    height: calc(100vh - 112px - var(--mainwin-mainroute-topoffset));
     padding: 20px 48px;
     overflow: overlay;
   }

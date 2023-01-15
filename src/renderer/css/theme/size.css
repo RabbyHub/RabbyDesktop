@@ -9,12 +9,14 @@
   --mainwin-sidebar-collapsed-w: 66px;
   --mainwin-sidebar-animation-second: 0.5s;
 
-  --mainwin-mainarea-topoffset: 0px;
+  --mainwin-mainroute-topoffset: 0px;
 
   --mainwin-headerblock-offset: 64px;
+
+  --mainwin-mainroute-height: calc(100vh - var(--mainwin-mainroute-topoffset));
 }
 
 html.os-win32,
 body.os-win32 {
-  --mainwin-mainarea-topoffset: 32px;
+  --mainwin-mainroute-topoffset: 32px;
 }
