@@ -152,9 +152,8 @@ onIpcMainEvent('__internal_rpc:main-window:click-close', async (evt) => {
   tabbedWin?.destroy();
 });
 
-handleIpcMainInvoke('get-app-version', (_, reqid) => {
+handleIpcMainInvoke('get-app-version', (_) => {
   return {
-    reqid,
     version: app.getVersion(),
   };
 });
