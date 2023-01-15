@@ -59,3 +59,16 @@ export async function toggleDappPinned(
     .invoke('dapps-togglepin', dappOrigins, nextPinned)
     .then(() => {});
 }
+
+export async function setDappsOrder(payload: {
+  pinnedList?: string[];
+  unpinnedList?: string[];
+}) {
+  return window.rabbyDesktop.ipcRenderer
+    .invoke('dapps-setOrder', payload)
+    .then((event) => {
+      if (event.error) {
+        throw new Error(event.error);
+      }
+    });
+}

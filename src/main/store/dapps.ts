@@ -271,6 +271,65 @@ handleIpcMainInvoke('dapps-togglepin', async (_, dappOrigins, nextPinned) => {
   };
 });
 
+handleIpcMainInvoke('dapps-setOrder', (_, { pinnedList, unpinnedList }) => {
+  const dappsMap = dappStore.get('dappsMap');
+
+  let changed = false;
+
+  // TODO: validate
+  if (Array.isArray(pinnedList)) {
+    pinnedList = pinnedList.filter(
+      (dappOrigin) => !!dappOrigin && dappsMap[dappOrigin]
+    );
+    const currentPinnedList = dappStore.get('pinnedList');
+
+    if (pinnedList.length !== currentPinnedList.length) {
+      return {
+        error: 'Invalid Params',
+      };
+    }
+    if (pinnedList.some((dappOrigin) => !dappsMap[dappOrigin])) {
+      return {
+        error: 'Invalid Params',
+      };
+    }
+    dappStore.set('pinnedList', pinnedList);
+    changed = true;
+  }
+
+  // TODO: validate
+  if (Array.isArray(unpinnedList)) {
+    unpinnedList = unpinnedList.filter(
+      (dappOrigin) => !!dappOrigin && dappsMap[dappOrigin]
+    );
+    const currentUnpinnedList = dappStore.get('unpinnedList');
+
+    if (unpinnedList.length !== currentUnpinnedList.length) {
+      return {
+        error: 'Invalid Params',
+      };
+    }
+    if (unpinnedList.some((dappOrigin) => !dappsMap[dappOrigin])) {
+      return {
+        error: 'Invalid Params',
+      };
+    }
+    dappStore.set('unpinnedList', unpinnedList);
+    changed = true;
+  }
+
+  if (changed) {
+    emitIpcMainEvent('__internal_main:dapps:pinnedListChanged', {
+      pinnedList: dappStore.get('pinnedList'),
+      unpinnedList: dappStore.get('unpinnedList'),
+    });
+  }
+
+  return {
+    error: null,
+  };
+});
+
 onIpcMainEvent(
   '__internal_rpc:debug-tools:operate-debug-insecure-dapps',
   (event, opType) => {

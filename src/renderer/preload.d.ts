@@ -368,6 +368,17 @@ type ChannelInvokePayload = {
       unpinnedList: IDapp['origin'][];
     };
   };
+  'dapps-setOrder': {
+    send: [
+      {
+        pinnedList?: IDapp['origin'][];
+        unpinnedList?: IDapp['origin'][];
+      }
+    ];
+    response: {
+      error: string | null;
+    };
+  };
   'get-desktopAppState': {
     send: [];
     response: {
