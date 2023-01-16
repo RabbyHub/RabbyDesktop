@@ -145,7 +145,7 @@ const configuration: webpack.Configuration = {
       debug: true,
     }),
 
-    new ReactRefreshWebpackPlugin(),
+    new ReactRefreshWebpackPlugin({ overlay: false }),
   ],
 
   node: {

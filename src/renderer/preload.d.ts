@@ -285,17 +285,6 @@ type ChannelMessagePayload = {
     ];
   };
 
-  [`__internal_rpc:rabbyx-rpc:query`]: {
-    send: [reqId: string, query: Omit<IRabbyxRpcQuery, 'rpcId'>];
-    response: [
-      {
-        reqId: string;
-        result: any;
-        error?: Error;
-      }
-    ];
-  };
-
   [`rabbyx-rpc-respond`]: {
     send: [string | IRabbyxRpcResponse];
     response: [];
@@ -421,6 +410,14 @@ type ChannelInvokePayload = {
   'apply-proxyConfig': {
     send: [conf: IAppProxyConf];
     response: void;
+  };
+
+  [`__internal_rpc:rabbyx-rpc:query`]: {
+    send: [query: Omit<IRabbyxRpcQuery, 'rpcId'>];
+    response: {
+      result: any;
+      error?: Error;
+    };
   };
 };
 type IInvokesKey = keyof ChannelInvokePayload;
