@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import classnames from 'classnames';
-import { Modal, ModalProps, Button } from 'antd';
+import { ModalProps, Button } from 'antd';
 
 import { useDapps } from 'renderer/hooks/useDappsMngr';
 import { permissionService } from '@/renderer/ipcRequest/rabbyx';
@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 import { RCIconDappsModalClose } from '../../../../assets/icons/internal-homepage';
 import { DappFavicon } from '../DappFavicon';
+import { Modal } from '../Modal/Modal';
 
 function useDelete(dapp: IDapp | null) {
   const { removeDapp } = useDapps();
@@ -52,9 +53,9 @@ export default function ModalDeleteDapp({
       {...modalProps}
       title={null}
       footer={null}
-      closeIcon={<RCIconDappsModalClose />}
+      // closeIcon={<RCIconDappsModalClose />}
       className={classnames(styles.deleteModal, modalProps.className)}
-      wrapClassName={classnames('modal-dapp-mngr', modalProps.wrapClassName)}
+      wrapClassName={classnames(modalProps.wrapClassName)}
     >
       <div className={styles.deletingDapp}>
         <h3 className={styles.title}>Delete the Dapp?</h3>

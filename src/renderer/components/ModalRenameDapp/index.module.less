@@ -36,7 +36,7 @@
     margin-bottom: 24px;
 
     text-align: center;
-    color: var(--color-title);
+    color: #fff;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -47,26 +47,28 @@
     position: relative;
 
     .aliasInput {
-      background: var(--color-bg);
-      border: 1px solid var(--color-primary);
+      background: rgba(255, 255, 255, 0.1) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 8px;
-      height: 100%;
-      padding: 18px 16px;
-
-      font-weight: 500;
-      font-size: 16px;
-      color: var(--color-title);
-      height: 56px;
+      height: 64px;
+      padding: 16px 24px;
+      &:focus,
+      &:hover {
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      }
+      color: #fff;
     }
     margin-bottom: 45px;
   }
 
   .confirmBtn {
     width: 240px;
-    height: 56px;
+    height: 52px;
     border-radius: 8px;
-    font-weight: 700;
-    font-size: 16px;
-    line-height: 19px;
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 18px;
+    background-color: #707280 !important;
+    border: none;
   }
 }

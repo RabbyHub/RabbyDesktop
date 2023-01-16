@@ -1,4 +1,6 @@
 .addModal {
+  --color-title: #fff;
+
   :global {
     .ant-modal-body {
       padding: 64px;
@@ -7,25 +9,41 @@
       justify-content: center;
       align-items: center;
       text-align: center;
-      height: 520px;
-    }
-    .ant-modal-close-x {
-      @size: 76px;
-
-      width: @size;
-      height: @size;
-      line-height: @size;
-      font-size: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      height: 600px;
     }
   }
 }
 
+.input {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  height: 64px;
+  padding: 16px 24px;
+  &:focus,
+  &:hover {
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+  color: #fff;
+  box-shadow: none !important;
+
+  :global {
+    .ant-input-clear-icon {
+      color: #fff;
+    }
+  }
+}
+.backIcon {
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  cursor: pointer;
+}
+
 .stepAdd {
   height: 100%;
-  width: 100%;
+  width: 640px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -37,19 +55,9 @@
     letter-spacing: 0px;
     text-align: center;
     color: var(--color-title);
-    margin-bottom: 50px;
+    margin-bottom: 80px;
   }
 
-  .addUrlInput {
-    background: var(--color-bg) !important;
-    border: 1px solid var(--color-primary);
-    border-radius: 8px;
-    height: 64px;
-    padding: 16px 24px;
-    :global(.ant-input) {
-      background: var(--color-bg);
-    }
-  }
   :global {
     .ant-form-item {
       width: 100%;
@@ -63,20 +71,23 @@
   .addConfirmBtn {
     margin-top: auto;
     width: 240px;
-    height: 56px;
+    height: 52px;
     border-radius: 8px;
-    font-weight: 700;
-    font-size: 16px;
-    line-height: 19px;
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 18px;
+    background-color: #707280 !important;
+    border: none;
   }
 }
 
 .stepChecked {
   height: 100%;
-  width: 360px;
+  width: 400px;
   display: flex;
   align-items: center;
   flex-direction: column;
+  padding-top: 40px;
 
   .checkedFavicon {
     width: 80px;
@@ -84,7 +95,7 @@
     display: block;
     margin: 0 auto;
     margin-bottom: 24px;
-    border-radius: 4px;
+    border-radius: 8px;
   }
 
   .checkedDappUrl {
@@ -94,6 +105,7 @@
 
     text-align: center;
     color: var(--color-title);
+    margin-bottom: 32px;
   }
 
   .checkedDappUrl + .checkedInput {
@@ -115,11 +127,13 @@
   .checkedConfirmBtn {
     margin-top: auto;
     width: 240px;
-    height: 56px;
+    height: 52px;
     border-radius: 8px;
-    font-weight: 700;
-    font-size: 16px;
-    line-height: 19px;
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 18px;
+    background-color: #707280 !important;
+    border: none;
   }
 }
 
@@ -145,23 +159,25 @@
   &Btn {
     margin-top: auto;
     width: 240px;
-    height: 56px !important;
-    border-radius: 8px !important;
-    font-weight: 700 !important;
-    font-size: 16px;
-    line-height: 19px;
+    height: 52px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 18px;
+    background-color: #707280 !important;
+    border: none;
   }
 
   :global {
     .dapp-block {
       position: relative;
-      width: 330px;
-      height: 100px;
+      width: 300px;
+      // height: 100px;
       box-sizing: border-box;
       display: flex;
       justify-content: flex-start;
       align-items: center;
-      padding: 24px;
+      padding: 16px;
       margin-bottom: 24px;
 
       background-color: var(--color-bg);

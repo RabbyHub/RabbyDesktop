@@ -2,6 +2,7 @@
 import { CurrentAccountAndNewAccount } from '@/renderer/components/CurrentAccount';
 import { useWindowTabs } from '@/renderer/hooks-shell/useWindowTabs';
 import { setDappsOrder } from '@/renderer/ipcRequest/dapps';
+import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { message } from 'antd';
 import { useCallback, useState } from 'react';
 
@@ -24,11 +25,8 @@ type IOnOpDapp = (
 ) => void;
 
 export default function DApps() {
-  const { dapps, pinDapp, unpinDapp, pinnedDapps, unpinnedDapps, openDapp } =
+  const { pinDapp, unpinDapp, pinnedDapps, unpinnedDapps, openDapp } =
     useTabedDapps();
-  const { tabMap } = useWindowTabs();
-
-  const [isAdding, setIsAdding] = useState(false);
 
   const [renamingDapp, setRenamingDapp] = useState<IDapp | null>(null);
   const [deletingDapp, setDeletingDapp] = useState<IDapp | null>(null);
@@ -59,9 +57,6 @@ export default function DApps() {
     [pinDapp, unpinDapp]
   );
 
-  const [_data, setData] = useState(dapps);
-  console.log(dapps);
-
   return (
     <div className={style.page}>
       <img
@@ -69,7 +64,7 @@ export default function DApps() {
         src="rabby-internal://assets/icons/internal-homepage/icon-dapps-add.svg"
         alt=""
         onClick={() => {
-          setIsAdding(true);
+          showMainwinPopupview({ type: 'dapps-management' });
         }}
       />
       <div className={style.container}>
@@ -126,14 +121,6 @@ export default function DApps() {
           </div>
         </main>
 
-        <ModalAddDapp
-          destroyOnClose
-          open={isAdding}
-          onCancel={() => setIsAdding(false)}
-          onAddedDapp={() => {
-            setIsAdding(false);
-          }}
-        />
         <ModalRenameDapp
           destroyOnClose
           open={!!renamingDapp}

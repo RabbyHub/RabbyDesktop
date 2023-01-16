@@ -3,6 +3,7 @@
     padding: 56px 48px 48px 48px;
     height: 400px;
   }
+  --color-title: #fff;
 }
 
 .deletingDapp {
@@ -15,15 +16,16 @@
   :global {
     .dapp-block {
       position: relative;
-      width: 330px;
-      height: 100px;
+      width: 300px;
       box-sizing: border-box;
       display: flex;
       justify-content: flex-start;
       align-items: center;
-      padding: 24px;
-      border: 1px solid var(--color-line);
+      padding: 16px;
+      // border: 1px solid var(--color-line);
       border-radius: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 6px;
 
       .dapp-favicon {
         width: 52px;
@@ -64,8 +66,8 @@
         font-weight: 500;
         font-size: 14px;
         line-height: 16px;
-        color: var(--color-paragraph);
         .truncate;
+        color: #fff;
       }
 
       .dapp-alias + .dapp-url {
@@ -91,8 +93,7 @@
   font-size: 14px;
   line-height: 16px;
   text-align: center;
-
-  color: var(--color-paragraph);
+  color: #fff;
 
   & + .confirmBtn {
     margin-top: 48px;
@@ -101,9 +102,11 @@
 
 .confirmBtn.confirmBtn {
   width: 240px;
-  height: 56px;
+  height: 52px;
   border-radius: 8px;
-  font-weight: 700;
-  font-size: 16px;
-  line-height: 19px;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 18px;
+  background-color: #707280 !important;
+  border: none;
 }
