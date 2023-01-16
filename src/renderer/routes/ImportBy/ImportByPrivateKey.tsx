@@ -2,6 +2,8 @@ import { Form, Input, message } from 'antd';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { useAccountToDisplay } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
+import { useAddressManagement } from '@/renderer/hooks/rabbyx/useAddressManagement';
 import ImportView from '../Import/components/ImportView/ImportView';
 import BlockButton from '../Import/components/BlockButton/BlockButton';
 import styles from './ImportByPrivateKey.module.less';
@@ -13,12 +15,14 @@ interface FormData {
 const ImportByPrivateKey = () => {
   const nav = useNavigate();
   const [form] = Form.useForm<FormData>();
-
+  const { getAllAccountsToDisplay } = useAccountToDisplay();
+  const { getHighlightedAddressesAsync } = useAddressManagement();
   const onNext = React.useCallback(
     async ({ privateKey }: FormData) => {
       try {
         const data = await walletController.importPrivateKey(privateKey);
-
+        await getHighlightedAddressesAsync();
+        await getAllAccountsToDisplay();
         nav('/welcome/import/successful', {
           state: {
             accounts: data,
