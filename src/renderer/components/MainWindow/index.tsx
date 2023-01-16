@@ -7,7 +7,6 @@ import {
 
 import DApps from '@/renderer/routes/Dapps';
 import GettingStarted from '@/renderer/routes/Welcome/GettingStarted';
-import React, { useEffect } from 'react';
 import Home from '@/renderer/routes/Home';
 import ImportHome from '@/renderer/routes/Import/ImportHome';
 import ImportByPrivateKey from '@/renderer/routes/ImportBy/ImportByPrivateKey';
@@ -25,7 +24,6 @@ import { useTransactionChanged } from '@/renderer/hooks/rabbyx/useTransaction';
 import { useMainWindowEvents } from '@/renderer/hooks-shell/useWindowState';
 import { useAppUnlockEvents } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { useAccounts } from '@/renderer/hooks/rabbyx/useAccount';
-import RightToolbar from '@/renderer/routes/Home/components/RightToolbar';
 import { useMessageForwardToMainwin } from '@/renderer/hooks/useMessageToMainwin';
 import styles from './index.module.less';
 
@@ -116,21 +114,7 @@ const router = createRouter([
             routeCSSKeyword: 'home_assets',
           } as MainWindowRouteData;
         },
-        element: (
-          <>
-            {/* <Home /> */}
-            {/* TODO: just avoid mismatch rabby-api on Home, integrate it into Home later */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                justifyContent: 'flex-end',
-              }}
-            >
-              <RightToolbar />
-            </div>
-          </>
-        ),
+        element: <Home />,
       },
       {
         path: 'my-dapps',
