@@ -28,7 +28,6 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
     return null;
   }
 
-  console.log(currentAccount);
   return (
     <div
       className={clsx(styles.account, className)}
