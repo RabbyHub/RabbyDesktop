@@ -8,7 +8,7 @@ interface Device {
   name: string;
 }
 
-export const LedgerModal: React.FC<ModalProps> = (props) => {
+export const LedgerModal: React.FC<ModalProps> = ({ onCancel, ...props }) => {
   const [connected, setConnected] = React.useState(false);
   const [devices, setDevices] = React.useState<Device[]>([]);
 
@@ -30,13 +30,13 @@ export const LedgerModal: React.FC<ModalProps> = (props) => {
   return (
     <Modal
       {...props}
-      title={213}
       width={1280}
-      backable
-      onBack={() => setConnected(false)}
+      onCancel={(e) => {
+        onCancel?.(e);
+        setConnected(false);
+      }}
     >
-      {/* <HDManager keyring={KEYRING_CLASS.HARDWARE.LEDGER} keyringId={null} /> */}
-      123
+      <HDManager keyring={KEYRING_CLASS.HARDWARE.LEDGER} keyringId={null} />
     </Modal>
   );
 };
