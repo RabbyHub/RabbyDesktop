@@ -2,7 +2,7 @@ import { Modal as AntdModal, ModalProps } from 'antd';
 import classNames from 'classnames';
 import './modal.less';
 
-interface Props extends ModalProps {
+export interface Props extends ModalProps {
   backable?: boolean;
   subtitle?: string;
   onBack?: () => void;

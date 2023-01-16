@@ -1,8 +1,9 @@
 import React from 'react';
+import { KEYRING_CLASS } from '@/renderer/utils/constant';
 import { Modal } from '../Modal/Modal';
-import { KEYRING_CLASS } from '../../utils/keyring';
 import { SelectModalContent } from './SelectModalContent';
 import { ContactModalContent } from './ContactModalContent';
+import { HDManagerModal } from '../HDManager/HDManagerModal';
 
 interface Props {
   visible: boolean;
@@ -26,6 +27,23 @@ export const AddAddressModal: React.FC<Props> = ({ visible, onClose }) => {
       >
         <ContactModalContent onSuccess={onClose} />
       </Modal>
+    );
+  }
+
+  if (
+    keyringType &&
+    [
+      KEYRING_CLASS.HARDWARE.LEDGER,
+      KEYRING_CLASS.HARDWARE.ONEKEY,
+      KEYRING_CLASS.HARDWARE.TREZOR,
+    ].includes(keyringType)
+  ) {
+    return (
+      <HDManagerModal
+        open={visible}
+        onCancel={onClose}
+        keyringType={keyringType}
+      />
     );
   }
 

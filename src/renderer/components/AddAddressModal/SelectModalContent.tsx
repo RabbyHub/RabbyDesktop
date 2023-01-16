@@ -1,5 +1,5 @@
 import { useMessageForwardToMainwin } from '@/renderer/hooks/useMessageToMainwin';
-import { KEYRING_CLASS } from '@/renderer/utils/keyring';
+import { KEYRING_CLASS } from '@/renderer/utils/constant';
 import clsx from 'clsx';
 import React from 'react';
 import styles from './AddAddressModal.module.less';
@@ -8,14 +8,17 @@ const HARDWARE_MAP = [
   {
     logo: 'rabby-internal://assets/icons/device/ledger.svg',
     name: 'Ledger',
+    id: KEYRING_CLASS.HARDWARE.LEDGER,
   },
   {
     logo: 'rabby-internal://assets/icons/device/trezor.svg',
     name: 'Trezor',
+    id: KEYRING_CLASS.HARDWARE.TREZOR,
   },
   {
     logo: 'rabby-internal://assets/icons/device/onekey.svg',
     name: 'OneKey',
+    id: KEYRING_CLASS.HARDWARE.ONEKEY,
   },
 ];
 
@@ -51,7 +54,10 @@ export const SelectModalContent: React.FC<Props> = ({
         </div>
         <div className={styles.body}>
           {HARDWARE_MAP.map((hardware) => (
-            <div className={styles.device}>
+            <div
+              onClick={() => onSelectType(hardware.id)}
+              className={styles.device}
+            >
               <img className={styles.deviceLogo} src={hardware.logo} />
               <span className={styles.deviceName}>{hardware.name}</span>
             </div>
