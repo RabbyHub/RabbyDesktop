@@ -1,27 +1,49 @@
 import { KEYRING_CLASS } from '@/renderer/utils/constant';
-import { Button } from 'antd';
+import { Button, Spin } from 'antd';
 import React from 'react';
+import { LoadingOutlined } from '@ant-design/icons';
 import { Modal, Props as ModalProps } from '../Modal/Modal';
 import { HDManager } from './HDManager';
+import styles from './HDManagerModal.module.less';
 
 interface Device {
   name: string;
 }
 
-export const LedgerModal: React.FC<ModalProps> = ({ onCancel, ...props }) => {
+const LoadingIcon = (
+  <LoadingOutlined style={{ fontSize: 20, color: '#fff' }} spin />
+);
+
+export const LedgerModal: React.FC<ModalProps> = (props) => {
   const [connected, setConnected] = React.useState(false);
   const [devices, setDevices] = React.useState<Device[]>([]);
 
   if (!connected) {
     return (
       <Modal {...props} width={1000} title="Connect Ledger">
-        <div>
-          <div>Scanning device</div>
-          <ul>
-            <li>Plug your Ledger wallet into your computer</li>
-            <li>Unlock Ledger and open the Ethereum app</li>
-          </ul>
-          <Button onClick={() => setConnected(true)}>Next</Button>
+        <div className={styles.LedgerModal}>
+          {devices?.length ? (
+            <div>devices list</div>
+          ) : (
+            <div className={styles.scan}>
+              <Spin indicator={LoadingIcon} />
+              <span className={styles.text}>Scanning device</span>
+            </div>
+          )}
+          <div className={styles.tipsContainer}>
+            <ol className={styles.tips}>
+              <li>Plug your Ledger wallet into your computer</li>
+              <li>Unlock Ledger and open the Ethereum app</li>
+            </ol>
+          </div>
+          <Button
+            disabled={!connected}
+            className={styles.next}
+            type="primary"
+            onClick={() => setConnected(true)}
+          >
+            Next
+          </Button>
         </div>
       </Modal>
     );
@@ -32,6 +54,7 @@ export const LedgerModal: React.FC<ModalProps> = ({ onCancel, ...props }) => {
       {...props}
       width={1280}
       onCancel={(e) => {
+        const { onCancel } = props;
         onCancel?.(e);
         setConnected(false);
       }}

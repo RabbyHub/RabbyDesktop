@@ -12,6 +12,10 @@ interface Props {
 
 export const AddAddressModal: React.FC<Props> = ({ visible, onClose }) => {
   const [keyringType, setKeyringType] = React.useState<string>();
+  const handleCancel = React.useCallback(() => {
+    onClose();
+    setKeyringType(undefined);
+  }, []);
 
   if (keyringType === KEYRING_CLASS.WATCH) {
     return (
@@ -22,7 +26,7 @@ export const AddAddressModal: React.FC<Props> = ({ visible, onClose }) => {
         backable
         onBack={() => setKeyringType(undefined)}
         destroyOnClose
-        onCancel={onClose}
+        onCancel={handleCancel}
         footer={null}
       >
         <ContactModalContent onSuccess={onClose} />
@@ -41,8 +45,10 @@ export const AddAddressModal: React.FC<Props> = ({ visible, onClose }) => {
     return (
       <HDManagerModal
         open={visible}
-        onCancel={onClose}
+        onCancel={handleCancel}
+        destroyOnClose
         keyringType={keyringType}
+        footer={null}
       />
     );
   }
