@@ -216,6 +216,7 @@ function AddDapp({
             onClick={async () => {
               await makeSureDappAddedToConnectedSite(dappInfo);
               await updateDapp(dappInfo);
+              message.success('Added successfully');
               onAddedDapp?.();
             }}
             disabled={!isValidAlias}

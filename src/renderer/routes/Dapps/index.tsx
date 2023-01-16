@@ -1,12 +1,14 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 import { CurrentAccountAndNewAccount } from '@/renderer/components/CurrentAccount';
+import { useWindowTabs } from '@/renderer/hooks-shell/useWindowTabs';
+import { setDappsOrder } from '@/renderer/ipcRequest/dapps';
 import { message } from 'antd';
 import { useCallback, useState } from 'react';
 
 import ModalAddDapp from '../../components/ModalAddDapp';
 import ModalDeleteDapp from '../../components/ModalDeleteDapp';
 import ModalRenameDapp from '../../components/ModalRenameDapp';
-import { useDapps } from '../../hooks/useDappsMngr';
+import { useDapps, useTabedDapps } from '../../hooks/useDappsMngr';
 
 import { DAppBlock } from './components/DAppBlock';
 
@@ -22,7 +24,9 @@ type IOnOpDapp = (
 ) => void;
 
 export default function DApps() {
-  const { dapps, pinDapp, unpinDapp } = useDapps();
+  const { dapps, pinDapp, unpinDapp, pinnedDapps, unpinnedDapps, openDapp } =
+    useTabedDapps();
+  const { tabMap } = useWindowTabs();
 
   const [isAdding, setIsAdding] = useState(false);
 
@@ -56,6 +60,7 @@ export default function DApps() {
   );
 
   const [_data, setData] = useState(dapps);
+  console.log(dapps);
 
   return (
     <div className={style.page}>
@@ -82,13 +87,34 @@ export default function DApps() {
           <div className="dapps">
             <div className="dapp-matrix">
               <SortableList
-                data={_data}
+                data={pinnedDapps}
                 onChange={(v) => {
-                  setData(v);
+                  setDappsOrder({
+                    pinnedList: v.map((item) => item.origin),
+                  });
                 }}
                 renderItem={(dapp) => {
                   return (
                     <DAppBlock
+                      onOpen={openDapp}
+                      key={dapp.origin}
+                      dapp={dapp}
+                      onOpDapp={onClickDapp}
+                    />
+                  );
+                }}
+              />
+              <SortableList
+                data={unpinnedDapps}
+                onChange={(v) => {
+                  setDappsOrder({
+                    unpinnedList: v.map((item) => item.origin),
+                  });
+                }}
+                renderItem={(dapp) => {
+                  return (
+                    <DAppBlock
+                      onOpen={openDapp}
                       key={dapp.origin}
                       dapp={dapp}
                       onOpDapp={onClickDapp}
@@ -105,7 +131,6 @@ export default function DApps() {
           open={isAdding}
           onCancel={() => setIsAdding(false)}
           onAddedDapp={() => {
-            message.success('Added successfully');
             setIsAdding(false);
           }}
         />

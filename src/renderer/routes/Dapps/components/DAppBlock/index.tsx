@@ -23,11 +23,13 @@ type IOnOpDapp = (
 export const DAppBlock = ({
   dapp,
   onAdd,
+  onOpen,
   onOpDapp,
 }: React.PropsWithoutRef<{
-  dapp?: IMergedDapp;
+  dapp?: IDappWithTabInfo;
   onAdd?: () => void;
   onOpDapp?: IOnOpDapp;
+  onOpen?: (dapp: IDappWithTabInfo) => void;
 }>) => {
   const ref = useRef<HTMLDivElement>(null);
   const navigateToDapp = useNavigateToDappRoute();
@@ -110,15 +112,14 @@ export const DAppBlock = ({
       }
     >
       <div className="dapp-block" ref={ref}>
+        {dapp.tab && dapp.tab.status !== 'loading' ? (
+          <div className="dapp-indicator" />
+        ) : null}
         <div
           className="anchor"
-          // href="#"
-          // target="_blank"
-          // rel="noreferrer"
           onClick={(e) => {
             e.preventDefault();
-            console.log(dapp.origin);
-            navigateToDapp(dapp?.origin);
+            onOpen?.(dapp);
           }}
         >
           <DappFavicon

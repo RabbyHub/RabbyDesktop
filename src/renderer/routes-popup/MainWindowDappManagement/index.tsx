@@ -8,6 +8,8 @@ import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { usePopupViewInfo } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { Modal as RModal } from '@/renderer/components/Modal/Modal';
 import styles from './index.module.less';
+import { AddAddressModal } from '@/renderer/components/AddAddressModal/AddAddressModal';
+import ModalAddDapp from '@/renderer/components/ModalAddDapp';
 
 hideMainwinPopupview('dapps-management');
 
@@ -18,14 +20,15 @@ function DappsManager() {
 
   return (
     <div className={styles.MainWindowAddAddress}>
-      <RModal
+      <ModalAddDapp
         open
         onCancel={() => {
           hideView();
         }}
-      >
-        <div className={styles.content}>Click Close To Hide View.</div>
-      </RModal>
+        onAddedDapp={() => {
+          hideView();
+        }}
+      />
     </div>
   );
 }

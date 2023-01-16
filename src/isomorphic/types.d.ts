@@ -37,6 +37,10 @@ type IDapp = {
 
 type IMergedDapp = IDapp & { isPinned: boolean };
 
+type IDappWithTabInfo = IMergedDapp & {
+  tab?: chrome.tabs.Tab;
+};
+
 type IDesktopAppState = {
   firstStartApp: boolean;
   enableContentProtected: boolean;

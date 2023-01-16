@@ -1,17 +1,23 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 /// <reference path="../../renderer/preload.d.ts" />
+
+import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
+// import { useDapps } from 'renderer/hooks/useDappsMngr';
+
 import { sortDappsBasedPinned } from '@/isomorphic/dapp';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useWindowTabs } from '../hooks-shell/useWindowTabs';
 import { makeSureDappAddedToConnectedSite } from '../ipcRequest/connected-site';
 import {
-  fetchDapps,
-  detectDapps,
-  putDapp,
   deleteDapp,
-  toggleDappPinned,
+  detectDapps,
+  fetchDapps,
   getDapp,
+  putDapp,
+  toggleDappPinned,
 } from '../ipcRequest/dapps';
+import { toggleLoadingView } from '../ipcRequest/mainwin';
 
 const dappsAtomic = atom(null as null | IDapp[]);
 const pinnedListAtomic = atom([] as IDapp['origin'][]);
@@ -145,3 +151,73 @@ export function useDapp(origin?: string) {
 
   return dappInfo;
 }
+
+const createTabedDapps = (
+  list: IMergedDapp[],
+  tabMap: ReturnType<typeof useWindowTabs>['tabMap']
+) => {
+  return list.map((item) => {
+    return {
+      ...item,
+      tab: tabMap.get(item.origin),
+    };
+  });
+};
+
+export const useTabedDapps = () => {
+  const { dapps, pinnedDapps, unpinnedDapps, ...rest } = useDapps();
+  const { tabMap, activeTab } = useWindowTabs();
+  const navigateToDapp = useNavigateToDappRoute();
+
+  const onSelectDapp = useCallback((tab: chrome.tabs.Tab) => {
+    chrome.tabs.update(tab.id!, { active: true });
+    window.rabbyDesktop.ipcRenderer.sendMessage(
+      '__internal_rpc:mainwindow:select-tab',
+      tab.windowId,
+      tab.id!
+    );
+  }, []);
+  const onOpenDapp = useCallback(
+    (dappOrigin: string) => {
+      const foundDapp = !dappOrigin
+        ? null
+        : dapps.find((dapp) => {
+            return dapp.origin === dappOrigin;
+          });
+
+      if (activeTab && foundDapp) {
+        toggleLoadingView({
+          type: 'show',
+          tabId: activeTab.id!,
+          tabURL: dappOrigin,
+        });
+      }
+
+      window.rabbyDesktop.ipcRenderer.sendMessage(
+        '__internal_rpc:mainwindow:open-tab',
+        dappOrigin
+      );
+    },
+    [activeTab, dapps]
+  );
+
+  const openDapp = useCallback(
+    (dapp: IDappWithTabInfo) => {
+      if (dapp.tab) {
+        onSelectDapp(dapp.tab);
+      } else {
+        onOpenDapp(dapp.origin);
+      }
+      navigateToDapp(dapp.origin);
+    },
+    [onSelectDapp, onOpenDapp, navigateToDapp]
+  );
+
+  return {
+    ...rest,
+    openDapp,
+    dapps: createTabedDapps(dapps, tabMap),
+    pinnedDapps: createTabedDapps(pinnedDapps, tabMap),
+    unpinnedDapps: createTabedDapps(unpinnedDapps, tabMap),
+  };
+};
