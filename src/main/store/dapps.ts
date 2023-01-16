@@ -3,7 +3,11 @@
 import { app } from 'electron';
 import Store from 'electron-store';
 import { formatDapp, formatDapps } from '@/isomorphic/dapp';
-import { emitIpcMainEvent, onIpcMainEvent } from '../utils/ipcMainEvents';
+import {
+  emitIpcMainEvent,
+  handleIpcMainInvoke,
+  onIpcMainEvent,
+} from '../utils/ipcMainEvents';
 import { APP_NAME, PERSIS_STORE_PREFIX } from '../../isomorphic/constants';
 import { safeParse, shortStringify } from '../../isomorphic/json';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
@@ -85,40 +89,37 @@ export function parseDappUrl(
   };
 }
 
-onIpcMainEvent('detect-dapp', async (event, reqid, dappUrl) => {
+handleIpcMainInvoke('detect-dapp', async (_, dappUrl) => {
   const allDapps = formatDapps(dappStore.get('dapps'));
   const result = await detectDapps(dappUrl, allDapps);
 
-  event.reply('detect-dapp', {
-    reqid,
+  return {
     result,
-  });
+  };
 });
 
-onIpcMainEvent('get-dapp', (event, reqid, dappOrigin) => {
+handleIpcMainInvoke('get-dapp', (_, dappOrigin) => {
   const dapp =
     dappStore.get('dapps').find((d) => d.origin === dappOrigin) || null;
   const isPinned = !!dappStore.get('pinnedList').find((d) => d === dappOrigin);
 
-  event.reply('get-dapp', {
-    reqid,
+  return {
     dapp,
     isPinned,
-  });
+  };
 });
 
-onIpcMainEvent('dapps-fetch', (event, reqid) => {
+handleIpcMainInvoke('dapps-fetch', () => {
   const dapps = formatDapps(dappStore.get('dapps'));
   const pinnedList = dappStore.get('pinnedList');
 
-  event.reply('dapps-fetch', {
-    reqid,
+  return {
     dapps,
     pinnedList,
-  });
+  };
 });
 
-onIpcMainEvent('dapps-put', (event, reqid: string, dapp: IDapp) => {
+handleIpcMainInvoke('dapps-put', (_, dapp: IDapp) => {
   // TODO: is there mutex?
   const allDapps = formatDapps(dappStore.get('dapps'));
   const existedDapp = allDapps.find((d) => d.origin === dapp.origin);
@@ -130,13 +131,12 @@ onIpcMainEvent('dapps-put', (event, reqid: string, dapp: IDapp) => {
 
   dappStore.set('dapps', allDapps);
 
-  event.reply('dapps-put', {
-    reqid,
+  return {
     dapps: allDapps,
-  });
+  };
 });
 
-onIpcMainEvent('dapps-delete', (event, reqid: string, dapp: IDapp) => {
+handleIpcMainInvoke('dapps-delete', (_, dapp: IDapp) => {
   const allDapps = dappStore.get('dapps') || [];
   const dappIdx = allDapps.findIndex((d) => {
     return d.origin === dapp.origin;
@@ -155,39 +155,34 @@ onIpcMainEvent('dapps-delete', (event, reqid: string, dapp: IDapp) => {
   dappStore.set('pinnedList', pinnedList);
   emitIpcMainEvent('__internal_main:dapps:pinnedListChanged', pinnedList);
 
-  event.reply('dapps-delete', {
-    reqid,
+  return {
     dapps: allDapps,
     error,
-  });
+  };
 });
 
-onIpcMainEvent(
-  'dapps-togglepin',
-  async (event, reqid, dappOrigins, nextPinned) => {
-    // const dapps = dappStore.get('dapps') || [];
-    const pinnedList = dappStore.get('pinnedList') || [];
+handleIpcMainInvoke('dapps-togglepin', async (_, dappOrigins, nextPinned) => {
+  // const dapps = dappStore.get('dapps') || [];
+  const pinnedList = dappStore.get('pinnedList') || [];
 
-    dappOrigins.forEach((origin) => {
-      const idx = pinnedList.findIndex((o) => o === origin);
-      if (idx > -1) {
-        pinnedList.splice(idx, 1);
-      }
-      if (nextPinned) {
-        pinnedList.unshift(origin);
-      }
-    });
+  dappOrigins.forEach((origin) => {
+    const idx = pinnedList.findIndex((o) => o === origin);
+    if (idx > -1) {
+      pinnedList.splice(idx, 1);
+    }
+    if (nextPinned) {
+      pinnedList.unshift(origin);
+    }
+  });
 
-    dappStore.set('pinnedList', pinnedList);
+  dappStore.set('pinnedList', pinnedList);
 
-    event.reply('dapps-togglepin', {
-      reqid,
-      pinnedList,
-    });
+  emitIpcMainEvent('__internal_main:dapps:pinnedListChanged', pinnedList);
 
-    emitIpcMainEvent('__internal_main:dapps:pinnedListChanged', pinnedList);
-  }
-);
+  return {
+    pinnedList,
+  };
+});
 
 onIpcMainEvent(
   '__internal_rpc:debug-tools:operate-debug-insecure-dapps',

@@ -76,6 +76,14 @@ cd /path/to/RabbyDesktop;
 npm start
 ```
 
+**Experimental** for some reasons, you may wanna server files on `http://localhost:<port>` instead of custom protocol, set `HTTP_INSTEAD_OF_CUSTOM=true` on start development: 
+
+```bash
+HTTP_INSTEAD_OF_CUSTOM=true npm start
+```
+
+Then you can debug pages served on `http://localhost:<port>` that are served on custom protocol originally
+
 ### (Optional) Helpers
 
 If you want to view RabbyX's storage, you need to install storage-area-explorer plugin:

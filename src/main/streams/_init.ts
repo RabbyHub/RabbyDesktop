@@ -22,6 +22,7 @@ const CONF = {
       mainSession: Session;
       dappSafeViewSession: Session;
       checkingViewSession: Session;
+      checkingProxySession: Session;
     }>
   >,
   electronChromeExtensionsReady: {
@@ -96,6 +97,7 @@ const CONF = {
   } as IConf<
     ReplaySubject<{
       addAddress: BrowserView;
+      addressManagement: BrowserView;
       quickSwap: BrowserView;
     }>
   >,

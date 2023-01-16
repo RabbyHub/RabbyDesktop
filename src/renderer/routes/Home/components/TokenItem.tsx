@@ -4,6 +4,7 @@ import { formatNumber } from '@/renderer/utils/number';
 import TokenWithChain from '@/renderer/components/TokenWithChain';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import classNames from 'classnames';
+import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 
 const TokenItemWrapper = styled.li`
   font-weight: 500;
@@ -24,7 +25,7 @@ const TokenItemWrapper = styled.li`
     flex-wrap: wrap;
     .token-symbol {
       font-weight: 700;
-      font-size: 15px;
+      font-size: 14px;
       line-height: 18px;
       margin-left: 18px;
       white-space: nowrap;
@@ -39,6 +40,9 @@ const TokenItemWrapper = styled.li`
       font-size: 10px;
       line-height: 12px;
       color: #2ed4a3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       &.is-loss {
         color: #ff6060;
       }
@@ -50,6 +54,7 @@ const TokenItemWrapper = styled.li`
       font-size: 10px;
       line-height: 14px;
       color: rgba(255, 255, 255, 0.7);
+      align-items: center;
       .icon-numer-change-arrow {
         width: 9px;
         margin-left: 4px;
@@ -69,18 +74,18 @@ const TokenItemWrapper = styled.li`
 const TokenLogoField = styled.div`
   justify-content: flex-start;
   color: rgba(255, 255, 255, 0.8);
-  width: 150px;
+  width: 20%;
 `;
 const TokenPriceField = styled.div`
-  flex: 1;
+  width: 20%;
   justify-content: flex-end;
 `;
 const TokenAmountField = styled.div`
-  width: 200px;
+  width: 35%;
   justify-content: flex-end;
 `;
 const TokenUsdValueField = styled.div`
-  width: 200px;
+  width: 25%;
   justify-content: flex-end;
 `;
 
@@ -93,6 +98,7 @@ const TokenItemComp = ({
 }) => {
   const priceChange = useMemo(() => {
     if (!historyToken) return 0;
+    if (historyToken.price === 0) return token.price;
     return (token.price - historyToken.price) / historyToken.price;
   }, [token, historyToken]);
 
@@ -117,7 +123,7 @@ const TokenItemComp = ({
       <TokenPriceField>
         {historyToken && (
           <div className="number-change">
-            ${historyToken.price.toFixed(2)}
+            ${formatNumber(historyToken.price)}
             <img
               className="icon-numer-change-arrow"
               src="rabby-internal://assets/icons/home/amount-change-arrow.svg"
@@ -139,14 +145,15 @@ const TokenItemComp = ({
       <TokenAmountField>
         {historyToken && (
           <div className="number-change">
-            {historyToken.amount.toFixed(4)}
+            {formatNumber(historyToken.amount, 4)}{' '}
+            {ellipsisTokenSymbol(token.symbol)}
             <img
               className="icon-numer-change-arrow"
               src="rabby-internal://assets/icons/home/amount-change-arrow.svg"
             />
           </div>
         )}
-        {formatNumber(token.amount, 4)}
+        {formatNumber(token.amount, 4)} {ellipsisTokenSymbol(token.symbol)}
         {amountChange !== 0 && (
           <div
             className={classNames('price-change', {
@@ -154,14 +161,16 @@ const TokenItemComp = ({
             })}
           >
             {amountChange > 0 ? '+' : '-'}
-            {Math.abs(amountChange).toFixed(4)}
+            {`${Math.abs(amountChange).toFixed(4)} ${ellipsisTokenSymbol(
+              token.symbol
+            )}`}
           </div>
         )}
       </TokenAmountField>
       <TokenUsdValueField>
         {historyToken && (
           <div className="number-change">
-            ${(historyToken.usd_value || 0).toFixed(2)}
+            ${formatNumber(historyToken.usd_value || 0)}
             <img
               className="icon-numer-change-arrow"
               src="rabby-internal://assets/icons/home/amount-change-arrow.svg"

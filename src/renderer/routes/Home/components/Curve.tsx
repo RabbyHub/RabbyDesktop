@@ -40,7 +40,12 @@ const CurveThumbnail = ({ data, className }: CurveThumbnailProps) => {
 
   return (
     <CurveWrapper className={className}>
-      <AreaChart data={data?.list} width={460} height={100}>
+      <AreaChart
+        data={data?.list}
+        width={594}
+        height={100}
+        style={{ position: 'absolute', right: 0 }}
+      >
         <defs>
           <linearGradient id="curveThumbnail" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor={color} stopOpacity={0.8} />

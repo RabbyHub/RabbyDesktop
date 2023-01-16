@@ -19,7 +19,6 @@ import {
 import { useClickOutSide } from '@/renderer/hooks/useClick';
 import { detectOS } from '@/isomorphic/os';
 import classNames from 'classnames';
-import { CurrentAccountAndNewAccount } from '../CurrentAccount';
 import styles from './index.module.less';
 
 const isDarwin = detectOS() === 'darwin';
@@ -167,8 +166,6 @@ export const TopNavBar = () => {
           <img src="rabby-internal://assets/icons/top-bar/close.svg" />
         </div>
       </div>
-
-      <CurrentAccountAndNewAccount className={styles.right} />
     </div>
   );
 };

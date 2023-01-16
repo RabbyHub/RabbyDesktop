@@ -47,6 +47,17 @@ type M2RChanneMessagePayload = {
         type: IContextMenuPageInfo['type'];
         visible: false;
       };
+  '__internal_push:popupview-on-mainwin:on-visiblechange':
+    | {
+        type: PopupViewOnMainwinInfo['type'];
+        visible: true;
+        pageInfo: PopupViewOnMainwinInfo;
+      }
+    | {
+        type: PopupViewOnMainwinInfo['type'];
+        visible: false;
+      };
+
   /* eslint-disable-next-line @typescript-eslint/ban-types */
   '__internal_push:loading-view:toggle': ChannelMessagePayload['__internal_rpc:mainwindow:toggle-loading-view']['send'][0];
 
@@ -96,64 +107,6 @@ type ChannelMessagePayload = {
       }
     ];
   };
-  'detect-dapp': {
-    send: [reqid: string, dappUrl: string];
-    response: [
-      {
-        reqid: string;
-        result: IDappsDetectResult;
-      }
-    ];
-  };
-  'dapps-fetch': {
-    send: [reqid: string];
-    response: [
-      {
-        reqid: string;
-        dapps: IDapp[];
-        pinnedList: IDapp['origin'][];
-      }
-    ];
-  };
-  'get-dapp': {
-    send: [reqid: string, origin: IDapp['origin']];
-    response: [
-      {
-        reqid: string;
-        dapp: IDapp | null;
-        isPinned: boolean;
-      }
-    ];
-  };
-  'dapps-put': {
-    send: [reqid: string, dapp: IDapp];
-    response: [
-      {
-        reqid: string;
-        dapps: IDapp[];
-      }
-    ];
-  };
-  'dapps-delete': {
-    send: [reqid: string, dapp: IDapp];
-    response: [
-      {
-        reqid: string;
-        error?: string;
-        dapps: IDapp[];
-      }
-    ];
-  };
-  'dapps-togglepin': {
-    send: [reqid: string, dappOrigins: IDapp['origin'][], nextPinned: boolean];
-    response: [
-      {
-        reqid: string;
-        error?: string;
-        pinnedList: IDapp['origin'][];
-      }
-    ];
-  };
   'check-if-new-release': {
     send: [reqid: string];
     response: [
@@ -193,6 +146,18 @@ type ChannelMessagePayload = {
   '__internal_forward:main-window:open-dapp': {
     send: [origin: IDapp['origin']];
     response: [origin: IDapp['origin']];
+  };
+  '__internal_forward:main-window:client-message': {
+    send: [
+      {
+        type: 'route-navigate';
+        data: {
+          pathname: string;
+          params?: Record<string, string>;
+        };
+      }
+    ];
+    response: ChannelMessagePayload['__internal_forward:main-window:client-message']['send'];
   };
   '__internal_rpc:dapp-tabs:close-safe-view': {
     send: [];
@@ -319,17 +284,6 @@ type ChannelMessagePayload = {
     ];
   };
 
-  [`__internal_rpc:rabbyx-rpc:query`]: {
-    send: [reqId: string, query: Omit<IRabbyxRpcQuery, 'rpcId'>];
-    response: [
-      {
-        reqId: string;
-        result: any;
-        error?: Error;
-      }
-    ];
-  };
-
   [`rabbyx-rpc-respond`]: {
     send: [string | IRabbyxRpcResponse];
     response: [];
@@ -355,10 +309,49 @@ type IChannelsKey = keyof ChannelMessagePayload;
 
 type ChannelInvokePayload = {
   'get-app-version': {
-    send: [reqid: string];
+    send: [];
     response: {
-      reqid: string;
       version: ReturnType<Electron.App['getVersion']>;
+    };
+  };
+  'detect-dapp': {
+    send: [dappUrl: string];
+    response: {
+      result: IDappsDetectResult;
+    };
+  };
+  'dapps-fetch': {
+    send: [];
+    response: {
+      dapps: IDapp[];
+      pinnedList: IDapp['origin'][];
+    };
+  };
+  'get-dapp': {
+    send: [origin: IDapp['origin']];
+    response: {
+      dapp: IDapp | null;
+      isPinned: boolean;
+    };
+  };
+  'dapps-put': {
+    send: [dapp: IDapp];
+    response: {
+      dapps: IDapp[];
+    };
+  };
+  'dapps-delete': {
+    send: [dapp: IDapp];
+    response: {
+      error?: string;
+      dapps: IDapp[];
+    };
+  };
+  'dapps-togglepin': {
+    send: [dappOrigins: IDapp['origin'][], nextPinned: boolean];
+    response: {
+      error?: string;
+      pinnedList: IDapp['origin'][];
     };
   };
   'get-desktopAppState': {
@@ -380,6 +373,37 @@ type ChannelInvokePayload = {
   'toggle-activetab-animating': {
     send: [visible: boolean];
     response: void;
+  };
+  'check-proxyConfig': {
+    send: [
+      {
+        detectURL: string;
+        proxyConfig: IAppProxyConf['proxySettings'];
+      }
+    ];
+    response: {
+      valid: boolean;
+      errMsg: string;
+    };
+  };
+  'get-proxyConfig': {
+    send: [];
+    response: {
+      proxyType: IAppProxyConf['proxyType'];
+      proxySettings: IAppProxyConf['proxySettings'];
+    };
+  };
+  'apply-proxyConfig': {
+    send: [conf: IAppProxyConf];
+    response: void;
+  };
+
+  [`__internal_rpc:rabbyx-rpc:query`]: {
+    send: [query: Omit<IRabbyxRpcQuery, 'rpcId'>];
+    response: {
+      result: any;
+      error?: Error;
+    };
   };
 };
 type IInvokesKey = keyof ChannelInvokePayload;

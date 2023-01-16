@@ -24,10 +24,9 @@ import { useChromeTabsEvents } from '@/renderer/hooks-shell/useWindowTabs';
 import { useTransactionChanged } from '@/renderer/hooks/rabbyx/useTransaction';
 import { useMainWindowEvents } from '@/renderer/hooks-shell/useWindowState';
 import { useAppUnlockEvents } from '@/renderer/hooks/rabbyx/useUnlocked';
-import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
-import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { useAccounts } from '@/renderer/hooks/rabbyx/useAccount';
 import RightToolbar from '@/renderer/routes/Home/components/RightToolbar';
+import { useMessageForwardToMainwin } from '@/renderer/hooks/useMessageToMainwin';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -114,8 +113,7 @@ const router = createRouter([
         path: 'home',
         loader: () => {
           return {
-            title: '',
-            useAccountComponent: true,
+            routeCSSKeyword: 'home_assets',
           } as MainWindowRouteData;
         },
         element: (
@@ -140,7 +138,6 @@ const router = createRouter([
         loader: () => {
           return {
             title: 'My Dapps',
-            useAccountComponent: true,
           } as MainWindowRouteData;
         },
       },
@@ -155,6 +152,11 @@ const router = createRouter([
             <TopNavBar />
           </DappViewWrapper>
         ),
+        loader: () => {
+          return {
+            floatingAccountComponent: true,
+          } as MainWindowRouteData;
+        },
       },
       {
         path: 'settings',
@@ -162,7 +164,6 @@ const router = createRouter([
         loader: () => {
           return {
             title: 'Settings',
-            useAccountComponent: true,
           } as MainWindowRouteData;
         },
       },
@@ -206,16 +207,9 @@ export function MainWindow() {
   useMainWindowEvents();
   useChromeTabsEvents();
 
-  useEffect(() => {
-    if (!IS_RUNTIME_PRODUCTION) {
-      // const host = openApi.getHost();
-      // console.debug('[debug] getHost', host);
-
-      walletOpenapi.getLatestVersion().then((hostInWallet) => {
-        console.debug('[debug] walletOpenapi', hostInWallet);
-      });
-    }
-  }, []);
+  useMessageForwardToMainwin('route-navigate', (payload) => {
+    router.navigate(payload.data);
+  });
 
   return (
     <>

@@ -1,4 +1,5 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
+import { CurrentAccountAndNewAccount } from '@/renderer/components/CurrentAccount';
 import { message } from 'antd';
 import { useCallback, useState } from 'react';
 

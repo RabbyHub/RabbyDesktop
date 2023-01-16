@@ -1,10 +1,51 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useLocation, useMatches } from 'react-router-dom';
+import classNames from 'classnames';
+
+import { ensurePrefix } from '@/isomorphic/string';
 import { CurrentAccountAndNewAccount } from '../CurrentAccount';
-import styles from './MainRoute.module.less';
 import { MainWindowRouteData } from './type';
 
-export default function MainWindowMain({
+import styles from './MainRoute.module.less';
+
+function convertPathnameToClassName(pathname: string) {
+  return pathname.replace(/\/|:/g, '_');
+}
+
+function useMainWindowClassName(pname: string, extraRouteCSSKeyword?: string) {
+  const { classNameOnRoute, classNameOnHtml } = useMemo(() => {
+    const className = convertPathnameToClassName(pname);
+    const onRoutes = [
+      className ? `route${ensurePrefix(className, '_')}` : '',
+      extraRouteCSSKeyword
+        ? `route${ensurePrefix(extraRouteCSSKeyword, '_')}`
+        : '',
+    ].filter(Boolean);
+    const onHtmls = [
+      className ? `page${ensurePrefix(className, '_')}` : '',
+      extraRouteCSSKeyword
+        ? `page${ensurePrefix(extraRouteCSSKeyword, '_')}`
+        : '',
+    ].filter(Boolean);
+
+    return {
+      classNameOnRoute: onRoutes,
+      classNameOnHtml: onHtmls,
+    };
+  }, [pname, extraRouteCSSKeyword]);
+
+  useEffect(() => {
+    document.documentElement.classList.add(...classNameOnHtml);
+
+    return () => {
+      document.documentElement.classList.remove(...classNameOnHtml);
+    };
+  }, [classNameOnHtml]);
+
+  return classNameOnRoute;
+}
+
+export default function MainWindowRoute({
   children,
 }: React.PropsWithChildren<object>) {
   const location = useLocation();
@@ -15,16 +56,24 @@ export default function MainWindowMain({
       ?.data as MainWindowRouteData;
   }, [matches, location.pathname]);
 
+  const classNameOnRoute = useMainWindowClassName(
+    location.pathname,
+    matchedData?.routeCSSKeyword
+  );
+
   return (
-    <div className={styles.Main}>
-      {matchedData && (
-        <div className={styles.headerBlock}>
-          <div className={styles.pageTitle}>{matchedData.title || null}</div>
-          {matchedData.useAccountComponent && (
-            <div className={styles.accountComponent}>
-              <CurrentAccountAndNewAccount />
-            </div>
+    <div className={classNames(styles.MainWindowRoute, classNameOnRoute)}>
+      {!matchedData?.noDefaultHeader && (
+        <div
+          className={classNames(
+            styles.headerBlock,
+            matchedData?.floatingAccountComponent && styles.titleLess
           )}
+        >
+          <div className={styles.pageTitle}>{matchedData?.title || null}</div>
+          <div className={styles.accountComponent}>
+            <CurrentAccountAndNewAccount />
+          </div>
         </div>
       )}
       {children}

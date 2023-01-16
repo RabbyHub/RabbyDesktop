@@ -24,7 +24,7 @@ export const AddAddressModal: React.FC<Props> = ({ visible, onClose }) => {
         onCancel={onClose}
         footer={null}
       >
-        <ContactModalContent />
+        <ContactModalContent onSuccess={onClose} />
       </Modal>
     );
   }
@@ -37,7 +37,7 @@ export const AddAddressModal: React.FC<Props> = ({ visible, onClose }) => {
       onCancel={onClose}
       footer={null}
     >
-      <SelectModalContent onSelectType={setKeyringType} />
+      <SelectModalContent onClose={onClose} onSelectType={setKeyringType} />
     </Modal>
   );
 };
