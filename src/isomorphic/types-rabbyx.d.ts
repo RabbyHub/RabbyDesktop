@@ -90,3 +90,9 @@ type IHighlightedAddress = {
   brandName: Account['brandName'];
   address: Account['address'];
 };
+interface SwapState {
+  gasPriceCache?: GasCache;
+  selectedDex?: import('@rabby-wallet/rabby-swap').DEX_ENUM | null;
+  selectedChain?: import('@debank/common').CHAINS_ENUM;
+  unlimitedAllowance?: boolean;
+}

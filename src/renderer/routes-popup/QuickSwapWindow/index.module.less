@@ -1,18 +1,170 @@
 .QuickSwapWindow {
+  width: 337px;
+  height: 706px;
 
+  background: #464c59;
 }
 
 .mask {
   z-index: 0;
 }
 
+:root {
+  --swap-bg: #464c59;
+  --swap-content-w: 317px;
+}
+
 .container {
   position: fixed;
-  right: 0;
+  right: 10px;
   top: 64px + 12px;
-  height: 626px;
   width: 337px;
+  height: 706px;
 
-  background-color: var(--color-purewhite);
-  border-radius: 14px;
+  background-color: var(--swap-bg);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.swapBox {
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+  height: 100%;
+}
+
+.tokenExchange {
+  max-height: 444px;
+  padding-bottom: 62px;
+
+  .content {
+    width: var(--swap-content-w);
+    margin: 0 auto;
+    // padding: 12px;
+    padding-top: 2px;
+    border-radius: 6px;
+
+    .chainSelectBox {
+      display: flex;
+      align-items: center;
+      // justify-content: center;
+      height: 36px;
+
+      .refresh {
+        cursor: pointer;
+        // text-blue-light
+        // color: ;
+      }
+    }
+
+    .swapTokenBox {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      .p1 {
+        text-align: left;
+        width: 100%;
+        margin-bottom: 4px;
+        padding-left: 4px;
+      }
+
+      .p2 {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 6px;
+        padding-left: 4px;
+        width: 100%;
+        margin-bottom: 4px;
+        padding-left: 4px;
+
+        .isInsufficient {
+          color: rgba(236, 81, 81, 1);
+        }
+
+        .maxButton {
+          margin-left: 6px;
+          user-select: none;
+          cursor: pointer;
+        }
+      }
+
+      .switchBtn {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        font-size: 27px;
+        transform: translate(-50%, -50%);
+        cursor: pointer;
+        color: #666d7d;
+        &:hover {
+          // color: #a0a6b5;
+        }
+      }
+    }
+  }
+
+  .Slippage {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 16px;
+    margin-bottom: 8px;
+  }
+
+  .alert {
+    margin: 0 20px;
+    border-radius: 4px;
+    padding: 3px 0;
+    background-color: transparent;
+    margin-top: 6px;
+
+    .info {
+      padding-bottom: 4px;
+      align-self: flex-start;
+      transform: rotate(180deg);
+      transform-origin: center;
+      color: var(--color-orange);
+    }
+
+    .message {
+      font-size: 13px;
+      line-height: 16px;
+      color: var(--color-orange);
+    }
+    .info,
+    .message {
+      &.danger {
+        color: var(--color-red);
+      }
+    }
+  }
+}
+
+.tips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  .logo {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+  }
+}
+
+.itemCenter {
+  display: flex;
+  align-items: center;
+}
+
+.justify-between {
+  display: flex;
+
+  justify-content: center;
+}
+
+.hidden {
+  display: none !important;
 }

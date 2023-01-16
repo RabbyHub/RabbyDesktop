@@ -1,6 +1,7 @@
 import GlobalMask from '@/renderer/components/MainWindow/GlobalMask';
 import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import styles from './index.module.less';
+import { SwapByDex } from './swap';
 
 export default function QuickSwapWindow() {
   return (
@@ -12,7 +13,9 @@ export default function QuickSwapWindow() {
           // keep window state, don't reset
         }}
       />
-      <div className={styles.container}>This is Quick Swap Window</div>
+      <div className={styles.container}>
+        <SwapByDex />
+      </div>
     </div>
   );
 }
