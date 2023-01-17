@@ -6,7 +6,7 @@ import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
 
 import { sortDappsBasedPinned } from '@/isomorphic/dapp';
 import { atom, useAtom } from 'jotai';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useWindowTabs } from '../hooks-shell/useWindowTabs';
 import { makeSureDappAddedToConnectedSite } from '../ipcRequest/connected-site';
 import {
@@ -16,6 +16,8 @@ import {
   getDapp,
   putDapp,
   toggleDappPinned,
+  fetchProtocolDappsBinding,
+  putProtocolDappsBinding,
 } from '../ipcRequest/dapps';
 import { toggleLoadingView } from '../ipcRequest/mainwin';
 
@@ -32,6 +34,45 @@ const unpinnedListAtomic = atom([] as IDapp['origin'][]);
 //     };
 //   });
 // }
+
+const protocolDappsBindingAtom = atom({} as Record<string, IDapp['origin'][]>);
+export function useProtocolDappsBinding() {
+  const [protocolDappsBinding, setProtocolDappsBinding] = useAtom(
+    protocolDappsBindingAtom
+  );
+
+  const loadingRef = useRef(false);
+  const fetchBindings = useCallback(async () => {
+    if (loadingRef.current) return;
+
+    loadingRef.current = true;
+    fetchProtocolDappsBinding()
+      .then((newVal) => {
+        setProtocolDappsBinding(newVal);
+      })
+      .finally(() => {
+        loadingRef.current = false;
+      });
+  }, []);
+
+  useEffect(() => {
+    fetchBindings();
+  }, [fetchBindings]);
+
+  const bindingDappsToProtocol = useCallback(
+    async (protocol: string, dappOrigins: IDapp['origin'][]) => {
+      putProtocolDappsBinding(protocol, dappOrigins).then(() => {
+        fetchProtocolDappsBinding();
+      });
+    },
+    []
+  );
+
+  return {
+    protocolDappsBinding,
+    bindingDappsToProtocol,
+  };
+}
 
 export function useDapps() {
   const [originDapps, setDapps] = useAtom(dappsAtomic);

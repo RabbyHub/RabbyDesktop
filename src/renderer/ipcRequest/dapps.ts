@@ -66,3 +66,36 @@ export async function setDappsOrder(payload: {
       }
     });
 }
+
+export async function putProtocolDappsBinding(
+  protocolDappsMap: Record<string, IDapp['origin'][]>
+): Promise<void>;
+export async function putProtocolDappsBinding(
+  protocol: string,
+  dappOrigins: IDapp['origin'][]
+): Promise<void>;
+export async function putProtocolDappsBinding(...args: any[]): Promise<void> {
+  let map: Record<string, IDapp['origin'][]> = {};
+  if (typeof args[0] === 'object') {
+    map = { ...args[0] };
+  } else {
+    // eslint-disable-next-line prefer-destructuring
+    map[args[0]] = args[1];
+  }
+
+  return window.rabbyDesktop.ipcRenderer
+    .invoke('dapps-put-protocol-binding', map)
+    .then((event) => {
+      if (event.error) {
+        throw new Error(event.error);
+      }
+    });
+}
+
+export async function fetchProtocolDappsBinding() {
+  return window.rabbyDesktop.ipcRenderer
+    .invoke('dapps-fetch-protocol-binding')
+    .then((event) => {
+      return event.result;
+    });
+}
