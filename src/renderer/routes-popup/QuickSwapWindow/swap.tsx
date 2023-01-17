@@ -570,12 +570,16 @@ export const Swap = ({
     return null;
   }, [
     isInsufficient,
+    loading,
+    nativeTokenLoading,
+    tokenLoading,
+    payTokenLoading,
+    totalGasUsedLoading,
     payToken,
     payAmount,
     receiveToken,
-    loading,
+    slippage,
     quoteInfo,
-    tokenLoading,
     payTokenPass,
     receiveTokenPass,
     isSdkDataPass,
@@ -583,9 +587,7 @@ export const Swap = ({
     chain,
     dexId,
     gasMarket,
-    totalGasUsedLoading,
     totalGasUsed,
-    slippage,
   ]);
 
   const refresh = () => {
