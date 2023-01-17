@@ -1,24 +1,16 @@
-import React, {
-  ComponentProps,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import { Input, Skeleton, Space } from 'antd';
-import cloneDeep from 'lodash/cloneDeep';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Drawer, DrawerProps, Empty, Input, Skeleton } from 'antd';
 import BigNumber from 'bignumber.js';
-// import { TokenItem } from 'background/service/openapi';
-// import { useWallet } from 'ui/utils';
-// import TokenWithChain from '../TokenWithChain';
-// import TokenSelector, { isSwapTokenType } from '../TokenSelector';
 import styled from 'styled-components';
-// import LessPalette, { ellipsis } from '@/ui/style/var-defs';
 import IconRcArrowDownTriangle from '@/../assets/icons/swap/arrow-caret-down2.svg?rc';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-import openapi from '@/renderer/utils/openapi';
 import TokenWithChain from '@/renderer/components/TokenWithChain';
+import IconRcBack from '@/../assets/icons/swap/back.svg?rc';
+import IconRcSearch from '@/../assets/icons/swap/search.svg?rc';
+import { formatTokenAmount, splitNumberByStep } from '@/renderer/utils/number';
+import { useDebounce } from 'react-use';
+import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 
 const TokenWrapper = styled.div`
   /* width: 92px; */
@@ -38,15 +30,19 @@ const SelectTips = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 150px;
-  height: 32px;
+  width: 159px;
+  height: 44px;
   color: #fff;
-  background: #8697ff;
+  background: #424959;
   border-radius: 4px;
   font-weight: 500;
   font-size: 20px;
   line-height: 23px;
   & svg {
+    position: relative;
+    top: 2px;
+    width: 10px;
+    height: 12px;
     margin-left: 4px;
     filter: brightness(1000);
   }
@@ -63,18 +59,22 @@ const Wrapper = styled.div`
   & .ant-input {
     background-color: transparent;
     border-color: transparent;
-    color: #161819;
+    color: white;
     flex: 1;
     font-weight: 500;
     font-size: 22px;
     line-height: 26px;
 
     text-align: right;
-    color: #13141a;
     padding-right: 0;
 
+    &:focus {
+      border-color: transparent;
+      box-shadow: none;
+    }
+
     &:placeholder {
-      color: #707280;
+      color: #a9aaae;
     }
   }
 `;
@@ -83,12 +83,360 @@ const Text = styled.span`
   font-weight: 500;
   font-size: 20px;
   line-height: 23px;
-  color: var(--color-title);
+  color: white;
   max-width: 100px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
+
+const TitleWrapper = styled.div`
+  .title {
+    font-weight: 510;
+    font-size: 20px;
+    line-height: 24px;
+    text-align: center;
+    color: #ffffff;
+  }
+  .back {
+    position: absolute;
+    left: 13px;
+    top: 27px;
+    width: 6px !important;
+    height: 12px !important;
+    cursor: pointer;
+  }
+`;
+
+const StyledDrawer = styled(Drawer)`
+  .container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .searchIcon {
+    font-size: 16px;
+  }
+  .searchChainInput {
+    margin-top: 24px;
+    margin-bottom: 14px;
+    height: 36px;
+    font-size: 12px;
+    line-height: 14px;
+    border: 1px solid #5f6572 !important;
+    box-shadow: none !important;
+    border-radius: 6px;
+    background-color: transparent;
+    color: var(--color-purewhite);
+    & input::placeholder {
+      color: #707280;
+    }
+  }
+
+  .listHeader {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0 -10px;
+    padding: 0 10px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #4f5562;
+    .right {
+      color: rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  .listBox {
+    /* height: calc(100% - 144px); */
+    /* height: 622px; */
+    flex: 1;
+
+    overflow: scroll;
+    margin: 0 -10px;
+    padding: 0 10px;
+  }
+
+  .item {
+    height: 50px;
+    padding: 0 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid transparent;
+    cursor: pointer;
+    &:hover {
+      background: linear-gradient(90.98deg, #5e626b 1.39%, #656978 97.51%);
+      box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.07);
+      border-radius: 8px;
+
+      border: 1px solid #4d515f;
+    }
+  }
+
+  .left {
+    display: flex;
+    align-items: center;
+
+    .tokenInfo {
+      margin-left: 11px;
+      display: flex;
+      flex-direction: column;
+
+      .symbol {
+        font-weight: 510;
+        font-size: 13px;
+        line-height: 16px;
+        color: #ffffff;
+      }
+
+      .rate {
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 14px;
+
+        color: #898989;
+      }
+    }
+  }
+
+  .balance,
+  .usd {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .balance {
+    font-size: 13px;
+    line-height: 16px;
+    text-align: right;
+    color: #ffffff;
+  }
+
+  .usd {
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+    text-align: right;
+    color: #898989;
+  }
+
+  .noResult {
+    font-size: 14px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 12px;
+  }
+  .noResultTip {
+    font-size: 13px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+  }
+`;
+
+const SwapLoadingWrapper = styled.div`
+  margin-top: 12px;
+  margin-bottom: 20px;
+  padding-right: 17px;
+
+  .left {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2px;
+  }
+  .right {
+    display: flex;
+    justify-content: space-between;
+  }
+  .w-140 {
+    width: 140px;
+  }
+  .w-90 {
+    width: 90px;
+  }
+  .w-60 {
+    width: 60px;
+  }
+`;
+
+const SwapLoading = () => (
+  <SwapLoadingWrapper>
+    <div className="left ">
+      <Skeleton.Input
+        active
+        className="w-140"
+        style={{
+          height: 15,
+        }}
+      />
+      <Skeleton.Input
+        active
+        className="w-90"
+        style={{
+          height: 15,
+        }}
+      />
+    </div>
+    <div className="right">
+      <Skeleton.Input
+        active
+        className="w-60"
+        style={{
+          height: 14,
+        }}
+      />
+      <Skeleton.Input
+        active
+        className="w-60"
+        style={{
+          height: 14,
+        }}
+      />
+    </div>
+  </SwapLoadingWrapper>
+);
+interface TokenDrawerProps {
+  title?: React.ReactNode;
+  list: TokenItem[];
+  open?: boolean;
+  isLoading?: boolean;
+  placeholder?: string;
+  onClose: () => void;
+  onSearch: (q: string) => void;
+  onConfirm(item: TokenItem): void;
+  getContainer?: DrawerProps['getContainer'];
+}
+
+const TokenSelectDrawer = ({
+  title = 'Select a token',
+  open = false,
+  list,
+  onConfirm,
+  isLoading = false,
+  onSearch,
+  onClose,
+  placeholder = 'Search by Name / Address',
+  getContainer = false,
+}: TokenDrawerProps) => {
+  const [query, setQuery] = useState('');
+  const handleQueryChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    setQuery(e.target.value);
+  };
+
+  const isEmpty = !query && list.length <= 0;
+
+  useDebounce(
+    () => {
+      onSearch(query);
+    },
+    150,
+    [query]
+  );
+
+  return (
+    <StyledDrawer
+      getContainer={getContainer}
+      maskClosable={false}
+      closable={false}
+      placement="right"
+      // height="706"
+      width="100%"
+      open={open}
+      destroyOnClose
+      bodyStyle={{
+        padding: '20px 10px 0px 10px',
+        overflow: 'hidden',
+        backgroundColor: 'var(--swap-bg)',
+      }}
+      push={false}
+    >
+      <div className="container">
+        <TitleWrapper>
+          <IconRcBack className="back" onClick={onClose} />
+          <div className="title">{title}</div>
+        </TitleWrapper>
+
+        <Input
+          prefix={<IconRcSearch className="searchIcon" />}
+          value={query}
+          placeholder={placeholder}
+          size="large"
+          className="searchChainInput"
+          onChange={handleQueryChange}
+        />
+
+        <div className="listHeader">
+          <div className="left">Token</div>
+          <div className="right">Balance / Value</div>
+        </div>
+
+        <div className="listBox">
+          {!isLoading && isEmpty && (
+            <Empty
+              image="rabby-internal://assets/icons/swap/nodata-tx.png"
+              imageStyle={{
+                marginTop: 80,
+              }}
+              description={
+                <>
+                  <div className="noResult">No Results</div>
+                  <div className="noResultTip">
+                    Only tokens listed in Rabby by default are supported for
+                    swap
+                  </div>
+                </>
+              }
+            />
+          )}
+          {isLoading && (
+            <div>
+              {Array(8)
+                .fill(1)
+                .map(() => (
+                  <SwapLoading />
+                ))}
+            </div>
+          )}
+          {!isLoading &&
+            !isEmpty &&
+            list.map((t) => (
+              <div key={t.id} className="item" onClick={() => onConfirm(t)}>
+                <div className="left">
+                  <TokenWithChain token={t} />
+                  <div className="tokenInfo">
+                    <div className="symbol">{t.symbol}</div>
+                    <div className="rate">
+                      @{splitNumberByStep((t.price || 0).toFixed(2))}
+                    </div>
+                  </div>
+                </div>
+                <div className="right">
+                  <div className="balance" title={formatTokenAmount(t.amount)}>
+                    {t.amount !== 0 && t.amount < 0.0001
+                      ? '< 0.0001'
+                      : formatTokenAmount(t.amount)}
+                  </div>
+                  <div
+                    title={splitNumberByStep(
+                      new BigNumber(t.price || 0).times(t.amount).toFixed(2)
+                    )}
+                    className="usd"
+                  >
+                    $
+                    {splitNumberByStep(
+                      new BigNumber(t.price || 0).times(t.amount).toFixed(2)
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+        </div>
+      </div>
+    </StyledDrawer>
+  );
+};
 
 interface TokenAmountInputProps {
   token?: TokenItem;
@@ -102,9 +450,10 @@ interface TokenAmountInputProps {
   hideChainIcon?: boolean;
   value?: string;
   loading?: boolean;
+  getContainer?: DrawerProps['getContainer'];
 }
 
-const TokenSelect = ({
+export const TokenSelect = ({
   token,
   onChange,
   onTokenChange,
@@ -115,28 +464,26 @@ const TokenSelect = ({
   hideChainIcon = true,
   value,
   loading = false,
+  getContainer,
 }: TokenAmountInputProps) => {
   const latestChainId = useRef(chainId);
   const [tokens, setTokens] = useState<TokenItem[]>([]);
   const [originTokenList, setOriginTokenList] = useState<TokenItem[]>([]);
   const [isListLoading, setIsListLoading] = useState(true);
-  const [tokenSelectorVisible, setTokenSelectorVisible] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const { currentAccount } = useCurrentAccount();
-  // const wallet = useWallet();
-
-  // const isSwapType = isSwapTokenType(type);
 
   const handleCurrentTokenChange = (t: TokenItem) => {
     if (onChange) {
       onChange('');
     }
     onTokenChange(t);
-    setTokenSelectorVisible(false);
+    setOpen(false);
   };
 
   const handleTokenSelectorClose = () => {
-    setTokenSelectorVisible(false);
+    setOpen(false);
   };
 
   const sortTokensByPrice = (t: TokenItem[]) => {
@@ -151,10 +498,12 @@ const TokenSelect = ({
   const handleLoadTokens = async () => {
     setIsListLoading(true);
     let tokenList: TokenItem[] = [];
-    const getDefaultTokens = openapi.getSwapTokenList;
 
     const currentAddress = currentAccount?.address || '';
-    const defaultTokens = await getDefaultTokens(currentAddress, chainId);
+    const defaultTokens = await walletOpenapi.getSwapTokenList(
+      currentAddress,
+      chainId
+    );
 
     if (chainId !== latestChainId.current) return;
     tokenList = sortTokensByPrice(defaultTokens).filter((e) =>
@@ -166,7 +515,7 @@ const TokenSelect = ({
   };
 
   const handleSelectToken = () => {
-    setTokenSelectorVisible(true);
+    setOpen(true);
     handleLoadTokens();
   };
 
@@ -177,7 +526,7 @@ const TokenSelect = ({
     }
     setIsListLoading(true);
     try {
-      const data = await openapi.searchSwapToken(
+      const data = await walletOpenapi.searchSwapToken(
         currentAccount!.address,
         chainId,
         q
@@ -246,7 +595,7 @@ const TokenSelect = ({
           />
         ) : (
           <Input
-            className="h-[30px] max-w-"
+            className="amountInput"
             readOnly={type === 'swapTo'}
             placeholder="0"
             autoFocus={type !== 'swapTo'}
@@ -256,18 +605,17 @@ const TokenSelect = ({
             onChange={type !== 'swapTo' ? handleInput : undefined}
           />
         )}
+        <TokenSelectDrawer
+          open={open}
+          placeholder={placeholder}
+          list={availableToken}
+          onClose={handleTokenSelectorClose}
+          onSearch={handleSearchTokens}
+          onConfirm={handleCurrentTokenChange}
+          isLoading={isListLoading}
+          getContainer={getContainer}
+        />
       </Wrapper>
-      {/* <TokenSelector
-        visible={tokenSelectorVisible}
-        list={availableToken}
-        onConfirm={handleCurrentTokenChange}
-        onCancel={handleTokenSelectorClose}
-        onSearch={handleSearchTokens}
-        isLoading={isListLoading}
-        type={type}
-        placeholder={placeholder}
-        chainId={chainId}
-      /> */}
     </>
   );
 };

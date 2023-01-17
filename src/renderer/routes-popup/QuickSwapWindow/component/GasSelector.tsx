@@ -9,6 +9,52 @@ import IconTipDownArrow from '@/../assets/icons/swap/arrow-tips-down.svg?rc';
 import styled from 'styled-components';
 import { SlippageItem } from './Slippage';
 
+const SectionStyled = styled.section`
+  position: relative;
+  cursor: pointer;
+  color: #ffffff;
+  .header {
+    display: flex;
+    justify-content: space-between;
+
+    .title {
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 14px;
+    }
+
+    .gasLevel {
+      text-align: right;
+      font-size: 12px;
+      line-height: 14px;
+      display: flex;
+      align-items: center;
+
+      .arrow {
+        margin-left: 4px;
+        transform: rotate(180deg);
+
+        &.open {
+          transform: rotate(0);
+        }
+      }
+    }
+  }
+  .content {
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 9999px;
+    margin-top: 8px;
+    display: none;
+    &.flex {
+      display: flex;
+    }
+  }
+  .input {
+    cursor: pointer;
+  }
+`;
+
 const GasItem = styled(SlippageItem)`
   flex-direction: column;
   width: 72px;
@@ -28,13 +74,14 @@ const GasItem = styled(SlippageItem)`
     font-size: 12px;
     line-height: 14px;
     text-align: center;
-    color: #4b4d59;
+    color: #dcdde0;
   }
   .ant-input {
     padding: 0;
     font-weight: 500;
     font-size: 13px;
     line-height: 15px;
+    color: #dcdde0;
   }
 `;
 
@@ -103,29 +150,21 @@ export const GasSelector = ({
   }, [gasUsed, selectGas, gasList, token]);
 
   return (
-    <section className={clsx('relative cursor-pointer px-12')}>
-      <div className="flex justify-between" onClick={() => setOpen()}>
-        <div className="text-13 text-gray-title">Gas fee</div>
+    <SectionStyled>
+      <div className="header" onClick={() => setOpen()}>
+        <div className="title">Gas fee</div>
 
-        <div className="text-right text-13 font-medium flex items-center">
+        <div className="gasLevel">
           {selectGas?.level
             ? GAS_LEVEL_TEXT[selectGas?.level as keyof typeof GAS_LEVEL_TEXT]
             : ''}
           ·${gasUsd}
-          <div
-            className={clsx('ml-4', {
-              'rotate-180': open,
-            })}
-          >
+          <div className={clsx('arrow', open && 'open')}>
             <IconTipDownArrow />
           </div>
         </div>
       </div>
-      <div
-        className={clsx('flex justify-between items-center  rounded mt-8', {
-          hidden: !open,
-        })}
-      >
+      <div className={clsx('content', open && 'flex')}>
         {gasList.map((item) => (
           <GasItem
             active={selectGas?.level === item.level}
@@ -137,7 +176,7 @@ export const GasSelector = ({
             <div>
               {item.level === 'custom' ? (
                 <Input
-                  className="cursor-pointer"
+                  className="input"
                   value={
                     selectGas?.level === 'custom'
                       ? (selectGas?.price || 0) / 1e9
@@ -157,6 +196,6 @@ export const GasSelector = ({
           </GasItem>
         ))}
       </div>
-    </section>
+    </SectionStyled>
   );
 };

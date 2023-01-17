@@ -1,6 +1,5 @@
-import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
-import openApi from '@/renderer/utils/openapi';
 import { validateToken, ValidateTokenParam } from '@/renderer/utils/token';
 import { CHAINS, CHAINS_ENUM } from '@debank/common';
 import { GasLevel, Tx } from '@debank/rabby-api/dist/types';
@@ -18,7 +17,8 @@ import BigNumber from 'bignumber.js';
 import { useMemo } from 'react';
 import { useAsync } from 'react-use';
 
-const INTERNAL_REQUEST_ORIGIN = window.location.origin;
+const INTERNAL_REQUEST_ORIGIN =
+  'chrome-extension://gcnoccfhaccblggkkpnnhiplblddbcod';
 
 const ETH_USDT_CONTRACT = '0xdac17f958d2ee523a2206206994597c13d831ec7';
 
@@ -254,7 +254,7 @@ export const useGasAmount = <T extends ValidateTokenParam>(
           const tokenApproveParams =
             await walletController.generateApproveTokenTx({
               from: userAddress,
-              to: payToken.id,
+              to: payToken!.id,
               chainId: CHAINS[chain].id,
               // @ts-expect-error
               spender: DEX_SPENDER_WHITELIST[dexId][chain],
@@ -267,7 +267,7 @@ export const useGasAmount = <T extends ValidateTokenParam>(
             gasPrice: `0x${new BigNumber(gasPrice).toString(16)}`,
             gas: '0x0',
           };
-          const tokenApprovePreExecTx = await openApi.preExecTx({
+          const tokenApprovePreExecTx = await walletOpenapi.preExecTx({
             tx: tokenApproveTx,
             origin: INTERNAL_REQUEST_ORIGIN,
             address: userAddress,
@@ -297,7 +297,7 @@ export const useGasAmount = <T extends ValidateTokenParam>(
           );
         }
 
-        const swapPreExecTx = await openApi.preExecTx({
+        const swapPreExecTx = await walletOpenapi.preExecTx({
           tx: {
             ...data.tx,
             nonce: nextNonce,

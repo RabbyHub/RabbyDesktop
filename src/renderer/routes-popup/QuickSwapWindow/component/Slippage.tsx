@@ -1,7 +1,7 @@
 import { Input, Space, Tooltip } from 'antd';
 import clsx from 'clsx';
 import { memo, useMemo } from 'react';
-import { useCss, useToggle } from 'react-use';
+import { useToggle } from 'react-use';
 import styled from 'styled-components';
 import IconInfo from '@/../assets/icons/swap/info-outline.svg?rc';
 import IconTipDownArrow from '@/../assets/icons/swap/arrow-tips-down.svg?rc';
@@ -9,16 +9,16 @@ import IconArrowTips from '@/../assets/icons/swap/arrow.svg';
 
 const MinReceivedBox = styled.div`
   margin-top: 8px;
-  width: 312px;
   height: 30px;
-  background: #f5f6fa;
+  background: #505664;
   border-radius: 2px;
-  font-weight: 400;
-  font-size: 12px;
-  color: #4b4d59;
   display: flex;
   align-items: center;
   padding: 0 8px;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+  color: rgba(255, 255, 255, 0.8);
 `;
 
 export const SlippageItem = styled.div<{
@@ -44,13 +44,13 @@ export const SlippageItem = styled.div<{
       ? props.error
         ? 'rgba(255,176,32,0.1)'
         : 'rgba(134, 151, 255, 0.1)'
-      : '#f5f6fa'};
+      : '#505664'};
   color: ${(props) =>
     props.active
       ? props.error
         ? '#ffb020'
         : 'var(--color-primary)'
-      : 'var(--color-title)'};
+      : 'var(--color-purewhite)'};
   border-color: ${(props) =>
     props.active
       ? props.error
@@ -82,13 +82,15 @@ export const SlippageItem = styled.div<{
     opacity: ${(props) => (props.active && props.hasAmount ? 1 : 0)};
     content: '';
     position: absolute;
-    width: 15px;
-    height: 15px;
-    background-image: url(${IconArrowTips});
-    background-repeat: no-repeat;
     left: 50%;
-    bottom: -16px;
+    bottom: -10px;
     transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 4px 6.9px 4px;
+    border-color: transparent transparent #505664 transparent;
+    border-radius: 2px;
   }
   & input {
     text-align: center;
@@ -109,6 +111,57 @@ const SLIPPAGE = ['0.05', '0.5', '3'];
 const tips =
   'Your transaction will revert if the price changes unfavorably by more than this percentage';
 
+const Wrapper = styled.section`
+  position: relative;
+  cursor: pointer;
+  color: #ffffff;
+  .header {
+    display: flex;
+    justify-content: space-between;
+
+    .title {
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 14px;
+    }
+  }
+
+  .rate {
+    display: flex;
+    align-items: center;
+    font-weight: 510;
+    font-size: 12px;
+    line-height: 14px;
+    .orange {
+      color: var(--color-orange);
+    }
+    .arrow {
+      margin-left: 4px;
+      transform: rotate(180deg);
+
+      &.open {
+        transform: rotate(0);
+      }
+    }
+  }
+
+  .content {
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 9999px;
+    margin-top: 8px;
+    display: none;
+    &.flex {
+      display: flex;
+    }
+  }
+  /* text-12 mt-8 text-gray-content */
+  .inputTips {
+    font-size: 12px;
+    margin-top: 8px;
+    color: var(--color-comment1);
+  }
+`;
 interface SlippageProps {
   value: string;
   onChange: (n: string) => void;
@@ -128,50 +181,24 @@ export const Slippage = memo((props: SlippageProps) => {
 
   const hasAmount = !!amount;
 
-  const slippageTooltipsClassName = useCss({
-    '& .ant-tooltip-arrow': {
-      left: 'calc(50% - 94px )',
-    },
-  });
-
   return (
-    <section className={clsx('relative cursor-pointer px-12')}>
-      <div className="flex justify-between" onClick={() => setOpen()}>
+    <Wrapper>
+      <div className="header" onClick={setOpen}>
         <Space size={4}>
-          <div className="text-13 text-gray-title">Slippage</div>
-          <Tooltip
-            overlayClassName={clsx(
-              'rectangle max-w-[360px] left-[20px]',
-              slippageTooltipsClassName
-            )}
-            placement="top"
-            title={tips}
-          >
+          <div className="title">Slippage</div>
+          <Tooltip autoAdjustOverflow placement="top" title={tips}>
             <IconInfo />
           </Tooltip>
         </Space>
-        <div
-          className={clsx(
-            'text-right text-13 font-medium flex items-center',
-            (isLow || isHigh) && 'text-orange'
-          )}
-        >
+        <div className={clsx('rate', (isLow || isHigh) && 'orange')}>
           {value} %
-          <div
-            className={clsx('ml-4', {
-              'rotate-180': open,
-            })}
-          >
+          <div className={clsx('arrow', open && 'open')}>
             <IconTipDownArrow />
           </div>
         </div>
       </div>
 
-      <div
-        className={clsx('flex justify-between items-center  rounded mt-8', {
-          hidden: !open,
-        })}
-      >
+      <div className={clsx('content', open && 'flex')}>
         {SLIPPAGE.map((e) => (
           <SlippageItem
             key={e}
@@ -224,10 +251,8 @@ export const Slippage = memo((props: SlippageProps) => {
         </MinReceivedBox>
       )}
       {isCustom && value.trim() === '' && (
-        <div className="text-12 mt-8 text-gray-content">
-          Please input the custom slippage
-        </div>
+        <div className="inputTips">Please input the custom slippage</div>
       )}
-    </section>
+    </Wrapper>
   );
 });

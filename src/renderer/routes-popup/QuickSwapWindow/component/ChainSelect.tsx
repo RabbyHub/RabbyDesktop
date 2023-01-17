@@ -8,7 +8,7 @@ import IconRcSearch from '@/../assets/icons/swap/search.svg?rc';
 import IconRcBack from '@/../assets/icons/swap/back.svg?rc';
 
 import styled from 'styled-components';
-import { Drawer, Input } from 'antd';
+import { Drawer, Input, Tooltip } from 'antd';
 import clsx from 'clsx';
 import { usePreference } from '@/renderer/hooks/rabbyx/usePreference';
 
@@ -95,6 +95,7 @@ function ChainItem({
   onPinnedChange,
   checked,
   support = true,
+  disabledTips,
 }: {
   chain: CHAINS_ENUM;
   pinned: boolean;
@@ -102,34 +103,37 @@ function ChainItem({
   onClick?: React.DOMAttributes<HTMLDivElement>['onClick'];
   onPinnedChange?: (chain: CHAINS_ENUM, pinned: boolean) => void;
   support?: boolean;
+  disabledTips?: React.ReactNode;
 }) {
   const chainObj = CHAINS[chain];
   return (
-    <ChainItemWrapper support={support} onClick={onClick}>
-      <div className="left">
-        <img src={chainObj.logo} className="icon" />
-        <div className="name">{chainObj.name}</div>
-      </div>
-      <img
-        className={clsx(pinned ? 'star' : 'unStar')}
-        src={
-          pinned
-            ? 'rabby-internal://assets/icons/select-chain/icon-pinned-fill.svg'
-            : 'rabby-internal://assets/icons/select-chain/icon-pinned.svg'
-        }
-        onClick={(evt) => {
-          evt.stopPropagation();
-          onPinnedChange?.(chainObj.enum, !pinned);
-        }}
-        alt=""
-      />
-      {checked && (
+    <Tooltip title={disabledTips} open={support ? false : undefined}>
+      <ChainItemWrapper support={support} onClick={onClick}>
+        <div className="left">
+          <img src={chainObj.logo} className="icon" />
+          <div className="name">{chainObj.name}</div>
+        </div>
         <img
-          className="checked"
-          src="rabby-internal://assets/icons/select-chain/checked.svg"
+          className={clsx(pinned ? 'star' : 'unStar')}
+          src={
+            pinned
+              ? 'rabby-internal://assets/icons/select-chain/icon-pinned-fill.svg'
+              : 'rabby-internal://assets/icons/select-chain/icon-pinned.svg'
+          }
+          onClick={(evt) => {
+            evt.stopPropagation();
+            onPinnedChange?.(chainObj.enum, !pinned);
+          }}
+          alt=""
         />
-      )}
-    </ChainItemWrapper>
+        {checked && (
+          <img
+            className="checked"
+            src="rabby-internal://assets/icons/select-chain/checked.svg"
+          />
+        )}
+      </ChainItemWrapper>
+    </Tooltip>
   );
 }
 
@@ -286,6 +290,7 @@ export const ChainSelectDrawer = ({
               onClick={() => onChange(e.enum)}
               onPinnedChange={setChainPinned}
               support={supportChains ? supportChains?.includes(e.enum) : true}
+              disabledTips={disabledTips}
             />
           ))}
         </div>
@@ -300,6 +305,7 @@ export const ChainSelectDrawer = ({
               onClick={() => onChange(e.enum)}
               onPinnedChange={setChainPinned}
               support={supportChains ? supportChains?.includes(e.enum) : true}
+              disabledTips={disabledTips}
             />
           ))}
         </div>
@@ -337,7 +343,7 @@ interface ChainSelectorProps {
   readonly?: boolean;
   // direction?: 'top' | 'bottom';
   // supportChains?: CHAINS_ENUM[];
-  disabledTips?: string;
+  disabledTips?: React.ReactNode;
   title?: React.ReactNode;
 }
 export const ChainSelect = ({

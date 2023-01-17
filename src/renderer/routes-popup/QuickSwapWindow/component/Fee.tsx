@@ -1,8 +1,7 @@
 import { Space, Tooltip } from 'antd';
-import clsx from 'clsx';
-import { useCss } from 'react-use';
 import IconQuestion from '@/../assets/icons/swap/question-outline.svg?rc';
-import IconInfo from '@/../assets/icons/swap/info-outline.svg';
+import IconInfo from '@/../assets/icons/swap/info-outline.svg?rc';
+import styled from 'styled-components';
 
 const feeTips = {
   '0.3': () => '0.3% fee for common token',
@@ -11,31 +10,46 @@ const feeTips = {
     `0 fee to wrap/unwrap tokens by interacting directly with ${symbol} contracts.`,
 };
 
+const SectionStyled = styled.section`
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  .title {
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+  }
+
+  .feeBox {
+    text-align: right;
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 15px;
+    display: flex;
+    align-items: center;
+
+    .fee {
+      margin-right: 4px;
+    }
+  }
+
+  .input {
+    cursor: pointer;
+  }
+`;
+
 export interface FeeProps {
   fee: '0.3' | '0.1' | '0';
   symbol?: string;
 }
 export const Fee = (props: FeeProps) => {
   const { fee, symbol = '' } = props;
-  const feeTooltipsClassName = useCss({
-    '& .ant-tooltip-arrow': {
-      left: 'calc(50% - 88px )',
-    },
-  });
-  const feeNumClassName = useCss({
-    '& .ant-tooltip-arrow': {
-      left: 'calc(100% - 30px )',
-    },
-  });
+
   return (
-    <div className="flex justify-between px-12">
+    <SectionStyled>
       <Space size={4}>
-        <div className="text-13 text-gray-title">Rabby fee</div>
+        <div className="title">Rabby fee</div>
         <Tooltip
-          overlayClassName={clsx(
-            'rectangle max-w-[360px] left-[20px]',
-            feeTooltipsClassName
-          )}
           placement="top"
           title={
             "The charged fee depends on which token you're swapping. It has been charged from the current quote."
@@ -44,19 +58,12 @@ export const Fee = (props: FeeProps) => {
           <IconInfo />
         </Tooltip>
       </Space>
-      <div className="text-right text-13 font-medium flex items-center">
-        <span className="mr-4">{fee}%</span>
-        <Tooltip
-          overlayClassName={clsx(
-            'rectangle max-w-[360px] left-auto right-[20px]',
-            feeNumClassName
-          )}
-          placement="top"
-          title={feeTips[fee](symbol)}
-        >
+      <div className="feeBox">
+        <span className="fee">{fee}%</span>
+        <Tooltip placement="top" title={feeTips[fee](symbol)}>
           <IconQuestion />
         </Tooltip>
       </div>
-    </div>
+    </SectionStyled>
   );
 };

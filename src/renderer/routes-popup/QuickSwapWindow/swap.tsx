@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CHAINS, CHAINS_ENUM, formatTokenAmount } from '@debank/common';
-// import { useLocation } from 'react-router-dom';
 
 import {
   useAsync,
@@ -12,8 +11,6 @@ import {
 import clsx from 'clsx';
 import styled from 'styled-components';
 import BigNumber from 'bignumber.js';
-// import { SwapChainSelector } from '@/ui/component/ChainSelector/tag';
-// import TokenSelect from '@/ui/component/TokenSelect';
 import { Alert, Button, message, Modal, Skeleton, Switch } from 'antd';
 import { InfoCircleFilled } from '@ant-design/icons';
 
@@ -26,15 +23,14 @@ import {
 import { GasLevel, TokenItem } from '@debank/rabby-api/dist/types';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { useSwap } from '@/renderer/hooks/rabbyx/useSwap';
-import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
 import { splitNumberByStep } from '@/renderer/utils/number';
-import openapi from '@/renderer/utils/openapi';
 import { query2obj } from '@/renderer/utils/url';
+import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 
 import ButtonMax from '@/../assets/icons/swap/max.svg';
 
-import IconSwitchDex from '@/../assets/icons/swap/switch.svg?rc';
 import IconLoading from '@/../assets/icons/swap/loading.svg?rc';
 import IconSwitchToken from '@/../assets/icons/swap/switch-token.svg?rc';
 
@@ -43,8 +39,6 @@ import { Fee, FeeProps } from './component/Fee';
 import { GasSelector } from './component/GasSelector';
 import { IconRefresh } from './component/IconRefresh';
 import { useGasAmount, useVerifySdk } from './hooks';
-// import { useRbiSource } from '@/ui/utils/ga-event';
-// import stats from '@/stats';
 
 import { Slippage } from './component/Slippage';
 import { Header } from './component/Header';
@@ -58,15 +52,16 @@ import {
   TIPS,
   DEX,
 } from './constant';
+import { TokenSelect } from './component/TokenSelect';
 
 const { confirm } = Modal;
 
 const SwapTokenWrapper = styled.div`
-  /* width: 336px; */
   height: 103px;
   display: flex;
   flex-direction: column;
-  padding: 10px 12px 12px 8px;
+  justify-content: space-between;
+  padding: 17px;
   background: #505664;
   border-radius: 4px;
   font-weight: 400;
@@ -85,34 +80,45 @@ const FooterWrapper = styled.div`
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 15px;
   .box {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    margin-top: 5px;
   }
   .tips {
     font-weight: 500;
     font-size: 13px;
     line-height: 15px;
-    color: #13141a;
+    color: #fff;
 
     .swapTips {
-      color: #707280;
+      color: #b4bdcc;
     }
   }
 
   .allowance {
     display: flex;
+    align-items: center;
     gap: 7px;
     font-style: normal;
     font-weight: 400;
     font-size: 12px;
     line-height: 14px;
     text-align: right;
-    color: #707280;
+    color: #b4bdcc;
     &.unLimit {
-      color: var(--color-paragraph);
+      color: var(--color-border);
+    }
+    .ant-switch {
+      background-color: rgba(180, 189, 204, 0.5);
+    }
+    .ant-switch-checked {
+      background-color: #8697ff;
+    }
+    .ant-switch-handle::before {
+      background-color: #464c59;
     }
   }
 
@@ -143,7 +149,7 @@ const FooterWrapper = styled.div`
 `;
 
 export const SwapByDex = () => {
-  // const oDexId = useRabbySelector((state) => state.swap.selectedDex);
+  const domRef = useRef<HTMLDivElement>(null);
 
   const { currentAccount } = useCurrentAccount();
   const userAddress = currentAccount?.address || '';
@@ -154,34 +160,18 @@ export const SwapByDex = () => {
   const { unlimitedAllowance = false } = swap;
   const dispatch = swapState;
 
-  // const { search } = useLocation();
   const [searchObj] = useState<{
     payTokenId?: string;
     chain?: string;
   }>(query2obj(window.location.search));
 
-  // const rbiSource = useRbiSource();
-
-  // useMemo(() => {
-  //   if (rbiSource) {
-  //     stats.report('enterSwapDescPage', {
-  //       refer: rbiSource,
-  //     });
-  //   }
-  // }, [rbiSource]);
-
   const [refreshId, setRefreshId] = useState(0);
 
   const [dexId, setDexId] = useState(() => oDexId);
-  // const { userAddress, unlimitedAllowance } = useRabbySelector((state) => ({
-  //   userAddress: state.account.currentAccount?.address || '',
-  //   unlimitedAllowance: state.swap.unlimitedAllowance || false,
-  // }));
 
   const setUnlimited = (bool: boolean) => {
     dispatch.setUnlimitedAllowance(bool);
   };
-  // const wallet = useWallet();
 
   const [visible, toggleVisible] = useToggle(false);
 
@@ -257,14 +247,14 @@ export const SwapByDex = () => {
     return ['', ''];
   }, [oDexId]);
 
-  const { value: gasMarket } = useAsync(() => {
-    return openapi.gasMarket(CHAINS[chain].serverId);
+  const { value: gasMarket } = useAsync(async () => {
+    return walletOpenapi.gasMarket(CHAINS[chain].serverId);
   }, [chain]);
 
   const { value: nativeToken, loading: nativeTokenLoading } =
     useAsync(async () => {
       if (chain) {
-        const t = await openapi.getToken(
+        const t = await walletOpenapi.getToken(
           userAddress,
           CHAINS[chain].serverId,
           CHAINS[chain].nativeTokenAddress
@@ -276,14 +266,15 @@ export const SwapByDex = () => {
 
   const { loading: payTokenLoading } = useAsync(async () => {
     if (payToken?.id && chain && payToken?.time_at === 0) {
-      const t = await openapi.getToken(
+      const t = await walletOpenapi.getToken(
         userAddress,
         CHAINS[chain].serverId,
         payToken?.id
       );
+
       setPayToken(t);
     }
-  }, [chain, payToken?.id, payToken?.time_at, refreshId]);
+  }, [userAddress, chain, payToken?.id, payToken?.time_at, refreshId]);
 
   const [{ value: quoteInfo, loading }, fetchQuote] = useAsyncFn(async () => {
     if (
@@ -298,12 +289,7 @@ export const SwapByDex = () => {
     ) {
       return;
     }
-    // stats.report('swapRequestQuote', {
-    //   dex: dexId,
-    //   chain,
-    //   fromToken: payToken.id,
-    //   toToken: receiveToken.id,
-    // });
+
     try {
       const data = await getQuote(dexId, {
         fromToken: payToken.id,
@@ -319,23 +305,9 @@ export const SwapByDex = () => {
         chain,
       });
 
-      // stats.report('swapQuoteResult', {
-      //   dex: dexId,
-      //   chain,
-      //   fromToken: payToken.id,
-      //   toToken: receiveToken.id,
-      //   status: data ? 'success' : 'fail',
-      // });
-
       return data;
     } catch (error) {
-      // stats.report('swapQuoteResult', {
-      //   dex: dexId,
-      //   chain,
-      //   fromToken: payToken.id,
-      //   toToken: receiveToken.id,
-      //   status: 'fail',
-      // });
+      console.error('getQuote error ', error);
     }
   }, [
     userAddress,
@@ -363,11 +335,12 @@ export const SwapByDex = () => {
     dexId,
     slippage,
     data: quoteInfo &&
+      payToken &&
       receiveToken && {
         ...quoteInfo,
-        fromToken: payToken!.id,
+        fromToken: payToken.id,
         fromTokenAmount: new BigNumber(payAmount)
-          .times(10 ** payToken!.decimals)
+          .times(10 ** payToken.decimals)
           .toFixed(0, 1),
         toToken: receiveToken?.id,
       },
@@ -650,7 +623,8 @@ export const SwapByDex = () => {
           //   },
           // }
         );
-        window.close();
+        hideMainwinPopupview('quick-swap');
+        window.location.reload();
       } catch (error) {
         console.error(error);
       }
@@ -783,7 +757,7 @@ export const SwapByDex = () => {
   }
 
   return (
-    <div className={styles.swapBox}>
+    <div className={styles.swapBox} ref={domRef}>
       <Header logo={logo} name={name} toggleVisible={toggleVisible} />
 
       <div className={styles.tokenExchange}>
@@ -802,23 +776,22 @@ export const SwapByDex = () => {
           <div className={styles.swapTokenBox}>
             <SwapTokenWrapper>
               <div className={styles.p1}>Pay with</div>
-              {/* <TokenSelect
+              <TokenSelect
                 value={payAmount}
                 token={payToken}
                 onTokenChange={setPayToken}
                 chainId={CHAINS[chain].serverId}
-                type={'swapFrom'}
-                placeholder={'Search by Name / Address'}
+                type="swapFrom"
                 onChange={setAmount}
                 excludeTokens={
                   receiveToken?.id ? [receiveToken?.id] : undefined
                 }
-              /> */}
+                getContainer={() => domRef.current || document.body}
+              />
               <div className={styles.p2}>
                 {payTokenLoading ? (
                   <Skeleton.Input
                     style={{
-                      width: 86,
                       height: 14,
                     }}
                     active
@@ -844,15 +817,7 @@ export const SwapByDex = () => {
                     )}
                   </div>
                 )}
-                {payTokenLoading ? (
-                  <Skeleton.Input
-                    style={{
-                      width: 86,
-                      height: 14,
-                    }}
-                    active
-                  />
-                ) : (
+                {payTokenLoading ? null : (
                   <div
                     className={clsx((!payToken || !payAmount) && styles.hidden)}
                   >
@@ -863,16 +828,16 @@ export const SwapByDex = () => {
             </SwapTokenWrapper>
             <SwapTokenWrapper>
               <div className={styles.p1}>Receive</div>
-              {/* <TokenSelect
+              <TokenSelect
                 token={receiveToken}
                 onTokenChange={setReceiveToken}
                 chainId={CHAINS[chain].serverId}
                 type="swapTo"
-                placeholder="Search by Name / Address"
                 excludeTokens={payToken?.id ? [payToken?.id] : undefined}
                 value={receivedTokeAmountDisplay}
                 loading={loading}
-              /> */}
+                getContainer={() => domRef.current || document.body}
+              />
               <div className={styles.p2}>
                 <div className={clsx(!receiveToken && styles.hidden)}>
                   Balance:
