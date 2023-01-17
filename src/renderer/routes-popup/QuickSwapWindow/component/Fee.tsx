@@ -14,6 +14,25 @@ const SectionStyled = styled.section`
   color: #ffffff;
   display: flex;
   justify-content: space-between;
+
+  .tooltip1 {
+    .ant-tooltip-arrow {
+      left: 77px;
+    }
+    .ant-tooltip-inner {
+      width: var(--swap-content-w);
+      transform: translateX(10px);
+    }
+  }
+
+  .tooltip2 {
+    .ant-tooltip-arrow {
+      left: 182px;
+    }
+    .ant-tooltip-inner {
+      transform: translateX(-1px);
+    }
+  }
   .title {
     font-weight: 400;
     font-size: 12px;
@@ -51,16 +70,23 @@ export const Fee = (props: FeeProps) => {
         <div className="title">Rabby fee</div>
         <Tooltip
           placement="top"
+          overlayClassName="tooltip1"
           title={
             "The charged fee depends on which token you're swapping. It has been charged from the current quote."
           }
+          getPopupContainer={(e) => e.parentElement || document.body}
         >
           <IconInfo />
         </Tooltip>
       </Space>
       <div className="feeBox">
         <span className="fee">{fee}%</span>
-        <Tooltip placement="top" title={feeTips[fee](symbol)}>
+        <Tooltip
+          overlayClassName="tooltip2"
+          getPopupContainer={(e) => e.parentElement || document.body}
+          placement="top"
+          title={feeTips[fee](symbol)}
+        >
           <IconQuestion />
         </Tooltip>
       </div>

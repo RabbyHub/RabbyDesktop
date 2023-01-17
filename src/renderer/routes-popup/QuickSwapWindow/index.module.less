@@ -4,6 +4,10 @@
 
 :root {
   --swap-bg: #464c59;
+  --swap-content-w: 317px;
+  --color-disabled-bg: rgba(134, 151, 255, 0.4);
+  --color-disabled-text: rgba(255, 255, 255, 0.6);
+  --color-error: #ff6060;
 }
 
 .container {
@@ -84,10 +88,17 @@
         padding-left: 4px;
 
         .isInsufficient {
-          color: rgba(236, 81, 81, 1);
+          color: var(--color-error);
+        }
+
+        .itemsCenter {
+          display: flex;
+          align-items: center;
         }
 
         .maxButton {
+          width: 28px;
+          height: 14px;
           margin-left: 6px;
           user-select: none;
           cursor: pointer;
@@ -118,14 +129,14 @@
   }
 
   .alert {
-    margin: 0 20px;
+    margin: 0 10px;
     border-radius: 4px;
     padding: 3px 0;
     background-color: transparent;
-    margin-top: 6px;
+    margin-top: 22px;
 
     .info {
-      padding-bottom: 4px;
+      padding-bottom: 2px;
       align-self: flex-start;
       transform: rotate(180deg);
       transform-origin: center;
@@ -170,4 +181,74 @@
 
 .hidden {
   display: none !important;
+}
+
+.approvalModal {
+  .title {
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 23px;
+    text-align: center;
+    color: #ffffff;
+    margin: 0 auto;
+    margin-top: 60px;
+  }
+  .desc {
+    max-width: 387px;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 24px;
+    text-align: center;
+    margin: 0 auto;
+    margin-top: 24px;
+
+    color: #ffffff;
+  }
+  :global {
+    .ant-modal-close-x {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .anticon-exclamation-circle {
+      display: none;
+    }
+    .ant-modal-body {
+      padding: 0;
+    }
+    .ant-modal-content {
+      background: linear-gradient(106.82deg, #646978 0%, #474e5f 100%);
+      border-radius: 6px;
+
+      width: 522px;
+      height: 340px;
+      background: linear-gradient(106.82deg, #646978 0%, #474e5f 100%);
+      border-radius: 6px;
+    }
+
+    .ant-modal-confirm-body
+      > .anticon
+      + .ant-modal-confirm-title
+      + .ant-modal-confirm-content {
+      margin-left: 0;
+    }
+
+    .ant-modal-confirm-btns {
+      display: flex;
+      justify-content: center;
+      margin-top: 46px;
+      .ant-btn-primary {
+        width: 276px;
+        height: 48px;
+        border-radius: 4px;
+        font-weight: 500;
+        font-size: 17px;
+        line-height: 20px;
+      }
+      .ant-btn-default:first-child {
+        display: none;
+      }
+    }
+  }
 }

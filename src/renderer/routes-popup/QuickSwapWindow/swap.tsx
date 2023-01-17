@@ -12,7 +12,7 @@ import clsx from 'clsx';
 import styled from 'styled-components';
 import BigNumber from 'bignumber.js';
 import { Alert, Button, message, Modal, Skeleton, Switch } from 'antd';
-import { InfoCircleFilled } from '@ant-design/icons';
+import { InfoCircleOutlined } from '@ant-design/icons';
 
 import {
   DEX_ENUM,
@@ -33,6 +33,7 @@ import ButtonMax from '@/../assets/icons/swap/max.svg';
 
 import IconLoading from '@/../assets/icons/swap/loading.svg?rc';
 import IconSwitchToken from '@/../assets/icons/swap/switch-token.svg?rc';
+import IconRcClose from '@/../assets//icons/swap/close.svg?rc';
 
 import { DexSelectDrawer } from './component/DexSelect';
 import { Fee, FeeProps } from './component/Fee';
@@ -61,7 +62,9 @@ const SwapTokenWrapper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 17px;
+  padding: 16px;
+  padding-bottom: 14px;
+
   background: #505664;
   border-radius: 4px;
   font-weight: 400;
@@ -109,13 +112,25 @@ const FooterWrapper = styled.div`
     text-align: right;
     color: #b4bdcc;
     &.unLimit {
-      color: var(--color-border);
+      /* color: var(--color-border); */
     }
     .ant-switch {
+      min-width: 32px;
       background-color: rgba(180, 189, 204, 0.5);
+      &:focus,
+      &:hover {
+        box-shadow: none;
+      }
+    }
+    .ant-click-animating-node {
+      display: none;
     }
     .ant-switch-checked {
-      background-color: #8697ff;
+      background: #27c193;
+      &:focus,
+      &:hover {
+        box-shadow: none;
+      }
     }
     .ant-switch-handle::before {
       background-color: #464c59;
@@ -133,10 +148,11 @@ const FooterWrapper = styled.div`
   }
 
   .ant-btn-primary.disabled {
-    background-color: #b6c1ff;
-    box-shadow: 0px 12px 24px rgba(134, 151, 255, 0.12);
-    border-color: rgba(134, 151, 255, 0.12);
+    background-color: var(--color-disabled-bg);
+    box-shadow: none;
+    border-color: transparent;
     cursor: not-allowed;
+    color: rgba(255, 255, 255, 0.6);
   }
   @keyframes spin {
     to {
@@ -650,71 +666,52 @@ export const Swap = ({
     }
   };
 
-  const twoStepApproveCn = useCss({
-    '& .ant-modal-content': {
-      background: '#fff',
-    },
-    '& .ant-modal-body': {
-      padding: '12px 8px 32px 16px',
-    },
-    '& .ant-modal-confirm-content': {
-      padding: '4px 0 0 0',
-    },
-    '& .ant-modal-confirm-btns': {
-      justifyContent: 'center',
-      '.ant-btn-primary': {
-        width: '260px',
-        height: '40px',
-      },
-      'button:first-child': {
-        display: 'none',
-      },
-    },
-  });
   const handleSwap = async () => {
     if (payAmount && payToken && !receiveToken) {
-      message.error({
-        className: 'rabbyx-tx-changed-tip',
-        icon: (
-          <InfoCircleFilled
-            className={clsx(
-              'pb-2 self-start transform rotate-180 origin-center text-red-light'
-            )}
-          />
-        ),
-        content: 'Please select receive token',
-      });
+      // message.error({
+      //   className: 'rabbyx-tx-changed-tip',
+      //   icon: (
+      //     <InfoCircleOutlined
+      //       className={clsx(
+      //         'pb-2 self-start transform rotate-180 origin-center text-red-light'
+      //       )}
+      //     />
+      //   ),
+      //   content: 'Please select receive token',
+      // });
       return;
     }
     if (tipsDisplay?.level === 'danger') {
-      message.error({
-        className: 'rabbyx-tx-changed-tip',
-        icon: (
-          <InfoCircleFilled
-            className={clsx(
-              'pb-2 self-start transform rotate-180 origin-center text-red-light'
-            )}
-          />
-        ),
-        content: tipsDisplay.label,
-      });
+      // message.error({
+      //   className: 'rabbyx-tx-changed-tip',
+      //   icon: (
+      //     <InfoCircleOutlined
+      //       className={clsx(
+      //         'pb-2 self-start transform rotate-180 origin-center text-red-light'
+      //       )}
+      //     />
+      //   ),
+      //   content: tipsDisplay.label,
+      // });
       return;
     }
 
     if (canSubmit && oDexId) {
       if (shouldTwoStepApprove) {
         return confirm({
-          width: 360,
           closable: true,
           centered: true,
-          className: twoStepApproveCn,
+          className: styles.approvalModal,
           title: null,
+          icon: null,
+          closeIcon: <IconRcClose />,
+
           content: (
             <>
-              <div className="text-[16px] font-medium text-gray-title mb-18 text-center">
+              <div className={styles.title}>
                 Sign 2 transactions to change allowance
               </div>
-              <div className="text-13 leading-[17px]  text-gray-subTitle">
+              <div className={styles.desc}>
                 Token USDT requires 2 transactions to change allowance. First
                 you would need to reset allowance to zero, and only then set new
                 allowance value.
@@ -812,6 +809,7 @@ export const Swap = ({
                   receiveToken?.id ? [receiveToken?.id] : undefined
                 }
                 getContainer={() => domRef.current || document.body}
+                forceFocus={quickWindowOpen}
               />
               <div className={styles.p2}>
                 {payTokenLoading ? (
@@ -829,10 +827,12 @@ export const Swap = ({
                       isInsufficient && styles.isInsufficient
                     )}
                   >
-                    Balance:{' '}
-                    {splitNumberByStep(
-                      new BigNumber(payToken?.amount || 0).toFixed(2, 1)
-                    )}
+                    <span>
+                      Balance:{' '}
+                      {splitNumberByStep(
+                        new BigNumber(payToken?.amount || 0).toFixed(2, 1)
+                      )}
+                    </span>
                     {payToken && !payTokenIsNativeToken && (
                       <img
                         className={styles.maxButton}
@@ -928,7 +928,7 @@ export const Swap = ({
           <Alert
             className={styles.alert}
             icon={
-              <InfoCircleFilled
+              <InfoCircleOutlined
                 className={clsx(
                   styles.info,
                   tipsDisplay.level === 'danger' && styles.danger
@@ -960,7 +960,11 @@ export const Swap = ({
             </div>
             <div className={clsx('allowance', unlimitedAllowance && 'unLimit')}>
               <span>Unlimited allowance</span>{' '}
-              <Switch checked={unlimitedAllowance} onChange={setUnlimited} />
+              <Switch
+                size="small"
+                checked={unlimitedAllowance}
+                onChange={setUnlimited}
+              />
             </div>
           </div>
         )}

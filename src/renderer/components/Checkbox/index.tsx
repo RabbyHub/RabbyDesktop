@@ -55,7 +55,12 @@ export const Checkbox = ({
           backgroundColor: checkState ? background : unCheckBackground,
         }}
       >
-        {checkIcon ?? <img src={IconCheck} className={styles.iconCheck} />}
+        {checkIcon ?? (
+          <img
+            src={IconCheck}
+            className={cx(styles.iconCheck, checkState && styles.checked)}
+          />
+        )}
       </div>
       {children && <div className={styles.label}>{children}</div>}
     </div>

@@ -5,7 +5,6 @@ import { useToggle } from 'react-use';
 import styled from 'styled-components';
 import IconInfo from '@/../assets/icons/swap/info-outline.svg?rc';
 import IconTipDownArrow from '@/../assets/icons/swap/arrow-tips-down.svg?rc';
-import IconArrowTips from '@/../assets/icons/swap/arrow.svg';
 
 const MinReceivedBox = styled.div`
   margin-top: 8px;
@@ -186,7 +185,16 @@ export const Slippage = memo((props: SlippageProps) => {
       <div className="header" onClick={setOpen}>
         <Space size={4}>
           <div className="title">Slippage</div>
-          <Tooltip autoAdjustOverflow placement="top" title={tips}>
+          <Tooltip
+            autoAdjustOverflow
+            overlayInnerStyle={{
+              width: 317,
+              padding: '8px 12px',
+              transform: 'translateX(65px)',
+            }}
+            placement="top"
+            title={tips}
+          >
             <IconInfo />
           </Tooltip>
         </Space>

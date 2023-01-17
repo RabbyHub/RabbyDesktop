@@ -13,6 +13,8 @@ import clsx from 'clsx';
 import { usePreference } from '@/renderer/hooks/rabbyx/usePreference';
 
 const TitleWrapper = styled.div`
+  display: flex;
+  justify-content: center;
   .title {
     font-weight: 510;
     font-size: 14px;
@@ -69,8 +71,11 @@ const ChainItemWrapper = styled.div<{ support: boolean }>`
     margin-left: auto;
   }
   &:hover {
-    background: linear-gradient(90.98deg, #5e626b 1.39%, #4d515f 97.51%);
+    background: linear-gradient(90.98deg, #5e626b 1.39%, #4d515f 97.51%)
+        padding-box,
+      linear-gradient(90.64deg, #777d8e 1.38%, #677086 98.82%) border-box;
     box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.07);
+    border-radius: 8px;
   }
   &:hover .unStar {
     opacity: 1;
@@ -108,7 +113,10 @@ function ChainItem({
   const chainObj = CHAINS[chain];
   return (
     <Tooltip title={disabledTips} open={support ? false : undefined}>
-      <ChainItemWrapper support={support} onClick={onClick}>
+      <ChainItemWrapper
+        support={support}
+        onClick={support ? onClick : undefined}
+      >
         <div className="left">
           <img src={chainObj.logo} className="icon" />
           <div className="name">{chainObj.name}</div>
@@ -141,32 +149,43 @@ const StyledDrawer = styled(Drawer)`
   .searchIcon {
     font-size: 16px;
   }
-  .searchChainInput {
+  .ant-input-affix-wrapper {
     margin-top: 24px;
     margin-bottom: 14px;
     height: 36px;
     font-size: 12px;
     line-height: 14px;
-    border: 1px solid #5f6572 !important;
-    box-shadow: none !important;
+    border: 1px solid #5f6572;
+    box-shadow: none;
     border-radius: 6px;
     background-color: transparent;
     color: var(--color-purewhite);
+
+    &.ant-input-affix-wrapper-focused {
+      border: 1px solid var(--color-primary);
+    }
+
     & input::placeholder {
       color: #707280;
     }
   }
+
   .scrollContainer {
     overflow: scroll;
-    height: calc(706px - 113px);
     margin: 0 -10px;
     padding: 0 10px;
     padding-bottom: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
   .chainList {
     background: #4f5563;
     border-radius: 4px;
     margin-top: 10px;
+    &:first-child {
+      margin-top: 0;
+    }
   }
 `;
 
@@ -260,6 +279,8 @@ export const ChainSelectDrawer = ({
         padding: '23px 10px 0px 10px',
         overflow: 'hidden',
         backgroundColor: 'var(--swap-bg)',
+        display: 'flex',
+        flexDirection: 'column',
       }}
       push={false}
     >
@@ -269,14 +290,15 @@ export const ChainSelectDrawer = ({
       </TitleWrapper>
 
       <Input
+        autoCorrect="false"
+        autoComplete="false"
         prefix={<IconRcSearch className="searchIcon" />}
         value={searchInput}
         placeholder="Search chain"
-        size="large"
-        className="searchChainInput"
         onChange={(evt) => {
           setSearchInput(evt.target.value || '');
         }}
+        autoFocus
       />
 
       <div className="scrollContainer">
@@ -317,13 +339,13 @@ export const ChainSelectDrawer = ({
 const ChainSelectWrapper = styled.div`
   display: flex;
   align-items: center;
+  gap: 8px;
   cursor: pointer;
 
   .logo {
     width: 16px;
     height: 16px;
     border-radius: 2px;
-    margin-right: 6px;
     overflow: hidden;
   }
 
@@ -331,9 +353,6 @@ const ChainSelectWrapper = styled.div`
     font-weight: 510;
     font-size: 13px;
     color: #ffffff;
-  }
-  .arrow {
-    margin-left: 4px;
   }
 `;
 

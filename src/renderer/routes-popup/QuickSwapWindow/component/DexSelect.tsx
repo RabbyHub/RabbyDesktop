@@ -66,14 +66,16 @@ export const Wrapper = styled.div`
 
       .selected,
       .unSelected {
+        padding: 0 28px;
         padding-bottom: 18px;
-        font-weight: 500;
+        font-weight: 700;
         font-size: 12px;
+        line-height: 14px;
         color: #e9e9e9;
         text-align: center;
       }
       .unSelected {
-        font-weight: 500;
+        font-weight: 400;
       }
     }
   }
@@ -85,13 +87,6 @@ const ButtonWrapper = styled(Button)`
   border-radius: 8px;
   font-weight: 500;
   font-size: 17px;
-
-  &.ant-btn-primary[disabled] {
-    background-color: #b6c1ff;
-    box-shadow: 0px 12px 24px rgba(134, 151, 255, 0.12);
-    border-color: rgba(134, 151, 255, 0.12);
-    cursor: not-allowed;
-  }
 `;
 
 const DexItemBox = styled.div`
@@ -102,7 +97,12 @@ const DexItemBox = styled.div`
   padding: 16px;
   cursor: pointer;
   &:hover {
-    background: linear-gradient(90.98deg, #5e626b 1.39%, #656978 97.51%);
+    background: linear-gradient(90.98deg, #5e626b 1.39%, #656978 97.51%)
+        padding-box,
+      linear-gradient(90.64deg, #777d8e 1.38%, #7b8296 98.82%) border-box;
+
+    border: 1px solid transparent;
+
     box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.07);
   }
   .dex {
@@ -138,7 +138,7 @@ const DexItemBox = styled.div`
       font-weight: 400;
       font-size: 12px;
       line-height: 14px;
-      color: #707280;
+      color: #949cab;
     }
 
     .chain-logo {

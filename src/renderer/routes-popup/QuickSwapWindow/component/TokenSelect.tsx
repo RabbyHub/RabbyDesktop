@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Drawer, DrawerProps, Empty, Input, Skeleton } from 'antd';
+import { Drawer, DrawerProps, Empty, Input, InputRef, Skeleton } from 'antd';
 import BigNumber from 'bignumber.js';
 import styled from 'styled-components';
 import IconRcArrowDownTriangle from '@/../assets/icons/swap/arrow-caret-down2.svg?rc';
@@ -13,8 +13,6 @@ import { useDebounce } from 'react-use';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 
 const TokenWrapper = styled.div`
-  /* width: 92px; */
-  /* height: 30px; */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -22,7 +20,7 @@ const TokenWrapper = styled.div`
   padding: 4px;
   border-radius: 4px;
   &:hover {
-    background: rgba(134, 151, 255, 0.3);
+    background: rgba(134, 151, 255, 0.6);
   }
 `;
 
@@ -117,17 +115,23 @@ const StyledDrawer = styled(Drawer)`
   .searchIcon {
     font-size: 16px;
   }
-  .searchChainInput {
+
+  .ant-input-affix-wrapper {
     margin-top: 24px;
     margin-bottom: 14px;
     height: 36px;
     font-size: 12px;
     line-height: 14px;
-    border: 1px solid #5f6572 !important;
-    box-shadow: none !important;
+    border: 1px solid #5f6572;
+    box-shadow: none;
     border-radius: 6px;
     background-color: transparent;
     color: var(--color-purewhite);
+
+    &.ant-input-affix-wrapper-focused {
+      border: 1px solid var(--color-primary);
+    }
+
     & input::placeholder {
       color: #707280;
     }
@@ -150,29 +154,28 @@ const StyledDrawer = styled(Drawer)`
   }
 
   .listBox {
-    /* height: calc(100% - 144px); */
-    /* height: 622px; */
     flex: 1;
-
     overflow: scroll;
     margin: 0 -10px;
-    padding: 0 10px;
+    padding: 2px 10px;
   }
 
   .item {
     height: 50px;
     padding: 0 10px;
+    margin: 0 -10px;
+
     display: flex;
     justify-content: space-between;
     align-items: center;
     border: 1px solid transparent;
     cursor: pointer;
     &:hover {
-      background: linear-gradient(90.98deg, #5e626b 1.39%, #656978 97.51%);
+      background: linear-gradient(90.98deg, #5e626b 1.39%, #656978 97.51%)
+          padding-box,
+        linear-gradient(90.64deg, #777d8e 1.38%, #677086 98.82%) border-box;
       box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.07);
       border-radius: 8px;
-
-      border: 1px solid #4d515f;
     }
   }
 
@@ -363,7 +366,6 @@ const TokenSelectDrawer = ({
           value={query}
           placeholder={placeholder}
           size="large"
-          className="searchChainInput"
           onChange={handleQueryChange}
         />
 
@@ -451,6 +453,7 @@ interface TokenAmountInputProps {
   value?: string;
   loading?: boolean;
   getContainer?: DrawerProps['getContainer'];
+  forceFocus?: boolean;
 }
 
 export const TokenSelect = ({
@@ -465,7 +468,9 @@ export const TokenSelect = ({
   value,
   loading = false,
   getContainer,
+  forceFocus = false,
 }: TokenAmountInputProps) => {
+  const inputRef = useRef<InputRef>(null);
   const latestChainId = useRef(chainId);
   const [tokens, setTokens] = useState<TokenItem[]>([]);
   const [originTokenList, setOriginTokenList] = useState<TokenItem[]>([]);
@@ -562,6 +567,12 @@ export const TokenSelect = ({
     latestChainId.current = chainId;
   }, [chainId]);
 
+  useEffect(() => {
+    if (forceFocus) {
+      inputRef.current?.focus();
+    }
+  }, [forceFocus]);
+
   return (
     <>
       <Wrapper>
@@ -595,6 +606,7 @@ export const TokenSelect = ({
           />
         ) : (
           <Input
+            ref={inputRef}
             className="amountInput"
             readOnly={type === 'swapTo'}
             placeholder="0"
