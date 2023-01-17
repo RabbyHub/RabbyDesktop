@@ -160,6 +160,8 @@ const configurationShell: webpack.Configuration = {
       webpackPaths.entriesShell['_shell-webui'].jsEntry,
     [webpackPaths.entriesShell['_shell-new-tab'].name]:
       webpackPaths.entriesShell['_shell-new-tab'].jsEntry,
+    [webpackPaths.entriesShell['_shell-popup-view'].name]:
+      webpackPaths.entriesShell['_shell-popup-view'].jsEntry,
   },
 
   output: {

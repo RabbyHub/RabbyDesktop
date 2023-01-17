@@ -6,7 +6,7 @@ import {
 import { useAddressManagement } from '@/renderer/hooks/rabbyx/useAddressManagement';
 import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
 import { sortAccountsByBalance } from '@/renderer/utils/account';
-import { KEYRING_CLASS } from '@/renderer/utils/keyring';
+import { KEYRING_CLASS } from '@/renderer/utils/constant';
 import { groupBy } from 'lodash';
 import React from 'react';
 import { AccountDetail } from './AccountDetail';

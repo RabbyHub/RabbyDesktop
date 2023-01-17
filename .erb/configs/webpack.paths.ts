@@ -81,6 +81,12 @@ const entriesShell = {
     htmlFile: path.join(srcPath, `extension-shell/new-tab.ejs`),
     jsEntry: path.join(srcPath, 'extension-shell/new-tab.tsx'),
   } as IEntry,
+  '_shell-popup-view': {
+    name: 'popup-view',
+    target: 'popup-view.html',
+    htmlFile: path.join(srcPath, `extension-shell/popup-view.ejs`),
+    jsEntry: path.join(srcPath, 'extension-shell/popup-view.tsx'),
+  } as IEntry,
 } as const;
 
 const entriesRabby = {
