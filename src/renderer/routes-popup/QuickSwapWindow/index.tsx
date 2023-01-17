@@ -11,6 +11,7 @@ import GlobalMask from '@/renderer/components/MainWindow/GlobalMask';
 import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { usePopupViewInfo } from '@/renderer/hooks/usePopupWinOnMainwin';
 import styles from './index.module.less';
+
 import { SwapByDex } from './swap';
 
 const RESET_TIMEOUT = 1000 * 60 * 10;
@@ -37,6 +38,7 @@ const QuickSwap = () => {
         className={styles.mask}
         onClick={() => {
           setHide(true);
+
           setTimeout(() => {
             hideMainwinPopupview('quick-swap');
             setHide(false);

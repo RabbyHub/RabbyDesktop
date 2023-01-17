@@ -262,7 +262,7 @@ export const SwapByDex = () => {
 
         return t;
       }
-    }, [chain]);
+    }, [userAddress, chain]);
 
   const { loading: payTokenLoading } = useAsync(async () => {
     if (payToken?.id && chain && payToken?.time_at === 0) {
