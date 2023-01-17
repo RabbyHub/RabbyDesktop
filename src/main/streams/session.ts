@@ -31,7 +31,7 @@ import { checkOpenAction } from '../utils/tabs';
 import { getWindowFromWebContents, switchToBrowserTab } from '../utils/browser';
 import { supportHmrOnDev } from '../utils/webRequest';
 import { checkProxyViaBrowserView, setSessionProxy } from '../utils/appNetwork';
-import { desktopAppStore } from '../store/desktopApp';
+import { getAppProxyConf } from '../store/desktopApp';
 
 const sesLog = getBindLog('session', 'bgGrey');
 
@@ -107,10 +107,7 @@ export async function defaultSessionReadyThen() {
 }
 
 export async function checkProxyValidOnBootstrap() {
-  const appProxyConf = {
-    proxyType: desktopAppStore.get('proxyType'),
-    proxySettings: desktopAppStore.get('proxySettings'),
-  };
+  const appProxyConf = getAppProxyConf();
 
   if (appProxyConf.proxyType === 'none') {
     return {

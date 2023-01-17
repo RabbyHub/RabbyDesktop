@@ -2,7 +2,7 @@
 
 import { app } from 'electron';
 import Store from 'electron-store';
-import { fillUnpinnedList, formatDapp, formatDapps } from '@/isomorphic/dapp';
+import { fillUnpinnedList, formatDapp } from '@/isomorphic/dapp';
 import {
   emitIpcMainEvent,
   handleIpcMainInvoke,
@@ -11,8 +11,9 @@ import {
 import { APP_NAME, PERSIS_STORE_PREFIX } from '../../isomorphic/constants';
 import { safeParse, shortStringify } from '../../isomorphic/json';
 import { canoicalizeDappUrl, isDappProtocol } from '../../isomorphic/url';
-import { detectDapps } from '../utils/dapps';
+import { detectDapp } from '../utils/dapps';
 import { getBindLog } from '../utils/log';
+import { getAppProxyConf } from './desktopApp';
 
 const storeLog = getBindLog('store', 'bgGreen');
 
@@ -63,6 +64,7 @@ export const dappStore = new Store<{
         '^https://.+$': IDappSchema,
       },
       additionalProperties: false,
+      default: {} as Record<IDapp['origin'], IDapp>,
     },
     pinnedList: {
       type: 'array',
@@ -171,9 +173,24 @@ export function parseDappUrl(url: string, dapps = getAllDapps()) {
   };
 }
 
+// const allDapps = getAllDapps();
+// detectDapp('https://debank.com', allDapps);
+
 handleIpcMainInvoke('detect-dapp', async (_, dappUrl) => {
   const allDapps = getAllDapps();
-  const result = await detectDapps(dappUrl, allDapps);
+  const proxyConf = getAppProxyConf();
+
+  const result = await detectDapp(dappUrl, {
+    existedDapps: allDapps,
+    proxyOnParseFavicon:
+      proxyConf.proxyType === 'custom'
+        ? {
+            protocol: proxyConf.proxySettings.protocol,
+            host: proxyConf.proxySettings.hostname,
+            port: proxyConf.proxySettings.port,
+          }
+        : undefined,
+  });
 
   return {
     result,
