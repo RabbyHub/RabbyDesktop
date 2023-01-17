@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import PQueue from 'p-queue';
+import { groupBy } from 'lodash';
 import { CHAINS, CHAINS_ENUM } from '@debank/common';
 import { ComplexProtocol } from '@debank/rabby-api/dist/types';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
@@ -34,13 +35,7 @@ const getNoHistoryPriceTokensFromProtocolList = (
     .forEach((item) => {
       if (!historyProtocolMap[item.id]) {
         item.portfolio_item_list.forEach((i) => {
-          (i.detail.supply_token_list || []).forEach((token) => {
-            noHistoryPriceTokens.add(`${token.chain}-${token.id}`);
-          });
-          (i.detail.borrow_token_list || []).forEach((token) => {
-            noHistoryPriceTokens.add(`${token.chain}-${token.id}`);
-          });
-          (i.detail.reward_token_list || []).forEach((token) => {
+          i.asset_token_list.forEach((token) => {
             noHistoryPriceTokens.add(`${token.chain}-${token.id}`);
           });
         });
@@ -48,24 +43,12 @@ const getNoHistoryPriceTokensFromProtocolList = (
         const currentTokenList: string[] = [];
         const historyTokenList: string[] = [];
         item.portfolio_item_list.forEach((i) => {
-          (i.detail.supply_token_list || []).forEach((k) => {
-            currentTokenList.push(`${k.chain}-${k.id}`);
-          });
-          (i.detail.borrow_token_list || []).forEach((k) => {
-            currentTokenList.push(`${k.chain}-${k.id}`);
-          });
-          (i.detail.reward_token_list || []).forEach((k) => {
+          i.asset_token_list.forEach((k) => {
             currentTokenList.push(`${k.chain}-${k.id}`);
           });
         });
         historyProtocolMap[item.id].portfolio_item_list.forEach((i) => {
-          (i.detail.supply_token_list || []).forEach((k) => {
-            historyTokenList.push(`${k.chain}-${k.id}`);
-          });
-          (i.detail.borrow_token_list || []).forEach((k) => {
-            historyTokenList.push(`${k.chain}-${k.id}`);
-          });
-          (i.detail.reward_token_list || []).forEach((k) => {
+          i.asset_token_list.forEach((k) => {
             historyTokenList.push(`${k.chain}-${k.id}`);
           });
         });
@@ -95,12 +78,27 @@ export default (address: string | undefined) => {
       }
     >
   >({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
   const fetchData = async (addr: string) => {
+    setIsLoading(true);
+    setIsLoadingHistory(true);
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
     const result: DisplayProtocol[] = [];
     const historyList: DisplayProtocol[] = [];
     const queue = new PQueue({ concurrency: 20 });
+    const cachedProtocols = await walletOpenapi.getComplexProtocolList(addr);
+    setProtocolList(
+      cachedProtocols.map((item) => ({
+        ...item,
+        usd_value: item.portfolio_item_list.reduce(
+          (sum, i) => sum + i.stats.net_usd_value,
+          0
+        ),
+      }))
+    );
+    setIsLoading(false);
     const list = await walletOpenapi.getProtocolList(addr);
     list.forEach((item) => {
       queue.add(() => walletOpenapi.getProtocol({ addr, id: item.id }));
@@ -172,30 +170,41 @@ export default (address: string | undefined) => {
       }
     > = {};
     const tokenHistoryPriceQueue = new PQueue({ concurrency: 20 });
-    noHistoryPriceTokenList.forEach((i) => {
+    const grouped = groupBy(noHistoryPriceTokenList, (item) => {
+      return item.split('-')[0];
+    });
+    Object.keys(grouped).forEach((i) => {
+      const l = grouped[i];
       tokenHistoryPriceQueue.add(async () => {
-        const [chain, id] = i.split('-');
-        const { price } = await walletOpenapi.getTokenHistoryPrice({
-          chainId: chain,
-          id,
+        const priceMap = await walletOpenapi.getTokenHistoryDict({
+          chainId: i,
+          ids: l.map((s) => s.split('-')[1]).join(','),
           timeAt: YESTERDAY,
         });
         return {
-          price,
-          id,
-          chain,
+          chain: i,
+          price: priceMap,
         };
       });
     });
     tokenHistoryPriceQueue.on(
       'completed',
-      ({ price, id, chain }: { price: number; id: string; chain: string }) => {
-        tmap[`${chain}-${id}`] = { price, chain, id };
+      ({
+        priceMap,
+        chain,
+      }: {
+        priceMap: Record<string, number>;
+        chain: string;
+      }) => {
+        Object.keys(priceMap).forEach((id) => {
+          tmap[`${chain}-${id}`] = { price: priceMap[id], chain, id };
+        });
       }
     );
     await waitQueueFinished(tokenHistoryPriceQueue);
     if (addr === addressRef.current) {
       setTokenHistoryPriceMap(tmap);
+      setIsLoadingHistory(false);
     }
   };
 

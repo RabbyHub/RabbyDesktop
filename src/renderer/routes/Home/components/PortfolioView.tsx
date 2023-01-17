@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
 import styled from 'styled-components';
+import classNames from 'classnames';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import { DisplayChainWithWhiteLogo } from '@/renderer/hooks/useCurrentBalance';
+import { formatNumber } from '@/renderer/utils/number';
 import TokenItemComp from './TokenItem';
 import ProtocolItem from './ProtocolItem';
 
@@ -11,7 +13,6 @@ const PortfolioWrapper = styled.div`
   width: 100%;
   padding: 46px 27px;
   border-radius: 8px;
-  max-width: 1375px;
   position: relative;
   flex: 1;
   .icon-asset-arrow {
@@ -37,21 +38,61 @@ const PortfolioWrapper = styled.div`
         &:nth-child(1) {
           text-align: left;
           color: rgba(255, 255, 255, 0.8);
-          width: 20%;
+          width: 17%;
         }
         &:nth-child(2) {
-          width: 20%;
+          width: 22%;
         }
         &:nth-child(3) {
-          width: 35%;
+          width: 38%;
         }
         &:nth-child(4) {
-          width: 25%;
+          width: 23%;
         }
       }
     }
   }
 `;
+
+const ExpandItem = styled.div`
+  display: flex;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+  color: #9094a1;
+  padding: 0 23px;
+  align-items: center;
+  margin-top: 10px;
+  cursor: pointer;
+  .icon-hide-assets {
+    margin-right: 18px;
+  }
+  .hide-assets-usd-value {
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 18px;
+    text-align: right;
+    flex: 1;
+    color: #ffffff;
+  }
+  .icon-expand-arrow {
+    width: 10px;
+    height: 5px;
+    transform: rotate(0);
+    transition: transform 0.3s;
+    margin-left: 13px;
+    opacity: 0;
+    &.flip {
+      transform: rotate(180deg);
+    }
+  }
+  &:hover {
+    .icon-expand-arrow {
+      opacity: 1;
+    }
+  }
+`;
+
 const PortfolioView = ({
   tokenList,
   historyTokenMap,
@@ -60,6 +101,8 @@ const PortfolioView = ({
   protocolHistoryTokenPriceMap,
   chainBalances,
   selectChainServerId,
+  tokenHidden,
+  protocolHidden,
 }: {
   tokenList: TokenItem[];
   historyTokenMap: Record<string, TokenItem>;
@@ -71,6 +114,18 @@ const PortfolioView = ({
   >;
   chainBalances: DisplayChainWithWhiteLogo[];
   selectChainServerId: string | null;
+  tokenHidden: {
+    isExpand: boolean;
+    hiddenCount: number;
+    hiddenUsdValue: number;
+    setIsExpand(v: boolean): void;
+  };
+  protocolHidden: {
+    isExpand: boolean;
+    hiddenCount: number;
+    hiddenUsdValue: number;
+    setIsExpand(v: boolean): void;
+  };
 }) => {
   const assetArrowLeft = useMemo(() => {
     if (!selectChainServerId) return 65;
@@ -80,6 +135,10 @@ const PortfolioView = ({
     if (!el) return 65;
     return el.offsetLeft + el.offsetWidth / 2 - 7;
   }, [chainBalances, selectChainServerId]);
+
+  const handleClickExpandToken = () => {
+    tokenHidden.setIsExpand(!tokenHidden.isExpand);
+  };
 
   return (
     <PortfolioWrapper>
@@ -104,6 +163,26 @@ const PortfolioView = ({
             key={`${token.chain}-${token.id}`}
           />
         ))}
+        {tokenHidden.hiddenCount > 0 && (
+          <ExpandItem onClick={handleClickExpandToken}>
+            <img
+              className="icon-hide-assets"
+              src="rabby-internal://assets/icons/home/hide-assets.svg"
+            />
+            {tokenHidden.isExpand
+              ? 'Hide small value assets'
+              : `${tokenHidden.hiddenCount} Assets are hidden`}
+            <img
+              src="rabby-internal://assets/icons/home/expand-arrow.svg"
+              className={classNames('icon-expand-arrow', {
+                flip: !tokenHidden.isExpand,
+              })}
+            />
+            <span className="hide-assets-usd-value">
+              ${formatNumber(tokenHidden.hiddenUsdValue)}
+            </span>
+          </ExpandItem>
+        )}
       </ul>
       <div className="protocols">
         {protocolList.map((protocol) => (

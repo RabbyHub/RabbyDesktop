@@ -151,6 +151,7 @@
     "sortablejs": "^1.15.0",
     "stream-browserify": "^3.0.0",
     "styled-components": "^5.3.6",
+    "ts-toolbelt": "^9.6.0",
     "webextension-polyfill-ts": "^0.25.0"
   },
   "devDependencies": {

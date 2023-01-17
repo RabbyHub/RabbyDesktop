@@ -5,6 +5,9 @@ import TokenWithChain from '@/renderer/components/TokenWithChain';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import classNames from 'classnames';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
+import IconSwap from '../../../../../assets/icons/home/token-swap.svg?rc';
+import IconSend from '../../../../../assets/icons/home/token-send.svg?rc';
+import IconReceive from '../../../../../assets/icons/home/token-receive.svg?rc';
 
 const TokenItemWrapper = styled.li`
   font-weight: 500;
@@ -63,10 +66,13 @@ const TokenItemWrapper = styled.li`
     }
   }
   &:hover {
-    border-color: #6d7c93;
+    border-color: #757f95;
     box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.07);
     background: linear-gradient(90.98deg, #5e626b 1.39%, #4d515f 97.51%);
     .number-change {
+      opacity: 1;
+    }
+    .token-actions {
       opacity: 1;
     }
   }
@@ -74,18 +80,49 @@ const TokenItemWrapper = styled.li`
 const TokenLogoField = styled.div`
   justify-content: flex-start;
   color: rgba(255, 255, 255, 0.8);
-  width: 20%;
+  width: 17%;
+  .token-info {
+    display: flex;
+  }
+  .token-actions {
+    width: 100%;
+    display: flex;
+    padding-left: 42px;
+    opacity: 0;
+    align-items: center;
+    .icon {
+      cursor: pointer;
+      margin-right: 14px;
+      width: 10px;
+      height: 10px;
+      &.icon-swap {
+        width: 15px;
+        height: 15px;
+      }
+      &:hover {
+        g {
+          opacity: 1;
+        }
+        path {
+          stroke: #8697ff;
+        }
+        rect {
+          fill: #8697ff;
+        }
+      }
+    }
+  }
 `;
 const TokenPriceField = styled.div`
-  width: 20%;
+  width: 22%;
   justify-content: flex-end;
 `;
 const TokenAmountField = styled.div`
-  width: 35%;
+  width: 38%;
   justify-content: flex-end;
 `;
 const TokenUsdValueField = styled.div`
-  width: 25%;
+  width: 23%;
   justify-content: flex-end;
 `;
 
@@ -119,6 +156,11 @@ const TokenItemComp = ({
       <TokenLogoField>
         <TokenWithChain token={token} width="24px" height="24px" />
         <span className="token-symbol">{token.symbol}</span>
+        <div className="token-actions">
+          <IconSwap className="icon icon-swap" />
+          <IconSend className="icon icon-send" />
+          <IconReceive className="icon icon-receive" />
+        </div>
       </TokenLogoField>
       <TokenPriceField>
         {historyToken && (
