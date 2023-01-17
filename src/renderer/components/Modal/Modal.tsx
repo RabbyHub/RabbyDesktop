@@ -2,7 +2,7 @@ import { Modal as AntdModal, ModalProps } from 'antd';
 import classNames from 'classnames';
 import './modal.less';
 
-interface Props extends ModalProps {
+export interface Props extends ModalProps {
   backable?: boolean;
   subtitle?: string;
   onBack?: () => void;
@@ -29,22 +29,22 @@ export const Modal: React.FC<Props> = ({
         />
       }
       title={
-        title && (
-          <>
-            {backable && (
-              <span onClick={onBack} className="ant-modal-close-x back">
-                <img
-                  className="icon"
-                  src="rabby-internal://assets/icons/modal/back.svg"
-                />
-              </span>
-            )}
+        <>
+          {backable && (
+            <span onClick={onBack} className="ant-modal-close-x back">
+              <img
+                className="icon"
+                src="rabby-internal://assets/icons/modal/back.svg"
+              />
+            </span>
+          )}
+          {title && (
             <div className="headline">
               <span className="title">{title}</span>
               {subtitle && <span className="subtitle">{subtitle}</span>}
             </div>
-          </>
-        )
+          )}
+        </>
       }
     />
   );

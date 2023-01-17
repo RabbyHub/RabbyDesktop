@@ -8,7 +8,7 @@ import {
 import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { fromMainSubject, valueToMainSubject } from './_init';
 import { createPopupView, hidePopupView } from '../utils/browser';
-import { onMainWindowReady } from '../utils/stream-helpers';
+import { getWebuiURLBase, onMainWindowReady } from '../utils/stream-helpers';
 
 const viewsState: Record<
   PopupViewOnMainwinInfo['type'],
@@ -86,7 +86,7 @@ const addAddressReady = onMainWindowReady().then(async (mainWin) => {
   mainWindow.on('restore', onTargetWinUpdate);
 
   await addAddressPopup.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}?view=add-address#/`
+    `${await getWebuiURLBase()}/popup-view.html?view=add-address#/`
   );
 
   // debug-only
@@ -117,7 +117,7 @@ const addressManagementReady = onMainWindowReady().then(async (mainWin) => {
   mainWindow.on('restore', onTargetWinUpdate);
 
   await addressManagementPopup.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}?view=address-management#/`
+    `${await getWebuiURLBase()}/popup-view.html?view=address-management#/`
   );
 
   // debug-only
