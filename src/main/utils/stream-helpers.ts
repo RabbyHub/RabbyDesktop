@@ -13,6 +13,11 @@ export async function getWebuiExtId() {
   return (await getWebuiExtension()).id;
 }
 
+export async function getWebuiURLBase() {
+  const extId = (await getWebuiExtension()).id;
+  return `chrome-extension://${extId}`;
+}
+
 export async function onMainWindowReady(): Promise<
   import('../browser/browsers').default
 > {

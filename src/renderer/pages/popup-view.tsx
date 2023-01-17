@@ -19,8 +19,6 @@ import SwitchAccountWindow from '@/renderer/routes-popup/SwitchAccountWindow';
 
 import { parseQueryString } from '@/isomorphic/url';
 import RabbyNotificationGasket from '../routes-popup/RabbyNotificationGasket';
-import MainWindowAddressManagement from '../routes-popup/MainWindowAddressManagement';
-import MainWindowAddAddress from '../routes-popup/MainWindowAddAddress';
 
 function App() {
   return (
@@ -56,12 +54,6 @@ const container = document.getElementById('root')!;
 const root = createRoot(container);
 
 switch (parseQueryString().view) {
-  case 'address-management':
-    root.render(<MainWindowAddressManagement />);
-    break;
-  case 'add-address':
-    root.render(<MainWindowAddAddress />);
-    break;
   default:
     root.render(<App />);
     break;

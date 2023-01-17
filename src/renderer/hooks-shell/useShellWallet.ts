@@ -8,6 +8,10 @@ import { makeShellWallet } from '../utils-shell/shell-wallet';
 type ShellWalletType = ReturnType<typeof makeShellWallet>;
 const shellWalletAtom = atom(null as any as ReturnType<typeof makeShellWallet>);
 
+/**
+ * @description make sure you component is child of <ShellWalletProvider />
+ *
+ */
 export function useShellWallet() {
   const [shellWallet, setShellWallet] = useAtom(shellWalletAtom);
 

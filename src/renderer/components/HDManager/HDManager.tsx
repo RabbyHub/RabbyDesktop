@@ -49,7 +49,9 @@ export const HDManager: React.FC<StateProviderProps> = ({ keyring }) => {
   if (!initialed) {
     return (
       <div className="flex items-center justify-center w-screen h-screen">
-        <button onClick={handleConnect}>connect</button>
+        <button type="button" onClick={handleConnect}>
+          connect
+        </button>
         <Spin />
       </div>
     );
