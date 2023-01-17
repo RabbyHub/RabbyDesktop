@@ -10,11 +10,12 @@ import {
 } from '../utils/ipcMainEvents';
 import { APP_NAME, PERSIS_STORE_PREFIX } from '../../isomorphic/constants';
 import { safeParse, shortStringify } from '../../isomorphic/json';
-import { canoicalizeDappUrl } from '../../isomorphic/url';
+import { canoicalizeDappUrl, isDappProtocol } from '../../isomorphic/url';
 import { detectDapps } from '../utils/dapps';
 
 export const dappStore = new Store<{
   dapps: IDapp[];
+  protocolDappsBinding: Record<string, IDapp['origin'][]>;
   pinnedList: string[];
 }>({
   name: `${PERSIS_STORE_PREFIX}dapps`,
@@ -35,6 +36,13 @@ export const dappStore = new Store<{
         },
       },
       default: [] as IDapp[],
+    },
+    protocolDappsBinding: {
+      type: 'object',
+      patternProperties: {
+        '^https?://.+$': { type: 'string' },
+      },
+      default: {} as Record<IDapp['origin'], IDapp['origin'][]>,
     },
     pinnedList: {
       type: 'array',
@@ -182,6 +190,52 @@ handleIpcMainInvoke('dapps-togglepin', async (_, dappOrigins, nextPinned) => {
   return {
     pinnedList,
   };
+});
+
+handleIpcMainInvoke('dapps-fetch-protocol-binding', () => {
+  const protocolBindings = dappStore.get('protocolDappsBinding') || {};
+
+  return {
+    result: protocolBindings,
+  };
+});
+
+handleIpcMainInvoke('dapps-put-protocol-binding', (_, pBindings) => {
+  const protocolBindings = dappStore.get('protocolDappsBinding') || {};
+  const dappOrigins = new Set(
+    dappStore
+      .get('dapps')
+      .map((d) => d.origin)
+      .filter(Boolean)
+  );
+
+  let errItem: { error: string } | null = null;
+
+  Object.keys(pBindings).some((pLink) => {
+    if (!isDappProtocol(pLink)) {
+      errItem = {
+        error: 'Invalid protocol link',
+      };
+      return true;
+    }
+
+    return pBindings[pLink].some((dappOrigin: string) => {
+      if (!dappOrigins.has(dappOrigin)) {
+        errItem = {
+          error: `Invalid dapp origin for protocol binding ${dappOrigin}`,
+        };
+        return true;
+      }
+      return false;
+    });
+  });
+
+  if (errItem) return errItem;
+
+  Object.assign(protocolBindings, pBindings);
+  dappStore.set('protocolDappsBinding', protocolBindings);
+
+  return {};
 });
 
 onIpcMainEvent(

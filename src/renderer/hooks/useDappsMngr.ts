@@ -1,7 +1,7 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 /// <reference path="../../renderer/preload.d.ts" />
 import { atom, useAtom } from 'jotai';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { makeSureDappAddedToConnectedSite } from '../ipcRequest/connected-site';
 import {
   fetchDapps,
@@ -10,6 +10,8 @@ import {
   deleteDapp,
   toggleDappPinned,
   getDapp,
+  fetchProtocolDappsBinding,
+  putProtocolDappsBinding,
 } from '../ipcRequest/dapps';
 
 const dappsAtomic = atom(null as null | IDapp[]);
@@ -24,6 +26,45 @@ const pinnedListAtomic = atom([] as IDapp['origin'][]);
 //     };
 //   });
 // }
+
+const protocolDappsBindingAtom = atom({} as Record<string, IDapp['origin'][]>);
+export function useProtocolDappsBinding() {
+  const [protocolDappsBinding, setProtocolDappsBinding] = useAtom(
+    protocolDappsBindingAtom
+  );
+
+  const loadingRef = useRef(false);
+  const fetchBindings = useCallback(async () => {
+    if (loadingRef.current) return;
+
+    loadingRef.current = true;
+    fetchProtocolDappsBinding()
+      .then((newVal) => {
+        setProtocolDappsBinding(newVal);
+      })
+      .finally(() => {
+        loadingRef.current = false;
+      });
+  }, []);
+
+  useEffect(() => {
+    fetchBindings();
+  }, [fetchBindings]);
+
+  const bindingDappsToProtocol = useCallback(
+    async (protocol: string, dappOrigins: IDapp['origin'][]) => {
+      putProtocolDappsBinding(protocol, dappOrigins).then(() => {
+        fetchProtocolDappsBinding();
+      });
+    },
+    []
+  );
+
+  return {
+    protocolDappsBinding,
+    bindingDappsToProtocol,
+  };
+}
 
 export function useDapps() {
   const [originDapps, setDapps] = useAtom(dappsAtomic);

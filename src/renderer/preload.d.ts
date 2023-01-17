@@ -354,6 +354,18 @@ type ChannelInvokePayload = {
       pinnedList: IDapp['origin'][];
     };
   };
+  'dapps-put-protocol-binding': {
+    send: [Record<string, IDapp['origin'][]>];
+    response: {
+      error?: string;
+    };
+  };
+  'dapps-fetch-protocol-binding': {
+    send: [];
+    response: {
+      result: Record<string, IDapp['origin'][]>;
+    };
+  };
   'get-desktopAppState': {
     send: [];
     response: {
