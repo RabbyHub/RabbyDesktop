@@ -6,6 +6,7 @@ import { useCopyToClipboard } from 'react-use';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
 import { splitNumberByStep } from '@/renderer/utils/number';
+import { isNil } from 'lodash';
 import { AddToRabby } from './AddToRabby';
 import { MAX_ACCOUNT_COUNT } from './AdvancedSettings';
 import { AccountListSkeleton } from './AccountListSkeleton';
@@ -51,10 +52,6 @@ export const AccountList: React.FC<Props> = ({
   const [, copyToClipboard] = useCopyToClipboard();
   const copy = React.useCallback((value: string) => {
     copyToClipboard(value);
-    message.success({
-      content: 'Copied',
-      key: 'ledger-success',
-    });
   }, []);
 
   React.useEffect(() => {
@@ -155,6 +152,7 @@ export const AccountList: React.FC<Props> = ({
 
   return (
     <Table<Account>
+      scroll={{ y: 'calc(100vh - 240px)' }}
       dataSource={list}
       rowKey="index"
       className="AccountList"
@@ -175,7 +173,7 @@ export const AccountList: React.FC<Props> = ({
             })}
             style={{
               top: `${infoColumnTop}px`,
-              width: `${infoColumnWidth + 1}px`,
+              width: `${infoColumnWidth + 16}px`,
             }}
           >
             <td>
@@ -244,7 +242,7 @@ export const AccountList: React.FC<Props> = ({
           }
         />
         <Table.Column<Account>
-          width={200}
+          width={180}
           title="Notes"
           dataIndex="aliasName"
           key="aliasName"
@@ -267,7 +265,7 @@ export const AccountList: React.FC<Props> = ({
       </Table.ColumnGroup>
 
       <Table.ColumnGroup
-        className="column-group-wrap"
+        className="column-group-wrap last"
         title={
           <div ref={infoRef} className="column-group">
             <button
@@ -300,7 +298,7 @@ export const AccountList: React.FC<Props> = ({
           render={(value) =>
             hiddenInfo ? (
               <AccountListSkeleton width={100} />
-            ) : !Number.isNaN(value) ? (
+            ) : !isNil(value) ? (
               dayjs.unix(value).format('YYYY-MM-DD')
             ) : null
           }
@@ -309,7 +307,7 @@ export const AccountList: React.FC<Props> = ({
           title="Balance"
           dataIndex="balance"
           key="balance"
-          width={200}
+          width={180}
           ellipsis
           render={(balance, record) =>
             hiddenInfo ? (

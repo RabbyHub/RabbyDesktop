@@ -8,21 +8,6 @@ import { LedgerManager } from './LedgerManager';
 import { OneKeyManager } from './OnekeyManager';
 import { TrezorManager } from './TrezorManager';
 
-const LOGO_MAP = {
-  [HARDWARE_KEYRING_TYPES.Ledger.type]:
-    'rabby-internal://assets/icons/walletlogo/ledger.svg',
-  [HARDWARE_KEYRING_TYPES.Trezor.type]:
-    'rabby-internal://assets/icons/walletlogo/trezor.svg',
-  [HARDWARE_KEYRING_TYPES.Onekey.type]:
-    'rabby-internal://assets/icons/walletlogo/onekey.svg',
-};
-
-const LOGO_NAME_MAP = {
-  [HARDWARE_KEYRING_TYPES.Ledger.type]: 'Ledger',
-  [HARDWARE_KEYRING_TYPES.Trezor.type]: 'Trezor',
-  [HARDWARE_KEYRING_TYPES.Onekey.type]: 'OneKey',
-};
-
 const MANAGER_MAP = {
   [HARDWARE_KEYRING_TYPES.Ledger.type]: LedgerManager,
   [HARDWARE_KEYRING_TYPES.Trezor.type]: TrezorManager,
@@ -65,18 +50,12 @@ export const HDManager: React.FC<StateProviderProps> = ({ keyring }) => {
     );
   }
 
-  const LOGO_URL = LOGO_MAP[keyring];
   const Manager = MANAGER_MAP[keyring];
-  const name = LOGO_NAME_MAP[keyring];
 
   return (
     <HDManagerStateProvider keyringId={idRef.current} keyring={keyring}>
       <div className="HDManager">
         <main>
-          <div className="logo">
-            <img className="icon" src={LOGO_URL} />
-            <span className="title">Connected to {name}</span>
-          </div>
           <Manager />
         </main>
       </div>

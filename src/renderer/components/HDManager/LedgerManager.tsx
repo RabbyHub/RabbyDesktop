@@ -1,5 +1,4 @@
 import React from 'react';
-import { Modal } from 'antd';
 import { HARDWARE_KEYRING_TYPES } from '@/renderer/utils/constant';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { MainContainer } from './MainContainer';
@@ -11,6 +10,7 @@ import {
 } from './AdvancedSettings';
 import { HDPathType } from './HDPathTypeButton';
 import { fetchAccountsInfo, HDManagerStateContext, Account } from './utils';
+import { Modal } from '../Modal/Modal';
 
 const LEDGER_TYPE = HARDWARE_KEYRING_TYPES.Ledger.type;
 
@@ -145,7 +145,7 @@ export const LedgerManager: React.FC = () => {
         destroyOnClose
         className="AdvancedModal"
         title="Custom Address HD path"
-        visible={visibleAdvanced}
+        open={visibleAdvanced}
         width={840}
         footer={[]}
         onCancel={() => setVisibleAdvanced(false)}

@@ -1,20 +1,24 @@
 .HDManager {
   font-weight: 500;
   line-height: 1.15;
-  overflow-x: auto;
+  height: calc(100% - 70px);
+
+  .ant-tabs-content-holder {
+    margin-top: 28px;
+  }
 
   main {
     min-width: 1200px;
     position: relative;
     padding-top: 20px;
-    margin: 20px 120px;
+    margin: 0 120px;
     display: flex;
     flex-direction: column;
   }
 
   @media (max-width: 1536px) {
     main {
-      margin: 20px 10px;
+      margin: 0 40px;
     }
   }
 
@@ -38,14 +42,14 @@
     align-items: center;
     position: absolute;
     right: 0;
-    top: 0;
+    top: 78px;
     cursor: pointer;
     .icon {
       width: 16px;
       margin-right: 4px;
     }
     .title {
-      color: #4b4d59;
+      color: #fff;
       font-size: 12px;
       line-height: 1;
     }
@@ -57,7 +61,7 @@
     }
     .ant-tabs-nav-list {
       margin: auto;
-      background: #e5e9ef;
+      background: #707280;
       border-radius: 8px;
       padding: 4px;
     }
@@ -67,8 +71,8 @@
     .ant-tabs-tab {
       padding: 7px 34px;
       border-radius: 6px;
-      color: #707280;
-      font-size: 15px;
+      color: #fff;
+      font-size: 13px;
       transition: all 0.3s ease-in-out;
       margin: 0;
       &.ant-tabs-tab-active {
@@ -79,12 +83,37 @@
 }
 
 .AccountList {
+  .ant-spin-text {
+    color: #fff;
+    text-shadow: none!important;
+  }
+  .ant-table-summary {
+    position: static;
+  }
+  .ant-table {
+    background: transparent;
+    color: #fff;
+  }
+  .icon {
+    width: auto;
+    height: auto;
+  }
   .ant-table-cell {
     height: 55px;
     padding: 0 16px;
+    font-size: 13px;
+    color: #fff;
+    &::before {
+      display: none;
+    }
+
+    &.ant-table-cell-row-hover {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+    }
   }
+
   tr > td {
-    border-bottom: 1px solid #f5f6fa;
+    border-bottom: 1px solid rgba(245, 246, 250, 0.1);
   }
   .ant-table-thead {
     font-size: 12px;
@@ -92,27 +121,49 @@
 
     .ant-table-cell {
       padding: 8px 16px;
-      background: #FAFBFD;
       border-bottom: none;
       height: auto;
     }
 
     .column-group {
-      color: #707280;
+      color: #fff;
       text-align: left;
       font-weight: normal;
       padding: 10px 0 0;
 
       a {
-        color: #707280;
+        color: #fff;
         text-decoration: underline;
       }
     }
 
     .column-group-wrap {
-      border-right: 1px solid #f5f6fa;
+      border-right: 1px solid rgba(245, 246, 250, 0.1);
       padding-top: 0;
       padding-bottom: 0;
+      font-size: 12px;
+
+      &.last {
+        border-right: none;
+      }
+
+      button {
+        outline: none;
+        border: none;
+        background-color: transparent;
+        padding: 0;
+        cursor: pointer;
+      }
+    }
+
+    th.ant-table-cell {
+      font-size: 12px;
+      background-color: rgba(255, 255, 255, 0.2);
+      color: #fff;
+
+      &.cell-add {
+        font-size: 13px;
+      }
     }
   }
 
@@ -125,44 +176,46 @@
   }
 
   &-skeleton {
-    background: #f5f6fa;
+    background: rgba(255, 255, 255, 0.2);
     padding: 4px 6px;
     border-radius: 4px;
-    color: #707280;
+    color: #fff;
     font-size: 13px;
     display: block;
     margin: auto;
   }
 
   .cell-index {
-    color: #707280;
+    color: #fff;
     font-weight: 400;
     padding-right: 3px;
   }
 
   .cell-note {
-    border-right: 1px solid #f5f6fa;
+    border-right: 1px solid rgba(245, 246, 250, 0.1);
   }
 
   .cell-add {
-    border-right: 1px solid #f5f6fa;
+    border-right: 1px solid rgba(245, 246, 250, 0.1);
   }
 
   .copy-icon {
     width: 14px;
     margin-left: 4px;
+    cursor: pointer;
   }
 
   .info-mask {
     cursor: pointer;
     position: absolute;
     right: 0;
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: rgba(0, 0, 0, 0.4);
     bottom: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding-top: 108px;
+    color: #fff;
 
     &--center {
       justify-content: center;
@@ -202,6 +255,8 @@
     .alias-input {
       margin-right: 8px;
       flex: 1;
+      background-color: transparent;
+      color: #fff;
     }
   }
 
@@ -235,7 +290,7 @@
     margin-bottom: 40px;
 
     .label {
-      color: #13141a;
+      color: #fff;
       font-size: 15px;
       line-height: 17.5px;
       margin-bottom: 12px;
@@ -243,7 +298,8 @@
     }
 
     .tip {
-      color: #707280;
+      color: #fff;
+      opacity: 0.8;
       font-size: 13px;
       line-height: 15px;
       font-weight: 500;
@@ -253,6 +309,7 @@
       margin-bottom: 12px;
       width: 100%;
       display: flex;
+      border-radius: 6px;
 
       .ant-input-number-handler-wrap {
         display: none;
@@ -260,6 +317,7 @@
 
       .ant-input-number-input-wrap {
         width: 100%;
+        border-radius: 6px;
       }
     }
   }
@@ -271,18 +329,11 @@
     padding: 0;
   }
 
-  .ant-modal-header {
-    border-bottom: none;
-    padding: 40px 0;
-    background-color: #fff;
-  }
-
   .ant-modal-body {
-    padding: 0 74px;
+    padding: 0 74px 60px;
   }
 
   .ant-modal-content {
-    background-color: #fff;
     border-radius: 12px;
   }
 
@@ -297,7 +348,7 @@
   }
 
   .footer {
-    margin: 80px 0 60px;
+    margin: 80px 0 0;
   }
 }
 
@@ -313,18 +364,20 @@
   position: relative;
   margin-right: 16px;
   transition: all 0.3s ease-in-out;
+  border: none;
   &:last-child {
     margin-right: 0;
   }
 
   &--selected {
-    background: rgba(134, 151, 255, 0.2);
-    color: #8697ff;
+    background: #8697FF;
+    color: #fff;
   }
 
   &--on-chain::before {
     content: '';
     background: #27c193;
+    border: 1px solid #fff;
     position: absolute;
     right: 8px;
     top: 8px;
@@ -374,5 +427,11 @@
       border: 1px solid #D9DEE5;
       box-shadow: 0px 1px 2px rgba(29, 40, 109, 0.1);
     }
+  }
+}
+
+.HDManagerModal {
+  .ant-modal-close-x {
+    padding: 34px;
   }
 }

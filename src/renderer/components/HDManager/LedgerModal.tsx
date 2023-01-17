@@ -52,6 +52,10 @@ export const LedgerModal: React.FC<ModalProps> = (props) => {
   return (
     <Modal
       {...props}
+      style={{
+        top: 40,
+      }}
+      className="HDManagerModal"
       width={1280}
       onCancel={(e) => {
         const { onCancel } = props;
