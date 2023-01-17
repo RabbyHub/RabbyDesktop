@@ -1,18 +1,23 @@
 import clsx from 'clsx';
 import React, { memo, useEffect, useRef } from 'react';
+import { usePrevious } from 'react-use';
 
 export const IconRefresh = memo(
   (
     props: React.SVGProps<SVGSVGElement> & {
       refresh: () => void;
+      start?: boolean;
     }
   ) => {
-    const { className, refresh, ...other } = props;
+    const { className, refresh, start = true, ...other } = props;
 
     const clickAnimateElem = useRef<SVGAElement>();
     const repeatAnimateElem = useRef<SVGAElement>();
 
+    const previousStart = usePrevious(start);
+
     useEffect(() => {
+      if (!start) return;
       const listen = () => {
         clickAnimateElem.current?.addEventListener('beginEvent', refresh);
         repeatAnimateElem.current?.addEventListener('repeatEvent', refresh);
@@ -28,7 +33,13 @@ export const IconRefresh = memo(
       const remove = listen();
 
       return remove;
-    }, [refresh]);
+    }, [refresh, start]);
+
+    useEffect(() => {
+      if (!previousStart && start) {
+        refresh();
+      }
+    }, [previousStart, refresh, start]);
 
     return (
       <svg
@@ -75,7 +86,7 @@ export const IconRefresh = memo(
               values="0;-30"
               begin="arrow_loading.click; 0.7s"
               repeatCount="indefinite"
-              dur="29.3s"
+              dur="19.3s"
               ref={repeatAnimateElem as any}
             />
           </circle>

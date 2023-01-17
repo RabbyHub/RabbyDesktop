@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { CHAINS, CHAINS_ENUM, formatTokenAmount } from '@debank/common';
 
 import {
@@ -148,7 +148,11 @@ const FooterWrapper = styled.div`
   }
 `;
 
-export const SwapByDex = () => {
+export const Swap = ({
+  quickWindowOpen = true,
+}: {
+  quickWindowOpen?: boolean;
+}) => {
   const domRef = useRef<HTMLDivElement>(null);
 
   const { currentAccount } = useCurrentAccount();
@@ -262,6 +266,7 @@ export const SwapByDex = () => {
 
         return t;
       }
+      return undefined;
     }, [userAddress, chain]);
 
   const { loading: payTokenLoading } = useAsync(async () => {
@@ -309,6 +314,7 @@ export const SwapByDex = () => {
     } catch (error) {
       console.error('getQuote error ', error);
     }
+    return undefined;
   }, [
     userAddress,
     dexId,
@@ -505,6 +511,16 @@ export const SwapByDex = () => {
       return TIPS.insufficient;
     }
 
+    if (
+      loading ||
+      nativeTokenLoading ||
+      tokenLoading ||
+      payTokenLoading ||
+      totalGasUsedLoading
+    ) {
+      return null;
+    }
+
     if (payToken && payAmount && receiveToken) {
       if (!loading && !quoteInfo) {
         return TIPS.quoteFail;
@@ -551,6 +567,7 @@ export const SwapByDex = () => {
     if (Number(slippage) < 0.05) {
       return TIPS.lowSlippage;
     }
+    return null;
   }, [
     isInsufficient,
     payToken,
@@ -770,7 +787,11 @@ export const SwapByDex = () => {
               title={<>Select the chain supported by {name}</>}
             />
             {!!payAmount && !!payToken && !!receiveToken && (
-              <IconRefresh className={styles.refresh} refresh={refresh} />
+              <IconRefresh
+                className={styles.refresh}
+                refresh={refresh}
+                start={quickWindowOpen}
+              />
             )}
           </div>
           <div className={styles.swapTokenBox}>
@@ -956,3 +977,5 @@ export const SwapByDex = () => {
     </div>
   );
 };
+
+export const SwapByDex = memo(Swap);

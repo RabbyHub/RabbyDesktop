@@ -325,7 +325,7 @@ const TokenSelectDrawer = ({
     setQuery(e.target.value);
   };
 
-  const isEmpty = !query && list.length <= 0;
+  const isEmpty = list.length <= 0;
 
   useDebounce(
     () => {
@@ -392,7 +392,7 @@ const TokenSelectDrawer = ({
           )}
           {isLoading && (
             <div>
-              {Array(8)
+              {Array(12)
                 .fill(1)
                 .map(() => (
                   <SwapLoading />

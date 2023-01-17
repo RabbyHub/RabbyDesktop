@@ -53,7 +53,7 @@ const QuickSwap = () => {
           hide && styles.hide
         )}
       >
-        <SwapByDex />
+        <SwapByDex quickWindowOpen={localVisible} />
       </div>
     </div>
   );

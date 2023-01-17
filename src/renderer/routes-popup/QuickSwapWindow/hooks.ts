@@ -17,8 +17,7 @@ import BigNumber from 'bignumber.js';
 import { useMemo } from 'react';
 import { useAsync } from 'react-use';
 
-const INTERNAL_REQUEST_ORIGIN =
-  'chrome-extension://gcnoccfhaccblggkkpnnhiplblddbcod';
+const INTERNAL_REQUEST_ORIGIN = window.location.origin;
 
 const ETH_USDT_CONTRACT = '0xdac17f958d2ee523a2206206994597c13d831ec7';
 
