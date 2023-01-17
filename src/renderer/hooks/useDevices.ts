@@ -1,3 +1,4 @@
+import { message } from 'antd';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useState } from 'react';
 
@@ -14,6 +15,10 @@ export function useHIDDevices() {
     window.rabbyDesktop.ipcRenderer
       .invoke('get-hid-devices')
       .then((res) => {
+        if (res.error) {
+          message.error(res.error);
+          return;
+        }
         setDevices(res.devices);
       })
       .finally(() => {

@@ -314,6 +314,10 @@ type ChannelInvokePayload = {
       version: ReturnType<Electron.App['getVersion']>;
     };
   };
+  'get-os-info': {
+    send: [];
+    response: IOSInfo;
+  };
   'detect-dapp': {
     send: [dappUrl: string];
     response: {
@@ -404,6 +408,7 @@ type ChannelInvokePayload = {
       }
     ];
     response: {
+      error?: string;
       devices: IHidDeviceInfo[];
     };
   };

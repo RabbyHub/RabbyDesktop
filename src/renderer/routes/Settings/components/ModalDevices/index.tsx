@@ -1,4 +1,5 @@
 import { Modal as RabbyModal } from '@/renderer/components/Modal/Modal';
+import { useOSInfo } from '@/renderer/hooks/useMainBridge';
 import { Tabs } from 'antd';
 
 import { useState } from 'react';
@@ -12,6 +13,7 @@ export default function ModalDevices() {
   const [currentPerspective, setCurrentPerspective] =
     useState<IPerspective>('usb');
   const { isViewingDevices, setIsViewingDevices } = useIsViewingDevices();
+  const osInfo = useOSInfo();
 
   return (
     <RabbyModal
@@ -34,12 +36,15 @@ export default function ModalDevices() {
             key: 'usb',
             children: <DeviceViewUSB />,
           },
-          {
-            label: <span className={styles.tabLabel}>HID</span>,
-            key: 'hid',
-            children: <DeviceViewHID />,
-          },
-        ]}
+        ].concat(
+          osInfo && osInfo.platform !== 'darwin' && osInfo.arch !== 'arm64'
+            ? {
+                label: <span className={styles.tabLabel}>HID</span>,
+                key: 'hid',
+                children: <DeviceViewHID />,
+              }
+            : []
+        )}
         activeKey={currentPerspective}
         onChange={(activeKey: string) => {
           setCurrentPerspective(activeKey as IPerspective);

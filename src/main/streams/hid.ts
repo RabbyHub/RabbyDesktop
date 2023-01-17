@@ -1,5 +1,4 @@
 import { pickAllNonFnFields } from '@/isomorphic/json';
-import nodeHid from 'node-hid';
 
 import * as usb from 'usb';
 
@@ -46,6 +45,15 @@ getSessionInsts().then(({ mainSession }) => {
 });
 
 handleIpcMainInvoke('get-hid-devices', async (_, opts) => {
+  if (process.platform === 'darwin' && process.arch === 'arm64') {
+    return {
+      error: 'Not supported on this platform',
+      devices: [],
+    };
+  }
+
+  // eslint-disable-next-line global-require
+  const nodeHid = require('node-hid') as typeof import('node-hid');
   let nodeDevices = nodeHid.devices();
 
   if (opts?.filters) {
