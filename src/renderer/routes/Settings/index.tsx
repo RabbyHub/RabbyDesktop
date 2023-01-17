@@ -226,8 +226,8 @@ export function MainWindowSettings() {
           <h4 className={styles.blockTitle}>Developer Kits</h4>
           <div className={styles.itemList}>
             <ItemAction
-              name="HID Devices"
-              icon="rabby-internal://assets/icons/mainwin-settings/devices.svg"
+              name="Devices"
+              icon="rabby-internal://assets/icons/developer-kits/usb.svg"
               onClick={() => {
                 setIsViewingDevices(true);
               }}
