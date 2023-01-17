@@ -1,3 +1,4 @@
+import { isInternalProtocol } from '@/isomorphic/url';
 import {
   app,
   BrowserWindow,
@@ -294,42 +295,54 @@ const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
     appendMenu(menu, new MenuItem(newOpts));
   const appendSeparator = () => appendMenuSeparator(menu);
 
-  if (params.linkURL) {
-    // append({
-    //   label: labels.openInNewTab('link'),
-    //   click: () => {
-    //     openLink(params.linkURL, 'default', params);
-    //   },
-    // });
-    // append({
-    //   label: labels.openInNewWindow('link'),
-    //   click: () => {
-    //     openLink(params.linkURL, 'new-window', params);
-    //   },
-    // });
-    // appendSeparator();
-    append({
-      label: labels.copyAddress('link'),
-      click: () => {
-        clipboard.writeText(params.linkURL);
-      },
-    });
-    appendSeparator();
-  } else if (params.mediaType !== 'none') {
-    // TODO: Loop, Show controls
-    append({
-      label: labels.openInNewTab(params.mediaType),
-      click: () => {
-        openLink(params.srcURL, 'default', params);
-      },
-    });
-    append({
-      label: labels.copyAddress(params.mediaType),
-      click: () => {
-        clipboard.writeText(params.srcURL);
-      },
-    });
-    appendSeparator();
+  const isFromBuiltinPage = isInternalProtocol(params.pageURL);
+  const isBuiltinResource = params.linkURL
+    ? isInternalProtocol(params.linkURL)
+    : params.srcURL
+    ? isInternalProtocol(params.linkURL)
+    : false;
+
+  if (
+    !isFromBuiltinPage &&
+    !isBuiltinResource /*  || !IS_RUNTIME_PRODUCTION */
+  ) {
+    if (params.linkURL) {
+      // append({
+      //   label: labels.openInNewTab('link'),
+      //   click: () => {
+      //     openLink(params.linkURL, 'default', params);
+      //   },
+      // });
+      // append({
+      //   label: labels.openInNewWindow('link'),
+      //   click: () => {
+      //     openLink(params.linkURL, 'new-window', params);
+      //   },
+      // });
+      // appendSeparator();
+      append({
+        label: labels.copyAddress('link'),
+        click: () => {
+          clipboard.writeText(params.linkURL);
+        },
+      });
+      appendSeparator();
+    } else if (params.mediaType !== 'none') {
+      // TODO: Loop, Show controls
+      // append({
+      //   label: labels.openInNewTab(params.mediaType),
+      //   click: () => {
+      //     openLink(params.srcURL, 'default', params);
+      //   },
+      // });
+      append({
+        label: labels.copyAddress(params.mediaType),
+        click: () => {
+          clipboard.writeText(params.srcURL);
+        },
+      });
+      appendSeparator();
+    }
   }
 
   if (params.isEditable) {
@@ -443,6 +456,7 @@ const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
       label: labels.reload,
       click: () => webContents.reload(),
     });
+    appendSeparator();
   }
 
   if (extensionMenuItems) {
@@ -451,8 +465,6 @@ const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
   }
 
   if (!IS_RUNTIME_PRODUCTION) {
-    appendSeparator();
-
     append({
       label: 'RabbyX Debug Kits',
       submenu: buildRabbyXDebugMenu(opts),

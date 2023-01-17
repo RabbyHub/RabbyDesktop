@@ -4,10 +4,15 @@ import {
   RABBY_POPUP_GHOST_VIEW_URL,
 } from '@/isomorphic/constants';
 import { isRabbyXPage } from '@/isomorphic/url';
+import { randString } from '@/isomorphic/string';
 import { valueToMainSubject } from './_init';
 
 import { cLog } from '../utils/log';
-import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
+import {
+  handleIpcMainInvoke,
+  onIpcMainEvent,
+  sendToWebContents,
+} from '../utils/ipcMainEvents';
 import { getRabbyExtId, onMainWindowReady } from '../utils/stream-helpers';
 import { rabbyxQuery } from './rabbyIpcQuery/_base';
 import { createPopupView } from '../utils/browser';
@@ -18,20 +23,21 @@ onIpcMainEvent('rabby-extension-id', async (event) => {
   });
 });
 
-onIpcMainEvent('__internal_rpc:rabbyx-rpc:query', async (evt, reqId, query) => {
-  rabbyxQuery(query.method as any, query.params, reqId)
+handleIpcMainInvoke('__internal_rpc:rabbyx-rpc:query', async (_, query) => {
+  const reqId = randString();
+
+  return rabbyxQuery(query.method as any, query.params, reqId)
     .then((result) => {
-      evt.reply('__internal_rpc:rabbyx-rpc:query', {
+      return {
         reqId,
         result,
-      });
+      };
     })
     .catch((error) => {
-      evt.reply('__internal_rpc:rabbyx-rpc:query', {
-        reqId,
+      return {
         result: null,
         error,
-      });
+      };
     });
 });
 

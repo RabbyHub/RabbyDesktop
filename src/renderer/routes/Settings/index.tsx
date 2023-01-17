@@ -15,6 +15,7 @@ import styled from 'styled-components';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
 import { useProxyStateOnSettingPage } from './settingHooks';
+import { AutoUpdate } from '../Dapps/components/AutoUpdate';
 
 type TypedProps = {
   name: React.ReactNode;
@@ -219,7 +220,9 @@ export function MainWindowSettings() {
             name={`Version: ${appVerison || '-'}`}
             text=""
             icon="rabby-internal://assets/icons/mainwin-settings/info.svg"
-          />
+          >
+            <AutoUpdate isFold={false} />
+          </ItemText>
           {/* <ItemLink name='User Agreement' /> */}
           <ItemLink
             name="Privacy Policy"

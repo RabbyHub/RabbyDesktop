@@ -1,3 +1,4 @@
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import {
   RabbyXContollerMethods,
   RabbyXContollerMeththodNames,
@@ -49,53 +50,33 @@ function makeRabbyXController<T extends RabbyXContollerNS>(namespace: T) {
     get(_, prop: RabbyXContollerMeththodNames[T]) {
       return async function (...args: any[]) {
         const fixedArgs = fixArgs(prop as keyof RabbyXMethods, args as any);
-        const reqId = randString();
 
-        const p = new Promise(function (resolve, reject) {
-          const dispose = window.rabbyDesktop?.ipcRenderer.on(
-            '__internal_rpc:rabbyx-rpc:query',
-            (event) => {
-              // leave here for debug
-              // console.debug(
-              //   '[debug] __internal_rpc:rabbyx-rpc:query event back',
-              //   event
-              // );
-              if (event.reqId === reqId) {
-                dispose?.();
-
-                if (event.error) {
-                  // const err = new Error(`[rabbyx-controller] message: '${event.error.message}'; code: '${event.error.code}';`);
-                  // (err as any).rpcError = event.error;
-                  reject(event.error);
-                } else {
-                  resolve(event.result);
-                }
-              }
-            }
-          );
-        });
-
-        window.rabbyDesktop?.ipcRenderer.sendMessage(
-          '__internal_rpc:rabbyx-rpc:query',
-          reqId,
-          {
-            method: `${namespace}.${prop}`,
+        const method = `${namespace}.${prop}`;
+        return window.rabbyDesktop?.ipcRenderer
+          .invoke('__internal_rpc:rabbyx-rpc:query', {
+            method,
             params: fixedArgs,
-          }
-        );
+          })
+          .then((event) => {
+            // leave here for debug
+            // console.debug(
+            //   '[debug] __internal_rpc:rabbyx-rpc:query event back',
+            //   event
+            // );
+            if (event.error) {
+              // const err = new Error(`[rabbyx-controller] message: '${event.error.message}'; code: '${event.error.code}';`);
+              // (err as any).rpcError = event.error;
+              if (!IS_RUNTIME_PRODUCTION) {
+                console.error(
+                  `[rabbyx-controller] error on calling '${method}'`,
+                  event.error
+                );
+              }
+              throw event.error;
+            }
 
-        return p;
-
-        // // console.debug('[debug] data', data);
-        // if (data.error) {
-        //     const err = new Error(`[rabbyx-controller] message: '${data.error.message}'; code: '${data.error.code}';`);
-        //     (err as any).rpcError = data.error;
-        //     throw err;
-        // }
-
-        // if (!data.code && ('result' in data)) {
-        //     return data.result;
-        // }
+            return event.result;
+          });
       };
     },
   });
