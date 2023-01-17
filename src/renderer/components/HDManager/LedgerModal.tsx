@@ -57,6 +57,7 @@ export const LedgerModal: React.FC<ModalProps> = (props) => {
       }}
       className="HDManagerModal"
       width={1280}
+      backable
       onCancel={(e) => {
         const { onCancel } = props;
         onCancel?.(e);

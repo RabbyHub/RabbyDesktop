@@ -14,11 +14,13 @@ const HARDWARE_MAP = [
     logo: 'rabby-internal://assets/icons/device/trezor.svg',
     name: 'Trezor',
     id: KEYRING_CLASS.HARDWARE.TREZOR,
+    disabled: true,
   },
   {
     logo: 'rabby-internal://assets/icons/device/onekey.svg',
     name: 'OneKey',
     id: KEYRING_CLASS.HARDWARE.ONEKEY,
+    disabled: true,
   },
 ];
 
@@ -55,7 +57,12 @@ export const SelectModalContent: React.FC<Props> = ({
         <div className={styles.body}>
           {HARDWARE_MAP.map((hardware) => (
             <div
-              onClick={() => onSelectType(hardware.id)}
+              aria-disabled={hardware.disabled}
+              onClick={() => {
+                if (!hardware.disabled) {
+                  onSelectType(hardware.id);
+                }
+              }}
               className={styles.device}
             >
               <img className={styles.deviceLogo} src={hardware.logo} />
