@@ -40,6 +40,7 @@ export async function parseWebsiteFavicon(
 
     return fetchClient
       .get(targetURL, {
+        timeout: tmout,
         proxy: options?.proxy,
       })
       .then((res) => res.data);
@@ -53,6 +54,7 @@ export async function parseWebsiteFavicon(
     if (!targetURL) return Buffer.from([]);
     return fetchClient
       .get(targetURL, {
+        timeout: tmout,
         proxy: options?.proxy,
         responseType: 'arraybuffer',
       })
