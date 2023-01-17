@@ -15,7 +15,7 @@ const LoadingIcon = (
 );
 
 export const LedgerModal: React.FC<ModalProps> = (props) => {
-  const [connected, setConnected] = React.useState(false);
+  const [connected, setConnected] = React.useState(true);
   const [devices, setDevices] = React.useState<Device[]>([]);
 
   if (!connected) {

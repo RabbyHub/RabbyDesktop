@@ -2,7 +2,8 @@ import './index.less';
 import { Spin } from 'antd';
 import React from 'react';
 import { HARDWARE_KEYRING_TYPES } from '@/renderer/utils/constant';
-import { walletController } from '@/renderer/ipcRequest/rabbyx';
+// import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { useShellWallet } from '@/renderer/hooks-shell/useShellWallet';
 import { HDManagerStateProvider, StateProviderProps } from './utils';
 import { LedgerManager } from './LedgerManager';
 import { OneKeyManager } from './OnekeyManager';
@@ -15,6 +16,7 @@ const MANAGER_MAP = {
 };
 
 export const HDManager: React.FC<StateProviderProps> = ({ keyring }) => {
+  const walletController = useShellWallet();
   const [initialed, setInitialed] = React.useState(false);
   const idRef = React.useRef<number | null>(null);
 
@@ -23,16 +25,6 @@ export const HDManager: React.FC<StateProviderProps> = ({ keyring }) => {
   }, []);
 
   React.useEffect(() => {
-    walletController
-      .connectHardware({
-        type: keyring,
-        isWebHID: true,
-      })
-      .then((id) => {
-        idRef.current = id;
-        setInitialed(true);
-      });
-
     window.addEventListener('beforeunload', () => {
       closeConnect();
     });
@@ -42,9 +34,22 @@ export const HDManager: React.FC<StateProviderProps> = ({ keyring }) => {
     };
   }, []);
 
+  const handleConnect = () => {
+    walletController
+      .connectHardware({
+        type: keyring,
+        isWebHID: true,
+      })
+      .then((id) => {
+        idRef.current = id;
+        setInitialed(true);
+      });
+  };
+
   if (!initialed) {
     return (
       <div className="flex items-center justify-center w-screen h-screen">
+        <button onClick={handleConnect}>connect</button>
         <Spin />
       </div>
     );
