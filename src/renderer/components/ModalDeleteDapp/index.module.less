@@ -31,7 +31,7 @@
         width: 52px;
         height: 52px;
         margin-right: 16px;
-        border-radius: 50%;
+        border-radius: 8px;
       }
       margin-bottom: 24px;
     }
@@ -95,18 +95,22 @@
   text-align: center;
   color: #fff;
 
-  & + .confirmBtn {
+  & + .button {
     margin-top: 48px;
   }
 }
 
-.confirmBtn.confirmBtn {
+.button.button {
   width: 240px;
   height: 52px;
-  border-radius: 8px;
+  border-radius: 4px;
   font-weight: 500;
   font-size: 15px;
   line-height: 18px;
-  background-color: #707280 !important;
-  border: none;
+  display: block;
+  &:disabled {
+    background: #707280 !important;
+    border: none;
+    opacity: 1;
+  }
 }

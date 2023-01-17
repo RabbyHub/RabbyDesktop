@@ -22,7 +22,7 @@
   .dappFavicon {
     width: 80px;
     height: 80px;
-    border-radius: 50%;
+    border-radius: 12px;
     display: block;
     margin: 0 auto;
     margin-bottom: 16px;
@@ -47,28 +47,55 @@
     position: relative;
 
     .aliasInput {
-      background: rgba(255, 255, 255, 0.1) !important;
+      background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 8px;
       height: 64px;
       padding: 16px 24px;
       &:focus,
       &:hover {
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.5);
       }
       color: #fff;
+      box-shadow: none !important;
+
+      :global {
+        .ant-input-clear-icon {
+          color: #fff;
+        }
+      }
+    }
+    :global {
+      .ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled):hover {
+        border-color: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper,
+      .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper:hover {
+        border-color: #ff6f6f;
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .ant-form-item-explain-error {
+        color: #ff6f6f;
+      }
     }
     margin-bottom: 45px;
   }
 
-  .confirmBtn {
+  .button.button {
+    margin: auto auto 0 auto;
     width: 240px;
     height: 52px;
-    border-radius: 8px;
+    border-radius: 4px;
     font-weight: 500;
     font-size: 15px;
     line-height: 18px;
-    background-color: #707280 !important;
-    border: none;
+    display: block;
+    &:disabled {
+      background: #707280 !important;
+      border: none;
+      opacity: 1;
+    }
   }
 }

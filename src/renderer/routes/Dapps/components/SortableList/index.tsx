@@ -63,9 +63,9 @@ export const SortableItem = (
 };
 
 interface SortableListProps {
-  data?: IMergedDapp[];
-  onChange?(items: IMergedDapp[]): void;
-  renderItem?(item: IMergedDapp): ReactNode;
+  data?: IDappWithTabInfo[];
+  onChange?(items: IDappWithTabInfo[]): void;
+  renderItem?(item: IDappWithTabInfo): ReactNode;
 }
 export const SortableList = ({
   data = [],

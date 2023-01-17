@@ -89,7 +89,7 @@ export default function ModalDeleteDapp({
         <Button
           loading={isLoading}
           type="primary"
-          className={styles.confirmBtn}
+          className={styles.button}
           onClick={async () => {
             await doDelete();
             onDeletedDapp?.();

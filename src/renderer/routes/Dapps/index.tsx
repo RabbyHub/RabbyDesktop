@@ -1,15 +1,11 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
-import { CurrentAccountAndNewAccount } from '@/renderer/components/CurrentAccount';
-import { useWindowTabs } from '@/renderer/hooks-shell/useWindowTabs';
 import { setDappsOrder } from '@/renderer/ipcRequest/dapps';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
-import { message } from 'antd';
 import { useCallback, useState } from 'react';
 
-import ModalAddDapp from '../../components/ModalAddDapp';
 import ModalDeleteDapp from '../../components/ModalDeleteDapp';
 import ModalRenameDapp from '../../components/ModalRenameDapp';
-import { useDapps, useTabedDapps } from '../../hooks/useDappsMngr';
+import { useTabedDapps } from '../../hooks/useDappsMngr';
 
 import { DAppBlock } from './components/DAppBlock';
 

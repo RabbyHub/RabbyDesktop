@@ -96,11 +96,11 @@ function useCheckedStep() {
   };
 }
 
-function AddDapp({
+export function AddDapp({
   onAddedDapp,
   ...modalProps
 }: ModalProps & {
-  onAddedDapp?: () => void;
+  onAddedDapp?: (origin: string) => void;
 }) {
   const [step, setStep] = useState<IStep>('add');
   const navigate = useNavigate();
@@ -153,7 +153,7 @@ function AddDapp({
   }, [checkUrl, setCheckError, setDappInfo]);
 
   return (
-    <>
+    <div className={styles.step}>
       {step !== 'add' && (
         <img
           onClick={() => {
@@ -192,7 +192,7 @@ function AddDapp({
             type="primary"
             htmlType="submit"
             disabled={!isValidAddUrl}
-            className={styles.addConfirmBtn}
+            className={styles.button}
           >
             Check
           </Button>
@@ -222,12 +222,12 @@ function AddDapp({
           />
           <Button
             type="primary"
-            className={styles.checkedConfirmBtn}
+            className={styles.button}
             onClick={async () => {
               await makeSureDappAddedToConnectedSite(dappInfo);
               await updateDapp(dappInfo);
-              message.success('Added successfully');
-              onAddedDapp?.();
+              // message.success('Added successfully');
+              onAddedDapp?.(dappInfo.origin);
             }}
             disabled={!isValidAlias}
           >
@@ -275,14 +275,14 @@ function AddDapp({
             onClick={(e) => {
               modalProps.onCancel?.(e);
             }}
-            className={styles.stepDuplicatedBtn}
+            className={styles.button}
             disabled
           >
             Confirm
           </Button>
         </div>
       )}
-    </>
+    </div>
   );
 }
 
@@ -291,7 +291,7 @@ export default function ModalAddDapp({
   ...modalProps
 }: React.PropsWithChildren<
   ModalProps & {
-    onAddedDapp?: () => void;
+    onAddedDapp?: (origin: string) => void;
   }
 >) {
   return (

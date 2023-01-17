@@ -98,7 +98,7 @@ export default function ModalRenameDapp({
             loading={isLoading}
             type="primary"
             disabled={!isValidAlias}
-            className={styles.confirmBtn}
+            className={styles.button}
             onClick={async () => {
               await doRename();
               onRenamedDapp?.();
