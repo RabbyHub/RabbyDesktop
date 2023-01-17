@@ -1,5 +1,11 @@
 import React from 'react';
 import RcSwitch from 'rc-switch';
+import { LoadingOutlined } from '@ant-design/icons';
+import { Spin } from 'antd';
+
+const LoadingIcon = (
+  <LoadingOutlined style={{ fontSize: 20, color: '#8697ff' }} spin />
+);
 
 interface Props {
   onChange?: (value: boolean) => Promise<void>;
@@ -23,10 +29,7 @@ export const AddToRabby: React.FC<Props> = ({ checked, onChange }) => {
       loadingIcon={
         <div className="ant-switch-handle">
           {locked ? (
-            <img
-              className="icon-loading animate-spin"
-              src="rabby-internal://assets/icons/hd-manager/loading.svg"
-            />
+            <Spin className="icon-loading" indicator={LoadingIcon} />
           ) : checked ? (
             <img
               className="icon"
