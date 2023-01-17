@@ -63,6 +63,7 @@ export const dappStore = new Store<{
         '^https://.+$': IDappSchema,
       },
       additionalProperties: false,
+      default: {} as Record<IDapp['origin'], IDapp>,
     },
     pinnedList: {
       type: 'array',
@@ -174,6 +175,8 @@ export function parseDappUrl(url: string, dapps = getAllDapps()) {
 handleIpcMainInvoke('detect-dapp', async (_, dappUrl) => {
   const allDapps = getAllDapps();
   const result = await detectDapps(dappUrl, allDapps);
+
+  console.log('[feat] result', result);
 
   return {
     result,
