@@ -1,0 +1,91 @@
+## Pre-requisites
+# bundle install
+
+## Manage password of repo
+# fastlane match change_password
+
+## import .cert/.pkey/.p12
+# bundle exec fastlane match
+
+## Pull certificates
+# bundle exec fastlane match --readonly
+# [CONFIGURATION=development] [TYPE=development] bundle exec fastlane match --readonly
+
+## Create, update certificates
+# [CONFIGURATION=development] [TYPE=development] bundle exec fastlane match import
+
+## self-hosted certificates' storage repo for debank frontend group
+## use https:// if basic MATCH_GIT_BASIC_AUTHORIZATION environment variable setup
+if ENV['MATCH_GIT_BASIC_AUTHORIZATION']
+  git_url = "https://github.com/DeBankDeFi/apple-auto-certificates.git"
+else
+  git_url = "git@github.com:DeBankDeFi/apple-auto-certificates.git"
+end
+
+user_name = "lei.chen@debank.com"
+team_id = "ZPNP2SF27Q"
+
+run_type = "development"
+
+skip_certificate_matching = false
+skip_provisioning_profiles = false
+profile_name = false
+app_identifiers = ["com.debank.RabbyDesktop"]
+
+case ENV["CONFIGURATION"]
+  when "release"
+    ENV["CONFIGURATION"] = "release"
+  when "debug", "dev", "development"
+    ENV["CONFIGURATION"] = "development"
+  else
+    ENV["CONFIGURATION"] = "development"
+end
+
+if ENV["CONFIGURATION"] == "development"
+    profile_name = "RabbyDesktopDevelopment"
+    run_type = "development"
+    app_identifiers = ["*"]
+elsif ENV["CONFIGURATION"] == "release"
+  if ENV["TYPE"] == nil
+    ENV["TYPE"] = "developer_id"
+  end
+
+  case ENV["TYPE"]
+    when "developer_id"
+      run_type = "developer_id"
+      profile_name = "RabbyDesktopDeveloperID"
+    else
+      print("Invalid ENV[\"TYPE\"] value" + ENV["TYPE"])
+  end
+end
+
+biz_data = {
+  :git_url => git_url,
+  :type => run_type,
+  :username => user_name,
+  :team_id => team_id,
+  :app_identifiers => app_identifiers,
+  :platform => "macos",
+}
+
+# more parameters, see https://docs.fastlane.tools/actions/match/#parameters
+
+git_url(biz_data[:git_url])
+git_full_name("richardo2016x")
+git_user_email("richardo2016x@gmail.com")
+# values: developer_id, adhoc, development, enterprise, developer_id, mac_installer_distribution
+type(biz_data[:type])
+app_identifier(biz_data[:app_identifiers])
+username(biz_data[:username])
+team_id(biz_data[:team_id])
+platform(biz_data[:platform])
+skip_certificate_matching(skip_certificate_matching)
+skip_provisioning_profiles(skip_provisioning_profiles)
+profile_name(profile_name) if profile_name
+git_basic_authorization(ENV["MATCH_GIT_BASIC_AUTHORIZATION"]) if ENV['MATCH_GIT_BASIC_AUTHORIZATION']
+# values: mac_installer_distribution, developer_id_installer
+# additional_cert_types([additional_cert_type]) if additional_cert_type
+
+# set for CI machine
+keychain_name("debank_ci.keychain") if ENV["CI_JOB"]
+keychain_password("qa1234") if ENV["CI_JOB"]
