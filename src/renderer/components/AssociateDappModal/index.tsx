@@ -197,7 +197,6 @@ export default function AssociateDappModal({
         modalProps.onCancel?.(e);
       }}
       footer={null}
-      open
       className={classNames(styles.modal, modalProps.className)}
       wrapClassName={classNames(modalProps.wrapClassName)}
       destroyOnClose
