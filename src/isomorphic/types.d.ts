@@ -203,3 +203,5 @@ type IShellNavInfo = {
   tabUrl: string;
   dappSecurityCheckResult: ISecurityCheckResult | null;
 };
+
+type IHidDeviceInfo = import('node-hid').Device;

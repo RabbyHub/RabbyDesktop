@@ -408,6 +408,16 @@ type ChannelInvokePayload = {
     send: [conf: IAppProxyConf];
     response: void;
   };
+  'get-hid-devices': {
+    send: [
+      options?: {
+        filters?: HIDDeviceRequestOptions['filters'];
+      }
+    ];
+    response: {
+      devices: IHidDeviceInfo[];
+    };
+  };
 };
 type IInvokesKey = keyof ChannelInvokePayload;
 

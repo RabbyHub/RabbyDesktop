@@ -113,3 +113,13 @@ export function useCheckProxy() {
     onValidateProxy,
   };
 }
+
+const isViewingDevicesAtom = atom(false);
+export function useIsViewingDevices() {
+  const [isViewingDevices, setIsViewingDevices] = useAtom(isViewingDevicesAtom);
+
+  return {
+    isViewingDevices,
+    setIsViewingDevices,
+  };
+}
