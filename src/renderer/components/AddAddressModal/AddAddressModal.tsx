@@ -49,6 +49,7 @@ export const AddAddressModal: React.FC<Props> = ({ visible, onClose }) => {
         destroyOnClose
         keyringType={keyringType}
         footer={null}
+        backable
         onBack={() => {
           setKeyringType(undefined);
         }}
