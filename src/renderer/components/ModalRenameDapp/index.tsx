@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import classnames from 'classnames';
-import { Input, Modal, ModalProps, Button } from 'antd';
+import { Input, ModalProps, Button } from 'antd';
 import { useDapps } from 'renderer/hooks/useDappsMngr';
 import { isValidDappAlias } from '../../../isomorphic/dapp';
 
 import styles from './index.module.less';
 import { RCIconDappsModalClose } from '../../../../assets/icons/internal-homepage';
 import { DappFavicon } from '../DappFavicon';
+import { Modal } from '../Modal/Modal';
 
 const ALIAS_LIMIT = 15;
 
@@ -70,9 +71,9 @@ export default function ModalRenameDapp({
       {...modalProps}
       title={null}
       footer={null}
-      closeIcon={<RCIconDappsModalClose />}
+      // closeIcon={<RCIconDappsModalClose />}
       className={classnames(styles.renameModal, modalProps.className)}
-      wrapClassName={classnames('modal-dapp-mngr', modalProps.wrapClassName)}
+      wrapClassName={classnames(modalProps.wrapClassName)}
     >
       {dapp ? (
         <div className={styles.renameDapp}>
@@ -97,7 +98,7 @@ export default function ModalRenameDapp({
             loading={isLoading}
             type="primary"
             disabled={!isValidAlias}
-            className={styles.confirmBtn}
+            className={styles.button}
             onClick={async () => {
               await doRename();
               onRenamedDapp?.();

@@ -1,8 +1,9 @@
 import React from 'react';
+import { KEYRING_CLASS } from '@/renderer/utils/constant';
 import { Modal } from '../Modal/Modal';
-import { KEYRING_CLASS } from '../../utils/keyring';
 import { SelectModalContent } from './SelectModalContent';
 import { ContactModalContent } from './ContactModalContent';
+import { HDManagerModal } from '../HDManager/HDManagerModal';
 
 interface Props {
   visible: boolean;
@@ -11,6 +12,10 @@ interface Props {
 
 export const AddAddressModal: React.FC<Props> = ({ visible, onClose }) => {
   const [keyringType, setKeyringType] = React.useState<string>();
+  const handleCancel = React.useCallback(() => {
+    onClose();
+    setKeyringType(undefined);
+  }, []);
 
   if (keyringType === KEYRING_CLASS.WATCH) {
     return (
@@ -21,11 +26,34 @@ export const AddAddressModal: React.FC<Props> = ({ visible, onClose }) => {
         backable
         onBack={() => setKeyringType(undefined)}
         destroyOnClose
-        onCancel={onClose}
+        onCancel={handleCancel}
         footer={null}
       >
         <ContactModalContent onSuccess={onClose} />
       </Modal>
+    );
+  }
+
+  if (
+    keyringType &&
+    [
+      KEYRING_CLASS.HARDWARE.LEDGER,
+      KEYRING_CLASS.HARDWARE.ONEKEY,
+      KEYRING_CLASS.HARDWARE.TREZOR,
+    ].includes(keyringType)
+  ) {
+    return (
+      <HDManagerModal
+        open={visible}
+        onCancel={handleCancel}
+        destroyOnClose
+        keyringType={keyringType}
+        footer={null}
+        backable
+        onBack={() => {
+          setKeyringType(undefined);
+        }}
+      />
     );
   }
 

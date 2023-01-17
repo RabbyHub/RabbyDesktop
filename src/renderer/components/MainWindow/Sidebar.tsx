@@ -1,24 +1,24 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
-import { AutoUpdate } from '@/renderer/routes/Dapps/components/AutoUpdate';
 import { showMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useMemo } from 'react';
-import { useNavigate, useLocation, matchPath } from 'react-router-dom';
+import { matchPath, useLocation, useNavigate } from 'react-router-dom';
+import { Transition } from 'react-transition-group';
 import styled from 'styled-components';
-import { Transition, TransitionStatus } from 'react-transition-group';
 
 import {
   IDappWithTabInfo,
   useSidebarDapps,
 } from '@/renderer/hooks-shell/useMainWindow';
 import { useHasNewRelease } from '@/renderer/hooks/useAppUpdator';
-import { makeSureDappOpened } from '@/renderer/ipcRequest/mainwin';
 import { useSettings } from '@/renderer/hooks/useSettings';
-import styles from './Sidebar.module.less';
+import { makeSureDappOpened } from '@/renderer/ipcRequest/mainwin';
+import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { DappFavicon } from '../DappFavicon';
 import Hide from './Hide';
+import styles from './Sidebar.module.less';
 
 const DividerSizes = {
   height: 1,
@@ -266,8 +266,21 @@ export default function MainWindowSidebar() {
               />
             </div>
             <div className={styles.navFooter}>
-              <div className={styles.update}>
-                <AutoUpdate isFold={settings.sidebarCollapsed} />
+              <div
+                className={styles.addDappContainer}
+                onClick={() => {
+                  showMainwinPopupview({ type: 'dapps-management' });
+                }}
+              >
+                <div className={styles.addDapp}>
+                  <img
+                    className={styles.addDappIcon}
+                    src="rabby-internal://assets/icons/mainwin-sidebar/add-square.svg"
+                  />
+                  <Hide visible={!secondAnim} className={styles.addDappContent}>
+                    New Dapp
+                  </Hide>
+                </div>
               </div>
               <ul className={styles.routeList}>
                 <li

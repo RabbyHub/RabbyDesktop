@@ -85,10 +85,15 @@ export function usePopupViewInfo<T extends PopupViewOnMainwinInfo['type']>(
     hideMainwinPopupview(type);
   }, [type]);
 
+  const hideViewOnly = useCallback(() => {
+    hideMainwinPopupview(type);
+  }, [type]);
+
   return {
     localVisible,
     setLocalVisible,
     hideView,
+    hideViewOnly,
     visible: info.visible,
     pageInfo: info.pageInfo,
   };

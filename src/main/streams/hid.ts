@@ -42,6 +42,20 @@ getSessionInsts().then(({ mainSession }) => {
       }
     }
   );
+
+  mainSession.setPermissionCheckHandler(
+    (webContents, permission, requestingOrigin, details) => {
+      console.log(permission);
+      if (permission === 'hid') {
+        // Add logic here to determine if permission should be given to allow HID selection
+        return true;
+      }
+      if (permission === 'serial') {
+        // Add logic here to determine if permission should be given to allow serial port selection
+      }
+      return false;
+    }
+  );
 });
 
 handleIpcMainInvoke('get-hid-devices', async (_, opts) => {
