@@ -19,6 +19,7 @@ import SwitchAccountWindow from '@/renderer/routes-popup/SwitchAccountWindow';
 
 import { parseQueryString } from '@/isomorphic/url';
 import RabbyNotificationGasket from '../routes-popup/RabbyNotificationGasket';
+import MainWindowDappManagement from '../routes-popup/MainWindowDappManagement';
 
 function App() {
   return (
@@ -54,6 +55,9 @@ const container = document.getElementById('root')!;
 const root = createRoot(container);
 
 switch (parseQueryString().view) {
+  case 'dapps-management':
+    root.render(<MainWindowDappManagement />);
+    break;
   default:
     root.render(<App />);
     break;

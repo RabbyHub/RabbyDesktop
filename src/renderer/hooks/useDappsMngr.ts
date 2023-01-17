@@ -1,19 +1,29 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 /// <reference path="../../renderer/preload.d.ts" />
+
+import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
+// import { useDapps } from 'renderer/hooks/useDappsMngr';
+
+import { sortDappsBasedPinned } from '@/isomorphic/dapp';
 import { atom, useAtom } from 'jotai';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useWindowTabs } from '../hooks-shell/useWindowTabs';
 import { makeSureDappAddedToConnectedSite } from '../ipcRequest/connected-site';
 import {
-  fetchDapps,
-  detectDapps,
-  putDapp,
   deleteDapp,
-  toggleDappPinned,
+  detectDapps,
+  fetchDapps,
   getDapp,
+  putDapp,
+  toggleDappPinned,
+  fetchProtocolDappsBinding,
+  putProtocolDappsBinding,
 } from '../ipcRequest/dapps';
+import { toggleLoadingView } from '../ipcRequest/mainwin';
 
 const dappsAtomic = atom(null as null | IDapp[]);
 const pinnedListAtomic = atom([] as IDapp['origin'][]);
+const unpinnedListAtomic = atom([] as IDapp['origin'][]);
 
 // function mergePinnnedList(dapps: (IDapp | IMergedDapp)[], pinnedList: IDapp['origin'][]): IMergedDapp[] {
 //   const pinnedSet = new Set(pinnedList);
@@ -25,9 +35,49 @@ const pinnedListAtomic = atom([] as IDapp['origin'][]);
 //   });
 // }
 
+const protocolDappsBindingAtom = atom({} as Record<string, IDapp['origin'][]>);
+export function useProtocolDappsBinding() {
+  const [protocolDappsBinding, setProtocolDappsBinding] = useAtom(
+    protocolDappsBindingAtom
+  );
+
+  const loadingRef = useRef(false);
+  const fetchBindings = useCallback(async () => {
+    if (loadingRef.current) return;
+
+    loadingRef.current = true;
+    fetchProtocolDappsBinding()
+      .then((newVal) => {
+        setProtocolDappsBinding(newVal);
+      })
+      .finally(() => {
+        loadingRef.current = false;
+      });
+  }, []);
+
+  useEffect(() => {
+    fetchBindings();
+  }, [fetchBindings]);
+
+  const bindingDappsToProtocol = useCallback(
+    async (protocol: string, dappOrigins: IDapp['origin'][]) => {
+      return putProtocolDappsBinding(protocol, dappOrigins).then(() => {
+        fetchBindings();
+      });
+    },
+    [fetchBindings]
+  );
+
+  return {
+    protocolDappsBinding,
+    bindingDappsToProtocol,
+  };
+}
+
 export function useDapps() {
   const [originDapps, setDapps] = useAtom(dappsAtomic);
   const [pinnedList, setPinnedList] = useAtom(pinnedListAtomic);
+  const [unpinnedList, setUnpinnedList] = useAtom(unpinnedListAtomic);
 
   // only fetch dapps once
   useEffect(() => {
@@ -36,6 +86,7 @@ export function useDapps() {
     fetchDapps().then((newVal) => {
       setDapps(newVal.dapps);
       setPinnedList(newVal.pinnedList);
+      setUnpinnedList(newVal.unpinnedList);
 
       // guard logic
       newVal.dapps.forEach((dapp) => {
@@ -48,19 +99,18 @@ export function useDapps() {
 
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:*:pinnedListChanged',
+      '__internal_push:dapps:changed',
       (event) => {
-        setPinnedList(event.pinnedList);
+        if (event.dapps) setDapps(event.dapps);
+        if (event.pinnedList) setPinnedList(event.pinnedList);
+        if (event.unpinnedList) setUnpinnedList(event.unpinnedList);
       }
     );
   }, [setPinnedList]);
 
   const updateDapp = useCallback(
     async (dapp: IDapp) => {
-      return putDapp(dapp).then((newDapps) => {
-        setDapps(newDapps);
-        return newDapps;
-      });
+      return putDapp(dapp);
     },
     [setDapps]
   );
@@ -74,62 +124,42 @@ export function useDapps() {
 
   const removeDapp = useCallback(
     async (dapp: IDapp) => {
-      return deleteDapp(dapp).then((newVal) => {
-        setDapps(newVal);
-        return newVal;
-      });
+      return deleteDapp(dapp);
     },
     [setDapps]
   );
 
-  const pinDapp = useCallback((origin: string) => {
-    toggleDappPinned([origin], true);
+  const pinDapp = useCallback((dappOrigin: string) => {
+    toggleDappPinned([dappOrigin], true);
   }, []);
 
-  const unpinDapp = useCallback((origin: string) => {
-    toggleDappPinned([origin], false);
+  const unpinDapp = useCallback((dappOrigin: string) => {
+    toggleDappPinned([dappOrigin], false);
   }, []);
 
   /* eslint-disable @typescript-eslint/no-shadow */
   const { mergeDapps, pinnedDapps, unpinnedDapps } = useMemo(() => {
-    const dappMap = new Map(
-      (originDapps || []).map((dapp) => [dapp.origin, dapp])
-    );
-
-    const pinnedDapps: IMergedDapp[] = [];
-    pinnedList.forEach((origin) => {
-      const dapp = dappMap.get(origin);
-      if (!dapp) return;
-
-      pinnedDapps.push({
-        ...dapp,
-        isPinned: true,
-      });
-    });
-
-    const pinnedSet = new Set(pinnedList || []);
-    const unpinnedDapps: IMergedDapp[] = [];
-    (originDapps || []).forEach((dapp) => {
-      if (pinnedSet.has(dapp.origin)) return;
-      const item = {
-        ...dapp,
-        isPinned: pinnedSet.has(dapp.origin),
-      };
-
-      unpinnedDapps.push(item);
-    });
+    const {
+      allDapps: mergeDapps,
+      pinnedDapps,
+      unpinnedDapps,
+    } = sortDappsBasedPinned(originDapps || [], pinnedList, unpinnedList);
 
     return {
-      mergeDapps: pinnedDapps.concat(unpinnedDapps),
+      mergeDapps,
       pinnedDapps,
       unpinnedDapps,
     };
-  }, [originDapps, pinnedList]);
+  }, [originDapps, pinnedList, unpinnedList]);
   /* eslint-enable @typescript-eslint/no-shadow */
+
+  console.debug('[debug] pinnedList, unpinnedList', pinnedList, unpinnedList);
+  console.debug('[debug] mergeDapps', mergeDapps);
 
   return {
     dapps: mergeDapps,
     pinnedList,
+    unpinnedList,
     pinnedDapps,
     unpinnedDapps,
     detectDapps,
@@ -157,3 +187,73 @@ export function useDapp(origin?: string) {
 
   return dappInfo;
 }
+
+const createTabedDapps = (
+  list: IMergedDapp[],
+  tabMap: ReturnType<typeof useWindowTabs>['tabMap']
+) => {
+  return list.map((item) => {
+    return {
+      ...item,
+      tab: tabMap.get(item.origin),
+    };
+  });
+};
+
+export const useTabedDapps = () => {
+  const { dapps, pinnedDapps, unpinnedDapps, ...rest } = useDapps();
+  const { tabMap, activeTab } = useWindowTabs();
+  const navigateToDapp = useNavigateToDappRoute();
+
+  const onSelectDapp = useCallback((tab: chrome.tabs.Tab) => {
+    chrome.tabs.update(tab.id!, { active: true });
+    window.rabbyDesktop.ipcRenderer.sendMessage(
+      '__internal_rpc:mainwindow:select-tab',
+      tab.windowId,
+      tab.id!
+    );
+  }, []);
+  const onOpenDapp = useCallback(
+    (dappOrigin: string) => {
+      const foundDapp = !dappOrigin
+        ? null
+        : dapps.find((dapp) => {
+            return dapp.origin === dappOrigin;
+          });
+
+      if (activeTab && foundDapp) {
+        toggleLoadingView({
+          type: 'show',
+          tabId: activeTab.id!,
+          tabURL: dappOrigin,
+        });
+      }
+
+      window.rabbyDesktop.ipcRenderer.sendMessage(
+        '__internal_rpc:mainwindow:open-tab',
+        dappOrigin
+      );
+    },
+    [activeTab, dapps]
+  );
+
+  const openDapp = useCallback(
+    (dapp: IDappWithTabInfo) => {
+      if (dapp.tab) {
+        onSelectDapp(dapp.tab);
+      } else {
+        onOpenDapp(dapp.origin);
+      }
+      navigateToDapp(dapp.origin);
+    },
+    [onSelectDapp, onOpenDapp, navigateToDapp]
+  );
+
+  return {
+    ...rest,
+    openDapp,
+    dapps: createTabedDapps(dapps, tabMap),
+    pinnedDapps: createTabedDapps(pinnedDapps, tabMap),
+    unpinnedDapps: createTabedDapps(unpinnedDapps, tabMap),
+  };
+};

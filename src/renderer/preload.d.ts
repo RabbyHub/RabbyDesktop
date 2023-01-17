@@ -34,9 +34,7 @@ type M2RChanneMessagePayload = {
   '__internal_push:mainwindow:got-dapp-screenshot': {
     imageBuf: Buffer | null;
   };
-  '__internal_push:*:pinnedListChanged': {
-    pinnedList: string[];
-  };
+  '__internal_push:dapps:changed': MainInternalsMessagePayload['__internal_main:dapps:changed']['send'][0];
   '__internal_push:popupwin-on-mainwin:on-visiblechange':
     | {
         type: IContextMenuPageInfo['type'];
@@ -325,6 +323,7 @@ type ChannelInvokePayload = {
     response: {
       dapps: IDapp[];
       pinnedList: IDapp['origin'][];
+      unpinnedList: IDapp['origin'][];
     };
   };
   'get-dapp': {
@@ -336,22 +335,41 @@ type ChannelInvokePayload = {
   };
   'dapps-put': {
     send: [dapp: IDapp];
-    response: {
-      dapps: IDapp[];
-    };
+    response: void;
   };
   'dapps-delete': {
     send: [dapp: IDapp];
     response: {
       error?: string;
-      dapps: IDapp[];
     };
   };
   'dapps-togglepin': {
     send: [dappOrigins: IDapp['origin'][], nextPinned: boolean];
     response: {
       error?: string;
-      pinnedList: IDapp['origin'][];
+    };
+  };
+  'dapps-setOrder': {
+    send: [
+      {
+        pinnedList?: IDapp['origin'][];
+        unpinnedList?: IDapp['origin'][];
+      }
+    ];
+    response: {
+      error: string | null;
+    };
+  };
+  'dapps-put-protocol-binding': {
+    send: [Record<string, IDapp['origin'][]>];
+    response: {
+      error?: string;
+    };
+  };
+  'dapps-fetch-protocol-binding': {
+    send: [];
+    response: {
+      result: Record<string, IDapp['origin'][]>;
     };
   };
   'get-desktopAppState': {
