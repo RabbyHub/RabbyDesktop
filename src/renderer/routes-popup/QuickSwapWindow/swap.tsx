@@ -672,6 +672,7 @@ export const Swap = ({
   const handleSwap = async () => {
     if (payAmount && payToken && !receiveToken) {
       message.error({
+        className: 'rabbyx-tx-changed-tip',
         icon: (
           <InfoCircleFilled
             className={clsx(
@@ -685,6 +686,7 @@ export const Swap = ({
     }
     if (tipsDisplay?.level === 'danger') {
       message.error({
+        className: 'rabbyx-tx-changed-tip',
         icon: (
           <InfoCircleFilled
             className={clsx(
