@@ -325,6 +325,7 @@ export const useGasAmount = <T extends ValidateTokenParam>(
       gasMarket,
       shouldTwoStepApprove,
       payAmount,
+      userAddress,
     ]);
 
   return {
