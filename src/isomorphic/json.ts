@@ -26,3 +26,12 @@ export function simpleDiff(v1: any, v2: any) {
   v2 = typeof v2 === 'object' ? sortObjectByKeys(v2) : v2;
   return JSON.stringify(v1) === JSON.stringify(v2);
 }
+
+export function pickAllNonFnFields<T extends Record<string, any>>(input: T) {
+  return Object.keys(input).reduce((acc, key) => {
+    if (typeof (input as any)[key] !== 'function') {
+      (acc as any)[key] = (input as any)[key];
+    }
+    return acc;
+  }, {} as PickAllNonFnFields<T>);
+}

@@ -407,6 +407,16 @@ type ChannelInvokePayload = {
       devices: IHidDeviceInfo[];
     };
   };
+  'get-usb-devices': {
+    send: [
+      options?: {
+        filters?: HIDDeviceRequestOptions['filters'];
+      }
+    ];
+    response: {
+      devices: IUSBDevice[];
+    };
+  };
   [`__internal_rpc:rabbyx-rpc:query`]: {
     send: [query: Omit<IRabbyxRpcQuery, 'rpcId'>];
     response: {

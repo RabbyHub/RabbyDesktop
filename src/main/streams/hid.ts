@@ -1,7 +1,22 @@
+import { pickAllNonFnFields } from '@/isomorphic/json';
 import nodeHid from 'node-hid';
+
+import * as usb from 'usb';
 
 import { handleIpcMainInvoke } from '../utils/ipcMainEvents';
 import { getSessionInsts } from '../utils/stream-helpers';
+
+const webusb = new usb.WebUSB({
+  allowAllDevices: true,
+});
+
+webusb.addEventListener('connect', (device) => {
+  console.debug('[debug] connect', device);
+});
+
+webusb.removeEventListener('disconnect', (device) => {
+  console.debug('[debug] disconnect', device);
+});
 
 getSessionInsts().then(({ mainSession }) => {
   mainSession.on(
@@ -31,27 +46,51 @@ getSessionInsts().then(({ mainSession }) => {
 });
 
 handleIpcMainInvoke('get-hid-devices', async (_, opts) => {
-  let devices = nodeHid.devices();
+  let nodeDevices = nodeHid.devices();
 
   if (opts?.filters) {
     const filters = Array.isArray(opts.filters) ? opts.filters : [opts.filters];
     filters.forEach((filter) => {
       if (filter.vendorId) {
-        devices = devices.filter((d) => d.vendorId === filter.vendorId);
+        nodeDevices = nodeDevices.filter((d) => d.vendorId === filter.vendorId);
       }
       if (filter.productId) {
-        devices = devices.filter((d) => d.productId === filter.productId);
+        nodeDevices = nodeDevices.filter(
+          (d) => d.productId === filter.productId
+        );
       }
       if (filter.usagePage) {
-        devices = devices.filter((d) => d.usagePage === filter.usagePage);
+        nodeDevices = nodeDevices.filter(
+          (d) => d.usagePage === filter.usagePage
+        );
       }
       if (filter.usage) {
-        devices = devices.filter((d) => d.usage === filter.usage);
+        nodeDevices = nodeDevices.filter((d) => d.usage === filter.usage);
       }
     });
   }
 
   return {
-    devices,
+    devices: nodeDevices,
+  };
+});
+
+handleIpcMainInvoke('get-usb-devices', async (_, opts) => {
+  let usbDevices = await webusb.getDevices();
+
+  if (opts?.filters) {
+    const filters = Array.isArray(opts.filters) ? opts.filters : [opts.filters];
+    filters.forEach((filter) => {
+      if (filter.vendorId) {
+        usbDevices = usbDevices.filter((d) => d.vendorId === filter.vendorId);
+      }
+      if (filter.productId) {
+        usbDevices = usbDevices.filter((d) => d.productId === filter.productId);
+      }
+    });
+  }
+
+  return {
+    devices: usbDevices.map((d) => pickAllNonFnFields(d)),
   };
 });
