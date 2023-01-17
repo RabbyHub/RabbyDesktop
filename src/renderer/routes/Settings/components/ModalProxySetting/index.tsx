@@ -5,6 +5,10 @@ import styled from 'styled-components';
 import { useCheckProxy, useSettingProxyModal } from '../../settingHooks';
 
 const RModal = styled(RabbyModal)`
+  .ant-modal-header {
+    padding: 0;
+  }
+
   .form-title {
     font-size: 20px;
     text-align: center;
