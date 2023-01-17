@@ -3,9 +3,9 @@ import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useRef } from 'react';
 
 type AccountWithName = Account & { alianName: string };
-const currentAccountAtom = atom<null | (RabbyAccount & { alianName: string })>(
-  null
-);
+const currentAccountAtom = atom<
+  null | (RabbyAccount & { alianName: string; balance?: number })
+>(null);
 const accountsAtom = atom<AccountWithName[]>([]);
 
 async function getAliasNameByAddress(address: string) {

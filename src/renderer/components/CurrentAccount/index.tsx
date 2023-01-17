@@ -1,6 +1,7 @@
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
+import { splitNumberByStep } from '@/renderer/utils/number';
 import clsx from 'clsx';
 import { useMemo } from 'react';
 import styles from './index.module.less';
@@ -17,9 +18,16 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
         : '',
     [currentAccount?.address]
   );
+
+  const balance = useMemo(() => {
+    return currentAccount?.balance
+      ? splitNumberByStep(currentAccount?.balance.toFixed(2))
+      : undefined;
+  }, [currentAccount?.balance]);
   if (!currentAccount?.alianName) {
     return null;
   }
+
   return (
     <div
       className={clsx(styles.account, className)}
@@ -40,10 +48,8 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
       </div>
       <div className={styles.dockRight}>
         <span className={styles.addr}>{displayAddr}</span>
-        <img
-          className={styles.dropdownIcon}
-          src="rabby-internal://assets/icons/top-bar/select.svg"
-        />
+
+        {balance && <span className={styles.balance}>${balance}</span>}
       </div>
     </div>
   );
