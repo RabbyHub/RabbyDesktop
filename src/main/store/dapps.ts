@@ -208,14 +208,11 @@ handleIpcMainInvoke('dapps-put', (_, dapp: IDapp) => {
   unpinnedList.push(dapp.origin);
   dappStore.set('unpinnedList', unpinnedList);
 
-  emitIpcMainEvent('__internal_main:dapps:pinnedListChanged', {
+  emitIpcMainEvent('__internal_main:dapps:changed', {
+    dapps: getAllDapps(),
     pinnedList,
     unpinnedList,
   });
-
-  return {
-    dapps: getAllDapps(),
-  };
 });
 
 handleIpcMainInvoke('dapps-delete', (_, dappToDel: IDapp) => {
@@ -242,7 +239,8 @@ handleIpcMainInvoke('dapps-delete', (_, dappToDel: IDapp) => {
     .filter((o) => o !== dappToDel.origin);
   dappStore.set('unpinnedList', unpinnedList);
 
-  emitIpcMainEvent('__internal_main:dapps:pinnedListChanged', {
+  emitIpcMainEvent('__internal_main:dapps:changed', {
+    dapps: getAllDapps(),
     pinnedList,
     unpinnedList,
   });
@@ -275,15 +273,12 @@ handleIpcMainInvoke('dapps-togglepin', async (_, dappOrigins, nextPinned) => {
   dappStore.set('pinnedList', pinnedList);
   dappStore.set('unpinnedList', unpinnedList);
 
-  emitIpcMainEvent('__internal_main:dapps:pinnedListChanged', {
+  emitIpcMainEvent('__internal_main:dapps:changed', {
     pinnedList,
     unpinnedList,
   });
 
-  return {
-    pinnedList,
-    unpinnedList,
-  };
+  return {};
 });
 
 handleIpcMainInvoke('dapps-setOrder', (_, { pinnedList, unpinnedList }) => {
@@ -334,7 +329,7 @@ handleIpcMainInvoke('dapps-setOrder', (_, { pinnedList, unpinnedList }) => {
   }
 
   if (changed) {
-    emitIpcMainEvent('__internal_main:dapps:pinnedListChanged', {
+    emitIpcMainEvent('__internal_main:dapps:changed', {
       pinnedList: dappStore.get('pinnedList'),
       unpinnedList: dappStore.get('unpinnedList'),
     });

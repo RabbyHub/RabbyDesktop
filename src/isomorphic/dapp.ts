@@ -75,20 +75,27 @@ export function sortDappsBasedPinned(
   pinnedList: string[],
   unpinnedList: string[]
 ) {
-  const pinnedSet = new Set(pinnedList);
-  const unpinnedSet = new Set(unpinnedList);
+  const dappsHash = dapps.reduce((acc, dapp) => {
+    acc[dapp.origin] = dapp;
+    return acc;
+  }, {} as Record<IDapp['origin'], IDapp>);
 
   const pinnedDapps: IMergedDapp[] = [];
   const unpinnedDapps: IMergedDapp[] = [];
-  dapps.forEach((dapp) => {
-    if (pinnedSet.has(dapp.origin)) {
+
+  pinnedList.forEach((dappOrigin) => {
+    if (dappsHash[dappOrigin]) {
       pinnedDapps.push({
-        ...dapp,
+        ...dappsHash[dappOrigin],
         isPinned: true,
       });
-    } else if (unpinnedSet.has(dapp.origin)) {
+    }
+  });
+
+  unpinnedList.forEach((dappOrigin) => {
+    if (dappsHash[dappOrigin]) {
       unpinnedDapps.push({
-        ...dapp,
+        ...dappsHash[dappOrigin],
         isPinned: false,
       });
     }

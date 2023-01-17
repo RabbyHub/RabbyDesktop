@@ -58,20 +58,18 @@ export function useDapps() {
 
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:dapps:pinnedListChanged',
+      '__internal_push:dapps:changed',
       (event) => {
-        setPinnedList(event.pinnedList);
-        setUnpinnedList(event.unpinnedList);
+        if (event.dapps) setDapps(event.dapps);
+        if (event.pinnedList) setPinnedList(event.pinnedList);
+        if (event.unpinnedList) setUnpinnedList(event.unpinnedList);
       }
     );
   }, [setPinnedList]);
 
   const updateDapp = useCallback(
     async (dapp: IDapp) => {
-      return putDapp(dapp).then((newDapps) => {
-        setDapps(newDapps);
-        return newDapps;
-      });
+      return putDapp(dapp);
     },
     [setDapps]
   );
@@ -85,10 +83,7 @@ export function useDapps() {
 
   const removeDapp = useCallback(
     async (dapp: IDapp) => {
-      return deleteDapp(dapp).then((newVal) => {
-        setDapps(newVal);
-        return newVal;
-      });
+      return deleteDapp(dapp);
     },
     [setDapps]
   );

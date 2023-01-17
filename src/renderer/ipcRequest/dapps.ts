@@ -30,11 +30,7 @@ export async function detectDapps(dappUrl: string) {
 }
 
 export async function putDapp(dapp: IDapp) {
-  return window.rabbyDesktop.ipcRenderer
-    .invoke('dapps-put', dapp)
-    .then((event) => {
-      return event.dapps;
-    });
+  return window.rabbyDesktop.ipcRenderer.invoke('dapps-put', dapp);
 }
 
 export async function deleteDapp(dapp: IDapp) {
@@ -43,8 +39,6 @@ export async function deleteDapp(dapp: IDapp) {
     .then((event) => {
       if (event.error) {
         throw new Error(event.error);
-      } else {
-        return event.dapps;
       }
     });
 }

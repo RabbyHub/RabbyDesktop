@@ -34,10 +34,7 @@ type M2RChanneMessagePayload = {
   '__internal_push:mainwindow:got-dapp-screenshot': {
     imageBuf: Buffer | null;
   };
-  '__internal_push:dapps:pinnedListChanged': {
-    pinnedList: string[];
-    unpinnedList: string[];
-  };
+  '__internal_push:dapps:changed': MainInternalsMessagePayload['__internal_main:dapps:changed']['send'][0];
   '__internal_push:popupwin-on-mainwin:on-visiblechange':
     | {
         type: IContextMenuPageInfo['type'];
@@ -338,23 +335,18 @@ type ChannelInvokePayload = {
   };
   'dapps-put': {
     send: [dapp: IDapp];
-    response: {
-      dapps: IDapp[];
-    };
+    response: void;
   };
   'dapps-delete': {
     send: [dapp: IDapp];
     response: {
       error?: string;
-      dapps: IDapp[];
     };
   };
   'dapps-togglepin': {
     send: [dappOrigins: IDapp['origin'][], nextPinned: boolean];
     response: {
       error?: string;
-      pinnedList: IDapp['origin'][];
-      unpinnedList: IDapp['origin'][];
     };
   };
   'dapps-setOrder': {
