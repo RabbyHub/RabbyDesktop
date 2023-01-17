@@ -48,7 +48,12 @@ export const dappStore = new Store<{
     protocolDappsBinding: {
       type: 'object',
       patternProperties: {
-        '^https?://.+$': { type: 'string' },
+        '^https?://.+$': {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
       },
       default: {} as Record<IDapp['origin'], IDapp['origin'][]>,
     },

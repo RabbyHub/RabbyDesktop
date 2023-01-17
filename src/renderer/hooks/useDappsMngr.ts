@@ -62,10 +62,10 @@ export function useProtocolDappsBinding() {
   const bindingDappsToProtocol = useCallback(
     async (protocol: string, dappOrigins: IDapp['origin'][]) => {
       return putProtocolDappsBinding(protocol, dappOrigins).then(() => {
-        fetchProtocolDappsBinding();
+        fetchBindings();
       });
     },
-    []
+    [fetchBindings]
   );
 
   return {
