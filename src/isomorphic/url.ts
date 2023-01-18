@@ -1,3 +1,4 @@
+import { AxiosProxyConfig } from 'axios';
 import { RABBY_INTERNAL_PROTOCOL } from './constants';
 
 export function parseQueryString(input?: string) {
@@ -233,6 +234,10 @@ export function formatProxyServerURL(settings: IAppProxyConf['proxySettings']) {
   return `${filterProxyProtocol(settings.protocol)}://${settings.hostname}:${
     settings.port
   }`;
+}
+
+export function formatAxiosProxyConfig(conf: AxiosProxyConfig) {
+  return `${filterProxyProtocol(conf.protocol)}://${conf.host}:${conf.port}`;
 }
 
 export function coercePort(input: any) {

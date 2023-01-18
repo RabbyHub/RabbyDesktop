@@ -1,10 +1,14 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 
 import { format as urlFormat } from 'url';
-import Axios, { AxiosError } from 'axios';
+import Axios, { AxiosError, AxiosProxyConfig } from 'axios';
 import LRUCache from 'lru-cache';
 
-import { canoicalizeDappUrl } from '../../isomorphic/url';
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import {
+  canoicalizeDappUrl,
+  formatAxiosProxyConfig,
+} from '../../isomorphic/url';
 import { parseWebsiteFavicon } from './fetch';
 import { AxiosElectronAdapter } from './axios';
 import { checkUrlViaBrowserView, CHROMIUM_NET_ERR_DESC } from './appNetwork';
@@ -50,9 +54,12 @@ async function checkDappHttpsCert(
   };
 }
 
-export async function detectDapps(
+export async function detectDapp(
   dappsUrl: string,
-  existedDapps: IDapp[]
+  opts: {
+    existedDapps: IDapp[];
+    proxyOnParseFavicon?: AxiosProxyConfig;
+  }
 ): Promise<IDappsDetectResult<DETECT_ERR_CODES>> {
   // TODO: process void url;
   const dappOrigin = canoicalizeDappUrl(dappsUrl).origin;
@@ -103,12 +110,19 @@ export async function detectDapps(
   }
 
   const { urlInfo, origin } = canoicalizeDappUrl(checkResult.finalUrl);
+  if (opts.proxyOnParseFavicon && !IS_RUNTIME_PRODUCTION) {
+    console.debug(
+      `[debug] use proxy ${formatAxiosProxyConfig(
+        opts.proxyOnParseFavicon
+      )} on parsing favicon`
+    );
+  }
   const { iconInfo, faviconUrl, faviconBase64 } = await parseWebsiteFavicon(
     origin,
-    { timeout: DFLT_TIMEOUT }
+    { timeout: DFLT_TIMEOUT, proxy: opts.proxyOnParseFavicon }
   );
 
-  const repeatedDapp = existedDapps.find((item) => item.origin === origin);
+  const repeatedDapp = opts.existedDapps.find((item) => item.origin === origin);
 
   const data = {
     urlInfo,
