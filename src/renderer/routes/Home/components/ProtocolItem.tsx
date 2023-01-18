@@ -52,6 +52,9 @@ const ProtocolItemWrapper = styled.div`
         cursor: pointer;
         margin-left: 2px;
       }
+      .icon-relate {
+        margin-left: 3px;
+      }
     }
     &.has-bind {
       .protocol-name {
@@ -86,16 +89,16 @@ const ProtocolItem = ({
   const { protocolDappsBinding } = useProtocolDappsBinding();
   const openDapp = useOpenDapp();
 
-  const { hasBinded, dappUrl } = useMemo(() => {
+  const { hasBinded, bindUrl } = useMemo(() => {
     return {
-      hasBinded: protocolDappsBinding[protocol.id]?.length > 0,
-      dappUrl: protocolDappsBinding[protocol.id]?.[0],
+      hasBinded: !!protocolDappsBinding[protocol.id],
+      bindUrl: protocolDappsBinding[protocol.id] || '',
     };
   }, [protocolDappsBinding, protocol.id]);
 
   const handleClickProtocolName = useCallback(() => {
-    if (dappUrl) openDapp(dappUrl);
-  }, [dappUrl, openDapp]);
+    if (bindUrl) openDapp(bindUrl);
+  }, [bindUrl, openDapp]);
 
   return (
     <ProtocolItemWrapper>
@@ -123,15 +126,21 @@ const ProtocolItem = ({
         )}
         {hasBinded && (
           <div className="protocol-bind">
-            <span className="protocol-dapp">
-              {protocolDappsBinding[protocol.id]}
-            </span>
-            <img
-              src="rabby-internal://assets/icons/home/bind-edit.svg"
-              alt=""
-              className="icon-edit"
-              onClick={() => onClickRelate(protocol)}
-            />
+            <span className="protocol-dapp">{bindUrl}</span>
+            {protocolDappsBinding[protocol.id] ? (
+              <img
+                src="rabby-internal://assets/icons/home/bind-edit.svg"
+                alt=""
+                className="icon-edit"
+                onClick={() => onClickRelate(protocol)}
+              />
+            ) : (
+              <img
+                src="rabby-internal://assets/icons/home/dapp-relate.svg"
+                className="icon-relate"
+                onClick={() => onClickRelate(protocol)}
+              />
+            )}
           </div>
         )}
       </div>
