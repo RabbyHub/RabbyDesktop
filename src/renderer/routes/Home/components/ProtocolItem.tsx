@@ -1,10 +1,11 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import classNames from 'classnames';
 import { useProtocolDappsBinding } from '@/renderer/hooks/useDappsMngr';
 import { IconWithChain } from '@/renderer/components/TokenWithChain';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 // import { hasSameOrigin } from '@/isomorphic/url';
+import { useOpenDapp } from '@/renderer/utils/react-router';
 import PoolItem from './PoolItem';
 
 const ProtocolItemWrapper = styled.div`
@@ -83,19 +84,18 @@ const ProtocolItem = ({
   onClickRelate(protocol: DisplayProtocol): void;
 }) => {
   const { protocolDappsBinding } = useProtocolDappsBinding();
+  const openDapp = useOpenDapp();
 
-  const hasBinded = useMemo(() => {
-    return protocolDappsBinding[protocol.id]?.length > 0;
-  }, []);
+  const { hasBinded, dappUrl } = useMemo(() => {
+    return {
+      hasBinded: protocolDappsBinding[protocol.id]?.length > 0,
+      dappUrl: protocolDappsBinding[protocol.id]?.[0],
+    };
+  }, [protocolDappsBinding, protocol.id]);
 
-  const handleClickProtocolName = () => {
-    if (!hasBinded) return;
-    const url = protocolDappsBinding[protocol.id][0];
-    window.rabbyDesktop.ipcRenderer.sendMessage(
-      '__internal_rpc:mainwindow:open-tab',
-      url
-    );
-  };
+  const handleClickProtocolName = useCallback(() => {
+    if (dappUrl) openDapp(dappUrl);
+  }, [dappUrl, openDapp]);
 
   return (
     <ProtocolItemWrapper>
