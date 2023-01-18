@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { Tooltip } from 'antd';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import Transactions from './Transactions';
 import IconSwap from '../../../../../assets/icons/home/swap.svg?rc';
@@ -45,6 +46,7 @@ const RightBar = () => {
   const actions = [
     {
       id: 'swap',
+      name: 'swap',
       icon: <IconSwap width="35px" height="35px" />,
       onClick: () => {
         showMainwinPopupview({ type: 'quick-swap' }, { openDevTools: false });
@@ -52,18 +54,23 @@ const RightBar = () => {
     },
     {
       id: 'send',
+      name: 'Send',
       icon: <IconSend width="35px" height="35px" />,
     },
     {
       id: 'receive',
+      name: 'Receive',
       icon: <IconReceive width="35px" height="35px" />,
     },
     {
       id: 'gas-topup',
+      name: 'Gas Top Up',
       icon: <IconGasTopup width="35px" height="35px" />,
     },
     {
       id: 'security',
+      name: 'Security',
+
       icon: <IconSecurity width="35px" height="35px" />,
     },
   ];
@@ -71,9 +78,11 @@ const RightBar = () => {
     <RightBarWrapper>
       <ActionList>
         {actions.map((action) => (
-          <li key={action.id} onClick={action.onClick}>
-            {action.icon}
-          </li>
+          <Tooltip title={action.name} key={action.id} mouseEnterDelay={0.2}>
+            <li key={action.id} onClick={action.onClick}>
+              {action.icon}
+            </li>
+          </Tooltip>
         ))}
       </ActionList>
       <Transactions />
