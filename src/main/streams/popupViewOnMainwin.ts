@@ -22,6 +22,9 @@ const viewsState: Record<
   'address-management': {
     visible: false,
   },
+  'quick-swap': {
+    visible: false,
+  },
   'dapps-management': {
     visible: false,
   },
@@ -161,15 +164,48 @@ const dappsManagementReady = onMainWindowReady().then(async (mainWin) => {
   return addressManagementPopup;
 });
 
+const quickSwapReady = onMainWindowReady().then(async (mainWin) => {
+  const mainWindow = mainWin.window;
+
+  const addressManagementPopup = createPopupView({});
+
+  mainWindow.addBrowserView(addressManagementPopup);
+
+  const onTargetWinUpdate = () => {
+    if (viewsState['quick-swap'].visible)
+      updateSubviewPos(mainWindow, addressManagementPopup);
+  };
+  mainWindow.on('show', onTargetWinUpdate);
+  mainWindow.on('move', onTargetWinUpdate);
+  mainWindow.on('resized', onTargetWinUpdate);
+  mainWindow.on('unmaximize', onTargetWinUpdate);
+  mainWindow.on('restore', onTargetWinUpdate);
+
+  await addressManagementPopup.webContents.loadURL(
+    `${RABBY_POPUP_GHOST_VIEW_URL}?view=quick-swap#/`
+  );
+
+  // debug-only
+  if (!IS_RUNTIME_PRODUCTION) {
+    // addressManagementPopup.webContents.openDevTools({ mode: 'detach' });
+  }
+
+  hidePopupView(addressManagementPopup);
+
+  return addressManagementPopup;
+});
+
 Promise.all([
   addAddressReady,
   addressManagementReady,
+  quickSwapReady,
   dappsManagementReady,
 ]).then((wins) => {
   valueToMainSubject('popupViewsOnMainwinReady', {
     addAddress: wins[0],
     addressManagement: wins[1],
-    dappsManagement: wins[2],
+    quickSwap: wins[2],
+    dappsManagement: wins[3],
   });
 });
 
@@ -177,7 +213,7 @@ onIpcMainEvent(
   '__internal_rpc:popupview-on-mainwin:toggle-show',
   async (_, payload) => {
     const mainWindow = (await onMainWindowReady()).window;
-    const { addAddress, addressManagement, dappsManagement } =
+    const { addAddress, addressManagement, quickSwap, dappsManagement } =
       await firstValueFrom(fromMainSubject('popupViewsOnMainwinReady'));
 
     const targetView =
@@ -185,6 +221,8 @@ onIpcMainEvent(
         ? addAddress
         : payload.type === 'address-management'
         ? addressManagement
+        : payload.type === 'quick-swap'
+        ? quickSwap
         : payload.type === 'dapps-management'
         ? dappsManagement
         : null;
