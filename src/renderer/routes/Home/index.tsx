@@ -17,7 +17,6 @@ import ChainList from './components/ChainList';
 import Curve from './components/Curve';
 import PortfolioView from './components/PortfolioView';
 import RightBar from './components/RightBar';
-import RightToolbar from './components/RightToolbar';
 
 const HomeBody = styled.div`
   display: flex;
@@ -333,9 +332,6 @@ const Home = () => {
         />
       </HomeWrapper>
       <RightBar />
-      <RightToolbarWrapper>
-        <RightToolbar />
-      </RightToolbarWrapper>
     </HomeBody>
   );
 };

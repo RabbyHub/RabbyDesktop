@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import Transactions from './Transactions';
 import IconSwap from '../../../../../assets/icons/home/swap.svg?rc';
 import IconSend from '../../../../../assets/icons/home/send.svg?rc';
@@ -45,6 +46,9 @@ const RightBar = () => {
     {
       id: 'swap',
       icon: <IconSwap width="35px" height="35px" />,
+      onClick: () => {
+        showMainwinPopupview({ type: 'quick-swap' }, { openDevTools: false });
+      },
     },
     {
       id: 'send',
@@ -67,7 +71,9 @@ const RightBar = () => {
     <RightBarWrapper>
       <ActionList>
         {actions.map((action) => (
-          <li key={action.id}>{action.icon}</li>
+          <li key={action.id} onClick={action.onClick}>
+            {action.icon}
+          </li>
         ))}
       </ActionList>
       <Transactions />
