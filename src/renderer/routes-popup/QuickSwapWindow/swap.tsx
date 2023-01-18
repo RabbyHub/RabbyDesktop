@@ -1,7 +1,13 @@
 import { memo, useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { CHAINS, CHAINS_ENUM, formatTokenAmount } from '@debank/common';
 
-import { useAsync, useAsyncFn, useDebounce, useToggle } from 'react-use';
+import {
+  useAsync,
+  useAsyncFn,
+  useDebounce,
+  useLocation,
+  useToggle,
+} from 'react-use';
 import clsx from 'clsx';
 import styled from 'styled-components';
 import BigNumber from 'bignumber.js';
@@ -172,11 +178,11 @@ export const Swap = ({
   const lastSelectedDex = swap.selectedDex;
   const lastSelectedChain = swap.selectedChain || CHAINS_ENUM.ETH;
   const { unlimitedAllowance = false } = swap;
-
+  const { search } = useLocation();
   const [searchObj] = useState<{
     payTokenId?: string;
     chain?: string;
-  }>(query2obj(window.location.search));
+  }>(query2obj(search || ''));
 
   const [refreshId, setRefreshId] = useState(0);
 
