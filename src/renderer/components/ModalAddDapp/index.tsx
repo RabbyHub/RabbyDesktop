@@ -1,12 +1,13 @@
 import React, { useCallback, useState } from 'react';
 import classnames from 'classnames';
-import { Input, Modal, ModalProps, Button, message, Form } from 'antd';
+import { Input, ModalProps, Button, message, Form } from 'antd';
 import { ExclamationCircleFilled } from '@ant-design/icons';
 
 import { useDapps } from 'renderer/hooks/useDappsMngr';
 import { makeSureDappAddedToConnectedSite } from '@/renderer/ipcRequest/connected-site';
 import { useNavigate } from 'react-router-dom';
 import { navigateToDappRoute } from '@/renderer/utils/react-router';
+import { Modal } from '../Modal/Modal';
 import styles from './index.module.less';
 import { isValidDappAlias } from '../../../isomorphic/dapp';
 import { IS_RUNTIME_PRODUCTION } from '../../../isomorphic/constants';
@@ -95,11 +96,11 @@ function useCheckedStep() {
   };
 }
 
-function AddDapp({
+export function AddDapp({
   onAddedDapp,
   ...modalProps
 }: ModalProps & {
-  onAddedDapp?: () => void;
+  onAddedDapp?: (origin: string) => void;
 }) {
   const [step, setStep] = useState<IStep>('add');
   const navigate = useNavigate();
@@ -152,7 +153,16 @@ function AddDapp({
   }, [checkUrl, setCheckError, setDappInfo]);
 
   return (
-    <>
+    <div className={styles.step}>
+      {step !== 'add' && (
+        <img
+          onClick={() => {
+            setStep('add');
+          }}
+          className={styles.backIcon}
+          src="rabby-internal://assets/icons/modal/back.svg"
+        />
+      )}
       {step === 'add' && (
         <Form className={styles.stepAdd} onFinish={doCheck}>
           <h3 className={styles.addTitle}>Enter or copy the Dapp URL</h3>
@@ -170,7 +180,7 @@ function AddDapp({
             ]}
           >
             <Input
-              className={styles.addUrlInput}
+              className={styles.input}
               value={addUrl}
               onChange={onChangeAddUrl}
               placeholder="https://somedapp.xyz"
@@ -182,7 +192,7 @@ function AddDapp({
             type="primary"
             htmlType="submit"
             disabled={!isValidAddUrl}
-            className={styles.addConfirmBtn}
+            className={styles.button}
           >
             Check
           </Button>
@@ -204,7 +214,7 @@ function AddDapp({
           <span className={styles.checkedDappUrl}>{dappInfo.origin}</span>
 
           <Input
-            className={styles.checkedInput}
+            className={styles.input}
             value={dappInfo.alias}
             onChange={onChangeDappAlias}
             placeholder="Please name the dapp"
@@ -212,11 +222,12 @@ function AddDapp({
           />
           <Button
             type="primary"
-            className={styles.checkedConfirmBtn}
+            className={styles.button}
             onClick={async () => {
               await makeSureDappAddedToConnectedSite(dappInfo);
               await updateDapp(dappInfo);
-              onAddedDapp?.();
+              // message.success('Added successfully');
+              onAddedDapp?.(dappInfo.origin);
             }}
             disabled={!isValidAlias}
           >
@@ -264,14 +275,14 @@ function AddDapp({
             onClick={(e) => {
               modalProps.onCancel?.(e);
             }}
-            className={styles.stepDuplicatedBtn}
+            className={styles.button}
             disabled
           >
             Confirm
           </Button>
         </div>
       )}
-    </>
+    </div>
   );
 }
 
@@ -280,12 +291,12 @@ export default function ModalAddDapp({
   ...modalProps
 }: React.PropsWithChildren<
   ModalProps & {
-    onAddedDapp?: () => void;
+    onAddedDapp?: (origin: string) => void;
   }
 >) {
   return (
     <Modal
-      width={800}
+      width={1000}
       centered
       {...modalProps}
       onCancel={(e) => {
@@ -293,10 +304,10 @@ export default function ModalAddDapp({
       }}
       title={null}
       footer={null}
-      closeIcon={<RCIconDappsModalClose />}
       className={classnames(styles.addModal, modalProps.className)}
-      wrapClassName={classnames('modal-dapp-mngr', modalProps.wrapClassName)}
+      wrapClassName={classnames(modalProps.wrapClassName)}
       destroyOnClose
+      onBack={() => {}}
     >
       <AddDapp onAddedDapp={onAddedDapp} {...modalProps} />
     </Modal>

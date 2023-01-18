@@ -141,6 +141,28 @@ export type RabbyXMethod = {
     },
     $ctx?: unknown
   ) => Promise<void>;
+  'walletController.requestKeyring': (
+    type: string,
+    methodName: string,
+    keyringId: number | null,
+    ...params: any[]
+  ) => any;
+  'walletController.connectHardware': ({
+    type,
+    hdPath,
+    needUnlock,
+    isWebHID,
+  }: {
+    type: string;
+    hdPath?: string | undefined;
+    needUnlock?: boolean | undefined;
+    isWebHID?: boolean | undefined;
+  }) => number | null;
+  'walletController.unlockHardwareAccount': (
+    keyring: string,
+    indexes: number[],
+    keyringId: number | null
+  ) => Account;
 
   'permissionService.addConnectedSite': (
     origin: string,

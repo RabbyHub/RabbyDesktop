@@ -9,8 +9,14 @@ type MainInternalsMessagePayload = {
     ];
     response: [];
   };
-  '__internal_main:dapps:pinnedListChanged': {
-    send: [pinnedList: IDapp['origin'][]];
+  '__internal_main:dapps:changed': {
+    send: [
+      {
+        dapps?: IDapp[];
+        pinnedList?: IDapp['origin'][];
+        unpinnedList?: IDapp['origin'][];
+      }
+    ];
     response: [];
   };
   '__internal_main:mainwindow:show': {

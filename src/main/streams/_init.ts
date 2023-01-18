@@ -99,6 +99,7 @@ const CONF = {
       addAddress: BrowserView;
       addressManagement: BrowserView;
       quickSwap: BrowserView;
+      dappsManagement: BrowserView;
     }>
   >,
 };

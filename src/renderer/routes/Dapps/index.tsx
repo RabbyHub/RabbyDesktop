@@ -1,16 +1,16 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
-import { CurrentAccountAndNewAccount } from '@/renderer/components/CurrentAccount';
-import { message } from 'antd';
+import { setDappsOrder } from '@/renderer/ipcRequest/dapps';
+import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { useCallback, useState } from 'react';
 
-import ModalAddDapp from '../../components/ModalAddDapp';
 import ModalDeleteDapp from '../../components/ModalDeleteDapp';
 import ModalRenameDapp from '../../components/ModalRenameDapp';
-import { useDapps } from '../../hooks/useDappsMngr';
+import { useTabedDapps } from '../../hooks/useDappsMngr';
 
 import { DAppBlock } from './components/DAppBlock';
 
 import { ReleaseNote } from './components/ReleaseNote';
+import { SortableList } from './components/SortableList';
 import './index.less';
 
 import style from './index.module.less';
@@ -21,9 +21,8 @@ type IOnOpDapp = (
 ) => void;
 
 export default function DApps() {
-  const { dapps, pinDapp, unpinDapp } = useDapps();
-
-  const [isAdding, setIsAdding] = useState(false);
+  const { pinDapp, unpinDapp, pinnedDapps, unpinnedDapps, openDapp } =
+    useTabedDapps();
 
   const [renamingDapp, setRenamingDapp] = useState<IDapp | null>(null);
   const [deletingDapp, setDeletingDapp] = useState<IDapp | null>(null);
@@ -56,6 +55,14 @@ export default function DApps() {
 
   return (
     <div className={style.page}>
+      <img
+        className={style.addDapp}
+        src="rabby-internal://assets/icons/internal-homepage/icon-dapps-add.svg"
+        alt=""
+        onClick={() => {
+          showMainwinPopupview({ type: 'dapps-management' });
+        }}
+      />
       <div className={style.container}>
         <header className={style.header}>
           <div className={style.desc}>
@@ -70,36 +77,46 @@ export default function DApps() {
         <main className={style.main}>
           <div className="dapps">
             <div className="dapp-matrix">
-              {dapps.map((dapp, idx) => {
-                return (
-                  <DAppBlock
-                    /* eslint-disable-next-line react/no-array-index-key */
-                    key={`${dapp.origin}-${dapp.alias}-${idx}`}
-                    dapp={dapp}
-                    onOpDapp={onClickDapp}
-                  />
-                );
-              })}
-              <DAppBlock
-                key="J_add"
-                onAdd={() => {
-                  setIsAdding(true);
+              <SortableList
+                data={pinnedDapps}
+                onChange={(v) => {
+                  setDappsOrder({
+                    pinnedList: v.map((item) => item.origin),
+                  });
+                }}
+                renderItem={(dapp) => {
+                  return (
+                    <DAppBlock
+                      onOpen={openDapp}
+                      key={dapp.origin}
+                      dapp={dapp}
+                      onOpDapp={onClickDapp}
+                    />
+                  );
+                }}
+              />
+              <SortableList
+                data={unpinnedDapps}
+                onChange={(v) => {
+                  setDappsOrder({
+                    unpinnedList: v.map((item) => item.origin),
+                  });
+                }}
+                renderItem={(dapp) => {
+                  return (
+                    <DAppBlock
+                      onOpen={openDapp}
+                      key={dapp.origin}
+                      dapp={dapp}
+                      onOpDapp={onClickDapp}
+                    />
+                  );
                 }}
               />
             </div>
           </div>
         </main>
 
-        {/* <Footer appVersion={appVersion} /> */}
-        <ModalAddDapp
-          destroyOnClose
-          open={isAdding}
-          onCancel={() => setIsAdding(false)}
-          onAddedDapp={() => {
-            message.success('Added successfully');
-            setIsAdding(false);
-          }}
-        />
         <ModalRenameDapp
           destroyOnClose
           open={!!renamingDapp}

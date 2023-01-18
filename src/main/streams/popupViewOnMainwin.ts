@@ -8,7 +8,7 @@ import {
 import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { fromMainSubject, valueToMainSubject } from './_init';
 import { createPopupView, hidePopupView } from '../utils/browser';
-import { onMainWindowReady } from '../utils/stream-helpers';
+import { getWebuiURLBase, onMainWindowReady } from '../utils/stream-helpers';
 
 const viewsState: Record<
   PopupViewOnMainwinInfo['type'],
@@ -23,6 +23,9 @@ const viewsState: Record<
     visible: false,
   },
   'quick-swap': {
+    visible: false,
+  },
+  'dapps-management': {
     visible: false,
   },
 };
@@ -86,7 +89,7 @@ const addAddressReady = onMainWindowReady().then(async (mainWin) => {
   mainWindow.on('restore', onTargetWinUpdate);
 
   await addAddressPopup.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}?view=add-address#/`
+    `${await getWebuiURLBase()}/popup-view.html?view=add-address#/`
   );
 
   // debug-only
@@ -117,7 +120,38 @@ const addressManagementReady = onMainWindowReady().then(async (mainWin) => {
   mainWindow.on('restore', onTargetWinUpdate);
 
   await addressManagementPopup.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}?view=address-management#/`
+    `${await getWebuiURLBase()}/popup-view.html?view=address-management#/`
+  );
+
+  // debug-only
+  if (!IS_RUNTIME_PRODUCTION) {
+    // addressManagementPopup.webContents.openDevTools({ mode: 'detach' });
+  }
+
+  hidePopupView(addressManagementPopup);
+
+  return addressManagementPopup;
+});
+
+const dappsManagementReady = onMainWindowReady().then(async (mainWin) => {
+  const mainWindow = mainWin.window;
+
+  const addressManagementPopup = createPopupView({});
+
+  mainWindow.addBrowserView(addressManagementPopup);
+
+  const onTargetWinUpdate = () => {
+    if (viewsState['dapps-management'].visible)
+      updateSubviewPos(mainWindow, addressManagementPopup);
+  };
+  mainWindow.on('show', onTargetWinUpdate);
+  mainWindow.on('move', onTargetWinUpdate);
+  mainWindow.on('resized', onTargetWinUpdate);
+  mainWindow.on('unmaximize', onTargetWinUpdate);
+  mainWindow.on('restore', onTargetWinUpdate);
+
+  await addressManagementPopup.webContents.loadURL(
+    `${RABBY_POPUP_GHOST_VIEW_URL}?view=dapps-management#/`
   );
 
   // debug-only
@@ -161,23 +195,26 @@ const quickSwapReady = onMainWindowReady().then(async (mainWin) => {
   return addressManagementPopup;
 });
 
-Promise.all([addAddressReady, addressManagementReady, quickSwapReady]).then(
-  (wins) => {
-    valueToMainSubject('popupViewsOnMainwinReady', {
-      addAddress: wins[0],
-      addressManagement: wins[1],
-      quickSwap: wins[2],
-    });
-  }
-);
+Promise.all([
+  addAddressReady,
+  addressManagementReady,
+  quickSwapReady,
+  dappsManagementReady,
+]).then((wins) => {
+  valueToMainSubject('popupViewsOnMainwinReady', {
+    addAddress: wins[0],
+    addressManagement: wins[1],
+    quickSwap: wins[2],
+    dappsManagement: wins[3],
+  });
+});
 
 onIpcMainEvent(
   '__internal_rpc:popupview-on-mainwin:toggle-show',
   async (_, payload) => {
     const mainWindow = (await onMainWindowReady()).window;
-    const { addAddress, addressManagement, quickSwap } = await firstValueFrom(
-      fromMainSubject('popupViewsOnMainwinReady')
-    );
+    const { addAddress, addressManagement, quickSwap, dappsManagement } =
+      await firstValueFrom(fromMainSubject('popupViewsOnMainwinReady'));
 
     const targetView =
       payload.type === 'add-address'
@@ -186,6 +223,8 @@ onIpcMainEvent(
         ? addressManagement
         : payload.type === 'quick-swap'
         ? quickSwap
+        : payload.type === 'dapps-management'
+        ? dappsManagement
         : null;
 
     if (!targetView) return;
@@ -194,15 +233,19 @@ onIpcMainEvent(
       viewsState[payload.type].visible = true;
       updateSubviewPos(mainWindow, targetView);
       targetView.webContents.focus();
-      sendToWebContents(
-        targetView.webContents,
-        '__internal_push:popupview-on-mainwin:on-visiblechange',
-        {
-          type: payload.type,
-          visible: true,
-          pageInfo: payload.pageInfo,
-        }
-      );
+
+      setTimeout(() => {
+        sendToWebContents(
+          targetView.webContents,
+          '__internal_push:popupview-on-mainwin:on-visiblechange',
+          {
+            type: payload.type,
+            visible: true,
+            pageInfo: payload.pageInfo,
+          }
+        );
+      }, 50);
+
       if (
         !IS_RUNTIME_PRODUCTION &&
         payload.openDevTools &&

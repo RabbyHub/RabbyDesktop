@@ -124,6 +124,13 @@ export function isEnableContentProtected() {
   return desktopAppStore.get('enableContentProtected') !== false;
 }
 
+export function getAppProxyConf() {
+  return {
+    proxyType: desktopAppStore.get('proxyType'),
+    proxySettings: desktopAppStore.get('proxySettings'),
+  };
+}
+
 handleIpcMainInvoke('get-desktopAppState', () => {
   desktopAppStore.set('firstStartApp', false);
 
