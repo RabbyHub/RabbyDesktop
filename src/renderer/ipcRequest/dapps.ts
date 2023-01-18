@@ -29,6 +29,10 @@ export async function detectDapps(dappUrl: string) {
     });
 }
 
+export async function addDapp(dapp: IDapp) {
+  return window.rabbyDesktop.ipcRenderer.invoke('dapps-post', dapp);
+}
+
 export async function putDapp(dapp: IDapp) {
   return window.rabbyDesktop.ipcRenderer.invoke('dapps-put', dapp);
 }

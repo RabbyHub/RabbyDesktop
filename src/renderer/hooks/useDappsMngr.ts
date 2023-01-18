@@ -79,6 +79,9 @@ export function useDapps() {
   const [pinnedList, setPinnedList] = useAtom(pinnedListAtomic);
   const [unpinnedList, setUnpinnedList] = useAtom(unpinnedListAtomic);
 
+  console.log('[feat] originDapps', originDapps);
+  console.log('[feat] pinnedList, unpinnedList', pinnedList, unpinnedList);
+
   // only fetch dapps once
   useEffect(() => {
     if (originDapps) return;
@@ -108,19 +111,9 @@ export function useDapps() {
     );
   }, [setPinnedList]);
 
-  const updateDapp = useCallback(
-    async (dapp: IDapp) => {
-      return putDapp(dapp);
-    },
-    [setDapps]
-  );
-
-  const renameDapp = useCallback(
-    async (dapp: IDapp, alias: string) => {
-      updateDapp({ ...dapp, alias });
-    },
-    [updateDapp]
-  );
+  const renameDapp = useCallback(async (dapp: IDapp, alias: string) => {
+    putDapp({ ...dapp, alias });
+  }, []);
 
   const removeDapp = useCallback(
     async (dapp: IDapp) => {
@@ -163,7 +156,6 @@ export function useDapps() {
     pinnedDapps,
     unpinnedDapps,
     detectDapps,
-    updateDapp,
     renameDapp,
     removeDapp,
     pinDapp,

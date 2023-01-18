@@ -333,6 +333,12 @@ type ChannelInvokePayload = {
       isPinned: boolean;
     };
   };
+  'dapps-post': {
+    send: [dapp: IDapp];
+    response: {
+      error?: string;
+    };
+  };
   'dapps-put': {
     send: [dapp: IDapp];
     response: void;
