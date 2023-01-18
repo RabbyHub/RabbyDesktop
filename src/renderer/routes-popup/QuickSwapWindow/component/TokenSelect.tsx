@@ -227,15 +227,24 @@ const StyledDrawer = styled(Drawer)`
   }
 
   .noResult {
-    font-size: 14px;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 21px;
     text-align: center;
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.4);
+    margin: 0 auto;
+    margin-top: 20px;
     margin-bottom: 12px;
   }
   .noResultTip {
-    font-size: 13px;
+    margin: 0 auto;
+
+    width: 283px;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 18px;
     text-align: center;
-    color: rgba(255, 255, 255, 0.6);
+    color: #707280;
   }
 `;
 
@@ -380,9 +389,11 @@ const TokenSelectDrawer = ({
         <div className="listBox">
           {!isLoading && isEmpty && (
             <Empty
-              image="rabby-internal://assets/icons/swap/nodata-tx.png"
+              image="rabby-internal://assets/icons/swap/no-result.svg"
               imageStyle={{
-                marginTop: 80,
+                width: 60,
+                height: 52,
+                margin: '173px auto 0 auto',
               }}
               description={
                 <>
