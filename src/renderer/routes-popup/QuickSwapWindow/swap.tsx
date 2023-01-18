@@ -675,6 +675,8 @@ export const Swap = ({
 
   const handleSwap = async () => {
     if (payAmount && payToken && !receiveToken) {
+      // TODO：等待设计确认 toast
+
       // message.error({
       //   className: 'rabbyx-tx-changed-tip',
       //   icon: (
@@ -689,6 +691,8 @@ export const Swap = ({
       return;
     }
     if (tipsDisplay?.level === 'danger') {
+      // TODO：等待设计确认
+
       // message.error({
       //   className: 'rabbyx-tx-changed-tip',
       //   icon: (
@@ -704,33 +708,35 @@ export const Swap = ({
     }
 
     if (canSubmit && lastSelectedDex) {
-      if (shouldTwoStepApprove) {
-        return confirm({
-          closable: true,
-          centered: true,
-          className: styles.approvalModal,
-          title: null,
-          icon: null,
-          closeIcon: <IconRcClose />,
+      // TODO：等待设计确认 两步授权弹窗
 
-          content: (
-            <>
-              <div className={styles.title}>
-                Sign 2 transactions to change allowance
-              </div>
-              <div className={styles.desc}>
-                Token USDT requires 2 transactions to change allowance. First
-                you would need to reset allowance to zero, and only then set new
-                allowance value.
-              </div>
-            </>
-          ),
-          okText: 'Proceed with two step approve',
-          onOk() {
-            gotoSwap();
-          },
-        });
-      }
+      // if (shouldTwoStepApprove) {
+      //   return confirm({
+      //     closable: true,
+      //     centered: true,
+      //     className: styles.approvalModal,
+      //     title: null,
+      //     icon: null,
+      //     closeIcon: <IconRcClose />,
+
+      //     content: (
+      //       <>
+      //         <div className={styles.title}>
+      //           Sign 2 transactions to change allowance
+      //         </div>
+      //         <div className={styles.desc}>
+      //           Token USDT requires 2 transactions to change allowance. First
+      //           you would need to reset allowance to zero, and only then set new
+      //           allowance value.
+      //         </div>
+      //       </>
+      //     ),
+      //     okText: 'Proceed with two step approve',
+      //     onOk() {
+      //       gotoSwap();
+      //     },
+      //   });
+      // }
       gotoSwap();
     }
   };
