@@ -22,7 +22,7 @@
   .dappFavicon {
     width: 80px;
     height: 80px;
-    border-radius: 50%;
+    border-radius: 12px;
     display: block;
     margin: 0 auto;
     margin-bottom: 16px;
@@ -36,7 +36,7 @@
     margin-bottom: 24px;
 
     text-align: center;
-    color: var(--color-title);
+    color: #fff;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -47,26 +47,55 @@
     position: relative;
 
     .aliasInput {
-      background: var(--color-bg);
-      border: 1px solid var(--color-primary);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 8px;
-      height: 100%;
-      padding: 18px 16px;
+      height: 64px;
+      padding: 16px 24px;
+      &:focus,
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+      }
+      color: #fff;
+      box-shadow: none !important;
 
-      font-weight: 500;
-      font-size: 16px;
-      color: var(--color-title);
-      height: 56px;
+      :global {
+        .ant-input-clear-icon {
+          color: #fff;
+        }
+      }
+    }
+    :global {
+      .ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled):hover {
+        border-color: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper,
+      .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper:hover {
+        border-color: #ff6f6f;
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .ant-form-item-explain-error {
+        color: #ff6f6f;
+      }
     }
     margin-bottom: 45px;
   }
 
-  .confirmBtn {
+  .button.button {
+    margin: auto auto 0 auto;
     width: 240px;
-    height: 56px;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 16px;
-    line-height: 19px;
+    height: 52px;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 18px;
+    display: block;
+    &:disabled {
+      background: #707280 !important;
+      border: none;
+      opacity: 1;
+    }
   }
 }

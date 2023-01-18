@@ -1,9 +1,11 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
-import { Dropdown, Menu } from 'antd';
+import { Divider, Dropdown, Menu } from 'antd';
 import React, { useRef } from 'react';
 
 import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
 import clsx from 'clsx';
+import { javascript } from 'webpack';
 import {
   RCIconDappsDelete,
   RCIconDappsEdit,
@@ -21,11 +23,13 @@ type IOnOpDapp = (
 export const DAppBlock = ({
   dapp,
   onAdd,
+  onOpen,
   onOpDapp,
 }: React.PropsWithoutRef<{
-  dapp?: IMergedDapp;
+  dapp?: IDappWithTabInfo;
   onAdd?: () => void;
   onOpDapp?: IOnOpDapp;
+  onOpen?: (dapp: IDappWithTabInfo) => void;
 }>) => {
   const ref = useRef<HTMLDivElement>(null);
   const navigateToDapp = useNavigateToDappRoute();
@@ -108,13 +112,14 @@ export const DAppBlock = ({
       }
     >
       <div className="dapp-block" ref={ref}>
-        <a
+        {dapp.tab && dapp.tab.status !== 'loading' ? (
+          <div className="dapp-indicator" />
+        ) : null}
+        <div
           className="anchor"
-          href={dapp.origin}
-          target="_blank"
-          rel="noreferrer"
-          onClick={() => {
-            navigateToDapp(dapp?.origin);
+          onClick={(e) => {
+            e.preventDefault();
+            onOpen?.(dapp);
           }}
         >
           <DappFavicon
@@ -126,7 +131,7 @@ export const DAppBlock = ({
             <h4 className="dapp-alias">{dapp.alias}</h4>
             <div className="dapp-url">{dapp.origin}</div>
           </div>
-        </a>
+        </div>
 
         <div
           className={clsx('menu-entry', dapp.isPinned && 'is-pinned')}

@@ -16,6 +16,7 @@ export async function fetchDapps() {
     return {
       dapps: event.dapps,
       pinnedList: event.pinnedList,
+      unpinnedList: event.unpinnedList,
     };
   });
 }
@@ -29,11 +30,7 @@ export async function detectDapps(dappUrl: string) {
 }
 
 export async function putDapp(dapp: IDapp) {
-  return window.rabbyDesktop.ipcRenderer
-    .invoke('dapps-put', dapp)
-    .then((event) => {
-      return event.dapps;
-    });
+  return window.rabbyDesktop.ipcRenderer.invoke('dapps-put', dapp);
 }
 
 export async function deleteDapp(dapp: IDapp) {
@@ -42,8 +39,6 @@ export async function deleteDapp(dapp: IDapp) {
     .then((event) => {
       if (event.error) {
         throw new Error(event.error);
-      } else {
-        return event.dapps;
       }
     });
 }
@@ -56,7 +51,51 @@ export async function toggleDappPinned(
 
   return window.rabbyDesktop.ipcRenderer
     .invoke('dapps-togglepin', dappOrigins, nextPinned)
+    .then(() => {});
+}
+
+export async function setDappsOrder(payload: {
+  pinnedList?: string[];
+  unpinnedList?: string[];
+}) {
+  return window.rabbyDesktop.ipcRenderer
+    .invoke('dapps-setOrder', payload)
     .then((event) => {
-      return event.pinnedList;
+      if (event.error) {
+        throw new Error(event.error);
+      }
+    });
+}
+
+export async function putProtocolDappsBinding(
+  protocolDappsMap: Record<string, IDapp['origin'][]>
+): Promise<void>;
+export async function putProtocolDappsBinding(
+  protocol: string,
+  dappOrigins: IDapp['origin'][]
+): Promise<void>;
+export async function putProtocolDappsBinding(...args: any[]): Promise<void> {
+  let map: Record<string, IDapp['origin'][]> = {};
+  if (typeof args[0] === 'object') {
+    map = { ...args[0] };
+  } else {
+    // eslint-disable-next-line prefer-destructuring
+    map[args[0]] = args[1];
+  }
+
+  return window.rabbyDesktop.ipcRenderer
+    .invoke('dapps-put-protocol-binding', map)
+    .then((event) => {
+      if (event.error) {
+        throw new Error(event.error);
+      }
+    });
+}
+
+export async function fetchProtocolDappsBinding() {
+  return window.rabbyDesktop.ipcRenderer
+    .invoke('dapps-fetch-protocol-binding')
+    .then((event) => {
+      return event.result;
     });
 }
