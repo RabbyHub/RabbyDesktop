@@ -155,7 +155,16 @@ export async function createRabbyxNotificationWindow({
     },
   });
 
-  RABBYX_WINDOWID_S.add(win.id);
+  const windowId = win.window.id;
+  // win.window.on('closed', () => {
+  //   console.log('[feat] destroyed', RABBYX_WINDOWID_S);
+  //   RABBYX_WINDOWID_S.delete(windowId);
+  //   toggleMaskViaOpenedRabbyxNotificationWindow();
+  // });
+
+  win.tabs.tabList[0]?._patchWindowClose();
+
+  RABBYX_WINDOWID_S.add(windowId);
   toggleMaskViaOpenedRabbyxNotificationWindow();
 
   return win.window as BrowserWindow;
@@ -201,16 +210,25 @@ onIpcMainEvent('__internal_rpc:browser-dev:openDevTools', (evt) => {
   }
 });
 
-onIpcMainEvent('__internal_webui-window-close', (_, winId, webContentsId) => {
-  const tabbedWindow = findByWindowId(winId);
-  const tabToClose = tabbedWindow?.tabs.tabList.find((tab) => {
-    if (tab.view && tab.view?.webContents.id === webContentsId) {
-      return true;
-    }
-    return false;
-  });
-  tabToClose?.destroy();
-});
+onIpcMainEvent(
+  '__internal_webui-window-close',
+  (evt, windowId, webContentsId) => {
+    const webContents = evt.sender;
+    const window = getWindowFromWebContents(webContents);
+    console.log('[feat] winId, webContentsId', window?.id, webContents.id);
+
+    if (!window) return;
+
+    const tabbedWindow = findByWindowId(window.id);
+    const tabToClose = tabbedWindow?.tabs.tabList.find((tab) => {
+      if (tab.view && tab.view?.webContents.id === webContents.id) {
+        return true;
+      }
+      return false;
+    });
+    tabToClose?.destroy();
+  }
+);
 
 onIpcMainEvent('__internal_rpc:mainwindow:open-tab', async (_, dappOrigin) => {
   const mainTabbedWin = await onMainWindowReady();
