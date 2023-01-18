@@ -52,9 +52,7 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
       <div className={styles.dockRight}>
         <span className={styles.addr}>{displayAddr}</span>
 
-        {balance && (
-          <span className={styles.balance}>${formatNumber(balance)}</span>
-        )}
+        <span className={styles.balance}>${formatNumber(balance || 0)}</span>
       </div>
     </div>
   );
