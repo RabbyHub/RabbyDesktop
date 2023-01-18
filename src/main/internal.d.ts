@@ -15,6 +15,7 @@ type MainInternalsMessagePayload = {
         dapps?: IDapp[];
         pinnedList?: IDapp['origin'][];
         unpinnedList?: IDapp['origin'][];
+        protocolDappsBinding?: Record<string, IDapp['origin']>;
       }
     ];
     response: [];
