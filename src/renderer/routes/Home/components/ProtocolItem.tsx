@@ -91,20 +91,29 @@ const ProtocolItem = ({
 
   const { hasBinded, bindUrl } = useMemo(() => {
     const arr = Object.values(protocolDappsBinding);
-    const t = arr.find((item) => item === protocol.site_url);
+    const t = arr.find((item) => item.siteUrl === protocol.site_url);
+
+    if (protocolDappsBinding[protocol.id]) {
+      return {
+        hasBinded: true,
+        bindUrl: protocolDappsBinding[protocol.id].origin,
+      };
+    }
 
     if (t) {
       return {
         hasBinded: true,
-        bindUrl: t,
+        bindUrl: t.origin,
       };
     }
 
     return {
       hasBinded: !!protocolDappsBinding[protocol.id],
-      bindUrl: protocolDappsBinding[protocol.id] || '',
+      bindUrl: protocolDappsBinding[protocol.id]
+        ? protocolDappsBinding[protocol.id].origin
+        : '',
     };
-  }, [protocolDappsBinding, protocol.id]);
+  }, [protocolDappsBinding, protocol]);
 
   const handleClickProtocolName = useCallback(() => {
     if (bindUrl) openDapp(bindUrl);
