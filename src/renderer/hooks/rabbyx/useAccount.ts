@@ -21,6 +21,11 @@ export function useCurrentAccount() {
       if (account?.address) {
         alianName = await getAliasNameByAddress(account.address);
       }
+      if (!('balance' in account)) {
+        (account as any).balance =
+          (await walletController.getAddressBalance(account?.address))
+            .total_usd_value ?? 0;
+      }
       setCurrentAccount((pre) => {
         return {
           ...pre,

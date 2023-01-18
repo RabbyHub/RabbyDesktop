@@ -13,6 +13,7 @@ import clsx from 'clsx';
 import React from 'react';
 import { useCopyToClipboard } from 'react-use';
 import styles from './AddressManagementDrawer.module.less';
+import { useAccountInfo } from './useAccountInfo';
 
 interface Props {
   account: IDisplayedAccountWithBalance;
@@ -22,6 +23,7 @@ interface Props {
 export const CurrentAccount: React.FC<Props> = ({ account, onClick }) => {
   const { whitelist, enable } = useWhitelist();
   const brandName = account.brandName as WALLET_BRAND_TYPES;
+  const accountInfo = useAccountInfo(account.type, account.address);
 
   const isInWhitelist = React.useMemo(() => {
     return enable && whitelist.some((e) => isSameAddress(e, account.address));
@@ -45,9 +47,13 @@ export const CurrentAccount: React.FC<Props> = ({ account, onClick }) => {
   );
   const [, copyToClipboard] = useCopyToClipboard();
 
-  const onCopy = React.useCallback(() => {
-    copyToClipboard(account.address);
-  }, [account.address, copyToClipboard]);
+  const onCopy = React.useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      copyToClipboard(account.address);
+    },
+    [account.address, copyToClipboard]
+  );
 
   return (
     <section onClick={onClick} className={styles.CurrentAccount}>
@@ -57,7 +63,9 @@ export const CurrentAccount: React.FC<Props> = ({ account, onClick }) => {
       <div className={styles.content}>
         <div className={clsx(styles.part, styles.partName)}>
           <div className={styles.name}>{account.alianName}</div>
-          {/* <div className={styles.index}>#2</div> */}
+          {accountInfo && (
+            <div className={styles.index}>#{accountInfo.index}</div>
+          )}
           {isInWhitelist && (
             <Tooltip
               overlayClassName="rectangle"
