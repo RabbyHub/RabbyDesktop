@@ -90,6 +90,16 @@ const ProtocolItem = ({
   const openDapp = useOpenDapp();
 
   const { hasBinded, bindUrl } = useMemo(() => {
+    const arr = Object.values(protocolDappsBinding);
+    const t = arr.find((item) => item === protocol.site_url);
+
+    if (t) {
+      return {
+        hasBinded: true,
+        bindUrl: t,
+      };
+    }
+
     return {
       hasBinded: !!protocolDappsBinding[protocol.id],
       bindUrl: protocolDappsBinding[protocol.id] || '',
