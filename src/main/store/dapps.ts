@@ -5,6 +5,7 @@ import Store from 'electron-store';
 import {
   fillUnpinnedList,
   formatDapp,
+  formatDapps,
   normalizeProtocolBindingValues,
 } from '@/isomorphic/dapp';
 import { arraify } from '@/isomorphic/array';
@@ -15,7 +16,7 @@ import {
 } from '../utils/ipcMainEvents';
 import { APP_NAME, PERSIS_STORE_PREFIX } from '../../isomorphic/constants';
 import { safeParse, shortStringify } from '../../isomorphic/json';
-import { canoicalizeDappUrl, isDappProtocol } from '../../isomorphic/url';
+import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { detectDapp } from '../utils/dapps';
 import { getBindLog } from '../utils/log';
 import { getAppProxyConf } from './desktopApp';
@@ -105,12 +106,12 @@ export const dappStore = new Store<{
   },
   migrations: {
     '>=0.3.0': (store) => {
-      const dapps = store.get('dapps') || [];
+      const dapps = formatDapps(store.get('dapps') || []);
 
       let dappsMap = store.get('dappsMap');
       if ((!dappsMap || !Object.keys(dappsMap).length) && dapps.length) {
         dappsMap = dapps.reduce((acc, dapp) => {
-          acc[dapp.origin] = dapp;
+          if (dapp.origin) acc[dapp.origin] = dapp;
           return acc;
         }, {} as Record<IDapp['origin'], IDapp>);
         store.set('dappsMap', dappsMap);
