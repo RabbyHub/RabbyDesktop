@@ -14,6 +14,9 @@ export const useAccountInfo = (type: string, address: string) => {
     index: number;
   }>();
   const isLedger = type === KEYRING_CLASS.HARDWARE.LEDGER;
+  const isTrezorLike =
+    type === KEYRING_CLASS.HARDWARE.TREZOR ||
+    type === KEYRING_CLASS.HARDWARE.ONEKEY;
 
   const fetchLedgerAccount = React.useCallback(() => {
     walletController
@@ -43,10 +46,7 @@ export const useAccountInfo = (type: string, address: string) => {
   useEffect(() => {
     if (isLedger) {
       fetchLedgerAccount();
-    } else if (
-      type === KEYRING_CLASS.HARDWARE.TREZOR ||
-      type === KEYRING_CLASS.HARDWARE.ONEKEY
-    ) {
+    } else if (isTrezorLike) {
       fetchTrezorLikeAccount();
     }
   }, [address]);
