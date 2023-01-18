@@ -154,6 +154,12 @@ export function getAllDapps() {
   return result;
 }
 
+export function getProtocolDappsBindings() {
+  const protocolDappsBinding = dappStore.get('protocolDappsBinding') || {};
+
+  return normalizeProtocolBindingValues(protocolDappsBinding);
+}
+
 export function findDappByOrigin(url: string, dapps = getAllDapps()) {
   const dappOrigin = canoicalizeDappUrl(url).origin;
   return dapps.find((item) => item.origin === dappOrigin) || null;
@@ -252,6 +258,14 @@ handleIpcMainInvoke('dapps-delete', (_, dappToDel: IDapp) => {
   }
 
   delete dappsMap[dappToDel.origin];
+  const protocolDappsBinding = getProtocolDappsBindings();
+  Object.entries(protocolDappsBinding).forEach((dapps) => {
+    const [protocol, dappOrigin] = dapps;
+    if (dappOrigin === dappToDel.origin) {
+      delete protocolDappsBinding[protocol];
+    }
+  });
+  dappStore.set('protocolDappsBinding', protocolDappsBinding);
 
   dappStore.set('dappsMap', dappsMap);
 
@@ -268,6 +282,7 @@ handleIpcMainInvoke('dapps-delete', (_, dappToDel: IDapp) => {
     dapps: getAllDapps(),
     pinnedList,
     unpinnedList,
+    protocolDappsBinding,
   });
 
   return {
@@ -366,15 +381,15 @@ handleIpcMainInvoke('dapps-setOrder', (_, { pinnedList, unpinnedList }) => {
 });
 
 handleIpcMainInvoke('dapps-fetch-protocol-binding', () => {
-  const protocolBindings = dappStore.get('protocolDappsBinding') || {};
+  const protocolBindings = getProtocolDappsBindings();
 
   return {
-    result: normalizeProtocolBindingValues(protocolBindings),
+    result: protocolBindings,
   };
 });
 
 handleIpcMainInvoke('dapps-put-protocol-binding', (_, pBindings) => {
-  const protocolBindings = dappStore.get('protocolDappsBinding') || {};
+  const protocolBindings = getProtocolDappsBindings();
   const dappOrigins = new Set(
     getAllDapps()
       .map((d) => d.origin)
@@ -406,6 +421,10 @@ handleIpcMainInvoke('dapps-put-protocol-binding', (_, pBindings) => {
 
   Object.assign(protocolBindings, pBindings);
   dappStore.set('protocolDappsBinding', protocolBindings);
+
+  emitIpcMainEvent('__internal_main:dapps:changed', {
+    protocolDappsBinding: protocolBindings,
+  });
 
   return {};
 });

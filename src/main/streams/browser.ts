@@ -46,12 +46,13 @@ onIpcMainEvent(
 
 onIpcMainInternalEvent(
   '__internal_main:dapps:changed',
-  async ({ dapps, pinnedList, unpinnedList }) => {
+  async ({ dapps, pinnedList, unpinnedList, protocolDappsBinding }) => {
     const mainContents = (await onMainWindowReady()).window.webContents;
     sendToWebContents(mainContents, '__internal_push:dapps:changed', {
       dapps,
       pinnedList,
       unpinnedList,
+      protocolDappsBinding,
     });
   }
 );
