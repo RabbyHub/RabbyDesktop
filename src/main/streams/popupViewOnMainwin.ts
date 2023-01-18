@@ -258,3 +258,21 @@ onIpcMainEvent(
     }
   }
 );
+
+onIpcMainEvent(
+  '__internal_rpc:rabbyx:on-session-broadcast',
+  async (_, payload) => {
+    const { addAddress, addressManagement, quickSwap, dappsManagement } =
+      await firstValueFrom(fromMainSubject('popupViewsOnMainwinReady'));
+    [addAddress, addressManagement, quickSwap, dappsManagement].forEach(
+      (view) => {
+        // forward to main window
+        sendToWebContents(
+          view.webContents,
+          '__internal_push:rabbyx:session-broadcast-forward-to-main',
+          payload
+        );
+      }
+    );
+  }
+);
