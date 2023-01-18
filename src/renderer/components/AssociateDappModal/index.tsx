@@ -72,9 +72,11 @@ const DappCardAdd = ({ onClick }: { onClick?: () => void }) => {
 };
 
 const AssociateDapp = ({
+  protocolId,
   url,
   onOk,
 }: {
+  protocolId: string;
   url: string;
   onOk?: (origin: string) => void;
 }) => {
@@ -110,7 +112,7 @@ const AssociateDapp = ({
   const handleConfirm = async () => {
     setLoading(true);
     try {
-      await bindingDappsToProtocol(url, [current]);
+      await bindingDappsToProtocol(protocolId, [current]);
       onOk?.(current);
     } catch (e: any) {
       message.error(e.message);
@@ -181,11 +183,13 @@ const AssociateDapp = ({
 export default function AssociateDappModal({
   onOk,
   url,
+  protocolId,
   ...modalProps
 }: React.PropsWithChildren<
   ModalProps & {
-    onOk?: (origin: string) => void;
+    protocolId: string;
     url: string;
+    onOk?: (origin: string) => void;
   }
 >) {
   return (
@@ -201,7 +205,7 @@ export default function AssociateDappModal({
       wrapClassName={classNames(modalProps.wrapClassName)}
       destroyOnClose
     >
-      <AssociateDapp url={url} onOk={onOk} />
+      <AssociateDapp protocolId={protocolId} url={url} onOk={onOk} />
     </Modal>
   );
 }

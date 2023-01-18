@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import classNames from 'classnames';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import { DisplayChainWithWhiteLogo } from '@/renderer/hooks/useCurrentBalance';
+import AssociateDappModal from '@/renderer/components/AssociateDappModal';
 import { formatNumber } from '@/renderer/utils/number';
 import TokenItemComp from './TokenItem';
 import ProtocolItem from './ProtocolItem';
@@ -127,6 +128,9 @@ const PortfolioView = ({
     setIsExpand(v: boolean): void;
   };
 }) => {
+  const [relateDappModalOpen, setRelateDappModalOpen] = useState(false);
+  const [relateDappUrl, setRelateDappUrl] = useState('');
+  const [relateDappId, setRelateDappId] = useState('');
   const assetArrowLeft = useMemo(() => {
     if (!selectChainServerId) return 65;
     const el: HTMLLIElement | null = document.querySelector(
@@ -138,6 +142,12 @@ const PortfolioView = ({
 
   const handleClickExpandToken = () => {
     tokenHidden.setIsExpand(!tokenHidden.isExpand);
+  };
+
+  const handleRelateDapp = (protocol: DisplayProtocol) => {
+    setRelateDappId(protocol.id);
+    setRelateDappUrl(protocol.site_url);
+    setRelateDappModalOpen(true);
   };
 
   return (
@@ -191,9 +201,16 @@ const PortfolioView = ({
             protocol={protocol}
             historyProtocol={historyProtocolMap[protocol.id]}
             protocolHistoryTokenPriceMap={protocolHistoryTokenPriceMap}
+            onClickRelate={handleRelateDapp}
           />
         ))}
       </div>
+      <AssociateDappModal
+        protocolId={relateDappId}
+        open={relateDappModalOpen}
+        url={relateDappUrl}
+        onCancel={() => setRelateDappModalOpen(false)}
+      />
     </PortfolioWrapper>
   );
 };

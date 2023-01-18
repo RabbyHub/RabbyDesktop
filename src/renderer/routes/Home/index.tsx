@@ -75,7 +75,7 @@ const HomeWrapper = styled.div`
       }
     }
     .balance {
-      font-weight: 590;
+      font-weight: 500;
       font-size: 46px;
       line-height: 55px;
     }

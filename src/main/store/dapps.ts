@@ -389,13 +389,6 @@ handleIpcMainInvoke('dapps-put-protocol-binding', (_, pBindings) => {
   let errItem: { error: string } | null = null;
 
   Object.keys(pBindings).some((pLink) => {
-    if (!isDappProtocol(pLink)) {
-      errItem = {
-        error: 'Invalid protocol link',
-      };
-      return true;
-    }
-
     return pBindings[pLink].some((dappOrigin: string) => {
       if (!dappOrigins.has(dappOrigin)) {
         errItem = {
