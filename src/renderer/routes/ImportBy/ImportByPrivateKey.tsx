@@ -14,15 +14,18 @@ interface FormData {
 
 const ImportByPrivateKey = () => {
   const nav = useNavigate();
+  const [loading, setLoading] = React.useState(false);
   const [form] = Form.useForm<FormData>();
   const { getAllAccountsToDisplay } = useAccountToDisplay();
   const { getHighlightedAddressesAsync } = useAddressManagement();
   const onNext = React.useCallback(
     async ({ privateKey }: FormData) => {
+      setLoading(true);
       try {
         const data = await walletController.importPrivateKey(privateKey);
         await getHighlightedAddressesAsync();
         await getAllAccountsToDisplay();
+        setLoading(false);
         nav('/welcome/import/successful', {
           state: {
             accounts: data,
@@ -73,7 +76,9 @@ const ImportByPrivateKey = () => {
         </div>
 
         <Form.Item>
-          <BlockButton htmlType="submit">Next</BlockButton>
+          <BlockButton loading={loading} htmlType="submit">
+            Next
+          </BlockButton>
         </Form.Item>
       </Form>
     </ImportView>

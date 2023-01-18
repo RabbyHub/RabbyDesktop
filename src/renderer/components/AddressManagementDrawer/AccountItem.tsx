@@ -14,6 +14,7 @@ import clsx from 'clsx';
 import React from 'react';
 import { useCopyToClipboard } from 'react-use';
 import styles from './AddressManagementDrawer.module.less';
+import { useAccountInfo } from './useAccountInfo';
 
 interface Props {
   account: IDisplayedAccountWithBalance;
@@ -37,6 +38,7 @@ export const AccountItem: React.FC<Props> = ({
   const { whitelist, enable } = useWhitelist();
   const { toggleHighlightedAddressAsync, highlightedAddresses } =
     useAddressManagement();
+  const accountInfo = useAccountInfo(account.type, account.address);
 
   const isInWhitelist = React.useMemo(() => {
     return enable && whitelist.some((e) => isSameAddress(e, account.address));
@@ -91,7 +93,9 @@ export const AccountItem: React.FC<Props> = ({
           <div className={styles.content}>
             <div className={clsx(styles.part, styles.partName)}>
               <div className={styles.name}>{account.alianName}</div>
-              {/* <div className={styles.index}>#2</div> */}
+              {accountInfo && (
+                <div className={styles.index}>#{accountInfo.index}</div>
+              )}
               {isInWhitelist && (
                 <Tooltip
                   overlayClassName="rectangle"
