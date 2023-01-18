@@ -143,9 +143,6 @@ export function useDapps() {
   }, [originDapps, pinnedList, unpinnedList]);
   /* eslint-enable @typescript-eslint/no-shadow */
 
-  console.debug('[debug] pinnedList, unpinnedList', pinnedList, unpinnedList);
-  console.debug('[debug] mergeDapps', mergeDapps);
-
   return {
     dapps: mergeDapps,
     pinnedList,

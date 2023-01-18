@@ -20,8 +20,6 @@ const QuickSwap = () => {
   const [hide, setHide] = useState(false);
   const { localVisible, pageInfo } = usePopupViewInfo('quick-swap');
 
-  console.debug('[feat] pageInfo?.state', pageInfo?.state);
-
   const [, cancel, reset] = useTimeoutFn(() => {
     window.location.reload();
   }, RESET_TIMEOUT);
