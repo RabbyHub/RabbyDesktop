@@ -2,7 +2,12 @@
 
 import { app } from 'electron';
 import Store from 'electron-store';
-import { fillUnpinnedList, formatDapp } from '@/isomorphic/dapp';
+import {
+  fillUnpinnedList,
+  formatDapp,
+  normalizeProtocolBindingValues,
+} from '@/isomorphic/dapp';
+import { arraify } from '@/isomorphic/array';
 import {
   emitIpcMainEvent,
   handleIpcMainInvoke,
@@ -50,7 +55,7 @@ export const dappStore = new Store<{
       type: 'object',
       patternProperties: {
         '^https?://.+$': {
-          type: 'array',
+          type: ['array', 'string'],
           items: {
             type: 'string',
           },
@@ -223,25 +228,15 @@ handleIpcMainInvoke('dapps-fetch', () => {
 handleIpcMainInvoke('dapps-put', (_, dapp: IDapp) => {
   // TODO: is there mutex?
   const dappsMap = dappStore.get('dappsMap');
-  const pinnedList = dappStore.get('pinnedList');
-  const unpinnedList = dappStore.get('unpinnedList');
 
-  dappsMap[dapp.origin] = dapp;
+  dappsMap[dapp.origin] = {
+    ...dappsMap[dapp.origin],
+    ...dapp,
+  };
   dappStore.set('dappsMap', dappsMap);
-
-  const pinnedIdx = pinnedList.indexOf(dapp.origin);
-  if (pinnedIdx > -1) {
-    pinnedList.splice(pinnedIdx, 1);
-    dappStore.set('pinnedList', pinnedList);
-  }
-
-  unpinnedList.push(dapp.origin);
-  dappStore.set('unpinnedList', unpinnedList);
 
   emitIpcMainEvent('__internal_main:dapps:changed', {
     dapps: getAllDapps(),
-    pinnedList,
-    unpinnedList,
   });
 });
 
@@ -374,7 +369,7 @@ handleIpcMainInvoke('dapps-fetch-protocol-binding', () => {
   const protocolBindings = dappStore.get('protocolDappsBinding') || {};
 
   return {
-    result: protocolBindings,
+    result: normalizeProtocolBindingValues(protocolBindings),
   };
 });
 
@@ -389,7 +384,14 @@ handleIpcMainInvoke('dapps-put-protocol-binding', (_, pBindings) => {
   let errItem: { error: string } | null = null;
 
   Object.keys(pBindings).some((pLink) => {
-    return pBindings[pLink].some((dappOrigin: string) => {
+    // if (!isDappProtocol(pLink)) {
+    //   errItem = {
+    //     error: 'Invalid protocol link',
+    //   };
+    //   return true;
+    // }
+
+    return arraify(pBindings[pLink]).some((dappOrigin: string) => {
       if (!dappOrigins.has(dappOrigin)) {
         errItem = {
           error: `Invalid dapp origin for protocol binding ${dappOrigin}`,

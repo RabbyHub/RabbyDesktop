@@ -107,3 +107,21 @@ export function sortDappsBasedPinned(
     unpinnedDapps,
   };
 }
+
+export function normalizeProtocolBindingValues(
+  protocolBindings: Record<string, IDapp['origin'] | IDapp['origin'][]>
+) {
+  return Object.entries(protocolBindings).reduce((acc, [key, val]) => {
+    if (Array.isArray(val)) {
+      if (val[0]) {
+        // eslint-disable-next-line prefer-destructuring
+        acc[key] = val[0];
+      } else {
+        delete acc[key];
+      }
+    } else {
+      acc[key] = val;
+    }
+    return acc;
+  }, {} as Record<string, IDapp['origin']>);
+}

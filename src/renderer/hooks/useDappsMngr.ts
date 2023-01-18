@@ -35,7 +35,7 @@ const unpinnedListAtomic = atom([] as IDapp['origin'][]);
 //   });
 // }
 
-const protocolDappsBindingAtom = atom({} as Record<string, IDapp['origin'][]>);
+const protocolDappsBindingAtom = atom({} as Record<string, IDapp['origin']>);
 export function useProtocolDappsBinding() {
   const [protocolDappsBinding, setProtocolDappsBinding] = useAtom(
     protocolDappsBindingAtom
@@ -60,7 +60,7 @@ export function useProtocolDappsBinding() {
   }, [fetchBindings]);
 
   const bindingDappsToProtocol = useCallback(
-    async (protocol: string, dappOrigins: IDapp['origin'][]) => {
+    async (protocol: string, dappOrigins: IDapp['origin']) => {
       return putProtocolDappsBinding(protocol, dappOrigins).then(() => {
         fetchBindings();
       });
