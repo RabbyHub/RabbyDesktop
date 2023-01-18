@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import styled from 'styled-components';
 import classNames from 'classnames';
+import { flatten } from 'lodash';
 import { useProtocolDappsBinding } from '@/renderer/hooks/useDappsMngr';
 import { IconWithChain } from '@/renderer/components/TokenWithChain';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
@@ -51,6 +52,9 @@ const ProtocolItemWrapper = styled.div`
         cursor: pointer;
         margin-left: 2px;
       }
+      .icon-relate {
+        margin-left: 3px;
+      }
     }
     &.has-bind {
       .protocol-name {
@@ -84,9 +88,20 @@ const ProtocolItem = ({
 }) => {
   const { protocolDappsBinding } = useProtocolDappsBinding();
 
-  const hasBinded = useMemo(() => {
-    return protocolDappsBinding[protocol.id]?.length > 0;
-  }, []);
+  const { hasBinded, bindUrl } = useMemo(() => {
+    const arr = flatten(Object.values(protocolDappsBinding));
+    const t = arr.find((item) => item === protocol.site_url);
+    if (t) {
+      return {
+        hasBinded: true,
+        bindUrl: t,
+      };
+    }
+    return {
+      hasBinded: protocolDappsBinding[protocol.id]?.length > 0,
+      bindUrl: protocolDappsBinding[protocol.id],
+    };
+  }, [protocol, protocolDappsBinding]);
 
   const handleClickProtocolName = () => {
     if (!hasBinded) return;
@@ -123,15 +138,21 @@ const ProtocolItem = ({
         )}
         {hasBinded && (
           <div className="protocol-bind">
-            <span className="protocol-dapp">
-              {protocolDappsBinding[protocol.id]}
-            </span>
-            <img
-              src="rabby-internal://assets/icons/home/bind-edit.svg"
-              alt=""
-              className="icon-edit"
-              onClick={() => onClickRelate(protocol)}
-            />
+            <span className="protocol-dapp">{bindUrl}</span>
+            {protocolDappsBinding[protocol.id] ? (
+              <img
+                src="rabby-internal://assets/icons/home/bind-edit.svg"
+                alt=""
+                className="icon-edit"
+                onClick={() => onClickRelate(protocol)}
+              />
+            ) : (
+              <img
+                src="rabby-internal://assets/icons/home/dapp-relate.svg"
+                className="icon-relate"
+                onClick={() => onClickRelate(protocol)}
+              />
+            )}
           </div>
         )}
       </div>
