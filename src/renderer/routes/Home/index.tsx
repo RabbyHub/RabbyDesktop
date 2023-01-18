@@ -17,6 +17,7 @@ import ChainList from './components/ChainList';
 import Curve from './components/Curve';
 import PortfolioView from './components/PortfolioView';
 import RightBar from './components/RightBar';
+import RightToolbar from './components/RightToolbar';
 
 const HomeBody = styled.div`
   display: flex;
@@ -80,6 +81,15 @@ const HomeWrapper = styled.div`
       line-height: 55px;
     }
   }
+`;
+
+const RightToolbarWrapper = styled.div`
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  position: absolute;
+  top: 50px;
+  right: 0;
 `;
 
 const calcFilterPrice = (tokens: { usd_value?: number }[]) => {
@@ -323,6 +333,9 @@ const Home = () => {
         />
       </HomeWrapper>
       <RightBar />
+      <RightToolbarWrapper>
+        <RightToolbar />
+      </RightToolbarWrapper>
     </HomeBody>
   );
 };
