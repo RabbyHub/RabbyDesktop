@@ -176,7 +176,7 @@ const StyledDrawer = styled(Drawer)`
   }
 
   .scrollContainer {
-    overflow: scroll;
+    overflow: auto;
     margin: 0 -10px;
     padding: 0 10px;
     padding-bottom: 20px;
