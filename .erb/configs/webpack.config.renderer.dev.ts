@@ -8,11 +8,12 @@ import { merge } from 'webpack-merge';
 import { execSync, spawn } from 'child_process';
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
+import SvgSpriteLoaderPlugin from 'svg-sprite-loader/plugin';
 
 import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
-import { getDevStyleLoaders, getWebpackAliases } from './common';
+import { getDevStyleLoaders, getSvgSpriteLoaders, getWebpackAliases } from './common';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -105,8 +106,9 @@ const configuration: webpack.Configuration = {
           },
         ],
       },
+      getSvgSpriteLoaders(),
       {
-        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        test: /\.(png|jpg|jpeg|gif)$/i,
         type: 'asset/resource',
         resourceQuery: { not: [/rc/] },
       },
@@ -139,6 +141,10 @@ const configuration: webpack.Configuration = {
      */
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'development',
+    }),
+
+    new SvgSpriteLoaderPlugin({
+      plainSprite: true
     }),
 
     new webpack.LoaderOptionsPlugin({

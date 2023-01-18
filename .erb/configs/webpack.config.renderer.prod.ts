@@ -11,11 +11,13 @@ import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import { merge } from 'webpack-merge';
 import TerserPlugin from 'terser-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
+import SvgSpriteLoaderPlugin from 'svg-sprite-loader/plugin';
+
 import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
 import deleteSourceMaps from '../scripts/delete-source-maps';
-import { getProdStyleLoaders, getWebpackAliases } from './common';
+import { getProdStyleLoaders, getSvgSpriteLoaders, getWebpackAliases } from './common';
 
 checkNodeEnv('production');
 deleteSourceMaps();
@@ -71,9 +73,10 @@ const configuration: webpack.Configuration = {
           },
         ],
       },
+      getSvgSpriteLoaders(),
       // Images
       {
-        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        test: /\.(png|jpg|jpeg|gif)$/i,
         type: 'asset/resource',
         resourceQuery: { not: [/rc/] },
       },
@@ -103,6 +106,10 @@ const configuration: webpack.Configuration = {
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'production',
       DEBUG_PROD: false,
+    }),
+
+    new SvgSpriteLoaderPlugin({
+      plainSprite: true
     }),
 
     new MiniCssExtractPlugin({

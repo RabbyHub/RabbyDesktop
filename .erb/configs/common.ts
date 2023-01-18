@@ -1,6 +1,33 @@
 import path from 'path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
+import webpackPaths from './webpack.paths';
+
+export function getSvgSpriteLoaders() {
+  return {
+    test: /\.svg$/,
+    issuer: /\.[jt]sx?$/,
+    loader: 'svg-sprite-loader',
+    resourceQuery: { not: [/rc/] },
+    // include: [
+    // ],
+    options: {
+      extract: true,
+      symbolId: (filePath: string) => {
+        const fname = path.dirname(filePath).replace(/\\/g, '/');
+        let baseName = path.basename(filePath, '.svg');
+        if (baseName.indexOf(process.platform) === 0) {
+          baseName = baseName.slice(process.platform.length);
+        }
+        return `${fname.split('/').pop()}#${baseName}`;
+      },
+      spriteFilename: 'desktop.sp.svg',
+      outputPath: './assets/generated/',
+      publicPath: 'rabby-internal://local/assets/generated/'
+    }
+  };
+}
+
 export function getDevStyleLoaders () {
   return [
     {
