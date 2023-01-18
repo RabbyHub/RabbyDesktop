@@ -1,13 +1,25 @@
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-
+import useCurrentBalance from '@/renderer/hooks/useCurrentBalance';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
-import { splitNumberByStep } from '@/renderer/utils/number';
+import { formatNumber } from '@/renderer/utils/number';
+import {
+  KEYRING_ICONS_WHITE,
+  WALLET_BRAND_CONTENT,
+} from '@/renderer/utils/constant';
 import clsx from 'clsx';
 import { useMemo } from 'react';
 import styles from './index.module.less';
 
 export const CurrentAccount = ({ className }: { className?: string }) => {
   const { currentAccount } = useCurrentAccount();
+  const [balance] = useCurrentBalance(currentAccount?.address);
+  const addressTypeIcon = useMemo(() => {
+    if (!currentAccount?.type) return '';
+    return (
+      KEYRING_ICONS_WHITE[currentAccount.type] ||
+      WALLET_BRAND_CONTENT?.[currentAccount.brandName]?.image
+    );
+  }, [currentAccount]);
   const displayAddr = useMemo(
     () =>
       currentAccount?.address
@@ -19,11 +31,6 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
     [currentAccount?.address]
   );
 
-  const balance = useMemo(() => {
-    return currentAccount?.balance
-      ? splitNumberByStep(currentAccount?.balance.toFixed(2))
-      : undefined;
-  }, [currentAccount?.balance]);
   if (!currentAccount?.alianName) {
     return null;
   }
@@ -39,17 +46,15 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
       }}
     >
       <div className={styles.content}>
-        <img
-          className={styles.logo}
-          src="rabby-internal://assets/icons/wallet/private-key.svg"
-          alt="key"
-        />
+        <img className={styles.logo} src={addressTypeIcon} alt="key" />
         <span className={styles.aliasName}>{currentAccount?.alianName}</span>
       </div>
       <div className={styles.dockRight}>
         <span className={styles.addr}>{displayAddr}</span>
 
-        {balance && <span className={styles.balance}>${balance}</span>}
+        {balance && (
+          <span className={styles.balance}>${formatNumber(balance)}</span>
+        )}
       </div>
     </div>
   );
