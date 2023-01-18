@@ -7,11 +7,11 @@ import { useDapps } from 'renderer/hooks/useDappsMngr';
 import { makeSureDappAddedToConnectedSite } from '@/renderer/ipcRequest/connected-site';
 import { useNavigate } from 'react-router-dom';
 import { navigateToDappRoute } from '@/renderer/utils/react-router';
+import { addDapp } from '@/renderer/ipcRequest/dapps';
 import { Modal } from '../Modal/Modal';
 import styles from './index.module.less';
 import { isValidDappAlias } from '../../../isomorphic/dapp';
 import { IS_RUNTIME_PRODUCTION } from '../../../isomorphic/constants';
-import { RCIconDappsModalClose } from '../../../../assets/icons/internal-homepage';
 import { DappFavicon } from '../DappFavicon';
 
 type IStep = 'add' | 'checked' | 'duplicated';
@@ -120,8 +120,6 @@ export function AddDapp({
 
   const [duplicatedDapp, setDuplicatedDapp] = useState<IDapp | null>(null);
 
-  const { updateDapp } = useDapps();
-
   const doCheck = useCallback(async () => {
     setCheckError(null);
 
@@ -225,7 +223,7 @@ export function AddDapp({
             className={styles.button}
             onClick={async () => {
               await makeSureDappAddedToConnectedSite(dappInfo);
-              await updateDapp(dappInfo);
+              await addDapp(dappInfo);
               // message.success('Added successfully');
               onAddedDapp?.(dappInfo.origin);
             }}
