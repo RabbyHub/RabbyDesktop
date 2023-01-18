@@ -38,10 +38,11 @@ const ProtocolItemWrapper = styled.div`
       width: 14px;
     }
     .protocol-bind {
-      display: flex;
+      display: none;
       width: 14px;
       align-items: center;
       .protocol-dapp {
+        white-space: nowrap;
         margin-left: 12px;
         font-weight: 400;
         font-size: 12px;
@@ -63,6 +64,11 @@ const ProtocolItemWrapper = styled.div`
           color: #8697ff;
           text-decoration: underline;
         }
+      }
+    }
+    &:hover {
+      .protocol-bind {
+        display: flex;
       }
     }
   }
@@ -98,6 +104,10 @@ const ProtocolItem = ({
         hasBinded: true,
         bindUrl: protocolDappsBinding[protocol.id].origin,
       };
+    }
+
+    if (protocolDappsBinding[protocol.id]) {
+      return { hasBinded: true, bindUrl: protocolDappsBinding[protocol.id] };
     }
 
     if (t) {
