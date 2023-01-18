@@ -1,13 +1,7 @@
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { CHAINS, CHAINS_ENUM, formatTokenAmount } from '@debank/common';
 
-import {
-  useAsync,
-  useAsyncFn,
-  useCss,
-  useDebounce,
-  useToggle,
-} from 'react-use';
+import { useAsync, useAsyncFn, useDebounce, useToggle } from 'react-use';
 import clsx from 'clsx';
 import styled from 'styled-components';
 import BigNumber from 'bignumber.js';
@@ -175,10 +169,9 @@ export const Swap = ({
   const userAddress = currentAccount?.address || '';
   const swapState = useSwap();
   const { swap } = swapState;
-  const oDexId = swap.selectedDex;
-  const oChain = swap.selectedChain || CHAINS_ENUM.ETH;
+  const lastSelectedDex = swap.selectedDex;
+  const lastSelectedChain = swap.selectedChain || CHAINS_ENUM.ETH;
   const { unlimitedAllowance = false } = swap;
-  const dispatch = swapState;
 
   const [searchObj] = useState<{
     payTokenId?: string;
@@ -187,15 +180,15 @@ export const Swap = ({
 
   const [refreshId, setRefreshId] = useState(0);
 
-  const [dexId, setDexId] = useState(() => oDexId);
+  const [dexId, setDexId] = useState(() => lastSelectedDex);
 
   const setUnlimited = (bool: boolean) => {
-    dispatch.setUnlimitedAllowance(bool);
+    swapState.setUnlimitedAllowance(bool);
   };
 
   const [visible, toggleVisible] = useToggle(false);
 
-  const [chain, setChain] = useState(oChain);
+  const [chain, setChain] = useState(lastSelectedChain);
 
   const [payAmount, setAmount] = useState('');
   const [feeRate, setFeeRate] = useState<FeeProps['fee']>('0.3');
@@ -209,20 +202,28 @@ export const Swap = ({
     undefined
   );
 
+  const saveSelectedChain = useCallback(
+    (v: CHAINS_ENUM) => {
+      setChain(v);
+      swapState.setLastSelectedSwapChain(v);
+    },
+    [swapState?.setLastSelectedSwapChain]
+  );
+
   useMemo(() => {
     if (searchObj.chain && searchObj.payTokenId) {
       const target = Object.values(CHAINS).find(
         (item) => item.serverId === searchObj.chain
       );
       if (target) {
-        setChain(target?.enum);
+        saveSelectedChain(target?.enum);
         setPayToken({
           ...getChainDefaultToken(target?.enum),
           id: searchObj.payTokenId,
         });
       }
     }
-  }, [searchObj?.chain, searchObj?.payTokenId]);
+  }, [searchObj.chain, searchObj.payTokenId, saveSelectedChain]);
 
   const payTokenIsNativeToken = useMemo(
     () => payToken?.id === CHAINS[chain].nativeTokenAddress,
@@ -239,7 +240,7 @@ export const Swap = ({
       const res =
         !!wrapTokens.find((token) => isSameAddress(payToken?.id, token)) &&
         !!wrapTokens.find((token) => isSameAddress(receiveToken?.id, token));
-      setDexId(res ? DEX_ENUM.WRAPTOKEN : oDexId);
+      setDexId(res ? DEX_ENUM.WRAPTOKEN : lastSelectedDex);
       return [
         res,
         // @ts-expect-error
@@ -248,24 +249,24 @@ export const Swap = ({
           : receiveToken.symbol,
       ];
     }
-    setDexId(oDexId);
+    setDexId(lastSelectedDex);
     return [false, ''];
   }, [
     payToken?.id,
     payToken?.symbol,
     receiveToken?.id,
     receiveToken?.symbol,
-    oDexId,
+    lastSelectedDex,
     chain,
   ]);
 
   const [logo, name] = useMemo(() => {
-    if (oDexId) {
+    if (lastSelectedDex) {
       // @ts-expect-error
-      return [DEX[oDexId].logo, DEX[oDexId].name];
+      return [DEX[lastSelectedDex].logo, DEX[lastSelectedDex].name];
     }
     return ['', ''];
-  }, [oDexId]);
+  }, [lastSelectedDex]);
 
   const { value: gasMarket } = useAsync(async () => {
     return walletOpenapi.gasMarket(CHAINS[chain].serverId);
@@ -273,7 +274,7 @@ export const Swap = ({
 
   const { value: nativeToken, loading: nativeTokenLoading } =
     useAsync(async () => {
-      if (chain) {
+      if (chain && userAddress) {
         const t = await walletOpenapi.getToken(
           userAddress,
           CHAINS[chain].serverId,
@@ -286,7 +287,7 @@ export const Swap = ({
     }, [userAddress, chain]);
 
   const { loading: payTokenLoading } = useAsync(async () => {
-    if (payToken?.id && chain && payToken?.time_at === 0) {
+    if (userAddress && payToken?.id && chain && payToken?.time_at === 0) {
       const t = await walletOpenapi.getToken(
         userAddress,
         CHAINS[chain].serverId,
@@ -473,13 +474,12 @@ export const Swap = ({
   };
 
   const handleChain = (c: CHAINS_ENUM) => {
-    setChain(c);
-    dispatch.setLastSelectedSwapChain(c);
+    saveSelectedChain(c);
     resetSwapTokens(c);
   };
 
   const onChainChanged = async () => {
-    const gasCache = await dispatch.getLastTimeGasSelection(chain);
+    const gasCache = await swapState.getSwapGasCache(chain);
     setGasLevel(
       gasCache
         ? {
@@ -508,6 +508,7 @@ export const Swap = ({
   const switchToken = () => {
     setPayToken(receiveToken);
     setReceiveToken(payToken);
+    fetchQuote();
   };
 
   const canSubmit =
@@ -619,7 +620,7 @@ export const Swap = ({
         (item) => item.level === gasLevel.level
       )!.price;
     }
-    await dispatch.updateSwapGasCache(chain, {
+    await swapState.updateSwapGasCache(chain, {
       gasPrice: price,
       gasLevel: gasLevel.level,
       lastTimeSelect: gasLevel.level === 'custom' ? 'gasPrice' : 'gasLevel',
@@ -627,7 +628,7 @@ export const Swap = ({
   };
 
   const gotoSwap = async () => {
-    if (canSubmit && oDexId) {
+    if (canSubmit && lastSelectedDex) {
       let price = 0;
       if (gasLevel.level === 'custom') {
         price = gasLevel.price;
@@ -644,7 +645,7 @@ export const Swap = ({
             quote: quoteInfo,
             needApprove: !tokenApproved,
             // @ts-expect-error
-            spender: DEX_SPENDER_WHITELIST[oDexId][chain],
+            spender: DEX_SPENDER_WHITELIST[lastSelectedDex][chain],
             pay_token_id: payToken.id,
             gasPrice: price,
             unlimited: !!unlimitedAllowance,
@@ -696,7 +697,7 @@ export const Swap = ({
       return;
     }
 
-    if (canSubmit && oDexId) {
+    if (canSubmit && lastSelectedDex) {
       if (shouldTwoStepApprove) {
         return confirm({
           closable: true,
@@ -750,23 +751,28 @@ export const Swap = ({
   }, [isWrapToken, isStableCoin]);
 
   useEffect(() => {
-    if (dexId !== oDexId && dexId !== DEX_ENUM.WRAPTOKEN) {
-      setChain(CHAINS_ENUM.ETH);
+    if (dexId !== lastSelectedDex && dexId !== DEX_ENUM.WRAPTOKEN) {
+      saveSelectedChain(CHAINS_ENUM.ETH);
       resetSwapTokens(CHAINS_ENUM.ETH);
-      setDexId(oDexId);
+      setDexId(lastSelectedDex);
       setAmount('');
     }
-  }, [dexId, oDexId]);
+  }, [dexId, lastSelectedDex, saveSelectedChain]);
 
   useEffect(() => {
     onChainChanged();
   }, [chain]);
 
   useEffect(() => {
+    setChain(lastSelectedChain);
+    setPayToken(getChainDefaultToken(lastSelectedChain));
+  }, [lastSelectedChain]);
+
+  useEffect(() => {
     return cancel;
   }, []);
 
-  if (!oDexId) {
+  if (!lastSelectedDex) {
     return (
       <div className="bg-gray-bg h-full">
         <DexSelectDrawer visible onClose={() => toggleVisible(false)} />
@@ -784,7 +790,11 @@ export const Swap = ({
             <ChainSelect
               value={chain}
               onChange={handleChain}
-              disabledTips="Not supported by the current exchange"
+              disabledTips={
+                <span style={{ fontSize: 12 }}>
+                  Not supported by the current exchange
+                </span>
+              }
               title={<>Select the chain supported by {name}</>}
             />
             {!!payAmount && !!payToken && !!receiveToken && (

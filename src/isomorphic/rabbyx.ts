@@ -86,7 +86,7 @@ export type RabbyXMethod = {
     k?: keyof SwapState
   ) => typeof k extends void ? SwapState : SwapState[keyof SwapState];
 
-  'walletController.getLastTimeGasSelection': (
+  'walletController.getSwapGasCache': (
     chainId: keyof GasCache
   ) => ChainGas | null;
 

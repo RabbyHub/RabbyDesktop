@@ -22,15 +22,17 @@ const SectionStyled = styled.section`
     .ant-tooltip-inner {
       width: var(--swap-content-w);
       transform: translateX(10px);
+      font-size: 12;
     }
   }
 
   .tooltip2 {
     .ant-tooltip-arrow {
-      left: 182px;
+      left: 156px;
     }
     .ant-tooltip-inner {
-      transform: translateX(-1px);
+      transform: translateX(-10px);
+      font-size: 12;
     }
   }
   .title {

@@ -191,6 +191,7 @@ export const Slippage = memo((props: SlippageProps) => {
               width: 317,
               padding: '8px 12px',
               transform: 'translateX(65px)',
+              fontSize: '12px',
             }}
             placement="top"
             title={tips}

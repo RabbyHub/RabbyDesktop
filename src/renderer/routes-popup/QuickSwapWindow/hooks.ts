@@ -150,8 +150,6 @@ export const useVerifySdk = <T extends ValidateTokenParam>(
     chain
   );
 
-  // const wallet = useWallet();
-
   const { value: tokenApprovalResult = [true, false] } = useAsync(async () => {
     if (!payToken || !dexId || !payAmount) return [true, false];
     if (payToken?.id === CHAINS[chain].nativeTokenAddress) {

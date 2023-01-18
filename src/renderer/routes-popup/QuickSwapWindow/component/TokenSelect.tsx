@@ -242,7 +242,6 @@ const StyledDrawer = styled(Drawer)`
 const SwapLoadingWrapper = styled.div`
   margin-top: 12px;
   margin-bottom: 20px;
-  padding-right: 17px;
 
   .left {
     display: flex;
@@ -252,6 +251,10 @@ const SwapLoadingWrapper = styled.div`
   .right {
     display: flex;
     justify-content: space-between;
+  }
+  .left,
+  .right {
+    overflow: hidden;
   }
   .w-140 {
     width: 140px;

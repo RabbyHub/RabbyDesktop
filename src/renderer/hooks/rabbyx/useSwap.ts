@@ -38,8 +38,8 @@ export const useSwap = () => {
         await walletController.updateSwapGasCache(chainId, gas);
         await getSwap('gasPriceCache');
       },
-      getLastTimeGasSelection: async (chain: CHAINS_ENUM) => {
-        const gasCache = await walletController.getLastTimeGasSelection(chain);
+      getSwapGasCache: async (chain: CHAINS_ENUM) => {
+        const gasCache = await walletController.getSwapGasCache(chain);
         if (gasCache) {
           s((e) => ({
             ...e,

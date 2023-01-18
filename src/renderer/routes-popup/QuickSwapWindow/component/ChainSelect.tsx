@@ -112,7 +112,12 @@ function ChainItem({
 }) {
   const chainObj = CHAINS[chain];
   return (
-    <Tooltip title={disabledTips} open={support ? false : undefined}>
+    <Tooltip
+      trigger={['click', 'hover']}
+      mouseEnterDelay={10}
+      title={disabledTips}
+      open={support ? false : undefined}
+    >
       <ChainItemWrapper
         support={support}
         onClick={support ? onClick : undefined}
