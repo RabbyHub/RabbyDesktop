@@ -155,7 +155,7 @@ const StyledDrawer = styled(Drawer)`
 
   .listBox {
     flex: 1;
-    overflow: scroll;
+    overflow: auto;
     margin: 0 -10px;
     padding: 2px 10px;
   }
