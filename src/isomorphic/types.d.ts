@@ -201,6 +201,7 @@ type PopupViewOnMainwinInfo =
     }
   | {
       type: 'quick-swap';
+      state?: any;
     }
   | {
       type: 'dapps-management';
