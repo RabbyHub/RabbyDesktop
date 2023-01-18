@@ -130,8 +130,8 @@ function ChainItem({
           className={clsx(pinned ? 'star' : 'unStar')}
           src={
             pinned
-              ? 'rabby-internal://assets/icons/select-chain/icon-pinned-fill.svg'
-              : 'rabby-internal://assets/icons/select-chain/icon-pinned.svg'
+              ? 'rabby-internal://assets/icons/swap/pinned.svg'
+              : 'rabby-internal://assets/icons/swap/unpinned.svg'
           }
           onClick={(evt) => {
             evt.stopPropagation();
@@ -142,7 +142,7 @@ function ChainItem({
         {checked && (
           <img
             className="checked"
-            src="rabby-internal://assets/icons/select-chain/checked.svg"
+            src="rabby-internal://assets/icons/swap/checked.svg"
           />
         )}
       </ChainItemWrapper>
