@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { TokenItem, TransferingNFTItem } from '@debank/rabby-api/dist/types';
 import { CHAINS } from '@debank/common';
 import styled from 'styled-components';
@@ -157,8 +157,8 @@ const Transactions = () => {
   const [recentTxs, setRecentTxs] = useState<TransactionDataItem[]>([]);
   const [pendingTxs, setPendingTxs] = useState<TransactionDataItem[]>([]);
 
-  const initLocalTxs = async () => {
-    if (!currentAccount.address) return;
+  const initLocalTxs = useCallback(async () => {
+    if (!currentAccount?.address) return;
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
     const { pendings, completeds } =
       await walletController.getTransactionHistory(currentAccount.address);
@@ -216,28 +216,7 @@ const Transactions = () => {
         });
       });
     setPendingTxs(pTxs);
-  };
-
-  const watchTrsancationChange = () => {
-    window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:rabbyx:session-broadcast-forward-to-main',
-      (payload) => {
-        if (payload.event !== 'transactionChanged') return;
-        switch (payload.data?.type) {
-          default:
-            break;
-          case 'submitted': {
-            initLocalTxs();
-            break;
-          }
-          case 'finished': {
-            initLocalTxs();
-            break;
-          }
-        }
-      }
-    );
-  };
+  }, [currentAccount]);
 
   const init = async () => {
     if (!currentAccount) return;
@@ -299,8 +278,25 @@ const Transactions = () => {
   }, [currentAccount]);
 
   useEffect(() => {
-    watchTrsancationChange();
-  }, []);
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_push:rabbyx:session-broadcast-forward-to-main',
+      (payload) => {
+        if (payload.event !== 'transactionChanged') return;
+        switch (payload.data?.type) {
+          default:
+            break;
+          case 'submitted': {
+            initLocalTxs();
+            break;
+          }
+          case 'finished': {
+            initLocalTxs();
+            break;
+          }
+        }
+      }
+    );
+  }, [initLocalTxs]);
 
   const Empty = (
     <EmptyView>

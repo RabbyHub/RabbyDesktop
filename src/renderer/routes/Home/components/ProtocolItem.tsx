@@ -38,10 +38,11 @@ const ProtocolItemWrapper = styled.div`
       width: 14px;
     }
     .protocol-bind {
-      display: flex;
+      display: none;
       width: 14px;
       align-items: center;
       .protocol-dapp {
+        white-space: nowrap;
         margin-left: 12px;
         font-weight: 400;
         font-size: 12px;
@@ -63,6 +64,11 @@ const ProtocolItemWrapper = styled.div`
           color: #8697ff;
           text-decoration: underline;
         }
+      }
+    }
+    &:hover {
+      .protocol-bind {
+        display: flex;
       }
     }
   }
@@ -93,6 +99,10 @@ const ProtocolItem = ({
     const arr = Object.values(protocolDappsBinding);
     const t = arr.find((item) => item === protocol.site_url);
 
+    if (protocolDappsBinding[protocol.id]) {
+      return { hasBinded: true, bindUrl: protocolDappsBinding[protocol.id] };
+    }
+
     if (t) {
       return {
         hasBinded: true,
@@ -104,7 +114,7 @@ const ProtocolItem = ({
       hasBinded: !!protocolDappsBinding[protocol.id],
       bindUrl: protocolDappsBinding[protocol.id] || '',
     };
-  }, [protocolDappsBinding, protocol.id]);
+  }, [protocolDappsBinding, protocol]);
 
   const handleClickProtocolName = useCallback(() => {
     if (bindUrl) openDapp(bindUrl);
