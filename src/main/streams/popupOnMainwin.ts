@@ -232,8 +232,8 @@ Promise.all([sidebarReady, switchChainReady, switchAccountReady]).then(
 const SIZE_MAP: Record<
   IContextMenuPageInfo['type'],
   {
-    width?: number;
-    height?: number;
+    width: number;
+    height: number;
   }
 > = {
   'sidebar-dapp': {
@@ -249,6 +249,29 @@ const SIZE_MAP: Record<
     height: 60 * 2 + 1,
   },
 };
+
+function pickWH(
+  type: IContextMenuPageInfo['type'],
+  input: { width?: number; height?: number }
+) {
+  let result: Required<typeof input>;
+  switch (type) {
+    case 'switch-account':
+      result = {
+        width: SIZE_MAP[type].width,
+        height: input.height || SIZE_MAP[type].height,
+      };
+      break;
+    default:
+      result = { ...SIZE_MAP[type] };
+      break;
+  }
+
+  result.width = Math.round(result.width);
+  result.height = Math.round(result.height);
+
+  return result;
+}
 
 const { handler } = onIpcMainEvent(
   '__internal_rpc:popupwin-on-mainwin:toggle-show',
@@ -273,8 +296,7 @@ const { handler } = onIpcMainEvent(
       updateSubWindowRect(mainWindow, targetWin, {
         x: payload.rect.x,
         y: payload.rect.y,
-        width: payload.rect.width || SIZE_MAP[payload.type].width,
-        height: payload.rect.height || SIZE_MAP[payload.type].height,
+        ...pickWH(payload.type, payload.rect),
       });
       sendToWebContents(
         targetWin.webContents,
@@ -285,6 +307,10 @@ const { handler } = onIpcMainEvent(
           pageInfo: payload.pageInfo,
         }
       );
+
+      if (targetWin && !IS_RUNTIME_PRODUCTION && payload.openDevTools) {
+        targetWin.webContents.openDevTools({ mode: 'detach' });
+      }
       showPopupWindow(targetWin);
     } else {
       hidePopupOnMainWindow(targetWin, payload.type);

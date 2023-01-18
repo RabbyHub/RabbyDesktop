@@ -18,6 +18,7 @@ import { message } from 'antd';
 import ChainList from './components/ChainList';
 import Curve from './components/Curve';
 import PortfolioView from './components/PortfolioView';
+import RightToolbar from './components/RightToolbar';
 
 const HomeWrapper = styled.div`
   padding-top: 24px;
@@ -74,6 +75,15 @@ const HomeWrapper = styled.div`
       line-height: 55px;
     }
   }
+`;
+
+const RightToolbarWrapper = styled.div`
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  position: absolute;
+  top: 50px;
+  right: 0;
 `;
 
 const calcFilterPrice = (tokens: { usd_value?: number }[]) => {
@@ -300,6 +310,9 @@ const Home = () => {
         chainBalances={chainBalances}
         selectChainServerId={selectChainServerId}
       />
+      <RightToolbarWrapper>
+        <RightToolbar />
+      </RightToolbarWrapper>
     </HomeWrapper>
   );
 };

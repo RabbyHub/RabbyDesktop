@@ -200,6 +200,9 @@ type PopupViewOnMainwinInfo =
       type: 'address-management';
     }
   | {
+      type: 'quick-swap';
+    }
+  | {
       type: 'dapps-management';
     };
 
