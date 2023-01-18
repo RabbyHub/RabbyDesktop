@@ -55,7 +55,7 @@ const QuickSwap = () => {
           hide && styles.hide
         )}
       >
-        <SwapByDex quickWindowOpen={localVisible} />
+        <SwapByDex quickWindowOpen={localVisible} pageInfo={pageInfo?.state} />
       </div>
     </div>
   );
