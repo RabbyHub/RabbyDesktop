@@ -24,6 +24,14 @@
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
   transition-duration: 150ms !important;
   transform: translateX(600px);
+
+  :global {
+    .ant-btn-primary:hover,
+    .ant-btn-primary:focus {
+      background-color: var(--color-primary);
+      border-color: transparent;
+    }
+  }
 }
 
 .show {
