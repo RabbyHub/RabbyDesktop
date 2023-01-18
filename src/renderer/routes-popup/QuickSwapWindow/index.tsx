@@ -18,7 +18,9 @@ const RESET_TIMEOUT = 1000 * 60 * 10;
 
 const QuickSwap = () => {
   const [hide, setHide] = useState(false);
-  const { localVisible } = usePopupViewInfo('quick-swap');
+  const { localVisible, pageInfo } = usePopupViewInfo('quick-swap');
+
+  console.debug('[feat] pageInfo?.state', pageInfo?.state);
 
   const [, cancel, reset] = useTimeoutFn(() => {
     window.location.reload();
@@ -53,7 +55,7 @@ const QuickSwap = () => {
           hide && styles.hide
         )}
       >
-        <SwapByDex quickWindowOpen={localVisible} />
+        <SwapByDex quickWindowOpen={localVisible} pageInfo={pageInfo?.state} />
       </div>
     </div>
   );

@@ -1,0 +1,9 @@
+<svg width="35" height="35" viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect class="bg" width="35" height="35" rx="14" fill="black" fill-opacity="0.15"/>
+<g opacity="0.5">
+<path d="M11 25V10C11 9.44772 11.4477 9 12 9H19C19.5523 9 20 9.44772 20 10V25" stroke="white" stroke-opacity="0.98" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="7.75" y1="25.25" x2="23.25" y2="25.25" stroke="white" stroke-opacity="0.98" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M20 14.6034H22.4545C23.0068 14.6034 23.4545 15.0512 23.4545 15.6034V21C23.4545 21.5523 23.9023 22 24.4545 22H25C25.5523 22 26 21.5523 26 21V14.9096C26 13.9519 25.8624 12.999 25.5914 12.0804L25.2727 11" stroke="white" stroke-opacity="0.98" stroke-width="1.5" stroke-linecap="round"/>
+</g>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M14.7499 19C14.7499 19.4142 15.0857 19.75 15.4999 19.75C15.9141 19.75 16.2499 19.4142 16.2499 19V17.75H17.5C17.9142 17.75 18.25 17.4142 18.25 17C18.25 16.5858 17.9142 16.25 17.5 16.25H16.2499V15C16.2499 14.5858 15.9141 14.25 15.4999 14.25C15.0857 14.25 14.7499 14.5858 14.7499 15V16.25H13.5C13.0858 16.25 12.75 16.5858 12.75 17C12.75 17.4142 13.0858 17.75 13.5 17.75H14.7499V19Z" fill="#fff" fill-opacity="0.6" />
+</svg>

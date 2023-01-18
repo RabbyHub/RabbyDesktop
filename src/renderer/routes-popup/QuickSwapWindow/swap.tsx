@@ -17,6 +17,7 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import {
   DEX_ENUM,
   DEX_SPENDER_WHITELIST,
+  DEX_SUPPORT_CHAINS,
   getQuote,
   WrapTokenAddressMap,
 } from '@rabby-wallet/rabby-swap';
@@ -166,8 +167,10 @@ const FooterWrapper = styled.div`
 
 export const Swap = ({
   quickWindowOpen = true,
+  pageInfo,
 }: {
   quickWindowOpen?: boolean;
+  pageInfo?: { chain?: string; payTokenId?: string };
 }) => {
   const domRef = useRef<HTMLDivElement>(null);
 
@@ -178,11 +181,11 @@ export const Swap = ({
   const lastSelectedDex = swap.selectedDex;
   const lastSelectedChain = swap.selectedChain || CHAINS_ENUM.ETH;
   const { unlimitedAllowance = false } = swap;
-  const { search } = useLocation();
-  const [searchObj] = useState<{
-    payTokenId?: string;
-    chain?: string;
-  }>(query2obj(search || ''));
+  // const { search } = useLocation();
+  // const [searchObj] = useState<{
+  //   payTokenId?: string;
+  //   chain?: string;
+  // }>(query2obj(search || ''));
 
   const [refreshId, setRefreshId] = useState(0);
 
@@ -217,19 +220,32 @@ export const Swap = ({
   );
 
   useMemo(() => {
-    if (searchObj.chain && searchObj.payTokenId) {
+    if (lastSelectedDex && pageInfo?.chain && pageInfo?.payTokenId) {
+      if (
+        !DEX_SUPPORT_CHAINS[lastSelectedDex]
+          .map((e) => CHAINS[e].serverId)
+          .includes(pageInfo?.chain)
+      ) {
+        saveSelectedChain(CHAINS_ENUM.ETH);
+        setPayToken(getChainDefaultToken(CHAINS_ENUM.ETH));
+        setReceiveToken(undefined);
+        setAmount('');
+        return;
+      }
       const target = Object.values(CHAINS).find(
-        (item) => item.serverId === searchObj.chain
+        (item) => item.serverId === pageInfo.chain
       );
       if (target) {
         saveSelectedChain(target?.enum);
         setPayToken({
           ...getChainDefaultToken(target?.enum),
-          id: searchObj.payTokenId,
+          id: pageInfo.payTokenId,
         });
+        setReceiveToken(undefined);
+        setAmount('');
       }
     }
-  }, [searchObj.chain, searchObj.payTokenId, saveSelectedChain]);
+  }, [pageInfo?.chain, pageInfo?.payTokenId, saveSelectedChain]);
 
   const payTokenIsNativeToken = useMemo(
     () => payToken?.id === CHAINS[chain].nativeTokenAddress,
@@ -777,7 +793,9 @@ export const Swap = ({
 
   useEffect(() => {
     setChain(lastSelectedChain);
-    setPayToken(getChainDefaultToken(lastSelectedChain));
+    if (payToken?.chain !== CHAINS[lastSelectedChain].serverId) {
+      setPayToken(getChainDefaultToken(lastSelectedChain));
+    }
   }, [lastSelectedChain]);
 
   useEffect(() => {

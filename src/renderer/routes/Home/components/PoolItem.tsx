@@ -69,7 +69,7 @@ const TokenItemWrapper = styled.div`
     font-size: 13px;
     line-height: 16px;
     color: #ffffff;
-    width: 20%;
+    width: 17%;
     overflow: hidden;
     text-overflow: ellipsis;
     align-items: center;
@@ -83,7 +83,7 @@ const TokenItemWrapper = styled.div`
     align-items: center;
     justify-content: flex-end;
     flex-wrap: wrap;
-    width: 20%;
+    width: 22%;
     font-weight: 500;
     font-size: 12px;
     line-height: 14px;
@@ -101,7 +101,7 @@ const TokenItemWrapper = styled.div`
     }
   }
   .token-amount {
-    width: 35%;
+    width: 38%;
     display: flex;
     justify-content: flex-end;
     flex-wrap: wrap;
@@ -113,7 +113,7 @@ const TokenItemWrapper = styled.div`
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
-    width: 25%;
+    width: 23%;
     font-weight: 700;
     font-size: 12px;
     line-height: 14px;
@@ -156,7 +156,7 @@ const TokenItemComp = ({
     if (!historyPortfolio) {
       return null;
     }
-    const h = historyPortfolio.detail.supply_token_list.find(
+    const h = historyPortfolio.asset_token_list.find(
       (item) => item.chain === token.chain && item.id === token.id
     );
     if (h) return h;
@@ -242,7 +242,7 @@ const TokenItemComp = ({
             })}
           >
             {amountChange > 0 ? '+' : '-'}
-            {`${formatNumber(amountChange, 4)}`}{' '}
+            {`${formatNumber(Math.abs(amountChange), 4)}`}{' '}
             <span className="symbol">{ellipsisTokenSymbol(token.symbol)}</span>
           </div>
         )}
@@ -265,7 +265,7 @@ const TokenItemComp = ({
             })}
           >
             {usdValueChange > 0 ? '+' : '-'}$
-            {Math.abs(usdValueChange).toFixed(2)}
+            {formatNumber(Math.abs(usdValueChange))}
           </div>
         )}
       </div>
@@ -286,15 +286,17 @@ const PoolItem = ({
   >;
 }) => {
   const totalUsdValue = useMemo(() => {
-    return (portfolio.detail.supply_token_list || []).reduce((sum, item) => {
+    return (portfolio.asset_token_list || []).reduce((sum, item) => {
       return sum.plus(new BigNumber(item.amount).times(item.price));
     }, new BigNumber(0));
   }, [portfolio]);
+
   return (
     <PoolItemWrapper>
-      {portfolio.detail.supply_token_list?.map((token) => (
+      {portfolio.asset_token_list?.map((token, index) => (
         <TokenItemComp
-          key={`${token.chain}-${token.id}`}
+          // eslint-disable-next-line react/no-array-index-key
+          key={`${token.chain}-${token.id}-${index}`}
           poolId={portfolio.pool.id}
           token={token}
           historyProtocol={historyProtocol}

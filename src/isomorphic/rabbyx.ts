@@ -3,6 +3,7 @@ import type { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 import type { TotalBalanceResponse } from '@debank/rabby-api/dist/types';
+import { TransactionGroup } from './types-rabbyx';
 
 type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
 type OpenApiService = import('@debank/rabby-api').OpenApiService;
@@ -25,7 +26,10 @@ export type RabbyXMethod = {
     type: string;
     brandName: string;
   }[];
-
+  'walletController.getTransactionHistory': (addr: string) => {
+    pendings: TransactionGroup[];
+    completeds: TransactionGroup[];
+  };
   'walletController.updateAlianName': (addr: string, name: string) => void;
   'walletController.getAlianName': (addr: string) => string;
 
@@ -232,10 +236,12 @@ export type RabbyXMethod = {
   'openapi.addOriginFeedback': OpenApiService['addOriginFeedback'];
   'openapi.getNetCurve': OpenApiService['getNetCurve'];
   'openapi.getTokenHistoryPrice': OpenApiService['getTokenHistoryPrice'];
+  'openapi.getTokenHistoryDict': OpenApiService['getTokenHistoryDict'];
   'openapi.getHistoryTokenList': OpenApiService['getHistoryTokenList'];
   'openapi.getProtocolList': OpenApiService['getProtocolList'];
   'openapi.getProtocol': OpenApiService['getProtocol'];
   'openapi.getHistoryProtocol': OpenApiService['getHistoryProtocol'];
+  'openapi.getComplexProtocolList': OpenApiService['getComplexProtocolList'];
 };
 
 export type RabbyXMethods = {

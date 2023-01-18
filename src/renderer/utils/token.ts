@@ -2,7 +2,7 @@ import { CHAINS, CHAINS_ENUM } from '@debank/common';
 import { Contract, providers } from 'ethers';
 import { hexToString } from 'web3-utils';
 
-export const ellipsisTokenSymbol = (text: string, length = 6) => {
+export const ellipsisTokenSymbol = (text: string, length = 5) => {
   const regexp = new RegExp(`^(.{${length}})(.*)$`);
   return text.replace(regexp, '$1...');
 };

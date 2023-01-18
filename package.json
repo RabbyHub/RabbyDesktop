@@ -117,7 +117,7 @@
   "dependencies": {
     "@debank/common": "^0.2.23",
     "@debank/parse-favicon": "^0.1.1",
-    "@debank/rabby-api": "^0.5.17",
+    "@debank/rabby-api": "^0.5.19",
     "@dnd-kit/core": "^6.0.7",
     "@dnd-kit/sortable": "^7.0.2",
     "@rabby-wallet/electron-chrome-extensions": "^3.9.12",
@@ -155,6 +155,7 @@
     "sortablejs": "^1.15.0",
     "stream-browserify": "^3.0.0",
     "styled-components": "^5.3.6",
+    "ts-toolbelt": "^9.6.0",
     "webextension-polyfill-ts": "^0.25.0"
   },
   "devDependencies": {

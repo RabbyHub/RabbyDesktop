@@ -5,6 +5,12 @@
 @font-face {
   font-family: 'SF Pro';
   src: url('rabby-internal://assets/fonts/SF-Pro.ttf');
+  font-weight:normal;
+}
+@font-face {
+  font-family: 'SF Pro';
+  src: url('rabby-internal://assets/fonts/SF-Pro-Text-Bold.otf');
+  font-weight: 700;
 }
 :root {
   --default-font: SF Pro, Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";

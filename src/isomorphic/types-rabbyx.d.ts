@@ -1,4 +1,5 @@
-// type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
+import { Object as ObjectType } from 'ts-toolbelt';
+import { ExplainTxResponse, Tx } from '@debank/rabby-api/dist/types';
 
 type RabbyAccount = {
   address: string;
@@ -90,6 +91,43 @@ type IHighlightedAddress = {
   brandName: Account['brandName'];
   address: Account['address'];
 };
+
+export interface TransactionHistoryItem {
+  rawTx: Tx;
+  createdAt: number;
+  isCompleted: boolean;
+  hash: string;
+  failed: boolean;
+  gasUsed?: number;
+  isSubmitFailed?: boolean;
+  site?: ConnectedSite;
+}
+
+export interface TransactionSigningItem {
+  rawTx: Tx;
+  explain?: ObjectType.Merge<
+    ExplainTxResponse,
+    { approvalId: string; calcSuccess: boolean }
+  >;
+  id: string;
+  isSubmitted?: boolean;
+}
+
+export interface TransactionGroup {
+  chainId: number;
+  nonce: number;
+  txs: TransactionHistoryItem[];
+  isPending: boolean;
+  createdAt: number;
+  explain: ObjectType.Merge<
+    ExplainTxResponse,
+    { approvalId: string; calcSuccess: boolean }
+  >;
+  isFailed: boolean;
+  isSubmitFailed?: boolean;
+  $ctx?: any;
+}
+
 interface SwapState {
   gasPriceCache?: GasCache;
   selectedDex?: import('@rabby-wallet/rabby-swap').DEX_ENUM | null;
