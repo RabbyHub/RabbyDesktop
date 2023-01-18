@@ -222,13 +222,41 @@ handleIpcMainInvoke('get-dapp', (_, dappOrigin) => {
 handleIpcMainInvoke('dapps-fetch', () => {
   const dapps = getAllDapps();
   const pinnedList = dappStore.get('pinnedList');
-  const unpinnedList = dappStore.get('unpinnedList');
+  const { unpinnedList } = fillUnpinnedList(
+    dapps,
+    pinnedList,
+    dappStore.get('unpinnedList')
+  );
 
   return {
     dapps,
     pinnedList,
     unpinnedList,
   };
+});
+
+handleIpcMainInvoke('dapps-post', (_, dapp: IDapp) => {
+  const dappsMap = dappStore.get('dappsMap');
+
+  if (dappsMap[dapp.origin]) {
+    return {
+      error: 'Dapp already exists',
+    };
+  }
+
+  dappsMap[dapp.origin] = dapp;
+  dappStore.set('dappsMap', dappsMap);
+
+  const unpinnedList = dappStore.get('unpinnedList');
+  unpinnedList.push(dapp.origin);
+  dappStore.set('unpinnedList', unpinnedList);
+
+  emitIpcMainEvent('__internal_main:dapps:changed', {
+    dapps: getAllDapps(),
+    unpinnedList,
+  });
+
+  return {};
 });
 
 handleIpcMainInvoke('dapps-put', (_, dapp: IDapp) => {
