@@ -103,7 +103,7 @@ export const dappStore = new Store<{
       const dapps = store.get('dapps') || [];
 
       let dappsMap = store.get('dappsMap');
-      if (!dappsMap && dapps.length) {
+      if ((!dappsMap || !Object.keys(dappsMap).length) && dapps.length) {
         dappsMap = dapps.reduce((acc, dapp) => {
           acc[dapp.origin] = dapp;
           return acc;
