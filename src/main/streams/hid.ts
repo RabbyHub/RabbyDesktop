@@ -20,7 +20,6 @@ getSessionInsts().then(({ mainSession }) => {
       });
 
       eventSelectHidDevice.preventDefault();
-      console.debug('[feat] callback', callback);
       if (details.deviceList && details.deviceList.length > 0) {
         callback(details.deviceList[0].deviceId);
       }

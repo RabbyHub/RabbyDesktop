@@ -79,9 +79,6 @@ export function useDapps() {
   const [pinnedList, setPinnedList] = useAtom(pinnedListAtomic);
   const [unpinnedList, setUnpinnedList] = useAtom(unpinnedListAtomic);
 
-  console.log('[feat] originDapps', originDapps);
-  console.log('[feat] pinnedList, unpinnedList', pinnedList, unpinnedList);
-
   // only fetch dapps once
   useEffect(() => {
     if (originDapps) return;
