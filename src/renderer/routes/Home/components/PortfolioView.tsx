@@ -159,41 +159,43 @@ const PortfolioView = ({
           transform: `translateX(${assetArrowLeft}px)`,
         }}
       />
-      <ul className="assets-list">
-        <li className="th">
-          <div>Asset</div>
-          <div>Price</div>
-          <div>Amount</div>
-          <div>USD-Value</div>
-        </li>
-        {tokenList.map((token) => (
-          <TokenItemComp
-            token={token}
-            historyToken={historyTokenMap[`${token.chain}-${token.id}`]}
-            key={`${token.chain}-${token.id}`}
-          />
-        ))}
-        {tokenHidden.hiddenCount > 0 && (
-          <ExpandItem onClick={handleClickExpandToken}>
-            <img
-              className="icon-hide-assets"
-              src="rabby-internal://assets/icons/home/hide-assets.svg"
+      {tokenList.length > 0 && (
+        <ul className="assets-list">
+          <li className="th">
+            <div>Asset</div>
+            <div>Price</div>
+            <div>Amount</div>
+            <div>USD-Value</div>
+          </li>
+          {tokenList.map((token) => (
+            <TokenItemComp
+              token={token}
+              historyToken={historyTokenMap[`${token.chain}-${token.id}`]}
+              key={`${token.chain}-${token.id}`}
             />
-            {tokenHidden.isExpand
-              ? 'Hide small value assets'
-              : `${tokenHidden.hiddenCount} Assets are hidden`}
-            <img
-              src="rabby-internal://assets/icons/home/expand-arrow.svg"
-              className={classNames('icon-expand-arrow', {
-                flip: !tokenHidden.isExpand,
-              })}
-            />
-            <span className="hide-assets-usd-value">
-              ${formatNumber(tokenHidden.hiddenUsdValue)}
-            </span>
-          </ExpandItem>
-        )}
-      </ul>
+          ))}
+          {tokenHidden.hiddenCount > 0 && (
+            <ExpandItem onClick={handleClickExpandToken}>
+              <img
+                className="icon-hide-assets"
+                src="rabby-internal://assets/icons/home/hide-assets.svg"
+              />
+              {tokenHidden.isExpand
+                ? 'Hide small value assets'
+                : `${tokenHidden.hiddenCount} Assets are hidden`}
+              <img
+                src="rabby-internal://assets/icons/home/expand-arrow.svg"
+                className={classNames('icon-expand-arrow', {
+                  flip: !tokenHidden.isExpand,
+                })}
+              />
+              <span className="hide-assets-usd-value">
+                ${formatNumber(tokenHidden.hiddenUsdValue)}
+              </span>
+            </ExpandItem>
+          )}
+        </ul>
+      )}
       <div className="protocols">
         {protocolList.map((protocol) => (
           <ProtocolItem

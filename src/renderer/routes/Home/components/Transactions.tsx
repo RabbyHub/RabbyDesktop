@@ -27,6 +27,24 @@ const TransactionList = styled.ul`
   border-radius: 6px;
 `;
 
+const EmptyView = styled.div`
+  height: 155px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  p {
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 14px;
+    color: rgba(255, 255, 255, 0.4);
+  }
+  .icon-empty {
+    width: 52px;
+  }
+`;
+
 export interface TransactionDataItem {
   type: string | null;
   receives: {
@@ -284,6 +302,25 @@ const Transactions = () => {
     watchTrsancationChange();
   }, []);
 
+  const Empty = (
+    <EmptyView>
+      <img
+        src="rabby-internal://assets/icons/home/tx-empty.png"
+        className="icon-empty"
+      />
+      <p>No more transaction in last 24 hours</p>
+    </EmptyView>
+  );
+
+  if (pendingTxs.length <= 0 && recentTxs.length <= 0) {
+    return (
+      <TransactionWrapper>
+        <Title>Transactions</Title>
+        <TransactionList>{Empty}</TransactionList>
+      </TransactionWrapper>
+    );
+  }
+
   return (
     <TransactionWrapper>
       <Title>Transactions</Title>
@@ -294,6 +331,7 @@ const Transactions = () => {
         {recentTxs.map((tx) => {
           return <TransactionItem item={tx} key={`${tx.chain}-${tx.id}`} />;
         })}
+        {pendingTxs.length + recentTxs.length < 3 && Empty}
       </TransactionList>
     </TransactionWrapper>
   );
