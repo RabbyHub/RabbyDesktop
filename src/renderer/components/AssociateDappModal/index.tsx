@@ -87,7 +87,24 @@ const AssociateDapp = ({
     useProtocolDappsBinding();
   const [loading, setLoading] = useState(false);
 
-  console.log(protocolDappsBinding);
+  const bindedDapp = protocolDappsBinding?.[protocolId];
+
+  console.log(url);
+
+  useEffect(() => {
+    if (bindedDapp) {
+      setCurrent(bindedDapp);
+      return;
+    }
+    try {
+      const { origin } = new URL(url);
+      const dapp = dapps.find((item) => item.origin === origin);
+      if (dapp) {
+        setCurrent(dapp.origin);
+      }
+      // eslint-disable-next-line no-empty
+    } catch (e) {}
+  }, [bindedDapp, dapps, url]);
 
   const dappList = useMemo(() => {
     try {
@@ -119,6 +136,7 @@ const AssociateDapp = ({
     }
     setLoading(false);
   };
+
   return (
     <>
       <div className={styles.associateDapp}>
@@ -173,7 +191,10 @@ const AssociateDapp = ({
         }}
         onAddedDapp={(origin) => {
           setIsShowAdd(false);
-          setCurrent(origin);
+          // todo: fix me
+          setTimeout(() => {
+            setCurrent(origin);
+          }, 16);
         }}
       />
     </>
