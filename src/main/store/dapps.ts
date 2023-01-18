@@ -34,6 +34,14 @@ const IDappSchema: import('json-schema-typed').JSONSchema = {
   },
 };
 
+const IProtocolBindingSchema: import('json-schema-typed').JSONSchema = {
+  type: 'object',
+  properties: {
+    origin: { type: 'string' },
+    siteUrl: { type: 'string' },
+  },
+};
+
 export const dappStore = new Store<{
   dapps: IDapp[];
   protocolDappsBinding: Record<string, IDapp['origin'][]>;
@@ -55,14 +63,9 @@ export const dappStore = new Store<{
     protocolDappsBinding: {
       type: 'object',
       patternProperties: {
-        '^https?://.+$': {
-          type: ['array', 'string'],
-          items: {
-            type: 'string',
-          },
-        },
+        '^https?://.+$': IProtocolBindingSchema,
       },
-      default: {} as Record<IDapp['origin'], IDapp['origin'][]>,
+      default: {} as IProtocolDappBindings,
     },
     dappsMap: {
       type: 'object',
@@ -289,8 +292,8 @@ handleIpcMainInvoke('dapps-delete', (_, dappToDel: IDapp) => {
   delete dappsMap[dappToDel.origin];
   const protocolDappsBinding = getProtocolDappsBindings();
   Object.entries(protocolDappsBinding).forEach((dapps) => {
-    const [protocol, dappOrigin] = dapps;
-    if (dappOrigin === dappToDel.origin) {
+    const [protocol, binding] = dapps;
+    if (binding.origin === dappToDel.origin) {
       delete protocolDappsBinding[protocol];
     }
   });
@@ -435,10 +438,10 @@ handleIpcMainInvoke('dapps-put-protocol-binding', (_, pBindings) => {
     //   return true;
     // }
 
-    return arraify(pBindings[pLink]).some((dappOrigin: string) => {
-      if (!dappOrigins.has(dappOrigin)) {
+    return arraify(pBindings[pLink]).some((item) => {
+      if (!dappOrigins.has(item.origin)) {
         errItem = {
-          error: `Invalid dapp origin for protocol binding ${dappOrigin}`,
+          error: `Invalid dapp origin for protocol binding ${item.origin}`,
         };
         return true;
       }

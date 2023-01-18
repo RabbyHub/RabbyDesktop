@@ -367,7 +367,7 @@ type ChannelInvokePayload = {
     };
   };
   'dapps-put-protocol-binding': {
-    send: [Record<string, IDapp['origin']>];
+    send: [bindings: IProtocolDappBindings];
     response: {
       error?: string;
     };
@@ -375,7 +375,7 @@ type ChannelInvokePayload = {
   'dapps-fetch-protocol-binding': {
     send: [];
     response: {
-      result: Record<string, IDapp['origin']>;
+      result: IProtocolDappBindings;
     };
   };
   'get-desktopAppState': {
