@@ -212,6 +212,7 @@ const PortfolioView = ({
         open={relateDappModalOpen}
         url={relateDappUrl}
         onCancel={() => setRelateDappModalOpen(false)}
+        onOk={() => setRelateDappModalOpen(false)}
       />
     </PortfolioWrapper>
   );
