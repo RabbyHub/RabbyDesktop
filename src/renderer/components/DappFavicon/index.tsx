@@ -34,11 +34,12 @@ interface FaviconProps extends ImageProps {
 }
 
 export const DappFavicon = (props: FaviconProps) => {
-  const { origin, ...rest } = props;
+  const { origin, src, ...rest } = props;
   const fallbackImage = useFallbackImage(origin);
   return (
     <Image
       preview={false}
+      src={src || fallbackImage}
       // placeholder={
       //   <img
       //     src={fallbackImage}

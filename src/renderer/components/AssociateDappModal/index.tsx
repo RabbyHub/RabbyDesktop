@@ -110,7 +110,7 @@ const AssociateDapp = ({
   const handleConfirm = async () => {
     setLoading(true);
     try {
-      await bindingDappsToProtocol(url, [current]);
+      await bindingDappsToProtocol(url, current);
       onOk?.(current);
     } catch (e: any) {
       message.error(e.message);
