@@ -14,6 +14,19 @@ export function useNavigateToDappRoute() {
   );
 }
 
+export function useOpenDapp() {
+  const navigateToDapp = useNavigateToDappRoute();
+
+  return useCallback((dappUrl: string) => {
+    window.rabbyDesktop.ipcRenderer.sendMessage(
+      '__internal_rpc:mainwindow:open-tab',
+      dappUrl
+    );
+
+    navigateToDapp(dappUrl);
+  }, []);
+}
+
 export function navigateToDappRoute(
   navigate: ReturnType<
     typeof import('react-router-dom').createMemoryRouter
