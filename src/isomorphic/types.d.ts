@@ -214,3 +214,8 @@ type IShellNavInfo = {
   tabUrl: string;
   dappSecurityCheckResult: ISecurityCheckResult | null;
 };
+
+type IProtocolDappBindings = Record<
+  string,
+  { origin: string; siteUrl: string }
+>;

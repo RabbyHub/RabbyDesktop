@@ -1,5 +1,5 @@
-import { Object as ObjectType } from 'ts-toolbelt';
-import { ExplainTxResponse, Tx } from '@debank/rabby-api/dist/types';
+import type { Object as ObjectType } from 'ts-toolbelt';
+import type { ExplainTxResponse, Tx } from '@debank/rabby-api/dist/types';
 
 type RabbyAccount = {
   address: string;

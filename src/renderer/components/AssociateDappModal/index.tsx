@@ -89,21 +89,10 @@ const AssociateDapp = ({
 
   const bindedDapp = protocolDappsBinding?.[protocolId];
 
-  console.log(url);
-
   useEffect(() => {
     if (bindedDapp) {
-      setCurrent(bindedDapp);
-      return;
+      setCurrent(bindedDapp.siteUrl);
     }
-    try {
-      const { origin } = new URL(url);
-      const dapp = dapps.find((item) => item.origin === origin);
-      if (dapp) {
-        setCurrent(dapp.origin);
-      }
-      // eslint-disable-next-line no-empty
-    } catch (e) {}
   }, [bindedDapp, dapps, url]);
 
   const dappList = useMemo(() => {
@@ -129,7 +118,10 @@ const AssociateDapp = ({
   const handleConfirm = async () => {
     setLoading(true);
     try {
-      await bindingDappsToProtocol(protocolId, current);
+      await bindingDappsToProtocol(protocolId, {
+        origin: current,
+        siteUrl: url,
+      });
       onOk?.(current);
     } catch (e: any) {
       message.error(e.message);

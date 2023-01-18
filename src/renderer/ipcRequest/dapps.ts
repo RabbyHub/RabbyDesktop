@@ -72,14 +72,14 @@ export async function setDappsOrder(payload: {
 }
 
 export async function putProtocolDappsBinding(
-  protocolDappsMap: Record<string, IDapp['origin']>
+  protocolDappsMap: IProtocolDappBindings
 ): Promise<void>;
 export async function putProtocolDappsBinding(
   protocol: string,
-  dappOrigins: IDapp['origin']
+  binding: IProtocolDappBindings[any]
 ): Promise<void>;
 export async function putProtocolDappsBinding(...args: any[]): Promise<void> {
-  let map: Record<string, IDapp['origin']> = {};
+  let map: IProtocolDappBindings = {};
   if (typeof args[0] === 'object') {
     map = { ...args[0] };
   } else {

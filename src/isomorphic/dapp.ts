@@ -109,19 +109,13 @@ export function sortDappsBasedPinned(
 }
 
 export function normalizeProtocolBindingValues(
-  protocolBindings: Record<string, IDapp['origin'] | IDapp['origin'][]>
-) {
+  protocolBindings: Record<string, any>
+): IProtocolDappBindings {
   return Object.entries(protocolBindings).reduce((acc, [key, val]) => {
-    if (Array.isArray(val)) {
-      if (val[0]) {
-        // eslint-disable-next-line prefer-destructuring
-        acc[key] = val[0];
-      } else {
-        delete acc[key];
-      }
-    } else {
+    if (val?.origin && val?.siteUrl) {
       acc[key] = val;
     }
+
     return acc;
-  }, {} as Record<string, IDapp['origin']>);
+  }, {} as IProtocolDappBindings);
 }
