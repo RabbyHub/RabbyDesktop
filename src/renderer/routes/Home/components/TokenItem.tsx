@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
 import styled from 'styled-components';
-import { formatNumber } from '@/renderer/utils/number';
-import TokenWithChain from '@/renderer/components/TokenWithChain';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import classNames from 'classnames';
+import { formatNumber } from '@/renderer/utils/number';
+import TokenWithChain from '@/renderer/components/TokenWithChain';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
+import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import IconSwap from '../../../../../assets/icons/home/token-swap.svg?rc';
 import IconSend from '../../../../../assets/icons/home/token-send.svg?rc';
 import IconReceive from '../../../../../assets/icons/home/token-receive.svg?rc';
@@ -151,13 +152,23 @@ const TokenItemComp = ({
     );
   }, [token, historyToken]);
 
+  const handleClickSwap = () => {
+    showMainwinPopupview(
+      {
+        type: 'quick-swap',
+        state: { payTokenId: token.id, chain: token.chain },
+      },
+      { openDevTools: false }
+    );
+  };
+
   return (
     <TokenItemWrapper className="td" key={`${token.chain}-${token.id}`}>
       <TokenLogoField>
         <TokenWithChain token={token} width="24px" height="24px" />
         <span className="token-symbol">{token.symbol}</span>
         <div className="token-actions">
-          <IconSwap className="icon icon-swap" />
+          <IconSwap className="icon icon-swap" onClick={handleClickSwap} />
           <IconSend className="icon icon-send" />
           <IconReceive className="icon icon-receive" />
         </div>

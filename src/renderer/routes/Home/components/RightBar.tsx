@@ -47,10 +47,7 @@ const RightBar = () => {
       id: 'swap',
       icon: <IconSwap width="35px" height="35px" />,
       onClick: () => {
-        showMainwinPopupview(
-          { type: 'quick-swap', state: { test: 'bar' } },
-          { openDevTools: false }
-        );
+        showMainwinPopupview({ type: 'quick-swap' }, { openDevTools: false });
       },
     },
     {
