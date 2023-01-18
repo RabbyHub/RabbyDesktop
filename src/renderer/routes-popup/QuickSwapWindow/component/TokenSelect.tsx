@@ -597,13 +597,20 @@ export const TokenSelect = ({
           )}
         </div>
         {loading ? (
-          <Skeleton.Input
-            active
+          <div
             style={{
               width: 110,
-              height: 20,
+              height: 26,
+              overflow: 'hidden',
             }}
-          />
+          >
+            <Skeleton.Input
+              active
+              style={{
+                height: 26,
+              }}
+            />
+          </div>
         ) : (
           <Input
             ref={inputRef}

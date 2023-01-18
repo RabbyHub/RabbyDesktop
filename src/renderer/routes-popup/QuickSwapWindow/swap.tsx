@@ -870,13 +870,20 @@ export const Swap = ({
                 </div>
 
                 {loading ? (
-                  <Skeleton.Input
+                  <div
                     style={{
                       width: 86,
                       height: 14,
+                      overflow: 'hidden',
                     }}
-                    active
-                  />
+                  >
+                    <Skeleton.Input
+                      style={{
+                        height: 14,
+                      }}
+                      active
+                    />
+                  </div>
                 ) : (
                   <div
                     className={clsx(
