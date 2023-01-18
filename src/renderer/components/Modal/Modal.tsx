@@ -29,22 +29,24 @@ export const Modal: React.FC<Props> = ({
         />
       }
       title={
-        <>
-          {backable && (
-            <span onClick={onBack} className="ant-modal-close-x back">
-              <img
-                className="icon"
-                src="rabby-internal://assets/icons/modal/back.svg"
-              />
-            </span>
-          )}
-          {title && (
-            <div className="headline">
-              <span className="title">{title}</span>
-              {subtitle && <span className="subtitle">{subtitle}</span>}
-            </div>
-          )}
-        </>
+        (backable || title) && (
+          <>
+            {backable && (
+              <span onClick={onBack} className="ant-modal-close-x back">
+                <img
+                  className="icon"
+                  src="rabby-internal://assets/icons/modal/back.svg"
+                />
+              </span>
+            )}
+            {title && (
+              <div className="headline">
+                <span className="title">{title}</span>
+                {subtitle && <span className="subtitle">{subtitle}</span>}
+              </div>
+            )}
+          </>
+        )
       }
     />
   );
