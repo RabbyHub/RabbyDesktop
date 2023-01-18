@@ -11,7 +11,7 @@ import {
 import clsx from 'clsx';
 import styled from 'styled-components';
 import BigNumber from 'bignumber.js';
-import { Alert, Button, message, Modal, Skeleton, Switch } from 'antd';
+import { Alert, Button, Modal, Skeleton, Switch } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
 
 import {
