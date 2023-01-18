@@ -93,15 +93,28 @@ export class Tab {
       });
     });
 
+    this._patchWindowClose();
+  }
+
+  /** @internal */
+  _patchWindowClose() {
     // polyfill for window.close
     this.view?.webContents.executeJavaScript(`
       ;(function () {
-        if (window.location.protocol !== 'chrome-extension:') return ;
+        if (window.close && window.close.__patched) return ;
+
+        if (
+          window.location.href !== 'about:blank'
+          && window.location.protocol !== 'chrome-extension:'
+        ) return ;
+
+
         var origWinClose = window.close.bind(window);
         window.close = function (...args) {
           window.rabbyDesktop.ipcRenderer.sendMessage('__internal_webui-window-close', ${this.window?.id}, ${this.view?.webContents.id});
           origWinClose(args);
         }
+        window.close.__patched = true;
       })();
     `);
   }
