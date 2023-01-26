@@ -51,6 +51,25 @@ const PortfolioWrapper = styled.div`
       }
     }
   }
+  &.empty {
+    display: flex;
+    flex-direction: column;
+    flex: auto;
+    flex-grow: 0;
+    height: 300px;
+    align-items: center;
+    justify-content: center;
+    .icon-empty {
+      width: 60px;
+    }
+    .text-empty {
+      font-size: 18px;
+      line-height: 21px;
+      color: rgba(255, 255, 255, 0.4);
+      margin: 0;
+      margin-top: 20px;
+    }
+  }
 `;
 
 const PortfolioView = ({
@@ -102,12 +121,32 @@ const PortfolioView = ({
     if (!el) return 65;
     return el.offsetLeft + el.offsetWidth / 2 - 7;
   }, [chainBalances, selectChainServerId]);
+  const isEmpty = useMemo(() => {
+    return (
+      !isLoadingProtocolList &&
+      !isLoadingTokenList &&
+      tokenList.length <= 0 &&
+      protocolList.length <= 0
+    );
+  }, [isLoadingProtocolList, isLoadingTokenList, tokenList, protocolList]);
 
   const handleRelateDapp = (protocol: DisplayProtocol) => {
     setRelateDappId(protocol.id);
     setRelateDappUrl(protocol.site_url);
     setRelateDappModalOpen(true);
   };
+
+  if (isEmpty) {
+    return (
+      <PortfolioWrapper className="empty">
+        <img
+          className="icon-empty"
+          src="rabby-internal://assets/icons/home/asset-empty.svg"
+        />
+        <p className="text-empty">No assets</p>
+      </PortfolioWrapper>
+    );
+  }
 
   return (
     <PortfolioWrapper>
