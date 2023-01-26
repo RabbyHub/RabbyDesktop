@@ -250,6 +250,7 @@ const Home = () => {
 
   const init = async () => {
     if (!currentAccount?.address) return;
+    setSelectChainServerId(null);
     setIsProtocolExpand(false);
     setIsTokenExpand(false);
   };
