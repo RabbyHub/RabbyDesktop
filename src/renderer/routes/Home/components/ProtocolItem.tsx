@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { Skeleton } from 'antd';
 import styled from 'styled-components';
 import classNames from 'classnames';
 import { useProtocolDappsBinding } from '@/renderer/hooks/useDappsMngr';
@@ -6,7 +7,7 @@ import { IconWithChain } from '@/renderer/components/TokenWithChain';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 // import { hasSameOrigin } from '@/isomorphic/url';
 import { useOpenDapp } from '@/renderer/utils/react-router';
-import PoolItem from './PoolItem';
+import PoolItem, { LoadingPoolItem } from './PoolItem';
 
 const ProtocolItemWrapper = styled.div`
   margin-bottom: 27px;
@@ -106,10 +107,6 @@ const ProtocolItem = ({
       };
     }
 
-    if (protocolDappsBinding[protocol.id]) {
-      return { hasBinded: true, bindUrl: protocolDappsBinding[protocol.id] };
-    }
-
     if (t) {
       return {
         hasBinded: true,
@@ -182,6 +179,36 @@ const ProtocolItem = ({
             key={`${portfolio.position_index}-${portfolio.pool.id}`}
           />
         ))}
+      </div>
+    </ProtocolItemWrapper>
+  );
+};
+
+export const LoadingProtocolItem = () => {
+  return (
+    <ProtocolItemWrapper>
+      <div className="protocol-info">
+        <Skeleton.Input
+          active
+          style={{
+            width: '14px',
+            height: '14px',
+            borderRadius: '2px',
+          }}
+        />
+        <span className="protocol-name">
+          <Skeleton.Input
+            active
+            style={{
+              width: '76px',
+              height: '20px',
+              borderRadius: '2px',
+            }}
+          />
+        </span>
+      </div>
+      <div className="protocol-list">
+        <LoadingPoolItem />
       </div>
     </ProtocolItemWrapper>
   );

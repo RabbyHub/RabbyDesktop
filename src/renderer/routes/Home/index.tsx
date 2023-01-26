@@ -82,15 +82,6 @@ const HomeWrapper = styled.div`
   }
 `;
 
-const RightToolbarWrapper = styled.div`
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
-  position: absolute;
-  top: 50px;
-  right: 0;
-`;
-
 const calcFilterPrice = (tokens: { usd_value?: number }[]) => {
   const total = tokens.reduce((t, item) => (item.usd_value || 0) + t, 0);
   return Math.min(total / 100, 1000);
@@ -201,17 +192,23 @@ const Home = () => {
     null
   );
   const curveData = useCurve(currentAccount?.address, balance || 0, Date.now());
-  const { tokenList, historyTokenMap } = useHistoryTokenList(
-    currentAccount?.address
-  );
+  const {
+    tokenList,
+    historyTokenMap,
+    isLoading: isLoadingTokenList,
+  } = useHistoryTokenList(currentAccount?.address);
   const filterTokenList = useMemo(() => {
     const list: TokenItem[] = selectChainServerId
       ? tokenList.filter((token) => token.chain === selectChainServerId)
       : tokenList;
     return sortBy(list, (i) => i.usd_value || 0).reverse();
   }, [tokenList, selectChainServerId]);
-  const { protocolList, historyProtocolMap, tokenHistoryPriceMap } =
-    useHistoryProtocol(currentAccount?.address);
+  const {
+    protocolList,
+    historyProtocolMap,
+    tokenHistoryPriceMap,
+    isLoading: isLoadingProtocol,
+  } = useHistoryProtocol(currentAccount?.address);
   const {
     filterList: displayTokenList,
     isExpand: isTokenExpand,
@@ -329,6 +326,8 @@ const Home = () => {
             hiddenUsdValue: protocolHiddenUsdValue,
             setIsExpand: setIsProtocolExpand,
           }}
+          isLoadingTokenList={isLoadingTokenList}
+          isLoadingProtocolList={isLoadingProtocol}
         />
       </HomeWrapper>
       <RightBar />
