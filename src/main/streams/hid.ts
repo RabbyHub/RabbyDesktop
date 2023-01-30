@@ -4,6 +4,7 @@ import usb = require('usb');
 import { pickAllNonFnFields } from '@/isomorphic/json';
 
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import { isInternalProtocol } from '@/isomorphic/url';
 import { handleIpcMainInvoke, sendToWebContents } from '../utils/ipcMainEvents';
 import { getSessionInsts, getAllMainUIViews } from '../utils/stream-helpers';
 
@@ -69,14 +70,30 @@ getSessionInsts().then(({ mainSession }) => {
 
   mainSession.setPermissionCheckHandler(
     (webContents, permission, requestingOrigin, details) => {
-      console.log(permission);
       if (permission === 'hid') {
         // Add logic here to determine if permission should be given to allow HID selection
         return true;
       }
-      if (permission === 'serial') {
-        // Add logic here to determine if permission should be given to allow serial port selection
+      switch (permission) {
+        case 'clipboard-sanitized-write':
+        case 'accessibility-events':
+          return true;
+        case 'serial':
+        default: {
+          if (isInternalProtocol(requestingOrigin)) {
+            return true;
+          }
+          break;
+        }
       }
+
+      if (!IS_RUNTIME_PRODUCTION) {
+        console.log(
+          `Permission Denied: called for ${permission} from ${requestingOrigin} with details:`,
+          details
+        );
+      }
+
       return false;
     }
   );
