@@ -36,7 +36,7 @@ const LogoOnekey = 'rabby-internal://assets/icons/walletlogo/onekey.svg';
 const IconPrivateKeyWhite =
   'rabby-internal://assets/icons/walletlogo/private-key-white.svg';
 const IconPrivateKeyInk =
-  'rabby-internal://assets/icons/walletlogo/privatekey-ink.svg';
+  'rabby-internal://assets/icons/walletlogo/privatekeylogo.svg';
 const LogoPrivateKey =
   'rabby-internal://assets/icons/walletlogo/privatekeylogo.svg';
 const LogoTp = 'rabby-internal://assets/icons/walletlogo/tp.svg';
