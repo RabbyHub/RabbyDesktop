@@ -20,9 +20,8 @@ import { useCallback, useEffect } from 'react';
  * const sendMessage = useForwardTo('*'); // send to all built-in views on mainWindow
  * const sendMessage = useForwardTo('add-address'); // send to specific built-in view
  *
- * sendMessage({
- *    type: 'some-message-type', // define/find valid type in `src/preloads/forward.d.ts`
- * });
+ * // define/find valid type in `src/preloads/forward.d.ts`
+ * sendMessage('some-message-type', ...);
  * ```
  */
 type ChannelForwardMessagePayload = ChannelForwardMessageType['send'][0];
@@ -35,7 +34,7 @@ export function useForwardTo<
     (type: T['type'], restPayload: Omit<Payload, 'type' | 'targetView'>) => {
       if (!isBuiltinView(window.location.href, targetView)) {
         console.warn(
-          `[useMessageForwardToMainwin] it's not expected to send message from ${targetView} to itself.`
+          `[useForwardTo] it's not expected to send message from ${targetView} to itself.`
         );
       }
 
@@ -78,6 +77,9 @@ export function useMessageForwarded<
 type MainWindowChannelMessage = ChannelForwardMessagePayload & {
   targetView: 'main-window';
 };
+/**
+ * @deprecated use `useForwardTo`/`useMessageForwarded` instead
+ */
 export function useMessageForwardToMainwin<
   T extends MainWindowChannelMessage['type']
 >(
