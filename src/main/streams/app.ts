@@ -263,7 +263,6 @@ export default function bootstrap() {
     const lastMainWinPos = getOrInitMainWinPosition();
     // init window
     const mainWindow = await createWindow({
-      // defaultTabUrl: RABBY_HOMEPAGE_URL,
       defaultTabUrl: '',
       window: {
         show: false,

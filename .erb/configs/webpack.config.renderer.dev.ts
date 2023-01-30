@@ -8,6 +8,7 @@ import { merge } from 'webpack-merge';
 import { execSync, spawn } from 'child_process';
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
+import WindiCSSWebpackPlugin from 'windicss-webpack-plugin';
 
 import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
@@ -122,6 +123,8 @@ const configuration: webpack.Configuration = {
             sourceType: 'var',
           }),
         ]),
+
+    new WindiCSSWebpackPlugin(),
 
     new webpack.NoEmitOnErrorsPlugin(),
 
