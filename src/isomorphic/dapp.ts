@@ -107,3 +107,15 @@ export function sortDappsBasedPinned(
     unpinnedDapps,
   };
 }
+
+export function normalizeProtocolBindingValues(
+  protocolBindings: Record<string, any>
+): IProtocolDappBindings {
+  return Object.entries(protocolBindings).reduce((acc, [key, val]) => {
+    if (val?.origin && val?.siteUrl) {
+      acc[key] = val;
+    }
+
+    return acc;
+  }, {} as IProtocolDappBindings);
+}

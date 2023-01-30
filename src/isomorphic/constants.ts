@@ -31,3 +31,10 @@ export const RABBY_MAIN_POPUP_VIEW = `${RABBY_LOCAL_URLBASE}/main-popup-view.htm
 export const RABBY_POPUP_GHOST_VIEW_URL = `${RABBY_LOCAL_URLBASE}/popup-view.html`;
 
 export const RABBY_BLANKPAGE_RELATIVE_URL = `preloads/blank.html`;
+
+export const GAS_LEVEL_TEXT = {
+  slow: 'Standard',
+  normal: 'Fast',
+  fast: 'Instant',
+  custom: 'Custom',
+};

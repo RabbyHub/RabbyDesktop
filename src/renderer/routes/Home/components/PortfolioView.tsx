@@ -1,17 +1,17 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import { DisplayChainWithWhiteLogo } from '@/renderer/hooks/useCurrentBalance';
-import TokenItemComp from './TokenItem';
-import ProtocolItem from './ProtocolItem';
+import AssociateDappModal from '@/renderer/components/AssociateDappModal';
+import TokenList from './TokenList';
+import ProtocolList from './ProtocolList';
 
 const PortfolioWrapper = styled.div`
   background: rgba(255, 255, 255, 0.07);
   width: 100%;
   padding: 46px 27px;
   border-radius: 8px;
-  max-width: 1375px;
   position: relative;
   flex: 1;
   .icon-asset-arrow {
@@ -37,21 +37,41 @@ const PortfolioWrapper = styled.div`
         &:nth-child(1) {
           text-align: left;
           color: rgba(255, 255, 255, 0.8);
-          width: 20%;
+          width: 17%;
         }
         &:nth-child(2) {
-          width: 20%;
+          width: 22%;
         }
         &:nth-child(3) {
-          width: 35%;
+          width: 38%;
         }
         &:nth-child(4) {
-          width: 25%;
+          width: 23%;
         }
       }
     }
   }
+  &.empty {
+    display: flex;
+    flex-direction: column;
+    flex: auto;
+    flex-grow: 0;
+    height: 300px;
+    align-items: center;
+    justify-content: center;
+    .icon-empty {
+      width: 60px;
+    }
+    .text-empty {
+      font-size: 18px;
+      line-height: 21px;
+      color: rgba(255, 255, 255, 0.4);
+      margin: 0;
+      margin-top: 20px;
+    }
+  }
 `;
+
 const PortfolioView = ({
   tokenList,
   historyTokenMap,
@@ -60,6 +80,10 @@ const PortfolioView = ({
   protocolHistoryTokenPriceMap,
   chainBalances,
   selectChainServerId,
+  tokenHidden,
+  protocolHidden,
+  isLoadingTokenList,
+  isLoadingProtocolList,
 }: {
   tokenList: TokenItem[];
   historyTokenMap: Record<string, TokenItem>;
@@ -71,7 +95,24 @@ const PortfolioView = ({
   >;
   chainBalances: DisplayChainWithWhiteLogo[];
   selectChainServerId: string | null;
+  tokenHidden: {
+    isExpand: boolean;
+    hiddenCount: number;
+    hiddenUsdValue: number;
+    setIsExpand(v: boolean): void;
+  };
+  protocolHidden: {
+    isExpand: boolean;
+    hiddenCount: number;
+    hiddenUsdValue: number;
+    setIsExpand(v: boolean): void;
+  };
+  isLoadingTokenList: boolean;
+  isLoadingProtocolList: boolean;
 }) => {
+  const [relateDappModalOpen, setRelateDappModalOpen] = useState(false);
+  const [relateDappUrl, setRelateDappUrl] = useState('');
+  const [relateDappId, setRelateDappId] = useState('');
   const assetArrowLeft = useMemo(() => {
     if (!selectChainServerId) return 65;
     const el: HTMLLIElement | null = document.querySelector(
@@ -80,6 +121,32 @@ const PortfolioView = ({
     if (!el) return 65;
     return el.offsetLeft + el.offsetWidth / 2 - 7;
   }, [chainBalances, selectChainServerId]);
+  const isEmpty = useMemo(() => {
+    return (
+      !isLoadingProtocolList &&
+      !isLoadingTokenList &&
+      tokenList.length <= 0 &&
+      protocolList.length <= 0
+    );
+  }, [isLoadingProtocolList, isLoadingTokenList, tokenList, protocolList]);
+
+  const handleRelateDapp = (protocol: DisplayProtocol) => {
+    setRelateDappId(protocol.id);
+    setRelateDappUrl(protocol.site_url);
+    setRelateDappModalOpen(true);
+  };
+
+  if (isEmpty) {
+    return (
+      <PortfolioWrapper className="empty">
+        <img
+          className="icon-empty"
+          src="rabby-internal://assets/icons/home/asset-empty.svg"
+        />
+        <p className="text-empty">No assets</p>
+      </PortfolioWrapper>
+    );
+  }
 
   return (
     <PortfolioWrapper>
@@ -90,31 +157,26 @@ const PortfolioView = ({
           transform: `translateX(${assetArrowLeft}px)`,
         }}
       />
-      <ul className="assets-list">
-        <li className="th">
-          <div>Asset</div>
-          <div>Price</div>
-          <div>Amount</div>
-          <div>USD-Value</div>
-        </li>
-        {tokenList.map((token) => (
-          <TokenItemComp
-            token={token}
-            historyToken={historyTokenMap[`${token.chain}-${token.id}`]}
-            key={`${token.chain}-${token.id}`}
-          />
-        ))}
-      </ul>
-      <div className="protocols">
-        {protocolList.map((protocol) => (
-          <ProtocolItem
-            key={protocol.id}
-            protocol={protocol}
-            historyProtocol={historyProtocolMap[protocol.id]}
-            protocolHistoryTokenPriceMap={protocolHistoryTokenPriceMap}
-          />
-        ))}
-      </div>
+      <TokenList
+        tokenList={tokenList}
+        historyTokenMap={historyTokenMap}
+        tokenHidden={tokenHidden}
+        isLoadingTokenList={isLoadingTokenList}
+      />
+      <ProtocolList
+        protocolList={protocolList}
+        historyProtocolMap={historyProtocolMap}
+        protocolHistoryTokenPriceMap={protocolHistoryTokenPriceMap}
+        onRelateDapp={handleRelateDapp}
+        isLoading={isLoadingProtocolList}
+      />
+      <AssociateDappModal
+        protocolId={relateDappId}
+        open={relateDappModalOpen}
+        url={relateDappUrl}
+        onCancel={() => setRelateDappModalOpen(false)}
+        onOk={() => setRelateDappModalOpen(false)}
+      />
     </PortfolioWrapper>
   );
 };

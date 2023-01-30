@@ -1,5 +1,9 @@
+import type { DEX_ENUM } from '@rabby-wallet/rabby-swap';
+import type { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
+
 // eslint-disable-next-line @typescript-eslint/naming-convention
 import type { TotalBalanceResponse } from '@debank/rabby-api/dist/types';
+import { TransactionGroup } from './types-rabbyx';
 
 type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
 type OpenApiService = import('@debank/rabby-api').OpenApiService;
@@ -22,7 +26,10 @@ export type RabbyXMethod = {
     type: string;
     brandName: string;
   }[];
-
+  'walletController.getTransactionHistory': (addr: string) => {
+    pendings: TransactionGroup[];
+    completeds: TransactionGroup[];
+  };
   'walletController.updateAlianName': (addr: string, name: string) => void;
   'walletController.getAlianName': (addr: string) => string;
 
@@ -79,6 +86,65 @@ export type RabbyXMethod = {
   ) => void;
   'walletController.getWhitelist': () => string[];
   'walletController.isWhitelistEnabled': () => boolean;
+  'walletController.getSwap': (
+    k?: keyof SwapState
+  ) => typeof k extends void ? SwapState : SwapState[keyof SwapState];
+
+  'walletController.getSwapGasCache': (
+    chainId: keyof GasCache
+  ) => ChainGas | null;
+
+  'walletController.updateSwapGasCache': (
+    chainId: keyof GasCache,
+    gas: ChainGas
+  ) => void;
+
+  'walletController.setSwapDexId': (dexId: DEX_ENUM) => void;
+
+  'walletController.setLastSelectedSwapChain': (dexId: CHAINS_ENUM) => void;
+
+  'walletController.setUnlimitedAllowance': (bool: boolean) => void;
+
+  'walletController.getCustomRpcByChain': (chain: CHAINS_ENUM) => string;
+
+  'walletController.getERC20Allowance': (
+    chainServerId: string,
+    erc20Address: string,
+    contractAddress: string
+  ) => Promise<string>;
+
+  'walletController.getRecommendNonce': (p: {
+    from: string;
+    chainId: number;
+  }) => Promise<string>;
+
+  'walletController.generateApproveTokenTx': (p: {
+    from: string;
+    to: string;
+    chainId: number;
+    spender: string;
+    amount: string;
+  }) => {
+    from: string;
+    to: string;
+    chainId: number;
+    value: string;
+    data: string;
+  };
+
+  'walletController.dexSwap': (
+    p: {
+      chain: CHAINS_ENUM;
+      quote: QuoteResult;
+      needApprove: boolean;
+      spender: string;
+      pay_token_id: string;
+      unlimited: boolean;
+      gasPrice: number;
+      shouldTwoStepApprove: boolean;
+    },
+    $ctx?: unknown
+  ) => Promise<void>;
   'walletController.requestKeyring': (
     type: string,
     methodName: string,
@@ -170,10 +236,12 @@ export type RabbyXMethod = {
   'openapi.addOriginFeedback': OpenApiService['addOriginFeedback'];
   'openapi.getNetCurve': OpenApiService['getNetCurve'];
   'openapi.getTokenHistoryPrice': OpenApiService['getTokenHistoryPrice'];
+  'openapi.getTokenHistoryDict': OpenApiService['getTokenHistoryDict'];
   'openapi.getHistoryTokenList': OpenApiService['getHistoryTokenList'];
   'openapi.getProtocolList': OpenApiService['getProtocolList'];
   'openapi.getProtocol': OpenApiService['getProtocol'];
   'openapi.getHistoryProtocol': OpenApiService['getHistoryProtocol'];
+  'openapi.getComplexProtocolList': OpenApiService['getComplexProtocolList'];
 };
 
 export type RabbyXMethods = {

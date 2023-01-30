@@ -35,7 +35,7 @@ const unpinnedListAtomic = atom([] as IDapp['origin'][]);
 //   });
 // }
 
-const protocolDappsBindingAtom = atom({} as Record<string, IDapp['origin'][]>);
+const protocolDappsBindingAtom = atom({} as IProtocolDappBindings);
 export function useProtocolDappsBinding() {
   const [protocolDappsBinding, setProtocolDappsBinding] = useAtom(
     protocolDappsBindingAtom
@@ -60,8 +60,8 @@ export function useProtocolDappsBinding() {
   }, [fetchBindings]);
 
   const bindingDappsToProtocol = useCallback(
-    async (protocol: string, dappOrigins: IDapp['origin'][]) => {
-      return putProtocolDappsBinding(protocol, dappOrigins).then(() => {
+    async (protocol: string, item: IProtocolDappBindings[any]) => {
+      return putProtocolDappsBinding(protocol, item).then(() => {
         fetchBindings();
       });
     },
@@ -108,19 +108,9 @@ export function useDapps() {
     );
   }, [setPinnedList]);
 
-  const updateDapp = useCallback(
-    async (dapp: IDapp) => {
-      return putDapp(dapp);
-    },
-    [setDapps]
-  );
-
-  const renameDapp = useCallback(
-    async (dapp: IDapp, alias: string) => {
-      updateDapp({ ...dapp, alias });
-    },
-    [updateDapp]
-  );
+  const renameDapp = useCallback(async (dapp: IDapp, alias: string) => {
+    putDapp({ ...dapp, alias });
+  }, []);
 
   const removeDapp = useCallback(
     async (dapp: IDapp) => {
@@ -153,9 +143,6 @@ export function useDapps() {
   }, [originDapps, pinnedList, unpinnedList]);
   /* eslint-enable @typescript-eslint/no-shadow */
 
-  console.debug('[debug] pinnedList, unpinnedList', pinnedList, unpinnedList);
-  console.debug('[debug] mergeDapps', mergeDapps);
-
   return {
     dapps: mergeDapps,
     pinnedList,
@@ -163,7 +150,6 @@ export function useDapps() {
     pinnedDapps,
     unpinnedDapps,
     detectDapps,
-    updateDapp,
     renameDapp,
     removeDapp,
     pinDapp,

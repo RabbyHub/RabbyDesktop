@@ -1,3 +1,5 @@
+import { keyBy } from 'lodash';
+import { CHAINS } from '@debank/common';
 /**
  *
  * @param origin (exchange.pancakeswap.finance)
@@ -25,4 +27,12 @@ export const hashCode = (str: string) => {
     hash |= 0; // Convert to 32bit integer
   }
   return hash;
+};
+
+const chainsDict = keyBy(CHAINS, 'serverId');
+export const getChain = (chainId?: string) => {
+  if (!chainId) {
+    return null;
+  }
+  return chainsDict[chainId];
 };

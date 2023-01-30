@@ -1,10 +1,8 @@
 import { useEffect, useState, useMemo } from 'react';
-import BigNumber from 'bignumber.js';
 import styled from 'styled-components';
 import classNames from 'classnames';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import { sortBy } from 'lodash';
-import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { ellipsis } from '@/renderer/utils/address';
 import { formatNumber } from '@/renderer/utils/number';
 import useCurrentBalance from '@/renderer/hooks/useCurrentBalance';
@@ -18,22 +16,30 @@ import { message } from 'antd';
 import ChainList from './components/ChainList';
 import Curve from './components/Curve';
 import PortfolioView from './components/PortfolioView';
+import RightBar from './components/RightBar';
 
-const HomeWrapper = styled.div`
+const HomeBody = styled.div`
+  display: flex;
   padding-top: 24px;
   padding-left: 28px;
-  padding-right: 358px;
-  color: #fff;
+  padding-right: 28px;
   min-height: calc(100vh - 64px);
+`;
+
+const HomeWrapper = styled.div`
+  color: #fff;
+  height: 100%;
   display: flex;
   flex-direction: column;
+  max-width: 1375px;
+  margin: 0 auto;
+  flex: 1;
   .header {
     width: 100%;
     margin-bottom: 20px;
     .top {
       display: flex;
       margin-bottom: 20px;
-      max-width: 1375px;
       .left {
         margin-right: 40px;
       }
@@ -69,7 +75,7 @@ const HomeWrapper = styled.div`
       }
     }
     .balance {
-      font-weight: 590;
+      font-weight: 500;
       font-size: 46px;
       line-height: 55px;
     }
@@ -94,18 +100,27 @@ const useExpandList = (tokens: TokenItem[]) => {
   const [isExpand, setIsExpand] = useState(false);
   const filterPrice = useMemo(() => calcFilterPrice(tokens), [tokens]);
   const isShowExpand = useMemo(() => calcIsShowExpand(tokens), [tokens]);
-
-  const totalHidden = useMemo(
-    () =>
-      tokens.reduce((t, item) => {
+  const { totalHidden, totalHiddenCount } = useMemo(() => {
+    if (!isShowExpand) {
+      return {
+        totalHidden: 0,
+        totalHiddenCount: 0,
+      };
+    }
+    return {
+      totalHidden: tokens.reduce((t, item) => {
         const price = item.amount * item.price || 0;
         if (price < filterPrice) {
           return t + price;
         }
         return t;
       }, 0),
-    [tokens, filterPrice]
-  );
+      totalHiddenCount: tokens.filter((item) => {
+        const price = item.amount * item.price || 0;
+        return price < filterPrice;
+      }).length,
+    };
+  }, [tokens, filterPrice]);
   const filterList = useMemo(() => {
     if (!isShowExpand) {
       return tokens;
@@ -123,6 +138,7 @@ const useExpandList = (tokens: TokenItem[]) => {
     filterPrice,
     isShowExpand,
     totalHidden,
+    totalHiddenCount,
   };
 };
 const useExpandProtocolList = (protocols: DisplayProtocol[]) => {
@@ -130,17 +146,21 @@ const useExpandProtocolList = (protocols: DisplayProtocol[]) => {
   const filterPrice = useMemo(() => calcFilterPrice(protocols), [protocols]);
   const isShowExpand = useMemo(() => calcIsShowExpand(protocols), [protocols]);
 
-  const totalHidden = useMemo(
-    () =>
-      protocols.reduce((t, item) => {
+  const { totalHidden, totalHiddenCount } = useMemo(() => {
+    return {
+      totalHidden: protocols.reduce((t, item) => {
         const price = item.usd_value || 0;
         if (price < filterPrice) {
           return t + price;
         }
         return t;
       }, 0),
-    [protocols, filterPrice]
-  );
+      totalHiddenCount: protocols.filter((item) => {
+        const price = item.usd_value || 0;
+        return price < filterPrice;
+      }).length,
+    };
+  }, [protocols, filterPrice]);
   const filterList = useMemo(() => {
     if (!isShowExpand) {
       return protocols;
@@ -158,6 +178,7 @@ const useExpandProtocolList = (protocols: DisplayProtocol[]) => {
     filterPrice,
     isShowExpand,
     totalHidden,
+    totalHiddenCount,
   };
 };
 
@@ -167,50 +188,34 @@ const Home = () => {
     currentAccount?.address,
     true
   );
-  const [netCurve, setNetCurve] = useState<
-    {
-      timestamp: number;
-      usd_value: number;
-    }[]
-  >([]);
   const [selectChainServerId, setSelectChainServerId] = useState<string | null>(
     null
   );
-  const { usdValueChange, percentChange, isLoss } = useMemo(() => {
-    if (!balance || netCurve.length <= 0)
-      return { usdValueChange: '0', percentChange: '0' };
-    const balanceBn = new BigNumber(balance);
-    const yesterdayBalanceBn = new BigNumber(netCurve[0].usd_value);
-    const gap = balanceBn.minus(yesterdayBalanceBn);
-    let changePercent = 0;
-    if (yesterdayBalanceBn.eq(0)) {
-      if (balanceBn.eq(0)) {
-        changePercent = 0;
-      } else {
-        changePercent = 1;
-      }
-    } else {
-      changePercent = gap.div(yesterdayBalanceBn).toNumber();
-    }
-    return {
-      usdValueChange: gap.abs().toFixed(2),
-      percentChange: Math.abs(changePercent * 100).toFixed(2),
-      isLoss: balanceBn.lt(yesterdayBalanceBn),
-    };
-  }, [netCurve, balance]);
-  const curveData = useCurve(balance || 0, Date.now(), netCurve);
-  const { tokenList, historyTokenMap } = useHistoryTokenList(
-    currentAccount?.address
-  );
+  const curveData = useCurve(currentAccount?.address, balance || 0, Date.now());
+  const {
+    tokenList,
+    historyTokenMap,
+    isLoading: isLoadingTokenList,
+  } = useHistoryTokenList(currentAccount?.address);
   const filterTokenList = useMemo(() => {
     const list: TokenItem[] = selectChainServerId
       ? tokenList.filter((token) => token.chain === selectChainServerId)
       : tokenList;
     return sortBy(list, (i) => i.usd_value || 0).reverse();
   }, [tokenList, selectChainServerId]);
-  const { protocolList, historyProtocolMap, tokenHistoryPriceMap } =
-    useHistoryProtocol(currentAccount?.address);
-  const { filterList: displayTokenList } = useExpandList(filterTokenList);
+  const {
+    protocolList,
+    historyProtocolMap,
+    tokenHistoryPriceMap,
+    isLoading: isLoadingProtocol,
+  } = useHistoryProtocol(currentAccount?.address);
+  const {
+    filterList: displayTokenList,
+    isExpand: isTokenExpand,
+    totalHidden: tokenHiddenUsdValue,
+    totalHiddenCount: tokenHiddenCount,
+    setIsExpand: setIsTokenExpand,
+  } = useExpandList(filterTokenList);
 
   const filterProtocolList = useMemo(() => {
     const list: DisplayProtocol[] = selectChainServerId
@@ -224,7 +229,7 @@ const Home = () => {
           return {
             ...item,
             portfolio_item_list: sortBy(item.portfolio_item_list, (i) => {
-              return (i.detail.supply_token_list || []).reduce(
+              return (i.asset_token_list || []).reduce(
                 (sum, j) => sum + j.price * j.amount,
                 0
               );
@@ -235,13 +240,19 @@ const Home = () => {
       (i) => i.usd_value || 0
     ).reverse();
   }, [protocolList, selectChainServerId]);
-  const { filterList: displayProtocolList } =
-    useExpandProtocolList(filterProtocolList);
+  const {
+    filterList: displayProtocolList,
+    isExpand: isProtocolExpand,
+    totalHidden: protocolHiddenUsdValue,
+    totalHiddenCount: protocolHiddenCount,
+    setIsExpand: setIsProtocolExpand,
+  } = useExpandProtocolList(filterProtocolList);
 
   const init = async () => {
     if (!currentAccount?.address) return;
-    const curve = await walletOpenapi.getNetCurve(currentAccount.address);
-    setNetCurve(curve);
+    setSelectChainServerId(null);
+    setIsProtocolExpand(false);
+    setIsTokenExpand(false);
   };
 
   useEffect(() => {
@@ -249,58 +260,79 @@ const Home = () => {
   }, [currentAccount]);
 
   return (
-    <HomeWrapper>
-      <div className="header">
-        <div className="top">
-          <div className="left">
-            <div
-              className="current-address"
-              onClick={async () => {
-                if (!currentAccount?.address) return;
+    <HomeBody>
+      <HomeWrapper>
+        <div className="header">
+          <div className="top">
+            <div className="left">
+              <div
+                className="current-address"
+                onClick={async () => {
+                  if (!currentAccount?.address) return;
 
-                await window.navigator.clipboard.writeText(
-                  currentAccount.address
-                );
-                message.open({
-                  type: 'success',
-                  content: 'Copied Address',
-                  className: 'mainwindow-default-tip',
-                  duration: 1,
-                });
-              }}
-            >
-              {ellipsis(currentAccount?.address || '')}
-              <img
-                className="icon-copy"
-                src="rabby-internal://assets/icons/home/copy.svg"
-              />
+                  await window.navigator.clipboard.writeText(
+                    currentAccount.address
+                  );
+                  message.open({
+                    type: 'success',
+                    content: 'Copied Address',
+                    className: 'mainwindow-default-tip',
+                    duration: 1,
+                  });
+                }}
+              >
+                {ellipsis(currentAccount?.address || '')}
+                <img
+                  className="icon-copy"
+                  src="rabby-internal://assets/icons/home/copy.svg"
+                />
+              </div>
+              <div className="balance">${formatNumber(balance || 0)}</div>
             </div>
-            <div className="balance">${formatNumber(balance || 0)}</div>
+            {curveData ? (
+              <div className="right">
+                <div
+                  className={classNames('balance-change', {
+                    'is-loss': curveData.isLoss,
+                  })}
+                >{`${curveData.isLoss ? '-' : '+'}${curveData.change} (${
+                  curveData.changePercent
+                })`}</div>
+                {curveData.list.length > 0 && <Curve data={curveData} />}
+              </div>
+            ) : null}
           </div>
-          <div className="right">
-            <div
-              className={classNames('balance-change', { 'is-loss': isLoss })}
-            >{`${isLoss ? '-' : '+'}$${formatNumber(
-              usdValueChange
-            )} (${percentChange}%)`}</div>
-            <Curve data={curveData} />
-          </div>
+          <ChainList
+            chainBalances={chainBalances}
+            onChange={setSelectChainServerId}
+          />
         </div>
-        <ChainList
+        <PortfolioView
+          tokenList={displayTokenList}
+          historyTokenMap={historyTokenMap}
+          protocolList={displayProtocolList}
+          historyProtocolMap={historyProtocolMap}
+          protocolHistoryTokenPriceMap={tokenHistoryPriceMap}
           chainBalances={chainBalances}
-          onChange={setSelectChainServerId}
+          selectChainServerId={selectChainServerId}
+          tokenHidden={{
+            isExpand: isTokenExpand,
+            hiddenCount: tokenHiddenCount,
+            hiddenUsdValue: tokenHiddenUsdValue,
+            setIsExpand: setIsTokenExpand,
+          }}
+          protocolHidden={{
+            isExpand: isProtocolExpand,
+            hiddenCount: protocolHiddenCount,
+            hiddenUsdValue: protocolHiddenUsdValue,
+            setIsExpand: setIsProtocolExpand,
+          }}
+          isLoadingTokenList={isLoadingTokenList}
+          isLoadingProtocolList={isLoadingProtocol}
         />
-      </div>
-      <PortfolioView
-        tokenList={displayTokenList}
-        historyTokenMap={historyTokenMap}
-        protocolList={displayProtocolList}
-        historyProtocolMap={historyProtocolMap}
-        protocolHistoryTokenPriceMap={tokenHistoryPriceMap}
-        chainBalances={chainBalances}
-        selectChainServerId={selectChainServerId}
-      />
-    </HomeWrapper>
+      </HomeWrapper>
+      <RightBar />
+    </HomeBody>
   );
 };
 

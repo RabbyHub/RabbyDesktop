@@ -1,7 +1,49 @@
 
-v0.3.0 / 2023-01-13
+v0.4.0 / 2023-01-19
 ==================
 
+  * style: tuning.
+  * chore: code clean.
+  * fix: only display bind dapp info when hover (#84)
+  * Feat/update dapps bindings (#85)
+  * fix: ensure patch `window.close` in rabbyx's notification win. (#82)
+  * fix: zero balance account
+  * Merge remote-tracking branch 'origin/dev' into dev
+  * fix: sync rabbyx's session message to popupView on mainWin.
+  * Merge pull request #83 from RabbyHub/fix/overflow-scroll
+  * fix: overflow
+  * fix: account detail (#77)
+  * feat: add home page transactions (#74)
+  * Merge remote-tracking branch 'origin/dev' into dev
+  * fix: robust change on migrate dapps' data
+  * Feat/home page quick swap (#70)
+  * fix: cannot fetch newly added dapp. (#81)
+  * fix: allow ledger sign connectoin.
+  * chore: update rabbyx to use new rabby-api in background.
+  * fix: dapp favicon (#80)
+  * fix: unbind protocol on dapp removed.
+  * feat: adjust logic about protocolDappsBinding.
+  * fix: error on rename dapp. (#78)
+  * fix: modal (#76)
+  * fix: dapps store migration.
+  * fix: style.
+  * feat: improve stablility on parse favicon. (#75)
+  * wip: add dapp (#60)
+  * feat: init hd manager (#72)
+  * fix: husky (#71)
+  * build: add fastlane script. (#69)
+  * fix: get-app-version.
+  * fix: update accounts (#68)
+  * chore: avoid frequent react-refresh overlay.
+  * feat: normalize dapps about invoking.
+  * feat: integrate autoUpdate into settings page.
+  * security: disable open linkURL/srcURL from context menu popup.
+  * feat: apply styles rules on mainWindow. (#67)
+
+v0.3.0 / 2023-01-13
+===================
+
+  * Release v0.3.0
   * style: tuning settings page.
   * feat: support set proxy server for whole app. (#66)
   * chore: add build helper script.

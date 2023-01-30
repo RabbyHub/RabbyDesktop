@@ -70,6 +70,12 @@ type M2RChanneMessagePayload = {
   '__internal_push:rabbyx:get-dapp-screenshot': {
     reqId: string;
   };
+  '__internal_push:webusb:device-changed': {
+    changes: {
+      type: 'connect' | 'disconnect';
+      device: INodeWebUSBDevice;
+    };
+  };
 };
 
 type IPushEvents = keyof M2RChanneMessagePayload;
@@ -312,6 +318,10 @@ type ChannelInvokePayload = {
       version: ReturnType<Electron.App['getVersion']>;
     };
   };
+  'get-os-info': {
+    send: [];
+    response: IOSInfo;
+  };
   'detect-dapp': {
     send: [dappUrl: string];
     response: {
@@ -331,6 +341,12 @@ type ChannelInvokePayload = {
     response: {
       dapp: IDapp | null;
       isPinned: boolean;
+    };
+  };
+  'dapps-post': {
+    send: [dapp: IDapp];
+    response: {
+      error?: string;
     };
   };
   'dapps-put': {
@@ -361,7 +377,7 @@ type ChannelInvokePayload = {
     };
   };
   'dapps-put-protocol-binding': {
-    send: [Record<string, IDapp['origin'][]>];
+    send: [bindings: IProtocolDappBindings];
     response: {
       error?: string;
     };
@@ -369,7 +385,7 @@ type ChannelInvokePayload = {
   'dapps-fetch-protocol-binding': {
     send: [];
     response: {
-      result: Record<string, IDapp['origin'][]>;
+      result: IProtocolDappBindings;
     };
   };
   'get-desktopAppState': {
@@ -415,7 +431,27 @@ type ChannelInvokePayload = {
     send: [conf: IAppProxyConf];
     response: void;
   };
-
+  'get-hid-devices': {
+    send: [
+      options?: {
+        filters?: HIDDeviceRequestOptions['filters'];
+      }
+    ];
+    response: {
+      error?: string;
+      devices: IHidDeviceInfo[];
+    };
+  };
+  'get-usb-devices': {
+    send: [
+      options?: {
+        filters?: HIDDeviceRequestOptions['filters'];
+      }
+    ];
+    response: {
+      devices: IUSBDevice[];
+    };
+  };
   [`__internal_rpc:rabbyx-rpc:query`]: {
     send: [query: Omit<IRabbyxRpcQuery, 'rpcId'>];
     response: {

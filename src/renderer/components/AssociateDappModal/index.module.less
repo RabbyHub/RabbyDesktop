@@ -21,6 +21,7 @@
     line-height: 18px;
 
     color: #8697ff;
+    height: 64px;
   }
 
   &Content {
@@ -75,7 +76,7 @@
     padding: 40px 32px 20px;
   }
   &Title {
-    font-weight: 510;
+    font-weight: 500;
     font-size: 28px;
     line-height: 33px;
     text-align: center;
@@ -83,7 +84,7 @@
     margin-bottom: 12px;
   }
   &Desc {
-    font-weight: 510;
+    font-weight: 500;
     font-size: 15px;
     line-height: 18px;
     text-align: center;
@@ -95,13 +96,15 @@
 
   &Body {
     padding: 0 32px;
+    height: 372px;
     .dappContainer {
       padding-top: 12px;
       overflow: overlay;
-      height: 372px;
       display: flex;
+      max-height: 100%;
       gap: 20px;
       flex-wrap: wrap;
+      align-items: flex-start;
     }
   }
   &Footer {

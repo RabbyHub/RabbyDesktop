@@ -72,9 +72,11 @@ const DappCardAdd = ({ onClick }: { onClick?: () => void }) => {
 };
 
 const AssociateDapp = ({
+  protocolId,
   url,
   onOk,
 }: {
+  protocolId: string;
   url: string;
   onOk?: (origin: string) => void;
 }) => {
@@ -85,7 +87,13 @@ const AssociateDapp = ({
     useProtocolDappsBinding();
   const [loading, setLoading] = useState(false);
 
-  console.log(protocolDappsBinding);
+  const bindedDapp = protocolDappsBinding?.[protocolId];
+
+  useEffect(() => {
+    if (bindedDapp) {
+      setCurrent(bindedDapp.siteUrl);
+    }
+  }, [bindedDapp, dapps, url]);
 
   const dappList = useMemo(() => {
     try {
@@ -110,13 +118,17 @@ const AssociateDapp = ({
   const handleConfirm = async () => {
     setLoading(true);
     try {
-      await bindingDappsToProtocol(url, [current]);
+      await bindingDappsToProtocol(protocolId, {
+        origin: current,
+        siteUrl: url,
+      });
       onOk?.(current);
     } catch (e: any) {
       message.error(e.message);
     }
     setLoading(false);
   };
+
   return (
     <>
       <div className={styles.associateDapp}>
@@ -171,7 +183,10 @@ const AssociateDapp = ({
         }}
         onAddedDapp={(origin) => {
           setIsShowAdd(false);
-          setCurrent(origin);
+          // todo: fix me
+          setTimeout(() => {
+            setCurrent(origin);
+          }, 16);
         }}
       />
     </>
@@ -181,11 +196,13 @@ const AssociateDapp = ({
 export default function AssociateDappModal({
   onOk,
   url,
+  protocolId,
   ...modalProps
 }: React.PropsWithChildren<
   ModalProps & {
-    onOk?: (origin: string) => void;
+    protocolId: string;
     url: string;
+    onOk?: (origin: string) => void;
   }
 >) {
   return (
@@ -201,7 +218,7 @@ export default function AssociateDappModal({
       wrapClassName={classNames(modalProps.wrapClassName)}
       destroyOnClose
     >
-      <AssociateDapp url={url} onOk={onOk} />
+      <AssociateDapp protocolId={protocolId} url={url} onOk={onOk} />
     </Modal>
   );
 }

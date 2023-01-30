@@ -200,6 +200,10 @@ type PopupViewOnMainwinInfo =
       type: 'address-management';
     }
   | {
+      type: 'quick-swap';
+      state?: any;
+    }
+  | {
       type: 'dapps-management';
     };
 
@@ -210,3 +214,17 @@ type IShellNavInfo = {
   tabUrl: string;
   dappSecurityCheckResult: ISecurityCheckResult | null;
 };
+
+type IHidDeviceInfo = import('node-hid').Device;
+
+type IUSBDevice = PickAllNonFnFields<USBDevice>;
+type INodeWebUSBDevice = PickAllNonFnFields<import('usb').WebUSBDevice>;
+
+type IOSInfo = {
+  arch: typeof process.arch;
+  platform: typeof process.platform;
+};
+type IProtocolDappBindings = Record<
+  string,
+  { origin: string; siteUrl: string }
+>;
