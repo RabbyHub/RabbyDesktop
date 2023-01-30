@@ -2,6 +2,7 @@
 /// <reference path="../main/internal.d.ts" />
 /// <reference path="../isomorphic/types.d.ts" />
 /// <reference path="../isomorphic/type-helpers.d.ts" />
+/// <reference path="../preloads/forward.d.ts" />
 
 type M2RChanneMessagePayload = {
   'download-release-progress-updated': {
@@ -162,6 +163,10 @@ type ChannelMessagePayload = {
       }
     ];
     response: ChannelMessagePayload['__internal_forward:main-window:client-message']['send'];
+  };
+  '__internal_forward:views:channel-message': {
+    send: ChannelForwardMessageType['send'];
+    response: ChannelForwardMessageType['response'];
   };
   '__internal_rpc:dapp-tabs:close-safe-view': {
     send: [];

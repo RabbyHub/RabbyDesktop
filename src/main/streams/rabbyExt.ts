@@ -13,7 +13,11 @@ import {
   onIpcMainEvent,
   sendToWebContents,
 } from '../utils/ipcMainEvents';
-import { getRabbyExtId, onMainWindowReady } from '../utils/stream-helpers';
+import {
+  getRabbyExtId,
+  getSessionInsts,
+  onMainWindowReady,
+} from '../utils/stream-helpers';
 import { rabbyxQuery } from './rabbyIpcQuery/_base';
 import { createPopupView } from '../utils/browser';
 
@@ -85,10 +89,22 @@ const maskReady = getRabbyExtId().then(async () => {
 const rabbyxInitialized = new Promise<number>((resolve) => {
   const dispose = onIpcMainEvent('rabbyx-initialized', (_, time) => {
     dispose();
-    cLog('rabbyx-initialized', time);
     resolve(time);
   });
 });
+
+Promise.all([getSessionInsts(), getRabbyExtId(), rabbyxInitialized]).then(
+  ([{ mainSession }, extId, time]) => {
+    return new Promise((resolve) => {
+      mainSession.on('extension-ready', async (_evt, ext) => {
+        if (ext.id === extId) {
+          cLog('rabbyx-initialized', ext.id, time);
+          resolve(ext);
+        }
+      });
+    });
+  }
+);
 
 const bgWcReady = new Promise<Electron.WebContents>((resolve) => {
   app.on('web-contents-created', async (_, webContents) => {

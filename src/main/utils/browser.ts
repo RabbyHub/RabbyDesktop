@@ -153,6 +153,8 @@ export function hidePopupView(view: BrowserView) {
   const bounds = view.getBounds();
   view.setBounds({
     ...bounds,
+    width: 1,
+    height: 1,
     x: -99999,
     y: -99999,
   });

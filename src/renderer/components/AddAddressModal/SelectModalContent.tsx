@@ -1,4 +1,4 @@
-import { useMessageForwardToMainwin } from '@/renderer/hooks/useMessageToMainwin';
+import { useMessageForwardToMainwin } from '@/renderer/hooks/useViewsMessage';
 import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { KEYRING_CLASS } from '@/renderer/utils/constant';
 import clsx from 'clsx';

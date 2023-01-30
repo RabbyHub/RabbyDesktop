@@ -25,7 +25,7 @@ export async function onMainWindowReady(): Promise<
 }
 
 export async function getRabbyExtId() {
-  const ext = await firstValueFrom(fromMainSubject('rabbyExtensionReady'));
+  const ext = await firstValueFrom(fromMainSubject('rabbyExtensionLoaded'));
 
   return ext.id;
 }
