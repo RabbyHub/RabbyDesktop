@@ -15,7 +15,7 @@ const TokenWithChainWrapper = styled.div`
     height: 16px;
     position: absolute;
     right: -6px;
-    top: -6px;
+    bottom: -6px;
   }
   .no-round {
     border-radius: 4px !important;

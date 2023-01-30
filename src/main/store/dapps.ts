@@ -2,7 +2,13 @@
 
 import { app } from 'electron';
 import Store from 'electron-store';
-import { fillUnpinnedList, formatDapp } from '@/isomorphic/dapp';
+import {
+  fillUnpinnedList,
+  formatDapp,
+  formatDapps,
+  normalizeProtocolBindingValues,
+} from '@/isomorphic/dapp';
+import { arraify } from '@/isomorphic/array';
 import {
   emitIpcMainEvent,
   handleIpcMainInvoke,
@@ -10,7 +16,7 @@ import {
 } from '../utils/ipcMainEvents';
 import { APP_NAME, PERSIS_STORE_PREFIX } from '../../isomorphic/constants';
 import { safeParse, shortStringify } from '../../isomorphic/json';
-import { canoicalizeDappUrl, isDappProtocol } from '../../isomorphic/url';
+import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { detectDapp } from '../utils/dapps';
 import { getBindLog } from '../utils/log';
 import { getAppProxyConf } from './desktopApp';
@@ -25,6 +31,14 @@ const IDappSchema: import('json-schema-typed').JSONSchema = {
     origin: { type: 'string' },
     faviconUrl: { type: 'string' },
     faviconBase64: { type: 'string' },
+  },
+};
+
+const IProtocolBindingSchema: import('json-schema-typed').JSONSchema = {
+  type: 'object',
+  properties: {
+    origin: { type: 'string' },
+    siteUrl: { type: 'string' },
   },
 };
 
@@ -49,14 +63,9 @@ export const dappStore = new Store<{
     protocolDappsBinding: {
       type: 'object',
       patternProperties: {
-        '^https?://.+$': {
-          type: 'array',
-          items: {
-            type: 'string',
-          },
-        },
+        '^https?://.+$': IProtocolBindingSchema,
       },
-      default: {} as Record<IDapp['origin'], IDapp['origin'][]>,
+      default: {} as IProtocolDappBindings,
     },
     dappsMap: {
       type: 'object',
@@ -100,12 +109,12 @@ export const dappStore = new Store<{
   },
   migrations: {
     '>=0.3.0': (store) => {
-      const dapps = store.get('dapps') || [];
+      const dapps = formatDapps(store.get('dapps') || []);
 
       let dappsMap = store.get('dappsMap');
       if ((!dappsMap || !Object.keys(dappsMap).length) && dapps.length) {
         dappsMap = dapps.reduce((acc, dapp) => {
-          acc[dapp.origin] = dapp;
+          if (dapp.origin) acc[dapp.origin] = dapp;
           return acc;
         }, {} as Record<IDapp['origin'], IDapp>);
         store.set('dappsMap', dappsMap);
@@ -147,6 +156,12 @@ export function getAllDapps() {
   // }
 
   return result;
+}
+
+export function getProtocolDappsBindings() {
+  const protocolDappsBinding = dappStore.get('protocolDappsBinding') || {};
+
+  return normalizeProtocolBindingValues(protocolDappsBinding);
 }
 
 export function findDappByOrigin(url: string, dapps = getAllDapps()) {
@@ -211,7 +226,11 @@ handleIpcMainInvoke('get-dapp', (_, dappOrigin) => {
 handleIpcMainInvoke('dapps-fetch', () => {
   const dapps = getAllDapps();
   const pinnedList = dappStore.get('pinnedList');
-  const unpinnedList = dappStore.get('unpinnedList');
+  const { unpinnedList } = fillUnpinnedList(
+    dapps,
+    pinnedList,
+    dappStore.get('unpinnedList')
+  );
 
   return {
     dapps,
@@ -220,28 +239,42 @@ handleIpcMainInvoke('dapps-fetch', () => {
   };
 });
 
-handleIpcMainInvoke('dapps-put', (_, dapp: IDapp) => {
-  // TODO: is there mutex?
+handleIpcMainInvoke('dapps-post', (_, dapp: IDapp) => {
   const dappsMap = dappStore.get('dappsMap');
-  const pinnedList = dappStore.get('pinnedList');
-  const unpinnedList = dappStore.get('unpinnedList');
+
+  if (dappsMap[dapp.origin]) {
+    return {
+      error: 'Dapp already exists',
+    };
+  }
 
   dappsMap[dapp.origin] = dapp;
   dappStore.set('dappsMap', dappsMap);
 
-  const pinnedIdx = pinnedList.indexOf(dapp.origin);
-  if (pinnedIdx > -1) {
-    pinnedList.splice(pinnedIdx, 1);
-    dappStore.set('pinnedList', pinnedList);
-  }
-
+  const unpinnedList = dappStore.get('unpinnedList');
   unpinnedList.push(dapp.origin);
   dappStore.set('unpinnedList', unpinnedList);
 
   emitIpcMainEvent('__internal_main:dapps:changed', {
     dapps: getAllDapps(),
-    pinnedList,
     unpinnedList,
+  });
+
+  return {};
+});
+
+handleIpcMainInvoke('dapps-put', (_, dapp: IDapp) => {
+  // TODO: is there mutex?
+  const dappsMap = dappStore.get('dappsMap');
+
+  dappsMap[dapp.origin] = {
+    ...dappsMap[dapp.origin],
+    ...dapp,
+  };
+  dappStore.set('dappsMap', dappsMap);
+
+  emitIpcMainEvent('__internal_main:dapps:changed', {
+    dapps: getAllDapps(),
   });
 });
 
@@ -257,6 +290,14 @@ handleIpcMainInvoke('dapps-delete', (_, dappToDel: IDapp) => {
   }
 
   delete dappsMap[dappToDel.origin];
+  const protocolDappsBinding = getProtocolDappsBindings();
+  Object.entries(protocolDappsBinding).forEach((dapps) => {
+    const [protocol, binding] = dapps;
+    if (binding.origin === dappToDel.origin) {
+      delete protocolDappsBinding[protocol];
+    }
+  });
+  dappStore.set('protocolDappsBinding', protocolDappsBinding);
 
   dappStore.set('dappsMap', dappsMap);
 
@@ -273,6 +314,7 @@ handleIpcMainInvoke('dapps-delete', (_, dappToDel: IDapp) => {
     dapps: getAllDapps(),
     pinnedList,
     unpinnedList,
+    protocolDappsBinding,
   });
 
   return {
@@ -371,7 +413,7 @@ handleIpcMainInvoke('dapps-setOrder', (_, { pinnedList, unpinnedList }) => {
 });
 
 handleIpcMainInvoke('dapps-fetch-protocol-binding', () => {
-  const protocolBindings = dappStore.get('protocolDappsBinding') || {};
+  const protocolBindings = getProtocolDappsBindings();
 
   return {
     result: protocolBindings,
@@ -379,7 +421,7 @@ handleIpcMainInvoke('dapps-fetch-protocol-binding', () => {
 });
 
 handleIpcMainInvoke('dapps-put-protocol-binding', (_, pBindings) => {
-  const protocolBindings = dappStore.get('protocolDappsBinding') || {};
+  const protocolBindings = getProtocolDappsBindings();
   const dappOrigins = new Set(
     getAllDapps()
       .map((d) => d.origin)
@@ -389,17 +431,17 @@ handleIpcMainInvoke('dapps-put-protocol-binding', (_, pBindings) => {
   let errItem: { error: string } | null = null;
 
   Object.keys(pBindings).some((pLink) => {
-    if (!isDappProtocol(pLink)) {
-      errItem = {
-        error: 'Invalid protocol link',
-      };
-      return true;
-    }
+    // if (!isDappProtocol(pLink)) {
+    //   errItem = {
+    //     error: 'Invalid protocol link',
+    //   };
+    //   return true;
+    // }
 
-    return pBindings[pLink].some((dappOrigin: string) => {
-      if (!dappOrigins.has(dappOrigin)) {
+    return arraify(pBindings[pLink]).some((item) => {
+      if (!dappOrigins.has(item.origin)) {
         errItem = {
-          error: `Invalid dapp origin for protocol binding ${dappOrigin}`,
+          error: `Invalid dapp origin for protocol binding ${item.origin}`,
         };
         return true;
       }
@@ -411,6 +453,10 @@ handleIpcMainInvoke('dapps-put-protocol-binding', (_, pBindings) => {
 
   Object.assign(protocolBindings, pBindings);
   dappStore.set('protocolDappsBinding', protocolBindings);
+
+  emitIpcMainEvent('__internal_main:dapps:changed', {
+    protocolDappsBinding: protocolBindings,
+  });
 
   return {};
 });

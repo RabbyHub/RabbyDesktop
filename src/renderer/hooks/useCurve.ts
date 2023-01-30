@@ -1,5 +1,6 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { formatNumber } from '@/renderer/utils/number';
+import { walletOpenapi } from '../ipcRequest/rabbyx';
 
 type CurveList = Array<{ timestamp: number; usd_value: number }>;
 
@@ -64,13 +65,33 @@ const formChartData = (
 };
 
 export default (
+  address: string | undefined,
   realtimeNetWorth: number,
-  realtimeTimestamp: number,
-  data: CurveList
+  realtimeTimestamp: number
 ) => {
+  const [data, setData] = useState<
+    {
+      timestamp: number;
+      usd_value: number;
+    }[]
+  >([]);
+  const [isLoading, setIsLoading] = useState(true);
   const select = useCallback(
     () => formChartData(data, realtimeNetWorth, realtimeTimestamp),
     [realtimeNetWorth, realtimeTimestamp, data]
   );
-  return select();
+
+  const fetch = async (addr: string) => {
+    setIsLoading(true);
+    const curve = await walletOpenapi.getNetCurve(addr);
+    setData(curve);
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    if (!address) return;
+    fetch(address);
+  }, [address]);
+
+  return isLoading ? undefined : select();
 };

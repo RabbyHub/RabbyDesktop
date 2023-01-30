@@ -200,6 +200,10 @@ type PopupViewOnMainwinInfo =
       type: 'address-management';
     }
   | {
+      type: 'quick-swap';
+      state?: any;
+    }
+  | {
       type: 'dapps-management';
     };
 
@@ -219,3 +223,7 @@ type IOSInfo = {
   arch: typeof process.arch;
   platform: typeof process.platform;
 };
+type IProtocolDappBindings = Record<
+  string,
+  { origin: string; siteUrl: string }
+>;

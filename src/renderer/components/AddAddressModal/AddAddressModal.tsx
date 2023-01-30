@@ -65,7 +65,7 @@ export const AddAddressModal: React.FC<Props> = ({ visible, onClose }) => {
       onCancel={onClose}
       footer={null}
     >
-      <SelectModalContent onClose={onClose} onSelectType={setKeyringType} />
+      <SelectModalContent onSelectType={setKeyringType} />
     </Modal>
   );
 };

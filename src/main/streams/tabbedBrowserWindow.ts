@@ -155,7 +155,15 @@ export async function createRabbyxNotificationWindow({
     },
   });
 
-  RABBYX_WINDOWID_S.add(win.id);
+  const windowId = win.window.id;
+  win.window.on('closed', () => {
+    RABBYX_WINDOWID_S.delete(windowId);
+    toggleMaskViaOpenedRabbyxNotificationWindow();
+  });
+
+  win.tabs.tabList[0]?._patchWindowClose();
+
+  RABBYX_WINDOWID_S.add(windowId);
   toggleMaskViaOpenedRabbyxNotificationWindow();
 
   return win.window as BrowserWindow;
@@ -305,14 +313,6 @@ onMainWindowReady().then((mainTabbedWin) => {
   mainTabbedWin.window.on('resize', onTargetWinUpdate);
   mainTabbedWin.window.on('unmaximize', onTargetWinUpdate);
   mainTabbedWin.window.on('restore', onTargetWinUpdate);
-});
-
-onIpcMainInternalEvent('__internal_main:tabbed-window:destroyed', (winId) => {
-  if (RABBYX_WINDOWID_S.has(winId)) {
-    RABBYX_WINDOWID_S.delete(winId);
-  }
-
-  toggleMaskViaOpenedRabbyxNotificationWindow();
 });
 
 onIpcMainInternalEvent(

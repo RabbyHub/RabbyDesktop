@@ -109,12 +109,12 @@ const router = createRouter([
     children: [
       {
         path: 'home',
-        element: <Home />,
         loader: () => {
           return {
             routeCSSKeyword: 'home_assets',
           } as MainWindowRouteData;
         },
+        element: <Home />,
       },
       {
         path: 'my-dapps',

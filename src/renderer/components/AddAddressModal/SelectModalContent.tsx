@@ -1,4 +1,5 @@
 import { useMessageForwardToMainwin } from '@/renderer/hooks/useMessageToMainwin';
+import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { KEYRING_CLASS } from '@/renderer/utils/constant';
 import clsx from 'clsx';
 import React from 'react';
@@ -26,13 +27,9 @@ const HARDWARE_MAP = [
 
 interface Props {
   onSelectType: (type: string) => void;
-  onClose?: () => void;
 }
 
-export const SelectModalContent: React.FC<Props> = ({
-  onSelectType,
-  onClose,
-}) => {
+export const SelectModalContent: React.FC<Props> = ({ onSelectType }) => {
   const mainNav = useMessageForwardToMainwin('route-navigate');
 
   const handleImportByPrivateKey = React.useCallback(() => {
@@ -42,7 +39,12 @@ export const SelectModalContent: React.FC<Props> = ({
         pathname: '/import-by/private-key',
       },
     });
-    onClose?.();
+    hideMainwinPopupview('add-address', {
+      reloadView: true,
+    });
+    hideMainwinPopupview('address-management', {
+      reloadView: true,
+    });
   }, [mainNav]);
 
   return (

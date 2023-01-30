@@ -19,6 +19,8 @@ import SwitchAccountWindow from '@/renderer/routes-popup/SwitchAccountWindow';
 
 import { parseQueryString } from '@/isomorphic/url';
 import RabbyNotificationGasket from '../routes-popup/RabbyNotificationGasket';
+import MainWindowAddAddress from '../routes-popup/MainWindowAddAddress';
+import QuickSwapWindow from '../routes-popup/QuickSwapWindow';
 import MainWindowDappManagement from '../routes-popup/MainWindowDappManagement';
 
 function App() {
@@ -41,6 +43,10 @@ function App() {
           element={<SwitchAccountWindow />}
         />
         <Route
+          path="/popupview__add-address"
+          element={<MainWindowAddAddress />}
+        />
+        <Route
           path="/rabby-notification-gasket"
           element={<RabbyNotificationGasket />}
         />
@@ -57,6 +63,9 @@ const root = createRoot(container);
 switch (parseQueryString().view) {
   case 'dapps-management':
     root.render(<MainWindowDappManagement />);
+    break;
+  case 'quick-swap':
+    root.render(<QuickSwapWindow />);
     break;
   default:
     root.render(<App />);
