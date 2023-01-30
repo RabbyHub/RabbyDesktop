@@ -91,6 +91,7 @@ export default function ModalRenameDapp({
               className={styles.aliasInput}
               value={alias}
               onChange={onAliasChange}
+              autoFocus
               // placeholder="https://somedapp.xyz"
             />
           </div>
