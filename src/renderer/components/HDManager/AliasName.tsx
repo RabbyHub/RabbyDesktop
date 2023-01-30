@@ -41,29 +41,29 @@ export const AliasName: React.FC<Props> = ({
     setHover(false);
   }, []);
 
-  const cachedValue = cachedName.get(address);
+  // const cachedValue = cachedName.get(address);
 
   React.useEffect(() => {
     setValue(aliasName);
 
-    if (aliasName && cachedValue && cachedValue !== aliasName) {
-      setValue(cachedValue);
-      onChange(cachedValue);
-    } else if (aliasName) {
-      cachedName.set(address, aliasName);
-    }
+    // if (aliasName && cachedValue && cachedValue !== aliasName) {
+    //   setValue(cachedValue);
+    //   onChange(cachedValue);
+    // } else if (aliasName) {
+    //   cachedName.set(address, aliasName);
+    // }
   }, [aliasName]);
 
   if (!value) {
-    if (cachedValue) {
-      return (
-        <div className="AliasName AliasName--disabled">
-          <div className="label">
-            <span className="text">{cachedValue}</span>
-          </div>
-        </div>
-      );
-    }
+    // if (cachedValue) {
+    //   return (
+    //     <div className="AliasName AliasName--disabled">
+    //       <div className="label">
+    //         <span className="text">{cachedValue}</span>
+    //       </div>
+    //     </div>
+    //   );
+    // }
 
     return null;
   }

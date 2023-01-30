@@ -61,6 +61,24 @@ export const AccountList: React.FC<Props> = ({
     }
   }, [hiddenInfo, data]);
 
+  const fullList = React.useMemo(() => {
+    return list.map((item) => {
+      const current = currentAccounts?.find((cur) =>
+        isSameAddress(cur.address, item.address)
+      );
+
+      if (current) {
+        item.aliasName = current.aliasName;
+        item.checked = true;
+      } else {
+        item.checked = false;
+        item.aliasName = undefined;
+      }
+
+      return item;
+    });
+  }, [list, currentAccounts]);
+
   const currentIndex = React.useMemo(() => {
     if (!preventLoading && list?.length) {
       return list.findIndex((item) => !item.address);
@@ -151,7 +169,7 @@ export const AccountList: React.FC<Props> = ({
   return (
     <Table<Account>
       scroll={{ y: 'calc(100vh - 240px)' }}
-      dataSource={list}
+      dataSource={fullList}
       rowKey="index"
       className="AccountList"
       loading={
@@ -190,9 +208,7 @@ export const AccountList: React.FC<Props> = ({
         render={(val, record) =>
           record.address ? (
             <AddToRabby
-              checked={currentAccounts?.some((item) =>
-                isSameAddress(item.address, record.address)
-              )}
+              checked={record.checked}
               onChange={(v) => handleAddAccount(v, record)}
             />
           ) : (
@@ -245,15 +261,12 @@ export const AccountList: React.FC<Props> = ({
           key="aliasName"
           className="cell-note"
           render={(value, record) => {
-            const account = currentAccounts?.find((item) =>
-              isSameAddress(item.address, record.address)
-            );
             return !record.address ? (
               <AccountListSkeleton align="left" width={100} />
             ) : (
               <AliasName
                 address={record.address}
-                aliasName={account?.aliasName}
+                aliasName={value}
                 onChange={(val) => handleChangeAliasName(val, record)}
               />
             );
