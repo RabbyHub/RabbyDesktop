@@ -87,13 +87,17 @@ const AssociateDapp = ({
     useProtocolDappsBinding();
   const [loading, setLoading] = useState(false);
 
-  const bindedDapp = protocolDappsBinding?.[protocolId];
+  const bindUrl = useMemo(() => {
+    const arr = Object.values(protocolDappsBinding);
+    const t = arr.find((item) => item.siteUrl === url);
+    return protocolDappsBinding[protocolId]?.origin || t?.origin || null;
+  }, [protocolDappsBinding, protocolId, url]);
 
   useEffect(() => {
-    if (bindedDapp) {
-      setCurrent(bindedDapp.siteUrl);
+    if (bindUrl) {
+      setCurrent(bindUrl);
     }
-  }, [bindedDapp, dapps, url]);
+  }, [bindUrl]);
 
   const dappList = useMemo(() => {
     try {
