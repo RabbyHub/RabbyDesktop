@@ -32,9 +32,13 @@ export const AliasName: React.FC<Props> = ({
 
       onChange(inputValue);
     }
+
+    setValue(inputValue);
+  }, []);
+
+  const onClickCheck = React.useCallback(() => {
     setFocus(false);
     setHover(false);
-    setValue(inputValue);
   }, []);
 
   const cachedValue = cachedName.get(address);
@@ -65,7 +69,7 @@ export const AliasName: React.FC<Props> = ({
   }
 
   return (
-    <div className="AliasName" onClick={() => setHover(true)}>
+    <div className="AliasName">
       {hover || focus ? (
         <div className="input-group">
           <Input
@@ -77,12 +81,13 @@ export const AliasName: React.FC<Props> = ({
             autoFocus
           />
           <img
+            onClick={onClickCheck}
             className="icon"
             src="rabby-internal://assets/icons/hd-manager/check-green.svg"
           />
         </div>
       ) : (
-        <div className="label">
+        <div className="label" onClick={() => setHover(true)}>
           <span className="text">{value}</span>
           <img
             className="icon"

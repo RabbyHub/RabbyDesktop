@@ -28,7 +28,6 @@ export const AccountList: React.FC<Props> = ({
   const [list, setList] = React.useState<Account[]>([]);
   const infoRef = React.useRef<HTMLDivElement>(null);
   const [infoColumnWidth, setInfoColumnWidth] = React.useState(0);
-  const [infoColumnTop, setInfoColumnTop] = React.useState(0);
   const {
     currentAccounts,
     getCurrentAccounts,
@@ -121,7 +120,6 @@ export const AccountList: React.FC<Props> = ({
     // watch infoRef resize
     const resizeObserver = new ResizeObserver(() => {
       setInfoColumnWidth(infoRef.current?.parentElement?.offsetWidth ?? 0);
-      setInfoColumnTop(infoRef.current?.closest('thead')?.offsetHeight ?? 0);
     });
     resizeObserver.observe(infoRef.current ?? new Element());
     return () => {
@@ -172,8 +170,7 @@ export const AccountList: React.FC<Props> = ({
               'info-mask--center': list.length < 4,
             })}
             style={{
-              top: `${infoColumnTop}px`,
-              width: `${infoColumnWidth + 16}px`,
+              width: `${infoColumnWidth}px`,
             }}
           >
             <td>
