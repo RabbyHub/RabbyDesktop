@@ -47,7 +47,7 @@ export function useConnectedSite(currentOrigin?: string) {
     fetchConnectedSite();
 
     return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:rabbyx:session-broadcast-forward-to-main',
+      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
       (payload) => {
         switch (payload.event) {
           default:

@@ -55,7 +55,7 @@ onIpcMainEvent(
     // forward to main window
     sendToWebContents(
       tabbedWin.window.webContents,
-      '__internal_push:rabbyx:session-broadcast-forward-to-main',
+      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
       payload
     );
 

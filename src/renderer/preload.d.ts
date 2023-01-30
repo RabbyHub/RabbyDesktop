@@ -66,7 +66,7 @@ type M2RChanneMessagePayload = {
     previousUrl: string;
     currentUrl: string;
   };
-  '__internal_push:rabbyx:session-broadcast-forward-to-main': RabbyEvent;
+  '__internal_push:rabbyx:session-broadcast-forward-to-desktop': RabbyEvent;
 
   '__internal_push:rabbyx:get-dapp-screenshot': {
     reqId: string;

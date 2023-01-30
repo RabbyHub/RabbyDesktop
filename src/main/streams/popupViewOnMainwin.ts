@@ -217,19 +217,8 @@ onIpcMainEvent(
   '__internal_rpc:popupview-on-mainwin:toggle-show',
   async (_, payload) => {
     const mainWindow = (await onMainWindowReady()).window;
-    const { addAddress, addressManagement, quickSwap, dappsManagement } =
-      await firstValueFrom(fromMainSubject('popupViewsOnMainwinReady'));
-
-    const targetView =
-      payload.type === 'add-address'
-        ? addAddress
-        : payload.type === 'address-management'
-        ? addressManagement
-        : payload.type === 'quick-swap'
-        ? quickSwap
-        : payload.type === 'dapps-management'
-        ? dappsManagement
-        : null;
+    const { views } = await getAllMainUIViews();
+    const targetView = views[payload.type] || null;
 
     if (!targetView) return;
 
@@ -266,18 +255,15 @@ onIpcMainEvent(
 onIpcMainEvent(
   '__internal_rpc:rabbyx:on-session-broadcast',
   async (_, payload) => {
-    const { addAddress, addressManagement, quickSwap, dappsManagement } =
-      await firstValueFrom(fromMainSubject('popupViewsOnMainwinReady'));
-    [addAddress, addressManagement, quickSwap, dappsManagement].forEach(
-      (view) => {
-        // forward to main window
-        sendToWebContents(
-          view.webContents,
-          '__internal_push:rabbyx:session-broadcast-forward-to-main',
-          payload
-        );
-      }
-    );
+    const { viewOnlyList } = await getAllMainUIViews();
+    viewOnlyList.forEach((webContents) => {
+      // forward to main window
+      sendToWebContents(
+        webContents,
+        '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
+        payload
+      );
+    });
   }
 );
 
@@ -305,7 +291,7 @@ onIpcMainEvent(
         break;
       default: {
         if (!IS_RUNTIME_PRODUCTION) {
-          throw new Error(`Unknown targetView: ${payload.targetView}`);
+          throw new Error(`Unknown targetView: ${(payload as any).targetView}`);
         }
         return;
       }
