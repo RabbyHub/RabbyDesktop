@@ -155,7 +155,8 @@ const StyledDrawer = styled(Drawer)`
 
   .listBox {
     flex: 1;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: overlay;
     margin: 0 -10px;
     padding: 2px 10px;
   }
@@ -535,7 +536,6 @@ export const TokenSelect = ({
 
   const handleSelectToken = () => {
     setOpen(true);
-    handleLoadTokens();
   };
 
   const handleSearchTokens = async (q: string) => {
@@ -574,6 +574,12 @@ export const TokenSelect = ({
       onChange(v);
     }
   };
+
+  useEffect(() => {
+    if (currentAccount?.address && open) {
+      handleLoadTokens();
+    }
+  }, [currentAccount?.address, open]);
 
   useEffect(() => {
     setTokens([]);

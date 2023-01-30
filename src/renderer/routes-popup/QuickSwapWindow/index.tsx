@@ -3,7 +3,7 @@ import {
   RouterProvider,
   Navigate,
 } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import clsx from 'clsx';
 import { useTimeoutFn } from 'react-use';
 
@@ -24,6 +24,15 @@ const QuickSwap = () => {
     window.location.reload();
   }, RESET_TIMEOUT);
 
+  const hideQuickSwapView = useCallback(() => {
+    setHide(true);
+
+    setTimeout(() => {
+      hideMainwinPopupview('quick-swap');
+      setHide(false);
+    }, 150);
+  }, []);
+
   useEffect(() => {
     if (localVisible) {
       cancel();
@@ -34,18 +43,8 @@ const QuickSwap = () => {
 
   return (
     <div className={styles.QuickSwapWindow}>
-      <GlobalMask
-        className={styles.mask}
-        onClick={() => {
-          setHide(true);
-
-          setTimeout(() => {
-            hideMainwinPopupview('quick-swap');
-            setHide(false);
-          }, 150);
-          // keep window state, don't reset
-        }}
-      />
+      <GlobalMask className={styles.mask} onClick={hideQuickSwapView} />
+      <GlobalMask className={styles.mask2} onClick={hideQuickSwapView} />
       <div
         className={clsx(
           styles.container,
