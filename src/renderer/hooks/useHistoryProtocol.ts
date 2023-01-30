@@ -220,5 +220,6 @@ export default (address: string | undefined) => {
     protocolList,
     historyProtocolMap,
     tokenHistoryPriceMap,
+    isLoading,
   };
 };

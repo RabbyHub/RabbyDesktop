@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import styled from 'styled-components';
+import { Skeleton } from 'antd';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import classNames from 'classnames';
 import { formatNumber } from '@/renderer/utils/number';
@@ -241,6 +242,83 @@ const TokenItemComp = ({
             {Math.abs(usdValueChange).toFixed(2)}
           </div>
         )}
+      </TokenUsdValueField>
+    </TokenItemWrapper>
+  );
+};
+
+export const LoadingTokenItem = () => {
+  return (
+    <TokenItemWrapper className="td">
+      <TokenLogoField>
+        <Skeleton.Input
+          active
+          style={{
+            width: '24px',
+            height: '24px',
+            borderRadius: '24px',
+          }}
+        />
+        <span className="token-symbol">
+          <Skeleton.Input
+            active
+            style={{
+              width: '63px',
+              height: '20px',
+              borderRadius: '2px',
+            }}
+          />
+        </span>
+      </TokenLogoField>
+      <TokenPriceField>
+        <Skeleton.Input
+          active
+          style={{
+            width: '60px',
+            height: '14px',
+            borderRadius: '2px',
+          }}
+        />
+        <div className="price-change">
+          <Skeleton.Input
+            active
+            style={{
+              width: '35px',
+              height: '11px',
+              borderRadius: '2px',
+            }}
+          />
+        </div>
+      </TokenPriceField>
+      <TokenAmountField>
+        <Skeleton.Input
+          active
+          style={{
+            width: '92px',
+            height: '14px',
+            borderRadius: '2px',
+          }}
+        />
+        <div className="price-change">
+          <Skeleton.Input
+            active
+            style={{
+              width: '55px',
+              height: '11px',
+              borderRadius: '2px',
+            }}
+          />
+        </div>
+      </TokenAmountField>
+      <TokenUsdValueField>
+        <Skeleton.Input
+          active
+          style={{
+            width: '92px',
+            height: '14px',
+            borderRadius: '2px',
+          }}
+        />
       </TokenUsdValueField>
     </TokenItemWrapper>
   );

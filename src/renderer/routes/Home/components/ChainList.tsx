@@ -41,6 +41,14 @@ const ChainListWrapper = styled.ul`
   }
 `;
 
+const NoAssetsView = styled.div`
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+
+  color: rgba(255, 255, 255, 0.3);
+`;
+
 const ChainList = ({
   chainBalances,
   onChange,
@@ -57,7 +65,7 @@ const ChainList = ({
       (item) => item.serverId === selectChainServerId
     );
     return chain || null;
-  }, [selectChainServerId, chainBalances]);
+  }, [selectChainServerId]);
 
   const handleSelectChain = async (serverId: string) => {
     if (serverId === selectChainServerId) {
@@ -69,6 +77,9 @@ const ChainList = ({
     await Promise.resolve(); // 强制 onChange 在下一次渲染触发，为了能在 PortfolioView 中取到 UI 变化后的链图标位置和宽度
     onChange(serverId);
   };
+  if (chainBalances.length <= 0) {
+    return <NoAssetsView>No assets</NoAssetsView>;
+  }
   if (chainBalances.length === 1) {
     return (
       <ChainListWrapper>

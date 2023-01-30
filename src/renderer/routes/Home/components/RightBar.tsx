@@ -17,7 +17,7 @@ const ActionList = styled.ul`
   list-style: none;
   padding: 73px 0 0 23px;
   display: flex;
-  margin-bottom: 80px;
+  margin-bottom: 37px;
   li {
     border-radius: 14px;
     margin-right: 25px;

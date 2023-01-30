@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import styled from 'styled-components';
+import { Skeleton } from 'antd';
 import { PortfolioItem, TokenItem } from '@debank/rabby-api/dist/types';
 import classNames from 'classnames';
 import TokenWithChain from '@/renderer/components/TokenWithChain';
@@ -137,6 +138,84 @@ const TokenItemWrapper = styled.div`
     margin-bottom: 0;
   }
 `;
+
+const LoadingTokenItem = () => {
+  return (
+    <TokenItemWrapper>
+      <div className="token-symbol">
+        <Skeleton.Input
+          active
+          style={{
+            width: '19px',
+            height: '19px',
+            borderRadius: '19px',
+          }}
+        />
+        <div className="symbol">
+          <Skeleton.Input
+            active
+            style={{
+              width: '63px',
+              height: '17px',
+              borderRadius: '2px',
+            }}
+          />
+        </div>
+      </div>
+      <div className="token-price">
+        <Skeleton.Input
+          active
+          style={{
+            width: '60px',
+            height: '12px',
+            borderRadius: '2px',
+          }}
+        />
+
+        <div className="price-change">
+          <Skeleton.Input
+            active
+            style={{
+              width: '35px',
+              height: '9px',
+              borderRadius: '2px',
+            }}
+          />
+        </div>
+      </div>
+      <div className="token-amount">
+        <Skeleton.Input
+          active
+          style={{
+            width: '92px',
+            height: '12px',
+            borderRadius: '2px',
+          }}
+        />
+        <div className="price-change">
+          <Skeleton.Input
+            active
+            style={{
+              width: '55px',
+              height: '9px',
+              borderRadius: '2px',
+            }}
+          />
+        </div>
+      </div>
+      <div className="token-usd-value">
+        <Skeleton.Input
+          active
+          style={{
+            width: '92px',
+            height: '12px',
+            borderRadius: '2px',
+          }}
+        />
+      </div>
+    </TokenItemWrapper>
+  );
+};
 
 const TokenItemComp = ({
   token,
@@ -316,6 +395,15 @@ const PoolItem = ({
           ${formatNumber(totalUsdValue.toFixed())}
         </span>
       </PoolItemFooter>
+    </PoolItemWrapper>
+  );
+};
+
+export const LoadingPoolItem = () => {
+  return (
+    <PoolItemWrapper>
+      <LoadingTokenItem />
+      <LoadingTokenItem />
     </PoolItemWrapper>
   );
 };

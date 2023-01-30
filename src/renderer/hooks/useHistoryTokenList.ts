@@ -30,8 +30,10 @@ export default (address: string | undefined) => {
   const [historyTokenMap, setHistoryTokenMap] = useState<
     Record<string, TokenItem>
   >({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchData = async (addr: string) => {
+    setIsLoading(true);
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
     const result: TokenItem[] = [];
     const list = await walletOpenapi.listToken(addr);
@@ -42,6 +44,7 @@ export default (address: string | undefined) => {
         usd_value: new BigNumber(item.amount).times(item.price).toNumber(),
       }))
     );
+    setIsLoading(false);
     const yesterdayTokenList = await walletOpenapi.getHistoryTokenList({
       id: addr,
       timeAt: YESTERDAY,
@@ -101,5 +104,6 @@ export default (address: string | undefined) => {
   return {
     tokenList,
     historyTokenMap,
+    isLoading,
   };
 };

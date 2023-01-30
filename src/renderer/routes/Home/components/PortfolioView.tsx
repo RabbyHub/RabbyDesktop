@@ -1,13 +1,11 @@
 import { useMemo, useState } from 'react';
 import styled from 'styled-components';
-import classNames from 'classnames';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import { DisplayChainWithWhiteLogo } from '@/renderer/hooks/useCurrentBalance';
 import AssociateDappModal from '@/renderer/components/AssociateDappModal';
-import { formatNumber } from '@/renderer/utils/number';
-import TokenItemComp from './TokenItem';
-import ProtocolItem from './ProtocolItem';
+import TokenList from './TokenList';
+import ProtocolList from './ProtocolList';
 
 const PortfolioWrapper = styled.div`
   background: rgba(255, 255, 255, 0.07);
@@ -53,43 +51,23 @@ const PortfolioWrapper = styled.div`
       }
     }
   }
-`;
-
-const ExpandItem = styled.div`
-  display: flex;
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 14px;
-  color: #9094a1;
-  padding: 0 23px;
-  align-items: center;
-  margin-top: 10px;
-  cursor: pointer;
-  .icon-hide-assets {
-    margin-right: 18px;
-  }
-  .hide-assets-usd-value {
-    font-weight: 700;
-    font-size: 13px;
-    line-height: 18px;
-    text-align: right;
-    flex: 1;
-    color: #ffffff;
-  }
-  .icon-expand-arrow {
-    width: 10px;
-    height: 5px;
-    transform: rotate(0);
-    transition: transform 0.3s;
-    margin-left: 13px;
-    opacity: 0;
-    &.flip {
-      transform: rotate(180deg);
+  &.empty {
+    display: flex;
+    flex-direction: column;
+    flex: auto;
+    flex-grow: 0;
+    height: 300px;
+    align-items: center;
+    justify-content: center;
+    .icon-empty {
+      width: 60px;
     }
-  }
-  &:hover {
-    .icon-expand-arrow {
-      opacity: 1;
+    .text-empty {
+      font-size: 18px;
+      line-height: 21px;
+      color: rgba(255, 255, 255, 0.4);
+      margin: 0;
+      margin-top: 20px;
     }
   }
 `;
@@ -104,6 +82,8 @@ const PortfolioView = ({
   selectChainServerId,
   tokenHidden,
   protocolHidden,
+  isLoadingTokenList,
+  isLoadingProtocolList,
 }: {
   tokenList: TokenItem[];
   historyTokenMap: Record<string, TokenItem>;
@@ -127,6 +107,8 @@ const PortfolioView = ({
     hiddenUsdValue: number;
     setIsExpand(v: boolean): void;
   };
+  isLoadingTokenList: boolean;
+  isLoadingProtocolList: boolean;
 }) => {
   const [relateDappModalOpen, setRelateDappModalOpen] = useState(false);
   const [relateDappUrl, setRelateDappUrl] = useState('');
@@ -139,16 +121,32 @@ const PortfolioView = ({
     if (!el) return 65;
     return el.offsetLeft + el.offsetWidth / 2 - 7;
   }, [chainBalances, selectChainServerId]);
-
-  const handleClickExpandToken = () => {
-    tokenHidden.setIsExpand(!tokenHidden.isExpand);
-  };
+  const isEmpty = useMemo(() => {
+    return (
+      !isLoadingProtocolList &&
+      !isLoadingTokenList &&
+      tokenList.length <= 0 &&
+      protocolList.length <= 0
+    );
+  }, [isLoadingProtocolList, isLoadingTokenList, tokenList, protocolList]);
 
   const handleRelateDapp = (protocol: DisplayProtocol) => {
     setRelateDappId(protocol.id);
     setRelateDappUrl(protocol.site_url);
     setRelateDappModalOpen(true);
   };
+
+  if (isEmpty) {
+    return (
+      <PortfolioWrapper className="empty">
+        <img
+          className="icon-empty"
+          src="rabby-internal://assets/icons/home/asset-empty.svg"
+        />
+        <p className="text-empty">No assets</p>
+      </PortfolioWrapper>
+    );
+  }
 
   return (
     <PortfolioWrapper>
@@ -159,54 +157,19 @@ const PortfolioView = ({
           transform: `translateX(${assetArrowLeft}px)`,
         }}
       />
-      {tokenList.length > 0 && (
-        <ul className="assets-list">
-          <li className="th">
-            <div>Asset</div>
-            <div>Price</div>
-            <div>Amount</div>
-            <div>USD-Value</div>
-          </li>
-          {tokenList.map((token) => (
-            <TokenItemComp
-              token={token}
-              historyToken={historyTokenMap[`${token.chain}-${token.id}`]}
-              key={`${token.chain}-${token.id}`}
-            />
-          ))}
-          {tokenHidden.hiddenCount > 0 && (
-            <ExpandItem onClick={handleClickExpandToken}>
-              <img
-                className="icon-hide-assets"
-                src="rabby-internal://assets/icons/home/hide-assets.svg"
-              />
-              {tokenHidden.isExpand
-                ? 'Hide small value assets'
-                : `${tokenHidden.hiddenCount} Assets are hidden`}
-              <img
-                src="rabby-internal://assets/icons/home/expand-arrow.svg"
-                className={classNames('icon-expand-arrow', {
-                  flip: !tokenHidden.isExpand,
-                })}
-              />
-              <span className="hide-assets-usd-value">
-                ${formatNumber(tokenHidden.hiddenUsdValue)}
-              </span>
-            </ExpandItem>
-          )}
-        </ul>
-      )}
-      <div className="protocols">
-        {protocolList.map((protocol) => (
-          <ProtocolItem
-            key={protocol.id}
-            protocol={protocol}
-            historyProtocol={historyProtocolMap[protocol.id]}
-            protocolHistoryTokenPriceMap={protocolHistoryTokenPriceMap}
-            onClickRelate={handleRelateDapp}
-          />
-        ))}
-      </div>
+      <TokenList
+        tokenList={tokenList}
+        historyTokenMap={historyTokenMap}
+        tokenHidden={tokenHidden}
+        isLoadingTokenList={isLoadingTokenList}
+      />
+      <ProtocolList
+        protocolList={protocolList}
+        historyProtocolMap={historyProtocolMap}
+        protocolHistoryTokenPriceMap={protocolHistoryTokenPriceMap}
+        onRelateDapp={handleRelateDapp}
+        isLoading={isLoadingProtocolList}
+      />
       <AssociateDappModal
         protocolId={relateDappId}
         open={relateDappModalOpen}
