@@ -71,8 +71,10 @@ export const ContactModalContent: React.FC<Props> = ({ onSuccess }) => {
   const [run, loading] = useWalletRequest(walletController.importWatchAddress, {
     async onSuccess(accounts) {
       setLocked(true);
-      await getHighlightedAddressesAsync();
-      await getAllAccountsToDisplay();
+      await Promise.all([
+        getHighlightedAddressesAsync(),
+        getAllAccountsToDisplay(),
+      ]);
       onSuccess(accounts[0].address);
       setLocked(false);
     },

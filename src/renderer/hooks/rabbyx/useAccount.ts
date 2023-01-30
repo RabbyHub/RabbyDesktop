@@ -17,8 +17,8 @@ async function getAliasNameByAddress(address: string) {
 export function useCurrentAccount() {
   const [currentAccount, setCurrentAccount] = useAtom(currentAccountAtom);
 
-  const fetchCurrentAccount = useCallback(() => {
-    walletController.getCurrentAccount().then(async (account) => {
+  const fetchCurrentAccount = useCallback(async () => {
+    return walletController.getCurrentAccount().then(async (account) => {
       let alianName = '';
       if (account?.address) {
         alianName = await getAliasNameByAddress(account.address);

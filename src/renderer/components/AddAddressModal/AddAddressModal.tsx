@@ -20,6 +20,7 @@ export const AddAddressModal: React.FC<Props> = ({ visible, onClose }) => {
   if (keyringType === KEYRING_CLASS.WATCH) {
     return (
       <Modal
+        centered
         open={visible}
         title="Add Contacts"
         subtitle="You can also use it as a watch-only address"
@@ -59,6 +60,7 @@ export const AddAddressModal: React.FC<Props> = ({ visible, onClose }) => {
 
   return (
     <Modal
+      centered
       open={visible}
       title="Add an Address"
       destroyOnClose

@@ -36,7 +36,7 @@ export const LedgerModal: React.FC<ModalProps> = (props) => {
 
   if (!connected) {
     return (
-      <Modal {...props} width={1000} title="Connect Ledger">
+      <Modal {...props} centered width={1000} title="Connect Ledger">
         <div className={styles.LedgerModal}>
           {devices?.length ? (
             <div className={styles.devices}>
@@ -84,9 +84,7 @@ export const LedgerModal: React.FC<ModalProps> = (props) => {
   return (
     <Modal
       {...props}
-      style={{
-        top: 40,
-      }}
+      centered
       className="HDManagerModal"
       width={1280}
       backable
