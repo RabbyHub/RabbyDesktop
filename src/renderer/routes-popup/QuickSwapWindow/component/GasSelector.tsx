@@ -32,10 +32,9 @@ const SectionStyled = styled.section`
 
       .arrow {
         margin-left: 4px;
-        transform: rotate(180deg);
 
         &.open {
-          transform: rotate(0);
+          transform: rotate(180deg);
         }
       }
     }
