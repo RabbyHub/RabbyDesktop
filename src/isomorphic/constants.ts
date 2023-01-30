@@ -22,7 +22,6 @@ export const RABBY_LOCAL_URLBASE =
     ? `${RABBY_INTERNAL_PROTOCOL}//local`
     : `http://localhost:${DEV_SERVER_PORT}`;
 
-export const RABBY_HOMEPAGE_URL = `${RABBY_LOCAL_URLBASE}/home.html`;
 export const RABBY_GETTING_STARTED_URL = `${RABBY_LOCAL_URLBASE}/getting-started.html`;
 export const RABBY_SPALSH_URL = `${RABBY_LOCAL_URLBASE}/splash.html`;
 export const RABBY_LOADING_URL = `${RABBY_LOCAL_URLBASE}/loading.html`;

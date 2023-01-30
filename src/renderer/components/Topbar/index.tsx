@@ -46,10 +46,7 @@ import {
   parseQueryString,
 } from '../../../isomorphic/url';
 
-import {
-  IS_RUNTIME_PRODUCTION,
-  RABBY_HOMEPAGE_URL,
-} from '../../../isomorphic/constants';
+import { IS_RUNTIME_PRODUCTION } from '../../../isomorphic/constants';
 import DappAddressBar from './DappAddressBar';
 
 const isDebug = process.env.NODE_ENV !== 'production';
@@ -72,21 +69,12 @@ const CLOSABLE = INIT_QS.__webuiClosable === 'true';
 
 function filterFavIcon(url?: string, isActiveTab = false) {
   // homepage
-  if (url?.startsWith(RABBY_HOMEPAGE_URL)) {
-    return isActiveTab
-      ? 'rabby-internal://assets/icons/internal-homepage/icon-home.svg'
-      : 'rabby-internal://assets/icons/internal-homepage/icon-home-blur.svg';
-  }
-
-  return null;
+  return isActiveTab
+    ? 'rabby-internal://assets/icons/internal-homepage/icon-home.svg'
+    : 'rabby-internal://assets/icons/internal-homepage/icon-home-blur.svg';
 }
 
 function filterClosable(url?: string, isClosable = CLOSABLE) {
-  // home page
-  if (url?.includes(RABBY_HOMEPAGE_URL)) {
-    return false;
-  }
-
   return isClosable;
 }
 
