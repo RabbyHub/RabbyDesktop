@@ -4,6 +4,7 @@
 
 /// <reference path="../preload.d.ts" />
 
+import { atom, useAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 
 export function useAppVersion() {
@@ -16,4 +17,17 @@ export function useAppVersion() {
   }, []);
 
   return version;
+}
+
+const osInfoAtom = atom<IOSInfo | null>(null);
+export function useOSInfo() {
+  const [osInfo, setOSInfo] = useAtom(osInfoAtom);
+
+  useEffect(() => {
+    window.rabbyDesktop.ipcRenderer.invoke('get-os-info').then((event) => {
+      setOSInfo(event);
+    });
+  }, []);
+
+  return osInfo;
 }

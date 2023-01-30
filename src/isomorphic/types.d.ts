@@ -215,6 +215,15 @@ type IShellNavInfo = {
   dappSecurityCheckResult: ISecurityCheckResult | null;
 };
 
+type IHidDeviceInfo = import('node-hid').Device;
+
+type IUSBDevice = PickAllNonFnFields<USBDevice>;
+type INodeWebUSBDevice = PickAllNonFnFields<import('usb').WebUSBDevice>;
+
+type IOSInfo = {
+  arch: typeof process.arch;
+  platform: typeof process.platform;
+};
 type IProtocolDappBindings = Record<
   string,
   { origin: string; siteUrl: string }

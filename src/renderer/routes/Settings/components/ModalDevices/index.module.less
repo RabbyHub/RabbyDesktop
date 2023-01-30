@@ -1,0 +1,158 @@
+.modalDevicesModal {
+  :global {
+    .ant-modal-header {
+      padding: 0;
+    }
+  }
+
+  .tabs {
+    color: var(--color-purewhite);
+  }
+
+  .form-title {
+    font-size: 20px;
+    text-align: center;
+  }
+
+  .devicesList {
+    margin-top: 24px;
+    margin-bottom: 24px;
+    max-height: 300px;
+
+    padding-right: 10px;
+    overflow-y: overlay;
+    overflow-x: hidden;
+  }
+
+  .deviceItem {
+    color: var(--color-purewhite);
+  }
+
+  .deviceItemTitle {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-bottom: 8px;
+  }
+
+  .J_name {
+    width: 10em;
+  }
+
+  .deviceAttr {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    color: var(--color-purewhite);
+
+    & + .deviceAttr {
+      margin-left: 12px;
+    }
+
+    .attrLabel + .attrValue {
+      margin-left: 4px;
+    }
+
+    &.J_ID .attrValue {
+      min-width: 4em;
+    }
+    &.J_VENDORID .attrValue {
+      min-width: 3em;
+    }
+
+    .attrValue {
+      text-align: center;
+    }
+  }
+
+  .copiable {
+    cursor: pointer;
+    &.attrValue {
+      padding: 2px 4px;
+      background-color: dimgray;
+      border-radius: 6px;
+    }
+  }
+
+  :global {
+    .ant-list-item-meta-description {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .ant-list-item-meta-avatar {
+      align-self: center;
+    }
+  }
+
+  .deviceLabelIcon {
+    // align-self: center;
+    margin-right: 4px;
+  }
+
+  .operations {
+    margin-top: 12px;
+    .check-btn-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .check-proxy-btn {
+      text-align: center;
+      color: #ffffff;
+      border-color: none;
+
+      > span {
+        text-decoration-line: underline;
+      }
+
+      opacity: 0.7;
+      &:not([disabled]):hover {
+        opacity: 1;
+      }
+    }
+
+    .btns {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btns > .op_btn {
+      width: 50%;
+      flex-shrink: 1;
+      height: 48px;
+      width: 200px;
+      border-radius: 4px;
+    }
+  }
+
+  .h2, h4,
+  .form-title {
+    color: white;
+  }
+
+  .form-item-label {
+    color: white;
+    font-size: 15px;
+  }
+
+  :global {
+    .ant-form-item-label label::after {
+      color: white;
+    }
+
+    .ant-modal-content {
+      padding: 36px 32px;
+      /* width: 480px; */
+      min-height: 300px;
+    }
+
+    .ant-modal-close-x {
+      padding: 36px 24px;
+    }
+  }
+}

@@ -158,6 +158,13 @@ handleIpcMainInvoke('get-app-version', (_) => {
   };
 });
 
+handleIpcMainInvoke('get-os-info', () => {
+  return {
+    platform: process.platform,
+    arch: process.arch,
+  };
+});
+
 onIpcMainEvent(
   '__internal_rpc:app:open-external-url',
   async (evt, externalURL) => {
