@@ -12,7 +12,9 @@ import { useIsAddAddress } from '@/renderer/components/AddressManagementDrawer/F
 import styles from './index.module.less';
 
 function AddressMngr() {
-  const { localVisible, hideView } = usePopupViewInfo('address-management');
+  const { localVisible, hideView } = usePopupViewInfo('address-management', {
+    enableTopViewGuard: true,
+  });
   const { isAddingAddress, setIsAddingAddress } = useIsAddAddress();
 
   if (!localVisible) return null;

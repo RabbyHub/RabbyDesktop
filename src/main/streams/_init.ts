@@ -34,7 +34,7 @@ const CONF = {
     subject: new ReplaySubject(1),
     once: true,
   } as IConf<ReplaySubject<Electron.Extension>>,
-  rabbyExtensionReady: {
+  rabbyExtensionLoaded: {
     subject: new ReplaySubject(1),
     once: true,
   } as IConf<ReplaySubject<Electron.Extension>>,

@@ -1,6 +1,7 @@
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useRef } from 'react';
+import { useMessageForwarded } from '../useViewsMessage';
 
 type AccountWithName = Account & { alianName: string };
 const currentAccountAtom = atom<
@@ -49,7 +50,7 @@ export function useCurrentAccount() {
     fetchCurrentAccount();
 
     return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:rabbyx:session-broadcast-forward-to-main',
+      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
       (payload) => {
         switch (payload.event) {
           default:
@@ -63,6 +64,10 @@ export function useCurrentAccount() {
       }
     );
   }, [fetchCurrentAccount]);
+
+  useMessageForwarded('*', 'refreshCurrentAccount', () => {
+    fetchCurrentAccount();
+  });
 
   return {
     switchAccount,

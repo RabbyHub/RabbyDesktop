@@ -228,3 +228,5 @@ type IProtocolDappBindings = Record<
   string,
   { origin: string; siteUrl: string }
 >;
+
+type IBuiltinViewName = PopupViewOnMainwinInfo['type'] | 'main-window';

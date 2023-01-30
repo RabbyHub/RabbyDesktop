@@ -2,6 +2,7 @@
 /// <reference path="../main/internal.d.ts" />
 /// <reference path="../isomorphic/types.d.ts" />
 /// <reference path="../isomorphic/type-helpers.d.ts" />
+/// <reference path="../preloads/forward.d.ts" />
 
 type M2RChanneMessagePayload = {
   'download-release-progress-updated': {
@@ -65,7 +66,7 @@ type M2RChanneMessagePayload = {
     previousUrl: string;
     currentUrl: string;
   };
-  '__internal_push:rabbyx:session-broadcast-forward-to-main': RabbyEvent;
+  '__internal_push:rabbyx:session-broadcast-forward-to-desktop': RabbyEvent;
 
   '__internal_push:rabbyx:get-dapp-screenshot': {
     reqId: string;
@@ -162,6 +163,10 @@ type ChannelMessagePayload = {
       }
     ];
     response: ChannelMessagePayload['__internal_forward:main-window:client-message']['send'];
+  };
+  '__internal_forward:views:channel-message': {
+    send: ChannelForwardMessageType['send'];
+    response: ChannelForwardMessageType['response'];
   };
   '__internal_rpc:dapp-tabs:close-safe-view': {
     send: [];

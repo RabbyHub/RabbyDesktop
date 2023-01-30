@@ -17,7 +17,7 @@ export default function GettingStarted() {
 
   React.useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:rabbyx:session-broadcast-forward-to-main',
+      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
       (payload) => {
         if (payload.event === 'accountsChanged') {
           fetchAccounts();

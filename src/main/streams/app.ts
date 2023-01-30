@@ -253,7 +253,7 @@ export default function bootstrap() {
      * orders:
      * sessionReady
      * -> webuiExtensionReady
-     * -> rabbyExtensionReady
+     * -> rabbyExtensionLoaded
      * -> electronChromeExtensionsReady
      *
      * so we just need to wait electronChromeExtensionsReady ready

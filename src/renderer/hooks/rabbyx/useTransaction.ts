@@ -6,7 +6,7 @@ const DEBUG_DURACTION = 0;
 export function useTransactionChanged() {
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:rabbyx:session-broadcast-forward-to-main',
+      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
       (payload) => {
         if (payload.event !== 'transactionChanged') return;
         switch (payload.data?.type) {
