@@ -124,9 +124,7 @@ const configuration: webpack.Configuration = {
           }),
         ]),
 
-    new WindiCSSWebpackPlugin({
-      virtualModulePath: 'src',
-    }),
+    new WindiCSSWebpackPlugin(),
 
     new webpack.NoEmitOnErrorsPlugin(),
 
