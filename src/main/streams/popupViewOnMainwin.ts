@@ -277,6 +277,9 @@ onIpcMainEvent(
       case '*':
         views = list;
         break;
+      case 'main-window':
+        views = [hash.mainWindow];
+        break;
       case 'add-address':
         views = [hash.addAddress];
         break;

@@ -275,22 +275,3 @@ onIpcMainEvent(
     );
   }
 );
-
-onIpcMainEvent(
-  '__internal_forward:views:channel-message',
-  async (_, payload) => {
-    switch (payload.targetView) {
-      case '*':
-      case 'main-window':
-        break;
-      default:
-        return;
-    }
-
-    const mainTabbedWin = await onMainWindowReady();
-    mainTabbedWin.window.webContents.send(
-      '__internal_forward:views:channel-message',
-      payload
-    );
-  }
-);
