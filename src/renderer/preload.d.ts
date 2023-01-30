@@ -70,6 +70,12 @@ type M2RChanneMessagePayload = {
   '__internal_push:rabbyx:get-dapp-screenshot': {
     reqId: string;
   };
+  '__internal_push:webusb:device-changed': {
+    changes: {
+      type: 'connect' | 'disconnect';
+      device: INodeWebUSBDevice;
+    };
+  };
 };
 
 type IPushEvents = keyof M2RChanneMessagePayload;

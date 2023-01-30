@@ -1,20 +1,44 @@
+import nodeHid = require('node-hid');
+import usb = require('usb');
+
 import { pickAllNonFnFields } from '@/isomorphic/json';
 
-import * as usb from 'usb';
-
-import { handleIpcMainInvoke } from '../utils/ipcMainEvents';
-import { getSessionInsts } from '../utils/stream-helpers';
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import { handleIpcMainInvoke, sendToWebContents } from '../utils/ipcMainEvents';
+import { getSessionInsts, getAllMainUIViews } from '../utils/stream-helpers';
 
 const webusb = new usb.WebUSB({
   allowAllDevices: true,
 });
 
-webusb.addEventListener('connect', (device) => {
-  console.debug('[debug] connect', device);
+webusb.addEventListener('connect', async (event) => {
+  if (!IS_RUNTIME_PRODUCTION) console.debug('[debug] connect', event);
+
+  const { list } = await getAllMainUIViews();
+
+  list.forEach((view) => {
+    sendToWebContents(view, '__internal_push:webusb:device-changed', {
+      changes: {
+        type: 'connect',
+        device: pickAllNonFnFields(event.device) as INodeWebUSBDevice,
+      },
+    });
+  });
 });
 
-webusb.removeEventListener('disconnect', (device) => {
-  console.debug('[debug] disconnect', device);
+webusb.addEventListener('disconnect', async (event) => {
+  if (!IS_RUNTIME_PRODUCTION) console.debug('[debug] disconnect', event);
+
+  const { list } = await getAllMainUIViews();
+
+  list.forEach((view) => {
+    sendToWebContents(view, '__internal_push:webusb:device-changed', {
+      changes: {
+        type: 'disconnect',
+        device: pickAllNonFnFields(event.device) as INodeWebUSBDevice,
+      },
+    });
+  });
 });
 
 getSessionInsts().then(({ mainSession }) => {
@@ -59,16 +83,17 @@ getSessionInsts().then(({ mainSession }) => {
 });
 
 handleIpcMainInvoke('get-hid-devices', async (_, opts) => {
-  if (process.platform === 'darwin' && process.arch === 'arm64') {
+  let nodeDevices: nodeHid.Device[] = [];
+
+  try {
+    nodeDevices = nodeHid.devices();
+  } catch (e) {
+    console.error(e);
     return {
       error: 'Not supported on this platform',
       devices: [],
     };
   }
-
-  // eslint-disable-next-line global-require
-  const nodeHid = require('node-hid') as typeof import('node-hid');
-  let nodeDevices = nodeHid.devices();
 
   if (opts?.filters) {
     const filters = Array.isArray(opts.filters) ? opts.filters : [opts.filters];

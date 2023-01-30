@@ -97,3 +97,26 @@ export function updateMainWindowActiveTabRect(
 ) {
   valueToMainSubject('mainWindowActiveTabRect', rectState);
 }
+
+export async function getAllMainUIViews() {
+  const [
+    mainWin,
+    { addAddress, addressManagement, quickSwap, dappsManagement },
+  ] = await Promise.all([
+    await onMainWindowReady(),
+    await firstValueFrom(fromMainSubject('popupViewsOnMainwinReady')),
+  ]);
+
+  const hash = {
+    mainWin: mainWin.window.webContents,
+    addAddress: addAddress.webContents,
+    addressManagement: addressManagement.webContents,
+    quickSwap: quickSwap.webContents,
+    dappsManagement: dappsManagement.webContents,
+  };
+
+  return {
+    hash,
+    list: Object.values(hash),
+  };
+}

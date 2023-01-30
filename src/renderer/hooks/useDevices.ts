@@ -1,6 +1,6 @@
 import { message } from 'antd';
 import { atom, useAtom } from 'jotai';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 const hidDevicesAtom = atom<IHidDeviceInfo[]>([]);
 export function useHIDDevices() {
@@ -24,6 +24,15 @@ export function useHIDDevices() {
       .finally(() => {
         setIsFetching(false);
       });
+  }, []);
+
+  useEffect(() => {
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_push:webusb:device-changed',
+      (event) => {
+        fetchDevices();
+      }
+    );
   }, []);
 
   return {
@@ -51,6 +60,15 @@ export function useUSBDevices() {
       .finally(() => {
         setIsFetching(false);
       });
+  }, []);
+
+  useEffect(() => {
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_push:webusb:device-changed',
+      (event) => {
+        fetchDevices();
+      }
+    );
   }, []);
 
   return {

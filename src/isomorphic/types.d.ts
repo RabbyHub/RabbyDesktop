@@ -218,6 +218,7 @@ type IShellNavInfo = {
 type IHidDeviceInfo = import('node-hid').Device;
 
 type IUSBDevice = PickAllNonFnFields<USBDevice>;
+type INodeWebUSBDevice = PickAllNonFnFields<import('usb').WebUSBDevice>;
 
 type IOSInfo = {
   arch: typeof process.arch;
