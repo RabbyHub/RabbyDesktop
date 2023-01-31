@@ -8,9 +8,14 @@ import { HDManagerModal } from '../HDManager/HDManagerModal';
 interface Props {
   visible: boolean;
   onClose: () => void;
+  showEntryButton?: boolean;
 }
 
-export const AddAddressModal: React.FC<Props> = ({ visible, onClose }) => {
+export const AddAddressModal: React.FC<Props> = ({
+  showEntryButton,
+  visible,
+  onClose,
+}) => {
   const [keyringType, setKeyringType] = React.useState<string>();
   const handleCancel = React.useCallback(() => {
     onClose();
@@ -54,6 +59,7 @@ export const AddAddressModal: React.FC<Props> = ({ visible, onClose }) => {
         onBack={() => {
           setKeyringType(undefined);
         }}
+        showEntryButton={showEntryButton}
       />
     );
   }

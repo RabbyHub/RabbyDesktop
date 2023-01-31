@@ -15,6 +15,7 @@ function App() {
   return (
     <AddAddressModal
       visible
+      showEntryButton
       onClose={() => {
         hideMainwinPopupview('add-address');
         resetPage();

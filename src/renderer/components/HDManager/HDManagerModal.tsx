@@ -5,6 +5,7 @@ import { LedgerModal } from './LedgerModal';
 
 export interface Props extends ModalProps {
   keyringType: string;
+  showEntryButton?: boolean;
 }
 
 export const HDManagerModal: React.FC<Props> = ({ keyringType, ...props }) => {

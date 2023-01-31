@@ -1,7 +1,15 @@
 .HDManager {
   font-weight: 500;
   line-height: 1.15;
-  height: calc(100% - 70px);
+  padding-bottom: 16px;
+  min-height: calc(100% - 64px);
+  display: flex;
+
+  .footer-button {
+    margin: 16px auto 0;
+    width: 200px;
+    height: 40px;
+  }
 
   .ant-tabs-content-holder {
     margin-top: 28px;
@@ -14,6 +22,7 @@
     margin: 0 40px;
     display: flex;
     flex-direction: column;
+    flex: 1;
   }
 
   .logo {
@@ -50,6 +59,8 @@
   }
 
   .tabs {
+    flex: 1;
+
     .ant-tabs-nav::before {
       display: none;
     }
