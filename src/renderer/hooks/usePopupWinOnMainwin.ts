@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { hideMainwinPopupview } from '../ipcRequest/mainwin-popupview';
 
 export function usePopupWinInfo<T extends IContextMenuPageInfo['type']>(
@@ -45,7 +45,10 @@ export function usePopupWinInfo<T extends IContextMenuPageInfo['type']>(
   };
 }
 export function usePopupViewInfo<T extends PopupViewOnMainwinInfo['type']>(
-  type: T
+  type: T,
+  opts?: {
+    enableTopViewGuard?: boolean;
+  }
 ) {
   const [localVisible, setLocalVisible] = useState(false);
 
@@ -88,6 +91,20 @@ export function usePopupViewInfo<T extends PopupViewOnMainwinInfo['type']>(
   const hideViewOnly = useCallback(() => {
     hideMainwinPopupview(type);
   }, [type]);
+
+  const localVisibleRef = useRef(localVisible);
+  useEffect(() => {
+    const prev = localVisibleRef.current;
+    if (opts?.enableTopViewGuard && prev && !localVisible) {
+      hideViewOnly();
+    }
+
+    localVisibleRef.current = localVisible;
+
+    return () => {
+      localVisibleRef.current = false;
+    };
+  }, [opts?.enableTopViewGuard, localVisible, hideViewOnly]);
 
   return {
     localVisible,

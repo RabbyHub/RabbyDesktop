@@ -2,13 +2,12 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { maxBy, sortBy } from 'lodash';
 import { useInterval } from 'react-use';
-import {
-  TokenItem,
-  TransferingNFTItem,
-  Tx,
-} from '@debank/rabby-api/dist/types';
+import { TokenItem, TransferingNFTItem } from '@debank/rabby-api/dist/types';
 import { CHAINS } from '@debank/common';
-import { TransactionGroup } from '@/isomorphic/types-rabbyx';
+import type {
+  TransactionDataItem,
+  TransactionGroup,
+} from '@/isomorphic/types/rabbyx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 // eslint-disable-next-line import/no-cycle
@@ -49,39 +48,6 @@ const EmptyView = styled.div`
     width: 52px;
   }
 `;
-
-export interface TransactionDataItem {
-  type: string | null;
-  receives: {
-    tokenId: string;
-    from: string;
-    token: TokenItem | undefined;
-    amount: number;
-  }[];
-  sends: {
-    tokenId: string;
-    to: string;
-    token: TokenItem | undefined;
-    amount: number;
-  }[];
-  protocol: {
-    name: string;
-    logoUrl: string;
-  } | null;
-  id: string;
-  chain: string;
-  approve?: {
-    token_id: string;
-    value: number;
-    token: TokenItem;
-    spender: string;
-  };
-  status: 'failed' | 'pending' | 'completed' | 'finish';
-  otherAddr: string;
-  name: string | undefined;
-  timeAt: number;
-  rawTx?: Tx;
-}
 
 const formatToken = (i: TokenItem | TransferingNFTItem, isReceive: boolean) => {
   const token: {
@@ -352,7 +318,7 @@ const Transactions = () => {
 
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:rabbyx:session-broadcast-forward-to-main',
+      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
       (payload) => {
         if (payload.event !== 'transactionChanged') return;
         switch (payload.data?.type) {

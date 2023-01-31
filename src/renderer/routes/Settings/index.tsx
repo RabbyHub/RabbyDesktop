@@ -12,10 +12,15 @@ import {
 import { Modal, Switch, SwitchProps, Tooltip } from 'antd';
 import { useSettings } from '@/renderer/hooks/useSettings';
 import styled from 'styled-components';
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
-import { useProxyStateOnSettingPage } from './settingHooks';
+import {
+  useIsViewingDevices,
+  useProxyStateOnSettingPage,
+} from './settingHooks';
 import { AutoUpdate } from '../Dapps/components/AutoUpdate';
+import ModalDevices from './components/ModalDevices';
 
 type TypedProps = {
   name: React.ReactNode;
@@ -136,12 +141,15 @@ export function MainWindowSettings() {
   const { setIsSettingProxy, customProxyServer, proxyType } =
     useProxyStateOnSettingPage();
 
+  const { setIsViewingDevices } = useIsViewingDevices();
+
   return (
     <div className={styles.settingsPage}>
       {/* TODO: implement Update Area */}
       <div />
 
       <ModalProxySetting />
+      <ModalDevices />
 
       <div className={styles.settingBlock}>
         <h4 className={styles.blockTitle}>Security</h4>
@@ -212,6 +220,21 @@ export function MainWindowSettings() {
           </ItemAction>
         </div>
       </div>
+
+      {!IS_RUNTIME_PRODUCTION && (
+        <div className={styles.settingBlock}>
+          <h4 className={styles.blockTitle}>Developer Kits</h4>
+          <div className={styles.itemList}>
+            <ItemAction
+              name="Devices"
+              icon="rabby-internal://assets/icons/developer-kits/usb.svg"
+              onClick={() => {
+                setIsViewingDevices(true);
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       <div className={styles.settingBlock}>
         <h4 className={styles.blockTitle}>About</h4>

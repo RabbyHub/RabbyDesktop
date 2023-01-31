@@ -44,6 +44,16 @@ type ItOrItsPromise<T> = T extends Promise<any>
   ? ExtractPromiseValue<T> | T
   : T | Promise<T>;
 
+type AllNonFnFields<T extends Record<string, any>> = {
+  [K in keyof T]: T[K] extends (...args: any[]) => any ? void : K;
+}[keyof T] &
+  string;
+
+type PickAllNonFnFields<T extends Record<string, any>> = Pick<
+  T,
+  AllNonFnFields<T>
+>;
+
 type EventTypeOfBrowserOn = [
   'page-title-updated',
   'close',

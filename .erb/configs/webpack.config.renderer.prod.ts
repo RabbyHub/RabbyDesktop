@@ -11,6 +11,8 @@ import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import { merge } from 'webpack-merge';
 import TerserPlugin from 'terser-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
+import WindiCSSWebpackPlugin from 'windicss-webpack-plugin';
+
 import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
@@ -104,6 +106,8 @@ const configuration: webpack.Configuration = {
       NODE_ENV: 'production',
       DEBUG_PROD: false,
     }),
+
+    new WindiCSSWebpackPlugin(),
 
     new MiniCssExtractPlugin({
       filename: '[name].css',

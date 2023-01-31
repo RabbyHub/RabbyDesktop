@@ -36,7 +36,7 @@ const LogoOnekey = 'rabby-internal://assets/icons/walletlogo/onekey.svg';
 const IconPrivateKeyWhite =
   'rabby-internal://assets/icons/walletlogo/private-key-white.svg';
 const IconPrivateKeyInk =
-  'rabby-internal://assets/icons/walletlogo/privatekey-ink.svg';
+  'rabby-internal://assets/icons/walletlogo/privatekeylogo.svg';
 const LogoPrivateKey =
   'rabby-internal://assets/icons/walletlogo/privatekeylogo.svg';
 const LogoTp = 'rabby-internal://assets/icons/walletlogo/tp.svg';
@@ -56,7 +56,10 @@ const IconWatchWhite =
   'rabby-internal://assets/icons/walletlogo/IconWatch-white.svg';
 const LogoDefiant = 'rabby-internal://assets/icons/walletlogo/defiant.svg';
 const LogoDefiantWhite = 'rabby-internal://assets/icons/walletlogo/defiant.svg';
-
+const LogoWalletConnect =
+  'rabby-internal://assets/icons/walletlogo/walletconnect28.svg';
+const IconWalletConnect =
+  'rabby-internal://assets/icons/walletlogo/walletconnect28.svg';
 export { CHAINS, CHAINS_ENUM };
 
 export const KEYRING_TYPE = {
@@ -320,6 +323,7 @@ export enum WALLET_BRAND_TYPES {
   COOLWALLET = 'CoolWallet',
   DEFIANT = 'Defiant',
   AIRGAP = 'AirGap',
+  WalletConnect = 'WalletConnect',
 }
 
 enum WALLET_BRAND_CATEGORY {
@@ -509,6 +513,15 @@ export const WALLET_BRAND_CONTENT: {
     brand: WALLET_BRAND_TYPES.TRUSTWALLET,
     icon: IconTrust,
     image: LogoTrust,
+    connectType: BRAND_WALLET_CONNECT_TYPE.WalletConnect,
+    category: WALLET_BRAND_CATEGORY.MOBILE,
+  },
+  [WALLET_BRAND_TYPES.WalletConnect]: {
+    id: 100,
+    name: 'Wallet Connect',
+    brand: WALLET_BRAND_TYPES.WalletConnect,
+    icon: IconWalletConnect,
+    image: LogoWalletConnect,
     connectType: BRAND_WALLET_CONNECT_TYPE.WalletConnect,
     category: WALLET_BRAND_CATEGORY.MOBILE,
   },

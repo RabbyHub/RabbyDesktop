@@ -183,6 +183,7 @@ export function AddDapp({
               onChange={onChangeAddUrl}
               placeholder="https://somedapp.xyz"
               allowClear
+              autoFocus
             />
           </Form.Item>
           <Button

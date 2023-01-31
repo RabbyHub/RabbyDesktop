@@ -81,19 +81,21 @@ const AssociateDapp = ({
   onOk?: (origin: string) => void;
 }) => {
   const { dapps } = useDapps();
-  const [current, setCurrent] = useState('');
+  const [current, setCurrent] = useState<string | null>(null);
   const [isShowAdd, setIsShowAdd] = useState(false);
   const { bindingDappsToProtocol, protocolDappsBinding } =
     useProtocolDappsBinding();
   const [loading, setLoading] = useState(false);
 
-  const bindedDapp = protocolDappsBinding?.[protocolId];
+  const bindUrl = useMemo(() => {
+    const arr = Object.values(protocolDappsBinding);
+    const t = arr.find((item) => item.siteUrl === url);
+    return protocolDappsBinding[protocolId]?.origin || t?.origin || null;
+  }, [protocolDappsBinding, protocolId, url]);
 
   useEffect(() => {
-    if (bindedDapp) {
-      setCurrent(bindedDapp.siteUrl);
-    }
-  }, [bindedDapp, dapps, url]);
+    setCurrent(bindUrl);
+  }, [bindUrl]);
 
   const dappList = useMemo(() => {
     try {
@@ -116,6 +118,9 @@ const AssociateDapp = ({
   }, [url, dapps]);
 
   const handleConfirm = async () => {
+    if (!current) {
+      return;
+    }
     setLoading(true);
     try {
       await bindingDappsToProtocol(protocolId, {

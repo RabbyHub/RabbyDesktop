@@ -97,10 +97,11 @@ export const TrezorManager: React.FC<Props> = ({ HDName = 'Trezor' }) => {
       />
 
       <Modal
+        centered
         destroyOnClose
         className="AdvancedModal"
         title="Custom Address HD path"
-        visible={visibleAdvanced}
+        open={visibleAdvanced}
         width={840}
         footer={[]}
         onCancel={() => setVisibleAdvanced(false)}

@@ -1,7 +1,15 @@
 .HDManager {
   font-weight: 500;
   line-height: 1.15;
-  height: calc(100% - 70px);
+  padding-bottom: 16px;
+  min-height: calc(100% - 64px);
+  display: flex;
+
+  .footer-button {
+    margin: 16px auto 0;
+    width: 200px;
+    height: 40px;
+  }
 
   .ant-tabs-content-holder {
     margin-top: 28px;
@@ -11,15 +19,10 @@
     min-width: 1200px;
     position: relative;
     padding-top: 20px;
-    margin: 0 120px;
+    margin: 0 40px;
     display: flex;
     flex-direction: column;
-  }
-
-  @media (max-width: 1536px) {
-    main {
-      margin: 0 40px;
-    }
+    flex: 1;
   }
 
   .logo {
@@ -54,35 +57,12 @@
       line-height: 1;
     }
   }
-
-  .tabs {
-    .ant-tabs-nav::before {
-      display: none;
-    }
-    .ant-tabs-nav-list {
-      margin: auto;
-      background: #707280;
-      border-radius: 8px;
-      padding: 4px;
-    }
-    .ant-tabs-ink-bar {
-      display: none;
-    }
-    .ant-tabs-tab {
-      padding: 7px 34px;
-      border-radius: 6px;
-      color: #fff;
-      font-size: 13px;
-      transition: all 0.3s ease-in-out;
-      margin: 0;
-      &.ant-tabs-tab-active {
-        background: #fff;
-      }
-    }
-  }
 }
 
 .AccountList {
+  border-radius: 8px;
+  overflow: hidden;
+
   .ant-spin-text {
     color: #fff;
     text-shadow: none!important;
@@ -93,6 +73,9 @@
   .ant-table {
     background: rgba(255, 255, 255, 0.1);
     color: #fff;
+  }
+  table {
+    position: relative;
   }
   .icon {
     width: auto;
@@ -131,7 +114,7 @@
       font-weight: normal;
       padding: 10px 0 0;
 
-      a {
+      button {
         text-decoration: underline;
       }
     }
@@ -211,6 +194,7 @@
     right: 0;
     background-color: rgba(0, 0, 0, 0.4);
     bottom: 0;
+    top: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -443,5 +427,6 @@
 
   .back {
     z-index: 10;
+    width: 92px;
   }
 }

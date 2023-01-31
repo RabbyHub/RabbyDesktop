@@ -1,11 +1,13 @@
 import { AxiosProxyConfig } from 'axios';
-import { RABBY_INTERNAL_PROTOCOL } from './constants';
+import { RABBY_INTERNAL_PROTOCOL, RABBY_LOCAL_URLBASE } from './constants';
 
-export function parseQueryString(input?: string) {
+export function parseQueryString(
+  input: string = typeof window !== 'undefined'
+    ? window.location.search.slice(1)
+    : ''
+) {
   const result: Record<string, string> = {};
-  const queryStr =
-    (typeof window !== 'undefined' ? window.location.search.slice(1) : input) ||
-    '';
+  const queryStr = (input || '').replace(/^[?#&]/, '');
 
   queryStr
     .trim()
@@ -90,6 +92,59 @@ export function isMainWinShellWebUI(url: string) {
     url.includes('__webuiIsMainWindow=true')
   );
 }
+function _isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
+  const urlInfo = new URL(url);
+  const queryInfo = parseQueryString(urlInfo.search);
+
+  switch (viewType) {
+    case 'main-window':
+      return isMainWinShellWebUI(url);
+    case 'address-management':
+      return (
+        url.startsWith('chrome-extension:') &&
+        urlInfo.pathname === '/popup-view.html' &&
+        queryInfo.view === 'add-address'
+      );
+    case 'add-address':
+      return (
+        url.startsWith('chrome-extension:') &&
+        urlInfo.pathname === '/popup-view.html' &&
+        queryInfo.view === 'add-address'
+      );
+    case 'dapps-management':
+      return (
+        url.startsWith(RABBY_LOCAL_URLBASE) &&
+        urlInfo.pathname === '/popup-view.html' &&
+        queryInfo.view === 'dapps-management'
+      );
+    case 'quick-swap':
+      return (
+        url.startsWith(RABBY_LOCAL_URLBASE) &&
+        urlInfo.pathname === '/popup-view.html' &&
+        queryInfo.view === 'quick-swap'
+      );
+    default:
+      return false;
+  }
+}
+
+export function isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
+  switch (viewType) {
+    default:
+      return _isBuiltinView(url, viewType);
+    case '*':
+      return (
+        [
+          'main-window',
+          'address-management',
+          'add-address',
+          'dapps-management',
+          'quick-swap',
+        ] as const
+      ).some((view) => _isBuiltinView(url, view));
+  }
+}
+
 export function isRabbyXNotificationWinShellWebUI(url: string) {
   return (
     url.startsWith('chrome-extension:') &&

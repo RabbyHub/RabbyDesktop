@@ -1,6 +1,8 @@
+import { Account, RabbyAccount } from '@/isomorphic/types/rabbyx';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useRef } from 'react';
+import { useMessageForwarded } from '../useViewsMessage';
 
 type AccountWithName = Account & { alianName: string };
 const currentAccountAtom = atom<
@@ -14,17 +16,11 @@ async function getAliasNameByAddress(address: string) {
 
 export function useCurrentAccount() {
   const [currentAccount, setCurrentAccount] = useAtom(currentAccountAtom);
-
-  const fetchCurrentAccount = useCallback(() => {
-    walletController.getCurrentAccount().then(async (account) => {
+  const fetchCurrentAccount = useCallback(async () => {
+    return walletController.getCurrentAccount().then(async (account) => {
       let alianName = '';
       if (account?.address) {
         alianName = await getAliasNameByAddress(account.address);
-      }
-      if (!('balance' in account)) {
-        (account as any).balance =
-          (await walletController.getAddressBalance(account?.address))
-            .total_usd_value ?? 0;
       }
       setCurrentAccount((pre) => {
         return {
@@ -49,7 +45,7 @@ export function useCurrentAccount() {
     fetchCurrentAccount();
 
     return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:rabbyx:session-broadcast-forward-to-main',
+      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
       (payload) => {
         switch (payload.event) {
           default:
@@ -63,6 +59,10 @@ export function useCurrentAccount() {
       }
     );
   }, [fetchCurrentAccount]);
+
+  useMessageForwarded('*', 'refreshCurrentAccount', () => {
+    fetchCurrentAccount();
+  });
 
   return {
     switchAccount,

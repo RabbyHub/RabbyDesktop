@@ -25,7 +25,7 @@ export async function onMainWindowReady(): Promise<
 }
 
 export async function getRabbyExtId() {
-  const ext = await firstValueFrom(fromMainSubject('rabbyExtensionReady'));
+  const ext = await firstValueFrom(fromMainSubject('rabbyExtensionLoaded'));
 
   return ext.id;
 }
@@ -96,4 +96,41 @@ export function updateMainWindowActiveTabRect(
   rectState: IMainWindowActiveTabRect
 ) {
   valueToMainSubject('mainWindowActiveTabRect', rectState);
+}
+
+export async function getAllMainUIViews() {
+  const [
+    mainWin,
+    { addAddress, addressManagement, quickSwap, dappsManagement },
+  ] = await Promise.all([
+    await onMainWindowReady(),
+    await firstValueFrom(fromMainSubject('popupViewsOnMainwinReady')),
+  ]);
+
+  const views = {
+    'add-address': addAddress,
+    'address-management': addressManagement,
+    'quick-swap': quickSwap,
+    'dapps-management': dappsManagement,
+  } as const;
+
+  const viewOnlyHash = {
+    addAddress: addAddress.webContents,
+    addressManagement: addressManagement.webContents,
+    quickSwap: quickSwap.webContents,
+    dappsManagement: dappsManagement.webContents,
+  };
+
+  const hash = {
+    mainWindow: mainWin.window.webContents,
+    ...viewOnlyHash,
+  };
+
+  return {
+    views,
+    viewOnlyHash,
+    viewOnlyList: Object.values(viewOnlyHash),
+    hash,
+    list: Object.values(hash),
+  };
 }

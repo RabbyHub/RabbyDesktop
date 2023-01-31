@@ -22,11 +22,13 @@ export const useAccountInfo = (type: string, address: string) => {
     walletController
       .requestKeyring(type, 'getAccountInfo', null, address)
       .then((res) => {
-        setAccount({
-          ...res,
-          hdPathTypeLabel:
-            LedgerHDPathTypeLabel[res.hdPathType as LedgerHDPathType],
-        });
+        if (res) {
+          setAccount({
+            ...res,
+            hdPathTypeLabel:
+              LedgerHDPathTypeLabel[res.hdPathType as LedgerHDPathType],
+          });
+        }
       });
   }, []);
 

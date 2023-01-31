@@ -30,12 +30,6 @@ type IEntry = {
 }
 
 const entriesRenderer = {
-  home: {
-    name: 'home',
-    target: 'home.html',
-    htmlFile: path.join(srcRendererPath, `home.ejs`),
-    jsEntry: path.join(srcRendererPath, 'home.tsx'),
-  },
   splash: {
     name: 'splash',
     target: 'splash.html',

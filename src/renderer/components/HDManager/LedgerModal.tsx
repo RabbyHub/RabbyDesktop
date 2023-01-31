@@ -11,7 +11,11 @@ interface Device {
 
 const ledgerUSBVendorId = 0x2c97;
 
-export const LedgerModal: React.FC<ModalProps> = (props) => {
+interface Props extends ModalProps {
+  showEntryButton?: boolean;
+}
+
+export const LedgerModal: React.FC<Props> = ({ showEntryButton, ...props }) => {
   const [connected, setConnected] = React.useState(false);
   const [devices, setDevices] = React.useState<Device[]>([]);
 
@@ -34,9 +38,18 @@ export const LedgerModal: React.FC<ModalProps> = (props) => {
     detectDevice();
   }, []);
 
+  const handleClose = React.useCallback(
+    (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+      const { onCancel } = props;
+      onCancel?.(e);
+      setConnected(false);
+    },
+    [props]
+  );
+
   if (!connected) {
     return (
-      <Modal {...props} width={1000} title="Connect Ledger">
+      <Modal {...props} centered width={1000} title="Connect Ledger">
         <div className={styles.LedgerModal}>
           {devices?.length ? (
             <div className={styles.devices}>
@@ -84,19 +97,18 @@ export const LedgerModal: React.FC<ModalProps> = (props) => {
   return (
     <Modal
       {...props}
-      style={{
-        top: 40,
-      }}
+      centered
       className="HDManagerModal"
       width={1280}
       backable
-      onCancel={(e) => {
-        const { onCancel } = props;
-        onCancel?.(e);
-        setConnected(false);
-      }}
+      onCancel={handleClose}
     >
-      <HDManager keyring={KEYRING_CLASS.HARDWARE.LEDGER} keyringId={null} />
+      <HDManager
+        onCancel={handleClose}
+        keyring={KEYRING_CLASS.HARDWARE.LEDGER}
+        keyringId={null}
+        showEntryButton={showEntryButton}
+      />
     </Modal>
   );
 };

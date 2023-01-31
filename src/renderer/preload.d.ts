@@ -2,6 +2,7 @@
 /// <reference path="../main/internal.d.ts" />
 /// <reference path="../isomorphic/types.d.ts" />
 /// <reference path="../isomorphic/type-helpers.d.ts" />
+/// <reference path="../preloads/forward.d.ts" />
 
 type M2RChanneMessagePayload = {
   'download-release-progress-updated': {
@@ -65,10 +66,16 @@ type M2RChanneMessagePayload = {
     previousUrl: string;
     currentUrl: string;
   };
-  '__internal_push:rabbyx:session-broadcast-forward-to-main': RabbyEvent;
+  '__internal_push:rabbyx:session-broadcast-forward-to-desktop': RabbyEvent;
 
   '__internal_push:rabbyx:get-dapp-screenshot': {
     reqId: string;
+  };
+  '__internal_push:webusb:device-changed': {
+    changes: {
+      type: 'connect' | 'disconnect';
+      device: INodeWebUSBDevice;
+    };
   };
 };
 
@@ -156,6 +163,10 @@ type ChannelMessagePayload = {
       }
     ];
     response: ChannelMessagePayload['__internal_forward:main-window:client-message']['send'];
+  };
+  '__internal_forward:views:channel-message': {
+    send: ChannelForwardMessageType['send'];
+    response: ChannelForwardMessageType['response'];
   };
   '__internal_rpc:dapp-tabs:close-safe-view': {
     send: [];
@@ -312,6 +323,10 @@ type ChannelInvokePayload = {
       version: ReturnType<Electron.App['getVersion']>;
     };
   };
+  'get-os-info': {
+    send: [];
+    response: IOSInfo;
+  };
   'detect-dapp': {
     send: [dappUrl: string];
     response: {
@@ -421,7 +436,27 @@ type ChannelInvokePayload = {
     send: [conf: IAppProxyConf];
     response: void;
   };
-
+  'get-hid-devices': {
+    send: [
+      options?: {
+        filters?: HIDDeviceRequestOptions['filters'];
+      }
+    ];
+    response: {
+      error?: string;
+      devices: IHidDeviceInfo[];
+    };
+  };
+  'get-usb-devices': {
+    send: [
+      options?: {
+        filters?: HIDDeviceRequestOptions['filters'];
+      }
+    ];
+    response: {
+      devices: IUSBDevice[];
+    };
+  };
   [`__internal_rpc:rabbyx-rpc:query`]: {
     send: [query: Omit<IRabbyxRpcQuery, 'rpcId'>];
     response: {
@@ -469,10 +504,6 @@ interface Window {
   };
 
   __RD_isDappSafeView?: boolean;
-  // for dapp webview
-  __rD?: {
-    tellConnection(info: IConnectedSiteToDisplay): void;
-  };
 
   // from dapp
   ethereum?: any;

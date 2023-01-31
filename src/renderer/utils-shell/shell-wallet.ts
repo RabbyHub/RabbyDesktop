@@ -3,7 +3,7 @@ import type {
   RabbyXContollerMethods,
   RabbyXContollerMeththodNames,
   RabbyXContollerNS,
-} from '@/isomorphic/rabbyx';
+} from '@/isomorphic/types/rabbyx';
 import eventBus from './eventBus';
 
 export function makeShellWallet<

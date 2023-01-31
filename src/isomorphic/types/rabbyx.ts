@@ -1,9 +1,159 @@
+import { Object as ObjectType } from 'ts-toolbelt';
+import type {
+  ExplainTxResponse,
+  Tx,
+  TotalBalanceResponse,
+  TokenItem,
+} from '@debank/rabby-api/dist/types';
+
 import type { DEX_ENUM } from '@rabby-wallet/rabby-swap';
 import type { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-import type { TotalBalanceResponse } from '@debank/rabby-api/dist/types';
-import { TransactionGroup } from './types-rabbyx';
+export type RabbyAccount = {
+  address: string;
+  type: string;
+  brandName: string;
+  alianName?: string;
+};
+
+export type Account = RabbyAccount & {
+  displayBrandName?: string;
+  index?: number;
+  balance?: number;
+};
+
+export interface GasCache {
+  [chainId: string | number]: ChainGas;
+}
+
+export interface ChainGas {
+  gasPrice?: number | null; // custom cached gas price
+  gasLevel?: string | null; // cached gasLevel
+  lastTimeSelect?: 'gasLevel' | 'gasPrice'; // last time selection, 'gasLevel' | 'gasPrice'
+}
+
+export interface AddedToken {
+  [address: string]: string[];
+}
+
+export interface PreferenceState {
+  externalLinkAck: boolean;
+  useLedgerLive: boolean;
+  locale: string;
+  isDefaultWallet: boolean;
+  lastTimeSendToken: Record<string, TokenItem>;
+  walletSavedList: [];
+  gasCache: GasCache;
+  currentVersion: string;
+  firstOpen: boolean;
+  pinnedChain: string[];
+  AddedToken: AddedToken;
+  tokenApprovalChain: Record<string, import('@debank/common').CHAINS_ENUM>;
+  nftApprovalChain: Record<string, import('@debank/common').CHAINS_ENUM>;
+}
+
+interface DisplayKeyring {
+  unlock: () => Promise<void>;
+  getFirstPage: () => Promise<string[]>;
+  getNextPage: () => Promise<string[]>;
+  getAccounts: () => Promise<string[]>;
+  getAccountsWithBrand: () => Promise<Account[]>;
+  activeAccounts: (indexes: number[]) => Promise<string[]>;
+}
+
+export interface DisplayedKeyring {
+  type: string;
+  accounts: {
+    address: string;
+    brandName: string;
+    type?: string;
+    keyring?: DisplayKeyring;
+    alianName?: string;
+  }[];
+  keyring: DisplayKeyring;
+  byImport?: boolean;
+}
+
+export type IHighlightedAddress = {
+  brandName: Account['brandName'];
+  address: Account['address'];
+};
+
+interface TransactionHistoryItem {
+  rawTx: Tx;
+  createdAt: number;
+  isCompleted: boolean;
+  hash: string;
+  failed: boolean;
+  gasUsed?: number;
+  isSubmitFailed?: boolean;
+  site?: ConnectedSite;
+}
+
+interface TransactionSigningItem {
+  rawTx: Tx;
+  explain?: ObjectType.Merge<
+    ExplainTxResponse,
+    { approvalId: string; calcSuccess: boolean }
+  >;
+  id: string;
+  isSubmitted?: boolean;
+}
+
+export interface TransactionDataItem {
+  type: string | null;
+  receives: {
+    tokenId: string;
+    from: string;
+    token: TokenItem | undefined;
+    amount: number;
+  }[];
+  sends: {
+    tokenId: string;
+    to: string;
+    token: TokenItem | undefined;
+    amount: number;
+  }[];
+  protocol: {
+    name: string;
+    logoUrl: string;
+  } | null;
+  id: string;
+  chain: string;
+  approve?: {
+    token_id: string;
+    value: number;
+    token: TokenItem;
+    spender: string;
+  };
+  status: 'failed' | 'pending' | 'completed' | 'finish';
+  otherAddr: string;
+  name: string | undefined;
+  timeAt: number;
+  rawTx?: Tx;
+}
+
+export interface TransactionGroup {
+  chainId: number;
+  nonce: number;
+  txs: TransactionHistoryItem[];
+  isPending: boolean;
+  createdAt: number;
+  explain: ObjectType.Merge<
+    ExplainTxResponse,
+    { approvalId: string; calcSuccess: boolean }
+  >;
+  isFailed: boolean;
+  isSubmitFailed?: boolean;
+  $ctx?: any;
+}
+
+export interface SwapState {
+  gasPriceCache?: GasCache;
+  selectedDex?: import('@rabby-wallet/rabby-swap').DEX_ENUM | null;
+  selectedChain?: import('@debank/common').CHAINS_ENUM;
+  unlimitedAllowance?: boolean;
+}
 
 type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
 type OpenApiService = import('@debank/rabby-api').OpenApiService;
@@ -168,6 +318,20 @@ export type RabbyXMethod = {
     indexes: number[],
     keyringId: number | null
   ) => Account;
+
+  'walletController.initWalletConnect': (
+    brandName: string,
+    bridge?: string
+  ) => {
+    uri: string;
+    stashId: number | null;
+  };
+  'walletController.importWalletConnect': (
+    address: string,
+    brandName: string,
+    bridge?: string,
+    stashId?: number
+  ) => Account[];
 
   'permissionService.addConnectedSite': (
     origin: string,

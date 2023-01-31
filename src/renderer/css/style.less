@@ -75,4 +75,43 @@ body {
     box-shadow: 0px 24px 40px rgba(0, 0, 0, 0.12);
     border-radius: 8px;
   }
+  .mainwindow-default-tip .ant-message-notice-content,
+  .rabbyx-tx-changed-tip .ant-message-notice-content {
+    > .ant-message-custom-content {
+      display: flex;
+      align-items: center;
+    }
+  }
+}
+
+.rabby-tabs {
+  flex: 1;
+
+  .ant-tabs-nav::before {
+    display: none;
+  }
+
+  .ant-tabs-nav-list {
+    margin: auto;
+    background: #707280;
+    border-radius: 8px;
+    padding: 4px;
+  }
+
+  .ant-tabs-ink-bar {
+    display: none;
+  }
+
+  .ant-tabs-tab {
+    padding: 7px 34px;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 13px;
+    transition: all 0.3s ease-in-out;
+    margin: 0!important;
+
+    &.ant-tabs-tab-active {
+      background: #fff;
+    }
+  }
 }

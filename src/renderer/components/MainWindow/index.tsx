@@ -24,7 +24,7 @@ import { useTransactionChanged } from '@/renderer/hooks/rabbyx/useTransaction';
 import { useMainWindowEvents } from '@/renderer/hooks-shell/useWindowState';
 import { useAppUnlockEvents } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { useAccounts } from '@/renderer/hooks/rabbyx/useAccount';
-import { useMessageForwardToMainwin } from '@/renderer/hooks/useMessageToMainwin';
+import { useMessageForwardToMainwin } from '@/renderer/hooks/useViewsMessage';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';

@@ -158,6 +158,13 @@ handleIpcMainInvoke('get-app-version', (_) => {
   };
 });
 
+handleIpcMainInvoke('get-os-info', () => {
+  return {
+    platform: process.platform,
+    arch: process.arch,
+  };
+});
+
 onIpcMainEvent(
   '__internal_rpc:app:open-external-url',
   async (evt, externalURL) => {
@@ -246,7 +253,7 @@ export default function bootstrap() {
      * orders:
      * sessionReady
      * -> webuiExtensionReady
-     * -> rabbyExtensionReady
+     * -> rabbyExtensionLoaded
      * -> electronChromeExtensionsReady
      *
      * so we just need to wait electronChromeExtensionsReady ready
@@ -256,7 +263,6 @@ export default function bootstrap() {
     const lastMainWinPos = getOrInitMainWinPosition();
     // init window
     const mainWindow = await createWindow({
-      // defaultTabUrl: RABBY_HOMEPAGE_URL,
       defaultTabUrl: '',
       window: {
         show: false,

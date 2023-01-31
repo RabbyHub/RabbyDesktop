@@ -80,7 +80,7 @@ export default function ModalRenameDapp({
           <DappFavicon
             origin={dapp?.origin}
             className={styles.dappFavicon}
-            src={dapp?.faviconUrl}
+            src={dapp.faviconBase64 || dapp.faviconUrl}
             alt={dapp?.faviconUrl}
           />
           <div className={styles.dappUrl} title={dapp?.origin}>
@@ -91,6 +91,7 @@ export default function ModalRenameDapp({
               className={styles.aliasInput}
               value={alias}
               onChange={onAliasChange}
+              autoFocus
               // placeholder="https://somedapp.xyz"
             />
           </div>

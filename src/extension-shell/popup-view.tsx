@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import '@/renderer/css/style.less';
 
 import './popup-view.less';
+import '@/renderer/css/windicss';
 
 import { parseQueryString } from '@/isomorphic/url';
 import { ShellWalletProvider } from '@/renderer/components/ShellWallet';

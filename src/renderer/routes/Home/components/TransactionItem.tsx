@@ -9,7 +9,7 @@ import { maxBy } from 'lodash';
 import { IconWithChain } from '@/renderer/components/TokenWithChain';
 import NameAndAddress from '@/renderer/components/NameAndAddress';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
-import { TransactionDataItem } from './Transactions';
+import { TransactionDataItem } from '@/isomorphic/types/rabbyx';
 import TxChange from './TxChange';
 
 const TransactionItemWrapper = styled.div`

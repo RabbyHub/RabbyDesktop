@@ -48,13 +48,36 @@ The fallback value of `RABBY_DESKTOP_REPO` is the relative path `../RabbyDesktop
 ~/Documents/RabbyDesktop
 ``` -->
 
-## Starting Development
+### Native Modules
 
-Before start run electron app, you need to install rabbyx plugin:
+There's some node modules such as `node-hid` that need to be compiled for your platform, on running `npm install`, make sure you use node with arch corresponding to your electron version. Check your local node's arch:
 
 ```bash
-sh scripts/install_rabbyx.sh
+node -e "console.log(process.arch)"
 ```
+
+If you're using Apple Silicon but running node with arch `x64` like this: 
+
+![alt](./docs/check-node-arch.png)
+
+That's because you install node(maybe `x64` or `arm64`) and run it in rosetta2, You SHOULD:
+
+1. switch back to node(arm64) by installing correct node
+2. make sure you disable rosetta on node(arm64):
+
+![alt](./docs/disable-rosetta2.jpeg)
+
+More information about [rosetta2](https://iboysoft.com/news/uninstall-rosetta-2.html#how-to-check-if-rosetta-2-is-installed)
+
+### RabbyX Extension
+
+on `postinstall`, we install rabbyx plugin AUTOMATICALLY. Check you have `assets/chrome_exts/rabbyx` folder after `npm install` finished, if not, you can install it manually:
+
+```bash
+npm run install:rabbyX
+```
+
+## Starting Development
 
 <!-- Start the RabbyX Project's build process in a separate terminal:
 

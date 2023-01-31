@@ -13,7 +13,11 @@ import {
   onIpcMainEvent,
   sendToWebContents,
 } from '../utils/ipcMainEvents';
-import { getRabbyExtId, onMainWindowReady } from '../utils/stream-helpers';
+import {
+  getRabbyExtId,
+  getSessionInsts,
+  onMainWindowReady,
+} from '../utils/stream-helpers';
 import { rabbyxQuery } from './rabbyIpcQuery/_base';
 import { createPopupView } from '../utils/browser';
 
@@ -51,7 +55,7 @@ onIpcMainEvent(
     // forward to main window
     sendToWebContents(
       tabbedWin.window.webContents,
-      '__internal_push:rabbyx:session-broadcast-forward-to-main',
+      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
       payload
     );
 

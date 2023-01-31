@@ -1,7 +1,7 @@
-/// <reference path="../../../isomorphic/types-rabbyx.d.ts" />
-
+import type { AddedToken, GasCache } from '@/isomorphic/types/rabbyx';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { CHAINS_ENUM } from '@debank/common';
+import { TokenItem } from '@debank/rabby-api/dist/types';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
 
@@ -10,7 +10,7 @@ interface PreferenceState {
   useLedgerLive: boolean;
   locale: string;
   isDefaultWallet: boolean;
-  lastTimeSendToken: Record<string, /* TokenItem */ any>;
+  lastTimeSendToken: Record<string, TokenItem>;
   walletSavedList: [];
   gasCache: GasCache;
   currentVersion: string;

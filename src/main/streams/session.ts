@@ -90,7 +90,7 @@ async function loadExtensions(sess: Electron.Session, extensionsPath: string) {
         });
         extensions.push(ext);
         if (ext.name.toLowerCase().includes('rabby')) {
-          valueToMainSubject('rabbyExtensionReady', ext);
+          valueToMainSubject('rabbyExtensionLoaded', ext);
           rabbyExt = ext;
         }
       } catch (e) {

@@ -14,6 +14,8 @@ checkNodeEnv('development');
 
 const dist = webpackPaths.dllPath;
 
+const rendererConf = require('./webpack.config.renderer.dev').default;
+
 const configuration: webpack.Configuration = {
   context: webpackPaths.rootPath,
 
@@ -28,7 +30,7 @@ const configuration: webpack.Configuration = {
   /**
    * Use `module` from `webpack.config.renderer.dev.js`
    */
-  module: require('./webpack.config.renderer.dev').default.module,
+  module: rendererConf[0].module,
 
   entry: {
     renderer: Object.keys(dependencies || {})

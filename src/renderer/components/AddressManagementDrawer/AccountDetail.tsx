@@ -14,6 +14,7 @@ import { useAddressSource } from '@/renderer/hooks/rabbyx/useAddressSource';
 import QRCode from 'qrcode.react';
 import { Input, Popover } from 'antd';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { useForwardTo } from '@/renderer/hooks/useViewsMessage';
 import styles from './AddressManagementDrawer.module.less';
 import { AccountDetailItem } from './AccountDetailItem';
 import { useAccountInfo } from './useAccountInfo';
@@ -44,6 +45,8 @@ export const AccountDetail: React.FC<Props> = ({
   const { getAllAccountsToDisplay } = useAccountToDisplay();
   const accountInfo = useAccountInfo(account.type, account.address);
 
+  const broadcastToViews = useForwardTo('*');
+
   const updateAliasName = React.useCallback(
     async (e: any) => {
       const { value: inputValue } = e.target as { value: string };
@@ -55,9 +58,10 @@ export const AccountDetail: React.FC<Props> = ({
 
       setAliasInput(inputValue);
       await walletController.updateAlianName(account.address, inputValue);
+      broadcastToViews('refreshCurrentAccount', {});
       getAllAccountsToDisplay();
     },
-    [account.address, walletController]
+    [account.address, walletController, broadcastToViews]
   );
 
   React.useEffect(() => {

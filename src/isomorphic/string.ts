@@ -15,3 +15,12 @@ export function randString(length = 10) {
   }
   return result;
 }
+
+export function keywordMatch(keyword: string, text?: string | number) {
+  return `${text ?? ''}`.toLowerCase().includes(keyword);
+}
+
+export function extractProductNameFromHIDPath(hidPath: string) {
+  const pathParts = hidPath.match(/\{([^{^}]+)\}/) || [];
+  return pathParts[1] || '';
+}

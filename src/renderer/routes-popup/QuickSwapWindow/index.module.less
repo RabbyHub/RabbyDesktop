@@ -1,6 +1,15 @@
 .mask {
   z-index: 0;
 }
+.mask2 {
+  left: calc(100vw - 625px);
+  z-index: 0;
+  background: linear-gradient(
+    270.65deg,
+    rgba(0, 0, 0, 0.4) 32.61%,
+    rgba(0, 0, 0, 0) 99.53%
+  );
+}
 
 :root {
   --swap-bg: #464c59;
@@ -19,7 +28,7 @@
   height: 706px;
 
   background-color: var(--swap-bg);
-  border-radius: 16px;
+  border-radius: 8px;
   overflow: hidden;
   transition-property: transform !important;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -27,6 +36,10 @@
   transform: translateX(600px);
 
   :global {
+    ::-webkit-scrollbar {
+      display: none;
+    }
+
     .ant-btn-primary:hover,
     .ant-btn-primary:focus {
       background-color: var(--color-primary);

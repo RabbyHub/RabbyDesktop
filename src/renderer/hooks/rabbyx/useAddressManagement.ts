@@ -1,3 +1,4 @@
+import type { Account, IHighlightedAddress } from '@/isomorphic/types/rabbyx';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
@@ -6,7 +7,7 @@ import { useAccountToDisplay } from './useAccountToDisplay';
 const highlightedAddressesAtom = atom<IHighlightedAddress[]>([]);
 
 export const useAddressManagement = () => {
-  const { getAllAccountsToDisplay } = useAccountToDisplay();
+  const { removeAccount } = useAccountToDisplay();
   const [highlightedAddresses, setHighlightedAddresses] = useAtom(
     highlightedAddressesAtom
   );
@@ -64,9 +65,9 @@ export const useAddressManagement = () => {
   const removeAddress = React.useCallback(
     async (payload: Parameters<typeof walletController.removeAddress>) => {
       await walletController.removeAddress(...payload);
-      getAllAccountsToDisplay();
+      removeAccount(payload);
     },
-    [getAllAccountsToDisplay]
+    [removeAccount]
   );
 
   return {
