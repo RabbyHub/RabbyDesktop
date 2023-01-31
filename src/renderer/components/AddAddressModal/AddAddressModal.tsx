@@ -46,7 +46,7 @@ export const AddAddressModal: React.FC<Props> = ({
       <WalletConnectModal
         centered
         open={visible}
-        title="Wellet Connect"
+        title="Wallet Connect"
         backable
         onBack={() => setKeyringType(undefined)}
         destroyOnClose
