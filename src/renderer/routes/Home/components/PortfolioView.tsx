@@ -124,7 +124,7 @@ const PortfolioView = ({
     );
     if (!el) return 65;
     return el.offsetLeft + el.offsetWidth / 2 - 7;
-  }, [chainBalances, selectChainServerId]);
+  }, [selectChainServerId]);
   const isEmpty = useMemo(() => {
     return (
       !isLoadingProtocolList &&

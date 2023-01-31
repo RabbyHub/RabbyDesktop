@@ -120,7 +120,7 @@ const useExpandList = (tokens: TokenItem[]) => {
         return price < filterPrice;
       }).length,
     };
-  }, [tokens, filterPrice]);
+  }, [tokens, filterPrice, isShowExpand]);
 
   const filterList = useMemo(() => {
     if (!isShowExpand) {

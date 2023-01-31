@@ -219,7 +219,7 @@ const TransactionItem = ({ item }: { item: TransactionDataItem }) => {
     if (isReceive) return 'rabby-internal://assets/icons/home/tx-receive.svg';
     if (item.protocol?.logoUrl) return item.protocol.logoUrl;
     return null;
-  }, [item]);
+  }, [item, isCancel, isSend, isReceive]);
 
   const handleClickSpeedUp = async () => {
     if (!item.rawTx) return;
