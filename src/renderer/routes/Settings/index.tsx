@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import classNames from 'classnames';
 import { openExternalUrl, requestResetApp } from '@/renderer/ipcRequest/app';
 
@@ -9,7 +9,7 @@ import {
   IconTooltipInfo,
 } from '@/../assets/icons/mainwin-settings';
 
-import { Modal, Switch, SwitchProps, Tooltip } from 'antd';
+import { Button, Modal, Switch, SwitchProps, Tooltip } from 'antd';
 import { useSettings } from '@/renderer/hooks/useSettings';
 import styled from 'styled-components';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
@@ -21,6 +21,7 @@ import {
 } from './settingHooks';
 import { AutoUpdate } from '../Dapps/components/AutoUpdate';
 import ModalDevices from './components/ModalDevices';
+import { testRequestDevice } from './components/ModalDevices/useFilteredDevices';
 
 type TypedProps = {
   name: React.ReactNode;
@@ -231,7 +232,18 @@ export function MainWindowSettings() {
               onClick={() => {
                 setIsViewingDevices(true);
               }}
-            />
+            >
+              <Button
+                type="primary"
+                ghost
+                onClick={(evt) => {
+                  evt.stopPropagation();
+                  testRequestDevice();
+                }}
+              >
+                <code>hid.requestDevices()</code>
+              </Button>
+            </ItemAction>
           </div>
         </div>
       )}

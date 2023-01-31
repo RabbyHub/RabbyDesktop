@@ -88,7 +88,6 @@ const CONF = {
     ReplaySubject<{
       sidebarContext: BrowserWindow;
       switchChain: BrowserWindow;
-      switchAccount: BrowserWindow;
     }>
   >,
   popupViewsOnMainwinReady: {
@@ -100,6 +99,7 @@ const CONF = {
       addressManagement: BrowserView;
       quickSwap: BrowserView;
       dappsManagement: BrowserView;
+      selectDevices: BrowserView;
     }>
   >,
 };

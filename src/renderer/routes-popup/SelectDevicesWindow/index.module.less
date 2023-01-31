@@ -1,0 +1,144 @@
+@import "@/renderer/css/mixins.less";
+
+:global {
+  body.select-devices-popup {
+    overflow-x: hidden;
+    // background: linear-gradient(112.9deg, #6F7584 0%, #3B404D 100%);
+  }
+
+  body.select-devices-popup {
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+@device-item-h: 56px;
+
+@header-h: 115px;
+
+@h-tipContainer: 100px;
+@h-button: 52px;
+
+.SelectDevicesModal {
+  :global {
+    .ant-modal-body {
+      height: calc(100% - @header-h);
+      overflow: hidden;
+    }
+    .ant-modal-content {
+      height: 600px;
+    }
+  }
+}
+
+.SelectDevicesContent {
+  width: 432px;
+  margin: auto;
+  padding-bottom: 52px;
+  height: 100%;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+
+  > * {
+    flex-shrink: 0;
+  }
+
+  .error {
+    background: rgba(255, 125, 125, 0.5);
+    border-radius: 4px;
+    padding: 16px 20px;
+    display: flex;
+
+    .text  {
+      margin-left: 8px;
+      font-size: 15px;
+    }
+  }
+
+  .icon {
+    margin-right: 6px;
+  }
+
+  .devices {
+    color: #fff;
+    flex-shrink: 1;
+    height: 100%;
+    max-height: calc(100% - @h-tipContainer - @h-button);
+    display: flex;
+    flex-direction: column;
+
+    .title {
+      flex-shrink: 0;
+      height: 40px;
+      font-size: 13px;
+      font-weight: normal;
+      justify-content: flex-start;
+      margin-bottom: 0;
+      align-items: center;
+      color: #fff;
+      text-align: center;
+    }
+
+    .list {
+      flex-shrink: 1;
+      height: 100%;
+      // max-height: calc(100% - 40px);
+      overflow-y: overlay;
+      padding-right: 12px;
+      .chrome-like-scrollbar();
+    }
+  }
+
+  .device {
+    background: rgba(var(--color-primary-rgb), 0.2);
+    border-radius: 4px;
+    height: @device-item-h;
+    padding: 16px 20px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+
+    &:hover, &.selected {
+      background: rgba(var(--color-primary-rgb), 0.5);
+    }
+
+    .checkIcon {
+      color: var(--color-comment2);
+      width: 20px;
+      height: 20px;
+    }
+
+    &.selected .checkIcon {
+      color: var(--color-green);
+    }
+  }
+
+  .device + .device {
+    margin-top: 16px;
+  }
+
+  .tipsContainer {
+    text-align: center;
+    padding-top: 40px;
+    height: @h-tipContainer;
+  }
+
+  .tips {
+    display: inline-block;
+    font-size: 13px;
+    line-height: 24px;
+    text-align: left;
+    padding-left: 0;
+  }
+
+  .next {
+    display: block;
+    width: 250px;
+    height: @h-button;
+    margin: auto;
+  }
+}
