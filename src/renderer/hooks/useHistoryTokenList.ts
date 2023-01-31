@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import BigNumber from 'bignumber.js';
-import { CHAINS, CHAINS_ENUM } from '@debank/common';
-import { TokenItem } from '@debank/rabby-api/dist/types';
+import PQueue from 'p-queue';
+import { groupBy } from 'lodash';
+import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 
 export interface TokenWithHistoryItem {
@@ -9,24 +10,11 @@ export interface TokenWithHistoryItem {
   history: TokenItem;
 }
 
-const LOAD_HISTORY_CHAIN_WHITELIST = [
-  CHAINS[CHAINS_ENUM.ETH].serverId,
-  CHAINS[CHAINS_ENUM.BSC].serverId,
-  CHAINS[CHAINS_ENUM.POLYGON].serverId,
-  CHAINS[CHAINS_ENUM.OP].serverId,
-  CHAINS[CHAINS_ENUM.AVAX].serverId,
-  CHAINS[CHAINS_ENUM.GNOSIS].serverId,
-  CHAINS[CHAINS_ENUM.ARBITRUM].serverId,
-  CHAINS[CHAINS_ENUM.FTM].serverId,
-  CHAINS[CHAINS_ENUM.CRO].serverId,
-  CHAINS[CHAINS_ENUM.AURORA].serverId,
-  CHAINS[CHAINS_ENUM.MOBM].serverId,
-  CHAINS[CHAINS_ENUM.MOVR].serverId,
-  CHAINS[CHAINS_ENUM.FUSE].serverId,
-];
-
 export default (address: string | undefined) => {
   const [tokenList, setTokenList] = useState<TokenItem[]>([]);
+  const [supportHistoryChains, setSupportHistoryChains] = useState<
+    ServerChain[]
+  >([]);
   const [historyTokenMap, setHistoryTokenMap] = useState<
     Record<string, TokenItem>
   >({});
@@ -36,6 +24,14 @@ export default (address: string | undefined) => {
     setIsLoading(true);
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
     const result: TokenItem[] = [];
+    const cachedList = await walletOpenapi.getCachedTokenList(addr);
+    setTokenList(
+      cachedList.map((item) => ({
+        ...item,
+        usd_value: new BigNumber(item.amount).times(item.price).toNumber(),
+      }))
+    );
+    setIsLoading(false);
     const list = await walletOpenapi.listToken(addr);
     const q: TokenItem[] = [];
     setTokenList(
@@ -44,7 +40,11 @@ export default (address: string | undefined) => {
         usd_value: new BigNumber(item.amount).times(item.price).toNumber(),
       }))
     );
-    setIsLoading(false);
+    const chainList = await walletOpenapi.getChainList();
+    const supportHistoryChainList = chainList.filter(
+      (item) => item.is_support_history
+    );
+    setSupportHistoryChains(supportHistoryChainList);
     const yesterdayTokenList = await walletOpenapi.getHistoryTokenList({
       id: addr,
       timeAt: YESTERDAY,
@@ -61,26 +61,73 @@ export default (address: string | undefined) => {
             .times(yesterdayTokenItem.price)
             .toNumber(),
         });
-      } else if (LOAD_HISTORY_CHAIN_WHITELIST.includes(token.chain)) {
+      } else if (
+        supportHistoryChainList.some((item) => item.id === token.chain)
+      ) {
         q.push(token);
       }
     }
     try {
-      const priceList = await Promise.all(
-        q.map((item) =>
-          walletOpenapi.getTokenHistoryPrice({
-            chainId: item.chain,
-            id: item.id,
+      const tmap: Record<
+        string,
+        {
+          price: number;
+          id: string;
+          chain: string;
+        }
+      > = {};
+      const tokenHistoryPriceQueue = new PQueue({ concurrency: 20 });
+      const grouped = groupBy(q, (item) => {
+        return item.chain;
+      });
+      Object.keys(grouped).forEach((i) => {
+        const l = grouped[i];
+        tokenHistoryPriceQueue.add(async () => {
+          const priceMap = await walletOpenapi.getTokenHistoryDict({
+            chainId: i,
+            ids: l.map((s) => s.id).join(','),
             timeAt: YESTERDAY,
-          })
-        )
+          });
+          return {
+            chain: i,
+            price: priceMap,
+          };
+        });
+      });
+      tokenHistoryPriceQueue.on(
+        'completed',
+        ({
+          price,
+          chain,
+        }: {
+          price: Record<string, number>;
+          chain: string;
+        }) => {
+          Object.keys(price).forEach((id) => {
+            tmap[`${chain}-${id}`] = { price: price[id], chain, id };
+          });
+        }
       );
-      result.push(
-        ...q.map((item, index) => ({
-          ...item,
-          price: priceList[index].price,
-        }))
-      );
+      const waitQueueFinished = (queue: PQueue) => {
+        return new Promise((resolve) => {
+          queue.on('empty', () => {
+            if (queue.pending <= 0) resolve(null);
+          });
+        });
+      };
+      await waitQueueFinished(tokenHistoryPriceQueue);
+      Object.values(tmap).forEach((item) => {
+        const target = q.find(
+          (token) => token.id === item.id && token.chain === item.chain
+        );
+        if (target) {
+          result.push({
+            ...target,
+            price: item.price,
+            amount: 0,
+          });
+        }
+      });
     } catch (e) {
       // NOTHING
     }
@@ -105,5 +152,6 @@ export default (address: string | undefined) => {
     tokenList,
     historyTokenMap,
     isLoading,
+    supportHistoryChains,
   };
 };

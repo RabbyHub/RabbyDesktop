@@ -1,15 +1,17 @@
-import { useEffect, useState, useCallback } from 'react';
-import { TokenItem, TransferingNFTItem } from '@debank/rabby-api/dist/types';
-import { CHAINS } from '@debank/common';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { maxBy, sortBy } from 'lodash';
-import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import { useInterval } from 'react-use';
+import { TokenItem, TransferingNFTItem } from '@debank/rabby-api/dist/types';
+import { CHAINS } from '@debank/common';
 import type {
   TransactionDataItem,
   TransactionGroup,
 } from '@/isomorphic/types/rabbyx';
-import TransactionItem from './TransactionItem';
+import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
+import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+// eslint-disable-next-line import/no-cycle
+import TransactionItem, { LoadingTransactionItem } from './TransactionItem';
 
 const TransactionWrapper = styled.div``;
 
@@ -126,17 +128,78 @@ const Transactions = () => {
   const { currentAccount } = useCurrentAccount();
   const [recentTxs, setRecentTxs] = useState<TransactionDataItem[]>([]);
   const [pendingTxs, setPendingTxs] = useState<TransactionDataItem[]>([]);
+  const [localTxs, setLocalTxs] = useState<TransactionDataItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const completedTxs = useMemo(() => {
+    return localTxs.filter(
+      (item) =>
+        !recentTxs.find((i) => item.id === i.id && item.chain === i.chain)
+    );
+  }, [recentTxs, localTxs]);
+
+  const mergedRecentTxs = useMemo(() => {
+    return sortBy([...recentTxs, ...completedTxs], 'timeAt')
+      .reverse()
+      .slice(0, 3);
+  }, [recentTxs, completedTxs]);
 
   const initLocalTxs = useCallback(async () => {
     if (!currentAccount?.address) return;
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
     const { pendings, completeds } =
       await walletController.getTransactionHistory(currentAccount.address);
-    const localTxs: TransactionDataItem[] = [];
+    const lTxs: TransactionDataItem[] = [];
     const pTxs: TransactionDataItem[] = [];
-    // completeds.filter(
-    //   (item) => item.createdAt >= YESTERDAY * 1000 && !item.isSubmitFailed
-    // );
+    completeds
+      .filter(
+        (item) => item.createdAt >= YESTERDAY * 1000 && !item.isSubmitFailed
+      )
+      .forEach((item) => {
+        const chain = Object.values(CHAINS).find((i) => i.id === item.chainId);
+        if (!chain) return;
+        const maxTx = maxBy(
+          item.txs,
+          (i) => i.rawTx.gasPrice || i.rawTx.maxFeePerGas
+        )!;
+        const { type, protocol } = getTxInfoFromExplain(item.explain);
+        const balanceChange = item.explain.balance_change;
+        lTxs.push({
+          type,
+          receives: [
+            ...balanceChange.receive_nft_list,
+            ...balanceChange.receive_token_list,
+          ].map(
+            (i) =>
+              formatToken(i, true) as {
+                tokenId: string;
+                from: string;
+                token: TokenItem | undefined;
+                amount: number;
+              }
+          ),
+          sends: [
+            ...balanceChange.send_nft_list,
+            ...balanceChange.send_token_list,
+          ].map(
+            (i) =>
+              formatToken(i, false) as {
+                tokenId: string;
+                to: string;
+                token: TokenItem | undefined;
+                amount: number;
+              }
+          ),
+          protocol,
+          id: maxTx!.hash,
+          chain: chain.serverId,
+          status: 'completed',
+          otherAddr: maxTx.rawTx.to || '',
+          name: '',
+          timeAt: item.createdAt,
+        });
+      });
+    setLocalTxs(lTxs);
     pendings
       .filter(
         (item) => item.createdAt >= YESTERDAY * 1000 && !item.isSubmitFailed
@@ -183,6 +246,7 @@ const Transactions = () => {
           otherAddr: maxTx.rawTx.to || '',
           name: '',
           timeAt: item.createdAt,
+          rawTx: maxTx.rawTx,
         });
       });
     setPendingTxs(pTxs);
@@ -194,9 +258,7 @@ const Transactions = () => {
     const txs = await walletOpenapi.listTxHisotry({
       id: currentAccount.address,
     });
-    const recent = txs.history_list
-      .filter((item) => item.time_at >= YESTERDAY)
-      .slice(0, 3);
+    const recent = txs.history_list.filter((item) => item.time_at >= YESTERDAY);
     const dbTxs = recent.map((item) => {
       const data: TransactionDataItem = {
         type: item.cate_id,
@@ -241,9 +303,16 @@ const Transactions = () => {
     });
     initLocalTxs();
     setRecentTxs(sortBy(dbTxs, 'timeAt').reverse());
+    setIsLoading(false);
   };
 
+  useInterval(
+    init,
+    pendingTxs.length > 0 || completedTxs.length > 0 ? 5000 : 60 * 1000
+  );
+
   useEffect(() => {
+    setIsLoading(true);
     init();
   }, [currentAccount]);
 
@@ -278,6 +347,19 @@ const Transactions = () => {
     </EmptyView>
   );
 
+  if (isLoading) {
+    return (
+      <TransactionWrapper>
+        <Title>Transactions</Title>
+        <TransactionList>
+          <LoadingTransactionItem />
+          <LoadingTransactionItem />
+          <LoadingTransactionItem />
+        </TransactionList>
+      </TransactionWrapper>
+    );
+  }
+
   if (pendingTxs.length <= 0 && recentTxs.length <= 0) {
     return (
       <TransactionWrapper>
@@ -294,10 +376,10 @@ const Transactions = () => {
         {pendingTxs.map((tx) => {
           return <TransactionItem item={tx} key={`${tx.chain}-${tx.id}`} />;
         })}
-        {recentTxs.map((tx) => {
+        {mergedRecentTxs.map((tx) => {
           return <TransactionItem item={tx} key={`${tx.chain}-${tx.id}`} />;
         })}
-        {pendingTxs.length + recentTxs.length < 3 && Empty}
+        {pendingTxs.length + mergedRecentTxs.length < 3 && Empty}
       </TransactionList>
     </TransactionWrapper>
   );

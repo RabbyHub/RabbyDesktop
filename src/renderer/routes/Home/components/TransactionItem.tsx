@@ -1,10 +1,14 @@
 /* eslint-disable import/no-cycle */
 import styled from 'styled-components';
+import { Tooltip, Skeleton } from 'antd';
+import { intToHex } from 'ethereumjs-util';
 import { useMemo } from 'react';
 import classNames from 'classnames';
+import { GasLevel } from '@debank/rabby-api/dist/types';
+import { maxBy } from 'lodash';
 import { IconWithChain } from '@/renderer/components/TokenWithChain';
 import NameAndAddress from '@/renderer/components/NameAndAddress';
-import { TokenItem } from '@debank/rabby-api/dist/types';
+import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { TransactionDataItem } from '@/isomorphic/types/rabbyx';
 import TxChange from './TxChange';
 
@@ -24,6 +28,37 @@ const TransactionItemWrapper = styled.div`
   }
   &:nth-last-child(1) {
     border-bottom: none;
+  }
+`;
+
+const Actions = styled.div`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  .icon-cancel {
+    width: 9px;
+  }
+  .icon-speedup {
+    width: 6px;
+  }
+  .icon-cancel,
+  .icon-speedup {
+    opacity: 0.3;
+    cursor: pointer;
+    transition: opacity 0.3s;
+  }
+  .icon-cancel:hover,
+  .icon-speedup:hover {
+    opacity: 1;
+  }
+  .divider {
+    height: 8px;
+    width: 1px;
+    background-color: rgba(255, 255, 255, 0.3);
+    margin-left: 10px;
+    margin-right: 10px;
   }
 `;
 
@@ -52,6 +87,25 @@ const PendingTag = styled.div`
     width: 10px;
     margin-right: 3px;
     animation: spining 1.5s infinite linear;
+  }
+`;
+
+const CompletedTag = styled.div`
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: #686d7c;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 4px 7px;
+  border-bottom-right-radius: 4px;
+  display: flex;
+  align-items: center;
+  .icon-completed {
+    width: 11px;
+    margin-right: 3px;
   }
 `;
 
@@ -106,6 +160,41 @@ const TxExplainInner = styled.div`
   }
 `;
 
+export const LoadingTransactionItem = () => {
+  return (
+    <TransactionItemWrapper>
+      <TxExplain className="tx-explain">
+        <Skeleton.Input
+          active
+          style={{
+            borderRadius: '2px',
+            width: '26px',
+            height: '26px',
+            marginRight: '10px',
+          }}
+        />
+        <TxExplainInner>
+          <Skeleton.Input
+            active
+            style={{
+              width: '92px',
+              height: '14px',
+            }}
+          />
+        </TxExplainInner>
+        <Skeleton.Input
+          active
+          style={{
+            width: '92px',
+            height: '14px',
+            marginLeft: '27px',
+          }}
+        />
+      </TxExplain>
+    </TransactionItemWrapper>
+  );
+};
+
 const TransactionItem = ({ item }: { item: TransactionDataItem }) => {
   const { isPending, isCompleted, isFailed } = useMemo(() => {
     return {
@@ -130,7 +219,58 @@ const TransactionItem = ({ item }: { item: TransactionDataItem }) => {
     if (isReceive) return 'rabby-internal://assets/icons/home/tx-receive.svg';
     if (item.protocol?.logoUrl) return item.protocol.logoUrl;
     return null;
-  }, [item]);
+  }, [item, isCancel, isSend, isReceive]);
+
+  const handleClickSpeedUp = async () => {
+    if (!item.rawTx) return;
+    const maxGasPrice = Number(
+      item.rawTx.gasPrice || item.rawTx.maxFeePerGas || 0
+    );
+    const gasLevels: GasLevel[] = await walletOpenapi.gasMarket(item.chain);
+    const maxGasMarketPrice = maxBy(gasLevels, (level) => level.price)?.price;
+    if (!maxGasMarketPrice) return;
+    await walletController.sendRequest({
+      method: 'eth_sendTransaction',
+      params: [
+        {
+          from: item.rawTx.from,
+          value: item.rawTx.value,
+          data: item.rawTx.data,
+          nonce: item.rawTx.nonce,
+          chainId: item.rawTx.chainId,
+          to: item.rawTx.to,
+          gasPrice: intToHex(
+            Math.round(Math.max(maxGasPrice * 2, maxGasMarketPrice))
+          ),
+          isSpeedUp: true,
+        },
+      ],
+    });
+  };
+
+  const handleClickCancel = async () => {
+    if (!item.rawTx) return;
+    const maxGasPrice = Number(
+      item.rawTx.gasPrice || item.rawTx.maxFeePerGas || 0
+    );
+    const gasLevels: GasLevel[] = await walletOpenapi.gasMarket(item.chain);
+    const maxGasMarketPrice = maxBy(gasLevels, (level) => level.price)?.price;
+    if (!maxGasMarketPrice) return;
+    await walletController.sendRequest({
+      method: 'eth_sendTransaction',
+      params: [
+        {
+          from: item.rawTx.from,
+          to: item.rawTx.from,
+          gasPrice: intToHex(Math.max(maxGasPrice * 2, maxGasMarketPrice)),
+          value: '0x0',
+          chainId: item.rawTx.chainId,
+          nonce: item.rawTx.nonce,
+          isCancel: true,
+        },
+      ],
+    });
+  };
 
   const projectName = (
     <span>
@@ -193,19 +333,50 @@ const TransactionItem = ({ item }: { item: TransactionDataItem }) => {
       })}
     >
       {isFailed && (
-        <FailedTag
-          className="icon-failed"
-          src="rabby-internal://assets/icons/home/tx-failed.svg"
-        />
+        <Tooltip title="Transaction failed">
+          <FailedTag
+            className="icon-failed"
+            src="rabby-internal://assets/icons/home/tx-failed.svg"
+          />
+        </Tooltip>
       )}
       {isPending && (
-        <PendingTag>
-          <img
-            src="rabby-internal://assets/icons/home/tx-pending.svg"
-            className="icon-pending"
-          />
-          Pending
-        </PendingTag>
+        <>
+          <PendingTag>
+            <img
+              src="rabby-internal://assets/icons/home/tx-pending.svg"
+              className="icon-pending"
+            />
+            Pending
+          </PendingTag>
+          <Actions>
+            <img
+              src="rabby-internal://assets/icons/home/action-speedup.svg"
+              className="icon-speedup"
+              onClick={handleClickSpeedUp}
+            />
+            <div className="divider" />
+            <img
+              src="rabby-internal://assets/icons/home/action-cancel.svg"
+              className="icon-cancel"
+              onClick={handleClickCancel}
+            />
+          </Actions>
+        </>
+      )}
+      {isCompleted && (
+        <Tooltip
+          title="Transaction on chain, decoding data to generate record"
+          overlayStyle={{ width: '187px' }}
+        >
+          <CompletedTag>
+            <img
+              src="rabby-internal://assets/icons/home/tx-completed.svg"
+              className="icon-completed"
+            />
+            Completed
+          </CompletedTag>
+        </Tooltip>
       )}
       <TxExplain
         className={classNames('tx-explain', {

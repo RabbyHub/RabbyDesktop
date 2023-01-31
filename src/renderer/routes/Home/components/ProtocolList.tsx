@@ -1,4 +1,5 @@
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
+import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
 import ProtocolItem, { LoadingProtocolItem } from './ProtocolItem';
 
 const ProtocolList = ({
@@ -7,6 +8,8 @@ const ProtocolList = ({
   protocolHistoryTokenPriceMap,
   onRelateDapp,
   isLoading,
+  supportHistoryChains,
+  historyTokenDict,
 }: {
   protocolList: DisplayProtocol[];
   historyProtocolMap: Record<string, DisplayProtocol>;
@@ -16,6 +19,8 @@ const ProtocolList = ({
   >;
   onRelateDapp(protocol: DisplayProtocol): void;
   isLoading: boolean;
+  supportHistoryChains: ServerChain[];
+  historyTokenDict: Record<string, TokenItem>;
 }) => {
   if (isLoading) {
     return (
@@ -35,6 +40,10 @@ const ProtocolList = ({
           historyProtocol={historyProtocolMap[protocol.id]}
           protocolHistoryTokenPriceMap={protocolHistoryTokenPriceMap}
           onClickRelate={onRelateDapp}
+          supportHistory={supportHistoryChains.some(
+            (item) => item.id === protocol.chain
+          )}
+          historyTokenDict={historyTokenDict}
         />
       ))}
     </div>

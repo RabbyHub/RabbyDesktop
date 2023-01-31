@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { TokenItem } from '@debank/rabby-api/dist/types';
+import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import { DisplayChainWithWhiteLogo } from '@/renderer/hooks/useCurrentBalance';
 import AssociateDappModal from '@/renderer/components/AssociateDappModal';
@@ -78,12 +78,13 @@ const PortfolioView = ({
   protocolList,
   historyProtocolMap,
   protocolHistoryTokenPriceMap,
-  chainBalances,
   selectChainServerId,
   tokenHidden,
   protocolHidden,
   isLoadingTokenList,
   isLoadingProtocolList,
+  supportHistoryChains,
+  historyTokenDict,
 }: {
   tokenList: TokenItem[];
   historyTokenMap: Record<string, TokenItem>;
@@ -93,7 +94,6 @@ const PortfolioView = ({
     string,
     { id: string; price: number; chain: string }
   >;
-  chainBalances: DisplayChainWithWhiteLogo[];
   selectChainServerId: string | null;
   tokenHidden: {
     isExpand: boolean;
@@ -109,6 +109,8 @@ const PortfolioView = ({
   };
   isLoadingTokenList: boolean;
   isLoadingProtocolList: boolean;
+  supportHistoryChains: ServerChain[];
+  historyTokenDict: Record<string, TokenItem>;
 }) => {
   const [relateDappModalOpen, setRelateDappModalOpen] = useState(false);
   const [relateDappUrl, setRelateDappUrl] = useState('');
@@ -120,7 +122,7 @@ const PortfolioView = ({
     );
     if (!el) return 65;
     return el.offsetLeft + el.offsetWidth / 2 - 7;
-  }, [chainBalances, selectChainServerId]);
+  }, [selectChainServerId]);
   const isEmpty = useMemo(() => {
     return (
       !isLoadingProtocolList &&
@@ -169,6 +171,8 @@ const PortfolioView = ({
         protocolHistoryTokenPriceMap={protocolHistoryTokenPriceMap}
         onRelateDapp={handleRelateDapp}
         isLoading={isLoadingProtocolList}
+        supportHistoryChains={supportHistoryChains}
+        historyTokenDict={historyTokenDict}
       />
       <AssociateDappModal
         protocolId={relateDappId}

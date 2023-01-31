@@ -1,25 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import PQueue from 'p-queue';
 import { groupBy } from 'lodash';
-import { CHAINS, CHAINS_ENUM } from '@debank/common';
-import { ComplexProtocol } from '@debank/rabby-api/dist/types';
+import {
+  ComplexProtocol,
+  ServerChain,
+  TokenItem,
+} from '@debank/rabby-api/dist/types';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
-
-export const LOAD_HISTORY_CHAIN_WHITELIST = [
-  CHAINS[CHAINS_ENUM.ETH].serverId,
-  CHAINS[CHAINS_ENUM.BSC].serverId,
-  CHAINS[CHAINS_ENUM.POLYGON].serverId,
-  CHAINS[CHAINS_ENUM.OP].serverId,
-  CHAINS[CHAINS_ENUM.AVAX].serverId,
-  CHAINS[CHAINS_ENUM.GNOSIS].serverId,
-  CHAINS[CHAINS_ENUM.ARBITRUM].serverId,
-  CHAINS[CHAINS_ENUM.FTM].serverId,
-  CHAINS[CHAINS_ENUM.CRO].serverId,
-  CHAINS[CHAINS_ENUM.AURORA].serverId,
-  CHAINS[CHAINS_ENUM.MOBM].serverId,
-  CHAINS[CHAINS_ENUM.MOVR].serverId,
-  CHAINS[CHAINS_ENUM.FUSE].serverId,
-];
 
 export interface DisplayProtocol extends ComplexProtocol {
   usd_value: number;
@@ -27,11 +14,13 @@ export interface DisplayProtocol extends ComplexProtocol {
 
 const getNoHistoryPriceTokensFromProtocolList = (
   protocolList: DisplayProtocol[],
-  historyProtocolMap: Record<string, DisplayProtocol>
+  historyProtocolMap: Record<string, DisplayProtocol>,
+  supportHistoryChainList: ServerChain[]
 ) => {
   const noHistoryPriceTokens = new Set<string>();
+  const historyTokenMap: Record<string, TokenItem> = {};
   protocolList
-    .filter((item) => LOAD_HISTORY_CHAIN_WHITELIST.includes(item.chain))
+    .filter((item) => supportHistoryChainList.some((i) => i.id === item.chain))
     .forEach((item) => {
       if (!historyProtocolMap[item.id]) {
         item.portfolio_item_list.forEach((i) => {
@@ -50,6 +39,10 @@ const getNoHistoryPriceTokensFromProtocolList = (
         historyProtocolMap[item.id].portfolio_item_list.forEach((i) => {
           i.asset_token_list.forEach((k) => {
             historyTokenList.push(`${k.chain}-${k.id}`);
+            historyTokenMap[`${k.chain}-${k.id}`] = {
+              ...k,
+              amount: 0,
+            };
           });
         });
         currentTokenList.forEach((i) => {
@@ -59,7 +52,10 @@ const getNoHistoryPriceTokensFromProtocolList = (
         });
       }
     });
-  return Array.from(noHistoryPriceTokens);
+  return {
+    noHistoryPriceTokenList: Array.from(noHistoryPriceTokens),
+    historyTokenMap,
+  };
 };
 
 export default (address: string | undefined) => {
@@ -80,6 +76,12 @@ export default (address: string | undefined) => {
   >({});
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [supportHistoryChains, setSupportHistoryChains] = useState<
+    ServerChain[]
+  >([]);
+  const [historyTokenDict, setHistoryTokenDict] = useState<
+    Record<string, TokenItem>
+  >({});
 
   const fetchData = async (addr: string) => {
     setIsLoading(true);
@@ -122,12 +124,17 @@ export default (address: string | undefined) => {
       });
     };
     await waitQueueFinished(queue);
+    const chainList = await walletOpenapi.getChainList();
+    const supportHistoryChainList = chainList.filter(
+      (item) => item.is_support_history
+    );
+    setSupportHistoryChains(supportHistoryChainList);
     const historyQueue = new PQueue({ concurrency: 20 });
     if (addr === addressRef.current) {
       setProtocolList(result);
     }
     result.forEach((item) => {
-      if (LOAD_HISTORY_CHAIN_WHITELIST.includes(item.chain)) {
+      if (supportHistoryChainList.some((i) => i.id === item.chain)) {
         historyQueue.add(async () => {
           const r = await walletOpenapi.getHistoryProtocol({
             addr,
@@ -157,10 +164,13 @@ export default (address: string | undefined) => {
     if (addr === addressRef.current) {
       setHistoryProtocolMap(map);
     }
-    const noHistoryPriceTokenList = getNoHistoryPriceTokensFromProtocolList(
-      result,
-      map
-    );
+    const { noHistoryPriceTokenList, historyTokenMap } =
+      getNoHistoryPriceTokensFromProtocolList(
+        result,
+        map,
+        supportHistoryChainList
+      );
+    setHistoryTokenDict(historyTokenMap);
     const tmap: Record<
       string,
       {
@@ -189,15 +199,9 @@ export default (address: string | undefined) => {
     });
     tokenHistoryPriceQueue.on(
       'completed',
-      ({
-        priceMap,
-        chain,
-      }: {
-        priceMap: Record<string, number>;
-        chain: string;
-      }) => {
-        Object.keys(priceMap).forEach((id) => {
-          tmap[`${chain}-${id}`] = { price: priceMap[id], chain, id };
+      ({ price, chain }: { price: Record<string, number>; chain: string }) => {
+        Object.keys(price).forEach((id) => {
+          tmap[`${chain}-${id}`] = { price: price[id], chain, id };
         });
       }
     );
@@ -221,5 +225,8 @@ export default (address: string | undefined) => {
     historyProtocolMap,
     tokenHistoryPriceMap,
     isLoading,
+    isLoadingHistory,
+    supportHistoryChains,
+    historyTokenDict,
   };
 };
