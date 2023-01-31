@@ -4,6 +4,7 @@ import { Modal } from '../Modal/Modal';
 import { SelectModalContent } from './SelectModalContent';
 import { ContactModalContent } from './ContactModalContent';
 import { HDManagerModal } from '../HDManager/HDManagerModal';
+import { WalletConnectModal } from '../WalletConnect/WalletConnectModal';
 
 interface Props {
   visible: boolean;
@@ -37,6 +38,22 @@ export const AddAddressModal: React.FC<Props> = ({
       >
         <ContactModalContent onSuccess={onClose} />
       </Modal>
+    );
+  }
+
+  if (keyringType === KEYRING_CLASS.WALLETCONNECT) {
+    return (
+      <WalletConnectModal
+        centered
+        open={visible}
+        title="Wellet Connect"
+        backable
+        onBack={() => setKeyringType(undefined)}
+        destroyOnClose
+        onCancel={handleCancel}
+        footer={null}
+        onSuccess={handleCancel}
+      />
     );
   }
 

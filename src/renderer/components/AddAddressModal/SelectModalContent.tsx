@@ -1,5 +1,3 @@
-import { useMessageForwardToMainwin } from '@/renderer/hooks/useViewsMessage';
-import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { KEYRING_CLASS } from '@/renderer/utils/constant';
 import clsx from 'clsx';
 import React from 'react';
@@ -30,23 +28,6 @@ interface Props {
 }
 
 export const SelectModalContent: React.FC<Props> = ({ onSelectType }) => {
-  const mainNav = useMessageForwardToMainwin('route-navigate');
-
-  const handleImportByPrivateKey = React.useCallback(() => {
-    mainNav({
-      type: 'route-navigate',
-      data: {
-        pathname: '/import-by/private-key',
-      },
-    });
-    hideMainwinPopupview('add-address', {
-      reloadView: true,
-    });
-    hideMainwinPopupview('address-management', {
-      reloadView: true,
-    });
-  }, [mainNav]);
-
   return (
     <div className={styles.SelectModalContent}>
       <div className={styles.panel}>
@@ -73,6 +54,22 @@ export const SelectModalContent: React.FC<Props> = ({ onSelectType }) => {
           ))}
         </div>
       </div>
+
+      <div
+        className={clsx(styles.panel, styles.panelContact)}
+        onClick={() => onSelectType(KEYRING_CLASS.WALLETCONNECT)}
+      >
+        <div className={styles.logo}>
+          <img src="rabby-internal://assets/icons/add-address/walletconnect.svg" />
+        </div>
+        <div className={styles.content}>
+          <span className={styles.title}>Wallet Connect</span>
+        </div>
+        <div className={styles.action}>
+          <img src="rabby-internal://assets/icons/add-address/arrow-right.svg" />
+        </div>
+      </div>
+
       <div
         className={clsx(styles.panel, styles.panelContact)}
         onClick={() => onSelectType(KEYRING_CLASS.WATCH)}
@@ -85,21 +82,6 @@ export const SelectModalContent: React.FC<Props> = ({ onSelectType }) => {
           <span className={styles.subtitle}>
             You can also use it as a watch-only address
           </span>
-        </div>
-        <div className={styles.action}>
-          <img src="rabby-internal://assets/icons/add-address/arrow-right.svg" />
-        </div>
-      </div>
-
-      <div
-        className={clsx(styles.panel, styles.panelContact)}
-        onClick={handleImportByPrivateKey}
-      >
-        <div className={styles.logo}>
-          <img src="rabby-internal://assets/icons/add-address/privatekey.svg" />
-        </div>
-        <div className={styles.content}>
-          <span className={styles.title}>Import Private Key</span>
         </div>
         <div className={styles.action}>
           <img src="rabby-internal://assets/icons/add-address/arrow-right.svg" />
