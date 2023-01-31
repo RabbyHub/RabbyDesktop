@@ -1,5 +1,3 @@
-/// <reference path="types-rabbyx.d.ts" />
-
 /* from builder-util-runtime/out/ProgressCallbackTransform.d.ts */
 interface ProgressInfo {
   total: number;
@@ -8,6 +6,12 @@ interface ProgressInfo {
   percent: number;
   bytesPerSecond: number;
 }
+
+type RabbyEvent = {
+  event: string;
+  data?: any;
+  origin?: string;
+};
 
 type DappViewRect = {
   x: number;
@@ -97,6 +101,21 @@ type IAppUpdatorDownloadProgress =
     };
 
 type HexValue = `0x${number}`;
+
+type IConnectedSiteInfo = {
+  chain: import('@debank/common').CHAINS_ENUM;
+  icon: string;
+  isConnected: boolean;
+  isSigned: boolean;
+  isTop: boolean;
+  name: string;
+  origin: string;
+};
+
+interface ConnectedSite extends IConnectedSiteInfo {
+  e?: number;
+  order?: number;
+}
 
 type IConnectedSiteToDisplay = {
   origin: IConnectedSiteInfo['origin'];

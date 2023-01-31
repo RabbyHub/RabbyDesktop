@@ -2,7 +2,7 @@
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import styled from 'styled-components';
 import { numberWithCommasIsLtOne } from '@/renderer/utils/number';
-import { TransactionDataItem } from './Transactions';
+import { TransactionDataItem } from '@/isomorphic/types/rabbyx';
 
 export function getTokenSymbol(token?: TokenItem) {
   return (
