@@ -1,6 +1,6 @@
 import { filter, firstValueFrom, Subject } from 'rxjs';
 
-import { RabbyXMethod } from '@/isomorphic/rabbyx';
+import { RabbyXMethod } from '@/isomorphic/types/rabbyx';
 import { safeParse } from '@/isomorphic/json';
 import { randString } from '@/isomorphic/string';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';

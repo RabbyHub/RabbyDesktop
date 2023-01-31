@@ -3,10 +3,12 @@ import { TokenItem, TransferingNFTItem } from '@debank/rabby-api/dist/types';
 import { CHAINS } from '@debank/common';
 import styled from 'styled-components';
 import { maxBy, sortBy } from 'lodash';
-import { TransactionGroup } from '@/isomorphic/types-rabbyx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
-// eslint-disable-next-line import/no-cycle
+import type {
+  TransactionDataItem,
+  TransactionGroup,
+} from '@/isomorphic/types/rabbyx';
 import TransactionItem from './TransactionItem';
 
 const TransactionWrapper = styled.div``;
@@ -44,38 +46,6 @@ const EmptyView = styled.div`
     width: 52px;
   }
 `;
-
-export interface TransactionDataItem {
-  type: string | null;
-  receives: {
-    tokenId: string;
-    from: string;
-    token: TokenItem | undefined;
-    amount: number;
-  }[];
-  sends: {
-    tokenId: string;
-    to: string;
-    token: TokenItem | undefined;
-    amount: number;
-  }[];
-  protocol: {
-    name: string;
-    logoUrl: string;
-  } | null;
-  id: string;
-  chain: string;
-  approve?: {
-    token_id: string;
-    value: number;
-    token: TokenItem;
-    spender: string;
-  };
-  status: 'failed' | 'pending' | 'completed' | 'finish';
-  otherAddr: string;
-  name: string | undefined;
-  timeAt: number;
-}
 
 const formatToken = (i: TokenItem | TransferingNFTItem, isReceive: boolean) => {
   const token: {

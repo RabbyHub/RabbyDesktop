@@ -4,7 +4,7 @@ import {
   RabbyXContollerMeththodNames,
   RabbyXContollerNS,
   RabbyXMethods,
-} from '@/isomorphic/rabbyx';
+} from '@/isomorphic/types/rabbyx';
 import { randString } from 'isomorphic/string';
 
 function fixArgs(
