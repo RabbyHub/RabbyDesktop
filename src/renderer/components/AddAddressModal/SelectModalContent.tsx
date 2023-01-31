@@ -1,3 +1,4 @@
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { useMessageForwardToMainwin } from '@/renderer/hooks/useViewsMessage';
 import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { KEYRING_CLASS } from '@/renderer/utils/constant';
@@ -73,6 +74,22 @@ export const SelectModalContent: React.FC<Props> = ({ onSelectType }) => {
           ))}
         </div>
       </div>
+
+      <div
+        className={clsx(styles.panel, styles.panelContact)}
+        onClick={() => onSelectType(KEYRING_CLASS.WALLETCONNECT)}
+      >
+        <div className={styles.logo}>
+          <img src="rabby-internal://assets/icons/add-address/walletconnect.svg" />
+        </div>
+        <div className={styles.content}>
+          <span className={styles.title}>Wallet Connect</span>
+        </div>
+        <div className={styles.action}>
+          <img src="rabby-internal://assets/icons/add-address/arrow-right.svg" />
+        </div>
+      </div>
+
       <div
         className={clsx(styles.panel, styles.panelContact)}
         onClick={() => onSelectType(KEYRING_CLASS.WATCH)}
@@ -91,20 +108,22 @@ export const SelectModalContent: React.FC<Props> = ({ onSelectType }) => {
         </div>
       </div>
 
-      <div
-        className={clsx(styles.panel, styles.panelContact)}
-        onClick={handleImportByPrivateKey}
-      >
-        <div className={styles.logo}>
-          <img src="rabby-internal://assets/icons/add-address/privatekey.svg" />
+      {!IS_RUNTIME_PRODUCTION && (
+        <div
+          className={clsx(styles.panel, styles.panelContact)}
+          onClick={handleImportByPrivateKey}
+        >
+          <div className={styles.logo}>
+            <img src="rabby-internal://assets/icons/add-address/privatekey.svg" />
+          </div>
+          <div className={styles.content}>
+            <span className={styles.title}>Import Private Key</span>
+          </div>
+          <div className={styles.action}>
+            <img src="rabby-internal://assets/icons/add-address/arrow-right.svg" />
+          </div>
         </div>
-        <div className={styles.content}>
-          <span className={styles.title}>Import Private Key</span>
-        </div>
-        <div className={styles.action}>
-          <img src="rabby-internal://assets/icons/add-address/arrow-right.svg" />
-        </div>
-      </div>
+      )}
     </div>
   );
 };

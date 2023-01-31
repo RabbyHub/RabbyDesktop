@@ -28,7 +28,6 @@ export const AccountList: React.FC<Props> = ({
   const [list, setList] = React.useState<Account[]>([]);
   const infoRef = React.useRef<HTMLDivElement>(null);
   const [infoColumnWidth, setInfoColumnWidth] = React.useState(0);
-  const [infoColumnTop, setInfoColumnTop] = React.useState(0);
   const {
     currentAccounts,
     getCurrentAccounts,
@@ -61,6 +60,24 @@ export const AccountList: React.FC<Props> = ({
       setList(data ?? []);
     }
   }, [hiddenInfo, data]);
+
+  const fullList = React.useMemo(() => {
+    return list.map((item) => {
+      const current = currentAccounts?.find((cur) =>
+        isSameAddress(cur.address, item.address)
+      );
+
+      if (current) {
+        item.aliasName = current.aliasName;
+        item.checked = true;
+      } else {
+        item.checked = false;
+        item.aliasName = undefined;
+      }
+
+      return item;
+    });
+  }, [list, currentAccounts]);
 
   const currentIndex = React.useMemo(() => {
     if (!preventLoading && list?.length) {
@@ -121,7 +138,6 @@ export const AccountList: React.FC<Props> = ({
     // watch infoRef resize
     const resizeObserver = new ResizeObserver(() => {
       setInfoColumnWidth(infoRef.current?.parentElement?.offsetWidth ?? 0);
-      setInfoColumnTop(infoRef.current?.closest('thead')?.offsetHeight ?? 0);
     });
     resizeObserver.observe(infoRef.current ?? new Element());
     return () => {
@@ -153,7 +169,7 @@ export const AccountList: React.FC<Props> = ({
   return (
     <Table<Account>
       scroll={{ y: 'calc(100vh - 240px)' }}
-      dataSource={list}
+      dataSource={fullList}
       rowKey="index"
       className="AccountList"
       loading={
@@ -172,8 +188,7 @@ export const AccountList: React.FC<Props> = ({
               'info-mask--center': list.length < 4,
             })}
             style={{
-              top: `${infoColumnTop}px`,
-              width: `${infoColumnWidth + 16}px`,
+              width: `${infoColumnWidth}px`,
             }}
           >
             <td>
@@ -193,9 +208,7 @@ export const AccountList: React.FC<Props> = ({
         render={(val, record) =>
           record.address ? (
             <AddToRabby
-              checked={currentAccounts?.some((item) =>
-                isSameAddress(item.address, record.address)
-              )}
+              checked={record.checked}
               onChange={(v) => handleAddAccount(v, record)}
             />
           ) : (
@@ -248,15 +261,12 @@ export const AccountList: React.FC<Props> = ({
           key="aliasName"
           className="cell-note"
           render={(value, record) => {
-            const account = currentAccounts?.find((item) =>
-              isSameAddress(item.address, record.address)
-            );
             return !record.address ? (
               <AccountListSkeleton align="left" width={100} />
             ) : (
               <AliasName
                 address={record.address}
-                aliasName={account?.aliasName}
+                aliasName={value}
                 onChange={(val) => handleChangeAliasName(val, record)}
               />
             );

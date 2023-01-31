@@ -6,8 +6,6 @@ import {
 
 import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { usePopupViewInfo } from '@/renderer/hooks/usePopupWinOnMainwin';
-import { Modal as RModal } from '@/renderer/components/Modal/Modal';
-import { AddAddressModal } from '@/renderer/components/AddAddressModal/AddAddressModal';
 import ModalAddDapp from '@/renderer/components/ModalAddDapp';
 import styles from './index.module.less';
 

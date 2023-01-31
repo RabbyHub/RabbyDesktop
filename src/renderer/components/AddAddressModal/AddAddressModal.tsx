@@ -4,13 +4,19 @@ import { Modal } from '../Modal/Modal';
 import { SelectModalContent } from './SelectModalContent';
 import { ContactModalContent } from './ContactModalContent';
 import { HDManagerModal } from '../HDManager/HDManagerModal';
+import { WalletConnectModal } from '../WalletConnect/WalletConnectModal';
 
 interface Props {
   visible: boolean;
   onClose: () => void;
+  showEntryButton?: boolean;
 }
 
-export const AddAddressModal: React.FC<Props> = ({ visible, onClose }) => {
+export const AddAddressModal: React.FC<Props> = ({
+  showEntryButton,
+  visible,
+  onClose,
+}) => {
   const [keyringType, setKeyringType] = React.useState<string>();
   const handleCancel = React.useCallback(() => {
     onClose();
@@ -20,6 +26,7 @@ export const AddAddressModal: React.FC<Props> = ({ visible, onClose }) => {
   if (keyringType === KEYRING_CLASS.WATCH) {
     return (
       <Modal
+        centered
         open={visible}
         title="Add Contacts"
         subtitle="You can also use it as a watch-only address"
@@ -31,6 +38,22 @@ export const AddAddressModal: React.FC<Props> = ({ visible, onClose }) => {
       >
         <ContactModalContent onSuccess={onClose} />
       </Modal>
+    );
+  }
+
+  if (keyringType === KEYRING_CLASS.WALLETCONNECT) {
+    return (
+      <WalletConnectModal
+        centered
+        open={visible}
+        title="Wallet Connect"
+        backable
+        onBack={() => setKeyringType(undefined)}
+        destroyOnClose
+        onCancel={handleCancel}
+        footer={null}
+        onSuccess={handleCancel}
+      />
     );
   }
 
@@ -53,12 +76,14 @@ export const AddAddressModal: React.FC<Props> = ({ visible, onClose }) => {
         onBack={() => {
           setKeyringType(undefined);
         }}
+        showEntryButton={showEntryButton}
       />
     );
   }
 
   return (
     <Modal
+      centered
       open={visible}
       title="Add an Address"
       destroyOnClose

@@ -142,6 +142,7 @@ export const LedgerManager: React.FC = () => {
       <MainContainer setting={setting} loading={loading} HDName="Ledger" />
 
       <Modal
+        centered
         destroyOnClose
         className="AdvancedModal"
         title="Custom Address HD path"

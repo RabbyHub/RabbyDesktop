@@ -1,5 +1,5 @@
 import './index.less';
-import { Spin } from 'antd';
+import { Button, ModalProps, Spin } from 'antd';
 import React from 'react';
 import { HARDWARE_KEYRING_TYPES } from '@/renderer/utils/constant';
 import { useShellWallet } from '@/renderer/hooks-shell/useShellWallet';
@@ -14,7 +14,16 @@ const MANAGER_MAP = {
   [HARDWARE_KEYRING_TYPES.Onekey.type]: OneKeyManager,
 };
 
-export const HDManager: React.FC<StateProviderProps> = ({ keyring }) => {
+interface Props extends StateProviderProps {
+  showEntryButton?: boolean;
+  onCancel?: ModalProps['onCancel'];
+}
+
+export const HDManager: React.FC<Props> = ({
+  keyring,
+  showEntryButton,
+  onCancel,
+}) => {
   const walletController = useShellWallet();
   const [initialed, setInitialed] = React.useState(false);
   const idRef = React.useRef<number | null>(null);
@@ -57,6 +66,11 @@ export const HDManager: React.FC<StateProviderProps> = ({ keyring }) => {
       <div className="HDManager">
         <main>
           <Manager />
+          {showEntryButton && (
+            <Button onClick={onCancel} className="footer-button" type="primary">
+              Enter Rabby
+            </Button>
+          )}
         </main>
       </div>
     </HDManagerStateProvider>

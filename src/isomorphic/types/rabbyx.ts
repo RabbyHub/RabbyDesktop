@@ -317,6 +317,20 @@ export type RabbyXMethod = {
     keyringId: number | null
   ) => Account;
 
+  'walletController.initWalletConnect': (
+    brandName: string,
+    bridge?: string
+  ) => {
+    uri: string;
+    stashId: number | null;
+  };
+  'walletController.importWalletConnect': (
+    address: string,
+    brandName: string,
+    bridge?: string,
+    stashId?: number
+  ) => Account[];
+
   'permissionService.addConnectedSite': (
     origin: string,
     name: string,

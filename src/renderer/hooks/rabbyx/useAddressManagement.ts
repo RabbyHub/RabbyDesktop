@@ -7,7 +7,7 @@ import { useAccountToDisplay } from './useAccountToDisplay';
 const highlightedAddressesAtom = atom<IHighlightedAddress[]>([]);
 
 export const useAddressManagement = () => {
-  const { getAllAccountsToDisplay } = useAccountToDisplay();
+  const { removeAccount } = useAccountToDisplay();
   const [highlightedAddresses, setHighlightedAddresses] = useAtom(
     highlightedAddressesAtom
   );
@@ -65,9 +65,9 @@ export const useAddressManagement = () => {
   const removeAddress = React.useCallback(
     async (payload: Parameters<typeof walletController.removeAddress>) => {
       await walletController.removeAddress(...payload);
-      getAllAccountsToDisplay();
+      removeAccount(payload);
     },
-    [getAllAccountsToDisplay]
+    [removeAccount]
   );
 
   return {

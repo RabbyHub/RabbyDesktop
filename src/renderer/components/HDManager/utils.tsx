@@ -6,6 +6,7 @@ import PQueue from 'p-queue';
 import React from 'react';
 
 export interface Account {
+  checked?: boolean;
   address: string;
   balance?: number;
   index: number;

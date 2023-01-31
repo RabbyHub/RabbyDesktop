@@ -62,6 +62,22 @@ export const useAccountToDisplay = () => {
     }
   }, [setAccountsList, setLoading]);
 
+  const removeAccount = React.useCallback(
+    async (payload: Parameters<typeof walletController.removeAddress>) => {
+      setAccountsList((prev) => {
+        return prev.filter((item) => {
+          return !(
+            item.address === payload[0] &&
+            item.type === payload[1] &&
+            item.brandName === payload[2]
+          );
+        });
+      });
+      getAllAccountsToDisplay();
+    },
+    [getAllAccountsToDisplay, setAccountsList]
+  );
+
   React.useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
@@ -79,5 +95,10 @@ export const useAccountToDisplay = () => {
     );
   }, []);
 
-  return { accountsList, loadingAccounts, getAllAccountsToDisplay };
+  return {
+    accountsList,
+    loadingAccounts,
+    getAllAccountsToDisplay,
+    removeAccount,
+  };
 };
