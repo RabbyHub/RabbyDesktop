@@ -78,7 +78,6 @@ const PortfolioView = ({
   protocolList,
   historyProtocolMap,
   protocolHistoryTokenPriceMap,
-  chainBalances,
   selectChainServerId,
   tokenHidden,
   protocolHidden,
@@ -95,7 +94,6 @@ const PortfolioView = ({
     string,
     { id: string; price: number; chain: string }
   >;
-  chainBalances: DisplayChainWithWhiteLogo[];
   selectChainServerId: string | null;
   tokenHidden: {
     isExpand: boolean;

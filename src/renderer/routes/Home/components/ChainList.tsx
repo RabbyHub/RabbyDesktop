@@ -1,8 +1,9 @@
-import { DisplayChainWithWhiteLogo } from '@/renderer/hooks/useCurrentBalance';
+import { DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import classNames from 'classnames';
 import styled from 'styled-components';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CHAINS_LIST } from '@debank/common';
+import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 
 const ChainListWrapper = styled.ul`
   display: flex;
@@ -56,6 +57,7 @@ const ChainList = ({
   chainBalances: DisplayChainWithWhiteLogo[];
   onChange(id: string | null): void;
 }) => {
+  const { currentAccount } = useCurrentAccount();
   const [selectChainServerId, setSelectChainServerId] = useState<null | string>(
     null
   );
@@ -67,19 +69,30 @@ const ChainList = ({
     return chain || null;
   }, [selectChainServerId]);
 
+  const reset = () => {
+    setSelectChainServerId(null);
+    onChange(null);
+  };
+
   const handleSelectChain = async (serverId: string) => {
     if (serverId === selectChainServerId) {
-      setSelectChainServerId(null);
-      onChange(null);
+      reset();
       return;
     }
     setSelectChainServerId(serverId);
     await Promise.resolve(); // 强制 onChange 在下一次渲染触发，为了能在 PortfolioView 中取到 UI 变化后的链图标位置和宽度
     onChange(serverId);
   };
+
+  useEffect(() => {
+    if (!currentAccount?.address) return;
+    reset();
+  }, [currentAccount]);
+
   if (chainBalances.length <= 0) {
     return <NoAssetsView>No assets</NoAssetsView>;
   }
+
   if (chainBalances.length === 1) {
     return (
       <ChainListWrapper>
@@ -90,6 +103,7 @@ const ChainList = ({
       </ChainListWrapper>
     );
   }
+
   return (
     <ChainListWrapper>
       {chainBalances.map((item) => (

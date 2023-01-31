@@ -5,10 +5,12 @@ import { TokenItem } from '@debank/rabby-api/dist/types';
 import { sortBy } from 'lodash';
 import { ellipsis } from '@/renderer/utils/address';
 import { formatNumber } from '@/renderer/utils/number';
-import useCurrentBalance from '@/renderer/hooks/useCurrentBalance';
+import { formatChain, DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
+import { useTotalBalance } from '@/renderer/utils/balance';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import useCurve from '@/renderer/hooks/useCurve';
 import useHistoryTokenList from '@/renderer/hooks/useHistoryTokenList';
+import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import useHistoryProtocol, {
   DisplayProtocol,
 } from '@/renderer/hooks/useHistoryProtocol';
@@ -185,25 +187,27 @@ const useExpandProtocolList = (protocols: DisplayProtocol[]) => {
 
 const Home = () => {
   const { currentAccount } = useCurrentAccount();
-  const [balance, chainBalances] = useCurrentBalance(
-    currentAccount?.address,
-    true
-  );
+
   const [selectChainServerId, setSelectChainServerId] = useState<string | null>(
     null
   );
-  const curveData = useCurve(currentAccount?.address, balance || 0, Date.now());
+  const [usedChainList, setUsedChainList] = useState<
+    DisplayChainWithWhiteLogo[]
+  >([]);
+
   const {
     tokenList,
     historyTokenMap,
     isLoading: isLoadingTokenList,
   } = useHistoryTokenList(currentAccount?.address);
+
   const filterTokenList = useMemo(() => {
     const list: TokenItem[] = selectChainServerId
       ? tokenList.filter((token) => token.chain === selectChainServerId)
       : tokenList;
     return sortBy(list, (i) => i.usd_value || 0).reverse();
   }, [tokenList, selectChainServerId]);
+
   const {
     protocolList,
     historyProtocolMap,
@@ -212,6 +216,7 @@ const Home = () => {
     supportHistoryChains,
     historyTokenDict,
   } = useHistoryProtocol(currentAccount?.address);
+
   const {
     filterList: displayTokenList,
     isExpand: isTokenExpand,
@@ -219,6 +224,14 @@ const Home = () => {
     totalHiddenCount: tokenHiddenCount,
     setIsExpand: setIsTokenExpand,
   } = useExpandList(filterTokenList);
+
+  const totalBalance = useTotalBalance(tokenList, protocolList);
+
+  const curveData = useCurve(
+    currentAccount?.address,
+    Number(totalBalance) || 0,
+    Date.now()
+  );
 
   const filterProtocolList = useMemo(() => {
     const list: DisplayProtocol[] = selectChainServerId
@@ -259,7 +272,8 @@ const Home = () => {
 
   const init = async () => {
     if (!currentAccount?.address) return;
-    setSelectChainServerId(null);
+    const chainList = await walletOpenapi.usedChainList(currentAccount.address);
+    setUsedChainList(chainList.map((chain) => formatChain(chain)));
     setIsProtocolExpand(false);
     setIsTokenExpand(false);
   };
@@ -296,7 +310,7 @@ const Home = () => {
                   src="rabby-internal://assets/icons/home/copy.svg"
                 />
               </div>
-              <div className="balance">${formatNumber(balance || 0)}</div>
+              <div className="balance">${formatNumber(totalBalance || 0)}</div>
             </div>
             {curveData ? (
               <div className="right">
@@ -312,7 +326,7 @@ const Home = () => {
             ) : null}
           </div>
           <ChainList
-            chainBalances={chainBalances}
+            chainBalances={usedChainList}
             onChange={setSelectChainServerId}
           />
         </div>
@@ -322,7 +336,6 @@ const Home = () => {
           protocolList={displayProtocolList}
           historyProtocolMap={historyProtocolMap}
           protocolHistoryTokenPriceMap={tokenHistoryPriceMap}
-          chainBalances={chainBalances}
           selectChainServerId={selectChainServerId}
           tokenHidden={{
             isExpand: isTokenExpand,
