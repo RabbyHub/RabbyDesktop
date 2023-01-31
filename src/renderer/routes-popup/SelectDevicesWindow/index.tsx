@@ -119,7 +119,10 @@ function SelectDeviceModal() {
         <div className={styles.SelectDevicesContent}>
           {deviceList?.length ? (
             <div className={styles.devices}>
-              <h3 className={styles.title}>Found the following device</h3>
+              <h3 className={styles.title}>
+                Found the following{' '}
+                {deviceList?.length > 1 ? 'devices' : 'device'}
+              </h3>
               <div className={styles.list}>
                 {deviceList.map((d) => {
                   const isSelected = selectedDevice?.deviceId === d.deviceId;
@@ -153,12 +156,16 @@ function SelectDeviceModal() {
               </div>
             </div>
           ) : (
-            <div className={styles.error}>
-              <img
-                className={styles.icon}
-                src="rabby-internal://assets/icons/select-devices/warning.svg"
-              />
-              <span className={styles.text}>Hardware wallet not detected</span>
+            <div className={styles.errorContainer}>
+              <div className={styles.error}>
+                <img
+                  className={styles.icon}
+                  src="rabby-internal://assets/icons/select-devices/warning.svg"
+                />
+                <span className={styles.text}>
+                  Hardware wallet not detected
+                </span>
+              </div>
             </div>
           )}
           <div className={styles.tipsContainer}>

@@ -228,7 +228,7 @@ const selectDevicesReady = onMainWindowReady().then(async (mainWin) => {
 
   // debug-only
   if (!IS_RUNTIME_PRODUCTION) {
-    selectDevicesPopup.webContents.openDevTools({ mode: 'detach' });
+    // selectDevicesPopup.webContents.openDevTools({ mode: 'detach' });
   }
 
   hidePopupView(selectDevicesPopup);
