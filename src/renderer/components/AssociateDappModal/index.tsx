@@ -81,7 +81,7 @@ const AssociateDapp = ({
   onOk?: (origin: string) => void;
 }) => {
   const { dapps } = useDapps();
-  const [current, setCurrent] = useState('');
+  const [current, setCurrent] = useState<string | null>(null);
   const [isShowAdd, setIsShowAdd] = useState(false);
   const { bindingDappsToProtocol, protocolDappsBinding } =
     useProtocolDappsBinding();
@@ -94,9 +94,7 @@ const AssociateDapp = ({
   }, [protocolDappsBinding, protocolId, url]);
 
   useEffect(() => {
-    if (bindUrl) {
-      setCurrent(bindUrl);
-    }
+    setCurrent(bindUrl);
   }, [bindUrl]);
 
   const dappList = useMemo(() => {
@@ -120,6 +118,9 @@ const AssociateDapp = ({
   }, [url, dapps]);
 
   const handleConfirm = async () => {
+    if (!current) {
+      return;
+    }
     setLoading(true);
     try {
       await bindingDappsToProtocol(protocolId, {
