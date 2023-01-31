@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { Tooltip } from 'antd';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import Transactions from './Transactions';
 import IconSwap from '../../../../../assets/icons/home/swap.svg?rc';
@@ -78,11 +77,9 @@ const RightBar = () => {
     <RightBarWrapper>
       <ActionList>
         {actions.map((action) => (
-          <Tooltip title={action.name} key={action.id} mouseEnterDelay={0.2}>
-            <li key={action.id} onClick={action.onClick}>
-              {action.icon}
-            </li>
-          </Tooltip>
+          <li key={action.id} onClick={action.onClick}>
+            {action.icon}
+          </li>
         ))}
       </ActionList>
       <Transactions />

@@ -222,23 +222,33 @@ const TokenItemComp = ({
   historyProtocol,
   poolId,
   historyTokenPrice,
+  supportHistory,
+  historyToken,
+  positionIndex,
 }: {
   token: TokenItem;
   historyProtocol?: DisplayProtocol;
   poolId: string;
   historyTokenPrice?: { id: string; chain: string; price: number };
+  historyToken?: TokenItem;
+  supportHistory: boolean;
+  positionIndex: string;
 }) => {
   const tokenHistory = useMemo(() => {
     const historyPortfolio = historyProtocol?.portfolio_item_list.find(
-      (item) => item.pool.id === poolId
+      (item) => item.pool.id === poolId && item.position_index === positionIndex
     );
-    if (!historyPortfolio) {
+    if (!supportHistory) {
       return null;
     }
-    const h = historyPortfolio.asset_token_list.find(
-      (item) => item.chain === token.chain && item.id === token.id
-    );
-    if (h) return h;
+    if (historyPortfolio) {
+      const h = historyPortfolio.asset_token_list.find(
+        (item) => item.chain === token.chain && item.id === token.id
+      );
+      if (h) {
+        return h;
+      }
+    }
     if (historyTokenPrice) {
       return {
         ...token,
@@ -246,8 +256,19 @@ const TokenItemComp = ({
         amount: 0,
       };
     }
+    if (historyToken) {
+      return historyToken;
+    }
     return null;
-  }, [poolId, historyProtocol, historyTokenPrice]);
+  }, [
+    poolId,
+    historyProtocol,
+    historyTokenPrice,
+    token,
+    supportHistory,
+    historyToken,
+    positionIndex,
+  ]);
 
   const priceChange = useMemo(() => {
     if (!tokenHistory) return 0;
@@ -356,6 +377,8 @@ const PoolItem = ({
   portfolio,
   historyProtocol,
   protocolHistoryTokenPriceMap,
+  supportHistory,
+  historyTokenDict,
 }: {
   portfolio: PortfolioItem;
   historyProtocol?: DisplayProtocol;
@@ -363,6 +386,8 @@ const PoolItem = ({
     string,
     { id: string; chain: string; price: number }
   >;
+  supportHistory: boolean;
+  historyTokenDict: Record<string, TokenItem>;
 }) => {
   const totalUsdValue = useMemo(() => {
     return (portfolio.asset_token_list || []).reduce((sum, item) => {
@@ -382,6 +407,9 @@ const PoolItem = ({
           historyTokenPrice={
             protocolHistoryTokenPriceMap[`${token.chain}-${token.id}`]
           }
+          supportHistory={supportHistory}
+          historyToken={historyTokenDict[`${token.chain}-${token.id}`]}
+          positionIndex={portfolio.position_index}
         />
       ))}
       <PoolItemFooter className="pool-item-footer">

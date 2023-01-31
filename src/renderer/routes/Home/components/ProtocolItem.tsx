@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { Skeleton } from 'antd';
 import styled from 'styled-components';
 import classNames from 'classnames';
+import { TokenItem } from '@debank/rabby-api/dist/types';
 import { useProtocolDappsBinding } from '@/renderer/hooks/useDappsMngr';
 import { IconWithChain } from '@/renderer/components/TokenWithChain';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
@@ -29,8 +30,8 @@ const ProtocolItemWrapper = styled.div`
       .chain-logo {
         width: 8px;
         height: 8px;
-        top: -4px;
-        right: -4px;
+        bottom: -2.5px;
+        right: -2.5px;
       }
     }
     .icon-relate {
@@ -84,6 +85,8 @@ const ProtocolItem = ({
   historyProtocol,
   protocolHistoryTokenPriceMap,
   onClickRelate,
+  supportHistory,
+  historyTokenDict,
 }: {
   protocol: DisplayProtocol;
   historyProtocol?: DisplayProtocol;
@@ -92,6 +95,8 @@ const ProtocolItem = ({
     { id: string; chain: string; price: number }
   >;
   onClickRelate(protocol: DisplayProtocol): void;
+  supportHistory: boolean;
+  historyTokenDict: Record<string, TokenItem>;
 }) => {
   const { protocolDappsBinding } = useProtocolDappsBinding();
   const openDapp = useOpenDapp();
@@ -177,6 +182,8 @@ const ProtocolItem = ({
             historyProtocol={historyProtocol}
             protocolHistoryTokenPriceMap={protocolHistoryTokenPriceMap}
             key={`${portfolio.position_index}-${portfolio.pool.id}`}
+            supportHistory={supportHistory}
+            historyTokenDict={historyTokenDict}
           />
         ))}
       </div>

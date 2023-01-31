@@ -9,6 +9,7 @@ type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
 type OpenApiService = import('@debank/rabby-api').OpenApiService;
 
 export type RabbyXMethod = {
+  'walletController.sendRequest': <T = any>(data: any) => T;
   'walletController.verifyPassword': (password: string) => void;
   'walletController.changeAccount': (account: Account) => void;
   'walletController.getCurrentAccount': () => RabbyAccount;
@@ -242,6 +243,8 @@ export type RabbyXMethod = {
   'openapi.getProtocol': OpenApiService['getProtocol'];
   'openapi.getHistoryProtocol': OpenApiService['getHistoryProtocol'];
   'openapi.getComplexProtocolList': OpenApiService['getComplexProtocolList'];
+  'openapi.getChainList': OpenApiService['getChainList'];
+  'openapi.getCachedTokenList': OpenApiService['getCachedTokenList'];
 };
 
 export type RabbyXMethods = {

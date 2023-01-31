@@ -121,6 +121,7 @@ const useExpandList = (tokens: TokenItem[]) => {
       }).length,
     };
   }, [tokens, filterPrice]);
+
   const filterList = useMemo(() => {
     if (!isShowExpand) {
       return tokens;
@@ -208,6 +209,8 @@ const Home = () => {
     historyProtocolMap,
     tokenHistoryPriceMap,
     isLoading: isLoadingProtocol,
+    supportHistoryChains,
+    historyTokenDict,
   } = useHistoryProtocol(currentAccount?.address);
   const {
     filterList: displayTokenList,
@@ -226,6 +229,12 @@ const Home = () => {
     return sortBy(
       sortBy(
         list.map((item) => {
+          item.portfolio_item_list = item.portfolio_item_list.map((i) => ({
+            ...i,
+            asset_token_list: sortBy(i.asset_token_list, (j) => {
+              return j.amount * j.price;
+            }).reverse(),
+          }));
           return {
             ...item,
             portfolio_item_list: sortBy(item.portfolio_item_list, (i) => {
@@ -329,6 +338,8 @@ const Home = () => {
           }}
           isLoadingTokenList={isLoadingTokenList}
           isLoadingProtocolList={isLoadingProtocol}
+          supportHistoryChains={supportHistoryChains}
+          historyTokenDict={historyTokenDict}
         />
       </HomeWrapper>
       <RightBar />
