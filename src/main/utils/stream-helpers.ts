@@ -98,10 +98,39 @@ export function updateMainWindowActiveTabRect(
   valueToMainSubject('mainWindowActiveTabRect', rectState);
 }
 
+export async function getAllMainUIWindows() {
+  const [mainWin, { switchChain, sidebarContext }] = await Promise.all([
+    await onMainWindowReady(),
+    await firstValueFrom(fromMainSubject('contextMenuPopupWindowReady')),
+  ]);
+
+  const popupOnly = {
+    'switch-chain': switchChain,
+    'sidebar-context': sidebarContext,
+  } as const;
+
+  const windows = {
+    'main-window': mainWin.window,
+    ...popupOnly,
+  } as const;
+
+  return {
+    windows,
+    popupOnly,
+    windowList: Object.values(windows),
+  };
+}
+
 export async function getAllMainUIViews() {
   const [
     mainWin,
-    { addAddress, addressManagement, quickSwap, dappsManagement },
+    {
+      addAddress,
+      addressManagement,
+      quickSwap,
+      dappsManagement,
+      selectDevices,
+    },
   ] = await Promise.all([
     await onMainWindowReady(),
     await firstValueFrom(fromMainSubject('popupViewsOnMainwinReady')),
@@ -112,6 +141,7 @@ export async function getAllMainUIViews() {
     'address-management': addressManagement,
     'quick-swap': quickSwap,
     'dapps-management': dappsManagement,
+    'select-devices': selectDevices,
   } as const;
 
   const viewOnlyHash = {
@@ -119,6 +149,7 @@ export async function getAllMainUIViews() {
     addressManagement: addressManagement.webContents,
     quickSwap: quickSwap.webContents,
     dappsManagement: dappsManagement.webContents,
+    selectDevices: selectDevices.webContents,
   };
 
   const hash = {

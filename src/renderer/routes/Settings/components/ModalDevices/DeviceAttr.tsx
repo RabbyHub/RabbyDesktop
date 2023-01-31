@@ -16,12 +16,13 @@ function copyAttrValue(input: Parameters<typeof copyText>[0]) {
 export default function DeviceAttr({
   icon,
   label,
-  value,
+  children,
+  value = children,
   className,
 }: React.PropsWithChildren<{
   icon?: React.ReactNode;
-  label: string;
-  value?: string | number;
+  label: React.ReactNode;
+  value?: React.ReactNode;
   className?: string;
 }>) {
   return (
@@ -35,7 +36,8 @@ export default function DeviceAttr({
         onClick={() => {
           if (!value) return;
 
-          copyAttrValue(value);
+          if (typeof value === 'string' || typeof value === 'number')
+            copyAttrValue(value);
         }}
       >
         {value || '-'}

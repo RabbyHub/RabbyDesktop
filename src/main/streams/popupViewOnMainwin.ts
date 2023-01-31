@@ -1,12 +1,15 @@
 import { BrowserView, BrowserWindow } from 'electron';
-import { firstValueFrom } from 'rxjs';
 
 import {
   IS_RUNTIME_PRODUCTION,
   RABBY_POPUP_GHOST_VIEW_URL,
 } from '../../isomorphic/constants';
-import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
-import { fromMainSubject, valueToMainSubject } from './_init';
+import {
+  onIpcMainEvent,
+  onIpcMainInternalEvent,
+  sendToWebContents,
+} from '../utils/ipcMainEvents';
+import { valueToMainSubject } from './_init';
 import { createPopupView, hidePopupView } from '../utils/browser';
 import {
   getAllMainUIViews,
@@ -30,6 +33,9 @@ const viewsState: Record<
     visible: false,
   },
   'dapps-management': {
+    visible: false,
+  },
+  'select-devices': {
     visible: false,
   },
 };
@@ -199,21 +205,54 @@ const quickSwapReady = onMainWindowReady().then(async (mainWin) => {
   return quickSwapPopup;
 });
 
+const selectDevicesReady = onMainWindowReady().then(async (mainWin) => {
+  const mainWindow = mainWin.window;
+
+  const selectDevicesPopup = createPopupView({});
+
+  mainWindow.addBrowserView(selectDevicesPopup);
+
+  const onTargetWinUpdate = () => {
+    if (viewsState['select-devices'].visible)
+      updateSubviewPos(mainWindow, selectDevicesPopup);
+  };
+  mainWindow.on('show', onTargetWinUpdate);
+  mainWindow.on('move', onTargetWinUpdate);
+  mainWindow.on('resized', onTargetWinUpdate);
+  mainWindow.on('unmaximize', onTargetWinUpdate);
+  mainWindow.on('restore', onTargetWinUpdate);
+
+  await selectDevicesPopup.webContents.loadURL(
+    `${RABBY_POPUP_GHOST_VIEW_URL}?view=select-devices#/`
+  );
+
+  // debug-only
+  if (!IS_RUNTIME_PRODUCTION) {
+    selectDevicesPopup.webContents.openDevTools({ mode: 'detach' });
+  }
+
+  hidePopupView(selectDevicesPopup);
+
+  return selectDevicesPopup;
+});
+
 Promise.all([
   addAddressReady,
   addressManagementReady,
-  quickSwapReady,
   dappsManagementReady,
+  quickSwapReady,
+  selectDevicesReady,
 ]).then((wins) => {
   valueToMainSubject('popupViewsOnMainwinReady', {
     addAddress: wins[0],
     addressManagement: wins[1],
-    quickSwap: wins[2],
-    dappsManagement: wins[3],
+    dappsManagement: wins[2],
+    quickSwap: wins[3],
+    selectDevices: wins[4],
   });
 });
 
-onIpcMainEvent(
+const { handler } = onIpcMainEvent(
   '__internal_rpc:popupview-on-mainwin:toggle-show',
   async (_, payload) => {
     const mainWindow = (await onMainWindowReady()).window;
@@ -249,6 +288,13 @@ onIpcMainEvent(
     } else {
       hidePopupViewOnMainWindow(targetView, payload.type);
     }
+  }
+);
+
+onIpcMainInternalEvent(
+  '__internal_main:popupview-on-mainwin:toggle-show',
+  (payload) => {
+    handler(null as any, payload);
   }
 );
 

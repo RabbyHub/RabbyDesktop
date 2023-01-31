@@ -156,3 +156,30 @@
     }
   }
 }
+
+.devicesList {
+  :global {
+    .ant-list-item-meta-content {
+      position: relative;
+
+      :local {
+        .rightOps {
+          position: absolute;
+          top: 0;
+          right: 0;
+          width: 100px;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+      }
+    }
+  }
+}
+
+.itemDesc {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

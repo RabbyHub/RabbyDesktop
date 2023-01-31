@@ -8,7 +8,7 @@ import { useEffect, useMemo } from 'react';
 import SvgIconDeviceManufacturer from './device-manufacturer.svg?rc';
 import { useIsViewingDevices } from '../../settingHooks';
 import styles from './index.module.less';
-import { useFilteredDevices } from './useFilteredDevices';
+import { testRequestDevice, useFilteredDevices } from './useFilteredDevices';
 import DeviceAttr from './DeviceAttr';
 
 export default function DeviceViewHID() {
@@ -102,19 +102,38 @@ export default function DeviceViewHID() {
                     </div>
                   }
                   description={
-                    <>
-                      <DeviceAttr
-                        className={styles.J_ID}
-                        label="ID"
-                        value={deviceItem.productId}
-                      />
-                      <DeviceAttr
-                        className={styles.J_VENDORID}
-                        label="VendorId"
-                        value={deviceItem.vendorId}
-                      />
-                      <DeviceAttr label="SN" value={deviceItem.serialNumber} />
-                    </>
+                    <div className={styles.itemDesc}>
+                      <div className={styles.itemDescAtts}>
+                        <DeviceAttr
+                          className={styles.J_ID}
+                          label="ID"
+                          value={deviceItem.productId}
+                        />
+                        <DeviceAttr
+                          className={styles.J_VENDORID}
+                          label="VendorId"
+                          value={deviceItem.vendorId}
+                        />
+                        <DeviceAttr
+                          label="SN"
+                          value={deviceItem.serialNumber}
+                        />
+                      </div>
+                      <div className={styles.rightOps}>
+                        <Button
+                          type="link"
+                          onClick={(evt) => {
+                            evt.preventDefault();
+                            testRequestDevice({
+                              vendorId: deviceItem.vendorId,
+                              productId: deviceItem.productId,
+                            });
+                          }}
+                        >
+                          Try Request It
+                        </Button>
+                      </div>
+                    </div>
                   }
                 />
               </List.Item>

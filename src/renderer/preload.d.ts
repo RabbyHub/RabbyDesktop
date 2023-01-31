@@ -77,6 +77,9 @@ type M2RChanneMessagePayload = {
       device: INodeWebUSBDevice;
     };
   };
+  '__internal_push:webhid:select-list': {
+    deviceList: IMergedHidDevice[];
+  };
 };
 
 type IPushEvents = keyof M2RChanneMessagePayload;
@@ -444,7 +447,7 @@ type ChannelInvokePayload = {
     ];
     response: {
       error?: string;
-      devices: IHidDeviceInfo[];
+      devices: INodeHidDeviceInfo[];
     };
   };
   'get-usb-devices': {
@@ -455,6 +458,18 @@ type ChannelInvokePayload = {
     ];
     response: {
       devices: IUSBDevice[];
+    };
+  };
+  'confirm-selected-device': {
+    send: [
+      {
+        selectId: string;
+        // null means cancel
+        device: Pick<IHidDevice, 'deviceId' | 'productId' | 'vendorId'> | null;
+      }
+    ];
+    response: {
+      error: string | null;
     };
   };
   [`__internal_rpc:rabbyx-rpc:query`]: {

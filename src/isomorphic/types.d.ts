@@ -206,10 +206,27 @@ type IContextMenuPageInfo =
         id: chrome.tabs.Tab['id'];
         url: chrome.tabs.Tab['url'];
       };
+    };
+
+type ISelectDeviceState = {
+  selectId: string;
+} & (
+  | {
+      status: 'pending';
     }
   | {
-      type: 'switch-account';
-    };
+      status: 'selected';
+      deviceInfo: {
+        vendorId: IHidDevice['vendorId'];
+        productId: IHidDevice['productId'];
+        deviceId?: IHidDevice['deviceId'];
+        name?: IHidDevice['name'];
+      };
+    }
+  | {
+      status: 'rejected';
+    }
+);
 
 type PopupViewOnMainwinInfo =
   | {
@@ -224,6 +241,10 @@ type PopupViewOnMainwinInfo =
     }
   | {
       type: 'dapps-management';
+    }
+  | {
+      type: 'select-devices';
+      state: ISelectDeviceState;
     };
 
 type IShellNavInfo = {
@@ -234,10 +255,15 @@ type IShellNavInfo = {
   dappSecurityCheckResult: ISecurityCheckResult | null;
 };
 
-type IHidDeviceInfo = import('node-hid').Device;
+type INodeHidDeviceInfo = import('node-hid').Device;
 
 type IUSBDevice = PickAllNonFnFields<USBDevice>;
 type INodeWebUSBDevice = PickAllNonFnFields<import('usb').WebUSBDevice>;
+type IHidDevice = Electron.HIDDevice;
+
+type IMergedHidDevice = IHidDevice & {
+  nodeDevice?: INodeHidDeviceInfo | null;
+};
 
 type IOSInfo = {
   arch: typeof process.arch;

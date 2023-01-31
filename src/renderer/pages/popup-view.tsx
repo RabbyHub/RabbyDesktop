@@ -16,7 +16,7 @@ import SecurityAddressbarPopup from '@/renderer/routes-popup/SecurityAddressbarP
 
 import { SidebarContextMenu } from '@/renderer/routes-popup/SidebarContextMenu';
 import SwitchChainWindow from '@/renderer/routes-popup/SwitchChainWindow';
-import SwitchAccountWindow from '@/renderer/routes-popup/SwitchAccountWindow';
+import SelectDevicesWindow from '@/renderer/routes-popup/SelectDevicesWindow';
 
 import { parseQueryString } from '@/isomorphic/url';
 import RabbyNotificationGasket from '../routes-popup/RabbyNotificationGasket';
@@ -39,10 +39,6 @@ function App() {
         />
         <Route path="/popup__sidebar-dapp" element={<SidebarContextMenu />} />
         <Route path="/popup__switch-chain" element={<SwitchChainWindow />} />
-        <Route
-          path="/popup__switch-account"
-          element={<SwitchAccountWindow />}
-        />
         <Route
           path="/popupview__add-address"
           element={<MainWindowAddAddress />}
@@ -67,6 +63,9 @@ switch (parseQueryString().view) {
     break;
   case 'quick-swap':
     root.render(<QuickSwapWindow />);
+    break;
+  case 'select-devices':
+    root.render(<SelectDevicesWindow />);
     break;
   default:
     root.render(<App />);

@@ -169,65 +169,12 @@ const switchChainReady = onMainWindowReady().then(async (mainWin) => {
   return switchChainPopup;
 });
 
-const switchAccountReady = onMainWindowReady().then(async (mainWin) => {
-  const targetWin = mainWin.window;
-
-  const switchAccountPopup = createPopupWindow({
-    parent: mainWin.window,
-    transparent: false,
-    hasShadow: true,
-    closable: false,
+Promise.all([sidebarReady, switchChainReady]).then((wins) => {
+  valueToMainSubject('contextMenuPopupWindowReady', {
+    sidebarContext: wins[0],
+    switchChain: wins[1],
   });
-
-  // disable close by shortcut
-  switchAccountPopup.on('close', (evt) => {
-    evt.preventDefault();
-
-    return false;
-  });
-
-  updateSubWindowRect(mainWin.window, switchAccountPopup);
-  const onTargetWinUpdate = () => {
-    if (switchAccountPopup.isVisible())
-      hidePopupOnMainWindow(switchAccountPopup, 'switch-account');
-  };
-  targetWin.on('show', onTargetWinUpdate);
-  targetWin.on('move', onTargetWinUpdate);
-  targetWin.on('resized', onTargetWinUpdate);
-  targetWin.on('unmaximize', onTargetWinUpdate);
-  targetWin.on('restore', onTargetWinUpdate);
-
-  mainWin.tabs.on('tab-focused', () => {
-    hidePopupOnMainWindow(switchAccountPopup, 'switch-account');
-  });
-
-  mainWin.window.on('focus', () => {
-    hidePopupOnMainWindow(switchAccountPopup, 'switch-account');
-  });
-
-  await switchAccountPopup.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}#/popup__switch-account`
-  );
-
-  // debug-only
-  if (!IS_RUNTIME_PRODUCTION) {
-    // switchAccountPopup.webContents.openDevTools({ mode: 'detach' });
-  }
-
-  hidePopupOnMainWindow(switchAccountPopup, 'switch-account');
-
-  return switchAccountPopup;
 });
-
-Promise.all([sidebarReady, switchChainReady, switchAccountReady]).then(
-  (wins) => {
-    valueToMainSubject('contextMenuPopupWindowReady', {
-      sidebarContext: wins[0],
-      switchChain: wins[1],
-      switchAccount: wins[2],
-    });
-  }
-);
 
 const SIZE_MAP: Record<
   IContextMenuPageInfo['type'],
@@ -244,10 +191,6 @@ const SIZE_MAP: Record<
     width: 272,
     height: 400,
   },
-  'switch-account': {
-    width: 240,
-    height: 60 * 2 + 1,
-  },
 };
 
 function pickWH(
@@ -256,12 +199,6 @@ function pickWH(
 ) {
   let result: Required<typeof input>;
   switch (type) {
-    case 'switch-account':
-      result = {
-        width: SIZE_MAP[type].width,
-        height: input.height || SIZE_MAP[type].height,
-      };
-      break;
     default:
       result = { ...SIZE_MAP[type] };
       break;
@@ -277,7 +214,7 @@ const { handler } = onIpcMainEvent(
   '__internal_rpc:popupwin-on-mainwin:toggle-show',
   async (_, payload) => {
     const mainWindow = (await onMainWindowReady()).window;
-    const { sidebarContext, switchChain, switchAccount } = await firstValueFrom(
+    const { sidebarContext, switchChain } = await firstValueFrom(
       fromMainSubject('contextMenuPopupWindowReady')
     );
 
@@ -286,8 +223,6 @@ const { handler } = onIpcMainEvent(
         ? sidebarContext
         : payload.type === 'switch-chain'
         ? switchChain
-        : payload.type === 'switch-account'
-        ? switchAccount
         : null;
 
     if (!targetWin) return;

@@ -5,7 +5,7 @@ import { useEffect, useMemo } from 'react';
 import SvgIconDeviceManufacturer from './device-manufacturer.svg?rc';
 import { useIsViewingDevices } from '../../settingHooks';
 import styles from './index.module.less';
-import { useFilteredDevices } from './useFilteredDevices';
+import { testRequestDevice, useFilteredDevices } from './useFilteredDevices';
 import DeviceAttr from './DeviceAttr';
 
 export default function DeviceViewUSB() {
@@ -96,7 +96,7 @@ export default function DeviceViewUSB() {
                     </div>
                   }
                   description={
-                    <>
+                    <div className={styles.itemDesc}>
                       <DeviceAttr
                         className={styles.J_ID}
                         label="ID"
@@ -108,7 +108,22 @@ export default function DeviceViewUSB() {
                         value={deviceItem.vendorId}
                       />
                       <DeviceAttr label="SN" value={deviceItem.serialNumber} />
-                    </>
+
+                      <div className={styles.rightOps}>
+                        <Button
+                          type="link"
+                          onClick={(evt) => {
+                            evt.preventDefault();
+                            testRequestDevice({
+                              vendorId: deviceItem.vendorId,
+                              productId: deviceItem.productId,
+                            });
+                          }}
+                        >
+                          Try Request It
+                        </Button>
+                      </div>
+                    </div>
                   }
                 />
               </List.Item>

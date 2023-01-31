@@ -1,8 +1,9 @@
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { message } from 'antd';
 import { atom, useAtom } from 'jotai';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 
-const hidDevicesAtom = atom<IHidDeviceInfo[]>([]);
+const hidDevicesAtom = atom<INodeHidDeviceInfo[]>([]);
 export function useHIDDevices() {
   const [devices, setDevices] = useAtom(hidDevicesAtom);
 
@@ -76,4 +77,33 @@ export function useUSBDevices() {
     devices,
     fetchDevices,
   };
+}
+
+const doRequest = (evt?: MouseEvent) => {
+  evt?.stopPropagation();
+
+  window.navigator.hid
+    .requestDevice({ filters: [] })
+    .then((res) => {
+      console.debug('[debug] selected device', res);
+    })
+    .catch((error) => {
+      console.debug('[debug] error', error);
+    });
+};
+/**
+ * @description only used to test on dev mode
+ */
+export function useTestHidSelectModal() {
+  useLayoutEffect(() => {
+    if (IS_RUNTIME_PRODUCTION) return;
+
+    document?.addEventListener('click', doRequest);
+
+    return () => {
+      document?.removeEventListener('click', doRequest);
+    };
+  }, []);
+
+  return doRequest;
 }
