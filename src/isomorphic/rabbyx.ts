@@ -3,7 +3,6 @@ import type { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 import type { TotalBalanceResponse } from '@debank/rabby-api/dist/types';
-import { TransactionGroup } from './types-rabbyx';
 
 type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
 type OpenApiService = import('@debank/rabby-api').OpenApiService;

@@ -1,5 +1,6 @@
-import type { Object as ObjectType } from 'ts-toolbelt';
-import type { ExplainTxResponse, Tx } from '@debank/rabby-api/dist/types';
+type ExplainTxResponse =
+  import('@debank/rabby-api/dist/types').ExplainTxResponse;
+type Tx = import('@debank/rabby-api/dist/types').Tx;
 
 type RabbyAccount = {
   address: string;
@@ -92,7 +93,7 @@ type IHighlightedAddress = {
   address: Account['address'];
 };
 
-export interface TransactionHistoryItem {
+interface TransactionHistoryItem {
   rawTx: Tx;
   createdAt: number;
   isCompleted: boolean;
@@ -103,9 +104,9 @@ export interface TransactionHistoryItem {
   site?: ConnectedSite;
 }
 
-export interface TransactionSigningItem {
+interface TransactionSigningItem {
   rawTx: Tx;
-  explain?: ObjectType.Merge<
+  explain?: import('ts-toolbelt').Object.Merge<
     ExplainTxResponse,
     { approvalId: string; calcSuccess: boolean }
   >;
@@ -113,13 +114,13 @@ export interface TransactionSigningItem {
   isSubmitted?: boolean;
 }
 
-export interface TransactionGroup {
+interface TransactionGroup {
   chainId: number;
   nonce: number;
   txs: TransactionHistoryItem[];
   isPending: boolean;
   createdAt: number;
-  explain: ObjectType.Merge<
+  explain: import('ts-toolbelt').Object.Merge<
     ExplainTxResponse,
     { approvalId: string; calcSuccess: boolean }
   >;
