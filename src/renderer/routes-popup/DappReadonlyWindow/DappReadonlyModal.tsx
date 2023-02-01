@@ -12,7 +12,7 @@ import '@/renderer/css/windicss';
 import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import { RcIconClose, RcIconLoading } from '@/../assets/icons/readonly-modal';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
-import styles from './index.module.less';
+import styles from './DappReadonlyModal.module.less';
 import useDragHeadbar from '../../hooks/useDragheadbar';
 
 function closeView() {

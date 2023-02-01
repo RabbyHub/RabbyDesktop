@@ -23,6 +23,7 @@ import RabbyNotificationGasket from '../routes-popup/RabbyNotificationGasket';
 import MainWindowAddAddress from '../routes-popup/MainWindowAddAddress';
 import QuickSwapWindow from '../routes-popup/QuickSwapWindow';
 import MainWindowDappManagement from '../routes-popup/MainWindowDappManagement';
+import DappReadonlyWindow from '../routes-popup/DappReadonlyWindow';
 
 function App() {
   return (
@@ -66,6 +67,9 @@ switch (parseQueryString().view) {
     break;
   case 'select-devices':
     root.render(<SelectDevicesWindow />);
+    break;
+  case 'dapp-safe-view':
+    root.render(<DappReadonlyWindow />);
     break;
   default:
     root.render(<App />);

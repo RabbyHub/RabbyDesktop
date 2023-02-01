@@ -2,7 +2,7 @@ import { BrowserView, BrowserWindow } from 'electron';
 
 import {
   IS_RUNTIME_PRODUCTION,
-  RABBY_MAIN_POPUP_VIEW,
+  RABBY_POPUP_GHOST_VIEW_URL,
 } from '../../isomorphic/constants';
 
 import { createPopupView } from '../utils/browser';
@@ -84,7 +84,9 @@ onMainWindowReady().then(async (mainWin) => {
   targetWin.on('unmaximize', onTargetWinUpdate);
   targetWin.on('restore', onTargetWinUpdate);
 
-  baseView.webContents.loadURL(`${RABBY_MAIN_POPUP_VIEW}#/dapp-safe-view`);
+  baseView.webContents.loadURL(
+    `${RABBY_POPUP_GHOST_VIEW_URL}?view=dapp-safe-view#/`
+  );
 
   hideView(baseView, targetWin);
 
@@ -111,6 +113,10 @@ export async function attachDappSafeview(
     return;
   }
 
+  let favIcon: IParsedFavicon = {
+    iconInfo: null,
+    faviconUrl: `https://www.google.com/s2/favicons?domain=${url}`,
+  };
   sendToWebContents(
     baseView.webContents,
     '__internal_push:dapp-tabs:open-safe-view',
@@ -118,10 +124,7 @@ export async function attachDappSafeview(
       url,
       sourceURL: opts.sourceURL,
       status: 'start-loading',
-      favIcon: {
-        iconInfo: null,
-        faviconUrl: `https://www.google.com/s2/favicons?domain=${url}`,
-      },
+      favIcon,
     }
   );
 
@@ -140,11 +143,14 @@ export async function attachDappSafeview(
           }
         : undefined;
 
-    const favIcon = await parseWebsiteFavicon(url, {
+    favIcon = await parseWebsiteFavicon(url, {
       timeout: 3000,
       proxy: proxyOnParseFavicon,
     });
-
+  } catch (e) {
+    // TODO: deal with potential load failure here
+    console.error(e);
+  } finally {
     sendToWebContents(
       baseView.webContents,
       '__internal_push:dapp-tabs:open-safe-view',
@@ -155,10 +161,6 @@ export async function attachDappSafeview(
         favIcon,
       }
     );
-  } catch (e) {
-    // TODO: deal with potential load failure here
-  } finally {
-    updateSubWindowPosition(targetWin, { baseView });
   }
 }
 
