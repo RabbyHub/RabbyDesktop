@@ -1,7 +1,30 @@
 
-v0.4.0 / 2023-01-19
+v0.4.1 / 2023-02-01
 ==================
 
+  * feat: support readonly tips modal. (#97)
+  * feat: tx history time (#96)
+  * feat: detect ledger (#95)
+  * feat: disable all pointer-events on <img /> for built-in views. (#94)
+  * chore: tuning.
+  * feat: basic support to select hid devices by UI. (#93)
+  * feat: optimize home page (#92)
+  * fix: dapp bind (#88)
+  * fix: ledger bugs && add walletconnect (#91)
+  * types: normalize types module. (#90)
+  * fix: disable windi-base.css to avoid its reset.
+  * fix: main session's permission check handler.
+  * style: little fix.
+  * feat: support `useMessageForwarded`/`useForwardTo` (#89)
+  * fix: quick swap style (#87)
+  * build: support windicss (tailwindcss v2 compatible) (#79)
+  * feat: support apis about hid devices. (#73)
+  * feat: + portfolio loading (#86)
+
+v0.4.0 / 2023-01-19
+===================
+
+  * Release v0.4.0
   * style: tuning.
   * chore: code clean.
   * fix: only display bind dapp info when hover (#84)
