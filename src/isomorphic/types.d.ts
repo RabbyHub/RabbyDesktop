@@ -241,6 +241,9 @@ type PopupViewOnMainwinInfo =
     }
   | {
       type: 'dapps-management';
+      state?: {
+        newDappOrigin?: string;
+      };
     }
   | {
       type: 'select-devices';
@@ -279,7 +282,7 @@ type IBuiltinViewName = PopupViewOnMainwinInfo['type'] | 'main-window';
 type INonSameDomainAction = {
   url: string;
   sourceURL: string;
-  toExistedDapp: boolean;
+  // toExistedDapp: boolean;
   status: 'start-loading' | 'loaded';
   favIcon: IParsedFavicon | null;
 };
@@ -289,3 +292,16 @@ type IParsedFavicon = {
   faviconUrl?: string;
   faviconBase64?: string;
 };
+
+type IPopupViewChanges<
+  T extends PopupViewOnMainwinInfo['type'] = PopupViewOnMainwinInfo['type']
+> =
+  | {
+      type: T;
+      visible: true;
+      pageInfo: PopupViewOnMainwinInfo & { type: T };
+    }
+  | {
+      type: T;
+      visible: false;
+    };

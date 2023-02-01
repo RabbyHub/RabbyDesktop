@@ -12,13 +12,13 @@ import {
   sendToWebContents,
 } from '../utils/ipcMainEvents';
 import {
+  forwardToMainWebContents,
   getDappSafeView,
   getSessionInsts,
   onMainWindowReady,
 } from '../utils/stream-helpers';
 import { valueToMainSubject } from './_init';
 import { getAssetPath } from '../utils/app';
-import { parseDappUrl } from '../store/dapps';
 import { parseWebsiteFavicon } from '../utils/fetch';
 import { getAppProxyConf } from '../store/desktopApp';
 
@@ -101,7 +101,15 @@ export async function attachDappSafeview(
 ) {
   const targetWin = opts._targetwin || (await onMainWindowReady()).window;
   const { baseView } = await getDappSafeView();
-  const toExistedDapp = !!opts.existedDapp;
+
+  if (opts.existedDapp) {
+    forwardToMainWebContents(
+      '__internal_forward:main-window:open-dapp',
+      opts.existedDapp.origin
+    );
+
+    return;
+  }
 
   sendToWebContents(
     baseView.webContents,
@@ -109,7 +117,6 @@ export async function attachDappSafeview(
     {
       url,
       sourceURL: opts.sourceURL,
-      toExistedDapp,
       status: 'start-loading',
       favIcon: {
         iconInfo: null,
@@ -144,7 +151,6 @@ export async function attachDappSafeview(
       {
         url,
         sourceURL: opts.sourceURL,
-        toExistedDapp,
         status: 'loaded',
         favIcon,
       }

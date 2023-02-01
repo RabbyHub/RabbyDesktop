@@ -11,7 +11,7 @@ import '@/renderer/css/windicss';
 
 import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import { RcIconClose, RcIconLoading } from '@/../assets/icons/readonly-modal';
-import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import styles from './index.module.less';
 import useDragHeadbar from '../../hooks/useDragheadbar';
 
@@ -102,7 +102,15 @@ function InnerSameOrigin({
         <Button
           className={classNames(styles.button, styles.J_add)}
           type="primary"
-          onClick={() => {}}
+          onClick={() => {
+            closeView();
+            showMainwinPopupview({
+              type: 'dapps-management',
+              state: {
+                newDappOrigin: targetInfo.origin,
+              },
+            });
+          }}
         >
           Add a dapp
         </Button>
@@ -125,7 +133,6 @@ export default function DappReadonlyModal() {
   const [nonSameOrigin, setNonSameOrigin] = useState<INonSameDomainAction>({
     url: '',
     sourceURL: '',
-    toExistedDapp: false,
     status: 'loaded',
     favIcon: null,
   });
@@ -155,12 +162,6 @@ export default function DappReadonlyModal() {
   useDragHeadbar();
 
   if (!nonSameOrigin.url) return null;
-
-  if (nonSameOrigin.toExistedDapp && !IS_RUNTIME_PRODUCTION) {
-    console.error(
-      'unexpected, thie view should only be opened when visiting different domain'
-    );
-  }
 
   return (
     <Modal

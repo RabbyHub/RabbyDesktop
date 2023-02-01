@@ -5,7 +5,10 @@ import {
   onIpcMainInternalEvent,
   sendToWebContents,
 } from '../utils/ipcMainEvents';
-import { onMainWindowReady } from '../utils/stream-helpers';
+import {
+  forwardToMainWebContents,
+  onMainWindowReady,
+} from '../utils/stream-helpers';
 import { getWindowFromBrowserWindow } from './tabbedBrowserWindow';
 import { setListeners, setOpenHandlerForWebContents } from './webContents';
 
@@ -16,16 +19,6 @@ onIpcMainEvent(
     win?.setIgnoreMouseEvents(...args);
   }
 );
-
-async function forwardToMainWebContents<T extends IChannelsKey = IChannelsKey>(
-  eventName: T,
-  payload: ChannelMessagePayload[T] extends void
-    ? null
-    : ChannelMessagePayload[T]['response'][0]
-) {
-  const mainWin = await onMainWindowReady();
-  mainWin.window.webContents.send(eventName, payload);
-}
 
 onIpcMainEvent(
   '__internal_forward:main-window:close-tab',

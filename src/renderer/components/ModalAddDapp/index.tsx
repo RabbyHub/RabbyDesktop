@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import classnames from 'classnames';
 import { Input, ModalProps, Button, message, Form } from 'antd';
 import { ExclamationCircleFilled } from '@ant-design/icons';
@@ -11,8 +11,8 @@ import { addDapp } from '@/renderer/ipcRequest/dapps';
 import { Modal } from '../Modal/Modal';
 import styles from './index.module.less';
 import { isValidDappAlias } from '../../../isomorphic/dapp';
-import { IS_RUNTIME_PRODUCTION } from '../../../isomorphic/constants';
 import { DappFavicon } from '../DappFavicon';
+import { useAddDappURL } from './useAddDapp';
 
 type IStep = 'add' | 'checked' | 'duplicated';
 
@@ -21,10 +21,11 @@ function useAddStep() {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const [_checkError, setCheckError] = useState<string | null>(null);
 
-  const [addUrl, setAddUrl] = useState(
-    IS_RUNTIME_PRODUCTION ? 'https://' : 'https://debank.com'
-  );
-  // const [addUrl, setAddUrl] = useState<string>(UNISWAP_INFO.url);
+  const [addUrl, setAddUrl] = useAddDappURL();
+  const [addStepForm] = Form.useForm<{ url: string }>();
+  useEffect(() => {
+    addStepForm.setFieldsValue({ url: addUrl });
+  }, [addUrl]);
 
   const onChangeAddUrl = useCallback(
     (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,6 +64,7 @@ function useAddStep() {
     isCheckingUrl,
     checkUrl,
     resetChecking,
+    addStepForm,
     addUrl,
     onChangeAddUrl,
     isValidAddUrl,
@@ -106,6 +108,7 @@ export function AddDapp({
   const navigate = useNavigate();
 
   const {
+    addStepForm,
     addUrl,
     onChangeAddUrl,
     isValidAddUrl,
@@ -162,7 +165,7 @@ export function AddDapp({
         />
       )}
       {step === 'add' && (
-        <Form className={styles.stepAdd} onFinish={doCheck}>
+        <Form form={addStepForm} className={styles.stepAdd} onFinish={doCheck}>
           <h3 className={styles.addTitle}>Enter or copy the Dapp URL</h3>
           <Form.Item
             name="url"

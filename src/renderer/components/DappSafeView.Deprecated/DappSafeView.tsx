@@ -16,12 +16,14 @@ function closeView() {
 }
 
 export default function DappSafeView() {
-  const [urlInfo, setUrlInfo] = useState<INonSameDomainAction>({
+  const [urlInfo, setUrlInfo] = useState<
+    INonSameDomainAction & { toExistedDapp: boolean }
+  >({
     url: '',
     sourceURL: '',
-    toExistedDapp: false,
     status: 'loaded',
     favIcon: null,
+    toExistedDapp: false,
   });
   const {
     settings: { sidebarCollapsed },
@@ -35,7 +37,7 @@ export default function DappSafeView() {
       '__internal_push:dapp-tabs:open-safe-view',
       (state) => {
         fetchState();
-        setUrlInfo(state);
+        setUrlInfo({ ...state, toExistedDapp: false });
       }
     );
   }, [fetchState]);
