@@ -9,6 +9,7 @@ import { maxBy } from 'lodash';
 import { IconWithChain } from '@/renderer/components/TokenWithChain';
 import NameAndAddress from '@/renderer/components/NameAndAddress';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import { sinceTime } from '@/renderer/utils/time';
 import { TransactionDataItem } from '@/isomorphic/types/rabbyx';
 import TxChange from './TxChange';
 
@@ -17,17 +18,39 @@ const TransactionItemWrapper = styled.div`
   padding: 28px 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.11);
   position: relative;
+  .tx-time {
+    position: absolute;
+    left: 10px;
+    top: 2px;
+    font-size: 12px;
+    line-height: 14px;
+    color: rgba(255, 255, 255, 0.3);
+    opacity: 0;
+  }
   &.failed {
     padding-top: 30px;
     .tx-explain {
       opacity: 0.3;
     }
+    .tx-time {
+      left: 29px;
+    }
   }
   &.pending {
     padding-top: 38px;
   }
+  &.completed {
+    .tx-time {
+      left: 93px;
+    }
+  }
   &:nth-last-child(1) {
     border-bottom: none;
+  }
+  &:hover {
+    .tx-time {
+      opacity: 1;
+    }
   }
 `;
 
@@ -377,6 +400,9 @@ const TransactionItem = ({ item }: { item: TransactionDataItem }) => {
             Completed
           </CompletedTag>
         </Tooltip>
+      )}
+      {!isPending && (
+        <div className="tx-time">{sinceTime(item.timeAt / 1000)}</div>
       )}
       <TxExplain
         className={classNames('tx-explain', {
