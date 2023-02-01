@@ -24,6 +24,18 @@ export async function onMainWindowReady(): Promise<
   return firstValueFrom(fromMainSubject('mainWindowReady'));
 }
 
+export async function forwardToMainWebContents<
+  T extends IChannelsKey = IChannelsKey
+>(
+  eventName: T,
+  payload: ChannelMessagePayload[T] extends void
+    ? null
+    : ChannelMessagePayload[T]['response'][0]
+) {
+  const mainWin = await onMainWindowReady();
+  mainWin.window.webContents.send(eventName, payload);
+}
+
 export async function getRabbyExtId() {
   const ext = await firstValueFrom(fromMainSubject('rabbyExtensionLoaded'));
 

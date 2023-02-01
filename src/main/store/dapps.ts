@@ -170,7 +170,7 @@ export function findDappByOrigin(url: string, dapps = getAllDapps()) {
 }
 
 export function parseDappUrl(url: string, dapps = getAllDapps()) {
-  const { isDapp, origin } = canoicalizeDappUrl(url);
+  const { isDapp, origin, domain } = canoicalizeDappUrl(url);
 
   const foundDapp = !isDapp
     ? null
@@ -178,12 +178,13 @@ export function parseDappUrl(url: string, dapps = getAllDapps()) {
         const formatted = formatDapp(item);
         return formatted?.origin && formatted.origin === origin;
       });
-  const existedOrigin = !isDapp ? false : !!foundDapp;
+  const existedDapp = !isDapp ? false : !!foundDapp;
 
   return {
     isDapp,
     origin,
-    existedOrigin,
+    domain,
+    existedDapp,
     foundDapp,
   };
 }

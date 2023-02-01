@@ -5,10 +5,15 @@ import {
   IS_RUNTIME_PRODUCTION,
   RABBY_SPALSH_URL,
 } from '../../isomorphic/constants';
-import { isRabbyShellURL, isUrlFromDapp } from '../../isomorphic/url';
+import {
+  formatProxyServerURL,
+  isRabbyShellURL,
+  isUrlFromDapp,
+} from '../../isomorphic/url';
 import buildChromeContextMenu from '../browser/context-menu';
 import { setupMenu } from '../browser/menu';
 import {
+  getAppProxyConf,
   getOrInitMainWinPosition,
   storeMainWinPosition,
 } from '../store/desktopApp';
@@ -46,6 +51,13 @@ const appLog = getBindLog('appStream', 'bgGrey');
 const isDarwin = process.platform === 'darwin';
 
 const DENY_ACTION = { action: 'deny' } as const;
+
+// const appProxyConf = getAppProxyConf();
+// if (appProxyConf.proxyType === 'custom' && appProxyConf.proxySettings) {
+//   const proxyServer = formatProxyServerURL(appProxyConf.proxySettings);
+//   app.commandLine.appendSwitch('--proxy-server', proxyServer);
+//   appLog(`set proxy server: ${proxyServer}`);
+// }
 
 app.on('web-contents-created', async (evtApp, webContents) => {
   const type = webContents.getType();

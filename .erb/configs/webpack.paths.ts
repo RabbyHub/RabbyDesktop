@@ -48,12 +48,6 @@ const entriesRenderer = {
     htmlFile: path.join(srcRendererPath, `pages/loading.ejs`),
     jsEntry: path.join(srcRendererPath, 'pages/loading.tsx'),
   },
-  'main-popup-view': {
-    name: 'main-popup-view',
-    target: 'main-popup-view.html',
-    htmlFile: path.join(srcRendererPath, `pages/main-popup-view.ejs`),
-    jsEntry: path.join(srcRendererPath, 'pages/main-popup-view.tsx'),
-  },
   'popup-view': {
     name: 'popup-view',
     target: 'popup-view.html',

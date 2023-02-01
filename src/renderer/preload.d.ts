@@ -21,11 +21,7 @@ type M2RChanneMessagePayload = {
     origin: string;
     checkResult: ISecurityCheckResult;
   };
-  '__internal_push:dapp-tabs:open-safe-view': {
-    url: string;
-    isExisted: boolean;
-    status: 'start-loading' | 'loaded';
-  };
+  '__internal_push:dapp-tabs:open-safe-view': INonSameDomainAction;
   '__internal_push:mainwindow:all-tabs-closed': {
     windowId: number;
   };
@@ -46,16 +42,7 @@ type M2RChanneMessagePayload = {
         type: IContextMenuPageInfo['type'];
         visible: false;
       };
-  '__internal_push:popupview-on-mainwin:on-visiblechange':
-    | {
-        type: PopupViewOnMainwinInfo['type'];
-        visible: true;
-        pageInfo: PopupViewOnMainwinInfo;
-      }
-    | {
-        type: PopupViewOnMainwinInfo['type'];
-        visible: false;
-      };
+  '__internal_push:popupview-on-mainwin:on-visiblechange': IPopupViewChanges;
 
   /* eslint-disable-next-line @typescript-eslint/ban-types */
   '__internal_push:loading-view:toggle': ChannelMessagePayload['__internal_rpc:mainwindow:toggle-loading-view']['send'][0];
@@ -470,6 +457,13 @@ type ChannelInvokePayload = {
     ];
     response: {
       error: string | null;
+    };
+  };
+  'parse-favicon': {
+    send: [targetURL: string];
+    response: {
+      error?: string | null;
+      favicon: IParsedFavicon | null;
     };
   };
   [`__internal_rpc:rabbyx-rpc:query`]: {

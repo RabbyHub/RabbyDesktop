@@ -44,10 +44,11 @@ export function usePopupWinInfo<T extends IContextMenuPageInfo['type']>(
     pageInfo: info.pageInfo,
   };
 }
-export function usePopupViewInfo<T extends PopupViewOnMainwinInfo['type']>(
+export function usePopupViewInfo<T extends IPopupViewChanges['type']>(
   type: T,
   opts?: {
     enableTopViewGuard?: boolean;
+    onVisibleChanged?: (payload: IPopupViewChanges<T>) => void;
   }
 ) {
   const [localVisible, setLocalVisible] = useState(false);
@@ -79,9 +80,11 @@ export function usePopupViewInfo<T extends PopupViewOnMainwinInfo['type']>(
             pageInfo: null,
           });
         }
+
+        opts?.onVisibleChanged?.(payload as any);
       }
     );
-  }, [type]);
+  }, [type, opts?.onVisibleChanged]);
 
   const hideView = useCallback(() => {
     setLocalVisible(false);

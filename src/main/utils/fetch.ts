@@ -25,7 +25,7 @@ export async function parseWebsiteFavicon(
     timeout?: number;
     proxy?: AxiosProxyConfig;
   }
-) {
+): Promise<IParsedFavicon> {
   const { timeout: tmout = 2 * 1e3 } = options || {};
   websiteBaseURL = websiteBaseURL.replace(/\/$/, '');
 
