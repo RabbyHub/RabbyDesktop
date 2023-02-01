@@ -1,0 +1,191 @@
+@import '~antd/lib/style/themes/default.less';
+
+
+.DappReadonlyModal {
+  user-select: none;
+
+  :global {
+    .ant-modal-content {
+      width: 520px;
+      min-height: 320px;
+
+      border-radius: 12px;
+      padding: 40px;
+    }
+
+    .ant-modal-body {
+      padding: 0;
+    }
+
+    .ant-modal-close-x {
+      height: 44px;
+      width: 44px;
+      line-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      > img.close-icon {
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+
+  .closeIcon {
+    width: 24px;
+    height: 24px;
+    color: var(--color-comment1);
+  }
+
+}
+
+.DappReadonlyModal.J_external {
+  .header .title {
+    display: block;
+    width: 100%;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 24px;
+    color: var(--color-title);
+    text-align: center;
+  }
+
+  .tipContainer {
+    width: 440px;
+
+    font-style: normal;
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 20px;
+    text-align: center;
+  }
+
+  .externalLinkContainer {
+    @apply flex justify-center items-center;
+    padding: 40px;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 18px;
+    cursor: default;
+
+    .link {
+      // @apply flex justify-center items-center ml-12px;
+      @apply ml-12px;
+      text-align: center;
+      color: var(--color-comment1);
+      // max-width: 5em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .buttonContainer {
+    text-align: center;
+
+    > .button.J_openInBrowser {
+      margin: 0 auto;
+      width: 200px;
+      height: 48px;
+      background: var(--color-line);
+      border-radius: 4px;
+
+      border-color: var(--color-line);
+      color: var(--color-title);
+
+      &:hover, &:active, &:focus {
+        border-color: var(--color-line);
+        color: var(--color-title);
+      }
+    }
+  }
+}
+
+.DappReadonlyModal.J_sameDomain {
+  :global {
+    .ant-modal-content {
+      width: 560px;
+    }
+  }
+
+  .header .avatarWrapper {
+    margin: 0 auto;
+    text-align: center;
+
+    .link {
+      @apply flex justify-center items-center mt-16px;
+      text-align: center;
+      color: var(--color-comment1);
+      font-style: normal;
+      font-weight: 500;
+      font-size: 15px;
+      line-height: 18px;
+    }
+
+    .loadingWrapper {
+      background-color: #eee;
+      width: 40px;
+      height: 40px;
+      @apply flex justify-center items-center;
+      margin: 0 auto;
+      color: var(--color-primary);
+
+      > svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    .avatar, .loadingWrapper {
+      border-radius: 3.5px;
+    }
+  }
+
+  .tipContainer {
+    width: 100%;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 22px;
+    text-align: center;
+    color: var(--color-title);
+  }
+
+  .buttonContainer {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+
+    > .button.J_add {
+      margin: 0 auto;
+      width: 200px;
+      height: 48px;
+      border-radius: 4px;
+    }
+
+    > .button.J_openInBrowser {
+      font-style: normal;
+      font-weight: 500;
+      font-size: 13px;
+      line-height: 16px;
+      padding: 0;
+      margin-top: 20px;
+      display: inline-flex;
+      align-items: flex-start;
+      justify-content: center;
+
+      > span {
+        text-align: center;
+        text-decoration-line: underline;
+        color: var(--color-paragraph);
+      }
+
+      &:hover, &:active, &:focus {
+        background-color: transparent;
+      }
+    }
+  }
+}

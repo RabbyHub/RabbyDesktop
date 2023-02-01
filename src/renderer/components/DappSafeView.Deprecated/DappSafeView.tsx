@@ -16,10 +16,12 @@ function closeView() {
 }
 
 export default function DappSafeView() {
-  const [urlInfo, setUrlInfo] = useState({
+  const [urlInfo, setUrlInfo] = useState<INonSameDomainAction>({
     url: '',
-    isExisted: false,
-    status: 'loading' as 'start-loading' | 'loaded',
+    sourceURL: '',
+    toExistedDapp: false,
+    status: 'loaded',
+    favIcon: null,
   });
   const {
     settings: { sidebarCollapsed },
@@ -31,9 +33,9 @@ export default function DappSafeView() {
 
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:dapp-tabs:open-safe-view',
-      ({ url, isExisted, status }) => {
+      (state) => {
         fetchState();
-        setUrlInfo({ url, isExisted, status });
+        setUrlInfo(state);
       }
     );
   }, [fetchState]);
@@ -71,7 +73,7 @@ export default function DappSafeView() {
       footer={null}
     >
       <div className="alert-header">
-        {urlInfo.isExisted ? (
+        {urlInfo.toExistedDapp ? (
           <div className="inner">
             This page is in reader mode because it doesn't belong to the current
             Dapp. You can have full access to it by opening{' '}

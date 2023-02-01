@@ -21,11 +21,7 @@ type M2RChanneMessagePayload = {
     origin: string;
     checkResult: ISecurityCheckResult;
   };
-  '__internal_push:dapp-tabs:open-safe-view': {
-    url: string;
-    isExisted: boolean;
-    status: 'start-loading' | 'loaded';
-  };
+  '__internal_push:dapp-tabs:open-safe-view': INonSameDomainAction;
   '__internal_push:mainwindow:all-tabs-closed': {
     windowId: number;
   };
@@ -470,6 +466,13 @@ type ChannelInvokePayload = {
     ];
     response: {
       error: string | null;
+    };
+  };
+  'parse-favicon': {
+    send: [targetURL: string];
+    response: {
+      error?: string | null;
+      favicon: IParsedFavicon | null;
     };
   };
   [`__internal_rpc:rabbyx-rpc:query`]: {

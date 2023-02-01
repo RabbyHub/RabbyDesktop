@@ -7,13 +7,13 @@ import './main-popup-view.less';
 
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 
-import DappSafeView from '../routes/DappSafeView/DappSafeView';
+import DappReadonlyModal from '../routes-popup/DappReadonlyModal';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/dapp-safe-view" element={<DappSafeView />} />
+        <Route path="/dapp-safe-view" element={<DappReadonlyModal />} />
       </Routes>
     </Router>
   );

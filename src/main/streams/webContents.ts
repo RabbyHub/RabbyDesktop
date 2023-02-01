@@ -61,11 +61,11 @@ export function setOpenHandlerForWebContents({
     const isToExt = targetURL.startsWith('chrome-extension://');
 
     if (isFromDapp && !toSameOrigin) {
-      attachDappSafeview(
-        targetURL,
-        targetInfo.existedOrigin,
-        parentTabbedWin.window
-      );
+      attachDappSafeview(targetURL, {
+        sourceURL: currentUrl,
+        existedDapp: targetInfo.foundDapp,
+        _targetwin: parentTabbedWin.window,
+      });
     } else if (!isToExt) {
       switch (details.disposition) {
         case 'foreground-tab':
@@ -131,7 +131,10 @@ export const setListeners = {
       // this tabs is render as app's self UI, such as topbar.
       if (isFromDapp && !toSameOrigin) {
         evt.preventDefault();
-        attachDappSafeview(targetURL);
+        attachDappSafeview(targetURL, {
+          existedDapp: targetInfo.foundDapp,
+          sourceURL: currentUrl,
+        });
 
         return false;
       }
@@ -169,7 +172,11 @@ export const setListeners = {
 
         if (isFromDapp && !toSameOrigin) {
           evt.preventDefault();
-          attachDappSafeview(targetURL, targetInfo.existedOrigin, parentWindow);
+          attachDappSafeview(targetURL, {
+            sourceURL: currentUrl,
+            existedDapp: targetInfo.foundDapp,
+            _targetwin: parentWindow,
+          });
 
           return false;
         }

@@ -275,3 +275,17 @@ type IProtocolDappBindings = Record<
 >;
 
 type IBuiltinViewName = PopupViewOnMainwinInfo['type'] | 'main-window';
+
+type INonSameDomainAction = {
+  url: string;
+  sourceURL: string;
+  toExistedDapp: boolean;
+  status: 'start-loading' | 'loaded';
+  favIcon: IParsedFavicon | null;
+};
+
+type IParsedFavicon = {
+  iconInfo: import('@debank/parse-favicon').Icon | null;
+  faviconUrl?: string;
+  faviconBase64?: string;
+};

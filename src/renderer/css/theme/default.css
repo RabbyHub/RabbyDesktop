@@ -29,6 +29,7 @@
   --color-comment2-rgb: 180, 189, 204;
   --color-bg: #f5f6fa;
   --color-line: #e5e9ef;
+  --color-line-rgb: 229, 233, 239;
   --color-border: var(--color-line);
   --color-pureblack: black;
   --color-purewhite: white;
