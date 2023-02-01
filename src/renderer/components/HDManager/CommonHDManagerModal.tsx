@@ -1,5 +1,5 @@
 import './index.less';
-import { Button, ModalProps, Spin } from 'antd';
+import { Button, message, Spin } from 'antd';
 import React from 'react';
 import { HARDWARE_KEYRING_TYPES } from '@/renderer/utils/constant';
 import { useShellWallet } from '@/renderer/hooks-shell/useShellWallet';
@@ -7,6 +7,7 @@ import { HDManagerStateProvider, StateProviderProps } from './utils';
 import { LedgerManager } from './LedgerManager';
 import { OneKeyManager } from './OnekeyManager';
 import { TrezorManager } from './TrezorManager';
+import { Modal, Props as ModalProps } from '../Modal/Modal';
 
 const MANAGER_MAP = {
   [HARDWARE_KEYRING_TYPES.Ledger.type]: LedgerManager,
@@ -14,15 +15,16 @@ const MANAGER_MAP = {
   [HARDWARE_KEYRING_TYPES.Onekey.type]: OneKeyManager,
 };
 
-interface Props extends StateProviderProps {
+interface Props extends StateProviderProps, ModalProps {
   showEntryButton?: boolean;
   onCancel?: ModalProps['onCancel'];
 }
 
-export const HDManager: React.FC<Props> = ({
+export const CommonHDManagerModal: React.FC<Props> = ({
   keyring,
   showEntryButton,
   onCancel,
+  ...props
 }) => {
   const walletController = useShellWallet();
   const [initialed, setInitialed] = React.useState(false);
@@ -40,7 +42,16 @@ export const HDManager: React.FC<Props> = ({
       })
       .then((id: number) => {
         idRef.current = id;
+        return walletController.requestKeyring(keyring, 'unlock', id);
+      })
+      .then(() => {
         setInitialed(true);
+      })
+      .catch(() => {
+        props.onBack?.();
+        message.error(
+          'Unable to connect to Hardware wallet. Please try to re-connect.'
+        );
       });
     window.addEventListener('beforeunload', () => {
       closeConnect();
@@ -52,27 +63,29 @@ export const HDManager: React.FC<Props> = ({
   }, []);
 
   if (!initialed) {
-    return (
-      <div className="flex items-center justify-center w-screen h-screen">
-        <Spin />
-      </div>
-    );
+    return null;
   }
 
   const Manager = MANAGER_MAP[keyring];
 
   return (
-    <HDManagerStateProvider keyringId={idRef.current} keyring={keyring}>
-      <div className="HDManager">
-        <main>
-          <Manager />
-          {showEntryButton && (
-            <Button onClick={onCancel} className="footer-button" type="primary">
-              Enter Rabby
-            </Button>
-          )}
-        </main>
-      </div>
-    </HDManagerStateProvider>
+    <Modal {...props} onCancel={onCancel}>
+      <HDManagerStateProvider keyringId={idRef.current} keyring={keyring}>
+        <div className="HDManager">
+          <main>
+            <Manager />
+            {showEntryButton && (
+              <Button
+                onClick={onCancel}
+                className="footer-button"
+                type="primary"
+              >
+                Enter Rabby
+              </Button>
+            )}
+          </main>
+        </div>
+      </HDManagerStateProvider>
+    </Modal>
   );
 };

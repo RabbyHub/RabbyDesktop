@@ -171,7 +171,10 @@ getSessionInsts().then(({ mainSession }) => {
         // Optionally update details.deviceList
         const eids = new Set(details.deviceList.map((d) => d.deviceId));
         let updated = false;
-        eventDetails.device.forEach((d) => {
+        const devices = Array.isArray(eventDetails?.device)
+          ? eventDetails.device
+          : [];
+        devices.forEach((d) => {
           if (!eids.has(d.deviceId)) {
             details.deviceList.push(d);
             updated = true;
@@ -185,8 +188,10 @@ getSessionInsts().then(({ mainSession }) => {
 
       mainSession.on('hid-device-removed', (_, eventDetails) => {
         console.debug('hid-device-removed FIRED WITH', eventDetails);
-
-        const rids = new Set(eventDetails.device.map((d) => d.deviceId));
+        const devices = Array.isArray(eventDetails?.device)
+          ? eventDetails.device
+          : [];
+        const rids = new Set(devices.map((d) => d.deviceId));
         // Optionally update details.deviceList
         details.deviceList = details.deviceList.filter((d) =>
           rids.has(d.deviceId)
