@@ -161,6 +161,26 @@ export default function DappReadonlyModal() {
 
   useDragHeadbar();
 
+  // useEffect(() => {
+  //   if (!nonSameOrigin.url) return;
+
+  //   window.rabbyDesktop.ipcRenderer.invoke('parse-favicon', nonSameOrigin.url)
+  //     .then(res => {
+  //       if (res.error) {
+  //         console.error(res.error);
+  //         return;
+  //       }
+
+  //       setNonSameOrigin(prev => {
+  //         return {
+  //           ...prev,
+  //           status: 'loaded',
+  //           favIcon: res.favicon,
+  //         }
+  //       });
+  //     });
+  // }, [nonSameOrigin.url]);
+
   if (!nonSameOrigin.url) return null;
 
   return (
