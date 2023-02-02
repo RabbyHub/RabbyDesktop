@@ -309,7 +309,7 @@ export const Swap = ({
     }, [userAddress, chain]);
 
   const { loading: payTokenLoading } = useAsync(async () => {
-    if (userAddress && payToken?.id && chain && payToken?.time_at === 0) {
+    if (userAddress && payToken?.id && chain && quickWindowOpen) {
       const t = await walletOpenapi.getToken(
         userAddress,
         CHAINS[chain].serverId,
@@ -318,7 +318,7 @@ export const Swap = ({
 
       setPayToken(t);
     }
-  }, [userAddress, chain, payToken?.id, payToken?.time_at, refreshId]);
+  }, [userAddress, chain, payToken?.id, refreshId, quickWindowOpen]);
 
   const [{ value: quoteInfo, loading }, fetchQuote] = useAsyncFn(async () => {
     if (
