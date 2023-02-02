@@ -2,7 +2,7 @@ export function isValidDappAlias(alias: string) {
   return /[\w\d]+/.test(alias);
 }
 
-export function formatDapp(input: any) {
+export function formatDapp(input: any): IDapp | null {
   if (!input?.origin) return null;
 
   return {

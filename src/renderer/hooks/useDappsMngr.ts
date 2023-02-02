@@ -24,16 +24,6 @@ const dappsAtomic = atom(null as null | IDapp[]);
 const pinnedListAtomic = atom([] as IDapp['origin'][]);
 const unpinnedListAtomic = atom([] as IDapp['origin'][]);
 
-// function mergePinnnedList(dapps: (IDapp | IMergedDapp)[], pinnedList: IDapp['origin'][]): IMergedDapp[] {
-//   const pinnedSet = new Set(pinnedList);
-//   return dapps.map(dapp => {
-//     return {
-//       ...dapp,
-//       isPinned: pinnedSet.has(dapp.origin),
-//     };
-//   });
-// }
-
 const protocolDappsBindingAtom = atom({} as IProtocolDappBindings);
 export function useProtocolDappsBinding() {
   const [protocolDappsBinding, setProtocolDappsBinding] = useAtom(
@@ -78,18 +68,22 @@ export function useDapps() {
   const [pinnedList, setPinnedList] = useAtom(pinnedListAtomic);
   const [unpinnedList, setUnpinnedList] = useAtom(unpinnedListAtomic);
 
-  // only fetch dapps once
+  // only fetch dapps once for every call to hooks
+  const calledRef = useRef(false);
   useEffect(() => {
-    if (originDapps) return;
+    if (calledRef.current) return;
+
     // eslint-disable-next-line promise/catch-or-return
     fetchDapps().then((newVal) => {
+      calledRef.current = true;
+
       setDapps(newVal.dapps);
       setPinnedList(newVal.pinnedList);
       setUnpinnedList(newVal.unpinnedList);
 
       return newVal;
     });
-  }, [setPinnedList, originDapps, setDapps]);
+  }, [setPinnedList, setDapps]);
 
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(

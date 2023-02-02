@@ -7,7 +7,6 @@ import { permissionService } from '@/renderer/ipcRequest/rabbyx';
 import { navigateToDappRoute } from '@/renderer/utils/react-router';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
-import { RCIconDappsModalClose } from '../../../../assets/icons/internal-homepage';
 import { DappFavicon } from '../DappFavicon';
 import { Modal } from '../Modal/Modal';
 

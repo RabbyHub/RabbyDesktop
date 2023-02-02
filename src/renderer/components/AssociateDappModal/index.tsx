@@ -8,7 +8,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { DappFavicon } from '../DappFavicon';
 import { Modal } from '../Modal/Modal';
-import ModalAddDapp, { AddDapp } from '../ModalAddDapp';
+import ModalAddDapp from '../ModalAddDapp';
 import styles from './index.module.less';
 
 const Checkbox = ({

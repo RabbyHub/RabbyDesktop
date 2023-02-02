@@ -5,7 +5,6 @@ import { useDapps } from 'renderer/hooks/useDappsMngr';
 import { isValidDappAlias } from '../../../isomorphic/dapp';
 
 import styles from './index.module.less';
-import { RCIconDappsModalClose } from '../../../../assets/icons/internal-homepage';
 import { DappFavicon } from '../DappFavicon';
 import { Modal } from '../Modal/Modal';
 
