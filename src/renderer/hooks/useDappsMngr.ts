@@ -8,7 +8,6 @@ import { sortDappsBasedPinned } from '@/isomorphic/dapp';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useWindowTabs } from '../hooks-shell/useWindowTabs';
-import { makeSureDappAddedToConnectedSite } from '../ipcRequest/connected-site';
 import {
   deleteDapp,
   detectDapps,
@@ -88,11 +87,6 @@ export function useDapps() {
       setPinnedList(newVal.pinnedList);
       setUnpinnedList(newVal.unpinnedList);
 
-      // guard logic
-      newVal.dapps.forEach((dapp) => {
-        makeSureDappAddedToConnectedSite(dapp);
-      });
-
       return newVal;
     });
   }, [setPinnedList, originDapps, setDapps]);
@@ -158,7 +152,7 @@ export function useDapps() {
 }
 
 export function useDapp(origin?: string) {
-  const [dappInfo, setDappInfo] = useState<IMergedDapp | null>(null);
+  const [dappInfo, setDappInfo] = useState<Partial<IMergedDapp> | null>(null);
 
   useEffect(() => {
     if (!origin) {
