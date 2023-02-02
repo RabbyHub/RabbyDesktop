@@ -67,69 +67,71 @@ export default (address: string | undefined) => {
         q.push(token);
       }
     }
-    try {
-      const tmap: Record<
-        string,
-        {
-          price: number;
-          id: string;
-          chain: string;
-        }
-      > = {};
-      const tokenHistoryPriceQueue = new PQueue({ concurrency: 20 });
-      const grouped = groupBy(q, (item) => {
-        return item.chain;
-      });
-      Object.keys(grouped).forEach((i) => {
-        const l = grouped[i];
-        tokenHistoryPriceQueue.add(async () => {
-          const priceMap = await walletOpenapi.getTokenHistoryDict({
-            chainId: i,
-            ids: l.map((s) => s.id).join(','),
-            timeAt: YESTERDAY,
-          });
-          return {
-            chain: i,
-            price: priceMap,
-          };
+    if (q.length > 0) {
+      try {
+        const tmap: Record<
+          string,
+          {
+            price: number;
+            id: string;
+            chain: string;
+          }
+        > = {};
+        const tokenHistoryPriceQueue = new PQueue({ concurrency: 20 });
+        const grouped = groupBy(q, (item) => {
+          return item.chain;
         });
-      });
-      tokenHistoryPriceQueue.on(
-        'completed',
-        ({
-          price,
-          chain,
-        }: {
-          price: Record<string, number>;
-          chain: string;
-        }) => {
-          Object.keys(price).forEach((id) => {
-            tmap[`${chain}-${id}`] = { price: price[id], chain, id };
-          });
-        }
-      );
-      const waitQueueFinished = (queue: PQueue) => {
-        return new Promise((resolve) => {
-          queue.on('empty', () => {
-            if (queue.pending <= 0) resolve(null);
+        Object.keys(grouped).forEach((i) => {
+          const l = grouped[i];
+          tokenHistoryPriceQueue.add(async () => {
+            const priceMap = await walletOpenapi.getTokenHistoryDict({
+              chainId: i,
+              ids: l.map((s) => s.id).join(','),
+              timeAt: YESTERDAY,
+            });
+            return {
+              chain: i,
+              price: priceMap,
+            };
           });
         });
-      };
-      await waitQueueFinished(tokenHistoryPriceQueue);
-      Object.values(tmap).forEach((item) => {
-        const target = q.find(
-          (token) => token.id === item.id && token.chain === item.chain
+        tokenHistoryPriceQueue.on(
+          'completed',
+          ({
+            price,
+            chain,
+          }: {
+            price: Record<string, number>;
+            chain: string;
+          }) => {
+            Object.keys(price).forEach((id) => {
+              tmap[`${chain}-${id}`] = { price: price[id], chain, id };
+            });
+          }
         );
-        if (target) {
-          result.push({
-            ...target,
-            price: item.price,
-            amount: 0,
+        const waitQueueFinished = (queue: PQueue) => {
+          return new Promise((resolve) => {
+            queue.on('empty', () => {
+              if (queue.pending <= 0) resolve(null);
+            });
           });
-        }
-      });
-    } catch (e) {
-      // NOTHING
+        };
+        await waitQueueFinished(tokenHistoryPriceQueue);
+        Object.values(tmap).forEach((item) => {
+          const target = q.find(
+            (token) => token.id === item.id && token.chain === item.chain
+          );
+          if (target) {
+            result.push({
+              ...target,
+              price: item.price,
+              amount: 0,
+            });
+          }
+        });
+      } catch (e) {
+        // NOTHING
+      }
     }
     setHistoryTokenMap(
       result.reduce((res, item) => {
