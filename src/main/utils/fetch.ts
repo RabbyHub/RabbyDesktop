@@ -3,7 +3,11 @@ import { Icon as IconInfo, parseFavicon } from '@debank/parse-favicon';
 import Axios, { AxiosProxyConfig } from 'axios';
 
 import { catchError, firstValueFrom, map, of, timeout } from 'rxjs';
-import { canoicalizeDappUrl } from '../../isomorphic/url';
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import {
+  canoicalizeDappUrl,
+  formatAxiosProxyConfig,
+} from '../../isomorphic/url';
 
 const fetchClient = Axios.create({});
 
@@ -31,6 +35,17 @@ export async function parseWebsiteFavicon(
 
   const reqIconUrlBufs: Record<string, string> = {};
 
+  const proxyOpts =
+    options?.proxy?.protocol === 'socks5' ? undefined : options?.proxy;
+
+  if (proxyOpts && !IS_RUNTIME_PRODUCTION) {
+    console.debug(
+      `[debug] use proxy ${formatAxiosProxyConfig(
+        proxyOpts
+      )} on parsing favicon`
+    );
+  }
+
   async function textFetcher(url: string) {
     // leave here for debug
     // console.debug('[debug] textFetcher:: websiteBaseURL, url', websiteBaseURL, url);
@@ -41,7 +56,7 @@ export async function parseWebsiteFavicon(
     return fetchClient
       .get(targetURL, {
         timeout: tmout,
-        proxy: options?.proxy,
+        proxy: proxyOpts,
       })
       .then((res) => res.data);
   }
@@ -55,7 +70,7 @@ export async function parseWebsiteFavicon(
     return fetchClient
       .get(targetURL, {
         timeout: tmout,
-        proxy: options?.proxy,
+        proxy: proxyOpts,
         responseType: 'arraybuffer',
       })
       .then((res) => {
