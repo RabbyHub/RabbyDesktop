@@ -63,15 +63,14 @@ export async function getContextMenuPopupWindow() {
   return firstValueFrom(fromMainSubject('contextMenuPopupWindowReady'));
 }
 
-export const RABBYX_WINDOWID_S = new Set<number>();
-export async function toggleMaskViaOpenedRabbyxNotificationWindow() {
+export async function __internalToggleRabbyxGasketMask(nextShow: boolean) {
   const { window: mainWin } = await onMainWindowReady();
   const { rabbyNotificationGasket } = await getRabbyExtViews();
 
   if (!mainWin.isDestroyed()) {
     const [width, height] = mainWin.getSize();
 
-    if (RABBYX_WINDOWID_S.size) {
+    if (nextShow) {
       mainWin.addBrowserView(rabbyNotificationGasket);
       mainWin.setTopBrowserView(rabbyNotificationGasket);
       mainWin.setResizable(false);
@@ -92,6 +91,11 @@ export async function toggleMaskViaOpenedRabbyxNotificationWindow() {
       mainWin.removeBrowserView(rabbyNotificationGasket);
     }
   }
+}
+
+export const RABBYX_WINDOWID_S = new Set<number>();
+export async function toggleMaskViaOpenedRabbyxNotificationWindow() {
+  __internalToggleRabbyxGasketMask(RABBYX_WINDOWID_S.size > 0);
 }
 
 const INIT_ACTIVE_TAB_RECT: IMainWindowActiveTabRect = {

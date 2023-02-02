@@ -238,20 +238,31 @@ function buildDebugKitsMenu(opts: ChromeContextMenuOptions) {
     },
   });
   appendMenu(debugKitsMenu, {
-    label: `Inspect DappSafeView's Content`,
-    click: () => {
-      emitIpcMainEvent('__internal_main:dev', {
-        type: 'dapp-safe-view:inspect',
-        viewType: 'safe',
-      });
-    },
-  });
-  appendMenu(debugKitsMenu, {
     label: `Inspect DappSafeView's Wrapper`,
     click: () => {
       emitIpcMainEvent('__internal_main:dev', {
         type: 'dapp-safe-view:inspect',
         viewType: 'base',
+      });
+    },
+  });
+
+  appendMenuSeparator(debugKitsMenu);
+  appendMenu(debugKitsMenu, {
+    label: `Open Rabby Sign's Gasket`,
+    click: () => {
+      emitIpcMainEvent('__internal_main:dev', {
+        type: 'rabbyx-sign-gasket:toggle-show',
+        nextShow: true,
+      });
+    },
+  });
+  appendMenu(debugKitsMenu, {
+    label: `Close Rabby Sign's Gasket`,
+    click: () => {
+      emitIpcMainEvent('__internal_main:dev', {
+        type: 'rabbyx-sign-gasket:toggle-show',
+        nextShow: false,
       });
     },
   });

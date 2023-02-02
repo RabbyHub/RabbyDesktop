@@ -169,6 +169,13 @@ export async function createRabbyxNotificationWindow({
   return win.window as BrowserWindow;
 }
 
+onIpcMainEvent('__internal_rpc:rabbyx:close-signwin', async () => {
+  RABBYX_WINDOWID_S.forEach((wid) => {
+    const win = BrowserWindow.fromId(wid);
+    if (win) win.close();
+  });
+});
+
 onIpcMainEvent(
   '__internal_rpc:webui-ext:navinfo',
   async (event, reqid, tabId) => {

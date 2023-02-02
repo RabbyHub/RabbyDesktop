@@ -283,6 +283,11 @@ type ChannelMessagePayload = {
     ];
   };
 
+  '__internal_rpc:rabbyx:close-signwin': {
+    send: [];
+    response: [];
+  };
+
   [`rabbyx-rpc-respond`]: {
     send: [string | IRabbyxRpcResponse];
     response: [];

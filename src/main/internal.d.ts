@@ -108,6 +108,10 @@ type MainInternalsMessagePayload = {
       | {
           type: 'loading-view:inspect';
         }
+      | {
+          type: 'rabbyx-sign-gasket:toggle-show';
+          nextShow: boolean;
+        }
     ];
     response: [];
   };
