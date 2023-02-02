@@ -41,22 +41,10 @@ export function destroyBrowserWebview(view?: BrowserView | null) {
 
 const IS_DARWIN = process.platform === 'darwin';
 
-export function createPopupWindow(
-  opts?: Electron.BrowserWindowConstructorOptions
-) {
-  const window = new BrowserWindow({
-    hasShadow: false,
-    ...opts,
-    show: false,
-    frame: false,
-    parent: opts?.parent,
-    modal: false,
-    movable: false,
-    maximizable: false,
-    minimizable: false,
-    resizable: false,
-    fullscreenable: false,
-    skipTaskbar: true,
+function getPopupWinDefaultOpts<
+  T extends Electron.BrowserWindowConstructorOptions
+>(opts?: T) {
+  return {
     titleBarStyle: 'hiddenInset',
     ...(IS_DARWIN
       ? {
@@ -85,6 +73,46 @@ export function createPopupWindow(
       autoplayPolicy: 'user-gesture-required',
       contextIsolation: true,
     },
+  } as const;
+}
+
+export function createPopupModalWindow(
+  opts: Omit<
+    Electron.BrowserWindowConstructorOptions,
+    | 'hasShadow'
+    | 'modal'
+    | 'frame'
+    | 'closable'
+    | 'movable'
+    | 'resizable'
+    | 'minimizable'
+    | 'maximizable'
+    | 'fullscreenable'
+    | 'alwaysOnTop'
+    | 'show'
+    | 'opacity'
+    | 'skipTaskbar'
+    | 'titleBarStyle'
+    | 'trafficLightPosition'
+    | 'backgroundColor'
+  > & {
+    parent: Exclude<Electron.BrowserWindowConstructorOptions['parent'], void>;
+  }
+) {
+  const window = new BrowserWindow({
+    ...opts,
+    hasShadow: false,
+    modal: true,
+    frame: false,
+    movable: false,
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    alwaysOnTop: true,
+    show: false,
+    skipTaskbar: true,
+    ...getPopupWinDefaultOpts(opts),
   });
 
   if (isEnableContentProtected()) {
@@ -94,7 +122,31 @@ export function createPopupWindow(
   return window;
 }
 
-const isDarwin = process.platform === 'darwin';
+export function createPopupWindow(
+  opts?: Electron.BrowserWindowConstructorOptions
+) {
+  const window = new BrowserWindow({
+    hasShadow: false,
+    ...opts,
+    show: false,
+    frame: false,
+    modal: false,
+    movable: false,
+    maximizable: false,
+    minimizable: false,
+    resizable: false,
+    fullscreenable: false,
+    skipTaskbar: true,
+    ...getPopupWinDefaultOpts(opts),
+  });
+
+  if (isEnableContentProtected()) {
+    window.setContentProtection(true);
+  }
+
+  return window;
+}
+
 /**
  * @description on windows, we assume the popupWin has been shown by calling `window.show()` or set `show: true` on constucting,
  * you need to make sure the window is visible before calling this.
@@ -107,7 +159,7 @@ export function showPopupWindow(
     isInActiveOnDarwin: boolean;
   }
 ) {
-  if (isDarwin) {
+  if (IS_DARWIN) {
     if (opts?.isInActiveOnDarwin) {
       popupWin.showInactive();
     } else {
@@ -122,7 +174,7 @@ export function showPopupWindow(
 }
 
 export function hidePopupWindow(popupWin: BrowserWindow) {
-  if (isDarwin) {
+  if (IS_DARWIN) {
     popupWin.hide();
   } else {
     popupWin.setOpacity(0);

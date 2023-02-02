@@ -1,5 +1,6 @@
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { fromMainSubject, valueToMainSubject } from '../streams/_init';
+import { emitIpcMainEvent } from './ipcMainEvents';
 
 export async function getElectronChromeExtensions() {
   return firstValueFrom(fromMainSubject('electronChromeExtensionsReady'));
@@ -62,15 +63,14 @@ export async function getContextMenuPopupWindow() {
   return firstValueFrom(fromMainSubject('contextMenuPopupWindowReady'));
 }
 
-export const RABBYX_WINDOWID_S = new Set<number>();
-export async function toggleMaskViaOpenedRabbyxNotificationWindow() {
+export async function __internalToggleRabbyxGasketMask(nextShow: boolean) {
   const { window: mainWin } = await onMainWindowReady();
   const { rabbyNotificationGasket } = await getRabbyExtViews();
 
   if (!mainWin.isDestroyed()) {
     const [width, height] = mainWin.getSize();
 
-    if (RABBYX_WINDOWID_S.size) {
+    if (nextShow) {
       mainWin.addBrowserView(rabbyNotificationGasket);
       mainWin.setTopBrowserView(rabbyNotificationGasket);
       mainWin.setResizable(false);
@@ -91,6 +91,11 @@ export async function toggleMaskViaOpenedRabbyxNotificationWindow() {
       mainWin.removeBrowserView(rabbyNotificationGasket);
     }
   }
+}
+
+export const RABBYX_WINDOWID_S = new Set<number>();
+export async function toggleMaskViaOpenedRabbyxNotificationWindow() {
+  __internalToggleRabbyxGasketMask(RABBYX_WINDOWID_S.size > 0);
 }
 
 const INIT_ACTIVE_TAB_RECT: IMainWindowActiveTabRect = {
@@ -117,8 +122,8 @@ export async function getAllMainUIWindows() {
   ]);
 
   const popupOnly = {
+    'sidebar-dapp': sidebarContext,
     'switch-chain': switchChain,
-    'sidebar-context': sidebarContext,
   } as const;
 
   const windows = {
@@ -176,4 +181,25 @@ export async function getAllMainUIViews() {
     hash,
     list: Object.values(hash),
   };
+}
+
+export function startSelectDevices(selectId: string) {
+  emitIpcMainEvent('__internal_main:popupview-on-mainwin:toggle-show', {
+    nextShow: true,
+    type: 'select-devices',
+    pageInfo: {
+      type: 'select-devices',
+      state: {
+        selectId,
+        status: 'pending',
+      },
+    },
+  });
+}
+
+export function stopSelectDevices() {
+  emitIpcMainEvent('__internal_main:popupview-on-mainwin:toggle-show', {
+    nextShow: false,
+    type: 'select-devices',
+  });
 }

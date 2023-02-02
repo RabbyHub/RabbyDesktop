@@ -1,19 +1,14 @@
-import { app, BrowserWindow, dialog, shell, Tray } from 'electron';
+import { app, BrowserWindow, dialog, shell } from 'electron';
 
 import {
   APP_NAME,
   IS_RUNTIME_PRODUCTION,
   RABBY_SPALSH_URL,
 } from '../../isomorphic/constants';
-import {
-  formatProxyServerURL,
-  isRabbyShellURL,
-  isUrlFromDapp,
-} from '../../isomorphic/url';
+import { isRabbyShellURL, isUrlFromDapp } from '../../isomorphic/url';
 import buildChromeContextMenu from '../browser/context-menu';
 import { setupMenu } from '../browser/menu';
 import {
-  getAppProxyConf,
   getOrInitMainWinPosition,
   storeMainWinPosition,
 } from '../store/desktopApp';

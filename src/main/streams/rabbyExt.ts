@@ -11,12 +11,13 @@ import { cLog } from '../utils/log';
 import {
   handleIpcMainInvoke,
   onIpcMainEvent,
+  onIpcMainInternalEvent,
   sendToWebContents,
 } from '../utils/ipcMainEvents';
 import {
   getRabbyExtId,
-  getSessionInsts,
   onMainWindowReady,
+  __internalToggleRabbyxGasketMask,
 } from '../utils/stream-helpers';
 import { rabbyxQuery } from './rabbyIpcQuery/_base';
 import { createPopupView } from '../utils/browser';
@@ -146,3 +147,14 @@ onIpcMainEvent(
     });
   }
 );
+
+onIpcMainInternalEvent('__internal_main:dev', async (payload) => {
+  switch (payload.type) {
+    case 'rabbyx-sign-gasket:toggle-show': {
+      __internalToggleRabbyxGasketMask(payload.nextShow);
+      break;
+    }
+    default:
+      break;
+  }
+});

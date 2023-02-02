@@ -1,0 +1,44 @@
+.maskInGasket {
+  left: 0;
+}
+
+:global {
+  html.__rabbyx-shell-page.os-darwin {
+    :local {
+      .maskInGasket {
+        -webkit-app-region: drag;
+        z-index: 1;
+        width: calc(100vw - 400px);
+      }
+    }
+  }
+}
+
+.maskInGasket {
+  position: relative;
+  .closeBtn {
+    position: absolute;
+    bottom: 12px;
+    right: calc(var(--mainwin-rabbyx-popup-w));
+    min-width: 80px;
+    height: 40px;
+    background-size: 16px 16px;
+    cursor: pointer;
+    z-index: 1;
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .closeIcon {
+    width: 16px;
+    height: 16px;
+    @apply mr-6px;
+    // color: rgba(0, 0, 0, 0.7);
+    // background: #eee;
+    // box-shadow: 1px 2px 7px rgb(0 0 0 / 70%);
+  }
+}
