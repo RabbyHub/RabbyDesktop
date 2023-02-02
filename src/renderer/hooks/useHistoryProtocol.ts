@@ -179,33 +179,41 @@ export default (address: string | undefined) => {
         chain: string;
       }
     > = {};
-    const tokenHistoryPriceQueue = new PQueue({ concurrency: 20 });
-    const grouped = groupBy(noHistoryPriceTokenList, (item) => {
-      return item.split('-')[0];
-    });
-    Object.keys(grouped).forEach((i) => {
-      const l = grouped[i];
-      tokenHistoryPriceQueue.add(async () => {
-        const priceMap = await walletOpenapi.getTokenHistoryDict({
-          chainId: i,
-          ids: l.map((s) => s.split('-')[1]).join(','),
-          timeAt: YESTERDAY,
-        });
-        return {
-          chain: i,
-          price: priceMap,
-        };
+    if (noHistoryPriceTokenList.length > 0) {
+      const tokenHistoryPriceQueue = new PQueue({ concurrency: 20 });
+      const grouped = groupBy(noHistoryPriceTokenList, (item) => {
+        return item.split('-')[0];
       });
-    });
-    tokenHistoryPriceQueue.on(
-      'completed',
-      ({ price, chain }: { price: Record<string, number>; chain: string }) => {
-        Object.keys(price).forEach((id) => {
-          tmap[`${chain}-${id}`] = { price: price[id], chain, id };
+      Object.keys(grouped).forEach((i) => {
+        const l = grouped[i];
+        tokenHistoryPriceQueue.add(async () => {
+          const priceMap = await walletOpenapi.getTokenHistoryDict({
+            chainId: i,
+            ids: l.map((s) => s.split('-')[1]).join(','),
+            timeAt: YESTERDAY,
+          });
+          return {
+            chain: i,
+            price: priceMap,
+          };
         });
-      }
-    );
-    await waitQueueFinished(tokenHistoryPriceQueue);
+      });
+      tokenHistoryPriceQueue.on(
+        'completed',
+        ({
+          price,
+          chain,
+        }: {
+          price: Record<string, number>;
+          chain: string;
+        }) => {
+          Object.keys(price).forEach((id) => {
+            tmap[`${chain}-${id}`] = { price: price[id], chain, id };
+          });
+        }
+      );
+      await waitQueueFinished(tokenHistoryPriceQueue);
+    }
     if (addr === addressRef.current) {
       setTokenHistoryPriceMap(tmap);
       setIsLoadingHistory(false);
