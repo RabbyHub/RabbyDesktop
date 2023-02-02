@@ -10,17 +10,25 @@ import {
   sendToWebContents,
 } from '../utils/ipcMainEvents';
 import { valueToMainSubject } from './_init';
-import { createPopupView, hidePopupView } from '../utils/browser';
+import {
+  createPopupModalWindow,
+  createPopupView,
+  hidePopupView,
+  showPopupWindow,
+} from '../utils/browser';
 import {
   getAllMainUIViews,
   getWebuiURLBase,
   onMainWindowReady,
+  stopSelectDevices,
 } from '../utils/stream-helpers';
 
 const viewsState: Record<
   PopupViewOnMainwinInfo['type'],
   {
     visible: boolean;
+    readonly s_isModal?: boolean;
+    modalWindow?: BrowserWindow;
   }
 > = {
   'add-address': {
@@ -37,10 +45,13 @@ const viewsState: Record<
   },
   'select-devices': {
     visible: false,
+    get s_isModal() {
+      return true;
+    },
   },
 };
 
-async function hidePopupViewOnMainWindow(
+async function hidePopupViewOnWindow(
   targetView: BrowserView | null,
   type: PopupViewOnMainwinInfo['type']
 ) {
@@ -55,22 +66,24 @@ async function hidePopupViewOnMainWindow(
     }
   );
 
+  if (viewsState[type].modalWindow) {
+    viewsState[type].modalWindow!.hide();
+    viewsState[type].modalWindow!.removeBrowserView(targetView);
+    viewsState[type].modalWindow!.destroy();
+    viewsState[type].modalWindow = undefined;
+  }
+
   hidePopupView(targetView);
   viewsState[type].visible = false;
 }
 
-function updateSubviewPos(
-  parentWindow: BrowserWindow,
-  view: BrowserView,
-  viewRect?: Electron.Point & { width?: number; height?: number }
-) {
+function updateSubviewPos(parentWindow: BrowserWindow, view: BrowserView) {
   const [width, height] = parentWindow.getSize();
   const popupRect = {
     x: 0,
     y: 0,
     width,
     height,
-    ...viewRect,
   };
 
   // Convert to ints
@@ -78,7 +91,50 @@ function updateSubviewPos(
   const y = Math.floor(popupRect.y);
 
   view.setBounds({ ...popupRect, x, y });
-  parentWindow.setTopBrowserView(view);
+  if (BrowserWindow.fromBrowserView(view) === parentWindow) {
+    parentWindow.setTopBrowserView(view);
+  } else if (!IS_RUNTIME_PRODUCTION) {
+    console.error('updateSubviewPos: view is not attached to parentWindow!');
+  }
+}
+
+async function showModalPopup(
+  viewType: PopupViewOnMainwinInfo['type'],
+  targetView: BrowserView
+) {
+  const mainWindow = (await onMainWindowReady()).window;
+
+  const modalWindow = createPopupModalWindow({
+    parent: mainWindow,
+  });
+  const mainBounds = mainWindow.getBounds();
+  const topOffset =
+    process.platform === 'win32'
+      ? /* NativeAppSizes.windowTitlebarHeight */ 0
+      : 0;
+  modalWindow.setBounds({
+    width: mainBounds.width,
+    height: mainBounds.height - topOffset,
+    x: mainBounds.x,
+    y: mainBounds.y + topOffset,
+  });
+
+  viewsState[viewType].modalWindow = modalWindow;
+  modalWindow.addBrowserView(targetView);
+
+  updateSubviewPos(modalWindow, targetView);
+  targetView.webContents.focus();
+
+  showPopupWindow(modalWindow);
+  modalWindow.focus();
+
+  if (viewType === 'select-devices') {
+    modalWindow.on('blur', () => {
+      stopSelectDevices();
+    });
+  }
+
+  return modalWindow;
 }
 
 const addAddressReady = onMainWindowReady().then(async (mainWin) => {
@@ -205,22 +261,8 @@ const quickSwapReady = onMainWindowReady().then(async (mainWin) => {
   return quickSwapPopup;
 });
 
-const selectDevicesReady = onMainWindowReady().then(async (mainWin) => {
-  const mainWindow = mainWin.window;
-
+const selectDevicesReady = onMainWindowReady().then(async () => {
   const selectDevicesPopup = createPopupView({});
-
-  mainWindow.addBrowserView(selectDevicesPopup);
-
-  const onTargetWinUpdate = () => {
-    if (viewsState['select-devices'].visible)
-      updateSubviewPos(mainWindow, selectDevicesPopup);
-  };
-  mainWindow.on('show', onTargetWinUpdate);
-  mainWindow.on('move', onTargetWinUpdate);
-  mainWindow.on('resized', onTargetWinUpdate);
-  mainWindow.on('unmaximize', onTargetWinUpdate);
-  mainWindow.on('restore', onTargetWinUpdate);
 
   await selectDevicesPopup.webContents.loadURL(
     `${RABBY_POPUP_GHOST_VIEW_URL}?view=select-devices#/`
@@ -263,8 +305,12 @@ const { handler } = onIpcMainEvent(
 
     if (payload.nextShow) {
       viewsState[payload.type].visible = true;
-      updateSubviewPos(mainWindow, targetView);
-      targetView.webContents.focus();
+      if (!viewsState[payload.type].s_isModal) {
+        updateSubviewPos(mainWindow, targetView);
+        targetView.webContents.focus();
+      } else {
+        showModalPopup(payload.type, targetView);
+      }
 
       setTimeout(() => {
         sendToWebContents(
@@ -286,7 +332,7 @@ const { handler } = onIpcMainEvent(
         targetView.webContents.openDevTools({ mode: 'detach' });
       }
     } else {
-      hidePopupViewOnMainWindow(targetView, payload.type);
+      hidePopupViewOnWindow(targetView, payload.type);
     }
   }
 );

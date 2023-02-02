@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { hideMainwinPopup } from '../ipcRequest/mainwin-popup';
 import { hideMainwinPopupview } from '../ipcRequest/mainwin-popupview';
 
 export function usePopupWinInfo<T extends IContextMenuPageInfo['type']>(
-  type: T
+  type: T,
+  opts?: {
+    enableTopViewGuard?: boolean;
+  }
 ) {
   const [localVisible, setLocalVisible] = useState(false);
 
@@ -37,9 +41,34 @@ export function usePopupWinInfo<T extends IContextMenuPageInfo['type']>(
     );
   }, [type]);
 
+  const hideWindow = useCallback(() => {
+    setLocalVisible(false);
+    hideMainwinPopup(type);
+  }, [type]);
+
+  const hideWindowOnly = useCallback(() => {
+    hideMainwinPopup(type);
+  }, [type]);
+
+  const localVisibleRef = useRef(localVisible);
+  useEffect(() => {
+    const prev = localVisibleRef.current;
+    if (opts?.enableTopViewGuard && prev && !localVisible) {
+      hideWindowOnly();
+    }
+
+    localVisibleRef.current = localVisible;
+
+    return () => {
+      localVisibleRef.current = false;
+    };
+  }, [opts?.enableTopViewGuard, localVisible, hideWindowOnly]);
+
   return {
     localVisible,
     setLocalVisible,
+    hideWindow,
+    hideWindowOnly,
     visible: info.visible,
     pageInfo: info.pageInfo,
   };

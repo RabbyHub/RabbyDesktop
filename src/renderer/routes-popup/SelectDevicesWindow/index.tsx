@@ -110,6 +110,7 @@ function SelectDeviceModal() {
         className={styles.SelectDevicesModal}
         open={localVisible}
         centered
+        mask={false}
         width={1000}
         title="Connect Hardware Wallet"
         onCancel={() => {

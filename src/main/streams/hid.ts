@@ -6,12 +6,13 @@ import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { isInternalProtocol } from '@/isomorphic/url';
 import { randString } from '@/isomorphic/string';
 import { catchError, filter as filterOp, of, Subject, timeout } from 'rxjs';
+import { handleIpcMainInvoke, sendToWebContents } from '../utils/ipcMainEvents';
 import {
-  emitIpcMainEvent,
-  handleIpcMainInvoke,
-  sendToWebContents,
-} from '../utils/ipcMainEvents';
-import { getSessionInsts, getAllMainUIViews } from '../utils/stream-helpers';
+  getSessionInsts,
+  getAllMainUIViews,
+  stopSelectDevices,
+  startSelectDevices,
+} from '../utils/stream-helpers';
 import { filterNodeHIDDevices } from '../utils/devices';
 
 const webusb = new usb.WebUSB({
@@ -89,27 +90,6 @@ handleIpcMainInvoke('confirm-selected-device', (_, payload) => {
   };
 });
 
-function startSelect(selectId: string) {
-  emitIpcMainEvent('__internal_main:popupview-on-mainwin:toggle-show', {
-    nextShow: true,
-    type: 'select-devices',
-    pageInfo: {
-      type: 'select-devices',
-      state: {
-        selectId,
-        status: 'pending',
-      },
-    },
-  });
-}
-
-function stopSelect() {
-  emitIpcMainEvent('__internal_main:popupview-on-mainwin:toggle-show', {
-    nextShow: false,
-    type: 'select-devices',
-  });
-}
-
 const SELECT_DEVICE_TIMEOUT = 180 * 1e3;
 getSessionInsts().then(({ mainSession }) => {
   mainSession.on(
@@ -139,7 +119,7 @@ getSessionInsts().then(({ mainSession }) => {
           // leave here for debug
           // console.debug('[debug] select-hid-device:: selectResult', selectResult);
           sub.unsubscribe();
-          stopSelect();
+          stopSelectDevices();
 
           switch (selectResult.status) {
             default:
@@ -164,10 +144,10 @@ getSessionInsts().then(({ mainSession }) => {
           }
         });
 
-      startSelect(selectId);
+      startSelectDevices(selectId);
 
       mainSession.on('hid-device-added', (_, eventDetails) => {
-        console.debug('hid-device-added FIRED WITH', eventDetails);
+        console.debug('hid-device-added FIRED WITH', eventDetails.device);
         // Optionally update details.deviceList
         const eids = new Set(details.deviceList.map((d) => d.deviceId));
         let updated = false;
@@ -187,7 +167,7 @@ getSessionInsts().then(({ mainSession }) => {
       });
 
       mainSession.on('hid-device-removed', (_, eventDetails) => {
-        console.debug('hid-device-removed FIRED WITH', eventDetails);
+        console.debug('hid-device-removed FIRED WITH', eventDetails.device);
         const devices = Array.isArray(eventDetails?.device)
           ? eventDetails.device
           : [];
