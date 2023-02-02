@@ -43,7 +43,7 @@ export const useVerifyToken = <T extends ValidateTokenParam>(
     }
 
     return [true, true, true];
-  }, [payToken, receiveToken, chain]);
+  }, [payToken?.id, receiveToken?.id, chain]);
   return data;
 };
 
