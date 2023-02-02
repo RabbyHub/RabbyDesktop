@@ -326,6 +326,11 @@ handleIpcMainInvoke('dapps-delete', (_, dappToDel: IDapp) => {
     };
   }
 
+  emitIpcMainEvent(
+    '__internal_main:app:close-tab-on-del-dapp',
+    dappToDel.origin
+  );
+
   delete dappsMap[dappToDel.origin];
   const protocolDappsBinding = getProtocolDappsBindings();
   Object.entries(protocolDappsBinding).forEach((dapps) => {

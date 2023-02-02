@@ -1,7 +1,7 @@
 import { BrowserWindow } from 'electron';
 import { bufferTime, fromEvent, map } from 'rxjs';
 
-import { isUrlFromDapp } from '@/isomorphic/url';
+import { isUrlFromDapp, parseDomainMeta } from '@/isomorphic/url';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 import {
   onIpcMainEvent,
@@ -27,6 +27,8 @@ import {
 import { getOrPutCheckResult } from '../utils/dapps';
 import { createDappTab } from './webContents';
 import { isEnableContentProtected } from '../store/desktopApp';
+import { getAllDapps } from '../store/dapps';
+import { cLog } from '../utils/log';
 
 const windows: TabbedBrowserWindow[] = [];
 
@@ -331,5 +333,31 @@ onIpcMainInternalEvent(
       // trigger re draw
       mainWin.tabs.selected.show();
     }
+  }
+);
+
+onIpcMainInternalEvent(
+  '__internal_main:app:close-tab-on-del-dapp',
+  async (dappOrigin) => {
+    const mainWin = await onMainWindowReady();
+
+    const allDapps = getAllDapps();
+    const domainMeta = parseDomainMeta(dappOrigin, allDapps, {});
+    const isMainDomainAppWithoutSubDomainsDapp =
+      domainMeta?.is2ndaryDomain && !domainMeta.subDomains.length;
+
+    const tabs = !isMainDomainAppWithoutSubDomainsDapp
+      ? [mainWin.tabs.findByOrigin(dappOrigin)]
+      : mainWin.tabs.filterTab((tabURL) => {
+          const tabDomainMeta = parseDomainMeta(tabURL, allDapps, {});
+          return tabDomainMeta.secondaryDomain === domainMeta.secondaryDomain;
+        });
+
+    tabs.forEach((tab) => {
+      if (tab) {
+        tab.destroy();
+        cLog(`close-tab-on-del-dapp: destroyed tab ${tab.id}`);
+      }
+    });
   }
 );
