@@ -88,7 +88,7 @@ function InnerSameOrigin({
               className={styles.avatar}
               size={40}
             >
-              {targetInfo.domain[0].toLocaleUpperCase()}
+              {targetInfo.secondaryDomain[0].toLocaleUpperCase()}
             </Avatar>
           )}
           <span className={styles.link}>{targetInfo.origin}</span>
@@ -153,7 +153,7 @@ export default function DappReadonlyModal() {
 
     return {
       targetInfo: target,
-      toSameDomain: target.domain === source.domain,
+      toSameDomain: target.secondaryDomain === source.secondaryDomain,
       isLoadingFavicon: nonSameOrigin.status === 'start-loading',
       // isLoadingFavicon: true,
     };

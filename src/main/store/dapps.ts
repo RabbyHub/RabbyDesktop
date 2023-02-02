@@ -16,7 +16,11 @@ import {
 } from '../utils/ipcMainEvents';
 import { APP_NAME, PERSIS_STORE_PREFIX } from '../../isomorphic/constants';
 import { safeParse, shortStringify } from '../../isomorphic/json';
-import { canoicalizeDappUrl } from '../../isomorphic/url';
+import {
+  canoicalizeDappUrl,
+  isUrlFromDapp,
+  parseDomainMeta,
+} from '../../isomorphic/url';
 import { detectDapp } from '../utils/dapps';
 import { getBindLog } from '../utils/log';
 import { getAppProxyConf } from './desktopApp';
@@ -169,8 +173,9 @@ export function findDappByOrigin(url: string, dapps = getAllDapps()) {
   return dapps.find((item) => item.origin === dappOrigin) || null;
 }
 
-export function parseDappUrl(url: string, dapps = getAllDapps()) {
-  const { isDapp, origin, domain } = canoicalizeDappUrl(url);
+function parseDappUrl(url: string, dapps = getAllDapps()) {
+  const { isDapp, origin, secondaryDomain, is2ndaryDomain, isSubDomain } =
+    canoicalizeDappUrl(url);
 
   const foundDapp = !isDapp
     ? null
@@ -178,14 +183,45 @@ export function parseDappUrl(url: string, dapps = getAllDapps()) {
         const formatted = formatDapp(item);
         return formatted?.origin && formatted.origin === origin;
       });
-  const existedDapp = !isDapp ? false : !!foundDapp;
 
   return {
     isDapp,
     origin,
-    domain,
-    existedDapp,
+    secondaryDomain,
+    is2ndaryDomain,
+    isSubDomain,
     foundDapp,
+    existedDapp: !isDapp ? false : !!foundDapp,
+  };
+}
+
+export function parseDappRedirect(
+  currentURL: string,
+  targetURL: string,
+  dapps = getAllDapps()
+) {
+  const isFromDapp = isUrlFromDapp(currentURL);
+
+  const currentInfo = parseDappUrl(currentURL, dapps);
+  const targetInfo = parseDappUrl(targetURL, dapps);
+  const isToSameOrigin = currentInfo.origin === targetInfo.origin;
+
+  const shouldKeepTab =
+    currentInfo.secondaryDomain === targetInfo.secondaryDomain &&
+    !parseDomainMeta(currentURL, dapps, {}).subDomains.length;
+  const maybeRedirectInSPA = isFromDapp && isToSameOrigin;
+
+  const isToExtension = targetURL.startsWith('chrome-extension://');
+
+  return {
+    currentInfo,
+    targetInfo,
+
+    isFromDapp,
+    isToSameOrigin,
+    shouldKeepTab,
+    maybeRedirectInSPA,
+    isToExtension,
   };
 }
 

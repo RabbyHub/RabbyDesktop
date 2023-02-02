@@ -2,7 +2,6 @@
 /// <reference path="../../renderer/preload.d.ts" />
 
 import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
-// import { useDapps } from 'renderer/hooks/useDappsMngr';
 
 import { sortDappsBasedPinned } from '@/isomorphic/dapp';
 import { atom, useAtom } from 'jotai';
@@ -115,28 +114,26 @@ export function useDapps() {
     toggleDappPinned([dappOrigin], false);
   }, []);
 
-  /* eslint-disable @typescript-eslint/no-shadow */
-  const { mergeDapps, pinnedDapps, unpinnedDapps } = useMemo(() => {
+  const staticsSummary = useMemo(() => {
     const {
+      secondaryDomainMeta,
       allDapps: mergeDapps,
       pinnedDapps,
       unpinnedDapps,
     } = sortDappsBasedPinned(originDapps || [], pinnedList, unpinnedList);
 
     return {
-      mergeDapps,
+      secondaryDomainMeta,
+      dapps: mergeDapps,
       pinnedDapps,
       unpinnedDapps,
     };
   }, [originDapps, pinnedList, unpinnedList]);
-  /* eslint-enable @typescript-eslint/no-shadow */
 
   return {
-    dapps: mergeDapps,
+    ...staticsSummary,
     pinnedList,
     unpinnedList,
-    pinnedDapps,
-    unpinnedDapps,
     detectDapps,
     renameDapp,
     removeDapp,
@@ -164,7 +161,7 @@ export function useDapp(origin?: string) {
 
 const createTabedDapps = (
   list: IMergedDapp[],
-  tabMap: ReturnType<typeof useWindowTabs>['tabMap']
+  tabMap: ReturnType<typeof useWindowTabs>['tabMapByOrigin']
 ) => {
   return list.map((item) => {
     return {
@@ -176,7 +173,7 @@ const createTabedDapps = (
 
 export const useTabedDapps = () => {
   const { dapps, pinnedDapps, unpinnedDapps, ...rest } = useDapps();
-  const { tabMap, activeTab } = useWindowTabs();
+  const { tabMapByOrigin, activeTab } = useWindowTabs();
   const navigateToDapp = useNavigateToDappRoute();
 
   const onSelectDapp = useCallback((tab: chrome.tabs.Tab) => {
@@ -226,8 +223,8 @@ export const useTabedDapps = () => {
   return {
     ...rest,
     openDapp,
-    dapps: createTabedDapps(dapps, tabMap),
-    pinnedDapps: createTabedDapps(pinnedDapps, tabMap),
-    unpinnedDapps: createTabedDapps(unpinnedDapps, tabMap),
+    dapps: createTabedDapps(dapps, tabMapByOrigin),
+    pinnedDapps: createTabedDapps(pinnedDapps, tabMapByOrigin),
+    unpinnedDapps: createTabedDapps(unpinnedDapps, tabMapByOrigin),
   };
 };

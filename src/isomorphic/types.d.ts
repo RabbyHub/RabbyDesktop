@@ -39,7 +39,21 @@ type IDapp = {
   faviconBase64?: string;
 };
 
-type IMergedDapp = IDapp & { isPinned: boolean };
+type IDappWithDomainMeta = IDapp & {
+  // only dapp with second domain has this property
+  secondDomainMeta?: I2ndDomainMeta;
+};
+
+type IMergedDapp = IDappWithDomainMeta & {
+  isPinned: boolean;
+};
+
+type I2ndDomainMeta = {
+  is2ndaryDomain: boolean;
+  secondaryDomain: string;
+  origin: string;
+  subDomains: string[];
+};
 
 type IDappWithTabInfo = IMergedDapp & {
   tab?: chrome.tabs.Tab;

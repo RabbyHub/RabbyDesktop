@@ -1,22 +1,48 @@
+import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useDapps } from '../hooks/useDappsMngr';
 import { toggleLoadingView } from '../ipcRequest/mainwin';
 import { navigateToDappRoute } from '../utils/react-router';
-import { useWindowTabs } from './useWindowTabs';
+import { ChromeTabWithOrigin, useWindowTabs } from './useWindowTabs';
 
 export type IDappWithTabInfo = IMergedDapp & {
   tab?: chrome.tabs.Tab;
 };
 
+function findTab(
+  dapp: IDappWithTabInfo,
+  {
+    tabMapByOrigin,
+    tabMapBySecondaryMap,
+  }: {
+    tabMapByOrigin: Map<string, ChromeTabWithOrigin>;
+    tabMapBySecondaryMap: Map<string, ChromeTabWithOrigin>;
+    alwaysKeepDapp?: boolean;
+  }
+) {
+  const urlMeta = canoicalizeDappUrl(dapp.origin);
+  const isMainDomainAppWithoutSubDomainsDapp =
+    dapp.secondDomainMeta?.is2ndaryDomain &&
+    !dapp.secondDomainMeta.subDomains.length;
+
+  const tab = isMainDomainAppWithoutSubDomainsDapp
+    ? tabMapBySecondaryMap.get(urlMeta.secondaryDomain) ||
+      tabMapByOrigin.get(dapp.origin)
+    : tabMapByOrigin.get(dapp.origin);
+
+  return tab;
+}
+
 export function useSidebarDapps() {
-  const { tabMap, activeTab } = useWindowTabs();
+  const { tabMapByOrigin, tabMapBySecondaryMap, activeTab } = useWindowTabs();
   const { dapps: allDapps, pinnedDapps, unpinnedDapps } = useDapps();
 
   const dappsInSidebar = useMemo(() => {
     const unpinnedOpenedDapps: IDappWithTabInfo[] = [];
     unpinnedDapps.forEach((dapp) => {
-      const tab = tabMap.get(dapp.origin);
+      const tab = findTab(dapp, { tabMapByOrigin, tabMapBySecondaryMap });
+
       if (tab) {
         unpinnedOpenedDapps.push({
           ...dapp,
@@ -27,14 +53,16 @@ export function useSidebarDapps() {
 
     return {
       pinnedDapps: pinnedDapps.map((dapp) => {
+        const tab = findTab(dapp, { tabMapByOrigin, tabMapBySecondaryMap });
+
         return {
           ...dapp,
-          tab: tabMap.get(dapp.origin),
+          tab,
         };
       }),
       unpinnedOpenedDapps,
     };
-  }, [pinnedDapps, unpinnedDapps, tabMap]);
+  }, [pinnedDapps, unpinnedDapps, tabMapByOrigin, tabMapBySecondaryMap]);
 
   const dappActions = {
     onSelectDapp: useCallback((tab: chrome.tabs.Tab) => {

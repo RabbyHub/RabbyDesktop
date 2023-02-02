@@ -1,6 +1,6 @@
-import { getBaseHref, isUrlFromDapp } from '@/isomorphic/url';
+import { getBaseHref } from '@/isomorphic/url';
 import TabbedBrowserWindow from '../browser/browsers';
-import { getAllDapps, parseDappUrl } from '../store/dapps';
+import { getAllDapps, parseDappRedirect } from '../store/dapps';
 import { switchToBrowserTab } from '../utils/browser';
 import { attachDappSafeview } from './dappSafeview';
 
@@ -49,24 +49,30 @@ export function setOpenHandlerForWebContents({
     if (!webContents) return { action: 'deny' };
 
     const currentUrl = webContents.getURL();
-    const isFromDapp = isUrlFromDapp(currentUrl);
     const dapps = getAllDapps();
 
     const targetURL = details.url;
-    const currentInfo = parseDappUrl(currentUrl, dapps);
-    const targetInfo = parseDappUrl(targetURL, dapps);
-    const toSameOrigin = currentInfo.origin === targetInfo.origin;
-    const maybeRedirectInSPA = isFromDapp && toSameOrigin;
 
-    const isToExt = targetURL.startsWith('chrome-extension://');
+    const {
+      targetInfo,
+      isFromDapp,
+      isToExtension,
+      isToSameOrigin,
+      shouldKeepTab,
+      maybeRedirectInSPA,
+    } = parseDappRedirect(currentUrl, targetURL, dapps);
 
-    if (isFromDapp && !toSameOrigin) {
-      attachDappSafeview(targetURL, {
-        sourceURL: currentUrl,
-        existedDapp: targetInfo.foundDapp,
-        _targetwin: parentTabbedWin.window,
-      });
-    } else if (!isToExt) {
+    if (isFromDapp && !isToSameOrigin) {
+      if (shouldKeepTab) {
+        webContents.loadURL(targetURL);
+      } else {
+        attachDappSafeview(targetURL, {
+          sourceURL: currentUrl,
+          existedDapp: targetInfo.foundDapp,
+          _targetwin: parentTabbedWin.window,
+        });
+      }
+    } else if (!isToExtension) {
       switch (details.disposition) {
         case 'foreground-tab':
         case 'background-tab':
@@ -120,16 +126,17 @@ export const setListeners = {
       if (!webContents) return;
       const evtWebContents = (evt as any).sender as Electron.WebContents;
       const currentUrl = evtWebContents.getURL();
-      const isFromDapp = isUrlFromDapp(currentUrl);
 
       const dapps = getAllDapps();
 
-      const currentInfo = parseDappUrl(currentUrl, dapps);
-      const targetInfo = parseDappUrl(targetURL, dapps);
-      const toSameOrigin = currentInfo.origin === targetInfo.origin;
+      const { targetInfo, isFromDapp, shouldKeepTab, isToSameOrigin } =
+        parseDappRedirect(currentUrl, targetURL, dapps);
 
       // this tabs is render as app's self UI, such as topbar.
-      if (isFromDapp && !toSameOrigin) {
+      if (isFromDapp && !isToSameOrigin) {
+        // allow redirect in main domain
+        if (shouldKeepTab) return true;
+
         evt.preventDefault();
         attachDappSafeview(targetURL, {
           existedDapp: targetInfo.foundDapp,
@@ -161,16 +168,19 @@ export const setListeners = {
         const evtWebContents = (evt as any).sender as Electron.WebContents;
         const currentUrl = evtWebContents.getURL();
 
-        // actually, it's always from dapp on isMainContentsForTabbedWindow=false
-        const isFromDapp = isUrlFromDapp(currentUrl);
-
         const dapps = getAllDapps();
 
-        const currentInfo = parseDappUrl(currentUrl, dapps);
-        const targetInfo = parseDappUrl(targetURL, dapps);
-        const toSameOrigin = currentInfo.origin === targetInfo.origin;
+        const {
+          targetInfo,
+          // actually, it's always from dapp on isMainContentsForTabbedWindow=false
+          isFromDapp,
+          shouldKeepTab,
+          isToSameOrigin,
+        } = parseDappRedirect(currentUrl, targetURL, dapps);
 
-        if (isFromDapp && !toSameOrigin) {
+        if (isFromDapp && !isToSameOrigin) {
+          if (shouldKeepTab) return true;
+
           evt.preventDefault();
           attachDappSafeview(targetURL, {
             sourceURL: currentUrl,
