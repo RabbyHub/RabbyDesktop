@@ -6,6 +6,7 @@ import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { isInternalProtocol } from '@/isomorphic/url';
 import { randString } from '@/isomorphic/string';
 import { catchError, filter as filterOp, of, Subject, timeout } from 'rxjs';
+import { arraify } from '@/isomorphic/array';
 import { handleIpcMainInvoke, sendToWebContents } from '../utils/ipcMainEvents';
 import {
   getSessionInsts,
@@ -151,9 +152,7 @@ getSessionInsts().then(({ mainSession }) => {
         // Optionally update details.deviceList
         const eids = new Set(details.deviceList.map((d) => d.deviceId));
         let updated = false;
-        const devices = Array.isArray(eventDetails?.device)
-          ? eventDetails.device
-          : [];
+        const devices = arraify(eventDetails?.device).filter(Boolean);
         devices.forEach((d) => {
           if (!eids.has(d.deviceId)) {
             details.deviceList.push(d);
@@ -168,13 +167,11 @@ getSessionInsts().then(({ mainSession }) => {
 
       mainSession.on('hid-device-removed', (_, eventDetails) => {
         console.debug('hid-device-removed FIRED WITH', eventDetails.device);
-        const devices = Array.isArray(eventDetails?.device)
-          ? eventDetails.device
-          : [];
+        const devices = arraify(eventDetails?.device).filter(Boolean);
         const rids = new Set(devices.map((d) => d.deviceId));
         // Optionally update details.deviceList
-        details.deviceList = details.deviceList.filter((d) =>
-          rids.has(d.deviceId)
+        details.deviceList = details.deviceList.filter(
+          (d) => !rids.has(d.deviceId)
         );
 
         pushHidSelectDevices(details.deviceList);
