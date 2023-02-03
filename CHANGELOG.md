@@ -1,7 +1,19 @@
 
-v0.4.1 / 2023-02-01
-==================
+v0.4.2 / 2023-02-03
+===================
 
+  * feat: 'system' as default proxy type.
+  * feat: update balance cache when portfolio balance changed (#102)
+  * feat: upgrade rabbyx core version.
+  * feat: gather sidebar's tabs by secondary domain. (#101)
+  * feat: make select devices as modal window. (#100)
+  * fix: history token not set when taskQueue is empty (#98)
+  * fix: refetch data after changing addr (#99)
+
+v0.4.1 / 2023-02-01
+===================
+
+  * Release v0.4.1
   * feat: support readonly tips modal. (#97)
   * feat: tx history time (#96)
   * feat: detect ledger (#95)
