@@ -17,7 +17,9 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
     if (!currentAccount?.type) return '';
     return (
       KEYRING_ICONS_WHITE[currentAccount.type] ||
-      WALLET_BRAND_CONTENT?.[currentAccount.brandName]?.image
+      WALLET_BRAND_CONTENT[
+        currentAccount.brandName as keyof typeof WALLET_BRAND_CONTENT
+      ]?.image
     );
   }, [currentAccount]);
   const displayAddr = useMemo(
