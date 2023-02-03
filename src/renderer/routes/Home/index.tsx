@@ -8,9 +8,10 @@ import { formatNumber } from '@/renderer/utils/number';
 import { formatChain, DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import { useTotalBalance } from '@/renderer/utils/balance';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
+import { useBalanceValue } from '@/renderer/hooks/useCurrentBalance';
 import useCurve from '@/renderer/hooks/useCurve';
 import useHistoryTokenList from '@/renderer/hooks/useHistoryTokenList';
-import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import useHistoryProtocol, {
   DisplayProtocol,
 } from '@/renderer/hooks/useHistoryProtocol';
@@ -187,6 +188,7 @@ const useExpandProtocolList = (protocols: DisplayProtocol[]) => {
 
 const Home = () => {
   const { currentAccount } = useCurrentAccount();
+  const [_, updateBalanceValue] = useBalanceValue();
 
   const [selectChainServerId, setSelectChainServerId] = useState<string | null>(
     null
@@ -281,6 +283,15 @@ const Home = () => {
   useEffect(() => {
     init();
   }, [currentAccount]);
+
+  useEffect(() => {
+    if (!currentAccount) return;
+    updateBalanceValue(totalBalance);
+    walletController.updateAddressBalanceCache(
+      currentAccount.address,
+      totalBalance
+    );
+  }, [totalBalance, currentAccount]);
 
   return (
     <HomeBody>

@@ -332,6 +332,10 @@ export type RabbyXMethod = {
     bridge?: string,
     stashId?: number
   ) => Account[];
+  'walletController.updateAddressBalanceCache': (
+    address: string,
+    balance: string
+  ) => void;
 
   'permissionService.addConnectedSite': (
     origin: string,
