@@ -71,7 +71,7 @@ export const desktopAppStore = new Store<{
     proxyType: {
       type: 'string',
       enum: ['none', 'system', 'custom'],
-      default: 'none',
+      default: 'system',
     },
     proxySettings: {
       type: 'object',
