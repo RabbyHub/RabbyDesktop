@@ -8,7 +8,11 @@
       .maskInGasket {
         -webkit-app-region: drag;
         z-index: 1;
-        width: calc(100vw - 400px);
+        width: calc(100vw - var(--mainwin-rabbyx-popup-w));
+
+        .closeBtn {
+          right: 0;
+        }
       }
     }
   }
