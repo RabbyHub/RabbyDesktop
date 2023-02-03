@@ -123,6 +123,10 @@ type MainInternalsMessagePayload = {
     send: [];
     response: [];
   };
+  '__internal_main:app:close-tab-on-del-dapp': {
+    send: [dappOrigin: string];
+    response: [];
+  };
 };
 
 type MainInternals = keyof MainInternalsMessagePayload;

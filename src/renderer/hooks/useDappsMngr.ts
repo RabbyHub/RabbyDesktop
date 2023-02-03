@@ -2,13 +2,11 @@
 /// <reference path="../../renderer/preload.d.ts" />
 
 import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
-// import { useDapps } from 'renderer/hooks/useDappsMngr';
 
 import { sortDappsBasedPinned } from '@/isomorphic/dapp';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useWindowTabs } from '../hooks-shell/useWindowTabs';
-import { makeSureDappAddedToConnectedSite } from '../ipcRequest/connected-site';
 import {
   deleteDapp,
   detectDapps,
@@ -24,16 +22,6 @@ import { toggleLoadingView } from '../ipcRequest/mainwin';
 const dappsAtomic = atom(null as null | IDapp[]);
 const pinnedListAtomic = atom([] as IDapp['origin'][]);
 const unpinnedListAtomic = atom([] as IDapp['origin'][]);
-
-// function mergePinnnedList(dapps: (IDapp | IMergedDapp)[], pinnedList: IDapp['origin'][]): IMergedDapp[] {
-//   const pinnedSet = new Set(pinnedList);
-//   return dapps.map(dapp => {
-//     return {
-//       ...dapp,
-//       isPinned: pinnedSet.has(dapp.origin),
-//     };
-//   });
-// }
 
 const protocolDappsBindingAtom = atom({} as IProtocolDappBindings);
 export function useProtocolDappsBinding() {
@@ -79,23 +67,22 @@ export function useDapps() {
   const [pinnedList, setPinnedList] = useAtom(pinnedListAtomic);
   const [unpinnedList, setUnpinnedList] = useAtom(unpinnedListAtomic);
 
-  // only fetch dapps once
+  // only fetch dapps once for every call to hooks
+  const calledRef = useRef(false);
   useEffect(() => {
-    if (originDapps) return;
+    if (calledRef.current) return;
+
     // eslint-disable-next-line promise/catch-or-return
     fetchDapps().then((newVal) => {
+      calledRef.current = true;
+
       setDapps(newVal.dapps);
       setPinnedList(newVal.pinnedList);
       setUnpinnedList(newVal.unpinnedList);
 
-      // guard logic
-      newVal.dapps.forEach((dapp) => {
-        makeSureDappAddedToConnectedSite(dapp);
-      });
-
       return newVal;
     });
-  }, [setPinnedList, originDapps, setDapps]);
+  }, [setPinnedList, setDapps]);
 
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
@@ -127,28 +114,26 @@ export function useDapps() {
     toggleDappPinned([dappOrigin], false);
   }, []);
 
-  /* eslint-disable @typescript-eslint/no-shadow */
-  const { mergeDapps, pinnedDapps, unpinnedDapps } = useMemo(() => {
+  const staticsSummary = useMemo(() => {
     const {
+      secondaryDomainMeta,
       allDapps: mergeDapps,
       pinnedDapps,
       unpinnedDapps,
     } = sortDappsBasedPinned(originDapps || [], pinnedList, unpinnedList);
 
     return {
-      mergeDapps,
+      secondaryDomainMeta,
+      dapps: mergeDapps,
       pinnedDapps,
       unpinnedDapps,
     };
   }, [originDapps, pinnedList, unpinnedList]);
-  /* eslint-enable @typescript-eslint/no-shadow */
 
   return {
-    dapps: mergeDapps,
+    ...staticsSummary,
     pinnedList,
     unpinnedList,
-    pinnedDapps,
-    unpinnedDapps,
     detectDapps,
     renameDapp,
     removeDapp,
@@ -158,7 +143,7 @@ export function useDapps() {
 }
 
 export function useDapp(origin?: string) {
-  const [dappInfo, setDappInfo] = useState<IMergedDapp | null>(null);
+  const [dappInfo, setDappInfo] = useState<Partial<IMergedDapp> | null>(null);
 
   useEffect(() => {
     if (!origin) {
@@ -176,7 +161,7 @@ export function useDapp(origin?: string) {
 
 const createTabedDapps = (
   list: IMergedDapp[],
-  tabMap: ReturnType<typeof useWindowTabs>['tabMap']
+  tabMap: ReturnType<typeof useWindowTabs>['tabMapByOrigin']
 ) => {
   return list.map((item) => {
     return {
@@ -188,7 +173,7 @@ const createTabedDapps = (
 
 export const useTabedDapps = () => {
   const { dapps, pinnedDapps, unpinnedDapps, ...rest } = useDapps();
-  const { tabMap, activeTab } = useWindowTabs();
+  const { tabMapByOrigin, activeTab } = useWindowTabs();
   const navigateToDapp = useNavigateToDappRoute();
 
   const onSelectDapp = useCallback((tab: chrome.tabs.Tab) => {
@@ -238,8 +223,8 @@ export const useTabedDapps = () => {
   return {
     ...rest,
     openDapp,
-    dapps: createTabedDapps(dapps, tabMap),
-    pinnedDapps: createTabedDapps(pinnedDapps, tabMap),
-    unpinnedDapps: createTabedDapps(unpinnedDapps, tabMap),
+    dapps: createTabedDapps(dapps, tabMapByOrigin),
+    pinnedDapps: createTabedDapps(pinnedDapps, tabMapByOrigin),
+    unpinnedDapps: createTabedDapps(unpinnedDapps, tabMapByOrigin),
   };
 };

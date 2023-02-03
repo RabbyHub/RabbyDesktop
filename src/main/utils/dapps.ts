@@ -4,11 +4,7 @@ import { format as urlFormat } from 'url';
 import Axios, { AxiosError, AxiosProxyConfig } from 'axios';
 import LRUCache from 'lru-cache';
 
-import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
-import {
-  canoicalizeDappUrl,
-  formatAxiosProxyConfig,
-} from '../../isomorphic/url';
+import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { parseWebsiteFavicon } from './fetch';
 import { AxiosElectronAdapter } from './axios';
 import { checkUrlViaBrowserView, CHROMIUM_NET_ERR_DESC } from './appNetwork';
@@ -110,13 +106,6 @@ export async function detectDapp(
   }
 
   const { urlInfo, origin } = canoicalizeDappUrl(checkResult.finalUrl);
-  if (opts.proxyOnParseFavicon && !IS_RUNTIME_PRODUCTION) {
-    console.debug(
-      `[debug] use proxy ${formatAxiosProxyConfig(
-        opts.proxyOnParseFavicon
-      )} on parsing favicon`
-    );
-  }
   const { iconInfo, faviconUrl, faviconBase64 } = await parseWebsiteFavicon(
     origin,
     { timeout: DFLT_TIMEOUT, proxy: opts.proxyOnParseFavicon }

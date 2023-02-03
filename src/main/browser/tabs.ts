@@ -404,4 +404,11 @@ export class Tabs extends EventEmitter {
       );
     });
   }
+
+  filterTab(filterFn: (tabURL: string) => boolean) {
+    return this.tabList.filter((tab) => {
+      if (!tab.view?.webContents) return false;
+      return filterFn(tab.view?.webContents.getURL());
+    });
+  }
 }

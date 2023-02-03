@@ -4,7 +4,6 @@ import { Input, ModalProps, Button, message, Form } from 'antd';
 import { ExclamationCircleFilled } from '@ant-design/icons';
 
 import { useDapps } from 'renderer/hooks/useDappsMngr';
-import { makeSureDappAddedToConnectedSite } from '@/renderer/ipcRequest/connected-site';
 import { useNavigate } from 'react-router-dom';
 import { navigateToDappRoute } from '@/renderer/utils/react-router';
 import { addDapp } from '@/renderer/ipcRequest/dapps';
@@ -226,7 +225,6 @@ export function AddDapp({
             type="primary"
             className={styles.button}
             onClick={async () => {
-              await makeSureDappAddedToConnectedSite(dappInfo);
               await addDapp(dappInfo);
               // message.success('Added successfully');
               onAddedDapp?.(dappInfo.origin);

@@ -4,7 +4,7 @@ import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { fetchDapps } from '../ipcRequest/dapps';
 
-type ChromeTabWithOrigin = chrome.tabs.Tab & {
+export type ChromeTabWithOrigin = chrome.tabs.Tab & {
   dappOrigin: string;
 };
 
@@ -71,10 +71,13 @@ export function useWindowTabs() {
   }, [setTabList, updateActiveTab]);
 
   /* eslint-disable @typescript-eslint/no-shadow */
-  const { tabMap, activeTab } = useMemo(() => {
+  const { tabMapByOrigin, tabMapBySecondaryMap, activeTab } = useMemo(() => {
     let activeTab = null as ChromeTabWithOrigin | null;
-    const tabMap: Map<ChromeTabWithOrigin['dappOrigin'], ChromeTabWithOrigin> =
-      new Map();
+    const tabMapByOrigin = new Map<
+      ChromeTabWithOrigin['dappOrigin'],
+      ChromeTabWithOrigin
+    >();
+    const tabMapBySecondaryMap = new Map<string, ChromeTabWithOrigin>();
     origTabList.forEach((_tab) => {
       const tab = { ..._tab };
       if (tab.id === activeTabId) {
@@ -84,17 +87,20 @@ export function useWindowTabs() {
         tab.active = false;
       }
 
-      tabMap.set(tab.dappOrigin, tab);
+      const parsed = canoicalizeDappUrl(tab.dappOrigin);
+      tabMapByOrigin.set(tab.dappOrigin, tab);
+      tabMapBySecondaryMap.set(parsed.secondaryDomain, tab);
 
       return tab;
     });
 
-    return { tabMap, activeTab };
+    return { tabMapByOrigin, tabMapBySecondaryMap, activeTab };
   }, [origTabList, activeTabId]);
   /* eslint-enable @typescript-eslint/no-shadow */
 
   return {
-    tabMap,
+    tabMapByOrigin,
+    tabMapBySecondaryMap,
     activeTab,
     setTabList,
     fetchTabListState,

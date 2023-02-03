@@ -152,7 +152,7 @@ const TabList = ({
 };
 
 export default function MainWindowSidebar() {
-  const { allDapps, pinnedDapps, unpinnedOpenedDapps, activeTab, dappActions } =
+  const { pinnedDapps, unpinnedOpenedDapps, activeTab, dappActions } =
     useSidebarDapps();
 
   const navigate = useNavigate();

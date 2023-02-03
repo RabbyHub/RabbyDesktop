@@ -156,6 +156,18 @@ export function isDappProtocol(protocolOrUrl: string) {
   return protocolOrUrl.startsWith('https:');
 }
 
+export function getDomainFromHostname(hostname: string) {
+  const parts = hostname.split('.');
+  const secondaryDomain = parts.slice(parts.length - 2).join('.');
+
+  return {
+    secondaryDomain,
+    secondaryOrigin: `https://${secondaryDomain}`,
+    is2ndaryDomain: parts.length === 2 && secondaryDomain === hostname,
+    isSubDomain: parts.length > 2,
+  };
+}
+
 export function isInternalProtocol(url: string) {
   return [
     `${RABBY_INTERNAL_PROTOCOL}//`,
@@ -181,14 +193,51 @@ export function canoicalizeDappUrl(url: string) {
     `${urlInfo?.protocol}//${hostname}${
       urlInfo?.port ? `:${urlInfo?.port}` : ''
     }`;
-  const domain = hostname.split('.').slice(-2).join('.');
+
+  const domainInfo = getDomainFromHostname(hostname);
 
   return {
     urlInfo,
     isDapp,
     origin,
-    domain,
+    hostname,
+    ...domainInfo,
   };
+}
+
+export function parseDomainMeta(
+  urlOrigin: string,
+  inputOrigins: (string | { origin: string })[] | Set<string>,
+  retCache: Record<I2ndDomainMeta['secondaryDomain'], I2ndDomainMeta>
+) {
+  const allOrigins = Array.from(inputOrigins);
+
+  const parsed = canoicalizeDappUrl(urlOrigin);
+
+  if (!retCache[parsed.secondaryDomain]) {
+    const record: I2ndDomainMeta = {
+      secondaryDomain: parsed.secondaryDomain,
+      origin: parsed.origin,
+      is2ndaryDomain: parsed.is2ndaryDomain,
+      subDomains: [],
+    };
+
+    allOrigins.forEach((dO) => {
+      const dappOrigin = typeof dO === 'string' ? dO : dO.origin;
+      const originInfo = canoicalizeDappUrl(dappOrigin);
+      if (originInfo.secondaryDomain !== record.secondaryDomain) return;
+      if (
+        !originInfo.is2ndaryDomain &&
+        !record.subDomains.includes(originInfo.hostname)
+      ) {
+        record.subDomains.push(originInfo.hostname);
+      }
+    });
+
+    retCache[parsed.secondaryDomain] = record;
+  }
+
+  return retCache[parsed.secondaryDomain];
 }
 
 export function parseOrigin(url: string) {
@@ -200,7 +249,7 @@ export const getOriginFromUrl = (url: string) => {
 };
 
 export const getMainDomain = (url: string) => {
-  return canoicalizeDappUrl(url).domain;
+  return canoicalizeDappUrl(url).secondaryDomain;
 };
 
 export function getBaseHref(url: string) {

@@ -1,8 +1,11 @@
+import { ensurePrefix } from './string';
+import { parseDomainMeta } from './url';
+
 export function isValidDappAlias(alias: string) {
   return /[\w\d]+/.test(alias);
 }
 
-export function formatDapp(input: any) {
+export function formatDapp(input: any): IDapp | null {
   if (!input?.origin) return null;
 
   return {
@@ -70,15 +73,43 @@ export function fillUnpinnedList(
   };
 }
 
+export function isFromSecondaryDomainToUnAddedSubDomain(
+  sourceMeta: I2ndDomainMeta,
+  targetMeta: I2ndDomainMeta
+) {
+  return (
+    sourceMeta.secondaryDomain === targetMeta.secondaryDomain &&
+    !sourceMeta.subDomains.find((d) => {
+      return (
+        ensurePrefix(d, 'https://') ===
+        ensurePrefix(targetMeta.secondaryDomain, 'https://')
+      );
+    })
+  );
+}
+
 export function sortDappsBasedPinned(
   dapps: IDapp[],
   pinnedList: string[],
   unpinnedList: string[]
 ) {
+  const secondaryDomainMeta = <
+    Record<I2ndDomainMeta['secondaryDomain'], I2ndDomainMeta>
+  >{};
+
+  const tmpRet = {} as Parameters<typeof parseDomainMeta>[2];
   const dappsHash = dapps.reduce((acc, dapp) => {
     acc[dapp.origin] = dapp;
+
+    const dMeta = parseDomainMeta(dapp.origin, dapps, tmpRet);
+    secondaryDomainMeta[dMeta.secondaryDomain] =
+      secondaryDomainMeta[dMeta.secondaryDomain] || dMeta;
+
+    if (dMeta.is2ndaryDomain) {
+      acc[dapp.origin].secondDomainMeta = dMeta;
+    }
     return acc;
-  }, {} as Record<IDapp['origin'], IDapp>);
+  }, {} as Record<IDapp['origin'], IDappWithDomainMeta>);
 
   const pinnedDapps: IMergedDapp[] = [];
   const unpinnedDapps: IMergedDapp[] = [];
@@ -102,6 +133,7 @@ export function sortDappsBasedPinned(
   });
 
   return {
+    secondaryDomainMeta,
     allDapps: pinnedDapps.concat(unpinnedDapps),
     pinnedDapps,
     unpinnedDapps,
