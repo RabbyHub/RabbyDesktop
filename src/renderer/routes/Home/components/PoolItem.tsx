@@ -75,21 +75,20 @@ const TokenItemWrapper = styled.div`
     font-size: 13px;
     line-height: 16px;
     color: #ffffff;
-    width: 17%;
+    width: 25%;
     overflow: hidden;
     text-overflow: ellipsis;
     align-items: center;
     .symbol {
-      flex: 1;
       margin-left: 16px;
     }
   }
   .token-price {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: flex-start;
     flex-wrap: wrap;
-    width: 22%;
+    width: 25%;
     font-weight: 500;
     font-size: 12px;
     line-height: 14px;
@@ -101,7 +100,7 @@ const TokenItemWrapper = styled.div`
     font-size: 10px;
     line-height: 12px;
     color: #c6c6c6;
-    text-align: right;
+    text-align: left;
     &.is-loss {
       color: #ff6060;
     }
@@ -110,9 +109,9 @@ const TokenItemWrapper = styled.div`
     }
   }
   .token-amount {
-    width: 38%;
+    width: 25%;
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     flex-wrap: wrap;
     font-weight: 500;
     font-size: 12px;
@@ -122,11 +121,14 @@ const TokenItemWrapper = styled.div`
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
-    width: 23%;
+    width: 25%;
     font-weight: 700;
     font-size: 12px;
     line-height: 14px;
     text-align: right;
+    .price-change {
+      text-align: right;
+    }
   }
   .number-change {
     opacity: 0;
@@ -145,6 +147,16 @@ const TokenItemWrapper = styled.div`
   &:nth-last-child(1) {
     margin-bottom: 0;
   }
+`;
+
+const DebtTag = styled.div`
+  border: 1px solid #807f7f;
+  border-radius: 2px;
+  font-size: 12px;
+  line-height: 14px;
+  color: #959595;
+  padding: 0 6px;
+  margin-left: 8px;
 `;
 
 const LoadingTokenItem = () => {
@@ -335,7 +347,8 @@ const TokenItemComp = ({
           width="18px"
           height="18px"
         />
-        <div className="symbol">{token.symbol}</div>
+        <div className="symbol">{ellipsisTokenSymbol(token.symbol)}</div>
+        {isDebt && <DebtTag>Debt</DebtTag>}
       </div>
       <div className="token-price">
         ${formatPrice(token.price)}

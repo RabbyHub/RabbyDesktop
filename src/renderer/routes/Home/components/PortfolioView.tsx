@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
-import { DisplayChainWithWhiteLogo } from '@/renderer/hooks/useCurrentBalance';
 import AssociateDappModal from '@/renderer/components/AssociateDappModal';
 import TokenList from './TokenList';
 import ProtocolList from './ProtocolList';
@@ -33,20 +32,20 @@ const PortfolioWrapper = styled.div`
       line-height: 14px;
       padding: 0 23px;
       & > div {
-        text-align: right;
+        text-align: left;
         &:nth-child(1) {
-          text-align: left;
           color: rgba(255, 255, 255, 0.8);
-          width: 17%;
+          width: 25%;
         }
         &:nth-child(2) {
-          width: 22%;
+          width: 25%;
         }
         &:nth-child(3) {
-          width: 38%;
+          width: 25%;
         }
         &:nth-child(4) {
-          width: 23%;
+          text-align: right;
+          width: 25%;
         }
       }
     }

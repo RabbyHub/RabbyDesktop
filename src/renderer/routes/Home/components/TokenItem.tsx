@@ -29,7 +29,7 @@ const TokenItemWrapper = styled.li`
   border: 1px solid transparent;
   & > div {
     position: relative;
-    text-align: right;
+    text-align: left;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -90,7 +90,7 @@ const TokenItemWrapper = styled.li`
 const TokenLogoField = styled.div`
   justify-content: flex-start;
   color: rgba(255, 255, 255, 0.8);
-  width: 17%;
+  width: 25%;
   .token-info {
     display: flex;
   }
@@ -124,16 +124,19 @@ const TokenLogoField = styled.div`
   }
 `;
 const TokenPriceField = styled.div`
-  width: 22%;
-  justify-content: flex-end;
+  width: 25%;
+  justify-content: flex-start;
 `;
 const TokenAmountField = styled.div`
-  width: 38%;
-  justify-content: flex-end;
+  width: 25%;
+  justify-content: flex-start;
 `;
 const TokenUsdValueField = styled.div`
-  width: 23%;
+  width: 25%;
   justify-content: flex-end;
+  .price-change {
+    text-align: right;
+  }
 `;
 
 const TokenItemComp = ({
