@@ -83,6 +83,7 @@ const PortfolioView = ({
   protocolHidden,
   isLoadingTokenList,
   isLoadingProtocolList,
+  isLoadingProtocolHistory,
   supportHistoryChains,
   historyTokenDict,
 }: {
@@ -109,6 +110,7 @@ const PortfolioView = ({
   };
   isLoadingTokenList: boolean;
   isLoadingProtocolList: boolean;
+  isLoadingProtocolHistory: boolean;
   supportHistoryChains: ServerChain[];
   historyTokenDict: Record<string, TokenItem>;
 }) => {
@@ -164,6 +166,7 @@ const PortfolioView = ({
         historyTokenMap={historyTokenMap}
         tokenHidden={tokenHidden}
         isLoadingTokenList={isLoadingTokenList}
+        supportHistoryChains={supportHistoryChains}
       />
       <ProtocolList
         protocolList={protocolList}
@@ -173,6 +176,7 @@ const PortfolioView = ({
         isLoading={isLoadingProtocolList}
         supportHistoryChains={supportHistoryChains}
         historyTokenDict={historyTokenDict}
+        isLoadingProtocolHistory={isLoadingProtocolHistory}
       />
       <AssociateDappModal
         protocolId={relateDappId}

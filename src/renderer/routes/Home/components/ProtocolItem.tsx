@@ -86,6 +86,7 @@ const ProtocolItem = ({
   protocolHistoryTokenPriceMap,
   onClickRelate,
   supportHistory,
+  isLoadingProtocolHistory,
   historyTokenDict,
 }: {
   protocol: DisplayProtocol;
@@ -96,6 +97,7 @@ const ProtocolItem = ({
   >;
   onClickRelate(protocol: DisplayProtocol): void;
   supportHistory: boolean;
+  isLoadingProtocolHistory: boolean;
   historyTokenDict: Record<string, TokenItem>;
 }) => {
   const { protocolDappsBinding } = useProtocolDappsBinding();
@@ -184,6 +186,7 @@ const ProtocolItem = ({
             key={`${portfolio.position_index}-${portfolio.pool.id}`}
             supportHistory={supportHistory}
             historyTokenDict={historyTokenDict}
+            isLoadingProtocolHistory={isLoadingProtocolHistory}
           />
         ))}
       </div>

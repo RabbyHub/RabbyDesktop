@@ -215,6 +215,7 @@ const Home = () => {
     historyProtocolMap,
     tokenHistoryPriceMap,
     isLoading: isLoadingProtocol,
+    isLoadingHistory: isLoadingProtocolHistory,
     supportHistoryChains,
     historyTokenDict,
   } = useHistoryProtocol(currentAccount?.address);
@@ -362,6 +363,7 @@ const Home = () => {
           }}
           isLoadingTokenList={isLoadingTokenList}
           isLoadingProtocolList={isLoadingProtocol}
+          isLoadingProtocolHistory={isLoadingProtocolHistory}
           supportHistoryChains={supportHistoryChains}
           historyTokenDict={historyTokenDict}
         />

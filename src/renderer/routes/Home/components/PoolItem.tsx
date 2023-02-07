@@ -4,7 +4,12 @@ import { Skeleton } from 'antd';
 import { PortfolioItem, TokenItem } from '@debank/rabby-api/dist/types';
 import classNames from 'classnames';
 import TokenWithChain from '@/renderer/components/TokenWithChain';
-import { formatNumber } from '@/renderer/utils/number';
+import {
+  formatNumber,
+  formatAmount,
+  formatPrice,
+  formatUsdValue,
+} from '@/renderer/utils/number';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 import BigNumber from 'bignumber.js';
@@ -95,10 +100,13 @@ const TokenItemWrapper = styled.div`
     font-weight: 400;
     font-size: 10px;
     line-height: 12px;
-    color: #2ed4a3;
+    color: #c6c6c6;
     text-align: right;
     &.is-loss {
       color: #ff6060;
+    }
+    &.is-increase {
+      color: #2ed4a3;
     }
   }
   .token-amount {
@@ -225,6 +233,7 @@ const TokenItemComp = ({
   supportHistory,
   historyToken,
   positionIndex,
+  isLoadingProtocolHistory,
 }: {
   token: TokenItem;
   historyProtocol?: DisplayProtocol;
@@ -233,6 +242,7 @@ const TokenItemComp = ({
   historyToken?: TokenItem;
   supportHistory: boolean;
   positionIndex: string;
+  isLoadingProtocolHistory: boolean;
 }) => {
   const tokenHistory = useMemo(() => {
     const historyPortfolio = historyProtocol?.portfolio_item_list.find(
@@ -270,6 +280,10 @@ const TokenItemComp = ({
     positionIndex,
   ]);
 
+  const isDebt = useMemo(() => {
+    return token.amount < 0;
+  }, [token]);
+
   const priceChange = useMemo(() => {
     if (!tokenHistory) return 0;
     if (tokenHistory.price === 0) return token.price;
@@ -278,17 +292,39 @@ const TokenItemComp = ({
 
   const amountChange = useMemo(() => {
     if (!tokenHistory) return 0;
+    if (isDebt) {
+      return -(token.amount - tokenHistory.amount);
+    }
     return token.amount - tokenHistory.amount;
-  }, [token, tokenHistory]);
+  }, [token, tokenHistory, isDebt]);
 
   const usdValue = useMemo(() => {
     return token.amount * token.price;
   }, [token]);
 
   const usdValueChange = useMemo(() => {
-    if (!tokenHistory) return 0;
-    return usdValue - tokenHistory.price * tokenHistory.amount;
-  }, [usdValue, tokenHistory]);
+    if (!tokenHistory) {
+      return {
+        value: 0,
+        percentage: 0,
+      };
+    }
+    let historyAmount = tokenHistory.amount;
+    if (!supportHistory) {
+      historyAmount = token.amount;
+    }
+    const historyValue = historyAmount * tokenHistory.price;
+    let valueChange = 0;
+    valueChange =
+      token.amount * token.price - historyAmount * tokenHistory.price;
+    if (isDebt) {
+      valueChange = -valueChange;
+    }
+    return {
+      value: valueChange,
+      percentage: valueChange === 0 ? 0 : valueChange / historyValue,
+    };
+  }, [tokenHistory, token, supportHistory, isDebt]);
 
   return (
     <TokenItemWrapper>
@@ -302,70 +338,47 @@ const TokenItemComp = ({
         <div className="symbol">{token.symbol}</div>
       </div>
       <div className="token-price">
-        {tokenHistory && (
-          <div className="number-change">
-            ${formatNumber(tokenHistory.price)}
-            <img
-              className="icon-numer-change-arrow"
-              src="rabby-internal://assets/icons/home/amount-change-arrow.svg"
-            />
-          </div>
-        )}
-        ${formatNumber(token.price)}
-        {priceChange !== 0 && (
+        ${formatPrice(token.price)}
+        {!isLoadingProtocolHistory && supportHistory && tokenHistory && (
           <div
             className={classNames('price-change', {
               'is-loss': priceChange < 0,
+              'is-increase': priceChange > 0,
             })}
           >
-            {priceChange > 0 ? '+' : '-'}
+            {priceChange >= 0 ? '+' : '-'}
             {Math.abs(priceChange * 100).toFixed(2)}%
           </div>
         )}
       </div>
       <div className="token-amount">
-        {tokenHistory && (
-          <div className="number-change">
-            {formatNumber(tokenHistory.amount, 4)}{' '}
-            {ellipsisTokenSymbol(tokenHistory.symbol)}
-            <img
-              className="icon-numer-change-arrow"
-              src="rabby-internal://assets/icons/home/amount-change-arrow.svg"
-            />
-          </div>
-        )}
-        {`${formatNumber(token.amount, 4)}`} {ellipsisTokenSymbol(token.symbol)}
-        {amountChange !== 0 && (
+        {`${formatAmount(token.amount)}`} {ellipsisTokenSymbol(token.symbol)}
+        {!isLoadingProtocolHistory && supportHistory && tokenHistory && (
           <div
             className={classNames('price-change', {
               'is-loss': amountChange < 0,
+              'is-increase': amountChange > 0,
             })}
           >
-            {amountChange > 0 ? '+' : '-'}
-            {`${formatNumber(Math.abs(amountChange), 4)}`}{' '}
+            {amountChange >= 0 ? '+' : '-'}
+            {`${formatNumber(Math.abs(amountChange))}`}{' '}
             <span className="symbol">{ellipsisTokenSymbol(token.symbol)}</span>
           </div>
         )}
       </div>
       <div className="token-usd-value">
-        {tokenHistory && (
-          <div className="number-change">
-            ${formatNumber(tokenHistory.price * tokenHistory.amount || 0)}
-            <img
-              className="icon-numer-change-arrow"
-              src="rabby-internal://assets/icons/home/amount-change-arrow.svg"
-            />
-          </div>
-        )}
-        {`$${formatNumber(usdValue || '0')}`}
-        {usdValueChange !== 0 && (
+        {`${formatUsdValue(usdValue || '0')}`}
+        {!isLoadingProtocolHistory && supportHistory && tokenHistory && (
           <div
             className={classNames('price-change', {
-              'is-loss': usdValueChange < 0,
+              'is-loss': usdValueChange.value < 0,
+              'is-increase': usdValueChange.value > 0,
             })}
           >
-            {usdValueChange > 0 ? '+' : '-'}$
-            {formatNumber(Math.abs(usdValueChange))}
+            {usdValueChange.value >= 0 ? '+' : '-'}
+            {`${(Math.abs(usdValueChange.percentage) * 100).toFixed(
+              2
+            )}% (${formatUsdValue(Math.abs(usdValueChange.value))})`}
           </div>
         )}
       </div>
@@ -379,6 +392,7 @@ const PoolItem = ({
   protocolHistoryTokenPriceMap,
   supportHistory,
   historyTokenDict,
+  isLoadingProtocolHistory,
 }: {
   portfolio: PortfolioItem;
   historyProtocol?: DisplayProtocol;
@@ -387,6 +401,7 @@ const PoolItem = ({
     { id: string; chain: string; price: number }
   >;
   supportHistory: boolean;
+  isLoadingProtocolHistory: boolean;
   historyTokenDict: Record<string, TokenItem>;
 }) => {
   const totalUsdValue = useMemo(() => {
@@ -410,6 +425,7 @@ const PoolItem = ({
           supportHistory={supportHistory}
           historyToken={historyTokenDict[`${token.chain}-${token.id}`]}
           positionIndex={portfolio.position_index}
+          isLoadingProtocolHistory={isLoadingProtocolHistory}
         />
       ))}
       <PoolItemFooter className="pool-item-footer">
