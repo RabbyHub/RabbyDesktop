@@ -362,8 +362,8 @@ const TokenItemComp = ({
         {!isLoadingProtocolHistory && supportHistory && tokenHistory && (
           <div
             className={classNames('price-change', {
-              'is-loss': priceChange < 0,
-              'is-increase': priceChange > 0,
+              'is-loss': !isDebt && priceChange < 0,
+              'is-increase': !isDebt && priceChange > 0,
             })}
           >
             {priceChange >= 0 ? '+' : '-'}
@@ -376,8 +376,8 @@ const TokenItemComp = ({
         {!isLoadingProtocolHistory && supportHistory && tokenHistory && (
           <div
             className={classNames('price-change', {
-              'is-loss': amountChange < 0,
-              'is-increase': amountChange > 0,
+              'is-loss': !isDebt && amountChange < 0,
+              'is-increase': !isDebt && amountChange > 0,
             })}
           >
             {amountChange >= 0 ? '+' : '-'}
@@ -391,8 +391,8 @@ const TokenItemComp = ({
         {!isLoadingProtocolHistory && supportHistory && tokenHistory && (
           <div
             className={classNames('price-change', {
-              'is-loss': usdValueChange.value < 0,
-              'is-increase': usdValueChange.value > 0,
+              'is-loss': !isDebt && usdValueChange.value < 0,
+              'is-increase': !isDebt && usdValueChange.value > 0,
             })}
           >
             {usdValueChange.value >= 0 ? '+' : '-'}
