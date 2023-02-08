@@ -98,6 +98,11 @@ function updateSubviewPos(parentWindow: BrowserWindow, view: BrowserView) {
   }
 }
 
+const IS_DARWIN = process.platform === 'darwin';
+const SIZE = {
+  width: 1000,
+  height: 600,
+};
 async function showModalPopup(
   viewType: PopupViewOnMainwinInfo['type'],
   targetView: BrowserView
@@ -106,18 +111,27 @@ async function showModalPopup(
 
   const modalWindow = createPopupModalWindow({
     parent: mainWindow,
+    ...(IS_DARWIN && {
+      ...SIZE,
+      center: true,
+    }),
   });
   const mainBounds = mainWindow.getBounds();
-  const topOffset =
-    process.platform === 'win32'
-      ? /* NativeAppSizes.windowTitlebarHeight */ 0
-      : 0;
-  modalWindow.setBounds({
-    width: mainBounds.width,
-    height: mainBounds.height - topOffset,
-    x: mainBounds.x,
-    y: mainBounds.y + topOffset,
-  });
+
+  modalWindow.setBounds(
+    IS_DARWIN
+      ? {
+          // make it centered
+          x: Math.floor((mainBounds.width - SIZE.width) / 2),
+          y: Math.floor((mainBounds.height - SIZE.height) / 2),
+        }
+      : {
+          width: mainBounds.width,
+          height: mainBounds.height,
+          x: mainBounds.x,
+          y: mainBounds.y,
+        }
+  );
 
   viewsState[viewType].modalWindow = modalWindow;
   modalWindow.addBrowserView(targetView);
