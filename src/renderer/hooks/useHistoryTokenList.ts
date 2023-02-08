@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import BigNumber from 'bignumber.js';
 import PQueue from 'p-queue';
 import { groupBy } from 'lodash';
-import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
+import { TokenItem } from '@debank/rabby-api/dist/types';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 
 export interface TokenWithHistoryItem {
@@ -12,9 +12,6 @@ export interface TokenWithHistoryItem {
 
 export default (address: string | undefined) => {
   const [tokenList, setTokenList] = useState<TokenItem[]>([]);
-  const [supportHistoryChains, setSupportHistoryChains] = useState<
-    ServerChain[]
-  >([]);
   const [historyTokenMap, setHistoryTokenMap] = useState<
     Record<string, TokenItem>
   >({});
@@ -40,11 +37,6 @@ export default (address: string | undefined) => {
         usd_value: new BigNumber(item.amount).times(item.price).toNumber(),
       }))
     );
-    const chainList = await walletOpenapi.getChainList();
-    const supportHistoryChainList = chainList.filter(
-      (item) => item.is_support_history
-    );
-    setSupportHistoryChains(supportHistoryChainList);
     const yesterdayTokenList = await walletOpenapi.getHistoryTokenList({
       id: addr,
       timeAt: YESTERDAY,
@@ -61,9 +53,7 @@ export default (address: string | undefined) => {
             .times(yesterdayTokenItem.price)
             .toNumber(),
         });
-      } else if (
-        supportHistoryChainList.some((item) => item.id === token.chain)
-      ) {
+      } else {
         q.push(token);
       }
     }
@@ -154,6 +144,5 @@ export default (address: string | undefined) => {
     tokenList,
     historyTokenMap,
     isLoading,
-    supportHistoryChains,
   };
 };

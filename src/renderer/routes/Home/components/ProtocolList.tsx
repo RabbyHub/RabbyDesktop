@@ -8,6 +8,7 @@ const ProtocolList = ({
   protocolHistoryTokenPriceMap,
   onRelateDapp,
   isLoading,
+  isLoadingProtocolHistory,
   supportHistoryChains,
   historyTokenDict,
 }: {
@@ -19,6 +20,7 @@ const ProtocolList = ({
   >;
   onRelateDapp(protocol: DisplayProtocol): void;
   isLoading: boolean;
+  isLoadingProtocolHistory: boolean;
   supportHistoryChains: ServerChain[];
   historyTokenDict: Record<string, TokenItem>;
 }) => {
@@ -44,6 +46,7 @@ const ProtocolList = ({
             (item) => item.id === protocol.chain
           )}
           historyTokenDict={historyTokenDict}
+          isLoadingProtocolHistory={isLoadingProtocolHistory}
         />
       ))}
     </div>

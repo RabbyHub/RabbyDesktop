@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import classNames from 'classnames';
 import { Skeleton } from 'antd';
-import { TokenItem } from '@debank/rabby-api/dist/types';
+import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
 import { formatNumber } from '@/renderer/utils/number';
 import TokenItemComp, { LoadingTokenItem } from './TokenItem';
 
@@ -49,10 +49,12 @@ const TokenList = ({
   tokenHidden,
   historyTokenMap,
   isLoadingTokenList,
+  supportHistoryChains,
 }: {
   tokenList: TokenItem[];
   historyTokenMap: Record<string, TokenItem>;
   isLoadingTokenList: boolean;
+  supportHistoryChains: ServerChain[];
   tokenHidden: {
     isExpand: boolean;
     hiddenCount: number;
@@ -129,6 +131,9 @@ const TokenList = ({
           token={token}
           historyToken={historyTokenMap[`${token.chain}-${token.id}`]}
           key={`${token.chain}-${token.id}`}
+          supportHistory={
+            !!supportHistoryChains.find((item) => item.id === token.chain)
+          }
         />
       ))}
       {tokenHidden.hiddenCount > 0 && (

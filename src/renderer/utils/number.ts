@@ -76,6 +76,35 @@ export const formatNumber = (
   return n.toFormat(decimal, format);
 };
 
+export const formatPrice = (price: string | number) => {
+  if (price >= 1) {
+    return formatNumber(price);
+  }
+  if (price < 0.00001) {
+    if (price.toString().length > 10) {
+      return Number(price).toExponential(4);
+    }
+    return price.toString();
+  }
+  return formatNumber(price, 4);
+};
+
+export const formatUsdValue = (value: string | number) => {
+  if (new BigNumber(value).gte(0.01) || new BigNumber(value).eq(0)) {
+    return `$${formatNumber(value)}`;
+  }
+  return '<$0.01';
+};
+
+export const formatAmount = (amount: string | number, decimals = 4) => {
+  if (amount > 1e9) {
+    return `${new BigNumber(amount).div(1e9).toFormat(4)}B`;
+  }
+  if (amount > 10000) return formatNumber(amount);
+  if (amount > 1) return formatNumber(amount, 4);
+  return formatNumber(amount, decimals);
+};
+
 export const intToHex = (n: number) => {
   if (n % 1 !== 0) throw new Error(`${n} is not int`);
   return `0x${n.toString(16)}`;
