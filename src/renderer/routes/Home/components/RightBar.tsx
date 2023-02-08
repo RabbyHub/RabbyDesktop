@@ -10,13 +10,17 @@ import IconGasTopup from '../../../../../assets/icons/home/gas-topup.svg?rc';
 const RightBarWrapper = styled.div`
   width: 330px;
   margin-left: 28px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 88px);
 `;
 
 const ActionList = styled.ul`
   list-style: none;
   padding: 48px 0 0 23px;
   display: flex;
-  margin-bottom: 60px;
+  margin-bottom: 65px;
   li {
     border-radius: 14px;
     margin-right: 25px;

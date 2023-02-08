@@ -178,7 +178,19 @@ const TxExplain = styled.div`
 
 const TxExplainInner = styled.div`
   flex: 1;
+  overflow: hidden;
+  .tx-explain-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .tx-explain-desc {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 12px;
+    line-height: 14px;
+    color: rgba(255, 255, 255, 0.3);
     margin-top: 2px;
   }
 `;
@@ -316,11 +328,13 @@ const TransactionItem = ({ item }: { item: TransactionDataItem }) => {
     const amount = item.approve?.value || 0;
 
     interAddressExplain = (
-      <div className="tx-explain-title">
-        Approve {amount < 1e9 ? amount.toFixed(4) : 'infinite'}{' '}
-        {`${approveToken.symbol || approveToken.display_symbol} for `}
-        {projectName}
-      </div>
+      <>
+        <div className="tx-explain-title">
+          Approve {amount < 1e9 ? amount.toFixed(4) : 'infinite'}{' '}
+          {`${approveToken.symbol || approveToken.display_symbol}`}
+        </div>
+        <div className="tx-explain-desc">{projectName}</div>
+      </>
     );
   } else if (isSend) {
     interAddressExplain = (

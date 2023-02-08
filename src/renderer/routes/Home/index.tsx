@@ -330,8 +330,8 @@ const Home = () => {
                   className={classNames('balance-change', {
                     'is-loss': curveData.isLoss,
                   })}
-                >{`${curveData.isLoss ? '-' : '+'}${curveData.change} (${
-                  curveData.changePercent
+                >{`${curveData.isLoss ? '-' : '+'}${curveData.changePercent} (${
+                  curveData.change
                 })`}</div>
                 {curveData.list.length > 0 && <Curve data={curveData} />}
               </div>

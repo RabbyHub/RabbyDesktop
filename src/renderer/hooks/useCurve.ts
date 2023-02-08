@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { formatNumber } from '@/renderer/utils/number';
+import { formatNumber, formatUsdValue } from '@/renderer/utils/number';
 import { walletOpenapi } from '../ipcRequest/rabbyx';
 
 type CurveList = Array<{ timestamp: number; usd_value: number }>;
@@ -17,8 +17,8 @@ const formChartData = (
 
       return {
         value: x.usd_value || 0,
-        netWorth: x.usd_value ? `$${formatNumber(x.usd_value, 0)}` : '$0',
-        change: `$${formatNumber(Math.abs(change))}`,
+        netWorth: x.usd_value ? `${formatUsdValue(x.usd_value)}` : '$0',
+        change: `${formatUsdValue(Math.abs(change))}`,
         isLoss: change < 0,
         changePercent:
           startData.usd_value === 0
@@ -53,8 +53,8 @@ const formChartData = (
 
   return {
     list,
-    netWorth: endNetWorth === 0 ? '$0' : `$${formatNumber(endNetWorth)}`,
-    change: `$${formatNumber(Math.abs(assetsChange))}`,
+    netWorth: endNetWorth === 0 ? '$0' : `${formatUsdValue(endNetWorth)}`,
+    change: `${formatUsdValue(Math.abs(assetsChange))}`,
     changePercent:
       startData.usd_value !== 0
         ? `${Math.abs((assetsChange * 100) / startData.usd_value).toFixed(2)}%`
