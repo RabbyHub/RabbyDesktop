@@ -31,6 +31,9 @@ const PoolItemWrapper = styled.div`
     .number-change {
       opacity: 1;
     }
+    .debt-tag {
+      display: block;
+    }
   }
 `;
 
@@ -144,19 +147,19 @@ const TokenItemWrapper = styled.div`
       margin-right: 2px;
     }
   }
+  .debt-tag {
+    border: 1px solid #807f7f;
+    border-radius: 2px;
+    font-size: 12px;
+    line-height: 14px;
+    color: #959595;
+    padding: 0 6px;
+    margin-left: 8px;
+    display: none;
+  }
   &:nth-last-child(1) {
     margin-bottom: 0;
   }
-`;
-
-const DebtTag = styled.div`
-  border: 1px solid #807f7f;
-  border-radius: 2px;
-  font-size: 12px;
-  line-height: 14px;
-  color: #959595;
-  padding: 0 6px;
-  margin-left: 8px;
 `;
 
 const LoadingTokenItem = () => {
@@ -332,9 +335,13 @@ const TokenItemComp = ({
     if (isDebt) {
       valueChange = -valueChange;
     }
+    let percentage = valueChange === 0 ? 0 : valueChange / historyValue;
+    if (historyValue === 0 && valueChange !== 0) {
+      percentage = 1;
+    }
     return {
       value: valueChange,
-      percentage: valueChange === 0 ? 0 : valueChange / historyValue,
+      percentage,
     };
   }, [tokenHistory, token, supportHistory, isDebt]);
 
@@ -348,7 +355,7 @@ const TokenItemComp = ({
           height="18px"
         />
         <div className="symbol">{ellipsisTokenSymbol(token.symbol)}</div>
-        {isDebt && <DebtTag>Debt</DebtTag>}
+        {isDebt && <div className="debt-tag">Debt</div>}
       </div>
       <div className="token-price">
         ${formatPrice(token.price)}
