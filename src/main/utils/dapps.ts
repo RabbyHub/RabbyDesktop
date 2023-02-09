@@ -123,6 +123,7 @@ export async function detectDapp(
     recommendedAlias: inputCoreName,
     faviconUrl: faviconUrl || undefined,
     faviconBase64: faviconBase64 || undefined,
+    isExistedDapp: !!repeatedDapp,
   };
 
   if (repeatedDapp) {
