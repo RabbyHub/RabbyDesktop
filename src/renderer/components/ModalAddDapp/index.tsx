@@ -1,16 +1,13 @@
+import { Button, Form, Input, message, ModalProps } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
-import classnames from 'classnames';
-import { Input, ModalProps, Button, message, Form } from 'antd';
-import { ExclamationCircleFilled } from '@ant-design/icons';
 
-import { useDapps } from 'renderer/hooks/useDappsMngr';
+import classNames from 'classnames';
 import { useNavigate } from 'react-router-dom';
-import { navigateToDappRoute } from '@/renderer/utils/react-router';
-import { addDapp } from '@/renderer/ipcRequest/dapps';
-import { Modal } from '../Modal/Modal';
-import styles from './index.module.less';
+import { useDapps } from 'renderer/hooks/useDappsMngr';
 import { isValidDappAlias } from '../../../isomorphic/dapp';
 import { DappFavicon } from '../DappFavicon';
+import { Modal } from '../Modal/Modal';
+import styles from './index.module.less';
 import { useAddDappURL } from './useAddDapp';
 
 type IStep = 'add' | 'checked' | 'duplicated';
@@ -97,6 +94,88 @@ function useCheckedStep() {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface PreviewDappProps {}
+const PreviewDapp = (props: PreviewDappProps) => {
+  return (
+    <div className={styles.preview}>
+      <div className={styles.previewHeader}>
+        <div className={styles.previewIcon}>todo</div>
+        <div>
+          <div className={styles.previewTitle}>
+            <Input />
+          </div>
+          <div className={styles.previewDesc}>uniswap.org/</div>
+        </div>
+        <div className={styles.previewAction}>
+          <Button type="primary">Add</Button>
+
+          {/* <Button type="primary">Open</Button>
+          <LoadingOutlined /> */}
+        </div>
+      </div>
+      <iframe
+        className={styles.previewContent}
+        src="https://app.uniswap.org"
+        title="debank"
+      />
+      {/* <div className={styles.previewEmpty}>
+        <div>
+          <img
+            src="rabby-internal://assets/icons/add-dapp/icon-failed.svg"
+            alt=""
+          />
+          <div className={styles.previewEmptyTitle}>网页缩略图加载失败</div>
+        </div>
+      </div> */}
+    </div>
+  );
+};
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface DappCardProps {
+  dapp?: IMergedDapp;
+}
+const DappCard = ({ dapp }: DappCardProps) => {
+  return (
+    <div className={classNames(styles.dapp)}>
+      <DappFavicon
+        className={styles.dappIcon}
+        origin={dapp?.origin || ''}
+        src={dapp?.faviconBase64 ? dapp.faviconBase64 : dapp?.faviconUrl}
+      />
+      <div className={styles.dappContent}>
+        <div className={styles.dappName}>{dapp?.alias}</div>
+        <div className={styles.dappOrigin}>{dapp?.origin}</div>
+      </div>
+    </div>
+  );
+};
+
+const RelationModal = () => {
+  return (
+    <Modal open className={styles.relationModal} width={500}>
+      <div className={styles.content}>
+        <div className={styles.title}>
+          There is an inclusion relationship with the domain name of the added
+          Dapp. The following Dapp will be replaced after adding.
+        </div>
+        <div className={styles.body}>
+          <DappCard />
+        </div>
+        <div className={styles.footer}>
+          <Button ghost block size="large">
+            Cancel adding
+          </Button>
+          <Button type="primary" block size="large">
+            Confirm to add
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
 export function AddDapp({
   onAddedDapp,
   ...modalProps
@@ -153,135 +232,43 @@ export function AddDapp({
   }, [checkUrl, setCheckError, setDappInfo]);
 
   return (
-    <div className={styles.step}>
-      {step !== 'add' && (
-        <img
-          onClick={() => {
-            setStep('add');
-          }}
-          className={styles.backIcon}
-          src="rabby-internal://assets/icons/modal/back.svg"
-        />
-      )}
-      {step === 'add' && (
-        <Form form={addStepForm} className={styles.stepAdd} onFinish={doCheck}>
-          <h3 className={styles.addTitle}>Enter or copy the Dapp URL</h3>
-          <Form.Item
-            name="url"
-            validateStatus={checkError ? 'error' : undefined}
-            help={checkError}
-            // validateTrigger="onBlur"
-            rules={[
-              {
-                pattern: /^https:\/\/.+/,
-                message:
-                  'Dapp with protocols other than HTTPS is not supported',
-              },
-            ]}
-          >
-            <Input
-              className={styles.input}
-              value={addUrl}
-              onChange={onChangeAddUrl}
-              placeholder="https://somedapp.xyz"
-              allowClear
-              autoFocus
-            />
-          </Form.Item>
-          <Button
-            loading={isCheckingUrl}
-            type="primary"
-            htmlType="submit"
-            disabled={!isValidAddUrl}
-            className={styles.button}
-          >
-            Check
-          </Button>
-        </Form>
-      )}
-
-      {step === 'checked' && (
-        <div className={styles.stepChecked}>
-          <DappFavicon
-            origin={dappInfo.origin}
-            className={styles.checkedFavicon}
-            src={
-              dappInfo.faviconBase64
-                ? dappInfo.faviconBase64
-                : dappInfo.faviconUrl
-            }
-            alt={dappInfo.faviconUrl}
-          />
-          <span className={styles.checkedDappUrl}>{dappInfo.origin}</span>
-
+    <div className={styles.content}>
+      <h3 className={styles.title}>Enter the Dapp domain name</h3>
+      <Form form={addStepForm} className={styles.form} onFinish={doCheck}>
+        <Form.Item
+          name="url"
+          validateStatus={checkError ? 'error' : undefined}
+          help={
+            checkError ||
+            'To ensure the security of your funds, please ensure that you enter the official domain name of Dapp'
+          }
+          // validateTrigger="onBlur"
+          rules={[
+            {
+              pattern: /^https:\/\/.+/,
+              message: 'Dapp with protocols other than HTTPS is not supported',
+            },
+          ]}
+        >
           <Input
             className={styles.input}
-            value={dappInfo.alias}
-            onChange={onChangeDappAlias}
-            placeholder="Please name the dapp"
-            allowClear
-          />
-          <Button
-            type="primary"
-            className={styles.button}
-            onClick={async () => {
-              await addDapp(dappInfo);
-              // message.success('Added successfully');
-              onAddedDapp?.(dappInfo.origin);
-            }}
-            disabled={!isValidAlias}
-          >
-            Confirm
-          </Button>
-        </div>
-      )}
-      {step === 'duplicated' && duplicatedDapp && (
-        <div className={styles.stepDuplicated}>
-          <div className={styles.stepDuplicatedTips}>
-            <ExclamationCircleFilled />
-            You have added the dapp
-          </div>
-          <div className="dapp-block">
-            <a
-              className="anchor"
-              href={duplicatedDapp?.origin}
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => {
-                navigateToDappRoute(navigate, duplicatedDapp.origin);
-              }}
-            >
-              {/* TODO: robust about load image */}
-              <DappFavicon
-                origin={duplicatedDapp?.origin}
-                className="dapp-favicon"
-                src={
-                  duplicatedDapp?.faviconBase64 || duplicatedDapp?.faviconUrl
-                }
-                alt="duplicatedDapp?.origin"
+            value={addUrl}
+            onChange={onChangeAddUrl}
+            placeholder="Input the Dapp domain name. e.g. debank.com"
+            autoFocus
+            suffix={
+              <img
+                onClick={() => {
+                  // todo
+                }}
+                src="rabby-internal://assets/icons/add-dapp/icon-search.svg"
               />
-              <div className="infos">
-                <h4 className="dapp-alias" title={duplicatedDapp?.alias}>
-                  {duplicatedDapp?.alias}
-                </h4>
-                <div className="dapp-url" title={duplicatedDapp?.origin}>
-                  {duplicatedDapp?.origin}
-                </div>
-              </div>
-            </a>
-          </div>
-          <Button
-            type="primary"
-            onClick={(e) => {
-              modalProps.onCancel?.(e);
-            }}
-            className={styles.button}
-            disabled
-          >
-            Confirm
-          </Button>
-        </div>
-      )}
+            }
+          />
+        </Form.Item>
+      </Form>
+      <PreviewDapp />
+      {/* <RelationModal /> */}
     </div>
   );
 }
@@ -304,8 +291,8 @@ export default function ModalAddDapp({
       }}
       title={null}
       footer={null}
-      className={classnames(styles.addModal, modalProps.className)}
-      wrapClassName={classnames(modalProps.wrapClassName)}
+      className={classNames(styles.addModal, modalProps.className)}
+      wrapClassName={classNames(modalProps.wrapClassName)}
       destroyOnClose
       onBack={() => {}}
     >

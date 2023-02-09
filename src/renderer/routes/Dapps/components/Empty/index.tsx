@@ -1,0 +1,162 @@
+import styles from './index.module.less';
+
+interface Point {
+  x: number;
+  y: number;
+}
+
+export const calculateDeltas = (
+  startPoint: Point,
+  endPoint: Point
+): {
+  dx: number;
+  dy: number;
+  absDx: number;
+  absDy: number;
+} => {
+  const dx = endPoint.x - startPoint.x;
+  const dy = endPoint.y - startPoint.y;
+  const absDx = Math.abs(dx);
+  const absDy = Math.abs(dy);
+
+  return { dx, dy, absDx, absDy };
+};
+
+const calculateFixedLineInflectionConstant = (absDx: number, absDy: number) => {
+  const WEIGHT_X = 8;
+  const WEIGHT_Y = 2;
+
+  return Math.round(Math.sqrt(absDx) * WEIGHT_X + Math.sqrt(absDy) * WEIGHT_Y);
+};
+
+export const calculateControlPoints = ({
+  absDx,
+  absDy,
+  dx,
+  dy,
+}: {
+  absDx: number;
+  absDy: number;
+  dx: number;
+  dy: number;
+}): {
+  p1: Point;
+  p2: Point;
+  p3: Point;
+  p4: Point;
+} => {
+  const offset = 8;
+  let startPointX = offset;
+  let startPointY = offset;
+  let endPointX = absDx - offset;
+  let endPointY = absDy - offset;
+  if (dx < 0) [startPointX, endPointX] = [endPointX, startPointX];
+  if (dy < 0) [startPointY, endPointY] = [endPointY, startPointY];
+
+  // const fixedLineInflectionConstant = 200; // We will calculate this value dynamically in next step
+  const fixedLineInflectionConstant = calculateFixedLineInflectionConstant(
+    absDx,
+    absDy
+  );
+
+  const p1 = {
+    x: startPointX,
+    y: startPointY,
+  };
+  const p2 = {
+    x: startPointX + fixedLineInflectionConstant / 10,
+    y: startPointY + fixedLineInflectionConstant,
+  };
+  const p3 = {
+    x: endPointX - fixedLineInflectionConstant / 4,
+    y: endPointY - fixedLineInflectionConstant,
+  };
+  const p4 = {
+    x: endPointX,
+    y: endPointY,
+  };
+
+  return { p1, p2, p3, p4 };
+};
+
+interface ArrowProps {
+  startPoint: Point;
+  endPoint: Point;
+  className?: string;
+}
+const Arrow = ({ startPoint, endPoint, className }: ArrowProps) => {
+  const { absDx, absDy, dx, dy } = calculateDeltas(startPoint, endPoint);
+  const { p1, p2, p3, p4 } = calculateControlPoints({
+    dx,
+    dy,
+    absDx,
+    absDy,
+  });
+  const arrowHeadEndingSize = 20;
+
+  return (
+    <svg width={absDx + 10} height={absDy + 10}>
+      <g opacity={0.2}>
+        <path
+          d={`
+          M 
+            ${p1.x}, ${p1.y} 
+          C 
+            ${p2.x}, ${p2.y} 
+            ${p3.x}, ${p3.y} 
+            ${p4.x}, ${p4.y} 
+        `}
+          stroke="white"
+          fill="none"
+          strokeWidth={4}
+        />
+        <circle
+          xmlns="http://www.w3.org/2000/svg"
+          cx="8"
+          cy="8"
+          r="8"
+          fill="white"
+        />
+        <circle
+          xmlns="http://www.w3.org/2000/svg"
+          cx="8"
+          cy="8"
+          r="5.5"
+          stroke="black"
+          strokeOpacity={0.28}
+          strokeWidth={2}
+        />
+
+        <path
+          d={`
+            M ${p4.x} ${p4.y}
+            L ${p4.x - arrowHeadEndingSize} ${p4.y - arrowHeadEndingSize / 2}
+            Z
+            M ${p4.x} ${p4.y}
+            L ${p4.x + (arrowHeadEndingSize / 5) * 2} ${
+            p4.y - arrowHeadEndingSize
+          }
+            Z
+          `}
+          fill="white"
+          stroke="white"
+          strokeWidth={4}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </g>
+    </svg>
+  );
+};
+
+export const Empty = () => {
+  return (
+    <div className={styles.empty}>
+      <div className={styles.emptyTitle}>添加 Dapp 开启您的 web3 之旅</div>
+      <div className={styles.emptyDesc}>
+        点击左下角+号，开始添加您的第一个Dapp
+      </div>
+      {/* <Arrow /> */}
+    </div>
+  );
+};
