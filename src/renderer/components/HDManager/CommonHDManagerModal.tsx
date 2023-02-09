@@ -47,8 +47,9 @@ export const CommonHDManagerModal: React.FC<Props> = ({
       .then(() => {
         setInitialed(true);
       })
-      .catch(() => {
+      .catch((e: any) => {
         props.onBack?.();
+        console.error(e);
         message.error(
           'Unable to connect to Hardware wallet. Please try to re-connect.'
         );
