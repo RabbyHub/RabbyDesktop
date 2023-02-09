@@ -65,7 +65,6 @@ const CONF = {
   } as IConf<
     ReplaySubject<{
       baseView: BrowserView;
-      safeView: BrowserView;
     }>
   >,
   securityCheckPopupWindowReady: {

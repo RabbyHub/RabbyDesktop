@@ -34,12 +34,12 @@ type M2RChanneMessagePayload = {
   '__internal_push:dapps:changed': MainInternalsMessagePayload['__internal_main:dapps:changed']['send'][0];
   '__internal_push:popupwin-on-mainwin:on-visiblechange':
     | {
-        type: IContextMenuPageInfo['type'];
+        type: IPopupWinPageInfo['type'];
         visible: true;
-        pageInfo: IContextMenuPageInfo;
+        pageInfo: IPopupWinPageInfo;
       }
     | {
-        type: IContextMenuPageInfo['type'];
+        type: IPopupWinPageInfo['type'];
         visible: false;
       };
   '__internal_push:popupview-on-mainwin:on-visiblechange': IPopupViewChanges;

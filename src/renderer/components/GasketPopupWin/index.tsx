@@ -11,7 +11,7 @@ export function GasketPopupWin({
   openDevTools,
 }: React.PropsWithChildren<{
   className?: string;
-  pageInfo: IContextMenuPageInfo;
+  pageInfo: IPopupWinPageInfo;
   openDevTools?: boolean;
 }>) {
   const divRef = useRef<HTMLDivElement>(null);

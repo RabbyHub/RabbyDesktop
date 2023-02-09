@@ -206,7 +206,7 @@ type IRabbyxRpcResponse = {
   error?: Error;
 };
 
-type IContextMenuPageInfo =
+type IPopupWinPageInfo =
   | {
       type: 'sidebar-dapp';
       dappTabInfo: {
