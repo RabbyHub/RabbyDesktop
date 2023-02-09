@@ -1,3 +1,10 @@
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import styles from './index.module.less';
 
 interface Point {
@@ -92,10 +99,10 @@ const Arrow = ({ startPoint, endPoint, className }: ArrowProps) => {
     absDx,
     absDy,
   });
-  const arrowHeadEndingSize = 20;
+  const arrowHeadEndingSize = 16;
 
   return (
-    <svg width={absDx + 10} height={absDy + 10}>
+    <svg width={absDx + 10} height={absDy + 10} className={className}>
       <g opacity={0.2}>
         <path
           d={`
@@ -116,15 +123,9 @@ const Arrow = ({ startPoint, endPoint, className }: ArrowProps) => {
           cy="8"
           r="8"
           fill="white"
-        />
-        <circle
-          xmlns="http://www.w3.org/2000/svg"
-          cx="8"
-          cy="8"
-          r="5.5"
           stroke="black"
           strokeOpacity={0.28}
-          strokeWidth={2}
+          strokeWidth={4}
         />
 
         <path
@@ -150,13 +151,48 @@ const Arrow = ({ startPoint, endPoint, className }: ArrowProps) => {
 };
 
 export const Empty = () => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [endPoint, setEndPoint] = useState({
+    x: 200,
+    y: 200,
+  });
+
+  const handleLayout = useCallback(() => {
+    const end = document.body.getBoundingClientRect();
+    const start = ref.current?.getBoundingClientRect();
+    if (!start) {
+      return;
+    }
+
+    const point = {
+      x: end.left + end.width - (start.left + start.width) - 48,
+      y: end.top + end.height - (start.top + start.height) - 130,
+    };
+    setEndPoint(point);
+  }, []);
+
+  useLayoutEffect(() => {
+    handleLayout();
+  }, [handleLayout]);
+
+  useEffect(() => {
+    window.addEventListener('resize', handleLayout);
+    return () => {
+      window.removeEventListener('resize', handleLayout);
+    };
+  }, [handleLayout]);
+
   return (
-    <div className={styles.empty}>
+    <div className={styles.empty} ref={ref}>
       <div className={styles.emptyTitle}>添加 Dapp 开启您的 web3 之旅</div>
       <div className={styles.emptyDesc}>
         点击左下角+号，开始添加您的第一个Dapp
       </div>
-      {/* <Arrow /> */}
+      <Arrow
+        startPoint={{ x: 0, y: 0 }}
+        endPoint={endPoint}
+        className={styles.arrow}
+      />
     </div>
   );
 };
