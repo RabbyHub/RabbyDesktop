@@ -1,6 +1,6 @@
 export function showMainwinPopup(
   rect: { x: number; y: number; width?: number; height?: number },
-  pageInfo: IContextMenuPageInfo,
+  pageInfo: IPopupWinPageInfo,
   opts?: {
     openDevTools?: boolean;
   }
@@ -17,7 +17,7 @@ export function showMainwinPopup(
   );
 }
 
-export function hideMainwinPopup(type: IContextMenuPageInfo['type']) {
+export function hideMainwinPopup(type: IPopupWinPageInfo['type']) {
   return window.rabbyDesktop.ipcRenderer.sendMessage(
     '__internal_rpc:popupwin-on-mainwin:toggle-show',
     {

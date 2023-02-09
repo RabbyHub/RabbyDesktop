@@ -74,7 +74,7 @@ type MainInternalsMessagePayload = {
   '__internal_main:popupwin-on-mainwin:toggle-show': {
     send: [
       | {
-          type: IContextMenuPageInfo['type'];
+          type: IPopupWinPageInfo['type'];
           nextShow: true;
           rect: {
             x: Electron.Point['x'];
@@ -82,12 +82,12 @@ type MainInternalsMessagePayload = {
             width?: number;
             height?: number;
           };
-          pageInfo: IContextMenuPageInfo;
+          pageInfo: IPopupWinPageInfo;
           openDevTools?: boolean;
         }
       | {
           nextShow: false;
-          type: IContextMenuPageInfo['type'];
+          type: IPopupWinPageInfo['type'];
         }
     ];
     response: [];
@@ -103,7 +103,7 @@ type MainInternalsMessagePayload = {
         }
       | {
           type: 'dapp-safe-view:inspect';
-          viewType: 'base' | 'safe';
+          viewType: 'base';
         }
       | {
           type: 'loading-view:inspect';
