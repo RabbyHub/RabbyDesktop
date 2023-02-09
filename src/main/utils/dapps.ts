@@ -107,26 +107,25 @@ export async function detectDapp(
   }
 
   const { origin: finalOrigin } = canoicalizeDappUrl(checkResult.finalUrl);
-  const { iconInfo, faviconUrl, faviconBase64 } = await parseWebsiteFavicon(
-    finalOrigin,
-    { timeout: DFLT_TIMEOUT, proxy: opts.proxyOnParseFavicon }
-  );
 
   const repeatedDapp = opts.existedDapps.find(
     (item) => item.origin === finalOrigin
   );
 
-  const data = {
+  const data: IDappsDetectResult['data'] = {
     inputOrigin: dappOrigin,
     finalOrigin,
-    icon: iconInfo || null,
+    icon: null,
     recommendedAlias: inputCoreName,
-    faviconUrl: faviconUrl || undefined,
-    faviconBase64: faviconBase64 || undefined,
+    faviconUrl: undefined,
+    faviconBase64: undefined,
     isExistedDapp: !!repeatedDapp,
   };
 
   if (repeatedDapp) {
+    data.faviconUrl = repeatedDapp.faviconUrl;
+    data.faviconBase64 = repeatedDapp.faviconBase64;
+
     return {
       data,
       error: {
@@ -135,6 +134,15 @@ export async function detectDapp(
       },
     };
   }
+
+  const { iconInfo, faviconUrl, faviconBase64 } = await parseWebsiteFavicon(
+    finalOrigin,
+    { timeout: DFLT_TIMEOUT, proxy: opts.proxyOnParseFavicon }
+  );
+
+  data.icon = iconInfo;
+  data.faviconUrl = faviconUrl;
+  data.faviconBase64 = faviconBase64;
 
   return { data };
 }
