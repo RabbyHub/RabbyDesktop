@@ -211,7 +211,7 @@ export function AddDapp({
 
       setDuplicatedDapp({
         alias: '',
-        origin: payload.data!.origin,
+        origin: payload.data!.inputOrigin,
         faviconUrl: payload.data!.faviconUrl,
         faviconBase64: payload.data!.faviconBase64,
       });
@@ -224,7 +224,7 @@ export function AddDapp({
       setStep('checked');
       setDappInfo({
         alias: '',
-        origin: payload.data.origin,
+        origin: payload.data.inputOrigin,
         faviconUrl: payload.data.faviconUrl,
         faviconBase64: payload.data.faviconBase64,
       });

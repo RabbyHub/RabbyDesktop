@@ -82,8 +82,9 @@ type ISensitiveConfig = {
 
 type IDappsDetectResult<T extends string = string> = {
   data: null | {
-    urlInfo: Partial<URL> | null;
-    origin: string;
+    finalOrigin: string;
+    inputOrigin: string;
+    recommendedAlias: string;
     icon: import('@debank/parse-favicon').Icon | null;
     faviconUrl?: string;
     faviconBase64?: string; // base64
