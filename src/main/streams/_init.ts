@@ -79,6 +79,15 @@ const CONF = {
     subject: new ReplaySubject(1),
     once: true,
   } as IConf<ReplaySubject<BrowserWindow>>,
+  hardwareConnectPopup: {
+    subject: new ReplaySubject(1),
+    once: true,
+  } as IConf<
+    ReplaySubject<{
+      onekeyPopup: BrowserView;
+      trezorPopup: BrowserView;
+    }>
+  >,
 
   contextMenuPopupWindowReady: {
     subject: new ReplaySubject(1),

@@ -92,6 +92,29 @@ type MainInternalsMessagePayload = {
     ];
     response: [];
   };
+  '__internal_main:hardware-connect-popup:toggle-show': {
+    send: [
+      | {
+          type: IHardwareConnectPageType;
+          nextShow: true;
+          rect?: {
+            x?: Electron.Point['x'];
+            y?: Electron.Point['y'];
+            width?: number;
+            height?: number;
+          };
+          connectInfo: {
+            url: string;
+          };
+          openDevTools?: boolean;
+        }
+      | {
+          nextShow: false;
+          type: IHardwareConnectPageType;
+        }
+    ];
+    response: [];
+  };
   '__internal_main:tabbed-window:destroyed': {
     send: [windowId: Electron.BrowserWindow['id']];
     response: [];

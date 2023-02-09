@@ -259,6 +259,7 @@ type ChannelMessagePayload = {
   '__internal_rpc:mainwindow:toggle-loading-view': MainInternalsMessagePayload['__internal_main:mainwindow:toggle-loading-view'];
   '__internal_rpc:popupview-on-mainwin:toggle-show': MainInternalsMessagePayload['__internal_main:popupview-on-mainwin:toggle-show'];
   '__internal_rpc:popupwin-on-mainwin:toggle-show': MainInternalsMessagePayload['__internal_main:popupwin-on-mainwin:toggle-show'];
+  '__internal_rpc:hardware-connect-popup:toggle-show': MainInternalsMessagePayload['__internal_main:hardware-connect-popup:toggle-show'];
   '__internal_rpc:app:open-external-url': {
     send: [externalURL: string];
     response: [];
