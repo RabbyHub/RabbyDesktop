@@ -58,10 +58,11 @@ export async function detectDapp(
   }
 ): Promise<IDappsDetectResult<DETECT_ERR_CODES>> {
   // TODO: process void url;
-  const dappOrigin = canoicalizeDappUrl(dappsUrl).origin;
-  const { urlInfo: inputUrlInfo } = canoicalizeDappUrl(dappOrigin);
+  const { origin: dappOrigin, hostWithoutTLD: inputCoreName } =
+    canoicalizeDappUrl(dappsUrl);
+  const { urlInfo: dappOriginInfo } = canoicalizeDappUrl(dappOrigin);
 
-  if (inputUrlInfo?.protocol !== 'https:') {
+  if (dappOriginInfo?.protocol !== 'https:') {
     return {
       data: null,
       error: {
@@ -71,9 +72,9 @@ export async function detectDapp(
     };
   }
 
-  const formatedUrl = urlFormat(inputUrlInfo);
+  const formatedOrigin = urlFormat(dappOriginInfo);
 
-  const checkResult = await checkUrlViaBrowserView(formatedUrl);
+  const checkResult = await checkUrlViaBrowserView(formatedOrigin);
   const isCertErr = !checkResult.valid && !!checkResult.certErrorDesc;
 
   if (isCertErr) {
@@ -105,18 +106,21 @@ export async function detectDapp(
     };
   }
 
-  const { urlInfo, origin } = canoicalizeDappUrl(checkResult.finalUrl);
+  const { origin: finalOrigin } = canoicalizeDappUrl(checkResult.finalUrl);
   const { iconInfo, faviconUrl, faviconBase64 } = await parseWebsiteFavicon(
-    origin,
+    finalOrigin,
     { timeout: DFLT_TIMEOUT, proxy: opts.proxyOnParseFavicon }
   );
 
-  const repeatedDapp = opts.existedDapps.find((item) => item.origin === origin);
+  const repeatedDapp = opts.existedDapps.find(
+    (item) => item.origin === finalOrigin
+  );
 
   const data = {
-    urlInfo,
-    origin,
+    inputOrigin: dappOrigin,
+    finalOrigin,
     icon: iconInfo || null,
+    recommendedAlias: inputCoreName,
     faviconUrl: faviconUrl || undefined,
     faviconBase64: faviconBase64 || undefined,
   };
@@ -202,12 +206,12 @@ const securityCheckResults = new LRUCache<
   ttl: 1000 * 60 * 60 * 24,
 });
 
-async function doCheckDappOrigin(origin: string) {
+async function doCheckDappOrigin(dappOrigin: string) {
   // TODO: catch error here
   const [httpsCheckResult, latestUpdateResult] = await Promise.all([
-    checkDappHttpsCert(origin),
+    checkDappHttpsCert(dappOrigin),
     queryDappLatestUpdateInfo({
-      dapp_origin: origin,
+      dapp_origin: dappOrigin,
     })
       .then((json) => {
         const latestItem = json.detect_list?.[0] || null;
@@ -292,7 +296,7 @@ async function doCheckDappOrigin(origin: string) {
   resultLevel = resultLevel || 'ok';
 
   const checkResult: ISecurityCheckResult = {
-    origin,
+    origin: dappOrigin,
     countWarnings,
     countDangerIssues,
     countIssues: countWarnings + countDangerIssues,
@@ -312,19 +316,19 @@ export async function getOrPutCheckResult(
     updateOnSet?: boolean;
   }
 ) {
-  const { origin } = canoicalizeDappUrl(dappUrl);
+  const { origin: dappOrigin } = canoicalizeDappUrl(dappUrl);
 
-  let checkResult = securityCheckResults.get(origin);
+  let checkResult = securityCheckResults.get(dappOrigin);
 
   if (!checkResult) {
-    checkResult = await doCheckDappOrigin(origin);
-    securityCheckResults.set(origin, checkResult);
+    checkResult = await doCheckDappOrigin(dappOrigin);
+    securityCheckResults.set(dappOrigin, checkResult);
   } else if (options?.updateOnSet) {
-    const p = doCheckDappOrigin(origin);
+    const p = doCheckDappOrigin(dappOrigin);
 
     if (options?.wait) {
       try {
-        securityCheckResults.set(origin, await p);
+        securityCheckResults.set(dappOrigin, await p);
       } catch (e) {
         console.error(e);
       }
