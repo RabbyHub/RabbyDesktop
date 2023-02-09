@@ -77,6 +77,29 @@ export function isRabbyXPage(
   }
 }
 
+const HARDWARE_CONNECT = [
+  // onekey
+  {
+    type: 'onekey',
+    urls: ['https://connect.onekey.so/popup.html'],
+  },
+  {
+    type: 'trezor',
+    urls: [
+      'https://connect.trezor.io/8/popup.html',
+      'https://connect.trezor.io/9/popup.html',
+    ],
+  },
+] as const;
+
+export function checkHardwareConnectPage(url: string) {
+  const connInfo = HARDWARE_CONNECT.find((info) =>
+    info.urls.some((u) => url.startsWith(u))
+  );
+
+  return connInfo || false;
+}
+
 export function isUrlFromDapp(url: string) {
   return (
     !url.startsWith(RABBY_INTERNAL_PROTOCOL) &&
