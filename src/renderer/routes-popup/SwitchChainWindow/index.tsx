@@ -57,7 +57,7 @@ function ChainItem({
 function SwitchChainPage({
   pageInfo,
 }: {
-  pageInfo: IContextMenuPageInfo & { type: 'switch-chain' };
+  pageInfo: IPopupWinPageInfo & { type: 'switch-chain' };
 }) {
   useBodyClassNameOnMounted('switch-chain-page');
   const scrollRef = useRef(null);

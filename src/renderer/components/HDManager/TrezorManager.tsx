@@ -1,4 +1,3 @@
-import { Modal } from 'antd';
 import React from 'react';
 import useModal from 'antd/lib/modal/useModal';
 import { useAsyncRetry } from 'react-use';
@@ -10,6 +9,7 @@ import {
 import { HDPathType } from './HDPathTypeButton';
 import { MainContainer } from './MainContainer';
 import { HDManagerStateContext, sleep } from './utils';
+import { Modal } from '../Modal/Modal';
 
 interface Props {
   HDName?: string;

@@ -1,7 +1,18 @@
 
+v0.4.3 / 2023-02-08
+===================
+
+  * feat: allow reject sign on click gasket.
+  * feat: tuning sidebar and style of toast.
+  * fix: white background of modal window on macOS 13. (#103)
+  * feat: history transaction display (#105)
+  * feat: portfolio number display logic (#104)
+
 v0.4.2 / 2023-02-03
 ===================
 
+  * Release v0.4.2
+  * build: add prerelease version update script.
   * feat: 'system' as default proxy type.
   * feat: update balance cache when portfolio balance changed (#102)
   * feat: upgrade rabbyx core version.

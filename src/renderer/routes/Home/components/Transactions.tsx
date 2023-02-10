@@ -13,14 +13,10 @@ import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 // eslint-disable-next-line import/no-cycle
 import TransactionItem, { LoadingTransactionItem } from './TransactionItem';
 
-const TransactionWrapper = styled.div``;
-
-const Title = styled.p`
-  margin-bottom: 20px;
-  font-weight: 500;
-  font-size: 15px;
-  line-height: 18px;
-  color: rgba(255, 255, 255, 0.4);
+const TransactionWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100% - 154px);
 `;
 
 const TransactionList = styled.ul`
@@ -28,7 +24,13 @@ const TransactionList = styled.ul`
   padding: 0;
   margin: 0;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  flex: 1;
+  overflow: auto;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const EmptyView = styled.div`
@@ -47,6 +49,19 @@ const EmptyView = styled.div`
   .icon-empty {
     width: 52px;
   }
+`;
+
+const ViewAllButton = styled.div`
+  cursor: pointer;
+  text-align: center;
+  font-size: 12px;
+  line-height: 40px;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom-right-radius: 6px;
+  border-bottom-left-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top-width: 0;
 `;
 
 const formatToken = (i: TokenItem | TransferingNFTItem, isReceive: boolean) => {
@@ -92,6 +107,7 @@ const formatToken = (i: TokenItem | TransferingNFTItem, isReceive: boolean) => {
 const getTxInfoFromExplain = (explain: TransactionGroup['explain']) => {
   let type = '';
   let protocol: TransactionDataItem['protocol'] = null;
+  let name = '';
   if (explain.type_cancel_tx) {
     type = 'cancel';
   } else if (
@@ -109,6 +125,7 @@ const getTxInfoFromExplain = (explain: TransactionGroup['explain']) => {
       name: explain.type_call.contract_protocol_name,
       logoUrl: explain.type_call.contract_protocol_logo_url,
     };
+    name = explain.type_call.action;
   } else if (
     explain.type_token_approval &&
     explain.type_token_approval.spender_protocol_name
@@ -121,8 +138,19 @@ const getTxInfoFromExplain = (explain: TransactionGroup['explain']) => {
   return {
     type,
     protocol,
+    name,
   };
 };
+
+const Empty = ({ isMore }: { isMore?: boolean }) => (
+  <EmptyView>
+    <img
+      src="rabby-internal://assets/icons/home/tx-empty.png"
+      className="icon-empty"
+    />
+    <p>No {isMore && 'more '}transaction in last 24 hours</p>
+  </EmptyView>
+);
 
 const Transactions = () => {
   const { currentAccount } = useCurrentAccount();
@@ -139,9 +167,10 @@ const Transactions = () => {
   }, [recentTxs, localTxs]);
 
   const mergedRecentTxs = useMemo(() => {
-    return sortBy([...recentTxs, ...completedTxs], 'timeAt')
-      .reverse()
-      .slice(0, 3);
+    return sortBy(
+      [...recentTxs.slice(0, 3), ...completedTxs],
+      'timeAt'
+    ).reverse();
   }, [recentTxs, completedTxs]);
 
   const initLocalTxs = useCallback(async () => {
@@ -160,9 +189,9 @@ const Transactions = () => {
         if (!chain) return;
         const maxTx = maxBy(
           item.txs,
-          (i) => i.rawTx.gasPrice || i.rawTx.maxFeePerGas
+          (i) => Number(i.rawTx.gasPrice) || Number(i.rawTx.maxFeePerGas)
         )!;
-        const { type, protocol } = getTxInfoFromExplain(item.explain);
+        const { type, protocol, name } = getTxInfoFromExplain(item.explain);
         const balanceChange = item.explain.balance_change;
         lTxs.push({
           type,
@@ -195,7 +224,7 @@ const Transactions = () => {
           chain: chain.serverId,
           status: 'completed',
           otherAddr: maxTx.rawTx.to || '',
-          name: '',
+          name,
           timeAt: item.createdAt,
         });
       });
@@ -211,7 +240,7 @@ const Transactions = () => {
           item.txs,
           (i) => i.rawTx.gasPrice || i.rawTx.maxFeePerGas
         )!;
-        const { type, protocol } = getTxInfoFromExplain(item.explain);
+        const { type, protocol, name } = getTxInfoFromExplain(item.explain);
         const balanceChange = item.explain.balance_change;
         pTxs.push({
           type,
@@ -244,7 +273,7 @@ const Transactions = () => {
           chain: chain.serverId,
           status: 'pending',
           otherAddr: maxTx.rawTx.to || '',
-          name: '',
+          name,
           timeAt: item.createdAt,
           rawTx: maxTx.rawTx,
         });
@@ -337,20 +366,9 @@ const Transactions = () => {
     );
   }, [initLocalTxs]);
 
-  const Empty = (
-    <EmptyView>
-      <img
-        src="rabby-internal://assets/icons/home/tx-empty.png"
-        className="icon-empty"
-      />
-      <p>No more transaction in last 24 hours</p>
-    </EmptyView>
-  );
-
   if (isLoading) {
     return (
       <TransactionWrapper>
-        <Title>Transactions</Title>
         <TransactionList>
           <LoadingTransactionItem />
           <LoadingTransactionItem />
@@ -363,15 +381,16 @@ const Transactions = () => {
   if (pendingTxs.length <= 0 && recentTxs.length <= 0) {
     return (
       <TransactionWrapper>
-        <Title>Transactions</Title>
-        <TransactionList>{Empty}</TransactionList>
+        <TransactionList>
+          <Empty />
+        </TransactionList>
+        <ViewAllButton>View All Transactions</ViewAllButton>
       </TransactionWrapper>
     );
   }
 
   return (
     <TransactionWrapper>
-      <Title>Transactions</Title>
       <TransactionList>
         {pendingTxs.map((tx) => {
           return <TransactionItem item={tx} key={`${tx.chain}-${tx.id}`} />;
@@ -379,8 +398,9 @@ const Transactions = () => {
         {mergedRecentTxs.map((tx) => {
           return <TransactionItem item={tx} key={`${tx.chain}-${tx.id}`} />;
         })}
-        {pendingTxs.length + mergedRecentTxs.length < 3 && Empty}
+        {pendingTxs.length + mergedRecentTxs.length < 3 && <Empty isMore />}
       </TransactionList>
+      <ViewAllButton>View All Transactions</ViewAllButton>
     </TransactionWrapper>
   );
 };

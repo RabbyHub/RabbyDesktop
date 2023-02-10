@@ -20,6 +20,20 @@
 @h-tipContainer: 100px;
 @h-button: 52px;
 
+:global {
+  html.os-darwin.__rabbyx-shell-page {
+    :local .SelectDevicesModal {
+      width: 1000px;
+      height: 600px;
+      max-width: 100vw !important;
+
+      :global .ant-modal-content {
+        border-radius: 9px;
+      }
+    }
+  }
+}
+
 .SelectDevicesModal {
   :global {
     .ant-modal-body {

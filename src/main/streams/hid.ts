@@ -181,6 +181,8 @@ getSessionInsts().then(({ mainSession }) => {
 
   mainSession.setPermissionCheckHandler(
     (webContents, permission, requestingOrigin, details) => {
+      // leave here for debug
+      // console.debug('[debug] setPermissionCheckHandler:: permission', permission);
       switch (permission) {
         case 'clipboard-sanitized-write':
         case 'accessibility-events':

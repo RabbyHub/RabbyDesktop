@@ -59,6 +59,22 @@
       padding: 12px;
     }
   }
+
+  .txPendingCount {
+    width: 16px;
+    height: 16px;
+    font-size: 12px;
+
+    :global .ant-badge-count {
+      box-shadow: none;
+    }
+
+    &.inCollapsed {
+      :global .ant-badge-count {
+        padding: 0;
+      }
+    }
+  }
 }
 
 :global {
@@ -139,9 +155,6 @@
   .routeLogo {
     width: 20px;
     height: 20px;
-    &.isDapp {
-      border-radius: 3px;
-    }
   }
 
   &.isDapp .routeLogo {
@@ -173,6 +186,21 @@
     opacity: 1;
 
     transition: opacity var(--mainwin-sidebar-animation-second);
+
+    .txPendingCount {
+      position: absolute;
+      :global .ant-badge-count {
+        position: absolute;
+        top: 12px;
+        right: -8px;
+        padding: 2px;
+        min-width: 16px;
+        height: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
   }
 
   .routeItemInner {

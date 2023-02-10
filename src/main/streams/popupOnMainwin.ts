@@ -20,7 +20,7 @@ import { onMainWindowReady } from '../utils/stream-helpers';
 
 async function hidePopupOnMainWindow(
   targetWin: BrowserWindow | null,
-  type: IContextMenuPageInfo['type']
+  type: IPopupWinPageInfo['type']
 ) {
   if (!targetWin || targetWin.isDestroyed()) return;
 
@@ -177,7 +177,7 @@ Promise.all([sidebarReady, switchChainReady]).then((wins) => {
 });
 
 const SIZE_MAP: Record<
-  IContextMenuPageInfo['type'],
+  IPopupWinPageInfo['type'],
   {
     width: number;
     height: number;
@@ -194,7 +194,7 @@ const SIZE_MAP: Record<
 };
 
 function pickWH(
-  type: IContextMenuPageInfo['type'],
+  type: IPopupWinPageInfo['type'],
   input: { width?: number; height?: number }
 ) {
   let result: Required<typeof input>;

@@ -1,5 +1,8 @@
+import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { message } from 'antd';
-import { useEffect } from 'react';
+import { atom, useAtom } from 'jotai';
+import { useCallback, useEffect } from 'react';
+import { useCurrentAccount } from './useAccount';
 
 const DEBUG_DURACTION = 0;
 
@@ -52,4 +55,38 @@ export function useTransactionChanged() {
       }
     );
   }, []);
+}
+
+const pendingTxCountAtom = atom(0);
+export function useTransactionPendingCount() {
+  const { currentAccount } = useCurrentAccount();
+  const [pendingTxCount, setPendingTxCount] = useAtom(pendingTxCountAtom);
+
+  const fetchCount = useCallback(() => {
+    if (!currentAccount?.address) {
+      setPendingTxCount(0);
+      return;
+    }
+
+    walletController
+      .getTransactionHistory(currentAccount.address)
+      .then(({ pendings }) => {
+        setPendingTxCount(pendings.length);
+      });
+  }, [currentAccount?.address, setPendingTxCount]);
+
+  useEffect(() => {
+    fetchCount();
+
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
+      (payload) => {
+        if (payload.event !== 'transactionChanged') return;
+
+        fetchCount();
+      }
+    );
+  }, [fetchCount]);
+
+  return pendingTxCount;
 }

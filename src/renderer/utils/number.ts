@@ -90,7 +90,11 @@ export const formatPrice = (price: string | number) => {
 };
 
 export const formatUsdValue = (value: string | number) => {
-  if (new BigNumber(value).gte(0.01) || new BigNumber(value).eq(0)) {
+  const bnValue = new BigNumber(value);
+  if (bnValue.lt(0)) {
+    return `-$${formatNumber(Math.abs(Number(value)))}`;
+  }
+  if (bnValue.gte(0.01) || bnValue.eq(0)) {
     return `$${formatNumber(value)}`;
   }
   return '<$0.01';
