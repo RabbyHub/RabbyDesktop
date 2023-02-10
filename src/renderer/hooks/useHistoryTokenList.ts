@@ -10,15 +10,17 @@ export interface TokenWithHistoryItem {
   history: TokenItem;
 }
 
-export default (address: string | undefined) => {
+export default (address: string | undefined, nonce = 0) => {
   const [tokenList, setTokenList] = useState<TokenItem[]>([]);
   const [historyTokenMap, setHistoryTokenMap] = useState<
     Record<string, TokenItem>
   >({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingRealTime, setIsLoadingRealTime] = useState(false);
 
   const fetchData = async (addr: string) => {
     setIsLoading(true);
+    setIsLoadingRealTime(true);
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
     const result: TokenItem[] = [];
     const cachedList = await walletOpenapi.getCachedTokenList(addr);
@@ -37,6 +39,7 @@ export default (address: string | undefined) => {
         usd_value: new BigNumber(item.amount).times(item.price).toNumber(),
       }))
     );
+    setIsLoadingRealTime(false);
     const yesterdayTokenList = await walletOpenapi.getHistoryTokenList({
       id: addr,
       timeAt: YESTERDAY,
@@ -138,11 +141,12 @@ export default (address: string | undefined) => {
     setTokenList([]);
     setHistoryTokenMap({});
     fetchData(address);
-  }, [address]);
+  }, [address, nonce]);
 
   return {
     tokenList,
     historyTokenMap,
     isLoading,
+    isLoadingRealTime,
   };
 };
