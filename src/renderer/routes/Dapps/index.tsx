@@ -2,6 +2,7 @@
 import { setDappsOrder } from '@/renderer/ipcRequest/dapps';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { useCallback, useState } from 'react';
+import { Empty } from './components/Empty';
 
 import ModalDeleteDapp from '../../components/ModalDeleteDapp';
 import ModalRenameDapp from '../../components/ModalRenameDapp';
@@ -21,7 +22,7 @@ type IOnOpDapp = (
 ) => void;
 
 export default function DApps() {
-  const { pinDapp, unpinDapp, pinnedDapps, unpinnedDapps, openDapp } =
+  const { dapps, pinDapp, unpinDapp, pinnedDapps, unpinnedDapps, openDapp } =
     useTabedDapps();
 
   const [renamingDapp, setRenamingDapp] = useState<IDapp | null>(null);
@@ -75,46 +76,50 @@ export default function DApps() {
           </div>
         </header>
         <main className={style.main}>
-          <div className="dapps">
-            <div className="dapp-matrix">
-              <SortableList
-                data={pinnedDapps}
-                onChange={(v) => {
-                  setDappsOrder({
-                    pinnedList: v.map((item) => item.origin),
-                  });
-                }}
-                renderItem={(dapp) => {
-                  return (
-                    <DAppBlock
-                      onOpen={openDapp}
-                      key={dapp.origin}
-                      dapp={dapp}
-                      onOpDapp={onClickDapp}
-                    />
-                  );
-                }}
-              />
-              <SortableList
-                data={unpinnedDapps}
-                onChange={(v) => {
-                  setDappsOrder({
-                    unpinnedList: v.map((item) => item.origin),
-                  });
-                }}
-                renderItem={(dapp) => {
-                  return (
-                    <DAppBlock
-                      onOpen={openDapp}
-                      key={dapp.origin}
-                      dapp={dapp}
-                      onOpDapp={onClickDapp}
-                    />
-                  );
-                }}
-              />
+          {dapps?.length ? (
+            <div className="dapps">
+              <div className="dapp-matrix">
+                <SortableList
+                  data={pinnedDapps}
+                  onChange={(v) => {
+                    setDappsOrder({
+                      pinnedList: v.map((item) => item.origin),
+                    });
+                  }}
+                  renderItem={(dapp) => {
+                    return (
+                      <DAppBlock
+                        onOpen={openDapp}
+                        key={dapp.origin}
+                        dapp={dapp}
+                        onOpDapp={onClickDapp}
+                      />
+                    );
+                  }}
+                />
+                <SortableList
+                  data={unpinnedDapps}
+                  onChange={(v) => {
+                    setDappsOrder({
+                      unpinnedList: v.map((item) => item.origin),
+                    });
+                  }}
+                  renderItem={(dapp) => {
+                    return (
+                      <DAppBlock
+                        onOpen={openDapp}
+                        key={dapp.origin}
+                        dapp={dapp}
+                        onOpDapp={onClickDapp}
+                      />
+                    );
+                  }}
+                />
+              </div>
             </div>
-          </div>
+          ) : (
+            <Empty />
+          )}
         </main>
 
         <ModalRenameDapp

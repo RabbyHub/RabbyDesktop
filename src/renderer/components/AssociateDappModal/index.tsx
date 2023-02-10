@@ -1,3 +1,4 @@
+import { canoicalizeDappUrl } from '@/isomorphic/url';
 import {
   useDapps,
   useProtocolDappsBinding,
@@ -53,7 +54,9 @@ const DappCard = ({ checked, onSelect, dapp }: DappCardProps) => {
       />
       <div className={styles.dappContent}>
         <div className={styles.dappName}>{dapp.alias}</div>
-        <div className={styles.dappOrigin}>{dapp.origin}</div>
+        <div className={styles.dappOrigin}>
+          {dapp.origin?.replace(/^\w+:\/\//, '')}
+        </div>
       </div>
       <div className={styles.dappExtra}>
         <Checkbox checked={checked} />
@@ -69,6 +72,14 @@ const DappCardAdd = ({ onClick }: { onClick?: () => void }) => {
       <div className={styles.dappContent}>Add a dapp</div>
     </div>
   );
+};
+
+const sortDapps = (dapps: IMergedDapp[], index: number) => {
+  const _dapps = [...dapps];
+  const dapp = dapps[index];
+  _dapps.splice(index, 1);
+  _dapps.unshift(dapp);
+  return _dapps;
 };
 
 const AssociateDapp = ({
@@ -88,10 +99,10 @@ const AssociateDapp = ({
   const [loading, setLoading] = useState(false);
 
   const bindUrl = useMemo(() => {
-    const arr = Object.values(protocolDappsBinding);
-    const t = arr.find((item) => item.siteUrl === url);
-    return protocolDappsBinding[protocolId]?.origin || t?.origin || null;
-  }, [protocolDappsBinding, protocolId, url]);
+    // const arr = Object.values(protocolDappsBinding);
+    // const t = arr.find((item) => item.siteUrl === url);
+    return protocolDappsBinding[protocolId]?.origin || null;
+  }, [protocolDappsBinding, protocolId]);
 
   useEffect(() => {
     setCurrent(bindUrl);
@@ -99,19 +110,28 @@ const AssociateDapp = ({
 
   const dappList = useMemo(() => {
     try {
-      const { origin } = new URL(url);
+      const site = canoicalizeDappUrl(url);
 
+      // 完全匹配
       const index = dapps.findIndex((dapp) => {
-        return dapp.origin === origin;
+        return dapp.origin === site.origin;
       });
-      if (index === -1) {
-        return dapps;
+      if (index !== -1) {
+        return sortDapps(dapps, index);
       }
-      const _dapps = [...dapps];
-      const dapp = dapps[index];
-      _dapps.splice(index, 1);
-      _dapps.unshift(dapp);
-      return _dapps;
+
+      // 二级域名匹配
+      const domainIndex = dapps.findIndex((dapp) => {
+        const dappSite = canoicalizeDappUrl(dapp.origin);
+        return (
+          dappSite.secondaryDomain === site.secondaryDomain &&
+          dappSite.is2ndaryDomain
+        );
+      });
+      if (domainIndex !== -1) {
+        return sortDapps(dapps, domainIndex);
+      }
+      return dapps;
     } catch (e) {
       return dapps;
     }
@@ -187,7 +207,7 @@ const AssociateDapp = ({
           setIsShowAdd(false);
         }}
         onAddedDapp={(origin) => {
-          setIsShowAdd(false);
+          // setIsShowAdd(false);
           // todo: fix me
           setTimeout(() => {
             setCurrent(origin);

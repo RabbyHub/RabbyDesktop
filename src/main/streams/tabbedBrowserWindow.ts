@@ -2,6 +2,7 @@ import { BrowserWindow } from 'electron';
 import { bufferTime, fromEvent, map } from 'rxjs';
 
 import { isUrlFromDapp, parseDomainMeta } from '@/isomorphic/url';
+import { arraify } from '@/isomorphic/array';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 import {
   onIpcMainEvent,
@@ -207,20 +208,28 @@ onIpcMainInternalEvent(
 
 onIpcMainInternalEvent(
   '__internal_main:app:close-tab-on-del-dapp',
-  async (dappOrigin) => {
+  async (deledDappOrigins) => {
     const mainWin = await onMainWindowReady();
 
-    const allDapps = getAllDapps();
-    const domainMeta = parseDomainMeta(dappOrigin, allDapps, {});
-    const isMainDomainAppWithoutSubDomainsDapp =
-      domainMeta?.is2ndaryDomain && !domainMeta.subDomains.length;
+    let tabs: import('../browser/tabs').Tab[] = [];
 
-    const tabs = !isMainDomainAppWithoutSubDomainsDapp
-      ? [mainWin.tabs.findByOrigin(dappOrigin)]
-      : mainWin.tabs.filterTab((tabURL) => {
-          const tabDomainMeta = parseDomainMeta(tabURL, allDapps, {});
-          return tabDomainMeta.secondaryDomain === domainMeta.secondaryDomain;
-        });
+    const dappOrigins = new Set(arraify(deledDappOrigins));
+    const allDapps = getAllDapps();
+
+    dappOrigins.forEach((dappOrigin) => {
+      const domainMeta = parseDomainMeta(dappOrigin, allDapps, {});
+      const isMainDomainAppWithoutSubDomainsDapp =
+        domainMeta?.is2ndaryDomain && !domainMeta.subDomains.length;
+
+      const tabsToClose = !isMainDomainAppWithoutSubDomainsDapp
+        ? mainWin.tabs.findByOrigin(dappOrigin)
+        : mainWin.tabs.filterTab((tabURL) => {
+            const tabDomainMeta = parseDomainMeta(tabURL, allDapps, {});
+            return tabDomainMeta.secondaryDomain === domainMeta.secondaryDomain;
+          });
+
+      if (tabsToClose) tabs = tabs.concat(tabsToClose);
+    });
 
     tabs.forEach((tab) => {
       if (tab) {

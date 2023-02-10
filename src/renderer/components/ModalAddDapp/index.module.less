@@ -1,30 +1,51 @@
-.step {
-  --color-title: #fff;
-  padding: 64px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  height: 600px;
+@import '@/renderer/css/mixins.less';
+
+.addModal {
+  .content {
+    padding: 32px 120px 63px 120px;
+    min-height: 702px;
+  }
+  .title {
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 24px;
+    text-align: center;
+    color: #ffffff;
+    margin-bottom: 32px;
+  }
+  .form {
+    // min-height: 84px;
+    // margin-bottom: 24px;
+  }
 
   .input {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
-    height: 64px;
-    padding: 16px 24px;
+    height: 52px;
+    padding: 16px;
     &:focus,
     &:hover {
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.5);
     }
-    color: #fff;
     box-shadow: none !important;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+
+    color: #ffffff;
 
     :global {
       .ant-input-clear-icon {
         color: #fff;
+      }
+    }
+
+    &Suffix {
+      font-size: 16px;
+      img {
+        cursor: pointer;
       }
     }
   }
@@ -35,224 +56,258 @@
     }
     .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper,
     .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper:hover {
-      border-color: #ff6f6f;
+      border-color: #ff7f7f;
       background: rgba(255, 255, 255, 0.1);
     }
     .ant-form-item-explain-error {
-      color: #ff6f6f;
-    }
-  }
-  .backIcon {
-    position: absolute;
-    top: 40px;
-    left: 40px;
-    cursor: pointer;
-  }
-  .button.button {
-    margin: auto auto 0 auto;
-    width: 240px;
-    height: 52px;
-    border-radius: 4px;
-    font-weight: 500;
-    font-size: 15px;
-    line-height: 18px;
-    display: block;
-    &:disabled {
-      background: #707280 !important;
-      border: none;
-      opacity: 1;
-    }
-  }
-
-  .stepAdd {
-    height: 100%;
-    width: 640px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-    .addTitle {
-      font-size: 24px;
-      font-weight: 700;
-      line-height: 28px;
-      letter-spacing: 0px;
-      text-align: center;
-      color: var(--color-title);
-      margin-bottom: 80px;
-    }
-
-    :global {
-      .ant-form-item {
-        width: 100%;
-        text-align: left;
-      }
-      .ant-form-item-explain {
-        margin-top: 16px;
+      color: #ff7f7f;
+      .link {
+        text-decoration: underline;
+        cursor: pointer;
       }
     }
-
-    .addConfirmBtn {
-      margin-top: auto;
-      width: 240px;
-      height: 52px;
-      border-radius: 8px;
-      font-weight: 500;
-      font-size: 15px;
-      line-height: 18px;
-      background-color: #707280 !important;
-      border: none;
-    }
-  }
-
-  .stepChecked {
-    height: 100%;
-    width: 400px;
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    padding-top: 40px;
-
-    .checkedFavicon {
-      width: 80px;
-      height: 80px;
-      display: block;
-      margin: 0 auto;
-      margin-bottom: 24px;
-      border-radius: 8px;
-    }
-
-    .checkedDappUrl {
-      font-weight: 500;
-      font-size: 16px;
-      line-height: 19px;
-
-      text-align: center;
-      color: var(--color-title);
+    .ant-form-item {
       margin-bottom: 32px;
     }
 
-    .checkedDappUrl + .checkedInput {
-      margin-top: 24px;
+    .ant-form-item-explain {
+      margin-top: 12px;
+      margin-bottom: 24px;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 14px;
     }
-
-    .checkedInput {
-      background: var(--color-bg);
-      border: 1px solid var(--color-primary);
-      border-radius: 8px;
-      height: 64px;
-      padding: 16px 24px;
-
-      :global(.ant-input) {
-        background: var(--color-bg);
-      }
-    }
-
-    .checkedConfirmBtn {
-      margin-top: auto;
-      width: 240px;
-      height: 52px;
-      border-radius: 8px;
-      font-weight: 500;
-      font-size: 15px;
-      line-height: 18px;
-      background-color: #707280 !important;
-      border: none;
+    .ant-form-item-explain-success {
+      color: rgba(255, 255, 255, 0.6);
     }
   }
 
-  .stepDuplicated {
-    padding-top: 36px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100%;
+  .preview {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
 
-    &Tips {
-      color: var(--color-orange);
-      font-weight: 500;
-      font-size: 16px;
-      line-height: 19px;
+    &BtnSuccess {
+      background: #27c193;
+      box-shadow: 0px 4px 12px rgba(48, 158, 86, 0.2);
+      border-color: #27c193;
+    }
 
+    &Loading {
+      width: 112px;
+      text-align: center;
+      color: #fff;
+      font-size: 20px;
+    }
+
+    &Icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+    }
+
+    &Header {
+      padding: 8px 12px 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    &Title {
+      :global {
+        .ant-input {
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 2px;
+          padding: 4px;
+          height: 24px;
+          width: 148px;
+
+          font-weight: 500;
+          font-size: 13px;
+          line-height: 16px;
+          color: #ffffff;
+        }
+      }
+    }
+    &Alias {
+      color: #fff;
+      padding-left: 4px;
+      font-size: 14px;
+      line-height: 16px;
+    }
+    &Desc {
+      font-weight: 400;
+      font-size: 13px;
+      line-height: 16px;
+      color: #ffffff;
+      opacity: 0.6;
+      padding-left: 4px;
+    }
+
+    &Action {
+      margin-left: auto;
+
+      :global {
+        .ant-btn {
+          height: 36px;
+          width: 112px;
+          font-weight: 500;
+          font-size: 15px;
+          line-height: 18px;
+          text-align: center;
+          color: #ffffff;
+        }
+      }
+    }
+    &Content {
+      width: 100%;
+      height: 393px;
+      border: 0;
+      border-radius: 0 0 8px 8px;
+    }
+    &Empty {
+      height: 393px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      margin-bottom: 40px;
-    }
-    &Btn {
-      margin-top: auto;
-      width: 240px;
-      height: 52px;
-      border-radius: 8px;
-      font-weight: 500;
-      font-size: 15px;
-      line-height: 18px;
-      background-color: #707280 !important;
-      border: none;
-    }
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
 
+      text-align: center;
+
+      &Title {
+        font-weight: 400;
+        font-size: 13px;
+        line-height: 16px;
+        color: #ffffff;
+        opacity: 0.6;
+        margin-top: 24px;
+      }
+    }
+  }
+}
+
+.relationModal {
+  :global {
+    .ant-modal-close-x {
+      padding: 16px;
+    }
+  }
+  .content {
+    padding: 40px 0;
+    height: 400px;
+  }
+  .title {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 22px;
+    text-align: center;
+    color: #ffffff;
+    padding: 0 40px;
+    margin-bottom: 32px;
+  }
+
+  .body,
+  .footer {
+    padding-left: 92px;
+    padding-right: 92px;
+  }
+  .body {
+    height: 180px;
+    overflow: overlay;
+    .chrome-like-scrollbar();
+  }
+  .footer {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
     :global {
-      .dapp-block {
-        position: relative;
-        width: 300px;
-        // height: 100px;
-        box-sizing: border-box;
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        padding: 16px;
-        margin-bottom: 24px;
-
-        background-color: var(--color-bg);
-        border-radius: 8px;
-
-        .dapp-favicon {
-          width: 52px;
-          height: 52px;
-          margin-right: 16px;
-          border-radius: 4px;
-        }
+      .ant-btn {
+        height: 44px;
+        border-radius: 4px;
+        font-weight: 500;
+        font-size: 15px;
+        line-height: 18px;
       }
-
-      .dapp-block .anchor {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-      }
-
-      .truncate() {
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-      }
-
-      .dapp-block .anchor .infos {
-        overflow: hidden;
-        .dapp-alias {
-          font-weight: 700;
-          font-size: 18px;
-          line-height: 21px;
-          color: var(--color-title);
-          margin-bottom: 0;
-          text-align: left;
-          .truncate;
-        }
-        .dapp-url {
-          font-style: normal;
-          font-weight: 500;
-          font-size: 14px;
-          line-height: 16px;
-          color: var(--color-paragraph);
-          .truncate;
-        }
-
-        .dapp-alias + .dapp-url {
-          margin-top: 4px;
-        }
+      .ant-btn-background-ghost {
+        opacity: 0.8;
       }
     }
+  }
+}
+
+.dapp {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  padding: 16px;
+  width: 100%;
+
+  &:not(:last-child) {
+    margin-bottom: 8px;
+  }
+
+  &Active {
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  &Add {
+    background: rgba(134, 151, 255, 0.2);
+
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 18px;
+
+    color: #8697ff;
+    height: 64px;
+  }
+
+  &Content {
+    overflow: hidden;
+  }
+
+  &Icon {
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 4px;
+  }
+
+  &Name {
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 16px;
+    color: #ffffff;
+    margin-bottom: 2px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  &Origin {
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+    color: #ffffff;
+    opacity: 0.8;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  &Extra {
+    margin-left: auto;
+  }
+}
+
+.previewImageContainer {
+  height: 393px;
+  width: 100%;
+
+  > .imgBlock {
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 100%;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
   }
 }

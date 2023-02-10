@@ -4,10 +4,12 @@ import { format as urlFormat } from 'url';
 import Axios, { AxiosError, AxiosProxyConfig } from 'axios';
 import LRUCache from 'lru-cache';
 
+import { BrowserWindow } from 'electron';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { parseWebsiteFavicon } from './fetch';
 import { AxiosElectronAdapter } from './axios';
 import { checkUrlViaBrowserView, CHROMIUM_NET_ERR_DESC } from './appNetwork';
+import { createPopupWindow } from './browser';
 
 const DFLT_TIMEOUT = 8 * 1e3;
 
@@ -50,6 +52,81 @@ async function checkDappHttpsCert(
   };
 }
 
+let previewWindow: BrowserWindow;
+export async function safeCapturePage(
+  targetURL: string,
+  opts?: {
+    timeout?: number;
+  }
+): Promise<{
+  previewImg: Uint8Array | null;
+  error?: string | null;
+}> {
+  if (!previewWindow) {
+    previewWindow = createPopupWindow({
+      width: 1366,
+      height: 768,
+      show: false,
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        webviewTag: false,
+      },
+    });
+  }
+
+  const { timeout: timeoutValue = 8 * 1e3 } = opts || {};
+
+  previewWindow.loadURL(targetURL);
+
+  const p = new Promise<Uint8Array | null>((resolve, reject) => {
+    let timeouted = false;
+
+    setTimeout(() => {
+      timeouted = true;
+      reject(new Error('timeout'));
+    }, timeoutValue);
+
+    previewWindow.webContents.on('did-fail-load', () => {
+      reject();
+    });
+
+    previewWindow.webContents.on('certificate-error', () => {
+      reject();
+    });
+
+    previewWindow.webContents.on('did-finish-load', () => {
+      previewWindow.webContents.capturePage().then((image) => {
+        if (timeouted) return;
+
+        resolve(image.toPNG());
+      });
+    });
+  });
+
+  let previewImg: Uint8Array | string | null = null;
+  let error: string | null = null;
+  try {
+    previewImg = await p;
+  } catch (e: any) {
+    if (e?.message === 'timeout') {
+      error = 'Preview timeout';
+    } else {
+      error = 'Error occured on Preview dapp';
+    }
+    previewImg = null;
+  } finally {
+    previewWindow.loadURL('about:blank');
+    // previewWindow.close();
+    // previewWindow.destroy();
+  }
+
+  return {
+    previewImg,
+    error,
+  };
+}
+
 export async function detectDapp(
   dappsUrl: string,
   opts: {
@@ -58,10 +135,11 @@ export async function detectDapp(
   }
 ): Promise<IDappsDetectResult<DETECT_ERR_CODES>> {
   // TODO: process void url;
-  const dappOrigin = canoicalizeDappUrl(dappsUrl).origin;
-  const { urlInfo: inputUrlInfo } = canoicalizeDappUrl(dappOrigin);
+  const { origin: dappOrigin, hostWithoutTLD: inputCoreName } =
+    canoicalizeDappUrl(dappsUrl);
+  const { urlInfo: dappOriginInfo } = canoicalizeDappUrl(dappOrigin);
 
-  if (inputUrlInfo?.protocol !== 'https:') {
+  if (dappOriginInfo?.protocol !== 'https:') {
     return {
       data: null,
       error: {
@@ -71,9 +149,9 @@ export async function detectDapp(
     };
   }
 
-  const formatedUrl = urlFormat(inputUrlInfo);
+  const formatedOrigin = urlFormat(dappOriginInfo);
 
-  const checkResult = await checkUrlViaBrowserView(formatedUrl);
+  const checkResult = await checkUrlViaBrowserView(formatedOrigin);
   const isCertErr = !checkResult.valid && !!checkResult.certErrorDesc;
 
   if (isCertErr) {
@@ -105,23 +183,28 @@ export async function detectDapp(
     };
   }
 
-  const { urlInfo, origin } = canoicalizeDappUrl(checkResult.finalUrl);
-  const { iconInfo, faviconUrl, faviconBase64 } = await parseWebsiteFavicon(
-    origin,
-    { timeout: DFLT_TIMEOUT, proxy: opts.proxyOnParseFavicon }
+  const { origin: finalOrigin } = canoicalizeDappUrl(checkResult.finalUrl);
+
+  const repeatedDapp = opts.existedDapps.find(
+    (item) => item.origin === finalOrigin
   );
 
-  const repeatedDapp = opts.existedDapps.find((item) => item.origin === origin);
-
-  const data = {
-    urlInfo,
-    origin,
-    icon: iconInfo || null,
-    faviconUrl: faviconUrl || undefined,
-    faviconBase64: faviconBase64 || undefined,
+  const data: IDappsDetectResult['data'] = {
+    inputOrigin: dappOrigin,
+    finalOrigin,
+    icon: null,
+    recommendedAlias: inputCoreName,
+    faviconUrl: undefined,
+    faviconBase64: undefined,
+    isExistedDapp: !!repeatedDapp,
+    previewImg: null,
   };
 
   if (repeatedDapp) {
+    data.faviconUrl = repeatedDapp.faviconUrl;
+    data.faviconBase64 = repeatedDapp.faviconBase64;
+    data.recommendedAlias = repeatedDapp.alias || inputCoreName;
+
     return {
       data,
       error: {
@@ -130,6 +213,20 @@ export async function detectDapp(
       },
     };
   }
+
+  const [{ iconInfo, faviconUrl, faviconBase64 }, previewResult] =
+    await Promise.all([
+      parseWebsiteFavicon(finalOrigin, {
+        timeout: DFLT_TIMEOUT,
+        proxy: opts.proxyOnParseFavicon,
+      }),
+      safeCapturePage(checkResult.finalUrl, { timeout: DFLT_TIMEOUT }),
+    ]);
+
+  data.icon = iconInfo;
+  data.faviconUrl = faviconUrl;
+  data.faviconBase64 = faviconBase64;
+  data.previewImg = previewResult.previewImg;
 
   return { data };
 }
@@ -202,12 +299,12 @@ const securityCheckResults = new LRUCache<
   ttl: 1000 * 60 * 60 * 24,
 });
 
-async function doCheckDappOrigin(origin: string) {
+async function doCheckDappOrigin(dappOrigin: string) {
   // TODO: catch error here
   const [httpsCheckResult, latestUpdateResult] = await Promise.all([
-    checkDappHttpsCert(origin),
+    checkDappHttpsCert(dappOrigin),
     queryDappLatestUpdateInfo({
-      dapp_origin: origin,
+      dapp_origin: dappOrigin,
     })
       .then((json) => {
         const latestItem = json.detect_list?.[0] || null;
@@ -292,7 +389,7 @@ async function doCheckDappOrigin(origin: string) {
   resultLevel = resultLevel || 'ok';
 
   const checkResult: ISecurityCheckResult = {
-    origin,
+    origin: dappOrigin,
     countWarnings,
     countDangerIssues,
     countIssues: countWarnings + countDangerIssues,
@@ -312,19 +409,19 @@ export async function getOrPutCheckResult(
     updateOnSet?: boolean;
   }
 ) {
-  const { origin } = canoicalizeDappUrl(dappUrl);
+  const { origin: dappOrigin } = canoicalizeDappUrl(dappUrl);
 
-  let checkResult = securityCheckResults.get(origin);
+  let checkResult = securityCheckResults.get(dappOrigin);
 
   if (!checkResult) {
-    checkResult = await doCheckDappOrigin(origin);
-    securityCheckResults.set(origin, checkResult);
+    checkResult = await doCheckDappOrigin(dappOrigin);
+    securityCheckResults.set(dappOrigin, checkResult);
   } else if (options?.updateOnSet) {
-    const p = doCheckDappOrigin(origin);
+    const p = doCheckDappOrigin(dappOrigin);
 
     if (options?.wait) {
       try {
-        securityCheckResults.set(origin, await p);
+        securityCheckResults.set(dappOrigin, await p);
       } catch (e) {
         console.error(e);
       }

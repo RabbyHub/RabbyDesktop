@@ -256,6 +256,10 @@ type ChannelMessagePayload = {
     send: [rect: IMainWindowActiveTabRect];
     response: [];
   };
+  '__internal_rpc:preview-dapp-frame:toggle-show': {
+    send: [rect: IPreviewDappViewChanges];
+    response: [];
+  };
   '__internal_rpc:mainwindow:toggle-loading-view': MainInternalsMessagePayload['__internal_main:mainwindow:toggle-loading-view'];
   '__internal_rpc:popupview-on-mainwin:toggle-show': MainInternalsMessagePayload['__internal_main:popupview-on-mainwin:toggle-show'];
   '__internal_rpc:popupwin-on-mainwin:toggle-show': MainInternalsMessagePayload['__internal_main:popupwin-on-mainwin:toggle-show'];
@@ -352,6 +356,12 @@ type ChannelInvokePayload = {
   'dapps-put': {
     send: [dapp: IDapp];
     response: void;
+  };
+  'dapps-replace': {
+    send: [originsToDel: string | string[], newDapp: IDapp];
+    response: {
+      error?: string | null;
+    };
   };
   'dapps-delete': {
     send: [dapp: IDapp];
@@ -471,6 +481,13 @@ type ChannelInvokePayload = {
       favicon: IParsedFavicon | null;
     };
   };
+  'preview-dapp': {
+    send: [targetURL: string];
+    response: {
+      error?: string | null;
+      previewImg: Uint8Array | string | null;
+    };
+  };
   [`__internal_rpc:rabbyx-rpc:query`]: {
     send: [query: Omit<IRabbyxRpcQuery, 'rpcId'>];
     response: {
@@ -514,6 +531,10 @@ interface Window {
           func: (event: M2RChanneMessagePayload[T]) => void
         ): (() => void) | undefined;
       };
+    };
+    rendererHelpers: {
+      b64ToObjLink: (b64: string) => string;
+      bufToObjLink: (buf: Buffer | Uint8Array) => string;
     };
   };
 

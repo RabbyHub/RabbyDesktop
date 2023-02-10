@@ -1,297 +1,519 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import classnames from 'classnames';
-import { Input, ModalProps, Button, message, Form } from 'antd';
-import { ExclamationCircleFilled } from '@ant-design/icons';
+import { LoadingOutlined } from '@ant-design/icons';
+import { Button, Form, Input, ModalProps } from 'antd';
+import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 
+import { canoicalizeDappUrl } from '@/isomorphic/url';
+import { addDapp, replaceDapp } from '@/renderer/ipcRequest/dapps';
+import { useRequest, useSetState } from 'ahooks';
+import classNames from 'classnames';
 import { useDapps } from 'renderer/hooks/useDappsMngr';
-import { useNavigate } from 'react-router-dom';
-import { navigateToDappRoute } from '@/renderer/utils/react-router';
-import { addDapp } from '@/renderer/ipcRequest/dapps';
+import { useOpenDapp } from '@/renderer/utils/react-router';
+import { DappFavicon } from '../DappFavicon';
 import { Modal } from '../Modal/Modal';
 import styles from './index.module.less';
-import { isValidDappAlias } from '../../../isomorphic/dapp';
-import { DappFavicon } from '../DappFavicon';
-import { useAddDappURL } from './useAddDapp';
 
-type IStep = 'add' | 'checked' | 'duplicated';
+const findRelatedDapps = (dapps: IDapp[], url: string) => {
+  const current = canoicalizeDappUrl(url);
 
-function useAddStep() {
-  const { detectDapps } = useDapps();
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const [_checkError, setCheckError] = useState<string | null>(null);
+  // 正在添加 uniswap.org 提示会替换掉 app.uniswap.org
+  if (current.is2ndaryDomain) {
+    return dapps.filter((dapp) => {
+      const result = canoicalizeDappUrl(dapp.origin);
+      return result.secondaryDomain === current.secondaryDomain;
+    });
+  }
+  // 正在添加 app.uniswap.org 提示会替换掉uniswap.org
+  if (current.isSubDomain) {
+    return dapps.filter((dapp) => {
+      const result = canoicalizeDappUrl(dapp.origin);
+      return (
+        result.secondaryDomain === current.secondaryDomain &&
+        result.is2ndaryDomain
+      );
+    });
+  }
+  return [];
+};
 
-  const [addUrl, setAddUrl] = useAddDappURL();
-  const [addStepForm] = Form.useForm<{ url: string }>();
-  useEffect(() => {
-    addStepForm.setFieldsValue({ url: addUrl });
-  }, [addUrl]);
+interface PreviewDappProps {
+  data: NonNullable<IDappsDetectResult['data']>;
+  onAdd: (dapp: NonNullable<IDappsDetectResult['data']>) => void;
+  onOpen: (dapp: NonNullable<IDappsDetectResult['data']>) => void;
+  loading?: boolean;
+}
+const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
+  const [input, setInput] = useState(data.recommendedAlias);
 
-  const onChangeAddUrl = useCallback(
-    (evt: React.ChangeEvent<HTMLInputElement>) => {
-      setAddUrl(evt.target.value);
-    },
-    []
+  const previewBlobLink = useMemo(() => {
+    if (data.isExistedDapp) return null;
+    if (!data.previewImg) return null;
+
+    return window.rabbyDesktop.rendererHelpers.bufToObjLink(data.previewImg);
+  }, [data.isExistedDapp, data.previewImg]);
+  return (
+    <div className={styles.preview}>
+      <div className={styles.previewHeader}>
+        <DappFavicon
+          className={styles.previewIcon}
+          origin={data.inputOrigin}
+          src={data?.faviconBase64 || data?.faviconUrl}
+        />
+        <div>
+          <div className={styles.previewTitle}>
+            {data?.isExistedDapp ? (
+              <span className={styles.previewAlias}>
+                {data.recommendedAlias}
+              </span>
+            ) : (
+              <Input
+                spellCheck={false}
+                defaultValue={data.recommendedAlias}
+                key={data?.recommendedAlias}
+                onChange={(e) => setInput(e.target.value)}
+                autoFocus
+              />
+            )}
+          </div>
+          <div className={styles.previewDesc}>
+            {data.inputOrigin?.replace(/^\w+:\/\//, '')}
+          </div>
+        </div>
+        <div className={styles.previewAction}>
+          {loading ? (
+            <div className={styles.previewLoading}>
+              <LoadingOutlined />
+            </div>
+          ) : (
+            <>
+              {data?.isExistedDapp ? (
+                <Button
+                  type="primary"
+                  className={styles.previewBtnSuccess}
+                  onClick={() => {
+                    onOpen?.(data);
+                  }}
+                >
+                  Open
+                </Button>
+              ) : (
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    if (input) {
+                      onAdd({
+                        ...data,
+                        recommendedAlias: input,
+                      });
+                    } else {
+                      onAdd(data);
+                    }
+                  }}
+                >
+                  Add
+                </Button>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+      {!data?.isExistedDapp && previewBlobLink && (
+        <div className={styles.previewImageContainer}>
+          <div
+            className={styles.imgBlock}
+            style={{
+              backgroundImage: `url(${previewBlobLink})`,
+            }}
+          />
+        </div>
+      )}
+      {!data?.isExistedDapp && !previewBlobLink && (
+        <div className={styles.previewEmpty}>
+          <div>
+            <img
+              src="rabby-internal://assets/icons/add-dapp/icon-failed.svg"
+              alt=""
+            />
+            <div className={styles.previewEmptyTitle}>Page load failed</div>
+          </div>
+        </div>
+      )}
+    </div>
   );
+};
 
-  const [isCheckingUrl, setIsChecking] = useState(false);
-  // mock
-  const checkUrl = useCallback(async () => {
-    setIsChecking(true);
+interface DappCardProps {
+  dapp?: IDapp;
+}
+const DappCard = ({ dapp }: DappCardProps) => {
+  return (
+    <div className={classNames(styles.dapp)}>
+      <DappFavicon
+        className={styles.dappIcon}
+        origin={dapp?.origin || ''}
+        src={dapp?.faviconBase64 ? dapp.faviconBase64 : dapp?.faviconUrl}
+      />
+      <div className={styles.dappContent}>
+        <div className={styles.dappName}>{dapp?.alias}</div>
+        <div className={styles.dappOrigin}>
+          {dapp?.origin?.replace(/^\w+:\/\//, '')}
+        </div>
+      </div>
+    </div>
+  );
+};
 
-    try {
-      const result = await detectDapps(addUrl);
-      return result;
-    } catch (e: any) {
-      message.error(e.message);
-      return;
-    } finally {
-      setIsChecking(false);
+interface RelationModalProps {
+  data: IDapp[];
+  open?: boolean;
+  onCancel?: () => void;
+  onOk?: () => void;
+}
+const RelationModal = ({ data, open, onCancel, onOk }: RelationModalProps) => {
+  return (
+    <Modal
+      open={open}
+      onCancel={onCancel}
+      className={styles.relationModal}
+      width={500}
+      centered
+    >
+      <div className={styles.content}>
+        <div className={styles.title}>
+          There is an inclusion relationship with the domain name of the added
+          Dapp. The following Dapp will be replaced after adding.
+        </div>
+        <div className={styles.body}>
+          {data.map((dapp) => {
+            return <DappCard key={dapp.origin} dapp={dapp} />;
+          })}
+        </div>
+        <div className={styles.footer}>
+          <Button ghost block size="large" onClick={onCancel}>
+            Cancel adding
+          </Button>
+          <Button type="primary" block size="large" onClick={onOk}>
+            Confirm to add
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+const validateInput = (input: string, onReplace?: (v: string) => void) => {
+  const domain = input?.trim();
+  if (!domain) {
+    return {
+      validateStatus: 'error' as const,
+      help: 'Input the Dapp domain name. e.g. debank.com',
+    };
+  }
+  const urlString = /^(\w+:)?\/\//.test(domain) ? domain : `https://${domain}`;
+  try {
+    const url = new URL(urlString);
+    if (url.hostname !== domain) {
+      return {
+        validateStatus: 'error' as const,
+        help: (
+          <>
+            The input is not a domain name. Replace with{' '}
+            <span
+              className="link"
+              onClick={() => {
+                onReplace?.(url.hostname);
+              }}
+            >
+              {url.hostname}
+            </span>
+          </>
+        ),
+      };
     }
-  }, [addUrl, detectDapps]);
+  } catch (e) {
+    return {
+      validateStatus: 'error' as const,
+      help: 'Invalid input',
+    };
+  }
+  return null;
+};
 
-  const resetChecking = useCallback(() => {
-    setIsChecking(false);
-  }, []);
+const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
+  const [state, setState] = useSetState<{
+    dappInfo?: IDappsDetectResult['data'];
+    validateStatus?: 'error' | 'success';
+    help?: ReactNode;
+  }>({});
 
-  const isValidAddUrl = /https:\/\/.+/.test(addUrl);
-  // const checkError = !isValidAddUrl
-  //   ? 'Dapp with protocols other than HTTPS is not supported'
-  //   : _checkError;
-  const checkError = _checkError;
-
-  return {
-    isCheckingUrl,
-    checkUrl,
-    resetChecking,
-    addStepForm,
-    addUrl,
-    onChangeAddUrl,
-    isValidAddUrl,
-    checkError,
-    setCheckError,
-    setAddUrl,
-  };
-}
-
-function useCheckedStep() {
-  const [dappInfo, setDappInfo] = useState<IDapp>({
-    alias: '',
-    origin: '',
-    faviconUrl: '',
-    faviconBase64: '',
-  });
-  const onChangeDappAlias = useCallback(
-    (evt: React.ChangeEvent<HTMLInputElement>) => {
-      setDappInfo((prev) => {
-        return { ...prev, alias: evt.target.value };
+  const { detectDapps } = useDapps();
+  const { runAsync, loading } = useRequest(
+    async (url: string) => {
+      const validateRes = validateInput(url, onReplace);
+      if (validateRes) {
+        setState({
+          ...validateRes,
+        });
+        return null;
+      }
+      const { data, error } = await detectDapps(`https://${url}`);
+      if (error) {
+        setState({
+          validateStatus: 'error',
+          help: error.message,
+        });
+        return null;
+      }
+      if (data && data.inputOrigin !== data.finalOrigin) {
+        setState({
+          validateStatus: 'error',
+          help: (
+            <>
+              The current URL is redirected to{' '}
+              <span
+                className="link"
+                onClick={() => {
+                  onReplace?.(data.finalOrigin.replace(/^\w+:\/\//, ''));
+                }}
+              >
+                {data.finalOrigin?.replace(/^\w+:\/\//, '')}
+              </span>
+            </>
+          ),
+        });
+        return null;
+      }
+      setState({
+        dappInfo: data,
+        validateStatus: undefined,
+        help: null,
       });
+      return data;
     },
-    []
+    {
+      manual: true,
+      onBefore: () => {
+        setState({
+          dappInfo: null,
+          validateStatus: undefined,
+          help: null,
+        });
+      },
+    }
   );
-
   return {
-    dappInfo,
-    setDappInfo,
-    onChangeDappAlias,
-    isValidAlias: isValidDappAlias(dappInfo.alias),
+    state,
+    setState,
+    loading,
+    check: runAsync,
   };
-}
+};
+
+const sleep = (time: number) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(null);
+    }, time);
+  });
+};
 
 export function AddDapp({
   onAddedDapp,
-  ...modalProps
+  onOpenDapp,
 }: ModalProps & {
   onAddedDapp?: (origin: string) => void;
+  onOpenDapp?: (origin: string) => void;
 }) {
-  const [step, setStep] = useState<IStep>('add');
-  const navigate = useNavigate();
+  const { dapps } = useDapps();
+  const [form] = Form.useForm();
+  const [input, setInput] = useState('');
+  const openDapp = useOpenDapp();
 
-  const {
-    addStepForm,
-    addUrl,
-    onChangeAddUrl,
-    isValidAddUrl,
-    isCheckingUrl,
-    checkUrl,
-    checkError,
-    setCheckError,
-  } = useAddStep();
-
-  const { dappInfo, setDappInfo, onChangeDappAlias, isValidAlias } =
-    useCheckedStep();
-
-  const [duplicatedDapp, setDuplicatedDapp] = useState<IDapp | null>(null);
-
-  const doCheck = useCallback(async () => {
-    setCheckError(null);
-
-    const payload = await checkUrl();
-
-    if (payload?.error?.type === 'REPEAT') {
-      setStep('duplicated');
-
-      setDuplicatedDapp({
-        alias: '',
-        origin: payload.data!.origin,
-        faviconUrl: payload.data!.faviconUrl,
-        faviconBase64: payload.data!.faviconBase64,
+  const { state, setState, check, loading } = useCheckDapp({
+    onReplace(v) {
+      form.setFieldsValue({
+        url: v,
       });
+      setState({
+        validateStatus: undefined,
+        help: '',
+      });
+    },
+  });
+
+  const [addState, setAddState] = useSetState<{
+    isShowModal: boolean;
+    relatedDapps: IDapp[];
+    dappInfo: IDappsDetectResult['data'];
+  }>({
+    isShowModal: false,
+    relatedDapps: [],
+    dappInfo: null,
+  });
+
+  const { runAsync: runAddDapp, loading: isAddLoading } = useRequest(
+    (dapp, urls?: string[]) => {
+      return Promise.all([
+        urls ? replaceDapp(urls, dapp) : addDapp(dapp),
+        sleep(500),
+      ]);
+    },
+    {
+      manual: true,
+    }
+  );
+
+  const handleCheck = async () => {
+    if (loading) {
+      return;
+    }
+    const { url } = form.getFieldsValue();
+    setState({
+      validateStatus: undefined,
+      help: '',
+    });
+    await check(url);
+  };
+
+  const handleAdd = async (
+    dappInfo: NonNullable<IDappsDetectResult['data']>,
+    urls?: string[]
+  ) => {
+    await runAddDapp(
+      {
+        origin: dappInfo.inputOrigin,
+        alias: dappInfo.recommendedAlias,
+        faviconBase64: dappInfo.faviconBase64,
+        faviconUrl: dappInfo.faviconUrl,
+      },
+      urls
+    );
+    const nextDappInfo = {
+      ...dappInfo,
+      isExistedDapp: true,
+    };
+    setAddState({
+      dappInfo: nextDappInfo,
+    });
+    setState({
+      dappInfo: nextDappInfo,
+    });
+
+    onAddedDapp?.(dappInfo.inputOrigin);
+  };
+
+  const handleAddCheck = async (
+    dappInfo: NonNullable<IDappsDetectResult['data']>
+  ) => {
+    if (!dappInfo) {
       return;
     }
 
-    setCheckError(payload?.error?.message || null);
-
-    if (payload?.data) {
-      setStep('checked');
-      setDappInfo({
-        alias: '',
-        origin: payload.data.origin,
-        faviconUrl: payload.data.faviconUrl,
-        faviconBase64: payload.data.faviconBase64,
+    const relatedDapps = findRelatedDapps(dapps || [], dappInfo.inputOrigin);
+    setAddState({
+      dappInfo,
+    });
+    if (relatedDapps.length) {
+      setAddState({
+        isShowModal: true,
+        relatedDapps,
       });
+    } else {
+      handleAdd(dappInfo);
     }
-  }, [checkUrl, setCheckError, setDappInfo]);
+  };
 
   return (
-    <div className={styles.step}>
-      {step !== 'add' && (
-        <img
-          onClick={() => {
-            setStep('add');
-          }}
-          className={styles.backIcon}
-          src="rabby-internal://assets/icons/modal/back.svg"
-        />
-      )}
-      {step === 'add' && (
-        <Form form={addStepForm} className={styles.stepAdd} onFinish={doCheck}>
-          <h3 className={styles.addTitle}>Enter or copy the Dapp URL</h3>
-          <Form.Item
-            name="url"
-            validateStatus={checkError ? 'error' : undefined}
-            help={checkError}
-            // validateTrigger="onBlur"
-            rules={[
-              {
-                pattern: /^https:\/\/.+/,
-                message:
-                  'Dapp with protocols other than HTTPS is not supported',
-              },
-            ]}
-          >
-            <Input
-              className={styles.input}
-              value={addUrl}
-              onChange={onChangeAddUrl}
-              placeholder="https://somedapp.xyz"
-              allowClear
-              autoFocus
-            />
-          </Form.Item>
-          <Button
-            loading={isCheckingUrl}
-            type="primary"
-            htmlType="submit"
-            disabled={!isValidAddUrl}
-            className={styles.button}
-          >
-            Check
-          </Button>
-        </Form>
-      )}
-
-      {step === 'checked' && (
-        <div className={styles.stepChecked}>
-          <DappFavicon
-            origin={dappInfo.origin}
-            className={styles.checkedFavicon}
-            src={
-              dappInfo.faviconBase64
-                ? dappInfo.faviconBase64
-                : dappInfo.faviconUrl
-            }
-            alt={dappInfo.faviconUrl}
-          />
-          <span className={styles.checkedDappUrl}>{dappInfo.origin}</span>
-
+    <div className={styles.content}>
+      <h3 className={styles.title}>Enter the Dapp domain name</h3>
+      <Form
+        form={form}
+        className={styles.form}
+        onFinish={handleCheck}
+        onFieldsChange={() => {
+          const { url } = form.getFieldsValue();
+          setInput(url);
+        }}
+      >
+        <Form.Item
+          name="url"
+          validateStatus={state?.validateStatus || 'success'}
+          help={
+            state?.help
+              ? state?.help
+              : input
+              ? null
+              : 'To ensure the security of your funds, please ensure that you enter the official domain name of Dapp'
+          }
+        >
           <Input
             className={styles.input}
-            value={dappInfo.alias}
-            onChange={onChangeDappAlias}
-            placeholder="Please name the dapp"
-            allowClear
+            placeholder="Input the Dapp domain name. e.g. debank.com"
+            autoFocus
+            spellCheck={false}
+            suffix={
+              <span className={styles.inputSuffix}>
+                {loading ? (
+                  <LoadingOutlined />
+                ) : (
+                  <img
+                    onClick={() => {
+                      handleCheck();
+                    }}
+                    src="rabby-internal://assets/icons/add-dapp/icon-search.svg"
+                  />
+                )}
+              </span>
+            }
           />
-          <Button
-            type="primary"
-            className={styles.button}
-            onClick={async () => {
-              await addDapp(dappInfo);
-              // message.success('Added successfully');
-              onAddedDapp?.(dappInfo.origin);
-            }}
-            disabled={!isValidAlias}
-          >
-            Confirm
-          </Button>
-        </div>
-      )}
-      {step === 'duplicated' && duplicatedDapp && (
-        <div className={styles.stepDuplicated}>
-          <div className={styles.stepDuplicatedTips}>
-            <ExclamationCircleFilled />
-            You have added the dapp
-          </div>
-          <div className="dapp-block">
-            <a
-              className="anchor"
-              href={duplicatedDapp?.origin}
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => {
-                navigateToDappRoute(navigate, duplicatedDapp.origin);
-              }}
-            >
-              {/* TODO: robust about load image */}
-              <DappFavicon
-                origin={duplicatedDapp?.origin}
-                className="dapp-favicon"
-                src={
-                  duplicatedDapp?.faviconBase64 || duplicatedDapp?.faviconUrl
-                }
-                alt="duplicatedDapp?.origin"
-              />
-              <div className="infos">
-                <h4 className="dapp-alias" title={duplicatedDapp?.alias}>
-                  {duplicatedDapp?.alias}
-                </h4>
-                <div className="dapp-url" title={duplicatedDapp?.origin}>
-                  {duplicatedDapp?.origin}
-                </div>
-              </div>
-            </a>
-          </div>
-          <Button
-            type="primary"
-            onClick={(e) => {
-              modalProps.onCancel?.(e);
-            }}
-            className={styles.button}
-            disabled
-          >
-            Confirm
-          </Button>
-        </div>
-      )}
+        </Form.Item>
+      </Form>
+      {state.dappInfo ? (
+        <PreviewDapp
+          data={state.dappInfo}
+          loading={isAddLoading}
+          onAdd={(dapp) => {
+            handleAddCheck(dapp);
+          }}
+          onOpen={(dapp) => {
+            openDapp(dapp.inputOrigin);
+            onOpenDapp?.(dapp.inputOrigin);
+          }}
+        />
+      ) : null}
+      <RelationModal
+        data={addState.relatedDapps}
+        open={addState.isShowModal}
+        onCancel={() => {
+          setAddState({
+            isShowModal: false,
+            relatedDapps: [],
+          });
+        }}
+        onOk={() => {
+          setAddState({
+            isShowModal: false,
+            relatedDapps: [],
+          });
+          if (addState.dappInfo) {
+            handleAdd(
+              addState.dappInfo,
+              addState.relatedDapps.map((d) => d.origin)
+            );
+          }
+        }}
+      />
     </div>
   );
 }
 
 export default function ModalAddDapp({
   onAddedDapp,
+  onOpenDapp,
   ...modalProps
 }: React.PropsWithChildren<
   ModalProps & {
     onAddedDapp?: (origin: string) => void;
+    onOpenDapp?: (origin: string) => void;
   }
 >) {
   return (
@@ -304,12 +526,16 @@ export default function ModalAddDapp({
       }}
       title={null}
       footer={null}
-      className={classnames(styles.addModal, modalProps.className)}
-      wrapClassName={classnames(modalProps.wrapClassName)}
+      className={classNames(styles.addModal, modalProps.className)}
+      wrapClassName={classNames(modalProps.wrapClassName)}
       destroyOnClose
       onBack={() => {}}
     >
-      <AddDapp onAddedDapp={onAddedDapp} {...modalProps} />
+      <AddDapp
+        onAddedDapp={onAddedDapp}
+        onOpenDapp={onOpenDapp}
+        {...modalProps}
+      />
     </Modal>
   );
 }

@@ -1,0 +1,54 @@
+.dappViewWrapper {
+  padding: var(--dappViewPaddingOffsetToSidebar);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.dappViewGasket {
+  background: #ffeef9;
+  flex-shrink: 1;
+  border-radius: 0 6px 6px 6px;
+  height: 100%;
+  max-height: calc(100% - var(--dappViewPaddingOffset) - 70px);
+  position: relative;
+}
+.activeDappView {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  &.debug {
+    outline: 1px solid blue;
+  }
+
+  &.withScreenshot {
+    overflow: hidden; // cut off the blur effect
+  }
+}
+
+img.activeDappScreenshot {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: blur(8px);
+}
+
+div.activeDappScreenshot {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  backdrop-filter: blur(16px);
+}
+
+:global {
+  html.os-darwin {
+    :local {
+      .dappViewGasket {
+        max-height: calc(100% - var(--dappViewPaddingOffset) - 10px);
+      }
+    }
+  }
+}

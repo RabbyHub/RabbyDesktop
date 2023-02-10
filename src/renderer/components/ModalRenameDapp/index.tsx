@@ -83,7 +83,7 @@ export default function ModalRenameDapp({
             alt={dapp?.faviconUrl}
           />
           <div className={styles.dappUrl} title={dapp?.origin}>
-            {dapp?.origin}
+            {dapp?.origin?.replace(/^\w+:\/\//, '')}
           </div>
           <div className={styles.modifyWrapper}>
             <Input

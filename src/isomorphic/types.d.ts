@@ -30,6 +30,17 @@ type IMainWindowActiveTabRect =
       rect?: null | DappViewRect;
     };
 
+type IPreviewDappViewChanges =
+  | {
+      dappViewState: 'mounted';
+      dappURL: string;
+      rect: DappViewRect;
+    }
+  | {
+      dappViewState: 'unmounted';
+      rect?: null | DappViewRect;
+    };
+
 type IDapp = {
   // TODO: implement it;
   id?: string;
@@ -82,11 +93,14 @@ type ISensitiveConfig = {
 
 type IDappsDetectResult<T extends string = string> = {
   data: null | {
-    urlInfo: Partial<URL> | null;
-    origin: string;
+    finalOrigin: string;
+    inputOrigin: string;
+    recommendedAlias: string;
     icon: import('@debank/parse-favicon').Icon | null;
     faviconUrl?: string;
     faviconBase64?: string; // base64
+    isExistedDapp?: boolean;
+    previewImg?: Uint8Array | null;
   };
   error?: {
     type: T;

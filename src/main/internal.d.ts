@@ -124,7 +124,7 @@ type MainInternalsMessagePayload = {
     response: [];
   };
   '__internal_main:app:close-tab-on-del-dapp': {
-    send: [dappOrigin: string];
+    send: [dappOrigin: string | string[]];
     response: [];
   };
 };

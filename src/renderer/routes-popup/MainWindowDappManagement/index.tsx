@@ -26,7 +26,7 @@ function DappsManager() {
         onCancel={() => {
           hideView();
         }}
-        onAddedDapp={() => {
+        onOpenDapp={() => {
           hideView();
         }}
       />

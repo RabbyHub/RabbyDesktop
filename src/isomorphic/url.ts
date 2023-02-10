@@ -181,9 +181,11 @@ export function isDappProtocol(protocolOrUrl: string) {
 
 export function getDomainFromHostname(hostname: string) {
   const parts = hostname.split('.');
-  const secondaryDomain = parts.slice(parts.length - 2).join('.');
+  const secondaryDomainParts = parts.slice(parts.length - 2);
+  const secondaryDomain = secondaryDomainParts.join('.');
 
   return {
+    hostWithoutTLD: secondaryDomainParts[0],
     secondaryDomain,
     secondaryOrigin: `https://${secondaryDomain}`,
     is2ndaryDomain: parts.length === 2 && secondaryDomain === hostname,

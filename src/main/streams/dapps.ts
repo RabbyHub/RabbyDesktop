@@ -1,4 +1,8 @@
+import { Blob } from 'buffer';
+
 import { getAppProxyConf } from '../store/desktopApp';
+import { createPopupWindow } from '../utils/browser';
+import { safeCapturePage } from '../utils/dapps';
 import { parseWebsiteFavicon } from '../utils/fetch';
 import { handleIpcMainInvoke } from '../utils/ipcMainEvents';
 
@@ -27,4 +31,14 @@ handleIpcMainInvoke('parse-favicon', async (_, targetURL) => {
   }
 
   return result;
+});
+
+// create popup window with 1366 * 768 size, and capature it
+handleIpcMainInvoke('preview-dapp', async (_, targetURL) => {
+  const result = await safeCapturePage(targetURL);
+
+  return {
+    error: result.error,
+    previewImg: result.previewImg,
+  };
 });

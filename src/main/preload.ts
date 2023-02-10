@@ -9,7 +9,7 @@ import {
   RABBY_INTERNAL_PROTOCOL,
   RABBY_LOCAL_URLBASE,
 } from 'isomorphic/constants';
-import { ipcRendererObj } from '../preloads/base';
+import { ipcRendererObj, rendererHelpers } from '../preloads/base';
 
 import { setupClass } from '../preloads/setup-class';
 
@@ -30,6 +30,7 @@ if (IS_BUILTIN_WEBVIEW && !window.rabbyDesktop) {
   try {
     contextBridge.exposeInMainWorld('rabbyDesktop', {
       ipcRenderer: ipcRendererObj,
+      rendererHelpers,
     });
   } catch (e) {
     console.error(e);
@@ -42,6 +43,7 @@ if (IS_BUILTIN_WEBVIEW && !window.rabbyDesktop) {
       ipcRenderer: {
         sendMessage: ipcRendererObj.sendMessage,
       },
+      rendererHelpers,
     } as any;
   }
 }
