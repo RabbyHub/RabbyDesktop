@@ -1,7 +1,19 @@
 
+v0.4.4 / 2023-02-10
+===================
+
+  * feat: vary persisted/runtime proxy config, improve proxy stablity.
+  * fix: avoid repeat opening dapp tab.
+  * feat: update add dapp  (#106)
+  * feat: + refresh portfolio button (#108)
+  * feat: support open dapp in other views.
+  * feat: init trezor & onekey (#107)
+  * chore: code cleanup.
+
 v0.4.3 / 2023-02-08
 ===================
 
+  * Release v0.4.3
   * feat: allow reject sign on click gasket.
   * feat: tuning sidebar and style of toast.
   * fix: white background of modal window on macOS 13. (#103)
