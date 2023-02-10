@@ -55,11 +55,8 @@ export function useForwardTo<
 
 export function useMessageForwarded<
   T extends Pick<ChannelForwardMessagePayload, 'type' | 'targetView'>
->(
-  targetView: T['targetView'],
-  type: T['type'],
-  callback?: (payload: ChannelForwardMessagePayload & T) => void
-) {
+>(matches: T, callback?: (payload: ChannelForwardMessagePayload & T) => void) {
+  const { targetView, type } = matches;
   useEffect(() => {
     if (!isBuiltinView(window.location.href, targetView)) return;
 
@@ -71,15 +68,13 @@ export function useMessageForwarded<
         }
       }
     );
-  }, [targetView, callback]);
+  }, [targetView, type, callback]);
 }
 
 type MainWindowChannelMessage = ChannelForwardMessagePayload & {
   targetView: 'main-window';
 };
-/**
- * @deprecated use `useForwardTo`/`useMessageForwarded` instead
- */
+
 export function useMessageForwardToMainwin<
   T extends MainWindowChannelMessage['type']
 >(
@@ -87,7 +82,7 @@ export function useMessageForwardToMainwin<
   callback?: (payload: MainWindowChannelMessage & { type: T }) => void
 ) {
   const forwardTo = useForwardTo('main-window');
-  useMessageForwarded('main-window', type, callback);
+  useMessageForwarded({ targetView: 'main-window', type }, callback);
 
   return useCallback(
     (payload: Omit<MainWindowChannelMessage, 'targetView'> & { type: T }) => {

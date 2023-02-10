@@ -60,9 +60,15 @@ export function useCurrentAccount() {
     );
   }, [fetchCurrentAccount]);
 
-  useMessageForwarded('*', 'refreshCurrentAccount', () => {
-    fetchCurrentAccount();
-  });
+  useMessageForwarded(
+    {
+      targetView: '*',
+      type: 'refreshCurrentAccount',
+    },
+    () => {
+      fetchCurrentAccount();
+    }
+  );
 
   return {
     switchAccount,

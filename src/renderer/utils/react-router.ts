@@ -1,5 +1,7 @@
+import { isBuiltinView } from '@/isomorphic/url';
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useForwardTo } from '../hooks/useViewsMessage';
 
 export function useNavigateToDappRoute() {
   const navigate = useNavigate();
@@ -14,17 +16,27 @@ export function useNavigateToDappRoute() {
   );
 }
 
+const isMainWindow = isBuiltinView(window.location.href, 'main-window');
 export function useOpenDapp() {
   const navigateToDapp = useNavigateToDappRoute();
+  const forwardToMain = useForwardTo('main-window');
 
-  return useCallback((dappUrl: string) => {
-    window.rabbyDesktop.ipcRenderer.sendMessage(
-      '__internal_rpc:mainwindow:open-tab',
-      dappUrl
-    );
+  return useCallback(
+    (dappUrl: string) => {
+      if (!isMainWindow) {
+        forwardToMain('open-dapp', { data: { dappURL: dappUrl } });
+        return;
+      }
 
-    navigateToDapp(dappUrl);
-  }, []);
+      window.rabbyDesktop.ipcRenderer.sendMessage(
+        '__internal_rpc:mainwindow:open-tab',
+        dappUrl
+      );
+
+      navigateToDapp(dappUrl);
+    },
+    [navigateToDapp, forwardToMain]
+  );
 }
 
 export function navigateToDappRoute(

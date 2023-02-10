@@ -3,7 +3,7 @@ type RendererForwardMessageViewType = IBuiltinViewName | '*';
 type ChannelForwardMessageType = {
   send: [
     | {
-        targetView: RendererForwardMessageViewType & 'main-window';
+        targetView: 'main-window';
         type: 'route-navigate';
         data: {
           pathname: string;
@@ -11,23 +11,30 @@ type ChannelForwardMessageType = {
         };
       }
     | {
-        targetView: RendererForwardMessageViewType & '*';
+        targetView: 'main-window';
+        type: 'open-dapp';
+        data: {
+          dappURL: string;
+        };
+      }
+    | {
+        targetView: '*';
         type: 'refreshCurrentAccount';
       }
     | {
-        targetView: RendererForwardMessageViewType & 'add-address';
+        targetView: 'add-address';
         type: 'nothing-but-reserved';
       }
     | {
-        targetView: RendererForwardMessageViewType & 'address-management';
+        targetView: 'address-management';
         type: 'nothing-but-reserved';
       }
     | {
-        targetView: RendererForwardMessageViewType & 'quick-swap';
+        targetView: 'quick-swap';
         type: 'nothing-but-reserved';
       }
     | {
-        targetView: RendererForwardMessageViewType & 'dapps-management';
+        targetView: 'dapps-management';
         type: 'nothing-but-reserved';
       }
   ];

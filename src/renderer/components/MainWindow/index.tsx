@@ -25,6 +25,7 @@ import { useMainWindowEvents } from '@/renderer/hooks-shell/useWindowState';
 import { useAppUnlockEvents } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { useAccounts } from '@/renderer/hooks/rabbyx/useAccount';
 import { useMessageForwardToMainwin } from '@/renderer/hooks/useViewsMessage';
+import { navigateToDappRoute } from '@/renderer/utils/react-router';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -193,6 +194,14 @@ export function MainWindow() {
 
   useMessageForwardToMainwin('route-navigate', (payload) => {
     router.navigate(payload.data);
+  });
+  useMessageForwardToMainwin('open-dapp', (payload) => {
+    window.rabbyDesktop.ipcRenderer.sendMessage(
+      '__internal_rpc:mainwindow:open-tab',
+      payload.data.dappURL
+    );
+
+    navigateToDappRoute(router.navigate, payload.data.dappURL);
   });
 
   return (
