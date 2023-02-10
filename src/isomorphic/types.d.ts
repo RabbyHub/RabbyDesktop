@@ -88,6 +88,7 @@ type IDappsDetectResult<T extends string = string> = {
     icon: import('@debank/parse-favicon').Icon | null;
     faviconUrl?: string;
     faviconBase64?: string; // base64
+    isExistedDapp?: boolean;
   };
   error?: {
     type: T;

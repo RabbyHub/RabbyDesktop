@@ -25,6 +25,16 @@ export async function detectDapps(dappUrl: string) {
   return window.rabbyDesktop.ipcRenderer
     .invoke('detect-dapp', dappUrl)
     .then((event) => {
+      // ignore REPEAT
+      if (event.result.error?.type === 'REPEAT') {
+        if (event.result.data) {
+          event.result.data.isExistedDapp = true;
+        }
+        return {
+          ...event.result,
+          error: undefined,
+        };
+      }
       return event.result;
     });
 }
