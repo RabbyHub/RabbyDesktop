@@ -175,6 +175,7 @@ const RelationModal = ({ data, open, onCancel, onOk }: RelationModalProps) => {
       onCancel={onCancel}
       className={styles.relationModal}
       width={500}
+      centered
     >
       <div className={styles.content}>
         <div className={styles.title}>
