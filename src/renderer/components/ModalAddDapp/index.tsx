@@ -7,6 +7,7 @@ import { addDapp } from '@/renderer/ipcRequest/dapps';
 import { useRequest, useSetState } from 'ahooks';
 import classNames from 'classnames';
 import { useDapps } from 'renderer/hooks/useDappsMngr';
+import { useOpenDapp } from '@/renderer/utils/react-router';
 import { DappFavicon } from '../DappFavicon';
 import { Modal } from '../Modal/Modal';
 import styles from './index.module.less';
@@ -37,7 +38,7 @@ const findRelatedDapps = (dapps: IDapp[], url: string) => {
 interface PreviewDappProps {
   data: NonNullable<IDappsDetectResult['data']>;
   onAdd: (dapp: NonNullable<IDappsDetectResult['data']>) => void;
-  onOpen?: () => void;
+  onOpen: (dapp: NonNullable<IDappsDetectResult['data']>) => void;
   loading?: boolean;
 }
 const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
@@ -80,7 +81,7 @@ const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
                   type="primary"
                   className={styles.previewBtnSuccess}
                   onClick={() => {
-                    onOpen?.();
+                    onOpen?.(data);
                   }}
                 >
                   Open
@@ -200,6 +201,7 @@ const validateInput = (input: string, onReplace?: (v: string) => void) => {
           <>
             The input is not a domain name. Replace with{' '}
             <span
+              className="link"
               onClick={() => {
                 onReplace?.(url.hostname);
               }}
@@ -250,7 +252,14 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
           help: (
             <>
               The current URL is redirected to{' '}
-              {data.finalOrigin?.replace(/^\w+:\/\//, '')}
+              <span
+                className="link"
+                onClick={() => {
+                  onReplace?.(data.finalOrigin.replace(/^\w+:\/\//, ''));
+                }}
+              >
+                {data.finalOrigin?.replace(/^\w+:\/\//, '')}
+              </span>
             </>
           ),
         });
@@ -292,17 +301,24 @@ const sleep = (time: number) => {
 
 export function AddDapp({
   onAddedDapp,
+  onOpenDapp,
 }: ModalProps & {
   onAddedDapp?: (origin: string) => void;
+  onOpenDapp?: (origin: string) => void;
 }) {
   const { dapps } = useDapps();
   const [form] = Form.useForm();
   const [input, setInput] = useState('');
+  const openDapp = useOpenDapp();
 
   const { state, setState, check, loading } = useCheckDapp({
     onReplace(v) {
       form.setFieldsValue({
         url: v,
+      });
+      setState({
+        validateStatus: undefined,
+        help: '',
       });
     },
   });
@@ -347,14 +363,18 @@ export function AddDapp({
       faviconBase64: dappInfo.faviconBase64,
       faviconUrl: dappInfo.faviconUrl,
     });
-    if (addState.dappInfo) {
-      setState({
-        dappInfo: {
-          ...addState.dappInfo,
-          isExistedDapp: true,
-        },
-      });
-    }
+    const nextDappInfo = {
+      ...dappInfo,
+      isExistedDapp: true,
+    };
+    setAddState({
+      dappInfo: nextDappInfo,
+    });
+    setState({
+      dappInfo: nextDappInfo,
+    });
+
+    onAddedDapp?.(dappInfo.inputOrigin);
   };
 
   const handleAddCheck = async (
@@ -429,8 +449,9 @@ export function AddDapp({
           onAdd={(dapp) => {
             handleAddCheck(dapp);
           }}
-          onOpen={() => {
-            // todo
+          onOpen={(dapp) => {
+            openDapp(dapp.inputOrigin);
+            onOpenDapp?.(dapp.inputOrigin);
           }}
         />
       ) : null}
@@ -459,10 +480,12 @@ export function AddDapp({
 
 export default function ModalAddDapp({
   onAddedDapp,
+  onOpenDapp,
   ...modalProps
 }: React.PropsWithChildren<
   ModalProps & {
     onAddedDapp?: (origin: string) => void;
+    onOpenDapp?: (origin: string) => void;
   }
 >) {
   return (
@@ -480,7 +503,11 @@ export default function ModalAddDapp({
       destroyOnClose
       onBack={() => {}}
     >
-      <AddDapp onAddedDapp={onAddedDapp} {...modalProps} />
+      <AddDapp
+        onAddedDapp={onAddedDapp}
+        onOpenDapp={onOpenDapp}
+        {...modalProps}
+      />
     </Modal>
   );
 }
