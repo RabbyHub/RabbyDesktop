@@ -42,18 +42,16 @@ export const CommonHDManagerModal: React.FC<Props> = ({
       })
       .then((id: number) => {
         idRef.current = id;
-        return walletController.requestKeyring(keyring, 'unlock', id);
-      })
-      .then(() => {
         setInitialed(true);
-      })
-      .catch((e: any) => {
-        props.onBack?.();
-        console.error(e);
-        message.error(
-          'Unable to connect to Hardware wallet. Please try to re-connect.'
-        );
       });
+
+    // .catch((e: any) => {
+    //   props.onBack?.();
+    //   console.error(e);
+    //   message.error(
+    //     'Unable to connect to Hardware wallet. Please try to re-connect.'
+    //   );
+    // });
     window.addEventListener('beforeunload', () => {
       closeConnect();
     });
