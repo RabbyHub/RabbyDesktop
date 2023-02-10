@@ -315,6 +315,33 @@ handleIpcMainInvoke('dapps-put', (_, dapp: IDapp) => {
   });
 });
 
+function checkDelDapp(
+  originToDel: IDapp['origin'],
+  retDappsMap: Record<string, IDapp>
+) {
+  delete retDappsMap[originToDel];
+  const protocolDappsBinding = getProtocolDappsBindings();
+  Object.entries(protocolDappsBinding).forEach((dapps) => {
+    const [protocol, binding] = dapps;
+    if (binding.origin === originToDel) {
+      delete protocolDappsBinding[protocol];
+    }
+  });
+
+  const pinnedList = dappStore
+    .get('pinnedList')
+    .filter((o) => o !== originToDel);
+  const unpinnedList = dappStore
+    .get('unpinnedList')
+    .filter((o) => o !== originToDel);
+
+  return {
+    protocolDappsBinding,
+    pinnedList,
+    unpinnedList,
+  };
+}
+
 handleIpcMainInvoke('dapps-replace', (_, oldOrigin, newDapp) => {
   // TODO: is there mutex?
   const dappsMap = dappStore.get('dappsMap');
@@ -327,10 +354,13 @@ handleIpcMainInvoke('dapps-replace', (_, oldOrigin, newDapp) => {
     };
   }
 
-  delete dappsMap[oldOrigin];
+  const delResult = checkDelDapp(oldOrigin, dappsMap);
+  dappStore.set('protocolDappsBinding', delResult.protocolDappsBinding);
+  dappStore.set('pinnedList', delResult.pinnedList);
+  dappStore.set('unpinnedList', delResult.unpinnedList);
   emitIpcMainEvent('__internal_main:app:close-tab-on-del-dapp', oldOrigin);
 
-  dappsMap[oldOrigin] = {
+  dappsMap[newDapp.origin] = {
     ...oldDapp,
     ...newDapp,
   };
@@ -354,37 +384,20 @@ handleIpcMainInvoke('dapps-delete', (_, dappToDel: IDapp) => {
     };
   }
 
+  const delResult = checkDelDapp(dappToDel.origin, dappsMap);
+  dappStore.set('protocolDappsBinding', delResult.protocolDappsBinding);
+  dappStore.set('pinnedList', delResult.pinnedList);
+  dappStore.set('unpinnedList', delResult.unpinnedList);
   emitIpcMainEvent(
     '__internal_main:app:close-tab-on-del-dapp',
     dappToDel.origin
   );
 
-  delete dappsMap[dappToDel.origin];
-  const protocolDappsBinding = getProtocolDappsBindings();
-  Object.entries(protocolDappsBinding).forEach((dapps) => {
-    const [protocol, binding] = dapps;
-    if (binding.origin === dappToDel.origin) {
-      delete protocolDappsBinding[protocol];
-    }
-  });
-  dappStore.set('protocolDappsBinding', protocolDappsBinding);
-
-  dappStore.set('dappsMap', dappsMap);
-
-  const pinnedList = dappStore
-    .get('pinnedList')
-    .filter((o) => o !== dappToDel.origin);
-  dappStore.set('pinnedList', pinnedList);
-  const unpinnedList = dappStore
-    .get('unpinnedList')
-    .filter((o) => o !== dappToDel.origin);
-  dappStore.set('unpinnedList', unpinnedList);
-
   emitIpcMainEvent('__internal_main:dapps:changed', {
     dapps: getAllDapps(),
-    pinnedList,
-    unpinnedList,
-    protocolDappsBinding,
+    pinnedList: delResult.pinnedList,
+    unpinnedList: delResult.unpinnedList,
+    protocolDappsBinding: delResult.protocolDappsBinding,
   });
 
   return {
