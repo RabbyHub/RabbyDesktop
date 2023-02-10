@@ -44,6 +44,7 @@ const HomeWrapper = styled.div`
       display: flex;
       margin-bottom: 20px;
       .left {
+        z-index: 1;
         margin-right: 40px;
       }
       .right {
@@ -81,6 +82,29 @@ const HomeWrapper = styled.div`
       font-weight: 500;
       font-size: 46px;
       line-height: 55px;
+      display: flex;
+      align-items: center;
+      .icon-refresh {
+        display: none;
+        cursor: pointer;
+        margin-left: 14px;
+        @keyframes spining {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+        &.circling {
+          animation: spining 1.5s infinite linear;
+        }
+      }
+      &:hover {
+        .icon-refresh {
+          display: block;
+        }
+      }
     }
   }
 `;
@@ -188,6 +212,7 @@ const useExpandProtocolList = (protocols: DisplayProtocol[]) => {
 
 const Home = () => {
   const { currentAccount } = useCurrentAccount();
+  const [updateNonce, setUpdateNonce] = useState(0);
   const [_, updateBalanceValue] = useBalanceValue();
 
   const [selectChainServerId, setSelectChainServerId] = useState<string | null>(
@@ -201,7 +226,8 @@ const Home = () => {
     tokenList,
     historyTokenMap,
     isLoading: isLoadingTokenList,
-  } = useHistoryTokenList(currentAccount?.address);
+    isLoadingRealTime: isLoadingRealTimeTokenList,
+  } = useHistoryTokenList(currentAccount?.address, updateNonce);
 
   const filterTokenList = useMemo(() => {
     const list: TokenItem[] = selectChainServerId
@@ -216,9 +242,10 @@ const Home = () => {
     tokenHistoryPriceMap,
     isLoading: isLoadingProtocol,
     isLoadingHistory: isLoadingProtocolHistory,
+    isLoadingRealTime: isLoadingRealTimeProtocol,
     supportHistoryChains,
     historyTokenDict,
-  } = useHistoryProtocol(currentAccount?.address);
+  } = useHistoryProtocol(currentAccount?.address, updateNonce);
 
   const {
     filterList: displayTokenList,
@@ -281,6 +308,10 @@ const Home = () => {
     setIsTokenExpand(false);
   };
 
+  const handleClickRefresh = () => {
+    setUpdateNonce(updateNonce + 1);
+  };
+
   useEffect(() => {
     init();
   }, [currentAccount]);
@@ -322,7 +353,17 @@ const Home = () => {
                   src="rabby-internal://assets/icons/home/copy.svg"
                 />
               </div>
-              <div className="balance">${formatNumber(totalBalance || 0)}</div>
+              <div className="balance">
+                ${formatNumber(totalBalance || 0)}{' '}
+                <img
+                  src="rabby-internal://assets/icons/home/asset-update.svg"
+                  className={classNames('icon-refresh', {
+                    circling:
+                      isLoadingRealTimeTokenList || isLoadingRealTimeProtocol,
+                  })}
+                  onClick={handleClickRefresh}
+                />
+              </div>
             </div>
             {curveData ? (
               <div className="right">

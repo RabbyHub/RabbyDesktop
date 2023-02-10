@@ -58,7 +58,7 @@ const getNoHistoryPriceTokensFromProtocolList = (
   };
 };
 
-export default (address: string | undefined) => {
+export default (address: string | undefined, nonce = 0) => {
   const addressRef = useRef(address);
   const [protocolList, setProtocolList] = useState<DisplayProtocol[]>([]);
   const [historyProtocolMap, setHistoryProtocolMap] = useState<
@@ -76,6 +76,7 @@ export default (address: string | undefined) => {
   >({});
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [isLoadingRealTime, setIsLoadingRealTime] = useState(true);
   const [supportHistoryChains, setSupportHistoryChains] = useState<
     ServerChain[]
   >([]);
@@ -85,6 +86,7 @@ export default (address: string | undefined) => {
 
   const fetchData = async (addr: string) => {
     setIsLoading(true);
+    setIsLoadingRealTime(true);
     setIsLoadingHistory(true);
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
     const result: DisplayProtocol[] = [];
@@ -124,6 +126,7 @@ export default (address: string | undefined) => {
       });
     };
     await waitQueueFinished(queue);
+    setIsLoadingRealTime(false);
     const chainList = await walletOpenapi.getChainList();
     const supportHistoryChainList = chainList.filter(
       (item) => item.is_support_history
@@ -226,7 +229,7 @@ export default (address: string | undefined) => {
     setProtocolList([]);
     setHistoryProtocolMap({});
     fetchData(address);
-  }, [address]);
+  }, [address, nonce]);
 
   return {
     protocolList,
@@ -234,6 +237,7 @@ export default (address: string | undefined) => {
     tokenHistoryPriceMap,
     isLoading,
     isLoadingHistory,
+    isLoadingRealTime,
     supportHistoryChains,
     historyTokenDict,
   };

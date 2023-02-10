@@ -53,6 +53,7 @@ const TokenItemWrapper = styled.li`
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      display: none;
       &.is-loss {
         color: #ff6060;
       }
@@ -84,6 +85,11 @@ const TokenItemWrapper = styled.li`
     }
     .token-actions {
       opacity: 1;
+    }
+    & > div {
+      .price-change {
+        display: block;
+      }
     }
   }
 `;
@@ -135,6 +141,7 @@ const TokenUsdValueField = styled.div`
   width: 25%;
   justify-content: flex-end;
   .price-change {
+    display: block !important;
     text-align: right;
   }
 `;

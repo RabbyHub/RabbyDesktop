@@ -34,6 +34,10 @@ const PoolItemWrapper = styled.div`
     .debt-tag {
       display: block;
     }
+    .token-price .price-change,
+    .token-amount .price-change {
+      display: block;
+    }
   }
 `;
 
@@ -104,6 +108,7 @@ const TokenItemWrapper = styled.div`
     line-height: 12px;
     color: #c6c6c6;
     text-align: left;
+    display: none;
     &.is-loss {
       color: #ff6060;
     }
@@ -130,6 +135,7 @@ const TokenItemWrapper = styled.div`
     line-height: 14px;
     text-align: right;
     .price-change {
+      display: block;
       text-align: right;
     }
   }
