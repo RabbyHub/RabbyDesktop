@@ -315,6 +315,34 @@ handleIpcMainInvoke('dapps-put', (_, dapp: IDapp) => {
   });
 });
 
+handleIpcMainInvoke('dapps-replace', (_, oldOrigin, newDapp) => {
+  // TODO: is there mutex?
+  const dappsMap = dappStore.get('dappsMap');
+
+  const oldDapp = dappsMap[oldOrigin];
+
+  if (!oldDapp) {
+    return {
+      error: 'Not found',
+    };
+  }
+
+  delete dappsMap[oldOrigin];
+  emitIpcMainEvent('__internal_main:app:close-tab-on-del-dapp', oldOrigin);
+
+  dappsMap[oldOrigin] = {
+    ...oldDapp,
+    ...newDapp,
+  };
+  dappStore.set('dappsMap', dappsMap);
+
+  emitIpcMainEvent('__internal_main:dapps:changed', {
+    dapps: getAllDapps(),
+  });
+
+  return {};
+});
+
 handleIpcMainInvoke('dapps-delete', (_, dappToDel: IDapp) => {
   const dappsMap = dappStore.get('dappsMap');
   const dapp = [dappToDel.origin];
