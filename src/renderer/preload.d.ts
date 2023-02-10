@@ -433,8 +433,8 @@ type ChannelInvokePayload = {
   'get-proxyConfig': {
     send: [];
     response: {
-      proxyType: IAppProxyConf['proxyType'];
-      proxySettings: IAppProxyConf['proxySettings'];
+      persisted: IAppProxyConf;
+      runtime: IAppProxyConf;
     };
   };
   'apply-proxyConfig': {

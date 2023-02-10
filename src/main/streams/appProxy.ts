@@ -2,6 +2,7 @@ import { coercePort } from '@/isomorphic/url';
 import { desktopAppStore } from '../store/desktopApp';
 import { checkProxyViaBrowserView } from '../utils/appNetwork';
 import { emitIpcMainEvent, handleIpcMainInvoke } from '../utils/ipcMainEvents';
+import { getAppRuntimeProxyConf } from '../utils/stream-helpers';
 
 handleIpcMainInvoke('check-proxyConfig', async (evt, payload) => {
   let valid = false;
@@ -32,8 +33,11 @@ handleIpcMainInvoke('get-proxyConfig', async (evt) => {
   const proxySettings = desktopAppStore.get('proxySettings');
 
   return {
-    proxyType,
-    proxySettings,
+    persisted: {
+      proxyType,
+      proxySettings,
+    },
+    runtime: await getAppRuntimeProxyConf(),
   };
 });
 

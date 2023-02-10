@@ -101,6 +101,10 @@ const CONF = {
       selectDevices: BrowserView;
     }>
   >,
+
+  appRuntimeProxyConf: {
+    subject: new ReplaySubject(1),
+  } as IConf<ReplaySubject<IAppProxyConf>>,
 };
 
 type IMainSubjects = typeof CONF;

@@ -2,7 +2,7 @@ import {
   IS_RUNTIME_PRODUCTION,
   RABBY_INTERNAL_PROTOCOL,
 } from '@/isomorphic/constants';
-import { formatProxyServerURL } from '@/isomorphic/url';
+import { formatProxyRules } from '@/isomorphic/url';
 import { BrowserView } from 'electron';
 import { catchError, firstValueFrom, of, Subject, timeout } from 'rxjs';
 import { BrowserViewManager } from './browserView';
@@ -152,31 +152,30 @@ export async function checkUrlViaBrowserView(
   });
 }
 
+const proxyBypassRules = [
+  '<local>',
+  `${RABBY_INTERNAL_PROTOCOL}//*`,
+  'chrome-extension://*',
+  'chrome://*',
+].join(',');
+
 export function setSessionProxy(
   session: Electron.Session,
   conf: IAppProxyConf
 ) {
-  const proxyServer = formatProxyServerURL(conf.proxySettings);
-
-  const proxyBypassRules = [
-    '<local>',
-    `${RABBY_INTERNAL_PROTOCOL}//*`,
-    'chrome-extension://*',
-    'chrome://*',
-  ].join(',');
+  const proxyRules = formatProxyRules(conf.proxySettings);
 
   session.clearHostResolverCache();
 
   if (conf.proxyType === 'custom') {
     session.setProxy({
       mode: 'fixed_servers',
-      proxyRules: [proxyServer].join(','),
+      proxyRules: [proxyRules].join(','),
       proxyBypassRules,
     });
   } else if (conf.proxyType === 'system') {
     session.setProxy({
       mode: 'system',
-      proxyRules: '',
       proxyBypassRules,
     });
   } else {
@@ -186,7 +185,7 @@ export function setSessionProxy(
     });
   }
 
-  return proxyServer;
+  return proxyRules;
 }
 
 export async function checkProxyViaBrowserView(
@@ -195,11 +194,11 @@ export async function checkProxyViaBrowserView(
 ) {
   const view = await checkingProxyViewReady;
 
-  const proxyServer = setSessionProxy(view.webContents.session, conf);
+  const proxyRules = setSessionProxy(view.webContents.session, conf);
 
   if (!IS_RUNTIME_PRODUCTION) {
     console.debug(
-      `[checkProxyViaBrowserView] targetURL: ${targetURL}; proxyType: ${conf.proxyType}; proxyServer: ${proxyServer}`
+      `[checkProxyViaBrowserView] targetURL: ${targetURL}; proxyType: ${conf.proxyType}; proxyRules: ${proxyRules}`
     );
   }
 

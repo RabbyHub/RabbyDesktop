@@ -365,6 +365,12 @@ export function formatProxyServerURL(settings: IAppProxyConf['proxySettings']) {
   }`;
 }
 
+export function formatProxyRules(settings: IAppProxyConf['proxySettings']) {
+  const fixedServer = formatProxyServerURL(settings);
+
+  return [fixedServer, 'direct://'].join(',');
+}
+
 export function formatAxiosProxyConfig(conf: AxiosProxyConfig) {
   return `${filterProxyProtocol(conf.protocol)}://${conf.host}:${conf.port}`;
 }

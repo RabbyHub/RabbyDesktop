@@ -203,3 +203,7 @@ export function stopSelectDevices() {
     type: 'select-devices',
   });
 }
+
+export async function getAppRuntimeProxyConf() {
+  return firstValueFrom(fromMainSubject('appRuntimeProxyConf'));
+}

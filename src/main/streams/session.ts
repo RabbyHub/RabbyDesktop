@@ -198,22 +198,21 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   sesLog(
     `[checkProxyValidOnBootstrap] valid: ${result.valid}; shouldProxy: ${result.shouldProxy}`
   );
+  let realProxy = { ...result.appProxyConf };
   if (result.shouldProxy) {
-    setSessionProxy(sessionIns, result.appProxyConf);
-    setSessionProxy(dappSafeViewSession, result.appProxyConf);
-    setSessionProxy(checkingViewSession, result.appProxyConf);
+    setSessionProxy(sessionIns, realProxy);
+    setSessionProxy(dappSafeViewSession, realProxy);
+    setSessionProxy(checkingViewSession, realProxy);
   } else if (!result.valid) {
-    sesLog('proxy config invalid! no applied');
-    setSessionProxy(sessionIns, { ...result.appProxyConf, proxyType: 'none' });
-    setSessionProxy(dappSafeViewSession, {
-      ...result.appProxyConf,
-      proxyType: 'none',
-    });
-    setSessionProxy(checkingViewSession, {
-      ...result.appProxyConf,
-      proxyType: 'none',
-    });
+    sesLog(`proxy config invalid! fallback to system mode`);
+    realProxy = { ...realProxy, proxyType: 'system' };
+
+    setSessionProxy(sessionIns, realProxy);
+    setSessionProxy(dappSafeViewSession, realProxy);
+    setSessionProxy(checkingViewSession, realProxy);
   }
+
+  valueToMainSubject('appRuntimeProxyConf', realProxy);
   supportHmrOnDev(sessionIns);
 
   sessionIns.setPreloads([preloadPath]);

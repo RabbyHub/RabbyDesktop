@@ -4,7 +4,6 @@ import { atom, useAtom } from 'jotai';
 
 import {
   applyProxyConfig,
-  getPersistedProxyConfig,
   validateProxyConfig,
 } from '@/renderer/ipcRequest/app';
 import { formatProxyServerURL } from '@/isomorphic/url';
@@ -42,13 +41,16 @@ export function useSettingProxyModal() {
   const [localProxyType, setLocalProxyType] = useState(appProxyConf.proxyType);
 
   const fetchProxyConf = useCallback(() => {
-    getPersistedProxyConfig().then((result) => {
+    window.rabbyDesktop.ipcRenderer.invoke('get-proxyConfig').then((result) => {
+      const { persisted } = result;
+      const runtimeConf = result.runtime;
+
       setAppProxyConf((prev) => {
         const nextVal = {
-          proxyType: result.proxyType,
+          proxyType: runtimeConf.proxyType,
           proxySettings: {
             ...prev.proxySettings,
-            ...result.proxySettings,
+            ...runtimeConf.proxySettings,
           },
         };
         setLocalProxyType(nextVal.proxyType);
