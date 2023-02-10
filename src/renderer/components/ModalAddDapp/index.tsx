@@ -11,6 +11,7 @@ import { useOpenDapp } from '@/renderer/utils/react-router';
 import { DappFavicon } from '../DappFavicon';
 import { Modal } from '../Modal/Modal';
 import styles from './index.module.less';
+import { DappPreviewFrame } from '../DappPreviewFrame';
 
 const findRelatedDapps = (dapps: IDapp[], url: string) => {
   const current = canoicalizeDappUrl(url);
@@ -108,6 +109,10 @@ const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
           )}
         </div>
       </div>
+      <DappPreviewFrame
+        className={styles.previewContent}
+        dappURL={data.inputOrigin}
+      />
       {/* <iframe
         className={styles.previewContent}
         src={data.inputOrigin}

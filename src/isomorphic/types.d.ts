@@ -30,6 +30,17 @@ type IMainWindowActiveTabRect =
       rect?: null | DappViewRect;
     };
 
+type IPreviewDappViewChanges =
+  | {
+      dappViewState: 'mounted';
+      dappURL: string;
+      rect: DappViewRect;
+    }
+  | {
+      dappViewState: 'unmounted';
+      rect?: null | DappViewRect;
+    };
+
 type IDapp = {
   // TODO: implement it;
   id?: string;

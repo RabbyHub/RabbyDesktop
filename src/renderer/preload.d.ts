@@ -256,6 +256,10 @@ type ChannelMessagePayload = {
     send: [rect: IMainWindowActiveTabRect];
     response: [];
   };
+  '__internal_rpc:preview-dapp-frame:toggle-show': {
+    send: [rect: IPreviewDappViewChanges];
+    response: [];
+  };
   '__internal_rpc:mainwindow:toggle-loading-view': MainInternalsMessagePayload['__internal_main:mainwindow:toggle-loading-view'];
   '__internal_rpc:popupview-on-mainwin:toggle-show': MainInternalsMessagePayload['__internal_main:popupview-on-mainwin:toggle-show'];
   '__internal_rpc:popupwin-on-mainwin:toggle-show': MainInternalsMessagePayload['__internal_main:popupwin-on-mainwin:toggle-show'];
@@ -475,6 +479,13 @@ type ChannelInvokePayload = {
     response: {
       error?: string | null;
       favicon: IParsedFavicon | null;
+    };
+  };
+  'preview-dapp': {
+    send: [targetURL: string];
+    response: {
+      error?: string | null;
+      previewImg: string | null;
     };
   };
   [`__internal_rpc:rabbyx-rpc:query`]: {

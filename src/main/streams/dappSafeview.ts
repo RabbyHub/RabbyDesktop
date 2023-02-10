@@ -5,7 +5,7 @@ import {
   RABBY_POPUP_GHOST_VIEW_URL,
 } from '../../isomorphic/constants';
 
-import { createPopupView } from '../utils/browser';
+import { createPopupView, hidePopupView } from '../utils/browser';
 import {
   onIpcMainEvent,
   onIpcMainInternalEvent,
@@ -52,24 +52,6 @@ onMainWindowReady().then(async (mainWin) => {
   const targetWin = mainWin.window;
 
   const baseView = createPopupView({});
-
-  const { dappSafeViewSession } = await getSessionInsts();
-
-  // TODO: stop it interacting with wallet by default
-  const safeView = createPopupView({
-    webPreferences: {
-      session: dappSafeViewSession,
-      sandbox: true,
-      nodeIntegration: false,
-      contextIsolation: true,
-      allowRunningInsecureContent: false,
-      autoplayPolicy: 'user-gesture-required',
-      preload: getAssetPath(`./preloads/dappSafeViewPreload.js`),
-      safeDialogs: true,
-      disableDialogs: true,
-      devTools: !IS_RUNTIME_PRODUCTION,
-    },
-  });
 
   updateSubWindowPosition(mainWin.window, { baseView });
   const onTargetWinUpdate = () => {
@@ -164,6 +146,31 @@ export async function attachDappSafeview(
   }
 }
 
+const dappPreviewViewReady = onMainWindowReady().then(async (tabbedMainWin) => {
+  const { dappSafeViewSession } = await getSessionInsts();
+
+  // TODO: stop it interacting with wallet by default
+  const safeView = createPopupView({
+    webPreferences: {
+      session: dappSafeViewSession,
+      sandbox: true,
+      nodeIntegration: false,
+      contextIsolation: true,
+      allowRunningInsecureContent: false,
+      autoplayPolicy: 'user-gesture-required',
+      preload: getAssetPath(`./preloads/dappSafeViewPreload.js`),
+      safeDialogs: true,
+      disableDialogs: true,
+      devTools: !IS_RUNTIME_PRODUCTION,
+    },
+  });
+
+  tabbedMainWin.window.addBrowserView(safeView);
+  hidePopupView(safeView);
+
+  return safeView;
+});
+
 onIpcMainEvent('__internal_rpc:dapp-tabs:close-safe-view', async () => {
   const targetWin = (await onMainWindowReady()).window;
   const dappSafeModeViews = await getDappSafeView();
@@ -193,3 +200,34 @@ onIpcMainInternalEvent('__internal_main:dev', async (payload) => {
       break;
   }
 });
+
+onIpcMainEvent(
+  '__internal_rpc:preview-dapp-frame:toggle-show',
+  async (_, payload) => {
+    const dappPreviewView = await dappPreviewViewReady;
+    const parentWin = (await onMainWindowReady()).window;
+
+    switch (payload.dappViewState) {
+      case 'mounted': {
+        const rect = {
+          x: Math.floor(payload.rect.x),
+          y: Math.floor(payload.rect.y),
+          width: Math.floor(payload.rect.width),
+          height: Math.floor(payload.rect.height),
+        };
+        dappPreviewView.setBounds(rect);
+        dappPreviewView.webContents.loadURL(payload.dappURL);
+
+        parentWin.setTopBrowserView(dappPreviewView);
+        break;
+      }
+      case 'unmounted': {
+        hidePopupView(dappPreviewView);
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+  }
+);
