@@ -125,6 +125,7 @@ export async function detectDapp(
   if (repeatedDapp) {
     data.faviconUrl = repeatedDapp.faviconUrl;
     data.faviconBase64 = repeatedDapp.faviconBase64;
+    data.recommendedAlias = repeatedDapp.alias || inputCoreName;
 
     return {
       data,

@@ -47,6 +47,17 @@ export async function putDapp(dapp: IDapp) {
   return window.rabbyDesktop.ipcRenderer.invoke('dapps-put', dapp);
 }
 
+export async function replaceDapp(
+  originsToDel: string | string[],
+  dapp: IDapp
+) {
+  return window.rabbyDesktop.ipcRenderer.invoke(
+    'dapps-replace',
+    originsToDel,
+    dapp
+  );
+}
+
 export async function deleteDapp(dapp: IDapp) {
   return window.rabbyDesktop.ipcRenderer
     .invoke('dapps-delete', dapp)

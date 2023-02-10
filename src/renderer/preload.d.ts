@@ -353,6 +353,12 @@ type ChannelInvokePayload = {
     send: [dapp: IDapp];
     response: void;
   };
+  'dapps-replace': {
+    send: [originsToDel: string | string[], newDapp: IDapp];
+    response: {
+      error?: string | null;
+    };
+  };
   'dapps-delete': {
     send: [dapp: IDapp];
     response: {
