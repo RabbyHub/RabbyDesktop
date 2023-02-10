@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { hideMainwinPopup } from '../ipcRequest/mainwin-popup';
 import { hideMainwinPopupview } from '../ipcRequest/mainwin-popupview';
 
-export function usePopupWinInfo<T extends IContextMenuPageInfo['type']>(
+export function usePopupWinInfo<T extends IPopupWinPageInfo['type']>(
   type: T,
   opts?: {
     enableTopViewGuard?: boolean;
@@ -12,7 +12,7 @@ export function usePopupWinInfo<T extends IContextMenuPageInfo['type']>(
 
   const [info, setInfo] = useState<{
     visible: boolean;
-    pageInfo: (IContextMenuPageInfo & { type: typeof type }) | null;
+    pageInfo: (IPopupWinPageInfo & { type: typeof type }) | null;
   }>({
     visible: false,
     pageInfo: null,

@@ -90,7 +90,7 @@ onMainWindowReady().then(async (mainWin) => {
 
   hideView(baseView, targetWin);
 
-  valueToMainSubject('dappSafeModeViews', { baseView, safeView });
+  valueToMainSubject('dappSafeModeViews', { baseView });
 });
 
 export async function attachDappSafeview(
@@ -169,9 +169,6 @@ onIpcMainEvent('__internal_rpc:dapp-tabs:close-safe-view', async () => {
   const dappSafeModeViews = await getDappSafeView();
 
   hideView(dappSafeModeViews.baseView, targetWin);
-  hideView(dappSafeModeViews.safeView, targetWin);
-
-  dappSafeModeViews.safeView.webContents.loadURL('about:blank');
 });
 
 onIpcMainInternalEvent('__internal_main:dev', async (payload) => {
@@ -186,10 +183,6 @@ onIpcMainInternalEvent('__internal_main:dev', async (payload) => {
       const dappSafeModeViews = await getDappSafeView();
       if (payload.viewType === 'base') {
         dappSafeModeViews.baseView.webContents.openDevTools({
-          mode: 'detach',
-        });
-      } else if (payload.viewType === 'safe') {
-        dappSafeModeViews.safeView.webContents.openDevTools({
           mode: 'detach',
         });
       }

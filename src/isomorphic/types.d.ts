@@ -208,7 +208,8 @@ type IRabbyxRpcResponse = {
   error?: Error;
 };
 
-type IContextMenuPageInfo =
+type IHardwareConnectPageType = 'onekey' | 'trezor';
+type IPopupWinPageInfo =
   | {
       type: 'sidebar-dapp';
       dappTabInfo: {

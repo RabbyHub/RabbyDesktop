@@ -16,6 +16,8 @@ import { useHasNewRelease } from '@/renderer/hooks/useAppUpdator';
 import { useSettings } from '@/renderer/hooks/useSettings';
 import { makeSureDappOpened } from '@/renderer/ipcRequest/mainwin';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
+import { useTransactionPendingCount } from '@/renderer/hooks/rabbyx/useTransaction';
+import { Badge } from 'antd';
 import { DappFavicon } from '../DappFavicon';
 import Hide from './Hide';
 import styles from './Sidebar.module.less';
@@ -51,11 +53,11 @@ const StaticEntries = [
     title: 'Home',
     logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/home.svg',
   },
-  {
-    path: '/mainwin/swap',
-    title: 'Swap',
-    logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/swap.svg',
-  },
+  // {
+  //   path: '/mainwin/swap',
+  //   title: 'Swap',
+  //   logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/swap.svg',
+  // },
   {
     path: '/mainwin/my-dapps',
     title: 'My Dapp',
@@ -192,6 +194,8 @@ export default function MainWindowSidebar() {
 
   const { settings, toggleSidebarCollapsed } = useSettings();
 
+  const pendingTxCount = useTransactionPendingCount();
+
   return (
     <Transition in={!settings.sidebarCollapsed} timeout={500}>
       {(state) => {
@@ -217,6 +221,8 @@ export default function MainWindowSidebar() {
             <div className={styles.dappsRouteList}>
               <ul className={styles.routeList}>
                 {StaticEntries.map((sE) => {
+                  const isHome = sE.path === '/mainwin/home';
+
                   return (
                     <li
                       key={`sE-${sE.path}`}
@@ -229,12 +235,39 @@ export default function MainWindowSidebar() {
                       }}
                     >
                       <div className={styles.routeItemInner}>
-                        <img className={styles.routeLogo} src={sE.logoSrc} />
+                        {isHome && secondAnim ? (
+                          <Badge
+                            className={classNames(
+                              styles.txPendingCount,
+                              styles.inCollapsed
+                            )}
+                            count={pendingTxCount}
+                            color="#ffb020"
+                          >
+                            <img
+                              className={styles.routeLogo}
+                              src={sE.logoSrc}
+                            />
+                          </Badge>
+                        ) : (
+                          <img className={styles.routeLogo} src={sE.logoSrc} />
+                        )}
                         <Hide
                           visible={!secondAnim}
                           className={styles.routeTitle}
                         >
-                          {sE.title}
+                          <span>{sE.title}</span>
+                          {isHome &&
+                          !settings.sidebarCollapsed &&
+                          pendingTxCount ? (
+                            <Badge
+                              className={styles.txPendingCount}
+                              count={pendingTxCount}
+                              color="#ffb020"
+                            >
+                              <span />
+                            </Badge>
+                          ) : null}
                         </Hide>
                       </div>
                     </li>

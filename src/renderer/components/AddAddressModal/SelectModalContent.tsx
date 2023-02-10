@@ -16,13 +16,11 @@ const HARDWARE_MAP = [
     logo: 'rabby-internal://assets/icons/device/trezor.svg',
     name: 'Trezor',
     id: KEYRING_CLASS.HARDWARE.TREZOR,
-    disabled: true,
   },
   {
     logo: 'rabby-internal://assets/icons/device/onekey.svg',
     name: 'OneKey',
     id: KEYRING_CLASS.HARDWARE.ONEKEY,
-    disabled: true,
   },
 ];
 

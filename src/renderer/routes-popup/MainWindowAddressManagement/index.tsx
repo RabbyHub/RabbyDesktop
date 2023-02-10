@@ -9,7 +9,10 @@ import { AddressManagementDrawer } from '@/renderer/components/AddressManagement
 
 import { usePopupViewInfo } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { useIsAddAddress } from '@/renderer/components/AddressManagementDrawer/Footer';
+import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import styles from './index.module.less';
+
+hideMainwinPopupview('address-management');
 
 function AddressMngr() {
   const { localVisible, hideView } = usePopupViewInfo('address-management', {
