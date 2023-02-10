@@ -102,6 +102,12 @@ onIpcMainEvent('__internal_webui-window-close', (_, winId, webContentsId) => {
 onIpcMainEvent('__internal_rpc:mainwindow:open-tab', async (_, dappOrigin) => {
   const mainTabbedWin = await onMainWindowReady();
 
+  const openedTab = mainTabbedWin.tabs.findByOrigin(dappOrigin);
+  if (openedTab) {
+    mainTabbedWin.tabs.select(openedTab.id);
+    return;
+  }
+
   createDappTab(mainTabbedWin, dappOrigin);
 });
 
