@@ -32,6 +32,7 @@ import { getWindowFromWebContents, switchToBrowserTab } from '../utils/browser';
 import { supportHmrOnDev } from '../utils/webRequest';
 import { checkProxyViaBrowserView, setSessionProxy } from '../utils/appNetwork';
 import { getAppProxyConf } from '../store/desktopApp';
+import { createTrezorLikeConnectPageWindow } from '../utils/hardwareConnect';
 
 const sesLog = getBindLog('session', 'bgGrey');
 
@@ -247,6 +248,13 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
       });
 
       switch (actionInfo.action) {
+        case 'open-hardware-connect': {
+          const { window, tab } = await createTrezorLikeConnectPageWindow(
+            actionInfo.pageURL
+          );
+
+          return [tab.view!.webContents, window];
+        }
         case 'activate-tab': {
           switchToBrowserTab(actionInfo.tabId, win);
 

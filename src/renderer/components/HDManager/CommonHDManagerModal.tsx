@@ -1,5 +1,5 @@
 import './index.less';
-import { Button, message, Spin } from 'antd';
+import { Button, message } from 'antd';
 import React from 'react';
 import { HARDWARE_KEYRING_TYPES } from '@/renderer/utils/constant';
 import { useShellWallet } from '@/renderer/hooks-shell/useShellWallet';
@@ -29,6 +29,7 @@ export const CommonHDManagerModal: React.FC<Props> = ({
   const walletController = useShellWallet();
   const [initialed, setInitialed] = React.useState(false);
   const idRef = React.useRef<number | null>(null);
+  const isLedger = keyring === HARDWARE_KEYRING_TYPES.Ledger.type;
 
   const closeConnect = React.useCallback(() => {
     walletController.requestKeyring(keyring, 'cleanUp', idRef.current);
@@ -42,16 +43,25 @@ export const CommonHDManagerModal: React.FC<Props> = ({
       })
       .then((id: number) => {
         idRef.current = id;
-        return walletController.requestKeyring(keyring, 'unlock', id);
+
+        if (isLedger) {
+          return walletController.requestKeyring(
+            keyring,
+            'unlock',
+            idRef.current
+          );
+        }
       })
       .then(() => {
         setInitialed(true);
       })
       .catch(() => {
-        props.onBack?.();
-        message.error(
-          'Unable to connect to Hardware wallet. Please try to re-connect.'
-        );
+        if (isLedger) {
+          props.onBack?.();
+          message.error(
+            'Unable to connect to Hardware wallet. Please try to re-connect.'
+          );
+        }
       });
     window.addEventListener('beforeunload', () => {
       closeConnect();

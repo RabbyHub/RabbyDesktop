@@ -151,6 +151,7 @@ async function showModalPopup(
   return modalWindow;
 }
 
+// pointless now
 const addAddressReady = onMainWindowReady().then(async (mainWin) => {
   const mainWindow = mainWin.window;
 

@@ -1,4 +1,4 @@
-import { isRabbyXPage } from '@/isomorphic/url';
+import { checkHardwareConnectPage, isRabbyXPage } from '@/isomorphic/url';
 import { Tabs } from '../browser/tabs';
 
 export function checkOpenAction(
@@ -18,9 +18,30 @@ export function checkOpenAction(
   | {
       action: 'open-external';
       externalUrl: string;
+    }
+  | {
+      action: 'open-hardware-connect';
+      type: 'onekey' | 'trezor';
+      pageURL: string;
     } {
   const isFromExt = opts.fromUrl.startsWith('chrome-extension://');
   const isToExt = opts.toUrl.startsWith('chrome-extension://');
+
+  const isFromRabbyxBg = isRabbyXPage(
+    opts.fromUrl,
+    opts.rabbyExtId,
+    'background'
+  );
+  const hardwareConnectInfo = checkHardwareConnectPage(opts.toUrl);
+
+  // maybe click behavior on notitication window
+  if (isFromRabbyxBg && hardwareConnectInfo) {
+    return {
+      action: 'open-hardware-connect',
+      type: hardwareConnectInfo.type,
+      pageURL: opts.toUrl,
+    };
+  }
 
   const openedTab = !isToExt
     ? tabs.findByOrigin(opts.toUrl)
@@ -32,13 +53,9 @@ export function checkOpenAction(
       openedTab,
     };
   }
-  const maybeClickBehaviorOnNotitication = isRabbyXPage(
-    opts.fromUrl,
-    opts.rabbyExtId,
-    'background'
-  );
 
-  if (maybeClickBehaviorOnNotitication && opts.toUrl.startsWith('http')) {
+  if (isFromRabbyxBg && opts.toUrl.startsWith('http')) {
+    // http(s) url
     return {
       action: 'open-external',
       externalUrl: opts.toUrl,
