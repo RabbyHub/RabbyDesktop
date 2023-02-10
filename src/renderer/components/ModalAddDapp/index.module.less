@@ -35,11 +35,11 @@
     }
     .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper,
     .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper:hover {
-      border-color: #ff6f6f;
+      border-color: #ff7f7f;
       background: rgba(255, 255, 255, 0.1);
     }
     .ant-form-item-explain-error {
-      color: #ff6f6f;
+      color: #ff7f7f;
     }
   }
   .backIcon {
@@ -298,6 +298,13 @@
         color: #fff;
       }
     }
+
+    &Suffix {
+      font-size: 16px;
+      img {
+        cursor: pointer;
+      }
+    }
   }
   :global {
     .ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled):hover {
@@ -306,11 +313,11 @@
     }
     .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper,
     .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper:hover {
-      border-color: #ff6f6f;
+      border-color: #ff7f7f;
       background: rgba(255, 255, 255, 0.1);
     }
     .ant-form-item-explain-error {
-      color: #ff6f6f;
+      color: #ff7f7f;
     }
     .ant-form-item {
       margin-bottom: 32px;
@@ -322,14 +329,28 @@
       font-weight: 400;
       font-size: 12px;
       line-height: 14px;
-      color: #ffffff;
-      opacity: 0.6;
+    }
+    .ant-form-item-explain-success {
+      color: rgba(255, 255, 255, 0.6);
     }
   }
 
   .preview {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 8px;
+
+    &BtnSuccess {
+      background: #27c193;
+      box-shadow: 0px 4px 12px rgba(48, 158, 86, 0.2);
+      border-color: #27c193;
+    }
+
+    &Loading {
+      width: 112px;
+      text-align: center;
+      color: #fff;
+      font-size: 20px;
+    }
 
     &Icon {
       width: 24px;
@@ -360,6 +381,12 @@
           color: #ffffff;
         }
       }
+    }
+    &Alias {
+      color: #fff;
+      padding-left: 4px;
+      font-size: 14px;
+      line-height: 16px;
     }
     &Desc {
       font-weight: 400;
@@ -396,6 +423,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
 
       text-align: center;
 

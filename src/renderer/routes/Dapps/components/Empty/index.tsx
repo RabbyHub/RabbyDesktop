@@ -184,9 +184,12 @@ export const Empty = () => {
 
   return (
     <div className={styles.empty} ref={ref}>
-      <div className={styles.emptyTitle}>添加 Dapp 开启您的 web3 之旅</div>
+      <div className={styles.emptyTitle}>
+        Add Dapp and start your web3 journey
+      </div>
       <div className={styles.emptyDesc}>
-        点击左下角+号，开始添加您的第一个Dapp
+        Click the plus sign in the lower left corner to start adding your first
+        Dapp
       </div>
       <Arrow
         startPoint={{ x: 0, y: 0 }}
