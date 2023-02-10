@@ -100,6 +100,7 @@ type IDappsDetectResult<T extends string = string> = {
     faviconUrl?: string;
     faviconBase64?: string; // base64
     isExistedDapp?: boolean;
+    previewImg?: Uint8Array | null;
   };
   error?: {
     type: T;

@@ -485,7 +485,7 @@ type ChannelInvokePayload = {
     send: [targetURL: string];
     response: {
       error?: string | null;
-      previewImg: string | null;
+      previewImg: Uint8Array | string | null;
     };
   };
   [`__internal_rpc:rabbyx-rpc:query`]: {
@@ -531,6 +531,10 @@ interface Window {
           func: (event: M2RChanneMessagePayload[T]) => void
         ): (() => void) | undefined;
       };
+    };
+    rendererHelpers: {
+      b64ToObjLink: (b64: string) => string;
+      bufToObjLink: (buf: Buffer | Uint8Array) => string;
     };
   };
 

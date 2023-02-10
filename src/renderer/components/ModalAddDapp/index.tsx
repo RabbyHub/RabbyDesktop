@@ -1,6 +1,6 @@
 import { LoadingOutlined } from '@ant-design/icons';
 import { Button, Form, Input, ModalProps } from 'antd';
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 
 import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { addDapp, replaceDapp } from '@/renderer/ipcRequest/dapps';
@@ -11,7 +11,6 @@ import { useOpenDapp } from '@/renderer/utils/react-router';
 import { DappFavicon } from '../DappFavicon';
 import { Modal } from '../Modal/Modal';
 import styles from './index.module.less';
-import { DappPreviewFrame } from '../DappPreviewFrame';
 
 const findRelatedDapps = (dapps: IDapp[], url: string) => {
   const current = canoicalizeDappUrl(url);
@@ -44,6 +43,13 @@ interface PreviewDappProps {
 }
 const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
   const [input, setInput] = useState(data.recommendedAlias);
+
+  const previewBlobLink = useMemo(() => {
+    if (data.isExistedDapp) return null;
+    if (!data.previewImg) return null;
+
+    return window.rabbyDesktop.rendererHelpers.bufToObjLink(data.previewImg);
+  }, [data.isExistedDapp, data.previewImg]);
   return (
     <div className={styles.preview}>
       <div className={styles.previewHeader}>
@@ -60,6 +66,7 @@ const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
               </span>
             ) : (
               <Input
+                spellCheck={false}
                 defaultValue={data.recommendedAlias}
                 key={data?.recommendedAlias}
                 onChange={(e) => setInput(e.target.value)}
@@ -109,24 +116,27 @@ const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
           )}
         </div>
       </div>
-      <DappPreviewFrame
-        className={styles.previewContent}
-        dappURL={data.inputOrigin}
-      />
-      {/* <iframe
-        className={styles.previewContent}
-        src={data.inputOrigin}
-        title="debank"
-      /> */}
-      <div className={styles.previewEmpty}>
-        <div>
-          <img
-            src="rabby-internal://assets/icons/add-dapp/icon-failed.svg"
-            alt=""
+      {!data?.isExistedDapp && previewBlobLink && (
+        <div className={styles.previewImageContainer}>
+          <div
+            className={styles.imgBlock}
+            style={{
+              backgroundImage: `url(${previewBlobLink})`,
+            }}
           />
-          <div className={styles.previewEmptyTitle}>Page load failed</div>
         </div>
-      </div>
+      )}
+      {!data?.isExistedDapp && !previewBlobLink && (
+        <div className={styles.previewEmpty}>
+          <div>
+            <img
+              src="rabby-internal://assets/icons/add-dapp/icon-failed.svg"
+              alt=""
+            />
+            <div className={styles.previewEmptyTitle}>Page load failed</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -438,6 +448,7 @@ export function AddDapp({
             className={styles.input}
             placeholder="Input the Dapp domain name. e.g. debank.com"
             autoFocus
+            spellCheck={false}
             suffix={
               <span className={styles.inputSuffix}>
                 {loading ? (

@@ -4,10 +4,12 @@ import { format as urlFormat } from 'url';
 import Axios, { AxiosError, AxiosProxyConfig } from 'axios';
 import LRUCache from 'lru-cache';
 
+import { BrowserWindow } from 'electron';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { parseWebsiteFavicon } from './fetch';
 import { AxiosElectronAdapter } from './axios';
 import { checkUrlViaBrowserView, CHROMIUM_NET_ERR_DESC } from './appNetwork';
+import { createPopupWindow } from './browser';
 
 const DFLT_TIMEOUT = 8 * 1e3;
 
@@ -47,6 +49,81 @@ async function checkDappHttpsCert(
   return {
     type: DETECT_ERR_CODES.HTTPS_CERT_INVALID,
     errorCode: checkResult.certErrorDesc!,
+  };
+}
+
+let previewWindow: BrowserWindow;
+export async function safeCapturePage(
+  targetURL: string,
+  opts?: {
+    timeout?: number;
+  }
+): Promise<{
+  previewImg: Uint8Array | null;
+  error?: string | null;
+}> {
+  if (!previewWindow) {
+    previewWindow = createPopupWindow({
+      width: 1366,
+      height: 768,
+      show: false,
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        webviewTag: false,
+      },
+    });
+  }
+
+  const { timeout: timeoutValue = 8 * 1e3 } = opts || {};
+
+  previewWindow.loadURL(targetURL);
+
+  const p = new Promise<Uint8Array | null>((resolve, reject) => {
+    let timeouted = false;
+
+    setTimeout(() => {
+      timeouted = true;
+      reject(new Error('timeout'));
+    }, timeoutValue);
+
+    previewWindow.webContents.on('did-fail-load', () => {
+      reject();
+    });
+
+    previewWindow.webContents.on('certificate-error', () => {
+      reject();
+    });
+
+    previewWindow.webContents.on('did-finish-load', () => {
+      previewWindow.webContents.capturePage().then((image) => {
+        if (timeouted) return;
+
+        resolve(image.toPNG());
+      });
+    });
+  });
+
+  let previewImg: Uint8Array | string | null = null;
+  let error: string | null = null;
+  try {
+    previewImg = await p;
+  } catch (e: any) {
+    if (e?.message === 'timeout') {
+      error = 'Preview timeout';
+    } else {
+      error = 'Error occured on Preview dapp';
+    }
+    previewImg = null;
+  } finally {
+    previewWindow.loadURL('about:blank');
+    // previewWindow.close();
+    // previewWindow.destroy();
+  }
+
+  return {
+    previewImg,
+    error,
   };
 }
 
@@ -120,6 +197,7 @@ export async function detectDapp(
     faviconUrl: undefined,
     faviconBase64: undefined,
     isExistedDapp: !!repeatedDapp,
+    previewImg: null,
   };
 
   if (repeatedDapp) {
@@ -136,14 +214,19 @@ export async function detectDapp(
     };
   }
 
-  const { iconInfo, faviconUrl, faviconBase64 } = await parseWebsiteFavicon(
-    finalOrigin,
-    { timeout: DFLT_TIMEOUT, proxy: opts.proxyOnParseFavicon }
-  );
+  const [{ iconInfo, faviconUrl, faviconBase64 }, previewResult] =
+    await Promise.all([
+      parseWebsiteFavicon(finalOrigin, {
+        timeout: DFLT_TIMEOUT,
+        proxy: opts.proxyOnParseFavicon,
+      }),
+      safeCapturePage(checkResult.finalUrl, { timeout: DFLT_TIMEOUT }),
+    ]);
 
   data.icon = iconInfo;
   data.faviconUrl = faviconUrl;
   data.faviconBase64 = faviconBase64;
+  data.previewImg = previewResult.previewImg;
 
   return { data };
 }
