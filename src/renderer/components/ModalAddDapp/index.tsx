@@ -1,6 +1,8 @@
 import { Button, Form, Input, message, ModalProps } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { getDomainFromHostname, canoicalizeDappUrl } from '@/isomorphic/url';
+import { addDapp } from '@/renderer/ipcRequest/dapps';
 import classNames from 'classnames';
 import { useNavigate } from 'react-router-dom';
 import { useDapps } from 'renderer/hooks/useDappsMngr';
@@ -12,8 +14,35 @@ import { useAddDappURL } from './useAddDapp';
 
 type IStep = 'add' | 'checked' | 'duplicated';
 
+const findRelatedDapps = (dapps: IDapp[], url: string) => {
+  const current = canoicalizeDappUrl(url);
+
+  // 正在添加 uniswap.org 提示会替换掉 app.uniswap.org
+  if (current.is2ndaryDomain) {
+    return dapps.filter((dapp) => {
+      const result = canoicalizeDappUrl(dapp.origin);
+      return result.secondaryDomain === current.secondaryDomain;
+    });
+  }
+  // 正在添加 app.uniswap.org 提示会替换掉uniswap.org
+  if (current.isSubDomain) {
+    return dapps.filter((dapp) => {
+      const result = canoicalizeDappUrl(dapp.origin);
+      return (
+        result.secondaryDomain === current.secondaryDomain &&
+        result.is2ndaryDomain
+      );
+    });
+  }
+  return [];
+};
+
 function useAddStep() {
-  const { detectDapps } = useDapps();
+  const { detectDapps, dapps } = useDapps();
+  console.log(dapps);
+  console.log(getDomainFromHostname('baidu.com'));
+  const a = findRelatedDapps(dapps || [], 'https://uniswap.org');
+  console.log(a);
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const [_checkError, setCheckError] = useState<string | null>(null);
 
@@ -71,16 +100,16 @@ function useAddStep() {
 }
 
 function useCheckedStep() {
-  const [dappInfo, setDappInfo] = useState<IDapp>({
-    alias: '',
-    origin: '',
-    faviconUrl: '',
-    faviconBase64: '',
-  });
+  const [dappInfo, setDappInfo] = useState<IDappsDetectResult['data'] | null>(
+    null
+  );
   const onChangeDappAlias = useCallback(
     (evt: React.ChangeEvent<HTMLInputElement>) => {
       setDappInfo((prev) => {
-        return { ...prev, alias: evt.target.value };
+        if (prev) {
+          return { ...prev, recommendedAlias: evt.target.value };
+        }
+        return prev;
       });
     },
     []
@@ -90,33 +119,40 @@ function useCheckedStep() {
     dappInfo,
     setDappInfo,
     onChangeDappAlias,
-    isValidAlias: isValidDappAlias(dappInfo.alias),
+    isValidAlias: isValidDappAlias(dappInfo?.recommendedAlias || ''),
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface PreviewDappProps {}
-const PreviewDapp = (props: PreviewDappProps) => {
+interface PreviewDappProps {
+  data: NonNullable<IDappsDetectResult['data']>;
+  onAdd: () => void;
+}
+const PreviewDapp = ({ data, onAdd }: PreviewDappProps) => {
   return (
     <div className={styles.preview}>
       <div className={styles.previewHeader}>
-        <div className={styles.previewIcon}>todo</div>
+        <DappFavicon
+          className={styles.previewIcon}
+          origin={data.inputOrigin}
+          src={data?.faviconBase64 || data?.faviconUrl}
+        />
         <div>
           <div className={styles.previewTitle}>
-            <Input />
+            <Input defaultValue={data.recommendedAlias} />
           </div>
-          <div className={styles.previewDesc}>uniswap.org/</div>
+          <div className={styles.previewDesc}>{data.inputOrigin}</div>
         </div>
         <div className={styles.previewAction}>
-          <Button type="primary">Add</Button>
-
-          {/* <Button type="primary">Open</Button>
-          <LoadingOutlined /> */}
+          <Button type="primary" onClick={onAdd}>
+            Add
+          </Button>
+          <Button type="primary">Open</Button>
+          {/* <LoadingOutlined /> */}
         </div>
       </div>
       <iframe
         className={styles.previewContent}
-        src="https://app.uniswap.org"
+        src={data.inputOrigin}
         title="debank"
       />
       {/* <div className={styles.previewEmpty}>
@@ -132,9 +168,8 @@ const PreviewDapp = (props: PreviewDappProps) => {
   );
 };
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface DappCardProps {
-  dapp?: IMergedDapp;
+  dapp?: IDapp;
 }
 const DappCard = ({ dapp }: DappCardProps) => {
   return (
@@ -152,22 +187,35 @@ const DappCard = ({ dapp }: DappCardProps) => {
   );
 };
 
-const RelationModal = () => {
+interface RelationModalProps {
+  data: IDapp[];
+  open?: boolean;
+  onCancel?: () => void;
+  onOk?: () => void;
+}
+const RelationModal = ({ data, open, onCancel, onOk }: RelationModalProps) => {
   return (
-    <Modal open className={styles.relationModal} width={500}>
+    <Modal
+      open={open}
+      onCancel={onCancel}
+      className={styles.relationModal}
+      width={500}
+    >
       <div className={styles.content}>
         <div className={styles.title}>
           There is an inclusion relationship with the domain name of the added
           Dapp. The following Dapp will be replaced after adding.
         </div>
         <div className={styles.body}>
-          <DappCard />
+          {data.map((dapp) => {
+            return <DappCard key={dapp.origin} dapp={dapp} />;
+          })}
         </div>
         <div className={styles.footer}>
-          <Button ghost block size="large">
+          <Button ghost block size="large" onClick={onCancel}>
             Cancel adding
           </Button>
-          <Button type="primary" block size="large">
+          <Button type="primary" block size="large" onClick={onOk}>
             Confirm to add
           </Button>
         </div>
@@ -175,6 +223,8 @@ const RelationModal = () => {
     </Modal>
   );
 };
+
+// const check
 
 export function AddDapp({
   onAddedDapp,
@@ -184,6 +234,7 @@ export function AddDapp({
 }) {
   const [step, setStep] = useState<IStep>('add');
   const navigate = useNavigate();
+  const { dapps } = useDapps();
 
   const {
     addStepForm,
@@ -196,6 +247,8 @@ export function AddDapp({
     setCheckError,
   } = useAddStep();
 
+  const [dapp, setDapp] = useState<IDapp | null>(null);
+
   const { dappInfo, setDappInfo, onChangeDappAlias, isValidAlias } =
     useCheckedStep();
 
@@ -205,6 +258,7 @@ export function AddDapp({
     setCheckError(null);
 
     const payload = await checkUrl();
+    console.log(payload);
 
     if (payload?.error?.type === 'REPEAT') {
       setStep('duplicated');
@@ -221,15 +275,33 @@ export function AddDapp({
     setCheckError(payload?.error?.message || null);
 
     if (payload?.data) {
-      setStep('checked');
-      setDappInfo({
-        alias: '',
-        origin: payload.data.inputOrigin,
-        faviconUrl: payload.data.faviconUrl,
-        faviconBase64: payload.data.faviconBase64,
-      });
+      setDappInfo(payload.data);
     }
   }, [checkUrl, setCheckError, setDappInfo]);
+
+  const [isShowRelatedModal, setIsShowRelatedModal] = useState(false);
+  const [relatedDapps, setRelatedDapps] = useState<IDapp[]>([]);
+
+  const handleAdd = async () => {
+    if (!dappInfo) {
+      return;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    const relatedDapps = findRelatedDapps(dapps || [], dappInfo.inputOrigin);
+    if (relatedDapps.length) {
+      setRelatedDapps(relatedDapps);
+      setIsShowRelatedModal(true);
+      return;
+    }
+
+    await addDapp({
+      origin: dappInfo.inputOrigin,
+      alias: dappInfo.recommendedAlias,
+      faviconBase64: dappInfo.faviconBase64,
+      faviconUrl: dappInfo.faviconUrl,
+    });
+  };
 
   return (
     <div className={styles.content}>
@@ -243,12 +315,12 @@ export function AddDapp({
             'To ensure the security of your funds, please ensure that you enter the official domain name of Dapp'
           }
           // validateTrigger="onBlur"
-          rules={[
-            {
-              pattern: /^https:\/\/.+/,
-              message: 'Dapp with protocols other than HTTPS is not supported',
-            },
-          ]}
+          // rules={[
+          //   {
+          //     pattern: /^https:\/\/.+/,
+          //     message: 'Dapp with protocols other than HTTPS is not supported',
+          //   },
+          // ]}
         >
           <Input
             className={styles.input}
@@ -259,7 +331,7 @@ export function AddDapp({
             suffix={
               <img
                 onClick={() => {
-                  // todo
+                  doCheck();
                 }}
                 src="rabby-internal://assets/icons/add-dapp/icon-search.svg"
               />
@@ -267,8 +339,17 @@ export function AddDapp({
           />
         </Form.Item>
       </Form>
-      <PreviewDapp />
-      {/* <RelationModal /> */}
+      {dappInfo ? <PreviewDapp data={dappInfo} onAdd={handleAdd} /> : null}
+      <RelationModal
+        data={relatedDapps}
+        open={isShowRelatedModal}
+        onCancel={() => {
+          setIsShowRelatedModal(false);
+        }}
+        onOk={() => {
+          setIsShowRelatedModal(false);
+        }}
+      />
     </div>
   );
 }

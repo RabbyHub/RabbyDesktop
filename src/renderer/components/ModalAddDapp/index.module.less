@@ -260,6 +260,7 @@
 .addModal {
   .content {
     padding: 32px 120px 63px 120px;
+    min-height: 702px;
   }
   .title {
     font-weight: 500;
@@ -329,6 +330,12 @@
   .preview {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 8px;
+
+    &Icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+    }
 
     &Header {
       padding: 8px 12px 8px 16px;
@@ -460,7 +467,10 @@
   border-radius: 6px;
   padding: 16px;
   width: 100%;
-  cursor: pointer;
+
+  &:not(:last-child) {
+    margin-bottom: 8px;
+  }
 
   &Active {
     background: rgba(0, 0, 0, 0.4);
