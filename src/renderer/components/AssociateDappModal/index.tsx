@@ -54,7 +54,9 @@ const DappCard = ({ checked, onSelect, dapp }: DappCardProps) => {
       />
       <div className={styles.dappContent}>
         <div className={styles.dappName}>{dapp.alias}</div>
-        <div className={styles.dappOrigin}>{dapp.origin}</div>
+        <div className={styles.dappOrigin}>
+          {dapp.origin?.replace(/^\w+:\/\//, '')}
+        </div>
       </div>
       <div className={styles.dappExtra}>
         <Checkbox checked={checked} />

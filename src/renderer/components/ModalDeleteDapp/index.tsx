@@ -77,7 +77,9 @@ export default function ModalDeleteDapp({
               />
               <div className="infos">
                 <h4 className="dapp-alias">{dapp.alias}</h4>
-                <span className="dapp-url">{dapp.origin}</span>
+                <span className="dapp-url">
+                  {dapp.origin?.replace(/^\w+:\/\//, '')}
+                </span>
               </div>
             </a>
           </div>

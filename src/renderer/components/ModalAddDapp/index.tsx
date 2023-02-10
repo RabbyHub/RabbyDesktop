@@ -3,7 +3,7 @@ import { Button, Form, Input, ModalProps } from 'antd';
 import React, { ReactNode, useState } from 'react';
 
 import { canoicalizeDappUrl } from '@/isomorphic/url';
-import { addDapp } from '@/renderer/ipcRequest/dapps';
+import { addDapp, replaceDapp } from '@/renderer/ipcRequest/dapps';
 import { useRequest, useSetState } from 'ahooks';
 import classNames from 'classnames';
 import { useDapps } from 'renderer/hooks/useDappsMngr';
@@ -62,6 +62,7 @@ const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
                 defaultValue={data.recommendedAlias}
                 key={data?.recommendedAlias}
                 onChange={(e) => setInput(e.target.value)}
+                autoFocus
               />
             )}
           </div>
@@ -334,8 +335,11 @@ export function AddDapp({
   });
 
   const { runAsync: runAddDapp, loading: isAddLoading } = useRequest(
-    (dapp) => {
-      return Promise.all([addDapp(dapp), sleep(500)]);
+    (dapp, urls?: string[]) => {
+      return Promise.all([
+        urls ? replaceDapp(urls, dapp) : addDapp(dapp),
+        sleep(500),
+      ]);
     },
     {
       manual: true,
@@ -355,14 +359,18 @@ export function AddDapp({
   };
 
   const handleAdd = async (
-    dappInfo: NonNullable<IDappsDetectResult['data']>
+    dappInfo: NonNullable<IDappsDetectResult['data']>,
+    urls?: string[]
   ) => {
-    await runAddDapp({
-      origin: dappInfo.inputOrigin,
-      alias: dappInfo.recommendedAlias,
-      faviconBase64: dappInfo.faviconBase64,
-      faviconUrl: dappInfo.faviconUrl,
-    });
+    await runAddDapp(
+      {
+        origin: dappInfo.inputOrigin,
+        alias: dappInfo.recommendedAlias,
+        faviconBase64: dappInfo.faviconBase64,
+        faviconUrl: dappInfo.faviconUrl,
+      },
+      urls
+    );
     const nextDappInfo = {
       ...dappInfo,
       isExistedDapp: true,
@@ -470,7 +478,10 @@ export function AddDapp({
             relatedDapps: [],
           });
           if (addState.dappInfo) {
-            handleAdd(addState.dappInfo);
+            handleAdd(
+              addState.dappInfo,
+              addState.relatedDapps.map((d) => d.origin)
+            );
           }
         }}
       />
