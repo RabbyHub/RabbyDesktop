@@ -354,7 +354,7 @@ type ChannelInvokePayload = {
     response: void;
   };
   'dapps-replace': {
-    send: [oldOrigin: string, dapp: Partial<IDapp> & { origin: string }];
+    send: [originsToDel: string | string[], newDapp: IDapp];
     response: {
       error?: string | null;
     };

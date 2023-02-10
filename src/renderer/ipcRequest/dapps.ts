@@ -47,10 +47,13 @@ export async function putDapp(dapp: IDapp) {
   return window.rabbyDesktop.ipcRenderer.invoke('dapps-put', dapp);
 }
 
-export async function replaceDapp(oldOrigin: string, dapp: Partial<IDapp>) {
+export async function replaceDapp(
+  originsToDel: string | string[],
+  dapp: IDapp
+) {
   return window.rabbyDesktop.ipcRenderer.invoke(
     'dapps-replace',
-    oldOrigin,
+    originsToDel,
     dapp
   );
 }
