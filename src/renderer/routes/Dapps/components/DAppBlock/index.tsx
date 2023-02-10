@@ -13,7 +13,6 @@ import {
 } from '../../../../../../assets/icons/internal-homepage';
 
 import { DappFavicon } from '../../../../components/DappFavicon';
-// import './index.less';
 
 type IOnOpDapp = (
   op: 'rename' | 'delete' | 'pin' | 'unpin',
@@ -129,7 +128,9 @@ export const DAppBlock = ({
           />
           <div className="infos">
             <h4 className="dapp-alias">{dapp.alias}</h4>
-            <div className="dapp-url">{dapp.origin}</div>
+            <div className="dapp-url">
+              {dapp.origin?.replace(/^\w+:\/\//, '')}
+            </div>
           </div>
         </div>
 
