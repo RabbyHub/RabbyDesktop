@@ -113,7 +113,7 @@ export async function checkProxyValidOnBootstrap() {
   if (appProxyConf.proxyType === 'none') {
     return {
       valid: true,
-      shouldProxy: false,
+      shouldApplyProxyOnBoot: false,
       appProxyConf,
     };
   }
@@ -125,7 +125,7 @@ export async function checkProxyValidOnBootstrap() {
 
   return {
     valid: result.valid,
-    shouldProxy: result.valid,
+    shouldApplyProxyOnBoot: result.valid,
     appProxyConf,
   };
 }
@@ -195,17 +195,26 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
 
   // must after sessionReady
   const result = await checkProxyValidOnBootstrap();
-  sesLog(
-    `[checkProxyValidOnBootstrap] valid: ${result.valid}; shouldProxy: ${result.shouldProxy}`
-  );
+
+  if (!IS_RUNTIME_PRODUCTION) {
+    sesLog(
+      `[checkProxyValidOnBootstrap] valid: ${result.valid}; shouldApplyProxyOnBoot: ${result.shouldApplyProxyOnBoot}`
+    );
+  }
   const realProxy = { ...result.appProxyConf };
 
-  setSessionProxy(sessionIns, realProxy);
-  setSessionProxy(dappSafeViewSession, realProxy);
-  setSessionProxy(checkingViewSession, realProxy);
+  if (result.shouldApplyProxyOnBoot) {
+    setSessionProxy(sessionIns, realProxy);
+    setSessionProxy(dappSafeViewSession, realProxy);
+    setSessionProxy(checkingViewSession, realProxy);
 
-  if (!result.valid) {
-    sesLog(`[bootstrap] proxy config invalid! but we still apply it.`);
+    if (!result.valid) {
+      sesLog(`[bootstrap] proxy config invalid! but we still apply it.`);
+    }
+  } else if (result.appProxyConf.proxyType !== 'none') {
+    sesLog(`[bootstrap] proxy config not applied.`);
+  } else {
+    sesLog(`[bootstrap] no proxy config.`);
   }
 
   valueToMainSubject('appRuntimeProxyConf', realProxy);
