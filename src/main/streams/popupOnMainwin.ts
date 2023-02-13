@@ -16,7 +16,11 @@ import {
   hidePopupWindow,
   showPopupWindow,
 } from '../utils/browser';
-import { onMainWindowReady } from '../utils/stream-helpers';
+import {
+  getAllMainUIWindows,
+  getPopupWindowOnMain,
+  onMainWindowReady,
+} from '../utils/stream-helpers';
 
 async function hidePopupOnMainWindow(
   targetWin: BrowserWindow | null,
@@ -119,60 +123,9 @@ const sidebarReady = onMainWindowReady().then(async (mainWin) => {
   return sidebarAppPopup;
 });
 
-const switchChainReady = onMainWindowReady().then(async (mainWin) => {
-  const targetWin = mainWin.window;
-
-  const switchChainPopup = createPopupWindow({
-    parent: mainWin.window,
-    transparent: false,
-    hasShadow: true,
-    closable: false,
-  });
-
-  // disable close by shortcut
-  switchChainPopup.on('close', (evt) => {
-    evt.preventDefault();
-
-    return false;
-  });
-
-  updateSubWindowRect(mainWin.window, switchChainPopup);
-  const onTargetWinUpdate = () => {
-    if (switchChainPopup.isVisible())
-      hidePopupOnMainWindow(switchChainPopup, 'switch-chain');
-  };
-  targetWin.on('show', onTargetWinUpdate);
-  targetWin.on('move', onTargetWinUpdate);
-  targetWin.on('resized', onTargetWinUpdate);
-  targetWin.on('unmaximize', onTargetWinUpdate);
-  targetWin.on('restore', onTargetWinUpdate);
-
-  mainWin.tabs.on('tab-focused', () => {
-    hidePopupOnMainWindow(switchChainPopup, 'switch-chain');
-  });
-
-  mainWin.window.on('focus', () => {
-    hidePopupOnMainWindow(switchChainPopup, 'switch-chain');
-  });
-
-  await switchChainPopup.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}#/popup__switch-chain`
-  );
-
-  // debug-only
-  if (!IS_RUNTIME_PRODUCTION) {
-    // switchChainPopup.webContents.openDevTools({ mode: 'detach' });
-  }
-
-  hidePopupWindow(switchChainPopup);
-
-  return switchChainPopup;
-});
-
-Promise.all([sidebarReady, switchChainReady]).then((wins) => {
-  valueToMainSubject('contextMenuPopupWindowReady', {
+Promise.all([sidebarReady]).then((wins) => {
+  valueToMainSubject('popupWindowOnMain', {
     sidebarContext: wins[0],
-    switchChain: wins[1],
   });
 });
 
@@ -186,10 +139,6 @@ const SIZE_MAP: Record<
   'sidebar-dapp': {
     width: 140,
     height: 100,
-  },
-  'switch-chain': {
-    width: 272,
-    height: 400,
   },
 };
 
@@ -214,16 +163,9 @@ const { handler } = onIpcMainEvent(
   '__internal_rpc:popupwin-on-mainwin:toggle-show',
   async (_, payload) => {
     const mainWindow = (await onMainWindowReady()).window;
-    const { sidebarContext, switchChain } = await firstValueFrom(
-      fromMainSubject('contextMenuPopupWindowReady')
-    );
+    const { popupOnly } = await getAllMainUIWindows();
 
-    const targetWin =
-      payload.type === 'sidebar-dapp'
-        ? sidebarContext
-        : payload.type === 'switch-chain'
-        ? switchChain
-        : null;
+    const targetWin = popupOnly[payload.type] || null;
 
     if (!targetWin) return;
 

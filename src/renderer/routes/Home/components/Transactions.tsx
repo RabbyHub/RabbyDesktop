@@ -343,6 +343,7 @@ const Transactions = () => {
   useEffect(() => {
     setIsLoading(true);
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentAccount]);
 
   useEffect(() => {

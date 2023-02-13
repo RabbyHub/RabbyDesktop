@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Form, Input, message } from 'antd';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';

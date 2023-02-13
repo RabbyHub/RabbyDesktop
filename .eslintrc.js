@@ -42,7 +42,7 @@ module.exports = {
     'promise/always-return': 'off',
     'promise/catch-or-return': 'off',
     'jsx-a11y/no-noninteractive-element-interactions': 'off',
-    'react-hooks/exhaustive-deps': 'warn',
+    'react-hooks/exhaustive-deps': 'error',
     '@typescript-eslint/naming-convention': 'off',
   },
   parserOptions: {

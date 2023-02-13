@@ -15,7 +15,6 @@ import SecurityNotifications from '@/renderer/routes-popup/SecurityNotifications
 import SecurityAddressbarPopup from '@/renderer/routes-popup/SecurityAddressbarPopup/SecurityAddressbarPopup';
 
 import { SidebarContextMenu } from '@/renderer/routes-popup/SidebarContextMenu';
-import SwitchChainWindow from '@/renderer/routes-popup/SwitchChainWindow';
 import SelectDevicesWindow from '@/renderer/routes-popup/SelectDevicesWindow';
 
 import { parseQueryString } from '@/isomorphic/url';
@@ -24,6 +23,7 @@ import MainWindowAddAddress from '../routes-popup/MainWindowAddAddress';
 import QuickSwapWindow from '../routes-popup/QuickSwapWindow';
 import MainWindowDappManagement from '../routes-popup/MainWindowDappManagement';
 import DappReadonlyWindow from '../routes-popup/DappReadonlyWindow';
+import ZPopupLayer from '../routes-popup/ZPopupLayer';
 
 function App() {
   return (
@@ -39,7 +39,7 @@ function App() {
           element={<SecurityAddressbarPopup />}
         />
         <Route path="/popup__sidebar-dapp" element={<SidebarContextMenu />} />
-        <Route path="/popup__switch-chain" element={<SwitchChainWindow />} />
+        {/* <Route path="/popup__switch-chain" element={<SwitchChainModal />} /> */}
         <Route
           path="/popupview__add-address"
           element={<MainWindowAddAddress />}
@@ -71,6 +71,10 @@ switch (parseQueryString().view) {
   case 'dapp-safe-view':
     root.render(<DappReadonlyWindow />);
     break;
+  case 'z-popup': {
+    root.render(<ZPopupLayer />);
+    break;
+  }
   default:
     root.render(<App />);
     break;

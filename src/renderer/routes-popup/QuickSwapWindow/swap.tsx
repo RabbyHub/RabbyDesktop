@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { memo, useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { CHAINS, CHAINS_ENUM, formatTokenAmount } from '@debank/common';
 

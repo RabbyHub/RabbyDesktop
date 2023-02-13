@@ -123,28 +123,19 @@ function _isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
     case 'main-window':
       return isMainWinShellWebUI(url);
     case 'address-management':
-      return (
-        url.startsWith('chrome-extension:') &&
-        urlInfo.pathname === '/popup-view.html' &&
-        queryInfo.view === 'add-address'
-      );
     case 'add-address':
       return (
         url.startsWith('chrome-extension:') &&
         urlInfo.pathname === '/popup-view.html' &&
-        queryInfo.view === 'add-address'
+        queryInfo.view === `${viewType}`
       );
     case 'dapps-management':
-      return (
-        url.startsWith(RABBY_LOCAL_URLBASE) &&
-        urlInfo.pathname === '/popup-view.html' &&
-        queryInfo.view === 'dapps-management'
-      );
     case 'quick-swap':
+    case 'z-popup':
       return (
         url.startsWith(RABBY_LOCAL_URLBASE) &&
         urlInfo.pathname === '/popup-view.html' &&
-        queryInfo.view === 'quick-swap'
+        queryInfo.view === `${viewType}`
       );
     default:
       return false;
@@ -163,7 +154,9 @@ export function isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
           'add-address',
           'dapps-management',
           'quick-swap',
-        ] as const
+          'z-popup',
+          // 'select-devices'
+        ] as IBuiltinViewName[]
       ).some((view) => _isBuiltinView(url, view));
   }
 }

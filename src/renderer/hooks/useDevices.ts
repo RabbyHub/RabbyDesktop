@@ -25,7 +25,7 @@ export function useHIDDevices() {
       .finally(() => {
         setIsFetching(false);
       });
-  }, []);
+  }, [setDevices, isFetching, setIsFetching]);
 
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
@@ -34,7 +34,7 @@ export function useHIDDevices() {
         fetchDevices();
       }
     );
-  }, []);
+  }, [fetchDevices]);
 
   return {
     isFetchingDevice: isFetching,
@@ -61,7 +61,7 @@ export function useUSBDevices() {
       .finally(() => {
         setIsFetching(false);
       });
-  }, []);
+  }, [isFetching, setDevices, setIsFetching]);
 
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
@@ -70,7 +70,7 @@ export function useUSBDevices() {
         fetchDevices();
       }
     );
-  }, []);
+  }, [fetchDevices]);
 
   return {
     isFetchingDevice: isFetching,

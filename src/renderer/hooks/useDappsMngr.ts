@@ -41,7 +41,7 @@ export function useProtocolDappsBinding() {
       .finally(() => {
         loadingRef.current = false;
       });
-  }, []);
+  }, [setProtocolDappsBinding]);
 
   useEffect(() => {
     fetchBindings();
@@ -82,7 +82,7 @@ export function useDapps() {
 
       return newVal;
     });
-  }, [setPinnedList, setDapps]);
+  }, [setPinnedList, setDapps, setUnpinnedList]);
 
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
@@ -93,18 +93,15 @@ export function useDapps() {
         if (event.unpinnedList) setUnpinnedList(event.unpinnedList);
       }
     );
-  }, [setPinnedList]);
+  }, [setPinnedList, setUnpinnedList, setDapps]);
 
   const renameDapp = useCallback(async (dapp: IDapp, alias: string) => {
     putDapp({ ...dapp, alias });
   }, []);
 
-  const removeDapp = useCallback(
-    async (dapp: IDapp) => {
-      return deleteDapp(dapp);
-    },
-    [setDapps]
-  );
+  const removeDapp = useCallback(async (dapp: IDapp) => {
+    return deleteDapp(dapp);
+  }, []);
 
   const pinDapp = useCallback((dappOrigin: string) => {
     toggleDappPinned([dappOrigin], true);

@@ -87,6 +87,7 @@ const ChainList = ({
   useEffect(() => {
     if (!currentAccount?.address) return;
     reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentAccount]);
 
   if (chainBalances.length <= 0) {

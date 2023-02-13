@@ -59,8 +59,8 @@ export async function getDappLoadingView() {
   return firstValueFrom(fromMainSubject('dappLoadingView'));
 }
 
-export async function getContextMenuPopupWindow() {
-  return firstValueFrom(fromMainSubject('contextMenuPopupWindowReady'));
+export async function getPopupWindowOnMain() {
+  return firstValueFrom(fromMainSubject('popupWindowOnMain'));
 }
 
 export async function __internalToggleRabbyxGasketMask(nextShow: boolean) {
@@ -116,14 +116,13 @@ export function updateMainWindowActiveTabRect(
 }
 
 export async function getAllMainUIWindows() {
-  const [mainWin, { switchChain, sidebarContext }] = await Promise.all([
+  const [mainWin, { sidebarContext }] = await Promise.all([
     await onMainWindowReady(),
-    await firstValueFrom(fromMainSubject('contextMenuPopupWindowReady')),
+    await firstValueFrom(fromMainSubject('popupWindowOnMain')),
   ]);
 
   const popupOnly = {
     'sidebar-dapp': sidebarContext,
-    'switch-chain': switchChain,
   } as const;
 
   const windows = {
@@ -147,6 +146,7 @@ export async function getAllMainUIViews() {
       quickSwap,
       dappsManagement,
       selectDevices,
+      zPopup,
     },
   ] = await Promise.all([
     await onMainWindowReady(),
@@ -159,6 +159,7 @@ export async function getAllMainUIViews() {
     'quick-swap': quickSwap,
     'dapps-management': dappsManagement,
     'select-devices': selectDevices,
+    'z-popup': zPopup,
   } as const;
 
   const viewOnlyHash = {
@@ -167,6 +168,7 @@ export async function getAllMainUIViews() {
     quickSwap: quickSwap.webContents,
     dappsManagement: dappsManagement.webContents,
     selectDevices: selectDevices.webContents,
+    zPopup: zPopup.webContents,
   };
 
   const hash = {

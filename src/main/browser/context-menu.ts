@@ -14,9 +14,10 @@ import {
 } from '../streams/rabbyIpcQuery/_base';
 import { getWindowFromWebContents } from '../utils/browser';
 import { appendMenu, appendMenuSeparator } from '../utils/context-menu';
-import { emitIpcMainEvent } from '../utils/ipcMainEvents';
+import { emitIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import {
-  getContextMenuPopupWindow,
+  getAllMainUIViews,
+  getPopupWindowOnMain,
   getRabbyExtViews,
   getWebuiExtId,
   onMainWindowReady,
@@ -198,13 +199,13 @@ function buildDebugKitsMenu(opts: ChromeContextMenuOptions) {
   appendMenu(debugKitsMenu, {
     label: 'Open SwitchChain Popup',
     click: () => {
-      getContextMenuPopupWindow().then(async (wins) => {
+      getPopupWindowOnMain().then(async () => {
         const mainWin = await onMainWindowReady();
-        wins.switchChain.webContents.openDevTools({ mode: 'detach' });
+        const { viewOnlyHash } = await getAllMainUIViews();
 
         const firstTab = mainWin.tabs.tabList[0];
 
-        if (!firstTab.view) {
+        if (!firstTab?.view) {
           dialog.showErrorBox(
             'No Tab Found',
             `You wanna quick debug the first tab's switchChain popup but no any dapp opened, Please open a tab and try again.`
@@ -212,17 +213,28 @@ function buildDebugKitsMenu(opts: ChromeContextMenuOptions) {
           return;
         }
 
-        emitIpcMainEvent('__internal_main:popupwin-on-mainwin:toggle-show', {
-          type: 'switch-chain',
+        viewOnlyHash.zPopup.openDevTools({ mode: 'detach' });
+        emitIpcMainEvent('__internal_main:popupview-on-mainwin:toggle-show', {
+          type: 'z-popup',
           nextShow: true,
-          rect: { x: params.x, y: params.y },
           pageInfo: {
-            type: 'switch-chain',
-            dappTabInfo: {
-              id: firstTab.id,
-              url: firstTab.view.webContents.getURL(),
-            },
+            type: 'z-popup',
           },
+        });
+        viewOnlyHash.zPopup.send('__internal_forward:views:channel-message', {
+          targetView: 'z-popup',
+          type: 'update-subview-state',
+          partials: {
+            'switch-chain': {
+              visible: true,
+              state: {
+                dappTabInfo: {
+                  id: firstTab.id,
+                  url: firstTab.view.webContents.getURL(),
+                },
+              },
+            },
+          } as IZPopupSubviewState,
         });
       });
     },

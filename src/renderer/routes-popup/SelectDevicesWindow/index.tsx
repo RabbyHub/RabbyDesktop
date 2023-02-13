@@ -44,13 +44,16 @@ function useHidSelectDevice() {
     [selectedDevice]
   );
 
-  const cancelSelect = useCallback((selectId: string) => {
-    window.rabbyDesktop.ipcRenderer.invoke('confirm-selected-device', {
-      selectId,
-      device: null,
-    });
-    hideView();
-  }, []);
+  const cancelSelect = useCallback(
+    (selectId: string) => {
+      window.rabbyDesktop.ipcRenderer.invoke('confirm-selected-device', {
+        selectId,
+        device: null,
+      });
+      hideView();
+    },
+    [hideView]
+  );
 
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(

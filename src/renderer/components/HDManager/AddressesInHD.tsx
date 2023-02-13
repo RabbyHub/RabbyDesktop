@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { message } from 'antd';
 import React from 'react';

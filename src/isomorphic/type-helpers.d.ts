@@ -54,6 +54,10 @@ type PickAllNonFnFields<T extends Record<string, any>> = Pick<
   AllNonFnFields<T>
 >;
 
+type NullableFields<T extends object> = {
+  [K in keyof T]: T[K] | null;
+};
+
 type EventTypeOfBrowserOn = [
   'page-title-updated',
   'close',
