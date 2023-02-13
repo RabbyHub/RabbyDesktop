@@ -26,12 +26,15 @@ import { useCallback, useEffect } from 'react';
  */
 type ChannelForwardMessagePayload = ChannelForwardMessageType['send'][0];
 export function useForwardTo<
-  T extends Pick<ChannelForwardMessagePayload, 'type' | 'targetView'>
->(targetView: T['targetView']) {
-  type Payload = ChannelForwardMessagePayload & T;
+  TV extends ChannelForwardMessagePayload['targetView']
+>(targetView: TV) {
+  type Payload = ChannelForwardMessagePayload & { targetView: TV };
 
   const forwardMessageTo = useCallback(
-    (type: T['type'], restPayload: Omit<Payload, 'type' | 'targetView'>) => {
+    <TT extends Payload['type']>(
+      type: TT,
+      restPayload: Omit<Payload, 'type' | 'targetView'>
+    ) => {
       if (!isBuiltinView(window.location.href, targetView)) {
         console.warn(
           `[useForwardTo] it's not expected to send message from ${targetView} to itself.`
