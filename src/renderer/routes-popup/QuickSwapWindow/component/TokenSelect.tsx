@@ -579,6 +579,7 @@ export const TokenSelect = ({
     if (currentAccount?.address && open) {
       handleLoadTokens();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentAccount?.address, open]);
 
   useEffect(() => {

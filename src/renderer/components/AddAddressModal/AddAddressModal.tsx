@@ -21,6 +21,7 @@ export const AddAddressModal: React.FC<Props> = ({
   const handleCancel = React.useCallback(() => {
     onClose();
     setKeyringType(undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (keyringType === KEYRING_CLASS.WATCH) {

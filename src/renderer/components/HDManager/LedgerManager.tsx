@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React from 'react';
 import { HARDWARE_KEYRING_TYPES } from '@/renderer/utils/constant';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';

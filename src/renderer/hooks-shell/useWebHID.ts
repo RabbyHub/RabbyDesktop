@@ -14,7 +14,7 @@ export function useRequestDevice(opts?: HIDDeviceRequestOptions) {
       .then((res) => {
         setDevices(res);
       });
-  }, []);
+  }, [opts?.filters]);
 
   useEffect(() => {
     if (firstFetched) return;

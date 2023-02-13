@@ -80,6 +80,7 @@ export const WalletConnectModalContent: React.FC<Props> = ({ onSuccess }) => {
 
   React.useEffect(() => {
     handleImportByWalletConnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bridgeURL]);
 
   return (

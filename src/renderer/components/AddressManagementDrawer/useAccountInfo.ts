@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { KEYRING_CLASS } from '@/renderer/utils/constant';
 import {

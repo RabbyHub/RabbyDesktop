@@ -36,7 +36,7 @@ export const MainContainer: React.FC<Props> = ({
     return () => {
       window.removeEventListener('focus', handleFocus);
     };
-  }, [firstFetchAccounts]);
+  }, [createTask, firstFetchAccounts, getCurrentAccounts]);
 
   const filterCurrentAccounts = React.useMemo(() => {
     return (

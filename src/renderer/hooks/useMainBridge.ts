@@ -27,7 +27,7 @@ export function useOSInfo() {
     window.rabbyDesktop.ipcRenderer.invoke('get-os-info').then((event) => {
       setOSInfo(event);
     });
-  }, []);
+  }, [setOSInfo]);
 
   return osInfo;
 }
