@@ -187,10 +187,10 @@ function SwitchChainModalInner({
 }
 
 export default function SwitchChainModal() {
-  const { svVisible, pageInfo, closeSubview } =
+  const { svVisible, svState, closeSubview } =
     useZPopupViewState('switch-chain');
 
-  if (!pageInfo?.state?.dappTabInfo) return null;
+  if (!svState?.dappTabInfo) return null;
 
   return (
     <RModal
@@ -204,7 +204,7 @@ export default function SwitchChainModal() {
         closeSubview();
       }}
     >
-      <SwitchChainModalInner dappTabInfo={pageInfo.state.dappTabInfo} />
+      <SwitchChainModalInner dappTabInfo={svState.dappTabInfo} />
     </RModal>
   );
 }

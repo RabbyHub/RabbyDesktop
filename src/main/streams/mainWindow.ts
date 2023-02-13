@@ -264,14 +264,3 @@ onIpcMainEvent(
     }
   }
 );
-
-onIpcMainEvent(
-  '__internal_forward:main-window:client-message',
-  async (event, payload) => {
-    const mainTabbedWin = await onMainWindowReady();
-    mainTabbedWin.window.webContents.send(
-      '__internal_forward:main-window:client-message',
-      payload
-    );
-  }
-);

@@ -80,13 +80,12 @@ const CONF = {
     once: true,
   } as IConf<ReplaySubject<BrowserWindow>>,
 
-  contextMenuPopupWindowReady: {
+  popupWindowOnMain: {
     subject: new ReplaySubject(1),
     once: true,
   } as IConf<
     ReplaySubject<{
       sidebarContext: BrowserWindow;
-      switchChain: BrowserWindow;
     }>
   >,
   popupViewsOnMainwinReady: {

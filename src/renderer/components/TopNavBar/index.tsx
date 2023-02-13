@@ -12,7 +12,6 @@ import { Divider, message } from 'antd';
 import { useDappNavigation } from '@/renderer/hooks-shell/useDappNavigation';
 import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
 import { useCallback, useRef, useState, useMemo } from 'react';
-import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import { useClickOutSide } from '@/renderer/hooks/useClick';
 import { detectOS } from '@/isomorphic/os';
 import classNames from 'classnames';
@@ -45,8 +44,9 @@ const ConnectedChain = ({
 >) => {
   const divRef = useRef<HTMLDivElement>(null);
 
+  const zActions = useZPopupLayer();
   useClickOutSide(divRef, () => {
-    hideMainwinPopup('switch-chain');
+    zActions.hideZSubview('switch-chain');
   });
   return (
     <div className={clsx(styles.chain, className)} ref={divRef} {...others}>

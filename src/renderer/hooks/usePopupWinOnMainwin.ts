@@ -201,7 +201,6 @@ export function useZPopupLayer() {
   );
 
   return {
-    updateZPopup,
     showZSubview,
     hideZSubview,
   };
@@ -257,11 +256,11 @@ export function useZPopupViewState<T extends keyof ZViewStates>(
     });
   }, [svType, setSvStates]);
 
-  const { visible: svVisible, ...restSVState } = svStates[svType] || {};
+  const { visible: svVisible, state: SVState } = svStates[svType] || {};
 
   return {
     svVisible: !!svVisible,
-    svState: restSVState,
+    svState: SVState,
     /**
      * @deprecated for compatibility
      */
