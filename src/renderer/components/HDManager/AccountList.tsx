@@ -7,6 +7,7 @@ import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
 import { splitNumberByStep } from '@/renderer/utils/number';
 import { isNil } from 'lodash';
+import { useAccountToDisplay } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
 import { AddToRabby } from './AddToRabby';
 import { MAX_ACCOUNT_COUNT } from './AdvancedSettings';
 import { AccountListSkeleton } from './AccountListSkeleton';
@@ -40,6 +41,7 @@ export const AccountList: React.FC<Props> = ({
     keyring,
   } = React.useContext(HDManagerStateContext);
   const [loadNum, setLoadNum] = React.useState(0);
+  const { getAllAccountsToDisplay } = useAccountToDisplay();
 
   const toggleHiddenInfo = React.useCallback(
     (e: React.MouseEvent, val: boolean) => {
@@ -119,6 +121,9 @@ export const AccountList: React.FC<Props> = ({
           content: 'The address is removed from Rabby',
         });
       }
+
+      // update sidebar account list
+      getAllAccountsToDisplay();
     },
     []
   );
