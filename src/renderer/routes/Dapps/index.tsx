@@ -2,6 +2,7 @@
 import { setDappsOrder } from '@/renderer/ipcRequest/dapps';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { useCallback, useState } from 'react';
+import ReceiveModal from '@/renderer/components/ReceiveModal';
 import { Empty } from './components/Empty';
 
 import ModalDeleteDapp from '../../components/ModalDeleteDapp';
@@ -136,6 +137,7 @@ export default function DApps() {
           onCancel={() => setDeletingDapp(null)}
           onDeletedDapp={() => setDeletingDapp(null)}
         />
+        {/* <ReceiveModal open={true} /> */}
         <ReleaseNote />
       </div>
     </div>
