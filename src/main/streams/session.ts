@@ -198,18 +198,14 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   sesLog(
     `[checkProxyValidOnBootstrap] valid: ${result.valid}; shouldProxy: ${result.shouldProxy}`
   );
-  let realProxy = { ...result.appProxyConf };
-  if (result.shouldProxy) {
-    setSessionProxy(sessionIns, realProxy);
-    setSessionProxy(dappSafeViewSession, realProxy);
-    setSessionProxy(checkingViewSession, realProxy);
-  } else if (!result.valid) {
-    sesLog(`proxy config invalid! fallback to system mode`);
-    realProxy = { ...realProxy, proxyType: 'system' };
+  const realProxy = { ...result.appProxyConf };
 
-    setSessionProxy(sessionIns, realProxy);
-    setSessionProxy(dappSafeViewSession, realProxy);
-    setSessionProxy(checkingViewSession, realProxy);
+  setSessionProxy(sessionIns, realProxy);
+  setSessionProxy(dappSafeViewSession, realProxy);
+  setSessionProxy(checkingViewSession, realProxy);
+
+  if (!result.valid) {
+    sesLog(`[bootstrap] proxy config invalid! but we still apply it.`);
   }
 
   valueToMainSubject('appRuntimeProxyConf', realProxy);
