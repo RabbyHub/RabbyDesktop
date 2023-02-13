@@ -12,13 +12,11 @@ import { Divider, message } from 'antd';
 import { useDappNavigation } from '@/renderer/hooks-shell/useDappNavigation';
 import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
 import { useCallback, useRef, useState, useMemo } from 'react';
-import {
-  hideMainwinPopup,
-  showMainwinPopup,
-} from '@/renderer/ipcRequest/mainwin-popup';
+import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import { useClickOutSide } from '@/renderer/hooks/useClick';
 import { detectOS } from '@/isomorphic/os';
 import classNames from 'classnames';
+import { useZPopupLayer } from '@/renderer/hooks/usePopupWinOnMainwin';
 import styles from './index.module.less';
 
 const isDarwin = detectOS() === 'darwin';
@@ -85,6 +83,8 @@ export const TopNavBar = () => {
     }
   }, [activeTab?.id]);
 
+  const zActions = useZPopupLayer();
+
   return (
     <div className={styles.main}>
       {/* keep this element in first to make it bottom, or move it last to make it top */}
@@ -141,19 +141,12 @@ export const TopNavBar = () => {
             <ConnectedChain
               chain={currentConnectedSite.chain}
               onClick={(event) => {
-                const el = event.currentTarget as HTMLDivElement;
-                const rect = el.getBoundingClientRect();
-
-                showMainwinPopup(
-                  { x: rect.x, y: rect.bottom + 10 },
-                  {
-                    type: 'switch-chain',
-                    dappTabInfo: {
-                      id: activeTab?.id,
-                      url: activeTab?.url,
-                    },
-                  }
-                );
+                zActions.showZSubview('switch-chain', {
+                  dappTabInfo: {
+                    id: activeTab?.id,
+                    url: activeTab?.url,
+                  },
+                });
               }}
             />
           </div>

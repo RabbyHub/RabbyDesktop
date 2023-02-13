@@ -37,8 +37,6 @@ export function useCurrentConnection(tab: Pick<chrome.tabs.Tab, 'id' | 'url'>) {
         chain,
       });
       getCurrentSite();
-
-      hideMainwinPopup('switch-chain');
     },
     [currentSite, getCurrentSite]
   );

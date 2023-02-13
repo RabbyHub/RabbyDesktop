@@ -1,5 +1,5 @@
 import { isBuiltinView } from '@/isomorphic/url';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 /**
  * @description this hooks is used to forward message from other BrowserViews to main window
@@ -37,7 +37,7 @@ export function useForwardTo<
     ) => {
       if (!isBuiltinView(window.location.href, targetView)) {
         console.warn(
-          `[useForwardTo] it's not expected to send message from ${targetView} to itself.`
+          `[useForwardTo] it's not expected to send message from non built-in view '${targetView}'.`
         );
       }
 
@@ -60,14 +60,19 @@ export function useMessageForwarded<
   T extends Pick<ChannelForwardMessagePayload, 'type' | 'targetView'>
 >(matches: T, callback?: (payload: ChannelForwardMessagePayload & T) => void) {
   const { targetView, type } = matches;
+  const callbackRef = useRef(callback);
+
   useEffect(() => {
+    callbackRef.current = callback;
+
     if (!isBuiltinView(window.location.href, targetView)) return;
 
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_forward:views:channel-message',
       (payload) => {
         if (payload.type === type) {
-          callback?.(payload as any);
+          const cb = callbackRef.current;
+          cb?.(payload as any);
         }
       }
     );
@@ -91,6 +96,6 @@ export function useMessageForwardToMainwin<
     (payload: Omit<MainWindowChannelMessage, 'targetView'> & { type: T }) => {
       return forwardTo(type, payload);
     },
-    [forwardTo]
+    [type, forwardTo]
   );
 }

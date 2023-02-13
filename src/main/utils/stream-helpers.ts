@@ -147,6 +147,7 @@ export async function getAllMainUIViews() {
       quickSwap,
       dappsManagement,
       selectDevices,
+      zPopup,
     },
   ] = await Promise.all([
     await onMainWindowReady(),
@@ -159,6 +160,7 @@ export async function getAllMainUIViews() {
     'quick-swap': quickSwap,
     'dapps-management': dappsManagement,
     'select-devices': selectDevices,
+    'z-popup': zPopup,
   } as const;
 
   const viewOnlyHash = {
@@ -167,6 +169,7 @@ export async function getAllMainUIViews() {
     quickSwap: quickSwap.webContents,
     dappsManagement: dappsManagement.webContents,
     selectDevices: selectDevices.webContents,
+    zPopup: zPopup.webContents,
   };
 
   const hash = {

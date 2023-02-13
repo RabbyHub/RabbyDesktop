@@ -277,6 +277,9 @@ type PopupViewOnMainwinInfo =
   | {
       type: 'select-devices';
       state: ISelectDeviceState;
+    }
+  | {
+      type: 'z-popup';
     };
 
 type IShellNavInfo = {

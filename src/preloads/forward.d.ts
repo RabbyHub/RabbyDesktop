@@ -1,4 +1,23 @@
+/// <reference path="../isomorphic/type-helpers.d.ts" />
+
 type RendererForwardMessageViewType = IBuiltinViewName | '*';
+
+type SVState<T extends object> = { visible: boolean } & {
+  state?: T;
+};
+
+type ZViewStates = {
+  'switch-chain': {
+    dappTabInfo: {
+      id: chrome.tabs.Tab['id'];
+      url: chrome.tabs.Tab['url'];
+    };
+  };
+};
+
+type IZPopupSubviewState = {
+  [K in keyof ZViewStates]: SVState<NullableFields<ZViewStates[K]>>;
+};
 
 type ChannelForwardMessageType = {
   send: [
@@ -36,6 +55,11 @@ type ChannelForwardMessageType = {
     | {
         targetView: 'dapps-management';
         type: 'nothing-but-reserved';
+      }
+    | {
+        targetView: 'z-popup';
+        type: 'update-subview-state';
+        partials?: Partial<IZPopupSubviewState>;
       }
   ];
   response: ChannelForwardMessageType['send'];

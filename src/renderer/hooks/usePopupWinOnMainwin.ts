@@ -1,6 +1,11 @@
+import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { hideMainwinPopup } from '../ipcRequest/mainwin-popup';
-import { hideMainwinPopupview } from '../ipcRequest/mainwin-popupview';
+import {
+  hideMainwinPopupview,
+  showMainwinPopupview,
+} from '../ipcRequest/mainwin-popupview';
+import { useForwardTo, useMessageForwarded } from './useViewsMessage';
 
 export function usePopupWinInfo<T extends IPopupWinPageInfo['type']>(
   type: T,
@@ -113,7 +118,7 @@ export function usePopupViewInfo<T extends IPopupViewChanges['type']>(
         opts?.onVisibleChanged?.(payload as any);
       }
     );
-  }, [type, opts?.onVisibleChanged]);
+  }, [type, opts, opts?.onVisibleChanged]);
 
   const hideView = useCallback(() => {
     setLocalVisible(false);
@@ -145,5 +150,122 @@ export function usePopupViewInfo<T extends IPopupViewChanges['type']>(
     hideViewOnly,
     visible: info.visible,
     pageInfo: info.pageInfo,
+  };
+}
+
+/**
+ * @description provide actions to operate z-popup on main views
+ * @returns
+ */
+export function useZPopupLayer() {
+  const sendMsg = useForwardTo('z-popup');
+
+  const updateZPopup = useCallback(
+    <V extends keyof ZViewStates>(
+      svType: V,
+      visible: boolean,
+      svPartials?: ZViewStates[V]
+    ) => {
+      const partials = {
+        [svType]: {
+          visible,
+          state: svPartials,
+        },
+      };
+
+      sendMsg('update-subview-state', {
+        partials,
+      });
+
+      if (Object.values(partials).some((v) => v?.visible)) {
+        showMainwinPopupview({ type: 'z-popup' });
+      } else {
+        hideMainwinPopupview('z-popup');
+      }
+    },
+    [sendMsg]
+  );
+
+  const showZSubview = useCallback(
+    <V extends keyof ZViewStates>(svType: V, svPartials?: ZViewStates[V]) => {
+      updateZPopup(svType, true, svPartials);
+    },
+    [updateZPopup]
+  );
+
+  const hideZSubview = useCallback(
+    <V extends keyof ZViewStates>(svType: V) => {
+      updateZPopup(svType, false);
+    },
+    [updateZPopup]
+  );
+
+  return {
+    updateZPopup,
+    showZSubview,
+    hideZSubview,
+  };
+}
+
+const ZPopupSubviewStateAtom = atom<NullableFields<IZPopupSubviewState>>({
+  'switch-chain': null,
+});
+
+export function useZPopupViewStates() {
+  const [svStates, setSvStates] = useAtom(ZPopupSubviewStateAtom);
+
+  return {
+    svStates,
+    setSvStates,
+  };
+}
+export function useZPopupViewState<T extends keyof ZViewStates>(
+  svType: T,
+  onFieldsChanged?: (partials?: IZPopupSubviewState[T]) => void
+) {
+  const { svStates, setSvStates } = useZPopupViewStates();
+
+  useMessageForwarded(
+    {
+      type: 'update-subview-state',
+      targetView: 'z-popup',
+    },
+    (payload) => {
+      const { partials } = payload;
+      if (!partials) return;
+      if (!partials[svType]) return;
+
+      onFieldsChanged?.(partials[svType]);
+    }
+  );
+
+  const closeSubview = useCallback(() => {
+    setSvStates((prev) => {
+      const partials = {
+        ...prev,
+        [svType]: {
+          ...prev[svType],
+          visible: false,
+        },
+      };
+
+      if (Object.values(partials).every((v) => !v?.visible)) {
+        hideMainwinPopupview('z-popup');
+      }
+
+      return partials;
+    });
+  }, [svType, setSvStates]);
+
+  const { visible: svVisible, ...restSVState } = svStates[svType] || {};
+
+  return {
+    svVisible: !!svVisible,
+    svState: restSVState,
+    /**
+     * @deprecated for compatibility
+     */
+    pageInfo: svStates[svType],
+    closeSubview,
   };
 }

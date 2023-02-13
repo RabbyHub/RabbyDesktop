@@ -49,6 +49,9 @@ const viewsState: Record<
       return true;
     },
   },
+  'z-popup': {
+    visible: false,
+  },
 };
 
 async function hidePopupViewOnWindow(
@@ -293,12 +296,43 @@ const selectDevicesReady = onMainWindowReady().then(async () => {
   return selectDevicesPopup;
 });
 
+const zPopupReady = onMainWindowReady().then(async (mainWin) => {
+  const mainWindow = mainWin.window;
+
+  const zPopup = createPopupView({});
+
+  mainWindow.addBrowserView(zPopup);
+
+  const onTargetWinUpdate = () => {
+    if (viewsState['z-popup'].visible) updateSubviewPos(mainWindow, zPopup);
+  };
+  mainWindow.on('show', onTargetWinUpdate);
+  mainWindow.on('move', onTargetWinUpdate);
+  mainWindow.on('resized', onTargetWinUpdate);
+  mainWindow.on('unmaximize', onTargetWinUpdate);
+  mainWindow.on('restore', onTargetWinUpdate);
+
+  await zPopup.webContents.loadURL(
+    `${RABBY_POPUP_GHOST_VIEW_URL}?view=z-popup#/`
+  );
+
+  // debug-only
+  if (!IS_RUNTIME_PRODUCTION) {
+    zPopup.webContents.openDevTools({ mode: 'detach' });
+  }
+
+  hidePopupView(zPopup);
+
+  return zPopup;
+});
+
 Promise.all([
   addAddressReady,
   addressManagementReady,
   dappsManagementReady,
   quickSwapReady,
   selectDevicesReady,
+  zPopupReady,
 ]).then((wins) => {
   valueToMainSubject('popupViewsOnMainwinReady', {
     addAddress: wins[0],
@@ -306,6 +340,7 @@ Promise.all([
     dappsManagement: wins[2],
     quickSwap: wins[3],
     selectDevices: wins[4],
+    zPopup: wins[5],
   });
 });
 
@@ -398,6 +433,9 @@ onIpcMainEvent(
         break;
       case 'dapps-management':
         views = [hash.dappsManagement];
+        break;
+      case 'z-popup':
+        views = [hash.zPopup];
         break;
       default: {
         if (!IS_RUNTIME_PRODUCTION) {
