@@ -653,12 +653,10 @@ export const Swap = () => {
           //   },
           // }
         );
-        // hideMainwinPopupview('quick-swap');
-        // window.location.reload();
       } catch (error) {
         console.error(error);
       } finally {
-        refresh();
+        refresh?.();
       }
     }
   };

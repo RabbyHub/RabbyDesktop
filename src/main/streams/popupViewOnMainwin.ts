@@ -37,9 +37,6 @@ const viewsState: Record<
   'address-management': {
     visible: false,
   },
-  'quick-swap': {
-    visible: false,
-  },
   'dapps-management': {
     visible: false,
   },
@@ -248,37 +245,6 @@ const dappsManagementReady = onMainWindowReady().then(async (mainWin) => {
   return dappsManagementPopup;
 });
 
-const quickSwapReady = onMainWindowReady().then(async (mainWin) => {
-  const mainWindow = mainWin.window;
-
-  const quickSwapPopup = createPopupView({});
-
-  mainWindow.addBrowserView(quickSwapPopup);
-
-  const onTargetWinUpdate = () => {
-    if (viewsState['quick-swap'].visible)
-      updateSubviewPos(mainWindow, quickSwapPopup);
-  };
-  mainWindow.on('show', onTargetWinUpdate);
-  mainWindow.on('move', onTargetWinUpdate);
-  mainWindow.on('resized', onTargetWinUpdate);
-  mainWindow.on('unmaximize', onTargetWinUpdate);
-  mainWindow.on('restore', onTargetWinUpdate);
-
-  await quickSwapPopup.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}?view=quick-swap#/`
-  );
-
-  // debug-only
-  if (!IS_RUNTIME_PRODUCTION) {
-    // quickSwapPopup.webContents.openDevTools({ mode: 'detach' });
-  }
-
-  hidePopupView(quickSwapPopup);
-
-  return quickSwapPopup;
-});
-
 const selectDevicesReady = onMainWindowReady().then(async () => {
   const selectDevicesPopup = createPopupView({});
 
@@ -330,7 +296,6 @@ Promise.all([
   addAddressReady,
   addressManagementReady,
   dappsManagementReady,
-  quickSwapReady,
   selectDevicesReady,
   zPopupReady,
 ]).then((wins) => {
@@ -338,9 +303,8 @@ Promise.all([
     addAddress: wins[0],
     addressManagement: wins[1],
     dappsManagement: wins[2],
-    quickSwap: wins[3],
-    selectDevices: wins[4],
-    zPopup: wins[5],
+    selectDevices: wins[3],
+    zPopup: wins[4],
   });
 });
 
@@ -427,9 +391,6 @@ const { handler: handler2 } = onIpcMainEvent(
         break;
       case 'address-management':
         views = [hash.addressManagement];
-        break;
-      case 'quick-swap':
-        views = [hash.quickSwap];
         break;
       case 'dapps-management':
         views = [hash.dappsManagement];

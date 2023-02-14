@@ -20,7 +20,6 @@ import SelectDevicesWindow from '@/renderer/routes-popup/SelectDevicesWindow';
 import { parseQueryString } from '@/isomorphic/url';
 import RabbyNotificationGasket from '../routes-popup/RabbyNotificationGasket';
 import MainWindowAddAddress from '../routes-popup/MainWindowAddAddress';
-import QuickSwapWindow from '../routes-popup/QuickSwapWindow';
 import MainWindowDappManagement from '../routes-popup/MainWindowDappManagement';
 import DappReadonlyWindow from '../routes-popup/DappReadonlyWindow';
 
@@ -62,9 +61,6 @@ const root = createRoot(container);
 switch (parseQueryString().view) {
   case 'dapps-management':
     root.render(<MainWindowDappManagement />);
-    break;
-  case 'quick-swap':
-    root.render(<QuickSwapWindow />);
     break;
   case 'select-devices':
     root.render(<SelectDevicesWindow />);

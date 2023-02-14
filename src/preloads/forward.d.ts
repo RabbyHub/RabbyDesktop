@@ -58,10 +58,6 @@ type ChannelForwardMessageType =
       type: 'nothing-but-reserved';
     }
   | {
-      targetView: 'quick-swap';
-      type: 'nothing-but-reserved';
-    }
-  | {
       targetView: 'dapps-management';
       type: 'nothing-but-reserved';
     }
