@@ -8,20 +8,24 @@ import {
   RcIconStopload,
 } from '@/../assets/icons/top-bar';
 
-import { Divider, message } from 'antd';
+import { Divider } from 'antd';
 import { useDappNavigation } from '@/renderer/hooks-shell/useDappNavigation';
 import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
-import { useCallback, useRef, useState, useMemo } from 'react';
-import { useClickOutSide } from '@/renderer/hooks/useClick';
+import {
+  useCallback,
+  useState,
+  useMemo,
+  forwardRef,
+  ForwardedRef,
+} from 'react';
 import { detectOS } from '@/isomorphic/os';
 import classNames from 'classnames';
+
+import { useCurrentConnection } from '@/renderer/hooks/rabbyx/useConnection';
 import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
-import {
-  hideMainwinPopup,
-  showMainwinPopup,
-} from '@/renderer/ipcRequest/mainwin-popup';
 import styles from './index.module.less';
 import { toastMessage } from '../TransparentToast';
+import { useSwitchChainModal } from '../SwitchChainModal';
 
 const isDarwin = detectOS() === 'darwin';
 
@@ -37,33 +41,29 @@ const RiskArea = () => {
   );
 };
 
-const ConnectedChain = ({
-  chain,
-  className,
-  ...others
-}: {
-  chain: CHAINS_ENUM;
-} & React.DetailedHTMLProps<
-  React.HTMLAttributes<HTMLDivElement>,
-  HTMLDivElement
->) => {
-  const divRef = useRef<HTMLDivElement>(null);
-
-  useClickOutSide(divRef, () => {
-    hideMainwinPopup('switch-chain-tmp');
-  });
-  const zActions = useZPopupLayerOnMain();
-  useClickOutSide(divRef, () => {
-    zActions.hideZSubview('switch-chain');
-  });
-  return (
-    <div className={clsx(styles.chain, className)} ref={divRef} {...others}>
-      <img className={styles.logo} src={CHAINS[chain].logo} alt={chain} />
-      <span className={styles.chainName}>{CHAINS[chain].name}</span>
-      <img src={IconArrowDown} alt="" />
-    </div>
-  );
-};
+const ConnectedChain = forwardRef(
+  (
+    {
+      chain,
+      className,
+      ...others
+    }: {
+      chain: CHAINS_ENUM;
+    } & React.DetailedHTMLProps<
+      React.HTMLAttributes<HTMLDivElement>,
+      HTMLDivElement
+    >,
+    ref: ForwardedRef<HTMLDivElement>
+  ) => {
+    return (
+      <div className={clsx(styles.chain, className)} ref={ref} {...others}>
+        <img className={styles.logo} src={CHAINS[chain].logo} alt={chain} />
+        <span className={styles.chainName}>{CHAINS[chain].name}</span>
+        <img src={IconArrowDown} alt="" />
+      </div>
+    );
+  }
+);
 
 export const TopNavBar = () => {
   const [chainHover, setChainHover] = useState(false);
@@ -85,6 +85,11 @@ export const TopNavBar = () => {
 
   const { currentConnectedSite } = useConnectedSite(tabOrigin);
 
+  const { switchChain } = useCurrentConnection({
+    id: activeTab?.id,
+    url: activeTab?.url,
+  });
+
   const handleCloseTab = useCallback(() => {
     if (activeTab?.id) {
       chrome.tabs.remove(activeTab?.id);
@@ -92,6 +97,10 @@ export const TopNavBar = () => {
   }, [activeTab?.id]);
 
   const zActions = useZPopupLayerOnMain();
+
+  const { ref: divRef, open } = useSwitchChainModal<HTMLDivElement>((c) => {
+    console.log('c', c);
+  });
 
   return (
     <div className={styles.main}>
@@ -147,28 +156,21 @@ export const TopNavBar = () => {
         {!!currentConnectedSite?.isConnected && !!currentConnectedSite?.chain && (
           <div className={styles.connectChainBox} {...hiddenHistoryOnMouseOver}>
             <ConnectedChain
+              ref={divRef}
               chain={currentConnectedSite.chain}
               onClick={(event) => {
-                const el = event.currentTarget as HTMLDivElement;
-                const rect = el.getBoundingClientRect();
-
-                showMainwinPopup(
-                  { x: rect.x, y: rect.bottom + 10 },
-                  {
-                    type: 'switch-chain-tmp',
-                    dappTabInfo: {
-                      id: activeTab?.id,
-                      url: activeTab?.url,
-                    },
-                  }
-                );
-
                 // zActions.showZSubview('switch-chain', {
                 //   dappTabInfo: {
                 //     id: activeTab?.id,
                 //     url: activeTab?.url,
                 //   },
                 // });
+                open({
+                  value: currentConnectedSite.chain,
+                  // onchange: () => {
+                  //   console.log('test');
+                  // },
+                });
               }}
             />
           </div>

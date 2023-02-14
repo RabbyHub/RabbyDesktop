@@ -26,6 +26,8 @@ import { useAppUnlockEvents } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { useAccounts } from '@/renderer/hooks/rabbyx/useAccount';
 import { useMessageForwardToMainwin } from '@/renderer/hooks/useViewsMessage';
 import { navigateToDappRoute } from '@/renderer/utils/react-router';
+// import { Swap } from '@/renderer/routes-popup/QuickSwapWindow/swap';
+import { Swap } from '@/renderer/routes/Swap';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -34,6 +36,7 @@ import Titlebar from '../Titlebar';
 import { TopNavBar } from '../TopNavBar';
 import { MainWindowRouteData } from './type';
 import { DappViewWrapper } from '../DappView';
+// import { Swap } from '@/renderer/routes/Swap';
 
 function WelcomeWrapper() {
   const { hasFetched, accounts } = useAccounts();
@@ -128,7 +131,7 @@ const router = createRouter([
       },
       {
         path: 'swap',
-        element: <ComingSoon pageName="Swap" />,
+        element: <Swap />,
       },
       {
         path: 'dapps/:origin',

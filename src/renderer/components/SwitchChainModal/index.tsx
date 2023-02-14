@@ -1,15 +1,18 @@
-import { Input } from 'antd';
-import { useCallback, useRef } from 'react';
+import { Input, Tooltip } from 'antd';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
-import { useScroll } from 'react-use';
 
 import { Modal as RModal } from '@/renderer/components/Modal/Modal';
-import { useCurrentConnection } from '@/renderer/hooks/rabbyx/useConnection';
 import {
   useZPopupLayerOnMain,
   useZPopupViewState,
 } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { useBodyClassNameOnMounted } from '@/renderer/hooks/useMountedEffect';
+import IconRcSearch from '@/../assets/icons/swap/search.svg?rc';
+import { usePreference } from '@/renderer/hooks/rabbyx/usePreference';
+import { Chain, CHAINS_ENUM, CHAINS_LIST } from '@debank/common';
+import { useClickOutSide } from '@/renderer/hooks/useClick';
+import { useMessageForwarded } from '@/renderer/hooks/useViewsMessage';
 import styles from './index.module.less';
 
 type OnPinnedChanged = (
@@ -23,67 +26,128 @@ function ChainItem({
   onClick,
   onPinnedChange,
   checked,
+  support = true,
+  disabledTips,
 }: {
   chain: import('@debank/common').Chain;
   pinned: boolean;
   checked: boolean;
   onClick?: React.DOMAttributes<HTMLDivElement>['onClick'];
   onPinnedChange?: OnPinnedChanged;
+  support?: boolean;
+  disabledTips?: React.ReactNode;
 }) {
   return (
-    <div className={styles.chainItem} onClick={onClick}>
-      <div className={styles.chainItemLeft}>
-        <img src={chain.logo} className={styles.chainItemIcon} />
-        <div className={styles.chainItemName}>{chain.name}</div>
-      </div>
-      <img
-        className={clsx(styles.chainItemStar, pinned ? styles.block : '')}
-        src={
-          pinned
-            ? 'rabby-internal://assets/icons/select-chain/icon-pinned-fill.svg'
-            : 'rabby-internal://assets/icons/select-chain/icon-pinned.svg'
-        }
-        onClick={(evt) => {
-          evt.stopPropagation();
-          onPinnedChange?.(chain.enum, !pinned);
-        }}
-        alt=""
-      />
-      {checked && (
+    <Tooltip
+      trigger={['click', 'hover']}
+      mouseEnterDelay={10}
+      title={disabledTips}
+      open={support ? false : undefined}
+      placement="topLeft"
+      align={{
+        offset: [40, 0],
+      }}
+    >
+      <div className={styles.chainItem} onClick={onClick}>
+        <div className={styles.chainItemLeft}>
+          <img src={chain.logo} className={styles.chainItemIcon} />
+          <div className={styles.chainItemName}>{chain.name}</div>
+        </div>
         <img
-          className={styles.chainItemChecked}
-          src="rabby-internal://assets/icons/select-chain/checked.svg"
+          className={clsx(styles.chainItemStar, pinned ? styles.block : '')}
+          src={
+            pinned
+              ? 'rabby-internal://assets/icons/select-chain/icon-pinned-fill.svg'
+              : 'rabby-internal://assets/icons/select-chain/icon-pinned.svg'
+          }
+          onClick={(evt) => {
+            evt.stopPropagation();
+            onPinnedChange?.(chain.enum, !pinned);
+          }}
+          alt=""
         />
-      )}
-    </div>
+        {checked && (
+          <img
+            className={styles.chainItemChecked}
+            src="rabby-internal://assets/icons/select-chain/checked.svg"
+          />
+        )}
+      </div>
+    </Tooltip>
   );
 }
 
+function searchFilter(keyword: string) {
+  return (item: typeof CHAINS_LIST[number]) =>
+    [item.name, item.enum, item.nativeTokenSymbol].some((token) =>
+      token.toLowerCase().includes(keyword)
+    );
+}
+
 function SwitchChainModalInner({
-  dappTabInfo: tab,
+  value = CHAINS_ENUM.ETH,
+  onChange,
+  title = 'Select the chain',
+  supportChains,
+  disabledTips,
 }: {
-  dappTabInfo: ZViewStates['switch-chain']['dappTabInfo'];
+  value?: CHAINS_ENUM;
+  onChange: (v: CHAINS_ENUM) => void;
+  title?: string;
+  supportChains?: CHAINS_ENUM[];
+  disabledTips?: React.ReactNode;
 }) {
   useBodyClassNameOnMounted('switch-chain-subview');
-  const scrollRef = useRef(null);
-  const { y } = useScroll(scrollRef);
 
   const zActions = useZPopupLayerOnMain();
 
-  const {
-    pinnedChains,
-    unpinnedChains,
+  const { preferences, setChainPinned } = usePreference();
 
-    setChainPinned,
-    switchChain,
+  const [searchInput, setSearchInput] = useState('');
 
-    searchInput,
-    setSearchInput,
-    searchedPinned,
-    searchedUnpinned,
-    searchedChains,
-    currentSite,
-  } = useCurrentConnection(tab);
+  const { pinnedChains, unpinnedChains } = useMemo(() => {
+    const sortFn = (a: Chain, b: Chain) => {
+      if (supportChains) {
+        let an = 0;
+        let bn = 0;
+        if (supportChains.includes(a.enum)) {
+          an = 1;
+        }
+        if (supportChains.includes(b.enum)) {
+          bn = 1;
+        }
+
+        return bn - an;
+      }
+      return 0;
+    };
+    const pinnedSet = new Set(preferences.pinnedChain);
+    const pinned: typeof CHAINS_LIST[number][] = [];
+    const unpinned: typeof CHAINS_LIST[number][] = [];
+    CHAINS_LIST.forEach((chain) => {
+      if (pinnedSet.has(chain.enum)) {
+        pinned.push(chain);
+      } else {
+        unpinned.push(chain);
+      }
+    });
+    const keyword = searchInput?.trim().toLowerCase();
+    if (!keyword) {
+      return {
+        pinnedChains: pinned.sort(sortFn),
+        unpinnedChains: unpinned.sort(sortFn),
+      };
+    }
+
+    const filterFunc = searchFilter(keyword);
+    const searchedPinned = pinned.filter(filterFunc);
+    const searchedUnpinned = unpinned.filter(filterFunc);
+
+    return {
+      pinnedChains: searchedPinned.sort(sortFn),
+      unpinnedChains: searchedUnpinned.sort(sortFn),
+    };
+  }, [preferences.pinnedChain, searchInput, supportChains]);
 
   const onPinnedChange: OnPinnedChanged = useCallback(
     (chain, nextPinned) => {
@@ -93,57 +157,23 @@ function SwitchChainModalInner({
   );
 
   return (
-    <div className={styles.SwitchChainModalInner} ref={scrollRef}>
-      <div
-        className={clsx(styles.inputWrapper, {
-          [styles.show]: y > 40 || searchedChains.length > 0,
-        })}
-      >
-        <Input
-          value={searchInput}
-          placeholder="Search chain"
-          size="large"
-          className={styles.searchChainInput}
-          onChange={(evt) => {
-            setSearchInput(evt.target.value || '');
-          }}
-        />
-      </div>
-      {searchedChains.length > 0 ? (
-        <div className={`${styles.chainList} ${styles.searchChainList}`}>
-          {searchedPinned.map((chain) => {
-            return (
-              <ChainItem
-                key={`searched-chain-${chain.id}`}
-                chain={chain}
-                pinned
-                checked={currentSite?.chain === chain.enum}
-                onClick={async () => {
-                  await switchChain(chain.enum);
-                  zActions.hideZSubview('switch-chain');
-                }}
-                onPinnedChange={onPinnedChange}
-              />
-            );
-          })}
-          {searchedUnpinned.map((chain) => {
-            return (
-              <ChainItem
-                key={`searched-chain-${chain.id}`}
-                chain={chain}
-                pinned={false}
-                onClick={async () => {
-                  await switchChain(chain.enum);
-                  zActions.hideZSubview('switch-chain');
-                }}
-                onPinnedChange={onPinnedChange}
-                checked={currentSite?.chain === chain.enum}
-              />
-            );
-          })}
-        </div>
-      ) : (
-        <>
+    <div className={styles.SwitchChainModalInner}>
+      <div className={styles.title}>{title}</div>
+      <Input
+        autoCorrect="false"
+        autoComplete="false"
+        size="large"
+        className={styles.search}
+        prefix={<IconRcSearch className="searchIcon" />}
+        value={searchInput}
+        placeholder="Search chain"
+        onChange={(evt) => {
+          setSearchInput(evt.target.value || '');
+        }}
+        autoFocus
+      />
+      <div className={styles.scrollContainer}>
+        <div>
           {pinnedChains.length > 0 && (
             <div className={styles.chainList}>
               {pinnedChains.map((chain) => {
@@ -153,11 +183,15 @@ function SwitchChainModalInner({
                     chain={chain}
                     pinned
                     onClick={async () => {
-                      await switchChain(chain.enum);
-                      zActions.hideZSubview('switch-chain');
+                      await onChange(chain.enum);
+                      // zActions.hideZSubview('switch-chain');
                     }}
                     onPinnedChange={onPinnedChange}
-                    checked={currentSite?.chain === chain.enum}
+                    checked={value === chain.enum}
+                    support={
+                      supportChains ? supportChains?.includes(chain.enum) : true
+                    }
+                    disabledTips={disabledTips}
                   />
                 );
               })}
@@ -171,17 +205,21 @@ function SwitchChainModalInner({
                   chain={chain}
                   pinned={false}
                   onClick={async () => {
-                    await switchChain(chain.enum);
-                    zActions.hideZSubview('switch-chain');
+                    await onChange(chain.enum);
+                    // zActions.hideZSubview('switch-chain');
                   }}
                   onPinnedChange={onPinnedChange}
-                  checked={currentSite?.chain === chain.enum}
+                  checked={value === chain.enum}
+                  support={
+                    supportChains ? supportChains?.includes(chain.enum) : true
+                  }
+                  disabledTips={disabledTips}
                 />
               );
             })}
           </div>
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -190,7 +228,21 @@ export default function SwitchChainModal() {
   const { svVisible, svState, closeSubview } =
     useZPopupViewState('switch-chain');
 
-  if (!svState?.dappTabInfo) return null;
+  console.log({ svState });
+
+  const ZActions = useZPopupLayer();
+
+  const onChainChange = useCallback(
+    (v: CHAINS_ENUM) => {
+      // throw new Error('Function not implemented.');
+      if (v) {
+        ZActions.showZSubview('switch-chain', { value: v });
+      }
+    },
+    [ZActions]
+  );
+
+  if (!svState) return null;
 
   return (
     <RModal
@@ -198,13 +250,65 @@ export default function SwitchChainModal() {
       centered
       className={styles.SwitchChainModal}
       mask
-      width={604}
-      title="Select the Chain"
+      width={488}
       onCancel={() => {
         closeSubview();
       }}
     >
-      <SwitchChainModalInner dappTabInfo={svState.dappTabInfo} />
+      <SwitchChainModalInner {...svState} onChange={onChainChange} />
     </RModal>
   );
 }
+
+export const useSwitchChainModal = <T extends HTMLElement>(
+  cb?: (c: CHAINS_ENUM) => void,
+  clickOutSide = true
+) => {
+  const ref = useRef<T>(null);
+  const ZActions = useZPopupLayer();
+  // const { svState } = useZPopupViewState('switch-chain');
+
+  useClickOutSide(ref, () => {
+    if (clickOutSide) {
+      ZActions.hideZSubview('switch-chain');
+    }
+  });
+
+  // useMessageForwarded(
+  //   {
+  //     type: 'update-subview-state',
+  //     targetView: 'main-window',
+  //   },
+  //   (payload) => {
+  //     const { partials } = payload;
+  //     // @ts-expect-error
+  //     const chain = partials?.['switch-chain']?.state?.value;
+  //     if (chain) {
+  //       cb?.(chain);
+  //     }
+  //     // if (!partials) return;
+
+  //     // setSvStates((prev) => ({
+  //     //   ...prev,
+  //     //   ...partials,
+  //     // }));
+  //   }
+  // );
+
+  return useMemo(
+    () => ({
+      ref,
+      open: (svPartials?: {
+        value?: CHAINS_ENUM | undefined;
+        title?: string | undefined;
+        supportChains?: CHAINS_ENUM[] | undefined;
+        disabledTips?: string | undefined;
+      }) =>
+        ZActions.showZSubview('switch-chain', {
+          value: CHAINS_ENUM.ETH,
+          ...svPartials,
+        }),
+    }),
+    [ZActions]
+  );
+};

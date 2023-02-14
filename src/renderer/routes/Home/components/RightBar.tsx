@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
+import { useNavigate } from 'react-router-dom';
 import Transactions from './Transactions';
 import IconSwap from '../../../../../assets/icons/home/swap.svg?rc';
 import IconSend from '../../../../../assets/icons/home/send.svg?rc';
@@ -46,13 +47,14 @@ const ActionList = styled.ul`
 `;
 
 const RightBar = () => {
+  const navigation = useNavigate();
   const actions = [
     {
       id: 'swap',
       name: 'swap',
       icon: <IconSwap width="35px" height="35px" />,
       onClick: () => {
-        showMainwinPopupview({ type: 'quick-swap' }, { openDevTools: false });
+        navigation('/mainwin/swap');
       },
     },
     {
@@ -65,17 +67,17 @@ const RightBar = () => {
       name: 'Receive',
       icon: <IconReceive width="35px" height="35px" />,
     },
-    {
-      id: 'gas-topup',
-      name: 'Gas Top Up',
-      icon: <IconGasTopup width="35px" height="35px" />,
-    },
-    {
-      id: 'security',
-      name: 'Security',
+    // {
+    //   id: 'gas-topup',
+    //   name: 'Gas Top Up',
+    //   icon: <IconGasTopup width="35px" height="35px" />,
+    // },
+    // {
+    //   id: 'security',
+    //   name: 'Security',
 
-      icon: <IconSecurity width="35px" height="35px" />,
-    },
+    //   icon: <IconSecurity width="35px" height="35px" />,
+    // },
   ];
   return (
     <RightBarWrapper>

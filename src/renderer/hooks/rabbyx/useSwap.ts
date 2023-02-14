@@ -1,11 +1,14 @@
 import { atom, useAtom } from 'jotai';
 import { useAsync } from 'react-use';
 import { useCallback, useMemo } from 'react';
-import { CHAINS_ENUM } from '@debank/common';
+import { CHAINS, CHAINS_ENUM } from '@debank/common';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 
-import type { DEX_ENUM } from '@rabby-wallet/rabby-swap';
+import { DEX_ENUM, DEX_SUPPORT_CHAINS } from '@rabby-wallet/rabby-swap';
 import type { ChainGas, GasCache, SwapState } from '@/isomorphic/types/rabbyx';
+import { message } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import { obj2query } from '@/renderer/utils/url';
 
 export const swapAtom = atom<SwapState>({
   gasPriceCache: {},
@@ -68,4 +71,35 @@ export const useSwap = () => {
     error,
     ...updateMethod,
   };
+};
+
+export const useGotoSwapByToken = () => {
+  const navigate = useNavigate();
+
+  const { swap } = useSwap();
+  const { selectedDex } = swap;
+
+  const gotoSwap = useCallback(
+    (chain: string, payTokenId: string) => {
+      if (
+        selectedDex &&
+        !DEX_SUPPORT_CHAINS[selectedDex]
+          .map((e) => CHAINS[e].serverId)
+          .includes(chain)
+      ) {
+        return message.info({
+          content: 'The token on this chain is not supported on current dex',
+          icon: (() => null) as any,
+        });
+      }
+      return navigate(
+        `/mainwin/swap?${obj2query({
+          chain,
+          payTokenId,
+        })}`
+      );
+    },
+    [selectedDex, navigate]
+  );
+  return gotoSwap;
 };
