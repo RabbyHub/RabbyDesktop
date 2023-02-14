@@ -1,13 +1,14 @@
 import { LoadingOutlined } from '@ant-design/icons';
-import { Button, Form, Input, ModalProps } from 'antd';
-import React, { ReactNode, useEffect, useMemo, useState } from 'react';
+import { Button, Form, Input, ModalProps, InputRef } from 'antd';
+import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 
 import { canoicalizeDappUrl } from '@/isomorphic/url';
-import { addDapp, replaceDapp } from '@/renderer/ipcRequest/dapps';
-import { useRequest, useSetState } from 'ahooks';
-import classNames from 'classnames';
-import { useDapps } from 'renderer/hooks/useDappsMngr';
+import { addDapp, putDapp, replaceDapp } from '@/renderer/ipcRequest/dapps';
 import { useOpenDapp } from '@/renderer/utils/react-router';
+import { useMount, useRequest, useSetState } from 'ahooks';
+import classNames from 'classnames';
+import { useClickAway } from 'react-use';
+import { useDapps } from 'renderer/hooks/useDappsMngr';
 import { DappFavicon } from '../DappFavicon';
 import { Modal } from '../Modal/Modal';
 import styles from './index.module.less';
@@ -34,6 +35,85 @@ const findRelatedDapps = (dapps: IDapp[], url: string) => {
   }
   return [];
 };
+interface EditableInputProps {
+  value?: string;
+  onChange?: (v: string) => void;
+  defaultEditable?: boolean;
+}
+const EditableInput = ({
+  value,
+  defaultEditable,
+  onChange,
+}: EditableInputProps) => {
+  const [isEdit, setIsEdit] = useState(!!defaultEditable);
+  const [form] = Form.useForm();
+  const ref = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<InputRef>(null);
+
+  useClickAway(
+    ref,
+    () => {
+      setIsEdit(false);
+    },
+    ['mousedown']
+  );
+
+  useMount(() => {
+    if (isEdit) {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }
+  });
+
+  useEffect(() => {}, [form, isEdit, value]);
+
+  return (
+    <div ref={ref}>
+      {isEdit ? (
+        <Form
+          className={styles.editableInput}
+          form={form}
+          initialValues={{
+            alias: value,
+          }}
+        >
+          <Form.Item name="alias" rules={[{ required: true, message: '' }]}>
+            <Input
+              autoFocus
+              placeholder="Please input alias"
+              maxLength={15}
+              ref={inputRef}
+            />
+          </Form.Item>
+          <img
+            onClick={() => {
+              form.validateFields().then((values) => {
+                onChange?.(values.alias);
+                setIsEdit(false);
+              });
+            }}
+            src="rabby-internal://assets/icons/add-dapp/icon-check.svg"
+            alt=""
+          />
+        </Form>
+      ) : (
+        <div className={styles.editableInput}>
+          <div className={styles.editableInputStatic}>{value}</div>
+          <img
+            onClick={() => {
+              setIsEdit(true);
+              form.setFieldsValue({
+                alias: value,
+              });
+            }}
+            src="rabby-internal://assets/icons/add-dapp/icon-edit.svg"
+            alt=""
+          />
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface PreviewDappProps {
   data: NonNullable<IDappsDetectResult['data']>;
@@ -43,13 +123,12 @@ interface PreviewDappProps {
 }
 const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
   const [input, setInput] = useState(data.recommendedAlias);
-
   const previewBlobLink = useMemo(() => {
-    if (data.isExistedDapp) return null;
     if (!data.previewImg) return null;
 
     return window.rabbyDesktop.rendererHelpers.bufToObjLink(data.previewImg);
-  }, [data.isExistedDapp, data.previewImg]);
+  }, [data.previewImg]);
+
   return (
     <div className={styles.preview}>
       <div className={styles.previewHeader}>
@@ -60,19 +139,19 @@ const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
         />
         <div>
           <div className={styles.previewTitle}>
-            {data?.isExistedDapp ? (
-              <span className={styles.previewAlias}>
-                {data.recommendedAlias}
-              </span>
-            ) : (
-              <Input
-                spellCheck={false}
-                defaultValue={data.recommendedAlias}
-                key={data?.recommendedAlias}
-                onChange={(e) => setInput(e.target.value)}
-                autoFocus
-              />
-            )}
+            <EditableInput
+              value={input}
+              defaultEditable={!data?.isExistedDapp}
+              onChange={(v) => {
+                if (data.isExistedDapp) {
+                  putDapp({
+                    origin: data.inputOrigin,
+                    alias: v,
+                  });
+                }
+                setInput(v);
+              }}
+            />
           </div>
           <div className={styles.previewDesc}>
             {data.inputOrigin?.replace(/^\w+:\/\//, '')}
@@ -116,7 +195,7 @@ const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
           )}
         </div>
       </div>
-      {!data?.isExistedDapp && previewBlobLink && (
+      {previewBlobLink ? (
         <div className={styles.previewImageContainer}>
           <div
             className={styles.imgBlock}
@@ -125,8 +204,7 @@ const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
             }}
           />
         </div>
-      )}
-      {!data?.isExistedDapp && !previewBlobLink && (
+      ) : (
         <div className={styles.previewEmpty}>
           <div>
             <img
@@ -174,7 +252,7 @@ const RelationModal = ({ data, open, onCancel, onOk }: RelationModalProps) => {
       open={open}
       onCancel={onCancel}
       className={styles.relationModal}
-      width={500}
+      width={560}
       centered
     >
       <div className={styles.content}>
@@ -387,15 +465,17 @@ export function AddDapp({
       },
       urls
     );
-    const nextDappInfo = {
-      ...dappInfo,
-      isExistedDapp: true,
+    const nextState = {
+      dappInfo: {
+        ...dappInfo,
+        isExistedDapp: true,
+      },
     };
+    setState(nextState);
     setAddState({
-      dappInfo: nextDappInfo,
-    });
-    setState({
-      dappInfo: nextDappInfo,
+      isShowModal: false,
+      relatedDapps: [],
+      dappInfo: null,
     });
 
     onAddedDapp?.(dappInfo.inputOrigin);
@@ -409,11 +489,9 @@ export function AddDapp({
     }
 
     const relatedDapps = findRelatedDapps(dapps || [], dappInfo.inputOrigin);
-    setAddState({
-      dappInfo,
-    });
     if (relatedDapps.length) {
       setAddState({
+        dappInfo,
         isShowModal: true,
         relatedDapps,
       });
@@ -487,13 +565,10 @@ export function AddDapp({
           setAddState({
             isShowModal: false,
             relatedDapps: [],
+            dappInfo: null,
           });
         }}
         onOk={() => {
-          setAddState({
-            isShowModal: false,
-            relatedDapps: [],
-          });
           if (addState.dappInfo) {
             handleAdd(
               addState.dappInfo,

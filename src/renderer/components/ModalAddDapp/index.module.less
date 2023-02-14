@@ -50,6 +50,9 @@
     }
   }
   :global {
+    .ant-modal-close-x {
+      padding: 32px 24px;
+    }
     .ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled):hover {
       border-color: rgba(255, 255, 255, 0.5);
       background: rgba(255, 255, 255, 0.1);
@@ -309,5 +312,44 @@
     height: 100%;
     border-bottom-left-radius: 6px;
     border-bottom-right-radius: 6px;
+  }
+}
+
+.editableInput {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+
+  &Static {
+    padding-left: 4px;
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 16px;
+    color: #ffffff;
+  }
+
+  :global {
+    .ant-form-item {
+      margin-bottom: 0;
+    }
+    .ant-form-item-control-input {
+      min-height: unset;
+    }
+    .ant-form-item-explain {
+      display: none;
+    }
+    .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper,
+    .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper:hover {
+      border-color: #ff7f7f;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input,
+    .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+  img {
+    cursor: pointer;
   }
 }
