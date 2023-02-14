@@ -86,6 +86,17 @@ export class Tab {
       this.tabs.emit('tab-focused');
     });
 
+    this.view?.webContents.on('page-favicon-updated', (evt, favicons) => {
+      const currentURL = this.view?.webContents.getURL();
+      if (!currentURL) return;
+
+      const dappOrigin = canoicalizeDappUrl(currentURL).origin;
+      emitIpcMainEvent('__internal_main:tabbed-window:tab-favicon-updated', {
+        dappOrigin,
+        favicons,
+      });
+    });
+
     this.view!.webContents.on('did-stop-loading', () => {
       emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
         type: 'hide',

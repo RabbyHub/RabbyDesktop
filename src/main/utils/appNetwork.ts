@@ -56,6 +56,7 @@ export async function checkUrlViaBrowserView(
   opts?: {
     timeout?: number;
     view?: BrowserView;
+    onPageFaviconUpdated?: (favicons: string[]) => void;
   }
 ) {
   const { checkingViewSession } = await getSessionInsts();
@@ -84,6 +85,10 @@ export async function checkUrlViaBrowserView(
       };
 
   const checkResult = new Subject<Result>();
+
+  view.webContents.on('page-favicon-updated', (_, favicons) => {
+    opts?.onPageFaviconUpdated?.(favicons);
+  });
 
   view.webContents.on('did-finish-load', () => {
     checkResult.next({

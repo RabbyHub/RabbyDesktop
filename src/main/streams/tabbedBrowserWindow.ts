@@ -17,7 +17,7 @@ import {
 } from '../utils/browser';
 import { getOrPutCheckResult } from '../utils/dapps';
 import { createDappTab } from './webContents';
-import { getAllDapps } from '../store/dapps';
+import { dappStore, getAllDapps } from '../store/dapps';
 import { cLog } from '../utils/log';
 
 import {
@@ -243,5 +243,21 @@ onIpcMainInternalEvent(
         cLog(`close-tab-on-del-dapp: destroyed tab ${tab.id}`);
       }
     });
+  }
+);
+
+onIpcMainInternalEvent(
+  '__internal_main:tabbed-window:tab-favicon-updated',
+  async ({ dappOrigin, favicons }) => {
+    const dappsMap = dappStore.get('dappsMap');
+
+    const dappInfo = dappsMap[dappOrigin];
+
+    if (!dappInfo) return;
+
+    if (!dappInfo.faviconUrl && favicons[0]) {
+      dappInfo.faviconUrl = favicons[0];
+      dappStore.set('dappsMap', dappsMap);
+    }
   }
 );

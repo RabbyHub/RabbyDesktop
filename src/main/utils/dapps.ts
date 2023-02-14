@@ -157,7 +157,12 @@ export async function detectDapp(
 
   const formatedOrigin = urlFormat(dappOriginInfo);
 
-  const checkResult = await checkUrlViaBrowserView(formatedOrigin);
+  let fallbackFavicon: string | undefined;
+  const checkResult = await checkUrlViaBrowserView(formatedOrigin, {
+    onPageFaviconUpdated: (favicons) => {
+      fallbackFavicon = favicons[0];
+    },
+  });
   const isCertErr = !checkResult.valid && !!checkResult.certErrorDesc;
 
   if (isCertErr) {
@@ -230,7 +235,7 @@ export async function detectDapp(
     ]);
 
   data.icon = iconInfo;
-  data.faviconUrl = faviconUrl;
+  data.faviconUrl = faviconUrl || fallbackFavicon;
   data.faviconBase64 = faviconBase64;
   data.previewImg = previewResult.previewImg;
 

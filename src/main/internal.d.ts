@@ -9,6 +9,15 @@ type MainInternalsMessagePayload = {
     ];
     response: [];
   };
+  '__internal_main:tabbed-window:tab-favicon-updated': {
+    send: [
+      {
+        dappOrigin: string;
+        favicons: string[];
+      }
+    ];
+    response: [];
+  };
   '__internal_main:dapps:changed': {
     send: [
       {

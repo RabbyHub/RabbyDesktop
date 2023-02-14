@@ -44,6 +44,7 @@ module.exports = {
     'jsx-a11y/no-noninteractive-element-interactions': 'off',
     'react-hooks/exhaustive-deps': 'error',
     '@typescript-eslint/naming-convention': 'off',
+    'prefer-destructuring': 'off',
   },
   parserOptions: {
     ecmaVersion: 2020,
