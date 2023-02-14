@@ -5,6 +5,7 @@ import { Input } from 'antd';
 import { useCallback, useRef } from 'react';
 import clsx from 'clsx';
 import { useScroll } from 'react-use';
+import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import styles from './index.module.less';
 
 type OnPinnedChanged = (
@@ -57,7 +58,7 @@ function ChainItem({
 function SwitchChainPage({
   pageInfo,
 }: {
-  pageInfo: IPopupWinPageInfo & { type: 'switch-chain' };
+  pageInfo: IPopupWinPageInfo & { type: 'switch-chain-tmp' };
 }) {
   useBodyClassNameOnMounted('switch-chain-page');
   const scrollRef = useRef(null);
@@ -111,8 +112,9 @@ function SwitchChainPage({
                 chain={chain}
                 pinned
                 checked={currentSite?.chain === chain.enum}
-                onClick={() => {
-                  switchChain(chain.enum);
+                onClick={async () => {
+                  await switchChain(chain.enum);
+                  hideMainwinPopup('switch-chain-tmp');
                 }}
                 onPinnedChange={onPinnedChange}
               />
@@ -124,8 +126,9 @@ function SwitchChainPage({
                 key={`searched-chain-${chain.id}`}
                 chain={chain}
                 pinned={false}
-                onClick={() => {
-                  switchChain(chain.enum);
+                onClick={async () => {
+                  await switchChain(chain.enum);
+                  hideMainwinPopup('switch-chain-tmp');
                 }}
                 onPinnedChange={onPinnedChange}
                 checked={currentSite?.chain === chain.enum}
@@ -143,8 +146,9 @@ function SwitchChainPage({
                     key={`chain-${chain.id}`}
                     chain={chain}
                     pinned
-                    onClick={() => {
-                      switchChain(chain.enum);
+                    onClick={async () => {
+                      await switchChain(chain.enum);
+                      hideMainwinPopup('switch-chain-tmp');
                     }}
                     onPinnedChange={onPinnedChange}
                     checked={currentSite?.chain === chain.enum}
@@ -160,8 +164,9 @@ function SwitchChainPage({
                   key={`chain-${chain.id}`}
                   chain={chain}
                   pinned={false}
-                  onClick={() => {
-                    switchChain(chain.enum);
+                  onClick={async () => {
+                    await switchChain(chain.enum);
+                    hideMainwinPopup('switch-chain-tmp');
                   }}
                   onPinnedChange={onPinnedChange}
                   checked={currentSite?.chain === chain.enum}
@@ -176,7 +181,7 @@ function SwitchChainPage({
 }
 
 export default function SwitchChainWindow() {
-  const { pageInfo } = usePopupWinInfo('switch-chain');
+  const { pageInfo } = usePopupWinInfo('switch-chain-tmp');
 
   if (!pageInfo?.dappTabInfo?.url) return null;
 

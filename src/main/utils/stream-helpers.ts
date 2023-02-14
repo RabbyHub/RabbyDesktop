@@ -116,13 +116,14 @@ export function updateMainWindowActiveTabRect(
 }
 
 export async function getAllMainUIWindows() {
-  const [mainWin, { sidebarContext }] = await Promise.all([
+  const [mainWin, { sidebarContext, switchChain }] = await Promise.all([
     await onMainWindowReady(),
     await firstValueFrom(fromMainSubject('popupWindowOnMain')),
   ]);
 
   const popupOnly = {
     'sidebar-dapp': sidebarContext,
+    'switch-chain-tmp': switchChain,
   } as const;
 
   const windows = {

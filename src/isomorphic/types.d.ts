@@ -221,13 +221,21 @@ type IRabbyxRpcResponse = {
 };
 
 type IHardwareConnectPageType = 'onekey' | 'trezor';
-type IPopupWinPageInfo = {
-  type: 'sidebar-dapp';
-  dappTabInfo: {
-    origin: string;
-    id: chrome.tabs.Tab['id'];
-  };
-};
+type IPopupWinPageInfo =
+  | {
+      type: 'sidebar-dapp';
+      dappTabInfo: {
+        origin: string;
+        id: chrome.tabs.Tab['id'];
+      };
+    }
+  | {
+      type: 'switch-chain-tmp';
+      dappTabInfo: {
+        id: chrome.tabs.Tab['id'];
+        url: chrome.tabs.Tab['url'];
+      };
+    };
 
 type ISelectDeviceState = {
   selectId: string;
