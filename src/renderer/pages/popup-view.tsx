@@ -25,6 +25,8 @@ import MainWindowDappManagement from '../routes-popup/MainWindowDappManagement';
 import DappReadonlyWindow from '../routes-popup/DappReadonlyWindow';
 import ZPopupLayer from '../routes-popup/ZPopupLayer';
 
+import SwitchChainWindow from '../routes-popup/SwitchChainWindow.deprecated';
+
 function App() {
   return (
     <Router>
@@ -39,7 +41,7 @@ function App() {
           element={<SecurityAddressbarPopup />}
         />
         <Route path="/popup__sidebar-dapp" element={<SidebarContextMenu />} />
-        {/* <Route path="/popup__switch-chain" element={<SwitchChainModal />} /> */}
+        <Route path="/popup__switch-chain" element={<SwitchChainWindow />} />
         <Route
           path="/popupview__add-address"
           element={<MainWindowAddAddress />}

@@ -86,6 +86,7 @@ const CONF = {
   } as IConf<
     ReplaySubject<{
       sidebarContext: BrowserWindow;
+      switchChain: BrowserWindow;
     }>
   >,
   popupViewsOnMainwinReady: {

@@ -16,6 +16,10 @@ import { useClickOutSide } from '@/renderer/hooks/useClick';
 import { detectOS } from '@/isomorphic/os';
 import classNames from 'classnames';
 import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
+import {
+  hideMainwinPopup,
+  showMainwinPopup,
+} from '@/renderer/ipcRequest/mainwin-popup';
 import styles from './index.module.less';
 
 const isDarwin = detectOS() === 'darwin';
@@ -44,6 +48,9 @@ const ConnectedChain = ({
 >) => {
   const divRef = useRef<HTMLDivElement>(null);
 
+  useClickOutSide(divRef, () => {
+    hideMainwinPopup('switch-chain-tmp');
+  });
   const zActions = useZPopupLayerOnMain();
   useClickOutSide(divRef, () => {
     zActions.hideZSubview('switch-chain');
@@ -141,12 +148,26 @@ export const TopNavBar = () => {
             <ConnectedChain
               chain={currentConnectedSite.chain}
               onClick={(event) => {
-                zActions.showZSubview('switch-chain', {
-                  dappTabInfo: {
-                    id: activeTab?.id,
-                    url: activeTab?.url,
-                  },
-                });
+                const el = event.currentTarget as HTMLDivElement;
+                const rect = el.getBoundingClientRect();
+
+                showMainwinPopup(
+                  { x: rect.x, y: rect.bottom + 10 },
+                  {
+                    type: 'switch-chain-tmp',
+                    dappTabInfo: {
+                      id: activeTab?.id,
+                      url: activeTab?.url,
+                    },
+                  }
+                );
+
+                // zActions.showZSubview('switch-chain', {
+                //   dappTabInfo: {
+                //     id: activeTab?.id,
+                //     url: activeTab?.url,
+                //   },
+                // });
               }}
             />
           </div>
