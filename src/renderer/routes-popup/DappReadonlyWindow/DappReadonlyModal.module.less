@@ -11,6 +11,9 @@
 
       border-radius: 12px;
       padding: 40px;
+
+      background: linear-gradient(112.9deg, #6F7584 0%, #3B404D 100%);
+      color: white;
     }
 
     .ant-modal-body {
@@ -35,7 +38,10 @@
   .closeIcon {
     width: 24px;
     height: 24px;
-    color: var(--color-comment1);
+
+    > path {
+      stroke: var(--color-purewhite);
+    }
   }
 
 }
@@ -54,7 +60,7 @@
     .link {
       @apply flex justify-center items-center mt-16px;
       text-align: center;
-      color: var(--color-comment1);
+      color: var(--color-purewhite);
       font-style: normal;
       font-weight: 500;
       font-size: 15px;
@@ -87,7 +93,7 @@
     font-size: 15px;
     line-height: 22px;
     text-align: center;
-    color: var(--color-title);
+    color: var(--color-purewhite);
   }
 
   .buttonContainer {
@@ -116,7 +122,8 @@
       > span {
         text-align: center;
         text-decoration-line: underline;
-        color: var(--color-paragraph);
+        color: var(--color-purewhite);
+        opacity: 0.6;
       }
 
       &:hover, &:active, &:focus {
