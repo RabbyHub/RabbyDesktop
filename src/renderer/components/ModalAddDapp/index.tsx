@@ -65,8 +65,6 @@ const EditableInput = ({
     }
   });
 
-  useEffect(() => {}, [form, isEdit, value]);
-
   return (
     <div ref={ref}>
       {isEdit ? (
