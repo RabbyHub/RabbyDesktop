@@ -1,5 +1,5 @@
-import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { useLatestDappScreenshot } from '@/renderer/hooks-shell/useMainWindow';
+import { useIsAnimating } from '@/renderer/hooks/useSidebar';
 import classNames from 'classnames';
 import { useLayoutEffect, useRef } from 'react';
 import styles from './index.module.less';
@@ -50,6 +50,7 @@ function ActiveDappView() {
   }, []);
 
   const imageDataURL = useLatestDappScreenshot();
+  const { isAnimating } = useIsAnimating();
 
   return (
     <div
@@ -57,7 +58,8 @@ function ActiveDappView() {
       className={classNames(
         styles.activeDappView,
         // IS_RUNTIME_PRODUCTION && styles.debug,
-        imageDataURL && styles.withScreenshot
+        imageDataURL && styles.withScreenshot,
+        isAnimating && styles.isAnimating
       )}
     >
       {/* disabled now */}
@@ -80,7 +82,7 @@ React.PropsWithChildren<{}>) {
   return (
     <div className={styles.dappViewWrapper}>
       {children || null}
-      <div className={styles.dappViewGasket}>
+      <div className={classNames(styles.dappViewGasket)}>
         <ActiveDappView />
       </div>
     </div>

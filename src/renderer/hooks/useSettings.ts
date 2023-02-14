@@ -1,6 +1,7 @@
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useRef } from 'react';
 import { toggleMainWinTabAnimating } from '../ipcRequest/mainwin';
+import { useIsAnimating } from './useSidebar';
 
 const desktopAppStateAtom = atom(null as IDesktopAppState | null);
 
@@ -37,11 +38,11 @@ export function useSettings() {
     [setDesktopAppState]
   );
 
-  const animatingRef = useRef(false);
+  const { isAnimating, setIsAnimating } = useIsAnimating();
   const toggleSidebarCollapsed = useCallback(
     async (nextVal: boolean) => {
       await toggleMainWinTabAnimating(true);
-      animatingRef.current = true;
+      setIsAnimating(true);
       localStorage.setItem('sidebarCollapsed', JSON.stringify(nextVal));
       const result = await window.rabbyDesktop.ipcRenderer.invoke(
         'put-desktopAppState',
@@ -58,10 +59,10 @@ export function useSettings() {
       });
       setTimeout(() => {
         toggleMainWinTabAnimating(false);
-        animatingRef.current = false;
+        setIsAnimating(false);
       }, SIDEBAR_WIDTH_ANIMATION_SECOND * 1000);
     },
-    [setDesktopAppState]
+    [setDesktopAppState, setIsAnimating]
   );
 
   useEffect(() => {
@@ -69,6 +70,7 @@ export function useSettings() {
   }, [fetchState]);
 
   return {
+    isAnimating,
     settings: {
       enableContentProtected: desktopAppState?.enableContentProtected !== false,
       sidebarCollapsed: Boolean(
