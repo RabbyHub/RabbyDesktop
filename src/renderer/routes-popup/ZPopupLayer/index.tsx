@@ -1,14 +1,16 @@
 import {
-  usePopupViewInfo,
-  useZPopupViewStates,
-} from '@/renderer/hooks/usePopupWinOnMainwin';
-import { useMessageForwarded } from '@/renderer/hooks/useViewsMessage';
-import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
-import {
   createHashRouter as createRouter,
   RouterProvider,
   Navigate,
 } from 'react-router-dom';
+
+import {
+  usePopupViewInfo,
+  useZPopupCallbackRegistry,
+  useZPopupViewStates,
+} from '@/renderer/hooks/usePopupWinOnMainwin';
+import { useMessageForwarded } from '@/renderer/hooks/useViewsMessage';
+import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import SwitchChainModal from '../../components/SwitchChainModal';
 
 import styles from './index.module.less';
@@ -17,6 +19,8 @@ hideMainwinPopupview('z-popup');
 
 function App() {
   usePopupViewInfo('z-popup', { enableTopViewGuard: true });
+  useZPopupCallbackRegistry();
+
   const { setSvStates } = useZPopupViewStates();
 
   useMessageForwarded(

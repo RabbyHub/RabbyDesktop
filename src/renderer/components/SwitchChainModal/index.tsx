@@ -6,7 +6,7 @@ import { useScroll } from 'react-use';
 import { Modal as RModal } from '@/renderer/components/Modal/Modal';
 import { useCurrentConnection } from '@/renderer/hooks/rabbyx/useConnection';
 import {
-  useZPopupLayer,
+  useZPopupLayerOnMain,
   useZPopupViewState,
 } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { useBodyClassNameOnMounted } from '@/renderer/hooks/useMountedEffect';
@@ -68,7 +68,7 @@ function SwitchChainModalInner({
   const scrollRef = useRef(null);
   const { y } = useScroll(scrollRef);
 
-  const zActions = useZPopupLayer();
+  const zActions = useZPopupLayerOnMain();
 
   const {
     pinnedChains,

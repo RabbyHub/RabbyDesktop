@@ -15,7 +15,7 @@ import { useCallback, useRef, useState, useMemo } from 'react';
 import { useClickOutSide } from '@/renderer/hooks/useClick';
 import { detectOS } from '@/isomorphic/os';
 import classNames from 'classnames';
-import { useZPopupLayer } from '@/renderer/hooks/usePopupWinOnMainwin';
+import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import styles from './index.module.less';
 
 const isDarwin = detectOS() === 'darwin';
@@ -44,7 +44,7 @@ const ConnectedChain = ({
 >) => {
   const divRef = useRef<HTMLDivElement>(null);
 
-  const zActions = useZPopupLayer();
+  const zActions = useZPopupLayerOnMain();
   useClickOutSide(divRef, () => {
     zActions.hideZSubview('switch-chain');
   });
@@ -83,7 +83,7 @@ export const TopNavBar = () => {
     }
   }, [activeTab?.id]);
 
-  const zActions = useZPopupLayer();
+  const zActions = useZPopupLayerOnMain();
 
   return (
     <div className={styles.main}>
