@@ -23,42 +23,7 @@ function closeView() {
 
 closeView();
 
-function InnnerVisitOther({
-  externalOrigin,
-  externalURL,
-}: {
-  externalOrigin: string;
-  externalURL: string;
-}) {
-  return (
-    <>
-      <header className={styles.header}>
-        <span className={styles.title}>Visiting new site</span>
-      </header>
-      <div className={classNames(styles.tipContainer, 'mt-16px')}>
-        You're about to visit a new page with different domain name from the
-        current Dapp. You can open it in your browser.
-      </div>
-      <div className={styles.externalLinkContainer}>
-        <img src="rabby-internal://assets/icons/readonly-modal/icon-link.svg" />
-        <span className={styles.link}>{externalURL}</span>
-      </div>
-      <div className={styles.buttonContainer}>
-        <Button
-          className={classNames(styles.button, styles.J_openInBrowser)}
-          type="default"
-          onClick={() => {
-            openExternalUrl(externalURL);
-          }}
-        >
-          Open in browser
-        </Button>
-      </div>
-    </>
-  );
-}
-
-function InnerSameOrigin({
+function InnerRedirect({
   nonSameOrigin,
   isLoadingFavicon,
   targetInfo,
@@ -95,13 +60,22 @@ function InnerSameOrigin({
         </div>
       </header>
       <div className={classNames(styles.tipContainer, 'mt-30px pb-60px')}>
-        The domain name of the new page is detected to be different from that of
-        the current Dapp. The page will open in your browser
+        The page you want to open does not belong to the current Dapp
       </div>
       <div className={classNames(styles.buttonContainer)}>
         <Button
           className={classNames(styles.button, styles.J_add)}
           type="primary"
+          onClick={() => {
+            openExternalUrl(nonSameOrigin.url);
+          }}
+        >
+          Open in browser
+        </Button>
+
+        <Button
+          className={classNames(styles.button, styles.J_openInBrowser)}
+          type="text"
           onClick={() => {
             closeView();
             showMainwinPopupview({
@@ -112,17 +86,7 @@ function InnerSameOrigin({
             });
           }}
         >
-          Add a dapp
-        </Button>
-
-        <Button
-          className={classNames(styles.button, styles.J_openInBrowser)}
-          type="text"
-          onClick={() => {
-            openExternalUrl(nonSameOrigin.url);
-          }}
-        >
-          Open in browser
+          Add as dapp
         </Button>
       </div>
     </>
@@ -161,26 +125,6 @@ export default function DappReadonlyModal() {
 
   useDragHeadbar();
 
-  // useEffect(() => {
-  //   if (!nonSameOrigin.url) return;
-
-  //   window.rabbyDesktop.ipcRenderer.invoke('parse-favicon', nonSameOrigin.url)
-  //     .then(res => {
-  //       if (res.error) {
-  //         console.error(res.error);
-  //         return;
-  //       }
-
-  //       setNonSameOrigin(prev => {
-  //         return {
-  //           ...prev,
-  //           status: 'loaded',
-  //           favIcon: res.favicon,
-  //         }
-  //       });
-  //     });
-  // }, [nonSameOrigin.url]);
-
   if (!nonSameOrigin.url) return null;
 
   return (
@@ -201,18 +145,11 @@ export default function DappReadonlyModal() {
       closeIcon={<RcIconClose className={styles.closeIcon} />}
       footer={null}
     >
-      {!toSameDomain ? (
-        <InnnerVisitOther
-          externalOrigin={targetInfo.origin}
-          externalURL={nonSameOrigin.url}
-        />
-      ) : (
-        <InnerSameOrigin
-          nonSameOrigin={nonSameOrigin}
-          targetInfo={targetInfo}
-          isLoadingFavicon={isLoadingFavicon}
-        />
-      )}
+      <InnerRedirect
+        nonSameOrigin={nonSameOrigin}
+        targetInfo={targetInfo}
+        isLoadingFavicon={isLoadingFavicon}
+      />
     </Modal>
   );
 }
