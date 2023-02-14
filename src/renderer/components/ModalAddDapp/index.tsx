@@ -12,6 +12,7 @@ import { useDapps } from 'renderer/hooks/useDappsMngr';
 import { DappFavicon } from '../DappFavicon';
 import { Modal } from '../Modal/Modal';
 import styles from './index.module.less';
+import { useAddDappURL } from './useAddDapp';
 
 const findRelatedDapps = (dapps: IDapp[], url: string) => {
   const current = canoicalizeDappUrl(url);
@@ -403,6 +404,10 @@ export function AddDapp({
   const [form] = Form.useForm();
   const [input, setInput] = useState('');
   const openDapp = useOpenDapp();
+  const [addUrl] = useAddDappURL();
+  useEffect(() => {
+    form.setFieldsValue({ url: addUrl?.replace(/^\w+:\/\//, '') });
+  }, [addUrl, form]);
 
   const { state, setState, check, loading } = useCheckDapp({
     onReplace(v) {
