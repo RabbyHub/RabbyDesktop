@@ -19,6 +19,13 @@ type IZPopupSubviewState = {
   [K in keyof ZViewStates]: SVState<NullableFields<ZViewStates[K]>>;
 };
 
+type IZCallbackPayload<SV extends keyof ZViewStates> = {
+  svOpenId: string;
+  subView: SV;
+  latestState: IZPopupSubviewState[SV]['state'];
+  $subViewState: IZPopupSubviewState[SV];
+};
+
 type ChannelForwardMessageType = {
   send: [
     | {
@@ -60,6 +67,19 @@ type ChannelForwardMessageType = {
         targetView: 'z-popup';
         type: 'update-subview-state';
         partials?: Partial<IZPopupSubviewState>;
+      }
+    | {
+        targetView: 'z-popup';
+        type: 'register-subview-openid';
+        payload: {
+          svOpenId: string;
+          subView: keyof ZViewStates;
+        };
+      }
+    | {
+        targetView: 'main-window';
+        type: 'consume-subview-openid';
+        payload: IZCallbackPayload<keyof ZViewStates>;
       }
   ];
   response: ChannelForwardMessageType['send'];

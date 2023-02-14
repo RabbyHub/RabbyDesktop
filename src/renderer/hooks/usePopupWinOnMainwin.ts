@@ -1,5 +1,8 @@
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useRef, useState } from 'react';
+
+import { randString } from '@/isomorphic/string';
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { hideMainwinPopup } from '../ipcRequest/mainwin-popup';
 import {
   hideMainwinPopupview,
@@ -153,11 +156,60 @@ export function usePopupViewInfo<T extends IPopupViewChanges['type']>(
   };
 }
 
+function noop() {}
+type IZCallback<V extends keyof ZViewStates> = (
+  payload: IZCallbackPayload<V>
+) => any;
+const zPopupCallbacks: {
+  [K in string]?: {
+    subView: keyof ZViewStates;
+    callback: IZCallback<keyof ZViewStates>;
+  } | null;
+} = {};
+
+export function useZPopupCallbackOnMainWindow() {
+  useMessageForwarded(
+    { targetView: 'main-window', type: 'consume-subview-openid' },
+    ({ payload }) => {
+      if (!IS_RUNTIME_PRODUCTION) {
+        console.debug(
+          '[debug] useZPopupCallbackOnMainWindow:: payload',
+          payload
+        );
+      }
+      if (
+        payload?.svOpenId &&
+        zPopupCallbacks[payload.svOpenId]?.subView === payload.subView
+      ) {
+        zPopupCallbacks[payload.svOpenId]?.callback(payload);
+        zPopupCallbacks[payload.svOpenId] = null;
+      }
+    }
+  );
+}
+
+const zPopupCallbackIds: {
+  [K in string]?: string;
+} = {};
+export function useZPopupCallbackRegistry() {
+  useMessageForwarded(
+    { targetView: 'z-popup', type: 'register-subview-openid' },
+    ({ payload }) => {
+      if (!IS_RUNTIME_PRODUCTION) {
+        console.debug('[debug] useZPopupCallbackRegistry:: payload', payload);
+      }
+      if (payload?.svOpenId) {
+        zPopupCallbackIds[payload.subView] = payload.svOpenId;
+      }
+    }
+  );
+}
+
 /**
  * @description provide actions to operate z-popup on main views
  * @returns
  */
-export function useZPopupLayer() {
+export function useZPopupLayerOnMain() {
   const sendMsg = useForwardTo('z-popup');
 
   const updateZPopup = useCallback(
@@ -187,10 +239,25 @@ export function useZPopupLayer() {
   );
 
   const showZSubview = useCallback(
-    <V extends keyof ZViewStates>(svType: V, svPartials?: ZViewStates[V]) => {
+    <V extends keyof ZViewStates>(
+      svType: V,
+      svPartials?: ZViewStates[V],
+      callback?: IZCallback<V>
+    ) => {
       updateZPopup(svType, true, svPartials);
+
+      const svOpenId = randString();
+      if (typeof callback === 'function') {
+        zPopupCallbacks[svOpenId] = {
+          subView: svType,
+          callback: callback as any,
+        };
+      }
+      sendMsg('register-subview-openid', {
+        payload: { svOpenId, subView: svType },
+      });
     },
-    [updateZPopup]
+    [updateZPopup, sendMsg]
   );
 
   const hideZSubview = useCallback(
@@ -213,16 +280,14 @@ const ZPopupSubviewStateAtom = atom<NullableFields<IZPopupSubviewState>>({
 export function useZPopupViewStates() {
   const [svStates, setSvStates] = useAtom(ZPopupSubviewStateAtom);
 
-  return {
-    svStates,
-    setSvStates,
-  };
+  return { svStates, setSvStates };
 }
 export function useZPopupViewState<T extends keyof ZViewStates>(
   svType: T,
   onFieldsChanged?: (partials?: IZPopupSubviewState[T]) => void
 ) {
   const { svStates, setSvStates } = useZPopupViewStates();
+  const sendToMain = useForwardTo('main-window');
 
   useMessageForwarded(
     {
@@ -248,13 +313,24 @@ export function useZPopupViewState<T extends keyof ZViewStates>(
         },
       };
 
+      const svOpenId = zPopupCallbackIds[svType];
+      delete zPopupCallbackIds[svType];
+      sendToMain('consume-subview-openid', {
+        payload: {
+          svOpenId,
+          subView: svType,
+          latestState: partials[svType]?.state,
+          $subViewState: partials[svType],
+        },
+      });
+
       if (Object.values(partials).every((v) => !v?.visible)) {
         hideMainwinPopupview('z-popup');
       }
 
       return partials;
     });
-  }, [svType, setSvStates]);
+  }, [svType, setSvStates, sendToMain]);
 
   const { visible: svVisible, state: SVState } = svStates[svType] || {};
 

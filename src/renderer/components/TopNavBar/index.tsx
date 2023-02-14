@@ -15,7 +15,7 @@ import { useCallback, useRef, useState, useMemo } from 'react';
 import { useClickOutSide } from '@/renderer/hooks/useClick';
 import { detectOS } from '@/isomorphic/os';
 import classNames from 'classnames';
-import { useZPopupLayer } from '@/renderer/hooks/usePopupWinOnMainwin';
+import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import {
   hideMainwinPopup,
   showMainwinPopup,
@@ -51,7 +51,7 @@ const ConnectedChain = ({
   useClickOutSide(divRef, () => {
     hideMainwinPopup('switch-chain-tmp');
   });
-  const zActions = useZPopupLayer();
+  const zActions = useZPopupLayerOnMain();
   useClickOutSide(divRef, () => {
     zActions.hideZSubview('switch-chain');
   });
@@ -90,7 +90,7 @@ export const TopNavBar = () => {
     }
   }, [activeTab?.id]);
 
-  const zActions = useZPopupLayer();
+  const zActions = useZPopupLayerOnMain();
 
   return (
     <div className={styles.main}>
