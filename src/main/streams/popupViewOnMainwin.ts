@@ -318,7 +318,7 @@ const zPopupReady = onMainWindowReady().then(async (mainWin) => {
 
   // debug-only
   if (!IS_RUNTIME_PRODUCTION) {
-    zPopup.webContents.openDevTools({ mode: 'detach' });
+    // zPopup.webContents.openDevTools({ mode: 'detach' });
   }
 
   hidePopupView(zPopup);
