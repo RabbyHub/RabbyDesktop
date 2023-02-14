@@ -111,17 +111,15 @@ export default function DappReadonlyModal() {
     );
   }, [fetchState]);
 
-  const { targetInfo, toSameDomain, isLoadingFavicon } = useMemo(() => {
+  const { targetInfo, isLoadingFavicon } = useMemo(() => {
     const target = canoicalizeDappUrl(nonSameOrigin.url);
-    const source = canoicalizeDappUrl(nonSameOrigin.sourceURL);
 
     return {
       targetInfo: target,
-      toSameDomain: target.secondaryDomain === source.secondaryDomain,
       isLoadingFavicon: nonSameOrigin.status === 'start-loading',
       // isLoadingFavicon: true,
     };
-  }, [nonSameOrigin.url, nonSameOrigin.sourceURL, nonSameOrigin.status]);
+  }, [nonSameOrigin.url, nonSameOrigin.status]);
 
   useDragHeadbar();
 
@@ -131,10 +129,7 @@ export default function DappReadonlyModal() {
     <Modal
       width={520}
       centered
-      className={classNames(
-        styles.DappReadonlyModal,
-        toSameDomain ? styles.J_sameDomain : styles.J_external
-      )}
+      className={classNames(styles.DappReadonlyModal)}
       wrapClassName={classNames(styles.DappReadonlyModalWrap)}
       open={!!nonSameOrigin.url}
       maskClosable
