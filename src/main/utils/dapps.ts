@@ -5,6 +5,7 @@ import Axios, { AxiosError, AxiosProxyConfig } from 'axios';
 import LRUCache from 'lru-cache';
 
 import { BrowserWindow } from 'electron';
+import { waitForMS } from '@/isomorphic/date';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { parseWebsiteFavicon } from './fetch';
 import { AxiosElectronAdapter } from './axios';
@@ -53,6 +54,7 @@ async function checkDappHttpsCert(
 }
 
 let previewWindow: BrowserWindow;
+const WAIT_RENDER_TIME = 2 * 1e3;
 export async function safeCapturePage(
   targetURL: string,
   opts?: {
@@ -85,7 +87,7 @@ export async function safeCapturePage(
     setTimeout(() => {
       timeouted = true;
       reject(new Error('timeout'));
-    }, timeoutValue);
+    }, timeoutValue + WAIT_RENDER_TIME);
 
     previewWindow.webContents.on('did-fail-load', () => {
       reject();
@@ -95,12 +97,16 @@ export async function safeCapturePage(
       reject();
     });
 
-    previewWindow.webContents.on('did-finish-load', () => {
-      previewWindow.webContents.capturePage().then((image) => {
-        if (timeouted) return;
+    previewWindow.webContents.on('did-finish-load', async () => {
+      // wait for 1s to make sure the page is loaded
+      waitForMS(WAIT_RENDER_TIME)
+        .then(() => previewWindow.webContents.capturePage())
+        .then((image) => {
+          if (timeouted) return;
 
-        resolve(image.toPNG());
-      });
+          resolve(image.toPNG());
+        })
+        .catch(reject);
     });
   });
 

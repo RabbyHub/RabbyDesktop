@@ -13,3 +13,11 @@ export function formatSeconds(
     .local()
     .format(format);
 }
+
+export async function waitForMS(seconds: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, seconds * 1e3);
+  });
+}

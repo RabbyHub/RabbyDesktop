@@ -93,6 +93,14 @@ export async function checkUrlViaBrowserView(
     checkResult.complete();
   });
 
+  view.webContents.on('dom-ready', () => {
+    checkResult.next({
+      valid: true,
+      finalUrl: view.webContents.getURL(),
+    });
+    checkResult.complete();
+  });
+
   view.webContents.on(
     'did-fail-load',
     (_, errorCode, errorDesc, validatedURL) => {
