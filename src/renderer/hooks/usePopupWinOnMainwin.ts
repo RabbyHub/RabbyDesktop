@@ -335,7 +335,7 @@ export function useZPopupViewState<T extends keyof ZViewStates>(
   const { visible: svVisible, state: svState } = svStates[svType] || {};
 
   const setSvState = useCallback(
-    (svPartials: IZPopupSubviewState[T]) => {
+    (svPartials: IZPopupSubviewState[T]['state']) => {
       setSvStates((prev) => {
         const partials = {
           ...prev,
