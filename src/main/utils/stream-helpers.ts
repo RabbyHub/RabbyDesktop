@@ -141,14 +141,7 @@ export async function getAllMainUIWindows() {
 export async function getAllMainUIViews() {
   const [
     mainWin,
-    {
-      addAddress,
-      addressManagement,
-      quickSwap,
-      dappsManagement,
-      selectDevices,
-      zPopup,
-    },
+    { addAddress, addressManagement, dappsManagement, selectDevices, zPopup },
   ] = await Promise.all([
     await onMainWindowReady(),
     await firstValueFrom(fromMainSubject('popupViewsOnMainwinReady')),
@@ -157,7 +150,6 @@ export async function getAllMainUIViews() {
   const views = {
     'add-address': addAddress,
     'address-management': addressManagement,
-    'quick-swap': quickSwap,
     'dapps-management': dappsManagement,
     'select-devices': selectDevices,
     'z-popup': zPopup,
@@ -166,7 +158,6 @@ export async function getAllMainUIViews() {
   const viewOnlyHash = {
     addAddress: addAddress.webContents,
     addressManagement: addressManagement.webContents,
-    quickSwap: quickSwap.webContents,
     dappsManagement: dappsManagement.webContents,
     selectDevices: selectDevices.webContents,
     zPopup: zPopup.webContents,

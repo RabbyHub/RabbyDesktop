@@ -1,4 +1,4 @@
-import { Space, Tooltip } from 'antd';
+import { Tooltip } from 'antd';
 import IconQuestion from '@/../assets/icons/swap/question-outline.svg?rc';
 import IconInfo from '@/../assets/icons/swap/info-outline.svg?rc';
 import styled from 'styled-components';
@@ -15,9 +15,15 @@ const SectionStyled = styled.section`
   display: flex;
   justify-content: space-between;
 
+  .left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
   .tooltip1 {
     .ant-tooltip-arrow {
-      left: 77px;
+      left: 100px;
     }
     .ant-tooltip-inner {
       width: var(--swap-content-w);
@@ -28,16 +34,16 @@ const SectionStyled = styled.section`
 
   .tooltip2 {
     .ant-tooltip-arrow {
-      left: 156px;
+      left: 124px;
     }
     .ant-tooltip-inner {
-      transform: translateX(-10px);
+      max-width: var(--swap-content-w);
       font-size: 12;
     }
   }
   .title {
     font-weight: 400;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 14px;
   }
 
@@ -50,6 +56,8 @@ const SectionStyled = styled.section`
     align-items: center;
 
     .fee {
+      font-weight: 500;
+      font-size: 14px;
       margin-right: 4px;
     }
   }
@@ -68,7 +76,7 @@ export const Fee = (props: FeeProps) => {
 
   return (
     <SectionStyled>
-      <Space size={4}>
+      <div className="left">
         <div className="title">Rabby fee</div>
         <Tooltip
           placement="top"
@@ -80,7 +88,7 @@ export const Fee = (props: FeeProps) => {
         >
           <IconInfo />
         </Tooltip>
-      </Space>
+      </div>
       <div className="feeBox">
         <span className="fee">{fee}%</span>
         <Tooltip

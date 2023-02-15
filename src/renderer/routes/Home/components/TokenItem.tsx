@@ -12,6 +12,7 @@ import {
 import TokenWithChain from '@/renderer/components/TokenWithChain';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
+import { useGotoSwapByToken } from '@/renderer/hooks/rabbyx/useSwap';
 import IconSwap from '../../../../../assets/icons/home/token-swap.svg?rc';
 import IconSend from '../../../../../assets/icons/home/token-send.svg?rc';
 import IconReceive from '../../../../../assets/icons/home/token-receive.svg?rc';
@@ -188,15 +189,10 @@ const TokenItemComp = ({
       percentage: valueChange === 0 ? 0 : valueChange / historyValue,
     };
   }, [token, historyToken, supportHistory]);
+  const gotoSwap = useGotoSwapByToken();
 
   const handleClickSwap = () => {
-    showMainwinPopupview(
-      {
-        type: 'quick-swap',
-        state: { payTokenId: token.id, chain: token.chain },
-      },
-      { openDevTools: false }
-    );
+    gotoSwap(token.chain, token.id);
   };
 
   return (

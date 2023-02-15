@@ -1,5 +1,7 @@
 /// <reference path="../isomorphic/type-helpers.d.ts" />
 
+type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
+
 type RendererForwardMessageViewType = IBuiltinViewName | '*';
 
 type SVState<T extends object> = { visible: boolean } & {
@@ -8,16 +10,16 @@ type SVState<T extends object> = { visible: boolean } & {
 
 type ZViewStates = {
   'switch-chain': {
-    dappTabInfo: {
-      id: chrome.tabs.Tab['id'];
-      url: chrome.tabs.Tab['url'];
-    };
+    value?: CHAINS_ENUM;
+    title?: string;
+    supportChains?: CHAINS_ENUM[];
+    disabledTips?: string;
   };
   'security-notification': ISecurityNotificationPayload;
 };
 
 type IZPopupSubviewState = {
-  [K in keyof ZViewStates]: SVState<NullableFields<ZViewStates[K]>>;
+  [K in keyof ZViewStates]: SVState<ZViewStates[K]>;
 };
 
 type IZCallbackPayload<SV extends keyof ZViewStates> = {
@@ -53,10 +55,6 @@ type ChannelForwardMessageType =
     }
   | {
       targetView: 'address-management';
-      type: 'nothing-but-reserved';
-    }
-  | {
-      targetView: 'quick-swap';
       type: 'nothing-but-reserved';
     }
   | {

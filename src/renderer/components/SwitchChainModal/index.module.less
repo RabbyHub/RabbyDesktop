@@ -1,8 +1,9 @@
-@import "@/renderer/css/mixins.less";
+@import '@/renderer/css/mixins.less';
 
 :global {
   body.switch-chain-subview {
-    &::-webkit-scrollbar, *::-webkit-scrollbar {
+    &::-webkit-scrollbar,
+    *::-webkit-scrollbar {
       display: none;
     }
   }
@@ -12,37 +13,67 @@
   :global .ant-modal-content {
     overflow: hidden;
   }
+  :global .ant-modal-close-x {
+    padding: 0;
+    margin-top: 30px;
+    margin-right: 16px;
+  }
 }
 
 .SwitchChainModalInner {
-  padding: 10px 16px;
-  // height: 100vh;
+  padding: 30px 16px;
+  padding-bottom: 0;
   height: 734px;
-  max-height: 70%;
+  height: 700px;
   box-sizing: border-box;
   width: 100%;
-  background-color: #fff;
+  background: #525767;
+  box-shadow: 0px 24px 80px rgba(19, 20, 26, 0.18);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  .title {
+    font-weight: 510;
+    font-size: 22px;
+    line-height: 26px;
+    text-align: center;
+    color: #ffffff;
+  }
+  .search:global {
+    &.ant-input-affix-wrapper {
+      margin-top: 24px;
+      margin-bottom: 14px;
+      height: 36px;
+      font-size: 12px;
+      line-height: 14px;
+      border: 1px solid #5f6572;
+      box-shadow: none;
+      border-radius: 6px;
+      background-color: transparent;
+      color: var(--color-purewhite);
+
+      &.ant-input-affix-wrapper-focused {
+        border: 1px solid var(--color-primary);
+      }
+
+      & input::placeholder {
+        color: #d9d9d9;
+      }
+    }
+  }
+}
+
+.scrollContainer {
+  flex: 1;
+  padding-bottom: 16px;
   overflow-y: visible;
   overflow-x: hidden;
 }
 
-.inputWrapper {
-  transform: translateY(-50px);
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background: #fff;
-  transition: transform .3s;
-  padding: 10px 16px;
-  z-index: 100;
-  &.show {
-    transform: translateY(0);
-  }
-}
-
 .chainList {
-  background: #F5F6FA;
+  background: rgba(255, 255, 255, 0.06);
   margin-bottom: 12px;
   border-radius: 6px;
   &:nth-last-child(1) {
@@ -67,52 +98,48 @@
   cursor: pointer;
   position: relative;
   border: 1px solid transparent;
-  border-radius: 4px;
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 12px;
-    right: 12px;
-    border-bottom: 1px solid #e5e9ef;
+  border-radius: 8px;
+  &.notSupport {
+    opacity: 0.4;
+    cursor: not-allowed;
   }
   &Left {
     display: flex;
     align-items: center;
   }
   &Icon {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
   }
   &Name {
     font-weight: 500;
     font-size: 15px;
     line-height: 18px;
-    color: #13141a;
-    margin-left: 12px;
+    color: #ffffff;
+    margin-left: 8px;
   }
-  &Star {
+  .chainItemStar {
     margin-left: 8px;
     display: none;
+    &.block {
+      display: block;
+    }
   }
+
   &Checked {
     margin-left: auto;
   }
-  &:hover {
-    background-color: #dce0f9;
-    border: 1px solid #8697ff;
-    &::after {
-      display: none;
-    }
-  }
-  &:hover &Star {
-    display: block;
-  }
+
   &:last-child::after {
     display: none;
   }
   &:hover {
-    background-color: #f5f5f5;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.07);
+    .chainItemStar {
+      display: block;
+    }
   }
 
   .actionPin {
@@ -121,8 +148,4 @@
 
     color: var(--color-primary);
   }
-}
-
-.block {
-  display: block;
 }

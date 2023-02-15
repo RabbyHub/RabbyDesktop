@@ -1,16 +1,22 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Drawer, DrawerProps, Empty, Input, InputRef, Skeleton } from 'antd';
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from 'react';
+import { Empty, Input, InputRef, Modal, Skeleton } from 'antd';
 import BigNumber from 'bignumber.js';
 import styled from 'styled-components';
 import IconRcArrowDownTriangle from '@/../assets/icons/swap/arrow-caret-down2.svg?rc';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import TokenWithChain from '@/renderer/components/TokenWithChain';
-import IconRcBack from '@/../assets/icons/swap/back.svg?rc';
 import IconRcSearch from '@/../assets/icons/swap/search.svg?rc';
 import { formatTokenAmount, splitNumberByStep } from '@/renderer/utils/number';
 import { useDebounce } from 'react-use';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import IconClose from '@/../assets/icons/swap/modal-close.svg?rc';
 
 const TokenWrapper = styled.div`
   display: flex;
@@ -20,7 +26,33 @@ const TokenWrapper = styled.div`
   padding: 4px;
   border-radius: 4px;
   &:hover {
-    background: rgba(134, 151, 255, 0.6);
+    & > .text {
+      color: #8697ff;
+    }
+
+    & > .arrow-icon {
+      path {
+        fill: #8697ff;
+        stroke: #8697ff;
+      }
+    }
+  }
+
+  & > .text {
+    margin: 0 10px;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 23px;
+    color: white;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  & > .arrow-icon {
+    width: 10px;
+    height: 8px;
   }
 `;
 
@@ -28,14 +60,13 @@ const SelectTips = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 159px;
-  height: 44px;
+  width: 172px;
+  height: 48px;
   color: #fff;
-  background: #424959;
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 4px;
   font-weight: 500;
-  font-size: 20px;
-  line-height: 23px;
+  font-size: 24px;
   & svg {
     position: relative;
     top: 2px;
@@ -77,21 +108,10 @@ const Wrapper = styled.div`
   }
 `;
 
-const Text = styled.span`
-  font-weight: 500;
-  font-size: 20px;
-  line-height: 23px;
-  color: white;
-  max-width: 100px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
-
 const TitleWrapper = styled.div`
   .title {
-    font-weight: 510;
-    font-size: 20px;
+    font-weight: 500;
+    font-size: 22px;
     line-height: 24px;
     text-align: center;
     color: #ffffff;
@@ -104,9 +124,31 @@ const TitleWrapper = styled.div`
     height: 12px !important;
     cursor: pointer;
   }
+  .closeIcon {
+    position: absolute;
+    right: 22px;
+    top: 30px;
+    cursor: pointer;
+    width: 24px !important;
+    height: 25px !important;
+  }
 `;
 
-const StyledDrawer = styled(Drawer)`
+const StyledModal = styled(Modal)`
+  .ant-modal-content {
+    background-color: transparent;
+  }
+  .ant-modal-body {
+    height: 700px;
+    padding: 0 28px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-top: 30px;
+    background: #525767;
+    box-shadow: 0px 24px 80px rgba(19, 20, 26, 0.18);
+    border-radius: 12px;
+  }
   .container {
     height: 100%;
     display: flex;
@@ -117,23 +159,23 @@ const StyledDrawer = styled(Drawer)`
   }
 
   .ant-input-affix-wrapper {
-    margin-top: 24px;
-    margin-bottom: 14px;
+    margin-top: 33px;
+    margin-bottom: 0;
     height: 36px;
     font-size: 12px;
-    line-height: 14px;
-    border: 1px solid #5f6572;
+    line-height: 17px;
     box-shadow: none;
-    border-radius: 6px;
-    background-color: transparent;
     color: var(--color-purewhite);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.21);
+    border-radius: 6px;
 
     &.ant-input-affix-wrapper-focused {
       border: 1px solid var(--color-primary);
     }
 
     & input::placeholder {
-      color: #707280;
+      color: #d9d9d9;
     }
   }
 
@@ -141,13 +183,12 @@ const StyledDrawer = styled(Drawer)`
     display: flex;
     justify-content: space-between;
     font-weight: 400;
-    font-size: 12px;
-    line-height: 14px;
+    font-size: 14px;
+    line-height: 16px;
     color: rgba(255, 255, 255, 0.8);
-    margin: 0 -10px;
-    padding: 0 10px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #4f5562;
+    margin: 0 -28px;
+    padding: 20px 28px;
+    border-bottom: 1px solid #6f7585;
     .right {
       color: rgba(255, 255, 255, 0.3);
     }
@@ -157,8 +198,8 @@ const StyledDrawer = styled(Drawer)`
     flex: 1;
     overflow-x: hidden;
     overflow-y: overlay;
-    margin: 0 -10px;
-    padding: 2px 10px;
+    margin: 0 -28px;
+    padding: 2px 28px;
   }
 
   .item {
@@ -190,7 +231,7 @@ const StyledDrawer = styled(Drawer)`
       flex-direction: column;
 
       .symbol {
-        font-weight: 510;
+        font-weight: 500;
         font-size: 13px;
         line-height: 16px;
         color: #ffffff;
@@ -245,7 +286,7 @@ const StyledDrawer = styled(Drawer)`
     font-size: 12px;
     line-height: 18px;
     text-align: center;
-    color: #707280;
+    color: rgba(255, 255, 255, 0.4);
   }
 `;
 
@@ -322,10 +363,9 @@ interface TokenDrawerProps {
   onClose: () => void;
   onSearch: (q: string) => void;
   onConfirm(item: TokenItem): void;
-  getContainer?: DrawerProps['getContainer'];
 }
 
-const TokenSelectDrawer = ({
+const TokenSelectModal = ({
   title = 'Select a token',
   open = false,
   list,
@@ -334,7 +374,6 @@ const TokenSelectDrawer = ({
   onSearch,
   onClose,
   placeholder = 'Search by Name / Address',
-  getContainer = false,
 }: TokenDrawerProps) => {
   const [query, setQuery] = useState('');
   const handleQueryChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -352,26 +391,19 @@ const TokenSelectDrawer = ({
   );
 
   return (
-    <StyledDrawer
-      getContainer={getContainer}
-      maskClosable={false}
-      closable={false}
-      placement="right"
-      // height="706"
-      width="100%"
+    <StyledModal
+      onCancel={onClose}
+      width={536}
       open={open}
       destroyOnClose
-      bodyStyle={{
-        padding: '20px 10px 0px 10px',
-        overflow: 'hidden',
-        backgroundColor: 'var(--swap-bg)',
-      }}
-      push={false}
+      closable={false}
+      title={null}
+      footer={null}
     >
       <div className="container">
         <TitleWrapper>
-          <IconRcBack className="back" onClick={onClose} />
           <div className="title">{title}</div>
+          <IconClose className="closeIcon" onClick={onClose} />
         </TitleWrapper>
 
         <Input
@@ -394,7 +426,7 @@ const TokenSelectDrawer = ({
               imageStyle={{
                 width: 60,
                 height: 52,
-                margin: '173px auto 0 auto',
+                margin: '150px auto 0 auto',
               }}
               description={
                 <>
@@ -411,8 +443,9 @@ const TokenSelectDrawer = ({
             <div>
               {Array(12)
                 .fill(1)
-                .map(() => (
-                  <SwapLoading />
+                .map((_, idx) => (
+                  // eslint-disable-next-line react/no-array-index-key
+                  <SwapLoading key={`loading-${idx}`} />
                 ))}
             </div>
           )}
@@ -451,7 +484,7 @@ const TokenSelectDrawer = ({
             ))}
         </div>
       </div>
-    </StyledDrawer>
+    </StyledModal>
   );
 };
 
@@ -462,14 +495,21 @@ interface TokenAmountInputProps {
   chainId: string;
   excludeTokens?: TokenItem['id'][];
   type: 'swapTo' | 'swapFrom';
-  // type?: ComponentProps<typeof TokenSelector>['type'];
   placeholder?: string;
   hideChainIcon?: boolean;
   value?: string;
   loading?: boolean;
-  getContainer?: DrawerProps['getContainer'];
   forceFocus?: boolean;
 }
+
+const sortTokensByPrice = (t: TokenItem[]) => {
+  return [...t].sort((a, b) => {
+    return new BigNumber(b.amount)
+      .times(new BigNumber(b.price || 0))
+      .minus(new BigNumber(a.amount).times(new BigNumber(a.price || 0)))
+      .toNumber();
+  });
+};
 
 export const TokenSelect = ({
   token,
@@ -482,7 +522,6 @@ export const TokenSelect = ({
   hideChainIcon = true,
   value,
   loading = false,
-  getContainer,
   forceFocus = false,
 }: TokenAmountInputProps) => {
   const inputRef = useRef<InputRef>(null);
@@ -506,16 +545,7 @@ export const TokenSelect = ({
     setOpen(false);
   };
 
-  const sortTokensByPrice = (t: TokenItem[]) => {
-    return [...t].sort((a, b) => {
-      return new BigNumber(b.amount)
-        .times(new BigNumber(b.price || 0))
-        .minus(new BigNumber(a.amount).times(new BigNumber(a.price || 0)))
-        .toNumber();
-    });
-  };
-
-  const handleLoadTokens = async () => {
+  const handleLoadTokens = useCallback(async () => {
     setIsListLoading(true);
     let tokenList: TokenItem[] = [];
 
@@ -532,7 +562,7 @@ export const TokenSelect = ({
     setOriginTokenList(tokenList);
     setTokens(tokenList);
     setIsListLoading(false);
-  };
+  }, [chainId, type, currentAccount?.address]);
 
   const handleSelectToken = () => {
     setOpen(true);
@@ -579,8 +609,7 @@ export const TokenSelect = ({
     if (currentAccount?.address && open) {
       handleLoadTokens();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentAccount?.address, open]);
+  }, [currentAccount?.address, handleLoadTokens, open]);
 
   useEffect(() => {
     setTokens([]);
@@ -607,13 +636,15 @@ export const TokenSelect = ({
                 hideConer
                 hideChainIcon={hideChainIcon}
               />
-              <Text title={token.symbol}>{token.symbol}</Text>
-              <IconRcArrowDownTriangle className="ml-[3px]" />
+              <span className="text" title={token.symbol}>
+                {token.symbol}
+              </span>
+              <IconRcArrowDownTriangle className="arrow-icon " />
             </TokenWrapper>
           ) : (
             <SelectTips>
               <span>Select Token</span>
-              <IconRcArrowDownTriangle className="brightness-[100] ml-[7px]" />
+              <IconRcArrowDownTriangle className="ml-[10px]" />
             </SelectTips>
           )}
         </div>
@@ -645,7 +676,7 @@ export const TokenSelect = ({
             onChange={type !== 'swapTo' ? handleInput : undefined}
           />
         )}
-        <TokenSelectDrawer
+        <TokenSelectModal
           open={open}
           placeholder={placeholder}
           list={availableToken}
@@ -653,7 +684,6 @@ export const TokenSelect = ({
           onSearch={handleSearchTokens}
           onConfirm={handleCurrentTokenChange}
           isLoading={isListLoading}
-          getContainer={getContainer}
         />
       </Wrapper>
     </>
