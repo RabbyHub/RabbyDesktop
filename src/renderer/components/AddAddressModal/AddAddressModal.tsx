@@ -11,7 +11,7 @@ export const AddAddressModal: React.FC = () => {
       keyringType={svState?.keyringType ?? undefined}
       onCancel={closeSubview}
       visible={svVisible}
-      showEntryButton={svState?.showEntryButton}
+      showEntryButton={!!svState?.showEntryButton}
     />
   );
 };

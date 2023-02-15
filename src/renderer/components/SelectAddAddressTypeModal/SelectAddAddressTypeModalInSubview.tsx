@@ -19,7 +19,7 @@ export const SelectAddAddressTypeModalInSubview: React.FC = () => {
         'add-address-modal',
         {
           keyringType,
-          showEntryButton: svState?.showEntryButton,
+          showEntryButton: !!svState?.showEntryButton,
         },
         () => {
           closeSubview();
