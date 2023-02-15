@@ -1,12 +1,6 @@
 import { app, clipboard } from 'electron';
 import { interval, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, pairwise } from 'rxjs/operators';
-import {
-  getAllMainUIViews,
-  pushChangesToZPopupLayer,
-} from '../utils/stream-helpers';
-
-import { openSecurityNotificationView } from './securityNotification';
 
 const trimedClipboardText$ = interval(300).pipe(
   map(() => ({
@@ -45,18 +39,30 @@ const continuousWeb3Addrs$ = clipboardChanged$.pipe(
 let subs: Subscription[] = [];
 
 subs = subs.concat(
-  clipboardChanged$.subscribe(async (ref) => {}),
-  inContinuousWeb3Addrs$.subscribe(async ([, cur]) => {
-    pushChangesToZPopupLayer({
-      'security-notification': {
-        visible: true,
-        state: {
-          type: 'full-web3-addr',
-          web3Addr: cur.text,
-        },
-      },
-    });
-  })
+  clipboardChanged$
+    .pipe(filter(({ text }) => WEB3_ADDR_FULL_REGEX.test(text)))
+    .subscribe(async ({ text }) => {
+      // pushChangesToZPopupLayer({
+      //   'security-notification': {
+      //     visible: true,
+      //     state: {
+      //       type: 'full-web3-addr',
+      //       web3Addr: text,
+      //     },
+      //   },
+      // });
+    })
+  // inContinuousWeb3Addrs$.subscribe(async ([, cur]) => {
+  //   pushChangesToZPopupLayer({
+  //     'security-notification': {
+  //       visible: true,
+  //       state: {
+  //         type: 'full-web3-addr',
+  //         web3Addr: cur.text,
+  //       },
+  //     },
+  //   });
+  // })
   // continuousWeb3Addrs$.subscribe(async ([prev, cur]) => {
   //   openSecurityNotificationView({
   //     type:

@@ -1,10 +1,11 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useRef } from 'react';
 import { message } from 'antd';
 
 import { RcIconToastSuccess } from '@/../assets/icons/global-toast';
 import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
 import classNames from 'classnames';
 import { useClickOutSide } from '@/renderer/hooks/useClick';
+import { isWeb3Addr } from '@/isomorphic/web3';
 
 const TIMEOUT = 3000;
 
@@ -31,22 +32,28 @@ export function toastMessage(config: OpenParamters[0]) {
 
 const TOAST_KEY = 'addr-changed-toast';
 
+function ToastContent({
+  children,
+  onClickOutside,
+  ...props
+}: React.PropsWithChildren<{
+  onClickOutside?: () => void;
+}>) {
+  const clickRef = useRef<any>(null);
+
+  useClickOutSide(clickRef, () => {
+    onClickOutside?.();
+  });
+
+  return (
+    <div {...props} ref={clickRef}>
+      {children}
+    </div>
+  );
+}
+
 export default function TransparentToast() {
   const timerRef = useRef<any>();
-
-  const clickRef = useRef<any>(null);
-  const ToastContent = useMemo(() => {
-    return ({
-      children,
-      ...props
-    }: React.PropsWithChildren<{ foo?: string }>) => {
-      return (
-        <div {...props} ref={clickRef}>
-          {children}
-        </div>
-      );
-    };
-  }, []);
 
   const { closeSubview, svVisible } = useZPopupViewState(
     'security-notification',
@@ -56,7 +63,14 @@ export default function TransparentToast() {
           icon: null,
           key: TOAST_KEY,
           content: (
-            <ToastContent>
+            <ToastContent
+              onClickOutside={() => {
+                if (!svVisible) return;
+
+                message.destroy(TOAST_KEY);
+                closeSubview();
+              }}
+            >
               <div className="flex items-center">
                 <RcIconToastSuccess className="mr-6px w-[16px] h-[16px]" />
                 Copied:
@@ -82,12 +96,28 @@ export default function TransparentToast() {
     }
   );
 
-  useClickOutSide(clickRef, () => {
-    if (!svVisible) return;
-
-    message.destroy(TOAST_KEY);
-    closeSubview();
-  });
-
   return null;
+}
+
+export async function toastCopiedWeb3Addr(text: string) {
+  if (isWeb3Addr(text)) {
+    toastMessage({
+      icon: null,
+      key: TOAST_KEY,
+      content: (
+        <ToastContent
+          onClickOutside={() => {
+            message.destroy(TOAST_KEY);
+          }}
+        >
+          <div className="flex items-center">
+            <RcIconToastSuccess className="mr-6px w-[16px] h-[16px]" />
+            Copied:
+          </div>
+          <div>{text}</div>
+        </ToastContent>
+      ),
+      duration: TIMEOUT,
+    });
+  }
 }
