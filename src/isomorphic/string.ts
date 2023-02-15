@@ -24,3 +24,17 @@ export function extractProductNameFromHIDPath(hidPath: string) {
   const pathParts = hidPath.match(/\{([^{^}]+)\}/) || [];
   return pathParts[1] || '';
 }
+
+export function stringifyWebPreferences(preferences: Electron.WebPreferences) {
+  return Object.entries(preferences)
+    .reduce((accu, [key, value]) => {
+      if (typeof value === 'boolean') {
+        accu.push(`${key}=${value ? 1 : 0}`);
+      } else {
+        accu.push(`${key}=${value}`);
+      }
+
+      return accu;
+    }, [] as `${string}=${string}`[])
+    .join(', ');
+}

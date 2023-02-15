@@ -1,6 +1,6 @@
 import { LoadingOutlined } from '@ant-design/icons';
 import { Button, Form, Input, ModalProps, InputRef } from 'antd';
-import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
 
 import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { addDapp, putDapp, replaceDapp } from '@/renderer/ipcRequest/dapps';
@@ -13,6 +13,7 @@ import { DappFavicon } from '../DappFavicon';
 import { Modal } from '../Modal/Modal';
 import styles from './index.module.less';
 import { useAddDappURL } from './useAddDapp';
+import { PreviewWebview } from '../DappView/PreviewWebview';
 
 const findRelatedDapps = (dapps: IDapp[], url: string) => {
   const current = canoicalizeDappUrl(url);
@@ -122,11 +123,6 @@ interface PreviewDappProps {
 }
 const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
   const [input, setInput] = useState(data.recommendedAlias);
-  const previewBlobLink = useMemo(() => {
-    if (!data.previewImg) return null;
-
-    return window.rabbyDesktop.rendererHelpers.bufToObjLink(data.previewImg);
-  }, [data.previewImg]);
 
   return (
     <div className={styles.preview}>
@@ -194,26 +190,21 @@ const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
           )}
         </div>
       </div>
-      {previewBlobLink ? (
-        <div className={styles.previewImageContainer}>
-          <div
-            className={styles.imgBlock}
-            style={{
-              backgroundImage: `url(${previewBlobLink})`,
-            }}
-          />
-        </div>
-      ) : (
-        <div className={styles.previewEmpty}>
-          <div>
-            <img
-              src="rabby-internal://assets/icons/add-dapp/icon-failed.svg"
-              alt=""
-            />
-            <div className={styles.previewEmptyTitle}>Page load failed</div>
+      <PreviewWebview
+        containerClassName={styles.previewTagContainer}
+        src={data.finalOrigin}
+        loadFailedView={
+          <div className={styles.previewEmpty}>
+            <div>
+              <img
+                src="rabby-internal://assets/icons/add-dapp/icon-failed.svg"
+                alt=""
+              />
+              <div className={styles.previewEmptyTitle}>Page load failed</div>
+            </div>
           </div>
-        </div>
-      )}
+        }
+      />
     </div>
   );
 };

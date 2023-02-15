@@ -37,3 +37,12 @@ export const GAS_LEVEL_TEXT = {
   fast: 'Instant',
   custom: 'Custom',
 };
+
+export const SAFE_WEBPREFERENCES: Electron.WebPreferences = {
+  sandbox: true,
+  nodeIntegration: false,
+  nodeIntegrationInWorker: false,
+  allowRunningInsecureContent: false,
+  autoplayPolicy: 'user-gesture-required',
+  contextIsolation: true,
+};
