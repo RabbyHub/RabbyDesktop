@@ -59,12 +59,10 @@ export default function AddAddressDropdown() {
 
   const handleClick = React.useCallback(
     (info: { key: string }) => {
+      closeSubview();
       zActions.showZSubview('add-address-modal', {
         keyringType: info.key,
       });
-      setTimeout(() => {
-        closeSubview();
-      }, 10);
     },
     [closeSubview, zActions]
   );
