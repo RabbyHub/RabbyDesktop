@@ -23,6 +23,7 @@ import classNames from 'classnames';
 
 import { useCurrentConnection } from '@/renderer/hooks/rabbyx/useConnection';
 import { useSwitchChainModal } from '@/renderer/hooks/useSwitchChainModal';
+import { copyText } from '@/renderer/utils/clipboard';
 import styles from './index.module.less';
 import { toastMessage } from '../TransparentToast';
 
@@ -117,7 +118,7 @@ export const TopNavBar = () => {
             className={styles.urlText}
             onClick={async () => {
               if (!activeTab?.url) return;
-              await window.navigator.clipboard.writeText(activeTab.url);
+              await copyText(activeTab.url);
               toastMessage({
                 type: 'success',
                 content: 'Copied url',

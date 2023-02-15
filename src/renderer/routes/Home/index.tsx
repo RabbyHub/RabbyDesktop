@@ -16,8 +16,9 @@ import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import useHistoryProtocol, {
   DisplayProtocol,
 } from '@/renderer/hooks/useHistoryProtocol';
-import { message } from 'antd';
-import { toastMessage } from '@/renderer/components/TransparentToast';
+import { toastCopiedWeb3Addr } from '@/renderer/components/TransparentToast';
+import { copyText } from '@/renderer/utils/clipboard';
+
 import ChainList from './components/ChainList';
 import Curve from './components/Curve';
 import PortfolioView from './components/PortfolioView';
@@ -333,27 +334,22 @@ const Home = () => {
         <div className="header">
           <div className="top">
             <div className="left">
-              <div
-                className="current-address"
-                onClick={async () => {
-                  if (!currentAccount?.address) return;
+              <div className="current-address">
+                <span
+                  className="inline-flex items-center"
+                  onClick={async () => {
+                    if (!currentAccount?.address) return;
 
-                  await window.navigator.clipboard.writeText(
-                    currentAccount.address
-                  );
-                  toastMessage({
-                    type: 'success',
-                    content: 'Copied Address',
-                    className: 'mainwindow-default-tip',
-                    duration: 1,
-                  });
-                }}
-              >
-                {ellipsis(currentAccount?.address || '')}
-                <img
-                  className="icon-copy"
-                  src="rabby-internal://assets/icons/home/copy.svg"
-                />
+                    await copyText(currentAccount.address);
+                    toastCopiedWeb3Addr(currentAccount.address);
+                  }}
+                >
+                  {ellipsis(currentAccount?.address || '')}
+                  <img
+                    className="icon-copy"
+                    src="rabby-internal://assets/icons/home/copy.svg"
+                  />
+                </span>
               </div>
               <div className="balance">
                 ${formatNumber(totalBalance || 0)}{' '}
