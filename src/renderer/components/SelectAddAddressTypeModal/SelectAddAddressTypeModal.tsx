@@ -9,6 +9,9 @@ interface Props {
   showEntryButton?: boolean;
 }
 
+/**
+ * @deprecated
+ */
 export const SelectAddAddressTypeModal: React.FC<Props> = ({
   showEntryButton,
   visible,

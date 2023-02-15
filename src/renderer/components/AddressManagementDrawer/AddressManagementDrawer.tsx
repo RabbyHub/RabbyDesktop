@@ -7,6 +7,9 @@ interface Props {
   onClose: () => void;
 }
 
+/**
+ * @deprecated
+ */
 export const AddressManagementDrawer: React.FC<Props> = ({
   visible,
   onClose,

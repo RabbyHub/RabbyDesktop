@@ -26,12 +26,16 @@ type ZViewStates = {
   };
   'add-address-modal': {
     keyringType: string;
+    showEntryButton?: boolean;
   };
   'address-management': {
     // nothing
   };
   'address-detail': {
     account: IDisplayedAccountWithBalance;
+  };
+  'select-add-address-type-modal': {
+    showEntryButton?: boolean;
   };
 };
 

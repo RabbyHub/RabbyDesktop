@@ -228,6 +228,7 @@ const ZPopupSubviewStateAtom = atom<NullableFields<IZPopupSubviewState>>({
   'add-address-modal': null,
   'address-management': null,
   'address-detail': null,
+  'select-add-address-type-modal': null,
 });
 
 export function useZPopupViewStates() {

@@ -1,8 +1,10 @@
+import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { Button } from 'antd';
 import React from 'react';
 import styles from './index.module.less';
 
 export const Footer: React.FC = () => {
+  const { showZSubview } = useZPopupLayerOnMain();
   return (
     <section className={styles.footer}>
       <Button
@@ -14,7 +16,7 @@ export const Footer: React.FC = () => {
         }
         className={styles.button}
         onClick={() => {
-          // TODO ADD ADDRESS
+          showZSubview('select-add-address-type-modal');
         }}
       >
         Add address
