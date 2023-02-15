@@ -2,6 +2,7 @@ import { getBaseHref } from '@/isomorphic/url';
 import TabbedBrowserWindow from '../browser/browsers';
 import { getAllDapps, parseDappRedirect } from '../store/dapps';
 import { switchToBrowserTab } from '../utils/browser';
+import { onMainWindowReady } from '../utils/stream-helpers';
 import { attachDappSafeview } from './dappSafeview';
 
 export function createDappTab(mainTabbedWin: TabbedBrowserWindow, url: string) {
@@ -28,6 +29,16 @@ export function createDappTab(mainTabbedWin: TabbedBrowserWindow, url: string) {
   //     );
   //   }
   // );
+}
+
+async function openInNewTab(targetURL: string) {
+  const mainWindow = await onMainWindowReady();
+  const openedDapp = mainWindow?.tabs.findByOrigin(targetURL);
+  if (openedDapp) {
+    switchToBrowserTab(openedDapp!.id, mainWindow!);
+  } else {
+    createDappTab(mainWindow, targetURL);
+  }
 }
 
 /**
@@ -59,10 +70,13 @@ export function setOpenHandlerForWebContents({
       isToExtension,
       isToSameOrigin,
       shouldKeepTab,
+      shouldOpenInAnotherTab,
       maybeRedirectInSPA,
     } = parseDappRedirect(currentUrl, targetURL, dapps);
 
-    if (isFromDapp && !isToSameOrigin) {
+    if (shouldOpenInAnotherTab) {
+      openInNewTab(targetURL);
+    } else if (isFromDapp && !isToSameOrigin) {
       if (shouldKeepTab) {
         webContents.loadURL(targetURL);
       } else {
@@ -131,8 +145,18 @@ export const setListeners = {
 
       const dapps = getAllDapps();
 
-      const { targetInfo, isFromDapp, shouldKeepTab, isToSameOrigin } =
-        parseDappRedirect(currentUrl, targetURL, dapps);
+      const {
+        targetInfo,
+        isFromDapp,
+        shouldKeepTab,
+        shouldOpenInAnotherTab,
+        isToSameOrigin,
+      } = parseDappRedirect(currentUrl, targetURL, dapps);
+
+      if (shouldOpenInAnotherTab) {
+        openInNewTab(targetURL);
+        return false;
+      }
 
       // this tabs is render as app's self UI, such as topbar.
       if (isFromDapp && !isToSameOrigin) {
@@ -177,8 +201,14 @@ export const setListeners = {
           // actually, it's always from dapp on isMainContentsForTabbedWindow=false
           isFromDapp,
           shouldKeepTab,
+          shouldOpenInAnotherTab,
           isToSameOrigin,
         } = parseDappRedirect(currentUrl, targetURL, dapps);
+
+        if (shouldOpenInAnotherTab) {
+          openInNewTab(targetURL);
+          return false;
+        }
 
         if (isFromDapp && !isToSameOrigin) {
           if (shouldKeepTab) return true;

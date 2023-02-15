@@ -206,12 +206,21 @@ export function parseDappRedirect(
   const targetInfo = parseDappUrl(targetURL, dapps);
   const isToSameOrigin = currentInfo.origin === targetInfo.origin;
 
+  // TODO: improve here, allow calculation in one time iteration
+  const currentDomainMeta = parseDomainMeta(currentURL, dapps, {});
+  const targetDomainMeta = parseDomainMeta(targetURL, dapps, {});
+
   const shouldKeepTab =
     currentInfo.secondaryDomain === targetInfo.secondaryDomain &&
-    !parseDomainMeta(currentURL, dapps, {}).subDomains.length;
+    !currentDomainMeta.subDomains.length;
   const maybeRedirectInSPA = isFromDapp && isToSameOrigin;
 
   const isToExtension = targetURL.startsWith('chrome-extension://');
+
+  const shouldOpenInAnotherTab =
+    !!currentURL &&
+    !isToSameOrigin &&
+    targetDomainMeta.is2ndaryDomainOriginExisted;
 
   return {
     currentInfo,
@@ -220,6 +229,7 @@ export function parseDappRedirect(
     isFromDapp,
     isToSameOrigin,
     shouldKeepTab,
+    shouldOpenInAnotherTab,
     maybeRedirectInSPA,
     isToExtension,
   };
