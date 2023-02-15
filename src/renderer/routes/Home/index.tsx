@@ -17,6 +17,7 @@ import useHistoryProtocol, {
   DisplayProtocol,
 } from '@/renderer/hooks/useHistoryProtocol';
 import { message } from 'antd';
+import { toastMessage } from '@/renderer/components/TransparentToast';
 import ChainList from './components/ChainList';
 import Curve from './components/Curve';
 import PortfolioView from './components/PortfolioView';
@@ -340,7 +341,7 @@ const Home = () => {
                   await window.navigator.clipboard.writeText(
                     currentAccount.address
                   );
-                  message.open({
+                  toastMessage({
                     type: 'success',
                     content: 'Copied Address',
                     className: 'mainwindow-default-tip',

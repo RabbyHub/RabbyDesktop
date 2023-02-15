@@ -1,5 +1,5 @@
+import { toastMessage } from '@/renderer/components/TransparentToast';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
-import { message } from 'antd';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
 import { useCurrentAccount } from './useAccount';
@@ -16,7 +16,7 @@ export function useTransactionChanged() {
           default:
             break;
           case 'push-failed': {
-            message.open({
+            toastMessage({
               type: 'error',
               content: 'Transaction push failed',
               className: 'rabbyx-tx-changed-tip',
@@ -25,7 +25,7 @@ export function useTransactionChanged() {
             break;
           }
           case 'submitted': {
-            message.open({
+            toastMessage({
               type: 'success',
               content: 'Transaction submitted',
               className: 'rabbyx-tx-changed-tip',
@@ -35,14 +35,14 @@ export function useTransactionChanged() {
           }
           case 'finished': {
             if (payload.data?.success) {
-              message.open({
+              toastMessage({
                 type: 'success',
                 content: 'Transaction success',
                 className: 'rabbyx-tx-changed-tip',
                 // duration: DEBUG_DURACTION,
               });
             } else {
-              message.open({
+              toastMessage({
                 type: 'error',
                 content: 'Transaction failed',
                 className: 'rabbyx-tx-changed-tip',

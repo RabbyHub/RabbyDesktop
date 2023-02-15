@@ -143,8 +143,8 @@ type ChannelMessagePayload = {
     response: [origin: IDapp['origin']];
   };
   '__internal_forward:views:channel-message': {
-    send: ChannelForwardMessageType['send'];
-    response: ChannelForwardMessageType['response'];
+    send: MainInternalsMessagePayload['__internal_main:views:channel-message']['send'];
+    response: MainInternalsMessagePayload['__internal_main:views:channel-message']['send'];
   };
   '__internal_rpc:dapp-tabs:close-safe-view': {
     send: [];

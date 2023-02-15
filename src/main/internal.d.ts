@@ -80,6 +80,10 @@ type MainInternalsMessagePayload = {
     ];
     response: [];
   };
+  '__internal_main:views:channel-message': {
+    send: [ChannelForwardMessageType];
+    response: [];
+  };
   '__internal_main:popupwin-on-mainwin:toggle-show': {
     send: [
       | {

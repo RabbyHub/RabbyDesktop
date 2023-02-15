@@ -3,12 +3,11 @@ import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { randString } from '@/isomorphic/string';
 import { isBuiltinView } from '@/isomorphic/url';
 
-type ChannelForwardMessagePayload = ChannelForwardMessageType['send'][0];
 function onMessageForwarded<
-  T extends Pick<ChannelForwardMessagePayload, 'type' | 'targetView'>
+  T extends Pick<ChannelForwardMessageType, 'type' | 'targetView'>
 >(
   matches: T | T[],
-  callback: (payload: ChannelForwardMessagePayload & T) => void
+  callback: (payload: ChannelForwardMessageType & T) => void
 ) {
   const matchList = arraify(matches);
 

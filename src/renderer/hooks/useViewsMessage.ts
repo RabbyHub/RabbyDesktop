@@ -24,11 +24,10 @@ import { useCallback, useEffect, useRef } from 'react';
  * sendMessage('some-message-type', ...);
  * ```
  */
-type ChannelForwardMessagePayload = ChannelForwardMessageType['send'][0];
 export function useForwardTo<
-  TV extends ChannelForwardMessagePayload['targetView']
+  TV extends ChannelForwardMessageType['targetView']
 >(targetView: TV) {
-  type Payload = ChannelForwardMessagePayload & { targetView: TV };
+  type Payload = ChannelForwardMessageType & { targetView: TV };
 
   const forwardMessageTo = useCallback(
     <TT extends Payload['type']>(
@@ -47,7 +46,7 @@ export function useForwardTo<
           ...restPayload,
           targetView,
           type,
-        } as any
+        } as Payload
       );
     },
     [targetView]
@@ -57,8 +56,8 @@ export function useForwardTo<
 }
 
 export function useMessageForwarded<
-  T extends Pick<ChannelForwardMessagePayload, 'type' | 'targetView'>
->(matches: T, callback?: (payload: ChannelForwardMessagePayload & T) => void) {
+  T extends Pick<ChannelForwardMessageType, 'type' | 'targetView'>
+>(matches: T, callback?: (payload: ChannelForwardMessageType & T) => void) {
   const { targetView, type } = matches;
   const callbackRef = useRef(callback);
 
@@ -79,7 +78,7 @@ export function useMessageForwarded<
   }, [targetView, type, callback]);
 }
 
-type MainWindowChannelMessage = ChannelForwardMessagePayload & {
+type MainWindowChannelMessage = ChannelForwardMessageType & {
   targetView: 'main-window';
 };
 

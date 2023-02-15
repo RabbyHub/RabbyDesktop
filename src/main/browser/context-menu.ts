@@ -21,6 +21,7 @@ import {
   getRabbyExtViews,
   getWebuiExtId,
   onMainWindowReady,
+  pushChangesToZPopupLayer,
 } from '../utils/stream-helpers';
 
 const LABELS = {
@@ -201,7 +202,6 @@ function buildDebugKitsMenu(opts: ChromeContextMenuOptions) {
     click: () => {
       getPopupWindowOnMain().then(async () => {
         const mainWin = await onMainWindowReady();
-        const { viewOnlyHash } = await getAllMainUIViews();
 
         const firstTab = mainWin.tabs.tabList[0];
 
@@ -213,28 +213,33 @@ function buildDebugKitsMenu(opts: ChromeContextMenuOptions) {
           return;
         }
 
-        viewOnlyHash.zPopup.openDevTools({ mode: 'detach' });
-        emitIpcMainEvent('__internal_main:popupview-on-mainwin:toggle-show', {
-          type: 'z-popup',
-          nextShow: true,
-          pageInfo: {
-            type: 'z-popup',
-          },
-        });
-        viewOnlyHash.zPopup.send('__internal_forward:views:channel-message', {
-          targetView: 'z-popup',
-          type: 'update-subview-state',
-          partials: {
-            'switch-chain': {
-              visible: true,
-              state: {
-                dappTabInfo: {
-                  id: firstTab.id,
-                  url: firstTab.view.webContents.getURL(),
-                },
+        pushChangesToZPopupLayer({
+          'switch-chain': {
+            visible: true,
+            state: {
+              dappTabInfo: {
+                id: firstTab.id,
+                url: firstTab.view.webContents.getURL(),
               },
             },
-          } as IZPopupSubviewState,
+          },
+        });
+      });
+    },
+  });
+
+  appendMenu(debugKitsMenu, {
+    label: 'Push Copied web3 addr',
+    click: () => {
+      getPopupWindowOnMain().then(async () => {
+        pushChangesToZPopupLayer({
+          'security-notification': {
+            visible: true,
+            state: {
+              type: 'full-web3-addr',
+              web3Addr: '0x5853ed4f26a3fcea565b3fbc698bb19cdf6deb85',
+            },
+          },
         });
       });
     },

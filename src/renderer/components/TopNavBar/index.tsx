@@ -21,6 +21,7 @@ import {
   showMainwinPopup,
 } from '@/renderer/ipcRequest/mainwin-popup';
 import styles from './index.module.less';
+import { toastMessage } from '../TransparentToast';
 
 const isDarwin = detectOS() === 'darwin';
 
@@ -111,7 +112,7 @@ export const TopNavBar = () => {
             onClick={async () => {
               if (!activeTab?.url) return;
               await window.navigator.clipboard.writeText(activeTab.url);
-              message.open({
+              toastMessage({
                 type: 'success',
                 content: 'Copied url',
                 className: 'mainwindow-default-tip',

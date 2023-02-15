@@ -13,6 +13,7 @@ import {
   hideMainwinPopupview,
   showMainwinPopupview,
 } from '@/renderer/ipcRequest/mainwin-popupview';
+import TransparentToast from '@/renderer/components/TransparentToast';
 import SwitchChainModal from '../../components/SwitchChainModal';
 
 import styles from './index.module.less';
@@ -56,6 +57,7 @@ function App() {
   return (
     <>
       <SwitchChainModal />
+      <TransparentToast />
     </>
   );
 }

@@ -210,3 +210,17 @@ export function stopSelectDevices() {
 export async function getAppRuntimeProxyConf() {
   return firstValueFrom(fromMainSubject('appRuntimeProxyConf'));
 }
+
+export async function pushChangesToZPopupLayer(
+  partials: (ChannelForwardMessageType & {
+    type: 'update-subview-state';
+  })['partials']
+) {
+  const { viewOnlyHash } = await getAllMainUIViews();
+
+  viewOnlyHash.zPopup.send('__internal_forward:views:channel-message', {
+    targetView: 'z-popup',
+    type: 'update-subview-state',
+    partials,
+  });
+}

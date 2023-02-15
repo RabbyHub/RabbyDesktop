@@ -1,7 +1,10 @@
 import { app, clipboard } from 'electron';
 import { interval, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, pairwise } from 'rxjs/operators';
-import { cLog } from '../utils/log';
+import {
+  getAllMainUIViews,
+  pushChangesToZPopupLayer,
+} from '../utils/stream-helpers';
 
 import { openSecurityNotificationView } from './securityNotification';
 
@@ -42,25 +45,28 @@ const continuousWeb3Addrs$ = clipboardChanged$.pipe(
 let subs: Subscription[] = [];
 
 subs = subs.concat(
-  clipboardChanged$.subscribe(async (ref) => {
-    // cLog('[feat] latestValue is', ref);
-  }),
+  clipboardChanged$.subscribe(async (ref) => {}),
   inContinuousWeb3Addrs$.subscribe(async ([, cur]) => {
-    openSecurityNotificationView({
-      type: 'full-web3-addr',
-      web3Addr: cur.text,
-    });
-  }),
-  continuousWeb3Addrs$.subscribe(async ([prev, cur]) => {
-    openSecurityNotificationView({
-      type:
-        cur.time - prev.time >= 1e3
-          ? 'full-web3-addr-changed'
-          : 'full-web3-addr-quick-changed',
-      prevAddr: prev.text,
-      curAddr: cur.text,
+    pushChangesToZPopupLayer({
+      'security-notification': {
+        visible: true,
+        state: {
+          type: 'full-web3-addr',
+          web3Addr: cur.text,
+        },
+      },
     });
   })
+  // continuousWeb3Addrs$.subscribe(async ([prev, cur]) => {
+  //   openSecurityNotificationView({
+  //     type:
+  //       cur.time - prev.time >= 1e3
+  //         ? 'full-web3-addr-changed'
+  //         : 'full-web3-addr-quick-changed',
+  //     prevAddr: prev.text,
+  //     curAddr: cur.text,
+  //   });
+  // })
 );
 
 app.on('will-quit', () => {

@@ -409,7 +409,7 @@ onIpcMainEvent(
   }
 );
 
-onIpcMainEvent(
+const { handler: handler2 } = onIpcMainEvent(
   '__internal_forward:views:channel-message',
   async (_, payload) => {
     let views: BrowserView['webContents'][] = [];
@@ -450,3 +450,7 @@ onIpcMainEvent(
     });
   }
 );
+
+onIpcMainInternalEvent('__internal_main:views:channel-message', (payload) => {
+  handler2(null as any, payload);
+});
