@@ -16,6 +16,15 @@ type ZViewStates = {
     disabledTips?: string;
   };
   'security-notification': ISecurityNotificationPayload;
+  'add-address-dropdown': {
+    pos: {
+      x: number;
+      y: number;
+    };
+  };
+  'add-address-modal': {
+    keyringType: string;
+  };
 };
 
 type IZPopupSubviewState = {

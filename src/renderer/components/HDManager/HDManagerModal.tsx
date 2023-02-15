@@ -26,7 +26,6 @@ export const HDManagerModal: React.FC<Props> = ({
       centered
       className="HDManagerModal"
       width={1280}
-      backable
       onCancel={handleClose}
       keyring={keyringType}
       keyringId={null}

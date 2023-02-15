@@ -1,3 +1,4 @@
+import AddAddressDropdown from '@/renderer/components/AddAddressDropdown';
 import {
   createHashRouter as createRouter,
   RouterProvider,
@@ -14,6 +15,7 @@ import {
   showMainwinPopupview,
 } from '@/renderer/ipcRequest/mainwin-popupview';
 import TransparentToast from '@/renderer/components/TransparentToast';
+import { AddAddressModal } from '@/renderer/components/AddAddressModal/AddAddressModal';
 import SwitchChainModal from '../../components/SwitchChainModal';
 
 import styles from './index.module.less';
@@ -58,6 +60,8 @@ function App() {
     <>
       <SwitchChainModal />
       <TransparentToast />
+      <AddAddressDropdown />
+      <AddAddressModal />
     </>
   );
 }

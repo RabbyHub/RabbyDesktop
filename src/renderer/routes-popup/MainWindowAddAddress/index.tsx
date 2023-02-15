@@ -4,7 +4,7 @@ import {
   Navigate,
 } from 'react-router-dom';
 
-import { AddAddressModal } from '@/renderer/components/AddAddressModal/AddAddressModal';
+import { SelectAddAddressTypeModal } from '@/renderer/components/SelectAddAddressTypeModal/SelectAddAddressTypeModal';
 import { useResetToCurrentPage } from '@/renderer/components/PopupViewUtils';
 import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import styles from './index.module.less';
@@ -13,7 +13,7 @@ function App() {
   const resetPage = useResetToCurrentPage();
 
   return (
-    <AddAddressModal
+    <SelectAddAddressTypeModal
       visible
       showEntryButton
       onClose={() => {

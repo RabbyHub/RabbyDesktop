@@ -1,18 +1,16 @@
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-import useCurrentBalance from '@/renderer/hooks/useCurrentBalance';
+import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
-import { formatNumber } from '@/renderer/utils/number';
 import {
   KEYRING_ICONS_WHITE,
   WALLET_BRAND_CONTENT,
 } from '@/renderer/utils/constant';
 import clsx from 'clsx';
-import { useMemo } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import styles from './index.module.less';
 
 export const CurrentAccount = ({ className }: { className?: string }) => {
   const { currentAccount } = useCurrentAccount();
-  const [balance] = useCurrentBalance(currentAccount?.address);
   const addressTypeIcon = useMemo(() => {
     if (!currentAccount?.type) return '';
     return (
@@ -53,19 +51,38 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
       </div>
       <div className={styles.dockRight}>
         <span className={styles.addr}>{displayAddr}</span>
-
-        <span className={styles.balance}>${formatNumber(balance || 0)}</span>
       </div>
     </div>
   );
 };
 
 export const AddNewAccount = ({ className }: { className?: string }) => {
+  const zActions = useZPopupLayerOnMain();
+  const divRef = useRef<HTMLDivElement>(null);
+  const [showDropdown, setShowDropdown] = useState(false);
+
   return (
     <div
       className={clsx(styles.addNewAccount, className)}
-      onClick={() => {
-        showMainwinPopupview({ type: 'add-address' }, { openDevTools: false });
+      style={{
+        visibility: showDropdown ? 'hidden' : 'visible',
+      }}
+      ref={divRef}
+      onMouseEnter={() => {
+        const pos = divRef.current?.getBoundingClientRect();
+        setShowDropdown(true);
+        zActions.showZSubview(
+          'add-address-dropdown',
+          {
+            pos: {
+              x: pos?.left || 0,
+              y: pos?.bottom || 0,
+            },
+          },
+          () => {
+            setShowDropdown(false);
+          }
+        );
       }}
     >
       <img src="rabby-internal://assets/icons/top-bar/add-address.svg" />
@@ -80,8 +97,8 @@ export const CurrentAccountAndNewAccount = ({
 }) => {
   return (
     <div className={clsx(styles.row, className)} data-nodrag>
+      <AddNewAccount />
       <CurrentAccount />
-      {/* <AddNewAccount /> */}
     </div>
   );
 };
