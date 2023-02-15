@@ -7,7 +7,7 @@ import classNames from 'classnames';
 import { useClickOutSide } from '@/renderer/hooks/useClick';
 import { isWeb3Addr } from '@/isomorphic/web3';
 
-const TIMEOUT = 3000;
+const TIMEOUT_SEC = 3;
 
 type OpenParamters = Parameters<typeof message.open>;
 
@@ -81,7 +81,7 @@ export default function TransparentToast() {
           onClose: () => {
             closeSubview();
           },
-          duration: TIMEOUT,
+          duration: TIMEOUT_SEC,
         });
 
         if (timerRef.current) {
@@ -91,7 +91,7 @@ export default function TransparentToast() {
           message.destroy(TOAST_KEY);
           timerRef.current = undefined;
           closeSubview();
-        }, TIMEOUT);
+        }, TIMEOUT_SEC * 1e3);
       }
     }
   );
@@ -117,7 +117,7 @@ export async function toastCopiedWeb3Addr(text: string) {
           <div>{text}</div>
         </ToastContent>
       ),
-      duration: TIMEOUT,
+      duration: TIMEOUT_SEC,
     });
   }
 }
