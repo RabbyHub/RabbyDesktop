@@ -2,13 +2,18 @@ import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { randString } from '@/isomorphic/string';
-import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import { parseQueryString } from '@/isomorphic/url';
 import { hideMainwinPopup } from '../ipcRequest/mainwin-popup';
 import {
   hideMainwinPopupview,
   showMainwinPopupview,
 } from '../ipcRequest/mainwin-popupview';
 import { useForwardTo, useMessageForwarded } from './useViewsMessage';
+import {
+  consumeZCallback,
+  IZCallback,
+  registerZCallback,
+} from '../ipcRequest/zPopupMessage';
 
 export function usePopupWinInfo<T extends IPopupWinPageInfo['type']>(
   type: T,
@@ -156,55 +161,7 @@ export function usePopupViewInfo<T extends IPopupViewChanges['type']>(
   };
 }
 
-function noop() {}
-type IZCallback<V extends keyof ZViewStates> = (
-  payload: IZCallbackPayload<V>
-) => any;
-const zPopupCallbacks: {
-  [K in string]?: {
-    subView: keyof ZViewStates;
-    callback: IZCallback<keyof ZViewStates>;
-  } | null;
-} = {};
-
-export function useZPopupCallbackOnMainWindow() {
-  useMessageForwarded(
-    { targetView: 'main-window', type: 'consume-subview-openid' },
-    ({ payload }) => {
-      if (!IS_RUNTIME_PRODUCTION) {
-        console.debug(
-          '[debug] useZPopupCallbackOnMainWindow:: payload',
-          payload
-        );
-      }
-      if (
-        payload?.svOpenId &&
-        zPopupCallbacks[payload.svOpenId]?.subView === payload.subView
-      ) {
-        zPopupCallbacks[payload.svOpenId]?.callback(payload);
-        zPopupCallbacks[payload.svOpenId] = null;
-      }
-    }
-  );
-}
-
-const zPopupCallbackIds: {
-  [K in string]?: string;
-} = {};
-export function useZPopupCallbackRegistry() {
-  useMessageForwarded(
-    { targetView: 'z-popup', type: 'register-subview-openid' },
-    ({ payload }) => {
-      if (!IS_RUNTIME_PRODUCTION) {
-        console.debug('[debug] useZPopupCallbackRegistry:: payload', payload);
-      }
-      if (payload?.svOpenId) {
-        zPopupCallbackIds[payload.subView] = payload.svOpenId;
-      }
-    }
-  );
-}
-
+const isInZPopup = parseQueryString().view === 'z-popup';
 /**
  * @description provide actions to operate z-popup on main views
  * @returns
@@ -228,12 +185,6 @@ export function useZPopupLayerOnMain() {
       sendMsg('update-subview-state', {
         partials,
       });
-
-      if (Object.values(partials).some((v) => v?.visible)) {
-        showMainwinPopupview({ type: 'z-popup' });
-      } else {
-        hideMainwinPopupview('z-popup');
-      }
     },
     [sendMsg]
   );
@@ -246,12 +197,9 @@ export function useZPopupLayerOnMain() {
     ) => {
       updateZPopup(svType, true, svPartials);
 
-      const svOpenId = randString();
+      let svOpenId = randString();
       if (typeof callback === 'function') {
-        zPopupCallbacks[svOpenId] = {
-          subView: svType,
-          callback: callback as any,
-        };
+        svOpenId = registerZCallback(svType, callback).svOpenId;
       }
       sendMsg('register-subview-openid', {
         payload: { svOpenId, subView: svType },
@@ -278,16 +226,16 @@ const ZPopupSubviewStateAtom = atom<NullableFields<IZPopupSubviewState>>({
 });
 
 export function useZPopupViewStates() {
-  const [svStates, setSvStates] = useAtom(ZPopupSubviewStateAtom);
+  const [zviewsState, setZViewsState] = useAtom(ZPopupSubviewStateAtom);
 
-  return { svStates, setSvStates };
+  return { zviewsState, setZViewsState };
 }
 export function useZPopupViewState<T extends keyof ZViewStates>(
   svType: T,
   onFieldsChanged?: (partials?: IZPopupSubviewState[T]) => void
 ) {
-  const { svStates, setSvStates } = useZPopupViewStates();
-  const sendToMain = useForwardTo('main-window');
+  const { zviewsState, setZViewsState } = useZPopupViewStates();
+  const broadcastMsg = useForwardTo('*');
 
   useMessageForwarded(
     {
@@ -304,7 +252,7 @@ export function useZPopupViewState<T extends keyof ZViewStates>(
   );
 
   const closeSubview = useCallback(() => {
-    setSvStates((prev) => {
+    setZViewsState((prev) => {
       const partials = {
         ...prev,
         [svType]: {
@@ -313,9 +261,8 @@ export function useZPopupViewState<T extends keyof ZViewStates>(
         },
       };
 
-      const svOpenId = zPopupCallbackIds[svType];
-      delete zPopupCallbackIds[svType];
-      sendToMain('consume-subview-openid', {
+      const svOpenId = consumeZCallback(svType);
+      broadcastMsg('consume-subview-openid', {
         payload: {
           svOpenId,
           subView: svType,
@@ -330,13 +277,13 @@ export function useZPopupViewState<T extends keyof ZViewStates>(
 
       return partials;
     });
-  }, [svType, setSvStates, sendToMain]);
+  }, [svType, setZViewsState, broadcastMsg]);
 
-  const { visible: svVisible, state: svState } = svStates[svType] || {};
+  const { visible: svVisible, state: svState } = zviewsState[svType] || {};
 
   const setSvState = useCallback(
     (svPartials: IZPopupSubviewState[T]['state']) => {
-      setSvStates((prev) => {
+      setZViewsState((prev) => {
         const partials = {
           ...prev,
           [svType]: {
@@ -348,7 +295,7 @@ export function useZPopupViewState<T extends keyof ZViewStates>(
         return partials;
       });
     },
-    [svType, setSvStates]
+    [svType, setZViewsState]
   );
 
   return {
@@ -358,7 +305,7 @@ export function useZPopupViewState<T extends keyof ZViewStates>(
     /**
      * @deprecated for compatibility
      */
-    pageInfo: svStates[svType],
+    pageInfo: zviewsState[svType],
     closeSubview,
   };
 }

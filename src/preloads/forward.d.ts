@@ -77,7 +77,7 @@ type ChannelForwardMessageType = {
         };
       }
     | {
-        targetView: 'main-window';
+        targetView: 'main-window' | 'z-popup';
         type: 'consume-subview-openid';
         payload: IZCallbackPayload<keyof ZViewStates>;
       }

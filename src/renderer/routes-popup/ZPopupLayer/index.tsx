@@ -6,22 +6,21 @@ import {
 
 import {
   usePopupViewInfo,
-  useZPopupCallbackRegistry,
   useZPopupViewStates,
 } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { useMessageForwarded } from '@/renderer/hooks/useViewsMessage';
-import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
+import {
+  hideMainwinPopupview,
+  showMainwinPopupview,
+} from '@/renderer/ipcRequest/mainwin-popupview';
 import SwitchChainModal from '../../components/SwitchChainModal';
 
 import styles from './index.module.less';
 
 hideMainwinPopupview('z-popup');
 
-function App() {
-  usePopupViewInfo('z-popup', { enableTopViewGuard: true });
-  useZPopupCallbackRegistry();
-
-  const { setSvStates } = useZPopupViewStates();
+function useReactOnZPopupMessage() {
+  const { setZViewsState } = useZPopupViewStates();
 
   useMessageForwarded(
     {
@@ -32,12 +31,27 @@ function App() {
       const { partials } = payload;
       if (!partials) return;
 
-      setSvStates((prev) => ({
-        ...prev,
-        ...partials,
-      }));
+      setZViewsState((prev) => {
+        const nextStates = {
+          ...prev,
+          ...partials,
+        };
+
+        if (Object.values(nextStates).some((v) => v?.visible)) {
+          showMainwinPopupview({ type: 'z-popup' });
+        } else {
+          hideMainwinPopupview('z-popup');
+        }
+
+        return nextStates;
+      });
     }
   );
+}
+
+function App() {
+  usePopupViewInfo('z-popup', { enableTopViewGuard: true });
+  useReactOnZPopupMessage();
 
   return (
     <>

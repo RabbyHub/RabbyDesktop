@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 
 import './webui.less';
 import '@/renderer/css/windicss';
+import '@/renderer/ipcRequest/zPopupMessage';
 
 import { MainWindow } from '@/renderer/components/MainWindow';
 import Topbar from '@/renderer/components/Topbar';

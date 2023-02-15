@@ -25,7 +25,6 @@ import { useMainWindowEvents } from '@/renderer/hooks-shell/useWindowState';
 import { useAppUnlockEvents } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { useAccounts } from '@/renderer/hooks/rabbyx/useAccount';
 import { useMessageForwardToMainwin } from '@/renderer/hooks/useViewsMessage';
-import { useZPopupCallbackOnMainWindow } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { navigateToDappRoute } from '@/renderer/utils/react-router';
 import styles from './index.module.less';
 
@@ -204,8 +203,6 @@ export function MainWindow() {
 
     navigateToDappRoute(router.navigate, payload.data.dappURL);
   });
-
-  useZPopupCallbackOnMainWindow();
 
   return (
     <>
