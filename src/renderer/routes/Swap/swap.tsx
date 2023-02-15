@@ -1,18 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { memo, useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { memo, useEffect, useMemo, useState, useCallback } from 'react';
 import { CHAINS, CHAINS_ENUM, formatTokenAmount } from '@debank/common';
 
-import {
-  useAsync,
-  useAsyncFn,
-  useDebounce,
-  useLocation,
-  useToggle,
-} from 'react-use';
+import { useAsync, useAsyncFn, useDebounce, useToggle } from 'react-use';
 import clsx from 'clsx';
 import styled from 'styled-components';
 import BigNumber from 'bignumber.js';
-import { Alert, Button, Modal, Skeleton, Switch } from 'antd';
+import { Alert, Button, message, Modal, Skeleton, Switch } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
 
 import {
@@ -28,16 +22,15 @@ import { useSwap } from '@/renderer/hooks/rabbyx/useSwap';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
 import { splitNumberByStep } from '@/renderer/utils/number';
-import { query2obj } from '@/renderer/utils/url';
-import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 
 import ButtonMax from '@/../assets/icons/swap/max.svg';
 
 import IconLoading from '@/../assets/icons/swap/loading.svg?rc';
 import IconSwitchToken from '@/../assets/icons/swap/switch-token.svg?rc';
-import IconRcClose from '@/../assets//icons/swap/close.svg?rc';
 
-import { DexSelectDrawer } from './component/DexSelect';
+import IconRcClose from '@/../assets/icons/swap/close.svg?rc';
+import { useSearchParams } from 'react-router-dom';
+import { DexSelect } from './component/DexSelect';
 import { Fee, FeeProps } from './component/Fee';
 import { GasSelector } from './component/GasSelector';
 import { IconRefresh } from './component/IconRefresh';
@@ -57,35 +50,32 @@ import {
 } from './constant';
 import { TokenSelect } from './component/TokenSelect';
 
-const { confirm } = Modal;
-
 const SwapTokenWrapper = styled.div`
-  height: 103px;
+  height: 134px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 16px;
-  padding-bottom: 14px;
-
-  background: #505664;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   font-weight: 400;
-  font-size: 12px;
-  line-height: 14px;
-  color: #a9aaae;
+  font-size: 14px;
+  line-height: 17px;
+  color: #c9c9c9;
 `;
 
 const FooterWrapper = styled.div`
-  position: absolute;
-  left: 0;
+  position: sticky;
   bottom: 0;
-  width: 100%;
-  border-top: 1px solid #4f5666;
-  padding: 10px;
-  margin: 0 auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 0 -28px;
+  margin-top: 30px;
+
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 18px;
+  padding: 28px;
   .box {
     display: flex;
     align-items: center;
@@ -94,8 +84,8 @@ const FooterWrapper = styled.div`
   }
   .tips {
     font-weight: 500;
-    font-size: 13px;
-    line-height: 15px;
+    font-size: 14px;
+    line-height: 16px;
     color: #fff;
 
     .swapTips {
@@ -106,18 +96,18 @@ const FooterWrapper = styled.div`
   .allowance {
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 16px;
     font-style: normal;
     font-weight: 400;
-    font-size: 12px;
-    line-height: 14px;
+    font-size: 14px;
+    line-height: 16px;
     text-align: right;
     color: #b4bdcc;
     &.unLimit {
       /* color: var(--color-border); */
     }
     .ant-switch {
-      min-width: 32px;
+      min-width: 40px;
       background-color: rgba(180, 189, 204, 0.5);
       &:focus,
       &:hover {
@@ -133,15 +123,18 @@ const FooterWrapper = styled.div`
       &:hover {
         box-shadow: none;
       }
+
+      .ant-switch-handle::before {
+        background-color: #4e5465;
+      }
     }
     .ant-switch-handle::before {
-      background-color: #464c59;
+      background-color: #d0d5df;
     }
   }
 
   .ant-btn-primary {
-    height: 47px;
-    width: 317px;
+    height: 62px;
     border-radius: 8px;
     display: flex;
     justify-content: center;
@@ -150,7 +143,7 @@ const FooterWrapper = styled.div`
   }
 
   .ant-btn-primary.disabled {
-    background-color: var(--color-disabled-bg);
+    background-color: rgba(134, 151, 255, 0.4);
     box-shadow: none;
     border-color: transparent;
     cursor: not-allowed;
@@ -166,15 +159,7 @@ const FooterWrapper = styled.div`
   }
 `;
 
-export const Swap = ({
-  quickWindowOpen = true,
-  pageInfo,
-}: {
-  quickWindowOpen?: boolean;
-  pageInfo?: { chain?: string; payTokenId?: string };
-}) => {
-  const domRef = useRef<HTMLDivElement>(null);
-
+export const Swap = () => {
   const { currentAccount } = useCurrentAccount();
   const userAddress = currentAccount?.address || '';
   const swapState = useSwap();
@@ -182,11 +167,15 @@ export const Swap = ({
   const lastSelectedDex = swap.selectedDex;
   const lastSelectedChain = swap.selectedChain || CHAINS_ENUM.ETH;
   const { unlimitedAllowance = false } = swap;
-  // const { search } = useLocation();
-  // const [searchObj] = useState<{
-  //   payTokenId?: string;
-  //   chain?: string;
-  // }>(query2obj(search || ''));
+
+  const [searchParams] = useSearchParams();
+  const pageInfo = useMemo(
+    () => ({
+      payTokenId: searchParams.get('payTokenId'),
+      chain: searchParams.get('chain'),
+    }),
+    [searchParams]
+  );
 
   const [refreshId, setRefreshId] = useState(0);
 
@@ -310,7 +299,7 @@ export const Swap = ({
     }, [userAddress, chain]);
 
   const { loading: payTokenLoading } = useAsync(async () => {
-    if (userAddress && payToken?.id && chain && quickWindowOpen) {
+    if (userAddress && payToken?.id && chain) {
       const t = await walletOpenapi.getToken(
         userAddress,
         CHAINS[chain].serverId,
@@ -319,7 +308,7 @@ export const Swap = ({
 
       setPayToken(t);
     }
-  }, [userAddress, chain, payToken?.id, refreshId, quickWindowOpen]);
+  }, [userAddress, chain, payToken?.time_at, payToken?.id, refreshId]);
 
   const [{ value: quoteInfo, loading }, fetchQuote] = useAsyncFn(async () => {
     if (
@@ -369,10 +358,6 @@ export const Swap = ({
 
   const {
     isSdkDataPass,
-    tokenLoading,
-    tokenPass,
-    payTokenPass,
-    receiveTokenPass,
 
     tokenApproved,
     shouldTwoStepApprove,
@@ -540,8 +525,6 @@ export const Swap = ({
     !!chain &&
     !!payAmount &&
     !isInsufficient &&
-    !tokenLoading &&
-    tokenPass &&
     !loading &&
     !!quoteInfo &&
     isSdkDataPass;
@@ -554,7 +537,6 @@ export const Swap = ({
     if (
       loading ||
       nativeTokenLoading ||
-      tokenLoading ||
       payTokenLoading ||
       totalGasUsedLoading
     ) {
@@ -566,15 +548,7 @@ export const Swap = ({
         return TIPS.quoteFail;
       }
 
-      if (!tokenLoading && !payTokenPass) {
-        return TIPS.payTokenFail;
-      }
-
-      if (!tokenLoading && !receiveTokenPass) {
-        return TIPS.receivingTokenFail;
-      }
-
-      if (!loading && quoteInfo && !tokenLoading && !isSdkDataPass) {
+      if (!loading && quoteInfo && !isSdkDataPass) {
         return TIPS.securityFail;
       }
 
@@ -612,7 +586,6 @@ export const Swap = ({
     isInsufficient,
     loading,
     nativeTokenLoading,
-    tokenLoading,
     payTokenLoading,
     totalGasUsedLoading,
     payToken,
@@ -620,8 +593,6 @@ export const Swap = ({
     receiveToken,
     slippage,
     quoteInfo,
-    payTokenPass,
-    receiveTokenPass,
     isSdkDataPass,
     isHighPriceDifference,
     chain,
@@ -662,7 +633,7 @@ export const Swap = ({
       }
       await handleUpdateGasCache();
       try {
-        walletController.dexSwap(
+        await walletController.dexSwap(
           {
             chain,
             quote: quoteInfo,
@@ -682,10 +653,10 @@ export const Swap = ({
           //   },
           // }
         );
-        hideMainwinPopupview('quick-swap');
-        window.location.reload();
       } catch (error) {
         console.error(error);
+      } finally {
+        refresh?.();
       }
     }
   };
@@ -694,76 +665,70 @@ export const Swap = ({
     if (payAmount && payToken && !receiveToken) {
       // TODO：等待设计确认 toast
 
-      // message.error({
-      //   className: 'rabbyx-tx-changed-tip',
-      //   icon: (
-      //     <InfoCircleOutlined
-      //       className={clsx(
-      //         'pb-2 self-start transform rotate-180 origin-center text-red-light'
-      //       )}
-      //     />
-      //   ),
-      //   content: 'Please select receive token',
-      // });
+      message.error({
+        className: 'rabbyx-tx-changed-tip',
+        icon: (
+          <InfoCircleOutlined
+            className={clsx(
+              'pb-2 self-start transform rotate-180 origin-center text-red-light'
+            )}
+          />
+        ),
+        content: 'Please select receive token',
+      });
       return;
     }
     if (tipsDisplay?.level === 'danger') {
       // TODO：等待设计确认
 
-      // message.error({
-      //   className: 'rabbyx-tx-changed-tip',
-      //   icon: (
-      //     <InfoCircleOutlined
-      //       className={clsx(
-      //         'pb-2 self-start transform rotate-180 origin-center text-red-light'
-      //       )}
-      //     />
-      //   ),
-      //   content: tipsDisplay.label,
-      // });
+      message.error({
+        className: 'rabbyx-tx-changed-tip',
+        icon: (
+          <InfoCircleOutlined
+            className={clsx(
+              'pb-2 self-start transform rotate-180 origin-center text-red-light'
+            )}
+          />
+        ),
+        content: tipsDisplay.label,
+      });
       return;
     }
 
     if (canSubmit && lastSelectedDex) {
-      // TODO：等待设计确认 两步授权弹窗
+      if (shouldTwoStepApprove) {
+        return Modal.confirm({
+          closable: true,
+          centered: true,
+          className: styles.approvalModal,
+          title: null,
+          icon: null,
+          closeIcon: <IconRcClose />,
 
-      // if (shouldTwoStepApprove) {
-      //   return confirm({
-      //     closable: true,
-      //     centered: true,
-      //     className: styles.approvalModal,
-      //     title: null,
-      //     icon: null,
-      //     closeIcon: <IconRcClose />,
-
-      //     content: (
-      //       <>
-      //         <div className={styles.title}>
-      //           Sign 2 transactions to change allowance
-      //         </div>
-      //         <div className={styles.desc}>
-      //           Token USDT requires 2 transactions to change allowance. First
-      //           you would need to reset allowance to zero, and only then set new
-      //           allowance value.
-      //         </div>
-      //       </>
-      //     ),
-      //     okText: 'Proceed with two step approve',
-      //     onOk() {
-      //       gotoSwap();
-      //     },
-      //   });
-      // }
+          content: (
+            <>
+              <div className={styles.title}>
+                Sign 2 transactions to change allowance
+              </div>
+              <div className={styles.desc}>
+                Token USDT requires 2 transactions to change allowance. First
+                you would need to reset allowance to zero, and only then set new
+                allowance value.
+              </div>
+            </>
+          ),
+          okText: 'Proceed with two step approve',
+          onOk() {
+            gotoSwap();
+          },
+        });
+      }
       gotoSwap();
     }
   };
 
   const totalLoading =
-    loading ||
-    nativeTokenLoading ||
-    tokenLoading ||
-    payTokenLoading ||
-    totalGasUsedLoading;
+    loading || nativeTokenLoading || payTokenLoading || totalGasUsedLoading;
 
   useEffect(() => {
     if (isWrapToken) {
@@ -793,26 +758,19 @@ export const Swap = ({
   }, [chain]);
 
   useEffect(() => {
-    setChain(lastSelectedChain);
-    if (payToken?.chain !== CHAINS[lastSelectedChain].serverId) {
-      setPayToken(getChainDefaultToken(lastSelectedChain));
-    }
-  }, [lastSelectedChain]);
-
-  useEffect(() => {
     return cancel;
   }, []);
 
   if (!lastSelectedDex) {
     return (
       <div className="bg-gray-bg h-full">
-        <DexSelectDrawer visible onClose={() => toggleVisible(false)} />
+        <DexSelect visible onClose={() => toggleVisible(false)} />
       </div>
     );
   }
 
   return (
-    <div className={styles.swapBox} ref={domRef}>
+    <div className={styles.swapBox}>
       <Header logo={logo} name={name} toggleVisible={toggleVisible} />
 
       <div className={styles.tokenExchange}>
@@ -821,19 +779,11 @@ export const Swap = ({
             <ChainSelect
               value={chain}
               onChange={handleChain}
-              disabledTips={
-                <span style={{ fontSize: 12 }}>
-                  Not supported by the current exchange
-                </span>
-              }
-              title={<>Select the chain supported by {name}</>}
+              disabledTips="Not supported by the current exchange"
+              title={`Select the chain supported by ${name}`}
             />
             {!!payAmount && !!payToken && !!receiveToken && (
-              <IconRefresh
-                className={styles.refresh}
-                refresh={refresh}
-                start={quickWindowOpen}
-              />
+              <IconRefresh className={styles.refresh} refresh={refresh} />
             )}
           </div>
           <div className={styles.swapTokenBox}>
@@ -849,8 +799,7 @@ export const Swap = ({
                 excludeTokens={
                   receiveToken?.id ? [receiveToken?.id] : undefined
                 }
-                getContainer={() => domRef.current || document.body}
-                forceFocus={quickWindowOpen}
+                forceFocus
               />
               <div className={styles.p2}>
                 {payTokenLoading ? (
@@ -902,7 +851,6 @@ export const Swap = ({
                 excludeTokens={payToken?.id ? [payToken?.id] : undefined}
                 value={receivedTokeAmountDisplay}
                 loading={loading}
-                getContainer={() => domRef.current || document.body}
               />
               <div className={styles.p2}>
                 <div className={clsx(!receiveToken && styles.hidden)}>
@@ -936,9 +884,10 @@ export const Swap = ({
                 )}
               </div>
             </SwapTokenWrapper>
-            <div className={styles.switchBtn} onClick={switchToken}>
-              <IconSwitchToken />
-            </div>
+            <IconSwitchToken
+              className={styles.switchBtn}
+              onClick={switchToken}
+            />
           </div>
           {payToken && receiveToken && (
             <div className={styles.Slippage}>
@@ -998,8 +947,7 @@ export const Swap = ({
         )}
       </div>
 
-      <DexSelectDrawer visible={visible} onClose={() => toggleVisible(false)} />
-
+      <DexSelect visible={visible} onClose={() => toggleVisible(false)} />
       <FooterWrapper>
         {!tokenApproved && (
           <div className="box">
@@ -1009,7 +957,7 @@ export const Swap = ({
             <div className={clsx('allowance', unlimitedAllowance && 'unLimit')}>
               <span>Unlimited allowance</span>{' '}
               <Switch
-                size="small"
+                size="default"
                 checked={unlimitedAllowance}
                 onChange={setUnlimited}
               />
@@ -1020,7 +968,7 @@ export const Swap = ({
           size="large"
           type="primary"
           onClick={handleSwap}
-          className={clsx((!canSubmit || totalLoading) && 'disabled')}
+          className={clsx('submit', (!canSubmit || totalLoading) && 'disabled')}
           icon={totalLoading ? <IconLoading className="animate-spin" /> : null}
         >
           {loading

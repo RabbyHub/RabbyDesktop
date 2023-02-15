@@ -96,7 +96,6 @@ const CONF = {
     ReplaySubject<{
       addAddress: BrowserView;
       addressManagement: BrowserView;
-      quickSwap: BrowserView;
       dappsManagement: BrowserView;
       selectDevices: BrowserView;
       zPopup: BrowserView;
@@ -105,7 +104,7 @@ const CONF = {
 
   appRuntimeProxyConf: {
     subject: new ReplaySubject(1),
-  } as IConf<ReplaySubject<IAppProxyConf>>,
+  } as IConf<ReplaySubject<IRunningAppProxyConf>>,
 };
 
 type IMainSubjects = typeof CONF;

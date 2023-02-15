@@ -17,7 +17,6 @@ import { Unlock } from '@/renderer/routes/Unlock/Unlock';
 import { RequireUnlock } from '@/renderer/routes/RequireUnlock';
 import { useForwardFromInternalPage } from '@/renderer/hooks-shell/useMainWindow';
 import { useClickMainWindowHideContextMenu } from '@/renderer/hooks/useClick';
-import ComingSoon from '@/renderer/routes/ComingSoon';
 import { MainWindowSettings } from '@/renderer/routes/Settings';
 import { useChromeTabsEvents } from '@/renderer/hooks-shell/useWindowTabs';
 import { useTransactionChanged } from '@/renderer/hooks/rabbyx/useTransaction';
@@ -26,6 +25,7 @@ import { useAppUnlockEvents } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { useAccounts } from '@/renderer/hooks/rabbyx/useAccount';
 import { useMessageForwardToMainwin } from '@/renderer/hooks/useViewsMessage';
 import { navigateToDappRoute } from '@/renderer/utils/react-router';
+import { Swap } from '@/renderer/routes/Swap';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -128,7 +128,7 @@ const router = createRouter([
       },
       {
         path: 'swap',
-        element: <ComingSoon pageName="Swap" />,
+        element: <Swap />,
       },
       {
         path: 'dapps/:origin',

@@ -16,19 +16,19 @@ const defaulAppProxyConf: IAppProxyConf = {
     port: 1080,
   },
 };
-const appProxyConfAtom = atom<IAppProxyConf>(defaulAppProxyConf);
+const appProxyConfAtom = atom<IRunningAppProxyConf>({
+  ...defaulAppProxyConf,
+  applied: false,
+});
 const isSettingProxyAtom = atom(false);
 
 export function useProxyStateOnSettingPage() {
   const [appProxyConf] = useAtom(appProxyConfAtom);
   const [, setIsSettingProxy] = useAtom(isSettingProxyAtom);
 
-  const isUsingProxy = appProxyConf.proxyType !== 'none';
-
   return {
     proxyType: appProxyConf.proxyType,
     customProxyServer: formatProxyServerURL(appProxyConf.proxySettings),
-    isUsingProxy,
     setIsSettingProxy,
   };
 }
@@ -52,6 +52,7 @@ export function useSettingProxyModal() {
             ...prev.proxySettings,
             ...runtimeConf.proxySettings,
           },
+          applied: runtimeConf.applied,
         };
         setLocalProxyType(nextVal.proxyType);
         proxyCustomForm.setFieldsValue(nextVal.proxySettings);
@@ -81,6 +82,7 @@ export function useSettingProxyModal() {
 
     proxyType: appProxyConf.proxyType,
     proxyCustomForm,
+    isProxyApplied: appProxyConf.applied,
 
     applyProxyAndRelaunch,
   };

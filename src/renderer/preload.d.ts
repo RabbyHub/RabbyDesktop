@@ -422,7 +422,7 @@ type ChannelInvokePayload = {
     send: [];
     response: {
       persisted: IAppProxyConf;
-      runtime: IAppProxyConf;
+      runtime: IRunningAppProxyConf;
     };
   };
   'apply-proxyConfig': {

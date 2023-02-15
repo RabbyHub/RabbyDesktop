@@ -1,17 +1,16 @@
 import { CHAINS_ENUM, CHAINS } from '@debank/common';
 import { DEX_ENUM } from '@rabby-wallet/rabby-swap';
-import { Button, Drawer } from 'antd';
+import { Button, Modal } from 'antd';
 import { useState } from 'react';
 import styled from 'styled-components';
 import { Checkbox } from '@/renderer/components/Checkbox';
 import { useSwap } from '@/renderer/hooks/rabbyx/useSwap';
 import IconClose from '@/../assets/icons/swap/modal-close.svg?rc';
-import IconRcBack from '@/../assets/icons/swap/back.svg?rc';
 import { DEX } from '../constant';
 
 export const Wrapper = styled.div`
   position: absolute;
-  top: 20px;
+  top: 30px;
   left: 0;
   width: 100%;
 
@@ -27,49 +26,45 @@ export const Wrapper = styled.div`
 
   .title {
     font-weight: 700;
-    font-size: 16px;
+    font-size: 22px;
+    line-height: 26px;
     text-align: center;
     color: var(--color-purewhite);
   }
 
   .closeWrapper {
-    display: none;
     position: absolute;
-    top: 50%;
-    right: 20px;
-    transform: translateY(-50%);
+    right: 22px;
+    top: 0;
   }
   .closeIcon {
     cursor: pointer;
-    width: 16px;
-    height: 16px;
+    width: 24px !important;
+    height: 25px !important;
   }
   & + .dexList {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 12px;
-    margin-top: 65px;
+    margin-top: 56px;
 
     & + .footerArea {
-      position: absolute;
-      left: 0;
-      bottom: 0;
+      margin-top: 30px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       width: 100%;
-      padding-top: 15px;
-      padding-bottom: 10px;
-      border-top: 1px solid #4f5666;
-
+      padding-top: 30px;
+      /* padding-bottom: 10px; */
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
       .selected,
       .unSelected {
         padding: 0 28px;
-        padding-bottom: 18px;
-        font-weight: 700;
-        font-size: 12px;
+        padding-bottom: 20px;
+        font-weight: 400;
+        font-size: 14px;
         line-height: 14px;
         color: #e9e9e9;
         text-align: center;
@@ -82,35 +77,41 @@ export const Wrapper = styled.div`
 `;
 
 const ButtonWrapper = styled(Button)`
-  width: 316px;
-  height: 46px;
+  /* width: 316px; */
+  width: 100%;
+  height: 55px;
   border-radius: 8px;
   font-weight: 500;
   font-size: 17px;
 `;
 
 const DexItemBox = styled.div`
-  width: 317px;
+  width: 100%;
+  height: 128px;
   background: #505664;
-  border-radius: 8px;
   border: 1px solid transparent;
-  padding: 16px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
   cursor: pointer;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   &:hover {
-    background: linear-gradient(90.98deg, #5e626b 1.39%, #656978 97.51%)
-        padding-box,
-      linear-gradient(90.64deg, #777d8e 1.38%, #7b8296 98.82%) border-box;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.15);
 
-    border: 1px solid transparent;
-
-    box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.07);
+    .dex {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
   }
   .dex {
-    padding-bottom: 10px;
+    padding-bottom: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(180, 189, 204, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 
     .dexBox {
       display: flex;
@@ -122,8 +123,8 @@ const DexItemBox = styled.div`
         margin-right: 8px;
       }
       .name {
-        font-weight: 510;
-        font-size: 15px;
+        font-weight: 500;
+        font-size: 22px;
         color: var(--color-purewhite);
       }
     }
@@ -206,12 +207,26 @@ const DexItem = (props: DexItemProps) => {
   );
 };
 
+const StyledModal = styled(Modal)`
+  .ant-modal-content {
+    background-color: transparent;
+  }
+  .ant-modal-body {
+    background: #525767;
+    box-shadow: 0px 24px 80px rgba(19, 20, 26, 0.18);
+    border-radius: 12px;
+    padding: 30px 20px;
+    padding-bottom: 18px;
+    height: 664px;
+  }
+`;
+
 interface DexSelectDrawerProps {
   visible: boolean;
   onClose: () => void;
 }
 
-export const DexSelectDrawer = (props: DexSelectDrawerProps) => {
+export const DexSelect = (props: DexSelectDrawerProps) => {
   const { visible, onClose } = props;
 
   const swapState = useSwap();
@@ -230,32 +245,20 @@ export const DexSelectDrawer = (props: DexSelectDrawerProps) => {
   };
 
   return (
-    <Drawer
-      getContainer={false}
-      maskClosable={false}
+    <StyledModal
       closable={false}
-      placement="right"
-      width="100%"
+      onCancel={close}
+      width={536}
+      centered
       open={visible}
+      title={null}
+      footer={null}
       destroyOnClose
-      bodyStyle={{
-        padding: 0,
-        paddingTop: '24px',
-        overflow: 'hidden',
-        backgroundColor: 'var(--swap-bg)',
-      }}
-      push={false}
     >
       <Wrapper>
-        {!!dexId && <IconRcBack className="back" onClick={onClose} />}
-
         <div className="title">Swap tokens on different DEXes</div>
         <div className="closeWrapper">
-          <IconClose
-            className="closeIcon"
-            viewBox="0 0 20 20"
-            onClick={close}
-          />
+          <IconClose className="closeIcon" onClick={close} />
         </div>
       </Wrapper>
       <div className="dexList">
@@ -301,6 +304,6 @@ export const DexSelectDrawer = (props: DexSelectDrawerProps) => {
           Confirm
         </ButtonWrapper>
       </div>
-    </Drawer>
+    </StyledModal>
   );
 };

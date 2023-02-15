@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
 import { validateToken, ValidateTokenParam } from '@/renderer/utils/token';
@@ -21,32 +20,6 @@ import { useAsync } from 'react-use';
 const INTERNAL_REQUEST_ORIGIN = window.location.origin;
 
 const ETH_USDT_CONTRACT = '0xdac17f958d2ee523a2206206994597c13d831ec7';
-
-export const useVerifyToken = <T extends ValidateTokenParam>(
-  payToken?: T,
-  receiveToken?: T,
-  chain?: CHAINS_ENUM
-) => {
-  const data = useAsync(async () => {
-    if (payToken && receiveToken && chain) {
-      const customRPC = await walletController.getCustomRpcByChain(chain);
-      const [fromTokenValidationStatus, toTokenValidationStatus] =
-        await Promise.all([
-          validateToken(payToken, chain, customRPC),
-          validateToken(receiveToken, chain, customRPC),
-        ]);
-
-      return [
-        fromTokenValidationStatus && toTokenValidationStatus,
-        fromTokenValidationStatus,
-        toTokenValidationStatus,
-      ];
-    }
-
-    return [true, true, true];
-  }, [payToken?.id, receiveToken?.id, chain]);
-  return data;
-};
 
 export const useVerifyRouterAndSpender = (
   chain: CHAINS_ENUM,
@@ -72,7 +45,7 @@ export const useVerifyRouterAndSpender = (
         ? true
         : isSameAddress(spenderWhitelist, spender),
     ];
-  }, [dexId, router, spender]);
+  }, [chain, dexId, payTokenId, router, spender]);
   return data;
 };
 
@@ -129,7 +102,7 @@ type VerifySdkParams<T extends ValidateTokenParam> = {
 export const useVerifySdk = <T extends ValidateTokenParam>(
   p: VerifySdkParams<T>
 ) => {
-  const { chain, dexId, slippage, data, payToken, receiveToken, payAmount } = p;
+  const { chain, dexId, slippage, data, payToken, payAmount } = p;
   const [routerPass, spenderPass] = useVerifyRouterAndSpender(
     chain,
     dexId,
@@ -143,12 +116,6 @@ export const useVerifySdk = <T extends ValidateTokenParam>(
     new BigNumber(slippage).div(100).toFixed(),
     data?.tx ? { ...data?.tx, chainId: CHAINS[chain].id } : undefined,
     data
-  );
-
-  const { value: tokenVerifyResult, loading: tokenLoading } = useVerifyToken(
-    payToken,
-    receiveToken,
-    chain
   );
 
   const { value: tokenApprovalResult = [true, false] } = useAsync(async () => {
@@ -184,11 +151,6 @@ export const useVerifySdk = <T extends ValidateTokenParam>(
     spenderPass,
     callDataPass,
     isSdkDataPass: routerPass && spenderPass && callDataPass,
-
-    tokenLoading,
-    tokenPass: !!tokenVerifyResult?.[0],
-    payTokenPass: !!tokenVerifyResult?.[1],
-    receiveTokenPass: !!tokenVerifyResult?.[2],
 
     tokenApproved: tokenApprovalResult[0],
     shouldTwoStepApprove: tokenApprovalResult[1],

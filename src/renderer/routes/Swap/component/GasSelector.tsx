@@ -19,13 +19,14 @@ const SectionStyled = styled.section`
 
     .title {
       font-weight: 400;
-      font-size: 12px;
+      font-size: 14px;
       line-height: 14px;
     }
 
     .gasLevel {
+      font-weight: 500;
       text-align: right;
-      font-size: 12px;
+      font-size: 14px;
       line-height: 14px;
       display: flex;
       align-items: center;
@@ -56,7 +57,6 @@ const SectionStyled = styled.section`
 
 const GasItem = styled(SlippageItem)`
   flex-direction: column;
-  width: 72px;
   height: 52px;
   padding: 10px 4px 9px 4px;
   justify-content: space-between;
@@ -65,22 +65,33 @@ const GasItem = styled(SlippageItem)`
   line-height: 15px;
   text-align: center;
   &:hover {
-    background-color: rgba(134, 151, 255, 0.1);
-    border-color: var(--color-primary);
+    background: rgba(134, 151, 255, 0.1);
+    border: 1px solid var(--color-primary);
+    border-radius: 4px;
   }
   .gas-level {
+    font-size: 14px;
+    line-height: 14px;
+    text-align: center;
     font-weight: 400;
     font-size: 12px;
     line-height: 14px;
     text-align: center;
     color: #dcdde0;
   }
+  .gas-num {
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 16px;
+    text-align: center;
+    color: #ffffff;
+  }
   .ant-input {
     padding: 0;
     font-weight: 500;
     font-size: 13px;
     line-height: 15px;
-    color: #dcdde0;
+    color: #ffffff;
   }
 `;
 
@@ -172,7 +183,7 @@ export const GasSelector = ({
             <div className="gas-level">
               {GAS_LEVEL_TEXT[item.level as keyof typeof GAS_LEVEL_TEXT]}
             </div>
-            <div>
+            <div className="gas-num">
               {item.level === 'custom' ? (
                 <Input
                   className="input"

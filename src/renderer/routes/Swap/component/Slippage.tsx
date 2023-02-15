@@ -1,4 +1,4 @@
-import { Input, Space, Tooltip } from 'antd';
+import { Input, Tooltip } from 'antd';
 import clsx from 'clsx';
 import { memo, useMemo } from 'react';
 import { useToggle } from 'react-use';
@@ -7,10 +7,8 @@ import IconInfo from '@/../assets/icons/swap/info-outline.svg?rc';
 import IconTipDownArrow from '@/../assets/icons/swap/arrow-tips-down.svg?rc';
 
 const MinReceivedBox = styled.div`
-  margin-top: 8px;
+  margin-top: 12px;
   height: 30px;
-  background: #505664;
-  border-radius: 2px;
   display: flex;
   align-items: center;
   padding: 0 8px;
@@ -18,6 +16,9 @@ const MinReceivedBox = styled.div`
   font-size: 12px;
   line-height: 14px;
   color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
 `;
 
 export const SlippageItem = styled.div<{
@@ -26,36 +27,36 @@ export const SlippageItem = styled.div<{
   hasAmount?: boolean;
 }>`
   position: relative;
-  width: 72px;
+  width: 125px;
   height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
   border-radius: 4px;
-  /* margin: 4px 0; */
   border: 1px solid transparent;
   cursor: pointer;
   font-weight: 500;
   font-size: 13px;
   line-height: 15px;
+
   background-color: ${(props) =>
     props.active
       ? props.error
         ? 'rgba(255,176,32,0.1)'
         : 'rgba(134, 151, 255, 0.1)'
-      : '#505664'};
+      : 'rgba(255, 255, 255, 0.1)'};
   color: ${(props) =>
     props.active
       ? props.error
         ? '#ffb020'
         : 'var(--color-primary)'
-      : 'var(--color-purewhite)'};
+      : 'rgba(255, 255, 255, 0.8)'};
   border-color: ${(props) =>
     props.active
       ? props.error
         ? '#ffb020'
         : 'var(--color-primary)'
-      : 'transparent'};
+      : '1px solid rgba(255, 255, 255, 0.1)'};
 
   &:hover {
     background-color: ${(props) =>
@@ -77,7 +78,7 @@ export const SlippageItem = styled.div<{
           : 'var(--color-primary)'
         : 'var(--color-primary)'};
   }
-  &::after {
+  /* &::after {
     opacity: ${(props) => (props.active && props.hasAmount ? 1 : 0)};
     content: '';
     position: absolute;
@@ -88,9 +89,9 @@ export const SlippageItem = styled.div<{
     height: 0;
     border-style: solid;
     border-width: 0 4px 6.9px 4px;
-    border-color: transparent transparent #505664 transparent;
+    border-color: transparent transparent rgba(255, 255, 255, 0.1) transparent;
     border-radius: 2px;
-  }
+  } */
   & input {
     text-align: center;
     color: ${(props) =>
@@ -117,10 +118,17 @@ const Wrapper = styled.section`
   .header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+
+    .left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
 
     .title {
       font-weight: 400;
-      font-size: 12px;
+      font-size: 14px;
       line-height: 14px;
     }
   }
@@ -128,8 +136,8 @@ const Wrapper = styled.section`
   .rate {
     display: flex;
     align-items: center;
-    font-weight: 510;
-    font-size: 12px;
+    font-weight: 500;
+    font-size: 14px;
     line-height: 14px;
     .orange {
       color: var(--color-orange);
@@ -153,9 +161,8 @@ const Wrapper = styled.section`
       display: flex;
     }
   }
-  /* text-12 mt-8 text-gray-content */
   .inputTips {
-    font-size: 12px;
+    font-size: 13px;
     margin-top: 8px;
     color: var(--color-comment1);
   }
@@ -182,7 +189,7 @@ export const Slippage = memo((props: SlippageProps) => {
   return (
     <Wrapper>
       <div className="header" onClick={setOpen}>
-        <Space size={4}>
+        <div className="left">
           <div className="title">Slippage</div>
           <Tooltip
             autoAdjustOverflow
@@ -197,7 +204,7 @@ export const Slippage = memo((props: SlippageProps) => {
           >
             <IconInfo />
           </Tooltip>
-        </Space>
+        </div>
         <div className={clsx('rate', (isLow || isHigh) && 'orange')}>
           {value} %
           <div className={clsx('arrow', open && 'open')}>

@@ -87,6 +87,8 @@ type IAppProxyConf = {
   };
 };
 
+type IRunningAppProxyConf = IAppProxyConf & { applied: boolean };
+
 type ISensitiveConfig = {
   enableContentProtected: boolean;
 } & IAppProxyConf;
@@ -263,10 +265,6 @@ type PopupViewOnMainwinInfo =
     }
   | {
       type: 'address-management';
-    }
-  | {
-      type: 'quick-swap';
-      state?: any;
     }
   | {
       type: 'dapps-management';
