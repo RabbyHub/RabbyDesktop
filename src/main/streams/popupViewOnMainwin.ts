@@ -313,12 +313,12 @@ const zPopupReady = onMainWindowReady().then(async (mainWin) => {
   mainWindow.on('restore', onTargetWinUpdate);
 
   await zPopup.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}?view=z-popup#/`
+    `${await getWebuiURLBase()}/popup-view.html?view=z-popup#/`
   );
 
   // debug-only
   if (!IS_RUNTIME_PRODUCTION) {
-    // zPopup.webContents.openDevTools({ mode: 'detach' });
+    zPopup.webContents.openDevTools({ mode: 'detach' });
   }
 
   hidePopupView(zPopup);

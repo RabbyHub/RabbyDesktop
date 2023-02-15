@@ -11,6 +11,7 @@ import { ShellWalletProvider } from '@/renderer/components/ShellWallet';
 
 import MainWindowAddressManagement from '@/renderer/routes-popup/MainWindowAddressManagement';
 import MainWindowAddAddress from '@/renderer/routes-popup/MainWindowAddAddress';
+import ZPopupLayer from '@/renderer/routes-popup/ZPopupLayer';
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
@@ -30,6 +31,14 @@ switch (parseQueryString().view) {
       </ShellWalletProvider>
     );
     break;
+  case 'z-popup': {
+    root.render(
+      <ShellWalletProvider>
+        <ZPopupLayer />
+      </ShellWalletProvider>
+    );
+    break;
+  }
   default:
     throw new Error('Unknown view');
     break;

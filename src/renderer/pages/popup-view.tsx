@@ -23,7 +23,6 @@ import MainWindowAddAddress from '../routes-popup/MainWindowAddAddress';
 import QuickSwapWindow from '../routes-popup/QuickSwapWindow';
 import MainWindowDappManagement from '../routes-popup/MainWindowDappManagement';
 import DappReadonlyWindow from '../routes-popup/DappReadonlyWindow';
-import ZPopupLayer from '../routes-popup/ZPopupLayer';
 
 import SwitchChainWindow from '../routes-popup/SwitchChainWindow.deprecated';
 
@@ -73,10 +72,6 @@ switch (parseQueryString().view) {
   case 'dapp-safe-view':
     root.render(<DappReadonlyWindow />);
     break;
-  case 'z-popup': {
-    root.render(<ZPopupLayer />);
-    break;
-  }
   default:
     root.render(<App />);
     break;

@@ -124,6 +124,7 @@ function _isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
       return isMainWinShellWebUI(url);
     case 'address-management':
     case 'add-address':
+    case 'z-popup':
       return (
         url.startsWith('chrome-extension:') &&
         urlInfo.pathname === '/popup-view.html' &&
@@ -131,7 +132,6 @@ function _isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
       );
     case 'dapps-management':
     case 'quick-swap':
-    case 'z-popup':
       return (
         url.startsWith(RABBY_LOCAL_URLBASE) &&
         urlInfo.pathname === '/popup-view.html' &&
