@@ -365,7 +365,7 @@ interface TokenDrawerProps {
   onConfirm(item: TokenItem): void;
 }
 
-const TokenSelectDrawer = ({
+const TokenSelectModal = ({
   title = 'Select a token',
   open = false,
   list,
@@ -443,8 +443,9 @@ const TokenSelectDrawer = ({
             <div>
               {Array(12)
                 .fill(1)
-                .map(() => (
-                  <SwapLoading />
+                .map((_, idx) => (
+                  // eslint-disable-next-line react/no-array-index-key
+                  <SwapLoading key={`loading-${idx}`} />
                 ))}
             </div>
           )}
@@ -675,7 +676,7 @@ export const TokenSelect = ({
             onChange={type !== 'swapTo' ? handleInput : undefined}
           />
         )}
-        <TokenSelectDrawer
+        <TokenSelectModal
           open={open}
           placeholder={placeholder}
           list={availableToken}
