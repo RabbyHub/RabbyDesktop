@@ -3,7 +3,7 @@
 .row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .account {
@@ -12,11 +12,14 @@
   justify-content: space-between;
   gap: 6px;
   height: 40px;
-  padding: 10px;
+  padding: 10px 12px;
   background: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(20px);
   border-radius: 6px;
   cursor: pointer;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.4);
+  }
 
   font-weight: 500;
   font-size: 15px;
@@ -34,7 +37,6 @@
     .logo {
       width: 20px;
       height: 20px;
-      opacity: 0.6;
     }
 
     .aliasName {
@@ -86,9 +88,11 @@
   padding: 10px;
   cursor: pointer;
   background: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(20px);
   border-radius: 6px;
   img {
     display: block;
+  }
+  &.hover {
+    background: rgba(0, 0, 0, 0.4);
   }
 }

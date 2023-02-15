@@ -87,12 +87,17 @@ export default function AddAddressDropdown() {
       open={svVisible}
       overlay={
         <div onMouseEnter={handleOpen} onMouseLeave={handleClose}>
-          <Menu className={styles.Menu} onClick={handleClick}>
+          <Menu className={styles.Menu}>
             {KEYRING_MAP.map((keyring) => (
               <Menu.Item className={styles.MenuItem} key={keyring.id}>
                 <div className="flex items-center">
                   <img className={styles.Icon} src={keyring.logo} />
-                  <span>{keyring.name}</span>
+                  <span
+                    className={styles.ItemName}
+                    onClick={() => handleClick({ key: keyring.id })}
+                  >
+                    {keyring.name}
+                  </span>
                 </div>
               </Menu.Item>
             ))}
@@ -110,12 +115,7 @@ export default function AddAddressDropdown() {
           // icon height is 40px
           top: (svState?.pos?.y ?? 0) - 40,
         }}
-      >
-        <img
-          className="block"
-          src="rabby-internal://assets/icons/top-bar/add-address.svg"
-        />
-      </div>
+      />
     </Dropdown>
   );
 }

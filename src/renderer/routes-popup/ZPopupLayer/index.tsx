@@ -16,6 +16,8 @@ import {
 } from '@/renderer/ipcRequest/mainwin-popupview';
 import TransparentToast from '@/renderer/components/TransparentToast';
 import { AddAddressModal } from '@/renderer/components/AddAddressModal/AddAddressModal';
+import { AddressManagementModal } from '@/renderer/components/AddressManagementModal/AddressManagementModal';
+import { AddressDetailModal } from '@/renderer/components/AddressDetailModal/AddressDetailModal';
 import SwitchChainModal from '../../components/SwitchChainModal';
 
 import styles from './index.module.less';
@@ -62,6 +64,8 @@ function App() {
       <TransparentToast />
       <AddAddressDropdown />
       <AddAddressModal />
+      <AddressManagementModal />
+      <AddressDetailModal />
     </>
   );
 }

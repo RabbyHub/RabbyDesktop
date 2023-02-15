@@ -30,6 +30,7 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
         : '',
     [currentAccount?.address]
   );
+  const zActions = useZPopupLayerOnMain();
 
   if (!currentAccount?.alianName) {
     return null;
@@ -39,10 +40,7 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
     <div
       className={clsx(styles.account, className)}
       onClick={() => {
-        showMainwinPopupview(
-          { type: 'address-management' },
-          { openDevTools: false }
-        );
+        zActions.showZSubview('address-management');
       }}
     >
       <div className={styles.content}>
@@ -52,6 +50,7 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
       <div className={styles.dockRight}>
         <span className={styles.addr}>{displayAddr}</span>
       </div>
+      <img src="rabby-internal://assets/icons/top-bar/select.svg" />
     </div>
   );
 };
@@ -63,10 +62,9 @@ export const AddNewAccount = ({ className }: { className?: string }) => {
 
   return (
     <div
-      className={clsx(styles.addNewAccount, className)}
-      style={{
-        visibility: showDropdown ? 'hidden' : 'visible',
-      }}
+      className={clsx(styles.addNewAccount, className, {
+        [styles.hover]: showDropdown,
+      })}
       ref={divRef}
       onMouseEnter={() => {
         const pos = divRef.current?.getBoundingClientRect();

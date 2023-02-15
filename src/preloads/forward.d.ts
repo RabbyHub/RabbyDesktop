@@ -1,6 +1,8 @@
 /// <reference path="../isomorphic/type-helpers.d.ts" />
 
 type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
+type IDisplayedAccountWithBalance =
+  import('@/renderer/hooks/rabbyx/useAccountToDisplay').IDisplayedAccountWithBalance;
 
 type RendererForwardMessageViewType = IBuiltinViewName | '*';
 
@@ -24,6 +26,12 @@ type ZViewStates = {
   };
   'add-address-modal': {
     keyringType: string;
+  };
+  'address-management': {
+    // nothing
+  };
+  'address-detail': {
+    account: IDisplayedAccountWithBalance;
   };
 };
 
