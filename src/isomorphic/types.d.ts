@@ -87,6 +87,8 @@ type IAppProxyConf = {
   };
 };
 
+type IRunningAppProxyConf = IAppProxyConf & { applied: boolean };
+
 type ISensitiveConfig = {
   enableContentProtected: boolean;
 } & IAppProxyConf;
