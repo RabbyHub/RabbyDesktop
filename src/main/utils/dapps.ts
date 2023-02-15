@@ -208,7 +208,6 @@ export async function detectDapp(
     faviconUrl: undefined,
     faviconBase64: undefined,
     isExistedDapp: !!repeatedDapp,
-    previewImg: null,
   };
 
   if (repeatedDapp) {
@@ -225,19 +224,17 @@ export async function detectDapp(
     };
   }
 
-  const [{ iconInfo, faviconUrl, faviconBase64 }, previewResult] =
-    await Promise.all([
-      parseWebsiteFavicon(finalOrigin, {
-        timeout: DFLT_TIMEOUT,
-        proxy: opts.proxyOnParseFavicon,
-      }),
-      safeCapturePage(checkResult.finalUrl, { timeout: DFLT_TIMEOUT }),
-    ]);
+  const { iconInfo, faviconUrl, faviconBase64 } = await parseWebsiteFavicon(
+    finalOrigin,
+    {
+      timeout: DFLT_TIMEOUT,
+      proxy: opts.proxyOnParseFavicon,
+    }
+  );
 
   data.icon = iconInfo;
   data.faviconUrl = faviconUrl || fallbackFavicon;
   data.faviconBase64 = faviconBase64;
-  data.previewImg = previewResult.previewImg;
 
   return { data };
 }

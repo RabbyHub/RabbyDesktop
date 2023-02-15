@@ -1,5 +1,6 @@
 @import '@/renderer/css/mixins.less';
 
+@previewBoxRadius: 8px;
 .addModal {
   .content {
     padding: 32px 120px 63px 120px;
@@ -87,7 +88,7 @@
 
   .preview {
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
+    border-radius: @previewBoxRadius;
 
     &BtnSuccess {
       background: #27c193;
@@ -313,6 +314,47 @@
     border-bottom-left-radius: 6px;
     border-bottom-right-radius: 6px;
   }
+}
+
+.previewTagContainer {
+  position: relative;
+  border-bottom-left-radius: @previewBoxRadius;
+  border-bottom-right-radius: @previewBoxRadius;
+  overflow: hidden;
+
+  &::after {
+    content: ' ';
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 9;
+    cursor: default;
+  }
+  @previewRealW: 760px;
+  @previewRealH: 393px;
+
+  @embeddedH: 768px;
+  @scale: (@previewRealH / @embeddedH);
+  @ratio: (@previewRealW / @previewRealH);
+
+  height: @previewRealH;
+  width: 100%;
+
+  > webview {
+    width: unit(@ratio * @embeddedH, px);
+    height: @embeddedH;
+    transform: scale(unit(@scale));
+    transform-origin: 0 0;
+    // opacity: 0.6;
+    // transition: cubic-bezier(0.4, 0, 1, 1) 0.3s opacity;
+  }
+
+  // &:hover > webview {
+  //   opacity: 1;
+  // }
 }
 
 .editableInput {
