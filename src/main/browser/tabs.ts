@@ -380,6 +380,8 @@ export class Tabs extends EventEmitter {
     tab.show();
     this.selected = tab;
     this.emit('tab-selected', tab);
+
+    return tab;
   }
 
   unSelectAll() {

@@ -202,8 +202,23 @@ onIpcMainEvent(
     const mainTabbedWin = await onMainWindowReady();
     if (mainTabbedWin.window.id !== winId) return;
 
+    const prevSelected = mainTabbedWin.tabs.selected;
+    if (prevSelected) {
+      emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
+        type: 'hide',
+        tabId: prevSelected.id,
+      });
+    }
+
     await clearCaptureState();
-    mainTabbedWin?.tabs.select(tabId);
+    const selected = mainTabbedWin?.tabs.select(tabId);
+    if (selected?.view?.webContents.isLoading()) {
+      emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
+        type: 'show',
+        tabURL: selected.view.webContents.getURL(),
+        tabId: selected.id,
+      });
+    }
     getLatestCapturedActiveTab();
   }
 );
