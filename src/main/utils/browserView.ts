@@ -35,6 +35,9 @@ export class BrowserViewManager {
     delete this.busyViews[view.webContents.id];
 
     if (!view.webContents.isDestroyed()) {
+      view.webContents.stop();
+      view.webContents.clearHistory();
+
       redirectToAboutBlank(view.webContents);
       this.idleViews[view.webContents.id] = view;
     }
