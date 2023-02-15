@@ -1,7 +1,7 @@
 import { ReceiveModalWraper } from '@/renderer/components/ReceiveModal';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
 import IconReceive from '../../../../../assets/icons/home/receive.svg?rc';
 import IconSend from '../../../../../assets/icons/home/send.svg?rc';
 import IconSwap from '../../../../../assets/icons/home/swap.svg?rc';
@@ -46,22 +46,25 @@ const ActionList = styled.ul`
 `;
 
 const RightBar = () => {
-  const navigation = useNavigate();
   const [isShowReceive, setIsShowReceive] = useState(false);
 
+  const navigateTo = useNavigate();
   const actions = [
     {
       id: 'swap',
       name: 'swap',
       icon: <IconSwap width="35px" height="35px" />,
       onClick: () => {
-        navigation('/mainwin/swap');
+        navigateTo('/mainwin/swap');
       },
     },
     {
       id: 'send',
       name: 'Send',
       icon: <IconSend width="35px" height="35px" />,
+      onClick: () => {
+        navigateTo('/mainwin/send-token');
+      },
     },
     {
       id: 'receive',

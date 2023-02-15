@@ -159,6 +159,10 @@ type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
 type OpenApiService = import('@debank/rabby-api').OpenApiService;
 
 export type RabbyXMethod = {
+  'walletController.requestETHRpc': (
+    data: { method: string; params: any },
+    chainId: string
+  ) => any;
   'walletController.sendRequest': <T = any>(data: any) => T;
   'walletController.verifyPassword': (password: string) => void;
   'walletController.changeAccount': (account: Account) => void;
@@ -237,6 +241,14 @@ export type RabbyXMethod = {
   ) => void;
   'walletController.getWhitelist': () => string[];
   'walletController.isWhitelistEnabled': () => boolean;
+  'walletController.setLastTimeSendToken': (
+    address: string,
+    token: TokenItem
+  ) => void;
+  'walletController.getLastTimeGasSelection': (
+    id: keyof GasCache
+  ) => ChainGas | null;
+  'walletController.getLastTimeSendToken': (address: string) => TokenItem;
   'walletController.getSwap': (
     k?: keyof SwapState
   ) => typeof k extends void ? SwapState : SwapState[keyof SwapState];
