@@ -12,11 +12,15 @@ import { MainContainer } from './MainContainer';
 import { HDManagerStateContext, sleep } from './utils';
 import { Modal } from '../Modal/Modal';
 
-interface Props {
+export interface Props {
   HDName?: string;
+  onRetry?: () => void;
 }
 
-export const TrezorManager: React.FC<Props> = ({ HDName = 'Trezor' }) => {
+export const TrezorManager: React.FC<Props> = ({
+  HDName = 'Trezor',
+  onRetry,
+}) => {
   const [loading, setLoading] = React.useState(true);
   const { getCurrentAccounts } = React.useContext(HDManagerStateContext);
   const [visibleAdvanced, setVisibleAdvanced] = React.useState(false);
@@ -70,10 +74,16 @@ export const TrezorManager: React.FC<Props> = ({ HDName = 'Trezor' }) => {
     } else {
       setPreventLoading(true);
       modal.error({
-        content: `${HDName}Connect has stopped. Please refresh the page to connect again.`,
-        okText: 'Refresh',
+        className: 'RabbyModal inherit',
+        wrapClassName: 'p-20',
+        content: (
+          <div className="text-white">
+            {`${HDName}Connect has stopped. Please retry to connect again.`}
+          </div>
+        ),
+        okText: 'Retry',
         onOk() {
-          window.location.reload();
+          onRetry?.();
         },
       });
     }

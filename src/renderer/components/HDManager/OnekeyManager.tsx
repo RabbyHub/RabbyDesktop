@@ -1,6 +1,6 @@
 import React from 'react';
-import { TrezorManager } from './TrezorManager';
+import { TrezorManager, Props } from './TrezorManager';
 
-export const OneKeyManager: React.FC = () => {
-  return <TrezorManager HDName="OneKey" />;
+export const OneKeyManager: React.FC<Props> = (props) => {
+  return <TrezorManager {...props} HDName="OneKey" />;
 };

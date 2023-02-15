@@ -32,12 +32,12 @@ export const CommonHDManagerModal: React.FC<Props> = ({
   const idRef = React.useRef<number | null>(null);
   const isLedger = keyring === HARDWARE_KEYRING_TYPES.Ledger.type;
 
-  const closeConnect = React.useCallback(() => {
-    walletController.requestKeyring(keyring, 'cleanUp', idRef.current);
+  const closeConnect = React.useCallback(async () => {
+    return walletController.requestKeyring(keyring, 'cleanUp', idRef.current);
   }, []);
 
-  React.useEffect(() => {
-    walletController
+  const initConnect = React.useCallback(async () => {
+    return walletController
       .connectHardware({
         type: keyring,
         isWebHID: true,
@@ -65,6 +65,14 @@ export const CommonHDManagerModal: React.FC<Props> = ({
           );
         }
       });
+  }, []);
+
+  const onRetry = React.useCallback(() => {
+    walletController.requestKeyring(keyring, 'unlock', idRef.current);
+  }, []);
+
+  React.useEffect(() => {
+    initConnect();
     window.addEventListener('beforeunload', () => {
       closeConnect();
     });
@@ -87,7 +95,7 @@ export const CommonHDManagerModal: React.FC<Props> = ({
       <HDManagerStateProvider keyringId={idRef.current} keyring={keyring}>
         <div className="HDManager">
           <main>
-            <Manager />
+            <Manager onRetry={onRetry} />
             {showEntryButton && (
               <Button
                 onClick={onCancel}
