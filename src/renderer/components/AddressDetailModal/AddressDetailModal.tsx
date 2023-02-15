@@ -20,7 +20,7 @@ export const AddressDetailModal: React.FC = () => {
     [removeAddress, getHighlightedAddressesAsync, closeSubview]
   );
 
-  if (!svState.account) return null;
+  if (!svVisible || !svState?.account) return null;
 
   return (
     <Modal
