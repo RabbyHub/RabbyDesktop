@@ -7,7 +7,7 @@ project_dir=$(dirname "$script_dir")
 
 # npm run package:darwin:arm64;
 if [ -e $project_dir/release/build-darwin-arm64-reg/rabby-wallet-desktop-installer-arm64-${VERSION}.dmg ]; then
-  TARGET=$project_dir/release/rabby-wallet-desktop-installer-m1-${VERSION}.dmg
+  TARGET=$project_dir/release/rabby-wallet-desktop-installer-silicon-${VERSION}.dmg
   rm -f $TARGET;
 
   cp $project_dir/release/build-darwin-arm64-reg/rabby-wallet-desktop-installer-arm64-${VERSION}.dmg $TARGET;
