@@ -70,7 +70,10 @@ export function PreviewWebview({
 
   return (
     <Container
-      className={classNames(containerClassName, 'preview-webview-load-failed')}
+      className={classNames(
+        containerClassName,
+        isLoadFailed && 'preview-webview-load-failed'
+      )}
       ref={containerRef}
     >
       <webview
