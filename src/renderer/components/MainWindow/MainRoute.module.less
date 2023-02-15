@@ -13,6 +13,27 @@
 
 @headerBlockOffset: 10px;
 
+:global {
+  html.os-darwin {
+    :local {
+      .headerBlock:not(.floatingAccountComponent) {
+        position: relative;
+        &::after {
+          content: ' ';
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          z-index: -1;
+          -webkit-app-region: drag;
+          top: 0;
+          left: 0;
+          right: 0;
+        }
+      }
+    }
+  }
+}
+
 .headerBlock {
   padding-top: @headerBlockOffset;
   height: var(--mainwin-headerblock-offset);
@@ -23,7 +44,7 @@
   padding-left: 0;
   padding-right: 0;
 
-  &.titleLess {
+  &.floatingAccountComponent {
     position: absolute;
     width: 100%;
 

@@ -67,7 +67,8 @@ export default function MainWindowRoute({
         <div
           className={classNames(
             styles.headerBlock,
-            matchedData?.floatingAccountComponent && styles.titleLess
+            matchedData?.floatingAccountComponent &&
+              styles.floatingAccountComponent
           )}
         >
           <div className={styles.pageTitle}>{matchedData?.title || null}</div>
