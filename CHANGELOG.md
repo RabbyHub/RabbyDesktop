@@ -1,7 +1,33 @@
 
+v0.4.5 / 2023-02-15
+==================
+
+  * chore: code cleanup.
+  * chore: update rename_dist.sh
+  * feat: use window inner copied-web-addr-tip.
+  * feat: better zview state management.
+  * fix: type.
+  * feat: migrate z-popup as shell popup-view.
+  * feat: allow update subview's state via `useZPopupViewState`
+  * feat: fill missing favicon if tab got it.
+  * feat: improve effect on detect-dapp and capturing page.
+  * feat: recover switch-chain window temporarily. (#116)
+  * feat: support callback on `zActions.showZSubview`.
+  * fix: tuning style of dappViewGasket & DappReadonlyModal (#115)
+  * fix: sidebar style (#113)
+  * fix: add url (#114)
+  * feat: normalize.
+  * fix: add dapp (#111)
+  * feat: support z-popup. (#110)
+  * chore: cleanup workflow of proxy.
+  * feat: always apply user defined proxy settings.
+  * feat: upgrade rabbyx for new sign window style.
+  * fix: update account list (#109)
+
 v0.4.4 / 2023-02-10
 ===================
 
+  * Release v0.4.4
   * feat: vary persisted/runtime proxy config, improve proxy stablity.
   * fix: avoid repeat opening dapp tab.
   * feat: update add dapp  (#106)
