@@ -11,11 +11,13 @@ import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import { BrowserViewManager } from '../utils/browserView';
 import { desktopAppStore } from '../store/desktopApp';
+import { getAssetPath } from '../utils/app';
 
 const viewMngr = new BrowserViewManager({
   webPreferences: {
     safeDialogs: true,
     safeDialogsMessage: 'Stop consecutive dialogs',
+    preload: getAssetPath('./preloads/dappViewPreload.js'),
   },
 });
 
