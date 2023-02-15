@@ -115,6 +115,13 @@ export function isMainWinShellWebUI(url: string) {
     url.includes('__webuiIsMainWindow=true')
   );
 }
+export function isForTrezorLikeWebUI(url: string) {
+  return (
+    url.startsWith('chrome-extension:') &&
+    url.includes('__webuiForTrezorLike=true')
+  );
+}
+
 function _isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
   const urlInfo = new URL(url);
   const queryInfo = parseQueryString(urlInfo.search);

@@ -12,6 +12,8 @@ export const NativeAppSizes = {
   dappViewPaddingOffsetToSidebar,
 
   rabbyxNotificationWindowWidth: 400,
+
+  trezorLikeConnectionWindowHeight: 52,
 };
 
 const sidebarWidth = 160;
