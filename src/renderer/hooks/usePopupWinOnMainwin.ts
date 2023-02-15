@@ -332,11 +332,29 @@ export function useZPopupViewState<T extends keyof ZViewStates>(
     });
   }, [svType, setSvStates, sendToMain]);
 
-  const { visible: svVisible, state: SVState } = svStates[svType] || {};
+  const { visible: svVisible, state: svState } = svStates[svType] || {};
+
+  const setSvState = useCallback(
+    (svPartials: IZPopupSubviewState[T]) => {
+      setSvStates((prev) => {
+        const partials = {
+          ...prev,
+          [svType]: {
+            ...prev[svType],
+            state: svPartials,
+          },
+        };
+
+        return partials;
+      });
+    },
+    [svType, setSvStates]
+  );
 
   return {
+    setSvState,
     svVisible: !!svVisible,
-    svState: SVState,
+    svState,
     /**
      * @deprecated for compatibility
      */
