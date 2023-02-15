@@ -51,7 +51,6 @@ export default function TransparentToast() {
   const { closeSubview, svVisible } = useZPopupViewState(
     'security-notification',
     (payload) => {
-      console.debug('[security-notification] tttttt', payload);
       if (payload?.state?.type === 'full-web3-addr') {
         toastMessage({
           icon: null,
@@ -77,6 +76,7 @@ export default function TransparentToast() {
         timerRef.current = setTimeout(() => {
           message.destroy(TOAST_KEY);
           timerRef.current = undefined;
+          closeSubview();
         }, TIMEOUT);
       }
     }
