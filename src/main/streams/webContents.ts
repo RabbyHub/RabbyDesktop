@@ -127,6 +127,8 @@ export const setListeners = {
       const evtWebContents = (evt as any).sender as Electron.WebContents;
       const currentUrl = evtWebContents.getURL();
 
+      if (!currentUrl) return false;
+
       const dapps = getAllDapps();
 
       const { targetInfo, isFromDapp, shouldKeepTab, isToSameOrigin } =
