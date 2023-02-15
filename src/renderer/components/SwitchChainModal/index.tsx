@@ -1,18 +1,13 @@
 import { Input, Tooltip } from 'antd';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import clsx from 'clsx';
 
 import { Modal as RModal } from '@/renderer/components/Modal/Modal';
-import {
-  useZPopupLayerOnMain,
-  useZPopupViewState,
-} from '@/renderer/hooks/usePopupWinOnMainwin';
+import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { useBodyClassNameOnMounted } from '@/renderer/hooks/useMountedEffect';
 import IconRcSearch from '@/../assets/icons/swap/search.svg?rc';
 import { usePreference } from '@/renderer/hooks/rabbyx/usePreference';
 import { Chain, CHAINS_ENUM, CHAINS_LIST } from '@debank/common';
-import { useClickOutSide } from '@/renderer/hooks/useClick';
-import { useMessageForwarded } from '@/renderer/hooks/useViewsMessage';
 import styles from './index.module.less';
 
 type OnPinnedChanged = (
@@ -48,7 +43,10 @@ function ChainItem({
         offset: [40, 0],
       }}
     >
-      <div className={styles.chainItem} onClick={onClick}>
+      <div
+        className={clsx(styles.chainItem, !support && styles.notSupport)}
+        onClick={support ? onClick : undefined}
+      >
         <div className={styles.chainItemLeft}>
           <img src={chain.logo} className={styles.chainItemIcon} />
           <div className={styles.chainItemName}>{chain.name}</div>
@@ -57,8 +55,8 @@ function ChainItem({
           className={clsx(styles.chainItemStar, pinned ? styles.block : '')}
           src={
             pinned
-              ? 'rabby-internal://assets/icons/select-chain/icon-pinned-fill.svg'
-              : 'rabby-internal://assets/icons/select-chain/icon-pinned.svg'
+              ? 'rabby-internal://assets/icons/swap/pinned.svg'
+              : 'rabby-internal://assets/icons/swap/unpinned.svg'
           }
           onClick={(evt) => {
             evt.stopPropagation();
@@ -98,8 +96,6 @@ function SwitchChainModalInner({
   disabledTips?: React.ReactNode;
 }) {
   useBodyClassNameOnMounted('switch-chain-subview');
-
-  const zActions = useZPopupLayerOnMain();
 
   const { preferences, setChainPinned } = usePreference();
 
@@ -184,7 +180,6 @@ function SwitchChainModalInner({
                     pinned
                     onClick={async () => {
                       await onChange(chain.enum);
-                      // zActions.hideZSubview('switch-chain');
                     }}
                     onPinnedChange={onPinnedChange}
                     checked={value === chain.enum}
@@ -206,7 +201,6 @@ function SwitchChainModalInner({
                   pinned={false}
                   onClick={async () => {
                     await onChange(chain.enum);
-                    // zActions.hideZSubview('switch-chain');
                   }}
                   onPinnedChange={onPinnedChange}
                   checked={value === chain.enum}
@@ -225,22 +219,15 @@ function SwitchChainModalInner({
 }
 
 export default function SwitchChainModal() {
-  const { svVisible, svState, closeSubview } =
+  const { svVisible, svState, setSvState, closeSubview } =
     useZPopupViewState('switch-chain');
 
-  console.log({ svState });
-
-  const ZActions = useZPopupLayer();
-
-  const onChainChange = useCallback(
-    (v: CHAINS_ENUM) => {
-      // throw new Error('Function not implemented.');
-      if (v) {
-        ZActions.showZSubview('switch-chain', { value: v });
-      }
-    },
-    [ZActions]
-  );
+  const onChainChange = (v: CHAINS_ENUM) => {
+    if (v) {
+      setSvState({ value: v });
+      closeSubview();
+    }
+  };
 
   if (!svState) return null;
 
@@ -259,56 +246,3 @@ export default function SwitchChainModal() {
     </RModal>
   );
 }
-
-export const useSwitchChainModal = <T extends HTMLElement>(
-  cb?: (c: CHAINS_ENUM) => void,
-  clickOutSide = true
-) => {
-  const ref = useRef<T>(null);
-  const ZActions = useZPopupLayer();
-  // const { svState } = useZPopupViewState('switch-chain');
-
-  useClickOutSide(ref, () => {
-    if (clickOutSide) {
-      ZActions.hideZSubview('switch-chain');
-    }
-  });
-
-  // useMessageForwarded(
-  //   {
-  //     type: 'update-subview-state',
-  //     targetView: 'main-window',
-  //   },
-  //   (payload) => {
-  //     const { partials } = payload;
-  //     // @ts-expect-error
-  //     const chain = partials?.['switch-chain']?.state?.value;
-  //     if (chain) {
-  //       cb?.(chain);
-  //     }
-  //     // if (!partials) return;
-
-  //     // setSvStates((prev) => ({
-  //     //   ...prev,
-  //     //   ...partials,
-  //     // }));
-  //   }
-  // );
-
-  return useMemo(
-    () => ({
-      ref,
-      open: (svPartials?: {
-        value?: CHAINS_ENUM | undefined;
-        title?: string | undefined;
-        supportChains?: CHAINS_ENUM[] | undefined;
-        disabledTips?: string | undefined;
-      }) =>
-        ZActions.showZSubview('switch-chain', {
-          value: CHAINS_ENUM.ETH,
-          ...svPartials,
-        }),
-    }),
-    [ZActions]
-  );
-};

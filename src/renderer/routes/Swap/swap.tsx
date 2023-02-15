@@ -779,12 +779,8 @@ export const Swap = () => {
             <ChainSelect
               value={chain}
               onChange={handleChain}
-              disabledTips={
-                <span style={{ fontSize: 12 }}>
-                  Not supported by the current exchange
-                </span>
-              }
-              title={<>Select the chain supported by {name}</>}
+              disabledTips="Not supported by the current exchange"
+              title={`Select the chain supported by ${name}`}
             />
             {!!payAmount && !!payToken && !!receiveToken && (
               <IconRefresh className={styles.refresh} refresh={refresh} />

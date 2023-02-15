@@ -22,10 +22,9 @@ import { detectOS } from '@/isomorphic/os';
 import classNames from 'classnames';
 
 import { useCurrentConnection } from '@/renderer/hooks/rabbyx/useConnection';
-import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
+import { useSwitchChainModal } from '@/renderer/hooks/useSwitchChainModal';
 import styles from './index.module.less';
 import { toastMessage } from '../TransparentToast';
-import { useSwitchChainModal } from '../SwitchChainModal';
 
 const isDarwin = detectOS() === 'darwin';
 
@@ -96,10 +95,8 @@ export const TopNavBar = () => {
     }
   }, [activeTab?.id]);
 
-  const zActions = useZPopupLayerOnMain();
-
-  const { ref: divRef, open } = useSwitchChainModal<HTMLDivElement>((c) => {
-    console.log('c', c);
+  const { ref: divRef, open } = useSwitchChainModal<HTMLDivElement>((chain) => {
+    switchChain(chain);
   });
 
   return (
@@ -158,18 +155,9 @@ export const TopNavBar = () => {
             <ConnectedChain
               ref={divRef}
               chain={currentConnectedSite.chain}
-              onClick={(event) => {
-                // zActions.showZSubview('switch-chain', {
-                //   dappTabInfo: {
-                //     id: activeTab?.id,
-                //     url: activeTab?.url,
-                //   },
-                // });
+              onClick={() => {
                 open({
                   value: currentConnectedSite.chain,
-                  // onchange: () => {
-                  //   console.log('test');
-                  // },
                 });
               }}
             />
