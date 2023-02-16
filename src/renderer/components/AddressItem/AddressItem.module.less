@@ -1,38 +1,42 @@
 .AddressItem {
   border-radius: 8px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.1);
   padding: 16px;
   width: 480px;
   text-align: left;
   margin-bottom: 16px;
 
   .name {
-    font-size: 20px;
-    line-height: 24px;
-    color: var(--color-title);
-    margin-bottom: 4px;
-    font-weight: 700;
+    font-size: 15px;
+    line-height: 18px;
+    color: #fff;
+    font-weight: 500;
     display: flex;
     align-items: center;
+    height: 24px;
+    overflow: hidden;
   }
 
   .address {
-    font-size: 16px;
-    line-height: 18px;
-    line-height: 1;
-    color: var(--color-paragraph);
+    font-size: 13px;
+    line-height: 16px;
+    font-weight: 400;
+    color: #fff;
+    opacity: 0.6;
   }
 
   .editButton {
     padding: 0;
-    height: 24px;
-    width: 24px;
-    margin-left: 4px;
+    height: 16px;
+    width: 16px;
+    margin-left: 6px;
     align-items: center;
     display: flex;
   }
 
   .icon {
+    height: 16px;
+    width: 16px;
     display: block;
   }
 
@@ -42,5 +46,7 @@
     padding-top: 0;
     padding-bottom: 0;
     font-weight: inherit;
+    background: transparent;
+    color: inherit;
   }
 }

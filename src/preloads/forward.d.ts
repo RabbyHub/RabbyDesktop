@@ -33,6 +33,7 @@ type ZViewStates = {
   };
   'address-detail': {
     account: IDisplayedAccountWithBalance;
+    backable?: boolean;
   };
   'select-add-address-type-modal': {
     showEntryButton?: boolean;

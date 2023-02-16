@@ -112,6 +112,7 @@ export const MainContainer: React.FC = () => {
     if (selectedAccount) {
       zActions.showZSubview('address-detail', {
         account: selectedAccount,
+        backable: true,
       });
       setSelectedAccount(undefined);
     }

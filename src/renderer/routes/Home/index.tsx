@@ -19,6 +19,7 @@ import useHistoryProtocol, {
 import { toastCopiedWeb3Addr } from '@/renderer/components/TransparentToast';
 import { copyText } from '@/renderer/utils/clipboard';
 
+import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import ChainList from './components/ChainList';
 import Curve from './components/Curve';
 import PortfolioView from './components/PortfolioView';
@@ -76,9 +77,9 @@ const HomeWrapper = styled.div`
       margin-bottom: 20px;
       display: flex;
       align-items: center;
-      .icon-copy {
+      .icon {
         cursor: pointer;
-        margin-left: 6px;
+        margin-left: 8px;
       }
     }
     .balance {
@@ -328,6 +329,8 @@ const Home = () => {
     );
   }, [totalBalance, currentAccount]);
 
+  const { showZSubview } = useZPopupLayerOnMain();
+
   return (
     <HomeBody>
       <HomeWrapper>
@@ -346,8 +349,22 @@ const Home = () => {
                 >
                   {ellipsis(currentAccount?.address || '')}
                   <img
-                    className="icon-copy"
+                    className="icon"
                     src="rabby-internal://assets/icons/home/copy.svg"
+                  />
+                </span>
+
+                <span
+                  className="inline-flex items-center"
+                  onClick={() => {
+                    showZSubview('address-detail', {
+                      account: currentAccount as IDisplayedAccountWithBalance,
+                    });
+                  }}
+                >
+                  <img
+                    className="icon"
+                    src="rabby-internal://assets/icons/home/info.svg"
                   />
                 </span>
               </div>

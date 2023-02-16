@@ -14,12 +14,14 @@ import { QRCodePanel } from './QRCodePanel';
 import { URLPanel } from './URLPanel';
 import styles from './WalletConnectModal.module.less';
 
+type Account = import('@/isomorphic/types/rabbyx').Account;
+
 export const DEFAULT_BRIDGE = 'https://bridge.walletconnect.org';
 
 const DEFAULT_BRAND = WALLET_BRAND_TYPES.WalletConnect;
 
 interface Props {
-  onSuccess: () => void;
+  onSuccess: (accounts: Account[]) => void;
 }
 
 export const WalletConnectModalContent: React.FC<Props> = ({ onSuccess }) => {
@@ -31,10 +33,10 @@ export const WalletConnectModalContent: React.FC<Props> = ({ onSuccess }) => {
   const [tab, setTab] = React.useState<'QRCode' | 'URL'>('QRCode');
 
   const [run] = useWalletRequest(walletController.importWalletConnect, {
-    onSuccess() {
+    onSuccess(data) {
       // back to home page
       getAllAccountsToDisplay();
-      onSuccess();
+      onSuccess(data);
     },
     onError(err: { message: any }) {
       message.error(err?.message);

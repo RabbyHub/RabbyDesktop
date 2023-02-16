@@ -15,16 +15,10 @@ export const SelectAddAddressTypeModalInSubview: React.FC = () => {
 
   React.useEffect(() => {
     if (keyringType) {
-      showZSubview(
-        'add-address-modal',
-        {
-          keyringType,
-          showEntryButton: !!svState?.showEntryButton,
-        },
-        () => {
-          closeSubview();
-        }
-      );
+      showZSubview('add-address-modal', {
+        keyringType,
+        showEntryButton: !!svState?.showEntryButton,
+      });
       setKeyringType(undefined);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

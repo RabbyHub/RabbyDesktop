@@ -29,7 +29,7 @@ export const AddressDetailModal: React.FC = () => {
       title="Address detail"
       onCancel={closeSubview}
       open={svVisible}
-      backable
+      backable={svState.backable}
       onBack={closeSubview}
     >
       <AccountDetail
