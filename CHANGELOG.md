@@ -1,7 +1,20 @@
 
-v0.4.5 / 2023-02-15
+v0.4.6 / 2023-02-16
 ==================
 
+  * style: tuning.
+  * feat: greater draggable area on darwin.
+  * feat: true realtime preview on add dapp. (#122)
+  * feat: only allow BrowserView on tabs connect wallet by default. (#119)
+  * feat: disable clipboard service, use lighter copy tips. (#120)
+  * feat: improve show/hide of loading view. (#121)
+  * fix: not always apply user defined proxy.
+  * Feat/swap (#118)
+
+v0.4.5 / 2023-02-15
+===================
+
+  * Release v0.4.5
   * chore: code cleanup.
   * chore: update rename_dist.sh
   * feat: use window inner copied-web-addr-tip.
