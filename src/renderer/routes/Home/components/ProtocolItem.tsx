@@ -38,6 +38,7 @@ const ProtocolItemWrapper = styled.div`
       cursor: pointer;
       margin-left: 8px;
       width: 14px;
+      display: none;
     }
     .protocol-bind {
       display: none;
@@ -69,6 +70,9 @@ const ProtocolItemWrapper = styled.div`
       }
     }
     &:hover {
+      .icon-relate {
+        display: block;
+      }
       .protocol-bind {
         display: flex;
       }
