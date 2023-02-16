@@ -48,12 +48,16 @@ const TokenChange = ({
   if (sends.length + receives.length > 2) {
     return (
       <TxChangeWrapper className="ui token-change">
-        <div className="token-change-item is-success">
-          + {`${receives.length} Assets`}
-        </div>
-        <div className="token-change-item is-success">
-          - {`${sends.length} Assets`}
-        </div>
+        {receives.length > 0 && (
+          <div className="token-change-item is-success">
+            + {`${receives.length} Assets`}
+          </div>
+        )}
+        {sends.length > 0 && (
+          <div className="token-change-item is-success">
+            - {`${sends.length} Assets`}
+          </div>
+        )}
       </TxChangeWrapper>
     );
   }
