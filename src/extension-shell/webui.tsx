@@ -14,6 +14,7 @@ import {
   isMainWinShellWebUI,
   isRabbyXNotificationWinShellWebUI,
 } from '@/isomorphic/url';
+import { HardwareConnectTopbar } from '@/renderer/components/HardwareConnectTopbar/HardwareConnectTopbar';
 
 if (isMainWinShellWebUI(window.location.href)) {
   const container = document.createElement('div');
@@ -24,11 +25,9 @@ if (isMainWinShellWebUI(window.location.href)) {
 } else if (isForTrezorLikeWebUI(window.location.href)) {
   document.documentElement.classList.add('__rabbyx-trezor-like', 'popup-win');
 
-  const container = document.createElement('div');
-  container.id = 'root';
-  document.body.appendChild(container);
+  const container = document.getElementById('topbar')!;
   const root = createRoot(container);
-  root.render(<div className="bg-blue h-[100%]" />);
+  root.render(<HardwareConnectTopbar />);
 } else if (!isRabbyXNotificationWinShellWebUI(window.location.href)) {
   document.documentElement.classList.add('__rabbyx-browser-like', 'popup-win');
 
