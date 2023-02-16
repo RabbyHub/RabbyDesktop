@@ -8,6 +8,7 @@ export const AddressManagementModal: React.FC = () => {
 
   return (
     <Modal
+      centered
       width={520}
       onCancel={closeSubview}
       open={svVisible}
