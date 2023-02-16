@@ -73,7 +73,7 @@ export default function TransparentToast() {
             >
               <div className="flex items-center">
                 <RcIconToastSuccess className="mr-6px w-[16px] h-[16px]" />
-                Copied:
+                <span style={{ color: '#27C193' }}>Copied:</span>
               </div>
               <div>{payload.state.web3Addr}</div>
             </ToastContent>
@@ -112,7 +112,7 @@ export async function toastCopiedWeb3Addr(text: string) {
         >
           <div className="flex items-center">
             <RcIconToastSuccess className="mr-6px w-[16px] h-[16px]" />
-            Copied:
+            <span style={{ color: '#27C193' }}>Copied:</span>
           </div>
           <div>{text}</div>
         </ToastContent>
