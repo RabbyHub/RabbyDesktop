@@ -215,11 +215,15 @@ export class Tab {
     const hideTopbar =
       !this.$meta.topbarStacks?.tabs && !this.$meta.topbarStacks?.navigation;
 
-    const { isOfMainWindow } = this.$meta;
+    const { isOfMainWindow, isOfTreasureLikeConnection } = this.$meta;
     const isCollapsedMainWindow =
       isOfMainWindow && desktopAppStore.get('sidebarCollapsed');
 
-    const topOffset = hideTopbar ? 0 : NATIVE_HEADER_H;
+    const topOffset = hideTopbar
+      ? 0
+      : !isOfTreasureLikeConnection
+      ? NATIVE_HEADER_H
+      : NativeAppSizes.trezorLikeConnectionWindowHeaderHeight;
 
     if (this._isAnimating) {
       this.view!.setAutoResize({ width: true, height: true });
