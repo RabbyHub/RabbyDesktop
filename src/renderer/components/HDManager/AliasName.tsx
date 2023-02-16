@@ -38,8 +38,10 @@ export const AliasName: React.FC<Props> = ({
   }, []);
 
   const onClickCheck = React.useCallback(() => {
-    setFocus(false);
-    setHover(false);
+    setTimeout(() => {
+      setFocus(false);
+      setHover(false);
+    }, 0);
   }, []);
 
   // const cachedValue = cachedName.get(address);
@@ -72,7 +74,7 @@ export const AliasName: React.FC<Props> = ({
   return (
     <div className="AliasName">
       {hover || focus ? (
-        <div className="input-group">
+        <div className="input-group" onBlur={onClickCheck}>
           <Input
             className="alias-input"
             defaultValue={value}
