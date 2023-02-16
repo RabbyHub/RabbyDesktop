@@ -224,7 +224,7 @@ export default function SwitchChainModal() {
 
   const onChainChange = (v: CHAINS_ENUM) => {
     if (v) {
-      setSvState({ value: v });
+      setSvState({ value: v, isCancel: false });
       closeSubview();
     }
   };
@@ -239,6 +239,7 @@ export default function SwitchChainModal() {
       mask
       width={488}
       onCancel={() => {
+        setSvState({ isCancel: true });
         closeSubview();
       }}
     >
