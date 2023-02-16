@@ -9,10 +9,13 @@ import {
   IconTooltipInfo,
 } from '@/../assets/icons/mainwin-settings';
 
-import { Button, Modal, Switch, SwitchProps, Tooltip } from 'antd';
+import { Button, Modal, SwitchProps, Tooltip } from 'antd';
 import { useSettings } from '@/renderer/hooks/useSettings';
 import styled from 'styled-components';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
+import { ModalConfirm } from '@/renderer/components/Modal/Confirm';
+import { Switch } from '@/renderer/components/Switch/Switch';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
 import {
@@ -144,6 +147,8 @@ export function MainWindowSettings() {
 
   const { setIsViewingDevices } = useIsViewingDevices();
 
+  const { whitelist, enable, toggleWhitelist } = useWhitelist();
+
   return (
     <div className={styles.settingsPage}>
       {/* TODO: implement Update Area */}
@@ -190,6 +195,32 @@ export function MainWindowSettings() {
                 ),
                 onOk: () => {
                   toggleEnableContentProtection(nextEnabled);
+                },
+              });
+            }}
+          />
+          <ItemSwitch
+            checked={enable}
+            name={
+              <>
+                <div className="flex flex-col gap-[4px]">
+                  <span className="text-14 font-medium">Whitelist</span>
+                  <span className="text-14 text-white opacity-[0.6]">
+                    You can only send assets to whitelisted address
+                  </span>
+                </div>
+              </>
+            }
+            icon="rabby-internal://assets/icons/send-token/whitelist.svg"
+            onChange={(nextEnabled: boolean) => {
+              ModalConfirm({
+                height: 268,
+                title: `${nextEnabled ? 'Enable' : 'Disable'} Whitelist`,
+                content: nextEnabled
+                  ? 'Once enabled, you can only send assets to the addresses in the whitelist using Rabby.'
+                  : 'You can send assets to any address once disabled',
+                onOk: () => {
+                  toggleWhitelist(nextEnabled);
                 },
               });
             }}

@@ -177,6 +177,7 @@ export const GasSelector = ({
       <div className={clsx('content', open && 'flex')}>
         {gasList.map((item) => (
           <GasItem
+            key={item.level}
             active={selectGas?.level === item.level}
             onClick={(e) => panelSelection(e, item)}
           >

@@ -23,8 +23,15 @@ import { isSameAddress } from '@/renderer/utils/address';
 import { formatAmount, splitNumberByStep } from '@/renderer/utils/number';
 import AccountCard from '@/renderer/components/AccountCard';
 import AddressViewer from '@/renderer/components/AddressViewer';
+import { ModalConfirm } from '@/renderer/components/Modal/Confirm';
+import { copyText } from '@/renderer/utils/clipboard';
+import { toastCopiedWeb3Addr } from '@/renderer/components/TransparentToast';
 import GasSelector from './components/GasSelector';
 import GasReserved from './components/GasReserved';
+import { ChainSelect } from '../Swap/component/ChainSelect';
+import { TokenSelect } from '../Swap/component/TokenSelect';
+import { ContactEditModal } from './components/ContactEditModal';
+import { ContactListModal } from './components/ContactListModal';
 
 const MaxButton = styled.img`
   cursor: pointer;
@@ -39,6 +46,7 @@ const SendTokenWrapper = styled.div`
   margin: 0 auto;
   width: 600px;
   color: #fff;
+  margin-top: 18px;
   .section {
     background: rgba(0, 0, 0, 0.06);
     border-radius: 8px;
@@ -74,6 +82,13 @@ const SendTokenWrapper = styled.div`
     &:focus {
       box-shadow: none;
     }
+  }
+  .tokenInput {
+    height: 72px;
+    padding: 0 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 4px;
   }
   .ant-form-item:nth-last-child(1) {
     margin-bottom: 0;
@@ -112,6 +127,13 @@ const SendTokenWrapper = styled.div`
       }
     }
   }
+  .balance-error {
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 16px;
+    text-align: right;
+    color: #ff8080;
+  }
   .token-info {
     margin-top: 8px;
     border-radius: 4px;
@@ -144,6 +166,63 @@ const SendTokenWrapper = styled.div`
       &:nth-last-child(1) {
         margin-bottom: 0;
       }
+    }
+  }
+
+  .sendBtn {
+    width: 552px;
+    height: 56px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 24px;
+  }
+
+  .whitelist-alert {
+    display: flex;
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 16px;
+    color: #ff8080;
+    margin-top: 16px;
+    margin-bottom: 16px;
+    justify-content: center;
+    .icon-check {
+      width: 14px;
+      height: 14px;
+      margin-right: 4px;
+    }
+    &__content {
+      max-width: 312px;
+      margin-bottom: 0;
+    }
+    &.granted {
+      color: #fff;
+    }
+  }
+
+  .to-address {
+    .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input,
+    .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input:hover {
+      border-color: #ff8080;
+    }
+    .ant-form-item-explain-error {
+      padding-top: 8px;
+      color: #ff8080;
+    }
+  }
+
+  .footer {
+    padding-top: 24px;
+    position: relative;
+
+    &::before {
+      position: absolute;
+      content: '';
+      top: 0;
+      left: -24px;
+      width: 598px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
     }
   }
 `;
@@ -643,33 +722,10 @@ const SendToken = () => {
     );
   };
 
-  const handleCopyContractAddress = () => {
-    // const clipboard = new ClipboardJS('.send-token', {
-    //   text: function () {
-    //     return currentToken.id;
-    //   },
-    // });
-    // clipboard.on('success', () => {
-    //   message.success({
-    //     duration: 3,
-    //     icon: <i />,
-    //     content: (
-    //       <div>
-    //         <div className="flex gap-4 mb-4">
-    //           <img src={IconSuccess} alt="" />
-    //           Copied
-    //         </div>
-    //         <div className="text-white">{currentToken.id}</div>
-    //       </div>
-    //     ),
-    //   });
-    //   clipboard.destroy();
-    // });
-  };
-
-  const handleClickBack = () => {
-    // history.replace('/');
-  };
+  const handleCopyContractAddress = useCallback((s: string) => {
+    copyText(s);
+    toastCopiedWeb3Addr(s);
+  }, []);
 
   const initByCache = async () => {
     if (!currentAccount) return;
@@ -750,17 +806,13 @@ const SendToken = () => {
 
   const handleClickWhitelistAlert = () => {
     if (whitelistEnabled && !temporaryGrant && !toAddressInWhitelist) {
-      // AuthenticationModalPromise({
-      //   title: 'Grant temporary permission',
-      //   cancelText: 'Cancel',
-      //   wallet,
-      //   onFinished() {
-      //     setTemporaryGrant(true);
-      //   },
-      //   onCancel() {
-      //     // do nothing
-      //   },
-      // });
+      ModalConfirm({
+        title: 'Grant temporary permission',
+        height: 268,
+        onOk: () => {
+          setTemporaryGrant(true);
+        },
+      });
     }
   };
 
@@ -778,9 +830,6 @@ const SendToken = () => {
 
   return (
     <SendTokenWrapper>
-      {/* <PageHeader onBack={handleClickBack} forceShowBack>
-        {t('Send')}
-      </PageHeader> */}
       <Form
         form={form}
         onFinish={handleSubmit}
@@ -790,12 +839,9 @@ const SendToken = () => {
           amount: '',
         }}
       >
-        {/* <TagChainSelector
-          value={chain}
-          onChange={handleChainChanged}
-          showModal={showChainsModal}
-        /> */}
-        <div className="section relative">
+        <ChainSelect value={chain} onChange={handleChainChanged} />
+
+        <div className="section relative mt-16">
           <div className="section-title">From</div>
           <AccountCard alianName={sendAlianName} />
           <div className="section-title">
@@ -913,16 +959,17 @@ const SendToken = () => {
               <div className="balance-error">{balanceError || balanceWarn}</div>
             ) : null}
           </div>
-          <Form.Item name="amount">
+          <Form.Item name="amount" className="mb-0">
             {currentAccount && (
-              // <TokenAmountInput
-              //   token={currentToken}
-              //   onTokenChange={handleCurrentTokenChange}
-              //   chainId={CHAINS[chain].serverId}
-              //   amountFocus={amountFocus}
-              //   inlinePrize
-              // />
-              <div>TokenAmountInput</div>
+              <TokenSelect
+                className="tokenInput"
+                onTokenChange={handleCurrentTokenChange}
+                chainId={CHAINS[chain].serverId}
+                token={currentToken}
+                inlinePrize
+                hideChainIcon={false}
+                logoSize={32}
+              />
             )}
           </Form.Item>
           <div className="token-info">
@@ -934,7 +981,7 @@ const SendToken = () => {
                   <img
                     src="rabby-internal://assets/icons/home/copy.svg"
                     className="icon icon-copy"
-                    onClick={handleCopyContractAddress}
+                    onClick={() => handleCopyContractAddress(currentToken.id)}
                   />
                 </span>
               </div>
@@ -959,12 +1006,7 @@ const SendToken = () => {
             </div>
           </div>
         </div>
-        <div
-          className={clsx(
-            isNativeToken &&
-              'w-full absolute bottom-[32px] left-1/2 -translate-x-1/2'
-          )}
-        >
+        <div>
           {showWhitelistAlert && (
             <div
               className={clsx(
@@ -979,10 +1021,11 @@ const SendToken = () => {
                 {whitelistEnabled && (
                   <img
                     src={
-                      ''
-                      // whitelistAlertContent.success
-                      //   ? IconCheck
-                      //   : IconTemporaryGrantCheckbox
+                      whitelistAlertContent.success
+                        ? 'rabby-internal://assets/icons/send-token/icon-check.svg'
+                        : temporaryGrant
+                        ? 'rabby-internal://assets/icons/send-token/temporary-grant-checkbox.svg'
+                        : 'rabby-internal://assets/icons/send-token/icon-uncheck.svg'
                     }
                     className="icon icon-check inline-block relative -top-1"
                   />
@@ -997,7 +1040,7 @@ const SendToken = () => {
               type="primary"
               htmlType="submit"
               size="large"
-              className="w-[200px]"
+              className="sendBtn"
               loading={isSubmitLoading}
             >
               Send
@@ -1005,18 +1048,18 @@ const SendToken = () => {
           </div>
         </div>
       </Form>
-      {/* <ContactEditModal
-        visible={showEditContactModal}
+      <ContactEditModal
+        open={showEditContactModal}
         address={form.getFieldValue('to')}
         onOk={handleConfirmContact}
         onCancel={handleCancelEditContact}
-        isEdit={!!contactInfo}
       />
+
       <ContactListModal
         visible={showListContactModal}
         onCancel={() => setShowListContactModal(false)}
         onOk={handleConfirmContact}
-      /> */}
+      />
 
       <GasSelector
         visible={gasSelectorVisible}

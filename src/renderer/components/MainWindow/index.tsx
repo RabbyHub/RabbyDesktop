@@ -35,6 +35,7 @@ import Titlebar from '../Titlebar';
 import { TopNavBar } from '../TopNavBar';
 import { MainWindowRouteData } from './type';
 import { DappViewWrapper } from '../DappView';
+import { FixedBackHeader } from '../FixedBackHeader';
 
 function WelcomeWrapper() {
   const { hasFetched, accounts } = useAccounts();
@@ -129,12 +130,12 @@ const router = createRouter([
       },
       {
         path: 'send-token',
-        element: <SendToken />,
-        loader: () => {
-          return {
-            title: 'Send',
-          } as MainWindowRouteData;
-        },
+        element: (
+          <>
+            <FixedBackHeader>Send</FixedBackHeader>
+            <SendToken />
+          </>
+        ),
       },
       {
         path: 'swap',

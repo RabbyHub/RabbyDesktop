@@ -221,7 +221,7 @@ export type RabbyXMethod = {
     : PreferenceState[keyof PreferenceState];
 
   'walletController.importWatchAddress': (address: string) => RabbyAccount[];
-
+  'walletController.getAddedToken': (address: string) => string[];
   'walletController.getAllVisibleAccounts': () => DisplayedKeyring[];
   'walletController.getAllAlianNameByMap': () => Record<string, any>;
   'walletController.getAddressBalance': (
@@ -240,6 +240,10 @@ export type RabbyXMethod = {
     brand?: string | undefined
   ) => void;
   'walletController.getWhitelist': () => string[];
+  'walletController.setWhitelist': (addresses: string[]) => Promise<void>;
+  'walletController.addWhitelist': (addresses: string[]) => Promise<void>;
+  'walletController.toggleWhitelist': (enable: boolean) => Promise<void>;
+
   'walletController.isWhitelistEnabled': () => boolean;
   'walletController.setLastTimeSendToken': (
     address: string,

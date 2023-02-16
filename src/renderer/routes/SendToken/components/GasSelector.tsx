@@ -12,6 +12,12 @@ import { GasLevel, TokenItem } from '@debank/rabby-api/dist/types';
 import { formatTokenAmount } from '@/renderer/utils/number';
 import { Modal } from '@/renderer/components/Modal/Modal';
 
+const StyledModal = styled(Modal)`
+  .ant-modal-header {
+    padding-top: 24px;
+    padding-bottom: 16px;
+  }
+`;
 interface GasSelectorProps {
   chainId: number;
   onChange(gas: GasLevel): void;
@@ -26,10 +32,8 @@ const GasSelectorWrapper = styled.div`
   padding: 0 32px 32px;
   .gas-selector {
     background: rgba(255, 255, 255, 0.1);
-    border: 1px solid #e5e9ef;
     border-radius: 6px;
     display: flex;
-    margin-bottom: 20px;
     padding: 16px;
     flex-direction: column;
 
@@ -57,15 +61,18 @@ const GasSelectorWrapper = styled.div`
       width: 100%;
       height: 18px;
       line-height: 18px;
-      .usmoney {
+      color: #ffffff;
+      font-weight: 500;
+      font-size: 14px;
+      .gasmoney {
+        margin-left: 26px;
         font-size: 15px;
-        color: rgba(255, 255, 255, 0.8);
         line-height: 18px;
         font-weight: 500;
       }
-      .gasmoney {
+      .usmoney {
         font-size: 12px;
-        color: #fff;
+        color: rgba(256, 256, 256, 0.8);
         margin-left: 8px;
       }
     }
@@ -119,6 +126,7 @@ const GasSelectorWrapper = styled.div`
           margin: 4px auto 0;
         }
         .ant-input {
+          color: #ffffff;
           text-align: center !important;
           font-size: 13px !important;
           padding-top: 0;
@@ -129,7 +137,7 @@ const GasSelectorWrapper = styled.div`
         }
         .ant-input:focus,
         .ant-input-focused {
-          color: #4b4d59;
+          color: #ffffff;
         }
       }
     }
@@ -148,7 +156,7 @@ const Description = styled.p`
 const Footer = styled.div`
   display: flex;
   justify-content: center;
-  margin-top: 79px;
+  margin-top: 32px;
 `;
 
 const GasSelector = ({
@@ -248,14 +256,16 @@ const GasSelector = ({
   }, [gas]);
 
   return (
-    <Modal
+    <StyledModal
       title="Set Gas Price (Gwei)"
-      visible={visible}
+      open={visible}
       onBack={onClose}
       onCancel={onClose}
       className="send-token-gas-selector"
-      closable
+      closable={false}
+      maskClosable
       width="480px"
+      centered
     >
       <GasSelectorWrapper>
         <Description>
@@ -264,14 +274,7 @@ const GasSelector = ({
         </Description>
         <div className="gas-selector gray-section-block">
           <div className="top">
-            <p className="usmoney">
-              ≈ $
-              {new BigNumber(selectedGas ? selectedGas.price : 0)
-                .times(MINIMUM_GAS_LIMIT)
-                .div(1e18)
-                .times(token.price)
-                .toFixed(2)}
-            </p>
+            <p>Gas</p>
             <p className="gasmoney">
               {`${formatTokenAmount(
                 new BigNumber(selectedGas ? selectedGas.price : 0)
@@ -280,10 +283,19 @@ const GasSelector = ({
                   .toFixed()
               )} ${chain.nativeTokenSymbol}`}
             </p>
+            <p className="usmoney">
+              ≈ $
+              {new BigNumber(selectedGas ? selectedGas.price : 0)
+                .times(MINIMUM_GAS_LIMIT)
+                .div(1e18)
+                .times(token.price)
+                .toFixed(2)}
+            </p>
           </div>
           <div className="card-container">
             {gasList.map((item) => (
               <div
+                key={item.level}
                 className={clsx('card cursor-pointer', {
                   active: selectedGas?.level === item.level,
                 })}
@@ -330,7 +342,7 @@ const GasSelector = ({
           </Button>
         </Footer>
       </GasSelectorWrapper>
-    </Modal>
+    </StyledModal>
   );
 };
 

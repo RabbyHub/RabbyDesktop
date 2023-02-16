@@ -15,7 +15,7 @@ import TokenWithChain from '@/renderer/components/TokenWithChain';
 import IconRcSearch from '@/../assets/icons/swap/search.svg?rc';
 import { formatTokenAmount, splitNumberByStep } from '@/renderer/utils/number';
 import { useDebounce } from 'react-use';
-import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import IconClose from '@/../assets/icons/swap/modal-close.svg?rc';
 
 const TokenWrapper = styled.div`
@@ -84,26 +84,51 @@ const Wrapper = styled.div`
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
+  height: 72px;
 
-  & .ant-input {
-    background-color: transparent;
-    border-color: transparent;
-    color: white;
+  & > .inlinePrizeBox {
     flex: 1;
-    font-weight: 500;
-    font-size: 22px;
-    line-height: 26px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    overflow: hidden;
 
-    text-align: right;
-    padding-right: 0;
-
-    &:focus {
+    & .ant-input {
+      background-color: transparent !important;
       border-color: transparent;
-      box-shadow: none;
+      color: white;
+      flex: 1;
+      font-weight: 500;
+      font-size: 24px;
+      line-height: 29px;
+      padding: 0;
+      max-width: 100%;
+
+      text-align: right;
+      padding-right: 0;
+      overflow: hidden;
+      &:focus {
+        border-color: transparent;
+        box-shadow: none;
+      }
+
+      &:placeholder {
+        color: #a9aaae;
+      }
     }
 
-    &:placeholder {
-      color: #a9aaae;
+    .inlinePrize {
+      max-width: 100%;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 14px;
+      text-align: right;
+
+      color: #ffffff;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      opacity: 0.6;
     }
   }
 `;
@@ -189,8 +214,14 @@ const StyledModal = styled(Modal)`
     margin: 0 -28px;
     padding: 20px 28px;
     border-bottom: 1px solid #6f7585;
+    .left {
+      text-align: left;
+    }
     .right {
       color: rgba(255, 255, 255, 0.3);
+      &:last-child {
+        text-align: right;
+      }
     }
   }
 
@@ -221,12 +252,18 @@ const StyledModal = styled(Modal)`
     }
   }
 
+  .grid3 {
+    display: grid;
+    grid-template-columns: 180px auto 200px;
+    grid-column-gap: 10px;
+  }
+
   .left {
     display: flex;
     align-items: center;
 
     .tokenInfo {
-      margin-left: 11px;
+      margin-left: 12px;
       display: flex;
       flex-direction: column;
 
@@ -249,8 +286,9 @@ const StyledModal = styled(Modal)`
 
   .balance,
   .usd {
-    display: flex;
-    justify-content: flex-end;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
   }
 
   .balance {
@@ -307,53 +345,71 @@ const SwapLoadingWrapper = styled.div`
   .right {
     overflow: hidden;
   }
-  .w-140 {
-    width: 140px;
-  }
-  .w-90 {
-    width: 90px;
-  }
-  .w-60 {
-    width: 60px;
-  }
 `;
 
-const SwapLoading = () => (
-  <SwapLoadingWrapper>
-    <div className="left ">
-      <Skeleton.Input
-        active
-        className="w-140"
-        style={{
-          height: 15,
-        }}
-      />
-      <Skeleton.Input
-        active
-        className="w-90"
-        style={{
-          height: 15,
-        }}
-      />
-    </div>
-    <div className="right">
-      <Skeleton.Input
-        active
-        className="w-60"
-        style={{
-          height: 14,
-        }}
-      />
-      <Skeleton.Input
-        active
-        className="w-60"
-        style={{
-          height: 14,
-        }}
-      />
-    </div>
-  </SwapLoadingWrapper>
-);
+const SwapLoading = ({ columns = 2 }) =>
+  columns === 2 ? (
+    <SwapLoadingWrapper>
+      <div className="left ">
+        <Skeleton.Input
+          active
+          className="w-[140px]"
+          style={{
+            height: 15,
+          }}
+        />
+        <Skeleton.Input
+          active
+          className="w-[90px]"
+          style={{
+            height: 15,
+          }}
+        />
+      </div>
+      <div className="right">
+        <Skeleton.Input
+          active
+          className="w-[60px]"
+          style={{
+            height: 14,
+          }}
+        />
+        <Skeleton.Input
+          active
+          className="w-[60px]"
+          style={{
+            height: 14,
+          }}
+        />
+      </div>
+    </SwapLoadingWrapper>
+  ) : (
+    <SwapLoadingWrapper>
+      <div className="flex items-center justify-between">
+        <Skeleton.Input
+          active
+          className="w-[100px]"
+          style={{
+            height: 24,
+          }}
+        />
+        <Skeleton.Input
+          active
+          className="w-[100px]"
+          style={{
+            height: 24,
+          }}
+        />
+        <Skeleton.Input
+          active
+          className="w-[100px]"
+          style={{
+            height: 24,
+          }}
+        />
+      </div>
+    </SwapLoadingWrapper>
+  );
 interface TokenDrawerProps {
   title?: React.ReactNode;
   list: TokenItem[];
@@ -363,7 +419,82 @@ interface TokenDrawerProps {
   onClose: () => void;
   onSearch: (q: string) => void;
   onConfirm(item: TokenItem): void;
+  columns?: 2 | 3;
 }
+
+const SwapToken = ({
+  t,
+  onConfirm,
+}: {
+  t: TokenItem;
+  onConfirm: (t: TokenItem) => void;
+}) => {
+  return (
+    <div className="item" onClick={() => onConfirm(t)}>
+      <div className="left">
+        <TokenWithChain token={t} />
+        <div className="tokenInfo">
+          <div className="symbol">{t.symbol}</div>
+          <div className="rate">
+            @{splitNumberByStep((t.price || 0).toFixed(2))}
+          </div>
+        </div>
+      </div>
+      <div className="right">
+        <div className="balance" title={formatTokenAmount(t.amount)}>
+          {t.amount !== 0 && t.amount < 0.0001
+            ? '< 0.0001'
+            : formatTokenAmount(t.amount)}
+        </div>
+        <div
+          title={splitNumberByStep(
+            new BigNumber(t.price || 0).times(t.amount).toFixed(2)
+          )}
+          className="usd"
+        >
+          $
+          {splitNumberByStep(
+            new BigNumber(t.price || 0).times(t.amount).toFixed(2)
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DefaultToken = ({
+  t,
+  onConfirm,
+}: {
+  t: TokenItem;
+  onConfirm: (t: TokenItem) => void;
+}) => {
+  return (
+    <div className="item grid3" onClick={() => onConfirm(t)}>
+      <div className="left">
+        <TokenWithChain width="24px" height="24px" token={t} />
+        <div className="tokenInfo">
+          <div className="symbol text-15">{t.symbol}</div>
+        </div>
+      </div>
+      <div
+        title={splitNumberByStep(
+          new BigNumber(t.price || 0).times(t.amount).toFixed(2)
+        )}
+        className="usd text-15"
+      >
+        {splitNumberByStep(
+          new BigNumber(t.price || 0).times(t.amount).toFixed(2)
+        )}
+      </div>
+      <div className="balance text-15" title={formatTokenAmount(t.amount)}>
+        {t.amount !== 0 && t.amount < 0.0001
+          ? '< 0.0001'
+          : formatTokenAmount(t.amount)}
+      </div>
+    </div>
+  );
+};
 
 const TokenSelectModal = ({
   title = 'Select a token',
@@ -374,6 +505,7 @@ const TokenSelectModal = ({
   onSearch,
   onClose,
   placeholder = 'Search by Name / Address',
+  columns = 2,
 }: TokenDrawerProps) => {
   const [query, setQuery] = useState('');
   const handleQueryChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -390,8 +522,27 @@ const TokenSelectModal = ({
     [query]
   );
 
+  const listHeader = useMemo(() => {
+    if (columns === 2) {
+      return (
+        <div className="listHeader">
+          <div className="left">Token</div>
+          <div className="right">Balance / Value</div>
+        </div>
+      );
+    }
+    return (
+      <div className="listHeader grid3">
+        <div className="right">Token</div>
+        <div className="right">Price</div>
+        <div className="right">Balance</div>
+      </div>
+    );
+  }, [columns]);
+
   return (
     <StyledModal
+      centered
       onCancel={onClose}
       width={536}
       open={open}
@@ -414,10 +565,7 @@ const TokenSelectModal = ({
           onChange={handleQueryChange}
         />
 
-        <div className="listHeader">
-          <div className="left">Token</div>
-          <div className="right">Balance / Value</div>
-        </div>
+        {listHeader}
 
         <div className="listBox">
           {!isLoading && isEmpty && (
@@ -430,58 +578,38 @@ const TokenSelectModal = ({
               }}
               description={
                 <>
-                  <div className="noResult">No Results</div>
-                  <div className="noResultTip">
-                    Only tokens listed in Rabby by default are supported for
-                    swap
+                  <div className="noResult">
+                    No {columns === 2 ? 'Results' : 'Tokens'}
                   </div>
+                  {columns === 2 && (
+                    <div className="noResultTip">
+                      Only tokens listed in Rabby by default are supported for
+                      swap
+                    </div>
+                  )}
                 </>
               }
             />
           )}
           {isLoading && (
             <div>
-              {Array(12)
+              {Array(8)
                 .fill(1)
                 .map((_, idx) => (
                   // eslint-disable-next-line react/no-array-index-key
-                  <SwapLoading key={`loading-${idx}`} />
+                  <SwapLoading columns={columns} key={`loading-${idx}`} />
                 ))}
             </div>
           )}
           {!isLoading &&
             !isEmpty &&
-            list.map((t) => (
-              <div key={t.id} className="item" onClick={() => onConfirm(t)}>
-                <div className="left">
-                  <TokenWithChain token={t} />
-                  <div className="tokenInfo">
-                    <div className="symbol">{t.symbol}</div>
-                    <div className="rate">
-                      @{splitNumberByStep((t.price || 0).toFixed(2))}
-                    </div>
-                  </div>
-                </div>
-                <div className="right">
-                  <div className="balance" title={formatTokenAmount(t.amount)}>
-                    {t.amount !== 0 && t.amount < 0.0001
-                      ? '< 0.0001'
-                      : formatTokenAmount(t.amount)}
-                  </div>
-                  <div
-                    title={splitNumberByStep(
-                      new BigNumber(t.price || 0).times(t.amount).toFixed(2)
-                    )}
-                    className="usd"
-                  >
-                    $
-                    {splitNumberByStep(
-                      new BigNumber(t.price || 0).times(t.amount).toFixed(2)
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
+            list.map((t) =>
+              columns === 2 ? (
+                <SwapToken t={t} onConfirm={onConfirm} key={t.id} />
+              ) : (
+                <DefaultToken t={t} onConfirm={onConfirm} key={t.id} />
+              )
+            )}
         </div>
       </div>
     </StyledModal>
@@ -494,12 +622,15 @@ interface TokenAmountInputProps {
   onTokenChange(token: TokenItem): void;
   chainId: string;
   excludeTokens?: TokenItem['id'][];
-  type: 'swapTo' | 'swapFrom';
+  type?: 'default' | 'swapTo' | 'swapFrom';
   placeholder?: string;
   hideChainIcon?: boolean;
   value?: string;
   loading?: boolean;
   forceFocus?: boolean;
+  inlinePrize?: boolean;
+  className?: string;
+  logoSize?: number;
 }
 
 const sortTokensByPrice = (t: TokenItem[]) => {
@@ -517,12 +648,15 @@ export const TokenSelect = ({
   onTokenChange,
   chainId,
   excludeTokens = [],
-  type = 'swapTo',
+  type = 'default',
   placeholder,
   hideChainIcon = true,
   value,
   loading = false,
   forceFocus = false,
+  inlinePrize = false,
+  className,
+  logoSize = 28,
 }: TokenAmountInputProps) => {
   const inputRef = useRef<InputRef>(null);
   const latestChainId = useRef(chainId);
@@ -546,22 +680,54 @@ export const TokenSelect = ({
   };
 
   const handleLoadTokens = useCallback(async () => {
-    setIsListLoading(true);
-    let tokenList: TokenItem[] = [];
+    if (type === 'default') {
+      setIsListLoading(true);
+      let tokenList: TokenItem[] = [];
 
-    const currentAddress = currentAccount?.address || '';
-    const defaultTokens = await walletOpenapi.getSwapTokenList(
-      currentAddress,
-      chainId
-    );
+      const currentAddress = currentAccount?.address || '';
+      const defaultTokens = await walletOpenapi.listToken(
+        currentAddress,
+        chainId
+      );
+      let localAddedTokens: TokenItem[] = [];
 
-    if (chainId !== latestChainId.current) return;
-    tokenList = sortTokensByPrice(defaultTokens).filter((e) =>
-      type === 'swapFrom' ? e.amount > 0 : true
-    );
-    setOriginTokenList(tokenList);
-    setTokens(tokenList);
-    setIsListLoading(false);
+      const localAdded =
+        (await walletController.getAddedToken(currentAddress)).filter(
+          (item) => {
+            const [chain] = item.split(':');
+            return chain === chainId;
+          }
+        ) || [];
+      if (localAdded.length > 0) {
+        localAddedTokens = await walletOpenapi.customListToken(
+          localAdded,
+          currentAddress
+        );
+      }
+
+      if (chainId !== latestChainId.current) return;
+      tokenList = sortTokensByPrice([...defaultTokens, ...localAddedTokens]);
+      setOriginTokenList(tokenList);
+      setTokens(tokenList);
+      setIsListLoading(false);
+    } else {
+      setIsListLoading(true);
+      let tokenList: TokenItem[] = [];
+
+      const currentAddress = currentAccount?.address || '';
+      const defaultTokens = await walletOpenapi.getSwapTokenList(
+        currentAddress,
+        chainId
+      );
+
+      if (chainId !== latestChainId.current) return;
+      tokenList = sortTokensByPrice(defaultTokens).filter((e) =>
+        type === 'swapFrom' ? e.amount > 0 : true
+      );
+      setOriginTokenList(tokenList);
+      setTokens(tokenList);
+      setIsListLoading(false);
+    }
   }, [chainId, type, currentAccount?.address]);
 
   const handleSelectToken = () => {
@@ -625,13 +791,13 @@ export const TokenSelect = ({
 
   return (
     <>
-      <Wrapper>
+      <Wrapper className={className}>
         <div onClick={handleSelectToken}>
           {token ? (
             <TokenWrapper>
               <TokenWithChain
-                width="24px"
-                height="24px"
+                width={`${logoSize}px`}
+                height={`${logoSize}px`}
                 token={token}
                 hideConer
                 hideChainIcon={hideChainIcon}
@@ -664,17 +830,33 @@ export const TokenSelect = ({
             />
           </div>
         ) : (
-          <Input
-            ref={inputRef}
-            className="amountInput"
-            readOnly={type === 'swapTo'}
-            placeholder="0"
-            autoFocus={type !== 'swapTo'}
-            autoCorrect="false"
-            autoComplete="false"
-            value={value ?? input}
-            onChange={type !== 'swapTo' ? handleInput : undefined}
-          />
+          <div className="inlinePrizeBox">
+            <Input
+              ref={inputRef}
+              className="amountInput"
+              readOnly={type === 'swapTo'}
+              placeholder="0"
+              autoFocus={type !== 'swapTo'}
+              autoCorrect="false"
+              autoComplete="false"
+              value={value ?? input}
+              onChange={type !== 'swapTo' ? handleInput : undefined}
+            />
+            {inlinePrize && token && (
+              <div
+                className="inlinePrize"
+                title={splitNumberByStep(
+                  ((Number(value) || 0) * token.price || 0).toFixed(2)
+                )}
+              >
+                {Number(value)
+                  ? `≈$${splitNumberByStep(
+                      ((Number(value) || 0) * token.price || 0).toFixed(2)
+                    )}`
+                  : ''}
+              </div>
+            )}
+          </div>
         )}
         <TokenSelectModal
           open={open}
@@ -684,6 +866,7 @@ export const TokenSelect = ({
           onSearch={handleSearchTokens}
           onConfirm={handleCurrentTokenChange}
           isLoading={isListLoading}
+          columns={type === 'default' ? 3 : 2}
         />
       </Wrapper>
     </>
