@@ -79,7 +79,7 @@ export type IHighlightedAddress = {
   address: Account['address'];
 };
 
-interface TransactionHistoryItem {
+export interface TransactionHistoryItem {
   rawTx: Tx;
   createdAt: number;
   isCompleted: boolean;
@@ -131,6 +131,8 @@ export interface TransactionDataItem {
   name: string | undefined;
   timeAt: number;
   rawTx?: Tx;
+  txs?: TransactionHistoryItem[];
+  origin?: string;
 }
 
 export interface TransactionGroup {

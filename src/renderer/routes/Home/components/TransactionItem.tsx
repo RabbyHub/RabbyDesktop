@@ -2,22 +2,31 @@
 import styled from 'styled-components';
 import { Tooltip, Skeleton } from 'antd';
 import { intToHex } from 'ethereumjs-util';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
-import { GasLevel } from '@debank/rabby-api/dist/types';
-import { maxBy } from 'lodash';
+import { GasLevel, TokenItem } from '@debank/rabby-api/dist/types';
+import { maxBy, minBy } from 'lodash';
 import { IconWithChain } from '@/renderer/components/TokenWithChain';
 import NameAndAddress from '@/renderer/components/NameAndAddress';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { sinceTime } from '@/renderer/utils/time';
-import { TransactionDataItem } from '@/isomorphic/types/rabbyx';
+import {
+  TransactionDataItem,
+  TransactionHistoryItem,
+} from '@/isomorphic/types/rabbyx';
+import { isSameAddress } from '@/renderer/utils/address';
 import TxChange from './TxChange';
 
 const TransactionItemWrapper = styled.div`
-  display: flex;
-  padding: 28px 10px;
+  // display: flex;
+  padding: 25px 10px 15px 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.11);
   position: relative;
+  &:hover {
+    .tx-origin {
+      display: block;
+    }
+  }
   .tx-time {
     position: absolute;
     left: 10px;
@@ -26,6 +35,14 @@ const TransactionItemWrapper = styled.div`
     line-height: 14px;
     color: rgba(255, 255, 255, 0.3);
     opacity: 0;
+  }
+  .tx-origin {
+    display: none;
+    margin-top: 15px;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+    color: rgba(255, 255, 255, 0.3);
   }
   &.failed {
     padding-top: 30px;
@@ -195,6 +212,56 @@ const TxExplainInner = styled.div`
   }
 `;
 
+const ChildrenWrapper = styled.div`
+  padding: 15px 0;
+  border-top: 1px dashed #616776;
+  margin-top: 15px;
+
+  .pending-detail {
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+    color: rgba(255, 255, 255, 0.75);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .tx-history__item--children__item {
+    display: flex;
+    align-items: center;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+    color: #d9d9d9;
+    opacity: 0.3;
+
+    &.active {
+      color: #fff;
+      opacity: 0.75;
+    }
+
+    .tx-type {
+      width: 65px;
+    }
+    .ahead {
+      flex: 1;
+      margin-left: 75px;
+      font-size: 12px;
+    }
+    .icon-spin {
+      width: 14px;
+      height: 14px;
+      animation: spining 1.5s infinite linear;
+    }
+
+    &:not(:last-child) {
+      margin-bottom: 10px;
+    }
+  }
+`;
+
 export const LoadingTransactionItem = () => {
   return (
     <TransactionItemWrapper>
@@ -230,6 +297,27 @@ export const LoadingTransactionItem = () => {
   );
 };
 
+const ChildrenTxText = ({
+  tx,
+  originTx,
+}: {
+  tx: TransactionHistoryItem;
+  originTx: TransactionHistoryItem;
+}) => {
+  const isOrigin = tx.hash === originTx.hash;
+  const isCancel = isSameAddress(tx.rawTx.from, tx.rawTx.to);
+  let text = '';
+
+  if (isOrigin) {
+    text = 'Initial tx';
+  } else if (isCancel) {
+    text = 'Cancel tx';
+  } else {
+    text = 'Speed up tx';
+  }
+  return <span className="tx-type">{text}</span>;
+};
+
 const TransactionItem = ({ item }: { item: TransactionDataItem }) => {
   const { isPending, isCompleted, isFailed } = useMemo(() => {
     return {
@@ -255,6 +343,109 @@ const TransactionItem = ({ item }: { item: TransactionDataItem }) => {
     if (item.protocol?.logoUrl) return item.protocol.logoUrl;
     return null;
   }, [item, isCancel, isSend, isReceive]);
+
+  const originTx = minBy(item.txs, (tx) => tx.createdAt);
+
+  const [txQueues, setTxQueues] = useState<
+    Record<
+      string,
+      {
+        frontTx?: number;
+        gasUsed?: number;
+        token?: TokenItem;
+        tokenCount?: number;
+      }
+    >
+  >({});
+
+  const loadTxData = async () => {
+    if (!item.txs || item.txs.length <= 0 || !item.rawTx) {
+      return;
+    }
+
+    const completedTx = item.txs.find((tx) => tx.isCompleted);
+
+    const results = await Promise.all(
+      item.txs
+        .filter((tx) => !tx.isSubmitFailed)
+        .map((tx) =>
+          walletOpenapi.getTx(
+            item.chain,
+            tx.hash,
+            Number(tx.rawTx.gasPrice || tx.rawTx.maxFeePerGas || 0)
+          )
+        )
+    );
+    let map = {};
+    results.forEach(
+      ({ code, status, front_tx_count, gas_used, token }, index) => {
+        if (!item?.txs?.[index]?.hash) {
+          return;
+        }
+        if (isCompleted) {
+          if (!completedTx!.gasUsed) {
+            map = {
+              ...map,
+              [item.txs[index].hash]: {
+                token,
+                tokenCount:
+                  (gas_used *
+                    Number(
+                      completedTx!.rawTx.gasPrice ||
+                        completedTx!.rawTx.maxFeePerGas ||
+                        0
+                    )) /
+                  1e18,
+                gasUsed: gas_used,
+              },
+            };
+          } else if (code === 0) {
+            map = {
+              ...map,
+              [item.txs[index].hash]: {
+                token,
+                gasUsed: completedTx!.gasUsed,
+                tokenCount:
+                  (completedTx!.gasUsed *
+                    Number(
+                      completedTx!.rawTx.gasPrice ||
+                        completedTx!.rawTx.maxFeePerGas ||
+                        0
+                    )) /
+                  1e18,
+              },
+            };
+          }
+        } else if (status !== 0 && code === 0) {
+          // walletController.completedTransaction({
+          //   address: item.txs[index].rawTx.from,
+          //   chainId: Number(item.txs[index].rawTx.chainId),
+          //   nonce: Number(item.txs[index].rawTx.nonce),
+          //   hash: item.txs[index].hash,
+          //   success: status === 1,
+          //   gasUsed: gas_used,
+          // });
+        } else {
+          map = {
+            ...map,
+            [item.txs[index].hash]: {
+              frontTx: front_tx_count,
+            },
+          };
+        }
+      }
+    );
+    if (!isCompleted && results.some((i) => i.status !== 0 && i.code === 0)) {
+      // onComplete && onComplete();
+    } else {
+      setTxQueues(map);
+    }
+  };
+
+  useEffect(() => {
+    loadTxData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleClickSpeedUp = async () => {
     if (!item.rawTx) return;
@@ -435,6 +626,55 @@ const TransactionItem = ({ item }: { item: TransactionDataItem }) => {
         <TxExplainInner>{interAddressExplain}</TxExplainInner>
         <TxChange sends={item.sends} receives={item.receives} />
       </TxExplain>
+      {item.origin ? (
+        <div className="tx-origin">Initiate from Dapp: {item.origin}</div>
+      ) : null}
+      {isPending && (item?.txs?.length || 0) > 1 && (
+        <ChildrenWrapper>
+          <div className="tx-history__item--children">
+            <div className="pending-detail">
+              Pending detail
+              <Tooltip
+                title="Only one transaction will be completed, and it is almost always the one with the highest gas price"
+                autoAdjustOverflow={false}
+                overlayStyle={{ maxWidth: '287px' }}
+              >
+                <img
+                  className="icon icon-question-mark"
+                  src="rabby-internal://assets/icons/home/question.svg"
+                />
+              </Tooltip>
+            </div>
+            {item.txs
+              ?.sort((a, b) => b.createdAt - a.createdAt)
+              .map((tx, index) => (
+                <div
+                  className={classNames('tx-history__item--children__item', {
+                    active: index === 0,
+                  })}
+                >
+                  <ChildrenTxText tx={tx} originTx={originTx!} />
+                  <div className="ahead">
+                    {txQueues[tx.hash] ? (
+                      <>
+                        {Number(
+                          tx.rawTx.gasPrice || tx.rawTx.maxFeePerGas || 0
+                        ) / 1e9}{' '}
+                        Gwei{' '}
+                      </>
+                    ) : (
+                      'Unknown'
+                    )}
+                  </div>
+                  <img
+                    className="icon icon-spin"
+                    src="rabby-internal://assets/icons/home/tx-pending-1.svg"
+                  />
+                </div>
+              ))}
+          </div>
+        </ChildrenWrapper>
+      )}
     </TransactionItemWrapper>
   );
 };

@@ -163,7 +163,13 @@ export default function MainWindowSidebar() {
   const { matchedSE, matchedDapp } = useMemo(() => {
     return {
       matchedSE: StaticEntries.find((sE) =>
-        matchPath(sE.path, location.pathname)
+        matchPath(
+          {
+            path: sE.path,
+            end: false,
+          },
+          location.pathname
+        )
       ),
       matchedDapp: matchPath(DappRoutePatter, location.pathname),
     };
@@ -228,7 +234,13 @@ export default function MainWindowSidebar() {
                       key={`sE-${sE.path}`}
                       className={classNames(
                         styles.routeItem,
-                        matchPath(sE.path, location.pathname) && styles.active
+                        matchPath(
+                          {
+                            path: sE.path,
+                            end: false,
+                          },
+                          location.pathname
+                        ) && styles.active
                       )}
                       onClick={() => {
                         navigate(sE.path);

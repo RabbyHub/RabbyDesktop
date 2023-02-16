@@ -8,5 +8,7 @@ export type MainWindowRouteData =
       floatingAccountComponent?: boolean;
 
       routeCSSKeyword?: string;
+
+      backable?: boolean;
     }
   | undefined;
