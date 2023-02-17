@@ -1,18 +1,24 @@
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-import useCurrentBalance from '@/renderer/hooks/useCurrentBalance';
-import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
-import { formatNumber } from '@/renderer/utils/number';
+import { useClickOutSide } from '@/renderer/hooks/useClick';
+import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
+import {
+  hideMainwinPopupview,
+  showMainwinPopupview,
+} from '@/renderer/ipcRequest/mainwin-popupview';
 import {
   KEYRING_ICONS_WHITE,
   WALLET_BRAND_CONTENT,
 } from '@/renderer/utils/constant';
 import clsx from 'clsx';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
+import {
+  ADD_DROPDOWN_LEFT_OFFSET,
+  getAddDropdownKeyrings,
+} from '../AddAddressDropdown/constants';
 import styles from './index.module.less';
 
 export const CurrentAccount = ({ className }: { className?: string }) => {
   const { currentAccount } = useCurrentAccount();
-  const [balance] = useCurrentBalance(currentAccount?.address);
   const addressTypeIcon = useMemo(() => {
     if (!currentAccount?.type) return '';
     return (
@@ -32,6 +38,7 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
         : '',
     [currentAccount?.address]
   );
+  const zActions = useZPopupLayerOnMain();
 
   if (!currentAccount?.alianName) {
     return null;
@@ -41,10 +48,7 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
     <div
       className={clsx(styles.account, className)}
       onClick={() => {
-        showMainwinPopupview(
-          { type: 'address-management' },
-          { openDevTools: false }
-        );
+        zActions.showZSubview('address-management');
       }}
     >
       <div className={styles.content}>
@@ -53,19 +57,41 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
       </div>
       <div className={styles.dockRight}>
         <span className={styles.addr}>{displayAddr}</span>
-
-        <span className={styles.balance}>${formatNumber(balance || 0)}</span>
       </div>
+      <img src="rabby-internal://assets/icons/top-bar/select.svg" />
     </div>
   );
 };
 
+const DROPDOWN_POPUP_H =
+  getAddDropdownKeyrings().length * 46 + 10 * 12; /* y-paddings */
+
 export const AddNewAccount = ({ className }: { className?: string }) => {
+  const divRef = useRef<HTMLDivElement>(null);
+
+  useClickOutSide(divRef, () => {
+    hideMainwinPopupview('add-address-dropdown');
+  });
+
   return (
     <div
       className={clsx(styles.addNewAccount, className)}
-      onClick={() => {
-        showMainwinPopupview({ type: 'add-address' }, { openDevTools: false });
+      ref={divRef}
+      onMouseEnter={(evt) => {
+        if (!divRef.current) return;
+        const pos = divRef.current.getBoundingClientRect();
+
+        // const divRect = (evt.target as HTMLDivElement).getBoundingClientRect();
+        showMainwinPopupview({
+          type: 'add-address-dropdown',
+          triggerRect: {
+            x: pos.x - ADD_DROPDOWN_LEFT_OFFSET,
+            // y: pos.y + 40, // if you wanna the standalone add-address-dropdown below the add button
+            y: pos.y,
+            width: 240,
+            height: Math.max(300, DROPDOWN_POPUP_H),
+          },
+        });
       }}
     >
       <img src="rabby-internal://assets/icons/top-bar/add-address.svg" />
@@ -80,8 +106,8 @@ export const CurrentAccountAndNewAccount = ({
 }) => {
   return (
     <div className={clsx(styles.row, className)} data-nodrag>
+      <AddNewAccount />
       <CurrentAccount />
-      {/* <AddNewAccount /> */}
     </div>
   );
 };

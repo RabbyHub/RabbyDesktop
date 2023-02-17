@@ -260,7 +260,13 @@ type ISelectDeviceState = {
 
 type PopupViewOnMainwinInfo =
   | {
-      type: 'add-address';
+      type: 'add-address-dropdown';
+      triggerRect?: {
+        x?: number;
+        y?: number;
+        width?: number;
+        height?: number;
+      };
     }
   | {
       type: 'address-management';

@@ -4,7 +4,7 @@ import {
   Navigate,
 } from 'react-router-dom';
 
-import { AddAddressModal } from '@/renderer/components/AddAddressModal/AddAddressModal';
+import { SelectAddAddressTypeModal } from '@/renderer/components/SelectAddAddressTypeModal/SelectAddAddressTypeModal';
 import { AddressManagementDrawer } from '@/renderer/components/AddressManagementDrawer/AddressManagementDrawer';
 
 import { usePopupViewInfo } from '@/renderer/hooks/usePopupWinOnMainwin';
@@ -30,7 +30,7 @@ function AddressMngr() {
           hideView();
         }}
       />
-      <AddAddressModal
+      <SelectAddAddressTypeModal
         visible={isAddingAddress}
         onClose={() => {
           setIsAddingAddress(false);

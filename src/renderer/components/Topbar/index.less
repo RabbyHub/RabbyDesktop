@@ -51,7 +51,7 @@ html {
   padding: 0;
 }
 
-body.popup-win {
+html.popup-win {
   background: #ececec;
   padding: 0;
   margin: 0;
@@ -74,6 +74,16 @@ body.popup-win {
   display: none;
   background: var(--color-primary);
   height: calc(var(--rabby-tab-h) + var(--rabby-toolbar-h));
+}
+
+html.__rabbyx-browser-like .topbar {
+  display: block;
+}
+
+html.__rabbyx-trezor-like .topbar {
+  display: block;
+  background: #ececec;
+  height: 52px;
 }
 
 /*----- TABS -----*/

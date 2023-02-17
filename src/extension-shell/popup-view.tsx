@@ -25,7 +25,7 @@ switch (parseQueryString().view) {
       </ShellWalletProvider>
     );
     break;
-  case 'add-address':
+  case 'add-address-dropdown':
     root.render(
       <ShellWalletProvider>
         <MainWindowAddAddress />

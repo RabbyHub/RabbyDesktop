@@ -29,6 +29,7 @@ type ITabOptions = {
   };
   initDetails?: Partial<chrome.tabs.CreateProperties>;
   isOfMainWindow?: boolean;
+  isOfTreasureLikeConnection?: boolean;
 };
 
 const dappViewTopOffset =
@@ -56,21 +57,28 @@ export class Tab {
     initDetails: ITabOptions['initDetails'];
     topbarStacks: ITabOptions['topbarStacks'];
     isOfMainWindow: boolean;
+    isOfTreasureLikeConnection: boolean;
   } = {
     initDetails: {},
     topbarStacks: { ...DEFAULT_TOPBAR_STACKS },
     isOfMainWindow: false,
+    isOfTreasureLikeConnection: false,
   };
 
   private _isAnimating: boolean = false;
 
-  constructor(
-    ofWindow: BrowserWindow,
-    { tabs, topbarStacks, initDetails, isOfMainWindow }: ITabOptions
-  ) {
+  constructor(ofWindow: BrowserWindow, tabOptions: ITabOptions) {
+    const { tabs, topbarStacks, initDetails } = tabOptions;
+
     this.$meta.initDetails = { ...initDetails };
     this.$meta.topbarStacks = { ...DEFAULT_TOPBAR_STACKS, ...topbarStacks };
-    this.$meta.isOfMainWindow = !!isOfMainWindow;
+    this.$meta.isOfMainWindow = !!tabOptions.isOfMainWindow;
+    this.$meta.isOfTreasureLikeConnection =
+      !!tabOptions.isOfTreasureLikeConnection;
+
+    if (this.$meta.isOfTreasureLikeConnection) {
+      this.$meta.topbarStacks.tabs = true;
+    }
 
     this.tabs = tabs;
     this.view = viewMngr.allocateView(false);
@@ -207,11 +215,15 @@ export class Tab {
     const hideTopbar =
       !this.$meta.topbarStacks?.tabs && !this.$meta.topbarStacks?.navigation;
 
-    const { isOfMainWindow } = this.$meta;
+    const { isOfMainWindow, isOfTreasureLikeConnection } = this.$meta;
     const isCollapsedMainWindow =
       isOfMainWindow && desktopAppStore.get('sidebarCollapsed');
 
-    const topOffset = hideTopbar ? 0 : NATIVE_HEADER_H;
+    const topOffset = hideTopbar
+      ? 0
+      : !isOfTreasureLikeConnection
+      ? NATIVE_HEADER_H
+      : NativeAppSizes.trezorLikeConnectionWindowHeaderHeight;
 
     if (this._isAnimating) {
       this.view!.setAutoResize({ width: true, height: true });

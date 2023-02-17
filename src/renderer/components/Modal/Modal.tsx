@@ -6,6 +6,7 @@ export interface Props extends ModalProps {
   backable?: boolean;
   subtitle?: string;
   onBack?: () => void;
+  smallTitle?: boolean;
 }
 
 export const Modal: React.FC<Props> = ({
@@ -13,13 +14,16 @@ export const Modal: React.FC<Props> = ({
   title,
   subtitle,
   onBack,
+  smallTitle,
   ...props
 }) => {
   return (
     <AntdModal
       width={1000}
       {...props}
-      className={classNames('RabbyModal', props.className)}
+      className={classNames('RabbyModal', props.className, {
+        'small-title': smallTitle,
+      })}
       destroyOnClose
       footer={null}
       closeIcon={

@@ -1,5 +1,5 @@
 import { useAccounts } from '@/renderer/hooks/rabbyx/useAccount';
-import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
+import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { Button, Col, Row } from 'antd';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -25,6 +25,7 @@ export default function GettingStarted() {
       }
     );
   }, [fetchAccounts]);
+  const { showZSubview } = useZPopupLayerOnMain();
 
   return (
     <Row className={styles['page-welcome']} align="middle">
@@ -39,10 +40,9 @@ export default function GettingStarted() {
           type="primary"
           className={styles['btn-start']}
           onClick={() => {
-            showMainwinPopupview(
-              { type: 'add-address' },
-              { openDevTools: false }
-            );
+            showZSubview('select-add-address-type-modal', {
+              showEntryButton: true,
+            });
           }}
         >
           Get started

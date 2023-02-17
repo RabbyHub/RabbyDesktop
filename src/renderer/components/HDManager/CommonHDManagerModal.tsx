@@ -32,12 +32,12 @@ export const CommonHDManagerModal: React.FC<Props> = ({
   const idRef = React.useRef<number | null>(null);
   const isLedger = keyring === HARDWARE_KEYRING_TYPES.Ledger.type;
 
-  const closeConnect = React.useCallback(() => {
-    walletController.requestKeyring(keyring, 'cleanUp', idRef.current);
+  const closeConnect = React.useCallback(async () => {
+    return walletController.requestKeyring(keyring, 'cleanUp', idRef.current);
   }, []);
 
-  React.useEffect(() => {
-    walletController
+  const initConnect = React.useCallback(async () => {
+    return walletController
       .connectHardware({
         type: keyring,
         isWebHID: true,
@@ -56,14 +56,23 @@ export const CommonHDManagerModal: React.FC<Props> = ({
       .then(() => {
         setInitialed(true);
       })
-      .catch(() => {
+      .catch((e: any) => {
+        console.log(e);
         if (isLedger) {
-          props.onBack?.();
+          // props.onBack?.();
           message.error(
             'Unable to connect to Hardware wallet. Please try to re-connect.'
           );
         }
       });
+  }, []);
+
+  const onRetry = React.useCallback(() => {
+    walletController.requestKeyring(keyring, 'unlock', idRef.current);
+  }, []);
+
+  React.useEffect(() => {
+    initConnect();
     window.addEventListener('beforeunload', () => {
       closeConnect();
     });
@@ -73,28 +82,38 @@ export const CommonHDManagerModal: React.FC<Props> = ({
     };
   }, []);
 
-  if (!initialed) {
-    return null;
-  }
-
   const Manager = MANAGER_MAP[keyring];
 
+  if (!isLedger) {
+    if (!initialed) {
+      return null;
+    }
+  }
+
   return (
-    <Modal {...props} onCancel={onCancel}>
+    <Modal
+      {...props}
+      onCancel={(e) => {
+        onCancel?.(e);
+        closeConnect();
+      }}
+    >
       <HDManagerStateProvider keyringId={idRef.current} keyring={keyring}>
         <div className="HDManager">
-          <main>
-            <Manager />
-            {showEntryButton && (
-              <Button
-                onClick={onCancel}
-                className="footer-button"
-                type="primary"
-              >
-                Enter Rabby
-              </Button>
-            )}
-          </main>
+          {initialed ? (
+            <main>
+              <Manager onRetry={onRetry} />
+              {showEntryButton && (
+                <Button
+                  onClick={onCancel}
+                  className="footer-button"
+                  type="primary"
+                >
+                  Enter Rabby
+                </Button>
+              )}
+            </main>
+          ) : null}
         </div>
       </HDManagerStateProvider>
     </Modal>

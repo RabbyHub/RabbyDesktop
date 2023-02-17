@@ -7,7 +7,7 @@ import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { useWalletRequest } from '@/renderer/hooks/useWalletRequest';
 import { useAccountToDisplay } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
 import { useAddressManagement } from '@/renderer/hooks/rabbyx/useAddressManagement';
-import styles from './AddAddressModal.module.less';
+import styles from './index.module.less';
 
 type ENS = Awaited<ReturnType<OpenApiService['getEnsAddressByName']>>;
 

@@ -1,5 +1,5 @@
 import { createWindow } from '../streams/tabbedBrowserWindow';
-import { onMainWindowReady } from './stream-helpers';
+import { getRabbyExtViews, onMainWindowReady } from './stream-helpers';
 
 function getConnectWinSize(
   pWinBounds: Pick<Electron.Rectangle, 'width' | 'height'>
@@ -17,19 +17,16 @@ function updateSubWindowRect(
   if (window.isDestroyed()) return;
 
   const pWinBounds = parentWin.getBounds();
+  const selfWinBounds = window.getBounds();
+
   const popupRect = {
-    x: 0,
-    y: 0,
+    ...selfWinBounds,
     ...getConnectWinSize(pWinBounds),
   };
 
-  window.setSize(popupRect.width, popupRect.height, true);
-
-  // get bounds
-  const selfViewBounds = window.getBounds();
-  // top-right
-  let x = pWinBounds.x + popupRect.x + popupRect.width - selfViewBounds.width;
-  let y = pWinBounds.y + popupRect.y;
+  // make it centered
+  let x = pWinBounds.x + (pWinBounds.width - popupRect.width) / 2;
+  let y = pWinBounds.y + (pWinBounds.height - popupRect.height) / 2;
 
   // Convert to ints
   x = Math.floor(x);
@@ -49,6 +46,7 @@ export async function createTrezorLikeConnectPageWindow(connectURL: string) {
   const tabbedWin = await createWindow({
     defaultTabUrl: connectURL,
     defaultOpen: false,
+    isForTrezorLikeConnection: true,
     window: {
       parent: mainWindow,
       modal: true,
@@ -86,6 +84,14 @@ export async function createTrezorLikeConnectPageWindow(connectURL: string) {
 
   //   return false;
   // });
+
+  connWindow.on('closed', async () => {
+    // const { backgroundWebContents } = await getRabbyExtViews();
+    // backgroundWebContents.executeJavaScript(`window._TrezorConnect.dispose();`);
+    // // backgroundWebContents.executeJavaScript(`window._TrezorConnect.cancel();`);
+    // backgroundWebContents.executeJavaScript(`window._OnekeyConnect.dispose();`);
+    // // backgroundWebContents.executeJavaScript(`window._OnekeyConnect.cancel();`);
+  });
 
   mainWindow.on('close', () => {
     if (connWindow.isDestroyed()) return;

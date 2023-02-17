@@ -1,0 +1,281 @@
+.MainContainer {
+  color: #fff;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 20px;
+  height: 607px;
+
+  .header {
+    .divider {
+      color: #FFFFFF;
+      opacity: 0.3;
+      text-align: center;
+      margin-bottom: 16px;
+
+      .text {
+        position: relative;
+        font-size: 12px;
+
+        &::after,
+        &::before {
+          content: '';
+          border-bottom: 1px solid #E5E9EF;
+          position: absolute;
+          width: 52px;
+          top: 50%;
+        }
+
+        &::after {
+          left: -66px;
+        }
+
+        &::before {
+          right: -66px;
+        }
+      }
+    }
+  }
+  .body {
+    overflow-y: auto;
+    flex: 1;
+
+
+
+    .group {
+      margin-bottom: 14px;
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+  .footer {
+    padding-top: 14px;
+
+    .button {
+      margin: auto;
+      height: 44px;
+      width: 240px;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      place-content: center;
+      border: none;
+      border-radius: 4px;
+
+      .icon {
+        margin-right: 6px;
+      }
+    }
+  }
+}
+
+.AccountItem {
+  margin: 0 32px 8px 0;
+  display: flex;
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &:hover {
+    .pin {
+      display: block;
+    }
+    .action {
+      opacity: 100%;
+    }
+    .trash {
+      opacity: 100%;
+    }
+
+    .checkIcon {
+      opacity: 100%;
+    }
+  }
+
+  .container {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    flex: 1;
+  }
+
+  .main {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    padding-left: 16px;
+    height: 60px;
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    cursor: pointer;
+    &:hover {
+      background: rgba(134, 151, 255, 0.1);
+
+      .checkIcon {
+        .check {
+          display: block;
+        }
+        .uncheck {
+          display: none;
+        }
+      }
+    }
+  }
+
+  .pin {
+    display: none;
+    &.pinned {
+      display: block;
+    }
+  }
+
+  .index {
+    color: #707280;
+    font-size: 12px;
+  }
+
+  .logo {
+    margin-right: 12px;
+    width: 24px;
+    height: 24px;
+
+    img {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  }
+
+  .action {
+    width: 48px;
+    opacity: 0;
+    padding: 20px 16px;
+    cursor: pointer;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    &:hover {
+      background: rgba(134, 151, 255, 0.1);
+      .arrowHover {
+        display: block;
+      }
+      .arrow {
+        display: none;
+      }
+    }
+    .arrowHover {
+      display: none;
+    }
+    .arrow {
+      display: block;
+    }
+  }
+
+  .trash {
+    display: flex;
+    align-items: center;
+    width: 32px;
+    justify-content: center;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .checkIcon {
+    opacity: 0;
+    padding-right: 16px;
+
+    .check {
+      display: none;
+    }
+  }
+
+  .content {
+    flex: 1;
+    font-size: 13px;
+    color: #fff;
+    word-break: break-all;
+    display: flex;
+    flex-direction: column;
+
+    .part {
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      > * {
+        margin-right: 4px;
+
+        &:last-child {
+          margin-right: 0;
+        }
+      }
+
+      &.partAddress {
+        font-size: 12px;
+
+        .balance {
+          margin-left: 8px;
+        }
+      }
+
+      .icon {
+        cursor: pointer;
+      }
+    }
+  }
+}
+
+.CurrentAccount {
+  background: #8697FF;
+  border-radius: 6px;
+  padding: 18px 16px;
+  margin: 0 32px 16px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+
+  .balance {
+    margin-right: 8px;
+  }
+
+  .index {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+
+  .logo {
+    margin-right: 12px;
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    font-size: 15px;
+    flex: 1;
+
+    .part {
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      > * {
+        margin-right: 4px;
+
+        &:last-child {
+          margin-right: 0;
+        }
+      }
+    }
+  }
+}
+

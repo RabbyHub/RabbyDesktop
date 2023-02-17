@@ -130,6 +130,10 @@ type ChannelMessagePayload = {
     send: [];
     response: [];
   };
+  '__internal_rpc:trezor-like-window:click-close': {
+    send: [];
+    response: [];
+  };
   '__internal_forward:main-window:getCurrentTab': {
     send: [];
     response: [chrome.tabs.Tab];
