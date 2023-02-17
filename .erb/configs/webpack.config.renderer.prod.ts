@@ -107,6 +107,10 @@ const configuration: webpack.Configuration = {
       DEBUG_PROD: false,
     }),
 
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+    }),
+
     new WindiCSSWebpackPlugin(),
 
     new MiniCssExtractPlugin({

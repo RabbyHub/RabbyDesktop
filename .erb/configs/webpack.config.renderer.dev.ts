@@ -124,8 +124,6 @@ const configuration: webpack.Configuration = {
           }),
         ]),
 
-    new WindiCSSWebpackPlugin(),
-
     new webpack.NoEmitOnErrorsPlugin(),
 
     /**
@@ -143,6 +141,12 @@ const configuration: webpack.Configuration = {
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'development',
     }),
+
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+    }),
+
+    new WindiCSSWebpackPlugin(),
 
     new webpack.LoaderOptionsPlugin({
       debug: true,

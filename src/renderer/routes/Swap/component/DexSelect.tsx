@@ -57,8 +57,16 @@ export const Wrapper = styled.div`
       justify-content: center;
       width: 100%;
       padding-top: 30px;
-      /* padding-bottom: 10px; */
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      &::before {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        position: absolute;
+        top: 0;
+        left: -28px;
+        content: '';
+        height: 0;
+        width: calc(100% + 28px + 28px);
+      }
       .selected,
       .unSelected {
         padding: 0 28px;
@@ -215,7 +223,7 @@ const StyledModal = styled(Modal)`
     background: #525767;
     box-shadow: 0px 24px 80px rgba(19, 20, 26, 0.18);
     border-radius: 12px;
-    padding: 30px 20px;
+    padding: 30px 28px;
     padding-bottom: 18px;
     height: 664px;
   }

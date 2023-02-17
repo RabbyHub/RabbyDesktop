@@ -159,6 +159,10 @@ type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
 type OpenApiService = import('@debank/rabby-api').OpenApiService;
 
 export type RabbyXMethod = {
+  'walletController.requestETHRpc': (
+    data: { method: string; params: any },
+    chainId: string
+  ) => any;
   'walletController.sendRequest': <T = any>(data: any) => T;
   'walletController.verifyPassword': (password: string) => void;
   'walletController.changeAccount': (account: Account) => void;
@@ -217,7 +221,7 @@ export type RabbyXMethod = {
     : PreferenceState[keyof PreferenceState];
 
   'walletController.importWatchAddress': (address: string) => RabbyAccount[];
-
+  'walletController.getAddedToken': (address: string) => string[];
   'walletController.getAllVisibleAccounts': () => DisplayedKeyring[];
   'walletController.getAllAlianNameByMap': () => Record<string, any>;
   'walletController.getAddressBalance': (
@@ -236,7 +240,19 @@ export type RabbyXMethod = {
     brand?: string | undefined
   ) => void;
   'walletController.getWhitelist': () => string[];
+  'walletController.setWhitelist': (addresses: string[]) => Promise<void>;
+  'walletController.addWhitelist': (addresses: string[]) => Promise<void>;
+  'walletController.toggleWhitelist': (enable: boolean) => Promise<void>;
+
   'walletController.isWhitelistEnabled': () => boolean;
+  'walletController.setLastTimeSendToken': (
+    address: string,
+    token: TokenItem
+  ) => void;
+  'walletController.getLastTimeGasSelection': (
+    id: keyof GasCache
+  ) => ChainGas | null;
+  'walletController.getLastTimeSendToken': (address: string) => TokenItem;
   'walletController.getSwap': (
     k?: keyof SwapState
   ) => typeof k extends void ? SwapState : SwapState[keyof SwapState];

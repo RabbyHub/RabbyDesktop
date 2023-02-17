@@ -13,6 +13,7 @@ import ImportByPrivateKey from '@/renderer/routes/ImportBy/ImportByPrivateKey';
 import ImportSetPassword from '@/renderer/routes/Import/ImportSetPassword';
 import ImportSuccessful from '@/renderer/routes/Import/ImportSuccessful';
 import ImportByContainer from '@/renderer/routes/ImportBy/ImportByContainer';
+import SendToken from '@/renderer/routes/SendToken';
 import { Unlock } from '@/renderer/routes/Unlock/Unlock';
 import { RequireUnlock } from '@/renderer/routes/RequireUnlock';
 import { useForwardFromInternalPage } from '@/renderer/hooks-shell/useMainWindow';
@@ -34,6 +35,7 @@ import Titlebar from '../Titlebar';
 import { TopNavBar } from '../TopNavBar';
 import { MainWindowRouteData } from './type';
 import { DappViewWrapper } from '../DappView';
+import { FixedBackHeader } from '../FixedBackHeader';
 
 function WelcomeWrapper() {
   const { hasFetched, accounts } = useAccounts();
@@ -125,6 +127,15 @@ const router = createRouter([
             title: 'My Dapps',
           } as MainWindowRouteData;
         },
+      },
+      {
+        path: 'send-token',
+        element: (
+          <>
+            <FixedBackHeader>Send</FixedBackHeader>
+            <SendToken />
+          </>
+        ),
       },
       {
         path: 'swap',
