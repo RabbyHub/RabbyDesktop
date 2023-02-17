@@ -28,7 +28,7 @@ export const CommonHDManagerModal: React.FC<Props> = ({
   ...props
 }) => {
   const walletController = useShellWallet();
-  const [, setInitialed] = React.useState(false);
+  const [initialed, setInitialed] = React.useState(false);
   const idRef = React.useRef<number | null>(null);
   const isLedger = keyring === HARDWARE_KEYRING_TYPES.Ledger.type;
 
@@ -84,6 +84,12 @@ export const CommonHDManagerModal: React.FC<Props> = ({
 
   const Manager = MANAGER_MAP[keyring];
 
+  if (!isLedger) {
+    if (!initialed) {
+      return null;
+    }
+  }
+
   return (
     <Modal
       {...props}
@@ -94,18 +100,20 @@ export const CommonHDManagerModal: React.FC<Props> = ({
     >
       <HDManagerStateProvider keyringId={idRef.current} keyring={keyring}>
         <div className="HDManager">
-          <main>
-            <Manager onRetry={onRetry} />
-            {showEntryButton && (
-              <Button
-                onClick={onCancel}
-                className="footer-button"
-                type="primary"
-              >
-                Enter Rabby
-              </Button>
-            )}
-          </main>
+          {initialed ? (
+            <main>
+              <Manager onRetry={onRetry} />
+              {showEntryButton && (
+                <Button
+                  onClick={onCancel}
+                  className="footer-button"
+                  type="primary"
+                >
+                  Enter Rabby
+                </Button>
+              )}
+            </main>
+          ) : null}
         </div>
       </HDManagerStateProvider>
     </Modal>

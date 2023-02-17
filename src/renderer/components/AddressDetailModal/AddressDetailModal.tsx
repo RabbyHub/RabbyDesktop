@@ -24,6 +24,7 @@ export const AddressDetailModal: React.FC = () => {
 
   return (
     <Modal
+      centered
       smallTitle
       width={520}
       title="Address detail"
