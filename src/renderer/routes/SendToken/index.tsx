@@ -968,6 +968,7 @@ const SendToken = () => {
                 inlinePrize
                 hideChainIcon={false}
                 logoSize={32}
+                forceFocus={amountFocus}
               />
             )}
           </Form.Item>
