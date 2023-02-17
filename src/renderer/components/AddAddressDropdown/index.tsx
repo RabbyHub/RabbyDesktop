@@ -1,19 +1,16 @@
 import { Dropdown, Menu } from 'antd';
 import React from 'react';
 import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
-import {
-  usePopupViewInfo,
-  useZPopupLayerOnMain,
-} from '@/renderer/hooks/usePopupWinOnMainwin';
+import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
+import { detectOS } from '@/isomorphic/os';
 import { ADD_DROPDOWN_LEFT_OFFSET, getAddDropdownKeyrings } from './constants';
 import styles from './index.module.less';
 
 const keyrings = getAddDropdownKeyrings();
 
 export default function AddAddressDropdown() {
-  const { visible } = usePopupViewInfo('add-address-dropdown');
   const zActions = useZPopupLayerOnMain();
-
+  const IS_MACOS = detectOS() === 'darwin';
   const onOpenChange = React.useCallback((open: boolean) => {
     if (!open) {
       hideMainwinPopupview('add-address-dropdown');
@@ -30,9 +27,15 @@ export default function AddAddressDropdown() {
     [zActions]
   );
 
+  const props = IS_MACOS
+    ? {}
+    : {
+        open: true,
+      };
+
   return (
     <Dropdown
-      open={visible}
+      {...props}
       onOpenChange={onOpenChange}
       overlay={
         <div>
