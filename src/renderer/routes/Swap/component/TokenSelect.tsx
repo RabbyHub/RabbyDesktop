@@ -836,7 +836,7 @@ export const TokenSelect = ({
               className="amountInput"
               readOnly={type === 'swapTo'}
               placeholder="0"
-              autoFocus={type !== 'swapTo'}
+              autoFocus={forceFocus}
               autoCorrect="false"
               autoComplete="false"
               value={value ?? input}

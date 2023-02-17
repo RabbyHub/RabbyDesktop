@@ -2,6 +2,7 @@ import { ReceiveModalWraper } from '@/renderer/components/ReceiveModal';
 import { useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import { Tooltip } from 'antd';
 import IconReceive from '../../../../../assets/icons/home/receive.svg?rc';
 import IconSend from '../../../../../assets/icons/home/send.svg?rc';
 import IconSwap from '../../../../../assets/icons/home/swap.svg?rc';
@@ -18,12 +19,14 @@ const RightBarWrapper = styled.div`
 
 const ActionList = styled.ul`
   list-style: none;
-  padding: 48px 0 0 23px;
+  padding: 48px 0 0 0;
   display: flex;
   margin-bottom: 65px;
+  justify-content: center;
+  gap: 50px;
   li {
     border-radius: 14px;
-    margin-right: 25px;
+    /* margin-right: 25px; */
     cursor: pointer;
     svg {
       &:hover {
@@ -40,7 +43,7 @@ const ActionList = styled.ul`
       }
     }
     &:nth-last-child(1) {
-      margin-right: 0;
+      /* margin-right: 0; */
     }
   }
 `;
@@ -90,9 +93,13 @@ const RightBar = () => {
     <RightBarWrapper>
       <ActionList>
         {actions.map((action) => (
-          <li key={action.id} onClick={action.onClick}>
-            {action.icon}
-          </li>
+          <Tooltip
+            key={action.id}
+            title={action.name}
+            overlayInnerStyle={{ padding: '6px 8px' }}
+          >
+            <li onClick={action.onClick}>{action.icon}</li>
+          </Tooltip>
         ))}
       </ActionList>
       <Transactions />
