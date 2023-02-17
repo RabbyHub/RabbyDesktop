@@ -151,10 +151,12 @@ const TokenItemComp = ({
   token,
   historyToken,
   supportHistory,
+  onReceiveClick,
 }: {
   token: TokenItem;
   historyToken?: TokenItem;
   supportHistory: boolean;
+  onReceiveClick?: (token: TokenItem) => void;
 }) => {
   const priceChange = useMemo(() => {
     if (!historyToken) return 0;
@@ -203,7 +205,12 @@ const TokenItemComp = ({
         <div className="token-actions">
           <IconSwap className="icon icon-swap" onClick={handleClickSwap} />
           <IconSend className="icon icon-send" />
-          <IconReceive className="icon icon-receive" />
+          <IconReceive
+            className="icon icon-receive"
+            onClick={() => {
+              onReceiveClick?.(token);
+            }}
+          />
         </div>
       </TokenLogoField>
       <TokenPriceField>
