@@ -1,5 +1,7 @@
 import styled from 'styled-components';
 import { FixedBackHeader } from '@/renderer/components/FixedBackHeader';
+import { useSwap } from '@/renderer/hooks/rabbyx/useSwap';
+import clsx from 'clsx';
 import { SwapByDex } from './swap';
 
 const SwapWrapper = styled.div`
@@ -29,11 +31,13 @@ const SwapWrapper = styled.div`
 `;
 
 export const Swap = () => {
+  const { swap } = useSwap();
+  const lastSelectedDex = swap.selectedDex;
   return (
     <SwapWrapper>
       <FixedBackHeader>Swap</FixedBackHeader>
 
-      <div className="content">
+      <div className={clsx(lastSelectedDex && 'content')}>
         <SwapByDex />
       </div>
     </SwapWrapper>

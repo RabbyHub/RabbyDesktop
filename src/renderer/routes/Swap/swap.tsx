@@ -70,7 +70,6 @@ const FooterWrapper = styled.div`
   bottom: 0;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   margin: 0 -28px;
-  margin-top: 30px;
 
   display: flex;
   flex-direction: column;
