@@ -4,23 +4,30 @@ import {
   Navigate,
 } from 'react-router-dom';
 
-import { SelectAddAddressTypeModal } from '@/renderer/components/SelectAddAddressTypeModal/SelectAddAddressTypeModal';
-import { useResetToCurrentPage } from '@/renderer/components/PopupViewUtils';
-import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
+import AddAddressDropdown from '@/renderer/components/AddAddressDropdown';
+import { css, createGlobalStyle } from 'styled-components';
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import { useBodyClassNameOnMounted } from '@/renderer/hooks/useMountedEffect';
 import styles from './index.module.less';
 
-function App() {
-  const resetPage = useResetToCurrentPage();
+const Gasket = createGlobalStyle`
+  html {
+    ${
+      !IS_RUNTIME_PRODUCTION &&
+      css`
+        background: rgba(var(--color-primary-rgb), 0.3);
+      `
+    }
+  }
+`;
 
+function App() {
+  useBodyClassNameOnMounted('add-address-popup');
   return (
-    <SelectAddAddressTypeModal
-      visible
-      showEntryButton
-      onClose={() => {
-        hideMainwinPopupview('add-address');
-        resetPage();
-      }}
-    />
+    <>
+      <Gasket />
+      <AddAddressDropdown />
+    </>
   );
 }
 

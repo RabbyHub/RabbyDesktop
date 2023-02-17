@@ -1,4 +1,3 @@
-import AddAddressDropdown from '@/renderer/components/AddAddressDropdown';
 import {
   createHashRouter as createRouter,
   RouterProvider,
@@ -63,7 +62,6 @@ function App() {
     <>
       <SwitchChainModal />
       <TransparentToast />
-      <AddAddressDropdown />
       <AddAddressModal />
       <AddressManagementModal />
       <AddressDetailModal />

@@ -2,7 +2,6 @@
 import { setDappsOrder } from '@/renderer/ipcRequest/dapps';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { useCallback, useState } from 'react';
-import ReceiveModal from '@/renderer/components/ReceiveModal';
 import { Empty } from './components/Empty';
 
 import ModalDeleteDapp from '../../components/ModalDeleteDapp';

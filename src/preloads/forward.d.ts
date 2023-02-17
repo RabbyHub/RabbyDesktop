@@ -73,10 +73,6 @@ type ChannelForwardMessageType =
       type: 'refreshCurrentAccount';
     }
   | {
-      targetView: 'add-address';
-      type: 'nothing-but-reserved';
-    }
-  | {
       targetView: 'address-management';
       type: 'nothing-but-reserved';
     }
