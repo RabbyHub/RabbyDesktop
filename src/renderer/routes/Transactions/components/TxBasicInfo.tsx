@@ -1,3 +1,4 @@
+import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import { getChain } from '@/renderer/utils';
 import { ellipsis } from '@/renderer/utils/address';
 import { sinceTime } from '@/renderer/utils/time';
@@ -24,7 +25,18 @@ export const TxBasicInfo = ({ data }: TxBasicInfoProps) => {
       <div className={styles.txTime}>{time}</div>
       <div className={styles.txHash}>
         {chain?.name || 'Unknown'}:{' '}
-        <a target="_blank" rel="noreferrer" href={`${link}`}>
+        <a
+          target="_blank"
+          rel="noreferrer"
+          href={`${link}`}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (link) {
+              openExternalUrl(link);
+            }
+          }}
+        >
           {ellipsis(data.id)}
         </a>
       </div>

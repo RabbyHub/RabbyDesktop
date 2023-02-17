@@ -11,7 +11,7 @@ export const Loading = () => {
           styles.loadingItem
         )}
       >
-        <div>
+        <div className="w-[250px]">
           <div>
             <Skeleton.Input
               active
@@ -35,7 +35,7 @@ export const Loading = () => {
             />
           </div>
         </div>
-        <div className="flex items-center gap-[15px]">
+        <div className="flex items-center gap-[15px] w-[325px] flex-1">
           <Skeleton.Input
             active
             style={{
@@ -66,7 +66,7 @@ export const Loading = () => {
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-[15px]">
+        <div className="flex items-center gap-[15px] flex-1">
           <Skeleton.Input
             active
             style={{
@@ -82,7 +82,7 @@ export const Loading = () => {
             }}
           />
         </div>
-        <div className="text-right">
+        <div className="text-right w-[250px] ml-auto">
           <div>
             <Skeleton.Input
               active
@@ -110,7 +110,7 @@ export const Loading = () => {
           styles.loadingItem
         )}
       >
-        <div>
+        <div className="w-[250px]">
           <div>
             <Skeleton.Input
               active
@@ -134,7 +134,7 @@ export const Loading = () => {
             />
           </div>
         </div>
-        <div className="flex items-center gap-[15px]">
+        <div className="flex items-center gap-[15px] w-[325px] flex-1">
           <Skeleton.Input
             active
             style={{
@@ -165,7 +165,7 @@ export const Loading = () => {
             </div>
           </div>
         </div>
-        <div>
+        <div className="flex-1">
           <div className="flex items-center gap-[15px]  mb-[10px]">
             <Skeleton.Input
               active
@@ -217,7 +217,7 @@ export const Loading = () => {
             />
           </div>
         </div>
-        <div className="text-right">
+        <div className="text-right w-[250px] ml-auto">
           <div>
             <Skeleton.Input
               active

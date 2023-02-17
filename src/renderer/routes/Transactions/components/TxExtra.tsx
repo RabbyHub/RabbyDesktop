@@ -1,3 +1,4 @@
+import { TransactionWebsite } from '@/renderer/components/TransactionWebsite';
 import { getChain } from '@/renderer/utils';
 import { numberWithCommasIsLtOne } from '@/renderer/utils/number';
 import { TxDisplayItem, TxHistoryItem } from '@debank/rabby-api/dist/types';
@@ -6,9 +7,10 @@ import styles from '../index.module.less';
 
 interface TxExtraProps {
   data: TxDisplayItem | TxHistoryItem;
+  site?: ConnectedSite;
 }
 
-export const TxExtra = ({ data }: TxExtraProps) => {
+export const TxExtra = ({ data, site }: TxExtraProps) => {
   const chain = getChain(data.chain);
   return (
     <div className={classNames(styles.txExtra)}>
@@ -19,7 +21,12 @@ export const TxExtra = ({ data }: TxExtraProps) => {
           {numberWithCommasIsLtOne(data.tx?.usd_gas_fee ?? 0, 2)})
         </div>
       ) : null}
-      <div className={styles.txSource}>Initiate from Dapp:</div>
+      {site && (
+        <div className={styles.txSource}>
+          Initiate from Dapp:{' '}
+          <TransactionWebsite site={site} className={styles.txSourceLink} />
+        </div>
+      )}
     </div>
   );
 };

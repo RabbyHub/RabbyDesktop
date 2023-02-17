@@ -47,6 +47,7 @@ const Transactions = () => {
                     projectDict={item.projectDict}
                     cateDict={item.cateDict}
                     tokenDict={item.tokenDict}
+                    site={source?.get([item.chain, item.id].join('|'))}
                   />
                 );
               })}

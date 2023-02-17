@@ -15,6 +15,7 @@ import {
   TransactionHistoryItem,
 } from '@/isomorphic/types/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
+import { TransactionWebsite } from '@/renderer/components/TransactionWebsite';
 import TxChange from './TxChange';
 
 const TransactionItemWrapper = styled.div`
@@ -43,6 +44,12 @@ const TransactionItemWrapper = styled.div`
     font-size: 12px;
     line-height: 14px;
     color: rgba(255, 255, 255, 0.3);
+
+    .tx-dapp-link:not(.isRabby) {
+      color: rgba(255, 255, 255, 0.6);
+      cursor: pointer;
+      text-decoration: underline;
+    }
   }
   &.failed {
     padding-top: 30px;
@@ -626,8 +633,11 @@ const TransactionItem = ({ item }: { item: TransactionDataItem }) => {
         <TxExplainInner>{interAddressExplain}</TxExplainInner>
         <TxChange sends={item.sends} receives={item.receives} />
       </TxExplain>
-      {item.origin ? (
-        <div className="tx-origin">Initiate from Dapp: {item.origin}</div>
+      {item.site ? (
+        <div className="tx-origin">
+          Initiate from Dapp:{' '}
+          <TransactionWebsite site={item.site} className="tx-dapp-link" />
+        </div>
       ) : null}
       {isPending && (item?.txs?.length || 0) > 1 && (
         <ChildrenWrapper>

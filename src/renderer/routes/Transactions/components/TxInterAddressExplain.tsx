@@ -27,14 +27,9 @@ export const TxInterAddressExplain = ({
         project.name
       ) : data.other_addr ? (
         <div className="inline-flex items-center gap-[4px]">
-          <NameAndAddress address={data.other_addr} />
-          <img
-            className="w-[14px] h-[14px] cursor-pointer"
-            src="rabby-internal://assets/icons/transaction/copy.svg"
-            alt=""
-            onClick={() => {
-              alert('todo');
-            }}
+          <NameAndAddress
+            address={data.other_addr}
+            copyIconClass="w-[14px] h-[14px] cursor-pointer"
           />
         </div>
       ) : (

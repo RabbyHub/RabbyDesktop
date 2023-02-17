@@ -1,7 +1,6 @@
-import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { CHAINS } from '@debank/common';
 import { useRequest } from 'ahooks';
-import { minBy } from 'lodash';
 import { useMemo } from 'react';
 
 export const useTxSource = (address: string) => {
@@ -10,34 +9,22 @@ export const useTxSource = (address: string) => {
   );
 
   const dict = useMemo(() => {
+    const map = new Map();
     if (!data?.completeds) {
-      return {};
+      return map;
     }
-    const list = data.completeds.map((item) => {
-      // const originTx = minBy(item.txs, (tx) => tx.createdAt);
+    data.completeds.forEach((item) => {
       const completedTx = item.txs.find((tx) => tx.isCompleted);
       const chain = Object.values(CHAINS).find((i) => i.id === item.chainId);
-      return {
-        chain: chain?.serverId,
-        hash: completedTx?.hash,
-        origin: completedTx?.site?.origin,
-      };
+      if (completedTx?.site) {
+        map.set(
+          [chain?.serverId, completedTx?.hash].join('|'),
+          completedTx?.site
+        );
+      }
     });
-    return list;
-    // return [...data.completeds, ...data.pendings].reduce((acc, item) => {
-    //   const originTx = minBy(item.txs, (tx) => tx.createdAt);
-    //   if (
-    //     originTx?.site?.origin &&
-    //     /^https?:\/\//.test(originTx?.site?.origin)
-    //   ) {
-    //     acc[originTx.hash] = originTx.site.origin;
-    //   }
-    //   return acc;
-    // }, {} as Record<string, string>);
+    return map;
   }, [data?.completeds]);
-
-  console.log(dict);
-  console.log(data);
 
   return dict;
 };

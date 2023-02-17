@@ -180,9 +180,9 @@ const Transactions = () => {
         ...recentTxs.slice(0, 3).map((item) => {
           return {
             ...item,
-            origin: localTxs.find(
+            site: localTxs.find(
               (i) => i.id === item.id && i.chain === item.chain
-            )?.origin,
+            )?.site,
           };
         }),
         ...completedTxs,
@@ -247,7 +247,7 @@ const Transactions = () => {
           otherAddr: maxTx.rawTx.to || '',
           name,
           timeAt: item.createdAt,
-          origin: completedTx?.site?.origin,
+          site: completedTx?.site,
         });
       });
     setLocalTxs(lTxs);
@@ -299,7 +299,7 @@ const Transactions = () => {
           name,
           timeAt: item.createdAt,
           rawTx: maxTx.rawTx,
-          origin: originTx?.site?.origin,
+          site: originTx?.site,
           txs: item.txs,
         });
       });

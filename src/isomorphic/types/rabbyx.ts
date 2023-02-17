@@ -132,7 +132,7 @@ export interface TransactionDataItem {
   timeAt: number;
   rawTx?: Tx;
   txs?: TransactionHistoryItem[];
-  origin?: string;
+  site?: ConnectedSite;
 }
 
 export interface TransactionGroup {
