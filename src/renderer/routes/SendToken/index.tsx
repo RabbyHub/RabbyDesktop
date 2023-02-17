@@ -476,7 +476,6 @@ const SendToken = () => {
         method: 'eth_sendTransaction',
         params: [params],
       });
-      window.close();
     } catch (e: any) {
       message.error(e.message);
     }
