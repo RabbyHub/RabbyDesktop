@@ -223,6 +223,7 @@ export function useZPopupLayerOnMain() {
 
 const ZPopupSubviewStateAtom = atom<NullableFields<IZPopupSubviewState>>({
   'switch-chain': null,
+  'confirm-connect-hardware': null,
   'security-notification': null,
   'add-address-dropdown': null,
   'add-address-modal': null,

@@ -345,3 +345,9 @@ export type UIContactBookItem = {
   name: string;
   address: string;
 };
+
+type IConfirmConnectTrezorLike = {
+  hardwareType: 'trezor' | 'onekey';
+  confirmOpenId: string;
+  confirmed: boolean;
+};

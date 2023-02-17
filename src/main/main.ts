@@ -20,6 +20,7 @@ import './streams/popupViewOnMainwin';
 import './streams/webContents';
 import './streams/appProxy';
 import './streams/hid';
+import './streams/trezorLike';
 import './streams/dapps';
 
 import bootstrap from './streams/app';

@@ -39,6 +39,7 @@ type ZViewStates = {
   'select-add-address-type-modal': {
     showEntryButton?: boolean;
   };
+  'confirm-connect-hardware': IConfirmConnectTrezorLike;
 };
 
 type IZPopupSubviewState = {

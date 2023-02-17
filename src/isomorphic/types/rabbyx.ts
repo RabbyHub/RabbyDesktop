@@ -354,6 +354,7 @@ export type RabbyXMethod = {
     address: string,
     balance: string
   ) => void;
+  'walletController.rejectAllApprovals': () => void;
 
   'permissionService.addConnectedSite': (
     origin: string,

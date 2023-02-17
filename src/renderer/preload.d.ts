@@ -303,6 +303,11 @@ type ChannelMessagePayload = {
     ];
     response: [];
   };
+
+  '__internal_rpc:trezor-like:confirm-connect': {
+    send: [IConfirmConnectTrezorLike];
+    response: [];
+  };
 };
 
 type IChannelsKey = keyof ChannelMessagePayload;

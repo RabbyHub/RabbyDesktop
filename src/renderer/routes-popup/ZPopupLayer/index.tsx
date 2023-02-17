@@ -18,6 +18,7 @@ import { AddAddressModal } from '@/renderer/components/AddAddressModal/AddAddres
 import { AddressManagementModal } from '@/renderer/components/AddressManagementModal/AddressManagementModal';
 import { AddressDetailModal } from '@/renderer/components/AddressDetailModal/AddressDetailModal';
 import { SelectAddAddressTypeModalInSubview } from '@/renderer/components/SelectAddAddressTypeModal/SelectAddAddressTypeModalInSubview';
+import ConfirmConnectHardwareModal from '@/renderer/components/HDManager/ConfirmConnectHardwareModal';
 import SwitchChainModal from '../../components/SwitchChainModal';
 
 import styles from './index.module.less';
@@ -61,6 +62,7 @@ function App() {
   return (
     <>
       <SwitchChainModal />
+      <ConfirmConnectHardwareModal />
       <TransparentToast />
       <AddAddressModal />
       <AddressManagementModal />

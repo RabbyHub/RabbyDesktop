@@ -4,7 +4,8 @@ import path from 'path';
 import { protocol, session, shell } from 'electron';
 import { firstValueFrom } from 'rxjs';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
-import { isRabbyXPage } from '@/isomorphic/url';
+import { checkHardwareConnectPage, isRabbyXPage } from '@/isomorphic/url';
+import { randString } from '@/isomorphic/string';
 import {
   IS_RUNTIME_PRODUCTION,
   RABBY_INTERNAL_PROTOCOL,
@@ -26,13 +27,20 @@ import {
   createRabbyxNotificationWindow,
 } from './tabbedBrowserWindow';
 import { firstEl } from '../../isomorphic/array';
-import { getRabbyExtId, getWebuiExtId } from '../utils/stream-helpers';
+import {
+  getRabbyExtId,
+  executeJavascriptOnRabbyxBg,
+  getWebuiExtId,
+  pushChangesToZPopupLayer,
+} from '../utils/stream-helpers';
 import { checkOpenAction } from '../utils/tabs';
 import { getWindowFromWebContents, switchToBrowserTab } from '../utils/browser';
 import { supportHmrOnDev } from '../utils/webRequest';
 import { checkProxyViaBrowserView, setSessionProxy } from '../utils/appNetwork';
 import { getAppProxyConf } from '../store/desktopApp';
 import { createTrezorLikeConnectPageWindow } from '../utils/hardwareConnect';
+import { waitConfirmOpenId } from './trezorLike';
+import { rabbyxQuery } from './rabbyIpcQuery/_base';
 
 const sesLog = getBindLog('session', 'bgGrey');
 
@@ -249,6 +257,42 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
 
       switch (actionInfo.action) {
         case 'open-hardware-connect': {
+          const confirmOpenId = randString();
+
+          const hardwareType = actionInfo.type;
+
+          pushChangesToZPopupLayer({
+            'confirm-connect-hardware': {
+              visible: true,
+              state: {
+                confirmOpenId,
+                hardwareType,
+                confirmed: false, // pointless but for type check
+              },
+            },
+          });
+
+          // await confirm to open hardware connect page
+          const waitResult = await waitConfirmOpenId({
+            confirmOpenId,
+            hardwareType,
+          });
+
+          // TODO: alert warning if timeouted
+          if (waitResult.timeouted || !waitResult.confirmed) {
+            switch (hardwareType) {
+              case 'trezor':
+                executeJavascriptOnRabbyxBg(`window._TrezorConnect.cancel()`);
+                break;
+              case 'onekey':
+                executeJavascriptOnRabbyxBg(`window._OnekeyConnect.cancel()`);
+                break;
+              default:
+                break;
+            }
+            return false;
+          }
+
           const { window, tab } = await createTrezorLikeConnectPageWindow(
             actionInfo.pageURL
           );

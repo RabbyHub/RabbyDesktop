@@ -47,6 +47,15 @@ export async function getRabbyExtViews() {
   return firstValueFrom(fromMainSubject('rabbyExtViews'));
 }
 
+export async function executeJavascriptOnRabbyxBg(
+  code: string,
+  runInIsolatedContext?: boolean
+) {
+  const { backgroundWebContents } = await getRabbyExtViews();
+
+  backgroundWebContents.executeJavaScript(code, runInIsolatedContext);
+}
+
 export async function getSessionInsts() {
   return firstValueFrom(fromMainSubject('sessionReady'));
 }
