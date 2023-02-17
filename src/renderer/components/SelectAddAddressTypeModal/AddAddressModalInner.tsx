@@ -31,9 +31,6 @@ export const AddAddressModalInner: React.FC<Props> = ({
         pathname: '/import-by/private-key',
       },
     } as any);
-    hideMainwinPopupview('add-address', {
-      reloadView: true,
-    });
     hideMainwinPopupview('address-management', {
       reloadView: true,
     });

@@ -130,7 +130,7 @@ function _isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
     case 'main-window':
       return isMainWinShellWebUI(url);
     case 'address-management':
-    case 'add-address':
+    case 'add-address-dropdown':
     case 'z-popup':
       return (
         url.startsWith('chrome-extension:') &&
@@ -157,7 +157,7 @@ export function isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
         [
           'main-window',
           'address-management',
-          'add-address',
+          'add-address-dropdown',
           'dapps-management',
           'z-popup',
           // 'select-devices'

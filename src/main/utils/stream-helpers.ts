@@ -148,7 +148,7 @@ export async function getAllMainUIViews() {
   ]);
 
   const views = {
-    'add-address': addAddress,
+    'add-address-dropdown': addAddress,
     'address-management': addressManagement,
     'dapps-management': dappsManagement,
     'select-devices': selectDevices,

@@ -1,4 +1,5 @@
 import {
+  NativeAppSizes,
   NativeLayouts,
   NativeLayoutsCollapsed,
 } from '@/isomorphic/const-size-next';
@@ -48,4 +49,19 @@ export function pickMainWindowLayouts() {
   const sidebarCollapsed = desktopAppStore.get('sidebarCollapsed');
 
   return sidebarCollapsed ? NativeLayoutsCollapsed : NativeLayouts;
+}
+
+export function getMainWindowTopOffset() {
+  return process.platform === 'darwin'
+    ? 0
+    : NativeAppSizes.windowTitlebarHeight;
+}
+
+export function roundRectValue(retRect: Partial<Electron.Rectangle>) {
+  if (retRect.x !== undefined) retRect.x = Math.round(retRect.x);
+  if (retRect.y !== undefined) retRect.y = Math.round(retRect.y);
+  if (retRect.width !== undefined) retRect.width = Math.round(retRect.width);
+  if (retRect.height !== undefined) retRect.height = Math.round(retRect.height);
+
+  return retRect;
 }

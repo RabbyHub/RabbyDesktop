@@ -1,12 +1,20 @@
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
+import { useClickOutSide } from '@/renderer/hooks/useClick';
 import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
-import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
+import {
+  hideMainwinPopupview,
+  showMainwinPopupview,
+} from '@/renderer/ipcRequest/mainwin-popupview';
 import {
   KEYRING_ICONS_WHITE,
   WALLET_BRAND_CONTENT,
 } from '@/renderer/utils/constant';
 import clsx from 'clsx';
 import { useMemo, useRef, useState } from 'react';
+import {
+  ADD_DROPDOWN_LEFT_OFFSET,
+  getAddDropdownKeyrings,
+} from '../AddAddressDropdown/constants';
 import styles from './index.module.less';
 
 export const CurrentAccount = ({ className }: { className?: string }) => {
@@ -55,10 +63,16 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
   );
 };
 
+const DROPDOWN_POPUP_H =
+  getAddDropdownKeyrings().length * 46 + 10 * 12; /* y-paddings */
+
 export const AddNewAccount = ({ className }: { className?: string }) => {
-  const zActions = useZPopupLayerOnMain();
   const divRef = useRef<HTMLDivElement>(null);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  useClickOutSide(divRef, () => {
+    hideMainwinPopupview('add-address-dropdown');
+  });
 
   return (
     <div
@@ -66,21 +80,22 @@ export const AddNewAccount = ({ className }: { className?: string }) => {
         [styles.hover]: showDropdown,
       })}
       ref={divRef}
-      onMouseEnter={() => {
-        const pos = divRef.current?.getBoundingClientRect();
+      onMouseEnter={(evt) => {
+        if (!divRef.current) return;
+        const pos = divRef.current.getBoundingClientRect();
+
+        // const divRect = (evt.target as HTMLDivElement).getBoundingClientRect();
         setShowDropdown(true);
-        zActions.showZSubview(
-          'add-address-dropdown',
-          {
-            pos: {
-              x: pos?.left || 0,
-              y: pos?.bottom || 0,
-            },
+        showMainwinPopupview({
+          type: 'add-address-dropdown',
+          triggerRect: {
+            x: pos.x - ADD_DROPDOWN_LEFT_OFFSET,
+            // y: pos.y + 40, // if you wanna the standalone add-address-dropdown below the add button
+            y: pos.y,
+            width: 240,
+            height: Math.max(300, DROPDOWN_POPUP_H),
           },
-          () => {
-            setShowDropdown(false);
-          }
-        );
+        });
       }}
     >
       <img src="rabby-internal://assets/icons/top-bar/add-address.svg" />
