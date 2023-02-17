@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import './index.less';
 import clsx from 'classnames';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { useCopyAddress } from '@/renderer/hooks/useCopyAddress';
+import IconCopy from '../../../../assets/icons/common/copy.svg?rc';
 
 interface NameAndAddressProps {
   className?: string;
@@ -29,6 +31,8 @@ const NameAndAddress = ({
   };
   const localName = aliasName || '';
 
+  const copyAddress = useCopyAddress();
+
   useEffect(() => {
     init();
   }, [address]);
@@ -51,6 +55,12 @@ const NameAndAddress = ({
               ?.toLowerCase()
               .slice(-4)}`}
       </div>
+      <IconCopy
+        className={clsx('ml-4 cursor-pointer', copyIconClass)}
+        onClick={() => {
+          copyAddress(address);
+        }}
+      />
     </div>
   );
 };

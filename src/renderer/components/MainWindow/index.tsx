@@ -8,6 +8,7 @@ import {
 import DApps from '@/renderer/routes/Dapps';
 import GettingStarted from '@/renderer/routes/Welcome/GettingStarted';
 import Home from '@/renderer/routes/Home';
+import Transactions from '@/renderer/routes/Transactions';
 import ImportHome from '@/renderer/routes/Import/ImportHome';
 import ImportByPrivateKey from '@/renderer/routes/ImportBy/ImportByPrivateKey';
 import ImportSetPassword from '@/renderer/routes/Import/ImportSetPassword';
@@ -118,6 +119,17 @@ const router = createRouter([
           } as MainWindowRouteData;
         },
         element: <Home />,
+      },
+      {
+        path: 'home/transactions',
+        loader: () => {
+          return {
+            title: 'Transactions',
+            routeCSSKeyword: 'transactions',
+            backable: true,
+          } as MainWindowRouteData;
+        },
+        element: <Transactions />,
       },
       {
         path: 'my-dapps',
