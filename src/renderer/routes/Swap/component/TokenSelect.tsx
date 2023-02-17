@@ -41,7 +41,7 @@ const TokenWrapper = styled.div`
   & > .text {
     margin: 0 10px;
     font-weight: 500;
-    font-size: 20px;
+    font-size: 24px;
     line-height: 23px;
     color: white;
     max-width: 100px;
