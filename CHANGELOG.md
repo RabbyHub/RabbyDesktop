@@ -1,7 +1,22 @@
 
-v0.4.6 / 2023-02-16
-==================
+v0.4.7 / 2023-02-17
+===================
 
+  * feat: add new address (#117)
+  * Fix: swap、 send style (#132)
+  * feat: transaction (#130)
+  * fix: push changes of dapp to all built-in views. (#131)
+  * fix: unexpected closing window on sendToken
+  * Feat/send token (#128)
+  * feat: receive (#127)
+  * fix: edit alias name (#124)
+  * feat: add onCancelCb on switchChain (#126)
+  * fix: only display bind button when hovered (#125)
+
+v0.4.6 / 2023-02-16
+===================
+
+  * Release v0.4.6
   * style: tuning.
   * feat: greater draggable area on darwin.
   * feat: true realtime preview on add dapp. (#122)
