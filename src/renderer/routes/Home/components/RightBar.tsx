@@ -1,12 +1,11 @@
-import styled from 'styled-components';
-import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
+import { ReceiveModalWraper } from '@/renderer/components/ReceiveModal';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Transactions from './Transactions';
-import IconSwap from '../../../../../assets/icons/home/swap.svg?rc';
-import IconSend from '../../../../../assets/icons/home/send.svg?rc';
+import styled from 'styled-components';
 import IconReceive from '../../../../../assets/icons/home/receive.svg?rc';
-import IconSecurity from '../../../../../assets/icons/home/security.svg?rc';
-import IconGasTopup from '../../../../../assets/icons/home/gas-topup.svg?rc';
+import IconSend from '../../../../../assets/icons/home/send.svg?rc';
+import IconSwap from '../../../../../assets/icons/home/swap.svg?rc';
+import Transactions from './Transactions';
 
 const RightBarWrapper = styled.div`
   width: 330px;
@@ -48,6 +47,8 @@ const ActionList = styled.ul`
 
 const RightBar = () => {
   const navigation = useNavigate();
+  const [isShowReceive, setIsShowReceive] = useState(false);
+
   const actions = [
     {
       id: 'swap',
@@ -66,6 +67,9 @@ const RightBar = () => {
       id: 'receive',
       name: 'Receive',
       icon: <IconReceive width="35px" height="35px" />,
+      onClick: () => {
+        setIsShowReceive(true);
+      },
     },
     // {
     //   id: 'gas-topup',
@@ -89,6 +93,12 @@ const RightBar = () => {
         ))}
       </ActionList>
       <Transactions />
+      <ReceiveModalWraper
+        open={isShowReceive}
+        onCancel={() => {
+          setIsShowReceive(false);
+        }}
+      />
     </RightBarWrapper>
   );
 };

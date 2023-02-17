@@ -5,6 +5,7 @@ import { useZPopupLayerOnMain } from './usePopupWinOnMainwin';
 
 export const useSwitchChainModal = <T extends HTMLElement>(
   cb?: (c: CHAINS_ENUM) => void,
+  onCancelCb?: () => void,
   clickOutSide = true
 ) => {
   const ref = useRef<T>(null);
@@ -27,12 +28,14 @@ export const useSwitchChainModal = <T extends HTMLElement>(
             ...svPartials,
           },
           (payload) => {
-            if (payload.latestState?.value) {
-              cb?.(payload.latestState?.value);
+            if (payload.latestState?.isCancel) {
+              onCancelCb?.();
+            } else {
+              cb?.(payload.latestState?.value || CHAINS_ENUM.ETH);
             }
           }
         ),
     }),
-    [ZActions, cb]
+    [ZActions, cb, onCancelCb]
   );
 };
