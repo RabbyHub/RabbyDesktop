@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { useLocation, useMatches } from 'react-router-dom';
+import { useLocation, useMatches, useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
 
 import { ensurePrefix } from '@/isomorphic/string';
@@ -61,6 +61,8 @@ export default function MainWindowRoute({
     matchedData?.routeCSSKeyword
   );
 
+  const navigate = useNavigate();
+
   return (
     <div className={classNames(styles.MainWindowRoute, classNameOnRoute)}>
       {!matchedData?.noDefaultHeader && (
@@ -68,10 +70,23 @@ export default function MainWindowRoute({
           className={classNames(
             styles.headerBlock,
             matchedData?.floatingAccountComponent &&
-              styles.floatingAccountComponent
+              styles.floatingAccountComponent,
+            'page-header-block'
           )}
         >
-          <div className={styles.pageTitle}>{matchedData?.title || null}</div>
+          <div className={classNames(styles.pageTitle, 'page-title')}>
+            {matchedData?.backable ? (
+              <img
+                src="rabby-internal://assets/icons/common/back.svg"
+                className={classNames(styles.pageBack, 'icon-back')}
+                alt=""
+                onClick={() => {
+                  navigate(-1);
+                }}
+              />
+            ) : null}
+            {matchedData?.title || null}
+          </div>
           <div className={styles.accountComponent}>
             <CurrentAccountAndNewAccount />
           </div>

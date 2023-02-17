@@ -1,7 +1,5 @@
-import { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import IconSwapBack from '@/../assets/icons/swap/back.svg?rc';
+import { FixedBackHeader } from '@/renderer/components/FixedBackHeader';
 import { SwapByDex } from './swap';
 
 const SwapWrapper = styled.div`
@@ -31,16 +29,9 @@ const SwapWrapper = styled.div`
 `;
 
 export const Swap = () => {
-  const navigate = useNavigate();
-  const goBack = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
   return (
     <SwapWrapper>
-      <header className="header">
-        <IconSwapBack onClick={goBack} />
-        <div>Swap</div>
-      </header>
+      <FixedBackHeader>Swap</FixedBackHeader>
 
       <div className="content">
         <SwapByDex />

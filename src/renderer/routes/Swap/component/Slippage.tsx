@@ -192,10 +192,8 @@ export const Slippage = memo((props: SlippageProps) => {
         <div className="left">
           <div className="title">Slippage</div>
           <Tooltip
-            autoAdjustOverflow
             overlayInnerStyle={{
-              width: 317,
-              padding: '8px 12px',
+              width: 320,
               transform: 'translateX(65px)',
               fontSize: '12px',
             }}

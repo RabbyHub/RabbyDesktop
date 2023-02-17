@@ -7,7 +7,8 @@ import {
 } from '../utils/ipcMainEvents';
 import {
   forwardToMainWebContents,
-  onMainWindowReady,
+  getAllMainUIViews,
+  getAllMainUIWindows,
 } from '../utils/stream-helpers';
 import { getWindowFromBrowserWindow } from './tabbedBrowserWindow';
 import { setListeners, setOpenHandlerForWebContents } from './webContents';
@@ -40,12 +41,23 @@ onIpcMainEvent(
 onIpcMainInternalEvent(
   '__internal_main:dapps:changed',
   async ({ dapps, pinnedList, unpinnedList, protocolDappsBinding }) => {
-    const mainContents = (await onMainWindowReady()).window.webContents;
-    sendToWebContents(mainContents, '__internal_push:dapps:changed', {
-      dapps,
-      pinnedList,
-      unpinnedList,
-      protocolDappsBinding,
+    const [{ windowList }, { viewOnlyList }] = await Promise.all([
+      getAllMainUIWindows(),
+      getAllMainUIViews(),
+    ]);
+
+    const viewSet = new Set([
+      ...windowList.map((win) => win.webContents),
+      ...viewOnlyList.map((view) => view),
+    ]);
+
+    viewSet.forEach((webContents) => {
+      sendToWebContents(webContents, '__internal_push:dapps:changed', {
+        dapps,
+        pinnedList,
+        unpinnedList,
+        protocolDappsBinding,
+      });
     });
   }
 );
