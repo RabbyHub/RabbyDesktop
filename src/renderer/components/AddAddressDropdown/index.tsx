@@ -1,11 +1,10 @@
 import { Dropdown, Menu } from 'antd';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import {
   usePopupViewInfo,
   useZPopupLayerOnMain,
 } from '@/renderer/hooks/usePopupWinOnMainwin';
-import { useClickOutSide } from '@/renderer/hooks/useClick';
 import { ADD_DROPDOWN_LEFT_OFFSET, getAddDropdownKeyrings } from './constants';
 import styles from './index.module.less';
 
@@ -13,12 +12,13 @@ const keyrings = getAddDropdownKeyrings();
 
 export default function AddAddressDropdown() {
   const { visible } = usePopupViewInfo('add-address-dropdown');
-  const hoveredRef = React.useRef(true);
-  useEffect(() => {
-    hoveredRef.current = visible;
-  }, [visible]);
-
   const zActions = useZPopupLayerOnMain();
+
+  const onOpenChange = React.useCallback((open: boolean) => {
+    if (!open) {
+      hideMainwinPopupview('add-address-dropdown');
+    }
+  }, []);
 
   const handleClick = React.useCallback(
     (info: { key: string }) => {
@@ -30,31 +30,12 @@ export default function AddAddressDropdown() {
     [zActions]
   );
 
-  const handleOpen = React.useCallback(() => {
-    hoveredRef.current = true;
-  }, []);
-
-  const handleClose = React.useCallback(() => {
-    hoveredRef.current = false;
-    hideMainwinPopupview('add-address-dropdown');
-  }, []);
-
-  const overlayRef = React.useRef<HTMLDivElement>(null);
-
-  useClickOutSide(overlayRef, () => {
-    hideMainwinPopupview('add-address-dropdown');
-  });
-
   return (
     <Dropdown
-      open={hoveredRef.current}
-      trigger={['click', 'hover']}
+      open={visible}
+      onOpenChange={onOpenChange}
       overlay={
-        <div
-          ref={overlayRef}
-          onMouseEnter={handleOpen}
-          onMouseLeave={handleClose}
-        >
+        <div>
           <Menu className={styles.Menu}>
             {keyrings.map((keyring) => (
               <Menu.Item className={styles.MenuItem} key={keyring.id}>
@@ -74,8 +55,6 @@ export default function AddAddressDropdown() {
       }
     >
       <div
-        onMouseEnter={handleOpen}
-        // onMouseLeave={handleClose}
         className={styles.NewAccountIcon}
         style={{
           position: 'absolute',

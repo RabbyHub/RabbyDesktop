@@ -59,7 +59,7 @@ export const CommonHDManagerModal: React.FC<Props> = ({
       .catch((e: any) => {
         console.log(e);
         if (isLedger) {
-          props.onBack?.();
+          // props.onBack?.();
           message.error(
             'Unable to connect to Hardware wallet. Please try to re-connect.'
           );

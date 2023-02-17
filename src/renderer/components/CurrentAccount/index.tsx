@@ -10,7 +10,7 @@ import {
   WALLET_BRAND_CONTENT,
 } from '@/renderer/utils/constant';
 import clsx from 'clsx';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef } from 'react';
 import {
   ADD_DROPDOWN_LEFT_OFFSET,
   getAddDropdownKeyrings,
@@ -68,7 +68,6 @@ const DROPDOWN_POPUP_H =
 
 export const AddNewAccount = ({ className }: { className?: string }) => {
   const divRef = useRef<HTMLDivElement>(null);
-  const [showDropdown, setShowDropdown] = useState(false);
 
   useClickOutSide(divRef, () => {
     hideMainwinPopupview('add-address-dropdown');
@@ -76,16 +75,13 @@ export const AddNewAccount = ({ className }: { className?: string }) => {
 
   return (
     <div
-      className={clsx(styles.addNewAccount, className, {
-        [styles.hover]: showDropdown,
-      })}
+      className={clsx(styles.addNewAccount, className)}
       ref={divRef}
       onMouseEnter={(evt) => {
         if (!divRef.current) return;
         const pos = divRef.current.getBoundingClientRect();
 
         // const divRect = (evt.target as HTMLDivElement).getBoundingClientRect();
-        setShowDropdown(true);
         showMainwinPopupview({
           type: 'add-address-dropdown',
           triggerRect: {
