@@ -3,9 +3,8 @@ import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { KEYRING_CLASS } from '@/renderer/utils/constant';
 import React from 'react';
 import { HDManagerModal } from '../HDManager/HDManagerModal';
-import { Modal } from '../Modal/Modal';
 import { WalletConnectModal } from '../WalletConnect/WalletConnectModal';
-import { ContactModalContent } from './ContactModalContent';
+import { ContactModal } from './ContactModal';
 
 export interface Props {
   keyringType?: string;
@@ -44,7 +43,7 @@ export const AddAddressModalInner: React.FC<Props> = ({
 
   if (keyringType === KEYRING_CLASS.WATCH) {
     return (
-      <Modal
+      <ContactModal
         centered
         open={visible}
         title="Add Contacts"
@@ -54,9 +53,8 @@ export const AddAddressModalInner: React.FC<Props> = ({
         destroyOnClose
         onCancel={onCancel}
         footer={null}
-      >
-        <ContactModalContent onSuccess={onCancel} />
-      </Modal>
+        onSuccess={onCancel}
+      />
     );
   }
 

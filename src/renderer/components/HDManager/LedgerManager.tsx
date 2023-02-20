@@ -145,7 +145,7 @@ export const LedgerManager: React.FC = () => {
       <Modal
         centered
         destroyOnClose
-        className="AdvancedModal"
+        className="AdvancedModal inherit"
         title="Custom Address HD path"
         open={visibleAdvanced}
         width={840}

@@ -111,7 +111,7 @@ export const TrezorManager: React.FC<Props> = ({
       <Modal
         centered
         destroyOnClose
-        className="AdvancedModal"
+        className="AdvancedModal inherit"
         title="Custom Address HD path"
         open={visibleAdvanced}
         width={840}
