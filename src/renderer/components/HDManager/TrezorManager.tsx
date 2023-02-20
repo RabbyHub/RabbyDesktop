@@ -37,7 +37,6 @@ export const TrezorManager: React.FC<Props> = ({
   }, [loading]);
 
   const fetchCurrentAccounts = React.useCallback(async () => {
-    console.log('第一次');
     setLoading(true);
     await getCurrentAccounts();
     setSetting({
