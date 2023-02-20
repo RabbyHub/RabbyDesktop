@@ -37,17 +37,12 @@ export default function AddAddressDropdown() {
       onOpenChange={onOpenChange}
       overlay={
         <div>
-          <Menu className={styles.Menu}>
+          <Menu className={styles.Menu} onClick={handleClick}>
             {keyrings.map((keyring) => (
               <Menu.Item className={styles.MenuItem} key={keyring.id}>
                 <div className="flex items-center">
                   <img className={styles.Icon} src={keyring.logo} />
-                  <span
-                    className={styles.ItemName}
-                    onClick={() => handleClick({ key: keyring.id })}
-                  >
-                    {keyring.name}
-                  </span>
+                  <span className={styles.ItemName}>{keyring.name}</span>
                 </div>
               </Menu.Item>
             ))}

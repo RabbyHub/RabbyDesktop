@@ -13,6 +13,7 @@ import { Tooltip } from 'antd';
 import clsx from 'clsx';
 import React from 'react';
 import { useCopyToClipboard } from 'react-use';
+import { toastCopiedWeb3Addr } from '../TransparentToast';
 import styles from './index.module.less';
 import { useAccountInfo } from './useAccountInfo';
 
@@ -56,9 +57,14 @@ export const AccountItem: React.FC<Props> = ({
 
   const [, copyToClipboard] = useCopyToClipboard();
 
-  const onCopy = React.useCallback(() => {
-    copyToClipboard(account.address);
-  }, [account.address, copyToClipboard]);
+  const onCopy: React.MouseEventHandler<HTMLDivElement> = React.useCallback(
+    (e) => {
+      e.stopPropagation();
+      copyToClipboard(account.address);
+      toastCopiedWeb3Addr(account.address);
+    },
+    [account.address, copyToClipboard]
+  );
 
   const onTogglePin: React.MouseEventHandler<HTMLDivElement> =
     React.useCallback(

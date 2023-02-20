@@ -1,3 +1,4 @@
+import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { useMessageForwardToMainwin } from '@/renderer/hooks/useViewsMessage';
 import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { KEYRING_CLASS } from '@/renderer/utils/constant';
@@ -21,7 +22,15 @@ export const AddAddressModalInner: React.FC<Props> = ({
   onCancel,
   showEntryButton,
 }) => {
+  const { hideZSubview } = useZPopupLayerOnMain();
   const mainNav = useMessageForwardToMainwin('route-navigate');
+
+  // close all popupView
+  const onSuccess = React.useCallback(() => {
+    onCancel();
+    hideZSubview('select-add-address-type-modal');
+    hideZSubview('address-management');
+  }, [onCancel, hideZSubview]);
 
   const handleImportByPrivateKey = React.useCallback(() => {
     mainNav({
@@ -53,7 +62,7 @@ export const AddAddressModalInner: React.FC<Props> = ({
         destroyOnClose
         onCancel={onCancel}
         footer={null}
-        onSuccess={onCancel}
+        onSuccess={onSuccess}
       />
     );
   }
@@ -69,7 +78,7 @@ export const AddAddressModalInner: React.FC<Props> = ({
         destroyOnClose
         onCancel={onCancel}
         footer={null}
-        onSuccess={onCancel}
+        onSuccess={onSuccess}
       />
     );
   }
@@ -85,7 +94,7 @@ export const AddAddressModalInner: React.FC<Props> = ({
     return (
       <HDManagerModal
         open={visible}
-        onCancel={onCancel}
+        onCancel={onSuccess}
         destroyOnClose
         keyringType={keyringType}
         footer={null}

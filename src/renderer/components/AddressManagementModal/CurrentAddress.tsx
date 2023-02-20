@@ -12,6 +12,7 @@ import { Tooltip } from 'antd';
 import clsx from 'clsx';
 import React from 'react';
 import { useCopyToClipboard } from 'react-use';
+import { toastCopiedWeb3Addr } from '../TransparentToast';
 import styles from './index.module.less';
 import { useAccountInfo } from './useAccountInfo';
 
@@ -51,6 +52,7 @@ export const CurrentAccount: React.FC<Props> = ({ account, onClick }) => {
     (e: React.MouseEvent) => {
       e.stopPropagation();
       copyToClipboard(account.address);
+      toastCopiedWeb3Addr(account.address);
     },
     [account.address, copyToClipboard]
   );

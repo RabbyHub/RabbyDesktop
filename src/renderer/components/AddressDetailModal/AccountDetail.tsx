@@ -19,6 +19,7 @@ import { useForwardTo } from '@/renderer/hooks/useViewsMessage';
 import styles from './index.module.less';
 import { AccountDetailItem } from './AccountDetailItem';
 import { useAccountInfo } from '../AddressManagementModal/useAccountInfo';
+import { toastCopiedWeb3Addr } from '../TransparentToast';
 
 export interface Props {
   onClose: () => void;
@@ -35,6 +36,7 @@ export const AccountDetail: React.FC<Props> = ({
   const [, copyToClipboard] = useCopyToClipboard();
   const onCopy = React.useCallback(() => {
     copyToClipboard(account.address);
+    toastCopiedWeb3Addr(account.address);
   }, [account.address, copyToClipboard]);
   const source = useAddressSource({
     type: account.type,
