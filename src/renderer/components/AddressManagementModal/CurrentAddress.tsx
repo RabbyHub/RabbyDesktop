@@ -75,7 +75,10 @@ export const CurrentAccount: React.FC<Props> = ({ account, onClick }) => {
               title="Whitelisted address"
             >
               <div className={styles.whitelist}>
-                <img src="rabby-internal://assets/icons/address-management/whitelist.svg" />
+                <img
+                  width={16}
+                  src="rabby-internal://assets/icons/address-management/whitelist-white.svg"
+                />
               </div>
             </Tooltip>
           )}
