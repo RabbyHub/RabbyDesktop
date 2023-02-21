@@ -143,6 +143,10 @@ export default class TabbedBrowserWindow {
     return this.$meta.isMainWindow;
   }
 
+  isForTrezorLikeConnection() {
+    return this.$meta.isForTrezorLikeConnection;
+  }
+
   isRabbyXNotificationWindow() {
     return this.$meta.isRabbyXNotificationWindow;
   }
