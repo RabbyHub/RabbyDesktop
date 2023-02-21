@@ -18,6 +18,8 @@ import { makeSureDappOpened } from '@/renderer/ipcRequest/mainwin';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { useTransactionPendingCount } from '@/renderer/hooks/rabbyx/useTransaction';
 import { Badge } from 'antd';
+import { usePrevious } from 'react-use';
+import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { DappFavicon } from '../DappFavicon';
 import Hide from './Hide';
 import styles from './Sidebar.module.less';
@@ -174,6 +176,13 @@ export default function MainWindowSidebar() {
       matchedDapp: matchPath(DappRoutePatter, location.pathname),
     };
   }, [location.pathname]);
+  const prevMatchedDapp = usePrevious(matchedDapp);
+
+  useEffect(() => {
+    if (prevMatchedDapp?.params.origin !== matchedDapp?.params.origin) {
+      walletController.rejectAllApprovals();
+    }
+  }, [prevMatchedDapp, matchedDapp]);
 
   useLayoutEffect(() => {
     const dispose = window.rabbyDesktop.ipcRenderer.on(
