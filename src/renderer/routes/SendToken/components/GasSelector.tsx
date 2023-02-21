@@ -1,6 +1,6 @@
 import clsx from 'classnames';
 import React, { useEffect, useState, useRef } from 'react';
-import { Input, Button } from 'antd';
+import { Button } from 'antd';
 import styled from 'styled-components';
 import { BigNumber } from 'bignumber.js';
 import {
@@ -11,6 +11,7 @@ import {
 import { GasLevel, TokenItem } from '@debank/rabby-api/dist/types';
 import { formatTokenAmount } from '@/renderer/utils/number';
 import { Modal } from '@/renderer/components/Modal/Modal';
+import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 
 const StyledModal = styled(Modal)`
   .ant-modal-header {
@@ -311,7 +312,7 @@ const GasSelector = ({
                   })}
                 >
                   {item.level === 'custom' ? (
-                    <Input
+                    <RabbyInput
                       className="cursor-pointer"
                       value={customGas}
                       defaultValue={customGas}

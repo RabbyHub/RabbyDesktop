@@ -1,5 +1,5 @@
 import { OpenApiService } from '@debank/rabby-api';
-import { Button, Input } from 'antd';
+import { Button } from 'antd';
 import React from 'react';
 import useDebounceValue from '@/renderer/hooks/useDebounceValue';
 import { isValidAddress } from 'ethereumjs-util';
@@ -8,6 +8,7 @@ import { useWalletRequest } from '@/renderer/hooks/useWalletRequest';
 import { useAccountToDisplay } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
 import { useAddressManagement } from '@/renderer/hooks/rabbyx/useAddressManagement';
 import styles from './index.module.less';
+import RabbyInput from '../AntdOverwrite/Input';
 
 type Account = import('@/isomorphic/types/rabbyx').Account;
 type ENS = Awaited<ReturnType<OpenApiService['getEnsAddressByName']>>;
@@ -100,7 +101,7 @@ export const ContactModalContent: React.FC<Props> = ({ onSuccess }) => {
   return (
     <form onSubmit={onSubmit} className={styles.ContactModalContent}>
       <div className={styles.inputWrap}>
-        <Input
+        <RabbyInput
           className={styles.input}
           autoFocus
           value={value}

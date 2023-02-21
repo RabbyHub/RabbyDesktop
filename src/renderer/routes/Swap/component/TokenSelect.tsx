@@ -17,6 +17,7 @@ import { formatTokenAmount, splitNumberByStep } from '@/renderer/utils/number';
 import { useDebounce } from 'react-use';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import IconClose from '@/../assets/icons/swap/modal-close.svg?rc';
+import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 
 const TokenWrapper = styled.div`
   display: flex;
@@ -557,7 +558,7 @@ const TokenSelectModal = ({
           <IconClose className="closeIcon" onClick={onClose} />
         </TitleWrapper>
 
-        <Input
+        <RabbyInput
           prefix={<IconRcSearch className="searchIcon" />}
           value={query}
           placeholder={placeholder}
@@ -831,7 +832,7 @@ export const TokenSelect = ({
           </div>
         ) : (
           <div className="inlinePrizeBox">
-            <Input
+            <RabbyInput
               ref={inputRef}
               className="amountInput"
               readOnly={type === 'swapTo'}

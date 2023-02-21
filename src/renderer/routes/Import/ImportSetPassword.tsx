@@ -1,5 +1,6 @@
+import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
-import { Checkbox, Input, Form, message } from 'antd';
+import { Checkbox, Form, message } from 'antd';
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import BlockButton from './components/BlockButton/BlockButton';
@@ -80,7 +81,7 @@ const ImportSetPassword = () => {
               },
             ]}
           >
-            <Input
+            <RabbyInput
               className={styles.input}
               placeholder="Set Password"
               type="password"
@@ -105,7 +106,7 @@ const ImportSetPassword = () => {
               }),
             ]}
           >
-            <Input
+            <RabbyInput
               className={styles.input}
               placeholder="Confirm"
               type="password"

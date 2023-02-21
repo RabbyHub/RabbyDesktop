@@ -1,3 +1,4 @@
+import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import { Modal as RabbyModal } from '@/renderer/components/Modal/Modal';
 import { Button, Form, Input, Modal, Radio } from 'antd';
 import classNames from 'classnames';
@@ -204,7 +205,7 @@ export default function ModalProxySetting() {
           label={<span className="form-item-label">Hostname: </span>}
           rules={[]}
         >
-          <Input
+          <RabbyInput
             disabled={!isUsingCustomProxy}
             spellCheck={false}
             placeholder="Hostname or IP"
@@ -218,7 +219,7 @@ export default function ModalProxySetting() {
           label={<span className="form-item-label">Port: </span>}
           rules={[]}
         >
-          <Input
+          <RabbyInput
             disabled={!isUsingCustomProxy}
             spellCheck={false}
             placeholder="Port"
@@ -233,7 +234,7 @@ export default function ModalProxySetting() {
             label={<span className="form-item-label">(optional) Username: </span>}
             rules={[]}
           >
-            <Input
+            <RabbyInput
               disabled={!isUsingCustomProxy}
               spellCheck={false}
               placeholder="Proxy Server Username"
@@ -247,7 +248,7 @@ export default function ModalProxySetting() {
             label={<span className="form-item-label">(optional) Password: </span>}
             rules={[]}
           >
-            <Input
+            <RabbyInput
               disabled={!isUsingCustomProxy}
               spellCheck={false}
               type="password"

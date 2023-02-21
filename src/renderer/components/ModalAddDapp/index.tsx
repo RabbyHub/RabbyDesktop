@@ -1,5 +1,5 @@
 import { LoadingOutlined } from '@ant-design/icons';
-import { Button, Form, Input, ModalProps, InputRef } from 'antd';
+import { Button, Form, ModalProps, InputRef } from 'antd';
 import React, { ReactNode, useEffect, useRef, useState } from 'react';
 
 import { canoicalizeDappUrl } from '@/isomorphic/url';
@@ -14,6 +14,7 @@ import { Modal } from '../Modal/Modal';
 import styles from './index.module.less';
 import { useAddDappURL } from './useAddDapp';
 import { PreviewWebview } from '../DappView/PreviewWebview';
+import RabbyInput from '../AntdOverwrite/Input';
 
 const findRelatedDapps = (dapps: IDapp[], url: string) => {
   const current = canoicalizeDappUrl(url);
@@ -78,7 +79,7 @@ const EditableInput = ({
           }}
         >
           <Form.Item name="alias" rules={[{ required: true, message: '' }]}>
-            <Input
+            <RabbyInput
               autoFocus
               placeholder="Please input alias"
               maxLength={15}
@@ -517,7 +518,7 @@ export function AddDapp({
               : 'To ensure the security of your funds, please ensure that you enter the official domain name of Dapp'
           }
         >
-          <Input
+          <RabbyInput
             className={styles.input}
             placeholder="Input the Dapp domain name. e.g. debank.com"
             autoFocus

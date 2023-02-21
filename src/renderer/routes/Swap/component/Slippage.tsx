@@ -1,10 +1,11 @@
-import { Input, Tooltip } from 'antd';
+import { Tooltip } from 'antd';
 import clsx from 'clsx';
 import { memo, useMemo } from 'react';
 import { useToggle } from 'react-use';
 import styled from 'styled-components';
 import IconInfo from '@/../assets/icons/swap/info-outline.svg?rc';
 import IconTipDownArrow from '@/../assets/icons/swap/arrow-tips-down.svg?rc';
+import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 
 const MinReceivedBox = styled.div`
   margin-top: 12px;
@@ -267,7 +268,7 @@ export const Slippage = memo((props: SlippageProps) => {
           hasAmount={hasAmount}
         >
           {isCustom ? (
-            <Input
+            <RabbyInput
               autoFocus
               bordered={false}
               value={`${value}%`}

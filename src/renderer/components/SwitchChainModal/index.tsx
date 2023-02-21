@@ -1,4 +1,4 @@
-import { Input, Tooltip } from 'antd';
+import { Tooltip } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import clsx from 'clsx';
 
@@ -9,6 +9,7 @@ import IconRcSearch from '@/../assets/icons/swap/search.svg?rc';
 import { usePreference } from '@/renderer/hooks/rabbyx/usePreference';
 import { Chain, CHAINS_ENUM, CHAINS_LIST } from '@debank/common';
 import styles from './index.module.less';
+import RabbyInput from '../AntdOverwrite/Input';
 
 type OnPinnedChanged = (
   chain: import('@debank/common').CHAINS_ENUM,
@@ -155,7 +156,7 @@ function SwitchChainModalInner({
   return (
     <div className={styles.SwitchChainModalInner}>
       <div className={styles.title}>{title}</div>
-      <Input
+      <RabbyInput
         autoCorrect="false"
         autoComplete="false"
         size="large"

@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import BigNumber from 'bignumber.js';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { useDebounce } from 'react-use';
-import { Input, Form, Skeleton, message, Button } from 'antd';
+import { Form, Skeleton, message, Button } from 'antd';
 import abiCoder, { AbiCoder } from 'web3-eth-abi';
 import { isValidAddress, intToHex } from 'ethereumjs-util';
 import styled from 'styled-components';
@@ -26,6 +26,7 @@ import AddressViewer from '@/renderer/components/AddressViewer';
 import { ModalConfirm } from '@/renderer/components/Modal/Confirm';
 import { copyText } from '@/renderer/utils/clipboard';
 import { toastCopiedWeb3Addr } from '@/renderer/components/TransparentToast';
+import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import GasSelector from './components/GasSelector';
 import GasReserved from './components/GasReserved';
 import { ChainSelect } from '../Swap/component/ChainSelect';
@@ -902,7 +903,7 @@ const SendToken = () => {
                 },
               ]}
             >
-              <Input
+              <RabbyInput
                 placeholder="Enter the address"
                 autoComplete="off"
                 autoFocus
