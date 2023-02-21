@@ -1,5 +1,5 @@
 import { LoadingOutlined } from '@ant-design/icons';
-import { Button, Form, Input, ModalProps, InputRef } from 'antd';
+import { Button, Form, Input, InputRef } from 'antd';
 import React, { ReactNode, useEffect, useRef, useState } from 'react';
 
 import { canoicalizeDappUrl } from '@/isomorphic/url';
@@ -10,7 +10,7 @@ import classNames from 'classnames';
 import { useClickAway } from 'react-use';
 import { useDapps } from 'renderer/hooks/useDappsMngr';
 import { DappFavicon } from '../DappFavicon';
-import { Modal } from '../Modal/Modal';
+import { Modal, Props as ModalProps } from '../Modal/Modal';
 import styles from './index.module.less';
 import { useAddDappURL } from './useAddDapp';
 import { PreviewWebview } from '../DappView/PreviewWebview';
@@ -193,6 +193,19 @@ const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
       <PreviewWebview
         containerClassName={styles.previewTagContainer}
         src={data.finalOrigin}
+        loadingView={
+          <div className={styles.previewEmpty}>
+            <div>
+              <img
+                className={styles.loadingSpinner}
+                src="rabby-internal://assets/icons/add-dapp/icon-pageloading.svg"
+                style={{ animation: 'rotate 1s linear infinite' }}
+                alt=""
+              />
+              <div className={styles.previewEmptyTitle}>Loading page...</div>
+            </div>
+          </div>
+        }
         loadFailedView={
           <div className={styles.previewEmpty}>
             <div>
@@ -590,8 +603,8 @@ export default function ModalAddDapp({
       width={1000}
       centered
       {...modalProps}
-      onCancel={(e) => {
-        modalProps.onCancel?.(e);
+      onCancel={() => {
+        modalProps.onCancel?.();
       }}
       title={null}
       footer={null}
