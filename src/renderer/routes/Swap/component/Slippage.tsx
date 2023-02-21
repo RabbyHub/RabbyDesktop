@@ -78,20 +78,51 @@ export const SlippageItem = styled.div<{
           : 'var(--color-primary)'
         : 'var(--color-primary)'};
   }
-  /* &::after {
+  &::before,
+  &::after {
     opacity: ${(props) => (props.active && props.hasAmount ? 1 : 0)};
     content: '';
     position: absolute;
+    bottom: -14px;
     left: 50%;
-    bottom: -10px;
-    transform: translateX(-50%);
     width: 0;
     height: 0;
-    border-style: solid;
-    border-width: 0 4px 6.9px 4px;
-    border-color: transparent transparent rgba(255, 255, 255, 0.1) transparent;
-    border-radius: 2px;
-  } */
+    border: 8px solid transparent;
+    border-bottom-color: #787d88;
+
+    border-top: 0;
+    margin-left: -8px;
+    margin-top: -8px;
+  }
+  &::after {
+    bottom: -15px;
+    border-bottom-color: #696e7b;
+  }
+  &:nth-child(2) {
+    &::before {
+      border-bottom-color: #787c88;
+    }
+    &::after {
+      border-bottom-color: #676c78;
+    }
+  }
+  &:nth-child(3) {
+    &::before {
+      border-bottom-color: #747984;
+    }
+    &::after {
+      border-bottom-color: #656976;
+    }
+  }
+  &:nth-child(4) {
+    &::before {
+      border-bottom-color: #747883;
+    }
+    &::after {
+      border-bottom-color: #626673;
+    }
+  }
+
   & input {
     text-align: center;
     color: ${(props) =>

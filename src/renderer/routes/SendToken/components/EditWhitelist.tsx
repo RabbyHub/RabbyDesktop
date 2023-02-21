@@ -130,7 +130,7 @@ export const EditWhitelist = ({
     <StyledModal
       centered
       width={520}
-      bodyStyle={{ height: 680, paddingBottom: 32 }}
+      bodyStyle={{ height: 680, padding: '0 32px 32px' }}
       open
       title="Select Address"
       onCancel={handleClickBack}

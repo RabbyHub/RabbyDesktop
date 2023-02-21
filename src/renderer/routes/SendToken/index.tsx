@@ -467,17 +467,22 @@ const SendToken = () => {
       }
     }
     try {
+      setAmountFocus(false);
+
       await walletController.setLastTimeSendToken(
         currentAccount!.address,
         currentToken
       );
 
-      walletController.sendRequest({
+      await walletController.sendRequest({
         method: 'eth_sendTransaction',
         params: [params],
       });
     } catch (e: any) {
       message.error(e.message);
+    } finally {
+      setIsSubmitLoading(false);
+      setAmountFocus(true);
     }
   };
 
@@ -968,6 +973,7 @@ const SendToken = () => {
                 inlinePrize
                 hideChainIcon={false}
                 logoSize={32}
+                forceFocus={amountFocus}
               />
             )}
           </Form.Item>
