@@ -2,7 +2,7 @@ import { getBaseHref } from '@/isomorphic/url';
 import TabbedBrowserWindow from '../browser/browsers';
 import { getAllDapps, parseDappRedirect } from '../store/dapps';
 import { switchToBrowserTab } from '../utils/browser';
-import { attachDappSafeview } from './dappSafeview';
+import { safeOpenURL } from './dappSafeview';
 
 export function createDappTab(mainTabbedWin: TabbedBrowserWindow, url: string) {
   const continualOpenedTab = mainTabbedWin.createTab({
@@ -66,7 +66,7 @@ export function setOpenHandlerForWebContents({
       if (shouldKeepTab) {
         webContents.loadURL(targetURL);
       } else {
-        attachDappSafeview(targetURL, {
+        safeOpenURL(targetURL, {
           sourceURL: currentUrl,
           existedDapp: targetInfo.foundDapp,
           _targetwin: parentTabbedWin.window,
@@ -138,7 +138,7 @@ export const setListeners = {
         if (shouldKeepTab) return true;
 
         evt.preventDefault();
-        attachDappSafeview(targetURL, {
+        safeOpenURL(targetURL, {
           existedDapp: targetInfo.foundDapp,
           sourceURL: currentUrl,
         });
@@ -182,7 +182,7 @@ export const setListeners = {
           if (shouldKeepTab) return true;
 
           evt.preventDefault();
-          attachDappSafeview(targetURL, {
+          safeOpenURL(targetURL, {
             sourceURL: currentUrl,
             existedDapp: targetInfo.foundDapp,
             _targetwin: parentWindow,

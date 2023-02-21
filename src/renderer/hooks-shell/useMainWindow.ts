@@ -125,8 +125,9 @@ export function useForwardFromInternalPage(
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_forward:main-window:open-dapp',
-      (dappOrigin) => {
-        chrome.tabs.create({ url: dappOrigin, active: true });
+      (targetURL) => {
+        const dappOrigin = canoicalizeDappUrl(targetURL).origin;
+        chrome.tabs.create({ url: targetURL, active: true });
 
         navigateToDappRoute(router.navigate, dappOrigin);
       }

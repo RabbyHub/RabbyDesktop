@@ -75,29 +75,30 @@ onMainWindowReady().then(async (mainWin) => {
   valueToMainSubject('dappSafeModeViews', { baseView });
 });
 
-export async function attachDappSafeview(
-  url: string,
+export async function safeOpenURL(
+  targetURL: string,
   opts: {
     sourceURL: string;
     existedDapp?: IDapp | null;
     _targetwin?: BrowserWindow;
   }
 ) {
-  const targetWin = opts._targetwin || (await onMainWindowReady()).window;
-  const { baseView } = await getDappSafeView();
-
   if (opts.existedDapp) {
     forwardToMainWebContents(
       '__internal_forward:main-window:open-dapp',
-      opts.existedDapp.origin
+      targetURL
     );
 
     return;
   }
 
+  // start: for non-added dapp, alert user to add it
+  const targetWin = opts._targetwin || (await onMainWindowReady()).window;
+
+  const { baseView } = await getDappSafeView();
   let favIcon: IParsedFavicon = {
     iconInfo: null,
-    faviconUrl: `https://www.google.com/s2/favicons?domain=${url}`,
+    faviconUrl: `https://www.google.com/s2/favicons?domain=${targetURL}`,
   };
   sendToWebContents(
     baseView.webContents,
@@ -125,7 +126,7 @@ export async function attachDappSafeview(
           }
         : undefined;
 
-    favIcon = await parseWebsiteFavicon(url, {
+    favIcon = await parseWebsiteFavicon(targetURL, {
       timeout: 3000,
       proxy: proxyOnParseFavicon,
     });
@@ -137,7 +138,7 @@ export async function attachDappSafeview(
       baseView.webContents,
       '__internal_push:dapp-tabs:open-safe-view',
       {
-        url,
+        url: targetURL,
         sourceURL: opts.sourceURL,
         status: 'loaded',
         favIcon,
@@ -181,7 +182,7 @@ onIpcMainEvent('__internal_rpc:dapp-tabs:close-safe-view', async () => {
 onIpcMainInternalEvent('__internal_main:dev', async (payload) => {
   switch (payload.type) {
     case 'dapp-safe-view:open': {
-      attachDappSafeview('https://help.uniswap.org/en', {
+      safeOpenURL('https://help.uniswap.org/en', {
         sourceURL: 'https://app.uniswap.org/',
       });
       break;
