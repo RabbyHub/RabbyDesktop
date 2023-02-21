@@ -1,5 +1,11 @@
 import { arraify } from '@/isomorphic/array';
-import { MutableRefObject, useEffect, useLayoutEffect, useRef } from 'react';
+import {
+  MutableRefObject,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+} from 'react';
 
 export default function useMountedEffect<
   T extends (isMountedRef: MutableRefObject<boolean>) => any
@@ -21,8 +27,12 @@ export default function useMountedEffect<
   return isMounted;
 }
 
-export function useBodyClassNameOnMounted(className: string | string[]) {
-  const classNames = arraify(className).join(' ');
+export function useBodyClassNameOnMounted(
+  className: (string | string | number | boolean)[]
+) {
+  const classNames = useMemo(() => {
+    return arraify(className).filter(Boolean).join(' ');
+  }, [className]);
 
   useLayoutEffect(() => {
     classNames.split(' ').forEach((name) => {

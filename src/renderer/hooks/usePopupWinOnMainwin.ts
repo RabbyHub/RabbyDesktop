@@ -135,6 +135,19 @@ export function usePopupViewInfo<T extends IPopupViewChanges['type']>(
     hideMainwinPopupview(type);
   }, [type]);
 
+  const delayHideView = useCallback(
+    (timeout?: number) => {
+      if (timeout) {
+        setTimeout(() => {
+          hideView();
+        }, timeout);
+      } else {
+        hideView();
+      }
+    },
+    [hideView]
+  );
+
   const hideViewOnly = useCallback(() => {
     hideMainwinPopupview(type);
   }, [type]);
@@ -157,6 +170,7 @@ export function usePopupViewInfo<T extends IPopupViewChanges['type']>(
     localVisible,
     setLocalVisible,
     hideView,
+    delayHideView,
     hideViewOnly,
     visible: info.visible,
     pageInfo: info.pageInfo,

@@ -67,6 +67,9 @@ type M2RChanneMessagePayload = {
   '__internal_push:webhid:select-list': {
     deviceList: IMergedHidDevice[];
   };
+  '__internal_push:webhid:select-devices-modal-blur': {
+    foo?: string;
+  };
 };
 
 type IPushEvents = keyof M2RChanneMessagePayload;

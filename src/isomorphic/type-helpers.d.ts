@@ -55,7 +55,7 @@ type PickAllNonFnFields<T extends Record<string, any>> = Pick<
 >;
 
 type NullableFields<T extends object> = {
-  [K in keyof T]: T[K] | null;
+  [K in keyof T]?: T[K] | null;
 };
 
 type EventTypeOfBrowserOn = [

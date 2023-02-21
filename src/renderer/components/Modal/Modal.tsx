@@ -6,6 +6,7 @@ export interface Props extends ModalProps {
   backable?: boolean;
   subtitle?: string;
   onBack?: () => void;
+  onCancel?: () => void;
   smallTitle?: boolean;
 }
 

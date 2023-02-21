@@ -99,6 +99,7 @@ const CONF = {
       dappsManagement: BrowserView;
       selectDevices: BrowserView;
       zPopup: BrowserView;
+      globalToastPopup: BrowserView;
     }>
   >,
 

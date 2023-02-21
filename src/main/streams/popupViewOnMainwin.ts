@@ -20,7 +20,6 @@ import {
   getAllMainUIViews,
   getWebuiURLBase,
   onMainWindowReady,
-  stopSelectDevices,
 } from '../utils/stream-helpers';
 import { getMainWindowTopOffset, roundRectValue } from '../utils/browserView';
 
@@ -50,14 +49,15 @@ const viewsState: Record<
   'z-popup': {
     visible: false,
   },
+  'global-toast-popup': {
+    visible: false,
+  },
 };
 
 async function hidePopupViewOnWindow(
-  targetView: BrowserView | null,
+  targetView: BrowserView,
   type: PopupViewOnMainwinInfo['type']
 ) {
-  if (!targetView || targetView.webContents.isDestroyed()) return;
-
   sendToWebContents(
     targetView.webContents,
     '__internal_push:popupview-on-mainwin:on-visiblechange',
@@ -66,6 +66,8 @@ async function hidePopupViewOnWindow(
       visible: false,
     }
   );
+
+  if (targetView.webContents.isDestroyed()) return;
 
   if (viewsState[type].modalWindow) {
     viewsState[type].modalWindow!.hide();
@@ -97,6 +99,15 @@ function updateSubviewPos(
     popupRect = {
       ...popupRect,
       ...selfBounds,
+    };
+  } else if (viewType === 'global-toast-popup') {
+    popupRect.width = 600;
+    popupRect = {
+      ...popupRect,
+      height: 80,
+      // make it h-center
+      x: Math.floor((width - popupRect.width) / 2),
+      y: getMainWindowTopOffset(),
     };
   } else if (typeof viewType === 'object') {
     popupRect = {
@@ -161,7 +172,11 @@ async function showModalPopup(
 
   if (viewType === 'select-devices') {
     modalWindow.on('blur', () => {
-      stopSelectDevices();
+      sendToWebContents(
+        targetView.webContents,
+        '__internal_push:webhid:select-devices-modal-blur',
+        {}
+      );
     });
   }
 
@@ -192,7 +207,7 @@ const addAddressReady = onMainWindowReady().then(async (mainWin) => {
 
   // debug-only
   if (!IS_RUNTIME_PRODUCTION) {
-    addAddressPopup.webContents.openDevTools({ mode: 'detach' });
+    // addAddressPopup.webContents.openDevTools({ mode: 'detach' });
   }
 
   hidePopupView(addAddressPopup);
@@ -209,7 +224,11 @@ const addressManagementReady = onMainWindowReady().then(async (mainWin) => {
 
   const onTargetWinUpdate = () => {
     if (viewsState['address-management'].visible)
-      updateSubviewPos(mainWindow, addressManagementPopup);
+      updateSubviewPos(
+        mainWindow,
+        addressManagementPopup,
+        'address-management'
+      );
   };
   mainWindow.on('show', onTargetWinUpdate);
   mainWindow.on('move', onTargetWinUpdate);
@@ -240,7 +259,7 @@ const dappsManagementReady = onMainWindowReady().then(async (mainWin) => {
 
   const onTargetWinUpdate = () => {
     if (viewsState['dapps-management'].visible)
-      updateSubviewPos(mainWindow, dappsManagementPopup);
+      updateSubviewPos(mainWindow, dappsManagementPopup, 'dapps-management');
   };
   mainWindow.on('show', onTargetWinUpdate);
   mainWindow.on('move', onTargetWinUpdate);
@@ -309,12 +328,44 @@ const zPopupReady = onMainWindowReady().then(async (mainWin) => {
   return zPopup;
 });
 
+const globalToastPopupReady = onMainWindowReady().then(async (mainWin) => {
+  const mainWindow = mainWin.window;
+
+  const globalToastPopup = createPopupView({});
+
+  mainWindow.addBrowserView(globalToastPopup);
+
+  const onTargetWinUpdate = () => {
+    if (viewsState['global-toast-popup'].visible)
+      updateSubviewPos(mainWindow, globalToastPopup, 'global-toast-popup');
+  };
+  mainWindow.on('show', onTargetWinUpdate);
+  mainWindow.on('move', onTargetWinUpdate);
+  mainWindow.on('resized', onTargetWinUpdate);
+  mainWindow.on('unmaximize', onTargetWinUpdate);
+  mainWindow.on('restore', onTargetWinUpdate);
+
+  await globalToastPopup.webContents.loadURL(
+    `${RABBY_POPUP_GHOST_VIEW_URL}?view=global-toast-popup#/`
+  );
+
+  // debug-only
+  if (!IS_RUNTIME_PRODUCTION) {
+    // globalToastPopup.webContents.openDevTools({ mode: 'detach' });
+  }
+
+  hidePopupView(globalToastPopup);
+
+  return globalToastPopup;
+});
+
 Promise.all([
   addAddressReady,
   addressManagementReady,
   dappsManagementReady,
   selectDevicesReady,
   zPopupReady,
+  globalToastPopupReady,
 ]).then((wins) => {
   valueToMainSubject('popupViewsOnMainwinReady', {
     addAddress: wins[0],
@@ -322,6 +373,7 @@ Promise.all([
     dappsManagement: wins[2],
     selectDevices: wins[3],
     zPopup: wins[4],
+    globalToastPopup: wins[5],
   });
 });
 
@@ -348,7 +400,7 @@ const { handler } = onIpcMainEvent(
         }
         targetView.webContents.focus();
       } else {
-        showModalPopup(payload.type, targetView);
+        await showModalPopup(payload.type, targetView);
       }
 
       setTimeout(() => {

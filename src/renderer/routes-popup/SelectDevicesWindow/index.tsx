@@ -65,6 +65,18 @@ function useHidSelectDevice() {
   }, []);
 
   useEffect(() => {
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_push:webhid:select-devices-modal-blur',
+      () => {
+        const selectId = pageInfo?.state?.selectId;
+        if (!selectId) return;
+
+        cancelSelect(selectId);
+      }
+    );
+  }, [pageInfo, cancelSelect]);
+
+  useEffect(() => {
     if (!localVisible) {
       setDeviceList([]);
       setSelectedDevice(null);
