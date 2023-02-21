@@ -146,6 +146,7 @@ function _isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
         queryInfo.view === `${viewType}`
       );
     case 'dapps-management':
+    case 'global-toast-popup':
       return (
         url.startsWith(RABBY_LOCAL_URLBASE) &&
         urlInfo.pathname === '/popup-view.html' &&
@@ -168,6 +169,7 @@ export function isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
           'add-address-dropdown',
           'dapps-management',
           'z-popup',
+          'global-toast-popup',
           // 'select-devices'
         ] as IBuiltinViewName[]
       ).some((view) => _isBuiltinView(url, view));

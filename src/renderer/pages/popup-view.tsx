@@ -24,6 +24,7 @@ import MainWindowDappManagement from '../routes-popup/MainWindowDappManagement';
 import DappReadonlyWindow from '../routes-popup/DappReadonlyWindow';
 
 import SwitchChainWindow from '../routes-popup/SwitchChainWindow.deprecated';
+import GlobalToastPopup from '../components/GlobalToastPopup';
 
 function App() {
   return (
@@ -67,6 +68,9 @@ switch (parseQueryString().view) {
     break;
   case 'dapp-safe-view':
     root.render(<DappReadonlyWindow />);
+    break;
+  case 'global-toast-popup':
+    root.render(<GlobalToastPopup />);
     break;
   default:
     root.render(<App />);

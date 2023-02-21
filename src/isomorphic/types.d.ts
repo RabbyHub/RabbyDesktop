@@ -269,6 +269,9 @@ type PopupViewOnMainwinInfo =
       };
     }
   | {
+      /**
+       * @deprecated
+       */
       type: 'address-management';
     }
   | {
@@ -283,6 +286,12 @@ type PopupViewOnMainwinInfo =
     }
   | {
       type: 'z-popup';
+    }
+  | {
+      type: 'global-toast-popup';
+      state?: {
+        toastType?: 'foo';
+      };
     };
 
 type IShellNavInfo = {
