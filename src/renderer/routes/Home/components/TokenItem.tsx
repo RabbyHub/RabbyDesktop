@@ -11,7 +11,6 @@ import {
 } from '@/renderer/utils/number';
 import TokenWithChain from '@/renderer/components/TokenWithChain';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
-import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { useGotoSwapByToken } from '@/renderer/hooks/rabbyx/useSwap';
 import IconSwap from '../../../../../assets/icons/home/token-swap.svg?rc';
 import IconSend from '../../../../../assets/icons/home/token-send.svg?rc';
@@ -40,9 +39,6 @@ const TokenItemWrapper = styled.li`
       line-height: 18px;
       margin-left: 18px;
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      flex: 1;
       text-align: left;
     }
     .price-change {
@@ -78,9 +74,6 @@ const TokenItemWrapper = styled.li`
     }
   }
   &:hover {
-    border-color: #757f95;
-    box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.07);
-    background: linear-gradient(90.98deg, #5e626b 1.39%, #4d515f 97.51%);
     .number-change {
       opacity: 1;
     }
@@ -95,18 +88,18 @@ const TokenItemWrapper = styled.li`
   }
 `;
 const TokenLogoField = styled.div`
+  display: flex;
   justify-content: flex-start;
   color: rgba(255, 255, 255, 0.8);
-  width: 25%;
+  width: 30%;
   .token-info {
     display: flex;
   }
   .token-actions {
-    width: 100%;
     display: flex;
-    padding-left: 42px;
     opacity: 0;
     align-items: center;
+    margin-left: 8px;
     .icon {
       cursor: pointer;
       margin-right: 14px;
@@ -131,15 +124,15 @@ const TokenLogoField = styled.div`
   }
 `;
 const TokenPriceField = styled.div`
-  width: 25%;
+  width: 24%;
   justify-content: flex-start;
 `;
 const TokenAmountField = styled.div`
-  width: 25%;
+  width: 29%;
   justify-content: flex-start;
 `;
 const TokenUsdValueField = styled.div`
-  width: 25%;
+  width: 17%;
   justify-content: flex-end;
   .price-change {
     display: block !important;
@@ -156,15 +149,6 @@ const TokenItemComp = ({
   historyToken?: TokenItem;
   supportHistory: boolean;
 }) => {
-  const priceChange = useMemo(() => {
-    if (!historyToken) return 0;
-    if (historyToken.price === 0) {
-      if (token.price === 0) return 0;
-      return 1;
-    }
-    return (token.price - historyToken.price) / historyToken.price;
-  }, [token, historyToken]);
-
   const amountChange = useMemo(() => {
     if (!historyToken || !supportHistory) return 0;
     return token.amount - historyToken.amount;
@@ -199,30 +183,19 @@ const TokenItemComp = ({
     <TokenItemWrapper className="td" key={`${token.chain}-${token.id}`}>
       <TokenLogoField>
         <TokenWithChain token={token} width="24px" height="24px" />
-        <span className="token-symbol">{token.symbol}</span>
+        <span className="token-symbol" title={token.symbol}>
+          {ellipsisTokenSymbol(token.symbol)}
+        </span>
         <div className="token-actions">
           <IconSwap className="icon icon-swap" onClick={handleClickSwap} />
           <IconSend className="icon icon-send" />
           <IconReceive className="icon icon-receive" />
         </div>
       </TokenLogoField>
-      <TokenPriceField>
-        {`$${formatPrice(token.price)}`}
-        {historyToken && (
-          <div
-            className={classNames('price-change', {
-              'is-loss': priceChange < 0,
-              'is-increase': priceChange > 0,
-            })}
-          >
-            {priceChange >= 0 ? '+' : '-'}
-            {Math.abs(priceChange * 100).toFixed(2)}%
-          </div>
-        )}
-      </TokenPriceField>
+      <TokenPriceField>{`$${formatPrice(token.price)}`}</TokenPriceField>
       <TokenAmountField>
         {formatAmount(token.amount)} {ellipsisTokenSymbol(token.symbol)}
-        {historyToken && (
+        {historyToken && Math.abs(amountChange * token.price) >= 1 && (
           <div
             className={classNames('price-change', {
               'is-loss': amountChange < 0,

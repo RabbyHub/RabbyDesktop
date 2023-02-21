@@ -12,6 +12,7 @@ const ChainListWrapper = styled.ul`
   margin: 0;
   padding: 0;
   position: relative;
+  flex: 1;
   li {
     cursor: pointer;
     opacity: 0.8;
