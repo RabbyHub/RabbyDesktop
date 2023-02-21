@@ -5,8 +5,8 @@ function getConnectWinSize(
   pWinBounds: Pick<Electron.Rectangle, 'width' | 'height'>
 ) {
   return {
-    width: Math.max(pWinBounds.width - 400, 800),
-    height: Math.max(Math.floor(pWinBounds.height * 0.8), 600),
+    width: Math.max(pWinBounds.width - 400, 900),
+    height: Math.max(Math.floor(pWinBounds.height * 0.8), 700),
   };
 }
 
