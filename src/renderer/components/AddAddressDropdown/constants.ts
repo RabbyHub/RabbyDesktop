@@ -30,7 +30,7 @@ const KEYRING_MAP: KeyringLabel[] = [
   },
   {
     logo: 'rabby-internal://assets/icons/add-address/cup.svg',
-    name: 'Add Contacts',
+    name: 'Contacts',
     id: KEYRING_CLASS.WATCH,
   },
 ];

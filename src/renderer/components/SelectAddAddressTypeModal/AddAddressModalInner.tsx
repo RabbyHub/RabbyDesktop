@@ -1,11 +1,11 @@
+import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { useMessageForwardToMainwin } from '@/renderer/hooks/useViewsMessage';
 import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { KEYRING_CLASS } from '@/renderer/utils/constant';
 import React from 'react';
 import { HDManagerModal } from '../HDManager/HDManagerModal';
-import { Modal } from '../Modal/Modal';
 import { WalletConnectModal } from '../WalletConnect/WalletConnectModal';
-import { ContactModalContent } from './ContactModalContent';
+import { ContactModal } from './ContactModal';
 
 export interface Props {
   keyringType?: string;
@@ -22,7 +22,15 @@ export const AddAddressModalInner: React.FC<Props> = ({
   onCancel,
   showEntryButton,
 }) => {
+  const { hideZSubview } = useZPopupLayerOnMain();
   const mainNav = useMessageForwardToMainwin('route-navigate');
+
+  // close all popupView
+  const onSuccess = React.useCallback(() => {
+    onCancel();
+    hideZSubview('select-add-address-type-modal');
+    hideZSubview('address-management');
+  }, [onCancel, hideZSubview]);
 
   const handleImportByPrivateKey = React.useCallback(() => {
     mainNav({
@@ -44,7 +52,7 @@ export const AddAddressModalInner: React.FC<Props> = ({
 
   if (keyringType === KEYRING_CLASS.WATCH) {
     return (
-      <Modal
+      <ContactModal
         centered
         open={visible}
         title="Add Contacts"
@@ -54,9 +62,8 @@ export const AddAddressModalInner: React.FC<Props> = ({
         destroyOnClose
         onCancel={onCancel}
         footer={null}
-      >
-        <ContactModalContent onSuccess={onCancel} />
-      </Modal>
+        onSuccess={onSuccess}
+      />
     );
   }
 
@@ -71,7 +78,7 @@ export const AddAddressModalInner: React.FC<Props> = ({
         destroyOnClose
         onCancel={onCancel}
         footer={null}
-        onSuccess={onCancel}
+        onSuccess={onSuccess}
       />
     );
   }
@@ -87,7 +94,7 @@ export const AddAddressModalInner: React.FC<Props> = ({
     return (
       <HDManagerModal
         open={visible}
-        onCancel={onCancel}
+        onCancel={onSuccess}
         destroyOnClose
         keyringType={keyringType}
         footer={null}

@@ -108,7 +108,7 @@ const useGetCurrentAccounts = ({ keyringId, keyring }: StateProviderProps) => {
 
     setAccounts(accountsWithAliasName);
     setLoading(false);
-  }, []);
+  }, [keyringId, keyring]);
 
   const removeCurrentAccount = React.useCallback((address: string) => {
     setAccounts((result) => {
@@ -207,6 +207,7 @@ export const HDManagerStateProvider: React.FC<
     children?: React.ReactNode;
   }
 > = ({ children, keyringId, keyring }) => {
+  console.log(keyringId, keyring);
   return (
     <HDManagerStateContext.Provider
       value={{

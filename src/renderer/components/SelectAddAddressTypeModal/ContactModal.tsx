@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal, Props as ModalProps } from '../Modal/Modal';
-import { SuccessContent } from '../SelectAddAddressTypeModal/SuccessContent';
-import { WalletConnectModalContent } from './WalletConnectModalContent';
+import { SuccessContent } from './SuccessContent';
+import { ContactModalContent } from './ContactModalContent';
 
 type Account = import('@/isomorphic/types/rabbyx').Account;
 
@@ -9,10 +9,7 @@ interface Props extends ModalProps {
   onSuccess: () => void;
 }
 
-export const WalletConnectModal: React.FC<Props> = ({
-  onSuccess,
-  ...props
-}) => {
+export const ContactModal: React.FC<Props> = ({ onSuccess, ...props }) => {
   const [result, setResult] = React.useState<Account[]>();
 
   if (result) {
@@ -25,7 +22,7 @@ export const WalletConnectModal: React.FC<Props> = ({
 
   return (
     <Modal {...props}>
-      <WalletConnectModalContent onSuccess={setResult} />
+      <ContactModalContent onSuccess={setResult} />
     </Modal>
   );
 };
