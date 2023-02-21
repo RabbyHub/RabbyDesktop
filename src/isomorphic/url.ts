@@ -123,13 +123,11 @@ export function isForTrezorLikeWebUI(url: string) {
 }
 
 export function maybeTrezorLikeBuiltInHttpPage(url: string) {
-  const urlInfo = new URL(url);
+  // const urlInfo = new URL(url);
 
-  return (
-    checkHardwareConnectPage(url) ||
-    urlInfo.hostname.includes('onekey.so') || // onekey
-    urlInfo.hostname.includes('trezor.io') // onekey
-  );
+  return checkHardwareConnectPage(url);
+  // || urlInfo.hostname.includes('onekey.so')// onekey
+  // || urlInfo.hostname.includes('trezor.io') // trezor
 }
 
 function _isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {

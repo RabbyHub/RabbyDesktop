@@ -47,7 +47,7 @@ export function setOpenHandlerForWebContents({
   webContents: Electron.WebContents;
   parentTabbedWin: TabbedBrowserWindow;
 }) {
-  const isForTrezorLike = parentTabbedWin.isForTrezorLikeConnection();
+  const isForTrezorLikeConnection = parentTabbedWin.isForTrezorLikeConnection();
 
   webContents.setWindowOpenHandler((details) => {
     if (!webContents) return { action: 'deny' };
@@ -65,7 +65,10 @@ export function setOpenHandlerForWebContents({
       shouldKeepTab,
       shouldOpenExternal,
       maybeRedirectInSPA,
-    } = parseDappRedirect(currentUrl, targetURL, { dapps });
+    } = parseDappRedirect(currentUrl, targetURL, {
+      dapps,
+      isForTrezorLikeConnection,
+    });
 
     if (shouldOpenExternal) {
       shell.openExternal(targetURL);
