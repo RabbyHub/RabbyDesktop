@@ -15,7 +15,7 @@ import {
   KEYRING_CLASS,
 } from '@/renderer/utils/constant';
 import { TokenItem, GasLevel } from '@debank/rabby-api/dist/types';
-import { UIContactBookItem } from '@/isomorphic/types';
+import { UIContactBookItem } from '@/isomorphic/types/contact';
 import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { ChainGas } from '@/isomorphic/types/rabbyx';

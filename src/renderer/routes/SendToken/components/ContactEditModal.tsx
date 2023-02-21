@@ -1,4 +1,4 @@
-import { UIContactBookItem } from '@/isomorphic/types';
+import { UIContactBookItem } from '@/isomorphic/types/contact';
 import { Modal } from '@/renderer/components/Modal/Modal';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { Button, Input } from 'antd';

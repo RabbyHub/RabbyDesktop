@@ -1,4 +1,4 @@
-import { UIContactBookItem } from '@/isomorphic/types';
+import { UIContactBookItem } from '@/isomorphic/types/contact';
 import { toastMessage } from '@/renderer/components/TransparentToast';
 import {
   IDisplayedAccountWithBalance,
