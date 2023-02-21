@@ -2,6 +2,7 @@ import { Dropdown, Menu } from 'antd';
 import React from 'react';
 import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
+import { useConnectLedger } from '@/renderer/hooks/useConnectLedger';
 import { ADD_DROPDOWN_LEFT_OFFSET, getAddDropdownKeyrings } from './constants';
 import styles from './index.module.less';
 
@@ -21,15 +22,17 @@ export default function AddAddressDropdown() {
       hideView();
     }
   }, []);
+  const connectLedger = useConnectLedger();
 
   const handleClick = React.useCallback(
     (info: { key: string }) => {
+      connectLedger(info.key);
       hideView();
       zActions.showZSubview('add-address-modal', {
         keyringType: info.key,
       });
     },
-    [zActions]
+    [connectLedger, zActions]
   );
 
   return (
