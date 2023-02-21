@@ -39,6 +39,8 @@ type ZViewStates = {
   'select-add-address-type-modal': {
     showEntryButton?: boolean;
   };
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  'gasket-modal-like-window': {};
 };
 
 type IZPopupSubviewState = {

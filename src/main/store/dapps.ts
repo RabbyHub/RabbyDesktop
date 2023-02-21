@@ -19,6 +19,7 @@ import { safeParse, shortStringify } from '../../isomorphic/json';
 import {
   canoicalizeDappUrl,
   isUrlFromDapp,
+  maybeTrezorLikeBuiltInHttpPage,
   parseDomainMeta,
 } from '../../isomorphic/url';
 import { detectDapp } from '../utils/dapps';
@@ -198,8 +199,14 @@ function parseDappUrl(url: string, dapps = getAllDapps()) {
 export function parseDappRedirect(
   currentURL: string,
   targetURL: string,
-  dapps = getAllDapps()
+  opts?: {
+    dapps?: IDapp[];
+    isForTrezorLikeConnection?: boolean;
+  }
 ) {
+  const { dapps = getAllDapps(), isForTrezorLikeConnection = false } =
+    opts || {};
+
   const isFromDapp = isUrlFromDapp(currentURL);
 
   const currentInfo = parseDappUrl(currentURL, dapps);
@@ -213,6 +220,15 @@ export function parseDappRedirect(
 
   const isToExtension = targetURL.startsWith('chrome-extension://');
 
+  let shouldOpenExternal = false;
+  if (
+    isForTrezorLikeConnection &&
+    !isToExtension &&
+    !maybeTrezorLikeBuiltInHttpPage(targetURL)
+  ) {
+    shouldOpenExternal = true;
+  }
+
   return {
     currentInfo,
     targetInfo,
@@ -220,6 +236,7 @@ export function parseDappRedirect(
     isFromDapp,
     isToSameOrigin,
     shouldKeepTab,
+    shouldOpenExternal,
     maybeRedirectInSPA,
     isToExtension,
   };

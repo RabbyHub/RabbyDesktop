@@ -18,6 +18,7 @@ import { AddAddressModal } from '@/renderer/components/AddAddressModal/AddAddres
 import { AddressManagementModal } from '@/renderer/components/AddressManagementModal/AddressManagementModal';
 import { AddressDetailModal } from '@/renderer/components/AddressDetailModal/AddressDetailModal';
 import { SelectAddAddressTypeModalInSubview } from '@/renderer/components/SelectAddAddressTypeModal/SelectAddAddressTypeModalInSubview';
+import GasketModalLikeWindow from '@/renderer/components/GasketModalLikeWindow';
 import SwitchChainModal from '../../components/SwitchChainModal';
 
 import styles from './index.module.less';
@@ -66,6 +67,7 @@ function App() {
       <AddressManagementModal />
       <AddressDetailModal />
       <SelectAddAddressTypeModalInSubview />
+      <GasketModalLikeWindow />
     </>
   );
 }

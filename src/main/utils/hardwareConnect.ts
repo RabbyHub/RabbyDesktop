@@ -1,12 +1,12 @@
 import { createWindow } from '../streams/tabbedBrowserWindow';
-import { getRabbyExtViews, onMainWindowReady } from './stream-helpers';
+import { onMainWindowReady, pushChangesToZPopupLayer } from './stream-helpers';
 
 function getConnectWinSize(
   pWinBounds: Pick<Electron.Rectangle, 'width' | 'height'>
 ) {
   return {
-    width: Math.max(pWinBounds.width - 400, 800),
-    height: Math.max(Math.floor(pWinBounds.height * 0.8), 600),
+    width: Math.max(pWinBounds.width - 400, 900),
+    height: Math.max(Math.floor(pWinBounds.height * 0.8), 700),
   };
 }
 
@@ -49,7 +49,7 @@ export async function createTrezorLikeConnectPageWindow(connectURL: string) {
     isForTrezorLikeConnection: true,
     window: {
       parent: mainWindow,
-      modal: true,
+      modal: false,
       center: true,
       type: 'popup',
       ...getConnectWinSize(mainWindow.getBounds()),
@@ -62,6 +62,12 @@ export async function createTrezorLikeConnectPageWindow(connectURL: string) {
 
       // frame: true,
       // trafficLightPosition: { x: 10, y: 10 }
+    },
+  });
+
+  pushChangesToZPopupLayer({
+    'gasket-modal-like-window': {
+      visible: true,
     },
   });
 
@@ -91,6 +97,11 @@ export async function createTrezorLikeConnectPageWindow(connectURL: string) {
     // // backgroundWebContents.executeJavaScript(`window._TrezorConnect.cancel();`);
     // backgroundWebContents.executeJavaScript(`window._OnekeyConnect.dispose();`);
     // // backgroundWebContents.executeJavaScript(`window._OnekeyConnect.cancel();`);
+    pushChangesToZPopupLayer({
+      'gasket-modal-like-window': {
+        visible: false,
+      },
+    });
   });
 
   mainWindow.on('close', () => {
