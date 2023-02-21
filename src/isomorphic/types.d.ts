@@ -340,8 +340,3 @@ type IPopupViewChanges<
       type: T;
       visible: false;
     };
-
-export type UIContactBookItem = {
-  name: string;
-  address: string;
-};
