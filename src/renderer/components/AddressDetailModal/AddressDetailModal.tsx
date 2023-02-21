@@ -27,7 +27,7 @@ export const AddressDetailModal: React.FC = () => {
       centered
       smallTitle
       width={520}
-      title="Address detail"
+      title="Address Detail"
       onCancel={closeSubview}
       open={svVisible}
       backable={svState.backable}
