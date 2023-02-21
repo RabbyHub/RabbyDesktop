@@ -1,10 +1,8 @@
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
-import { useMessageForwardToMainwin } from '@/renderer/hooks/useViewsMessage';
-import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { KEYRING_CLASS } from '@/renderer/utils/constant';
 import clsx from 'clsx';
 import React from 'react';
-import styles from './AddAddressModal.module.less';
+import styles from './index.module.less';
 
 const HARDWARE_MAP = [
   {
@@ -29,23 +27,6 @@ interface Props {
 }
 
 export const SelectModalContent: React.FC<Props> = ({ onSelectType }) => {
-  const mainNav = useMessageForwardToMainwin('route-navigate');
-
-  const handleImportByPrivateKey = React.useCallback(() => {
-    mainNav({
-      type: 'route-navigate',
-      data: {
-        pathname: '/import-by/private-key',
-      },
-    });
-    hideMainwinPopupview('add-address', {
-      reloadView: true,
-    });
-    hideMainwinPopupview('address-management', {
-      reloadView: true,
-    });
-  }, [mainNav]);
-
   return (
     <div className={styles.SelectModalContent}>
       <div className={styles.panel}>
@@ -58,11 +39,8 @@ export const SelectModalContent: React.FC<Props> = ({ onSelectType }) => {
         <div className={styles.body}>
           {HARDWARE_MAP.map((hardware) => (
             <div
-              aria-disabled={hardware.disabled}
               onClick={() => {
-                if (!hardware.disabled) {
-                  onSelectType(hardware.id);
-                }
+                onSelectType(hardware.id);
               }}
               className={styles.device}
             >
@@ -109,7 +87,7 @@ export const SelectModalContent: React.FC<Props> = ({ onSelectType }) => {
       {!IS_RUNTIME_PRODUCTION && (
         <div
           className={clsx(styles.panel, styles.panelContact)}
-          onClick={handleImportByPrivateKey}
+          onClick={() => onSelectType(KEYRING_CLASS.PRIVATE_KEY)}
         >
           <div className={styles.logo}>
             <img src="rabby-internal://assets/icons/add-address/privatekey.svg" />

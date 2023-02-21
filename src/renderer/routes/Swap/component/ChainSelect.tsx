@@ -60,7 +60,7 @@ export const ChainSelect = ({
     }
   };
 
-  const { open } = useSwitchChainModal(handleChange, false);
+  const { open } = useSwitchChainModal(handleChange);
 
   const openChainModal = useCallback(() => {
     open({

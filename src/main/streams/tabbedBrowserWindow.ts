@@ -10,7 +10,11 @@ import {
   sendToWebContents,
 } from '../utils/ipcMainEvents';
 
-import { onMainWindowReady, RABBYX_WINDOWID_S } from '../utils/stream-helpers';
+import {
+  getRabbyExtViews,
+  onMainWindowReady,
+  RABBYX_WINDOWID_S,
+} from '../utils/stream-helpers';
 import {
   getRabbyxNotificationBounds,
   isPopupWindowHidden,
@@ -261,3 +265,19 @@ onIpcMainInternalEvent(
     }
   }
 );
+
+onIpcMainEvent('__internal_rpc:trezor-like-window:click-close', async (evt) => {
+  const { sender } = evt;
+  const tabbedWin = getTabbedWindowFromWebContents(sender);
+  if (!tabbedWin) return;
+
+  tabbedWin.window.hide();
+
+  const { backgroundWebContents } = await getRabbyExtViews();
+
+  backgroundWebContents.executeJavaScript(`window._TrezorConnect.dispose();`);
+
+  backgroundWebContents.executeJavaScript(`window._OnekeyConnect.dispose();`);
+
+  tabbedWin.tabs.destroy();
+});

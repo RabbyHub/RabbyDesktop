@@ -1,4 +1,4 @@
-import { isMainWinShellWebUI } from '@/isomorphic/url';
+import { isForTrezorLikeWebUI, isMainWinShellWebUI } from '@/isomorphic/url';
 import { detectOS } from '@/isomorphic/os';
 import { useCallback, useEffect } from 'react';
 import { atom, useAtom } from 'jotai';
@@ -61,14 +61,20 @@ export function useWindowState() {
   }, [setWinState]);
 
   const onCloseButton = useCallback(() => {
-    if (!isMainWinShellWebUI(window.location.href)) {
-      chrome.windows.remove(chrome.windows.WINDOW_ID_CURRENT);
+    if (isMainWinShellWebUI(window.location.href)) {
+      window.rabbyDesktop.ipcRenderer.sendMessage(
+        '__internal_rpc:main-window:click-close'
+      );
+      return;
+    }
+    if (isForTrezorLikeWebUI(window.location.href)) {
+      window.rabbyDesktop.ipcRenderer.sendMessage(
+        '__internal_rpc:trezor-like-window:click-close'
+      );
       return;
     }
 
-    window.rabbyDesktop.ipcRenderer.sendMessage(
-      '__internal_rpc:main-window:click-close'
-    );
+    chrome.windows.remove(chrome.windows.WINDOW_ID_CURRENT);
   }, []);
 
   return {

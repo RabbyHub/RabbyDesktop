@@ -102,6 +102,7 @@ const PortfolioView = ({
   >;
   selectChainServerId: string | null;
   tokenHidden: {
+    isShowExpand: boolean;
     isExpand: boolean;
     hiddenCount: number;
     hiddenUsdValue: number;
@@ -109,6 +110,7 @@ const PortfolioView = ({
     setIsExpand(v: boolean): void;
   };
   protocolHidden: {
+    isShowExpand: boolean;
     isExpand: boolean;
     hiddenCount: number;
     hiddenUsdValue: number;
@@ -186,6 +188,7 @@ const PortfolioView = ({
         historyTokenDict={historyTokenDict}
         isLoadingProtocolHistory={isLoadingProtocolHistory}
         view={view}
+        protocolHidden={protocolHidden}
       />
       <AssociateDappModal
         protocolId={relateDappId}

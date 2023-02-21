@@ -1,12 +1,12 @@
+import { ReceiveModalWraper } from '@/renderer/components/ReceiveModal';
+import { useState } from 'react';
 import styled from 'styled-components';
-import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { useNavigate } from 'react-router-dom';
-import Transactions from './Transactions';
-import IconSwap from '../../../../../assets/icons/home/swap.svg?rc';
-import IconSend from '../../../../../assets/icons/home/send.svg?rc';
+import { Tooltip } from 'antd';
 import IconReceive from '../../../../../assets/icons/home/receive.svg?rc';
-import IconSecurity from '../../../../../assets/icons/home/security.svg?rc';
-import IconGasTopup from '../../../../../assets/icons/home/gas-topup.svg?rc';
+import IconSend from '../../../../../assets/icons/home/send.svg?rc';
+import IconSwap from '../../../../../assets/icons/home/swap.svg?rc';
+import Transactions from './Transactions';
 
 const RightBarWrapper = styled.div`
   width: 330px;
@@ -19,12 +19,14 @@ const RightBarWrapper = styled.div`
 
 const ActionList = styled.ul`
   list-style: none;
-  padding: 48px 0 0 23px;
+  padding: 48px 0 0 0;
   display: flex;
   margin-bottom: 65px;
+  justify-content: center;
+  gap: 50px;
   li {
     border-radius: 14px;
-    margin-right: 25px;
+    /* margin-right: 25px; */
     cursor: pointer;
     svg {
       &:hover {
@@ -41,31 +43,39 @@ const ActionList = styled.ul`
       }
     }
     &:nth-last-child(1) {
-      margin-right: 0;
+      /* margin-right: 0; */
     }
   }
 `;
 
 const RightBar = () => {
-  const navigation = useNavigate();
+  const [isShowReceive, setIsShowReceive] = useState(false);
+
+  const navigateTo = useNavigate();
   const actions = [
     {
       id: 'swap',
       name: 'swap',
       icon: <IconSwap width="35px" height="35px" />,
       onClick: () => {
-        navigation('/mainwin/swap');
+        navigateTo('/mainwin/swap');
       },
     },
     {
       id: 'send',
       name: 'Send',
       icon: <IconSend width="35px" height="35px" />,
+      onClick: () => {
+        navigateTo('/mainwin/send-token');
+      },
     },
     {
       id: 'receive',
       name: 'Receive',
       icon: <IconReceive width="35px" height="35px" />,
+      onClick: () => {
+        setIsShowReceive(true);
+      },
     },
     // {
     //   id: 'gas-topup',
@@ -83,12 +93,22 @@ const RightBar = () => {
     <RightBarWrapper>
       <ActionList>
         {actions.map((action) => (
-          <li key={action.id} onClick={action.onClick}>
-            {action.icon}
-          </li>
+          <Tooltip
+            key={action.id}
+            title={action.name}
+            overlayInnerStyle={{ padding: '6px 8px' }}
+          >
+            <li onClick={action.onClick}>{action.icon}</li>
+          </Tooltip>
         ))}
       </ActionList>
       <Transactions />
+      <ReceiveModalWraper
+        open={isShowReceive}
+        onCancel={() => {
+          setIsShowReceive(false);
+        }}
+      />
     </RightBarWrapper>
   );
 };

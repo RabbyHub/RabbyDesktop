@@ -70,7 +70,6 @@ const FooterWrapper = styled.div`
   bottom: 0;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   margin: 0 -28px;
-  margin-top: 30px;
 
   display: flex;
   flex-direction: column;
@@ -103,34 +102,6 @@ const FooterWrapper = styled.div`
     line-height: 16px;
     text-align: right;
     color: #b4bdcc;
-    &.unLimit {
-      /* color: var(--color-border); */
-    }
-    .ant-switch {
-      min-width: 40px;
-      background-color: rgba(180, 189, 204, 0.5);
-      &:focus,
-      &:hover {
-        box-shadow: none;
-      }
-    }
-    .ant-click-animating-node {
-      display: none;
-    }
-    .ant-switch-checked {
-      background: #27c193;
-      &:focus,
-      &:hover {
-        box-shadow: none;
-      }
-
-      .ant-switch-handle::before {
-        background-color: #4e5465;
-      }
-    }
-    .ant-switch-handle::before {
-      background-color: #d0d5df;
-    }
   }
 
   .ant-btn-primary {
@@ -956,11 +927,7 @@ export const Swap = () => {
             </div>
             <div className={clsx('allowance', unlimitedAllowance && 'unLimit')}>
               <span>Unlimited allowance</span>{' '}
-              <Switch
-                size="default"
-                checked={unlimitedAllowance}
-                onChange={setUnlimited}
-              />
+              <Switch checked={unlimitedAllowance} onChange={setUnlimited} />
             </div>
           </div>
         )}

@@ -35,21 +35,23 @@ export default React.memo((props: { data: PortfolioItem[] }) => {
 
         return (
           <Panel>
-            <HealthRateTag>
-              Health Rate
-              <Tooltip title="Your assests will be liquidated if the health factor is less than or equal to 1">
-                <img
-                  src="rabby-internal://assets/icons/home/info.svg"
-                  alt=""
-                  className="icon-info"
-                />
-              </Tooltip>
-              <span className="rate-number">
-                {p.detail.health_rate <= 10
-                  ? p.detail.health_rate.toFixed(2)
-                  : '>10'}
-              </span>
-            </HealthRateTag>
+            {p.detail.health_rate && (
+              <HealthRateTag>
+                Health Rate
+                <Tooltip title="Your assests will be liquidated if the health factor is less than or equal to 1">
+                  <img
+                    src="rabby-internal://assets/icons/home/info.svg"
+                    alt=""
+                    className="icon-info"
+                  />
+                </Tooltip>
+                <span className="rate-number">
+                  {p.detail.health_rate <= 10
+                    ? p.detail.health_rate.toFixed(2)
+                    : '>10'}
+                </span>
+              </HealthRateTag>
+            )}
             {p.detail.supply_token_list?.length > 0 ? (
               <Table>
                 <Table.Header headers={supplyHeaders} />

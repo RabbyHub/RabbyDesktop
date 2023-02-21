@@ -1,8 +1,13 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { maxBy, sortBy } from 'lodash';
+import { maxBy, minBy, sortBy } from 'lodash';
 import { useInterval } from 'react-use';
-import { TokenItem, TransferingNFTItem } from '@debank/rabby-api/dist/types';
+import { useNavigate } from 'react-router-dom';
+import {
+  TokenItem,
+  TransferingNFTItem,
+  TxHistoryResult,
+} from '@debank/rabby-api/dist/types';
 import { CHAINS } from '@debank/common';
 import type {
   TransactionDataItem,
@@ -142,19 +147,22 @@ const getTxInfoFromExplain = (explain: TransactionGroup['explain']) => {
   };
 };
 
-const Empty = ({ isMore }: { isMore?: boolean }) => (
+const Empty = ({ text }: { text: string }) => (
   <EmptyView>
     <img
       src="rabby-internal://assets/icons/home/tx-empty.png"
       className="icon-empty"
     />
-    <p>No {isMore && 'more '}transaction in last 24 hours</p>
+    <p>{text}</p>
   </EmptyView>
 );
 
 const Transactions = () => {
   const { currentAccount } = useCurrentAccount();
   const [recentTxs, setRecentTxs] = useState<TransactionDataItem[]>([]);
+  const [remoteTxs, setRemoteTxs] = useState<TxHistoryResult['history_list']>(
+    []
+  );
   const [pendingTxs, setPendingTxs] = useState<TransactionDataItem[]>([]);
   const [localTxs, setLocalTxs] = useState<TransactionDataItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -168,10 +176,22 @@ const Transactions = () => {
 
   const mergedRecentTxs = useMemo(() => {
     return sortBy(
-      [...recentTxs.slice(0, 3), ...completedTxs],
+      [
+        ...recentTxs.slice(0, 3).map((item) => {
+          return {
+            ...item,
+            site: localTxs.find(
+              (i) => i.id === item.id && i.chain === item.chain
+            )?.site,
+          };
+        }),
+        ...completedTxs,
+      ],
       'timeAt'
     ).reverse();
-  }, [recentTxs, completedTxs]);
+  }, [recentTxs, completedTxs, localTxs]);
+
+  console.log(completedTxs, pendingTxs, localTxs, mergedRecentTxs);
 
   const initLocalTxs = useCallback(async () => {
     if (!currentAccount?.address) return;
@@ -191,6 +211,7 @@ const Transactions = () => {
           item.txs,
           (i) => Number(i.rawTx.gasPrice) || Number(i.rawTx.maxFeePerGas)
         )!;
+        const completedTx = item.txs.find((tx) => tx.isCompleted);
         const { type, protocol, name } = getTxInfoFromExplain(item.explain);
         const balanceChange = item.explain.balance_change;
         lTxs.push({
@@ -226,6 +247,7 @@ const Transactions = () => {
           otherAddr: maxTx.rawTx.to || '',
           name,
           timeAt: item.createdAt,
+          site: completedTx?.site,
         });
       });
     setLocalTxs(lTxs);
@@ -240,6 +262,7 @@ const Transactions = () => {
           item.txs,
           (i) => i.rawTx.gasPrice || i.rawTx.maxFeePerGas
         )!;
+        const originTx = minBy(item.txs, (tx) => tx.createdAt);
         const { type, protocol, name } = getTxInfoFromExplain(item.explain);
         const balanceChange = item.explain.balance_change;
         pTxs.push({
@@ -276,6 +299,8 @@ const Transactions = () => {
           name,
           timeAt: item.createdAt,
           rawTx: maxTx.rawTx,
+          site: originTx?.site,
+          txs: item.txs,
         });
       });
     setPendingTxs(pTxs);
@@ -287,6 +312,7 @@ const Transactions = () => {
     const txs = await walletOpenapi.listTxHisotry({
       id: currentAccount.address,
     });
+    setRemoteTxs(txs.history_list || []);
     const recent = txs.history_list.filter((item) => item.time_at >= YESTERDAY);
     const dbTxs = recent.map((item) => {
       const data: TransactionDataItem = {
@@ -367,6 +393,8 @@ const Transactions = () => {
     );
   }, [initLocalTxs]);
 
+  const navigate = useNavigate();
+
   if (isLoading) {
     return (
       <TransactionWrapper>
@@ -379,13 +407,27 @@ const Transactions = () => {
     );
   }
 
-  if (pendingTxs.length <= 0 && recentTxs.length <= 0) {
+  if (pendingTxs.length <= 0 && mergedRecentTxs.length <= 0) {
     return (
       <TransactionWrapper>
         <TransactionList>
-          <Empty />
+          <Empty
+            text={
+              remoteTxs.length > 0
+                ? 'No transaction in last 24 hours'
+                : 'No transaction'
+            }
+          />
         </TransactionList>
-        <ViewAllButton>View All Transactions</ViewAllButton>
+        {remoteTxs.length > 0 && (
+          <ViewAllButton
+            onClick={() => {
+              navigate('/mainwin/home/transactions');
+            }}
+          >
+            View All Transactions
+          </ViewAllButton>
+        )}
       </TransactionWrapper>
     );
   }
@@ -399,9 +441,17 @@ const Transactions = () => {
         {mergedRecentTxs.map((tx) => {
           return <TransactionItem item={tx} key={`${tx.chain}-${tx.id}`} />;
         })}
-        {pendingTxs.length + mergedRecentTxs.length < 3 && <Empty isMore />}
+        {pendingTxs.length + mergedRecentTxs.length < 3 && (
+          <Empty text="No more transaction in last 24 hours" />
+        )}
       </TransactionList>
-      <ViewAllButton>View All Transactions</ViewAllButton>
+      <ViewAllButton
+        onClick={() => {
+          navigate('/mainwin/home/transactions');
+        }}
+      >
+        View All Transactions
+      </ViewAllButton>
     </TransactionWrapper>
   );
 };

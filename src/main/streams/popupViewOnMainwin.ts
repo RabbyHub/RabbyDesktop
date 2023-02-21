@@ -22,6 +22,7 @@ import {
   onMainWindowReady,
   stopSelectDevices,
 } from '../utils/stream-helpers';
+import { getMainWindowTopOffset, roundRectValue } from '../utils/browserView';
 
 const viewsState: Record<
   PopupViewOnMainwinInfo['type'],
@@ -31,7 +32,7 @@ const viewsState: Record<
     modalWindow?: BrowserWindow;
   }
 > = {
-  'add-address': {
+  'add-address-dropdown': {
     visible: false,
   },
   'address-management': {
@@ -77,20 +78,36 @@ async function hidePopupViewOnWindow(
   viewsState[type].visible = false;
 }
 
-function updateSubviewPos(parentWindow: BrowserWindow, view: BrowserView) {
+function updateSubviewPos(
+  parentWindow: BrowserWindow,
+  view: BrowserView,
+  viewType?: PopupViewOnMainwinInfo['type'] | Electron.Rectangle
+) {
   const [width, height] = parentWindow.getSize();
-  const popupRect = {
+  let popupRect = {
     x: 0,
     y: 0,
     width,
     height,
   };
 
-  // Convert to ints
-  const x = Math.floor(popupRect.x);
-  const y = Math.floor(popupRect.y);
+  if (viewType === 'add-address-dropdown') {
+    const selfBounds = view.getBounds();
 
-  view.setBounds({ ...popupRect, x, y });
+    popupRect = {
+      ...popupRect,
+      ...selfBounds,
+    };
+  } else if (typeof viewType === 'object') {
+    popupRect = {
+      ...popupRect,
+      ...viewType,
+    };
+  }
+
+  roundRectValue(popupRect);
+
+  view.setBounds(popupRect);
   if (BrowserWindow.fromBrowserView(view) === parentWindow) {
     parentWindow.setTopBrowserView(view);
   } else if (!IS_RUNTIME_PRODUCTION) {
@@ -160,8 +177,8 @@ const addAddressReady = onMainWindowReady().then(async (mainWin) => {
   mainWindow.addBrowserView(addAddressPopup);
 
   const onTargetWinUpdate = () => {
-    if (viewsState['add-address'].visible)
-      updateSubviewPos(mainWindow, addAddressPopup);
+    if (viewsState['add-address-dropdown'].visible)
+      updateSubviewPos(mainWindow, addAddressPopup, 'add-address-dropdown');
   };
   mainWindow.on('show', onTargetWinUpdate);
   mainWindow.on('move', onTargetWinUpdate);
@@ -170,12 +187,12 @@ const addAddressReady = onMainWindowReady().then(async (mainWin) => {
   mainWindow.on('restore', onTargetWinUpdate);
 
   await addAddressPopup.webContents.loadURL(
-    `${await getWebuiURLBase()}/popup-view.html?view=add-address#/`
+    `${await getWebuiURLBase()}/popup-view.html?view=add-address-dropdown#/`
   );
 
   // debug-only
   if (!IS_RUNTIME_PRODUCTION) {
-    // addAddressPopup.webContents.openDevTools({ mode: 'detach' });
+    addAddressPopup.webContents.openDevTools({ mode: 'detach' });
   }
 
   hidePopupView(addAddressPopup);
@@ -320,7 +337,15 @@ const { handler } = onIpcMainEvent(
     if (payload.nextShow) {
       viewsState[payload.type].visible = true;
       if (!viewsState[payload.type].s_isModal) {
-        updateSubviewPos(mainWindow, targetView);
+        if (payload.type === 'add-address-dropdown') {
+          updateSubviewPos(
+            mainWindow,
+            targetView,
+            (payload.pageInfo as any).triggerRect
+          );
+        } else {
+          updateSubviewPos(mainWindow, targetView, payload.type);
+        }
         targetView.webContents.focus();
       } else {
         showModalPopup(payload.type, targetView);
@@ -385,9 +410,6 @@ const { handler: handler2 } = onIpcMainEvent(
         break;
       case 'main-window':
         views = [hash.mainWindow];
-        break;
-      case 'add-address':
-        views = [hash.addAddress];
         break;
       case 'address-management':
         views = [hash.addressManagement];

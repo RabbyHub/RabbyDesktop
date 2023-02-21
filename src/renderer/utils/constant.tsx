@@ -541,7 +541,7 @@ export const KEYRING_ICONS = {
 export const KEYRING_ICONS_WHITE = {
   [KEYRING_CLASS.MNEMONIC]: IconMnemonicWhite,
   [KEYRING_CLASS.PRIVATE_KEY]: IconPrivateKeyWhite,
-  [KEYRING_CLASS.WATCH]: IconWatchWhite,
+  [KEYRING_CLASS.WATCH]: IconWatchPurple,
   [HARDWARE_KEYRING_TYPES.BitBox02.type]: IconBitBox02,
   [HARDWARE_KEYRING_TYPES.Ledger.type]: LogoLedgerWhite,
   [HARDWARE_KEYRING_TYPES.Onekey.type]: LogoOnekey,
@@ -558,7 +558,7 @@ export const KEYRING_PURPLE_LOGOS = {
 export const KEYRINGS_LOGOS = {
   [KEYRING_CLASS.MNEMONIC]: LogoMnemonic,
   [KEYRING_CLASS.PRIVATE_KEY]: LogoPrivateKey,
-  [KEYRING_CLASS.WATCH]: IconWatchWhite,
+  [KEYRING_CLASS.WATCH]: IconWatchPurple,
   [HARDWARE_KEYRING_TYPES.BitBox02.type]: IconBitBox02WithBorder,
   [HARDWARE_KEYRING_TYPES.Ledger.type]: LogoLedgerWhite,
   [HARDWARE_KEYRING_TYPES.Onekey.type]: IconOneKey18,
@@ -751,4 +751,5 @@ declare global {
     __is_rd__?: boolean;
   }
 }
+
 export const IS_RD = window.__is_rd__;

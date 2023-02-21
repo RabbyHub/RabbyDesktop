@@ -19,6 +19,7 @@ export type TabbedBrowserWindowOptions = {
   defaultOpen?: boolean;
   isMainWindow?: boolean;
   isRabbyXNotificationWindow?: boolean;
+  isForTrezorLikeConnection?: boolean;
 };
 
 export default class TabbedBrowserWindow {
@@ -42,11 +43,13 @@ export default class TabbedBrowserWindow {
     hasNavigationBar: boolean;
     defaultOpen: boolean;
     isMainWindow: boolean;
+    isForTrezorLikeConnection: boolean;
     isRabbyXNotificationWindow: boolean;
   } = {
     hasNavigationBar: false,
     defaultOpen: true,
     isMainWindow: false,
+    isForTrezorLikeConnection: false,
     isRabbyXNotificationWindow: false,
   };
 
@@ -65,6 +68,7 @@ export default class TabbedBrowserWindow {
     this.$meta.isMainWindow = !!options.isMainWindow;
     this.$meta.isRabbyXNotificationWindow =
       !!options.isRabbyXNotificationWindow;
+    this.$meta.isForTrezorLikeConnection = !!options.isForTrezorLikeConnection;
 
     const origUrl = `chrome-extension://${options.webuiExtensionId}/webui.html`;
     /* eslint-disable @typescript-eslint/naming-convention */
@@ -72,6 +76,9 @@ export default class TabbedBrowserWindow {
       ...options.queryStringArgs,
       ...(this.$meta.hasNavigationBar && { __withNavigationbar: 'true' }),
       ...(this.$meta.isMainWindow && { __webuiIsMainWindow: 'true' }),
+      ...(this.$meta.isForTrezorLikeConnection && {
+        __webuiForTrezorLike: 'true',
+      }),
       ...(this.$meta.isRabbyXNotificationWindow && {
         __webuiIsRabbyXNotificationWindow: 'true',
       }),
@@ -136,6 +143,10 @@ export default class TabbedBrowserWindow {
     return this.$meta.isMainWindow;
   }
 
+  isForTrezorLikeConnection() {
+    return this.$meta.isForTrezorLikeConnection;
+  }
+
   isRabbyXNotificationWindow() {
     return this.$meta.isRabbyXNotificationWindow;
   }
@@ -152,6 +163,7 @@ export default class TabbedBrowserWindow {
     return this.tabs.create({
       ...options,
       isOfMainWindow: this.$meta.isMainWindow,
+      isOfTreasureLikeConnection: this.$meta.isForTrezorLikeConnection,
     });
   }
 

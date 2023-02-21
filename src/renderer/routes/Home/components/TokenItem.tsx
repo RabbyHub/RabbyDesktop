@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import { Skeleton } from 'antd';
 import { TokenItem } from '@debank/rabby-api/dist/types';
@@ -12,6 +12,7 @@ import {
 import TokenWithChain from '@/renderer/components/TokenWithChain';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 import { useGotoSwapByToken } from '@/renderer/hooks/rabbyx/useSwap';
+import { useNavigate } from 'react-router-dom';
 import IconSwap from '../../../../../assets/icons/home/token-swap.svg?rc';
 import IconSend from '../../../../../assets/icons/home/token-send.svg?rc';
 import IconReceive from '../../../../../assets/icons/home/token-receive.svg?rc';
@@ -144,11 +145,15 @@ const TokenItemComp = ({
   token,
   historyToken,
   supportHistory,
+  onReceiveClick,
 }: {
   token: TokenItem;
   historyToken?: TokenItem;
   supportHistory: boolean;
+  onReceiveClick?: (token: TokenItem) => void;
 }) => {
+  const navigate = useNavigate();
+
   const amountChange = useMemo(() => {
     if (!historyToken || !supportHistory) return 0;
     return token.amount - historyToken.amount;
@@ -175,9 +180,13 @@ const TokenItemComp = ({
   }, [token, historyToken, supportHistory]);
   const gotoSwap = useGotoSwapByToken();
 
-  const handleClickSwap = () => {
+  const handleClickSwap = useCallback(() => {
     gotoSwap(token.chain, token.id);
-  };
+  }, [gotoSwap, token.chain, token.id]);
+
+  const handleClickSend = useCallback(() => {
+    navigate(`/mainwin/send-token?token=${token?.chain}:${token?.id}`);
+  }, [navigate, token?.chain, token?.id]);
 
   return (
     <TokenItemWrapper className="td" key={`${token.chain}-${token.id}`}>
@@ -188,8 +197,13 @@ const TokenItemComp = ({
         </span>
         <div className="token-actions">
           <IconSwap className="icon icon-swap" onClick={handleClickSwap} />
-          <IconSend className="icon icon-send" />
-          <IconReceive className="icon icon-receive" />
+          <IconSend className="icon icon-send" onClick={handleClickSend} />
+          <IconReceive
+            className="icon icon-receive"
+            onClick={() => {
+              onReceiveClick?.(token);
+            }}
+          />
         </div>
       </TokenLogoField>
       <TokenPriceField>{`$${formatPrice(token.price)}`}</TokenPriceField>

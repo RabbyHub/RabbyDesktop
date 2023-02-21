@@ -1,6 +1,8 @@
 /// <reference path="../isomorphic/type-helpers.d.ts" />
 
 type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
+type IDisplayedAccountWithBalance =
+  import('@/renderer/hooks/rabbyx/useAccountToDisplay').IDisplayedAccountWithBalance;
 
 type RendererForwardMessageViewType = IBuiltinViewName | '*';
 
@@ -14,8 +16,31 @@ type ZViewStates = {
     title?: string;
     supportChains?: CHAINS_ENUM[];
     disabledTips?: string;
+    isCancel?: boolean;
   };
   'security-notification': ISecurityNotificationPayload;
+  'add-address-dropdown': {
+    pos: {
+      x: number;
+      y: number;
+    };
+  };
+  'add-address-modal': {
+    keyringType: string;
+    showEntryButton?: boolean;
+  };
+  'address-management': {
+    // nothing
+  };
+  'address-detail': {
+    account: IDisplayedAccountWithBalance;
+    backable?: boolean;
+  };
+  'select-add-address-type-modal': {
+    showEntryButton?: boolean;
+  };
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  'gasket-modal-like-window': {};
 };
 
 type IZPopupSubviewState = {
@@ -48,10 +73,6 @@ type ChannelForwardMessageType =
   | {
       targetView: '*';
       type: 'refreshCurrentAccount';
-    }
-  | {
-      targetView: 'add-address';
-      type: 'nothing-but-reserved';
     }
   | {
       targetView: 'address-management';

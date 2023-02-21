@@ -5,7 +5,7 @@ import { TokenItem } from '@debank/rabby-api/dist/types';
 import { Contract, providers } from 'ethers';
 import { hexToString } from 'web3-utils';
 import TokensIcons from '../routes/Home/components/TokenIcons';
-import { splitNumberByStep } from './number';
+import { formatUsdValue, splitNumberByStep } from './number';
 
 export const ellipsisTokenSymbol = (text: string, length = 5) => {
   if (text.length <= length) return text;
@@ -305,25 +305,10 @@ export function getTokens(tokens: TokenItem[] = [], separator = ' + ') {
   );
 }
 
-const floorFixNumber = (num: number) => {
-  return num.toString().match(/^-?\d+(?:\.\d{0,2})?/)?.[0];
-};
-
-export function ProfileUSDValue(value: number | string, billion = false) {
-  let res = splitNumberByStep(value);
-  if (value === 0) return `$0`;
-  if (res === '-' || value === undefined || value === null) return res;
-
-  if (billion && Number(value) > 1e9) {
-    res = `${floorFixNumber(Number(value) / 1e9)} B`;
-  }
-  return `$${res}`;
-}
-
 export function getUsd(tokens: TokenItem[] = []) {
   // 沒有价格
   if (tokens.every((v) => !v.price)) return '-';
-  return `${ProfileUSDValue(
+  return `${formatUsdValue(
     tokens.reduce((sum, curr) => {
       const res = (sum += (curr.price || 0) * curr.amount);
       return res;

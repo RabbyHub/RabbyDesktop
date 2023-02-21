@@ -77,7 +77,7 @@ export function isRabbyXPage(
   }
 }
 
-const HARDWARE_CONNECT = [
+const TREZOR_LIKE_CONNECT = [
   // onekey
   {
     type: 'onekey',
@@ -93,7 +93,7 @@ const HARDWARE_CONNECT = [
 ] as const;
 
 export function checkHardwareConnectPage(url: string) {
-  const connInfo = HARDWARE_CONNECT.find((info) =>
+  const connInfo = TREZOR_LIKE_CONNECT.find((info) =>
     info.urls.some((u) => url.startsWith(u))
   );
 
@@ -115,6 +115,23 @@ export function isMainWinShellWebUI(url: string) {
     url.includes('__webuiIsMainWindow=true')
   );
 }
+export function isForTrezorLikeWebUI(url: string) {
+  return (
+    url.startsWith('chrome-extension:') &&
+    url.includes('__webuiForTrezorLike=true')
+  );
+}
+
+export function maybeTrezorLikeBuiltInHttpPage(url: string) {
+  const urlInfo = new URL(url);
+
+  return (
+    checkHardwareConnectPage(url) ||
+    urlInfo.hostname.includes('onekey.so') || // onekey
+    urlInfo.hostname.includes('trezor.io') // onekey
+  );
+}
+
 function _isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
   const urlInfo = new URL(url);
   const queryInfo = parseQueryString(urlInfo.search);
@@ -123,7 +140,7 @@ function _isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
     case 'main-window':
       return isMainWinShellWebUI(url);
     case 'address-management':
-    case 'add-address':
+    case 'add-address-dropdown':
     case 'z-popup':
       return (
         url.startsWith('chrome-extension:') &&
@@ -150,7 +167,7 @@ export function isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
         [
           'main-window',
           'address-management',
-          'add-address',
+          'add-address-dropdown',
           'dapps-management',
           'z-popup',
           // 'select-devices'

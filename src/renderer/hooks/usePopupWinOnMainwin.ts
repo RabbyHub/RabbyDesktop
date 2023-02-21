@@ -1,3 +1,5 @@
+/// <reference path="../../isomorphic/types.d.ts" />
+
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -224,6 +226,12 @@ export function useZPopupLayerOnMain() {
 const ZPopupSubviewStateAtom = atom<NullableFields<IZPopupSubviewState>>({
   'switch-chain': null,
   'security-notification': null,
+  'add-address-dropdown': null,
+  'add-address-modal': null,
+  'address-management': null,
+  'address-detail': null,
+  'select-add-address-type-modal': null,
+  'gasket-modal-like-window': null,
 });
 
 export function useZPopupViewStates() {

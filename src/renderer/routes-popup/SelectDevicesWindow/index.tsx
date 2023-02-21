@@ -115,7 +115,7 @@ function SelectDeviceModal() {
         centered
         mask={false}
         width={1000}
-        title="Connect Hardware Wallet"
+        title="Connect Ledger"
         onCancel={() => {
           cancelSelect(pageState.selectId);
         }}
@@ -124,8 +124,8 @@ function SelectDeviceModal() {
           {deviceList?.length ? (
             <div className={styles.devices}>
               <h3 className={styles.title}>
-                Found the following{' '}
-                {deviceList?.length > 1 ? 'devices' : 'device'}
+                The following {deviceList?.length > 1 ? 'devices' : 'device'} is{' '}
+                found
               </h3>
               <div className={styles.list}>
                 {deviceList.map((d) => {

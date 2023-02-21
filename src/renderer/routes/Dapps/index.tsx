@@ -136,6 +136,7 @@ export default function DApps() {
           onCancel={() => setDeletingDapp(null)}
           onDeletedDapp={() => setDeletingDapp(null)}
         />
+        {/* <ReceiveModal open={true} /> */}
         <ReleaseNote />
       </div>
     </div>

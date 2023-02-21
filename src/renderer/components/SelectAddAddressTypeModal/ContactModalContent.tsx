@@ -7,12 +7,13 @@ import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { useWalletRequest } from '@/renderer/hooks/useWalletRequest';
 import { useAccountToDisplay } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
 import { useAddressManagement } from '@/renderer/hooks/rabbyx/useAddressManagement';
-import styles from './AddAddressModal.module.less';
+import styles from './index.module.less';
 
+type Account = import('@/isomorphic/types/rabbyx').Account;
 type ENS = Awaited<ReturnType<OpenApiService['getEnsAddressByName']>>;
 
 interface Props {
-  onSuccess: (address: string) => void;
+  onSuccess: (accounts: Account[]) => void;
 }
 
 export const ContactModalContent: React.FC<Props> = ({ onSuccess }) => {
@@ -71,11 +72,8 @@ export const ContactModalContent: React.FC<Props> = ({ onSuccess }) => {
   const [run, loading] = useWalletRequest(walletController.importWatchAddress, {
     async onSuccess(accounts) {
       setLocked(true);
-      await Promise.all([
-        getHighlightedAddressesAsync(),
-        getAllAccountsToDisplay(),
-      ]);
-      onSuccess(accounts[0].address);
+      Promise.all([getHighlightedAddressesAsync(), getAllAccountsToDisplay()]);
+      onSuccess(accounts);
       setLocked(false);
     },
     onError(err) {

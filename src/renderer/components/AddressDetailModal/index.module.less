@@ -1,0 +1,91 @@
+.AccountDetail {
+  margin: 0 20px;
+  height: 607px;
+
+  .header {
+    font-size: 20px;
+    font-weight: 500;
+    text-align: center;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 32px;
+
+    .back {
+      cursor: pointer;
+      position: absolute;
+      left: 0;
+    }
+  }
+
+  .part {
+    background: rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+    overflow: hidden;
+    border-radius: 6px;
+    padding: 0 16px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  .address {
+    font-size: 12px;
+    display: flex;
+    width: 100%;
+
+    .text {
+      flex: 1;
+      display: block;
+    }
+  }
+  .copy {
+    cursor: pointer;
+  }
+  .deleteAddress {
+    color: rgba(255, 111, 111, 1);
+    cursor: pointer;
+  }
+  .editNote {
+    display: flex;
+    align-items: center;
+    .icon {
+      margin-left: 4px;
+    }
+  }
+  .source {
+    display: flex;
+    align-items: center;
+    .text {
+      margin-left: 4px;
+    }
+  }
+}
+
+.AccountDetailItem {
+  color: #fff;
+  height: 56px;
+  border-bottom: 0.5px solid rgba(229, 233, 239, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  &:last-child {
+    border-bottom: none;
+  }
+  .title {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .content {
+    font-weight: 400;
+    opacity: 0.8;
+  }
+  .description {
+    display: flex;
+    align-items: center;
+  }
+  .headline {
+    flex: 1;
+  }
+}

@@ -19,6 +19,7 @@ import useHistoryProtocol, {
 import { toastCopiedWeb3Addr } from '@/renderer/components/TransparentToast';
 import { copyText } from '@/renderer/utils/clipboard';
 import BigNumber from 'bignumber.js';
+import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { useSwitchView, VIEW_TYPE } from './hooks';
 
 import ChainList from './components/ChainList';
@@ -78,9 +79,9 @@ const HomeWrapper = styled.div`
       margin-bottom: 20px;
       display: flex;
       align-items: center;
-      .icon-copy {
+      .icon {
         cursor: pointer;
-        margin-left: 6px;
+        margin-left: 8px;
       }
     }
     .balance {
@@ -227,7 +228,6 @@ const useExpandProtocolList = (protocols: DisplayProtocol[]) => {
   const [isExpand, setIsExpand] = useState(false);
   const filterPrice = useMemo(() => calcFilterPrice(protocols), [protocols]);
   const isShowExpand = useMemo(() => calcIsShowExpand(protocols), [protocols]);
-
   const { totalHidden, totalHiddenCount } = useMemo(() => {
     return {
       totalHidden: protocols.reduce((t, item) => {
@@ -244,6 +244,7 @@ const useExpandProtocolList = (protocols: DisplayProtocol[]) => {
     };
   }, [protocols, filterPrice]);
   const filterList = useMemo(() => {
+    console.log('isShowExpand', isShowExpand);
     if (!isShowExpand) {
       return protocols;
     }
@@ -302,6 +303,7 @@ const Home = () => {
   } = useHistoryProtocol(currentAccount?.address, updateNonce, currentView);
   const {
     filterList: displayTokenList,
+    isShowExpand: isShowTokenExpand,
     isExpand: isTokenExpand,
     totalHidden: tokenHiddenUsdValue,
     totalHiddenCount: tokenHiddenCount,
@@ -370,6 +372,7 @@ const Home = () => {
   }, [protocolList, selectChainServerId]);
   const {
     filterList: displayProtocolList,
+    isShowExpand: isShowProtocolExpand,
     isExpand: isProtocolExpand,
     totalHidden: protocolHiddenUsdValue,
     totalHiddenCount: protocolHiddenCount,
@@ -401,6 +404,8 @@ const Home = () => {
     );
   }, [totalBalance, currentAccount]);
 
+  const { showZSubview } = useZPopupLayerOnMain();
+
   return (
     <HomeBody>
       <HomeWrapper>
@@ -419,8 +424,22 @@ const Home = () => {
                 >
                   {ellipsis(currentAccount?.address || '')}
                   <img
-                    className="icon-copy"
+                    className="icon"
                     src="rabby-internal://assets/icons/home/copy.svg"
+                  />
+                </span>
+
+                <span
+                  className="inline-flex items-center"
+                  onClick={() => {
+                    showZSubview('address-detail', {
+                      account: currentAccount as IDisplayedAccountWithBalance,
+                    });
+                  }}
+                >
+                  <img
+                    className="icon"
+                    src="rabby-internal://assets/icons/home/info.svg"
                   />
                 </span>
               </div>
@@ -487,8 +506,10 @@ const Home = () => {
             hiddenUsdValue: tokenHiddenUsdValue,
             expandTokensUsdValueChange,
             setIsExpand: setIsTokenExpand,
+            isShowExpand: isShowTokenExpand,
           }}
           protocolHidden={{
+            isShowExpand: isShowProtocolExpand,
             isExpand: isProtocolExpand,
             hiddenCount: protocolHiddenCount,
             hiddenUsdValue: protocolHiddenUsdValue,

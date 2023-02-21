@@ -3,6 +3,9 @@ import classNames from 'classnames';
 import { Skeleton } from 'antd';
 import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
 import { formatNumber, formatUsdValue } from '@/renderer/utils/number';
+import { ReceiveModal } from '@/renderer/components/ReceiveModal';
+import { useCallback, useState } from 'react';
+import { getChain } from '@/renderer/utils';
 import TokenItemComp, { LoadingTokenItem } from './TokenItem';
 
 const ExpandItem = styled.div`
@@ -69,6 +72,7 @@ const TokenList = ({
   isLoadingTokenList: boolean;
   supportHistoryChains: ServerChain[];
   tokenHidden: {
+    isShowExpand: boolean;
     isExpand: boolean;
     hiddenCount: number;
     hiddenUsdValue: number;
@@ -80,6 +84,24 @@ const TokenList = ({
   const handleClickExpandToken = () => {
     tokenHidden.setIsExpand(!tokenHidden.isExpand);
   };
+
+  const [state, setState] = useState<{
+    isShowReceiveModal: boolean;
+    token?: string;
+    chain?: CHAINS_ENUM;
+  }>({
+    isShowReceiveModal: false,
+    token: undefined,
+    chain: undefined,
+  });
+
+  const handleReceiveClick = useCallback((token: TokenItem) => {
+    setState({
+      isShowReceiveModal: true,
+      token: token.symbol,
+      chain: getChain(token.chain)?.enum,
+    });
+  }, []);
 
   if (isLoadingTokenList) {
     return (
@@ -134,64 +156,79 @@ const TokenList = ({
   }
 
   return (
-    <ul className="assets-list">
-      <li className="th">
-        <div>Asset</div>
-        <div>Price</div>
-        <div>Amount</div>
-        <div>USD Value</div>
-      </li>
-      {tokenList.map((token) => (
-        <TokenItemComp
-          token={token}
-          historyToken={
-            showHistory
-              ? historyTokenMap[`${token.chain}-${token.id}`]
-              : undefined
-          }
-          key={`${token.chain}-${token.id}`}
-          supportHistory={
-            !!supportHistoryChains.find((item) => item.id === token.chain)
-          }
-        />
-      ))}
-      {tokenHidden.hiddenCount > 0 && (
-        <ExpandItem onClick={handleClickExpandToken}>
-          <img
-            className="icon-hide-assets"
-            src="rabby-internal://assets/icons/home/hide-assets.svg"
+    <>
+      <ul className="assets-list">
+        <li className="th">
+          <div>Asset</div>
+          <div>Price</div>
+          <div>Amount</div>
+          <div>USD Value</div>
+        </li>
+        {tokenList.map((token) => (
+          <TokenItemComp
+            token={token}
+            historyToken={
+              showHistory
+                ? historyTokenMap[`${token.chain}-${token.id}`]
+                : undefined
+            }
+            key={`${token.chain}-${token.id}`}
+            supportHistory={
+              !!supportHistoryChains.find((item) => item.id === token.chain)
+            }
+            onReceiveClick={handleReceiveClick}
           />
-          {tokenHidden.isExpand
-            ? 'Hide small value assets'
-            : `${tokenHidden.hiddenCount} Assets are hidden`}
-          <img
-            src="rabby-internal://assets/icons/home/expand-arrow.svg"
-            className={classNames('icon-expand-arrow', {
-              flip: !tokenHidden.isExpand,
-            })}
-          />
-          <div className="hide-assets-usd-value">
-            {formatUsdValue(tokenHidden.hiddenUsdValue)}
-            {showHistory && (
-              <div
-                className={classNames('usd-value-change', {
-                  'is-loss': tokenHidden.expandTokensUsdValueChange < 0,
-                  'is-increase': tokenHidden.expandTokensUsdValueChange > 0,
-                })}
-              >
-                {`${formatNumber(
-                  (tokenHidden.expandTokensUsdValueChange /
-                    tokenHidden.hiddenUsdValue) *
-                    100
-                )}% (${formatUsdValue(
-                  tokenHidden.expandTokensUsdValueChange
-                )})`}
-              </div>
-            )}
-          </div>
-        </ExpandItem>
-      )}
-    </ul>
+        ))}
+        {tokenHidden.hiddenCount > 0 && tokenHidden.isShowExpand && (
+          <ExpandItem onClick={handleClickExpandToken}>
+            <img
+              className="icon-hide-assets"
+              src="rabby-internal://assets/icons/home/hide-assets.svg"
+            />
+            {tokenHidden.isExpand
+              ? 'Hide small value assets'
+              : `${tokenHidden.hiddenCount} Assets are hidden`}
+            <img
+              src="rabby-internal://assets/icons/home/expand-arrow.svg"
+              className={classNames('icon-expand-arrow', {
+                flip: !tokenHidden.isExpand,
+              })}
+            />
+            <div className="hide-assets-usd-value">
+              {formatUsdValue(tokenHidden.hiddenUsdValue)}
+              {showHistory && (
+                <div
+                  className={classNames('usd-value-change', {
+                    'is-loss': tokenHidden.expandTokensUsdValueChange < 0,
+                    'is-increase': tokenHidden.expandTokensUsdValueChange > 0,
+                  })}
+                >
+                  {`${formatNumber(
+                    (tokenHidden.expandTokensUsdValueChange /
+                      tokenHidden.hiddenUsdValue) *
+                      100
+                  )}% (${formatUsdValue(
+                    tokenHidden.expandTokensUsdValueChange
+                  )})`}
+                </div>
+              )}
+            </div>
+          </ExpandItem>
+        )}
+      </ul>
+      <ReceiveModal
+        open={state.isShowReceiveModal}
+        token={state.token}
+        chain={state.chain}
+        onCancel={() => {
+          setState({
+            isShowReceiveModal: false,
+            token: undefined,
+            chain: undefined,
+          });
+        }}
+      />
+    </>
   );
 };
 

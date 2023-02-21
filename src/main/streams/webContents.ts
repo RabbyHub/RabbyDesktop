@@ -1,8 +1,10 @@
 import { getBaseHref } from '@/isomorphic/url';
+import { shell } from 'electron';
 import TabbedBrowserWindow from '../browser/browsers';
 import { getAllDapps, parseDappRedirect } from '../store/dapps';
 import { switchToBrowserTab } from '../utils/browser';
-import { attachDappSafeview } from './dappSafeview';
+import { safeOpenURL } from './dappSafeview';
+import { getTabbedWindowFromWebContents } from '../utils/tabbedBrowserWindow';
 
 export function createDappTab(mainTabbedWin: TabbedBrowserWindow, url: string) {
   const continualOpenedTab = mainTabbedWin.createTab({
@@ -45,6 +47,8 @@ export function setOpenHandlerForWebContents({
   webContents: Electron.WebContents;
   parentTabbedWin: TabbedBrowserWindow;
 }) {
+  const isForTrezorLike = parentTabbedWin.isForTrezorLikeConnection();
+
   webContents.setWindowOpenHandler((details) => {
     if (!webContents) return { action: 'deny' };
 
@@ -59,14 +63,20 @@ export function setOpenHandlerForWebContents({
       isToExtension,
       isToSameOrigin,
       shouldKeepTab,
+      shouldOpenExternal,
       maybeRedirectInSPA,
-    } = parseDappRedirect(currentUrl, targetURL, dapps);
+    } = parseDappRedirect(currentUrl, targetURL, { dapps });
+
+    if (shouldOpenExternal) {
+      shell.openExternal(targetURL);
+      return { action: 'deny' };
+    }
 
     if (isFromDapp && !isToSameOrigin) {
       if (shouldKeepTab) {
         webContents.loadURL(targetURL);
       } else {
-        attachDappSafeview(targetURL, {
+        safeOpenURL(targetURL, {
           sourceURL: currentUrl,
           existedDapp: targetInfo.foundDapp,
           _targetwin: parentTabbedWin.window,
@@ -127,10 +137,24 @@ export const setListeners = {
       const evtWebContents = (evt as any).sender as Electron.WebContents;
       const currentUrl = evtWebContents.getURL();
 
+      const tabbedWin = getTabbedWindowFromWebContents(evtWebContents);
       const dapps = getAllDapps();
 
-      const { targetInfo, isFromDapp, shouldKeepTab, isToSameOrigin } =
-        parseDappRedirect(currentUrl, targetURL, dapps);
+      const {
+        targetInfo,
+        isFromDapp,
+        shouldKeepTab,
+        shouldOpenExternal,
+        isToSameOrigin,
+      } = parseDappRedirect(currentUrl, targetURL, {
+        dapps,
+        isForTrezorLikeConnection: tabbedWin?.isForTrezorLikeConnection(),
+      });
+
+      if (shouldOpenExternal) {
+        shell.openExternal(targetURL);
+        return false;
+      }
 
       // this tabs is render as app's self UI, such as topbar.
       if (isFromDapp && !isToSameOrigin) {
@@ -138,7 +162,7 @@ export const setListeners = {
         if (shouldKeepTab) return true;
 
         evt.preventDefault();
-        attachDappSafeview(targetURL, {
+        safeOpenURL(targetURL, {
           existedDapp: targetInfo.foundDapp,
           sourceURL: currentUrl,
         });
@@ -169,20 +193,30 @@ export const setListeners = {
         const currentUrl = evtWebContents.getURL();
 
         const dapps = getAllDapps();
+        const tabbedWin = getTabbedWindowFromWebContents(evtWebContents);
 
         const {
           targetInfo,
           // actually, it's always from dapp on isMainContentsForTabbedWindow=false
           isFromDapp,
           shouldKeepTab,
+          shouldOpenExternal,
           isToSameOrigin,
-        } = parseDappRedirect(currentUrl, targetURL, dapps);
+        } = parseDappRedirect(currentUrl, targetURL, {
+          dapps,
+          isForTrezorLikeConnection: tabbedWin?.isForTrezorLikeConnection(),
+        });
+
+        if (shouldOpenExternal) {
+          shell.openExternal(targetURL);
+          return false;
+        }
 
         if (isFromDapp && !isToSameOrigin) {
           if (shouldKeepTab) return true;
 
           evt.preventDefault();
-          attachDappSafeview(targetURL, {
+          safeOpenURL(targetURL, {
             sourceURL: currentUrl,
             existedDapp: targetInfo.foundDapp,
             _targetwin: parentWindow,
