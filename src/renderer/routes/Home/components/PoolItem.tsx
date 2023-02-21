@@ -356,6 +356,7 @@ const TokenItemComp = ({
               <span className="symbol">
                 {ellipsisTokenSymbol(token.symbol)}
               </span>
+              {` (${formatUsdValue(Math.abs(amountChange * token.price))})`}
             </div>
           )}
       </div>

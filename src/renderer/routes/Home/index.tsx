@@ -12,7 +12,7 @@ import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { useBalanceValue } from '@/renderer/hooks/useCurrentBalance';
 import useCurve from '@/renderer/hooks/useCurve';
 import useHistoryTokenList from '@/renderer/hooks/useHistoryTokenList';
-import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import useHistoryProtocol, {
   DisplayProtocol,
 } from '@/renderer/hooks/useHistoryProtocol';
@@ -385,6 +385,7 @@ const Home = () => {
     setUsedChainList(chainList.map((chain) => formatChain(chain)));
     setIsProtocolExpand(false);
     setIsTokenExpand(false);
+    switchView(VIEW_TYPE.DEFAULT);
   };
 
   const handleClickRefresh = () => {
@@ -394,15 +395,6 @@ const Home = () => {
   useEffect(() => {
     init();
   }, [currentAccount]);
-
-  useEffect(() => {
-    if (!currentAccount) return;
-    updateBalanceValue(totalBalance);
-    walletController.updateAddressBalanceCache(
-      currentAccount.address,
-      totalBalance
-    );
-  }, [totalBalance, currentAccount]);
 
   const { showZSubview } = useZPopupLayerOnMain();
 

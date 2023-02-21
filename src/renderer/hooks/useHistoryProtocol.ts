@@ -240,6 +240,8 @@ export default (
   useEffect(() => {
     isHistoryLoadedRef.current = false;
     isRealTimeLoadedRef.current = false;
+    isLoadingHistoryRef.current = false;
+    isLoadingRealTimeRef.current = false;
     protocolListRef.current = [];
     setHistoryProtocolMap({});
   }, [address, nonce]);

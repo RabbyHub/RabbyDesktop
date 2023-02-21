@@ -51,7 +51,6 @@ const TokenItemWrapper = styled.li`
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      display: none;
       &.is-loss {
         color: #ff6060;
       }
@@ -71,19 +70,6 @@ const TokenItemWrapper = styled.li`
         width: 9px;
         margin-left: 4px;
         margin-right: 2px;
-      }
-    }
-  }
-  &:hover {
-    .number-change {
-      opacity: 1;
-    }
-    .token-actions {
-      opacity: 1;
-    }
-    & > div {
-      .price-change {
-        display: block;
       }
     }
   }
@@ -219,7 +205,7 @@ const TokenItemComp = ({
             {amountChange >= 0 ? '+' : '-'}
             {`${formatNumber(Math.abs(amountChange))} ${ellipsisTokenSymbol(
               token.symbol
-            )}`}
+            )} (${formatUsdValue(Math.abs(amountChange * token.price))})`}
           </div>
         )}
       </TokenAmountField>
