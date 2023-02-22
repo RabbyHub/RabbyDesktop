@@ -53,6 +53,7 @@ export function PreviewWebview({
 
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadFailed, setIsLoadFailed] = useState(false);
+  const [url, setUrl] = useState('');
   // did-fail-load
   useEffect(() => {
     if (!containerRef.current) return;
@@ -71,6 +72,7 @@ export function PreviewWebview({
 
     const loadstop = () => {
       setIsLoading(false);
+      setUrl((webview as any).getURL());
     };
 
     webview.addEventListener('did-start-loading', loadstart);
@@ -103,6 +105,9 @@ export function PreviewWebview({
       />
       {isLoading ? loadingView : null}
       {!isLoading && isLoadFailed ? loadFailedView || null : null}
+      {!isLoading && !isLoadFailed && url ? (
+        <div className="preview-webview-url">{url}</div>
+      ) : null}
     </Container>
   );
 }

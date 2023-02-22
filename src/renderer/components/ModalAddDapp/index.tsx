@@ -193,7 +193,7 @@ const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
       </div>
       <PreviewWebview
         containerClassName={styles.previewTagContainer}
-        src={data.finalOrigin}
+        src={data.inputOrigin}
         loadingView={
           <div className={styles.previewEmpty}>
             <div>
@@ -296,19 +296,7 @@ const validateInput = (input: string, onReplace?: (v: string) => void) => {
     if (url.hostname !== domain) {
       return {
         validateStatus: 'error' as const,
-        help: (
-          <>
-            The input is not a domain name. Replace with{' '}
-            <span
-              className="link"
-              onClick={() => {
-                onReplace?.(url.hostname);
-              }}
-            >
-              {url.hostname}
-            </span>
-          </>
-        ),
+        help: <>The input is not a domain name.</>,
       };
     }
   } catch (e) {
@@ -356,15 +344,22 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
           validateStatus: 'error',
           help: (
             <>
-              The current URL is redirected to{' '}
-              <span
-                className="link"
-                onClick={() => {
-                  onReplace?.(data.finalOrigin.replace(/^\w+:\/\//, ''));
-                }}
-              >
-                {data.finalOrigin?.replace(/^\w+:\/\//, '')}
-              </span>
+              The current domain has been redirected to{' '}
+              {data.finalOrigin?.replace(/^\w+:\/\//, '')} which may pose a
+              security risk. It cannot be added as a Dapp.
+            </>
+          ),
+        });
+        return null;
+      }
+      if (data && canoicalizeDappUrl(data.inputOrigin).isSubDomain) {
+        setState({
+          dappInfo: data,
+          validateStatus: 'success',
+          help: (
+            <>
+              It appears that the current input may be a subdomain. By adding it
+              as a Dapp, you'll be limited to browsing within that subdomain.
             </>
           ),
         });
@@ -514,6 +509,20 @@ export function AddDapp({
     }
   };
 
+  useEffect(() => {
+    if (!input.trim()) {
+      setState({
+        validateStatus: undefined,
+        help: 'To ensure the security of your funds, please ensure that you enter the official domain name of Dapp',
+      });
+    } else {
+      setState({
+        validateStatus: undefined,
+        help: '',
+      });
+    }
+  }, [input, setState]);
+
   return (
     <div className={styles.content}>
       <h3 className={styles.title}>Enter the Dapp domain name</h3>
@@ -529,13 +538,7 @@ export function AddDapp({
         <Form.Item
           name="url"
           validateStatus={state?.validateStatus || 'success'}
-          help={
-            state?.help
-              ? state?.help
-              : input
-              ? null
-              : 'To ensure the security of your funds, please ensure that you enter the official domain name of Dapp'
-          }
+          help={state?.help}
         >
           <RabbyInput
             className={styles.input}
