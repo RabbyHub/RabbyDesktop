@@ -35,6 +35,14 @@ const HomeBody = styled.div`
   height: calc(100vh - 64px);
 `;
 
+const Container = styled.div`
+  display: flex;
+  height: 100%;
+  max-width: 1738px;
+  width: 100%;
+  margin: 0 auto;
+`;
+
 const HomeWrapper = styled.div`
   color: #fff;
   height: 100%;
@@ -399,122 +407,124 @@ const Home = () => {
 
   return (
     <HomeBody>
-      <HomeWrapper>
-        <div className="header">
-          <div className="top">
-            <div className="left">
-              <div className="current-address">
-                <span
-                  className="inline-flex items-center"
-                  onClick={async () => {
-                    if (!currentAccount?.address) return;
+      <Container>
+        <HomeWrapper>
+          <div className="header">
+            <div className="top">
+              <div className="left">
+                <div className="current-address">
+                  <span
+                    className="inline-flex items-center"
+                    onClick={async () => {
+                      if (!currentAccount?.address) return;
 
-                    await copyText(currentAccount.address);
-                    toastCopiedWeb3Addr(currentAccount.address);
-                  }}
-                >
-                  {ellipsis(currentAccount?.address || '')}
-                  <img
-                    className="icon"
-                    src="rabby-internal://assets/icons/home/copy.svg"
-                  />
-                </span>
+                      await copyText(currentAccount.address);
+                      toastCopiedWeb3Addr(currentAccount.address);
+                    }}
+                  >
+                    {ellipsis(currentAccount?.address || '')}
+                    <img
+                      className="icon"
+                      src="rabby-internal://assets/icons/home/copy.svg"
+                    />
+                  </span>
 
-                <span
-                  className="inline-flex items-center"
-                  onClick={() => {
-                    showZSubview('address-detail', {
-                      account: currentAccount as IDisplayedAccountWithBalance,
-                    });
-                  }}
-                >
+                  <span
+                    className="inline-flex items-center"
+                    onClick={() => {
+                      showZSubview('address-detail', {
+                        account: currentAccount as IDisplayedAccountWithBalance,
+                      });
+                    }}
+                  >
+                    <img
+                      className="icon"
+                      src="rabby-internal://assets/icons/home/info.svg"
+                    />
+                  </span>
+                </div>
+                <div className="balance">
+                  ${formatNumber(totalBalance || 0)}{' '}
                   <img
-                    className="icon"
-                    src="rabby-internal://assets/icons/home/info.svg"
+                    src="rabby-internal://assets/icons/home/asset-update.svg"
+                    className={classNames('icon-refresh', {
+                      circling:
+                        isLoadingRealTimeTokenList || isLoadingRealTimeProtocol,
+                    })}
+                    onClick={handleClickRefresh}
                   />
-                </span>
+                </div>
               </div>
-              <div className="balance">
-                ${formatNumber(totalBalance || 0)}{' '}
-                <img
-                  src="rabby-internal://assets/icons/home/asset-update.svg"
-                  className={classNames('icon-refresh', {
-                    circling:
-                      isLoadingRealTimeTokenList || isLoadingRealTimeProtocol,
-                  })}
-                  onClick={handleClickRefresh}
-                />
-              </div>
+              {curveData ? (
+                <div className="right">
+                  <div
+                    className={classNames('balance-change', {
+                      'is-loss': curveData.isLoss,
+                    })}
+                  >{`${curveData.isLoss ? '-' : '+'}${
+                    curveData.changePercent
+                  } (${curveData.change})`}</div>
+                  {curveData.list.length > 0 && <Curve data={curveData} />}
+                </div>
+              ) : null}
             </div>
-            {curveData ? (
-              <div className="right">
+            <div className="flex justify-between items-center">
+              <ChainList
+                chainBalances={usedChainList}
+                onChange={setSelectChainServerId}
+              />
+              <SwitchViewWrapper>
                 <div
-                  className={classNames('balance-change', {
-                    'is-loss': curveData.isLoss,
+                  className={classNames('item', {
+                    active: currentView === VIEW_TYPE.DEFAULT,
                   })}
-                >{`${curveData.isLoss ? '-' : '+'}${curveData.changePercent} (${
-                  curveData.change
-                })`}</div>
-                {curveData.list.length > 0 && <Curve data={curveData} />}
-              </div>
-            ) : null}
+                  onClick={() => switchView(VIEW_TYPE.DEFAULT)}
+                >
+                  Default
+                </div>
+                <div
+                  className={classNames('item', {
+                    active: currentView === VIEW_TYPE.CHANGE,
+                  })}
+                  onClick={() => switchView(VIEW_TYPE.CHANGE)}
+                >
+                  Change
+                </div>
+              </SwitchViewWrapper>
+            </div>
           </div>
-          <div className="flex justify-between items-center">
-            <ChainList
-              chainBalances={usedChainList}
-              onChange={setSelectChainServerId}
-            />
-            <SwitchViewWrapper>
-              <div
-                className={classNames('item', {
-                  active: currentView === VIEW_TYPE.DEFAULT,
-                })}
-                onClick={() => switchView(VIEW_TYPE.DEFAULT)}
-              >
-                Default
-              </div>
-              <div
-                className={classNames('item', {
-                  active: currentView === VIEW_TYPE.CHANGE,
-                })}
-                onClick={() => switchView(VIEW_TYPE.CHANGE)}
-              >
-                Change
-              </div>
-            </SwitchViewWrapper>
-          </div>
-        </div>
-        <PortfolioView
-          tokenList={displayTokenList}
-          historyTokenMap={historyTokenMap}
-          protocolList={displayProtocolList}
-          historyProtocolMap={historyProtocolMap}
-          protocolHistoryTokenPriceMap={tokenHistoryPriceMap}
-          selectChainServerId={selectChainServerId}
-          tokenHidden={{
-            isExpand: isTokenExpand,
-            hiddenCount: tokenHiddenCount,
-            hiddenUsdValue: tokenHiddenUsdValue,
-            expandTokensUsdValueChange,
-            setIsExpand: setIsTokenExpand,
-            isShowExpand: isShowTokenExpand,
-          }}
-          protocolHidden={{
-            isShowExpand: isShowProtocolExpand,
-            isExpand: isProtocolExpand,
-            hiddenCount: protocolHiddenCount,
-            hiddenUsdValue: protocolHiddenUsdValue,
-            setIsExpand: setIsProtocolExpand,
-          }}
-          isLoadingTokenList={isLoadingTokenList}
-          isLoadingProtocolList={isLoadingProtocol}
-          isLoadingProtocolHistory={isLoadingProtocolHistory}
-          supportHistoryChains={supportHistoryChains}
-          historyTokenDict={historyTokenDict}
-          view={currentView}
-        />
-      </HomeWrapper>
-      <RightBar />
+          <PortfolioView
+            tokenList={displayTokenList}
+            historyTokenMap={historyTokenMap}
+            protocolList={displayProtocolList}
+            historyProtocolMap={historyProtocolMap}
+            protocolHistoryTokenPriceMap={tokenHistoryPriceMap}
+            selectChainServerId={selectChainServerId}
+            tokenHidden={{
+              isExpand: isTokenExpand,
+              hiddenCount: tokenHiddenCount,
+              hiddenUsdValue: tokenHiddenUsdValue,
+              expandTokensUsdValueChange,
+              setIsExpand: setIsTokenExpand,
+              isShowExpand: isShowTokenExpand,
+            }}
+            protocolHidden={{
+              isShowExpand: isShowProtocolExpand,
+              isExpand: isProtocolExpand,
+              hiddenCount: protocolHiddenCount,
+              hiddenUsdValue: protocolHiddenUsdValue,
+              setIsExpand: setIsProtocolExpand,
+            }}
+            isLoadingTokenList={isLoadingTokenList}
+            isLoadingProtocolList={isLoadingProtocol}
+            isLoadingProtocolHistory={isLoadingProtocolHistory}
+            supportHistoryChains={supportHistoryChains}
+            historyTokenDict={historyTokenDict}
+            view={currentView}
+          />
+        </HomeWrapper>
+        <RightBar />
+      </Container>
     </HomeBody>
   );
 };
