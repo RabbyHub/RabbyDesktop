@@ -1,7 +1,36 @@
 
+v0.4.8 / 2023-02-22
+===================
+
+  * fix: webview tag loading in mainWindow webContents.
+  * chore: upgrade rabbyx to update matomo idSite.
+  * fix: home width (#150)
+  * fix: display of sign window on scaled win32. (#149)
+  * fix: _TrezorConnect.close (#148)
+  * fix: receive (#146)
+  * fix: update alias when change (#147)
+  * feat: new portfolio page (#144)
+  * feat: disable spellcheck by default. (#142)
+  * fix: handle react-hooks/exhaustive-deps (#143)
+  * fix: style of sign button on watch address.
+  * feat: reject all approvals on switching dapp.
+  * feat: add loaing status for <PreviewWebview />
+  * style: add gasket mask for hid select modal.
+  * fix: empty modal on select devices modal window blur. (#145)
+  * fix: link on onekey connection page.
+  * fix: scrollbar in address list modal (#141)
+  * feat: adjust trezor like connection window. (#140)
+  * feat: update trezor (#138)
+  * fix: declaration files. (#139)
+  * fix: the spacing between the button and swap box (#137)
+  * feat: add send link on homepage (#134)
+  * fix: behavior of open handler. (#135)
+  * fix: address bugs (#136)
+
 v0.4.7 / 2023-02-17
 ===================
 
+  * Release v0.4.7
   * feat: add new address (#117)
   * Fix: swap、 send style (#132)
   * feat: transaction (#130)
