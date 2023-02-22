@@ -1,5 +1,6 @@
 import { BrowserView, BrowserWindow } from 'electron';
 
+import { roundRectValue } from '@/isomorphic/shape';
 import {
   IS_RUNTIME_PRODUCTION,
   RABBY_POPUP_GHOST_VIEW_URL,
@@ -21,7 +22,7 @@ import {
   getWebuiURLBase,
   onMainWindowReady,
 } from '../utils/stream-helpers';
-import { getMainWindowTopOffset, roundRectValue } from '../utils/browserView';
+import { getMainWindowTopOffset } from '../utils/browserView';
 
 const viewsState: Record<
   PopupViewOnMainwinInfo['type'],
