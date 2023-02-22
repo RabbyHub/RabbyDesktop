@@ -48,10 +48,13 @@ const ReceiveContent = ({ onCancel, chain, token }: ReceiveContentProps) => {
     return `Receive ${assets} on ${chainName}`;
   }, [chain, token]);
 
+  const isWatchAddress =
+    currentAccount?.type && currentAccount?.type === KEYRING_CLASS.WATCH;
+
   const copy = useCopyAddress();
 
   useEffect(() => {
-    if (currentAccount?.type && currentAccount?.type !== KEYRING_CLASS.WATCH) {
+    if (!isWatchAddress) {
       return;
     }
     confirmModalRef.current = AntdModal.confirm({
@@ -94,7 +97,7 @@ const ReceiveContent = ({ onCancel, chain, token }: ReceiveContentProps) => {
     return () => {
       confirmModalRef.current?.destroy();
     };
-  }, [currentAccount?.type]);
+  }, [isWatchAddress]);
 
   useEffect(() => {
     confirmModalRef.current?.update({
@@ -111,12 +114,19 @@ const ReceiveContent = ({ onCancel, chain, token }: ReceiveContentProps) => {
       <div className={styles.receiveHeader}>
         <div className={styles.account}>
           <img src={icon} alt="" className={styles.accountIcon} />
-          <span className={styles.accountName}>
-            {currentAccount?.alianName}
-          </span>
-          <span className={styles.accountBalance}>
-            ${splitNumberByStep(balance || '0', 3, ',', true)}
-          </span>
+          <div className="text-left overflow-hidden">
+            <div className="flex items-center">
+              <span className={styles.accountName}>
+                {currentAccount?.alianName}
+              </span>
+              <span className={styles.accountBalance}>
+                ${splitNumberByStep(balance || '0', 3, ',', true)}
+              </span>
+            </div>
+            {isWatchAddress ? (
+              <div className={styles.accountType}>Watch Mode address</div>
+            ) : null}
+          </div>
         </div>
       </div>
       <div className={styles.receiveBody}>
@@ -210,6 +220,13 @@ export const ReceiveModalWraper = ({
     }
   }, [currentChain, open, openChainModal]);
 
+  const handleReceiveCancel = useCallback(() => {
+    setState({
+      chain: undefined,
+    });
+    onCancel?.();
+  }, [onCancel, setState]);
+
   if (!currentChain) {
     return null;
   }
@@ -219,12 +236,7 @@ export const ReceiveModalWraper = ({
       open={open}
       chain={currentChain}
       token={token}
-      onCancel={() => {
-        setState({
-          chain: undefined,
-        });
-        onCancel?.();
-      }}
+      onCancel={handleReceiveCancel}
     />
   );
 };
