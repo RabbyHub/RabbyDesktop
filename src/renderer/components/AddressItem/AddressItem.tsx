@@ -1,4 +1,4 @@
-import { useAddressManagement } from '@/renderer/hooks/rabbyx/useAddressManagement';
+import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { Button } from 'antd';
 import React from 'react';
@@ -14,7 +14,6 @@ interface Props {
 export const AddressItem: React.FC<Props> = ({ address, type, brandName }) => {
   const [aliasName, setAliasName] = React.useState<string>('');
   const [isEdit, setIsEdit] = React.useState<boolean>(false);
-  const { getHighlightedAddressesAsync } = useAddressManagement();
 
   React.useEffect(() => {
     walletController.getAlianName(address).then((name) => {
@@ -22,13 +21,12 @@ export const AddressItem: React.FC<Props> = ({ address, type, brandName }) => {
     });
   }, [address]);
 
-  const onUpdateAliasName = React.useCallback(() => {
-    walletController
-      .updateAlianName(address, aliasName)
-      .then(() => getHighlightedAddressesAsync());
+  const onUpdateAliasName = React.useCallback(async () => {
+    await walletController.updateAlianName(address, aliasName);
+    forwardMessageTo('*', 'refreshCurrentAccount', {});
 
     setIsEdit(false);
-  }, [address, aliasName, getHighlightedAddressesAsync]);
+  }, [address, aliasName]);
 
   const shortAddress = `${address?.toLowerCase().slice(0, 6)}...${address
     ?.toLowerCase()
