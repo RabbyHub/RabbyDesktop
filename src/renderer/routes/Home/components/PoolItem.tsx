@@ -344,7 +344,7 @@ const TokenItemComp = ({
         {!isLoadingProtocolHistory &&
           supportHistory &&
           tokenHistory &&
-          Math.abs(amountChange * token.price) >= 1 && (
+          Math.abs(amountChange * token.price) >= 0.01 && (
             <div
               className={classNames('price-change', {
                 'is-loss': !isDebt && amountChange < 0,

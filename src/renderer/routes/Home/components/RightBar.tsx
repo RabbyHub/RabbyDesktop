@@ -55,7 +55,7 @@ const RightBar = () => {
   const actions = [
     {
       id: 'swap',
-      name: 'swap',
+      name: 'Swap',
       icon: <IconSwap width="35px" height="35px" />,
       onClick: () => {
         navigateTo('/mainwin/swap');

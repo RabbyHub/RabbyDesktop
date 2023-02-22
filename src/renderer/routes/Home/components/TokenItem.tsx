@@ -73,6 +73,11 @@ const TokenItemWrapper = styled.li`
       }
     }
   }
+  &:hover {
+    .token-actions {
+      opacity: 1;
+    }
+  }
 `;
 const TokenLogoField = styled.div`
   display: flex;
@@ -195,7 +200,7 @@ const TokenItemComp = ({
       <TokenPriceField>{`$${formatPrice(token.price)}`}</TokenPriceField>
       <TokenAmountField>
         {formatAmount(token.amount)} {ellipsisTokenSymbol(token.symbol)}
-        {historyToken && Math.abs(amountChange * token.price) >= 1 && (
+        {historyToken && Math.abs(amountChange * token.price) >= 0.01 && (
           <div
             className={classNames('price-change', {
               'is-loss': amountChange < 0,
