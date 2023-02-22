@@ -45,7 +45,7 @@ const TransactionItemWrapper = styled.div`
     line-height: 14px;
     color: rgba(255, 255, 255, 0.3);
 
-    .tx-dapp-link:not(.isRabby) {
+    .tx-dapp-link:not(.is-rabby) {
       color: rgba(255, 255, 255, 0.6);
       cursor: pointer;
       text-decoration: underline;
@@ -106,6 +106,17 @@ const Actions = styled.div`
     background-color: rgba(255, 255, 255, 0.3);
     margin-left: 10px;
     margin-right: 10px;
+  }
+  &.disabled {
+    opacity: 0.4;
+    .icon-cancel,
+    .icon-speedup {
+      cursor: not-allowed;
+    }
+    .icon-cancel:hover,
+    .icon-speedup:hover {
+      opacity: 0.3;
+    }
   }
 `;
 
@@ -220,7 +231,7 @@ const TxExplainInner = styled.div`
 `;
 
 const ChildrenWrapper = styled.div`
-  padding: 15px 0;
+  padding: 15px 0 0;
   border-top: 1px dashed #616776;
   margin-top: 15px;
 
@@ -325,7 +336,13 @@ const ChildrenTxText = ({
   return <span className="tx-type">{text}</span>;
 };
 
-const TransactionItem = ({ item }: { item: TransactionDataItem }) => {
+const TransactionItem = ({
+  item,
+  canCancel,
+}: {
+  item: TransactionDataItem;
+  canCancel?: boolean;
+}) => {
   const { isPending, isCompleted, isFailed } = useMemo(() => {
     return {
       isPending: item.status === 'pending',
@@ -455,7 +472,7 @@ const TransactionItem = ({ item }: { item: TransactionDataItem }) => {
   }, []);
 
   const handleClickSpeedUp = async () => {
-    if (!item.rawTx) return;
+    if (!item.rawTx || !canCancel) return;
     const maxGasPrice = Number(
       item.rawTx.gasPrice || item.rawTx.maxFeePerGas || 0
     );
@@ -482,7 +499,7 @@ const TransactionItem = ({ item }: { item: TransactionDataItem }) => {
   };
 
   const handleClickCancel = async () => {
-    if (!item.rawTx) return;
+    if (!item.rawTx || !canCancel) return;
     const maxGasPrice = Number(
       item.rawTx.gasPrice || item.rawTx.maxFeePerGas || 0
     );
@@ -584,19 +601,37 @@ const TransactionItem = ({ item }: { item: TransactionDataItem }) => {
             />
             Pending
           </PendingTag>
-          <Actions>
-            <img
-              src="rabby-internal://assets/icons/home/action-speedup.svg"
-              className="icon-speedup"
-              onClick={handleClickSpeedUp}
-            />
-            <div className="divider" />
-            <img
-              src="rabby-internal://assets/icons/home/action-cancel.svg"
-              className="icon-cancel"
-              onClick={handleClickCancel}
-            />
-          </Actions>
+          <Tooltip
+            title={
+              canCancel
+                ? null
+                : 'Cannot speed up or cancel: Not the first pending txn'
+            }
+            placement="topRight"
+            autoAdjustOverflow={false}
+          >
+            <Actions
+              className={classNames({
+                disabled: !canCancel,
+              })}
+            >
+              <Tooltip title={canCancel ? 'Speed up' : null}>
+                <img
+                  src="rabby-internal://assets/icons/home/action-speedup.svg"
+                  className="icon-speedup"
+                  onClick={handleClickSpeedUp}
+                />
+              </Tooltip>
+              <div className="divider" />
+              <Tooltip title={canCancel ? 'Cancel' : null}>
+                <img
+                  src="rabby-internal://assets/icons/home/action-cancel.svg"
+                  className="icon-cancel"
+                  onClick={handleClickCancel}
+                />
+              </Tooltip>
+            </Actions>
+          </Tooltip>
         </>
       )}
       {isCompleted && (

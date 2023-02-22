@@ -5,6 +5,7 @@ import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import AssociateDappModal from '@/renderer/components/AssociateDappModal';
 import TokenList from './TokenList';
 import ProtocolList from './ProtocolList';
+import { VIEW_TYPE } from '../hooks';
 
 const PortfolioWrapper = styled.div`
   background: rgba(255, 255, 255, 0.07);
@@ -13,6 +14,10 @@ const PortfolioWrapper = styled.div`
   border-radius: 8px;
   position: relative;
   flex: 1;
+  overflow: auto;
+  ::-webkit-scrollbar {
+    display: none;
+  }
   .icon-asset-arrow {
     position: absolute;
     top: -8px;
@@ -35,17 +40,17 @@ const PortfolioWrapper = styled.div`
         text-align: left;
         &:nth-child(1) {
           color: rgba(255, 255, 255, 0.8);
-          width: 25%;
+          width: 30%;
         }
         &:nth-child(2) {
-          width: 25%;
+          width: 24%;
         }
         &:nth-child(3) {
-          width: 25%;
+          width: 29%;
         }
         &:nth-child(4) {
           text-align: right;
-          width: 25%;
+          width: 17%;
         }
       }
     }
@@ -85,6 +90,7 @@ const PortfolioView = ({
   isLoadingProtocolHistory,
   supportHistoryChains,
   historyTokenDict,
+  view,
 }: {
   tokenList: TokenItem[];
   historyTokenMap: Record<string, TokenItem>;
@@ -96,12 +102,15 @@ const PortfolioView = ({
   >;
   selectChainServerId: string | null;
   tokenHidden: {
+    isShowExpand: boolean;
     isExpand: boolean;
     hiddenCount: number;
     hiddenUsdValue: number;
+    expandTokensUsdValueChange: number;
     setIsExpand(v: boolean): void;
   };
   protocolHidden: {
+    isShowExpand: boolean;
     isExpand: boolean;
     hiddenCount: number;
     hiddenUsdValue: number;
@@ -112,6 +121,7 @@ const PortfolioView = ({
   isLoadingProtocolHistory: boolean;
   supportHistoryChains: ServerChain[];
   historyTokenDict: Record<string, TokenItem>;
+  view: VIEW_TYPE;
 }) => {
   const [relateDappModalOpen, setRelateDappModalOpen] = useState(false);
   const [relateDappUrl, setRelateDappUrl] = useState('');
@@ -166,6 +176,7 @@ const PortfolioView = ({
         tokenHidden={tokenHidden}
         isLoadingTokenList={isLoadingTokenList}
         supportHistoryChains={supportHistoryChains}
+        showHistory={view === VIEW_TYPE.CHANGE}
       />
       <ProtocolList
         protocolList={protocolList}
@@ -176,6 +187,8 @@ const PortfolioView = ({
         supportHistoryChains={supportHistoryChains}
         historyTokenDict={historyTokenDict}
         isLoadingProtocolHistory={isLoadingProtocolHistory}
+        view={view}
+        protocolHidden={protocolHidden}
       />
       <AssociateDappModal
         protocolId={relateDappId}

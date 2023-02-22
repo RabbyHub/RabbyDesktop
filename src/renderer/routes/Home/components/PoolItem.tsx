@@ -12,27 +12,39 @@ import {
 } from '@/renderer/utils/number';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
-import BigNumber from 'bignumber.js';
 
 const PoolItemWrapper = styled.div`
   padding: 25px 25px 0 25px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  position: relative;
+  margin-bottom: 12px;
+  padding-top: 40px;
+  padding-bottom: 24px;
+  .tag {
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 12px;
+    line-height: 14px;
+    color: #ffffff;
+    padding: 5px 22px;
+    text-align: center;
+    top: 0;
+    left: 0;
+    border-top-left-radius: 12px;
+    border-bottom-right-radius: 4px;
+  }
   &:nth-last-child(1) {
-    border-bottom: none;
+    margin-bottom: 0;
   }
   &:hover {
-    border-radius: 8px;
-    border-color: transparent;
-    background: linear-gradient(91.16deg, #5e626b 2.51%, #4d515f 95.88%);
-    box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.07);
     .pool-item-footer {
       display: flex;
     }
     .number-change {
       opacity: 1;
-    }
-    .debt-tag {
-      display: block;
     }
     .token-price .price-change,
     .token-amount .price-change {
@@ -41,48 +53,17 @@ const PoolItemWrapper = styled.div`
   }
 `;
 
-const PoolItemFooter = styled.div`
-  position: relative;
-  height: 46px;
-  display: flex;
-  align-items: center;
-  font-weight: 510;
-  font-size: 12px;
-  line-height: 14px;
-  color: #ffffff;
-  display: none;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  .icon-pool {
-    margin-right: 8px;
-  }
-  .pool-contract {
-    margin-left: 4px;
-    color: #b8b8b8;
-  }
-  .pool-usd-value {
-    flex: 1;
-    text-align: right;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-weight: 700;
-    font-size: 13px;
-    line-height: 16px;
-    color: #ffffff;
-  }
-`;
-
 const TokenItemWrapper = styled.div`
   display: flex;
-  align-items: center;
-  height: 30px;
-  margin-bottom: 15px;
+  align-items: flex-start;
+  margin-bottom: 22px;
   .token-symbol {
     display: flex;
     font-weight: 500;
     font-size: 13px;
     line-height: 16px;
     color: #ffffff;
-    width: 25%;
+    width: 30%;
     overflow: hidden;
     text-overflow: ellipsis;
     align-items: center;
@@ -95,7 +76,7 @@ const TokenItemWrapper = styled.div`
     align-items: center;
     justify-content: flex-start;
     flex-wrap: wrap;
-    width: 25%;
+    width: 24%;
     font-weight: 500;
     font-size: 12px;
     line-height: 14px;
@@ -108,7 +89,6 @@ const TokenItemWrapper = styled.div`
     line-height: 12px;
     color: #c6c6c6;
     text-align: left;
-    display: none;
     &.is-loss {
       color: #ff6060;
     }
@@ -117,7 +97,7 @@ const TokenItemWrapper = styled.div`
     }
   }
   .token-amount {
-    width: 25%;
+    width: 29%;
     display: flex;
     justify-content: flex-start;
     flex-wrap: wrap;
@@ -129,7 +109,7 @@ const TokenItemWrapper = styled.div`
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
-    width: 25%;
+    width: 17%;
     font-weight: 700;
     font-size: 12px;
     line-height: 14px;
@@ -154,14 +134,15 @@ const TokenItemWrapper = styled.div`
     }
   }
   .debt-tag {
-    border: 1px solid #807f7f;
-    border-radius: 2px;
-    font-size: 12px;
-    line-height: 14px;
-    color: #959595;
-    padding: 0 6px;
-    margin-left: 8px;
-    display: none;
+    border: 1px solid #ff6060;
+    border-radius: 4px;
+    padding: 2px 5px;
+    font-weight: 700;
+    font-size: 10px;
+    line-height: 12px;
+    text-transform: uppercase;
+    color: #ff6060;
+    margin-left: 6px;
   }
   &:nth-last-child(1) {
     margin-bottom: 0;
@@ -305,12 +286,6 @@ const TokenItemComp = ({
     return token.amount < 0;
   }, [token]);
 
-  const priceChange = useMemo(() => {
-    if (!tokenHistory) return 0;
-    if (tokenHistory.price === 0) return token.price;
-    return (token.price - tokenHistory.price) / tokenHistory.price;
-  }, [token, tokenHistory]);
-
   const amountChange = useMemo(() => {
     if (!tokenHistory) return 0;
     if (isDebt) {
@@ -363,34 +338,27 @@ const TokenItemComp = ({
         <div className="symbol">{ellipsisTokenSymbol(token.symbol)}</div>
         {isDebt && <div className="debt-tag">Debt</div>}
       </div>
-      <div className="token-price">
-        ${formatPrice(token.price)}
-        {!isLoadingProtocolHistory && supportHistory && tokenHistory && (
-          <div
-            className={classNames('price-change', {
-              'is-loss': !isDebt && priceChange < 0,
-              'is-increase': !isDebt && priceChange > 0,
-            })}
-          >
-            {priceChange >= 0 ? '+' : '-'}
-            {Math.abs(priceChange * 100).toFixed(2)}%
-          </div>
-        )}
-      </div>
+      <div className="token-price">${formatPrice(token.price)}</div>
       <div className="token-amount">
         {`${formatAmount(token.amount)}`} {ellipsisTokenSymbol(token.symbol)}
-        {!isLoadingProtocolHistory && supportHistory && tokenHistory && (
-          <div
-            className={classNames('price-change', {
-              'is-loss': !isDebt && amountChange < 0,
-              'is-increase': !isDebt && amountChange > 0,
-            })}
-          >
-            {amountChange >= 0 ? '+' : '-'}
-            {`${formatNumber(Math.abs(amountChange))}`}{' '}
-            <span className="symbol">{ellipsisTokenSymbol(token.symbol)}</span>
-          </div>
-        )}
+        {!isLoadingProtocolHistory &&
+          supportHistory &&
+          tokenHistory &&
+          Math.abs(amountChange * token.price) >= 0.01 && (
+            <div
+              className={classNames('price-change', {
+                'is-loss': !isDebt && amountChange < 0,
+                'is-increase': !isDebt && amountChange > 0,
+              })}
+            >
+              {amountChange >= 0 ? '+' : '-'}
+              {`${formatNumber(Math.abs(amountChange))}`}{' '}
+              <span className="symbol">
+                {ellipsisTokenSymbol(token.symbol)}
+              </span>
+              {` (${formatUsdValue(Math.abs(amountChange * token.price))})`}
+            </div>
+          )}
       </div>
       <div className="token-usd-value">
         {`${formatUsdValue(usdValue || '0')}`}
@@ -430,14 +398,9 @@ const PoolItem = ({
   isLoadingProtocolHistory: boolean;
   historyTokenDict: Record<string, TokenItem>;
 }) => {
-  const totalUsdValue = useMemo(() => {
-    return (portfolio.asset_token_list || []).reduce((sum, item) => {
-      return sum.plus(new BigNumber(item.amount).times(item.price));
-    }, new BigNumber(0));
-  }, [portfolio]);
-
   return (
     <PoolItemWrapper>
+      <div className="tag">{portfolio.name}</div>
       {portfolio.asset_token_list?.map((token, index) => (
         <TokenItemComp
           // eslint-disable-next-line react/no-array-index-key
@@ -454,17 +417,6 @@ const PoolItem = ({
           isLoadingProtocolHistory={isLoadingProtocolHistory}
         />
       ))}
-      <PoolItemFooter className="pool-item-footer">
-        <img
-          className="icon-pool"
-          src="rabby-internal://assets/icons/home/pool.svg"
-        />
-        {portfolio.name}
-        <span className="pool-contract">({portfolio.pool.controller})</span>
-        <span className="pool-usd-value">
-          ${formatNumber(totalUsdValue.toFixed())}
-        </span>
-      </PoolItemFooter>
     </PoolItemWrapper>
   );
 };

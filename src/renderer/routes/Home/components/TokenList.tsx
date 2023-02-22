@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import classNames from 'classnames';
 import { Skeleton } from 'antd';
 import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
-import { formatNumber } from '@/renderer/utils/number';
+import { formatNumber, formatUsdValue } from '@/renderer/utils/number';
 import { ReceiveModal } from '@/renderer/components/ReceiveModal';
 import { useCallback, useState } from 'react';
 import { getChain } from '@/renderer/utils';
@@ -28,6 +28,18 @@ const ExpandItem = styled.div`
     text-align: right;
     flex: 1;
     color: #ffffff;
+    .usd-value-change {
+      font-size: 10px;
+      line-height: 12px;
+      color: rgba(255, 255, 255, 0.5);
+      font-weight: normal;
+      &.is-loss {
+        color: #ff6060;
+      }
+      &.is-increase {
+        color: #2ed4a3;
+      }
+    }
   }
   .icon-expand-arrow {
     width: 10px;
@@ -53,17 +65,21 @@ const TokenList = ({
   historyTokenMap,
   isLoadingTokenList,
   supportHistoryChains,
+  showHistory,
 }: {
   tokenList: TokenItem[];
   historyTokenMap: Record<string, TokenItem>;
   isLoadingTokenList: boolean;
   supportHistoryChains: ServerChain[];
   tokenHidden: {
+    isShowExpand: boolean;
     isExpand: boolean;
     hiddenCount: number;
     hiddenUsdValue: number;
+    expandTokensUsdValueChange: number;
     setIsExpand(v: boolean): void;
   };
+  showHistory: boolean;
 }) => {
   const handleClickExpandToken = () => {
     tokenHidden.setIsExpand(!tokenHidden.isExpand);
@@ -146,12 +162,16 @@ const TokenList = ({
           <div>Asset</div>
           <div>Price</div>
           <div>Amount</div>
-          <div>USD-Value</div>
+          <div>USD Value</div>
         </li>
         {tokenList.map((token) => (
           <TokenItemComp
             token={token}
-            historyToken={historyTokenMap[`${token.chain}-${token.id}`]}
+            historyToken={
+              showHistory
+                ? historyTokenMap[`${token.chain}-${token.id}`]
+                : undefined
+            }
             key={`${token.chain}-${token.id}`}
             supportHistory={
               !!supportHistoryChains.find((item) => item.id === token.chain)
@@ -159,7 +179,7 @@ const TokenList = ({
             onReceiveClick={handleReceiveClick}
           />
         ))}
-        {tokenHidden.hiddenCount > 0 && (
+        {tokenHidden.hiddenCount > 0 && tokenHidden.isShowExpand && (
           <ExpandItem onClick={handleClickExpandToken}>
             <img
               className="icon-hide-assets"
@@ -174,9 +194,25 @@ const TokenList = ({
                 flip: !tokenHidden.isExpand,
               })}
             />
-            <span className="hide-assets-usd-value">
-              ${formatNumber(tokenHidden.hiddenUsdValue)}
-            </span>
+            <div className="hide-assets-usd-value">
+              {formatUsdValue(tokenHidden.hiddenUsdValue)}
+              {showHistory && (
+                <div
+                  className={classNames('usd-value-change', {
+                    'is-loss': tokenHidden.expandTokensUsdValueChange < 0,
+                    'is-increase': tokenHidden.expandTokensUsdValueChange > 0,
+                  })}
+                >
+                  {`${formatNumber(
+                    (tokenHidden.expandTokensUsdValueChange /
+                      tokenHidden.hiddenUsdValue) *
+                      100
+                  )}% (${formatUsdValue(
+                    tokenHidden.expandTokensUsdValueChange
+                  )})`}
+                </div>
+              )}
+            </div>
           </ExpandItem>
         )}
       </ul>

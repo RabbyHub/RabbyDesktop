@@ -1,6 +1,11 @@
+/* eslint-disable import/no-cycle */
+/* eslint-disable no-multi-assign */
 import { CHAINS, CHAINS_ENUM } from '@debank/common';
+import { TokenItem } from '@debank/rabby-api/dist/types';
 import { Contract, providers } from 'ethers';
 import { hexToString } from 'web3-utils';
+import TokensIcons from '../routes/Home/components/TokenIcons';
+import { formatUsdValue, splitNumberByStep } from './number';
 
 export const ellipsisTokenSymbol = (text: string, length = 5) => {
   if (text.length <= length) return text;
@@ -259,3 +264,54 @@ export const validateToken = async <
     return false;
   }
 };
+
+export function wrapUrlInImg(url: string, alt?: string, size?: number) {
+  return (
+    <img
+      src={url}
+      style={{ width: size || 20, height: size || 20 }}
+      alt={alt || ''}
+      onError={(ev) => {
+        // @ts-ignore
+        ev.target.src =
+          'rabby-internal://assets/icons/common/token-default.svg';
+      }}
+    />
+  );
+}
+
+export const wrapUrlInImgOrDefault = (url?: string, size?: number) => {
+  return url ? (
+    wrapUrlInImg(url, undefined, size)
+  ) : (
+    <img
+      src="rabby-internal://assets/icons/common/token-default.svg"
+      style={{ width: size || 20, height: size || 20 }}
+    />
+  );
+};
+
+export function getTokens(tokens: TokenItem[] = [], separator = ' + ') {
+  const tokenStr = tokens
+    .filter((item) => !!item)
+    .map((token) => token.symbol)
+    .join(separator);
+  const icon = <TokensIcons icons={tokens.map((v) => v?.logo_url)} />;
+  return (
+    <div className="flex items-center flex-wrap">
+      {icon}
+      <div>{tokenStr}</div>
+    </div>
+  );
+}
+
+export function getUsd(tokens: TokenItem[] = []) {
+  // 沒有价格
+  if (tokens.every((v) => !v.price)) return '-';
+  return `${formatUsdValue(
+    tokens.reduce((sum, curr) => {
+      const res = (sum += (curr.price || 0) * curr.amount);
+      return res;
+    }, 0)
+  )}`;
+}

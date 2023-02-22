@@ -6,34 +6,65 @@ import { TokenItem } from '@debank/rabby-api/dist/types';
 import { useProtocolDappsBinding } from '@/renderer/hooks/useDappsMngr';
 import { IconWithChain } from '@/renderer/components/TokenWithChain';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
-// import { hasSameOrigin } from '@/isomorphic/url';
 import { useOpenDapp } from '@/renderer/utils/react-router';
+import { formatUsdValue } from '@/renderer/utils/number';
 import PoolItem, { LoadingPoolItem } from './PoolItem';
 
 const ProtocolItemWrapper = styled.div`
   margin-bottom: 27px;
+  /* .protocol-list {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+  } */
+  .tag {
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 12px;
+    line-height: 14px;
+    color: #ffffff;
+    padding: 5px 22px;
+    text-align: center;
+    top: 0;
+    left: 0;
+    border-top-left-radius: 12px;
+    border-bottom-right-radius: 4px;
+  }
+`;
+
+const ProtocolHeader = styled.div`
+  display: flex;
+  margin-bottom: 20px;
+  padding-left: 22px;
+  padding-right: 22px;
+  align-items: flex-end;
+  .protocol-name {
+    margin-left: 8px;
+    font-weight: 700;
+    font-size: 12px;
+    line-height: 14px;
+    color: #fff;
+    text-transform: uppercase;
+  }
+  .token-with-chain {
+    .chain-logo {
+      width: 8px;
+      height: 8px;
+      bottom: -2.5px;
+      right: -2.5px;
+    }
+  }
+  .protocol-usd {
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 18px;
+    text-align: right;
+    color: #ffffff;
+  }
   .protocol-info {
     display: flex;
-    padding-left: 25px;
-    margin-bottom: 10px;
     align-items: center;
-    .protocol-name {
-      margin-left: 8px;
-      font-weight: 700;
-      font-size: 12px;
-      line-height: 14px;
-      color: rgba(169, 173, 185, 0.6);
-      text-transform: uppercase;
-    }
-    .token-with-chain {
-      opacity: 0.6;
-      .chain-logo {
-        width: 8px;
-        height: 8px;
-        bottom: -2.5px;
-        right: -2.5px;
-      }
-    }
     .icon-relate {
       cursor: pointer;
       margin-left: 8px;
@@ -77,10 +108,6 @@ const ProtocolItemWrapper = styled.div`
         display: flex;
       }
     }
-  }
-  .protocol-list {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
   }
 `;
 
@@ -139,11 +166,7 @@ const ProtocolItem = ({
 
   return (
     <ProtocolItemWrapper>
-      <div
-        className={classNames('protocol-info', {
-          'has-bind': hasBinded,
-        })}
-      >
+      <ProtocolHeader>
         <IconWithChain
           iconUrl={protocol.logo_url}
           chainServerId={protocol.chain}
@@ -151,36 +174,47 @@ const ProtocolItem = ({
           height="14px"
           noRound
         />
-        <span className="protocol-name" onClick={handleClickProtocolName}>
-          {protocol.name}
-        </span>
-        {!hasBinded && (
-          <img
-            src="rabby-internal://assets/icons/home/dapp-relate.svg"
-            className="icon-relate"
-            onClick={() => onClickRelate(protocol)}
-          />
-        )}
-        {hasBinded && (
-          <div className="protocol-bind">
-            <span className="protocol-dapp">{bindUrl}</span>
-            {protocolDappsBinding[protocol.id] ? (
-              <img
-                src="rabby-internal://assets/icons/home/bind-edit.svg"
-                alt=""
-                className="icon-edit"
-                onClick={() => onClickRelate(protocol)}
-              />
-            ) : (
+        <div className="flex-1">
+          <div
+            className={classNames('protocol-info', {
+              'has-bind': hasBinded,
+            })}
+          >
+            <span className="protocol-name" onClick={handleClickProtocolName}>
+              {protocol.name}
+            </span>
+            {!hasBinded && (
               <img
                 src="rabby-internal://assets/icons/home/dapp-relate.svg"
                 className="icon-relate"
                 onClick={() => onClickRelate(protocol)}
               />
             )}
+            {hasBinded && (
+              <div className="protocol-bind">
+                <span className="protocol-dapp">{bindUrl}</span>
+                {protocolDappsBinding[protocol.id] ? (
+                  <img
+                    src="rabby-internal://assets/icons/home/bind-edit.svg"
+                    alt=""
+                    className="icon-edit"
+                    onClick={() => onClickRelate(protocol)}
+                  />
+                ) : (
+                  <img
+                    src="rabby-internal://assets/icons/home/dapp-relate.svg"
+                    className="icon-relate"
+                    onClick={() => onClickRelate(protocol)}
+                  />
+                )}
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+        <span className="protocol-usd">
+          {formatUsdValue(protocol.usd_value)}
+        </span>
+      </ProtocolHeader>
       <div className="protocol-list">
         {protocol.portfolio_item_list.map((portfolio) => (
           <PoolItem

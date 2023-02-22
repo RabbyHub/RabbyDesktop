@@ -2,7 +2,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import classNames from 'classnames';
-import { TokenItem } from '@debank/rabby-api/dist/types';
+import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
 import { sortBy } from 'lodash';
 import { ellipsis } from '@/renderer/utils/address';
 import { formatNumber } from '@/renderer/utils/number';
@@ -12,14 +12,16 @@ import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { useBalanceValue } from '@/renderer/hooks/useCurrentBalance';
 import useCurve from '@/renderer/hooks/useCurve';
 import useHistoryTokenList from '@/renderer/hooks/useHistoryTokenList';
-import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import useHistoryProtocol, {
   DisplayProtocol,
 } from '@/renderer/hooks/useHistoryProtocol';
 import { toastCopiedWeb3Addr } from '@/renderer/components/TransparentToast';
 import { copyText } from '@/renderer/utils/clipboard';
-
+import BigNumber from 'bignumber.js';
 import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
+import { useSwitchView, VIEW_TYPE } from './hooks';
+
 import ChainList from './components/ChainList';
 import Curve from './components/Curve';
 import PortfolioView from './components/PortfolioView';
@@ -30,7 +32,7 @@ const HomeBody = styled.div`
   padding-top: 24px;
   padding-left: 28px;
   padding-right: 28px;
-  min-height: calc(100vh - 64px);
+  height: calc(100vh - 64px);
 `;
 
 const HomeWrapper = styled.div`
@@ -101,6 +103,7 @@ const HomeWrapper = styled.div`
           }
         }
         &.circling {
+          display: block;
           animation: spining 1.5s infinite linear;
         }
       }
@@ -109,6 +112,24 @@ const HomeWrapper = styled.div`
           display: block;
         }
       }
+    }
+  }
+`;
+
+const SwitchViewWrapper = styled.div`
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 4px;
+  display: flex;
+  justify-content: space-between;
+  .item {
+    padding: 5px 10px;
+    font-size: 12px;
+    color: #ffffff;
+    cursor: pointer;
+    border-radius: 4px;
+    &.active {
+      background: rgba(255, 255, 255, 0.06);
     }
   }
 `;
@@ -127,7 +148,11 @@ const calcIsShowExpand = (tokens: { usd_value?: number }[]) => {
   }
   return true;
 };
-const useExpandList = (tokens: TokenItem[]) => {
+const useExpandList = (
+  tokens: TokenItem[],
+  historyTokenMap: null | Record<string, TokenItem>,
+  supportHistoryChains: ServerChain[]
+) => {
   const [isExpand, setIsExpand] = useState(false);
   const filterPrice = useMemo(() => calcFilterPrice(tokens), [tokens]);
   const isShowExpand = useMemo(() => calcIsShowExpand(tokens), [tokens]);
@@ -152,16 +177,41 @@ const useExpandList = (tokens: TokenItem[]) => {
       }).length,
     };
   }, [tokens, filterPrice, isShowExpand]);
-
   const filterList = useMemo(() => {
     if (!isShowExpand) {
       return tokens;
     }
-    const result = isExpand
-      ? tokens
-      : tokens.filter((item) => (item.amount * item.price || 0) >= filterPrice);
-    return result;
+    if (isExpand) {
+      return tokens;
+    }
+    return tokens.filter(
+      (item) => (item.amount * item.price || 0) >= filterPrice
+    );
   }, [isExpand, tokens, isShowExpand, filterPrice]);
+  const omitTokens = tokens.filter(
+    (item) => (item.amount * item.price || 0) < filterPrice
+  );
+  const usdValueChange = historyTokenMap
+    ? omitTokens.reduce((sum, item) => {
+        const key = `${item.chain}-${item.id}`;
+        const history = historyTokenMap[key];
+        if (!history) {
+          return sum + new BigNumber(item.amount).times(item.price).toNumber();
+        }
+        if (supportHistoryChains.find((chain) => chain.id === item.chain)) {
+          return (
+            sum +
+            (new BigNumber(item.amount).times(item.price).toNumber() -
+              new BigNumber(history.amount).times(history.price).toNumber())
+          );
+        }
+        return (
+          sum +
+          (new BigNumber(item.amount).times(item.price).toNumber() -
+            new BigNumber(item.amount).times(history.price).toNumber())
+        );
+      }, 0)
+    : 0;
 
   return {
     isExpand,
@@ -171,13 +221,13 @@ const useExpandList = (tokens: TokenItem[]) => {
     isShowExpand,
     totalHidden,
     totalHiddenCount,
+    usdValueChange,
   };
 };
 const useExpandProtocolList = (protocols: DisplayProtocol[]) => {
   const [isExpand, setIsExpand] = useState(false);
   const filterPrice = useMemo(() => calcFilterPrice(protocols), [protocols]);
   const isShowExpand = useMemo(() => calcIsShowExpand(protocols), [protocols]);
-
   const { totalHidden, totalHiddenCount } = useMemo(() => {
     return {
       totalHidden: protocols.reduce((t, item) => {
@@ -225,13 +275,13 @@ const Home = () => {
   const [usedChainList, setUsedChainList] = useState<
     DisplayChainWithWhiteLogo[]
   >([]);
-
+  const { currentView, switchView } = useSwitchView();
   const {
     tokenList,
     historyTokenMap,
     isLoading: isLoadingTokenList,
     isLoadingRealTime: isLoadingRealTimeTokenList,
-  } = useHistoryTokenList(currentAccount?.address, updateNonce);
+  } = useHistoryTokenList(currentAccount?.address, updateNonce, currentView);
 
   const filterTokenList = useMemo(() => {
     const list: TokenItem[] = selectChainServerId
@@ -249,15 +299,20 @@ const Home = () => {
     isLoadingRealTime: isLoadingRealTimeProtocol,
     supportHistoryChains,
     historyTokenDict,
-  } = useHistoryProtocol(currentAccount?.address, updateNonce);
-
+  } = useHistoryProtocol(currentAccount?.address, updateNonce, currentView);
   const {
     filterList: displayTokenList,
+    isShowExpand: isShowTokenExpand,
     isExpand: isTokenExpand,
     totalHidden: tokenHiddenUsdValue,
     totalHiddenCount: tokenHiddenCount,
     setIsExpand: setIsTokenExpand,
-  } = useExpandList(filterTokenList);
+    usdValueChange: expandTokensUsdValueChange,
+  } = useExpandList(
+    filterTokenList,
+    currentView === VIEW_TYPE.DEFAULT ? null : historyTokenMap,
+    supportHistoryChains
+  );
 
   const totalBalance = useTotalBalance(tokenList, protocolList);
 
@@ -276,12 +331,30 @@ const Home = () => {
     return sortBy(
       sortBy(
         list.map((item) => {
-          item.portfolio_item_list = item.portfolio_item_list.map((i) => ({
-            ...i,
-            asset_token_list: sortBy(i.asset_token_list, (j) => {
-              return j.amount * j.price;
-            }).reverse(),
-          }));
+          item.portfolio_item_list = item.portfolio_item_list.map((i) => {
+            const assetList = i.asset_token_list;
+            let positiveList: TokenItem[] = [];
+            let negativeList: TokenItem[] = [];
+            assetList.forEach((j) => {
+              if (j.amount < 0) {
+                negativeList.push(j);
+              } else {
+                positiveList.push(j);
+              }
+            });
+            positiveList = sortBy(
+              positiveList,
+              (j) => j.amount * j.price
+            ).reverse();
+            negativeList = sortBy(
+              negativeList,
+              (j) => Math.abs(j.amount) * j.price
+            ).reverse();
+            return {
+              ...i,
+              asset_token_list: [...positiveList, ...negativeList],
+            };
+          });
           return {
             ...item,
             portfolio_item_list: sortBy(item.portfolio_item_list, (i) => {
@@ -298,6 +371,7 @@ const Home = () => {
   }, [protocolList, selectChainServerId]);
   const {
     filterList: displayProtocolList,
+    isShowExpand: isShowProtocolExpand,
     isExpand: isProtocolExpand,
     totalHidden: protocolHiddenUsdValue,
     totalHiddenCount: protocolHiddenCount,
@@ -310,6 +384,7 @@ const Home = () => {
     setUsedChainList(chainList.map((chain) => formatChain(chain)));
     setIsProtocolExpand(false);
     setIsTokenExpand(false);
+    switchView(VIEW_TYPE.DEFAULT);
   };
 
   const handleClickRefresh = () => {
@@ -319,15 +394,6 @@ const Home = () => {
   useEffect(() => {
     init();
   }, [currentAccount]);
-
-  useEffect(() => {
-    if (!currentAccount) return;
-    updateBalanceValue(totalBalance);
-    walletController.updateAddressBalanceCache(
-      currentAccount.address,
-      totalBalance
-    );
-  }, [totalBalance, currentAccount]);
 
   const { showZSubview } = useZPopupLayerOnMain();
 
@@ -393,10 +459,30 @@ const Home = () => {
               </div>
             ) : null}
           </div>
-          <ChainList
-            chainBalances={usedChainList}
-            onChange={setSelectChainServerId}
-          />
+          <div className="flex justify-between items-center">
+            <ChainList
+              chainBalances={usedChainList}
+              onChange={setSelectChainServerId}
+            />
+            <SwitchViewWrapper>
+              <div
+                className={classNames('item', {
+                  active: currentView === VIEW_TYPE.DEFAULT,
+                })}
+                onClick={() => switchView(VIEW_TYPE.DEFAULT)}
+              >
+                Default
+              </div>
+              <div
+                className={classNames('item', {
+                  active: currentView === VIEW_TYPE.CHANGE,
+                })}
+                onClick={() => switchView(VIEW_TYPE.CHANGE)}
+              >
+                Change
+              </div>
+            </SwitchViewWrapper>
+          </div>
         </div>
         <PortfolioView
           tokenList={displayTokenList}
@@ -409,9 +495,12 @@ const Home = () => {
             isExpand: isTokenExpand,
             hiddenCount: tokenHiddenCount,
             hiddenUsdValue: tokenHiddenUsdValue,
+            expandTokensUsdValueChange,
             setIsExpand: setIsTokenExpand,
+            isShowExpand: isShowTokenExpand,
           }}
           protocolHidden={{
+            isShowExpand: isShowProtocolExpand,
             isExpand: isProtocolExpand,
             hiddenCount: protocolHiddenCount,
             hiddenUsdValue: protocolHiddenUsdValue,
@@ -422,6 +511,7 @@ const Home = () => {
           isLoadingProtocolHistory={isLoadingProtocolHistory}
           supportHistoryChains={supportHistoryChains}
           historyTokenDict={historyTokenDict}
+          view={currentView}
         />
       </HomeWrapper>
       <RightBar />
