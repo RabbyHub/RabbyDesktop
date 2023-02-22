@@ -345,7 +345,13 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
         });
         return null;
       }
-      if (data && data.inputOrigin !== data.finalOrigin) {
+      console.log(data);
+      if (
+        data &&
+        data.inputOrigin !== data.finalOrigin &&
+        canoicalizeDappUrl(data.inputOrigin).secondaryDomain !==
+          canoicalizeDappUrl(data.finalOrigin).secondaryDomain
+      ) {
         setState({
           validateStatus: 'error',
           help: (
