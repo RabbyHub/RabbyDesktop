@@ -434,14 +434,22 @@ const Transactions = () => {
     <TransactionWrapper>
       <TransactionList>
         {pendingTxs.map((tx) => {
-          return <TransactionItem item={tx} key={`${tx.chain}-${tx.id}`} />;
+          return (
+            <TransactionItem
+              item={tx}
+              key={`${tx.chain}-${tx.id}`}
+              canCancel={
+                minBy(
+                  pendingTxs.filter((i) => i.chain === tx.chain),
+                  (i) => i.rawTx?.nonce
+                )?.rawTx?.nonce === tx.rawTx?.nonce
+              }
+            />
+          );
         })}
         {mergedRecentTxs.map((tx) => {
           return <TransactionItem item={tx} key={`${tx.chain}-${tx.id}`} />;
         })}
-        {pendingTxs.length + mergedRecentTxs.length < 3 && (
-          <Empty text="No more transaction in last 24 hours" />
-        )}
       </TransactionList>
       <ViewAllButton
         onClick={() => {

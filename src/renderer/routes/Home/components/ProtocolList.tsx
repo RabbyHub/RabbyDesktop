@@ -1,6 +1,7 @@
+import styled from 'styled-components';
+import classNames from 'classnames';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
-import styled from 'styled-components';
 import { VIEW_TYPE } from '../hooks';
 import HistoryProtocolItem, {
   LoadingProtocolItem,
@@ -14,14 +15,19 @@ const Expand = styled.div`
   text-align: center;
   color: rgba(255, 255, 255, 0.3);
   justify-content: center;
+  cursor: pointer;
   .show-all {
     color: rgba(255, 255, 255, 0.5);
     margin-left: 2px;
     display: flex;
     align-items: center;
-    cursor: pointer;
     .icon-triangle {
+      transform: rotate(0deg);
+      transition: transform 0.3s;
       margin-left: 7px;
+      &.flip {
+        transform: rotate(180deg);
+      }
     }
   }
 `;
@@ -93,17 +99,20 @@ const ProtocolList = ({
           />
         ))}
       {protocolHidden.hiddenCount > 0 && protocolHidden.isShowExpand && (
-        <Expand>
-          Protocols with small deposits are not displayed.{' '}
-          <div
-            className="show-all"
-            onClick={() => {
-              protocolHidden.setIsExpand(!protocolHidden.isExpand);
-            }}
-          >
-            Show all
+        <Expand
+          onClick={() => {
+            protocolHidden.setIsExpand(!protocolHidden.isExpand);
+          }}
+        >
+          {protocolHidden.isExpand
+            ? 'Hide protocols with small deposits.'
+            : 'Protocols with small deposits are not displayed.'}{' '}
+          <div className="show-all">
+            {!protocolHidden.isExpand && 'Show all'}
             <img
-              className="icon-triangle"
+              className={classNames('icon-triangle', {
+                flip: protocolHidden.isExpand,
+              })}
               src="rabby-internal://assets/icons/home/triange.svg"
             />
           </div>
