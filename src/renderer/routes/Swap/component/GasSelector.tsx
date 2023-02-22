@@ -1,12 +1,13 @@
 import clsx from 'clsx';
 import React, { useRef, useMemo } from 'react';
-import { Input, InputRef } from 'antd';
+import { InputRef } from 'antd';
 import BigNumber from 'bignumber.js';
 import { GasLevel, TokenItem } from '@debank/rabby-api/dist/types';
 import { GAS_LEVEL_TEXT } from '@/isomorphic/constants';
 import { useToggle } from 'react-use';
 import IconTipDownArrow from '@/../assets/icons/swap/arrow-tips-down.svg?rc';
 import styled from 'styled-components';
+import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import { SlippageItem } from './Slippage';
 
 const SectionStyled = styled.section`
@@ -186,7 +187,7 @@ export const GasSelector = ({
             </div>
             <div className="gas-num">
               {item.level === 'custom' ? (
-                <Input
+                <RabbyInput
                   className="input"
                   value={
                     selectGas?.level === 'custom'

@@ -1,11 +1,11 @@
 import { useCurrentConnection } from '@/renderer/hooks/rabbyx/useConnection';
 import { usePopupWinInfo } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { useBodyClassNameOnMounted } from '@/renderer/hooks/useMountedEffect';
-import { Input } from 'antd';
 import { useCallback, useRef } from 'react';
 import clsx from 'clsx';
 import { useScroll } from 'react-use';
 import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
+import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import styles from './index.module.less';
 
 type OnPinnedChanged = (
@@ -93,7 +93,7 @@ function SwitchChainPage({
           [styles.show]: y > 40 || searchedChains.length > 0,
         })}
       >
-        <Input
+        <RabbyInput
           value={searchInput}
           placeholder="Search chain"
           size="large"

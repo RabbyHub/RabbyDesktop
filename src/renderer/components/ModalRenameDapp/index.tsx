@@ -1,12 +1,13 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import classnames from 'classnames';
-import { Input, ModalProps, Button } from 'antd';
+import { ModalProps, Button } from 'antd';
 import { useDapps } from 'renderer/hooks/useDappsMngr';
 import { isValidDappAlias } from '../../../isomorphic/dapp';
 
 import styles from './index.module.less';
 import { DappFavicon } from '../DappFavicon';
 import { Modal } from '../Modal/Modal';
+import RabbyInput from '../AntdOverwrite/Input';
 
 const ALIAS_LIMIT = 15;
 
@@ -86,7 +87,7 @@ export default function ModalRenameDapp({
             {dapp?.origin?.replace(/^\w+:\/\//, '')}
           </div>
           <div className={styles.modifyWrapper}>
-            <Input
+            <RabbyInput
               className={styles.aliasInput}
               value={alias}
               onChange={onAliasChange}

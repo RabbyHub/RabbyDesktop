@@ -13,9 +13,10 @@ import {
 } from '@/renderer/utils/constant';
 import { useAddressSource } from '@/renderer/hooks/rabbyx/useAddressSource';
 import QRCode from 'qrcode.react';
-import { Input, Popover } from 'antd';
+import { Popover } from 'antd';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { useForwardTo } from '@/renderer/hooks/useViewsMessage';
+import RabbyInput from '../AntdOverwrite/Input';
 import styles from './AddressManagementDrawer.module.less';
 import { AccountDetailItem } from './AccountDetailItem';
 import { useAccountInfo } from './useAccountInfo';
@@ -93,7 +94,7 @@ export const AccountDetail: React.FC<Props> = ({
         />
         <AccountDetailItem headline="Address Note">
           {editing ? (
-            <Input
+            <RabbyInput
               className="alias-input"
               defaultValue={aliasInput}
               onBlur={updateAliasName}

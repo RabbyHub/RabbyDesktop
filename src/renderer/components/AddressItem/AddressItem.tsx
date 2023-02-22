@@ -1,7 +1,8 @@
 import { useAddressManagement } from '@/renderer/hooks/rabbyx/useAddressManagement';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
-import { Button, Input } from 'antd';
+import { Button } from 'antd';
 import React from 'react';
+import RabbyInput from '../AntdOverwrite/Input';
 import styles from './AddressItem.module.less';
 
 interface Props {
@@ -37,7 +38,7 @@ export const AddressItem: React.FC<Props> = ({ address, type, brandName }) => {
     <div className={styles.AddressItem}>
       <div className={styles.name}>
         {isEdit ? (
-          <Input
+          <RabbyInput
             value={aliasName}
             onChange={(e) => setAliasName(e.target.value)}
             onBlur={onUpdateAliasName}

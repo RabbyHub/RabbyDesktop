@@ -1,10 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Form, Input, message } from 'antd';
+import { Form, message } from 'antd';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { useAccountToDisplay } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
 import { useAddressManagement } from '@/renderer/hooks/rabbyx/useAddressManagement';
+import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import ImportView from '../Import/components/ImportView/ImportView';
 import BlockButton from '../Import/components/BlockButton/BlockButton';
 import styles from './ImportByPrivateKey.module.less';
@@ -67,7 +68,7 @@ const ImportByPrivateKey = () => {
               },
             ]}
           >
-            <Input.TextArea
+            <RabbyInput.TextArea
               className={styles.input}
               spellCheck={false}
               placeholder="Enter your Private Key"

@@ -1,7 +1,8 @@
 import { UIContactBookItem } from '@/isomorphic/types/contact';
+import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import { Modal } from '@/renderer/components/Modal/Modal';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
-import { Button, Input } from 'antd';
+import { Button } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
@@ -104,7 +105,7 @@ export const ContactEditModal = ({
       onCancel={onCancel}
       title="Edit address note"
     >
-      <Input
+      <RabbyInput
         className="nameInput"
         value={name}
         onChange={(e) => setName(e.target.value)}

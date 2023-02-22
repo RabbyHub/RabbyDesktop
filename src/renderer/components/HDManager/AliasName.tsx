@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Input } from 'antd';
 import React from 'react';
+import RabbyInput from '../AntdOverwrite/Input';
 
 interface Props {
   address: string;
@@ -75,7 +75,7 @@ export const AliasName: React.FC<Props> = ({
     <div className="AliasName">
       {hover || focus ? (
         <div className="input-group" onBlur={onClickCheck}>
-          <Input
+          <RabbyInput
             className="alias-input"
             defaultValue={value}
             onBlur={onChangeAliasName}

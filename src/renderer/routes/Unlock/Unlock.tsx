@@ -1,3 +1,4 @@
+import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import { useUnlocked } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { Button, Col, Input, message, Row, Form } from 'antd';
@@ -44,7 +45,7 @@ export const Unlock: React.FC = () => {
           <h1 className={styles.title}>Rabby Wallet Desktop</h1>
           <Form form={form} onFinish={onNext}>
             <Form.Item name="password">
-              <Input
+              <RabbyInput
                 className={styles.input}
                 placeholder="Enter the Password to Unlock"
                 type="password"
