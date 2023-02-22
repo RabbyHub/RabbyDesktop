@@ -275,9 +275,9 @@ onIpcMainEvent('__internal_rpc:trezor-like-window:click-close', async (evt) => {
 
   const { backgroundWebContents } = await getRabbyExtViews();
 
-  backgroundWebContents.executeJavaScript(`window._TrezorConnect.dispose();`);
+  backgroundWebContents.executeJavaScript(`window._TrezorConnect.cancel();`);
 
-  backgroundWebContents.executeJavaScript(`window._OnekeyConnect.dispose();`);
+  backgroundWebContents.executeJavaScript(`window._OnekeyConnect.cancel();`);
 
   tabbedWin.tabs.destroy();
 });
