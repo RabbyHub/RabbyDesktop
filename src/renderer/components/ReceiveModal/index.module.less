@@ -5,15 +5,18 @@
     }
   }
   .receive {
-    padding: 30px 30px 33px 30px;
+    padding: 20px 40px 33px 40px;
     text-align: center;
     color: #fff;
 
     .account {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: inline-flex;
       margin-bottom: 48px;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 6px;
+      padding: 15px 38px;
+      max-width: 100%;
+      overflow: hidden;
 
       &Icon {
         width: 27px;
@@ -40,6 +43,13 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+      }
+      &Type {
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 14px;
+        color: #ffffff;
+        opacity: 0.6;
       }
     }
 
