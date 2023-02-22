@@ -10,7 +10,8 @@ const webviewWebPreferencesAttr = stringifyWebPreferences({
 });
 
 const Container = styled.div`
-  &.preview-webview-load-failed > webview {
+  &.preview-webview-load-failed > webview,
+  &.preview-webview-loading > webview {
     display: none;
   }
 `;
@@ -18,6 +19,7 @@ const Container = styled.div`
 export function PreviewWebview({
   containerClassName,
   loadFailedView,
+  loadingView,
   ...props
 }: Omit<
   React.DetailedHTMLProps<
@@ -27,6 +29,7 @@ export function PreviewWebview({
   'partition' | 'webpreferences'
 > & {
   loadFailedView?: React.ReactNode;
+  loadingView?: React.ReactNode;
   containerClassName?: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -48,6 +51,7 @@ export function PreviewWebview({
   //   (webview as HTMLElement).style.transform = `scale(${scale})`;
   // }, []);
 
+  const [isLoading, setIsLoading] = useState(false);
   const [isLoadFailed, setIsLoadFailed] = useState(false);
   // did-fail-load
   useEffect(() => {
@@ -57,11 +61,24 @@ export function PreviewWebview({
     if (!webview) return;
 
     const handleDidFailLoad = (event: Electron.Event) => {
+      setIsLoading(false);
       setIsLoadFailed(true);
     };
 
+    const loadstart = () => {
+      setIsLoading(true);
+    };
+
+    const loadstop = () => {
+      setIsLoading(false);
+    };
+
+    webview.addEventListener('did-start-loading', loadstart);
+    webview.addEventListener('did-stop-loading', loadstop);
     webview.addEventListener('did-fail-load', handleDidFailLoad);
     return () => {
+      webview.removeEventListener('did-start-loading', loadstart);
+      webview.removeEventListener('did-stop-loading', loadstop);
       webview.removeEventListener('did-fail-load', handleDidFailLoad);
     };
   }, []);
@@ -72,7 +89,8 @@ export function PreviewWebview({
     <Container
       className={classNames(
         containerClassName,
-        isLoadFailed && 'preview-webview-load-failed'
+        isLoadFailed && 'preview-webview-load-failed',
+        isLoading && 'preview-webview-loading'
       )}
       ref={containerRef}
     >
@@ -83,7 +101,8 @@ export function PreviewWebview({
         partition="checkingView"
         webpreferences={webviewWebPreferencesAttr}
       />
-      {isLoadFailed ? loadFailedView || null : null}
+      {isLoading ? loadingView : null}
+      {!isLoading && isLoadFailed ? loadFailedView || null : null}
     </Container>
   );
 }

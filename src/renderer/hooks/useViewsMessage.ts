@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef } from 'react';
 
 /**
  * @description this hooks is used to forward message from other BrowserViews to main window
+ * @deprecated use `forwardMessageTo` directly
  *
  * @example
  *
@@ -24,15 +25,16 @@ import { useCallback, useEffect, useRef } from 'react';
  * sendMessage('some-message-type', ...);
  * ```
  */
-export function useForwardTo<
-  TV extends ChannelForwardMessageType['targetView']
->(targetView: TV) {
-  type Payload = ChannelForwardMessageType & { targetView: TV };
-
-  const forwardMessageTo = useCallback(
-    <TT extends Payload['type']>(
+export function useForwardTo<TV extends keyof ForwardMessageViewTypes>(
+  targetView: TV
+) {
+  const forwardMessage = useCallback(
+    <TT extends ForwardMessageViewTypes[TV]>(
       type: TT,
-      restPayload: Omit<Payload, 'type' | 'targetView'>
+      restPayload: Omit<
+        ChannelForwardMessageType & { targetView: TV; type: TT },
+        'type' | 'targetView'
+      >
     ) => {
       if (!isBuiltinView(window.location.href, targetView)) {
         console.warn(
@@ -46,13 +48,40 @@ export function useForwardTo<
           ...restPayload,
           targetView,
           type,
-        } as Payload
+        } as ChannelForwardMessageType
       );
     },
     [targetView]
   );
 
-  return forwardMessageTo;
+  return forwardMessage;
+}
+
+export function forwardMessageTo<
+  T extends keyof ForwardMessageViewTypes,
+  U extends ForwardMessageViewTypes[T]
+>(
+  targetView: T,
+  type: U,
+  restPayload: Omit<
+    ChannelForwardMessageType & { targetView: T; type: U },
+    'type' | 'targetView'
+  >
+) {
+  if (!isBuiltinView(window.location.href, targetView)) {
+    console.warn(
+      `[forwardMessageTo] it's not expected to send message from non built-in view '${targetView}'.`
+    );
+  }
+
+  window.rabbyDesktop.ipcRenderer.sendMessage(
+    '__internal_forward:views:channel-message',
+    {
+      ...restPayload,
+      targetView,
+      type,
+    } as any
+  );
 }
 
 export function useMessageForwarded<
@@ -88,13 +117,12 @@ export function useMessageForwardToMainwin<
   type: T,
   callback?: (payload: MainWindowChannelMessage & { type: T }) => void
 ) {
-  const forwardTo = useForwardTo('main-window');
   useMessageForwarded({ targetView: 'main-window', type }, callback);
 
   return useCallback(
-    (payload: Omit<MainWindowChannelMessage, 'targetView'> & { type: T }) => {
-      return forwardTo(type, payload);
+    (payload: Omit<MainWindowChannelMessage, 'targetView'> & { type?: T }) => {
+      return forwardMessageTo('main-window', type, payload as any);
     },
-    [type, forwardTo]
+    [type]
   );
 }

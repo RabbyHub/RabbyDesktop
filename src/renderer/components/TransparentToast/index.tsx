@@ -52,7 +52,30 @@ function ToastContent({
   );
 }
 
-export default function TransparentToast() {
+export async function toastCopiedWeb3Addr(text: string) {
+  if (isWeb3Addr(text)) {
+    toastMessage({
+      icon: null,
+      key: TOAST_KEY,
+      content: (
+        <ToastContent
+          onClickOutside={() => {
+            message.destroy(TOAST_KEY);
+          }}
+        >
+          <div className="flex items-center">
+            <RcIconToastSuccess className="mr-6px w-[16px] h-[16px]" />
+            <span style={{ color: '#27C193' }}>Copied:</span>
+          </div>
+          <div>{text}</div>
+        </ToastContent>
+      ),
+      duration: TIMEOUT_SEC,
+    });
+  }
+}
+
+function ToastSecurityNotification() {
   const timerRef = useRef<any>();
 
   const { closeSubview, svVisible } = useZPopupViewState(
@@ -99,25 +122,10 @@ export default function TransparentToast() {
   return null;
 }
 
-export async function toastCopiedWeb3Addr(text: string) {
-  if (isWeb3Addr(text)) {
-    toastMessage({
-      icon: null,
-      key: TOAST_KEY,
-      content: (
-        <ToastContent
-          onClickOutside={() => {
-            message.destroy(TOAST_KEY);
-          }}
-        >
-          <div className="flex items-center">
-            <RcIconToastSuccess className="mr-6px w-[16px] h-[16px]" />
-            <span style={{ color: '#27C193' }}>Copied:</span>
-          </div>
-          <div>{text}</div>
-        </ToastContent>
-      ),
-      duration: TIMEOUT_SEC,
-    });
-  }
+export default function TransparentToast() {
+  return (
+    <>
+      <ToastSecurityNotification />
+    </>
+  );
 }

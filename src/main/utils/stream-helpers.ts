@@ -139,28 +139,27 @@ export async function getAllMainUIWindows() {
 }
 
 export async function getAllMainUIViews() {
-  const [
-    mainWin,
-    { addAddress, addressManagement, dappsManagement, selectDevices, zPopup },
-  ] = await Promise.all([
+  const [mainWin, mainViews] = await Promise.all([
     await onMainWindowReady(),
     await firstValueFrom(fromMainSubject('popupViewsOnMainwinReady')),
   ]);
 
   const views = {
-    'add-address-dropdown': addAddress,
-    'address-management': addressManagement,
-    'dapps-management': dappsManagement,
-    'select-devices': selectDevices,
-    'z-popup': zPopup,
+    'add-address-dropdown': mainViews.addAddress,
+    'address-management': mainViews.addressManagement,
+    'dapps-management': mainViews.dappsManagement,
+    'select-devices': mainViews.selectDevices,
+    'z-popup': mainViews.zPopup,
+    'global-toast-popup': mainViews.globalToastPopup,
   } as const;
 
   const viewOnlyHash = {
-    addAddress: addAddress.webContents,
-    addressManagement: addressManagement.webContents,
-    dappsManagement: dappsManagement.webContents,
-    selectDevices: selectDevices.webContents,
-    zPopup: zPopup.webContents,
+    addAddress: mainViews.addAddress.webContents,
+    addressManagement: mainViews.addressManagement.webContents,
+    dappsManagement: mainViews.dappsManagement.webContents,
+    selectDevices: mainViews.selectDevices.webContents,
+    zPopup: mainViews.zPopup.webContents,
+    globalToastPopup: mainViews.globalToastPopup.webContents,
   };
 
   const hash = {
@@ -177,7 +176,26 @@ export async function getAllMainUIViews() {
   };
 }
 
+export async function pushChangesToZPopupLayer(
+  partials: (ChannelForwardMessageType & {
+    type: 'update-subview-state';
+  })['partials']
+) {
+  const { viewOnlyHash } = await getAllMainUIViews();
+
+  viewOnlyHash.zPopup.send('__internal_forward:views:channel-message', {
+    targetView: 'z-popup',
+    type: 'update-subview-state',
+    partials,
+  });
+}
+
 export function startSelectDevices(selectId: string) {
+  pushChangesToZPopupLayer({
+    'gasket-modal-like-window': {
+      visible: true,
+    },
+  });
   emitIpcMainEvent('__internal_main:popupview-on-mainwin:toggle-show', {
     nextShow: true,
     type: 'select-devices',
@@ -196,22 +214,13 @@ export function stopSelectDevices() {
     nextShow: false,
     type: 'select-devices',
   });
+  pushChangesToZPopupLayer({
+    'gasket-modal-like-window': {
+      visible: false,
+    },
+  });
 }
 
 export async function getAppRuntimeProxyConf() {
   return firstValueFrom(fromMainSubject('appRuntimeProxyConf'));
-}
-
-export async function pushChangesToZPopupLayer(
-  partials: (ChannelForwardMessageType & {
-    type: 'update-subview-state';
-  })['partials']
-) {
-  const { viewOnlyHash } = await getAllMainUIViews();
-
-  viewOnlyHash.zPopup.send('__internal_forward:views:channel-message', {
-    targetView: 'z-popup',
-    type: 'update-subview-state',
-    partials,
-  });
 }

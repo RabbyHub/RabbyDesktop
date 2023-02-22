@@ -10,15 +10,12 @@ export interface Props extends ModalProps {
 export const HDManagerModal: React.FC<Props> = ({
   keyringType,
   showEntryButton,
+  onCancel,
   ...props
 }) => {
-  const handleClose = React.useCallback(
-    (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-      const { onCancel } = props;
-      onCancel?.(e);
-    },
-    [props]
-  );
+  const handleClose = React.useCallback(() => {
+    onCancel?.();
+  }, [onCancel]);
 
   return (
     <CommonHDManagerModal

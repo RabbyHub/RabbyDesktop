@@ -123,13 +123,11 @@ export function isForTrezorLikeWebUI(url: string) {
 }
 
 export function maybeTrezorLikeBuiltInHttpPage(url: string) {
-  const urlInfo = new URL(url);
+  // const urlInfo = new URL(url);
 
-  return (
-    checkHardwareConnectPage(url) ||
-    urlInfo.hostname.includes('onekey.so') || // onekey
-    urlInfo.hostname.includes('trezor.io') // onekey
-  );
+  return checkHardwareConnectPage(url);
+  // || urlInfo.hostname.includes('onekey.so')// onekey
+  // || urlInfo.hostname.includes('trezor.io') // trezor
 }
 
 function _isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
@@ -148,6 +146,7 @@ function _isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
         queryInfo.view === `${viewType}`
       );
     case 'dapps-management':
+    case 'global-toast-popup':
       return (
         url.startsWith(RABBY_LOCAL_URLBASE) &&
         urlInfo.pathname === '/popup-view.html' &&
@@ -170,6 +169,7 @@ export function isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
           'add-address-dropdown',
           'dapps-management',
           'z-popup',
+          'global-toast-popup',
           // 'select-devices'
         ] as IBuiltinViewName[]
       ).some((view) => _isBuiltinView(url, view));

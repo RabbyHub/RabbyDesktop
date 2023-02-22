@@ -39,8 +39,9 @@ type ZViewStates = {
   'select-add-address-type-modal': {
     showEntryButton?: boolean;
   };
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  /* eslint-disable @typescript-eslint/ban-types */
   'gasket-modal-like-window': {};
+  /* eslint-enable @typescript-eslint/ban-types */
 };
 
 type IZPopupSubviewState = {
@@ -68,6 +69,14 @@ type ChannelForwardMessageType =
       type: 'open-dapp';
       data: {
         dappURL: string;
+      };
+    }
+  | {
+      targetView: 'main-window';
+      type: 'toast-on-mainwin';
+      data: {
+        type: 'ledger-connect-failed';
+        message?: string;
       };
     }
   | {
@@ -100,3 +109,9 @@ type ChannelForwardMessageType =
       type: 'consume-subview-openid';
       payload: IZCallbackPayload<keyof ZViewStates>;
     };
+
+type ForwardMessageViewTypes = {
+  [K in ChannelForwardMessageType['targetView']]: (ChannelForwardMessageType & {
+    targetView: K;
+  })['type'];
+};

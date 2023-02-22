@@ -1,12 +1,11 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { memo, useEffect, useMemo, useState, useCallback } from 'react';
+import { memo, useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { CHAINS, CHAINS_ENUM, formatTokenAmount } from '@debank/common';
 
 import { useAsync, useAsyncFn, useDebounce, useToggle } from 'react-use';
 import clsx from 'clsx';
 import styled from 'styled-components';
 import BigNumber from 'bignumber.js';
-import { Alert, Button, message, Modal, Skeleton, Switch } from 'antd';
+import { Alert, Button, message, Modal, Skeleton } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
 
 import {
@@ -30,6 +29,7 @@ import IconSwitchToken from '@/../assets/icons/swap/switch-token.svg?rc';
 
 import IconRcClose from '@/../assets/icons/swap/close.svg?rc';
 import { useSearchParams } from 'react-router-dom';
+import { Switch } from '@/renderer/components/Switch/Switch';
 import { DexSelect } from './component/DexSelect';
 import { Fee, FeeProps } from './component/Fee';
 import { GasSelector } from './component/GasSelector';
@@ -134,7 +134,13 @@ export const Swap = () => {
   const { currentAccount } = useCurrentAccount();
   const userAddress = currentAccount?.address || '';
   const swapState = useSwap();
-  const { swap } = swapState;
+  const {
+    swap,
+    setLastSelectedSwapChain,
+    setUnlimitedAllowance,
+    getSwapGasCache,
+    updateSwapGasCache,
+  } = swapState;
   const lastSelectedDex = swap.selectedDex;
   const lastSelectedChain = swap.selectedChain || CHAINS_ENUM.ETH;
   const { unlimitedAllowance = false } = swap;
@@ -153,7 +159,7 @@ export const Swap = () => {
   const [dexId, setDexId] = useState(() => lastSelectedDex);
 
   const setUnlimited = (bool: boolean) => {
-    swapState.setUnlimitedAllowance(bool);
+    setUnlimitedAllowance(bool);
   };
 
   const [visible, toggleVisible] = useToggle(false);
@@ -175,13 +181,18 @@ export const Swap = () => {
   const saveSelectedChain = useCallback(
     (v: CHAINS_ENUM) => {
       setChain(v);
-      swapState.setLastSelectedSwapChain(v);
+      setLastSelectedSwapChain(v);
     },
-    [swapState?.setLastSelectedSwapChain]
+    [setLastSelectedSwapChain]
   );
 
+  const pageInfoInitd = useRef(false);
   useMemo(() => {
     if (lastSelectedDex && pageInfo?.chain && pageInfo?.payTokenId) {
+      if (pageInfoInitd.current) {
+        return;
+      }
+      pageInfoInitd.current = true;
       if (
         !DEX_SUPPORT_CHAINS[lastSelectedDex]
           .map((e) => CHAINS[e].serverId)
@@ -206,7 +217,12 @@ export const Swap = () => {
         setAmount('');
       }
     }
-  }, [pageInfo?.chain, pageInfo?.payTokenId, saveSelectedChain]);
+  }, [
+    lastSelectedDex,
+    pageInfo?.chain,
+    pageInfo?.payTokenId,
+    saveSelectedChain,
+  ]);
 
   const payTokenIsNativeToken = useMemo(
     () => payToken?.id === CHAINS[chain].nativeTokenAddress,
@@ -457,8 +473,8 @@ export const Swap = () => {
     resetSwapTokens(c);
   };
 
-  const onChainChanged = async () => {
-    const gasCache = await swapState.getSwapGasCache(chain);
+  const onChainChanged = useCallback(async () => {
+    const gasCache = await getSwapGasCache(chain);
     setGasLevel(
       gasCache
         ? {
@@ -474,7 +490,7 @@ export const Swap = () => {
           }
         : defaultGasFee
     );
-  };
+  }, [getSwapGasCache, chain]);
 
   const handleMax = () => {
     setAmount(
@@ -585,7 +601,7 @@ export const Swap = () => {
         (item) => item.level === gasLevel.level
       )!.price;
     }
-    await swapState.updateSwapGasCache(chain, {
+    await updateSwapGasCache(chain, {
       gasPrice: price,
       gasLevel: gasLevel.level,
       lastTimeSelect: gasLevel.level === 'custom' ? 'gasPrice' : 'gasLevel',
@@ -715,8 +731,11 @@ export const Swap = () => {
     }
   }, [isWrapToken, isStableCoin]);
 
+  const lastSelectedDexRef = useRef(lastSelectedDex);
+
   useEffect(() => {
-    if (dexId !== lastSelectedDex && dexId !== DEX_ENUM.WRAPTOKEN) {
+    if (lastSelectedDexRef.current !== lastSelectedDex) {
+      lastSelectedDexRef.current = lastSelectedDex;
       saveSelectedChain(CHAINS_ENUM.ETH);
       resetSwapTokens(CHAINS_ENUM.ETH);
       setDexId(lastSelectedDex);
@@ -726,10 +745,12 @@ export const Swap = () => {
 
   useEffect(() => {
     onChainChanged();
-  }, [chain]);
+  }, [onChainChanged]);
 
   useEffect(() => {
     return cancel;
+    //  unmount to cancel timer
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!lastSelectedDex) {
