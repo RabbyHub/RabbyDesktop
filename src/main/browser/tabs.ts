@@ -18,6 +18,7 @@ const viewMngr = new BrowserViewManager({
     safeDialogs: true,
     safeDialogsMessage: 'Stop consecutive dialogs',
     preload: getAssetPath('./preloads/dappViewPreload.js'),
+    webviewTag: false,
   },
 });
 

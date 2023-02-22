@@ -277,6 +277,9 @@ export default function bootstrap() {
         height: lastMainWinPos.height,
         x: lastMainWinPos.x,
         y: lastMainWinPos.y,
+        webPreferences: {
+          webviewTag: true,
+        },
       },
       isMainWindow: true,
     });
