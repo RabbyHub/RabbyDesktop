@@ -23,9 +23,15 @@ const TransactionItemWrapper = styled.div`
   padding: 25px 10px 15px 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.11);
   position: relative;
+  .name-and-address .icon-copy {
+    opacity: 0;
+  }
   &:hover {
     .tx-origin {
       display: block;
+    }
+    .name-and-address .icon-copy {
+      opacity: 1;
     }
   }
   .tx-time {
@@ -527,7 +533,7 @@ const TransactionItem = ({
       {item.protocol?.name ? (
         item.protocol.name
       ) : item.otherAddr ? (
-        <NameAndAddress address={item.otherAddr} />
+        <NameAndAddress address={item.otherAddr} copyIconClass="icon-copy" />
       ) : (
         ''
       )}
