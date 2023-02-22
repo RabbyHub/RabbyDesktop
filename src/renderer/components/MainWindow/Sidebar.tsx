@@ -139,11 +139,9 @@ const TabList = ({
                 ) : (
                   <div className={classNames(styles.indicator)} />
                 ))}
-              <DappFavicon
-                origin={dapp.origin}
-                src={faviconUrl}
-                className={classNames(styles.routeLogo, styles.isDapp)}
-              />
+              <div className={styles.dappIcon}>
+                <DappFavicon origin={dapp.origin} src={faviconUrl} />
+              </div>
               <Hide visible={!isFold} className={styles.routeTitle}>
                 {dapp.alias || dapp.origin}
               </Hide>

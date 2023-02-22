@@ -159,8 +159,21 @@
     height: 20px;
   }
 
-  &.isDapp .routeLogo {
-    border-radius: 3px;
+  .dappIcon {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background-color: #fff;
+    padding: 1px;
+    :global {
+      .ant-image,
+      .ant-image-img {
+        display: block;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+      }
+    }
   }
 
   .routeItemInner {
