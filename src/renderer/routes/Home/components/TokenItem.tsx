@@ -164,9 +164,13 @@ const TokenItemComp = ({
     const historyValue = historyAmount * historyToken.price;
     const valueChange =
       token.amount * token.price - historyAmount * historyToken.price;
+    let percentage = valueChange === 0 ? 0 : valueChange / historyValue;
+    if (historyAmount === 0) {
+      percentage = 1;
+    }
     return {
       value: valueChange,
-      percentage: valueChange === 0 ? 0 : valueChange / historyValue,
+      percentage,
     };
   }, [token, historyToken, supportHistory]);
   const gotoSwap = useGotoSwapByToken();

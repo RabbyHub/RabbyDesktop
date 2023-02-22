@@ -13,7 +13,7 @@ type TransactionItemProps = {
 
 export const TransactionItem = (props: TransactionItemProps) => {
   const { data, cateDict, projectDict, tokenDict, site } = props;
-  // console.log(data, cateDict, projectDict, tokenDict);
+
   const isFailed = data.tx?.status === 0;
   return (
     <div className={classNames(styles.tx, isFailed && styles.txFailed)}>

@@ -191,8 +191,6 @@ const Transactions = () => {
     ).reverse();
   }, [recentTxs, completedTxs, localTxs]);
 
-  console.log(completedTxs, pendingTxs, localTxs, mergedRecentTxs);
-
   const initLocalTxs = useCallback(async () => {
     if (!currentAccount?.address) return;
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);

@@ -244,7 +244,6 @@ const useExpandProtocolList = (protocols: DisplayProtocol[]) => {
     };
   }, [protocols, filterPrice]);
   const filterList = useMemo(() => {
-    console.log('isShowExpand', isShowExpand);
     if (!isShowExpand) {
       return protocols;
     }
