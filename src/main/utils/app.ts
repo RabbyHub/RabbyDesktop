@@ -7,6 +7,7 @@ import {
   FRAME_MIN_SIZE,
 } from '../../isomorphic/const-size';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
+import { getWindowBoundsInWorkArea } from './screen';
 
 const PROJ_ROOT = path.join(__dirname, '../../../');
 
@@ -79,12 +80,23 @@ export function getBrowserWindowOpts(
 ): Electron.BrowserWindowConstructorOptions {
   const isPopup = windowOpts?.type === 'popup';
 
+  const expectedBounds = getWindowBoundsInWorkArea({
+    x: windowOpts?.x,
+    y: windowOpts?.y,
+    width: windowOpts?.width || FRAME_MIN_SIZE.minWidth,
+    height: windowOpts?.height || FRAME_MIN_SIZE.minHeight,
+  });
+
+  if (!IS_RUNTIME_PRODUCTION) {
+    console.debug('[getBrowserWindowOpts] expectedBounds', expectedBounds);
+  }
+
   return {
     ...FRAME_DEFAULT_SIZE,
     ...FRAME_MAX_SIZE,
     ...(!isPopup && !opts?.zeroMinSize ? FRAME_MIN_SIZE : {}),
-    width: FRAME_MIN_SIZE.minWidth,
-    height: FRAME_MIN_SIZE.minHeight,
+    width: expectedBounds.width,
+    height: expectedBounds.height,
     frame: false,
     icon: getWindowIconOpts().icon,
     resizable: true,
