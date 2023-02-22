@@ -212,7 +212,7 @@ const TokenItemComp = ({
             })}
           >
             {amountChange >= 0 ? '+' : '-'}
-            {`${formatNumber(Math.abs(amountChange))} ${ellipsisTokenSymbol(
+            {`${formatAmount(Math.abs(amountChange))} ${ellipsisTokenSymbol(
               token.symbol
             )} (${formatUsdValue(Math.abs(amountChange * token.price))})`}
           </div>
