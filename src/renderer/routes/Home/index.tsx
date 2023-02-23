@@ -53,7 +53,7 @@ const HomeWrapper = styled.div`
   flex: 1;
   .header {
     width: 100%;
-    margin-bottom: 20px;
+    margin-bottom: 5px;
     .top {
       display: flex;
       margin-bottom: 20px;
