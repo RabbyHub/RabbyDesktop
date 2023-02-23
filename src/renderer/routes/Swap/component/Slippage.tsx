@@ -281,6 +281,23 @@ export const Slippage = memo((props: SlippageProps) => {
                   onChange(Number(v) > 50 ? '50' : v);
                 }
               }}
+              onKeyDown={(event) => {
+                const key = event.key;
+                const target = event.currentTarget;
+                const isDelete =
+                  key === 'Backspace' &&
+                  !!target.selectionStart &&
+                  target.value[target.selectionStart - 1] === '%';
+                if (!isDelete) return;
+
+                if (target.selectionStart) {
+                  target.focus();
+                  target.setSelectionRange(
+                    target.selectionStart - 1,
+                    target.selectionStart - 1
+                  );
+                }
+              }}
             />
           ) : (
             'Custom'
