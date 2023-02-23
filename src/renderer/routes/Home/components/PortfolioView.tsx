@@ -10,7 +10,7 @@ import { VIEW_TYPE } from '../hooks';
 const PortfolioWrapper = styled.div`
   background: rgba(255, 255, 255, 0.07);
   width: 100%;
-  padding: 46px 27px;
+  padding: 28px 27px;
   padding-right: 0;
   border-radius: 8px;
   position: relative;
@@ -38,6 +38,7 @@ const PortfolioWrapper = styled.div`
       font-size: 12px;
       line-height: 14px;
       padding: 0 23px;
+      margin-bottom: 28px;
       & > div {
         text-align: left;
         &:nth-child(1) {
