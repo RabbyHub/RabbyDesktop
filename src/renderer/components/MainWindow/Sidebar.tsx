@@ -12,7 +12,7 @@ import {
   IDappWithTabInfo,
   useSidebarDapps,
 } from '@/renderer/hooks-shell/useMainWindow';
-import { useHasNewRelease } from '@/renderer/hooks/useAppUpdator';
+import { useCheckNewRelease } from '@/renderer/hooks/useAppUpdator';
 import { useSettings } from '@/renderer/hooks/useSettings';
 import { makeSureDappOpened } from '@/renderer/ipcRequest/mainwin';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
@@ -205,7 +205,7 @@ export default function MainWindowSidebar() {
     }
   }, [matchedDapp]);
 
-  const hasNewRelease = useHasNewRelease();
+  const { hasNewRelease } = useCheckNewRelease({ isWindowTop: true });
 
   const { settings, toggleSidebarCollapsed } = useSettings();
 
@@ -352,8 +352,14 @@ export default function MainWindowSidebar() {
                       className={styles.routeLogo}
                       src="rabby-internal://assets/icons/mainwin-sidebar/setting.svg"
                     />
-                    <Hide visible={!secondAnim} className={styles.routeTitle}>
-                      Settings
+                    <Hide
+                      visible={!secondAnim}
+                      className={classNames(
+                        styles.routeTitle,
+                        styles.J_settings
+                      )}
+                    >
+                      {hasNewRelease ? 'New Version' : 'Settings'}
                     </Hide>
                   </div>
                 </li>
