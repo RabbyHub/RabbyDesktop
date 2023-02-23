@@ -197,10 +197,7 @@ export const useTabedDapps = () => {
         });
       }
 
-      window.rabbyDesktop.ipcRenderer.sendMessage(
-        '__internal_rpc:mainwindow:open-tab',
-        dappOrigin
-      );
+      window.rabbyDesktop.ipcRenderer.invoke('safe-open-dapp-tab', dappOrigin);
     },
     [activeTab, dapps]
   );

@@ -228,10 +228,6 @@ type ChannelMessagePayload = {
     send: [];
     response: [];
   };
-  '__internal_rpc:mainwindow:open-tab': {
-    send: [dappOrigin: string];
-    response: [];
-  };
   '__internal_rpc:mainwindow:select-tab': {
     send: [winId: number, tabId: number];
     response: [];

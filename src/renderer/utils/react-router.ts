@@ -28,12 +28,13 @@ export function useOpenDapp() {
         return;
       }
 
-      window.rabbyDesktop.ipcRenderer.sendMessage(
-        '__internal_rpc:mainwindow:open-tab',
-        dappUrl
-      );
-
-      navigateToDapp(dappUrl);
+      window.rabbyDesktop.ipcRenderer
+        .invoke('safe-open-dapp-tab', dappUrl)
+        .then(({ shouldMakeOpenTab }) => {
+          if (shouldMakeOpenTab) {
+            navigateToDapp(dappUrl);
+          }
+        });
     },
     [navigateToDapp, forwardToMain]
   );

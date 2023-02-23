@@ -178,6 +178,12 @@ type ChannelInvokePayload = {
       dynamicConfig: IAppDynamicConfig;
     };
   };
+  'safe-open-dapp-tab': {
+    send: [dappOrigin: string];
+    response: {
+      shouldMakeOpenTab: boolean;
+    };
+  };
   [`__internal_rpc:rabbyx-rpc:query`]: {
     send: [query: Omit<IRabbyxRpcQuery, 'rpcId'>];
     response: {
