@@ -350,7 +350,11 @@ export default function MainWindowSidebar() {
                   <div className={styles.routeItemInner}>
                     <img
                       className={styles.routeLogo}
-                      src="rabby-internal://assets/icons/mainwin-sidebar/setting.svg"
+                      src={
+                        hasNewRelease && secondAnim
+                          ? 'rabby-internal://assets/icons/mainwin-sidebar/setting-with-newrelease.svg'
+                          : 'rabby-internal://assets/icons/mainwin-sidebar/setting.svg'
+                      }
                     />
                     <Hide
                       visible={!secondAnim}
@@ -359,7 +363,15 @@ export default function MainWindowSidebar() {
                         styles.J_settings
                       )}
                     >
-                      {hasNewRelease ? 'New Version' : 'Settings'}
+                      Settings
+                      {hasNewRelease ? (
+                        <span>
+                          <img
+                            className="ml-[4px]"
+                            src="rabby-internal://assets/icons/mainwin-sidebar/icon-new-release.svg"
+                          />
+                        </span>
+                      ) : null}
                     </Hide>
                   </div>
                 </li>
