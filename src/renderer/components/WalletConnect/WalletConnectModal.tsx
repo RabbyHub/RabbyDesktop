@@ -17,7 +17,7 @@ export const WalletConnectModal: React.FC<Props> = ({
 
   if (result) {
     return (
-      <Modal open={props.open} centered smallTitle>
+      <Modal open={props.open} centered smallTitle onCancel={onSuccess}>
         <SuccessContent onSuccess={onSuccess} accounts={result ?? []} />
       </Modal>
     );

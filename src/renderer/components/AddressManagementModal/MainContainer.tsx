@@ -18,8 +18,12 @@ import { Header } from './Header';
 export const MainContainer: React.FC = () => {
   const { getHighlightedAddressesAsync, removeAddress, highlightedAddresses } =
     useAddressManagement();
-  const { getAllAccountsToDisplay, accountsList, loadingAccounts } =
-    useAccountToDisplay();
+  const {
+    getAllAccountsToDisplay,
+    accountsList,
+    loadingAccounts,
+    updateBalance,
+  } = useAccountToDisplay();
   const { init: whitelistInit } = useWhitelist();
   const { currentAccount, switchAccount } = useCurrentAccount();
   const [selectedAccount, setSelectedAccount] =
@@ -107,6 +111,13 @@ export const MainContainer: React.FC = () => {
   React.useEffect(() => {
     whitelistInit();
   }, [whitelistInit]);
+
+  React.useEffect(() => {
+    // update balance
+    if (currentDisplayAccount?.address) {
+      updateBalance(currentDisplayAccount.address);
+    }
+  }, [currentDisplayAccount?.address, updateBalance]);
 
   React.useEffect(() => {
     if (selectedAccount) {

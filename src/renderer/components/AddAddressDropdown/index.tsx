@@ -37,6 +37,7 @@ export default function AddAddressDropdown() {
 
   return (
     <Dropdown
+      mouseEnterDelay={0}
       onOpenChange={onOpenChange}
       overlay={
         <div>

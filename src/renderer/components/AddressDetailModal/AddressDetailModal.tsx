@@ -1,4 +1,7 @@
-import { IDisplayedAccountWithBalance } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
+import {
+  IDisplayedAccountWithBalance,
+  useAccountToDisplay,
+} from '@/renderer/hooks/rabbyx/useAccountToDisplay';
 import { useAddressManagement } from '@/renderer/hooks/rabbyx/useAddressManagement';
 import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
 import React from 'react';
@@ -10,6 +13,8 @@ export const AddressDetailModal: React.FC = () => {
     useZPopupViewState('address-detail');
   const { getHighlightedAddressesAsync, removeAddress } =
     useAddressManagement();
+  const { updateBalance } = useAccountToDisplay();
+  const [balance, setBalance] = React.useState(svState?.account?.balance);
 
   const handleDelete = React.useCallback(
     async (account: IDisplayedAccountWithBalance) => {
@@ -19,6 +24,12 @@ export const AddressDetailModal: React.FC = () => {
     },
     [removeAddress, getHighlightedAddressesAsync, closeSubview]
   );
+
+  React.useEffect(() => {
+    if (svState?.account?.address) {
+      updateBalance(svState?.account?.address).then(setBalance);
+    }
+  }, [svState?.account, updateBalance]);
 
   if (!svVisible || !svState?.account) return null;
 
@@ -36,7 +47,10 @@ export const AddressDetailModal: React.FC = () => {
       <AccountDetail
         onClose={closeSubview}
         onDelete={handleDelete}
-        account={svState.account}
+        account={{
+          ...svState.account,
+          balance: balance ?? 0,
+        }}
       />
     </Modal>
   );

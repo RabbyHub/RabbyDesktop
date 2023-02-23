@@ -14,7 +14,7 @@ export const ContactModal: React.FC<Props> = ({ onSuccess, ...props }) => {
 
   if (result) {
     return (
-      <Modal open={props.open} centered smallTitle>
+      <Modal open={props.open} centered smallTitle onCancel={onSuccess}>
         <SuccessContent onSuccess={onSuccess} accounts={result ?? []} />
       </Modal>
     );

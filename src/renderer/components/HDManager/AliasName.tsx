@@ -18,6 +18,7 @@ export const AliasName: React.FC<Props> = ({
   const [hover, setHover] = React.useState(false);
   const [value, setValue] = React.useState(aliasName);
   const [focus, setFocus] = React.useState(false);
+  const inputRef = React.useRef<HTMLDivElement>(null);
 
   const onChangeAliasName = React.useCallback((e: any) => {
     const { value: inputValue } = e.target as { value: string };
@@ -41,7 +42,7 @@ export const AliasName: React.FC<Props> = ({
     setTimeout(() => {
       setFocus(false);
       setHover(false);
-    }, 0);
+    }, 200);
   }, []);
 
   // const cachedValue = cachedName.get(address);
@@ -84,7 +85,6 @@ export const AliasName: React.FC<Props> = ({
             autoFocus
           />
           <img
-            onClick={onClickCheck}
             className="icon"
             src="rabby-internal://assets/icons/hd-manager/check-green.svg"
           />
