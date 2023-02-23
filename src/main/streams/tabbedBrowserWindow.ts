@@ -5,6 +5,7 @@ import { isUrlFromDapp, parseDomainMeta } from '@/isomorphic/url';
 import { arraify } from '@/isomorphic/array';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 import {
+  handleIpcMainInvoke,
   onIpcMainEvent,
   onIpcMainInternalEvent,
   sendToWebContents,
@@ -28,6 +29,7 @@ import {
   findByWindowId,
   getTabbedWindowFromWebContents,
 } from '../utils/tabbedBrowserWindow';
+import { safeOpenURL } from './dappSafeview';
 
 /**
  * @deprecated import members from '../utils/tabbedBrowserWindow' instead
@@ -103,16 +105,26 @@ onIpcMainEvent('__internal_webui-window-close', (_, winId, webContentsId) => {
   tabToClose?.destroy();
 });
 
-onIpcMainEvent('__internal_rpc:mainwindow:open-tab', async (_, dappOrigin) => {
+handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
   const mainTabbedWin = await onMainWindowReady();
 
   const openedTab = mainTabbedWin.tabs.findByOrigin(dappOrigin);
   if (openedTab) {
     mainTabbedWin.tabs.select(openedTab.id);
-    return;
+    return { shouldMakeOpenTab: true };
   }
 
-  createDappTab(mainTabbedWin, dappOrigin);
+  const currentUrl = evt.sender.getURL();
+  const existedDapp = getAllDapps().find((dapp) => dapp.origin === dappOrigin);
+
+  safeOpenURL(dappOrigin, {
+    sourceURL: currentUrl,
+    existedDapp,
+  });
+
+  return {
+    shouldMakeOpenTab: !!existedDapp,
+  };
 });
 
 onIpcMainEvent(

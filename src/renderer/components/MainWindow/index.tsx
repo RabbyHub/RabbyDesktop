@@ -219,8 +219,8 @@ export function MainWindow() {
     router.navigate(payload.data);
   });
   useMessageForwardToMainwin('open-dapp', (payload) => {
-    window.rabbyDesktop.ipcRenderer.sendMessage(
-      '__internal_rpc:mainwindow:open-tab',
+    window.rabbyDesktop.ipcRenderer.invoke(
+      'safe-open-dapp-tab',
       payload.data.dappURL
     );
 

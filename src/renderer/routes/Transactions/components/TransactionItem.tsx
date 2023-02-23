@@ -8,11 +8,11 @@ import { TxInterAddressExplain } from './TxInterAddressExplain';
 
 type TransactionItemProps = {
   data: TxDisplayItem | TxHistoryItem;
-  site?: ConnectedSite;
+  origin?: string;
 } & Pick<TxDisplayItem, 'cateDict' | 'projectDict' | 'tokenDict'>;
 
 export const TransactionItem = (props: TransactionItemProps) => {
-  const { data, cateDict, projectDict, tokenDict, site } = props;
+  const { data, cateDict, projectDict, tokenDict, origin } = props;
 
   const isFailed = data.tx?.status === 0;
   return (
@@ -34,7 +34,7 @@ export const TransactionItem = (props: TransactionItemProps) => {
         tokenDict={tokenDict}
       />
       <TxChange data={data} tokenDict={tokenDict} />
-      <TxExtra data={data} site={site} />
+      <TxExtra data={data} origin={origin} />
     </div>
   );
 };

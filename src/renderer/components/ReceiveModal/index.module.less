@@ -11,12 +11,19 @@
 
     .account {
       display: inline-flex;
-      margin-bottom: 48px;
       background: rgba(0, 0, 0, 0.1);
       border-radius: 6px;
-      padding: 15px 38px;
       max-width: 100%;
       overflow: hidden;
+      padding: 13px 11px 17px 11px;
+      margin-bottom: 29px;
+      justify-content: center;
+      min-width: 236px;
+
+      &.isWatch {
+        padding: 11px 19px;
+        margin-bottom: 19px;
+      }
 
       &Icon {
         width: 27px;
@@ -50,6 +57,8 @@
         line-height: 14px;
         color: #ffffff;
         opacity: 0.6;
+        padding-top: 3px;
+        padding-bottom: 2px;
       }
     }
 

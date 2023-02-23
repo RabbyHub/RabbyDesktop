@@ -1,6 +1,12 @@
 import { LoadingOutlined } from '@ant-design/icons';
 import { Button, Form, InputRef } from 'antd';
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { addDapp, putDapp, replaceDapp } from '@/renderer/ipcRequest/dapps';
@@ -137,9 +143,9 @@ const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
           <div className={styles.previewTitle}>
             <EditableInput
               value={input}
-              defaultEditable={!data?.isExistedDapp}
+              defaultEditable={!data?.isInputExistedDapp}
               onChange={(v) => {
-                if (data.isExistedDapp) {
+                if (data.isInputExistedDapp) {
                   putDapp({
                     origin: data.inputOrigin,
                     alias: v,
@@ -160,7 +166,7 @@ const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
             </div>
           ) : (
             <>
-              {data?.isExistedDapp ? (
+              {data?.isInputExistedDapp ? (
                 <Button
                   type="primary"
                   className={styles.previewBtnSuccess}
@@ -193,7 +199,7 @@ const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
       </div>
       <PreviewWebview
         containerClassName={styles.previewTagContainer}
-        src={data.finalOrigin}
+        src={data.inputOrigin}
         loadingView={
           <div className={styles.previewEmpty}>
             <div>
@@ -296,19 +302,7 @@ const validateInput = (input: string, onReplace?: (v: string) => void) => {
     if (url.hostname !== domain) {
       return {
         validateStatus: 'error' as const,
-        help: (
-          <>
-            The input is not a domain name. Replace with{' '}
-            <span
-              className="link"
-              onClick={() => {
-                onReplace?.(url.hostname);
-              }}
-            >
-              {url.hostname}
-            </span>
-          </>
-        ),
+        help: <>The input is not a domain name.</>,
       };
     }
   } catch (e) {
@@ -345,20 +339,32 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
         });
         return null;
       }
-      if (data && data.inputOrigin !== data.finalOrigin) {
+      if (
+        data &&
+        data.inputOrigin !== data.finalOrigin &&
+        canoicalizeDappUrl(data.inputOrigin).secondaryDomain !==
+          canoicalizeDappUrl(data.finalOrigin).secondaryDomain
+      ) {
         setState({
           validateStatus: 'error',
           help: (
             <>
-              The current URL is redirected to{' '}
-              <span
-                className="link"
-                onClick={() => {
-                  onReplace?.(data.finalOrigin.replace(/^\w+:\/\//, ''));
-                }}
-              >
-                {data.finalOrigin?.replace(/^\w+:\/\//, '')}
-              </span>
+              The current domain has been redirected to{' '}
+              {data.finalOrigin?.replace(/^\w+:\/\//, '')} which may pose a
+              security risk. It cannot be added as a Dapp.
+            </>
+          ),
+        });
+        return null;
+      }
+      if (data && canoicalizeDappUrl(data.inputOrigin).isSubDomain) {
+        setState({
+          dappInfo: data,
+          validateStatus: 'success',
+          help: (
+            <>
+              It appears that the current input may be a subdomain. By adding it
+              as a Dapp, you'll be limited to browsing within that subdomain.
             </>
           ),
         });
@@ -407,7 +413,6 @@ export function AddDapp({
 }) {
   const { dapps } = useDapps();
   const [form] = Form.useForm();
-  const [input, setInput] = useState('');
   const openDapp = useOpenDapp();
   const [addUrl] = useAddDappURL();
   useEffect(() => {
@@ -476,7 +481,7 @@ export function AddDapp({
     const nextState = {
       dappInfo: {
         ...dappInfo,
-        isExistedDapp: true,
+        isInputExistedDapp: true,
       },
     };
     setState(nextState);
@@ -507,6 +512,23 @@ export function AddDapp({
       handleAdd(dappInfo);
     }
   };
+  const InitialHelpMessage =
+    'To ensure the security of your funds, please ensure that you enter the official domain name of Dapp';
+
+  const handleFormChange = useCallback(() => {
+    const { url } = form.getFieldsValue();
+    if (!url.trim()) {
+      setState({
+        validateStatus: undefined,
+        help: InitialHelpMessage,
+      });
+    } else if (state.help === InitialHelpMessage) {
+      setState({
+        validateStatus: undefined,
+        help: '',
+      });
+    }
+  }, [form, setState, state.help]);
 
   return (
     <div className={styles.content}>
@@ -515,21 +537,12 @@ export function AddDapp({
         form={form}
         className={styles.form}
         onFinish={handleCheck}
-        onFieldsChange={() => {
-          const { url } = form.getFieldsValue();
-          setInput(url);
-        }}
+        onFieldsChange={handleFormChange}
       >
         <Form.Item
           name="url"
           validateStatus={state?.validateStatus || 'success'}
-          help={
-            state?.help
-              ? state?.help
-              : input
-              ? null
-              : 'To ensure the security of your funds, please ensure that you enter the official domain name of Dapp'
-          }
+          help={state?.help}
         >
           <RabbyInput
             className={styles.input}

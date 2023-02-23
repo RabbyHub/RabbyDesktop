@@ -196,20 +196,25 @@ export async function detectDapp(
 
   const { origin: finalOrigin } = canoicalizeDappUrl(checkResult.finalUrl);
 
-  const repeatedDapp = opts.existedDapps.find(
+  const repeatedInputDapp = opts.existedDapps.find(
+    (item) => item.origin === formatedOrigin
+  );
+  const repeatedFinalDapp = opts.existedDapps.find(
     (item) => item.origin === finalOrigin
   );
 
   const data: IDappsDetectResult['data'] = {
     inputOrigin: dappOrigin,
+    isInputExistedDapp: !!repeatedInputDapp,
     finalOrigin,
+    isFinalExistedDapp: !!repeatedFinalDapp,
     icon: null,
     recommendedAlias: inputCoreName,
     faviconUrl: undefined,
     faviconBase64: undefined,
-    isExistedDapp: !!repeatedDapp,
   };
 
+  const repeatedDapp = repeatedInputDapp || repeatedFinalDapp;
   if (repeatedDapp) {
     data.faviconUrl = repeatedDapp.faviconUrl;
     data.faviconBase64 = repeatedDapp.faviconBase64;

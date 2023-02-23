@@ -393,8 +393,8 @@ const TransactionItem = ({
 
   const isFromRabby = useMemo(() => {
     if (!item.site) return false;
-    const { name, origin } = item.site;
-    return /^chrome-extension:\/\//.test(origin) && name === 'Rabby Wallet';
+    const { origin } = item.site;
+    return !/^https:\/\//.test(origin);
   }, [item]);
 
   const loadTxData = async () => {
@@ -686,7 +686,10 @@ const TransactionItem = ({
       {item.site && !isFromRabby ? (
         <div className="tx-origin">
           Initiate from Dapp:{' '}
-          <TransactionWebsite site={item.site} className="tx-dapp-link" />
+          <TransactionWebsite
+            origin={item.site.origin}
+            className="tx-dapp-link"
+          />
         </div>
       ) : null}
       {isPending && (item?.txs?.length || 0) > 1 && (
