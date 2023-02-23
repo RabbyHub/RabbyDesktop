@@ -7,10 +7,10 @@ import styles from '../index.module.less';
 
 interface TxExtraProps {
   data: TxDisplayItem | TxHistoryItem;
-  site?: ConnectedSite;
+  origin?: string;
 }
 
-export const TxExtra = ({ data, site }: TxExtraProps) => {
+export const TxExtra = ({ data, origin }: TxExtraProps) => {
   const chain = getChain(data.chain);
   return (
     <div className={classNames(styles.txExtra)}>
@@ -21,10 +21,10 @@ export const TxExtra = ({ data, site }: TxExtraProps) => {
           {numberWithCommasIsLtOne(data.tx?.usd_gas_fee ?? 0, 2)})
         </div>
       ) : null}
-      {site && (
+      {origin && (
         <div className={styles.txSource}>
           Initiate from Dapp:{' '}
-          <TransactionWebsite site={site} className={styles.txSourceLink} />
+          <TransactionWebsite origin={origin} className={styles.txSourceLink} />
         </div>
       )}
     </div>

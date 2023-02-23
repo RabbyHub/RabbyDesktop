@@ -9,17 +9,20 @@ export const useTxSource = (address: string) => {
   );
 
   const dict = useMemo(() => {
-    const map = new Map();
+    const map = new Map<string, string>();
     if (!data?.completeds) {
       return map;
     }
     data.completeds.forEach((item) => {
       const completedTx = item.txs.find((tx) => tx.isCompleted);
       const chain = Object.values(CHAINS).find((i) => i.id === item.chainId);
-      if (completedTx?.site) {
+      if (
+        completedTx?.site?.origin &&
+        /^https?:\/\//.test(completedTx?.site?.origin)
+      ) {
         map.set(
           [chain?.serverId, completedTx?.hash].join('|'),
-          completedTx?.site
+          completedTx?.site?.origin
         );
       }
     });
