@@ -116,6 +116,7 @@ export function getBrowserWindowOpts(
 }
 
 export const IS_REG_BUILD = (process as any).buildchannel === 'reg';
+export const IS_APP_PROD_BUILD = (process as any).buildchannel === 'prod';
 
 export function relaunchApp() {
   const relaunchOptions = {

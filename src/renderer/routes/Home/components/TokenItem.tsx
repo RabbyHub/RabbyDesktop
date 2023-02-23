@@ -4,7 +4,6 @@ import { Skeleton } from 'antd';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import classNames from 'classnames';
 import {
-  formatNumber,
   formatPrice,
   formatAmount,
   formatUsdValue,
@@ -22,12 +21,12 @@ const TokenItemWrapper = styled.li`
   font-size: 13px;
   line-height: 18px;
   color: #ffffff;
-  height: 60px;
   display: flex;
   align-items: center;
   border-radius: 8px;
   padding: 0 23px;
   border: 1px solid transparent;
+  padding-bottom: 36px;
   & > div {
     position: relative;
     text-align: left;

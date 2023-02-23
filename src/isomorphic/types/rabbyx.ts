@@ -141,12 +141,14 @@ export interface TransactionGroup {
   txs: TransactionHistoryItem[];
   isPending: boolean;
   createdAt: number;
+  completedAt?: number;
   explain: ObjectType.Merge<
     ExplainTxResponse,
     { approvalId: string; calcSuccess: boolean }
   >;
   isFailed: boolean;
   isSubmitFailed?: boolean;
+  dbIndexed: boolean;
   $ctx?: any;
 }
 
@@ -183,6 +185,11 @@ export type RabbyXMethod = {
     type: string;
     brandName: string;
   }[];
+  'walletController.markTransactionAsIndexed': (
+    address: string,
+    chainId: number,
+    hash: string
+  ) => void;
   'walletController.getTransactionHistory': (addr: string) => {
     pendings: TransactionGroup[];
     completeds: TransactionGroup[];

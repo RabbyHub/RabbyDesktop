@@ -35,10 +35,10 @@ const ProtocolItemWrapper = styled.div`
 
 const ProtocolHeader = styled.div`
   display: flex;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
   padding-left: 22px;
   padding-right: 22px;
-  align-items: flex-end;
+  align-items: flex-start;
   .protocol-name {
     margin-left: 8px;
     font-weight: 700;
@@ -111,6 +111,23 @@ const ProtocolHeader = styled.div`
   }
 `;
 
+const UsdValueChangeWrapper = styled.div`
+  width: 100%;
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 12px;
+  color: #c6c6c6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  &.is-loss {
+    color: #ff6060;
+  }
+  &.is-increase {
+    color: #2ed4a3;
+  }
+`;
+
 const ProtocolItem = ({
   protocol,
   historyProtocol,
@@ -164,6 +181,55 @@ const ProtocolItem = ({
     if (bindUrl) openDapp(bindUrl);
   }, [bindUrl, openDapp]);
 
+  const historyProtocolUsdValue = useMemo(() => {
+    let sum = 0;
+    if (isLoadingProtocolHistory) return null;
+    protocol.portfolio_item_list.forEach((portfolio) => {
+      const historyPortfolio = historyProtocol?.portfolio_item_list.find(
+        (item) =>
+          item.pool.id === portfolio.pool.id &&
+          item.position_index === portfolio.position_index
+      );
+      if (historyPortfolio) {
+        const change = historyPortfolio.asset_token_list.reduce((res, item) => {
+          return res + item.amount * item.price;
+        }, 0);
+        sum += change;
+      } else if (!supportHistory) {
+        // const change = portfolio.asset_token_list.reduce((res, item) => {
+        //   const tokenHistoryPrice =
+        //     protocolHistoryTokenPriceMap[`${item.chain}-${item.id}`];
+        //   if (tokenHistoryPrice) {
+        //     return tokenHistoryPrice.price * item.amount;
+        //   }
+        //   return res;
+        // }, 0);
+        // sum += change;
+        return null;
+      } else {
+        const change = portfolio.asset_token_list.reduce((res, item) => {
+          return res + item.price * item.amount;
+        }, 0);
+        sum += change;
+      }
+    });
+    const valueChange = protocol.usd_value - sum;
+    let percentage = valueChange === 0 ? 0 : valueChange / sum;
+    if (sum === 0 && valueChange !== 0) {
+      percentage = 1;
+    }
+    return {
+      historyUsdValueChange: protocol.usd_value - sum,
+      percentage,
+    };
+  }, [
+    protocol,
+    historyProtocol,
+    // protocolHistoryTokenPriceMap,
+    supportHistory,
+    isLoadingProtocolHistory,
+  ]);
+
   return (
     <ProtocolItemWrapper>
       <ProtocolHeader>
@@ -213,6 +279,21 @@ const ProtocolItem = ({
         </div>
         <span className="protocol-usd">
           {formatUsdValue(protocol.usd_value)}
+          {historyProtocolUsdValue && (
+            <UsdValueChangeWrapper
+              className={classNames('price-change', {
+                'is-loss': historyProtocolUsdValue.historyUsdValueChange < 0,
+                'is-increase':
+                  historyProtocolUsdValue.historyUsdValueChange > 0,
+              })}
+            >{`${
+              historyProtocolUsdValue.historyUsdValueChange >= 0 ? '+' : '-'
+            }${Math.abs(historyProtocolUsdValue.percentage * 100).toFixed(
+              2
+            )}% (${formatUsdValue(
+              historyProtocolUsdValue.historyUsdValueChange
+            )})`}</UsdValueChangeWrapper>
+          )}
         </span>
       </ProtocolHeader>
       <div className="protocol-list">

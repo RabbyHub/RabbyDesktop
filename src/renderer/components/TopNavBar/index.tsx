@@ -24,6 +24,7 @@ import classNames from 'classnames';
 import { useCurrentConnection } from '@/renderer/hooks/rabbyx/useConnection';
 import { useSwitchChainModal } from '@/renderer/hooks/useSwitchChainModal';
 import { copyText } from '@/renderer/utils/clipboard';
+import { useMatchURLBaseConfig } from '@/renderer/hooks-ipc/useAppDynamicConfig';
 import styles from './index.module.less';
 import { toastMessage } from '../TransparentToast';
 
@@ -100,11 +101,21 @@ export const TopNavBar = () => {
     switchChain(chain);
   });
 
+  const { navTextColor, navBackgroundColor } = useMatchURLBaseConfig(
+    activeTab?.url
+  );
+
   return (
     <div className={styles.main}>
       {/* keep this element in first to make it bottom, or move it last to make it top */}
       {isDarwin && <div className={classNames(styles.macOSGasket)} />}
-      <div className={styles.left} data-nodrag>
+      <div
+        className={styles.left}
+        style={{
+          ...(navBackgroundColor && { backgroundColor: navBackgroundColor }),
+        }}
+        data-nodrag
+      >
         <RiskArea />
         <Divider type="vertical" className={styles.divider} />
         {activeTab?.status === 'loading' && (
@@ -116,6 +127,7 @@ export const TopNavBar = () => {
         <div className={styles.url}>
           <span
             className={styles.urlText}
+            style={{ ...(navTextColor && { color: navTextColor }) }}
             onClick={async () => {
               if (!activeTab?.url) return;
               await copyText(activeTab.url);

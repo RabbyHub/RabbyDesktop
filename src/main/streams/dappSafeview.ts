@@ -104,7 +104,7 @@ export async function safeOpenURL(
     baseView.webContents,
     '__internal_push:dapp-tabs:open-safe-view',
     {
-      url,
+      url: targetURL,
       sourceURL: opts.sourceURL,
       status: 'start-loading',
       favIcon,

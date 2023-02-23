@@ -136,6 +136,17 @@ export function getAppProxyConf() {
   };
 }
 
+export function getAppProxyConfigForAxios() {
+  const proxyConf = getAppProxyConf();
+  return proxyConf.proxyType === 'custom'
+    ? {
+        protocol: proxyConf.proxySettings.protocol,
+        host: proxyConf.proxySettings.hostname,
+        port: proxyConf.proxySettings.port,
+      }
+    : undefined;
+}
+
 handleIpcMainInvoke('get-desktopAppState', () => {
   desktopAppStore.set('firstStartApp', false);
 
