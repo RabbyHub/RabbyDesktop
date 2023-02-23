@@ -19,7 +19,7 @@ export default React.memo((props: { data: PortfolioItem[] }) => {
               <Table.Row>
                 <Value.Tokens value={supply_token_list} />
                 <Value.Balances value={supply_token_list} />
-                <Value.Balances value={debt_token} isDebt />
+                <Value.Balances value={debt_token} />
                 <Value.Percent value={p.detail.debt_ratio} />
                 <Value.USDValue value={p.stats.net_usd_value} />
               </Table.Row>

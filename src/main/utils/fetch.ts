@@ -8,6 +8,7 @@ import {
   canoicalizeDappUrl,
   formatAxiosProxyConfig,
 } from '../../isomorphic/url';
+import { IS_APP_PROD_BUILD } from './app';
 
 const fetchClient = Axios.create({});
 
@@ -17,6 +18,13 @@ function getHref(url: string, base: string) {
   } catch (error) {
     return '';
   }
+}
+
+function filterAxiosProxy(proxyConfig?: AxiosProxyConfig) {
+  const resultConfig =
+    proxyConfig?.protocol === 'socks5' ? undefined : proxyConfig;
+
+  return resultConfig;
 }
 
 /**
@@ -35,13 +43,12 @@ export async function parseWebsiteFavicon(
 
   const reqIconUrlBufs: Record<string, string> = {};
 
-  const proxyOpts =
-    options?.proxy?.protocol === 'socks5' ? undefined : options?.proxy;
+  const axiosProxy = filterAxiosProxy(options?.proxy);
 
-  if (proxyOpts && !IS_RUNTIME_PRODUCTION) {
+  if (axiosProxy && !IS_RUNTIME_PRODUCTION) {
     console.debug(
       `[debug] use proxy ${formatAxiosProxyConfig(
-        proxyOpts
+        axiosProxy
       )} on parsing favicon`
     );
   }
@@ -56,7 +63,7 @@ export async function parseWebsiteFavicon(
     return fetchClient
       .get(targetURL, {
         timeout: tmout,
-        proxy: proxyOpts,
+        proxy: axiosProxy,
       })
       .then((res) => res.data);
   }
@@ -70,7 +77,7 @@ export async function parseWebsiteFavicon(
     return fetchClient
       .get(targetURL, {
         timeout: tmout,
-        proxy: proxyOpts,
+        proxy: axiosProxy,
         responseType: 'arraybuffer',
       })
       .then((res) => {
@@ -120,5 +127,33 @@ export async function parseWebsiteFavicon(
     iconInfo,
     faviconUrl: faviconUrl || undefined,
     faviconBase64: faviconBase64 || undefined,
+  };
+}
+
+const configURLs = IS_APP_PROD_BUILD
+  ? {
+      domain_metas: `https://download.rabby.io/cdn-config/dapps/domain_metas.json`,
+    }
+  : {
+      domain_metas: `https://download.rabby.io/cdn-config-pre/dapps/domain_metas.json`,
+    };
+
+export async function fetchDynamicConfig(options?: {
+  timeout?: number;
+  proxy?: AxiosProxyConfig;
+}) {
+  const { timeout: timeoutV = 5 * 1e3, proxy } = options || {};
+  const [domain_metas = {}] = await Promise.all([
+    fetchClient
+      .get(`${configURLs.domain_metas}?t=${Date.now()}`, {
+        timeout: timeoutV,
+        proxy,
+      })
+      .then((res) => res.data)
+      .catch((err) => undefined), // TODO: report to sentry
+  ]);
+
+  return {
+    domain_metas: (domain_metas as IAppDynamicConfig['domain_metas']) || {},
   };
 }

@@ -20,7 +20,7 @@ import TxChange from './TxChange';
 
 const TransactionItemWrapper = styled.div`
   // display: flex;
-  padding: 25px 10px 15px 10px;
+  padding: 28px 10px 28px 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.11);
   position: relative;
   .name-and-address .icon-copy {
@@ -37,7 +37,7 @@ const TransactionItemWrapper = styled.div`
   .tx-time {
     position: absolute;
     left: 10px;
-    top: 2px;
+    top: 5px;
     font-size: 12px;
     line-height: 14px;
     color: rgba(255, 255, 255, 0.3);
@@ -50,6 +50,9 @@ const TransactionItemWrapper = styled.div`
     font-size: 12px;
     line-height: 14px;
     color: rgba(255, 255, 255, 0.3);
+    position: absolute;
+    left: 10px;
+    bottom: 5px;
 
     .tx-dapp-link:not(.is-rabby) {
       color: rgba(255, 255, 255, 0.6);
@@ -388,6 +391,12 @@ const TransactionItem = ({
     >
   >({});
 
+  const isFromRabby = useMemo(() => {
+    if (!item.site) return false;
+    const { origin } = item.site;
+    return !/^https:\/\//.test(origin);
+  }, [item]);
+
   const loadTxData = async () => {
     if (!item.txs || item.txs.length <= 0 || !item.rawTx) {
       return;
@@ -674,7 +683,7 @@ const TransactionItem = ({
         <TxExplainInner>{interAddressExplain}</TxExplainInner>
         <TxChange sends={item.sends} receives={item.receives} />
       </TxExplain>
-      {item.site?.origin && /^https:\/\//.test(item.site?.origin) ? (
+      {item.site && !isFromRabby ? (
         <div className="tx-origin">
           Initiate from Dapp:{' '}
           <TransactionWebsite

@@ -209,13 +209,16 @@ export function isInternalProtocol(url: string) {
   ].some((protocol) => url.startsWith(protocol));
 }
 
-export function canoicalizeDappUrl(url: string) {
-  let urlInfo: Partial<URL> | null = null;
+export function safeParseURL(url: string): URL | null {
   try {
-    urlInfo = new URL(url);
+    return new URL(url);
   } catch (e) {
-    urlInfo = null;
+    return null;
   }
+}
+
+export function canoicalizeDappUrl(url: string) {
+  const urlInfo: Partial<URL> | null = safeParseURL(url);
 
   const hostname = urlInfo?.hostname || '';
   const isDapp = urlInfo?.protocol === 'https:';

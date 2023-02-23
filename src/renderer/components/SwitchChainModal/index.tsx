@@ -86,7 +86,7 @@ function searchFilter(keyword: string) {
 function SwitchChainModalInner({
   value = CHAINS_ENUM.ETH,
   onChange,
-  title = 'Select the chain',
+  title = 'Select chain',
   supportChains,
   disabledTips,
 }: {

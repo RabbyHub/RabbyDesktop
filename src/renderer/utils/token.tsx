@@ -4,8 +4,9 @@ import { CHAINS, CHAINS_ENUM } from '@debank/common';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import { Contract, providers } from 'ethers';
 import { hexToString } from 'web3-utils';
+import styled from 'styled-components';
 import TokensIcons from '../routes/Home/components/TokenIcons';
-import { formatUsdValue, splitNumberByStep } from './number';
+import { formatUsdValue } from './number';
 
 export const ellipsisTokenSymbol = (text: string, length = 5) => {
   if (text.length <= length) return text;
@@ -291,7 +292,23 @@ export const wrapUrlInImgOrDefault = (url?: string, size?: number) => {
   );
 };
 
-export function getTokens(tokens: TokenItem[] = [], separator = ' + ') {
+const DebtTag = styled.div`
+  border: 1px solid #ff6060;
+  border-radius: 4px;
+  padding: 2px 5px;
+  font-weight: 700;
+  font-size: 10px;
+  line-height: 12px;
+  text-transform: uppercase;
+  color: #ff6060;
+  margin-left: 6px;
+`;
+
+export function getTokens(
+  tokens: TokenItem[] = [],
+  separator = ' + ',
+  isDebt = false
+) {
   const tokenStr = tokens
     .filter((item) => !!item)
     .map((token) => token.symbol)
@@ -301,6 +318,7 @@ export function getTokens(tokens: TokenItem[] = [], separator = ' + ') {
     <div className="flex items-center flex-wrap">
       {icon}
       <div>{tokenStr}</div>
+      {isDebt && <DebtTag>Debt</DebtTag>}
     </div>
   );
 }

@@ -10,13 +10,15 @@ import { VIEW_TYPE } from '../hooks';
 const PortfolioWrapper = styled.div`
   background: rgba(255, 255, 255, 0.07);
   width: 100%;
-  padding: 46px 27px;
+  padding: 28px 27px;
+  padding-right: 0;
   border-radius: 8px;
   position: relative;
-  flex: 1;
-  overflow: auto;
-  ::-webkit-scrollbar {
-    display: none;
+  height: 100%;
+  .scroll-container {
+    overflow: overlay;
+    height: 100%;
+    padding-right: 27px;
   }
   .icon-asset-arrow {
     position: absolute;
@@ -36,6 +38,7 @@ const PortfolioWrapper = styled.div`
       font-size: 12px;
       line-height: 14px;
       padding: 0 23px;
+      margin-bottom: 28px;
       & > div {
         text-align: left;
         &:nth-child(1) {
@@ -162,42 +165,46 @@ const PortfolioView = ({
   }
 
   return (
-    <PortfolioWrapper>
-      <img
-        src="rabby-internal://assets/icons/home/asset-arrow.svg"
-        className="icon-asset-arrow"
-        style={{
-          transform: `translateX(${assetArrowLeft}px)`,
-        }}
-      />
-      <TokenList
-        tokenList={tokenList}
-        historyTokenMap={historyTokenMap}
-        tokenHidden={tokenHidden}
-        isLoadingTokenList={isLoadingTokenList}
-        supportHistoryChains={supportHistoryChains}
-        showHistory={view === VIEW_TYPE.CHANGE}
-      />
-      <ProtocolList
-        protocolList={protocolList}
-        historyProtocolMap={historyProtocolMap}
-        protocolHistoryTokenPriceMap={protocolHistoryTokenPriceMap}
-        onRelateDapp={handleRelateDapp}
-        isLoading={isLoadingProtocolList}
-        supportHistoryChains={supportHistoryChains}
-        historyTokenDict={historyTokenDict}
-        isLoadingProtocolHistory={isLoadingProtocolHistory}
-        view={view}
-        protocolHidden={protocolHidden}
-      />
-      <AssociateDappModal
-        protocolId={relateDappId}
-        open={relateDappModalOpen}
-        url={relateDappUrl}
-        onCancel={() => setRelateDappModalOpen(false)}
-        onOk={() => setRelateDappModalOpen(false)}
-      />
-    </PortfolioWrapper>
+    <div className="flex-1 overflow-hidden pt-[15px]">
+      <PortfolioWrapper>
+        <img
+          src="rabby-internal://assets/icons/home/asset-arrow.svg"
+          className="icon-asset-arrow"
+          style={{
+            transform: `translateX(${assetArrowLeft}px)`,
+          }}
+        />
+        <div className="scroll-container">
+          <TokenList
+            tokenList={tokenList}
+            historyTokenMap={historyTokenMap}
+            tokenHidden={tokenHidden}
+            isLoadingTokenList={isLoadingTokenList}
+            supportHistoryChains={supportHistoryChains}
+            showHistory={view === VIEW_TYPE.CHANGE}
+          />
+          <ProtocolList
+            protocolList={protocolList}
+            historyProtocolMap={historyProtocolMap}
+            protocolHistoryTokenPriceMap={protocolHistoryTokenPriceMap}
+            onRelateDapp={handleRelateDapp}
+            isLoading={isLoadingProtocolList}
+            supportHistoryChains={supportHistoryChains}
+            historyTokenDict={historyTokenDict}
+            isLoadingProtocolHistory={isLoadingProtocolHistory}
+            view={view}
+            protocolHidden={protocolHidden}
+          />
+          <AssociateDappModal
+            protocolId={relateDappId}
+            open={relateDappModalOpen}
+            url={relateDappUrl}
+            onCancel={() => setRelateDappModalOpen(false)}
+            onOk={() => setRelateDappModalOpen(false)}
+          />
+        </div>
+      </PortfolioWrapper>
+    </div>
   );
 };
 

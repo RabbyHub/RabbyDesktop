@@ -117,6 +117,11 @@ export default (
       }));
       setIsLoading(false);
       const list = await walletOpenapi.getProtocolList(addr);
+      if (list.length <= 0) {
+        isRealTimeLoadedRef.current = true;
+        isLoadingRealTimeRef.current = false;
+        setForceUpdate((prev) => !prev);
+      }
       list.forEach((item) => {
         queue.add(() => walletOpenapi.getProtocol({ addr, id: item.id }));
       });
