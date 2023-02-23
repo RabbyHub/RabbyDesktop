@@ -5,13 +5,21 @@ export function isValidDappAlias(alias: string) {
   return /[\w\d]+/.test(alias);
 }
 
-export function formatDapp(input: any): IDapp | null {
+export function formatDapp(
+  input: any,
+  patchesData?: {
+    faviconUrl?: string;
+  }
+): IDapp | null {
   if (!input?.origin) return null;
 
   return {
     alias: input?.alias || ('' as IDapp['alias']),
     origin: input.origin as IDapp['origin'],
-    faviconUrl: input?.faviconUrl || ('' as IDapp['faviconUrl']),
+    faviconUrl:
+      patchesData?.faviconUrl ||
+      input?.faviconUrl ||
+      ('' as IDapp['faviconUrl']),
     faviconBase64: input?.faviconBase64 || ('' as IDapp['faviconBase64']),
   };
 }
