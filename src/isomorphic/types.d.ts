@@ -76,6 +76,20 @@ type IDesktopAppState = {
   sidebarCollapsed: boolean;
 };
 
+type IAppDynamicConfig = {
+  domain_metas?: {
+    url_head?: {
+      [key: string]: {
+        alias?: string;
+        navTextColorLight?: string;
+        navBgColorLight?: string;
+        navBgColorDark?: string;
+        faviconURL?: string;
+      };
+    };
+  };
+};
+
 type IAppProxyConf = {
   proxyType: 'none' | 'system' | 'custom';
   proxySettings: {
