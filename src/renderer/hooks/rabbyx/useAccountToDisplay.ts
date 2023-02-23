@@ -95,10 +95,32 @@ export const useAccountToDisplay = () => {
     );
   }, []);
 
+  const updateBalance = React.useCallback(
+    async (address: string) => {
+      const balance = await walletController.getAddressBalance(address);
+
+      setAccountsList((prev) => {
+        return prev.map((item) => {
+          if (item.address === address) {
+            return {
+              ...item,
+              balance: balance?.total_usd_value || 0,
+            };
+          }
+          return item;
+        });
+      });
+
+      return balance.total_usd_value;
+    },
+    [setAccountsList]
+  );
+
   return {
     accountsList,
     loadingAccounts,
     getAllAccountsToDisplay,
     removeAccount,
+    updateBalance,
   };
 };
