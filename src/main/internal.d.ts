@@ -132,6 +132,10 @@ type MainInternalsMessagePayload = {
     send: [];
     response: [];
   };
+  '__internal_main:app:reset-rabbyx-approvals': {
+    send: [];
+    response: [];
+  };
   '__internal_main:app:relaunch': {
     send: [];
     response: [];

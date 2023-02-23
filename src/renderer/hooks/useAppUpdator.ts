@@ -80,13 +80,41 @@ const releaseCheckInfoAtom = atom({
 } as IAppUpdatorCheckResult);
 const downloadInfoAtom = atom(null as null | IAppUpdatorDownloadProgress);
 
-export function useHasNewRelease() {
-  const [releaseCheckInfo] = useAtom(releaseCheckInfoAtom);
-  return releaseCheckInfo.hasNewRelease;
+export function useCheckNewRelease(opts?: { isWindowTop?: boolean }) {
+  const { isWindowTop } = opts || {};
+  const [releaseCheckInfo, setReleaseCheckInfo] = useAtom(releaseCheckInfoAtom);
+
+  const fetchReleaseInfo = useCallback(async () => {
+    // eslint-disable-next-line promise/catch-or-return
+    const newVal = await checkIfNewRelease();
+    setReleaseCheckInfo(newVal);
+  }, [setReleaseCheckInfo]);
+
+  useEffect(() => {
+    fetchReleaseInfo();
+    if (!isWindowTop) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      fetchReleaseInfo();
+    }, 1000 * 60 * 60 * 0.5);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [isWindowTop, fetchReleaseInfo, setReleaseCheckInfo]);
+
+  return {
+    hasNewRelease: releaseCheckInfo.hasNewRelease,
+    releaseCheckInfo,
+    setReleaseCheckInfo,
+    fetchReleaseInfo,
+  };
 }
 
 export function useAppUpdator() {
-  const [releaseCheckInfo, setReleaseCheckInfo] = useAtom(releaseCheckInfoAtom);
+  const [releaseCheckInfo] = useAtom(releaseCheckInfoAtom);
   const [downloadInfo, setDownloadInfo] = useAtom(downloadInfoAtom);
 
   const onDownload: OnDownloadFunc = useCallback(
@@ -99,24 +127,6 @@ export function useAppUpdator() {
   const requestDownload = useCallback(async () => {
     await startDownload({ onDownload });
   }, [onDownload]);
-
-  useEffect(() => {
-    const fetchReleaseInfo = () => {
-      // eslint-disable-next-line promise/catch-or-return
-      checkIfNewRelease().then((newVal) => {
-        setReleaseCheckInfo(newVal);
-        return newVal;
-      });
-    };
-    fetchReleaseInfo();
-    const timer = setInterval(() => {
-      fetchReleaseInfo();
-    }, 1000 * 60 * 60 * 0.5);
-
-    return () => {
-      clearInterval(timer);
-    };
-  }, [setReleaseCheckInfo]);
 
   return {
     releaseCheckInfo,

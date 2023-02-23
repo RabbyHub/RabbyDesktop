@@ -46,3 +46,5 @@ export const SAFE_WEBPREFERENCES: Electron.WebPreferences = {
   autoplayPolicy: 'user-gesture-required',
   contextIsolation: true,
 };
+
+export const FORCE_DISABLE_CONTENT_PROTECTION = true;

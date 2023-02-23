@@ -5,6 +5,7 @@ import { Subject, debounceTime } from 'rxjs';
 import Store from 'electron-store';
 import {
   APP_NAME,
+  FORCE_DISABLE_CONTENT_PROTECTION,
   IS_RUNTIME_PRODUCTION,
   PERSIS_STORE_PREFIX,
 } from '../../isomorphic/constants';
@@ -67,7 +68,7 @@ export const desktopAppStore = new Store<{
     },
     enableContentProtected: {
       type: 'boolean',
-      default: true,
+      default: !FORCE_DISABLE_CONTENT_PROTECTION,
     },
     sidebarCollapsed: {
       type: 'boolean',
@@ -115,6 +116,11 @@ export const desktopAppStore = new Store<{
 
   watch: true,
 });
+
+// force disable it
+if (FORCE_DISABLE_CONTENT_PROTECTION) {
+  desktopAppStore.set('enableContentProtected', false);
+}
 
 function getState() {
   return {

@@ -12,7 +12,10 @@ import {
 import { Button, Modal, SwitchProps, Tooltip } from 'antd';
 import { useSettings } from '@/renderer/hooks/useSettings';
 import styled from 'styled-components';
-import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import {
+  FORCE_DISABLE_CONTENT_PROTECTION,
+  IS_RUNTIME_PRODUCTION,
+} from '@/isomorphic/constants';
 import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
 import { ModalConfirm } from '@/renderer/components/Modal/Confirm';
 import { Switch } from '@/renderer/components/Switch/Switch';
@@ -160,45 +163,47 @@ export function MainWindowSettings() {
       <div className={styles.settingBlock}>
         <h4 className={styles.blockTitle}>Security</h4>
         <div className={styles.itemList}>
-          <ItemSwitch
-            checked={settings.enableContentProtected}
-            name={
-              <>
-                <Tooltip
-                  trigger="hover"
-                  title="Once enabled, content in Rabby will be hidden during screen recording."
-                >
-                  <span style={{ display: 'flex', alignItems: 'center' }}>
-                    Screen Capture Protection
-                    <img
-                      className={styles.nameTooltipIcon}
-                      src={IconTooltipInfo}
-                      style={{
-                        position: 'relative',
-                        top: 1,
-                      }}
-                    />
-                  </span>
-                </Tooltip>
-              </>
-            }
-            icon="rabby-internal://assets/icons/mainwin-settings/content-protection.svg"
-            onChange={(nextEnabled: boolean) => {
-              Modal.confirm({
-                title: 'Restart Confirmation',
-                content: (
-                  <>
-                    It's required to restart Rabby App to apply this change.{' '}
-                    <br />
-                    Do you confirm to {nextEnabled ? 'enable' : 'disable'} it?
-                  </>
-                ),
-                onOk: () => {
-                  toggleEnableContentProtection(nextEnabled);
-                },
-              });
-            }}
-          />
+          {!FORCE_DISABLE_CONTENT_PROTECTION && (
+            <ItemSwitch
+              checked={settings.enableContentProtected}
+              name={
+                <>
+                  <Tooltip
+                    trigger="hover"
+                    title="Once enabled, content in Rabby will be hidden during screen recording."
+                  >
+                    <span style={{ display: 'flex', alignItems: 'center' }}>
+                      Screen Capture Protection
+                      <img
+                        className={styles.nameTooltipIcon}
+                        src={IconTooltipInfo}
+                        style={{
+                          position: 'relative',
+                          top: 1,
+                        }}
+                      />
+                    </span>
+                  </Tooltip>
+                </>
+              }
+              icon="rabby-internal://assets/icons/mainwin-settings/content-protection.svg"
+              onChange={(nextEnabled: boolean) => {
+                Modal.confirm({
+                  title: 'Restart Confirmation',
+                  content: (
+                    <>
+                      It's required to restart Rabby App to apply this change.{' '}
+                      <br />
+                      Do you confirm to {nextEnabled ? 'enable' : 'disable'} it?
+                    </>
+                  ),
+                  onOk: () => {
+                    toggleEnableContentProtection(nextEnabled);
+                  },
+                });
+              }}
+            />
+          )}
           <ItemSwitch
             checked={enable}
             name={
@@ -253,32 +258,6 @@ export function MainWindowSettings() {
         </div>
       </div>
 
-      {!IS_RUNTIME_PRODUCTION && (
-        <div className={styles.settingBlock}>
-          <h4 className={styles.blockTitle}>Developer Kits</h4>
-          <div className={styles.itemList}>
-            <ItemAction
-              name="Devices"
-              icon="rabby-internal://assets/icons/developer-kits/usb.svg"
-              onClick={() => {
-                setIsViewingDevices(true);
-              }}
-            >
-              <Button
-                type="primary"
-                ghost
-                onClick={(evt) => {
-                  evt.stopPropagation();
-                  testRequestDevice();
-                }}
-              >
-                <code>hid.requestDevices()</code>
-              </Button>
-            </ItemAction>
-          </div>
-        </div>
-      )}
-
       <div className={styles.settingBlock}>
         <h4 className={styles.blockTitle}>About</h4>
         <div className={styles.itemList}>
@@ -313,17 +292,47 @@ export function MainWindowSettings() {
         </div>
       </div>
 
-      <div className={styles.settingBlock}>
-        <div className={styles.itemList}>
-          <ItemAction
-            name={<span className={styles.dangerText}>Reset App</span>}
-            icon="rabby-internal://assets/icons/mainwin-settings/reset.svg"
-            onClick={() => {
-              requestResetApp();
-            }}
-          />
+      {!IS_RUNTIME_PRODUCTION && (
+        <div className={styles.settingBlock}>
+          <h4 className={styles.blockTitle}>Developer Kits</h4>
+          <div className={styles.itemList}>
+            <ItemAction
+              name="Devices"
+              icon="rabby-internal://assets/icons/developer-kits/usb.svg"
+              onClick={() => {
+                setIsViewingDevices(true);
+              }}
+            >
+              <Button
+                type="primary"
+                ghost
+                onClick={(evt) => {
+                  evt.stopPropagation();
+                  testRequestDevice();
+                }}
+              >
+                <code>hid.requestDevices()</code>
+              </Button>
+            </ItemAction>
+            <ItemAction
+              name={<span className={styles.dangerText}>Reset App</span>}
+              icon="rabby-internal://assets/icons/mainwin-settings/reset.svg"
+              onClick={() => {
+                requestResetApp();
+              }}
+            />
+            <ItemAction
+              name={<span className={styles.dangerText}>Reset Signs</span>}
+              icon="rabby-internal://assets/icons/mainwin-settings/reset.svg"
+              onClick={() => {
+                window.rabbyDesktop.ipcRenderer.sendMessage(
+                  '__internal_rpc:app:reset-rabbyx-approvals'
+                );
+              }}
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
