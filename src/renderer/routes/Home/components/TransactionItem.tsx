@@ -391,6 +391,12 @@ const TransactionItem = ({
     >
   >({});
 
+  const isFromRabby = useMemo(() => {
+    if (!item.site) return false;
+    const { name, origin } = item.site;
+    return /^chrome-extension:\/\//.test(origin) && name === 'Rabby Wallet';
+  }, [item]);
+
   const loadTxData = async () => {
     if (!item.txs || item.txs.length <= 0 || !item.rawTx) {
       return;
@@ -677,7 +683,7 @@ const TransactionItem = ({
         <TxExplainInner>{interAddressExplain}</TxExplainInner>
         <TxChange sends={item.sends} receives={item.receives} />
       </TxExplain>
-      {item.site ? (
+      {item.site && !isFromRabby ? (
         <div className="tx-origin">
           Initiate from Dapp:{' '}
           <TransactionWebsite site={item.site} className="tx-dapp-link" />
