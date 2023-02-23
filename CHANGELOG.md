@@ -1,7 +1,25 @@
 
+v0.5.0 / 2023-02-23
+===================
+
+  * fix: tuning style. (#160)
+  * fix: home bottom margin
+  * fix: duration of toast copied web3 addr in mainWindow.
+  * fix/dapp manage (#155)
+  * feat: adjust settings & upgrade (#159)
+  * fix: variable ref.
+  * fix: rabby is not a dapp
+  * fix: find localTx from tx history (#158)
+  * feat: support dynamic config pull. (#156)
+  * Fix/slippage input (#152)
+  * fix: portfolio issues (#157)
+  * fix: history txs complete status (#154)
+  * fix: edit name (#153)
+
 v0.4.8 / 2023-02-22
 ===================
 
+  * Release v0.4.8
   * fix: webview tag loading in mainWindow webContents.
   * chore: upgrade rabbyx to update matomo idSite.
   * fix: home width (#150)
