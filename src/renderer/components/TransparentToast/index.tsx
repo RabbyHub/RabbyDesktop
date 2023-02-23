@@ -6,6 +6,7 @@ import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
 import classNames from 'classnames';
 import { useClickOutSide } from '@/renderer/hooks/useClick';
 import { isWeb3Addr } from '@/isomorphic/web3';
+import { isMainWinShellWebUI } from '@/isomorphic/url';
 
 const TIMEOUT_SEC = 3;
 
@@ -52,6 +53,8 @@ function ToastContent({
   );
 }
 
+const inMainWin = isMainWinShellWebUI(window.location.href);
+
 export async function toastCopiedWeb3Addr(text: string) {
   if (isWeb3Addr(text)) {
     toastMessage({
@@ -60,7 +63,9 @@ export async function toastCopiedWeb3Addr(text: string) {
       content: (
         <ToastContent
           onClickOutside={() => {
-            message.destroy(TOAST_KEY);
+            if (!inMainWin) {
+              message.destroy(TOAST_KEY);
+            }
           }}
         >
           <div className="flex items-center">
