@@ -18,7 +18,7 @@ export const useTxSource = (address: string) => {
       const chain = Object.values(CHAINS).find((i) => i.id === item.chainId);
       if (
         completedTx?.site?.origin &&
-        /^https?:\/\//.test(completedTx?.site?.origin)
+        /^https:\/\//.test(completedTx?.site?.origin)
       ) {
         map.set(
           [chain?.serverId, completedTx?.hash].join('|'),

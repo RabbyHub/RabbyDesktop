@@ -674,10 +674,13 @@ const TransactionItem = ({
         <TxExplainInner>{interAddressExplain}</TxExplainInner>
         <TxChange sends={item.sends} receives={item.receives} />
       </TxExplain>
-      {item.site ? (
+      {item.site?.origin && /^https:\/\//.test(item.site?.origin) ? (
         <div className="tx-origin">
           Initiate from Dapp:{' '}
-          <TransactionWebsite site={item.site} className="tx-dapp-link" />
+          <TransactionWebsite
+            origin={item.site.origin}
+            className="tx-dapp-link"
+          />
         </div>
       ) : null}
       {isPending && (item?.txs?.length || 0) > 1 && (
