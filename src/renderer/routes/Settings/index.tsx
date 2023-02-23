@@ -258,6 +258,40 @@ export function MainWindowSettings() {
         </div>
       </div>
 
+      <div className={styles.settingBlock}>
+        <h4 className={styles.blockTitle}>About</h4>
+        <div className={styles.itemList}>
+          <ItemText
+            name={`Version: ${appVerison || '-'}`}
+            text=""
+            icon="rabby-internal://assets/icons/mainwin-settings/info.svg"
+          >
+            <AutoUpdate isFold={false} />
+          </ItemText>
+          {/* <ItemLink name='User Agreement' /> */}
+          <ItemLink
+            name="Privacy Policy"
+            link="https://rabby.io/docs/privacy/"
+            icon="rabby-internal://assets/icons/mainwin-settings/privacy.svg"
+          />
+          <ItemLink
+            name="Website"
+            link="https://rabby.io/"
+            icon="rabby-internal://assets/icons/mainwin-settings/homesite.svg"
+          />
+          <ItemLink
+            name="Discord"
+            link="https://discord.gg/seFBCWmUre"
+            icon="rabby-internal://assets/icons/mainwin-settings/discord.svg"
+          />
+          <ItemLink
+            name="Twitter"
+            link="https://twitter.com/Rabby_io"
+            icon="rabby-internal://assets/icons/mainwin-settings/twitter.svg"
+          />
+        </div>
+      </div>
+
       {!IS_RUNTIME_PRODUCTION && (
         <div className={styles.settingBlock}>
           <h4 className={styles.blockTitle}>Developer Kits</h4>
@@ -299,40 +333,6 @@ export function MainWindowSettings() {
           </div>
         </div>
       )}
-
-      <div className={styles.settingBlock}>
-        <h4 className={styles.blockTitle}>About</h4>
-        <div className={styles.itemList}>
-          <ItemText
-            name={`Version: ${appVerison || '-'}`}
-            text=""
-            icon="rabby-internal://assets/icons/mainwin-settings/info.svg"
-          >
-            <AutoUpdate isFold={false} />
-          </ItemText>
-          {/* <ItemLink name='User Agreement' /> */}
-          <ItemLink
-            name="Privacy Policy"
-            link="https://rabby.io/docs/privacy/"
-            icon="rabby-internal://assets/icons/mainwin-settings/privacy.svg"
-          />
-          <ItemLink
-            name="Website"
-            link="https://rabby.io/"
-            icon="rabby-internal://assets/icons/mainwin-settings/homesite.svg"
-          />
-          <ItemLink
-            name="Discord"
-            link="https://discord.gg/seFBCWmUre"
-            icon="rabby-internal://assets/icons/mainwin-settings/discord.svg"
-          />
-          <ItemLink
-            name="Twitter"
-            link="https://twitter.com/Rabby_io"
-            icon="rabby-internal://assets/icons/mainwin-settings/twitter.svg"
-          />
-        </div>
-      </div>
     </div>
   );
 }
