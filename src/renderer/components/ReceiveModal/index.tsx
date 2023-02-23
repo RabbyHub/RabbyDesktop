@@ -112,7 +112,12 @@ const ReceiveContent = ({ onCancel, chain, token }: ReceiveContentProps) => {
   return (
     <div className={styles.receive}>
       <div className={styles.receiveHeader}>
-        <div className={styles.account}>
+        <div
+          className={classNames(
+            styles.account,
+            isWatchAddress && styles.isWatch
+          )}
+        >
           <img src={icon} alt="" className={styles.accountIcon} />
           <div className="text-left overflow-hidden">
             <div className="flex items-center">
