@@ -280,6 +280,22 @@ export function MainWindowSettings() {
                 <code>hid.requestDevices()</code>
               </Button>
             </ItemAction>
+            <ItemAction
+              name={<span className={styles.dangerText}>Reset App</span>}
+              icon="rabby-internal://assets/icons/mainwin-settings/reset.svg"
+              onClick={() => {
+                requestResetApp();
+              }}
+            />
+            <ItemAction
+              name={<span className={styles.dangerText}>Reset Signs</span>}
+              icon="rabby-internal://assets/icons/mainwin-settings/reset.svg"
+              onClick={() => {
+                window.rabbyDesktop.ipcRenderer.sendMessage(
+                  '__internal_rpc:app:reset-rabbyx-approvals'
+                );
+              }}
+            />
           </div>
         </div>
       )}
@@ -314,18 +330,6 @@ export function MainWindowSettings() {
             name="Twitter"
             link="https://twitter.com/Rabby_io"
             icon="rabby-internal://assets/icons/mainwin-settings/twitter.svg"
-          />
-        </div>
-      </div>
-
-      <div className={styles.settingBlock}>
-        <div className={styles.itemList}>
-          <ItemAction
-            name={<span className={styles.dangerText}>Reset App</span>}
-            icon="rabby-internal://assets/icons/mainwin-settings/reset.svg"
-            onClick={() => {
-              requestResetApp();
-            }}
           />
         </div>
       </div>
