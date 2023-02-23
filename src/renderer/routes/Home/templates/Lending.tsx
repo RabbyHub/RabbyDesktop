@@ -87,8 +87,8 @@ export default React.memo((props: { data: PortfolioItem[] }) => {
                       .map((token: any) => {
                         return (
                           <Table.Row>
-                            <Value.Token value={token} />
-                            <Value.Balance value={token} isDebt />
+                            <Value.Token value={token} isDebt />
+                            <Value.Balance value={token} />
                             <Value.USDValue
                               value={token.amount * token.price}
                             />
