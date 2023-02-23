@@ -6,6 +6,7 @@ import {
   RcIconHistoryGoBack,
   RcIconReload,
   RcIconStopload,
+  RcIconShield,
 } from '@/../assets/icons/top-bar';
 
 import { Divider } from 'antd';
@@ -30,12 +31,18 @@ import { toastMessage } from '../TransparentToast';
 
 const isDarwin = detectOS() === 'darwin';
 
-const RiskArea = () => {
+const RiskArea = ({
+  style,
+  iconColor,
+}: React.PropsWithChildren<{
+  style?: React.CSSProperties;
+  iconColor?: string;
+}>) => {
   return (
-    <div className={styles.risk}>
-      <img
+    <div style={style} className={styles.risk}>
+      <RcIconShield
+        style={{ ...(iconColor && { color: iconColor }) }}
         className={styles.icon}
-        src="rabby-internal://assets/icons/top-bar/icon-shield-ok.svg"
       />
       <div className={styles.text}>No risk found</div>
     </div>
@@ -101,9 +108,8 @@ export const TopNavBar = () => {
     switchChain(chain);
   });
 
-  const { navTextColor, navBackgroundColor } = useMatchURLBaseConfig(
-    activeTab?.url
-  );
+  const { navTextColor, navIconColor, navBackgroundColor } =
+    useMatchURLBaseConfig(activeTab?.url);
 
   return (
     <div className={styles.main}>
@@ -116,7 +122,7 @@ export const TopNavBar = () => {
         }}
         data-nodrag
       >
-        <RiskArea />
+        <RiskArea style={{ color: navTextColor }} iconColor={navIconColor} />
         <Divider type="vertical" className={styles.divider} />
         {activeTab?.status === 'loading' && (
           <img
@@ -144,6 +150,7 @@ export const TopNavBar = () => {
         </div>
         <div className={clsx(styles.historyBar, chainHover && styles.hidden)}>
           <RcIconHistoryGoBack
+            style={{ color: navIconColor }}
             className={clsx(
               styles.goBack,
               selectedTabInfo?.canGoBack && styles.active
@@ -151,6 +158,7 @@ export const TopNavBar = () => {
             onClick={navActions.onGoBackButtonClick}
           />
           <RcIconHistoryGoBack
+            style={{ color: navIconColor }}
             className={clsx(
               styles.goForward,
               selectedTabInfo?.canGoForward && styles.active
@@ -158,9 +166,15 @@ export const TopNavBar = () => {
             onClick={navActions.onGoForwardButtonClick}
           />
           {activeTab?.status === 'loading' ? (
-            <RcIconStopload onClick={navActions.onStopLoadingButtonClick} />
+            <RcIconStopload
+              style={{ color: navIconColor }}
+              onClick={navActions.onStopLoadingButtonClick}
+            />
           ) : (
-            <RcIconReload onClick={navActions.onReloadButtonClick} />
+            <RcIconReload
+              style={{ color: navIconColor }}
+              onClick={navActions.onReloadButtonClick}
+            />
           )}
         </div>
         {!!currentConnectedSite?.isConnected && !!currentConnectedSite?.chain && (

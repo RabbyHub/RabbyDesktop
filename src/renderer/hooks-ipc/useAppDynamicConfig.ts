@@ -42,28 +42,29 @@ export function useMatchURLBaseConfig(urlBase?: string) {
     fetchConfig();
   }, [fetchConfig, urlBase]);
 
-  const { navTextColor, navBackgroundColor, urlBaseConf } = useMemo(() => {
+  return useMemo(() => {
     const matchedConf = matchURLHead(
       urlBase,
       appDynamicConfig?.domain_metas?.url_head
     );
-    const bgColor = matchedConf?.navBgColorLight || '#ffeef9';
-    const bgModel = tinyColor(bgColor);
+    const bgColor = matchedConf?.navBgColorLight || 'rgba(0, 0, 0, 0.2)';
 
+    // const bgModel = tinyColor(bgColor);
+    // const textColor =
+    //   matchedConf?.navTextColorLight ||
+    //   (bgModel.isDark() ? invertColor(bgModel.toHex(), true) : 'rgba(255, 255, 255, 0.8)');
     const textColor =
-      matchedConf?.navTextColorLight ||
-      (bgModel.isDark() ? invertColor(bgModel.toHex()) : '#4b4d59');
+      matchedConf?.navTextColorLight || 'rgba(255, 255, 255, 0.8)';
+
+    const navIconColor = tinyColor(textColor).brighten(10).toHex();
+    const dividerBorderColor = tinyColor(textColor).brighten(10).toHex();
 
     return {
       navTextColor: textColor,
+      navIconColor,
+      navDividerColor: dividerBorderColor,
       navBackgroundColor: bgColor,
       urlBaseConf: matchedConf,
     };
   }, [urlBase, appDynamicConfig?.domain_metas?.url_head]);
-
-  return {
-    navTextColor,
-    navBackgroundColor,
-    urlBaseConf,
-  };
 }
