@@ -106,13 +106,25 @@ export const TokensSlash = ({ value }: { value: TokenItem[] }) => {
   return <Col>{getTokens(value, '/')}</Col>;
 };
 
-export const Tokens = ({ value }: { value: TokenItem[] }) => {
+export const Tokens = ({
+  value,
+  isDebt = false,
+}: {
+  value: TokenItem[];
+  isDebt?: boolean;
+}) => {
   value = Array.isArray(value) ? value : [value];
-  return <Col>{getTokens(value)}</Col>;
+  return <Col>{getTokens(value, undefined, isDebt)}</Col>;
 };
 
-export const Token = ({ value }: { value: TokenItem }) => {
-  return <Tokens value={[value]} />;
+export const Token = ({
+  value,
+  isDebt = false,
+}: {
+  value: TokenItem;
+  isDebt?: boolean;
+}) => {
+  return <Tokens value={[value]} isDebt={isDebt} />;
 };
 
 export const USDValue = ({ value }: { value: string | number }) => {
