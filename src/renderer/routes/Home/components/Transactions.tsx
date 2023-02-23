@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 import { maxBy, minBy, sortBy } from 'lodash';
 import { useInterval } from 'react-use';
@@ -8,7 +8,7 @@ import {
   TransferingNFTItem,
   TxHistoryResult,
 } from '@debank/rabby-api/dist/types';
-import { CHAINS } from '@debank/common';
+import { CHAINS, CHAINS_LIST } from '@debank/common';
 import type {
   TransactionDataItem,
   TransactionGroup,
@@ -160,9 +160,7 @@ const Empty = ({ text }: { text: string }) => (
 const Transactions = () => {
   const { currentAccount } = useCurrentAccount();
   const [recentTxs, setRecentTxs] = useState<TransactionDataItem[]>([]);
-  const [remoteTxs, setRemoteTxs] = useState<TxHistoryResult['history_list']>(
-    []
-  );
+  const remoteTxsRef = useRef<TxHistoryResult['history_list']>([]);
   const [pendingTxs, setPendingTxs] = useState<TransactionDataItem[]>([]);
   const [localTxs, setLocalTxs] = useState<TransactionDataItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -191,16 +189,42 @@ const Transactions = () => {
     ).reverse();
   }, [recentTxs, completedTxs, localTxs]);
 
-  const initLocalTxs = useCallback(async () => {
-    if (!currentAccount?.address) return;
+  const initLocalTxs = async (address: string) => {
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
     const { pendings, completeds } =
-      await walletController.getTransactionHistory(currentAccount.address);
+      await walletController.getTransactionHistory(address);
     const lTxs: TransactionDataItem[] = [];
     const pTxs: TransactionDataItem[] = [];
-    completeds
+    const markedCompleteds = completeds.map((item) => {
+      if (!item.dbIndexed) {
+        const chain = CHAINS_LIST.find((c) => c.id === item.chainId);
+        if (chain) {
+          const target = remoteTxsRef.current.find((i) =>
+            item.txs.find(
+              (tx) => tx.hash === i.id && i.chain === chain.serverId
+            )
+          );
+          if (target) {
+            walletController.markTransactionAsIndexed(
+              address,
+              chain.id,
+              target.id
+            );
+            return {
+              ...item,
+              dbIndexed: true,
+            };
+          }
+        }
+      }
+      return item;
+    });
+    markedCompleteds
       .filter(
-        (item) => item.createdAt >= YESTERDAY * 1000 && !item.isSubmitFailed
+        (item) =>
+          (item.completedAt || item.createdAt) >= YESTERDAY * 1000 &&
+          !item.isSubmitFailed &&
+          !item.dbIndexed
       )
       .forEach((item) => {
         const chain = Object.values(CHAINS).find((i) => i.id === item.chainId);
@@ -244,7 +268,7 @@ const Transactions = () => {
           status: 'completed',
           otherAddr: maxTx.rawTx.to || '',
           name,
-          timeAt: item.createdAt,
+          timeAt: item.completedAt || item.createdAt,
           site: completedTx?.site,
         });
       });
@@ -302,15 +326,15 @@ const Transactions = () => {
         });
       });
     setPendingTxs(pTxs);
-  }, [currentAccount]);
+  };
 
-  const init = async () => {
-    if (!currentAccount) return;
+  const init = async (address?: string) => {
+    if (!address) return;
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
     const txs = await walletOpenapi.listTxHisotry({
-      id: currentAccount.address,
+      id: address,
     });
-    setRemoteTxs(txs.history_list || []);
+    remoteTxsRef.current = txs.history_list || [];
     const recent = txs.history_list.filter((item) => item.time_at >= YESTERDAY);
     const dbTxs = recent.map((item) => {
       const data: TransactionDataItem = {
@@ -354,23 +378,25 @@ const Transactions = () => {
       }
       return data;
     });
-    initLocalTxs();
+    initLocalTxs(address);
     setRecentTxs(sortBy(dbTxs, 'timeAt').reverse());
     setIsLoading(false);
   };
 
   useInterval(
-    init,
+    () => init(currentAccount?.address),
     pendingTxs.length > 0 || completedTxs.length > 0 ? 5000 : 60 * 1000
   );
 
   useEffect(() => {
+    if (!currentAccount) return;
     setIsLoading(true);
-    init();
+    init(currentAccount.address);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentAccount]);
 
   useEffect(() => {
+    if (!currentAccount) return;
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
       (payload) => {
@@ -379,17 +405,17 @@ const Transactions = () => {
           default:
             break;
           case 'submitted': {
-            initLocalTxs();
+            initLocalTxs(currentAccount.address);
             break;
           }
           case 'finished': {
-            initLocalTxs();
+            initLocalTxs(currentAccount.address);
             break;
           }
         }
       }
     );
-  }, [initLocalTxs]);
+  }, [currentAccount]);
 
   const navigate = useNavigate();
 
@@ -411,13 +437,13 @@ const Transactions = () => {
         <TransactionList>
           <Empty
             text={
-              remoteTxs.length > 0
+              remoteTxsRef.current.length > 0
                 ? 'No transaction in last 24 hours'
                 : 'No transaction'
             }
           />
         </TransactionList>
-        {remoteTxs.length > 0 && (
+        {remoteTxsRef.current.length > 0 && (
           <ViewAllButton
             onClick={() => {
               navigate('/mainwin/home/transactions');
