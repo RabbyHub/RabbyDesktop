@@ -12,6 +12,7 @@ import { CHAINS, CHAINS_LIST } from '@debank/common';
 import type {
   TransactionDataItem,
   TransactionGroup,
+  TransactionHistoryItem,
 } from '@/isomorphic/types/rabbyx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
@@ -174,20 +175,10 @@ const Transactions = () => {
 
   const mergedRecentTxs = useMemo(() => {
     return sortBy(
-      [
-        ...recentTxs.slice(0, 3).map((item) => {
-          return {
-            ...item,
-            site: localTxs.find(
-              (i) => i.id === item.id && i.chain === item.chain
-            )?.site,
-          };
-        }),
-        ...completedTxs,
-      ],
+      [...recentTxs.slice(0, 3), ...completedTxs],
       'timeAt'
     ).reverse();
-  }, [recentTxs, completedTxs, localTxs]);
+  }, [recentTxs, completedTxs]);
 
   const initLocalTxs = async (address: string) => {
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
@@ -334,9 +325,21 @@ const Transactions = () => {
     const txs = await walletOpenapi.listTxHisotry({
       id: address,
     });
+    const { completeds } = await walletController.getTransactionHistory(
+      address
+    );
     remoteTxsRef.current = txs.history_list || [];
     const recent = txs.history_list.filter((item) => item.time_at >= YESTERDAY);
     const dbTxs = recent.map((item) => {
+      let localTx: TransactionHistoryItem | null = null;
+      for (let i = 0; i < completeds.length; i++) {
+        const group = completeds[i];
+        const chain = CHAINS_LIST.find((c) => group.chainId === c.id);
+        if (chain && item.chain === chain.serverId) {
+          localTx = group.txs.find((tx) => tx.hash === item.id) || null;
+          if (localTx) break;
+        }
+      }
       const data: TransactionDataItem = {
         type: item.cate_id,
         receives: item.receives.map((i) => ({
@@ -365,6 +368,10 @@ const Transactions = () => {
         name: item.tx?.name,
         timeAt: item.time_at * 1000,
       };
+      if (localTx) {
+        data.rawTx = localTx.rawTx;
+        data.site = localTx.site;
+      }
       if (item.tx?.status === 0) {
         data.status = 'failed';
       }
