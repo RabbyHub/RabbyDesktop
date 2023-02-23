@@ -1,6 +1,12 @@
 import { LoadingOutlined } from '@ant-design/icons';
 import { Button, Form, InputRef } from 'antd';
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { addDapp, putDapp, replaceDapp } from '@/renderer/ipcRequest/dapps';
@@ -333,7 +339,6 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
         });
         return null;
       }
-      console.log(data);
       if (
         data &&
         data.inputOrigin !== data.finalOrigin &&
@@ -408,7 +413,6 @@ export function AddDapp({
 }) {
   const { dapps } = useDapps();
   const [form] = Form.useForm();
-  const [input, setInput] = useState('');
   const openDapp = useOpenDapp();
   const [addUrl] = useAddDappURL();
   useEffect(() => {
@@ -508,20 +512,23 @@ export function AddDapp({
       handleAdd(dappInfo);
     }
   };
+  const InitialHelpMessage =
+    'To ensure the security of your funds, please ensure that you enter the official domain name of Dapp';
 
-  useEffect(() => {
-    if (!input.trim()) {
+  const handleFormChange = useCallback(() => {
+    const { url } = form.getFieldsValue();
+    if (!url.trim()) {
       setState({
         validateStatus: undefined,
-        help: 'To ensure the security of your funds, please ensure that you enter the official domain name of Dapp',
+        help: InitialHelpMessage,
       });
-    } else {
+    } else if (state.help === InitialHelpMessage) {
       setState({
         validateStatus: undefined,
         help: '',
       });
     }
-  }, [input, setState]);
+  }, [form, setState, state.help]);
 
   return (
     <div className={styles.content}>
@@ -530,10 +537,7 @@ export function AddDapp({
         form={form}
         className={styles.form}
         onFinish={handleCheck}
-        onFieldsChange={() => {
-          const { url } = form.getFieldsValue();
-          setInput(url);
-        }}
+        onFieldsChange={handleFormChange}
       >
         <Form.Item
           name="url"
