@@ -143,9 +143,9 @@ const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
           <div className={styles.previewTitle}>
             <EditableInput
               value={input}
-              defaultEditable={!data?.isExistedDapp}
+              defaultEditable={!data?.isInputExistedDapp}
               onChange={(v) => {
-                if (data.isExistedDapp) {
+                if (data.isInputExistedDapp) {
                   putDapp({
                     origin: data.inputOrigin,
                     alias: v,
@@ -166,7 +166,7 @@ const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
             </div>
           ) : (
             <>
-              {data?.isExistedDapp ? (
+              {data?.isInputExistedDapp ? (
                 <Button
                   type="primary"
                   className={styles.previewBtnSuccess}
@@ -481,7 +481,7 @@ export function AddDapp({
     const nextState = {
       dappInfo: {
         ...dappInfo,
-        isExistedDapp: true,
+        isInputExistedDapp: true,
       },
     };
     setState(nextState);

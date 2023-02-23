@@ -96,12 +96,13 @@ type ISensitiveConfig = {
 type IDappsDetectResult<T extends string = string> = {
   data: null | {
     finalOrigin: string;
+    isFinalExistedDapp?: boolean;
     inputOrigin: string;
+    isInputExistedDapp?: boolean;
     recommendedAlias: string;
     icon: import('@debank/parse-favicon').Icon | null;
     faviconUrl?: string;
     faviconBase64?: string; // base64
-    isExistedDapp?: boolean;
   };
   error?: {
     type: T;

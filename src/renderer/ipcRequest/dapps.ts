@@ -27,9 +27,6 @@ export async function detectDapps(dappUrl: string) {
     .then((event) => {
       // ignore REPEAT
       if (event.result.error?.type === 'REPEAT') {
-        if (event.result.data) {
-          event.result.data.isExistedDapp = true;
-        }
         return {
           ...event.result,
           error: undefined,
