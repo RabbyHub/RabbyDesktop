@@ -1,6 +1,12 @@
 import { Tooltip } from 'antd';
 import clsx from 'clsx';
-import { memo, useMemo } from 'react';
+import {
+  memo,
+  useMemo,
+  useCallback,
+  ChangeEventHandler,
+  KeyboardEventHandler,
+} from 'react';
 import { useToggle } from 'react-use';
 import styled from 'styled-components';
 import IconInfo from '@/../assets/icons/swap/info-outline.svg?rc';
@@ -218,6 +224,44 @@ export const Slippage = memo((props: SlippageProps) => {
 
   const hasAmount = !!amount;
 
+  const onInputFocus: ChangeEventHandler<HTMLInputElement> = useCallback(
+    (e) => {
+      e.target?.select?.();
+    },
+    []
+  );
+
+  const onInputChange: ChangeEventHandler<HTMLInputElement> = useCallback(
+    (e) => {
+      const v = e.target.value.replace(/%/g, '');
+      if (/^\d*(\.\d*)?$/.test(v)) {
+        onChange(Number(v) > 50 ? '50' : v);
+      }
+    },
+    [onChange]
+  );
+
+  const onInputKeyDown: KeyboardEventHandler<HTMLInputElement> = useCallback(
+    (event) => {
+      const key = event.key;
+      const target = event.currentTarget;
+      const isDelete =
+        key === 'Backspace' &&
+        !!target.selectionStart &&
+        target.value[target.selectionStart - 1] === '%';
+      if (!isDelete) return;
+
+      if (target.selectionStart) {
+        target.focus();
+        target.setSelectionRange(
+          target.selectionStart - 1,
+          target.selectionStart - 1
+        );
+      }
+    },
+    []
+  );
+
   return (
     <Wrapper>
       <div className="header" onClick={setOpen}>
@@ -272,32 +316,9 @@ export const Slippage = memo((props: SlippageProps) => {
               autoFocus
               bordered={false}
               value={`${value}%`}
-              onFocus={(e) => {
-                e.target?.select?.();
-              }}
-              onChange={(e) => {
-                const v = e.target.value.replace(/%/g, '');
-                if (/^\d*(\.\d*)?$/.test(v)) {
-                  onChange(Number(v) > 50 ? '50' : v);
-                }
-              }}
-              onKeyDown={(event) => {
-                const key = event.key;
-                const target = event.currentTarget;
-                const isDelete =
-                  key === 'Backspace' &&
-                  !!target.selectionStart &&
-                  target.value[target.selectionStart - 1] === '%';
-                if (!isDelete) return;
-
-                if (target.selectionStart) {
-                  target.focus();
-                  target.setSelectionRange(
-                    target.selectionStart - 1,
-                    target.selectionStart - 1
-                  );
-                }
-              }}
+              onFocus={onInputFocus}
+              onChange={onInputChange}
+              onKeyDown={onInputKeyDown}
             />
           ) : (
             'Custom'
