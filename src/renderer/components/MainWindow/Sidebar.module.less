@@ -162,16 +162,17 @@
   .dappIcon {
     width: 20px;
     height: 20px;
-    border-radius: 4px;
-    background-color: #fff;
-    padding: 1px;
     :global {
       .ant-image,
       .ant-image-img {
         display: block;
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
+
+        width: 100%;
+        height: 100%;
+      }
+      .ant-image-img {
+        border-radius: 4px;
+        background-color: #fff;
       }
     }
   }
