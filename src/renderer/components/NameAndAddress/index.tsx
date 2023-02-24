@@ -33,6 +33,10 @@ const NameAndAddress = ({
 
   const copyAddress = useCopyAddress();
 
+  const shortAddress = `${address?.toLowerCase().slice(0, 6)}...${address
+    ?.toLowerCase()
+    .slice(-4)}`;
+
   useEffect(() => {
     init();
   }, [address]);
@@ -47,20 +51,29 @@ const NameAndAddress = ({
         className={clsx('address', addressClass, !localName && noNameClass)}
         title={address.toLowerCase()}
       >
-        {localName
-          ? `(${address?.toLowerCase().slice(0, 6)}...${address
-              ?.toLowerCase()
-              .slice(-4)})`
-          : `${address?.toLowerCase().slice(0, 6)}...${address
-              ?.toLowerCase()
-              .slice(-4)}`}
+        {localName ? (
+          <>
+            ({shortAddress}{' '}
+            <IconCopy
+              className={clsx('ml-4 cursor-pointer', copyIconClass)}
+              onClick={() => {
+                copyAddress(address);
+              }}
+            />{' '}
+            )
+          </>
+        ) : (
+          <>
+            {shortAddress}{' '}
+            <IconCopy
+              className={clsx('ml-4 cursor-pointer', copyIconClass)}
+              onClick={() => {
+                copyAddress(address);
+              }}
+            />
+          </>
+        )}
       </div>
-      <IconCopy
-        className={clsx('ml-4 cursor-pointer', copyIconClass)}
-        onClick={() => {
-          copyAddress(address);
-        }}
-      />
     </div>
   );
 };

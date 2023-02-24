@@ -188,8 +188,7 @@ export const Empty = () => {
         Add Dapp and start your web3 journey
       </div>
       <div className={styles.emptyDesc}>
-        Click the plus sign in the lower left corner to start adding your first
-        Dapp
+        Click the plus sign to add your first Dapp
       </div>
       <Arrow
         startPoint={{ x: 0, y: 0 }}

@@ -2,6 +2,7 @@
 import NameAndAddress from '@/renderer/components/NameAndAddress';
 import { TxDisplayItem, TxHistoryItem } from '@debank/rabby-api/dist/types';
 // import { NameAndAddress } from '..';
+import classNames from 'classnames';
 import { getChain } from '@/renderer/utils';
 import styles from '../index.module.less';
 import { TxAvatar } from './TxAvatar';
@@ -22,7 +23,7 @@ export const TxInterAddressExplain = ({
   const chain = getChain(data.chain);
 
   const projectName = (
-    <span>
+    <>
       {project?.name ? (
         project.name
       ) : data.other_addr ? (
@@ -35,7 +36,7 @@ export const TxInterAddressExplain = ({
       ) : (
         ''
       )}
-    </span>
+    </>
   );
 
   let interAddressExplain;
@@ -70,7 +71,7 @@ export const TxInterAddressExplain = ({
   }
 
   return (
-    <div className={styles.txExplain}>
+    <div className={classNames(styles.txExplain, styles.colTxExplain)}>
       <div className={styles.txAvatarContainer}>
         <TxAvatar
           src={projectDict[data.project_id as string]?.logo_url}

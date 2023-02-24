@@ -115,11 +115,12 @@
     }
 
     &Explain {
-      width: 325px;
+      width: 345px;
       display: flex;
       align-items: center;
       gap: 18px;
       flex: 1 1;
+      padding-right: 18px;
 
       :global {
         .name-and-address {
@@ -129,6 +130,9 @@
             font-size: inherit;
             line-height: inherit;
             color: inherit;
+          }
+          .name {
+            max-width: 110px;
           }
         }
       }
@@ -150,6 +154,7 @@
       }
       &Body {
         flex: 1;
+        overflow: hidden;
       }
     }
     &Avatar {
@@ -162,6 +167,7 @@
         position: relative;
         width: 30px;
         height: 30px;
+        flex-shrink: 0;
       }
 
       &Badge {
@@ -245,6 +251,15 @@
 
         // text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
       }
+    }
+  }
+
+  .colTx {
+    &Explain {
+      flex: 4;
+    }
+    &Change {
+      flex: 3;
     }
   }
 }

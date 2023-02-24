@@ -1,11 +1,9 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
-import { Divider, Dropdown, Menu } from 'antd';
+import { Dropdown, Menu } from 'antd';
 import React, { useRef } from 'react';
 
-import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
 import clsx from 'clsx';
-import { javascript } from 'webpack';
 import {
   RCIconDappsDelete,
   RCIconDappsEdit,
@@ -28,10 +26,9 @@ export const DAppBlock = ({
   dapp?: IDappWithTabInfo;
   onAdd?: () => void;
   onOpDapp?: IOnOpDapp;
-  onOpen?: (dapp: IDappWithTabInfo) => void;
+  onOpen?: (dappOrigin: string) => void;
 }>) => {
   const ref = useRef<HTMLDivElement>(null);
-  const navigateToDapp = useNavigateToDappRoute();
 
   if (onAdd) {
     return (
@@ -111,14 +108,21 @@ export const DAppBlock = ({
       }
     >
       <div className="dapp-block" ref={ref}>
-        {dapp.tab && dapp.tab.status !== 'loading' ? (
-          <div className="dapp-indicator" />
+        {dapp.tab ? (
+          dapp.tab.status === 'loading' ? (
+            <img
+              className="dapp-indicator loading"
+              src="rabby-internal://assets/icons/dapps/dapp-loading.svg"
+            />
+          ) : (
+            <div className="dapp-indicator" />
+          )
         ) : null}
         <div
           className="anchor"
           onClick={(e) => {
             e.preventDefault();
-            onOpen?.(dapp);
+            onOpen?.(dapp?.origin);
           }}
         >
           <DappFavicon

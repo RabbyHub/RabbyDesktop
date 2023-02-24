@@ -57,7 +57,7 @@ export default function ModalDeleteDapp({
       wrapClassName={classnames(modalProps.wrapClassName)}
     >
       <div className={styles.deletingDapp}>
-        <h3 className={styles.title}>Delete the Dapp?</h3>
+        <h3 className={styles.title}>Confirm to delete?</h3>
         <div className="dapp-block-wrapper">
           <div className="dapp-block">
             <a
@@ -85,7 +85,7 @@ export default function ModalDeleteDapp({
           </div>
         </div>
         <p className={styles.tips}>
-          Deleting the Dapp will also erase your records here.
+          Your records will be erased after deletion.
         </p>
         <Button
           loading={isLoading}

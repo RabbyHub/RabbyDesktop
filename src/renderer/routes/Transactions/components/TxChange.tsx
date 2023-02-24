@@ -5,10 +5,7 @@ import {
   TxDisplayItem,
   TxHistoryItem,
 } from '@debank/rabby-api/dist/types';
-// import NFTAvatar from '@/ui/views/Dashboard/components/NFT/NFTAvatar';
-import React from 'react';
-// import IconUnknown from 'ui/assets/token-default.svg';
-// import { numberWithCommasIsLtOne } from 'ui/utils';
+import classNames from 'classnames';
 import styles from '../index.module.less';
 
 const IconUnknown = 'rabby-internal://assets/icons/common/token-default.svg';
@@ -31,7 +28,7 @@ export const TxChange = ({ data: info, tokenDict }: TxChangeProps) => {
   }
 
   return (
-    <div className={styles.txChange}>
+    <div className={classNames(styles.txChange, styles.colTxChange)}>
       {info.sends?.map((v) => {
         const token = tokens[v.token_id];
         const isNft = v.token_id?.length === 32;
