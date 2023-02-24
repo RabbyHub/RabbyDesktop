@@ -28,7 +28,7 @@ import IconLoading from '@/../assets/icons/swap/loading.svg?rc';
 import IconSwitchToken from '@/../assets/icons/swap/switch-token.svg?rc';
 
 import IconRcClose from '@/../assets/icons/swap/close.svg?rc';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Switch } from '@/renderer/components/Switch/Switch';
 import { DexSelect } from './component/DexSelect';
 import { Fee, FeeProps } from './component/Fee';
@@ -144,6 +144,7 @@ export const Swap = () => {
   const lastSelectedDex = swap.selectedDex;
   const lastSelectedChain = swap.selectedChain || CHAINS_ENUM.ETH;
   const { unlimitedAllowance = false } = swap;
+  const navigate = useNavigate();
 
   const [searchParams] = useSearchParams();
   const pageInfo = useMemo(
@@ -714,6 +715,10 @@ export const Swap = () => {
     }
   };
 
+  const gotoBack = () => {
+    navigate(-1);
+  };
+
   const totalLoading =
     loading || nativeTokenLoading || payTokenLoading || totalGasUsedLoading;
 
@@ -756,7 +761,7 @@ export const Swap = () => {
   if (!lastSelectedDex) {
     return (
       <div className="bg-gray-bg h-full">
-        <DexSelect visible onClose={() => toggleVisible(false)} />
+        <DexSelect visible onClose={gotoBack} />
       </div>
     );
   }
