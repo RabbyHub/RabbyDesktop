@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { useLocation, useMatches, useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
-
+import Home from '@/renderer/routes/Home';
 import { ensurePrefix } from '@/isomorphic/string';
 import { CurrentAccountAndNewAccount } from '../CurrentAccount';
 import { MainWindowRouteData } from './type';
@@ -92,7 +92,14 @@ export default function MainWindowRoute({
           </div>
         </div>
       )}
-      {children}
+      <div
+        style={{
+          display: location.pathname === '/mainwin/home' ? 'block' : 'none',
+        }}
+      >
+        <Home />
+      </div>
+      {location.pathname !== '/mainwin/home' && children}
     </div>
   );
 }

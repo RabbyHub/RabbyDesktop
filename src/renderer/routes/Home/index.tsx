@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState, useMemo } from 'react';
+import { usePrevious } from 'react-use';
 import styled from 'styled-components';
 import classNames from 'classnames';
 import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
@@ -276,6 +277,7 @@ const useExpandProtocolList = (protocols: DisplayProtocol[]) => {
 
 const Home = () => {
   const { currentAccount } = useCurrentAccount();
+  const prevAccount = usePrevious(currentAccount);
   const [updateNonce, setUpdateNonce] = useState(0);
   const [_, updateBalanceValue] = useBalanceValue();
 
@@ -402,7 +404,9 @@ const Home = () => {
   };
 
   useEffect(() => {
-    init();
+    if (currentAccount?.address !== prevAccount?.address) {
+      init();
+    }
   }, [currentAccount]);
 
   const { showZSubview } = useZPopupLayerOnMain();
