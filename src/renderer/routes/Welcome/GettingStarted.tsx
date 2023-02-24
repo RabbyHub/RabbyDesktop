@@ -4,6 +4,8 @@ import { Button, Col, Row } from 'antd';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './GettingStarted.module.less';
+import InviteCodeModal from './InviteCodeModal';
+import { useInvited } from './useInvited';
 
 export default function GettingStarted() {
   const nav = useNavigate();
@@ -26,6 +28,31 @@ export default function GettingStarted() {
     );
   }, [fetchAccounts]);
   const { showZSubview } = useZPopupLayerOnMain();
+  const [visibleInviteCodeModal, setVisibleInviteCodeModal] =
+    React.useState(false);
+  const { isInvited } = useInvited();
+
+  const onClickButton = React.useCallback(() => {
+    if (!isInvited) {
+      setVisibleInviteCodeModal(true);
+      return;
+    }
+    showZSubview('select-add-address-type-modal', {
+      showEntryButton: true,
+    });
+  }, [showZSubview, isInvited]);
+
+  const handleCancelModal = React.useCallback(
+    (isValid: boolean) => {
+      if (isValid) {
+        showZSubview('select-add-address-type-modal', {
+          showEntryButton: true,
+        });
+      }
+      setVisibleInviteCodeModal(false);
+    },
+    [showZSubview]
+  );
 
   return (
     <Row className={styles['page-welcome']} align="middle">
@@ -39,11 +66,7 @@ export default function GettingStarted() {
         <Button
           type="primary"
           className={styles['btn-start']}
-          onClick={() => {
-            showZSubview('select-add-address-type-modal', {
-              showEntryButton: true,
-            });
-          }}
+          onClick={onClickButton}
         >
           Get started
         </Button>
@@ -52,6 +75,11 @@ export default function GettingStarted() {
         src="rabby-internal://assets/icons/common/logo.svg"
         alt="logo"
         className={styles.logo}
+      />
+
+      <InviteCodeModal
+        open={visibleInviteCodeModal}
+        onCancel={handleCancelModal}
       />
     </Row>
   );
