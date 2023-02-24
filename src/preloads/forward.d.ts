@@ -88,6 +88,10 @@ type ChannelForwardMessageType =
       };
     }
   | {
+      targetView: 'main-window';
+      type: 'on-deleted-account';
+    }
+  | {
       targetView: '*';
       type: 'refreshCurrentAccount';
     }

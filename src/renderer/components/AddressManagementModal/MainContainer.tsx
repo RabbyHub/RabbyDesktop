@@ -10,6 +10,7 @@ import { KEYRING_CLASS } from '@/renderer/utils/constant';
 import { groupBy } from 'lodash';
 import React from 'react';
 import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
+import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import styles from './index.module.less';
 import { Body } from './Body';
 import { Footer } from './Footer';
@@ -100,6 +101,8 @@ export const MainContainer: React.FC = () => {
     async (account: IDisplayedAccountWithBalance) => {
       await removeAddress([account.address, account.type, account.brandName]);
       getHighlightedAddressesAsync();
+
+      forwardMessageTo('main-window', 'on-deleted-account', {});
     },
     [removeAddress, getHighlightedAddressesAsync]
   );

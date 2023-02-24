@@ -4,6 +4,7 @@ import {
 } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
 import { useAddressManagement } from '@/renderer/hooks/rabbyx/useAddressManagement';
 import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
+import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import React from 'react';
 import { Modal } from '../Modal/Modal';
 import { AccountDetail } from './AccountDetail';
@@ -20,6 +21,8 @@ export const AddressDetailModal: React.FC = () => {
     async (account: IDisplayedAccountWithBalance) => {
       await removeAddress([account.address, account.type, account.brandName]);
       getHighlightedAddressesAsync();
+      forwardMessageTo('main-window', 'on-deleted-account', {});
+
       closeSubview();
     },
     [removeAddress, getHighlightedAddressesAsync, closeSubview]
