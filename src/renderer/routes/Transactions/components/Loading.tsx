@@ -35,7 +35,12 @@ export const Loading = () => {
             />
           </div>
         </div>
-        <div className="flex items-center gap-[15px] w-[325px] flex-1">
+        <div
+          className={classNames(
+            'flex items-center gap-[15px]',
+            styles.colTxExplain
+          )}
+        >
           <Skeleton.Input
             active
             style={{
@@ -66,7 +71,12 @@ export const Loading = () => {
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-[15px] flex-1">
+        <div
+          className={classNames(
+            'flex items-center gap-[15px]',
+            styles.colTxChange
+          )}
+        >
           <Skeleton.Input
             active
             style={{
@@ -134,7 +144,12 @@ export const Loading = () => {
             />
           </div>
         </div>
-        <div className="flex items-center gap-[15px] w-[325px] flex-1">
+        <div
+          className={classNames(
+            'flex items-center gap-[15px]',
+            styles.colTxExplain
+          )}
+        >
           <Skeleton.Input
             active
             style={{
@@ -165,7 +180,7 @@ export const Loading = () => {
             </div>
           </div>
         </div>
-        <div className="flex-1">
+        <div className={styles.colTxChange}>
           <div className="flex items-center gap-[15px]  mb-[10px]">
             <Skeleton.Input
               active
