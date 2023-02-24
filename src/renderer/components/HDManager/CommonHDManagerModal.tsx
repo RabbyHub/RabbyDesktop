@@ -85,10 +85,6 @@ export const CommonHDManagerModal: React.FC<Props> = ({
       });
   }, [walletController, keyring, isLedger]);
 
-  const onRetry = React.useCallback(() => {
-    walletController.requestKeyring(keyring, 'unlock', idRef.current);
-  }, [keyring, walletController]);
-
   const cleanupModal = React.useCallback(() => {
     onCancel?.();
     setConnectReq({ connected: false, step: HD_CONN_STEP.PREPARE });
@@ -126,19 +122,17 @@ export const CommonHDManagerModal: React.FC<Props> = ({
 
   const Manager = MANAGER_MAP[keyring];
 
+  const handleClose = () => {
+    cleanupModal();
+    closeConnect();
+  };
   return (
-    <Modal
-      {...props}
-      onCancel={() => {
-        cleanupModal();
-        closeConnect();
-      }}
-    >
+    <Modal {...props} onCancel={handleClose}>
       <HDManagerStateProvider keyringId={idRef.current} keyring={keyring}>
         <div className="HDManager">
           {connectReq.connected ? (
             <main>
-              <Manager onRetry={onRetry} />
+              <Manager onClose={handleClose} />
               {showEntryButton && (
                 <Button
                   onClick={onCancel}
