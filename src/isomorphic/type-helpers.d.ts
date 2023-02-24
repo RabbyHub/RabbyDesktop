@@ -43,6 +43,7 @@ type ExtractPromiseValue<T> = T extends Promise<infer R> ? R : never;
 type ItOrItsPromise<T> = T extends Promise<any>
   ? ExtractPromiseValue<T> | T
   : T | Promise<T>;
+type ItOrItsArray<T> = T extends Array<infer U> ? T : T | T[];
 
 type AllNonFnFields<T extends Record<string, any>> = {
   [K in keyof T]: T[K] extends (...args: any[]) => any ? void : K;

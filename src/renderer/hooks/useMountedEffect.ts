@@ -28,7 +28,7 @@ export default function useMountedEffect<
 }
 
 export function useBodyClassNameOnMounted(
-  className: (string | string | number | boolean)[]
+  className: ItOrItsArray<string | string | number | boolean>
 ) {
   const classNames = useMemo(() => {
     return arraify(className).filter(Boolean).join(' ');
