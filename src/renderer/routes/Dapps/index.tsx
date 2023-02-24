@@ -2,6 +2,7 @@
 import { setDappsOrder } from '@/renderer/ipcRequest/dapps';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { useCallback, useState } from 'react';
+import { useOpenDapp } from '@/renderer/utils/react-router';
 import { Empty } from './components/Empty';
 
 import ModalDeleteDapp from '../../components/ModalDeleteDapp';
@@ -22,8 +23,10 @@ type IOnOpDapp = (
 ) => void;
 
 export default function DApps() {
-  const { dapps, pinDapp, unpinDapp, pinnedDapps, unpinnedDapps, openDapp } =
+  const { dapps, pinDapp, unpinDapp, pinnedDapps, unpinnedDapps } =
     useTabedDapps();
+
+  const openDapp = useOpenDapp();
 
   const [renamingDapp, setRenamingDapp] = useState<IDapp | null>(null);
   const [deletingDapp, setDeletingDapp] = useState<IDapp | null>(null);

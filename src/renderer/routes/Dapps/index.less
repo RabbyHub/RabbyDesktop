@@ -53,6 +53,17 @@
       height: 6px;
       border-radius: 50%;
       background-color: var(--color-comment2);
+
+      &.loading {
+        @iconSize: 16px;
+
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: @iconSize;
+        height: @iconSize;
+        background-color: transparent;
+      }
     }
 
     &.is-add {

@@ -1,7 +1,6 @@
 import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo } from 'react';
-import { useDapps } from '../hooks/useDappsMngr';
 import { toggleLoadingView } from '../ipcRequest/mainwin';
 import { navigateToDappRoute } from '../utils/react-router';
 import { ChromeTabWithOrigin, useWindowTabs } from './useWindowTabs';
@@ -10,7 +9,7 @@ export type IDappWithTabInfo = IMergedDapp & {
   tab?: chrome.tabs.Tab;
 };
 
-function findTab(
+export function findTab(
   dapp: IDappWithTabInfo,
   {
     tabMapByOrigin,
