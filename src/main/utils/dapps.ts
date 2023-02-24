@@ -141,9 +141,9 @@ export async function detectDapp(
   }
 ): Promise<IDappsDetectResult<DETECT_ERR_CODES>> {
   // TODO: process void url;
-  const { origin: dappOrigin, hostWithoutTLD: inputCoreName } =
+  const { origin: inputOrigin, hostWithoutTLD: inputCoreName } =
     canoicalizeDappUrl(dappsUrl);
-  const { urlInfo: dappOriginInfo } = canoicalizeDappUrl(dappOrigin);
+  const { urlInfo: dappOriginInfo } = canoicalizeDappUrl(inputOrigin);
 
   if (dappOriginInfo?.protocol !== 'https:') {
     return {
@@ -155,10 +155,8 @@ export async function detectDapp(
     };
   }
 
-  const formatedOrigin = urlFormat(dappOriginInfo);
-
   let fallbackFavicon: string | undefined;
-  const checkResult = await checkUrlViaBrowserView(formatedOrigin, {
+  const checkResult = await checkUrlViaBrowserView(urlFormat(dappOriginInfo), {
     onPageFaviconUpdated: (favicons) => {
       fallbackFavicon = favicons[0];
     },
@@ -197,14 +195,14 @@ export async function detectDapp(
   const { origin: finalOrigin } = canoicalizeDappUrl(checkResult.finalUrl);
 
   const repeatedInputDapp = opts.existedDapps.find(
-    (item) => item.origin === formatedOrigin
+    (item) => item.origin === inputOrigin
   );
   const repeatedFinalDapp = opts.existedDapps.find(
     (item) => item.origin === finalOrigin
   );
 
   const data: IDappsDetectResult['data'] = {
-    inputOrigin: dappOrigin,
+    inputOrigin,
     isInputExistedDapp: !!repeatedInputDapp,
     finalOrigin,
     isFinalExistedDapp: !!repeatedFinalDapp,
