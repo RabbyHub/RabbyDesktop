@@ -22,6 +22,8 @@ import './streams/appProxy';
 import './streams/hid';
 import './streams/dapps';
 
+import './streams/developer';
+
 import bootstrap from './streams/app';
 
 bootstrap();
