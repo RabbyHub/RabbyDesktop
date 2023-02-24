@@ -28,42 +28,17 @@ export default React.memo((props: { data: PortfolioItem[] }) => {
   return data.map((p: any) => (
     <Panel>
       <Table>
-        <Table.Header headers={headers} />
+        <Table.Header
+          headers={['Currency Pair', 'Side', 'Margin', 'P&L', 'USD Value']}
+        />
         <Table.Body>
           <Table.Row>
-            {hasDescription && <Value.String value={p.detail.description} />}
             <Value.TokensSlash
               value={[p.detail.base_token, p.detail.quote_token]}
             />
             <Value.String value={p.detail.side} />
-            <Value.NumberWithCommas value={p.detail.entry_price} />
-            <Value.NumberWithCommas value={p.detail.mark_price} />
-            {p.detail.liquidation_price ? (
-              <Value.NumberWithCommas value={p.detail.liquidation_price} />
-            ) : (
-              <Value.String value="-" />
-            )}
-            <Value.Balance value={p.detail.position_token} />
-          </Table.Row>
-        </Table.Body>
-      </Table>
-
-      <Table>
-        <Table.Header
-          headers={[
-            'Margin',
-            'Margin Rate',
-            'Leverage',
-            '24h Funding',
-            'USD Value',
-          ]}
-        />
-        <Table.Body>
-          <Table.Row>
             <Value.Balance value={p.detail.margin_token} />
-            <Value.Percent value={p.detail.margin_rate} />
-            <Value.String value={`${formatNumber(p.detail.leverage)} ×`} />
-            <Value.Percent value={p.detail.daily_funding_rate} />
+            <Value.USDValue value={p.detail.pnl_usd_value || 0} />
             <Value.USDValue value={p.stats.net_usd_value} />
           </Table.Row>
         </Table.Body>

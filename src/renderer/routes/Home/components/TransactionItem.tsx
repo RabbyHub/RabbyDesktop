@@ -20,7 +20,7 @@ import TxChange from './TxChange';
 
 const TransactionItemWrapper = styled.div`
   // display: flex;
-  padding: 28px 10px 28px 10px;
+  padding: 28px 16px 28px 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.11);
   position: relative;
   .name-and-address .icon-copy {
@@ -90,7 +90,7 @@ const TransactionItemWrapper = styled.div`
 const Actions = styled.div`
   position: absolute;
   top: 10px;
-  right: 10px;
+  right: 16px;
   display: flex;
   align-items: center;
   .icon-cancel {

@@ -34,10 +34,7 @@ const TransactionList = styled.ul`
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
   flex: 1;
-  overflow: auto;
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  overflow: overlay;
 `;
 
 const EmptyView = styled.div`
@@ -214,7 +211,7 @@ const Transactions = () => {
     markedCompleteds
       .filter(
         (item) =>
-          (item.completedAt || item.createdAt) >= YESTERDAY * 1000 &&
+          (item.completedAt || item.createdAt) >= Date.now() - 3600000 &&
           !item.isSubmitFailed &&
           !item.dbIndexed
       )

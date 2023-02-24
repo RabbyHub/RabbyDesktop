@@ -10,15 +10,19 @@ import { VIEW_TYPE } from '../hooks';
 const PortfolioWrapper = styled.div`
   background: rgba(255, 255, 255, 0.07);
   width: 100%;
-  padding: 28px 27px;
+  padding: 0 27px;
   padding-right: 0;
   border-radius: 8px;
   position: relative;
   height: 100%;
+  padding-top: 10px;
+  padding-bottom: 10px;
   .scroll-container {
     overflow: overlay;
     height: 100%;
     padding-right: 27px;
+    padding-top: 18px;
+    padding-bottom: 18px;
   }
   .icon-asset-arrow {
     position: absolute;
