@@ -100,8 +100,8 @@ export async function createRabbyxNotificationWindow({
       ...(shouldPosCenter
         ? {
             center: true,
-            hasShadow: true,
-            roundedCorners: false,
+            hasShadow: false,
+            roundedCorners: true,
             width: expectedBounds.width,
             height: expectedBounds.height,
           }
