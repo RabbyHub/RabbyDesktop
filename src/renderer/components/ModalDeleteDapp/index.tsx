@@ -6,6 +6,7 @@ import { useDapps } from 'renderer/hooks/useDappsMngr';
 import { permissionService } from '@/renderer/ipcRequest/rabbyx';
 import { navigateToDappRoute } from '@/renderer/utils/react-router';
 import { useNavigate } from 'react-router-dom';
+import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
 import styles from './index.module.less';
 import { DappFavicon } from '../DappFavicon';
 import { Modal } from '../Modal/Modal';
@@ -38,6 +39,7 @@ export default function ModalDeleteDapp({
   ModalProps & {
     dapp: IDapp | null;
     onDeletedDapp?: () => void;
+    onCancel?: () => void;
   }
 >) {
   const { doDelete, isLoading } = useDelete(dapp);
@@ -52,7 +54,6 @@ export default function ModalDeleteDapp({
       {...modalProps}
       title={null}
       footer={null}
-      // closeIcon={<RCIconDappsModalClose />}
       className={classnames(styles.deleteModal, modalProps.className)}
       wrapClassName={classnames(modalProps.wrapClassName)}
     >
@@ -77,9 +78,9 @@ export default function ModalDeleteDapp({
               />
               <div className="infos">
                 <h4 className="dapp-alias">{dapp.alias}</h4>
-                <span className="dapp-url">
+                <div className="dapp-url">
                   {dapp.origin?.replace(/^\w+:\/\//, '')}
-                </span>
+                </div>
               </div>
             </a>
           </div>
@@ -102,3 +103,19 @@ export default function ModalDeleteDapp({
     </Modal>
   );
 }
+
+export const DeleteDappModal = () => {
+  const { svVisible, svState, closeSubview } =
+    useZPopupViewState('delete-dapp-modal');
+
+  if (!svState?.dapp) return null;
+
+  return (
+    <ModalDeleteDapp
+      dapp={svState.dapp}
+      open={svVisible}
+      onCancel={closeSubview}
+      onDeletedDapp={closeSubview}
+    />
+  );
+};

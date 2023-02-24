@@ -19,6 +19,8 @@ import { AddressManagementModal } from '@/renderer/components/AddressManagementM
 import { AddressDetailModal } from '@/renderer/components/AddressDetailModal/AddressDetailModal';
 import { SelectAddAddressTypeModalInSubview } from '@/renderer/components/SelectAddAddressTypeModal/SelectAddAddressTypeModalInSubview';
 import GasketModalLikeWindow from '@/renderer/components/GasketModalLikeWindow';
+import { RenameDappModal } from '@/renderer/components/ModalRenameDapp';
+import { DeleteDappModal } from '@/renderer/components/ModalDeleteDapp';
 import SwitchChainModal from '../../components/SwitchChainModal';
 
 import styles from './index.module.less';
@@ -68,6 +70,8 @@ function App() {
       <AddressDetailModal />
       <SelectAddAddressTypeModalInSubview />
       <GasketModalLikeWindow />
+      <RenameDappModal />
+      <DeleteDappModal />
     </>
   );
 }

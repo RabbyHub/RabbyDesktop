@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import classnames from 'classnames';
 import { ModalProps, Button } from 'antd';
 import { useDapps } from 'renderer/hooks/useDappsMngr';
+import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { isValidDappAlias } from '../../../isomorphic/dapp';
 
 import styles from './index.module.less';
@@ -59,6 +60,7 @@ export default function ModalRenameDapp({
   ModalProps & {
     dapp: IDapp | null;
     onRenamedDapp?: () => void;
+    onCancel?: () => void;
   }
 >) {
   const { alias, onAliasChange, isValidAlias, doRename, isLoading } =
@@ -112,3 +114,19 @@ export default function ModalRenameDapp({
     </Modal>
   );
 }
+
+export const RenameDappModal = () => {
+  const { svVisible, svState, closeSubview } =
+    useZPopupViewState('rename-dapp-modal');
+
+  if (!svState?.dapp) return null;
+
+  return (
+    <ModalRenameDapp
+      dapp={svState.dapp}
+      open={svVisible}
+      onCancel={closeSubview}
+      onRenamedDapp={closeSubview}
+    />
+  );
+};
