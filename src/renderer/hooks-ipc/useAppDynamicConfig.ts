@@ -35,6 +35,30 @@ function useAppDynamicConfig() {
   };
 }
 
+const DEFAULT_COLOR = {
+  backgroundColor: 'rgba(0, 0, 0, 0.2)',
+  textColor: 'rgba(255, 255, 255, 0.8)',
+};
+function safeParseColor(defaultColor: string, remoteColor?: string) {
+  const remoteModel = tinyColor(remoteColor);
+  const defaultmodel = tinyColor(defaultColor);
+  const isFromRemote =
+    remoteModel.isValid() &&
+    remoteModel.toRgbString() !== defaultmodel.toRgbString();
+
+  return {
+    model: isFromRemote ? remoteModel : defaultmodel,
+    color: isFromRemote ? remoteModel.toRgbString() : defaultColor,
+    isFromRemote,
+    remoteModel,
+    remoteColor,
+    remoteInvertedColor: isFromRemote
+      ? invertColor(remoteModel.toHex()!)
+      : undefined,
+    defaultmodel,
+  };
+}
+
 export function useMatchURLBaseConfig(urlBase?: string) {
   const { appDynamicConfig, fetchConfig } = useAppDynamicConfig();
 
@@ -47,24 +71,31 @@ export function useMatchURLBaseConfig(urlBase?: string) {
       urlBase,
       appDynamicConfig?.domain_metas?.url_head
     );
-    const bgColor = matchedConf?.navBgColorLight || 'rgba(0, 0, 0, 0.2)';
+    const defaultColors = {
+      ...DEFAULT_COLOR,
+      ...appDynamicConfig?.domain_metas?.url_head?.default,
+    };
+    const bgColors = safeParseColor(
+      defaultColors.backgroundColor,
+      matchedConf?.navBgColorLight
+    );
+    const textColors = !bgColors.isFromRemote
+      ? safeParseColor(defaultColors.textColor)
+      : safeParseColor(
+          tinyColor(bgColors.remoteInvertedColor)
+            .setAlpha(1 - bgColors.remoteModel.getAlpha())
+            .toRgbString(),
+          matchedConf?.navTextColorLight
+        );
 
-    // const bgModel = tinyColor(bgColor);
-    // const textColor =
-    //   matchedConf?.navTextColorLight ||
-    //   (bgModel.isDark() ? invertColor(bgModel.toHex(), true) : 'rgba(255, 255, 255, 0.8)');
-    const textColor =
-      matchedConf?.navTextColorLight || 'rgba(255, 255, 255, 0.8)';
-
-    const navIconColor = tinyColor(textColor).brighten(10).toHex();
-    const dividerBorderColor = tinyColor(textColor).brighten(10).toHex();
+    const navIconColor = textColors.model.brighten(10).toRgbString();
+    const navDividerColor = textColors.model.setAlpha(0.1).toRgbString();
 
     return {
-      navTextColor: textColor,
+      navTextColor: textColors.color,
       navIconColor,
-      navDividerColor: dividerBorderColor,
-      navBackgroundColor: bgColor,
-      urlBaseConf: matchedConf,
+      navDividerColor,
+      navBackgroundColor: bgColors.color,
     };
   }, [urlBase, appDynamicConfig?.domain_metas?.url_head]);
 }

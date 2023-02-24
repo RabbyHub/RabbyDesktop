@@ -108,7 +108,7 @@ export const TopNavBar = () => {
     switchChain(chain);
   });
 
-  const { navTextColor, navIconColor, navBackgroundColor } =
+  const { navTextColor, navIconColor, navDividerColor, navBackgroundColor } =
     useMatchURLBaseConfig(activeTab?.url);
 
   return (
@@ -123,7 +123,11 @@ export const TopNavBar = () => {
         data-nodrag
       >
         <RiskArea style={{ color: navTextColor }} iconColor={navIconColor} />
-        <Divider type="vertical" className={styles.divider} />
+        <Divider
+          type="vertical"
+          className={classNames(styles.divider)}
+          style={{ ...(navIconColor && { borderColor: navDividerColor }) }}
+        />
         {activeTab?.status === 'loading' && (
           <img
             className={styles.loadingIcon}
