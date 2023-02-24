@@ -220,7 +220,7 @@ const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
                 src="rabby-internal://assets/icons/add-dapp/icon-failed.svg"
                 alt=""
               />
-              <div className={styles.previewEmptyTitle}>Page load failed</div>
+              <div className={styles.previewEmptyTitle}>Fail to load</div>
             </div>
           </div>
         }
@@ -267,8 +267,8 @@ const RelationModal = ({ data, open, onCancel, onOk }: RelationModalProps) => {
     >
       <div className={styles.content}>
         <div className={styles.title}>
-          There is an inclusion relationship with the domain name of the added
-          Dapp. The following Dapp will be replaced after adding.
+          You've already added a Dapp related to the current domain name. Adding
+          this new Dapp will replace the previous one.
         </div>
         <div className={styles.body}>
           {data.map((dapp) => {
@@ -513,7 +513,7 @@ export function AddDapp({
     }
   };
   const InitialHelpMessage =
-    'To ensure the security of your funds, please ensure that you enter the official domain name of Dapp';
+    "For your security, please ensure you enter the official domain name of the Dapp you'd like to add.";
 
   const handleFormChange = useCallback(() => {
     const { url } = form.getFieldsValue();

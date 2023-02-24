@@ -59,7 +59,7 @@ const ReceiveContent = ({ onCancel, chain, token }: ReceiveContentProps) => {
     }
     confirmModalRef.current = AntdModal.confirm({
       maskClosable: false,
-      closable: true,
+      // closable: true,
       centered: true,
       width: 520,
       className: styles.confirmModal,
@@ -69,6 +69,9 @@ const ReceiveContent = ({ onCancel, chain, token }: ReceiveContentProps) => {
         ghost: true,
         size: 'large',
       },
+
+      okText: 'Confirm',
+
       cancelButtonProps: {
         size: 'large',
         type: 'primary',
@@ -87,7 +90,7 @@ const ReceiveContent = ({ onCancel, chain, token }: ReceiveContentProps) => {
             src="rabby-internal://assets/icons/modal/warning.svg"
           />
           <div>
-            This is a Watch Mode address.
+            This is a watch-only address.
             <br />
             Are you sure to use it to receive assets?
           </div>
@@ -129,7 +132,7 @@ const ReceiveContent = ({ onCancel, chain, token }: ReceiveContentProps) => {
               </span>
             </div>
             {isWatchAddress ? (
-              <div className={styles.accountType}>Watch Mode address</div>
+              <div className={styles.accountType}>Watch-only address</div>
             ) : null}
           </div>
         </div>

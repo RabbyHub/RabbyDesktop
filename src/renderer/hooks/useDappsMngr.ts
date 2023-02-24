@@ -1,10 +1,4 @@
 /// <reference path="../../isomorphic/types.d.ts" />
-/// <reference path="../../renderer/preload.d.ts" />
-
-import {
-  useNavigateToDappRoute,
-  useOpenDapp,
-} from '@/renderer/utils/react-router';
 
 import { sortDappsBasedPinned } from '@/isomorphic/dapp';
 import { atom, useAtom } from 'jotai';
@@ -14,14 +8,13 @@ import {
   deleteDapp,
   detectDapps,
   fetchDapps,
+  fetchProtocolDappsBinding,
   getDapp,
   putDapp,
-  toggleDappPinned,
-  fetchProtocolDappsBinding,
   putProtocolDappsBinding,
+  toggleDappPinned,
 } from '../ipcRequest/dapps';
-import { toggleLoadingView } from '../ipcRequest/mainwin';
-import { findTab } from '../hooks-shell/useMainWindow';
+import { findTab } from '../utils/tab';
 
 const dappsAtomic = atom(null as null | IDapp[]);
 const pinnedListAtomic = atom([] as IDapp['origin'][]);
