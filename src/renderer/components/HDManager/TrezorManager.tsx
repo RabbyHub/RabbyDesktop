@@ -14,12 +14,12 @@ import { Modal } from '../Modal/Modal';
 
 export interface Props {
   HDName?: string;
-  onRetry?: () => void;
+  onClose?: () => void;
 }
 
 export const TrezorManager: React.FC<Props> = ({
   HDName = 'Trezor',
-  onRetry,
+  onClose,
 }) => {
   const [loading, setLoading] = React.useState(true);
   const { getCurrentAccounts } = React.useContext(HDManagerStateContext);
@@ -83,7 +83,7 @@ export const TrezorManager: React.FC<Props> = ({
         ),
         okText: 'Retry',
         onOk() {
-          onRetry?.();
+          onClose?.();
         },
       });
     }
