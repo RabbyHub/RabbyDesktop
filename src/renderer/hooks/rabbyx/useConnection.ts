@@ -4,7 +4,6 @@ import { getOriginFromUrl } from '@/isomorphic/url';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import { usePreference } from './usePreference';
 import useDebounceValue from '../useDebounceValue';
 
@@ -27,7 +26,7 @@ export function useCurrentConnection(tab: Pick<chrome.tabs.Tab, 'id' | 'url'>) {
     const domain = getOriginFromUrl(tab.url);
     const current = await walletController.getCurrentSite(tab.id, domain);
     setCurrentSite(current);
-  }, [tab, setCurrentSite]);
+  }, [tab.id, tab.url, setCurrentSite]);
 
   const switchChain = useCallback(
     async (chain: CHAINS_ENUM) => {
