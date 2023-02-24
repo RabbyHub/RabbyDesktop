@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef, memo } from 'react';
 import clsx from 'clsx';
 import BigNumber from 'bignumber.js';
 import { useLocation, useSearchParams } from 'react-router-dom';
@@ -33,6 +33,7 @@ import { ChainSelect } from '../Swap/component/ChainSelect';
 import { TokenSelect } from '../Swap/component/TokenSelect';
 import { ContactEditModal } from './components/ContactEditModal';
 import { ContactListModal } from './components/ContactListModal';
+import { useOnTxFinished } from './hooks';
 
 const MaxButton = styled.img`
   cursor: pointer;
@@ -228,7 +229,7 @@ const SendTokenWrapper = styled.div`
   }
 `;
 
-const SendToken = () => {
+const SendTokenInner = () => {
   const { currentAccount } = useCurrentAccount();
   const [chain, setChain] = useState(CHAINS_ENUM.ETH);
   const [tokenAmountForGas, setTokenAmountForGas] = useState('0');
@@ -282,6 +283,12 @@ const SendToken = () => {
     Record<string, { list: GasLevel[]; expireAt: number }>
   >({});
   const [isGnosisSafe, setIsGnosisSafe] = useState(false);
+
+  const lastSubmitRef = useRef<{
+    token: TokenItem;
+    addr: string;
+    hash: string;
+  } | null>(null);
   const {
     whitelist,
     enable: whitelistEnabled,
@@ -462,7 +469,6 @@ const SendToken = () => {
           params.gas = intToHex(21000); // L2 has extra validation fee so can not set gasLimit as 21000 when send native token
         }
       }
-      setIsSubmitLoading(false);
       if (showGasReserved) {
         params.gasPrice = selectedGasLevel?.price;
       }
@@ -475,10 +481,15 @@ const SendToken = () => {
         currentToken
       );
 
-      await walletController.sendRequest({
+      const hash = (await walletController.sendRequest({
         method: 'eth_sendTransaction',
         params: [params],
-      });
+      })) as string;
+      lastSubmitRef.current = {
+        hash,
+        token: currentToken,
+        addr: currentAccount!.address,
+      };
     } catch (e: any) {
       message.error(e.message);
     } finally {
@@ -593,15 +604,29 @@ const SendToken = () => {
     setShowEditContactModal(true);
   };
 
-  const loadCurrentToken = async (
-    id: string,
-    chainId: string,
-    address: string
-  ) => {
-    const t = await walletOpenapi.getToken(address, chainId, id);
-    setCurrentToken(t);
-    setIsLoading(false);
-  };
+  const loadCurrentToken = useCallback(
+    async (id: string, chainId: string, address: string, check?: boolean) => {
+      const t = await walletOpenapi.getToken(address, chainId, id);
+      setCurrentToken(t);
+      setIsLoading(false);
+
+      if (check) {
+        const valuse = form.getFieldsValue();
+        if (valuse.to && valuse.amount) {
+          if (
+            new BigNumber(valuse.amount || 0).isGreaterThan(
+              new BigNumber(t.raw_amount_hex_str || 0).div(10 ** t.decimals)
+            )
+          ) {
+            setBalanceError('Insufficient balance');
+          } else {
+            setBalanceError(null);
+          }
+        }
+      }
+    },
+    [form]
+  );
 
   const handleCurrentTokenChange = async (token: TokenItem) => {
     if (!currentAccount) return;
@@ -832,6 +857,26 @@ const SendToken = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentAccount]);
+
+  const handleTxFinished: Parameters<typeof useOnTxFinished>[0] = useCallback(
+    ({ hash }) => {
+      if (
+        lastSubmitRef.current?.hash === hash &&
+        lastSubmitRef.current?.addr === currentAccount?.address &&
+        lastSubmitRef.current?.token === currentToken
+      ) {
+        loadCurrentToken(
+          currentToken?.id,
+          currentToken.chain,
+          currentAccount?.address,
+          true
+        );
+      }
+    },
+    [currentAccount?.address, currentToken, loadCurrentToken]
+  );
+
+  useOnTxFinished(handleTxFinished);
 
   return (
     <SendTokenWrapper>
@@ -1083,5 +1128,10 @@ const SendToken = () => {
     </SendTokenWrapper>
   );
 };
+
+const SendToken = memo(() => {
+  const { currentAccount } = useCurrentAccount();
+  return <SendTokenInner key={`${currentAccount?.address}`} />;
+});
 
 export default SendToken;

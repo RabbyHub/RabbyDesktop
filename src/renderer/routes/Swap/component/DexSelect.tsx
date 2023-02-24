@@ -232,10 +232,11 @@ const StyledModal = styled(Modal)`
 interface DexSelectDrawerProps {
   visible: boolean;
   onClose: () => void;
+  onConfirm?: () => void;
 }
 
 export const DexSelect = (props: DexSelectDrawerProps) => {
-  const { visible, onClose } = props;
+  const { visible, onClose, onConfirm } = props;
 
   const swapState = useSwap();
   const dexId = swapState.swap.selectedDex;
@@ -249,7 +250,7 @@ export const DexSelect = (props: DexSelectDrawerProps) => {
   const handleDexId = async () => {
     if (!checkedId) return;
     await swapState.setSwapDexId(checkedId as DEX_ENUM);
-    onClose();
+    onConfirm?.();
   };
 
   return (
