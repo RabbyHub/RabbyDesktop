@@ -229,7 +229,7 @@ const SendTokenWrapper = styled.div`
   }
 `;
 
-const SendToken = () => {
+const SendTokenInner = () => {
   const { currentAccount } = useCurrentAccount();
   const [chain, setChain] = useState(CHAINS_ENUM.ETH);
   const [tokenAmountForGas, setTokenAmountForGas] = useState('0');
@@ -1128,5 +1128,10 @@ const SendToken = () => {
     </SendTokenWrapper>
   );
 };
+
+const SendToken = memo(() => {
+  const { currentAccount } = useCurrentAccount();
+  return <SendTokenInner key={`${currentAccount?.address}`} />;
+});
 
 export default SendToken;

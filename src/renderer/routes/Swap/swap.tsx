@@ -715,9 +715,13 @@ export const Swap = () => {
     }
   };
 
-  const gotoBack = () => {
+  const gotoBack = useCallback(() => {
     navigate(-1);
-  };
+  }, [navigate]);
+
+  const closeDexModal = useCallback(() => {
+    toggleVisible(false);
+  }, [toggleVisible]);
 
   const totalLoading =
     loading || nativeTokenLoading || payTokenLoading || totalGasUsedLoading;
@@ -761,7 +765,7 @@ export const Swap = () => {
   if (!lastSelectedDex) {
     return (
       <div className="bg-gray-bg h-full">
-        <DexSelect visible onClose={gotoBack} />
+        <DexSelect visible onClose={gotoBack} onConfirm={closeDexModal} />
       </div>
     );
   }
@@ -944,7 +948,11 @@ export const Swap = () => {
         )}
       </div>
 
-      <DexSelect visible={visible} onClose={() => toggleVisible(false)} />
+      <DexSelect
+        visible={visible}
+        onClose={closeDexModal}
+        onConfirm={closeDexModal}
+      />
       <FooterWrapper>
         {!tokenApproved && (
           <div className="box">
