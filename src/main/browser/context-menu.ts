@@ -1,4 +1,4 @@
-import { isInternalProtocol } from '@/isomorphic/url';
+import { canoicalizeDappUrl, isInternalProtocol } from '@/isomorphic/url';
 import {
   app,
   BrowserWindow,
@@ -8,19 +8,19 @@ import {
   dialog,
 } from 'electron';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
+import { getAllDapps } from '../store/dapps';
+import { safeOpenURL } from '../streams/dappSafeview';
 import {
   rabbyxQuery,
   RABBY_DESKTOP_KR_PWD,
 } from '../streams/rabbyIpcQuery/_base';
 import { getWindowFromWebContents } from '../utils/browser';
 import { appendMenu, appendMenuSeparator } from '../utils/context-menu';
-import { emitIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
+import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import {
-  getAllMainUIViews,
   getPopupWindowOnMain,
   getRabbyExtViews,
   getWebuiExtId,
-  onMainWindowReady,
   pushChangesToZPopupLayer,
 } from '../utils/stream-helpers';
 
@@ -192,43 +192,97 @@ function buildRabbyXDebugMenu(opts: ChromeContextMenuOptions) {
   return menu;
 }
 
-function buildDebugKitsMenu(opts: ChromeContextMenuOptions) {
+function buildInspectKitsMenu(opts: ChromeContextMenuOptions) {
   const { params } = opts;
 
-  const debugKitsMenu = new Menu();
+  const inspectKitsMenu = new Menu();
 
-  appendMenu(debugKitsMenu, {
-    label: 'Open SwitchChain Popup',
+  appendMenu(inspectKitsMenu, {
+    label: 'Open MetaMask Test Dapp',
     click: () => {
-      getPopupWindowOnMain().then(async () => {
-        const mainWin = await onMainWindowReady();
-
-        const firstTab = mainWin.tabs.tabList[0];
-
-        if (!firstTab?.view) {
-          dialog.showErrorBox(
-            'No Tab Found',
-            `You wanna quick debug the first tab's switchChain popup but no any dapp opened, Please open a tab and try again.`
-          );
-          return;
-        }
-
-        pushChangesToZPopupLayer({
-          'switch-chain': {
-            visible: true,
-            state: {
-              dappTabInfo: {
-                id: firstTab.id,
-                url: firstTab.view.webContents.getURL(),
-              },
-            },
-          },
-        });
+      const targetURL = 'https://metamask.github.io/test-dapp/';
+      const targetOrigin = canoicalizeDappUrl(targetURL).origin;
+      safeOpenURL(targetURL, {
+        sourceURL: params.pageURL,
+        existedDapp: getAllDapps().find((dapp) => dapp.origin === targetOrigin),
       });
     },
   });
 
-  appendMenu(debugKitsMenu, {
+  appendMenuSeparator(inspectKitsMenu);
+  appendMenu(inspectKitsMenu, {
+    label: `Open DappSafeView's Content`,
+    click: () => {
+      emitIpcMainEvent('__internal_main:dev', {
+        type: 'dapp-safe-view:open',
+      });
+    },
+  });
+  appendMenu(inspectKitsMenu, {
+    label: `Inspect DappSafeView's Wrapper`,
+    click: () => {
+      emitIpcMainEvent('__internal_main:dev', {
+        type: 'dapp-safe-view:inspect',
+        viewType: 'base',
+      });
+    },
+  });
+
+  appendMenuSeparator(inspectKitsMenu);
+  appendMenu(inspectKitsMenu, {
+    label: `Open Rabby Sign's Gasket`,
+    click: () => {
+      emitIpcMainEvent('__internal_main:dev', {
+        type: 'rabbyx-sign-gasket:toggle-show',
+        nextShow: true,
+      });
+    },
+  });
+  appendMenu(inspectKitsMenu, {
+    label: `Close Rabby Sign's Gasket`,
+    click: () => {
+      emitIpcMainEvent('__internal_main:dev', {
+        type: 'rabbyx-sign-gasket:toggle-show',
+        nextShow: false,
+      });
+    },
+  });
+
+  appendMenuSeparator(inspectKitsMenu);
+  appendMenu(inspectKitsMenu, {
+    label: `Capture Active Tab's Screenshot`,
+    click: async () => {
+      emitIpcMainEvent('__internal_main:mainwindow:capture-tab');
+    },
+  });
+
+  appendMenuSeparator(inspectKitsMenu);
+  appendMenu(inspectKitsMenu, {
+    label: `Inspect LoadingView`,
+    click: () => {
+      emitIpcMainEvent('__internal_main:dev', {
+        type: 'loading-view:inspect',
+      });
+    },
+  });
+
+  appendMenuSeparator(inspectKitsMenu);
+  appendMenu(inspectKitsMenu, {
+    label: `Reset App`,
+    click: () => {
+      emitIpcMainEvent('__internal_main:app:reset-app');
+    },
+  });
+
+  return inspectKitsMenu;
+}
+
+function buildEventsKitsMenu(opts: ChromeContextMenuOptions) {
+  const { params } = opts;
+
+  const eventKitsMenu = new Menu();
+
+  appendMenu(eventKitsMenu, {
     label: 'Push Copied web3 addr',
     click: () => {
       getPopupWindowOnMain().then(async () => {
@@ -245,72 +299,7 @@ function buildDebugKitsMenu(opts: ChromeContextMenuOptions) {
     },
   });
 
-  appendMenuSeparator(debugKitsMenu);
-  appendMenu(debugKitsMenu, {
-    label: `Open DappSafeView's Content`,
-    click: () => {
-      emitIpcMainEvent('__internal_main:dev', {
-        type: 'dapp-safe-view:open',
-      });
-    },
-  });
-  appendMenu(debugKitsMenu, {
-    label: `Inspect DappSafeView's Wrapper`,
-    click: () => {
-      emitIpcMainEvent('__internal_main:dev', {
-        type: 'dapp-safe-view:inspect',
-        viewType: 'base',
-      });
-    },
-  });
-
-  appendMenuSeparator(debugKitsMenu);
-  appendMenu(debugKitsMenu, {
-    label: `Open Rabby Sign's Gasket`,
-    click: () => {
-      emitIpcMainEvent('__internal_main:dev', {
-        type: 'rabbyx-sign-gasket:toggle-show',
-        nextShow: true,
-      });
-    },
-  });
-  appendMenu(debugKitsMenu, {
-    label: `Close Rabby Sign's Gasket`,
-    click: () => {
-      emitIpcMainEvent('__internal_main:dev', {
-        type: 'rabbyx-sign-gasket:toggle-show',
-        nextShow: false,
-      });
-    },
-  });
-
-  appendMenuSeparator(debugKitsMenu);
-  appendMenu(debugKitsMenu, {
-    label: `Capture Active Tab's Screenshot`,
-    click: async () => {
-      emitIpcMainEvent('__internal_main:mainwindow:capture-tab');
-    },
-  });
-
-  appendMenuSeparator(debugKitsMenu);
-  appendMenu(debugKitsMenu, {
-    label: `Inspect LoadingView`,
-    click: () => {
-      emitIpcMainEvent('__internal_main:dev', {
-        type: 'loading-view:inspect',
-      });
-    },
-  });
-
-  appendMenuSeparator(debugKitsMenu);
-  appendMenu(debugKitsMenu, {
-    label: `Reset App`,
-    click: () => {
-      emitIpcMainEvent('__internal_main:app:reset-app');
-    },
-  });
-
-  return debugKitsMenu;
+  return eventKitsMenu;
 }
 
 const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
@@ -499,8 +488,13 @@ const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
     });
 
     append({
-      label: 'Debug Kits',
-      submenu: buildDebugKitsMenu(opts),
+      label: 'Views Kits',
+      submenu: buildInspectKitsMenu(opts),
+    });
+
+    append({
+      label: 'Test Events',
+      submenu: buildEventsKitsMenu(opts),
     });
 
     appendSeparator();

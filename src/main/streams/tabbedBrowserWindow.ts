@@ -1,7 +1,11 @@
 import { BrowserWindow } from 'electron';
 import { bufferTime, fromEvent, map } from 'rxjs';
 
-import { isUrlFromDapp, parseDomainMeta } from '@/isomorphic/url';
+import {
+  isUrlFromDapp,
+  parseDomainMeta,
+  parseQueryString,
+} from '@/isomorphic/url';
 import { arraify } from '@/isomorphic/array';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 import {
@@ -15,17 +19,18 @@ import {
   getRabbyExtViews,
   onMainWindowReady,
   RABBYX_WINDOWID_S,
+  toggleMaskViaOpenedRabbyxNotificationWindow,
 } from '../utils/stream-helpers';
 import {
-  getRabbyxNotificationBounds,
+  parseRabbyxNotificationParams,
   isPopupWindowHidden,
 } from '../utils/browser';
 import { getOrPutCheckResult } from '../utils/dapps';
-import { createDappTab } from './webContents';
 import { dappStore, getAllDapps } from '../store/dapps';
 import { cLog } from '../utils/log';
 
 import {
+  createWindow,
   findByWindowId,
   getTabbedWindowFromWebContents,
 } from '../utils/tabbedBrowserWindow';
@@ -44,8 +49,93 @@ export {
   isTabbedWebContents,
   createWindow,
   removeWindowRecord,
-  createRabbyxNotificationWindow,
 } from '../utils/tabbedBrowserWindow';
+
+const isWin32 = process.platform === 'win32';
+
+const rabbyxWinState = {
+  signApprovalType: null as string | null,
+};
+export async function createRabbyxNotificationWindow({
+  url,
+  width,
+  height,
+}: {
+  url: string;
+  width?: number;
+  height?: number;
+}) {
+  const mainWin = await onMainWindowReady();
+
+  const queryObj = parseQueryString(url.split('?')[1] || '');
+  rabbyxWinState.signApprovalType = queryObj.type;
+
+  const { finalBounds: expectedBounds, shouldPosCenter } =
+    parseRabbyxNotificationParams(mainWin.window, {
+      signApprovalType: rabbyxWinState.signApprovalType,
+      details: { width, height },
+    });
+
+  const win = await createWindow({
+    defaultTabUrl: url,
+    windowType: 'popup',
+    isRabbyXNotificationWindow: true,
+    window: {
+      frame: false,
+      /**
+       * @notice by default, set transparent to true will
+       * lead all click behavior to be ignored (passthrough),
+       *
+       * but in this case, we provide a popup-view as gasket, which is
+       * under this window and above the main window, so we can set
+       * transparent to true and make borderless-style window.
+       */
+      transparent: true,
+      ...(!isWin32 && {
+        roundedCorners: true,
+        hasShadow: false,
+      }),
+      x: expectedBounds.x,
+      y: expectedBounds.y,
+      ...(shouldPosCenter
+        ? {
+            center: true,
+            hasShadow: true,
+            roundedCorners: false,
+            width: expectedBounds.width,
+            height: expectedBounds.height,
+          }
+        : {
+            width: Math.min(
+              width || expectedBounds.width,
+              expectedBounds.width
+            ),
+            height: expectedBounds.height,
+          }),
+      movable: false,
+      maximizable: false,
+      minimizable: false,
+      fullscreenable: false,
+      resizable: false,
+      parent: mainWin.window,
+      type: 'popup',
+    },
+  });
+
+  const windowId = win.window.id;
+  win.window.on('closed', () => {
+    rabbyxWinState.signApprovalType = null;
+    RABBYX_WINDOWID_S.delete(windowId);
+    toggleMaskViaOpenedRabbyxNotificationWindow();
+  });
+
+  win.tabs.tabList[0]?._patchWindowClose();
+
+  RABBYX_WINDOWID_S.add(windowId);
+  toggleMaskViaOpenedRabbyxNotificationWindow();
+
+  return win.window as BrowserWindow;
+}
 
 onIpcMainEvent('__internal_rpc:rabbyx:close-signwin', async () => {
   RABBYX_WINDOWID_S.forEach((wid) => {
@@ -205,7 +295,18 @@ onMainWindowReady().then((mainTabbedWin) => {
       if (!win || win?.isDestroyed()) return;
       if (isPopupWindowHidden(win)) return;
 
-      win.setBounds(getRabbyxNotificationBounds(mainTabbedWin.window));
+      const bounds = win.getBounds();
+      const { finalBounds } = parseRabbyxNotificationParams(
+        mainTabbedWin.window,
+        {
+          details: {
+            width: bounds.width,
+            height: bounds.height,
+          },
+          signApprovalType: rabbyxWinState.signApprovalType,
+        }
+      );
+      win.setBounds(finalBounds);
     });
   };
 

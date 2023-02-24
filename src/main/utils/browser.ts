@@ -1,5 +1,7 @@
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
 import { RABBY_BLANKPAGE_RELATIVE_URL } from '@/isomorphic/constants';
+import { isRabbyXCenteredWindowType } from '@/isomorphic/rabbyx';
+import { roundRectValue } from '@/isomorphic/shape';
 import { BrowserView, BrowserWindow } from 'electron';
 import { isEnableContentProtected } from '../store/desktopApp';
 import { getAssetPath } from './app';
@@ -247,21 +249,51 @@ export function browserWindowOn<T extends EventTypeOfBrowserOn>(
 const isWin32 = process.platform === 'win32';
 const rWinWidth = NativeAppSizes.rabbyxNotificationWindowWidth;
 
-export function getRabbyxNotificationBounds(
-  mainWindow: BrowserWindow
-): Electron.Rectangle {
+export function parseRabbyxNotificationParams(
+  mainWindow: BrowserWindow,
+  opts: {
+    details: Pick<chrome.windows.CreateData, 'height' | 'width'>;
+    signApprovalType: string | null;
+  }
+) {
   const mainBounds = mainWindow.getBounds();
   const topOffset = isWin32 ? NativeAppSizes.windowTitlebarHeight : 0;
 
-  const maxHeight = mainBounds.height - topOffset;
-  const maxWith = isWin32 ? rWinWidth - 1 : rWinWidth;
+  const { signApprovalType, details } = opts || {};
 
-  return {
-    width: maxWith,
-    height: maxHeight - 1,
-    x: mainBounds.x + mainBounds.width - rWinWidth,
-    y: mainBounds.y + topOffset,
+  const result = {
+    finalBounds: { width: 0, height: 0, x: 0, y: 0 } as Electron.Rectangle,
+    shouldPosCenter: false,
   };
+
+  const selfBounds = {
+    width: details?.width || 400,
+    height: details?.height || 400,
+  };
+
+  if (!isRabbyXCenteredWindowType(signApprovalType)) {
+    // dock right
+    const maxHeight = mainBounds.height - topOffset;
+    const maxWith = isWin32 ? rWinWidth - 1 : rWinWidth;
+
+    result.finalBounds = {
+      width: maxWith,
+      height: maxHeight - 1,
+      x: mainBounds.x + mainBounds.width - rWinWidth,
+      y: mainBounds.y + topOffset,
+    };
+  } else {
+    result.finalBounds = {
+      ...selfBounds,
+      x: mainBounds.x + (mainBounds.width - selfBounds.width) / 2,
+      y: mainBounds.y + (mainBounds.height - selfBounds.height) / 2,
+    };
+    result.shouldPosCenter = true;
+  }
+
+  roundRectValue(result.finalBounds);
+
+  return result;
 }
 
 export async function captureWebContents(webContents: Electron.WebContents) {
