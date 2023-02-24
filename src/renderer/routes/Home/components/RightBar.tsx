@@ -58,7 +58,7 @@ const RightBar = () => {
       name: 'Swap',
       icon: <IconSwap width="35px" height="35px" />,
       onClick: () => {
-        navigateTo('/mainwin/swap');
+        navigateTo('/mainwin/home/swap');
       },
     },
     {
@@ -66,7 +66,7 @@ const RightBar = () => {
       name: 'Send',
       icon: <IconSend width="35px" height="35px" />,
       onClick: () => {
-        navigateTo('/mainwin/send-token');
+        navigateTo('/mainwin/home/send-token');
       },
     },
     {

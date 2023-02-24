@@ -132,16 +132,7 @@ const router = createRouter([
         element: <Transactions />,
       },
       {
-        path: 'my-dapps',
-        element: <DApps />,
-        loader: () => {
-          return {
-            title: 'My Dapps',
-          } as MainWindowRouteData;
-        },
-      },
-      {
-        path: 'send-token',
+        path: 'home/send-token',
         element: (
           <>
             <FixedBackHeader>Send</FixedBackHeader>
@@ -150,7 +141,7 @@ const router = createRouter([
         ),
       },
       {
-        path: 'swap',
+        path: 'home/swap',
         element: <Swap />,
       },
       {
@@ -166,6 +157,16 @@ const router = createRouter([
           } as MainWindowRouteData;
         },
       },
+      {
+        path: 'my-dapps',
+        element: <DApps />,
+        loader: () => {
+          return {
+            title: 'My Dapps',
+          } as MainWindowRouteData;
+        },
+      },
+
       {
         path: 'settings',
         element: <MainWindowSettings />,

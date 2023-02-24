@@ -179,7 +179,7 @@ const TokenItemComp = ({
   }, [gotoSwap, token.chain, token.id]);
 
   const handleClickSend = useCallback(() => {
-    navigate(`/mainwin/send-token?token=${token?.chain}:${token?.id}`);
+    navigate(`/mainwin/home/send-token?token=${token?.chain}:${token?.id}`);
   }, [navigate, token?.chain, token?.id]);
 
   return (
