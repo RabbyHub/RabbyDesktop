@@ -42,6 +42,14 @@ type ZViewStates = {
   /* eslint-disable @typescript-eslint/ban-types */
   'gasket-modal-like-window': {};
   /* eslint-enable @typescript-eslint/ban-types */
+
+  'rename-dapp-modal': {
+    dapp: IDapp;
+  };
+
+  'delete-dapp-modal': {
+    dapp: IDapp;
+  };
 };
 
 type IZPopupSubviewState = {

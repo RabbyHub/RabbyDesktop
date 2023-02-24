@@ -187,7 +187,7 @@ const SIZE_MAP: Record<
 > = {
   'sidebar-dapp': {
     width: 140,
-    height: 100,
+    height: 148,
   },
   'switch-chain-tmp': {
     width: 272,

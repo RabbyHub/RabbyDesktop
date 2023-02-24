@@ -1,18 +1,24 @@
 import {
+  RCIconClose,
   RCIconPin,
   RCIconUnpinFill,
-  RCIconClose,
 } from '@/../assets/icons/internal-homepage';
-import { usePopupWinInfo } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { useDapp } from '@/renderer/hooks/useDappsMngr';
-import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
+import {
+  usePopupWinInfo,
+  useZPopupLayerOnMain,
+} from '@/renderer/hooks/usePopupWinOnMainwin';
 import { toggleDappPinned } from '@/renderer/ipcRequest/dapps';
 import {
   closeTabFromInternalPage,
   openDappFromInternalPage,
 } from '@/renderer/ipcRequest/mainwin';
+import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import { Menu } from 'antd';
+import classNames from 'classnames';
+import { MenuClickEventHandler } from 'rc-menu/lib/interface';
 
+import { useMemo } from 'react';
 import styles from './index.module.less';
 
 export const SidebarContextMenu = () => {
@@ -20,6 +26,108 @@ export const SidebarContextMenu = () => {
 
   const origin = pageInfo?.dappTabInfo?.origin || '';
   const dappInfo = useDapp(origin);
+  const zActions = useZPopupLayerOnMain();
+
+  const items = useMemo(() => {
+    if (!origin) {
+      return [];
+    }
+    return [
+      dappInfo?.isPinned
+        ? {
+            key: 'dapp-unpin',
+            className: styles['dapp-dropdown-item'],
+            label: <span className="text">Unpin</span>,
+            icon: (
+              <img
+                className={styles['dapp-dropdown-item-icon']}
+                src="rabby-internal://assets/icons/sidebar-context-menu/icon-pinned.svg"
+              />
+            ),
+          }
+        : {
+            key: 'dapp-pin',
+            className: styles['dapp-dropdown-item'],
+            label: <span className="text">Pin</span>,
+            icon: (
+              <img
+                className={styles['dapp-dropdown-item-icon']}
+                src="rabby-internal://assets/icons/sidebar-context-menu/icon-pin.svg"
+              />
+            ),
+          },
+      {
+        key: 'dapp-rename',
+        className: styles['dapp-dropdown-item'],
+        label: <span className="text">Rename</span>,
+        icon: (
+          <img
+            className={styles['dapp-dropdown-item-icon']}
+            src="rabby-internal://assets/icons/sidebar-context-menu/icon-edit.svg"
+          />
+        ),
+      },
+      !pageInfo?.dappTabInfo?.id
+        ? {
+            key: 'dapp-delete',
+            className: classNames(
+              styles['dapp-dropdown-item'],
+              styles['dapp-dropdown-item-danger']
+            ),
+            label: <span className="text">Delete</span>,
+            icon: (
+              <img
+                className={styles['dapp-dropdown-item-icon']}
+                src="rabby-internal://assets/icons/sidebar-context-menu/icon-trash.svg"
+              />
+            ),
+          }
+        : {
+            key: 'dapp-close',
+            className: styles['dapp-dropdown-item'],
+            label: <span className="text">Close</span>,
+            icon: (
+              <img
+                className={styles['dapp-dropdown-item-icon']}
+                src="rabby-internal://assets/icons/sidebar-context-menu/icon-close.svg"
+              />
+            ),
+          },
+    ];
+  }, [dappInfo?.isPinned, origin, pageInfo?.dappTabInfo?.id]);
+
+  const handleMenuClick: MenuClickEventHandler = ({ key }) => {
+    switch (key) {
+      case 'dapp-pin':
+        toggleDappPinned(origin, true);
+        break;
+      case 'dapp-unpin':
+        toggleDappPinned(origin, false);
+        break;
+      case 'dapp-close': {
+        const tabId = pageInfo?.dappTabInfo?.id;
+        if (tabId) closeTabFromInternalPage(tabId);
+        break;
+      }
+      case 'dapp-rename':
+        if (dappInfo) {
+          zActions.showZSubview('rename-dapp-modal', {
+            dapp: dappInfo as IDapp,
+          });
+        }
+        break;
+      case 'dapp-delete':
+        if (dappInfo) {
+          zActions.showZSubview('delete-dapp-modal', {
+            dapp: dappInfo as IDapp,
+          });
+        }
+        break;
+      default:
+        break;
+    }
+    hideMainwinPopup('sidebar-dapp');
+  };
 
   if (!origin) return null;
   if (pageInfo?.type !== 'sidebar-dapp') return null;
@@ -27,71 +135,9 @@ export const SidebarContextMenu = () => {
   return (
     <div>
       <Menu
-        onClick={({ key }) => {
-          switch (key) {
-            case 'dapp-pin':
-              toggleDappPinned(origin, true);
-              break;
-            case 'dapp-unpin':
-              toggleDappPinned(origin, false);
-              break;
-            case 'dapp-close': {
-              const tabId = pageInfo?.dappTabInfo?.id;
-              if (tabId) closeTabFromInternalPage(tabId);
-              break;
-            }
-            case 'dapp-open':
-              if (origin) {
-                openDappFromInternalPage(origin);
-              }
-              break;
-            default:
-              break;
-          }
-          hideMainwinPopup('sidebar-dapp');
-        }}
         className={styles.dappDropdownMenu}
-        items={[
-          dappInfo?.isPinned
-            ? {
-                key: 'dapp-unpin',
-                className: styles['dapp-dropdown-item'],
-                label: <span className="text">Unpin</span>,
-                icon: (
-                  <RCIconUnpinFill
-                    className={styles['dapp-dropdown-item-icon']}
-                  />
-                ),
-              }
-            : {
-                key: 'dapp-pin',
-                className: styles['dapp-dropdown-item'],
-                label: <span className="text">Pin</span>,
-                icon: (
-                  <RCIconPin className={styles['dapp-dropdown-item-icon']} />
-                ),
-              },
-          !pageInfo?.dappTabInfo?.id
-            ? {
-                key: 'dapp-open',
-                className: styles['dapp-dropdown-item'],
-                label: <span className="text">Open</span>,
-                icon: (
-                  <RCIconClose
-                    style={{ visibility: 'hidden' }}
-                    className={styles['dapp-dropdown-item-icon']}
-                  />
-                ),
-              }
-            : {
-                key: 'dapp-close',
-                className: styles['dapp-dropdown-item'],
-                label: <span className="text">Close</span>,
-                icon: (
-                  <RCIconClose className={styles['dapp-dropdown-item-icon']} />
-                ),
-              },
-        ]}
+        onClick={handleMenuClick}
+        items={items}
       />
     </div>
   );

@@ -1,7 +1,12 @@
 .deleteModal {
-  :global(.ant-modal-body) {
-    padding: 56px 48px 48px 48px !important;
-    height: 400px;
+  :global {
+    .ant-modal-body {
+      padding: 33px 48px 48px 48px !important;
+    }
+    .ant-modal-close-x {
+      font-size: 24px !important;
+      padding: 24px !important;
+    }
   }
   --color-title: #fff;
 }
@@ -16,24 +21,28 @@
   :global {
     .dapp-block {
       position: relative;
-      width: 300px;
+      width: 376px;
+      min-height: 64px;
       box-sizing: border-box;
       display: flex;
       justify-content: flex-start;
       align-items: center;
       padding: 16px;
-      // border: 1px solid var(--color-line);
-      border-radius: 8px;
-      background: rgba(0, 0, 0, 0.2);
+
+      background: rgba(0, 0, 0, 0.21);
       border-radius: 6px;
+      margin-bottom: 44px;
+
+      .ant-image {
+        display: block;
+      }
 
       .dapp-favicon {
-        width: 52px;
-        height: 52px;
-        margin-right: 16px;
-        border-radius: 8px;
+        width: 24px;
+        height: 24px;
+        margin-right: 12px;
+        border-radius: 2px;
       }
-      margin-bottom: 24px;
     }
 
     .dapp-block .anchor {
@@ -55,59 +64,53 @@
       text-align: left;
       .dapp-alias {
         font-weight: 700;
-        font-size: 18px;
-        line-height: 21px;
-        color: var(--color-title);
-        margin-bottom: 0;
-        text-align: left;
+        font-size: 13px;
+        line-height: 16px;
+        color: #fff;
+        margin-bottom: 2px;
         .truncate;
       }
       .dapp-url {
-        font-style: normal;
-        font-weight: 500;
-        font-size: 14px;
-        line-height: 16px;
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 14px;
+        color: #ffffff;
+        opacity: 0.8;
         .truncate;
-        color: #fff;
-      }
-
-      .dapp-alias + .dapp-url {
-        margin-top: 4px;
       }
     }
   }
 }
 
 .title {
-  font-size: 24px;
   font-weight: 700;
-  line-height: 28px;
-  letter-spacing: 0px;
+  font-size: 20px;
+  line-height: 24px;
   text-align: center;
-  color: var(--color-title);
-  margin-bottom: 24px;
+  color: #fff;
+  margin-bottom: 44px;
 }
 
 .tips {
-  font-style: normal;
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 16px;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 19px;
   text-align: center;
   color: #fff;
+  margin: 0;
 
   & + .button {
-    margin-top: 48px;
+    margin-top: 68px;
   }
 }
 
 .button.button {
   width: 240px;
-  height: 52px;
-  border-radius: 4px;
+  height: 56px;
+  border-radius: 8px;
   font-weight: 500;
-  font-size: 15px;
-  line-height: 18px;
+  font-size: 16px;
+  line-height: 19px;
   display: block;
   &:disabled {
     background: #707280 !important;
