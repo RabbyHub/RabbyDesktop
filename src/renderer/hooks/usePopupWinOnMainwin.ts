@@ -6,16 +6,14 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { randString } from '@/isomorphic/string';
 import { parseQueryString } from '@/isomorphic/url';
 import { hideMainwinPopup } from '../ipcRequest/mainwin-popup';
-import {
-  hideMainwinPopupview,
-  showMainwinPopupview,
-} from '../ipcRequest/mainwin-popupview';
-import { useForwardTo, useMessageForwarded } from './useViewsMessage';
+import { hideMainwinPopupview } from '../ipcRequest/mainwin-popupview';
+import { forwardMessageTo, useMessageForwarded } from './useViewsMessage';
 import {
   consumeZCallback,
   IZCallback,
   registerZCallback,
 } from '../ipcRequest/zPopupMessage';
+import { pickVisibleFromZViewStates } from '../utils/zviews';
 
 export function usePopupWinInfo<T extends IPopupWinPageInfo['type']>(
   type: T,
@@ -183,8 +181,6 @@ const isInZPopup = parseQueryString().view === 'z-popup';
  * @returns
  */
 export function useZPopupLayerOnMain() {
-  const sendMsg = useForwardTo('z-popup');
-
   const updateZPopup = useCallback(
     <V extends keyof ZViewStates>(
       svType: V,
@@ -198,11 +194,11 @@ export function useZPopupLayerOnMain() {
         },
       };
 
-      sendMsg('update-subview-state', {
+      forwardMessageTo('z-popup', 'update-subview-state', {
         partials,
       });
     },
-    [sendMsg]
+    []
   );
 
   const showZSubview = useCallback(
@@ -217,11 +213,11 @@ export function useZPopupLayerOnMain() {
       if (typeof callback === 'function') {
         svOpenId = registerZCallback(svType, callback).svOpenId;
       }
-      sendMsg('register-subview-openid', {
+      forwardMessageTo('z-popup', 'register-subview-openid', {
         payload: { svOpenId, subView: svType },
       });
     },
-    [updateZPopup, sendMsg]
+    [updateZPopup]
   );
 
   const hideZSubview = useCallback(
@@ -248,7 +244,7 @@ const ZPopupSubviewStateAtom = atom<NullableFields<IZPopupSubviewState>>({
   'gasket-modal-like-window': null,
 });
 
-export function useZPopupViewStates() {
+export function useZViewStates() {
   const [zviewsState, setZViewsState] = useAtom(ZPopupSubviewStateAtom);
 
   return { zviewsState, setZViewsState };
@@ -257,8 +253,7 @@ export function useZPopupViewState<T extends keyof ZViewStates>(
   svType: T,
   onFieldsChanged?: (partials?: IZPopupSubviewState[T]) => void
 ) {
-  const { zviewsState, setZViewsState } = useZPopupViewStates();
-  const broadcastMsg = useForwardTo('*');
+  const { zviewsState, setZViewsState } = useZViewStates();
 
   useMessageForwarded(
     {
@@ -282,15 +277,17 @@ export function useZPopupViewState<T extends keyof ZViewStates>(
           ...prev[svType],
           visible: false,
         },
-      };
+      } as IZPopupSubviewState;
 
-      const svOpenId = consumeZCallback(svType);
-      broadcastMsg('consume-subview-openid', {
+      const svOpenId = consumeZCallback(svType)!;
+      forwardMessageTo('*', 'consume-subview-openid', {
         payload: {
           svOpenId,
           subView: svType,
           latestState: partials[svType]?.state,
-          $subViewState: partials[svType],
+          $subViewState: partials[svType]!,
+          // $zViewsStates: partials,
+          $zViewsStatesVisible: pickVisibleFromZViewStates(partials),
         },
       });
 
@@ -300,7 +297,7 @@ export function useZPopupViewState<T extends keyof ZViewStates>(
 
       return partials;
     });
-  }, [svType, setZViewsState, broadcastMsg]);
+  }, [svType, setZViewsState]);
 
   const { visible: svVisible, state: svState } = zviewsState[svType] || {};
 
@@ -331,4 +328,31 @@ export function useZPopupViewState<T extends keyof ZViewStates>(
     pageInfo: zviewsState[svType],
     closeSubview,
   };
+}
+
+/**
+ * @description this hooks only works on main-window
+ */
+export function useZViewsVisibleChanged(
+  onStatesChanged?: (nextVisibles: IZPopupSubviewVisibleState) => void
+) {
+  useMessageForwarded(
+    {
+      targetView: 'main-window',
+      type: 'z-views-visible-changed',
+    },
+    ({ nextVisibles }) => {
+      onStatesChanged?.(nextVisibles);
+    }
+  );
+
+  useMessageForwarded(
+    {
+      targetView: 'main-window',
+      type: 'consume-subview-openid',
+    },
+    ({ payload }) => {
+      onStatesChanged?.(payload.$zViewsStatesVisible);
+    }
+  );
 }

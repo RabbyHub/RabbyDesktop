@@ -56,11 +56,17 @@ type IZPopupSubviewState = {
   [K in keyof ZViewStates]: SVState<ZViewStates[K]>;
 };
 
+type IZPopupSubviewVisibleState = {
+  [K in keyof ZViewStates]: { visible: boolean };
+};
+
 type IZCallbackPayload<SV extends keyof ZViewStates> = {
   svOpenId: string;
   subView: SV;
   latestState: IZPopupSubviewState[SV]['state'];
   $subViewState: IZPopupSubviewState[SV];
+  // $zViewsStates: NullableFields<IZPopupSubviewState>;
+  $zViewsStatesVisible: IZPopupSubviewVisibleState;
 };
 
 type ChannelForwardMessageType =
@@ -91,6 +97,16 @@ type ChannelForwardMessageType =
       targetView: 'main-window';
       type: 'on-deleted-account';
     }
+  // | {
+  //   targetView: 'main-window';
+  //   type: 'z-view-states-changed';
+  //   nextStates: NullableFields<IZPopupSubviewState>;
+  // }
+  | {
+      targetView: 'main-window';
+      type: 'z-views-visible-changed';
+      nextVisibles: IZPopupSubviewVisibleState;
+    }
   | {
       targetView: '*';
       type: 'refreshCurrentAccount';
@@ -117,7 +133,7 @@ type ChannelForwardMessageType =
       };
     }
   | {
-      targetView: 'main-window' | 'z-popup';
+      targetView: '*' | 'main-window' | 'z-popup';
       type: 'consume-subview-openid';
       payload: IZCallbackPayload<keyof ZViewStates>;
     };
