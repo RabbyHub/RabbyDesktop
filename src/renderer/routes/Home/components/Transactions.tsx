@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 import { maxBy, minBy, sortBy } from 'lodash';
-import { useInterval } from 'react-use';
+import { useInterval, usePrevious } from 'react-use';
 import { useNavigate } from 'react-router-dom';
 import {
   TokenItem,
@@ -163,6 +163,7 @@ const Transactions = () => {
   const [pendingTxs, setPendingTxs] = useState<TransactionDataItem[]>([]);
   const [localTxs, setLocalTxs] = useState<TransactionDataItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const prevAccount = usePrevious(currentAccount);
 
   const completedTxs = useMemo(() => {
     return localTxs.filter(
@@ -394,7 +395,8 @@ const Transactions = () => {
   );
 
   useEffect(() => {
-    if (!currentAccount) return;
+    if (!currentAccount || prevAccount?.address === currentAccount.address)
+      return;
     setIsLoading(true);
     init(currentAccount.address);
     // eslint-disable-next-line react-hooks/exhaustive-deps

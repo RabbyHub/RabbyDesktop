@@ -1,8 +1,8 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { usePrevious } from 'react-use';
 import styled from 'styled-components';
 import classNames from 'classnames';
+import { useLocation } from 'react-router-dom';
 import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
 import { sortBy } from 'lodash';
 import { ellipsis } from '@/renderer/utils/address';
@@ -10,7 +10,6 @@ import { formatNumber } from '@/renderer/utils/number';
 import { formatChain, DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import { useTotalBalance } from '@/renderer/utils/balance';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-import { useBalanceValue } from '@/renderer/hooks/useCurrentBalance';
 import useCurve from '@/renderer/hooks/useCurve';
 import useHistoryTokenList from '@/renderer/hooks/useHistoryTokenList';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
@@ -276,11 +275,10 @@ const useExpandProtocolList = (protocols: DisplayProtocol[]) => {
 };
 
 const Home = () => {
+  const rerenderAtRef = useRef(0);
   const { currentAccount } = useCurrentAccount();
   const prevAccount = usePrevious(currentAccount);
   const [updateNonce, setUpdateNonce] = useState(0);
-  const [_, updateBalanceValue] = useBalanceValue();
-
   const [selectChainServerId, setSelectChainServerId] = useState<string | null>(
     null
   );
@@ -355,6 +353,7 @@ const Home = () => {
     Number(totalBalance) || 0,
     Date.now()
   );
+  const location = useLocation();
 
   const filterProtocolList = useMemo(() => {
     const list: DisplayProtocol[] = selectChainServerId
@@ -414,6 +413,7 @@ const Home = () => {
 
   const init = async () => {
     if (!currentAccount?.address) return;
+    rerenderAtRef.current = Date.now();
     const chainList = await walletOpenapi.usedChainList(currentAccount.address);
     setUsedChainList(chainList.map((chain) => formatChain(chain)));
     setIsProtocolExpand(false);
@@ -426,10 +426,20 @@ const Home = () => {
   };
 
   useEffect(() => {
-    if (currentAccount?.address !== prevAccount?.address) {
+    if (currentAccount && currentAccount?.address !== prevAccount?.address) {
       init();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentAccount]);
+
+  useEffect(() => {
+    if (location.pathname === '/mainwin/home') {
+      if (Date.now() - rerenderAtRef.current >= 3600000) {
+        init();
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location]);
 
   const { showZSubview } = useZPopupLayerOnMain();
 
