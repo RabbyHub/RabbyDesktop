@@ -325,6 +325,28 @@ const Home = () => {
     currentView === VIEW_TYPE.DEFAULT ? null : historyTokenMap,
     supportHistoryChains
   );
+  const displayChainList = useMemo(() => {
+    const map: Record<string, number> = {};
+    protocolList.forEach((protocol) => {
+      if (map[protocol.chain]) {
+        map[protocol.chain] += protocol.usd_value;
+      } else {
+        map[protocol.chain] = protocol.usd_value;
+      }
+    });
+    tokenList.forEach((token) => {
+      if (map[token.chain]) {
+        map[token.chain] += token.usd_value || 0;
+      } else {
+        map[token.chain] = token.usd_value || 0;
+      }
+    });
+    const list = usedChainList.map((chain) => ({
+      ...chain,
+      usd_value: map[chain.id] || 0,
+    }));
+    return sortBy(list, (item) => item.usd_value).reverse();
+  }, [usedChainList, protocolList, tokenList]);
 
   const totalBalance = useTotalBalance(tokenList, protocolList);
 
@@ -476,7 +498,7 @@ const Home = () => {
             </div>
             <div className="flex justify-between items-center">
               <ChainList
-                chainBalances={usedChainList}
+                chainBalances={displayChainList}
                 onChange={setSelectChainServerId}
               />
               <SwitchViewWrapper>

@@ -24,14 +24,14 @@ const TransactionItemWrapper = styled.div`
   border-bottom: 1px solid rgba(255, 255, 255, 0.11);
   position: relative;
   .name-and-address .icon-copy {
-    opacity: 0;
+    display: none;
   }
   &:hover {
     .tx-origin {
       display: block;
     }
     .name-and-address .icon-copy {
-      opacity: 1;
+      display: inline-block;
     }
   }
   .tx-time {
