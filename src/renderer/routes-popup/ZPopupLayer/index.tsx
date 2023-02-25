@@ -6,9 +6,12 @@ import {
 
 import {
   usePopupViewInfo,
-  useZPopupViewStates,
+  useZViewStates,
 } from '@/renderer/hooks/usePopupWinOnMainwin';
-import { useMessageForwarded } from '@/renderer/hooks/useViewsMessage';
+import {
+  forwardMessageTo,
+  useMessageForwarded,
+} from '@/renderer/hooks/useViewsMessage';
 import {
   hideMainwinPopupview,
   showMainwinPopupview,
@@ -21,6 +24,7 @@ import { SelectAddAddressTypeModalInSubview } from '@/renderer/components/Select
 import GasketModalLikeWindow from '@/renderer/components/GasketModalLikeWindow';
 import { RenameDappModal } from '@/renderer/components/ModalRenameDapp';
 import { DeleteDappModal } from '@/renderer/components/ModalDeleteDapp';
+import { pickVisibleFromZViewStates } from '@/renderer/utils/zviews';
 import SwitchChainModal from '../../components/SwitchChainModal';
 
 import styles from './index.module.less';
@@ -28,7 +32,7 @@ import styles from './index.module.less';
 hideMainwinPopupview('z-popup');
 
 function useReactOnZPopupMessage() {
-  const { setZViewsState } = useZPopupViewStates();
+  const { setZViewsState } = useZViewStates();
 
   useMessageForwarded(
     {
@@ -43,7 +47,11 @@ function useReactOnZPopupMessage() {
         const nextStates = {
           ...prev,
           ...partials,
-        };
+        } as NullableFields<IZPopupSubviewState>;
+
+        forwardMessageTo('main-window', 'z-views-visible-changed', {
+          nextVisibles: pickVisibleFromZViewStates(nextStates),
+        });
 
         if (Object.values(nextStates).some((v) => v?.visible)) {
           showMainwinPopupview({ type: 'z-popup' });
