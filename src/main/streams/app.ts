@@ -147,12 +147,9 @@ app.on('activate', (_, hasVisibleWindows) => {
 onIpcMainEvent('__internal_rpc:main-window:click-close', async (evt) => {
   const { sender } = evt;
   const tabbedWin = getTabbedWindowFromWebContents(sender);
-  if (tabbedWin === (await onMainWindowReady())) {
-    if (isDarwin) {
-      tabbedWin.window.hide();
-    } else {
-      app.quit();
-    }
+  const mainTabbedWin = await onMainWindowReady();
+  if (tabbedWin === mainTabbedWin) {
+    app.quit();
     return;
   }
 

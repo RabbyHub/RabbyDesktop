@@ -25,7 +25,10 @@ import { useTransactionChanged } from '@/renderer/hooks/rabbyx/useTransaction';
 import { useMainWindowEvents } from '@/renderer/hooks-shell/useWindowState';
 import { useAppUnlockEvents } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { useAccounts } from '@/renderer/hooks/rabbyx/useAccount';
-import { useMessageForwardToMainwin } from '@/renderer/hooks/useViewsMessage';
+import {
+  useMessageForwarded,
+  useMessageForwardToMainwin,
+} from '@/renderer/hooks/useViewsMessage';
 import { navigateToDappRoute } from '@/renderer/utils/react-router';
 import { Swap } from '@/renderer/routes/Swap';
 import styles from './index.module.less';
@@ -49,7 +52,14 @@ function WelcomeWrapper() {
 }
 
 function MainWrapper() {
-  const { hasFetched, accounts } = useAccounts();
+  const { hasFetched, accounts, fetchAccounts } = useAccounts();
+
+  useMessageForwarded(
+    { targetView: 'main-window', type: 'on-deleted-account' },
+    () => {
+      fetchAccounts();
+    }
+  );
 
   if (hasFetched && !accounts.length) {
     return <Navigate to="/welcome/getting-started" />;

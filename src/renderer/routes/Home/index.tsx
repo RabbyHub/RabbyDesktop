@@ -117,10 +117,10 @@ const HomeWrapper = styled.div`
           animation: spining 1.5s infinite linear;
         }
       }
-      &:hover {
-        .icon-refresh {
-          display: block;
-        }
+    }
+    &:hover {
+      .icon-refresh {
+        display: block;
       }
     }
   }
