@@ -19,11 +19,14 @@ import useHistoryProtocol, {
 import { toastCopiedWeb3Addr } from '@/renderer/components/TransparentToast';
 import { copyText } from '@/renderer/utils/clipboard';
 import BigNumber from 'bignumber.js';
-import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
+import {
+  useZPopupLayerOnMain,
+  useZViewsVisibleChanged,
+} from '@/renderer/hooks/usePopupWinOnMainwin';
 import { useSwitchView, VIEW_TYPE } from './hooks';
 
 import ChainList from './components/ChainList';
-import Curve from './components/Curve';
+import Curve, { CurveModal } from './components/Curve';
 import PortfolioView from './components/PortfolioView';
 import RightBar from './components/RightBar';
 
@@ -59,7 +62,7 @@ const HomeWrapper = styled.div`
       display: flex;
       margin-bottom: 20px;
       .left {
-        z-index: 1;
+        z-index: 2;
         margin-right: 40px;
       }
       .right {
@@ -67,13 +70,21 @@ const HomeWrapper = styled.div`
         position: relative;
         .balance-change {
           position: absolute;
-          right: 28px;
-          top: 77px;
+          top: 0;
+          right: 0;
+          width: 600px;
+          height: 100%;
+          display: flex;
+          align-items: flex-end;
+          justify-content: flex-end;
+          padding-right: 28px;
           font-weight: 500;
           font-size: 18px;
           line-height: 21px;
           margin-left: 6px;
           color: #2ed4a3;
+          z-index: 1;
+          cursor: pointer;
           &.is-loss {
             color: #ff6060;
           }
@@ -276,6 +287,7 @@ const useExpandProtocolList = (protocols: DisplayProtocol[]) => {
 
 const Home = () => {
   const rerenderAtRef = useRef(0);
+  const [curveModalOpen, setCurveModalOpen] = useState(false);
   const { currentAccount } = useCurrentAccount();
   const prevAccount = usePrevious(currentAccount);
   const [updateNonce, setUpdateNonce] = useState(0);
@@ -432,6 +444,16 @@ const Home = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentAccount]);
 
+  useZViewsVisibleChanged((visibles) => {
+    if (
+      Date.now() - rerenderAtRef.current >= 3600000 &&
+      location.pathname === '/mainwin/home' &&
+      !Object.values(visibles).some((item) => item.visible) // all closed
+    ) {
+      init();
+    }
+  });
+
   useEffect(() => {
     if (location.pathname === '/mainwin/home') {
       if (Date.now() - rerenderAtRef.current >= 3600000) {
@@ -494,7 +516,7 @@ const Home = () => {
                 </div>
               </div>
               {curveData ? (
-                <div className="right">
+                <div className="right" onClick={() => setCurveModalOpen(true)}>
                   <div
                     className={classNames('balance-change', {
                       'is-loss': curveData.isLoss,
@@ -563,6 +585,14 @@ const Home = () => {
         </HomeWrapper>
         <RightBar />
       </Container>
+      {curveModalOpen && (
+        <CurveModal
+          data={curveData}
+          onClose={() => {
+            setCurveModalOpen(false);
+          }}
+        />
+      )}
     </HomeBody>
   );
 };
