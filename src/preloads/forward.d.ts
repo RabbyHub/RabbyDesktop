@@ -28,6 +28,7 @@ type ZViewStates = {
   'add-address-modal': {
     keyringType: string;
     showEntryButton?: boolean;
+    showBackButton?: boolean;
   };
   'address-management': {
     // nothing

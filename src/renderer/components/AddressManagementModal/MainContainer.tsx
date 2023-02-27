@@ -30,6 +30,7 @@ export const MainContainer: React.FC = () => {
   const [selectedAccount, setSelectedAccount] =
     React.useState<IDisplayedAccountWithBalance>();
   const zActions = useZPopupLayerOnMain();
+  const [isDeleted, setIsDeleted] = React.useState(false);
 
   const [sortedAccountsList, watchSortedAccountsList] = React.useMemo(() => {
     const restAccounts = [...accountsList];
@@ -103,6 +104,7 @@ export const MainContainer: React.FC = () => {
       getHighlightedAddressesAsync();
 
       forwardMessageTo('main-window', 'on-deleted-account', {});
+      setIsDeleted(true);
     },
     [removeAddress, getHighlightedAddressesAsync]
   );
@@ -134,10 +136,10 @@ export const MainContainer: React.FC = () => {
   }, [selectedAccount]);
 
   React.useEffect(() => {
-    if (noAccount) {
+    if (isDeleted && noAccount) {
       zActions.hideZSubview('address-management');
     }
-  }, [noAccount, zActions]);
+  }, [isDeleted, noAccount, zActions]);
 
   return (
     <div className={styles.MainContainer}>

@@ -49,16 +49,15 @@
 .SelectDevicesContent {
   width: 432px;
   margin: auto;
-  padding-bottom: 52px;
-  height: 100%;
+  height: calc(100% - 28px);
   color: #fff;
   display: flex;
   flex-direction: column;
+  position: relative;
 
   .center-block() {
     flex-shrink: 1;
-    height: 100%;
-    max-height: calc(100% - @h-tipContainer - @h-button);
+    max-height: calc(100% - @h-tipContainer - @h-button - 44px);
   }
 
   > * {
@@ -162,5 +161,9 @@
     width: 250px;
     height: @h-button;
     margin: auto;
+    position: absolute;
+    bottom: 44px;
+    left: 0;
+    right: 0;
   }
 }
