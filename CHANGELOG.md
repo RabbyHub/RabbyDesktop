@@ -1,7 +1,39 @@
 
+v0.5.1 / 2023-02-27
+===================
+
+  * chore: fix some style (#177)
+  * fix: allow open dapp with existed main domain. (#178)
+  * fix: address-management styles (#176)
+  * feat: bypass all websocket like connections to avoid wallet connect issue.
+  * fix: styles (#175)
+  * feat: home keep-alive (#171)
+  * chore: fix some ui bugs (#173)
+  * fix: close address management (#172)
+  * feat: support `useZViewsVisibleChanged`.
+  * fix: rabbyx sign window style on darwin. (#170)
+  * chore: upgrade rabbyx.
+  * fix: on darwin, quit app on click mainWindow's close button.
+  * feat: back to getting-started on no accounts rest. (#169)
+  * Merge branch 'dev' of github.com:RabbyHub/RabbyDesktop into dev
+  * fix: portfolio page styles
+  * fix: upgrade axios to avoid exports mistake on renderer.
+  * feat: invite code modal (#165)
+  * feat: update sidebar context menu (#162)
+  * chore: fix some bugs (#166)
+  * feat: tuning navbar style. (#164)
+  * fix: close connect modal (#167)
+  * feat: adjust position of rabbyx's sign windows. (#168)
+  * Feat/refresh (#163)
+  * fix: judgement of `isInputExistedDapp`.
+  * fix: type.
+  * fix: potential infinite call in `useCurrentConnection`.
+  * fix: goback on swap (#161)
+
 v0.5.0 / 2023-02-23
 ===================
 
+  * Release v0.5.0
   * fix: tuning style. (#160)
   * fix: home bottom margin
   * fix: duration of toast copied web3 addr in mainWindow.
