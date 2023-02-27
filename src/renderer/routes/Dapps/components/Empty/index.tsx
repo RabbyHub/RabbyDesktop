@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { useSize } from 'ahooks';
 import styles from './index.module.less';
 
 interface Point {
@@ -176,9 +177,15 @@ export const Empty = () => {
   }, [handleLayout]);
 
   useEffect(() => {
-    window.addEventListener('resize', handleLayout);
+    const resizeObserver = new ResizeObserver(() => {
+      handleLayout();
+    });
+
+    if (ref?.current?.parentElement) {
+      resizeObserver.observe(ref.current?.parentElement);
+    }
     return () => {
-      window.removeEventListener('resize', handleLayout);
+      resizeObserver.disconnect();
     };
   }, [handleLayout]);
 
