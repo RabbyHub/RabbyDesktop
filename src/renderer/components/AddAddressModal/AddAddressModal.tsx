@@ -14,6 +14,7 @@ export const AddAddressModal: React.FC = () => {
       onCancel={closeSubview}
       visible={svVisible}
       showEntryButton={!!svState?.showEntryButton}
+      showBackButton={!!svState?.showBackButton}
       onBack={closeSubview}
     />
   );

@@ -13,6 +13,7 @@ export interface Props {
   visible: boolean;
   onCancel: () => void;
   showEntryButton?: boolean;
+  showBackButton?: boolean;
 }
 
 export const AddAddressModalInner: React.FC<Props> = ({
@@ -21,6 +22,7 @@ export const AddAddressModalInner: React.FC<Props> = ({
   visible,
   onCancel,
   showEntryButton,
+  showBackButton,
 }) => {
   const { hideZSubview } = useZPopupLayerOnMain();
   const mainNav = useMessageForwardToMainwin('route-navigate');
@@ -57,7 +59,7 @@ export const AddAddressModalInner: React.FC<Props> = ({
         open={visible}
         title="Add Contacts"
         subtitle="You can also use it as a watch-only address"
-        backable={!!onBack}
+        backable={showBackButton}
         onBack={onBack}
         destroyOnClose
         onCancel={onCancel}
@@ -73,7 +75,7 @@ export const AddAddressModalInner: React.FC<Props> = ({
         centered
         open={visible}
         title="Wallet Connect"
-        backable={!!onBack}
+        backable={showBackButton}
         onBack={onBack}
         destroyOnClose
         onCancel={onCancel}
@@ -98,7 +100,7 @@ export const AddAddressModalInner: React.FC<Props> = ({
         destroyOnClose
         keyringType={keyringType}
         footer={null}
-        backable={!!onBack}
+        backable={showBackButton}
         onBack={onBack}
         showEntryButton={showEntryButton}
       />

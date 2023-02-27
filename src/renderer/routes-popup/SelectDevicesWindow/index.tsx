@@ -186,8 +186,8 @@ function SelectDeviceModal() {
           )}
           <div className={styles.tipsContainer}>
             <ol className={styles.tips}>
-              <li>Plug your Hardware wallet into your computer</li>
-              <li>Unlock Hardware wallet and open the Ethereum app</li>
+              <li>Plug your Ledger wallet into your computer</li>
+              <li>Unlock Ledger and open the Ethereum app</li>
             </ol>
           </div>
           <Button
