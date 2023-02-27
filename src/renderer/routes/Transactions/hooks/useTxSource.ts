@@ -4,8 +4,11 @@ import { useRequest } from 'ahooks';
 import { useMemo } from 'react';
 
 export const useTxSource = (address: string) => {
-  const { data } = useRequest(() =>
-    walletController.getTransactionHistory(address)
+  const { data } = useRequest(
+    () => walletController.getTransactionHistory(address),
+    {
+      refreshDeps: [address],
+    }
   );
 
   const dict = useMemo(() => {
