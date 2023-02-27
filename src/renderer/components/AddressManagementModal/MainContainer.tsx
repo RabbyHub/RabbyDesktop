@@ -133,6 +133,12 @@ export const MainContainer: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAccount]);
 
+  React.useEffect(() => {
+    if (noAccount) {
+      zActions.hideZSubview('address-management');
+    }
+  }, [noAccount, zActions]);
+
   return (
     <div className={styles.MainContainer}>
       <Header
