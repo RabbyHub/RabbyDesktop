@@ -19,7 +19,7 @@ export const Footer: React.FC = () => {
           showZSubview('select-add-address-type-modal');
         }}
       >
-        Add address
+        Add Address
       </Button>
     </section>
   );
