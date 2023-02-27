@@ -62,6 +62,7 @@ type IMergedDapp = IDappWithDomainMeta & {
 type I2ndDomainMeta = {
   is2ndaryDomain: boolean;
   secondaryDomain: string;
+  secondaryDomainOriginExisted: boolean;
   origin: string;
   subDomains: string[];
 };
