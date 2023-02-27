@@ -73,19 +73,20 @@ export const TrezorManager: React.FC<Props> = ({
       sleep(1000).then(fetchCurrentAccountsRetry.retry);
     } else {
       setPreventLoading(true);
-      modal.error({
-        className: 'RabbyModal inherit',
-        wrapClassName: 'p-20',
-        content: (
-          <div className="text-white">
-            {`${HDName}Connect has stopped. Please retry to connect again.`}
-          </div>
-        ),
-        okText: 'Retry',
-        onOk() {
-          onClose?.();
-        },
-      });
+      // modal.error({
+      //   className: 'RabbyModal inherit',
+      //   wrapClassName: 'p-20',
+      //   content: (
+      //     <div className="text-white">
+      //       {`${HDName}Connect has stopped. Please retry to connect again.`}
+      //     </div>
+      //   ),
+      //   okText: 'Retry',
+      //   onOk() {
+      //     onClose?.();
+      //   },
+      // });
+      onClose?.();
     }
   }, [fetchCurrentAccountsRetry.loading, fetchCurrentAccountsRetry.error]);
 

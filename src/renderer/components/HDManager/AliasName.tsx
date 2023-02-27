@@ -81,7 +81,10 @@ export const AliasName: React.FC<Props> = ({
             defaultValue={value}
             onBlur={onChangeAliasName}
             onFocus={() => setFocus(true)}
-            onPressEnter={onChangeAliasName}
+            onPressEnter={(e) => {
+              onChangeAliasName(e);
+              onClickCheck();
+            }}
             autoFocus
           />
           <img
