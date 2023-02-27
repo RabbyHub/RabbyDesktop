@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { usePrevious } from 'react-use';
 import BigNumber from 'bignumber.js';
 import PQueue from 'p-queue';
 import { groupBy } from 'lodash';
@@ -179,6 +180,7 @@ export default (
     isRealTimeLoadedRef.current = false;
     isHistoryLoadedRef.current = false;
     setHistoryTokenMap({});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, nonce]);
 
   useEffect(() => {

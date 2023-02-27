@@ -1,7 +1,8 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
+import { usePrevious } from 'react-use';
 import styled from 'styled-components';
 import classNames from 'classnames';
+import { useLocation } from 'react-router-dom';
 import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
 import { sortBy } from 'lodash';
 import { ellipsis } from '@/renderer/utils/address';
@@ -9,7 +10,6 @@ import { formatNumber } from '@/renderer/utils/number';
 import { formatChain, DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import { useTotalBalance } from '@/renderer/utils/balance';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-import { useBalanceValue } from '@/renderer/hooks/useCurrentBalance';
 import useCurve from '@/renderer/hooks/useCurve';
 import useHistoryTokenList from '@/renderer/hooks/useHistoryTokenList';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
@@ -19,11 +19,14 @@ import useHistoryProtocol, {
 import { toastCopiedWeb3Addr } from '@/renderer/components/TransparentToast';
 import { copyText } from '@/renderer/utils/clipboard';
 import BigNumber from 'bignumber.js';
-import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
+import {
+  useZPopupLayerOnMain,
+  useZViewsVisibleChanged,
+} from '@/renderer/hooks/usePopupWinOnMainwin';
 import { useSwitchView, VIEW_TYPE } from './hooks';
 
 import ChainList from './components/ChainList';
-import Curve from './components/Curve';
+import Curve, { CurveModal } from './components/Curve';
 import PortfolioView from './components/PortfolioView';
 import RightBar from './components/RightBar';
 
@@ -59,7 +62,7 @@ const HomeWrapper = styled.div`
       display: flex;
       margin-bottom: 20px;
       .left {
-        z-index: 1;
+        z-index: 2;
         margin-right: 40px;
       }
       .right {
@@ -67,13 +70,21 @@ const HomeWrapper = styled.div`
         position: relative;
         .balance-change {
           position: absolute;
-          right: 28px;
-          top: 77px;
+          top: 0;
+          right: 0;
+          width: 600px;
+          height: 100%;
+          display: flex;
+          align-items: flex-end;
+          justify-content: flex-end;
+          padding-right: 28px;
           font-weight: 500;
           font-size: 18px;
           line-height: 21px;
           margin-left: 6px;
           color: #2ed4a3;
+          z-index: 1;
+          cursor: pointer;
           &.is-loss {
             color: #ff6060;
           }
@@ -275,10 +286,11 @@ const useExpandProtocolList = (protocols: DisplayProtocol[]) => {
 };
 
 const Home = () => {
+  const rerenderAtRef = useRef(0);
+  const [curveModalOpen, setCurveModalOpen] = useState(false);
   const { currentAccount } = useCurrentAccount();
+  const prevAccount = usePrevious(currentAccount);
   const [updateNonce, setUpdateNonce] = useState(0);
-  const [_, updateBalanceValue] = useBalanceValue();
-
   const [selectChainServerId, setSelectChainServerId] = useState<string | null>(
     null
   );
@@ -323,6 +335,28 @@ const Home = () => {
     currentView === VIEW_TYPE.DEFAULT ? null : historyTokenMap,
     supportHistoryChains
   );
+  const displayChainList = useMemo(() => {
+    const map: Record<string, number> = {};
+    protocolList.forEach((protocol) => {
+      if (map[protocol.chain]) {
+        map[protocol.chain] += protocol.usd_value;
+      } else {
+        map[protocol.chain] = protocol.usd_value;
+      }
+    });
+    tokenList.forEach((token) => {
+      if (map[token.chain]) {
+        map[token.chain] += token.usd_value || 0;
+      } else {
+        map[token.chain] = token.usd_value || 0;
+      }
+    });
+    const list = usedChainList.map((chain) => ({
+      ...chain,
+      usd_value: map[chain.id] || 0,
+    }));
+    return sortBy(list, (item) => item.usd_value).reverse();
+  }, [usedChainList, protocolList, tokenList]);
 
   const totalBalance = useTotalBalance(tokenList, protocolList);
 
@@ -331,6 +365,7 @@ const Home = () => {
     Number(totalBalance) || 0,
     Date.now()
   );
+  const location = useLocation();
 
   const filterProtocolList = useMemo(() => {
     const list: DisplayProtocol[] = selectChainServerId
@@ -390,6 +425,7 @@ const Home = () => {
 
   const init = async () => {
     if (!currentAccount?.address) return;
+    rerenderAtRef.current = Date.now();
     const chainList = await walletOpenapi.usedChainList(currentAccount.address);
     setUsedChainList(chainList.map((chain) => formatChain(chain)));
     setIsProtocolExpand(false);
@@ -402,8 +438,30 @@ const Home = () => {
   };
 
   useEffect(() => {
-    init();
+    if (currentAccount && currentAccount?.address !== prevAccount?.address) {
+      init();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentAccount]);
+
+  useZViewsVisibleChanged((visibles) => {
+    if (
+      Date.now() - rerenderAtRef.current >= 3600000 &&
+      location.pathname === '/mainwin/home' &&
+      !Object.values(visibles).some((item) => item.visible) // all closed
+    ) {
+      init();
+    }
+  });
+
+  useEffect(() => {
+    if (location.pathname === '/mainwin/home') {
+      if (Date.now() - rerenderAtRef.current >= 3600000) {
+        init();
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location]);
 
   const { showZSubview } = useZPopupLayerOnMain();
 
@@ -458,7 +516,7 @@ const Home = () => {
                 </div>
               </div>
               {curveData ? (
-                <div className="right">
+                <div className="right" onClick={() => setCurveModalOpen(true)}>
                   <div
                     className={classNames('balance-change', {
                       'is-loss': curveData.isLoss,
@@ -472,7 +530,7 @@ const Home = () => {
             </div>
             <div className="flex justify-between items-center">
               <ChainList
-                chainBalances={usedChainList}
+                chainBalances={displayChainList}
                 onChange={setSelectChainServerId}
               />
               <SwitchViewWrapper>
@@ -527,6 +585,14 @@ const Home = () => {
         </HomeWrapper>
         <RightBar />
       </Container>
+      {curveModalOpen && (
+        <CurveModal
+          data={curveData}
+          onClose={() => {
+            setCurveModalOpen(false);
+          }}
+        />
+      )}
     </HomeBody>
   );
 };
