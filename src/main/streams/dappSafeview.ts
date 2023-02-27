@@ -80,10 +80,11 @@ export async function safeOpenURL(
   opts: {
     sourceURL: string;
     existedDapp?: IDapp | null;
+    existedMainDomainDapp?: IDapp | null;
     _targetwin?: BrowserWindow;
   }
 ) {
-  if (opts.existedDapp) {
+  if (opts.existedDapp || opts.existedMainDomainDapp) {
     forwardToMainWebContents(
       '__internal_forward:main-window:open-dapp',
       targetURL

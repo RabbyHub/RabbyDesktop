@@ -63,6 +63,7 @@ export function setOpenHandlerForWebContents({
       isToExtension,
       isToSameOrigin,
       shouldKeepTab,
+      allowOpenTab,
       shouldOpenExternal,
       maybeRedirectInSPA,
     } = parseDappRedirect(currentUrl, targetURL, {
@@ -76,14 +77,15 @@ export function setOpenHandlerForWebContents({
     }
 
     if (isFromDapp && !isToSameOrigin) {
-      if (shouldKeepTab) {
-        webContents.loadURL(targetURL);
-      } else {
+      if (allowOpenTab || !shouldKeepTab) {
         safeOpenURL(targetURL, {
           sourceURL: currentUrl,
           existedDapp: targetInfo.foundDapp,
+          existedMainDomainDapp: targetInfo.foundMainDomainDapp,
           _targetwin: parentTabbedWin.window,
         });
+      } else if (shouldKeepTab) {
+        webContents.loadURL(targetURL);
       }
     } else if (!isToExtension) {
       switch (details.disposition) {
@@ -146,6 +148,7 @@ export const setListeners = {
       const {
         targetInfo,
         isFromDapp,
+        allowOpenTab,
         shouldKeepTab,
         shouldOpenExternal,
         isToSameOrigin,
@@ -162,7 +165,7 @@ export const setListeners = {
       // this tabs is render as app's self UI, such as topbar.
       if (isFromDapp && !isToSameOrigin) {
         // allow redirect in main domain
-        if (shouldKeepTab) return true;
+        if (allowOpenTab || shouldKeepTab) return true;
 
         evt.preventDefault();
         safeOpenURL(targetURL, {
@@ -202,6 +205,7 @@ export const setListeners = {
           targetInfo,
           // actually, it's always from dapp on isMainContentsForTabbedWindow=false
           isFromDapp,
+          allowOpenTab,
           shouldKeepTab,
           shouldOpenExternal,
           isToSameOrigin,
@@ -216,7 +220,7 @@ export const setListeners = {
         }
 
         if (isFromDapp && !isToSameOrigin) {
-          if (shouldKeepTab) return true;
+          if (allowOpenTab || shouldKeepTab) return true;
 
           evt.preventDefault();
           safeOpenURL(targetURL, {

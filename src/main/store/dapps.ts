@@ -175,15 +175,35 @@ export function findDappByOrigin(url: string, dapps = getAllDapps()) {
 }
 
 function parseDappUrl(url: string, dapps = getAllDapps()) {
-  const { isDapp, origin, secondaryDomain, is2ndaryDomain, isSubDomain } =
-    canoicalizeDappUrl(url);
+  const {
+    isDapp,
+    origin,
+    secondaryDomain,
+    secondaryOrigin,
+    is2ndaryDomain,
+    isSubDomain,
+  } = canoicalizeDappUrl(url);
 
-  const foundDapp = !isDapp
-    ? null
-    : dapps.find((item: IDapp) => {
-        const formatted = formatDapp(item);
-        return formatted?.origin && formatted.origin === origin;
-      });
+  const matches = {
+    foundDapp: null as null | IDapp,
+    foundMainDomainDapp: null as null | IDapp,
+  };
+
+  if (isDapp) {
+    dapps.find((item: IDapp) => {
+      const formatted = formatDapp(item);
+
+      if (formatted?.origin && formatted.origin === origin) {
+        matches.foundDapp = formatted;
+      }
+
+      if (formatted?.origin && formatted.origin === secondaryOrigin) {
+        matches.foundMainDomainDapp = formatted;
+      }
+
+      return matches.foundDapp && matches.foundMainDomainDapp;
+    });
+  }
 
   return {
     isDapp,
@@ -191,8 +211,8 @@ function parseDappUrl(url: string, dapps = getAllDapps()) {
     secondaryDomain,
     is2ndaryDomain,
     isSubDomain,
-    foundDapp,
-    existedDapp: !isDapp ? false : !!foundDapp,
+    ...matches,
+    existedDapp: !isDapp ? false : !!matches.foundDapp,
   };
 }
 
@@ -213,9 +233,20 @@ export function parseDappRedirect(
   const targetInfo = parseDappUrl(targetURL, dapps);
   const isToSameOrigin = currentInfo.origin === targetInfo.origin;
 
+  const domainMetaCache: Record<
+    I2ndDomainMeta['secondaryDomain'],
+    I2ndDomainMeta
+  > = {};
+  parseDomainMeta(currentURL, dapps, domainMetaCache);
+  parseDomainMeta(targetURL, dapps, domainMetaCache);
+
   const shouldKeepTab =
     currentInfo.secondaryDomain === targetInfo.secondaryDomain &&
-    !parseDomainMeta(currentURL, dapps, {}).subDomains.length;
+    !!domainMetaCache[currentInfo.secondaryDomain]
+      ?.secondaryDomainOriginExisted;
+  const allowOpenTab =
+    !!domainMetaCache[targetInfo.secondaryDomain]?.secondaryDomainOriginExisted;
+
   const maybeRedirectInSPA = isFromDapp && isToSameOrigin;
 
   const isToExtension = targetURL.startsWith('chrome-extension://');
@@ -236,6 +267,7 @@ export function parseDappRedirect(
     isFromDapp,
     isToSameOrigin,
     shouldKeepTab,
+    allowOpenTab,
     shouldOpenExternal,
     maybeRedirectInSPA,
     isToExtension,

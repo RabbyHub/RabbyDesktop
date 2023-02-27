@@ -255,6 +255,7 @@ export function parseDomainMeta(
       secondaryDomain: parsed.secondaryDomain,
       origin: parsed.origin,
       is2ndaryDomain: parsed.is2ndaryDomain,
+      secondaryDomainOriginExisted: false,
       subDomains: [],
     };
 
@@ -262,10 +263,10 @@ export function parseDomainMeta(
       const dappOrigin = typeof dO === 'string' ? dO : dO.origin;
       const originInfo = canoicalizeDappUrl(dappOrigin);
       if (originInfo.secondaryDomain !== record.secondaryDomain) return;
-      if (
-        !originInfo.is2ndaryDomain &&
-        !record.subDomains.includes(originInfo.hostname)
-      ) {
+
+      if (originInfo.is2ndaryDomain) {
+        record.secondaryDomainOriginExisted = true;
+      } else if (!record.subDomains.includes(originInfo.hostname)) {
         record.subDomains.push(originInfo.hostname);
       }
     });
