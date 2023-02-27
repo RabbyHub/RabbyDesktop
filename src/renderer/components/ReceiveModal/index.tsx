@@ -124,10 +124,16 @@ const ReceiveContent = ({ onCancel, chain, token }: ReceiveContentProps) => {
           <img src={icon} alt="" className={styles.accountIcon} />
           <div className="text-left overflow-hidden">
             <div className="flex items-center">
-              <span className={styles.accountName}>
+              <span
+                className={classNames(styles.accountName, 'max-w-[150px]')}
+                title={currentAccount?.alianName}
+              >
                 {currentAccount?.alianName}
               </span>
-              <span className={styles.accountBalance}>
+              <span
+                className={styles.accountBalance}
+                title={`${splitNumberByStep(balance || '0', 3, ',', true)}`}
+              >
                 ${splitNumberByStep(balance || '0', 3, ',', true)}
               </span>
             </div>
@@ -221,12 +227,17 @@ export const ReceiveModalWraper = ({
     handleChange,
     handleCancel
   );
+  const ref = useRef(openChainModal);
+
+  useEffect(() => {
+    ref.current = openChainModal;
+  }, [openChainModal]);
 
   useEffect(() => {
     if (open && !currentChain) {
-      openChainModal();
+      ref.current();
     }
-  }, [currentChain, open, openChainModal]);
+  }, [currentChain, open]);
 
   const handleReceiveCancel = useCallback(() => {
     setState({

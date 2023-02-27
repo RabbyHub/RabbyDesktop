@@ -315,6 +315,9 @@ export default function MainWindowSidebar() {
                 dapps={unpinnedOpenedDapps}
                 activeTabId={activeTab?.id}
                 isFold={secondAnim}
+                style={{
+                  minHeight: 52 * Math.min(unpinnedOpenedDapps.length, 3),
+                }}
               />
             </div>
             <div className={styles.navFooter}>
