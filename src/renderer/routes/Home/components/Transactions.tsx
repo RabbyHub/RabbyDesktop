@@ -264,9 +264,7 @@ const Transactions = () => {
       });
     setLocalTxs(lTxs);
     pendings
-      .filter(
-        (item) => item.createdAt >= YESTERDAY * 1000 && !item.isSubmitFailed
-      )
+      .filter((item) => !item.isSubmitFailed)
       .forEach((item) => {
         const chain = Object.values(CHAINS).find((i) => i.id === item.chainId);
         if (!chain) return;
