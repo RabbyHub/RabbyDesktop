@@ -227,12 +227,17 @@ export const ReceiveModalWraper = ({
     handleChange,
     handleCancel
   );
+  const ref = useRef(openChainModal);
+
+  useEffect(() => {
+    ref.current = openChainModal;
+  }, [openChainModal]);
 
   useEffect(() => {
     if (open && !currentChain) {
-      openChainModal();
+      ref.current();
     }
-  }, [currentChain, open, openChainModal]);
+  }, [currentChain, open]);
 
   const handleReceiveCancel = useCallback(() => {
     setState({
