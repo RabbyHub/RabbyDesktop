@@ -530,6 +530,10 @@ export function AddDapp({
     }
   }, [form, setState, state.help]);
 
+  useMount(() => {
+    handleFormChange();
+  });
+
   return (
     <div className={styles.content}>
       <h3 className={styles.title}>Enter the Dapp domain name</h3>
