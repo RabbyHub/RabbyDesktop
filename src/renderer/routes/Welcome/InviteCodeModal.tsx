@@ -34,7 +34,6 @@ const InviteCodeModal: React.FC<{
           handleCancel(isValid);
         }
       } catch (e: any) {
-        console.log(e);
         setErrorMessage(e?.message);
       }
       setLoading(false);
@@ -50,16 +49,19 @@ const InviteCodeModal: React.FC<{
         onCancel={() => handleCancel(isInvited)}
         centered
         width={638}
-        title="Enter your invitation code and get started"
+        title=" "
       >
-        <div className="px-[48px] pt-[12px] h-[104px]">
+        <div className="px-[48px] h-[177px]">
+          <h1 className="mb-[32px] text-white text-[28px]">
+            Enter your invitation code and get started
+          </h1>
           <Form onFinish={onSubmit} form={formData}>
             <div className="flex gap-16">
               <Form.Item className="flex-1 mb-16" name="code">
-                <RabbyInput autoFocus />
+                <RabbyInput className="h-[56px]" autoFocus />
               </Form.Item>
               <Button
-                className="w-[166px]"
+                className="w-[166px] h-[56px]"
                 loading={loading}
                 type="primary"
                 htmlType="submit"
