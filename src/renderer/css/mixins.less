@@ -14,7 +14,7 @@
   -webkit-app-region: none;
 }
 
-@chromelike-scrollbar-w: 8px;
+@chromelike-scrollbar-w: 6px;
 @chromelike-scrollbar-max-w: 10px;
 
 .chrome-like-scrollbar() {
@@ -23,13 +23,13 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    border-radius: 1em;
-    background-color: rgba(var(--color-comment1-rgb), 0.5);
+    border-radius: 50px;
+    background-color: #787D8C;
   }
-
+  
   &::-webkit-scrollbar-track {
     border-radius: 1em;
-    background-color: rgba(var(--color-comment2-rgb), 0.5);
+    background-color: transparent;
   }
 }
 

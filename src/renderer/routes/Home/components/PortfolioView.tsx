@@ -15,14 +15,12 @@ const PortfolioWrapper = styled.div`
   border-radius: 8px;
   position: relative;
   height: 100%;
-  padding-top: 10px;
-  padding-bottom: 10px;
   .scroll-container {
     overflow: overlay;
     height: 100%;
     padding-right: 27px;
-    padding-top: 18px;
-    padding-bottom: 18px;
+    padding-top: 28px;
+    padding-bottom: 28px;
   }
   .icon-asset-arrow {
     position: absolute;
