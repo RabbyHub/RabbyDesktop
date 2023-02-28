@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 import { openExternalUrl, requestResetApp } from '@/renderer/ipcRequest/app';
 
@@ -26,7 +26,7 @@ import {
   useIsViewingDevices,
   useProxyStateOnSettingPage,
 } from './settingHooks';
-import { AutoUpdate } from '../Dapps/components/AutoUpdate';
+import { AutoUpdate } from './components/AutoUpdate';
 import ModalDevices from './components/ModalDevices';
 import { testRequestDevice } from './components/ModalDevices/useFilteredDevices';
 
