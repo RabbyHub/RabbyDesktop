@@ -82,26 +82,45 @@ export const DAppBlock = ({
                   key: 'dapp-unpin',
                   className: 'dapp-dropdown-item',
                   label: <span className="text">Unpin</span>,
-                  // icon: <RCIconPinFill />,
-                  icon: <RCIconPin />,
+                  icon: (
+                    <img
+                      className="dapp-dropdown-item-icon"
+                      src="rabby-internal://assets/icons/sidebar-context-menu/icon-pinned.svg"
+                    />
+                  ),
                 }
               : {
                   key: 'dapp-pin',
                   className: 'dapp-dropdown-item',
                   label: <span className="text">Pin</span>,
-                  icon: <RCIconPin />,
+                  icon: (
+                    <img
+                      className="dapp-dropdown-item-icon"
+                      src="rabby-internal://assets/icons/sidebar-context-menu/icon-pin.svg"
+                    />
+                  ),
                 },
             {
               key: 'dapp-rename',
               className: 'dapp-dropdown-item',
               label: <span className="text">Rename</span>,
-              icon: <RCIconDappsEdit />,
+              icon: (
+                <img
+                  className="dapp-dropdown-item-icon"
+                  src="rabby-internal://assets/icons/sidebar-context-menu/icon-edit.svg"
+                />
+              ),
             },
             {
               key: 'dapp-delete',
-              className: 'dapp-dropdown-item J_delete',
+              className: 'dapp-dropdown-item dapp-dropdown-item-danger',
               label: <span className="text">Delete</span>,
-              icon: <RCIconDappsDelete />,
+              icon: (
+                <img
+                  className="dapp-dropdown-item-icon"
+                  src="rabby-internal://assets/icons/sidebar-context-menu/icon-trash.svg"
+                />
+              ),
             },
           ]}
         />

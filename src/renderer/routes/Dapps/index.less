@@ -141,37 +141,46 @@
 
 .dapps-dropdown-operations {
   .ant-dropdown-menu {
-    background: var(--color-purewhite);
-
-    box-shadow: 0px 8px 32px rgba(19, 20, 26, 0.08);
+    padding-top: 7px;
+    padding-bottom: 7px;
+    background: #525767;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0px 24px 32px rgba(15, 27, 52, 0.14);
     border-radius: 8px;
-    padding: 8px 0;
-    user-select: none;
+    font-family: var(--default-font);
+    width: 140px;
   }
   .ant-dropdown-menu-item-icon {
     width: 20px;
     height: 20px;
+    position: static;
     margin-right: 12px;
   }
 
   .dapp-dropdown-item {
-    padding: 12px 16px;
-    border-radius: 4px;
-    min-width: 140px;
-    &.J_delete:hover {
-      background-color: rgba(236, 81, 81, 0.1);
+    margin: 0 !important;
+    height: 44px !important;
+    color: #fff;
+    border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    &-danger {
+      .text {
+        color: #ec5151 !important;
+      }
     }
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.07);
+      border-radius: 4px;
+    }
+
     .text {
-      font-style: normal;
       font-weight: 500;
       font-size: 14px;
       line-height: 17px;
-
-      color: var(--color-title);
-    }
-
-    &.J_delete .text {
-      color: var(--color-red);
+      color: #fff;
     }
   }
 }
