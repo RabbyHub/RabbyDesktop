@@ -261,7 +261,10 @@ export default function ModalProxySetting() {
       <div className="operations">
         <div className="check-btn-wrapper">
           <Button
-            className="check-proxy-btn"
+            className={classNames(
+              'check-proxy-btn',
+              !isUsingCustomProxy && 'hidden'
+            )}
             loading={isCheckingProxy}
             disabled={!isUsingCustomProxy}
             type="link"
