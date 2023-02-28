@@ -1,6 +1,7 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 
 import { sortDappsBasedPinned } from '@/isomorphic/dapp';
+import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useWindowTabs } from '../hooks-shell/useWindowTabs';
@@ -149,6 +150,34 @@ export function useDapp(origin?: string) {
       setDappInfo(newVal);
     });
   }, [origin]);
+
+  return dappInfo;
+}
+
+export function useMatchDapp(origin?: string) {
+  // 先根据 origin 匹配 Dapp，无匹配项后再用 domain 匹配一次
+  const { dapps } = useDapps();
+  const [dappInfo, setDappInfo] = useState<Partial<IMergedDapp> | null>(null);
+
+  useEffect(() => {
+    if (!origin) {
+      setDappInfo(null);
+      return;
+    }
+
+    const findExact = dapps.find((item) => item.origin === origin);
+    if (findExact) {
+      setDappInfo(findExact);
+    } else {
+      const { secondaryOrigin } = canoicalizeDappUrl(origin);
+      const findMatchDomain = dapps.find(
+        (item) => item.origin === secondaryOrigin
+      );
+      if (findMatchDomain) {
+        setDappInfo(findMatchDomain);
+      }
+    }
+  }, [origin, dapps]);
 
   return dappInfo;
 }

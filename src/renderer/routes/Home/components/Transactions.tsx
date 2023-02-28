@@ -156,7 +156,7 @@ const Empty = ({ text }: { text: string }) => (
   </EmptyView>
 );
 
-const Transactions = () => {
+const Transactions = ({ updateNonce }: { updateNonce: number }) => {
   const { currentAccount } = useCurrentAccount();
   const [recentTxs, setRecentTxs] = useState<TransactionDataItem[]>([]);
   const remoteTxsRef = useRef<TxHistoryResult['history_list']>([]);
@@ -164,6 +164,7 @@ const Transactions = () => {
   const [localTxs, setLocalTxs] = useState<TransactionDataItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const prevAccount = usePrevious(currentAccount);
+  const prevNonce = usePrevious(updateNonce);
 
   const completedTxs = useMemo(() => {
     return localTxs.filter(
@@ -395,12 +396,16 @@ const Transactions = () => {
   );
 
   useEffect(() => {
-    if (!currentAccount || prevAccount?.address === currentAccount.address)
+    if (
+      !currentAccount ||
+      (prevAccount?.address === currentAccount.address &&
+        prevNonce === updateNonce)
+    )
       return;
     setIsLoading(true);
     init(currentAccount.address);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentAccount]);
+  }, [currentAccount, updateNonce]);
 
   useEffect(() => {
     if (!currentAccount) return;

@@ -1,9 +1,9 @@
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import dayjs from 'dayjs';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import {
   formatUsdValue,
-  formatTokenAmount,
+  formatAmount,
   formatNumber,
 } from '@/renderer/utils/number';
 import { getTokens, ellipsisTokenSymbol, getUsd } from '@/renderer/utils/token';
@@ -49,7 +49,7 @@ const TokensAmount = ({
         .filter((item) => !!item)
         .map((item) => (
           <TokenAmountWrapper>
-            {formatTokenAmount(item.amount)} {ellipsisTokenSymbol(item.symbol)}
+            {formatAmount(item.amount)} {ellipsisTokenSymbol(item.symbol)}
             {isDebt ? <DebtTag>Debt</DebtTag> : null}
             {item.price !== 0 &&
               withPrice &&

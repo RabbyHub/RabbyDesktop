@@ -1,5 +1,6 @@
 import { TxDisplayItem, TxHistoryItem } from '@debank/rabby-api/dist/types';
 import classNames from 'classnames';
+import { useMatchDapp } from '@/renderer/hooks/useDappsMngr';
 import styles from '../index.module.less';
 import { TxBasicInfo } from './TxBasicInfo';
 import { TxChange } from './TxChange';
@@ -13,7 +14,7 @@ type TransactionItemProps = {
 
 export const TransactionItem = (props: TransactionItemProps) => {
   const { data, cateDict, projectDict, tokenDict, origin } = props;
-
+  const dapp = useMatchDapp(origin);
   const isFailed = data.tx?.status === 0;
   return (
     <div className={classNames(styles.tx, isFailed && styles.txFailed)}>
@@ -34,7 +35,7 @@ export const TransactionItem = (props: TransactionItemProps) => {
         tokenDict={tokenDict}
       />
       <TxChange data={data} tokenDict={tokenDict} />
-      <TxExtra data={data} origin={origin} />
+      <TxExtra data={data} origin={dapp?.origin} />
     </div>
   );
 };
