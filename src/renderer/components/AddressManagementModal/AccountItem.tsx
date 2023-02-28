@@ -109,7 +109,10 @@ export const AccountItem: React.FC<Props> = ({
                   title="Whitelisted address"
                 >
                   <div className={styles.whitelist}>
-                    <img src="rabby-internal://assets/icons/address-management/whitelist.svg" />
+                    <img
+                      width={16}
+                      src="rabby-internal://assets/icons/address-management/whitelist-white.svg"
+                    />
                   </div>
                 </Tooltip>
               )}
@@ -133,7 +136,7 @@ export const AccountItem: React.FC<Props> = ({
                 {ellipsis(account.address)}
               </div>
               <div onClick={onCopy} className={clsx(styles.copy, styles.icon)}>
-                <img src="rabby-internal://assets/icons/address-management/copy.svg" />
+                <img src="rabby-internal://assets/icons/address-management/copy-white.svg" />
               </div>
               <div className={styles.balance}>
                 ${splitNumberByStep(account.balance?.toFixed(2))}
