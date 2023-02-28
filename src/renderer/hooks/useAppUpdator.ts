@@ -88,6 +88,8 @@ export function useCheckNewRelease(opts?: { isWindowTop?: boolean }) {
     // eslint-disable-next-line promise/catch-or-return
     const newVal = await checkIfNewRelease();
     setReleaseCheckInfo(newVal);
+
+    return newVal;
   }, [setReleaseCheckInfo]);
 
   useEffect(() => {

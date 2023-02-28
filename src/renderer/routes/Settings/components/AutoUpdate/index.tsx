@@ -40,7 +40,8 @@ export const AutoUpdate = ({ isFold }: AutoUpdateProps) => {
       <div className={classNames(style.autoUpdate, isFold && style.isFold)}>
         <div
           className="auto-update is-downloaded"
-          onClick={() => {
+          onClick={(evt) => {
+            evt.stopPropagation();
             quitAndUpgrade();
           }}
         >
@@ -58,7 +59,8 @@ export const AutoUpdate = ({ isFold }: AutoUpdateProps) => {
     <div className={classNames(style.autoUpdate, isFold && style.isFold)}>
       <div
         className="auto-update"
-        onClick={() => {
+        onClick={(evt) => {
+          evt.stopPropagation();
           requestDownload();
         }}
       >

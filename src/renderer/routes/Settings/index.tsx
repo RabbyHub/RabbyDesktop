@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 import { openExternalUrl, requestResetApp } from '@/renderer/ipcRequest/app';
 
@@ -9,7 +9,7 @@ import {
   IconTooltipInfo,
 } from '@/../assets/icons/mainwin-settings';
 
-import { Button, Modal, SwitchProps, Tooltip } from 'antd';
+import { Button, message, Modal, SwitchProps, Tooltip } from 'antd';
 import { useSettings } from '@/renderer/hooks/useSettings';
 import styled from 'styled-components';
 import {
@@ -19,13 +19,14 @@ import {
 import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
 import { ModalConfirm } from '@/renderer/components/Modal/Confirm';
 import { Switch } from '@/renderer/components/Switch/Switch';
+import { useCheckNewRelease } from '@/renderer/hooks/useAppUpdator';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
 import {
   useIsViewingDevices,
   useProxyStateOnSettingPage,
 } from './settingHooks';
-import { AutoUpdate } from '../Dapps/components/AutoUpdate';
+import { AutoUpdate } from './components/AutoUpdate';
 import ModalDevices from './components/ModalDevices';
 import { testRequestDevice } from './components/ModalDevices/useFilteredDevices';
 
@@ -150,7 +151,9 @@ export function MainWindowSettings() {
 
   const { setIsViewingDevices } = useIsViewingDevices();
 
-  const { whitelist, enable, toggleWhitelist } = useWhitelist();
+  const { fetchReleaseInfo } = useCheckNewRelease();
+
+  const { enable, toggleWhitelist } = useWhitelist();
 
   return (
     <div className={styles.settingsPage}>
@@ -261,13 +264,22 @@ export function MainWindowSettings() {
       <div className={styles.settingBlock}>
         <h4 className={styles.blockTitle}>About</h4>
         <div className={styles.itemList}>
-          <ItemText
+          <ItemAction
             name={`Version: ${appVerison || '-'}`}
-            text=""
             icon="rabby-internal://assets/icons/mainwin-settings/info.svg"
+            onClick={() => {
+              fetchReleaseInfo().then((releseInfo) => {
+                message.open({
+                  type: 'info',
+                  content: !releseInfo?.hasNewRelease
+                    ? 'It is the latest version.'
+                    : 'New version is available',
+                });
+              });
+            }}
           >
             <AutoUpdate isFold={false} />
-          </ItemText>
+          </ItemAction>
           {/* <ItemLink name='User Agreement' /> */}
           <ItemLink
             name="Privacy Policy"
