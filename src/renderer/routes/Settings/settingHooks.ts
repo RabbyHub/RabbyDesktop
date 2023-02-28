@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Form, message } from 'antd';
+import { Form, InputProps, message } from 'antd';
 import { atom, useAtom } from 'jotai';
 
 import {
@@ -7,6 +7,7 @@ import {
   validateProxyConfig,
 } from '@/renderer/ipcRequest/app';
 import { formatProxyServerURL } from '@/isomorphic/url';
+import { ensurePrefix } from '@/isomorphic/string';
 
 const defaulAppProxyConf: IAppProxyConf = {
   proxyType: 'none',
@@ -90,12 +91,15 @@ export function useSettingProxyModal() {
 
 export function useCheckProxy() {
   const [isCheckingProxy, setIsChecking] = useState(false);
+  const [checkingTarget, setCheckingTarget] = useState('google.com');
   const onValidateProxy = useCallback(
     (proxySettings: IAppProxyConf['proxySettings']) => {
       if (isCheckingProxy) return;
 
+      const targetURL = ensurePrefix(checkingTarget, 'https://');
+
       setIsChecking(true);
-      validateProxyConfig('https://google.com', proxySettings)
+      validateProxyConfig(targetURL, proxySettings)
         .then((res) => {
           if (res.valid) {
             message.success('Proxy is valid');
@@ -109,12 +113,21 @@ export function useCheckProxy() {
           setIsChecking(false);
         });
     },
-    [isCheckingProxy]
+    [isCheckingProxy, checkingTarget]
+  );
+
+  const onCheckingTargetChange: InputProps['onChange'] & object = useCallback(
+    (evt) => {
+      setCheckingTarget(evt.target.value);
+    },
+    [setCheckingTarget]
   );
 
   return {
     isCheckingProxy,
     onValidateProxy,
+    checkingTarget,
+    onCheckingTargetChange,
   };
 }
 

@@ -1,0 +1,148 @@
+.ModalProxySetting {
+  :global {
+    .ant-modal-header {
+      padding: 0;
+    }
+
+    .form-title {
+      font-size: 20px;
+      text-align: center;
+    }
+    .form-item-label {
+      color: white;
+      font-size: 15px;
+    }
+
+    .h2,
+    h4,
+    .form-title,
+    .ant-form-item-label label::after {
+      color: white;
+    }
+
+    .ant-form-item + .ant-form,
+    .ant-form-item + .ant-form-item {
+      margin-top: 24px;
+    }
+
+    .ant-modal-content {
+      padding: 36px 32px;
+      width: 480px;
+      min-height: 300px;
+      background-color: #525767;
+    }
+
+    .ant-modal-close-x {
+      padding: 36px 24px;
+    }
+
+    .proxy-custom-form.disabled {
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .input-field {
+      .ant-form-item-control-input,
+      .ant-form-item-control-input-content,
+      .ant-input {
+        height: 52px;
+      }
+
+      .ant-form-item-control-input-content {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .ant-input {
+        background: transparent;
+        color: white;
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .ant-input-affix-wrapper {
+        background: transparent;
+        border-color: transparent;
+        max-height: 100%;
+
+        > .ant-input {
+          align-self: center;
+        }
+      }
+
+      .ant-input-prefix {
+        color: rgba(255, 255, 255, 0.5);
+      }
+    }
+
+    .one-line-items {
+      display: flex;
+      align-items: center;
+
+      .ant-form-item + .ant-form-item {
+        margin-top: 0;
+        margin-left: 12px;
+      }
+    }
+
+    .ant-radio-group {
+      background-color: var(--color-comment1);
+      border-radius: 6px;
+      .ant-radio-button-wrapper {
+        background-color: transparent;
+        border-radius: 6px;
+        color: white;
+        border-color: transparent;
+        &::before {
+          display: none;
+        }
+      }
+      .ant-radio-button-wrapper.ant-radio-button-wrapper-checked {
+        background: #ffffff;
+        color: var(--color-primary);
+        border-radius: 6px;
+        border-color: transparent;
+      }
+    }
+
+    .check-btn-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .check-proxy-btn {
+        text-align: center;
+        color: #ffffff;
+        border-color: none;
+
+        > span {
+          text-decoration-line: underline;
+        }
+
+        opacity: 0.7;
+        &:not([disabled]):hover {
+          opacity: 1;
+        }
+      }
+    }
+
+    .operations {
+      margin-top: 12px;
+
+      .btns {
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .btns > .op_btn {
+        width: 50%;
+        flex-shrink: 1;
+        height: 48px;
+        width: 200px;
+        border-radius: 4px;
+      }
+    }
+  }
+}

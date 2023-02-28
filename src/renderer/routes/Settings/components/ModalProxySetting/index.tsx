@@ -1,135 +1,10 @@
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
-import { Modal as RabbyModal } from '@/renderer/components/Modal/Modal';
-import { Button, Form, Input, Modal, Radio } from 'antd';
+import { Modal as RModal } from '@/renderer/components/Modal/Modal';
+import { Button, Form, Modal, Radio } from 'antd';
 import classNames from 'classnames';
-import styled from 'styled-components';
+import { useCallback } from 'react';
 import { useCheckProxy, useSettingProxyModal } from '../../settingHooks';
-
-const RModal = styled(RabbyModal)`
-  .ant-modal-header {
-    padding: 0;
-  }
-
-  .form-title {
-    font-size: 20px;
-    text-align: center;
-  }
-  .form-item-label {
-    color: white;
-    font-size: 15px;
-  }
-
-  .h2,
-  h4,
-  .form-title,
-  .ant-form-item-label label::after {
-    color: white;
-  }
-
-  .ant-form-item + .ant-form,
-  .ant-form-item + .ant-form-item {
-    margin-top: 24px;
-  }
-
-  .ant-modal-content {
-    padding: 36px 32px;
-    width: 480px;
-    min-height: 300px;
-  }
-
-  .ant-modal-close-x {
-    padding: 36px 24px;
-  }
-
-  .proxy-custom-form.disabled {
-    pointer-events: none;
-    opacity: 0.5;
-  }
-
-  .input-field {
-    .ant-form-item-control-input,
-    .ant-form-item-control-input-content,
-    .ant-input {
-      height: 52px;
-    }
-
-    .ant-input {
-      background: transparent;
-      color: white;
-      border-color: rgba(255, 255, 255, 0.1);
-    }
-  }
-
-  .one-line-items {
-    display: flex;
-    align-items: center;
-
-    .ant-form-item + .ant-form-item {
-      margin-top: 0;
-      margin-left: 12px;
-    }
-  }
-
-  .ant-radio-group {
-    background-color: var(--color-comment1);
-    border-radius: 6px;
-    .ant-radio-button-wrapper {
-      background-color: transparent;
-      border-radius: 6px;
-      color: white;
-      border-color: transparent;
-      &::before {
-        display: none;
-      }
-    }
-    .ant-radio-button-wrapper.ant-radio-button-wrapper-checked {
-      background: #ffffff;
-      color: var(--color-primary);
-      border-radius: 6px;
-      border-color: transparent;
-    }
-  }
-
-  .operations {
-    margin-top: 12px;
-
-    .check-btn-wrapper {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .check-proxy-btn {
-      text-align: center;
-      color: #ffffff;
-      border-color: none;
-
-      > span {
-        text-decoration-line: underline;
-      }
-
-      opacity: 0.7;
-      &:not([disabled]):hover {
-        opacity: 1;
-      }
-    }
-
-    .btns {
-      margin-top: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .btns > .op_btn {
-      width: 50%;
-      flex-shrink: 1;
-      height: 48px;
-      width: 200px;
-      border-radius: 4px;
-    }
-  }
-`;
+import styles from './index.module.less';
 
 export default function ModalProxySetting() {
   const {
@@ -142,14 +17,33 @@ export default function ModalProxySetting() {
 
     applyProxyAndRelaunch,
   } = useSettingProxyModal();
-  const { onValidateProxy, isCheckingProxy } = useCheckProxy();
+  const {
+    checkingTarget,
+    onCheckingTargetChange,
+    onValidateProxy,
+    isCheckingProxy,
+  } = useCheckProxy();
 
   const isUsingCustomProxy = localProxyType === 'custom';
+
+  const doValidate = useCallback(() => {
+    if (!isUsingCustomProxy || !checkingTarget) return;
+
+    const values = proxyCustomForm.getFieldsValue();
+
+    onValidateProxy({
+      protocol: values.protocol,
+      hostname: values.hostname,
+      port: values.port,
+    });
+  }, [proxyCustomForm, onValidateProxy, isUsingCustomProxy, checkingTarget]);
 
   return (
     <RModal
       visible={isSettingProxy}
       width={400}
+      centered
+      className={styles.ModalProxySetting}
       onCancel={() => {
         setIsSettingProxy(false);
       }}
@@ -256,31 +150,44 @@ export default function ModalProxySetting() {
             />
           </Form.Item>
         </div> */}
+        <Form.Item
+          label={<span className="form-item-label">Checking: </span>}
+          className="input-field"
+        >
+          <RabbyInput
+            disabled={!isUsingCustomProxy || !checkingTarget}
+            className="mr-[4px]"
+            prefix="https://"
+            suffix={
+              <div className="check-btn-wrapper">
+                <Button
+                  className={classNames(
+                    'check-proxy-btn',
+                    !isUsingCustomProxy && 'hidden'
+                  )}
+                  loading={isCheckingProxy}
+                  disabled={!isUsingCustomProxy}
+                  type="link"
+                  onClick={() => {
+                    doValidate();
+                  }}
+                >
+                  Check
+                </Button>
+              </div>
+            }
+            onChange={onCheckingTargetChange}
+            value={checkingTarget}
+            onKeyUpCapture={(evt) => {
+              if (evt.key === 'Enter') {
+                doValidate();
+              }
+            }}
+          />
+        </Form.Item>
       </Form>
 
       <div className="operations">
-        <div className="check-btn-wrapper">
-          <Button
-            className={classNames(
-              'check-proxy-btn',
-              !isUsingCustomProxy && 'hidden'
-            )}
-            loading={isCheckingProxy}
-            disabled={!isUsingCustomProxy}
-            type="link"
-            onClick={() => {
-              const values = proxyCustomForm.getFieldsValue();
-              onValidateProxy({
-                protocol: values.protocol,
-                hostname: values.hostname,
-                port: values.port,
-              });
-            }}
-          >
-            Check
-          </Button>
-        </div>
-
         <div className="btns">
           <Button
             disabled={isCheckingProxy}
