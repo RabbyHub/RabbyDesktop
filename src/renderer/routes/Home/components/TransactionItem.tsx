@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { GasLevel, TokenItem } from '@debank/rabby-api/dist/types';
 import { maxBy, minBy } from 'lodash';
+import { useMatchDapp } from '@/renderer/hooks/useDappsMngr';
 import { IconWithChain } from '@/renderer/components/TokenWithChain';
 import NameAndAddress from '@/renderer/components/NameAndAddress';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
@@ -376,7 +377,7 @@ const TransactionItem = ({
     if (item.protocol?.logoUrl) return item.protocol.logoUrl;
     return null;
   }, [item, isCancel, isSend, isReceive]);
-
+  const dapp = useMatchDapp(item.site?.origin);
   const originTx = minBy(item.txs, (tx) => tx.createdAt);
 
   const [txQueues, setTxQueues] = useState<
@@ -683,13 +684,10 @@ const TransactionItem = ({
         <TxExplainInner>{interAddressExplain}</TxExplainInner>
         <TxChange sends={item.sends} receives={item.receives} />
       </TxExplain>
-      {item.site && !isFromRabby ? (
+      {dapp?.origin && !isFromRabby ? (
         <div className="tx-origin">
           Initiate from Dapp:{' '}
-          <TransactionWebsite
-            origin={item.site.origin}
-            className="tx-dapp-link"
-          />
+          <TransactionWebsite origin={dapp.origin} className="tx-dapp-link" />
         </div>
       ) : null}
       {isPending && (item?.txs?.length || 0) > 1 && (

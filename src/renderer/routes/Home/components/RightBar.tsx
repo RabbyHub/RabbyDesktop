@@ -48,7 +48,7 @@ const ActionList = styled.ul`
   }
 `;
 
-const RightBar = () => {
+const RightBar = ({ updateNonce }: { updateNonce: number }) => {
   const [isShowReceive, setIsShowReceive] = useState(false);
 
   const navigateTo = useNavigate();
@@ -77,17 +77,6 @@ const RightBar = () => {
         setIsShowReceive(true);
       },
     },
-    // {
-    //   id: 'gas-topup',
-    //   name: 'Gas Top Up',
-    //   icon: <IconGasTopup width="35px" height="35px" />,
-    // },
-    // {
-    //   id: 'security',
-    //   name: 'Security',
-
-    //   icon: <IconSecurity width="35px" height="35px" />,
-    // },
   ];
   return (
     <RightBarWrapper>
@@ -102,7 +91,7 @@ const RightBar = () => {
           </Tooltip>
         ))}
       </ActionList>
-      <Transactions />
+      <Transactions updateNonce={updateNonce} />
       <ReceiveModalWraper
         open={isShowReceive}
         onCancel={() => {

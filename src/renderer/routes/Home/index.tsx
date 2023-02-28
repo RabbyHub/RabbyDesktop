@@ -583,7 +583,7 @@ const Home = () => {
             view={currentView}
           />
         </HomeWrapper>
-        <RightBar />
+        <RightBar updateNonce={updateNonce} />
       </Container>
       {curveModalOpen && (
         <CurveModal
