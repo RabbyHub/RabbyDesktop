@@ -1,38 +1,28 @@
 .page-welcome {
   height: 100vh;
-
-  .slogan {
-    font-weight: 700;
-    font-size: 48px;
-    line-height: 56px;
-    color: var(--color-purewhite);
-    margin-bottom: 24px;
-  }
-  .slogan + .slogan {
-    margin-top: 64px;
-  }
-
-  .page-content {
-    margin-bottom: 100px;
-  }
+  display: flex;
+  justify-content: center;
 
   .container {
-    margin-top: -82px;
+    padding-top: 220px;
+    .logo {
+      display: block;
+      margin-bottom: 24px;
+    }
+    .slogan {
+      display: block;
+      margin-bottom: 74px;
+    }
   }
 
   .btn-start {
-    height: 72px;
+    height: 52px;
     border-radius: 8px;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 24px;
     line-height: 28px;
     border: none;
-    width: 280px;
-  }
-
-  .logo {
-    position: absolute;
-    right: 85px;
-    bottom: 70px;
+    width: 205px;
+    background: linear-gradient(90.72deg, #8697ff 0.44%, #9086ff 99.47%);
   }
 }
