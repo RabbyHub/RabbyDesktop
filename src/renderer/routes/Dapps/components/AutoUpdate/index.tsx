@@ -25,7 +25,7 @@ export const AutoUpdate = ({ isFold }: AutoUpdateProps) => {
         <div className="auto-update is-downloading">
           <img
             src="rabby-internal://assets/icons/update/downloading.svg"
-            className="auto-update-icon animate"
+            className="auto-update-icon is-animate"
             alt=""
           />
           <div className="auto-update-content">
