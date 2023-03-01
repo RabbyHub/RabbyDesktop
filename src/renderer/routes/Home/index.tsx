@@ -366,11 +366,7 @@ const Home = () => {
 
   const totalBalance = useTotalBalance(tokenList, protocolList);
 
-  const curveData = useCurve(
-    currentAccount?.address,
-    Number(totalBalance) || 0,
-    Date.now()
-  );
+  const curveData = useCurve(currentAccount?.address);
   const location = useLocation();
 
   const filterProtocolList = useMemo(() => {

@@ -1,14 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { formatNumber, formatUsdValue } from '@/renderer/utils/number';
+import { formatUsdValue } from '@/renderer/utils/number';
 import { walletOpenapi } from '../ipcRequest/rabbyx';
 
 type CurveList = Array<{ timestamp: number; usd_value: number }>;
 
-const formChartData = (
-  data: CurveList,
-  realtimeNetWorth = 0,
-  realtimeTimestamp?: number
-) => {
+const formChartData = (data: CurveList) => {
   const startData = data[0] || { value: 0, timestamp: 0 };
 
   const list =
@@ -28,25 +24,6 @@ const formChartData = (
       };
     }) || [];
 
-  // patch realtime newworth
-  if (realtimeTimestamp) {
-    const realtimeChange = realtimeNetWorth - startData.usd_value;
-
-    list.push({
-      value: realtimeNetWorth || 0,
-      netWorth: realtimeNetWorth ? `$${formatNumber(realtimeNetWorth)}` : '$0',
-      change: `${formatNumber(Math.abs(realtimeChange))}`,
-      isLoss: realtimeChange < 0,
-      changePercent:
-        startData.usd_value === 0
-          ? `${realtimeNetWorth === 0 ? '0' : '100.00'}%`
-          : `${(Math.abs(realtimeChange * 100) / startData.usd_value).toFixed(
-              2
-            )}%`,
-      timestamp: Math.floor(realtimeTimestamp / 1000),
-    });
-  }
-
   const endNetWorth = list?.length ? list[list.length - 1]?.value : 0;
   const assetsChange = endNetWorth - startData.usd_value;
   const isEmptyAssets = endNetWorth === 0 && startData.usd_value === 0;
@@ -64,11 +41,7 @@ const formChartData = (
   };
 };
 
-export default (
-  address: string | undefined,
-  realtimeNetWorth: number,
-  realtimeTimestamp: number
-) => {
+export default (address: string | undefined) => {
   const [data, setData] = useState<
     {
       timestamp: number;
@@ -76,10 +49,7 @@ export default (
     }[]
   >([]);
   const [isLoading, setIsLoading] = useState(true);
-  const select = useCallback(
-    () => formChartData(data, realtimeNetWorth, realtimeTimestamp),
-    [realtimeNetWorth, realtimeTimestamp, data]
-  );
+  const select = useCallback(() => formChartData(data), [data]);
 
   const fetch = async (addr: string) => {
     setIsLoading(true);
