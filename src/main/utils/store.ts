@@ -14,6 +14,7 @@ import { ensurePrefix, unPrefix } from '@/isomorphic/string';
 import { storeLog } from './log';
 
 const isDarwin = process.platform === 'darwin';
+const isWin32 = process.platform === 'win32';
 
 export function getAppUserDataPath() {
   return app.getPath('userData').replace('Electron', APP_NAME);
@@ -53,6 +54,9 @@ export function makeStore<T extends Record<string, any>>(
       ? {
           encryptionKey: options.encryptionKey || baseName,
           fileExtension: 'dat',
+          ...(isWin32 && {
+            cwd: path.resolve(getLocalDataPath(), './local_data'),
+          }),
         }
       : {
           fileExtension: 'json',
