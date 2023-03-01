@@ -1,29 +1,11 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { PortfolioItem } from '@debank/rabby-api/dist/types';
-import { formatNumber } from '@/renderer/utils/number';
 import { Table } from '../components/Table';
 import Panel from '../components/Panel';
 import * as Value from '../components/Value';
 
 export default React.memo((props: { data: PortfolioItem[] }) => {
   const data: any = props.data;
-  const hasDescription = data.some((v: any) => !!v.detail.description);
-
-  const headers = useMemo(() => {
-    const _headers = [
-      'Currency Pair',
-      'Side',
-      'Entry Price',
-      'Mark Price',
-      'Liquidation Price',
-      'Position',
-    ];
-    if (hasDescription) {
-      _headers.unshift('');
-    }
-
-    return _headers;
-  }, [hasDescription]);
 
   return data.map((p: any) => (
     <Panel>

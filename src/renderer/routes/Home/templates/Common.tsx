@@ -11,8 +11,12 @@ const Common = ({ data }: { data: PortfolioItem[] }) => {
   const hasBorrowTokenList = data.some(
     (v) => v.detail.borrow_token_list !== undefined
   );
+  const hasDescription = data.some(
+    (v: any) => v.detail.description !== undefined
+  );
 
   if (hasRewardTokenList) headers.push('Rewards');
+  if (hasDescription) headers.unshift('');
   if (hasBorrowTokenList) headers.push('Borrow');
 
   headers.push('USD Value');
@@ -22,9 +26,12 @@ const Common = ({ data }: { data: PortfolioItem[] }) => {
       <Table>
         <Table.Header headers={headers} />
         <Table.Body>
-          {data.map((p) => {
+          {data.map((p: any) => {
             return (
               <Table.Row>
+                {hasDescription && (
+                  <Value.String value={p.detail.description} />
+                )}
                 <Value.Tokens value={p.detail.supply_token_list} />
                 <Value.Balances value={p.detail.supply_token_list} />
                 {hasRewardTokenList && (
