@@ -20,8 +20,9 @@ export const StyledModal = styled(Modal)`
     padding: 24px;
   }
 
-  .ant-modal-body {
+  .ant-modal-content .ant-modal-body {
     padding-inline: 32px;
+    padding: 24px;
     padding-bottom: 40px;
 
     .ant-input-affix-wrapper {
