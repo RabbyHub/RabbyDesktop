@@ -17,7 +17,6 @@ import IconSend from '../../../../../assets/icons/home/token-send.svg?rc';
 import IconReceive from '../../../../../assets/icons/home/token-receive.svg?rc';
 
 const TokenItemWrapper = styled.li`
-  font-weight: 500;
   font-size: 13px;
   line-height: 18px;
   color: #ffffff;
@@ -35,11 +34,12 @@ const TokenItemWrapper = styled.li`
     flex-wrap: wrap;
     .token-symbol {
       font-weight: 700;
-      font-size: 14px;
+      font-size: 15px;
       line-height: 18px;
       margin-left: 18px;
       white-space: nowrap;
       text-align: left;
+      color: #ffffff;
     }
     .price-change {
       width: 100%;
@@ -125,6 +125,7 @@ const TokenAmountField = styled.div`
 const TokenUsdValueField = styled.div`
   width: 17%;
   justify-content: flex-end;
+  font-weight: 700;
   .price-change {
     display: block !important;
     text-align: right;
