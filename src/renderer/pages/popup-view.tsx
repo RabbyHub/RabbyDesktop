@@ -11,7 +11,6 @@ import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { PopupViewClose, ResetTo } from '@/renderer/components/PopupViewUtils';
 
 import SecurityCheck from '@/renderer/routes-popup/SecurityCheck/SecurityCheck';
-import SecurityNotifications from '@/renderer/routes-popup/SecurityNotifications/SecurityNotifications';
 import SecurityAddressbarPopup from '@/renderer/routes-popup/SecurityAddressbarPopup/SecurityAddressbarPopup';
 
 import { SidebarContextMenu } from '@/renderer/routes-popup/SidebarContextMenu';
@@ -31,10 +30,6 @@ function App() {
     <Router>
       <Routes>
         <Route path="/security-check" element={<SecurityCheck />} />
-        <Route
-          path="/security-notifications"
-          element={<SecurityNotifications />}
-        />
         <Route
           path="/security-addressbarpopup"
           element={<SecurityAddressbarPopup />}

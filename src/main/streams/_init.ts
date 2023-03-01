@@ -71,10 +71,6 @@ const CONF = {
     subject: new ReplaySubject(1),
     once: true,
   } as IConf<ReplaySubject<BrowserWindow>>,
-  securityNotificationsWindowReady: {
-    subject: new ReplaySubject(1),
-    once: true,
-  } as IConf<ReplaySubject<BrowserWindow>>,
   securityAddressbarPopup: {
     subject: new ReplaySubject(1),
     once: true,

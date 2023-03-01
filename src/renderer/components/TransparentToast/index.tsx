@@ -80,57 +80,6 @@ export async function toastCopiedWeb3Addr(text: string) {
   }
 }
 
-function ToastSecurityNotification() {
-  const timerRef = useRef<any>();
-
-  const { closeSubview, svVisible } = useZPopupViewState(
-    'security-notification',
-    (payload) => {
-      if (payload?.state?.type === 'full-web3-addr') {
-        toastMessage({
-          icon: null,
-          key: TOAST_KEY,
-          content: (
-            <ToastContent
-              onClickOutside={() => {
-                if (!svVisible) return;
-
-                message.destroy(TOAST_KEY);
-                closeSubview();
-              }}
-            >
-              <div className="flex items-center">
-                <RcIconToastSuccess className="mr-6px w-[16px] h-[16px]" />
-                <span style={{ color: '#27C193' }}>Copied:</span>
-              </div>
-              <div>{payload.state.web3Addr}</div>
-            </ToastContent>
-          ),
-          onClose: () => {
-            closeSubview();
-          },
-          duration: TIMEOUT_SEC,
-        });
-
-        if (timerRef.current) {
-          clearTimeout(timerRef.current);
-        }
-        timerRef.current = setTimeout(() => {
-          message.destroy(TOAST_KEY);
-          timerRef.current = undefined;
-          closeSubview();
-        }, TIMEOUT_SEC * 1e3);
-      }
-    }
-  );
-
-  return null;
-}
-
 export default function TransparentToast() {
-  return (
-    <>
-      <ToastSecurityNotification />
-    </>
-  );
+  return <>{/* <ToastSecurityNotification /> */}</>;
 }

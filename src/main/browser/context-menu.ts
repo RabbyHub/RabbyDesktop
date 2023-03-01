@@ -17,12 +17,7 @@ import {
 import { getWindowFromWebContents } from '../utils/browser';
 import { appendMenu, appendMenuSeparator } from '../utils/context-menu';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
-import {
-  getPopupWindowOnMain,
-  getRabbyExtViews,
-  getWebuiExtId,
-  pushChangesToZPopupLayer,
-} from '../utils/stream-helpers';
+import { getRabbyExtViews, getWebuiExtId } from '../utils/stream-helpers';
 
 const LABELS = {
   openInNewTab: (type: 'link' | Electron.ContextMenuParams['mediaType']) =>
@@ -277,31 +272,6 @@ function buildInspectKitsMenu(opts: ChromeContextMenuOptions) {
   return inspectKitsMenu;
 }
 
-function buildEventsKitsMenu(opts: ChromeContextMenuOptions) {
-  const { params } = opts;
-
-  const eventKitsMenu = new Menu();
-
-  appendMenu(eventKitsMenu, {
-    label: 'Push Copied web3 addr',
-    click: () => {
-      getPopupWindowOnMain().then(async () => {
-        pushChangesToZPopupLayer({
-          'security-notification': {
-            visible: true,
-            state: {
-              type: 'full-web3-addr',
-              web3Addr: '0x5853ed4f26a3fcea565b3fbc698bb19cdf6deb85',
-            },
-          },
-        });
-      });
-    },
-  });
-
-  return eventKitsMenu;
-}
-
 const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
   const { params, webContents, openLink, extensionMenuItems } = opts;
 
@@ -490,11 +460,6 @@ const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
     append({
       label: 'Views Kits',
       submenu: buildInspectKitsMenu(opts),
-    });
-
-    append({
-      label: 'Test Events',
-      submenu: buildEventsKitsMenu(opts),
     });
 
     appendSeparator();
