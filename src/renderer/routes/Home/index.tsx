@@ -366,7 +366,7 @@ const Home = () => {
 
   const totalBalance = useTotalBalance(tokenList, protocolList);
 
-  const curveData = useCurve(currentAccount?.address);
+  const curveData = useCurve(currentAccount?.address, updateNonce);
   const location = useLocation();
 
   const filterProtocolList = useMemo(() => {
@@ -453,6 +453,7 @@ const Home = () => {
       !Object.values(visibles).some((item) => item.visible) // all closed
     ) {
       init();
+      setUpdateNonce(updateNonce + 1);
     }
   });
 

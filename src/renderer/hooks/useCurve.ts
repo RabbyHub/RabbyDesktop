@@ -1,10 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
-import { formatUsdValue } from '@/renderer/utils/number';
+import { formatNumber, formatUsdValue } from '@/renderer/utils/number';
 import { walletOpenapi } from '../ipcRequest/rabbyx';
 
 type CurveList = Array<{ timestamp: number; usd_value: number }>;
 
-const formChartData = (data: CurveList) => {
+const formChartData = (
+  data: CurveList,
+  realtimeNetWorth = 0,
+  realtimeTimestamp?: number
+) => {
   const startData = data[0] || { value: 0, timestamp: 0 };
 
   const list =
@@ -24,6 +28,25 @@ const formChartData = (data: CurveList) => {
       };
     }) || [];
 
+  // patch realtime newworth
+  if (realtimeTimestamp) {
+    const realtimeChange = realtimeNetWorth - startData.usd_value;
+
+    list.push({
+      value: realtimeNetWorth || 0,
+      netWorth: realtimeNetWorth ? `$${formatNumber(realtimeNetWorth)}` : '$0',
+      change: `${formatNumber(Math.abs(realtimeChange))}`,
+      isLoss: realtimeChange < 0,
+      changePercent:
+        startData.usd_value === 0
+          ? `${realtimeNetWorth === 0 ? '0' : '100.00'}%`
+          : `${(Math.abs(realtimeChange * 100) / startData.usd_value).toFixed(
+              2
+            )}%`,
+      timestamp: Math.floor(realtimeTimestamp / 1000),
+    });
+  }
+
   const endNetWorth = list?.length ? list[list.length - 1]?.value : 0;
   const assetsChange = endNetWorth - startData.usd_value;
   const isEmptyAssets = endNetWorth === 0 && startData.usd_value === 0;
@@ -41,7 +64,7 @@ const formChartData = (data: CurveList) => {
   };
 };
 
-export default (address: string | undefined) => {
+export default (address: string | undefined, nonce: number) => {
   const [data, setData] = useState<
     {
       timestamp: number;
@@ -61,7 +84,7 @@ export default (address: string | undefined) => {
   useEffect(() => {
     if (!address) return;
     fetch(address);
-  }, [address]);
+  }, [address, nonce]);
 
   return isLoading ? undefined : select();
 };
