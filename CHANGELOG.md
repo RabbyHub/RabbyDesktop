@@ -1,7 +1,33 @@
 
+v0.5.2 / 2023-03-01
+===================
+
+  * feat: set local data path on windows.
+  * security: remove codes about clipboard changed.
+  * fix: portfolio page styles (#196)
+  * fix: toast styles (#198)
+  * chore: change some style (#194)
+  * feat: vary localDataPath with userData on production. (#195)
+  * fix: copy styles (#193)
+  * feat: allow user to check url they want. (#192)
+  * fix: dropdown styles (#191)
+  * feat: support manual check new version. (#190)
+  * chore: chian margin of icon and name (#189)
+  * fix: dapp matching rules (#188)
+  * feat: welcome page (#186)
+  * chore: change some style (#183)
+  * feat: tuning style of rabbyx connect window. (#187)
+  * fix: time span (#184)
+  * fix: address-management styles (#185)
+  * fix: inviteCodeModal style (#182)
+
 v0.5.1 / 2023-02-27
 ===================
 
+  * Release v0.5.1
+  * fix: hd connect modal (#181)
+  * fix: add dapp (#180)
+  * feat: global scrollbar style (#179)
   * chore: fix some style (#177)
   * fix: allow open dapp with existed main domain. (#178)
   * fix: address-management styles (#176)
