@@ -162,7 +162,7 @@ const CompletedTag = styled.div`
   position: absolute;
   left: 0;
   top: 0;
-  background: #686d7c;
+  background: rgba(255, 255, 255, 0.1);
   font-weight: 400;
   font-size: 12px;
   line-height: 14px;
@@ -271,7 +271,7 @@ const ChildrenWrapper = styled.div`
     }
 
     .tx-type {
-      width: 65px;
+      width: 80px;
     }
     .ahead {
       flex: 1;
