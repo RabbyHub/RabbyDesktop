@@ -49,8 +49,14 @@ export function makeStore<T extends Record<string, any>>(
       },
     } as StoreOptions<T>['schema'],
     cwd: getLocalDataPath(),
-    encryptionKey: options.encryptionKey || baseName,
-    fileExtension: IS_RUNTIME_PRODUCTION ? 'dat' : 'json',
+    ...(IS_RUNTIME_PRODUCTION
+      ? {
+          encryptionKey: options.encryptionKey || baseName,
+          fileExtension: 'dat',
+        }
+      : {
+          fileExtension: 'json',
+        }),
   }) as AppStore<T>;
 
   const $rawStore = !IS_RUNTIME_PRODUCTION
