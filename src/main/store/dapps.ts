@@ -1,7 +1,5 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 
-import { app } from 'electron';
-import Store from 'electron-store';
 import {
   fillUnpinnedList,
   formatDapp,
@@ -14,7 +12,7 @@ import {
   handleIpcMainInvoke,
   onIpcMainEvent,
 } from '../utils/ipcMainEvents';
-import { APP_NAME, PERSIS_STORE_PREFIX } from '../../isomorphic/constants';
+import { PERSIS_STORE_PREFIX } from '../../isomorphic/constants';
 import { safeParse, shortStringify } from '../../isomorphic/json';
 import {
   canoicalizeDappUrl,
@@ -23,10 +21,9 @@ import {
   parseDomainMeta,
 } from '../../isomorphic/url';
 import { detectDapp } from '../utils/dapps';
-import { getBindLog } from '../utils/log';
+import { storeLog } from '../utils/log';
 import { getAppProxyConf } from './desktopApp';
-
-const storeLog = getBindLog('store', 'bgGreen');
+import { getLocalDataPath, makeStore } from '../utils/store';
 
 const IDappSchema: import('json-schema-typed').JSONSchema = {
   type: 'object',
@@ -47,7 +44,7 @@ const IProtocolBindingSchema: import('json-schema-typed').JSONSchema = {
   },
 };
 
-export const dappStore = new Store<{
+export const dappStore = makeStore<{
   dapps: IDapp[];
   protocolDappsBinding: Record<string, IDapp['origin'][]>;
   dappsMap: Record<IDapp['origin'], IDapp>;
@@ -56,7 +53,7 @@ export const dappStore = new Store<{
 }>({
   name: `${PERSIS_STORE_PREFIX}dapps`,
 
-  cwd: app.getPath('userData').replace('Electron', APP_NAME),
+  cwd: getLocalDataPath(),
 
   schema: {
     /** @deprecated */

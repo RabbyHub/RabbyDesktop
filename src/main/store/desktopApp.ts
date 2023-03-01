@@ -2,9 +2,7 @@
 
 import { app, screen, BrowserWindow } from 'electron';
 import { Subject, debounceTime } from 'rxjs';
-import Store from 'electron-store';
 import {
-  APP_NAME,
   FORCE_DISABLE_CONTENT_PROTECTION,
   IS_RUNTIME_PRODUCTION,
   PERSIS_STORE_PREFIX,
@@ -13,8 +11,9 @@ import { safeParse, shortStringify } from '../../isomorphic/json';
 import { FRAME_DEFAULT_SIZE } from '../../isomorphic/const-size';
 import { emitIpcMainEvent, handleIpcMainInvoke } from '../utils/ipcMainEvents';
 import { getWindowBoundsInWorkArea } from '../utils/screen';
+import { getLocalDataPath, makeStore } from '../utils/store';
 
-export const desktopAppStore = new Store<{
+export const desktopAppStore = makeStore<{
   firstStartApp: IDesktopAppState['firstStartApp'];
   lastWindowPosition: {
     width: number;
@@ -31,7 +30,7 @@ export const desktopAppStore = new Store<{
 }>({
   name: `${PERSIS_STORE_PREFIX}desktopApp`,
 
-  cwd: app.getPath('userData').replace('Electron', APP_NAME),
+  cwd: getLocalDataPath(),
 
   schema: {
     firstStartApp: {

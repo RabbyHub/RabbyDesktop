@@ -1,13 +1,11 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 
-import { app } from 'electron';
-import Store from 'electron-store';
 import {
-  APP_NAME,
   IS_RUNTIME_PRODUCTION,
   PERSIS_STORE_PREFIX,
 } from '../../isomorphic/constants';
 import { safeParse, shortStringify } from '../../isomorphic/json';
+import { getLocalDataPath, makeStore } from '../utils/store';
 import { fetchDynamicConfig } from '../utils/fetch';
 import { handleIpcMainInvoke } from '../utils/ipcMainEvents';
 import { cLog } from '../utils/log';
@@ -23,10 +21,10 @@ const SchemaDomainMetas: import('json-schema-typed').JSONSchema = {
   },
 };
 
-export const dynamicConfigStore = new Store<IAppDynamicConfig>({
+export const dynamicConfigStore = makeStore<IAppDynamicConfig>({
   name: `${PERSIS_STORE_PREFIX}dynamicConfig`,
 
-  cwd: app.getPath('userData').replace('Electron', APP_NAME),
+  cwd: getLocalDataPath(),
 
   schema: {
     domain_metas: {
