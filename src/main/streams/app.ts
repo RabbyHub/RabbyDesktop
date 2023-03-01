@@ -40,6 +40,7 @@ import { clearAllStoreData, clearAllUserData } from '../utils/security';
 import { tryAutoUnlockRabbyX } from './rabbyIpcQuery/autoUnlock';
 import { alertAutoUnlockFailed } from './mainWindow';
 import { setupAppTray } from './appTray';
+import { getAppUserDataPath, getLocalDataPath } from '../utils/store';
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
@@ -236,10 +237,7 @@ onIpcMainInternalEvent('__internal_main:app:relaunch', () => {
 export default function bootstrap() {
   // eslint-disable-next-line promise/catch-or-return
   app.whenReady().then(async () => {
-    app.setPath(
-      'userData',
-      app.getPath('userData').replace('Electron', APP_NAME)
-    );
+    app.setPath('userData', getAppUserDataPath());
     if (!IS_RUNTIME_PRODUCTION) {
       // we just need to modify it for development, because `APP_NAME` in production is from package.json
       app.setName(APP_NAME);
@@ -251,6 +249,7 @@ export default function bootstrap() {
     appLog('::init', `desktop's home: ${app.getPath('home')}`);
     appLog('::init', `desktop's appData: ${app.getPath('appData')}`);
     appLog('::init', `desktop's userData: ${app.getPath('userData')}`);
+    appLog('::init', `desktop's localDataPath: ${getLocalDataPath()}`);
 
     // wait main subject ready
     /**

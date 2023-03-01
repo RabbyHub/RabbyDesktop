@@ -35,3 +35,5 @@ export function getBindLog(
 }
 
 export const cLog = getBindLog('cLog', 'blue');
+
+export const storeLog = getBindLog('store', 'bgGreen');
