@@ -249,6 +249,8 @@ export default (
     isLoadingRealTimeRef.current = false;
     protocolListRef.current = [];
     setHistoryProtocolMap({});
+    setTokenHistoryPriceMap({});
+    setHistoryTokenDict({});
   }, [address, nonce]);
 
   useEffect(() => {

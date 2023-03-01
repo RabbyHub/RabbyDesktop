@@ -428,11 +428,11 @@ const Home = () => {
   const init = async () => {
     if (!currentAccount?.address) return;
     rerenderAtRef.current = Date.now();
-    const chainList = await walletOpenapi.usedChainList(currentAccount.address);
-    setUsedChainList(chainList.map((chain) => formatChain(chain)));
     setIsProtocolExpand(false);
     setIsTokenExpand(false);
     switchView(VIEW_TYPE.DEFAULT);
+    const chainList = await walletOpenapi.usedChainList(currentAccount.address);
+    setUsedChainList(chainList.map((chain) => formatChain(chain)));
   };
 
   const handleClickRefresh = () => {
@@ -461,6 +461,7 @@ const Home = () => {
     if (location.pathname === '/mainwin/home') {
       if (Date.now() - rerenderAtRef.current >= 3600000) {
         init();
+        setUpdateNonce(updateNonce + 1);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
