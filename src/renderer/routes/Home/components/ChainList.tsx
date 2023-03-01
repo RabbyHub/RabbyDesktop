@@ -12,7 +12,6 @@ const ChainListWrapper = styled.ul`
   margin: 0;
   padding: 0;
   position: relative;
-  flex: 1;
   li {
     cursor: pointer;
     opacity: 0.6;
@@ -107,7 +106,7 @@ const ChainList = ({
   }
 
   return (
-    <ChainListWrapper>
+    <ChainListWrapper id="chain-list">
       {chainBalances.map((item) => (
         <li
           id={`chain-icon-${item.id}`}

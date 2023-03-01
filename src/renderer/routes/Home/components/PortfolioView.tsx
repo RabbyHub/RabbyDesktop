@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
+import { DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import AssociateDappModal from '@/renderer/components/AssociateDappModal';
 import TokenList from './TokenList';
@@ -96,6 +97,7 @@ const PortfolioView = ({
   supportHistoryChains,
   historyTokenDict,
   view,
+  chainList,
 }: {
   tokenList: TokenItem[];
   historyTokenMap: Record<string, TokenItem>;
@@ -127,18 +129,21 @@ const PortfolioView = ({
   supportHistoryChains: ServerChain[];
   historyTokenDict: Record<string, TokenItem>;
   view: VIEW_TYPE;
+  chainList: DisplayChainWithWhiteLogo[];
 }) => {
   const [relateDappModalOpen, setRelateDappModalOpen] = useState(false);
   const [relateDappUrl, setRelateDappUrl] = useState('');
   const [relateDappId, setRelateDappId] = useState('');
   const assetArrowLeft = useMemo(() => {
-    if (!selectChainServerId) return 65;
     const el: HTMLLIElement | null = document.querySelector(
       `#chain-icon-${selectChainServerId}`
     );
+    if (!selectChainServerId) {
+      return (24 * Math.min(27, chainList.length || 2)) / 2 - 7;
+    }
     if (!el) return 65;
     return el.offsetLeft + el.offsetWidth / 2 - 7;
-  }, [selectChainServerId]);
+  }, [selectChainServerId, chainList]);
   const isEmpty = useMemo(() => {
     return (
       !isLoadingProtocolList &&

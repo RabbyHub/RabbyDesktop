@@ -138,20 +138,25 @@ const HomeWrapper = styled.div`
 `;
 
 const SwitchViewWrapper = styled.div`
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
-  padding: 4px;
+  flex: 1;
   display: flex;
-  justify-content: space-between;
-  .item {
-    padding: 5px 10px;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.3);
-    cursor: pointer;
-    border-radius: 4px;
-    &.active {
-      color: #ffffff;
-      background: rgba(255, 255, 255, 0.06);
+  justify-content: flex-end;
+  .switch-view {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 4px;
+    display: flex;
+    justify-content: space-between;
+    .item {
+      padding: 5px 10px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      border-radius: 4px;
+      &.active {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.06);
+      }
     }
   }
 `;
@@ -590,21 +595,23 @@ const Home = () => {
                 />
               )}
               <SwitchViewWrapper>
-                <div
-                  className={classNames('item', {
-                    active: currentView === VIEW_TYPE.DEFAULT,
-                  })}
-                  onClick={() => switchView(VIEW_TYPE.DEFAULT)}
-                >
-                  Default
-                </div>
-                <div
-                  className={classNames('item', {
-                    active: currentView === VIEW_TYPE.CHANGE,
-                  })}
-                  onClick={() => switchView(VIEW_TYPE.CHANGE)}
-                >
-                  Change
+                <div className="switch-view">
+                  <div
+                    className={classNames('item', {
+                      active: currentView === VIEW_TYPE.DEFAULT,
+                    })}
+                    onClick={() => switchView(VIEW_TYPE.DEFAULT)}
+                  >
+                    Default
+                  </div>
+                  <div
+                    className={classNames('item', {
+                      active: currentView === VIEW_TYPE.CHANGE,
+                    })}
+                    onClick={() => switchView(VIEW_TYPE.CHANGE)}
+                  >
+                    Change
+                  </div>
                 </div>
               </SwitchViewWrapper>
             </div>
@@ -636,6 +643,7 @@ const Home = () => {
             isLoadingProtocolHistory={isLoadingProtocolHistory}
             supportHistoryChains={supportHistoryChains}
             historyTokenDict={historyTokenDict}
+            chainList={displayChainList}
             view={currentView}
           />
         </HomeWrapper>

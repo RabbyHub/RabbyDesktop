@@ -11,7 +11,9 @@ const Common = ({ data }: { data: PortfolioItem[] }) => {
   const hasBorrowTokenList = data.some(
     (v) => v.detail.borrow_token_list !== undefined
   );
-  const hasDescription = data.some((v) => v.detail.description !== undefined);
+  const hasDescription = data.some(
+    (v: any) => v.detail.description !== undefined
+  );
 
   if (hasRewardTokenList) headers.push('Rewards');
   if (hasDescription) headers.unshift('');
