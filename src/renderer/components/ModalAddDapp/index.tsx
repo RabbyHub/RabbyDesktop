@@ -520,7 +520,7 @@ export function AddDapp({
     if (!url.trim()) {
       setState({
         validateStatus: undefined,
-        help: InitialHelpMessage,
+        help: '',
       });
     } else if (state.help === InitialHelpMessage) {
       setState({
@@ -531,7 +531,12 @@ export function AddDapp({
   }, [form, setState, state.help]);
 
   useMount(() => {
-    handleFormChange();
+    if (!addUrl) {
+      setState({
+        validateStatus: undefined,
+        help: InitialHelpMessage,
+      });
+    }
   });
 
   return (

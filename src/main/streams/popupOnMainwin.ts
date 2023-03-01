@@ -76,8 +76,8 @@ const sidebarReady = onMainWindowReady().then(async (mainWin) => {
 
   const sidebarAppPopup = createPopupWindow({
     parent: mainWin.window,
-    transparent: false,
-    hasShadow: true,
+    transparent: true,
+    hasShadow: false,
     closable: false,
   });
 
