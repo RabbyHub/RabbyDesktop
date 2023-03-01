@@ -55,6 +55,8 @@ module.exports = {
     "artifactName": "rabby-wallet-desktop-installer-${arch}-${version}.${ext}",
     "uninstallDisplayName": "${productName}",
     "deleteAppDataOnUninstall": true,
+    "allowToChangeInstallationDirectory": false,
+    "createDesktopShortcut": true,
   },
   "linux": {
     "target": [
