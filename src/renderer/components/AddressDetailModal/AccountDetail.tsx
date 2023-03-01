@@ -83,7 +83,7 @@ export const AccountDetail: React.FC<Props> = ({
               <img
                 className={styles.copy}
                 onClick={onCopy}
-                src="rabby-internal://assets/icons/address-management/copy.svg"
+                src="rabby-internal://assets/icons/address-management/copy-white.svg"
               />
             </div>
           }
