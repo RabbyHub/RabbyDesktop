@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
+import { Skeleton } from 'antd';
 import { usePrevious } from 'react-use';
 import styled from 'styled-components';
 import classNames from 'classnames';
@@ -472,67 +473,122 @@ const Home = () => {
           <div className="header">
             <div className="top">
               <div className="left">
-                <div className="current-address">
-                  <span
-                    className="inline-flex items-center"
-                    onClick={async () => {
-                      if (!currentAccount?.address) return;
-
-                      await copyText(currentAccount.address);
-                      toastCopiedWeb3Addr(currentAccount.address);
-                    }}
-                  >
-                    {ellipsis(currentAccount?.address || '')}
-                    <img
-                      className="icon"
-                      src="rabby-internal://assets/icons/home/copy.svg"
+                {isLoadingTokenList ? (
+                  <div className="current-address">
+                    <Skeleton.Input
+                      active
+                      style={{
+                        width: '120px',
+                        height: '21px',
+                        borderRadius: '2px',
+                      }}
                     />
-                  </span>
+                  </div>
+                ) : (
+                  <div className="current-address">
+                    <span
+                      className="inline-flex items-center"
+                      onClick={async () => {
+                        if (!currentAccount?.address) return;
 
-                  <span
-                    className="inline-flex items-center"
-                    onClick={() => {
-                      showZSubview('address-detail', {
-                        account: currentAccount as IDisplayedAccountWithBalance,
-                      });
-                    }}
-                  >
-                    <img
-                      className="icon"
-                      src="rabby-internal://assets/icons/home/info.svg"
-                    />
-                  </span>
-                </div>
+                        await copyText(currentAccount.address);
+                        toastCopiedWeb3Addr(currentAccount.address);
+                      }}
+                    >
+                      {ellipsis(currentAccount?.address || '')}
+                      <img
+                        className="icon"
+                        src="rabby-internal://assets/icons/home/copy.svg"
+                      />
+                    </span>
+
+                    <span
+                      className="inline-flex items-center"
+                      onClick={() => {
+                        showZSubview('address-detail', {
+                          account:
+                            currentAccount as IDisplayedAccountWithBalance,
+                        });
+                      }}
+                    >
+                      <img
+                        className="icon"
+                        src="rabby-internal://assets/icons/home/info.svg"
+                      />
+                    </span>
+                  </div>
+                )}
                 <div className="balance">
-                  ${formatNumber(totalBalance || 0)}{' '}
-                  <img
-                    src="rabby-internal://assets/icons/home/asset-update.svg"
-                    className={classNames('icon-refresh', {
-                      circling:
-                        isLoadingRealTimeTokenList || isLoadingRealTimeProtocol,
-                    })}
-                    onClick={handleClickRefresh}
-                  />
+                  {isLoadingTokenList ? (
+                    <Skeleton.Input
+                      active
+                      style={{
+                        width: '234px',
+                        height: '43px',
+                        borderRadius: '2px',
+                      }}
+                    />
+                  ) : (
+                    <>
+                      ${formatNumber(totalBalance || 0)}{' '}
+                      <img
+                        src="rabby-internal://assets/icons/home/asset-update.svg"
+                        className={classNames('icon-refresh', {
+                          circling:
+                            isLoadingRealTimeTokenList ||
+                            isLoadingRealTimeProtocol,
+                        })}
+                        onClick={handleClickRefresh}
+                      />
+                    </>
+                  )}
                 </div>
               </div>
+
               {curveData ? (
                 <div className="right" onClick={() => setCurveModalOpen(true)}>
-                  <div
-                    className={classNames('balance-change', {
-                      'is-loss': curveData.isLoss,
-                    })}
-                  >{`${curveData.isLoss ? '-' : '+'}${
-                    curveData.changePercent
-                  } (${curveData.change})`}</div>
-                  {curveData.list.length > 0 && <Curve data={curveData} />}
+                  {isLoadingTokenList ? (
+                    <div className="balance-change">
+                      <Skeleton.Input
+                        active
+                        style={{
+                          width: '141px',
+                          height: '21px',
+                          borderRadius: '2px',
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <div
+                        className={classNames('balance-change', {
+                          'is-loss': curveData.isLoss,
+                        })}
+                      >{`${curveData.isLoss ? '-' : '+'}${
+                        curveData.changePercent
+                      } (${curveData.change})`}</div>
+                      {curveData.list.length > 0 && <Curve data={curveData} />}
+                    </>
+                  )}
                 </div>
               ) : null}
             </div>
             <div className="flex justify-between items-center">
-              <ChainList
-                chainBalances={displayChainList}
-                onChange={setSelectChainServerId}
-              />
+              {isLoadingTokenList ? (
+                <Skeleton.Input
+                  active
+                  style={{
+                    width: '141px',
+                    height: '21px',
+                    borderRadius: '2px',
+                  }}
+                />
+              ) : (
+                <ChainList
+                  chainBalances={displayChainList}
+                  onChange={setSelectChainServerId}
+                />
+              )}
               <SwitchViewWrapper>
                 <div
                   className={classNames('item', {
