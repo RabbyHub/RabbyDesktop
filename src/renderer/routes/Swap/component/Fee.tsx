@@ -31,16 +31,16 @@ const SectionStyled = styled.section`
       width: var(--swap-content-w);
       transform: translateX(10px);
       font-size: 12;
+      display: flex;
+      align-items: center;
     }
   }
 
   .tooltip2 {
-    .ant-tooltip-arrow {
-      left: 124px;
-    }
     .ant-tooltip-inner {
-      max-width: var(--swap-content-w);
       font-size: 12;
+      display: flex;
+      align-items: center;
     }
   }
   .title {
@@ -104,6 +104,9 @@ export const Fee = (props: FeeProps) => {
         <span className="fee">{fee}%</span>
         <span className="real-fee">0%</span>
         <Tooltip
+          overlayStyle={{
+            maxWidth: 600,
+          }}
           overlayClassName="tooltip2"
           getPopupContainer={(e) => e.parentElement || document.body}
           placement="top"
