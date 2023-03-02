@@ -36,7 +36,7 @@ const HomeBody = styled.div`
   padding-top: 24px;
   padding-left: 28px;
   padding-right: 28px;
-  height: calc(100vh - 64px);
+  height: calc(100vh - 64px - var(--mainwin-mainroute-topoffset));
 `;
 
 const Container = styled.div`
