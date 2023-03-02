@@ -4,8 +4,10 @@ import IconInfo from '@/../assets/icons/swap/info-outline.svg?rc';
 import styled from 'styled-components';
 
 const feeTips = {
-  '0.3': () => '0.3% fee for common token',
-  '0.1': () => '0.1% fee for stablecoins',
+  '0.3': () =>
+    'Enjoy fee-free transactions - 0.3% fee for common tokens is removed',
+  '0.1': () =>
+    'Enjoy fee-free transactions - 0.1% fee for stable coins is removed',
   '0': (symbol: string) =>
     `0 fee to wrap/unwrap tokens by interacting directly with ${symbol} contracts.`,
 };
@@ -59,6 +61,15 @@ const SectionStyled = styled.section`
       font-weight: 500;
       font-size: 14px;
       margin-right: 4px;
+      text-decoration: line-through;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .real-fee {
+      color: #ffffff;
+      margin-right: 4px;
+      font-weight: 500;
+      font-size: 14px;
     }
   }
 
@@ -91,6 +102,7 @@ export const Fee = (props: FeeProps) => {
       </div>
       <div className="feeBox">
         <span className="fee">{fee}%</span>
+        <span className="real-fee">0%</span>
         <Tooltip
           overlayClassName="tooltip2"
           getPopupContainer={(e) => e.parentElement || document.body}
