@@ -157,3 +157,37 @@ export async function fetchDynamicConfig(options?: {
     domain_metas: (domain_metas as IAppDynamicConfig['domain_metas']) || {},
   };
 }
+
+// const DFLT_TIMEOUT = 8 * 1e3;
+// import nodeFetch, { AbortError } from 'node-fetch'; // for node-fetch@3
+// type FetchParams = Parameters<typeof nodeFetch>;
+// /**
+//  * @description just one wrapper for node-fetch
+//  */
+// export async function appFetch(
+//   url: FetchParams[0],
+//   options?: FetchParams[1] & {
+//     timeout?: number;
+//   }
+// ) {
+//   const { timeout: timeoutValue = DFLT_TIMEOUT, ...fetchOptions } =
+//     options || {};
+//   const controller = new AbortController();
+
+//   const timer = timeoutValue
+//     ? setTimeout(() => {
+//         controller.abort();
+//       }, timeoutValue)
+//     : undefined;
+
+//   return nodeFetch(url, fetchOptions)
+//     .catch((error) => {
+//       if (error instanceof AbortError) {
+//         throw new Error('timeout');
+//       }
+//       throw error;
+//     })
+//     .finally(() => {
+//       clearTimeout(timer);
+//     });
+// }

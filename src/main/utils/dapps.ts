@@ -3,10 +3,17 @@
 import { format as urlFormat } from 'url';
 import Axios, { AxiosError, AxiosProxyConfig } from 'axios';
 import LRUCache from 'lru-cache';
-
 import { BrowserWindow } from 'electron';
+
+import { unfurl } from 'unfurl.js';
+import nodeFetch from 'node-fetch';
+import createHttpsProxyAgent from 'https-proxy-agent';
+
 import { waitForMS } from '@/isomorphic/date';
-import { canoicalizeDappUrl } from '../../isomorphic/url';
+import {
+  canoicalizeDappUrl,
+  formatAxiosProxyConfig,
+} from '../../isomorphic/url';
 import { parseWebsiteFavicon } from './fetch';
 import { AxiosElectronAdapter } from './axios';
 import { checkUrlViaBrowserView, CHROMIUM_NET_ERR_DESC } from './appNetwork';
@@ -137,9 +144,10 @@ export async function detectDapp(
   dappsUrl: string,
   opts: {
     existedDapps: IDapp[];
-    proxyOnParseFavicon?: AxiosProxyConfig;
+    proxyOnGrab?: AxiosProxyConfig;
   }
 ): Promise<IDappsDetectResult<DETECT_ERR_CODES>> {
+  const { proxyOnGrab } = opts;
   // TODO: process void url;
   const { origin: inputOrigin, hostWithoutTLD: inputCoreName } =
     canoicalizeDappUrl(dappsUrl);
@@ -154,13 +162,40 @@ export async function detectDapp(
       },
     };
   }
-
+  const formattedTargetURL = urlFormat(dappOriginInfo);
   let fallbackFavicon: string | undefined;
-  const checkResult = await checkUrlViaBrowserView(urlFormat(dappOriginInfo), {
-    onPageFaviconUpdated: (favicons) => {
-      fallbackFavicon = favicons[0];
-    },
-  });
+
+  const [checkResult, targetMetadata] = await Promise.all([
+    await checkUrlViaBrowserView(formattedTargetURL, {
+      onPageFaviconUpdated: (favicons) => {
+        fallbackFavicon = favicons[0];
+      },
+      timeout: DFLT_TIMEOUT,
+    }),
+    await unfurl(formattedTargetURL, {
+      fetch: async (url) => {
+        const agent = proxyOnGrab
+          ? createHttpsProxyAgent(formatAxiosProxyConfig(proxyOnGrab))
+          : undefined;
+
+        return nodeFetch(url, {
+          headers: {
+            Accept: 'text/html, application/xhtml+xml',
+            'User-Agent': 'facebookexternalhit',
+          },
+          follow: 100,
+          size: 0, // no limit
+          timeout: DFLT_TIMEOUT,
+          agent,
+        });
+      },
+    }).catch((err) => {
+      console.debug(`[detectDapp] unfurl error occured`);
+      console.error(err);
+      return null;
+    }),
+  ]);
+
   const isCertErr = !checkResult.valid && !!checkResult.certErrorDesc;
 
   if (isCertErr) {
@@ -207,8 +242,18 @@ export async function detectDapp(
     finalOrigin,
     isFinalExistedDapp: !!repeatedFinalDapp,
     icon: null,
-    recommendedAlias: inputCoreName,
-    faviconUrl: undefined,
+    recommendedAlias:
+      targetMetadata?.open_graph?.site_name ||
+      targetMetadata?.open_graph?.title ||
+      targetMetadata?.twitter_card?.site ||
+      targetMetadata?.twitter_card?.title ||
+      targetMetadata?.title ||
+      inputCoreName,
+    faviconUrl:
+      targetMetadata?.favicon ||
+      targetMetadata?.open_graph?.images?.[0]?.url ||
+      targetMetadata?.twitter_card?.images?.[0]?.url ||
+      fallbackFavicon,
     faviconBase64: undefined,
   };
 
@@ -227,17 +272,20 @@ export async function detectDapp(
     };
   }
 
-  const { iconInfo, faviconUrl, faviconBase64 } = await parseWebsiteFavicon(
-    finalOrigin,
-    {
-      timeout: DFLT_TIMEOUT,
-      proxy: opts.proxyOnParseFavicon,
-    }
-  );
+  // TODO: if existed, fetch the url and store as base64
+  if (!data.faviconUrl) {
+    const { iconInfo, faviconUrl, faviconBase64 } = await parseWebsiteFavicon(
+      finalOrigin,
+      {
+        timeout: DFLT_TIMEOUT,
+        proxy: proxyOnGrab,
+      }
+    );
 
-  data.icon = iconInfo;
-  data.faviconUrl = faviconUrl || fallbackFavicon;
-  data.faviconBase64 = faviconBase64;
+    data.icon = iconInfo;
+    data.faviconUrl = faviconUrl || fallbackFavicon;
+    data.faviconBase64 = faviconBase64;
+  }
 
   return { data };
 }
