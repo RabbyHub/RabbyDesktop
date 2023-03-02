@@ -450,7 +450,7 @@ const Home = () => {
     if (
       Date.now() - rerenderAtRef.current >= 3600000 &&
       location.pathname === '/mainwin/home' &&
-      !Object.values(visibles).some((item) => item.visible) // all closed
+      !Object.values(visibles).some((item) => item) // all closed
     ) {
       init();
       setUpdateNonce(updateNonce + 1);
