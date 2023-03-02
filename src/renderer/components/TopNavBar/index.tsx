@@ -134,23 +134,21 @@ export const TopNavBar = () => {
             src="rabby-internal://assets/icons/top-bar/icon-dapp-nav-loading.svg"
           />
         )}
-        <div className={styles.url}>
-          <span
-            className={styles.urlText}
-            style={{ ...(navTextColor && { color: navTextColor }) }}
-            onClick={async () => {
-              if (!activeTab?.url) return;
-              await copyText(activeTab.url);
-              toastMessage({
-                type: 'success',
-                content: 'Copied url',
-                className: 'mainwindow-default-tip',
-                duration: 1,
-              });
-            }}
-          >
-            {activeTab?.url || ''}
-          </span>
+        <div
+          className={styles.url}
+          style={{ ...(navTextColor && { color: navTextColor }) }}
+          onClick={async () => {
+            if (!activeTab?.url) return;
+            await copyText(activeTab.url);
+            toastMessage({
+              type: 'success',
+              content: 'Copied url',
+              className: 'mainwindow-default-tip',
+              duration: 1,
+            });
+          }}
+        >
+          {activeTab?.url || ''}
         </div>
         <div className={clsx(styles.historyBar, chainHover && styles.hidden)}>
           <RcIconHistoryGoBack

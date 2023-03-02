@@ -43,15 +43,10 @@
       width: 100%;
       flex-shrink: 1;
       display: inline-block;
-      .truncate;
-    }
-
-    .urlText {
-      display: inline;
-      width: 100%;
-      overflow: hidden;
       user-select: none;
       cursor: pointer;
+      margin-right: 38px;
+      .truncate;
     }
 
     .close {
@@ -70,18 +65,20 @@
     &:hover .historyBar {
       opacity: 1;
       transition: opacity 0.2s;
+      width: auto;
+      padding-right: 12px;
     }
 
     .historyBar {
+      width: 0;
       opacity: 0;
       display: flex;
       align-items: center;
       gap: 12px;
       margin-left: auto;
-      padding: 0 12px;
-
       &.hidden {
         opacity: 0;
+        width: 0;
       }
 
       & > * {
