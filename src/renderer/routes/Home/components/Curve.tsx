@@ -1,9 +1,8 @@
 import { useMemo, useState, useCallback } from 'react';
-import classNames from 'classnames';
 import { AreaChart, YAxis, Area, XAxis, Tooltip } from 'recharts';
 import styled from 'styled-components';
-import { Modal } from 'antd';
 import dayjs from 'dayjs';
+import { Modal } from '@/renderer/components/Modal/Modal';
 
 export type CurvePoint = {
   value: number;
@@ -145,9 +144,11 @@ export const CurveModal = ({ data, className, onClose }: CurveModalProps) => {
     <Modal
       onCancel={onClose}
       open
+      closable={false}
       width="742px"
-      className="curve-modal"
+      className="curve-modal inherit"
       footer={null}
+      centered
     >
       <CurveModalWrapper className={className}>
         <div className="legend">

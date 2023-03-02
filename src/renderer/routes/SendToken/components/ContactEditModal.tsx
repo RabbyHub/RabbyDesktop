@@ -104,6 +104,8 @@ export const ContactEditModal = ({
       open={open}
       onCancel={onCancel}
       title="Edit address note"
+      className="inherit"
+      centered
     >
       <RabbyInput
         className="nameInput"
