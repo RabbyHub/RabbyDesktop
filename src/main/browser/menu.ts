@@ -1,5 +1,6 @@
-import { Menu } from 'electron';
+import { Menu, shell } from 'electron';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
+import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 
 export const setupMenu = ({
   getFocusedWebContents,
@@ -62,6 +63,27 @@ export const setupMenu = ({
         { role: 'togglefullscreen' },
         { type: 'separator' },
         { role: 'quit' },
+      ].filter(Boolean),
+    },
+    {
+      label: 'Help',
+      submenu: <Electron.MenuItemConstructorOptions['submenu']>[
+        {
+          label: 'Privacy Policy',
+          click: async () => {
+            shell.openExternal('https://rabby.io/docs/privacy/');
+          },
+        },
+        {
+          type: 'separator',
+        },
+        {
+          label: 'Reset App Data',
+          accelerator: 'Option',
+          click: async () => {
+            emitIpcMainEvent('__internal_main:app:reset-app');
+          },
+        },
       ].filter(Boolean),
     },
   ];
