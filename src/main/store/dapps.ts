@@ -22,7 +22,7 @@ import {
 } from '../../isomorphic/url';
 import { detectDapp } from '../utils/dapps';
 import { storeLog } from '../utils/log';
-import { getLocalDataPath, makeStore } from '../utils/store';
+import { makeStore } from '../utils/store';
 import { getAppProxyConfigForAxios } from './desktopApp';
 
 const IDappSchema: import('json-schema-typed').JSONSchema = {
@@ -52,8 +52,6 @@ export const dappStore = makeStore<{
   unpinnedList: string[];
 }>({
   name: `${PERSIS_STORE_PREFIX}dapps`,
-
-  cwd: getLocalDataPath(),
 
   schema: {
     /** @deprecated */

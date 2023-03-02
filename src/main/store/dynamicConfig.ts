@@ -5,7 +5,7 @@ import {
   PERSIS_STORE_PREFIX,
 } from '../../isomorphic/constants';
 import { safeParse, shortStringify } from '../../isomorphic/json';
-import { getLocalDataPath, makeStore } from '../utils/store';
+import { makeStore } from '../utils/store';
 import { fetchDynamicConfig } from '../utils/fetch';
 import { handleIpcMainInvoke } from '../utils/ipcMainEvents';
 import { cLog } from '../utils/log';
@@ -23,8 +23,6 @@ const SchemaDomainMetas: import('json-schema-typed').JSONSchema = {
 
 export const dynamicConfigStore = makeStore<IAppDynamicConfig>({
   name: `${PERSIS_STORE_PREFIX}dynamicConfig`,
-
-  cwd: getLocalDataPath(),
 
   schema: {
     domain_metas: {

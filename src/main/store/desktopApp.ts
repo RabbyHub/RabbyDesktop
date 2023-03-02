@@ -11,7 +11,7 @@ import { safeParse, shortStringify } from '../../isomorphic/json';
 import { FRAME_DEFAULT_SIZE } from '../../isomorphic/const-size';
 import { emitIpcMainEvent, handleIpcMainInvoke } from '../utils/ipcMainEvents';
 import { getWindowBoundsInWorkArea } from '../utils/screen';
-import { getLocalDataPath, makeStore } from '../utils/store';
+import { makeStore } from '../utils/store';
 
 export const desktopAppStore = makeStore<{
   firstStartApp: IDesktopAppState['firstStartApp'];
@@ -29,8 +29,6 @@ export const desktopAppStore = makeStore<{
   sidebarCollapsed: IDesktopAppState['sidebarCollapsed'];
 }>({
   name: `${PERSIS_STORE_PREFIX}desktopApp`,
-
-  cwd: getLocalDataPath(),
 
   schema: {
     firstStartApp: {
