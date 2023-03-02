@@ -323,7 +323,7 @@ export const Swap = () => {
           .toFixed(0, 1),
         userAddress,
         slippage: Number(slippage),
-        feeRate: Number(feeRate) || 0,
+        feeRate: 0,
         chain,
       });
 
