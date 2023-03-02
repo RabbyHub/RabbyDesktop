@@ -64,11 +64,7 @@ const formChartData = (
   };
 };
 
-export default (
-  address: string | undefined,
-  realtimeNetWorth: number,
-  realtimeTimestamp: number
-) => {
+export default (address: string | undefined, nonce: number) => {
   const [data, setData] = useState<
     {
       timestamp: number;
@@ -76,10 +72,7 @@ export default (
     }[]
   >([]);
   const [isLoading, setIsLoading] = useState(true);
-  const select = useCallback(
-    () => formChartData(data, realtimeNetWorth, realtimeTimestamp),
-    [realtimeNetWorth, realtimeTimestamp, data]
-  );
+  const select = useCallback(() => formChartData(data), [data]);
 
   const fetch = async (addr: string) => {
     setIsLoading(true);
@@ -91,7 +84,7 @@ export default (
   useEffect(() => {
     if (!address) return;
     fetch(address);
-  }, [address]);
+  }, [address, nonce]);
 
   return isLoading ? undefined : select();
 };
