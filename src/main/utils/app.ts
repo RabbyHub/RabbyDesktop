@@ -3,7 +3,6 @@ import path from 'path';
 import { app } from 'electron';
 import {
   FRAME_DEFAULT_SIZE,
-  FRAME_MAX_SIZE,
   FRAME_MIN_SIZE,
 } from '../../isomorphic/const-size';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
@@ -93,7 +92,7 @@ export function getBrowserWindowOpts(
 
   return {
     ...FRAME_DEFAULT_SIZE,
-    ...FRAME_MAX_SIZE,
+    // ...FRAME_MAX_SIZE,
     ...(!isPopup && !opts?.zeroMinSize ? FRAME_MIN_SIZE : {}),
     width: expectedBounds.width,
     height: expectedBounds.height,
