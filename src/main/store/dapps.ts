@@ -22,8 +22,8 @@ import {
 } from '../../isomorphic/url';
 import { detectDapp } from '../utils/dapps';
 import { storeLog } from '../utils/log';
-import { getAppProxyConf } from './desktopApp';
 import { getLocalDataPath, makeStore } from '../utils/store';
+import { getAppProxyConfigForAxios } from './desktopApp';
 
 const IDappSchema: import('json-schema-typed').JSONSchema = {
   type: 'object',
@@ -276,18 +276,10 @@ export function parseDappRedirect(
 
 handleIpcMainInvoke('detect-dapp', async (_, dappUrl) => {
   const allDapps = getAllDapps();
-  const proxyConf = getAppProxyConf();
 
   const result = await detectDapp(dappUrl, {
     existedDapps: allDapps,
-    proxyOnParseFavicon:
-      proxyConf.proxyType === 'custom'
-        ? {
-            protocol: proxyConf.proxySettings.protocol,
-            host: proxyConf.proxySettings.hostname,
-            port: proxyConf.proxySettings.port,
-          }
-        : undefined,
+    proxyOnGrab: getAppProxyConfigForAxios(),
   });
 
   return {
