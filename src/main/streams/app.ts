@@ -40,7 +40,7 @@ import { clearAllStoreData, clearAllUserData } from '../utils/security';
 import { tryAutoUnlockRabbyX } from './rabbyIpcQuery/autoUnlock';
 import { alertAutoUnlockFailed } from './mainWindow';
 import { setupAppTray } from './appTray';
-import { getAppUserDataPath, getLocalDataPath } from '../utils/store';
+import { getAppUserDataPath } from '../utils/store';
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
@@ -249,7 +249,6 @@ export default function bootstrap() {
     appLog('::init', `desktop's home: ${app.getPath('home')}`);
     appLog('::init', `desktop's appData: ${app.getPath('appData')}`);
     appLog('::init', `desktop's userData: ${app.getPath('userData')}`);
-    appLog('::init', `desktop's localDataPath: ${getLocalDataPath()}`);
 
     // wait main subject ready
     /**
