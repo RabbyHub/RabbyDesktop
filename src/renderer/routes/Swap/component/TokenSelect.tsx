@@ -517,6 +517,12 @@ const TokenSelectModal = ({
     [query]
   );
 
+  useEffect(() => {
+    if (!open) {
+      setQuery('');
+    }
+  }, [open]);
+
   const listHeader = useMemo(() => {
     if (columns === 2) {
       return (
