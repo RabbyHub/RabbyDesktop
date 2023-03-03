@@ -464,9 +464,7 @@ const DefaultToken = ({
         </div>
       </div>
       <div
-        title={splitNumberByStep(
-          new BigNumber(t.price || 0).times(t.amount).toFixed(2)
-        )}
+        title={splitNumberByStep(new BigNumber(t.price || 0).toFixed(2))}
         className="usd text-15 text-left"
       >
         ${splitNumberByStep(new BigNumber(t.price || 0).toFixed(2))}
