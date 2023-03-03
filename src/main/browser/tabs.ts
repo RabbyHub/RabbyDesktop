@@ -303,7 +303,12 @@ export class Tab {
 
   hide() {
     this.view!.setAutoResize({ width: false, height: false });
-    this.view!.setBounds({ x: -1000, y: 0, width: 0, height: 0 });
+    const oldBounds = this.view!.getBounds();
+    this.view!.setBounds({
+      ...oldBounds,
+      x: -1000 - oldBounds.width,
+      y: -1000 - oldBounds.height,
+    });
   }
 }
 
