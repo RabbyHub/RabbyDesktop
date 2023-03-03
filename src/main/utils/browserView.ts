@@ -3,13 +3,17 @@ import {
   NativeLayouts,
   NativeLayoutsCollapsed,
 } from '@/isomorphic/const-size-next';
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import {
   BrowserView,
   BrowserViewConstructorOptions,
+  WebContents,
   webContents,
 } from 'electron';
 import { desktopAppStore } from '../store/desktopApp';
 import { redirectToAboutBlank } from './browser';
+
+const ghostViewIds = new Set<WebContents['id']>();
 
 export class BrowserViewManager {
   private idleViews: Record<number, BrowserView> = {};
@@ -63,24 +67,29 @@ export class BrowserViewManager {
     // then try to destroy it
     try {
       const viewId = view.webContents.id;
+
+      view.webContents.close();
       // make sure you detach it from BrowserWindow first
       (view.webContents as any).destroy();
       delete this.idleViews[viewId];
       delete this.busyViews[viewId];
+      ghostViewIds.add(viewId);
 
       console.debug(
         `[BrowserViewManager::recycleView] try to destroy webContents '${viewId}'`
       );
 
-      view.webContents.forcefullyCrashRenderer();
-
-      const shouldBeDeleted = webContents
-        .getAllWebContents()
-        .find((wc) => wc.id === viewId);
-      if (shouldBeDeleted) {
-        console.debug(
-          `[BrowserViewManager::recycleView] webContents '${viewId}' not deleted, isDestroyed: ${shouldBeDeleted.isDestroyed()}`
-        );
+      if (!IS_RUNTIME_PRODUCTION) {
+        setTimeout(() => {
+          const shouldBeDeleted = webContents
+            .getAllWebContents()
+            .find((wc) => wc.id === viewId);
+          if (shouldBeDeleted) {
+            console.debug(
+              `[BrowserViewManager::recycleView] webContents '${viewId}' not deleted, isDestroyed: ${shouldBeDeleted.isDestroyed()}`
+            );
+          }
+        }, 0);
       }
     } catch (err) {
       console.debug(
