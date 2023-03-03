@@ -1,5 +1,8 @@
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
-import { RABBY_BLANKPAGE_RELATIVE_URL } from '@/isomorphic/constants';
+import {
+  SAFE_WEBPREFERENCES,
+  RABBY_BLANKPAGE_RELATIVE_URL,
+} from '@/isomorphic/constants';
 import { isRabbyXCenteredWindowType } from '@/isomorphic/rabbyx';
 import { roundRectValue } from '@/isomorphic/shape';
 import { BrowserView, BrowserWindow } from 'electron';
@@ -115,6 +118,10 @@ export function createPopupModalWindow(
     show: false,
     skipTaskbar: true,
     ...getPopupWinDefaultOpts(opts),
+    webPreferences: {
+      ...SAFE_WEBPREFERENCES,
+      webviewTag: false,
+    },
   });
 
   if (isEnableContentProtected()) {
@@ -147,6 +154,34 @@ export function createPopupWindow(
   }
 
   return window;
+}
+
+export function createTmpEmptyBrowser() {
+  const window = new BrowserWindow({
+    hasShadow: false,
+    ...getPopupWinDefaultOpts(),
+    show: false,
+    frame: false,
+    modal: false,
+    movable: false,
+    maximizable: false,
+    minimizable: false,
+    resizable: false,
+    fullscreenable: false,
+    skipTaskbar: true,
+    width: 1,
+    height: 1,
+  });
+
+  return {
+    tmpWindow: window,
+    asyncClose: () => {
+      setTimeout(() => {
+        window.hide();
+        window.destroy();
+      }, 300);
+    },
+  };
 }
 
 /**
