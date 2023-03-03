@@ -182,6 +182,7 @@ const Wrapper = styled.section`
     }
     .arrow {
       margin-left: 4px;
+      font-size: 12px;
 
       &.open {
         transform: rotate(180deg);
@@ -268,15 +269,18 @@ export const Slippage = memo((props: SlippageProps) => {
         <div className="left">
           <div className="title">Slippage</div>
           <Tooltip
+            overlayStyle={{
+              maxWidth: 600,
+            }}
             overlayInnerStyle={{
-              width: 320,
-              transform: 'translateX(65px)',
               fontSize: '12px',
+              display: 'flex',
+              alignItems: 'center',
             }}
             placement="top"
             title={tips}
           >
-            <IconInfo />
+            <IconInfo className="text-14" />
           </Tooltip>
         </div>
         <div className={clsx('rate', (isLow || isHigh) && 'orange')}>
