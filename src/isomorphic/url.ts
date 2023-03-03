@@ -61,10 +61,11 @@ export function isRabbyShellURL(url: string) {
 export function isRabbyXPage(
   url: string,
   extid: string,
-  type: 'background' | 'notification'
+  type?: 'background' | 'notification'
 ) {
   switch (type) {
     default:
+      return url.startsWith(`chrome-extension://${extid}`);
     case 'notification':
       return url.startsWith(`chrome-extension://${extid}/notification.html`);
     case 'background':

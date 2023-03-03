@@ -54,11 +54,14 @@ export function checkOpenAction(
     };
   }
 
-  if (isFromRabbyxBg && opts.toUrl.startsWith('http')) {
+  if (
+    isRabbyXPage(opts.fromUrl, opts.rabbyExtId) &&
+    (opts.toUrl.startsWith('http') || !opts.toUrl)
+  ) {
     // http(s) url
     return {
       action: 'open-external',
-      externalUrl: opts.toUrl,
+      externalUrl: opts.toUrl || 'https://rabby.io',
     };
   }
 
