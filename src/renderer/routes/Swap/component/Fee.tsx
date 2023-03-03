@@ -23,26 +23,14 @@ const SectionStyled = styled.section`
     gap: 6px;
   }
 
-  .tooltip1 {
-    .ant-tooltip-arrow {
-      left: 100px;
-    }
-    .ant-tooltip-inner {
-      width: var(--swap-content-w);
-      transform: translateX(10px);
+  .tooltip {
+    .ant-tooltip-content .ant-tooltip-inner {
       font-size: 12;
       display: flex;
       align-items: center;
     }
   }
 
-  .tooltip2 {
-    .ant-tooltip-inner {
-      font-size: 12;
-      display: flex;
-      align-items: center;
-    }
-  }
   .title {
     font-weight: 400;
     font-size: 14px;
@@ -82,6 +70,15 @@ export interface FeeProps {
   fee: '0.3' | '0.1' | '0';
   symbol?: string;
 }
+
+const overlayStyle = {
+  maxWidth: 660,
+};
+const overlayInnerStyle = {
+  display: 'flex',
+  alignItems: 'center',
+};
+
 export const Fee = (props: FeeProps) => {
   const { fee, symbol = '' } = props;
 
@@ -90,29 +87,25 @@ export const Fee = (props: FeeProps) => {
       <div className="left">
         <div className="title">Rabby fee</div>
         <Tooltip
+          overlayStyle={overlayStyle}
+          overlayInnerStyle={overlayInnerStyle}
           placement="top"
-          overlayClassName="tooltip1"
           title={
             "The charged fee depends on which token you're swapping. It has been charged from the current quote."
           }
-          getPopupContainer={(e) => e.parentElement || document.body}
         >
-          <IconInfo />
+          <IconInfo className="text-14" />
         </Tooltip>
       </div>
       <div className="feeBox">
         <span className="fee">{fee}%</span>
         <span className="real-fee">0%</span>
         <Tooltip
-          overlayStyle={{
-            maxWidth: 600,
-          }}
-          overlayClassName="tooltip2"
-          getPopupContainer={(e) => e.parentElement || document.body}
-          placement="top"
+          overlayStyle={overlayStyle}
+          overlayInnerStyle={overlayInnerStyle}
           title={feeTips[fee](symbol)}
         >
-          <IconQuestion />
+          <IconQuestion className="text-14" />
         </Tooltip>
       </div>
     </SectionStyled>
