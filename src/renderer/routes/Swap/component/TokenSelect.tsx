@@ -250,7 +250,7 @@ const StyledModal = styled(Modal)`
 
   .grid3 {
     display: grid;
-    grid-template-columns: 180px auto 200px;
+    grid-template-columns: 200px 1fr 160px;
     grid-column-gap: 10px;
   }
 
@@ -467,11 +467,9 @@ const DefaultToken = ({
         title={splitNumberByStep(
           new BigNumber(t.price || 0).times(t.amount).toFixed(2)
         )}
-        className="usd text-15"
+        className="usd text-15 text-left"
       >
-        {splitNumberByStep(
-          new BigNumber(t.price || 0).times(t.amount).toFixed(2)
-        )}
+        ${splitNumberByStep(new BigNumber(t.price || 0).toFixed(2))}
       </div>
       <div className="balance text-15" title={formatTokenAmount(t.amount)}>
         {t.amount !== 0 && t.amount < 0.0001
