@@ -5,6 +5,8 @@ import { matchURLHead } from '@/isomorphic/app-config';
 
 import tinyColor from 'tinycolor2';
 import { invertColor } from '@/isomorphic/colors';
+import { canoicalizeDappUrl } from '@/isomorphic/url';
+import { isEqual } from 'lodash';
 
 const appDynamicConfigAtom = atom({} as IAppDynamicConfig);
 function useAppDynamicConfig() {
@@ -99,3 +101,27 @@ export function useMatchURLBaseConfig(urlBase?: string) {
     };
   }, [urlBase, appDynamicConfig?.domain_metas?.url_head]);
 }
+
+export const useCanoicalizeDappUrl = () => {
+  const { appDynamicConfig } = useAppDynamicConfig();
+
+  const ids = useMemo(
+    () => appDynamicConfig?.special_main_domains?.ids || [],
+    [appDynamicConfig?.special_main_domains?.ids]
+  );
+
+  return useCallback(
+    (url: string) => {
+      const res = canoicalizeDappUrl(url);
+      return {
+        ...res,
+        isSpecialMainDomain: !!ids.find((domain) => {
+          const list = domain.split('.');
+          const list1 = res.hostname.split('.');
+          return isEqual(list, list1.slice(list1.length - list.length));
+        }),
+      };
+    },
+    [ids]
+  );
+};
