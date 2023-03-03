@@ -13,14 +13,19 @@ import { BrowserViewManager } from '../utils/browserView';
 import { desktopAppStore } from '../store/desktopApp';
 import { getAssetPath } from '../utils/app';
 
-const viewMngr = new BrowserViewManager({
-  webPreferences: {
-    safeDialogs: true,
-    safeDialogsMessage: 'Stop consecutive dialogs',
-    preload: getAssetPath('./preloads/dappViewPreload.js'),
-    webviewTag: false,
+const viewMngr = new BrowserViewManager(
+  {
+    webPreferences: {
+      safeDialogs: true,
+      safeDialogsMessage: 'Stop consecutive dialogs',
+      preload: getAssetPath('./preloads/dappViewPreload.js'),
+      webviewTag: false,
+    },
   },
-});
+  {
+    destroyOnRecycle: true,
+  }
+);
 
 type ITabOptions = {
   tabs: Tabs;
