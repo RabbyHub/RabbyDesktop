@@ -235,7 +235,7 @@ export function parseDappRedirect(
   parseDomainMeta(currentURL, dapps, domainMetaCache);
   parseDomainMeta(targetURL, dapps, domainMetaCache);
 
-  const shouldKeepTab =
+  const couldKeepTab =
     currentInfo.secondaryDomain === targetInfo.secondaryDomain &&
     !!domainMetaCache[currentInfo.secondaryDomain]
       ?.secondaryDomainOriginExisted;
@@ -261,7 +261,7 @@ export function parseDappRedirect(
 
     isFromDapp,
     isToSameOrigin,
-    shouldKeepTab,
+    couldKeepTab,
     allowOpenTab,
     shouldOpenExternal,
     maybeRedirectInSPA,
