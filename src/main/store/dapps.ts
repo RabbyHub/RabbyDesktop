@@ -24,6 +24,7 @@ import { detectDapp } from '../utils/dapps';
 import { storeLog } from '../utils/log';
 import { makeStore } from '../utils/store';
 import { getAppProxyConfigForAxios } from './desktopApp';
+import { rabbyxQuery } from '../streams/rabbyIpcQuery/_base';
 
 const IDappSchema: import('json-schema-typed').JSONSchema = {
   type: 'object',
@@ -396,6 +397,7 @@ function checkDelDapp(
 
   originsToDel.forEach((o) => {
     delete dappsMap[o];
+    rabbyxQuery('walletController.removeConnectedSite', [o]);
   });
 
   Object.entries(protocolDappsBinding).forEach((dapps) => {
