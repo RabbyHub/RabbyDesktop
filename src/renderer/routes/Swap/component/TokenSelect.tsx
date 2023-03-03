@@ -12,6 +12,7 @@ import { useAsync, useDebounce } from 'react-use';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import IconClose from '@/../assets/icons/swap/modal-close.svg?rc';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
+import { getChain } from '@/renderer/utils';
 
 const TokenWrapper = styled.div`
   display: flex;
@@ -213,7 +214,7 @@ const StyledModal = styled(Modal)`
       text-align: left;
     }
     .right {
-      color: rgba(255, 255, 255, 0.3);
+      color: rgba(255, 255, 255, 0.6);
       &:last-child {
         text-align: right;
       }
@@ -298,28 +299,17 @@ const StyledModal = styled(Modal)`
     font-size: 12px;
     line-height: 14px;
     text-align: right;
-    color: #898989;
+    color: rgba(255, 255, 255, 0.8);
   }
 
   .noResult {
     font-weight: 400;
-    font-size: 18px;
-    line-height: 21px;
-    text-align: center;
-    color: rgba(255, 255, 255, 0.4);
-    margin: 0 auto;
-    margin-top: 20px;
-    margin-bottom: 12px;
-  }
-  .noResultTip {
-    margin: 0 auto;
-
-    width: 283px;
-    font-weight: 400;
-    font-size: 12px;
+    font-size: 13px;
     line-height: 18px;
     text-align: center;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0 auto;
+    margin-top: 20px;
   }
 `;
 
@@ -415,6 +405,7 @@ interface TokenDrawerProps {
   onSearch: (q: string) => void;
   onConfirm(item: TokenItem): void;
   columns?: 2 | 3;
+  chainId: string;
 }
 
 const SwapToken = ({
@@ -501,6 +492,7 @@ const TokenSelectModal = ({
   onClose,
   placeholder = 'Search by Name / Address',
   columns = 2,
+  chainId,
 }: TokenDrawerProps) => {
   const [query, setQuery] = useState('');
   const handleQueryChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -516,6 +508,11 @@ const TokenSelectModal = ({
     150,
     [query]
   );
+
+  const isAddr = useMemo(() => {
+    const kw = query.trim();
+    return kw.length === 42 && kw.toLowerCase().startsWith('0x');
+  }, [query]);
 
   useEffect(() => {
     if (!open) {
@@ -578,17 +575,16 @@ const TokenSelectModal = ({
                 margin: '150px auto 0 auto',
               }}
               description={
-                <>
-                  <div className="noResult">
-                    No {columns === 2 ? 'Results' : 'Tokens'}
-                  </div>
-                  {columns === 2 && (
-                    <div className="noResultTip">
-                      Only tokens listed in Rabby by default are supported for
-                      swap
-                    </div>
+                <div className="noResult">
+                  No Match
+                  <br />
+                  {!isAddr && (
+                    <>
+                      Try to search contract address on{' '}
+                      {getChain(chainId)?.name || 'chain'}
+                    </>
                   )}
-                </>
+                </div>
               }
             />
           )}
@@ -858,6 +854,7 @@ export const TokenSelect = ({
           onConfirm={handleCurrentTokenChange}
           isLoading={isListLoading}
           columns={type === 'default' ? 3 : 2}
+          chainId={chainId}
         />
       </Wrapper>
     </>
