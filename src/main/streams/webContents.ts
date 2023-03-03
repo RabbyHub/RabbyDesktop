@@ -77,15 +77,15 @@ export function setOpenHandlerForWebContents({
     }
 
     if (isFromDapp && !isToSameOrigin) {
-      if (allowOpenTab || !shouldKeepTab) {
+      if (shouldKeepTab) {
+        webContents.loadURL(targetURL);
+      } else if (allowOpenTab) {
         safeOpenURL(targetURL, {
           sourceURL: currentUrl,
           existedDapp: targetInfo.foundDapp,
           existedMainDomainDapp: targetInfo.foundMainDomainDapp,
           _targetwin: parentTabbedWin.window,
         });
-      } else if (shouldKeepTab) {
-        webContents.loadURL(targetURL);
       }
     } else if (!isToExtension) {
       switch (details.disposition) {
