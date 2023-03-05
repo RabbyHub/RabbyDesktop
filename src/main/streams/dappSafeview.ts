@@ -21,6 +21,7 @@ import { valueToMainSubject } from './_init';
 import { getAssetPath } from '../utils/app';
 import { parseWebsiteFavicon } from '../utils/fetch';
 import { getAppProxyConf } from '../store/desktopApp';
+import { findDappsByOrigin } from '../store/dapps';
 
 function hideView(view: BrowserView, parentWin: BrowserWindow) {
   parentWin.removeBrowserView(view);
@@ -183,8 +184,13 @@ onIpcMainEvent('__internal_rpc:dapp-tabs:close-safe-view', async () => {
 onIpcMainInternalEvent('__internal_main:dev', async (payload) => {
   switch (payload.type) {
     case 'dapp-safe-view:open': {
-      safeOpenURL('https://help.uniswap.org/en', {
+      const targetOrigin = 'https://help.uniswap.org/en';
+      const findResult = findDappsByOrigin(targetOrigin);
+
+      safeOpenURL(targetOrigin, {
         sourceURL: 'https://app.uniswap.org/',
+        existedDapp: findResult.dappByOrigin,
+        existedMainDomainDapp: findResult.dappBySecondaryDomainOrigin,
       });
       break;
     }

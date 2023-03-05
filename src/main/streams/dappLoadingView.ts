@@ -8,7 +8,7 @@ import {
   onIpcMainInternalEvent,
   sendToWebContents,
 } from '../utils/ipcMainEvents';
-import { findDappByOrigin } from '../store/dapps';
+import { findDappsByOrigin } from '../store/dapps';
 import { pickMainWindowLayouts } from '../utils/browserView';
 
 const dappTopOffset =
@@ -73,7 +73,7 @@ const dispose = onIpcMainInternalEvent(
 
     switch (payload.type) {
       case 'show': {
-        const dapp = findDappByOrigin(payload.tabURL);
+        const dapp = findDappsByOrigin(payload.tabURL).dappByOrigin;
         payload.dapp = dapp;
 
         updateViewPosition(dappLoadingView, !!dapp);

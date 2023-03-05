@@ -141,19 +141,30 @@ export function getAllDapps() {
 
   const result = Object.values(dappsMap).map((dapp) => formatDapp(dapp)!);
 
-  // if (opts?.sort) {
-  //   result = result.sort((a, b) => {
-  //     const aPinned = dappStore.get('pinnedList', []).includes(a.origin);
-  //     const bPinned = dappStore.get('pinnedList', []).includes(b.origin);
-  //     if (aPinned && !bPinned) {
-  //       return -1;
-  //     }
-  //     if (!aPinned && bPinned) {
-  //       return 1;
-  //     }
-  //     return 0;
-  //   });
-  // }
+  return result;
+}
+
+export function findDappsByOrigin(
+  dappOrigin: string,
+  dapps: IDapp[] = getAllDapps()
+) {
+  const secondaryOrigin = canoicalizeDappUrl(dappOrigin).secondaryOrigin;
+
+  const result = {
+    dappByOrigin: null as null | IDapp,
+    dappBySecondaryDomainOrigin: null as null | IDapp,
+  };
+  dapps.find((dapp) => {
+    if (dapp.origin === dappOrigin) {
+      result.dappByOrigin = dapp;
+    }
+
+    if (dapp.origin === secondaryOrigin) {
+      result.dappBySecondaryDomainOrigin = dapp;
+    }
+
+    return result.dappByOrigin && result.dappBySecondaryDomainOrigin;
+  });
 
   return result;
 }
@@ -162,11 +173,6 @@ export function getProtocolDappsBindings() {
   const protocolDappsBinding = dappStore.get('protocolDappsBinding') || {};
 
   return normalizeProtocolBindingValues(protocolDappsBinding);
-}
-
-export function findDappByOrigin(url: string, dapps = getAllDapps()) {
-  const dappOrigin = canoicalizeDappUrl(url).origin;
-  return dapps.find((item) => item.origin === dappOrigin) || null;
 }
 
 function parseDappUrl(url: string, dapps = getAllDapps()) {
@@ -185,19 +191,9 @@ function parseDappUrl(url: string, dapps = getAllDapps()) {
   };
 
   if (isDapp) {
-    dapps.find((item: IDapp) => {
-      const formatted = formatDapp(item);
-
-      if (formatted?.origin && formatted.origin === origin) {
-        matches.foundDapp = formatted;
-      }
-
-      if (formatted?.origin && formatted.origin === secondaryOrigin) {
-        matches.foundMainDomainDapp = formatted;
-      }
-
-      return matches.foundDapp && matches.foundMainDomainDapp;
-    });
+    const findResult = findDappsByOrigin(origin, dapps);
+    matches.foundDapp = findResult.dappByOrigin;
+    matches.foundMainDomainDapp = findResult.dappBySecondaryDomainOrigin;
   }
 
   return {
