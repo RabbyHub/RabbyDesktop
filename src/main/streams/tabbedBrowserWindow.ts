@@ -26,7 +26,7 @@ import {
   isPopupWindowHidden,
 } from '../utils/browser';
 import { getOrPutCheckResult } from '../utils/dapps';
-import { dappStore, getAllDapps } from '../store/dapps';
+import { dappStore, findDappsByOrigin, getAllDapps } from '../store/dapps';
 import { cLog } from '../utils/log';
 
 import {
@@ -205,15 +205,17 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
   }
 
   const currentUrl = evt.sender.getURL();
-  const existedDapp = getAllDapps().find((dapp) => dapp.origin === dappOrigin);
+  const { dappByOrigin, dappBySecondaryDomainOrigin } =
+    findDappsByOrigin(dappOrigin);
 
   safeOpenURL(dappOrigin, {
     sourceURL: currentUrl,
-    existedDapp,
+    existedDapp: dappByOrigin,
+    existedMainDomainDapp: dappBySecondaryDomainOrigin,
   });
 
   return {
-    shouldMakeOpenTab: !!existedDapp,
+    shouldMakeOpenTab: !!dappByOrigin || !!dappBySecondaryDomainOrigin,
   };
 });
 

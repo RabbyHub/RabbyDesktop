@@ -8,7 +8,7 @@ import {
   dialog,
 } from 'electron';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
-import { getAllDapps } from '../store/dapps';
+import { findDappsByOrigin } from '../store/dapps';
 import { safeOpenURL } from '../streams/dappSafeview';
 import {
   rabbyxQuery,
@@ -197,9 +197,11 @@ function buildInspectKitsMenu(opts: ChromeContextMenuOptions) {
     click: () => {
       const targetURL = 'https://metamask.github.io/test-dapp/';
       const targetOrigin = canoicalizeDappUrl(targetURL).origin;
+      const findResult = findDappsByOrigin(targetOrigin);
       safeOpenURL(targetURL, {
         sourceURL: params.pageURL,
-        existedDapp: getAllDapps().find((dapp) => dapp.origin === targetOrigin),
+        existedDapp: findResult.dappByOrigin,
+        existedMainDomainDapp: findResult.dappBySecondaryDomainOrigin,
       });
     },
   });
