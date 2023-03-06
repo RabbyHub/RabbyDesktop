@@ -127,11 +127,13 @@ const TokenPriceField = styled.div`
 const TokenAmountField = styled.div`
   width: 29%;
   justify-content: flex-start;
+  position: relative;
 `;
 const TokenUsdValueField = styled.div`
   width: 17%;
   justify-content: flex-end;
   font-weight: 700;
+  position: relative;
   .price-change {
     display: block !important;
     text-align: right;
@@ -212,7 +214,7 @@ const TokenItemComp = ({
         {formatAmount(token.amount)} {ellipsisTokenSymbol(token.symbol)}
         {historyToken && Math.abs(amountChange * token.price) >= 0.01 && (
           <div
-            className={classNames('price-change', {
+            className={classNames('price-change absolute -bottom-12', {
               'is-loss': amountChange < 0,
               'is-increase': amountChange > 0,
             })}
@@ -228,7 +230,7 @@ const TokenItemComp = ({
         {`${formatUsdValue(token.usd_value || '0')}`}
         {historyToken && (
           <div
-            className={classNames('price-change', {
+            className={classNames('price-change absolute -bottom-12', {
               'is-loss': usdValueChange.value < 0,
               'is-increase': usdValueChange.value > 0,
             })}

@@ -22,6 +22,7 @@ const ExpandItem = styled.div`
     margin-right: 18px;
   }
   .hide-assets-usd-value {
+    position: relative;
     font-weight: 700;
     font-size: 13px;
     line-height: 18px;
@@ -198,10 +199,13 @@ const TokenList = ({
               {formatUsdValue(tokenHidden.hiddenUsdValue)}
               {showHistory && (
                 <div
-                  className={classNames('usd-value-change', {
-                    'is-loss': tokenHidden.expandTokensUsdValueChange < 0,
-                    'is-increase': tokenHidden.expandTokensUsdValueChange > 0,
-                  })}
+                  className={classNames(
+                    'usd-value-change absolute -bottom-12 right-0',
+                    {
+                      'is-loss': tokenHidden.expandTokensUsdValueChange < 0,
+                      'is-increase': tokenHidden.expandTokensUsdValueChange > 0,
+                    }
+                  )}
                 >
                   {`${formatNumber(
                     (tokenHidden.expandTokensUsdValueChange /
