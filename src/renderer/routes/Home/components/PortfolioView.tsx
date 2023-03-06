@@ -132,8 +132,8 @@ const PortfolioView = ({
   chainList: DisplayChainWithWhiteLogo[];
 }) => {
   const [relateDappModalOpen, setRelateDappModalOpen] = useState(false);
-  const [relateDappUrl, setRelateDappUrl] = useState('');
-  const [relateDappId, setRelateDappId] = useState('');
+  const [relateDappProtocol, setRelateDappProtocol] =
+    useState<DisplayProtocol | null>(null);
   const assetArrowLeft = useMemo(() => {
     const el: HTMLLIElement | null = document.querySelector(
       `#chain-icon-${selectChainServerId}`
@@ -154,8 +154,7 @@ const PortfolioView = ({
   }, [isLoadingProtocolList, isLoadingTokenList, tokenList, protocolList]);
 
   const handleRelateDapp = (protocol: DisplayProtocol) => {
-    setRelateDappId(protocol.id);
-    setRelateDappUrl(protocol.site_url);
+    setRelateDappProtocol(protocol);
     setRelateDappModalOpen(true);
   };
 
@@ -202,13 +201,14 @@ const PortfolioView = ({
             view={view}
             protocolHidden={protocolHidden}
           />
-          <AssociateDappModal
-            protocolId={relateDappId}
-            open={relateDappModalOpen}
-            url={relateDappUrl}
-            onCancel={() => setRelateDappModalOpen(false)}
-            onOk={() => setRelateDappModalOpen(false)}
-          />
+          {relateDappProtocol && (
+            <AssociateDappModal
+              relateDappProtocol={relateDappProtocol}
+              open={relateDappModalOpen}
+              onCancel={() => setRelateDappModalOpen(false)}
+              onOk={() => setRelateDappModalOpen(false)}
+            />
+          )}
         </div>
       </PortfolioWrapper>
     </div>

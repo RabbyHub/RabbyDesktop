@@ -1,249 +1,350 @@
-import { canoicalizeDappUrl } from '@/isomorphic/url';
-import {
-  useDapps,
-  useProtocolDappsBinding,
-} from '@/renderer/hooks/useDappsMngr';
-import { Button, message, ModalProps } from 'antd';
+import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
+import { Button, ModalProps } from 'antd';
 import classNames from 'classnames';
-import React, { useEffect, useMemo, useState } from 'react';
-
-import { DappFavicon } from '../DappFavicon';
+import React, { useMemo, useState } from 'react';
+import { useOpenDapp } from '@/renderer/utils/react-router';
+import styled from 'styled-components';
+import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
+import ModalAddDapp from '@/renderer/components/ModalAddDapp';
+import {
+  useProtocolDappsBinding,
+  useTabedDapps,
+} from '@/renderer/hooks/useDappsMngr';
+import { isDomainLikeStr } from '@/renderer/utils/url';
 import { Modal } from '../Modal/Modal';
-import ModalAddDapp from '../ModalAddDapp';
 import styles from './index.module.less';
+import { toastMessage } from '../TransparentToast';
 
-const Checkbox = ({
-  checked,
-  className,
-  onChange,
+const BindDappWrapper = styled.div`
+  padding: 32px 60px;
+  height: 500px;
+  .header {
+    color: #fff;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 24px;
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .search-result {
+    height: 240px;
+    overflow: overlay;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    color: #fff;
+    margin-top: 16px;
+    position: relative;
+  }
+  .footer {
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 16px;
+    color: #fff;
+    margin-top: 28px;
+    .url {
+      font-weight: 700;
+      text-decoration: underline;
+    }
+  }
+`;
+
+const DappItemWrapper = styled.div`
+  padding: 20px 16px;
+  display: flex;
+  align-items: center;
+  .dapp-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 12px;
+  }
+  .dapp-info {
+    overflow: hidden;
+    p {
+      margin-bottom: 2px;
+      font-weight: 700;
+      font-size: 13px;
+      line-height: 16px;
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      &:nth-last-child(1) {
+        font-weight: normal;
+        font-size: 12px;
+        line-height: 14px;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 0;
+      }
+    }
+  }
+  .open-button {
+    background: #27c193;
+    box-shadow: 0px 4px 12px rgba(48, 158, 86, 0.2);
+    border-color: #27c193;
+  }
+  .binded-tip {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 16px;
+    color: #ffffff;
+    margin-right: 12px;
+    .icon-success {
+      margin-right: 6px;
+    }
+  }
+`;
+
+const EmptyView = styled.div`
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  p {
+    margin-top: 8px;
+    margin-bottom: 0;
+    font-size: 13px;
+    line-height: 16px;
+    color: rgba(255, 255, 255, 0.5);
+  }
+`;
+
+const DappItem = ({
+  dapp,
+  onBind,
+  onOpen,
+  isBinded,
+  protocol,
 }: {
-  checked?: boolean;
-  className?: string;
-  onChange?: (v: boolean) => void;
+  dapp: {
+    id?: string;
+    alias: string;
+    origin: string;
+    faviconUrl?: string | undefined;
+    faviconBase64?: string;
+  };
+  onBind(origin: string): void;
+  onOpen(url: string): void;
+  isBinded: boolean;
+  protocol: DisplayProtocol;
 }) => {
   return (
-    <img
-      className={className}
-      onClick={() => onChange?.(!checked)}
-      src={
-        checked
-          ? 'rabby-internal://assets/icons/checkbox/checked.svg'
-          : 'rabby-internal://assets/icons/checkbox/unchecked.svg'
-      }
-    />
-  );
-};
-
-interface DappCardProps {
-  dapp: IMergedDapp;
-  checked?: boolean;
-  onSelect?: (dapp: IMergedDapp) => void;
-}
-const DappCard = ({ checked, onSelect, dapp }: DappCardProps) => {
-  return (
-    <div
-      className={classNames(styles.dapp, checked ? styles.dappActive : null)}
-      onClick={() => {
-        onSelect?.(dapp);
-      }}
-    >
-      <DappFavicon
-        className={styles.dappIcon}
-        origin={dapp.origin}
+    <DappItemWrapper>
+      <img
+        className="dapp-icon"
         src={dapp.faviconBase64 ? dapp.faviconBase64 : dapp.faviconUrl}
       />
-      <div className={styles.dappContent}>
-        <div className={styles.dappName}>{dapp.alias}</div>
-        <div className={styles.dappOrigin}>
-          {dapp.origin?.replace(/^\w+:\/\//, '')}
-        </div>
+      <div className="flex-1 dapp-info">
+        <p>{dapp.alias}</p>
+        <p>{dapp.origin}</p>
       </div>
-      <div className={styles.dappExtra}>
-        <Checkbox checked={checked} />
-      </div>
-    </div>
+      {isBinded ? (
+        <>
+          <div className="binded-tip">
+            <img
+              src="rabby-internal://assets/icons/home/success.svg"
+              className="icon-success"
+            />
+            Binded to {protocol.name}
+          </div>
+          <Button
+            type="primary"
+            className="open-button rounded"
+            onClick={() => onOpen(dapp.origin)}
+          >
+            Open
+          </Button>
+        </>
+      ) : (
+        <Button
+          type="primary"
+          className="w-[72px] rounded"
+          onClick={() => onBind(dapp.origin)}
+        >
+          Bind
+        </Button>
+      )}
+    </DappItemWrapper>
   );
 };
 
-const DappCardAdd = ({ onClick }: { onClick?: () => void }) => {
-  return (
-    <div className={classNames(styles.dapp, styles.dappAdd)} onClick={onClick}>
-      <img src="rabby-internal://assets/icons/associate-dapp/plus.svg" alt="" />
-      <div className={styles.dappContent}>Add a dapp</div>
-    </div>
-  );
-};
-
-const sortDapps = (dapps: IMergedDapp[], index: number) => {
-  const _dapps = [...dapps];
-  const dapp = dapps[index];
-  _dapps.splice(index, 1);
-  _dapps.unshift(dapp);
-  return _dapps;
-};
-
-const AssociateDapp = ({
-  protocolId,
-  url,
-  onOk,
+const BindDapp = ({
+  protocol,
+  onCancel,
 }: {
-  protocolId: string;
-  url: string;
-  onOk?: (origin: string) => void;
+  protocol: DisplayProtocol;
+  onCancel(e?: any): void;
 }) => {
-  const { dapps } = useDapps();
-  const [current, setCurrent] = useState<string | null>(null);
-  const [isShowAdd, setIsShowAdd] = useState(false);
-  const { bindingDappsToProtocol, protocolDappsBinding } =
+  const { dapps } = useTabedDapps();
+  const [kw, setKw] = useState('');
+  const [openAddDapp, setOpenAddDapp] = useState(false);
+  const [addDappUrl, setAddDappUrl] = useState<string | undefined>(undefined);
+  const { protocolDappsBinding, bindingDappsToProtocol } =
     useProtocolDappsBinding();
-  const [loading, setLoading] = useState(false);
 
-  const bindUrl = useMemo(() => {
-    // const arr = Object.values(protocolDappsBinding);
-    // const t = arr.find((item) => item.siteUrl === url);
-    return protocolDappsBinding[protocolId]?.origin || null;
-  }, [protocolDappsBinding, protocolId]);
+  const binded = useMemo(() => {
+    return protocolDappsBinding[protocol.id];
+  }, [protocolDappsBinding, protocol]);
 
-  useEffect(() => {
-    setCurrent(bindUrl);
-  }, [bindUrl]);
+  const isDomainLikeKw = useMemo(() => {
+    return isDomainLikeStr(kw);
+  }, [kw]);
 
-  const dappList = useMemo(() => {
-    try {
-      const site = canoicalizeDappUrl(url);
+  const searchResult = useMemo(() => {
+    if (!kw) return [];
+    const regexp = new RegExp(kw, 'i');
+    const arr = dapps.filter(
+      (dapp) => regexp.test(dapp.alias) || regexp.test(dapp.origin)
+    );
+    return arr;
+  }, [kw, dapps]);
 
-      // 完全匹配
-      const index = dapps.findIndex((dapp) => {
-        return dapp.origin === site.origin;
-      });
-      if (index !== -1) {
-        return sortDapps(dapps, index);
-      }
+  const shouldAdd = useMemo(() => {
+    if (isDomainLikeKw && searchResult.length <= 0) return true;
+    return false;
+  }, [isDomainLikeKw, searchResult]);
 
-      // 二级域名匹配
-      const domainIndex = dapps.findIndex((dapp) => {
-        const dappSite = canoicalizeDappUrl(dapp.origin);
-        return (
-          dappSite.secondaryDomain === site.secondaryDomain &&
-          dappSite.is2ndaryDomain
-        );
-      });
-      if (domainIndex !== -1) {
-        return sortDapps(dapps, domainIndex);
-      }
-      return dapps;
-    } catch (e) {
-      return dapps;
-    }
-  }, [url, dapps]);
+  const handleBind = async (origin: string) => {
+    await bindingDappsToProtocol(protocol.id, {
+      origin,
+      siteUrl: protocol.site_url,
+    });
+    toastMessage({
+      type: 'success',
+      content: 'Binding success',
+    });
+  };
 
-  const handleConfirm = async () => {
-    if (!current) {
-      return;
-    }
-    setLoading(true);
-    try {
-      await bindingDappsToProtocol(protocolId, {
-        origin: current,
-        siteUrl: url,
-      });
-      onOk?.(current);
-    } catch (e: any) {
-      message.error(e.message);
-    }
-    setLoading(false);
+  const openDapp = useOpenDapp();
+
+  const handleOpenDapp = (url: string) => {
+    onCancel();
+    openDapp(url);
+  };
+
+  const handleAddDapp = () => {
+    setAddDappUrl(kw);
+    setTimeout(() => {
+      setOpenAddDapp(true);
+    }, 100);
   };
 
   return (
-    <>
-      <div className={styles.associateDapp}>
-        <div className={styles.associateDappHeader}>
-          <div className={styles.associateDappTitle}>
-            Associate current protocol with your Dapp
-          </div>
-          <div className={styles.associateDappDesc}>
-            By associating the current protocol with your Dapp, you can access
-            the Dapp by clicking the protocol.
-          </div>
-        </div>
-        <div className={styles.associateDappBody}>
-          <div className={styles.dappContainer}>
-            {dappList.map((dapp) => {
-              return (
-                <DappCard
-                  dapp={dapp}
-                  key={dapp.origin}
-                  checked={dapp.origin === current}
-                  onSelect={(_dapp) => {
-                    setCurrent(_dapp.origin);
-                  }}
-                />
-              );
-            })}
-            <DappCardAdd
-              onClick={() => {
-                setIsShowAdd(true);
-              }}
+    <BindDappWrapper>
+      <div className="header">Bind Dapp for {protocol.name}</div>
+      <div className="body">
+        <RabbyInput
+          value={kw}
+          onChange={(e) => setKw(e.target.value)}
+          className={styles.input}
+          placeholder="Input the Dapp name or domain"
+          autoFocus
+          spellCheck={false}
+          suffix={
+            <img
+              className="cursor-pointer"
+              src="rabby-internal://assets/icons/add-dapp/icon-search.svg"
             />
-          </div>
-        </div>
-        <div className={styles.associateDappFooter}>
-          <Button
-            type="primary"
-            block
-            size="large"
-            className={styles.button}
-            disabled={!current}
-            loading={loading}
-            onClick={handleConfirm}
-          >
-            Confirm
-          </Button>
-        </div>
+          }
+        />
+        {(kw || searchResult.length > 0) && (
+          <>
+            <div className="search-result">
+              {searchResult.length > 0 ? (
+                searchResult.map((item) => (
+                  <DappItem
+                    dapp={item}
+                    onBind={handleBind}
+                    isBinded={binded?.origin === item.origin}
+                    onOpen={handleOpenDapp}
+                    protocol={protocol}
+                  />
+                ))
+              ) : (
+                <EmptyView>
+                  <img
+                    src="rabby-internal://assets/icons/home/no-search-result.svg"
+                    alt=""
+                  />
+                  <p>No Match</p>
+                </EmptyView>
+              )}
+            </div>
+            <div
+              className={classNames('footer', {
+                'cursor-pointer': shouldAdd,
+              })}
+              onClick={handleAddDapp}
+            >
+              {shouldAdd ? (
+                <div className="flex items-center">
+                  <div className="flex-1">
+                    Don't see the Dapp you want? Add{' '}
+                    <span className="url">{kw}</span> as new Dapp and bind
+                  </div>
+                  <img
+                    className="icon-enter"
+                    src="rabby-internal://assets/icons/home/arrow-right.svg"
+                  />
+                </div>
+              ) : (
+                "Don't see the Dapp you want? Try to enter the Dapp domain."
+              )}
+            </div>
+          </>
+        )}
       </div>
       <ModalAddDapp
-        open={isShowAdd}
-        onCancel={() => {
-          setIsShowAdd(false);
-        }}
-        onAddedDapp={(origin) => {
-          // setIsShowAdd(false);
-          // todo: fix me
-          setTimeout(() => {
-            setCurrent(origin);
-          }, 16);
-        }}
+        onCancel={() => setOpenAddDapp(false)}
+        open={openAddDapp}
+        url={addDappUrl}
+        openBtn={
+          <Button
+            className={`${styles.successBtn} w-[200px] rounded`}
+            type="primary"
+            onClick={() => setOpenAddDapp(false)}
+          >
+            Go back to bind Dapp
+          </Button>
+        }
       />
-    </>
+    </BindDappWrapper>
   );
 };
 
 export default function AssociateDappModal({
   onOk,
-  url,
-  protocolId,
+  relateDappProtocol,
   ...modalProps
 }: React.PropsWithChildren<
   ModalProps & {
-    protocolId: string;
-    url: string;
+    relateDappProtocol: DisplayProtocol;
     onOk?: (origin: string) => void;
   }
 >) {
   return (
     <Modal
-      width={1000}
+      width={620}
       centered
       {...modalProps}
       onCancel={(e) => {
         modalProps.onCancel?.(e);
       }}
       footer={null}
-      className={classNames(styles.modal, modalProps.className)}
+      className={classNames('bind-dapp-modal', modalProps.className)}
       wrapClassName={classNames(modalProps.wrapClassName)}
       destroyOnClose
     >
-      <AssociateDapp protocolId={protocolId} url={url} onOk={onOk} />
+      <BindDapp
+        protocol={relateDappProtocol}
+        onCancel={(e) => {
+          modalProps.onCancel?.(e);
+        }}
+      />
     </Modal>
   );
 }
