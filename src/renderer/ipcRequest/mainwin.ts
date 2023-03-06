@@ -29,7 +29,7 @@ export function closeTabFromInternalPage(
 
 export function openDappFromInternalPage(origin: IDapp['origin']) {
   window.rabbyDesktop.ipcRenderer.sendMessage(
-    '__internal_forward:main-window:open-dapp',
+    '__internal_forward:main-window:create-dapp-tab',
     origin
   );
 }

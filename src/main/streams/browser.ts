@@ -29,10 +29,10 @@ onIpcMainEvent(
 );
 
 onIpcMainEvent(
-  '__internal_forward:main-window:open-dapp',
+  '__internal_forward:main-window:create-dapp-tab',
   async (_, dappOrigin: string) => {
     forwardToMainWebContents(
-      '__internal_forward:main-window:open-dapp',
+      '__internal_forward:main-window:create-dapp-tab',
       dappOrigin
     );
   }

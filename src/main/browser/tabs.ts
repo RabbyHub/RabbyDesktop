@@ -431,6 +431,17 @@ export class Tabs extends EventEmitter {
     });
   }
 
+  findBySecondaryDomain(inputURL: string) {
+    const inputUrlInfo = canoicalizeDappUrl(inputURL);
+    if (!inputUrlInfo.secondaryDomain) return null;
+
+    return this.tabList.find((tab) => {
+      if (!tab.view?.webContents) return false;
+      const tabUrlInfo = canoicalizeDappUrl(tab.view?.webContents.getURL());
+      return tabUrlInfo.secondaryDomain === inputUrlInfo.secondaryDomain;
+    });
+  }
+
   findByUrlbase(url: string) {
     const { urlInfo } = canoicalizeDappUrl(url);
     if (!urlInfo?.origin) return null;

@@ -206,7 +206,7 @@ function buildInspectKitsMenu(opts: ChromeContextMenuOptions) {
         sourceURL: params.pageURL,
         existedDapp: findResult.dappByOrigin,
         existedMainDomainDapp: findResult.dappBySecondaryDomainOrigin,
-      });
+      }).then((res) => res.activeTab());
     },
   });
 

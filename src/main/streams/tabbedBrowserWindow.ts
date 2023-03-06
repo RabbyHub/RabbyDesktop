@@ -212,7 +212,7 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
     sourceURL: currentUrl,
     existedDapp: dappByOrigin,
     existedMainDomainDapp: dappBySecondaryDomainOrigin,
-  });
+  }).then((res) => res.activeTab());
 
   return {
     shouldMakeOpenTab: !!dappByOrigin || !!dappBySecondaryDomainOrigin,

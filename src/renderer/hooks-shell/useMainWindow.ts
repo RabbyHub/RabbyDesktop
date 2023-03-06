@@ -101,7 +101,7 @@ export function useForwardFromInternalPage(
 
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_forward:main-window:open-dapp',
+      '__internal_forward:main-window:create-dapp-tab',
       (targetURL) => {
         const dappOrigin = canoicalizeDappUrl(targetURL).origin;
         chrome.tabs.create({ url: targetURL, active: true });
