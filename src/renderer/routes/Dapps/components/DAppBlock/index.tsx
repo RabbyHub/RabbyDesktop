@@ -53,7 +53,7 @@ export const DAppBlock = ({
   return (
     <Dropdown
       overlayClassName="dapps-dropdown-operations"
-      getPopupContainer={() => ref.current || document.body}
+      // getPopupContainer={() => ref.current || document.body}
       trigger={['contextMenu']}
       // open
       overlay={

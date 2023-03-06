@@ -143,9 +143,17 @@ export async function fetchDynamicConfig(options?: {
   proxy?: AxiosProxyConfig;
 }) {
   const { timeout: timeoutV = 5 * 1e3, proxy } = options || {};
-  const [domain_metas = {}] = await Promise.all([
+  const [domain_metas = {}, special_main_domains = {}] = await Promise.all([
     fetchClient
       .get(`${configURLs.domain_metas}?t=${Date.now()}`, {
+        timeout: timeoutV,
+        proxy,
+      })
+      .then((res) => res.data)
+      .catch((err) => undefined), // TODO: report to sentry
+
+    fetchClient
+      .get(`https://api.rabby.io/v1/domain/share_list`, {
         timeout: timeoutV,
         proxy,
       })
@@ -155,6 +163,8 @@ export async function fetchDynamicConfig(options?: {
 
   return {
     domain_metas: (domain_metas as IAppDynamicConfig['domain_metas']) || {},
+    special_main_domains:
+      (special_main_domains as IAppDynamicConfig['special_main_domains']) || {},
   };
 }
 

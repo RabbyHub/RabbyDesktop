@@ -89,6 +89,9 @@ type IAppDynamicConfig = {
       };
     };
   };
+  special_main_domains?: {
+    ids?: string[];
+  };
 };
 
 type IAppProxyConf = {

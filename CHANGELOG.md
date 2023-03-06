@@ -1,7 +1,28 @@
 
+v0.5.3 / 2023-03-03
+===================
+
+  * fix: repeative request connect on debank.com (mobile version actually) (#211)
+  * feat: swap styles (#210)
+  * fix: modal styles (#209)
+  * feat: adjust link/redirect behaviors.
+  * fix: open new tab when secondaryDomain tab existed.
+  * feat: try to improve viewManager for tabs. (#208)
+  * fix: open url from rabbyx's approval page.
+  * feat: remove maxmize restrain
+  * fix: home height (#207)
+  * feat: recover data storage under userData on macOS. (#206)
+  * feat: use site's og/twitter info. (#205)
+  * feat: swap with no fee (#203)
+  * Feat/token search (#204)
+  * fix: curve update (#201)
+  * fix: modal styles (#200)
+  * chore: url truncate style (#202)
+
 v0.5.2 / 2023-03-01
 ===================
 
+  * Release v0.5.2
   * feat: set local data path on windows.
   * security: remove codes about clipboard changed.
   * fix: portfolio page styles (#196)

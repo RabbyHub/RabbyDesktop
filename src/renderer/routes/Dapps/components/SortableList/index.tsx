@@ -53,6 +53,7 @@ export const SortableItem = (
     opacity: isDragging ? 0.4 : undefined,
     transform: CSS.Translate.toString(transform),
     transition,
+    overflow: 'hidden',
   };
 
   return (

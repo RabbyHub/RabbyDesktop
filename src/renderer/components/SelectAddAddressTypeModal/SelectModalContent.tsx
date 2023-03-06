@@ -29,7 +29,7 @@ interface Props {
 export const SelectModalContent: React.FC<Props> = ({ onSelectType }) => {
   return (
     <div className={styles.SelectModalContent}>
-      <div className={styles.panel}>
+      <div className={clsx(styles.panel, styles.panelHD)}>
         <div className={styles.header}>
           <div className={styles.logo}>
             <img src="rabby-internal://assets/icons/add-address/device.svg" />

@@ -62,7 +62,7 @@ export function setOpenHandlerForWebContents({
       isFromDapp,
       isToExtension,
       isToSameOrigin,
-      shouldKeepTab,
+      couldKeepTab,
       allowOpenTab,
       shouldOpenExternal,
       maybeRedirectInSPA,
@@ -77,15 +77,15 @@ export function setOpenHandlerForWebContents({
     }
 
     if (isFromDapp && !isToSameOrigin) {
-      if (shouldKeepTab) {
-        webContents.loadURL(targetURL);
-      } else if (allowOpenTab) {
+      if (!couldKeepTab || allowOpenTab) {
         safeOpenURL(targetURL, {
           sourceURL: currentUrl,
           existedDapp: targetInfo.foundDapp,
           existedMainDomainDapp: targetInfo.foundMainDomainDapp,
           _targetwin: parentTabbedWin.window,
         });
+      } else {
+        webContents.loadURL(targetURL);
       }
     } else if (!isToExtension) {
       switch (details.disposition) {
@@ -149,7 +149,7 @@ export const setListeners = {
         targetInfo,
         isFromDapp,
         allowOpenTab,
-        shouldKeepTab,
+        couldKeepTab,
         shouldOpenExternal,
         isToSameOrigin,
       } = parseDappRedirect(currentUrl, targetURL, {
@@ -162,11 +162,10 @@ export const setListeners = {
         return false;
       }
 
-      // this tabs is render as app's self UI, such as topbar.
-      if (isFromDapp && !isToSameOrigin) {
-        // allow redirect in main domain
-        if (allowOpenTab || shouldKeepTab) return true;
+      // allow redirect in main domain
+      if (allowOpenTab || couldKeepTab) return true;
 
+      if (!currentUrl || (isFromDapp && !isToSameOrigin)) {
         evt.preventDefault();
         safeOpenURL(targetURL, {
           existedDapp: targetInfo.foundDapp,
@@ -176,7 +175,7 @@ export const setListeners = {
         return false;
       }
 
-      return true;
+      return !!currentUrl;
     });
   },
 
@@ -206,7 +205,7 @@ export const setListeners = {
           // actually, it's always from dapp on isMainContentsForTabbedWindow=false
           isFromDapp,
           allowOpenTab,
-          shouldKeepTab,
+          couldKeepTab,
           shouldOpenExternal,
           isToSameOrigin,
         } = parseDappRedirect(currentUrl, targetURL, {
@@ -220,7 +219,7 @@ export const setListeners = {
         }
 
         if (isFromDapp && !isToSameOrigin) {
-          if (allowOpenTab || shouldKeepTab) return true;
+          if (allowOpenTab || couldKeepTab) return true;
 
           evt.preventDefault();
           safeOpenURL(targetURL, {

@@ -34,6 +34,7 @@ const SectionStyled = styled.section`
 
       .arrow {
         margin-left: 4px;
+        font-size: 12px;
 
         &.open {
           transform: rotate(180deg);

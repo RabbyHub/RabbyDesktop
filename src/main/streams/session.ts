@@ -26,9 +26,17 @@ import {
   createRabbyxNotificationWindow,
 } from './tabbedBrowserWindow';
 import { firstEl } from '../../isomorphic/array';
-import { getRabbyExtId, getWebuiExtId } from '../utils/stream-helpers';
+import {
+  getRabbyExtId,
+  getWebuiExtId,
+  onMainWindowReady,
+} from '../utils/stream-helpers';
 import { checkOpenAction } from '../utils/tabs';
-import { getWindowFromWebContents, switchToBrowserTab } from '../utils/browser';
+import {
+  createTmpEmptyBrowser,
+  getWindowFromWebContents,
+  switchToBrowserTab,
+} from '../utils/browser';
 import { supportHmrOnDev } from '../utils/webRequest';
 import { checkProxyViaBrowserView, setSessionProxy } from '../utils/appNetwork';
 import { getAppProxyConf } from '../store/desktopApp';
@@ -331,7 +339,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
       return currentWin;
     },
 
-    createWindow: async (details) => {
+    createWindow: async (details, ctx) => {
       const inputUrl = firstEl(details.url || '');
       const tabUrl =
         inputUrl || getShellPageUrl('debug-new-tab', await getWebuiExtId());
@@ -340,6 +348,27 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
       const isNotification = isRabbyXPage(inputUrl, rabbyExtId, 'notification');
 
       if (isNotification) {
+        // TODO: check if it's rabbyx webContents
+        // const fromWc = ctx.event.sender;
+
+        const mainTabbedWin = await onMainWindowReady();
+
+        const focusedTab = mainTabbedWin?.getFocusedTab();
+
+        if (
+          !focusedTab?.view?.webContents.id ||
+          focusedTab.view.webContents.isDestroyed()
+        ) {
+          console.debug(
+            '[createWindow] try to connect but not active tab, ignore'
+          );
+
+          const { tmpWindow, asyncClose } = createTmpEmptyBrowser();
+          asyncClose();
+
+          return tmpWindow;
+        }
+
         return createRabbyxNotificationWindow({
           url: tabUrl,
           width: details.width,

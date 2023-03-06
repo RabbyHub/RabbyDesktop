@@ -144,7 +144,6 @@ export const CurveModal = ({ data, className, onClose }: CurveModalProps) => {
     <Modal
       onCancel={onClose}
       open
-      closable={false}
       width="742px"
       className="curve-modal inherit"
       footer={null}

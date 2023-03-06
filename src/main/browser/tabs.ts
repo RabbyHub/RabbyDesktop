@@ -27,6 +27,8 @@ const viewMngr = new BrowserViewManager(
   }
 );
 
+const isDarwin = process.platform === 'darwin';
+
 type ITabOptions = {
   tabs: Tabs;
   topbarStacks?: {
@@ -40,7 +42,7 @@ type ITabOptions = {
 
 const dappViewTopOffset =
   NativeAppSizes.mainWindowDappTopOffset +
-  (process.platform === 'darwin' ? 0 : NativeAppSizes.windowTitlebarHeight);
+  (isDarwin ? 0 : NativeAppSizes.windowTitlebarHeight);
 
 const DEFAULT_TOPBAR_STACKS = {
   tabs: true,
@@ -303,7 +305,16 @@ export class Tab {
 
   hide() {
     this.view!.setAutoResize({ width: false, height: false });
-    this.view!.setBounds({ x: -1000, y: 0, width: 0, height: 0 });
+    if (isDarwin) {
+      const oldBounds = this.view!.getBounds();
+      this.view!.setBounds({
+        ...oldBounds,
+        x: -1000 - oldBounds.width,
+        y: -1000 - oldBounds.height,
+      });
+    } else {
+      this.view!.setBounds({ x: -1000, y: -1000, width: 0, height: 0 });
+    }
   }
 }
 
