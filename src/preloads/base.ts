@@ -7,9 +7,9 @@ export const ipcRendererObj = {
   ) {
     ipcRenderer.send(channel, ...args);
   },
-  invoke<T extends IChannelsKey>(
+  invoke<T extends IInvokesKey>(
     channel: T,
-    ...args: ChannelMessagePayload[T]['send']
+    ...args: ChannelInvokePayload[T]['send']
   ) {
     return ipcRenderer.invoke(channel, ...args);
   },
