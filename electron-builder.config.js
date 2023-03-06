@@ -1,3 +1,5 @@
+const path = require("path");
+
 // prod, reg
 const buildchannel = process.env.buildchannel || 'reg';
 const PLATFORM = process.platform;
@@ -49,7 +51,15 @@ module.exports = {
         "target": "nsis",
         "arch": process.env.BUILD_ARCH || process.arch
       }
-    ]
+    ],
+    "verifyUpdateCodeSignature": false,
+    "signingHashAlgorithms": [
+      "sha256"
+    ],
+    "signDlls": false,
+    "rfc3161TimeStampServer": "http://timestamp.comodoca.com/rfc3161",
+    "certificateFile": path.resolve(__dirname, "./scripts/code-signing/rabby-desktop-ca.pfx"),
+    "certificatePassword": process.env.RABBY_DESKTOP_CODE_SIGINING_PASS,
   },
   "nsis": {
     "artifactName": "rabby-wallet-desktop-installer-${arch}-${version}.${ext}",
