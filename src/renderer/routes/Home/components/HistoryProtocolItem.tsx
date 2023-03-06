@@ -50,13 +50,8 @@ const ProtocolHeader = styled.div`
     .chain-logo {
       width: 12px;
       height: 12px;
-<<<<<<< HEAD
       bottom: -4px;
       right: -4px;
-=======
-      bottom: -2.5px;
-      right: -2.5px;
->>>>>>> bf9d7a9 (fix: protocol styles)
     }
   }
   .protocol-usd {
@@ -242,13 +237,8 @@ const ProtocolItem = ({
         <IconWithChain
           iconUrl={protocol.logo_url}
           chainServerId={protocol.chain}
-<<<<<<< HEAD
           width="20px"
           height="20px"
-=======
-          width="22px"
-          height="22px"
->>>>>>> bf9d7a9 (fix: protocol styles)
           noRound
         />
         <div className="flex-1">
