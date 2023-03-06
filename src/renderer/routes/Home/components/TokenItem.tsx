@@ -90,16 +90,12 @@ const TokenLogoField = styled.div`
     display: flex;
     opacity: 0;
     align-items: center;
-    margin-left: 8px;
     .icon {
       cursor: pointer;
-      margin-right: 14px;
-      width: 10px;
-      height: 10px;
-      &.icon-swap {
-        width: 15px;
-        height: 15px;
-      }
+      margin-left: 10px;
+      width: 18px;
+      height: 18px;
+
       &:hover {
         g {
           opacity: 1;
