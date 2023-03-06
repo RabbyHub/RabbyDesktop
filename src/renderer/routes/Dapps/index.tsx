@@ -74,8 +74,8 @@ export default function DApps() {
               className={style.icon}
               src="rabby-internal://assets/icons/security-check/icon-shield-gray.svg"
             />
-            Dapp Security Engine, provided by Rabby Wallet Desktop, offers
-            better security for your Dapp use.
+            Dapp Security Engine, provided by Rabby Desktop, offers better
+            security for your Dapp use.
           </div>
         </header>
         <main className={style.main}>

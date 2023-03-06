@@ -191,7 +191,7 @@ onIpcMainInternalEvent('__internal_main:app:reset-app', async () => {
     type: 'question',
     title: 'Reset Rabby',
     message:
-      'All data about Rabby Wallet would be clear. Do you confirm to reset Rabby?',
+      'All data about Rabby Desktop would be clear. Do you confirm to reset Rabby?',
     defaultId: cancleId,
     cancelId: cancleId,
     noLink: true,

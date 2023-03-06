@@ -3,7 +3,7 @@ const buildchannel = process.env.buildchannel || 'reg';
 const PLATFORM = process.platform;
 
 module.exports = {
-  "productName": "Rabby Wallet",
+  "productName": "Rabby Desktop",
   "appId": "com.debank.RabbyDesktop",
   "asar": true,
   "asarUnpack": "**\\*.{node,dll}",
