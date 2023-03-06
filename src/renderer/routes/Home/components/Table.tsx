@@ -15,6 +15,7 @@ const RowWrapper = styled.div`
   line-height: 14px;
   color: #ffffff;
   padding: 16px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   &:nth-last-child(1) {
     border: none;
   }
@@ -47,6 +48,14 @@ const ColWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  &:not(.header):nth-child(1),
+  &:not(.header):nth-last-child(1) {
+    font-size: 13px;
+    font-weight: 500;
+  }
+  &:not(.header):nth-last-child(1) {
+    font-weight: 700;
+  }
   &:nth-last-child(1) {
     justify-content: flex-end;
   }
@@ -54,11 +63,17 @@ const ColWrapper = styled.div`
 const Col = ({
   children,
   className,
+  header,
 }: {
   children: ReactNode;
   className?: string;
+  header?: boolean;
 }) => {
-  return <ColWrapper className={className}>{children}</ColWrapper>;
+  return (
+    <ColWrapper className={classNames(className, { header })}>
+      {children}
+    </ColWrapper>
+  );
 };
 Table.Col = Col;
 
@@ -66,7 +81,7 @@ const Header = ({ headers }: { headers: string[] }) => {
   return (
     <Row header>
       {headers.map((item) => (
-        <Col>{item}</Col>
+        <Col header>{item}</Col>
       ))}
     </Row>
   );

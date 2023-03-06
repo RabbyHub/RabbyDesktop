@@ -7,6 +7,7 @@ import AssociateDappModal from '@/renderer/components/AssociateDappModal';
 import TokenList from './TokenList';
 import ProtocolList from './ProtocolList';
 import { VIEW_TYPE } from '../hooks';
+import ScrollTopContext from './scrollTopContext';
 
 const PortfolioWrapper = styled.div`
   background: rgba(255, 255, 255, 0.07);
@@ -132,6 +133,7 @@ const PortfolioView = ({
   chainList: DisplayChainWithWhiteLogo[];
 }) => {
   const [relateDappModalOpen, setRelateDappModalOpen] = useState(false);
+  const [scrollTop, setScrollTop] = useState(0);
   const [relateDappProtocol, setRelateDappProtocol] =
     useState<DisplayProtocol | null>(null);
   const assetArrowLeft = useMemo(() => {
@@ -158,6 +160,11 @@ const PortfolioView = ({
     setRelateDappModalOpen(true);
   };
 
+  const handleScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+    const scroll = (e.target as HTMLDivElement).scrollTop;
+    setScrollTop(scroll);
+  };
+
   if (isEmpty) {
     return (
       <PortfolioWrapper className="empty">
@@ -171,47 +178,49 @@ const PortfolioView = ({
   }
 
   return (
-    <div className="flex-1 overflow-hidden pt-[15px]">
-      <PortfolioWrapper>
-        <img
-          src="rabby-internal://assets/icons/home/asset-arrow.svg"
-          className="icon-asset-arrow"
-          style={{
-            transform: `translateX(${assetArrowLeft}px)`,
-          }}
-        />
-        <div className="scroll-container">
-          <TokenList
-            tokenList={tokenList}
-            historyTokenMap={historyTokenMap}
-            tokenHidden={tokenHidden}
-            isLoadingTokenList={isLoadingTokenList}
-            supportHistoryChains={supportHistoryChains}
-            showHistory={view === VIEW_TYPE.CHANGE}
+    <ScrollTopContext.Provider value={scrollTop}>
+      <div className="flex-1 overflow-hidden pt-[15px]">
+        <PortfolioWrapper>
+          <img
+            src="rabby-internal://assets/icons/home/asset-arrow.svg"
+            className="icon-asset-arrow"
+            style={{
+              transform: `translateX(${assetArrowLeft}px)`,
+            }}
           />
-          <ProtocolList
-            protocolList={protocolList}
-            historyProtocolMap={historyProtocolMap}
-            protocolHistoryTokenPriceMap={protocolHistoryTokenPriceMap}
-            onRelateDapp={handleRelateDapp}
-            isLoading={isLoadingProtocolList}
-            supportHistoryChains={supportHistoryChains}
-            historyTokenDict={historyTokenDict}
-            isLoadingProtocolHistory={isLoadingProtocolHistory}
-            view={view}
-            protocolHidden={protocolHidden}
-          />
-          {relateDappProtocol && (
-            <AssociateDappModal
-              relateDappProtocol={relateDappProtocol}
-              open={relateDappModalOpen}
-              onCancel={() => setRelateDappModalOpen(false)}
-              onOk={() => setRelateDappModalOpen(false)}
+          <div className="scroll-container" onScroll={handleScroll}>
+            <TokenList
+              tokenList={tokenList}
+              historyTokenMap={historyTokenMap}
+              tokenHidden={tokenHidden}
+              isLoadingTokenList={isLoadingTokenList}
+              supportHistoryChains={supportHistoryChains}
+              showHistory={view === VIEW_TYPE.CHANGE}
             />
-          )}
-        </div>
-      </PortfolioWrapper>
-    </div>
+            <ProtocolList
+              protocolList={protocolList}
+              historyProtocolMap={historyProtocolMap}
+              protocolHistoryTokenPriceMap={protocolHistoryTokenPriceMap}
+              onRelateDapp={handleRelateDapp}
+              isLoading={isLoadingProtocolList}
+              supportHistoryChains={supportHistoryChains}
+              historyTokenDict={historyTokenDict}
+              isLoadingProtocolHistory={isLoadingProtocolHistory}
+              view={view}
+              protocolHidden={protocolHidden}
+            />
+            {relateDappProtocol && (
+              <AssociateDappModal
+                relateDappProtocol={relateDappProtocol}
+                open={relateDappModalOpen}
+                onCancel={() => setRelateDappModalOpen(false)}
+                onOk={() => setRelateDappModalOpen(false)}
+              />
+            )}
+          </div>
+        </PortfolioWrapper>
+      </div>
+    </ScrollTopContext.Provider>
   );
 };
 

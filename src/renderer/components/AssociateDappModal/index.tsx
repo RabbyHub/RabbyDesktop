@@ -10,7 +10,7 @@ import {
   useProtocolDappsBinding,
   useTabedDapps,
 } from '@/renderer/hooks/useDappsMngr';
-import { isDomainLikeStr } from '@/renderer/utils/url';
+import { isDomainLikeStr, removeProtocolFromUrl } from '@/renderer/utils/url';
 import { Modal } from '../Modal/Modal';
 import styles from './index.module.less';
 import { toastMessage } from '../TransparentToast';
@@ -140,7 +140,7 @@ const DappItem = ({
       />
       <div className="flex-1 dapp-info">
         <p>{dapp.alias}</p>
-        <p>{dapp.origin}</p>
+        <p>{removeProtocolFromUrl(dapp.origin)}</p>
       </div>
       {isBinded ? (
         <>
@@ -196,11 +196,15 @@ const BindDapp = ({
 
   const searchResult = useMemo(() => {
     if (!kw) return [];
-    const regexp = new RegExp(kw, 'i');
-    const arr = dapps.filter(
-      (dapp) => regexp.test(dapp.alias) || regexp.test(dapp.origin)
-    );
-    return arr;
+    try {
+      const regexp = new RegExp(encodeURIComponent(kw), 'i');
+      const arr = dapps.filter(
+        (dapp) => regexp.test(dapp.alias) || regexp.test(dapp.origin)
+      );
+      return arr;
+    } catch (e) {
+      return [];
+    }
   }, [kw, dapps]);
 
   const shouldAdd = useMemo(() => {
@@ -227,10 +231,15 @@ const BindDapp = ({
   };
 
   const handleAddDapp = () => {
+    if (!shouldAdd) return;
     setAddDappUrl(kw);
     setTimeout(() => {
       setOpenAddDapp(true);
     }, 100);
+  };
+
+  const handleBack = () => {
+    setOpenAddDapp(false);
   };
 
   return (
@@ -262,6 +271,7 @@ const BindDapp = ({
                     isBinded={binded?.origin === item.origin}
                     onOpen={handleOpenDapp}
                     protocol={protocol}
+                    key={item.origin}
                   />
                 ))
               ) : (
@@ -306,7 +316,7 @@ const BindDapp = ({
           <Button
             className={`${styles.successBtn} w-[200px] rounded`}
             type="primary"
-            onClick={() => setOpenAddDapp(false)}
+            onClick={handleBack}
           >
             Go back to bind Dapp
           </Button>

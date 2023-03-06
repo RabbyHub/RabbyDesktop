@@ -134,6 +134,7 @@ const TokenUsdValueField = styled.div`
   justify-content: flex-end;
   font-weight: 700;
   position: relative;
+  font-size: 15px;
   .price-change {
     display: block !important;
     text-align: right;
