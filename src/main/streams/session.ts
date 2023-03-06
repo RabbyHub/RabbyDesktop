@@ -348,27 +348,6 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
       const isNotification = isRabbyXPage(inputUrl, rabbyExtId, 'notification');
 
       if (isNotification) {
-        // TODO: check if it's rabbyx webContents
-        // const fromWc = ctx.event.sender;
-
-        const mainTabbedWin = await onMainWindowReady();
-
-        const focusedTab = mainTabbedWin?.getFocusedTab();
-
-        if (
-          !focusedTab?.view?.webContents.id ||
-          focusedTab.view.webContents.isDestroyed()
-        ) {
-          console.debug(
-            '[createWindow] try to connect but not active tab, ignore'
-          );
-
-          const { tmpWindow, asyncClose } = createTmpEmptyBrowser();
-          asyncClose();
-
-          return tmpWindow;
-        }
-
         return createRabbyxNotificationWindow({
           url: tabUrl,
           width: details.width,

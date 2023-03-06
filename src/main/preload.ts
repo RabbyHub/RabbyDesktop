@@ -12,6 +12,7 @@ import {
 import { ipcRendererObj, rendererHelpers } from '../preloads/base';
 
 import { setupClass } from '../preloads/setup-class';
+import { setupDapp } from '../preloads/setup-dapp';
 
 if (
   window.location.protocol === 'chrome-extension:' &&
@@ -51,3 +52,5 @@ if (IS_BUILTIN_WEBVIEW && !window.rabbyDesktop) {
 if (IS_BUILTIN_WEBVIEW) {
   setupClass();
 }
+
+setupDapp();

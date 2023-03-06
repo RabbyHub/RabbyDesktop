@@ -5,6 +5,8 @@ import { createPopupWindow } from '../utils/browser';
 import { safeCapturePage } from '../utils/dapps';
 import { parseWebsiteFavicon } from '../utils/fetch';
 import { handleIpcMainInvoke } from '../utils/ipcMainEvents';
+import { onMainWindowReady } from '../utils/stream-helpers';
+import { getTabbedWindowFromWebContents } from './tabbedBrowserWindow';
 
 handleIpcMainInvoke('parse-favicon', async (_, targetURL) => {
   const result = {
@@ -42,3 +44,28 @@ handleIpcMainInvoke('preview-dapp', async (_, targetURL) => {
     previewImg: result.previewImg,
   };
 });
+
+handleIpcMainInvoke(
+  '__outer_rpc:check-if-requestable',
+  async (evt, reqData) => {
+    const webContents = evt.sender;
+    const tabbedWin = getTabbedWindowFromWebContents(webContents);
+    const mainTabbedWin = await onMainWindowReady();
+
+    if (tabbedWin !== mainTabbedWin) {
+      return {
+        result: false,
+      };
+    }
+
+    if (
+      !mainTabbedWin.tabs.selected ||
+      mainTabbedWin.tabs.selected.view?.webContents?.id !== webContents.id
+    )
+      return { result: false };
+
+    return {
+      result: true,
+    };
+  }
+);
