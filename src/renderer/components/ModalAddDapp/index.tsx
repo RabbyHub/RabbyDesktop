@@ -9,6 +9,7 @@ import { useRequest, useSetState } from 'ahooks';
 import classNames from 'classnames';
 import { useDapps } from 'renderer/hooks/useDappsMngr';
 import { debounce } from 'lodash';
+import { useGetSpecialDomain } from '@/renderer/hooks-ipc/useAppDynamicConfig';
 import RabbyInput from '../AntdOverwrite/Input';
 import { Modal, Props as ModalProps } from '../Modal/Modal';
 import styles from './index.module.less';
@@ -107,6 +108,7 @@ const validateInput = (input: string, onReplace?: (v: string) => void) => {
 };
 
 const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
+  const getSpecialDomain = useGetSpecialDomain();
   const [state, setState] = useSetState<{
     dappInfo?: IDappsDetectResult['data'];
     validateStatus?: 'error' | 'success';
@@ -116,8 +118,16 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
   const { detectDapps } = useDapps();
   const { runAsync, loading, cancel } = useRequest(
     async (url: string) => {
+      const specialDomain = getSpecialDomain(url);
+      if (specialDomain) {
+        return {
+          validateRes: {
+            validateStatus: 'error' as const,
+            help: `The domain name of "${specialDomain}" is not supported for now`,
+          },
+        };
+      }
       const validateRes = validateInput(url, onReplace);
-      console.log('validateRes', validateRes, url);
       if (validateRes) {
         return {
           validateRes,
@@ -353,7 +363,7 @@ export function AddDapp({
           state?.validateStatus !== 'error' && state?.help && styles.formHasHelp
         )}
         onFinish={handleCheck}
-        // onFieldsChange={handleFormChange}
+        onFieldsChange={handleCheckDebounce}
       >
         <Form.Item
           name="url"
@@ -366,7 +376,6 @@ export function AddDapp({
             placeholder="Input the Dapp domain name. e.g. debank.com"
             autoFocus
             spellCheck={false}
-            onChange={handleCheckDebounce}
             suffix={
               <span className={styles.inputSuffix}>
                 {loading ? (
