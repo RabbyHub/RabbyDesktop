@@ -49,10 +49,10 @@ const ProtocolHeader = styled.div`
   }
   .token-with-chain {
     .chain-logo {
-      width: 8px;
-      height: 8px;
-      bottom: -2.5px;
-      right: -2.5px;
+      width: 12px;
+      height: 12px;
+      bottom: -4px;
+      right: -4px;
     }
   }
   .protocol-usd {
@@ -236,8 +236,8 @@ const ProtocolItem = ({
         <IconWithChain
           iconUrl={protocol.logo_url}
           chainServerId={protocol.chain}
-          width="14px"
-          height="14px"
+          width="20px"
+          height="20px"
           noRound
         />
         <div className="flex-1">

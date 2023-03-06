@@ -1,12 +1,17 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useEffect, useState } from 'react';
 import classNames from 'classnames';
 import styled from 'styled-components';
-import { Tooltip } from 'antd';
+import { Tooltip, Popover } from 'antd';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import { IconWithChain } from '@/renderer/components/TokenWithChain';
-import { useProtocolDappsBinding } from '@/renderer/hooks/useDappsMngr';
+import {
+  useProtocolDappsBinding,
+  useTabedDapps,
+} from '@/renderer/hooks/useDappsMngr';
+import IconRcMore from '@/../assets/icons/home/more.svg?rc';
 import { useOpenDapp } from '@/renderer/utils/react-router';
 import { formatUsdValue } from '@/renderer/utils/number';
+import { isSameOrigin, isSameDomain } from '@/renderer/utils/url';
 import * as Template from '../templates';
 
 const TemplateDict = {
@@ -64,20 +69,12 @@ const ProtocolHeader = styled.div`
   padding-left: 22px;
   padding-right: 22px;
   align-items: flex-end;
-  .protocol-name {
-    margin-left: 8px;
-    font-weight: 700;
-    font-size: 12px;
-    line-height: 14px;
-    color: #fff;
-    text-transform: uppercase;
-  }
   .token-with-chain {
     .chain-logo {
-      width: 8px;
-      height: 8px;
-      bottom: -2.5px;
-      right: -2.5px;
+      width: 12px;
+      height: 12px;
+      bottom: -4px;
+      right: -4px;
     }
   }
   .protocol-usd {
@@ -88,56 +85,76 @@ const ProtocolHeader = styled.div`
     color: #ffffff;
   }
   .protocol-info {
-    display: flex;
+    display: inline-flex;
     align-items: center;
+    margin-left: 12px;
+    position: relative;
+    cursor: pointer;
+    .protocol-name {
+      font-weight: 700;
+      font-size: 15px;
+      line-height: 18px;
+      color: #fff;
+      text-transform: uppercase;
+    }
     .icon-relate {
       cursor: pointer;
-      margin-left: 8px;
-      width: 14px;
-      display: none;
+      margin-left: 6px;
+      width: 12px;
     }
     .protocol-bind {
-      display: none;
-      width: 14px;
+      display: flex;
       align-items: center;
       .protocol-dapp {
         white-space: nowrap;
-        margin-left: 12px;
+        margin-left: 6px;
         font-weight: 400;
         font-size: 12px;
         line-height: 14px;
         color: rgba(255, 255, 255, 0.5);
       }
-      .icon-edit {
-        cursor: pointer;
-        margin-left: 2px;
-      }
-      .icon-relate {
-        margin-left: 3px;
-      }
+    }
+    &::after {
+      content: '';
+      height: 1px;
+      width: 100%;
+      position: absolute;
+      left: 0;
+      bottom: -2px;
+      background-color: rgba(255, 255, 255, 0.5);
     }
     &.has-bind {
       .protocol-name {
-        cursor: pointer;
-        &:hover {
-          color: #8697ff;
-          text-decoration: underline;
-        }
+        color: #8697ff;
+      }
+      .protocol-dapp {
+        color: #8697ff;
+      }
+      &::after {
+        background-color: #8697ff;
       }
     }
-    &:hover {
-      .icon-relate {
-        display: block;
-      }
-      .protocol-bind {
-        display: flex;
-      }
-    }
+  }
+  .icon-edit {
+    cursor: pointer;
+    margin-left: 8px;
   }
 `;
 
 const ProtocolWrapper = styled.div`
   margin-bottom: 28px;
+`;
+
+const RemoveBinding = styled.div`
+  display: flex;
+  cursor: pointer;
+  color: #fff;
+  font-size: 14px;
+  line-height: 17px;
+  align-items: center;
+  .icon-unbind {
+    margin-right: 8px;
+  }
 `;
 
 const DefaultProtocolItem = ({
@@ -160,8 +177,10 @@ const DefaultProtocolItem = ({
     _arr.push(v);
     typesMap.set(mapKey, _arr);
   });
-
-  const { protocolDappsBinding } = useProtocolDappsBinding();
+  const { dapps } = useTabedDapps();
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const { protocolDappsBinding, bindingDappsToProtocol } =
+    useProtocolDappsBinding();
   const openDapp = useOpenDapp();
 
   const { hasBinded, bindUrl } = useMemo(() => {
@@ -194,52 +213,84 @@ const DefaultProtocolItem = ({
     if (bindUrl) openDapp(bindUrl);
   }, [bindUrl, openDapp]);
 
+  useEffect(() => {
+    const siteUrl = protocol.site_url;
+    const sameOrigin = dapps.find((dapp) =>
+      isSameOrigin(dapp.origin, protocol.site_url)
+    );
+    const sameDomain = dapps.find((dapp) =>
+      isSameDomain(dapp.origin, protocol.site_url)
+    );
+    if (protocolDappsBinding[protocol.id]) return;
+    if (sameOrigin || sameDomain) {
+      const target = sameOrigin || sameDomain;
+      bindingDappsToProtocol(protocol.id, {
+        origin: target!.origin,
+        siteUrl,
+      });
+    }
+  }, [dapps, protocol, bindingDappsToProtocol, protocolDappsBinding]);
+
+  const handleClickEditBind = () => {
+    setPopoverOpen(false);
+    onClickRelate(protocol);
+  };
+
   return (
     <ProtocolWrapper>
       <ProtocolHeader>
         <IconWithChain
           iconUrl={protocol.logo_url}
           chainServerId={protocol.chain}
-          width="14px"
-          height="14px"
+          width="20px"
+          height="20px"
           noRound
         />
-        <div className="flex-1">
+        <div className="flex flex-1 items-center">
           <div
             className={classNames('protocol-info', {
               'has-bind': hasBinded,
             })}
+            onClick={() =>
+              hasBinded ? handleClickProtocolName() : onClickRelate(protocol)
+            }
           >
-            <span className="protocol-name" onClick={handleClickProtocolName}>
-              {protocol.name}
-            </span>
+            <span className="protocol-name">{protocol.name}</span>
             {!hasBinded && (
               <img
                 src="rabby-internal://assets/icons/home/dapp-relate.svg"
                 className="icon-relate"
-                onClick={() => onClickRelate(protocol)}
               />
             )}
             {hasBinded && (
               <div className="protocol-bind">
-                <span className="protocol-dapp">{bindUrl}</span>
-                {protocolDappsBinding[protocol.id] ? (
-                  <img
-                    src="rabby-internal://assets/icons/home/bind-edit.svg"
-                    alt=""
-                    className="icon-edit"
-                    onClick={() => onClickRelate(protocol)}
-                  />
-                ) : (
-                  <img
-                    src="rabby-internal://assets/icons/home/dapp-relate.svg"
-                    className="icon-relate"
-                    onClick={() => onClickRelate(protocol)}
-                  />
-                )}
+                <span className="protocol-dapp">({bindUrl})</span>
               </div>
             )}
           </div>
+          {hasBinded && (
+            <Popover
+              trigger="click"
+              content={
+                <RemoveBinding onClick={handleClickEditBind}>
+                  <img
+                    className="icon-unbind"
+                    src="rabby-internal://assets/icons/home/bind-edit.svg"
+                  />
+                  Edit binded Dapp
+                </RemoveBinding>
+              }
+              placement="bottomLeft"
+              showArrow={false}
+              overlayClassName="remove-binding-popover"
+              open={popoverOpen}
+            >
+              <IconRcMore
+                className="icon-edit"
+                onClick={() => setPopoverOpen(true)}
+              />
+            </Popover>
+          )}
         </div>
         <span className="protocol-usd">
           {formatUsdValue(protocol.usd_value)}
