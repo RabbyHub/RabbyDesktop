@@ -7,7 +7,7 @@ import { ReceiveModal } from '@/renderer/components/ReceiveModal';
 import { useCallback, useState } from 'react';
 import { getChain } from '@/renderer/utils';
 import TokenItemComp, { LoadingTokenItem } from './TokenItem';
-//
+
 const ExpandItem = styled.div`
   display: flex;
   font-weight: 400;
