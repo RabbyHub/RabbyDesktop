@@ -2,6 +2,7 @@ import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import { Button, ModalProps } from 'antd';
 import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
+import { useOpenDapp } from '@/renderer/utils/react-router';
 import styled from 'styled-components';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import {
@@ -11,6 +12,7 @@ import {
 import { isDomainLikeStr } from '@/renderer/utils/url';
 import { Modal } from '../Modal/Modal';
 import styles from './index.module.less';
+import { toastMessage } from '../TransparentToast';
 
 const BindDappWrapper = styled.div`
   padding: 32px 60px;
@@ -40,6 +42,10 @@ const BindDappWrapper = styled.div`
     line-height: 16px;
     color: #fff;
     margin-top: 28px;
+    .url {
+      font-weight: 700;
+      text-decoration: underline;
+    }
   }
 `;
 
@@ -72,6 +78,23 @@ const DappItemWrapper = styled.div`
       }
     }
   }
+  .open-button {
+    background: #27c193;
+    box-shadow: 0px 4px 12px rgba(48, 158, 86, 0.2);
+    border-color: #27c193;
+  }
+  .binded-tip {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 16px;
+    color: #ffffff;
+    margin-right: 12px;
+    .icon-success {
+      margin-right: 6px;
+    }
+  }
 `;
 
 const EmptyView = styled.div`
@@ -92,6 +115,9 @@ const EmptyView = styled.div`
 const DappItem = ({
   dapp,
   onBind,
+  onOpen,
+  isBinded,
+  protocol,
 }: {
   dapp: {
     id?: string;
@@ -101,6 +127,9 @@ const DappItem = ({
     faviconBase64?: string;
   };
   onBind(origin: string): void;
+  onOpen(url: string): void;
+  isBinded: boolean;
+  protocol: DisplayProtocol;
 }) => {
   return (
     <DappItemWrapper>
@@ -112,18 +141,51 @@ const DappItem = ({
         <p>{dapp.alias}</p>
         <p>{dapp.origin}</p>
       </div>
-      <Button type="primary" onClick={() => onBind(dapp.origin)}>
-        Bind
-      </Button>
+      {isBinded ? (
+        <>
+          <div className="binded-tip">
+            <img
+              src="rabby-internal://assets/icons/home/success.svg"
+              className="icon-success"
+            />
+            Binded to {protocol.name}
+          </div>
+          <Button
+            type="primary"
+            className="open-button rounded"
+            onClick={() => onOpen(dapp.origin)}
+          >
+            Open
+          </Button>
+        </>
+      ) : (
+        <Button
+          type="primary"
+          className="w-[72px] rounded"
+          onClick={() => onBind(dapp.origin)}
+        >
+          Bind
+        </Button>
+      )}
     </DappItemWrapper>
   );
 };
 
-const BindDapp = ({ protocol }: { protocol: DisplayProtocol }) => {
+const BindDapp = ({
+  protocol,
+  onCancel,
+}: {
+  protocol: DisplayProtocol;
+  onCancel(e?: any): void;
+}) => {
   const { dapps } = useTabedDapps();
   const [kw, setKw] = useState('');
   const { protocolDappsBinding, bindingDappsToProtocol } =
     useProtocolDappsBinding();
+
+  const binded = useMemo(() => {
+    return protocolDappsBinding[protocol.id];
+  }, [protocolDappsBinding, protocol]);
 
   const isDomainLikeKw = useMemo(() => {
     return isDomainLikeStr(kw);
@@ -138,11 +200,26 @@ const BindDapp = ({ protocol }: { protocol: DisplayProtocol }) => {
     return arr;
   }, [kw, dapps]);
 
-  const handleBind = (origin: string) => {
-    bindingDappsToProtocol(protocol.id, {
+  const shouldAdd = useMemo(() => {
+    if (isDomainLikeKw && searchResult.length <= 0) return true;
+    return false;
+  }, [isDomainLikeKw, searchResult]);
+
+  const handleBind = async (origin: string) => {
+    await bindingDappsToProtocol(protocol.id, {
       origin,
       siteUrl: protocol.site_url,
     });
+    toastMessage({
+      type: 'success',
+      content: 'Binding success',
+    });
+  };
+
+  const openDapp = useOpenDapp();
+  const handleOpenDapp = (url: string) => {
+    onCancel();
+    openDapp(url);
   };
 
   return (
@@ -168,7 +245,13 @@ const BindDapp = ({ protocol }: { protocol: DisplayProtocol }) => {
             <div className="search-result">
               {searchResult.length > 0 ? (
                 searchResult.map((item) => (
-                  <DappItem dapp={item} onBind={handleBind} />
+                  <DappItem
+                    dapp={item}
+                    onBind={handleBind}
+                    isBinded={binded?.origin === item.origin}
+                    onOpen={handleOpenDapp}
+                    protocol={protocol}
+                  />
                 ))
               ) : (
                 <EmptyView>
@@ -180,8 +263,25 @@ const BindDapp = ({ protocol }: { protocol: DisplayProtocol }) => {
                 </EmptyView>
               )}
             </div>
-            <div className="footer">
-              Don't see the Dapp you want? Try to enter the Dapp domain.
+            <div
+              className={classNames('footer', {
+                'cursor-pointer': shouldAdd,
+              })}
+            >
+              {shouldAdd ? (
+                <div className="flex items-center">
+                  <div className="flex-1">
+                    Don't see the Dapp you want? Add{' '}
+                    <span className="url">{kw}</span> as new Dapp and bind
+                  </div>
+                  <img
+                    className="icon-enter"
+                    src="rabby-internal://assets/icons/home/arrow-right.svg"
+                  />
+                </div>
+              ) : (
+                "Don't see the Dapp you want? Try to enter the Dapp domain."
+              )}
             </div>
           </>
         )}
@@ -213,7 +313,12 @@ export default function AssociateDappModal({
       wrapClassName={classNames(modalProps.wrapClassName)}
       destroyOnClose
     >
-      <BindDapp protocol={relateDappProtocol} />
+      <BindDapp
+        protocol={relateDappProtocol}
+        onCancel={(e) => {
+          modalProps.onCancel?.(e);
+        }}
+      />
     </Modal>
   );
 }

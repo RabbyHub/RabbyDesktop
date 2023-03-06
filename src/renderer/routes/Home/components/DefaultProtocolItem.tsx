@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useEffect } from 'react';
+import { useMemo, useCallback, useEffect, useState } from 'react';
 import classNames from 'classnames';
 import styled from 'styled-components';
 import { Tooltip, Popover } from 'antd';
@@ -178,6 +178,7 @@ const DefaultProtocolItem = ({
     typesMap.set(mapKey, _arr);
   });
   const { dapps } = useTabedDapps();
+  const [popoverOpen, setPopoverOpen] = useState(false);
   const { protocolDappsBinding, bindingDappsToProtocol } =
     useProtocolDappsBinding();
   const openDapp = useOpenDapp();
@@ -230,6 +231,11 @@ const DefaultProtocolItem = ({
     }
   }, [dapps, protocol, bindingDappsToProtocol, protocolDappsBinding]);
 
+  const handleClickEditBind = () => {
+    setPopoverOpen(false);
+    onClickRelate(protocol);
+  };
+
   return (
     <ProtocolWrapper>
       <ProtocolHeader>
@@ -266,19 +272,23 @@ const DefaultProtocolItem = ({
             <Popover
               trigger="click"
               content={
-                <RemoveBinding>
+                <RemoveBinding onClick={handleClickEditBind}>
                   <img
                     className="icon-unbind"
-                    src="rabby-internal://assets/icons/home/unbind.svg"
+                    src="rabby-internal://assets/icons/home/bind-edit.svg"
                   />
-                  Remove binding
+                  Edit binded Dapp
                 </RemoveBinding>
               }
               placement="bottomLeft"
               showArrow={false}
               overlayClassName="remove-binding-popover"
+              open={popoverOpen}
             >
-              <IconRcMore className="icon-edit" />
+              <IconRcMore
+                className="icon-edit"
+                onClick={() => setPopoverOpen(true)}
+              />
             </Popover>
           )}
         </div>
