@@ -1,6 +1,6 @@
 import { useMemo, useCallback } from 'react';
 import styled from 'styled-components';
-import { Skeleton } from 'antd';
+import { Skeleton, Tooltip } from 'antd';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import classNames from 'classnames';
 import {
@@ -199,14 +199,20 @@ const TokenItemComp = ({
           {ellipsisTokenSymbol(token.symbol)}
         </span>
         <div className="token-actions">
-          <IconSwap className="icon icon-swap" onClick={handleClickSwap} />
-          <IconSend className="icon icon-send" onClick={handleClickSend} />
-          <IconReceive
-            className="icon icon-receive"
-            onClick={() => {
-              onReceiveClick?.(token);
-            }}
-          />
+          <Tooltip title="swap">
+            <IconSwap className="icon icon-swap" onClick={handleClickSwap} />
+          </Tooltip>
+          <Tooltip title="send">
+            <IconSend className="icon icon-send" onClick={handleClickSend} />
+          </Tooltip>
+          <Tooltip title="receive">
+            <IconReceive
+              className="icon icon-receive"
+              onClick={() => {
+                onReceiveClick?.(token);
+              }}
+            />
+          </Tooltip>
         </div>
       </TokenLogoField>
       <TokenPriceField>{`$${formatPrice(token.price)}`}</TokenPriceField>
