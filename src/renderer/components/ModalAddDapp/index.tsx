@@ -345,7 +345,7 @@ export function AddDapp({
     state.validateStatus === 'error' && state.help && !loading;
 
   useEffect(() => {
-    const url = canoicalizeDappUrl(initUrl || addUrl)?.hostname;
+    const url = (initUrl || addUrl || '').replace(/^\w+:\/\//, '');
     form.setFieldsValue({ url });
     if (url) {
       check(url);
