@@ -1,7 +1,7 @@
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import { Button, ModalProps } from 'antd';
 import classNames from 'classnames';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useOpenDapp } from '@/renderer/utils/react-router';
 import styled from 'styled-components';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
@@ -304,7 +304,7 @@ const BindDapp = ({
         url={addDappUrl}
         openBtn={
           <Button
-            className="w-[200px] rounded"
+            className={`${styles.successBtn} w-[200px] rounded`}
             type="primary"
             onClick={() => setOpenAddDapp(false)}
           >
