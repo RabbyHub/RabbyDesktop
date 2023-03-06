@@ -238,6 +238,7 @@ export function canoicalizeDappUrl(url: string) {
     isDapp,
     origin,
     hostname,
+    fullDomain: urlInfo?.host || '',
     ...domainInfo,
   };
 }

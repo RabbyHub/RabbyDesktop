@@ -76,6 +76,7 @@ export async function checkUrlViaBrowserView(
         valid: true;
         // some website would redirec to another origin, such as https://binance.com -> https://www.binance.com
         finalUrl: string;
+        isRedirected?: boolean;
       }
     | {
         valid: false;
@@ -90,9 +91,18 @@ export async function checkUrlViaBrowserView(
     opts?.onPageFaviconUpdated?.(favicons);
   });
 
+  const successResult: Result = {
+    valid: true,
+    finalUrl: '',
+    isRedirected: false,
+  };
+  view.webContents.on('did-redirect-navigation', () => {
+    successResult.isRedirected = true;
+  });
+
   view.webContents.on('did-finish-load', () => {
     checkResult.next({
-      valid: true,
+      ...successResult,
       finalUrl: view.webContents.getURL(),
     });
     checkResult.complete();
@@ -100,7 +110,7 @@ export async function checkUrlViaBrowserView(
 
   view.webContents.on('dom-ready', () => {
     checkResult.next({
-      valid: true,
+      ...successResult,
       finalUrl: view.webContents.getURL(),
     });
     checkResult.complete();
