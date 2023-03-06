@@ -1,6 +1,6 @@
 import { useMemo, useCallback } from 'react';
 import styled from 'styled-components';
-import { Skeleton } from 'antd';
+import { Skeleton, Tooltip } from 'antd';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import classNames from 'classnames';
 import {
@@ -127,11 +127,13 @@ const TokenPriceField = styled.div`
 const TokenAmountField = styled.div`
   width: 29%;
   justify-content: flex-start;
+  position: relative;
 `;
 const TokenUsdValueField = styled.div`
   width: 17%;
   justify-content: flex-end;
   font-weight: 700;
+  position: relative;
   .price-change {
     display: block !important;
     text-align: right;
@@ -197,14 +199,20 @@ const TokenItemComp = ({
           {ellipsisTokenSymbol(token.symbol)}
         </span>
         <div className="token-actions">
-          <IconSwap className="icon icon-swap" onClick={handleClickSwap} />
-          <IconSend className="icon icon-send" onClick={handleClickSend} />
-          <IconReceive
-            className="icon icon-receive"
-            onClick={() => {
-              onReceiveClick?.(token);
-            }}
-          />
+          <Tooltip title="swap">
+            <IconSwap className="icon icon-swap" onClick={handleClickSwap} />
+          </Tooltip>
+          <Tooltip title="send">
+            <IconSend className="icon icon-send" onClick={handleClickSend} />
+          </Tooltip>
+          <Tooltip title="receive">
+            <IconReceive
+              className="icon icon-receive"
+              onClick={() => {
+                onReceiveClick?.(token);
+              }}
+            />
+          </Tooltip>
         </div>
       </TokenLogoField>
       <TokenPriceField>{`$${formatPrice(token.price)}`}</TokenPriceField>
@@ -212,7 +220,7 @@ const TokenItemComp = ({
         {formatAmount(token.amount)} {ellipsisTokenSymbol(token.symbol)}
         {historyToken && Math.abs(amountChange * token.price) >= 0.01 && (
           <div
-            className={classNames('price-change', {
+            className={classNames('price-change absolute -bottom-12', {
               'is-loss': amountChange < 0,
               'is-increase': amountChange > 0,
             })}
@@ -228,7 +236,7 @@ const TokenItemComp = ({
         {`${formatUsdValue(token.usd_value || '0')}`}
         {historyToken && (
           <div
-            className={classNames('price-change', {
+            className={classNames('price-change absolute -bottom-12', {
               'is-loss': usdValueChange.value < 0,
               'is-increase': usdValueChange.value > 0,
             })}

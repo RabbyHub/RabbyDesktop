@@ -55,7 +55,7 @@ const NameAndAddress = ({
           <>
             ({shortAddress}{' '}
             <IconCopy
-              className={clsx('ml-4 cursor-pointer', copyIconClass)}
+              className={clsx('ml-4 cursor-pointer opacity-40', copyIconClass)}
               onClick={() => {
                 copyAddress(address);
               }}
@@ -66,7 +66,7 @@ const NameAndAddress = ({
           <>
             {shortAddress}{' '}
             <IconCopy
-              className={clsx('ml-4 cursor-pointer', copyIconClass)}
+              className={clsx('ml-4 cursor-pointer opacity-40', copyIconClass)}
               onClick={() => {
                 copyAddress(address);
               }}

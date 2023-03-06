@@ -36,14 +36,13 @@ const ProtocolItemWrapper = styled.div`
 const ProtocolHeader = styled.div`
   display: flex;
   margin-bottom: 14px;
-  padding-left: 22px;
-  padding-right: 22px;
-  align-items: flex-start;
+  padding: 0 23px;
+  align-items: center;
   .protocol-name {
     margin-left: 8px;
     font-weight: 700;
-    font-size: 12px;
-    line-height: 14px;
+    font-size: 15px;
+    line-height: 1;
     color: #fff;
     text-transform: uppercase;
   }
@@ -56,11 +55,13 @@ const ProtocolHeader = styled.div`
     }
   }
   .protocol-usd {
+    min-width: 20%;
     font-weight: 700;
     font-size: 15px;
     line-height: 18px;
     text-align: right;
     color: #ffffff;
+    position: relative;
   }
   .protocol-info {
     display: flex;
@@ -281,7 +282,7 @@ const ProtocolItem = ({
           {formatUsdValue(protocol.usd_value)}
           {historyProtocolUsdValue && (
             <UsdValueChangeWrapper
-              className={classNames('price-change', {
+              className={classNames('price-change absolute -bottom-12', {
                 'is-loss': historyProtocolUsdValue.historyUsdValueChange < 0,
                 'is-increase':
                   historyProtocolUsdValue.historyUsdValueChange > 0,

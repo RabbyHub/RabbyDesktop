@@ -311,13 +311,14 @@ export function getTokens(
 ) {
   const tokenStr = tokens
     .filter((item) => !!item)
-    .map((token) => token.symbol)
+    .map((token) => ellipsisTokenSymbol(token.symbol))
     .join(separator);
-  const icon = <TokensIcons icons={tokens.map((v) => v?.logo_url)} />;
+  const icon = (
+    <TokensIcons tokens={tokenStr} icons={tokens.map((v) => v?.logo_url)} />
+  );
   return (
-    <div className="flex items-center flex-wrap">
+    <div className="flex items-center flex-wrap mr-2">
       {icon}
-      <div>{tokenStr}</div>
       {isDebt && <DebtTag>Debt</DebtTag>}
     </div>
   );
