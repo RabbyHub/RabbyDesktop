@@ -1,26 +1,23 @@
 import { LoadingOutlined } from '@ant-design/icons';
-import { Button, Form, InputRef } from 'antd';
-import React, {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { Form } from 'antd';
+import React, { ReactNode, useEffect } from 'react';
 
 import { canoicalizeDappUrl } from '@/isomorphic/url';
-import { addDapp, putDapp, replaceDapp } from '@/renderer/ipcRequest/dapps';
+import { addDapp, replaceDapp } from '@/renderer/ipcRequest/dapps';
 import { useOpenDapp } from '@/renderer/utils/react-router';
-import { useMount, useRequest, useSetState } from 'ahooks';
+import { useRequest, useSetState } from 'ahooks';
 import classNames from 'classnames';
-import { useClickAway } from 'react-use';
 import { useDapps } from 'renderer/hooks/useDappsMngr';
-import { DappFavicon } from '../DappFavicon';
+import { debounce } from 'lodash';
+import RabbyInput from '../AntdOverwrite/Input';
 import { Modal, Props as ModalProps } from '../Modal/Modal';
 import styles from './index.module.less';
+import { PreviewDapp } from './PreviewDapp';
+import { RelationModal } from './RelactionModal';
 import { useAddDappURL } from './useAddDapp';
-import { PreviewWebview } from '../DappView/PreviewWebview';
-import RabbyInput from '../AntdOverwrite/Input';
+import { DomainExample } from './DomainExample';
+import { Warning } from './Warning';
+import { toastMessage } from '../TransparentToast';
 
 const findRelatedDapps = (dapps: IDapp[], url: string) => {
   const current = canoicalizeDappUrl(url);
@@ -44,271 +41,66 @@ const findRelatedDapps = (dapps: IDapp[], url: string) => {
   }
   return [];
 };
-interface EditableInputProps {
-  value?: string;
-  onChange?: (v: string) => void;
-  defaultEditable?: boolean;
-}
-const EditableInput = ({
-  value,
-  defaultEditable,
-  onChange,
-}: EditableInputProps) => {
-  const [isEdit, setIsEdit] = useState(!!defaultEditable);
-  const [form] = Form.useForm();
-  const ref = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<InputRef>(null);
-
-  useClickAway(
-    ref,
-    () => {
-      setIsEdit(false);
-    },
-    ['mousedown']
-  );
-
-  useMount(() => {
-    if (isEdit) {
-      inputRef.current?.focus();
-      inputRef.current?.select();
-    }
-  });
-
-  return (
-    <div ref={ref}>
-      {isEdit ? (
-        <Form
-          className={styles.editableInput}
-          form={form}
-          initialValues={{
-            alias: value,
-          }}
-        >
-          <Form.Item name="alias" rules={[{ required: true, message: '' }]}>
-            <RabbyInput
-              autoFocus
-              placeholder="Please input alias"
-              maxLength={15}
-              ref={inputRef}
-            />
-          </Form.Item>
-          <img
-            onClick={() => {
-              form.validateFields().then((values) => {
-                onChange?.(values.alias);
-                setIsEdit(false);
-              });
-            }}
-            src="rabby-internal://assets/icons/add-dapp/icon-check.svg"
-            alt=""
-          />
-        </Form>
-      ) : (
-        <div className={styles.editableInput}>
-          <div className={styles.editableInputStatic}>{value}</div>
-          <img
-            onClick={() => {
-              setIsEdit(true);
-              form.setFieldsValue({
-                alias: value,
-              });
-            }}
-            src="rabby-internal://assets/icons/add-dapp/icon-edit.svg"
-            alt=""
-          />
-        </div>
-      )}
-    </div>
-  );
-};
-
-interface PreviewDappProps {
-  data: NonNullable<IDappsDetectResult['data']>;
-  onAdd: (dapp: NonNullable<IDappsDetectResult['data']>) => void;
-  onOpen: (dapp: NonNullable<IDappsDetectResult['data']>) => void;
-  loading?: boolean;
-}
-const PreviewDapp = ({ data, onAdd, loading, onOpen }: PreviewDappProps) => {
-  const [input, setInput] = useState(data.recommendedAlias);
-
-  return (
-    <div className={styles.preview}>
-      <div className={styles.previewHeader}>
-        <DappFavicon
-          className={styles.previewIcon}
-          origin={data.inputOrigin}
-          src={data?.faviconBase64 || data?.faviconUrl}
-        />
-        <div>
-          <div className={styles.previewTitle}>
-            <EditableInput
-              value={input}
-              defaultEditable={!data?.isInputExistedDapp}
-              onChange={(v) => {
-                if (data.isInputExistedDapp) {
-                  putDapp({
-                    origin: data.inputOrigin,
-                    alias: v,
-                  });
-                }
-                setInput(v);
-              }}
-            />
-          </div>
-          <div className={styles.previewDesc}>
-            {data.inputOrigin?.replace(/^\w+:\/\//, '')}
-          </div>
-        </div>
-        <div className={styles.previewAction}>
-          {loading ? (
-            <div className={styles.previewLoading}>
-              <LoadingOutlined />
-            </div>
-          ) : (
-            <>
-              {data?.isInputExistedDapp ? (
-                <Button
-                  type="primary"
-                  className={styles.previewBtnSuccess}
-                  onClick={() => {
-                    onOpen?.(data);
-                  }}
-                >
-                  Open
-                </Button>
-              ) : (
-                <Button
-                  type="primary"
-                  onClick={() => {
-                    if (input) {
-                      onAdd({
-                        ...data,
-                        recommendedAlias: input,
-                      });
-                    } else {
-                      onAdd(data);
-                    }
-                  }}
-                >
-                  Add
-                </Button>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-      <PreviewWebview
-        containerClassName={styles.previewTagContainer}
-        src={data.inputOrigin}
-        loadingView={
-          <div className={styles.previewEmpty}>
-            <div>
-              <img
-                className={styles.loadingSpinner}
-                src="rabby-internal://assets/icons/add-dapp/icon-pageloading.svg"
-                style={{ animation: 'rotate 1s linear infinite' }}
-                alt=""
-              />
-              <div className={styles.previewEmptyTitle}>Loading page...</div>
-            </div>
-          </div>
-        }
-        loadFailedView={
-          <div className={styles.previewEmpty}>
-            <div>
-              <img
-                src="rabby-internal://assets/icons/add-dapp/icon-failed.svg"
-                alt=""
-              />
-              <div className={styles.previewEmptyTitle}>Fail to load</div>
-            </div>
-          </div>
-        }
-      />
-    </div>
-  );
-};
-
-interface DappCardProps {
-  dapp?: IDapp;
-}
-const DappCard = ({ dapp }: DappCardProps) => {
-  return (
-    <div className={classNames(styles.dapp)}>
-      <DappFavicon
-        className={styles.dappIcon}
-        origin={dapp?.origin || ''}
-        src={dapp?.faviconBase64 ? dapp.faviconBase64 : dapp?.faviconUrl}
-      />
-      <div className={styles.dappContent}>
-        <div className={styles.dappName}>{dapp?.alias}</div>
-        <div className={styles.dappOrigin}>
-          {dapp?.origin?.replace(/^\w+:\/\//, '')}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-interface RelationModalProps {
-  data: IDapp[];
-  open?: boolean;
-  onCancel?: () => void;
-  onOk?: () => void;
-}
-const RelationModal = ({ data, open, onCancel, onOk }: RelationModalProps) => {
-  return (
-    <Modal
-      open={open}
-      onCancel={onCancel}
-      className={styles.relationModal}
-      width={560}
-      centered
-    >
-      <div className={styles.content}>
-        <div className={styles.title}>
-          You've already added a Dapp related to the current domain name. Adding
-          this new Dapp will replace the previous one.
-        </div>
-        <div className={styles.body}>
-          {data.map((dapp) => {
-            return <DappCard key={dapp.origin} dapp={dapp} />;
-          })}
-        </div>
-        <div className={styles.footer}>
-          <Button ghost block size="large" onClick={onCancel}>
-            Cancel adding
-          </Button>
-          <Button type="primary" block size="large" onClick={onOk}>
-            Confirm to add
-          </Button>
-        </div>
-      </div>
-    </Modal>
-  );
-};
 
 const validateInput = (input: string, onReplace?: (v: string) => void) => {
   const domain = input?.trim();
   if (!domain) {
     return {
+      validateStatus: 'success' as const,
+      help: '',
+    };
+    // return {
+    //   validateStatus: 'error' as const,
+    //   help: 'Input the Dapp domain name. e.g. debank.com',
+    // };
+  }
+  const hasSpace = /\s/.test(domain);
+  const hasSuffix = /\.\w+/.test(domain);
+  if (hasSpace || !hasSuffix || /\.$/.test(domain)) {
+    return {
       validateStatus: 'error' as const,
-      help: 'Input the Dapp domain name. e.g. debank.com',
+      help: 'Input is not a domain',
     };
   }
-  const urlString = /^(\w+:)?\/\//.test(domain) ? domain : `https://${domain}`;
+  const hasProtocol = /^(\w+:)\/\//.test(domain);
+  const hasPath = /\//.test(domain.replace(/^(\w+:)\/\//, ''));
+
+  const urlString = hasProtocol ? domain : `https://${domain}`;
   try {
     const url = new URL(urlString);
-    if (url.hostname !== domain) {
+    if (url.hostname !== domain.replace(/^(w+:)\/\//, '')) {
       return {
         validateStatus: 'error' as const,
-        help: <>The input is not a domain name.</>,
+        help: (
+          <>
+            Input should not contain{' '}
+            {[
+              hasProtocol ? `${url.protocol}//` : null,
+              [
+                url.port ? `:${url.port}` : null,
+                hasPath ? url.pathname : null,
+                url.search ? url.search : null,
+              ].join(''),
+            ]
+              .filter(Boolean)
+              .map((v) => `"${v}"`)
+              .join(' and ')}{' '}
+            .Maybe you want to add{' '}
+            <span
+              onClick={() => onReplace?.(url.hostname)}
+              className={styles.replaceLink}
+            >
+              {url.hostname}
+            </span>
+            ?
+          </>
+        ),
       };
     }
   } catch (e) {
     return {
       validateStatus: 'error' as const,
-      help: 'Invalid input',
+      help: 'Input is not a domain',
     };
   }
   return null;
@@ -322,60 +114,16 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
   }>({});
 
   const { detectDapps } = useDapps();
-  const { runAsync, loading } = useRequest(
+  const { runAsync, loading, cancel } = useRequest(
     async (url: string) => {
       const validateRes = validateInput(url, onReplace);
+      console.log('validateRes', validateRes, url);
       if (validateRes) {
-        setState({
-          ...validateRes,
-        });
-        return null;
+        return {
+          validateRes,
+        };
       }
-      const { data, error } = await detectDapps(`https://${url}`);
-      if (error) {
-        setState({
-          validateStatus: 'error',
-          help: error.message,
-        });
-        return null;
-      }
-      if (
-        data &&
-        data.inputOrigin !== data.finalOrigin &&
-        canoicalizeDappUrl(data.inputOrigin).secondaryDomain !==
-          canoicalizeDappUrl(data.finalOrigin).secondaryDomain
-      ) {
-        setState({
-          validateStatus: 'error',
-          help: (
-            <>
-              The current domain has been redirected to{' '}
-              {data.finalOrigin?.replace(/^\w+:\/\//, '')} which may pose a
-              security risk. It cannot be added as a Dapp.
-            </>
-          ),
-        });
-        return null;
-      }
-      if (data && canoicalizeDappUrl(data.inputOrigin).isSubDomain) {
-        setState({
-          dappInfo: data,
-          validateStatus: 'success',
-          help: (
-            <>
-              It appears that the current input may be a subdomain. By adding it
-              as a Dapp, you'll be limited to browsing within that subdomain.
-            </>
-          ),
-        });
-        return null;
-      }
-      setState({
-        dappInfo: data,
-        validateStatus: undefined,
-        help: null,
-      });
-      return data;
+      return detectDapps(`https://${url}`);
     },
     {
       manual: true,
@@ -386,6 +134,63 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
           help: null,
         });
       },
+      onSuccess: (res) => {
+        if (!res) {
+          return;
+        }
+        if ('validateRes' in res) {
+          setState(res.validateRes);
+          return;
+        }
+
+        const { data, error } = res;
+
+        if (error) {
+          setState({
+            validateStatus: 'error',
+            help: error.message,
+          });
+          return null;
+        }
+        if (
+          data &&
+          data.inputOrigin !== data.finalOrigin &&
+          canoicalizeDappUrl(data.inputOrigin).secondaryDomain !==
+            canoicalizeDappUrl(data.finalOrigin).secondaryDomain
+        ) {
+          setState({
+            validateStatus: 'error',
+            help: (
+              <>
+                The current domain has been redirected to{' '}
+                {data.finalOrigin?.replace(/^\w+:\/\//, '')} which may pose a
+                security risk. It cannot be added as a Dapp.
+              </>
+            ),
+          });
+          return null;
+        }
+        if (data && canoicalizeDappUrl(data.inputOrigin).isSubDomain) {
+          setState({
+            dappInfo: data,
+            validateStatus: 'success',
+            help: (
+              <>
+                It appears that the current input may be a subdomain. By adding
+                it as a Dapp, you'll be limited to browsing within that
+                subdomain.
+              </>
+            ),
+          });
+          return null;
+        }
+        setState({
+          dappInfo: data,
+          validateStatus: undefined,
+          help: null,
+        });
+        return data;
+      },
     }
   );
   return {
@@ -393,6 +198,8 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
     setState,
     loading,
     check: runAsync,
+    debounceCheck: debounce(runAsync, 500),
+    cancel,
   };
 };
 
@@ -415,15 +222,13 @@ export function AddDapp({
   const [form] = Form.useForm();
   const openDapp = useOpenDapp();
   const [addUrl] = useAddDappURL();
-  useEffect(() => {
-    form.setFieldsValue({ url: addUrl?.replace(/^\w+:\/\//, '') });
-  }, [addUrl, form]);
 
   const { state, setState, check, loading } = useCheckDapp({
     onReplace(v) {
       form.setFieldsValue({
         url: v,
       });
+      check(v);
       setState({
         validateStatus: undefined,
         help: '',
@@ -454,9 +259,6 @@ export function AddDapp({
   );
 
   const handleCheck = async () => {
-    if (loading) {
-      return;
-    }
     const { url } = form.getFieldsValue();
     setState({
       validateStatus: undefined,
@@ -464,6 +266,8 @@ export function AddDapp({
     });
     await check(url);
   };
+
+  const handleCheckDebounce = debounce(handleCheck, 700);
 
   const handleAdd = async (
     dappInfo: NonNullable<IDappsDetectResult['data']>,
@@ -478,6 +282,11 @@ export function AddDapp({
       },
       urls
     );
+    toastMessage({
+      type: 'success',
+      content: 'Add success',
+      className: styles.toast,
+    });
     const nextState = {
       dappInfo: {
         ...dappInfo,
@@ -512,52 +321,52 @@ export function AddDapp({
       handleAdd(dappInfo);
     }
   };
-  const InitialHelpMessage =
-    "For your security, please ensure you enter the official domain name of the Dapp you'd like to add.";
+  // const handleFormChange = useCallback(() => {
+  //   const { url } = form.getFieldsValue();
+  //   if (!url.trim()) {
+  //     setState({
+  //       validateStatus: undefined,
+  //       help: '',
+  //     });
+  //   }
+  // }, [form, setState, state.help]);
 
-  const handleFormChange = useCallback(() => {
-    const { url } = form.getFieldsValue();
-    if (!url.trim()) {
-      setState({
-        validateStatus: undefined,
-        help: '',
-      });
-    } else if (state.help === InitialHelpMessage) {
-      setState({
-        validateStatus: undefined,
-        help: '',
-      });
-    }
-  }, [form, setState, state.help]);
+  const isShowExample = !state?.dappInfo && !state.help && !loading;
+  const isShowWarning =
+    state.validateStatus === 'error' && state.help && !loading;
 
-  useMount(() => {
-    if (!addUrl) {
-      setState({
-        validateStatus: undefined,
-        help: InitialHelpMessage,
-      });
+  useEffect(() => {
+    const url = addUrl?.replace(/^\w+:\/\//, '');
+    form.setFieldsValue({ url });
+    if (url) {
+      check(url);
     }
-  });
+  }, [addUrl, check, form]);
 
   return (
     <div className={styles.content}>
       <h3 className={styles.title}>Enter the Dapp domain name</h3>
       <Form
         form={form}
-        className={styles.form}
+        className={classNames(
+          styles.form,
+          state?.validateStatus !== 'error' && state?.help && styles.formHasHelp
+        )}
         onFinish={handleCheck}
-        onFieldsChange={handleFormChange}
+        // onFieldsChange={handleFormChange}
       >
         <Form.Item
           name="url"
-          validateStatus={state?.validateStatus || 'success'}
-          help={state?.help}
+          help={
+            state?.validateStatus !== 'error' && state?.help ? state?.help : ''
+          }
         >
           <RabbyInput
             className={styles.input}
             placeholder="Input the Dapp domain name. e.g. debank.com"
             autoFocus
             spellCheck={false}
+            onChange={handleCheckDebounce}
             suffix={
               <span className={styles.inputSuffix}>
                 {loading ? (
@@ -575,7 +384,16 @@ export function AddDapp({
           />
         </Form.Item>
       </Form>
-      {state.dappInfo ? (
+      {isShowExample && (
+        <DomainExample
+          onDomainClick={(domain) => {
+            form.setFieldsValue({ url: domain });
+            handleCheckDebounce();
+          }}
+        />
+      )}
+      {isShowWarning && <Warning>{state.help}</Warning>}
+      {state.dappInfo && !loading ? (
         <PreviewDapp
           data={state.dappInfo}
           loading={isAddLoading}

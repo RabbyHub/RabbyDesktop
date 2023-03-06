@@ -3,7 +3,7 @@
 @previewBoxRadius: 8px;
 .addModal {
   .content {
-    padding: 32px 120px 48px 120px;
+    padding: 32px 100px 40px 100px;
     min-height: 680px;
   }
   .title {
@@ -15,14 +15,23 @@
     margin-bottom: 32px;
   }
   .form {
-    height: 100px;
+    height: 96px;
+    &HasHelp {
+      margin-bottom: 12px;
+    }
+  }
+
+  .replaceLink {
+    text-decoration: underline;
+    cursor: pointer;
+    text-underline-offset: 3px;
   }
 
   .input {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
-    height: 52px;
+    height: 56px;
     padding: 16px;
     &:focus,
     &:hover {
@@ -40,6 +49,8 @@
       .ant-input {
         border-radius: 0;
         font-size: 15px;
+        font-weight: 400;
+        line-height: 18px;
       }
       .ant-input-clear-icon {
         color: #fff;
@@ -68,10 +79,6 @@
     }
     .ant-form-item-explain-error {
       color: #ff7f7f;
-      .link {
-        text-decoration: underline;
-        cursor: pointer;
-      }
     }
 
     .ant-form-item-explain {
@@ -85,334 +92,24 @@
       color: rgba(255, 255, 255, 0.6);
     }
   }
-
-  .preview {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: @previewBoxRadius;
-
-    &BtnSuccess {
-      background: #27c193;
-      box-shadow: 0px 4px 12px rgba(48, 158, 86, 0.2);
-      border-color: #27c193;
-    }
-
-    &Loading {
-      width: 112px;
-      text-align: center;
-      color: #fff;
-      font-size: 20px;
-    }
-
-    &Icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 6px;
-    }
-
-    &Header {
-      padding: 14px 24px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-height: 72px;
-    }
-
-    &Title {
-      :global {
-        .ant-input {
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 2px;
-          padding: 4px 2px;
-          height: 24px;
-          width: 160px;
-
-          font-weight: 500;
-          font-size: 17px;
-          line-height: 20px;
-          color: #ffffff;
-        }
-      }
-    }
-    &Alias {
-      color: #fff;
-      padding-left: 4px;
-      font-size: 14px;
-      line-height: 16px;
-    }
-    &Desc {
-      font-weight: 400;
-      font-size: 15px;
-      line-height: 18px;
-      color: #ffffff;
-      opacity: 0.6;
-      padding-left: 4px;
-    }
-
-    &Action {
-      margin-left: auto;
-
-      :global {
-        .ant-btn {
-          height: 40px;
-          width: 124px;
-          border-radius: 4px;
-          font-weight: 500;
-          font-size: 17px;
-          line-height: 20px;
-          text-align: center;
-          color: #ffffff;
-        }
-      }
-    }
-    &Content {
-      width: 100%;
-      height: 393px;
-      border: 0;
-      border-radius: 0 0 8px 8px;
-    }
-    &Empty {
-      height: 372px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-
-      text-align: center;
-
-      &Title {
-        font-weight: 400;
-        font-size: 13px;
-        line-height: 16px;
-        color: #ffffff;
-        opacity: 0.6;
-        margin-top: 24px;
-      }
-    }
-  }
 }
 
-.relationModal {
+.toast {
+  color: red;
   :global {
-    .ant-modal-close-x {
+    .ant-message-notice-content {
+      background-color: #474c5a;
       padding: 16px;
-    }
-  }
-  .content {
-    padding: 40px 0;
-    height: 400px;
-  }
-  .title {
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 22px;
-    text-align: center;
-    color: #ffffff;
-    padding: 0 40px;
-    margin-bottom: 32px;
-  }
+      backdrop-filter: blur(20px);
+      min-width: 156px;
+      text-align: left;
 
-  .body,
-  .footer {
-    padding-left: 92px;
-    padding-right: 92px;
-  }
-  .body {
-    height: 180px;
-    overflow: overlay;
-    .chrome-like-scrollbar();
-  }
-  .footer {
-    display: flex;
-    gap: 16px;
-    margin-top: 24px;
-    :global {
-      .ant-btn {
-        height: 44px;
-        border-radius: 4px;
-        font-weight: 500;
+      .ant-message-custom-content {
+        display: inline-flex;
+        align-items: center;
         font-size: 15px;
-        line-height: 18px;
-      }
-      .ant-btn-background-ghost {
-        opacity: 0.8;
+        line-height: 16px;
       }
     }
-  }
-}
-
-.dapp {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 6px;
-  padding: 16px;
-  width: 100%;
-
-  &:not(:last-child) {
-    margin-bottom: 8px;
-  }
-
-  &Active {
-    background: rgba(0, 0, 0, 0.4);
-  }
-
-  &Add {
-    background: rgba(134, 151, 255, 0.2);
-
-    font-weight: 700;
-    font-size: 15px;
-    line-height: 18px;
-
-    color: #8697ff;
-    height: 64px;
-  }
-
-  &Content {
-    overflow: hidden;
-  }
-
-  &Icon {
-    width: 24px !important;
-    height: 24px !important;
-    border-radius: 4px;
-  }
-
-  &Name {
-    font-weight: 700;
-    font-size: 13px;
-    line-height: 16px;
-    color: #ffffff;
-    margin-bottom: 2px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-  }
-  &Origin {
-    font-weight: 400;
-    font-size: 12px;
-    line-height: 14px;
-    color: #ffffff;
-    opacity: 0.8;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-  }
-
-  &Extra {
-    margin-left: auto;
-  }
-}
-
-.previewImageContainer {
-  height: 372px;
-  width: 100%;
-
-  > .imgBlock {
-    background-size: cover;
-    background-repeat: no-repeat;
-    height: 100%;
-    border-bottom-left-radius: 6px;
-    border-bottom-right-radius: 6px;
-  }
-}
-
-.previewTagContainer {
-  position: relative;
-  border-bottom-left-radius: @previewBoxRadius;
-  border-bottom-right-radius: @previewBoxRadius;
-  overflow: hidden;
-
-  &::after {
-    content: ' ';
-    display: block;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 9;
-    cursor: default;
-  }
-  @previewRealW: 760px;
-  @previewRealH: 372px;
-
-  @embeddedH: 768px;
-  @scale: (@previewRealH / @embeddedH);
-  @ratio: (@previewRealW / @previewRealH);
-
-  height: @previewRealH;
-  width: 100%;
-
-  > webview {
-    width: unit(@ratio * @embeddedH, px);
-    height: @embeddedH;
-    transform: scale(unit(@scale));
-    transform-origin: 0 0;
-    // opacity: 0.6;
-    // transition: cubic-bezier(0.4, 0, 1, 1) 0.3s opacity;
-  }
-
-  // &:hover > webview {
-  //   opacity: 1;
-  // }
-
-  :global {
-    .preview-webview-url {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-
-      background: #f5f6fa;
-      padding: 4px 8px;
-
-      border: 1px solid #e5e9ef;
-      border-radius: 0px 4px;
-
-      font-weight: 400;
-      font-size: 12px;
-      line-height: 14px;
-      color: #707280;
-    }
-  }
-}
-
-.editableInput {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 24px;
-
-  &Static {
-    padding-left: 4px;
-    font-weight: 500;
-    font-size: 17px;
-    line-height: 20px;
-    color: #ffffff;
-  }
-
-  :global {
-    .ant-form-item {
-      margin-bottom: 0;
-    }
-    .ant-form-item-control-input {
-      min-height: unset;
-    }
-    .ant-form-item-explain {
-      display: none;
-    }
-    .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper,
-    .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper:hover {
-      border-color: #ff7f7f;
-      background: rgba(255, 255, 255, 0.1);
-    }
-    .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input,
-    .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-  }
-  img {
-    cursor: pointer;
   }
 }
