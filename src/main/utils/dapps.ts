@@ -25,6 +25,7 @@ const DFLT_TIMEOUT = 8 * 1e3;
 const enum DETECT_ERR_CODES {
   NOT_HTTPS = 'NOT_HTTPS',
   INACCESSIBLE = 'INACCESSIBLE',
+  REDIRECTED = 'REDIRECTED',
   HTTPS_CERT_INVALID = 'HTTPS_CERT_INVALID',
   TIMEOUT = 'TIMEOUT',
 
@@ -213,7 +214,8 @@ export async function detectDapp(
         data: null,
         error: {
           type: DETECT_ERR_CODES.TIMEOUT,
-          message: 'Checking the Dapp timed out, please try again later',
+          message:
+            'Access to Dapp timed out, please check your network and try again.',
         },
       };
     }
@@ -222,12 +224,24 @@ export async function detectDapp(
       data: null,
       error: {
         type: DETECT_ERR_CODES.INACCESSIBLE,
-        message: 'This Dapp is inaccessible. It may be an invalid URL',
+        message: 'The Domain cannot be accessed.',
       },
     };
   }
 
-  const { origin: finalOrigin } = canoicalizeDappUrl(checkResult.finalUrl);
+  const { origin: finalOrigin, fullDomain: finalDomain } = canoicalizeDappUrl(
+    checkResult.finalUrl
+  );
+
+  if (checkResult.isRedirected) {
+    return {
+      data: null,
+      error: {
+        type: DETECT_ERR_CODES.REDIRECTED,
+        message: `Cannot be added as a Dapp: the current domain has been redirected to ${finalDomain}, which may pose a security risk.`,
+      },
+    };
+  }
 
   const repeatedInputDapp = opts.existedDapps.find(
     (item) => item.origin === inputOrigin

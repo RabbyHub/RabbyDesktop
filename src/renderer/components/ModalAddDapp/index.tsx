@@ -162,24 +162,6 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
           });
           return null;
         }
-        if (
-          data &&
-          data.inputOrigin !== data.finalOrigin &&
-          canoicalizeDappUrl(data.inputOrigin).secondaryDomain !==
-            canoicalizeDappUrl(data.finalOrigin).secondaryDomain
-        ) {
-          setState({
-            validateStatus: 'error',
-            help: (
-              <>
-                The current domain has been redirected to{' '}
-                {data.finalOrigin?.replace(/^\w+:\/\//, '')} which may pose a
-                security risk. It cannot be added as a Dapp.
-              </>
-            ),
-          });
-          return null;
-        }
         const dappUrl = canoicalizeDappUrl(data?.inputOrigin || '');
         if (data && dappUrl.isSubDomain) {
           setState({
