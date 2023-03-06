@@ -191,6 +191,13 @@ type ChannelInvokePayload = {
       error?: Error;
     };
   };
+  [`__outer_rpc:check-if-requestable`]: {
+    send: [reqData?: any];
+    response: {
+      result: boolean;
+      error?: string;
+    };
+  };
 };
 
 type IInvokesKey = keyof ChannelInvokePayload;
