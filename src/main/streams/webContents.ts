@@ -83,7 +83,7 @@ export function setOpenHandlerForWebContents({
           existedDapp: targetInfo.foundDapp,
           existedMainDomainDapp: targetInfo.foundMainDomainDapp,
           _targetwin: parentTabbedWin.window,
-        });
+        }).then((res) => res.activeTab());
       } else {
         webContents.loadURL(targetURL);
       }
@@ -92,7 +92,8 @@ export function setOpenHandlerForWebContents({
         case 'foreground-tab':
         case 'background-tab':
         case 'new-window': {
-          const openedDapp = parentTabbedWin?.tabs.findByOrigin(targetURL);
+          const openedDapp =
+            parentTabbedWin?.tabs.findBySecondaryDomain(targetURL);
           if (openedDapp) {
             switchToBrowserTab(openedDapp!.id, parentTabbedWin!);
 
@@ -170,7 +171,7 @@ export const setListeners = {
         safeOpenURL(targetURL, {
           existedDapp: targetInfo.foundDapp,
           sourceURL: currentUrl,
-        });
+        }).then((res) => res.activeTab());
 
         return false;
       }
@@ -226,7 +227,7 @@ export const setListeners = {
             sourceURL: currentUrl,
             existedDapp: targetInfo.foundDapp,
             _targetwin: parentWindow,
-          });
+          }).then((res) => res.activeTab());
 
           return false;
         }

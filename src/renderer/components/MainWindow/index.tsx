@@ -230,12 +230,13 @@ export function MainWindow() {
     router.navigate(payload.data);
   });
   useMessageForwardToMainwin('open-dapp', (payload) => {
-    window.rabbyDesktop.ipcRenderer.invoke(
-      'safe-open-dapp-tab',
-      payload.data.dappURL
-    );
-
-    navigateToDappRoute(router.navigate, payload.data.dappURL);
+    window.rabbyDesktop.ipcRenderer
+      .invoke('safe-open-dapp-tab', payload.data.dappURL)
+      .then(({ shouldNavTabOnClient }) => {
+        if (shouldNavTabOnClient) {
+          navigateToDappRoute(router.navigate, payload.data.dappURL);
+        }
+      });
   });
 
   return (

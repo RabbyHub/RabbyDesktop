@@ -1,11 +1,16 @@
 import { BrowserView, BrowserWindow } from 'electron';
 
+import { canoicalizeDappUrl } from '@/isomorphic/url';
 import {
   IS_RUNTIME_PRODUCTION,
   RABBY_POPUP_GHOST_VIEW_URL,
 } from '../../isomorphic/constants';
 
-import { createPopupView, hidePopupView } from '../utils/browser';
+import {
+  createPopupView,
+  hidePopupView,
+  switchToBrowserTab,
+} from '../utils/browser';
 import {
   onIpcMainEvent,
   onIpcMainInternalEvent,
@@ -76,6 +81,34 @@ onMainWindowReady().then(async (mainWin) => {
   valueToMainSubject('dappSafeModeViews', { baseView });
 });
 
+function defaultActiveTabNoop() {}
+type SafeOpenResult = {
+  activeTab: () => void;
+} & (
+  | {
+      type: 'alert-user';
+    }
+  | {
+      type: 'switch-to-opened-tab';
+      openedTab: import('../browser/tabs').Tab;
+      shouldLoad?: boolean;
+    }
+  | {
+      type: 'create-tab';
+    }
+);
+/**
+ * @description
+ * workflow:
+ * 1. if allowed dapp
+ *  - try to find opened tab by secondary domain, if found, switch to it
+ *  - else, create a new tab
+ * 2. if not allowed dapp
+ *  - alert user to add it
+ * @param targetURL
+ * @param opts
+ * @returns
+ */
 export async function safeOpenURL(
   targetURL: string,
   opts: {
@@ -84,14 +117,38 @@ export async function safeOpenURL(
     existedMainDomainDapp?: IDapp | null;
     _targetwin?: BrowserWindow;
   }
-) {
+): Promise<SafeOpenResult> {
+  const mainTabbedWin = await onMainWindowReady();
   if (opts.existedDapp || opts.existedMainDomainDapp) {
+    const openedTab = mainTabbedWin.tabs.findBySecondaryDomain(targetURL);
+    if (openedTab?.view) {
+      const currentURL = openedTab.view.webContents.getURL();
+      const shouldLoad =
+        canoicalizeDappUrl(targetURL).origin !==
+        canoicalizeDappUrl(currentURL).origin;
+
+      return {
+        type: 'switch-to-opened-tab',
+        openedTab,
+        activeTab: () => {
+          if (shouldLoad) {
+            openedTab.view?.webContents.loadURL(targetURL);
+          }
+          switchToBrowserTab(openedTab.id, mainTabbedWin);
+        },
+        shouldLoad,
+      };
+    }
+
     forwardToMainWebContents(
-      '__internal_forward:main-window:open-dapp',
+      '__internal_forward:main-window:create-dapp-tab',
       targetURL
     );
 
-    return;
+    return {
+      type: 'create-tab',
+      activeTab: defaultActiveTabNoop,
+    };
   }
 
   // start: for non-added dapp, alert user to add it
@@ -147,6 +204,11 @@ export async function safeOpenURL(
       }
     );
   }
+
+  return {
+    type: 'alert-user',
+    activeTab: defaultActiveTabNoop,
+  };
 }
 
 const dappPreviewViewReady = onMainWindowReady().then(async (tabbedMainWin) => {
@@ -191,7 +253,7 @@ onIpcMainInternalEvent('__internal_main:dev', async (payload) => {
         sourceURL: 'https://app.uniswap.org/',
         existedDapp: findResult.dappByOrigin,
         existedMainDomainDapp: findResult.dappBySecondaryDomainOrigin,
-      });
+      }).then((res) => res.activeTab());
       break;
     }
     case 'dapp-safe-view:inspect': {
