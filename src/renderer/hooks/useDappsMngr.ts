@@ -43,7 +43,16 @@ export function useProtocolDappsBinding() {
 
   useEffect(() => {
     fetchBindings();
-  }, [fetchBindings]);
+
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_push:dapps:changed',
+      (payload) => {
+        if (payload.protocolDappsBinding) {
+          setProtocolDappsBinding(payload.protocolDappsBinding);
+        }
+      }
+    );
+  }, [fetchBindings, setProtocolDappsBinding]);
 
   const bindingDappsToProtocol = useCallback(
     async (protocol: string, item: IProtocolDappBindings[any]) => {

@@ -396,7 +396,7 @@ function checkDelDapp(
 
   Object.entries(protocolDappsBinding).forEach((dapps) => {
     const [protocol, binding] = dapps;
-    if (binding.origin === originToDel) {
+    if (originsSet.has(binding.origin)) {
       delete protocolDappsBinding[protocol];
     }
   });
