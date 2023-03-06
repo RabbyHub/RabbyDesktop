@@ -34,6 +34,15 @@ const TokenAmountWrapper = styled.div`
   }
 `;
 
+const StringDiv = styled.div`
+  word-break: break-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+`;
+
 const TokensAmount = ({
   tokens,
   withPrice = false,
@@ -63,7 +72,11 @@ const TokensAmount = ({
 };
 
 export const String = ({ value }: { value: ReactNode }) => {
-  return <Col>{value}</Col>;
+  return (
+    <Col>
+      <StringDiv>{value}</StringDiv>
+    </Col>
+  );
 };
 
 export const Time = ({ value }: { value: string | number | undefined }) => {
