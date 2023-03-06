@@ -11,11 +11,11 @@ const TokenWithChainWrapper = styled.div`
     border-radius: 100%;
   }
   .chain-logo {
-    width: 16px;
-    height: 16px;
+    width: 12px;
+    height: 12px;
     position: absolute;
-    right: -6px;
-    bottom: -6px;
+    bottom: -2px;
+    right: -4px;
   }
   .no-round {
     border-radius: 4px !important;

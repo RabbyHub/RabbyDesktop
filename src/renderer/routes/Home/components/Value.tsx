@@ -41,6 +41,7 @@ const StringDiv = styled.div`
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  font-size: 13px;
 `;
 
 const TokensAmount = ({
@@ -141,7 +142,7 @@ export const Token = ({
 };
 
 export const USDValue = ({ value }: { value: string | number }) => {
-  return <Col>{formatUsdValue(value)}</Col>;
+  return <Col className="text-[13px]">{formatUsdValue(value)}</Col>;
 };
 
 export const TokensUSDValue = ({ value }: { value: TokenItem[] }) => {

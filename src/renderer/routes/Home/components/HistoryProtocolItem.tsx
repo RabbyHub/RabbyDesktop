@@ -42,8 +42,8 @@ const ProtocolHeader = styled.div`
   .protocol-name {
     margin-left: 8px;
     font-weight: 700;
-    font-size: 12px;
-    line-height: 14px;
+    font-size: 15px;
+    line-height: 1;
     color: #fff;
     text-transform: uppercase;
   }
