@@ -1,124 +1,38 @@
-.dapp {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 6px;
+.input {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  height: 52px;
   padding: 16px;
-
-  width: 298px;
-  cursor: pointer;
-
-  &Active {
-    background: rgba(0, 0, 0, 0.4);
+  color: #fff !important;
+  &:focus,
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
   }
+  box-shadow: none !important;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
 
-  &Add {
-    background: rgba(134, 151, 255, 0.2);
+  color: #ffffff;
 
-    font-weight: 700;
-    font-size: 15px;
-    line-height: 18px;
-
-    color: #8697ff;
-    height: 64px;
-  }
-
-  &Content {
-    overflow: hidden;
-  }
-
-  &Icon {
-    width: 24px !important;
-    height: 24px !important;
-    border-radius: 4px;
-  }
-
-  &Name {
-    font-weight: 700;
-    font-size: 13px;
-    line-height: 16px;
-    color: #ffffff;
-    margin-bottom: 2px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-  }
-  &Origin {
-    font-weight: 400;
-    font-size: 12px;
-    line-height: 14px;
-    color: #ffffff;
-    opacity: 0.8;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-  }
-
-  &Extra {
-    margin-left: auto;
-  }
-}
-
-.stepAddContainer {
-  position: relative;
-  .backIcon {
-    position: absolute;
-    top: 40px;
-    left: 40px;
-    cursor: pointer;
-  }
-}
-
-.associateDapp {
-  height: 600px;
-  &Header {
-    padding: 40px 32px 20px;
-  }
-  &Title {
-    font-weight: 500;
-    font-size: 28px;
-    line-height: 33px;
-    text-align: center;
-    color: #ffffff;
-    margin-bottom: 12px;
-  }
-  &Desc {
-    font-weight: 500;
-    font-size: 15px;
-    line-height: 18px;
-    text-align: center;
-
-    color: #ffffff;
-
-    opacity: 0.8;
-  }
-
-  &Body {
-    padding: 0 32px;
-    height: 372px;
-    .dappContainer {
-      padding-top: 12px;
-      overflow: overlay;
-      display: flex;
-      max-height: 100%;
-      gap: 20px;
-      flex-wrap: wrap;
-      align-items: flex-start;
+  &Suffix {
+    font-size: 16px;
+    img {
+      cursor: pointer;
     }
   }
-  &Footer {
-    padding: 20px 32px 32px 52px;
-    text-align: center;
-    .button.button {
-      margin: auto;
-      height: 52px;
-      width: 200px;
-      display: block;
-      &:disabled {
-        background: #707280 !important;
-        border: none;
-        opacity: 1;
+}
+:global {
+  .ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled):hover {
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .bind-dapp-modal {
+    .ant-modal-content {
+      .ant-modal-close-x {
+        padding: 32px 32px 0 0;
       }
     }
   }

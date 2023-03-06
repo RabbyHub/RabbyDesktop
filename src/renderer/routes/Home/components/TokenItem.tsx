@@ -113,6 +113,12 @@ const TokenLogoField = styled.div`
       }
     }
   }
+  .token-with-chain .chain-logo {
+    width: 12px;
+    height: 12px;
+    bottom: -1px;
+    right: -5px;
+  }
 `;
 const TokenPriceField = styled.div`
   width: 24%;
