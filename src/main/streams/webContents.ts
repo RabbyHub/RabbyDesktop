@@ -5,6 +5,7 @@ import { getAllDapps, parseDappRedirect } from '../store/dapps';
 import { switchToBrowserTab } from '../utils/browser';
 import { safeOpenURL } from './dappSafeview';
 import { getTabbedWindowFromWebContents } from '../utils/tabbedBrowserWindow';
+import { getBlockchainExplorers } from '../store/dynamicConfig';
 
 export function createDappTab(mainTabbedWin: TabbedBrowserWindow, url: string) {
   const continualOpenedTab = mainTabbedWin.createTab({
@@ -68,6 +69,7 @@ export function setOpenHandlerForWebContents({
       maybeRedirectInSPA,
     } = parseDappRedirect(currentUrl, targetURL, {
       dapps,
+      blockchain_explorers: getBlockchainExplorers(),
       isForTrezorLikeConnection,
     });
 
@@ -155,6 +157,7 @@ export const setListeners = {
         isToSameOrigin,
       } = parseDappRedirect(currentUrl, targetURL, {
         dapps,
+        blockchain_explorers: getBlockchainExplorers(),
         isForTrezorLikeConnection: tabbedWin?.isForTrezorLikeConnection(),
       });
 
@@ -211,6 +214,7 @@ export const setListeners = {
           isToSameOrigin,
         } = parseDappRedirect(currentUrl, targetURL, {
           dapps,
+          blockchain_explorers: getBlockchainExplorers(),
           isForTrezorLikeConnection: tabbedWin?.isForTrezorLikeConnection(),
         });
 

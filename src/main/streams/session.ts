@@ -41,6 +41,7 @@ import { supportHmrOnDev } from '../utils/webRequest';
 import { checkProxyViaBrowserView, setSessionProxy } from '../utils/appNetwork';
 import { getAppProxyConf } from '../store/desktopApp';
 import { createTrezorLikeConnectPageWindow } from '../utils/hardwareConnect';
+import { getBlockchainExplorers } from '../store/dynamicConfig';
 
 const sesLog = getBindLog('session', 'bgGrey');
 
@@ -253,6 +254,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
         toUrl: details.url || '',
         fromSameWindow: fromWindow === win.window,
         rabbyExtId,
+        blockchainExplorers: getBlockchainExplorers(),
       });
 
       switch (actionInfo.action) {

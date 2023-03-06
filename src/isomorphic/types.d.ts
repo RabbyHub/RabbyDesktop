@@ -89,6 +89,7 @@ type IAppDynamicConfig = {
       };
     };
   };
+  blockchain_explorers?: string[];
   special_main_domains?: {
     ids?: string[];
   };

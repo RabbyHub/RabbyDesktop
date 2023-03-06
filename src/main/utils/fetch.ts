@@ -133,19 +133,34 @@ export async function parseWebsiteFavicon(
 const configURLs = IS_APP_PROD_BUILD
   ? {
       domain_metas: `https://download.rabby.io/cdn-config/dapps/domain_metas.json`,
+      blockchain_explorers: `https://download.rabby.io/cdn-config/dapps/blockchain_explorers.json`,
     }
   : {
       domain_metas: `https://download.rabby.io/cdn-config-pre/dapps/domain_metas.json`,
+      blockchain_explorers: `https://download.rabby.io/cdn-config-pre/dapps/blockchain_explorers.json`,
     };
+
+export const DEFAULT_BLOCKCHAIN_EXPLORERS = ['etherscan.io'];
 
 export async function fetchDynamicConfig(options?: {
   timeout?: number;
   proxy?: AxiosProxyConfig;
 }) {
   const { timeout: timeoutV = 5 * 1e3, proxy } = options || {};
-  const [domain_metas = {}, special_main_domains = {}] = await Promise.all([
+  const [
+    domain_metas = {},
+    blockchain_explorers = Array.from(DEFAULT_BLOCKCHAIN_EXPLORERS),
+    special_main_domains = {},
+  ] = await Promise.all([
     fetchClient
       .get(`${configURLs.domain_metas}?t=${Date.now()}`, {
+        timeout: timeoutV,
+        proxy,
+      })
+      .then((res) => res.data)
+      .catch((err) => undefined), // TODO: report to sentry
+    fetchClient
+      .get(`${configURLs.blockchain_explorers}?t=${Date.now()}`, {
         timeout: timeoutV,
         proxy,
       })
@@ -161,8 +176,12 @@ export async function fetchDynamicConfig(options?: {
       .catch((err) => undefined), // TODO: report to sentry
   ]);
 
+  console.log('[feat] blockchain_explorers', blockchain_explorers);
+
   return {
     domain_metas: (domain_metas as IAppDynamicConfig['domain_metas']) || {},
+    blockchain_explorers:
+      (blockchain_explorers as IAppDynamicConfig['blockchain_explorers']) || [],
     special_main_domains:
       (special_main_domains as IAppDynamicConfig['special_main_domains']) || {},
   };
