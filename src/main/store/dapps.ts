@@ -207,16 +207,24 @@ function parseDappUrl(url: string, dapps = getAllDapps()) {
   };
 }
 
+const nullSet = new Set();
+
 export function parseDappRedirect(
   currentURL: string,
   targetURL: string,
   opts?: {
     dapps?: IDapp[];
+    blockchain_explorers?: Set<
+      (IAppDynamicConfig['blockchain_explorers'] & object)[number]
+    >;
     isForTrezorLikeConnection?: boolean;
   }
 ) {
-  const { dapps = getAllDapps(), isForTrezorLikeConnection = false } =
-    opts || {};
+  const {
+    dapps = getAllDapps(),
+    isForTrezorLikeConnection = false,
+    blockchain_explorers = nullSet,
+  } = opts || {};
 
   const isFromDapp = isUrlFromDapp(currentURL);
 
@@ -242,7 +250,7 @@ export function parseDappRedirect(
 
   const isToExtension = targetURL.startsWith('chrome-extension://');
 
-  let shouldOpenExternal = false;
+  let shouldOpenExternal = blockchain_explorers.has(targetInfo.secondaryDomain);
   if (
     isForTrezorLikeConnection &&
     !isToExtension &&

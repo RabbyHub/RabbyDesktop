@@ -8,6 +8,9 @@ export function checkOpenAction(
     toUrl: string;
     fromSameWindow: boolean;
     rabbyExtId: string;
+    blockchainExplorers: Set<
+      (IAppDynamicConfig['blockchain_explorers'] & object)[number]
+    >;
   }
 ):
   | {

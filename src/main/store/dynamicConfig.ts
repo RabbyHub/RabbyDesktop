@@ -6,7 +6,10 @@ import {
 } from '../../isomorphic/constants';
 import { safeParse, shortStringify } from '../../isomorphic/json';
 import { makeStore } from '../utils/store';
-import { fetchDynamicConfig } from '../utils/fetch';
+import {
+  DEFAULT_BLOCKCHAIN_EXPLORERS,
+  fetchDynamicConfig,
+} from '../utils/fetch';
 import { handleIpcMainInvoke } from '../utils/ipcMainEvents';
 import { cLog } from '../utils/log';
 import { getAppProxyConfigForAxios } from './desktopApp';
@@ -31,6 +34,11 @@ export const dynamicConfigStore = makeStore<IAppDynamicConfig>({
         '^.+$': SchemaDomainMetas,
       },
       default: {},
+    },
+    blockchain_explorers: {
+      type: 'array',
+      items: { type: 'string' },
+      default: [],
     },
     special_main_domains: {
       type: 'object',
@@ -57,7 +65,7 @@ const INTERVAL_SEC = IS_RUNTIME_PRODUCTION ? 5 * 60 : 60;
 function scheduleFetch() {
   const fetchData = () => {
     fetchDynamicConfig({ proxy: getAppProxyConfigForAxios() }).then(
-      ({ domain_metas, special_main_domains }) => {
+      ({ domain_metas, blockchain_explorers, special_main_domains }) => {
         cLog('[scheduleFetch] DynamicConfig will be updated');
         // leave here for debug
         if (!IS_RUNTIME_PRODUCTION) {
@@ -68,6 +76,9 @@ function scheduleFetch() {
           ...dynamicConfigStore.get('domain_metas'),
           ...domain_metas, // shallow merge to avoid bad data from remote
         });
+        dynamicConfigStore.set('blockchain_explorers', [
+          ...new Set(blockchain_explorers),
+        ]);
         dynamicConfigStore.set('special_main_domains', {
           ...dynamicConfigStore.get('special_main_domains'),
           ...special_main_domains,
@@ -89,3 +100,11 @@ handleIpcMainInvoke('get-app-dynamic-config', () => {
     },
   };
 });
+
+export function getBlockchainExplorers() {
+  const set = new Set(dynamicConfigStore.get('blockchain_explorers'));
+
+  DEFAULT_BLOCKCHAIN_EXPLORERS.forEach((d) => set.add(d));
+
+  return set;
+}
