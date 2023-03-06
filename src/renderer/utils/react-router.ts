@@ -30,8 +30,8 @@ export function useOpenDapp() {
 
       window.rabbyDesktop.ipcRenderer
         .invoke('safe-open-dapp-tab', dappUrl)
-        .then(({ shouldMakeOpenTab }) => {
-          if (shouldMakeOpenTab) {
+        .then(({ shouldNavTabOnClient }) => {
+          if (shouldNavTabOnClient) {
             navigateToDapp(dappUrl);
           }
         });

@@ -196,14 +196,6 @@ onIpcMainEvent('__internal_webui-window-close', (_, winId, webContentsId) => {
 });
 
 handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
-  const mainTabbedWin = await onMainWindowReady();
-
-  const openedTab = mainTabbedWin.tabs.findByOrigin(dappOrigin);
-  if (openedTab) {
-    mainTabbedWin.tabs.select(openedTab.id);
-    return { shouldMakeOpenTab: true };
-  }
-
   const currentUrl = evt.sender.getURL();
   const { dappByOrigin, dappBySecondaryDomainOrigin } =
     findDappsByOrigin(dappOrigin);
@@ -215,7 +207,7 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
   }).then((res) => res.activeTab());
 
   return {
-    shouldMakeOpenTab: !!dappByOrigin || !!dappBySecondaryDomainOrigin,
+    shouldNavTabOnClient: !!dappByOrigin || !!dappBySecondaryDomainOrigin,
   };
 });
 

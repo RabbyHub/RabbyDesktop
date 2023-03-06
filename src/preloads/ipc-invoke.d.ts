@@ -181,7 +181,7 @@ type ChannelInvokePayload = {
   'safe-open-dapp-tab': {
     send: [dappOrigin: string];
     response: {
-      shouldMakeOpenTab: boolean;
+      shouldNavTabOnClient: boolean;
     };
   };
   [`__internal_rpc:rabbyx-rpc:query`]: {
