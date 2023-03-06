@@ -33,6 +33,13 @@ const CurveWrapper = styled.div`
   top: 0;
   width: 100%;
   height: 100%;
+  -webkit-mask-image: -webkit-gradient(
+    linear,
+    left top,
+    right top,
+    from(rgba(255, 255, 255, 1)),
+    to(rgba(255, 255, 255, 0))
+  );
 `;
 
 const CurveThumbnail = ({ data, className }: CurveThumbnailProps) => {

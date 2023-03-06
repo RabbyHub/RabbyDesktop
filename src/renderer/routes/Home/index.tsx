@@ -70,10 +70,9 @@ const HomeWrapper = styled.div`
         position: relative;
         .balance-change {
           position: absolute;
-          top: 0;
+          bottom: 17px;
           right: 0;
           width: 600px;
-          height: 100%;
           display: flex;
           align-items: flex-end;
           justify-content: flex-end;
