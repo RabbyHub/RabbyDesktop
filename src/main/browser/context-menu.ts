@@ -14,10 +14,14 @@ import {
   rabbyxQuery,
   RABBY_DESKTOP_KR_PWD,
 } from '../streams/rabbyIpcQuery/_base';
-import { getWindowFromWebContents } from '../utils/browser';
+import { getWindowFromWebContents, switchToBrowserTab } from '../utils/browser';
 import { appendMenu, appendMenuSeparator } from '../utils/context-menu';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
-import { getRabbyExtViews, getWebuiExtId } from '../utils/stream-helpers';
+import {
+  getRabbyExtViews,
+  getWebuiExtId,
+  onMainWindowReady,
+} from '../utils/stream-helpers';
 
 const LABELS = {
   openInNewTab: (type: 'link' | Electron.ContextMenuParams['mediaType']) =>
@@ -274,7 +278,31 @@ function buildInspectKitsMenu(opts: ChromeContextMenuOptions) {
   return inspectKitsMenu;
 }
 
-const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
+async function buildOpenedTabsMenu(opts: ChromeContextMenuOptions) {
+  const mainTabbedWin = await onMainWindowReady();
+
+  const menu = new Menu();
+
+  const tabList = mainTabbedWin.tabs.tabList;
+
+  tabList.forEach((tab) => {
+    if (!tab.view?.webContents) return;
+
+    appendMenu(menu, {
+      label: tab.view.webContents.getURL(),
+      click: () => {
+        if (!tab.view) return;
+        switchToBrowserTab(tab.view.webContents.id, mainTabbedWin);
+      },
+    });
+  });
+
+  return menu;
+}
+
+async function buildChromeContextMenu(
+  opts: ChromeContextMenuOptions
+): Promise<Menu> {
   const { params, webContents, openLink, extensionMenuItems } = opts;
 
   const labels = opts.labels || opts.strings || LABELS;
@@ -464,6 +492,11 @@ const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
       submenu: buildInspectKitsMenu(opts),
     });
 
+    append({
+      label: 'Opened Tabs in Main Window',
+      submenu: await buildOpenedTabsMenu(opts),
+    });
+
     appendSeparator();
     append({
       label: labels.inspect,
@@ -492,6 +525,6 @@ const buildChromeContextMenu = (opts: ChromeContextMenuOptions): Menu => {
   }
 
   return menu;
-};
+}
 
 export default buildChromeContextMenu;

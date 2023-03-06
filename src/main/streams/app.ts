@@ -111,7 +111,7 @@ app.on('web-contents-created', async (evtApp, webContents) => {
     // it's shell
     if (isRabbyShellURL(pageURL) && IS_RUNTIME_PRODUCTION) return;
 
-    const menu = buildChromeContextMenu({
+    const menu = await buildChromeContextMenu({
       params,
       webContents,
       extensionMenuItems: (
