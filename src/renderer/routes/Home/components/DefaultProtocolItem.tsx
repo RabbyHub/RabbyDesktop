@@ -243,12 +243,17 @@ const DefaultProtocolItem = ({
           iconUrl={protocol.logo_url}
           chainServerId={protocol.chain}
 <<<<<<< HEAD
+<<<<<<< HEAD
           width="20px"
           height="20px"
 =======
           width="32px"
           height="32px"
 >>>>>>> 9375e66 (fix: col styles)
+=======
+          width="22px"
+          height="22px"
+>>>>>>> 0216cfa (fix: icon size)
           noRound
         />
         <div className="flex flex-1 items-center">

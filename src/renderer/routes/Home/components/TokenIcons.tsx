@@ -8,7 +8,7 @@ const TokenIconsWrapper = styled.div`
   align-items: center;
   position: relative;
   align-self: center;
-  width: 100%;
+  max-width: 100%;
 
   & > div {
     display: inline;
