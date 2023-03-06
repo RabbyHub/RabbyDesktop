@@ -140,10 +140,10 @@ export const setListeners = {
    * Emitted when a server side redirect occurs during navigation. For example a 302 redirect.
    */
   'will-redirect': (webContents: Electron.WebContents) => {
-    webContents.on('will-redirect', (evt, targetURL) => {
+    webContents.on('will-redirect', (evt, targetURL, isInPlace) => {
       if (!webContents) return;
       const evtWebContents = (evt as any).sender as Electron.WebContents;
-      const currentUrl = evtWebContents.getURL();
+      const previousURL = evtWebContents.getURL();
 
       const tabbedWin = getTabbedWindowFromWebContents(evtWebContents);
       const dapps = getAllDapps();
@@ -155,7 +155,7 @@ export const setListeners = {
         couldKeepTab,
         shouldOpenExternal,
         isToSameOrigin,
-      } = parseDappRedirect(currentUrl, targetURL, {
+      } = parseDappRedirect(previousURL, targetURL, {
         dapps,
         blockchain_explorers: getBlockchainExplorers(),
         isForTrezorLikeConnection: tabbedWin?.isForTrezorLikeConnection(),
@@ -169,17 +169,22 @@ export const setListeners = {
       // allow redirect in main domain
       if (allowOpenTab || couldKeepTab) return true;
 
-      if (!currentUrl || (isFromDapp && !isToSameOrigin)) {
+      if (!previousURL || (isFromDapp && !isToSameOrigin)) {
+        const redirectSourceTab = tabbedWin?.tabs.tabList.find(
+          (tab) => tab.view?.webContents.id === evtWebContents.id
+        );
+
         evt.preventDefault();
         safeOpenURL(targetURL, {
           existedDapp: targetInfo.foundDapp,
-          sourceURL: currentUrl,
+          sourceURL: previousURL,
+          redirectSourceTab,
         }).then((res) => res.activeTab());
 
         return false;
       }
 
-      return !!currentUrl;
+      return !!previousURL;
     });
   },
 
@@ -226,10 +231,12 @@ export const setListeners = {
         if (isFromDapp && !isToSameOrigin) {
           if (allowOpenTab || couldKeepTab) return true;
 
+          // const openedTab = tabbedWin?.tabs.tabList.find(tab => tab.view?.webContents.id === evtWebContents.id);
           evt.preventDefault();
           safeOpenURL(targetURL, {
             sourceURL: currentUrl,
             existedDapp: targetInfo.foundDapp,
+            // openedTab,
             _targetwin: parentWindow,
           }).then((res) => res.activeTab());
 
