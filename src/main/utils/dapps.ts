@@ -25,7 +25,7 @@ const DFLT_TIMEOUT = 8 * 1e3;
 const enum DETECT_ERR_CODES {
   NOT_HTTPS = 'NOT_HTTPS',
   INACCESSIBLE = 'INACCESSIBLE',
-  REDIRECTED = 'REDIRECTED',
+  REDIRECTED_OUT = 'REDIRECTED_OUT',
   HTTPS_CERT_INVALID = 'HTTPS_CERT_INVALID',
   TIMEOUT = 'TIMEOUT',
 
@@ -233,11 +233,11 @@ export async function detectDapp(
     checkResult.finalUrl
   );
 
-  if (checkResult.isRedirected) {
+  if (checkResult.isRedirectedOut) {
     return {
       data: null,
       error: {
-        type: DETECT_ERR_CODES.REDIRECTED,
+        type: DETECT_ERR_CODES.REDIRECTED_OUT,
         message: `Cannot be added as a Dapp: the current domain has been redirected to ${finalDomain}, which may pose a security risk.`,
       },
     };

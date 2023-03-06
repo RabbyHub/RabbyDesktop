@@ -2,7 +2,7 @@ import {
   IS_RUNTIME_PRODUCTION,
   RABBY_INTERNAL_PROTOCOL,
 } from '@/isomorphic/constants';
-import { formatProxyRules } from '@/isomorphic/url';
+import { canoicalizeDappUrl, formatProxyRules } from '@/isomorphic/url';
 import { BrowserView } from 'electron';
 import { catchError, firstValueFrom, of, Subject, timeout } from 'rxjs';
 import { BrowserViewManager } from './browserView';
@@ -76,7 +76,7 @@ export async function checkUrlViaBrowserView(
         valid: true;
         // some website would redirec to another origin, such as https://binance.com -> https://www.binance.com
         finalUrl: string;
-        isRedirected?: boolean;
+        isRedirectedOut?: boolean;
       }
     | {
         valid: false;
@@ -91,13 +91,16 @@ export async function checkUrlViaBrowserView(
     opts?.onPageFaviconUpdated?.(favicons);
   });
 
+  const parsedInputInfo = canoicalizeDappUrl(targetURL);
   const successResult: Result = {
     valid: true,
     finalUrl: '',
-    isRedirected: false,
+    isRedirectedOut: false,
   };
-  view.webContents.on('did-redirect-navigation', () => {
-    successResult.isRedirected = true;
+  view.webContents.on('did-redirect-navigation', (_, currentURL) => {
+    successResult.isRedirectedOut =
+      parsedInputInfo.secondaryDomain !==
+      canoicalizeDappUrl(currentURL).secondaryDomain;
   });
 
   view.webContents.on('did-finish-load', () => {
