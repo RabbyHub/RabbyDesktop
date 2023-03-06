@@ -1,5 +1,6 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 
+import { arraify } from '@/isomorphic/array';
 import {
   IS_RUNTIME_PRODUCTION,
   PERSIS_STORE_PREFIX,
@@ -102,9 +103,11 @@ handleIpcMainInvoke('get-app-dynamic-config', () => {
 });
 
 export function getBlockchainExplorers() {
-  const set = new Set(dynamicConfigStore.get('blockchain_explorers'));
+  const set = new Set(DEFAULT_BLOCKCHAIN_EXPLORERS);
 
-  DEFAULT_BLOCKCHAIN_EXPLORERS.forEach((d) => set.add(d));
+  arraify(dynamicConfigStore.get('blockchain_explorers')).forEach((d) => {
+    if (d) set.add(d);
+  });
 
   return set;
 }
