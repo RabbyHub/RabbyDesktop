@@ -1,9 +1,10 @@
-import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+// import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { usePopupViewInfo } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { atom, useAtom } from 'jotai';
 
 const addUrlAtom = atom(
-  IS_RUNTIME_PRODUCTION ? 'https://' : 'https://debank.com'
+  ''
+  // IS_RUNTIME_PRODUCTION ? 'https://' : 'https://debank.com'
 );
 
 export function useAddDappURL() {

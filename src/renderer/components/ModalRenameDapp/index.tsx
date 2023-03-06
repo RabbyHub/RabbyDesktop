@@ -10,7 +10,7 @@ import { DappFavicon } from '../DappFavicon';
 import { Modal } from '../Modal/Modal';
 import RabbyInput from '../AntdOverwrite/Input';
 
-const ALIAS_LIMIT = 15;
+// const ALIAS_LIMIT = 15;
 
 function useRename(dapp: IDapp | null) {
   const [alias, setAlias] = useState<string>(dapp?.alias || '');
@@ -46,9 +46,8 @@ function useRename(dapp: IDapp | null) {
     doRename,
     isLoading,
     isValidAlias:
-      alias.length <= ALIAS_LIMIT &&
-      isValidDappAlias(alias) &&
-      alias !== dapp?.alias,
+      // alias.length <= ALIAS_LIMIT &&
+      isValidDappAlias(alias) && alias !== dapp?.alias,
   };
 }
 
