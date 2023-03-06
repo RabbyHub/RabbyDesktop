@@ -180,15 +180,23 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
           });
           return null;
         }
-        if (data && canoicalizeDappUrl(data.inputOrigin).isSubDomain) {
+        const dappUrl = canoicalizeDappUrl(data?.inputOrigin || '');
+        if (data && dappUrl.isSubDomain) {
           setState({
             dappInfo: data,
             validateStatus: 'success',
             help: (
               <>
-                It appears that the current input may be a subdomain. By adding
-                it as a Dapp, you'll be limited to browsing within that
-                subdomain.
+                Check that what you entered may be a subdomain name, whether to
+                replace with{' '}
+                <span
+                  className={styles.replaceLink}
+                  onClick={() => {
+                    onReplace?.(dappUrl.secondaryDomain);
+                  }}
+                >
+                  {dappUrl.secondaryDomain}
+                </span>
               </>
             ),
           });
