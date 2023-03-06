@@ -1,14 +1,10 @@
-import Axios from 'axios';
-import { useRequest } from 'ahooks';
-import { useCallback, useEffect, useMemo } from 'react';
 import { atom, useAtom } from 'jotai';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { matchURLHead } from '@/isomorphic/app-config';
 
-import tinyColor from 'tinycolor2';
 import { invertColor } from '@/isomorphic/colors';
-import { canoicalizeDappUrl } from '@/isomorphic/url';
-import { isEqual } from 'lodash';
+import tinyColor from 'tinycolor2';
 import { getSpecialDomain } from '../utils/specialDomain';
 
 const appDynamicConfigAtom = atom({} as IAppDynamicConfig);
@@ -106,23 +102,28 @@ export function useMatchURLBaseConfig(urlBase?: string) {
 }
 
 export const useGetSpecialDomain = () => {
-  // const { appDynamicConfig } = useAppDynamicConfig();
-  const { data } = useRequest(
-    () => {
-      return Axios.get<{ ids: string[] }>(
-        `https://api.rabby.io/v1/domain/share_list`
-      );
-    },
-    {
-      cacheKey: 'useCheckSpecialDomain',
-    }
-  );
+  const { appDynamicConfig } = useAppDynamicConfig();
+  const domains = useMemo(() => {
+    return appDynamicConfig?.special_main_domains?.ids || [];
+  }, [appDynamicConfig?.special_main_domains?.ids]);
 
-  const domains = useMemo(() => data?.data?.ids || [], [data?.data?.ids]);
+  console.log(appDynamicConfig);
+
+  // const { data } = useRequest(
+  //   () => {
+  //     return Axios.get<{ ids: string[] }>(
+  //       `https://api.rabby.io/v1/domain/share_list`
+  //     );
+  //   },
+  //   {
+  //     cacheKey: 'useCheckSpecialDomain',
+  //   }
+  // );
+
+  // const domains = useMemo(() => data?.data?.ids || [], [data?.data?.ids]);
 
   return useCallback(
     (url: string) => {
-      console.log(url, domains);
       return getSpecialDomain(url, domains);
     },
     [domains]

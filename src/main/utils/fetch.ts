@@ -152,13 +152,13 @@ export async function fetchDynamicConfig(options?: {
       .then((res) => res.data)
       .catch((err) => undefined), // TODO: report to sentry
 
-    // fetchClient
-    //   .get(`https://api.rabby.io/v1/domain/share_list?t=${Date.now()}`, {
-    //     timeout: timeoutV,
-    //     proxy,
-    //   })
-    //   .then((res) => res.data)
-    //   .catch((err) => undefined), // TODO: report to sentry
+    fetchClient
+      .get(`https://api.rabby.io/v1/domain/share_list`, {
+        timeout: timeoutV,
+        proxy,
+      })
+      .then((res) => res.data)
+      .catch((err) => undefined), // TODO: report to sentry
   ]);
 
   return {

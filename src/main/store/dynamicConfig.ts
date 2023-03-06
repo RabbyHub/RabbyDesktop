@@ -53,9 +53,9 @@ export const dynamicConfigStore = makeStore<IAppDynamicConfig>({
   encryptionKey: 'dynamicConfig',
 });
 
-const INTERVAL_SEC = IS_RUNTIME_PRODUCTION ? 5 * 60 : 5;
+const INTERVAL_SEC = IS_RUNTIME_PRODUCTION ? 5 * 60 : 60;
 function scheduleFetch() {
-  setInterval(() => {
+  const fetchData = () => {
     fetchDynamicConfig({ proxy: getAppProxyConfigForAxios() }).then(
       ({ domain_metas, special_main_domains }) => {
         cLog('[scheduleFetch] DynamicConfig will be updated');
@@ -68,14 +68,15 @@ function scheduleFetch() {
           ...dynamicConfigStore.get('domain_metas'),
           ...domain_metas, // shallow merge to avoid bad data from remote
         });
-        console.debug('special_main_domains', special_main_domains);
         dynamicConfigStore.set('special_main_domains', {
           ...dynamicConfigStore.get('special_main_domains'),
           ...special_main_domains,
         });
       }
     );
-  }, INTERVAL_SEC * 1e3);
+  };
+  fetchData();
+  setInterval(fetchData, INTERVAL_SEC * 1e3);
 }
 
 scheduleFetch();
@@ -84,6 +85,7 @@ handleIpcMainInvoke('get-app-dynamic-config', () => {
   return {
     dynamicConfig: {
       domain_metas: dynamicConfigStore.get('domain_metas'),
+      special_main_domains: dynamicConfigStore.get('special_main_domains'),
     },
   };
 });

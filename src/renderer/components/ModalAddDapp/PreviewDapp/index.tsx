@@ -13,12 +13,14 @@ interface PreviewDappProps {
   onAdd: (dapp: NonNullable<IDappsDetectResult['data']>) => void;
   onOpen: (dapp: NonNullable<IDappsDetectResult['data']>) => void;
   loading?: boolean;
+  openBtn?: React.ReactNode;
 }
 export const PreviewDapp = ({
   data,
   onAdd,
   loading,
   onOpen,
+  openBtn,
 }: PreviewDappProps) => {
   const [input, setInput] = useState(data.recommendedAlias);
 
@@ -57,15 +59,17 @@ export const PreviewDapp = ({
           ) : (
             <>
               {data?.isInputExistedDapp ? (
-                <Button
-                  type="primary"
-                  className={styles.previewBtnSuccess}
-                  onClick={() => {
-                    onOpen?.(data);
-                  }}
-                >
-                  Open
-                </Button>
+                openBtn || (
+                  <Button
+                    type="primary"
+                    className={styles.previewBtnSuccess}
+                    onClick={() => {
+                      onOpen?.(data);
+                    }}
+                  >
+                    Open
+                  </Button>
+                )
               ) : (
                 <Button
                   type="primary"

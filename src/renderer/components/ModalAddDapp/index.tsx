@@ -224,9 +224,13 @@ const sleep = (time: number) => {
 export function AddDapp({
   onAddedDapp,
   onOpenDapp,
+  url: initUrl,
+  openBtn,
 }: ModalProps & {
   onAddedDapp?: (origin: string) => void;
   onOpenDapp?: (origin: string) => void;
+  url?: string;
+  openBtn?: ReactNode;
 }) {
   const { dapps } = useDapps();
   const [form] = Form.useForm();
@@ -239,10 +243,6 @@ export function AddDapp({
         url: v,
       });
       check(v);
-      setState({
-        validateStatus: undefined,
-        help: '',
-      });
     },
   });
 
@@ -331,27 +331,18 @@ export function AddDapp({
       handleAdd(dappInfo);
     }
   };
-  // const handleFormChange = useCallback(() => {
-  //   const { url } = form.getFieldsValue();
-  //   if (!url.trim()) {
-  //     setState({
-  //       validateStatus: undefined,
-  //       help: '',
-  //     });
-  //   }
-  // }, [form, setState, state.help]);
 
   const isShowExample = !state?.dappInfo && !state.help && !loading;
   const isShowWarning =
     state.validateStatus === 'error' && state.help && !loading;
 
   useEffect(() => {
-    const url = addUrl?.replace(/^\w+:\/\//, '');
+    const url = canoicalizeDappUrl(initUrl || addUrl)?.hostname;
     form.setFieldsValue({ url });
     if (url) {
       check(url);
     }
-  }, [addUrl, check, form]);
+  }, [addUrl, check, form, initUrl]);
 
   return (
     <div className={styles.content}>
@@ -397,7 +388,7 @@ export function AddDapp({
         <DomainExample
           onDomainClick={(domain) => {
             form.setFieldsValue({ url: domain });
-            handleCheckDebounce();
+            handleCheck();
           }}
         />
       )}
@@ -413,6 +404,7 @@ export function AddDapp({
             openDapp(dapp.inputOrigin);
             onOpenDapp?.(dapp.inputOrigin);
           }}
+          openBtn={openBtn}
         />
       ) : null}
       <RelationModal
@@ -446,6 +438,8 @@ export default function ModalAddDapp({
   ModalProps & {
     onAddedDapp?: (origin: string) => void;
     onOpenDapp?: (origin: string) => void;
+    url?: string;
+    openBtn?: React.ReactNode;
   }
 >) {
   return (
