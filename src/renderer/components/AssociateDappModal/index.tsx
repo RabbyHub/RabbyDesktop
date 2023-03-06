@@ -5,6 +5,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useOpenDapp } from '@/renderer/utils/react-router';
 import styled from 'styled-components';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
+import ModalAddDapp from '@/renderer/components/ModalAddDapp';
 import {
   useProtocolDappsBinding,
   useTabedDapps,
@@ -180,6 +181,8 @@ const BindDapp = ({
 }) => {
   const { dapps } = useTabedDapps();
   const [kw, setKw] = useState('');
+  const [openAddDapp, setOpenAddDapp] = useState(false);
+  const [addDappUrl, setAddDappUrl] = useState<string | undefined>(undefined);
   const { protocolDappsBinding, bindingDappsToProtocol } =
     useProtocolDappsBinding();
 
@@ -217,9 +220,17 @@ const BindDapp = ({
   };
 
   const openDapp = useOpenDapp();
+
   const handleOpenDapp = (url: string) => {
     onCancel();
     openDapp(url);
+  };
+
+  const handleAddDapp = () => {
+    setAddDappUrl(kw);
+    setTimeout(() => {
+      setOpenAddDapp(true);
+    }, 100);
   };
 
   return (
@@ -267,6 +278,7 @@ const BindDapp = ({
               className={classNames('footer', {
                 'cursor-pointer': shouldAdd,
               })}
+              onClick={handleAddDapp}
             >
               {shouldAdd ? (
                 <div className="flex items-center">
@@ -286,6 +298,20 @@ const BindDapp = ({
           </>
         )}
       </div>
+      <ModalAddDapp
+        onCancel={() => setOpenAddDapp(false)}
+        open={openAddDapp}
+        url={addDappUrl}
+        openBtn={
+          <Button
+            className="w-[200px] rounded"
+            type="primary"
+            onClick={() => setOpenAddDapp(false)}
+          >
+            Go back to bind Dapp
+          </Button>
+        }
+      />
     </BindDappWrapper>
   );
 };
