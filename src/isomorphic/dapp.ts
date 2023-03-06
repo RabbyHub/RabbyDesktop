@@ -13,7 +13,17 @@ export function formatDapp(
 ): IDapp | null {
   if (!input?.origin) return null;
 
+  switch (input?.type) {
+    case 'http':
+    default: {
+      input.type = 'http';
+      break;
+    }
+  }
+
   return {
+    id: input.id || input.origin,
+    type: input?.type,
     alias: input?.alias || ('' as IDapp['alias']),
     origin: input.origin as IDapp['origin'],
     faviconUrl:
@@ -158,4 +168,9 @@ export function normalizeProtocolBindingValues(
 
     return acc;
   }, {} as IProtocolDappBindings);
+}
+
+const VALID_TYPES = ['http', 'ipfs'];
+export function isValidDappType(type: string) {
+  return type && VALID_TYPES.includes(type);
 }

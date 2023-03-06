@@ -176,8 +176,6 @@ export async function fetchDynamicConfig(options?: {
       .catch((err) => undefined), // TODO: report to sentry
   ]);
 
-  console.log('[feat] blockchain_explorers', blockchain_explorers);
-
   return {
     domain_metas: (domain_metas as IAppDynamicConfig['domain_metas']) || {},
     blockchain_explorers:
