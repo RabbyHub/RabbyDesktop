@@ -60,7 +60,7 @@ function InnerRedirect({
         </div>
       </header>
       <div className={classNames(styles.tipContainer, 'mt-30px pb-60px')}>
-        The page you want to open does not belong to the current Dapp
+        The page you want to open has not been added as a Dapp.
       </div>
       <div className={classNames(styles.buttonContainer)}>
         <Button

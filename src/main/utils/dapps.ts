@@ -215,7 +215,7 @@ export async function detectDapp(
         error: {
           type: DETECT_ERR_CODES.TIMEOUT,
           message:
-            'Access to Dapp timed out, please check your network and try again.',
+            'Access to Dapp timed out. Please check your network and retry.',
         },
       };
     }

@@ -53,7 +53,7 @@ export const DAppBlock = ({
   return (
     <Dropdown
       overlayClassName="dapps-dropdown-operations"
-      // getPopupContainer={() => ref.current || document.body}
+      getPopupContainer={() => ref.current || document.body}
       trigger={['contextMenu']}
       // open
       overlay={
@@ -149,7 +149,7 @@ export const DAppBlock = ({
             origin={dapp.origin}
             src={dapp.faviconBase64 ? dapp.faviconBase64 : dapp.faviconUrl}
           />
-          <div className="infos">
+          <div className="infos pr-[16px]">
             <h4 className="dapp-alias">{dapp.alias}</h4>
             <div className="dapp-url">
               {dapp.origin?.replace(/^\w+:\/\//, '')}
