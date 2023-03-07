@@ -41,14 +41,32 @@ type IPreviewDappViewChanges =
       rect?: null | DappViewRect;
     };
 
-type IDapp = {
-  // TODO: implement it;
-  id?: string;
+type IDappType = INextDapp['type'];
+type INextDapp = {
+  id: string;
   alias: string;
-  origin: string | `https://${string}${string}`;
-  faviconUrl?: string;
-  faviconBase64?: string;
-};
+} & (
+  | {
+      type: 'unknown';
+      origin: string;
+    }
+  | {
+      type: 'http';
+      origin: string | `https://${string}${string}`;
+      faviconUrl?: string;
+      faviconBase64?: string;
+    }
+  | {
+      type: 'ipfs';
+      origin: string | `ipfs://${string}${string}`;
+    }
+);
+
+type IHttpDapp = INextDapp & { type: 'http' };
+/**
+ * @description alias of http type dapp
+ */
+type IDapp = IHttpDapp;
 
 type IDappWithDomainMeta = IDapp & {
   // only dapp with second domain has this property
