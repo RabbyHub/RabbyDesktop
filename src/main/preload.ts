@@ -1,6 +1,6 @@
 /// <reference path="../renderer/preload.d.ts" />
 
-import { contextBridge } from 'electron';
+import { app, contextBridge } from 'electron';
 import { injectBrowserAction } from '@rabby-wallet/electron-chrome-extensions/dist/browser-action';
 
 // to injectExtensionAPIs on chrome-extension://
@@ -10,6 +10,7 @@ import {
   RABBY_LOCAL_URLBASE,
 } from 'isomorphic/constants';
 import { ipcRendererObj, rendererHelpers } from '../preloads/base';
+import pkgjson from '../../package.json';
 
 import { setupClass } from '../preloads/setup-class';
 import { setupDapp } from '../preloads/setup-dapp';
@@ -31,6 +32,9 @@ const IS_BUILTIN_WEBVIEW =
 if (IS_BUILTIN_WEBVIEW && !window.rabbyDesktop) {
   try {
     contextBridge.exposeInMainWorld('rabbyDesktop', {
+      get appVersion() {
+        return pkgjson.version;
+      },
       ipcRenderer: ipcRendererObj,
       rendererHelpers,
     });
@@ -42,6 +46,9 @@ if (IS_BUILTIN_WEBVIEW && !window.rabbyDesktop) {
      * for those context, we can only receive message from main world
      */
     window.rabbyDesktop = {
+      get appVersion() {
+        return pkgjson.version;
+      },
       ipcRenderer: {
         ...(isExtensionBackground(window.location.href) && {
           invoke: ipcRendererObj.invoke,

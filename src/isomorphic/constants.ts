@@ -48,3 +48,7 @@ export const SAFE_WEBPREFERENCES: Electron.WebPreferences = {
 };
 
 export const FORCE_DISABLE_CONTENT_PROTECTION = true;
+
+export const APP_RUNTIME_ENV = IS_RUNTIME_PRODUCTION
+  ? 'production'
+  : 'development';

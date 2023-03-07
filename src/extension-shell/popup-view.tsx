@@ -5,6 +5,7 @@ import '@/renderer/css/style.less';
 
 import './popup-view.less';
 import '@/renderer/css/windicss';
+import '@/renderer/utils/rendererReport';
 import '@/renderer/ipcRequest/zPopupMessage';
 
 import { parseQueryString } from '@/isomorphic/url';

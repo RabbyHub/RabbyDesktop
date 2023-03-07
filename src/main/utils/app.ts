@@ -1,11 +1,14 @@
 /* eslint import/prefer-default-export: off */
 import path from 'path';
 import { app } from 'electron';
+import * as Sentry from '@sentry/electron';
+
+import { filterAppChannel, getSentryEnv } from '@/isomorphic/env';
 import {
   FRAME_DEFAULT_SIZE,
   FRAME_MIN_SIZE,
 } from '../../isomorphic/const-size';
-import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
+import { APP_NAME, IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 import { getWindowBoundsInWorkArea } from './screen';
 
 const PROJ_ROOT = path.join(__dirname, '../../../');
@@ -112,6 +115,27 @@ export function getBrowserWindowOpts(
       ...windowOpts?.webPreferences,
     },
   };
+}
+
+export function getMainProcessAppChannel() {
+  return filterAppChannel((process as any).buildchannel);
+}
+
+/**
+ * @warning make sure calling after app's userData setup
+ */
+export function initMainProcessSentry() {
+  Sentry.init({
+    dsn: 'https://520afbe8f6574cb3a39e6cb7296f9008@o460488.ingest.sentry.io/4504751161868288',
+    release: app.getVersion(),
+
+    // Set tracesSampleRate to 1.0 to capture 100%
+    // of transactions for performance monitoring.
+    // We recommend adjusting this value in production
+    tracesSampleRate: 1.0,
+    environment: getSentryEnv(getMainProcessAppChannel()),
+    debug: !IS_RUNTIME_PRODUCTION,
+  });
 }
 
 export const IS_REG_BUILD = (process as any).buildchannel === 'reg';

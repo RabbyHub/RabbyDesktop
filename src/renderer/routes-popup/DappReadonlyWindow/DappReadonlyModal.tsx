@@ -8,6 +8,7 @@ import { canoicalizeDappUrl } from 'isomorphic/url';
 import { useSettings } from '@/renderer/hooks/useSettings';
 
 import '@/renderer/css/windicss';
+import '@/renderer/utils/rendererReport';
 
 import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import { RcIconClose, RcIconLoading } from '@/../assets/icons/readonly-modal';
