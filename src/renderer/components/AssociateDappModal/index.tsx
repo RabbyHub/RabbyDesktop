@@ -11,6 +11,7 @@ import {
   useTabedDapps,
 } from '@/renderer/hooks/useDappsMngr';
 import { isDomainLikeStr, removeProtocolFromUrl } from '@/renderer/utils/url';
+import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 import { Modal } from '../Modal/Modal';
 import styles from './index.module.less';
 import { toastMessage } from '../TransparentToast';
@@ -295,7 +296,8 @@ const BindDapp = ({
                 <div className="flex items-center">
                   <div className="flex-1">
                     Don't see the Dapp you want? Add{' '}
-                    <span className="url">{kw}</span> as new Dapp and bind
+                    <span className="url">{ellipsisTokenSymbol(kw, 20)}</span>{' '}
+                    as new Dapp and bind
                   </div>
                   <img
                     className="icon-enter"

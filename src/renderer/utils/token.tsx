@@ -317,7 +317,7 @@ export function getTokens(
     <TokensIcons tokens={tokenStr} icons={tokens.map((v) => v?.logo_url)} />
   );
   return (
-    <div className="flex items-center flex-wrap mr-2">
+    <div className="flex items-center flex-wrap">
       {icon}
       {isDebt && <DebtTag>Debt</DebtTag>}
     </div>

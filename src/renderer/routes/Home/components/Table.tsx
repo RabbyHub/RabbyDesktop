@@ -48,6 +48,14 @@ const ColWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  margin-right: 15px;
+  &:nth-last-child(1) {
+    margin-right: 0;
+  }
+  &:nth-last-child(2) {
+    margin-right: 8px;
+  }
+
   &:not(.header):nth-child(1),
   &:not(.header):nth-last-child(1) {
     font-size: 13px;

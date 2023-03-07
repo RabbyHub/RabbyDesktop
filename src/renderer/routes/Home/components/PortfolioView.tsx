@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import styled from 'styled-components';
+import classNames from 'classnames';
 import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
 import { DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
@@ -167,13 +168,28 @@ const PortfolioView = ({
 
   if (isEmpty) {
     return (
-      <PortfolioWrapper className="empty">
-        <img
-          className="icon-empty"
-          src="rabby-internal://assets/icons/home/asset-empty.svg"
-        />
-        <p className="text-empty">No assets</p>
-      </PortfolioWrapper>
+      <div
+        className={classNames({
+          'pt-[15px]': chainList.length > 1,
+        })}
+      >
+        <PortfolioWrapper className="empty">
+          {chainList.length > 1 && (
+            <img
+              src="rabby-internal://assets/icons/home/asset-arrow.svg"
+              className="icon-asset-arrow"
+              style={{
+                transform: `translateX(${assetArrowLeft}px)`,
+              }}
+            />
+          )}
+          <img
+            className="icon-empty"
+            src="rabby-internal://assets/icons/home/asset-empty.svg"
+          />
+          <p className="text-empty">No assets</p>
+        </PortfolioWrapper>
+      </div>
     );
   }
 

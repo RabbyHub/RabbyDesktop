@@ -4,6 +4,7 @@ import {
   fillUnpinnedList,
   formatDapp,
   formatDapps,
+  isValidDappType,
   normalizeProtocolBindingValues,
 } from '@/isomorphic/dapp';
 import { arraify } from '@/isomorphic/array';
@@ -124,6 +125,7 @@ export const dappStore = makeStore<{
 });
 
 (function initStore() {
+  /* resort :start */
   const dappsMap = dappStore.get('dappsMap') || {};
 
   const { pinnedList, unpinnedList } = fillUnpinnedList(
@@ -134,6 +136,21 @@ export const dappStore = makeStore<{
 
   dappStore.set('pinnedList', pinnedList);
   dappStore.set('unpinnedList', unpinnedList);
+  /* resort :end */
+
+  /* coerce INextDapp :start */
+  let changed = false;
+  Object.entries(dappsMap).forEach(([k, v]) => {
+    if ((!v.id || !isValidDappType(v.type)) && k.startsWith('http')) {
+      changed = true;
+      v.id = v.origin;
+      v.type = 'http';
+    }
+  });
+  if (changed) {
+    dappStore.set('dappsMap', dappsMap);
+  }
+  /* coerce INextDapp :end  */
 })();
 
 export function getAllDapps() {
@@ -626,12 +643,16 @@ onIpcMainEvent(
   (event, opType) => {
     const dappToAdd: IDapp[] = [
       {
+        id: 'https://expired.badssl.com',
+        type: 'http',
         alias: 'badssl',
         origin: 'https://expired.badssl.com',
         faviconUrl: '',
         faviconBase64: '',
       },
       {
+        id: 'https://expired.badssl.com',
+        type: 'http',
         alias: 'self-signed',
         origin: 'https://self-signed.badssl.com',
         faviconUrl: '',

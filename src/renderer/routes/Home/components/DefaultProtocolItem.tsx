@@ -97,6 +97,8 @@ const ProtocolHeader = styled.div`
     line-height: 18px;
     text-align: right;
     color: #ffffff;
+    position: relative;
+    width: 20%;
   }
   .protocol-info {
     display: inline-flex;
