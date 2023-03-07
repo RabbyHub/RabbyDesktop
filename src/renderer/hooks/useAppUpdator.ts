@@ -2,7 +2,7 @@
 /// <reference path="../../renderer/preload.d.ts" />
 
 import { atom, useAtom } from 'jotai';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { randString } from '../../isomorphic/string';
 
 async function checkIfNewRelease() {
@@ -118,21 +118,26 @@ export function useCheckNewRelease(opts?: { isWindowTop?: boolean }) {
 export function useAppUpdator() {
   const [releaseCheckInfo] = useAtom(releaseCheckInfoAtom);
   const [downloadInfo, setDownloadInfo] = useAtom(downloadInfoAtom);
+  const [isDownloading, setIsDownloading] = useState(
+    !!downloadInfo && !downloadInfo.isEnd
+  );
 
   const onDownload: OnDownloadFunc = useCallback(
     (info) => {
       setDownloadInfo(info);
+      setIsDownloading(!!info && !info.isEnd);
     },
     [setDownloadInfo]
   );
 
   const requestDownload = useCallback(async () => {
     await startDownload({ onDownload });
+    setIsDownloading(true);
   }, [onDownload]);
 
   return {
     releaseCheckInfo,
-    isDownloading: !!downloadInfo && !downloadInfo.isEnd,
+    isDownloading,
     isDownloaded:
       releaseCheckInfo.hasNewRelease && !!downloadInfo && downloadInfo.isEnd,
     progress: downloadInfo?.progress,
