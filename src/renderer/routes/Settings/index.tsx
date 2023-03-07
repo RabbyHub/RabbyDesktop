@@ -22,10 +22,7 @@ import { Switch } from '@/renderer/components/Switch/Switch';
 import { useCheckNewRelease } from '@/renderer/hooks/useAppUpdator';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
-import {
-  useIsViewingDevices,
-  useProxyStateOnSettingPage,
-} from './settingHooks';
+import { useProxyStateOnSettingPage } from './settingHooks';
 import { AutoUpdate } from './components/AutoUpdate';
 import ModalDevices from './components/ModalDevices';
 import { testRequestDevice } from './components/ModalDevices/useFilteredDevices';
@@ -149,7 +146,7 @@ export function MainWindowSettings() {
   const { setIsSettingProxy, customProxyServer, proxyType } =
     useProxyStateOnSettingPage();
 
-  const { setIsViewingDevices } = useIsViewingDevices();
+  // const { setIsViewingDevices } = useIsViewingDevices();
 
   const { fetchReleaseInfo } = useCheckNewRelease();
 
@@ -308,12 +305,12 @@ export function MainWindowSettings() {
         <div className={styles.settingBlock}>
           <h4 className={styles.blockTitle}>Developer Kits</h4>
           <div className={styles.itemList}>
-            <ItemAction
+            <ItemText
               name="Devices"
               icon="rabby-internal://assets/icons/developer-kits/usb.svg"
-              onClick={() => {
-                setIsViewingDevices(true);
-              }}
+              // onClick={() => {
+              //   setIsViewingDevices(true);
+              // }}
             >
               <Button
                 type="primary"
@@ -325,7 +322,7 @@ export function MainWindowSettings() {
               >
                 <code>hid.requestDevices()</code>
               </Button>
-            </ItemAction>
+            </ItemText>
             <ItemAction
               name={<span className={styles.dangerText}>Reset App</span>}
               icon="rabby-internal://assets/icons/mainwin-settings/reset.svg"
