@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import styled from 'styled-components';
+import classNames from 'classnames';
 import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
 import { DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
@@ -140,7 +141,10 @@ const PortfolioView = ({
     const el: HTMLLIElement | null = document.querySelector(
       `#chain-icon-${selectChainServerId}`
     );
+    console.log('selectChainServerId', selectChainServerId);
+    console.log('chainList', chainList);
     if (!selectChainServerId) {
+      console.log((24 * Math.min(27, chainList.length || 2)) / 2 - 7);
       return (24 * Math.min(27, chainList.length || 2)) / 2 - 7;
     }
     if (!el) return 65;
@@ -167,13 +171,28 @@ const PortfolioView = ({
 
   if (isEmpty) {
     return (
-      <PortfolioWrapper className="empty">
-        <img
-          className="icon-empty"
-          src="rabby-internal://assets/icons/home/asset-empty.svg"
-        />
-        <p className="text-empty">No assets</p>
-      </PortfolioWrapper>
+      <div
+        className={classNames({
+          'pt-[15px]': chainList.length > 1,
+        })}
+      >
+        <PortfolioWrapper className="empty">
+          {chainList.length > 1 && (
+            <img
+              src="rabby-internal://assets/icons/home/asset-arrow.svg"
+              className="icon-asset-arrow"
+              style={{
+                transform: `translateX(${assetArrowLeft}px)`,
+              }}
+            />
+          )}
+          <img
+            className="icon-empty"
+            src="rabby-internal://assets/icons/home/asset-empty.svg"
+          />
+          <p className="text-empty">No assets</p>
+        </PortfolioWrapper>
+      </div>
     );
   }
 
