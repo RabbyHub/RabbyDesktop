@@ -204,7 +204,7 @@ export async function detectDapp(
       data: null,
       error: {
         type: DETECT_ERR_CODES.HTTPS_CERT_INVALID,
-        message: 'The certificate of the Dapp has expired',
+        message: checkResult.certErrorDesc,
       },
     };
   }
