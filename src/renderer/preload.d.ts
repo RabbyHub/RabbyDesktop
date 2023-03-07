@@ -308,6 +308,7 @@ type IChannelsKey = keyof ChannelMessagePayload;
 interface Window {
   // for built-in webview
   rabbyDesktop: {
+    readonly appVersion: string;
     ipcRenderer: {
       /* send message to main process */
       sendMessage<T extends IChannelsKey>(
