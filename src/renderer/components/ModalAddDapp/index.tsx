@@ -188,8 +188,8 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
             validateStatus: 'success',
             help: (
               <>
-                Check that what you entered may be a subdomain name, whether to
-                replace with{' '}
+                You may have entered a subdomain name. Do you want to replace
+                with the main domain{' '}
                 <span
                   className={styles.replaceLink}
                   onClick={() => {
@@ -197,7 +197,8 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
                   }}
                 >
                   {dappUrl.secondaryDomain}
-                </span>
+                </span>{' '}
+                ?
               </>
             ),
           });

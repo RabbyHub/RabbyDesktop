@@ -305,7 +305,7 @@ const BindDapp = ({
                   />
                 </div>
               ) : (
-                "Don't see the Dapp you want? Try to enter the Dapp domain."
+                "Don't see the Dapp you want? Try searching the Dapp domain."
               )}
             </div>
           </>
