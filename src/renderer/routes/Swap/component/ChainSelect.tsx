@@ -66,10 +66,6 @@ export const ChainSelect = ({
     openChainModal();
   };
 
-  // if (!selectedDex) {
-  //   return null;
-  // }
-
   return (
     <>
       <ChainSelectWrapper onClick={handleClickSelector}>
