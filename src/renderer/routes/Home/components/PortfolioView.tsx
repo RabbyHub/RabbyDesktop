@@ -141,10 +141,7 @@ const PortfolioView = ({
     const el: HTMLLIElement | null = document.querySelector(
       `#chain-icon-${selectChainServerId}`
     );
-    console.log('selectChainServerId', selectChainServerId);
-    console.log('chainList', chainList);
     if (!selectChainServerId) {
-      console.log((24 * Math.min(27, chainList.length || 2)) / 2 - 7);
       return (24 * Math.min(27, chainList.length || 2)) / 2 - 7;
     }
     if (!el) return 65;
