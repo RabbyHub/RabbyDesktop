@@ -238,7 +238,8 @@ const BindDapp = ({
     }, 100);
   };
 
-  const handleBack = () => {
+  const handleBack = (dapp: IDapp) => {
+    setKw(dapp.alias);
     setOpenAddDapp(false);
   };
 
@@ -312,15 +313,8 @@ const BindDapp = ({
         onCancel={() => setOpenAddDapp(false)}
         open={openAddDapp}
         url={addDappUrl}
-        openBtn={
-          <Button
-            className={`${styles.successBtn} w-[200px] rounded`}
-            type="primary"
-            onClick={handleBack}
-          >
-            Go back to bind Dapp
-          </Button>
-        }
+        isGoBack
+        onGoBackClick={handleBack}
       />
     </BindDappWrapper>
   );
