@@ -12,6 +12,7 @@ type ChannelInvokePayload = {
     send: [];
     response: {
       version: ReturnType<Electron.App['getVersion']>;
+      appChannel: 'reg' | 'prod';
     };
   };
   'get-os-info': {

@@ -12,7 +12,13 @@ import {
   getOrInitMainWinPosition,
   storeMainWinPosition,
 } from '../store/desktopApp';
-import { getAssetPath, getBrowserWindowOpts, relaunchApp } from '../utils/app';
+import {
+  getMainProcessAppChannel,
+  getAssetPath,
+  getBrowserWindowOpts,
+  relaunchApp,
+} from '../utils/app';
+import '../utils/appReport';
 import {
   emitIpcMainEvent,
   handleIpcMainInvoke,
@@ -160,6 +166,7 @@ onIpcMainEvent('__internal_rpc:main-window:click-close', async (evt) => {
 handleIpcMainInvoke('get-app-version', (_) => {
   return {
     version: app.getVersion(),
+    appChannel: getMainProcessAppChannel(),
   };
 });
 
