@@ -24,7 +24,7 @@ const ExpandItem = styled.div`
   .hide-assets-usd-value {
     position: relative;
     font-weight: 700;
-    font-size: 13px;
+    font-size: 15px;
     line-height: 18px;
     text-align: right;
     flex: 1;
