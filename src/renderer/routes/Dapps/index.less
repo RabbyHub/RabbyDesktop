@@ -3,7 +3,7 @@
   .dapp-matrix {
     display: grid;
     grid-gap: 20px;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   // &.J_add
@@ -188,7 +188,7 @@
 @media screen and (min-width: 1150px) {
   .dapps {
     .dapp-matrix {
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
 }
@@ -196,7 +196,7 @@
 @media screen and (min-width: 1400px) {
   .dapps {
     .dapp-matrix {
-      grid-template-columns: 1fr 1fr 1fr 1fr;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
   }
 }
@@ -204,7 +204,7 @@
 @media screen and (min-width: 1690px) {
   .dapps {
     .dapp-matrix {
-      grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
     }
   }
 }
@@ -212,7 +212,7 @@
 @media screen and (min-width: 1980px) {
   .dapps {
     .dapp-matrix {
-      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
     }
   }
 }
