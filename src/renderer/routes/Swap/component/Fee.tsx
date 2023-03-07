@@ -98,7 +98,7 @@ export const Fee = (props: FeeProps) => {
         </Tooltip>
       </div>
       <div className="feeBox">
-        <span className="fee">{fee}%</span>
+        {fee !== '0' && <span className="fee">{fee}%</span>}
         <span className="real-fee">0%</span>
         <Tooltip
           overlayStyle={overlayStyle}
