@@ -1,14 +1,26 @@
-import { useCallback, useMemo } from 'react';
-import { Skeleton } from 'antd';
+import {
+  useCallback,
+  useMemo,
+  useState,
+  useRef,
+  ReactNode,
+  useContext,
+  useEffect,
+} from 'react';
+import { Skeleton, Popover } from 'antd';
 import styled from 'styled-components';
 import classNames from 'classnames';
 import { TokenItem } from '@debank/rabby-api/dist/types';
+import { useClickAway } from 'react-use';
 import { useProtocolDappsBinding } from '@/renderer/hooks/useDappsMngr';
 import { IconWithChain } from '@/renderer/components/TokenWithChain';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import { useOpenDapp } from '@/renderer/utils/react-router';
 import { formatUsdValue } from '@/renderer/utils/number';
+import { removeProtocolFromUrl } from '@/renderer/utils/url';
+import IconRcMore from '@/../assets/icons/home/more.svg?rc';
 import PoolItem, { LoadingPoolItem } from './PoolItem';
+import ScrollTopContext from './scrollTopContext';
 
 const ProtocolItemWrapper = styled.div`
   margin-bottom: 27px;
@@ -35,17 +47,10 @@ const ProtocolItemWrapper = styled.div`
 
 const ProtocolHeader = styled.div`
   display: flex;
-  margin-bottom: 14px;
-  padding: 0 23px;
-  align-items: center;
-  .protocol-name {
-    margin-left: 8px;
-    font-weight: 700;
-    font-size: 15px;
-    line-height: 1;
-    color: #fff;
-    text-transform: uppercase;
-  }
+  margin-bottom: 20px;
+  padding-left: 22px;
+  padding-right: 22px;
+  align-items: flex-end;
   .token-with-chain {
     .chain-logo {
       width: 12px;
@@ -55,60 +60,66 @@ const ProtocolHeader = styled.div`
     }
   }
   .protocol-usd {
-    min-width: 20%;
     font-weight: 700;
     font-size: 15px;
     line-height: 18px;
     text-align: right;
     color: #ffffff;
-    position: relative;
   }
   .protocol-info {
-    display: flex;
+    display: inline-flex;
     align-items: center;
+    margin-left: 12px;
+    position: relative;
+    cursor: pointer;
+    .protocol-name {
+      font-weight: 700;
+      font-size: 15px;
+      line-height: 18px;
+      color: #fff;
+      text-transform: uppercase;
+    }
     .icon-relate {
       cursor: pointer;
-      margin-left: 8px;
-      width: 14px;
-      display: none;
+      margin-left: 6px;
+      width: 12px;
     }
     .protocol-bind {
-      display: none;
-      width: 14px;
+      display: flex;
       align-items: center;
       .protocol-dapp {
         white-space: nowrap;
-        margin-left: 12px;
+        margin-left: 6px;
         font-weight: 400;
         font-size: 12px;
         line-height: 14px;
         color: rgba(255, 255, 255, 0.5);
       }
-      .icon-edit {
-        cursor: pointer;
-        margin-left: 2px;
-      }
-      .icon-relate {
-        margin-left: 3px;
-      }
+    }
+    &::after {
+      content: '';
+      height: 1px;
+      width: 100%;
+      position: absolute;
+      left: 0;
+      bottom: -2px;
+      background-color: rgba(255, 255, 255, 0.5);
     }
     &.has-bind {
       .protocol-name {
-        cursor: pointer;
-        &:hover {
-          color: #8697ff;
-          text-decoration: underline;
-        }
+        color: #8697ff;
+      }
+      .protocol-dapp {
+        color: #8697ff;
+      }
+      &::after {
+        background-color: #8697ff;
       }
     }
-    &:hover {
-      .icon-relate {
-        display: block;
-      }
-      .protocol-bind {
-        display: flex;
-      }
-    }
+  }
+  .icon-edit {
+    cursor: pointer;
+    margin-left: 8px;
   }
 `;
 
@@ -128,6 +139,38 @@ const UsdValueChangeWrapper = styled.div`
     color: #2ed4a3;
   }
 `;
+
+const RemoveBindingWrapper = styled.div`
+  display: flex;
+  cursor: pointer;
+  color: #fff;
+  font-size: 14px;
+  line-height: 17px;
+  align-items: center;
+  .icon-unbind {
+    margin-right: 8px;
+  }
+`;
+
+const RemoveBinding = ({
+  children,
+  onClick,
+  onClickOutSide,
+}: {
+  children: ReactNode;
+  onClick(): void;
+  onClickOutSide(): void;
+}) => {
+  const wrapper = useRef(null);
+  useClickAway(wrapper, () => {
+    onClickOutSide();
+  });
+  return (
+    <RemoveBindingWrapper ref={wrapper} onClick={onClick}>
+      {children}
+    </RemoveBindingWrapper>
+  );
+};
 
 const ProtocolItem = ({
   protocol,
@@ -150,7 +193,9 @@ const ProtocolItem = ({
   historyTokenDict: Record<string, TokenItem>;
 }) => {
   const { protocolDappsBinding } = useProtocolDappsBinding();
+  const [popoverOpen, setPopoverOpen] = useState(false);
   const openDapp = useOpenDapp();
+  const scrollTop = useContext(ScrollTopContext);
 
   const { hasBinded, bindUrl } = useMemo(() => {
     const arr = Object.values(protocolDappsBinding);
@@ -197,16 +242,15 @@ const ProtocolItem = ({
         }, 0);
         sum += change;
       } else if (!supportHistory) {
-        // const change = portfolio.asset_token_list.reduce((res, item) => {
-        //   const tokenHistoryPrice =
-        //     protocolHistoryTokenPriceMap[`${item.chain}-${item.id}`];
-        //   if (tokenHistoryPrice) {
-        //     return tokenHistoryPrice.price * item.amount;
-        //   }
-        //   return res;
-        // }, 0);
-        // sum += change;
-        return null;
+        const change = portfolio.asset_token_list.reduce((res, item) => {
+          const tokenHistoryPrice =
+            protocolHistoryTokenPriceMap[`${item.chain}-${item.id}`];
+          if (tokenHistoryPrice) {
+            return tokenHistoryPrice.price * item.amount;
+          }
+          return res;
+        }, 0);
+        sum += change;
       } else {
         const change = portfolio.asset_token_list.reduce((res, item) => {
           return res + item.price * item.amount;
@@ -226,10 +270,19 @@ const ProtocolItem = ({
   }, [
     protocol,
     historyProtocol,
-    // protocolHistoryTokenPriceMap,
+    protocolHistoryTokenPriceMap,
     supportHistory,
     isLoadingProtocolHistory,
   ]);
+
+  const handleClickEditBind = () => {
+    setPopoverOpen(false);
+    onClickRelate(protocol);
+  };
+
+  useEffect(() => {
+    setPopoverOpen(false);
+  }, [scrollTop]);
 
   return (
     <ProtocolItemWrapper>
@@ -241,42 +294,56 @@ const ProtocolItem = ({
           height="20px"
           noRound
         />
-        <div className="flex-1">
+        <div className="flex flex-1 items-center">
           <div
             className={classNames('protocol-info', {
               'has-bind': hasBinded,
             })}
+            onClick={() =>
+              hasBinded ? handleClickProtocolName() : onClickRelate(protocol)
+            }
           >
-            <span className="protocol-name" onClick={handleClickProtocolName}>
-              {protocol.name}
-            </span>
+            <span className="protocol-name">{protocol.name}</span>
             {!hasBinded && (
               <img
                 src="rabby-internal://assets/icons/home/dapp-relate.svg"
                 className="icon-relate"
-                onClick={() => onClickRelate(protocol)}
               />
             )}
             {hasBinded && (
               <div className="protocol-bind">
-                <span className="protocol-dapp">{bindUrl}</span>
-                {protocolDappsBinding[protocol.id] ? (
-                  <img
-                    src="rabby-internal://assets/icons/home/bind-edit.svg"
-                    alt=""
-                    className="icon-edit"
-                    onClick={() => onClickRelate(protocol)}
-                  />
-                ) : (
-                  <img
-                    src="rabby-internal://assets/icons/home/dapp-relate.svg"
-                    className="icon-relate"
-                    onClick={() => onClickRelate(protocol)}
-                  />
-                )}
+                <span className="protocol-dapp">
+                  ({removeProtocolFromUrl(bindUrl)})
+                </span>
               </div>
             )}
           </div>
+          {hasBinded && (
+            <Popover
+              trigger="click"
+              content={
+                <RemoveBinding
+                  onClick={handleClickEditBind}
+                  onClickOutSide={() => setPopoverOpen(false)}
+                >
+                  <img
+                    className="icon-unbind"
+                    src="rabby-internal://assets/icons/home/bind-edit.svg"
+                  />
+                  Edit binded Dapp
+                </RemoveBinding>
+              }
+              placement="bottomLeft"
+              showArrow={false}
+              overlayClassName="remove-binding-popover"
+              open={popoverOpen}
+            >
+              <IconRcMore
+                className="icon-edit"
+                onClick={() => setPopoverOpen(true)}
+              />
+            </Popover>
+          )}
         </div>
         <span className="protocol-usd">
           {formatUsdValue(protocol.usd_value)}

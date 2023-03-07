@@ -1,7 +1,16 @@
-import { useMemo, useCallback, useEffect, useState } from 'react';
+import {
+  useMemo,
+  useCallback,
+  useEffect,
+  useState,
+  ReactNode,
+  useRef,
+  useContext,
+} from 'react';
 import classNames from 'classnames';
 import styled from 'styled-components';
 import { Tooltip, Popover } from 'antd';
+import { useClickAway } from 'react-use';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import { IconWithChain } from '@/renderer/components/TokenWithChain';
 import {
@@ -11,8 +20,13 @@ import {
 import IconRcMore from '@/../assets/icons/home/more.svg?rc';
 import { useOpenDapp } from '@/renderer/utils/react-router';
 import { formatUsdValue } from '@/renderer/utils/number';
-import { isSameOrigin, isSameDomain } from '@/renderer/utils/url';
+import {
+  isSameOrigin,
+  isSameDomain,
+  removeProtocolFromUrl,
+} from '@/renderer/utils/url';
 import * as Template from '../templates';
+import ScrollTopContext from './scrollTopContext';
 
 const TemplateDict = {
   common: Template.Common,
@@ -145,7 +159,7 @@ const ProtocolWrapper = styled.div`
   margin-bottom: 28px;
 `;
 
-const RemoveBinding = styled.div`
+const RemoveBindingWrapper = styled.div`
   display: flex;
   cursor: pointer;
   color: #fff;
@@ -156,6 +170,26 @@ const RemoveBinding = styled.div`
     margin-right: 8px;
   }
 `;
+
+const RemoveBinding = ({
+  children,
+  onClick,
+  onClickOutSide,
+}: {
+  children: ReactNode;
+  onClick(): void;
+  onClickOutSide(): void;
+}) => {
+  const wrapper = useRef(null);
+  useClickAway(wrapper, () => {
+    onClickOutSide();
+  });
+  return (
+    <RemoveBindingWrapper ref={wrapper} onClick={onClick}>
+      {children}
+    </RemoveBindingWrapper>
+  );
+};
 
 const DefaultProtocolItem = ({
   protocol,
@@ -179,6 +213,7 @@ const DefaultProtocolItem = ({
   });
   const { dapps } = useTabedDapps();
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const scrollTop = useContext(ScrollTopContext);
   const { protocolDappsBinding, bindingDappsToProtocol } =
     useProtocolDappsBinding();
   const openDapp = useOpenDapp();
@@ -236,6 +271,10 @@ const DefaultProtocolItem = ({
     onClickRelate(protocol);
   };
 
+  useEffect(() => {
+    setPopoverOpen(false);
+  }, [scrollTop]);
+
   return (
     <ProtocolWrapper>
       <ProtocolHeader>
@@ -264,7 +303,9 @@ const DefaultProtocolItem = ({
             )}
             {hasBinded && (
               <div className="protocol-bind">
-                <span className="protocol-dapp">({bindUrl})</span>
+                <span className="protocol-dapp">
+                  ({removeProtocolFromUrl(bindUrl)})
+                </span>
               </div>
             )}
           </div>
@@ -272,7 +313,10 @@ const DefaultProtocolItem = ({
             <Popover
               trigger="click"
               content={
-                <RemoveBinding onClick={handleClickEditBind}>
+                <RemoveBinding
+                  onClick={handleClickEditBind}
+                  onClickOutSide={() => setPopoverOpen(false)}
+                >
                   <img
                     className="icon-unbind"
                     src="rabby-internal://assets/icons/home/bind-edit.svg"

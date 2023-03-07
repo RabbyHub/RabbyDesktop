@@ -39,3 +39,7 @@ export const isSameDomain = (a: string, b: string) => {
 export const isDomainLikeStr = (str: string) => {
   return str.split('.').length > 1;
 };
+
+export const removeProtocolFromUrl = (url: string) => {
+  return url.replace(/^\w+:\/\//, '');
+};
