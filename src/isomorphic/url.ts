@@ -1,6 +1,14 @@
 import { AxiosProxyConfig } from 'axios';
 import { RABBY_INTERNAL_PROTOCOL, RABBY_LOCAL_URLBASE } from './constants';
 
+export function safeParseURL(url: string): URL | null {
+  try {
+    return new URL(url);
+  } catch (e) {
+    return null;
+  }
+}
+
 export function parseQueryString(
   input: string = typeof window !== 'undefined'
     ? window.location.search.slice(1)
@@ -76,6 +84,14 @@ export function isRabbyXPage(
         )
       );
   }
+}
+
+export function isExtensionBackground(url: string) {
+  const urlInfo = safeParseURL(url);
+  return (
+    urlInfo?.protocol === 'chrome-extension:' &&
+    urlInfo.pathname === '/background.html'
+  );
 }
 
 const TREZOR_LIKE_CONNECT = [
@@ -208,14 +224,6 @@ export function isInternalProtocol(url: string) {
     'chrome-extension://',
     'chrome://',
   ].some((protocol) => url.startsWith(protocol));
-}
-
-export function safeParseURL(url: string): URL | null {
-  try {
-    return new URL(url);
-  } catch (e) {
-    return null;
-  }
 }
 
 export function canoicalizeDappUrl(url: string) {
