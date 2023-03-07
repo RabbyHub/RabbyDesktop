@@ -1,7 +1,53 @@
 
+v0.5.5 / 2023-03-07
+==================
+
+  * fix: rightBar margin (#245)
+  * feat: update splash.
+  * fix: download (#244)
+  * fix: fix ref to `@sentry/electron` on build. (#243)
+  * feat: introduce sentry on main process & renderer process (#242)
+  * fix: protocol header padding (#241)
+  * fix: size 15px (#240)
+  * fix: text (#239)
+  * feat: pos ETHSign type window center.
+  * feat: allow invokation from extension's background. (#237)
+  * fix: zero fee tip (#238)
+  * chore: fix some text (#236)
+  * feat: upgrade IDapp. (#223)
+  * build: simplify deps about usb/hid, upgrade chain-data. (#234)
+  * fix: url ellipsis (#233)
+  * feat: detailed info for https cert error. (#231)
+  * fix: tooltip (#230)
+  * fix: url ellipsis (#229)
+  * Merge branch 'dev' of github.com:RabbyHub/RabbyDesktop into dev
+  * chore: rm console
+  * feat: basic support for windows code signing. (#226)
+  * fix: portfolio wrapper pt
+  * fix: dapp bind (#225)
+  * fix: add dapp bugs (#228)
+  * fix: open behavior on site redirect.
+  * feat: open scanLinks externally. (#227)
+  * feat: rename app's brandName.
+  * fix: curve (#224)
+  * fix: ui (#222)
+  * feat: support always open external url matching `blockchain_explorers` (#221)
+  * fix: behavior of safe open. (#220)
+  * feat: on add dapp, only prevent redirected url without same main domain.
+  * feat: dapp bind (#219)
+  * feat: adjust dapp-add process. (#218)
+  * fix: add dapp subdomain message (#216)
+  * fix: creation of rabbyx's sign window. (#217)
+  * fix: react to protocol bindings changed. (#213)
+  * feat: new add dapp (#214)
+  * feat: upgrade rabbyx. (#215)
+  * fix: safe open dapp. (#212)
+  * fix: behavior of `tab.hide()` on win32.
+
 v0.5.3 / 2023-03-03
 ===================
 
+  * Release v0.5.3
   * fix: repeative request connect on debank.com (mobile version actually) (#211)
   * feat: swap styles (#210)
   * fix: modal styles (#209)
