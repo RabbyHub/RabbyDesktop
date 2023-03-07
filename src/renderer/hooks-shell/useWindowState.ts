@@ -4,6 +4,7 @@ import { useCallback, useEffect } from 'react';
 import { atom, useAtom } from 'jotai';
 import { useMessageForwardToMainwin } from '../hooks/useViewsMessage';
 import { useMainWindowEventsToast } from './useMainWindowEvents';
+import { matomoRequestEvent } from '../utils/matomo-request';
 
 const OS_TYPE = detectOS();
 const isDarwin = OS_TYPE === 'darwin';
@@ -106,4 +107,12 @@ export function useMainWindowEvents() {
   }, [setWinState]);
 
   useMainWindowEventsToast();
+
+  useEffect(() => {
+    matomoRequestEvent({
+      category: 'User',
+      action: 'active',
+      label: 'desktop|mainWindow',
+    });
+  }, []);
 }
