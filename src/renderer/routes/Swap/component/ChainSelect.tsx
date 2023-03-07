@@ -34,6 +34,7 @@ interface ChainSelectorProps {
   readonly?: boolean;
   disabledTips?: string;
   title?: string;
+  supportChains?: CHAINS_ENUM[];
 }
 export const ChainSelect = ({
   value,
@@ -41,18 +42,8 @@ export const ChainSelect = ({
   readonly = false,
   disabledTips,
   title,
+  supportChains,
 }: ChainSelectorProps) => {
-  const {
-    swap: { selectedDex },
-  } = useSwap();
-
-  const supportChains = useMemo(
-    () =>
-      DEX_SUPPORT_CHAINS[
-        selectedDex as unknown as keyof typeof DEX_SUPPORT_CHAINS
-      ] || [],
-    [selectedDex]
-  );
   const handleChange = (v: CHAINS_ENUM) => {
     if (readonly) return;
     if (onChange) {
@@ -75,9 +66,9 @@ export const ChainSelect = ({
     openChainModal();
   };
 
-  if (!selectedDex) {
-    return null;
-  }
+  // if (!selectedDex) {
+  //   return null;
+  // }
 
   return (
     <>
