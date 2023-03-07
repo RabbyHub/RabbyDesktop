@@ -196,13 +196,13 @@ const TokenItemComp = ({
           {ellipsisTokenSymbol(token.symbol)}
         </span>
         <div className="token-actions">
-          <Tooltip title="SWAP">
+          <Tooltip title="Swap">
             <IconSwap className="icon icon-swap" onClick={handleClickSwap} />
           </Tooltip>
-          <Tooltip title="SEND">
+          <Tooltip title="Send">
             <IconSend className="icon icon-send" onClick={handleClickSend} />
           </Tooltip>
-          <Tooltip title="RECEIVE">
+          <Tooltip title="Receive">
             <IconReceive
               className="icon icon-receive"
               onClick={() => {
