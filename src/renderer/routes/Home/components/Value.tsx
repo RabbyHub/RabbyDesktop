@@ -142,7 +142,7 @@ export const Token = ({
 };
 
 export const USDValue = ({ value }: { value: string | number }) => {
-  return <Col className="text-[13px]">{formatUsdValue(value)}</Col>;
+  return <Col>{formatUsdValue(value)}</Col>;
 };
 
 export const TokensUSDValue = ({ value }: { value: TokenItem[] }) => {
