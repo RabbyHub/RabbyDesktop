@@ -1,7 +1,7 @@
 /* eslint import/prefer-default-export: off */
 import path from 'path';
 import { app } from 'electron';
-import * as Sentry from '@sentry/electron';
+import * as Sentry from '@sentry/electron/main';
 
 import { filterAppChannel, getSentryEnv } from '@/isomorphic/env';
 import {
@@ -128,6 +128,8 @@ export function initMainProcessSentry() {
   Sentry.init({
     dsn: 'https://520afbe8f6574cb3a39e6cb7296f9008@o460488.ingest.sentry.io/4504751161868288',
     release: app.getVersion(),
+
+    // enableNative: false,
 
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
