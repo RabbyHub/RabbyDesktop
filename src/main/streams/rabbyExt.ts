@@ -158,3 +158,9 @@ onIpcMainInternalEvent('__internal_main:dev', async (payload) => {
       break;
   }
 });
+
+handleIpcMainInvoke('rabbyx:get-app-version', (_) => {
+  return {
+    version: app.getVersion(),
+  };
+});
