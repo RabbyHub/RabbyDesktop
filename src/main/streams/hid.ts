@@ -1,6 +1,4 @@
-import usb = require('usb');
-
-import { pickAllNonFnFields } from '@/isomorphic/json';
+// import usb = require('usb');
 
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { isInternalProtocol } from '@/isomorphic/url';
@@ -14,41 +12,7 @@ import {
   stopSelectDevices,
   startSelectDevices,
 } from '../utils/stream-helpers';
-import { filterNodeHIDDevices } from '../utils/devices';
-
-const webusb = new usb.WebUSB({
-  allowAllDevices: true,
-});
-
-webusb.addEventListener('connect', async (event) => {
-  if (!IS_RUNTIME_PRODUCTION) console.debug('[debug] connect', event);
-
-  const { list } = await getAllMainUIViews();
-
-  list.forEach((view) => {
-    sendToWebContents(view, '__internal_push:webusb:device-changed', {
-      changes: {
-        type: 'connect',
-        device: pickAllNonFnFields(event.device) as INodeWebUSBDevice,
-      },
-    });
-  });
-});
-
-webusb.addEventListener('disconnect', async (event) => {
-  if (!IS_RUNTIME_PRODUCTION) console.debug('[debug] disconnect', event);
-
-  const { list } = await getAllMainUIViews();
-
-  list.forEach((view) => {
-    sendToWebContents(view, '__internal_push:webusb:device-changed', {
-      changes: {
-        type: 'disconnect',
-        device: pickAllNonFnFields(event.device) as INodeWebUSBDevice,
-      },
-    });
-  });
-});
+// import { filterNodeHIDDevices } from '../utils/devices';
 
 async function pushHidSelectDevices(deviceList: IHidDevice[]) {
   const { views } = await getAllMainUIViews();
@@ -209,26 +173,60 @@ getSessionInsts().then(({ mainSession }) => {
   );
 });
 
-handleIpcMainInvoke('get-hid-devices', async (_, opts) => {
-  return filterNodeHIDDevices(opts);
-});
+// const webusb = new usb.WebUSB({
+//   allowAllDevices: true,
+// });
 
-handleIpcMainInvoke('get-usb-devices', async (_, opts) => {
-  let usbDevices = await webusb.getDevices();
+// webusb.addEventListener('connect', async (event) => {
+//   if (!IS_RUNTIME_PRODUCTION) console.debug('[debug] connect', event);
 
-  if (opts?.filters) {
-    const filters = Array.isArray(opts.filters) ? opts.filters : [opts.filters];
-    filters.forEach((filter) => {
-      if (filter.vendorId) {
-        usbDevices = usbDevices.filter((d) => d.vendorId === filter.vendorId);
-      }
-      if (filter.productId) {
-        usbDevices = usbDevices.filter((d) => d.productId === filter.productId);
-      }
-    });
-  }
+//   const { list } = await getAllMainUIViews();
 
-  return {
-    devices: usbDevices.map((d) => pickAllNonFnFields(d)),
-  };
-});
+//   list.forEach((view) => {
+//     sendToWebContents(view, '__internal_push:webusb:device-changed', {
+//       changes: {
+//         type: 'connect',
+//         device: pickAllNonFnFields(event.device) as INodeWebUSBDevice,
+//       },
+//     });
+//   });
+// });
+
+// webusb.addEventListener('disconnect', async (event) => {
+//   if (!IS_RUNTIME_PRODUCTION) console.debug('[debug] disconnect', event);
+
+//   const { list } = await getAllMainUIViews();
+
+//   list.forEach((view) => {
+//     sendToWebContents(view, '__internal_push:webusb:device-changed', {
+//       changes: {
+//         type: 'disconnect',
+//         device: pickAllNonFnFields(event.device) as INodeWebUSBDevice,
+//       },
+//     });
+//   });
+// });
+
+// handleIpcMainInvoke('get-hid-devices', async (_, opts) => {
+//   return filterNodeHIDDevices(opts);
+// });
+
+// handleIpcMainInvoke('get-usb-devices', async (_, opts) => {
+//   let usbDevices = await webusb.getDevices();
+
+//   if (opts?.filters) {
+//     const filters = Array.isArray(opts.filters) ? opts.filters : [opts.filters];
+//     filters.forEach((filter) => {
+//       if (filter.vendorId) {
+//         usbDevices = usbDevices.filter((d) => d.vendorId === filter.vendorId);
+//       }
+//       if (filter.productId) {
+//         usbDevices = usbDevices.filter((d) => d.productId === filter.productId);
+//       }
+//     });
+//   }
+
+//   return {
+//     devices: usbDevices.map((d) => pickAllNonFnFields(d)),
+//   };
+// });
