@@ -1,5 +1,6 @@
 import path from 'path';
 import { Icon as IconInfo, parseFavicon } from '@debank/parse-favicon';
+import { CHAINS_RAW_LIST } from '@/isomorphic/chain-data';
 import Axios, { AxiosProxyConfig } from 'axios';
 
 import { catchError, firstValueFrom, map, of, timeout } from 'rxjs';
@@ -140,7 +141,15 @@ const configURLs = IS_APP_PROD_BUILD
       blockchain_explorers: `https://download.rabby.io/cdn-config-pre/dapps/blockchain_explorers.json`,
     };
 
-export const DEFAULT_BLOCKCHAIN_EXPLORERS = ['etherscan.io'];
+export const DEFAULT_BLOCKCHAIN_EXPLORERS: Set<string> = new Set();
+CHAINS_RAW_LIST.forEach((chain) => {
+  const { fullDomain } = canoicalizeDappUrl(chain.scanLink);
+
+  if (fullDomain) DEFAULT_BLOCKCHAIN_EXPLORERS.add(fullDomain);
+});
+
+// TODO: maybe we could put it into a online config file
+// console.debug('DEFAULT_BLOCKCHAIN_EXPLORERS', DEFAULT_BLOCKCHAIN_EXPLORERS);
 
 export async function fetchDynamicConfig(options?: {
   timeout?: number;
@@ -175,8 +184,6 @@ export async function fetchDynamicConfig(options?: {
       .then((res) => res.data)
       .catch((err) => undefined), // TODO: report to sentry
   ]);
-
-  console.log('[feat] blockchain_explorers', blockchain_explorers);
 
   return {
     domain_metas: (domain_metas as IAppDynamicConfig['domain_metas']) || {},

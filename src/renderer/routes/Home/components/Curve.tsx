@@ -37,8 +37,8 @@ const CurveWrapper = styled.div`
     linear,
     left top,
     right top,
-    from(rgba(255, 255, 255, 1)),
-    to(rgba(255, 255, 255, 0))
+    from(rgba(255, 255, 255, 0.15)),
+    to(rgba(255, 255, 255, 0.8))
   );
 `;
 
