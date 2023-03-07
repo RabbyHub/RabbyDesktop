@@ -48,7 +48,7 @@ const ProtocolItemWrapper = styled.div`
 const ProtocolHeader = styled.div`
   display: flex;
   margin-bottom: 20px;
-  padding-left: 22px;
+  padding-left: 25px;
   padding-right: 22px;
   align-items: flex-end;
   .token-with-chain {
