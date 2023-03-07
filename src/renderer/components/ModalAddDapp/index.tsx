@@ -225,12 +225,14 @@ export function AddDapp({
   onAddedDapp,
   onOpenDapp,
   url: initUrl,
-  openBtn,
+  isGoBack,
+  onGoBackClick,
 }: ModalProps & {
   onAddedDapp?: (origin: string) => void;
   onOpenDapp?: (origin: string) => void;
   url?: string;
-  openBtn?: ReactNode;
+  isGoBack?: boolean;
+  onGoBackClick?: (dapp: IDapp) => void;
 }) {
   const { dapps } = useDapps();
   const [form] = Form.useForm();
@@ -404,7 +406,8 @@ export function AddDapp({
             openDapp(dapp.inputOrigin);
             onOpenDapp?.(dapp.inputOrigin);
           }}
-          openBtn={openBtn}
+          isGoBack={isGoBack}
+          onGoBackClick={onGoBackClick}
         />
       ) : null}
       <RelationModal
@@ -439,7 +442,8 @@ export default function ModalAddDapp({
     onAddedDapp?: (origin: string) => void;
     onOpenDapp?: (origin: string) => void;
     url?: string;
-    openBtn?: React.ReactNode;
+    isGoBack?: boolean;
+    onGoBackClick?: (dapp: IDapp) => void;
   }
 >) {
   return (

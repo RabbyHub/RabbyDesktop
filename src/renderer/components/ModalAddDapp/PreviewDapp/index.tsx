@@ -13,14 +13,16 @@ interface PreviewDappProps {
   onAdd: (dapp: NonNullable<IDappsDetectResult['data']>) => void;
   onOpen: (dapp: NonNullable<IDappsDetectResult['data']>) => void;
   loading?: boolean;
-  openBtn?: React.ReactNode;
+  isGoBack?: boolean;
+  onGoBackClick?: (dapp: IDapp) => void;
 }
 export const PreviewDapp = ({
   data,
   onAdd,
   loading,
   onOpen,
-  openBtn,
+  isGoBack,
+  onGoBackClick,
 }: PreviewDappProps) => {
   const [input, setInput] = useState(data.recommendedAlias);
 
@@ -59,7 +61,22 @@ export const PreviewDapp = ({
           ) : (
             <>
               {data?.isInputExistedDapp ? (
-                openBtn || (
+                isGoBack ? (
+                  <Button
+                    type="primary"
+                    className={styles.previewBtnSuccess}
+                    onClick={() => {
+                      onGoBackClick?.({
+                        origin: data.inputOrigin,
+                        alias: input || '-',
+                        faviconBase64: data.faviconBase64,
+                        faviconUrl: data.faviconUrl,
+                      });
+                    }}
+                  >
+                    Go back to bind Dapp
+                  </Button>
+                ) : (
                   <Button
                     type="primary"
                     className={styles.previewBtnSuccess}
