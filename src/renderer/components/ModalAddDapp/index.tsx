@@ -50,54 +50,62 @@ const validateInput = (input: string, onReplace?: (v: string) => void) => {
       validateStatus: 'success' as const,
       help: '',
     };
-    // return {
-    //   validateStatus: 'error' as const,
-    //   help: 'Input the Dapp domain name. e.g. debank.com',
-    // };
   }
-  const hasSpace = /\s/.test(domain);
-  const hasSuffix = /\.\w+/.test(domain);
-  if (hasSpace || !hasSuffix || /\.$/.test(domain)) {
-    return {
-      validateStatus: 'error' as const,
-      help: 'Input is not a domain',
-    };
-  }
+
   const hasProtocol = /^(\w+:)\/\//.test(domain);
-  const hasPath = /\//.test(domain.replace(/^(\w+:)\/\//, ''));
 
   const urlString = hasProtocol ? domain : `https://${domain}`;
   try {
     const url = new URL(urlString);
-    if (url.hostname !== domain.replace(/^(w+:)\/\//, '')) {
+    const rest = urlString.replace(`${url.protocol}//${url.hostname}`, '');
+
+    // todo detect is domain ?
+    if (
+      url.hostname.startsWith('.') ||
+      url.hostname.endsWith('.') ||
+      !url.hostname.includes('.')
+    ) {
       return {
         validateStatus: 'error' as const,
-        help: (
-          <>
-            Input should not contain{' '}
-            {[
-              hasProtocol ? `${url.protocol}//` : null,
-              [
-                url.port ? `:${url.port}` : null,
-                hasPath ? url.pathname : null,
-                url.search ? url.search : null,
-              ].join(''),
-            ]
-              .filter(Boolean)
-              .map((v) => `"${v}"`)
-              .join(' and ')}{' '}
-            .Maybe you want to add{' '}
-            <span
-              onClick={() => onReplace?.(url.hostname)}
-              className={styles.replaceLink}
-            >
-              {url.hostname}
-            </span>
-            ?
-          </>
-        ),
+        help: 'Input is not a domain',
       };
     }
+    // hostname 有转义
+    if (/^\w+:\/\//.test(rest)) {
+      return {
+        validateStatus: 'error' as const,
+        help: 'Input is not a domain',
+      };
+    }
+    if (url.hostname === domain) {
+      return null;
+    }
+
+    return {
+      validateStatus: 'error' as const,
+      help: (
+        <>
+          Input should not contain{' '}
+          {[
+            hasProtocol ? `${url.protocol}//` : null,
+            rest.length > 20 ? `${rest.substring(0, 20)}...` : rest,
+          ]
+            .filter(Boolean)
+            .map((v) => `"${v}"`)
+            .join(' and ')}
+          .
+          <br />
+          Maybe you want to add{' '}
+          <span
+            onClick={() => onReplace?.(url.hostname)}
+            className={styles.replaceLink}
+          >
+            {url.hostname}
+          </span>{' '}
+          ?
+        </>
+      ),
+    };
   } catch (e) {
     return {
       validateStatus: 'error' as const,
@@ -149,7 +157,9 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
           return;
         }
         if ('validateRes' in res) {
-          setState(res.validateRes);
+          if (res.validateRes) {
+            setState(res.validateRes);
+          }
           return;
         }
 
@@ -215,12 +225,14 @@ export function AddDapp({
   onAddedDapp,
   onOpenDapp,
   url: initUrl,
-  openBtn,
+  isGoBack,
+  onGoBackClick,
 }: ModalProps & {
   onAddedDapp?: (origin: string) => void;
   onOpenDapp?: (origin: string) => void;
   url?: string;
-  openBtn?: ReactNode;
+  isGoBack?: boolean;
+  onGoBackClick?: (dapp: IDapp) => void;
 }) {
   const { dapps } = useDapps();
   const [form] = Form.useForm();
@@ -354,7 +366,7 @@ export function AddDapp({
         >
           <RabbyInput
             className={styles.input}
-            placeholder="Input the Dapp domain name. e.g. debank.com"
+            placeholder="Input the Dapp domain name"
             autoFocus
             spellCheck={false}
             suffix={
@@ -394,7 +406,8 @@ export function AddDapp({
             openDapp(dapp.inputOrigin);
             onOpenDapp?.(dapp.inputOrigin);
           }}
-          openBtn={openBtn}
+          isGoBack={isGoBack}
+          onGoBackClick={onGoBackClick}
         />
       ) : null}
       <RelationModal
@@ -429,7 +442,8 @@ export default function ModalAddDapp({
     onAddedDapp?: (origin: string) => void;
     onOpenDapp?: (origin: string) => void;
     url?: string;
-    openBtn?: React.ReactNode;
+    isGoBack?: boolean;
+    onGoBackClick?: (dapp: IDapp) => void;
   }
 >) {
   return (
