@@ -179,6 +179,14 @@ export const Swap = () => {
     undefined
   );
 
+  const supportChains = useMemo(
+    () =>
+      DEX_SUPPORT_CHAINS[
+        lastSelectedDex as unknown as keyof typeof DEX_SUPPORT_CHAINS
+      ] || [],
+    [lastSelectedDex]
+  );
+
   const saveSelectedChain = useCallback(
     (v: CHAINS_ENUM) => {
       setChain(v);
@@ -782,6 +790,7 @@ export const Swap = () => {
               onChange={handleChain}
               disabledTips="Not supported by the current exchange"
               title={`Select the chain supported by ${name}`}
+              supportChains={supportChains}
             />
             {!!payAmount && !!payToken && !!receiveToken && (
               <IconRefresh className={styles.refresh} refresh={refresh} />
