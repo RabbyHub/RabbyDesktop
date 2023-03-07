@@ -116,11 +116,14 @@ export async function safeOpenURL(
     existedDapp?: IDapp | null;
     existedMainDomainDapp?: IDapp | null;
     _targetwin?: BrowserWindow;
+    redirectSourceTab?: import('../browser/tabs').Tab;
   }
 ): Promise<SafeOpenResult> {
   const mainTabbedWin = await onMainWindowReady();
   if (opts.existedDapp || opts.existedMainDomainDapp) {
-    const openedTab = mainTabbedWin.tabs.findBySecondaryDomain(targetURL);
+    const openedTab =
+      opts.redirectSourceTab ||
+      mainTabbedWin.tabs.findBySecondaryDomain(targetURL);
     if (openedTab?.view) {
       const currentURL = openedTab.view.webContents.getURL();
       const shouldLoad =

@@ -377,7 +377,7 @@ const TransactionItem = ({
     if (item.protocol?.logoUrl) return item.protocol.logoUrl;
     return null;
   }, [item, isCancel, isSend, isReceive]);
-  const dapp = useMatchDapp(item.site?.origin);
+  // const dapp = useMatchDapp(item.site?.origin);
   const originTx = minBy(item.txs, (tx) => tx.createdAt);
 
   const [txQueues, setTxQueues] = useState<
@@ -684,10 +684,13 @@ const TransactionItem = ({
         <TxExplainInner>{interAddressExplain}</TxExplainInner>
         <TxChange sends={item.sends} receives={item.receives} />
       </TxExplain>
-      {dapp?.origin && !isFromRabby ? (
+      {item?.site?.origin && !isFromRabby ? (
         <div className="tx-origin">
           Initiate from Dapp:{' '}
-          <TransactionWebsite origin={dapp.origin} className="tx-dapp-link" />
+          <TransactionWebsite
+            origin={item.site?.origin}
+            className="tx-dapp-link"
+          />
         </div>
       ) : null}
       {isPending && (item?.txs?.length || 0) > 1 && (

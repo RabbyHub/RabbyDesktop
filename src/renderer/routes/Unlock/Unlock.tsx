@@ -42,7 +42,7 @@ export const Unlock: React.FC = () => {
             alt="logo"
             className={styles.logo}
           />
-          <h1 className={styles.title}>Rabby Wallet Desktop</h1>
+          <h1 className={styles.title}>Rabby Desktop</h1>
           <Form form={form} onFinish={onNext}>
             <Form.Item name="password">
               <RabbyInput
