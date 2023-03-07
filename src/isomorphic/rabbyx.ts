@@ -15,6 +15,7 @@ export function isRabbyXCenteredWindowType(viewType?: string | null) {
     default: {
       return false;
     }
+    case 'ETHSign':
     case 'Connect':
     case 'AddChain':
     case 'AddAsset':
