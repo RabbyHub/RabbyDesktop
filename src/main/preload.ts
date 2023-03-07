@@ -13,6 +13,7 @@ import { ipcRendererObj, rendererHelpers } from '../preloads/base';
 
 import { setupClass } from '../preloads/setup-class';
 import { setupDapp } from '../preloads/setup-dapp';
+import { isExtensionBackground } from '../isomorphic/url';
 
 if (
   window.location.protocol === 'chrome-extension:' &&
@@ -42,6 +43,9 @@ if (IS_BUILTIN_WEBVIEW && !window.rabbyDesktop) {
      */
     window.rabbyDesktop = {
       ipcRenderer: {
+        ...(isExtensionBackground(window.location.href) && {
+          invoke: ipcRendererObj.invoke,
+        }),
         sendMessage: ipcRendererObj.sendMessage,
       },
       rendererHelpers,

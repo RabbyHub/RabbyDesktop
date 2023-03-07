@@ -1,3 +1,12 @@
+type RabbyxInvokePayload = {
+  'rabbyx:get-app-version': {
+    send: [];
+    response: {
+      version: ReturnType<Electron.App['getVersion']>;
+    };
+  };
+};
+
 type ChannelInvokePayload = {
   'get-app-version': {
     send: [];
@@ -198,6 +207,6 @@ type ChannelInvokePayload = {
       error?: string;
     };
   };
-};
+} & RabbyxInvokePayload;
 
 type IInvokesKey = keyof ChannelInvokePayload;
