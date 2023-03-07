@@ -1,5 +1,6 @@
 import { app, BrowserWindow, dialog, shell } from 'electron';
 
+import { filterAppChannel } from '@/isomorphic/env';
 import {
   APP_NAME,
   IS_RUNTIME_PRODUCTION,
@@ -13,12 +14,12 @@ import {
   storeMainWinPosition,
 } from '../store/desktopApp';
 import {
-  getMainProcessAppChannel,
   getAssetPath,
   getBrowserWindowOpts,
+  getMainProcessAppChannel,
   relaunchApp,
+  initMainProcessSentry,
 } from '../utils/app';
-import '../utils/appReport';
 import {
   emitIpcMainEvent,
   handleIpcMainInvoke,
@@ -242,14 +243,15 @@ onIpcMainInternalEvent('__internal_main:app:relaunch', () => {
 });
 
 export default function bootstrap() {
+  app.setPath('userData', getAppUserDataPath());
+  if (!IS_RUNTIME_PRODUCTION) {
+    // we just need to modify it for development, because `APP_NAME` in production is from package.json
+    app.setName(APP_NAME);
+  }
+  initMainProcessSentry();
+
   // eslint-disable-next-line promise/catch-or-return
   app.whenReady().then(async () => {
-    app.setPath('userData', getAppUserDataPath());
-    if (!IS_RUNTIME_PRODUCTION) {
-      // we just need to modify it for development, because `APP_NAME` in production is from package.json
-      app.setName(APP_NAME);
-    }
-
     valueToMainSubject('userAppReady', undefined);
 
     appLog('::init', 'app ready, paths:');
