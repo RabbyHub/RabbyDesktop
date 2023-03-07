@@ -168,7 +168,16 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
         if (error) {
           setState({
             validateStatus: 'error',
-            help: error.message,
+            help:
+              error.type === 'HTTPS_CERT_INVALID' ? (
+                <>
+                  The https certificate of the Dapp is invalid.
+                  <br />
+                  [ERROR] {error.message}
+                </>
+              ) : (
+                error.message
+              ),
           });
           return null;
         }
