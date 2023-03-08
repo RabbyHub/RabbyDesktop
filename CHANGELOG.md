@@ -1,7 +1,18 @@
 
+v0.5.7 / 2023-03-08
+===================
+
+  * fix: cannot open its App on uniswap.org & www.paraswap.io (#250)
+  * feat: support force update. (#249)
+  * type: some type fix.
+  * fix: extra action back to seondaryDomain on its sub domain tab open. (#248)
+  * chore: don't report to sentry in mainprocess on dev.
+  * feat: support sign windows with production certificate. (#247)
+
 v0.5.6 / 2023-03-07
 ===================
 
+  * Release v0.5.6
   * fix:chain select (#246)
 
 v0.5.5 / 2023-03-07
