@@ -91,7 +91,6 @@ type SafeOpenResult = {
   | {
       type: 'switch-to-opened-tab';
       openedTab: import('../browser/tabs').Tab;
-      shouldLoad?: boolean;
     }
   | {
       type: 'create-tab';
@@ -126,9 +125,16 @@ export async function safeOpenURL(
       mainTabbedWin.tabs.findBySecondaryDomain(targetURL);
     if (openedTab?.view) {
       const currentURL = openedTab.view.webContents.getURL();
-      const shouldLoad =
-        canoicalizeDappUrl(targetURL).origin !==
-        canoicalizeDappUrl(currentURL).origin;
+      let shouldLoad = false;
+      if (opts.redirectSourceTab) {
+        shouldLoad =
+          canoicalizeDappUrl(targetURL).origin !==
+          canoicalizeDappUrl(currentURL).origin;
+      } else if (openedTab) {
+        shouldLoad =
+          canoicalizeDappUrl(targetURL).secondaryDomain !==
+          canoicalizeDappUrl(currentURL).secondaryDomain;
+      }
 
       return {
         type: 'switch-to-opened-tab',
@@ -139,7 +145,6 @@ export async function safeOpenURL(
           }
           switchToBrowserTab(openedTab.id, mainTabbedWin);
         },
-        shouldLoad,
       };
     }
 
