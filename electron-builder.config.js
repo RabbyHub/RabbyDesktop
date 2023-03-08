@@ -9,6 +9,7 @@ const selfSignCert = path.resolve(__dirname, "./scripts/code-signing/rabby-deskt
 const prodCert = path.resolve(__dirname, "./scripts/code-signing/rabby-desktop-ca.p12");
 
 function getWindowsCert() {
+  if (PLATFORM !== "win32") return {};
   if (fs.existsSync(prodCert)) {
     if (!process.env.RABBY_DESKTOP_CODE_SIGINING_PASS_PROD) {
       console.warn(`[getWindowsCert] RABBY_DESKTOP_CODE_SIGINING_PASS_PROD is not set.`);
