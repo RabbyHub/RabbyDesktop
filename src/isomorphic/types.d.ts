@@ -1,4 +1,9 @@
 /* from builder-util-runtime/out/ProgressCallbackTransform.d.ts */
+type IAppVersions = {
+  version: ReturnType<Electron.App['getVersion']>;
+  appChannel: 'reg' | 'prod';
+};
+
 interface ProgressInfo {
   total: number;
   delta: number;
@@ -110,6 +115,9 @@ type IAppDynamicConfig = {
   blockchain_explorers?: string[];
   special_main_domains?: {
     ids?: string[];
+  };
+  app_update?: {
+    force_update?: string[];
   };
 };
 

@@ -51,6 +51,16 @@ export const dynamicConfigStore = makeStore<IAppDynamicConfig>({
       },
       default: {},
     },
+    app_update: {
+      type: 'object',
+      properties: {
+        force_update: {
+          type: 'array',
+          items: { type: 'string' },
+        },
+      },
+      default: {},
+    },
   },
 
   serialize: shortStringify,
@@ -66,7 +76,12 @@ const INTERVAL_SEC = IS_RUNTIME_PRODUCTION ? 5 * 60 : 60;
 function scheduleFetch() {
   const fetchData = () => {
     fetchDynamicConfig({ proxy: getAppProxyConfigForAxios() }).then(
-      ({ domain_metas, blockchain_explorers, special_main_domains }) => {
+      ({
+        domain_metas,
+        blockchain_explorers,
+        special_main_domains,
+        app_update,
+      }) => {
         cLog('[scheduleFetch] DynamicConfig will be updated');
         // leave here for debug
         if (!IS_RUNTIME_PRODUCTION) {
@@ -83,6 +98,10 @@ function scheduleFetch() {
         dynamicConfigStore.set('special_main_domains', {
           ...dynamicConfigStore.get('special_main_domains'),
           ...special_main_domains,
+        });
+        dynamicConfigStore.set('app_update', {
+          ...dynamicConfigStore.get('app_update'),
+          ...app_update,
         });
       }
     );

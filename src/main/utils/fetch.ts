@@ -135,10 +135,12 @@ const configURLs = IS_APP_PROD_BUILD
   ? {
       domain_metas: `https://download.rabby.io/cdn-config/dapps/domain_metas.json`,
       blockchain_explorers: `https://download.rabby.io/cdn-config/dapps/blockchain_explorers.json`,
+      app_update: `https://download.rabby.io/cdn-config/app/app_update.json`,
     }
   : {
       domain_metas: `https://download.rabby.io/cdn-config-pre/dapps/domain_metas.json`,
       blockchain_explorers: `https://download.rabby.io/cdn-config-pre/dapps/blockchain_explorers.json`,
+      app_update: `https://download.rabby.io/cdn-config-pre/app/app_update.json`,
     };
 
 export const DEFAULT_BLOCKCHAIN_EXPLORERS: Set<string> = new Set();
@@ -157,25 +159,11 @@ export async function fetchDynamicConfig(options?: {
 }) {
   const { timeout: timeoutV = 5 * 1e3, proxy } = options || {};
   const [
+    special_main_domains = {},
     domain_metas = {},
     blockchain_explorers = Array.from(DEFAULT_BLOCKCHAIN_EXPLORERS),
-    special_main_domains = {},
+    app_update = {},
   ] = await Promise.all([
-    fetchClient
-      .get(`${configURLs.domain_metas}?t=${Date.now()}`, {
-        timeout: timeoutV,
-        proxy,
-      })
-      .then((res) => res.data)
-      .catch((err) => undefined), // TODO: report to sentry
-    fetchClient
-      .get(`${configURLs.blockchain_explorers}?t=${Date.now()}`, {
-        timeout: timeoutV,
-        proxy,
-      })
-      .then((res) => res.data)
-      .catch((err) => undefined), // TODO: report to sentry
-
     fetchClient
       .get(`https://api.rabby.io/v1/domain/share_list`, {
         timeout: timeoutV,
@@ -183,6 +171,21 @@ export async function fetchDynamicConfig(options?: {
       })
       .then((res) => res.data)
       .catch((err) => undefined), // TODO: report to sentry
+    ...(
+      [
+        configURLs.domain_metas,
+        configURLs.blockchain_explorers,
+        configURLs.app_update,
+      ] as const
+    ).map((url) => {
+      return fetchClient
+        .get(`${url}?t=${Date.now()}`, {
+          timeout: timeoutV,
+          proxy,
+        })
+        .then((res) => res.data)
+        .catch((err) => undefined);
+    }),
   ]);
 
   return {
@@ -191,6 +194,7 @@ export async function fetchDynamicConfig(options?: {
       (blockchain_explorers as IAppDynamicConfig['blockchain_explorers']) || [],
     special_main_domains:
       (special_main_domains as IAppDynamicConfig['special_main_domains']) || {},
+    app_update: (app_update as IAppDynamicConfig['app_update']) || {},
   };
 }
 
