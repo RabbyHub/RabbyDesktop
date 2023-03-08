@@ -214,6 +214,7 @@ export function getDomainFromHostname(hostname: string) {
     secondaryDomain,
     secondaryOrigin: `https://${secondaryDomain}`,
     is2ndaryDomain: parts.length === 2 && secondaryDomain === hostname,
+    isWWWSubDomain: parts.length === 3 && parts[0] === 'www',
     isSubDomain: parts.length > 2,
   };
 }

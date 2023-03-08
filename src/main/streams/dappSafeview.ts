@@ -120,20 +120,22 @@ export async function safeOpenURL(
 ): Promise<SafeOpenResult> {
   const mainTabbedWin = await onMainWindowReady();
   if (opts.existedDapp || opts.existedMainDomainDapp) {
-    const openedTab =
-      opts.redirectSourceTab ||
-      mainTabbedWin.tabs.findBySecondaryDomain(targetURL);
+    const foundOpenedTab = mainTabbedWin.tabs.findBySecondaryDomain(targetURL);
+    const openedTab = opts.redirectSourceTab || foundOpenedTab;
+
     if (openedTab?.view) {
       const currentURL = openedTab.view.webContents.getURL();
       let shouldLoad = false;
+      const targetInfo = canoicalizeDappUrl(targetURL);
+      const currentInfo = canoicalizeDappUrl(currentURL);
+
       if (opts.redirectSourceTab) {
+        shouldLoad = targetInfo.origin !== currentInfo.origin;
+      } else if (foundOpenedTab) {
         shouldLoad =
-          canoicalizeDappUrl(targetURL).origin !==
-          canoicalizeDappUrl(currentURL).origin;
-      } else if (openedTab) {
-        shouldLoad =
-          canoicalizeDappUrl(targetURL).secondaryDomain !==
-          canoicalizeDappUrl(currentURL).secondaryDomain;
+          currentInfo.is2ndaryDomain ||
+          currentInfo.isWWWSubDomain ||
+          targetInfo.secondaryDomain !== currentInfo.secondaryDomain;
       }
 
       return {
