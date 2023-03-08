@@ -1,6 +1,5 @@
 import { app, BrowserWindow, dialog, shell } from 'electron';
 
-import { filterAppChannel } from '@/isomorphic/env';
 import {
   APP_NAME,
   IS_RUNTIME_PRODUCTION,
@@ -48,6 +47,7 @@ import { tryAutoUnlockRabbyX } from './rabbyIpcQuery/autoUnlock';
 import { alertAutoUnlockFailed } from './mainWindow';
 import { setupAppTray } from './appTray';
 import { getAppUserDataPath } from '../utils/store';
+import { checkForceUpdate } from '../updater/force_update';
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
@@ -299,6 +299,8 @@ export default function bootstrap() {
       ) {
         getOrInitMainWinPosition(mainWin);
       }
+
+      checkForceUpdate();
     });
     mainWin.on('moved', () => {
       storeMainWinPosition(mainWin);

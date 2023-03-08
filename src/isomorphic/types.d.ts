@@ -116,6 +116,9 @@ type IAppDynamicConfig = {
   special_main_domains?: {
     ids?: string[];
   };
+  app_update?: {
+    force_update?: string[];
+  };
 };
 
 type IAppProxyConf = {
