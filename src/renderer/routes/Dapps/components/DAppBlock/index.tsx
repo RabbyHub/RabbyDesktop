@@ -141,7 +141,7 @@ export const DAppBlock = ({
           className="anchor"
           onClick={(e) => {
             e.preventDefault();
-            onOpen?.(dapp?.origin);
+            onOpen?.(dapp.origin);
           }}
         >
           <DappFavicon

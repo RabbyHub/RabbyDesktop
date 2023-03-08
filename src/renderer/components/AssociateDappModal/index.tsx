@@ -1,5 +1,5 @@
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
-import { Button, ModalProps } from 'antd';
+import { Button } from 'antd';
 import classNames from 'classnames';
 import React, { useMemo, useState } from 'react';
 import { useOpenDapp } from '@/renderer/utils/react-router';
@@ -12,7 +12,7 @@ import {
 } from '@/renderer/hooks/useDappsMngr';
 import { isDomainLikeStr, removeProtocolFromUrl } from '@/renderer/utils/url';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
-import { Modal } from '../Modal/Modal';
+import { Modal, Props as ModalProps } from '../Modal/Modal';
 import styles from './index.module.less';
 import { toastMessage } from '../TransparentToast';
 
