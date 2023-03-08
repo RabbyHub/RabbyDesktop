@@ -140,7 +140,7 @@ const ProxyText = styled.div`
 `;
 
 export function MainWindowSettings() {
-  const appVerison = useAppVersion();
+  const appVerisons = useAppVersion();
   const { settings, toggleEnableContentProtection } = useSettings();
 
   const { setIsSettingProxy, customProxyServer, proxyType } =
@@ -262,7 +262,12 @@ export function MainWindowSettings() {
         <h4 className={styles.blockTitle}>About</h4>
         <div className={styles.itemList}>
           <ItemAction
-            name={`Version: ${appVerison || '-'}`}
+            name={[
+              `Version: ${appVerisons.version || '-'}`,
+              appVerisons.appChannel === 'prod'
+                ? ''
+                : `-${appVerisons.appChannel}`,
+            ].join('')}
             icon="rabby-internal://assets/icons/mainwin-settings/info.svg"
             onClick={() => {
               fetchReleaseInfo().then((releseInfo) => {

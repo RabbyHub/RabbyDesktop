@@ -8,15 +8,18 @@ import { atom, useAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 
 export function useAppVersion() {
-  const [version, setVersion] = useState<string>('');
+  const [versions, setVersions] = useState<IAppVersions>({
+    version: '',
+    appChannel: 'reg',
+  });
 
   useEffect(() => {
     window.rabbyDesktop.ipcRenderer.invoke('get-app-version').then((event) => {
-      setVersion(event.version);
+      setVersions(event);
     });
   }, []);
 
-  return version;
+  return versions;
 }
 
 const osInfoAtom = atom<IOSInfo | null>(null);

@@ -10,10 +10,7 @@ type RabbyxInvokePayload = {
 type ChannelInvokePayload = {
   'get-app-version': {
     send: [];
-    response: {
-      version: ReturnType<Electron.App['getVersion']>;
-      appChannel: 'reg' | 'prod';
-    };
+    response: IAppVersions;
   };
   'get-os-info': {
     send: [];
