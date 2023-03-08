@@ -1,8 +1,36 @@
+const fs = require("fs");
 const path = require("path");
 
 // prod, reg
 const buildchannel = process.env.buildchannel || 'reg';
 const PLATFORM = process.platform;
+
+const selfSignCert = path.resolve(__dirname, "./scripts/code-signing/rabby-desktop-ca.pfx");
+const prodCert = path.resolve(__dirname, "./scripts/code-signing/rabby-desktop-ca.p12");
+
+function getWindowsCert() {
+  if (fs.existsSync(prodCert)) {
+    if (!process.env.RABBY_DESKTOP_CODE_SIGINING_PASS_PROD) {
+      console.warn(`[getWindowsCert] RABBY_DESKTOP_CODE_SIGINING_PASS_PROD is not set.`);
+      return {};
+    }
+
+    return {
+      "certificateFile": prodCert,
+      "certificatePassword": process.env.RABBY_DESKTOP_CODE_SIGINING_PASS_PROD,
+    }
+  }
+
+  if (!process.env.RABBY_DESKTOP_CODE_SIGINING_PASS) {
+    console.warn(`[getWindowsCert] RABBY_DESKTOP_CODE_SIGINING_PASS is not set.`);
+    return {};
+  }
+
+  return {
+    "certificateFile": selfSignCert,
+    "certificatePassword": process.env.RABBY_DESKTOP_CODE_SIGINING_PASS,
+  }
+}
 
 module.exports = {
   "productName": "Rabby Desktop",
@@ -58,8 +86,7 @@ module.exports = {
     ],
     "signDlls": false,
     "rfc3161TimeStampServer": "http://timestamp.comodoca.com/rfc3161",
-    "certificateFile": path.resolve(__dirname, "./scripts/code-signing/rabby-desktop-ca.pfx"),
-    "certificatePassword": process.env.RABBY_DESKTOP_CODE_SIGINING_PASS,
+    ...getWindowsCert(),
   },
   "nsis": {
     "artifactName": "rabby-wallet-desktop-installer-${arch}-${version}.${ext}",
