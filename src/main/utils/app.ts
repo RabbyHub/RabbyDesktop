@@ -126,7 +126,9 @@ export function getMainProcessAppChannel() {
  */
 export function initMainProcessSentry() {
   Sentry.init({
-    dsn: 'https://520afbe8f6574cb3a39e6cb7296f9008@o460488.ingest.sentry.io/4504751161868288',
+    dsn: !IS_RUNTIME_PRODUCTION
+      ? ''
+      : 'https://520afbe8f6574cb3a39e6cb7296f9008@o460488.ingest.sentry.io/4504751161868288',
     release: app.getVersion(),
 
     // enableNative: false,
