@@ -35,9 +35,6 @@ const viewsState: Record<
   'add-address-dropdown': {
     visible: false,
   },
-  'address-management': {
-    visible: false,
-  },
   'dapps-management': {
     visible: false,
   },
@@ -216,41 +213,6 @@ const addAddressReady = onMainWindowReady().then(async (mainWin) => {
   return addAddressPopup;
 });
 
-const addressManagementReady = onMainWindowReady().then(async (mainWin) => {
-  const mainWindow = mainWin.window;
-
-  const addressManagementPopup = createPopupView({});
-
-  mainWindow.addBrowserView(addressManagementPopup);
-
-  const onTargetWinUpdate = () => {
-    if (viewsState['address-management'].visible)
-      updateSubviewPos(
-        mainWindow,
-        addressManagementPopup,
-        'address-management'
-      );
-  };
-  mainWindow.on('show', onTargetWinUpdate);
-  mainWindow.on('move', onTargetWinUpdate);
-  mainWindow.on('resized', onTargetWinUpdate);
-  mainWindow.on('unmaximize', onTargetWinUpdate);
-  mainWindow.on('restore', onTargetWinUpdate);
-
-  await addressManagementPopup.webContents.loadURL(
-    `${await getWebuiURLBase()}/popup-view.html?view=address-management#/`
-  );
-
-  // debug-only
-  if (!IS_RUNTIME_PRODUCTION) {
-    // addressManagementPopup.webContents.openDevTools({ mode: 'detach' });
-  }
-
-  hidePopupView(addressManagementPopup);
-
-  return addressManagementPopup;
-});
-
 const dappsManagementReady = onMainWindowReady().then(async (mainWin) => {
   const mainWindow = mainWin.window;
 
@@ -362,7 +324,6 @@ const globalToastPopupReady = onMainWindowReady().then(async (mainWin) => {
 
 Promise.all([
   addAddressReady,
-  addressManagementReady,
   dappsManagementReady,
   selectDevicesReady,
   zPopupReady,
@@ -370,11 +331,10 @@ Promise.all([
 ]).then((wins) => {
   valueToMainSubject('popupViewsOnMainwinReady', {
     addAddress: wins[0],
-    addressManagement: wins[1],
-    dappsManagement: wins[2],
-    selectDevices: wins[3],
-    zPopup: wins[4],
-    globalToastPopup: wins[5],
+    dappsManagement: wins[1],
+    selectDevices: wins[2],
+    zPopup: wins[3],
+    globalToastPopup: wins[4],
   });
 });
 
@@ -463,9 +423,6 @@ const { handler: handler2 } = onIpcMainEvent(
         break;
       case 'main-window':
         views = [hash.mainWindow];
-        break;
-      case 'address-management':
-        views = [hash.addressManagement];
         break;
       case 'dapps-management':
         views = [hash.dappsManagement];

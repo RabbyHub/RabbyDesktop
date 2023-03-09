@@ -154,7 +154,6 @@ function _isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
   switch (viewType) {
     case 'main-window':
       return isMainWinShellWebUI(url);
-    case 'address-management':
     case 'add-address-dropdown':
     case 'z-popup':
       return (

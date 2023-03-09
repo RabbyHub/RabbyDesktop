@@ -146,7 +146,6 @@ export async function getAllMainUIViews() {
 
   const views = {
     'add-address-dropdown': mainViews.addAddress,
-    'address-management': mainViews.addressManagement,
     'dapps-management': mainViews.dappsManagement,
     'select-devices': mainViews.selectDevices,
     'z-popup': mainViews.zPopup,
@@ -155,7 +154,6 @@ export async function getAllMainUIViews() {
 
   const viewOnlyHash = {
     addAddress: mainViews.addAddress.webContents,
-    addressManagement: mainViews.addressManagement.webContents,
     dappsManagement: mainViews.dappsManagement.webContents,
     selectDevices: mainViews.selectDevices.webContents,
     zPopup: mainViews.zPopup.webContents,

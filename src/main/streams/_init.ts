@@ -91,7 +91,6 @@ const CONF = {
   } as IConf<
     ReplaySubject<{
       addAddress: BrowserView;
-      addressManagement: BrowserView;
       dappsManagement: BrowserView;
       selectDevices: BrowserView;
       zPopup: BrowserView;
