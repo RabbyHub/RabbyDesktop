@@ -315,12 +315,6 @@ type PopupViewOnMainwinInfo =
       };
     }
   | {
-      /**
-       * @deprecated
-       */
-      type: 'address-management';
-    }
-  | {
       type: 'dapps-management';
       state?: {
         newDappOrigin?: string;
