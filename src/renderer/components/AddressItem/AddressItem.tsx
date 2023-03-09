@@ -21,12 +21,18 @@ export const AddressItem: React.FC<Props> = ({ address, type, brandName }) => {
     });
   }, [address]);
 
-  const onUpdateAliasName = React.useCallback(async () => {
-    await walletController.updateAlianName(address, aliasName);
-    forwardMessageTo('*', 'refreshCurrentAccount', {});
+  const onUpdateAliasName = React.useCallback(
+    async (e: any) => {
+      if (e.type === 'keydown' && e.keyCode !== 13) {
+        return;
+      }
+      await walletController.updateAlianName(address, aliasName);
+      forwardMessageTo('*', 'refreshCurrentAccount', {});
 
-    setIsEdit(false);
-  }, [address, aliasName]);
+      setIsEdit(false);
+    },
+    [address, aliasName]
+  );
 
   const shortAddress = `${address?.toLowerCase().slice(0, 6)}...${address
     ?.toLowerCase()
@@ -40,7 +46,7 @@ export const AddressItem: React.FC<Props> = ({ address, type, brandName }) => {
             value={aliasName}
             onChange={(e) => setAliasName(e.target.value)}
             onBlur={onUpdateAliasName}
-            onPressEnter={onUpdateAliasName}
+            onKeyDownCapture={onUpdateAliasName}
             autoFocus
             width="auto"
             className={styles.input}

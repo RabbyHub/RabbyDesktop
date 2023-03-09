@@ -54,6 +54,10 @@ export const AccountDetail: React.FC<Props> = ({
   const updateAliasName = React.useCallback(
     async (e: any) => {
       const { value: inputValue } = e.target as { value: string };
+      if (e.type === 'keydown' && e.keyCode !== 13) {
+        return;
+      }
+
       setEditing(false);
 
       if (!inputValue) {
@@ -94,7 +98,7 @@ export const AccountDetail: React.FC<Props> = ({
               className="alias-input"
               defaultValue={aliasInput}
               onBlur={updateAliasName}
-              onPressEnter={updateAliasName}
+              onKeyDownCapture={updateAliasName}
               autoFocus
             />
           ) : (
