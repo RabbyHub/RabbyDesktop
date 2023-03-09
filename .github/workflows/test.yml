@@ -3,35 +3,79 @@ name: Test
 on:
   push:
     branches:
-      - disable_test*
+      - dev
+      - feat*
+
+defaults:
+  run:
+    shell: bash -ieo pipefail {0}
 
 jobs:
-  test:
-    runs-on: ${{ matrix.os }}
-
+  setup:
+    name: Build
     strategy:
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        host: [Windows, macOS]
+    runs-on:
+      - self-hosted
+      - X64
+      - ${{ matrix.host }}
+    env:
+      NODE_OPTIONS: '--max_old_space_size=4096'
 
     steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v1
+      - name: Checkout git repo
+        uses: actions/checkout@v3
 
-      - name: Install Node.js and NPM
-        uses: actions/setup-node@v2
+      - name: Env Test
+        id: env-test
+        shell: bash
+        run: |
+          echo "whoami $(whoami)"
+          echo "shell is $(echo $0)"
+          echo "HOME is $HOME"
+          echo "USERPROFILE is $USERPROFILE"
+          echo "which node $(which node)"
+
+      # - name: Install Node and NPM
+      #   uses: actions/setup-node@v1
+      #   with:
+      #     node-version: 16
+      #     cache: npm
+
+      - name: Use NPM Token with organization read access
+        uses: heisenberg-2077/use-npm-token-action@v1
         with:
-          node-version: 16
-          cache: npm
+          token: '${{ secrets.NPM_AUTH_TOKEN }}'
 
-      - name: npm install
+      - name: Install and build
+        shell: bash
         run: |
-          npm install
+          npm i -g @debank/cli@latest;
+          npm i;
+          if [[ "$OSTYPE" == "darwin"* ]]; then
+            security unlock-keychain -p ${{ secrets.KEYCHAIN_PASS }} ~/Library/Keychains/login.keychain-db
+            npm run package:darwin:arm64;
+            npm run package:darwin:x64;
+          else
+            bash ./.github/workflows/fix-vars.sh
+            npm run package:win32:x64;
+          fi
 
-      - name: npm test
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npm run package
-          npm run lint
-          npm exec tsc
-          npm test
+          KEYCHAIN_PASS: ${{ secrets.KEYCHAIN_PASS }}
+          RABBY_BUILD_BUCKET: ${{ secrets.RABBY_BUILD_BUCKET }}
+          RABBY_APPLE_TEAM_ID: ${{ secrets.RABBY_APPLE_TEAM_ID }}
+          RABBY_APPLE_ID: ${{ secrets.RABBY_APPLE_ID }}
+          RABBY_APPLE_ID_PASS: ${{ secrets.RABBY_APPLE_ID_PASS }}
+          RABBY_DESKTOP_CODE_SIGINING_PASS_PROD: ${{ secrets.RABBY_DESKTOP_CODE_SIGINING_PASS_PROD }}
+          RABBY_DESKTOP_KR_PWD: ${{ secrets.RABBY_DESKTOP_KR_PWD }}
+          RABBY_REALLY_COPY: ${{ vars.RABBY_REALLY_COPY }}
+          LARK_CHAT_URL: ${{ secrets.LARK_CHAT_URL }}
+          LARK_CHAT_SECRET: ${{ secrets.LARK_CHAT_SECRET }}
+          # see more details on https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
+          GIT_ACTIONS_JOB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          GIT_COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
+          GIT_REF_NAME: ${{ github.ref_name }}
+          GIT_REF_URL: ${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }}
+          GITHUB_REF: ${{ github.ref }}

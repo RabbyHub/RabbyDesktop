@@ -5,19 +5,24 @@ const path = require("path");
 const buildchannel = process.env.buildchannel || 'reg';
 const PLATFORM = process.platform;
 
-const selfSignCert = path.resolve(__dirname, "./scripts/code-signing/rabby-desktop-ca.pfx");
-const prodCert = path.resolve(__dirname, "./scripts/code-signing/rabby-desktop-ca.p12");
-
 function getWindowsCert() {
   if (PLATFORM !== "win32") return {};
-  if (fs.existsSync(prodCert)) {
+
+  const selfSignCert = path.resolve(__dirname, "./scripts/code-signing/rabby-desktop-ca.pfx");
+  const prodCert = path.resolve(__dirname, "./scripts/code-signing/rabby-desktop-ca.p12");
+  const userProdCert = path.resolve(process.env.USERPROFILE, "./.rabby-build/code-signing/rabby-desktop-ca.p12");
+  // console.debug(`[getWindowsCert] userProdCert is ${userProdCert}`);
+
+  const finalProdCert = fs.existsSync(userProdCert) ? userProdCert : prodCert;
+
+  if (fs.existsSync(finalProdCert)) {
     if (!process.env.RABBY_DESKTOP_CODE_SIGINING_PASS_PROD) {
       console.warn(`[getWindowsCert] RABBY_DESKTOP_CODE_SIGINING_PASS_PROD is not set.`);
       return {};
     }
 
     return {
-      "certificateFile": prodCert,
+      "certificateFile": finalProdCert,
       "certificatePassword": process.env.RABBY_DESKTOP_CODE_SIGINING_PASS_PROD,
     }
   }
