@@ -5,4 +5,9 @@ project_dir=$(dirname "$script_dir")
 
 . $script_dir/fns_release.sh --source-only
 
-update_version;
+# if is mac
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  release_darwin;
+else
+  release_win32;
+fi

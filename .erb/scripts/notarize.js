@@ -7,14 +7,18 @@ exports.default = async function notarizeMacos(context) {
     return;
   }
 
-  if (process.env.CI !== 'true') {
+  if (process.env.RABBY_NOTARIZE !== 'true') {
     console.warn('Skipping notarizing step. Packaging is not running in CI');
     return;
   }
 
-  if (!('RABBY_APPLE_ID' in process.env && 'RABBY_APPLE_ID_PASS' in process.env)) {
+  if (!(
+    'RABBY_APPLE_TEAM_ID' in process.env
+    && 'RABBY_APPLE_ID' in process.env
+    && 'RABBY_APPLE_ID_PASS' in process.env
+  )) {
     console.warn(
-      'Skipping notarizing step. RABBY_APPLE_ID and RABBY_APPLE_ID_PASS env variables must be set'
+      'Skipping notarizing step. RABBY_APPLE_TEAM_ID, RABBY_APPLE_ID and RABBY_APPLE_ID_PASS env variables must be set'
     );
     return;
   }
