@@ -239,9 +239,7 @@ const ProtocolItem = ({
           item.position_index === portfolio.position_index
       );
       if (historyPortfolio) {
-        const change = historyPortfolio.asset_token_list.reduce((res, item) => {
-          return res + item.amount * item.price;
-        }, 0);
+        const change = historyPortfolio.stats.net_usd_value;
         sum += change;
       } else if (!supportHistory) {
         const change = portfolio.asset_token_list.reduce((res, item) => {
