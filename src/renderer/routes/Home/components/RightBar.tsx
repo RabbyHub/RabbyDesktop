@@ -6,7 +6,6 @@ import { Tooltip } from 'antd';
 import IconReceive from '../../../../../assets/icons/home/receive.svg?rc';
 import IconSend from '../../../../../assets/icons/home/send.svg?rc';
 import IconSwap from '../../../../../assets/icons/home/swap.svg?rc';
-import Transactions from './Transactions';
 
 const RightBarWrapper = styled.div`
   width: 330px;
@@ -91,7 +90,7 @@ const RightBar = ({ updateNonce }: { updateNonce: number }) => {
           </Tooltip>
         ))}
       </ActionList>
-      <Transactions updateNonce={updateNonce} />
+      {/* <Transactions updateNonce={updateNonce} /> */}
       <ReceiveModalWraper
         open={isShowReceive}
         onCancel={() => {

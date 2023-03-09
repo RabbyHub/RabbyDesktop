@@ -24,6 +24,10 @@ const TransactionWrapper = styled.div`
   flex-direction: column;
   max-height: calc(100% - 154px);
   overflow: hidden;
+  position: absolute;
+  right: -358px;
+  width: 330px;
+  top: 15px;
 `;
 
 const TransactionList = styled.ul`

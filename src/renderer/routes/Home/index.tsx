@@ -30,6 +30,7 @@ import ChainList from './components/ChainList';
 import Curve, { CurveModal } from './components/Curve';
 import PortfolioView from './components/PortfolioView';
 import RightBar from './components/RightBar';
+import Transactions from './components/Transactions';
 
 const HomeBody = styled.div`
   display: flex;
@@ -614,36 +615,39 @@ const Home = () => {
               </SwitchViewWrapper>
             </div>
           </div>
-          <PortfolioView
-            tokenList={displayTokenList}
-            historyTokenMap={historyTokenMap}
-            protocolList={displayProtocolList}
-            historyProtocolMap={historyProtocolMap}
-            protocolHistoryTokenPriceMap={tokenHistoryPriceMap}
-            selectChainServerId={selectChainServerId}
-            tokenHidden={{
-              isExpand: isTokenExpand,
-              hiddenCount: tokenHiddenCount,
-              hiddenUsdValue: tokenHiddenUsdValue,
-              expandTokensUsdValueChange,
-              setIsExpand: setIsTokenExpand,
-              isShowExpand: isShowTokenExpand,
-            }}
-            protocolHidden={{
-              isShowExpand: isShowProtocolExpand,
-              isExpand: isProtocolExpand,
-              hiddenCount: protocolHiddenCount,
-              hiddenUsdValue: protocolHiddenUsdValue,
-              setIsExpand: setIsProtocolExpand,
-            }}
-            isLoadingTokenList={isLoadingTokenList}
-            isLoadingProtocolList={isLoadingProtocol}
-            isLoadingProtocolHistory={isLoadingProtocolHistory}
-            supportHistoryChains={supportHistoryChains}
-            historyTokenDict={historyTokenDict}
-            chainList={displayChainList}
-            view={currentView}
-          />
+          <div className="relative">
+            <Transactions updateNonce={updateNonce} />
+            <PortfolioView
+              tokenList={displayTokenList}
+              historyTokenMap={historyTokenMap}
+              protocolList={displayProtocolList}
+              historyProtocolMap={historyProtocolMap}
+              protocolHistoryTokenPriceMap={tokenHistoryPriceMap}
+              selectChainServerId={selectChainServerId}
+              tokenHidden={{
+                isExpand: isTokenExpand,
+                hiddenCount: tokenHiddenCount,
+                hiddenUsdValue: tokenHiddenUsdValue,
+                expandTokensUsdValueChange,
+                setIsExpand: setIsTokenExpand,
+                isShowExpand: isShowTokenExpand,
+              }}
+              protocolHidden={{
+                isShowExpand: isShowProtocolExpand,
+                isExpand: isProtocolExpand,
+                hiddenCount: protocolHiddenCount,
+                hiddenUsdValue: protocolHiddenUsdValue,
+                setIsExpand: setIsProtocolExpand,
+              }}
+              isLoadingTokenList={isLoadingTokenList}
+              isLoadingProtocolList={isLoadingProtocol}
+              isLoadingProtocolHistory={isLoadingProtocolHistory}
+              supportHistoryChains={supportHistoryChains}
+              historyTokenDict={historyTokenDict}
+              chainList={displayChainList}
+              view={currentView}
+            />
+          </div>
         </HomeWrapper>
         <RightBar updateNonce={updateNonce} />
       </Container>
