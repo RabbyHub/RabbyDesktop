@@ -482,7 +482,7 @@ const Home = () => {
                       active
                       style={{
                         width: '120px',
-                        height: '21px',
+                        height: '17px',
                         borderRadius: '2px',
                       }}
                     />
@@ -527,7 +527,7 @@ const Home = () => {
                       active
                       style={{
                         width: '234px',
-                        height: '43px',
+                        height: '55px',
                         borderRadius: '2px',
                       }}
                     />
