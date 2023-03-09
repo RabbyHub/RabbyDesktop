@@ -168,12 +168,15 @@ const PortfolioView = ({
 
   if (isEmpty) {
     return (
-      <div
-        className={classNames({
-          'pt-[15px]': chainList.length > 1,
-        })}
-      >
+      <div className="flex-1 overflow-hidden pt-[15px]">
         <PortfolioWrapper className="empty">
+          <img
+            src="rabby-internal://assets/icons/home/asset-arrow.svg"
+            className="icon-asset-arrow"
+            style={{
+              transform: `translateX(${assetArrowLeft}px)`,
+            }}
+          />
           {chainList.length > 1 && (
             <img
               src="rabby-internal://assets/icons/home/asset-arrow.svg"

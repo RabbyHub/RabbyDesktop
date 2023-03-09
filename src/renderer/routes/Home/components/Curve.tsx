@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { AreaChart, YAxis, Area, XAxis, Tooltip } from 'recharts';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
@@ -33,6 +33,7 @@ const CurveWrapper = styled.div`
   top: 0;
   width: 100%;
   height: 100%;
+  z-index: 1;
   -webkit-mask-image: -webkit-gradient(
     linear,
     left top,
@@ -40,20 +41,32 @@ const CurveWrapper = styled.div`
     from(rgba(255, 255, 255, 0.15)),
     to(rgba(255, 255, 255, 0.8))
   );
+
+  &:hover {
+    -webkit-mask-image: none;
+  }
 `;
 
 const CurveThumbnail = ({ data, className }: CurveThumbnailProps) => {
   const color = useMemo(() => {
     return `var(--color-${data?.isLoss ? 'red' : 'green'})`;
   }, [data]);
+  const divRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(92);
+
+  useEffect(() => {
+    if (divRef.current) {
+      setHeight(divRef.current.clientHeight);
+    }
+  }, []);
 
   return (
-    <CurveWrapper className={className}>
+    <CurveWrapper ref={divRef} className={className}>
       <AreaChart
         data={data?.list}
         width={594}
-        height={100}
-        style={{ position: 'absolute', right: 0 }}
+        height={height}
+        style={{ position: 'absolute', right: 0, cursor: 'pointer' }}
       >
         <defs>
           <linearGradient id="curveThumbnail" x1="0" y1="0" x2="0" y2="1">
