@@ -1,0 +1,99 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      # - dev
+      # - feat*
+      - build/ci*
+      - trigger-build
+    tags:
+      - 'v*'
+
+defaults:
+  run:
+    shell: bash -ieo pipefail {0}
+
+jobs:
+  setup:
+    name: prepare build
+    runs-on: [self-hosted, X64, macOS, builder]
+    # if: ${{ github.repository_owner == 'RabbyHub' }}
+    env:
+      NODE_OPTIONS: '--max_old_space_size=4096'
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+
+      - name: Env Test
+        id: env-test
+        run: |
+          echo "whoami $(whoami)"
+          echo "shell is $(echo $0)"
+          echo "which node $(which node)"
+
+      - name: Install Node and NPM
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16
+          cache: npm
+
+      - name: Use NPM Token with organization read access
+        uses: heisenberg-2077/use-npm-token-action@v1
+        with:
+          token: '${{ secrets.NPM_AUTH_TOKEN }}'
+
+  build-darwin:
+    name: prepare build macOS
+    runs-on: [self-hosted, X64, macOS]
+    needs: setup
+    steps:
+      - name: Install and build
+        run: |
+          npm i -g @debank/cli;
+          npm i;
+          security unlock-keychain -p ${{ secrets.KEYCHAIN_PASS }} ~/Library/Keychains/login.keychain-db
+          if [[ $GITHUB_REF == refs/tags/v* ]]; then
+            export buildchannel=prod
+          else
+            export buildchannel=reg
+          fi
+          sh ./scripts/release_desktop.sh
+        env:
+          KEYCHAIN_PASS: ${{ secrets.KEYCHAIN_PASS }}
+          RABBY_BUILD_BUCKET: ${{ secrets.RABBY_BUILD_BUCKET }}
+          RABBY_APPLE_TEAM_ID: ${{ secrets.RABBY_APPLE_TEAM_ID }}
+          RABBY_APPLE_ID: ${{ secrets.RABBY_APPLE_ID }}
+          RABBY_APPLE_ID_PASS: ${{ secrets.RABBY_APPLE_ID_PASS }}
+          RABBY_REALLY_COPY: ${{ vars.RABBY_REALLY_COPY }}
+          LARK_CHAT_URL: ${{ secrets.LARK_CHAT_URL }}
+          LARK_CHAT_SECRET: ${{ secrets.LARK_CHAT_SECRET }}
+          # see more details on https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
+          GIT_ACTIONS_JOB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          GIT_COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
+          GIT_REF_NAME: ${{ github.ref_name }}
+          GIT_REF_URL: ${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }}
+          GITHUB_REF: ${{ github.ref }}
+  # build-win32:
+  #   name: prepare build windows
+  #   runs-on: [self-hosted, X64, Windows]
+  #   needs: setup
+  #   steps:
+  #     - name: Install and build
+  #       run: |
+  #         npm i -g @debank/cli;
+  #         npm i;
+  #         ./scripts/release_desktop.sh
+
+      # - name: Publish releases
+      #   env:
+      #     # These values are used for auto updates signing
+      #     APPLE_ID: ${{ secrets.APPLE_ID }}
+      #     APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
+      #     CSC_LINK: ${{ secrets.CSC_LINK }}
+      #     CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+      #     # This is used for uploading release assets to github
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     npm exec electron-builder -- --publish always --win --mac --linux
