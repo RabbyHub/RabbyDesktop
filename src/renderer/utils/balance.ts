@@ -23,10 +23,7 @@ export const useTotalBalance = (
     });
     protocols.forEach((protocol) => {
       protocol.portfolio_item_list.forEach((pool) => {
-        pool.asset_token_list.forEach((token) => {
-          const usd = new BigNumber(token.amount).times(token.price);
-          sum = sum.plus(usd);
-        });
+        sum = sum.plus(pool.stats.net_usd_value);
       });
     });
     return sum.toFixed();
