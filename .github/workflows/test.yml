@@ -33,13 +33,15 @@ jobs:
         run: |
           echo "whoami $(whoami)"
           echo "shell is $(echo $0)"
+          echo "HOME is $HOME"
+          echo "USERPROFILE is $USERPROFILE"
           echo "which node $(which node)"
 
-      - name: Install Node and NPM
-        uses: actions/setup-node@v1
-        with:
-          node-version: 16
-          cache: npm
+      # - name: Install Node and NPM
+      #   uses: actions/setup-node@v1
+      #   with:
+      #     node-version: 16
+      #     cache: npm
 
       - name: Use NPM Token with organization read access
         uses: heisenberg-2077/use-npm-token-action@v1
@@ -56,6 +58,7 @@ jobs:
             npm run package:darwin:arm64;
             npm run package:darwin:x64;
           else
+            bash ./.github/workflows/fix-vars.sh
             npm run package:win32:x64;
           fi
 

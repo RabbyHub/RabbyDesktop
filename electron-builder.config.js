@@ -10,7 +10,8 @@ function getWindowsCert() {
 
   const selfSignCert = path.resolve(__dirname, "./scripts/code-signing/rabby-desktop-ca.pfx");
   const prodCert = path.resolve(__dirname, "./scripts/code-signing/rabby-desktop-ca.p12");
-  const userProdCert = path.resolve(process.env.USERPROFILE, "./.rabby-build/code-signing/rabby-desktop-user.p12");
+  const userProdCert = path.resolve(process.env.USERPROFILE, "./.rabby-build/code-signing/rabby-desktop-ca.p12");
+  // console.debug(`[getWindowsCert] userProdCert is ${userProdCert}`);
 
   const finalProdCert = fs.existsSync(userProdCert) ? userProdCert : prodCert;
 
