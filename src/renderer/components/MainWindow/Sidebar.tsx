@@ -94,8 +94,7 @@ const TabList = ({
     <ul className={classNames(styles.routeList, className)} style={style}>
       {dapps.map((dapp) => {
         const { tab } = dapp;
-        const faviconUrl =
-          dapp?.faviconBase64 || dapp?.faviconUrl || dapp.tab?.favIconUrl;
+        const faviconUrl = dapp?.faviconBase64 || dapp?.faviconUrl;
 
         return (
           <li
