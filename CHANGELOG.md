@@ -1,8 +1,23 @@
 
+v0.5.8 / 2023-03-11
+===================
+
+  * chore: update trezror (#259)
+  * ci: accept env `buildchannel` from github actions vars.
+  * fix: prerelease script.
+  * fix: hd styles (#256)
+  * ci: support windows on actions. (#255)
+  * build: support build on github actions. (#254)
+  * fix: skeleton style (#251)
+  * feat: remove address management view (#252)
+  * fix: debt calc (#253)
+  * Release v0.5.7
+  * fix: cannot open its App on uniswap.org & www.paraswap.io (#250)
+
 v0.5.7 / 2023-03-08
 ===================
 
-  * fix: cannot open its App on uniswap.org & www.paraswap.io (#250)
+  * Release v0.5.7
   * feat: support force update. (#249)
   * type: some type fix.
   * fix: extra action back to seondaryDomain on its sub domain tab open. (#248)
