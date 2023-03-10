@@ -28,7 +28,7 @@ update_version() {
   cd $project_dir/release/app && npm --no-git-tag-version version $VERSION && cd $project_dir
 
   echo ":wq" | git-changelog --all --prune-old --tag v$VERSION;
-  git-release --tag v$VERSION;
+  echo "push release by run 'git-release v$VERSION'"
 }
 
 release_darwin() {
