@@ -14,34 +14,10 @@ import RabbyInput from '../AntdOverwrite/Input';
 import { Modal, Props as ModalProps } from '../Modal/Modal';
 import styles from './index.module.less';
 import { PreviewDapp } from './PreviewDapp';
-import { RelationModal } from './RelactionModal';
 import { useAddDappURL } from './useAddDapp';
 import { DomainExample } from './DomainExample';
 import { Warning } from './Warning';
 import { toastMessage } from '../TransparentToast';
-
-const findRelatedDapps = (dapps: IDapp[], url: string) => {
-  const current = canoicalizeDappUrl(url);
-
-  // 正在添加 uniswap.org 提示会替换掉 app.uniswap.org
-  if (current.is2ndaryDomain) {
-    return dapps.filter((dapp) => {
-      const result = canoicalizeDappUrl(dapp.origin);
-      return result.secondaryDomain === current.secondaryDomain;
-    });
-  }
-  // 正在添加 app.uniswap.org 提示会替换掉uniswap.org
-  if (current.isSubDomain) {
-    return dapps.filter((dapp) => {
-      const result = canoicalizeDappUrl(dapp.origin);
-      return (
-        result.secondaryDomain === current.secondaryDomain &&
-        result.is2ndaryDomain
-      );
-    });
-  }
-  return [];
-};
 
 const validateInput = (input: string, onReplace?: (v: string) => void) => {
   const domain = input?.trim();
@@ -126,19 +102,22 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
   const { detectDapps } = useDapps();
   const { runAsync, loading, cancel } = useRequest(
     async (url: string) => {
+      const validateRes = validateInput(url, onReplace);
+      if (validateRes) {
+        return {
+          validateRes,
+        };
+      }
       const specialDomain = getSpecialDomain(url);
-      if (specialDomain) {
+      if (
+        specialDomain &&
+        specialDomain === canoicalizeDappUrl(`https://${url}`).hostname
+      ) {
         return {
           validateRes: {
             validateStatus: 'error' as const,
             help: `The domain name of "${specialDomain}" is not supported for now`,
           },
-        };
-      }
-      const validateRes = validateInput(url, onReplace);
-      if (validateRes) {
-        return {
-          validateRes,
         };
       }
       return detectDapps(`https://${url}`);
@@ -182,7 +161,8 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
           return null;
         }
         const dappUrl = canoicalizeDappUrl(data?.inputOrigin || '');
-        if (data && dappUrl.isSubDomain) {
+        const specialDomain = getSpecialDomain(data?.inputOrigin || '');
+        if (data && dappUrl.isSubDomain && !specialDomain) {
           setState({
             dappInfo: data,
             validateStatus: 'success',
@@ -258,16 +238,6 @@ export function AddDapp({
     },
   });
 
-  const [addState, setAddState] = useSetState<{
-    isShowModal: boolean;
-    relatedDapps: IDapp[];
-    dappInfo: IDappsDetectResult['data'];
-  }>({
-    isShowModal: false,
-    relatedDapps: [],
-    dappInfo: null,
-  });
-
   const { runAsync: runAddDapp, loading: isAddLoading } = useRequest(
     (dapp, urls?: string[]) => {
       return Promise.all([
@@ -316,32 +286,8 @@ export function AddDapp({
       },
     };
     setState(nextState);
-    setAddState({
-      isShowModal: false,
-      relatedDapps: [],
-      dappInfo: null,
-    });
 
     onAddedDapp?.(dappInfo.inputOrigin);
-  };
-
-  const handleAddCheck = async (
-    dappInfo: NonNullable<IDappsDetectResult['data']>
-  ) => {
-    if (!dappInfo) {
-      return;
-    }
-
-    const relatedDapps = findRelatedDapps(dapps || [], dappInfo.inputOrigin);
-    if (relatedDapps.length) {
-      setAddState({
-        dappInfo,
-        isShowModal: true,
-        relatedDapps,
-      });
-    } else {
-      handleAdd(dappInfo);
-    }
   };
 
   const isShowExample = !state?.dappInfo && !state.help && !loading;
@@ -410,7 +356,7 @@ export function AddDapp({
           data={state.dappInfo}
           loading={isAddLoading}
           onAdd={(dapp) => {
-            handleAddCheck(dapp);
+            handleAdd(dapp);
           }}
           onOpen={(dapp) => {
             openDapp(dapp.inputOrigin);
@@ -420,25 +366,6 @@ export function AddDapp({
           onGoBackClick={onGoBackClick}
         />
       ) : null}
-      <RelationModal
-        data={addState.relatedDapps}
-        open={addState.isShowModal}
-        onCancel={() => {
-          setAddState({
-            isShowModal: false,
-            relatedDapps: [],
-            dappInfo: null,
-          });
-        }}
-        onOk={() => {
-          if (addState.dappInfo) {
-            handleAdd(
-              addState.dappInfo,
-              addState.relatedDapps.map((d) => d.origin)
-            );
-          }
-        }}
-      />
     </div>
   );
 }
