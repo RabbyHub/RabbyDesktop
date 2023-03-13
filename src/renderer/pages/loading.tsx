@@ -75,7 +75,7 @@ export default function App() {
 
   useEffect(() => {
     window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:loading-view:toggle',
+      '__internal_push:mainwindow:toggle-loading-view',
       (payload) => {
         if (payload.type === 'show') {
           setLoadingInfo((prev) => {

@@ -141,7 +141,11 @@ export function valueToMainSubject<T extends keyof IMainSubjects>(
   }
 
   if (!IS_RUNTIME_PRODUCTION) {
-    cLog('valueToMainSubject', `Subject '${type}' initialized`);
+    if (CONF[type].once) {
+      cLog('valueToMainSubject', `Subject '${type}' initialized`);
+    } else {
+      cLog('valueToMainSubject', `Subject '${type}' next value`);
+    }
   }
 
   store[type].initialized = true;

@@ -12,6 +12,7 @@ import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import { BrowserViewManager } from '../utils/browserView';
 import { desktopAppStore } from '../store/desktopApp';
 import { getAssetPath } from '../utils/app';
+import { hideLoadingView, isDappViewLoadingForTab } from '../utils/browser';
 
 const viewMngr = new BrowserViewManager(
   {
@@ -118,11 +119,11 @@ export class Tab {
     });
 
     this.view!.webContents.on('did-stop-loading', () => {
-      this.hideLoadingView();
+      if (isDappViewLoadingForTab(this.id)) hideLoadingView();
     });
 
     this.view!.webContents.on('dom-ready', () => {
-      this.hideLoadingView();
+      if (isDappViewLoadingForTab(this.id)) hideLoadingView();
     });
 
     this._patchWindowClose();
@@ -149,13 +150,6 @@ export class Tab {
         window.close.__patched = true;
       })();
     `);
-  }
-
-  hideLoadingView() {
-    emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-      type: 'hide',
-      tabId: this.id,
-    });
   }
 
   showLoadingView(nextURL: string) {
@@ -213,7 +207,7 @@ export class Tab {
     const result = await this.view?.webContents.loadURL(url);
     if (isMain) {
       emitIpcMainEvent('__internal_main:mainwindow:capture-tab');
-      this.hideLoadingView();
+      hideLoadingView();
     }
 
     return result;
@@ -301,6 +295,10 @@ export class Tab {
       y: -99999,
       // ...rect,
     });
+  }
+
+  get isAnimating() {
+    return this._isAnimating;
   }
 
   toggleAnimating(enabled = false) {
@@ -429,6 +427,21 @@ export class Tabs extends EventEmitter {
   unSelectAll() {
     if (this.selected) this.selected.hide();
     this.selected = undefined;
+  }
+
+  checkLoadingView() {
+    const tab = this.selected;
+
+    if (!tab || !tab.view?.webContents.isLoading() || tab.isAnimating) {
+      hideLoadingView();
+      return false;
+    }
+
+    const targetURL = tab.view!.webContents.getURL();
+
+    tab.showLoadingView(targetURL);
+
+    return true;
   }
 
   findByOrigin(url: string) {

@@ -1,5 +1,5 @@
 import { dialog } from 'electron';
-import { captureWebContents } from '../utils/browser';
+import { captureWebContents, hideLoadingView } from '../utils/browser';
 import {
   emitIpcMainEvent,
   handleIpcMainInvoke,
@@ -202,16 +202,8 @@ onIpcMainEvent(
     const mainTabbedWin = await onMainWindowReady();
     if (mainTabbedWin.window.id !== winId) return;
 
-    const prevSelected = mainTabbedWin.tabs.selected;
-    if (prevSelected) {
-      prevSelected.hideLoadingView();
-    }
-
     await clearCaptureState();
-    const selected = mainTabbedWin?.tabs.select(tabId);
-    if (selected?.view?.webContents.isLoading()) {
-      selected.showLoadingView(selected.view.webContents.getURL());
-    }
+    mainTabbedWin.tabs.checkLoadingView();
     getLatestCapturedActiveTab();
   }
 );
@@ -231,11 +223,7 @@ handleIpcMainInvoke('toggle-activetab-animating', async (_, animating) => {
     captureState.image = null;
   }
 
-  if (animating && isLoading) {
-    activeTab.hideLoadingView();
-  } else if (!animating && isLoading) {
-    activeTab.showLoadingView(activeTab.view!.webContents.getURL());
-  }
+  mainWin.tabs.checkLoadingView();
 });
 
 onIpcMainEvent(
@@ -257,7 +245,7 @@ onIpcMainEvent(
         dappViewState: 'unmounted',
       });
       mainTabbedWin.tabs.unSelectAll();
-      activeTab?.hideLoadingView();
+      hideLoadingView();
     }
   }
 );

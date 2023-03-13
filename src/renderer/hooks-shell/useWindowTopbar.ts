@@ -227,8 +227,8 @@ export function useTopbarTabs() {
   }, [updateActiveTab, windowId]);
 
   const tabActions = {
-    onTabClick: useCallback((tab: ChromeTab) => {
-      chrome.tabs.update(tab.id!, { active: true });
+    onTabClick: useCallback(async (tab: ChromeTab) => {
+      await chrome.tabs.update(tab.id!, { active: true });
       window.rabbyDesktop.ipcRenderer.sendMessage(
         '__internal_rpc:mainwindow:select-tab',
         tab.windowId,

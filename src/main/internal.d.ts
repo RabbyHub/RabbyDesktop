@@ -44,7 +44,6 @@ type MainInternalsMessagePayload = {
           }
         | {
             type: 'hide';
-            tabId: number;
           }
     ];
     response: [];

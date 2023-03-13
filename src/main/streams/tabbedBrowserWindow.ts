@@ -254,11 +254,6 @@ onMainWindowReady().then((mainTabbedWin) => {
         windowId: mainTabbedWin.window.id,
       }
     );
-
-    emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-      type: 'hide',
-      tabId: -1,
-    });
   });
 });
 

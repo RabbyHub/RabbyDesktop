@@ -110,6 +110,10 @@ export default class TabbedBrowserWindow {
       this.extensions.selectTab(tab.view!.webContents);
     });
 
+    this.tabs.on('tab-destroyed', () => {
+      this.tabs.checkLoadingView();
+    });
+
     emitIpcMainEvent('__internal_main:tabbed-window:view-added', {
       webContents: this.window.webContents,
       window: this.window,
