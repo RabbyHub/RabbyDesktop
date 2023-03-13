@@ -1,6 +1,7 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 
 import { arraify } from '@/isomorphic/array';
+import { canoicalizeDappUrl } from '@/isomorphic/url';
 import {
   IS_RUNTIME_PRODUCTION,
   PERSIS_STORE_PREFIX,
@@ -129,4 +130,13 @@ export function getBlockchainExplorers() {
   });
 
   return set;
+}
+
+export function isTargetScanLink(
+  targetURL: string | ReturnType<typeof canoicalizeDappUrl>
+) {
+  const parsedInfo =
+    typeof targetURL === 'string' ? canoicalizeDappUrl(targetURL) : targetURL;
+
+  return getBlockchainExplorers().has(parsedInfo.secondaryDomain);
 }

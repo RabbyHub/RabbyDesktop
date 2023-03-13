@@ -1,4 +1,4 @@
-import { BrowserWindow } from 'electron';
+import { BrowserWindow, shell } from 'electron';
 import { bufferTime, fromEvent, map } from 'rxjs';
 
 import {
@@ -35,6 +35,7 @@ import {
   getTabbedWindowFromWebContents,
 } from '../utils/tabbedBrowserWindow';
 import { safeOpenURL } from './dappSafeview';
+import { isTargetScanLink } from '../store/dynamicConfig';
 
 /**
  * @deprecated import members from '../utils/tabbedBrowserWindow' instead
@@ -196,6 +197,13 @@ onIpcMainEvent('__internal_webui-window-close', (_, winId, webContentsId) => {
 });
 
 handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
+  if (isTargetScanLink(dappOrigin)) {
+    shell.openExternal(dappOrigin);
+    return {
+      shouldNavTabOnClient: false,
+    };
+  }
+
   const currentUrl = evt.sender.getURL();
   const { dappByOrigin, dappBySecondaryDomainOrigin } =
     findDappsByOrigin(dappOrigin);
