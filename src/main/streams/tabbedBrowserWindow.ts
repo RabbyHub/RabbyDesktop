@@ -9,6 +9,7 @@ import {
 import { arraify } from '@/isomorphic/array';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 import {
+  emitIpcMainEvent,
   handleIpcMainInvoke,
   onIpcMainEvent,
   onIpcMainInternalEvent,
@@ -245,7 +246,7 @@ onIpcMainEvent(
 );
 
 onMainWindowReady().then((mainTabbedWin) => {
-  mainTabbedWin.tabs.on('all-tabs-destroyed', () => {
+  mainTabbedWin.tabs.on('all-tabs-destroyed', async () => {
     sendToWebContents(
       mainTabbedWin.window.webContents,
       '__internal_push:mainwindow:all-tabs-closed',
@@ -253,6 +254,11 @@ onMainWindowReady().then((mainTabbedWin) => {
         windowId: mainTabbedWin.window.id,
       }
     );
+
+    emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
+      type: 'hide',
+      tabId: -1,
+    });
   });
 });
 
