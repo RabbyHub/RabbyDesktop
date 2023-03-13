@@ -183,7 +183,7 @@ export default function MainWindowSidebar() {
   }, [prevMatchedDapp, matchedDapp]);
 
   useLayoutEffect(() => {
-    const dispose = window.rabbyDesktop.ipcRenderer.on(
+    return window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:mainwindow:all-tabs-closed',
       () => {
         if (!matchedSE) {
@@ -191,10 +191,6 @@ export default function MainWindowSidebar() {
         }
       }
     );
-
-    return () => {
-      dispose?.();
-    };
   }, [navigate, matchedSE]);
 
   useEffect(() => {

@@ -204,20 +204,13 @@ onIpcMainEvent(
 
     const prevSelected = mainTabbedWin.tabs.selected;
     if (prevSelected) {
-      emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-        type: 'hide',
-        tabId: prevSelected.id,
-      });
+      prevSelected.hideLoadingView();
     }
 
     await clearCaptureState();
     const selected = mainTabbedWin?.tabs.select(tabId);
     if (selected?.view?.webContents.isLoading()) {
-      emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-        type: 'show',
-        tabURL: selected.view.webContents.getURL(),
-        tabId: selected.id,
-      });
+      selected.showLoadingView(selected.view.webContents.getURL());
     }
     getLatestCapturedActiveTab();
   }
@@ -239,16 +232,9 @@ handleIpcMainInvoke('toggle-activetab-animating', async (_, animating) => {
   }
 
   if (animating && isLoading) {
-    emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-      type: 'hide',
-      tabId: activeTab.id,
-    });
+    activeTab.hideLoadingView();
   } else if (!animating && isLoading) {
-    emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-      type: 'show',
-      tabURL: activeTab.view!.webContents.getURL(),
-      tabId: activeTab.id,
-    });
+    activeTab.showLoadingView(activeTab.view!.webContents.getURL());
   }
 });
 
@@ -265,17 +251,13 @@ onIpcMainEvent(
       reports.rect.height = Math.round(reports.rect.height);
 
       updateMainWindowActiveTabRect(reports);
-      if (activeTab) activeTab.setAnimatedMainWindowTabRect(reports.rect);
+      activeTab?.setAnimatedMainWindowTabRect(reports.rect);
     } else if (reports.dappViewState === 'unmounted') {
       updateMainWindowActiveTabRect({
         dappViewState: 'unmounted',
       });
       mainTabbedWin.tabs.unSelectAll();
-      if (activeTab)
-        emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-          type: 'hide',
-          tabId: activeTab.id,
-        });
+      activeTab?.hideLoadingView();
     }
   }
 );

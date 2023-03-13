@@ -75,6 +75,8 @@ export class Tab {
 
   private _isAnimating: boolean = false;
 
+  private _isVisible: boolean = false;
+
   constructor(ofWindow: BrowserWindow, tabOptions: ITabOptions) {
     const { tabs, topbarStacks, initDetails } = tabOptions;
 
@@ -116,10 +118,11 @@ export class Tab {
     });
 
     this.view!.webContents.on('did-stop-loading', () => {
-      emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-        type: 'hide',
-        tabId: this.id,
-      });
+      this.hideLoadingView();
+    });
+
+    this.view!.webContents.on('dom-ready', () => {
+      this.hideLoadingView();
     });
 
     this._patchWindowClose();
@@ -146,6 +149,21 @@ export class Tab {
         window.close.__patched = true;
       })();
     `);
+  }
+
+  hideLoadingView() {
+    emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
+      type: 'hide',
+      tabId: this.id,
+    });
+  }
+
+  showLoadingView(nextURL: string) {
+    emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
+      type: 'show',
+      tabId: this.id,
+      tabURL: nextURL,
+    });
   }
 
   destroy() {
@@ -190,30 +208,19 @@ export class Tab {
       emitIpcMainEvent('__internal_main:mainwindow:capture-tab', {
         type: 'clear',
       });
-      emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-        type: 'show',
-        tabURL: url,
-        tabId: this.id,
-      });
+      this.showLoadingView(url);
     }
     const result = await this.view?.webContents.loadURL(url);
     if (isMain) {
       emitIpcMainEvent('__internal_main:mainwindow:capture-tab');
-      emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-        type: 'hide',
-        tabId: this.id,
-      });
+      this.hideLoadingView();
     }
 
     return result;
   }
 
   reload() {
-    emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-      type: 'show',
-      tabURL: this.view!.webContents.getURL(),
-      tabId: this.id,
-    });
+    this.showLoadingView(this.view!.webContents.getURL());
     this.view!.webContents.reload();
   }
 
@@ -232,6 +239,8 @@ export class Tab {
       : !isOfTreasureLikeConnection
       ? NATIVE_HEADER_H
       : NativeAppSizes.trezorLikeConnectionWindowHeaderHeight;
+
+    this._isVisible = true;
 
     if (this._isAnimating) {
       this.view!.setAutoResize({ width: true, height: true });
@@ -304,6 +313,8 @@ export class Tab {
   }
 
   hide() {
+    this._isVisible = false;
+
     this.view!.setAutoResize({ width: false, height: false });
     if (isDarwin) {
       const oldBounds = this.view!.getBounds();
