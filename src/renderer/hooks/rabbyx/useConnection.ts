@@ -16,7 +16,10 @@ function searchFilter(keyword: string) {
     );
 }
 
-export function useCurrentConnection(tab: Pick<chrome.tabs.Tab, 'id' | 'url'>) {
+export function useCurrentConnection(
+  tab: Pick<chrome.tabs.Tab, 'id' | 'url'>,
+  nonce: number
+) {
   const [currentSite, setCurrentSite] = useAtom(siteAtom);
 
   const { preferences, setChainPinned } = usePreference();
@@ -42,7 +45,7 @@ export function useCurrentConnection(tab: Pick<chrome.tabs.Tab, 'id' | 'url'>) {
 
   useEffect(() => {
     getCurrentSite();
-  }, [getCurrentSite]);
+  }, [getCurrentSite, nonce]);
 
   const removeConnectedSite = useCallback(
     async (origin: string) => {

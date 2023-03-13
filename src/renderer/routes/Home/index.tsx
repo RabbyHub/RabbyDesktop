@@ -111,7 +111,7 @@ const HomeWrapper = styled.div`
       display: flex;
       align-items: center;
       .icon-refresh {
-        display: none;
+        display: block;
         cursor: pointer;
         margin-left: 14px;
         @keyframes spining {
@@ -123,7 +123,6 @@ const HomeWrapper = styled.div`
           }
         }
         &.circling {
-          display: block;
           animation: spining 1.5s infinite linear;
         }
       }
