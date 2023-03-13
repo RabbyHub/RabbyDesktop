@@ -198,7 +198,7 @@ const PortfolioView = ({
 
   return (
     <ScrollTopContext.Provider value={scrollTop}>
-      <div className="flex-1 overflow-hidden pt-[15px]">
+      <div className="flex-1 overflow-hidden pt-[15px] h-full">
         <PortfolioWrapper>
           <img
             src="rabby-internal://assets/icons/home/asset-arrow.svg"
