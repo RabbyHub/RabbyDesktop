@@ -19,7 +19,8 @@ const PortfolioWrapper = styled.div`
   position: relative;
   height: 100%;
   .scroll-container {
-    overflow: overlay;
+    // don't use overflow: overlay, it will cause zIndex problem
+    overflow: auto;
     height: 100%;
     padding-right: 27px;
     padding-top: 28px;
