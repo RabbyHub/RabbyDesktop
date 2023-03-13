@@ -11,8 +11,8 @@ import {
 
 import { Divider } from 'antd';
 import { useDappNavigation } from '@/renderer/hooks-shell/useDappNavigation';
-import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
 import {
+  useEffect,
   useCallback,
   useState,
   useMemo,
@@ -75,6 +75,7 @@ const ConnectedChain = forwardRef(
 
 export const TopNavBar = () => {
   const [chainHover, setChainHover] = useState(false);
+  const [nonce, setNonce] = useState(0);
 
   const hiddenHistoryOnMouseOver = useMemo(
     () => ({
@@ -88,15 +89,15 @@ export const TopNavBar = () => {
     []
   );
 
-  const { tabOrigin, navActions, selectedTabInfo, activeTab } =
-    useDappNavigation();
+  const { navActions, selectedTabInfo, activeTab } = useDappNavigation();
 
-  const { currentConnectedSite } = useConnectedSite(tabOrigin);
-
-  const { switchChain } = useCurrentConnection({
-    id: activeTab?.id,
-    url: activeTab?.url,
-  });
+  const { switchChain, currentSite } = useCurrentConnection(
+    {
+      id: activeTab?.id,
+      url: activeTab?.url,
+    },
+    nonce
+  );
 
   const handleCloseTab = useCallback(() => {
     if (activeTab?.id) {
@@ -110,6 +111,22 @@ export const TopNavBar = () => {
 
   const { navTextColor, navIconColor, navDividerColor, navBackgroundColor } =
     useMatchURLBaseConfig(activeTab?.url);
+
+  useEffect(
+    () =>
+      window.rabbyDesktop.ipcRenderer.on(
+        '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
+        (payload) => {
+          if (payload.event !== 'createSession') return;
+          const { data } = payload;
+          const [tabId] = data.split('-');
+          if (Number(tabId) === activeTab?.id) {
+            setNonce(nonce + 1);
+          }
+        }
+      ),
+    [nonce, activeTab]
+  );
 
   return (
     <div className={styles.main}>
@@ -179,19 +196,17 @@ export const TopNavBar = () => {
             />
           )}
         </div>
-        {!!currentConnectedSite?.isConnected && !!currentConnectedSite?.chain && (
-          <div className={styles.connectChainBox} {...hiddenHistoryOnMouseOver}>
-            <ConnectedChain
-              ref={divRef}
-              chain={currentConnectedSite.chain}
-              onClick={() => {
-                open({
-                  value: currentConnectedSite.chain,
-                });
-              }}
-            />
-          </div>
-        )}
+        <div className={styles.connectChainBox} {...hiddenHistoryOnMouseOver}>
+          <ConnectedChain
+            ref={divRef}
+            chain={currentSite ? currentSite.chain : CHAINS_ENUM.ETH}
+            onClick={() => {
+              open({
+                value: currentSite ? currentSite.chain : CHAINS_ENUM.ETH,
+              });
+            }}
+          />
+        </div>
         <div
           className={styles.close}
           onClick={handleCloseTab}
