@@ -615,7 +615,7 @@ const Home = () => {
               </SwitchViewWrapper>
             </div>
           </div>
-          <div className="relative">
+          <div className="relative flex-1 h-0">
             <Transactions updateNonce={updateNonce} />
             <PortfolioView
               tokenList={displayTokenList}
