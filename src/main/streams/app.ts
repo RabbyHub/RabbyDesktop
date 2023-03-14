@@ -46,6 +46,7 @@ import { tryAutoUnlockRabbyX } from './rabbyIpcQuery/autoUnlock';
 import { alertAutoUnlockFailed } from './mainWindow';
 import { setupAppTray } from './appTray';
 import { checkForceUpdate } from '../updater/force_update';
+import { repairDappsFieldsOnBootstrap } from '../store/dapps';
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
@@ -347,5 +348,6 @@ export default function bootstrap() {
     if (!useBuiltInPwd) {
       alertAutoUnlockFailed();
     }
+    repairDappsFieldsOnBootstrap();
   });
 }
