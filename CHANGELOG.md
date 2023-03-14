@@ -1,7 +1,26 @@
 
+v0.6.0 / 2023-03-14
+===================
+
+  * feat: update chain when chain changed by dapp (#274)
+  * feat: update sentry configuration. (#273)
+  * fix: favicon placeholder (#272)
+  * feat: repair missing favicon base64 on bootstrap. (#271)
+  * feat: tuning logic about reposing mainWindow. (#269)
+  * fix: favicon (#267)
+  * fix: add dapp modal button (#263)
+  * feat: simplify state/workflow of dapp loading view. (#266)
+  * fix: transaction page overflow style (#268)
+  * feat: update currentSite after session created (#265)
+  * feat: always open scanLink externally. (#261)
+  * feat: support special subdomain & remove relaction dialog (#262)
+  * feat: update rabbyX (#264)
+  * fix: home view height (#260)
+
 v0.5.8 / 2023-03-11
 ===================
 
+  * Release v0.5.8
   * chore: update trezror (#259)
   * ci: accept env `buildchannel` from github actions vars.
   * fix: prerelease script.
@@ -11,13 +30,12 @@ v0.5.8 / 2023-03-11
   * fix: skeleton style (#251)
   * feat: remove address management view (#252)
   * fix: debt calc (#253)
-  * Release v0.5.7
-  * fix: cannot open its App on uniswap.org & www.paraswap.io (#250)
 
 v0.5.7 / 2023-03-08
 ===================
 
   * Release v0.5.7
+  * fix: cannot open its App on uniswap.org & www.paraswap.io (#250)
   * feat: support force update. (#249)
   * type: some type fix.
   * fix: extra action back to seondaryDomain on its sub domain tab open. (#248)
