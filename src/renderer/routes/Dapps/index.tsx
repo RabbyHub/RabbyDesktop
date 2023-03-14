@@ -15,6 +15,7 @@ import { SortableList } from './components/SortableList';
 import './index.less';
 
 import style from './index.module.less';
+import { NFTPanel } from './components/NFTPanel/NFTPanel';
 
 type IOnOpDapp = (
   op: 'rename' | 'delete' | 'pin' | 'unpin',
@@ -138,6 +139,8 @@ export default function DApps() {
           onCancel={() => setDeletingDapp(null)}
           onDeletedDapp={() => setDeletingDapp(null)}
         />
+        <NFTPanel />
+        <ReleaseNote />
       </div>
     </div>
   );
