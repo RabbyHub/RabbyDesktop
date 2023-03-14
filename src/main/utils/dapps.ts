@@ -300,12 +300,18 @@ export async function detectDapp(
     data.faviconUrl = faviconUrl || fallbackFavicon;
     data.faviconBase64 = faviconBase64;
   } else if (!data.faviconBase64) {
-    const faviconBuf = await fetchImageBuffer(data.faviconUrl, {
+    await fetchImageBuffer(data.faviconUrl, {
       timeout: DFLT_TIMEOUT,
       proxy: proxyOnGrab,
-    });
-
-    data.faviconBase64 = nativeImage.createFromBuffer(faviconBuf).toDataURL();
+    })
+      .then((faviconBuf) => {
+        data.faviconBase64 = nativeImage
+          .createFromBuffer(faviconBuf)
+          .toDataURL();
+      })
+      .catch((error) => {
+        console.error(`[detectDapp] fetch favicon error occured: `, error);
+      });
   }
 
   return { data };
