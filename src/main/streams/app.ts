@@ -290,16 +290,6 @@ export default function bootstrap() {
 
     const mainWin = mainWindow.window;
     mainWin.on('ready-to-show', () => {
-      const bounds = mainWin.getBounds();
-      if (
-        bounds.x !== lastMainWinPos.x ||
-        bounds.y !== lastMainWinPos.y ||
-        bounds.width !== lastMainWinPos.width ||
-        bounds.height !== lastMainWinPos.height
-      ) {
-        getOrInitMainWinPosition(mainWin);
-      }
-
       checkForceUpdate();
     });
     mainWin.on('moved', () => {
@@ -353,7 +343,7 @@ export default function bootstrap() {
 
     splashWin.destroy();
     setTimeout(() => {
-      emitIpcMainEvent('__internal_main:mainwindow:show');
+      emitIpcMainEvent('__internal_main:mainwindow:show', true);
     }, 200);
 
     if (!useBuiltInPwd) {

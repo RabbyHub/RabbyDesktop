@@ -1,4 +1,5 @@
 import { dialog } from 'electron';
+import { getOrInitMainWinPosition } from '../store/desktopApp';
 import { captureWebContents, hideLoadingView } from '../utils/browser';
 import {
   emitIpcMainEvent,
@@ -119,12 +120,19 @@ onMainWindowReady().then(async (mainWin) => {
   });
 });
 
-onIpcMainInternalEvent('__internal_main:mainwindow:show', async () => {
-  await getRabbyExtViews();
-  const mainTabbedWin = await onMainWindowReady();
-  mainTabbedWin.window.show();
-  mainTabbedWin.window.moveTop();
-});
+onIpcMainInternalEvent(
+  '__internal_main:mainwindow:show',
+  async (isInitMainWindow) => {
+    await getRabbyExtViews();
+    const mainTabbedWin = await onMainWindowReady();
+
+    mainTabbedWin.window.show();
+    if (isInitMainWindow) {
+      getOrInitMainWinPosition(mainTabbedWin.window);
+    }
+    mainTabbedWin.window.moveTop();
+  }
+);
 
 onIpcMainEvent('__internal_rpc:mainwindow:reload-tab', async (_, tabId) => {
   const mainTabbedWin = await onMainWindowReady();

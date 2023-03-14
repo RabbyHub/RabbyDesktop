@@ -30,7 +30,7 @@ type MainInternalsMessagePayload = {
     response: [];
   };
   '__internal_main:mainwindow:show': {
-    send: [];
+    send: [isInitMainWindow?: boolean];
     response: [];
   };
   '__internal_main:mainwindow:toggle-loading-view': {
