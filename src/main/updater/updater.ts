@@ -8,6 +8,7 @@ import type { GenericServerOptions } from 'builder-util-runtime';
 
 import { getAppCacheDir } from 'electron-updater/out/AppAdapter';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
+import { setAppRuntimeProxyToSession } from '../utils/appNetwork';
 
 eLog.transports.file.level = 'debug';
 
@@ -62,6 +63,8 @@ export class AppUpdaterWin32 extends NsisUpdater {
 
     // disable autoDownload, manually call `this.downloadUpdate(cancellationToken)` and `new (require('builder-util-runtime').CancellationToken)()` instead
     this.autoDownload = false;
+
+    setAppRuntimeProxyToSession(this.netSession);
   }
 
   // always enable updater, even in development mode, because we want customize the update behavior
@@ -91,6 +94,8 @@ export class AppUpdaterDarwin extends MacUpdater {
 
     // disable autoDownload, manually call `this.downloadUpdate(cancellationToken)` and `new (require('builder-util-runtime').CancellationToken)()` instead
     this.autoDownload = false;
+
+    setAppRuntimeProxyToSession(this.netSession);
   }
 
   // always enable updater, even in development mode, because we want customize the update behavior

@@ -6,7 +6,7 @@ import { canoicalizeDappUrl, formatProxyRules } from '@/isomorphic/url';
 import { BrowserView } from 'electron';
 import { catchError, firstValueFrom, of, Subject, timeout } from 'rxjs';
 import { BrowserViewManager } from './browserView';
-import { getSessionInsts } from './stream-helpers';
+import { getAppRuntimeProxyConf, getSessionInsts } from './stream-helpers';
 
 const DFLT_TIMEOUT = 8 * 1e3;
 
@@ -215,7 +215,7 @@ export async function checkUrlViaBrowserView(
       const favicons = document.querySelectorAll('link[rel="icon"]');
       const shortcuts = document.querySelectorAll('link[rel="shortcut icon"]');
       const appleTouchIcons = document.querySelectorAll('link[rel="apple-touch-icon"]');
-      
+
       ({
         favicons: Array.from([...shortcuts, ...favicons]).map(item => ({href: item.href, sizes: item.sizes.value})),
         appleTouchIcons: Array.from(appleTouchIcons).map(item => ({href: item.href, sizes: item.sizes.value})),
@@ -273,6 +273,14 @@ export function setSessionProxy(
   }
 
   return proxyRules;
+}
+
+export async function setAppRuntimeProxyToSession(sess: Electron.Session) {
+  const conf = await getAppRuntimeProxyConf();
+
+  if (conf.proxyType !== 'none') {
+    setSessionProxy(sess, conf);
+  }
 }
 
 export async function checkProxyViaBrowserView(
