@@ -45,6 +45,12 @@ const IProtocolBindingSchema: import('json-schema-typed').JSONSchema = {
   },
 };
 
+// TODO: temp logic here, after new type of dapp is added, this should be changed
+function fixTypedDappId(dapp: IDapp) {
+  dapp.id = dapp.origin;
+  dapp.type = 'http';
+}
+
 export const dappStore = makeStore<{
   dapps: IDapp[];
   protocolDappsBinding: Record<string, IDapp['origin'][]>;
@@ -143,8 +149,7 @@ export const dappStore = makeStore<{
   Object.entries(dappsMap).forEach(([k, v]) => {
     if ((!v.id || !isValidDappType(v.type)) && k.startsWith('http')) {
       changed = true;
-      v.id = v.origin;
-      v.type = 'http';
+      fixTypedDappId(v);
     }
   });
   if (changed) {
@@ -340,6 +345,8 @@ function checkAddDapp(
     unpinnedList: string[];
   }
 ) {
+  fixTypedDappId(newDapp);
+
   const {
     dappsMap = dappStore.get('dappsMap'),
     unpinnedList = dappStore.get('unpinnedList'),
