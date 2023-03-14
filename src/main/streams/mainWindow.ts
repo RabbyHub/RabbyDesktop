@@ -1,3 +1,4 @@
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { dialog } from 'electron';
 import { captureWebContents, hideLoadingView } from '../utils/browser';
 import {
@@ -8,6 +9,11 @@ import {
   sendToWebContents,
 } from '../utils/ipcMainEvents';
 import { resizeImage } from '../utils/nativeImage';
+import {
+  getMainWinLastPosition,
+  getWindowBoundsInWorkArea,
+  setMainWindowBounds,
+} from '../utils/screen';
 import {
   getRabbyExtViews,
   onMainWindowReady,
@@ -119,12 +125,34 @@ onMainWindowReady().then(async (mainWin) => {
   });
 });
 
-onIpcMainInternalEvent('__internal_main:mainwindow:show', async () => {
-  await getRabbyExtViews();
-  const mainTabbedWin = await onMainWindowReady();
-  mainTabbedWin.window.show();
-  mainTabbedWin.window.moveTop();
-});
+function initMainWindowPosition(mainWindow: Electron.BrowserWindow) {
+  const lastPos = getMainWinLastPosition();
+  const expectedBounds = getWindowBoundsInWorkArea(lastPos);
+
+  if (!IS_RUNTIME_PRODUCTION) {
+    console.debug(
+      '[isInitMainWindow] lastPos, expectedBounds',
+      lastPos,
+      expectedBounds
+    );
+  }
+
+  setMainWindowBounds(mainWindow, expectedBounds);
+}
+
+onIpcMainInternalEvent(
+  '__internal_main:mainwindow:show',
+  async (isInitMainWindow) => {
+    await getRabbyExtViews();
+    const mainTabbedWin = await onMainWindowReady();
+
+    if (isInitMainWindow) {
+      initMainWindowPosition(mainTabbedWin.window);
+    }
+    mainTabbedWin.window.show();
+    mainTabbedWin.window.moveTop();
+  }
+);
 
 onIpcMainEvent('__internal_rpc:mainwindow:reload-tab', async (_, tabId) => {
   const mainTabbedWin = await onMainWindowReady();

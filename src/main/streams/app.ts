@@ -8,10 +8,7 @@ import {
 import { isRabbyShellURL, isUrlFromDapp } from '../../isomorphic/url';
 import buildChromeContextMenu from '../browser/context-menu';
 import { setupMenu } from '../browser/menu';
-import {
-  getOrInitMainWinPosition,
-  storeMainWinPosition,
-} from '../store/desktopApp';
+import { storeMainWinPosition } from '../store/desktopApp';
 import {
   getAssetPath,
   getBrowserWindowOpts,
@@ -41,12 +38,13 @@ import {
   getRabbyExtViews,
 } from '../utils/stream-helpers';
 import { switchToBrowserTab } from '../utils/browser';
+import { getAppUserDataPath } from '../utils/store';
+import { getMainWinLastPosition } from '../utils/screen';
 import { createDappTab } from './webContents';
 import { clearAllStoreData, clearAllUserData } from '../utils/security';
 import { tryAutoUnlockRabbyX } from './rabbyIpcQuery/autoUnlock';
 import { alertAutoUnlockFailed } from './mainWindow';
 import { setupAppTray } from './appTray';
-import { getAppUserDataPath } from '../utils/store';
 import { checkForceUpdate } from '../updater/force_update';
 
 const appLog = getBindLog('appStream', 'bgGrey');
@@ -271,7 +269,7 @@ export default function bootstrap() {
      */
     const shellExts = await getElectronChromeExtensions();
 
-    const lastMainWinPos = getOrInitMainWinPosition();
+    const lastMainWinPos = getMainWinLastPosition();
     // init window
     const mainWindow = await createWindow({
       defaultTabUrl: '',
@@ -290,16 +288,6 @@ export default function bootstrap() {
 
     const mainWin = mainWindow.window;
     mainWin.on('ready-to-show', () => {
-      const bounds = mainWin.getBounds();
-      if (
-        bounds.x !== lastMainWinPos.x ||
-        bounds.y !== lastMainWinPos.y ||
-        bounds.width !== lastMainWinPos.width ||
-        bounds.height !== lastMainWinPos.height
-      ) {
-        getOrInitMainWinPosition(mainWin);
-      }
-
       checkForceUpdate();
     });
     mainWin.on('moved', () => {
@@ -353,7 +341,7 @@ export default function bootstrap() {
 
     splashWin.destroy();
     setTimeout(() => {
-      emitIpcMainEvent('__internal_main:mainwindow:show');
+      emitIpcMainEvent('__internal_main:mainwindow:show', true);
     }, 200);
 
     if (!useBuiltInPwd) {
