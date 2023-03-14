@@ -45,6 +45,18 @@ export function useCurrentConnection(
 
   useEffect(() => {
     getCurrentSite();
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
+      (payload) => {
+        switch (payload.event) {
+          default:
+            break;
+          case 'rabby:chainChanged': {
+            getCurrentSite();
+          }
+        }
+      }
+    );
   }, [getCurrentSite, nonce]);
 
   const removeConnectedSite = useCallback(
