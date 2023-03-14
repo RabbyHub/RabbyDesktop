@@ -61,9 +61,9 @@ export const NFTPanel = () => {
           >
             <span>Powered by zora</span>
             <span className={classNames('ml-[5px]')}>
-              <a href="https://zora.co">
-                <img src="rabby-internal://assets/icons/add-dapp/icon-help.svg" />
-              </a>
+              {/* <a href="https://zora.co"> */}
+              <img src="rabby-internal://assets/icons/add-dapp/icon-help.svg" />
+              {/* </a> */}
             </span>
           </footer>
         </div>

@@ -7,6 +7,7 @@ export interface Props {
   title: string;
   buttonText: string;
   onButtonClick: () => void;
+  currentNo: number;
 }
 
 export const Step: React.FC<Props> = ({
@@ -14,7 +15,11 @@ export const Step: React.FC<Props> = ({
   buttonText,
   onButtonClick,
   no,
+  currentNo,
 }) => {
+  const notCurrent = currentNo !== no;
+  const isDone = currentNo > no;
+
   return (
     <div
       className={classNames('w-[126px] flex flex-col text-white text-center')}
@@ -31,11 +36,14 @@ export const Step: React.FC<Props> = ({
         {title}
       </h2>
       <Button
-        className="w-[94px] h-[33px] mx-auto"
+        disabled={notCurrent}
+        className={classNames('w-[94px] h-[33px] mx-auto', {
+          'opacity-30': notCurrent,
+        })}
         type="primary"
         onClick={onButtonClick}
       >
-        {buttonText}
+        {isDone ? 'Done' : buttonText}
       </Button>
     </div>
   );
