@@ -3,7 +3,7 @@
 import { format as urlFormat } from 'url';
 import Axios, { AxiosError, AxiosProxyConfig } from 'axios';
 import LRUCache from 'lru-cache';
-import { BrowserWindow } from 'electron';
+import { BrowserWindow, nativeImage } from 'electron';
 
 import { unfurl } from 'unfurl.js';
 import nodeFetch from 'node-fetch';
@@ -14,7 +14,7 @@ import {
   canoicalizeDappUrl,
   formatAxiosProxyConfig,
 } from '../../isomorphic/url';
-import { parseWebsiteFavicon } from './fetch';
+import { fetchImageBuffer, parseWebsiteFavicon } from './fetch';
 import { AxiosElectronAdapter } from './axios';
 import { checkUrlViaBrowserView, CHROMIUM_NET_ERR_DESC } from './appNetwork';
 import { createPopupWindow } from './browser';
@@ -299,6 +299,13 @@ export async function detectDapp(
     data.icon = iconInfo;
     data.faviconUrl = faviconUrl || fallbackFavicon;
     data.faviconBase64 = faviconBase64;
+  } else if (!data.faviconBase64) {
+    const faviconBuf = await fetchImageBuffer(data.faviconUrl, {
+      timeout: DFLT_TIMEOUT,
+      proxy: proxyOnGrab,
+    });
+
+    data.faviconBase64 = nativeImage.createFromBuffer(faviconBuf).toDataURL();
   }
 
   return { data };
