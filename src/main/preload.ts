@@ -1,7 +1,8 @@
 /// <reference path="../renderer/preload.d.ts" />
 
-import { app, contextBridge } from 'electron';
+import { contextBridge } from 'electron';
 import { injectBrowserAction } from '@rabby-wallet/electron-chrome-extensions/dist/browser-action';
+// import "@sentry/electron/preload";
 
 // to injectExtensionAPIs on chrome-extension://
 import '@rabby-wallet/electron-chrome-extensions/dist/preload';
