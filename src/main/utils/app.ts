@@ -1,6 +1,6 @@
 /* eslint import/prefer-default-export: off */
 import path from 'path';
-import { app } from 'electron';
+import { app, net } from 'electron';
 import * as Sentry from '@sentry/electron/main';
 
 import { filterAppChannel, getSentryEnv } from '@/isomorphic/env';
@@ -8,7 +8,10 @@ import {
   FRAME_DEFAULT_SIZE,
   FRAME_MIN_SIZE,
 } from '../../isomorphic/const-size';
-import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
+import {
+  IS_RUNTIME_PRODUCTION,
+  SENTRY_DEBUG,
+} from '../../isomorphic/constants';
 import { getWindowBoundsInWorkArea } from './screen';
 
 const PROJ_ROOT = path.join(__dirname, '../../../');
@@ -138,7 +141,21 @@ export function initMainProcessSentry() {
     // We recommend adjusting this value in production
     tracesSampleRate: 1.0,
     environment: getSentryEnv(getMainProcessAppChannel()),
-    debug: !IS_RUNTIME_PRODUCTION,
+    debug: SENTRY_DEBUG,
+    transportOptions: {
+      // The maximum number of days to keep an event in the queue.
+      maxQueueAgeDays: 30,
+      // The maximum number of events to keep in the queue.
+      maxQueueCount: 30,
+      // Called every time the number of requests in the queue changes.
+      queuedLengthChanged: (length) => {},
+      // Called before attempting to send an event to Sentry. Used to override queuing behavior.
+      //
+      // Return 'send' to attempt to send the event.
+      // Return 'queue' to queue and persist the event for sending later.
+      // Return 'drop' to drop the event.
+      beforeSend: (request) => (net.isOnline() ? 'send' : 'queue'),
+    },
   });
 }
 

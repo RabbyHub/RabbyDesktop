@@ -31,6 +31,7 @@ import {
 } from '@/renderer/hooks/useViewsMessage';
 import { navigateToDappRoute } from '@/renderer/utils/react-router';
 import { Swap } from '@/renderer/routes/Swap';
+import { ErrorBoundary } from '@sentry/react';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -68,7 +69,9 @@ function MainWrapper() {
   return (
     <RequireUnlock>
       <div className={styles.mainWindow}>
-        <MainWindowSidebar />
+        <ErrorBoundary>
+          <MainWindowSidebar />
+        </ErrorBoundary>
         <MainRoute>
           <Outlet />
         </MainRoute>
@@ -81,6 +84,7 @@ const router = createRouter([
   {
     path: '/welcome',
     id: 'welcome',
+    errorElement: <ErrorBoundary />,
     element: <WelcomeWrapper />,
     children: [
       {
@@ -118,7 +122,7 @@ const router = createRouter([
   {
     path: '/mainwin',
     id: 'mainwin',
-    // errorElement: <ErrorBoundary />,
+    errorElement: <ErrorBoundary />,
     element: <MainWrapper />,
     children: [
       {
@@ -190,11 +194,13 @@ const router = createRouter([
   },
   {
     path: '/unlock',
+    errorElement: <ErrorBoundary />,
     element: <Unlock />,
   },
   {
     path: '/import-by',
     id: 'import-by',
+    errorElement: <ErrorBoundary />,
     element: (
       <div className={styles.ImportPage}>
         <ImportByContainer>

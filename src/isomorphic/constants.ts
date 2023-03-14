@@ -52,3 +52,6 @@ export const FORCE_DISABLE_CONTENT_PROTECTION = true;
 export const APP_RUNTIME_ENV = IS_RUNTIME_PRODUCTION
   ? 'production'
   : 'development';
+
+export const SENTRY_DEBUG = !IS_RUNTIME_PRODUCTION;
+// export const SENTRY_DEBUG = false;
