@@ -4,13 +4,11 @@ import { app, screen, BrowserWindow } from 'electron';
 import { Subject, debounceTime } from 'rxjs';
 import {
   FORCE_DISABLE_CONTENT_PROTECTION,
-  IS_RUNTIME_PRODUCTION,
   PERSIS_STORE_PREFIX,
 } from '../../isomorphic/constants';
 import { safeParse, shortStringify } from '../../isomorphic/json';
 import { FRAME_DEFAULT_SIZE } from '../../isomorphic/const-size';
 import { emitIpcMainEvent, handleIpcMainInvoke } from '../utils/ipcMainEvents';
-import { getWindowBoundsInWorkArea } from '../utils/screen';
 import { makeStore } from '../utils/store';
 
 export const desktopAppStore = makeStore<{
@@ -253,30 +251,4 @@ app.on('quit', () => {
 
 export function storeMainWinPosition(mainWin: BrowserWindow) {
   mainWinPositionSubject.next(mainWin);
-}
-
-export function getOrInitMainWinPosition(mainWin?: BrowserWindow) {
-  const pos = desktopAppStore.get('lastWindowPosition');
-  const mainBounds: Partial<Electron.Rectangle> | null = mainWin
-    ? mainWin.getBounds()
-    : null;
-
-  const expectedBounds = getWindowBoundsInWorkArea({
-    x: pos.x || mainBounds?.x || 0,
-    y: pos.y || mainBounds?.y || 0,
-    width: pos.width || mainBounds?.width || FRAME_DEFAULT_SIZE.width,
-    height: pos.height || mainBounds?.height || FRAME_DEFAULT_SIZE.height,
-  });
-
-  if (mainWin) {
-    if (!IS_RUNTIME_PRODUCTION) {
-      console.debug(
-        '[getOrInitMainWinPosition] expectedBounds',
-        expectedBounds
-      );
-    }
-    mainWin.setBounds(expectedBounds);
-  }
-
-  return expectedBounds;
 }

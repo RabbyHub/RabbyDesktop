@@ -8,10 +8,7 @@ import {
 import { isRabbyShellURL, isUrlFromDapp } from '../../isomorphic/url';
 import buildChromeContextMenu from '../browser/context-menu';
 import { setupMenu } from '../browser/menu';
-import {
-  getOrInitMainWinPosition,
-  storeMainWinPosition,
-} from '../store/desktopApp';
+import { storeMainWinPosition } from '../store/desktopApp';
 import {
   getAssetPath,
   getBrowserWindowOpts,
@@ -41,12 +38,13 @@ import {
   getRabbyExtViews,
 } from '../utils/stream-helpers';
 import { switchToBrowserTab } from '../utils/browser';
+import { getAppUserDataPath } from '../utils/store';
+import { getMainWinLastPosition } from '../utils/screen';
 import { createDappTab } from './webContents';
 import { clearAllStoreData, clearAllUserData } from '../utils/security';
 import { tryAutoUnlockRabbyX } from './rabbyIpcQuery/autoUnlock';
 import { alertAutoUnlockFailed } from './mainWindow';
 import { setupAppTray } from './appTray';
-import { getAppUserDataPath } from '../utils/store';
 import { checkForceUpdate } from '../updater/force_update';
 
 const appLog = getBindLog('appStream', 'bgGrey');
@@ -271,7 +269,7 @@ export default function bootstrap() {
      */
     const shellExts = await getElectronChromeExtensions();
 
-    const lastMainWinPos = getOrInitMainWinPosition();
+    const lastMainWinPos = getMainWinLastPosition();
     // init window
     const mainWindow = await createWindow({
       defaultTabUrl: '',

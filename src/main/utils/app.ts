@@ -8,7 +8,7 @@ import {
   FRAME_DEFAULT_SIZE,
   FRAME_MIN_SIZE,
 } from '../../isomorphic/const-size';
-import { APP_NAME, IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
+import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 import { getWindowBoundsInWorkArea } from './screen';
 
 const PROJ_ROOT = path.join(__dirname, '../../../');
