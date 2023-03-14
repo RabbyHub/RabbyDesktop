@@ -120,6 +120,7 @@
       align-items: center;
       gap: 18px;
       flex: 1 1;
+      overflow: hidden;
 
       :global {
         .name-and-address {
@@ -141,6 +142,9 @@
         font-size: 16px;
         line-height: 19px;
         color: #ffffff;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       &Desc {
@@ -181,6 +185,7 @@
 
     &Change {
       flex: 1 1;
+      overflow: hidden;
 
       :global {
         .token-change {
@@ -197,7 +202,9 @@
               font-size: 14px;
               line-height: 16px;
               font-variant-numeric: tabular-nums;
-
+              overflow: hidden;
+              white-space: nowrap;
+              text-overflow: ellipsis;
               color: #ffffff;
             }
           }
@@ -223,6 +230,7 @@
       margin-left: auto;
       width: 250px;
       text-align: right;
+      overflow: hidden;
     }
 
     &Gas {
@@ -230,6 +238,9 @@
       font-size: 13px;
       line-height: 16px;
       color: rgba(255, 255, 255, 0.3);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     &Source {
       margin-top: 8px;
