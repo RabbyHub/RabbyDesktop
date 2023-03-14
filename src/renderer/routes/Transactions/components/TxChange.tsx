@@ -41,7 +41,9 @@ export const TxChange = ({ data: info, tokenDict }: TxChangeProps) => {
         return (
           <div
             className="token-change-item"
-            title={name}
+            title={`${
+              isNft ? v.amount : numberWithCommasIsLtOne(v.amount, 2)
+            } ${name}`}
             data-id={v.token_id}
             data-name={name}
             key={v.token_id}
@@ -84,7 +86,9 @@ export const TxChange = ({ data: info, tokenDict }: TxChangeProps) => {
             data-id={v.token_id}
             data-name={name}
             className="token-change-item is-success"
-            title={name}
+            title={`${
+              isNft ? v.amount : numberWithCommasIsLtOne(v.amount, 2)
+            } ${name}`}
             key={v.token_id}
           >
             {isNft ? (
