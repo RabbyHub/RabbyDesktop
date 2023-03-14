@@ -8,6 +8,7 @@ import {
   normalizeProtocolBindingValues,
 } from '@/isomorphic/dapp';
 import { arraify } from '@/isomorphic/array';
+import { nativeImage } from 'electron';
 import {
   emitIpcMainEvent,
   handleIpcMainInvoke,
@@ -25,6 +26,7 @@ import { detectDapp } from '../utils/dapps';
 import { storeLog } from '../utils/log';
 import { makeStore } from '../utils/store';
 import { getAppProxyConfigForAxios } from './desktopApp';
+import { fetchImageBuffer } from '../utils/fetch';
 
 const IDappSchema: import('json-schema-typed').JSONSchema = {
   type: 'object',
@@ -293,6 +295,34 @@ export function parseDappRedirect(
     maybeRedirectInSPA,
     isToExtension,
   };
+}
+
+export async function repairDappsFieldsOnBootstrap() {
+  const dappsMap = dappStore.get('dappsMap') || {};
+
+  await Promise.allSettled(
+    Object.values(dappsMap).map(async (dapp) => {
+      if (dapp.faviconUrl && !dapp.faviconBase64) {
+        try {
+          const faviconBuf = await fetchImageBuffer(dapp.faviconUrl, {
+            timeout: 2 * 1e3,
+            proxy: getAppProxyConfigForAxios(),
+          });
+
+          dapp.faviconBase64 = nativeImage
+            .createFromBuffer(faviconBuf)
+            .toDataURL();
+        } catch (error) {
+          console.error(
+            `[repairDappsFieldsOnBootstrap] fetch favicon error occured: `,
+            error
+          );
+        }
+      }
+    })
+  );
+
+  dappStore.set('dappsMap', dappsMap);
 }
 
 // const allDapps = getAllDapps();
