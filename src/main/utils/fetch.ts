@@ -28,6 +28,43 @@ function filterAxiosProxy(proxyConfig?: AxiosProxyConfig) {
   return resultConfig;
 }
 
+export async function fetchImageBuffer(
+  iconURL: string,
+  options?: {
+    timeout?: number;
+    proxy?: AxiosProxyConfig;
+  }
+) {
+  let resultBuf: Buffer = Buffer.from([]);
+  const targetURL = getHref(iconURL, iconURL);
+  if (!targetURL) {
+    return resultBuf;
+  }
+
+  const { timeout: tmout = 2 * 1e3 } = options || {};
+  const axiosProxy = filterAxiosProxy(options?.proxy);
+
+  if (axiosProxy && !IS_RUNTIME_PRODUCTION) {
+    console.debug(
+      `[debug] use proxy ${formatAxiosProxyConfig(
+        axiosProxy
+      )} on parsing favicon`
+    );
+  }
+
+  await fetchClient
+    .get(targetURL, {
+      timeout: tmout,
+      proxy: axiosProxy,
+      responseType: 'arraybuffer',
+    })
+    .then((res) => {
+      resultBuf = Buffer.from(res.data, 'binary');
+    });
+
+  return resultBuf;
+}
+
 /**
  *
  * @param websiteBaseURL assume it is a valid baseURL like `${protocol}://${host}` without suffix

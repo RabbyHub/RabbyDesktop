@@ -15,6 +15,7 @@ import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 import { Modal, Props as ModalProps } from '../Modal/Modal';
 import styles from './index.module.less';
 import { toastMessage } from '../TransparentToast';
+import { DappFavicon } from '../DappFavicon';
 
 const BindDappWrapper = styled.div`
   padding: 32px 60px;
@@ -58,6 +59,7 @@ const DappItemWrapper = styled.div`
   .dapp-icon {
     width: 24px;
     height: 24px;
+    border-radius: 2px;
     margin-right: 12px;
   }
   .dapp-info {
@@ -135,9 +137,10 @@ const DappItem = ({
 }) => {
   return (
     <DappItemWrapper>
-      <img
+      <DappFavicon
         className="dapp-icon"
         src={dapp.faviconBase64 ? dapp.faviconBase64 : dapp.faviconUrl}
+        origin={dapp.origin}
       />
       <div className="flex-1 dapp-info">
         <p>{dapp.alias}</p>
