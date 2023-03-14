@@ -12,6 +12,7 @@ import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import { BrowserViewManager } from '../utils/browserView';
 import { desktopAppStore } from '../store/desktopApp';
 import { getAssetPath } from '../utils/app';
+import { hideLoadingView, isDappViewLoadingForTab } from '../utils/browser';
 
 const viewMngr = new BrowserViewManager(
   {
@@ -75,6 +76,8 @@ export class Tab {
 
   private _isAnimating: boolean = false;
 
+  private _isVisible: boolean = false;
+
   constructor(ofWindow: BrowserWindow, tabOptions: ITabOptions) {
     const { tabs, topbarStacks, initDetails } = tabOptions;
 
@@ -116,10 +119,11 @@ export class Tab {
     });
 
     this.view!.webContents.on('did-stop-loading', () => {
-      emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-        type: 'hide',
-        tabId: this.id,
-      });
+      if (isDappViewLoadingForTab(this.id)) hideLoadingView();
+    });
+
+    this.view!.webContents.on('dom-ready', () => {
+      if (isDappViewLoadingForTab(this.id)) hideLoadingView();
     });
 
     this._patchWindowClose();
@@ -146,6 +150,14 @@ export class Tab {
         window.close.__patched = true;
       })();
     `);
+  }
+
+  showLoadingView(nextURL: string) {
+    emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
+      type: 'show',
+      tabId: this.id,
+      tabURL: nextURL,
+    });
   }
 
   destroy() {
@@ -190,30 +202,19 @@ export class Tab {
       emitIpcMainEvent('__internal_main:mainwindow:capture-tab', {
         type: 'clear',
       });
-      emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-        type: 'show',
-        tabURL: url,
-        tabId: this.id,
-      });
+      this.showLoadingView(url);
     }
     const result = await this.view?.webContents.loadURL(url);
     if (isMain) {
       emitIpcMainEvent('__internal_main:mainwindow:capture-tab');
-      emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-        type: 'hide',
-        tabId: this.id,
-      });
+      hideLoadingView();
     }
 
     return result;
   }
 
   reload() {
-    emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-      type: 'show',
-      tabURL: this.view!.webContents.getURL(),
-      tabId: this.id,
-    });
+    this.showLoadingView(this.view!.webContents.getURL());
     this.view!.webContents.reload();
   }
 
@@ -232,6 +233,8 @@ export class Tab {
       : !isOfTreasureLikeConnection
       ? NATIVE_HEADER_H
       : NativeAppSizes.trezorLikeConnectionWindowHeaderHeight;
+
+    this._isVisible = true;
 
     if (this._isAnimating) {
       this.view!.setAutoResize({ width: true, height: true });
@@ -294,6 +297,10 @@ export class Tab {
     });
   }
 
+  get isAnimating() {
+    return this._isAnimating;
+  }
+
   toggleAnimating(enabled = false) {
     this._isAnimating = enabled;
     if (enabled) {
@@ -304,6 +311,8 @@ export class Tab {
   }
 
   hide() {
+    this._isVisible = false;
+
     this.view!.setAutoResize({ width: false, height: false });
     if (isDarwin) {
       const oldBounds = this.view!.getBounds();
@@ -418,6 +427,21 @@ export class Tabs extends EventEmitter {
   unSelectAll() {
     if (this.selected) this.selected.hide();
     this.selected = undefined;
+  }
+
+  checkLoadingView() {
+    const tab = this.selected;
+
+    if (!tab || !tab.view?.webContents.isLoading() || tab.isAnimating) {
+      hideLoadingView();
+      return false;
+    }
+
+    const targetURL = tab.view!.webContents.getURL();
+
+    tab.showLoadingView(targetURL);
+
+    return true;
   }
 
   findByOrigin(url: string) {

@@ -42,8 +42,8 @@ export function useSidebarDapps() {
   }, [pinnedDapps, unpinnedDapps, tabMapByOrigin, tabMapBySecondaryMap]);
 
   const dappActions = {
-    onSelectDapp: useCallback((tab: chrome.tabs.Tab) => {
-      chrome.tabs.update(tab.id!, { active: true });
+    onSelectDapp: useCallback(async (tab: chrome.tabs.Tab) => {
+      await chrome.tabs.update(tab.id!, { active: true });
       window.rabbyDesktop.ipcRenderer.sendMessage(
         '__internal_rpc:mainwindow:select-tab',
         tab.windowId,

@@ -1,5 +1,5 @@
 import { dialog } from 'electron';
-import { captureWebContents } from '../utils/browser';
+import { captureWebContents, hideLoadingView } from '../utils/browser';
 import {
   emitIpcMainEvent,
   handleIpcMainInvoke,
@@ -202,23 +202,8 @@ onIpcMainEvent(
     const mainTabbedWin = await onMainWindowReady();
     if (mainTabbedWin.window.id !== winId) return;
 
-    const prevSelected = mainTabbedWin.tabs.selected;
-    if (prevSelected) {
-      emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-        type: 'hide',
-        tabId: prevSelected.id,
-      });
-    }
-
     await clearCaptureState();
-    const selected = mainTabbedWin?.tabs.select(tabId);
-    if (selected?.view?.webContents.isLoading()) {
-      emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-        type: 'show',
-        tabURL: selected.view.webContents.getURL(),
-        tabId: selected.id,
-      });
-    }
+    mainTabbedWin.tabs.checkLoadingView();
     getLatestCapturedActiveTab();
   }
 );
@@ -238,18 +223,7 @@ handleIpcMainInvoke('toggle-activetab-animating', async (_, animating) => {
     captureState.image = null;
   }
 
-  if (animating && isLoading) {
-    emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-      type: 'hide',
-      tabId: activeTab.id,
-    });
-  } else if (!animating && isLoading) {
-    emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-      type: 'show',
-      tabURL: activeTab.view!.webContents.getURL(),
-      tabId: activeTab.id,
-    });
-  }
+  mainWin.tabs.checkLoadingView();
 });
 
 onIpcMainEvent(
@@ -265,17 +239,13 @@ onIpcMainEvent(
       reports.rect.height = Math.round(reports.rect.height);
 
       updateMainWindowActiveTabRect(reports);
-      if (activeTab) activeTab.setAnimatedMainWindowTabRect(reports.rect);
+      activeTab?.setAnimatedMainWindowTabRect(reports.rect);
     } else if (reports.dappViewState === 'unmounted') {
       updateMainWindowActiveTabRect({
         dappViewState: 'unmounted',
       });
       mainTabbedWin.tabs.unSelectAll();
-      if (activeTab)
-        emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
-          type: 'hide',
-          tabId: activeTab.id,
-        });
+      hideLoadingView();
     }
   }
 );

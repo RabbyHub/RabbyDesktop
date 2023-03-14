@@ -1,6 +1,10 @@
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
 import { RABBY_LOADING_URL } from '../../isomorphic/constants';
-import { createPopupView } from '../utils/browser';
+import {
+  createPopupView,
+  isDappViewLoading,
+  putDappLoadingViewState,
+} from '../utils/browser';
 import { getDappLoadingView, onMainWindowReady } from '../utils/stream-helpers';
 import { valueToMainSubject } from './_init';
 import {
@@ -15,16 +19,10 @@ const dappTopOffset =
   NativeAppSizes.mainWindowDappTopOffset +
   (process.platform === 'darwin' ? 0 : NativeAppSizes.windowTitlebarHeight);
 
-const currentState = {
-  isLoading: false,
-};
-
 async function updateViewPosition(
   loadingView: Electron.BrowserView,
-  isLoading = currentState.isLoading
+  isLoading: boolean = isDappViewLoading()
 ) {
-  currentState.isLoading = isLoading;
-
   const tabbedWin = await onMainWindowReady();
   const mainWin = tabbedWin.window;
   const [width, height] = mainWin.getSize();
@@ -73,13 +71,17 @@ const dispose = onIpcMainInternalEvent(
 
     switch (payload.type) {
       case 'show': {
-        const dapp = findDappsByOrigin(payload.tabURL).dappByOrigin;
+        const findResult = findDappsByOrigin(payload.tabURL);
+        const dapp =
+          findResult.dappByOrigin || findResult.dappBySecondaryDomainOrigin;
         payload.dapp = dapp;
 
+        putDappLoadingViewState({ loadingTabId: payload.tabId });
         updateViewPosition(dappLoadingView, !!dapp);
         break;
       }
       case 'hide': {
+        putDappLoadingViewState({ loadingTabId: -1 });
         updateViewPosition(dappLoadingView, false);
         break;
       }
@@ -88,7 +90,7 @@ const dispose = onIpcMainInternalEvent(
     }
     sendToWebContents(
       dappLoadingView.webContents,
-      '__internal_push:loading-view:toggle',
+      '__internal_push:mainwindow:toggle-loading-view',
       payload
     );
   }

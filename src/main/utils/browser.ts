@@ -8,6 +8,7 @@ import { roundRectValue } from '@/isomorphic/shape';
 import { BrowserView, BrowserWindow } from 'electron';
 import { isEnableContentProtected } from '../store/desktopApp';
 import { getAssetPath } from './app';
+import { emitIpcMainEvent } from './ipcMainEvents';
 
 export function getWindowFromWebContents(webContents: Electron.WebContents) {
   switch (webContents.getType()) {
@@ -337,4 +338,27 @@ export async function captureWebContents(webContents: Electron.WebContents) {
   }
 
   return webContents.capturePage();
+}
+
+const dappLoadingViewState = {
+  loadingTabId: -1 as number | false,
+};
+export function isDappViewLoadingForTab(tabId: number) {
+  return (
+    dappLoadingViewState.loadingTabId > 0 &&
+    dappLoadingViewState.loadingTabId === tabId
+  );
+}
+export function isDappViewLoading() {
+  return dappLoadingViewState.loadingTabId > 0;
+}
+export function putDappLoadingViewState(
+  partials: Partial<typeof dappLoadingViewState>
+) {
+  Object.assign(dappLoadingViewState, partials);
+}
+export function hideLoadingView() {
+  emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
+    type: 'hide',
+  });
 }
