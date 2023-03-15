@@ -13,6 +13,7 @@ import '@/renderer/utils/rendererReport';
 import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import { RcIconClose, RcIconLoading } from '@/../assets/icons/readonly-modal';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
+import { DappFavicon } from '@/renderer/components/DappFavicon';
 import styles from './DappReadonlyModal.module.less';
 import useDragHeadbar from '../../hooks/useDragheadbar';
 
@@ -46,16 +47,14 @@ function InnerRedirect({
               />
             </div>
           ) : (
-            <Avatar
+            <DappFavicon
               src={
                 nonSameOrigin.favIcon?.faviconBase64 ||
                 nonSameOrigin.favIcon?.faviconUrl
               }
+              origin={targetInfo.secondaryDomain[0].toLocaleUpperCase()}
               className={styles.avatar}
-              size={40}
-            >
-              {targetInfo.secondaryDomain[0].toLocaleUpperCase()}
-            </Avatar>
+            />
           )}
           <span className={styles.link}>{targetInfo.origin}</span>
         </div>
@@ -68,6 +67,7 @@ function InnerRedirect({
           className={classNames(styles.button, styles.J_add)}
           type="primary"
           onClick={() => {
+            closeView();
             openExternalUrl(nonSameOrigin.url);
           }}
         >
