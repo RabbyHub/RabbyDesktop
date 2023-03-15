@@ -1,6 +1,5 @@
 @import '~antd/lib/style/themes/default.less';
 
-
 .DappReadonlyModal {
   user-select: none;
 
@@ -21,9 +20,9 @@
     }
 
     .ant-modal-close-x {
-      height: 44px;
-      width: 44px;
-      line-height: 44px;
+      height: 56px;
+      width: 56px;
+      line-height: 56px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -43,7 +42,6 @@
       stroke: var(--color-purewhite);
     }
   }
-
 }
 
 .DappReadonlyModal {
@@ -61,16 +59,21 @@
       @apply flex justify-center items-center mt-16px;
       text-align: center;
       color: var(--color-purewhite);
-      font-style: normal;
       font-weight: 500;
       font-size: 15px;
       line-height: 18px;
+      overflow: hidden;
+      max-width: 100%;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      opacity: 0.8;
     }
 
     .loadingWrapper {
       background-color: #eee;
-      width: 40px;
-      height: 40px;
+      width: 52px;
+      height: 52px;
       @apply flex justify-center items-center;
       margin: 0 auto;
       color: var(--color-primary);
@@ -81,8 +84,13 @@
       }
     }
 
-    .avatar, .loadingWrapper {
-      border-radius: 3.5px;
+    .avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 4px;
+    }
+    .loadingWrapper {
+      border-radius: 4px;
     }
   }
 
@@ -126,7 +134,9 @@
         opacity: 0.6;
       }
 
-      &:hover, &:active, &:focus {
+      &:hover,
+      &:active,
+      &:focus {
         background-color: transparent;
       }
     }
