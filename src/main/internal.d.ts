@@ -143,6 +143,17 @@ type MainInternalsMessagePayload = {
     send: [dappOrigin: string | string[]];
     response: [];
   };
+  '__internal_main:mainwindow:dapp-tabs-to-be-closed': {
+    send: [
+      {
+        tabs: ItOrItsArray<{
+          tabId?: number[];
+          finalURL: string;
+        }>;
+      }
+    ];
+    response: [];
+  };
 };
 
 type MainInternals = keyof MainInternalsMessagePayload;

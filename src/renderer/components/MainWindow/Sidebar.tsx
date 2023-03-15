@@ -20,6 +20,7 @@ import { useTransactionPendingCount } from '@/renderer/hooks/rabbyx/useTransacti
 import { Badge } from 'antd';
 import { usePrevious } from 'react-use';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
 import { DappFavicon } from '../DappFavicon';
 import Hide from './Hide';
 import styles from './Sidebar.module.less';
@@ -111,7 +112,9 @@ const TabList = ({
               if (dapp.tab) {
                 dappActions.onSelectDapp(dapp.tab);
               } else {
-                dappActions.onOpenDapp(dapp.origin);
+                getLastOpenOriginByOrigin(dapp.origin).then((lastOrigin) => {
+                  dappActions.onOpenDapp(lastOrigin);
+                });
               }
               navigateToDapp(dapp.origin);
             }}

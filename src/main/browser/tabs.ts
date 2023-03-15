@@ -163,6 +163,7 @@ export class Tab {
   destroy() {
     if (this.destroyed) return;
 
+    const lastOpenInfo = this.makeTabLastOpenInfo();
     this.destroyed = true;
 
     this.hide();
@@ -188,8 +189,30 @@ export class Tab {
       viewMngr.recycleView(this.view!);
     }
 
+    if (lastOpenInfo) {
+      emitIpcMainEvent('__internal_main:mainwindow:dapp-tabs-to-be-closed', {
+        tabs: lastOpenInfo,
+      });
+    }
+
     this.window = undefined;
     this.view = undefined;
+  }
+
+  makeTabLastOpenInfo(): IDappLastOpenInfo | null {
+    if (!this.$meta.isOfMainWindow) return null;
+
+    let finalURL = '';
+    try {
+      finalURL = this.view?.webContents.getURL() || '';
+
+      if (!finalURL) return null;
+      return { finalURL };
+    } catch (e) {
+      // ignore
+    }
+
+    return null;
   }
 
   getInitialUrl() {

@@ -389,3 +389,7 @@ type IPopupViewChanges<
       type: T;
       visible: false;
     };
+
+type IDappLastOpenInfo = {
+  finalURL: string;
+};

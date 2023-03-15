@@ -1,4 +1,4 @@
-import { BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, shell } from 'electron';
 import { bufferTime, fromEvent, map } from 'rxjs';
 
 import {
@@ -396,4 +396,22 @@ onIpcMainEvent('__internal_rpc:trezor-like-window:click-close', async (evt) => {
   backgroundWebContents.executeJavaScript(`window._OnekeyConnect.cancel();`);
 
   tabbedWin.tabs.destroy();
+});
+
+app.on('quit', async () => {
+  const mainTabbedWin = await onMainWindowReady();
+
+  const allOpenedTabs = mainTabbedWin.tabs.tabList;
+
+  const lastOpenInfos: IDappLastOpenInfo[] = [];
+  allOpenedTabs.forEach((tab) => {
+    const lastOpenInfo = tab.makeTabLastOpenInfo()!;
+    if (lastOpenInfo) {
+      lastOpenInfos.push(lastOpenInfo);
+    }
+  });
+
+  emitIpcMainEvent('__internal_main:mainwindow:dapp-tabs-to-be-closed', {
+    tabs: lastOpenInfos,
+  });
 });
