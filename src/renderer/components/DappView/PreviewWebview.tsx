@@ -6,7 +6,7 @@ import styled from 'styled-components';
 
 const webviewWebPreferencesAttr = stringifyWebPreferences({
   ...SAFE_WEBPREFERENCES,
-  disableDialogs: false,
+  disableDialogs: true,
 });
 
 const Container = styled.div`

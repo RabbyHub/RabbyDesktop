@@ -44,6 +44,7 @@ const checkingProxyViewReady = getSessionInsts().then(
         session: checkingProxySession,
         sandbox: true,
         nodeIntegration: false,
+        disableDialogs: true,
       },
     });
 
@@ -66,6 +67,7 @@ export async function checkUrlViaBrowserView(
         session: checkingViewSession,
         sandbox: true,
         nodeIntegration: false,
+        disableDialogs: true,
       },
     });
   }
