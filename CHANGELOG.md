@@ -1,7 +1,18 @@
 
+v0.6.1 / 2023-03-15
+===================
+
+  * feat: re-open last opened url of dapp. (#279)
+  * feat: update top navbar style. (#276)
+  * fix: DappReadonlyModal (#277)
+  * feat: use proxy for app updator. (#270)
+  * chore: change welcome slogan (#278)
+  * feat: disable dialogs for invisible browserView. (#275)
+
 v0.6.0 / 2023-03-14
 ===================
 
+  * Release v0.6.0
   * feat: update chain when chain changed by dapp (#274)
   * feat: update sentry configuration. (#273)
   * fix: favicon placeholder (#272)
