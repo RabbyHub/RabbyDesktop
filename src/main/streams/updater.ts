@@ -1,7 +1,9 @@
 import { app } from 'electron';
 import { AppUpdaterWin32, AppUpdaterDarwin } from '../updater/updater';
+import { setSessionProxy } from '../utils/appNetwork';
 import { onIpcMainEvent } from '../utils/ipcMainEvents';
 import { getBindLog } from '../utils/log';
+import { getAppRuntimeProxyConf } from '../utils/stream-helpers';
 
 const log = getBindLog('updater', 'bgGrey');
 
@@ -21,6 +23,9 @@ async function getAutoUpdater() {
     } else {
       gAutoUpdater = new AppUpdaterWin32();
     }
+
+    const realProxy = await getAppRuntimeProxyConf();
+    setSessionProxy(gAutoUpdater.netSession, realProxy);
 
     // gAutoUpdater.on('checking-for-update', () => {
     //   log('gAutoUpdater:: checking-for-update', 'checking-for-update');
