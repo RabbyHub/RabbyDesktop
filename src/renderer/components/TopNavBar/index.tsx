@@ -44,7 +44,6 @@ const RiskArea = ({
         style={{ ...(iconColor && { color: iconColor }) }}
         className={styles.icon}
       />
-      <div className={styles.text}>No risk found</div>
     </div>
   );
 };
