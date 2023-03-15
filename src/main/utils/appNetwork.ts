@@ -56,7 +56,9 @@ export async function checkUrlViaBrowserView(
   opts?: {
     timeout?: number;
     view?: BrowserView;
-    onPageFaviconUpdated?: (favicons: string[]) => void;
+    onPageFaviconUpdated?: (
+      favicons: { href: string; sizes: string }[]
+    ) => void;
   }
 ) {
   const { checkingViewSession } = await getSessionInsts();
@@ -86,10 +88,6 @@ export async function checkUrlViaBrowserView(
       };
 
   const checkResult = new Subject<Result>();
-
-  view.webContents.on('page-favicon-updated', (_, favicons) => {
-    opts?.onPageFaviconUpdated?.(favicons);
-  });
 
   const parsedInputInfo = canoicalizeDappUrl(targetURL);
   const successResult: Result = {
@@ -173,7 +171,16 @@ export async function checkUrlViaBrowserView(
     );
   }
 
-  return firstValueFrom(obs).finally(() => {
+  return firstValueFrom(obs).finally(async () => {
+    const outlineScript = `
+      const favicons = document.querySelectorAll('link[rel="icon"]');
+      const appleTouchIcons = document.querySelectorAll('link[rel="apple-touch-icon"]');
+      
+      ({favicons: Array.from(favicons).map(item => ({href: item.href, sizes: item.sizes.value})), appleTouchIcons: Array.from(appleTouchIcons).map(item => ({href: item.href, sizes: item.sizes.value}))});
+    `;
+    const { favicons, appleTouchIcons } =
+      await view.webContents.executeJavaScript(outlineScript);
+    opts?.onPageFaviconUpdated?.([...favicons, ...appleTouchIcons]);
     viewMngr.recycleView(view);
   });
 }
