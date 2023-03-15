@@ -37,7 +37,7 @@ export const Step: React.FC<Props> = ({
       </h2>
       <Button
         disabled={notCurrent}
-        className={classNames('w-[94px] h-[33px] mx-auto', {
+        className={classNames('w-[94px] h-[33px] mx-auto rounded-[4px]', {
           'opacity-30': notCurrent,
         })}
         type="primary"

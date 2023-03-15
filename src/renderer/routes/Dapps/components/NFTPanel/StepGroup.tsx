@@ -3,6 +3,7 @@ import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import classNames from 'classnames';
 import React from 'react';
+import { NFTModal } from './NFTModal';
 import { Step } from './Step';
 import { TweetModal } from './TweetModal';
 
@@ -10,6 +11,7 @@ export const StepGroup: React.FC = () => {
   const [currentNo, setCurrentNo] = React.useState(1);
   const { dapps } = useTabedDapps();
   const [openTweetModal, setOpenTweetModal] = React.useState(false);
+  const [openNFTModal, setOpenNFTModal] = React.useState(false);
 
   const onAddDapp = React.useCallback(() => {
     showMainwinPopupview({ type: 'dapps-management' });
@@ -18,13 +20,16 @@ export const StepGroup: React.FC = () => {
     setOpenTweetModal(true);
   }, []);
   const onMint = React.useCallback(() => {
-    walletController.mintRabby().then(console.log);
+    setOpenNFTModal(true);
   }, []);
   const handleCloseTweetModal = React.useCallback((isSendTweet: boolean) => {
     setOpenTweetModal(false);
     if (isSendTweet) {
       setCurrentNo(3);
     }
+  }, []);
+  const handleCloseNFTModal = React.useCallback((isMinted: boolean) => {
+    setOpenNFTModal(false);
   }, []);
 
   React.useEffect(() => {
@@ -38,6 +43,7 @@ export const StepGroup: React.FC = () => {
   return (
     <section className={classNames('flex m-auto')}>
       <TweetModal open={openTweetModal} onClose={handleCloseTweetModal} />
+      <NFTModal open={openNFTModal} onClose={handleCloseNFTModal} />
       <Step
         currentNo={currentNo}
         no={1}

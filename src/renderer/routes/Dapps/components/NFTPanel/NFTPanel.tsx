@@ -1,16 +1,16 @@
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { Tooltip } from 'antd';
-import BigNumber from 'bignumber.js';
 import classNames from 'classnames';
 import React from 'react';
 import { StepGroup } from './StepGroup';
+import { useZoraMintFee } from './util';
 
 const IS_MINTED_KEY = 'IS_MINTED';
 
 export const NFTPanel = () => {
   const [isMinted, setIsMinted] = React.useState(true);
   const [total, setTotal] = React.useState(0);
-  const [fee, setFee] = React.useState(0);
+  const fee = useZoraMintFee();
 
   React.useEffect(() => {
     if (localStorage.getItem(IS_MINTED_KEY)) {
@@ -25,10 +25,6 @@ export const NFTPanel = () => {
     });
 
     walletController.mintedRabbyTotal().then(setTotal);
-    walletController.mintRabbyFee().then((result) => {
-      const n = new BigNumber(result).div(1e18).toNumber();
-      setFee(n);
-    });
   }, []);
 
   if (isMinted) {
