@@ -1,23 +1,43 @@
+import { useTabedDapps } from '@/renderer/hooks/useDappsMngr';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import classNames from 'classnames';
 import React from 'react';
 import { Step } from './Step';
+import { TweetModal } from './TweetModal';
 
 export const StepGroup: React.FC = () => {
-  const [currentNo, setCurrentNo] = React.useState(3);
+  const [currentNo, setCurrentNo] = React.useState(1);
+  const { dapps } = useTabedDapps();
+  const [openTweetModal, setOpenTweetModal] = React.useState(false);
 
   const onAddDapp = React.useCallback(() => {
     showMainwinPopupview({ type: 'dapps-management' });
-    // TODO: check if dapp is added
-    setCurrentNo(2);
   }, []);
-  const onTweet = React.useCallback(() => {}, []);
+  const onTweet = React.useCallback(() => {
+    setOpenTweetModal(true);
+  }, []);
   const onMint = React.useCallback(() => {
     walletController.mintRabby().then(console.log);
   }, []);
+  const handleCloseTweetModal = React.useCallback((isSendTweet: boolean) => {
+    setOpenTweetModal(false);
+    if (isSendTweet) {
+      setCurrentNo(3);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (currentNo === 1) {
+      if (dapps.length > 0) {
+        setCurrentNo(2);
+      }
+    }
+  }, [dapps, currentNo]);
+
   return (
     <section className={classNames('flex m-auto')}>
+      <TweetModal open={openTweetModal} onClose={handleCloseTweetModal} />
       <Step
         currentNo={currentNo}
         no={1}
