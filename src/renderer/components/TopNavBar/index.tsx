@@ -73,20 +73,7 @@ const ConnectedChain = forwardRef(
 );
 
 export const TopNavBar = () => {
-  const [chainHover, setChainHover] = useState(false);
   const [nonce, setNonce] = useState(0);
-
-  const hiddenHistoryOnMouseOver = useMemo(
-    () => ({
-      onMouseEnter: () => {
-        setChainHover(true);
-      },
-      onMouseLeave: () => {
-        setChainHover(false);
-      },
-    }),
-    []
-  );
 
   const { navActions, selectedTabInfo, activeTab } = useDappNavigation();
 
@@ -166,7 +153,7 @@ export const TopNavBar = () => {
         >
           {activeTab?.url || ''}
         </div>
-        <div className={clsx(styles.historyBar, chainHover && styles.hidden)}>
+        <div className={clsx(styles.historyBar)}>
           <RcIconHistoryGoBack
             style={{ color: navIconColor }}
             className={clsx(
@@ -195,7 +182,7 @@ export const TopNavBar = () => {
             />
           )}
         </div>
-        <div className={styles.connectChainBox} {...hiddenHistoryOnMouseOver}>
+        <div className={styles.connectChainBox}>
           <ConnectedChain
             ref={divRef}
             chain={currentSite ? currentSite.chain : CHAINS_ENUM.ETH}
@@ -206,11 +193,7 @@ export const TopNavBar = () => {
             }}
           />
         </div>
-        <div
-          className={styles.close}
-          onClick={handleCloseTab}
-          {...hiddenHistoryOnMouseOver}
-        >
+        <div className={styles.close} onClick={handleCloseTab}>
           <img src="rabby-internal://assets/icons/top-bar/close.svg" />
         </div>
       </div>
