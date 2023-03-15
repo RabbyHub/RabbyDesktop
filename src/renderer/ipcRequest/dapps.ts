@@ -1,4 +1,5 @@
 import { arraify } from '@/isomorphic/array';
+import { canoicalizeDappUrl } from '@/isomorphic/url';
 
 export async function getDapp(dappOrigin: string) {
   return window.rabbyDesktop.ipcRenderer
@@ -120,4 +121,30 @@ export async function fetchProtocolDappsBinding() {
     .then((event) => {
       return event.result;
     });
+}
+
+export async function fetchLastOpenInfos() {
+  return window.rabbyDesktop.ipcRenderer
+    .invoke('fetch-dapp-last-open-infos')
+    .then((res) => {
+      if (res.error) {
+        return {};
+      }
+
+      return res.lastOpenInfos;
+    });
+}
+
+export async function getLastOpenOriginByOrigin(dappOrigin: string) {
+  const lastOpenInfos = await fetchLastOpenInfos();
+
+  const parsedInfo = canoicalizeDappUrl(dappOrigin);
+  const lastInfo =
+    lastOpenInfos[parsedInfo.origin] ||
+    lastOpenInfos[parsedInfo.secondaryOrigin];
+
+  if (!lastInfo?.finalURL) return dappOrigin;
+
+  const parseLastInfo = canoicalizeDappUrl(lastInfo.finalURL);
+  return parseLastInfo.origin || dappOrigin;
 }

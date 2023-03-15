@@ -191,6 +191,13 @@ type ChannelInvokePayload = {
       shouldNavTabOnClient: boolean;
     };
   };
+  'fetch-dapp-last-open-infos': {
+    send: [];
+    response: {
+      error?: string | null;
+      lastOpenInfos: Record<IDapp['id'], IDappLastOpenInfo>;
+    };
+  };
   [`__internal_rpc:rabbyx-rpc:query`]: {
     send: [query: Omit<IRabbyxRpcQuery, 'rpcId'>];
     response: {

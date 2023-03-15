@@ -13,11 +13,13 @@ import {
   emitIpcMainEvent,
   handleIpcMainInvoke,
   onIpcMainEvent,
+  onIpcMainInternalEvent,
 } from '../utils/ipcMainEvents';
 import { PERSIS_STORE_PREFIX } from '../../isomorphic/constants';
 import { safeParse, shortStringify } from '../../isomorphic/json';
 import {
   canoicalizeDappUrl,
+  getOriginFromUrl,
   isUrlFromDapp,
   maybeTrezorLikeBuiltInHttpPage,
   parseDomainMeta,
@@ -57,6 +59,7 @@ export const dappStore = makeStore<{
   dapps: IDapp[];
   protocolDappsBinding: Record<string, IDapp['origin'][]>;
   dappsMap: Record<IDapp['origin'], IDapp>;
+  dappsLastOpenInfos: Record<IDapp['origin'], IDappLastOpenInfo>;
   pinnedList: string[];
   unpinnedList: string[];
 }>({
@@ -83,6 +86,19 @@ export const dappStore = makeStore<{
       },
       additionalProperties: false,
       default: {} as Record<IDapp['origin'], IDapp>,
+    },
+    dappsLastOpenInfos: {
+      type: 'object',
+      patternProperties: {
+        '^https://.+$': {
+          type: 'object',
+          properties: {
+            finalURL: { type: 'string' },
+          },
+        },
+      },
+      additionalProperties: false,
+      default: {} as Record<IDapp['origin'], IDappLastOpenInfo>,
     },
     pinnedList: {
       type: 'array',
@@ -127,6 +143,7 @@ export const dappStore = makeStore<{
           return acc;
         }, {} as Record<IDapp['origin'], IDapp>);
         store.set('dappsMap', dappsMap);
+        store.set('dapps', []);
       }
     },
   },
@@ -200,14 +217,8 @@ export function getProtocolDappsBindings() {
 }
 
 function parseDappUrl(url: string, dapps = getAllDapps()) {
-  const {
-    isDapp,
-    origin,
-    secondaryDomain,
-    secondaryOrigin,
-    is2ndaryDomain,
-    isSubDomain,
-  } = canoicalizeDappUrl(url);
+  const { isDapp, origin, secondaryDomain, is2ndaryDomain, isSubDomain } =
+    canoicalizeDappUrl(url);
 
   const matches = {
     foundDapp: null as null | IDapp,
@@ -435,6 +446,7 @@ function checkDelDapp(
   originToDel: IDapp['origin'] | IDapp['origin'][],
   rets: {
     dappsMap: Record<string, IDapp>;
+    dappsLastOpenInfos?: Record<string, IDappLastOpenInfo>;
     protocolDappsBinding?: IProtocolDappBindings;
     pinnedList?: IDapp['origin'][];
     unpinnedList?: IDapp['origin'][];
@@ -446,6 +458,7 @@ function checkDelDapp(
   const {
     dappsMap,
     protocolDappsBinding = getProtocolDappsBindings(),
+    dappsLastOpenInfos = dappStore.get('dappsLastOpenInfos') || {},
     pinnedList = dappStore.get('pinnedList').filter((o) => !originsSet.has(o)),
     unpinnedList = dappStore
       .get('unpinnedList')
@@ -454,6 +467,7 @@ function checkDelDapp(
 
   originsToDel.forEach((o) => {
     delete dappsMap[o];
+    delete dappsLastOpenInfos[o];
   });
 
   Object.entries(protocolDappsBinding).forEach((dapps) => {
@@ -465,6 +479,7 @@ function checkDelDapp(
 
   return {
     originsToDel,
+    dappsLastOpenInfos,
     protocolDappsBinding,
     pinnedList,
     unpinnedList,
@@ -487,6 +502,7 @@ handleIpcMainInvoke('dapps-replace', (_, oldOrigin, newDapp) => {
 
   dappStore.set('protocolDappsBinding', delResult.protocolDappsBinding);
   dappStore.set('pinnedList', delResult.pinnedList);
+  dappStore.set('dappsLastOpenInfos', delResult.dappsLastOpenInfos);
 
   dappStore.set('dappsMap', addResult.dappsMap);
   dappStore.set('unpinnedList', addResult.unpinnedList);
@@ -521,6 +537,7 @@ handleIpcMainInvoke('dapps-delete', (_, dappToDel: IDapp) => {
   dappStore.set('protocolDappsBinding', delResult.protocolDappsBinding);
   dappStore.set('pinnedList', delResult.pinnedList);
   dappStore.set('unpinnedList', delResult.unpinnedList);
+  dappStore.set('dappsLastOpenInfos', delResult.dappsLastOpenInfos);
   dappStore.set('dappsMap', dappsMap);
 
   const dapps = getAllDapps();
@@ -675,6 +692,21 @@ handleIpcMainInvoke('dapps-put-protocol-binding', (_, pBindings) => {
   return {};
 });
 
+handleIpcMainInvoke('fetch-dapp-last-open-infos', () => {
+  const lastOpenInfos = dappStore.get('dappsLastOpenInfos') || {};
+  // TODO: consier one in-memory cache
+  const dappsMap = dappStore.get('dappsMap') || {};
+
+  Object.keys(lastOpenInfos).forEach((dappOrigin) => {
+    if (!dappsMap[dappOrigin]) delete lastOpenInfos[dappOrigin];
+  });
+
+  return {
+    error: null,
+    lastOpenInfos,
+  };
+});
+
 onIpcMainEvent(
   '__internal_rpc:debug-tools:operate-debug-insecure-dapps',
   (event, opType) => {
@@ -711,5 +743,35 @@ onIpcMainEvent(
 
     dappStore.set('dappsMap', dappsMap);
     event.sender.reload();
+  }
+);
+
+onIpcMainInternalEvent(
+  '__internal_main:mainwindow:dapp-tabs-to-be-closed',
+  async ({ tabs: tabsInfo }) => {
+    const dappsMap = dappStore.get('dappsMap') || {};
+    const dappsLastOpenInfos = dappStore.get('dappsLastOpenInfos') || {};
+
+    let changed = false;
+    // record finalURL of tabs to be closed
+    arraify(tabsInfo).forEach((tabInfo) => {
+      const finalURL = tabInfo.finalURL;
+
+      const dappOrigin = getOriginFromUrl(finalURL);
+
+      const findResult = findDappsByOrigin(dappOrigin, Object.values(dappsMap));
+      const foundDapp =
+        findResult.dappByOrigin || findResult.dappBySecondaryDomainOrigin;
+      if (!foundDapp) return;
+
+      changed = true;
+      dappsLastOpenInfos[foundDapp.origin] = {
+        finalURL,
+      };
+    });
+
+    if (changed) {
+      dappStore.set('dappsLastOpenInfos', dappsLastOpenInfos);
+    }
   }
 );

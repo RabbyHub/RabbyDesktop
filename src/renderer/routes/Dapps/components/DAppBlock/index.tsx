@@ -4,6 +4,7 @@ import { Dropdown, Menu } from 'antd';
 import React, { useRef } from 'react';
 
 import clsx from 'clsx';
+import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
 import {
   RCIconDappsDelete,
   RCIconDappsEdit,
@@ -141,7 +142,11 @@ export const DAppBlock = ({
           className="anchor"
           onClick={(e) => {
             e.preventDefault();
-            onOpen?.(dapp.origin);
+            if (onOpen) {
+              getLastOpenOriginByOrigin(dapp.origin).then((lastOrigin) => {
+                onOpen(lastOrigin);
+              });
+            }
           }}
         >
           <DappFavicon
