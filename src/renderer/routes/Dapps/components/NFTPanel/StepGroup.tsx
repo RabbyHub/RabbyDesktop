@@ -1,10 +1,11 @@
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
+import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import classNames from 'classnames';
 import React from 'react';
 import { Step } from './Step';
 
 export const StepGroup: React.FC = () => {
-  const [currentNo, setCurrentNo] = React.useState(1);
+  const [currentNo, setCurrentNo] = React.useState(3);
 
   const onAddDapp = React.useCallback(() => {
     showMainwinPopupview({ type: 'dapps-management' });
@@ -12,7 +13,9 @@ export const StepGroup: React.FC = () => {
     setCurrentNo(2);
   }, []);
   const onTweet = React.useCallback(() => {}, []);
-  const onMint = React.useCallback(() => {}, []);
+  const onMint = React.useCallback(() => {
+    walletController.mintRabby().then(console.log);
+  }, []);
   return (
     <section className={classNames('flex m-auto')}>
       <Step

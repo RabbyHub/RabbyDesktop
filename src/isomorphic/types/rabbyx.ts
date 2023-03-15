@@ -363,6 +363,11 @@ export type RabbyXMethod = {
   ) => void;
   'walletController.rejectAllApprovals': () => void;
 
+  'walletController.mintRabby': () => void;
+  'walletController.isMintedRabby': () => boolean;
+  'walletController.mintedRabbyTotal': () => number;
+  'walletController.mintRabbyFee': () => string;
+
   'permissionService.addConnectedSite': (
     origin: string,
     name: string,

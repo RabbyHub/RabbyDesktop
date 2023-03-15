@@ -1,7 +1,40 @@
+import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { Tooltip } from 'antd';
+import BigNumber from 'bignumber.js';
 import classNames from 'classnames';
+import React from 'react';
 import { StepGroup } from './StepGroup';
 
+const IS_MINTED_KEY = 'IS_MINTED';
+
 export const NFTPanel = () => {
+  const [isMinted, setIsMinted] = React.useState(true);
+  const [total, setTotal] = React.useState(0);
+  const [fee, setFee] = React.useState(0);
+
+  React.useEffect(() => {
+    if (localStorage.getItem(IS_MINTED_KEY)) {
+      setIsMinted(true);
+      return;
+    }
+    walletController.isMintedRabby().then((result) => {
+      if (result) {
+        localStorage.setItem(IS_MINTED_KEY, '1');
+      }
+      setIsMinted(result);
+    });
+
+    walletController.mintedRabbyTotal().then(setTotal);
+    walletController.mintRabbyFee().then((result) => {
+      const n = new BigNumber(result).div(1e18).toNumber();
+      setFee(n);
+    });
+  }, []);
+
+  if (isMinted) {
+    return null;
+  }
+
   return (
     <div
       className={classNames(
@@ -43,7 +76,7 @@ export const NFTPanel = () => {
                 'text-[14px] font-medium opacity-60'
               )}
             >
-              <div>221 minted</div>
+              <div>{total} minted</div>
               <div
                 className={classNames(
                   'mx-[10px] w-1 h-[14px]',
@@ -61,9 +94,9 @@ export const NFTPanel = () => {
           >
             <span>Powered by zora</span>
             <span className={classNames('ml-[5px]')}>
-              {/* <a href="https://zora.co"> */}
-              <img src="rabby-internal://assets/icons/add-dapp/icon-help.svg" />
-              {/* </a> */}
+              <Tooltip title={`A ${fee}ETH fee goes to Zora for each mint.`}>
+                <img src="rabby-internal://assets/icons/add-dapp/icon-help.svg" />
+              </Tooltip>
             </span>
           </footer>
         </div>
