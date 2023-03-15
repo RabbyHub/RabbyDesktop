@@ -25,7 +25,9 @@ async function getAutoUpdater() {
     }
 
     const realProxy = await getAppRuntimeProxyConf();
-    setSessionProxy(gAutoUpdater.netSession, realProxy);
+    if (realProxy.proxyType !== 'none') {
+      setSessionProxy(gAutoUpdater.netSession, realProxy);
+    }
 
     // gAutoUpdater.on('checking-for-update', () => {
     //   log('gAutoUpdater:: checking-for-update', 'checking-for-update');
