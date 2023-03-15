@@ -28,10 +28,16 @@ export const AutoUpdate = ({ isFold }: AutoUpdateProps) => {
             className="auto-update-icon is-animate"
             alt=""
           />
-          <div className="auto-update-content">Downloading</div>
-          {/* <div className="auto-update-content">
-            {(progress?.percent || 0).toFixed(0)}% {isFold ? '' : 'completed'}
-          </div> */}
+          <div className="auto-update-content">
+            {!progress?.percent ? (
+              'Downloading'
+            ) : (
+              <>
+                {(progress?.percent || 0).toFixed(0)}%{' '}
+                {isFold ? '' : 'completed'}
+              </>
+            )}
+          </div>
         </div>
       </div>
     );
