@@ -69,7 +69,7 @@ export const NFTModal: React.FC<Props> = ({ onClose, ...props }) => {
                     <Tooltip
                       title={`A ${ZORE_MINT_FEE}ETH fee goes to Zora for each mint.`}
                     >
-                      <img src="rabby-internal://assets/icons/add-dapp/icon-help.svg" />
+                      <img src="rabby-internal://assets/icons/mint/icon-help.svg" />
                     </Tooltip>
                   </span>
                 </div>
