@@ -5,13 +5,12 @@ import classNames from 'classnames';
 import React from 'react';
 import { MintedSuccessful } from './MintedSuccessful';
 import { StepGroup } from './StepGroup';
-import { MintedData, useZoraMintFee } from './util';
+import { MintedData, ZORE_MINT_FEE } from './util';
 
 export const NFTPanel = () => {
   const [isMinted, setIsMinted] = React.useState(true);
   const [isEventEnd, setIsEventEnd] = React.useState(false);
   const [total, setTotal] = React.useState(0);
-  const fee = useZoraMintFee();
   const [mintedData, setMintedData] = React.useState<MintedData>();
 
   const checkMinted = React.useCallback(() => {
@@ -109,7 +108,9 @@ export const NFTPanel = () => {
             >
               <span>Powered by zora</span>
               <span className={classNames('ml-[5px]')}>
-                <Tooltip title={`A ${fee}ETH fee goes to Zora for each mint.`}>
+                <Tooltip
+                  title={`A ${ZORE_MINT_FEE}ETH fee goes to Zora for each mint.`}
+                >
                   <img src="rabby-internal://assets/icons/mint/icon-help.svg" />
                 </Tooltip>
               </span>
