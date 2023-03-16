@@ -141,6 +141,36 @@ export async function safeCapturePage(
   };
 }
 
+const findLargestFavIcon = (
+  icons: { href: string; sizes: string }[]
+): string => {
+  let largest: { href: string; size: number } | null = null;
+  icons.forEach((icon) => {
+    const sizes = icon.sizes.split(' ');
+    /**
+     * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link
+     * link 的 sizes 字段可以写多个长宽比，以空格拆分，且 100x100 和 100X100 都是合法的
+     * 这里无脑认为 link 的图标都是 1:1 的，且取 x 之前的宽度来计算
+     * */
+    const maxSize = Math.max(
+      ...sizes.map((s) => Number(s.toLowerCase().split('x')[0] || 0))
+    );
+    if (!largest) {
+      largest = {
+        href: icon.href,
+        size: maxSize,
+      };
+    } else if (maxSize > largest.size) {
+      largest = {
+        href: icon.href,
+        size: maxSize,
+      };
+    }
+  });
+
+  return (largest as { href: string; size: number } | null)?.href || '';
+};
+
 export async function detectDapp(
   dappsUrl: string,
   opts: {
@@ -169,7 +199,7 @@ export async function detectDapp(
   const [checkResult, targetMetadata] = await Promise.all([
     await checkUrlViaBrowserView(formattedTargetURL, {
       onPageFaviconUpdated: (favicons) => {
-        fallbackFavicon = favicons[0];
+        fallbackFavicon = findLargestFavIcon(favicons);
       },
       timeout: DFLT_TIMEOUT,
     }),
@@ -264,10 +294,10 @@ export async function detectDapp(
       targetMetadata?.title ||
       inputCoreName,
     faviconUrl:
+      fallbackFavicon ||
       targetMetadata?.favicon ||
       targetMetadata?.open_graph?.images?.[0]?.url ||
-      targetMetadata?.twitter_card?.images?.[0]?.url ||
-      fallbackFavicon,
+      targetMetadata?.twitter_card?.images?.[0]?.url,
     faviconBase64: undefined,
   };
 
