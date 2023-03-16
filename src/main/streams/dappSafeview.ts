@@ -83,17 +83,17 @@ onMainWindowReady().then(async (mainWin) => {
 
 function defaultActiveTabNoop() {}
 type SafeOpenResult = {
-  activeTab: () => void;
+  activeTab: () => Promise<void> | void;
 } & (
   | {
-      type: 'alert-user';
+      type: ISafeOpenDappTabResult['openType'] & 'alert-user';
     }
   | {
-      type: 'switch-to-opened-tab';
+      type: ISafeOpenDappTabResult['openType'] & 'switch-to-opened-tab';
       openedTab: import('../browser/tabs').Tab;
     }
   | {
-      type: 'create-tab';
+      type: ISafeOpenDappTabResult['openType'] & 'create-tab';
     }
 );
 /**
@@ -141,7 +141,7 @@ export async function safeOpenURL(
       return {
         type: 'switch-to-opened-tab',
         openedTab,
-        activeTab: () => {
+        activeTab: async () => {
           if (shouldLoad) {
             openedTab.view?.webContents.loadURL(targetURL);
           }

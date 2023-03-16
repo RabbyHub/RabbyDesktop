@@ -402,6 +402,7 @@ type IRabbyxInfo = {
 
 type ISafeOpenDappTabResult = {
   shouldNavTabOnClient: boolean;
+  openType?: 'alert-user' | 'switch-to-opened-tab' | 'create-tab';
   isOpenExternal: boolean;
   isTargetDapp?: boolean;
   isTargetDappByOrigin?: boolean;

@@ -213,11 +213,14 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
   const { dappByOrigin, dappBySecondaryDomainOrigin } =
     findDappsByOrigin(dappOrigin);
 
-  safeOpenURL(dappOrigin, {
+  const openResult = await safeOpenURL(dappOrigin, {
     sourceURL: currentUrl,
     existedDapp: dappByOrigin,
     existedMainDomainDapp: dappBySecondaryDomainOrigin,
-  }).then((res) => res.activeTab());
+  }).then((res) => {
+    res.activeTab();
+    return res;
+  });
 
   const isTargetDappByOrigin = !!dappByOrigin;
   const isTargetDappBySecondaryOrigin = !!dappBySecondaryDomainOrigin;
@@ -225,6 +228,7 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
 
   return {
     shouldNavTabOnClient: isTargetDapp,
+    openType: openResult.type,
     isOpenExternal: false,
     isTargetDapp,
     isTargetDappByOrigin,
