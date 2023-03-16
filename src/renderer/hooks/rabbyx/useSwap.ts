@@ -96,6 +96,7 @@ export const useGotoSwapByToken = () => {
         `/mainwin/home/swap?${obj2query({
           chain,
           payTokenId,
+          rbisource: 'homeAsset',
         })}`
       );
     },

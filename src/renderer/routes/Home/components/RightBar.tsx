@@ -57,7 +57,7 @@ const RightBar = ({ updateNonce }: { updateNonce: number }) => {
       name: 'Swap',
       icon: <IconSwap width="35px" height="35px" />,
       onClick: () => {
-        navigateTo('/mainwin/home/swap');
+        navigateTo('/mainwin/home/swap?rbisource=home');
       },
     },
     {
@@ -65,7 +65,7 @@ const RightBar = ({ updateNonce }: { updateNonce: number }) => {
       name: 'Send',
       icon: <IconSend width="35px" height="35px" />,
       onClick: () => {
-        navigateTo('/mainwin/home/send-token');
+        navigateTo('/mainwin/home/send-token?rbisource=home');
       },
     },
     {

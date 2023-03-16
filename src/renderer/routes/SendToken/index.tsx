@@ -27,6 +27,7 @@ import { ModalConfirm } from '@/renderer/components/Modal/Confirm';
 import { copyText } from '@/renderer/utils/clipboard';
 import { toastCopiedWeb3Addr } from '@/renderer/components/TransparentToast';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
+import { useRbiSource } from '@/renderer/hooks/useRbiSource';
 import GasSelector from './components/GasSelector';
 import GasReserved from './components/GasReserved';
 import { ChainSelect } from '../Swap/component/ChainSelect';
@@ -230,6 +231,8 @@ const SendTokenWrapper = styled.div`
 `;
 
 const SendTokenInner = () => {
+  const rbisource = useRbiSource();
+
   const { currentAccount } = useCurrentAccount();
   const [chain, setChain] = useState(CHAINS_ENUM.ETH);
   const [tokenAmountForGas, setTokenAmountForGas] = useState('0');
@@ -484,6 +487,13 @@ const SendTokenInner = () => {
       const hash = (await walletController.sendRequest({
         method: 'eth_sendTransaction',
         params: [params],
+        $ctx: {
+          ga: {
+            category: 'Send',
+            source: 'sendToken',
+            trigger: rbisource,
+          },
+        },
       })) as string;
       lastSubmitRef.current = {
         hash,
