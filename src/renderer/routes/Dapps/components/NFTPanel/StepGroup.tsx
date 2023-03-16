@@ -1,5 +1,6 @@
 import { useTabedDapps } from '@/renderer/hooks/useDappsMngr';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
+import { useOnTxFinished } from '@/renderer/routes/SendToken/hooks';
 import classNames from 'classnames';
 import React from 'react';
 import { NFTModal } from './NFTModal';
@@ -11,6 +12,9 @@ export const StepGroup: React.FC = () => {
   const { dapps } = useTabedDapps();
   const [openTweetModal, setOpenTweetModal] = React.useState(false);
   const [openNFTModal, setOpenNFTModal] = React.useState(false);
+  const hashRef = React.useRef<string>();
+  const [isMinting, setIsMinting] = React.useState(false);
+  const [isMinted, setIsMinted] = React.useState(false);
 
   const onAddDapp = React.useCallback(() => {
     showMainwinPopupview({ type: 'dapps-management' });
@@ -27,8 +31,12 @@ export const StepGroup: React.FC = () => {
       setCurrentNo(3);
     }
   }, []);
-  const handleCloseNFTModal = React.useCallback((isMinted: boolean) => {
+  const handleCloseNFTModal = React.useCallback((result: string) => {
     setOpenNFTModal(false);
+    if (result) {
+      setIsMinting(true);
+      hashRef.current = result;
+    }
   }, []);
 
   React.useEffect(() => {
@@ -38,6 +46,15 @@ export const StepGroup: React.FC = () => {
       }
     }
   }, [dapps, currentNo]);
+
+  const watchMintFinished = React.useCallback((result: { hash: string }) => {
+    if (result.hash === hashRef.current) {
+      setIsMinting(false);
+      setIsMinted(true);
+    }
+  }, []);
+
+  useOnTxFinished(watchMintFinished);
 
   return (
     <section className={classNames('flex m-auto')}>
@@ -70,8 +87,9 @@ export const StepGroup: React.FC = () => {
         currentNo={currentNo}
         no={3}
         title="Free Mint 1 NFT"
-        buttonText="Mint"
+        buttonText={isMinting ? 'Minting' : 'Mint'}
         onButtonClick={onMint}
+        loading={isMinting}
       />
     </section>
   );

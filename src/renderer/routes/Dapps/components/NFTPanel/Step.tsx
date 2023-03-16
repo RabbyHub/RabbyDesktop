@@ -8,6 +8,7 @@ export interface Props {
   buttonText: string;
   onButtonClick: () => void;
   currentNo: number;
+  loading?: boolean;
 }
 
 export const Step: React.FC<Props> = ({
@@ -16,6 +17,7 @@ export const Step: React.FC<Props> = ({
   onButtonClick,
   no,
   currentNo,
+  loading,
 }) => {
   const notCurrent = currentNo !== no;
   const isDone = currentNo > no;
@@ -37,6 +39,7 @@ export const Step: React.FC<Props> = ({
       </h2>
       <Button
         disabled={notCurrent}
+        loading={loading}
         className={classNames('w-[94px] h-[33px] mx-auto rounded-[4px]', {
           'opacity-30': notCurrent,
         })}

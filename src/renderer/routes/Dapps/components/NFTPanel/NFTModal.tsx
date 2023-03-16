@@ -5,7 +5,7 @@ import React from 'react';
 import { useZoraMintFee } from './util';
 
 interface Props extends ModalProps {
-  onClose: (isMinted: boolean) => void;
+  onClose: (hash: string) => void;
 }
 
 const RowItem = ({
@@ -24,13 +24,22 @@ const RowItem = ({
 };
 
 export const NFTModal: React.FC<Props> = ({ onClose, ...props }) => {
-  const { onCancel } = props;
-  const [isMinted, setIsMinted] = React.useState(false);
+  const [submitting, setSubmitting] = React.useState(false);
+  const [hash, setHash] = React.useState('');
   const fee = useZoraMintFee();
   const onMint = React.useCallback(() => {
-    walletController.mintRabby().then(console.log);
-    onCancel?.();
-  }, [onCancel]);
+    setSubmitting(true);
+    walletController
+      .mintRabby()
+      .then((result: string) => {
+        setHash(result);
+        onClose(result);
+        setSubmitting(false);
+      })
+      .catch(() => {
+        setSubmitting(false);
+      });
+  }, [onClose]);
 
   return (
     <Modal
@@ -38,7 +47,7 @@ export const NFTModal: React.FC<Props> = ({ onClose, ...props }) => {
       width={368}
       centered
       smallTitle
-      onCancel={() => onClose(isMinted)}
+      onCancel={() => onClose(hash)}
     >
       <div className="flex flex-col text-white overflow-hidden rounded-[8px]">
         <img
@@ -55,7 +64,7 @@ export const NFTModal: React.FC<Props> = ({ onClose, ...props }) => {
             <RowItem label="Rabby mint fee" value="Free" />
             <RowItem
               label={
-                <div>
+                <div className="flex items-center">
                   <span>Powered by zora</span>
                   <span className="ml-[5px]">
                     <Tooltip
@@ -71,6 +80,7 @@ export const NFTModal: React.FC<Props> = ({ onClose, ...props }) => {
           </div>
 
           <Button
+            loading={submitting}
             block
             type="primary"
             className="h-[50px] rounded-[8px]"
