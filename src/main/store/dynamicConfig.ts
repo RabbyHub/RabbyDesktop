@@ -137,6 +137,10 @@ export function isTargetScanLink(
 ) {
   const parsedInfo =
     typeof targetURL === 'string' ? canoicalizeDappUrl(targetURL) : targetURL;
+  const recordSet = getBlockchainExplorers();
 
-  return getBlockchainExplorers().has(parsedInfo.secondaryDomain);
+  return (
+    recordSet.has(parsedInfo.hostname) ||
+    recordSet.has(parsedInfo.secondaryDomain)
+  );
 }

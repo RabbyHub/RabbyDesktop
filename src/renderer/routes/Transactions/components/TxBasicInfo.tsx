@@ -1,7 +1,6 @@
 import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import { getChain } from '@/renderer/utils';
 import { ellipsis } from '@/renderer/utils/address';
-import { useOpenDapp } from '@/renderer/utils/react-router';
 import { sinceTime } from '@/renderer/utils/time';
 import { TxDisplayItem, TxHistoryItem } from '@debank/rabby-api/dist/types';
 import classNames from 'classnames';
@@ -14,7 +13,6 @@ interface TxBasicInfoProps {
 
 export const TxBasicInfo = ({ data }: TxBasicInfoProps) => {
   const time = sinceTime(data.time_at);
-  const openDapp = useOpenDapp();
 
   const chain = useMemo(() => getChain(data.chain), [data.chain]);
   const link = useMemo(
@@ -35,7 +33,7 @@ export const TxBasicInfo = ({ data }: TxBasicInfoProps) => {
             e.preventDefault();
             e.stopPropagation();
             if (link) {
-              openDapp(link);
+              openExternalUrl(link);
             }
           }}
         >
