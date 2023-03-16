@@ -174,19 +174,3 @@ export async function getLastOpenOriginByOrigin(dappOrigin: string) {
   const parseLastInfo = canoicalizeDappUrl(lastInfo.finalURL);
   return parseLastInfo.origin || dappOrigin;
 }
-
-export const CheckIsDapp = async (url: string) => {
-  const input = canoicalizeDappUrl(url);
-
-  const { dapps } = await fetchDapps();
-  return !!dapps.find((dapp) => {
-    const dappOrigin = canoicalizeDappUrl(dapp.origin);
-    return (
-      dappOrigin.hostname === input.hostname ||
-      (dappOrigin.is2ndaryDomain &&
-        dappOrigin.secondaryOrigin === input.secondaryDomain)
-    );
-  });
-};
-
-export const CheckIsDappOpend = (url: string) => {};
