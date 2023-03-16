@@ -1,6 +1,6 @@
 import { Modal, Props as ModalProps } from '@/renderer/components/Modal/Modal';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
-import { Button } from 'antd';
+import { Button, Tooltip } from 'antd';
 import React from 'react';
 import { useZoraMintFee } from './util';
 
@@ -8,7 +8,13 @@ interface Props extends ModalProps {
   onClose: (isMinted: boolean) => void;
 }
 
-const RowItem = ({ label, value }: { label: string; value: string }) => {
+const RowItem = ({
+  label,
+  value,
+}: {
+  label: React.ReactNode;
+  value: string;
+}) => {
   return (
     <div className="border-0 border-[#ffffff06] border-solid flex justify-between py-[15px]">
       <span>{label}</span>
@@ -47,7 +53,21 @@ export const NFTModal: React.FC<Props> = ({ onClose, ...props }) => {
           <div className="divide-y flex flex-col text-[13px]">
             <RowItem label="Amount" value="1" />
             <RowItem label="Rabby mint fee" value="Free" />
-            <RowItem label="Zora mint fee" value={`${fee} ETH`} />
+            <RowItem
+              label={
+                <div>
+                  <span>Powered by zora</span>
+                  <span className="ml-[5px]">
+                    <Tooltip
+                      title={`A ${fee}ETH fee goes to Zora for each mint.`}
+                    >
+                      <img src="rabby-internal://assets/icons/add-dapp/icon-help.svg" />
+                    </Tooltip>
+                  </span>
+                </div>
+              }
+              value={`${fee} ETH`}
+            />
           </div>
 
           <Button

@@ -5,27 +5,31 @@ import React from 'react';
 import { StepGroup } from './StepGroup';
 import { useZoraMintFee } from './util';
 
-const IS_MINTED_KEY = 'IS_MINTED';
-
 export const NFTPanel = () => {
   const [isMinted, setIsMinted] = React.useState(true);
   const [total, setTotal] = React.useState(0);
   const fee = useZoraMintFee();
 
-  React.useEffect(() => {
-    if (localStorage.getItem(IS_MINTED_KEY)) {
-      setIsMinted(true);
-      return;
-    }
+  const checkMinted = React.useCallback(() => {
     walletController.isMintedRabby().then((result) => {
-      if (result) {
-        localStorage.setItem(IS_MINTED_KEY, '1');
-      }
       setIsMinted(result);
     });
-
-    walletController.mintedRabbyTotal().then(setTotal);
   }, []);
+
+  React.useEffect(() => {
+    walletController.mintedRabbyTotal().then(setTotal);
+
+    checkMinted();
+    // watch account change and recheck
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
+      (payload) => {
+        if (payload.event === 'accountsChanged') {
+          checkMinted();
+        }
+      }
+    );
+  }, [checkMinted]);
 
   if (isMinted) {
     return null;

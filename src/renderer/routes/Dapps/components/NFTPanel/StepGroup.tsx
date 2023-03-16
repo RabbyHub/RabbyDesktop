@@ -1,6 +1,5 @@
 import { useTabedDapps } from '@/renderer/hooks/useDappsMngr';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
-import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import classNames from 'classnames';
 import React from 'react';
 import { NFTModal } from './NFTModal';
