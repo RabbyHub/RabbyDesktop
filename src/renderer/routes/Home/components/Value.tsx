@@ -7,6 +7,10 @@ import {
   formatNumber,
 } from '@/renderer/utils/number';
 import { getTokens, ellipsisTokenSymbol, getUsd } from '@/renderer/utils/token';
+import {
+  getCollectionDisplayName,
+  PortfolioItemNft,
+} from '@/renderer/utils/nft';
 import BigNumber from 'bignumber.js';
 import styled from 'styled-components';
 import { Table } from './Table';
@@ -123,12 +127,14 @@ export const TokensSlash = ({ value }: { value: TokenItem[] }) => {
 export const Tokens = ({
   value,
   isDebt = false,
+  nfts,
 }: {
   value: TokenItem[];
   isDebt?: boolean;
+  nfts?: PortfolioItemNft[];
 }) => {
   value = Array.isArray(value) ? value : [value];
-  return <Col>{getTokens(value, undefined, isDebt)}</Col>;
+  return <Col>{getTokens(value, undefined, isDebt, nfts)}</Col>;
 };
 
 export const Token = ({
@@ -199,4 +205,25 @@ const DeviderWrapper = styled.div`
 `;
 export const Divider = () => {
   return <DeviderWrapper />;
+};
+
+export const BlancesWithNfts = ({
+  tokens,
+  nfts,
+}: {
+  tokens: TokenItem[];
+  nfts?: PortfolioItemNft[];
+}) => {
+  const hasNft = !!nfts?.length;
+  return (
+    <Col className="flex-col items-start">
+      {hasNft &&
+        nfts.map((n) => (
+          <div className="mb-4">
+            {getCollectionDisplayName(n.collection)} x{n.amount}
+          </div>
+        ))}
+      <TokensAmount tokens={tokens} />
+    </Col>
+  );
 };

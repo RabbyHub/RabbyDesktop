@@ -8,6 +8,9 @@ import OptionsSeller from './OptionsSeller';
 import Perpetuals from './Perpetuals';
 import Reward from './Reward';
 import Vesting from './Vesting';
+import NFTCommon from './NFTCommon';
+import NFTLending from './NFTLending';
+import NFTFraction from './NFTFraction';
 
 export {
   Common,
@@ -20,4 +23,7 @@ export {
   Perpetuals,
   Reward,
   Vesting,
+  NFTCommon,
+  NFTLending,
+  NFTFraction,
 };

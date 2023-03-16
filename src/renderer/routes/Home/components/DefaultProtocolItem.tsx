@@ -41,6 +41,9 @@ const TemplateDict = {
   insurance_seller: Template.InsuranceSeller,
   insurance_buyer: Template.InsuranceBuyer,
   perpetuals: Template.Perpetuals,
+  nft_common: Template.NFTCommon,
+  nft_lending: Template.NFTLending,
+  nft_fraction: Template.NFTFraction,
 };
 
 const ProtocolItemWrapper = styled.div`
