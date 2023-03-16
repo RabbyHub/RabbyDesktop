@@ -31,10 +31,11 @@ export function useOpenDapp() {
 
       window.rabbyDesktop.ipcRenderer
         .invoke('safe-open-dapp-tab', dappUrl)
-        .then(({ shouldNavTabOnClient }) => {
+        .then(({ shouldNavTabOnClient, openType }) => {
           if (shouldNavTabOnClient) {
             navigateToDapp(dappUrl);
-            // todo: 判断是否是 dapp，判断是打开 dapp 还是 切换 tab。
+          }
+          if (openType === 'create-tab') {
             matomoRequestEvent({
               category: 'My Dapp',
               action: 'Visit Dapp',

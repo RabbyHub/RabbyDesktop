@@ -69,9 +69,8 @@ export function useSidebarDapps() {
 
         window.rabbyDesktop.ipcRenderer
           .invoke('safe-open-dapp-tab', dappOrigin)
-          .then(({ shouldNavTabOnClient }) => {
-            if (shouldNavTabOnClient) {
-              // todo: 判断是否是 dapp，判断是打开 dapp 还是 切换 tab。
+          .then(({ openType }) => {
+            if (openType === 'create-tab') {
               matomoRequestEvent({
                 category: 'My Dapp',
                 action: 'Visit Dapp',

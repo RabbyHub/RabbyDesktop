@@ -255,10 +255,11 @@ export function MainWindow() {
   useMessageForwardToMainwin('open-dapp', (payload) => {
     window.rabbyDesktop.ipcRenderer
       .invoke('safe-open-dapp-tab', payload.data.dappURL)
-      .then(({ shouldNavTabOnClient }) => {
+      .then(({ shouldNavTabOnClient, openType }) => {
         if (shouldNavTabOnClient) {
           navigateToDappRoute(router.navigate, payload.data.dappURL);
-          // todo: 判断是否是 dapp，判断是打开 dapp 还是 切换 tab。
+        }
+        if (openType === 'create-tab') {
           matomoRequestEvent({
             category: 'My Dapp',
             action: 'Visit Dapp',

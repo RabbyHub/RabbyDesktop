@@ -1,7 +1,6 @@
 import { customAlphabet, nanoid } from 'nanoid';
 
 const ANALYTICS_PATH = 'https://matomo.debank.com/matomo.php';
-const genExtensionId = customAlphabet('1234567890abcdef', 16);
 
 async function postData(url = '', params: URLSearchParams) {
   const response = await fetch(`${url}?${params.toString()}`, {
@@ -23,6 +22,18 @@ async function getDesktopVersion() {
   return desktopVersion;
 }
 
+let userId = '';
+const getUserId = async () => {
+  if (!userId) {
+    const { userId: id } = await window.rabbyDesktop.ipcRenderer.invoke(
+      'get-rabbyx-info'
+    );
+    userId = id || '';
+  }
+
+  return userId;
+};
+
 const getParams = async () => {
   const gaParams = new URLSearchParams();
 
@@ -33,8 +44,7 @@ const getParams = async () => {
   gaParams.append('idsite', '4');
   gaParams.append('rec', '1');
   gaParams.append('url', encodeURI(url));
-  // todo: get extension id
-  // gaParams.append('_id', await getExtensionId());
+  gaParams.append('_id', await getUserId());
   gaParams.append('rand', nanoid());
   gaParams.append('ca', '1');
   gaParams.append('h', new Date().getUTCHours().toString());
