@@ -8,14 +8,32 @@ import { StepGroup } from './StepGroup';
 import { MintedData, ZORE_MINT_FEE } from './util';
 
 export const NFTPanel = () => {
-  const [isMinted, setIsMinted] = React.useState(true);
+  const [isMinted, setIsMinted] = React.useState(false);
   const [isEventEnd, setIsEventEnd] = React.useState(false);
   const [total, setTotal] = React.useState(0);
   const [mintedData, setMintedData] = React.useState<MintedData>();
+  const [isOwner, setIsOwner] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
 
   const checkMinted = React.useCallback(() => {
-    walletController.isMintedRabby().then((result) => {
-      setIsMinted(result);
+    setIsLoading(true);
+
+    walletController.getMintedRabby().then((result) => {
+      setIsMinted(false);
+      setMintedData(undefined);
+      setIsOwner(false);
+
+      if (!result) {
+        // nothing
+      } else if (result.isOwner) {
+        setIsMinted(true);
+        setIsOwner(true);
+      } else {
+        setIsMinted(true);
+        setMintedData(result);
+      }
+
+      setIsLoading(false);
     });
   }, []);
 
@@ -44,7 +62,7 @@ export const NFTPanel = () => {
     );
   }, [checkMinted, checkEndDateTime]);
 
-  const visible = !isEventEnd;
+  const visible = !isLoading && !isEventEnd;
 
   return (
     <Hide unmountOnExit visible={visible}>
@@ -124,8 +142,8 @@ export const NFTPanel = () => {
           </div>
         </div>
         <div className={classNames('p-[15px] flex-1 flex item-center')}>
-          {mintedData ? (
-            <MintedSuccessful {...mintedData} />
+          {mintedData || isOwner ? (
+            <MintedSuccessful isOwner={isOwner} {...mintedData} />
           ) : (
             <StepGroup onMinted={setMintedData} />
           )}

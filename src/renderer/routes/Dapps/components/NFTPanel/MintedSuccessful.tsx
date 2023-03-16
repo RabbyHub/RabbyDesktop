@@ -30,10 +30,11 @@ const LabelButton = ({
   );
 };
 
-export const MintedSuccessful: React.FC<MintedData> = ({
-  contractAddress,
-  nftId,
-}) => {
+export const MintedSuccessful: React.FC<
+  Partial<MintedData> & {
+    isOwner?: boolean;
+  }
+> = ({ contractAddress, tokenId, isOwner } = {}) => {
   return (
     <div className="m-auto">
       <h1
@@ -42,8 +43,14 @@ export const MintedSuccessful: React.FC<MintedData> = ({
           'text-white text-[20px]'
         )}
       >
-        <span className="text-[26px]">🎉</span>
-        <span>Mint successfully #{nftId}</span>
+        {isOwner ? (
+          'YOU ARE THE OWNER OF THIS NFT'
+        ) : (
+          <>
+            <span className="text-[26px]">🎉</span>
+            <span>Mint successfully #{tokenId}</span>
+          </>
+        )}
       </h1>
 
       <section
@@ -53,7 +60,7 @@ export const MintedSuccessful: React.FC<MintedData> = ({
         )}
       >
         <LabelButton
-          to={`https://opensea.io/assets/${contractAddress}/${nftId}`}
+          to={`https://opensea.io/assets/${contractAddress}/${tokenId}`}
           icon="rabby-internal://assets/icons/mint/opensea.svg"
           label="OpenSea"
         />

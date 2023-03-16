@@ -64,12 +64,12 @@ export const StepGroup: React.FC<Props> = ({ onMinted }) => {
     );
     if (mintedTx) {
       const nft = mintedTx.explain.balance_change.receive_nft_list[0];
-      const { inner_id, contract_id } = nft;
+      const { inner_id, contract_id, detail_url } = nft;
 
       onMinted({
-        nftId: inner_id,
-        hash: hashRef.current!,
+        tokenId: inner_id,
         contractAddress: contract_id,
+        detailUrl: detail_url,
       });
     } else {
       console.error(
