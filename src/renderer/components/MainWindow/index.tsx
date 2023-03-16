@@ -1,5 +1,5 @@
 import {
-  createMemoryRouter as createRouter,
+  createHashRouter as createRouter,
   RouterProvider,
   Outlet,
   Navigate,
