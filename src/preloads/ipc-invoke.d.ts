@@ -191,9 +191,7 @@ type ChannelInvokePayload = {
   };
   'safe-open-dapp-tab': {
     send: [dappOrigin: string];
-    response: {
-      shouldNavTabOnClient: boolean;
-    };
+    response: ISafeOpenDappTabResult;
   };
   'fetch-dapp-last-open-infos': {
     send: [];

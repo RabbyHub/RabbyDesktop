@@ -399,3 +399,11 @@ type IRabbyxInfo = {
   userId?: string;
   requesterIsRabbyx: boolean;
 };
+
+type ISafeOpenDappTabResult = {
+  shouldNavTabOnClient: boolean;
+  isOpenExternal: boolean;
+  isTargetDapp?: boolean;
+  isTargetDappByOrigin?: boolean;
+  isTargetDappBySecondaryOrigin?: boolean;
+};
