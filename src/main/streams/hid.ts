@@ -64,6 +64,11 @@ getSessionInsts().then(({ mainSession }) => {
       // leave here for debug
       // console.debug('[debug] select-hid-device:: details', details);
 
+      if (details.deviceList.length === 1) {
+        callback(details.deviceList[0].deviceId);
+        return;
+      }
+
       const selectId = randString();
       SelectSubject.next({ selectId, status: 'pending' });
 
