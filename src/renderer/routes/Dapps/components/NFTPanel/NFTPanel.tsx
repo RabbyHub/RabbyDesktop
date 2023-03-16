@@ -44,14 +44,16 @@ export const NFTPanel = () => {
     );
   }, [checkMinted, checkEndDateTime]);
 
-  const visible = !isMinted && !isEventEnd;
+  const visible = !isEventEnd;
 
   return (
     <Hide unmountOnExit visible={visible}>
       <div
         className={classNames(
-          'flex fixed w-[64vw] inset-[20px] top-auto mx-auto rounded-[8px]',
-          'bg-[#2D313E] text-white shadow overflow-hidden'
+          'flex fixed w-[933px] top-auto mx-auto rounded-[8px]',
+          'bg-[#2D313E] text-white shadow overflow-hidden',
+          isMinted ? 'w-[755px] inset-[50px]' : 'w-[933px] inset-[20px]',
+          'transition-all duration-300 ease-in-out'
         )}
       >
         <div
@@ -66,8 +68,10 @@ export const NFTPanel = () => {
           <img
             src="https://via.placeholder.com/150"
             className={classNames(
-              'w-[112px] h-[112px] rounded-[4px]',
-              'object-cover'
+              'rounded-[4px]',
+              'object-cover',
+              isMinted ? 'w-[64px] h-[64px]' : 'w-[112px] h-[112px]',
+              'transition-all duration-300 ease-in-out'
             )}
           />
           <div
@@ -86,7 +90,7 @@ export const NFTPanel = () => {
               </h2>
               <p
                 className={classNames(
-                  'flex items-center',
+                  'flex items-center m-0',
                   'text-[14px] font-medium opacity-60'
                 )}
               >
@@ -100,21 +104,23 @@ export const NFTPanel = () => {
                 <div>Time limited</div>
               </p>
             </div>
-            <footer
-              className={classNames(
-                'items-center flex',
-                'text-[12px] font-medium opacity-60'
-              )}
-            >
-              <span>Powered by zora</span>
-              <span className={classNames('ml-[5px]')}>
-                <Tooltip
-                  title={`A ${ZORE_MINT_FEE}ETH fee goes to Zora for each mint.`}
-                >
-                  <img src="rabby-internal://assets/icons/mint/icon-help.svg" />
-                </Tooltip>
-              </span>
-            </footer>
+            {isMinted ? null : (
+              <footer
+                className={classNames(
+                  'items-center flex',
+                  'text-[12px] font-medium opacity-60'
+                )}
+              >
+                <span>Powered by zora</span>
+                <span className={classNames('ml-[5px]')}>
+                  <Tooltip
+                    title={`A ${ZORE_MINT_FEE}ETH fee goes to Zora for each mint.`}
+                  >
+                    <img src="rabby-internal://assets/icons/mint/icon-help.svg" />
+                  </Tooltip>
+                </span>
+              </footer>
+            )}
           </div>
         </div>
         <div className={classNames('p-[15px] flex-1 flex item-center')}>
