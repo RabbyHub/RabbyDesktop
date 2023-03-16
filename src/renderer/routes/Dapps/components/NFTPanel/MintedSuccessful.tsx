@@ -30,11 +30,11 @@ const LabelButton = ({
   );
 };
 
-export const MintedSuccessful: React.FC<
-  Partial<MintedData> & {
-    isOwner?: boolean;
-  }
-> = ({ contractAddress, tokenId, isOwner } = {}) => {
+export const MintedSuccessful: React.FC<Partial<MintedData>> = ({
+  contractAddress,
+  tokenId,
+  isOwner,
+} = {}) => {
   return (
     <div className="m-auto">
       <h1

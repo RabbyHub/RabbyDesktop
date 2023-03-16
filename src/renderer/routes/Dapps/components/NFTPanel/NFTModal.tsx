@@ -50,7 +50,7 @@ export const NFTModal: React.FC<Props> = ({ onClose, ...props }) => {
     >
       <div className="flex flex-col text-white overflow-hidden rounded-[8px]">
         <img
-          src="https://via.placeholder.com/500"
+          src="rabby-internal://assets/icons/mint/nft.svg"
           className="object-cover h-[368px]"
         />
 

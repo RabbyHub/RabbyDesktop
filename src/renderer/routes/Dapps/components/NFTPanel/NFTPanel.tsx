@@ -8,28 +8,18 @@ import { StepGroup } from './StepGroup';
 import { MintedData, ZORE_MINT_FEE } from './util';
 
 export const NFTPanel = () => {
-  const [isMinted, setIsMinted] = React.useState(false);
   const [isEventEnd, setIsEventEnd] = React.useState(false);
   const [total, setTotal] = React.useState(0);
   const [mintedData, setMintedData] = React.useState<MintedData>();
-  const [isOwner, setIsOwner] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(true);
 
   const checkMinted = React.useCallback(() => {
     setIsLoading(true);
 
     walletController.getMintedRabby().then((result) => {
-      setIsMinted(false);
       setMintedData(undefined);
-      setIsOwner(false);
 
-      if (!result) {
-        // nothing
-      } else if (result.isOwner) {
-        setIsMinted(true);
-        setIsOwner(true);
-      } else {
-        setIsMinted(true);
+      if (result) {
         setMintedData(result);
       }
 
@@ -69,8 +59,8 @@ export const NFTPanel = () => {
       <div
         className={classNames(
           'flex fixed w-[933px] top-auto mx-auto rounded-[8px]',
-          'bg-[#2D313E] text-white shadow overflow-hidden',
-          isMinted ? 'w-[755px] inset-[50px]' : 'w-[933px] inset-[20px]',
+          'bg-[#2D313E] text-white shadow-xl overflow-hidden',
+          mintedData ? 'w-[755px] inset-[50px]' : 'w-[933px] inset-[20px]',
           'transition-all duration-300 ease-in-out'
         )}
       >
@@ -84,11 +74,11 @@ export const NFTPanel = () => {
           }}
         >
           <img
-            src="https://via.placeholder.com/150"
+            src="rabby-internal://assets/icons/mint/nft.svg"
             className={classNames(
               'rounded-[4px]',
               'object-cover',
-              isMinted ? 'w-[64px] h-[64px]' : 'w-[112px] h-[112px]',
+              mintedData ? 'w-[64px] h-[64px]' : 'w-[112px] h-[112px]',
               'transition-all duration-300 ease-in-out'
             )}
           />
@@ -101,7 +91,8 @@ export const NFTPanel = () => {
               <h2
                 className={classNames(
                   'mb-[9px]',
-                  'text-[20px] font-bold text-white'
+                  'text-[20px] text-white',
+                  mintedData ? 'font-medium' : 'font-bold'
                 )}
               >
                 Rabby Desktop Genesis
@@ -122,7 +113,7 @@ export const NFTPanel = () => {
                 <div>Time limited</div>
               </p>
             </div>
-            {isMinted ? null : (
+            {mintedData ? null : (
               <footer
                 className={classNames(
                   'items-center flex',
@@ -142,8 +133,8 @@ export const NFTPanel = () => {
           </div>
         </div>
         <div className={classNames('p-[15px] flex-1 flex item-center')}>
-          {mintedData || isOwner ? (
-            <MintedSuccessful isOwner={isOwner} {...mintedData} />
+          {mintedData ? (
+            <MintedSuccessful {...mintedData} />
           ) : (
             <StepGroup onMinted={setMintedData} />
           )}
