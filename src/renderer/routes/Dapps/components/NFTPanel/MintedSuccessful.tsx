@@ -48,7 +48,7 @@ export const MintedSuccessful: React.FC<Partial<MintedData>> = ({
         ) : (
           <>
             <span className="text-[26px]">🎉</span>
-            <span>Mint successfully #{tokenId}</span>
+            <span>Mint successfully {tokenId ? `#${tokenId}` : ''}</span>
           </>
         )}
       </h1>
@@ -60,7 +60,7 @@ export const MintedSuccessful: React.FC<Partial<MintedData>> = ({
         )}
       >
         <LabelButton
-          to={`https://opensea.io/assets/${contractAddress}/${tokenId}`}
+          to={`https://opensea.io/assets/${contractAddress}/${tokenId ?? ''}`}
           icon="rabby-internal://assets/icons/mint/opensea.svg"
           label="OpenSea"
         />

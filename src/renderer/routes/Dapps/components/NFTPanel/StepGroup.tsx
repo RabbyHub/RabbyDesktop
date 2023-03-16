@@ -63,14 +63,22 @@ export const StepGroup: React.FC<Props> = ({ onMinted }) => {
       txs.find(({ hash }) => hash === hashRef.current)
     );
     if (mintedTx) {
-      const nft = mintedTx.explain.balance_change.receive_nft_list[0];
-      const { inner_id, contract_id, detail_url } = nft;
+      const nft = mintedTx.explain?.balance_change?.receive_nft_list?.[0];
+      if (nft) {
+        const { inner_id, contract_id, detail_url } = nft;
 
-      onMinted({
-        tokenId: inner_id,
-        contractAddress: contract_id,
-        detailUrl: detail_url,
-      });
+        onMinted({
+          tokenId: inner_id,
+          contractAddress: contract_id,
+          detailUrl: detail_url,
+        });
+      } else {
+        onMinted({
+          tokenId: '',
+          contractAddress: '',
+          detailUrl: '',
+        });
+      }
     } else {
       console.error(
         `Can't find tx with hash ${hashRef.current}, account: ${accountAddress}`
