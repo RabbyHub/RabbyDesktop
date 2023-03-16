@@ -306,6 +306,10 @@ const configurationShell: webpack.Configuration = {
           ),
           to: path.join(webpackPaths.assetsPath, 'desktop_shell/manifest.json'),
         },
+        {
+          from: path.join(webpackPaths.distExtsPath, 'rabby/vendor/matomo.client.js'),
+          to: path.join(webpackPaths.assetsPath, 'desktop_shell/vendor/'),
+        }
       ],
     }),
   ],

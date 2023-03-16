@@ -6,16 +6,14 @@ import { injectBrowserAction } from '@rabby-wallet/electron-chrome-extensions/di
 
 // to injectExtensionAPIs on chrome-extension://
 import '@rabby-wallet/electron-chrome-extensions/dist/preload';
-import {
-  RABBY_INTERNAL_PROTOCOL,
-  RABBY_LOCAL_URLBASE,
-} from 'isomorphic/constants';
+
 import { ipcRendererObj, rendererHelpers } from '../preloads/base';
 import pkgjson from '../../package.json';
 
 import { setupClass } from '../preloads/setup-class';
 import { setupDapp } from '../preloads/setup-dapp';
-import { isExtensionBackground } from '../isomorphic/url';
+import { getBuiltinViewType, isExtensionBackground } from '../isomorphic/url';
+import { injectMatomo } from '../preloads/global-inject';
 
 if (
   window.location.protocol === 'chrome-extension:' &&
@@ -25,10 +23,7 @@ if (
   injectBrowserAction();
 }
 
-const IS_BUILTIN_WEBVIEW =
-  ['chrome-extension:', RABBY_INTERNAL_PROTOCOL].includes(
-    window.location.protocol
-  ) || window.location.href.startsWith(RABBY_LOCAL_URLBASE);
+const IS_BUILTIN_WEBVIEW = !!getBuiltinViewType(window.location);
 
 if (IS_BUILTIN_WEBVIEW && !window.rabbyDesktop) {
   try {
@@ -63,6 +58,7 @@ if (IS_BUILTIN_WEBVIEW && !window.rabbyDesktop) {
 
 if (IS_BUILTIN_WEBVIEW) {
   setupClass();
+  injectMatomo();
 }
 
 setupDapp();

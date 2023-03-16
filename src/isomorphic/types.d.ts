@@ -393,3 +393,9 @@ type IPopupViewChanges<
 type IDappLastOpenInfo = {
   finalURL: string;
 };
+
+type IRabbyxInfo = {
+  rabbyxExtId: string;
+  userId?: string;
+  requesterIsRabbyx: boolean;
+};

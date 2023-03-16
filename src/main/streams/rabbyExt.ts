@@ -19,7 +19,7 @@ import {
   onMainWindowReady,
   __internalToggleRabbyxGasketMask,
 } from '../utils/stream-helpers';
-import { rabbyxQuery } from './rabbyIpcQuery/_base';
+import { rabbyxExecuteJs, rabbyxQuery } from './rabbyIpcQuery/_base';
 import { createPopupView } from '../utils/browser';
 
 onIpcMainEvent('rabby-extension-id', async (event) => {
@@ -162,5 +162,32 @@ onIpcMainInternalEvent('__internal_main:dev', async (payload) => {
 handleIpcMainInvoke('rabbyx:get-app-version', (_) => {
   return {
     version: app.getVersion(),
+  };
+});
+
+handleIpcMainInvoke('get-rabbyx-info', async (evt) => {
+  const rabbyxExtId = await getRabbyExtId();
+  const currentURL = evt.sender.getURL();
+
+  if (isRabbyXPage(currentURL, rabbyxExtId)) {
+    return { rabbyxExtId, requesterIsRabbyx: true, userId: undefined };
+  }
+
+  const result = await rabbyxExecuteJs<{ extensionId?: string } | null>(`
+  ;(async () => {
+    const result = await new Promise((resolve) => {
+      chrome.storage.local.get('extensionId', function(res) {
+        resolve(res);
+      });
+    });
+
+    return result;
+  })();
+  `);
+
+  return {
+    rabbyxExtId,
+    requesterIsRabbyx: false,
+    userId: result?.extensionId,
   };
 });
