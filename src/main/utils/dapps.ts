@@ -1,22 +1,19 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 
 import { format as urlFormat } from 'url';
+import { last } from 'lodash';
 import Axios, { AxiosError, AxiosProxyConfig } from 'axios';
 import LRUCache from 'lru-cache';
 import { BrowserWindow, nativeImage } from 'electron';
-
-import { unfurl } from 'unfurl.js';
-import nodeFetch from 'node-fetch';
-import createHttpsProxyAgent from 'https-proxy-agent';
-
 import { waitForMS } from '@/isomorphic/date';
-import {
-  canoicalizeDappUrl,
-  formatAxiosProxyConfig,
-} from '../../isomorphic/url';
+import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { fetchImageBuffer, parseWebsiteFavicon } from './fetch';
 import { AxiosElectronAdapter } from './axios';
-import { checkUrlViaBrowserView, CHROMIUM_NET_ERR_DESC } from './appNetwork';
+import {
+  checkUrlViaBrowserView,
+  CHROMIUM_NET_ERR_DESC,
+  MetaData,
+} from './appNetwork';
 import { createPopupWindow } from './browser';
 
 const DFLT_TIMEOUT = 8 * 1e3;
@@ -152,9 +149,14 @@ const findLargestFavIcon = (
      * link 的 sizes 字段可以写多个长宽比，以空格拆分，且 100x100 和 100X100 都是合法的
      * 这里无脑认为 link 的图标都是 1:1 的，且取 x 之前的宽度来计算
      * */
-    const maxSize = Math.max(
+    let maxSize = Math.max(
       ...sizes.map((s) => Number(s.toLowerCase().split('x')[0] || 0))
     );
+    const ext = last(icon.href.split('.'));
+    if (ext && ext !== 'ico') {
+      // 因为 .ico 文件不能转 base64，所以给非 ico 文件加权，确保同尺寸时取非 ico 文件做 favicon
+      maxSize += 1;
+    }
     if (!largest) {
       largest = {
         href: icon.href,
@@ -195,37 +197,14 @@ export async function detectDapp(
   }
   const formattedTargetURL = urlFormat(dappOriginInfo);
   let fallbackFavicon: string | undefined;
-
-  const [checkResult, targetMetadata] = await Promise.all([
-    await checkUrlViaBrowserView(formattedTargetURL, {
-      onPageFaviconUpdated: (favicons) => {
-        fallbackFavicon = findLargestFavIcon(favicons);
-      },
-      timeout: DFLT_TIMEOUT,
-    }),
-    await unfurl(formattedTargetURL, {
-      fetch: async (url) => {
-        const agent = proxyOnGrab
-          ? createHttpsProxyAgent(formatAxiosProxyConfig(proxyOnGrab))
-          : undefined;
-
-        return nodeFetch(url, {
-          headers: {
-            Accept: 'text/html, application/xhtml+xml',
-            'User-Agent': 'facebookexternalhit',
-          },
-          follow: 100,
-          size: 0, // no limit
-          timeout: DFLT_TIMEOUT,
-          agent,
-        });
-      },
-    }).catch((err) => {
-      console.debug(`[detectDapp] unfurl error occured`);
-      console.error(err);
-      return null;
-    }),
-  ]);
+  let targetMetadata: MetaData | undefined;
+  const checkResult = await checkUrlViaBrowserView(formattedTargetURL, {
+    onMetaDataUpdated: (meta) => {
+      fallbackFavicon = findLargestFavIcon(meta.favicons);
+      targetMetadata = meta;
+    },
+    timeout: DFLT_TIMEOUT,
+  });
 
   const isCertErr = !checkResult.valid && !!checkResult.certErrorDesc;
 
@@ -287,17 +266,16 @@ export async function detectDapp(
     isFinalExistedDapp: !!repeatedFinalDapp,
     icon: null,
     recommendedAlias:
-      targetMetadata?.open_graph?.site_name ||
-      targetMetadata?.open_graph?.title ||
+      targetMetadata?.og?.site_name ||
+      targetMetadata?.og?.title ||
       targetMetadata?.twitter_card?.site ||
       targetMetadata?.twitter_card?.title ||
       targetMetadata?.title ||
       inputCoreName,
     faviconUrl:
       fallbackFavicon ||
-      targetMetadata?.favicon ||
-      targetMetadata?.open_graph?.images?.[0]?.url ||
-      targetMetadata?.twitter_card?.images?.[0]?.url,
+      targetMetadata?.og?.image ||
+      targetMetadata?.twitter_card?.image,
     faviconBase64: undefined,
   };
 
@@ -321,7 +299,7 @@ export async function detectDapp(
     const { iconInfo, faviconUrl, faviconBase64 } = await parseWebsiteFavicon(
       finalOrigin,
       {
-        timeout: DFLT_TIMEOUT,
+        timeout: 3000, // 如果之前的流程取不到 favicon，这里大概率也取不到，所以直接 3s 超时即可
         proxy: proxyOnGrab,
       }
     );
@@ -331,7 +309,7 @@ export async function detectDapp(
     data.faviconBase64 = faviconBase64;
   } else if (!data.faviconBase64) {
     await fetchImageBuffer(data.faviconUrl, {
-      timeout: DFLT_TIMEOUT,
+      timeout: 3000, // base64 非必须，3s 取不到直接超时就好
       proxy: proxyOnGrab,
     })
       .then((faviconBuf) => {
