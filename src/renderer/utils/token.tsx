@@ -5,8 +5,10 @@ import { TokenItem } from '@debank/rabby-api/dist/types';
 import { Contract, providers } from 'ethers';
 import { hexToString } from 'web3-utils';
 import styled from 'styled-components';
+import LabelWithIcon from '@/renderer/components/LabelWithIcon';
 import TokensIcons from '../routes/Home/components/TokenIcons';
 import { formatUsdValue } from './number';
+import { getCollectionDisplayName, PortfolioItemNft } from './nft';
 
 export const ellipsisTokenSymbol = (text: string, length = 5) => {
   if (text.length <= length) return text;
@@ -266,11 +268,16 @@ export const validateToken = async <
   }
 };
 
-export function wrapUrlInImg(url: string, alt?: string, size?: number) {
+export function wrapUrlInImg(
+  url: string,
+  alt?: string,
+  size?: number,
+  style?: React.CSSProperties
+) {
   return (
     <img
       src={url}
-      style={{ width: size || 20, height: size || 20 }}
+      style={{ ...style, width: size || 20, height: size || 20 }}
       alt={alt || ''}
       onError={(ev) => {
         // @ts-ignore
@@ -281,13 +288,17 @@ export function wrapUrlInImg(url: string, alt?: string, size?: number) {
   );
 }
 
-export const wrapUrlInImgOrDefault = (url?: string, size?: number) => {
+export const wrapUrlInImgOrDefault = (
+  url?: string,
+  size?: number,
+  style?: React.CSSProperties
+) => {
   return url ? (
-    wrapUrlInImg(url, undefined, size)
+    wrapUrlInImg(url, undefined, size, style)
   ) : (
     <img
       src="rabby-internal://assets/icons/common/token-default.svg"
-      style={{ width: size || 20, height: size || 20 }}
+      style={{ ...style, width: size || 20, height: size || 20 }}
     />
   );
 };
@@ -307,18 +318,26 @@ const DebtTag = styled.div`
 export function getTokens(
   tokens: TokenItem[] = [],
   separator = ' + ',
-  isDebt = false
+  isDebt = false,
+  nfts?: PortfolioItemNft[]
 ) {
   const tokenStr = tokens
     .filter((item) => !!item)
     .map((token) => ellipsisTokenSymbol(token.symbol))
     .join(separator);
+  const nftStr = nfts
+    ?.map((n) => getCollectionDisplayName(n.collection))
+    .join(separator);
+  const label = nftStr ? nftStr + separator + tokenStr : tokenStr;
   const icon = (
-    <TokensIcons tokens={tokenStr} icons={tokens.map((v) => v?.logo_url)} />
+    <TokensIcons
+      icons={tokens.map((v) => v?.logo_url)}
+      nftIcons={nfts?.map((n) => n.collection?.logo_url)}
+    />
   );
   return (
     <div className="flex items-center flex-wrap">
-      {icon}
+      <LabelWithIcon label={label} icon={icon} />
       {isDebt && <DebtTag>Debt</DebtTag>}
     </div>
   );

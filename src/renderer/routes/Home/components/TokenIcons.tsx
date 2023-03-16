@@ -24,16 +24,20 @@ const TokenIconsWrapper = styled.div`
 const TokensIcons = React.memo(
   (props: {
     icons: (string | undefined)[] | (string | undefined);
+    nftIcons?: (string | undefined)[];
     width?: number;
     margin?: number;
-    tokens?: string;
   }) => {
-    const { icons: _icons, width: defaultWidth = 18, tokens } = props;
+    const { icons: _icons, width: defaultWidth = 18 } = props;
     const margin = props.margin ?? 6;
     const icons = Array.isArray(_icons) ? _icons : [_icons];
-    const width = (defaultWidth ? defaultWidth / 2 : 10) + margin / 2;
-    const imgs = icons.map((v) => wrapUrlInImgOrDefault(v, defaultWidth));
-    const containerWidth = 2 * width + (imgs.length - 1) * width;
+    const { nftIcons } = props;
+    const imgs = [
+      ...(nftIcons ?? []).map((n) =>
+        wrapUrlInImgOrDefault(n, defaultWidth, { borderRadius: 4 })
+      ),
+      ...icons.map((v) => wrapUrlInImgOrDefault(v, defaultWidth)),
+    ];
     return (
       <TokenIconsWrapper className="tokenIcons">
         {imgs.map((v, i) => (
@@ -41,13 +45,6 @@ const TokensIcons = React.memo(
             {v}
           </div>
         ))}
-        <div
-          style={{
-            marginLeft: '5px',
-          }}
-        >
-          {tokens}
-        </div>
       </TokenIconsWrapper>
     );
   }
