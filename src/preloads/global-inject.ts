@@ -32,7 +32,7 @@ export async function injectMatomo() {
 
   const u = 'https://matomo.debank.com/';
   _paq.push(['setTrackerUrl', `${u}matomo.php`]);
-  _paq.push(['setSiteId', '2']);
+  _paq.push(['setSiteId', '4']);
   if (userId) {
     _paq.push(['setVisitorId', userId]);
   }
