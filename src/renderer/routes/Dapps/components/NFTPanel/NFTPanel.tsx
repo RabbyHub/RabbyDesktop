@@ -9,6 +9,7 @@ import { MintedData, useZoraMintFee } from './util';
 
 export const NFTPanel = () => {
   const [isMinted, setIsMinted] = React.useState(true);
+  const [isEventEnd, setIsEventEnd] = React.useState(false);
   const [total, setTotal] = React.useState(0);
   const fee = useZoraMintFee();
   const [mintedData, setMintedData] = React.useState<MintedData>();
@@ -19,9 +20,19 @@ export const NFTPanel = () => {
     });
   }, []);
 
+  const checkEndDateTime = React.useCallback(() => {
+    walletController.mintedRabbyEndDateTime().then((result) => {
+      if (!result) return;
+      const endDateTime = new Date(result);
+      const now = new Date();
+
+      setIsEventEnd(now > endDateTime);
+    });
+  }, []);
+
   React.useEffect(() => {
     walletController.mintedRabbyTotal().then(setTotal);
-
+    checkEndDateTime();
     checkMinted();
     // watch account change and recheck
     return window.rabbyDesktop.ipcRenderer.on(
@@ -32,10 +43,12 @@ export const NFTPanel = () => {
         }
       }
     );
-  }, [checkMinted]);
+  }, [checkMinted, checkEndDateTime]);
+
+  const visible = !isMinted && !isEventEnd;
 
   return (
-    <Hide unmountOnExit visible={!isMinted}>
+    <Hide unmountOnExit visible={visible}>
       <div
         className={classNames(
           'flex fixed w-[64vw] inset-[20px] top-auto mx-auto rounded-[8px]',
