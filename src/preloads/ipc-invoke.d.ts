@@ -16,6 +16,10 @@ type ChannelInvokePayload = {
     send: [];
     response: IOSInfo;
   };
+  'get-rabbyx-info': {
+    send: [];
+    response: IRabbyxInfo;
+  };
   'detect-dapp': {
     send: [dappUrl: string];
     response: {
