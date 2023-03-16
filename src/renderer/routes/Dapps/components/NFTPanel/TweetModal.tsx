@@ -49,6 +49,7 @@ export const TweetModal: React.FC<Props> = ({ onClose, ...props }) => {
       <div className="text-[16px] leading-[22px] text-white pt-[50px] px-[30px]">
         {COLORFUL_TWEET_HTML.map((item) => (
           <p
+            key={item}
             // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{
               __html: item,

@@ -2,13 +2,15 @@ import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { Tooltip } from 'antd';
 import classNames from 'classnames';
 import React from 'react';
+import { MintedSuccessful } from './MintedSuccessful';
 import { StepGroup } from './StepGroup';
-import { useZoraMintFee } from './util';
+import { MintedData, useZoraMintFee } from './util';
 
 export const NFTPanel = () => {
   const [isMinted, setIsMinted] = React.useState(true);
   const [total, setTotal] = React.useState(0);
   const fee = useZoraMintFee();
+  const [mintedData, setMintedData] = React.useState<MintedData>();
 
   const checkMinted = React.useCallback(() => {
     walletController.isMintedRabby().then((result) => {
@@ -102,7 +104,11 @@ export const NFTPanel = () => {
         </div>
       </div>
       <div className={classNames('p-[15px] flex-1 flex item-center')}>
-        <StepGroup />
+        {mintedData ? (
+          <MintedSuccessful {...mintedData} />
+        ) : (
+          <StepGroup onMinted={setMintedData} />
+        )}
       </div>
     </div>
   );

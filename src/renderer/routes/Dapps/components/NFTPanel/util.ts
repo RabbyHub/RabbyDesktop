@@ -14,3 +14,9 @@ export const useZoraMintFee = () => {
 
   return fee;
 };
+
+export type MintedData = {
+  nftId: string;
+  hash: string;
+  contractAddress: string;
+};
