@@ -61,7 +61,7 @@ export const NFTPanel = () => {
             'bg-[#2D313E] bg-no-repeat bg-cover bg-right'
           )}
           style={{
-            backgroundImage: `url(rabby-internal://assets/icons/add-dapp/bg-arrow-right.svg)`,
+            backgroundImage: `url(rabby-internal://assets/icons/mint/bg-arrow-right.svg)`,
           }}
         >
           <img
@@ -110,7 +110,7 @@ export const NFTPanel = () => {
               <span>Powered by zora</span>
               <span className={classNames('ml-[5px]')}>
                 <Tooltip title={`A ${fee}ETH fee goes to Zora for each mint.`}>
-                  <img src="rabby-internal://assets/icons/add-dapp/icon-help.svg" />
+                  <img src="rabby-internal://assets/icons/mint/icon-help.svg" />
                 </Tooltip>
               </span>
             </footer>
