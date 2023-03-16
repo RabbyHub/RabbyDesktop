@@ -2,6 +2,7 @@ import { isBuiltinView } from '@/isomorphic/url';
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForwardTo } from '../hooks/useViewsMessage';
+import { matomoRequestEvent } from './matomo-request';
 
 export function useNavigateToDappRoute() {
   const navigate = useNavigate();
@@ -33,6 +34,12 @@ export function useOpenDapp() {
         .then(({ shouldNavTabOnClient }) => {
           if (shouldNavTabOnClient) {
             navigateToDapp(dappUrl);
+            // todo: 判断是否是 dapp，判断是打开 dapp 还是 切换 tab。
+            matomoRequestEvent({
+              category: 'My Dapp',
+              action: 'Visit Dapp',
+              label: dappUrl,
+            });
           }
         });
     },
