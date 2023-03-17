@@ -231,6 +231,7 @@ onIpcMainEvent(
     if (mainTabbedWin.window.id !== winId) return;
 
     await clearCaptureState();
+    mainTabbedWin.tabs.select(tabId);
     mainTabbedWin.tabs.checkLoadingView();
     getLatestCapturedActiveTab();
   }

@@ -136,6 +136,13 @@ export async function safeOpenURL(
           currentInfo.is2ndaryDomain ||
           currentInfo.isWWWSubDomain ||
           targetInfo.secondaryDomain !== currentInfo.secondaryDomain;
+
+        const openedTabURL = foundOpenedTab.view?.webContents.getURL();
+        if (!shouldLoad && openedTabURL) {
+          const openedSecondaryDomain =
+            canoicalizeDappUrl(openedTabURL).secondaryDomain;
+          shouldLoad = targetInfo.secondaryDomain === openedSecondaryDomain;
+        }
       }
 
       return {
