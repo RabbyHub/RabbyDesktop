@@ -6,11 +6,12 @@ import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { useOnTxFinished } from '@/renderer/routes/SendToken/hooks';
 import { ellipsis } from '@/renderer/utils/address';
 import classNames from 'classnames';
+import { useAtom } from 'jotai';
 import React from 'react';
 import { NFTModal } from './NFTModal';
 import { Step } from './Step';
 import { TweetModal } from './TweetModal';
-import { MintedData } from './util';
+import { isTweetAtom, MintedData } from './util';
 
 interface Props {
   onMinted: (params: MintedData) => void;
@@ -24,7 +25,7 @@ export const StepGroup: React.FC<Props> = ({ onMinted }) => {
   const [isMinting, setIsMinting] = React.useState(false);
   const { currentAccount } = useCurrentAccount();
   const [isAddDapp, setIsAddDapp] = React.useState(false);
-  const [isTweet, setIsTweet] = React.useState(false);
+  const [isTweet, setIsTweet] = useAtom(isTweetAtom);
 
   // 1. add dapp, then listen dapps length change to next step
   const onAddDapp = React.useCallback(() => {
@@ -32,9 +33,7 @@ export const StepGroup: React.FC<Props> = ({ onMinted }) => {
   }, []);
 
   React.useEffect(() => {
-    if (dapps.length > 0) {
-      setIsAddDapp(true);
-    }
+    setIsAddDapp(dapps.length > 0);
   }, [dapps]);
 
   // 2. tweet, then listen send tweet to next step
@@ -42,10 +41,13 @@ export const StepGroup: React.FC<Props> = ({ onMinted }) => {
     setOpenTweetModal(true);
   }, []);
 
-  const handleCloseTweetModal = React.useCallback((result: boolean) => {
-    setOpenTweetModal(false);
-    setIsTweet(result);
-  }, []);
+  const handleCloseTweetModal = React.useCallback(
+    (result: boolean) => {
+      setOpenTweetModal(false);
+      setIsTweet(result);
+    },
+    [setIsTweet]
+  );
 
   // 3. mint, then listen tx finished to show minted successful
   const onMint = React.useCallback(() => {

@@ -1,10 +1,11 @@
 import Hide from '@/renderer/components/MainWindow/Hide';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import classNames from 'classnames';
+import { useAtom } from 'jotai';
 import React from 'react';
 import { MintedSuccessful } from './MintedSuccessful';
 import { StepGroup } from './StepGroup';
-import { MintedData } from './util';
+import { isTweetAtom, MintedData } from './util';
 import { ZoraTip } from './ZoraTip';
 
 export const NFTPanel = () => {
@@ -12,6 +13,7 @@ export const NFTPanel = () => {
   const [total, setTotal] = React.useState(0);
   const [mintedData, setMintedData] = React.useState<MintedData>();
   const [isLoading, setIsLoading] = React.useState(true);
+  const [, setIsTweet] = useAtom(isTweetAtom);
 
   const checkMinted = React.useCallback(() => {
     setIsLoading(true);
@@ -47,10 +49,11 @@ export const NFTPanel = () => {
       (payload) => {
         if (payload.event === 'accountsChanged') {
           checkMinted();
+          setIsTweet(false);
         }
       }
     );
-  }, [checkMinted, checkEndDateTime]);
+  }, [checkMinted, checkEndDateTime, setIsTweet]);
 
   const visible = !isLoading && !isEventEnd;
 
