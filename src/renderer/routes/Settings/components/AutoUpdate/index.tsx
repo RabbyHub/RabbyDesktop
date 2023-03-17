@@ -4,8 +4,9 @@ import style from './index.module.less';
 
 interface AutoUpdateProps {
   isFold?: boolean;
+  className?: string;
 }
-export const AutoUpdate = ({ isFold }: AutoUpdateProps) => {
+export const AutoUpdate = ({ isFold, className }: AutoUpdateProps) => {
   const {
     releaseCheckInfo,
     isDownloading,
@@ -21,7 +22,13 @@ export const AutoUpdate = ({ isFold }: AutoUpdateProps) => {
 
   if (isDownloading) {
     return (
-      <div className={classNames(style.autoUpdate, isFold && style.isFold)}>
+      <div
+        className={classNames(
+          style.autoUpdate,
+          className,
+          isFold && style.isFold
+        )}
+      >
         <div className="auto-update is-downloading">
           <img
             src="rabby-internal://assets/icons/update/downloading.svg"
@@ -44,7 +51,13 @@ export const AutoUpdate = ({ isFold }: AutoUpdateProps) => {
   }
   if (isDownloaded) {
     return (
-      <div className={classNames(style.autoUpdate, isFold && style.isFold)}>
+      <div
+        className={classNames(
+          style.autoUpdate,
+          className,
+          isFold && style.isFold
+        )}
+      >
         <div
           className="auto-update is-downloaded"
           onClick={(evt) => {
@@ -63,7 +76,13 @@ export const AutoUpdate = ({ isFold }: AutoUpdateProps) => {
     );
   }
   return (
-    <div className={classNames(style.autoUpdate, isFold && style.isFold)}>
+    <div
+      className={classNames(
+        style.autoUpdate,
+        className,
+        isFold && style.isFold
+      )}
+    >
       <div
         className="auto-update"
         onClick={(evt) => {

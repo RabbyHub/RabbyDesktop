@@ -22,3 +22,7 @@ export function validateProxyConfig(
     proxyConfig,
   });
 }
+
+export function getReleaseNoteByVersion(version?: string) {
+  return window.rabbyDesktop.ipcRenderer.invoke('get-release-note', version);
+}

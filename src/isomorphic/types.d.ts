@@ -159,10 +159,12 @@ type IAppUpdatorCheckResult =
   | {
       hasNewRelease: true;
       releaseVersion: string;
+      releaseNote: string;
     }
   | {
       hasNewRelease: false;
       releaseVersion: null;
+      releaseNote: null;
     };
 
 type IAppUpdatorDownloadProgress =

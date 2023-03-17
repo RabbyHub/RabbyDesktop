@@ -79,6 +79,7 @@ const releaseCheckInfoAtom = atom({
   releaseVersion: null,
 } as IAppUpdatorCheckResult);
 const downloadInfoAtom = atom(null as null | IAppUpdatorDownloadProgress);
+const isDownloadingAtom = atom(false);
 
 export function useCheckNewRelease(opts?: { isWindowTop?: boolean }) {
   const { isWindowTop } = opts || {};
@@ -118,22 +119,20 @@ export function useCheckNewRelease(opts?: { isWindowTop?: boolean }) {
 export function useAppUpdator() {
   const [releaseCheckInfo] = useAtom(releaseCheckInfoAtom);
   const [downloadInfo, setDownloadInfo] = useAtom(downloadInfoAtom);
-  const [isDownloading, setIsDownloading] = useState(
-    !!downloadInfo && !downloadInfo.isEnd
-  );
+  const [isDownloading, setIsDownloading] = useAtom(isDownloadingAtom);
 
   const onDownload: OnDownloadFunc = useCallback(
     (info) => {
       setDownloadInfo(info);
       setIsDownloading(!!info && !info.isEnd);
     },
-    [setDownloadInfo]
+    [setDownloadInfo, setIsDownloading]
   );
 
   const requestDownload = useCallback(async () => {
     await startDownload({ onDownload });
     setIsDownloading(true);
-  }, [onDownload]);
+  }, [onDownload, setIsDownloading]);
 
   return {
     releaseCheckInfo,

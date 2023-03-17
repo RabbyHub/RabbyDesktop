@@ -200,6 +200,13 @@ type ChannelInvokePayload = {
       lastOpenInfos: Record<IDapp['id'], IDappLastOpenInfo>;
     };
   };
+  'get-release-note': {
+    send: [version?: string];
+    response: {
+      error?: string | null;
+      releaseNote: string;
+    };
+  };
   [`__internal_rpc:rabbyx-rpc:query`]: {
     send: [query: Omit<IRabbyxRpcQuery, 'rpcId'>];
     response: {
