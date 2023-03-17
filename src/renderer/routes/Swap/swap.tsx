@@ -642,9 +642,6 @@ export const Swap = () => {
             gasPrice: price,
             unlimited: !!unlimitedAllowance,
             shouldTwoStepApprove,
-            payAmount,
-            payToken,
-            receiveToken,
           },
           {
             ga: {

@@ -318,9 +318,6 @@ export type RabbyXMethod = {
       unlimited: boolean;
       gasPrice: number;
       shouldTwoStepApprove: boolean;
-      payAmount: string;
-      payToken: TokenItem;
-      receiveToken: TokenItem;
     },
     $ctx?: unknown
   ) => Promise<void>;
