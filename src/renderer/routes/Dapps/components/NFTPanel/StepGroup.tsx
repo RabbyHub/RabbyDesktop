@@ -16,13 +16,14 @@ interface Props {
 }
 
 export const StepGroup: React.FC<Props> = ({ onMinted }) => {
-  const [currentNo, setCurrentNo] = React.useState(1);
   const { dapps } = useTabedDapps();
   const [openTweetModal, setOpenTweetModal] = React.useState(false);
   const [openNFTModal, setOpenNFTModal] = React.useState(false);
   const hashRef = React.useRef<string>();
   const [isMinting, setIsMinting] = React.useState(false);
   const { currentAccount } = useCurrentAccount();
+  const [isAddDapp, setIsAddDapp] = React.useState(false);
+  const [isTweet, setIsTweet] = React.useState(false);
 
   // 1. add dapp, then listen dapps length change to next step
   const onAddDapp = React.useCallback(() => {
@@ -30,23 +31,19 @@ export const StepGroup: React.FC<Props> = ({ onMinted }) => {
   }, []);
 
   React.useEffect(() => {
-    if (currentNo === 1) {
-      if (dapps.length > 0) {
-        setCurrentNo(2);
-      }
+    if (dapps.length > 0) {
+      setIsAddDapp(true);
     }
-  }, [dapps, currentNo]);
+  }, [dapps]);
 
   // 2. tweet, then listen send tweet to next step
   const onTweet = React.useCallback(() => {
     setOpenTweetModal(true);
   }, []);
 
-  const handleCloseTweetModal = React.useCallback((isSendTweet: boolean) => {
+  const handleCloseTweetModal = React.useCallback((result: boolean) => {
     setOpenTweetModal(false);
-    if (isSendTweet) {
-      setCurrentNo(3);
-    }
+    setIsTweet(result);
   }, []);
 
   // 3. mint, then listen tx finished to show minted successful
@@ -119,8 +116,8 @@ export const StepGroup: React.FC<Props> = ({ onMinted }) => {
       <TweetModal open={openTweetModal} onClose={handleCloseTweetModal} />
       <NFTModal open={openNFTModal} onClose={handleCloseNFTModal} />
       <Step
-        currentNo={currentNo}
         no={1}
+        isDone={isAddDapp}
         title="Add a Dapp"
         buttonText="Add"
         onButtonClick={onAddDapp}
@@ -130,8 +127,8 @@ export const StepGroup: React.FC<Props> = ({ onMinted }) => {
         src="rabby-internal://assets/icons/mint/step-next.svg"
       />
       <Step
-        currentNo={currentNo}
         no={2}
+        isDone={isTweet}
         title="Share on Twitter"
         buttonText="Tweet"
         onButtonClick={onTweet}
@@ -142,7 +139,7 @@ export const StepGroup: React.FC<Props> = ({ onMinted }) => {
       />
 
       <Step
-        currentNo={currentNo}
+        disabled={!isTweet || !isAddDapp}
         no={3}
         title="Free Mint 1 NFT"
         buttonText={isMinting ? 'Minting' : 'Mint'}

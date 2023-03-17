@@ -3,25 +3,24 @@ import classNames from 'classnames';
 import React from 'react';
 
 export interface Props {
-  no: number;
   title: string;
   buttonText: string;
   onButtonClick: () => void;
-  currentNo: number;
   loading?: boolean;
+  isDone?: boolean;
+  no: number;
+  disabled?: boolean;
 }
 
 export const Step: React.FC<Props> = ({
   title,
   buttonText,
   onButtonClick,
-  no,
-  currentNo,
+  isDone,
   loading,
+  no,
+  disabled,
 }) => {
-  const notCurrent = currentNo !== no;
-  const isDone = currentNo > no;
-
   return (
     <div
       className={classNames('w-[126px] flex flex-col text-white text-center')}
@@ -38,10 +37,10 @@ export const Step: React.FC<Props> = ({
         {title}
       </h2>
       <Button
-        disabled={notCurrent}
+        disabled={disabled || isDone}
         loading={loading}
         className={classNames('w-[94px] h-[33px] mx-auto rounded-[4px]', {
-          'opacity-30': notCurrent,
+          'opacity-30': disabled || isDone,
         })}
         type="primary"
         onClick={onButtonClick}
