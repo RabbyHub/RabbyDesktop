@@ -4,7 +4,7 @@ import { AppUpdaterWin32, AppUpdaterDarwin } from '../updater/updater';
 import { IS_APP_PROD_BUILD } from '../utils/app';
 import { setSessionProxy } from '../utils/appNetwork';
 import { fetchText } from '../utils/fetch';
-import { onIpcMainEvent } from '../utils/ipcMainEvents';
+import { handleIpcMainInvoke, onIpcMainEvent } from '../utils/ipcMainEvents';
 import { getBindLog } from '../utils/log';
 import { getAppRuntimeProxyConf } from '../utils/stream-helpers';
 
@@ -140,4 +140,13 @@ onIpcMainEvent('quit-and-upgrade', async (event, reqid) => {
   event.reply('quit-and-upgrade', { reqid });
 
   autoUpdater.quitAndInstall();
+});
+
+handleIpcMainInvoke('get-release-note', async (event, version) => {
+  version = version || app.getVersion();
+
+  return {
+    error: null,
+    result: await getReleaseNote(version),
+  };
 });
