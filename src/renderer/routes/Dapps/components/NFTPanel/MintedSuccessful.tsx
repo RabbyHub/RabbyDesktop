@@ -41,11 +41,11 @@ export const MintedSuccessful: React.FC<Partial<MintedData>> = ({
     <div className="m-auto">
       <h1
         className={classNames(
-          'flex gap-[10px] flex-cols items-center mb-[12px]',
-          'text-white text-[20px]'
+          'relative flex gap-[10px] ml-[36px] flex-cols items-center mb-[9px]',
+          'text-white text-[20px] leading-[20px]'
         )}
       >
-        <span className="text-[26px]">🎉</span>
+        <span className="text-[26px] absolute left-[-36px]">🎉</span>
         <span>Mint successfully {tokenId ? `#${tokenId}` : ''}</span>
       </h1>
 

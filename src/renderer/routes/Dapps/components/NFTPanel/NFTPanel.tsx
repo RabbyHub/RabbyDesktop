@@ -1,11 +1,11 @@
 import Hide from '@/renderer/components/MainWindow/Hide';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
-import { Tooltip } from 'antd';
 import classNames from 'classnames';
 import React from 'react';
 import { MintedSuccessful } from './MintedSuccessful';
 import { StepGroup } from './StepGroup';
-import { MintedData, ZORE_MINT_FEE } from './util';
+import { MintedData } from './util';
+import { ZoraTip } from './ZoraTip';
 
 export const NFTPanel = () => {
   const [isEventEnd, setIsEventEnd] = React.useState(false);
@@ -84,7 +84,8 @@ export const NFTPanel = () => {
           />
           <div
             className={classNames(
-              'flex flex-col ml-16 py-[7px] justify-between'
+              'flex flex-col ml-16 py-[7px]',
+              mintedData ? 'justify-center' : 'justify-between'
             )}
           >
             <div>
@@ -121,13 +122,7 @@ export const NFTPanel = () => {
                 )}
               >
                 <span>Powered by zora</span>
-                <span className={classNames('ml-[5px]')}>
-                  <Tooltip
-                    title={`A ${ZORE_MINT_FEE}ETH fee goes to Zora for each mint.`}
-                  >
-                    <img src="rabby-internal://assets/icons/mint/icon-help.svg" />
-                  </Tooltip>
-                </span>
+                <ZoraTip />
               </footer>
             )}
           </div>

@@ -1,8 +1,9 @@
 import { Modal, Props as ModalProps } from '@/renderer/components/Modal/Modal';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
-import { Button, Tooltip } from 'antd';
+import { Button } from 'antd';
 import React from 'react';
 import { ZORE_MINT_FEE } from './util';
+import { ZoraTip } from './ZoraTip';
 
 interface Props extends ModalProps {
   onClose: (hash: string) => void;
@@ -47,6 +48,12 @@ export const NFTModal: React.FC<Props> = ({ onClose, ...props }) => {
       centered
       smallTitle
       onCancel={() => onClose(hash)}
+      closeIcon={
+        <img
+          className="icon close w-[16px]"
+          src="rabby-internal://assets/icons/mint/icon-close.svg"
+        />
+      }
     >
       <div className="flex flex-col text-white overflow-hidden rounded-[8px]">
         <img
@@ -65,13 +72,7 @@ export const NFTModal: React.FC<Props> = ({ onClose, ...props }) => {
               label={
                 <div className="flex items-center">
                   <span>Powered by zora</span>
-                  <span className="ml-[5px]">
-                    <Tooltip
-                      title={`A ${ZORE_MINT_FEE}ETH fee goes to Zora for each mint.`}
-                    >
-                      <img src="rabby-internal://assets/icons/mint/icon-help.svg" />
-                    </Tooltip>
-                  </span>
+                  <ZoraTip />
                 </div>
               }
               value={`${ZORE_MINT_FEE} ETH`}

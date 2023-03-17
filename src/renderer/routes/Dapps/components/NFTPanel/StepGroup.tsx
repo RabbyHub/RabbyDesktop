@@ -4,6 +4,7 @@ import { useTabedDapps } from '@/renderer/hooks/useDappsMngr';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { useOnTxFinished } from '@/renderer/routes/SendToken/hooks';
+import { ellipsis } from '@/renderer/utils/address';
 import classNames from 'classnames';
 import React from 'react';
 import { NFTModal } from './NFTModal';
@@ -19,7 +20,7 @@ export const StepGroup: React.FC<Props> = ({ onMinted }) => {
   const { dapps } = useTabedDapps();
   const [openTweetModal, setOpenTweetModal] = React.useState(false);
   const [openNFTModal, setOpenNFTModal] = React.useState(false);
-  const hashRef = React.useRef<string>();
+  const hashRef = React.useRef<string>('');
   const [isMinting, setIsMinting] = React.useState(false);
   const { currentAccount } = useCurrentAccount();
   const [isAddDapp, setIsAddDapp] = React.useState(false);
@@ -80,7 +81,7 @@ export const StepGroup: React.FC<Props> = ({ onMinted }) => {
 
       toastMessage({
         type: 'success',
-        content: `${hashRef.current} Minted successfully`,
+        content: `${ellipsis(hashRef.current)} Minted successfully`,
       });
     } else {
       console.error(

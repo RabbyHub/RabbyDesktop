@@ -8,6 +8,7 @@ export interface Props extends Omit<ModalProps, 'onCancel'> {
   onBack?: () => void;
   onCancel?: (e?: React.MouseEvent<HTMLElement>) => void;
   smallTitle?: boolean;
+  closeIcon?: React.ReactNode;
 }
 
 export const Modal: React.FC<Props> = ({
@@ -16,6 +17,7 @@ export const Modal: React.FC<Props> = ({
   subtitle,
   onBack,
   smallTitle,
+  closeIcon,
   ...props
 }) => {
   return (
@@ -28,10 +30,12 @@ export const Modal: React.FC<Props> = ({
       destroyOnClose
       footer={null}
       closeIcon={
-        <img
-          className="icon close"
-          src="rabby-internal://assets/icons/modal/close.svg"
-        />
+        closeIcon ?? (
+          <img
+            className="icon close"
+            src="rabby-internal://assets/icons/modal/close.svg"
+          />
+        )
       }
       title={
         (backable || title) && (
