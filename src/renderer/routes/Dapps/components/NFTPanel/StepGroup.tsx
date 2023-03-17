@@ -1,3 +1,4 @@
+import { toastMessage } from '@/renderer/components/TransparentToast';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { useTabedDapps } from '@/renderer/hooks/useDappsMngr';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
@@ -79,6 +80,11 @@ export const StepGroup: React.FC<Props> = ({ onMinted }) => {
           detailUrl: '',
         });
       }
+
+      toastMessage({
+        type: 'success',
+        content: `${hashRef.current} Minted successfully`,
+      });
     } else {
       console.error(
         `Can't find tx with hash ${hashRef.current}, account: ${accountAddress}`
