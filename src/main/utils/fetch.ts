@@ -28,6 +28,30 @@ function filterAxiosProxy(proxyConfig?: AxiosProxyConfig) {
   return resultConfig;
 }
 
+export async function fetchText(
+  targetURL: string,
+  options?: {
+    timeout?: number;
+    proxy?: AxiosProxyConfig;
+  }
+) {
+  // leave here for debug
+  // console.debug('[debug] fetchText:: targetURL', targetURL);
+
+  if (!targetURL) return '';
+
+  const { timeout: tmout = 2 * 1e3 } = options || {};
+  const axiosProxy = filterAxiosProxy(options?.proxy);
+
+  return fetchClient
+    .get(targetURL, {
+      timeout: tmout,
+      proxy: axiosProxy,
+      responseType: 'text',
+    })
+    .then((res) => res.data as string);
+}
+
 export async function fetchImageBuffer(
   iconURL: string,
   options?: {
@@ -43,14 +67,6 @@ export async function fetchImageBuffer(
 
   const { timeout: tmout = 2 * 1e3 } = options || {};
   const axiosProxy = filterAxiosProxy(options?.proxy);
-
-  if (axiosProxy && !IS_RUNTIME_PRODUCTION) {
-    console.debug(
-      `[debug] use proxy ${formatAxiosProxyConfig(
-        axiosProxy
-      )} on parsing favicon`
-    );
-  }
 
   await fetchClient
     .get(targetURL, {

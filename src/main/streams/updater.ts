@@ -1,11 +1,28 @@
 import { app } from 'electron';
+import { getAppProxyConfigForAxios } from '../store/desktopApp';
 import { AppUpdaterWin32, AppUpdaterDarwin } from '../updater/updater';
+import { IS_APP_PROD_BUILD } from '../utils/app';
 import { setSessionProxy } from '../utils/appNetwork';
+import { fetchText } from '../utils/fetch';
 import { onIpcMainEvent } from '../utils/ipcMainEvents';
 import { getBindLog } from '../utils/log';
 import { getAppRuntimeProxyConf } from '../utils/stream-helpers';
 
 const log = getBindLog('updater', 'bgGrey');
+
+async function getReleaseNote(version: string) {
+  const releaseNoteURLs = IS_APP_PROD_BUILD
+    ? {
+        markdown: `https://download.rabby.io/cdn-config/release_notes/${version}.md`,
+      }
+    : {
+        markdown: `https://download.rabby.io/cdn-config-pre/release_notes/${version}.md`,
+      };
+
+  return fetchText(releaseNoteURLs.markdown, {
+    proxy: getAppProxyConfigForAxios(),
+  }).catch(() => ''); // TODO: report error
+}
 
 let gAutoUpdater: AppUpdaterWin32 | AppUpdaterDarwin;
 
@@ -49,17 +66,19 @@ async function getAutoUpdater() {
 onIpcMainEvent('check-if-new-release', async (event, reqid) => {
   const autoUpdater = await getAutoUpdater();
 
-  autoUpdater.once('update-available', (info) => {
+  autoUpdater.once('update-available', async (info) => {
     event.reply('check-if-new-release', {
       reqid,
       ...(info
         ? {
             hasNewRelease: true,
             releaseVersion: info.version,
+            releaseNote: await getReleaseNote(info.version),
           }
         : {
             hasNewRelease: false,
             releaseVersion: null,
+            releaseNote: null,
           }),
     });
   });
@@ -68,6 +87,7 @@ onIpcMainEvent('check-if-new-release', async (event, reqid) => {
       reqid,
       hasNewRelease: false,
       releaseVersion: null,
+      releaseNote: null,
     });
   });
 
