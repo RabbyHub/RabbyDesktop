@@ -30,7 +30,7 @@ export const ChangeLog = () => {
           src="rabby-internal://assets/icons/change-log/icon-change-log.svg"
           alt=""
         />
-        view change log
+        View Release Note
       </Button>
       <Modal
         className={style.changeLogModal}
