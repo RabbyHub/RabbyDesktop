@@ -5,9 +5,9 @@ import styled from 'styled-components';
 
 const feeTips = {
   '0.3': () =>
-    'Enjoy fee-free transactions - 0.3% fee for common tokens is removed',
+    'Pay only 0.01% fee per transaction, instead of the usual 0.3% for common tokens',
   '0.1': () =>
-    'Enjoy fee-free transactions - 0.1% fee for stable coins is removed',
+    'Pay only 0.01% fee per transaction, instead of the usual 0.1% for stable coins',
   '0': (symbol: string) =>
     `0 fee to wrap/unwrap tokens by interacting directly with ${symbol} contracts.`,
 };
@@ -68,6 +68,7 @@ const SectionStyled = styled.section`
 
 export interface FeeProps {
   fee: '0.3' | '0.1' | '0';
+  feeAfterDiscount: string;
   symbol?: string;
 }
 
@@ -80,7 +81,7 @@ const overlayInnerStyle = {
 };
 
 export const Fee = (props: FeeProps) => {
-  const { fee, symbol = '' } = props;
+  const { fee, symbol = '', feeAfterDiscount } = props;
 
   return (
     <SectionStyled>
@@ -99,7 +100,7 @@ export const Fee = (props: FeeProps) => {
       </div>
       <div className="feeBox">
         {fee !== '0' && <span className="fee">{fee}%</span>}
-        <span className="real-fee">0%</span>
+        <span className="real-fee">{feeAfterDiscount}%</span>
         <Tooltip
           overlayStyle={overlayStyle}
           overlayInnerStyle={overlayInnerStyle}
