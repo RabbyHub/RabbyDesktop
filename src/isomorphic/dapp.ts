@@ -1,3 +1,4 @@
+import { last } from 'lodash';
 import { ensurePrefix, isInvalidBase64 } from './string';
 import { parseDomainMeta } from './url';
 
@@ -176,3 +177,38 @@ const VALID_TYPES = ['http', 'ipfs'];
 export function isValidDappType(type: string) {
   return type && VALID_TYPES.includes(type);
 }
+
+export const findLargestFavIcon = (
+  icons: { href: string; sizes: string }[]
+): string => {
+  let largest: { href: string; size: number } | null = null;
+  icons.forEach((icon) => {
+    const sizes = icon.sizes.split(' ');
+    /**
+     * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link
+     * link 的 sizes 字段可以写多个长宽比，以空格拆分，且 100x100 和 100X100 都是合法的
+     * 这里无脑认为 link 的图标都是 1:1 的，且取 x 之前的宽度来计算
+     * */
+    let maxSize = Math.max(
+      ...sizes.map((s) => Number(s.toLowerCase().split('x')[0] || 0))
+    );
+    const ext = last(icon.href.split('.'));
+    if (ext && ext !== 'ico') {
+      // 因为 .ico 文件不能转 base64，所以给非 ico 文件加权，确保同尺寸时取非 ico 文件做 favicon
+      maxSize += 1;
+    }
+    if (!largest) {
+      largest = {
+        href: icon.href,
+        size: maxSize,
+      };
+    } else if (maxSize > largest.size) {
+      largest = {
+        href: icon.href,
+        size: maxSize,
+      };
+    }
+  });
+
+  return (largest as { href: string; size: number } | null)?.href || '';
+};

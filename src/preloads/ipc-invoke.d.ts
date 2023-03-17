@@ -34,6 +34,15 @@ type ChannelInvokePayload = {
       unpinnedList: IDapp['origin'][];
     };
   };
+  'dapps-fix-faviconBase64': {
+    send: [
+      dappOrigin: IDapp['origin'],
+      faviconBase64: IDapp['faviconBase64'] & string
+    ];
+    response: {
+      error?: string;
+    }
+  };
   'get-dapp': {
     send: [origin: IDapp['origin']];
     response: {

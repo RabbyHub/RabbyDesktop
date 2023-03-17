@@ -1,8 +1,10 @@
+import { isInvalidBase64 } from '@/isomorphic/string';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useDapps } from '../hooks/useDappsMngr';
 import { toggleLoadingView } from '../ipcRequest/mainwin';
+import { getImageBuffer } from '../utils-shell/favicon';
 import { matomoRequestEvent } from '../utils/matomo-request';
 import { navigateToDappRoute } from '../utils/react-router';
 import { findTab } from '../utils/tab';
@@ -149,4 +151,33 @@ export function useLatestDappScreenshot() {
   }, [latestDappScreenshot, setLatestDappScreenshot]);
 
   return latestDappScreenshot;
+}
+
+// consider do this logic on worker thread
+export function useFixDappsOnMainWindow() {
+  const { dapps } = useDapps();
+
+  useEffect(() => {
+    console.log('[feat] dapps', dapps);
+    Promise.all(dapps.map(dapp => {
+      if (!isInvalidBase64(dapp.faviconBase64)) return true;
+
+      if (!dapp.faviconUrl) return ;
+      return getImageBuffer(dapp.faviconUrl)
+        .then(arrayBuffer => {
+          // array buffer to base64
+          const base64 = btoa(
+            new Uint8Array(arrayBuffer).reduce(
+              (data, byte) => data + String.fromCharCode(byte),
+              ''
+            )
+          );
+          console.log('[feat] base64', base64);
+
+          window.rabbyDesktop.ipcRenderer.invoke('dapps-fix-faviconBase64', dapp.origin, base64);
+        })
+        .catch(() => false)
+    }))
+  // only run once
+  }, []);
 }

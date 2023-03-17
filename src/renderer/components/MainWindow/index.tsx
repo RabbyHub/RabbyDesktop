@@ -17,7 +17,7 @@ import ImportByContainer from '@/renderer/routes/ImportBy/ImportByContainer';
 import SendToken from '@/renderer/routes/SendToken';
 import { Unlock } from '@/renderer/routes/Unlock/Unlock';
 import { RequireUnlock } from '@/renderer/routes/RequireUnlock';
-import { useForwardFromInternalPage } from '@/renderer/hooks-shell/useMainWindow';
+import { useFixDappsOnMainWindow, useForwardFromInternalPage } from '@/renderer/hooks-shell/useMainWindow';
 import { useClickMainWindowHideContextMenu } from '@/renderer/hooks/useClick';
 import { MainWindowSettings } from '@/renderer/routes/Settings';
 import { useChromeTabsEvents } from '@/renderer/hooks-shell/useWindowTabs';
@@ -268,6 +268,8 @@ export function MainWindow() {
         }
       });
   });
+
+  useFixDappsOnMainWindow();
 
   useMount(() => {
     logGetUserDapp();
