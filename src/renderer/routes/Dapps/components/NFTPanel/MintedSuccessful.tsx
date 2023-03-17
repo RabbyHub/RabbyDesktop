@@ -34,6 +34,9 @@ export const MintedSuccessful: React.FC<Partial<MintedData>> = ({
   contractAddress,
   tokenId,
 } = {}) => {
+  const openSeaUrl = tokenId
+    ? `https://opensea.io/assets/${contractAddress}/${tokenId}`
+    : `https://opensea.io/assets/ethereum/${contractAddress}`;
   return (
     <div className="m-auto">
       <h1
@@ -53,7 +56,7 @@ export const MintedSuccessful: React.FC<Partial<MintedData>> = ({
         )}
       >
         <LabelButton
-          to={`https://opensea.io/assets/${contractAddress}/${tokenId ?? ''}`}
+          to={openSeaUrl}
           icon="rabby-internal://assets/icons/mint/opensea.svg"
           label="OpenSea"
         />
