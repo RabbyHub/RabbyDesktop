@@ -3,6 +3,7 @@ import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useDapps } from '../hooks/useDappsMngr';
 import { toggleLoadingView } from '../ipcRequest/mainwin';
+import { matomoRequestEvent } from '../utils/matomo-request';
 import { navigateToDappRoute } from '../utils/react-router';
 import { findTab } from '../utils/tab';
 import { useWindowTabs } from './useWindowTabs';
@@ -66,10 +67,17 @@ export function useSidebarDapps() {
           });
         }
 
-        window.rabbyDesktop.ipcRenderer.invoke(
-          'safe-open-dapp-tab',
-          dappOrigin
-        );
+        window.rabbyDesktop.ipcRenderer
+          .invoke('safe-open-dapp-tab', dappOrigin)
+          .then(({ openType }) => {
+            if (openType === 'create-tab') {
+              matomoRequestEvent({
+                category: 'My Dapp',
+                action: 'Visit Dapp',
+                label: dappOrigin,
+              });
+            }
+          });
       },
       [activeTab, allDapps]
     ),

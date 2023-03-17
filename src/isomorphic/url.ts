@@ -405,3 +405,17 @@ export function coercePort(input: any) {
 
   return result || 80;
 }
+
+export function getBuiltinViewType(urlInfo: URL | Location) {
+  if (urlInfo.protocol === 'chrome-extension:') {
+    return 'chrome-extension';
+  }
+  if (
+    RABBY_INTERNAL_PROTOCOL === urlInfo.protocol ||
+    urlInfo.href.startsWith(RABBY_LOCAL_URLBASE)
+  ) {
+    return 'rabby-internal';
+  }
+
+  return false;
+}

@@ -13,6 +13,12 @@ async function getRabbyxBgWebContents() {
   );
 }
 
+export async function rabbyxExecuteJs<T>(script: string): Promise<T> {
+  const backgroundWebContents = await getRabbyxBgWebContents();
+
+  return backgroundWebContents.executeJavaScript(script);
+}
+
 const rabbyXRpcResponse = new Subject<IRabbyxRpcResponse>();
 const obs = rabbyXRpcResponse.asObservable();
 

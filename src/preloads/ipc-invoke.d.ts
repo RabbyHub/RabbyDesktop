@@ -16,6 +16,10 @@ type ChannelInvokePayload = {
     send: [];
     response: IOSInfo;
   };
+  'get-rabbyx-info': {
+    send: [];
+    response: IRabbyxInfo;
+  };
   'detect-dapp': {
     send: [dappUrl: string];
     response: {
@@ -187,9 +191,7 @@ type ChannelInvokePayload = {
   };
   'safe-open-dapp-tab': {
     send: [dappOrigin: string];
-    response: {
-      shouldNavTabOnClient: boolean;
-    };
+    response: ISafeOpenDappTabResult;
   };
   'fetch-dapp-last-open-infos': {
     send: [];

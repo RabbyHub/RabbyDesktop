@@ -10,6 +10,7 @@ import classNames from 'classnames';
 import { useDapps } from 'renderer/hooks/useDappsMngr';
 import { debounce } from 'lodash';
 import { useGetSpecialDomain } from '@/renderer/hooks-ipc/useAppDynamicConfig';
+import { stats } from '@/isomorphic/stats';
 import RabbyInput from '../AntdOverwrite/Input';
 import { Modal, Props as ModalProps } from '../Modal/Modal';
 import styles from './index.module.less';
@@ -91,6 +92,11 @@ const validateInput = (input: string, onReplace?: (v: string) => void) => {
   return null;
 };
 
+const statsInfo = {
+  startTime: Date.now(),
+  domain: '',
+};
+
 const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
   const getSpecialDomain = useGetSpecialDomain();
   const [state, setState] = useSetState<{
@@ -102,6 +108,9 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
   const { detectDapps } = useDapps();
   const { runAsync, loading, cancel } = useRequest(
     async (url: string) => {
+      statsInfo.domain = url;
+      statsInfo.startTime = Date.now();
+
       const validateRes = validateInput(url, onReplace);
       if (validateRes) {
         return {
@@ -132,13 +141,26 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
         });
       },
       onSuccess: (res) => {
+        const duration = Date.now() - statsInfo.startTime;
+        const report = (success: boolean) => {
+          if (statsInfo.domain) {
+            stats.report('addDappDuration', {
+              duration,
+              success,
+              domain: statsInfo.domain,
+            });
+          }
+        };
+
         if (!res) {
+          report(false);
           return;
         }
         if ('validateRes' in res) {
           if (res.validateRes) {
             setState(res.validateRes);
           }
+          report(false);
           return;
         }
 
@@ -158,6 +180,7 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
                 error.message
               ),
           });
+          report(false);
           return null;
         }
         const dappUrl = canoicalizeDappUrl(data?.inputOrigin || '');
@@ -182,8 +205,10 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
               </>
             ),
           });
+          report(true);
           return null;
         }
+        report(true);
         setState({
           dappInfo: data,
           validateStatus: undefined,

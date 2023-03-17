@@ -1,5 +1,5 @@
 import {
-  createMemoryRouter as createRouter,
+  createHashRouter as createRouter,
   RouterProvider,
   Outlet,
   Navigate,
@@ -32,6 +32,10 @@ import {
 import { navigateToDappRoute } from '@/renderer/utils/react-router';
 import { Swap } from '@/renderer/routes/Swap';
 import { ErrorBoundary } from '@sentry/react';
+import { useMount } from 'ahooks';
+import { matomoRequestEvent } from '@/renderer/utils/matomo-request';
+import { fetchDapps } from '@/renderer/ipcRequest/dapps';
+import dayjs from 'dayjs';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -41,6 +45,19 @@ import { TopNavBar } from '../TopNavBar';
 import { MainWindowRouteData } from './type';
 import { DappViewWrapper } from '../DappView';
 import { FixedBackHeader } from '../FixedBackHeader';
+
+const logGetUserDapp = async () => {
+  const lastLogTime = localStorage.getItem('matomo_last_log_time') || 0;
+  if (dayjs().isSame(+lastLogTime, 'day')) {
+    return;
+  }
+  await matomoRequestEvent({
+    category: 'My Dapp',
+    action: 'Get User Dapp',
+    value: await fetchDapps().then((res) => res?.dapps?.length || 0),
+  });
+  localStorage.setItem('matomo_last_log_time', Date.now().toString());
+};
 
 function WelcomeWrapper() {
   const { hasFetched, accounts } = useAccounts();
@@ -238,11 +255,22 @@ export function MainWindow() {
   useMessageForwardToMainwin('open-dapp', (payload) => {
     window.rabbyDesktop.ipcRenderer
       .invoke('safe-open-dapp-tab', payload.data.dappURL)
-      .then(({ shouldNavTabOnClient }) => {
+      .then(({ shouldNavTabOnClient, openType }) => {
         if (shouldNavTabOnClient) {
           navigateToDappRoute(router.navigate, payload.data.dappURL);
         }
+        if (openType === 'create-tab') {
+          matomoRequestEvent({
+            category: 'My Dapp',
+            action: 'Visit Dapp',
+            label: payload.data.dappURL,
+          });
+        }
       });
+  });
+
+  useMount(() => {
+    logGetUserDapp();
   });
 
   return (

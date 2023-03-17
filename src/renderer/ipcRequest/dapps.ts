@@ -1,5 +1,6 @@
 import { arraify } from '@/isomorphic/array';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
+import { matomoRequestEvent } from '../utils/matomo-request';
 
 export async function getDapp(dappOrigin: string) {
   return window.rabbyDesktop.ipcRenderer
@@ -38,7 +39,17 @@ export async function detectDapps(dappUrl: string) {
 }
 
 export async function addDapp(dapp: IDapp) {
-  return window.rabbyDesktop.ipcRenderer.invoke('dapps-post', dapp);
+  const res = window.rabbyDesktop.ipcRenderer.invoke('dapps-post', dapp);
+  res.then((r) => {
+    if (!r.error) {
+      matomoRequestEvent({
+        category: 'My Dapp',
+        action: 'Add Dapp',
+        label: dapp.origin,
+      });
+    }
+  });
+  return res;
 }
 
 export async function putDapp(dapp: IDapp) {
@@ -62,6 +73,12 @@ export async function deleteDapp(dapp: IDapp) {
     .then((event) => {
       if (event.error) {
         throw new Error(event.error);
+      } else {
+        matomoRequestEvent({
+          category: 'My Dapp',
+          action: 'Delete Dapp',
+          label: dapp.origin,
+        });
       }
     });
 }
@@ -74,7 +91,16 @@ export async function toggleDappPinned(
 
   return window.rabbyDesktop.ipcRenderer
     .invoke('dapps-togglepin', dappOrigins, nextPinned)
-    .then(() => {});
+    .then((r) => {
+      if (!r.error && nextPinned) {
+        matomoRequestEvent({
+          category: 'My Dapp',
+          action: 'Pin Dapp',
+          label: Array.isArray(dappOrigin) ? dappOrigin.join(',') : dappOrigin,
+        });
+      }
+      return r;
+    });
 }
 
 export async function setDappsOrder(payload: {

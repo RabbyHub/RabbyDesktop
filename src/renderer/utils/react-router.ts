@@ -2,6 +2,7 @@ import { isBuiltinView } from '@/isomorphic/url';
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForwardTo } from '../hooks/useViewsMessage';
+import { matomoRequestEvent } from './matomo-request';
 
 export function useNavigateToDappRoute() {
   const navigate = useNavigate();
@@ -30,9 +31,16 @@ export function useOpenDapp() {
 
       window.rabbyDesktop.ipcRenderer
         .invoke('safe-open-dapp-tab', dappUrl)
-        .then(({ shouldNavTabOnClient }) => {
+        .then(({ shouldNavTabOnClient, openType }) => {
           if (shouldNavTabOnClient) {
             navigateToDapp(dappUrl);
+          }
+          if (openType === 'create-tab') {
+            matomoRequestEvent({
+              category: 'My Dapp',
+              action: 'Visit Dapp',
+              label: dappUrl,
+            });
           }
         });
     },

@@ -393,3 +393,18 @@ type IPopupViewChanges<
 type IDappLastOpenInfo = {
   finalURL: string;
 };
+
+type IRabbyxInfo = {
+  rabbyxExtId: string;
+  userId?: string;
+  requesterIsRabbyx: boolean;
+};
+
+type ISafeOpenDappTabResult = {
+  shouldNavTabOnClient: boolean;
+  openType?: 'alert-user' | 'switch-to-opened-tab' | 'create-tab';
+  isOpenExternal: boolean;
+  isTargetDapp?: boolean;
+  isTargetDappByOrigin?: boolean;
+  isTargetDappBySecondaryOrigin?: boolean;
+};
