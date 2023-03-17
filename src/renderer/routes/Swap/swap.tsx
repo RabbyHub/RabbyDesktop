@@ -171,6 +171,7 @@ export const Swap = () => {
 
   const [payAmount, setAmount] = useState('');
   const [feeRate, setFeeRate] = useState<FeeProps['fee']>('0.3');
+  const [feeAfterDiscount, setFeeAfterDiscount] = useState('0.01');
   const [slippage, setSlippage] = useState('0.5');
   const [gasLevel, setGasLevel] = useState<GasLevel>(defaultGasFee);
 
@@ -333,7 +334,7 @@ export const Swap = () => {
           .toFixed(0, 1),
         userAddress,
         slippage: Number(slippage),
-        feeRate: 0,
+        feeRate: Number(feeAfterDiscount) || 0,
         chain,
       });
 
@@ -735,9 +736,12 @@ export const Swap = () => {
   useEffect(() => {
     if (isWrapToken) {
       setFeeRate('0');
+      setFeeAfterDiscount('0');
     } else if (isStableCoin) {
+      setFeeAfterDiscount('0.01');
       setFeeRate('0.1');
     } else {
+      setFeeAfterDiscount('0.01');
       setFeeRate('0.3');
     }
 
@@ -925,7 +929,11 @@ export const Swap = () => {
                 />
               )}
 
-              <Fee fee={feeRate} symbol={wrapTokenSymbol} />
+              <Fee
+                fee={feeRate}
+                feeAfterDiscount={feeAfterDiscount}
+                symbol={wrapTokenSymbol}
+              />
             </div>
           )}
         </div>
