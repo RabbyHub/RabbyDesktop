@@ -1,4 +1,4 @@
-import { ensurePrefix } from './string';
+import { ensurePrefix, isInvalidBase64 } from './string';
 import { parseDomainMeta } from './url';
 
 export function isValidDappAlias(alias: string) {
@@ -21,6 +21,8 @@ export function formatDapp(
     }
   }
 
+  const faviconBase64 = input?.faviconBase64 || ('' as IDapp['faviconBase64']);
+
   return {
     id: input.id || input.origin,
     type: input?.type,
@@ -30,7 +32,7 @@ export function formatDapp(
       patchesData?.faviconUrl ||
       input?.faviconUrl ||
       ('' as IDapp['faviconUrl']),
-    faviconBase64: input?.faviconBase64 || ('' as IDapp['faviconBase64']),
+    faviconBase64: isInvalidBase64(faviconBase64) ? '' : faviconBase64,
   };
 }
 
