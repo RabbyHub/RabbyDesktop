@@ -11,7 +11,6 @@ import { useTabedDapps } from '../../hooks/useDappsMngr';
 
 import { DAppBlock } from './components/DAppBlock';
 
-import { ReleaseNote } from './components/ReleaseNote';
 import { SortableList } from './components/SortableList';
 import './index.less';
 
@@ -139,8 +138,6 @@ export default function DApps() {
           onCancel={() => setDeletingDapp(null)}
           onDeletedDapp={() => setDeletingDapp(null)}
         />
-        {/* <ReceiveModal open={true} /> */}
-        <ReleaseNote />
       </div>
     </div>
   );

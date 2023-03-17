@@ -26,6 +26,7 @@ import { useProxyStateOnSettingPage } from './settingHooks';
 import { AutoUpdate } from './components/AutoUpdate';
 import ModalDevices from './components/ModalDevices';
 import { testRequestDevice } from './components/ModalDevices/useFilteredDevices';
+import { ChangeLog } from './components/ChangeLog';
 
 type TypedProps = {
   name: React.ReactNode;
@@ -280,7 +281,13 @@ export function MainWindowSettings() {
               });
             }}
           >
-            <AutoUpdate isFold={false} />
+            <div
+              className="flex items-center gap-[20px]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ChangeLog />
+              <AutoUpdate />
+            </div>
           </ItemAction>
           {/* <ItemLink name='User Agreement' /> */}
           <ItemLink
