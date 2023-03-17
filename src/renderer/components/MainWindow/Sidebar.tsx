@@ -108,13 +108,15 @@ const TabList = ({
                 activeTabId === tab?.id &&
                 styles.active
             )}
-            onClick={() => {
+            onClick={async () => {
               if (dapp.tab) {
                 dappActions.onSelectDapp(dapp.tab);
               } else {
-                getLastOpenOriginByOrigin(dapp.origin).then((lastOrigin) => {
-                  dappActions.onOpenDapp(lastOrigin);
-                });
+                await getLastOpenOriginByOrigin(dapp.origin).then(
+                  (lastOrigin) => {
+                    dappActions.onOpenDapp(lastOrigin);
+                  }
+                );
               }
               navigateToDapp(dapp.origin);
             }}
