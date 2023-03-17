@@ -42,3 +42,9 @@ export function stringifyWebPreferences(preferences: Electron.WebPreferences) {
     }, [] as `${string}=${string}`[])
     .join(', ');
 }
+
+export function isInvalidBase64(base64?: string) {
+  if (!base64) return true;
+
+  return !base64.split(';base64,')?.[1];
+}
