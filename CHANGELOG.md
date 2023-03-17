@@ -1,7 +1,26 @@
 
+v0.7.0 / 2023-03-17
+===================
+
+  * feat: filter invalid base64.
+  * feat: revert relaction domain (#292)
+  * fix: some bad behaviors on open/select dapp (#291)
+  * chore: change release note button text (#290)
+  * feat: release note (#288)
+  * feat: upgrade rabbyx's core to 0.72.0
+  * feat: change swap fee to 0.01% (#289)
+  * feat: add event log (#284)
+  * Feat/report tracing (#287)
+  * feat: selected by default when there is only one ledger (#281)
+  * feat: optmize dapp load (#286)
+  * feat: support nft portfolio (#285)
+  * feat: always open tx's explorer url externally. (#283)
+  * fix: use the largest favicon (#280)
+
 v0.6.1 / 2023-03-15
 ===================
 
+  * Release v0.6.1
   * feat: re-open last opened url of dapp. (#279)
   * feat: update top navbar style. (#276)
   * fix: DappReadonlyModal (#277)
