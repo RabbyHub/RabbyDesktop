@@ -33,7 +33,6 @@ const LabelButton = ({
 export const MintedSuccessful: React.FC<Partial<MintedData>> = ({
   contractAddress,
   tokenId,
-  isOwner,
 } = {}) => {
   return (
     <div className="m-auto">
@@ -43,14 +42,8 @@ export const MintedSuccessful: React.FC<Partial<MintedData>> = ({
           'text-white text-[20px]'
         )}
       >
-        {isOwner ? (
-          'YOU ARE THE OWNER OF THIS NFT'
-        ) : (
-          <>
-            <span className="text-[26px]">🎉</span>
-            <span>Mint successfully {tokenId ? `#${tokenId}` : ''}</span>
-          </>
-        )}
+        <span className="text-[26px]">🎉</span>
+        <span>Mint successfully {tokenId ? `#${tokenId}` : ''}</span>
       </h1>
 
       <section
