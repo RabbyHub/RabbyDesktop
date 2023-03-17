@@ -37,7 +37,7 @@ const getUserId = async () => {
 const getParams = async () => {
   const gaParams = new URLSearchParams();
 
-  const pathname = window.location.hash.substring(2) || 'background';
+  const pathname = window.location.hash.substring(2) || '';
   const url = `https://${window.location.host}.com/${pathname}`;
 
   gaParams.append('action_name', pathname);
