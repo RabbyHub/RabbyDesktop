@@ -30,6 +30,7 @@ import IconSwitchToken from '@/../assets/icons/swap/switch-token.svg?rc';
 import IconRcClose from '@/../assets/icons/swap/close.svg?rc';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Switch } from '@/renderer/components/Switch/Switch';
+import { useRbiSource } from '@/renderer/hooks/useRbiSource';
 import { DexSelect } from './component/DexSelect';
 import { Fee, FeeProps } from './component/Fee';
 import { GasSelector } from './component/GasSelector';
@@ -131,6 +132,7 @@ const FooterWrapper = styled.div`
 `;
 
 export const Swap = () => {
+  const rbiSource = useRbiSource();
   const { currentAccount } = useCurrentAccount();
   const userAddress = currentAccount?.address || '';
   const swapState = useSwap();
@@ -640,14 +642,14 @@ export const Swap = () => {
             gasPrice: price,
             unlimited: !!unlimitedAllowance,
             shouldTwoStepApprove,
+          },
+          {
+            ga: {
+              category: 'Swap',
+              source: 'swap',
+              trigger: rbiSource,
+            },
           }
-          // {
-          //   ga: {
-          //     category: 'Swap',
-          //     source: 'swap',
-          //     trigger: rbiSource,
-          //   },
-          // }
         );
       } catch (error) {
         console.error(error);
@@ -659,8 +661,6 @@ export const Swap = () => {
 
   const handleSwap = async () => {
     if (payAmount && payToken && !receiveToken) {
-      // TODO：等待设计确认 toast
-
       message.error({
         className: 'rabbyx-tx-changed-tip',
         icon: (
@@ -675,8 +675,6 @@ export const Swap = () => {
       return;
     }
     if (tipsDisplay?.level === 'danger') {
-      // TODO：等待设计确认
-
       message.error({
         className: 'rabbyx-tx-changed-tip',
         icon: (
