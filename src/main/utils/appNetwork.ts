@@ -2,7 +2,11 @@ import {
   IS_RUNTIME_PRODUCTION,
   RABBY_INTERNAL_PROTOCOL,
 } from '@/isomorphic/constants';
-import { canoicalizeDappUrl, formatProxyRules } from '@/isomorphic/url';
+import {
+  canoicalizeDappUrl,
+  formatProxyRules,
+  makeProxyPacScript,
+} from '@/isomorphic/url';
 import { BrowserView } from 'electron';
 import { catchError, firstValueFrom, of, Subject, timeout } from 'rxjs';
 import { BrowserViewManager } from './browserView';
@@ -214,7 +218,7 @@ export async function checkUrlViaBrowserView(
       }
       const favicons = document.querySelectorAll('link[rel="icon"]');
       const appleTouchIcons = document.querySelectorAll('link[rel="apple-touch-icon"]');
-      
+
       ({
         favicons: Array.from(favicons).map(item => ({href: item.href, sizes: item.sizes.value})),
         appleTouchIcons: Array.from(appleTouchIcons).map(item => ({href: item.href, sizes: item.sizes.value})),
@@ -238,6 +242,9 @@ export async function checkUrlViaBrowserView(
 
 const proxyBypassRules = [
   '<local>',
+  '127.0.0.1',
+  // 'localhost',
+  '::1',
   `${RABBY_INTERNAL_PROTOCOL}//*`,
   'chrome-extension://*',
   'chrome://*',
@@ -254,9 +261,16 @@ export function setSessionProxy(
   session.clearHostResolverCache();
 
   if (conf.proxyType === 'custom') {
+    // session.setProxy({
+    //   mode: 'fixed_servers',
+    //   proxyRules: [proxyRules].join(','),
+    //   proxyBypassRules,
+    // });
+
+    const { pacScriptBase64 } = makeProxyPacScript(conf.proxySettings);
     session.setProxy({
-      mode: 'fixed_servers',
-      proxyRules: [proxyRules].join(','),
+      mode: 'pac_script',
+      pacScript: pacScriptBase64,
       proxyBypassRules,
     });
   } else if (conf.proxyType === 'system') {

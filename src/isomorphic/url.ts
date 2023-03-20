@@ -387,6 +387,29 @@ export function formatProxyServerURL(settings: IAppProxyConf['proxySettings']) {
   }`;
 }
 
+export function makeProxyPacScript(
+  proxySettings: IAppProxyConf['proxySettings']
+) {
+  const fixedServer = formatProxyServerURL(proxySettings);
+
+  /* eslint-disable no-useless-escape */
+  const pacScript = `\
+function FindProxyForURL(url, host) {
+  if (/^127\.0\.0\.1$/.test(host) || /^::1$/.test(host) || /^localhost$/.test(host)) return "DIRECT";
+  return "PROXY ${fixedServer}";
+}
+`;
+  /* eslint-enable no-useless-escape */
+  return {
+    pacScript,
+    // pacScriptBase64: `data:text/plain;base64,${Buffer.from(pacScript, 'utf8').toString('base64')}`,
+    pacScriptBase64: `data:application/x-ns-proxy-autoconfig;base64,${Buffer.from(
+      pacScript,
+      'utf8'
+    ).toString('base64')}`,
+  };
+}
+
 export function formatProxyRules(settings: IAppProxyConf['proxySettings']) {
   const fixedServer = formatProxyServerURL(settings);
 
