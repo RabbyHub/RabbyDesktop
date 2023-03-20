@@ -71,7 +71,7 @@ export const NFTModal: React.FC<Props> = ({ onClose, ...props }) => {
             <RowItem
               label={
                 <div className="flex items-center">
-                  <span>Powered by zora</span>
+                  <span>Zora mint fee</span>
                   <ZoraTip />
                 </div>
               }
