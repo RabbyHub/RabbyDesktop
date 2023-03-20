@@ -140,7 +140,6 @@ export default function DApps() {
           onDeletedDapp={() => setDeletingDapp(null)}
         />
         <NFTPanel />
-        <ReleaseNote />
       </div>
     </div>
   );
