@@ -410,3 +410,20 @@ type ISafeOpenDappTabResult = {
   isTargetDappByOrigin?: boolean;
   isTargetDappBySecondaryOrigin?: boolean;
 };
+
+type IParseDomainInfo = {
+  hostWithoutTLD: string;
+  secondaryDomain: string;
+  secondaryOrigin: string;
+  is2ndaryDomain: boolean;
+  isWWWSubDomain: boolean;
+  isSubDomain: boolean;
+};
+
+type ICanonalizedUrlInfo = {
+  urlInfo: Partial<URL> | null;
+  isDapp: boolean;
+  origin: string;
+  hostname: string;
+  fullDomain: string;
+} & IParseDomainInfo;

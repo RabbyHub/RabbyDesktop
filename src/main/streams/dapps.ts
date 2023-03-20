@@ -1,7 +1,4 @@
-import { Blob } from 'buffer';
-
 import { getAppProxyConf } from '../store/desktopApp';
-import { createPopupWindow } from '../utils/browser';
 import { safeCapturePage } from '../utils/dapps';
 import { parseWebsiteFavicon } from '../utils/fetch';
 import { handleIpcMainInvoke } from '../utils/ipcMainEvents';

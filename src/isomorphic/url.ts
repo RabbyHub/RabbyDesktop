@@ -203,7 +203,7 @@ export function isDappProtocol(protocolOrUrl: string) {
   return protocolOrUrl.startsWith('https:');
 }
 
-export function getDomainFromHostname(hostname: string) {
+export function getDomainFromHostname(hostname: string): IParseDomainInfo {
   const parts = hostname.split('.');
   const secondaryDomainParts = parts.slice(parts.length - 2);
   const secondaryDomain = secondaryDomainParts.join('.');
@@ -226,7 +226,7 @@ export function isInternalProtocol(url: string) {
   ].some((protocol) => url.startsWith(protocol));
 }
 
-export function canoicalizeDappUrl(url: string) {
+export function canoicalizeDappUrl(url: string): ICanonalizedUrlInfo {
   const urlInfo: Partial<URL> | null = safeParseURL(url);
 
   const hostname = urlInfo?.hostname || '';

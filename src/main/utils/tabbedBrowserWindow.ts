@@ -1,5 +1,6 @@
 import { BrowserWindow } from 'electron';
 
+import { canoicalizeDappUrl } from '@/isomorphic/url';
 import TabbedBrowserWindow, {
   TabbedBrowserWindowOptions,
 } from '../browser/browsers';
@@ -11,6 +12,8 @@ import {
 import { getWindowFromWebContents } from './browser';
 
 import { isEnableContentProtected } from '../store/desktopApp';
+import { findDappsByOrigin } from '../store/dapps';
+import { Tab } from '../browser/tabs';
 
 const windows: TabbedBrowserWindow[] = [];
 
@@ -90,4 +93,43 @@ export async function removeWindowRecord(win: Electron.BrowserWindow) {
   }
 
   return tabbedWin;
+}
+
+export function getOrCreateDappBoundTab(
+  mainTabbedWin: TabbedBrowserWindow,
+  targetURL: string,
+  opts?: {
+    foundDapp: IDapp | null;
+  }
+) {
+  const parsedInfo =
+    typeof targetURL === 'string' ? canoicalizeDappUrl(targetURL) : targetURL;
+
+  let existedTab: Tab | null = null;
+  mainTabbedWin.tabs.tabList.find((tab) => {
+    const dappInfo = tab.getRelatedDappInfo(parsedInfo);
+    if (dappInfo?.matchedType === 'by-origin') {
+      existedTab = tab;
+    } else if (dappInfo?.matchedType === 'by-secondary-domain') {
+      existedTab = tab;
+    }
+
+    return dappInfo;
+  });
+
+  if (existedTab) return existedTab;
+
+  let foundDapp = opts?.foundDapp;
+  if (foundDapp === undefined) {
+    const findResult = findDappsByOrigin(parsedInfo.origin);
+    foundDapp =
+      findResult.dappByOrigin || findResult.dappBySecondaryDomainOrigin;
+  }
+
+  if (!foundDapp) return null;
+
+  return mainTabbedWin.createTab({
+    initDetails: { url: targetURL },
+    relatedDappId: foundDapp.id,
+  });
 }

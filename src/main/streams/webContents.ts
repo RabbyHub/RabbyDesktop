@@ -4,13 +4,19 @@ import TabbedBrowserWindow from '../browser/browsers';
 import { getAllDapps, parseDappRedirect } from '../store/dapps';
 import { switchToBrowserTab } from '../utils/browser';
 import { safeOpenURL } from './dappSafeview';
-import { getTabbedWindowFromWebContents } from '../utils/tabbedBrowserWindow';
+import {
+  getOrCreateDappBoundTab,
+  getTabbedWindowFromWebContents,
+} from '../utils/tabbedBrowserWindow';
 import { getBlockchainExplorers } from '../store/dynamicConfig';
+import { onMainWindowReady } from '../utils/stream-helpers';
 
-export function createDappTab(mainTabbedWin: TabbedBrowserWindow, url: string) {
-  const continualOpenedTab = mainTabbedWin.createTab({
-    initDetails: { url },
-  });
+/**
+ * @deprecated
+ */
+export function openTabOfDapp(mainTabbedWin: TabbedBrowserWindow, url: string) {
+  // find if opened tab already
+  const continualOpenedTab = getOrCreateDappBoundTab(mainTabbedWin, url);
   continualOpenedTab?.loadURL(url);
 
   // const closeOpenedTab = () => {
@@ -117,7 +123,10 @@ export function setOpenHandlerForWebContents({
               }, 200);
             }
           } else {
-            createDappTab(parentTabbedWin, targetURL);
+            onMainWindowReady().then((mainTabbedWin) => {
+              const dappTab = getOrCreateDappBoundTab(mainTabbedWin, targetURL);
+              dappTab?.loadURL(targetURL);
+            });
           }
           break;
         }

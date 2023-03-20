@@ -40,13 +40,13 @@ import {
 import { switchToBrowserTab } from '../utils/browser';
 import { getAppUserDataPath } from '../utils/store';
 import { getMainWinLastPosition } from '../utils/screen';
-import { createDappTab } from './webContents';
 import { clearAllStoreData, clearAllUserData } from '../utils/security';
 import { tryAutoUnlockRabbyX } from './rabbyIpcQuery/autoUnlock';
 import { alertAutoUnlockFailed } from './mainWindow';
 import { setupAppTray } from './appTray';
 import { checkForceUpdate } from '../updater/force_update';
 import { repairDappsFieldsOnBootstrap } from '../store/dapps';
+import { getOrCreateDappBoundTab } from '../utils/tabbedBrowserWindow';
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
@@ -93,7 +93,11 @@ app.on('web-contents-created', async (evtApp, webContents) => {
             switchToBrowserTab(dappTab!.id, tabbedWin!);
           } else if (mainTabbedWin === tabbedWin) {
             if (!isFromExt) {
-              createDappTab(tabbedWin, details.url);
+              const continualOpenedTab = getOrCreateDappBoundTab(
+                mainTabbedWin,
+                details.url
+              );
+              continualOpenedTab?.loadURL(details.url);
             } else {
               const tab = mainTabbedWin.createTab({
                 initDetails: details,
