@@ -26,14 +26,20 @@ const hideTransitionStyles = {
 const Hide = ({
   visible,
   children,
+  unmountOnExit,
   ...rest
 }: {
   visible: boolean;
   children?: ReactNode;
   style?: React.CSSProperties;
   className?: string;
+  unmountOnExit?: boolean;
 }) => (
-  <Transition in={visible} timeout={hideTransitionDuration}>
+  <Transition
+    unmountOnExit={unmountOnExit}
+    in={visible}
+    timeout={hideTransitionDuration}
+  >
     {(state) => (
       <div {...rest} style={hideTransitionStyles[state]}>
         {children}

@@ -21,6 +21,7 @@ import {
 } from '../utils/stream-helpers';
 import { rabbyxExecuteJs, rabbyxQuery } from './rabbyIpcQuery/_base';
 import { createPopupView } from '../utils/browser';
+import { getMainProcessAppChannel } from '../utils/app';
 
 onIpcMainEvent('rabby-extension-id', async (event) => {
   event.reply('rabby-extension-id', {
@@ -162,6 +163,7 @@ onIpcMainInternalEvent('__internal_main:dev', async (payload) => {
 handleIpcMainInvoke('rabbyx:get-app-version', (_) => {
   return {
     version: app.getVersion(),
+    appChannel: getMainProcessAppChannel(),
   };
 });
 
