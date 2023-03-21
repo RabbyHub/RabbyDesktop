@@ -40,12 +40,16 @@ export const Step: React.FC<Props> = ({
       <Button
         disabled={disabled || isDone}
         loading={loading}
+        prefixCls="rabby-button"
         className={classNames(
           styles.StepButton,
-          'w-[94px] h-[33px] mx-auto rounded-[4px] text-white',
+          'w-[94px] h-[33px] mx-auto rounded-[4px] text-white font-bold',
+          'bg-color-[#8697FF] outline-none border-none cursor-pointer shadow',
           {
-            'opacity-30 bg-color-[#8697FF]': disabled,
-            'bg-color-[#27C193] opacity-40 :hover:bg-color-[#27C193]': isDone,
+            'text-[#ffffff80] cursor-not-allowed': disabled || isDone,
+            'bg-opacity-30 bg-color-[#8697FF]': disabled,
+            'bg-color-[#27C193] bg-opacity-40 :hover:bg-color-[#27C193]':
+              isDone,
           }
         )}
         type="primary"
@@ -53,13 +57,15 @@ export const Step: React.FC<Props> = ({
         icon={
           isDone && (
             <img
-              className="mr-[5px]"
+              className="mr-[5px] opacity-50"
               src="rabby-internal://assets/icons/mint/check.svg"
             />
           )
         }
       >
-        {isDone ? 'Done' : buttonText}
+        <span className={classNames(loading && 'ml-[4px]')}>
+          {isDone ? 'Done' : buttonText}
+        </span>
       </Button>
     </div>
   );
