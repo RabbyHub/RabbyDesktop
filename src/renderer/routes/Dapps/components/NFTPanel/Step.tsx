@@ -44,7 +44,7 @@ export const Step: React.FC<Props> = ({
           styles.StepButton,
           'w-[94px] h-[33px] mx-auto rounded-[4px] text-white',
           {
-            'opacity-30 bg-color-[#8697FF4D]': disabled,
+            'opacity-30 bg-color-[#8697FF]': disabled,
             'bg-color-[#27C193] opacity-40 :hover:bg-color-[#27C193]': isDone,
           }
         )}
