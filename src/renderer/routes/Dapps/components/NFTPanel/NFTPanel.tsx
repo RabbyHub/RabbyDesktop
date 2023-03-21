@@ -37,8 +37,12 @@ export const NFTPanel = () => {
     });
   }, []);
 
-  React.useEffect(() => {
+  const getTotal = React.useCallback(() => {
     walletController.mintedRabbyTotal().then(setTotal);
+  }, []);
+
+  React.useEffect(() => {
+    getTotal();
     checkEndDateTime();
     checkMinted();
     // watch account change and recheck
@@ -47,10 +51,11 @@ export const NFTPanel = () => {
       (payload) => {
         if (payload.event === 'accountsChanged') {
           checkMinted();
+          getTotal();
         }
       }
     );
-  }, [checkMinted, checkEndDateTime]);
+  }, [checkMinted, checkEndDateTime, getTotal]);
 
   const visible = !isLoading && !isEventEnd;
 
@@ -131,7 +136,12 @@ export const NFTPanel = () => {
           {mintedData ? (
             <MintedSuccessful {...mintedData} />
           ) : (
-            <StepGroup onMinted={setMintedData} />
+            <StepGroup
+              onMinted={(data) => {
+                setMintedData(data);
+                setTotal((prev) => prev + 1);
+              }}
+            />
           )}
         </div>
       </div>
