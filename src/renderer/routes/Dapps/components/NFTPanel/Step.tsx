@@ -1,6 +1,7 @@
 import { Button } from 'antd';
 import classNames from 'classnames';
 import React from 'react';
+import styles from './style.module.css';
 
 export interface Props {
   title: string;
@@ -39,10 +40,14 @@ export const Step: React.FC<Props> = ({
       <Button
         disabled={disabled || isDone}
         loading={loading}
-        className={classNames('w-[94px] h-[33px] mx-auto rounded-[4px]', {
-          'opacity-30': disabled,
-          'bg-[#27C193] opacity-40': isDone,
-        })}
+        className={classNames(
+          styles.StepButton,
+          'w-[94px] h-[33px] mx-auto rounded-[4px] text-white',
+          {
+            'opacity-30 bg-color-[#8697FF4D]': disabled,
+            'bg-color-[#27C193] opacity-40 :hover:bg-color-[#27C193]': isDone,
+          }
+        )}
         type="primary"
         onClick={onButtonClick}
         icon={

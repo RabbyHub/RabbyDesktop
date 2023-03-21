@@ -4,7 +4,7 @@ import { Button } from 'antd';
 import React from 'react';
 
 const TWEET_CONTENT = [
-  `🤩  I just claimed my ‘Rabby Desktop Genesis’ NFT`,
+  `🤩  I just claimed my 'Rabby Desktop Genesis' NFT`,
   `⬇️  To join the FREE mint whitelist Visit https://rabby.io?platform=desktop to download Rabby Desktop Beta now.`,
   `#RabbyDesktop--a dedicated client for Dapp security. @Rabby_io`,
 ];
