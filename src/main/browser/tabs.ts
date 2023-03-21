@@ -38,6 +38,7 @@ type ITabOptions = {
   };
   initDetails?: Partial<chrome.tabs.CreateProperties>;
   isOfMainWindow?: boolean;
+  relatedDappId?: string;
   isOfTreasureLikeConnection?: boolean;
 };
 
@@ -66,11 +67,13 @@ export class Tab {
     initDetails: ITabOptions['initDetails'];
     topbarStacks: ITabOptions['topbarStacks'];
     isOfMainWindow: boolean;
+    relatedDappId: ITabOptions['relatedDappId'];
     isOfTreasureLikeConnection: boolean;
   } = {
     initDetails: {},
     topbarStacks: { ...DEFAULT_TOPBAR_STACKS },
     isOfMainWindow: false,
+    relatedDappId: '',
     isOfTreasureLikeConnection: false,
   };
 
@@ -84,6 +87,7 @@ export class Tab {
     this.$meta.initDetails = { ...initDetails };
     this.$meta.topbarStacks = { ...DEFAULT_TOPBAR_STACKS, ...topbarStacks };
     this.$meta.isOfMainWindow = !!tabOptions.isOfMainWindow;
+
     this.$meta.isOfTreasureLikeConnection =
       !!tabOptions.isOfTreasureLikeConnection;
 
@@ -96,6 +100,13 @@ export class Tab {
     this.id = this.view.webContents.id;
     this.window = ofWindow;
     this.windowId = ofWindow.id;
+
+    this.$meta.relatedDappId = tabOptions.relatedDappId;
+    if (this.$meta.relatedDappId && !this.$meta.isOfMainWindow) {
+      throw new Error(
+        `Tab of dapp must be of main window, but got relatedDappId: ${this.$meta.relatedDappId}`
+      );
+    }
 
     this.window.addBrowserView(this.view);
     emitIpcMainEvent('__internal_main:tabbed-window:view-added', {
@@ -347,6 +358,35 @@ export class Tab {
     } else {
       this.view!.setBounds({ x: -1000, y: -1000, width: 0, height: 0 });
     }
+  }
+
+  getRelatedDappInfo(dappOrigin: string | ICanonalizedUrlInfo) {
+    if (!this.$meta.isOfMainWindow || !this.$meta.relatedDappId) return null;
+
+    const parsedInfo =
+      typeof dappOrigin === 'string'
+        ? canoicalizeDappUrl(dappOrigin)
+        : dappOrigin;
+
+    if (!parsedInfo) return null;
+
+    const result = {
+      matchedOrigin: '',
+      matchedType: 'by-origin' as 'by-origin' | 'by-secondary-domain',
+    };
+
+    if (parsedInfo.origin === this.$meta.relatedDappId) {
+      result.matchedOrigin = parsedInfo.origin;
+      result.matchedType = 'by-origin';
+      return result;
+    }
+    if (parsedInfo.secondaryDomain === this.$meta.relatedDappId) {
+      result.matchedOrigin = parsedInfo.secondaryDomain;
+      result.matchedType = 'by-secondary-domain';
+      return result;
+    }
+
+    return null;
   }
 }
 
