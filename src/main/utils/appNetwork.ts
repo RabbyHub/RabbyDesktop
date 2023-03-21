@@ -213,10 +213,11 @@ export async function checkUrlViaBrowserView(
           tag.getAttribute('content');
       }
       const favicons = document.querySelectorAll('link[rel="icon"]');
+      const shortcuts = document.querySelectorAll('link[rel="shortcut icon"]');
       const appleTouchIcons = document.querySelectorAll('link[rel="apple-touch-icon"]');
       
       ({
-        favicons: Array.from(favicons).map(item => ({href: item.href, sizes: item.sizes.value})),
+        favicons: Array.from([...shortcuts, ...favicons]).map(item => ({href: item.href, sizes: item.sizes.value})),
         appleTouchIcons: Array.from(appleTouchIcons).map(item => ({href: item.href, sizes: item.sizes.value})),
         ogMeta,
         twitterMeta,
