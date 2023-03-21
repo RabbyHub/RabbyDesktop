@@ -26,6 +26,7 @@ export const StepGroup: React.FC<Props> = ({ onMinted }) => {
   const { currentAccount } = useCurrentAccount();
   const [isAddDapp, setIsAddDapp] = React.useState(false);
   const [isTweet, setIsTweet] = useAtom(isTweetAtom);
+  const accountAddress = currentAccount?.address as string;
 
   // 1. add dapp, then listen dapps length change to next step
   const onAddDapp = React.useCallback(() => {
@@ -44,9 +45,14 @@ export const StepGroup: React.FC<Props> = ({ onMinted }) => {
   const handleCloseTweetModal = React.useCallback(
     (result: boolean) => {
       setOpenTweetModal(false);
-      setIsTweet(result);
+      setIsTweet((prev) => {
+        return {
+          ...prev,
+          [accountAddress]: result,
+        };
+      });
     },
-    [setIsTweet]
+    [accountAddress, setIsTweet]
   );
 
   // 3. mint, then listen tx finished to show minted successful
@@ -55,7 +61,6 @@ export const StepGroup: React.FC<Props> = ({ onMinted }) => {
   }, []);
 
   const checkTxInfo = React.useCallback(async () => {
-    const accountAddress = currentAccount!.address;
     const { completeds } = await walletController.getTransactionHistory(
       accountAddress
     );
@@ -92,7 +97,7 @@ export const StepGroup: React.FC<Props> = ({ onMinted }) => {
     }
 
     setIsMinting(false);
-  }, [currentAccount, onMinted]);
+  }, [accountAddress, onMinted]);
 
   // close nft modal and start to watch tx
   const handleCloseNFTModal = React.useCallback((result: string) => {
@@ -131,7 +136,7 @@ export const StepGroup: React.FC<Props> = ({ onMinted }) => {
       />
       <Step
         no={2}
-        isDone={isTweet}
+        isDone={isTweet[accountAddress]}
         title="Share on Twitter"
         buttonText="Tweet"
         onButtonClick={onTweet}
@@ -142,7 +147,7 @@ export const StepGroup: React.FC<Props> = ({ onMinted }) => {
       />
 
       <Step
-        disabled={!isTweet || !isAddDapp}
+        disabled={!isTweet[accountAddress] || !isAddDapp}
         no={3}
         title="Free Mint 1 NFT"
         buttonText={isMinting ? 'Minting' : 'Mint'}

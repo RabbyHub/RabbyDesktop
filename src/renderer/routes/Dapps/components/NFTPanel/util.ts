@@ -9,4 +9,4 @@ export type MintedData = {
 };
 
 // need reset when account changed
-export const isTweetAtom = atom(false);
+export const isTweetAtom = atom<Record<string, boolean>>({});
