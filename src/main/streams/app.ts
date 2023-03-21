@@ -352,6 +352,6 @@ export default function bootstrap() {
     if (!useBuiltInPwd) {
       alertAutoUnlockFailed();
     }
-    repairDappsFieldsOnBootstrap();
+    // repairDappsFieldsOnBootstrap();
   });
 }
