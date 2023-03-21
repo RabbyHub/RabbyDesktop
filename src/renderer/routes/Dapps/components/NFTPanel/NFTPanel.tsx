@@ -38,7 +38,7 @@ export const NFTPanel = () => {
   }, []);
 
   const getTotal = React.useCallback(() => {
-    walletController.mintedRabbyTotal().then(setTotal);
+    walletController.mintedRabbyTotal().then((n) => setTotal(Number(n)));
   }, []);
 
   React.useEffect(() => {
