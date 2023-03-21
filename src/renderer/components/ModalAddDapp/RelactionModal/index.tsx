@@ -48,8 +48,9 @@ export const RelationModal = ({
     >
       <div className={styles.content}>
         <div className={styles.title}>
-          You've already added a Dapp related to the current domain name. Adding
-          this new Dapp will replace the previous one.
+          You already have a Dapp associated with this domain. Adding a new
+          domain will conflict with the existing Dapp. Do you want to replace it
+          or cancel?
         </div>
         <div className={styles.body}>
           {data.map((dapp) => {
