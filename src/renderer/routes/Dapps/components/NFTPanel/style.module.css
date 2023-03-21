@@ -1,7 +1,0 @@
-.StepButton[disabled] {
-  background: inherit;
-}
-
-.StepButton[disabled]:hover {
-  background: inherit;
-}

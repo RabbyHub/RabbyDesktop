@@ -1,7 +1,6 @@
 import { Button } from 'antd';
 import classNames from 'classnames';
 import React from 'react';
-import styles from './style.module.css';
 
 export interface Props {
   title: string;
@@ -42,12 +41,12 @@ export const Step: React.FC<Props> = ({
         loading={loading}
         prefixCls="rabby-button"
         className={classNames(
-          styles.StepButton,
           'w-[94px] h-[33px] mx-auto rounded-[4px] text-white font-bold',
           'bg-color-[#8697FF] outline-none border-none cursor-pointer shadow',
           {
-            'text-[#ffffff80] cursor-not-allowed': disabled || isDone,
-            'bg-opacity-30 bg-color-[#8697FF]': disabled,
+            'text-[#ffffff80] cursor-not-allowed':
+              loading || disabled || isDone,
+            'bg-opacity-30 bg-color-[#8697FF]': loading || disabled,
             'bg-color-[#27C193] bg-opacity-40 :hover:bg-color-[#27C193]':
               isDone,
           }
