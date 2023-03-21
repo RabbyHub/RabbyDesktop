@@ -40,10 +40,19 @@ export const Step: React.FC<Props> = ({
         disabled={disabled || isDone}
         loading={loading}
         className={classNames('w-[94px] h-[33px] mx-auto rounded-[4px]', {
-          'opacity-30': disabled || isDone,
+          'opacity-30': disabled,
+          'bg-[#27C193] opacity-40': isDone,
         })}
         type="primary"
         onClick={onButtonClick}
+        icon={
+          isDone && (
+            <img
+              className="mr-[5px]"
+              src="rabby-internal://assets/icons/mint/check.svg"
+            />
+          )
+        }
       >
         {isDone ? 'Done' : buttonText}
       </Button>
