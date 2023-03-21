@@ -1,7 +1,20 @@
 
+v0.8.0 / 2023-03-21
+===================
+
+  * chore: change add dapp ui (#298)
+  * fix: number
+  * feat: disable repair favicons on bootstrap.
+  * fix: tweet (#297)
+  * feat: mark mainWindow's tab with dapp id. (#294)
+  * feat: mint rabby (#282)
+  * feat: add tabs to add dapp modal (#296)
+  * fix: include shortcut icon into favicons (#293)
+
 v0.7.0 / 2023-03-17
 ===================
 
+  * Release v0.7.0
   * feat: filter invalid base64.
   * feat: revert relaction domain (#292)
   * fix: some bad behaviors on open/select dapp (#291)
@@ -46,12 +59,13 @@ v0.6.0 / 2023-03-14
   * feat: support special subdomain & remove relaction dialog (#262)
   * feat: update rabbyX (#264)
   * fix: home view height (#260)
+  * Release v0.5.8
+  * chore: update trezror (#259)
 
-v0.5.8 / 2023-03-11
+v0.5.8 / 2023-03-10
 ===================
 
   * Release v0.5.8
-  * chore: update trezror (#259)
   * ci: accept env `buildchannel` from github actions vars.
   * fix: prerelease script.
   * fix: hd styles (#256)
