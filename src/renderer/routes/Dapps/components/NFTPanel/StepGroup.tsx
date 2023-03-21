@@ -74,7 +74,7 @@ export const StepGroup: React.FC<Props> = ({ onMinted }) => {
         const { inner_id, contract_id, detail_url } = nft;
 
         onMinted({
-          tokenId: inner_id,
+          tokenId: '',
           contractAddress: contract_id,
           detailUrl: detail_url,
         });
