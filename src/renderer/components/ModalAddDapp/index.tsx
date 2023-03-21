@@ -387,68 +387,97 @@ export function AddDapp({
 
   return (
     <div className={styles.content}>
-      <h3 className={styles.title}>Enter the Dapp domain name</h3>
-      <Form
-        form={form}
-        className={classNames(
-          styles.form,
-          state?.validateStatus !== 'error' && state?.help && styles.formHasHelp
-        )}
-        onFinish={handleCheck}
-        onFieldsChange={handleCheckDebounce}
-      >
-        <Form.Item
-          name="url"
-          help={
-            state?.validateStatus !== 'error' && state?.help ? state?.help : ''
-          }
-        >
-          <RabbyInput
-            className={styles.input}
-            placeholder="Input the Dapp domain name"
-            autoFocus
-            spellCheck={false}
-            suffix={
-              <span className={styles.inputSuffix}>
-                {loading ? (
-                  <LoadingOutlined />
-                ) : (
-                  <img
-                    onClick={() => {
-                      handleCheck();
-                    }}
-                    src="rabby-internal://assets/icons/add-dapp/icon-search.svg"
-                  />
-                )}
-              </span>
-            }
-          />
-        </Form.Item>
-      </Form>
-      {isShowExample && (
-        <DomainExample
-          onDomainClick={(domain) => {
-            form.setFieldsValue({ url: domain });
-            handleCheck();
-          }}
-        />
-      )}
-      {isShowWarning && <Warning>{state.help}</Warning>}
-      {state.dappInfo && !loading ? (
-        <PreviewDapp
-          data={state.dappInfo}
-          loading={isAddLoading}
-          onAdd={(dapp) => {
-            handleAddCheck(dapp);
-          }}
-          onOpen={(dapp) => {
-            openDapp(dapp.inputOrigin);
-            onOpenDapp?.(dapp.inputOrigin);
-          }}
-          isGoBack={isGoBack}
-          onGoBackClick={onGoBackClick}
-        />
-      ) : null}
+      <h3 className={styles.title}>Add a new Dapp</h3>
+      <div className={styles.tabs}>
+        <div className={styles.tabList}>
+          <div className={styles.tabItemActive}>
+            Add a Dapp by domain
+            <img
+              src="rabby-internal://assets/icons/add-dapp/icon-tab-border.svg"
+              alt=""
+              className={styles.tabBorder}
+            />
+          </div>
+          <div className={styles.tabListExtra}>
+            <div className={styles.tabItem}>
+              IPFS <span className={styles.tagSoon}>Soon</span>
+            </div>
+            <div className={styles.tabItem}>
+              ENS <span className={styles.tagSoon}>Soon</span>
+            </div>
+            <div className={styles.tabItem}>
+              Local file <span className={styles.tagSoon}>Soon</span>
+            </div>
+          </div>
+        </div>
+        <div className={styles.tabPanel}>
+          <Form
+            form={form}
+            className={classNames(
+              styles.form,
+              state?.validateStatus !== 'error' &&
+                state?.help &&
+                styles.formHasHelp
+            )}
+            onFinish={handleCheck}
+            onFieldsChange={handleCheckDebounce}
+          >
+            <Form.Item
+              name="url"
+              help={
+                state?.validateStatus !== 'error' && state?.help
+                  ? state?.help
+                  : ''
+              }
+            >
+              <RabbyInput
+                className={styles.input}
+                placeholder="Input the Dapp domain name"
+                autoFocus
+                spellCheck={false}
+                suffix={
+                  <span className={styles.inputSuffix}>
+                    {loading ? (
+                      <LoadingOutlined />
+                    ) : (
+                      <img
+                        onClick={() => {
+                          handleCheck();
+                        }}
+                        src="rabby-internal://assets/icons/add-dapp/icon-search.svg"
+                      />
+                    )}
+                  </span>
+                }
+              />
+            </Form.Item>
+          </Form>
+          {isShowExample && (
+            <DomainExample
+              onDomainClick={(domain) => {
+                form.setFieldsValue({ url: domain });
+                handleCheck();
+              }}
+            />
+          )}
+          {isShowWarning && <Warning>{state.help}</Warning>}
+          {state.dappInfo && !loading ? (
+            <PreviewDapp
+              data={state.dappInfo}
+              loading={isAddLoading}
+              onAdd={(dapp) => {
+                handleAddCheck(dapp);
+              }}
+              onOpen={(dapp) => {
+                openDapp(dapp.inputOrigin);
+                onOpenDapp?.(dapp.inputOrigin);
+              }}
+              isGoBack={isGoBack}
+              onGoBackClick={onGoBackClick}
+            />
+          ) : null}
+        </div>
+      </div>
       <RelationModal
         data={addState.relatedDapps}
         open={addState.isShowModal}
@@ -487,7 +516,7 @@ export default function ModalAddDapp({
 >) {
   return (
     <Modal
-      width={1000}
+      width={896}
       centered
       {...modalProps}
       onCancel={() => {

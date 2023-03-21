@@ -3,8 +3,8 @@
 @previewBoxRadius: 8px;
 .addModal {
   .content {
-    padding: 32px 100px 40px 100px;
-    min-height: 680px;
+    padding: 30px;
+    min-height: 718px;
   }
   .title {
     font-weight: 500;
@@ -12,13 +12,10 @@
     line-height: 24px;
     text-align: center;
     color: #ffffff;
-    margin-bottom: 32px;
+    margin-bottom: 16px;
   }
   .form {
-    height: 96px;
-    &HasHelp {
-      margin-bottom: 12px;
-    }
+    height: 92px;
   }
 
   .replaceLink {
@@ -66,7 +63,10 @@
   }
   :global {
     .ant-modal-close-x {
-      padding: 32px 24px;
+      padding: 30px 28px;
+    }
+    .ant-form-item {
+      margin-bottom: 0;
     }
     .ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled):hover {
       border-color: rgba(255, 255, 255, 0.5);
@@ -83,13 +83,87 @@
 
     .ant-form-item-explain {
       margin-top: 12px;
-      margin-bottom: 24px;
+      margin-bottom: 0;
+      transition: none;
       font-weight: 400;
       font-size: 12px;
       line-height: 14px;
     }
     .ant-form-item-explain-success {
       color: rgba(255, 255, 255, 0.6);
+    }
+  }
+
+  .tab {
+    &Panel {
+      padding: 18px;
+      border: 1px solid #616676;
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      min-height: 573px;
+    }
+    &List {
+      display: flex;
+      align-items: flex-end;
+      &Extra {
+        flex: 1;
+        display: flex;
+        border: 1px solid #616676;
+        border-top-right-radius: 6px;
+
+        .tabItem {
+          width: 33.33%;
+          height: 39px;
+          text-align: center;
+          position: relative;
+          padding-top: 12px;
+
+          font-weight: 400;
+          font-size: 14px;
+          line-height: 17px;
+          color: rgba(255, 255, 255, 0.3);
+
+          &:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 6px;
+            bottom: 6px;
+            width: 1px;
+            background: rgba(255, 255, 255, 0.06);
+          }
+
+          .tagSoon {
+            font-weight: 400;
+            font-size: 12px;
+            line-height: 14px;
+            color: rgba(255, 255, 255, 0.3);
+            border-radius: 6px 6px 6px 1px;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 0 4px;
+            margin-left: 5px;
+          }
+        }
+      }
+    }
+    &ItemActive {
+      padding-left: 20px;
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 19px;
+      color: #ffffff;
+      padding: 20px 18px 4px 18px;
+      width: 289px;
+      border: 1px solid #616676;
+      border-bottom: 0;
+      border-right: 0;
+      border-radius: 6px 0 0 0;
+      position: relative;
+      .tabBorder {
+        position: absolute;
+        right: -14px;
+        top: -1px;
+      }
     }
   }
 }
