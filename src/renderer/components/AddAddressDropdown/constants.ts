@@ -33,6 +33,11 @@ const KEYRING_MAP: KeyringLabel[] = [
     name: 'Contacts',
     id: KEYRING_CLASS.WATCH,
   },
+  {
+    logo: 'rabby-internal://assets/icons/add-address/cup.svg',
+    name: 'Gnosis Safe',
+    id: KEYRING_CLASS.GNOSIS,
+  },
 ];
 
 if (!IS_RUNTIME_PRODUCTION) {

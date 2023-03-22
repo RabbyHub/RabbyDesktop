@@ -377,6 +377,11 @@ export type RabbyXMethod = {
   'walletController.mintedRabbyTotal': () => number;
 
   'walletController.clearAddressPendingTransactions': (address: string) => void;
+  'walletController.importGnosisAddress': (
+    address: string,
+    networkId: string
+  ) => Promise<RabbyAccount[]>;
+  'walletController.getTypedAccounts': () => Promise<DisplayedKeyring[]>;
 
   'permissionService.addConnectedSite': (
     origin: string,
