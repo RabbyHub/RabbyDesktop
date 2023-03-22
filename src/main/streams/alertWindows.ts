@@ -1,3 +1,4 @@
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { roundRectValue } from '@/isomorphic/shape';
 import { randString } from '@/isomorphic/string';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
@@ -30,24 +31,20 @@ function getPromptWindowBounds(parentWindow: Electron.BrowserWindow) {
   return roundRectValue({ x, y, width: SIZE.width, height: SIZE.height });
 }
 
-const promptState: Record<
-  string,
-  {
-    callerWindowId: number;
-    callerWebContentsId: number;
-    promptWindowId: number;
-  }
-> = {};
-
 // TODO:
 // 1. restrain only active tab run it
 // 2. avoid repeative prompt in short time
 onIpcMainSyncEvent('__internal_rpc:app:prompt-open', async (evt, options) => {
   const callerWebContents = evt.sender;
   const callerTabbedWin = getTabbedWindowFromWebContents(callerWebContents);
-
   if (!callerTabbedWin) {
     throw new Error(`Cannot find tabbed window from webContents`);
+  }
+
+  const mainTabbedWin = await onMainWindowReady();
+
+  if (callerWebContents === mainTabbedWin.window.webContents) {
+    throw new Error(`Cannot open prompt from mainWindow`);
   }
 
   const promptId = randString();
@@ -69,14 +66,12 @@ onIpcMainSyncEvent('__internal_rpc:app:prompt-open', async (evt, options) => {
       minimizable: false,
       fullscreen: false,
       movable: true,
+      show: false,
     },
   });
-
-  promptState[promptId] = {
-    callerWindowId: callerTabbedWin.window.id,
-    callerWebContentsId: callerWebContents.id,
-    promptWindowId: alertTabbedWin.window.id,
-  };
+  alertTabbedWin.window.setBounds(
+    getPromptWindowBounds(callerTabbedWin.window)
+  );
 
   const disposeOnConfirm = onIpcMainEvent(
     '__internal_rpc:app:prompt-confirm',
@@ -141,6 +136,10 @@ onIpcMainSyncEvent('__internal_rpc:app:prompt-open', async (evt, options) => {
     }
   );
 
+  if (IS_RUNTIME_PRODUCTION) {
+    alertTabbedWin.window.webContents.openDevTools({ mode: 'detach' });
+  }
+
   alertTabbedWin.window.on('closed', () => {
     disposeOnConfirm();
     disposeOnCancel();
@@ -150,10 +149,6 @@ onIpcMainSyncEvent('__internal_rpc:app:prompt-open', async (evt, options) => {
 
   // alertTabbedWin.window.setMenu(null);
   // alertTabbedWin.window.setMenuBarVisibility(false);
-
-  alertTabbedWin.window.setBounds(
-    getPromptWindowBounds(callerTabbedWin.window)
-  );
   alertTabbedWin.window.moveTop();
 
   alertTabbedWin.window.show();
@@ -166,21 +161,13 @@ onIpcMainInternalEvent('__internal_main:dev', async (payload) => {
   const callerWc =
     payload.callerWebContents || mainTabbedWin.window.webContents;
 
-  if (!callerWc.isDevToolsOpened()) {
-    callerWc.openDevTools({ mode: 'detach' });
-  } else if (callerWc.isDevToolsFocused()) {
-    callerWc.focus();
-  }
-  // callerWc.executeJavaScript(
-  //   `window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:app:prompt-open');`
-  // );
-  callerWc.executeJavaScript(`window.prompt('Test Message');`);
-});
+  // if (!IS_RUNTIME_PRODUCTION) {
+  //   if (!callerWc.isDevToolsOpened()) {
+  //     callerWc.openDevTools({ mode: 'detach' });
+  //   } else if (callerWc.isDevToolsFocused()) {
+  //     callerWc.focus();
+  //   }
+  // }
 
-// // just for debug
-// onMainWindowReady().then((mainTabbedWin) => {
-//   mainTabbedWin.window.webContents.openDevTools({ mode: 'detach' });
-//   mainTabbedWin.window.webContents.executeJavaScript(
-//     `window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:app:prompt-open');`
-//   );
-// });
+  callerWc.executeJavaScript(`window.prompt('prompt from dapp');`);
+});

@@ -1,4 +1,8 @@
-import { canoicalizeDappUrl, isInternalProtocol } from '@/isomorphic/url';
+import {
+  canoicalizeDappUrl,
+  isInternalProtocol,
+  isUrlFromDapp,
+} from '@/isomorphic/url';
 import {
   app,
   BrowserWindow,
@@ -210,16 +214,18 @@ function buildInspectKitsMenu(opts: ChromeContextMenuOptions) {
     },
   });
 
-  appendMenuSeparator(inspectKitsMenu);
-  appendMenu(inspectKitsMenu, {
-    label: `Test window.prompt`,
-    click: () => {
-      emitIpcMainEvent('__internal_main:dev', {
-        type: 'app:test-prompt',
-        callerWebContents: opts.webContents,
-      });
-    },
-  });
+  if (isUrlFromDapp(opts.webContents.getURL())) {
+    appendMenuSeparator(inspectKitsMenu);
+    appendMenu(inspectKitsMenu, {
+      label: `Test window.prompt`,
+      click: () => {
+        emitIpcMainEvent('__internal_main:dev', {
+          type: 'app:test-prompt',
+          callerWebContents: opts.webContents,
+        });
+      },
+    });
+  }
 
   appendMenuSeparator(inspectKitsMenu);
   appendMenu(inspectKitsMenu, {

@@ -1,6 +1,9 @@
+import { getBuiltinViewType } from '../isomorphic/url';
 import { exposeToMainWorld, ipcRendererObj } from './base';
 
 export async function injectAlertMethods() {
+  if (getBuiltinViewType(window.location)) return;
+
   exposeToMainWorld(
     '__RDPrompt',
     function (message?: string, defaultContent?: string) {
