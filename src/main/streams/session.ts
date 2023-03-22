@@ -5,6 +5,7 @@ import { protocol, session, shell } from 'electron';
 import { firstValueFrom } from 'rxjs';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { isRabbyXPage } from '@/isomorphic/url';
+import { removeElectronInUserAgent } from '@/isomorphic/string';
 import {
   IS_RUNTIME_PRODUCTION,
   RABBY_INTERNAL_PROTOCOL,
@@ -37,7 +38,7 @@ import {
   getWindowFromWebContents,
   switchToBrowserTab,
 } from '../utils/browser';
-import { supportHmrOnDev } from '../utils/webRequest';
+import { fixResponseHeaders, supportHmrOnDev } from '../utils/webRequest';
 import { checkProxyViaBrowserView, setSessionProxy } from '../utils/appNetwork';
 import { getAppProxyConf } from '../store/desktopApp';
 import { createTrezorLikeConnectPageWindow } from '../utils/hardwareConnect';
@@ -151,10 +152,6 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   // sub.unsubscribe();
   const sessionIns = session.defaultSession;
 
-  // // Remove Electron and App details to closer emulate Chrome's UA
-  const userAgent = sessionIns.getUserAgent().replace(/\sElectron\/\S+/, '');
-  sessionIns.setUserAgent(userAgent);
-
   if (
     !sessionIns.protocol.registerFileProtocol(
       RABBY_INTERNAL_PROTOCOL.slice(0, -1),
@@ -201,6 +198,19 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
     dappSafeViewSession,
     checkingViewSession,
     checkingProxySession,
+  });
+  const allSessions = [
+    sessionIns,
+    dappSafeViewSession,
+    checkingViewSession,
+    checkingProxySession,
+  ];
+  allSessions.forEach((sess) => {
+    // Remove Electron to closer emulate Chrome's UA
+    const userAgent = removeElectronInUserAgent(sess.getUserAgent());
+    sess.setUserAgent(userAgent);
+
+    fixResponseHeaders(sess);
   });
 
   // must after sessionReady
