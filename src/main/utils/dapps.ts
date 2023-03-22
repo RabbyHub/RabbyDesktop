@@ -295,32 +295,32 @@ export async function detectDapp(
   }
 
   // TODO: if existed, fetch the url and store as base64
-  if (!data.faviconUrl) {
-    const { iconInfo, faviconUrl, faviconBase64 } = await parseWebsiteFavicon(
-      finalOrigin,
-      {
-        timeout: 3000, // 如果之前的流程取不到 favicon，这里大概率也取不到，所以直接 3s 超时即可
-        proxy: proxyOnGrab,
-      }
-    );
+  // if (!data.faviconUrl) {
+  //   const { iconInfo, faviconUrl, faviconBase64 } = await parseWebsiteFavicon(
+  //     finalOrigin,
+  //     {
+  //       timeout: 3000, // 如果之前的流程取不到 favicon，这里大概率也取不到，所以直接 3s 超时即可
+  //       proxy: proxyOnGrab,
+  //     }
+  //   );
 
-    data.icon = iconInfo;
-    data.faviconUrl = faviconUrl || fallbackFavicon;
-    data.faviconBase64 = faviconBase64;
-  } else if (!data.faviconBase64) {
-    await fetchImageBuffer(data.faviconUrl, {
-      timeout: 3000, // base64 非必须，3s 取不到直接超时就好
-      proxy: proxyOnGrab,
-    })
-      .then((faviconBuf) => {
-        data.faviconBase64 = nativeImage
-          .createFromBuffer(faviconBuf)
-          .toDataURL();
-      })
-      .catch((error) => {
-        console.error(`[detectDapp] fetch favicon error occured: `, error);
-      });
-  }
+  //   data.icon = iconInfo;
+  //   data.faviconUrl = faviconUrl || fallbackFavicon;
+  //   data.faviconBase64 = faviconBase64;
+  // } else if (!data.faviconBase64) {
+  //   await fetchImageBuffer(data.faviconUrl, {
+  //     timeout: 3000, // base64 非必须，3s 取不到直接超时就好
+  //     proxy: proxyOnGrab,
+  //   })
+  //     .then((faviconBuf) => {
+  //       data.faviconBase64 = nativeImage
+  //         .createFromBuffer(faviconBuf)
+  //         .toDataURL();
+  //     })
+  //     .catch((error) => {
+  //       console.error(`[detectDapp] fetch favicon error occured: `, error);
+  //     });
+  // }
 
   return { data };
 }
