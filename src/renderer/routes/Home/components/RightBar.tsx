@@ -1,8 +1,9 @@
 import { ReceiveModalWraper } from '@/renderer/components/ReceiveModal';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { Tooltip } from 'antd';
+import { useGnosis, useIsGnosis } from '@/renderer/hooks/rabbyx/useGnosis';
 import IconReceive from '../../../../../assets/icons/home/receive.svg?rc';
 import IconSend from '../../../../../assets/icons/home/send.svg?rc';
 import IconSwap from '../../../../../assets/icons/home/swap.svg?rc';
@@ -49,34 +50,57 @@ const ActionList = styled.ul`
 
 const RightBar = ({ updateNonce }: { updateNonce: number }) => {
   const [isShowReceive, setIsShowReceive] = useState(false);
-
+  const isGnosis = useIsGnosis();
+  const { pendingCount } = useGnosis();
   const navigateTo = useNavigate();
-  const actions = [
-    {
-      id: 'swap',
-      name: 'Swap',
-      icon: <IconSwap width="35px" height="35px" />,
-      onClick: () => {
-        navigateTo('/mainwin/home/swap?rbisource=home');
+  const actions = useMemo(() => {
+    const list = [
+      {
+        id: 'swap',
+        name: 'Swap',
+        icon: <IconSwap width="35px" height="35px" />,
+        onClick: () => {
+          navigateTo('/mainwin/home/swap?rbisource=home');
+        },
       },
-    },
-    {
-      id: 'send',
-      name: 'Send',
-      icon: <IconSend width="35px" height="35px" />,
-      onClick: () => {
-        navigateTo('/mainwin/home/send-token?rbisource=home');
+      {
+        id: 'send',
+        name: 'Send',
+        icon: <IconSend width="35px" height="35px" />,
+        onClick: () => {
+          navigateTo('/mainwin/home/send-token?rbisource=home');
+        },
       },
-    },
-    {
-      id: 'receive',
-      name: 'Receive',
-      icon: <IconReceive width="35px" height="35px" />,
-      onClick: () => {
-        setIsShowReceive(true);
+      {
+        id: 'receive',
+        name: 'Receive',
+        icon: <IconReceive width="35px" height="35px" />,
+        onClick: () => {
+          setIsShowReceive(true);
+        },
       },
-    },
-  ];
+    ];
+
+    // TODO
+    if (isGnosis) {
+      list.push({
+        id: 'queue',
+        name: 'Queue',
+        icon: (
+          <div>
+            <span>{pendingCount}</span>
+            <IconReceive width="35px" height="35px" />
+          </div>
+        ),
+        onClick: () => {
+          navigateTo('/mainwin/home/gnosis-queue?rbisource=home');
+        },
+      });
+    }
+
+    return list;
+  }, [isGnosis, navigateTo, pendingCount]);
+
   return (
     <RightBarWrapper>
       <ActionList>
