@@ -156,3 +156,23 @@ export default function Titlebar(
     </div>
   );
 }
+
+export function TitlebarForAlertWindow(
+  _: React.PropsWithChildren<{
+    immersed?: boolean;
+  }>
+) {
+  const { osType: winOSType } = useWindowState();
+
+  return (
+    <div
+      className={classNames(
+        styles.titlebar,
+        winOSType === 'darwin' && styles['os-darwin'],
+        winOSType === 'win32' && styles['os-win32']
+      )}
+    >
+      <div className={styles['app-drag']} />
+    </div>
+  );
+}

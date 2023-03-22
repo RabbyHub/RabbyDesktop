@@ -14,6 +14,7 @@ import { setupClass } from '../preloads/setup-class';
 import { setupDapp } from '../preloads/setup-dapp';
 import { getBuiltinViewType, isExtensionBackground } from '../isomorphic/url';
 import { injectMatomo } from '../preloads/global-inject';
+import { injectAlertMethods } from '../preloads/setup-alert';
 
 if (
   window.location.protocol === 'chrome-extension:' &&
@@ -62,3 +63,4 @@ if (IS_BUILTIN_WEBVIEW) {
 }
 
 setupDapp();
+injectAlertMethods();

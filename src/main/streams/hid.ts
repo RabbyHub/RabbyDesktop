@@ -155,6 +155,7 @@ getSessionInsts().then(({ mainSession }) => {
       switch (permission) {
         case 'clipboard-sanitized-write':
         case 'accessibility-events':
+        case 'background-sync':
           return true;
         case 'serial':
         case 'hid':

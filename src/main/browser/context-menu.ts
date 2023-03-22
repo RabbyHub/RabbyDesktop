@@ -212,6 +212,17 @@ function buildInspectKitsMenu(opts: ChromeContextMenuOptions) {
 
   appendMenuSeparator(inspectKitsMenu);
   appendMenu(inspectKitsMenu, {
+    label: `Test window.prompt`,
+    click: () => {
+      emitIpcMainEvent('__internal_main:dev', {
+        type: 'app:test-prompt',
+        callerWebContents: opts.webContents,
+      });
+    },
+  });
+
+  appendMenuSeparator(inspectKitsMenu);
+  appendMenu(inspectKitsMenu, {
     label: `Open DappSafeView's Content`,
     click: () => {
       emitIpcMainEvent('__internal_main:dev', {

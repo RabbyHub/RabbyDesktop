@@ -22,7 +22,39 @@ export function onIpcMainEvent<T extends IChannelsKey = IChannelsKey>(
   ipcMain.on(eventName, handler as any);
 
   // dispose
+  let disposed = false;
   const dispose = () => {
+    if (disposed) return;
+    disposed = true;
+
+    return ipcMain.off(eventName, handler as any);
+  };
+
+  dispose.handler = handler;
+
+  return dispose;
+}
+
+export function onIpcMainSyncEvent<T extends ISendSyncKey = ISendSyncKey>(
+  eventName: T,
+  handler: (
+    event: Electron.IpcMainEvent & {
+      returnValue: ChannelSendSyncPayload[T]['returnValue'];
+      // disable reply for calling to `ipcRenderer.sendSync`
+      reply: {
+        (eventName: T, response: void): any;
+      };
+    },
+    ...args: ChannelSendSyncPayload[T]['send']
+  ) => any
+) {
+  ipcMain.on(eventName, handler as any);
+
+  // dispose
+  let disposed = false;
+  const dispose = () => {
+    if (disposed) return;
+    disposed = true;
     return ipcMain.off(eventName, handler as any);
   };
 
@@ -45,7 +77,10 @@ export function onIpcMainInternalEvent<T extends MainInternals = MainInternals>(
   ipcMain.on(eventName, handler as any);
 
   // dispose
+  let disposed = false;
   const dispose = () => {
+    if (disposed) return;
+    disposed = true;
     return ipcMain.off(eventName, handler as any);
   };
 
@@ -56,7 +91,7 @@ export function onIpcMainInternalEvent<T extends MainInternals = MainInternals>(
 
 export function sendToWebContents<T extends IPushEvents = IPushEvents>(
   webContents: Electron.WebContents | null | undefined,
-  eventName: T,
+  eventName: T & string,
   payload: M2RChanneMessagePayload[T] extends void
     ? null
     : M2RChanneMessagePayload[T]
@@ -72,4 +107,16 @@ export function handleIpcMainInvoke<T extends IInvokesKey = IInvokesKey>(
   ) => ItOrItsPromise<ChannelInvokePayload[T]['response']>
 ) {
   ipcMain.handle(eventName, handler as any);
+
+  // dispose
+  let disposed = false;
+  const dispose = () => {
+    if (disposed) return;
+    disposed = true;
+    return ipcMain.off(eventName, handler as any);
+  };
+
+  dispose.handler = handler;
+
+  return dispose;
 }

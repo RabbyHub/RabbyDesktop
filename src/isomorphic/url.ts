@@ -125,17 +125,21 @@ export function isUrlFromDapp(url: string) {
   );
 }
 
+export function getShellUIType(url: string) {
+  return parseQueryString(new URL(url).search).__webuiType;
+}
+
 // TODO: use better flag to check if it's main window's shell ui
 export function isMainWinShellWebUI(url: string) {
   return (
     url.startsWith('chrome-extension:') &&
-    url.includes('__webuiIsMainWindow=true')
+    url.includes('__webuiType=MainWindow')
   );
 }
 export function isForTrezorLikeWebUI(url: string) {
   return (
     url.startsWith('chrome-extension:') &&
-    url.includes('__webuiForTrezorLike=true')
+    url.includes('__webuiType=ForTrezorLike')
   );
 }
 
@@ -195,7 +199,7 @@ export function isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
 export function isRabbyXNotificationWinShellWebUI(url: string) {
   return (
     url.startsWith('chrome-extension:') &&
-    url.includes('__webuiIsRabbyXNotificationWindow=true')
+    url.includes('__webuiType=RabbyX-NotificationWindow')
   );
 }
 

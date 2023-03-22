@@ -1,0 +1,30 @@
+.AlertWindowPrompt {
+  color: var(--color-purewhite);
+  height: 100%;
+  max-height: var(--mainwin-mainroute-height);
+}
+
+.PromptInner {
+  // @apply flex align-start justify-center
+  // flex-direction: column;
+
+  @apply w-[300px] max-w-[80%] h-[100%];
+  @apply pt-[12px];
+  margin: 0 auto;
+}
+
+.originSite {
+  background-color: var(--color-paragraph);
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
+.messageContent {
+  line-height: 2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 100%;
+  overflow: hidden;
+}

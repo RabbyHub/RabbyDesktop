@@ -87,7 +87,7 @@ export function createPopupModalWindow(
     Electron.BrowserWindowConstructorOptions,
     | 'hasShadow'
     | 'modal'
-    | 'frame'
+    // | 'frame'
     | 'closable'
     | 'movable'
     | 'resizable'
@@ -109,7 +109,6 @@ export function createPopupModalWindow(
     ...opts,
     hasShadow: false,
     modal: true,
-    frame: false,
     movable: false,
     resizable: false,
     minimizable: false,
@@ -119,6 +118,7 @@ export function createPopupModalWindow(
     show: false,
     skipTaskbar: true,
     ...getPopupWinDefaultOpts(opts),
+    frame: !!opts.frame,
     webPreferences: {
       ...SAFE_WEBPREFERENCES,
       webviewTag: false,

@@ -81,7 +81,7 @@ export async function createRabbyxNotificationWindow({
   const win = await createWindow({
     defaultTabUrl: url,
     windowType: 'popup',
-    isRabbyXNotificationWindow: true,
+    webuiType: 'RabbyX-NotificationWindow',
     window: {
       frame: false,
       /**

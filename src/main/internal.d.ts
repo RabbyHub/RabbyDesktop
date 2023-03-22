@@ -124,6 +124,10 @@ type MainInternalsMessagePayload = {
           type: 'rabbyx-sign-gasket:toggle-show';
           nextShow: boolean;
         }
+      | {
+          type: 'app:test-prompt';
+          callerWebContents?: Electron.WebContents;
+        }
     ];
     response: [];
   };

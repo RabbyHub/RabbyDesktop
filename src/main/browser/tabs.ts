@@ -9,7 +9,10 @@ import {
 import { NATIVE_HEADER_H } from '../../isomorphic/const-size-classical';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
-import { BrowserViewManager } from '../utils/browserView';
+import {
+  BrowserViewManager,
+  patchTabbedBrowserWebContents,
+} from '../utils/browserView';
 import { desktopAppStore } from '../store/desktopApp';
 import { getAssetPath } from '../utils/app';
 import { hideLoadingView, isDappViewLoadingForTab } from '../utils/browser';
@@ -37,9 +40,8 @@ type ITabOptions = {
     navigation?: boolean;
   };
   initDetails?: Partial<chrome.tabs.CreateProperties>;
-  isOfMainWindow?: boolean;
+  webuiType?: IShellWebUIType;
   relatedDappId?: string;
-  isOfTreasureLikeConnection?: boolean;
 };
 
 const dappViewTopOffset =
@@ -66,15 +68,13 @@ export class Tab {
   private $meta: {
     initDetails: ITabOptions['initDetails'];
     topbarStacks: ITabOptions['topbarStacks'];
-    isOfMainWindow: boolean;
+    webuiType?: IShellWebUIType;
     relatedDappId: ITabOptions['relatedDappId'];
-    isOfTreasureLikeConnection: boolean;
   } = {
     initDetails: {},
     topbarStacks: { ...DEFAULT_TOPBAR_STACKS },
-    isOfMainWindow: false,
+    webuiType: undefined,
     relatedDappId: '',
-    isOfTreasureLikeConnection: false,
   };
 
   private _isAnimating: boolean = false;
@@ -86,12 +86,9 @@ export class Tab {
 
     this.$meta.initDetails = { ...initDetails };
     this.$meta.topbarStacks = { ...DEFAULT_TOPBAR_STACKS, ...topbarStacks };
-    this.$meta.isOfMainWindow = !!tabOptions.isOfMainWindow;
+    this.$meta.webuiType = tabOptions.webuiType;
 
-    this.$meta.isOfTreasureLikeConnection =
-      !!tabOptions.isOfTreasureLikeConnection;
-
-    if (this.$meta.isOfTreasureLikeConnection) {
+    if (this.$meta.webuiType === 'ForTrezorLike') {
       this.$meta.topbarStacks.tabs = true;
     }
 
@@ -102,7 +99,7 @@ export class Tab {
     this.windowId = ofWindow.id;
 
     this.$meta.relatedDappId = tabOptions.relatedDappId;
-    if (this.$meta.relatedDappId && !this.$meta.isOfMainWindow) {
+    if (this.$meta.relatedDappId && this.$meta.webuiType !== 'MainWindow') {
       throw new Error(
         `Tab of dapp must be of main window, but got relatedDappId: ${this.$meta.relatedDappId}`
       );
@@ -142,25 +139,23 @@ export class Tab {
 
   /** @internal */
   _patchWindowClose() {
-    // polyfill for window.close
-    this.view?.webContents.executeJavaScript(`
-      ;(function () {
-        if (window.close && window.close.__patched) return ;
+    patchTabbedBrowserWebContents(this.view!.webContents, {
+      windowId: this.windowId,
+    });
+  }
 
-        if (
-          window.location.href !== 'about:blank'
-          && window.location.protocol !== 'chrome-extension:'
-        ) return ;
+  get isOfMainWindow() {
+    return this.$meta.webuiType === 'MainWindow';
+  }
 
+  get isTitleBarLikeMainWindow() {
+    return (
+      this.$meta.webuiType === 'MainWindow' || this.$meta.webuiType === 'Prompt'
+    );
+  }
 
-        var origWinClose = window.close.bind(window);
-        window.close = function (...args) {
-          window.rabbyDesktop.ipcRenderer.sendMessage('__internal_webui-window-close', ${this.window?.id}, ${this.view?.webContents.id});
-          origWinClose(args);
-        }
-        window.close.__patched = true;
-      })();
-    `);
+  get isOfTreasureLikeConnection() {
+    return this.$meta.webuiType === 'ForTrezorLike';
   }
 
   showLoadingView(nextURL: string) {
@@ -211,7 +206,7 @@ export class Tab {
   }
 
   makeTabLastOpenInfo(): IDappLastOpenInfo | null {
-    if (!this.$meta.isOfMainWindow) return null;
+    if (!this.isOfMainWindow) return null;
 
     let finalURL = '';
     try {
@@ -231,7 +226,7 @@ export class Tab {
   }
 
   async loadURL(url: string) {
-    const isMain = this.$meta.isOfMainWindow;
+    const isMain = this.isOfMainWindow;
     if (isMain) {
       emitIpcMainEvent('__internal_main:mainwindow:capture-tab', {
         type: 'clear',
@@ -258,13 +253,12 @@ export class Tab {
     const hideTopbar =
       !this.$meta.topbarStacks?.tabs && !this.$meta.topbarStacks?.navigation;
 
-    const { isOfMainWindow, isOfTreasureLikeConnection } = this.$meta;
     const isCollapsedMainWindow =
-      isOfMainWindow && desktopAppStore.get('sidebarCollapsed');
+      this.isOfMainWindow && desktopAppStore.get('sidebarCollapsed');
 
     const topOffset = hideTopbar
       ? 0
-      : !isOfTreasureLikeConnection
+      : !this.isOfTreasureLikeConnection
       ? NATIVE_HEADER_H
       : NativeAppSizes.trezorLikeConnectionWindowHeaderHeight;
 
@@ -280,7 +274,7 @@ export class Tab {
       y: topOffset,
       width,
       height: height - topOffset,
-      ...(isOfMainWindow
+      ...(this.isTitleBarLikeMainWindow
         ? !isCollapsedMainWindow
           ? {
               x: NativeLayouts.dappsViewLeftOffset,
@@ -312,7 +306,7 @@ export class Tab {
   }
 
   setAnimatedMainWindowTabRect(rect?: Electron.Rectangle) {
-    if (!this.$meta.isOfMainWindow) return;
+    if (!this.isOfMainWindow) return;
     if (!this.view) return;
 
     if (!this._isAnimating) return;
@@ -361,7 +355,7 @@ export class Tab {
   }
 
   getRelatedDappInfo(dappOrigin: string | ICanonalizedUrlInfo) {
-    if (!this.$meta.isOfMainWindow || !this.$meta.relatedDappId) return null;
+    if (!this.isOfMainWindow || !this.$meta.relatedDappId) return null;
 
     const parsedInfo =
       typeof dappOrigin === 'string'
