@@ -2,10 +2,10 @@ import { roundRectValue } from '@/isomorphic/shape';
 import { randString } from '@/isomorphic/string';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
 import {
-  handleIpcMainInvoke,
   onIpcMainEvent,
   onIpcMainInternalEvent,
   onIpcMainSyncEvent,
+  sendToWebContents,
 } from '../utils/ipcMainEvents';
 import { onMainWindowReady } from '../utils/stream-helpers';
 import {
@@ -39,7 +39,9 @@ const promptState: Record<
   }
 > = {};
 
-// TODO: restrain only active tab run it
+// TODO:
+// 1. restrain only active tab run it
+// 2. avoid repeative prompt in short time
 onIpcMainSyncEvent('__internal_rpc:app:prompt-open', async (evt, options) => {
   const callerWebContents = evt.sender;
   const callerTabbedWin = getTabbedWindowFromWebContents(callerWebContents);
@@ -117,22 +119,25 @@ onIpcMainSyncEvent('__internal_rpc:app:prompt-open', async (evt, options) => {
     }
   );
 
-  const disposeOnQuery = handleIpcMainInvoke(
-    '__internal_rpc:app:prompt-query',
+  // __internal_rpc:app:prompt-mounted
+  const disposeOnMounted = onIpcMainEvent(
+    '__internal_rpc:app:prompt-mounted',
     (_, queryPromptId) => {
-      if (queryPromptId !== promptId)
-        return {
-          error: 'Mismatch promptId',
-        };
+      if (queryPromptId !== promptId) return;
+      sendToWebContents(
+        alertTabbedWin.window.webContents,
+        '__internal_push:app:prompt-init',
+        {
+          promptId,
+          data: {
+            message: options?.message || '',
+            originSite: canoicalizeDappUrl(options?.callerURL || '').origin,
+            initInput: options?.defaultContent || '',
+          },
+        }
+      );
 
-      return {
-        error: null,
-        data: {
-          message: options?.message || '',
-          originSite: canoicalizeDappUrl(options?.callerURL || '').origin,
-          initInput: options?.defaultContent || '',
-        },
-      };
+      disposeOnMounted();
     }
   );
 
@@ -140,7 +145,7 @@ onIpcMainSyncEvent('__internal_rpc:app:prompt-open', async (evt, options) => {
     disposeOnConfirm();
     disposeOnCancel();
     disposeOnError();
-    disposeOnQuery();
+    disposeOnMounted();
   });
 
   // alertTabbedWin.window.setMenu(null);

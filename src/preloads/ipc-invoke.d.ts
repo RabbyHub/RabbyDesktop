@@ -207,17 +207,6 @@ type ChannelInvokePayload = {
       releaseNote: string;
     };
   };
-  '__internal_rpc:app:prompt-query': {
-    send: [promptId: string];
-    response: {
-      error?: string | null;
-      data?: {
-        message?: string;
-        originSite?: string;
-        initInput?: string;
-      };
-    };
-  };
   [`__internal_rpc:rabbyx-rpc:query`]: {
     send: [query: Omit<IRabbyxRpcQuery, 'rpcId'>];
     response: {

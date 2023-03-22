@@ -26,18 +26,26 @@ export default function AlertWindowPrompt() {
   useEffect(() => {
     if (initedRef.current) return;
 
-    initedRef.current = true;
-    window.rabbyDesktop.ipcRenderer
-      .invoke('__internal_rpc:app:prompt-query', promptId)
-      .then((res) => {
-        if (res.error) return;
+    const dispose = window.rabbyDesktop.ipcRenderer.on(
+      '__internal_push:app:prompt-init',
+      (res) => {
+        if (res.promptId !== promptId) return;
 
         setInitContent({
           title: res.data?.message || '',
           originSite: res.data?.originSite || '',
         });
         setUserInput(res.data?.initInput || '');
-      });
+      }
+    );
+
+    initedRef.current = true;
+    window.rabbyDesktop.ipcRenderer.sendMessage(
+      '__internal_rpc:app:prompt-mounted',
+      promptId
+    );
+
+    return dispose;
   }, []);
 
   if (!promptId) return null;

@@ -99,6 +99,9 @@ export function sendToWebContents<T extends IPushEvents = IPushEvents>(
   webContents?.send(eventName, payload);
 }
 
+/**
+ * @description you cannot repeat register handler for the same event
+ */
 export function handleIpcMainInvoke<T extends IInvokesKey = IInvokesKey>(
   eventName: T,
   handler: (
@@ -107,16 +110,4 @@ export function handleIpcMainInvoke<T extends IInvokesKey = IInvokesKey>(
   ) => ItOrItsPromise<ChannelInvokePayload[T]['response']>
 ) {
   ipcMain.handle(eventName, handler as any);
-
-  // dispose
-  let disposed = false;
-  const dispose = () => {
-    if (disposed) return;
-    disposed = true;
-    return ipcMain.off(eventName, handler as any);
-  };
-
-  dispose.handler = handler;
-
-  return dispose;
 }

@@ -76,7 +76,7 @@ type M2RChanneMessagePayload = {
   '__internal_push:webhid:select-devices-modal-blur': {
     foo?: string;
   };
-} & keyof ChannelPushToWebContents;
+} & ChannelPushToWebContents;
 
 type IPushEvents = keyof M2RChanneMessagePayload;
 
@@ -271,6 +271,10 @@ type ChannelMessagePayload = {
     response: [];
   };
   '__internal_rpc:app:prompt-error': {
+    send: [promptId: string];
+    response: [];
+  };
+  '__internal_rpc:app:prompt-mounted': {
     send: [promptId: string];
     response: [];
   };
