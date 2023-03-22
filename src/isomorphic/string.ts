@@ -48,3 +48,7 @@ export function isInvalidBase64(base64?: string) {
 
   return !base64.split(';base64,')?.[1];
 }
+
+export function trimWebContentsUserAgent(userAgent: string) {
+  return userAgent.replace(/\sElectron\/\S+/, '');
+}
