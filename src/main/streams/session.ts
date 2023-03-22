@@ -1,11 +1,11 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 
-import { protocol, session, shell } from 'electron';
+import { app, protocol, session, shell } from 'electron';
 import { firstValueFrom } from 'rxjs';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { isRabbyXPage } from '@/isomorphic/url';
-import { removeElectronInUserAgent } from '@/isomorphic/string';
+import { trimWebContentsUserAgent } from '@/isomorphic/string';
 import {
   IS_RUNTIME_PRODUCTION,
   RABBY_INTERNAL_PROTOCOL,
@@ -38,7 +38,10 @@ import {
   getWindowFromWebContents,
   switchToBrowserTab,
 } from '../utils/browser';
-import { fixResponseHeaders, supportHmrOnDev } from '../utils/webRequest';
+import {
+  rewriteSessionWebRequestHeaders,
+  supportHmrOnDev,
+} from '../utils/webRequest';
 import { checkProxyViaBrowserView, setSessionProxy } from '../utils/appNetwork';
 import { getAppProxyConf } from '../store/desktopApp';
 import { createTrezorLikeConnectPageWindow } from '../utils/hardwareConnect';
@@ -207,11 +210,13 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   ];
   allSessions.forEach((sess) => {
     // Remove Electron to closer emulate Chrome's UA
-    const userAgent = removeElectronInUserAgent(sess.getUserAgent());
+    const userAgent = trimWebContentsUserAgent(sess.getUserAgent());
     sess.setUserAgent(userAgent);
 
-    fixResponseHeaders(sess);
+    rewriteSessionWebRequestHeaders(sess);
   });
+
+  app.userAgentFallback = trimWebContentsUserAgent(sessionIns.getUserAgent());
 
   // must after sessionReady
   const result = checkProxyValidOnBootstrap();
