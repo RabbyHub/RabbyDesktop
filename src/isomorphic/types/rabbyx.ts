@@ -379,8 +379,14 @@ export type RabbyXMethod = {
   'walletController.importGnosisAddress': (
     address: string,
     networkId: string
-  ) => Promise<RabbyAccount[]>;
-  'walletController.getTypedAccounts': () => Promise<DisplayedKeyring[]>;
+  ) => RabbyAccount[];
+  'walletController.getTypedAccounts': () => DisplayedKeyring[];
+  'walletController.getGnosisOwners': (
+    account: Account,
+    safeAddress: string,
+    version: string
+  ) => string[];
+  'walletController.getGnosisNetworkId': (address: string) => string;
 
   'permissionService.addConnectedSite': (
     origin: string,
