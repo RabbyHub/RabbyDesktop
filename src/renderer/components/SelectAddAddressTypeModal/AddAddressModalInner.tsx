@@ -3,6 +3,7 @@ import { useMessageForwardToMainwin } from '@/renderer/hooks/useViewsMessage';
 import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { KEYRING_CLASS } from '@/renderer/utils/constant';
 import React from 'react';
+import { GnosisModal } from '../GnosisModal/GnosisModal';
 import { HDManagerModal } from '../HDManager/HDManagerModal';
 import { WalletConnectModal } from '../WalletConnect/WalletConnectModal';
 import { ContactModal } from './ContactModal';
@@ -41,7 +42,7 @@ export const AddAddressModalInner: React.FC<Props> = ({
         pathname: '/import-by/private-key',
       },
     } as any);
-    hideMainwinPopupview('address-management', {
+    hideMainwinPopupview('z-popup', {
       reloadView: true,
     });
   }, [mainNav]);
@@ -75,6 +76,22 @@ export const AddAddressModalInner: React.FC<Props> = ({
         centered
         open={visible}
         title="Wallet Connect"
+        backable={showBackButton}
+        onBack={onBack}
+        destroyOnClose
+        onCancel={onCancel}
+        footer={null}
+        onSuccess={onSuccess}
+      />
+    );
+  }
+
+  if (keyringType === KEYRING_CLASS.GNOSIS) {
+    return (
+      <GnosisModal
+        centered
+        open={visible}
+        title="Gnosis Safe"
         backable={showBackButton}
         onBack={onBack}
         destroyOnClose

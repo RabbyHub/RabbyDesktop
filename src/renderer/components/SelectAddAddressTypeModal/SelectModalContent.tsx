@@ -2,6 +2,7 @@ import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { KEYRING_CLASS } from '@/renderer/utils/constant';
 import clsx from 'clsx';
 import React from 'react';
+import { ContactTypeCard } from './ContactCard';
 import styles from './index.module.less';
 
 const HARDWARE_MAP = [
@@ -51,54 +52,31 @@ export const SelectModalContent: React.FC<Props> = ({ onSelectType }) => {
         </div>
       </div>
 
-      <div
-        className={clsx(styles.panel, styles.panelContact)}
-        onClick={() => onSelectType(KEYRING_CLASS.WALLETCONNECT)}
-      >
-        <div className={styles.logo}>
-          <img src="rabby-internal://assets/icons/add-address/walletconnect.svg" />
-        </div>
-        <div className={styles.content}>
-          <span className={styles.title}>Wallet Connect</span>
-        </div>
-        <div className={styles.action}>
-          <img src="rabby-internal://assets/icons/add-address/arrow-right.svg" />
-        </div>
-      </div>
+      <ContactTypeCard
+        logo="rabby-internal://assets/icons/add-address/walletconnect.svg"
+        title="Wallet Connect"
+        onAction={() => onSelectType(KEYRING_CLASS.WALLETCONNECT)}
+      />
 
-      <div
-        className={clsx(styles.panel, styles.panelContact)}
-        onClick={() => onSelectType(KEYRING_CLASS.WATCH)}
-      >
-        <div className={styles.logo}>
-          <img src="rabby-internal://assets/icons/add-address/cup.svg" />
-        </div>
-        <div className={styles.content}>
-          <span className={styles.title}>Add Contacts</span>
-          <span className={styles.subtitle}>
-            You can also use it as a watch-only address
-          </span>
-        </div>
-        <div className={styles.action}>
-          <img src="rabby-internal://assets/icons/add-address/arrow-right.svg" />
-        </div>
-      </div>
+      <ContactTypeCard
+        logo="rabby-internal://assets/icons/add-address/cup.svg"
+        title="Add Contacts"
+        subtitle="You can also use it as a watch-only address"
+        onAction={() => onSelectType(KEYRING_CLASS.WATCH)}
+      />
+
+      <ContactTypeCard
+        logo="rabby-internal://assets/icons/add-address/cup.svg"
+        title="Add Gnosis Safe"
+        onAction={() => onSelectType(KEYRING_CLASS.GNOSIS)}
+      />
 
       {!IS_RUNTIME_PRODUCTION && (
-        <div
-          className={clsx(styles.panel, styles.panelContact)}
-          onClick={() => onSelectType(KEYRING_CLASS.PRIVATE_KEY)}
-        >
-          <div className={styles.logo}>
-            <img src="rabby-internal://assets/icons/add-address/privatekey.svg" />
-          </div>
-          <div className={styles.content}>
-            <span className={styles.title}>Import Private Key</span>
-          </div>
-          <div className={styles.action}>
-            <img src="rabby-internal://assets/icons/add-address/arrow-right.svg" />
-          </div>
-        </div>
+        <ContactTypeCard
+          logo="rabby-internal://assets/icons/add-address/privatekey.svg"
+          title="Import Private Key"
+          onAction={() => onSelectType(KEYRING_CLASS.PRIVATE_KEY)}
+        />
       )}
     </div>
   );
