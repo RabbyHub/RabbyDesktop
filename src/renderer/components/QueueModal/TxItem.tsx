@@ -12,8 +12,12 @@ import {
   SafeTransactionItem,
 } from '@rabby-wallet/gnosis-sdk/dist/api';
 import { Button } from 'antd';
+import classNames from 'classnames';
 import { intToHex, toChecksumAddress } from 'ethereumjs-util';
 import React from 'react';
+import { TxItemBasicInfo } from './TxItemBasicInfo';
+import { TxItemConfirmation } from './TxItemConfirmation';
+import { TxItemExplain } from './TxitemExplain';
 
 export interface Props {
   data: SafeTransactionItem;
@@ -103,13 +107,21 @@ export const TxItem: React.FC<Props> = ({
   }, [init]);
 
   return (
-    <div className="grid border-solid border-0 border-[#FFFFFF1A]">
-      <div className="flex items-center">
-        <time>
-          <span>2021-08-12 12:00:00</span>
-        </time>
-      </div>
+    <div
+      className={classNames(
+        'flex p-[20px]',
+        'border-solid border-0 border-[#FFFFFF1A]'
+      )}
+    >
+      <TxItemBasicInfo timeAt={data.submissionDate} nonce={data.nonce} />
       {/* <TxInterAddressExplain data={data} /> */}
+      <TxItemExplain explain={explain!} />
+      <TxItemConfirmation
+        confirmations={data.confirmations}
+        threshold={safeInfo.threshold}
+        owners={safeInfo.owners}
+      />
+
       <div>
         <Button>View and sign transaction</Button>
         <Button>Submit transaction</Button>

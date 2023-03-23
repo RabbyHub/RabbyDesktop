@@ -411,6 +411,7 @@ export type RabbyXMethod = {
     owner: string,
     signature: string
   ) => void;
+  'walletController.getAllVisibleAccountsArray': () => RabbyAccount[];
 
   'permissionService.addConnectedSite': (
     origin: string,

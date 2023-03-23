@@ -8,7 +8,7 @@ export const QueueModal: React.FC = () => {
 
   return (
     <Modal
-      width={976}
+      width={900}
       onCancel={closeSubview}
       open={svVisible}
       centered
