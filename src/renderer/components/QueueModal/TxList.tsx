@@ -4,9 +4,10 @@ import { SafeTransactionItem } from '@rabby-wallet/gnosis-sdk/dist/api';
 import { TxItemGroup } from './TxItemGroup';
 import { useSafeQueue } from './useSafeQueue';
 import styles from './style.module.less';
+import { TxItemGroupSkeleton } from './TxItemGroupSkeleton';
 
 export const TxList: React.FC = () => {
-  const { transactionsGroup, networkId, safeInfo } = useSafeQueue();
+  const { transactionsGroup, networkId, safeInfo, isLoading } = useSafeQueue();
 
   const handleSubmit = React.useCallback((data: SafeTransactionItem) => {
     console.log(data);
@@ -20,15 +21,22 @@ export const TxList: React.FC = () => {
         styles.scrollbar
       )}
     >
-      {Object.keys(transactionsGroup).map((key) => (
-        <TxItemGroup
-          key={key}
-          items={transactionsGroup[key]}
-          networkId={networkId}
-          safeInfo={safeInfo!}
-          onSubmit={handleSubmit}
-        />
-      ))}
+      {isLoading ? (
+        <>
+          <TxItemGroupSkeleton />
+          <TxItemGroupSkeleton />
+        </>
+      ) : (
+        Object.keys(transactionsGroup).map((key) => (
+          <TxItemGroup
+            key={key}
+            items={transactionsGroup[key]}
+            networkId={networkId}
+            safeInfo={safeInfo!}
+            onSubmit={handleSubmit}
+          />
+        ))
+      )}
     </section>
   );
 };

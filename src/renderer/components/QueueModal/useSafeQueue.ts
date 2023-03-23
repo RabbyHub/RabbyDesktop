@@ -13,7 +13,7 @@ import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { crossCompareOwners } from './util';
 
 export const useSafeQueue = () => {
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [safeInfo, setSafeInfo] = React.useState<SafeInfo>();
   const [networkId, setNetworkId] = React.useState('1');
   const [transactionsGroup, setTransactionsGroup] = React.useState<

@@ -1,7 +1,6 @@
 import { RabbyAccount } from '@/isomorphic/types/rabbyx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
-import { TxInterAddressExplain } from '@/renderer/routes/Transactions/components/TxInterAddressExplain';
 import {
   INTERNAL_REQUEST_ORIGIN,
   KEYRING_CLASS,
@@ -35,6 +34,9 @@ export const TxItem: React.FC<Props> = ({
   const [explain, setExplain] = React.useState<ExplainTxResponse | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const { currentAccount } = useCurrentAccount();
+  const canExecute =
+    data.confirmations.length >= safeInfo.threshold &&
+    data.nonce === safeInfo.nonce;
 
   const init = React.useCallback(async () => {
     const res = await walletOpenapi.preExecTx({
@@ -114,7 +116,6 @@ export const TxItem: React.FC<Props> = ({
       )}
     >
       <TxItemBasicInfo timeAt={data.submissionDate} nonce={data.nonce} />
-      {/* <TxInterAddressExplain data={data} /> */}
       <TxItemExplain explain={explain!} />
       <TxItemConfirmation
         confirmations={data.confirmations}
@@ -122,10 +123,10 @@ export const TxItem: React.FC<Props> = ({
         owners={safeInfo.owners}
       />
 
-      <div className="flex flex-col gap-[30px] justify-center flex-end">
+      <div className="flex flex-col gap-[20px] justify-center flex-end">
         <Button
           className={classNames(
-            'w-[172px] text-[13px] p-0',
+            'w-[172px] text-[13px] p-0 h-[34px] rounded-[4px]',
             'text-blue-light border-blue-light'
           )}
           type="ghost"
@@ -133,7 +134,15 @@ export const TxItem: React.FC<Props> = ({
           View and sign transaction
         </Button>
         <Button
-          className={classNames('w-[172px] text-[13px] p-0')}
+          prefixCls="rabby-button"
+          disabled={!canExecute}
+          className={classNames(
+            'w-[172px] text-[13px] h-[34px] rounded-[4px]',
+            'bg-color-[#8697FF] outline-none border-none cursor-pointer shadow',
+            {
+              'opacity-30 cursor-not-allowed': !canExecute,
+            }
+          )}
           type="primary"
         >
           Submit transaction
