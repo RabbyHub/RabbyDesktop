@@ -1,6 +1,6 @@
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
-import { validateToken, ValidateTokenParam } from '@/renderer/utils/token';
+import { ValidateTokenParam } from '@/renderer/utils/token';
 import { CHAINS, CHAINS_ENUM } from '@debank/common';
 import { GasLevel, Tx } from '@debank/rabby-api/dist/types';
 import {
@@ -183,11 +183,10 @@ export const useGasAmount = <T extends ValidateTokenParam>(
     dexId,
     gasMarket,
     gasLevel,
-    tokenApproved,
-    shouldTwoStepApprove,
     userAddress,
     refreshId,
   } = p;
+
   const { value: totalGasUsed, loading: totalGasUsedLoading } =
     useAsync(async () => {
       if (chain && payAmount && data && payToken && dexId && gasMarket) {
@@ -245,6 +244,37 @@ export const useGasAmount = <T extends ValidateTokenParam>(
           nextNonce = `0x${new BigNumber(nextNonce).plus(1).toString(16)}`;
         };
 
+        const getTokenApproveStatus = async () => {
+          if (!payToken || !dexId || !payAmount || !chain) return [true, false];
+          if (payToken?.id === CHAINS[chain].nativeTokenAddress) {
+            return [true, false];
+          }
+
+          const allowance = await walletController.getERC20Allowance(
+            CHAINS[chain].serverId,
+            payToken.id,
+            // @ts-expect-error
+            DEX_SPENDER_WHITELIST[dexId][chain]
+          );
+
+          const tokenApproved = new BigNumber(allowance).gte(
+            new BigNumber(payAmount).times(10 ** payToken.decimals)
+          );
+
+          if (
+            chain === CHAINS_ENUM.ETH &&
+            isSameAddress(payToken.id, ETH_USDT_CONTRACT) &&
+            Number(allowance) !== 0 &&
+            !tokenApproved
+          ) {
+            return [tokenApproved, true];
+          }
+          return [tokenApproved, false];
+        };
+
+        const [tokenApproved, shouldTwoStepApprove] =
+          await getTokenApproveStatus();
+
         if (shouldTwoStepApprove) {
           await approveToken('0');
         }
@@ -279,11 +309,9 @@ export const useGasAmount = <T extends ValidateTokenParam>(
       chain,
       data,
       refreshId,
-      tokenApproved,
       dexId,
       gasLevel,
       gasMarket,
-      shouldTwoStepApprove,
       payAmount,
       userAddress,
     ]);
