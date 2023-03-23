@@ -13,7 +13,7 @@ export interface Props extends ModalProps {
   onSuccess: () => void;
 }
 
-export const GnosisModal: React.FC<Props> = ({ onSuccess, ...props }) => {
+export const SafeModal: React.FC<Props> = ({ onSuccess, ...props }) => {
   const [form] = Form.useForm<{
     address: string;
     chain: Chain;
