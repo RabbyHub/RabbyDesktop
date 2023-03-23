@@ -67,7 +67,7 @@ export const SelectModalContent: React.FC<Props> = ({ onSelectType }) => {
 
       <ContactTypeCard
         logo="rabby-internal://assets/icons/add-address/cup.svg"
-        title="Add Gnosis Safe"
+        title="Add Safe"
         onAction={() => onSelectType(KEYRING_CLASS.GNOSIS)}
       />
 

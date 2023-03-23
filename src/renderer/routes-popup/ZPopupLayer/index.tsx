@@ -25,6 +25,7 @@ import GasketModalLikeWindow from '@/renderer/components/GasketModalLikeWindow';
 import { RenameDappModal } from '@/renderer/components/ModalRenameDapp';
 import { DeleteDappModal } from '@/renderer/components/ModalDeleteDapp';
 import { pickVisibleFromZViewStates } from '@/renderer/utils/zviews';
+import { QueueModal } from '@/renderer/components/QueueModal/QueueModal';
 import SwitchChainModal from '../../components/SwitchChainModal';
 
 import styles from './index.module.less';
@@ -80,6 +81,7 @@ function App() {
       <GasketModalLikeWindow />
       <RenameDappModal />
       <DeleteDappModal />
+      <QueueModal />
     </>
   );
 }

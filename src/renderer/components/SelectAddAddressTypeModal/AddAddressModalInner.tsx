@@ -91,7 +91,7 @@ export const AddAddressModalInner: React.FC<Props> = ({
       <GnosisModal
         centered
         open={visible}
-        title="Gnosis Safe"
+        title="Safe"
         backable={showBackButton}
         onBack={onBack}
         destroyOnClose
