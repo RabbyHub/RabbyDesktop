@@ -7,18 +7,25 @@ import { useCurrentAccount } from './useAccount';
 
 const pendingCountAtom = atom<number>(0);
 
-export const useGnosis = () => {
-  const [pendingCount, setPendingCount] = useAtom(pendingCountAtom);
+export const useIsSafe = () => {
   const { currentAccount } = useCurrentAccount();
 
+  return currentAccount?.type === KEYRING_CLASS.GNOSIS;
+};
+
+export const useSafe = () => {
+  const [pendingCount, setPendingCount] = useAtom(pendingCountAtom);
+  const { currentAccount } = useCurrentAccount();
+  const isSafe = useIsSafe();
+
   const fetchPendingCount = React.useCallback(async () => {
+    if (!isSafe) return 0;
     const address = currentAccount!.address;
-    console.log(currentAccount);
     const network = await walletController.getGnosisNetworkId(address);
     const txs = await Safe.getPendingTransactions(address, network);
 
     setPendingCount(txs.results.length);
-  }, [currentAccount, setPendingCount]);
+  }, [currentAccount, isSafe, setPendingCount]);
 
   React.useEffect(() => {
     fetchPendingCount();
@@ -27,10 +34,4 @@ export const useGnosis = () => {
   return {
     pendingCount,
   };
-};
-
-export const useIsGnosis = () => {
-  const { currentAccount } = useCurrentAccount();
-
-  return currentAccount?.type === KEYRING_CLASS.GNOSIS;
 };

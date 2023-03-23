@@ -110,7 +110,7 @@ export const KEYRING_TYPE_TEXT = {
   [KEYRING_CLASS.HARDWARE.TREZOR]: 'Imported by Trezor',
   [KEYRING_CLASS.HARDWARE.ONEKEY]: 'Imported by Onekey',
   [KEYRING_CLASS.HARDWARE.GRIDPLUS]: 'Imported by GridPlus',
-  [KEYRING_CLASS.GNOSIS]: 'Imported by Gnosis Safe',
+  [KEYRING_CLASS.GNOSIS]: 'Imported by Safe',
   [KEYRING_CLASS.HARDWARE.KEYSTONE]: 'Imported by QRCode Base',
 };
 export const BRAND_ALIAN_TYPE_TEXT = {
@@ -121,7 +121,7 @@ export const BRAND_ALIAN_TYPE_TEXT = {
   [KEYRING_CLASS.HARDWARE.TREZOR]: 'Trezor',
   [KEYRING_CLASS.HARDWARE.ONEKEY]: 'Onekey',
   [KEYRING_CLASS.HARDWARE.BITBOX02]: 'BitBox02',
-  [KEYRING_CLASS.GNOSIS]: 'Gnosis Safe',
+  [KEYRING_CLASS.GNOSIS]: 'Safe',
   [KEYRING_CLASS.HARDWARE.GRIDPLUS]: 'GridPlus',
   [KEYRING_CLASS.HARDWARE.KEYSTONE]: 'Keystone',
 };
@@ -401,7 +401,7 @@ export const WALLET_BRAND_CONTENT: {
   },
   [WALLET_BRAND_TYPES.GNOSIS]: {
     id: 13,
-    name: 'Gnosis Safe',
+    name: 'Safe',
     brand: WALLET_BRAND_TYPES.GNOSIS,
     icon: IconGnosis,
     image: IconGnosis,

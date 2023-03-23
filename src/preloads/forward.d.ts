@@ -51,6 +51,10 @@ type ZViewStates = {
   'delete-dapp-modal': {
     dapp: IDapp;
   };
+
+  'safe-queue-modal': {
+    // nothing
+  };
 };
 
 type IZPopupSubviewState = {

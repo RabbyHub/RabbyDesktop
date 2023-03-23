@@ -34,8 +34,8 @@ const KEYRING_MAP: KeyringLabel[] = [
     id: KEYRING_CLASS.WATCH,
   },
   {
-    logo: 'rabby-internal://assets/icons/add-address/cup.svg',
-    name: 'Gnosis Safe',
+    logo: 'rabby-internal://assets/icons/walletlogo/gnosis.svg',
+    name: 'Safe',
     id: KEYRING_CLASS.GNOSIS,
   },
 ];

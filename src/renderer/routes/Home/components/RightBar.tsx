@@ -3,7 +3,8 @@ import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { Tooltip } from 'antd';
-import { useGnosis, useIsGnosis } from '@/renderer/hooks/rabbyx/useGnosis';
+import { useSafe, useIsSafe } from '@/renderer/hooks/rabbyx/useSafe';
+import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import IconReceive from '../../../../../assets/icons/home/receive.svg?rc';
 import IconSend from '../../../../../assets/icons/home/send.svg?rc';
 import IconSwap from '../../../../../assets/icons/home/swap.svg?rc';
@@ -50,9 +51,10 @@ const ActionList = styled.ul`
 
 const RightBar = ({ updateNonce }: { updateNonce: number }) => {
   const [isShowReceive, setIsShowReceive] = useState(false);
-  const isGnosis = useIsGnosis();
-  const { pendingCount } = useGnosis();
+  const isSafe = useIsSafe();
+  const { pendingCount } = useSafe();
   const navigateTo = useNavigate();
+  const { showZSubview } = useZPopupLayerOnMain();
   const actions = useMemo(() => {
     const list = [
       {
@@ -81,8 +83,7 @@ const RightBar = ({ updateNonce }: { updateNonce: number }) => {
       },
     ];
 
-    // TODO
-    if (isGnosis) {
+    if (isSafe) {
       list.push({
         id: 'queue',
         name: 'Queue',
@@ -93,13 +94,13 @@ const RightBar = ({ updateNonce }: { updateNonce: number }) => {
           </div>
         ),
         onClick: () => {
-          navigateTo('/mainwin/home/gnosis-queue?rbisource=home');
+          showZSubview('safe-queue-modal');
         },
       });
     }
 
     return list;
-  }, [isGnosis, navigateTo, pendingCount]);
+  }, [isSafe, navigateTo, pendingCount, showZSubview]);
 
   return (
     <RightBarWrapper>

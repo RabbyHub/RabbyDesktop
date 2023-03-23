@@ -18,6 +18,7 @@ export const GnosisModal: React.FC<Props> = ({ onSuccess, ...props }) => {
     address: string;
     chain: Chain;
   }>();
+  const [loading, setLoading] = React.useState(false);
 
   const [run] = useWalletRequest(walletController.importGnosisAddress, {
     onSuccess(accounts) {
@@ -35,16 +36,56 @@ export const GnosisModal: React.FC<Props> = ({ onSuccess, ...props }) => {
   });
 
   const onAdd = React.useCallback(async () => {
+    setLoading(true);
     const { address, chain } = form.getFieldsValue();
-
-    if (await checkAddress(address, chain)) {
-      run(address, chain.id.toString());
+    if (!chain) {
+      form.setFields([
+        {
+          name: 'address',
+          errors: ['Please select a chain'],
+        },
+      ]);
+      setLoading(false);
+      return;
     }
+    try {
+      await checkAddress(address, chain);
+    } catch (err: any) {
+      form.setFields([
+        {
+          name: 'address',
+          errors: [err?.message || 'Not a valid address'],
+        },
+      ]);
+      setLoading(false);
+      return;
+    }
+
+    await run(address, chain.id.toString());
+    setLoading(false);
   }, [form, run]);
+
+  const onValuesChange = React.useCallback(() => {
+    form.setFields([
+      {
+        name: 'address',
+        errors: [],
+      },
+      {
+        name: 'chain',
+        errors: [],
+      },
+    ]);
+  }, [form]);
 
   return (
     <Modal {...props}>
-      <Form form={form} className="px-[190px]" onFinish={onAdd}>
+      <Form
+        onValuesChange={onValuesChange}
+        form={form}
+        className="px-[190px]"
+        onFinish={onAdd}
+      >
         <Form.Item name="address">
           <RabbyInput
             className={classNames(
@@ -54,11 +95,11 @@ export const GnosisModal: React.FC<Props> = ({ onSuccess, ...props }) => {
             autoFocus
           />
         </Form.Item>
-        <Form.Item name="chain">
+        <Form.Item name="chain" required>
           <ChainList />
         </Form.Item>
         <div className="text-center">
-          <Button type="primary" htmlType="submit">
+          <Button loading={loading} type="primary" htmlType="submit">
             Add
           </Button>
         </div>

@@ -8,6 +8,7 @@ import type {
 
 import type { DEX_ENUM } from '@rabby-wallet/rabby-swap';
 import type { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
+import { SafeTransactionDataPartial } from '@gnosis.pm/safe-core-sdk-types';
 
 export type RabbyAccount = {
   address: string;
@@ -388,6 +389,23 @@ export type RabbyXMethod = {
     version: string
   ) => string[];
   'walletController.getGnosisNetworkId': (address: string) => string;
+  'walletController.buildGnosisTransaction': (
+    safeAddress: string,
+    account: Account,
+    tx: any
+  ) => void;
+  'walletController.getGnosisTransactionHash': () => string;
+  'walletController.validateSafeConfirmation': (
+    txHash: string,
+    signature: string,
+    ownerAddress: string,
+    type: string,
+    version: string,
+    safeAddress: string,
+    tx: SafeTransactionDataPartial,
+    networkId: number,
+    owners: string[]
+  ) => boolean;
 
   'permissionService.addConnectedSite': (
     origin: string,
