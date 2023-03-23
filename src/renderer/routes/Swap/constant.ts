@@ -25,13 +25,14 @@ export const TIPS = {
     label: 'Fail to verify the receiving token',
     level: 'danger',
   },
+  preExecTxFail: {
+    label: 'The previous exchange rate has expired',
+    level: 'danger',
+  },
+
   priceDifference: {
     label:
       'The price difference is higher than 5%, which may cause a great loss',
-    level: 'warning',
-  },
-  gasCostFail: {
-    label: 'Fail to estimate gas cost',
     level: 'warning',
   },
   priceFail: {

@@ -379,7 +379,7 @@ export const Swap = () => {
     payAmount,
   });
 
-  const { totalGasUsed, totalGasUsedLoading } = useGasAmount({
+  const { totalGasUsed, totalGasUsedLoading, preExecTxError } = useGasAmount({
     chain,
     data: quoteInfo,
     payToken,
@@ -518,6 +518,9 @@ export const Swap = () => {
     fetchQuote();
   };
 
+  const preExecTxSuccess =
+    !totalGasUsedLoading && !preExecTxError && !!totalGasUsed;
+
   const canSubmit =
     !!payToken &&
     !!receiveToken &&
@@ -526,7 +529,8 @@ export const Swap = () => {
     !isInsufficient &&
     !loading &&
     !!quoteInfo &&
-    isSdkDataPass;
+    isSdkDataPass &&
+    preExecTxSuccess;
 
   const tipsDisplay = useMemo(() => {
     if (isInsufficient) {
@@ -551,9 +555,6 @@ export const Swap = () => {
         return TIPS.securityFail;
       }
 
-      if (!loading && quoteInfo && isHighPriceDifference) {
-        return TIPS.priceDifference;
-      }
       if (
         chain &&
         quoteInfo &&
@@ -562,10 +563,15 @@ export const Swap = () => {
         gasMarket &&
         !loading &&
         !totalGasUsedLoading &&
-        totalGasUsed === undefined
+        (preExecTxError || totalGasUsed === undefined)
       ) {
-        return TIPS.gasCostFail;
+        return TIPS.preExecTxFail;
       }
+
+      if (!loading && quoteInfo && isHighPriceDifference) {
+        return TIPS.priceDifference;
+      }
+
       if (
         quoteInfo &&
         (payToken.price === undefined || receiveToken.price === undefined)
@@ -598,6 +604,7 @@ export const Swap = () => {
     dexId,
     gasMarket,
     totalGasUsed,
+    preExecTxError,
   ]);
 
   const refresh = () => {
