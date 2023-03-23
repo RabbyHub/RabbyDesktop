@@ -100,8 +100,6 @@ export const TxItem: React.FC<Props> = ({
         },
       ],
     });
-    // TODO close window
-    // window.close();
   };
 
   React.useEffect(() => {
@@ -130,10 +128,13 @@ export const TxItem: React.FC<Props> = ({
             'text-blue-light border-blue-light'
           )}
           type="ghost"
+          onClick={handleView}
+          loading={isLoading}
         >
-          View and sign transaction
+          {isLoading ? 'Loading...' : 'View and sign transaction'}
         </Button>
         <Button
+          onClick={() => onSubmit(data)}
           prefixCls="rabby-button"
           disabled={!canExecute}
           className={classNames(
