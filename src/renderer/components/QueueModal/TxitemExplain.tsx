@@ -45,7 +45,7 @@ export const TxItemExplain: React.FC<Props> = ({ explain }) => {
   }
 
   return (
-    <p className="flex items-center m-0 w-[260px] flex-shrink-0">
+    <p className="flex items-center m-0 flex-1">
       <img
         className="w-[30px] h-[30px] mr-[10px]"
         src={iconUrl || IconUnknown}

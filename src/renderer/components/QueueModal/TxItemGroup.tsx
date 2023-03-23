@@ -24,7 +24,7 @@ export const TxItemGroup: React.FC<Props> = ({
       className={classNames(
         'flex flex-col',
         'border border-[#FFFFFF1A] border-solid rounded-[8px] text-white',
-        'divide-y '
+        'divide-y'
       )}
     >
       {items.length > 1 ? (

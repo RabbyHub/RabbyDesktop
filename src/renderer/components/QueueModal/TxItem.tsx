@@ -109,7 +109,7 @@ export const TxItem: React.FC<Props> = ({
   return (
     <div
       className={classNames(
-        'flex p-[20px]',
+        'flex p-[20px] gap-[10px]',
         'border-solid border-0 border-[#FFFFFF1A]'
       )}
     >
@@ -122,9 +122,22 @@ export const TxItem: React.FC<Props> = ({
         owners={safeInfo.owners}
       />
 
-      <div>
-        <Button>View and sign transaction</Button>
-        <Button>Submit transaction</Button>
+      <div className="flex flex-col gap-[30px] justify-center flex-end">
+        <Button
+          className={classNames(
+            'w-[172px] text-[13px] p-0',
+            'text-blue-light border-blue-light'
+          )}
+          type="ghost"
+        >
+          View and sign transaction
+        </Button>
+        <Button
+          className={classNames('w-[172px] text-[13px] p-0')}
+          type="primary"
+        >
+          Submit transaction
+        </Button>
       </div>
     </div>
   );

@@ -6,13 +6,10 @@ import classNames from 'classnames';
 import React from 'react';
 import NameAndAddress from '../NameAndAddress';
 
-const IconChecked =
-  'rabby-internal://assets/icons/address-management/check.svg';
-
-const IconUnCheck =
-  'rabby-internal://assets/icons/address-management/uncheck.svg';
-
+const IconChecked = 'rabby-internal://assets/icons/queue/checked.svg';
+const IconUnCheck = 'rabby-internal://assets/icons/queue/uncheck.svg';
 const IconTagYou = 'rabby-internal://assets/icons/queue/tag-you.svg';
+
 export interface Props {
   confirmations: SafeTransactionItem['confirmations'];
   threshold: number;
@@ -37,52 +34,55 @@ export const TxItemConfirmation: React.FC<Props> = ({
 
   return (
     <div>
-      <div className="text-[12px] text-[#BFC1C8] mb-[16px]">
+      <div className="text-[12px] text-[#bfc1c8] mb-[16px]">
         {confirmations.length >= threshold ? (
           'Enough signature collected'
         ) : (
           <>
-            <span className="number">{threshold - confirmations.length}</span>{' '}
+            <span className="text-white">
+              {threshold - confirmations.length}
+            </span>{' '}
             more confirmation needed
           </>
         )}
       </div>
-      <ul className="list-none p-0">
-        {owners.map((owner) => (
-          <li
-            className={classNames('flex text-white', {
-              checked: confirmations.find((confirm) =>
-                isSameAddress(confirm.owner, owner)
-              ),
-            })}
-            key={owner}
-          >
-            <img
-              className="w-[14px]"
-              src={
-                confirmations.find((confirm) =>
+      <ul className="list-none m-0 p-0">
+        {owners.map((owner) => {
+          const isYou = confirmations.find((confirm) =>
+            isSameAddress(confirm.owner, owner)
+          );
+          return (
+            <li
+              className={classNames('flex text-white mb-[16px]', {
+                checked: confirmations.find((confirm) =>
                   isSameAddress(confirm.owner, owner)
-                )
-                  ? IconChecked
-                  : IconUnCheck
-              }
-            />
-            <NameAndAddress
-              address={owner}
-              className="text-13"
-              nameClass="max-129 text-13"
-              addressClass="text-13"
-              noNameClass="no-name"
-            />
-            {visibleAccounts.find((account) =>
-              isSameAddress(account.address, owner)
-            ) ? (
-              <img src={IconTagYou} className="icon-tag" />
-            ) : (
-              <></>
-            )}
-          </li>
-        ))}
+                ),
+              })}
+              key={owner}
+            >
+              <img
+                className={classNames('w-[14px] mr-[5px]', {
+                  'opacity-40': !isYou,
+                })}
+                src={isYou ? IconChecked : IconUnCheck}
+              />
+              <NameAndAddress
+                address={owner}
+                className="text-[13px]"
+                nameClass="text-[13px] text-white"
+                addressClass="text-[13px] text-white"
+                noNameClass="opacity-40"
+              />
+              {visibleAccounts.find((account) =>
+                isSameAddress(account.address, owner)
+              ) ? (
+                <img src={IconTagYou} className="icon-tag" />
+              ) : (
+                <></>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
