@@ -79,7 +79,6 @@ export const AccountItem = ({
 
   const addressElement = useRef(null);
   const handleClickCopy = (e: React.MouseEvent<HTMLImageElement>) => {
-    if (disabled) return;
     e.stopPropagation();
     copyText(account.address);
     toastCopiedWeb3Addr(account.address);
