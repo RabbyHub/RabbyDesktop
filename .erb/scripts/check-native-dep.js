@@ -3,11 +3,23 @@ import chalk from 'chalk';
 import { execSync } from 'child_process';
 import { dependencies } from '../../package.json';
 
+const nativeDepsUsedByUI = [
+  'ethereumjs-util',
+  '@rabby-wallet/gnosis-sdk',
+  '@gnosis.pm/safe-core-sdk-types',
+]
+
 const depsWhilteList = [
-  // depent by 'ethereumjs-util'
-  'keccak',
+  // dependent by 'electron-rebuild'
   'lzma-native',
-  'secp256k1'
+  // dependent by 'ethereumjs-util'
+  'keccak',
+  'secp256k1',
+
+  // dependent by '@gnosis.pm/safe-core-sdk-types'
+  'bufferutil',
+  // dependent by '@gnosis.pm/safe-core-sdk-types', '@rabby-wallet/gnosis-sdk', '@debank/parse-favicon'
+  'utf-8-validate',
 ]
 
 if (dependencies) {
@@ -29,6 +41,7 @@ if (dependencies) {
     const rootDependencies = Object.keys(dependenciesObject);
     const filteredRootDependencies = rootDependencies.filter((rootDependency) =>
       dependenciesKeys.includes(rootDependency)
+      && !nativeDepsUsedByUI.includes(rootDependency)
     );
     if (filteredRootDependencies.length > 0) {
       const plural = filteredRootDependencies.length > 1;
