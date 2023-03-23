@@ -163,7 +163,7 @@ const SwitchViewWrapper = styled.div`
 
 const calcFilterPrice = (tokens: { usd_value?: number }[]) => {
   const total = tokens.reduce((t, item) => (item.usd_value || 0) + t, 0);
-  return Math.min(total / 100, 1000);
+  return Math.min(total * 0.001, 1000);
 };
 const calcIsShowExpand = (tokens: { usd_value?: number }[]) => {
   const filterPrice = calcFilterPrice(tokens);
