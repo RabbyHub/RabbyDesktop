@@ -151,7 +151,6 @@
     "electron-store": "^8.1.0",
     "electron-updater": "^5.2.1",
     "eth-rpc-errors": "^4.0.3",
-    "eth-sig-util": "^3.0.1",
     "ethereumjs-util": "^7.1.5",
     "ethers": "^5.7.2",
     "https-proxy-agent": "^5.0.1",

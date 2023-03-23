@@ -3,7 +3,7 @@ import { useMessageForwardToMainwin } from '@/renderer/hooks/useViewsMessage';
 import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { KEYRING_CLASS } from '@/renderer/utils/constant';
 import React from 'react';
-import { GnosisModal } from '../GnosisModal/GnosisModal';
+import { SafeModal } from '../SafeModal/SafeModal';
 import { HDManagerModal } from '../HDManager/HDManagerModal';
 import { WalletConnectModal } from '../WalletConnect/WalletConnectModal';
 import { ContactModal } from './ContactModal';
@@ -88,7 +88,7 @@ export const AddAddressModalInner: React.FC<Props> = ({
 
   if (keyringType === KEYRING_CLASS.GNOSIS) {
     return (
-      <GnosisModal
+      <SafeModal
         centered
         open={visible}
         title="Safe"

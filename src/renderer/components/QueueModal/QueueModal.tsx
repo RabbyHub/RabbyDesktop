@@ -7,7 +7,13 @@ export const QueueModal: React.FC = () => {
   const { svVisible, closeSubview } = useZPopupViewState('safe-queue-modal');
 
   return (
-    <Modal onCancel={closeSubview} open={svVisible} centered title="Queue">
+    <Modal
+      width={976}
+      onCancel={closeSubview}
+      open={svVisible}
+      centered
+      title="Queue"
+    >
       <TxList />
     </Modal>
   );

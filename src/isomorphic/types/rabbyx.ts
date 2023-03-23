@@ -405,6 +405,11 @@ export type RabbyXMethod = {
     networkId: number,
     owners: string[]
   ) => boolean;
+  'walletController.setGnosisTransactionHash': (hash: string) => void;
+  'walletController.gnosisAddPureSignature': (
+    owner: string,
+    signature: string
+  ) => void;
 
   'permissionService.addConnectedSite': (
     origin: string,
