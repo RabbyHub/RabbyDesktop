@@ -14,7 +14,7 @@ const ExpandItem = styled.div`
   font-size: 12px;
   line-height: 14px;
   color: #9094a1;
-  padding: 0 23px;
+  padding: 0 14px;
   align-items: center;
   margin-top: 10px;
   cursor: pointer;
@@ -35,10 +35,10 @@ const ExpandItem = styled.div`
       color: rgba(255, 255, 255, 0.5);
       font-weight: normal;
       &.is-loss {
-        color: #ff6060;
+        color: #ff6565;
       }
       &.is-increase {
-        color: #2ed4a3;
+        color: #4aebbb;
       }
     }
   }
@@ -177,7 +177,6 @@ const TokenList = ({
             supportHistory={
               !!supportHistoryChains.find((item) => item.id === token.chain)
             }
-            onReceiveClick={handleReceiveClick}
           />
         ))}
         {tokenHidden.hiddenCount > 0 && tokenHidden.isShowExpand && (

@@ -27,7 +27,7 @@ const TransactionWrapper = styled.div`
   position: absolute;
   right: -358px;
   width: 330px;
-  top: 15px;
+  top: 4px;
 `;
 
 const TransactionList = styled.ul`

@@ -51,7 +51,8 @@ const ProtocolItemWrapper = styled.div`
   border-radius: 12px;
   position: relative;
   margin-bottom: 12px;
-  padding-top: 40px;
+  padding-top: 36px;
+  overflow: hidden;
   .extra-info {
     position: absolute;
     left: 0;
@@ -82,10 +83,9 @@ const ProtocolItemWrapper = styled.div`
 
 const ProtocolHeader = styled.div`
   display: flex;
-  margin-bottom: 20px;
-  padding-left: 25px;
-  padding-right: 22px;
+  margin-bottom: 28px;
   align-items: flex-end;
+  padding: 0 4px;
   .token-with-chain {
     .chain-logo {
       width: 12px;
@@ -161,7 +161,9 @@ const ProtocolHeader = styled.div`
 `;
 
 const ProtocolWrapper = styled.div`
-  margin-bottom: 28px;
+  margin-bottom: 20px;
+  padding-left: 14px;
+  padding-right: 14px;
 `;
 
 const RemoveBindingWrapper = styled.div`

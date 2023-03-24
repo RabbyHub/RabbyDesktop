@@ -304,14 +304,14 @@ export const wrapUrlInImgOrDefault = (
 };
 
 const DebtTag = styled.div`
-  border: 1px solid #ff6060;
+  border: 1px solid #ff6565;
   border-radius: 4px;
   padding: 2px 5px;
   font-weight: 700;
   font-size: 10px;
   line-height: 12px;
   text-transform: uppercase;
-  color: #ff6060;
+  color: #ff6565;
   margin-left: 6px;
 `;
 

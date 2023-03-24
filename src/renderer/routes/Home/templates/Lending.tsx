@@ -14,6 +14,7 @@ const HealthRateTag = styled.div`
   color: rgba(255, 255, 255, 0.5);
   align-items: center;
   margin-bottom: 16px;
+  padding-left: 22px;
   .icon-info {
     margin-left: 4px;
     margin-right: 4px;

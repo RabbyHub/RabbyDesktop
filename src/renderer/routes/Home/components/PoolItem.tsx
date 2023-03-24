@@ -5,7 +5,6 @@ import { PortfolioItem, TokenItem } from '@debank/rabby-api/dist/types';
 import classNames from 'classnames';
 import TokenWithChain from '@/renderer/components/TokenWithChain';
 import {
-  formatNumber,
   formatAmount,
   formatPrice,
   formatUsdValue,
@@ -14,13 +13,13 @@ import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 
 const PoolItemWrapper = styled.div`
-  padding: 25px 25px 0 25px;
+  padding-top: 25px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   position: relative;
   margin-bottom: 12px;
   padding-top: 40px;
-  padding-bottom: 24px;
+  overflow: hidden;
   .tag {
     position: absolute;
     left: 0;
@@ -35,6 +34,32 @@ const PoolItemWrapper = styled.div`
     left: 0;
     border-top-left-radius: 12px;
     border-bottom-right-radius: 4px;
+  }
+  .th {
+    display: flex;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 1;
+    padding: 0 24px;
+    margin-bottom: 6px;
+    & > div {
+      text-align: left;
+      &:nth-child(1) {
+        color: rgba(255, 255, 255, 0.8);
+        width: 30%;
+      }
+      &:nth-child(2) {
+        width: 24%;
+      }
+      &:nth-child(3) {
+        width: 29%;
+      }
+      &:nth-child(4) {
+        text-align: right;
+        width: 17%;
+      }
+    }
   }
   &:nth-last-child(1) {
     margin-bottom: 0;
@@ -55,13 +80,15 @@ const PoolItemWrapper = styled.div`
 
 const TokenItemWrapper = styled.div`
   display: flex;
-  align-items: flex-start;
-  margin-bottom: 22px;
+  align-items: center;
+  height: 60px;
+  padding-left: 22px;
+  padding-right: 22px;
   .token-symbol {
     display: flex;
     font-weight: 500;
-    font-size: 13px;
-    line-height: 16px;
+    font-size: 14px;
+    line-height: 17px;
     color: #ffffff;
     width: 30%;
     overflow: hidden;
@@ -78,22 +105,22 @@ const TokenItemWrapper = styled.div`
     flex-wrap: wrap;
     width: 24%;
     font-weight: 500;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 14px;
     color: #ffffff;
   }
   .price-change {
     width: 100%;
     font-weight: 400;
-    font-size: 10px;
-    line-height: 12px;
+    font-size: 12px;
+    line-height: 14px;
     color: #c6c6c6;
     text-align: left;
     &.is-loss {
-      color: #ff6060;
+      color: #ff6565;
     }
     &.is-increase {
-      color: #2ed4a3;
+      color: #4aebbb;
     }
   }
   .token-amount {
@@ -102,8 +129,8 @@ const TokenItemWrapper = styled.div`
     justify-content: flex-start;
     flex-wrap: wrap;
     font-weight: 500;
-    font-size: 12px;
-    line-height: 14px;
+    font-size: 14px;
+    line-height: 17px;
   }
   .token-usd-value {
     display: flex;
@@ -111,8 +138,8 @@ const TokenItemWrapper = styled.div`
     justify-content: flex-end;
     width: 17%;
     font-weight: 700;
-    font-size: 12px;
-    line-height: 14px;
+    font-size: 14px;
+    line-height: 17px;
     text-align: right;
     .price-change {
       display: block;
@@ -134,18 +161,21 @@ const TokenItemWrapper = styled.div`
     }
   }
   .debt-tag {
-    border: 1px solid #ff6060;
+    border: 1px solid #ff6565;
     border-radius: 4px;
     padding: 2px 5px;
     font-weight: 700;
     font-size: 10px;
     line-height: 12px;
     text-transform: uppercase;
-    color: #ff6060;
+    color: #ff6565;
     margin-left: 6px;
   }
   &:nth-last-child(1) {
     margin-bottom: 0;
+  }
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.06);
   }
 `;
 
@@ -401,6 +431,12 @@ const PoolItem = ({
   return (
     <PoolItemWrapper>
       <div className="tag">{portfolio.name}</div>
+      <div className="th">
+        <div>Asset</div>
+        <div>Price</div>
+        <div>Amount</div>
+        <div>USD Value</div>
+      </div>
       {portfolio.asset_token_list?.map((token, index) => (
         <TokenItemComp
           // eslint-disable-next-line react/no-array-index-key

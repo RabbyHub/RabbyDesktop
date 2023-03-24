@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import styled from 'styled-components';
-import classNames from 'classnames';
 import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
 import { DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
@@ -11,9 +10,9 @@ import { VIEW_TYPE } from '../hooks';
 import ScrollTopContext from './scrollTopContext';
 
 const PortfolioWrapper = styled.div`
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.03);
   width: 100%;
-  padding: 0 27px;
+  padding: 0 14px 28px;
   padding-right: 0;
   border-radius: 8px;
   position: relative;
@@ -22,7 +21,7 @@ const PortfolioWrapper = styled.div`
     // don't use overflow: overlay, it will cause zIndex problem
     overflow: auto;
     height: 100%;
-    padding-right: 27px;
+    padding-right: 14px;
     padding-top: 28px;
     padding-bottom: 28px;
   }
@@ -42,9 +41,9 @@ const PortfolioWrapper = styled.div`
       color: rgba(255, 255, 255, 0.5);
       font-weight: 400;
       font-size: 12px;
-      line-height: 14px;
+      line-height: 1;
       padding: 0 23px;
-      margin-bottom: 28px;
+      margin-bottom: 15px;
       & > div {
         text-align: left;
         &:nth-child(1) {
@@ -138,16 +137,6 @@ const PortfolioView = ({
   const [scrollTop, setScrollTop] = useState(0);
   const [relateDappProtocol, setRelateDappProtocol] =
     useState<DisplayProtocol | null>(null);
-  const assetArrowLeft = useMemo(() => {
-    const el: HTMLLIElement | null = document.querySelector(
-      `#chain-icon-${selectChainServerId}`
-    );
-    if (!selectChainServerId) {
-      return (24 * Math.min(27, chainList.length || 2)) / 2 - 7;
-    }
-    if (!el) return 65;
-    return el.offsetLeft + el.offsetWidth / 2 - 7;
-  }, [selectChainServerId, chainList]);
   const isEmpty = useMemo(() => {
     return (
       !isLoadingProtocolList &&
@@ -169,24 +158,8 @@ const PortfolioView = ({
 
   if (isEmpty) {
     return (
-      <div className="flex-1 overflow-hidden pt-[15px]">
+      <div className="flex-1 overflow-hidden pt-[14px]">
         <PortfolioWrapper className="empty">
-          <img
-            src="rabby-internal://assets/icons/home/asset-arrow.svg"
-            className="icon-asset-arrow"
-            style={{
-              transform: `translateX(${assetArrowLeft}px)`,
-            }}
-          />
-          {chainList.length > 1 && (
-            <img
-              src="rabby-internal://assets/icons/home/asset-arrow.svg"
-              className="icon-asset-arrow"
-              style={{
-                transform: `translateX(${assetArrowLeft}px)`,
-              }}
-            />
-          )}
           <img
             className="icon-empty"
             src="rabby-internal://assets/icons/home/asset-empty.svg"
@@ -199,15 +172,8 @@ const PortfolioView = ({
 
   return (
     <ScrollTopContext.Provider value={scrollTop}>
-      <div className="flex-1 overflow-hidden pt-[15px] h-full">
+      <div className="flex-1 overflow-hidden pt-[4px] h-full">
         <PortfolioWrapper>
-          <img
-            src="rabby-internal://assets/icons/home/asset-arrow.svg"
-            className="icon-asset-arrow"
-            style={{
-              transform: `translateX(${assetArrowLeft}px)`,
-            }}
-          />
           <div className="scroll-container" onScroll={handleScroll}>
             <TokenList
               tokenList={tokenList}

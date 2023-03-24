@@ -23,11 +23,9 @@ import PoolItem, { LoadingPoolItem } from './PoolItem';
 import ScrollTopContext from './scrollTopContext';
 
 const ProtocolItemWrapper = styled.div`
-  margin-bottom: 27px;
-  /* .protocol-list {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-  } */
+  margin-bottom: 20px;
+  padding-left: 14px;
+  padding-right: 14px;
   .tag {
     position: absolute;
     left: 0;
@@ -47,10 +45,9 @@ const ProtocolItemWrapper = styled.div`
 
 const ProtocolHeader = styled.div`
   display: flex;
-  margin-bottom: 20px;
-  padding-left: 25px;
-  padding-right: 22px;
+  margin-bottom: 28px;
   align-items: flex-end;
+  padding: 0 4px;
   .token-with-chain {
     .chain-logo {
       width: 12px;
@@ -128,17 +125,17 @@ const ProtocolHeader = styled.div`
 const UsdValueChangeWrapper = styled.div`
   width: 100%;
   font-weight: 400;
-  font-size: 10px;
-  line-height: 12px;
+  font-size: 12px;
+  line-height: 14px;
   color: #c6c6c6;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   &.is-loss {
-    color: #ff6060;
+    color: #ff6565;
   }
   &.is-increase {
-    color: #2ed4a3;
+    color: #4aebbb;
   }
 `;
 
@@ -345,8 +342,8 @@ const ProtocolItem = ({
             </Popover>
           )}
         </div>
-        <span className="protocol-usd">
-          {formatUsdValue(protocol.usd_value)}
+        <div className="protocol-usd">
+          <div className="mb-[4px]">{formatUsdValue(protocol.usd_value)}</div>
           {historyProtocolUsdValue && (
             <UsdValueChangeWrapper
               className={classNames('price-change absolute -bottom-12', {
@@ -362,7 +359,7 @@ const ProtocolItem = ({
               historyProtocolUsdValue.historyUsdValueChange
             )})`}</UsdValueChangeWrapper>
           )}
-        </span>
+        </div>
       </ProtocolHeader>
       <div className="protocol-list">
         {protocol.portfolio_item_list.map((portfolio) => (
