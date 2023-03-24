@@ -175,6 +175,7 @@ type IAppUpdatorDownloadProgress =
   | {
       progress: null;
       isEnd: true;
+      downloadFailed?: boolean;
     };
 
 type HexValue = `0x${number}`;

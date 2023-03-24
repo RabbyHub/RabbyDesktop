@@ -204,7 +204,7 @@ type ChannelInvokePayload = {
     send: [version?: string];
     response: {
       error?: string | null;
-      releaseNote: string;
+      result: string;
     };
   };
   [`__internal_rpc:rabbyx-rpc:query`]: {

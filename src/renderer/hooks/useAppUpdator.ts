@@ -139,6 +139,7 @@ export function useAppUpdator() {
     isDownloading,
     isDownloaded:
       releaseCheckInfo.hasNewRelease && !!downloadInfo && downloadInfo.isEnd,
+    isDownloadedFailed: downloadInfo?.isEnd && !!downloadInfo.downloadFailed,
     progress: downloadInfo?.progress,
     requestDownload,
     downloadInfo,
