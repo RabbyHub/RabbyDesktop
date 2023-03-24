@@ -1,6 +1,6 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo } from 'react';
 import styled from 'styled-components';
-import { Skeleton, Tooltip } from 'antd';
+import { Skeleton } from 'antd';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import classNames from 'classnames';
 import {
@@ -10,22 +10,19 @@ import {
 } from '@/renderer/utils/number';
 import TokenWithChain from '@/renderer/components/TokenWithChain';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
-import { useGotoSwapByToken } from '@/renderer/hooks/rabbyx/useSwap';
-import { useNavigate } from 'react-router-dom';
-import IconSwap from '../../../../../assets/icons/home/token-swap.svg?rc';
-import IconSend from '../../../../../assets/icons/home/token-send.svg?rc';
-import IconReceive from '../../../../../assets/icons/home/token-receive.svg?rc';
 
 const TokenItemWrapper = styled.li`
-  font-size: 13px;
+  font-size: 15px;
   line-height: 18px;
   color: #ffffff;
   display: flex;
   align-items: center;
   border-radius: 8px;
-  padding: 0 23px;
   border: 1px solid transparent;
-  padding-bottom: 36px;
+  padding-bottom: 29px;
+  padding-top: 10px;
+  padding-left: 23px;
+  padding-right: 23px;
   & > div {
     position: relative;
     text-align: left;
@@ -51,10 +48,10 @@ const TokenItemWrapper = styled.li`
       overflow: hidden;
       text-overflow: ellipsis;
       &.is-loss {
-        color: #ff6060;
+        color: #ff6565;
       }
       &.is-increase {
-        color: #2ed4a3;
+        color: #4aebbb;
       }
     }
     .number-change {
@@ -73,6 +70,7 @@ const TokenItemWrapper = styled.li`
     }
   }
   &:hover {
+    background-color: rgba(0, 0, 0, 0.06);
     .token-actions {
       opacity: 1;
     }
@@ -141,15 +139,11 @@ const TokenItemComp = ({
   token,
   historyToken,
   supportHistory,
-  onReceiveClick,
 }: {
   token: TokenItem;
   historyToken?: TokenItem;
   supportHistory: boolean;
-  onReceiveClick?: (token: TokenItem) => void;
 }) => {
-  const navigate = useNavigate();
-
   const amountChange = useMemo(() => {
     if (!historyToken || !supportHistory) return 0;
     return token.amount - historyToken.amount;
@@ -178,17 +172,6 @@ const TokenItemComp = ({
       percentage,
     };
   }, [token, historyToken, supportHistory]);
-  const gotoSwap = useGotoSwapByToken();
-
-  const handleClickSwap = useCallback(() => {
-    gotoSwap(token.chain, token.id);
-  }, [gotoSwap, token.chain, token.id]);
-
-  const handleClickSend = useCallback(() => {
-    navigate(
-      `/mainwin/home/send-token?token=${token?.chain}:${token?.id}&rbisource=homeAsset`
-    );
-  }, [navigate, token?.chain, token?.id]);
 
   return (
     <TokenItemWrapper className="td" key={`${token.chain}-${token.id}`}>
@@ -197,7 +180,7 @@ const TokenItemComp = ({
         <span className="token-symbol" title={token.symbol}>
           {ellipsisTokenSymbol(token.symbol)}
         </span>
-        <div className="token-actions">
+        {/* <div className="token-actions">
           <Tooltip title="Swap">
             <IconSwap className="icon icon-swap" onClick={handleClickSwap} />
           </Tooltip>
@@ -212,7 +195,7 @@ const TokenItemComp = ({
               }}
             />
           </Tooltip>
-        </div>
+        </div> */}
       </TokenLogoField>
       <TokenPriceField>{`$${formatPrice(token.price)}`}</TokenPriceField>
       <TokenAmountField>

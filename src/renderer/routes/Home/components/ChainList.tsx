@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { useEffect, useMemo, useState } from 'react';
 import { CHAINS_LIST } from '@debank/common';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
+import { formatUsdValue } from '@/renderer/utils/number';
 
 const ChainListWrapper = styled.ul`
   display: flex;
@@ -14,27 +15,24 @@ const ChainListWrapper = styled.ul`
   position: relative;
   li {
     cursor: pointer;
-    opacity: 0.6;
     transition: opacity 0.3s;
     margin-right: 4px;
     display: flex;
     align-items: center;
-    img {
-      width: 20px;
-    }
-    .chain-name {
-      font-weight: 400;
-      font-size: 12px;
-      line-height: 14px;
-      margin-left: 2px;
+    margin-right: 8px;
+    margin-bottom: 18px;
+    font-weight: 500;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+    .chain-logo {
+      width: 16px;
       margin-right: 6px;
-      color: #fff;
     }
     &.selected {
       opacity: 1;
     }
     &.disabled {
-      opacity: 0.5;
+      opacity: 0.2;
     }
     &:nth-last-child(1) {
       margin-right: 0;
@@ -50,11 +48,15 @@ const NoAssetsView = styled.div`
   color: rgba(255, 255, 255, 0.3);
 `;
 
+interface Chain extends DisplayChainWithWhiteLogo {
+  usd_value: number;
+}
+
 const ChainList = ({
   chainBalances,
   onChange,
 }: {
-  chainBalances: DisplayChainWithWhiteLogo[];
+  chainBalances: Chain[];
   onChange(id: string | null): void;
 }) => {
   const { currentAccount } = useCurrentAccount();
@@ -118,10 +120,8 @@ const ChainList = ({
           })}
           onClick={() => handleSelectChain(item.id)}
         >
-          <img src={item.whiteLogo} />
-          {item.id === selectChainServerId && targetChain && (
-            <span className="chain-name">{targetChain.name}</span>
-          )}
+          <img className="chain-logo" src={item.logo || item.logo_url} />
+          {formatUsdValue(item.usd_value)}
         </li>
       ))}
     </ChainListWrapper>

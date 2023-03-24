@@ -161,7 +161,7 @@ const ProtocolHeader = styled.div`
 `;
 
 const ProtocolWrapper = styled.div`
-  margin-bottom: 28px;
+  margin-bottom: 20px;
 `;
 
 const RemoveBindingWrapper = styled.div`

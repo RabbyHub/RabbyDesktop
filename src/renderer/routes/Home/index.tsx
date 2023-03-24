@@ -1,6 +1,6 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo, useRef, MouseEvent } from 'react';
 import { Skeleton } from 'antd';
-import { usePrevious } from 'react-use';
+import { usePrevious, useInterval } from 'react-use';
 import styled from 'styled-components';
 import classNames from 'classnames';
 import { useLocation } from 'react-router-dom';
@@ -19,6 +19,7 @@ import useHistoryProtocol, {
 } from '@/renderer/hooks/useHistoryProtocol';
 import { toastCopiedWeb3Addr } from '@/renderer/components/TransparentToast';
 import { copyText } from '@/renderer/utils/clipboard';
+import { formatTimeReadable } from '@/renderer/utils/time';
 import BigNumber from 'bignumber.js';
 import {
   useZPopupLayerOnMain,
@@ -69,24 +70,35 @@ const HomeWrapper = styled.div`
       .right {
         flex: 1;
         position: relative;
-        .balance-change {
-          position: absolute;
-          bottom: 17px;
-          right: 0;
-          width: 600px;
+        .update-at {
           display: flex;
-          align-items: flex-end;
-          justify-content: flex-end;
-          padding-right: 28px;
-          font-weight: 500;
-          font-size: 18px;
-          line-height: 21px;
-          margin-left: 6px;
-          color: #2ed4a3;
-          z-index: 1;
-          cursor: pointer;
-          &.is-loss {
-            color: #ff6060;
+          font-size: 12px;
+          line-height: 14px;
+          color: rgba(255, 255, 255, 0.6);
+          align-items: center;
+          position: absolute;
+          right: 0;
+          bottom: 0;
+          z-index: 2;
+          span {
+            margin-left: 4px;
+            margin-right: 4px;
+          }
+          .icon-refresh {
+            display: block;
+            cursor: pointer;
+            margin-left: 7px;
+            @keyframes spining {
+              0% {
+                transform: rotate(0deg);
+              }
+              100% {
+                transform: rotate(360deg);
+              }
+            }
+            &.circling {
+              animation: spining 1.5s infinite linear;
+            }
           }
         }
       }
@@ -107,29 +119,21 @@ const HomeWrapper = styled.div`
     .balance {
       font-weight: 500;
       font-size: 46px;
-      line-height: 55px;
+      line-height: 1;
       display: flex;
-      align-items: center;
-      .icon-refresh {
-        display: block;
+      align-items: flex-end;
+      .balance-change {
+        display: flex;
+        font-weight: 500;
+        font-size: 18px;
+        line-height: 1;
+        margin-left: 6px;
+        color: #4aebbb;
+        padding-bottom: 4px;
         cursor: pointer;
-        margin-left: 14px;
-        @keyframes spining {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
+        &.is-loss {
+          color: #ff6565;
         }
-        &.circling {
-          animation: spining 1.5s infinite linear;
-        }
-      }
-    }
-    &:hover {
-      .icon-refresh {
-        display: block;
       }
     }
   }
@@ -146,6 +150,7 @@ const SwitchViewWrapper = styled.div`
     padding: 4px;
     display: flex;
     justify-content: space-between;
+    margin-left: 30px;
     .item {
       padding: 5px 10px;
       font-size: 12px;
@@ -297,6 +302,8 @@ const Home = () => {
   const { currentAccount } = useCurrentAccount();
   const prevAccount = usePrevious(currentAccount);
   const [updateNonce, setUpdateNonce] = useState(0);
+  const [updateAt, setUpdateAt] = useState(0);
+  const [now, setNow] = useState(0);
   const [selectChainServerId, setSelectChainServerId] = useState<string | null>(
     null
   );
@@ -435,7 +442,8 @@ const Home = () => {
     setUsedChainList(chainList.map((chain) => formatChain(chain)));
   };
 
-  const handleClickRefresh = () => {
+  const handleClickRefresh = (e: MouseEvent<HTMLImageElement>) => {
+    e.stopPropagation();
     setUpdateNonce(updateNonce + 1);
   };
 
@@ -466,6 +474,14 @@ const Home = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location]);
+
+  useEffect(() => {
+    setUpdateAt(Date.now() / 1000);
+  }, [updateNonce]);
+
+  useInterval(() => {
+    setNow(Date.now() / 1000);
+  }, 1000);
 
   const { showZSubview } = useZPopupLayerOnMain();
 
@@ -522,7 +538,7 @@ const Home = () => {
                   </div>
                 )}
                 <div className="balance">
-                  {isLoadingTokenList ? (
+                  {isLoadingTokenList || !curveData ? (
                     <Skeleton.Input
                       active
                       style={{
@@ -534,35 +550,6 @@ const Home = () => {
                   ) : (
                     <>
                       ${formatNumber(totalBalance || 0)}{' '}
-                      <img
-                        src="rabby-internal://assets/icons/home/asset-update.svg"
-                        className={classNames('icon-refresh', {
-                          circling:
-                            isLoadingRealTimeTokenList ||
-                            isLoadingRealTimeProtocol,
-                        })}
-                        onClick={handleClickRefresh}
-                      />
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {curveData ? (
-                <div className="right" onClick={() => setCurveModalOpen(true)}>
-                  {isLoadingTokenList ? (
-                    <div className="balance-change">
-                      <Skeleton.Input
-                        active
-                        style={{
-                          width: '141px',
-                          height: '21px',
-                          borderRadius: '2px',
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <>
                       <div
                         className={classNames('balance-change', {
                           'is-loss': curveData.isLoss,
@@ -570,13 +557,40 @@ const Home = () => {
                       >{`${curveData.isLoss ? '-' : '+'}${
                         curveData.changePercent
                       } (${curveData.change})`}</div>
-                      {curveData.list.length > 0 && <Curve data={curveData} />}
                     </>
                   )}
                 </div>
+              </div>
+
+              {curveData ? (
+                <div className="right" onClick={() => setCurveModalOpen(true)}>
+                  <div className="update-at">
+                    {isLoadingRealTimeTokenList || isLoadingRealTimeProtocol ? (
+                      'Updating data'
+                    ) : (
+                      <>
+                        Data updated{' '}
+                        <span className="text-white">
+                          {formatTimeReadable(now - updateAt)}
+                        </span>{' '}
+                        ago
+                      </>
+                    )}
+                    <img
+                      src="rabby-internal://assets/icons/home/asset-update.svg"
+                      className={classNames('icon-refresh', {
+                        circling:
+                          isLoadingRealTimeTokenList ||
+                          isLoadingRealTimeProtocol,
+                      })}
+                      onClick={handleClickRefresh}
+                    />
+                  </div>
+                  {curveData.list.length > 0 && <Curve data={curveData} />}
+                </div>
               ) : null}
             </div>
-            <div className="flex justify-between items-end">
+            <div className="flex justify-between items-start">
               {isLoadingTokenList ? (
                 <Skeleton.Input
                   active

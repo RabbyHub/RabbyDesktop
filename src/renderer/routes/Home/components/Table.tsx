@@ -11,7 +11,7 @@ export const Table = ({ children }: { children: ReactNode }) => {
 const RowWrapper = styled.div`
   display: flex;
   font-weight: 400;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 14px;
   color: #ffffff;
   padding: 16px 0;
@@ -23,6 +23,7 @@ const RowWrapper = styled.div`
     padding: 0;
     color: rgba(255, 255, 255, 0.5);
     border: none;
+    font-size: 12px;
   }
 `;
 
@@ -58,7 +59,7 @@ const ColWrapper = styled.div`
 
   &:not(.header):nth-child(1),
   &:not(.header):nth-last-child(1) {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
   }
   &:not(.header):nth-last-child(1) {

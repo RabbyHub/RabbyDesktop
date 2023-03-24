@@ -5,7 +5,6 @@ import { PortfolioItem, TokenItem } from '@debank/rabby-api/dist/types';
 import classNames from 'classnames';
 import TokenWithChain from '@/renderer/components/TokenWithChain';
 import {
-  formatNumber,
   formatAmount,
   formatPrice,
   formatUsdValue,
@@ -60,8 +59,8 @@ const TokenItemWrapper = styled.div`
   .token-symbol {
     display: flex;
     font-weight: 500;
-    font-size: 13px;
-    line-height: 16px;
+    font-size: 14px;
+    line-height: 17px;
     color: #ffffff;
     width: 30%;
     overflow: hidden;
@@ -78,22 +77,22 @@ const TokenItemWrapper = styled.div`
     flex-wrap: wrap;
     width: 24%;
     font-weight: 500;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 14px;
     color: #ffffff;
   }
   .price-change {
     width: 100%;
     font-weight: 400;
-    font-size: 10px;
-    line-height: 12px;
+    font-size: 12px;
+    line-height: 14px;
     color: #c6c6c6;
     text-align: left;
     &.is-loss {
-      color: #ff6060;
+      color: #ff6565;
     }
     &.is-increase {
-      color: #2ed4a3;
+      color: #4aebbb;
     }
   }
   .token-amount {
@@ -102,8 +101,8 @@ const TokenItemWrapper = styled.div`
     justify-content: flex-start;
     flex-wrap: wrap;
     font-weight: 500;
-    font-size: 12px;
-    line-height: 14px;
+    font-size: 14px;
+    line-height: 17px;
   }
   .token-usd-value {
     display: flex;
@@ -111,8 +110,8 @@ const TokenItemWrapper = styled.div`
     justify-content: flex-end;
     width: 17%;
     font-weight: 700;
-    font-size: 12px;
-    line-height: 14px;
+    font-size: 14px;
+    line-height: 17px;
     text-align: right;
     .price-change {
       display: block;
@@ -134,14 +133,14 @@ const TokenItemWrapper = styled.div`
     }
   }
   .debt-tag {
-    border: 1px solid #ff6060;
+    border: 1px solid #ff6565;
     border-radius: 4px;
     padding: 2px 5px;
     font-weight: 700;
     font-size: 10px;
     line-height: 12px;
     text-transform: uppercase;
-    color: #ff6060;
+    color: #ff6565;
     margin-left: 6px;
   }
   &:nth-last-child(1) {
