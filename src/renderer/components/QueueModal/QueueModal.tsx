@@ -14,7 +14,7 @@ export const QueueModal: React.FC = () => {
       centered
       title="Queue"
     >
-      <TxList />
+      <TxList onClose={closeSubview} />
     </Modal>
   );
 };

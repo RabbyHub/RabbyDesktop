@@ -6,14 +6,17 @@ import { intToHex } from 'ethereumjs-util';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { message } from 'antd';
-import { useSafe } from '@/renderer/hooks/rabbyx/useSafe';
 import { TxItemGroup } from './TxItemGroup';
 import { useSafeQueue } from './useSafeQueue';
 import styles from './style.module.less';
 import { TxItemGroupSkeleton } from './TxItemGroupSkeleton';
 import { SelectAddressModal } from './SelectAddressModal';
 
-export const TxList: React.FC = () => {
+interface Props {
+  onClose(): void;
+}
+
+export const TxList: React.FC<Props> = ({ onClose }) => {
   const { transactionsGroup, networkId, safeInfo, isLoading } = useSafeQueue();
   const [openSelectAddressModal, setOpenSelectAddressModal] =
     React.useState(false);
@@ -59,13 +62,17 @@ export const TxList: React.FC = () => {
         );
         await walletController.execGnosisTransaction(account);
         setSubmitting(false);
+        onClose();
       } catch (e: any) {
         message.error(e.message || JSON.stringify(e));
         setSubmitting(false);
       }
+      setOpenSelectAddressModal(false);
     },
-    [currentAddress, networkId, safeTx]
+    [currentAddress, networkId, onClose, safeTx]
   );
+
+  const isEmpty = Object.keys(transactionsGroup).length === 0 && !isLoading;
 
   return (
     <section
@@ -75,6 +82,11 @@ export const TxList: React.FC = () => {
         styles.scrollbar
       )}
     >
+      {isEmpty && (
+        <div className="text-white text-center opacity-60">
+          No pending transactions
+        </div>
+      )}
       {isLoading
         ? Array.from({ length: 3 }).map((_, index) => (
             // eslint-disable-next-line react/no-array-index-key
