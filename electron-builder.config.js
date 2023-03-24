@@ -86,7 +86,7 @@ module.exports = {
         "arch": process.env.BUILD_ARCH || process.arch
       }
     ],
-    "verifyUpdateCodeSignature": false,
+    "verifyUpdateCodeSignature": true,
     "signingHashAlgorithms": [
       "sha256"
     ],
