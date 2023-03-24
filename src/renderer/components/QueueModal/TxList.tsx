@@ -62,11 +62,11 @@ export const TxList: React.FC<Props> = ({ onClose }) => {
         );
         await walletController.execGnosisTransaction(account);
         setSubmitting(false);
-        onClose();
       } catch (e: any) {
         message.error(e.message || JSON.stringify(e));
         setSubmitting(false);
       }
+      onClose();
       setOpenSelectAddressModal(false);
     },
     [currentAddress, networkId, onClose, safeTx]
