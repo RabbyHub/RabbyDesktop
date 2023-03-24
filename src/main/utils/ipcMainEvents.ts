@@ -38,12 +38,9 @@ export function onIpcMainEvent<T extends IChannelsKey = IChannelsKey>(
 export function onIpcMainSyncEvent<T extends ISendSyncKey = ISendSyncKey>(
   eventName: T,
   handler: (
-    event: Electron.IpcMainEvent & {
+    // disable reply for calling to `ipcRenderer.sendSync`
+    event: Omit<Electron.IpcMainEvent, 'returnValue' | 'reply'> & {
       returnValue: ChannelSendSyncPayload[T]['returnValue'];
-      // disable reply for calling to `ipcRenderer.sendSync`
-      reply: {
-        (eventName: T, response: void): any;
-      };
     },
     ...args: ChannelSendSyncPayload[T]['send']
   ) => any

@@ -81,7 +81,7 @@ onIpcMainSyncEvent('__internal_rpc:app:prompt-open', async (evt, options) => {
       // set returnValue for confirm;
       evt.returnValue = {
         promptId,
-        returnValue: value,
+        value,
       };
       disposeOnConfirm();
 
@@ -97,7 +97,7 @@ onIpcMainSyncEvent('__internal_rpc:app:prompt-open', async (evt, options) => {
       // set returnValue for cancel;
       evt.returnValue = {
         promptId,
-        returnValue: null,
+        value: null,
       };
       disposeOnCancel();
 
