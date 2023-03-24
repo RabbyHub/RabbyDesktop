@@ -53,11 +53,19 @@ const AccountItemWrapper = styled.div`
     margin-bottom: 0;
   }
   &.disabled {
-    opacity: 0.5;
     cursor: not-allowed;
+    background: #585c6a;
     &:hover {
-      background-color: f5f6fa;
+      background: #5c606e;
       border-color: transparent;
+    }
+    & > *,
+    .account-info .name,
+    .account-info .addr {
+      opacity: 0.5;
+    }
+    & > .account-info {
+      opacity: 1;
     }
   }
 `;
@@ -79,7 +87,6 @@ export const AccountItem = ({
 
   const addressElement = useRef(null);
   const handleClickCopy = (e: React.MouseEvent<HTMLImageElement>) => {
-    if (disabled) return;
     e.stopPropagation();
     copyText(account.address);
     toastCopiedWeb3Addr(account.address);
@@ -124,7 +131,7 @@ export const AccountItem = ({
           </div>
         </div>
         <div className="address" title={account.address} ref={addressElement}>
-          {ellipsis(account.address)}
+          <div className="addr">{ellipsis(account.address)}</div>
           <div className="cursor-pointer" onClick={handleClickCopy}>
             <img
               className="icon-copy"
