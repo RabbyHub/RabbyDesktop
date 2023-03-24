@@ -23,6 +23,7 @@ import { useAccountInfo } from '../AddressManagementModal/useAccountInfo';
 import { toastCopiedWeb3Addr } from '../TransparentToast';
 import RabbyInput from '../AntdOverwrite/Input';
 import { SafeItem } from './SafeItem';
+import { WhitelistSwitch } from './WhitelistSwitch';
 
 export interface Props {
   onClose: () => void;
@@ -152,6 +153,11 @@ export const AccountDetail: React.FC<Props> = ({
           </AccountDetailItem>
         )}
         {isSafe && <SafeItem />}
+      </section>
+      <section className={styles.part}>
+        <AccountDetailItem headline="Add to Whitelist">
+          <WhitelistSwitch account={account} />
+        </AccountDetailItem>
       </section>
       <section className={styles.part}>
         <AccountDetailItem
