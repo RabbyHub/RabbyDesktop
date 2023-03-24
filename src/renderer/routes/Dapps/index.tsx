@@ -1,8 +1,9 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 import { setDappsOrder } from '@/renderer/ipcRequest/dapps';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useOpenDapp } from '@/renderer/utils/react-router';
+import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import { Empty } from './components/Empty';
 
 import ModalDeleteDapp from '../../components/ModalDeleteDapp';
@@ -23,8 +24,13 @@ type IOnOpDapp = (
 ) => void;
 
 export default function DApps() {
-  const { dapps, pinDapp, unpinDapp, pinnedDapps, unpinnedDapps } =
-    useTabedDapps();
+  const {
+    filteredData,
+    localSearchToken,
+    setLocalSearchToken,
+    pinDapp,
+    unpinDapp,
+  } = useTabedDapps();
 
   const openDapp = useOpenDapp();
 
@@ -77,13 +83,22 @@ export default function DApps() {
             Dapp Security Engine, provided by Rabby Desktop, offers better
             security for your Dapp use.
           </div>
+          <div className={style.searchTools}>
+            <div className={style.search}>
+              <RabbyInput
+                placeholder="Type to filter dapp by name or url"
+                value={localSearchToken}
+                onChange={(e) => setLocalSearchToken(e.target.value)}
+              />
+            </div>
+          </div>
         </header>
         <main className={style.main}>
-          {dapps?.length ? (
+          {filteredData.dapps?.length ? (
             <div className="dapps">
               <div className="dapp-matrix">
                 <SortableList
-                  data={pinnedDapps}
+                  data={filteredData.pinnedDapps}
                   onChange={(v) => {
                     setDappsOrder({
                       pinnedList: v.map((item) => item.origin),
@@ -101,7 +116,7 @@ export default function DApps() {
                   }}
                 />
                 <SortableList
-                  data={unpinnedDapps}
+                  data={filteredData.unpinnedDapps}
                   onChange={(v) => {
                     setDappsOrder({
                       unpinnedList: v.map((item) => item.origin),

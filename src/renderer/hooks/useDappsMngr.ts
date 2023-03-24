@@ -16,6 +16,7 @@ import {
   toggleDappPinned,
 } from '../ipcRequest/dapps';
 import { findTab } from '../utils/tab';
+import useDebounceValue from './useDebounceValue';
 
 const dappsAtomic = atom(null as null | IDapp[]);
 const pinnedListAtomic = atom([] as IDapp['origin'][]);
@@ -208,8 +209,36 @@ export const useTabedDapps = () => {
   const { dapps, pinnedDapps, unpinnedDapps, ...rest } = useDapps();
   const { tabMapByOrigin, tabMapBySecondaryMap } = useWindowTabs();
 
+  const [localSearchToken, setLocalSearchToken] = useState<string>('');
+  const debouncedSearchToken = useDebounceValue(localSearchToken, 250);
+  const filteredData = useMemo(() => {
+    if (!debouncedSearchToken)
+      return {
+        dapps,
+        pinnedDapps,
+        unpinnedDapps,
+      };
+
+    const token = debouncedSearchToken.toLowerCase();
+    const filterFn = (dapp: IDapp) => {
+      return (
+        dapp.alias?.toLowerCase().includes(token) ||
+        dapp.origin?.toLowerCase().includes(token)
+      );
+    };
+
+    return {
+      dapps: dapps?.filter(filterFn),
+      pinnedDapps: pinnedDapps?.filter(filterFn),
+      unpinnedDapps: unpinnedDapps?.filter(filterFn),
+    };
+  }, [dapps, pinnedDapps, unpinnedDapps, debouncedSearchToken]);
+
   return {
     ...rest,
+    localSearchToken,
+    setLocalSearchToken,
+    filteredData,
     dapps: useMemo(
       () => createTabedDapps(dapps, tabMapByOrigin, tabMapBySecondaryMap),
       [dapps, tabMapByOrigin, tabMapBySecondaryMap]

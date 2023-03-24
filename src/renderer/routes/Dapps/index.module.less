@@ -1,6 +1,10 @@
 .page {
   position: relative;
-  overflow: overlay;
+  overflow-y: hidden;
+
+  .container {
+    overflow-y: hidden;
+  }
 
   .account {
     position: absolute;
@@ -21,7 +25,7 @@
   }
 
   .header {
-    padding: 4px 48px 24px;
+    padding: 4px 48px 12px;
 
     .title {
       font-weight: 510;
@@ -43,7 +47,14 @@
       align-items: center;
       gap: 6px;
     }
+
+    .searchTools {
+      // padding: 0 48px 4px;
+      padding: 12px 0 4px;
+      // box-shadow: 0px 6px 8px rgba(var(--color-comment1-rgb), .3);
+    }
   }
+
   .main {
     height: calc(100vh - 112px - var(--mainwin-mainroute-topoffset));
     // padding: 20px 48px;
