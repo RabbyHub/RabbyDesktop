@@ -288,7 +288,7 @@ export default function bootstrap() {
           webviewTag: true,
         },
       },
-      isMainWindow: true,
+      webuiType: 'MainWindow',
     });
 
     const mainWin = mainWindow.window;

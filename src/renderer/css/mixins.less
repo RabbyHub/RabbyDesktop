@@ -26,7 +26,7 @@
     border-radius: 50px;
     background-color: #787D8C;
   }
-  
+
   &::-webkit-scrollbar-track {
     border-radius: 1em;
     background-color: transparent;
@@ -39,5 +39,67 @@
   }
   &:hover::-webkit-scrollbar {
     width: @chromelike-scrollbar-max-w;
+  }
+}
+
+.rabby-input() {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: none !important;
+  border-radius: 4px;
+  height: 40px;
+  padding: 10px;
+  font-size: 17px;
+  line-height: 20px;
+
+  color: #ffffff;
+
+  &:hover,
+  &:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+}
+
+.titlebar-like(@t-height: 32px) {
+  @rabby-titlebar-h: @t-height;
+
+  .titlebar {
+    width: 100%;
+    height: @rabby-titlebar-h;
+    display: flex;
+    flex-direction: row;
+    background-color: transparent;
+  }
+
+  .titlebar.os-darwin {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    width: var(--mainwin-sidebar-w);
+    height: @rabby-titlebar-h;
+    .global-draggable;
+
+    .app-drag {
+      height: 10px;
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100%;
+      z-index: -1;
+    }
+  }
+
+  .titlebar.os-win32 {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+
+  .app-drag {
+    flex: 1 0 auto;
+    -webkit-app-region: drag;
+    min-width: 2rem;
+    align-self: flex-end;
+    height: 100%;
   }
 }

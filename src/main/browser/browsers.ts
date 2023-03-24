@@ -7,6 +7,7 @@ import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 
 export type TabbedBrowserWindowOptions = {
   webuiExtensionId: string;
+  webuiType?: IShellWebUIType;
   defaultTabUrl?: string;
   window?: Electron.BrowserWindowConstructorOptions;
   session?: Electron.Session;
@@ -17,9 +18,6 @@ export type TabbedBrowserWindowOptions = {
   };
 
   defaultOpen?: boolean;
-  isMainWindow?: boolean;
-  isRabbyXNotificationWindow?: boolean;
-  isForTrezorLikeConnection?: boolean;
 };
 
 export default class TabbedBrowserWindow {
@@ -42,15 +40,11 @@ export default class TabbedBrowserWindow {
   private $meta: {
     hasNavigationBar: boolean;
     defaultOpen: boolean;
-    isMainWindow: boolean;
-    isForTrezorLikeConnection: boolean;
-    isRabbyXNotificationWindow: boolean;
+    webuiType?: IShellWebUIType;
   } = {
     hasNavigationBar: false,
     defaultOpen: true,
-    isMainWindow: false,
-    isForTrezorLikeConnection: false,
-    isRabbyXNotificationWindow: false,
+    webuiType: undefined,
   };
 
   constructor(options: TabbedBrowserWindowOptions) {
@@ -65,23 +59,14 @@ export default class TabbedBrowserWindow {
 
     this.$meta.hasNavigationBar = this.windowType !== 'popup';
     this.$meta.defaultOpen = options.defaultOpen !== false;
-    this.$meta.isMainWindow = !!options.isMainWindow;
-    this.$meta.isRabbyXNotificationWindow =
-      !!options.isRabbyXNotificationWindow;
-    this.$meta.isForTrezorLikeConnection = !!options.isForTrezorLikeConnection;
+    this.$meta.webuiType = options.webuiType || undefined;
 
     const origUrl = `chrome-extension://${options.webuiExtensionId}/webui.html`;
     /* eslint-disable @typescript-eslint/naming-convention */
     const webuiUrl = integrateQueryToUrl(origUrl, {
       ...options.queryStringArgs,
       ...(this.$meta.hasNavigationBar && { __withNavigationbar: 'true' }),
-      ...(this.$meta.isMainWindow && { __webuiIsMainWindow: 'true' }),
-      ...(this.$meta.isForTrezorLikeConnection && {
-        __webuiForTrezorLike: 'true',
-      }),
-      ...(this.$meta.isRabbyXNotificationWindow && {
-        __webuiIsRabbyXNotificationWindow: 'true',
-      }),
+      ...(options.webuiType && { __webuiType: options.webuiType }),
       // TODO: set 'false' for 'popup' window
       __webuiClosable: this.windowType !== 'popup' ? 'true' : 'false',
       ...(!IS_RUNTIME_PRODUCTION && {
@@ -93,7 +78,7 @@ export default class TabbedBrowserWindow {
     this.window.webContents.loadURL(webuiUrl);
 
     this.tabs = new Tabs(this.window, {
-      isOfMainWindow: this.$meta.isMainWindow,
+      isOfMainWindow: this.$meta.webuiType === 'MainWindow',
     });
 
     this.tabs.on('tab-created', (tab: Tab) => {
@@ -108,6 +93,10 @@ export default class TabbedBrowserWindow {
 
     this.tabs.on('tab-selected', (tab: Tab) => {
       this.extensions.selectTab(tab.view!.webContents);
+      emitIpcMainEvent('__internal_main:tabbed-window:tab-selected', {
+        windowId: this.window.id,
+        tabId: tab.view!.webContents.id,
+      });
     });
 
     this.tabs.on('tab-destroyed', () => {
@@ -122,9 +111,9 @@ export default class TabbedBrowserWindow {
 
     queueMicrotask(() => {
       // Create initial tab
-      if (!this.$meta.isMainWindow && this.$meta.defaultOpen) {
+      if (!this.isMainWindow() && this.$meta.defaultOpen) {
         this.createTab({
-          topbarStacks: this.$meta.isRabbyXNotificationWindow
+          topbarStacks: this.isRabbyXNotificationWindow()
             ? {
                 tabs: false,
                 navigation: false,
@@ -144,15 +133,15 @@ export default class TabbedBrowserWindow {
   }
 
   isMainWindow() {
-    return this.$meta.isMainWindow;
+    return this.$meta.webuiType === 'MainWindow';
   }
 
   isForTrezorLikeConnection() {
-    return this.$meta.isForTrezorLikeConnection;
+    return this.$meta.webuiType === 'ForTrezorLike';
   }
 
   isRabbyXNotificationWindow() {
-    return this.$meta.isRabbyXNotificationWindow;
+    return this.$meta.webuiType === 'RabbyX-NotificationWindow';
   }
 
   getFocusedTab() {
@@ -166,8 +155,7 @@ export default class TabbedBrowserWindow {
   createTab(options?: Parameters<Tabs['create']>[0]) {
     return this.tabs.create({
       ...options,
-      isOfMainWindow: this.$meta.isMainWindow,
-      isOfTreasureLikeConnection: this.$meta.isForTrezorLikeConnection,
+      webuiType: this.$meta.webuiType,
     });
   }
 

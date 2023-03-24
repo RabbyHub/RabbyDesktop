@@ -4,7 +4,12 @@
 /// <reference path="../isomorphic/type-helpers.d.ts" />
 /// <reference path="../preloads/forward.d.ts" />
 /// <reference path="../preloads/ipc-invoke.d.ts" />
+/// <reference path="../preloads/ipc-push.d.ts" />
+/// <reference path="../preloads/ipc-send.d.ts" />
 
+/**
+ * @deprecated will be migrated to `ChannelPushToWebContents`
+ */
 type M2RChanneMessagePayload = {
   'download-release-progress-updated': {
     originReqId: string;
@@ -71,7 +76,7 @@ type M2RChanneMessagePayload = {
   '__internal_push:webhid:select-devices-modal-blur': {
     foo?: string;
   };
-};
+} & ChannelPushToWebContents;
 
 type IPushEvents = keyof M2RChanneMessagePayload;
 
@@ -257,7 +262,22 @@ type ChannelMessagePayload = {
   };
   '__internal_rpc:app:reset-app': MainInternalsMessagePayload['__internal_main:app:reset-app'];
   '__internal_rpc:app:reset-rabbyx-approvals': MainInternalsMessagePayload['__internal_main:app:reset-rabbyx-approvals'];
-
+  '__internal_rpc:app:prompt-cancel': {
+    send: [promptId: string];
+    response: [];
+  };
+  '__internal_rpc:app:prompt-confirm': {
+    send: [promptId: string, returnValue: string];
+    response: [];
+  };
+  '__internal_rpc:app:prompt-error': {
+    send: [promptId: string];
+    response: [];
+  };
+  '__internal_rpc:app:prompt-mounted': {
+    send: [promptId: string];
+    response: [];
+  };
   '__internal_rpc:debug-tools:operate-debug-insecure-dapps': {
     send: [type: 'add' | 'trim'];
     response: [];
@@ -315,6 +335,10 @@ interface Window {
         channel: T,
         ...args: ChannelMessagePayload[T]['send']
       ): void;
+      sendSync<T extends ISendSyncKey>(
+        channel: T,
+        ...args: ChannelSendSyncPayload[T]['send']
+      ): ChannelSendSyncPayload[T]['returnValue'];
       invoke<T extends IInvokesKey>(
         channel: T,
         ...args: ChannelInvokePayload[T]['send']

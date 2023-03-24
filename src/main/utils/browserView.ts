@@ -111,3 +111,45 @@ export function getMainWindowTopOffset() {
     ? 0
     : NativeAppSizes.windowTitlebarHeight;
 }
+
+export function patchTabbedBrowserWebContents(
+  wc: Electron.WebContents,
+  options: {
+    windowId?: Electron.BrowserWindow['id'];
+  }
+) {
+  // polyfill for window.close
+  wc.executeJavaScript(`
+    ;(function () {
+      if (window.close && window.close.__patched) return ;
+
+      if (
+        window.location.href !== 'about:blank'
+        && window.location.protocol !== 'chrome-extension:'
+      ) return ;
+
+
+      var origWinClose = window.close.bind(window);
+      window.close = function (...args) {
+        window.rabbyDesktop.ipcRenderer.sendMessage('__internal_webui-window-close', ${options.windowId}, ${wc.id});
+        origWinClose(...args);
+      }
+      window.close.__patched = true;
+    })();
+
+    ;(function () {
+      if (window.prompt && window.prompt.__patched) return ;
+
+      var prompt = window.__RDPrompt.bind(window);
+      prompt.__patched = true;
+
+      delete window.prompt;
+      Object.defineProperty(window, 'prompt', {
+        value: window.__RDPrompt,
+        writeable: false,
+        configurable: false,
+      });
+      delete window.__RDPrompt;
+    })();
+  `);
+}

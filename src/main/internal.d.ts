@@ -108,6 +108,24 @@ type MainInternalsMessagePayload = {
     send: [windowId: Electron.BrowserWindow['id']];
     response: [];
   };
+  '__internal_main:tabbed-window:tab-destroyed': {
+    send: [
+      info: {
+        windowId: Electron.BrowserWindow['id'];
+        tabId: Electron.WebContents['id'];
+      }
+    ];
+    response: [];
+  };
+  '__internal_main:tabbed-window:tab-selected': {
+    send: [
+      info: {
+        windowId: Electron.BrowserWindow['id'];
+        tabId: Electron.WebContents['id'];
+      }
+    ];
+    response: [];
+  };
   '__internal_main:dev': {
     send: [
       | {
@@ -123,6 +141,10 @@ type MainInternalsMessagePayload = {
       | {
           type: 'rabbyx-sign-gasket:toggle-show';
           nextShow: boolean;
+        }
+      | {
+          type: 'app:test-prompt';
+          callerWebContents?: Electron.WebContents;
         }
     ];
     response: [];

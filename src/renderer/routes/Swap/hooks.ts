@@ -1,6 +1,6 @@
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
-import { validateToken, ValidateTokenParam } from '@/renderer/utils/token';
+import { ValidateTokenParam } from '@/renderer/utils/token';
 import { CHAINS, CHAINS_ENUM } from '@debank/common';
 import { GasLevel, Tx } from '@debank/rabby-api/dist/types';
 import {
@@ -183,113 +183,151 @@ export const useGasAmount = <T extends ValidateTokenParam>(
     dexId,
     gasMarket,
     gasLevel,
-    tokenApproved,
-    shouldTwoStepApprove,
     userAddress,
     refreshId,
   } = p;
-  const { value: totalGasUsed, loading: totalGasUsedLoading } =
-    useAsync(async () => {
-      if (chain && payAmount && data && payToken && dexId && gasMarket) {
-        const nonce = await walletController.getRecommendNonce({
-          from: data.tx.from,
-          chainId: CHAINS[chain].id,
-        });
 
-        let gasPrice = gasLevel.price;
-        if (gasLevel.level !== 'custom') {
-          const selectGas = (gasMarket || []).find(
-            (e) => e.level === gasLevel.level
-          );
-          gasPrice = selectGas?.price || 0;
-        }
+  const {
+    value: totalGasUsed,
+    loading: totalGasUsedLoading,
+    error,
+  } = useAsync(async () => {
+    if (chain && payAmount && data && payToken && dexId && gasMarket) {
+      const nonce = await walletController.getRecommendNonce({
+        from: data.tx.from,
+        chainId: CHAINS[chain].id,
+      });
 
-        let gasUsed = 0;
+      let gasPrice = gasLevel.price;
+      if (gasLevel.level !== 'custom') {
+        const selectGas = (gasMarket || []).find(
+          (e) => e.level === gasLevel.level
+        );
+        gasPrice = selectGas?.price || 0;
+      }
 
-        let nextNonce = nonce;
+      let gasUsed = 0;
 
-        const pendingTx: Tx[] = [];
+      let nextNonce = nonce;
 
-        const approveToken = async (amount: string) => {
-          const tokenApproveParams =
-            await walletController.generateApproveTokenTx({
-              from: userAddress,
-              to: payToken!.id,
-              chainId: CHAINS[chain].id,
-              // @ts-expect-error
-              spender: DEX_SPENDER_WHITELIST[dexId][chain],
-              amount,
-            });
-          const tokenApproveTx = {
-            ...tokenApproveParams,
-            nonce: nextNonce,
-            value: '0x',
-            gasPrice: `0x${new BigNumber(gasPrice).toString(16)}`,
-            gas: '0x0',
-          };
-          const tokenApprovePreExecTx = await walletOpenapi.preExecTx({
-            tx: tokenApproveTx,
-            origin: INTERNAL_REQUEST_ORIGIN,
-            address: userAddress,
-            updateNonce: true,
-            pending_tx_list: pendingTx,
-          });
+      const pendingTx: Tx[] = [];
 
-          gasUsed += tokenApprovePreExecTx.gas.gas_used;
-          pendingTx.push({
-            ...tokenApproveTx,
-            gas: `0x${new BigNumber(tokenApprovePreExecTx.gas.gas_used)
-              .times(4)
-              .toString(16)}`,
-          });
-          nextNonce = `0x${new BigNumber(nextNonce).plus(1).toString(16)}`;
-        };
-
-        if (shouldTwoStepApprove) {
-          await approveToken('0');
-        }
-
-        if (!tokenApproved) {
-          await approveToken(
-            new BigNumber(payAmount)
-              .times(10 ** payToken.decimals)
-              .toFixed(0, 1)
-          );
-        }
-
-        const swapPreExecTx = await walletOpenapi.preExecTx({
-          tx: {
-            ...data.tx,
-            nonce: nextNonce,
+      const approveToken = async (amount: string) => {
+        const tokenApproveParams =
+          await walletController.generateApproveTokenTx({
+            from: userAddress,
+            to: payToken!.id,
             chainId: CHAINS[chain].id,
-            value: `0x${new BigNumber(data.tx.value).toString(16)}`,
-            gasPrice: `0x${new BigNumber(gasPrice).toString(16)}`,
-            gas: '0x0',
-          } as Tx,
+            // @ts-expect-error
+            spender: DEX_SPENDER_WHITELIST[dexId][chain],
+            amount,
+          });
+        const tokenApproveTx = {
+          ...tokenApproveParams,
+          nonce: nextNonce,
+          value: '0x',
+          gasPrice: `0x${new BigNumber(gasPrice).toString(16)}`,
+          gas: '0x0',
+        };
+        const tokenApprovePreExecTx = await walletOpenapi.preExecTx({
+          tx: tokenApproveTx,
           origin: INTERNAL_REQUEST_ORIGIN,
           address: userAddress,
           updateNonce: true,
           pending_tx_list: pendingTx,
         });
 
-        return gasUsed + swapPreExecTx.gas.gas_used;
+        if (!tokenApprovePreExecTx?.pre_exec?.success) {
+          throw new Error('pre_exec_tx error');
+        }
+
+        gasUsed += tokenApprovePreExecTx.gas.gas_used;
+        pendingTx.push({
+          ...tokenApproveTx,
+          gas: `0x${new BigNumber(tokenApprovePreExecTx.gas.gas_used)
+            .times(4)
+            .toString(16)}`,
+        });
+        nextNonce = `0x${new BigNumber(nextNonce).plus(1).toString(16)}`;
+      };
+
+      const getTokenApproveStatus = async () => {
+        if (!payToken || !dexId || !payAmount || !chain) return [true, false];
+        if (payToken?.id === CHAINS[chain].nativeTokenAddress) {
+          return [true, false];
+        }
+
+        const allowance = await walletController.getERC20Allowance(
+          CHAINS[chain].serverId,
+          payToken.id,
+          // @ts-expect-error
+          DEX_SPENDER_WHITELIST[dexId][chain]
+        );
+
+        const tokenApproved = new BigNumber(allowance).gte(
+          new BigNumber(payAmount).times(10 ** payToken.decimals)
+        );
+
+        if (
+          chain === CHAINS_ENUM.ETH &&
+          isSameAddress(payToken.id, ETH_USDT_CONTRACT) &&
+          Number(allowance) !== 0 &&
+          !tokenApproved
+        ) {
+          return [tokenApproved, true];
+        }
+        return [tokenApproved, false];
+      };
+
+      const [tokenApproved, shouldTwoStepApprove] =
+        await getTokenApproveStatus();
+
+      if (shouldTwoStepApprove) {
+        await approveToken('0');
       }
-      return undefined;
-    }, [
-      chain,
-      data,
-      refreshId,
-      tokenApproved,
-      dexId,
-      gasLevel,
-      gasMarket,
-      shouldTwoStepApprove,
-      payAmount,
-      userAddress,
-    ]);
+
+      if (!tokenApproved) {
+        await approveToken(
+          new BigNumber(payAmount).times(10 ** payToken.decimals).toFixed(0, 1)
+        );
+      }
+
+      const swapPreExecTx = await walletOpenapi.preExecTx({
+        tx: {
+          ...data.tx,
+          nonce: nextNonce,
+          chainId: CHAINS[chain].id,
+          value: `0x${new BigNumber(data.tx.value).toString(16)}`,
+          gasPrice: `0x${new BigNumber(gasPrice).toString(16)}`,
+          gas: '0x0',
+        } as Tx,
+        origin: INTERNAL_REQUEST_ORIGIN,
+        address: userAddress,
+        updateNonce: true,
+        pending_tx_list: pendingTx,
+      });
+
+      if (!swapPreExecTx?.pre_exec?.success) {
+        throw new Error('pre_exec_tx error');
+      }
+
+      return gasUsed + swapPreExecTx.gas.gas_used;
+    }
+    return undefined;
+  }, [
+    chain,
+    data,
+    refreshId,
+    dexId,
+    gasLevel,
+    gasMarket,
+    payAmount,
+    userAddress,
+  ]);
 
   return {
     totalGasUsed,
     totalGasUsedLoading,
+    preExecTxError: error,
   };
 };

@@ -427,3 +427,9 @@ type ICanonalizedUrlInfo = {
   hostname: string;
   fullDomain: string;
 } & IParseDomainInfo;
+
+type IShellWebUIType =
+  | 'MainWindow'
+  | 'Prompt'
+  | 'ForTrezorLike'
+  | 'RabbyX-NotificationWindow';
