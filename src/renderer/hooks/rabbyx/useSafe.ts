@@ -17,16 +17,16 @@ export const useSafe = () => {
   const [pendingCount, setPendingCount] = useAtom(pendingCountAtom);
   const { currentAccount } = useCurrentAccount();
   const isSafe = useIsSafe();
+  const address = currentAccount!.address;
 
   const fetchPendingCount = React.useCallback(async () => {
     if (!isSafe) return 0;
     setPendingCount(0);
-    const address = currentAccount!.address;
     const network = await walletController.getGnosisNetworkId(address);
     const txs = await Safe.getPendingTransactions(address, network);
 
     setPendingCount(txs.results.length);
-  }, [currentAccount, isSafe, setPendingCount]);
+  }, [address, isSafe, setPendingCount]);
 
   React.useEffect(() => {
     fetchPendingCount();

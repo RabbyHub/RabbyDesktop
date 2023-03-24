@@ -6,6 +6,7 @@ import { intToHex } from 'ethereumjs-util';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { message } from 'antd';
+import { useSafe } from '@/renderer/hooks/rabbyx/useSafe';
 import { TxItemGroup } from './TxItemGroup';
 import { useSafeQueue } from './useSafeQueue';
 import styles from './style.module.less';
@@ -74,22 +75,20 @@ export const TxList: React.FC = () => {
         styles.scrollbar
       )}
     >
-      {isLoading ? (
-        <>
-          <TxItemGroupSkeleton />
-          <TxItemGroupSkeleton />
-        </>
-      ) : (
-        Object.keys(transactionsGroup).map((key) => (
-          <TxItemGroup
-            key={key}
-            items={transactionsGroup[key]}
-            networkId={networkId}
-            safeInfo={safeInfo!}
-            onSubmit={handleSubmit}
-          />
-        ))
-      )}
+      {isLoading
+        ? Array.from({ length: 3 }).map((_, index) => (
+            // eslint-disable-next-line react/no-array-index-key
+            <TxItemGroupSkeleton key={index} />
+          ))
+        : Object.keys(transactionsGroup).map((key) => (
+            <TxItemGroup
+              key={key}
+              items={transactionsGroup[key]}
+              networkId={networkId}
+              safeInfo={safeInfo!}
+              onSubmit={handleSubmit}
+            />
+          ))}
       <SelectAddressModal
         open={openSelectAddressModal}
         onCancel={() => setOpenSelectAddressModal(false)}

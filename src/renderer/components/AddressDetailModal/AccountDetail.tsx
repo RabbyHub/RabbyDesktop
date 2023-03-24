@@ -7,6 +7,7 @@ import {
 import { useCopyToClipboard } from 'react-use';
 import { splitNumberByStep } from '@/renderer/utils/number';
 import {
+  KEYRING_CLASS,
   KEYRING_ICONS,
   WALLET_BRAND_CONTENT,
   WALLET_BRAND_TYPES,
@@ -21,6 +22,7 @@ import { AccountDetailItem } from './AccountDetailItem';
 import { useAccountInfo } from '../AddressManagementModal/useAccountInfo';
 import { toastCopiedWeb3Addr } from '../TransparentToast';
 import RabbyInput from '../AntdOverwrite/Input';
+import { SafeItem } from './SafeItem';
 
 export interface Props {
   onClose: () => void;
@@ -34,6 +36,7 @@ export const AccountDetail: React.FC<Props> = ({
   account,
 }) => {
   const brandName = account.brandName as WALLET_BRAND_TYPES;
+  const isSafe = account.type === KEYRING_CLASS.GNOSIS;
   const [, copyToClipboard] = useCopyToClipboard();
   const onCopy = React.useCallback(() => {
     copyToClipboard(account.address);
@@ -134,6 +137,7 @@ export const AccountDetail: React.FC<Props> = ({
         <AccountDetailItem headline="Source">
           <div className={styles.source}>
             <img
+              className="w-[18px] h-[18px]"
               src={
                 KEYRING_ICONS[account.type] ||
                 WALLET_BRAND_CONTENT[brandName]?.image
@@ -147,6 +151,7 @@ export const AccountDetail: React.FC<Props> = ({
             {`${accountInfo.hdPathTypeLabel} #${accountInfo.index}`}
           </AccountDetailItem>
         )}
+        {isSafe && <SafeItem />}
       </section>
       <section className={styles.part}>
         <AccountDetailItem
