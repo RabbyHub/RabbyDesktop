@@ -21,4 +21,11 @@ type ChannelSendSyncPayload = {
   };
 };
 
+type IpcMainSendSyncEvent<RT> = Omit<
+  Electron.IpcMainEvent,
+  'returnValue' | 'reply'
+> & {
+  returnValue: RT;
+};
+
 type ISendSyncKey = keyof ChannelSendSyncPayload;

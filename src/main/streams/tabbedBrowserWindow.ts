@@ -418,7 +418,7 @@ onIpcMainEvent('__internal_rpc:trezor-like-window:click-close', async (evt) => {
 let tabWaitActiveMutexPools: {
   windowId: number;
   tabId: number;
-  sendEvent: Electron.IpcMainEvent;
+  sendEvent: IpcMainSendSyncEvent<any>;
 }[] = [];
 onIpcMainInternalEvent(
   '__internal_main:tabbed-window:destroyed',
