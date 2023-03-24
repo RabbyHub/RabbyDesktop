@@ -14,16 +14,21 @@ const RowWrapper = styled.div`
   font-size: 14px;
   line-height: 14px;
   color: #ffffff;
-  padding: 16px 0;
+  padding: 16px 22px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   &:nth-last-child(1) {
     border: none;
   }
   &.table-header {
-    padding: 0;
+    padding: 0 22px;
     color: rgba(255, 255, 255, 0.5);
     border: none;
     font-size: 12px;
+    margin-bottom: 4px;
+    margin-top: 4px;
+  }
+  &:not(.table-header):hover {
+    background-color: rgba(0, 0, 0, 0.06);
   }
 `;
 

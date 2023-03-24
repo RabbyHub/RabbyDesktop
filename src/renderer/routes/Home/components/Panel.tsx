@@ -2,7 +2,6 @@ import { ReactNode } from 'react';
 import styled from 'styled-components';
 
 const PanelWrapper = styled.div`
-  padding: 0 22px;
   margin-bottom: 14px;
   position: relative;
   &::after {

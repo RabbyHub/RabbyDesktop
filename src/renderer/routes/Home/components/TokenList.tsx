@@ -14,7 +14,7 @@ const ExpandItem = styled.div`
   font-size: 12px;
   line-height: 14px;
   color: #9094a1;
-  padding: 0 23px;
+  padding: 0 14px;
   align-items: center;
   margin-top: 10px;
   cursor: pointer;

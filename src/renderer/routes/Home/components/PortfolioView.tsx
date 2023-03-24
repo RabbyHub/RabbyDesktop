@@ -10,9 +10,9 @@ import { VIEW_TYPE } from '../hooks';
 import ScrollTopContext from './scrollTopContext';
 
 const PortfolioWrapper = styled.div`
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.03);
   width: 100%;
-  padding: 0 28px;
+  padding: 0 14px 28px;
   padding-right: 0;
   border-radius: 8px;
   position: relative;
@@ -21,7 +21,7 @@ const PortfolioWrapper = styled.div`
     // don't use overflow: overlay, it will cause zIndex problem
     overflow: auto;
     height: 100%;
-    padding-right: 28px;
+    padding-right: 14px;
     padding-top: 28px;
     padding-bottom: 28px;
   }
@@ -41,9 +41,9 @@ const PortfolioWrapper = styled.div`
       color: rgba(255, 255, 255, 0.5);
       font-weight: 400;
       font-size: 12px;
-      line-height: 14px;
+      line-height: 1;
       padding: 0 23px;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
       & > div {
         text-align: left;
         &:nth-child(1) {

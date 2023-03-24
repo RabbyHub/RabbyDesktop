@@ -19,10 +19,9 @@ const TokenItemWrapper = styled.li`
   align-items: center;
   border-radius: 8px;
   border: 1px solid transparent;
-  padding-bottom: 29px;
-  padding-top: 10px;
-  padding-left: 23px;
-  padding-right: 23px;
+  height: 63px;
+  padding-left: 14px;
+  padding-right: 14px;
   & > div {
     position: relative;
     text-align: left;
@@ -47,6 +46,7 @@ const TokenItemWrapper = styled.li`
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      margin-top: 4px;
       &.is-loss {
         color: #ff6565;
       }
@@ -62,6 +62,7 @@ const TokenItemWrapper = styled.li`
       line-height: 14px;
       color: rgba(255, 255, 255, 0.7);
       align-items: center;
+      margin-top: 4px;
       .icon-numer-change-arrow {
         width: 9px;
         margin-left: 4px;
@@ -202,7 +203,7 @@ const TokenItemComp = ({
         {formatAmount(token.amount)} {ellipsisTokenSymbol(token.symbol)}
         {historyToken && Math.abs(amountChange * token.price) >= 0.01 && (
           <div
-            className={classNames('price-change absolute -bottom-12', {
+            className={classNames('price-change', {
               'is-loss': amountChange < 0,
               'is-increase': amountChange > 0,
             })}
@@ -218,7 +219,7 @@ const TokenItemComp = ({
         {`${formatUsdValue(token.usd_value || '0')}`}
         {historyToken && (
           <div
-            className={classNames('price-change absolute -bottom-12', {
+            className={classNames('price-change', {
               'is-loss': usdValueChange.value < 0,
               'is-increase': usdValueChange.value > 0,
             })}

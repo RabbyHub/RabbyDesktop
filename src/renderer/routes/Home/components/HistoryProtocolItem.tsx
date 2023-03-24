@@ -24,10 +24,8 @@ import ScrollTopContext from './scrollTopContext';
 
 const ProtocolItemWrapper = styled.div`
   margin-bottom: 20px;
-  /* .protocol-list {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-  } */
+  padding-left: 14px;
+  padding-right: 14px;
   .tag {
     position: absolute;
     left: 0;
@@ -47,10 +45,9 @@ const ProtocolItemWrapper = styled.div`
 
 const ProtocolHeader = styled.div`
   display: flex;
-  margin-bottom: 20px;
-  padding-left: 25px;
-  padding-right: 22px;
+  margin-bottom: 28px;
   align-items: flex-end;
+  padding: 0 6px;
   .token-with-chain {
     .chain-logo {
       width: 12px;
