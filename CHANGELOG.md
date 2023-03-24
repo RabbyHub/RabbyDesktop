@@ -1,7 +1,25 @@
 
+v0.9.0 / 2023-03-25
+===================
+
+  * feat: integrate safe (#305)
+  * fix: update at
+  * fix: style
+  * fix: token list th padding
+  * feat: allow greater double-click-maximize area on macOS. (#310)
+  * feat: update home page style (#307)
+  * feat: update transactions and support clear pending txs (#306)
+  * feat: enable verify update code sign on windows. (#308)
+  * feat: swap pre exec tx (#303)
+  * feat: support `window.prompt`. (#301)
+  * feat: hide small assets 0.1% (#302)
+  * feat: remove fetch faviconBase64 (#300)
+  * feat: make sure `Electron` string trimed on request from webContents. (#299)
+
 v0.8.0 / 2023-03-21
 ===================
 
+  * Release v0.8.0
   * chore: change add dapp ui (#298)
   * fix: number
   * feat: disable repair favicons on bootstrap.
@@ -59,13 +77,12 @@ v0.6.0 / 2023-03-14
   * feat: support special subdomain & remove relaction dialog (#262)
   * feat: update rabbyX (#264)
   * fix: home view height (#260)
-  * Release v0.5.8
-  * chore: update trezror (#259)
 
-v0.5.8 / 2023-03-10
+v0.5.8 / 2023-03-11
 ===================
 
   * Release v0.5.8
+  * chore: update trezror (#259)
   * ci: accept env `buildchannel` from github actions vars.
   * fix: prerelease script.
   * fix: hd styles (#256)
