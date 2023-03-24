@@ -22,7 +22,7 @@ async function alertForceUpdate() {
   });
 
   if (result.response === confirmId) {
-    shell.openExternal('https://rabby.io?download=desktop');
+    shell.openExternal('https://rabby.io/?platform=desktop');
   }
 
   app.quit();

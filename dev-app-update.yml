@@ -1,4 +1,4 @@
 provider: generic
 # change to 'win32' if necessary
 url: https://download.rabby.io/wallet-desktop-updater-test/mac
-updaterCacheDirName: rabby-desktop-updater
+updaterCacheDirName: rabby-desktop-dev-updater

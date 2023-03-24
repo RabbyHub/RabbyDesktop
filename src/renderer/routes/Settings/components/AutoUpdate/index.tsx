@@ -11,6 +11,7 @@ export const AutoUpdate = ({ isFold, className }: AutoUpdateProps) => {
     releaseCheckInfo,
     isDownloading,
     isDownloaded,
+    isDownloadedFailed,
     requestDownload,
     progress,
     quitAndUpgrade,
@@ -49,7 +50,7 @@ export const AutoUpdate = ({ isFold, className }: AutoUpdateProps) => {
       </div>
     );
   }
-  if (isDownloaded) {
+  if (isDownloaded && !isDownloadedFailed) {
     return (
       <div
         className={classNames(

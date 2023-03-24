@@ -1,8 +1,12 @@
+import fs from 'fs';
+import path from 'path';
+
 import { NsisUpdater, MacUpdater } from 'electron-updater';
 import eLog from 'electron-log';
 
 import type { GenericServerOptions } from 'builder-util-runtime';
 
+import { getAppCacheDir } from 'electron-updater/out/AppAdapter';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 
 eLog.transports.file.level = 'debug';
@@ -27,6 +31,25 @@ function getAppUpdaterURL(): string {
   return `https://download.rabby.io/${remoteBaseDir}/${PLATFORM}-${ARCH}/`;
 }
 
+// keep the same cache dir in `dev-app-update.yml` on dev
+const CACHE_DIRNAME = !IS_RUNTIME_PRODUCTION
+  ? 'rabby-desktop-dev-updater'
+  : 'rabby-desktop-updater';
+function cleanCacheDir(baseDir: string) {
+  ['./pending'].forEach((p) => {
+    const fullpath = path.resolve(baseDir, p);
+    if (fs.existsSync(fullpath)) {
+      console.log('[cleanCacheDir] will remove', fullpath);
+      try {
+        fs.rmSync(fullpath, { recursive: true });
+      } catch (err) {
+        console.warn('[cleanCacheDir] error occured');
+        console.error(err);
+      }
+    }
+  });
+}
+
 export class AppUpdaterWin32 extends NsisUpdater {
   constructor(options?: GenericServerOptions) {
     super({
@@ -34,6 +57,7 @@ export class AppUpdaterWin32 extends NsisUpdater {
       url: getAppUpdaterURL(),
       ...options,
       logger: eLog,
+      updaterCacheDirName: CACHE_DIRNAME,
     } as GenericServerOptions);
 
     // disable autoDownload, manually call `this.downloadUpdate(cancellationToken)` and `new (require('builder-util-runtime').CancellationToken)()` instead
@@ -44,6 +68,14 @@ export class AppUpdaterWin32 extends NsisUpdater {
   // see more details on `node_modules/electron-updater/out/AppUpdater.js`
   isUpdaterActive() {
     return true;
+  }
+
+  getCacheDir() {
+    return path.resolve(getAppCacheDir(), CACHE_DIRNAME);
+  }
+
+  cleanDownloadedCache() {
+    cleanCacheDir(this.getCacheDir());
   }
 }
 
@@ -54,6 +86,7 @@ export class AppUpdaterDarwin extends MacUpdater {
       url: getAppUpdaterURL(),
       ...options,
       logger: eLog,
+      updaterCacheDirName: CACHE_DIRNAME,
     } as GenericServerOptions);
 
     // disable autoDownload, manually call `this.downloadUpdate(cancellationToken)` and `new (require('builder-util-runtime').CancellationToken)()` instead
@@ -64,5 +97,13 @@ export class AppUpdaterDarwin extends MacUpdater {
   // see more details on `node_modules/electron-updater/out/AppUpdater.js`
   isUpdaterActive() {
     return true;
+  }
+
+  getCacheDir() {
+    return path.resolve(getAppCacheDir(), CACHE_DIRNAME);
+  }
+
+  cleanDownloadedCache() {
+    cleanCacheDir(this.getCacheDir());
   }
 }
