@@ -33,7 +33,7 @@ export const TxItemConfirmation: React.FC<Props> = ({
   }, [init]);
 
   return (
-    <div className="w-[273px] overflow-hidden">
+    <div className="w-[300px] overflow-hidden">
       <div className="text-[12px] text-[#bfc1c8] mb-[16px]">
         {confirmations.length >= threshold ? (
           'Enough signature collected'
@@ -72,7 +72,7 @@ export const TxItemConfirmation: React.FC<Props> = ({
               <NameAndAddress
                 address={owner}
                 className="text-[13px]"
-                nameClass="text-[13px] text-white truncate max-w-[80px]"
+                nameClass="text-[13px] text-white truncate max-w-[100px]"
                 addressClass="text-[13px] text-white"
                 noNameClass="opacity-40"
                 copyIconClass="opacity-100"
