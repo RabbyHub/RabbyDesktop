@@ -46,7 +46,7 @@ export async function createTrezorLikeConnectPageWindow(connectURL: string) {
   const tabbedWin = await createWindow({
     defaultTabUrl: connectURL,
     defaultOpen: false,
-    isForTrezorLikeConnection: true,
+    webuiType: 'ForTrezorLike',
     window: {
       parent: mainWindow,
       modal: false,

@@ -22,7 +22,34 @@ export function onIpcMainEvent<T extends IChannelsKey = IChannelsKey>(
   ipcMain.on(eventName, handler as any);
 
   // dispose
+  let disposed = false;
   const dispose = () => {
+    if (disposed) return;
+    disposed = true;
+
+    return ipcMain.off(eventName, handler as any);
+  };
+
+  dispose.handler = handler;
+
+  return dispose;
+}
+
+export function onIpcMainSyncEvent<T extends ISendSyncKey = ISendSyncKey>(
+  eventName: T,
+  handler: (
+    // disable reply for calling to `ipcRenderer.sendSync`
+    event: IpcMainSendSyncEvent<ChannelSendSyncPayload[T]['returnValue']>,
+    ...args: ChannelSendSyncPayload[T]['send']
+  ) => any
+) {
+  ipcMain.on(eventName, handler as any);
+
+  // dispose
+  let disposed = false;
+  const dispose = () => {
+    if (disposed) return;
+    disposed = true;
     return ipcMain.off(eventName, handler as any);
   };
 
@@ -45,7 +72,10 @@ export function onIpcMainInternalEvent<T extends MainInternals = MainInternals>(
   ipcMain.on(eventName, handler as any);
 
   // dispose
+  let disposed = false;
   const dispose = () => {
+    if (disposed) return;
+    disposed = true;
     return ipcMain.off(eventName, handler as any);
   };
 
@@ -56,7 +86,7 @@ export function onIpcMainInternalEvent<T extends MainInternals = MainInternals>(
 
 export function sendToWebContents<T extends IPushEvents = IPushEvents>(
   webContents: Electron.WebContents | null | undefined,
-  eventName: T,
+  eventName: T & string,
   payload: M2RChanneMessagePayload[T] extends void
     ? null
     : M2RChanneMessagePayload[T]
@@ -64,6 +94,9 @@ export function sendToWebContents<T extends IPushEvents = IPushEvents>(
   webContents?.send(eventName, payload);
 }
 
+/**
+ * @description you cannot repeat register handler for the same event
+ */
 export function handleIpcMainInvoke<T extends IInvokesKey = IInvokesKey>(
   eventName: T,
   handler: (

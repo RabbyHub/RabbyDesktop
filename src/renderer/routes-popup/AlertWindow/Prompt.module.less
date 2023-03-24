@@ -1,0 +1,55 @@
+:global {
+  .titlebarForAlertWindow.titlebar.os-win32 {
+    background: transparent;
+  }
+
+  body {
+    background-color: transparent !important;
+  }
+}
+
+.AlertWindowPrompt {
+  color: var(--color-purewhite);
+  background-color: #525767;
+  font-family: 'SF Pro';
+  font-style: normal;
+  // font-weight: 510;
+  font-size: 18px;
+  line-height: 21px;
+
+  height: 100%;
+  padding: 30px
+}
+
+.PromptInner {
+  // @apply flex align-start justify-center
+  // flex-direction: column;
+
+  @apply w-[100%] h-[100%];
+  margin: 0 auto;
+}
+
+.originSite {
+  // background-color: var(--color-paragraph);
+  padding: 2px 4px;
+  border-radius: 4px;
+  // margin-left: 4px;
+  // margin-right: 4px;
+}
+
+.messageContent {
+  line-height: 2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 100%;
+  overflow: hidden;
+
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+}
+
+.actionBtn {
+  height: 44px;
+  border-radius: 6px;
+}

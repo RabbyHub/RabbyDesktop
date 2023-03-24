@@ -13,6 +13,7 @@ import './streams/dappLoadingView';
 import './streams/securityCheck';
 import './streams/securityAddressbarPopup';
 // import './streams/clipboard';
+import './streams/alertWindows';
 import './streams/browser';
 import './streams/popupOnMainwin';
 import './streams/popupViewOnMainwin';

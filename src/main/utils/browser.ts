@@ -87,7 +87,7 @@ export function createPopupModalWindow(
     Electron.BrowserWindowConstructorOptions,
     | 'hasShadow'
     | 'modal'
-    | 'frame'
+    // | 'frame'
     | 'closable'
     | 'movable'
     | 'resizable'
@@ -109,7 +109,6 @@ export function createPopupModalWindow(
     ...opts,
     hasShadow: false,
     modal: true,
-    frame: false,
     movable: false,
     resizable: false,
     minimizable: false,
@@ -119,6 +118,7 @@ export function createPopupModalWindow(
     show: false,
     skipTaskbar: true,
     ...getPopupWinDefaultOpts(opts),
+    frame: !!opts.frame,
     webPreferences: {
       ...SAFE_WEBPREFERENCES,
       webviewTag: false,
@@ -361,4 +361,61 @@ export function hideLoadingView() {
   emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
     type: 'hide',
   });
+}
+
+const isDarwin = process.platform === 'darwin';
+export function getTitlebarOffsetForMacOS() {
+  return isDarwin ? 28 : 0;
+}
+
+let modalWindowTitlebarOffset: number | null = null;
+/**
+ * @see https://github.com/electron/electron/issues/6287
+ * @deprecated
+ */
+export async function getOrRecordTitlebarOffset(record?: {
+  expectedH: number;
+}) {
+  if (process.platform !== 'darwin') return 0;
+
+  if (record) {
+    if (modalWindowTitlebarOffset !== null) {
+      throw new Error('modalWindowTitlebarOffset has been set');
+    }
+    const testSize = { width: 500, height: 400 };
+    const parentWindow = new BrowserWindow({
+      width: 1000,
+      height: 1000,
+    });
+
+    const modalWindow = new BrowserWindow({
+      modal: true,
+      parent: parentWindow,
+      width: testSize.width,
+      height: testSize.height,
+      show: false,
+      movable: false,
+      resizable: false,
+      minimizable: false,
+      maximizable: false,
+      fullscreenable: false,
+      skipTaskbar: true,
+      frame: false,
+      transparent: true,
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        webviewTag: false,
+        sandbox: true,
+      },
+    });
+
+    const actualHeight = await modalWindow.webContents.executeJavaScript(
+      `window.innerHeight`
+    );
+
+    modalWindowTitlebarOffset = actualHeight - record.expectedH;
+  }
+
+  return modalWindowTitlebarOffset || 0;
 }

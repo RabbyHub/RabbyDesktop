@@ -1,4 +1,9 @@
-import { ipcRenderer, IpcRendererEvent, nativeImage } from 'electron';
+import {
+  contextBridge,
+  ipcRenderer,
+  IpcRendererEvent,
+  nativeImage,
+} from 'electron';
 
 export const ipcRendererObj = {
   sendMessage<T extends IChannelsKey>(
@@ -6,6 +11,12 @@ export const ipcRendererObj = {
     ...args: ChannelMessagePayload[T]['send']
   ) {
     ipcRenderer.send(channel, ...args);
+  },
+  sendSync<T extends ISendSyncKey>(
+    channel: T,
+    ...args: ChannelSendSyncPayload[T]['send']
+  ): ChannelSendSyncPayload[T]['returnValue'] {
+    return ipcRenderer.sendSync(channel, ...args);
   },
   invoke<T extends IInvokesKey>(
     channel: T,
@@ -49,3 +60,24 @@ export const rendererHelpers: Window['rabbyDesktop']['rendererHelpers'] = {
     return blobLink;
   },
 };
+
+/**
+ * @description make sure k not exists in `window`
+ * @param k
+ * @param v
+ */
+export function exposeToMainWorld(k: string, v: any) {
+  try {
+    contextBridge.exposeInMainWorld(k, v);
+  } catch (e) {
+    // TODO: only enable this on dev!
+    console.error('exposeToMainWorld:: e', e);
+
+    delete (window as any)[k];
+    Object.defineProperty(window, k, {
+      value: v,
+      writable: false,
+      configurable: false,
+    });
+  }
+}

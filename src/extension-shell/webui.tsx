@@ -10,29 +10,50 @@ import '@/renderer/ipcRequest/zPopupMessage';
 import { MainWindow } from '@/renderer/components/MainWindow';
 import Topbar from '@/renderer/components/Topbar';
 
-import {
-  isForTrezorLikeWebUI,
-  isMainWinShellWebUI,
-  isRabbyXNotificationWinShellWebUI,
-} from '@/isomorphic/url';
+import { getShellUIType } from '@/isomorphic/url';
 import { HardwareConnectTopbar } from '@/renderer/components/HardwareConnectTopbar/HardwareConnectTopbar';
+import AlertWindowPrompt from '@/renderer/routes-popup/AlertWindow/Prompt';
 
-if (isMainWinShellWebUI(window.location.href)) {
-  const container = document.createElement('div');
-  container.id = 'root';
-  document.body.appendChild(container);
-  const root = createRoot(container);
-  root.render(<MainWindow />);
-} else if (isForTrezorLikeWebUI(window.location.href)) {
-  document.documentElement.classList.add('__rabbyx-trezor-like', 'popup-win');
+const shellUIType = getShellUIType(window.location.href) as IShellWebUIType &
+  string;
 
-  const container = document.getElementById('topbar')!;
-  const root = createRoot(container);
-  root.render(<HardwareConnectTopbar />);
-} else if (!isRabbyXNotificationWinShellWebUI(window.location.href)) {
-  document.documentElement.classList.add('__rabbyx-browser-like', 'popup-win');
+switch (shellUIType) {
+  case 'MainWindow': {
+    const container = document.createElement('div');
+    container.id = 'root';
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    root.render(<MainWindow />);
+    break;
+  }
+  case 'Prompt': {
+    const container = document.createElement('div');
+    container.id = 'root';
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    root.render(<AlertWindowPrompt />);
+    break;
+  }
+  case 'ForTrezorLike': {
+    document.documentElement.classList.add('__rabbyx-trezor-like', 'popup-win');
 
-  const container = document.getElementById('topbar')!;
-  const root = createRoot(container);
-  root.render(<Topbar />);
+    const container = document.getElementById('topbar')!;
+    const root = createRoot(container);
+    root.render(<HardwareConnectTopbar />);
+    break;
+  }
+  case 'RabbyX-NotificationWindow': {
+    break;
+  }
+  default: {
+    document.documentElement.classList.add(
+      '__rabbyx-browser-like',
+      'popup-win'
+    );
+
+    const container = document.getElementById('topbar')!;
+    const root = createRoot(container);
+    root.render(<Topbar />);
+    break;
+  }
 }
