@@ -39,11 +39,13 @@ function cleanCacheDir(baseDir: string) {
   ['./pending'].forEach((p) => {
     const fullpath = path.resolve(baseDir, p);
     if (fs.existsSync(fullpath)) {
-      console.log(
-        'AppUpdaterDarwin::cleanDownloadedCache will remove',
-        fullpath
-      );
-      fs.rmSync(fullpath);
+      console.log('[cleanCacheDir] will remove', fullpath);
+      try {
+        fs.rmSync(fullpath, { recursive: true });
+      } catch (err) {
+        console.warn('[cleanCacheDir] error occured');
+        console.error(err);
+      }
     }
   });
 }
