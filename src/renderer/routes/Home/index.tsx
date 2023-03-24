@@ -475,11 +475,18 @@ const Home = () => {
   }, [location]);
 
   useEffect(() => {
-    setUpdateAt(Date.now() / 1000);
+    setUpdateAt(0);
   }, [updateNonce]);
 
+  useEffect(() => {
+    if (!isLoadingRealTimeTokenList && !isLoadingRealTimeProtocol) {
+      const n = Date.now() - 1000;
+      setUpdateAt(Math.floor(n / 1000));
+    }
+  }, [isLoadingRealTimeTokenList, isLoadingRealTimeProtocol]);
+
   useInterval(() => {
-    setNow(Date.now() / 1000);
+    setNow(Math.floor(Date.now() / 1000));
   }, 1000);
 
   const { showZSubview } = useZPopupLayerOnMain();
@@ -564,7 +571,9 @@ const Home = () => {
               {curveData ? (
                 <div className="right" onClick={() => setCurveModalOpen(true)}>
                   <div className="update-at">
-                    {isLoadingRealTimeTokenList || isLoadingRealTimeProtocol ? (
+                    {isLoadingRealTimeTokenList ||
+                    isLoadingRealTimeProtocol ||
+                    updateAt === 0 ? (
                       'Updating data'
                     ) : (
                       <>

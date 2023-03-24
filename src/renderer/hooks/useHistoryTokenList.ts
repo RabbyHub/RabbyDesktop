@@ -21,8 +21,8 @@ export default (
   const [historyTokenMap, setHistoryTokenMap] = useState<
     Record<string, TokenItem>
   >({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingRealTime, setIsLoadingRealTime] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingRealTime, setIsLoadingRealTime] = useState(true);
   const isRealTimeLoadedRef = useRef(false);
   const isHistoryLoadedRef = useRef(false);
   const isLoadingHistory = useRef(false);
