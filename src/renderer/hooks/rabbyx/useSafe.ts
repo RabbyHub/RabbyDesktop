@@ -20,6 +20,7 @@ export const useSafe = () => {
 
   const fetchPendingCount = React.useCallback(async () => {
     if (!isSafe) return 0;
+    setPendingCount(0);
     const address = currentAccount!.address;
     const network = await walletController.getGnosisNetworkId(address);
     const txs = await Safe.getPendingTransactions(address, network);
