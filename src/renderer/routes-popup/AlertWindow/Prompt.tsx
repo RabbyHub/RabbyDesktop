@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { Button } from 'antd';
 
@@ -7,9 +7,10 @@ import '@/renderer/css/windicss';
 import '@/renderer/utils/rendererReport';
 
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
-import { TitlebarForAlertWindow } from '@/renderer/components/Titlebar';
 
 import { parseQueryString } from '@/isomorphic/url';
+
+import './Prompt.less';
 import styles from './Prompt.module.less';
 
 const promptId = parseQueryString().__webuiPromptId;
@@ -54,44 +55,43 @@ export default function AlertWindowPrompt() {
 
   return (
     <>
-      <TitlebarForAlertWindow />
+      {/* <TitlebarForAlertWindow /> */}
       <div className={styles.AlertWindowPrompt}>
         <div className={styles.PromptInner}>
-          <div className={clsx(styles.AlertWindowPrompt__content__body__text)}>
+          <div className={clsx(styles.AlertWindowPromptTitle)}>
             <p className={clsx('mb-4px')}>
               Page At
               <b className={styles.originSite}>{initContent.originSite}</b>
               says:
             </p>
-            <p className={clsx('mb-4px', styles.messageContent)}>
+            <p className={clsx('mb-0 h-[40px]', styles.messageContent)}>
               {initContent.title}
             </p>
-            <div>
-              <RabbyInput
-                disabled={disableOp}
-                onChange={(evt) => {
-                  setUserInput(evt.target.value);
-                }}
-                value={userInput}
-                maxLength={100}
-              />
-            </div>
+          </div>
+
+          <div className="mt-0">
+            <RabbyInput
+              className="prompt-input"
+              disabled={disableOp}
+              onChange={(evt) => {
+                setUserInput(evt.target.value);
+              }}
+              value={userInput}
+              maxLength={100}
+            />
           </div>
 
           <div
             className={clsx(
               styles.AlertWindowPrompt__content__body__buttons,
-              'flex align-items justify-center mt-[24px]'
+              'flex align-items justify-center mt-22px'
             )}
           >
             <Button
               type="primary"
               disabled={disableOp}
               ghost
-              className={clsx(
-                styles.AlertWindowPrompt__content__body__buttons__cancel,
-                'w-[100%]'
-              )}
+              className={clsx(styles.actionBtn, 'w-[100%]')}
               onClick={() => {
                 window.rabbyDesktop.ipcRenderer.sendMessage(
                   '__internal_rpc:app:prompt-cancel',
@@ -105,10 +105,7 @@ export default function AlertWindowPrompt() {
             <Button
               type="primary"
               disabled={disableOp}
-              className={clsx(
-                styles.AlertWindowPrompt__content__body__buttons__confirm,
-                'w-[100%]'
-              )}
+              className={clsx(styles.actionBtn, 'w-[100%]')}
               onClick={() => {
                 window.rabbyDesktop.ipcRenderer.sendMessage(
                   '__internal_rpc:app:prompt-confirm',

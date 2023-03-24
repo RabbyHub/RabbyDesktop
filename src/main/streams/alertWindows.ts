@@ -15,8 +15,8 @@ import {
 } from './tabbedBrowserWindow';
 
 const SIZE = {
-  width: 480,
-  height: 220,
+  width: 521,
+  height: 231,
 };
 
 function getPromptWindowBounds(parentWindow: Electron.BrowserWindow) {
@@ -33,7 +33,7 @@ function getPromptWindowBounds(parentWindow: Electron.BrowserWindow) {
 
 // TODO:
 // 1. restrain only active tab run it
-// 2. avoid repeative prompt in short time
+// 2. avoid repeative prompt in short time (consecutive prompt)
 onIpcMainSyncEvent('__internal_rpc:app:prompt-open', async (evt, options) => {
   const callerWebContents = evt.sender;
   const callerTabbedWin = getTabbedWindowFromWebContents(callerWebContents);
@@ -65,7 +65,7 @@ onIpcMainSyncEvent('__internal_rpc:app:prompt-open', async (evt, options) => {
       maximizable: false,
       minimizable: false,
       fullscreen: false,
-      movable: true,
+      movable: false,
       show: false,
     },
   });
