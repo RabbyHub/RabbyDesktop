@@ -6,6 +6,8 @@ import { TxList } from './TxList';
 export const QueueModal: React.FC = () => {
   const { svVisible, closeSubview } = useZPopupViewState('safe-queue-modal');
 
+  if (!svVisible) return null;
+
   return (
     <Modal
       width={1000}
