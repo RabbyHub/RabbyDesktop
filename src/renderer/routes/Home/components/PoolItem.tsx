@@ -19,6 +19,7 @@ const PoolItemWrapper = styled.div`
   position: relative;
   margin-bottom: 12px;
   padding-top: 40px;
+  overflow: hidden;
   .tag {
     position: absolute;
     left: 0;
