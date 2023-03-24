@@ -2,6 +2,7 @@ import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { roundRectValue } from '@/isomorphic/shape';
 import { randString } from '@/isomorphic/string';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
+import { getTitlebarOffsetForMacOS } from '../utils/browser';
 import {
   onIpcMainEvent,
   onIpcMainInternalEvent,
@@ -16,7 +17,7 @@ import {
 
 const SIZE = {
   width: 521,
-  height: 231,
+  height: 231 + getTitlebarOffsetForMacOS(),
 };
 
 function getPromptWindowBounds(parentWindow: Electron.BrowserWindow) {

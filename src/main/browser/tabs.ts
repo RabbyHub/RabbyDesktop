@@ -90,6 +90,9 @@ export class Tab {
 
     if (this.$meta.webuiType === 'ForTrezorLike') {
       this.$meta.topbarStacks.tabs = true;
+    } else if (this.$meta.webuiType === 'Prompt') {
+      this.$meta.topbarStacks.tabs = false;
+      this.$meta.topbarStacks.navigation = false;
     }
 
     this.tabs = tabs;
@@ -144,14 +147,12 @@ export class Tab {
     });
   }
 
-  get isOfMainWindow() {
-    return this.$meta.webuiType === 'MainWindow';
+  get isOfPrompt() {
+    return this.$meta.webuiType === 'Prompt';
   }
 
-  get isTitleBarLikeMainWindow() {
-    return (
-      this.$meta.webuiType === 'MainWindow' || this.$meta.webuiType === 'Prompt'
-    );
+  get isOfMainWindow() {
+    return this.$meta.webuiType === 'MainWindow';
   }
 
   get isOfTreasureLikeConnection() {
@@ -279,7 +280,7 @@ export class Tab {
       y: topOffset,
       width,
       height: height - topOffset,
-      ...(this.isTitleBarLikeMainWindow
+      ...(this.isOfMainWindow
         ? !isCollapsedMainWindow
           ? {
               x: NativeLayouts.dappsViewLeftOffset,
