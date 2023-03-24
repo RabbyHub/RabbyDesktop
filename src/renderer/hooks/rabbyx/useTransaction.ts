@@ -1,5 +1,6 @@
 import { toastMessage } from '@/renderer/components/TransparentToast';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { message } from 'antd';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
 import { useCurrentAccount } from './useAccount';
@@ -90,3 +91,26 @@ export function useTransactionPendingCount() {
 
   return pendingTxCount;
 }
+
+export const useClearPendingTx = () => {
+  const { currentAccount } = useCurrentAccount();
+  const [, setPendingTxCount] = useAtom(pendingTxCountAtom);
+
+  const clearPendingTx = useCallback(async () => {
+    if (currentAccount?.address) {
+      await walletController.clearAddressPendingTransactions(
+        currentAccount?.address
+      );
+      message.success({
+        content: 'Pending transaction cleared',
+      });
+      walletController
+        .getTransactionHistory(currentAccount.address)
+        .then(({ pendings }) => {
+          setPendingTxCount(pendings.length);
+        });
+    }
+  }, [currentAccount?.address, setPendingTxCount]);
+
+  return clearPendingTx;
+};

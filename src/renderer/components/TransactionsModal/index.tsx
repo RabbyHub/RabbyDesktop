@@ -1,3 +1,4 @@
+import { Modal } from '@/renderer/components/Modal/Modal';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { range } from 'lodash';
 import { useEffect, useRef } from 'react';
@@ -60,4 +61,22 @@ const Transactions = () => {
   );
 };
 
-export default Transactions;
+interface TransactionModalProps {
+  open?: boolean;
+  onClose?: () => void;
+}
+export const TransactionModal = ({ open, onClose }: TransactionModalProps) => {
+  return (
+    <Modal
+      open={open}
+      onCancel={onClose}
+      className={styles.transactionModal}
+      width={1070}
+      centered
+      destroyOnClose
+    >
+      <div className={styles.transactionModalTitle}>Transactions</div>
+      <Transactions />
+    </Modal>
+  );
+};

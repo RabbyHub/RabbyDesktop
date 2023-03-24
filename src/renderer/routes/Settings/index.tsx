@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import classNames from 'classnames';
 import { openExternalUrl, requestResetApp } from '@/renderer/ipcRequest/app';
 
@@ -27,6 +27,7 @@ import { AutoUpdate } from './components/AutoUpdate';
 import ModalDevices from './components/ModalDevices';
 import { testRequestDevice } from './components/ModalDevices/useFilteredDevices';
 import { ChangeLog } from './components/ChangeLog';
+import { ClearPendingModal } from './components/ClearPendingModal';
 
 type TypedProps = {
   name: React.ReactNode;
@@ -152,6 +153,9 @@ export function MainWindowSettings() {
   const { fetchReleaseInfo } = useCheckNewRelease();
 
   const { enable, toggleWhitelist } = useWhitelist();
+
+  const [isShowingClearPendingModal, setIsShowingClearPendingModal] =
+    useState(false);
 
   return (
     <div className={styles.settingsPage}>
@@ -312,6 +316,19 @@ export function MainWindowSettings() {
           />
         </div>
       </div>
+      <div className={styles.settingBlock}>
+        <div className={styles.itemList}>
+          <ItemAction
+            name="Clear Pending"
+            onClick={() => {
+              setIsShowingClearPendingModal(true);
+            }}
+            icon="rabby-internal://assets/icons/mainwin-settings/icon-clear.svg"
+          >
+            <img src={IconChevronRight} />
+          </ItemAction>
+        </div>
+      </div>
 
       {!IS_RUNTIME_PRODUCTION && (
         <div className={styles.settingBlock}>
@@ -354,6 +371,12 @@ export function MainWindowSettings() {
           </div>
         </div>
       )}
+      <ClearPendingModal
+        open={isShowingClearPendingModal}
+        onClose={() => {
+          setIsShowingClearPendingModal(false);
+        }}
+      />
     </div>
   );
 }

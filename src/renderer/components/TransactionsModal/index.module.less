@@ -1,18 +1,9 @@
-:global {
-  .route_transactions {
-    .page-header-block .page-title {
-      padding-left: 30px;
-    }
-  }
-}
-
 .page {
-  height: calc(
-    var(--mainwin-mainroute-height) - var(--mainwin-headerblock-offset)
-  );
+  height: 618px;
+  padding-left: 32px;
+  padding-right: 32px;
+  padding-bottom: 32px;
   overflow: overlay;
-  padding: 30px 60px;
-
   .container {
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 12px;
@@ -108,9 +99,7 @@
       > a {
         vertical-align: baseline;
         color: inherit;
-        &:hover {
-          text-decoration: underline;
-        }
+        text-decoration: underline;
       }
     }
 
@@ -121,6 +110,7 @@
       gap: 18px;
       flex: 1 1;
       overflow: hidden;
+      min-height: 37px;
 
       :global {
         .name-and-address {
@@ -279,10 +269,20 @@
   }
 }
 
-@media screen and (min-width: 2000px) {
-  .page {
-    width: 1700px;
-    margin-left: auto;
-    margin-right: auto;
+.transactionModal {
+  :global {
+    .ant-modal-close-x {
+      padding: 35px 30px;
+    }
+  }
+
+  &Title {
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 33px;
+    text-align: center;
+    color: #ffffff;
+    padding-top: 40px;
+    padding-bottom: 27px;
   }
 }

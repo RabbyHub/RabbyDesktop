@@ -2,7 +2,6 @@ import { useEffect, useState, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 import { maxBy, minBy, sortBy } from 'lodash';
 import { useInterval, usePrevious } from 'react-use';
-import { useNavigate } from 'react-router-dom';
 import {
   TokenItem,
   TransferingNFTItem,
@@ -17,6 +16,7 @@ import type {
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 // eslint-disable-next-line import/no-cycle
+import { TransactionModal } from '@/renderer/components/TransactionsModal';
 import TransactionItem, { LoadingTransactionItem } from './TransactionItem';
 
 const TransactionWrapper = styled.div`
@@ -258,7 +258,7 @@ const Transactions = ({ updateNonce }: { updateNonce: number }) => {
               }
           ),
           protocol,
-          id: maxTx!.hash,
+          id: completedTx?.hash || maxTx!.hash,
           chain: chain.serverId,
           status: 'completed',
           otherAddr: maxTx.rawTx.to || '',
@@ -431,7 +431,7 @@ const Transactions = ({ updateNonce }: { updateNonce: number }) => {
     );
   }, [currentAccount]);
 
-  const navigate = useNavigate();
+  const [isShowAll, setIsShowAll] = useState(false);
 
   if (isLoading) {
     return (
@@ -460,12 +460,18 @@ const Transactions = ({ updateNonce }: { updateNonce: number }) => {
         {remoteTxsRef.current.length > 0 && (
           <ViewAllButton
             onClick={() => {
-              navigate('/mainwin/home/transactions');
+              setIsShowAll(true);
             }}
           >
             View All Transactions
           </ViewAllButton>
         )}
+        <TransactionModal
+          open={isShowAll}
+          onClose={() => {
+            setIsShowAll(false);
+          }}
+        />
       </TransactionWrapper>
     );
   }
@@ -493,11 +499,17 @@ const Transactions = ({ updateNonce }: { updateNonce: number }) => {
       </TransactionList>
       <ViewAllButton
         onClick={() => {
-          navigate('/mainwin/home/transactions');
+          setIsShowAll(true);
         }}
       >
         View All Transactions
       </ViewAllButton>
+      <TransactionModal
+        open={isShowAll}
+        onClose={() => {
+          setIsShowAll(false);
+        }}
+      />
     </TransactionWrapper>
   );
 };
