@@ -83,19 +83,8 @@ const RightBar = ({ updateNonce }: { updateNonce: number }) => {
       },
     ];
 
-    if (isSafe) {
-      list.push({
-        id: 'queue',
-        name: 'Queue',
-        icon: <QueueIcon />,
-        onClick: () => {
-          showZSubview('safe-queue-modal');
-        },
-      });
-    }
-
     return list;
-  }, [isSafe, navigateTo, showZSubview]);
+  }, [navigateTo]);
 
   return (
     <RightBarWrapper>
@@ -109,6 +98,11 @@ const RightBar = ({ updateNonce }: { updateNonce: number }) => {
             <li onClick={action.onClick}>{action.icon}</li>
           </Tooltip>
         ))}
+        {isSafe && (
+          <li onClick={() => showZSubview('safe-queue-modal')}>
+            <QueueIcon />
+          </li>
+        )}
       </ActionList>
       {/* <Transactions updateNonce={updateNonce} /> */}
       <ReceiveModalWraper

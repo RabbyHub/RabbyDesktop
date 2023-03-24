@@ -1,4 +1,5 @@
 import { useSafe } from '@/renderer/hooks/rabbyx/useSafe';
+import { Tooltip } from 'antd';
 import classNames from 'classnames';
 import React from 'react';
 import IconQueue from '../../../../../assets/icons/queue/queue.svg?rc';
@@ -19,7 +20,12 @@ export const QueueIcon: React.FC = () => {
       >
         <span>{pendingCount}</span>
       </div>
-      <IconQueue width="35px" height="35px" />
+      <Tooltip
+        title={pendingCount ? `${pendingCount} in Queue` : 'Queue'}
+        overlayInnerStyle={{ padding: '6px 8px' }}
+      >
+        <IconQueue width="35px" height="35px" />
+      </Tooltip>
     </div>
   );
 };
