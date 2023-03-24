@@ -22,7 +22,8 @@ export const useSafeQueue = () => {
   const [isLoadFailed, setIsLoadFailed] = React.useState(false);
   const { currentAccount } = useCurrentAccount();
 
-  const init = React.useCallback(async () => {
+  const init = async () => {
+    console.log('123', currentAccount);
     const accountAddress = currentAccount!.address;
     try {
       const network = await walletController.getGnosisNetworkId(accountAddress);
@@ -108,12 +109,12 @@ export const useSafeQueue = () => {
       setIsLoading(false);
       setIsLoadFailed(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentAccount!.address]);
+  };
 
   React.useEffect(() => {
     init();
-  }, [init]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentAccount?.address]);
 
   return {
     isLoading,
