@@ -6,10 +6,10 @@ import { intToHex } from 'ethereumjs-util';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { message } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
 import { TxItemGroup } from './TxItemGroup';
 import { useSafeQueue } from './useSafeQueue';
 import styles from './style.module.less';
-import { TxItemGroupSkeleton } from './TxItemGroupSkeleton';
 import { SelectAddressModal } from './SelectAddressModal';
 
 interface Props {
@@ -83,24 +83,33 @@ export const TxList: React.FC<Props> = ({ onClose }) => {
       )}
     >
       {isEmpty && (
-        <div className="text-white text-center opacity-60">
-          No pending transactions
+        <div className="text-[#FFFFFF66] items-center justify-center opacity-60 flex flex-col mt-[150px]">
+          <img
+            className="w-[95px] h-[95px]"
+            src="rabby-internal://assets/icons/queue/empty.svg"
+          />
+          <div>No pending transactions</div>
         </div>
       )}
-      {isLoading
-        ? Array.from({ length: 3 }).map((_, index) => (
-            // eslint-disable-next-line react/no-array-index-key
-            <TxItemGroupSkeleton key={index} />
-          ))
-        : Object.keys(transactionsGroup).map((key) => (
-            <TxItemGroup
-              key={key}
-              items={transactionsGroup[key]}
-              networkId={networkId}
-              safeInfo={safeInfo!}
-              onSubmit={handleSubmit}
-            />
-          ))}
+      {isLoading ? (
+        <div className="text-[#FFFFFF66] items-center justify-center opacity-60 flex flex-col mt-[150px]">
+          <LoadingOutlined
+            style={{ fontSize: 50, marginBottom: '20px' }}
+            spin
+          />
+          <div>Loading data...</div>
+        </div>
+      ) : (
+        Object.keys(transactionsGroup).map((key) => (
+          <TxItemGroup
+            key={key}
+            items={transactionsGroup[key]}
+            networkId={networkId}
+            safeInfo={safeInfo!}
+            onSubmit={handleSubmit}
+          />
+        ))
+      )}
       <SelectAddressModal
         open={openSelectAddressModal}
         onCancel={() => setOpenSelectAddressModal(false)}

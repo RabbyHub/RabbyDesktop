@@ -1,5 +1,4 @@
 import { useAccountToDisplay } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
-import { useIsSafe } from '@/renderer/hooks/rabbyx/useSafe';
 import { isSameAddress } from '@/renderer/utils/address';
 import { Spin } from 'antd';
 import classNames from 'classnames';
@@ -42,20 +41,17 @@ export const SafeItem: React.FC = () => {
       }
       details={
         <div className="mt-[20px]">
-          <ul className="list-none m-0 p-0">
+          <ul className="list-none m-0 p-0 space-y-[16px]">
             {safeInfo.owners.map((owner) => {
               const isYou = accountsList.find((account) =>
                 isSameAddress(account.address, owner)
               );
               return (
-                <li
-                  className={classNames('flex text-white mb-[16px]')}
-                  key={owner}
-                >
+                <li className={classNames('flex text-white')} key={owner}>
                   <NameAndAddress
                     address={owner}
                     className="text-[12px]"
-                    nameClass="text-[12px] text-white"
+                    nameClass="text-[12px] text-white font-normal"
                     addressClass="text-[12px] text-white"
                     copyIconClass="opacity-100"
                   />

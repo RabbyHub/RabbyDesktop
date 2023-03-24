@@ -33,7 +33,7 @@ export const TxItemConfirmation: React.FC<Props> = ({
   }, [init]);
 
   return (
-    <div>
+    <div className="w-[273px] overflow-hidden">
       <div className="text-[12px] text-[#bfc1c8] mb-[16px]">
         {confirmations.length >= threshold ? (
           'Enough signature collected'
@@ -46,7 +46,7 @@ export const TxItemConfirmation: React.FC<Props> = ({
           </>
         )}
       </div>
-      <ul className="list-none m-0 p-0">
+      <ul className="list-none m-0 p-0 space-y-[16px]">
         {owners.map((owner) => {
           const isConfirmation = confirmations.find((confirm) =>
             isSameAddress(confirm.owner, owner)
@@ -56,7 +56,7 @@ export const TxItemConfirmation: React.FC<Props> = ({
           );
           return (
             <li
-              className={classNames('flex text-white mb-[16px]', {
+              className={classNames('flex text-white', {
                 checked: confirmations.find((confirm) =>
                   isSameAddress(confirm.owner, owner)
                 ),
@@ -72,7 +72,7 @@ export const TxItemConfirmation: React.FC<Props> = ({
               <NameAndAddress
                 address={owner}
                 className="text-[13px]"
-                nameClass="text-[13px] text-white"
+                nameClass="text-[13px] text-white truncate max-w-[80px]"
                 addressClass="text-[13px] text-white"
                 noNameClass="opacity-40"
                 copyIconClass="opacity-100"
