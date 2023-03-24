@@ -23,7 +23,6 @@ export const useSafeQueue = () => {
   const { currentAccount } = useCurrentAccount();
 
   const init = async () => {
-    console.log('123', currentAccount);
     const accountAddress = currentAccount!.address;
     try {
       const network = await walletController.getGnosisNetworkId(accountAddress);
