@@ -43,11 +43,16 @@ export const SelectAddressModal: React.FC<Props> = ({
     }
   }, [onConfirm, selectAccount]);
 
+  const handleCancel = React.useCallback(() => {
+    onCancel();
+    setSelectedAccount(undefined);
+  }, [onCancel]);
+
   return (
     <Modal
       width={500}
       open={open}
-      onCancel={onCancel}
+      onCancel={handleCancel}
       centered
       title={
         <div className="text-[22px] px-[30px]">
@@ -80,7 +85,7 @@ export const SelectAddressModal: React.FC<Props> = ({
 
         <div className="p-[20px] flex gap-[20px]">
           <RabbyButton
-            onClick={onCancel}
+            onClick={handleCancel}
             className="flex-1 rounded-[6px] h-[44px]"
           >
             Cancel

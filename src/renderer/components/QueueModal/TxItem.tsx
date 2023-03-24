@@ -124,17 +124,17 @@ export const TxItem: React.FC<Props> = ({
       />
 
       <div className="flex flex-col gap-[20px] justify-center flex-end">
-        <Button
+        <RabbyButton
           className={classNames(
             'w-[172px] text-[13px] p-0 h-[34px] rounded-[4px]',
-            'text-blue-light border-blue-light'
+            'text-blue-light border-[#8697FF] bg-transparent border-solid'
           )}
           type="ghost"
           onClick={handleView}
           loading={isLoading}
         >
           {isLoading ? 'Loading...' : 'View and sign transaction'}
-        </Button>
+        </RabbyButton>
         <RabbyButton
           onClick={() => onSubmit(data)}
           prefixCls="rabby-button"
