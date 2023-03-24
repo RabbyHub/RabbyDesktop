@@ -61,7 +61,7 @@ export const AccountItem: React.FC<Props> = ({
     (e) => {
       e.stopPropagation();
       copyToClipboard(account.address);
-      toastCopiedWeb3Addr(account.address);
+      toastCopiedWeb3Addr(account.address, { triggerEl: e.target });
     },
     [account.address, copyToClipboard]
   );

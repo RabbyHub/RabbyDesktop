@@ -8,6 +8,7 @@ import type {
 
 import type { DEX_ENUM } from '@rabby-wallet/rabby-swap';
 import type { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
+import { SafeTransactionDataPartial } from '@gnosis.pm/safe-core-sdk-types';
 
 export type RabbyAccount = {
   address: string;
@@ -377,6 +378,43 @@ export type RabbyXMethod = {
   'walletController.mintedRabbyTotal': () => number;
 
   'walletController.clearAddressPendingTransactions': (address: string) => void;
+  'walletController.importGnosisAddress': (
+    address: string,
+    networkId: string
+  ) => RabbyAccount[];
+  'walletController.getTypedAccounts': () => DisplayedKeyring[];
+  'walletController.getGnosisOwners': (
+    account: Account,
+    safeAddress: string,
+    version: string
+  ) => string[];
+  'walletController.getGnosisNetworkId': (address: string) => string;
+  'walletController.buildGnosisTransaction': (
+    safeAddress: string,
+    account: Account,
+    tx: any
+  ) => void;
+  'walletController.getGnosisTransactionHash': () => string;
+  'walletController.validateSafeConfirmation': (
+    txHash: string,
+    signature: string,
+    ownerAddress: string,
+    type: string,
+    version: string,
+    safeAddress: string,
+    tx: SafeTransactionDataPartial,
+    networkId: number,
+    owners: string[]
+  ) => boolean;
+  'walletController.setGnosisTransactionHash': (hash: string) => void;
+  'walletController.gnosisAddPureSignature': (
+    owner: string,
+    signature: string
+  ) => void;
+  'walletController.getAllVisibleAccountsArray': () => RabbyAccount[];
+  'walletController.execGnosisTransaction': (
+    account: IDisplayedAccountWithBalance
+  ) => void;
 
   'permissionService.addConnectedSite': (
     origin: string,

@@ -79,8 +79,8 @@ export function fromNow(time: number, currTime?: number) {
   return successTimeView;
 }
 
-export const sinceTime = (time: number) => {
+export const sinceTime = (time: number, format = 'YYYY/MM/DD HH:mm') => {
   return Date.now() / 1000 - time < 3600 * 24
     ? `${fromNow(time)} ago`
-    : dayjs(time * 1000).format('YYYY/MM/DD HH:mm');
+    : dayjs(time * 1000).format(format);
 };

@@ -29,6 +29,11 @@ const KEYRING_MAP: KeyringLabel[] = [
     id: KEYRING_CLASS.WALLETCONNECT,
   },
   {
+    logo: 'rabby-internal://assets/icons/walletlogo/gnosis.svg',
+    name: 'Safe',
+    id: KEYRING_CLASS.GNOSIS,
+  },
+  {
     logo: 'rabby-internal://assets/icons/add-address/cup.svg',
     name: 'Contacts',
     id: KEYRING_CLASS.WATCH,

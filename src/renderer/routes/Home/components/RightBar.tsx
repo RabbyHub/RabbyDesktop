@@ -1,11 +1,13 @@
 import { ReceiveModalWraper } from '@/renderer/components/ReceiveModal';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { Tooltip } from 'antd';
+import { useIsSafe } from '@/renderer/hooks/rabbyx/useSafe';
 import IconReceive from '../../../../../assets/icons/home/receive.svg?rc';
 import IconSend from '../../../../../assets/icons/home/send.svg?rc';
 import IconSwap from '../../../../../assets/icons/home/swap.svg?rc';
+import { QueueIcon } from './QueueIcon';
 
 const RightBarWrapper = styled.div`
   width: 330px;
@@ -49,34 +51,39 @@ const ActionList = styled.ul`
 
 const RightBar = ({ updateNonce }: { updateNonce: number }) => {
   const [isShowReceive, setIsShowReceive] = useState(false);
-
+  const isSafe = useIsSafe();
   const navigateTo = useNavigate();
-  const actions = [
-    {
-      id: 'swap',
-      name: 'Swap',
-      icon: <IconSwap width="35px" height="35px" />,
-      onClick: () => {
-        navigateTo('/mainwin/home/swap?rbisource=home');
+  const actions = useMemo(() => {
+    const list = [
+      {
+        id: 'swap',
+        name: 'Swap',
+        icon: <IconSwap width="35px" height="35px" />,
+        onClick: () => {
+          navigateTo('/mainwin/home/swap?rbisource=home');
+        },
       },
-    },
-    {
-      id: 'send',
-      name: 'Send',
-      icon: <IconSend width="35px" height="35px" />,
-      onClick: () => {
-        navigateTo('/mainwin/home/send-token?rbisource=home');
+      {
+        id: 'send',
+        name: 'Send',
+        icon: <IconSend width="35px" height="35px" />,
+        onClick: () => {
+          navigateTo('/mainwin/home/send-token?rbisource=home');
+        },
       },
-    },
-    {
-      id: 'receive',
-      name: 'Receive',
-      icon: <IconReceive width="35px" height="35px" />,
-      onClick: () => {
-        setIsShowReceive(true);
+      {
+        id: 'receive',
+        name: 'Receive',
+        icon: <IconReceive width="35px" height="35px" />,
+        onClick: () => {
+          setIsShowReceive(true);
+        },
       },
-    },
-  ];
+    ];
+
+    return list;
+  }, [navigateTo]);
+
   return (
     <RightBarWrapper>
       <ActionList>
@@ -89,6 +96,11 @@ const RightBar = ({ updateNonce }: { updateNonce: number }) => {
             <li onClick={action.onClick}>{action.icon}</li>
           </Tooltip>
         ))}
+        {isSafe && (
+          <li>
+            <QueueIcon />
+          </li>
+        )}
       </ActionList>
       {/* <Transactions updateNonce={updateNonce} /> */}
       <ReceiveModalWraper

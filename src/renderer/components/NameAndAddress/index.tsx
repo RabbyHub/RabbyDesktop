@@ -13,6 +13,7 @@ interface NameAndAddressProps {
   addressClass?: string;
   noNameClass?: string;
   copyIconClass?: string;
+  noCopy?: boolean;
 }
 
 const NameAndAddress = ({
@@ -22,6 +23,7 @@ const NameAndAddress = ({
   addressClass = '',
   noNameClass = '',
   copyIconClass = '',
+  noCopy = false,
 }: NameAndAddressProps) => {
   const [aliasName, setAliasName] = useState('');
   const init = async () => {
@@ -54,23 +56,33 @@ const NameAndAddress = ({
         {localName ? (
           <>
             ({shortAddress}{' '}
-            <IconCopy
-              className={clsx('ml-4 cursor-pointer opacity-40', copyIconClass)}
-              onClick={() => {
-                copyAddress(address);
-              }}
-            />{' '}
+            {!noCopy && (
+              <IconCopy
+                className={clsx(
+                  'ml-4 cursor-pointer opacity-40',
+                  copyIconClass
+                )}
+                onClick={() => {
+                  copyAddress(address);
+                }}
+              />
+            )}{' '}
             )
           </>
         ) : (
           <>
             {shortAddress}{' '}
-            <IconCopy
-              className={clsx('ml-4 cursor-pointer opacity-40', copyIconClass)}
-              onClick={() => {
-                copyAddress(address);
-              }}
-            />
+            {!noCopy && (
+              <IconCopy
+                className={clsx(
+                  'ml-4 cursor-pointer opacity-40',
+                  copyIconClass
+                )}
+                onClick={() => {
+                  copyAddress(address);
+                }}
+              />
+            )}
           </>
         )}
       </div>
