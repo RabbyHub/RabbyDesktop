@@ -376,6 +376,8 @@ export type RabbyXMethod = {
       };
   'walletController.mintedRabbyTotal': () => number;
 
+  'walletController.clearAddressPendingTransactions': (address: string) => void;
+
   'permissionService.addConnectedSite': (
     origin: string,
     name: string,

@@ -15,8 +15,12 @@ import {
   TransactionDataItem,
   TransactionHistoryItem,
 } from '@/isomorphic/types/rabbyx';
-import { isSameAddress } from '@/renderer/utils/address';
+import { ellipsis, isSameAddress } from '@/renderer/utils/address';
 import { TransactionWebsite } from '@/renderer/components/TransactionWebsite';
+import moment from 'moment';
+import { getChain } from '@/renderer/utils';
+import clsx from 'clsx';
+import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import TxChange from './TxChange';
 
 const TransactionItemWrapper = styled.div`
@@ -24,6 +28,12 @@ const TransactionItemWrapper = styled.div`
   padding: 28px 16px 28px 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.11);
   position: relative;
+  .pending-tooltip {
+    position: absolute;
+    left: 80px;
+    top: 5px;
+    display: none;
+  }
   .name-and-address .icon-copy {
     display: none;
   }
@@ -34,6 +44,12 @@ const TransactionItemWrapper = styled.div`
     .name-and-address .icon-copy {
       display: inline-block;
     }
+    .pending-tooltip {
+      display: block;
+    }
+    .tx-hash {
+      display: block;
+    }
   }
   .tx-time {
     position: absolute;
@@ -42,7 +58,6 @@ const TransactionItemWrapper = styled.div`
     font-size: 12px;
     line-height: 14px;
     color: rgba(255, 255, 255, 0.3);
-    opacity: 0;
   }
   .tx-origin {
     display: none;
@@ -61,6 +76,19 @@ const TransactionItemWrapper = styled.div`
       text-decoration: underline;
     }
   }
+  .tx-hash {
+    position: absolute;
+    right: 16px;
+    top: 7px;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+    text-decoration-line: underline;
+    color: #ffffff;
+    opacity: 0.3;
+    text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    display: none;
+  }
   &.failed {
     padding-top: 30px;
     .tx-explain {
@@ -72,6 +100,9 @@ const TransactionItemWrapper = styled.div`
   }
   &.pending {
     padding-top: 38px;
+    .tx-hash {
+      right: 65px;
+    }
   }
   &.completed {
     .tx-time {
@@ -80,11 +111,6 @@ const TransactionItemWrapper = styled.div`
   }
   &:nth-last-child(1) {
     border-bottom: none;
-  }
-  &:hover {
-    .tx-time {
-      opacity: 1;
-    }
   }
 `;
 
@@ -289,6 +315,47 @@ const ChildrenWrapper = styled.div`
     }
   }
 `;
+
+const PendingTooltip = ({ timeAt }: { timeAt: number }) => {
+  const isAlwaysShow = moment().isAfter(moment(timeAt).add(1, 'hour'));
+  return (
+    <Tooltip
+      title="Tx submitted. If the tx is pending for long hours, you can try to clear pending in settings."
+      overlayStyle={{ maxWidth: 306 }}
+    >
+      <img
+        src="rabby-internal://assets/icons/home/question-outline.svg"
+        className="pending-tooltip"
+        style={isAlwaysShow ? { display: 'block' } : undefined}
+      />
+    </Tooltip>
+  );
+};
+
+const TxHash = ({
+  item,
+  className,
+}: {
+  item: TransactionDataItem;
+  className?: string;
+}) => {
+  const chain = getChain(item.chain);
+  const link = chain?.scanLink.replace(/_s_/, item.id);
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (link) {
+      openExternalUrl(link);
+    }
+  };
+  if (!link) {
+    return null;
+  }
+  return (
+    <a href={link} className={clsx('tx-hash', className)} onClick={handleClick}>
+      {ellipsis(item.id)}
+    </a>
+  );
+};
 
 export const LoadingTransactionItem = () => {
   return (
@@ -617,6 +684,8 @@ const TransactionItem = ({
             />
             Pending
           </PendingTag>
+          <PendingTooltip timeAt={item.timeAt} />
+          <TxHash item={item} className="is-pending" />
           <Tooltip
             title={
               canCancel
@@ -665,7 +734,10 @@ const TransactionItem = ({
         </Tooltip>
       )}
       {!isPending && (
-        <div className="tx-time">{sinceTime(item.timeAt / 1000)}</div>
+        <>
+          <div className="tx-time">{sinceTime(item.timeAt / 1000)}</div>
+          <TxHash item={item} />
+        </>
       )}
       <TxExplain
         className={classNames('tx-explain', {
