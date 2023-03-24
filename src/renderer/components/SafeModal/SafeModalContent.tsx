@@ -100,12 +100,6 @@ export const SafeModalContent: React.FC<Props> = ({ onSuccess }) => {
             'text-[15px] leading-[18px] text-white'
           )}
           autoFocus
-          suffix={
-            <img
-              src="rabby-internal://assets/icons/queue/search.svg"
-              className="w-[20px]"
-            />
-          }
         />
       </Form.Item>
       <Form.Item className="mt-[36px]" name="chain" required>
