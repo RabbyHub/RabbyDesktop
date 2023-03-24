@@ -18,7 +18,7 @@ export const ContactTypeCard: React.FC<Props> = ({
   return (
     <div className={clsx(styles.panel, styles.panelContact)} onClick={onAction}>
       <div className={styles.logo}>
-        <img src={logo} />
+        <img className="w-[32px] h-[32px]" src={logo} />
       </div>
       <div className={styles.content}>
         <span className={styles.title}>{title}</span>
