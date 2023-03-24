@@ -54,10 +54,9 @@ export const SafeItem: React.FC = () => {
                 >
                   <NameAndAddress
                     address={owner}
-                    className="text-[13px]"
-                    nameClass="text-[13px] text-white"
-                    addressClass="text-[13px] text-white"
-                    noNameClass="opacity-40"
+                    className="text-[12px]"
+                    nameClass="text-[12px] text-white"
+                    addressClass="text-[12px] text-white"
                     copyIconClass="opacity-100"
                   />
                   {isYou ? <img src={IconTagYou} className="ml-[5px]" /> : null}
