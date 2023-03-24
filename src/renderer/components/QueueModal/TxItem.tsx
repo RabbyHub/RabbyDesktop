@@ -10,7 +10,6 @@ import {
   SafeInfo,
   SafeTransactionItem,
 } from '@rabby-wallet/gnosis-sdk/dist/api';
-import { Button } from 'antd';
 import classNames from 'classnames';
 import { intToHex } from 'ethereumjs-util';
 import React from 'react';

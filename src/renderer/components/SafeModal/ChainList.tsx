@@ -29,7 +29,12 @@ interface Props {
 export const ChainList: React.FC<Props> = ({ onChange, value }) => {
   return (
     <div
-      className={classNames('overflow-y-scroll h-[240px]', styles.scrollbar)}
+      className={classNames(
+        'overflow-y-scroll h-[290px]',
+        'flex flex-col gap-[26px] p-[24px]',
+        'bg-[#FFFFFF0F] rounded-[8px]',
+        styles.scrollbar
+      )}
     >
       {chainList.map((chain) => (
         <ChainItem
