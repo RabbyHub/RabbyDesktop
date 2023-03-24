@@ -59,16 +59,16 @@ export const SelectModalContent: React.FC<Props> = ({ onSelectType }) => {
       />
 
       <ContactTypeCard
+        logo="rabby-internal://assets/icons/walletlogo/gnosis.svg"
+        title="Safe"
+        onAction={() => onSelectType(KEYRING_CLASS.GNOSIS)}
+      />
+
+      <ContactTypeCard
         logo="rabby-internal://assets/icons/add-address/cup.svg"
         title="Add Contacts"
         subtitle="You can also use it as a watch-only address"
         onAction={() => onSelectType(KEYRING_CLASS.WATCH)}
-      />
-
-      <ContactTypeCard
-        logo="rabby-internal://assets/icons/walletlogo/gnosis.svg"
-        title="Add Safe"
-        onAction={() => onSelectType(KEYRING_CLASS.GNOSIS)}
       />
 
       {!IS_RUNTIME_PRODUCTION && (

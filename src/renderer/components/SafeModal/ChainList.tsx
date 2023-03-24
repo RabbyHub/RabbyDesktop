@@ -31,7 +31,7 @@ export const ChainList: React.FC<Props> = ({ onChange, value }) => {
     <div
       className={classNames(
         'overflow-y-scroll h-[290px]',
-        'flex flex-col gap-[26px] p-[24px]',
+        'flex flex-col',
         'bg-[#FFFFFF0F] rounded-[8px]',
         styles.scrollbar
       )}

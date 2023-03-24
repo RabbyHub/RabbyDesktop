@@ -21,9 +21,12 @@ export const ChainItem: React.FC<Props> = ({
   return (
     <div
       className={classNames(
-        'flex justify-between text-white',
-        isSupported ? 'cursor-pointer' : 'cursor-not-allowed',
-        !isSupported && 'opacity-40'
+        'flex justify-between items-center text-white',
+        'py-[14px] px-[24px] rounded-[8px]',
+        'border border-solid border-transparent',
+        isSupported
+          ? 'cursor-pointer hover:bg-color-[#FFFFFF1A] hover:border-[#FFFFFF1A]'
+          : 'cursor-not-allowed opacity-40'
       )}
       onClick={() => {
         if (isSupported) {

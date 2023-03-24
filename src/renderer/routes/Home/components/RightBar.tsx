@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { Tooltip } from 'antd';
 import { useIsSafe } from '@/renderer/hooks/rabbyx/useSafe';
-import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import IconReceive from '../../../../../assets/icons/home/receive.svg?rc';
 import IconSend from '../../../../../assets/icons/home/send.svg?rc';
 import IconSwap from '../../../../../assets/icons/home/swap.svg?rc';
@@ -54,7 +53,6 @@ const RightBar = ({ updateNonce }: { updateNonce: number }) => {
   const [isShowReceive, setIsShowReceive] = useState(false);
   const isSafe = useIsSafe();
   const navigateTo = useNavigate();
-  const { showZSubview } = useZPopupLayerOnMain();
   const actions = useMemo(() => {
     const list = [
       {
@@ -99,7 +97,7 @@ const RightBar = ({ updateNonce }: { updateNonce: number }) => {
           </Tooltip>
         ))}
         {isSafe && (
-          <li onClick={() => showZSubview('safe-queue-modal')}>
+          <li>
             <QueueIcon />
           </li>
         )}

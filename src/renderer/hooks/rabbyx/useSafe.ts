@@ -5,7 +5,7 @@ import { atom, useAtom } from 'jotai';
 import React from 'react';
 import { useCurrentAccount } from './useAccount';
 
-const pendingCountAtom = atom<number>(0);
+export const pendingCountAtom = atom<number>(0);
 
 export const useIsSafe = () => {
   const { currentAccount } = useCurrentAccount();
@@ -20,8 +20,10 @@ export const useSafe = () => {
   const address = currentAccount!.address;
 
   const fetchPendingCount = React.useCallback(async () => {
-    if (!isSafe) return 0;
-    setPendingCount(0);
+    if (!isSafe) {
+      setPendingCount(0);
+      return 0;
+    }
     const network = await walletController.getGnosisNetworkId(address);
     const txs = await Safe.getPendingTransactions(address, network);
 
@@ -34,5 +36,6 @@ export const useSafe = () => {
 
   return {
     pendingCount,
+    fetchPendingCount,
   };
 };

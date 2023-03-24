@@ -1,14 +1,23 @@
 import { useSafe } from '@/renderer/hooks/rabbyx/useSafe';
+import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { Tooltip } from 'antd';
 import classNames from 'classnames';
 import React from 'react';
 import IconQueue from '../../../../../assets/icons/queue/queue.svg?rc';
 
 export const QueueIcon: React.FC = () => {
-  const { pendingCount } = useSafe();
+  const { pendingCount, fetchPendingCount } = useSafe();
+  const { showZSubview } = useZPopupLayerOnMain();
 
   return (
-    <div className="relative">
+    <div
+      className="relative"
+      onClick={() =>
+        showZSubview('safe-queue-modal', {}, () => {
+          fetchPendingCount();
+        })
+      }
+    >
       <div
         className={classNames(
           'flex items-center justify-center',

@@ -75,6 +75,7 @@ export const TxItemConfirmation: React.FC<Props> = ({
                 nameClass="text-[13px] text-white"
                 addressClass="text-[13px] text-white"
                 noNameClass="opacity-40"
+                copyIconClass="opacity-100"
               />
               {isYou ? <img src={IconTagYou} className="ml-[5px]" /> : null}
             </li>

@@ -401,7 +401,7 @@ export const WALLET_BRAND_CONTENT: {
   },
   [WALLET_BRAND_TYPES.GNOSIS]: {
     id: 13,
-    name: 'Safe',
+    name: 'Gnosis Safe',
     brand: WALLET_BRAND_TYPES.GNOSIS,
     icon: IconGnosis,
     image: IconGnosis,

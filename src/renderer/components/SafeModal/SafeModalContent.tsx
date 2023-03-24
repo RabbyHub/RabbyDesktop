@@ -80,6 +80,10 @@ export const SafeModalContent: React.FC<Props> = ({ onSuccess }) => {
     ]);
   }, [form]);
 
+  const address = Form.useWatch('address', form);
+  const chain = Form.useWatch('chain', form);
+  const disabledSubmit = !address || !chain || loading;
+
   return (
     <Form
       onValuesChange={onValuesChange}
@@ -111,6 +115,7 @@ export const SafeModalContent: React.FC<Props> = ({ onSuccess }) => {
         <RabbyButton
           className="w-[240px] h-[52px]"
           loading={loading}
+          disabled={disabledSubmit}
           type="primary"
           htmlType="submit"
         >
