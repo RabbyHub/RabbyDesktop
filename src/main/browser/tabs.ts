@@ -195,6 +195,11 @@ export class Tab {
       viewMngr.recycleView(this.view!);
     }
 
+    emitIpcMainEvent('__internal_main:tabbed-window:tab-destroyed', {
+      windowId: this.windowId!,
+      tabId: this.id,
+    });
+
     if (lastOpenInfo) {
       emitIpcMainEvent('__internal_main:mainwindow:dapp-tabs-to-be-closed', {
         tabs: lastOpenInfo,

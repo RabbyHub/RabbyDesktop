@@ -93,6 +93,10 @@ export default class TabbedBrowserWindow {
 
     this.tabs.on('tab-selected', (tab: Tab) => {
       this.extensions.selectTab(tab.view!.webContents);
+      emitIpcMainEvent('__internal_main:tabbed-window:tab-selected', {
+        windowId: this.window.id,
+        tabId: tab.view!.webContents.id,
+      });
     });
 
     this.tabs.on('tab-destroyed', () => {

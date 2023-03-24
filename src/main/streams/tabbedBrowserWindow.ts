@@ -13,6 +13,7 @@ import {
   handleIpcMainInvoke,
   onIpcMainEvent,
   onIpcMainInternalEvent,
+  onIpcMainSyncEvent,
   sendToWebContents,
 } from '../utils/ipcMainEvents';
 
@@ -413,6 +414,64 @@ onIpcMainEvent('__internal_rpc:trezor-like-window:click-close', async (evt) => {
 
   tabbedWin.tabs.destroy();
 });
+
+let tabWaitActiveMutexPools: {
+  windowId: number;
+  tabId: number;
+  sendEvent: Electron.IpcMainEvent;
+}[] = [];
+onIpcMainInternalEvent(
+  '__internal_main:tabbed-window:destroyed',
+  (windowId) => {
+    tabWaitActiveMutexPools = tabWaitActiveMutexPools.filter(
+      (item) => item.windowId !== windowId
+    );
+  }
+);
+onIpcMainInternalEvent(
+  '__internal_main:tabbed-window:tab-destroyed',
+  (destroyedInfo) => {
+    tabWaitActiveMutexPools = tabWaitActiveMutexPools.filter(
+      (item) =>
+        item.windowId !== destroyedInfo.windowId &&
+        item.tabId !== destroyedInfo.tabId
+    );
+  }
+);
+onIpcMainSyncEvent('__internal_rpc:app:request-tab-mutex', async (evt) => {
+  const callerWebContents = evt.sender;
+
+  const tabbedWin = getTabbedWindowFromWebContents(callerWebContents);
+
+  if (!tabbedWin) {
+    evt.returnValue = { windowExisted: false };
+    return;
+  }
+
+  if (tabbedWin.tabs.selected?.view?.webContents.id === callerWebContents.id) {
+    evt.returnValue = { windowExisted: true };
+  } else {
+    tabWaitActiveMutexPools.push({
+      windowId: tabbedWin.window.id,
+      tabId: callerWebContents.id,
+      sendEvent: evt,
+    });
+  }
+});
+onIpcMainInternalEvent(
+  '__internal_main:tabbed-window:tab-selected',
+  (selectedInfo) => {
+    const waitOne = tabWaitActiveMutexPools.find(
+      (item) =>
+        item.windowId === selectedInfo.windowId &&
+        item.tabId === selectedInfo.tabId
+    );
+    if (!waitOne) return;
+    if (waitOne.sendEvent.sender.isDestroyed()) return;
+
+    waitOne.sendEvent.returnValue = { windowExisted: true };
+  }
+);
 
 app.on('quit', async () => {
   const mainTabbedWin = await onMainWindowReady();

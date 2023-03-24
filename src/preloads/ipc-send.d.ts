@@ -1,5 +1,5 @@
 type ChannelSendSyncPayload = {
-  [C in `__internal_rpc:app:prompt-open`]: {
+  '__internal_rpc:app:prompt-open': {
     send: [
       params: {
         callerURL: string;
@@ -10,6 +10,13 @@ type ChannelSendSyncPayload = {
     returnValue: {
       promptId: string;
       value: string | null;
+    };
+  };
+  '__internal_rpc:app:request-tab-mutex': {
+    send: [];
+    returnValue: {
+      windowExisted: boolean;
+      // mutextId: string;
     };
   };
 };

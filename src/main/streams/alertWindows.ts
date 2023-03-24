@@ -97,7 +97,7 @@ onIpcMainSyncEvent('__internal_rpc:app:prompt-open', async (evt, options) => {
       // set returnValue for cancel;
       evt.returnValue = {
         promptId,
-        returnValue: '',
+        returnValue: null,
       };
       disposeOnCancel();
 
