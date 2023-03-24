@@ -52,7 +52,7 @@ export const CurrentAccount: React.FC<Props> = ({ account, onClick }) => {
     (e: React.MouseEvent) => {
       e.stopPropagation();
       copyToClipboard(account.address);
-      toastCopiedWeb3Addr(account.address);
+      toastCopiedWeb3Addr(account.address, { triggerEl: e.target });
     },
     [account.address, copyToClipboard]
   );

@@ -31,19 +31,19 @@ export function toastMessage(config: OpenParamters[0]) {
   });
 }
 
-const TOAST_KEY = 'addr-changed-toast';
+const TOAST_KEY = 'addr-copied-toast';
 
 function ToastContent({
   children,
   onClickOutside,
   ...props
 }: React.PropsWithChildren<{
-  onClickOutside?: () => void;
+  onClickOutside?: (sourceEvt?: MouseEvent) => void;
 }>) {
   const clickRef = useRef<any>(null);
 
-  useClickOutSide(clickRef, () => {
-    onClickOutside?.();
+  useClickOutSide(clickRef, (e) => {
+    onClickOutside?.(e);
   });
 
   return (
@@ -55,17 +55,30 @@ function ToastContent({
 
 const inMainWin = isMainWinShellWebUI(window.location.href);
 
-export async function toastCopiedWeb3Addr(text: string) {
+export async function toastCopiedWeb3Addr(
+  text: string,
+  options?: {
+    triggerEl?: HTMLElement | EventTarget;
+  }
+) {
   if (isWeb3Addr(text)) {
     toastMessage({
       icon: null,
       key: TOAST_KEY,
       content: (
         <ToastContent
-          onClickOutside={() => {
-            if (!inMainWin) {
-              message.destroy(TOAST_KEY);
+          onClickOutside={(sourceEvt) => {
+            if (inMainWin) return;
+            if (
+              options?.triggerEl instanceof Element &&
+              (sourceEvt?.target as HTMLElement)?.contains(
+                options?.triggerEl as any
+              )
+            ) {
+              return;
             }
+
+            message.destroy(TOAST_KEY);
           }}
         >
           <div className="flex items-center">
