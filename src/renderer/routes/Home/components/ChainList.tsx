@@ -29,7 +29,13 @@ const ChainListWrapper = styled.ul`
       margin-right: 6px;
     }
     &.selected {
+      font-size: 14px;
+      line-height: 17px;
       opacity: 1;
+      color: #fff;
+      .chain-logo {
+        width: 20px;
+      }
     }
     &.disabled {
       opacity: 0.2;
@@ -77,6 +83,7 @@ const ChainList = ({
   };
 
   const handleSelectChain = async (serverId: string) => {
+    if (chainBalances.length <= 1) return;
     if (serverId === selectChainServerId) {
       reset();
       return;
@@ -94,17 +101,6 @@ const ChainList = ({
 
   if (chainBalances.length <= 0) {
     return <NoAssetsView>No assets</NoAssetsView>;
-  }
-
-  if (chainBalances.length === 1) {
-    return (
-      <ChainListWrapper>
-        <li>
-          <img src={chainBalances[0].whiteLogo} />
-          <span className="chain-name">{chainBalances[0].name}</span>
-        </li>
-      </ChainListWrapper>
-    );
   }
 
   return (

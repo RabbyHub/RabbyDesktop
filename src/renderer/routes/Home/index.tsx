@@ -150,7 +150,6 @@ const SwitchViewWrapper = styled.div`
     padding: 4px;
     display: flex;
     justify-content: space-between;
-    margin-left: 30px;
     .item {
       padding: 5px 10px;
       font-size: 12px;

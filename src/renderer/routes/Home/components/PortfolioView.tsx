@@ -158,7 +158,7 @@ const PortfolioView = ({
 
   if (isEmpty) {
     return (
-      <div className="flex-1 overflow-hidden pt-[4px]">
+      <div className="flex-1 overflow-hidden pt-[14px]">
         <PortfolioWrapper className="empty">
           <img
             className="icon-empty"
