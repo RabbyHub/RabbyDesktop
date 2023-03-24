@@ -412,6 +412,9 @@ export type RabbyXMethod = {
     signature: string
   ) => void;
   'walletController.getAllVisibleAccountsArray': () => RabbyAccount[];
+  'walletController.execGnosisTransaction': (
+    account: IDisplayedAccountWithBalance
+  ) => void;
 
   'permissionService.addConnectedSite': (
     origin: string,

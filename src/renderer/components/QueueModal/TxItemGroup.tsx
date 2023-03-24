@@ -47,7 +47,7 @@ export const TxItemGroup: React.FC<Props> = ({
       ) : null}
       {items.map((item) => (
         <TxItem
-          key={item.transactionHash}
+          key={item.safeTxHash}
           data={item}
           networkId={networkId}
           safeInfo={safeInfo}

@@ -48,8 +48,11 @@ export const TxItemConfirmation: React.FC<Props> = ({
       </div>
       <ul className="list-none m-0 p-0">
         {owners.map((owner) => {
-          const isYou = confirmations.find((confirm) =>
+          const isConfirmation = confirmations.find((confirm) =>
             isSameAddress(confirm.owner, owner)
+          );
+          const isYou = visibleAccounts.find((account) =>
+            isSameAddress(account.address, owner)
           );
           return (
             <li
@@ -62,9 +65,9 @@ export const TxItemConfirmation: React.FC<Props> = ({
             >
               <img
                 className={classNames('w-[14px] mr-[5px]', {
-                  'opacity-40': !isYou,
+                  'opacity-40': !isConfirmation,
                 })}
-                src={isYou ? IconChecked : IconUnCheck}
+                src={isConfirmation ? IconChecked : IconUnCheck}
               />
               <NameAndAddress
                 address={owner}
@@ -73,13 +76,7 @@ export const TxItemConfirmation: React.FC<Props> = ({
                 addressClass="text-[13px] text-white"
                 noNameClass="opacity-40"
               />
-              {visibleAccounts.find((account) =>
-                isSameAddress(account.address, owner)
-              ) ? (
-                <img src={IconTagYou} className="icon-tag" />
-              ) : (
-                <></>
-              )}
+              {isYou ? <img src={IconTagYou} className="ml-[5px]" /> : null}
             </li>
           );
         })}

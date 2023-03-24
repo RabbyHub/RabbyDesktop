@@ -12,8 +12,10 @@ import {
 } from '@rabby-wallet/gnosis-sdk/dist/api';
 import { Button } from 'antd';
 import classNames from 'classnames';
-import { intToHex, toChecksumAddress } from 'ethereumjs-util';
+import { intToHex } from 'ethereumjs-util';
 import React from 'react';
+import { toChecksumAddress } from 'web3-utils';
+import { RabbyButton } from '../Button/RabbyButton';
 import { TxItemBasicInfo } from './TxItemBasicInfo';
 import { TxItemConfirmation } from './TxItemConfirmation';
 import { TxItemExplain } from './TxitemExplain';
@@ -133,21 +135,13 @@ export const TxItem: React.FC<Props> = ({
         >
           {isLoading ? 'Loading...' : 'View and sign transaction'}
         </Button>
-        <Button
+        <RabbyButton
           onClick={() => onSubmit(data)}
           prefixCls="rabby-button"
           disabled={!canExecute}
-          className={classNames(
-            'w-[172px] text-[13px] h-[34px] rounded-[4px]',
-            'bg-color-[#8697FF] outline-none border-none cursor-pointer shadow',
-            {
-              'opacity-30 cursor-not-allowed': !canExecute,
-            }
-          )}
-          type="primary"
         >
           Submit transaction
-        </Button>
+        </RabbyButton>
       </div>
     </div>
   );
