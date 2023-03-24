@@ -42,7 +42,7 @@ const PortfolioWrapper = styled.div`
       font-weight: 400;
       font-size: 12px;
       line-height: 1;
-      padding: 0 23px;
+      padding: 0 14px;
       margin-bottom: 15px;
       & > div {
         text-align: left;
