@@ -21,14 +21,9 @@ export const useSafeQueue = () => {
   >({});
   const [isLoadFailed, setIsLoadFailed] = React.useState(false);
   const { currentAccount } = useCurrentAccount();
-  const accountAddress = currentAccount!.address;
-  const currentAccountRef = React.useRef(currentAccount);
-
-  React.useEffect(() => {
-    currentAccountRef.current = currentAccount;
-  }, [currentAccount]);
 
   const init = React.useCallback(async () => {
+    const accountAddress = currentAccount!.address;
     try {
       const network = await walletController.getGnosisNetworkId(accountAddress);
       const [info, txs] = await Promise.all([
@@ -53,7 +48,7 @@ export const useSafeQueue = () => {
         // eslint-disable-next-line no-await-in-loop
         await walletController.buildGnosisTransaction(
           safeTx.safe,
-          currentAccountRef.current!,
+          currentAccount!,
           tx
         );
         // eslint-disable-next-line no-await-in-loop
@@ -61,7 +56,7 @@ export const useSafeQueue = () => {
         txHashValidation.push(hash === safeTx.safeTxHash);
       }
       const owners = await walletController.getGnosisOwners(
-        currentAccountRef.current!,
+        currentAccount!,
         accountAddress,
         info.version
       );
@@ -113,7 +108,8 @@ export const useSafeQueue = () => {
       setIsLoading(false);
       setIsLoadFailed(true);
     }
-  }, [accountAddress]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentAccount!.address]);
 
   React.useEffect(() => {
     init();
