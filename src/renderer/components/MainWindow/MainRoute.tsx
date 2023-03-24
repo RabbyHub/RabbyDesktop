@@ -3,6 +3,7 @@ import { useLocation, useMatches, useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
 import Home from '@/renderer/routes/Home';
 import { ensurePrefix } from '@/isomorphic/string';
+import { useWindowState } from '@/renderer/hooks-shell/useWindowState';
 import { CurrentAccountAndNewAccount } from '../CurrentAccount';
 import { MainWindowRouteData } from './type';
 
@@ -62,6 +63,7 @@ export default function MainWindowRoute({
   );
 
   const navigate = useNavigate();
+  const { onDarwinToggleMaxmize } = useWindowState();
 
   return (
     <div className={classNames(styles.MainWindowRoute, classNameOnRoute)}>
@@ -73,6 +75,7 @@ export default function MainWindowRoute({
               styles.floatingAccountComponent,
             'page-header-block'
           )}
+          onDoubleClick={onDarwinToggleMaxmize}
         >
           <div className={classNames(styles.pageTitle, 'page-title')}>
             {matchedData?.backable ? (

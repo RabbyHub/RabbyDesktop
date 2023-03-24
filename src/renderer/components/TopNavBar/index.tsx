@@ -15,7 +15,6 @@ import {
   useEffect,
   useCallback,
   useState,
-  useMemo,
   forwardRef,
   ForwardedRef,
 } from 'react';
@@ -26,6 +25,7 @@ import { useCurrentConnection } from '@/renderer/hooks/rabbyx/useConnection';
 import { useSwitchChainModal } from '@/renderer/hooks/useSwitchChainModal';
 import { copyText } from '@/renderer/utils/clipboard';
 import { useMatchURLBaseConfig } from '@/renderer/hooks-ipc/useAppDynamicConfig';
+import { useWindowState } from '@/renderer/hooks-shell/useWindowState';
 import styles from './index.module.less';
 import { toastMessage } from '../TransparentToast';
 
@@ -98,6 +98,8 @@ export const TopNavBar = () => {
   const { navTextColor, navIconColor, navDividerColor, navBackgroundColor } =
     useMatchURLBaseConfig(activeTab?.url);
 
+  const { onDarwinToggleMaxmize } = useWindowState();
+
   useEffect(
     () =>
       window.rabbyDesktop.ipcRenderer.on(
@@ -115,7 +117,7 @@ export const TopNavBar = () => {
   );
 
   return (
-    <div className={styles.main}>
+    <div className={styles.main} onDoubleClick={onDarwinToggleMaxmize}>
       {/* keep this element in first to make it bottom, or move it last to make it top */}
       {isDarwin && <div className={classNames(styles.macOSGasket)} />}
       <div
@@ -124,6 +126,9 @@ export const TopNavBar = () => {
           ...(navBackgroundColor && { backgroundColor: navBackgroundColor }),
         }}
         data-nodrag
+        onDoubleClick={(evt) => {
+          evt.stopPropagation();
+        }}
       >
         <RiskArea style={{ color: navTextColor }} iconColor={navIconColor} />
         <Divider
