@@ -60,6 +60,7 @@ const HomeWrapper = styled.div`
   flex: 1;
   .header {
     width: 100%;
+    margin-bottom: 20px;
     .top {
       display: flex;
       margin-bottom: 20px;
@@ -140,7 +141,6 @@ const HomeWrapper = styled.div`
 `;
 
 const SwitchViewWrapper = styled.div`
-  margin-bottom: -5px;
   flex: 1;
   display: flex;
   justify-content: flex-end;
@@ -589,7 +589,7 @@ const Home = () => {
                 </div>
               ) : null}
             </div>
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between items-center">
               {isLoadingTokenList ? (
                 <Skeleton.Input
                   active

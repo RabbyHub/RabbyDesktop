@@ -158,7 +158,7 @@ const PortfolioView = ({
 
   if (isEmpty) {
     return (
-      <div className="flex-1 overflow-hidden pt-[14px]">
+      <div className="flex-1 overflow-hidden">
         <PortfolioWrapper className="empty">
           <img
             className="icon-empty"
@@ -172,7 +172,7 @@ const PortfolioView = ({
 
   return (
     <ScrollTopContext.Provider value={scrollTop}>
-      <div className="flex-1 overflow-hidden pt-[4px] h-full">
+      <div className="flex-1 overflow-hidden h-full">
         <PortfolioWrapper>
           <div className="scroll-container" onScroll={handleScroll}>
             <TokenList

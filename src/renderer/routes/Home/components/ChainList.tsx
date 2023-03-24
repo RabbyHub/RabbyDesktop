@@ -13,6 +13,7 @@ const ChainListWrapper = styled.ul`
   margin: 0;
   padding: 0;
   position: relative;
+  row-gap: 18px;
   li {
     cursor: pointer;
     transition: opacity 0.3s;
@@ -20,7 +21,6 @@ const ChainListWrapper = styled.ul`
     display: flex;
     align-items: center;
     margin-right: 8px;
-    margin-bottom: 18px;
     font-weight: 500;
     font-size: 12px;
     color: rgba(255, 255, 255, 0.8);
