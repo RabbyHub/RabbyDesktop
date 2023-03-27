@@ -85,6 +85,8 @@ jobs:
           GIT_REF_NAME: ${{ github.ref_name }}
           GIT_REF_URL: ${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }}
           GITHUB_REF: ${{ github.ref }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TRIGGERING_ACTOR: ${{ github.triggering_actor }}
 
       # - name: Publish releases
       #   env:
