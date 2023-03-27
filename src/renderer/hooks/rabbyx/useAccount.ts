@@ -1,7 +1,7 @@
 import { Account, RabbyAccount } from '@/isomorphic/types/rabbyx';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { atom, useAtom } from 'jotai';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useMessageForwarded } from '../useViewsMessage';
 
 type AccountWithName = Account & { alianName: string };
@@ -80,9 +80,10 @@ export function useCurrentAccount() {
 export function useAccounts() {
   const [accounts, setAccounts] = useAtom(accountsAtom);
 
-  const hasFetchedRef = useRef(false);
-  const fetchAccounts = useCallback(() => {
-    walletController.getAccounts().then(async (newVal) => {
+  const [hasFetched, setHasFetched] = useState(false);
+  const fetchAccounts = useCallback(async () => {
+    setHasFetched(false);
+    return walletController.getAccounts().then(async (newVal) => {
       const nextAccounts = await Promise.all(
         newVal.map(async (account) => {
           const alianName = await getAliasNameByAddress(account.address);
@@ -93,8 +94,10 @@ export function useAccounts() {
         })
       );
 
-      hasFetchedRef.current = true;
+      setHasFetched(true);
       setAccounts(nextAccounts);
+
+      return nextAccounts;
     });
   }, [setAccounts]);
 
@@ -105,6 +108,6 @@ export function useAccounts() {
   return {
     accounts,
     fetchAccounts,
-    hasFetched: hasFetchedRef.current,
+    localHasFetched: hasFetched,
   };
 }
