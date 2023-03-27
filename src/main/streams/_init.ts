@@ -83,6 +83,7 @@ const CONF = {
     ReplaySubject<{
       sidebarContext: BrowserWindow;
       switchChain: BrowserWindow;
+      inDappFind: BrowserWindow;
     }>
   >,
   popupViewsOnMainwinReady: {

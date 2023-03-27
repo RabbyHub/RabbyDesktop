@@ -13,12 +13,14 @@ import { valueToMainSubject } from './_init';
 import {
   createPopupWindow,
   hidePopupWindow,
+  isPopupWindowHidden,
   showPopupWindow,
 } from '../utils/browser';
 import {
   getAllMainUIWindows,
   onMainWindowReady,
 } from '../utils/stream-helpers';
+import { MainWindowTab } from '../browser/tabs';
 
 async function hidePopupOnMainWindow(
   targetWin: BrowserWindow | null,
@@ -171,10 +173,69 @@ const switchChainReady = onMainWindowReady().then(async (mainWin) => {
   return switchChainPopup;
 });
 
-Promise.all([sidebarReady, switchChainReady]).then((wins) => {
+const inDappFindReady = onMainWindowReady().then(async (mainWin) => {
+  const targetWin = mainWin.window;
+
+  const inDappFind = createPopupWindow({
+    parent: mainWin.window,
+    transparent: false,
+    hasShadow: true,
+    closable: false,
+    movable: false,
+    resizable: false,
+    maximizable: false,
+    minimizable: false,
+    fullscreenable: false,
+    alwaysOnTop: false,
+  });
+
+  // disable close by shortcut
+  inDappFind.on('close', (evt) => {
+    evt.preventDefault();
+
+    return false;
+  });
+
+  updateSubWindowRect(mainWin.window, inDappFind);
+  const onTargetWinUpdate = () => {
+    if (!isPopupWindowHidden(inDappFind)) {
+      (mainWin.tabs.selected as MainWindowTab)?.rePosFindWindow();
+    }
+    // hidePopupOnMainWindow(inDappFind, 'in-dapp-find');
+  };
+  targetWin.on('show', onTargetWinUpdate);
+  targetWin.on('move', onTargetWinUpdate);
+  targetWin.on('resized', onTargetWinUpdate);
+  targetWin.on('unmaximize', onTargetWinUpdate);
+  targetWin.on('restore', onTargetWinUpdate);
+
+  mainWin.tabs.on('tab-focused', () => {
+    // hidePopupOnMainWindow(inDappFind, 'in-dapp-find');
+  });
+
+  mainWin.window.on('focus', () => {
+    // hidePopupOnMainWindow(inDappFind, 'in-dapp-find');
+  });
+
+  await inDappFind.webContents.loadURL(
+    `${RABBY_POPUP_GHOST_VIEW_URL}?view=in-dapp-find`
+  );
+
+  // debug-only
+  if (!IS_RUNTIME_PRODUCTION) {
+    inDappFind.webContents.openDevTools({ mode: 'detach' });
+  }
+
+  hidePopupWindow(inDappFind);
+
+  return inDappFind;
+});
+
+Promise.all([sidebarReady, switchChainReady, inDappFindReady]).then((wins) => {
   valueToMainSubject('popupWindowOnMain', {
     sidebarContext: wins[0],
     switchChain: wins[1],
+    inDappFind: wins[2],
   });
 });
 
@@ -192,6 +253,11 @@ const SIZE_MAP: Record<
   'switch-chain-tmp': {
     width: 272,
     height: 400,
+  },
+  'in-dapp-find': {
+    // close to 6.8192
+    width: 356,
+    height: 52,
   },
 };
 

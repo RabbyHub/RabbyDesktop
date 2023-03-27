@@ -321,6 +321,8 @@ type ChannelMessagePayload = {
     ];
     response: [];
   };
+
+  '__internal_rpc:mainwindow:op-find-in-page': MainInternalsMessagePayload['__internal_main:mainwindow:op-find-in-page'];
 };
 
 type IChannelsKey = keyof ChannelMessagePayload;

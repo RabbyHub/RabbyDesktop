@@ -25,6 +25,7 @@ import DappReadonlyWindow from '../routes-popup/DappReadonlyWindow';
 
 import SwitchChainWindow from '../routes-popup/SwitchChainWindow.deprecated';
 import GlobalToastPopup from '../components/GlobalToastPopup';
+import InDappFindWindow from '../routes-popup/InDappFindWindow';
 
 function App() {
   return (
@@ -67,6 +68,9 @@ switch (parseQueryString().view) {
     break;
   case 'global-toast-popup':
     root.render(<GlobalToastPopup />);
+    break;
+  case 'in-dapp-find':
+    root.render(<InDappFindWindow />);
     break;
   default:
     root.render(<App />);
