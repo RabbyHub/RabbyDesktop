@@ -384,7 +384,7 @@ export const Swap = () => {
     data: quoteInfo,
     payToken,
     receiveToken,
-    dexId,
+    dexId: lastSelectedDex,
     gasMarket,
     gasLevel,
     tokenApproved,
