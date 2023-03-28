@@ -362,7 +362,7 @@ export const Swap = () => {
     shouldTwoStepApprove,
   } = useVerifySdk({
     chain,
-    dexId: lastSelectedDex,
+    dexId,
     slippage,
     data: quoteInfo &&
       payToken &&
