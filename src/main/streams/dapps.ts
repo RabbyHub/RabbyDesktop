@@ -1,3 +1,4 @@
+import { checkIfUrlInjectEthereum } from '@/isomorphic/url';
 import { getAppProxyConf } from '../store/desktopApp';
 import { safeCapturePage } from '../utils/dapps';
 import { parseWebsiteFavicon } from '../utils/fetch';
@@ -46,6 +47,10 @@ handleIpcMainInvoke(
   '__outer_rpc:check-if-requestable',
   async (evt, reqData) => {
     const webContents = evt.sender;
+    const srcURL = webContents.getURL();
+
+    if (checkIfUrlInjectEthereum(srcURL).isInternal) return { result: true };
+
     const tabbedWin = getTabbedWindowFromWebContents(webContents);
     const mainTabbedWin = await onMainWindowReady();
 

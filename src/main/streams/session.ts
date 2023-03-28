@@ -147,7 +147,7 @@ function checkProxyValidOnBootstrap() {
 protocol.registerSchemesAsPrivileged([
   {
     scheme: 'rabby-internal',
-    privileges: { standard: true, supportFetchAPI: true },
+    privileges: { secure: true, standard: true, supportFetchAPI: true },
   },
 ]);
 

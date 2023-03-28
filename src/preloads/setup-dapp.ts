@@ -1,6 +1,10 @@
 import { contextBridge } from 'electron';
-import { isUrlFromDapp } from '../isomorphic/url';
-import { ipcRendererObj } from './base';
+import { checkIfUrlInjectEthereum } from '../isomorphic/url';
+import { exposeToMainWorld, ipcRendererObj } from './base';
+
+import BroadcastChannelMessage from '../extension-wallet/utils/message/BroadcastChannelMessage';
+import PortMessage from '../extension-wallet/utils/message/PortMessageOrig';
+import { randString } from '../isomorphic/string';
 
 async function __rbCheckRequestable(reqData: any) {
   if (document.visibilityState === 'hidden') return false;
@@ -14,6 +18,8 @@ async function __rbCheckRequestable(reqData: any) {
       throw new Error(result.error);
     }
 
+    // console.trace('[feat] result', result);
+
     return result.result;
   } catch (err) {
     console.error(err);
@@ -22,8 +28,28 @@ async function __rbCheckRequestable(reqData: any) {
 }
 
 export function setupDapp() {
-  if (!isUrlFromDapp(window.location.href)) {
-    return;
+  const checkResult = checkIfUrlInjectEthereum(window.location.href);
+  if (!checkResult.couldInject) return;
+
+  if (checkResult.isInternal) {
+    const channelName = randString();
+    exposeToMainWorld('__RD_isDappSafeView', true);
+    exposeToMainWorld('channelName', channelName);
+
+    // TODO: not work in custom protocol
+    const pm = new PortMessage().connect();
+    const bcm = new BroadcastChannelMessage(channelName).listen((data: any) => {
+      console.log('[feat] bcm:: data', data);
+      return pm.request(data);
+    });
+
+    // // background notification
+    // pm.on('message', (data) => bcm.send('message', data));
+
+    // document.addEventListener('beforeunload', () => {
+    //   bcm.dispose();
+    //   pm.dispose();
+    // });
   }
 
   try {

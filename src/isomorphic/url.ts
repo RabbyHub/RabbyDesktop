@@ -125,6 +125,17 @@ export function isUrlFromDapp(url: string) {
   );
 }
 
+export function checkIfUrlInjectEthereum(url: string) {
+  const isInternal = url.startsWith(RABBY_INTERNAL_PROTOCOL);
+  const isDapp = isUrlFromDapp(url);
+
+  return {
+    isInternal,
+    isDapp,
+    couldInject: isInternal || isDapp,
+  };
+}
+
 export function getShellUIType(url: string) {
   return parseQueryString(new URL(url).search).__webuiType;
 }
