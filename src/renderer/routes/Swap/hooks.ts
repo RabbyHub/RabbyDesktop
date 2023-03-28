@@ -7,6 +7,7 @@ import {
   DEX_ENUM,
   DEX_ROUTER_WHITELIST,
   DEX_SPENDER_WHITELIST,
+  WrapTokenAddressMap,
 } from '@rabby-wallet/rabby-swap';
 import {
   decodeCalldata,
@@ -20,6 +21,22 @@ import { useAsync } from 'react-use';
 const INTERNAL_REQUEST_ORIGIN = window.location.origin;
 
 const ETH_USDT_CONTRACT = '0xdac17f958d2ee523a2206206994597c13d831ec7';
+
+function isSwapWrapToken(
+  payTokenId: string,
+  receiveId: string,
+  chain: CHAINS_ENUM
+) {
+  const wrapTokens = [
+    // @ts-expect-error
+    WrapTokenAddressMap[chain],
+    CHAINS[chain].nativeTokenAddress,
+  ];
+  return (
+    !!wrapTokens.find((token) => isSameAddress(payTokenId, token)) &&
+    !!wrapTokens.find((token) => isSameAddress(receiveId, token))
+  );
+}
 
 export const useVerifyRouterAndSpender = (
   chain: CHAINS_ENUM,
@@ -102,7 +119,7 @@ type VerifySdkParams<T extends ValidateTokenParam> = {
 export const useVerifySdk = <T extends ValidateTokenParam>(
   p: VerifySdkParams<T>
 ) => {
-  const { chain, dexId, slippage, data, payToken, payAmount } = p;
+  const { chain, dexId, slippage, data, payToken, payAmount, receiveToken } = p;
   const [routerPass, spenderPass] = useVerifyRouterAndSpender(
     chain,
     dexId,
@@ -119,8 +136,12 @@ export const useVerifySdk = <T extends ValidateTokenParam>(
   );
 
   const { value: tokenApprovalResult = [true, false] } = useAsync(async () => {
-    if (!payToken || !dexId || !payAmount) return [true, false];
-    if (payToken?.id === CHAINS[chain].nativeTokenAddress) {
+    if (!payToken || !receiveToken || !dexId || !payAmount)
+      return [true, false];
+    if (
+      payToken?.id === CHAINS[chain].nativeTokenAddress ||
+      isSwapWrapToken(payToken.id, receiveToken.id, chain)
+    ) {
       return [true, false];
     }
 
@@ -185,6 +206,7 @@ export const useGasAmount = <T extends ValidateTokenParam>(
     gasLevel,
     userAddress,
     refreshId,
+    receiveToken,
   } = p;
 
   const {
@@ -252,8 +274,12 @@ export const useGasAmount = <T extends ValidateTokenParam>(
       };
 
       const getTokenApproveStatus = async () => {
-        if (!payToken || !dexId || !payAmount || !chain) return [true, false];
-        if (payToken?.id === CHAINS[chain].nativeTokenAddress) {
+        if (!payToken || !receiveToken || !dexId || !payAmount || !chain)
+          return [true, false];
+        if (
+          payToken?.id === CHAINS[chain].nativeTokenAddress ||
+          isSwapWrapToken(payToken.id, receiveToken.id, chain)
+        ) {
           return [true, false];
         }
 

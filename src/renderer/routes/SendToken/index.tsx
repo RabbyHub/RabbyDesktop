@@ -1139,9 +1139,20 @@ const SendTokenInner = () => {
   );
 };
 
+const Wrapper = styled.div`
+  height: calc(
+    var(--mainwin-mainroute-height) - var(--mainwin-headerblock-offset)
+  );
+  overflow: overlay;
+`;
+
 const SendToken = memo(() => {
   const { currentAccount } = useCurrentAccount();
-  return <SendTokenInner key={`${currentAccount?.address}`} />;
+  return (
+    <Wrapper>
+      <SendTokenInner key={`${currentAccount?.address}`} />;
+    </Wrapper>
+  );
 });
 
 export default SendToken;
