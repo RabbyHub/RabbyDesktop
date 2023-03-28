@@ -223,9 +223,9 @@ function pickWH(
   return result;
 }
 
-const { handler } = onIpcMainEvent(
-  '__internal_rpc:popupwin-on-mainwin:toggle-show',
-  async (_, payload) => {
+const { handler: handlerToggleShowPopupWins } = onIpcMainInternalEvent(
+  '__internal_main:popupwin-on-mainwin:toggle-show',
+  async (payload) => {
     const mainWindow = (await onMainWindowReady()).window;
     const { popupOnly } = await getAllMainUIWindows();
 
@@ -259,11 +259,9 @@ const { handler } = onIpcMainEvent(
   }
 );
 
-if (!IS_RUNTIME_PRODUCTION) {
-  onIpcMainInternalEvent(
-    '__internal_main:popupwin-on-mainwin:toggle-show',
-    (payload) => {
-      handler(null as any, payload);
-    }
-  );
-}
+onIpcMainEvent(
+  '__internal_rpc:popupwin-on-mainwin:toggle-show',
+  async (_, payload) => {
+    handlerToggleShowPopupWins(payload);
+  }
+);
