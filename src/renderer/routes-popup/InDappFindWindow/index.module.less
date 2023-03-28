@@ -79,8 +79,8 @@
   align-items: center;
   justify-content: center;
 
-  &.disabled {
-    cursor: not-allowed;
+  &.disabledOp {
+    cursor: default;
     opacity: 0.5;
   }
 
@@ -90,8 +90,7 @@
     height: 100%;
   }
 
-  // &,
-  &:not(.disabled):hover {
+  &:not(.noOp):not(.disabledOp):hover {
     background-color: #eee;
   }
 }
