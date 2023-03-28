@@ -1,7 +1,20 @@
 
+v0.10.0 / 2023-03-28
+====================
+
+  * feat: support Enter/Return as findForward. (#318)
+  * chore: fix typo (#317)
+  * feat: add clearPendingTransactions event (#311)
+  * chore: disable devTools of inDappFind.
+  * feat: basic support for find content in dapp (#314)
+  * fix: swap wraptoken (#315)
+  * fix: avoid flashing or leave-in getting-started screen as account existed after mainWindow show. (#313)
+  * build: show triggers on notifying. (#312)
+
 v0.9.0 / 2023-03-25
 ===================
 
+  * Release v0.9.0
   * feat: integrate safe (#305)
   * fix: update at
   * fix: style
