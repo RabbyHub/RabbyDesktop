@@ -56,8 +56,8 @@ export default function InDappFindWindow() {
     return {
       activeMatchOrdinal,
       matches,
-      disabledBackward: activeMatchOrdinal <= 1,
-      disabledForward: activeMatchOrdinal >= matches,
+      noPrev: activeMatchOrdinal <= 1,
+      noNext: activeMatchOrdinal >= matches,
     };
   }, [foundState?.result]);
 
@@ -109,11 +109,11 @@ export default function InDappFindWindow() {
         <div
           className={clsx(
             styles.findOp,
-            // matchesInfo.disabledBackward && styles.disabled,
+            !matchesInfo.matches && styles.disabledOp,
             styles.findOpPrev
           )}
           onClick={() => {
-            // if (matchesInfo.disabledBackward) return;
+            // if (matchesInfo.noPrev) return;
 
             window.rabbyDesktop.ipcRenderer.sendMessage(
               '__internal_rpc:mainwindow:op-find-in-page',
@@ -128,8 +128,8 @@ export default function InDappFindWindow() {
 
         <div
           className={clsx(
-            styles.findOp
-            // matchesInfo.disabledForward && styles.disabled
+            styles.findOp,
+            !matchesInfo.matches && styles.disabledOp
           )}
           onClick={onFindForward}
         >

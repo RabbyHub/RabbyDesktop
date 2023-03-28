@@ -6,6 +6,7 @@ import {
   RABBY_POPUP_GHOST_VIEW_URL,
 } from '../../isomorphic/constants';
 import {
+  emitIpcMainEvent,
   onIpcMainEvent,
   onIpcMainInternalEvent,
   sendToWebContents,
@@ -348,6 +349,10 @@ const { handler } = onIpcMainEvent(
     if (!targetView) return;
 
     if (payload.nextShow) {
+      emitIpcMainEvent('__internal_main:mainwindow:op-find-in-page', {
+        type: 'stop-find',
+      });
+
       viewsState[payload.type].visible = true;
       if (!viewsState[payload.type].s_isModal) {
         if (payload.type === 'add-address-dropdown') {
