@@ -153,7 +153,7 @@ const DappItem = ({
               src="rabby-internal://assets/icons/home/success.svg"
               className="icon-success"
             />
-            Binded to {protocol.name}
+            Bound to {protocol.name}
           </div>
           <Button
             type="primary"
