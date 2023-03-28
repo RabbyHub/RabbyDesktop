@@ -22,8 +22,8 @@ import RabbyNotificationGasket from '../routes-popup/RabbyNotificationGasket';
 import MainWindowAddAddress from '../routes-popup/MainWindowAddAddress';
 import MainWindowDappManagement from '../routes-popup/MainWindowDappManagement';
 import DappReadonlyWindow from '../routes-popup/DappReadonlyWindow';
+import InDappFindWindow from '../routes-popup/InDappFindWindow';
 
-import SwitchChainWindow from '../routes-popup/SwitchChainWindow.deprecated';
 import GlobalToastPopup from '../components/GlobalToastPopup';
 
 function App() {
@@ -36,7 +36,6 @@ function App() {
           element={<SecurityAddressbarPopup />}
         />
         <Route path="/popup__sidebar-dapp" element={<SidebarContextMenu />} />
-        <Route path="/popup__switch-chain" element={<SwitchChainWindow />} />
         <Route
           path="/popupview__add-address"
           element={<MainWindowAddAddress />}
@@ -67,6 +66,9 @@ switch (parseQueryString().view) {
     break;
   case 'global-toast-popup':
     root.render(<GlobalToastPopup />);
+    break;
+  case 'in-dapp-find':
+    root.render(<InDappFindWindow />);
     break;
   default:
     root.render(<App />);

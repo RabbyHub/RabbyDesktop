@@ -8,4 +8,11 @@ type ChannelPushToWebContents = {
       initInput?: string;
     };
   };
+  '__internal_push:mainwindow:update-findresult-in-page': {
+    tabId: number;
+    find: {
+      searchText: string;
+      result: Electron.Result | null;
+    };
+  };
 };

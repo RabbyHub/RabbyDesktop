@@ -1,5 +1,6 @@
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { dialog } from 'electron';
+import type { MainWindowTab } from '../browser/tabs';
 import { captureWebContents, hideLoadingView } from '../utils/browser';
 import {
   emitIpcMainEvent,
@@ -8,6 +9,7 @@ import {
   onIpcMainInternalEvent,
   sendToWebContents,
 } from '../utils/ipcMainEvents';
+import { notifyStopFindInPage } from '../utils/mainTabbedWin';
 import { resizeImage } from '../utils/nativeImage';
 import {
   getMainWinLastPosition,
@@ -15,6 +17,8 @@ import {
   setMainWindowBounds,
 } from '../utils/screen';
 import {
+  getAllMainUIViews,
+  getAllMainUIWindows,
   getRabbyExtViews,
   onMainWindowReady,
   updateMainWindowActiveTabRect,
@@ -276,5 +280,90 @@ onIpcMainEvent(
       mainTabbedWin.tabs.unSelectAll();
       hideLoadingView();
     }
+  }
+);
+
+const { handler: handlerOpenFindInPage } = onIpcMainInternalEvent(
+  '__internal_main:mainwindow:op-find-in-page',
+  async (payload) => {
+    const mainTabbedWin = await onMainWindowReady();
+
+    const currentTab = mainTabbedWin.tabs.selected as MainWindowTab;
+    if (payload.type === 'stop-find') {
+      currentTab?.resetFindInPage();
+      return;
+    }
+
+    if (!currentTab?.view) return;
+
+    switch (payload.type) {
+      case 'start-find': {
+        const { popupOnly } = await getAllMainUIWindows();
+        const window = popupOnly['in-dapp-find'];
+        currentTab.tryStartFindInPage();
+
+        setTimeout(() => {
+          window.webContents.focus();
+        }, 200);
+
+        break;
+      }
+      case 'find-forward': {
+        if (currentTab.findInPageState.requestId <= 0) return;
+
+        currentTab.view.webContents.findInPage(
+          currentTab.findInPageState.searchText,
+          {
+            forward: true,
+            findNext: false,
+          }
+        );
+        break;
+      }
+      case 'find-backward': {
+        if (currentTab.findInPageState.requestId <= 0) return;
+
+        currentTab.view.webContents.findInPage(
+          currentTab.findInPageState.searchText,
+          {
+            forward: false,
+            findNext: false,
+          }
+        );
+        break;
+      }
+      case 'update-search-token': {
+        const searchText = payload.token;
+
+        if (!searchText) {
+          currentTab.clearFindInPageResult();
+          break;
+        }
+
+        currentTab.tryStartFindInPage(searchText);
+        break;
+      }
+      default:
+        break;
+    }
+  }
+);
+
+onIpcMainEvent(
+  '__internal_rpc:mainwindow:op-find-in-page',
+  async (_, payload) => {
+    handlerOpenFindInPage(payload);
+  }
+);
+
+onIpcMainInternalEvent(
+  '__internal_main:mainwindow:update-findresult-in-page',
+  async (payload) => {
+    const { popupOnly } = await getAllMainUIWindows();
+    sendToWebContents(
+      popupOnly['in-dapp-find'].webContents,
+      '__internal_push:mainwindow:update-findresult-in-page',
+      payload
+    );
   }
 );
