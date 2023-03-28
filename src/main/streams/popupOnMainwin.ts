@@ -1,5 +1,6 @@
 import { BrowserWindow } from 'electron';
 
+import { InDappFindSizes } from '@/isomorphic/const-size-next';
 import {
   IS_RUNTIME_PRODUCTION,
   RABBY_POPUP_GHOST_VIEW_URL,
@@ -123,68 +124,9 @@ const sidebarReady = onMainWindowReady().then(async (mainWin) => {
   return sidebarAppPopup;
 });
 
-const inDappFindReady = onMainWindowReady().then(async (mainWin) => {
-  const targetWin = mainWin.window;
-
-  const inDappFind = createPopupWindow({
-    parent: mainWin.window,
-    transparent: false,
-    hasShadow: true,
-    closable: false,
-    movable: false,
-    resizable: false,
-    maximizable: false,
-    minimizable: false,
-    fullscreenable: false,
-    alwaysOnTop: false,
-  });
-
-  // disable close by shortcut
-  inDappFind.on('close', (evt) => {
-    evt.preventDefault();
-
-    return false;
-  });
-
-  updateSubWindowRect(mainWin.window, inDappFind);
-  const onTargetWinUpdate = () => {
-    if (!isPopupWindowHidden(inDappFind)) {
-      (mainWin.tabs.selected as MainWindowTab)?.rePosFindWindow();
-    }
-    // hidePopupOnMainWindow(inDappFind, 'in-dapp-find');
-  };
-  targetWin.on('show', onTargetWinUpdate);
-  targetWin.on('move', onTargetWinUpdate);
-  targetWin.on('resized', onTargetWinUpdate);
-  targetWin.on('unmaximize', onTargetWinUpdate);
-  targetWin.on('restore', onTargetWinUpdate);
-
-  mainWin.tabs.on('tab-focused', () => {
-    // hidePopupOnMainWindow(inDappFind, 'in-dapp-find');
-  });
-
-  mainWin.window.on('focus', () => {
-    // hidePopupOnMainWindow(inDappFind, 'in-dapp-find');
-  });
-
-  await inDappFind.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}?view=in-dapp-find`
-  );
-
-  // debug-only
-  if (!IS_RUNTIME_PRODUCTION) {
-    // inDappFind.webContents.openDevTools({ mode: 'detach' });
-  }
-
-  hidePopupWindow(inDappFind);
-
-  return inDappFind;
-});
-
-Promise.all([sidebarReady, inDappFindReady]).then((wins) => {
+Promise.all([sidebarReady]).then((wins) => {
   valueToMainSubject('popupWindowOnMain', {
     sidebarContext: wins[0],
-    inDappFind: wins[1],
   });
 });
 
@@ -198,11 +140,6 @@ const SIZE_MAP: Record<
   'sidebar-dapp': {
     width: 140,
     height: 148,
-  },
-  'in-dapp-find': {
-    // close to 6.8192
-    width: 356,
-    height: 52,
   },
 };
 

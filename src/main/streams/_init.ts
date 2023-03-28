@@ -82,7 +82,6 @@ const CONF = {
   } as IConf<
     ReplaySubject<{
       sidebarContext: BrowserWindow;
-      inDappFind: BrowserWindow;
     }>
   >,
   popupViewsOnMainwinReady: {
@@ -95,6 +94,7 @@ const CONF = {
       selectDevices: BrowserView;
       zPopup: BrowserView;
       globalToastPopup: BrowserView;
+      inDappFind: BrowserView;
     }>
   >,
 

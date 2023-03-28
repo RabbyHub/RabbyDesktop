@@ -17,8 +17,8 @@ import { desktopAppStore } from '../store/desktopApp';
 import { getAssetPath } from '../utils/app';
 import { hideLoadingView, isDappViewLoadingForTab } from '../utils/browser';
 import {
-  notifyStartFindInPage,
-  notifyStopFindInPage,
+  notifyShowFindInPage,
+  notifyHideFindInPage,
 } from '../utils/mainTabbedWin';
 
 const viewMngr = new BrowserViewManager(
@@ -399,12 +399,20 @@ export class Tab {
   }
 }
 
+const DEFAULT_FIND_IN_PAGE_STATE = {
+  windowOpen: false,
+  requestId: -1,
+  searchText: '',
+  result: null,
+};
+
 export class MainWindowTab extends Tab {
   private _findInPageState: {
+    windowOpen: boolean;
     requestId: number;
     searchText: string;
     result?: Electron.Result | null;
-  } = { requestId: -1, searchText: '' };
+  } = { ...DEFAULT_FIND_IN_PAGE_STATE };
 
   constructor(...[parentWindow, options]: ConstructorParameters<typeof Tab>) {
     super(parentWindow, { ...options, webuiType: 'MainWindow' });
@@ -424,7 +432,7 @@ export class MainWindowTab extends Tab {
 
   protected _cleanupTab() {
     super._cleanupTab();
-    this._findInPageState = { requestId: -1, searchText: '' };
+    this._findInPageState = { ...DEFAULT_FIND_IN_PAGE_STATE };
   }
 
   set findInPageState(state: Partial<MainWindowTab['_findInPageState']>) {
@@ -436,7 +444,7 @@ export class MainWindowTab extends Tab {
   }
 
   // TODO: should we only call this method for selected tab?
-  tryStartFindInPage(searchText = '') {
+  resumeFindInPage(searchText = '') {
     if (this.destroyed) return;
     if (!this.view) return;
     if (!this._isVisible || this.isAnimating) return;
@@ -454,8 +462,10 @@ export class MainWindowTab extends Tab {
       this.resetFindInPage();
     }
 
+    this.findInPageState = { ...this.findInPageState, windowOpen: true };
+
     const viewBounds = this.view.getBounds();
-    notifyStartFindInPage({ x: viewBounds.x, y: viewBounds.y }, this.id);
+    notifyShowFindInPage({ x: viewBounds.x, y: viewBounds.y }, this.id);
   }
 
   clearFindInPageResult() {
@@ -472,8 +482,20 @@ export class MainWindowTab extends Tab {
     if (this.destroyed) return;
 
     this.clearFindInPageResult();
-    notifyStopFindInPage();
-    this.findInPageState = { requestId: -1, searchText: '', result: null };
+    notifyHideFindInPage();
+    this.findInPageState = { ...DEFAULT_FIND_IN_PAGE_STATE };
+  }
+
+  toggleAnimating(enabled?: boolean): void {
+    super.toggleAnimating(enabled);
+
+    if (this.findInPageState.windowOpen) {
+      if (enabled) {
+        notifyHideFindInPage();
+      } else {
+        this.resumeFindInPage(this._findInPageState.searchText);
+      }
+    }
   }
 
   show() {
@@ -483,20 +505,13 @@ export class MainWindowTab extends Tab {
 
   hide() {
     this.clearFindInPageResult();
-    notifyStopFindInPage();
+    notifyHideFindInPage();
     super.hide();
   }
 
   destroy() {
     this.resetFindInPage();
     super.destroy();
-  }
-
-  rePosFindWindow() {
-    if (!this.view) return;
-
-    const viewBounds = this.view.getBounds();
-    notifyStartFindInPage({ x: viewBounds.x, y: viewBounds.y }, this.id);
   }
 
   private _pushPrevFindInPageResult() {

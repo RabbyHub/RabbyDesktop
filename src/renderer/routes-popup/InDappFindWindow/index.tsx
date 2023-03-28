@@ -1,20 +1,49 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
 
-import { usePopupWinInfo } from '@/renderer/hooks/usePopupWinOnMainwin';
+import { usePopupViewInfo } from '@/renderer/hooks/usePopupWinOnMainwin';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import { useBodyClassNameOnMounted } from '@/renderer/hooks/useMountedEffect';
 import { Divider, InputRef } from 'antd';
 
 import { RcIconClose, RcIconDown } from '@/../assets/icons/in-dapp-finder';
+import { createGlobalStyle, css } from 'styled-components';
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import { InDappFindSizes } from '@/isomorphic/const-size-next';
 import styles from './index.module.less';
+
+const Gasket = createGlobalStyle`
+  html {
+    background: transparent;
+    /* ${
+      !IS_RUNTIME_PRODUCTION &&
+      css`
+        background: rgba(var(--color-primary-rgb), 0.3);
+      `
+    } */
+  }
+
+  body.InDappFindWindowBody {
+    overflow: hidden;
+    user-select: none;
+
+    #root {
+      height: 100%;
+      padding-right: ${InDappFindSizes.shadowRightOffset}px;
+    }
+
+    .InDappFindWindow {
+      height: calc(100% - ${InDappFindSizes.shadowBottomOffset}px);
+    }
+  }
+`;
 
 type FoundState = {
   tabId: number;
   result: Electron.Result | null;
 };
 export default function InDappFindWindow() {
-  const { localVisible, pageInfo } = usePopupWinInfo('in-dapp-find');
+  const { localVisible, pageInfo } = usePopupViewInfo('in-dapp-find');
 
   useBodyClassNameOnMounted('InDappFindWindowBody');
 
@@ -26,12 +55,12 @@ export default function InDappFindWindow() {
 
   const inputRef = useRef<InputRef>(null);
   useEffect(() => {
-    if (!localVisible) return;
-
     const inputWrapper = inputRef.current;
-    if (inputWrapper) {
-      inputWrapper.focus();
-      inputWrapper.input?.select();
+    if (!localVisible) {
+      inputWrapper?.blur();
+    } else {
+      inputWrapper?.focus();
+      inputWrapper?.input?.select();
     }
   }, [localVisible]);
 
@@ -70,10 +99,11 @@ export default function InDappFindWindow() {
     );
   }, []);
 
-  if (!pageInfo?.searchInfo?.id) return null;
+  if (!pageInfo?.searchInfo?.tabId) return null;
 
   return (
-    <div className={styles.InDappFindWindow}>
+    <div className={clsx(styles.InDappFindWindow, 'InDappFindWindow')}>
+      <Gasket />
       <div className={styles.inputWrapper}>
         <RabbyInput
           value={searchInput}

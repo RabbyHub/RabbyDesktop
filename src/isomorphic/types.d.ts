@@ -271,20 +271,13 @@ type IRabbyxRpcResponse = {
 };
 
 type IHardwareConnectPageType = 'onekey' | 'trezor';
-type IPopupWinPageInfo =
-  | {
-      type: 'sidebar-dapp';
-      dappTabInfo: {
-        origin: string;
-        id: chrome.tabs.Tab['id'];
-      };
-    }
-  | {
-      type: 'in-dapp-find';
-      searchInfo: {
-        id: chrome.tabs.Tab['id'];
-      };
-    };
+type IPopupWinPageInfo = {
+  type: 'sidebar-dapp';
+  dappTabInfo: {
+    origin: string;
+    id: chrome.tabs.Tab['id'];
+  };
+};
 
 type ISelectDeviceState = {
   selectId: string;
@@ -333,6 +326,13 @@ type PopupViewOnMainwinInfo =
       type: 'global-toast-popup';
       state?: {
         toastType?: 'foo';
+      };
+    }
+  | {
+      type: 'in-dapp-find';
+      searchInfo?: {
+        tabId: number;
+        tabOrigin: { x: number; y: number };
       };
     };
 

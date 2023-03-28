@@ -1,6 +1,8 @@
 import { BrowserView, BrowserWindow } from 'electron';
 
 import { roundRectValue } from '@/isomorphic/shape';
+import { InDappFindSizes } from '@/isomorphic/const-size-next';
+import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import {
   IS_RUNTIME_PRODUCTION,
   RABBY_POPUP_GHOST_VIEW_URL,
@@ -24,6 +26,7 @@ import {
   onMainWindowReady,
 } from '../utils/stream-helpers';
 import { getMainWindowTopOffset } from '../utils/browserView';
+import type { MainWindowTab } from '../browser/tabs';
 
 const viewsState: Record<
   PopupViewOnMainwinInfo['type'],
@@ -44,6 +47,9 @@ const viewsState: Record<
     get s_isModal() {
       return true;
     },
+  },
+  'in-dapp-find': {
+    visible: false,
   },
   'z-popup': {
     visible: false,
@@ -182,7 +188,6 @@ async function showModalPopup(
   return modalWindow;
 }
 
-// pointless now
 const addAddressReady = onMainWindowReady().then(async (mainWin) => {
   const mainWindow = mainWin.window;
 
@@ -262,6 +267,39 @@ const selectDevicesReady = onMainWindowReady().then(async () => {
   return selectDevicesPopup;
 });
 
+const inDappFindReady = onMainWindowReady().then(async (mainWin) => {
+  const mainWindow = mainWin.window;
+
+  const inDappFindPopup = createPopupView({});
+
+  mainWindow.addBrowserView(inDappFindPopup);
+
+  const onTargetWinUpdate = () => {
+    if (viewsState['in-dapp-find'].visible) {
+      const oldBounds = inDappFindPopup.getBounds();
+      updateSubviewPos(mainWindow, inDappFindPopup, oldBounds);
+    }
+  };
+  mainWindow.on('show', onTargetWinUpdate);
+  mainWindow.on('move', onTargetWinUpdate);
+  mainWindow.on('resized', onTargetWinUpdate);
+  mainWindow.on('unmaximize', onTargetWinUpdate);
+  mainWindow.on('restore', onTargetWinUpdate);
+
+  await inDappFindPopup.webContents.loadURL(
+    `${RABBY_POPUP_GHOST_VIEW_URL}?view=in-dapp-find`
+  );
+
+  // debug-only
+  if (!IS_RUNTIME_PRODUCTION) {
+    inDappFindPopup.webContents.openDevTools({ mode: 'detach' });
+  }
+
+  hidePopupView(inDappFindPopup);
+
+  return inDappFindPopup;
+});
+
 const zPopupReady = onMainWindowReady().then(async (mainWin) => {
   const mainWindow = mainWin.window;
 
@@ -327,6 +365,7 @@ Promise.all([
   addAddressReady,
   dappsManagementReady,
   selectDevicesReady,
+  inDappFindReady,
   zPopupReady,
   globalToastPopupReady,
 ]).then((wins) => {
@@ -334,24 +373,28 @@ Promise.all([
     addAddress: wins[0],
     dappsManagement: wins[1],
     selectDevices: wins[2],
-    zPopup: wins[3],
-    globalToastPopup: wins[4],
+    inDappFind: wins[3],
+    zPopup: wins[4],
+    globalToastPopup: wins[5],
   });
 });
 
-const { handler } = onIpcMainEvent(
-  '__internal_rpc:popupview-on-mainwin:toggle-show',
-  async (_, payload) => {
-    const mainWindow = (await onMainWindowReady()).window;
+const { handler } = onIpcMainInternalEvent(
+  '__internal_main:popupview-on-mainwin:toggle-show',
+  async (payload) => {
+    const mainTabbedWin = await onMainWindowReady();
+    const mainWindow = mainTabbedWin.window;
     const { views } = await getAllMainUIViews();
     const targetView = views[payload.type] || null;
 
     if (!targetView) return;
 
     if (payload.nextShow) {
-      emitIpcMainEvent('__internal_main:mainwindow:op-find-in-page', {
-        type: 'stop-find',
-      });
+      if (payload.type !== 'in-dapp-find') {
+        emitIpcMainEvent('__internal_main:mainwindow:op-find-in-page', {
+          type: 'stop-find',
+        });
+      }
 
       viewsState[payload.type].visible = true;
       if (!viewsState[payload.type].s_isModal) {
@@ -361,6 +404,14 @@ const { handler } = onIpcMainEvent(
             targetView,
             (payload.pageInfo as any).triggerRect
           );
+        } else if (payload.type === 'in-dapp-find') {
+          const tabOrigin = (payload.pageInfo as any).searchInfo.tabOrigin;
+
+          updateSubviewPos(mainWindow, targetView, {
+            ...InDappFindSizes,
+            x: tabOrigin.x,
+            y: tabOrigin.y,
+          });
         } else {
           updateSubviewPos(mainWindow, targetView, payload.type);
         }
@@ -389,15 +440,18 @@ const { handler } = onIpcMainEvent(
         targetView.webContents.openDevTools({ mode: 'detach' });
       }
     } else {
+      if (payload.type === 'in-dapp-find') {
+        mainTabbedWin.tabs.selected?.view?.webContents.focus();
+      }
       hidePopupViewOnWindow(targetView, payload.type);
     }
   }
 );
 
-onIpcMainInternalEvent(
-  '__internal_main:popupview-on-mainwin:toggle-show',
-  (payload) => {
-    handler(null as any, payload);
+onIpcMainEvent(
+  '__internal_rpc:popupview-on-mainwin:toggle-show',
+  (_, payload) => {
+    handler(payload);
   }
 );
 
