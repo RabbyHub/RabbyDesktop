@@ -1,7 +1,14 @@
 
+v0.10.1 / 2023-03-29
+====================
+
+  * feat: robust change on `useAccounts`.
+  * fix(swap): useVerifySdk dexId (#319)
+
 v0.10.0 / 2023-03-28
 ====================
 
+  * Release v0.10.0
   * feat: support Enter/Return as findForward. (#318)
   * chore: fix typo (#317)
   * feat: add clearPendingTransactions event (#311)
