@@ -26,4 +26,6 @@ import './streams/developer';
 
 import bootstrap from './streams/app';
 
+import './utils/ipfs/resolver';
+
 bootstrap();
