@@ -280,13 +280,6 @@ type IPopupWinPageInfo =
       };
     }
   | {
-      type: 'switch-chain-tmp';
-      dappTabInfo: {
-        id: chrome.tabs.Tab['id'];
-        url: chrome.tabs.Tab['url'];
-      };
-    }
-  | {
       type: 'in-dapp-find';
       searchInfo: {
         id: chrome.tabs.Tab['id'];

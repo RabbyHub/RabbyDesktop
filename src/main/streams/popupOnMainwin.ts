@@ -123,56 +123,6 @@ const sidebarReady = onMainWindowReady().then(async (mainWin) => {
   return sidebarAppPopup;
 });
 
-const switchChainReady = onMainWindowReady().then(async (mainWin) => {
-  const targetWin = mainWin.window;
-
-  const switchChainPopup = createPopupWindow({
-    parent: mainWin.window,
-    transparent: false,
-    hasShadow: true,
-    closable: false,
-  });
-
-  // disable close by shortcut
-  switchChainPopup.on('close', (evt) => {
-    evt.preventDefault();
-
-    return false;
-  });
-
-  updateSubWindowRect(mainWin.window, switchChainPopup);
-  const onTargetWinUpdate = () => {
-    if (switchChainPopup.isVisible())
-      hidePopupOnMainWindow(switchChainPopup, 'switch-chain-tmp');
-  };
-  targetWin.on('show', onTargetWinUpdate);
-  targetWin.on('move', onTargetWinUpdate);
-  targetWin.on('resized', onTargetWinUpdate);
-  targetWin.on('unmaximize', onTargetWinUpdate);
-  targetWin.on('restore', onTargetWinUpdate);
-
-  mainWin.tabs.on('tab-focused', () => {
-    hidePopupOnMainWindow(switchChainPopup, 'switch-chain-tmp');
-  });
-
-  mainWin.window.on('focus', () => {
-    hidePopupOnMainWindow(switchChainPopup, 'switch-chain-tmp');
-  });
-
-  await switchChainPopup.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}#/popup__switch-chain`
-  );
-
-  // debug-only
-  if (!IS_RUNTIME_PRODUCTION) {
-    // switchChainPopup.webContents.openDevTools({ mode: 'detach' });
-  }
-
-  hidePopupWindow(switchChainPopup);
-
-  return switchChainPopup;
-});
-
 const inDappFindReady = onMainWindowReady().then(async (mainWin) => {
   const targetWin = mainWin.window;
 
@@ -231,11 +181,10 @@ const inDappFindReady = onMainWindowReady().then(async (mainWin) => {
   return inDappFind;
 });
 
-Promise.all([sidebarReady, switchChainReady, inDappFindReady]).then((wins) => {
+Promise.all([sidebarReady, inDappFindReady]).then((wins) => {
   valueToMainSubject('popupWindowOnMain', {
     sidebarContext: wins[0],
-    switchChain: wins[1],
-    inDappFind: wins[2],
+    inDappFind: wins[1],
   });
 });
 
@@ -249,10 +198,6 @@ const SIZE_MAP: Record<
   'sidebar-dapp': {
     width: 140,
     height: 148,
-  },
-  'switch-chain-tmp': {
-    width: 272,
-    height: 400,
   },
   'in-dapp-find': {
     // close to 6.8192

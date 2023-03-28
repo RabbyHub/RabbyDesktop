@@ -22,10 +22,9 @@ import RabbyNotificationGasket from '../routes-popup/RabbyNotificationGasket';
 import MainWindowAddAddress from '../routes-popup/MainWindowAddAddress';
 import MainWindowDappManagement from '../routes-popup/MainWindowDappManagement';
 import DappReadonlyWindow from '../routes-popup/DappReadonlyWindow';
-
-import SwitchChainWindow from '../routes-popup/SwitchChainWindow.deprecated';
-import GlobalToastPopup from '../components/GlobalToastPopup';
 import InDappFindWindow from '../routes-popup/InDappFindWindow';
+
+import GlobalToastPopup from '../components/GlobalToastPopup';
 
 function App() {
   return (
@@ -37,7 +36,6 @@ function App() {
           element={<SecurityAddressbarPopup />}
         />
         <Route path="/popup__sidebar-dapp" element={<SidebarContextMenu />} />
-        <Route path="/popup__switch-chain" element={<SwitchChainWindow />} />
         <Route
           path="/popupview__add-address"
           element={<MainWindowAddAddress />}
