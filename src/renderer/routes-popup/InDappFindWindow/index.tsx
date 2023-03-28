@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
 
 import { usePopupWinInfo } from '@/renderer/hooks/usePopupWinOnMainwin';
@@ -61,6 +61,15 @@ export default function InDappFindWindow() {
     };
   }, [foundState?.result]);
 
+  const onFindForward = useCallback(() => {
+    window.rabbyDesktop.ipcRenderer.sendMessage(
+      '__internal_rpc:mainwindow:op-find-in-page',
+      {
+        type: 'find-forward',
+      }
+    );
+  }, []);
+
   if (!pageInfo?.searchInfo?.id) return null;
 
   return (
@@ -83,6 +92,12 @@ export default function InDappFindWindow() {
                 token: nextInput,
               }
             );
+          }}
+          onKeyDown={(evt) => {
+            if (evt.key === 'Enter') {
+              evt.stopPropagation();
+              onFindForward();
+            }
           }}
         />
         <div className={styles.foundMatchesInfo}>
@@ -116,16 +131,7 @@ export default function InDappFindWindow() {
             styles.findOp
             // matchesInfo.disabledForward && styles.disabled
           )}
-          onClick={() => {
-            // if (matchesInfo.disabledForward) return;
-
-            window.rabbyDesktop.ipcRenderer.sendMessage(
-              '__internal_rpc:mainwindow:op-find-in-page',
-              {
-                type: 'find-forward',
-              }
-            );
-          }}
+          onClick={onFindForward}
         >
           <RcIconDown />
         </div>
