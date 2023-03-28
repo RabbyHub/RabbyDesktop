@@ -1,7 +1,9 @@
+import { useCallback, useEffect, useState } from 'react';
+import { atom, useAtom } from 'jotai';
+import * as Sentry from '@sentry/react';
+
 import { Account, RabbyAccount } from '@/isomorphic/types/rabbyx';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
-import { atom, useAtom } from 'jotai';
-import { useCallback, useEffect, useState } from 'react';
 import { useMessageForwarded } from '../useViewsMessage';
 
 type AccountWithName = Account & { alianName: string };
@@ -83,22 +85,33 @@ export function useAccounts() {
   const [hasFetched, setHasFetched] = useState(false);
   const fetchAccounts = useCallback(async () => {
     setHasFetched(false);
-    return walletController.getAccounts().then(async (newVal) => {
-      const nextAccounts = await Promise.all(
-        newVal.map(async (account) => {
-          const alianName = await getAliasNameByAddress(account.address);
+
+    let nextAccounts: AccountWithName[] = [];
+    try {
+      nextAccounts = await walletController.getAccounts().then((list) => {
+        return list.map((account) => {
           return {
+            ...account,
+            alianName: '',
+          };
+        });
+      });
+
+      await Promise.allSettled(
+        nextAccounts.map(async (account, idx) => {
+          const alianName = await getAliasNameByAddress(account.address);
+          nextAccounts[idx] = {
             ...account,
             alianName,
           };
         })
       );
-
-      setHasFetched(true);
+    } catch (err) {
+      Sentry.captureException(err);
+    } finally {
       setAccounts(nextAccounts);
-
-      return nextAccounts;
-    });
+      setHasFetched(true);
+    }
   }, [setAccounts]);
 
   useEffect(() => {
