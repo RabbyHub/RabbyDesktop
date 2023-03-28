@@ -82,7 +82,13 @@ export function useTransactionPendingCount() {
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
       (payload) => {
-        if (payload.event !== 'transactionChanged') return;
+        if (
+          !['transactionChanged', 'clearPendingTransactions'].includes(
+            payload.event
+          )
+        ) {
+          return;
+        }
 
         fetchCount();
       }
@@ -94,7 +100,6 @@ export function useTransactionPendingCount() {
 
 export const useClearPendingTx = () => {
   const { currentAccount } = useCurrentAccount();
-  const [, setPendingTxCount] = useAtom(pendingTxCountAtom);
 
   const clearPendingTx = useCallback(async () => {
     if (currentAccount?.address) {
@@ -104,13 +109,8 @@ export const useClearPendingTx = () => {
       message.success({
         content: 'Pending transaction cleared',
       });
-      walletController
-        .getTransactionHistory(currentAccount.address)
-        .then(({ pendings }) => {
-          setPendingTxCount(pendings.length);
-        });
     }
-  }, [currentAccount?.address, setPendingTxCount]);
+  }, [currentAccount?.address]);
 
   return clearPendingTx;
 };
