@@ -97,7 +97,6 @@ export default function InDappFindWindow() {
             // matchesInfo.disabledBackward && styles.disabled,
             styles.findOpPrev
           )}
-          // TODO: add F2/Cmd+Shift+G shortcut
           onClick={() => {
             // if (matchesInfo.disabledBackward) return;
 
@@ -117,7 +116,6 @@ export default function InDappFindWindow() {
             styles.findOp
             // matchesInfo.disabledForward && styles.disabled
           )}
-          // TODO: add F3/Cmd+G shortcut
           onClick={() => {
             // if (matchesInfo.disabledForward) return;
 
