@@ -1,5 +1,4 @@
 import { app, BrowserWindow, shell } from 'electron';
-import { bufferTime, fromEvent, map } from 'rxjs';
 
 import {
   isUrlFromDapp,
@@ -18,6 +17,7 @@ import {
 } from '../utils/ipcMainEvents';
 
 import {
+  getAllMainUIViews,
   getRabbyExtViews,
   onMainWindowReady,
   RABBYX_WINDOWID_S,
@@ -38,6 +38,7 @@ import {
 } from '../utils/tabbedBrowserWindow';
 import { safeOpenURL } from './dappSafeview';
 import { isTargetScanLink } from '../store/dynamicConfig';
+import { MainWindowTab } from '../browser/tabs';
 
 /**
  * @deprecated import members from '../utils/tabbedBrowserWindow' instead
@@ -337,18 +338,6 @@ onMainWindowReady().then((mainTabbedWin) => {
   mainTabbedWin.window.on('unmaximize', onTargetWinUpdate);
   mainTabbedWin.window.on('restore', onTargetWinUpdate);
 });
-
-onIpcMainInternalEvent(
-  '__internal_main:mainwindow:sidebar-collapsed-changed',
-  async () => {
-    const mainWin = await onMainWindowReady();
-
-    if (mainWin.tabs.selected) {
-      // trigger re draw
-      mainWin.tabs.selected.show();
-    }
-  }
-);
 
 onIpcMainInternalEvent(
   '__internal_main:app:close-tab-on-del-dapp',
