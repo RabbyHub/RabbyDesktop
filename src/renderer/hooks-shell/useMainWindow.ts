@@ -5,7 +5,7 @@ import { useDapps } from '../hooks/useDappsMngr';
 import { toggleLoadingView } from '../ipcRequest/mainwin';
 import { matomoRequestEvent } from '../utils/matomo-request';
 import { navigateToDappRoute } from '../utils/react-router';
-import { findTab } from '../utils/tab';
+import { findTabByTabID } from '../utils/tab';
 import { useWindowTabs } from './useWindowTabs';
 
 export type IDappWithTabInfo = IMergedDapp & {
@@ -13,13 +13,18 @@ export type IDappWithTabInfo = IMergedDapp & {
 };
 
 export function useSidebarDapps() {
-  const { tabMapByOrigin, tabMapBySecondaryMap, activeTab } = useWindowTabs();
-  const { dapps: allDapps, pinnedDapps, unpinnedDapps } = useDapps();
+  const { tabsGroupById, activeTab } = useWindowTabs();
+  const {
+    dapps: allDapps,
+    pinnedDapps,
+    unpinnedDapps,
+    dappBoundTabIds,
+  } = useDapps();
 
   const dappsInSidebar = useMemo(() => {
     const unpinnedOpenedDapps: IDappWithTabInfo[] = [];
     unpinnedDapps.forEach((dapp) => {
-      const tab = findTab(dapp, { tabMapByOrigin, tabMapBySecondaryMap });
+      const tab = findTabByTabID(dapp, { tabsGroupById, dappBoundTabIds });
 
       if (tab) {
         unpinnedOpenedDapps.push({
@@ -31,7 +36,7 @@ export function useSidebarDapps() {
 
     return {
       pinnedDapps: pinnedDapps.map((dapp) => {
-        const tab = findTab(dapp, { tabMapByOrigin, tabMapBySecondaryMap });
+        const tab = findTabByTabID(dapp, { tabsGroupById, dappBoundTabIds });
 
         return {
           ...dapp,
@@ -40,7 +45,7 @@ export function useSidebarDapps() {
       }),
       unpinnedOpenedDapps,
     };
-  }, [pinnedDapps, unpinnedDapps, tabMapByOrigin, tabMapBySecondaryMap]);
+  }, [pinnedDapps, unpinnedDapps, tabsGroupById, dappBoundTabIds]);
 
   const dappActions = {
     onSelectDapp: useCallback(async (tab: chrome.tabs.Tab) => {
@@ -113,6 +118,17 @@ export function useForwardFromInternalPage(
       (targetURL) => {
         const dappOrigin = canoicalizeDappUrl(targetURL).origin;
         chrome.tabs.create({ url: targetURL, active: true });
+
+        navigateToDappRoute(router.navigate, dappOrigin);
+      }
+    );
+  }, [router.navigate]);
+
+  useEffect(() => {
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_push:mainwindow:opened-dapp-tab',
+      (payload) => {
+        const dappOrigin = canoicalizeDappUrl(payload.dappOrigin).origin;
 
         navigateToDappRoute(router.navigate, dappOrigin);
       }

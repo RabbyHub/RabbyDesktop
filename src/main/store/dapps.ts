@@ -15,7 +15,10 @@ import {
   onIpcMainEvent,
   onIpcMainInternalEvent,
 } from '../utils/ipcMainEvents';
-import { PERSIS_STORE_PREFIX } from '../../isomorphic/constants';
+import {
+  EnumOpenDappAction,
+  PERSIS_STORE_PREFIX,
+} from '../../isomorphic/constants';
 import { safeParse, shortStringify } from '../../isomorphic/json';
 import {
   canoicalizeDappUrl,
@@ -194,6 +197,7 @@ export function findDappsByOrigin(
   const result = {
     dappByOrigin: null as null | IDapp,
     dappBySecondaryDomainOrigin: null as null | IDapp,
+    dapp: null as null | IDapp,
   };
   dapps.find((dapp) => {
     if (dapp.origin === dappOrigin) {
@@ -206,6 +210,7 @@ export function findDappsByOrigin(
 
     return result.dappByOrigin && result.dappBySecondaryDomainOrigin;
   });
+  result.dapp = result.dappByOrigin || result.dappBySecondaryDomainOrigin;
 
   return result;
 }
@@ -253,12 +258,14 @@ export function parseDappRedirect(
       (IAppDynamicConfig['blockchain_explorers'] & object)[number]
     >;
     isForTrezorLikeConnection?: boolean;
+    isFromExistedTab?: boolean;
   }
 ) {
   const {
     dapps = getAllDapps(),
-    isForTrezorLikeConnection = false,
     blockchain_explorers = nullSet,
+    isForTrezorLikeConnection = false,
+    isFromExistedTab = false,
   } = opts || {};
 
   const isFromDapp = isUrlFromDapp(currentURL);
@@ -273,6 +280,8 @@ export function parseDappRedirect(
   > = {};
   parseDomainMeta(currentURL, dapps, domainMetaCache);
   parseDomainMeta(targetURL, dapps, domainMetaCache);
+
+  let finalAction: EnumOpenDappAction = EnumOpenDappAction.deny;
 
   const couldKeepTab =
     currentInfo.secondaryDomain === targetInfo.secondaryDomain &&
@@ -292,6 +301,14 @@ export function parseDappRedirect(
     !maybeTrezorLikeBuiltInHttpPage(targetURL)
   ) {
     shouldOpenExternal = true;
+    finalAction = EnumOpenDappAction.openExternal;
+  } else if (
+    isFromExistedTab &&
+    currentInfo.secondaryDomain === targetInfo.secondaryDomain
+  ) {
+    finalAction = EnumOpenDappAction.leaveInTab;
+  } else if (isFromDapp && !isToSameOrigin) {
+    finalAction = EnumOpenDappAction.safeOpenNewTab;
   }
 
   return {
@@ -300,9 +317,13 @@ export function parseDappRedirect(
 
     isFromDapp,
     isToSameOrigin,
+    /** @deprecated */
     couldKeepTab,
+    /** @deprecated */
     allowOpenTab,
+    /** @deprecated */
     shouldOpenExternal,
+    finalAction,
     maybeRedirectInSPA,
     isToExtension,
   };

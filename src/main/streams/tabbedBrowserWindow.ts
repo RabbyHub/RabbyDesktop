@@ -1,5 +1,4 @@
 import { app, BrowserWindow, shell } from 'electron';
-import { bufferTime, fromEvent, map } from 'rxjs';
 
 import {
   isUrlFromDapp,

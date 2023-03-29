@@ -1,7 +1,7 @@
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { BrowserWindow, session } from 'electron';
 import { integrateQueryToUrl } from '../../isomorphic/url';
-import { emitIpcMainEvent } from '../utils/ipcMainEvents';
+import { emitIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { Tab, Tabs } from './tabs';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 
@@ -89,6 +89,7 @@ export default class TabbedBrowserWindow {
 
       // Track tab that may have been created outside of the extensions API.
       this.extensions.addTab(tab.view!.webContents, tab.window!);
+      this._pushDappsBoundIds();
     });
 
     this.tabs.on('tab-selected', (tab: Tab) => {
@@ -101,6 +102,7 @@ export default class TabbedBrowserWindow {
 
     this.tabs.on('tab-destroyed', () => {
       this.tabs.checkLoadingView();
+      this._pushDappsBoundIds();
     });
 
     emitIpcMainEvent('__internal_main:tabbed-window:view-added', {
@@ -127,8 +129,33 @@ export default class TabbedBrowserWindow {
     });
   }
 
+  private _pushDappsBoundIds() {
+    if (!this.isMainWindow()) return;
+
+    const dappBoundTabIds = this.tabs.tabList.reduce((acc, tab) => {
+      if (!tab.view) return acc;
+      if (!tab.relatedDappId) return acc;
+
+      if (tab.relatedDappId) {
+        acc[tab.relatedDappId] = tab.view!.webContents.id;
+      }
+
+      return acc;
+    }, {} as IDappBoundTabIds);
+
+    sendToWebContents(
+      this.window.webContents,
+      '__internal_push:dapps:changed',
+      {
+        dappBoundTabIds,
+      }
+    );
+  }
+
   destroy() {
     this.tabs.destroy();
+
+    this._pushDappsBoundIds();
     this.window.destroy();
   }
 

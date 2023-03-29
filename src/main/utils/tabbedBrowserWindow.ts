@@ -12,8 +12,9 @@ import {
 import { getWindowFromWebContents } from './browser';
 
 import { isEnableContentProtected } from '../store/desktopApp';
-import { findDappsByOrigin } from '../store/dapps';
+import { findDappsByOrigin, getAllDapps } from '../store/dapps';
 import { Tab } from '../browser/tabs';
+import { sendToWebContents } from './ipcMainEvents';
 
 const windows: TabbedBrowserWindow[] = [];
 
@@ -56,6 +57,27 @@ export function getTabbedWindowFromWebContents(
   return window ? getWindowFromBrowserWindow(window) : null;
 }
 
+export function checkoutTabbedWindow(
+  webContents: BrowserWindow['webContents'],
+  dapps: IDapp[] = getAllDapps()
+) {
+  const window = getWindowFromWebContents(webContents);
+  const tabbedWindow = window ? getWindowFromBrowserWindow(window) : null;
+  const foundTab = tabbedWindow?.tabs.tabList.find(
+    (tab) => tab.view?.webContents.id === webContents.id
+  );
+  const matchedDappInfo = foundTab?.relatedDappId
+    ? findDappsByOrigin(foundTab.relatedDappId, dapps)
+    : null;
+
+  return {
+    parentWindow: window,
+    tabbedWindow,
+    foundTab,
+    matchedDappInfo,
+  };
+}
+
 export function isTabbedWebContents(webContents: Electron.WebContents) {
   return !!getTabbedWindowFromWebContents(webContents);
 }
@@ -95,19 +117,32 @@ export async function removeWindowRecord(win: Electron.BrowserWindow) {
   return tabbedWin;
 }
 
+type IGetTabFromMainWindowResult = {
+  foundMatchedDapp: IDapp | null;
+  existedTab: Tab | null;
+  createdTab: Tab | null;
+  finalTab: Tab | null;
+};
 export function getOrCreateDappBoundTab(
   mainTabbedWin: TabbedBrowserWindow,
   targetURL: string,
   opts?: {
     foundDapp: IDapp | null;
   }
-) {
+): IGetTabFromMainWindowResult {
   const parsedInfo =
     typeof targetURL === 'string' ? canoicalizeDappUrl(targetURL) : targetURL;
 
-  let existedTab: Tab | null = null;
+  const result = {
+    foundMatchedDapp: null as IDapp | null,
+    existedTab: null as Tab | null,
+    createdTab: null as Tab | null,
+    finalTab: null as Tab | null,
+  };
+
+  let existedTab = null as Tab | null;
   mainTabbedWin.tabs.tabList.find((tab) => {
-    const dappInfo = tab.getRelatedDappInfo(parsedInfo);
+    const dappInfo = tab.matchRelatedDappInfo(parsedInfo);
     if (dappInfo?.matchedType === 'by-origin') {
       existedTab = tab;
     } else if (dappInfo?.matchedType === 'by-secondary-domain') {
@@ -117,7 +152,8 @@ export function getOrCreateDappBoundTab(
     return dappInfo;
   });
 
-  if (existedTab) return existedTab;
+  // eslint-disable-next-line no-multi-assign
+  result.finalTab = result.existedTab = existedTab || null;
 
   let foundDapp = opts?.foundDapp;
   if (foundDapp === undefined) {
@@ -126,10 +162,32 @@ export function getOrCreateDappBoundTab(
       findResult.dappByOrigin || findResult.dappBySecondaryDomainOrigin;
   }
 
-  if (!foundDapp) return null;
+  result.foundMatchedDapp = foundDapp || null;
 
-  return mainTabbedWin.createTab({
-    initDetails: { url: targetURL },
-    relatedDappId: foundDapp.id,
-  });
+  if (!foundDapp) return result;
+
+  if (!existedTab) {
+    const createdTab = mainTabbedWin.createTab({
+      initDetails: { url: targetURL },
+      relatedDappId: foundDapp.id,
+    });
+
+    result.createdTab = createdTab;
+    result.finalTab = createdTab || existedTab || null;
+  }
+
+  // TODO: for existed tab, we should also push this event on another location
+  if (result.finalTab) {
+    sendToWebContents(
+      mainTabbedWin.window.webContents,
+      '__internal_push:mainwindow:opened-dapp-tab',
+      {
+        dappId: foundDapp.id,
+        tabId: result.finalTab?.id,
+        dappOrigin: foundDapp.origin,
+      }
+    );
+  }
+
+  return result;
 }

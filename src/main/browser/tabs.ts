@@ -86,11 +86,12 @@ export class Tab {
   protected _isVisible: boolean = false;
 
   constructor(ofWindow: BrowserWindow, tabOptions: ITabOptions) {
-    const { tabs, topbarStacks, initDetails } = tabOptions;
+    const { tabs, topbarStacks, initDetails, relatedDappId } = tabOptions;
 
     this.$meta.initDetails = { ...initDetails };
     this.$meta.topbarStacks = { ...DEFAULT_TOPBAR_STACKS, ...topbarStacks };
     this.$meta.webuiType = tabOptions.webuiType;
+    this.$meta.relatedDappId = relatedDappId || '';
 
     if (this.$meta.webuiType === 'ForTrezorLike') {
       this.$meta.topbarStacks.tabs = true;
@@ -369,7 +370,11 @@ export class Tab {
     }
   }
 
-  getRelatedDappInfo(dappOrigin: string | ICanonalizedUrlInfo) {
+  get relatedDappId() {
+    return this.$meta.relatedDappId;
+  }
+
+  matchRelatedDappInfo(dappOrigin: string | ICanonalizedUrlInfo) {
     if (!this.isOfMainWindow || !this.$meta.relatedDappId) return null;
 
     const parsedInfo =
@@ -645,6 +650,7 @@ export class Tabs extends EventEmitter {
     });
   }
 
+  /** @deprecated */
   findBySecondaryDomain(inputURL: string) {
     const inputUrlInfo = canoicalizeDappUrl(inputURL);
     if (!inputUrlInfo.secondaryDomain) return null;

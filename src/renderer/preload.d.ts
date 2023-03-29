@@ -37,7 +37,6 @@ type M2RChanneMessagePayload = {
   '__internal_push:mainwindow:got-dapp-screenshot': {
     imageBuf: Buffer | null;
   };
-  '__internal_push:dapps:changed': MainInternalsMessagePayload['__internal_main:dapps:changed']['send'][0];
   '__internal_push:popupwin-on-mainwin:on-visiblechange':
     | {
         type: IPopupWinPageInfo['type'];

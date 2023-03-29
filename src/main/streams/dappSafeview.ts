@@ -27,6 +27,7 @@ import { getAssetPath } from '../utils/app';
 import { parseWebsiteFavicon } from '../utils/fetch';
 import { getAppProxyConf } from '../store/desktopApp';
 import { findDappsByOrigin } from '../store/dapps';
+import { getOrCreateDappBoundTab } from '../utils/tabbedBrowserWindow';
 
 function hideView(view: BrowserView, parentWin: BrowserWindow) {
   parentWin.removeBrowserView(view);
@@ -119,8 +120,15 @@ export async function safeOpenURL(
   }
 ): Promise<SafeOpenResult> {
   const mainTabbedWin = await onMainWindowReady();
-  if (opts.existedDapp || opts.existedMainDomainDapp) {
-    const foundOpenedTab = mainTabbedWin.tabs.findBySecondaryDomain(targetURL);
+  const foundDapp = opts.existedDapp || opts.existedMainDomainDapp;
+
+  if (foundDapp) {
+    const { finalTab: foundOpenedTab } = getOrCreateDappBoundTab(
+      mainTabbedWin,
+      targetURL,
+      { foundDapp }
+    );
+
     const openedTab = opts.redirectSourceTab || foundOpenedTab;
 
     if (openedTab?.view) {
@@ -130,7 +138,7 @@ export async function safeOpenURL(
       const currentInfo = canoicalizeDappUrl(currentURL);
 
       if (opts.redirectSourceTab) {
-        shouldLoad = targetInfo.origin !== currentInfo.origin;
+        shouldLoad = false;
       } else if (foundOpenedTab) {
         shouldLoad =
           currentInfo.is2ndaryDomain ||
@@ -156,11 +164,6 @@ export async function safeOpenURL(
         },
       };
     }
-
-    forwardToMainWebContents(
-      '__internal_forward:main-window:create-dapp-tab',
-      targetURL
-    );
 
     return {
       type: 'create-tab',
