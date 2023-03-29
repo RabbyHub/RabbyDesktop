@@ -16,6 +16,10 @@ import {
 import { desktopAppStore } from '../store/desktopApp';
 import { getAssetPath } from '../utils/app';
 import { hideLoadingView, isDappViewLoadingForTab } from '../utils/browser';
+import {
+  notifyStartFindInPage,
+  notifyStopFindInPage,
+} from '../utils/mainTabbedWin';
 
 const viewMngr = new BrowserViewManager(
   {
@@ -79,7 +83,7 @@ export class Tab {
 
   private _isAnimating: boolean = false;
 
-  private _isVisible: boolean = false;
+  protected _isVisible: boolean = false;
 
   constructor(ofWindow: BrowserWindow, tabOptions: ITabOptions) {
     const { tabs, topbarStacks, initDetails } = tabOptions;
@@ -167,12 +171,15 @@ export class Tab {
     });
   }
 
+  protected _cleanupTab() {}
+
   destroy() {
     if (this.destroyed) return;
 
     const lastOpenInfo = this.makeTabLastOpenInfo();
     this.destroyed = true;
 
+    this._cleanupTab();
     this.hide();
 
     if (!this.view?.webContents.isDestroyed()) {
@@ -275,7 +282,7 @@ export class Tab {
       return;
     }
 
-    this.view!.setBounds({
+    const viewBounds = {
       x: 0,
       y: topOffset,
       width,
@@ -307,7 +314,9 @@ export class Tab {
                 NativeLayoutsCollapsed.dappsViewBottomOffset,
             }
         : {}),
-    });
+    };
+
+    this.view!.setBounds(viewBounds);
     this.view!.setAutoResize({ width: true, height: true });
   }
 
@@ -390,6 +399,117 @@ export class Tab {
   }
 }
 
+export class MainWindowTab extends Tab {
+  private _findInPageState: {
+    requestId: number;
+    searchText: string;
+    result?: Electron.Result | null;
+  } = { requestId: -1, searchText: '' };
+
+  constructor(...[parentWindow, options]: ConstructorParameters<typeof Tab>) {
+    super(parentWindow, { ...options, webuiType: 'MainWindow' });
+
+    this.view!.webContents.on('found-in-page', async (_, result) => {
+      this._findInPageState = {
+        ...this._findInPageState,
+        requestId: result.requestId,
+        result,
+      };
+      emitIpcMainEvent('__internal_main:mainwindow:update-findresult-in-page', {
+        tabId: this.id,
+        find: { result, searchText: this._findInPageState.searchText },
+      });
+    });
+  }
+
+  protected _cleanupTab() {
+    super._cleanupTab();
+    this._findInPageState = { requestId: -1, searchText: '' };
+  }
+
+  set findInPageState(state: Partial<MainWindowTab['_findInPageState']>) {
+    Object.assign(this._findInPageState, state);
+  }
+
+  get findInPageState(): MainWindowTab['_findInPageState'] {
+    return { ...this._findInPageState };
+  }
+
+  // TODO: should we only call this method for selected tab?
+  tryStartFindInPage(searchText = '') {
+    if (this.destroyed) return;
+    if (!this.view) return;
+    if (!this._isVisible || this.isAnimating) return;
+
+    let requestId = this._findInPageState.requestId;
+    if (searchText) {
+      requestId =
+        this.view?.webContents.findInPage(searchText, {
+          findNext: true,
+        }) || -1;
+
+      this.findInPageState = { searchText, requestId };
+    } else if (requestId <= 0) {
+      this.view?.webContents.stopFindInPage('clearSelection');
+      this.resetFindInPage();
+    }
+
+    const viewBounds = this.view.getBounds();
+    notifyStartFindInPage({ x: viewBounds.x, y: viewBounds.y }, this.id);
+  }
+
+  clearFindInPageResult() {
+    if (this.destroyed) return;
+
+    this.view?.webContents.stopFindInPage('clearSelection');
+    emitIpcMainEvent('__internal_main:mainwindow:update-findresult-in-page', {
+      tabId: this.id,
+      find: { result: null, searchText: '' },
+    });
+  }
+
+  resetFindInPage() {
+    if (this.destroyed) return;
+
+    this.clearFindInPageResult();
+    notifyStopFindInPage();
+    this.findInPageState = { requestId: -1, searchText: '', result: null };
+  }
+
+  show() {
+    this._pushPrevFindInPageResult();
+    super.show();
+  }
+
+  hide() {
+    this.clearFindInPageResult();
+    notifyStopFindInPage();
+    super.hide();
+  }
+
+  destroy() {
+    this.resetFindInPage();
+    super.destroy();
+  }
+
+  rePosFindWindow() {
+    if (!this.view) return;
+
+    const viewBounds = this.view.getBounds();
+    notifyStartFindInPage({ x: viewBounds.x, y: viewBounds.y }, this.id);
+  }
+
+  private _pushPrevFindInPageResult() {
+    emitIpcMainEvent('__internal_main:mainwindow:update-findresult-in-page', {
+      tabId: this.id,
+      find: {
+        result: this._findInPageState.result || null,
+        searchText: this._findInPageState.searchText || '',
+      },
+    });
+  }
+}
+
 export class Tabs extends EventEmitter {
   tabList: Tab[] = [];
 
@@ -440,10 +560,17 @@ export class Tabs extends EventEmitter {
   }
 
   create(options?: Omit<ITabOptions, 'tabs'>) {
-    const tab = new Tab(this.window!, {
-      ...options,
-      tabs: this,
-    });
+    const args = [
+      this.window!,
+      {
+        ...options,
+        tabs: this,
+      },
+    ] as const;
+    const tab =
+      options?.webuiType === 'MainWindow' && this.$meta.isOfMainWindow
+        ? new MainWindowTab(...args)
+        : new Tab(...args);
     this.tabList.push(tab);
     if (!this.selected) this.selected = tab;
     tab.show(); // must be attached to window

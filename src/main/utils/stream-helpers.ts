@@ -116,14 +116,14 @@ export function updateMainWindowActiveTabRect(
 }
 
 export async function getAllMainUIWindows() {
-  const [mainWin, { sidebarContext, switchChain }] = await Promise.all([
+  const [mainWin, { sidebarContext, inDappFind }] = await Promise.all([
     await onMainWindowReady(),
     await firstValueFrom(fromMainSubject('popupWindowOnMain')),
   ]);
 
-  const popupOnly = {
+  const popupOnly: Record<IPopupWinPageInfo['type'], Electron.BrowserWindow> = {
     'sidebar-dapp': sidebarContext,
-    'switch-chain-tmp': switchChain,
+    'in-dapp-find': inDappFind,
   } as const;
 
   const windows = {

@@ -1,0 +1,97 @@
+@import "@/renderer/css/mixins.less";
+
+:global {
+  body.InDappFindWindowBody {
+    overflow: hidden;
+    user-select: none;
+  }
+}
+
+.InDappFindWindow {
+  padding: 4px 8px;
+  height: 100vh;
+  box-sizing: border-box;
+  width: 100%;
+  background-color: #fff;
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-items: center;
+  user-select: none;
+}
+
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--color-comment1);
+
+  .foundMatchesInfo {
+    flex-shrink: 0;
+    color: var(--color-comment1);
+  }
+
+  flex-shrink: 1;
+  width: 100%;
+
+  background: #fff;
+  transition: transform .3s;
+
+  .tokenInput {
+    height: 36px;
+    font-size: 13px;
+    line-height: 14px;
+
+    border-color: transparent;
+    outline: 0;
+    box-shadow: none;
+  }
+}
+
+.divider {
+  height: calc(100% - 12px);
+  margin: 0 14px;
+}
+
+.findOps {
+  flex-shrink: 0;
+  width: 72px;
+  display: flex;
+  align-items: center;
+
+  .findOpPrev {
+    // rotate 90deg
+    transform: rotate(-180deg);
+  }
+}
+
+.findOp {
+  flex-shrink: 1;
+  width: 100%;
+  cursor: pointer;
+
+  border-radius: 50%;
+  background-color: transparent;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  > .icon {
+    margin: 0 auto;
+    width: 100%;
+    height: 100%;
+  }
+
+  // &,
+  &:not(.disabled):hover {
+    background-color: #eee;
+  }
+}

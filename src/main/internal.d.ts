@@ -176,6 +176,38 @@ type MainInternalsMessagePayload = {
     ];
     response: [];
   };
+  '__internal_main:mainwindow:toggle-indappfind-show': {
+    send: [show: boolean, tabId: number];
+  };
+  '__internal_main:mainwindow:op-find-in-page': {
+    send: [
+      | {
+          type: 'start-find';
+        }
+      | {
+          type: 'update-search-token';
+          token: string;
+        }
+      | {
+          type: 'find-forward';
+        }
+      | {
+          type: 'find-backward';
+          // } | {
+          //   type: 'clear-search',
+        }
+      | {
+          type: 'stop-find';
+        }
+    ];
+    response: [];
+  };
+  '__internal_main:mainwindow:update-findresult-in-page': {
+    send: [
+      ChannelPushToWebContents['__internal_push:mainwindow:update-findresult-in-page']
+    ];
+    response: [];
+  };
 };
 
 type MainInternals = keyof MainInternalsMessagePayload;

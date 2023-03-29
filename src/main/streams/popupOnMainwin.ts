@@ -13,12 +13,14 @@ import { valueToMainSubject } from './_init';
 import {
   createPopupWindow,
   hidePopupWindow,
+  isPopupWindowHidden,
   showPopupWindow,
 } from '../utils/browser';
 import {
   getAllMainUIWindows,
   onMainWindowReady,
 } from '../utils/stream-helpers';
+import { MainWindowTab } from '../browser/tabs';
 
 async function hidePopupOnMainWindow(
   targetWin: BrowserWindow | null,
@@ -121,27 +123,35 @@ const sidebarReady = onMainWindowReady().then(async (mainWin) => {
   return sidebarAppPopup;
 });
 
-const switchChainReady = onMainWindowReady().then(async (mainWin) => {
+const inDappFindReady = onMainWindowReady().then(async (mainWin) => {
   const targetWin = mainWin.window;
 
-  const switchChainPopup = createPopupWindow({
+  const inDappFind = createPopupWindow({
     parent: mainWin.window,
     transparent: false,
     hasShadow: true,
     closable: false,
+    movable: false,
+    resizable: false,
+    maximizable: false,
+    minimizable: false,
+    fullscreenable: false,
+    alwaysOnTop: false,
   });
 
   // disable close by shortcut
-  switchChainPopup.on('close', (evt) => {
+  inDappFind.on('close', (evt) => {
     evt.preventDefault();
 
     return false;
   });
 
-  updateSubWindowRect(mainWin.window, switchChainPopup);
+  updateSubWindowRect(mainWin.window, inDappFind);
   const onTargetWinUpdate = () => {
-    if (switchChainPopup.isVisible())
-      hidePopupOnMainWindow(switchChainPopup, 'switch-chain-tmp');
+    if (!isPopupWindowHidden(inDappFind)) {
+      (mainWin.tabs.selected as MainWindowTab)?.rePosFindWindow();
+    }
+    // hidePopupOnMainWindow(inDappFind, 'in-dapp-find');
   };
   targetWin.on('show', onTargetWinUpdate);
   targetWin.on('move', onTargetWinUpdate);
@@ -150,31 +160,31 @@ const switchChainReady = onMainWindowReady().then(async (mainWin) => {
   targetWin.on('restore', onTargetWinUpdate);
 
   mainWin.tabs.on('tab-focused', () => {
-    hidePopupOnMainWindow(switchChainPopup, 'switch-chain-tmp');
+    // hidePopupOnMainWindow(inDappFind, 'in-dapp-find');
   });
 
   mainWin.window.on('focus', () => {
-    hidePopupOnMainWindow(switchChainPopup, 'switch-chain-tmp');
+    // hidePopupOnMainWindow(inDappFind, 'in-dapp-find');
   });
 
-  await switchChainPopup.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}#/popup__switch-chain`
+  await inDappFind.webContents.loadURL(
+    `${RABBY_POPUP_GHOST_VIEW_URL}?view=in-dapp-find`
   );
 
   // debug-only
   if (!IS_RUNTIME_PRODUCTION) {
-    // switchChainPopup.webContents.openDevTools({ mode: 'detach' });
+    // inDappFind.webContents.openDevTools({ mode: 'detach' });
   }
 
-  hidePopupWindow(switchChainPopup);
+  hidePopupWindow(inDappFind);
 
-  return switchChainPopup;
+  return inDappFind;
 });
 
-Promise.all([sidebarReady, switchChainReady]).then((wins) => {
+Promise.all([sidebarReady, inDappFindReady]).then((wins) => {
   valueToMainSubject('popupWindowOnMain', {
     sidebarContext: wins[0],
-    switchChain: wins[1],
+    inDappFind: wins[1],
   });
 });
 
@@ -189,9 +199,10 @@ const SIZE_MAP: Record<
     width: 140,
     height: 148,
   },
-  'switch-chain-tmp': {
-    width: 272,
-    height: 400,
+  'in-dapp-find': {
+    // close to 6.8192
+    width: 356,
+    height: 52,
   },
 };
 
@@ -212,9 +223,9 @@ function pickWH(
   return result;
 }
 
-const { handler } = onIpcMainEvent(
-  '__internal_rpc:popupwin-on-mainwin:toggle-show',
-  async (_, payload) => {
+const { handler: handlerToggleShowPopupWins } = onIpcMainInternalEvent(
+  '__internal_main:popupwin-on-mainwin:toggle-show',
+  async (payload) => {
     const mainWindow = (await onMainWindowReady()).window;
     const { popupOnly } = await getAllMainUIWindows();
 
@@ -248,11 +259,9 @@ const { handler } = onIpcMainEvent(
   }
 );
 
-if (!IS_RUNTIME_PRODUCTION) {
-  onIpcMainInternalEvent(
-    '__internal_main:popupwin-on-mainwin:toggle-show',
-    (payload) => {
-      handler(null as any, payload);
-    }
-  );
-}
+onIpcMainEvent(
+  '__internal_rpc:popupwin-on-mainwin:toggle-show',
+  async (_, payload) => {
+    handlerToggleShowPopupWins(payload);
+  }
+);

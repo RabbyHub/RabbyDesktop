@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   createHashRouter as createRouter,
   RouterProvider,
@@ -59,9 +60,9 @@ const logGetUserDapp = async () => {
 };
 
 function WelcomeWrapper() {
-  const { hasFetched, accounts } = useAccounts();
+  const { localHasFetched, accounts } = useAccounts();
 
-  if (hasFetched && accounts.length) {
+  if (localHasFetched && accounts.length) {
     return <Navigate to="/mainwin/home" />;
   }
 
@@ -69,7 +70,7 @@ function WelcomeWrapper() {
 }
 
 function MainWrapper() {
-  const { hasFetched, accounts, fetchAccounts } = useAccounts();
+  const { localHasFetched, accounts, fetchAccounts } = useAccounts();
 
   useMessageForwarded(
     { targetView: 'main-window', type: 'on-deleted-account' },
@@ -78,7 +79,7 @@ function MainWrapper() {
     }
   );
 
-  if (hasFetched && !accounts.length) {
+  if (localHasFetched && !accounts.length) {
     return <Navigate to="/welcome/getting-started" />;
   }
 
@@ -226,6 +227,37 @@ const router = createRouter([
   },
 ]);
 
+/**
+ * @description make sure use this hooks only once at top-level component in whole app
+ */
+function useAccountsGuard(nav: (path: string) => void) {
+  const { localHasFetched, accounts, fetchAccounts } = useAccounts();
+
+  useEffect(() => {
+    if (localHasFetched && !accounts.length) {
+      nav('/welcome/getting-started');
+    }
+  }, [localHasFetched, nav, accounts]);
+
+  useEffect(() => {
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
+      (payload) => {
+        switch (payload.event) {
+          default:
+            break;
+          case 'accountsChanged':
+          case 'rabby:chainChanged': {
+            fetchAccounts();
+          }
+        }
+      }
+    );
+  }, [fetchAccounts]);
+
+  return { fetchAccounts };
+}
+
 export function MainWindow() {
   useClickMainWindowHideContextMenu();
   useForwardFromInternalPage(router);
@@ -257,6 +289,7 @@ export function MainWindow() {
       });
   });
 
+  useAccountsGuard(router.navigate);
   useMount(() => {
     logGetUserDapp();
   });

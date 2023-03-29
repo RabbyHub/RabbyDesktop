@@ -1,32 +1,11 @@
-import { useAccounts } from '@/renderer/hooks/rabbyx/useAccount';
 import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { Button } from 'antd';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import styles from './GettingStarted.module.less';
 import InviteCodeModal from './InviteCodeModal';
 import { useInvited } from './useInvited';
 
 export default function GettingStarted() {
-  const nav = useNavigate();
-  const { hasFetched, accounts, fetchAccounts } = useAccounts();
-
-  React.useEffect(() => {
-    if (hasFetched && accounts.length) {
-      nav('/', { replace: true });
-    }
-  }, [accounts.length, hasFetched, nav]);
-
-  React.useEffect(() => {
-    return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
-      (payload) => {
-        if (payload.event === 'accountsChanged') {
-          fetchAccounts();
-        }
-      }
-    );
-  }, [fetchAccounts]);
   const { showZSubview } = useZPopupLayerOnMain();
   const [visibleInviteCodeModal, setVisibleInviteCodeModal] =
     React.useState(false);
