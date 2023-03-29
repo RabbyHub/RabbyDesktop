@@ -26,7 +26,7 @@ import {
   onMainWindowReady,
 } from '../utils/stream-helpers';
 import { getMainWindowTopOffset } from '../utils/browserView';
-import type { MainWindowTab } from '../browser/tabs';
+import { notifyHideFindInPage } from '../utils/mainTabbedWin';
 
 const viewsState: Record<
   PopupViewOnMainwinInfo['type'],
@@ -391,9 +391,7 @@ const { handler } = onIpcMainInternalEvent(
 
     if (payload.nextShow) {
       if (payload.type !== 'in-dapp-find') {
-        emitIpcMainEvent('__internal_main:mainwindow:op-find-in-page', {
-          type: 'stop-find',
-        });
+        notifyHideFindInPage();
       }
 
       viewsState[payload.type].visible = true;
