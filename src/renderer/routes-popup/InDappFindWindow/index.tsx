@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
 
 import { usePopupWinInfo } from '@/renderer/hooks/usePopupWinOnMainwin';
@@ -56,10 +56,19 @@ export default function InDappFindWindow() {
     return {
       activeMatchOrdinal,
       matches,
-      disabledBackward: activeMatchOrdinal <= 1,
-      disabledForward: activeMatchOrdinal >= matches,
+      noPrev: activeMatchOrdinal <= 1,
+      noNext: activeMatchOrdinal >= matches,
     };
   }, [foundState?.result]);
+
+  const onFindForward = useCallback(() => {
+    window.rabbyDesktop.ipcRenderer.sendMessage(
+      '__internal_rpc:mainwindow:op-find-in-page',
+      {
+        type: 'find-forward',
+      }
+    );
+  }, []);
 
   if (!pageInfo?.searchInfo?.id) return null;
 
@@ -84,6 +93,12 @@ export default function InDappFindWindow() {
               }
             );
           }}
+          onKeyDown={(evt) => {
+            if (evt.key === 'Enter') {
+              evt.stopPropagation();
+              onFindForward();
+            }
+          }}
         />
         <div className={styles.foundMatchesInfo}>
           {matchesInfo.activeMatchOrdinal}/{matchesInfo.matches}
@@ -94,11 +109,11 @@ export default function InDappFindWindow() {
         <div
           className={clsx(
             styles.findOp,
-            // matchesInfo.disabledBackward && styles.disabled,
+            !matchesInfo.matches && styles.disabledOp,
             styles.findOpPrev
           )}
           onClick={() => {
-            // if (matchesInfo.disabledBackward) return;
+            // if (matchesInfo.noPrev) return;
 
             window.rabbyDesktop.ipcRenderer.sendMessage(
               '__internal_rpc:mainwindow:op-find-in-page',
@@ -113,19 +128,10 @@ export default function InDappFindWindow() {
 
         <div
           className={clsx(
-            styles.findOp
-            // matchesInfo.disabledForward && styles.disabled
+            styles.findOp,
+            !matchesInfo.matches && styles.disabledOp
           )}
-          onClick={() => {
-            // if (matchesInfo.disabledForward) return;
-
-            window.rabbyDesktop.ipcRenderer.sendMessage(
-              '__internal_rpc:mainwindow:op-find-in-page',
-              {
-                type: 'find-forward',
-              }
-            );
-          }}
+          onClick={onFindForward}
         >
           <RcIconDown />
         </div>

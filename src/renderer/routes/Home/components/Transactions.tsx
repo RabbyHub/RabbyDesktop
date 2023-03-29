@@ -414,6 +414,10 @@ const Transactions = ({ updateNonce }: { updateNonce: number }) => {
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
       (payload) => {
+        if (payload.event === 'clearPendingTransactions') {
+          initLocalTxs(currentAccount.address);
+          return;
+        }
         if (payload.event !== 'transactionChanged') return;
         switch (payload.data?.type) {
           default:

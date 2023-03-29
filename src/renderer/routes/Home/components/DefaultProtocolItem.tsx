@@ -328,7 +328,7 @@ const DefaultProtocolItem = ({
                     className="icon-unbind"
                     src="rabby-internal://assets/icons/home/bind-edit.svg"
                   />
-                  Edit binded Dapp
+                  Edit bound Dapp
                 </RemoveBinding>
               }
               placement="bottomLeft"
