@@ -1,7 +1,9 @@
 import { BrowserWindow } from 'electron';
 
 import { canoicalizeDappUrl } from '@/isomorphic/url';
+import { EnumMatchDappType } from '@/isomorphic/constants';
 import TabbedBrowserWindow, {
+  MainTabbedBrowserWindow,
   TabbedBrowserWindowOptions,
 } from '../browser/browsers';
 import { getBrowserWindowOpts } from './app';
@@ -124,10 +126,10 @@ type IGetTabFromMainWindowResult = {
   finalTab: Tab | null;
 };
 export function getOrCreateDappBoundTab(
-  mainTabbedWin: TabbedBrowserWindow,
+  mainTabbedWin: MainTabbedBrowserWindow,
   targetURL: string,
   opts?: {
-    foundDapp: IDapp | null;
+    targetMatchedDappResult: IMatchDappResult;
   }
 ): IGetTabFromMainWindowResult {
   const parsedInfo =
@@ -143,9 +145,9 @@ export function getOrCreateDappBoundTab(
   let existedTab = null as Tab | null;
   mainTabbedWin.tabs.tabList.find((tab) => {
     const dappInfo = tab.matchRelatedDappInfo(parsedInfo);
-    if (dappInfo?.matchedType === 'by-origin') {
+    if (dappInfo?.matchedType === EnumMatchDappType.byOrigin) {
       existedTab = tab;
-    } else if (dappInfo?.matchedType === 'by-secondary-domain') {
+    } else if (dappInfo?.matchedType === EnumMatchDappType.bySecondaryDomain) {
       existedTab = tab;
     }
 
@@ -155,21 +157,19 @@ export function getOrCreateDappBoundTab(
   // eslint-disable-next-line no-multi-assign
   result.finalTab = result.existedTab = existedTab || null;
 
-  let foundDapp = opts?.foundDapp;
-  if (foundDapp === undefined) {
-    const findResult = findDappsByOrigin(parsedInfo.origin);
-    foundDapp =
-      findResult.dappByOrigin || findResult.dappBySecondaryDomainOrigin;
+  let matchedDappResult = opts?.targetMatchedDappResult;
+  if (!matchedDappResult) {
+    matchedDappResult = findDappsByOrigin(parsedInfo.origin);
   }
 
-  result.foundMatchedDapp = foundDapp || null;
+  result.foundMatchedDapp = matchedDappResult?.dapp || null;
 
-  if (!foundDapp) return result;
+  if (!matchedDappResult.dapp) return result;
 
   if (!existedTab) {
     const createdTab = mainTabbedWin.createTab({
       initDetails: { url: targetURL },
-      relatedDappId: foundDapp.id,
+      relatedDappId: matchedDappResult.dapp.id,
     });
 
     result.createdTab = createdTab;
@@ -178,6 +178,7 @@ export function getOrCreateDappBoundTab(
 
   // TODO: for existed tab, we should also push this event on another location
   if (result.finalTab) {
+    const foundDapp = matchedDappResult.dapp;
     sendToWebContents(
       mainTabbedWin.window.webContents,
       '__internal_push:mainwindow:opened-dapp-tab',

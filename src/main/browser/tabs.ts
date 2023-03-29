@@ -6,6 +6,7 @@ import {
   NativeLayouts,
   NativeLayoutsCollapsed,
 } from '@/isomorphic/const-size-next';
+import { EnumMatchDappType } from '@/isomorphic/constants';
 import { NATIVE_HEADER_H } from '../../isomorphic/const-size-classical';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
@@ -69,7 +70,7 @@ export class Tab {
 
   tabs: Tabs;
 
-  private $meta: {
+  protected $meta: {
     initDetails: ITabOptions['initDetails'];
     topbarStacks: ITabOptions['topbarStacks'];
     webuiType?: IShellWebUIType;
@@ -373,35 +374,6 @@ export class Tab {
   get relatedDappId() {
     return this.$meta.relatedDappId;
   }
-
-  matchRelatedDappInfo(dappOrigin: string | ICanonalizedUrlInfo) {
-    if (!this.isOfMainWindow || !this.$meta.relatedDappId) return null;
-
-    const parsedInfo =
-      typeof dappOrigin === 'string'
-        ? canoicalizeDappUrl(dappOrigin)
-        : dappOrigin;
-
-    if (!parsedInfo) return null;
-
-    const result = {
-      matchedOrigin: '',
-      matchedType: 'by-origin' as 'by-origin' | 'by-secondary-domain',
-    };
-
-    if (parsedInfo.origin === this.$meta.relatedDappId) {
-      result.matchedOrigin = parsedInfo.origin;
-      result.matchedType = 'by-origin';
-      return result;
-    }
-    if (parsedInfo.secondaryDomain === this.$meta.relatedDappId) {
-      result.matchedOrigin = parsedInfo.secondaryDomain;
-      result.matchedType = 'by-secondary-domain';
-      return result;
-    }
-
-    return null;
-  }
 }
 
 export class MainWindowTab extends Tab {
@@ -513,12 +485,41 @@ export class MainWindowTab extends Tab {
       },
     });
   }
+
+  matchRelatedDappInfo(dappOrigin: string | ICanonalizedUrlInfo) {
+    if (!this.isOfMainWindow || !this.$meta.relatedDappId) return null;
+
+    const parsedInfo =
+      typeof dappOrigin === 'string'
+        ? canoicalizeDappUrl(dappOrigin)
+        : dappOrigin;
+
+    if (!parsedInfo) return null;
+
+    const result = {
+      matchedOrigin: '',
+      matchedType: null as null | EnumMatchDappType,
+    };
+
+    if (parsedInfo.origin === this.$meta.relatedDappId) {
+      result.matchedOrigin = parsedInfo.origin;
+      result.matchedType = EnumMatchDappType.byOrigin;
+      return result;
+    }
+    if (parsedInfo.secondaryOrigin === this.$meta.relatedDappId) {
+      result.matchedOrigin = parsedInfo.secondaryOrigin;
+      result.matchedType = EnumMatchDappType.bySecondaryDomain;
+      return result;
+    }
+
+    return null;
+  }
 }
 
-export class Tabs extends EventEmitter {
-  tabList: Tab[] = [];
+export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
+  tabList: TTab[] = [];
 
-  selected?: Tab;
+  selected?: TTab;
 
   window?: BrowserWindow;
 
@@ -572,10 +573,11 @@ export class Tabs extends EventEmitter {
         tabs: this,
       },
     ] as const;
-    const tab =
+    const tab = (
       options?.webuiType === 'MainWindow' && this.$meta.isOfMainWindow
         ? new MainWindowTab(...args)
-        : new Tab(...args);
+        : new Tab(...args)
+    ) as TTab;
     this.tabList.push(tab);
     if (!this.selected) this.selected = tab;
     tab.show(); // must be attached to window

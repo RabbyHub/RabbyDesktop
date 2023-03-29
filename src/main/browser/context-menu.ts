@@ -208,8 +208,7 @@ function buildInspectKitsMenu(opts: ChromeContextMenuOptions) {
       const findResult = findDappsByOrigin(targetOrigin);
       safeOpenURL(targetURL, {
         sourceURL: params.pageURL,
-        existedDapp: findResult.dappByOrigin,
-        existedMainDomainDapp: findResult.dappBySecondaryDomainOrigin,
+        targetMatchedDappResult: findResult,
       }).then((res) => res.activeTab());
     },
   });

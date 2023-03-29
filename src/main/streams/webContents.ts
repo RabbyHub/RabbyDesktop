@@ -1,7 +1,9 @@
 import { getBaseHref } from '@/isomorphic/url';
 import { shell } from 'electron';
 import { EnumOpenDappAction } from '@/isomorphic/constants';
-import TabbedBrowserWindow from '../browser/browsers';
+import TabbedBrowserWindow, {
+  MainTabbedBrowserWindow,
+} from '../browser/browsers';
 import { getAllDapps, parseDappRedirect } from '../store/dapps';
 import { switchToBrowserTab } from '../utils/browser';
 import { safeOpenURL } from './dappSafeview';
@@ -15,7 +17,10 @@ import { onMainWindowReady } from '../utils/stream-helpers';
 /**
  * @deprecated
  */
-export function openTabOfDapp(mainTabbedWin: TabbedBrowserWindow, url: string) {
+export function openTabOfDapp(
+  mainTabbedWin: MainTabbedBrowserWindow,
+  url: string
+) {
   // find if opened tab already
   const { finalTab: continualOpenedTab } = getOrCreateDappBoundTab(
     mainTabbedWin,
@@ -92,8 +97,7 @@ export function setOpenHandlerForWebContents({
       if (!couldKeepTab || allowOpenTab) {
         safeOpenURL(targetURL, {
           sourceURL: currentUrl,
-          existedDapp: targetInfo.foundDapp,
-          existedMainDomainDapp: targetInfo.foundMainDomainDapp,
+          targetMatchedDappResult: targetInfo.matchDappResult,
           _targetwin: parentTabbedWin.window,
         }).then((res) => res.activeTab());
       } else {
@@ -195,9 +199,9 @@ export const setListeners = {
         case EnumOpenDappAction.leaveInTab: {
           return true;
         }
-        case EnumOpenDappAction.safeOpenNewTab: {
+        case EnumOpenDappAction.safeOpenOrSwitchToAnotherTab: {
           safeOpenURL(targetURL, {
-            existedDapp: targetInfo.foundDapp,
+            targetMatchedDappResult: targetInfo.matchDappResult,
             sourceURL: previousURL,
             redirectSourceTab: foundTab,
           }).then((res) => res.activeTab());
@@ -262,11 +266,11 @@ export const setListeners = {
           case EnumOpenDappAction.leaveInTab: {
             return true;
           }
-          case EnumOpenDappAction.safeOpenNewTab: {
+          case EnumOpenDappAction.safeOpenOrSwitchToAnotherTab: {
             evt.preventDefault();
             safeOpenURL(targetURL, {
               sourceURL: currentUrl,
-              existedDapp: targetInfo.foundDapp,
+              targetMatchedDappResult: targetInfo.matchDappResult,
               // openedTab,
               _targetwin: parentWindow,
             }).then((res) => res.activeTab());

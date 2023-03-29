@@ -210,20 +210,19 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
   }
 
   const currentUrl = evt.sender.getURL();
-  const { dappByOrigin, dappBySecondaryDomainOrigin } =
-    findDappsByOrigin(dappOrigin);
+  const findResult = findDappsByOrigin(dappOrigin);
 
   const openResult = await safeOpenURL(dappOrigin, {
     sourceURL: currentUrl,
-    existedDapp: dappByOrigin,
-    existedMainDomainDapp: dappBySecondaryDomainOrigin,
+    targetMatchedDappResult: findResult,
   }).then((res) => {
     res.activeTab();
     return res;
   });
 
-  const isTargetDappByOrigin = !!dappByOrigin;
-  const isTargetDappBySecondaryOrigin = !!dappBySecondaryDomainOrigin;
+  const isTargetDappByOrigin = !!findResult.dappByOrigin;
+  const isTargetDappBySecondaryOrigin =
+    !!findResult.dappBySecondaryDomainOrigin;
   const isTargetDapp = isTargetDappByOrigin || isTargetDappBySecondaryOrigin;
 
   return {

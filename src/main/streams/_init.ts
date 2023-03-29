@@ -2,7 +2,7 @@ import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import type { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { BrowserView, BrowserWindow, Session } from 'electron';
 import { Subject, ReplaySubject, Observable } from 'rxjs';
-import TabbedBrowserWindow from '../browser/browsers';
+import type { MainTabbedBrowserWindow } from '../browser/browsers';
 import { cLog } from '../utils/log';
 
 type IConf<T extends Subject<any>> = {
@@ -51,7 +51,7 @@ const CONF = {
   mainWindowReady: {
     subject: new ReplaySubject(1),
     once: true,
-  } as IConf<ReplaySubject<TabbedBrowserWindow>>,
+  } as IConf<ReplaySubject<MainTabbedBrowserWindow>>,
   mainWindowActiveTabRect: {
     subject: new Subject(),
   } as IConf<Subject<IMainWindowActiveTabRect>>,

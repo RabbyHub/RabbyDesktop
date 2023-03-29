@@ -20,7 +20,7 @@ export async function getWebuiURLBase() {
 }
 
 export async function onMainWindowReady(): Promise<
-  import('../browser/browsers').default
+  import('../browser/browsers').MainTabbedBrowserWindow
 > {
   return firstValueFrom(fromMainSubject('mainWindowReady'));
 }

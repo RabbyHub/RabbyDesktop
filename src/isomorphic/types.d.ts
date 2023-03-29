@@ -441,3 +441,9 @@ type IOpenDappAction =
   | 'leave-in-tab'
   | 'open-external'
   | 'deny';
+
+type IMatchDappResult = {
+  dappByOrigin: null | IDapp;
+  dappBySecondaryDomainOrigin: null | IDapp;
+  dapp: null | IDapp;
+};

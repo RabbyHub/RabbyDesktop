@@ -17,7 +17,6 @@ import {
   sendToWebContents,
 } from '../utils/ipcMainEvents';
 import {
-  forwardToMainWebContents,
   getDappSafeView,
   getSessionInsts,
   onMainWindowReady,
@@ -113,39 +112,39 @@ export async function safeOpenURL(
   targetURL: string,
   opts: {
     sourceURL: string;
-    existedDapp?: IDapp | null;
-    existedMainDomainDapp?: IDapp | null;
+    targetMatchedDappResult: IMatchDappResult;
     _targetwin?: BrowserWindow;
     redirectSourceTab?: import('../browser/tabs').Tab;
   }
 ): Promise<SafeOpenResult> {
   const mainTabbedWin = await onMainWindowReady();
-  const foundDapp = opts.existedDapp || opts.existedMainDomainDapp;
 
-  if (foundDapp) {
-    const { finalTab: foundOpenedTab } = getOrCreateDappBoundTab(
-      mainTabbedWin,
-      targetURL,
-      { foundDapp }
-    );
+  if (opts.targetMatchedDappResult?.dapp) {
+    const findTabResult = getOrCreateDappBoundTab(mainTabbedWin, targetURL, {
+      targetMatchedDappResult: opts.targetMatchedDappResult,
+    });
 
-    const openedTab = opts.redirectSourceTab || foundOpenedTab;
+    const openedTab = opts.redirectSourceTab || findTabResult.finalTab;
 
     if (openedTab?.view) {
-      const currentURL = openedTab.view.webContents.getURL();
       let shouldLoad = false;
       const targetInfo = canoicalizeDappUrl(targetURL);
+      const currentURL = openedTab.view.webContents.getURL();
       const currentInfo = canoicalizeDappUrl(currentURL);
 
       if (opts.redirectSourceTab) {
         shouldLoad = false;
-      } else if (foundOpenedTab) {
+      } else if (findTabResult.finalTab) {
         shouldLoad =
           currentInfo.is2ndaryDomain ||
           currentInfo.isWWWSubDomain ||
           targetInfo.secondaryDomain !== currentInfo.secondaryDomain;
 
-        const openedTabURL = foundOpenedTab.view?.webContents.getURL();
+        const openedTabURL = findTabResult.finalTab.view?.webContents.getURL();
+
+        // for those cases:
+        // 1. SPA redirect
+        // 2. user open a link having same secondary domain with one exsited tab
         if (!shouldLoad && openedTabURL) {
           const openedSecondaryDomain =
             canoicalizeDappUrl(openedTabURL).secondaryDomain;
@@ -271,8 +270,7 @@ onIpcMainInternalEvent('__internal_main:dev', async (payload) => {
 
       safeOpenURL(targetOrigin, {
         sourceURL: 'https://app.uniswap.org/',
-        existedDapp: findResult.dappByOrigin,
-        existedMainDomainDapp: findResult.dappBySecondaryDomainOrigin,
+        targetMatchedDappResult: findResult,
       }).then((res) => res.activeTab());
       break;
     }
