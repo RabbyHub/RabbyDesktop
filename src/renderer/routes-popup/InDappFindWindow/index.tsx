@@ -99,6 +99,16 @@ export default function InDappFindWindow() {
     );
   }, []);
 
+  const onStopFind = useCallback(() => {
+    window.rabbyDesktop.ipcRenderer.sendMessage(
+      '__internal_rpc:mainwindow:op-find-in-page',
+      {
+        type: 'stop-find',
+      }
+    );
+    setSearchInput('');
+  }, []);
+
   if (!pageInfo?.searchInfo?.tabId) return null;
 
   return (
@@ -127,6 +137,9 @@ export default function InDappFindWindow() {
             if (evt.key === 'Enter') {
               evt.stopPropagation();
               onFindForward();
+            } else if (evt.key === 'Escape') {
+              evt.stopPropagation();
+              onStopFind();
             }
           }}
         />
@@ -168,15 +181,7 @@ export default function InDappFindWindow() {
 
         <div
           className={clsx(styles.findOp, styles.findOpClose)}
-          onClick={() => {
-            window.rabbyDesktop.ipcRenderer.sendMessage(
-              '__internal_rpc:mainwindow:op-find-in-page',
-              {
-                type: 'stop-find',
-              }
-            );
-            setSearchInput('');
-          }}
+          onClick={onStopFind}
         >
           <RcIconClose />
         </div>
