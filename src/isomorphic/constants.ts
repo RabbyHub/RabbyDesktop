@@ -55,3 +55,17 @@ export const APP_RUNTIME_ENV = IS_RUNTIME_PRODUCTION
 
 export const SENTRY_DEBUG = !IS_RUNTIME_PRODUCTION;
 // export const SENTRY_DEBUG = false;
+
+export const enum EnumOpenDappAction {
+  'deny' = 'deny',
+  'openExternal' = 'openExternal',
+  'safeOpenOrSwitchToAnotherTab' = 'safeOpenOrSwitchToAnotherTab',
+  // 'openInNewtab' = 'openInNewtab',
+  // 'alertUserAddDapp' = 'alertUserAddDapp',
+  'leaveInTab' = 'leaveInTab',
+}
+
+export const enum EnumMatchDappType {
+  byOrigin = 1,
+  bySecondaryDomain,
+}

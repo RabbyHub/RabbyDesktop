@@ -15,11 +15,12 @@ import {
   putProtocolDappsBinding,
   toggleDappPinned,
 } from '../ipcRequest/dapps';
-import { findTab } from '../utils/tab';
+import { findTabByTabID } from '../utils/tab';
 
 const dappsAtomic = atom(null as null | IDapp[]);
 const pinnedListAtomic = atom([] as IDapp['origin'][]);
 const unpinnedListAtomic = atom([] as IDapp['origin'][]);
+const dappsBoundTabIdsAtomic = atom({} as Record<IDapp['id'], number>);
 
 const protocolDappsBindingAtom = atom({} as IProtocolDappBindings);
 export function useProtocolDappsBinding() {
@@ -73,6 +74,9 @@ export function useDapps() {
   const [originDapps, setDapps] = useAtom(dappsAtomic);
   const [pinnedList, setPinnedList] = useAtom(pinnedListAtomic);
   const [unpinnedList, setUnpinnedList] = useAtom(unpinnedListAtomic);
+  const [dappBoundTabIds, setDappsBoundTabIds] = useAtom(
+    dappsBoundTabIdsAtomic
+  );
 
   // only fetch dapps once for every call to hooks
   const calledRef = useRef(false);
@@ -98,9 +102,10 @@ export function useDapps() {
         if (event.dapps) setDapps(event.dapps);
         if (event.pinnedList) setPinnedList(event.pinnedList);
         if (event.unpinnedList) setUnpinnedList(event.unpinnedList);
+        if (event.dappBoundTabIds) setDappsBoundTabIds(event.dappBoundTabIds);
       }
     );
-  }, [setPinnedList, setUnpinnedList, setDapps]);
+  }, [setDappsBoundTabIds, setPinnedList, setUnpinnedList, setDapps]);
 
   const renameDapp = useCallback(async (dapp: IDapp, alias: string) => {
     putDapp({ ...dapp, alias });
@@ -138,6 +143,7 @@ export function useDapps() {
     ...staticsSummary,
     pinnedList,
     unpinnedList,
+    dappBoundTabIds,
     detectDapps,
     renameDapp,
     removeDapp,
@@ -193,35 +199,35 @@ export function useMatchDapp(origin?: string) {
 
 const createTabedDapps = (
   list: IMergedDapp[],
-  tabMapByOrigin: ReturnType<typeof useWindowTabs>['tabMapByOrigin'],
-  tabMapBySecondaryMap: ReturnType<typeof useWindowTabs>['tabMapBySecondaryMap']
-) => {
+  dappBoundTabIds: IDappBoundTabIds,
+  tabsGroupById: ReturnType<typeof useWindowTabs>['tabsGroupById']
+): IDappWithTabInfo[] => {
   return list.map((item) => {
     return {
       ...item,
-      tab: findTab(item, { tabMapByOrigin, tabMapBySecondaryMap }),
+      tab: findTabByTabID(item, { dappBoundTabIds, tabsGroupById }),
     };
   });
 };
 
 export const useTabedDapps = () => {
-  const { dapps, pinnedDapps, unpinnedDapps, ...rest } = useDapps();
-  const { tabMapByOrigin, tabMapBySecondaryMap } = useWindowTabs();
+  const { dapps, pinnedDapps, unpinnedDapps, dappBoundTabIds, ...rest } =
+    useDapps();
+  const { tabsGroupById } = useWindowTabs();
 
   return {
     ...rest,
     dapps: useMemo(
-      () => createTabedDapps(dapps, tabMapByOrigin, tabMapBySecondaryMap),
-      [dapps, tabMapByOrigin, tabMapBySecondaryMap]
+      () => createTabedDapps(dapps, dappBoundTabIds, tabsGroupById),
+      [dapps, dappBoundTabIds, tabsGroupById]
     ),
     pinnedDapps: useMemo(
-      () => createTabedDapps(pinnedDapps, tabMapByOrigin, tabMapBySecondaryMap),
-      [pinnedDapps, tabMapByOrigin, tabMapBySecondaryMap]
+      () => createTabedDapps(pinnedDapps, dappBoundTabIds, tabsGroupById),
+      [pinnedDapps, dappBoundTabIds, tabsGroupById]
     ),
     unpinnedDapps: useMemo(
-      () =>
-        createTabedDapps(unpinnedDapps, tabMapByOrigin, tabMapBySecondaryMap),
-      [tabMapByOrigin, tabMapBySecondaryMap, unpinnedDapps]
+      () => createTabedDapps(unpinnedDapps, dappBoundTabIds, tabsGroupById),
+      [dappBoundTabIds, tabsGroupById, unpinnedDapps]
     ),
   };
 };

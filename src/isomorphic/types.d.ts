@@ -363,6 +363,8 @@ type IProtocolDappBindings = Record<
   { origin: string; siteUrl: string }
 >;
 
+type IDappBoundTabIds = Record<IDapp['id'], number>;
+
 type IBuiltinViewName = PopupViewOnMainwinInfo['type'] | 'main-window';
 
 type INonSameDomainAction = {
@@ -433,3 +435,15 @@ type IShellWebUIType =
   | 'Prompt'
   | 'ForTrezorLike'
   | 'RabbyX-NotificationWindow';
+
+type IOpenDappAction =
+  | 'open-in-newtab'
+  | 'leave-in-tab'
+  | 'open-external'
+  | 'deny';
+
+type IMatchDappResult = {
+  dappByOrigin: null | IDapp;
+  dappBySecondaryDomainOrigin: null | IDapp;
+  dapp: null | IDapp;
+};

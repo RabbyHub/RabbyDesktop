@@ -25,6 +25,7 @@ type MainInternalsMessagePayload = {
         pinnedList?: IDapp['origin'][];
         unpinnedList?: IDapp['origin'][];
         protocolDappsBinding?: IProtocolDappBindings;
+        dappBoundTabIds?: IDappBoundTabIds;
       }
     ];
     response: [];

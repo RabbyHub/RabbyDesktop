@@ -1,12 +1,15 @@
 import { getBaseHref } from '@/isomorphic/url';
 import { shell } from 'electron';
-import TabbedBrowserWindow from '../browser/browsers';
+import { EnumOpenDappAction } from '@/isomorphic/constants';
+import TabbedBrowserWindow, {
+  MainTabbedBrowserWindow,
+} from '../browser/browsers';
 import { getAllDapps, parseDappRedirect } from '../store/dapps';
 import { switchToBrowserTab } from '../utils/browser';
 import { safeOpenURL } from './dappSafeview';
 import {
+  checkoutTabbedWindow,
   getOrCreateDappBoundTab,
-  getTabbedWindowFromWebContents,
 } from '../utils/tabbedBrowserWindow';
 import { getBlockchainExplorers } from '../store/dynamicConfig';
 import { onMainWindowReady } from '../utils/stream-helpers';
@@ -14,9 +17,15 @@ import { onMainWindowReady } from '../utils/stream-helpers';
 /**
  * @deprecated
  */
-export function openTabOfDapp(mainTabbedWin: TabbedBrowserWindow, url: string) {
+export function openTabOfDapp(
+  mainTabbedWin: MainTabbedBrowserWindow,
+  url: string
+) {
   // find if opened tab already
-  const continualOpenedTab = getOrCreateDappBoundTab(mainTabbedWin, url);
+  const { finalTab: continualOpenedTab } = getOrCreateDappBoundTab(
+    mainTabbedWin,
+    url
+  );
   continualOpenedTab?.loadURL(url);
 
   // const closeOpenedTab = () => {
@@ -88,8 +97,7 @@ export function setOpenHandlerForWebContents({
       if (!couldKeepTab || allowOpenTab) {
         safeOpenURL(targetURL, {
           sourceURL: currentUrl,
-          existedDapp: targetInfo.foundDapp,
-          existedMainDomainDapp: targetInfo.foundMainDomainDapp,
+          targetMatchedDappResult: targetInfo.matchDappResult,
           _targetwin: parentTabbedWin.window,
         }).then((res) => res.activeTab());
       } else {
@@ -124,8 +132,11 @@ export function setOpenHandlerForWebContents({
             }
           } else {
             onMainWindowReady().then((mainTabbedWin) => {
-              const dappTab = getOrCreateDappBoundTab(mainTabbedWin, targetURL);
-              dappTab?.loadURL(targetURL);
+              const { finalTab } = getOrCreateDappBoundTab(
+                mainTabbedWin,
+                targetURL
+              );
+              finalTab?.loadURL(targetURL);
             });
           }
           break;
@@ -152,48 +163,60 @@ export const setListeners = {
     webContents.on('will-redirect', (evt, targetURL, isInPlace) => {
       if (!webContents) return;
       const evtWebContents = (evt as any).sender as Electron.WebContents;
-      const previousURL = evtWebContents.getURL();
-
-      const tabbedWin = getTabbedWindowFromWebContents(evtWebContents);
       const dapps = getAllDapps();
 
-      const {
-        targetInfo,
-        isFromDapp,
-        allowOpenTab,
-        couldKeepTab,
-        shouldOpenExternal,
-        isToSameOrigin,
-      } = parseDappRedirect(previousURL, targetURL, {
-        dapps,
-        blockchain_explorers: getBlockchainExplorers(),
-        isForTrezorLikeConnection: tabbedWin?.isForTrezorLikeConnection(),
-      });
+      const { tabbedWindow, foundTab, matchedDappInfo } = checkoutTabbedWindow(
+        evtWebContents,
+        dapps
+      );
+      const previousURL = matchedDappInfo?.dapp?.origin || '';
 
-      if (shouldOpenExternal) {
-        shell.openExternal(targetURL);
-        return false;
+      const { targetInfo, finalAction } = parseDappRedirect(
+        previousURL,
+        targetURL,
+        {
+          dapps,
+          blockchain_explorers: getBlockchainExplorers(),
+          isForTrezorLikeConnection: tabbedWindow?.isForTrezorLikeConnection(),
+          isFromExistedTab: !!foundTab,
+        }
+      );
+
+      switch (finalAction) {
+        case EnumOpenDappAction.deny: {
+          if (!!foundTab && !!targetInfo.existedDapp) {
+            // TODO: maybe we should open dapp from tab belongs to the dapp?
+            return true;
+          }
+          evt.preventDefault();
+          return false;
+        }
+        case EnumOpenDappAction.openExternal: {
+          shell.openExternal(targetURL);
+          evt.preventDefault();
+          return false;
+        }
+        case EnumOpenDappAction.leaveInTab: {
+          return true;
+        }
+        case EnumOpenDappAction.safeOpenOrSwitchToAnotherTab: {
+          safeOpenURL(targetURL, {
+            targetMatchedDappResult: targetInfo.matchDappResult,
+            sourceURL: previousURL,
+            redirectSourceTab: foundTab,
+          }).then((res) => res.activeTab());
+
+          evt.preventDefault();
+          return false;
+        }
+        default: {
+          evt.preventDefault();
+          return false;
+        }
       }
 
-      // allow redirect in main domain
-      if (allowOpenTab || couldKeepTab) return true;
-
-      if (!previousURL || (isFromDapp && !isToSameOrigin)) {
-        const redirectSourceTab = tabbedWin?.tabs.tabList.find(
-          (tab) => tab.view?.webContents.id === evtWebContents.id
-        );
-
-        evt.preventDefault();
-        safeOpenURL(targetURL, {
-          existedDapp: targetInfo.foundDapp,
-          sourceURL: previousURL,
-          redirectSourceTab,
-        }).then((res) => res.activeTab());
-
-        return false;
-      }
-
-      return !!previousURL;
+      evt.preventDefault();
+      return false;
     });
   },
 
@@ -216,43 +239,51 @@ export const setListeners = {
         const currentUrl = evtWebContents.getURL();
 
         const dapps = getAllDapps();
-        const tabbedWin = getTabbedWindowFromWebContents(evtWebContents);
+        const { tabbedWindow, foundTab } = checkoutTabbedWindow(
+          evtWebContents,
+          dapps
+        );
 
         const {
           targetInfo,
           // actually, it's always from dapp on isMainContentsForTabbedWindow=false
-          isFromDapp,
-          allowOpenTab,
-          couldKeepTab,
-          shouldOpenExternal,
-          isToSameOrigin,
+          finalAction,
         } = parseDappRedirect(currentUrl, targetURL, {
           dapps,
           blockchain_explorers: getBlockchainExplorers(),
-          isForTrezorLikeConnection: tabbedWin?.isForTrezorLikeConnection(),
+          isForTrezorLikeConnection: tabbedWindow?.isForTrezorLikeConnection(),
+          isFromExistedTab: !!foundTab,
         });
 
-        if (shouldOpenExternal) {
-          shell.openExternal(targetURL);
-          return false;
+        switch (finalAction) {
+          case EnumOpenDappAction.deny: {
+            return false;
+          }
+          case EnumOpenDappAction.openExternal: {
+            shell.openExternal(targetURL);
+            return false;
+          }
+          case EnumOpenDappAction.leaveInTab: {
+            return true;
+          }
+          case EnumOpenDappAction.safeOpenOrSwitchToAnotherTab: {
+            evt.preventDefault();
+            safeOpenURL(targetURL, {
+              sourceURL: currentUrl,
+              targetMatchedDappResult: targetInfo.matchDappResult,
+              // openedTab,
+              _targetwin: parentWindow,
+            }).then((res) => res.activeTab());
+
+            return false;
+          }
+          default: {
+            evt.preventDefault();
+            return false;
+          }
         }
 
-        if (isFromDapp && !isToSameOrigin) {
-          if (allowOpenTab || couldKeepTab) return true;
-
-          // const openedTab = tabbedWin?.tabs.tabList.find(tab => tab.view?.webContents.id === evtWebContents.id);
-          evt.preventDefault();
-          safeOpenURL(targetURL, {
-            sourceURL: currentUrl,
-            existedDapp: targetInfo.foundDapp,
-            // openedTab,
-            _targetwin: parentWindow,
-          }).then((res) => res.activeTab());
-
-          return false;
-        }
-
-        return true;
+        return false;
       }
     );
   },
