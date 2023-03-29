@@ -15,7 +15,10 @@ import { ensurePrefix, unPrefix } from '@/isomorphic/string';
 import { storeLog } from './log';
 
 export function getAppUserDataPath() {
-  return app.getPath('userData').replace('Electron', APP_NAME);
+  return app
+    .getPath('userData')
+    .replace('Electron', APP_NAME)
+    .replace('rabby-desktop', APP_NAME);
 }
 
 export function getAppInPkgDir() {
