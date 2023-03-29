@@ -1,7 +1,16 @@
 
+v0.10.2 / 2023-03-29
+====================
+
+  * feat: upgrade rabbyx for security on send message to desktop.
+  * fix: userData path on dev. (#321)
+  * feat: remove relaction modal (#316)
+  * reimpl in-dapp-find with BrowserView (#320)
+
 v0.10.1 / 2023-03-29
 ====================
 
+  * Release v0.10.1
   * feat: robust change on `useAccounts`.
   * fix(swap): useVerifySdk dexId (#319)
 
