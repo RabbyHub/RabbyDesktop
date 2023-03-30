@@ -46,6 +46,7 @@ export default function Titlebar(
   const {
     osType: winOSType,
     winState,
+    disabledMinimizeButton,
     onMinimizeButton,
     onWindowsMaximizeButton,
     onDarwinToggleMaxmize,
@@ -81,6 +82,7 @@ export default function Titlebar(
           <button
             type="button"
             className={classNames(styles.control, styles['triple-minimize'])}
+            disabled={disabledMinimizeButton}
             onClick={onMinimizeButton}
           >
             <img src={IconDarwinTripleMinimize} alt="minimize" />

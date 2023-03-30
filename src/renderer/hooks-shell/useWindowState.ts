@@ -20,13 +20,23 @@ export function useWindowState() {
 
   const onMinimizeButton = useCallback(() => {
     chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, async (win) => {
+      /**
+       * @notice just for robust, but we don't expect this to happen,
+       * make sure minimize button is disabled when window is fullscreen on darwin
+       */
+      if (isDarwin && winState === 'fullscreen') {
+        await chrome.windows.update(win.id!, {
+          state: 'normal',
+        });
+      }
+
       const nextState = 'minimized';
       await chrome.windows.update(win.id!, {
         state: nextState,
       });
       setWinState(nextState);
     });
-  }, [setWinState]);
+  }, [winState, setWinState]);
   const onWindowsMaximizeButton = useCallback(() => {
     chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, async (win) => {
       const nextState = winState === 'maximized' ? 'normal' : 'maximized';
@@ -86,6 +96,7 @@ export function useWindowState() {
   return {
     osType: OS_TYPE,
     winState,
+    disabledMinimizeButton: isDarwin && winState === 'fullscreen',
     onMinimizeButton,
     onWindowsMaximizeButton,
     onDarwinToggleMaxmize,

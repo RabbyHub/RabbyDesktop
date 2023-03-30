@@ -16,6 +16,7 @@ export function useWinTriples() {
   const {
     osType,
     winState,
+    disabledMinimizeButton,
     onMinimizeButton,
     onWindowsMaximizeButton,
     onFullscreenButton,
@@ -39,6 +40,7 @@ export function useWinTriples() {
   return {
     winOSType: osType,
     winState,
+    disabledMinimizeButton,
     winButtonActions,
   };
 }
