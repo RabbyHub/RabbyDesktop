@@ -21,9 +21,47 @@ export function supportHmrOnDev(session: Electron.Session) {
       // leave here for debug
       // console.debug('[debug] --onBeforeSendHeaders-- before', reqHeaders)
     }
+
     callback({
       cancel: false,
       requestHeaders: reqHeaders,
+    });
+  });
+}
+
+/**
+ * @deprecated
+ */
+export function supportRewriteCORS(session: Electron.Session) {
+  session.webRequest.onBeforeSendHeaders((_details, callback) => {
+    let reqHeaders = _details.requestHeaders;
+    if (reqHeaders.Origin?.startsWith('rabby-ipfs://')) {
+      reqHeaders = { ..._details.requestHeaders };
+
+      const urlInfo = new URL(_details.url);
+      reqHeaders.Origin = `http://${urlInfo.host}`;
+    }
+
+    if (reqHeaders.Origin === 'rabby-ipfs://') {
+      reqHeaders.Origin = '*';
+    }
+
+    callback({
+      cancel: false,
+      requestHeaders: reqHeaders,
+    });
+  });
+
+  // it's insecure for http-type dapp.
+  session.webRequest.onHeadersReceived((details, callback) => {
+    const resHeaders = { ...details.responseHeaders };
+
+    // it maybe cause repeative value in headers `Access-Control-Allow-Origin`
+    if (!resHeaders['Access-Control-Allow-Origin']?.length) {
+      resHeaders['Access-Control-Allow-Origin'] = ['*'];
+    }
+    callback({
+      responseHeaders: resHeaders,
     });
   });
 }
