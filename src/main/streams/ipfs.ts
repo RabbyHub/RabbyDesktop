@@ -1,10 +1,12 @@
+import { app } from 'electron';
 import { create } from 'ipfs-http-client';
+import path from 'path';
 import { IpfsService } from '../services/ipfs';
 import { handleIpcMainInvoke } from '../utils/ipcMainEvents';
 
 const ipfsService = new IpfsService({
   ipfs: create(),
-  rootPath: './tmp',
+  rootPath: path.join(app.getPath('userData'), 'ipfs-store'),
 });
 
 handleIpcMainInvoke('download-ipfs', async (_, ipfsString) => {

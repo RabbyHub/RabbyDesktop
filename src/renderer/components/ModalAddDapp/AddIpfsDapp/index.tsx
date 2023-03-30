@@ -1,5 +1,5 @@
 import { LoadingOutlined } from '@ant-design/icons';
-import { Form } from 'antd';
+import { Form, message } from 'antd';
 import { ReactNode, useEffect } from 'react';
 
 import { addDapp, replaceDapp } from '@/renderer/ipcRequest/dapps';
@@ -112,6 +112,14 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
         });
       },
       onSuccess: () => {
+        setState({
+          dappInfo: null,
+          validateStatus: undefined,
+          help: '',
+        });
+      },
+      onError: (e) => {
+        message.error(e.message);
         setState({
           dappInfo: null,
           validateStatus: undefined,
