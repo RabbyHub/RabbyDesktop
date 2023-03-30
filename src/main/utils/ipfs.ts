@@ -1,3 +1,4 @@
+import { normalizeIPFSPath } from '@/isomorphic/string';
 import { PromisePool } from '@supercharge/promise-pool';
 import { createWriteStream } from 'fs';
 import fs from 'fs/promises';
@@ -12,8 +13,13 @@ import path from 'path';
 //   console.log(CID.parse('QmeeFZ6m4SE2xCyRGKdCtdNPMibVw7NyFm5VSo8JPvhPBY'));
 // };
 
-export const listIPFSFiles = async (ipfs: IPFSHTTPClient, ipfsPath: string) => {
+export const listIPFSFiles = async (
+  ipfs: IPFSHTTPClient,
+  inputPath: string
+) => {
   const files: string[] = [];
+  const ipfsPath = normalizeIPFSPath(inputPath);
+
   const stat = await ipfs.files.stat(ipfsPath);
   if (stat.type === 'file') {
     files.push(ipfsPath);
