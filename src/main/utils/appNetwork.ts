@@ -5,7 +5,7 @@ import {
 import { canoicalizeDappUrl, formatProxyRules } from '@/isomorphic/url';
 import { BrowserView } from 'electron';
 import { catchError, firstValueFrom, of, Subject, timeout } from 'rxjs';
-import { BrowserViewManager } from './browserView';
+import { BrowserViewManager, parseSiteMetaByWebContents } from './browserView';
 import { getSessionInsts } from './stream-helpers';
 
 const DFLT_TIMEOUT = 8 * 1e3;
@@ -52,34 +52,12 @@ const checkingProxyViewReady = getSessionInsts().then(
   }
 );
 
-export type MetaData = {
-  title: string;
-  twitter_card: {
-    card?: string;
-    site?: string;
-    creator?: string;
-    creator_id?: string;
-    title?: string;
-    description?: string;
-    image?: string;
-  };
-  og: {
-    title?: string;
-    site_name?: string;
-    image?: string;
-  };
-  favicons: {
-    href: string;
-    sizes: string;
-  }[];
-};
-
 export async function checkUrlViaBrowserView(
   targetURL: string,
   opts?: {
     timeout?: number;
     view?: BrowserView;
-    onMetaDataUpdated?: (meta: MetaData) => void;
+    onMetaDataUpdated?: (meta: ISiteMetaData) => void;
   }
 ) {
   const { checkingViewSession } = await getSessionInsts();
@@ -194,45 +172,9 @@ export async function checkUrlViaBrowserView(
   }
 
   return firstValueFrom(obs).finally(async () => {
-    const outlineScript = `
-      const title = document.title;
-      const ogMeta = {};
-      const twitterMeta = {};
-
-      // 从 meta 标签中提取 open graph 属性
-      const ogTags = document.querySelectorAll('meta[property^="og:"]');
-      for (const tag of ogTags) {
-        ogMeta[tag.getAttribute('property').replace('og:', '')] =
-          tag.getAttribute('content');
-      }
-
-      // 从 meta 标签中提取 twitter 属性
-      const twitterTags = document.querySelectorAll('meta[name^="twitter:"]');
-      for (const tag of twitterTags) {
-        twitterMeta[tag.getAttribute('name').replace('twitter:', '')] =
-          tag.getAttribute('content');
-      }
-      const favicons = document.querySelectorAll('link[rel="icon"]');
-      const shortcuts = document.querySelectorAll('link[rel="shortcut icon"]');
-      const appleTouchIcons = document.querySelectorAll('link[rel="apple-touch-icon"]');
-      
-      ({
-        favicons: Array.from([...shortcuts, ...favicons]).map(item => ({href: item.href, sizes: item.sizes.value})),
-        appleTouchIcons: Array.from(appleTouchIcons).map(item => ({href: item.href, sizes: item.sizes.value})),
-        ogMeta,
-        twitterMeta,
-        title,
-      });
-    `;
-    const { favicons, appleTouchIcons, ogMeta, twitterMeta, title } =
-      await view.webContents.executeJavaScript(outlineScript);
-
-    opts?.onMetaDataUpdated?.({
-      twitter_card: twitterMeta,
-      og: ogMeta,
-      favicons: [...favicons, ...appleTouchIcons],
-      title,
-    });
+    opts?.onMetaDataUpdated?.(
+      await parseSiteMetaByWebContents(view.webContents)
+    );
     viewMngr.recycleView(view);
   });
 }

@@ -12,6 +12,7 @@ import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import {
   BrowserViewManager,
+  parseSiteMetaByWebContents,
   patchTabbedBrowserWebContents,
 } from '../utils/browserView';
 import { desktopAppStore } from '../store/desktopApp';
@@ -124,14 +125,27 @@ export class Tab {
       this.tabs.emit('tab-focused');
     });
 
-    this.view?.webContents.on('page-favicon-updated', (evt, favicons) => {
-      const currentURL = this.view?.webContents.getURL();
+    this.view?.webContents.on('page-favicon-updated', async (evt, favicons) => {
+      const wc = this.view!.webContents;
+      if (!wc || !this.relatedDappId) return;
+      const currentURL =
+        this.view?.webContents.getURL() ||
+        (await wc.executeJavaScript('window.location.href'));
       if (!currentURL) return;
 
-      const dappOrigin = canoicalizeDappUrl(currentURL).origin;
+      const currentInfo = canoicalizeDappUrl(currentURL);
+      const relatedInfo = canoicalizeDappUrl(this.relatedDappId);
+      if (currentInfo.secondaryDomain !== relatedInfo.secondaryDomain) return;
+
+      const sitemeta = await parseSiteMetaByWebContents(wc);
       emitIpcMainEvent('__internal_main:tabbed-window:tab-favicon-updated', {
-        dappOrigin,
-        favicons,
+        matchedRelatedDappId: this.relatedDappId,
+        matchedType:
+          currentInfo.origin === relatedInfo.origin
+            ? EnumMatchDappType.byOrigin
+            : EnumMatchDappType.bySecondaryDomain,
+        linkRelIcons: sitemeta.linkRelIcons,
+        favicons: sitemeta.favicons,
       });
     });
 

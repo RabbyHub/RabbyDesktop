@@ -6,7 +6,11 @@ import {
   parseQueryString,
 } from '@/isomorphic/url';
 import { arraify } from '@/isomorphic/array';
-import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
+import { pickFavIconURLFromMeta } from '@/isomorphic/html';
+import {
+  EnumMatchDappType,
+  IS_RUNTIME_PRODUCTION,
+} from '../../isomorphic/constants';
 import {
   emitIpcMainEvent,
   handleIpcMainInvoke,
@@ -17,7 +21,6 @@ import {
 } from '../utils/ipcMainEvents';
 
 import {
-  getAllMainUIViews,
   getRabbyExtViews,
   onMainWindowReady,
   RABBYX_WINDOWID_S,
@@ -38,7 +41,6 @@ import {
 } from '../utils/tabbedBrowserWindow';
 import { safeOpenURL } from './dappSafeview';
 import { isTargetScanLink } from '../store/dynamicConfig';
-import { MainWindowTab } from '../browser/tabs';
 
 /**
  * @deprecated import members from '../utils/tabbedBrowserWindow' instead
@@ -374,15 +376,22 @@ onIpcMainInternalEvent(
 
 onIpcMainInternalEvent(
   '__internal_main:tabbed-window:tab-favicon-updated',
-  async ({ dappOrigin, favicons }) => {
+  async ({ matchedRelatedDappId, matchedType, favicons, linkRelIcons }) => {
+    if (!matchedRelatedDappId || !favicons[0]) return;
+
     const dappsMap = dappStore.get('dappsMap');
+    const dapp = dappsMap[matchedRelatedDappId];
 
-    const dappInfo = dappsMap[dappOrigin];
+    // TODO: should report here, we expect related dapp should exist
+    if (!dapp) return;
 
-    if (!dappInfo) return;
+    const toCompare = pickFavIconURLFromMeta({ favicons, linkRelIcons });
+    if (!toCompare) return;
 
-    if (!dappInfo.faviconUrl && favicons[0]) {
-      dappInfo.faviconUrl = favicons[0];
+    const isSameFavicon = dapp.faviconUrl === toCompare;
+
+    if (!isSameFavicon || matchedType === EnumMatchDappType.byOrigin) {
+      dapp.faviconUrl = toCompare;
       dappStore.set('dappsMap', dappsMap);
     }
   }

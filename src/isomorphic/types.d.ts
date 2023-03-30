@@ -447,3 +447,29 @@ type IMatchDappResult = {
   dappBySecondaryDomainOrigin: null | IDapp;
   dapp: null | IDapp;
 };
+
+type ISiteMetaData = {
+  title: string;
+  twitter_card: {
+    card?: string;
+    site?: string;
+    creator?: string;
+    creator_id?: string;
+    title?: string;
+    description?: string;
+    image?: string;
+  };
+  og: {
+    title?: string;
+    site_name?: string;
+    image?: string;
+  };
+  linkRelIcons: {
+    href: string;
+    sizes: string;
+  }[];
+  favicons: {
+    href: string;
+    sizes: string;
+  }[];
+};
