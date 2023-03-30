@@ -80,8 +80,10 @@ export const downloadIPFSFiles = async (
     .process((item) => downloadIPFSFile(ipfs, item, rootPath));
 };
 
-export const resolveLocalFile = async (ipfsPath: string, rootPath: string) => {
+export const resolveLocalFile = async (inputPath: string, rootPath: string) => {
+  const ipfsPath = normalizeIPFSPath(inputPath);
   const filePath = path.join(rootPath, ipfsPath);
+
   const stat = await fs.stat(filePath);
   if (stat.isFile()) {
     return fs.readFile(filePath);

@@ -213,6 +213,22 @@ function buildInspectKitsMenu(opts: ChromeContextMenuOptions) {
     },
   });
 
+  appendMenu(inspectKitsMenu, {
+    label: 'Open Test IPFS Dapp',
+    click: async () => {
+      const targetURL =
+        'rabby-ipfs://QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV/';
+
+      const mainTabbedWin = await onMainWindowReady();
+      mainTabbedWin.createTab({
+        initDetails: {
+          url: targetURL,
+          active: true,
+        },
+      });
+    },
+  });
+
   if (isUrlFromDapp(opts.webContents.getURL())) {
     appendMenuSeparator(inspectKitsMenu);
     appendMenu(inspectKitsMenu, {

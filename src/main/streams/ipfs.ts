@@ -1,22 +1,20 @@
 import path from 'path';
 import { create } from 'ipfs-http-client';
+
 import { IpfsService } from '../services/ipfs';
 import { handleIpcMainInvoke } from '../utils/ipcMainEvents';
 import { getAppUserDataPath } from '../utils/store';
-import { onMainWindowReady } from '../utils/stream-helpers';
+import { getIpfsService, onMainWindowReady } from '../utils/stream-helpers';
+import { valueToMainSubject } from './_init';
 
-let gIpfsService: IpfsService;
-async function getIpfsService() {
-  await onMainWindowReady();
-  if (!gIpfsService) {
-    gIpfsService = new IpfsService({
-      ipfs: create(),
-      rootPath: path.join(getAppUserDataPath(), './local_cache/ipfs-store'),
-    });
-  }
+onMainWindowReady().then(() => {
+  const gIpfsService = new IpfsService({
+    ipfs: create(),
+    rootPath: path.join(getAppUserDataPath(), './local_cache/ipfs-store'),
+  });
 
-  return gIpfsService;
-}
+  valueToMainSubject('ipfsServiceReady', gIpfsService);
+});
 
 handleIpcMainInvoke('download-ipfs', async (_, ipfsString) => {
   const ipfsService = await getIpfsService();

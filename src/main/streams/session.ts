@@ -1,4 +1,4 @@
-import { promises as fs } from 'fs';
+import fs from 'fs';
 import path from 'path';
 
 import { app, protocol, session, shell } from 'electron';
@@ -8,6 +8,7 @@ import { isRabbyXPage } from '@/isomorphic/url';
 import { trimWebContentsUserAgent } from '@/isomorphic/string';
 import {
   IS_RUNTIME_PRODUCTION,
+  PROTOCOL_IPFS,
   RABBY_INTERNAL_PROTOCOL,
 } from '../../isomorphic/constants';
 import {
@@ -28,16 +29,12 @@ import {
 } from './tabbedBrowserWindow';
 import { firstEl } from '../../isomorphic/array';
 import {
+  getIpfsService,
   getRabbyExtId,
   getWebuiExtId,
-  onMainWindowReady,
 } from '../utils/stream-helpers';
 import { checkOpenAction } from '../utils/tabs';
-import {
-  createTmpEmptyBrowser,
-  getWindowFromWebContents,
-  switchToBrowserTab,
-} from '../utils/browser';
+import { getWindowFromWebContents, switchToBrowserTab } from '../utils/browser';
 import {
   rewriteSessionWebRequestHeaders,
   supportHmrOnDev,
@@ -53,14 +50,14 @@ const manifestExists = async (dirPath: string) => {
   if (!dirPath) return false;
   const manifestPath = path.join(dirPath, 'manifest.json');
   try {
-    return (await fs.stat(manifestPath)).isFile();
+    return fs.statSync(manifestPath).isFile();
   } catch {
     return false;
   }
 };
 
 async function loadExtensions(sess: Electron.Session, extensionsPath: string) {
-  const subDirectories = await fs.readdir(extensionsPath, {
+  const subDirectories = fs.readdirSync(extensionsPath, {
     withFileTypes: true,
   });
 
@@ -76,7 +73,7 @@ async function loadExtensions(sess: Electron.Session, extensionsPath: string) {
           return extPath;
         }
 
-        const extSubDirs = await fs.readdir(extPath, {
+        const extSubDirs = fs.readdirSync(extPath, {
           withFileTypes: true,
         });
 
@@ -146,17 +143,21 @@ function checkProxyValidOnBootstrap() {
 
 protocol.registerSchemesAsPrivileged([
   {
-    scheme: 'rabby-internal',
+    scheme: RABBY_INTERNAL_PROTOCOL.slice(0, -1),
+    privileges: { standard: true, supportFetchAPI: true },
+  },
+  {
+    scheme: PROTOCOL_IPFS.slice(0, -1),
     privileges: { standard: true, supportFetchAPI: true },
   },
 ]);
 
-firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
-  // sub.unsubscribe();
-  const sessionIns = session.defaultSession;
-
-  if (
-    !sessionIns.protocol.registerFileProtocol(
+const registerCallbacks: ((ctx: { session: Electron.Session }) => {
+  protocol: string;
+  registerSuccess: boolean;
+})[] = [
+  (ctx) => {
+    const registerSuccess = ctx.session.protocol.registerFileProtocol(
       RABBY_INTERNAL_PROTOCOL.slice(0, -1),
       (request, callback) => {
         const pathnameWithQuery = request.url.slice(
@@ -182,16 +183,67 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
           });
         }
       }
-    )
-  ) {
-    if (!IS_RUNTIME_PRODUCTION) {
-      throw new Error(
-        `[initSession] Failed to register protocol ${RABBY_INTERNAL_PROTOCOL}`
-      );
-    } else {
-      console.error(`Failed to register protocol`);
+    );
+
+    return { registerSuccess, protocol: RABBY_INTERNAL_PROTOCOL };
+  },
+  (ctx) => {
+    const registerSuccess = ctx.session.protocol.registerFileProtocol(
+      PROTOCOL_IPFS.slice(0, -1),
+      async (request, callback) => {
+        const pathnameWithQuery = request.url.slice(
+          `${PROTOCOL_IPFS}//`.length
+        );
+
+        const pathname = pathnameWithQuery.split('?')?.[0] || '';
+        const pathnameWithoutHash = pathname.split('#')?.[0] || '';
+
+        const ipfsService = await getIpfsService();
+        let filePath = ipfsService.resolveFile(pathnameWithoutHash);
+
+        if (!fs.existsSync(filePath)) {
+          callback({ data: 'Not found', mimeType: 'text/plain' });
+          return;
+        }
+
+        if (fs.statSync(filePath).isDirectory()) {
+          filePath = path.join(filePath, './index.html');
+        }
+
+        if (!fs.existsSync(filePath)) {
+          callback({ data: 'Not found', mimeType: 'text/plain' });
+          return;
+        }
+
+        callback({
+          path: filePath,
+        });
+      }
+    );
+
+    return { registerSuccess, protocol: PROTOCOL_IPFS };
+  },
+];
+
+firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
+  // sub.unsubscribe();
+  const sessionIns = session.defaultSession;
+
+  registerCallbacks.forEach((cb) => {
+    const { registerSuccess, protocol: registeredProtocol } = cb({
+      session: sessionIns,
+    });
+
+    if (!registerSuccess) {
+      if (!IS_RUNTIME_PRODUCTION) {
+        throw new Error(
+          `[initSession] Failed to register protocol ${registeredProtocol}`
+        );
+      } else {
+        console.error(`Failed to register protocol`);
+      }
     }
-  }
+  });
 
   const dappSafeViewSession = session.fromPartition('dappSafeView');
   const checkingViewSession = session.fromPartition('checkingView');

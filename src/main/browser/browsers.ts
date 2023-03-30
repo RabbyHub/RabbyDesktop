@@ -78,7 +78,7 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
     this.window.webContents.loadURL(webuiUrl);
 
     this.tabs = new Tabs(this.window, {
-      isOfMainWindow: this.$meta.webuiType === 'MainWindow',
+      webuiType: this.$meta.webuiType,
     });
 
     this.tabs.on('tab-created', (tab: Tab) => {

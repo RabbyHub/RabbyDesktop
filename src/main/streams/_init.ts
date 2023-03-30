@@ -101,6 +101,10 @@ const CONF = {
   appRuntimeProxyConf: {
     subject: new ReplaySubject(1),
   } as IConf<ReplaySubject<IRunningAppProxyConf>>,
+
+  ipfsServiceReady: {
+    subject: new ReplaySubject(1),
+  } as IConf<ReplaySubject<import('../services/ipfs').IpfsService>>,
 };
 
 type IMainSubjects = typeof CONF;

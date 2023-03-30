@@ -68,7 +68,7 @@ const StaticEntries = [
   },
 ] as const;
 
-const DappRoutePatter = '/mainwin/dapps/:origin';
+const DappRoutePatter = '/mainwin/dapps/:dappId';
 
 const TabList = ({
   className,
@@ -182,7 +182,7 @@ export default function MainWindowSidebar() {
   const prevMatchedDapp = usePrevious(matchedDapp);
 
   useEffect(() => {
-    if (prevMatchedDapp?.params.origin !== matchedDapp?.params.origin) {
+    if (prevMatchedDapp?.params.dappId !== matchedDapp?.params.dappId) {
       walletController.rejectAllApprovals();
     }
   }, [prevMatchedDapp, matchedDapp]);
@@ -200,7 +200,7 @@ export default function MainWindowSidebar() {
 
   useEffect(() => {
     if (matchedDapp) {
-      makeSureDappOpened(matchedDapp.params.origin!);
+      makeSureDappOpened(matchedDapp.params.dappId!);
     }
   }, [matchedDapp]);
 
