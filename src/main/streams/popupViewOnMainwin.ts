@@ -292,7 +292,7 @@ const inDappFindReady = onMainWindowReady().then(async (mainWin) => {
 
   // debug-only
   if (!IS_RUNTIME_PRODUCTION) {
-    inDappFindPopup.webContents.openDevTools({ mode: 'detach' });
+    // inDappFindPopup.webContents.openDevTools({ mode: 'detach' });
   }
 
   hidePopupView(inDappFindPopup);

@@ -247,7 +247,7 @@ export default function Topbar() {
             <button
               type="button"
               className="control triple-maximize"
-              onClick={winButtonActions.onMaximizeButton}
+              onClick={winButtonActions.onWindowsMaximizeButton}
             >
               <img
                 src={
