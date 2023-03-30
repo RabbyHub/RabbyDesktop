@@ -81,7 +81,8 @@ function filterClosable(url?: string, isClosable = CLOSABLE) {
 export default function Topbar() {
   const { tabListDomRef, tabList, activeTab, tabActions } = useTopbarTabs();
 
-  const { winOSType, winState, winButtonActions } = useWinTriples();
+  const { winOSType, disabledMinimizeButton, winState, winButtonActions } =
+    useWinTriples();
 
   const selectedTabInfo = useSelectedTabInfo(activeTab);
 
@@ -137,6 +138,7 @@ export default function Topbar() {
               type="button"
               className="control triple-minimize"
               onClick={winButtonActions.onMinimizeButton}
+              disabled={disabledMinimizeButton}
             >
               <img src={IconDarwinTripleMinimize} alt="minimize" />
               <img
@@ -247,7 +249,7 @@ export default function Topbar() {
             <button
               type="button"
               className="control triple-maximize"
-              onClick={winButtonActions.onMaximizeButton}
+              onClick={winButtonActions.onWindowsMaximizeButton}
             >
               <img
                 src={
