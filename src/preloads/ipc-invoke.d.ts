@@ -221,6 +221,13 @@ type ChannelInvokePayload = {
       error?: string;
     };
   };
+  'download-ipfs': {
+    send: [ipfsString: string];
+    response: {
+      error?: string | null;
+      success?: boolean;
+    };
+  };
 } & RabbyxInvokePayload;
 
 type IInvokesKey = keyof ChannelInvokePayload;

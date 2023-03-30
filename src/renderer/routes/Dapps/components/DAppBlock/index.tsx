@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 import { Dropdown, Menu } from 'antd';
-import React, { useRef } from 'react';
+import React, { ReactNode, useRef } from 'react';
 
 import clsx from 'clsx';
 import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
@@ -12,6 +12,32 @@ import {
 } from '../../../../../../assets/icons/internal-homepage';
 
 import { DappFavicon } from '../../../../components/DappFavicon';
+
+const Indicator = ({ dapp }: { dapp: IDappWithTabInfo }) => {
+  if (!dapp.tab) {
+    return null;
+  }
+  return <div className="dapp-indicator" />;
+  // return dapp?.tab ? (
+  //   dapp.tab.status === 'loading' ? (
+  //     <img
+  //       className="dapp-indicator loading"
+  //       src="rabby-internal://assets/icons/dapps/dapp-loading.svg"
+  //     />
+  //   ) : (
+  //     <div className="dapp-indicator" />
+  //   )
+  // ) : null;
+};
+
+const IpfsTag = ({ prefix }: { prefix?: ReactNode }) => {
+  return (
+    <div className="tag ipfs-tag">
+      {prefix}
+      ipfs
+    </div>
+  );
+};
 
 type IOnOpDapp = (
   op: 'rename' | 'delete' | 'pin' | 'unpin',
@@ -128,16 +154,13 @@ export const DAppBlock = ({
       }
     >
       <div className="dapp-block" ref={ref}>
-        {dapp.tab ? (
-          dapp.tab.status === 'loading' ? (
-            <img
-              className="dapp-indicator loading"
-              src="rabby-internal://assets/icons/dapps/dapp-loading.svg"
-            />
+        <div className={clsx('dapp-block-badge')}>
+          {'todo-is-ipfs' ? (
+            <IpfsTag prefix={<Indicator dapp={dapp} />} />
           ) : (
-            <div className="dapp-indicator" />
-          )
-        ) : null}
+            <Indicator dapp={dapp} />
+          )}
+        </div>
         <div
           className="anchor"
           onClick={(e) => {

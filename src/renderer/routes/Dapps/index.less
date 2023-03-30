@@ -45,12 +45,35 @@
       border-radius: 5px;
     }
 
-    .dapp-indicator {
+    .dapp-block-badge {
       position: absolute;
-      top: 8px;
-      left: 8px;
-      width: 6px;
-      height: 6px;
+      top: 0;
+      left: 0;
+    }
+    .tag {
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 15px;
+      padding: 0 5px;
+      border-radius: 6px 0 6px 0;
+      display: flex;
+      gap: 4px;
+
+      color: #ffffff;
+
+      .dapp-indicator {
+        background-color: #fff;
+        margin-left: 0;
+      }
+    }
+    .ipfs-tag {
+      background: #00d0d0;
+    }
+    .dapp-indicator {
+      margin-left: 5px;
+      margin-top: 5px;
+      width: 5px;
+      height: 5px;
       border-radius: 50%;
       background-color: var(--color-comment2);
 
