@@ -9,7 +9,6 @@ import {
   onIpcMainInternalEvent,
   sendToWebContents,
 } from '../utils/ipcMainEvents';
-import { notifyStopFindInPage } from '../utils/mainTabbedWin';
 import { resizeImage } from '../utils/nativeImage';
 import {
   getMainWinLastPosition,
@@ -18,7 +17,6 @@ import {
 } from '../utils/screen';
 import {
   getAllMainUIViews,
-  getAllMainUIWindows,
   getRabbyExtViews,
   onMainWindowReady,
   updateMainWindowActiveTabRect,
@@ -298,9 +296,9 @@ const { handler: handlerOpenFindInPage } = onIpcMainInternalEvent(
 
     switch (payload.type) {
       case 'start-find': {
-        const { popupOnly } = await getAllMainUIWindows();
-        const window = popupOnly['in-dapp-find'];
-        currentTab.tryStartFindInPage();
+        const { views } = await getAllMainUIViews();
+        const window = views['in-dapp-find'];
+        currentTab.resumeFindInPage();
 
         setTimeout(() => {
           window.webContents.focus();
@@ -340,11 +338,24 @@ const { handler: handlerOpenFindInPage } = onIpcMainInternalEvent(
           break;
         }
 
-        currentTab.tryStartFindInPage(searchText);
+        currentTab.resumeFindInPage(searchText);
         break;
       }
       default:
         break;
+    }
+  }
+);
+
+onIpcMainInternalEvent(
+  '__internal_main:mainwindow:sidebar-collapsed-changed',
+  async () => {
+    const mainWin = await onMainWindowReady();
+
+    const currentTab = mainWin.tabs.selected as MainWindowTab;
+    if (currentTab) {
+      // trigger re draw
+      currentTab.show();
     }
   }
 );
@@ -359,9 +370,9 @@ onIpcMainEvent(
 onIpcMainInternalEvent(
   '__internal_main:mainwindow:update-findresult-in-page',
   async (payload) => {
-    const { popupOnly } = await getAllMainUIWindows();
+    const { views } = await getAllMainUIViews();
     sendToWebContents(
-      popupOnly['in-dapp-find'].webContents,
+      views['in-dapp-find'].webContents,
       '__internal_push:mainwindow:update-findresult-in-page',
       payload
     );

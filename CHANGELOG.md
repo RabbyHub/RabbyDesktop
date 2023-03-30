@@ -1,7 +1,36 @@
 
+v0.10.2 / 2023-03-29
+====================
+
+  * feat: upgrade rabbyx for security on send message to desktop.
+  * fix: userData path on dev. (#321)
+  * feat: remove relaction modal (#316)
+  * reimpl in-dapp-find with BrowserView (#320)
+
+v0.10.1 / 2023-03-29
+====================
+
+  * Release v0.10.1
+  * feat: robust change on `useAccounts`.
+  * fix(swap): useVerifySdk dexId (#319)
+
+v0.10.0 / 2023-03-28
+====================
+
+  * Release v0.10.0
+  * feat: support Enter/Return as findForward. (#318)
+  * chore: fix typo (#317)
+  * feat: add clearPendingTransactions event (#311)
+  * chore: disable devTools of inDappFind.
+  * feat: basic support for find content in dapp (#314)
+  * fix: swap wraptoken (#315)
+  * fix: avoid flashing or leave-in getting-started screen as account existed after mainWindow show. (#313)
+  * build: show triggers on notifying. (#312)
+
 v0.9.0 / 2023-03-25
 ===================
 
+  * Release v0.9.0
   * feat: integrate safe (#305)
   * fix: update at
   * fix: style

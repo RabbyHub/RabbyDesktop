@@ -9,9 +9,13 @@
 
 .InDappFindWindow {
   padding: 4px 8px;
-  height: 100vh;
-  box-sizing: border-box;
   width: 100%;
+  height: calc(100% - 8px);
+  box-shadow: 1px 2px 7px #a57f7f;
+  border-radius: 6px;
+  border-top-left-radius: 0;
+
+  box-sizing: border-box;
   background-color: #fff;
   overflow: hidden;
 
@@ -79,8 +83,8 @@
   align-items: center;
   justify-content: center;
 
-  &.disabled {
-    cursor: not-allowed;
+  &.disabledOp {
+    cursor: default;
     opacity: 0.5;
   }
 
@@ -90,8 +94,7 @@
     height: 100%;
   }
 
-  // &,
-  &:not(.disabled):hover {
+  &:not(.noOp):not(.disabledOp):hover {
     background-color: #eee;
   }
 }

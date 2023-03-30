@@ -20,7 +20,7 @@ export async function getWebuiURLBase() {
 }
 
 export async function onMainWindowReady(): Promise<
-  import('../browser/browsers').default
+  import('../browser/browsers').MainTabbedBrowserWindow
 > {
   return firstValueFrom(fromMainSubject('mainWindowReady'));
 }
@@ -116,14 +116,13 @@ export function updateMainWindowActiveTabRect(
 }
 
 export async function getAllMainUIWindows() {
-  const [mainWin, { sidebarContext, inDappFind }] = await Promise.all([
+  const [mainWin, { sidebarContext }] = await Promise.all([
     await onMainWindowReady(),
     await firstValueFrom(fromMainSubject('popupWindowOnMain')),
   ]);
 
   const popupOnly: Record<IPopupWinPageInfo['type'], Electron.BrowserWindow> = {
     'sidebar-dapp': sidebarContext,
-    'in-dapp-find': inDappFind,
   } as const;
 
   const windows = {
@@ -144,13 +143,14 @@ export async function getAllMainUIViews() {
     await firstValueFrom(fromMainSubject('popupViewsOnMainwinReady')),
   ]);
 
-  const views = {
+  const views: Record<PopupViewOnMainwinInfo['type'], Electron.BrowserView> = {
     'add-address-dropdown': mainViews.addAddress,
     'dapps-management': mainViews.dappsManagement,
     'select-devices': mainViews.selectDevices,
     'z-popup': mainViews.zPopup,
     'global-toast-popup': mainViews.globalToastPopup,
-  } as const;
+    'in-dapp-find': mainViews.inDappFind,
+  };
 
   const viewOnlyHash = {
     addAddress: mainViews.addAddress.webContents,
@@ -158,6 +158,7 @@ export async function getAllMainUIViews() {
     selectDevices: mainViews.selectDevices.webContents,
     zPopup: mainViews.zPopup.webContents,
     globalToastPopup: mainViews.globalToastPopup.webContents,
+    inDappFind: mainViews.inDappFind.webContents,
   };
 
   const hash = {

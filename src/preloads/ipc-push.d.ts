@@ -15,4 +15,10 @@ type ChannelPushToWebContents = {
       result: Electron.Result | null;
     };
   };
+  '__internal_push:mainwindow:opened-dapp-tab': {
+    dappId: string;
+    dappOrigin: string;
+    tabId?: number;
+  };
+  '__internal_push:dapps:changed': MainInternalsMessagePayload['__internal_main:dapps:changed']['send'][0];
 };

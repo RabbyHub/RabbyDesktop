@@ -1,5 +1,4 @@
 import { app, BrowserWindow, shell } from 'electron';
-import { bufferTime, fromEvent, map } from 'rxjs';
 
 import {
   isUrlFromDapp,
@@ -7,7 +6,11 @@ import {
   parseQueryString,
 } from '@/isomorphic/url';
 import { arraify } from '@/isomorphic/array';
-import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
+import { pickFavIconURLFromMeta } from '@/isomorphic/html';
+import {
+  EnumMatchDappType,
+  IS_RUNTIME_PRODUCTION,
+} from '../../isomorphic/constants';
 import {
   emitIpcMainEvent,
   handleIpcMainInvoke,
@@ -211,20 +214,19 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
   }
 
   const currentUrl = evt.sender.getURL();
-  const { dappByOrigin, dappBySecondaryDomainOrigin } =
-    findDappsByOrigin(dappOrigin);
+  const findResult = findDappsByOrigin(dappOrigin);
 
   const openResult = await safeOpenURL(dappOrigin, {
     sourceURL: currentUrl,
-    existedDapp: dappByOrigin,
-    existedMainDomainDapp: dappBySecondaryDomainOrigin,
+    targetMatchedDappResult: findResult,
   }).then((res) => {
     res.activeTab();
     return res;
   });
 
-  const isTargetDappByOrigin = !!dappByOrigin;
-  const isTargetDappBySecondaryOrigin = !!dappBySecondaryDomainOrigin;
+  const isTargetDappByOrigin = !!findResult.dappByOrigin;
+  const isTargetDappBySecondaryOrigin =
+    !!findResult.dappBySecondaryDomainOrigin;
   const isTargetDapp = isTargetDappByOrigin || isTargetDappBySecondaryOrigin;
 
   return {
@@ -339,18 +341,6 @@ onMainWindowReady().then((mainTabbedWin) => {
 });
 
 onIpcMainInternalEvent(
-  '__internal_main:mainwindow:sidebar-collapsed-changed',
-  async () => {
-    const mainWin = await onMainWindowReady();
-
-    if (mainWin.tabs.selected) {
-      // trigger re draw
-      mainWin.tabs.selected.show();
-    }
-  }
-);
-
-onIpcMainInternalEvent(
   '__internal_main:app:close-tab-on-del-dapp',
   async (deledDappOrigins) => {
     const mainWin = await onMainWindowReady();
@@ -386,15 +376,22 @@ onIpcMainInternalEvent(
 
 onIpcMainInternalEvent(
   '__internal_main:tabbed-window:tab-favicon-updated',
-  async ({ dappOrigin, favicons }) => {
+  async ({ matchedRelatedDappId, matchedType, favicons, linkRelIcons }) => {
+    if (!matchedRelatedDappId || !favicons[0]) return;
+
     const dappsMap = dappStore.get('dappsMap');
+    const dapp = dappsMap[matchedRelatedDappId];
 
-    const dappInfo = dappsMap[dappOrigin];
+    // TODO: should report here, we expect related dapp should exist
+    if (!dapp) return;
 
-    if (!dappInfo) return;
+    const toCompare = pickFavIconURLFromMeta({ favicons, linkRelIcons });
+    if (!toCompare) return;
 
-    if (!dappInfo.faviconUrl && favicons[0]) {
-      dappInfo.faviconUrl = favicons[0];
+    const isSameFavicon = dapp.faviconUrl === toCompare;
+
+    if (!isSameFavicon || matchedType === EnumMatchDappType.byOrigin) {
+      dapp.faviconUrl = toCompare;
       dappStore.set('dappsMap', dappsMap);
     }
   }

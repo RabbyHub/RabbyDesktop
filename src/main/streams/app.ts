@@ -45,8 +45,8 @@ import { tryAutoUnlockRabbyX } from './rabbyIpcQuery/autoUnlock';
 import { alertAutoUnlockFailed } from './mainWindow';
 import { setupAppTray } from './appTray';
 import { checkForceUpdate } from '../updater/force_update';
-import { repairDappsFieldsOnBootstrap } from '../store/dapps';
 import { getOrCreateDappBoundTab } from '../utils/tabbedBrowserWindow';
+import { MainTabbedBrowserWindow } from '../browser/browsers';
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
@@ -93,7 +93,7 @@ app.on('web-contents-created', async (evtApp, webContents) => {
             switchToBrowserTab(dappTab!.id, tabbedWin!);
           } else if (mainTabbedWin === tabbedWin) {
             if (!isFromExt) {
-              const continualOpenedTab = getOrCreateDappBoundTab(
+              const { finalTab: continualOpenedTab } = getOrCreateDappBoundTab(
                 mainTabbedWin,
                 details.url
               );
@@ -276,7 +276,7 @@ export default function bootstrap() {
 
     const lastMainWinPos = getMainWinLastPosition();
     // init window
-    const mainWindow = await createWindow({
+    const mainWindow = (await createWindow({
       defaultTabUrl: '',
       window: {
         show: false,
@@ -289,7 +289,7 @@ export default function bootstrap() {
         },
       },
       webuiType: 'MainWindow',
-    });
+    })) as MainTabbedBrowserWindow;
 
     const mainWin = mainWindow.window;
     mainWin.on('ready-to-show', () => {

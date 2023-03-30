@@ -6,19 +6,21 @@ import {
   NativeLayouts,
   NativeLayoutsCollapsed,
 } from '@/isomorphic/const-size-next';
+import { EnumMatchDappType } from '@/isomorphic/constants';
 import { NATIVE_HEADER_H } from '../../isomorphic/const-size-classical';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import {
   BrowserViewManager,
+  parseSiteMetaByWebContents,
   patchTabbedBrowserWebContents,
 } from '../utils/browserView';
 import { desktopAppStore } from '../store/desktopApp';
 import { getAssetPath } from '../utils/app';
 import { hideLoadingView, isDappViewLoadingForTab } from '../utils/browser';
 import {
-  notifyStartFindInPage,
-  notifyStopFindInPage,
+  notifyShowFindInPage,
+  notifyHideFindInPage,
 } from '../utils/mainTabbedWin';
 
 const viewMngr = new BrowserViewManager(
@@ -69,7 +71,7 @@ export class Tab {
 
   tabs: Tabs;
 
-  private $meta: {
+  protected $meta: {
     initDetails: ITabOptions['initDetails'];
     topbarStacks: ITabOptions['topbarStacks'];
     webuiType?: IShellWebUIType;
@@ -86,11 +88,12 @@ export class Tab {
   protected _isVisible: boolean = false;
 
   constructor(ofWindow: BrowserWindow, tabOptions: ITabOptions) {
-    const { tabs, topbarStacks, initDetails } = tabOptions;
+    const { tabs, topbarStacks, initDetails, relatedDappId } = tabOptions;
 
     this.$meta.initDetails = { ...initDetails };
     this.$meta.topbarStacks = { ...DEFAULT_TOPBAR_STACKS, ...topbarStacks };
     this.$meta.webuiType = tabOptions.webuiType;
+    this.$meta.relatedDappId = relatedDappId || '';
 
     if (this.$meta.webuiType === 'ForTrezorLike') {
       this.$meta.topbarStacks.tabs = true;
@@ -122,14 +125,27 @@ export class Tab {
       this.tabs.emit('tab-focused');
     });
 
-    this.view?.webContents.on('page-favicon-updated', (evt, favicons) => {
-      const currentURL = this.view?.webContents.getURL();
+    this.view?.webContents.on('page-favicon-updated', async (evt, favicons) => {
+      const wc = this.view!.webContents;
+      if (!wc || !this.relatedDappId) return;
+      const currentURL =
+        this.view?.webContents.getURL() ||
+        (await wc.executeJavaScript('window.location.href'));
       if (!currentURL) return;
 
-      const dappOrigin = canoicalizeDappUrl(currentURL).origin;
+      const currentInfo = canoicalizeDappUrl(currentURL);
+      const relatedInfo = canoicalizeDappUrl(this.relatedDappId);
+      if (currentInfo.secondaryDomain !== relatedInfo.secondaryDomain) return;
+
+      const sitemeta = await parseSiteMetaByWebContents(wc);
       emitIpcMainEvent('__internal_main:tabbed-window:tab-favicon-updated', {
-        dappOrigin,
-        favicons,
+        matchedRelatedDappId: this.relatedDappId,
+        matchedType:
+          currentInfo.origin === relatedInfo.origin
+            ? EnumMatchDappType.byOrigin
+            : EnumMatchDappType.bySecondaryDomain,
+        linkRelIcons: sitemeta.linkRelIcons,
+        favicons: sitemeta.favicons,
       });
     });
 
@@ -369,42 +385,25 @@ export class Tab {
     }
   }
 
-  getRelatedDappInfo(dappOrigin: string | ICanonalizedUrlInfo) {
-    if (!this.isOfMainWindow || !this.$meta.relatedDappId) return null;
-
-    const parsedInfo =
-      typeof dappOrigin === 'string'
-        ? canoicalizeDappUrl(dappOrigin)
-        : dappOrigin;
-
-    if (!parsedInfo) return null;
-
-    const result = {
-      matchedOrigin: '',
-      matchedType: 'by-origin' as 'by-origin' | 'by-secondary-domain',
-    };
-
-    if (parsedInfo.origin === this.$meta.relatedDappId) {
-      result.matchedOrigin = parsedInfo.origin;
-      result.matchedType = 'by-origin';
-      return result;
-    }
-    if (parsedInfo.secondaryDomain === this.$meta.relatedDappId) {
-      result.matchedOrigin = parsedInfo.secondaryDomain;
-      result.matchedType = 'by-secondary-domain';
-      return result;
-    }
-
-    return null;
+  get relatedDappId() {
+    return this.$meta.relatedDappId;
   }
 }
 
+const DEFAULT_FIND_IN_PAGE_STATE = {
+  windowOpen: false,
+  requestId: -1,
+  searchText: '',
+  result: null,
+};
+
 export class MainWindowTab extends Tab {
   private _findInPageState: {
+    windowOpen: boolean;
     requestId: number;
     searchText: string;
     result?: Electron.Result | null;
-  } = { requestId: -1, searchText: '' };
+  } = { ...DEFAULT_FIND_IN_PAGE_STATE };
 
   constructor(...[parentWindow, options]: ConstructorParameters<typeof Tab>) {
     super(parentWindow, { ...options, webuiType: 'MainWindow' });
@@ -424,7 +423,7 @@ export class MainWindowTab extends Tab {
 
   protected _cleanupTab() {
     super._cleanupTab();
-    this._findInPageState = { requestId: -1, searchText: '' };
+    this._findInPageState = { ...DEFAULT_FIND_IN_PAGE_STATE };
   }
 
   set findInPageState(state: Partial<MainWindowTab['_findInPageState']>) {
@@ -436,7 +435,7 @@ export class MainWindowTab extends Tab {
   }
 
   // TODO: should we only call this method for selected tab?
-  tryStartFindInPage(searchText = '') {
+  resumeFindInPage(searchText = '') {
     if (this.destroyed) return;
     if (!this.view) return;
     if (!this._isVisible || this.isAnimating) return;
@@ -454,8 +453,10 @@ export class MainWindowTab extends Tab {
       this.resetFindInPage();
     }
 
+    this.findInPageState = { ...this.findInPageState, windowOpen: true };
+
     const viewBounds = this.view.getBounds();
-    notifyStartFindInPage({ x: viewBounds.x, y: viewBounds.y }, this.id);
+    notifyShowFindInPage({ x: viewBounds.x, y: viewBounds.y }, this.id);
   }
 
   clearFindInPageResult() {
@@ -472,8 +473,20 @@ export class MainWindowTab extends Tab {
     if (this.destroyed) return;
 
     this.clearFindInPageResult();
-    notifyStopFindInPage();
-    this.findInPageState = { requestId: -1, searchText: '', result: null };
+    notifyHideFindInPage();
+    this.findInPageState = { ...DEFAULT_FIND_IN_PAGE_STATE };
+  }
+
+  toggleAnimating(enabled?: boolean): void {
+    super.toggleAnimating(enabled);
+
+    if (this.findInPageState.windowOpen) {
+      if (enabled) {
+        notifyHideFindInPage();
+      } else {
+        this.resumeFindInPage(this._findInPageState.searchText);
+      }
+    }
   }
 
   show() {
@@ -483,20 +496,13 @@ export class MainWindowTab extends Tab {
 
   hide() {
     this.clearFindInPageResult();
-    notifyStopFindInPage();
+    notifyHideFindInPage();
     super.hide();
   }
 
   destroy() {
     this.resetFindInPage();
     super.destroy();
-  }
-
-  rePosFindWindow() {
-    if (!this.view) return;
-
-    const viewBounds = this.view.getBounds();
-    notifyStartFindInPage({ x: viewBounds.x, y: viewBounds.y }, this.id);
   }
 
   private _pushPrevFindInPageResult() {
@@ -508,12 +514,41 @@ export class MainWindowTab extends Tab {
       },
     });
   }
+
+  matchRelatedDappInfo(dappOrigin: string | ICanonalizedUrlInfo) {
+    if (!this.isOfMainWindow || !this.$meta.relatedDappId) return null;
+
+    const parsedInfo =
+      typeof dappOrigin === 'string'
+        ? canoicalizeDappUrl(dappOrigin)
+        : dappOrigin;
+
+    if (!parsedInfo) return null;
+
+    const result = {
+      matchedOrigin: '',
+      matchedType: null as null | EnumMatchDappType,
+    };
+
+    if (parsedInfo.origin === this.$meta.relatedDappId) {
+      result.matchedOrigin = parsedInfo.origin;
+      result.matchedType = EnumMatchDappType.byOrigin;
+      return result;
+    }
+    if (parsedInfo.secondaryOrigin === this.$meta.relatedDappId) {
+      result.matchedOrigin = parsedInfo.secondaryOrigin;
+      result.matchedType = EnumMatchDappType.bySecondaryDomain;
+      return result;
+    }
+
+    return null;
+  }
 }
 
-export class Tabs extends EventEmitter {
-  tabList: Tab[] = [];
+export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
+  tabList: TTab[] = [];
 
-  selected?: Tab;
+  selected?: TTab;
 
   window?: BrowserWindow;
 
@@ -567,10 +602,11 @@ export class Tabs extends EventEmitter {
         tabs: this,
       },
     ] as const;
-    const tab =
+    const tab = (
       options?.webuiType === 'MainWindow' && this.$meta.isOfMainWindow
         ? new MainWindowTab(...args)
-        : new Tab(...args);
+        : new Tab(...args)
+    ) as TTab;
     this.tabList.push(tab);
     if (!this.selected) this.selected = tab;
     tab.show(); // must be attached to window
@@ -645,6 +681,7 @@ export class Tabs extends EventEmitter {
     });
   }
 
+  /** @deprecated */
   findBySecondaryDomain(inputURL: string) {
     const inputUrlInfo = canoicalizeDappUrl(inputURL);
     if (!inputUrlInfo.secondaryDomain) return null;

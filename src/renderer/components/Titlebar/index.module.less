@@ -123,4 +123,15 @@
   .control:hover > img.hover-show {
     display: block;
   }
+
+  .control.triple-minimize[disabled] {
+    box-sizing: border-box;
+    background-color: #e6e6e6;
+    border: 1px solid #bbbbbd;
+    cursor: not-allowed;
+    border-radius: 50%;
+    > img {
+      display: none !important;
+    }
+  }
 }

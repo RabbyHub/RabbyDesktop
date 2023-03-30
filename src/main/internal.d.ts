@@ -12,8 +12,10 @@ type MainInternalsMessagePayload = {
   '__internal_main:tabbed-window:tab-favicon-updated': {
     send: [
       {
-        dappOrigin: string;
-        favicons: string[];
+        matchedRelatedDappId: IDapp['id'];
+        matchedType: import('@/isomorphic/constants').EnumMatchDappType;
+        linkRelIcons: ISiteMetaData['linkRelIcons'];
+        favicons: ISiteMetaData['favicons'];
       }
     ];
     response: [];
@@ -25,6 +27,7 @@ type MainInternalsMessagePayload = {
         pinnedList?: IDapp['origin'][];
         unpinnedList?: IDapp['origin'][];
         protocolDappsBinding?: IProtocolDappBindings;
+        dappBoundTabIds?: IDappBoundTabIds;
       }
     ];
     response: [];

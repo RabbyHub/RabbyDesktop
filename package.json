@@ -1,6 +1,6 @@
 {
   "name": "rabby-desktop",
-  "version": "0.9.0",
+  "version": "0.10.2",
   "description": "Rabby's desktop application, for WEB3 users",
   "keywords": [
     "electron",

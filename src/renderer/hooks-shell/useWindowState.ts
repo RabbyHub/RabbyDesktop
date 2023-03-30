@@ -2,7 +2,6 @@ import { isForTrezorLikeWebUI, isMainWinShellWebUI } from '@/isomorphic/url';
 import { detectOS } from '@/isomorphic/os';
 import { useCallback, useEffect } from 'react';
 import { atom, useAtom } from 'jotai';
-import { useMessageForwardToMainwin } from '../hooks/useViewsMessage';
 import { useMainWindowEventsToast } from './useMainWindowEvents';
 
 const OS_TYPE = detectOS();
@@ -20,45 +19,60 @@ export function useWindowState() {
   }, [setWinState]);
 
   const onMinimizeButton = useCallback(() => {
-    chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, (win) => {
+    chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, async (win) => {
+      /**
+       * @notice just for robust, but we don't expect this to happen,
+       * make sure minimize button is disabled when window is fullscreen on darwin
+       */
+      if (isDarwin && winState === 'fullscreen') {
+        await chrome.windows.update(win.id!, {
+          state: 'normal',
+        });
+      }
+
       const nextState = 'minimized';
-      setWinState(nextState);
-      chrome.windows.update(win.id!, {
+      await chrome.windows.update(win.id!, {
         state: nextState,
       });
+      setWinState(nextState);
     });
-  }, [setWinState]);
-  const onMaximizeButton = useCallback(() => {
-    chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, (win) => {
+  }, [winState, setWinState]);
+  const onWindowsMaximizeButton = useCallback(() => {
+    chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, async (win) => {
+      const nextState = winState === 'maximized' ? 'normal' : 'maximized';
+
+      await chrome.windows.update(win.id!, {
+        state: nextState,
+      });
+      setWinState(nextState);
+    });
+  }, [winState, setWinState]);
+
+  const onDarwinToggleMaxmize = useCallback(() => {
+    if (!isDarwin) return;
+
+    chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, async (win) => {
       /**
        * on darwin, you can not restore a maximized window by
        * clicking the maximize button, or programatically by default,
        * except program rememeber the previous window size and restore it later,
        * we don't implement it for now.
        */
-      const nextState =
-        win.state === 'maximized' && !isDarwin ? 'normal' : 'maximized';
 
-      setWinState(nextState);
-      chrome.windows.update(win.id!, {
-        state: nextState,
+      await chrome.windows.update(win.id!, {
+        state: 'maximized',
       });
+      setWinState('maximized');
     });
   }, [setWinState]);
 
-  const onDarwinToggleMaxmize = useCallback(() => {
-    if (!isDarwin) return;
-
-    onMaximizeButton();
-  }, [onMaximizeButton]);
-
   const onFullscreenButton = useCallback(() => {
-    chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, (win) => {
+    chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, async (win) => {
       const nextState = win.state === 'fullscreen' ? 'normal' : 'fullscreen';
-      setWinState(nextState);
-      chrome.windows.update(win.id!, {
+      await chrome.windows.update(win.id!, {
         state: nextState,
       });
+      setWinState(nextState);
     });
   }, [setWinState]);
 
@@ -82,8 +96,9 @@ export function useWindowState() {
   return {
     osType: OS_TYPE,
     winState,
+    disabledMinimizeButton: isDarwin && winState === 'fullscreen',
     onMinimizeButton,
-    onMaximizeButton,
+    onWindowsMaximizeButton,
     onDarwinToggleMaxmize,
     onFullscreenButton,
     onCloseButton,

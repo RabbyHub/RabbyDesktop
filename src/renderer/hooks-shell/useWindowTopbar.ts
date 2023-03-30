@@ -16,8 +16,9 @@ export function useWinTriples() {
   const {
     osType,
     winState,
+    disabledMinimizeButton,
     onMinimizeButton,
-    onMaximizeButton,
+    onWindowsMaximizeButton,
     onFullscreenButton,
     onCloseButton,
   } = useWindowState();
@@ -31,7 +32,7 @@ export function useWinTriples() {
     onGoForwardButtonClick: useCallback(() => chrome.tabs.goForward(), []),
     onReloadButtonClick: useCallback(() => chrome.tabs.reload(), []),
     onMinimizeButton,
-    onMaximizeButton,
+    onWindowsMaximizeButton,
     onCloseButton,
     onFullscreenButton,
   };
@@ -39,6 +40,7 @@ export function useWinTriples() {
   return {
     winOSType: osType,
     winState,
+    disabledMinimizeButton,
     winButtonActions,
   };
 }

@@ -271,20 +271,13 @@ type IRabbyxRpcResponse = {
 };
 
 type IHardwareConnectPageType = 'onekey' | 'trezor';
-type IPopupWinPageInfo =
-  | {
-      type: 'sidebar-dapp';
-      dappTabInfo: {
-        origin: string;
-        id: chrome.tabs.Tab['id'];
-      };
-    }
-  | {
-      type: 'in-dapp-find';
-      searchInfo: {
-        id: chrome.tabs.Tab['id'];
-      };
-    };
+type IPopupWinPageInfo = {
+  type: 'sidebar-dapp';
+  dappTabInfo: {
+    origin: string;
+    id: chrome.tabs.Tab['id'];
+  };
+};
 
 type ISelectDeviceState = {
   selectId: string;
@@ -334,6 +327,13 @@ type PopupViewOnMainwinInfo =
       state?: {
         toastType?: 'foo';
       };
+    }
+  | {
+      type: 'in-dapp-find';
+      searchInfo?: {
+        tabId: number;
+        tabOrigin: { x: number; y: number };
+      };
     };
 
 type IShellNavInfo = {
@@ -362,6 +362,8 @@ type IProtocolDappBindings = Record<
   string,
   { origin: string; siteUrl: string }
 >;
+
+type IDappBoundTabIds = Record<IDapp['id'], number>;
 
 type IBuiltinViewName = PopupViewOnMainwinInfo['type'] | 'main-window';
 
@@ -433,3 +435,41 @@ type IShellWebUIType =
   | 'Prompt'
   | 'ForTrezorLike'
   | 'RabbyX-NotificationWindow';
+
+type IOpenDappAction =
+  | 'open-in-newtab'
+  | 'leave-in-tab'
+  | 'open-external'
+  | 'deny';
+
+type IMatchDappResult = {
+  dappByOrigin: null | IDapp;
+  dappBySecondaryDomainOrigin: null | IDapp;
+  dapp: null | IDapp;
+};
+
+type ISiteMetaData = {
+  title: string;
+  twitter_card: {
+    card?: string;
+    site?: string;
+    creator?: string;
+    creator_id?: string;
+    title?: string;
+    description?: string;
+    image?: string;
+  };
+  og: {
+    title?: string;
+    site_name?: string;
+    image?: string;
+  };
+  linkRelIcons: {
+    href: string;
+    sizes: string;
+  }[];
+  favicons: {
+    href: string;
+    sizes: string;
+  }[];
+};

@@ -1,8 +1,13 @@
 import { getAppProxyConf } from '../store/desktopApp';
+import { checkUrlViaBrowserView } from '../utils/appNetwork';
+import {
+  BrowserViewManager,
+  parseSiteMetaByWebContents,
+} from '../utils/browserView';
 import { safeCapturePage } from '../utils/dapps';
 import { parseWebsiteFavicon } from '../utils/fetch';
 import { handleIpcMainInvoke } from '../utils/ipcMainEvents';
-import { onMainWindowReady } from '../utils/stream-helpers';
+import { getSessionInsts, onMainWindowReady } from '../utils/stream-helpers';
 import { getTabbedWindowFromWebContents } from './tabbedBrowserWindow';
 
 handleIpcMainInvoke('parse-favicon', async (_, targetURL) => {
