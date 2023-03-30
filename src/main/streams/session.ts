@@ -1,11 +1,17 @@
 import fs from 'fs';
 import path from 'path';
+import url from 'url';
 
 import { app, protocol, session, shell } from 'electron';
 import { firstValueFrom } from 'rxjs';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
-import { isRabbyXPage } from '@/isomorphic/url';
-import { trimWebContentsUserAgent } from '@/isomorphic/string';
+import { canoicalizeDappUrl, isRabbyXPage } from '@/isomorphic/url';
+import {
+  ensurePrefix,
+  trimWebContentsUserAgent,
+  ucfirst,
+  unPrefix,
+} from '@/isomorphic/string';
 import {
   IS_RUNTIME_PRODUCTION,
   PROTOCOL_IPFS,
@@ -43,6 +49,7 @@ import { checkProxyViaBrowserView, setSessionProxy } from '../utils/appNetwork';
 import { getAppProxyConf } from '../store/desktopApp';
 import { createTrezorLikeConnectPageWindow } from '../utils/hardwareConnect';
 import { getBlockchainExplorers } from '../store/dynamicConfig';
+import { checkoutCustomSchemeHandlerInfo } from '../utils/protocol';
 
 const sesLog = getBindLog('session', 'bgGrey');
 
@@ -150,6 +157,10 @@ protocol.registerSchemesAsPrivileged([
     scheme: PROTOCOL_IPFS.slice(0, -1),
     privileges: { standard: true, supportFetchAPI: true },
   },
+  // {
+  //   scheme: 'file:'.slice(0, -1),
+  //   privileges: { standard: true, corsEnabled: false, allowServiceWorkers: true, supportFetchAPI: true },
+  // },
 ]);
 
 const registerCallbacks: ((ctx: { session: Electron.Session }) => {
@@ -223,6 +234,64 @@ const registerCallbacks: ((ctx: { session: Electron.Session }) => {
 
     return { registerSuccess, protocol: PROTOCOL_IPFS };
   },
+  (ctx) => {
+    // const TARGET_PROTOCOL = 'file:';
+    const TARGET_PROTOCOL = 'http:';
+    // const unregistered = protocol.unregisterProtocol(TARGET_PROTOCOL.slice(0, -1));
+    // console.log(`unregistered: ${TARGET_PROTOCOL}`, unregistered);
+
+    const registerSuccess = protocol.interceptFileProtocol(
+      TARGET_PROTOCOL.slice(0, -1),
+      async (request, callback) => {
+        const checkouted = checkoutCustomSchemeHandlerInfo(
+          TARGET_PROTOCOL,
+          request.url
+        );
+        if (!checkouted) {
+          callback({
+            data: 'Not found',
+            mimeType: 'text/plain',
+            statusCode: 404,
+          });
+          return;
+        }
+
+        const { ipfsCid, fileRelPath } = checkouted;
+
+        const ipfsService = await getIpfsService();
+
+        let filePath = ipfsService.resolveFile(fileRelPath);
+
+        if (!fs.existsSync(filePath)) {
+          callback({
+            data: 'Not found',
+            mimeType: 'text/plain',
+            statusCode: 404,
+          });
+          return;
+        }
+
+        if (fs.statSync(filePath).isDirectory()) {
+          filePath = path.join(filePath, './index.html');
+        }
+
+        if (!fs.existsSync(filePath)) {
+          callback({
+            data: 'Not found',
+            mimeType: 'text/plain',
+            statusCode: 404,
+          });
+          return;
+        }
+
+        callback({
+          path: filePath,
+        });
+      }
+    );
+
+    return { registerSuccess, protocol: TARGET_PROTOCOL };
+  },
 ];
 
 firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
@@ -242,6 +311,8 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
       } else {
         console.error(`Failed to register protocol`);
       }
+    } else {
+      sesLog(`[initSession] registered protocol ${registeredProtocol} success`);
     }
   });
 

@@ -121,7 +121,8 @@ export function isUrlFromDapp(url: string) {
   return (
     !url.startsWith(RABBY_INTERNAL_PROTOCOL) &&
     !url.startsWith('chrome-extension:') &&
-    url.startsWith('https:')
+    (url.startsWith('https:') ||
+      (url.startsWith('http:') && url.includes('.local.ipfs'))) // ipfs support
   );
 }
 
@@ -213,6 +214,7 @@ export function getDomainFromHostname(hostname: string): IParseDomainInfo {
   const secondaryDomain = secondaryDomainParts.join('.');
 
   return {
+    subDomain: parts.slice(0, parts.length - 2).join('.'),
     hostWithoutTLD: secondaryDomainParts[0],
     secondaryDomain,
     secondaryOrigin: `https://${secondaryDomain}`,

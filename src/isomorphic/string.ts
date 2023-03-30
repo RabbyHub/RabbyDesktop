@@ -56,3 +56,7 @@ export function trimWebContentsUserAgent(userAgent: string) {
 export function normalizeIPFSPath(ipfsPath: string) {
   return ipfsPath.replace(/\\/g, '/');
 }
+
+export function ucfirst(str = '') {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}

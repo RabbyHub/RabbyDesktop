@@ -26,7 +26,6 @@ export class IpfsService {
     if (ipfsPath.startsWith('/ipfs/')) ipfsPath = `.${ipfsPath}`;
     else if (ipfsPath.startsWith('ipfs/')) ipfsPath = `./${ipfsPath}`;
     ipfsPath = ensurePrefix(ipfsPath, './ipfs/');
-    // console.log('[feat] resolveFile:: filePath, ipfsPath', filePath, ipfsPath);
 
     return path.resolve(this.rootPath, ipfsPath);
   }
