@@ -158,34 +158,36 @@ export async function parseSiteMetaByWebContents(
   wc: Electron.WebContents
 ): Promise<ISiteMetaData> {
   const outlineScript = `
-    const title = document.title;
-    const ogMeta = {};
-    const twitterMeta = {};
+    (() => {
+      const title = document.title;
+      const ogMeta = {};
+      const twitterMeta = {};
 
-    // 从 meta 标签中提取 open graph 属性
-    const ogTags = document.querySelectorAll('meta[property^="og:"]');
-    for (const tag of ogTags) {
-      ogMeta[tag.getAttribute('property').replace('og:', '')] =
-        tag.getAttribute('content');
-    }
+      // 从 meta 标签中提取 open graph 属性
+      const ogTags = document.querySelectorAll('meta[property^="og:"]');
+      for (const tag of ogTags) {
+        ogMeta[tag.getAttribute('property').replace('og:', '')] =
+          tag.getAttribute('content');
+      }
 
-    // 从 meta 标签中提取 twitter 属性
-    const twitterTags = document.querySelectorAll('meta[name^="twitter:"]');
-    for (const tag of twitterTags) {
-      twitterMeta[tag.getAttribute('name').replace('twitter:', '')] =
-        tag.getAttribute('content');
-    }
-    const linkRelIcons = document.querySelectorAll('link[rel="icon"]');
-    const shortcuts = document.querySelectorAll('link[rel="shortcut icon"]');
-    const appleTouchIcons = document.querySelectorAll('link[rel="apple-touch-icon"]');
+      // 从 meta 标签中提取 twitter 属性
+      const twitterTags = document.querySelectorAll('meta[name^="twitter:"]');
+      for (const tag of twitterTags) {
+        twitterMeta[tag.getAttribute('name').replace('twitter:', '')] =
+          tag.getAttribute('content');
+      }
+      const linkRelIcons = document.querySelectorAll('link[rel="icon"]');
+      const shortcuts = document.querySelectorAll('link[rel="shortcut icon"]');
+      const appleTouchIcons = document.querySelectorAll('link[rel="apple-touch-icon"]');
 
-    ({
-      linkRelIcons: Array.from([...shortcuts, ...linkRelIcons]).map(item => ({href: item.href, sizes: item.sizes.value})),
-      appleTouchIcons: Array.from(appleTouchIcons).map(item => ({href: item.href, sizes: item.sizes.value})),
-      ogMeta,
-      twitterMeta,
-      title,
-    });
+      return {
+        linkRelIcons: Array.from([...shortcuts, ...linkRelIcons]).map(item => ({href: item.href, sizes: item.sizes.value})),
+        appleTouchIcons: Array.from(appleTouchIcons).map(item => ({href: item.href, sizes: item.sizes.value})),
+        ogMeta,
+        twitterMeta,
+        title,
+      };
+    })();
   `;
   const { linkRelIcons, appleTouchIcons, ogMeta, twitterMeta, title } =
     await wc.executeJavaScript(outlineScript);
