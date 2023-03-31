@@ -11,13 +11,6 @@ import BigNumber from 'bignumber.js';
 import { useMemo } from 'react';
 import { getRouter, getSpender } from './utils';
 
-// REMOVE: after fixed rabby-swap
-const quoteNativeTokenAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
-const getRabbyTokenAddress = (addr: string, chain: CHAINS_ENUM) =>
-  isSameAddress(addr, quoteNativeTokenAddress)
-    ? CHAINS[chain].nativeTokenAddress
-    : addr;
-
 export function isSwapWrapToken(
   payTokenId: string,
   receiveId: string,
@@ -69,8 +62,6 @@ export const useVerifyRouterAndSpender = (
 export const useVerifyCalldata = <
   T extends Parameters<typeof decodeCalldata>[1]
 >(
-  // REMOVE: after fixed rabby-swap
-  chain: CHAINS_ENUM,
   data: QuoteResult | null,
   dexId: DEX_ENUM | null,
   slippage: string | number,
@@ -94,17 +85,9 @@ export const useVerifyCalldata = <
       );
 
       return (
-        isSameAddress(
-          callDataResult.fromToken,
-          // REMOVE: after fixed rabby-swap
-          getRabbyTokenAddress(data.fromToken, chain)
-        ) &&
+        isSameAddress(callDataResult.fromToken, data.fromToken) &&
         callDataResult.fromTokenAmount === data.fromTokenAmount &&
-        // REMOVE: after fixed rabby-swap
-        isSameAddress(
-          callDataResult.toToken,
-          getRabbyTokenAddress(data.toToken, chain)
-        ) &&
+        isSameAddress(callDataResult.toToken, data.toToken) &&
         new BigNumber(callDataResult.minReceiveToTokenAmount)
           .minus(estimateMinReceive)
           .div(estimateMinReceive)
@@ -113,7 +96,7 @@ export const useVerifyCalldata = <
       );
     }
     return true;
-  }, [callDataResult, data, slippage, chain]);
+  }, [callDataResult, data, slippage]);
 
   return result;
 };
@@ -145,8 +128,6 @@ export const useVerifySdk = <T extends ValidateTokenParam>(
   );
 
   const callDataPass = useVerifyCalldata(
-    // REMOVE: after fixed rabby-swap
-    chain,
     data,
     actualDexId,
     new BigNumber(slippage).div(100).toFixed(),

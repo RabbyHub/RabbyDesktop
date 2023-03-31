@@ -12,7 +12,6 @@ import { useAsync, useDebounce } from 'react-use';
 import ImgLock from '@/../assets/icons/swap/lock.svg';
 
 import { noop } from 'lodash';
-import { toastMessage } from '@/renderer/components/TransparentToast';
 import { CEX, DEX } from '../constant';
 import {
   getAllQuotes,
@@ -161,7 +160,14 @@ const DexQuoteItem = (props: QuoteItemProps) => {
     chain,
     dexId: dexId as DEX_ENUM,
     slippage,
-    data: quote,
+    data: {
+      ...quote,
+      fromToken: payToken.id,
+      fromTokenAmount: new BigNumber(payAmount)
+        .times(10 ** payToken.decimals)
+        .toFixed(0, 1),
+      toToken: receiveToken?.id,
+    } as typeof quote,
     payToken,
     receiveToken,
   });

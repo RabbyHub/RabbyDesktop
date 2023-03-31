@@ -1,7 +1,5 @@
-import { useMemo, useCallback, InsHTMLAttributes } from 'react';
+import { useCallback, InsHTMLAttributes } from 'react';
 import { CHAINS, CHAINS_ENUM } from '@debank/common';
-import { useSwap } from '@/renderer/hooks/rabbyx/useSwap';
-import { DEX_SUPPORT_CHAINS } from '@rabby-wallet/rabby-swap';
 
 import ImgArrowDown from '@/../assets/icons/swap/arrow-down.svg';
 import IconRcSwapArrowDownTriangle from '@/../assets/icons/swap/arrow-caret-down2.svg?rc';
