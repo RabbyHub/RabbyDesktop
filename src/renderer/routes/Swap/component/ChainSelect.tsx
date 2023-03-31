@@ -1,8 +1,9 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, InsHTMLAttributes } from 'react';
 import { CHAINS, CHAINS_ENUM } from '@debank/common';
 import { useSwap } from '@/renderer/hooks/rabbyx/useSwap';
 import { DEX_SUPPORT_CHAINS } from '@rabby-wallet/rabby-swap';
 
+import ImgArrowDown from '@/../assets/icons/swap/arrow-down.svg';
 import IconRcSwapArrowDownTriangle from '@/../assets/icons/swap/arrow-caret-down2.svg?rc';
 
 import styled from 'styled-components';
@@ -35,6 +36,7 @@ interface ChainSelectorProps {
   disabledTips?: string;
   title?: string;
   supportChains?: CHAINS_ENUM[];
+  chainRender?: ((chian: CHAINS_ENUM) => React.ReactNode) | React.ReactNode;
 }
 export const ChainSelect = ({
   value,
@@ -43,6 +45,7 @@ export const ChainSelect = ({
   disabledTips,
   title,
   supportChains,
+  chainRender,
 }: ChainSelectorProps) => {
   const handleChange = (v: CHAINS_ENUM) => {
     if (readonly) return;
@@ -69,16 +72,71 @@ export const ChainSelect = ({
   return (
     <>
       <ChainSelectWrapper onClick={handleClickSelector}>
-        <img src={CHAINS[value].logo} className="logo" />
-        <span className="name">{CHAINS[value].name}</span>
-        {!readonly && (
-          <IconRcSwapArrowDownTriangle
-            className="arrow"
-            width={10}
-            height={6}
-          />
+        {chainRender ? (
+          typeof chainRender === 'function' ? (
+            chainRender?.(value)
+          ) : (
+            chainRender
+          )
+        ) : (
+          <>
+            <img src={CHAINS[value].logo} className="logo" />
+            <span className="name">{CHAINS[value].name}</span>
+            {!readonly && (
+              <IconRcSwapArrowDownTriangle
+                className="arrow"
+                width={10}
+                height={6}
+              />
+            )}
+          </>
         )}
       </ChainSelectWrapper>
     </>
+  );
+};
+
+const ChainWrapper = styled.div`
+  height: 48px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  padding: 12px 16px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid transparent;
+  &:hover {
+    background: linear-gradient(
+        0deg,
+        rgba(134, 151, 255, 0.1),
+        rgba(134, 151, 255, 0.1)
+      ),
+      rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  & > {
+    .logo {
+      width: 24px;
+      height: 24px;
+    }
+    .down {
+      margin-left: auto;
+      width: 20px;
+      height: 20px;
+    }
+  }
+`;
+
+export const ChainRender = ({
+  chain,
+  ...other
+}: { chain: CHAINS_ENUM } & InsHTMLAttributes<HTMLDivElement>) => {
+  return (
+    <ChainWrapper {...other}>
+      <img className="logo" src={CHAINS[chain].logo} alt={CHAINS[chain].name} />
+      <span className="name">{CHAINS[chain].name}</span>
+      <img className="down" src={ImgArrowDown} alt="" />
+    </ChainWrapper>
   );
 };

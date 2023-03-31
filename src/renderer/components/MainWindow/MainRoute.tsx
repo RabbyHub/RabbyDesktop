@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import Home from '@/renderer/routes/Home';
 import { ensurePrefix } from '@/isomorphic/string';
 import { useWindowState } from '@/renderer/hooks-shell/useWindowState';
+import { Swap } from '@/renderer/routes/Swap';
 import { CurrentAccountAndNewAccount } from '../CurrentAccount';
 import { MainWindowRouteData } from './type';
 
@@ -102,7 +103,16 @@ export default function MainWindowRoute({
       >
         <Home />
       </div>
-      {location.pathname !== '/mainwin/home' && children}
+      <div
+        style={{
+          display: location.pathname === '/mainwin/swap' ? 'block' : 'none',
+        }}
+      >
+        <Swap />
+      </div>
+
+      {!['/mainwin/home', '/mainwin/swap'].includes(location.pathname) &&
+        children}
     </div>
   );
 }
