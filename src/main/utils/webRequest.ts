@@ -35,14 +35,14 @@ export function supportHmrOnDev(session: Electron.Session) {
 export function supportRewriteCORS(session: Electron.Session) {
   session.webRequest.onBeforeSendHeaders((_details, callback) => {
     let reqHeaders = _details.requestHeaders;
-    if (reqHeaders.Origin?.startsWith('rabby-ipfs://')) {
+    if (reqHeaders.Origin?.startsWith('ipfs://')) {
       reqHeaders = { ..._details.requestHeaders };
 
       const urlInfo = new URL(_details.url);
       reqHeaders.Origin = `http://${urlInfo.host}`;
     }
 
-    if (reqHeaders.Origin === 'rabby-ipfs://') {
+    if (reqHeaders.Origin === 'ipfs://') {
       reqHeaders.Origin = '*';
     }
 

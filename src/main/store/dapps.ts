@@ -78,14 +78,14 @@ export const dappStore = makeStore<{
     protocolDappsBinding: {
       type: 'object',
       patternProperties: {
-        '^(https?|rabby-ipfs)://.+$': IProtocolBindingSchema,
+        '^(https?|ipfs)://.+$': IProtocolBindingSchema,
       },
       default: {} as IProtocolDappBindings,
     },
     dappsMap: {
       type: 'object',
       patternProperties: {
-        '^(https?|rabby-ipfs)://.+$': IDappSchema,
+        '^(https?|ipfs)://.+$': IDappSchema,
       },
       additionalProperties: false,
       default: {} as Record<IDapp['origin'], IDapp>,
@@ -93,7 +93,7 @@ export const dappStore = makeStore<{
     dappsLastOpenInfos: {
       type: 'object',
       patternProperties: {
-        '^(https?|rabby-ipfs)://.+$': {
+        '^(https?|ipfs)://.+$': {
           type: 'object',
           properties: {
             finalURL: { type: 'string' },

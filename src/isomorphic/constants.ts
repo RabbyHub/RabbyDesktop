@@ -9,7 +9,7 @@ export const APP_UA_NAME = 'RabbyDesktop';
 export const PERSIS_STORE_PREFIX = 'rabby-store-';
 
 export const RABBY_INTERNAL_PROTOCOL = 'rabby-internal:';
-export const PROTOCOL_IPFS = 'rabby-ipfs:';
+export const PROTOCOL_IPFS = 'ipfs:';
 
 // only useful in dev mode
 let DEV_SERVER_PORT = 1212;
