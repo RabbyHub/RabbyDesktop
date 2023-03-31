@@ -165,7 +165,7 @@ type MainInternalsMessagePayload = {
     response: [];
   };
   '__internal_main:app:close-tab-on-del-dapp': {
-    send: [dappOrigin: string | string[]];
+    send: [dappIds: string | string[]];
     response: [];
   };
   '__internal_main:mainwindow:dapp-tabs-to-be-closed': {

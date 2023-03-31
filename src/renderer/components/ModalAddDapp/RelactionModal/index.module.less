@@ -1,0 +1,114 @@
+@import '@/renderer/css/mixins.less';
+
+.relationModal {
+  :global {
+    .ant-modal-close-x {
+      padding: 16px;
+    }
+  }
+  .content {
+    padding: 40px 0;
+    min-height: 400px;
+  }
+  .title {
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 22px;
+    text-align: center;
+    color: #ffffff;
+    padding: 0 60px;
+    margin-bottom: 10px;
+  }
+
+  .body,
+  .footer {
+    padding-left: 92px;
+    padding-right: 92px;
+  }
+  .body {
+    height: 180px;
+    overflow: overlay;
+    .chrome-like-scrollbar();
+  }
+  .footer {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
+    :global {
+      .ant-btn {
+        height: 44px;
+        border-radius: 4px;
+        font-weight: 500;
+        font-size: 15px;
+        line-height: 18px;
+      }
+      .ant-btn-background-ghost {
+        opacity: 0.8;
+      }
+    }
+  }
+}
+
+.dapp {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  padding: 16px;
+  width: 100%;
+
+  &:not(:last-child) {
+    margin-bottom: 8px;
+  }
+
+  &Active {
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  &Add {
+    background: rgba(134, 151, 255, 0.2);
+
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 18px;
+
+    color: #8697ff;
+    height: 64px;
+  }
+
+  &Content {
+    overflow: hidden;
+  }
+
+  &Icon {
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 4px;
+  }
+
+  &Name {
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 16px;
+    color: #ffffff;
+    margin-bottom: 2px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  &Origin {
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+    color: #ffffff;
+    opacity: 0.8;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  &Extra {
+    margin-left: auto;
+  }
+}
