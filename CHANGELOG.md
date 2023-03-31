@@ -1,7 +1,19 @@
 
+v0.11.0 / 2023-03-31
+====================
+
+  * feat: revert support for coexist of main-domain dapp and its sub-domain dapp. (#328)
+  * chore: upgrade rabbyx core to 0.76.0
+  * feat: support polygon zkevm
+  * fix: wrap special logic in closure to avoid conflict.
+  * feat: update dapp's faviconURL on open its tab. (#324)
+  * fix: mistake changes on commit f339d88.
+  * feat: tuning behavior of window controls(traffic). (#323)
+
 v0.10.2 / 2023-03-29
 ====================
 
+  * Release v0.10.2
   * feat: upgrade rabbyx for security on send message to desktop.
   * fix: userData path on dev. (#321)
   * feat: remove relaction modal (#316)
