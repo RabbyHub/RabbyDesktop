@@ -1,14 +1,7 @@
-import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
 import { ValidateTokenParam } from '@/renderer/utils/token';
 import { CHAINS, CHAINS_ENUM } from '@debank/common';
-import { GasLevel, Tx } from '@debank/rabby-api/dist/types';
-import {
-  DEX_ENUM,
-  DEX_ROUTER_WHITELIST,
-  DEX_SPENDER_WHITELIST,
-  WrapTokenAddressMap,
-} from '@rabby-wallet/rabby-swap';
+import { DEX_ENUM, WrapTokenAddressMap } from '@rabby-wallet/rabby-swap';
 import {
   decodeCalldata,
   DecodeCalldataResult,
@@ -16,20 +9,15 @@ import {
 } from '@rabby-wallet/rabby-swap/dist/quote';
 import BigNumber from 'bignumber.js';
 import { useMemo } from 'react';
-import { useAsync } from 'react-use';
+import { getRouter, getSpender } from './utils';
 
-const INTERNAL_REQUEST_ORIGIN = window.location.origin;
-
-const ETH_USDT_CONTRACT = '0xdac17f958d2ee523a2206206994597c13d831ec7';
-
-function isSwapWrapToken(
+export function isSwapWrapToken(
   payTokenId: string,
   receiveId: string,
   chain: CHAINS_ENUM
 ) {
   const wrapTokens = [
-    // @ts-expect-error
-    WrapTokenAddressMap[chain],
+    WrapTokenAddressMap[chain as keyof typeof WrapTokenAddressMap],
     CHAINS[chain].nativeTokenAddress,
   ];
   return (
@@ -40,39 +28,44 @@ function isSwapWrapToken(
 
 export const useVerifyRouterAndSpender = (
   chain: CHAINS_ENUM,
-  dexId?: DEX_ENUM | null,
+  dexId: DEX_ENUM,
   router?: string,
   spender?: string,
-  payTokenId?: string
+  payTokenId?: string,
+  receiveTokenId?: string
 ) => {
   const data = useMemo(() => {
     if (dexId === DEX_ENUM.WRAPTOKEN) {
       return [true, true];
     }
-    if (!dexId || !router || !spender) {
+    if (!dexId || !router || !spender || !payTokenId || !receiveTokenId) {
       return [true, true];
     }
-    // @ts-expect-error
-    const routerWhitelist = DEX_ROUTER_WHITELIST[dexId][chain];
-    // @ts-expect-error
-    const spenderWhitelist = DEX_SPENDER_WHITELIST[dexId][chain];
+    const routerWhitelist = getRouter(dexId, chain);
+    const spenderWhitelist = getSpender(dexId, chain);
+    const isNativeToken = isSameAddress(
+      payTokenId,
+      CHAINS[chain].nativeTokenAddress
+    );
+    const isWrapTokens = isSwapWrapToken(payTokenId, receiveTokenId, chain);
+
     return [
       isSameAddress(routerWhitelist, router),
-      payTokenId && isSameAddress(payTokenId, CHAINS[chain].nativeTokenAddress) // When payToken is native token, no need to approve so no need to verify spender
+      isNativeToken || isWrapTokens
         ? true
         : isSameAddress(spenderWhitelist, spender),
     ];
-  }, [chain, dexId, payTokenId, router, spender]);
+  }, [chain, dexId, payTokenId, receiveTokenId, router, spender]);
   return data;
 };
 
 export const useVerifyCalldata = <
   T extends Parameters<typeof decodeCalldata>[1]
 >(
-  dexId?: DEX_ENUM | null,
-  slippage?: string | number,
-  tx?: T,
-  data?: QuoteResult
+  data: QuoteResult | null,
+  dexId: DEX_ENUM | null,
+  slippage: string | number,
+  tx?: T
 ) => {
   const callDataResult = useMemo(() => {
     if (dexId && dexId !== DEX_ENUM.WRAPTOKEN && tx) {
@@ -90,6 +83,7 @@ export const useVerifyCalldata = <
       const estimateMinReceive = new BigNumber(data.toTokenAmount).times(
         new BigNumber(1).minus(slippage)
       );
+
       return (
         isSameAddress(callDataResult.fromToken, data.fromToken) &&
         callDataResult.fromTokenAmount === data.fromTokenAmount &&
@@ -109,251 +103,38 @@ export const useVerifyCalldata = <
 
 type VerifySdkParams<T extends ValidateTokenParam> = {
   chain: CHAINS_ENUM;
-  dexId?: DEX_ENUM | null;
+  dexId: DEX_ENUM;
   slippage: string | number;
-  data?: QuoteResult;
-  payToken?: T;
-  receiveToken?: T;
-  payAmount?: string;
+  data: QuoteResult | null;
+  payToken: T;
+  receiveToken: T;
 };
+
 export const useVerifySdk = <T extends ValidateTokenParam>(
   p: VerifySdkParams<T>
 ) => {
-  const { chain, dexId, slippage, data, payToken, payAmount, receiveToken } = p;
+  const { chain, dexId, slippage, data, payToken, receiveToken } = p;
+
+  const isWrapTokens = isSwapWrapToken(payToken.id, receiveToken.id, chain);
+  const actualDexId = isWrapTokens ? DEX_ENUM.WRAPTOKEN : dexId;
+
   const [routerPass, spenderPass] = useVerifyRouterAndSpender(
     chain,
-    dexId,
+    actualDexId,
     data?.tx.to,
     data?.spender,
-    payToken?.id
+    payToken?.id,
+    receiveToken?.id
   );
 
   const callDataPass = useVerifyCalldata(
-    dexId,
+    data,
+    actualDexId,
     new BigNumber(slippage).div(100).toFixed(),
-    data?.tx ? { ...data?.tx, chainId: CHAINS[chain].id } : undefined,
-    data
+    data?.tx ? { ...data?.tx, chainId: CHAINS[chain].id } : undefined
   );
 
-  const { value: tokenApprovalResult = [true, false] } = useAsync(async () => {
-    if (!payToken || !receiveToken || !dexId || !payAmount)
-      return [true, false];
-    if (
-      payToken?.id === CHAINS[chain].nativeTokenAddress ||
-      isSwapWrapToken(payToken.id, receiveToken.id, chain)
-    ) {
-      return [true, false];
-    }
-
-    const allowance = await walletController.getERC20Allowance(
-      CHAINS[chain].serverId,
-      payToken.id,
-      // @ts-expect-error
-      DEX_SPENDER_WHITELIST[dexId][chain]
-    );
-
-    const tokenApproved = new BigNumber(allowance).gte(
-      new BigNumber(payAmount).times(10 ** payToken.decimals)
-    );
-
-    if (
-      chain === CHAINS_ENUM.ETH &&
-      isSameAddress(payToken.id, ETH_USDT_CONTRACT) &&
-      Number(allowance) !== 0 &&
-      !tokenApproved
-    ) {
-      return [tokenApproved, true];
-    }
-    return [tokenApproved, false];
-  }, [chain, dexId, payToken, payAmount]);
-
   return {
-    routerPass,
-    spenderPass,
-    callDataPass,
     isSdkDataPass: routerPass && spenderPass && callDataPass,
-
-    tokenApproved: tokenApprovalResult[0],
-    shouldTwoStepApprove: tokenApprovalResult[1],
-  };
-};
-
-interface UseGasAmountParams<T extends ValidateTokenParam> {
-  chain?: CHAINS_ENUM;
-  data?: QuoteResult;
-  payToken?: T;
-  receiveToken?: T;
-  dexId?: DEX_ENUM | null;
-  gasMarket?: GasLevel[];
-  gasLevel: GasLevel;
-  tokenApproved: boolean;
-  shouldTwoStepApprove: boolean;
-  userAddress: string;
-  refreshId: number;
-  payAmount: string;
-}
-
-export const useGasAmount = <T extends ValidateTokenParam>(
-  p: UseGasAmountParams<T>
-) => {
-  const {
-    payAmount,
-    chain,
-    data,
-    payToken,
-    dexId,
-    gasMarket,
-    gasLevel,
-    userAddress,
-    refreshId,
-    receiveToken,
-  } = p;
-
-  const {
-    value: totalGasUsed,
-    loading: totalGasUsedLoading,
-    error,
-  } = useAsync(async () => {
-    if (chain && payAmount && data && payToken && dexId && gasMarket) {
-      const nonce = await walletController.getRecommendNonce({
-        from: data.tx.from,
-        chainId: CHAINS[chain].id,
-      });
-
-      let gasPrice = gasLevel.price;
-      if (gasLevel.level !== 'custom') {
-        const selectGas = (gasMarket || []).find(
-          (e) => e.level === gasLevel.level
-        );
-        gasPrice = selectGas?.price || 0;
-      }
-
-      let gasUsed = 0;
-
-      let nextNonce = nonce;
-
-      const pendingTx: Tx[] = [];
-
-      const approveToken = async (amount: string) => {
-        const tokenApproveParams =
-          await walletController.generateApproveTokenTx({
-            from: userAddress,
-            to: payToken!.id,
-            chainId: CHAINS[chain].id,
-            // @ts-expect-error
-            spender: DEX_SPENDER_WHITELIST[dexId][chain],
-            amount,
-          });
-        const tokenApproveTx = {
-          ...tokenApproveParams,
-          nonce: nextNonce,
-          value: '0x',
-          gasPrice: `0x${new BigNumber(gasPrice).toString(16)}`,
-          gas: '0x0',
-        };
-        const tokenApprovePreExecTx = await walletOpenapi.preExecTx({
-          tx: tokenApproveTx,
-          origin: INTERNAL_REQUEST_ORIGIN,
-          address: userAddress,
-          updateNonce: true,
-          pending_tx_list: pendingTx,
-        });
-
-        if (!tokenApprovePreExecTx?.pre_exec?.success) {
-          throw new Error('pre_exec_tx error');
-        }
-
-        gasUsed += tokenApprovePreExecTx.gas.gas_used;
-        pendingTx.push({
-          ...tokenApproveTx,
-          gas: `0x${new BigNumber(tokenApprovePreExecTx.gas.gas_used)
-            .times(4)
-            .toString(16)}`,
-        });
-        nextNonce = `0x${new BigNumber(nextNonce).plus(1).toString(16)}`;
-      };
-
-      const getTokenApproveStatus = async () => {
-        if (!payToken || !receiveToken || !dexId || !payAmount || !chain)
-          return [true, false];
-        if (
-          payToken?.id === CHAINS[chain].nativeTokenAddress ||
-          isSwapWrapToken(payToken.id, receiveToken.id, chain)
-        ) {
-          return [true, false];
-        }
-
-        const allowance = await walletController.getERC20Allowance(
-          CHAINS[chain].serverId,
-          payToken.id,
-          // @ts-expect-error
-          DEX_SPENDER_WHITELIST[dexId][chain]
-        );
-
-        const tokenApproved = new BigNumber(allowance).gte(
-          new BigNumber(payAmount).times(10 ** payToken.decimals)
-        );
-
-        if (
-          chain === CHAINS_ENUM.ETH &&
-          isSameAddress(payToken.id, ETH_USDT_CONTRACT) &&
-          Number(allowance) !== 0 &&
-          !tokenApproved
-        ) {
-          return [tokenApproved, true];
-        }
-        return [tokenApproved, false];
-      };
-
-      const [tokenApproved, shouldTwoStepApprove] =
-        await getTokenApproveStatus();
-
-      if (shouldTwoStepApprove) {
-        await approveToken('0');
-      }
-
-      if (!tokenApproved) {
-        await approveToken(
-          new BigNumber(payAmount).times(10 ** payToken.decimals).toFixed(0, 1)
-        );
-      }
-
-      const swapPreExecTx = await walletOpenapi.preExecTx({
-        tx: {
-          ...data.tx,
-          nonce: nextNonce,
-          chainId: CHAINS[chain].id,
-          value: `0x${new BigNumber(data.tx.value).toString(16)}`,
-          gasPrice: `0x${new BigNumber(gasPrice).toString(16)}`,
-          gas: '0x0',
-        } as Tx,
-        origin: INTERNAL_REQUEST_ORIGIN,
-        address: userAddress,
-        updateNonce: true,
-        pending_tx_list: pendingTx,
-      });
-
-      if (!swapPreExecTx?.pre_exec?.success) {
-        throw new Error('pre_exec_tx error');
-      }
-
-      return gasUsed + swapPreExecTx.gas.gas_used;
-    }
-    return undefined;
-  }, [
-    chain,
-    data,
-    refreshId,
-    dexId,
-    gasLevel,
-    gasMarket,
-    payAmount,
-    userAddress,
-  ]);
-
-  return {
-    totalGasUsed,
-    totalGasUsedLoading,
-    preExecTxError: error,
   };
 };
