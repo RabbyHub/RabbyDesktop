@@ -63,7 +63,7 @@ type INextDapp = {
     }
   | {
       type: 'ipfs';
-      origin: string | `ipfs://${string}${string}`;
+      origin: string | `rabby-ipfs://${string}${string}`;
     }
 );
 

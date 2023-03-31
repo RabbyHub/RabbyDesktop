@@ -5,6 +5,7 @@ import React, { ReactNode, useRef } from 'react';
 
 import clsx from 'clsx';
 import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
+import { formatDappURLToShow } from '@/isomorphic/dapp';
 import {
   RCIconDappsDelete,
   RCIconDappsEdit,
@@ -158,7 +159,7 @@ export const DAppBlock = ({
       <div className="dapp-block" ref={ref}>
         <div className={clsx('dapp-block-badge')}>
           {/* todo */}
-          {dapp.origin?.startsWith('ipfs://') ||
+          {dapp.origin?.startsWith('rabby-ipfs://') ||
           (dapp.type as any) === 'ipfs' ? (
             <IpfsTag prefix={<Indicator dapp={dapp} />} />
           ) : (
@@ -184,7 +185,7 @@ export const DAppBlock = ({
           <div className="infos pr-[16px]">
             <h4 className="dapp-alias">{dapp.alias}</h4>
             <div className="dapp-url">
-              {dapp.origin?.replace(/^\w+:\/\//, '')}
+              {formatDappURLToShow(dapp.origin?.replace(/^\w+:\/\//, ''))}
             </div>
           </div>
         </div>

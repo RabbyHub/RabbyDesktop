@@ -178,6 +178,16 @@ export function isValidDappType(type: string) {
   return type && VALID_TYPES.includes(type);
 }
 
+export function formatDappURLToShow(dappURL: string) {
+  if (!dappURL) return dappURL;
+
+  if (dappURL.startsWith(PROTOCOL_IPFS)) {
+    return dappURL.replace(/^rabby-ipfs:/, 'ipfs:');
+  }
+
+  return dappURL;
+}
+
 export function checkoutDappURL(dappPath: string) {
   if (dappPath.startsWith('/ipfs/') || dappPath.startsWith(PROTOCOL_IPFS)) {
     const ipfsCid = extractIpfsCid(dappPath);
@@ -186,7 +196,7 @@ export function checkoutDappURL(dappPath: string) {
 
     return {
       type: 'ipfs' as const,
-      dappURL: `ipfs://${ipfsCid}`,
+      dappURL: `rabby-ipfs://${ipfsCid}`,
     };
   }
 

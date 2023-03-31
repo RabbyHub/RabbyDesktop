@@ -126,7 +126,7 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
           },
         };
       }
-      return detectDapps(`ipfs://${url}`);
+      return detectDapps(`rabby-ipfs://${url}`);
     },
     {
       manual: true,

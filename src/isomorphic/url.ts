@@ -233,10 +233,10 @@ export function isInternalProtocol(url: string) {
   ].some((protocol) => url.startsWith(protocol));
 }
 
-const REGEXP_IPFS_URL = /^ipfs:\/\/([a-zA-Z0-9]*)/i;
-const REGEXP_IPFS_PATH = /^ipfs:\/\/([a-zA-Z0-9]*)/i;
+const REGEXP_IPFS_URL = /^rabby-ipfs:\/\/([a-zA-Z0-9]*)/i;
+const REGEXP_IPFS_PATH = /^rabby-ipfs:\/\/([a-zA-Z0-9]*)/i;
 export function extractIpfsCid(ipfsDappPath: string) {
-  if (ipfsDappPath.startsWith('ipfs:')) {
+  if (ipfsDappPath.startsWith('rabby-ipfs:')) {
     const [, ipfsCid = ''] = ipfsDappPath.match(REGEXP_IPFS_URL) || [];
 
     return ipfsCid;
@@ -251,15 +251,15 @@ export function canoicalizeDappUrl(url: string): ICanonalizedUrlInfo {
 
   const hostname = urlInfo?.hostname || '';
   const isDapp =
-    !!urlInfo?.protocol && ['https:', 'ipfs:'].includes(urlInfo?.protocol);
+    !!urlInfo?.protocol &&
+    ['https:', 'ipfs:', 'rabby-ipfs:'].includes(urlInfo?.protocol);
 
-  const origin =
-    urlInfo?.protocol === 'ipfs:'
-      ? `ipfs://${extractIpfsCid(url)}`
-      : urlInfo?.origin ||
-        `${urlInfo?.protocol}//${hostname}${
-          urlInfo?.port ? `:${urlInfo?.port}` : ''
-        }`;
+  const origin = ['ipfs:', 'rabby-ipfs:'].includes(urlInfo?.protocol || '')
+    ? `rabby-ipfs://${extractIpfsCid(url)}`
+    : urlInfo?.origin ||
+      `${urlInfo?.protocol}//${hostname}${
+        urlInfo?.port ? `:${urlInfo?.port}` : ''
+      }`;
 
   const domainInfo = getDomainFromHostname(hostname);
 

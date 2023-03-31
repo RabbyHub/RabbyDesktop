@@ -26,6 +26,7 @@ import { useSwitchChainModal } from '@/renderer/hooks/useSwitchChainModal';
 import { copyText } from '@/renderer/utils/clipboard';
 import { useMatchURLBaseConfig } from '@/renderer/hooks-ipc/useAppDynamicConfig';
 import { useWindowState } from '@/renderer/hooks-shell/useWindowState';
+import { formatDappURLToShow } from '@/isomorphic/dapp';
 import styles from './index.module.less';
 import { toastMessage } from '../TransparentToast';
 
@@ -156,7 +157,7 @@ export const TopNavBar = () => {
             });
           }}
         >
-          {activeTab?.url || ''}
+          {formatDappURLToShow(activeTab?.url || '')}
         </div>
         <div className={clsx(styles.historyBar)}>
           <RcIconHistoryGoBack
