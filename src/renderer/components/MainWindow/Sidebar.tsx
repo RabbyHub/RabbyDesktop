@@ -56,11 +56,11 @@ const StaticEntries = [
     title: 'Home',
     logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/home.svg',
   },
-  // {
-  //   path: '/mainwin/swap',
-  //   title: 'Swap',
-  //   logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/swap.svg',
-  // },
+  {
+    path: '/mainwin/swap',
+    title: 'Swap',
+    logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/swap.svg',
+  },
   {
     path: '/mainwin/my-dapps',
     title: 'My Dapp',
