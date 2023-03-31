@@ -1,7 +1,19 @@
 
+v0.11.1 / 2023-04-01
+====================
+
+  * ci: auto determine  which channel to be released when tagged ref triggered.
+  * Release v0.11.0
+  * feat: revert support for coexist of main-domain dapp and its sub-domain dapp. (#328)
+  * chore: upgrade rabbyx core to 0.76.0
+  * feat: integrate swap to reg version. (#329)
+  * Revert "feat: new swap (#325)" (#326)
+  * feat: new swap (#325)
+
 v0.11.0 / 2023-03-31
 ====================
 
+  * Release v0.11.0
   * feat: revert support for coexist of main-domain dapp and its sub-domain dapp. (#328)
   * chore: upgrade rabbyx core to 0.76.0
   * feat: support polygon zkevm
