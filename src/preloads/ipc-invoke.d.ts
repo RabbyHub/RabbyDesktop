@@ -52,7 +52,7 @@ type ChannelInvokePayload = {
     response: void;
   };
   'dapps-replace': {
-    send: [originsToDel: string | string[], newDapp: IDapp];
+    send: [idsToDel: string | string[], newDapp: IDapp];
     response: {
       error?: string | null;
     };

@@ -481,33 +481,31 @@ function checkDelDapp(
     unpinnedList?: IDapp['origin'][];
   }
 ) {
-  const originsToDel = arraify(originToDel);
-  const originsSet = new Set(originsToDel);
+  const dappIdsToDel = arraify(originToDel);
+  const idsSet = new Set(dappIdsToDel);
 
   const {
     dappsMap,
     protocolDappsBinding = getProtocolDappsBindings(),
     dappsLastOpenInfos = dappStore.get('dappsLastOpenInfos') || {},
-    pinnedList = dappStore.get('pinnedList').filter((o) => !originsSet.has(o)),
-    unpinnedList = dappStore
-      .get('unpinnedList')
-      .filter((o) => !originsSet.has(o)),
+    pinnedList = dappStore.get('pinnedList').filter((o) => !idsSet.has(o)),
+    unpinnedList = dappStore.get('unpinnedList').filter((o) => !idsSet.has(o)),
   } = rets;
 
-  originsToDel.forEach((o) => {
+  dappIdsToDel.forEach((o) => {
     delete dappsMap[o];
     delete dappsLastOpenInfos[o];
   });
 
   Object.entries(protocolDappsBinding).forEach((dapps) => {
     const [protocol, binding] = dapps;
-    if (originsSet.has(binding.origin)) {
+    if (idsSet.has(binding.origin)) {
       delete protocolDappsBinding[protocol];
     }
   });
 
   return {
-    originsToDel,
+    dappIdsToDel,
     dappsLastOpenInfos,
     protocolDappsBinding,
     pinnedList,
@@ -521,7 +519,7 @@ handleIpcMainInvoke('dapps-replace', (_, oldOrigin, newDapp) => {
   const delResult = checkDelDapp(oldOrigin, { dappsMap });
   emitIpcMainEvent(
     '__internal_main:app:close-tab-on-del-dapp',
-    delResult.originsToDel
+    delResult.dappIdsToDel
   );
 
   const addResult = checkAddDapp(newDapp, {
@@ -560,7 +558,7 @@ handleIpcMainInvoke('dapps-delete', (_, dappToDel: IDapp) => {
   const delResult = checkDelDapp(dappToDel.origin, { dappsMap });
   emitIpcMainEvent(
     '__internal_main:app:close-tab-on-del-dapp',
-    delResult.originsToDel
+    delResult.dappIdsToDel
   );
 
   dappStore.set('protocolDappsBinding', delResult.protocolDappsBinding);
