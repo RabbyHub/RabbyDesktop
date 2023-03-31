@@ -14,7 +14,11 @@ export class IpfsService {
   }
 
   public async download(ipfsPath: string) {
-    return downloadIPFSFiles(this.ipfs, ipfsPath, this.rootPath);
+    console.log('Downloading', ipfsPath);
+    const start = Date.now();
+    const res = await downloadIPFSFiles(this.ipfs, ipfsPath, this.rootPath);
+    console.log('Downloaded', ipfsPath, 'in', Date.now() - start, 'ms');
+    return res;
   }
 
   public async response(ipfsPath: string) {

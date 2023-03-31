@@ -108,7 +108,7 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
     async (_url: string) => {
       // eslint-disable-next-line no-eval
       // const { cid } = await eval(`import('is-ipfs')`);
-      // if (!cid(url)) {
+      // if (!cid(_url)) {
       //   return {
       //     validateRes: {
       //       validateStatus: 'error' as const,
@@ -116,11 +116,8 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
       //     },
       //   };
       // }
-      const url = _url.replace(/^\/?ipfs\//, '');
-      const dappUrl = canoicalizeDappUrl(`ipfs://${url}`);
-      const { success, error } = await downloadIPFS(
-        `/ipfs/${dappUrl.hostname}`
-      );
+      const url = _url.replace(/^\/?ipfs\//, '').split('/')[0];
+      const { success, error } = await downloadIPFS(`/ipfs/${url}`);
       if (!success) {
         return {
           validateRes: {
@@ -129,7 +126,7 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
           },
         };
       }
-      return detectDapps(`ipfs://${dappUrl.hostname}`);
+      return detectDapps(`ipfs://${url}`);
     },
     {
       manual: true,
