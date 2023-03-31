@@ -19,6 +19,7 @@ import { useOpenDapp } from '@/renderer/utils/react-router';
 import { formatUsdValue } from '@/renderer/utils/number';
 import { removeProtocolFromUrl } from '@/renderer/utils/url';
 import IconRcMore from '@/../assets/icons/home/more.svg?rc';
+import { formatDappURLToShow } from '@/isomorphic/dapp';
 import PoolItem, { LoadingPoolItem } from './PoolItem';
 import ScrollTopContext from './scrollTopContext';
 
@@ -313,7 +314,7 @@ const ProtocolItem = ({
                   (
                   {/^https:\/\//.test(bindUrl)
                     ? removeProtocolFromUrl(bindUrl)
-                    : bindUrl}
+                    : formatDappURLToShow(bindUrl)}
                   )
                 </span>
               </div>

@@ -1,3 +1,4 @@
+import { formatDappURLToShow } from '@/isomorphic/dapp';
 import { useDapp, useMatchDapp } from '@/renderer/hooks/useDappsMngr';
 import { useOpenDapp } from '@/renderer/utils/react-router';
 import { Tooltip } from 'antd';
@@ -25,15 +26,17 @@ export const TransactionWebsite = ({
     [openDapp, origin]
   );
 
+  const url = formatDappURLToShow(origin);
+
   if (!dapp || !dapp.alias) {
     return (
       <a href={origin} className={className} onClick={handleClick}>
-        {domain}
+        {url}
       </a>
     );
   }
   return (
-    <Tooltip title={origin} overlayStyle={{ maxWidth: 200 }}>
+    <Tooltip title={url} overlayStyle={{ maxWidth: 200 }}>
       <a href={origin} className={className} onClick={handleClick}>
         {dapp.alias}
       </a>
