@@ -1,8 +1,32 @@
+import { Tooltip } from 'antd';
 import clsx from 'clsx';
-import { memo, useMemo, useCallback, ChangeEventHandler } from 'react';
+import {
+  memo,
+  useMemo,
+  useCallback,
+  ChangeEventHandler,
+  KeyboardEventHandler,
+} from 'react';
 import { useToggle } from 'react-use';
 import styled from 'styled-components';
+import IconInfo from '@/../assets/icons/swap/info-outline.svg?rc';
+import IconTipDownArrow from '@/../assets/icons/swap/arrow-tips-down.svg?rc';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
+
+const MinReceivedBox = styled.div`
+  margin-top: 12px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+`;
 
 export const SlippageItem = styled.div<{
   active?: boolean;
@@ -10,67 +34,176 @@ export const SlippageItem = styled.div<{
   hasAmount?: boolean;
 }>`
   position: relative;
+  width: 125px;
+  height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
+  border-radius: 4px;
   border: 1px solid transparent;
   cursor: pointer;
-  border-radius: 6px;
-  width: 52px;
-  height: 32px;
-  font-size: 14px;
-  font-weight: medium;
-  background: rgba(0, 0, 0, 0.2);
-  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 15px;
+
+  background-color: ${(props) =>
+    props.active
+      ? props.error
+        ? 'rgba(255,176,32,0.1)'
+        : 'rgba(134, 151, 255, 0.1)'
+      : 'rgba(255, 255, 255, 0.1)'};
+  color: ${(props) =>
+    props.active
+      ? props.error
+        ? '#ffb020'
+        : 'var(--color-primary)'
+      : 'rgba(255, 255, 255, 0.8)'};
+  border-color: ${(props) =>
+    props.active
+      ? props.error
+        ? '#ffb020'
+        : 'var(--color-primary)'
+      : '1px solid rgba(255, 255, 255, 0.1)'};
+
+  &:hover {
+    background-color: ${(props) =>
+      props.active
+        ? props.error
+          ? 'rgba(255,176,32,0.1)'
+          : 'rgba(134, 151, 255, 0.1)'
+        : 'rgba(134, 151, 255, 0.1)'};
+    color: ${(props) =>
+      props.active
+        ? props.error
+          ? '#ffb020'
+          : 'var(--color-primary)'
+        : 'var(--color-primary)'};
+    border-color: ${(props) =>
+      props.active
+        ? props.error
+          ? '#ffb020'
+          : 'var(--color-primary)'
+        : 'var(--color-primary)'};
+  }
+  &::before,
+  &::after {
+    opacity: ${(props) => (props.active && props.hasAmount ? 1 : 0)};
+    content: '';
+    position: absolute;
+    bottom: -14px;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border: 8px solid transparent;
+    border-bottom-color: #787d88;
+
+    border-top: 0;
+    margin-left: -8px;
+    margin-top: -8px;
+  }
+  &::after {
+    bottom: -15px;
+    border-bottom-color: #696e7b;
+  }
+  &:nth-child(2) {
+    &::before {
+      border-bottom-color: #787c88;
+    }
+    &::after {
+      border-bottom-color: #676c78;
+    }
+  }
+  &:nth-child(3) {
+    &::before {
+      border-bottom-color: #747984;
+    }
+    &::after {
+      border-bottom-color: #656976;
+    }
+  }
+  &:nth-child(4) {
+    &::before {
+      border-bottom-color: #747883;
+    }
+    &::after {
+      border-bottom-color: #626673;
+    }
+  }
+
+  & input {
+    text-align: center;
+    color: ${(props) =>
+      props.active
+        ? props.error
+          ? '#ffb020'
+          : 'var(--color-primary)'
+        : 'var(--color-title)'};
+  }
+  & .ant-input-number-handler-wrap {
+    display: none !important;
+  }
 `;
 
-const SLIPPAGE = ['0.1', '0.3', '0.5'];
+const SLIPPAGE = ['0.05', '0.5', '3'];
+
+const tips =
+  'Your transaction will revert if the price changes unfavorably by more than this percentage';
 
 const Wrapper = styled.section`
-  .slippage {
+  position: relative;
+  cursor: pointer;
+  color: #ffffff;
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .title {
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 14px;
+    }
+  }
+
+  .rate {
     display: flex;
     align-items: center;
-    gap: 8px;
-  }
-
-  .input {
+    font-weight: 500;
     font-size: 14px;
-    color: white;
-    font-weight: medium;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 6px;
-    &:focus,
-    &:hover,
-    &:active {
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      box-shadow: none;
+    line-height: 14px;
+    .orange {
+      color: var(--color-orange);
+    }
+    .arrow {
+      margin-left: 4px;
+      font-size: 12px;
+
+      &.open {
+        transform: rotate(180deg);
+      }
     }
   }
 
-  .warning {
-    padding: 10px;
-    color: #ffdb5c;
-    font-weight: 400;
-    font-size: 13px;
-    line-height: 16px;
-    position: relative;
-    border-radius: 4px;
-    background: rgba(255, 219, 92, 0.1);
-    margin-top: 15px;
-    &:after {
-      position: absolute;
-      top: -8px;
-      left: 50%;
-      transform: translateX(-50%);
-      content: '';
-      width: 0;
-      height: 0;
-      border-width: 0 4px 8px 4px;
-      border-color: transparent transparent rgba(255, 219, 92, 0.1) transparent;
-      border-style: solid;
+  .content {
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 9999px;
+    margin-top: 8px;
+    display: none;
+    &.flex {
+      display: flex;
     }
+  }
+  .inputTips {
+    font-size: 13px;
+    margin-top: 8px;
+    color: var(--color-comment1);
   }
 `;
 interface SlippageProps {
@@ -85,21 +218,10 @@ export const Slippage = memo((props: SlippageProps) => {
   const [isCustom, setIsCustom] = useToggle(false);
 
   const [slippageError, isLow, isHigh] = useMemo(() => {
-    const low = Number(value || 0) < 0.1;
+    const low = Number(value || 0) < 0.05;
     const high = Number(value || 0) > 10;
     return [low || high, low, high];
   }, [value]);
-
-  const tips = useMemo(() => {
-    if (isLow) {
-      return 'Low slippage may cause failed transactions due to high volatility';
-    }
-    if (isHigh) {
-      // TODO: use recommend slippage instead of text
-      return 'To prevent front-running, we recommend a slippage of 0.9%';
-    }
-    return null;
-  }, [isHigh, isLow]);
 
   const hasAmount = !!amount;
 
@@ -112,7 +234,7 @@ export const Slippage = memo((props: SlippageProps) => {
 
   const onInputChange: ChangeEventHandler<HTMLInputElement> = useCallback(
     (e) => {
-      const v = e.target.value;
+      const v = e.target.value.replace(/%/g, '');
       if (/^\d*(\.\d*)?$/.test(v)) {
         onChange(Number(v) > 50 ? '50' : v);
       }
@@ -120,9 +242,56 @@ export const Slippage = memo((props: SlippageProps) => {
     [onChange]
   );
 
+  const onInputKeyDown: KeyboardEventHandler<HTMLInputElement> = useCallback(
+    (event) => {
+      const key = event.key;
+      const target = event.currentTarget;
+      const isDelete =
+        key === 'Backspace' &&
+        !!target.selectionStart &&
+        target.value[target.selectionStart - 1] === '%';
+      if (!isDelete) return;
+
+      if (target.selectionStart) {
+        target.focus();
+        target.setSelectionRange(
+          target.selectionStart - 1,
+          target.selectionStart - 1
+        );
+      }
+    },
+    []
+  );
+
   return (
     <Wrapper>
-      <div className="slippage">
+      <div className="header" onClick={setOpen}>
+        <div className="left">
+          <div className="title">Slippage</div>
+          <Tooltip
+            overlayStyle={{
+              maxWidth: 600,
+            }}
+            overlayInnerStyle={{
+              fontSize: '12px',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+            placement="top"
+            title={tips}
+          >
+            <IconInfo className="text-14" />
+          </Tooltip>
+        </div>
+        <div className={clsx('rate', (isLow || isHigh) && 'orange')}>
+          {value} %
+          <div className={clsx('arrow', open && 'open')}>
+            <IconTipDownArrow />
+          </div>
+        </div>
+      </div>
+
+      <div className={clsx('content', open && 'flex')}>
         {SLIPPAGE.map((e) => (
           <SlippageItem
             key={e}
@@ -132,29 +301,45 @@ export const Slippage = memo((props: SlippageProps) => {
               onChange(e);
             }}
             active={!isCustom && e === value}
+            hasAmount={hasAmount}
           >
             {e}%
           </SlippageItem>
         ))}
-        <div
+        <SlippageItem
           onClick={(event) => {
             event.stopPropagation();
             setIsCustom(true);
           }}
-          className="flex-1"
+          active={isCustom}
+          error={isCustom && slippageError}
+          hasAmount={hasAmount}
         >
-          <RabbyInput
-            className={clsx('input')}
-            bordered={false}
-            value={value}
-            onFocus={onInputFocus}
-            onChange={onInputChange}
-            suffix="%"
-          />
-        </div>
+          {isCustom ? (
+            <RabbyInput
+              autoFocus
+              bordered={false}
+              value={`${value}%`}
+              onFocus={onInputFocus}
+              onChange={onInputChange}
+              onKeyDown={onInputKeyDown}
+            />
+          ) : (
+            'Custom'
+          )}
+        </SlippageItem>
       </div>
 
-      {!!tips && <div className="warning">{tips}</div>}
+      {amount && open && (
+        <MinReceivedBox
+          title={`Minimum received after slippage : ${amount} ${symbol}`}
+        >
+          Minimum received after slippage : {amount} {symbol}
+        </MinReceivedBox>
+      )}
+      {isCustom && value.trim() === '' && (
+        <div className="inputTips">Please input the custom slippage</div>
+      )}
     </Wrapper>
   );
 });

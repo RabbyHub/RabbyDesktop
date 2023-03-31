@@ -1,10 +1,54 @@
 import { CHAINS, CHAINS_ENUM } from '@debank/common';
-import { TokenItem } from '@debank/rabby-api/dist/types';
 import { DEX_ENUM, DEX_SUPPORT_CHAINS } from '@rabby-wallet/rabby-swap';
 
 export const SWAP_FEE_ADDRESS = '0x39041F1B366fE33F9A5a79dE5120F2Aee2577ebc';
 
-export const ETH_USDT_CONTRACT = '0xdac17f958d2ee523a2206206994597c13d831ec7';
+export const TIPS = {
+  securityFail: {
+    label:
+      'Security verification failed, please contact us in Settings - Discord',
+    level: 'danger',
+  },
+  insufficient: {
+    label: 'Insufficient balance',
+    level: 'danger',
+  },
+  quoteFail: {
+    label: 'Fail to fetch quotes, please refresh to try again',
+    level: 'danger',
+  },
+  payTokenFail: {
+    label: 'Fail to verify the payment token',
+    level: 'danger',
+  },
+  receivingTokenFail: {
+    label: 'Fail to verify the receiving token',
+    level: 'danger',
+  },
+  preExecTxFail: {
+    label: 'The previous exchange rate has expired',
+    level: 'danger',
+  },
+
+  priceDifference: {
+    label:
+      'The price difference is higher than 5%, which may cause a great loss',
+    level: 'warning',
+  },
+  priceFail: {
+    label:
+      'Unable to acquire the USD value, thus unable to compare the price difference',
+    level: 'warning',
+  },
+  highSlippage: {
+    label: 'Transaction might be frontrun because of high slippage tolerance',
+    level: 'warning',
+  },
+  lowSlippage: {
+    label: 'Transaction might be reverted because of low slippage tolerance',
+    level: 'warning',
+  },
+};
 
 export const DEX = {
   [DEX_ENUM.ONEINCH]: {
@@ -25,13 +69,6 @@ export const DEX = {
   },
 };
 
-export const CEX = {
-  binance: {
-    name: 'Binance',
-    logo: 'rabby-internal://assets/icons/swap/binance.png',
-  },
-};
-
 export const getChainDefaultToken = (chain: CHAINS_ENUM) => {
   const chainInfo = CHAINS[chain];
   return {
@@ -49,7 +86,7 @@ export const getChainDefaultToken = (chain: CHAINS_ENUM) => {
     name: chainInfo.nativeTokenSymbol,
     chain: chainInfo.serverId,
     time_at: 0,
-  } as TokenItem;
+  };
 };
 
 export const defaultGasFee = {
