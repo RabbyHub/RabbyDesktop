@@ -9,7 +9,9 @@ import { valueToMainSubject } from './_init';
 
 onMainWindowReady().then(() => {
   const gIpfsService = new IpfsService({
-    ipfs: create(),
+    ipfs: create({
+      url: 'http://ipfs.rabby.io:5001',
+    }),
     rootPath: path.join(getAppUserDataPath(), './local_cache/ipfs-store'),
   });
 
@@ -17,11 +19,18 @@ onMainWindowReady().then(() => {
 });
 
 handleIpcMainInvoke('download-ipfs', async (_, ipfsString) => {
-  const ipfsService = await getIpfsService();
-  const result = await ipfsService.download(ipfsString);
-  if (result.errors?.length) {
+  try {
+    const ipfsService = await getIpfsService();
+    const result = await ipfsService.download(ipfsString);
+    if (result.errors?.length) {
+      return {
+        error: result.errors[0]?.message,
+        success: false,
+      };
+    }
+  } catch (e: any) {
     return {
-      error: result.errors[0]?.message,
+      error: e.message,
       success: false,
     };
   }

@@ -11,6 +11,7 @@ import { useRequest, useSetState } from 'ahooks';
 import classNames from 'classnames';
 import { debounce } from 'lodash';
 import { useDapps } from 'renderer/hooks/useDappsMngr';
+import { useUnmount } from 'react-use';
 import RabbyInput from '../../AntdOverwrite/Input';
 import { Props as ModalProps } from '../../Modal/Modal';
 import { toastMessage } from '../../TransparentToast';
@@ -250,7 +251,11 @@ export function AddDomainDapp({
 }) {
   const [form] = Form.useForm();
   const openDapp = useOpenDapp();
-  const [addUrl] = useAddDappURL();
+  const [addUrl, setAddUrl] = useAddDappURL();
+
+  useUnmount(() => {
+    setAddUrl('');
+  });
 
   const { state, setState, check, loading } = useCheckDapp({
     onReplace(v) {

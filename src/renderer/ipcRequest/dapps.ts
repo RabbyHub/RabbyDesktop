@@ -174,3 +174,7 @@ export async function getLastOpenOriginByOrigin(dappOrigin: string) {
   const parseLastInfo = canoicalizeDappUrl(lastInfo.finalURL);
   return parseLastInfo.origin || dappOrigin;
 }
+
+export async function downloadIPFS(cid: string) {
+  return window.rabbyDesktop.ipcRenderer.invoke('download-ipfs', cid);
+}

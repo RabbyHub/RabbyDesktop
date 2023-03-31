@@ -2,11 +2,17 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { Form, message } from 'antd';
 import { ReactNode, useEffect } from 'react';
 
-import { addDapp, replaceDapp } from '@/renderer/ipcRequest/dapps';
+import {
+  addDapp,
+  detectDapps,
+  downloadIPFS,
+  replaceDapp,
+} from '@/renderer/ipcRequest/dapps';
 import { useOpenDapp } from '@/renderer/utils/react-router';
 import { useRequest, useSetState } from 'ahooks';
 import classNames from 'classnames';
 import { debounce } from 'lodash';
+import { canoicalizeDappUrl } from '@/isomorphic/url';
 import RabbyInput from '../../AntdOverwrite/Input';
 import { Props as ModalProps } from '../../Modal/Modal';
 import { toastMessage } from '../../TransparentToast';
@@ -99,8 +105,31 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
   }>({});
 
   const { runAsync, loading, cancel } = useRequest(
-    async (url: string) => {
-      return window.rabbyDesktop.ipcRenderer.invoke('download-ipfs', url);
+    async (_url: string) => {
+      // eslint-disable-next-line no-eval
+      // const { cid } = await eval(`import('is-ipfs')`);
+      // if (!cid(url)) {
+      //   return {
+      //     validateRes: {
+      //       validateStatus: 'error' as const,
+      //       help: 'Input is not a valid IPFS cid',
+      //     },
+      //   };
+      // }
+      const url = _url.replace(/^\/?ipfs\//, '');
+      const dappUrl = canoicalizeDappUrl(`ipfs://${url}`);
+      const { success, error } = await downloadIPFS(
+        `/ipfs/${dappUrl.hostname}`
+      );
+      if (!success) {
+        return {
+          validateRes: {
+            validateStatus: 'error' as const,
+            help: error || '',
+          },
+        };
+      }
+      return detectDapps(`ipfs://${dappUrl.hostname}`);
     },
     {
       manual: true,
@@ -111,20 +140,37 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
           help: 'Downloading files on IPFS to local, please wait a moment...',
         });
       },
-      onSuccess: () => {
-        setState({
-          dappInfo: null,
-          validateStatus: undefined,
-          help: '',
-        });
-      },
-      onError: (e) => {
-        message.error(e.message);
-        setState({
-          dappInfo: null,
-          validateStatus: undefined,
-          help: '',
-        });
+      onSuccess(res) {
+        if ('validateRes' in res) {
+          if (res.validateRes) {
+            setState(res.validateRes);
+          }
+          return;
+        }
+
+        const { data, error } = res;
+
+        if (error) {
+          setState({
+            validateStatus: 'error',
+            help:
+              error.type === 'HTTPS_CERT_INVALID' ? (
+                <>
+                  The https certificate of the Dapp is invalid.
+                  <br />
+                  [ERROR] {error.message}
+                </>
+              ) : (
+                error.message
+              ),
+          });
+        } else {
+          setState({
+            dappInfo: data,
+            validateStatus: undefined,
+            help: null,
+          });
+        }
       },
     }
   );

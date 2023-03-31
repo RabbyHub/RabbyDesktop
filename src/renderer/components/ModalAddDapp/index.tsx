@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import classNames from 'classnames';
 import clsx from 'clsx';
@@ -7,15 +7,17 @@ import { AddDomainDapp } from './AddDomainDapp';
 import styles from './index.module.less';
 import { AddIpfsDapp } from './AddIpfsDapp';
 
-export function AddDapp(
-  props: ModalProps & {
-    onAddedDapp?: (origin: string) => void;
-    onOpenDapp?: (origin: string) => void;
-    url?: string;
-    isGoBack?: boolean;
-    onGoBackClick?: (dapp: IDapp) => void;
-  }
-) {
+export function AddDapp({
+  url,
+  ...rest
+}: ModalProps & {
+  onAddedDapp?: (origin: string) => void;
+  onOpenDapp?: (origin: string) => void;
+  url?: string;
+  isGoBack?: boolean;
+  onGoBackClick?: (dapp: IDapp) => void;
+}) {
+  const [innerUrl, setInnerUrl] = useState(url || '');
   const tabs = useMemo(
     () => [
       {
@@ -69,6 +71,7 @@ export function AddDapp(
                   if (tab.disabled) {
                     return;
                   }
+                  setInnerUrl('');
                   setActiveTab(tab.key);
                 }}
                 key={tab.key}
@@ -95,8 +98,8 @@ export function AddDapp(
           })}
         </div>
         <div className={styles.tabPanel}>
-          {activeTab === 'domain' && <AddDomainDapp {...props} />}
-          {activeTab === 'ipfs' && <AddIpfsDapp {...props} />}
+          {activeTab === 'domain' && <AddDomainDapp url={innerUrl} {...rest} />}
+          {activeTab === 'ipfs' && <AddIpfsDapp url={innerUrl} {...rest} />}
         </div>
       </div>
     </div>

@@ -310,7 +310,11 @@ const ProtocolItem = ({
             {hasBinded && (
               <div className="protocol-bind">
                 <span className="protocol-dapp">
-                  ({removeProtocolFromUrl(bindUrl)})
+                  (
+                  {/^https:\/\//.test(bindUrl)
+                    ? removeProtocolFromUrl(bindUrl)
+                    : bindUrl}
+                  )
                 </span>
               </div>
             )}

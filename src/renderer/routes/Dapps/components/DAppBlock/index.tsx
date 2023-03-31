@@ -75,6 +75,8 @@ export const DAppBlock = ({
     );
   }
 
+  console.log(dapp);
+
   if (!dapp) return null;
 
   return (
@@ -155,7 +157,9 @@ export const DAppBlock = ({
     >
       <div className="dapp-block" ref={ref}>
         <div className={clsx('dapp-block-badge')}>
-          {'todo-is-ipfs' ? (
+          {/* todo */}
+          {dapp.origin?.startsWith('ipfs://') ||
+          (dapp.type as any) === 'ipfs' ? (
             <IpfsTag prefix={<Indicator dapp={dapp} />} />
           ) : (
             <Indicator dapp={dapp} />
