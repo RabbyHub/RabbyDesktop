@@ -103,7 +103,7 @@ export class Tab {
     }
 
     this.tabs = tabs;
-    this.view = viewMngr.allocateView(false);
+    this.view = viewMngr.allocateView();
     this.id = this.view.webContents.id;
     this.window = ofWindow;
     this.windowId = ofWindow.id;
