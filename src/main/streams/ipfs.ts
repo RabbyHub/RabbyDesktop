@@ -1,40 +1,31 @@
 import path from 'path';
-import { create } from 'ipfs-http-client';
-
-import { IpfsService } from '../services/ipfs';
 import { handleIpcMainInvoke } from '../utils/ipcMainEvents';
+import { initIPFSModule } from '../utils/ipfs';
 import { getAppUserDataPath } from '../utils/store';
 import { getIpfsService, onMainWindowReady } from '../utils/stream-helpers';
 import { valueToMainSubject } from './_init';
 
-onMainWindowReady().then(() => {
+onMainWindowReady().then(async () => {
+  const { IpfsService } = await initIPFSModule();
   const gIpfsService = new IpfsService({
-    ipfs: create({
-      url: 'http://ipfs.rabby.io:5001',
-    }),
+    gateway: 'https://gateway-ipfs.rabby.io:8080',
     rootPath: path.join(getAppUserDataPath(), './local_cache/ipfs-store'),
   });
 
   valueToMainSubject('ipfsServiceReady', gIpfsService);
 });
 
-handleIpcMainInvoke('download-ipfs', async (_, ipfsString) => {
+handleIpcMainInvoke('download-ipfs', async (_, cid) => {
   try {
     const ipfsService = await getIpfsService();
-    const result = await ipfsService.download(ipfsString);
-    if (result.errors?.length) {
-      return {
-        error: result.errors[0]?.message,
-        success: false,
-      };
-    }
+    await ipfsService.download(cid);
+    return {
+      success: true,
+    };
   } catch (e: any) {
     return {
       error: e.message,
       success: false,
     };
   }
-  return {
-    success: true,
-  };
 });

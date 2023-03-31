@@ -117,7 +117,7 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
       //   };
       // }
       const url = _url.replace(/^\/?ipfs\//, '').split('/')[0];
-      const { success, error } = await downloadIPFS(`/ipfs/${url}`);
+      const { success, error } = await downloadIPFS(`${url}`);
       if (!success) {
         return {
           validateRes: {

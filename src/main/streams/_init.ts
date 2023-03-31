@@ -2,6 +2,7 @@ import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import type { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { BrowserView, BrowserWindow, Session } from 'electron';
 import { Subject, ReplaySubject, Observable } from 'rxjs';
+import { initIPFSModule } from '../utils/ipfs';
 import type { MainTabbedBrowserWindow } from '../browser/browsers';
 import { cLog } from '../utils/log';
 
@@ -102,9 +103,15 @@ const CONF = {
     subject: new ReplaySubject(1),
   } as IConf<ReplaySubject<IRunningAppProxyConf>>,
 
+  // todo fix me
   ipfsServiceReady: {
     subject: new ReplaySubject(1),
-  } as IConf<ReplaySubject<import('../services/ipfs').IpfsService>>,
+  } as IConf<
+    ReplaySubject<{
+      download: (cidString: string) => Promise<void>;
+      resolveFile: (ipfsPath: string) => string;
+    }>
+  >,
 };
 
 type IMainSubjects = typeof CONF;
