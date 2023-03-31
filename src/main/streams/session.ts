@@ -235,8 +235,8 @@ const registerCallbacks: ((ctx: { session: Electron.Session }) => {
     return { registerSuccess, protocol: PROTOCOL_IPFS };
   },
   (ctx) => {
-    // const TARGET_PROTOCOL = 'file:';
-    const TARGET_PROTOCOL = 'http:';
+    const TARGET_PROTOCOL = 'file:';
+    // const TARGET_PROTOCOL = 'http:';
     // const unregistered = protocol.unregisterProtocol(TARGET_PROTOCOL.slice(0, -1));
     // console.log(`unregistered: ${TARGET_PROTOCOL}`, unregistered);
 
