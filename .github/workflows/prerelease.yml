@@ -58,6 +58,15 @@ jobs:
         run: |
           npm i -g @debank/cli@latest;
           npm i;
+
+          if [[ $GITHUB_REF =~ ^v[0-9]+\.[0-9]+\.[1-9][0-9]*$ ]]; then
+            export buildchannel = "reg";
+            echo "[get_buildchannel] it's one reg version";
+          elif [[ $GITHUB_REF =~ ^v[0-9]+\.[0-9]+\.0$ ]]; then
+            export buildchannel = "prod";
+            echo "[get_buildchannel] it's one prod version";
+          fi
+
           if [[ "$OSTYPE" == "darwin"* ]]; then
             security unlock-keychain -p ${{ secrets.KEYCHAIN_PASS }} ~/Library/Keychains/login.keychain-db
           else
