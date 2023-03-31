@@ -106,17 +106,7 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
 
   const { runAsync, loading, cancel } = useRequest(
     async (_url: string) => {
-      // eslint-disable-next-line no-eval
-      // const { cid } = await eval(`import('is-ipfs')`);
-      // if (!cid(_url)) {
-      //   return {
-      //     validateRes: {
-      //       validateStatus: 'error' as const,
-      //       help: 'Input is not a valid IPFS cid',
-      //     },
-      //   };
-      // }
-      const url = _url.replace(/^\/?ipfs\//, '').split('/')[0];
+      const url = _url.replace(/^\/?ipfs\/|^\w+:\/\//, '').replace(/\/$/, '');
       const { success, error } = await downloadIPFS(`${url}`);
       if (!success) {
         return {

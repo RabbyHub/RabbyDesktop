@@ -227,6 +227,11 @@ export const initIPFSModule = async () => {
     }
 
     public async download(cidString: string) {
+      // eslint-disable-next-line no-eval
+      const { cid } = await eval(`import('is-ipfs')`);
+      if (!cid(cidString)) {
+        throw new Error('Input is not a valid IPFS cid');
+      }
       const carPath = path.join(this.rootPath, 'car', `${cidString}.car`);
       const extractPath = path.join(this.rootPath, 'ipfs');
       await fs.mkdir(extractPath, { recursive: true });
