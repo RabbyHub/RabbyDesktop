@@ -5,6 +5,7 @@ import {
   formatDapp,
   formatDapps,
   isValidDappType,
+  checkoutDappURL,
   normalizeProtocolBindingValues,
 } from '@/isomorphic/dapp';
 import { arraify } from '@/isomorphic/array';
@@ -27,7 +28,7 @@ import {
   maybeTrezorLikeBuiltInHttpPage,
   parseDomainMeta,
 } from '../../isomorphic/url';
-import { detectDapp } from '../utils/dapps';
+import { detectDapp, detectIPFSDapp } from '../utils/dapps';
 import { storeLog } from '../utils/log';
 import { makeStore } from '../utils/store';
 import { getAppProxyConfigForAxios } from './desktopApp';
@@ -370,6 +371,16 @@ export async function repairDappsFieldsOnBootstrap() {
 
 handleIpcMainInvoke('detect-dapp', async (_, dappUrl) => {
   const allDapps = getAllDapps();
+
+  const urlResult = checkoutDappURL(dappUrl);
+
+  if (urlResult.type === 'ipfs') {
+    return {
+      result: await detectIPFSDapp(urlResult.dappURL, {
+        existedDapps: allDapps,
+      }),
+    };
+  }
 
   const result = await detectDapp(dappUrl, {
     existedDapps: allDapps,

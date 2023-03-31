@@ -163,170 +163,164 @@ protocol.registerSchemesAsPrivileged([
   // },
 ]);
 
-const registerCallbacks: ((ctx: { session: Electron.Session }) => {
+const registerCallbacks: {
   protocol: string;
-  registerSuccess: boolean;
-})[] = [
-  (ctx) => {
-    const registerSuccess = ctx.session.protocol.registerFileProtocol(
-      RABBY_INTERNAL_PROTOCOL.slice(0, -1),
-      (request, callback) => {
-        const pathnameWithQuery = request.url.slice(
-          `${RABBY_INTERNAL_PROTOCOL}//`.length
-        );
+  handler: (ctx: { session: Electron.Session }) => {
+    protocol: string;
+    registerSuccess: boolean;
+  };
+}[] = [
+  {
+    protocol: RABBY_INTERNAL_PROTOCOL,
+    handler: (ctx) => {
+      const registerSuccess = ctx.session.protocol.registerFileProtocol(
+        RABBY_INTERNAL_PROTOCOL.slice(0, -1),
+        (request, callback) => {
+          const pathnameWithQuery = request.url.slice(
+            `${RABBY_INTERNAL_PROTOCOL}//`.length
+          );
 
-        const pathname = pathnameWithQuery.split('?')?.[0] || '';
-        const pathnameWithoutHash = pathname.split('#')?.[0] || '';
+          const pathname = pathnameWithQuery.split('?')?.[0] || '';
+          const pathnameWithoutHash = pathname.split('#')?.[0] || '';
 
-        if (pathnameWithoutHash.startsWith('assets/')) {
-          callback({
-            path: getAssetPath(pathnameWithoutHash.slice('assets/'.length)),
-          });
-        } else if (pathnameWithoutHash.startsWith('local/')) {
-          callback({
-            path: getRendererPath(pathnameWithoutHash.slice('local/'.length)),
-          });
-        } else {
-          // TODO: give one 404 page
-          callback({
-            data: 'Not found',
-            mimeType: 'text/plain',
-          });
+          if (pathnameWithoutHash.startsWith('assets/')) {
+            callback({
+              path: getAssetPath(pathnameWithoutHash.slice('assets/'.length)),
+            });
+          } else if (pathnameWithoutHash.startsWith('local/')) {
+            callback({
+              path: getRendererPath(pathnameWithoutHash.slice('local/'.length)),
+            });
+          } else {
+            // TODO: give one 404 page
+            callback({
+              data: 'Not found',
+              mimeType: 'text/plain',
+            });
+          }
         }
-      }
-    );
+      );
 
-    return { registerSuccess, protocol: RABBY_INTERNAL_PROTOCOL };
+      return { registerSuccess, protocol: RABBY_INTERNAL_PROTOCOL };
+    },
   },
-  (ctx) => {
-    const registerSuccess = ctx.session.protocol.registerFileProtocol(
-      PROTOCOL_IPFS.slice(0, -1),
-      async (request, callback) => {
-        const pathnameWithQuery = request.url.slice(
-          `${PROTOCOL_IPFS}//`.length
-        );
+  {
+    protocol: PROTOCOL_IPFS,
+    handler: (ctx) => {
+      const registerSuccess = ctx.session.protocol.registerFileProtocol(
+        PROTOCOL_IPFS.slice(0, -1),
+        async (request, callback) => {
+          const pathnameWithQuery = request.url.slice(
+            `${PROTOCOL_IPFS}//`.length
+          );
 
-        const pathname = pathnameWithQuery.split('?')?.[0] || '';
-        const pathnameWithoutHash = pathname.split('#')?.[0] || '';
+          const pathname = pathnameWithQuery.split('?')?.[0] || '';
+          const pathnameWithoutHash = pathname.split('#')?.[0] || '';
 
-        const ipfsService = await getIpfsService();
-        let filePath = ipfsService.resolveFile(pathnameWithoutHash);
+          const ipfsService = await getIpfsService();
+          let filePath = ipfsService.resolveFile(pathnameWithoutHash);
 
-        if (!fs.existsSync(filePath)) {
-          callback({ data: 'Not found', mimeType: 'text/plain' });
-          return;
+          if (!fs.existsSync(filePath)) {
+            callback({ data: 'Not found', mimeType: 'text/plain' });
+            return;
+          }
+
+          if (fs.statSync(filePath).isDirectory()) {
+            filePath = path.join(filePath, './index.html');
+          }
+
+          if (!fs.existsSync(filePath)) {
+            callback({ data: 'Not found', mimeType: 'text/plain' });
+            return;
+          }
+
+          callback({
+            path: filePath,
+          });
         }
+      );
 
-        if (fs.statSync(filePath).isDirectory()) {
-          filePath = path.join(filePath, './index.html');
-        }
-
-        if (!fs.existsSync(filePath)) {
-          callback({ data: 'Not found', mimeType: 'text/plain' });
-          return;
-        }
-
-        callback({
-          path: filePath,
-        });
-      }
-    );
-
-    return { registerSuccess, protocol: PROTOCOL_IPFS };
+      return { registerSuccess, protocol: PROTOCOL_IPFS };
+    },
   },
-  (ctx) => {
-    const TARGET_PROTOCOL = 'file:';
-    // const TARGET_PROTOCOL = 'http:';
-    // const unregistered = protocol.unregisterProtocol(TARGET_PROTOCOL.slice(0, -1));
-    // console.log(`unregistered: ${TARGET_PROTOCOL}`, unregistered);
+  {
+    protocol: 'file:',
+    handler: (ctx) => {
+      const TARGET_PROTOCOL = 'file:';
+      // const TARGET_PROTOCOL = 'http:';
+      // const unregistered = protocol.unregisterProtocol(TARGET_PROTOCOL.slice(0, -1));
+      // console.log(`unregistered: ${TARGET_PROTOCOL}`, unregistered);
 
-    const registerSuccess = protocol.interceptFileProtocol(
-      TARGET_PROTOCOL.slice(0, -1),
-      async (request, callback) => {
-        const checkouted = checkoutCustomSchemeHandlerInfo(
-          TARGET_PROTOCOL,
-          request.url
-        );
-        if (!checkouted) {
+      const registerSuccess = protocol.interceptFileProtocol(
+        TARGET_PROTOCOL.slice(0, -1),
+        async (request, callback) => {
+          const checkouted = checkoutCustomSchemeHandlerInfo(
+            TARGET_PROTOCOL,
+            request.url
+          );
+          if (!checkouted) {
+            callback({
+              data: 'Not found',
+              mimeType: 'text/plain',
+              statusCode: 404,
+            });
+            return;
+          }
+
+          const { ipfsCid, fileRelPath } = checkouted;
+
+          const ipfsService = await getIpfsService();
+
+          let filePath = ipfsService.resolveFile(fileRelPath);
+
+          if (!fs.existsSync(filePath)) {
+            callback({
+              data: 'Not found',
+              mimeType: 'text/plain',
+              statusCode: 404,
+            });
+            return;
+          }
+
+          if (fs.statSync(filePath).isDirectory()) {
+            filePath = path.join(filePath, './index.html');
+          }
+
+          if (!fs.existsSync(filePath)) {
+            callback({
+              data: 'Not found',
+              mimeType: 'text/plain',
+              statusCode: 404,
+            });
+            return;
+          }
+
           callback({
-            data: 'Not found',
-            mimeType: 'text/plain',
-            statusCode: 404,
+            path: filePath,
           });
-          return;
         }
+      );
 
-        const { ipfsCid, fileRelPath } = checkouted;
-
-        const ipfsService = await getIpfsService();
-
-        let filePath = ipfsService.resolveFile(fileRelPath);
-
-        if (!fs.existsSync(filePath)) {
-          callback({
-            data: 'Not found',
-            mimeType: 'text/plain',
-            statusCode: 404,
-          });
-          return;
-        }
-
-        if (fs.statSync(filePath).isDirectory()) {
-          filePath = path.join(filePath, './index.html');
-        }
-
-        if (!fs.existsSync(filePath)) {
-          callback({
-            data: 'Not found',
-            mimeType: 'text/plain',
-            statusCode: 404,
-          });
-          return;
-        }
-
-        callback({
-          path: filePath,
-        });
-      }
-    );
-
-    return { registerSuccess, protocol: TARGET_PROTOCOL };
+      return { registerSuccess, protocol: TARGET_PROTOCOL };
+    },
   },
 ];
 
 firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   // sub.unsubscribe();
-  const sessionIns = session.defaultSession;
-
-  registerCallbacks.forEach((cb) => {
-    const { registerSuccess, protocol: registeredProtocol } = cb({
-      session: sessionIns,
-    });
-
-    if (!registerSuccess) {
-      if (!IS_RUNTIME_PRODUCTION) {
-        throw new Error(
-          `[initSession] Failed to register protocol ${registeredProtocol}`
-        );
-      } else {
-        console.error(`Failed to register protocol`);
-      }
-    } else {
-      sesLog(`[initSession] registered protocol ${registeredProtocol} success`);
-    }
-  });
+  const mainSession = session.defaultSession;
 
   const dappSafeViewSession = session.fromPartition('dappSafeView');
   const checkingViewSession = session.fromPartition('checkingView');
   const checkingProxySession = session.fromPartition('checkingProxy');
   valueToMainSubject('sessionReady', {
-    mainSession: sessionIns,
+    mainSession,
     dappSafeViewSession,
     checkingViewSession,
     checkingProxySession,
   });
   const allSessions = [
-    sessionIns,
+    mainSession,
     dappSafeViewSession,
     checkingViewSession,
     checkingProxySession,
@@ -339,7 +333,40 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
     rewriteSessionWebRequestHeaders(sess);
   });
 
-  app.userAgentFallback = trimWebContentsUserAgent(sessionIns.getUserAgent());
+  [
+    { inst: mainSession, name: 'default' },
+    {
+      inst: checkingProxySession,
+      name: 'checkingProxy',
+      filterProtocol: ['file:'],
+    },
+  ].forEach(({ inst, name, filterProtocol }) => {
+    registerCallbacks.forEach(({ protocol: prot, handler }) => {
+      if (filterProtocol?.includes(prot)) return;
+
+      const { registerSuccess, protocol: registeredProtocol } = handler({
+        session: inst,
+      });
+
+      if (!registerSuccess) {
+        if (!IS_RUNTIME_PRODUCTION) {
+          throw new Error(
+            `[initSession][session:${name}] Failed to register protocol ${registeredProtocol}`
+          );
+        } else {
+          console.error(
+            `[initSession][session:${name}] Failed to register protocol`
+          );
+        }
+      } else {
+        sesLog(
+          `[initSession][session:${name}] registered protocol ${registeredProtocol} success`
+        );
+      }
+    });
+  });
+
+  app.userAgentFallback = trimWebContentsUserAgent(mainSession.getUserAgent());
 
   // must after sessionReady
   const result = checkProxyValidOnBootstrap();
@@ -347,7 +374,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   const realProxy = { ...result.appProxyConf, applied: false };
 
   if (result.shouldApplyProxyOnBoot) {
-    setSessionProxy(sessionIns, realProxy);
+    setSessionProxy(mainSession, realProxy);
     setSessionProxy(dappSafeViewSession, realProxy);
     setSessionProxy(checkingViewSession, realProxy);
 
@@ -361,13 +388,13 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   }
 
   valueToMainSubject('appRuntimeProxyConf', realProxy);
-  supportHmrOnDev(sessionIns);
+  supportHmrOnDev(mainSession);
 
-  sessionIns.setPreloads([preloadPath]);
+  mainSession.setPreloads([preloadPath]);
 
   // @notice: make sure all customized plugins loaded after ElectronChromeExtensions initialized
   const chromeExtensions = new ElectronChromeExtensions({
-    session: sessionIns,
+    session: mainSession,
 
     preloadPath,
 
@@ -513,13 +540,13 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
     },
   });
 
-  const webuiExtension = await sessionIns.loadExtension(
+  const webuiExtension = await mainSession.loadExtension(
     getAssetPath('desktop_shell'),
     { allowFileAccess: true }
   );
   valueToMainSubject('webuiExtensionReady', webuiExtension);
 
-  await loadExtensions(sessionIns!, getAssetPath('chrome_exts'));
+  await loadExtensions(mainSession!, getAssetPath('chrome_exts'));
 
   valueToMainSubject('electronChromeExtensionsReady', chromeExtensions);
 });

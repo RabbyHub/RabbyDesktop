@@ -1,5 +1,6 @@
 import { AxiosProxyConfig } from 'axios';
 import { RABBY_INTERNAL_PROTOCOL, RABBY_LOCAL_URLBASE } from './constants';
+import { ensurePrefix } from './string';
 
 export function safeParseURL(url: string): URL | null {
   try {
@@ -232,18 +233,33 @@ export function isInternalProtocol(url: string) {
   ].some((protocol) => url.startsWith(protocol));
 }
 
+const REGEXP_IPFS_URL = /^ipfs:\/\/([a-zA-Z0-9]*)/i;
+const REGEXP_IPFS_PATH = /^ipfs:\/\/([a-zA-Z0-9]*)/i;
+export function extractIpfsCid(ipfsDappPath: string) {
+  if (ipfsDappPath.startsWith('ipfs:')) {
+    const [, ipfsCid = ''] = ipfsDappPath.match(REGEXP_IPFS_URL) || [];
+
+    return ipfsCid;
+  }
+
+  const [, ipfsCid = ''] = ipfsDappPath.match(REGEXP_IPFS_PATH) || [];
+  return ipfsCid;
+}
+
 export function canoicalizeDappUrl(url: string): ICanonalizedUrlInfo {
   const urlInfo: Partial<URL> | null = safeParseURL(url);
 
   const hostname = urlInfo?.hostname || '';
-  const isDapp = urlInfo?.protocol === 'https:';
+  const isDapp =
+    !!urlInfo?.protocol && ['https:', 'ipfs:'].includes(urlInfo?.protocol);
 
-  // protcol://hostname[:port]
   const origin =
-    urlInfo?.origin ||
-    `${urlInfo?.protocol}//${hostname}${
-      urlInfo?.port ? `:${urlInfo?.port}` : ''
-    }`;
+    urlInfo?.protocol === 'ipfs:'
+      ? `ipfs://${extractIpfsCid(url)}`
+      : urlInfo?.origin ||
+        `${urlInfo?.protocol}//${hostname}${
+          urlInfo?.port ? `:${urlInfo?.port}` : ''
+        }`;
 
   const domainInfo = getDomainFromHostname(hostname);
 

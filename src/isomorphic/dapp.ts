@@ -1,5 +1,6 @@
+import { PROTOCOL_IPFS } from './constants';
 import { ensurePrefix, isInvalidBase64 } from './string';
-import { parseDomainMeta } from './url';
+import { extractIpfsCid, parseDomainMeta } from './url';
 
 export function isValidDappAlias(alias: string) {
   return /[\w\d]+/.test(alias);
@@ -175,4 +176,29 @@ export function normalizeProtocolBindingValues(
 const VALID_TYPES = ['http', 'ipfs'];
 export function isValidDappType(type: string) {
   return type && VALID_TYPES.includes(type);
+}
+
+export function checkoutDappURL(dappPath: string) {
+  if (dappPath.startsWith('/ipfs/') || dappPath.startsWith(PROTOCOL_IPFS)) {
+    const ipfsCid = extractIpfsCid(dappPath);
+
+    if (!ipfsCid) return { type: 'unknown' as const, dappURL: '' };
+
+    return {
+      type: 'ipfs' as const,
+      dappURL: `ipfs://${ipfsCid}`,
+    };
+  }
+
+  if (dappPath.startsWith('http')) {
+    return {
+      type: 'http' as const,
+      dappURL: dappPath,
+    };
+  }
+
+  return {
+    type: 'unknown',
+    dappURL: '',
+  };
 }
