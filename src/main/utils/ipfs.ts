@@ -167,7 +167,7 @@ export const initIPFSModule = async () => {
    */
   // const verifyCarFile = async (cid: string | CID, carPath: string) => {};
 
-  const verifyLocalFile = async (
+  const verifySingleFile = async (
     cid: string | CID,
     carPath: string,
     rootPath: string
@@ -182,7 +182,7 @@ export const initIPFSModule = async () => {
     if (!last) {
       throw new Error(`No entries found for ${cid}`);
     }
-    const localPath = path.join(rootPath, last.path);
+    const localPath = path.join(rootPath, 'ipfs', last.path);
     const localBuffer = await fs.readFile(localPath);
     const localHash = await sha256.digest(localBuffer);
 
@@ -194,6 +194,31 @@ export const initIPFSModule = async () => {
     const hash = await sha256.digest(Buffer.concat(data));
     if (toHex(hash.digest) !== toHex(localHash.digest)) {
       throw new Error(`Local file hash does not match CID ${cid}`);
+    }
+  };
+
+  const verifyFile = async (
+    cid: string | CID,
+    carPath: string,
+    rootPath: string
+  ) => {
+    const blockStore = await createBlockStore(carPath);
+    // eslint-disable-next-line no-restricted-syntax
+    for await (const file of recursive(cid, blockStore)) {
+      if (file.type === 'file') {
+        const data = [];
+        // eslint-disable-next-line no-restricted-syntax
+        for await (const chunk of file.content()) {
+          data.push(chunk);
+        }
+        const hash = await sha256.digest(Buffer.concat(data));
+        const localPath = path.join(rootPath, 'ipfs', file.path);
+        const localBuffer = await fs.readFile(localPath);
+        const localHash = await sha256.digest(localBuffer);
+        if (toHex(hash.digest) !== toHex(localHash.digest)) {
+          throw new Error(`Local file hash does not match CID ${cid}`);
+        }
+      }
     }
   };
 
@@ -242,6 +267,15 @@ export const initIPFSModule = async () => {
       console.log('extracting', cidString);
       await extractCarFile(cidString, carPath, extractPath);
       console.log('extracted', cidString);
+    }
+
+    // verify local file
+    public async verifyFile(cid: string) {
+      return verifyFile(
+        cid,
+        path.join(this.rootPath, 'car', `${cid}.car`),
+        this.rootPath
+      );
     }
 
     public resolveFile(filePath: string) {

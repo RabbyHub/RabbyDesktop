@@ -13,6 +13,7 @@ import { useRequest, useSetState } from 'ahooks';
 import classNames from 'classnames';
 import { debounce } from 'lodash';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
+import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import RabbyInput from '../../AntdOverwrite/Input';
 import { Props as ModalProps } from '../../Modal/Modal';
 import { toastMessage } from '../../TransparentToast';
@@ -227,6 +228,7 @@ export function AddIpfsDapp({
   };
 
   // const handleCheckDebounce = debounce(handleCheck, 700);
+  // const zActions = useZPopupLayerOnMain();
 
   const handleAdd = async (
     dappInfo: NonNullable<IDappsDetectResult['data']>,
