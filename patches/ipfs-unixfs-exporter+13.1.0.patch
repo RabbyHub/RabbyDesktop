@@ -1,0 +1,21 @@
+diff --git a/node_modules/ipfs-unixfs-exporter/package.json b/node_modules/ipfs-unixfs-exporter/package.json
+index bc5ee53..fe527ff 100644
+--- a/node_modules/ipfs-unixfs-exporter/package.json
++++ b/node_modules/ipfs-unixfs-exporter/package.json
+@@ -18,7 +18,7 @@
+     "node": ">=16.0.0",
+     "npm": ">=7.0.0"
+   },
+-  "type": "module",
++  "type": "commonjs",
+   "types": "./dist/src/index.d.ts",
+   "files": [
+     "src",
+@@ -29,6 +29,7 @@
+   "exports": {
+     ".": {
+       "types": "./dist/src/index.d.ts",
++      "node": "./dist/index.min.js",
+       "import": "./dist/src/index.js"
+     }
+   },

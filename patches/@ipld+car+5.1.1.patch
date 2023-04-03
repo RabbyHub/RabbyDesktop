@@ -1,0 +1,21 @@
+diff --git a/node_modules/@ipld/car/package.json b/node_modules/@ipld/car/package.json
+index f8633ed..9e712ce 100644
+--- a/node_modules/@ipld/car/package.json
++++ b/node_modules/@ipld/car/package.json
+@@ -22,7 +22,7 @@
+     "node": ">=16.0.0",
+     "npm": ">=7.0.0"
+   },
+-  "type": "module",
++  "type": "commonjs",
+   "types": "./dist/src/index.d.ts",
+   "typesVersions": {
+     "*": {
+@@ -49,6 +49,7 @@
+   "exports": {
+     ".": {
+       "types": "./dist/src/index.d.ts",
++      "node": "./dist/index.min.js",
+       "import": "./src/index.js",
+       "browser": "./src/index-browser.js"
+     },

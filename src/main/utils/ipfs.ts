@@ -4,10 +4,11 @@ import path from 'path';
 
 import { ensurePrefix, normalizeIPFSPath } from '@/isomorphic/string';
 
-// import { CarReader } from '@ipld/car';
-// import { recursive, walkPath } from 'ipfs-unixfs-exporter';
-// import { toHex } from 'multiformats/bytes';
-// import { sha256 } from 'multiformats/hashes/sha2';
+import { CarReader } from '@ipld/car';
+import { recursive, walkPath } from 'ipfs-unixfs-exporter';
+
+import { toHex } from '@/main/vendors/multiformats/src/bytes';
+import { sha256 } from '@/main/vendors/multiformats/src/hashes/sha2';
 
 import { type UnixFSEntry } from 'ipfs-unixfs-exporter';
 import { type CID } from 'multiformats';
@@ -18,10 +19,6 @@ import { formatProxyServerURL } from '@/isomorphic/url';
 import { getAppRuntimeProxyConf } from './stream-helpers';
 
 export const initIPFSModule = async () => {
-  const { CarReader } = await import('@ipld/car');
-  const { recursive, walkPath } = await import('ipfs-unixfs-exporter');
-  const { toHex } = await import('multiformats/bytes');
-  const { sha256 } = await import('multiformats/hashes/sha2');
   console.debug(' ::::::::::::::::::::: initIPFSModule');
 
   const hashes = {
