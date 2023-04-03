@@ -3,50 +3,26 @@ import fs from 'fs/promises';
 import path from 'path';
 
 import { ensurePrefix, normalizeIPFSPath } from '@/isomorphic/string';
-import { type CarReader as ICarReader } from '@ipld/car';
-import {
-  type recursive as IRecursive,
-  type UnixFSEntry,
-  type walkPath as IWalkPath,
-} from 'ipfs-unixfs-exporter';
+
+// import { CarReader } from '@ipld/car';
+// import { recursive, walkPath } from 'ipfs-unixfs-exporter';
+// import { toHex } from 'multiformats/bytes';
+// import { sha256 } from 'multiformats/hashes/sha2';
+
+import { type UnixFSEntry } from 'ipfs-unixfs-exporter';
 import { type CID } from 'multiformats';
-import { type toHex as IToHex } from 'multiformats/dist/types/src/bytes';
-import { type sha256 as ISha256 } from 'multiformats/hashes/sha2';
 import nodeFetch from 'node-fetch';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+
 import { formatProxyServerURL } from '@/isomorphic/url';
 import { getAppRuntimeProxyConf } from './stream-helpers';
 
 export const initIPFSModule = async () => {
-  /**
-   * import modules dynamically
-   * 为啥要这样做？
-   * 因为 pure esm 模块不能直接被 commonjs 模块引用，所以需要动态引入。
-   * 为什么不直接用 await import() 而要用 eval？
-   * 因为 await import() 会被 ts 转换成 require()，而 require() 又不能直接引用 esm 模块。
-   * 参考：https://stackoverflow.com/questions/70545129/compile-a-package-that-depends-on-esm-only-library-into-a-commonjs-package/70546326#70546326
-   */
-  // eslint-disable-next-line no-eval
-  const { CarReader } = await (eval(`import('@ipld/car')`) as Promise<{
-    CarReader: typeof ICarReader;
-  }>);
-  // eslint-disable-next-line no-eval
-  const { recursive, walkPath } = await (eval(
-    `import('ipfs-unixfs-exporter')`
-  ) as Promise<{
-    recursive: typeof IRecursive;
-    walkPath: typeof IWalkPath;
-  }>);
-  // eslint-disable-next-line no-eval
-  const { toHex } = await (eval(`import('multiformats/bytes')`) as Promise<{
-    toHex: typeof IToHex;
-  }>);
-  // eslint-disable-next-line no-eval
-  const { sha256 } = await (eval(
-    `import('multiformats/hashes/sha2')`
-  ) as Promise<{
-    sha256: typeof ISha256;
-  }>);
+  const { CarReader } = await import('@ipld/car');
+  const { recursive, walkPath } = await import('ipfs-unixfs-exporter');
+  const { toHex } = await import('multiformats/bytes');
+  const { sha256 } = await import('multiformats/hashes/sha2');
+  console.debug(' ::::::::::::::::::::: initIPFSModule');
 
   const hashes = {
     [sha256.code]: sha256,
