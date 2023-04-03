@@ -22,6 +22,7 @@ export const initIPFSModule = async () => {
   const { recursive, walkPath } = await import('ipfs-unixfs-exporter');
   const { toHex } = await import('multiformats/bytes');
   const { sha256 } = await import('multiformats/hashes/sha2');
+  const { cid: isCid } = await import('is-ipfs');
   console.debug(' ::::::::::::::::::::: initIPFSModule');
 
   const hashes = {
@@ -241,9 +242,7 @@ export const initIPFSModule = async () => {
     }
 
     public async download(cidString: string) {
-      // eslint-disable-next-line no-eval
-      const { cid } = await eval(`import('is-ipfs')`);
-      if (!cid(cidString)) {
+      if (!isCid(cidString)) {
         throw new Error('Input is not a valid IPFS cid');
       }
       const carPath = path.join(this.rootPath, 'car', `${cidString}.car`);
