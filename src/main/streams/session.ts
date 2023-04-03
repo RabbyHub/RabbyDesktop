@@ -13,6 +13,7 @@ import {
   unPrefix,
 } from '@/isomorphic/string';
 import {
+  DOT_IPFS_LOCALHOST,
   IS_RUNTIME_PRODUCTION,
   PROTOCOL_IPFS,
   RABBY_INTERNAL_PROTOCOL,
@@ -244,16 +245,21 @@ const registerCallbacks: {
     },
   },
   {
-    protocol: 'file:',
+    protocol: 'http:',
     handler: (ctx) => {
-      const TARGET_PROTOCOL = 'file:';
-      // const TARGET_PROTOCOL = 'http:';
+      const TARGET_PROTOCOL = 'http:';
       // const unregistered = protocol.unregisterProtocol(TARGET_PROTOCOL.slice(0, -1));
       // console.log(`unregistered: ${TARGET_PROTOCOL}`, unregistered);
 
       const registerSuccess = protocol.interceptFileProtocol(
         TARGET_PROTOCOL.slice(0, -1),
         async (request, callback) => {
+          const parsedReqURLInfo = canoicalizeDappUrl(request.url || '');
+          if (parsedReqURLInfo.secondaryDomain !== DOT_IPFS_LOCALHOST) {
+            protocol.uninterceptProtocol('http');
+            return;
+          }
+
           const checkouted = checkoutCustomSchemeHandlerInfo(
             TARGET_PROTOCOL,
             request.url
@@ -267,7 +273,7 @@ const registerCallbacks: {
             return;
           }
 
-          const { ipfsCid, fileRelPath } = checkouted;
+          const { fileRelPath } = checkouted;
 
           const ipfsService = await getIpfsService();
 
@@ -338,7 +344,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
     {
       inst: checkingProxySession,
       name: 'checkingProxy',
-      filterProtocol: ['file:'],
+      filterProtocol: ['file:', 'http:'],
     },
   ].forEach(({ inst, name, filterProtocol }) => {
     registerCallbacks.forEach(({ protocol: prot, handler }) => {
@@ -355,7 +361,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
           );
         } else {
           console.error(
-            `[initSession][session:${name}] Failed to register protocol`
+            `[initSession][session:${name}] Failed to register protocol ${registeredProtocol}`
           );
         }
       } else {

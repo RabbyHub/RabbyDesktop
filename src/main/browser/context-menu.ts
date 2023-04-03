@@ -216,9 +216,9 @@ function buildInspectKitsMenu(opts: ChromeContextMenuOptions) {
   appendMenu(inspectKitsMenu, {
     label: 'Open Test IPFS Dapp',
     click: async () => {
+      // const targetURL = 'rabby-internal://ipfs/QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV/';
       const targetURL =
-        'rabby-internal://ipfs/QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV/';
-      // const targetURL = 'http://QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV.local.ipfs';
+        'http://QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV.local.ipfs';
 
       const mainTabbedWin = await onMainWindowReady();
       mainTabbedWin.createTab({

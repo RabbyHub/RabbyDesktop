@@ -126,7 +126,7 @@ export class Tab {
     });
 
     this.view?.webContents.on('page-favicon-updated', async (evt, favicons) => {
-      const wc = this.view!.webContents;
+      const wc = this.view?.webContents;
       if (!wc || !this.relatedDappId) return;
       const currentURL =
         this.view?.webContents.getURL() ||

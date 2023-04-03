@@ -1,6 +1,9 @@
 import { AxiosProxyConfig } from 'axios';
-import { RABBY_INTERNAL_PROTOCOL, RABBY_LOCAL_URLBASE } from './constants';
-import { ensurePrefix } from './string';
+import {
+  DOT_IPFS_LOCALHOST,
+  RABBY_INTERNAL_PROTOCOL,
+  RABBY_LOCAL_URLBASE,
+} from './constants';
 
 export function safeParseURL(url: string): URL | null {
   try {
@@ -123,7 +126,7 @@ export function isUrlFromDapp(url: string) {
     !url.startsWith(RABBY_INTERNAL_PROTOCOL) &&
     !url.startsWith('chrome-extension:') &&
     (url.startsWith('https:') ||
-      (url.startsWith('http:') && url.includes('.local.ipfs'))) // ipfs support
+      (url.startsWith('http:') && url.includes(DOT_IPFS_LOCALHOST))) // ipfs support
   );
 }
 

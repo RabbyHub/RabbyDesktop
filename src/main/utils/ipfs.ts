@@ -13,6 +13,9 @@ import { type CID } from 'multiformats';
 import { type toHex as IToHex } from 'multiformats/dist/types/src/bytes';
 import { type sha256 as ISha256 } from 'multiformats/hashes/sha2';
 import nodeFetch from 'node-fetch';
+import { HttpsProxyAgent } from 'https-proxy-agent';
+import { formatProxyServerURL } from '@/isomorphic/url';
+import { getAppRuntimeProxyConf } from './stream-helpers';
 
 export const initIPFSModule = async () => {
   /**
@@ -65,9 +68,19 @@ export const initIPFSModule = async () => {
     fs.mkdir(carFolder, { recursive: true });
 
     const url = `${gateway.replace(/\/$/, '')}/ipfs/${cidString}?format=car`;
+
+    const runtimeProxyConf = await getAppRuntimeProxyConf();
+    let proxyAgent: HttpsProxyAgent;
+    if (runtimeProxyConf.proxyType === 'custom') {
+      proxyAgent = new HttpsProxyAgent(
+        formatProxyServerURL(runtimeProxyConf.proxySettings)
+      );
+    }
+
     return new Promise((resolve, reject) => {
       nodeFetch(url, {
         method: 'GET',
+        ...(proxyAgent && { agent: proxyAgent }),
       })
         .then((res) => {
           if (res.status > 200) {

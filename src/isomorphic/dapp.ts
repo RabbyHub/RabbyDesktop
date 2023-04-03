@@ -1,6 +1,6 @@
-import { PROTOCOL_IPFS } from './constants';
+import { IPFS_LOCALHOST, PROTOCOL_IPFS } from './constants';
 import { ensurePrefix, isInvalidBase64 } from './string';
-import { extractIpfsCid, parseDomainMeta } from './url';
+import { canoicalizeDappUrl, extractIpfsCid, parseDomainMeta } from './url';
 
 export function isValidDappAlias(alias: string) {
   return /[\w\d]+/.test(alias);
@@ -197,10 +197,21 @@ export function checkoutDappURL(dappPath: string) {
     return {
       type: 'ipfs' as const,
       dappURL: `rabby-ipfs://${ipfsCid}`,
+      ipfsCid,
     };
   }
 
   if (dappPath.startsWith('http')) {
+    const parsedInfo = canoicalizeDappUrl(dappPath);
+
+    if (parsedInfo.secondaryDomain === IPFS_LOCALHOST) {
+      return {
+        type: 'ipfs' as const,
+        dappURL: `rabby-ipfs://${parsedInfo.subDomain}`,
+        ipfsCid: parsedInfo.subDomain,
+      };
+    }
+
     return {
       type: 'http' as const,
       dappURL: dappPath,
@@ -208,7 +219,19 @@ export function checkoutDappURL(dappPath: string) {
   }
 
   return {
-    type: 'unknown',
+    type: 'unknown' as const,
     dappURL: '',
   };
+}
+
+export function makeDappURLToOpen<T extends string>(dappURL: T): string {
+  if (!dappURL) return dappURL;
+
+  const checkoutResult = checkoutDappURL(dappURL);
+
+  if (checkoutResult.type === 'ipfs') {
+    return `http://${checkoutResult.ipfsCid}.${IPFS_LOCALHOST}`;
+  }
+
+  return dappURL;
 }
