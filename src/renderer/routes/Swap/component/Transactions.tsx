@@ -187,7 +187,7 @@ interface TransactionProps {
 const Transaction = forwardRef<HTMLDivElement, TransactionProps>(
   ({ data }, ref) => {
     const isPending = data.status === 'Pending';
-    const isCompleted = true || data?.status === 'Completed';
+    const isCompleted = data?.status === 'Completed';
     const time = data?.finished_at || data?.create_at;
     const targetDex = data?.dex_id;
     const txId = data?.tx_id;
@@ -362,7 +362,7 @@ export const SwapTransactions = memo(({ addr }: SwapTransactionsProps) => {
           data={swap}
         />
       ))}
-      {(loading || loadingMore) && <TxLoading />}
+      {((loading && !txList) || loadingMore) && <TxLoading />}
     </Wrapper>
   );
 });
