@@ -18,7 +18,10 @@ import {
   rabbyxQuery,
   RABBY_DESKTOP_KR_PWD,
 } from '../streams/rabbyIpcQuery/_base';
-import { getWindowFromWebContents, switchToBrowserTab } from '../utils/browser';
+import {
+  getWindowFromWebContents,
+  notifySwitchedToBrowserTab,
+} from '../utils/browser';
 import { appendMenu, appendMenuSeparator } from '../utils/context-menu';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import {
@@ -308,7 +311,7 @@ async function buildOpenedTabsMenu(opts: ChromeContextMenuOptions) {
       label: tab.view.webContents.getURL(),
       click: () => {
         if (!tab.view) return;
-        switchToBrowserTab(tab.view.webContents.id, mainTabbedWin);
+        notifySwitchedToBrowserTab(tab.view.webContents.id, mainTabbedWin);
       },
     });
   });

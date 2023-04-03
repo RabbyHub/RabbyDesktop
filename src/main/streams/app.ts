@@ -37,7 +37,7 @@ import {
   onMainWindowReady,
   getRabbyExtViews,
 } from '../utils/stream-helpers';
-import { switchToBrowserTab } from '../utils/browser';
+import { notifySwitchedToBrowserTab } from '../utils/browser';
 import { getAppUserDataPath } from '../utils/store';
 import { getMainWinLastPosition } from '../utils/screen';
 import { clearAllStoreData, clearAllUserData } from '../utils/security';
@@ -90,7 +90,7 @@ app.on('web-contents-created', async (evtApp, webContents) => {
           const dappTab =
             tabbedWin && findOpenedDappTab(tabbedWin, details.url, isToExt);
           if (dappTab) {
-            switchToBrowserTab(dappTab!.id, tabbedWin!);
+            notifySwitchedToBrowserTab(dappTab!.id, tabbedWin!);
           } else if (mainTabbedWin === tabbedWin) {
             if (!isFromExt) {
               const { finalTab: continualOpenedTab } = getOrCreateDappBoundTab(

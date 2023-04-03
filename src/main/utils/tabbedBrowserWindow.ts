@@ -65,17 +65,17 @@ export function checkoutTabbedWindow(
 ) {
   const window = getWindowFromWebContents(webContents);
   const tabbedWindow = window ? getWindowFromBrowserWindow(window) : null;
-  const foundTab = tabbedWindow?.tabs.tabList.find(
+  const webContentsTab = tabbedWindow?.tabs.tabList.find(
     (tab) => tab.view?.webContents.id === webContents.id
   );
-  const matchedDappInfo = foundTab?.relatedDappId
-    ? findDappsByOrigin(foundTab.relatedDappId, dapps)
+  const matchedDappInfo = webContentsTab?.relatedDappId
+    ? findDappsByOrigin(webContentsTab.relatedDappId, dapps)
     : null;
 
   return {
     parentWindow: window,
     tabbedWindow,
-    foundTab,
+    webContentsTab,
     matchedDappInfo,
   };
 }
@@ -124,6 +124,7 @@ type IGetTabFromMainWindowResult = {
   existedTab: Tab | null;
   createdTab: Tab | null;
   finalTab: Tab | null;
+  finalTabByOrigin: Tab | null;
 };
 export function getOrCreateDappBoundTab(
   mainTabbedWin: MainTabbedBrowserWindow,
@@ -135,18 +136,20 @@ export function getOrCreateDappBoundTab(
   const parsedInfo =
     typeof targetURL === 'string' ? canoicalizeDappUrl(targetURL) : targetURL;
 
-  const result = {
-    foundMatchedDapp: null as IDapp | null,
-    existedTab: null as Tab | null,
-    createdTab: null as Tab | null,
-    finalTab: null as Tab | null,
+  const result: IGetTabFromMainWindowResult = {
+    foundMatchedDapp: null,
+    existedTab: null,
+    createdTab: null,
+    finalTab: null,
+    finalTabByOrigin: null,
   };
 
   let existedTab = null as Tab | null;
   mainTabbedWin.tabs.tabList.find((tab) => {
     const dappInfo = tab.matchRelatedDappInfo(parsedInfo);
     if (dappInfo?.matchedType === EnumMatchDappType.byOrigin) {
-      existedTab = tab;
+      // eslint-disable-next-line no-multi-assign
+      result.finalTabByOrigin = existedTab = tab;
     } else if (dappInfo?.matchedType === EnumMatchDappType.bySecondaryDomain) {
       existedTab = tab;
     }
@@ -173,6 +176,7 @@ export function getOrCreateDappBoundTab(
     });
 
     result.createdTab = createdTab;
+    result.finalTabByOrigin = result.finalTabByOrigin || createdTab;
     result.finalTab = createdTab || existedTab || null;
   }
 

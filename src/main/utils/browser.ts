@@ -250,7 +250,7 @@ export function hidePopupView(view: BrowserView) {
   });
 }
 
-export function switchToBrowserTab(
+export function notifySwitchedToBrowserTab(
   tabId: chrome.tabs.Tab['id'],
   tabbedWin: import('../browser/browsers').default
 ) {

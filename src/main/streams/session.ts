@@ -36,7 +36,7 @@ import { checkOpenAction } from '../utils/tabs';
 import {
   createTmpEmptyBrowser,
   getWindowFromWebContents,
-  switchToBrowserTab,
+  notifySwitchedToBrowserTab,
 } from '../utils/browser';
 import {
   rewriteSessionWebRequestHeaders,
@@ -281,7 +281,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
           return [tab.view!.webContents, window];
         }
         case 'activate-tab': {
-          switchToBrowserTab(actionInfo.tabId, win);
+          notifySwitchedToBrowserTab(actionInfo.tabId, win);
 
           // TODO: make sure actionInfo.openedTab existed
           return [

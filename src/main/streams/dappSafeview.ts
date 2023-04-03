@@ -9,7 +9,7 @@ import {
 import {
   createPopupView,
   hidePopupView,
-  switchToBrowserTab,
+  notifySwitchedToBrowserTab,
 } from '../utils/browser';
 import {
   onIpcMainEvent,
@@ -113,7 +113,9 @@ export async function safeOpenURL(
   opts: {
     sourceURL: string;
     targetMatchedDappResult: IMatchDappResult;
-    _targetwin?: BrowserWindow;
+    targetWindow?: BrowserWindow;
+    forceLeaveTab?: import('../browser/tabs').Tab | null;
+    serverSideRedirectSourceTab?: import('../browser/tabs').Tab;
     redirectSourceTab?: import('../browser/tabs').Tab;
   }
 ): Promise<SafeOpenResult> {
@@ -124,7 +126,10 @@ export async function safeOpenURL(
       targetMatchedDappResult: opts.targetMatchedDappResult,
     });
 
-    const openedTab = opts.redirectSourceTab || findTabResult.finalTab;
+    const openedTab =
+      opts.forceLeaveTab ||
+      opts.serverSideRedirectSourceTab ||
+      findTabResult.finalTab;
 
     if (openedTab?.view) {
       let shouldLoad = false;
@@ -132,7 +137,7 @@ export async function safeOpenURL(
       const currentURL = openedTab.view.webContents.getURL();
       const currentInfo = canoicalizeDappUrl(currentURL);
 
-      if (opts.redirectSourceTab) {
+      if (opts.serverSideRedirectSourceTab) {
         shouldLoad = false;
       } else if (findTabResult.finalTab) {
         shouldLoad =
@@ -159,7 +164,7 @@ export async function safeOpenURL(
           if (shouldLoad) {
             openedTab.view?.webContents.loadURL(targetURL);
           }
-          switchToBrowserTab(openedTab.id, mainTabbedWin);
+          notifySwitchedToBrowserTab(openedTab.id, mainTabbedWin);
         },
       };
     }
@@ -171,7 +176,7 @@ export async function safeOpenURL(
   }
 
   // start: for non-added dapp, alert user to add it
-  const targetWin = opts._targetwin || (await onMainWindowReady()).window;
+  const targetWin = opts.targetWindow || mainTabbedWin.window;
 
   const { baseView } = await getDappSafeView();
   let favIcon: IParsedFavicon = {

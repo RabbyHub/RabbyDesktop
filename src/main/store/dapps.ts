@@ -285,13 +285,6 @@ export function parseDappRedirect(
 
   let finalAction: EnumOpenDappAction = EnumOpenDappAction.deny;
 
-  const couldKeepTab =
-    currentInfo.secondaryDomain === targetInfo.secondaryDomain &&
-    !!domainMetaCache[currentInfo.secondaryDomain]
-      ?.secondaryDomainOriginExisted;
-  const allowOpenTab =
-    !!domainMetaCache[targetInfo.secondaryDomain]?.secondaryDomainOriginExisted;
-
   const maybeRedirectInSPA = isFromDapp && isToSameOrigin;
 
   const isToExtension = targetURL.startsWith('chrome-extension://');
@@ -330,12 +323,6 @@ export function parseDappRedirect(
 
     isFromDapp,
     isToSameOrigin,
-    /** @deprecated */
-    couldKeepTab,
-    /** @deprecated */
-    allowOpenTab,
-    /** @deprecated */
-    shouldOpenExternal,
     finalAction,
     maybeRedirectInSPA,
     isToExtension,

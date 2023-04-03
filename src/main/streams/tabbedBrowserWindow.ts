@@ -37,6 +37,7 @@ import { cLog } from '../utils/log';
 import {
   createWindow,
   findByWindowId,
+  getOrCreateDappBoundTab,
   getTabbedWindowFromWebContents,
 } from '../utils/tabbedBrowserWindow';
 import { safeOpenURL } from './dappSafeview';
@@ -216,9 +217,15 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
   const currentUrl = evt.sender.getURL();
   const findResult = findDappsByOrigin(dappOrigin);
 
+  const mainTabbedWindow = await onMainWindowReady();
+  const findTabResult = getOrCreateDappBoundTab(mainTabbedWindow, dappOrigin, {
+    targetMatchedDappResult: findResult,
+  });
+
   const openResult = await safeOpenURL(dappOrigin, {
     sourceURL: currentUrl,
     targetMatchedDappResult: findResult,
+    forceLeaveTab: findTabResult.finalTabByOrigin,
   }).then((res) => {
     res.activeTab();
     return res;
