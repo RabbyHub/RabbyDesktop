@@ -8,8 +8,10 @@ import {
   QuoteResult,
 } from '@rabby-wallet/rabby-swap/dist/quote';
 import BigNumber from 'bignumber.js';
-import { useMemo } from 'react';
-import { getRouter, getSpender } from './utils';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { Tx } from '@debank/rabby-api/dist/types';
+import { atom, useSetAtom } from 'jotai';
+import { getRouter, getSpender, postSwap, postSwapParams } from './utils';
 
 export function isSwapWrapToken(
   payTokenId: string,
@@ -121,7 +123,7 @@ export const useVerifySdk = <T extends ValidateTokenParam>(
   const [routerPass, spenderPass] = useVerifyRouterAndSpender(
     chain,
     actualDexId,
-    data?.tx.to,
+    data?.tx?.to,
     data?.spender,
     payToken?.id,
     receiveToken?.id
@@ -137,4 +139,62 @@ export const useVerifySdk = <T extends ValidateTokenParam>(
   return {
     isSdkDataPass: routerPass && spenderPass && callDataPass,
   };
+};
+
+export const refreshSwapTxListAtom = atom(0);
+export const useRefreshSwapTxList = () => {
+  const setReFreshSwapList = useSetAtom(refreshSwapTxListAtom);
+  return useCallback(() => {
+    setReFreshSwapList((e) => e + 1);
+  }, [setReFreshSwapList]);
+};
+
+export const useOnSwapPushTx = (
+  pushTxCb: (payload: Tx & { hash: string }) => void
+) => {
+  useEffect(
+    () =>
+      window.rabbyDesktop.ipcRenderer.on(
+        '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
+        (payload) => {
+          if (payload.event !== 'transactionChanged') return;
+
+          const { type, ...data } = payload.data || {};
+          if (payload.data?.type === 'push-tx') {
+            pushTxCb(data);
+          }
+        }
+      ),
+    [pushTxCb]
+  );
+};
+
+export const usePostSwap = () => {
+  const refreshSwapList = useRefreshSwapTxList();
+  const pushTxs = useRef<Record<string, Tx & { hash: string }>>({});
+
+  const setData = useCallback((d: Tx & { hash: string }) => {
+    pushTxs.current = {
+      ...pushTxs.current,
+      [`${d.chainId}-${d.hash.toLowerCase()}`]: d,
+    };
+  }, []);
+  useOnSwapPushTx(setData);
+
+  const postSwapByChainHash = useCallback(
+    async (
+      chain: CHAINS_ENUM,
+      hash: string,
+      swapData: Omit<postSwapParams, 'tx'>
+    ) => {
+      const data = pushTxs.current[`${CHAINS[chain].id}-${hash.toLowerCase()}`];
+      if (data) {
+        const { hash: _, ...tx } = data;
+        await postSwap({ ...swapData, tx });
+        refreshSwapList();
+      }
+    },
+    [refreshSwapList]
+  );
+  return postSwapByChainHash;
 };

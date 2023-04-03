@@ -24,9 +24,16 @@ import { ReceiveDetails } from './component/ReceiveDetail';
 import { Slippage } from './component/Slippage';
 import { SwapTransactions } from './component/Transactions';
 import { TokenRender } from './component/TokenRender';
-import { getAllQuotes, getSpender, getToken, isSwapWrapToken } from './utils';
+import {
+  getAllQuotes,
+  getSpender,
+  getToken,
+  isSwapWrapToken,
+  validSlippage,
+} from './utils';
 import { QuoteItemProps, QuoteProvider, Quotes } from './component/Quotes';
 import styles from './index.module.less';
+import { usePostSwap } from './hooks';
 
 const Wrapper = styled.div`
   & > .header {
@@ -314,15 +321,6 @@ export const SwapToken = () => {
       payAmount &&
       feeAfterDiscount
     ) {
-      // return getAllDexQuotes({
-      //   userAddress,
-      //   payToken,
-      //   receiveToken,
-      //   slippage,
-      //   chain,
-      //   payAmount,
-      //   fee: feeAfterDiscount,
-      // });
       return getAllQuotes({
         userAddress,
         payToken,
@@ -344,6 +342,21 @@ export const SwapToken = () => {
     feeAfterDiscount,
   ]);
 
+  const {
+    value: slippageValidInfo,
+    error: slippageValidError,
+    loading: slippageValidLoading,
+  } = useAsync(async () => {
+    if (chain && Number(slippage) && payToken?.id && receiveToken?.id) {
+      return validSlippage({
+        chain,
+        slippage,
+        payTokenId: payToken?.id,
+        receiveTokenId: receiveToken?.id,
+      });
+    }
+  }, [slippage, chain, payToken?.id, receiveToken?.id, refreshId]);
+
   const renderQuotes = useMemo(
     () =>
       userAddress &&
@@ -363,12 +376,6 @@ export const SwapToken = () => {
       userAddress,
     ]
   );
-
-  // if (dexQuotes) {
-  //   console.log({
-  //     dexQuotes,
-  //   });
-  // }
 
   useDebounce(
     () => {
@@ -453,6 +460,8 @@ export const SwapToken = () => {
     activeProvider?.error ||
     !activeProvider?.quote;
 
+  const postSwapByChainHash = usePostSwap();
+
   const gotoSwap = useCallback(
     async (unlimited = false) => {
       if (
@@ -462,7 +471,7 @@ export const SwapToken = () => {
         activeProvider?.gasPrice
       ) {
         try {
-          await walletController.dexSwap(
+          const hash = await walletController.dexSwap(
             {
               chain,
               quote: activeProvider.quote,
@@ -481,6 +490,17 @@ export const SwapToken = () => {
               },
             }
           );
+          if (hash && receiveToken) {
+            postSwapByChainHash(chain, hash, {
+              payToken,
+              receiveToken,
+              payAmount,
+              slippage,
+              dexId: activeProvider.name,
+              txId: hash,
+              quote: activeProvider.quote,
+            });
+          }
         } catch (e) {
           console.error('dexSwap', e);
         } finally {
@@ -489,15 +509,19 @@ export const SwapToken = () => {
       }
     },
     [
-      payToken?.id,
+      payToken,
       activeProvider?.error,
       activeProvider?.quote,
+      activeProvider?.gasPrice,
       activeProvider?.shouldApproveToken,
       activeProvider?.name,
-      activeProvider?.gasPrice,
       activeProvider?.shouldTwoStepApprove,
       chain,
       rbiSource,
+      receiveToken,
+      postSwapByChainHash,
+      payAmount,
+      slippage,
       refresh,
     ]
   );
@@ -566,21 +590,6 @@ export const SwapToken = () => {
   const handleUnlimitedSwap = useCallback(() => handleSwap(true), [handleSwap]);
   const handleLimitedSwap = useCallback(() => handleSwap(), [handleSwap]);
 
-  console.log({
-    activeProvider,
-  });
-
-  // const isStableCoin = useMemo(() => {
-  //   if (payToken?.price && receiveToken?.price) {
-  //     return new BigNumber(payToken?.price)
-  //       .minus(receiveToken?.price)
-  //       .div(payToken?.price)
-  //       .abs()
-  //       .lte(0.01);
-  //   }
-  //   return false;
-  // }, [payToken, receiveToken]);
-
   useEffect(() => {
     if (
       payToken?.id &&
@@ -592,12 +601,6 @@ export const SwapToken = () => {
       setFeeAfterDiscount('0.01');
     }
   }, [chain, payToken?.id, receiveToken?.id]);
-
-  // useEffect(() => {
-  //   if (isStableCoin) {
-  //     setSlippage('0.05');
-  //   }
-  // }, [isStableCoin]);
 
   return (
     <Wrapper>
@@ -708,7 +711,15 @@ export const SwapToken = () => {
                 </div>
               </div>
 
-              <Slippage value={slippage} onChange={setSlippage} />
+              <Slippage
+                value={slippage}
+                onChange={setSlippage}
+                recommendValue={
+                  slippageValidInfo?.is_valid
+                    ? undefined
+                    : slippageValidInfo?.suggest_slippage
+                }
+              />
             </div>
             <div className="btnBox">
               {activeProvider?.shouldApproveToken ? (
@@ -765,7 +776,7 @@ export const SwapToken = () => {
           </div>
         </div>
 
-        {/* <SwapTransactions /> */}
+        <SwapTransactions addr={userAddress} />
       </div>
     </Wrapper>
   );
