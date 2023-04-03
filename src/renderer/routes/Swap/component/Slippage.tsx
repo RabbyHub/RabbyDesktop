@@ -3,6 +3,7 @@ import { memo, useMemo, useCallback, ChangeEventHandler } from 'react';
 import { useToggle } from 'react-use';
 import styled from 'styled-components';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
+import BigNumber from 'bignumber.js';
 
 export const SlippageItem = styled.div<{
   active?: boolean;
@@ -78,30 +79,38 @@ interface SlippageProps {
   onChange: (n: string) => void;
   amount?: string | number;
   symbol?: string;
+  recommendValue?: number;
 }
 export const Slippage = memo((props: SlippageProps) => {
-  const { value, onChange, amount = '', symbol = '' } = props;
-  const [open, setOpen] = useToggle(false);
+  const { value, onChange, amount = '', symbol = '', recommendValue } = props;
   const [isCustom, setIsCustom] = useToggle(false);
 
-  const [slippageError, isLow, isHigh] = useMemo(() => {
-    const low = Number(value || 0) < 0.1;
-    const high = Number(value || 0) > 10;
-    return [low || high, low, high];
+  const isLow = useMemo(() => {
+    return Number(value || 0) < 0.1;
   }, [value]);
+
+  const setRecommendValue = useCallback(() => {
+    onChange(new BigNumber(recommendValue || 0).times(100).toString());
+  }, [onChange, recommendValue]);
 
   const tips = useMemo(() => {
     if (isLow) {
       return 'Low slippage may cause failed transactions due to high volatility';
     }
-    if (isHigh) {
+    if (recommendValue) {
       // TODO: use recommend slippage instead of text
-      return 'To prevent front-running, we recommend a slippage of 0.9%';
+      return (
+        <span>
+          To prevent front-running, we recommend a slippage of{' '}
+          <span onClick={setRecommendValue} className="underline">
+            {new BigNumber(recommendValue || 0).times(100).toString()}
+          </span>
+          %;
+        </span>
+      );
     }
     return null;
-  }, [isHigh, isLow]);
-
-  const hasAmount = !!amount;
+  }, [isLow, recommendValue, setRecommendValue]);
 
   const onInputFocus: ChangeEventHandler<HTMLInputElement> = useCallback(
     (e) => {

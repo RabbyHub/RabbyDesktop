@@ -1,7 +1,12 @@
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
 import { CHAINS, CHAINS_ENUM } from '@debank/common';
-import { ExplainTxResponse, TokenItem, Tx } from '@debank/rabby-api/dist/types';
+import {
+  CEXQuote,
+  ExplainTxResponse,
+  TokenItem,
+  Tx,
+} from '@debank/rabby-api/dist/types';
 import {
   DEX_ENUM,
   DEX_ROUTER_WHITELIST,
@@ -12,7 +17,6 @@ import {
 import { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
 import BigNumber from 'bignumber.js';
 import { SWAP_FEE_ADDRESS, DEX, ETH_USDT_CONTRACT, CEX } from './constant';
-import { CEXQuote } from './type';
 
 export function isSwapWrapToken(
   payTokenId: string,
@@ -118,17 +122,34 @@ const getCexQuote = async (
 
   const p = {
     cex_id,
+    // pay_token_amount: payAmount,
     pay_token_amount: new BigNumber(payAmount)
       .times(10 ** payToken.decimals)
       .toFixed(0),
+    // pay_token_amount: payAmount,
     chain_id: CHAINS[chain].serverId,
     pay_token_id: payToken.id,
     receive_token_id,
   };
   const queryString = new URLSearchParams(p).toString();
+  // try {
+  //   const data = await walletOpenapi.getCEXSwapQuote(p);
+  //   return {
+  //     data,
+  //     name: cex_id,
+  //     isDex: false,
+  //   };
+  // } catch (error) {
+  //   return {
+  //     data: null,
+  //     name: cex_id,
+  //     isDex: false,
+  //   };
+  // }
 
+  // REMOVE: test api
   return fetch(
-    `https://cex.rabby-api.debank.dbkops.com/v1/wallet/cex_swap_quote?${queryString}`
+    `https://cex-swap.rabby-api.debank.dbkops.com/v1/wallet/cex_swap_quote?${queryString}`
   )
     .then((response) => response.json())
     .then(
@@ -163,30 +184,77 @@ export const getAllQuotes = async (
   ]);
 };
 
-interface validSlippageParams {
+export interface validSlippageParams {
   chain: CHAINS_ENUM;
-  payAmount: string;
+  slippage: string;
   payTokenId: string;
   receiveTokenId: string;
 }
 export const validSlippage = async ({
   chain,
-  payAmount,
+  slippage,
   payTokenId,
   receiveTokenId,
 }: validSlippageParams) => {
   const p = {
-    pay_token_amount: payAmount,
+    slippage: new BigNumber(slippage).div(100).toString(),
     chain_id: CHAINS[chain].serverId,
-    pay_token_id: payTokenId,
-    receive_token_id: receiveTokenId,
+    from_token_id: payTokenId,
+    to_token_id: receiveTokenId,
   };
-  const queryString = new URLSearchParams(p).toString();
 
-  return fetch(
-    `https://cex.rabby-api.debank.dbkops.com/v1/wallet/check_slippage?${queryString}`
-  ).then((response) => response.json());
+  return walletOpenapi.checkSlippage(p);
 };
+
+export const getSwapList = async (addr: string, start = 0, limit = 5) => {
+  const data = await walletOpenapi.getSwapTradeList({
+    user_addr: addr,
+    start: `${start}`,
+    limit: `${limit}`,
+  });
+  return {
+    list: data?.history_list,
+    last: data,
+    totalCount: data?.total_cnt,
+  };
+};
+
+export interface postSwapParams {
+  payToken: TokenItem;
+  receiveToken: TokenItem;
+  payAmount: string;
+  // receiveRawAmount: string;
+  slippage: string;
+  dexId: string;
+  txId: string;
+  quote: QuoteResult;
+  tx: Tx;
+}
+export const postSwap = async ({
+  payToken,
+  receiveToken,
+  payAmount,
+  // receiveRawAmount,
+  slippage,
+  dexId,
+  txId,
+  quote,
+  tx,
+}: postSwapParams) =>
+  walletOpenapi.postSwap({
+    quote: {
+      pay_token_id: payToken.id,
+      pay_token_amount: Number(payAmount),
+      receive_token_id: receiveToken.id,
+      receive_token_amount: new BigNumber(quote.toTokenAmount)
+        .div(10 ** (quote.toTokenDecimals || receiveToken.decimals))
+        .toNumber(),
+      slippage: new BigNumber(slippage).div(100).toNumber(),
+    },
+    dex_id: dexId,
+    tx_id: txId,
+    tx,
+  });
 
 interface getTokenParams {
   addr: string;

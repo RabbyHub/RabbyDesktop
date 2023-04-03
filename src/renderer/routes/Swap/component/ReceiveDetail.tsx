@@ -121,11 +121,6 @@ export const ReceiveDetails = (
       const receive = receiveAll.times(receiveToken.price);
       const cut = receive.minus(pay).div(pay).times(100);
 
-      console.log({
-        pay: pay.toString(10),
-        receiveAll: receive.toString(10),
-      });
-
       return {
         receiveNum: formatAmount(receiveAll.toString(10)),
         payUsd: formatAmount(pay.toString(10)),

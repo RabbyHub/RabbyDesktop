@@ -1,5 +1,5 @@
 import { useMemo, useCallback } from 'react';
-import { TokenItem } from '@debank/rabby-api/dist/types';
+import { CEXQuote, TokenItem } from '@debank/rabby-api/dist/types';
 import { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
 import { Skeleton, Tooltip, message } from 'antd';
 import styled from 'styled-components';
@@ -23,7 +23,7 @@ import {
 import { IconRefresh } from './IconRefresh';
 import { WarningOrChecked } from './ReceiveDetail';
 import { useVerifySdk } from '../hooks';
-import { CEXQuote } from '../type';
+// import { CEXQuote } from '../type';
 
 const QuotesWrapper = styled.div`
   --green-color: #27c193;
@@ -587,7 +587,7 @@ export const Quotes = (props: QuotesProps) => {
                   quote={data}
                   name={name}
                   isBestQuote={idx === 0}
-                  bestAmount={bestAmount}
+                  bestAmount={`${bestAmount}`}
                   active={activeName === name}
                   {...other}
                 />
@@ -597,7 +597,7 @@ export const Quotes = (props: QuotesProps) => {
               <CexQuoteItem
                 name={name}
                 data={data}
-                bestAmount={bestAmount}
+                bestAmount={`${bestAmount}`}
                 isBestQuote={idx === 0}
               />
             );
