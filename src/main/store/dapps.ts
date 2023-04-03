@@ -260,6 +260,7 @@ export function parseDappRedirect(
     >;
     isForTrezorLikeConnection?: boolean;
     isFromExistedTab?: boolean;
+    isServerSideRedirect?: boolean;
   }
 ) {
   const {
@@ -267,6 +268,7 @@ export function parseDappRedirect(
     blockchain_explorers = nullSet,
     isForTrezorLikeConnection = false,
     isFromExistedTab = false,
+    isServerSideRedirect = false,
   } = opts || {};
 
   const isFromDapp = isUrlFromDapp(currentURL);
@@ -303,6 +305,8 @@ export function parseDappRedirect(
   ) {
     shouldOpenExternal = true;
     finalAction = EnumOpenDappAction.openExternal;
+  } else if (isServerSideRedirect && targetInfo.matchDappResult.dapp) {
+    finalAction = EnumOpenDappAction.leaveInTab;
   } else if (
     isFromExistedTab &&
     targetInfo.matchDappResult.dapp &&

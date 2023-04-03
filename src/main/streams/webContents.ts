@@ -179,6 +179,7 @@ export const setListeners = {
           blockchain_explorers: getBlockchainExplorers(),
           isForTrezorLikeConnection: tabbedWindow?.isForTrezorLikeConnection(),
           isFromExistedTab: !!foundTab,
+          isServerSideRedirect: true,
         }
       );
 
