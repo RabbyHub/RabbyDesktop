@@ -260,6 +260,7 @@ export function parseDappRedirect(
     >;
     isForTrezorLikeConnection?: boolean;
     isFromExistedTab?: boolean;
+    isOpenNewTab?: boolean;
   }
 ) {
   const {
@@ -316,6 +317,10 @@ export function parseDappRedirect(
   ) {
     finalAction = EnumOpenDappAction.leaveInTab;
   } else if (isFromDapp && !isToSameOrigin) {
+    finalAction = EnumOpenDappAction.safeOpenOrSwitchToAnotherTab;
+  }
+
+  if (opts?.isOpenNewTab && !shouldOpenExternal && !isToExtension) {
     finalAction = EnumOpenDappAction.safeOpenOrSwitchToAnotherTab;
   }
 

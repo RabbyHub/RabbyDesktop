@@ -73,77 +73,53 @@ export function setOpenHandlerForWebContents({
 
     const targetURL = details.url;
 
-    const {
-      targetInfo,
-      isFromDapp,
-      isToExtension,
-      isToSameOrigin,
-      couldKeepTab,
-      allowOpenTab,
-      shouldOpenExternal,
-      maybeRedirectInSPA,
-    } = parseDappRedirect(currentUrl, targetURL, {
-      dapps,
-      blockchain_explorers: getBlockchainExplorers(),
-      isForTrezorLikeConnection,
-    });
+    const { tabbedWindow, foundTab } = checkoutTabbedWindow(webContents, dapps);
 
-    if (shouldOpenExternal) {
-      shell.openExternal(targetURL);
-      return { action: 'deny' };
-    }
-
-    if (isFromDapp && !isToSameOrigin) {
-      if (!couldKeepTab || allowOpenTab) {
-        safeOpenURL(targetURL, {
-          sourceURL: currentUrl,
-          targetMatchedDappResult: targetInfo.matchDappResult,
-          _targetwin: parentTabbedWin.window,
-        }).then((res) => res.activeTab());
-      } else {
-        webContents.loadURL(targetURL);
+    const { targetInfo, finalAction, maybeRedirectInSPA } = parseDappRedirect(
+      currentUrl,
+      targetURL,
+      {
+        dapps,
+        blockchain_explorers: getBlockchainExplorers(),
+        isForTrezorLikeConnection,
+        isOpenNewTab: true,
       }
-    } else if (!isToExtension) {
-      switch (details.disposition) {
-        case 'foreground-tab':
-        case 'background-tab':
-        case 'new-window': {
-          const openedDapp =
-            parentTabbedWin?.tabs.findBySecondaryDomain(targetURL);
-          if (openedDapp) {
-            switchToBrowserTab(openedDapp!.id, parentTabbedWin!);
+    );
 
-            /**
-             * sometimes, targetURL has same origin with currentUrl.
-             *
-             * for SPA, we don't set new url for it.
-             * But for static redirect url, we need to set new url.
-             */
-            if (maybeRedirectInSPA) {
-              setTimeout(() => {
-                if (webContents.isDestroyed()) return;
+    switch (finalAction) {
+      case EnumOpenDappAction.deny: {
+        if (!!foundTab && !!targetInfo.existedDapp) {
+          return { action: 'deny' };
+        }
+        break;
+      }
+      case EnumOpenDappAction.openExternal: {
+        shell.openExternal(targetURL);
+        return { action: 'deny' };
+      }
+      case EnumOpenDappAction.leaveInTab: {
+        if (maybeRedirectInSPA) {
+          setTimeout(() => {
+            if (webContents.isDestroyed()) return;
 
-                if (
-                  getBaseHref(webContents.getURL()) !== getBaseHref(targetURL)
-                ) {
-                  webContents.loadURL(targetURL);
-                }
-              }, 200);
+            if (getBaseHref(webContents.getURL()) !== getBaseHref(targetURL)) {
+              webContents.loadURL(targetURL);
             }
-          } else {
-            onMainWindowReady().then((mainTabbedWin) => {
-              const { finalTab } = getOrCreateDappBoundTab(
-                mainTabbedWin,
-                targetURL
-              );
-              finalTab?.loadURL(targetURL);
-            });
-          }
-          break;
+          }, 200);
         }
-        default: {
-          break;
-        }
+        return { action: 'deny' };
+      }
+      case EnumOpenDappAction.safeOpenOrSwitchToAnotherTab: {
+        safeOpenURL(targetURL, {
+          targetMatchedDappResult: targetInfo.matchDappResult,
+          sourceURL: currentUrl,
+          _targetwin: tabbedWindow?.window,
+        }).then((res) => res.activeTab());
+
+        break;
+      }
+      default: {
+        break;
       }
     }
 
