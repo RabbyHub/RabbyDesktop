@@ -59,7 +59,7 @@ export const SENTRY_DEBUG = !IS_RUNTIME_PRODUCTION;
 export const enum EnumOpenDappAction {
   'deny' = 'deny',
   'openExternal' = 'openExternal',
-  'safeOpenOrSwitchToAnotherTab' = 'safeOpenOrSwitchToAnotherTab',
+  'safeCreateOrSwitchToAnotherTab' = 'safeCreateOrSwitchToAnotherTab',
   // 'openInNewtab' = 'openInNewtab',
   // 'alertUserAddDapp' = 'alertUserAddDapp',
   'leaveInTab' = 'leaveInTab',

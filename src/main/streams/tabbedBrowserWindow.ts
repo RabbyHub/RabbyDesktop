@@ -31,17 +31,19 @@ import {
   isPopupWindowHidden,
 } from '../utils/browser';
 import { getOrPutCheckResult } from '../utils/dapps';
-import { dappStore, findDappsByOrigin, getAllDapps } from '../store/dapps';
+import { dappStore, findDappsByOrigin } from '../store/dapps';
 import { cLog } from '../utils/log';
 
 import {
+  createDappBoundDapp,
   createWindow,
   findByWindowId,
-  getOrCreateDappBoundTab,
+  getOrCreateDappByURL,
   getTabbedWindowFromWebContents,
 } from '../utils/tabbedBrowserWindow';
 import { safeOpenURL } from './dappSafeview';
 import { isTargetScanLink } from '../store/dynamicConfig';
+import { MainWindowTab } from '../browser/tabs';
 
 /**
  * @deprecated import members from '../utils/tabbedBrowserWindow' instead
@@ -203,29 +205,46 @@ onIpcMainEvent('__internal_webui-window-close', (_, winId, webContentsId) => {
 });
 
 handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
+  const result = {
+    shouldNavTabOnClient: false,
+    isOpenExternal: false,
+    isTargetDapp: false,
+    isTargetDappByOrigin: false,
+    isTargetDappBySecondaryOrigin: false,
+  };
   if (isTargetScanLink(dappOrigin)) {
     shell.openExternal(dappOrigin);
-    return {
-      shouldNavTabOnClient: false,
-      isOpenExternal: true,
-      isTargetDapp: false,
-      isTargetDappByOrigin: false,
-      isTargetDappBySecondaryOrigin: false,
-    };
+    return { ...result, isOpenExternal: true };
   }
 
   const currentUrl = evt.sender.getURL();
   const findResult = findDappsByOrigin(dappOrigin);
 
   const mainTabbedWindow = await onMainWindowReady();
-  const findTabResult = getOrCreateDappBoundTab(mainTabbedWindow, dappOrigin, {
+  let openedTab = null as MainWindowTab | null;
+
+  if (!findResult.dapp) {
+    return result;
+  } // now we know there must be valid dappTab
+  const findTabResult = getOrCreateDappByURL(mainTabbedWindow, dappOrigin, {
     targetMatchedDappResult: findResult,
   });
+  if (findResult.dappByOrigin) {
+    openedTab =
+      findTabResult.finalTabByOrigin ||
+      createDappBoundDapp(
+        mainTabbedWindow,
+        dappOrigin,
+        findResult.dappByOrigin
+      );
+  } else if (findResult.dappBySecondaryDomainOrigin) {
+    openedTab = findTabResult.finalTabBySecondaryOrigin;
+  }
 
   const openResult = await safeOpenURL(dappOrigin, {
     sourceURL: currentUrl,
     targetMatchedDappResult: findResult,
-    forceLeaveTab: findTabResult.finalTabByOrigin,
+    forceLeaveTab: openedTab,
   }).then((res) => {
     res.activeTab();
     return res;

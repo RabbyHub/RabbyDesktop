@@ -515,6 +515,13 @@ export class MainWindowTab extends Tab {
     });
   }
 
+  get isBoundSecondaryDomainDapp() {
+    if (!this.$meta.relatedDappId) return;
+
+    const parsedInfo = canoicalizeDappUrl(this.$meta.relatedDappId);
+    return parsedInfo.is2ndaryDomain;
+  }
+
   matchRelatedDappInfo(dappOrigin: string | ICanonalizedUrlInfo) {
     if (!this.isOfMainWindow || !this.$meta.relatedDappId) return null;
 

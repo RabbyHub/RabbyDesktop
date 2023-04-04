@@ -26,7 +26,7 @@ import { getAssetPath } from '../utils/app';
 import { parseWebsiteFavicon } from '../utils/fetch';
 import { getAppProxyConf } from '../store/desktopApp';
 import { findDappsByOrigin } from '../store/dapps';
-import { getOrCreateDappBoundTab } from '../utils/tabbedBrowserWindow';
+import { getOrCreateDappByURL } from '../utils/tabbedBrowserWindow';
 
 function hideView(view: BrowserView, parentWin: BrowserWindow) {
   parentWin.removeBrowserView(view);
@@ -116,13 +116,12 @@ export async function safeOpenURL(
     targetWindow?: BrowserWindow;
     forceLeaveTab?: import('../browser/tabs').Tab | null;
     serverSideRedirectSourceTab?: import('../browser/tabs').Tab;
-    redirectSourceTab?: import('../browser/tabs').Tab;
   }
 ): Promise<SafeOpenResult> {
   const mainTabbedWin = await onMainWindowReady();
 
   if (opts.targetMatchedDappResult?.dapp) {
-    const findTabResult = getOrCreateDappBoundTab(mainTabbedWin, targetURL, {
+    const findTabResult = getOrCreateDappByURL(mainTabbedWin, targetURL, {
       targetMatchedDappResult: opts.targetMatchedDappResult,
     });
 

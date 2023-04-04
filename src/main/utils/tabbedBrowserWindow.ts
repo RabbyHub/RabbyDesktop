@@ -15,7 +15,7 @@ import { getWindowFromWebContents } from './browser';
 
 import { isEnableContentProtected } from '../store/desktopApp';
 import { findDappsByOrigin, getAllDapps } from '../store/dapps';
-import { Tab } from '../browser/tabs';
+import type { MainWindowTab } from '../browser/tabs';
 import { sendToWebContents } from './ipcMainEvents';
 
 const windows: TabbedBrowserWindow[] = [];
@@ -65,17 +65,17 @@ export function checkoutTabbedWindow(
 ) {
   const window = getWindowFromWebContents(webContents);
   const tabbedWindow = window ? getWindowFromBrowserWindow(window) : null;
-  const webContentsTab = tabbedWindow?.tabs.tabList.find(
+  const webContentsDappTab = tabbedWindow?.tabs.tabList.find(
     (tab) => tab.view?.webContents.id === webContents.id
   );
-  const matchedDappInfo = webContentsTab?.relatedDappId
-    ? findDappsByOrigin(webContentsTab.relatedDappId, dapps)
+  const matchedDappInfo = webContentsDappTab?.relatedDappId
+    ? findDappsByOrigin(webContentsDappTab.relatedDappId, dapps)
     : null;
 
   return {
     parentWindow: window,
     tabbedWindow,
-    webContentsTab,
+    webContentsDappTab,
     matchedDappInfo,
   };
 }
@@ -119,14 +119,49 @@ export async function removeWindowRecord(win: Electron.BrowserWindow) {
   return tabbedWin;
 }
 
+export function createDappBoundDapp(
+  mainTabbedWin: MainTabbedBrowserWindow,
+  targetURL: string,
+  matchedDapp: IMatchDappResult['dappByOrigin'] & object
+) {
+  const parsedInfo =
+    typeof targetURL === 'string' ? canoicalizeDappUrl(targetURL) : targetURL;
+  let openedTab: MainWindowTab | null = null;
+  mainTabbedWin.tabs.tabList.find((tab) => {
+    const dappInfo = tab.matchRelatedDappInfo(parsedInfo);
+    if (dappInfo?.matchedType === EnumMatchDappType.byOrigin) {
+      openedTab = tab;
+    }
+
+    return dappInfo;
+  });
+
+  if (!openedTab) {
+    openedTab = mainTabbedWin.createTab({
+      initDetails: { url: targetURL },
+      relatedDappId: matchedDapp.id,
+    });
+  }
+
+  sendToWebContents(
+    mainTabbedWin.window.webContents,
+    '__internal_push:mainwindow:opened-dapp-tab',
+    {
+      dappId: matchedDapp.id,
+      tabId: openedTab.id,
+      dappOrigin: matchedDapp.origin,
+    }
+  );
+
+  return openedTab;
+}
+
 type IGetTabFromMainWindowResult = {
-  foundMatchedDapp: IDapp | null;
-  existedTab: Tab | null;
-  createdTab: Tab | null;
-  finalTab: Tab | null;
-  finalTabByOrigin: Tab | null;
+  finalTab: MainWindowTab | null;
+  finalTabByOrigin: MainWindowTab | null;
+  finalTabBySecondaryOrigin: MainWindowTab | null;
 };
-export function getOrCreateDappBoundTab(
+export function getOrCreateDappByURL(
   mainTabbedWin: MainTabbedBrowserWindow,
   targetURL: string,
   opts?: {
@@ -137,47 +172,45 @@ export function getOrCreateDappBoundTab(
     typeof targetURL === 'string' ? canoicalizeDappUrl(targetURL) : targetURL;
 
   const result: IGetTabFromMainWindowResult = {
-    foundMatchedDapp: null,
-    existedTab: null,
-    createdTab: null,
     finalTab: null,
     finalTabByOrigin: null,
+    finalTabBySecondaryOrigin: null,
   };
 
-  let existedTab = null as Tab | null;
   mainTabbedWin.tabs.tabList.find((tab) => {
     const dappInfo = tab.matchRelatedDappInfo(parsedInfo);
     if (dappInfo?.matchedType === EnumMatchDappType.byOrigin) {
       // eslint-disable-next-line no-multi-assign
-      result.finalTabByOrigin = existedTab = tab;
+      result.finalTabByOrigin = tab;
     } else if (dappInfo?.matchedType === EnumMatchDappType.bySecondaryDomain) {
-      existedTab = tab;
+      // eslint-disable-next-line no-multi-assign
+      result.finalTabBySecondaryOrigin = tab;
     }
 
     return dappInfo;
   });
-
-  // eslint-disable-next-line no-multi-assign
-  result.finalTab = result.existedTab = existedTab || null;
 
   let matchedDappResult = opts?.targetMatchedDappResult;
   if (!matchedDappResult) {
     matchedDappResult = findDappsByOrigin(parsedInfo.origin);
   }
 
-  result.foundMatchedDapp = matchedDappResult?.dapp || null;
-
   if (!matchedDappResult.dapp) return result;
 
-  if (!existedTab) {
+  if (matchedDappResult.dappByOrigin) {
+    result.finalTab = result.finalTabByOrigin;
+  } else if (matchedDappResult.dappBySecondaryDomainOrigin) {
+    result.finalTab = result.finalTabBySecondaryOrigin;
+  }
+
+  if (!(result.finalTabByOrigin || result.finalTabBySecondaryOrigin)) {
     const createdTab = mainTabbedWin.createTab({
       initDetails: { url: targetURL },
       relatedDappId: matchedDappResult.dapp.id,
     });
 
-    result.createdTab = createdTab;
     result.finalTabByOrigin = result.finalTabByOrigin || createdTab;
-    result.finalTab = createdTab || existedTab || null;
+    result.finalTab = createdTab;
   }
 
   // TODO: for existed tab, we should also push this event on another location

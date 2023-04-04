@@ -45,7 +45,7 @@ import { tryAutoUnlockRabbyX } from './rabbyIpcQuery/autoUnlock';
 import { alertAutoUnlockFailed } from './mainWindow';
 import { setupAppTray } from './appTray';
 import { checkForceUpdate } from '../updater/force_update';
-import { getOrCreateDappBoundTab } from '../utils/tabbedBrowserWindow';
+import { getOrCreateDappByURL } from '../utils/tabbedBrowserWindow';
 import { MainTabbedBrowserWindow } from '../browser/browsers';
 
 const appLog = getBindLog('appStream', 'bgGrey');
@@ -93,7 +93,7 @@ app.on('web-contents-created', async (evtApp, webContents) => {
             notifySwitchedToBrowserTab(dappTab!.id, tabbedWin!);
           } else if (mainTabbedWin === tabbedWin) {
             if (!isFromExt) {
-              const { finalTab: continualOpenedTab } = getOrCreateDappBoundTab(
+              const { finalTab: continualOpenedTab } = getOrCreateDappByURL(
                 mainTabbedWin,
                 details.url
               );

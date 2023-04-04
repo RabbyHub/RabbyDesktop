@@ -8,7 +8,7 @@ import { getAllDapps, parseDappRedirect } from '../store/dapps';
 import { safeOpenURL } from './dappSafeview';
 import {
   checkoutTabbedWindow,
-  getOrCreateDappBoundTab,
+  getOrCreateDappByURL,
 } from '../utils/tabbedBrowserWindow';
 import { getBlockchainExplorers } from '../store/dynamicConfig';
 
@@ -20,7 +20,7 @@ export function openTabOfDapp(
   url: string
 ) {
   // find if opened tab already
-  const { finalTab: continualOpenedTab } = getOrCreateDappBoundTab(
+  const { finalTab: continualOpenedTab } = getOrCreateDappByURL(
     mainTabbedWin,
     url
   );
@@ -71,7 +71,7 @@ export function setOpenHandlerForWebContents({
 
     const targetURL = details.url;
 
-    const { tabbedWindow, webContentsTab } = checkoutTabbedWindow(
+    const { tabbedWindow, webContentsDappTab } = checkoutTabbedWindow(
       webContents,
       dapps
     );
@@ -82,7 +82,7 @@ export function setOpenHandlerForWebContents({
       {
         dapps,
         blockchain_explorers: getBlockchainExplorers(),
-        isFromExistedTab: !!webContentsTab,
+        webContentsDappTab,
         isForTrezorLikeConnection,
         isOpenNewTab: true,
       }
@@ -105,14 +105,16 @@ export function setOpenHandlerForWebContents({
               webContents.loadURL(targetURL);
             }
           }, 200);
+        } else {
+          // TODO: is here correct?
+          webContents.loadURL(targetURL);
         }
         return { action: 'deny' };
       }
-      case EnumOpenDappAction.safeOpenOrSwitchToAnotherTab: {
+      case EnumOpenDappAction.safeCreateOrSwitchToAnotherTab: {
         safeOpenURL(targetURL, {
           targetMatchedDappResult: targetInfo.matchDappResult,
           sourceURL: currentUrl,
-          redirectSourceTab: webContentsTab,
           targetWindow: tabbedWindow?.window,
         }).then((res) => res.activeTab());
 
@@ -141,7 +143,7 @@ export const setListeners = {
       const evtWebContents = (evt as any).sender as Electron.WebContents;
       const dapps = getAllDapps();
 
-      const { tabbedWindow, webContentsTab, matchedDappInfo } =
+      const { tabbedWindow, webContentsDappTab, matchedDappInfo } =
         checkoutTabbedWindow(evtWebContents, dapps);
       const previousURL = matchedDappInfo?.dapp?.origin || '';
 
@@ -152,14 +154,14 @@ export const setListeners = {
           dapps,
           blockchain_explorers: getBlockchainExplorers(),
           isForTrezorLikeConnection: tabbedWindow?.isForTrezorLikeConnection(),
-          isFromExistedTab: !!webContentsTab,
+          webContentsDappTab,
           isServerSideRedirect: true,
         }
       );
 
       switch (finalAction) {
         case EnumOpenDappAction.deny: {
-          if (!!webContentsTab && !!targetInfo.existedDapp) {
+          if (!!webContentsDappTab && !!targetInfo.existedDapp) {
             // TODO: maybe we should open dapp from tab belongs to the dapp?
             return true;
           }
@@ -174,11 +176,11 @@ export const setListeners = {
         case EnumOpenDappAction.leaveInTab: {
           return true;
         }
-        case EnumOpenDappAction.safeOpenOrSwitchToAnotherTab: {
+        case EnumOpenDappAction.safeCreateOrSwitchToAnotherTab: {
           safeOpenURL(targetURL, {
             targetMatchedDappResult: targetInfo.matchDappResult,
             sourceURL: previousURL,
-            serverSideRedirectSourceTab: webContentsTab,
+            serverSideRedirectSourceTab: webContentsDappTab,
           }).then((res) => res.activeTab());
 
           evt.preventDefault();
@@ -214,7 +216,7 @@ export const setListeners = {
         const currentUrl = evtWebContents.getURL();
 
         const dapps = getAllDapps();
-        const { tabbedWindow, webContentsTab } = checkoutTabbedWindow(
+        const { tabbedWindow, webContentsDappTab } = checkoutTabbedWindow(
           evtWebContents,
           dapps
         );
@@ -227,7 +229,7 @@ export const setListeners = {
           dapps,
           blockchain_explorers: getBlockchainExplorers(),
           isForTrezorLikeConnection: tabbedWindow?.isForTrezorLikeConnection(),
-          isFromExistedTab: !!webContentsTab,
+          webContentsDappTab,
         });
 
         switch (finalAction) {
@@ -241,12 +243,11 @@ export const setListeners = {
           case EnumOpenDappAction.leaveInTab: {
             return true;
           }
-          case EnumOpenDappAction.safeOpenOrSwitchToAnotherTab: {
+          case EnumOpenDappAction.safeCreateOrSwitchToAnotherTab: {
             evt.preventDefault();
             safeOpenURL(targetURL, {
               sourceURL: currentUrl,
               targetMatchedDappResult: targetInfo.matchDappResult,
-              // openedTab,
               targetWindow: parentWindow,
             }).then((res) => res.activeTab());
 

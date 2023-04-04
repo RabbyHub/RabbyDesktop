@@ -32,6 +32,7 @@ import { storeLog } from '../utils/log';
 import { makeStore } from '../utils/store';
 import { getAppProxyConfigForAxios } from './desktopApp';
 import { fetchImageBuffer } from '../utils/fetch';
+import type { MainWindowTab } from '../browser/tabs';
 
 const IDappSchema: import('json-schema-typed').JSONSchema = {
   type: 'object',
@@ -259,7 +260,7 @@ export function parseDappRedirect(
       (IAppDynamicConfig['blockchain_explorers'] & object)[number]
     >;
     isForTrezorLikeConnection?: boolean;
-    isFromExistedTab?: boolean;
+    webContentsDappTab?: import('../browser/tabs').Tab;
     isOpenNewTab?: boolean;
     isServerSideRedirect?: boolean;
   }
@@ -268,7 +269,7 @@ export function parseDappRedirect(
     dapps = getAllDapps(),
     blockchain_explorers = nullSet,
     isForTrezorLikeConnection = false,
-    isFromExistedTab = false,
+    webContentsDappTab = false,
     isServerSideRedirect = false,
   } = opts || {};
 
@@ -278,12 +279,12 @@ export function parseDappRedirect(
   const targetInfo = parseDappUrl(targetURL, dapps);
   const isToSameOrigin = currentInfo.origin === targetInfo.origin;
 
-  const domainMetaCache: Record<
-    I2ndDomainMeta['secondaryDomain'],
-    I2ndDomainMeta
-  > = {};
-  parseDomainMeta(currentURL, dapps, domainMetaCache);
-  parseDomainMeta(targetURL, dapps, domainMetaCache);
+  // const domainMetaCache: Record<
+  //   I2ndDomainMeta['secondaryDomain'],
+  //   I2ndDomainMeta
+  // > = {};
+  // parseDomainMeta(currentURL, dapps, domainMetaCache);
+  // parseDomainMeta(targetURL, dapps, domainMetaCache);
 
   let finalAction: EnumOpenDappAction = EnumOpenDappAction.deny;
 
@@ -300,25 +301,34 @@ export function parseDappRedirect(
     shouldOpenExternal = true;
     finalAction = EnumOpenDappAction.openExternal;
   } else if (isServerSideRedirect && targetInfo.matchDappResult.dapp) {
+    // for server side redirect, we cannot handle currentURl with is empty
+    // TODO: maybe we should 'closeAndOpenAnotherTab` instead of `leaveIntab` for server side redirect?
     finalAction = EnumOpenDappAction.leaveInTab;
   } else if (
-    isFromExistedTab &&
+    !!webContentsDappTab &&
     targetInfo.matchDappResult.dapp &&
     !isToSameOrigin
   ) {
-    finalAction = EnumOpenDappAction.safeOpenOrSwitchToAnotherTab;
+    finalAction = EnumOpenDappAction.safeCreateOrSwitchToAnotherTab;
   } else if (
-    isFromExistedTab &&
+    !!webContentsDappTab &&
     currentInfo.matchDappResult.dappBySecondaryDomainOrigin &&
     currentInfo.secondaryDomain === targetInfo.secondaryDomain
   ) {
     finalAction = EnumOpenDappAction.leaveInTab;
   } else if (isFromDapp && !isToSameOrigin) {
-    finalAction = EnumOpenDappAction.safeOpenOrSwitchToAnotherTab;
+    finalAction = EnumOpenDappAction.safeCreateOrSwitchToAnotherTab;
   }
 
-  if (opts?.isOpenNewTab && !shouldOpenExternal && !isToExtension) {
-    finalAction = EnumOpenDappAction.safeOpenOrSwitchToAnotherTab;
+  if (opts?.isOpenNewTab) {
+    if (
+      targetInfo.secondaryDomain === currentInfo.secondaryDomain &&
+      (webContentsDappTab as MainWindowTab).isBoundSecondaryDomainDapp
+    ) {
+      finalAction = EnumOpenDappAction.leaveInTab;
+    } else if (!shouldOpenExternal && !isToExtension) {
+      finalAction = EnumOpenDappAction.safeCreateOrSwitchToAnotherTab;
+    }
   }
 
   return {
