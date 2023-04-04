@@ -1,6 +1,5 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable no-multi-assign */
-import { CHAINS, CHAINS_ENUM } from '@debank/common';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import { Contract, providers } from 'ethers';
 import { hexToString } from 'web3-utils';
@@ -10,7 +9,7 @@ import TokensIcons from '../routes/Home/components/TokenIcons';
 import { formatUsdValue } from './number';
 import { getCollectionDisplayName, PortfolioItemNft } from './nft';
 
-export const ellipsisTokenSymbol = (text: string, length = 5) => {
+export const ellipsisTokenSymbol = (text: string, length = 6) => {
   if (text.length <= length) return text;
 
   const regexp = new RegExp(`^(.{${length}})(.*)$`);
@@ -227,45 +226,6 @@ export type ValidateTokenParam = {
   id: string;
   symbol: string;
   decimals: number;
-};
-export const validateToken = async <
-  T extends ValidateTokenParam = ValidateTokenParam
->(
-  token: T,
-  chain: CHAINS_ENUM,
-  customRPC: string
-) => {
-  if (!chain) return true;
-  const currentChain = CHAINS[chain];
-  if (token.id === currentChain.nativeTokenAddress) {
-    if (
-      token.symbol !== currentChain.nativeTokenSymbol ||
-      token.decimals !== currentChain.nativeTokenDecimals
-    ) {
-      return false;
-    }
-    return true;
-  }
-  try {
-    const [decimals, symbol] = await Promise.all([
-      geTokenDecimals(
-        token.id,
-        new providers.JsonRpcProvider(customRPC || currentChain.thridPartyRPC)
-      ),
-      getTokenSymbol(
-        token.id,
-        new providers.JsonRpcProvider(customRPC || currentChain.thridPartyRPC)
-      ),
-    ]);
-
-    if (symbol !== token.symbol || decimals !== token.decimals) {
-      return false;
-    }
-    return true;
-  } catch (e) {
-    console.error('token verify failed', e);
-    return false;
-  }
 };
 
 export function wrapUrlInImg(
