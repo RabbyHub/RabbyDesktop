@@ -96,7 +96,7 @@ export default (
               chain: string;
             }
           > = {};
-          const tokenHistoryPriceQueue = new PQueue({ concurrency: 20 });
+          const tokenHistoryPriceQueue = new PQueue({ concurrency: 100 });
           const grouped = groupBy(q, (item) => {
             return item.chain;
           });
