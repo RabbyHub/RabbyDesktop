@@ -21,7 +21,7 @@ export const TxBasicInfo = ({ data }: TxBasicInfoProps) => {
   );
 
   return (
-    <div className={classNames(styles.txInfo)}>
+    <div className={classNames(styles.txInfo, styles.colTxInfo)}>
       <div className={styles.txTime}>{time}</div>
       <div className={styles.txHash}>
         {chain?.name || 'Unknown'}:{' '}
