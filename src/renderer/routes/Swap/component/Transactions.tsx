@@ -23,7 +23,11 @@ import { useAtomValue } from 'jotai';
 import { useAsync } from 'react-use';
 import { uniqBy } from 'lodash';
 import { getSwapList } from '../utils';
-import { refreshSwapTxListAtom, useRefreshSwapTxList } from '../hooks';
+import {
+  refreshSwapTxListAtom,
+  useInSwap,
+  useRefreshSwapTxList,
+} from '../hooks';
 
 const EmptyWrapper = styled.div`
   display: flex;
@@ -112,13 +116,15 @@ const TokenCost = ({
   receiveToken,
   payTokenAmount,
   receiveTokenAmount,
+  loading = false,
 }: {
   payToken: TokenItem;
   receiveToken: TokenItem;
   payTokenAmount?: number;
   receiveTokenAmount?: number;
+  loading?: boolean;
 }) => {
-  if (!payTokenAmount || !receiveTokenAmount) {
+  if (loading) {
     return (
       <SkeletonInput
         block
@@ -136,7 +142,7 @@ const TokenCost = ({
         hideChainIcon
       />
       <div className="ml-12">
-        {formatAmount(payTokenAmount)} {payToken.symbol}
+        {formatAmount(payTokenAmount || '0')} {payToken.symbol}
       </div>
       <IconSwapArrow className="text-16 mx-24" />
       <TokenWithChain
@@ -146,7 +152,7 @@ const TokenCost = ({
         hideChainIcon
       />
       <div className="ml-12">
-        {formatAmount(receiveTokenAmount)} {receiveToken.symbol}
+        {formatAmount(receiveTokenAmount || '0')} {receiveToken.symbol}
       </div>
     </div>
   );
@@ -156,14 +162,18 @@ const SlippageUsage = ({
   slippage,
   actual = false,
   className = '',
+  loading = false,
 }: {
   slippage?: number;
   actual?: boolean;
   className?: string;
+  loading?: boolean;
 }) => {
   const value = useMemo(
     () =>
-      slippage ? `${new BigNumber(slippage).times(100).toString(10)}%` : '',
+      slippage !== undefined
+        ? `${new BigNumber(slippage).times(100).toString(10)}%`
+        : '',
     [slippage]
   );
   return (
@@ -176,13 +186,13 @@ const SlippageUsage = ({
       <div
         className={clsx('text-20 font-medium', actual && 'text-opacity-100')}
       >
-        {slippage ? (
+        {!loading ? (
           value
         ) : (
           <SkeletonInput active style={{ height: 24, minWidth: 60 }} />
         )}
       </div>
-      <div className="text-14"> Designated Slippage</div>
+      <div className="text-14">{actual ? 'Actual' : 'Designated'} Slippage</div>
     </div>
   );
 };
@@ -200,18 +210,13 @@ const Transaction = forwardRef<HTMLDivElement, TransactionProps>(
     const chainItem = CHAINS_LIST.find((e) => e.serverId === data?.chain);
     const chainName = chainItem?.name || '';
     const scanLink = chainItem?.scanLink.replace('_s_', '');
+    const loading = data?.status !== 'Finished';
 
     const gasUsed = useMemo(() => {
       if (data?.gas) {
-        const amount = new BigNumber(data.gas.usd_gas_fee).div(
-          10 ** data?.gas.native_token.decimals
-        );
-
-        const usdValue = amount.times(data?.gas.native_token?.price);
-
-        return `${formatAmount(amount.toString(10))} ${
+        return `${formatAmount(data.gas.native_gas_fee)} ${
           data?.gas.native_token.symbol
-        } (${formatUsdValue(usdValue.toString(10))})`;
+        } (${formatUsdValue(data.gas.usd_gas_fee)})`;
       }
       return '';
     }, [data?.gas]);
@@ -244,7 +249,11 @@ const Transaction = forwardRef<HTMLDivElement, TransactionProps>(
           <span>{!isPending && sinceTime(time)}</span>
           <span>Aggregator: {targetDex}</span>
 
-          {gasUsed ? <span className="ml-auto">GasFee: {gasUsed}</span> : null}
+          {!loading ? (
+            <span className="ml-auto">GasFee: {gasUsed}</span>
+          ) : (
+            <span className="ml-auto">Gwei: {data?.gas?.gas_price} Gwei</span>
+          )}
           <span>
             {chainName}:{' '}
             <span className="addr" onClick={gotoScan}>
@@ -270,6 +279,7 @@ const Transaction = forwardRef<HTMLDivElement, TransactionProps>(
               receiveToken={data.receive_token}
               payTokenAmount={data.actual.pay_token_amount}
               receiveTokenAmount={data.actual.receive_token_amount}
+              loading={loading}
             />
           </div>
 
@@ -278,6 +288,7 @@ const Transaction = forwardRef<HTMLDivElement, TransactionProps>(
             slippage={data.actual.slippage}
             actual
             className="ml-[56px]"
+            loading={loading}
           />
         </div>
       </div>
@@ -310,6 +321,7 @@ interface SwapTransactionsProps {
 export const SwapTransactions = memo(({ addr }: SwapTransactionsProps) => {
   const refreshSwapListTx = useRefreshSwapTxList();
   const refreshSwapTxListCount = useAtomValue(refreshSwapTxListAtom);
+  const isInSwap = useInSwap();
 
   const {
     data: txList,
@@ -318,14 +330,24 @@ export const SwapTransactions = memo(({ addr }: SwapTransactionsProps) => {
     loadingMore,
     noMore,
     mutate,
-  } = useInfiniteScroll((d) => getSwapList(addr, d?.list?.length || 0, 5), {
-    isNoMore(data) {
-      if (data) {
-        return data?.list.length >= data?.totalCount;
-      }
-      return true;
-    },
-  });
+  } = useInfiniteScroll(
+    (d) =>
+      getSwapList(
+        addr,
+        d?.list?.length && d?.list?.length > 1 ? d?.list?.length - 1 : 0,
+        5
+      ),
+    {
+      reloadDeps: [isInSwap],
+      isNoMore(data) {
+        if (data) {
+          return data?.list.length >= data?.totalCount;
+        }
+        return true;
+      },
+      manual: !isInSwap,
+    }
+  );
 
   const { value } = useAsync(
     async () => getSwapList(addr, 0, 5),
@@ -355,17 +377,18 @@ export const SwapTransactions = memo(({ addr }: SwapTransactionsProps) => {
   const [inViewport] = useInViewport(ref);
 
   useEffect(() => {
-    if (!noMore && inViewport && !loadingMore && loadMore) {
+    if (!noMore && inViewport && !loadingMore && loadMore && isInSwap) {
       loadMore();
     }
-  }, [inViewport, loadMore, loading, loadingMore, noMore]);
+  }, [inViewport, loadMore, loading, loadingMore, noMore, isInSwap]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (
       !loading &&
       !loadingMore &&
-      txList?.list?.some((e) => e.status !== 'Finished')
+      txList?.list?.some((e) => e.status !== 'Finished') &&
+      isInSwap
     ) {
       timer = setTimeout(refreshSwapListTx, 2000);
     }
@@ -374,7 +397,7 @@ export const SwapTransactions = memo(({ addr }: SwapTransactionsProps) => {
         clearTimeout(timer);
       }
     };
-  }, [loading, loadingMore, refreshSwapListTx, txList?.list]);
+  }, [loading, loadingMore, refreshSwapListTx, txList?.list, isInSwap]);
 
   return (
     <Wrapper>

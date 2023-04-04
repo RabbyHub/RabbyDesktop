@@ -23,7 +23,6 @@ import {
 import { IconRefresh } from './IconRefresh';
 import { WarningOrChecked } from './ReceiveDetail';
 import { useVerifySdk } from '../hooks';
-// import { CEXQuote } from '../type';
 
 const QuotesWrapper = styled.div`
   --green-color: #27c193;
@@ -473,17 +472,15 @@ const CexQuoteItem = (props: {
     if (data?.receive_token?.amount) {
       const bestQuoteAmount = new BigNumber(bestAmount);
       const receiveToken = data.receive_token;
-      const receivedTokeAmountBn = new BigNumber(receiveToken.amount).div(
-        10 ** receiveToken.decimals
-      );
       const percent = new BigNumber(receiveToken.amount)
+        .times(10 ** receiveToken.decimals)
         .minus(bestQuoteAmount || 0)
         .div(bestQuoteAmount)
         .times(100);
       center = (
         <>
           <span className="toToken">
-            {formatAmount(receivedTokeAmountBn.toString(10))}
+            {formatAmount(receiveToken.amount.toString(10))}
           </span>{' '}
           {receiveToken.symbol}
         </>
@@ -544,6 +541,7 @@ export const Quotes = (props: QuotesProps) => {
           (b.isDex ? b.data?.toTokenAmount : b?.data?.receive_token?.amount) ||
             0
         )
+          .times(b.isDex ? 1 : 10 ** other.receiveToken.decimals)
           .minus(
             (a.isDex
               ? a.data?.toTokenAmount
@@ -551,7 +549,7 @@ export const Quotes = (props: QuotesProps) => {
           )
           .toNumber()
       ),
-    [list]
+    [list, other?.receiveToken?.decimals]
   );
   return (
     <QuotesWrapper>
@@ -580,7 +578,9 @@ export const Quotes = (props: QuotesProps) => {
             const bestAmount =
               (bestQuote?.isDex
                 ? bestQuote?.data?.toTokenAmount
-                : bestQuote.data?.receive_token.amount) || '0';
+                : new BigNumber(bestQuote.data?.receive_token.amount || '0')
+                    .times(10 ** other.receiveToken.decimals)
+                    .toString(10)) || '0';
             if (isDex) {
               return (
                 <DexQuoteItem
@@ -606,13 +606,3 @@ export const Quotes = (props: QuotesProps) => {
     </QuotesWrapper>
   );
 };
-
-// const failed = 'No price found';
-// const cexTips =
-//   'CEX price is for reference only. Cannot be used for direct trading.';
-
-// const quoteFailed = 'Unable to fetch the price';
-
-// const preExecTxFailed = 'Unable to execute';
-
-// const securityVerificationFailed = 'Security verification failed';
