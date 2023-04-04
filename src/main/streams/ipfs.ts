@@ -23,6 +23,7 @@ handleIpcMainInvoke('download-ipfs', async (_, cid) => {
       success: true,
     };
   } catch (e: any) {
+    console.log(e);
     return {
       error: e.message,
       success: false,

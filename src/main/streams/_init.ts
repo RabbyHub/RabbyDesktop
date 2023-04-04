@@ -110,6 +110,8 @@ const CONF = {
       download: (cidString: string) => Promise<void>;
       cancelDownload: () => Promise<void>;
       resolveFile: (ipfsPath: string) => string;
+      isValid: (cid: string) => Promise<boolean>;
+      isExist: (cid: string) => Promise<boolean>;
     }>
   >,
 };

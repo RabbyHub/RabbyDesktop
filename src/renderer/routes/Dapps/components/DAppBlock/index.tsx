@@ -3,14 +3,9 @@
 import { Dropdown, Menu } from 'antd';
 import React, { ReactNode, useRef } from 'react';
 
-import clsx from 'clsx';
-import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
 import { formatDappURLToShow } from '@/isomorphic/dapp';
-import {
-  RCIconDappsDelete,
-  RCIconDappsEdit,
-  RCIconPin,
-} from '../../../../../../assets/icons/internal-homepage';
+import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
+import clsx from 'clsx';
 
 import { DappFavicon } from '../../../../components/DappFavicon';
 
@@ -158,7 +153,6 @@ export const DAppBlock = ({
     >
       <div className="dapp-block" ref={ref}>
         <div className={clsx('dapp-block-badge')}>
-          {/* todo */}
           {dapp.origin?.startsWith('rabby-ipfs://') ||
           (dapp.type as any) === 'ipfs' ? (
             <IpfsTag prefix={<Indicator dapp={dapp} />} />

@@ -44,7 +44,7 @@ export const IPFSAddFailedModal = () => {
       open={svVisible}
       onClose={closeSubview}
       title="IPFS CID verification failed"
-      content="The IPFS-CID of the locally downloaded file is different from the input, indicating a security risk. It is not allowed to be added as a Dapp"
+      content="The IPFS-CID of the locally downloaded file is different from the input, indicating a security risk. It is not allowed to be added as a Dapp."
     />
   );
 };
@@ -56,7 +56,7 @@ export const IPFSNoLodalModal = () => {
       open={svVisible}
       onClose={closeSubview}
       title="Failed to open the Dapp"
-      content="The IPFS-CID of the locally downloaded file is different from the input, indicating a security risk. It is not allowed to be added as a Dapp"
+      content="The Dapp local file does not exist. Please try adding it again."
     />
   );
 };

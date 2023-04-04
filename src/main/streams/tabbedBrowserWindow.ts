@@ -22,8 +22,10 @@ import {
 } from '../utils/ipcMainEvents';
 
 import {
+  getIpfsService,
   getRabbyExtViews,
   onMainWindowReady,
+  pushChangesToZPopupLayer,
   RABBYX_WINDOWID_S,
   toggleMaskViaOpenedRabbyxNotificationWindow,
 } from '../utils/stream-helpers';
@@ -212,6 +214,26 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
       isTargetDappByOrigin: false,
       isTargetDappBySecondaryOrigin: false,
     };
+  }
+  const dappTypeInfo = checkoutDappURL(dappOrigin);
+  if (dappTypeInfo?.type === 'ipfs') {
+    const ipfsService = await getIpfsService();
+    if (!(await ipfsService.isExist(dappTypeInfo.ipfsCid))) {
+      pushChangesToZPopupLayer({
+        'ipfs-no-local-modal': {
+          visible: true,
+        },
+      });
+      throw new Error('IPFS CID not local file found');
+    }
+    if (!(await ipfsService.isValid(dappTypeInfo.ipfsCid))) {
+      pushChangesToZPopupLayer({
+        'ipfs-verify-failed-modal': {
+          visible: true,
+        },
+      });
+      throw new Error('IPFS CID verify failed');
+    }
   }
 
   const currentUrl = evt.sender.getURL();

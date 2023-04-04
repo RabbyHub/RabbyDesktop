@@ -203,25 +203,26 @@ export const initIPFSModule = async () => {
 
     public rootPath: string;
 
-    public abortController?: AbortController;
+    public abortController: AbortController = new AbortController();
 
     constructor({ gateway, rootPath }: { gateway: string; rootPath: string }) {
       this.gateway = gateway;
       this.rootPath = rootPath;
     }
 
-    public async cancelDownload() {
-      if (this.abortController) {
-        this.abortController.abort();
-        this.abortController = undefined;
-      }
+    public cancelDownload() {
+      this.abortController?.abort();
+      this.abortController = new AbortController();
     }
 
     public async download(cidString: string) {
       this.cancelDownload();
-      this.abortController = new AbortController();
       if (!isCid(cidString)) {
         throw new Error('Input is not a valid IPFS cid');
+      }
+      if (await this.isValid(cidString)) {
+        console.log('File', cidString, 'is already downloaded');
+        return;
       }
       console.log('Downloading car', cidString);
       const start = Date.now();
@@ -240,6 +241,27 @@ export const initIPFSModule = async () => {
     // verify local file
     public async verifyFile(cid: string) {
       return verifyFile(cid, this.rootPath);
+    }
+
+    public async isValid(cid: string) {
+      try {
+        await this.verifyFile(cid);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    public async isExist(cid: string) {
+      try {
+        await Promise.all([
+          fs.access(path.join(this.rootPath, 'car', `${cid}.car`)),
+          fs.access(path.join(this.rootPath, 'ipfs', cid)),
+        ]);
+        return true;
+      } catch (error) {
+        return false;
+      }
     }
 
     public resolveFile(filePath: string) {
