@@ -126,7 +126,7 @@ export class Tab {
     });
 
     this.view?.webContents.on('page-favicon-updated', async (evt, favicons) => {
-      const wc = this.view!.webContents;
+      const wc = this.view?.webContents;
       if (!wc || !this.relatedDappId) return;
       const currentURL =
         this.view?.webContents.getURL() ||
@@ -711,10 +711,14 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
     });
   }
 
-  filterTab(filterFn: (tabURL: string) => boolean) {
+  filterTab(filterFn: (ctx: { tab: Tab; tabURL: string }) => boolean) {
     return this.tabList.filter((tab) => {
       if (!tab.view?.webContents) return false;
-      return filterFn(tab.view?.webContents.getURL());
+
+      return filterFn({
+        tab,
+        tabURL: tab.view?.webContents.getURL(),
+      });
     });
   }
 }

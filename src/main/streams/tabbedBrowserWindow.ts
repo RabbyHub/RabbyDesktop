@@ -349,30 +349,16 @@ onMainWindowReady().then((mainTabbedWin) => {
 
 onIpcMainInternalEvent(
   '__internal_main:app:close-tab-on-del-dapp',
-  async (deledDappOrigins) => {
+  async (deledDappIds) => {
     const mainWin = await onMainWindowReady();
 
-    let tabs: import('../browser/tabs').Tab[] = [];
+    const dappIds = new Set(arraify(deledDappIds));
 
-    const dappOrigins = new Set(arraify(deledDappOrigins));
-    const allDapps = getAllDapps();
-
-    dappOrigins.forEach((dappOrigin) => {
-      const domainMeta = parseDomainMeta(dappOrigin, allDapps, {});
-      const isMainDomainAppWithoutSubDomainsDapp =
-        domainMeta?.is2ndaryDomain && !domainMeta.subDomains.length;
-
-      const tabsToClose = !isMainDomainAppWithoutSubDomainsDapp
-        ? mainWin.tabs.findByOrigin(dappOrigin)
-        : mainWin.tabs.filterTab((tabURL) => {
-            const tabDomainMeta = parseDomainMeta(tabURL, allDapps, {});
-            return tabDomainMeta.secondaryDomain === domainMeta.secondaryDomain;
-          });
-
-      if (tabsToClose) tabs = tabs.concat(tabsToClose);
+    const tabsToClose = mainWin.tabs.filterTab((ctx) => {
+      return !!ctx.tab.relatedDappId && dappIds.has(ctx.tab.relatedDappId);
     });
 
-    tabs.forEach((tab) => {
+    tabsToClose.forEach((tab) => {
       if (tab) {
         tab.destroy();
         cLog(`close-tab-on-del-dapp: destroyed tab ${tab.id}`);
