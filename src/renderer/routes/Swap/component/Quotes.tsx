@@ -545,7 +545,9 @@ export const Quotes = (props: QuotesProps) => {
           .minus(
             (a.isDex
               ? a.data?.toTokenAmount
-              : a?.data?.receive_token?.amount) || 0
+              : new BigNumber(a?.data?.receive_token?.amount || '0').times(
+                  10 ** other.receiveToken.decimals
+                )) || 0
           )
           .toNumber()
       ),
