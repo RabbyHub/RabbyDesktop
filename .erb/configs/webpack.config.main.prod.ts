@@ -7,6 +7,8 @@ import webpack from 'webpack';
 import { merge } from 'webpack-merge';
 import TerserPlugin from 'terser-webpack-plugin';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
+
+import { GitRevisionPlugin } from 'git-revision-webpack-plugin';
 import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
@@ -15,6 +17,8 @@ import { getWebpackAliases } from './common';
 
 checkNodeEnv('production');
 deleteSourceMaps();
+
+const gitRevisionPlugin = new GitRevisionPlugin();
 
 const configuration: webpack.Configuration = {
   devtool: 'source-map',
@@ -67,12 +71,18 @@ const configuration: webpack.Configuration = {
       START_MINIMIZED: false,
     }),
 
+    gitRevisionPlugin,
     new webpack.DefinePlugin({
       'process.type': '"main"',
       // reg, prod
       'process.buildchannel': JSON.stringify(process.env.buildchannel || 'reg'),
       'process.buildarch': JSON.stringify(process.env.buildarch || ''),
       'process.RABBY_DESKTOP_KR_PWD': JSON.stringify(process.env.RABBY_DESKTOP_KR_PWD),
+
+      // 'process.GIT_VERSION': JSON.stringify(gitRevisionPlugin.version()),
+      'process.GIT_COMMITHASH': JSON.stringify(gitRevisionPlugin.commithash()),
+      // 'process.GIT_BRANCH': JSON.stringify(gitRevisionPlugin.branch()),
+      // 'process.GIT_LASTCOMMITDATETIME': JSON.stringify(gitRevisionPlugin.lastcommitdatetime()),
     }),
 
     new webpack.IgnorePlugin({
