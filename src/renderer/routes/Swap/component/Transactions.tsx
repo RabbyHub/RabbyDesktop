@@ -6,7 +6,11 @@ import { ellipsis } from '@/renderer/utils/address';
 import { CHAINS_LIST } from '@debank/common';
 import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import { forwardRef, memo, useEffect, useMemo, useRef } from 'react';
-import { SwapTradeList, TokenItem } from '@debank/rabby-api/dist/types';
+import {
+  SwapItem,
+  SwapTradeList,
+  TokenItem,
+} from '@debank/rabby-api/dist/types';
 import TokenWithChain from '@/renderer/components/TokenWithChain';
 import IconSwapArrow from '@/../assets/icons/swap/swap-arrow.svg?rc';
 import { formatAmount, formatUsdValue } from '@/renderer/utils/number';
@@ -16,6 +20,8 @@ import clsx from 'clsx';
 import { Tooltip } from 'antd';
 import { useInViewport, useInfiniteScroll } from 'ahooks';
 import { useAtomValue } from 'jotai';
+import { useAsync } from 'react-use';
+import { uniqBy } from 'lodash';
 import { getSwapList } from '../utils';
 import { refreshSwapTxListAtom, useRefreshSwapTxList } from '../hooks';
 
@@ -311,15 +317,38 @@ export const SwapTransactions = memo(({ addr }: SwapTransactionsProps) => {
     loadMore,
     loadingMore,
     noMore,
-  } = useInfiniteScroll((d) => getSwapList(addr, d?.list?.length || 0), {
-    reloadDeps: [refreshSwapTxListCount],
+    mutate,
+  } = useInfiniteScroll((d) => getSwapList(addr, d?.list?.length || 0, 5), {
     isNoMore(data) {
       if (data) {
-        return data?.list.length <= data?.last.total_cnt;
+        return data?.list.length >= data?.totalCount;
       }
       return true;
     },
   });
+
+  const { value } = useAsync(
+    async () => getSwapList(addr, 0, 5),
+    [addr, refreshSwapTxListCount]
+  );
+
+  useEffect(() => {
+    if (value?.list) {
+      mutate((d) => {
+        if (!d) {
+          return;
+        }
+        return {
+          last: d?.last,
+          totalCount: d?.totalCount,
+          list: uniqBy(
+            [...(value.list || []), ...(d?.list || [])],
+            (e) => `${e.chain}-${e.tx_id}`
+          ) as SwapItem[],
+        };
+      });
+    }
+  }, [mutate, value]);
 
   const ref = useRef<HTMLDivElement>(null);
 
@@ -353,11 +382,7 @@ export const SwapTransactions = memo(({ addr }: SwapTransactionsProps) => {
       {!loading && (!txList || !txList?.list?.length) && <Empty />}
       {txList?.list?.map((swap, idx) => (
         <Transaction
-          ref={
-            txList?.list.length > 4 && idx === txList?.list.length - 2
-              ? ref
-              : undefined
-          }
+          ref={txList?.list.length - 1 === idx ? ref : undefined}
           key={`${swap.tx_id}-${swap.chain}`}
           data={swap}
         />
