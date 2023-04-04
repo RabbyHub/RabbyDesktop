@@ -123,10 +123,6 @@ const getCexQuote = async (
   const p = {
     cex_id,
     pay_token_amount: payAmount,
-    // pay_token_amount: new BigNumber(payAmount)
-    //   .times(10 ** payToken.decimals)
-    //   .toFixed(0),
-    // pay_token_amount: payAmount,
     chain_id: CHAINS[chain].serverId,
     pay_token_id: payToken.id,
     receive_token_id,
@@ -146,24 +142,6 @@ const getCexQuote = async (
       isDex: false,
     };
   }
-
-  // // REMOVE: test api
-  // const queryString = new URLSearchParams(p).toString();
-  // return fetch(
-  //   `https://cex-swap.rabby-api.debank.dbkops.com/v1/wallet/cex_swap_quote?${queryString}`
-  // )
-  //   .then((response) => response.json())
-  //   .then(
-  //     (e: CEXQuote) =>
-  //       ({ data: e, name: cex_id, isDex: false } as TCexQuoteData)
-  //   )
-  //   .catch((e) => {
-  //     return {
-  //       data: null,
-  //       name: cex_id,
-  //       isDex: false,
-  //     };
-  //   });
 };
 
 export const getAllQuotes = async (

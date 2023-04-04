@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import IconSwapArrow from '@/../assets/icons/swap/swap-arrow.svg?rc';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import { Button, message, Modal } from 'antd';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { useAsync, useDebounce } from 'react-use';
@@ -33,7 +33,7 @@ import {
 } from './utils';
 import { QuoteItemProps, QuoteProvider, Quotes } from './component/Quotes';
 import styles from './index.module.less';
-import { usePostSwap } from './hooks';
+import { useInSwap, usePostSwap } from './hooks';
 
 const Wrapper = styled.div`
   & > .header {
@@ -214,7 +214,6 @@ const Wrapper = styled.div`
 const supportChains = [...new Set(Object.values(DEX_SUPPORT_CHAINS).flat())];
 
 export const SwapToken = () => {
-  const location = useLocation();
   const rbiSource = useRbiSource();
 
   const [slippage, setSlippage] = useState('0.5');
@@ -249,25 +248,18 @@ export const SwapToken = () => {
     setActiveProvider(undefined);
   }, []);
 
-  const inSwapRef = useRef(false);
+  const isInSwap = useInSwap();
   const refresh = useCallback(() => {
-    if (location.pathname === '/mainwin/swap') {
+    if (isInSwap) {
       setRefreshId((e) => e + 1);
     }
-  }, [location.pathname]);
+  }, [isInSwap]);
 
   useEffect(() => {
-    if (location.pathname === '/mainwin/swap') {
-      inSwapRef.current = true;
-    } else {
-      inSwapRef.current = false;
+    if (isInSwap) {
+      refresh();
     }
-  }, [location.pathname]);
-
-  if (inSwapRef.current) {
-    refresh();
-    inSwapRef.current = false;
-  }
+  }, [isInSwap, refresh]);
 
   if (shouldResetState.current && pageInfo.chain && pageInfo.payTokenId) {
     if (

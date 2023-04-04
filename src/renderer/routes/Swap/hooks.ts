@@ -8,9 +8,10 @@ import {
   QuoteResult,
 } from '@rabby-wallet/rabby-swap/dist/quote';
 import BigNumber from 'bignumber.js';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Tx } from '@debank/rabby-api/dist/types';
 import { atom, useSetAtom } from 'jotai';
+import { useLocation } from 'react-router-dom';
 import { getRouter, getSpender, postSwap, postSwapParams } from './utils';
 
 export function isSwapWrapToken(
@@ -178,7 +179,6 @@ export const usePostSwap = () => {
   const postSwapByChainHash = useCallback(
     async (key: string) => {
       if (localSwapTxs.current[key] && pushTxs.current[key]) {
-        console.log('postSwapByChainHash', postSwapByChainHash);
         const data = pushTxs.current[key];
         const swapData = localSwapTxs.current[key];
         const { hash: _, ...tx } = data;
@@ -222,4 +222,13 @@ export const usePostSwap = () => {
   );
 
   return addSwapTx;
+};
+
+export const useInSwap = () => {
+  const location = useLocation();
+
+  return useMemo(
+    () => location.pathname === '/mainwin/swap',
+    [location.pathname]
+  );
 };
