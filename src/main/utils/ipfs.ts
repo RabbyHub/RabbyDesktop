@@ -15,7 +15,12 @@ import nodeFetch from 'node-fetch';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 
 import { formatProxyServerURL } from '@/isomorphic/url';
+
+import { pipeline } from 'stream';
+import { promisify } from 'util';
 import { getAppRuntimeProxyConf } from './stream-helpers';
+
+const streamPipeline = promisify(pipeline);
 
 export const initIPFSModule = async () => {
   const { CarReader } = await import('@ipld/car');
@@ -38,45 +43,31 @@ export const initIPFSModule = async () => {
   const downloadCarFile = async (
     gateway: string,
     cidString: string,
-    rootPath: string
+    rootPath: string,
+    signal?: AbortSignal
   ) => {
     const carFolder = path.join(rootPath, 'car');
-    const filePath = path.join(carFolder, `${cidString}.car`);
     fs.mkdir(carFolder, { recursive: true });
+    const filePath = path.join(carFolder, `${cidString}.car`);
 
     const url = `${gateway.replace(/\/$/, '')}/ipfs/${cidString}?format=car`;
 
     const runtimeProxyConf = await getAppRuntimeProxyConf();
-    let proxyAgent: HttpsProxyAgent;
+    let proxyAgent: HttpsProxyAgent | null = null;
     if (runtimeProxyConf.proxyType === 'custom') {
       proxyAgent = new HttpsProxyAgent(
         formatProxyServerURL(runtimeProxyConf.proxySettings)
       );
     }
-
-    return new Promise((resolve, reject) => {
-      nodeFetch(url, {
-        method: 'GET',
-        ...(proxyAgent && { agent: proxyAgent }),
-      })
-        .then((res) => {
-          if (res.status > 200) {
-            throw new Error(`${res.status} ${res.statusText} ${url}`);
-          }
-          const dest = createWriteStream(filePath);
-
-          res.body.pipe(dest);
-          dest.on('finish', () => {
-            resolve(true);
-          });
-          dest.on('error', (err) => {
-            reject(err);
-          });
-        })
-        .catch((err) => {
-          reject(err);
-        });
+    const res = await nodeFetch(url, {
+      method: 'GET',
+      ...(proxyAgent && { agent: proxyAgent }),
+      signal: signal as any,
     });
+
+    if (!res.ok) throw new Error(`unexpected response ${res.statusText}`);
+
+    await streamPipeline(res.body, createWriteStream(filePath));
   };
 
   /**
@@ -121,18 +112,15 @@ export const initIPFSModule = async () => {
   /**
    * verify car file and extract it to rootPath
    * @param cid
-   * @param carPath
    * @param rootPath
    */
-  const extractCarFile = async (
-    cid: string | CID,
-    carPath: string,
-    rootPath: string
-  ) => {
-    const blockStore = await createBlockStore(carPath);
+  const extractCarFile = async (cid: string | CID, rootPath: string) => {
+    const blockStore = await createBlockStore(
+      path.join(rootPath, 'car', `${cid}.car`)
+    );
     // eslint-disable-next-line no-restricted-syntax
     for await (const file of recursive(cid, blockStore)) {
-      const filePath = path.join(rootPath, file.path);
+      const filePath = path.join(rootPath, 'ipfs', file.path);
       if (file.type === 'directory') {
         await fs.mkdir(filePath, { recursive: true });
       } else {
@@ -187,12 +175,10 @@ export const initIPFSModule = async () => {
     }
   };
 
-  const verifyFile = async (
-    cid: string | CID,
-    carPath: string,
-    rootPath: string
-  ) => {
-    const blockStore = await createBlockStore(carPath);
+  const verifyFile = async (cid: string | CID, rootPath: string) => {
+    const blockStore = await createBlockStore(
+      path.join(rootPath, 'car', `${cid}.car`)
+    );
     // eslint-disable-next-line no-restricted-syntax
     for await (const file of recursive(cid, blockStore)) {
       if (file.type === 'file') {
@@ -212,58 +198,48 @@ export const initIPFSModule = async () => {
     }
   };
 
-  // const test = async () => {
-  //   const node = create({
-  //     url: 'http://ipfs.rabby.io:5001',
-  //   });
-
-  //   const current = Date.now();
-  //   const cid = 'Qmdh9ySaLe5MAwEe7aqNsCK8t5mRx7cAfeJG3kXuKZsC2N';
-  //   console.log('downloading');
-  //   await downloadCarFile(node, `/ipfs/${cid}`, './temp');
-  //   console.log('downloaded');
-  //   console.log('extracting');
-  //   await extractCarFile(cid, `./temp/${cid}.car`, './temp');
-  //   console.log('end', Date.now() - current, 'ms');
-  //   console.log('extracted');
-  //   console.log('verifying');
-  //   await verifyLocalFile(`${cid}`, `./temp/${cid}.car`, './temp');
-  //   console.log('done');
-  // };
-
   class IpfsService {
     public gateway: string;
 
     public rootPath: string;
+
+    public abortController?: AbortController;
 
     constructor({ gateway, rootPath }: { gateway: string; rootPath: string }) {
       this.gateway = gateway;
       this.rootPath = rootPath;
     }
 
+    public async cancelDownload() {
+      if (this.abortController) {
+        this.abortController.abort();
+        this.abortController = undefined;
+      }
+    }
+
     public async download(cidString: string) {
+      this.cancelDownload();
+      this.abortController = new AbortController();
       if (!isCid(cidString)) {
         throw new Error('Input is not a valid IPFS cid');
       }
-      const carPath = path.join(this.rootPath, 'car', `${cidString}.car`);
-      const extractPath = path.join(this.rootPath, 'ipfs');
-      await fs.mkdir(extractPath, { recursive: true });
       console.log('Downloading car', cidString);
       const start = Date.now();
-      await downloadCarFile(this.gateway, cidString, this.rootPath);
+      await downloadCarFile(
+        this.gateway,
+        cidString,
+        this.rootPath,
+        this.abortController?.signal as AbortSignal
+      );
       console.log('Downloaded car', cidString, 'in', Date.now() - start, 'ms');
       console.log('extracting', cidString);
-      await extractCarFile(cidString, carPath, extractPath);
+      await extractCarFile(cidString, this.rootPath);
       console.log('extracted', cidString);
     }
 
     // verify local file
     public async verifyFile(cid: string) {
-      return verifyFile(
-        cid,
-        path.join(this.rootPath, 'car', `${cid}.car`),
-        this.rootPath
-      );
+      return verifyFile(cid, this.rootPath);
     }
 
     public resolveFile(filePath: string) {

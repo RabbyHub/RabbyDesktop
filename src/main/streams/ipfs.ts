@@ -29,3 +29,8 @@ handleIpcMainInvoke('download-ipfs', async (_, cid) => {
     };
   }
 });
+
+handleIpcMainInvoke('cancel-download-ipfs', async (_) => {
+  const ipfsService = await getIpfsService();
+  await ipfsService.cancelDownload();
+});

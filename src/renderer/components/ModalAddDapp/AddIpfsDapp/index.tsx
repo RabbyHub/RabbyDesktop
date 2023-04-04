@@ -4,6 +4,7 @@ import { ReactNode, useEffect } from 'react';
 
 import {
   addDapp,
+  cancelDownloadIPFS,
   detectDapps,
   downloadIPFS,
   replaceDapp,
@@ -14,6 +15,7 @@ import classNames from 'classnames';
 import { debounce } from 'lodash';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
+import { useUnmount } from 'react-use';
 import RabbyInput from '../../AntdOverwrite/Input';
 import { Props as ModalProps } from '../../Modal/Modal';
 import { toastMessage } from '../../TransparentToast';
@@ -271,6 +273,10 @@ export function AddIpfsDapp({
     }
   }, [addUrl, check, form, initUrl]);
 
+  useUnmount(() => {
+    cancelDownloadIPFS();
+  });
+
   return (
     <>
       <Form
@@ -327,4 +333,7 @@ export function AddIpfsDapp({
       ) : null}
     </>
   );
+}
+function onUnmount(arg0: () => void) {
+  throw new Error('Function not implemented.');
 }

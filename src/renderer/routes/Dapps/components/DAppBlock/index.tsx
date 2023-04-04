@@ -35,7 +35,7 @@ const IpfsTag = ({ prefix }: { prefix?: ReactNode }) => {
   return (
     <div className="tag ipfs-tag">
       {prefix}
-      ipfs
+      IPFS
     </div>
   );
 };
@@ -185,7 +185,7 @@ export const DAppBlock = ({
           <div className="infos pr-[16px]">
             <h4 className="dapp-alias">{dapp.alias}</h4>
             <div className="dapp-url">
-              {formatDappURLToShow(dapp.origin?.replace(/^\w+:\/\//, ''))}
+              {formatDappURLToShow(dapp.origin?.replace(/^[\w|-]+:\/\//, ''))}
             </div>
           </div>
         </div>

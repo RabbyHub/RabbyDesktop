@@ -108,6 +108,7 @@ const CONF = {
   } as IConf<
     ReplaySubject<{
       download: (cidString: string) => Promise<void>;
+      cancelDownload: () => Promise<void>;
       resolveFile: (ipfsPath: string) => string;
     }>
   >,

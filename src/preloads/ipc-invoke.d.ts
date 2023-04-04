@@ -228,6 +228,10 @@ type ChannelInvokePayload = {
       success?: boolean;
     };
   };
+  'cancel-download-ipfs': {
+    send: [];
+    response: void;
+  };
 } & RabbyxInvokePayload;
 
 type IInvokesKey = keyof ChannelInvokePayload;
