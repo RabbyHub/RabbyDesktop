@@ -505,3 +505,27 @@ type ITrezorLikeCannotUserReason =
       reasonType: 'enabled-ipfs';
       cannotUse: IHardwareConnectPageType;
     };
+// --------- BUNDLE -----------
+interface CommonBundleAccount {
+  id?: string;
+  type: 'bn' | 'btc' | 'eth';
+  nickname: string;
+  inBundle?: boolean;
+}
+interface BNAccount extends CommonBundleAccount {
+  type: 'bn';
+  apiKey: string;
+  apiSecret: string;
+}
+
+interface BTCAccount extends CommonBundleAccount {
+  type: 'btc';
+  address: string;
+}
+
+interface ETHAccount extends CommonBundleAccount {
+  type: 'eth';
+  address: string;
+}
+
+type BundleAccount = BTCAccount | BNAccount | ETHAccount;

@@ -21,4 +21,6 @@ type ChannelPushToWebContents = {
     tabId?: number;
   };
   '__internal_push:dapps:changed': MainInternalsMessagePayload['__internal_main:dapps:changed']['send'][0];
+
+  '__internal_push:bundle:changed': MainInternalsMessagePayload['__internal_main:bundle:changed']['send'][0];
 };

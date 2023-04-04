@@ -243,6 +243,36 @@ type ChannelInvokePayload = {
     send: [];
     response: void;
   };
+  'binance-sdk': {
+    send: [
+      {
+        apiKey: string;
+        apiSecret: string;
+        method: string;
+        params?: any[];
+      }
+    ];
+    response: any;
+  };
+  // Bundle
+  'bundle-account-post': {
+    send: [account: BundleAccount];
+    response: {
+      error?: string;
+    };
+  };
+  'bundle-account-put': {
+    send: [account: BundleAccount];
+    response: any;
+  };
+  'bundle-account-delete': {
+    send: [id: string];
+    response: any;
+  };
+  'bundle-account-init': {
+    send: [];
+    response: any;
+  };
 } & RabbyxInvokePayload;
 
 type IInvokesKey = keyof ChannelInvokePayload;

@@ -23,6 +23,8 @@ import './streams/hid';
 import './streams/dapps';
 import './streams/ipfs';
 import './streams/trezorLike';
+import './streams/cex/binance';
+import './store/bundle';
 
 import './streams/developer';
 

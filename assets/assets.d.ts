@@ -45,3 +45,5 @@ declare module '*.module.less' {
   };
   export default classes;
 }
+
+declare module '@binance/connector';

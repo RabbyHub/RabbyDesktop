@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef, MouseEvent } from 'react';
+import React, { useEffect, useState, useMemo, useRef, MouseEvent } from 'react';
 import { Skeleton } from 'antd';
 import { usePrevious, useInterval } from 'react-use';
 import styled from 'styled-components';
