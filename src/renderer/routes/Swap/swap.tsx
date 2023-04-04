@@ -460,7 +460,7 @@ export const SwapToken = () => {
     activeProvider?.error ||
     !activeProvider?.quote;
 
-  const postSwapByChainHash = usePostSwap();
+  const addLocalSwapTx = usePostSwap();
 
   const gotoSwap = useCallback(
     async (unlimited = false) => {
@@ -491,7 +491,7 @@ export const SwapToken = () => {
             }
           );
           if (hash && receiveToken) {
-            postSwapByChainHash(chain, hash, {
+            addLocalSwapTx(chain, hash, {
               payToken,
               receiveToken,
               payAmount,
@@ -502,7 +502,7 @@ export const SwapToken = () => {
             });
           }
         } catch (e) {
-          console.error('dexSwap', e);
+          console.error('gotoSwap error:', e);
         } finally {
           refresh?.();
         }
@@ -519,7 +519,7 @@ export const SwapToken = () => {
       chain,
       rbiSource,
       receiveToken,
-      postSwapByChainHash,
+      addLocalSwapTx,
       payAmount,
       slippage,
       refresh,
