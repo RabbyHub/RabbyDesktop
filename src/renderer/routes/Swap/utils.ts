@@ -131,38 +131,39 @@ const getCexQuote = async (
     pay_token_id: payToken.id,
     receive_token_id,
   };
-  const queryString = new URLSearchParams(p).toString();
-  // try {
-  //   const data = await walletOpenapi.getCEXSwapQuote(p);
-  //   return {
-  //     data,
-  //     name: cex_id,
-  //     isDex: false,
-  //   };
-  // } catch (error) {
-  //   return {
-  //     data: null,
-  //     name: cex_id,
-  //     isDex: false,
-  //   };
-  // }
 
-  // REMOVE: test api
-  return fetch(
-    `https://cex-swap.rabby-api.debank.dbkops.com/v1/wallet/cex_swap_quote?${queryString}`
-  )
-    .then((response) => response.json())
-    .then(
-      (e: CEXQuote) =>
-        ({ data: e, name: cex_id, isDex: false } as TCexQuoteData)
-    )
-    .catch((e) => {
-      return {
-        data: null,
-        name: cex_id,
-        isDex: false,
-      };
-    });
+  try {
+    const data = await walletOpenapi.getCEXSwapQuote(p);
+    return {
+      data,
+      name: cex_id,
+      isDex: false,
+    };
+  } catch (error) {
+    return {
+      data: null,
+      name: cex_id,
+      isDex: false,
+    };
+  }
+
+  // // REMOVE: test api
+  // const queryString = new URLSearchParams(p).toString();
+  // return fetch(
+  //   `https://cex-swap.rabby-api.debank.dbkops.com/v1/wallet/cex_swap_quote?${queryString}`
+  // )
+  //   .then((response) => response.json())
+  //   .then(
+  //     (e: CEXQuote) =>
+  //       ({ data: e, name: cex_id, isDex: false } as TCexQuoteData)
+  //   )
+  //   .catch((e) => {
+  //     return {
+  //       data: null,
+  //       name: cex_id,
+  //       isDex: false,
+  //     };
+  //   });
 };
 
 export const getAllQuotes = async (
