@@ -96,7 +96,7 @@ export default (
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
     const result: DisplayProtocol[] = protocolListRef.current;
     const historyList: DisplayProtocol[] = [];
-    const queue = new PQueue({ concurrency: 20 });
+    const queue = new PQueue({ concurrency: 100 });
     const waitQueueFinished = (q: PQueue) => {
       return new Promise((resolve) => {
         q.on('empty', () => {
@@ -149,7 +149,7 @@ export default (
         (item) => item.is_support_history
       );
       setSupportHistoryChains(supportHistoryChainList);
-      const historyQueue = new PQueue({ concurrency: 20 });
+      const historyQueue = new PQueue({ concurrency: 100 });
       if (addr === addressRef.current) {
         protocolListRef.current = result;
       }
@@ -200,7 +200,7 @@ export default (
         }
       > = {};
       if (noHistoryPriceTokenList.length > 0) {
-        const tokenHistoryPriceQueue = new PQueue({ concurrency: 20 });
+        const tokenHistoryPriceQueue = new PQueue({ concurrency: 100 });
         const grouped = groupBy(noHistoryPriceTokenList, (item) => {
           return item.split('-')[0];
         });
