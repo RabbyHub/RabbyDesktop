@@ -122,10 +122,10 @@ const getCexQuote = async (
 
   const p = {
     cex_id,
-    // pay_token_amount: payAmount,
-    pay_token_amount: new BigNumber(payAmount)
-      .times(10 ** payToken.decimals)
-      .toFixed(0),
+    pay_token_amount: payAmount,
+    // pay_token_amount: new BigNumber(payAmount)
+    //   .times(10 ** payToken.decimals)
+    //   .toFixed(0),
     // pay_token_amount: payAmount,
     chain_id: CHAINS[chain].serverId,
     pay_token_id: payToken.id,

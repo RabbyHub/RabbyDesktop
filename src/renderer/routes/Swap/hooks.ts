@@ -173,28 +173,53 @@ export const usePostSwap = () => {
   const refreshSwapList = useRefreshSwapTxList();
   const pushTxs = useRef<Record<string, Tx & { hash: string }>>({});
 
-  const setData = useCallback((d: Tx & { hash: string }) => {
-    pushTxs.current = {
-      ...pushTxs.current,
-      [`${d.chainId}-${d.hash.toLowerCase()}`]: d,
-    };
-  }, []);
-  useOnSwapPushTx(setData);
+  const localSwapTxs = useRef<Record<string, Omit<postSwapParams, 'tx'>>>({});
 
   const postSwapByChainHash = useCallback(
-    async (
-      chain: CHAINS_ENUM,
-      hash: string,
-      swapData: Omit<postSwapParams, 'tx'>
-    ) => {
-      const data = pushTxs.current[`${CHAINS[chain].id}-${hash.toLowerCase()}`];
-      if (data) {
+    async (key: string) => {
+      if (localSwapTxs.current[key] && pushTxs.current[key]) {
+        console.log('postSwapByChainHash', postSwapByChainHash);
+        const data = pushTxs.current[key];
+        const swapData = localSwapTxs.current[key];
         const { hash: _, ...tx } = data;
         await postSwap({ ...swapData, tx });
+
+        delete pushTxs.current[key];
+        delete localSwapTxs.current[key];
         refreshSwapList();
       }
     },
     [refreshSwapList]
   );
-  return postSwapByChainHash;
+
+  const setData = useCallback(
+    (d: Tx & { hash: string }) => {
+      const key = `${d.chainId}-${d.hash.toLowerCase()}`;
+      pushTxs.current = {
+        ...pushTxs.current,
+        [key]: d,
+      };
+      postSwapByChainHash(key);
+    },
+    [postSwapByChainHash]
+  );
+  useOnSwapPushTx(setData);
+
+  const addSwapTx = useCallback(
+    async (
+      chain: CHAINS_ENUM,
+      hash: string,
+      swapData: Omit<postSwapParams, 'tx'>
+    ) => {
+      const key = `${CHAINS[chain].id}-${hash.toLowerCase()}`;
+      localSwapTxs.current = {
+        ...localSwapTxs.current,
+        [key]: swapData,
+      };
+      postSwapByChainHash(key);
+    },
+    [postSwapByChainHash]
+  );
+
+  return addSwapTx;
 };
