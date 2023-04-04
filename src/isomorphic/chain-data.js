@@ -45,6 +45,7 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["CKB"] = "CKB";
     CHAINS_ENUM["TOMB"] = "TOMB";
     CHAINS_ENUM["PZE"] = "PZE";
+    CHAINS_ENUM["ERA"] = "ERA";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -762,6 +763,22 @@ export const CHAINS_RAW = {
         hex: "0x44d",
         scanLink: "https://zkevm.polygonscan.com/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/pze/a2276dce2d6a200c6148fb975f0eadd3.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+    },
+    [CHAINS_ENUM.ERA]: {
+        id: 324,
+        serverId: 'era',
+        network: '324',
+        name: 'zkSync Era',
+        nativeTokenSymbol: "ETH",
+        nativeTokenAddress: "era",
+        enum: CHAINS_ENUM.ERA,
+        hex: "0x144",
+        scanLink: "https://explorer.zksync.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/era/e21641a19fe6b8c5d05337dacae17b6e.png",
         nativeTokenDecimals: 18,
         eip: {
             "1559": false,
