@@ -13,7 +13,7 @@ interface TxExtraProps {
 export const TxExtra = ({ data, origin }: TxExtraProps) => {
   const chain = getChain(data.chain);
   return (
-    <div className={classNames(styles.txExtra)}>
+    <div className={classNames(styles.txExtra, styles.colTxExtra)}>
       {data.tx && data.tx?.eth_gas_fee ? (
         <div className={styles.txGas}>
           GasFee: {numberWithCommasIsLtOne(data.tx?.eth_gas_fee, 4)}{' '}
