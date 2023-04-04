@@ -11,7 +11,7 @@ export const Loading = () => {
           styles.loadingItem
         )}
       >
-        <div className="w-[250px]">
+        <div className={styles.colTxInfo}>
           <div>
             <Skeleton.Input
               active
@@ -92,7 +92,7 @@ export const Loading = () => {
             }}
           />
         </div>
-        <div className="text-right w-[250px] ml-auto">
+        <div className={classNames('text-right ml-auto', styles.colTxExtra)}>
           <div>
             <Skeleton.Input
               active
@@ -120,7 +120,7 @@ export const Loading = () => {
           styles.loadingItem
         )}
       >
-        <div className="w-[250px]">
+        <div className={styles.colTxInfo}>
           <div>
             <Skeleton.Input
               active
@@ -232,7 +232,7 @@ export const Loading = () => {
             />
           </div>
         </div>
-        <div className="text-right w-[250px] ml-auto">
+        <div className={classNames('text-right ml-auto', styles.colTxExtra)}>
           <div>
             <Skeleton.Input
               active
