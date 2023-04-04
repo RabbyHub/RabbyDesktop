@@ -22,7 +22,7 @@ import TransactionItem, { LoadingTransactionItem } from './TransactionItem';
 const TransactionWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  max-height: calc(100% - 154px);
+  max-height: 100%;
   overflow: hidden;
   position: absolute;
   right: -358px;
