@@ -57,12 +57,12 @@ export async function putDapp(dapp: IDapp) {
 }
 
 export async function replaceDapp(
-  dappIdsToDel: string | string[],
+  originsToDel: string | string[],
   dapp: IDapp
 ) {
   return window.rabbyDesktop.ipcRenderer.invoke(
     'dapps-replace',
-    dappIdsToDel,
+    originsToDel,
     dapp
   );
 }
