@@ -11,6 +11,7 @@ export function useAppVersion() {
   const [versions, setVersions] = useState<IAppVersions>({
     version: '',
     appChannel: 'reg',
+    gitRef: '',
   });
 
   useEffect(() => {

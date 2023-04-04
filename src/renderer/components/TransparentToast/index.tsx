@@ -2,7 +2,6 @@ import React, { useRef } from 'react';
 import { message } from 'antd';
 
 import { RcIconToastSuccess } from '@/../assets/icons/global-toast';
-import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
 import classNames from 'classnames';
 import { useClickOutSide } from '@/renderer/hooks/useClick';
 import { isWeb3Addr } from '@/isomorphic/web3';
