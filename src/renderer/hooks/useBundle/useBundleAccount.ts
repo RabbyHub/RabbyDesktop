@@ -1,8 +1,7 @@
-import { atom, useAtom } from 'jotai';
+import { useAtom } from 'jotai';
 import React from 'react';
-import { Binance } from './cex/binance';
-
-const bundleAccountsAtom = atom<BundleAccount[]>([]);
+import { Binance } from './cex/binance/binance';
+import { bundleAccountsAtom } from './shared';
 
 export const useBundleAccount = () => {
   const [accounts, setAccounts] = useAtom(bundleAccountsAtom);
@@ -29,6 +28,10 @@ export const useBundleAccount = () => {
     window.rabbyDesktop.ipcRenderer.invoke('bundle-account-put', account);
   }, []);
 
+  const deleteAccount = React.useCallback((id: string) => {
+    window.rabbyDesktop.ipcRenderer.invoke('bundle-account-delete', id);
+  }, []);
+
   React.useEffect(() => {
     window.rabbyDesktop.ipcRenderer.invoke('bundle-account-init');
 
@@ -43,6 +46,7 @@ export const useBundleAccount = () => {
   return {
     postAccount,
     putAccount,
+    deleteAccount,
     accounts,
   };
 };

@@ -3,7 +3,7 @@ import { Skeleton } from 'antd';
 import { usePrevious, useInterval } from 'react-use';
 import styled from 'styled-components';
 import classNames from 'classnames';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
 import { sortBy } from 'lodash';
 import { ellipsis } from '@/renderer/utils/address';
@@ -490,11 +490,22 @@ const Home = () => {
   }, 1000);
 
   const { showZSubview } = useZPopupLayerOnMain();
+  const navigateTo = useNavigate();
 
   return (
     <HomeBody>
       <Container>
         <HomeWrapper>
+          {/* TODO */}
+          <button
+            type="button"
+            onClick={() => {
+              navigateTo('/mainwin/home/bundle');
+            }}
+          >
+            Bundle
+          </button>
+
           <div className="header">
             <div className="top">
               <div className="left">

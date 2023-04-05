@@ -1,3 +1,4 @@
+import { useBinance } from './useBinance';
 import { useBundleAccount } from './useBundleAccount';
 
 /**
@@ -14,8 +15,10 @@ import { useBundleAccount } from './useBundleAccount';
  */
 export const useBundle = () => {
   const bundleAccount = useBundleAccount();
+  const binance = useBinance();
 
   return {
     ...bundleAccount,
+    binance,
   };
 };
