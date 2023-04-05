@@ -34,6 +34,9 @@ class TokenPrice {
   }
 
   addSymbol(symbol: string) {
+    if (!symbol) {
+      return;
+    }
     this.symbols.add(symbol);
   }
 

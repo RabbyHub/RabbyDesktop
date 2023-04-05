@@ -117,6 +117,8 @@ export class Binance {
     // 获取所有 token 对应的 usdt 价值
     await this.getUSDTPrices();
 
+    console.log(assets);
+
     // 汇总
     const result = {
       fundingAsset: this.calcFundingAsset(assets[0]),
@@ -187,8 +189,19 @@ export class Binance {
 
   private async marginAccount() {
     const res = await this.invoke<MarginAccountResponse>('marginAccount');
+    const checkValues = [
+      'borrowed',
+      'free',
+      'interest',
+      'locked',
+      'netAsset',
+    ] as const;
 
     res.userAssets.forEach((item) => {
+      if (checkValues.every((key) => item[key] === '0')) {
+        return;
+      }
+
       tokenPrice.addSymbol(item.asset);
     });
 

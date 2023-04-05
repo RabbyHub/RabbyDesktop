@@ -8,11 +8,18 @@ type BNAccountWithAPI = BNAccount & {
   api: Binance;
 };
 
+type BinanceAssets = Awaited<ReturnType<Binance['getAssets']>>;
+
+const plusAssets = (assets: BinanceAssets[]) => {
+  // return assets.reduce((prev, curr) => {
+  //   // prev.financeAsset.fixed.map((item, index) => {})
+  // }, assets[0]);
+};
+
 export const useBinance = () => {
   const [accounts] = useAtom(bundleAccountsAtom);
   const [balance, setBalance] = React.useState<string>('0');
-  const [assets, setAssets] =
-    React.useState<Awaited<ReturnType<Binance['getAssets']>>>();
+  const [assets, setAssets] = React.useState<BinanceAssets>();
 
   const bnAccounts = React.useMemo<BNAccountWithAPI[]>(() => {
     const result = accounts.filter(
