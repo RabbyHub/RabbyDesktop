@@ -5,12 +5,15 @@ export const HomeBundle = () => {
   const { binance } = useBundle();
 
   React.useEffect(() => {
-    binance.getAssets().then(console.log);
+    binance.getAssets();
   }, [binance]);
+
+  console.log('assets', binance.assets);
 
   return (
     <div>
       <h1>Bundles Page</h1>
+      <div>{binance.balance}</div>
     </div>
   );
 };

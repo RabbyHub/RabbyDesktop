@@ -1,5 +1,7 @@
 import BigNumber from 'bignumber.js';
 
+const USDT = 'USDT';
+const USDT_RE = new RegExp(`${USDT}$`);
 /**
  * 缓存符号对应价格，多个 bn 账户共用价格数据
  */
@@ -24,7 +26,7 @@ class TokenPrice {
     }[]
   ) {
     data.forEach(({ symbol, price }) => {
-      this.prices[symbol.replace(/USDT$/, '')] = {
+      this.prices[symbol.replace(USDT_RE, '')] = {
         value: price,
         lastUpdate: Date.now(),
       };
@@ -42,12 +44,16 @@ class TokenPrice {
       );
     });
 
-    return symbols.map((s) => `${s}USDT`);
+    return symbols.filter((s) => s !== USDT).map((s) => `${s}${USDT}`);
   }
 
   // 计算 symbol 对应的 USDT 价格
   getUSDTValue(symbol: string, value: string) {
     const price = this.prices[symbol];
+
+    if (symbol === USDT) {
+      return value;
+    }
 
     if (!price) {
       return '0';

@@ -1,18 +1,51 @@
 import { isBoolean } from 'lodash';
+import BigNumber from 'bignumber.js';
 import { ERROR } from '../../error';
 import { tokenPrice } from './price';
 import {
+  AssetWithRewards,
   FundingAsset,
   FundingWalletResponse,
+  IsolatedMarginAccountInfoResponse,
+  MarginAccountResponse,
+  SavingsCustomizedPositionResponse,
+  SavingsFlexibleProductPositionResponse,
   SpotAsset,
+  StakingProductPositionResponse,
   UserAssetResponse,
 } from './type';
-import { plusBigNumber } from '../util';
+import { valueGreaterThan10, plusBigNumber } from '../../util';
 
 export class Binance {
   apiKey: string;
 
   apiSecret: string;
+
+  // 总资产余额
+  private totalBalance = new BigNumber(0);
+
+  // 资产余额（排除小于 10u 的资产）
+  private balance = new BigNumber(0);
+
+  plusBalance(value: string) {
+    if (valueGreaterThan10(value)) {
+      this.balance = this.balance.plus(value);
+    }
+    this.totalBalance = this.totalBalance.plus(value);
+  }
+
+  getTotalBalance() {
+    return this.totalBalance.toString();
+  }
+
+  getBalance() {
+    return this.balance.toString();
+  }
+
+  resetBalance() {
+    this.totalBalance = new BigNumber(0);
+    this.balance = new BigNumber(0);
+  }
 
   constructor(apiKey: string, apiSecret: string) {
     this.apiKey = apiKey;
@@ -69,25 +102,32 @@ export class Binance {
 
   // 获取所有资产，并计算总价值
   async getAssets() {
+    this.resetBalance();
     // 获取所有资产
     const assets = await Promise.all([
       this.fundingWallet(),
       this.userAsset(),
       this.marginAccount(),
       this.isolatedMarginAccountInfo(),
-      this.savingsAccount(),
+      this.savingsFlexibleProductPosition(),
+      this.savingsCustomizedPosition(),
       this.stakingProductPosition('STAKING'),
     ]);
 
     // 获取所有 token 对应的 usdt 价值
     await this.getUSDTPrices();
 
-    console.log(assets);
-
     // 汇总
     const result = {
       fundingAsset: this.calcFundingAsset(assets[0]),
       spotAsset: this.calcSpotAsset(assets[1]),
+      marginAsset: this.calcMarginAccount(assets[2]),
+      isolatedMarginAsset: this.calcIsolatedMarginAccount(assets[3]),
+      financeAsset: {
+        flexible: this.calcFlexible(assets[4]),
+        fixed: this.calcFixed(assets[5]),
+        stake: this.calcStake(assets[6]),
+      },
     };
 
     return result;
@@ -96,187 +136,168 @@ export class Binance {
   private async fundingWallet() {
     const res = await this.invoke<FundingWalletResponse>('fundingWallet');
 
-    res.forEach((item) => {
-      tokenPrice.addSymbol(item.asset);
-    });
+    res.forEach(({ asset }) => tokenPrice.addSymbol(asset));
 
     return res;
   }
 
   private calcFundingAsset(res: FundingWalletResponse): FundingAsset {
-    return res.map((item) => {
-      const value = plusBigNumber(item.free, item.locked, item.freeze);
-      const usdtValue = tokenPrice.getUSDTValue(item.asset, value);
+    return res
+      .map((item) => {
+        const asset = item.asset;
+        const value = plusBigNumber(item.free, item.locked, item.freeze);
+        const usdtValue = tokenPrice.getUSDTValue(asset, value);
 
-      return {
-        asset: item.asset,
-        value,
-        usdtValue,
-      };
-    });
+        this.plusBalance(usdtValue);
+
+        return {
+          asset,
+          value,
+          usdtValue,
+        };
+      })
+      .filter((item) => valueGreaterThan10(item.usdtValue));
   }
 
   private async userAsset() {
     const res = await this.invoke<UserAssetResponse>('userAsset');
 
-    res.forEach((item) => {
+    res.forEach(({ asset }) => tokenPrice.addSymbol(asset));
+
+    return res;
+  }
+
+  private calcSpotAsset(res: UserAssetResponse): SpotAsset {
+    return res
+      .map((item) => {
+        const asset = item.asset;
+        const value = plusBigNumber(item.free, item.locked, item.freeze);
+        const usdtValue = tokenPrice.getUSDTValue(asset, value);
+
+        this.plusBalance(usdtValue);
+
+        return {
+          asset,
+          value,
+          usdtValue,
+        };
+      })
+      .filter((item) => valueGreaterThan10(item.usdtValue));
+  }
+
+  private async marginAccount() {
+    const res = await this.invoke<MarginAccountResponse>('marginAccount');
+
+    res.userAssets.forEach((item) => {
       tokenPrice.addSymbol(item.asset);
     });
 
     return res;
   }
 
-  calcSpotAsset(res: UserAssetResponse): SpotAsset {
+  // TODO
+  private calcMarginAccount(res: MarginAccountResponse) {}
+
+  private async isolatedMarginAccountInfo() {
+    const res = await this.invoke<IsolatedMarginAccountInfoResponse>(
+      'isolatedMarginAccountInfo'
+    );
+
+    res.assets.forEach((item) => {
+      tokenPrice.addSymbol(item.baseAsset.asset);
+      tokenPrice.addSymbol(item.quoteAsset.asset);
+    });
+
+    return res;
+  }
+
+  // TODO
+  private calcIsolatedMarginAccount(res: IsolatedMarginAccountInfoResponse) {}
+
+  private async savingsFlexibleProductPosition() {
+    const res = await this.invoke<SavingsFlexibleProductPositionResponse>(
+      'savingsFlexibleProductPosition'
+    );
+
+    res.forEach(({ asset }) => tokenPrice.addSymbol(asset));
+
+    return res;
+  }
+
+  private calcFlexible(
+    res: SavingsFlexibleProductPositionResponse
+  ): AssetWithRewards[] {
     return res.map((item) => {
-      const value = plusBigNumber(item.free, item.locked, item.freeze);
-      const usdtValue = tokenPrice.getUSDTValue(item.asset, value);
+      const asset = item.asset;
+      const value = item.totalAmount;
+      const usdtValue = tokenPrice.getUSDTValue(asset, value);
+
+      this.plusBalance(usdtValue);
 
       return {
-        asset: item.asset,
+        asset,
         value,
         usdtValue,
+        rewards: item.totalBonusRewards,
       };
     });
   }
 
-  private async marginAccount() {
-    return this.invoke<{
-      tradeEnabled: string;
-      transferEnabled: string;
-      borrowEnabled: string;
-      marginLevel: string;
-      totalAssetOfBtc: string;
-      totalLiabilityOfBtc: string;
-      totalNetAssetOfBtc: string;
-      userAssets: {
-        asset: string;
-        free: string;
-        locked: string;
-        borrowed: string;
-        interest: string;
-        netAsset: string;
-      }[];
-    }>('marginAccount');
+  // 国内测不了
+  private async savingsCustomizedPosition() {
+    const res = await this.invoke<SavingsCustomizedPositionResponse>(
+      'savingsCustomizedPosition'
+    );
+
+    res.forEach(({ asset }) => tokenPrice.addSymbol(asset));
+
+    return res;
   }
 
-  private async isolatedMarginAccountInfo() {
-    return this.invoke<{
-      assets: [
-        {
-          baseAsset: {
-            // 借贷资产
-            asset: string;
-            borrowEnabled: boolean;
-            borrowed: string;
-            free: string;
-            interest: string;
-            locked: string;
-            netAsset: string;
-            netAssetOfBtc: string;
-            repayEnabled: boolean;
-            totalAsset: string;
-          };
-          quoteAsset: {
-            // 抵押资产
-            asset: string;
-            borrowEnabled: boolean;
-            borrowed: string;
-            free: string;
-            interest: string;
-            locked: string;
-            netAsset: string;
-            netAssetOfBtc: string;
-            repayEnabled: boolean;
-            totalAsset: string;
-          };
-          symbol: string;
-          isolatedCreated: boolean;
-          marginLevel: string;
-          marginLevelStatus: string;
-          marginRatio: string;
-          indexPrice: string;
-          liquidatePrice: string;
-          liquidateRate: string;
-          tradeEnabled: boolean;
-          enabled: boolean;
-        }
-      ];
-      totalAssetOfBtc: string;
-      totalLiabilityOfBtc: string;
-      totalNetAssetOfBtc: string;
-    }>('isolatedMarginAccountInfo');
-  }
+  private calcFixed(res: SavingsCustomizedPositionResponse) {
+    return res.map((item) => {
+      const asset = item.asset;
+      const value = item.principal;
+      const usdtValue = tokenPrice.getUSDTValue(asset, value);
 
-  /**
-   * @deprecated
-   */
-  async savingsFlexibleProductPosition() {
-    return this.invoke<
-      {
-        asset: string;
-        productId: string;
-        productName: string;
-        dailyInterestRate: string;
-        annualInterestRate: string;
-        totalAmount: string;
-        lockedAmount: string;
-        freeAmount: string;
-        freezeAmount: string;
-        totalInterest: string;
-        canRedeem: boolean;
-        redeemingAmount: string;
-        tierAnnualInterestRate: Record<string, string>;
-        totalBonusRewards: string;
-        totalMarketRewards: string;
-        collateralAmount: string;
-      }[]
-    >('savingsFlexibleProductPosition');
-  }
+      this.plusBalance(usdtValue);
 
-  // TODO 币安宝定期
+      return {
+        asset,
+        value,
+        usdtValue,
+        rewards: item.interest,
+      };
+    });
+  }
 
   private async stakingProductPosition(type: string) {
-    return this.invoke<
-      {
-        positionId: string;
-        projectId: string;
-        asset: string;
-        amount: string;
-        purchaseTime: string;
-        duration: string;
-        accrualDays: string;
-        rewardAsset: string;
-        APY: string;
-        rewardAmt: string;
-        extraRewardAsset: string;
-        extraRewardAPY: string;
-        estExtraRewardAmt: string;
-        nextInterestPay: string;
-        nextInterestPayDate: string;
-        payInterestPeriod: string;
-        redeemAmountEarly: string;
-        interestEndDate: string;
-        deliverDate: string;
-        redeemPeriod: string;
-        redeemingAmt: string;
-        partialAmtDeliverDate: string;
-        canRedeemEarly: boolean;
-        renewable: boolean;
-        type: string;
-        status: string;
-      }[]
-    >('stakingProductPosition', [type]);
+    const res = await this.invoke<StakingProductPositionResponse>(
+      'stakingProductPosition',
+      [type]
+    );
+
+    res.forEach(({ asset }) => tokenPrice.addSymbol(asset));
+
+    return res;
   }
 
-  private savingsAccount() {
-    return this.invoke<{
-      totalAmountInBTC: string;
-      totalAmountInUSDT: string;
-      totalFixedAmountInBTC: string;
-      totalFixedAmountInUSDT: string;
-      totalFlexibleInBTC: string;
-      totalFlexibleInUSDT: string;
-    }>('savingsAccount');
+  // TODO 重新对下数据结构
+  private calcStake(res: StakingProductPositionResponse) {
+    return res.map((item) => {
+      const asset = item.asset;
+      const value = item.amount;
+      const usdtValue = tokenPrice.getUSDTValue(asset, value);
+
+      this.plusBalance(usdtValue);
+
+      return {
+        asset,
+        value,
+        usdtValue,
+        rewards: item.rewardAmt,
+      };
+    });
   }
 
   private async getUSDTPrices() {
