@@ -23,6 +23,16 @@ export const SlippageItem = styled.div<{
   font-weight: medium;
   background: rgba(0, 0, 0, 0.2);
   color: rgba(255, 255, 255, 0.6);
+  &:hover {
+    background: linear-gradient(
+        0deg,
+        rgba(134, 151, 255, 0.3),
+        rgba(134, 151, 255, 0.3)
+      ),
+      rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+  }
 `;
 
 const SLIPPAGE = ['0.1', '0.3', '0.5'];
@@ -47,6 +57,9 @@ const Wrapper = styled.section`
       background: rgba(0, 0, 0, 0.2);
       border: 1px solid rgba(255, 255, 255, 0.8);
       box-shadow: none;
+    }
+    > .ant-input {
+      border-radius: 0;
     }
   }
 
@@ -86,7 +99,7 @@ export const Slippage = memo((props: SlippageProps) => {
   const [isCustom, setIsCustom] = useToggle(false);
 
   const isLow = useMemo(() => {
-    return Number(value || 0) < 0.1;
+    return value?.trim() !== '' && Number(value || 0) < 0.1;
   }, [value]);
 
   const setRecommendValue = useCallback(() => {
@@ -158,6 +171,7 @@ export const Slippage = memo((props: SlippageProps) => {
             value={value}
             onFocus={onInputFocus}
             onChange={onInputChange}
+            placeholder="0.1"
             suffix="%"
           />
         </div>

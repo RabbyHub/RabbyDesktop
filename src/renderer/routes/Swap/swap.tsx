@@ -16,6 +16,7 @@ import IconRcClose from '@/../assets/icons/swap/close.svg?rc';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { useRbiSource } from '@/renderer/hooks/useRbiSource';
 import BigNumber from 'bignumber.js';
+import { isSameAddress } from '@/renderer/utils/address';
 import { ChainRender, ChainSelect } from './component/ChainSelect';
 import { SwapIntro } from './component/Intro';
 import { DEX, getChainDefaultToken } from './constant';
@@ -130,9 +131,9 @@ const Wrapper = styled.div`
         cursor: pointer;
         width: 24px;
         height: 24px;
-        opacity: 0.6;
+        color: rgba(255, 255, 255, 0.6);
         &:hover {
-          opacity: 1;
+          color: rgba(255, 255, 255, 1);
         }
       }
     }
@@ -195,17 +196,11 @@ const Wrapper = styled.div`
         height: 0;
         border-top: 1px solid rgba(255, 255, 255, 0.2);
       }
-
-      &:hover {
-        box-shadow: none;
-      }
       &.disabled {
         opacity: 0.6;
-        /* background-color: rgba(134, 151, 255, 0.6); */
         box-shadow: none;
         border-color: transparent;
         cursor: not-allowed;
-        /* color: rgba(255, 255, 255, 0.6); */
       }
     }
   }
@@ -236,6 +231,13 @@ export const SwapToken = () => {
       chain: searchParams.get('chain'),
     };
   }, [searchParams]);
+
+  const payTokenIsNativeToken = useMemo(() => {
+    if (payToken) {
+      return isSameAddress(payToken.id, CHAINS[chain].nativeTokenAddress);
+    }
+    return false;
+  }, [chain, payToken]);
 
   const chainSwitch = useCallback((c: CHAINS_ENUM, payTokenId?: string) => {
     setChain(c);
@@ -417,10 +419,10 @@ export const SwapToken = () => {
     }, []);
 
   const handleBalance = useCallback(() => {
-    if (payToken && payToken?.id !== CHAINS[chain].nativeTokenAddress) {
+    if (!payTokenIsNativeToken) {
       setPayAmount(`${payToken?.amount || ''}`);
     }
-  }, [chain, payToken]);
+  }, [payToken?.amount, payTokenIsNativeToken]);
 
   const exchangeToken = useCallback(() => {
     setPayToken(receiveToken);
@@ -443,11 +445,22 @@ export const SwapToken = () => {
     if (activeProvider?.name) {
       return `Swap via ${DexDisplayName}`;
     }
+    if (!receiveToken || !payToken) {
+      return 'Select token';
+    }
     return 'Select offer';
-  }, [DexDisplayName, Insufficient, activeProvider?.name]);
+  }, [
+    DexDisplayName,
+    Insufficient,
+    activeProvider?.name,
+    payToken,
+    receiveToken,
+  ]);
 
   const btnDisabled =
-    quoteLoading ||
+    !payToken ||
+    !receiveToken ||
+    !payAmount ||
     !activeProvider?.name ||
     activeProvider?.error ||
     !activeProvider?.quote;
@@ -535,7 +548,7 @@ export const SwapToken = () => {
         return;
       }
 
-      if (!activeProvider?.error && !quoteLoading && activeProvider?.quote) {
+      if (!activeProvider?.error && activeProvider?.quote) {
         if (activeProvider?.shouldTwoStepApprove) {
           return Modal.confirm({
             closable: true,
@@ -571,7 +584,6 @@ export const SwapToken = () => {
       payAmount,
       payToken,
       receiveToken,
-      quoteLoading,
       gotoSwap,
       activeProvider?.error,
       activeProvider?.quote,
@@ -594,6 +606,12 @@ export const SwapToken = () => {
     }
   }, [chain, payToken?.id, receiveToken?.id]);
 
+  useEffect(() => {
+    if (!payToken || !receiveToken || !payAmount) {
+      setActiveProvider(undefined);
+    }
+  }, [payToken, receiveToken, payAmount]);
+
   return (
     <Wrapper>
       <div className="header">
@@ -609,14 +627,16 @@ export const SwapToken = () => {
               <ChainSelect
                 value={chain}
                 onChange={chainSwitch}
-                disabledTips="Not supported by the current exchange"
-                title={`Select the chain supported by ${chainName}`}
+                disabledTips="Not supported"
+                title="Select chain"
                 supportChains={supportChains}
                 chainRender={<ChainRender chain={chain} />}
               />
             </div>
             <div className="section">
-              <div className="subText"> Swap from / To </div>
+              <div className="subText">
+                Swap from <span className="ml-[192px]">To</span>
+              </div>
               <div className="tokenGroup">
                 <TokenSelect
                   onTokenChange={setPayToken}
@@ -649,7 +669,8 @@ export const SwapToken = () => {
                 <div className="subText">Amount in {chainName}</div>
                 <div
                   className={clsx(
-                    'subText underline cursor-pointer',
+                    'subText',
+                    !payTokenIsNativeToken && 'underline cursor-pointer',
                     Insufficient && 'error'
                   )}
                   onClick={handleBalance}
@@ -674,45 +695,50 @@ export const SwapToken = () => {
                 {activeProvider?.halfBetterRate}% better exchange rate.
               </div>
             </div>
-            {!Insufficient &&
-              !quoteLoading &&
-              payAmount &&
+            {payAmount &&
               activeProvider?.quote?.toTokenAmount &&
               payToken &&
               receiveToken && (
-                <ReceiveDetails
-                  className="section"
-                  payAmount={payAmount}
-                  receiveRawAmount={activeProvider?.quote?.toTokenAmount}
-                  payToken={payToken}
-                  receiveToken={receiveToken}
-                  quoteWarning={activeProvider?.quoteWarning}
-                />
-              )}
-            <div className="section">
-              <div className="subText text-14 text-white flex justify-between">
-                <div>
-                  <span className="text-opacity-60">Slippage tolerance: </span>
-                  <span className="font-medium">{slippage}%</span>
-                </div>
-                <div>
-                  <span className="text-opacity-60">Minimum received: </span>
-                  <span className="font-medium">
-                    {miniReceivedAmount} {receiveToken?.symbol}
-                  </span>
-                </div>
-              </div>
+                <>
+                  <ReceiveDetails
+                    className="section"
+                    payAmount={payAmount}
+                    receiveRawAmount={activeProvider?.quote?.toTokenAmount}
+                    payToken={payToken}
+                    receiveToken={receiveToken}
+                    quoteWarning={activeProvider?.quoteWarning}
+                  />
+                  <div className="section">
+                    <div className="subText text-14 text-white flex justify-between">
+                      <div>
+                        <span className="text-white text-opacity-60">
+                          Slippage tolerance:{' '}
+                        </span>
+                        <span className="font-medium">{slippage}%</span>
+                      </div>
+                      <div>
+                        <span className="text-white text-opacity-60">
+                          Minimum received:{' '}
+                        </span>
+                        <span className="font-medium">
+                          {miniReceivedAmount} {receiveToken?.symbol}
+                        </span>
+                      </div>
+                    </div>
 
-              <Slippage
-                value={slippage}
-                onChange={setSlippage}
-                recommendValue={
-                  slippageValidInfo?.is_valid
-                    ? undefined
-                    : slippageValidInfo?.suggest_slippage
-                }
-              />
-            </div>
+                    <Slippage
+                      value={slippage}
+                      onChange={setSlippage}
+                      recommendValue={
+                        slippageValidInfo?.is_valid
+                          ? undefined
+                          : slippageValidInfo?.suggest_slippage
+                      }
+                    />
+                  </div>
+                </>
+              )}
+
             <div className="btnBox">
               {activeProvider?.shouldApproveToken ? (
                 <>

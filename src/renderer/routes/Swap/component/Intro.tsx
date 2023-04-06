@@ -28,6 +28,7 @@ const Wrapper = styled.div`
     }
 
     .discord {
+      margin-top: 32px;
       color: rgba(255, 255, 255, 0.6);
       .link {
         cursor: pointer;
@@ -38,7 +39,7 @@ const Wrapper = styled.div`
 `;
 export const SwapIntro = () => {
   const gotoDiscord = useCallback(() => {
-    openExternalUrl('https://discord.com/invite/seFBCWmUre');
+    openExternalUrl('https://discord.com/invite/qBgBp4gRvQ');
   }, []);
   return (
     <Wrapper>
@@ -72,7 +73,7 @@ export const SwapIntro = () => {
         from the receiving amount.
       </div>
 
-      <div className="discord segment">
+      <div className="discord">
         Find us in{' '}
         <span className="link" onClick={gotoDiscord}>
           Discord

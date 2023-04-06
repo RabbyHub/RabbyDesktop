@@ -45,10 +45,8 @@ const EmptyWrapper = styled.div`
   }
   .desc {
     color: rgba(255, 255, 255, 0.4);
-    font-size: 18px;
-    line-height: 21px;
-
-    color: #ffffff;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
   }
 `;
 const Empty = () => {
@@ -96,6 +94,7 @@ const Wrapper = styled.div`
 
     .addr {
       text-decoration: underline;
+      cursor: pointer;
     }
   }
 
@@ -106,6 +105,10 @@ const Wrapper = styled.div`
     height: 108px;
     margin-bottom: 32px;
     display: flex;
+
+    .active {
+      color: #fff;
+    }
   }
   .tx {
   }
@@ -117,12 +120,14 @@ const TokenCost = ({
   payTokenAmount,
   receiveTokenAmount,
   loading = false,
+  actual = false,
 }: {
   payToken: TokenItem;
   receiveToken: TokenItem;
   payTokenAmount?: number;
   receiveTokenAmount?: number;
   loading?: boolean;
+  actual?: boolean;
 }) => {
   if (loading) {
     return (
@@ -134,7 +139,7 @@ const TokenCost = ({
     );
   }
   return (
-    <div className="flex items-center">
+    <div className={clsx('flex items-center', actual && 'active')}>
       <TokenWithChain
         token={payToken}
         width="20px"
@@ -144,7 +149,7 @@ const TokenCost = ({
       <div className="ml-12">
         {formatAmount(payTokenAmount || '0')} {payToken.symbol}
       </div>
-      <IconSwapArrow className="text-16 mx-24" />
+      <IconSwapArrow className={clsx('text-16 mx-24')} />
       <TokenWithChain
         token={receiveToken}
         width="20px"
@@ -184,7 +189,10 @@ const SlippageUsage = ({
       )}
     >
       <div
-        className={clsx('text-20 font-medium', actual && 'text-opacity-100')}
+        className={clsx(
+          'text-20  font-medium',
+          actual && 'text-white text-opacity-100'
+        )}
       >
         {!loading ? (
           value
@@ -252,7 +260,7 @@ const Transaction = forwardRef<HTMLDivElement, TransactionProps>(
           {!loading ? (
             <span className="ml-auto">GasFee: {gasUsed}</span>
           ) : (
-            <span className="ml-auto">Gwei: {data?.gas?.gas_price} Gwei</span>
+            <span className="ml-auto">Gas: {data?.gas?.gas_price} Gwei</span>
           )}
           <span>
             {chainName}:{' '}
@@ -280,6 +288,7 @@ const Transaction = forwardRef<HTMLDivElement, TransactionProps>(
               payTokenAmount={data.actual.pay_token_amount}
               receiveTokenAmount={data.actual.receive_token_amount}
               loading={loading}
+              actual
             />
           </div>
 

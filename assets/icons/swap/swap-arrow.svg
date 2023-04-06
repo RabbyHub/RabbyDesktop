@@ -1,8 +1,9 @@
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <g opacity="0.6">
-    <path d="M15.1562 5.99844L21.2996 12.1418L15.1562 18.2852" stroke="white" stroke-width="2"
+  <g>
+    <path d="M15.1562 5.99844L21.2996 12.1418L15.1562 18.2852" stroke="currentColor"
+      stroke-width="2"
       stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M3.55469 12.1562L21.3022 12.1562" stroke="white" stroke-width="2"
+    <path d="M3.55469 12.1562L21.3022 12.1562" stroke="currentColor" stroke-width="2"
       stroke-linecap="round" stroke-linejoin="round" />
   </g>
 </svg>

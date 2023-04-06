@@ -171,8 +171,9 @@ export const ReceiveDetails = (
             )
           </span>
           <Tooltip
+            overlayClassName="rectangle max-w-[600px]"
             title={
-              <>
+              <div className="flex flex-col gap-2">
                 <div>
                   Est. Payment: {payAmount}
                   {payToken.symbol} ≈ ${payUsd}
@@ -182,7 +183,7 @@ export const ReceiveDetails = (
                   {receiveToken.symbol} ≈ ${receiveUsd}
                 </div>
                 <div>Est. Difference: {diff}%</div>
-              </>
+              </div>
             }
           >
             <img src={ImgInfo} />

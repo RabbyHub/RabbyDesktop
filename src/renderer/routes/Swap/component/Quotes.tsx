@@ -14,6 +14,7 @@ import ImgLock from '@/../assets/icons/swap/lock.svg';
 import { noop } from 'lodash';
 import { CEX, DEX } from '../constant';
 import {
+  QuotePreExecResultInfo,
   getAllQuotes,
   getDexQuote,
   getPreExecResult,
@@ -140,7 +141,11 @@ export interface QuoteItemProps {
   onClick: (provider: QuoteProvider) => void;
 }
 
-const DexQuoteItem = (props: QuoteItemProps) => {
+const DexQuoteItem = (
+  props: QuoteItemProps & {
+    preExecResult: QuotePreExecResultInfo;
+  }
+) => {
   // const { name, logo, error, symbol, amount, diff, disabled } = props;
   const {
     quote,
@@ -157,6 +162,7 @@ const DexQuoteItem = (props: QuoteItemProps) => {
     slippage,
     fee,
     onClick,
+    preExecResult,
   } = props;
   const dexInfo = useMemo(() => DEX[dexId as keyof typeof DEX], [dexId]);
 
@@ -175,24 +181,6 @@ const DexQuoteItem = (props: QuoteItemProps) => {
     payToken,
     receiveToken,
   });
-
-  const {
-    value: preExecTx,
-    error: preExecTxError,
-    loading: preExecTxLoading,
-  } = useAsync(async () => {
-    if (quote?.tx && !loading) {
-      return getPreExecResult({
-        userAddress,
-        chain,
-        payToken,
-        receiveToken,
-        payAmount,
-        quote,
-        dexId: dexId as DEX_ENUM,
-      });
-    }
-  }, [chain, dexId, payAmount, payToken, quote, receiveToken, userAddress]);
 
   const {
     value: halfAmountQuotePreExecTxResult,
@@ -242,15 +230,13 @@ const DexQuoteItem = (props: QuoteItemProps) => {
     if (
       active &&
       !halfAmountQuoteLoading &&
-      !preExecTxLoading &&
-      !preExecTxError &&
       !halfAmountQuoteError &&
       halfAmountQuotePreExecTxResult &&
-      preExecTx
+      preExecResult
     ) {
       return (
         halfBetterRate(
-          preExecTx?.swapPreExecTx,
+          preExecResult?.swapPreExecTx,
           halfAmountQuotePreExecTxResult?.swapPreExecTx
         ) || ''
       );
@@ -258,12 +244,10 @@ const DexQuoteItem = (props: QuoteItemProps) => {
     return '';
   }, [
     active,
-    preExecTxError,
-    halfAmountQuoteError,
     halfAmountQuoteLoading,
+    halfAmountQuoteError,
     halfAmountQuotePreExecTxResult,
-    preExecTx,
-    preExecTxLoading,
+    preExecResult,
   ]);
 
   const [middleContent, rightContent, disabled] = useMemo(() => {
@@ -304,10 +288,12 @@ const DexQuoteItem = (props: QuoteItemProps) => {
         </span>
       );
     }
-    if (preExecTxError) {
+    if (quote?.toTokenAmount && !preExecResult) {
+      center = <div className="ml-[66px]">-</div>;
       right = <div className="text-opacity-60">Unable to execute</div>;
       disable = true;
     }
+
     if (!isSdkDataPass) {
       disable = true;
       center = <div className="ml-[66px]">-</div>;
@@ -319,7 +305,7 @@ const DexQuoteItem = (props: QuoteItemProps) => {
   }, [
     quote?.toTokenAmount,
     quote?.toTokenDecimals,
-    preExecTxError,
+    preExecResult,
     isSdkDataPass,
     bestAmount,
     receiveToken.decimals,
@@ -328,7 +314,7 @@ const DexQuoteItem = (props: QuoteItemProps) => {
   ]);
 
   const quoteWarning = useMemo(() => {
-    if (!quote?.toTokenAmount || !preExecTx?.swapPreExecTx) {
+    if (!quote?.toTokenAmount || !preExecResult) {
       return '';
     }
 
@@ -341,7 +327,7 @@ const DexQuoteItem = (props: QuoteItemProps) => {
 
     const diff = receivedTokeAmountBn
       .minus(
-        preExecTx?.swapPreExecTx?.balance_change.receive_token_list[0]
+        preExecResult?.swapPreExecTx?.balance_change.receive_token_list[0]
           ?.amount || 0
       )
       .div(receivedTokeAmountBn)
@@ -351,7 +337,7 @@ const DexQuoteItem = (props: QuoteItemProps) => {
   }, [
     chain,
     payToken.id,
-    preExecTx?.swapPreExecTx,
+    preExecResult,
     quote?.toTokenAmount,
     quote?.toTokenDecimals,
     receiveToken.decimals,
@@ -359,22 +345,15 @@ const DexQuoteItem = (props: QuoteItemProps) => {
   ]);
 
   const CheckIcon = useCallback(() => {
-    if (
-      disabled ||
-      preExecTxLoading ||
-      loading ||
-      !quote?.tx ||
-      !preExecTx?.swapPreExecTx
-    ) {
+    if (disabled || loading || !quote?.tx || !preExecResult?.swapPreExecTx) {
       return null;
     }
     return <WarningOrChecked quoteWarning={quoteWarning} />;
   }, [
     disabled,
-    preExecTxLoading,
     loading,
     quote?.tx,
-    preExecTx?.swapPreExecTx,
+    preExecResult?.swapPreExecTx,
     quoteWarning,
   ]);
 
@@ -383,23 +362,20 @@ const DexQuoteItem = (props: QuoteItemProps) => {
     onClick({
       name: dexId,
       quote,
-      gasPrice: preExecTx?.gasPrice,
-      shouldApproveToken: !!preExecTx?.shouldApproveToken,
-      shouldTwoStepApprove: !!preExecTx?.shouldTwoStepApprove,
-      error: !!preExecTxError,
+      gasPrice: preExecResult?.gasPrice,
+      shouldApproveToken: !!preExecResult?.shouldApproveToken,
+      shouldTwoStepApprove: !!preExecResult?.shouldTwoStepApprove,
+      error: !preExecResult,
       halfBetterRate: halfBetterRateString,
       quoteWarning,
     });
   }, [
-    disabled,
     active,
+    disabled,
     onClick,
     dexId,
     quote,
-    preExecTx?.gasPrice,
-    preExecTx?.shouldApproveToken,
-    preExecTx?.shouldTwoStepApprove,
-    preExecTxError,
+    preExecResult,
     halfBetterRateString,
     quoteWarning,
   ]);
@@ -410,11 +386,11 @@ const DexQuoteItem = (props: QuoteItemProps) => {
         onClick({
           name: dexId,
           quote,
-          gasPrice: preExecTx?.gasPrice,
+          gasPrice: preExecResult?.gasPrice,
 
-          shouldApproveToken: !!preExecTx?.shouldApproveToken,
-          shouldTwoStepApprove: !!preExecTx?.shouldTwoStepApprove,
-          error: !!preExecTxError,
+          shouldApproveToken: !!preExecResult?.shouldApproveToken,
+          shouldTwoStepApprove: !!preExecResult?.shouldTwoStepApprove,
+          error: !preExecResult,
           halfBetterRate: halfBetterRateString,
           quoteWarning,
         });
@@ -422,15 +398,13 @@ const DexQuoteItem = (props: QuoteItemProps) => {
     },
     300,
     [
-      preExecTx?.gasPrice,
       quoteWarning,
       halfBetterRateString,
       active,
-      preExecTxError,
       dexId,
       onClick,
       quote,
-      preExecTx?.swapPreExecTx?.balance_change?.usd_value_change,
+      preExecResult,
     ]
   );
 
@@ -442,8 +416,11 @@ const DexQuoteItem = (props: QuoteItemProps) => {
       <div className="info">
         <img className="logo" src={dexInfo.logo} />
         <span>{dexInfo.name}</span>
-        {!!preExecTx?.shouldApproveToken && (
-          <Tooltip title="Token is not approved for this aggregator">
+        {!!preExecResult?.shouldApproveToken && (
+          <Tooltip
+            overlayClassName="rectangle /max-w-[300px]"
+            title="Token is not approved for this aggregator"
+          >
             <img src={ImgLock} className="w-14 h-14" />
           </Tooltip>
         )}
@@ -544,28 +521,28 @@ export const Quotes = (props: QuotesProps) => {
 
   const sortedList = useMemo(
     () =>
-      list.sort((a, b) =>
-        new BigNumber(
-          (b.isDex ? b.data?.toTokenAmount : b?.data?.receive_token?.amount) ||
-            0
-        )
-          .times(b.isDex ? 1 : 10 ** other.receiveToken.decimals)
-          .minus(
-            (a.isDex
-              ? a.data?.toTokenAmount
-              : new BigNumber(a?.data?.receive_token?.amount || '0').times(
-                  10 ** other.receiveToken.decimals
-                )) || 0
-          )
-          .toNumber()
-      ),
+      list.sort((a, b) => {
+        const getNumber = (quote: typeof a) => {
+          if (quote.isDex) {
+            if (!quote.preExecResult) {
+              return new BigNumber(0);
+            }
+            return new BigNumber(quote?.data?.toTokenAmount || 0);
+          }
+
+          return new BigNumber(quote?.data?.receive_token?.amount || 0).times(
+            10 ** other.receiveToken.decimals
+          );
+        };
+        return getNumber(b).minus(getNumber(a)).toNumber();
+      }),
     [list, other?.receiveToken?.decimals]
   );
   return (
     <QuotesWrapper>
       <div className="header">
         <div className="title">The following swap rates are found</div>
-        <IconRefresh refresh={refresh} />
+        <IconRefresh refresh={refresh} loading={loading} />
       </div>
       {loading && (
         <div className="flex flex-col gap-[20px]">
@@ -575,7 +552,7 @@ export const Quotes = (props: QuotesProps) => {
               <Skeleton.Input
                 active
                 block
-                style={{ height: 72, borderRadius: '6px' }}
+                style={{ height: 72, borderRadius: '6px', opacity: '0.5' }}
                 key={`${_ + i}`}
               />
             ))}
@@ -583,7 +560,8 @@ export const Quotes = (props: QuotesProps) => {
       )}
       <div className="flex flex-col gap-[20px]">
         {!loading &&
-          sortedList.map(({ name, data, isDex }, idx) => {
+          sortedList.map((params, idx) => {
+            const { name, data, isDex } = params;
             const bestQuote = sortedList?.[0];
             const bestAmount =
               (bestQuote?.isDex
@@ -594,6 +572,7 @@ export const Quotes = (props: QuotesProps) => {
             if (isDex) {
               return (
                 <DexQuoteItem
+                  preExecResult={params.preExecResult}
                   quote={data}
                   name={name}
                   isBestQuote={idx === 0}

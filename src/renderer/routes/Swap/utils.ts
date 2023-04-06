@@ -33,136 +33,6 @@ export function isSwapWrapToken(
   );
 }
 
-interface getDexQuoteParams {
-  payToken: TokenItem;
-  receiveToken: TokenItem;
-  userAddress: string;
-  slippage: string;
-  fee: string;
-  payAmount: string;
-  chain: CHAINS_ENUM;
-  dexId: DEX_ENUM;
-}
-
-export const getDexQuote = async ({
-  payToken,
-  receiveToken,
-  userAddress,
-  slippage,
-  fee: feeAfterDiscount,
-  payAmount,
-  chain,
-  dexId,
-}: getDexQuoteParams): Promise<{
-  data: null | QuoteResult;
-  name: string;
-  isDex: true;
-}> => {
-  try {
-    const data = await getQuote(
-      isSwapWrapToken(payToken.id, receiveToken.id, chain)
-        ? DEX_ENUM.WRAPTOKEN
-        : dexId,
-      {
-        fromToken: payToken.id,
-        toToken: receiveToken.id,
-        feeAddress: SWAP_FEE_ADDRESS,
-        fromTokenDecimals: payToken.decimals,
-        amount: new BigNumber(payAmount)
-          .times(10 ** payToken.decimals)
-          .toFixed(0, 1),
-        userAddress,
-        slippage: Number(slippage),
-        feeRate: Number(feeAfterDiscount) || 0,
-        chain,
-      }
-    );
-
-    return { data, name: dexId, isDex: true };
-  } catch (error) {
-    console.error('getQuote error ', error);
-    return { data: null, name: dexId, isDex: true };
-  }
-  // return undefined;
-};
-
-export const getAllDexQuotes = async (
-  params: Omit<getDexQuoteParams, 'dexId'>
-) => {
-  // const { payToken, receiveToken, chain } = params;
-  // if (isSwapWrapToken(payToken.id, receiveToken.id, chain)) {
-  //   const data = await getDexQuote({ ...params, dexId: DEX_ENUM.WRAPTOKEN });
-  //   return Promise.allSettled(Object.keys(DEX).map(() => data));
-  // }
-  return Promise.all(
-    (Object.keys(DEX) as DEX_ENUM[]).map((dexId) =>
-      getDexQuote({ ...params, dexId })
-    )
-  );
-};
-
-interface getAllCexQuotesParams {
-  payToken: TokenItem;
-  payAmount: string;
-  receiveTokenId: string;
-  chain: CHAINS_ENUM;
-}
-
-type TCexQuoteData = { data: null | CEXQuote; name: string; isDex: false };
-const getCexQuote = async (
-  params: getAllCexQuotesParams & { cexId: string }
-): Promise<TCexQuoteData> => {
-  const {
-    payToken,
-    payAmount,
-    receiveTokenId: receive_token_id,
-    chain,
-    cexId: cex_id,
-  } = params;
-
-  const p = {
-    cex_id,
-    pay_token_amount: payAmount,
-    chain_id: CHAINS[chain].serverId,
-    pay_token_id: payToken.id,
-    receive_token_id,
-  };
-
-  try {
-    const data = await walletOpenapi.getCEXSwapQuote(p);
-    return {
-      data,
-      name: cex_id,
-      isDex: false,
-    };
-  } catch (error) {
-    return {
-      data: null,
-      name: cex_id,
-      isDex: false,
-    };
-  }
-};
-
-export const getAllQuotes = async (
-  params: Omit<getDexQuoteParams, 'dexId'>
-) => {
-  return Promise.all([
-    ...(Object.keys(DEX) as DEX_ENUM[]).map((dexId) =>
-      getDexQuote({ ...params, dexId })
-    ),
-    ...Object.keys(CEX).map((cexId) =>
-      getCexQuote({
-        cexId,
-        payToken: params.payToken,
-        payAmount: params.payAmount,
-        receiveTokenId: params.receiveToken.id,
-        chain: params.chain,
-      })
-    ),
-  ]);
-};
-
 export interface validSlippageParams {
   chain: CHAINS_ENUM;
   slippage: string;
@@ -230,7 +100,8 @@ export const postSwap = async ({
         .toNumber(),
       slippage: new BigNumber(slippage).div(100).toNumber(),
     },
-    dex_id: dexId,
+    // 0xAPI => 0x
+    dex_id: dexId.replace('API', ''),
     tx_id: txId,
     tx,
   });
@@ -415,11 +286,173 @@ export const halfBetterRate = (
     half.balance_change.usd_value_change
   ) {
     const diff = new BigNumber(half.balance_change.usd_value_change)
-      .minus(full.balance_change.usd_value_change)
-      .div(full.balance_change.usd_value_change);
+      .times(2)
+      .minus(full.balance_change.usd_value_change);
+
+    console.log(
+      'half.balance_change.usd_value_change',
+      half.balance_change.usd_value_change,
+      diff.gt(0)
+    );
+
+    console.log(
+      'full.balance_change.usd_value_change',
+      full.balance_change.usd_value_change
+    );
     return diff.gt(0)
       ? new BigNumber(diff.toPrecision(1)).times(100).toString(10)
       : null;
   }
   return null;
+};
+
+export type QuotePreExecResultInfo = Awaited<
+  ReturnType<typeof getPreExecResult>
+> | null;
+
+interface getDexQuoteParams {
+  payToken: TokenItem;
+  receiveToken: TokenItem;
+  userAddress: string;
+  slippage: string;
+  fee: string;
+  payAmount: string;
+  chain: CHAINS_ENUM;
+  dexId: DEX_ENUM;
+}
+
+export const getDexQuote = async ({
+  payToken,
+  receiveToken,
+  userAddress,
+  slippage,
+  fee: feeAfterDiscount,
+  payAmount,
+  chain,
+  dexId,
+}: getDexQuoteParams): Promise<{
+  data: null | QuoteResult;
+  name: string;
+  isDex: true;
+  preExecResult: QuotePreExecResultInfo;
+}> => {
+  try {
+    const data = await getQuote(
+      isSwapWrapToken(payToken.id, receiveToken.id, chain)
+        ? DEX_ENUM.WRAPTOKEN
+        : dexId,
+      {
+        fromToken: payToken.id,
+        toToken: receiveToken.id,
+        feeAddress: SWAP_FEE_ADDRESS,
+        fromTokenDecimals: payToken.decimals,
+        amount: new BigNumber(payAmount)
+          .times(10 ** payToken.decimals)
+          .toFixed(0, 1),
+        userAddress,
+        slippage: Number(slippage),
+        feeRate: Number(feeAfterDiscount) || 0,
+        chain,
+      }
+    );
+    let preExecResult = null;
+    if (data) {
+      try {
+        preExecResult = await getPreExecResult({
+          userAddress,
+          chain,
+          payToken,
+          receiveToken,
+          payAmount,
+          quote: data,
+          dexId: dexId as DEX_ENUM,
+        });
+      } catch (error) {
+        return { data, name: dexId, isDex: true, preExecResult: null };
+      }
+    }
+
+    return { data, name: dexId, isDex: true, preExecResult };
+  } catch (error) {
+    console.error('getQuote error ', error);
+    return { data: null, name: dexId, isDex: true, preExecResult: null };
+  }
+  // return undefined;
+};
+
+export const getAllDexQuotes = async (
+  params: Omit<getDexQuoteParams, 'dexId'>
+) => {
+  // const { payToken, receiveToken, chain } = params;
+  // if (isSwapWrapToken(payToken.id, receiveToken.id, chain)) {
+  //   const data = await getDexQuote({ ...params, dexId: DEX_ENUM.WRAPTOKEN });
+  //   return Promise.allSettled(Object.keys(DEX).map(() => data));
+  // }
+  return Promise.all(
+    (Object.keys(DEX) as DEX_ENUM[]).map((dexId) =>
+      getDexQuote({ ...params, dexId })
+    )
+  );
+};
+
+interface getAllCexQuotesParams {
+  payToken: TokenItem;
+  payAmount: string;
+  receiveTokenId: string;
+  chain: CHAINS_ENUM;
+}
+
+type TCexQuoteData = { data: null | CEXQuote; name: string; isDex: false };
+const getCexQuote = async (
+  params: getAllCexQuotesParams & { cexId: string }
+): Promise<TCexQuoteData> => {
+  const {
+    payToken,
+    payAmount,
+    receiveTokenId: receive_token_id,
+    chain,
+    cexId: cex_id,
+  } = params;
+
+  const p = {
+    cex_id,
+    pay_token_amount: payAmount,
+    chain_id: CHAINS[chain].serverId,
+    pay_token_id: payToken.id,
+    receive_token_id,
+  };
+
+  try {
+    const data = await walletOpenapi.getCEXSwapQuote(p);
+    return {
+      data,
+      name: cex_id,
+      isDex: false,
+    };
+  } catch (error) {
+    return {
+      data: null,
+      name: cex_id,
+      isDex: false,
+    };
+  }
+};
+
+export const getAllQuotes = async (
+  params: Omit<getDexQuoteParams, 'dexId'>
+) => {
+  return Promise.all([
+    ...(Object.keys(DEX) as DEX_ENUM[]).map((dexId) =>
+      getDexQuote({ ...params, dexId })
+    ),
+    ...Object.keys(CEX).map((cexId) =>
+      getCexQuote({
+        cexId,
+        payToken: params.payToken,
+        payAmount: params.payAmount,
+        receiveTokenId: params.receiveToken.id,
+        chain: params.chain,
+      })
+    ),
+  ]);
 };

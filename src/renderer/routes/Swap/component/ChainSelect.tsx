@@ -107,8 +107,8 @@ const ChainWrapper = styled.div`
   &:hover {
     background: linear-gradient(
         0deg,
-        rgba(134, 151, 255, 0.1),
-        rgba(134, 151, 255, 0.1)
+        rgba(134, 151, 255, 0.3),
+        rgba(134, 151, 255, 0.3)
       ),
       rgba(0, 0, 0, 0.3);
     border-color: rgba(255, 255, 255, 0.2);
