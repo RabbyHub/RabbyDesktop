@@ -1,4 +1,8 @@
-import { formatDappURLToShow } from '@/isomorphic/dapp';
+import {
+  formatDappURLToShow,
+  makeDappURLToOpen,
+  makeIpfsDappURLToOpen,
+} from '@/isomorphic/dapp';
 import { useDapp, useMatchDapp } from '@/renderer/hooks/useDappsMngr';
 import { useOpenDapp } from '@/renderer/utils/react-router';
 import { Tooltip } from 'antd';
@@ -9,10 +13,11 @@ interface TransactionWebsiteProps {
   origin: string;
 }
 export const TransactionWebsite = ({
-  origin,
+  origin: _origin,
   className,
 }: TransactionWebsiteProps) => {
   const openDapp = useOpenDapp();
+  const origin = makeDappURLToOpen(_origin);
   const dapp = useMatchDapp(origin);
 
   const handleClick: React.MouseEventHandler<HTMLAnchorElement> = useCallback(

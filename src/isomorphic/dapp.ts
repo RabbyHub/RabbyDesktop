@@ -8,6 +8,7 @@ import {
   canoicalizeDappUrl,
   extractIpfsCid,
   IPFS_REGEXPS,
+  isIpfsHttpURL,
   parseDomainMeta,
 } from './url';
 
@@ -279,4 +280,13 @@ export function makeDappOriginToOpen(
   }
 
   return checkoutResult.dappURL;
+}
+
+export function makeDappURLToOpen(url: string) {
+  const isIpfs = isIpfsHttpURL(url);
+  if (isIpfs) {
+    const ipfsCid = extractIpfsCid(url);
+    return `rabby-ipfs://${ipfsCid}`;
+  }
+  return url;
 }
