@@ -1,7 +1,54 @@
 
+v0.12.0 / 2023-04-04
+====================
+
+  * Merge remote-tracking branch 'origin/dev' into publish/prod
+  * feat: slice git commit hash on prod.
+  * feat: show revision info in settings page on non-prod channel.
+  * feat: change transactions modal style (#335)
+  * feat: slice git commit hash on prod.
+  * feat: show revision info in settings page on non-prod channel.
+  * fix: transaction height (#338)
+  * fix: default token symbol ellipsis
+  * feat: change transactions modal style (#335)
+  * fix: default token symbol ellipsis
+  * feat: support zksync erc (#333)
+  * fix: allow server side 302 redirect to matched dapp tab. (#331)
+  * fix: increase concurrency (#332)
+  * Merge remote-tracking branch 'origin/dev' into publish/prod
+  * ci: auto determine  which channel to be released when tagged ref triggered.
+  * Release v0.11.0
+  * feat: revert support for coexist of main-domain dapp and its sub-domain dapp. (#328)
+  * chore: upgrade rabbyx core to 0.76.0
+
+v0.11.1-reg / 2023-04-01
+========================
+
+  * Release v0.11.1-reg
+  * ci: auto determine  which channel to be released when tagged ref triggered.
+  * Release v0.11.0
+  * feat: revert support for coexist of main-domain dapp and its sub-domain dapp. (#328)
+  * chore: upgrade rabbyx core to 0.76.0
+  * feat: integrate swap to reg version. (#329)
+  * Revert "feat: new swap (#325)" (#326)
+  * feat: new swap (#325)
+
+v0.11.0 / 2023-03-31
+====================
+
+  * Release v0.11.0
+  * feat: revert support for coexist of main-domain dapp and its sub-domain dapp. (#328)
+  * chore: upgrade rabbyx core to 0.76.0
+  * feat: support polygon zkevm
+  * fix: wrap special logic in closure to avoid conflict.
+  * feat: update dapp's faviconURL on open its tab. (#324)
+  * fix: mistake changes on commit f339d88.
+  * feat: tuning behavior of window controls(traffic). (#323)
+
 v0.10.2 / 2023-03-29
 ====================
 
+  * Release v0.10.2
   * feat: upgrade rabbyx for security on send message to desktop.
   * fix: userData path on dev. (#321)
   * feat: remove relaction modal (#316)

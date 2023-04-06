@@ -20,6 +20,7 @@ import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
 import { ModalConfirm } from '@/renderer/components/Modal/Confirm';
 import { Switch } from '@/renderer/components/Switch/Switch';
 import { useCheckNewRelease } from '@/renderer/hooks/useAppUpdator';
+import { copyText } from '@/renderer/utils/clipboard';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
 import { useProxyStateOnSettingPage } from './settingHooks';
@@ -41,7 +42,8 @@ type TypedProps = {
     }
   | {
       type: 'action';
-      onClick?: () => void;
+      // onClick?: () => void;
+      onClick?: React.DOMAttributes<HTMLDivElement>['onClick'];
     }
   | {
       type: 'switch';
@@ -156,6 +158,14 @@ export function MainWindowSettings() {
 
   const [isShowingClearPendingModal, setIsShowingClearPendingModal] =
     useState(false);
+
+  const versionStr = [
+    `Version: ${appVerisons.version || '-'}`,
+    appVerisons.appChannel === 'prod' ? '' : `-${appVerisons.appChannel}`,
+    appVerisons.appChannel === 'prod' ? '' : ` (${appVerisons.gitRef})`,
+  ]
+    .filter(Boolean)
+    .join('');
 
   return (
     <div className={styles.settingsPage}>
@@ -272,9 +282,29 @@ export function MainWindowSettings() {
               appVerisons.appChannel === 'prod'
                 ? ''
                 : `-${appVerisons.appChannel}`,
-            ].join('')}
+              appVerisons.appChannel === 'prod'
+                ? ''
+                : ` (${appVerisons.gitRef})`,
+            ]
+              .filter(Boolean)
+              .join('')}
             icon="rabby-internal://assets/icons/mainwin-settings/info.svg"
-            onClick={() => {
+            onClick={(evt) => {
+              if (evt.ctrlKey && evt.altKey) {
+                copyText(
+                  [
+                    `Version: ${appVerisons.version || '-'}`,
+                    `Channel: ${appVerisons.appChannel}`,
+                    `Revision: ${appVerisons.gitRef}`,
+                  ].join('; ')
+                );
+                message.open({
+                  type: 'info',
+                  content: 'Copied Version Info',
+                });
+                return;
+              }
+
               fetchReleaseInfo().then((releseInfo) => {
                 message.open({
                   type: 'info',

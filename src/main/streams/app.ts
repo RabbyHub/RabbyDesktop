@@ -15,6 +15,7 @@ import {
   getMainProcessAppChannel,
   relaunchApp,
   initMainProcessSentry,
+  getAppProjRefName,
 } from '../utils/app';
 import {
   emitIpcMainEvent,
@@ -171,6 +172,7 @@ handleIpcMainInvoke('get-app-version', (_) => {
   return {
     version: app.getVersion(),
     appChannel: getMainProcessAppChannel(),
+    gitRef: getAppProjRefName(),
   };
 });
 

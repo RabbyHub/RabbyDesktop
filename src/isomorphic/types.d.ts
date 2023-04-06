@@ -2,6 +2,7 @@
 type IAppVersions = {
   version: ReturnType<Electron.App['getVersion']>;
   appChannel: 'reg' | 'prod';
+  gitRef: string;
 };
 
 interface ProgressInfo {

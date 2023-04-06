@@ -6,7 +6,6 @@ import { Modal, Props as ModalProps } from '../Modal/Modal';
 import { AddDomainDapp } from './AddDomainDapp';
 import styles from './index.module.less';
 import { AddIpfsDapp } from './AddIpfsDapp';
-import { IPFSVerifyFailedModal } from '../IPFSAlertModal';
 
 export function AddDapp({
   url,

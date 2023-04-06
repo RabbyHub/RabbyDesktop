@@ -28,7 +28,11 @@ update_version() {
   cd $project_dir/release/app && npm --no-git-tag-version version $VERSION && cd $project_dir
 
   echo ":wq" | git-changelog --all --prune-old --tag v$VERSION;
-  echo "push release by run 'git-release v$VERSION'"
+  echo ""
+  echo "[update_version] enforce publish reg release by running 'git-release v$VERSION-reg'"
+  echo "[update_version] enforce publish prod release by running 'git-release v$VERSION-prod'"
+  echo "[update_version] determine release channel based on CI env variable by running 'git-release v$VERSION'"
+  echo ""
 }
 
 release_darwin() {

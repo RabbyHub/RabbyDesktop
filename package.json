@@ -1,6 +1,6 @@
 {
   "name": "rabby-desktop",
-  "version": "0.10.2",
+  "version": "0.12.0",
   "description": "Rabby's desktop application, for WEB3 users",
   "keywords": [
     "electron",
@@ -119,7 +119,7 @@
     }
   },
   "dependencies": {
-    "@debank/common": "^0.2.23",
+    "@debank/common": "^0.2.29",
     "@debank/festats": "^1.0.3",
     "@debank/parse-favicon": "^0.1.1",
     "@debank/rabby-api": "^0.5.20",
@@ -129,7 +129,7 @@
     "@ipld/car": "^5.1.1",
     "@rabby-wallet/electron-chrome-extensions": "^3.9.12",
     "@rabby-wallet/gnosis-sdk": "^1.3.1",
-    "@rabby-wallet/rabby-swap": "^0.0.10",
+    "@rabby-wallet/rabby-swap": "^0.0.12",
     "@sentry/electron": "^4.3.0",
     "@sentry/react": "^7.43.0",
     "@sentry/tracing": "^7.43.0",
@@ -238,6 +238,7 @@
     "eslint-plugin-react": "^7.30.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "file-loader": "^6.2.0",
+    "git-revision-webpack-plugin": "^5.0.0",
     "html-webpack-plugin": "^5.5.0",
     "husky": "^8.0.1",
     "identity-obj-proxy": "^3.0.0",

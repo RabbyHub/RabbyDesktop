@@ -1,5 +1,6 @@
 /* eslint import/prefer-default-export: off */
 import path from 'path';
+import child_process from 'child_process';
 import { app, net } from 'electron';
 import * as Sentry from '@sentry/electron/main';
 
@@ -176,4 +177,12 @@ export function relaunchApp() {
   // }
   app.relaunch(relaunchOptions);
   app.exit();
+}
+
+export function getAppProjRefName() {
+  if (IS_RUNTIME_PRODUCTION) {
+    return (process as any).GIT_COMMITHASH.slice(0, 7);
+  }
+  // git log --format="%h" -n 1
+  return child_process.execSync('git log --format="%h" -n 1').toString().trim();
 }
