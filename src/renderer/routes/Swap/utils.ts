@@ -289,16 +289,6 @@ export const halfBetterRate = (
       .times(2)
       .minus(full.balance_change.usd_value_change);
 
-    console.log(
-      'half.balance_change.usd_value_change',
-      half.balance_change.usd_value_change,
-      diff.gt(0)
-    );
-
-    console.log(
-      'full.balance_change.usd_value_change',
-      full.balance_change.usd_value_change
-    );
     return diff.gt(0)
       ? new BigNumber(diff.toPrecision(1)).times(100).toString(10)
       : null;
