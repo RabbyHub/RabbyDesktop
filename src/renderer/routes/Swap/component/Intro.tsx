@@ -51,10 +51,10 @@ export const SwapIntro = () => {
       <div className="segment">What's more...</div>
       <ul>
         <li className="desc">
-          - Rabby provides reference prices from CEX to help inform your trades{' '}
+          Rabby provides reference prices from CEX to help inform your trades{' '}
         </li>
         <li className="desc">
-          - Rabby validates your deal by simulating the transaction to make sure
+          Rabby validates your deal by simulating the transaction to make sure
           it goes smoothly.{' '}
         </li>
       </ul>
