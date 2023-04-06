@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import { SAFE_WEBPREFERENCES } from '@/isomorphic/constants';
 import { stringifyWebPreferences } from '@/isomorphic/string';
 import styled from 'styled-components';
+import { formatDappURLToShow } from '@/isomorphic/dapp';
 
 const webviewWebPreferencesAttr = stringifyWebPreferences({
   ...SAFE_WEBPREFERENCES,
@@ -106,7 +107,7 @@ export function PreviewWebview({
       {isLoading ? loadingView : null}
       {!isLoading && isLoadFailed ? loadFailedView || null : null}
       {!isLoading && !isLoadFailed && url ? (
-        <div className="preview-webview-url">{url}</div>
+        <div className="preview-webview-url">{formatDappURLToShow(url)}</div>
       ) : null}
     </Container>
   );
