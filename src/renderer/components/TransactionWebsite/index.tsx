@@ -12,8 +12,6 @@ export const TransactionWebsite = ({
   origin,
   className,
 }: TransactionWebsiteProps) => {
-  const domain = origin.replace(/^\w+:\/\//, '');
-
   const openDapp = useOpenDapp();
   const dapp = useMatchDapp(origin);
 
