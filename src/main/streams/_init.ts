@@ -112,6 +112,7 @@ const CONF = {
       resolveFile: (ipfsPath: string) => string;
       isValid: (cid: string) => Promise<boolean>;
       isExist: (cid: string) => Promise<boolean>;
+      removeFile: (cid: string) => Promise<void>;
     }>
   >,
 };

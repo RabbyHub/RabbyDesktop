@@ -264,6 +264,15 @@ export const initIPFSModule = async () => {
       }
     }
 
+    public async removeFile(cid: string) {
+      return Promise.all([
+        fs.rm(path.join(this.rootPath, 'car', `${cid}.car`), {
+          recursive: true,
+        }),
+        fs.rm(path.join(this.rootPath, 'ipfs', `${cid}`), { recursive: true }),
+      ]);
+    }
+
     public resolveFile(filePath: string) {
       let ipfsPath = normalizeIPFSPath(filePath);
       if (ipfsPath.startsWith('/ipfs/')) ipfsPath = `.${ipfsPath}`;

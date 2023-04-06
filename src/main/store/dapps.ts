@@ -33,6 +33,7 @@ import { storeLog } from '../utils/log';
 import { makeStore } from '../utils/store';
 import { getAppProxyConfigForAxios } from './desktopApp';
 import { fetchImageBuffer } from '../utils/fetch';
+import { getIpfsService } from '../utils/stream-helpers';
 
 const IDappSchema: import('json-schema-typed').JSONSchema = {
   type: 'object',
@@ -557,7 +558,7 @@ handleIpcMainInvoke('dapps-replace', (_, oldOrigin, newDapp) => {
   return {};
 });
 
-handleIpcMainInvoke('dapps-delete', (_, dappToDel: IDapp) => {
+handleIpcMainInvoke('dapps-delete', async (_, dappToDel: IDapp) => {
   const dappsMap = dappStore.get('dappsMap');
   const dapp = dappsMap[dappToDel.origin];
 
@@ -566,6 +567,12 @@ handleIpcMainInvoke('dapps-delete', (_, dappToDel: IDapp) => {
       error: 'Not found',
       dapps: [],
     };
+  }
+
+  const dappTypeInfo = checkoutDappURL(dapp.origin);
+  if (dappTypeInfo?.type === 'ipfs') {
+    const ipfsService = await getIpfsService();
+    await ipfsService.removeFile(dappTypeInfo.ipfsCid);
   }
 
   const delResult = checkDelDapp(dappToDel.origin, { dappsMap });
