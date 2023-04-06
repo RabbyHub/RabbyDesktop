@@ -20,6 +20,30 @@ import { PreviewDapp } from '../PreviewDapp';
 import { useAddDappURL } from '../useAddDapp';
 import { Warning } from '../Warning';
 import styles from './index.module.less';
+import { RelationModal } from '../RelactionModal';
+
+const findRelatedDapps = (dapps: IDapp[], url: string) => {
+  const current = canoicalizeDappUrl(url);
+
+  // 正在添加 uniswap.org 提示会替换掉 app.uniswap.org
+  if (current.is2ndaryDomain) {
+    return dapps.filter((dapp) => {
+      const result = canoicalizeDappUrl(dapp.origin);
+      return result.secondaryDomain === current.secondaryDomain;
+    });
+  }
+  // 正在添加 app.uniswap.org 提示会替换掉uniswap.org
+  if (current.isSubDomain) {
+    return dapps.filter((dapp) => {
+      const result = canoicalizeDappUrl(dapp.origin);
+      return (
+        result.secondaryDomain === current.secondaryDomain &&
+        result.is2ndaryDomain
+      );
+    });
+  }
+  return [];
+};
 
 const validateInput = (input: string, onReplace?: (v: string) => void) => {
   const domain = input?.trim();
@@ -249,6 +273,7 @@ export function AddDomainDapp({
   isGoBack?: boolean;
   onGoBackClick?: (dapp: IDapp) => void;
 }) {
+  const { dapps } = useDapps();
   const [form] = Form.useForm();
   const openDapp = useOpenDapp();
   const [addUrl, setAddUrl] = useAddDappURL();
@@ -264,6 +289,16 @@ export function AddDomainDapp({
       });
       check(v);
     },
+  });
+
+  const [addState, setAddState] = useSetState<{
+    isShowModal: boolean;
+    relatedDapps: IDapp[];
+    dappInfo: IDappsDetectResult['data'];
+  }>({
+    isShowModal: false,
+    relatedDapps: [],
+    dappInfo: null,
   });
 
   const { runAsync: runAddDapp, loading: isAddLoading } = useRequest(
@@ -314,8 +349,32 @@ export function AddDomainDapp({
       },
     };
     setState(nextState);
+    setAddState({
+      isShowModal: false,
+      relatedDapps: [],
+      dappInfo: null,
+    });
 
     onAddedDapp?.(dappInfo.inputOrigin);
+  };
+
+  const handleAddCheck = async (
+    dappInfo: NonNullable<IDappsDetectResult['data']>
+  ) => {
+    if (!dappInfo) {
+      return;
+    }
+
+    const relatedDapps = findRelatedDapps(dapps || [], dappInfo.inputOrigin);
+    if (relatedDapps.length) {
+      setAddState({
+        dappInfo,
+        isShowModal: true,
+        relatedDapps,
+      });
+    } else {
+      handleAdd(dappInfo);
+    }
   };
 
   const isShowExample = !state?.dappInfo && !state.help && !loading;
@@ -383,16 +442,36 @@ export function AddDomainDapp({
           data={state.dappInfo}
           loading={isAddLoading}
           onAdd={(dapp) => {
-            handleAdd(dapp);
+            handleAddCheck(dapp);
           }}
           onOpen={(dapp) => {
             openDapp(dapp.inputOrigin);
             onOpenDapp?.(dapp.inputOrigin);
           }}
           isGoBack={isGoBack}
-          onGoBackClick={onGoBackClick}
+          // todo: fix type
+          onGoBackClick={onGoBackClick as any}
         />
       ) : null}
+      <RelationModal
+        data={addState.relatedDapps}
+        open={addState.isShowModal}
+        onCancel={() => {
+          setAddState({
+            isShowModal: false,
+            relatedDapps: [],
+            dappInfo: null,
+          });
+        }}
+        onOk={() => {
+          if (addState.dappInfo) {
+            handleAdd(
+              addState.dappInfo,
+              addState.relatedDapps.map((d) => d.origin)
+            );
+          }
+        }}
+      />
     </>
   );
 }
