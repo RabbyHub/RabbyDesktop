@@ -1,6 +1,7 @@
 import { AxiosProxyConfig } from 'axios';
 import {
-  DOT_IPFS_LOCALHOST,
+  IPFS_LOCALHOST_DOMAIN,
+  LOCALIPFS_BRAND,
   RABBY_INTERNAL_PROTOCOL,
   RABBY_LOCAL_URLBASE,
 } from './constants';
@@ -126,7 +127,9 @@ export function isUrlFromDapp(url: string) {
     !url.startsWith(RABBY_INTERNAL_PROTOCOL) &&
     !url.startsWith('chrome-extension:') &&
     (url.startsWith('https:') ||
-      (url.startsWith('http:') && url.includes(DOT_IPFS_LOCALHOST))) // ipfs support
+      // ipfs support
+      (url.startsWith('http:') && url.includes(`.${IPFS_LOCALHOST_DOMAIN}`)) ||
+      (url.startsWith('http:') && url.includes(`${LOCALIPFS_BRAND}.`)))
   );
 }
 
@@ -220,6 +223,7 @@ export function getDomainFromHostname(hostname: string): IParseDomainInfo {
   return {
     subDomain: parts.slice(0, parts.length - 2).join('.'),
     hostWithoutTLD: secondaryDomainParts[0],
+    tld: secondaryDomainParts[1],
     secondaryDomain,
     secondaryOrigin: `https://${secondaryDomain}`,
     is2ndaryDomain: parts.length === 2 && secondaryDomain === hostname,
@@ -236,17 +240,44 @@ export function isInternalProtocol(url: string) {
   ].some((protocol) => url.startsWith(protocol));
 }
 
-const REGEXP_IPFS_URL = /^rabby-ipfs:\/\/([a-zA-Z0-9]*)/i;
-const REGEXP_IPFS_PATH = /^rabby-ipfs:\/\/([a-zA-Z0-9]*)/i;
+export const IPFS_REGEXPS = {
+  IPFS_REGEX: /^(?:ipfs|rabby-ipfs):\/\/([a-zA-Z0-9]+)(\/.*)?$/i,
+  LOCALIPFS_BRAND_REGEX: /^http:\/\/local.ipfs\.([a-zA-Z0-9]+)(\/.*)?$/i,
+  LOCALIPFS_MAINDOMAIN_REGEX: /^http:\/\/([a-zA-Z0-9]+)\.local\.ipfs(\/.*)?$/i,
+};
+
 export function extractIpfsCid(ipfsDappPath: string) {
-  if (ipfsDappPath.startsWith('rabby-ipfs:')) {
-    const [, ipfsCid = ''] = ipfsDappPath.match(REGEXP_IPFS_URL) || [];
+  if (ipfsDappPath.startsWith('/ipfs/')) {
+    return ipfsDappPath.split('/')[2] || '';
+  }
+
+  if (
+    ipfsDappPath.startsWith('rabby-ipfs:') ||
+    ipfsDappPath.startsWith('ipfs:')
+  ) {
+    const [, ipfsCid = ''] = ipfsDappPath.match(IPFS_REGEXPS.IPFS_REGEX) || [];
 
     return ipfsCid;
   }
 
-  const [, ipfsCid = ''] = ipfsDappPath.match(REGEXP_IPFS_PATH) || [];
-  return ipfsCid;
+  if (IPFS_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX.test(ipfsDappPath)) {
+    return (
+      ipfsDappPath.match(IPFS_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX)?.[1] || ''
+    );
+  }
+
+  if (IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX.test(ipfsDappPath)) {
+    return ipfsDappPath.match(IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX)?.[1] || '';
+  }
+
+  return '';
+}
+
+export function isIpfsHttpURL(dappURL: string) {
+  return (
+    IPFS_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX.test(dappURL) ||
+    IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX.test(dappURL)
+  );
 }
 
 export function canoicalizeDappUrl(url: string): ICanonalizedUrlInfo {

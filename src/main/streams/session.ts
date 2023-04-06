@@ -4,10 +4,14 @@ import path from 'path';
 import { app, protocol, session, shell } from 'electron';
 import { firstValueFrom } from 'rxjs';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
-import { canoicalizeDappUrl, isRabbyXPage } from '@/isomorphic/url';
+import {
+  canoicalizeDappUrl,
+  isIpfsHttpURL,
+  isRabbyXPage,
+} from '@/isomorphic/url';
 import { trimWebContentsUserAgent } from '@/isomorphic/string';
 import {
-  IPFS_LOCALHOST,
+  IPFS_LOCALHOST_DOMAIN,
   IS_RUNTIME_PRODUCTION,
   PROTOCOL_IPFS,
   RABBY_INTERNAL_PROTOCOL,
@@ -248,9 +252,11 @@ const registerCallbacks: {
       const registerSuccess = protocol.interceptFileProtocol(
         TARGET_PROTOCOL.slice(0, -1),
         async (request, callback) => {
-          const parsedReqURLInfo = canoicalizeDappUrl(request.url || '');
-
-          if (parsedReqURLInfo.secondaryDomain !== IPFS_LOCALHOST) {
+          console.log(
+            '[feat] isIpfsHttpURL(request.url)',
+            isIpfsHttpURL(request.url)
+          );
+          if (!isIpfsHttpURL(request.url)) {
             // protocol.uninterceptProtocol('http');
             callback({
               data: 'Not found',

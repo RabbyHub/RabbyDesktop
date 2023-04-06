@@ -1,19 +1,19 @@
 import { ensurePrefix } from '@/isomorphic/string';
-import { canoicalizeDappUrl } from '@/isomorphic/url';
+import { canoicalizeDappUrl, extractIpfsCid } from '@/isomorphic/url';
 
 export function checkoutCustomSchemeHandlerInfo(
   tProtocol: string,
   requestURL: string
 ) {
   if (tProtocol === 'http:') {
-    // it's http:<cid>.local.ipfs
+    // it's http://localipfs.<cid>
     const parsedInfo = canoicalizeDappUrl(requestURL);
     const pathnameWithQuery = parsedInfo.urlInfo?.pathname || '';
 
     const pathname = pathnameWithQuery.split('?')?.[0] || '';
     const pathnameWithoutHash = pathname.split('#')?.[0] || '';
 
-    const ipfsCid = parsedInfo.subDomain;
+    const ipfsCid = extractIpfsCid(requestURL);
     const fileRelPath = ensurePrefix(pathnameWithoutHash, `ipfs/${ipfsCid}/`);
 
     return {

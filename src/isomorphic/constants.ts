@@ -11,8 +11,10 @@ export const PERSIS_STORE_PREFIX = 'rabby-store-';
 export const RABBY_INTERNAL_PROTOCOL = 'rabby-internal:';
 export const PROTOCOL_IPFS = 'rabby-ipfs:';
 
-export const IPFS_LOCALHOST = `local.ipfs`;
-export const DOT_IPFS_LOCALHOST = `.${IPFS_LOCALHOST}`;
+export const IPFS_LOCALHOST_DOMAIN = `local.ipfs`;
+
+export const LOCALIPFS_BRAND = `local.ipfs`;
+export const LOCALIPFS_BRAND_DOT = `${LOCALIPFS_BRAND}.`;
 
 // only useful in dev mode
 let DEV_SERVER_PORT = 1212;

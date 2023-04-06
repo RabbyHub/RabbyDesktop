@@ -1,13 +1,18 @@
-import { IPFS_LOCALHOST, PROTOCOL_IPFS } from './constants';
+import {
+  IPFS_LOCALHOST_DOMAIN,
+  LOCALIPFS_BRAND,
+  PROTOCOL_IPFS,
+} from './constants';
 import { ensurePrefix, isInvalidBase64 } from './string';
-import { canoicalizeDappUrl, extractIpfsCid, parseDomainMeta } from './url';
+import {
+  canoicalizeDappUrl,
+  extractIpfsCid,
+  IPFS_REGEXPS,
+  parseDomainMeta,
+} from './url';
 
 export function isValidDappAlias(alias: string) {
   return /[\w\d]+/.test(alias);
-}
-
-export function normalizeIPFSOrigin(ipfsCid: string) {
-  return `http://${ipfsCid}.${IPFS_LOCALHOST}`;
 }
 
 export function checkoutDappURL(dappPath: string) {
@@ -26,11 +31,18 @@ export function checkoutDappURL(dappPath: string) {
   if (dappPath.startsWith('http')) {
     const parsedInfo = canoicalizeDappUrl(dappPath);
 
-    if (parsedInfo.secondaryDomain === IPFS_LOCALHOST) {
+    if (parsedInfo.secondaryDomain === IPFS_LOCALHOST_DOMAIN) {
       return {
         type: 'ipfs' as const,
         dappURL: `rabby-ipfs://${parsedInfo.subDomain}`,
         ipfsCid: parsedInfo.subDomain,
+      };
+    }
+    if (parsedInfo.hostWithoutTLD === LOCALIPFS_BRAND) {
+      return {
+        type: 'ipfs' as const,
+        dappURL: `rabby-ipfs://${parsedInfo.tld}`,
+        ipfsCid: parsedInfo.tld,
       };
     }
 
@@ -44,22 +56,6 @@ export function checkoutDappURL(dappPath: string) {
     type: 'unknown' as const,
     dappURL: '',
   };
-}
-
-export function makeDappOriginToOpen(
-  dappURL: string | ReturnType<typeof checkoutDappURL>,
-  sessionType: 'default' | 'preview' = 'default'
-): string {
-  if (!dappURL) return dappURL;
-
-  const checkoutResult =
-    typeof dappURL === 'string' ? checkoutDappURL(dappURL) : dappURL;
-
-  if (sessionType === 'default' && checkoutResult.type === 'ipfs') {
-    return `http://${checkoutResult.ipfsCid}.${IPFS_LOCALHOST}`;
-  }
-
-  return checkoutResult.dappURL;
 }
 
 export function formatDapp(
@@ -247,11 +243,40 @@ export function isValidDappType(type: string) {
 }
 
 export function formatDappURLToShow(dappURL: string) {
-  if (!dappURL) return dappURL;
+  let normalizedURL;
 
-  if (dappURL.startsWith(PROTOCOL_IPFS)) {
-    return dappURL.replace(/^rabby-ipfs:/, 'ipfs:');
+  if (IPFS_REGEXPS.IPFS_REGEX.test(dappURL)) {
+    normalizedURL = dappURL.replace(IPFS_REGEXPS.IPFS_REGEX, 'ipfs://$1$2');
+  } else if (IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX.test(dappURL)) {
+    normalizedURL = dappURL.replace(
+      IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX,
+      'ipfs://$1$2'
+    );
+  } else if (IPFS_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX.test(dappURL)) {
+    normalizedURL = dappURL.replace(
+      IPFS_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX,
+      'ipfs://$1$2'
+    );
+  } else {
+    normalizedURL = dappURL;
   }
 
-  return dappURL;
+  return normalizedURL;
+}
+
+export function makeDappOriginToOpen(
+  dappURL: string | ReturnType<typeof checkoutDappURL>,
+  sessionType: 'default' | 'preview' = 'default'
+): string {
+  if (!dappURL) return dappURL;
+
+  const checkoutResult =
+    typeof dappURL === 'string' ? checkoutDappURL(dappURL) : dappURL;
+
+  if (sessionType === 'default' && checkoutResult.type === 'ipfs') {
+    // return `http://${checkoutResult.ipfsCid}.${IPFS_LOCALHOST_DOMAIN}`;
+    return `http://${LOCALIPFS_BRAND}.${checkoutResult.ipfsCid}`;
+  }
+
+  return checkoutResult.dappURL;
 }
