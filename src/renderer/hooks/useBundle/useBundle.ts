@@ -14,11 +14,11 @@ import { useBundleAccount } from './useBundleAccount';
  *  - bn 的汇总
  */
 export const useBundle = () => {
-  const bundleAccount = useBundleAccount();
+  const account = useBundleAccount();
   const binance = useBinance();
 
   return {
-    ...bundleAccount,
+    account,
     binance,
   };
 };

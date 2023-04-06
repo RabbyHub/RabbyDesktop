@@ -8,6 +8,7 @@ import {
   FundingWalletResponse,
   IsolatedMarginAccountInfoResponse,
   MarginAccountResponse,
+  PermissionResponse,
   SavingsCustomizedPositionResponse,
   SavingsFlexibleProductPositionResponse,
   SpotAsset,
@@ -72,19 +73,7 @@ export class Binance {
    *  - 权限不对
    */
   async checkPermission() {
-    const res = await this.invoke<{
-      createTime: number;
-      enableFutures: boolean;
-      enableInternalTransfer: boolean;
-      enableMargin: boolean;
-      enableReading: boolean;
-      enableSpotAndMarginTrading: boolean;
-      enableVanillaOptions: boolean;
-      enableWithdrawals: boolean;
-      ipRestrict: boolean;
-      permitsUniversalTransfer: boolean;
-    }>('apiPermissions');
-
+    const res = await this.invoke<PermissionResponse>('apiPermissions');
     const allowed = ['enableReading'];
 
     Object.keys(res).forEach((key) => {
@@ -240,20 +229,22 @@ export class Binance {
   private calcFlexible(
     res: SavingsFlexibleProductPositionResponse
   ): AssetWithRewards[] {
-    return res.map((item) => {
-      const asset = item.asset;
-      const value = item.totalAmount;
-      const usdtValue = tokenPrice.getUSDTValue(asset, value);
+    return res
+      .map((item) => {
+        const asset = item.asset;
+        const value = item.totalAmount;
+        const usdtValue = tokenPrice.getUSDTValue(asset, value);
 
-      this.plusBalance(usdtValue);
+        this.plusBalance(usdtValue);
 
-      return {
-        asset,
-        value,
-        usdtValue,
-        rewards: item.totalBonusRewards,
-      };
-    });
+        return {
+          asset,
+          value,
+          usdtValue,
+          rewards: item.totalBonusRewards,
+        };
+      })
+      .filter((item) => valueGreaterThan10(item.usdtValue));
   }
 
   // 国内测不了
@@ -268,20 +259,22 @@ export class Binance {
   }
 
   private calcFixed(res: SavingsCustomizedPositionResponse) {
-    return res.map((item) => {
-      const asset = item.asset;
-      const value = item.principal;
-      const usdtValue = tokenPrice.getUSDTValue(asset, value);
+    return res
+      .map((item) => {
+        const asset = item.asset;
+        const value = item.principal;
+        const usdtValue = tokenPrice.getUSDTValue(asset, value);
 
-      this.plusBalance(usdtValue);
+        this.plusBalance(usdtValue);
 
-      return {
-        asset,
-        value,
-        usdtValue,
-        rewards: item.interest,
-      };
-    });
+        return {
+          asset,
+          value,
+          usdtValue,
+          rewards: item.interest,
+        };
+      })
+      .filter((item) => valueGreaterThan10(item.usdtValue));
   }
 
   private async stakingProductPosition(type: string) {
@@ -297,20 +290,22 @@ export class Binance {
 
   // TODO 重新对下数据结构
   private calcStake(res: StakingProductPositionResponse) {
-    return res.map((item) => {
-      const asset = item.asset;
-      const value = item.amount;
-      const usdtValue = tokenPrice.getUSDTValue(asset, value);
+    return res
+      .map((item) => {
+        const asset = item.asset;
+        const value = item.amount;
+        const usdtValue = tokenPrice.getUSDTValue(asset, value);
 
-      this.plusBalance(usdtValue);
+        this.plusBalance(usdtValue);
 
-      return {
-        asset,
-        value,
-        usdtValue,
-        rewards: item.rewardAmt,
-      };
-    });
+        return {
+          asset,
+          value,
+          usdtValue,
+          rewards: item.rewardAmt,
+        };
+      })
+      .filter((item) => valueGreaterThan10(item.usdtValue));
   }
 
   private async getUSDTPrices() {

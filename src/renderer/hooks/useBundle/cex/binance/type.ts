@@ -1,3 +1,16 @@
+export type PermissionResponse = {
+  createTime: number;
+  enableFutures: boolean;
+  enableInternalTransfer: boolean;
+  enableMargin: boolean;
+  enableReading: boolean;
+  enableSpotAndMarginTrading: boolean;
+  enableVanillaOptions: boolean;
+  enableWithdrawals: boolean;
+  ipRestrict: boolean;
+  permitsUniversalTransfer: boolean;
+};
+
 export type FundingWalletResponse = {
   asset: string;
   free: string;

@@ -510,6 +510,7 @@ interface CommonBundleAccount {
   id?: string;
   type: 'bn' | 'btc' | 'eth';
   nickname: string;
+  balance?: string;
   inBundle?: boolean;
 }
 interface BNAccount extends CommonBundleAccount {
