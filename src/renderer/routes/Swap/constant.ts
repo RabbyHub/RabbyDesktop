@@ -30,6 +30,14 @@ export const CEX = {
     name: 'Binance',
     logo: 'rabby-internal://assets/icons/swap/binance.png',
   },
+  okex: {
+    name: 'OKX',
+    logo: 'rabby-internal://assets/icons/swap/okx.png',
+  },
+  coinbase: {
+    name: 'Coinbase',
+    logo: 'rabby-internal://assets/icons/swap/coinbase.png',
+  },
 };
 
 export const getChainDefaultToken = (chain: CHAINS_ENUM) => {
