@@ -3,9 +3,12 @@ import React from 'react';
 import { Binance } from './cex/binance/binance';
 import { bundleAccountsAtom } from './shared';
 import { ERROR } from './error';
+import { useAccountToDisplay } from '../rabbyx/useAccountToDisplay';
 
 export const useBundleAccount = () => {
   const [accounts, setAccounts] = useAtom(bundleAccountsAtom);
+  const { accountsList: ethAccountList, getAllAccountsToDisplay } =
+    useAccountToDisplay();
 
   const preCheck = React.useCallback(
     async (account: Partial<BundleAccount>) => {
@@ -31,7 +34,7 @@ export const useBundleAccount = () => {
           };
         }
       } else if (account.type === 'eth') {
-        if (!account.address) {
+        if (!account.data?.address) {
           return {
             error: ERROR.INVALID_ADDRESS,
           };
@@ -48,7 +51,7 @@ export const useBundleAccount = () => {
             return true;
           }
         } else if (acc.type === 'eth' && account.type === 'eth') {
-          if (acc.address === account.address) {
+          if (acc.data.address === account.data?.address) {
             return true;
           }
         }
@@ -98,8 +101,11 @@ export const useBundleAccount = () => {
     window.rabbyDesktop.ipcRenderer.invoke('bundle-account-delete', id);
   }, []);
 
+  // 初始化数据
+  // 获取 bundle 账户和 eth 账户
   React.useEffect(() => {
     window.rabbyDesktop.ipcRenderer.invoke('bundle-account-init');
+    getAllAccountsToDisplay();
 
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:bundle:changed',
@@ -107,6 +113,7 @@ export const useBundleAccount = () => {
         setAccounts(data.accounts ?? []);
       }
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setAccounts]);
 
   const inBundleList = React.useMemo(() => {
@@ -114,21 +121,33 @@ export const useBundleAccount = () => {
   }, [accounts]);
 
   const binanceList = React.useMemo(() => {
-    return accounts.find((acc) => acc.type === 'bn');
+    return accounts.filter((acc) => acc.type === 'bn') as BNAccount[];
   }, [accounts]);
 
   const btcList = React.useMemo(() => {
-    return accounts.find((acc) => acc.type === 'btc');
+    return accounts.filter((acc) => acc.type === 'btc') as BTCAccount[];
   }, [accounts]);
+
+  const ethList = React.useMemo(() => {
+    return ethAccountList.map((acc) => {
+      return {
+        id: `${acc.type}.${acc.address}`,
+        type: 'eth',
+        nickname: acc.alianName,
+        balance: acc.balance.toString(),
+        data: acc,
+      } as ETHAccount;
+    });
+  }, [ethAccountList]);
 
   return {
     create,
     remove,
     updateNickname,
     preCheck,
-    list: accounts,
     inBundleList,
     binanceList,
     btcList,
+    ethList,
   };
 };

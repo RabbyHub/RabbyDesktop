@@ -526,7 +526,7 @@ interface BTCAccount extends CommonBundleAccount {
 
 interface ETHAccount extends CommonBundleAccount {
   type: 'eth';
-  address: string;
+  data: IDisplayedAccountWithBalance;
 }
 
 type BundleAccount = BTCAccount | BNAccount | ETHAccount;

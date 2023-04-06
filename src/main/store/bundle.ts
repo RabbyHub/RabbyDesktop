@@ -80,7 +80,7 @@ handleIpcMainInvoke('bundle-account-post', (_, account: BundleAccount) => {
         return true;
       }
     } else if (acc.type === 'eth' && account.type === 'eth') {
-      if (acc.address === account.address) {
+      if (acc.data.address === account.data.address) {
         return true;
       }
     }

@@ -1,5 +1,6 @@
 import { useBinance } from './useBinance';
 import { useBundleAccount } from './useBundleAccount';
+import { useETH } from './useETH';
 
 /**
  * - 地址列表
@@ -16,9 +17,11 @@ import { useBundleAccount } from './useBundleAccount';
 export const useBundle = () => {
   const account = useBundleAccount();
   const binance = useBinance();
+  const eth = useETH();
 
   return {
     account,
     binance,
+    eth,
   };
 };

@@ -1,8 +1,8 @@
-import { useAtom } from 'jotai';
 import React from 'react';
-import { bundleAccountsAtom, saveBundleAccountsBalance } from './shared';
+import { saveBundleAccountsBalance } from './shared';
 import { Binance } from './cex/binance/binance';
 import { mergeList, plusBigNumber } from './util';
+import { useBundleAccount } from './useBundleAccount';
 
 type BNAccountWithAPI = BNAccount & {
   api: Binance;
@@ -47,20 +47,20 @@ const mergeAssets = (assets: BinanceAssets[]) => {
 };
 
 export const useBinance = () => {
-  const [accounts, setAccounts] = useAtom(bundleAccountsAtom);
   const [balance, setBalance] = React.useState<string>('0');
   const [assets, setAssets] = React.useState<BinanceAssets>();
+  const { binanceList } = useBundleAccount();
 
   const bnAccounts = React.useMemo<BNAccountWithAPI[]>(() => {
-    const result = accounts.filter(
-      (account) => account.type === 'bn'
-    ) as BNAccount[];
-
-    return result.map((item) => ({
+    return binanceList.map((item) => ({
       ...item,
       api: new Binance(item.apiKey, item.apiSecret),
     }));
-  }, [accounts]);
+  }, [binanceList]);
+  const bnIds = React.useMemo(
+    () => bnAccounts.map((item) => item.id),
+    [bnAccounts]
+  );
 
   const getAssets = React.useCallback(async () => {
     // 获取所有资产
@@ -74,39 +74,24 @@ export const useBinance = () => {
       bnAccounts.map((account) => account.api.getBalance())
     );
 
-    const updateAccounts: BundleAccount[] = [];
-    // 更新 bn 余额
-    setAccounts((prev) => {
-      return prev.map((account) => {
-        if (account.type === 'bn') {
-          const index = bnAccounts.findIndex(
-            (item) => item.apiKey === account.apiKey
-          );
-          const newAccount = {
-            ...account,
-            balance: balances[index],
-          };
-
-          updateAccounts.push(newAccount);
-
-          return newAccount;
-        }
-
-        return account;
-      });
+    const updateAccounts = bnAccounts.map((account, index) => {
+      return {
+        ...account,
+        balance: balances[index],
+      };
     });
+
     // 持久化余额
     saveBundleAccountsBalance(updateAccounts);
     // 更新 bn 的总余额
     setBalance(plusBigNumber(...balances));
-  }, [bnAccounts, setAccounts]);
+  }, [bnAccounts]);
 
-  // update when bnAccounts changed
+  // update when bnAccount list changed
   React.useEffect(() => {
-    console.log('getAssets');
     getAssets();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bnAccounts]);
+  }, [JSON.stringify(bnIds)]);
 
   return {
     getAssets,

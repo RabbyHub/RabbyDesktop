@@ -2,7 +2,9 @@ import { useBundle } from '@/renderer/hooks/useBundle/useBundle';
 import React from 'react';
 
 export const HomeBundle = () => {
-  const { binance } = useBundle();
+  const { binance, account } = useBundle();
+
+  console.log('account', account);
 
   return (
     <div>
