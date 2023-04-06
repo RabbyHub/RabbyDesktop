@@ -5,6 +5,7 @@ export const HomeBundle = () => {
   const { binance, account } = useBundle();
 
   console.log('account', account);
+  console.log('binance', binance);
 
   return (
     <div>

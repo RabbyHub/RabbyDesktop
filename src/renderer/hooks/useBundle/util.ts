@@ -1,6 +1,9 @@
 import { BigNumber } from 'bignumber.js';
 
-export const plusBigNumber = (...values: string[]) => {
+/**
+ * 大数累加
+ */
+export const bigNumberSum = (...values: string[]) => {
   const result = values.reduce((prev, curr) => {
     return new BigNumber(prev).plus(curr).toString();
   }, '0');
@@ -8,12 +11,16 @@ export const plusBigNumber = (...values: string[]) => {
   return result;
 };
 
-// 小于 10u 的返回 false
+/**
+ * 小于 10u 的返回 false
+ */
 export const valueGreaterThan10 = (value: string, target = '10') => {
   return new BigNumber(value).isGreaterThanOrEqualTo(target);
 };
 
-// 指定字段相同的合并值
+/**
+ * 合并列表，根据指定的字段累加对应的值
+ */
 export const mergeList = <T>(
   array: T[],
   key: keyof T,
@@ -26,7 +33,7 @@ export const mergeList = <T>(
 
     if (index >= 0) {
       mergeKeys.forEach((k) => {
-        result[index][k] = plusBigNumber(
+        result[index][k] = bigNumberSum(
           result[index][k] as string,
           item[k] as string
         ) as any;

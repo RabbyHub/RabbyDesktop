@@ -12,6 +12,21 @@ export interface TokenWithHistoryItem {
   history: TokenItem;
 }
 
+export const loadCachedTokenList = async (addr: string) => {
+  const list = await walletOpenapi.getCachedTokenList(addr);
+  return list.map((item) => ({
+    ...item,
+    usd_value: new BigNumber(item.amount).times(item.price).toNumber(),
+  }));
+};
+export const loadRealTimeTokenList = async (addr: string) => {
+  const list = await walletOpenapi.listToken(addr);
+  return list.map((item) => ({
+    ...item,
+    usd_value: new BigNumber(item.amount).times(item.price).toNumber(),
+  }));
+};
+
 export default (
   address: string | undefined,
   nonce = 0,
@@ -31,11 +46,7 @@ export default (
     if (isHistoryLoadedRef.current) return;
     try {
       setIsLoading(true);
-      const cachedList = await walletOpenapi.getCachedTokenList(addr);
-      tokenListRef.current = cachedList.map((item) => ({
-        ...item,
-        usd_value: new BigNumber(item.amount).times(item.price).toNumber(),
-      }));
+      tokenListRef.current = await loadCachedTokenList(addr);
       setIsLoading(false);
     } catch (e) {
       setIsLoading(false);
@@ -46,11 +57,7 @@ export default (
     if (isRealTimeLoadedRef.current) return;
     try {
       setIsLoadingRealTime(true);
-      const list = await walletOpenapi.listToken(addr);
-      tokenListRef.current = list.map((item) => ({
-        ...item,
-        usd_value: new BigNumber(item.amount).times(item.price).toNumber(),
-      }));
+      tokenListRef.current = await loadRealTimeTokenList(addr);
       setIsLoadingRealTime(false);
       isRealTimeLoadedRef.current = true;
     } catch (e) {

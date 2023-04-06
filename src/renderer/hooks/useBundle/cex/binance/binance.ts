@@ -8,14 +8,17 @@ import {
   FundingWalletResponse,
   IsolatedMarginAccountInfoResponse,
   MarginAccountResponse,
+  MarginAsset,
   PermissionResponse,
   SavingsCustomizedPositionResponse,
   SavingsFlexibleProductPositionResponse,
   SpotAsset,
   StakingProductPositionResponse,
   UserAssetResponse,
+  Asset,
+  IsolatedMarginAsset,
 } from './type';
-import { valueGreaterThan10, plusBigNumber } from '../../util';
+import { valueGreaterThan10, bigNumberSum } from '../../util';
 
 export class Binance {
   apiKey: string;
@@ -62,6 +65,7 @@ export class Binance {
         params,
       });
     } catch (e) {
+      console.error(e);
       throw new Error(ERROR.INVALID_KEY);
     }
   }
@@ -136,7 +140,7 @@ export class Binance {
     return res
       .map((item) => {
         const asset = item.asset;
-        const value = plusBigNumber(item.free, item.locked, item.freeze);
+        const value = bigNumberSum(item.free, item.locked, item.freeze);
         const usdtValue = tokenPrice.getUSDTValue(asset, value);
 
         this.plusBalance(usdtValue);
@@ -162,7 +166,7 @@ export class Binance {
     return res
       .map((item) => {
         const asset = item.asset;
-        const value = plusBigNumber(item.free, item.locked, item.freeze);
+        const value = bigNumberSum(item.free, item.locked, item.freeze);
         const usdtValue = tokenPrice.getUSDTValue(asset, value);
 
         this.plusBalance(usdtValue);
@@ -177,7 +181,68 @@ export class Binance {
   }
 
   private async marginAccount() {
-    const res = await this.invoke<MarginAccountResponse>('marginAccount');
+    const res = await this.invoke<MarginAccountResponse>('marginAccount', []);
+    const checkValues = [
+      'borrowed',
+      'free',
+      'interest',
+      'locked',
+      'netAsset',
+    ] as const;
+    const userAssets: MarginAccountResponse['userAssets'] = [];
+
+    res.userAssets.forEach((item) => {
+      if (checkValues.every((key) => item[key] === '0')) {
+        return;
+      }
+
+      userAssets.push(item);
+      tokenPrice.addSymbol(item.asset);
+    });
+
+    return {
+      ...res,
+      userAssets,
+    };
+  }
+
+  private calcMarginAccount(res: MarginAccountResponse): MarginAsset {
+    const supplies: Asset[] = [];
+    const borrows: Asset[] = [];
+
+    res.userAssets.forEach((item) => {
+      const netAssetBN = new BigNumber(item.netAsset);
+
+      if (netAssetBN.gt(0)) {
+        supplies.push({
+          asset: item.asset,
+          value: item.netAsset,
+          usdtValue: tokenPrice.getUSDTValue(item.asset, item.netAsset),
+        });
+      } else {
+        const absValue = netAssetBN.abs().toString();
+        borrows.push({
+          asset: item.asset,
+          value: absValue,
+          usdtValue: tokenPrice.getUSDTValue(item.asset, absValue),
+        });
+      }
+
+      this.plusBalance(item.netAsset);
+    });
+
+    return {
+      supplies,
+      borrows,
+      healthRate: res.marginLevel,
+    };
+  }
+
+  private async isolatedMarginAccountInfo() {
+    const res = await this.invoke<IsolatedMarginAccountInfoResponse>(
+      'isolatedMarginAccountInfo'
+    );
+    const assets: IsolatedMarginAccountInfoResponse['assets'] = [];
     const checkValues = [
       'borrowed',
       'free',
@@ -186,35 +251,65 @@ export class Binance {
       'netAsset',
     ] as const;
 
-    res.userAssets.forEach((item) => {
-      if (checkValues.every((key) => item[key] === '0')) {
+    res.assets.forEach((item) => {
+      if (
+        checkValues.every(
+          (key) => item.baseAsset[key] === '0' && item.quoteAsset[key] === '0'
+        )
+      ) {
         return;
       }
 
-      tokenPrice.addSymbol(item.asset);
-    });
-
-    return res;
-  }
-
-  // TODO
-  private calcMarginAccount(res: MarginAccountResponse) {}
-
-  private async isolatedMarginAccountInfo() {
-    const res = await this.invoke<IsolatedMarginAccountInfoResponse>(
-      'isolatedMarginAccountInfo'
-    );
-
-    res.assets.forEach((item) => {
+      assets.push(item);
       tokenPrice.addSymbol(item.baseAsset.asset);
       tokenPrice.addSymbol(item.quoteAsset.asset);
     });
 
-    return res;
+    return {
+      ...res,
+      assets,
+    };
   }
 
-  // TODO
-  private calcIsolatedMarginAccount(res: IsolatedMarginAccountInfoResponse) {}
+  private calcIsolatedMarginAccount(
+    res: IsolatedMarginAccountInfoResponse
+  ): IsolatedMarginAsset {
+    return res.assets.map((item) => {
+      const assets = [item.baseAsset, item.quoteAsset];
+      const supplies: Asset[] = [];
+      const borrows: Asset[] = [];
+
+      assets.forEach((o) => {
+        const netAssetBN = new BigNumber(o.netAsset);
+        const borrowedBN = new BigNumber(o.borrowed);
+
+        if (netAssetBN.gt(0)) {
+          supplies.push({
+            asset: o.asset,
+            value: o.netAsset,
+            usdtValue: tokenPrice.getUSDTValue(o.asset, o.netAsset),
+          });
+
+          this.plusBalance(o.netAsset);
+        }
+        if (borrowedBN.gt(0)) {
+          borrows.push({
+            asset: o.asset,
+            value: o.borrowed,
+            usdtValue: tokenPrice.getUSDTValue(o.asset, o.borrowed),
+          });
+
+          this.plusBalance(o.borrowed);
+        }
+      });
+
+      return {
+        supplies,
+        borrows,
+        healthRate: item.marginLevel,
+      };
+    });
+  }
 
   private async savingsFlexibleProductPosition() {
     const res = await this.invoke<SavingsFlexibleProductPositionResponse>(
@@ -232,8 +327,15 @@ export class Binance {
     return res
       .map((item) => {
         const asset = item.asset;
-        const value = item.totalAmount;
-        const usdtValue = tokenPrice.getUSDTValue(asset, value);
+        const value = new BigNumber(item.totalAmount)
+          .minus(item.totalInterest)
+          .toString();
+        const tokenUSDTValue = tokenPrice.getUSDTValue(asset, value);
+        const rewardUSDTValue = tokenPrice.getUSDTValue(
+          asset,
+          item.totalInterest
+        );
+        const usdtValue = bigNumberSum(tokenUSDTValue, rewardUSDTValue);
 
         this.plusBalance(usdtValue);
 
@@ -241,13 +343,18 @@ export class Binance {
           asset,
           value,
           usdtValue,
-          rewards: item.totalBonusRewards,
+          rewards: [
+            {
+              asset,
+              value: item.totalInterest,
+              usdtValue: rewardUSDTValue,
+            },
+          ],
         };
       })
       .filter((item) => valueGreaterThan10(item.usdtValue));
   }
 
-  // 国内测不了
   private async savingsCustomizedPosition() {
     const res = await this.invoke<SavingsCustomizedPositionResponse>(
       'savingsCustomizedPosition'
@@ -258,12 +365,16 @@ export class Binance {
     return res;
   }
 
-  private calcFixed(res: SavingsCustomizedPositionResponse) {
+  private calcFixed(
+    res: SavingsCustomizedPositionResponse
+  ): AssetWithRewards[] {
     return res
       .map((item) => {
         const asset = item.asset;
         const value = item.principal;
-        const usdtValue = tokenPrice.getUSDTValue(asset, value);
+        const tokenUSDTValue = tokenPrice.getUSDTValue(asset, value);
+        const rewardUSDTValue = tokenPrice.getUSDTValue(asset, item.interest);
+        const usdtValue = bigNumberSum(tokenUSDTValue, rewardUSDTValue);
 
         this.plusBalance(usdtValue);
 
@@ -271,7 +382,13 @@ export class Binance {
           asset,
           value,
           usdtValue,
-          rewards: item.interest,
+          rewards: [
+            {
+              asset,
+              value: item.interest,
+              usdtValue: rewardUSDTValue,
+            },
+          ],
         };
       })
       .filter((item) => valueGreaterThan10(item.usdtValue));
@@ -283,18 +400,34 @@ export class Binance {
       [type]
     );
 
-    res.forEach(({ asset }) => tokenPrice.addSymbol(asset));
+    res.forEach(({ asset, rewardAsset, extraRewardAsset }) => {
+      tokenPrice.addSymbol(asset);
+      tokenPrice.addSymbol(rewardAsset);
+      tokenPrice.addSymbol(extraRewardAsset);
+    });
 
     return res;
   }
 
-  // TODO 重新对下数据结构
-  private calcStake(res: StakingProductPositionResponse) {
+  private calcStake(res: StakingProductPositionResponse): AssetWithRewards[] {
     return res
       .map((item) => {
         const asset = item.asset;
         const value = item.amount;
-        const usdtValue = tokenPrice.getUSDTValue(asset, value);
+        const tokenUSDTValue = tokenPrice.getUSDTValue(asset, value);
+        const rewardUSDTValue = tokenPrice.getUSDTValue(
+          item.rewardAsset,
+          item.rewardAmt
+        );
+        const extraRewardUSDTValue = tokenPrice.getUSDTValue(
+          item.extraRewardAsset,
+          item.estExtraRewardAmt
+        );
+        const usdtValue = bigNumberSum(
+          tokenUSDTValue,
+          rewardUSDTValue,
+          extraRewardUSDTValue
+        );
 
         this.plusBalance(usdtValue);
 
@@ -302,7 +435,18 @@ export class Binance {
           asset,
           value,
           usdtValue,
-          rewards: item.rewardAmt,
+          rewards: [
+            {
+              asset: item.rewardAsset,
+              value: item.rewardAmt,
+              usdtValue: rewardUSDTValue,
+            },
+            {
+              asset: item.extraRewardAsset,
+              value: item.estExtraRewardAmt,
+              usdtValue: extraRewardUSDTValue,
+            },
+          ],
         };
       })
       .filter((item) => valueGreaterThan10(item.usdtValue));

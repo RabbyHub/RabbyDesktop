@@ -20,7 +20,7 @@ export type FundingWalletResponse = {
   btcValuation: string;
 }[];
 
-type Asset = {
+export type Asset = {
   asset: string;
   value: string;
   usdtValue: string;
@@ -55,46 +55,44 @@ export type MarginAccountResponse = {
 };
 
 export type IsolatedMarginAccountInfoResponse = {
-  assets: [
-    {
-      baseAsset: {
-        // 借贷资产
-        asset: string;
-        borrowEnabled: boolean;
-        borrowed: string;
-        free: string;
-        interest: string;
-        locked: string;
-        netAsset: string;
-        netAssetOfBtc: string;
-        repayEnabled: boolean;
-        totalAsset: string;
-      };
-      quoteAsset: {
-        // 抵押资产
-        asset: string;
-        borrowEnabled: boolean;
-        borrowed: string;
-        free: string;
-        interest: string;
-        locked: string;
-        netAsset: string;
-        netAssetOfBtc: string;
-        repayEnabled: boolean;
-        totalAsset: string;
-      };
-      symbol: string;
-      isolatedCreated: boolean;
-      marginLevel: string;
-      marginLevelStatus: string;
-      marginRatio: string;
-      indexPrice: string;
-      liquidatePrice: string;
-      liquidateRate: string;
-      tradeEnabled: boolean;
-      enabled: boolean;
-    }
-  ];
+  assets: {
+    baseAsset: {
+      // 借贷资产
+      asset: string;
+      borrowEnabled: boolean;
+      borrowed: string;
+      free: string;
+      interest: string;
+      locked: string;
+      netAsset: string;
+      netAssetOfBtc: string;
+      repayEnabled: boolean;
+      totalAsset: string;
+    };
+    quoteAsset: {
+      // 抵押资产
+      asset: string;
+      borrowEnabled: boolean;
+      borrowed: string;
+      free: string;
+      interest: string;
+      locked: string;
+      netAsset: string;
+      netAssetOfBtc: string;
+      repayEnabled: boolean;
+      totalAsset: string;
+    };
+    symbol: string;
+    isolatedCreated: boolean;
+    marginLevel: string;
+    marginLevelStatus: string;
+    marginRatio: string;
+    indexPrice: string;
+    liquidatePrice: string;
+    liquidateRate: string;
+    tradeEnabled: boolean;
+    enabled: boolean;
+  }[];
   totalAssetOfBtc: string;
   totalLiabilityOfBtc: string;
   totalNetAssetOfBtc: string;
@@ -175,7 +173,7 @@ export type FundingAsset = Asset[];
 export type SpotAsset = Asset[];
 
 export type AssetWithRewards = Asset & {
-  rewards: string;
+  rewards: Asset[];
 };
 // 理财账户
 export type FinanceAsset = {
@@ -191,10 +189,8 @@ export type FinanceAsset = {
 export type MarginAsset = {
   supplies: Asset[];
   borrows: Asset[];
+  healthRate: string;
 };
 
 // 逐仓杠杆账户
-export type IsolatedMarginAsset = {
-  supplied: Asset;
-  borrowed: Asset;
-}[];
+export type IsolatedMarginAsset = MarginAsset[];
