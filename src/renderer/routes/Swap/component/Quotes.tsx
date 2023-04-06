@@ -89,6 +89,11 @@ const ItemWrapper = styled.div`
     gap: 6px;
     .toToken {
       color: #fff;
+      display: inline-block;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
   .no-price {
@@ -280,10 +285,12 @@ const DexQuoteItem = (props: QuoteItemProps) => {
         .minus(bestQuoteAmount || 0)
         .div(bestQuoteAmount)
         .times(100);
+
+      const s = formatAmount(receivedTokeAmountBn.toString(10));
       center = (
         <>
-          <span className="toToken">
-            {formatAmount(receivedTokeAmountBn.toString(10))}
+          <span className="toToken" title={s}>
+            {s}
           </span>{' '}
           {receiveToken.symbol}
         </>
@@ -477,10 +484,11 @@ const CexQuoteItem = (props: {
         .minus(bestQuoteAmount || 0)
         .div(bestQuoteAmount)
         .times(100);
+      const s = formatAmount(receiveToken.amount.toString(10));
       center = (
         <>
-          <span className="toToken">
-            {formatAmount(receiveToken.amount.toString(10))}
+          <span className="toToken" title={s}>
+            {s}
           </span>{' '}
           {receiveToken.symbol}
         </>
