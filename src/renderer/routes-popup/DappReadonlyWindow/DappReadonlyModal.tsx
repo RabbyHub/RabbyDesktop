@@ -32,7 +32,7 @@ function InnerRedirect({
 }: {
   nonSameOrigin: INonSameDomainAction;
   isLoadingFavicon?: boolean;
-  targetInfo: ReturnType<typeof canoicalizeDappUrl>;
+  targetInfo: ICanonalizedUrlInfo;
 }) {
   return (
     <>

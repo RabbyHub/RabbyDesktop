@@ -416,6 +416,7 @@ type ISafeOpenDappTabResult = {
 type IParseDomainInfo = {
   subDomain: string;
   hostWithoutTLD: string;
+  tld: string;
   secondaryDomain: string;
   secondaryOrigin: string;
   is2ndaryDomain: boolean;
