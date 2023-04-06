@@ -1,6 +1,6 @@
 import { useAtom } from 'jotai';
 import React from 'react';
-import { bundleAccountsAtom } from './shared';
+import { bundleAccountsAtom, saveBundleAccountsBalance } from './shared';
 import { Binance } from './cex/binance/binance';
 import { mergeList, plusBigNumber } from './util';
 
@@ -68,13 +68,13 @@ export const useBinance = () => {
       bnAccounts.map((account) => account.api.getAssets())
     );
 
-    // TODO: plus results
-    setAssets(result[0]);
+    setAssets(mergeAssets(result));
 
     const balances = await Promise.all(
       bnAccounts.map((account) => account.api.getBalance())
     );
 
+    const updateAccounts: BundleAccount[] = [];
     // 更新 bn 余额
     setAccounts((prev) => {
       return prev.map((account) => {
@@ -82,17 +82,22 @@ export const useBinance = () => {
           const index = bnAccounts.findIndex(
             (item) => item.apiKey === account.apiKey
           );
-
-          return {
+          const newAccount = {
             ...account,
             balance: balances[index],
           };
+
+          updateAccounts.push(newAccount);
+
+          return newAccount;
         }
 
         return account;
       });
     });
-
+    // 持久化余额
+    saveBundleAccountsBalance(updateAccounts);
+    // 更新 bn 的总余额
     setBalance(plusBigNumber(...balances));
   }, [bnAccounts, setAccounts]);
 

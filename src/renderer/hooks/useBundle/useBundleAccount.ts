@@ -7,72 +7,78 @@ import { ERROR } from './error';
 export const useBundleAccount = () => {
   const [accounts, setAccounts] = useAtom(bundleAccountsAtom);
 
-  const checkAccount = (account: Partial<BundleAccount>) => {
-    if (account.type === 'bn') {
-      if (!account.apiKey || !account.apiSecret) {
-        return {
-          error: ERROR.INVALID_KEY,
-        };
-      }
-    } else if (account.type === 'btc') {
-      if (!account.address) {
-        return {
-          error: ERROR.INVALID_ADDRESS,
-        };
-      }
-    } else if (account.type === 'eth') {
-      if (!account.address) {
-        return {
-          error: ERROR.INVALID_ADDRESS,
-        };
-      }
-    }
+  const preCheck = React.useCallback(
+    async (account: Partial<BundleAccount>) => {
+      if (account.type === 'bn') {
+        if (!account.apiKey || !account.apiSecret) {
+          return {
+            error: ERROR.INVALID_KEY,
+          };
+        }
 
-    const result = accounts.find((acc) => {
-      if (acc.type === 'bn' && account.type === 'bn') {
-        if (acc.apiKey === account.apiKey) {
-          return true;
+        const bn = new Binance(account.apiKey, account.apiSecret);
+        try {
+          await bn.checkPermission();
+        } catch (error: any) {
+          return {
+            error: error.message,
+          };
         }
-      } else if (acc.type === 'btc' && account.type === 'btc') {
-        if (acc.address === account.address) {
-          return true;
+      } else if (account.type === 'btc') {
+        if (!account.address) {
+          return {
+            error: ERROR.INVALID_ADDRESS,
+          };
         }
-      } else if (acc.type === 'eth' && account.type === 'eth') {
-        if (acc.address === account.address) {
-          return true;
+      } else if (account.type === 'eth') {
+        if (!account.address) {
+          return {
+            error: ERROR.INVALID_ADDRESS,
+          };
         }
       }
-      return false;
-    });
 
-    if (result) {
+      const result = accounts.find((acc) => {
+        if (acc.type === 'bn' && account.type === 'bn') {
+          if (acc.apiKey === account.apiKey) {
+            return true;
+          }
+        } else if (acc.type === 'btc' && account.type === 'btc') {
+          if (acc.address === account.address) {
+            return true;
+          }
+        } else if (acc.type === 'eth' && account.type === 'eth') {
+          if (acc.address === account.address) {
+            return true;
+          }
+        }
+        return false;
+      });
+
+      if (result) {
+        return {
+          error: ERROR.EXISTED,
+        };
+      }
+
       return {
-        error: ERROR.EXISTED,
+        error: null,
       };
-    }
+    },
+    [accounts]
+  );
 
-    return {
-      error: null,
-    };
-  };
-
-  const createAccount = React.useCallback(async (account: BundleAccount) => {
-    // check account
-    if (account.type === 'bn') {
-      // check permission
-      const bn = new Binance(account.apiKey, account.apiSecret);
-      try {
-        await bn.checkPermission();
-      } catch (error: any) {
-        return {
-          error: error.message,
-        };
+  const create = React.useCallback(
+    async (account: BundleAccount) => {
+      if ((await preCheck(account)).error) {
+        return;
       }
-    }
-    window.rabbyDesktop.ipcRenderer.invoke('bundle-account-post', account);
+      window.rabbyDesktop.ipcRenderer.invoke('bundle-account-post', account);
 
-    return account;
-  }, []);
+      return account;
+    },
+    [preCheck]
+  );
 
   const updateNickname = React.useCallback(
     (id: BundleAccount['id'], nickname: BundleAccount['nickname']) => {
@@ -88,7 +94,7 @@ export const useBundleAccount = () => {
     [accounts]
   );
 
-  const deleteAccount = React.useCallback((id: string) => {
+  const remove = React.useCallback((id: string) => {
     window.rabbyDesktop.ipcRenderer.invoke('bundle-account-delete', id);
   }, []);
 
@@ -103,11 +109,26 @@ export const useBundleAccount = () => {
     );
   }, [setAccounts]);
 
+  const inBundleList = React.useMemo(() => {
+    return accounts.filter((acc) => acc.inBundle);
+  }, [accounts]);
+
+  const binanceList = React.useMemo(() => {
+    return accounts.find((acc) => acc.type === 'bn');
+  }, [accounts]);
+
+  const btcList = React.useMemo(() => {
+    return accounts.find((acc) => acc.type === 'btc');
+  }, [accounts]);
+
   return {
-    createAccount,
+    create,
+    remove,
     updateNickname,
-    deleteAccount,
-    checkAccount,
-    accounts,
+    preCheck,
+    list: accounts,
+    inBundleList,
+    binanceList,
+    btcList,
   };
 };

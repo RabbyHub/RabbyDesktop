@@ -135,3 +135,27 @@ handleIpcMainInvoke('bundle-account-init', () => {
     accounts,
   });
 });
+
+handleIpcMainInvoke(
+  'bundle-account-update-balance',
+  (_, bundleAccounts: Pick<BundleAccount, 'id' | 'balance'>[]) => {
+    const accounts = bundleStore.get('accounts');
+
+    const newAccounts = accounts.map((account) => {
+      const bundleAccount = bundleAccounts.find(
+        (item) => item.id === account.id
+      );
+
+      if (bundleAccount) {
+        return {
+          ...account,
+          balance: bundleAccount.balance,
+        };
+      }
+
+      return account;
+    });
+
+    bundleStore.set('accounts', newAccounts);
+  }
+);

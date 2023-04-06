@@ -273,6 +273,10 @@ type ChannelInvokePayload = {
     send: [];
     response: any;
   };
+  'bundle-account-update-balance': {
+    send: [{ id?: string; balance?: string }[]];
+    response: any;
+  };
 } & RabbyxInvokePayload;
 
 type IInvokesKey = keyof ChannelInvokePayload;
