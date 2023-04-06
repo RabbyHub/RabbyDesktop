@@ -7,7 +7,7 @@ import {
 } from '@/isomorphic/url';
 import { arraify } from '@/isomorphic/array';
 import { pickFavIconURLFromMeta } from '@/isomorphic/html';
-import { checkoutDappURL, makeDappURLToOpen } from '@/isomorphic/dapp';
+import { checkoutDappURL, makeDappOriginToOpen } from '@/isomorphic/dapp';
 import {
   EnumMatchDappType,
   IS_RUNTIME_PRODUCTION,
@@ -240,7 +240,7 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
   const findResult = findDappsByOrigin(dappOrigin);
 
   if (findResult.dapp) {
-    dappOrigin = makeDappURLToOpen(findResult.dapp.origin);
+    dappOrigin = makeDappOriginToOpen(findResult.dapp.origin);
   }
 
   const openResult = await safeOpenURL(dappOrigin, {

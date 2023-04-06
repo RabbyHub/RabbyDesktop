@@ -160,7 +160,7 @@ protocol.registerSchemesAsPrivileged([
 
 const registerCallbacks: {
   protocol: string;
-  handler: (ctx: { session: Electron.Session }) => {
+  handler: (ctx: { session: Electron.Session; sessionName: string }) => {
     protocol: string;
     registerSuccess: boolean;
   };
@@ -249,6 +249,7 @@ const registerCallbacks: {
         TARGET_PROTOCOL.slice(0, -1),
         async (request, callback) => {
           const parsedReqURLInfo = canoicalizeDappUrl(request.url || '');
+
           if (parsedReqURLInfo.secondaryDomain !== IPFS_LOCALHOST) {
             // protocol.uninterceptProtocol('http');
             callback({
@@ -345,12 +346,18 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
       name: 'checkingProxy',
       filterProtocol: ['file:', 'http:'],
     },
+    {
+      inst: checkingViewSession,
+      name: 'checkingView',
+      filterProtocol: ['file:', 'http:'],
+    },
   ].forEach(({ inst, name, filterProtocol }) => {
     registerCallbacks.forEach(({ protocol: prot, handler }) => {
       if (filterProtocol?.includes(prot)) return;
 
       const { registerSuccess, protocol: registeredProtocol } = handler({
         session: inst,
+        sessionName: name,
       });
 
       if (!registerSuccess) {

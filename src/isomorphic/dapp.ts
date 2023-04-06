@@ -6,6 +6,62 @@ export function isValidDappAlias(alias: string) {
   return /[\w\d]+/.test(alias);
 }
 
+export function normalizeIPFSOrigin(ipfsCid: string) {
+  return `http://${ipfsCid}.${IPFS_LOCALHOST}`;
+}
+
+export function checkoutDappURL(dappPath: string) {
+  if (dappPath.startsWith('/ipfs/') || dappPath.startsWith(PROTOCOL_IPFS)) {
+    const ipfsCid = extractIpfsCid(dappPath);
+
+    if (!ipfsCid) return { type: 'unknown' as const, dappURL: '' };
+
+    return {
+      type: 'ipfs' as const,
+      dappURL: `rabby-ipfs://${ipfsCid}`,
+      ipfsCid,
+    };
+  }
+
+  if (dappPath.startsWith('http')) {
+    const parsedInfo = canoicalizeDappUrl(dappPath);
+
+    if (parsedInfo.secondaryDomain === IPFS_LOCALHOST) {
+      return {
+        type: 'ipfs' as const,
+        dappURL: `rabby-ipfs://${parsedInfo.subDomain}`,
+        ipfsCid: parsedInfo.subDomain,
+      };
+    }
+
+    return {
+      type: 'http' as const,
+      dappURL: dappPath,
+    };
+  }
+
+  return {
+    type: 'unknown' as const,
+    dappURL: '',
+  };
+}
+
+export function makeDappOriginToOpen(
+  dappURL: string | ReturnType<typeof checkoutDappURL>,
+  sessionType: 'default' | 'preview' = 'default'
+): string {
+  if (!dappURL) return dappURL;
+
+  const checkoutResult =
+    typeof dappURL === 'string' ? checkoutDappURL(dappURL) : dappURL;
+
+  if (sessionType === 'default' && checkoutResult.type === 'ipfs') {
+    return `http://${checkoutResult.ipfsCid}.${IPFS_LOCALHOST}`;
+  }
+
+  return checkoutResult.dappURL;
+}
+
 export function formatDapp(
   input: any,
   patchesData?: {
@@ -14,19 +70,17 @@ export function formatDapp(
 ): IDapp | null {
   if (!input?.origin) return null;
 
-  switch (input?.type) {
-    case 'http':
-    default: {
-      input.type = 'http';
-      break;
-    }
-  }
-
+  const parsedDappInfo = checkoutDappURL(input.origin);
   const faviconBase64 = input?.faviconBase64 || ('' as IDapp['faviconBase64']);
 
-  return {
+  let finalType = input?.type;
+  if (parsedDappInfo.type === 'ipfs') {
+    finalType = 'ipfs';
+  }
+
+  const formattedDapp = {
     id: input.id || input.origin,
-    type: input?.type,
+    type: finalType,
     alias: input?.alias || ('' as IDapp['alias']),
     origin: input.origin as IDapp['origin'],
     faviconUrl:
@@ -35,6 +89,20 @@ export function formatDapp(
       ('' as IDapp['faviconUrl']),
     faviconBase64: isInvalidBase64(faviconBase64) ? '' : faviconBase64,
   };
+
+  switch (finalType) {
+    case 'ipfs': {
+      // formattedDapp.id = formattedDapp.origin = makeDappOriginToOpen(input.origin);
+      break;
+    }
+    case 'http':
+    default: {
+      input.type = 'http';
+      break;
+    }
+  }
+
+  return formattedDapp;
 }
 
 export function formatDapps(input: any): IDapp[] {
@@ -183,54 +251,6 @@ export function formatDappURLToShow(dappURL: string) {
 
   if (dappURL.startsWith(PROTOCOL_IPFS)) {
     return dappURL.replace(/^rabby-ipfs:/, 'ipfs:');
-  }
-
-  return dappURL;
-}
-
-export function checkoutDappURL(dappPath: string) {
-  if (dappPath.startsWith('/ipfs/') || dappPath.startsWith(PROTOCOL_IPFS)) {
-    const ipfsCid = extractIpfsCid(dappPath);
-
-    if (!ipfsCid) return { type: 'unknown' as const, dappURL: '' };
-
-    return {
-      type: 'ipfs' as const,
-      dappURL: `rabby-ipfs://${ipfsCid}`,
-      ipfsCid,
-    };
-  }
-
-  if (dappPath.startsWith('http')) {
-    const parsedInfo = canoicalizeDappUrl(dappPath);
-
-    if (parsedInfo.secondaryDomain === IPFS_LOCALHOST) {
-      return {
-        type: 'ipfs' as const,
-        dappURL: `rabby-ipfs://${parsedInfo.subDomain}`,
-        ipfsCid: parsedInfo.subDomain,
-      };
-    }
-
-    return {
-      type: 'http' as const,
-      dappURL: dappPath,
-    };
-  }
-
-  return {
-    type: 'unknown' as const,
-    dappURL: '',
-  };
-}
-
-export function makeDappURLToOpen<T extends string>(dappURL: T): string {
-  if (!dappURL) return dappURL;
-
-  const checkoutResult = checkoutDappURL(dappURL);
-
-  if (checkoutResult.type === 'ipfs') {
-    return `http://${checkoutResult.ipfsCid}.${IPFS_LOCALHOST}`;
   }
 
   return dappURL;

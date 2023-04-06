@@ -2,7 +2,7 @@ import { putDapp } from '@/renderer/ipcRequest/dapps';
 import { LoadingOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useState } from 'react';
-import { makeDappURLToOpen } from '@/isomorphic/dapp';
+import { makeDappOriginToOpen } from '@/isomorphic/dapp';
 import RabbyInput from '../../AntdOverwrite/Input';
 
 import { DappFavicon } from '../../DappFavicon';
@@ -111,7 +111,7 @@ export const PreviewDapp = ({
       </div>
       <PreviewWebview
         containerClassName={styles.previewTagContainer}
-        src={makeDappURLToOpen(data.inputOrigin)}
+        src={makeDappOriginToOpen(data.inputOrigin, 'preview')}
         loadingView={
           <div className={styles.previewEmpty}>
             <div>
