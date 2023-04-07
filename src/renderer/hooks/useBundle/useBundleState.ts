@@ -14,7 +14,7 @@ import { useETH } from './useETH';
  *  - eth 的汇总
  *  - bn 的汇总
  */
-export const useBundle = () => {
+export const useBundleState = () => {
   const account = useBundleAccount();
   const binance = useBinance();
   const eth = useETH();
