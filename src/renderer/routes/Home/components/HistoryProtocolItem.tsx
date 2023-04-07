@@ -229,6 +229,9 @@ const ProtocolItem = ({
   const historyProtocolUsdValue = useMemo(() => {
     let sum = 0;
     if (isLoadingProtocolHistory) return null;
+    if (!supportHistory) {
+      return null;
+    }
     protocol.portfolio_item_list.forEach((portfolio) => {
       const historyPortfolio = historyProtocol?.portfolio_item_list.find(
         (item) =>
