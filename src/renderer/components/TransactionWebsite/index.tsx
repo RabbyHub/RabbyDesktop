@@ -13,8 +13,8 @@ export const TransactionWebsite = ({
   className,
 }: TransactionWebsiteProps) => {
   const openDapp = useOpenDapp();
-  const origin = makeDappURLToOpen(_origin);
-  const dapp = useMatchDapp(origin);
+  const dapp = useMatchDapp(makeDappURLToOpen(_origin));
+  const origin = dapp?.origin || _origin;
 
   const handleClick: React.MouseEventHandler<HTMLAnchorElement> = useCallback(
     (e) => {
