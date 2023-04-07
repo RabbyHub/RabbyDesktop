@@ -90,16 +90,17 @@ const Wrapper = styled.section`
 interface SlippageProps {
   value: string;
   onChange: (n: string) => void;
-  amount?: string | number;
-  symbol?: string;
   recommendValue?: number;
 }
 export const Slippage = memo((props: SlippageProps) => {
-  const { value, onChange, amount = '', symbol = '', recommendValue } = props;
+  const { value, onChange, recommendValue } = props;
   const [isCustom, setIsCustom] = useToggle(false);
 
-  const isLow = useMemo(() => {
-    return value?.trim() !== '' && Number(value || 0) < 0.1;
+  const [isLow, isHigh] = useMemo(() => {
+    return [
+      value?.trim() !== '' && Number(value || 0) < 0.1,
+      value?.trim() !== '' && Number(value || 0) > 10,
+    ];
   }, [value]);
 
   const setRecommendValue = useCallback(() => {
@@ -110,8 +111,10 @@ export const Slippage = memo((props: SlippageProps) => {
     if (isLow) {
       return 'Low slippage may cause failed transactions due to high volatility';
     }
+    if (isHigh) {
+      return 'Transaction might be frontrun because of high slippage tolerance';
+    }
     if (recommendValue) {
-      // TODO: use recommend slippage instead of text
       return (
         <span>
           To prevent front-running, we recommend a slippage of{' '}
@@ -123,7 +126,7 @@ export const Slippage = memo((props: SlippageProps) => {
       );
     }
     return null;
-  }, [isLow, recommendValue, setRecommendValue]);
+  }, [isHigh, isLow, recommendValue, setRecommendValue]);
 
   const onInputFocus: ChangeEventHandler<HTMLInputElement> = useCallback(
     (e) => {

@@ -26,6 +26,8 @@ import { Slippage } from './component/Slippage';
 import { SwapTransactions } from './component/Transactions';
 import { TokenRender } from './component/TokenRender';
 import {
+  TCexQuoteData,
+  TDexQuoteData,
   getAllQuotes,
   getSpender,
   getToken,
@@ -37,10 +39,14 @@ import styles from './index.module.less';
 import { useInSwap, usePostSwap } from './hooks';
 
 const Wrapper = styled.div`
+  --max-swap-width: 1080px;
+
   & > .header {
+    width: var(--max-swap-width);
     position: absolute;
     top: 24px;
-    left: 102px;
+    left: 50%;
+    transform: translateX(-50%);
     font-size: 16px;
     color: white;
     .title {
@@ -187,6 +193,10 @@ const Wrapper = styled.div`
       border-radius: 6px;
       position: relative;
 
+      &:hover {
+        box-shadow: 0px 16px 40px rgba(29, 35, 74, 0.2);
+      }
+
       &:first-of-type::after {
         position: absolute;
         top: -24px;
@@ -301,16 +311,26 @@ export const SwapToken = () => {
     }
   }, [refreshId, userAddress, payToken?.id, chain]);
 
-  const {
-    value: dexQuotes,
-    loading: quoteLoading,
-    error: quotesError,
-  } = useAsync(async () => {
+  const fetchIdRef = useRef(0);
+  const [quoteList, setQuotesList] = useState<
+    (TCexQuoteData | TDexQuoteData)[]
+  >([]);
+
+  const setQuote = useCallback(
+    (id: number) => (quote: TCexQuoteData | TDexQuoteData) => {
+      if (id === fetchIdRef.current) {
+        setQuotesList((e) => [...e, quote]);
+      }
+    },
+    []
+  );
+  const { loading: quoteLoading, error: quotesError } = useAsync(async () => {
+    setQuotesList([]);
+    fetchIdRef.current += 1;
     if (
       userAddress &&
       payToken &&
       receiveToken &&
-      slippage &&
       chain &&
       payAmount &&
       feeAfterDiscount
@@ -319,18 +339,20 @@ export const SwapToken = () => {
         userAddress,
         payToken,
         receiveToken,
-        slippage,
+        slippage: slippage || '0.1',
         chain,
         payAmount,
         fee: feeAfterDiscount,
+        setQuote: setQuote(fetchIdRef.current),
       });
     }
   }, [
+    setQuotesList,
+    setQuote,
     refreshId,
     userAddress,
     payToken,
     receiveToken,
-    slippage,
     chain,
     payAmount,
     feeAfterDiscount,
@@ -356,19 +378,10 @@ export const SwapToken = () => {
       userAddress &&
       payToken &&
       receiveToken &&
-      slippage &&
       chain &&
       payAmount &&
       feeAfterDiscount,
-    [
-      chain,
-      feeAfterDiscount,
-      payAmount,
-      payToken,
-      receiveToken,
-      slippage,
-      userAddress,
-    ]
+    [chain, feeAfterDiscount, payAmount, payToken, receiveToken, userAddress]
   );
 
   useDebounce(
@@ -666,7 +679,7 @@ export const SwapToken = () => {
             </div>
             <div className="section">
               <div className="amountBox">
-                <div className="subText">Amount in {chainName}</div>
+                <div className="subText">Amount</div>
                 <div
                   className={clsx(
                     'subText',
@@ -775,7 +788,7 @@ export const SwapToken = () => {
           <div className="box">
             {renderQuotes && payToken && receiveToken ? (
               <Quotes
-                list={dexQuotes}
+                list={quoteList}
                 loading={quoteLoading}
                 payToken={payToken}
                 receiveToken={receiveToken}

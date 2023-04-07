@@ -46,7 +46,6 @@ const EmptyWrapper = styled.div`
   .desc {
     color: rgba(255, 255, 255, 0.4);
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.7);
   }
 `;
 const Empty = () => {
@@ -56,14 +55,14 @@ const Empty = () => {
         src="rabby-internal://assets/icons/home/tx-empty.png"
         className="empty-img"
       />
-      <div className="desc">No Transactions</div>
+      <div className="desc">No Transactions records</div>
     </EmptyWrapper>
   );
 };
 
 const Wrapper = styled.div`
   color: rgba(255, 255, 255, 0.6);
-  width: 1080px;
+  width: var(--max-swap-width);
   margin: 0 auto;
   margin-top: 40px;
   margin-bottom: 100px;

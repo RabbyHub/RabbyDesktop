@@ -71,6 +71,9 @@ const ItemWrapper = styled.div`
     border-radius: 6px;
     cursor: not-allowed;
   }
+  &.error {
+    opacity: 0.6;
+  }
 
   .info {
     width: 144px;
@@ -411,14 +414,14 @@ const DexQuoteItem = (
   return (
     <ItemWrapper
       onClick={handleClick}
-      className={clsx(active && 'active', disabled && 'disabled')}
+      className={clsx(active && 'active', disabled && 'disabled error')}
     >
       <div className="info">
         <img className="logo" src={dexInfo.logo} />
         <span>{dexInfo.name}</span>
         {!!preExecResult?.shouldApproveToken && (
           <Tooltip
-            overlayClassName="rectangle /max-w-[300px]"
+            overlayClassName="rectangle max-w-[300px]"
             title="Token is not approved for this aggregator"
           >
             <img src={ImgLock} className="w-14 h-14" />
@@ -485,12 +488,15 @@ const CexQuoteItem = (props: {
 
   const handleClick = () => {
     message.info(
-      'CEX price is for reference only. Cannot be used for direct trading.'
+      'CEX price is for reference only. Cannot be used for direct trading now.'
     );
   };
 
   return (
-    <ItemWrapper className={clsx('disabled')} onClick={handleClick}>
+    <ItemWrapper
+      className={clsx('disabled', !data?.receive_token?.amount && 'error')}
+      onClick={handleClick}
+    >
       <div className="info">
         <img className="logo" src={dexInfo.logo} />
         <span>{dexInfo.name}</span>
@@ -501,6 +507,7 @@ const CexQuoteItem = (props: {
   );
 };
 
+const quoteCount = Object.keys(CEX).length + Object.keys(DEX).length;
 interface QuotesProps
   extends Omit<
     QuoteItemProps,
@@ -538,15 +545,57 @@ export const Quotes = (props: QuotesProps) => {
       }),
     [list, other?.receiveToken?.decimals]
   );
+  const loadingCount = useMemo(() => {
+    return quoteCount - (sortedList?.length || 0);
+  }, [sortedList?.length]);
   return (
     <QuotesWrapper>
       <div className="header">
         <div className="title">The following swap rates are found</div>
         <IconRefresh refresh={refresh} loading={loading} />
       </div>
+
+      <div className="flex flex-col gap-[20px]">
+        {sortedList.map((params, idx) => {
+          const { name, data, isDex } = params;
+          const bestQuote = sortedList?.[0];
+          const bestAmount =
+            (bestQuote?.isDex
+              ? bestQuote?.data?.toTokenAmount
+              : new BigNumber(bestQuote.data?.receive_token.amount || '0')
+                  .times(10 ** other.receiveToken.decimals)
+                  .toString(10)) || '0';
+          if (isDex) {
+            return (
+              <DexQuoteItem
+                preExecResult={params.preExecResult}
+                quote={data}
+                name={name}
+                isBestQuote={idx === 0}
+                bestAmount={`${bestAmount}`}
+                active={activeName === name}
+                {...other}
+              />
+            );
+          }
+          return (
+            <CexQuoteItem
+              name={name}
+              data={data}
+              bestAmount={`${bestAmount}`}
+              isBestQuote={idx === 0}
+            />
+          );
+        })}
+      </div>
       {loading && (
-        <div className="flex flex-col gap-[20px]">
-          {Array(5)
+        <div
+          className={clsx(
+            'flex flex-col gap-[20px]',
+            loadingCount !== quoteCount && 'mt-20'
+          )}
+        >
+          {Array(loadingCount)
             .fill(1)
             .map((_, i) => (
               <Skeleton.Input
@@ -558,40 +607,6 @@ export const Quotes = (props: QuotesProps) => {
             ))}
         </div>
       )}
-      <div className="flex flex-col gap-[20px]">
-        {!loading &&
-          sortedList.map((params, idx) => {
-            const { name, data, isDex } = params;
-            const bestQuote = sortedList?.[0];
-            const bestAmount =
-              (bestQuote?.isDex
-                ? bestQuote?.data?.toTokenAmount
-                : new BigNumber(bestQuote.data?.receive_token.amount || '0')
-                    .times(10 ** other.receiveToken.decimals)
-                    .toString(10)) || '0';
-            if (isDex) {
-              return (
-                <DexQuoteItem
-                  preExecResult={params.preExecResult}
-                  quote={data}
-                  name={name}
-                  isBestQuote={idx === 0}
-                  bestAmount={`${bestAmount}`}
-                  active={activeName === name}
-                  {...other}
-                />
-              );
-            }
-            return (
-              <CexQuoteItem
-                name={name}
-                data={data}
-                bestAmount={`${bestAmount}`}
-                isBestQuote={idx === 0}
-              />
-            );
-          })}
-      </div>
     </QuotesWrapper>
   );
 };

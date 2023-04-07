@@ -8,7 +8,7 @@ const Wrapper = styled.div`
   height: 100%;
   background-image: url(${ImgRabbyBg});
   background-repeat: no-repeat;
-  background-size: 150px 130px;
+  background-size: 78px 68px;
   background-position: bottom right;
   & > {
     .segment {
@@ -46,7 +46,7 @@ export const SwapIntro = () => {
       <div className="title">Rabby Swap Aggregator</div>
       <div className="desc">
         We find the best rates from top aggregators like 1inch, matcha,
-        Coinbase, and more. No hassle, just better swaps.
+        Paraswap, and more. No hassle, just better swaps.
       </div>
 
       <div className="segment">What's more...</div>
