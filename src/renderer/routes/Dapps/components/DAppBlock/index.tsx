@@ -5,6 +5,7 @@ import React, { useRef } from 'react';
 
 import clsx from 'clsx';
 import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
+import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import {
   RCIconDappsDelete,
   RCIconDappsEdit,
@@ -127,7 +128,13 @@ export const DAppBlock = ({
         />
       }
     >
-      <div className="dapp-block" ref={ref}>
+      <div
+        className="dapp-block"
+        ref={ref}
+        onContextMenu={() => {
+          hideMainwinPopup('sidebar-dapp');
+        }}
+      >
         {dapp.tab ? (
           dapp.tab.status === 'loading' ? (
             <img

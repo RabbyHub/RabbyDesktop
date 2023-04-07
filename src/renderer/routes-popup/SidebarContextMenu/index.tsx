@@ -15,6 +15,7 @@ import { MenuClickEventHandler } from 'rc-menu/lib/interface';
 
 import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
 import { useMemo } from 'react';
+import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import styles from './index.module.less';
 
 export const SidebarContextMenu = () => {
@@ -143,9 +144,15 @@ export const SidebarContextMenu = () => {
         const tabId = pageInfo?.dappTabInfo?.id;
         if (tabId) {
           closeTabFromInternalPage(tabId);
-          zActions.showZSubview('toast-zpopup-message', {
-            type: 'success',
-            content: 'Closed',
+          showMainwinPopupview({
+            type: 'global-toast-popup',
+            state: {
+              toastType: 'toast-message',
+              data: {
+                type: 'success',
+                content: 'Closed',
+              },
+            },
           });
         }
         break;
@@ -168,23 +175,42 @@ export const SidebarContextMenu = () => {
         if (dappInfo && connectedSiteMap[origin]) {
           removeConnectedSite(origin);
         }
-        zActions.showZSubview('toast-zpopup-message', {
-          type: 'success',
-          content: 'Disconnected',
+
+        showMainwinPopupview({
+          type: 'global-toast-popup',
+          state: {
+            toastType: 'toast-message',
+            data: {
+              type: 'success',
+              content: 'Disconnected',
+            },
+          },
         });
         break;
       case 'dapp-disconnect-all':
         removeAllConnectedSites();
-        zActions.showZSubview('toast-zpopup-message', {
-          type: 'success',
-          content: 'Disconnected',
+        showMainwinPopupview({
+          type: 'global-toast-popup',
+          state: {
+            toastType: 'toast-message',
+            data: {
+              type: 'success',
+              content: 'Disconnected',
+            },
+          },
         });
         break;
       case 'dapp-close-all':
         closeAllTabs();
-        zActions.showZSubview('toast-zpopup-message', {
-          type: 'success',
-          content: 'Closed',
+        showMainwinPopupview({
+          type: 'global-toast-popup',
+          state: {
+            toastType: 'toast-message',
+            data: {
+              type: 'success',
+              content: 'Closed',
+            },
+          },
         });
         break;
       default:
