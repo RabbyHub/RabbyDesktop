@@ -155,7 +155,7 @@ const router = createRouter([
         path: 'home/send-token',
         element: (
           <>
-            <FixedBackHeader>Send</FixedBackHeader>
+            <FixedBackHeader isShowBack={false}>Send</FixedBackHeader>
             <SendToken />
           </>
         ),

@@ -136,7 +136,7 @@
     width: 100%;
     box-sizing: border-box;
     padding-left: 20px;
-    opacity: 0.8;
+    opacity: 0.7;
     overflow: hidden;
     position: relative;
 
@@ -165,6 +165,19 @@
   .routeLogo {
     width: 20px;
     height: 20px;
+  }
+
+  .dappIconWithChain {
+    position: relative;
+
+    .chainLogo {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      right: -5px;
+      bottom: -2px;
+      border-radius: 50%;
+    }
   }
 
   .dappIcon {
@@ -207,8 +220,10 @@
     max-width: 100%;
     text-overflow: ellipsis;
     white-space: nowrap;
-    padding-right: 32px;
+    padding-right: 20px;
     opacity: 1;
+    font-weight: 700;
+    font-size: 14px;
 
     transition: opacity var(--mainwin-sidebar-animation-second);
 
@@ -250,10 +265,10 @@
 
   .dappIndicator {
     position: absolute;
-    left: 6px;
+    left: 5px;
     top: 50%;
-    width: 9px;
-    height: 9px;
+    width: 11px;
+    height: 11px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -263,11 +278,13 @@
       width: 4px;
       height: 4px;
       border-radius: 50%;
-      background: var(--color-comment2);
+      background-color: rgba(0, 0, 0, 0.7);
     }
     .closeIcon {
       display: none;
       cursor: pointer;
+      width: 11px;
+      height: 11px;
     }
 
     .loadingIcon {
@@ -324,6 +341,11 @@
   .dappList {
     flex: 1;
     overflow: overlay;
+
+    .routeTitle {
+      font-weight: 500;
+      font-size: 13px;
+    }
   }
 }
 
@@ -358,7 +380,7 @@
   padding: 12px 10px;
 
   color: #fff;
-  opacity: 0.8;
+  opacity: 0.7;
 
   font-size: 13px;
   line-height: 16px;

@@ -109,7 +109,7 @@ export const SidebarContextMenu = () => {
       {
         key: 'dapp-disconnect-all',
         className: styles['dapp-dropdown-item'],
-        label: <span className="text">Disconnect All Dapp</span>,
+        label: <span className="text">Disconnect All Dapps</span>,
         icon: (
           <img
             className={styles['dapp-dropdown-item-icon']}
@@ -120,7 +120,7 @@ export const SidebarContextMenu = () => {
       {
         key: 'dapp-close-all',
         className: styles['dapp-dropdown-item'],
-        label: <span className="text">Close All Dapp</span>,
+        label: <span className="text">Close All Dapps</span>,
         icon: (
           <img
             className={styles['dapp-dropdown-item-icon']}

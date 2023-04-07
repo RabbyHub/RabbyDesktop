@@ -24,6 +24,8 @@ import { Badge } from 'antd';
 import { usePrevious } from 'react-use';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
+import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
+import { CHAINS, CHAINS_ENUM } from '@debank/common';
 import { DappFavicon } from '../DappFavicon';
 import Hide from './Hide';
 import styles from './Sidebar.module.less';
@@ -117,6 +119,30 @@ const DappIndicator = ({ tab }: { tab?: chrome.tabs.Tab }) => {
   );
 };
 
+const DappIcon = ({
+  origin,
+  src,
+  chain,
+}: {
+  origin: string;
+  src?: string;
+  chain?: CHAINS_ENUM;
+}) => {
+  const chainLogo = useMemo(() => {
+    if (chain) {
+      return CHAINS[chain]?.logo;
+    }
+    return null;
+  }, [chain]);
+
+  return (
+    <div className={styles.dappIconWithChain}>
+      <DappFavicon origin={origin} src={src} />
+      {chainLogo && <img src={chainLogo} alt="" className={styles.chainLogo} />}
+    </div>
+  );
+};
+
 const TabList = ({
   className,
   dapps,
@@ -134,6 +160,7 @@ const TabList = ({
 }) => {
   const navigateToDapp = useNavigateToDappRoute();
   const location = useLocation();
+  const { connectedSiteMap } = useConnectedSite();
   if (!dapps?.length) {
     return null;
   }
@@ -144,7 +171,7 @@ const TabList = ({
         const { tab } = dapp;
         const faviconUrl =
           dapp?.faviconBase64 || dapp?.faviconUrl || dapp.tab?.favIconUrl;
-
+        const chain = connectedSiteMap[dapp.origin]?.chain;
         return (
           <li
             key={`dapp-${dapp.origin}`}
@@ -184,7 +211,7 @@ const TabList = ({
             <DappIndicator tab={tab} />
             <div className={styles.routeItemInner}>
               <div className={styles.dappIcon}>
-                <DappFavicon origin={dapp.origin} src={faviconUrl} />
+                <DappIcon origin={dapp.origin} src={faviconUrl} chain={chain} />
               </div>
               <Hide visible={!isFold} className={styles.routeTitle}>
                 {dapp.alias || dapp.origin}

@@ -119,14 +119,14 @@ export default function DApps() {
                 src="rabby-internal://assets/icons/dapps/icon-disconnect.svg"
                 alt=""
               />
-              Disconnect all
+              Disconnect All Dapps
             </div>
             <div className={style.action} onClick={handleCloseAll}>
               <img
                 src="rabby-internal://assets/icons/dapps/icon-close.svg"
                 alt=""
               />
-              Close open Dapps
+              Close All Dapps
             </div>
           </div>
         </header>
