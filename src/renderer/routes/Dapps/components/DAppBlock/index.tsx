@@ -71,8 +71,6 @@ export const DAppBlock = ({
     );
   }
 
-  console.log(dapp);
-
   if (!dapp) return null;
 
   return (
