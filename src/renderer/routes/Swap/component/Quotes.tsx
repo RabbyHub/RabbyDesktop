@@ -52,16 +52,21 @@ const ItemWrapper = styled.div`
   align-items: center;
   color: rgba(255, 255, 255, 0.8);
   background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  outline: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.12);
   border-radius: 6px;
 
   cursor: pointer;
 
-  &:hover:not(.disabled),
+  &:hover:not(.disabled) {
+    background: rgba(134, 151, 255, 0.1);
+    border-color: 2px solid transparent;
+    box-shadow: 0px 10px 16px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+  }
   &.active {
     background: rgba(134, 151, 255, 0.1);
-    border: 1px solid #8697ff;
+    outline: 2px solid #8697ff;
     box-shadow: 0px 10px 16px rgba(0, 0, 0, 0.1);
     border-radius: 6px;
   }

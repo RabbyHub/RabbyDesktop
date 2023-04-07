@@ -10,31 +10,29 @@ const Wrapper = styled.div`
   background-repeat: no-repeat;
   background-size: 78px 68px;
   background-position: bottom right;
-  & > {
-    .segment {
-      margin-top: 32px;
-      font-size: 14px;
-      font-weight: 700;
-      line-height: 24px;
-    }
-    .title {
-      font-weight: medium;
-      font-size: 18px;
-      margin-bottom: 12px;
-    }
-    .desc {
-      font-size: 14px;
-      line-height: 20px;
-      color: rgba(255, 255, 255, 0.8);
-    }
+  .segment {
+    margin-top: 32px;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 24px;
+  }
+  .title {
+    font-weight: medium;
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  .desc {
+    font-size: 14px;
+    line-height: 20px;
+    color: rgba(255, 255, 255, 0.8);
+  }
 
-    .discord {
-      margin-top: 32px;
-      color: rgba(255, 255, 255, 0.6);
-      .link {
-        cursor: pointer;
-        text-decoration: underline;
-      }
+  .discord {
+    margin-top: 32px;
+    color: rgba(255, 255, 255, 0.6);
+    .link {
+      cursor: pointer;
+      text-decoration: underline;
     }
   }
 `;

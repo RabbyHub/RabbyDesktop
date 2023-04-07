@@ -259,7 +259,9 @@ const Transaction = forwardRef<HTMLDivElement, TransactionProps>(
           {!loading ? (
             <span className="ml-auto">GasFee: {gasUsed}</span>
           ) : (
-            <span className="ml-auto">Gas: {data?.gas?.gas_price} Gwei</span>
+            <span className="ml-auto">
+              Gas price: {data?.gas?.gas_price} Gwei
+            </span>
           )}
           <span>
             {chainName}:{' '}

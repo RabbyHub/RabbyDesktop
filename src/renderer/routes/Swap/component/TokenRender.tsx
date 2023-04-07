@@ -49,6 +49,7 @@ const TokenRenderWrapper = styled.div`
   .arrow {
     margin-left: auto;
     font-size: 12px;
+    opacity: 0.8;
   }
 `;
 export const TokenRender: TokenAmountInputProps['tokenRender'] = ({

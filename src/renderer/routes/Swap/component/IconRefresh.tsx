@@ -104,7 +104,7 @@ export const IconRefresh = memo(
             strokeDasharray="30"
             strokeDashoffset="0"
           >
-            {!loading && (
+            {(!loading || animate) && (
               <animate
                 attributeName="stroke-dashoffset"
                 values="0;-30"

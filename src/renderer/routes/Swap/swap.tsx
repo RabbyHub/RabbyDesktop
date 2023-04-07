@@ -49,6 +49,7 @@ const Wrapper = styled.div`
     transform: translateX(-50%);
     font-size: 16px;
     color: white;
+    z-index: -1;
     .title {
       font-size: 28px;
       font-weight: medium;
@@ -231,6 +232,8 @@ export const SwapToken = () => {
   );
   const [receiveToken, setReceiveToken] = useState<TokenItem>();
   const [payAmount, setPayAmount] = useState('');
+  const [debouncePayAmount, setDebouncePayAmount] = useState('');
+
   const [refreshId, setRefreshId] = useState(0);
   const [activeProvider, setActiveProvider] = useState<QuoteProvider>();
 
@@ -338,7 +341,7 @@ export const SwapToken = () => {
       payToken &&
       receiveToken &&
       chain &&
-      payAmount &&
+      debouncePayAmount &&
       feeAfterDiscount
     ) {
       return getAllQuotes({
@@ -347,7 +350,7 @@ export const SwapToken = () => {
         receiveToken,
         slippage: slippage || '0.1',
         chain,
-        payAmount,
+        payAmount: debouncePayAmount,
         fee: feeAfterDiscount,
         setQuote: setQuote(fetchIdRef.current),
       });
@@ -360,7 +363,7 @@ export const SwapToken = () => {
     payToken,
     receiveToken,
     chain,
-    payAmount,
+    debouncePayAmount,
     feeAfterDiscount,
   ]);
 
@@ -398,6 +401,14 @@ export const SwapToken = () => {
     },
     300,
     [payTokenInfo, payTokenLoading]
+  );
+
+  useDebounce(
+    () => {
+      setDebouncePayAmount(payAmount);
+    },
+    300,
+    [payAmount]
   );
 
   if (error) {
@@ -639,10 +650,10 @@ export const SwapToken = () => {
 
   const receiveSlippageLoading = useMemo(
     () =>
-      activeProvider?.name
-        ? !quoteList?.find((e) => e.name === activeProvider.name)
+      payAmount !== debouncePayAmount || activeProvider?.name
+        ? !quoteList?.find((e) => e.name === activeProvider?.name)
         : false,
-    [activeProvider?.name, quoteList]
+    [activeProvider?.name, debouncePayAmount, payAmount, quoteList]
   );
 
   return (
@@ -815,7 +826,7 @@ export const SwapToken = () => {
                 loading={quoteLoading}
                 payToken={payToken}
                 receiveToken={receiveToken}
-                payAmount={payAmount}
+                payAmount={debouncePayAmount}
                 chain={chain}
                 userAddress={userAddress}
                 onClick={selectQuote}

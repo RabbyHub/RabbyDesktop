@@ -24,6 +24,7 @@ export const WarningOrChecked = ({
 }) => {
   return (
     <Tooltip
+      overlayClassName="rectangle max-w-[600px]"
       title={
         diffWarning
           ? `The offer may no longer be valid. Actual offer estimated through transaction simulation. You'll receive ${diffWarning}% less than the current offer.`
