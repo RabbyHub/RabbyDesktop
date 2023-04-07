@@ -1,19 +1,47 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 import { Dropdown, Menu } from 'antd';
-import React, { ReactNode, useRef } from 'react';
+import React, { ReactNode, useMemo, useRef } from 'react';
 
-import { formatDappURLToShow } from '@/isomorphic/dapp';
+import { formatDappURLToShow, makeDappHttpOrigin } from '@/isomorphic/dapp';
 import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
 import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import clsx from 'clsx';
+
+import { CHAINS_ENUM } from '@debank/common/dist/chain-data';
+import { CHAINS } from '@/renderer/utils/constant';
+import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
+import { DappFavicon } from '../../../../components/DappFavicon';
 import {
   RCIconDappsDelete,
   RCIconDappsEdit,
   RCIconPin,
 } from '../../../../../../assets/icons/internal-homepage';
 
-import { DappFavicon } from '../../../../components/DappFavicon';
+// todo: move to components
+const DappIcon = ({
+  origin,
+  src,
+  chain,
+}: {
+  origin: string;
+  src?: string;
+  chain?: CHAINS_ENUM;
+}) => {
+  const chainLogo = useMemo(() => {
+    if (chain) {
+      return CHAINS[chain]?.logo;
+    }
+    return null;
+  }, [chain]);
+
+  return (
+    <div className="dapp-icon-with-chain">
+      <DappFavicon origin={origin} src={src} className="dapp-favicon" />
+      {chainLogo && <img src={chainLogo} alt="" className="chain-logo" />}
+    </div>
+  );
+};
 
 const Indicator = ({ dapp }: { dapp: IDappWithTabInfo }) => {
   if (!dapp.tab) {
@@ -58,6 +86,9 @@ export const DAppBlock = ({
   onOpen?: (dappOrigin: string) => void;
 }>) => {
   const ref = useRef<HTMLDivElement>(null);
+  const { connectedSiteMap } = useConnectedSite();
+  const origin = makeDappHttpOrigin(dapp?.origin || '');
+  const chain = connectedSiteMap[origin || '']?.chain;
 
   if (onAdd) {
     return (
@@ -181,10 +212,10 @@ export const DAppBlock = ({
             }
           }}
         >
-          <DappFavicon
-            className="dapp-favicon"
+          <DappIcon
             origin={dapp.origin}
             src={dapp.faviconBase64 ? dapp.faviconBase64 : dapp.faviconUrl}
+            chain={chain}
           />
           <div className="infos pr-[16px]">
             <h4 className="dapp-alias">{dapp.alias}</h4>
