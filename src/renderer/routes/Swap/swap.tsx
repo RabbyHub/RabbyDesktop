@@ -295,8 +295,8 @@ export const SwapToken = () => {
   }
 
   const Insufficient = useMemo(
-    () => Number(payAmount) > Number(payToken?.amount || 0),
-    [payToken?.amount, payAmount]
+    () => Number(debouncePayAmount) > Number(payToken?.amount || 0),
+    [payToken?.amount, debouncePayAmount]
   );
 
   const { currentAccount } = useCurrentAccount();
@@ -388,9 +388,16 @@ export const SwapToken = () => {
       payToken &&
       receiveToken &&
       chain &&
-      payAmount &&
+      debouncePayAmount &&
       feeAfterDiscount,
-    [chain, feeAfterDiscount, payAmount, payToken, receiveToken, userAddress]
+    [
+      chain,
+      feeAfterDiscount,
+      debouncePayAmount,
+      payToken,
+      receiveToken,
+      userAddress,
+    ]
   );
 
   useDebounce(
@@ -490,7 +497,7 @@ export const SwapToken = () => {
   const btnDisabled =
     !payToken ||
     !receiveToken ||
-    !payAmount ||
+    !debouncePayAmount ||
     !activeProvider?.name ||
     activeProvider?.error ||
     !activeProvider?.quote;
@@ -529,7 +536,7 @@ export const SwapToken = () => {
             addLocalSwapTx(chain, hash, {
               payToken,
               receiveToken,
-              payAmount,
+              payAmount: debouncePayAmount,
               slippage,
               dexId: activeProvider.name,
               txId: hash,
@@ -555,7 +562,7 @@ export const SwapToken = () => {
       rbiSource,
       receiveToken,
       addLocalSwapTx,
-      payAmount,
+      debouncePayAmount,
       slippage,
       refresh,
     ]
@@ -563,7 +570,7 @@ export const SwapToken = () => {
 
   const handleSwap = useCallback(
     async (ulimit = false) => {
-      if (payAmount && payToken && !receiveToken) {
+      if (debouncePayAmount && payToken && !receiveToken) {
         message.error({
           className: 'rabbyx-tx-changed-tip',
           icon: (
@@ -611,7 +618,7 @@ export const SwapToken = () => {
       }
     },
     [
-      payAmount,
+      debouncePayAmount,
       payToken,
       receiveToken,
       gotoSwap,
@@ -640,20 +647,20 @@ export const SwapToken = () => {
     if (
       !payToken ||
       !receiveToken ||
-      !payAmount ||
+      !debouncePayAmount ||
       activeProvider?.error ||
       !activeProvider?.quote
     ) {
       setActiveProvider(undefined);
     }
-  }, [payToken, receiveToken, payAmount, activeProvider]);
+  }, [payToken, receiveToken, debouncePayAmount, activeProvider]);
 
   const receiveSlippageLoading = useMemo(
     () =>
-      payAmount !== debouncePayAmount || activeProvider?.name
+      activeProvider?.name
         ? !quoteList?.find((e) => e.name === activeProvider?.name)
         : false,
-    [activeProvider?.name, debouncePayAmount, payAmount, quoteList]
+    [activeProvider?.name, quoteList]
   );
 
   return (
@@ -739,14 +746,14 @@ export const SwapToken = () => {
                 {activeProvider?.halfBetterRate}% better exchange rate.
               </div>
             </div>
-            {payAmount &&
+            {debouncePayAmount &&
               activeProvider?.quote?.toTokenAmount &&
               payToken &&
               receiveToken && (
                 <>
                   <ReceiveDetails
                     className="section"
-                    payAmount={payAmount}
+                    payAmount={debouncePayAmount}
                     receiveRawAmount={activeProvider?.quote?.toTokenAmount}
                     payToken={payToken}
                     receiveToken={receiveToken}
@@ -795,7 +802,8 @@ export const SwapToken = () => {
                     onClick={handleLimitedSwap}
                     className={clsx('btn ', btnDisabled && 'disabled')}
                   >
-                    Approve {payAmount} {payToken?.symbol} to {DexDisplayName}{' '}
+                    Approve {debouncePayAmount} {payToken?.symbol} to{' '}
+                    {DexDisplayName}{' '}
                   </Button>
 
                   <Button
