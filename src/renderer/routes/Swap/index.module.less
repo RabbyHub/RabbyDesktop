@@ -1,171 +1,3 @@
-:root {
-  --swap-bg: #464c59;
-  --swap-content-w: 366px;
-  --color-disabled-bg: rgba(134, 151, 255, 0.4);
-  --color-disabled-text: rgba(255, 255, 255, 0.6);
-  --color-error: #ff6060;
-}
-
-.swapBox {
-  padding: 30px 28px;
-  padding-bottom: 0;
-  overflow: hidden;
-  position: relative;
-  height: 100%;
-  max-height: calc(100vh - 70px - 10px);
-  overflow: hidden;
-  // overflow-y: overlay;
-  transform: translateZ(0);
-  display: flex;
-  flex-direction: column;
-}
-
-.tokenExchange {
-  flex: 1;
-  overflow-x: hidden;
-  overflow-y: overlay;
-  margin: 0 -28px;
-  padding: 0 28px;
-  .content {
-    margin: 0 auto;
-    padding-top: 2px;
-    border-radius: 6px;
-
-    .chainSelectBox {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 36px;
-
-      .refresh {
-        cursor: pointer;
-        color: var(--color-primary);
-      }
-    }
-
-    .swapTokenBox {
-      margin-top: 12px;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 30px;
-
-      .p1 {
-        text-align: left;
-        width: 100%;
-        padding-left: 4px;
-      }
-
-      .p2 {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding-left: 4px;
-        width: 100%;
-        padding-left: 4px;
-
-        .isInsufficient {
-          color: var(--color-error);
-        }
-
-        .itemsCenter {
-          display: flex;
-          align-items: center;
-        }
-
-        .maxButton {
-          width: 28px;
-          height: 14px;
-          margin-left: 6px;
-          user-select: none;
-          cursor: pointer;
-        }
-      }
-
-      .switchBtn {
-        width: 40px;
-        height: 40px;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        font-size: 40px;
-        transform: translate(-50%, -50%);
-        cursor: pointer;
-        &:hover {
-          & > circle {
-            fill: #535b6d !important;
-          }
-        }
-      }
-    }
-  }
-
-  .Slippage {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    margin-bottom: 30px;
-  }
-
-  .alert {
-    margin-top: 30px;
-    margin-bottom: 30px;
-    border-radius: 4px;
-    padding: 3px 0;
-    background-color: transparent;
-    font-size: 14px;
-
-    .info {
-      padding-bottom: 4px;
-      padding-right: 2px;
-      margin-right: 6px;
-      align-self: flex-start;
-      transform: rotate(180deg);
-      transform-origin: center;
-      color: var(--color-orange);
-    }
-
-    .message {
-      font-size: 13px;
-      line-height: 16px;
-      color: var(--color-orange);
-    }
-    .info,
-    .message {
-      &.danger {
-        color: var(--color-red);
-      }
-    }
-  }
-}
-
-.tips {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  .logo {
-    width: 24px;
-    height: 24px;
-    border-radius: 4px;
-  }
-}
-
-.itemCenter {
-  display: flex;
-  align-items: center;
-}
-
-.justify-between {
-  display: flex;
-
-  justify-content: center;
-}
-
-.hidden {
-  display: none !important;
-}
-
 .approvalModal {
   .title {
     font-weight: 500;
@@ -174,18 +6,17 @@
     text-align: center;
     color: #ffffff;
     margin: 0 auto;
-    margin-top: 30px;
+    margin-top: 32px;
   }
   .desc {
-    max-width: 387px;
+    max-width: 420px;
     font-style: normal;
     font-weight: 400;
     font-size: 15px;
     line-height: 24px;
     text-align: center;
     margin: 0 auto;
-    margin-top: 14px;
-
+    margin-top: 24px;
     color: #ffffff;
   }
   :global {
@@ -201,8 +32,8 @@
       padding: 0;
     }
     .ant-modal-content {
-      width: 522px;
-      height: 262px;
+      width: 500px;
+      height: 284px;
       background: #525767;
       border-radius: 6px;
     }
@@ -217,9 +48,10 @@
     .ant-modal-confirm-btns {
       display: flex;
       justify-content: center;
-      margin-top: 46px;
+      margin-top: 48px;
+      margin-bottom: 32px;
       .ant-btn-primary {
-        width: 276px;
+        width: 298px;
         height: 48px;
         border-radius: 4px;
         font-weight: 500;

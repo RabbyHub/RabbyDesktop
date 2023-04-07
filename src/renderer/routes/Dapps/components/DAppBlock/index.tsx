@@ -8,15 +8,10 @@ import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
 import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import clsx from 'clsx';
 
-import { CHAINS_ENUM } from '@debank/common/dist/chain-data';
-import { CHAINS } from '@/renderer/utils/constant';
 import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
+import { CHAINS } from '@/renderer/utils/constant';
+import { CHAINS_ENUM } from '@debank/common/dist/chain-data';
 import { DappFavicon } from '../../../../components/DappFavicon';
-import {
-  RCIconDappsDelete,
-  RCIconDappsEdit,
-  RCIconPin,
-} from '../../../../../../assets/icons/internal-homepage';
 
 // todo: move to components
 const DappIcon = ({

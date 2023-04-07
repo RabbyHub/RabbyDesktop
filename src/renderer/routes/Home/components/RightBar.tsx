@@ -60,7 +60,7 @@ const RightBar = ({ updateNonce }: { updateNonce: number }) => {
         name: 'Swap',
         icon: <IconSwap width="35px" height="35px" />,
         onClick: () => {
-          navigateTo('/mainwin/home/swap?rbisource=home');
+          navigateTo('/mainwin/swap?rbisource=home');
         },
       },
       {

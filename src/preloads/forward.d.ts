@@ -63,6 +63,7 @@ type ZViewStates = {
     type?: 'success' | 'error' | 'warning' | 'info';
     duration?: number;
   };
+
   'ipfs-add-failed-modal': {
     // nothing
   };
