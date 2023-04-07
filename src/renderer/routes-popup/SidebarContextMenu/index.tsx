@@ -16,6 +16,7 @@ import { MenuClickEventHandler } from 'rc-menu/lib/interface';
 import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
 import { useMemo } from 'react';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
+import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import styles from './index.module.less';
 
 export const SidebarContextMenu = () => {
@@ -175,6 +176,7 @@ export const SidebarContextMenu = () => {
         if (dappInfo && connectedSiteMap[origin]) {
           removeConnectedSite(origin);
         }
+        forwardMessageTo('*', 'refreshConnectedSiteMap', {});
 
         showMainwinPopupview({
           type: 'global-toast-popup',
@@ -189,6 +191,8 @@ export const SidebarContextMenu = () => {
         break;
       case 'dapp-disconnect-all':
         removeAllConnectedSites();
+        forwardMessageTo('*', 'refreshConnectedSiteMap', {});
+
         showMainwinPopupview({
           type: 'global-toast-popup',
           state: {
