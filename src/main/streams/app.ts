@@ -37,6 +37,7 @@ import {
   getWebuiExtId,
   onMainWindowReady,
   getRabbyExtViews,
+  getAllMainUIWindows,
 } from '../utils/stream-helpers';
 import { switchToBrowserTab } from '../utils/browser';
 import { getAppUserDataPath } from '../utils/store';
@@ -48,6 +49,7 @@ import { setupAppTray } from './appTray';
 import { checkForceUpdate } from '../updater/force_update';
 import { getOrCreateDappBoundTab } from '../utils/tabbedBrowserWindow';
 import { MainTabbedBrowserWindow } from '../browser/browsers';
+import { notifyHidePopupWindowOnMain } from '../utils/mainTabbedWin';
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
@@ -121,6 +123,13 @@ app.on('web-contents-created', async (evtApp, webContents) => {
     const pageURL = params.pageURL || '';
     // it's shell
     if (isRabbyShellURL(pageURL) && IS_RUNTIME_PRODUCTION) return;
+
+    const { popupOnly } = await getAllMainUIWindows();
+    if (
+      BrowserWindow.fromWebContents(webContents) !== popupOnly['sidebar-dapp']
+    ) {
+      notifyHidePopupWindowOnMain('sidebar-dapp');
+    }
 
     const menu = await buildChromeContextMenu({
       params,
