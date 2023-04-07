@@ -223,3 +223,7 @@ export function stopSelectDevices() {
 export async function getAppRuntimeProxyConf() {
   return firstValueFrom(fromMainSubject('appRuntimeProxyConf'));
 }
+
+export async function getIpfsService() {
+  return firstValueFrom(fromMainSubject('ipfsServiceReady'));
+}

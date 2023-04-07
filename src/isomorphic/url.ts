@@ -1,5 +1,10 @@
 import { AxiosProxyConfig } from 'axios';
-import { RABBY_INTERNAL_PROTOCOL, RABBY_LOCAL_URLBASE } from './constants';
+import {
+  IPFS_LOCALHOST_DOMAIN,
+  LOCALIPFS_BRAND,
+  RABBY_INTERNAL_PROTOCOL,
+  RABBY_LOCAL_URLBASE,
+} from './constants';
 
 export function safeParseURL(url: string): URL | null {
   try {
@@ -121,7 +126,10 @@ export function isUrlFromDapp(url: string) {
   return (
     !url.startsWith(RABBY_INTERNAL_PROTOCOL) &&
     !url.startsWith('chrome-extension:') &&
-    url.startsWith('https:')
+    (url.startsWith('https:') ||
+      // ipfs support
+      (url.startsWith('http:') && url.includes(`.${IPFS_LOCALHOST_DOMAIN}`)) ||
+      (url.startsWith('http:') && url.includes(`${LOCALIPFS_BRAND}.`)))
   );
 }
 
@@ -213,7 +221,9 @@ export function getDomainFromHostname(hostname: string): IParseDomainInfo {
   const secondaryDomain = secondaryDomainParts.join('.');
 
   return {
+    subDomain: parts.slice(0, parts.length - 2).join('.'),
     hostWithoutTLD: secondaryDomainParts[0],
+    tld: secondaryDomainParts[1],
     secondaryDomain,
     secondaryOrigin: `https://${secondaryDomain}`,
     is2ndaryDomain: parts.length === 2 && secondaryDomain === hostname,
@@ -230,18 +240,73 @@ export function isInternalProtocol(url: string) {
   ].some((protocol) => url.startsWith(protocol));
 }
 
+export const IPFS_REGEXPS = {
+  IPFS_REGEX: /^(?:ipfs|rabby-ipfs):\/\/([a-zA-Z0-9]+)(\/.*)?$/i,
+  LOCALIPFS_BRAND_REGEX: /^http:\/\/local.ipfs\.([a-zA-Z0-9]+)(\/.*)?$/i,
+  LOCALIPFS_MAINDOMAIN_REGEX: /^http:\/\/([a-zA-Z0-9]+)\.local\.ipfs(\/.*)?$/i,
+};
+
+export function extractIpfsCid(ipfsDappPath: string) {
+  if (ipfsDappPath.startsWith('/ipfs/')) {
+    return ipfsDappPath.split('/')[2] || '';
+  }
+
+  if (
+    ipfsDappPath.startsWith('rabby-ipfs:') ||
+    ipfsDappPath.startsWith('ipfs:')
+  ) {
+    const [, ipfsCid = ''] = ipfsDappPath.match(IPFS_REGEXPS.IPFS_REGEX) || [];
+
+    return ipfsCid;
+  }
+
+  if (IPFS_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX.test(ipfsDappPath)) {
+    const [, ipfsCid = ''] =
+      ipfsDappPath.match(IPFS_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX) || [];
+
+    return ipfsCid;
+  }
+
+  if (IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX.test(ipfsDappPath)) {
+    const [, ipfsCid = ''] =
+      ipfsDappPath.match(IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX) || [];
+
+    return ipfsCid;
+  }
+
+  return '';
+}
+
+export function isIpfsHttpURL(dappURL: string) {
+  return (
+    IPFS_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX.test(dappURL) ||
+    IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX.test(dappURL)
+  );
+}
+
+export function isIpfsDappID(dappURL: string) {
+  return IPFS_REGEXPS.IPFS_REGEX.test(dappURL);
+}
+
+export function isURLForIpfsDapp(dappURL: string) {
+  return isIpfsHttpURL(dappURL) || isIpfsDappID(dappURL);
+}
+
 export function canoicalizeDappUrl(url: string): ICanonalizedUrlInfo {
   const urlInfo: Partial<URL> | null = safeParseURL(url);
 
   const hostname = urlInfo?.hostname || '';
-  const isDapp = urlInfo?.protocol === 'https:';
+  const isDapp =
+    (!!urlInfo?.protocol &&
+      ['https:', 'ipfs:', 'rabby-ipfs:'].includes(urlInfo?.protocol)) ||
+    isIpfsHttpURL(url);
 
-  // protcol://hostname[:port]
-  const origin =
-    urlInfo?.origin ||
-    `${urlInfo?.protocol}//${hostname}${
-      urlInfo?.port ? `:${urlInfo?.port}` : ''
-    }`;
+  const origin = ['ipfs:', 'rabby-ipfs:'].includes(urlInfo?.protocol || '')
+    ? `rabby-ipfs://${extractIpfsCid(url)}`
+    : urlInfo?.origin ||
+      `${urlInfo?.protocol}//${hostname}${
+        urlInfo?.port ? `:${urlInfo?.port}` : ''
+      }`;
 
   const domainInfo = getDomainFromHostname(hostname);
 
