@@ -166,6 +166,11 @@ export type StakingProductPositionResponse = {
   status: string;
 }[];
 
+export type TickerPriceResponse = {
+  symbol: string;
+  price: string;
+}[];
+
 // 资金账户
 export type FundingAsset = Asset[];
 

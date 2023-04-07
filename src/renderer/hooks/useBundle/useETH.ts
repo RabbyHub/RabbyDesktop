@@ -42,7 +42,9 @@ export const useETH = () => {
     setTokenList(realTimeList);
   }, [ethAccounts]);
 
-  const getProtocolList = React.useCallback(async () => {}, []);
+  const getProtocolList = React.useCallback(async () => {
+    // TODO
+  }, []);
 
   const getAssets = React.useCallback(async () => {
     getTokenList();

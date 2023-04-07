@@ -12,6 +12,7 @@ export const useBundleAccount = () => {
 
   const preCheck = React.useCallback(
     async (account: Partial<BundleAccount>) => {
+      console.log('check', account);
       if (account.type === 'bn') {
         if (!account.apiKey || !account.apiSecret) {
           return {
@@ -82,6 +83,11 @@ export const useBundleAccount = () => {
     },
     [preCheck]
   );
+
+  const addToBundle = React.useCallback(async (account: BundleAccount) => {
+    // todo check account
+    // update isBundle
+  }, []);
 
   const updateNickname = React.useCallback(
     (id: BundleAccount['id'], nickname: BundleAccount['nickname']) => {

@@ -17,6 +17,7 @@ import {
   UserAssetResponse,
   Asset,
   IsolatedMarginAsset,
+  TickerPriceResponse,
 } from './type';
 import { valueGreaterThan10, bigNumberSum } from '../../util';
 
@@ -192,6 +193,7 @@ export class Binance {
     const userAssets: MarginAccountResponse['userAssets'] = [];
 
     res.userAssets.forEach((item) => {
+      // 有时候返回的数据是空的
       if (checkValues.every((key) => item[key] === '0')) {
         return;
       }
@@ -252,6 +254,7 @@ export class Binance {
     ] as const;
 
     res.assets.forEach((item) => {
+      // 有时候返回的数据是空的
       if (
         checkValues.every(
           (key) => item.baseAsset[key] === '0' && item.quoteAsset[key] === '0'
@@ -459,12 +462,10 @@ export class Binance {
       return;
     }
 
-    const result = await this.invoke<
-      {
-        symbol: string;
-        price: string;
-      }[]
-    >('tickerPrice', [undefined, symbols]);
+    const result = await this.invoke<TickerPriceResponse>('tickerPrice', [
+      undefined,
+      symbols,
+    ]);
 
     tokenPrice.update(result);
   }
