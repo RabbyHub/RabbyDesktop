@@ -5,7 +5,11 @@ import {
   IS_RUNTIME_PRODUCTION,
   RABBY_SPALSH_URL,
 } from '../../isomorphic/constants';
-import { isRabbyShellURL, isUrlFromDapp } from '../../isomorphic/url';
+import {
+  isBuiltinView,
+  isRabbyShellURL,
+  isUrlFromDapp,
+} from '../../isomorphic/url';
 import buildChromeContextMenu from '../browser/context-menu';
 import { setupMenu } from '../browser/menu';
 import { storeMainWinPosition } from '../store/desktopApp';
@@ -37,6 +41,7 @@ import {
   getWebuiExtId,
   onMainWindowReady,
   getRabbyExtViews,
+  getAllMainUIWindows,
 } from '../utils/stream-helpers';
 import { switchToBrowserTab } from '../utils/browser';
 import { getAppUserDataPath } from '../utils/store';
@@ -48,6 +53,7 @@ import { setupAppTray } from './appTray';
 import { checkForceUpdate } from '../updater/force_update';
 import { getOrCreateDappBoundTab } from '../utils/tabbedBrowserWindow';
 import { MainTabbedBrowserWindow } from '../browser/browsers';
+import { notifyHidePopupWindowOnMain } from '../utils/mainTabbedWin';
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
@@ -120,7 +126,18 @@ app.on('web-contents-created', async (evtApp, webContents) => {
   webContents.on('context-menu', async (_, params) => {
     const pageURL = params.pageURL || '';
     // it's shell
-    if (isRabbyShellURL(pageURL) && IS_RUNTIME_PRODUCTION) return;
+    if (IS_RUNTIME_PRODUCTION && isRabbyShellURL(pageURL)) return;
+    if (IS_RUNTIME_PRODUCTION && isBuiltinView(pageURL, '*')) return;
+
+    const { popupOnly } = await getAllMainUIWindows();
+
+    if (
+      BrowserWindow.fromWebContents(webContents) === popupOnly['sidebar-dapp']
+    ) {
+      if (IS_RUNTIME_PRODUCTION) return;
+    } else {
+      notifyHidePopupWindowOnMain('sidebar-dapp');
+    }
 
     const menu = await buildChromeContextMenu({
       params,

@@ -1,0 +1,186 @@
+@import '@/renderer/css/mixins.less';
+
+@previewBoxRadius: 8px;
+.content {
+  padding: 30px;
+  min-height: 718px;
+}
+.title {
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 24px;
+  text-align: center;
+  color: #ffffff;
+  margin-bottom: 16px;
+}
+.form {
+  height: 92px;
+}
+
+.replaceLink {
+  text-decoration: underline;
+  cursor: pointer;
+  text-underline-offset: 3px;
+}
+
+.input.input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  height: 56px;
+  padding: 16px;
+  &:focus,
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+  box-shadow: none !important;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+
+  color: #ffffff;
+
+  :global {
+    .ant-input {
+      border-radius: 0;
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 18px;
+    }
+    .ant-input-clear-icon {
+      color: #fff;
+    }
+  }
+
+  &Suffix {
+    font-size: 16px;
+    img {
+      cursor: pointer;
+    }
+  }
+
+  :global {
+    .ant-form-item {
+      margin-bottom: 0;
+    }
+    .ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled):hover {
+      border-color: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper,
+    .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper:hover {
+      border-color: #ff7f7f;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .ant-form-item-explain-error {
+      color: #ff7f7f;
+    }
+
+    .ant-form-item-explain {
+      margin-top: 12px;
+      margin-bottom: 0;
+      transition: none;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 14px;
+    }
+    .ant-form-item-explain-success {
+      color: rgba(255, 255, 255, 0.6);
+    }
+  }
+}
+
+.tab {
+  &Panel {
+    padding: 18px;
+    border: 1px solid #616676;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    min-height: 573px;
+  }
+  &List {
+    display: flex;
+    align-items: flex-end;
+    &Extra {
+      flex: 1;
+      display: flex;
+      border: 1px solid #616676;
+      border-top-right-radius: 6px;
+      background: rgba(0, 0, 0, 0.08);
+
+      .tabItem {
+        width: 33.33%;
+        height: 39px;
+        text-align: center;
+        position: relative;
+        padding-top: 12px;
+
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 17px;
+        color: rgba(255, 255, 255, 0.3);
+
+        &:not(:last-child)::after {
+          content: '';
+          position: absolute;
+          right: 0;
+          top: 6px;
+          bottom: 6px;
+          width: 1px;
+          background: rgba(255, 255, 255, 0.06);
+        }
+
+        .tagSoon {
+          font-weight: 400;
+          font-size: 12px;
+          line-height: 14px;
+          color: rgba(255, 255, 255, 0.3);
+          border-radius: 6px 6px 6px 1px;
+          background-color: rgba(255, 255, 255, 0.1);
+          padding: 0 4px;
+          margin-left: 5px;
+        }
+      }
+    }
+  }
+  &ItemActive {
+    min-height: 46px;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 19px;
+    color: #ffffff;
+    padding: 19px 18px 4px 18px;
+    width: 289px;
+    border: 1px solid #616676;
+    border-bottom: 0;
+    border-right: 0;
+    border-radius: 6px 0 0 0;
+    position: relative;
+    .tabBorder {
+      position: absolute;
+      right: -14px;
+      top: -1px;
+    }
+  }
+}
+
+.toast {
+  color: red;
+  :global {
+    .ant-message-notice-content {
+      background-color: #474c5a;
+      padding: 16px;
+      backdrop-filter: blur(20px);
+      min-width: 156px;
+      text-align: left;
+
+      .ant-message-custom-content {
+        display: inline-flex;
+        align-items: center;
+        font-size: 15px;
+        line-height: 16px;
+      }
+    }
+  }
+}

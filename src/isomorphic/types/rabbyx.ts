@@ -212,6 +212,7 @@ export type RabbyXMethod = {
   'walletController.getConnectedSites': () => IConnectedSiteInfo[];
   'walletController.setRecentConnectedSites': (sites: ConnectedSite[]) => void;
   'walletController.getRecentConnectedSites': () => ConnectedSite[];
+  'walletController.removeAllRecentConnectedSites': () => void;
 
   'walletController.setSite': (siteInfo: ConnectedSite) => void;
   'walletController.getSite': (origin: string) => ConnectedSite;
@@ -321,7 +322,7 @@ export type RabbyXMethod = {
       shouldTwoStepApprove: boolean;
     },
     $ctx?: unknown
-  ) => Promise<void>;
+  ) => Promise<void | string>;
   'walletController.requestKeyring': (
     type: string,
     methodName: string,
@@ -492,6 +493,10 @@ export type RabbyXMethod = {
   'openapi.getComplexProtocolList': OpenApiService['getComplexProtocolList'];
   'openapi.getChainList': OpenApiService['getChainList'];
   'openapi.getCachedTokenList': OpenApiService['getCachedTokenList'];
+  'openapi.checkSlippage': OpenApiService['checkSlippage'];
+  'openapi.getCEXSwapQuote': OpenApiService['getCEXSwapQuote'];
+  'openapi.getSwapTradeList': OpenApiService['getSwapTradeList'];
+  'openapi.postSwap': OpenApiService['postSwap'];
 };
 
 export type RabbyXMethods = {

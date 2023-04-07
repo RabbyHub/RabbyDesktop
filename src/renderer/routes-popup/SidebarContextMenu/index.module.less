@@ -1,11 +1,24 @@
+.winWrapper {
+  overflow: hidden;
+  height: 100vh;
+}
+
 .dappDropdownMenu {
   padding-top: 7px;
   padding-bottom: 7px;
   background: #525767;
+  // background-color: #353945;
   border: 1px solid rgba(255, 255, 255, 0.1);
   // box-shadow: 0px 24px 32px rgba(15, 27, 52, 0.14);
   border-radius: 8px;
   font-family: var(--default-font);
+
+  :global {
+    .ant-menu-item-divider {
+      margin: 10px 16px;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+  }
 }
 .dapp-dropdown-item {
   margin: 0 !important;
@@ -17,7 +30,7 @@
   &-danger {
     :global {
       .ant-menu-title-content > .text {
-        color: #ec5151 !important;
+        color: #ff6565 !important;
       }
     }
   }

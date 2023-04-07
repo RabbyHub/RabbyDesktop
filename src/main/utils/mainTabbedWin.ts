@@ -24,3 +24,10 @@ export function notifyHideFindInPage() {
     nextShow: false,
   });
 }
+
+export function notifyHidePopupWindowOnMain(type: IPopupWinPageInfo['type']) {
+  emitIpcMainEvent('__internal_main:popupwin-on-mainwin:toggle-show', {
+    type,
+    nextShow: false,
+  });
+}

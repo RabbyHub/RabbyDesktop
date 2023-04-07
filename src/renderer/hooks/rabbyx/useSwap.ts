@@ -93,7 +93,7 @@ export const useGotoSwapByToken = () => {
         });
       }
       return navigate(
-        `/mainwin/home/swap?${obj2query({
+        `/mainwin/swap?${obj2query({
           chain,
           payTokenId,
           rbisource: 'homeAsset',

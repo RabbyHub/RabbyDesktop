@@ -155,17 +155,13 @@ const router = createRouter([
         path: 'home/send-token',
         element: (
           <>
-            <FixedBackHeader>Send</FixedBackHeader>
+            <FixedBackHeader isShowBack={false}>Send</FixedBackHeader>
             <SendToken />
           </>
         ),
       },
       {
-        path: 'home/swap',
-        element: <Swap />,
-      },
-      {
-        path: 'dapps/:origin',
+        path: 'dapps/:dappId',
         element: (
           <DappViewWrapper>
             <TopNavBar />
@@ -185,6 +181,10 @@ const router = createRouter([
             title: 'My Dapps',
           } as MainWindowRouteData;
         },
+      },
+      {
+        path: 'swap',
+        element: <Swap />,
       },
 
       {

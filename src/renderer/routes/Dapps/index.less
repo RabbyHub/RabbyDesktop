@@ -41,18 +41,51 @@
     .dapp-favicon {
       width: 32px;
       height: 32px;
-      margin-right: 12px;
       border-radius: 5px;
     }
+    .dapp-icon-with-chain {
+      margin-right: 12px;
+      position: relative;
+      .chain-logo {
+        width: 12px;
+        height: 12px;
+        position: absolute;
+        right: -6px;
+        bottom: -2px;
+      }
+    }
 
-    .dapp-indicator {
+    .dapp-block-badge {
       position: absolute;
-      top: 8px;
-      left: 8px;
-      width: 6px;
-      height: 6px;
+      top: 0;
+      left: 0;
+    }
+    .tag {
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 15px;
+      padding: 0 5px;
+      border-radius: 6px 0 6px 0;
+      display: flex;
+      gap: 4px;
+
+      color: #ffffff;
+
+      .dapp-indicator {
+        background: #5b5e68;
+        margin-left: 0;
+      }
+    }
+    .ipfs-tag {
+      background: #00d0d0;
+    }
+    .dapp-indicator {
+      margin-left: 5px;
+      margin-top: 5px;
+      width: 5px;
+      height: 5px;
       border-radius: 50%;
-      background-color: var(--color-comment2);
+      background-color: #5b5e68;
 
       &.loading {
         @iconSize: 16px;
@@ -148,7 +181,7 @@
     box-shadow: 0px 24px 32px rgba(15, 27, 52, 0.14);
     border-radius: 8px;
     font-family: var(--default-font);
-    width: 140px;
+    width: 210px;
   }
   .ant-dropdown-menu-item-icon {
     width: 20px;
@@ -166,7 +199,7 @@
     align-items: center;
     &-danger {
       .text {
-        color: #ec5151 !important;
+        color: #ff6565 !important;
       }
     }
     &:hover {

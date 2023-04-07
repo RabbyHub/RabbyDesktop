@@ -1,5 +1,7 @@
 /// <reference path="../isomorphic/type-helpers.d.ts" />
 
+import { ReactNode } from 'react';
+
 type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
 type IDisplayedAccountWithBalance =
   import('@/renderer/hooks/rabbyx/useAccountToDisplay').IDisplayedAccountWithBalance;
@@ -53,6 +55,24 @@ type ZViewStates = {
   };
 
   'safe-queue-modal': {
+    // nothing
+  };
+
+  'toast-zpopup-message': {
+    message?: ReactNode;
+    type?: 'success' | 'error' | 'warning' | 'info';
+    duration?: number;
+  };
+
+  'ipfs-add-failed-modal': {
+    // nothing
+  };
+
+  'ipfs-no-local-modal': {
+    // nothing
+  };
+
+  'ipfs-verify-failed-modal': {
     // nothing
   };
 };
@@ -115,6 +135,10 @@ type ChannelForwardMessageType =
   | {
       targetView: '*';
       type: 'refreshCurrentAccount';
+    }
+  | {
+      targetView: '*';
+      type: 'refreshConnectedSiteMap';
     }
   | {
       targetView: 'address-management';

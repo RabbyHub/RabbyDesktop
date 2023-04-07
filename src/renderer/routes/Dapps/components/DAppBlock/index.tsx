@@ -1,17 +1,68 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 import { Dropdown, Menu } from 'antd';
-import React, { useRef } from 'react';
+import React, { ReactNode, useMemo, useRef } from 'react';
 
-import clsx from 'clsx';
+import { formatDappURLToShow, makeDappHttpOrigin } from '@/isomorphic/dapp';
 import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
-import {
-  RCIconDappsDelete,
-  RCIconDappsEdit,
-  RCIconPin,
-} from '../../../../../../assets/icons/internal-homepage';
+import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
+import clsx from 'clsx';
 
+import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
+import { CHAINS } from '@/renderer/utils/constant';
+import { CHAINS_ENUM } from '@debank/common/dist/chain-data';
 import { DappFavicon } from '../../../../components/DappFavicon';
+
+// todo: move to components
+const DappIcon = ({
+  origin,
+  src,
+  chain,
+}: {
+  origin: string;
+  src?: string;
+  chain?: CHAINS_ENUM;
+}) => {
+  const chainLogo = useMemo(() => {
+    if (chain) {
+      return CHAINS[chain]?.logo;
+    }
+    return null;
+  }, [chain]);
+
+  return (
+    <div className="dapp-icon-with-chain">
+      <DappFavicon origin={origin} src={src} className="dapp-favicon" />
+      {chainLogo && <img src={chainLogo} alt="" className="chain-logo" />}
+    </div>
+  );
+};
+
+const Indicator = ({ dapp }: { dapp: IDappWithTabInfo }) => {
+  if (!dapp.tab) {
+    return null;
+  }
+  return <div className="dapp-indicator" />;
+  // return dapp?.tab ? (
+  //   dapp.tab.status === 'loading' ? (
+  //     <img
+  //       className="dapp-indicator loading"
+  //       src="rabby-internal://assets/icons/dapps/dapp-loading.svg"
+  //     />
+  //   ) : (
+  //     <div className="dapp-indicator" />
+  //   )
+  // ) : null;
+};
+
+const IpfsTag = ({ prefix }: { prefix?: ReactNode }) => {
+  return (
+    <div className="tag ipfs-tag">
+      {prefix}
+      IPFS
+    </div>
+  );
+};
 
 type IOnOpDapp = (
   op: 'rename' | 'delete' | 'pin' | 'unpin',
@@ -30,6 +81,9 @@ export const DAppBlock = ({
   onOpen?: (dappOrigin: string) => void;
 }>) => {
   const ref = useRef<HTMLDivElement>(null);
+  const { connectedSiteMap } = useConnectedSite();
+  const origin = makeDappHttpOrigin(dapp?.origin || '');
+  const chain = connectedSiteMap[origin || '']?.chain;
 
   if (onAdd) {
     return (
@@ -86,7 +140,7 @@ export const DAppBlock = ({
                   icon: (
                     <img
                       className="dapp-dropdown-item-icon"
-                      src="rabby-internal://assets/icons/sidebar-context-menu/icon-pinned.svg"
+                      src="rabby-internal://assets/icons/sidebar-context-menu/icon-unpin.svg"
                     />
                   ),
                 }
@@ -127,17 +181,21 @@ export const DAppBlock = ({
         />
       }
     >
-      <div className="dapp-block" ref={ref}>
-        {dapp.tab ? (
-          dapp.tab.status === 'loading' ? (
-            <img
-              className="dapp-indicator loading"
-              src="rabby-internal://assets/icons/dapps/dapp-loading.svg"
-            />
+      <div
+        className="dapp-block"
+        ref={ref}
+        onContextMenu={() => {
+          hideMainwinPopup('sidebar-dapp');
+        }}
+      >
+        <div className={clsx('dapp-block-badge')}>
+          {dapp.origin?.startsWith('rabby-ipfs://') ||
+          (dapp.type as any) === 'ipfs' ? (
+            <IpfsTag prefix={<Indicator dapp={dapp} />} />
           ) : (
-            <div className="dapp-indicator" />
-          )
-        ) : null}
+            <Indicator dapp={dapp} />
+          )}
+        </div>
         <div
           className="anchor"
           onClick={(e) => {
@@ -149,15 +207,15 @@ export const DAppBlock = ({
             }
           }}
         >
-          <DappFavicon
-            className="dapp-favicon"
+          <DappIcon
             origin={dapp.origin}
             src={dapp.faviconBase64 ? dapp.faviconBase64 : dapp.faviconUrl}
+            // chain={chain}
           />
           <div className="infos pr-[16px]">
             <h4 className="dapp-alias">{dapp.alias}</h4>
             <div className="dapp-url">
-              {dapp.origin?.replace(/^\w+:\/\//, '')}
+              {formatDappURLToShow(dapp.origin?.replace(/^[\w|-]+:\/\//, ''))}
             </div>
           </div>
         </div>

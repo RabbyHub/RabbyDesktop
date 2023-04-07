@@ -14,16 +14,23 @@ import {
 } from '@/renderer/hooks-shell/useMainWindow';
 import { useCheckNewRelease } from '@/renderer/hooks/useAppUpdator';
 import { useSettings } from '@/renderer/hooks/useSettings';
-import { makeSureDappOpened } from '@/renderer/ipcRequest/mainwin';
+import {
+  closeTabFromInternalPage,
+  makeSureDappOpened,
+} from '@/renderer/ipcRequest/mainwin';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { useTransactionPendingCount } from '@/renderer/hooks/rabbyx/useTransaction';
 import { Badge } from 'antd';
 import { usePrevious } from 'react-use';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
+import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
+import { CHAINS, CHAINS_ENUM } from '@debank/common';
+import { makeDappHttpOrigin } from '@/isomorphic/dapp';
 import { DappFavicon } from '../DappFavicon';
 import Hide from './Hide';
 import styles from './Sidebar.module.less';
+import { toastMessage } from '../TransparentToast';
 
 const DividerSizes = {
   height: 1,
@@ -56,19 +63,86 @@ const StaticEntries = [
     title: 'Home',
     logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/home.svg',
   },
-  // {
-  //   path: '/mainwin/swap',
-  //   title: 'Swap',
-  //   logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/swap.svg',
-  // },
+  {
+    path: '/mainwin/home/send-token',
+    title: 'Send',
+    logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/send.svg',
+  },
+  {
+    path: '/mainwin/swap',
+    title: 'Swap',
+    logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/swap.svg',
+  },
+  {
+    type: 'divider' as const,
+  },
   {
     path: '/mainwin/my-dapps',
-    title: 'My Dapp',
+    title: 'My Dapps',
     logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/dapps.svg',
   },
 ] as const;
 
-const DappRoutePatter = '/mainwin/dapps/:origin';
+const DappRoutePattern = '/mainwin/dapps/:dappId';
+
+const DappIndicator = ({ tab }: { tab?: chrome.tabs.Tab }) => {
+  const handleClose: React.MouseEventHandler = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (tab?.id) {
+      closeTabFromInternalPage(tab.id);
+      toastMessage({
+        type: 'success',
+        content: 'Closed',
+      });
+    }
+  };
+  if (!tab) {
+    return null;
+  }
+  return (
+    <div className={styles.dappIndicator}>
+      {tab?.status === 'loading' ? (
+        <img
+          className={styles.loadingIcon}
+          src="rabby-internal://assets/icons/mainwin-sidebar/sidebar-dapp-loading.svg"
+        />
+      ) : (
+        <div className={classNames(styles.indicator)} />
+      )}
+      <img
+        src="rabby-internal://assets/icons/mainwin-sidebar/icon-close.svg"
+        alt=""
+        onClick={handleClose}
+        className={styles.closeIcon}
+      />
+    </div>
+  );
+};
+
+const DappIcon = ({
+  origin,
+  src,
+  chain,
+}: {
+  origin: string;
+  src?: string;
+  chain?: CHAINS_ENUM;
+}) => {
+  const chainLogo = useMemo(() => {
+    if (chain) {
+      return CHAINS[chain]?.logo;
+    }
+    return null;
+  }, [chain]);
+
+  return (
+    <div className={styles.dappIconWithChain}>
+      <DappFavicon origin={origin} src={src} />
+      {chainLogo && <img src={chainLogo} alt="" className={styles.chainLogo} />}
+    </div>
+  );
+};
 
 const TabList = ({
   className,
@@ -86,7 +160,8 @@ const TabList = ({
   isFold?: boolean;
 }) => {
   const navigateToDapp = useNavigateToDappRoute();
-  const location = useLocation();
+  const { connectedSiteMap } = useConnectedSite();
+  const rLoc = useLocation();
   if (!dapps?.length) {
     return null;
   }
@@ -98,12 +173,18 @@ const TabList = ({
         const faviconUrl =
           dapp?.faviconBase64 || dapp?.faviconUrl || dapp.tab?.favIconUrl;
 
+        const origin = makeDappHttpOrigin(dapp.origin);
+        const chain = connectedSiteMap[origin]?.chain;
+
+        const matchedRoute = matchPath(DappRoutePattern, rLoc.pathname);
+        const matchedDappID = matchedRoute?.params.dappId || '';
+
         return (
           <li
             key={`dapp-${dapp.origin}`}
             className={classNames(
               styles.routeItem,
-              matchPath(DappRoutePatter, location.pathname) &&
+              matchedDappID &&
                 activeTabId &&
                 activeTabId === tab?.id &&
                 styles.active
@@ -134,18 +215,11 @@ const TabList = ({
               );
             }}
           >
+            <DappIndicator tab={tab} />
             <div className={styles.routeItemInner}>
-              {!!tab &&
-                (tab?.status === 'loading' ? (
-                  <img
-                    className={styles.loadingIcon}
-                    src="rabby-internal://assets/icons/mainwin-sidebar/sidebar-dapp-loading.svg"
-                  />
-                ) : (
-                  <div className={classNames(styles.indicator)} />
-                ))}
               <div className={styles.dappIcon}>
-                <DappFavicon origin={dapp.origin} src={faviconUrl} />
+                {/* <DappIcon origin={dapp.origin} src={faviconUrl} chain={chain} /> */}
+                <DappIcon origin={dapp.origin} src={faviconUrl} />
               </div>
               <Hide visible={!isFold} className={styles.routeTitle}>
                 {dapp.alias || dapp.origin}
@@ -167,22 +241,24 @@ export default function MainWindowSidebar() {
 
   const { matchedSE, matchedDapp } = useMemo(() => {
     return {
-      matchedSE: StaticEntries.find((sE) =>
-        matchPath(
-          {
-            path: sE.path,
-            end: false,
-          },
-          location.pathname
-        )
+      matchedSE: StaticEntries.find(
+        (sE) =>
+          !('type' in sE) &&
+          matchPath(
+            {
+              path: sE.path,
+              end: false,
+            },
+            location.pathname
+          )
       ),
-      matchedDapp: matchPath(DappRoutePatter, location.pathname),
+      matchedDapp: matchPath(DappRoutePattern, location.pathname),
     };
   }, [location.pathname]);
   const prevMatchedDapp = usePrevious(matchedDapp);
 
   useEffect(() => {
-    if (prevMatchedDapp?.params.origin !== matchedDapp?.params.origin) {
+    if (prevMatchedDapp?.params.dappId !== matchedDapp?.params.dappId) {
       walletController.rejectAllApprovals();
     }
   }, [prevMatchedDapp, matchedDapp]);
@@ -200,7 +276,7 @@ export default function MainWindowSidebar() {
 
   useEffect(() => {
     if (matchedDapp) {
-      makeSureDappOpened(matchedDapp.params.origin!);
+      makeSureDappOpened(matchedDapp.params.dappId!);
     }
   }, [matchedDapp]);
 
@@ -235,6 +311,11 @@ export default function MainWindowSidebar() {
             <div className={styles.dappsRouteList}>
               <ul className={styles.routeList}>
                 {StaticEntries.map((sE) => {
+                  if ('type' in sE) {
+                    return (
+                      <li className={styles.divider} style={DividerSizes} />
+                    );
+                  }
                   const isHome = sE.path === '/mainwin/home';
 
                   return (
@@ -245,7 +326,7 @@ export default function MainWindowSidebar() {
                         matchPath(
                           {
                             path: sE.path,
-                            end: false,
+                            // end: false,
                           },
                           location.pathname
                         ) && styles.active
@@ -295,31 +376,22 @@ export default function MainWindowSidebar() {
                 })}
               </ul>
 
-              <TabList
-                className={styles.pinnedList}
-                style={{
-                  // maxHeight: `calc(100% - ${StaticEntries.length * RouteItemH}px)`,
-                  // height: `${pinnedDapps.length * 84}px`,
-                  flexShrink: pinnedDapps.length < 5 ? 0 : 1,
-                }}
-                dappActions={dappActions}
-                dapps={pinnedDapps}
-                activeTabId={activeTab?.id}
-                isFold={secondAnim}
-              />
-              {unpinnedOpenedDapps?.length ? (
-                <div className={styles.divider} style={DividerSizes} />
-              ) : null}
-              <TabList
-                className={styles.unpinnedList}
-                dappActions={dappActions}
-                dapps={unpinnedOpenedDapps}
-                activeTabId={activeTab?.id}
-                isFold={secondAnim}
-                style={{
-                  minHeight: 52 * Math.min(unpinnedOpenedDapps.length, 3),
-                }}
-              />
+              <div className={styles.dappList}>
+                <TabList
+                  className={styles.pinnedList}
+                  dappActions={dappActions}
+                  dapps={pinnedDapps}
+                  activeTabId={activeTab?.id}
+                  isFold={secondAnim}
+                />
+                <TabList
+                  className={styles.unpinnedList}
+                  dappActions={dappActions}
+                  dapps={unpinnedOpenedDapps}
+                  activeTabId={activeTab?.id}
+                  isFold={secondAnim}
+                />
+              </div>
             </div>
             <div className={styles.navFooter}>
               <div

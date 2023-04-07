@@ -1,7 +1,21 @@
 
-v0.12.0 / 2023-04-04
+v0.13.0 / 2023-04-08
 ====================
 
+  * chore: little fix.
+  * fix: modal
+  * fix: swap route (#346)
+  * fix: kw search (#345)
+  * fix: hide sidebar-dapp context-menu scroller. (#344)
+  * feat: new sidebar (#342)
+  * feat: use rabbyx 0.78.x (#343)
+  * feat: ipfs (#322)
+  * feat: swap base (#339)
+
+v0.12.0-prod / 2023-04-04
+=========================
+
+  * Release v0.12.0-prod
   * Merge remote-tracking branch 'origin/dev' into publish/prod
   * feat: slice git commit hash on prod.
   * feat: show revision info in settings page on non-prod channel.
@@ -17,6 +31,12 @@ v0.12.0 / 2023-04-04
   * fix: increase concurrency (#332)
   * Merge remote-tracking branch 'origin/dev' into publish/prod
   * ci: auto determine  which channel to be released when tagged ref triggered.
+  * Revert "feat: new swap (#325)" (#326)
+  * feat: new swap (#325)
+
+v0.11.0 / 2023-03-31
+====================
+
   * Release v0.11.0
   * feat: revert support for coexist of main-domain dapp and its sub-domain dapp. (#328)
   * chore: upgrade rabbyx core to 0.76.0
@@ -32,13 +52,6 @@ v0.11.1-reg / 2023-04-01
   * feat: integrate swap to reg version. (#329)
   * Revert "feat: new swap (#325)" (#326)
   * feat: new swap (#325)
-
-v0.11.0 / 2023-03-31
-====================
-
-  * Release v0.11.0
-  * feat: revert support for coexist of main-domain dapp and its sub-domain dapp. (#328)
-  * chore: upgrade rabbyx core to 0.76.0
   * feat: support polygon zkevm
   * fix: wrap special logic in closure to avoid conflict.
   * feat: update dapp's faviconURL on open its tab. (#324)
