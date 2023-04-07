@@ -32,6 +32,7 @@ import {
   getSpender,
   getToken,
   isSwapWrapToken,
+  tokenAmountBn,
   validSlippage,
 } from './utils';
 import { QuoteItemProps, QuoteProvider, Quotes } from './component/Quotes';
@@ -295,8 +296,11 @@ export const SwapToken = () => {
   }
 
   const Insufficient = useMemo(
-    () => Number(debouncePayAmount) > Number(payToken?.amount || 0),
-    [payToken?.amount, debouncePayAmount]
+    () =>
+      payToken
+        ? tokenAmountBn(payToken).lt(debouncePayAmount)
+        : new BigNumber(0).lt(debouncePayAmount),
+    [payToken, debouncePayAmount]
   );
 
   const { currentAccount } = useCurrentAccount();
@@ -338,7 +342,8 @@ export const SwapToken = () => {
     fetchIdRef.current += 1;
     if (
       userAddress &&
-      payToken &&
+      payToken?.id &&
+      receiveToken?.id &&
       receiveToken &&
       chain &&
       debouncePayAmount &&
@@ -360,8 +365,8 @@ export const SwapToken = () => {
     setQuote,
     refreshId,
     userAddress,
-    payToken,
-    receiveToken,
+    payToken?.id,
+    receiveToken?.id,
     chain,
     debouncePayAmount,
     feeAfterDiscount,
@@ -457,9 +462,9 @@ export const SwapToken = () => {
 
   const handleBalance = useCallback(() => {
     if (!payTokenIsNativeToken) {
-      setPayAmount(`${payToken?.amount || ''}`);
+      setPayAmount(tokenAmountBn(payToken).toString(10));
     }
-  }, [payToken?.amount, payTokenIsNativeToken]);
+  }, [payToken, payTokenIsNativeToken]);
 
   const exchangeToken = useCallback(() => {
     setPayToken(receiveToken);

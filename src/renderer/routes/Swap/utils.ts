@@ -18,6 +18,11 @@ import { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
 import BigNumber from 'bignumber.js';
 import { SWAP_FEE_ADDRESS, DEX, ETH_USDT_CONTRACT, CEX } from './constant';
 
+export const tokenAmountBn = (token: TokenItem) =>
+  new BigNumber(token?.raw_amount_hex_str || 0, 16).div(
+    10 ** (token?.decimals || 1)
+  );
+
 export function isSwapWrapToken(
   payTokenId: string,
   receiveId: string,
