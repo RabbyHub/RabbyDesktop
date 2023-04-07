@@ -16,7 +16,9 @@ import {
   hideMainwinPopupview,
   showMainwinPopupview,
 } from '@/renderer/ipcRequest/mainwin-popupview';
-import TransparentToast from '@/renderer/components/TransparentToast';
+import TransparentToast, {
+  ToastZPopupMessage,
+} from '@/renderer/components/TransparentToast';
 import { AddAddressModal } from '@/renderer/components/AddAddressModal/AddAddressModal';
 import { AddressManagementModal } from '@/renderer/components/AddressManagementModal/AddressManagementModal';
 import { AddressDetailModal } from '@/renderer/components/AddressDetailModal/AddressDetailModal';
@@ -87,6 +89,7 @@ function App() {
       <RenameDappModal />
       <DeleteDappModal />
       <QueueModal />
+      <ToastZPopupMessage />
       <IPFSAddFailedModal />
       <IPFSNoLodalModal />
       <IPFSVerifyFailedModal />

@@ -325,9 +325,18 @@ type PopupViewOnMainwinInfo =
     }
   | {
       type: 'global-toast-popup';
-      state?: {
-        toastType?: 'foo';
-      };
+      state?:
+        | {
+            toastType?: 'foo';
+          }
+        | {
+            toastType: 'toast-message';
+            data: {
+              type: 'success' | 'error' | 'warning';
+              content?: string;
+              duration?: number;
+            };
+          };
     }
   | {
       type: 'in-dapp-find';

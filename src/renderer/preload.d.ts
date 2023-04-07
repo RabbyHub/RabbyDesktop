@@ -150,6 +150,10 @@ type ChannelMessagePayload = {
     send: [tabId: number];
     response: [tabId: number];
   };
+  '__internal_forward:main-window:close-all-tab': {
+    send: [];
+    response: [];
+  };
   '__internal_forward:main-window:create-dapp-tab': {
     send: [origin: IDapp['origin']];
     response: [origin: IDapp['origin']];

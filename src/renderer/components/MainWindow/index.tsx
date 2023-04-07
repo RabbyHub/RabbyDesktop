@@ -155,7 +155,7 @@ const router = createRouter([
         path: 'home/send-token',
         element: (
           <>
-            <FixedBackHeader>Send</FixedBackHeader>
+            <FixedBackHeader isShowBack={false}>Send</FixedBackHeader>
             <SendToken />
           </>
         ),
@@ -164,6 +164,10 @@ const router = createRouter([
       //   path: 'home/swap',
       //   element: <Swap />,
       // },
+      {
+        path: 'home/swap',
+        element: <Swap />,
+      },
       {
         path: 'dapps/:dappId',
         element: (

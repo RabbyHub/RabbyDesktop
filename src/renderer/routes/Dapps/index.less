@@ -41,8 +41,18 @@
     .dapp-favicon {
       width: 32px;
       height: 32px;
-      margin-right: 12px;
       border-radius: 5px;
+    }
+    .dapp-icon-with-chain {
+      margin-right: 12px;
+      position: relative;
+      .chain-logo {
+        width: 12px;
+        height: 12px;
+        position: absolute;
+        right: -6px;
+        bottom: -2px;
+      }
     }
 
     .dapp-block-badge {
@@ -171,7 +181,7 @@
     box-shadow: 0px 24px 32px rgba(15, 27, 52, 0.14);
     border-radius: 8px;
     font-family: var(--default-font);
-    width: 140px;
+    width: 210px;
   }
   .ant-dropdown-menu-item-icon {
     width: 20px;
@@ -189,7 +199,7 @@
     align-items: center;
     &-danger {
       .text {
-        color: #ec5151 !important;
+        color: #ff6565 !important;
       }
     }
     &:hover {

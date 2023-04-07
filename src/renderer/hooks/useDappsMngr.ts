@@ -197,7 +197,9 @@ export function useMatchDapp(origin?: string) {
       return;
     }
 
-    const findExact = dapps.find((item) => item.origin === origin);
+    const findExact = dapps.find(
+      (item) => item.origin.toLowerCase() === origin.toLowerCase()
+    );
     if (findExact) {
       setDappInfo(findExact);
     } else {

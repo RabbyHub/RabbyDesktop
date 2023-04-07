@@ -216,10 +216,14 @@ const BindDapp = ({
   //   if (isDomainLikeKw && searchResult.length <= 0) return true;
   //   return false;
   // }, [isDomainLikeKw, searchResult]);
+  // const shouldAdd = useMemo(() => {
+  //   if (searchResult.length <= 0) return true;
+  //   return false;
+  // }, [searchResult]);
+
   const shouldAdd = useMemo(() => {
-    if (searchResult.length <= 0) return true;
-    return false;
-  }, [searchResult]);
+    return !!kw?.trim().length;
+  }, [kw]);
 
   const handleBind = async (origin: string) => {
     await bindingDappsToProtocol(protocol.id, {

@@ -21,6 +21,7 @@ const StyledDiv = styled.div`
 
 export const FixedBackHeader = ({
   children,
+  isShowBack = true,
   ...other
 }: ComponentPropsWithoutRef<typeof StyledDiv>) => {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ export const FixedBackHeader = ({
 
   return (
     <StyledDiv {...other}>
-      <IconSwapBack onClick={goBack2} className="back" />
+      {isShowBack && <IconSwapBack onClick={goBack2} className="back" />}
       <div>{children}</div>
     </StyledDiv>
   );

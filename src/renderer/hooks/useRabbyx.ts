@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { CHAINS, CHAINS_LIST } from '@debank/common';
 import { atom, useAtom } from 'jotai';
 import { walletController } from '../ipcRequest/rabbyx';
+import { useMessageForwarded } from './useViewsMessage';
 
 const DEFAULT_ETH_CHAIN = CHAINS_LIST.find((chain) => chain.enum === 'ETH')!;
 
@@ -26,22 +27,37 @@ const connectedSiteMapAtom = atom(
 export function useConnectedSite(currentOrigin?: string) {
   const [connectedSiteMap, setConnectedSiteMap] = useAtom(connectedSiteMapAtom);
 
-  const fetchConnectedSite = useCallback(async () => {
-    const sites = await walletController.getConnectedSites();
+  const fetchConnectedSite = useCallback(
+    async (cleanup = false) => {
+      const sites = await walletController.getConnectedSites();
 
-    setConnectedSiteMap((prev) => {
-      return sites.reduce(
-        (acc, site) => {
-          acc[site.origin] = {
-            ...prev[site.origin],
-            ...transformConnectInfo(site),
-          };
-          return acc;
-        },
-        { ...prev }
-      );
-    });
-  }, [setConnectedSiteMap]);
+      setConnectedSiteMap((prev) => {
+        return sites.reduce(
+          (acc, site) => {
+            acc[site.origin] = {
+              ...prev[site.origin],
+              ...transformConnectInfo(site),
+            };
+            return acc;
+          },
+          cleanup ? {} : { ...prev }
+        );
+      });
+    },
+    [setConnectedSiteMap]
+  );
+
+  useMessageForwarded(
+    {
+      type: 'refreshConnectedSiteMap',
+      // this hooks is used only in mainWindow now, but
+      // we still declare the targetView here for future use
+      targetView: '*',
+    },
+    () => {
+      fetchConnectedSite(true);
+    }
+  );
 
   useEffect(() => {
     fetchConnectedSite();
@@ -82,9 +98,24 @@ export function useConnectedSite(currentOrigin?: string) {
     return connectedSiteMap?.[currentOrigin!] || null;
   }, [connectedSiteMap, currentOrigin]);
 
+  const removeConnectedSite = useCallback(
+    async (origin: string) => {
+      await walletController.removeConnectedSite(origin);
+      await fetchConnectedSite();
+    },
+    [fetchConnectedSite]
+  );
+
+  const removeAllConnectedSites = useCallback(async () => {
+    await walletController.removeAllRecentConnectedSites();
+    await fetchConnectedSite();
+  }, [fetchConnectedSite]);
+
   return {
     currentConnectedSite,
     connectedSiteMap,
     fetchConnectedSite,
+    removeConnectedSite,
+    removeAllConnectedSites,
   };
 }

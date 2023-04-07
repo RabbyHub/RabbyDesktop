@@ -28,6 +28,13 @@ onIpcMainEvent(
   }
 );
 
+onIpcMainEvent('__internal_forward:main-window:close-all-tab', async () => {
+  forwardToMainWebContents(
+    '__internal_forward:main-window:close-all-tab',
+    undefined
+  );
+});
+
 onIpcMainEvent(
   '__internal_forward:main-window:create-dapp-tab',
   async (_, dappOrigin: string) => {

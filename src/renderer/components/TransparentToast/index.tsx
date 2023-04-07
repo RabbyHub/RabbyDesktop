@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useLayoutEffect } from 'react';
 import { message } from 'antd';
 
 import { RcIconToastSuccess } from '@/../assets/icons/global-toast';
@@ -6,6 +6,7 @@ import classNames from 'classnames';
 import { useClickOutSide } from '@/renderer/hooks/useClick';
 import { isWeb3Addr } from '@/isomorphic/web3';
 import { isMainWinShellWebUI } from '@/isomorphic/url';
+import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
 
 const TIMEOUT_SEC = 3;
 
@@ -95,3 +96,30 @@ export async function toastCopiedWeb3Addr(
 export default function TransparentToast() {
   return <>{/* <ToastSecurityNotification /> */}</>;
 }
+
+export const ToastZPopupMessage = () => {
+  const { svVisible, svState, closeSubview } = useZPopupViewState(
+    'toast-zpopup-message'
+  );
+
+  useLayoutEffect(() => {
+    if (svVisible) {
+      toastMessage({
+        ...svState,
+        className: classNames(
+          svState.className,
+          'zpopup-toast',
+          'mainwindow-default-tip'
+        ),
+        content: (
+          <ToastContent onClickOutside={closeSubview}>
+            {svState.content}
+          </ToastContent>
+        ),
+        onClose: closeSubview,
+      });
+    }
+  }, [svVisible, svState, closeSubview]);
+
+  return null;
+};
