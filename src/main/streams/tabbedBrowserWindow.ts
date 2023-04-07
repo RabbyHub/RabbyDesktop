@@ -368,10 +368,19 @@ onIpcMainInternalEvent(
   async (deledDappIds) => {
     const mainWin = await onMainWindowReady();
 
-    const dappIds = new Set(arraify(deledDappIds));
+    const dappIds = new Set(
+      arraify(deledDappIds).map((id) => id.toLocaleLowerCase())
+    );
 
     const tabsToClose = mainWin.tabs.filterTab((ctx) => {
-      return !!ctx.tab.relatedDappId && dappIds.has(ctx.tab.relatedDappId);
+      const checkouted = ctx.tab.relatedDappId
+        ? checkoutDappURL(ctx.tab.relatedDappId)
+        : null;
+      return (
+        !!ctx.tab.relatedDappId &&
+        !!checkouted &&
+        dappIds.has(checkouted.dappID)
+      );
     });
 
     tabsToClose.forEach((tab) => {

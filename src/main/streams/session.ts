@@ -40,15 +40,13 @@ import {
 } from '../utils/stream-helpers';
 import { checkOpenAction } from '../utils/tabs';
 import { getWindowFromWebContents, switchToBrowserTab } from '../utils/browser';
-import {
-  rewriteSessionWebRequestHeaders,
-  supportHmrOnDev,
-} from '../utils/webRequest';
+import { rewriteSessionWebRequestHeaders } from '../utils/webRequest';
 import { checkProxyViaBrowserView, setSessionProxy } from '../utils/appNetwork';
 import { getAppProxyConf } from '../store/desktopApp';
 import { createTrezorLikeConnectPageWindow } from '../utils/hardwareConnect';
 import { getBlockchainExplorers } from '../store/dynamicConfig';
 import { checkoutCustomSchemeHandlerInfo } from '../utils/protocol';
+import { rewriteIpfsHtmlFile } from '../utils/file';
 
 const sesLog = getBindLog('session', 'bgGrey');
 
@@ -226,6 +224,7 @@ const registerCallbacks: {
 
           if (fs.statSync(filePath).isDirectory()) {
             filePath = path.join(filePath, './index.html');
+            filePath = rewriteIpfsHtmlFile(filePath);
           }
 
           if (!fs.existsSync(filePath)) {
@@ -249,7 +248,7 @@ const registerCallbacks: {
       // const unregistered = protocol.unregisterProtocol(TARGET_PROTOCOL.slice(0, -1));
       // console.log(`unregistered: ${TARGET_PROTOCOL}`, unregistered);
 
-      const registerSuccess = protocol.interceptFileProtocol(
+      const registerSuccess = ctx.session.protocol.interceptFileProtocol(
         TARGET_PROTOCOL.slice(0, -1),
         async (request, callback) => {
           if (!isIpfsHttpURL(request.url)) {
@@ -292,6 +291,7 @@ const registerCallbacks: {
 
           if (fs.statSync(filePath).isDirectory()) {
             filePath = path.join(filePath, './index.html');
+            filePath = rewriteIpfsHtmlFile(filePath);
           }
 
           if (!fs.existsSync(filePath)) {
@@ -303,9 +303,7 @@ const registerCallbacks: {
             return;
           }
 
-          callback({
-            path: filePath,
-          });
+          callback({ path: filePath });
         }
       );
 
@@ -321,36 +319,33 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   const dappSafeViewSession = session.fromPartition('dappSafeView');
   const checkingViewSession = session.fromPartition('checkingView');
   const checkingProxySession = session.fromPartition('checkingProxy');
-  valueToMainSubject('sessionReady', {
+
+  const allSessions = {
     mainSession,
     dappSafeViewSession,
     checkingViewSession,
     checkingProxySession,
-  });
-  const allSessions = [
-    mainSession,
-    dappSafeViewSession,
-    checkingViewSession,
-    checkingProxySession,
-  ];
-  allSessions.forEach((sess) => {
+  };
+
+  valueToMainSubject('sessionReady', allSessions);
+  Object.entries(allSessions).forEach(([name, sess]) => {
     // Remove Electron to closer emulate Chrome's UA
     const userAgent = trimWebContentsUserAgent(sess.getUserAgent());
     sess.setUserAgent(userAgent);
 
-    rewriteSessionWebRequestHeaders(sess);
+    rewriteSessionWebRequestHeaders(sess, name as keyof IAppSession);
   });
 
   [
-    { inst: mainSession, name: 'default' },
+    { inst: mainSession, name: 'mainSession' },
     {
       inst: checkingProxySession,
-      name: 'checkingProxy',
-      filterProtocol: ['file:', 'http:'],
+      name: 'checkingProxySession',
+      filterProtocol: ['file:'],
     },
     {
       inst: checkingViewSession,
-      name: 'checkingView',
+      name: 'checkingViewSession',
       filterProtocol: ['file:', 'http:'],
     },
   ].forEach(({ inst, name, filterProtocol }) => {
@@ -402,7 +397,6 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   }
 
   valueToMainSubject('appRuntimeProxyConf', realProxy);
-  supportHmrOnDev(mainSession);
 
   mainSession.setPreloads([preloadPath]);
 

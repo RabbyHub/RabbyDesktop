@@ -6,7 +6,7 @@ export function checkoutCustomSchemeHandlerInfo(
   requestURL: string
 ) {
   if (tProtocol === 'http:') {
-    // it's http://localipfs.<cid>
+    // it's http://local.ipfs.<cid>
     const parsedInfo = canoicalizeDappUrl(requestURL);
     const pathnameWithQuery = parsedInfo.urlInfo?.pathname || '';
 

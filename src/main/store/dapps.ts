@@ -194,7 +194,8 @@ export function findDappsByOrigin(
   dappOrigin: string,
   dapps: IDapp[] = getAllDapps()
 ) {
-  const secondaryOrigin = canoicalizeDappUrl(dappOrigin).secondaryOrigin;
+  const cUrlInfo = canoicalizeDappUrl(dappOrigin);
+  const secondaryOrigin = cUrlInfo.secondaryOrigin;
 
   const result: IMatchDappResult = {
     dappByOrigin: null as null | IDapp,
@@ -203,6 +204,11 @@ export function findDappsByOrigin(
   };
   dapps.find((dapp) => {
     if (dapp.origin === dappOrigin) {
+      result.dappByOrigin = dapp;
+    } else if (
+      dapp.type === 'ipfs' &&
+      dapp.origin.toLocaleLowerCase() === cUrlInfo.origin.toLocaleLowerCase()
+    ) {
       result.dappByOrigin = dapp;
     }
 
