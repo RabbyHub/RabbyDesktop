@@ -226,7 +226,7 @@ const supportChains = [...new Set(Object.values(DEX_SUPPORT_CHAINS).flat())];
 export const SwapToken = () => {
   const rbiSource = useRbiSource();
 
-  const [slippageState, setSlippage] = useState('0.5');
+  const [slippageState, setSlippage] = useState('0.1');
   const [chain, setChain] = useState<CHAINS_ENUM>(CHAINS_ENUM.ETH);
   const [payToken, setPayToken] = useState<TokenItem | undefined>(
     getChainDefaultToken(CHAINS_ENUM.ETH)
