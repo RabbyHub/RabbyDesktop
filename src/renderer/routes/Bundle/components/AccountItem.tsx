@@ -1,3 +1,4 @@
+import { useBundle } from '@/renderer/hooks/useBundle/useBundle';
 import { useCopyAddress } from '@/renderer/hooks/useCopyAddress';
 import { ellipsis } from '@/renderer/utils/address';
 import {
@@ -13,9 +14,18 @@ export interface Props {
   checked?: boolean;
   data: BundleAccount;
   isBundle?: boolean;
+  editable?: boolean;
 }
 
-export const AccountItem: React.FC<Props> = ({ checked, data, isBundle }) => {
+export const AccountItem: React.FC<Props> = ({
+  checked,
+  data,
+  isBundle,
+  editable,
+}) => {
+  const {
+    account: { addToBundle },
+  } = useBundle();
   const brandName = React.useMemo(() => {
     switch (data.type) {
       case 'eth':
@@ -54,9 +64,16 @@ export const AccountItem: React.FC<Props> = ({ checked, data, isBundle }) => {
   }, [data]);
 
   const onCopy = useCopyAddress();
+  const onClickEdit = React.useCallback(() => {
+    console.log(123);
+  }, []);
+  const onClick = React.useCallback(() => {
+    addToBundle(data);
+  }, [addToBundle, data]);
 
   return (
     <div
+      onClick={onClick}
       className={clsx(
         'group',
         'flex items-center cursor-pointer',
@@ -81,9 +98,24 @@ export const AccountItem: React.FC<Props> = ({ checked, data, isBundle }) => {
       </div>
       <div className={clsx('text-white text-[12px]', 'flex-1 space-y-[6px]')}>
         <div
-          className={clsx('font-medium', 'opacity-70 group-hover:opacity-100')}
+          className={clsx(
+            'flex items-center space-x-[3px]',
+            'font-medium text-[12px] leading-[16px]',
+            'opacity-70 group-hover:opacity-100',
+            'group'
+          )}
         >
-          {data.nickname}
+          <span>{data.nickname}</span>
+          {editable ? (
+            <img
+              onClick={onClickEdit}
+              className={clsx(
+                'group-hover:block hidden',
+                'opacity-70 hover:opacity-100'
+              )}
+              src="rabby-internal://assets/icons/bundle/edit.svg"
+            />
+          ) : null}
         </div>
         <div className="flex space-x-[5px] items-center">
           <span className="opacity-50">{ellipsis(displayAddress)}</span>

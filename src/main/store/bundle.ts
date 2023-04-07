@@ -68,7 +68,7 @@ export const bundleStore = makeStore<StoreProps>({
 handleIpcMainInvoke('bundle-account-post', (_, account: BundleAccount) => {
   const accounts = bundleStore.get('accounts');
 
-  account.id = nanoid();
+  account.id = account.id || nanoid();
 
   const result = accounts.find((acc) => {
     if (acc.type === 'bn' && account.type === 'bn') {

@@ -8,7 +8,7 @@ export const BinanceAccountList = () => {
   return (
     <CommonAccountList title="Binance Key">
       {account.binanceList.map((item) => (
-        <AccountItem key={item.id} data={item} />
+        <AccountItem editable key={item.id} data={item} />
       ))}
     </CommonAccountList>
   );

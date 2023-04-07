@@ -84,10 +84,26 @@ export const useBundleAccount = () => {
     [preCheck]
   );
 
-  const addToBundle = React.useCallback(async (account: BundleAccount) => {
-    // todo check account
-    // update isBundle
-  }, []);
+  const addToBundle = React.useCallback(
+    async (account: BundleAccount) => {
+      const existed = accounts.find(
+        (acc) => acc.id === account.id && acc.inBundle
+      );
+
+      if (existed) {
+        window.rabbyDesktop.ipcRenderer.invoke('bundle-account-put', {
+          ...account,
+          inBundle: true,
+        });
+        return;
+      }
+      window.rabbyDesktop.ipcRenderer.invoke('bundle-account-post', {
+        ...account,
+        inBundle: true,
+      });
+    },
+    [accounts]
+  );
 
   const updateNickname = React.useCallback(
     (id: BundleAccount['id'], nickname: BundleAccount['nickname']) => {
@@ -155,5 +171,6 @@ export const useBundleAccount = () => {
     binanceList,
     btcList,
     ethList,
+    addToBundle,
   };
 };

@@ -8,7 +8,7 @@ export const BTCAccountList = () => {
   return (
     <CommonAccountList title="BTC 地址">
       {account.btcList.map((item) => (
-        <AccountItem key={item.id} data={item} />
+        <AccountItem editable key={item.id} data={item} />
       ))}
     </CommonAccountList>
   );
