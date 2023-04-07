@@ -21,6 +21,7 @@ import { ModalConfirm } from '@/renderer/components/Modal/Confirm';
 import { Switch } from '@/renderer/components/Switch/Switch';
 import { useCheckNewRelease } from '@/renderer/hooks/useAppUpdator';
 import { copyText } from '@/renderer/utils/clipboard';
+import { detectOS } from '@/isomorphic/os';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
 import { useProxyStateOnSettingPage } from './settingHooks';
@@ -142,6 +143,8 @@ const ProxyText = styled.div`
     text-decoration: underline;
   }
 `;
+
+const osType = detectOS();
 
 export function MainWindowSettings() {
   const appVerisons = useAppVersion();
@@ -290,7 +293,10 @@ export function MainWindowSettings() {
               .join('')}
             icon="rabby-internal://assets/icons/mainwin-settings/info.svg"
             onClick={(evt) => {
-              if (evt.ctrlKey && evt.altKey) {
+              if (
+                (osType === 'win32' && evt.ctrlKey && evt.altKey) ||
+                (osType === 'darwin' && evt.metaKey && evt.altKey)
+              ) {
                 copyText(
                   [
                     `Version: ${appVerisons.version || '-'}`,
