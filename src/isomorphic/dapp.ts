@@ -276,14 +276,14 @@ export function formatDappURLToShow(dappURL: string) {
 
 export function makeDappHttpOrigin(
   dappURL: string | ReturnType<typeof checkoutDappURL>,
-  sessionType: 'default' | 'preview' = 'default'
+  sessionType: 'mainSession' | 'preview' = 'mainSession'
 ): string {
   if (!dappURL) return dappURL;
 
   const checkoutResult =
     typeof dappURL === 'string' ? checkoutDappURL(dappURL) : dappURL;
 
-  if (sessionType === 'default' && checkoutResult.type === 'ipfs') {
+  if (sessionType === 'mainSession' && checkoutResult.type === 'ipfs') {
     // return `http://${checkoutResult.ipfsCid}.${IPFS_LOCALHOST_DOMAIN}`;
     return makeIpfsDappHttpId(checkoutResult.ipfsCid);
   }

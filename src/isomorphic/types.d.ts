@@ -476,3 +476,10 @@ type ISiteMetaData = {
     sizes: string;
   }[];
 };
+
+type IAppSession = {
+  mainSession: Electron.Session;
+  dappSafeViewSession: Electron.Session;
+  checkingViewSession: Electron.Session;
+  checkingProxySession: Electron.Session;
+};

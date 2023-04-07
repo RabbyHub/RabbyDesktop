@@ -17,14 +17,7 @@ const CONF = {
   sessionReady: {
     subject: new ReplaySubject(1),
     once: true,
-  } as IConf<
-    ReplaySubject<{
-      mainSession: Session;
-      dappSafeViewSession: Session;
-      checkingViewSession: Session;
-      checkingProxySession: Session;
-    }>
-  >,
+  } as IConf<ReplaySubject<IAppSession>>,
   electronChromeExtensionsReady: {
     subject: new ReplaySubject(1),
     once: true,
