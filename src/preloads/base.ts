@@ -4,6 +4,7 @@ import {
   IpcRendererEvent,
   nativeImage,
 } from 'electron';
+import { formatDappURLToShow } from '../isomorphic/dapp';
 
 export const ipcRendererObj = {
   sendMessage<T extends IChannelsKey>(
@@ -58,6 +59,10 @@ export const rendererHelpers: Window['rabbyDesktop']['rendererHelpers'] = {
     );
 
     return blobLink;
+  },
+
+  formatDappURLToShow: (dappURL) => {
+    return formatDappURLToShow(dappURL);
   },
 };
 

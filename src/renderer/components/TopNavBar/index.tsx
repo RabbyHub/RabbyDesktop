@@ -17,6 +17,7 @@ import {
   useState,
   forwardRef,
   ForwardedRef,
+  useMemo,
 } from 'react';
 import { detectOS } from '@/isomorphic/os';
 import classNames from 'classnames';
@@ -26,6 +27,7 @@ import { useSwitchChainModal } from '@/renderer/hooks/useSwitchChainModal';
 import { copyText } from '@/renderer/utils/clipboard';
 import { useMatchURLBaseConfig } from '@/renderer/hooks-ipc/useAppDynamicConfig';
 import { useWindowState } from '@/renderer/hooks-shell/useWindowState';
+import { formatDappURLToShow } from '@/isomorphic/dapp';
 import styles from './index.module.less';
 import { toastMessage } from '../TransparentToast';
 
@@ -116,6 +118,10 @@ export const TopNavBar = () => {
     [nonce, activeTab]
   );
 
+  const dappURLToShow = useMemo(() => {
+    return formatDappURLToShow(activeTab?.url || '');
+  }, [activeTab?.url]);
+
   return (
     <div className={styles.main} onDoubleClick={onDarwinToggleMaxmize}>
       {/* keep this element in first to make it bottom, or move it last to make it top */}
@@ -146,8 +152,8 @@ export const TopNavBar = () => {
           className={styles.url}
           style={{ ...(navTextColor && { color: navTextColor }) }}
           onClick={async () => {
-            if (!activeTab?.url) return;
-            await copyText(activeTab.url);
+            if (!dappURLToShow) return;
+            await copyText(dappURLToShow);
             toastMessage({
               type: 'success',
               content: 'Copied url',
@@ -156,7 +162,7 @@ export const TopNavBar = () => {
             });
           }}
         >
-          {activeTab?.url || ''}
+          {dappURLToShow}
         </div>
         <div className={clsx(styles.historyBar)}>
           <RcIconHistoryGoBack

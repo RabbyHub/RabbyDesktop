@@ -160,12 +160,12 @@ const router = createRouter([
           </>
         ),
       },
+      // {
+      //   path: 'home/swap',
+      //   element: <Swap />,
+      // },
       {
-        path: 'home/swap',
-        element: <Swap />,
-      },
-      {
-        path: 'dapps/:origin',
+        path: 'dapps/:dappId',
         element: (
           <DappViewWrapper>
             <TopNavBar />
@@ -185,6 +185,15 @@ const router = createRouter([
             title: 'My Dapps',
           } as MainWindowRouteData;
         },
+      },
+      {
+        path: 'swap',
+        element: <Swap />,
+        // loader: () => {
+        //   // return {
+        //   //   title: 'Swap',
+        //   // } as MainWindowRouteData;
+        // },
       },
 
       {

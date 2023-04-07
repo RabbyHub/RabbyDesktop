@@ -51,6 +51,8 @@ type IDappType = INextDapp['type'];
 type INextDapp = {
   id: string;
   alias: string;
+  faviconUrl?: string;
+  faviconBase64?: string;
 } & (
   | {
       type: 'unknown';
@@ -59,12 +61,10 @@ type INextDapp = {
   | {
       type: 'http';
       origin: string | `https://${string}${string}`;
-      faviconUrl?: string;
-      faviconBase64?: string;
     }
   | {
       type: 'ipfs';
-      origin: string | `ipfs://${string}${string}`;
+      origin: string | `rabby-ipfs://${string}${string}`;
     }
 );
 
@@ -72,7 +72,7 @@ type IHttpDapp = INextDapp & { type: 'http' };
 /**
  * @description alias of http type dapp
  */
-type IDapp = IHttpDapp;
+type IDapp = INextDapp;
 
 type IDappWithDomainMeta = IDapp & {
   // only dapp with second domain has this property
@@ -415,7 +415,9 @@ type ISafeOpenDappTabResult = {
 };
 
 type IParseDomainInfo = {
+  subDomain: string;
   hostWithoutTLD: string;
+  tld: string;
   secondaryDomain: string;
   secondaryOrigin: string;
   is2ndaryDomain: boolean;
@@ -473,4 +475,11 @@ type ISiteMetaData = {
     href: string;
     sizes: string;
   }[];
+};
+
+type IAppSession = {
+  mainSession: Electron.Session;
+  dappSafeViewSession: Electron.Session;
+  checkingViewSession: Electron.Session;
+  checkingProxySession: Electron.Session;
 };

@@ -55,6 +55,18 @@ type ZViewStates = {
   'safe-queue-modal': {
     // nothing
   };
+
+  'ipfs-add-failed-modal': {
+    // nothing
+  };
+
+  'ipfs-no-local-modal': {
+    // nothing
+  };
+
+  'ipfs-verify-failed-modal': {
+    // nothing
+  };
 };
 
 type IZPopupSubviewState = {
