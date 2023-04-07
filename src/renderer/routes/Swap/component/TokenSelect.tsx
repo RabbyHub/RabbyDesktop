@@ -609,7 +609,7 @@ const TokenSelectModal = ({
   );
 };
 
-interface TokenAmountInputProps {
+export interface TokenAmountInputProps {
   token?: TokenItem;
   onChange?(amount: string): void;
   onTokenChange(token: TokenItem): void;
@@ -624,6 +624,15 @@ interface TokenAmountInputProps {
   inlinePrize?: boolean;
   className?: string;
   logoSize?: number;
+  tokenRender?:
+    | (({
+        token,
+        openTokenModal,
+      }: {
+        token?: TokenItem;
+        openTokenModal: () => void;
+      }) => React.ReactNode)
+    | React.ReactNode;
 }
 
 const sortTokensByPrice = (t: TokenItem[]) => {
@@ -650,6 +659,7 @@ export const TokenSelect = ({
   inlinePrize = false,
   className,
   logoSize = 28,
+  tokenRender,
 }: TokenAmountInputProps) => {
   const inputRef = useRef<InputRef>(null);
 
@@ -771,6 +781,27 @@ export const TokenSelect = ({
       inputRef.current?.focus();
     }
   }, [forceFocus]);
+
+  if (tokenRender) {
+    return (
+      <>
+        {typeof tokenRender === 'function'
+          ? tokenRender?.({ token, openTokenModal: handleSelectToken })
+          : tokenRender}
+        <TokenSelectModal
+          open={open}
+          placeholder={placeholder}
+          list={availableToken}
+          onClose={handleTokenSelectorClose}
+          onSearch={handleSearchTokens}
+          onConfirm={handleCurrentTokenChange}
+          isLoading={isListLoading}
+          columns={type === 'default' ? 3 : 2}
+          chainId={chainId}
+        />
+      </>
+    );
+  }
 
   return (
     <>
