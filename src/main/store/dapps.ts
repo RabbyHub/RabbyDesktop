@@ -381,7 +381,7 @@ handleIpcMainInvoke('detect-dapp', async (_, dappUrl) => {
 
   if (urlResult.type === 'ipfs') {
     return {
-      result: await detectIPFSDapp(urlResult.dappURL, {
+      result: await detectIPFSDapp(urlResult.dappID, {
         existedDapps: allDapps,
       }),
     };

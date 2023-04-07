@@ -16,15 +16,27 @@ export function isValidDappAlias(alias: string) {
   return /[\w\d]+/.test(alias);
 }
 
+function makeIpfsDappHttpId(ipfsCid: string) {
+  return `http://${LOCALIPFS_BRAND}.${ipfsCid}`;
+}
+
 export function checkoutDappURL(dappPath: string) {
+  const result = {
+    type: 'unknown' as const,
+    dappURL: '' as const,
+    dappID: '' as const,
+    dappHttpID: '' as const,
+  };
   if (dappPath.startsWith('/ipfs/') || dappPath.startsWith(PROTOCOL_IPFS)) {
     const ipfsCid = extractIpfsCid(dappPath);
 
-    if (!ipfsCid) return { type: 'unknown' as const, dappURL: '' };
+    if (!ipfsCid) return result;
 
     return {
       type: 'ipfs' as const,
       dappURL: `rabby-ipfs://${ipfsCid}`,
+      dappID: `rabby-ipfs://${ipfsCid}`,
+      dappHttpID: makeIpfsDappHttpId(ipfsCid),
       ipfsCid,
     };
   }
@@ -32,31 +44,28 @@ export function checkoutDappURL(dappPath: string) {
   if (dappPath.startsWith('http')) {
     const parsedInfo = canoicalizeDappUrl(dappPath);
 
-    if (parsedInfo.secondaryDomain === IPFS_LOCALHOST_DOMAIN) {
+    const ipfsCid = extractIpfsCid(parsedInfo.origin);
+
+    if (ipfsCid) {
       return {
         type: 'ipfs' as const,
-        dappURL: `rabby-ipfs://${parsedInfo.subDomain}`,
-        ipfsCid: parsedInfo.subDomain,
-      };
-    }
-    if (parsedInfo.hostWithoutTLD === LOCALIPFS_BRAND) {
-      return {
-        type: 'ipfs' as const,
-        dappURL: `rabby-ipfs://${parsedInfo.tld}`,
-        ipfsCid: parsedInfo.tld,
+        dappURL: `rabby-ipfs://${ipfsCid}`,
+        dappID: `rabby-ipfs://${ipfsCid}`,
+        dappHttpID: makeIpfsDappHttpId(ipfsCid),
+        ipfsCid,
       };
     }
 
+    const dappHttpID = canoicalizeDappUrl(dappPath).origin;
     return {
       type: 'http' as const,
       dappURL: dappPath,
+      dappID: dappHttpID,
+      dappHttpID,
     };
   }
 
-  return {
-    type: 'unknown' as const,
-    dappURL: '',
-  };
+  return result;
 }
 
 export function formatDapp(
@@ -89,7 +98,7 @@ export function formatDapp(
 
   switch (finalType) {
     case 'ipfs': {
-      // formattedDapp.id = formattedDapp.origin = makeDappOriginToOpen(input.origin);
+      // formattedDapp.id = formattedDapp.origin = makeDappHttpOrigin(input.origin);
       break;
     }
     case 'http':
@@ -265,7 +274,7 @@ export function formatDappURLToShow(dappURL: string) {
   return normalizedURL;
 }
 
-export function makeDappOriginToOpen(
+export function makeDappHttpOrigin(
   dappURL: string | ReturnType<typeof checkoutDappURL>,
   sessionType: 'default' | 'preview' = 'default'
 ): string {
@@ -276,7 +285,7 @@ export function makeDappOriginToOpen(
 
   if (sessionType === 'default' && checkoutResult.type === 'ipfs') {
     // return `http://${checkoutResult.ipfsCid}.${IPFS_LOCALHOST_DOMAIN}`;
-    return `http://${LOCALIPFS_BRAND}.${checkoutResult.ipfsCid}`;
+    return makeIpfsDappHttpId(checkoutResult.ipfsCid);
   }
 
   return checkoutResult.dappURL;

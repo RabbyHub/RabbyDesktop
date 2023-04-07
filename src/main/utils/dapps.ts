@@ -143,7 +143,7 @@ export async function detectIPFSDapp(
     existedDapps: IDapp[];
   }
 ): Promise<IDappsDetectResult<DETECT_ERR_CODES>> {
-  const inputOrigin = checkoutDappURL(ipfsDappPath).dappURL;
+  const inputOrigin = checkoutDappURL(ipfsDappPath).dappID;
 
   const { urlInfo: dappOriginInfo, hostWithoutTLD: inputCoreName } =
     canoicalizeDappUrl(inputOrigin);

@@ -1,13 +1,9 @@
 import { app, BrowserWindow, shell } from 'electron';
 
-import {
-  isUrlFromDapp,
-  parseDomainMeta,
-  parseQueryString,
-} from '@/isomorphic/url';
+import { isUrlFromDapp, parseQueryString } from '@/isomorphic/url';
 import { arraify } from '@/isomorphic/array';
 import { pickFavIconURLFromMeta } from '@/isomorphic/html';
-import { checkoutDappURL, makeDappOriginToOpen } from '@/isomorphic/dapp';
+import { checkoutDappURL, makeDappHttpOrigin } from '@/isomorphic/dapp';
 import {
   EnumMatchDappType,
   IS_RUNTIME_PRODUCTION,
@@ -240,7 +236,7 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
   const findResult = findDappsByOrigin(dappOrigin);
 
   if (findResult.dapp) {
-    dappOrigin = makeDappOriginToOpen(findResult.dapp.origin);
+    dappOrigin = makeDappHttpOrigin(findResult.dapp.origin);
   }
 
   const openResult = await safeOpenURL(dappOrigin, {

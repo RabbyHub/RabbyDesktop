@@ -261,13 +261,17 @@ export function extractIpfsCid(ipfsDappPath: string) {
   }
 
   if (IPFS_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX.test(ipfsDappPath)) {
-    return (
-      ipfsDappPath.match(IPFS_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX)?.[1] || ''
-    );
+    const [, ipfsCid = ''] =
+      ipfsDappPath.match(IPFS_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX) || [];
+
+    return ipfsCid;
   }
 
   if (IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX.test(ipfsDappPath)) {
-    return ipfsDappPath.match(IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX)?.[1] || '';
+    const [, ipfsCid = ''] =
+      ipfsDappPath.match(IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX) || [];
+
+    return ipfsCid;
   }
 
   return '';
@@ -280,13 +284,22 @@ export function isIpfsHttpURL(dappURL: string) {
   );
 }
 
+export function isIpfsDappID(dappURL: string) {
+  return IPFS_REGEXPS.IPFS_REGEX.test(dappURL);
+}
+
+export function isURLForIpfsDapp(dappURL: string) {
+  return isIpfsHttpURL(dappURL) || isIpfsDappID(dappURL);
+}
+
 export function canoicalizeDappUrl(url: string): ICanonalizedUrlInfo {
   const urlInfo: Partial<URL> | null = safeParseURL(url);
 
   const hostname = urlInfo?.hostname || '';
   const isDapp =
-    !!urlInfo?.protocol &&
-    ['https:', 'ipfs:', 'rabby-ipfs:'].includes(urlInfo?.protocol);
+    (!!urlInfo?.protocol &&
+      ['https:', 'ipfs:', 'rabby-ipfs:'].includes(urlInfo?.protocol)) ||
+    isIpfsHttpURL(url);
 
   const origin = ['ipfs:', 'rabby-ipfs:'].includes(urlInfo?.protocol || '')
     ? `rabby-ipfs://${extractIpfsCid(url)}`

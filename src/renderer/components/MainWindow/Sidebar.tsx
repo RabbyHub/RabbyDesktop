@@ -21,6 +21,7 @@ import { Badge } from 'antd';
 import { usePrevious } from 'react-use';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
+import { makeDappHttpOrigin } from '@/isomorphic/dapp';
 import { DappFavicon } from '../DappFavicon';
 import Hide from './Hide';
 import styles from './Sidebar.module.less';
@@ -68,7 +69,7 @@ const StaticEntries = [
   },
 ] as const;
 
-const DappRoutePatter = '/mainwin/dapps/:dappId';
+const DappRoutePattern = '/mainwin/dapps/:dappId';
 
 const TabList = ({
   className,
@@ -86,7 +87,7 @@ const TabList = ({
   isFold?: boolean;
 }) => {
   const navigateToDapp = useNavigateToDappRoute();
-  const location = useLocation();
+  const rLoc = useLocation();
   if (!dapps?.length) {
     return null;
   }
@@ -98,12 +99,15 @@ const TabList = ({
         const faviconUrl =
           dapp?.faviconBase64 || dapp?.faviconUrl || dapp.tab?.favIconUrl;
 
+        const matchedRoute = matchPath(DappRoutePattern, rLoc.pathname);
+        const matchedDappID = matchedRoute?.params.dappId || '';
+
         return (
           <li
             key={`dapp-${dapp.origin}`}
             className={classNames(
               styles.routeItem,
-              matchPath(DappRoutePatter, location.pathname) &&
+              matchedDappID &&
                 activeTabId &&
                 activeTabId === tab?.id &&
                 styles.active
@@ -176,7 +180,7 @@ export default function MainWindowSidebar() {
           location.pathname
         )
       ),
-      matchedDapp: matchPath(DappRoutePatter, location.pathname),
+      matchedDapp: matchPath(DappRoutePattern, location.pathname),
     };
   }, [location.pathname]);
   const prevMatchedDapp = usePrevious(matchedDapp);

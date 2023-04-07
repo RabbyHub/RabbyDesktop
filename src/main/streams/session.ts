@@ -252,10 +252,6 @@ const registerCallbacks: {
       const registerSuccess = protocol.interceptFileProtocol(
         TARGET_PROTOCOL.slice(0, -1),
         async (request, callback) => {
-          console.log(
-            '[feat] isIpfsHttpURL(request.url)',
-            isIpfsHttpURL(request.url)
-          );
           if (!isIpfsHttpURL(request.url)) {
             // protocol.uninterceptProtocol('http');
             callback({

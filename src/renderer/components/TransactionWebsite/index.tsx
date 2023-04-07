@@ -1,9 +1,5 @@
-import {
-  formatDappURLToShow,
-  makeDappURLToOpen,
-  makeIpfsDappURLToOpen,
-} from '@/isomorphic/dapp';
-import { useDapp, useMatchDapp } from '@/renderer/hooks/useDappsMngr';
+import { formatDappURLToShow, makeDappURLToOpen } from '@/isomorphic/dapp';
+import { useMatchDapp } from '@/renderer/hooks/useDappsMngr';
 import { useOpenDapp } from '@/renderer/utils/react-router';
 import { Tooltip } from 'antd';
 import { useCallback } from 'react';
