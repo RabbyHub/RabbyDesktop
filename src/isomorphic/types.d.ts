@@ -51,6 +51,8 @@ type IDappType = INextDapp['type'];
 type INextDapp = {
   id: string;
   alias: string;
+  faviconUrl?: string;
+  faviconBase64?: string;
 } & (
   | {
       type: 'unknown';
@@ -59,8 +61,6 @@ type INextDapp = {
   | {
       type: 'http';
       origin: string | `https://${string}${string}`;
-      faviconUrl?: string;
-      faviconBase64?: string;
     }
   | {
       type: 'ipfs';
@@ -72,7 +72,7 @@ type IHttpDapp = INextDapp & { type: 'http' };
 /**
  * @description alias of http type dapp
  */
-type IDapp = IHttpDapp;
+type IDapp = INextDapp;
 
 type IDappWithDomainMeta = IDapp & {
   // only dapp with second domain has this property
