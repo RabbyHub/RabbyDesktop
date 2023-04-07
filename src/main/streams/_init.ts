@@ -1,6 +1,6 @@
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import type { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
-import { BrowserView, BrowserWindow, Session } from 'electron';
+import { BrowserView, BrowserWindow } from 'electron';
 import { Subject, ReplaySubject, Observable } from 'rxjs';
 import type { MainTabbedBrowserWindow } from '../browser/browsers';
 import { cLog } from '../utils/log';

@@ -4,14 +4,9 @@ import path from 'path';
 import { app, protocol, session, shell } from 'electron';
 import { firstValueFrom } from 'rxjs';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
-import {
-  canoicalizeDappUrl,
-  isIpfsHttpURL,
-  isRabbyXPage,
-} from '@/isomorphic/url';
+import { isIpfsHttpURL, isRabbyXPage } from '@/isomorphic/url';
 import { trimWebContentsUserAgent } from '@/isomorphic/string';
 import {
-  IPFS_LOCALHOST_DOMAIN,
   IS_RUNTIME_PRODUCTION,
   PROTOCOL_IPFS,
   RABBY_INTERNAL_PROTOCOL,
@@ -47,6 +42,7 @@ import { createTrezorLikeConnectPageWindow } from '../utils/hardwareConnect';
 import { getBlockchainExplorers } from '../store/dynamicConfig';
 import { checkoutCustomSchemeHandlerInfo } from '../utils/protocol';
 import { rewriteIpfsHtmlFile } from '../utils/file';
+import { SPECIAL_SESSIONS } from '../main-constants';
 
 const sesLog = getBindLog('session', 'bgGrey');
 
@@ -252,7 +248,6 @@ const registerCallbacks: {
         TARGET_PROTOCOL.slice(0, -1),
         async (request, callback) => {
           if (!isIpfsHttpURL(request.url)) {
-            // protocol.uninterceptProtocol('http');
             callback({
               data: 'Not found',
               mimeType: 'text/plain',
@@ -316,11 +311,15 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   // sub.unsubscribe();
   const mainSession = session.defaultSession;
 
+  const ipfsDappSession = session.fromPartition(
+    SPECIAL_SESSIONS.ipfsDappSession
+  );
   const dappSafeViewSession = session.fromPartition('dappSafeView');
   const checkingViewSession = session.fromPartition('checkingView');
   const checkingProxySession = session.fromPartition('checkingProxy');
 
   const allSessions = {
+    ipfsDappSession,
     mainSession,
     dappSafeViewSession,
     checkingViewSession,
@@ -336,21 +335,32 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
     rewriteSessionWebRequestHeaders(sess, name as keyof IAppSession);
   });
 
-  [
-    { inst: mainSession, name: 'mainSession' },
+  const REG_CONFS = [
+    {
+      inst: mainSession,
+      name: 'mainSession',
+      includeFilters: [RABBY_INTERNAL_PROTOCOL, PROTOCOL_IPFS],
+    },
+    {
+      inst: ipfsDappSession,
+      name: SPECIAL_SESSIONS.ipfsDappSession,
+      includeFilters: [RABBY_INTERNAL_PROTOCOL, PROTOCOL_IPFS, 'http:'],
+    },
     {
       inst: checkingProxySession,
       name: 'checkingProxySession',
-      filterProtocol: ['file:'],
+      includeFilters: [RABBY_INTERNAL_PROTOCOL],
     },
     {
       inst: checkingViewSession,
       name: 'checkingViewSession',
-      filterProtocol: ['file:', 'http:'],
+      includeFilters: [RABBY_INTERNAL_PROTOCOL],
     },
-  ].forEach(({ inst, name, filterProtocol }) => {
+  ] as const;
+
+  REG_CONFS.forEach(({ inst, name, includeFilters }) => {
     registerCallbacks.forEach(({ protocol: prot, handler }) => {
-      if (filterProtocol?.includes(prot)) return;
+      if (!includeFilters.includes(prot as any)) return;
 
       const { registerSuccess, protocol: registeredProtocol } = handler({
         session: inst,

@@ -8,7 +8,7 @@ import {
 } from '@/isomorphic/const-size-next';
 import { EnumMatchDappType } from '@/isomorphic/constants';
 import { NATIVE_HEADER_H } from '../../isomorphic/const-size-classical';
-import { canoicalizeDappUrl } from '../../isomorphic/url';
+import { canoicalizeDappUrl, isIpfsHttpURL } from '../../isomorphic/url';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import {
   BrowserViewManager,
@@ -22,6 +22,7 @@ import {
   notifyShowFindInPage,
   notifyHideFindInPage,
 } from '../utils/mainTabbedWin';
+import { SPECIAL_SESSIONS } from '../main-constants';
 
 const viewMngr = new BrowserViewManager(
   {
@@ -103,7 +104,15 @@ export class Tab {
     }
 
     this.tabs = tabs;
-    this.view = viewMngr.allocateView();
+
+    this.view = viewMngr.allocateView({
+      ...(this.relatedDappId &&
+        isIpfsHttpURL(this.relatedDappId) && {
+          webPreferences: {
+            partition: SPECIAL_SESSIONS.ipfsDappSession,
+          },
+        }),
+    });
     this.id = this.view.webContents.id;
     this.window = ofWindow;
     this.windowId = ofWindow.id;
