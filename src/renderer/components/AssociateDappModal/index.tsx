@@ -195,16 +195,13 @@ const BindDapp = ({
     return protocolDappsBinding[protocol.id];
   }, [protocolDappsBinding, protocol]);
 
-  const isDomainLikeKw = useMemo(() => {
-    return isDomainLikeStr(kw);
-  }, [kw]);
-
   const searchResult = useMemo(() => {
     if (!kw) return [];
     try {
-      const regexp = new RegExp(encodeURIComponent(kw), 'i');
       const arr = dapps.filter(
-        (dapp) => regexp.test(dapp.alias) || regexp.test(dapp.origin)
+        (dapp) =>
+          dapp.alias.toLowerCase().includes(kw.toLowerCase()) ||
+          dapp.origin.toLowerCase().includes(kw.toLowerCase())
       );
       return arr;
     } catch (e) {
