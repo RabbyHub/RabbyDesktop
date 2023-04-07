@@ -69,7 +69,7 @@ const StaticEntries = [
     logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/send.svg',
   },
   {
-    path: '/mainwin/home/swap',
+    path: '/mainwin/swap',
     title: 'Swap',
     logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/swap.svg',
   },
