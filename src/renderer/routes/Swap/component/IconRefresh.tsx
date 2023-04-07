@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import React, { memo, useEffect, useRef } from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { usePrevious } from 'react-use';
 
 export const IconRefresh = memo(
@@ -7,23 +7,42 @@ export const IconRefresh = memo(
     props: React.SVGProps<SVGSVGElement> & {
       refresh: () => void;
       start?: boolean;
+      loading?: boolean;
     }
   ) => {
-    const { className, refresh, start = true, ...other } = props;
+    const { loading, className, refresh, start = true, ...other } = props;
 
     const clickAnimateElem = useRef<SVGAElement>();
     const repeatAnimateElem = useRef<SVGAElement>();
 
     const previousStart = usePrevious(start);
 
+    const [animate, setAnimate] = useState(false);
+
     useEffect(() => {
       if (!start) return;
+
       const listen = () => {
-        clickAnimateElem.current?.addEventListener('beginEvent', refresh);
+        let current = true;
+        const beginEventFn = () => {
+          setAnimate(true);
+          refresh();
+          setTimeout(() => {
+            if (current) {
+              setAnimate(false);
+            }
+          }, 1000);
+        };
+
+        clickAnimateElem.current?.addEventListener('beginEvent', beginEventFn);
         repeatAnimateElem.current?.addEventListener('repeatEvent', refresh);
 
         return () => {
-          clickAnimateElem.current?.removeEventListener('beginEvent', refresh);
+          current = false;
+          clickAnimateElem.current?.removeEventListener(
+            'beginEvent',
+            beginEventFn
+          );
           repeatAnimateElem.current?.removeEventListener(
             'repeatEvent',
             refresh
@@ -33,7 +52,7 @@ export const IconRefresh = memo(
       const remove = listen();
 
       return remove;
-    }, [refresh, start]);
+    }, [refresh, start, loading]);
 
     useEffect(() => {
       if (!previousStart && start) {
@@ -43,10 +62,14 @@ export const IconRefresh = memo(
 
     return (
       <svg
+        key={!loading || animate ? 'animate' : 'stop'}
         id="arrow_loading"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="-6 -6 36 36"
-        className={clsx('arrow-loading', className || 'text-blue-light')}
+        className={clsx(
+          'arrow-loading cursor-pointer',
+          className || 'text-blue-light'
+        )}
         width="36"
         height="36"
         {...other}
@@ -81,14 +104,16 @@ export const IconRefresh = memo(
             strokeDasharray="30"
             strokeDashoffset="0"
           >
-            <animate
-              attributeName="stroke-dashoffset"
-              values="0;-30"
-              begin="arrow_loading.click; 0.7s"
-              repeatCount="indefinite"
-              dur="19.3s"
-              ref={repeatAnimateElem as any}
-            />
+            {(!loading || animate) && (
+              <animate
+                attributeName="stroke-dashoffset"
+                values="0;-30"
+                begin="arrow_loading.click; 0.7s"
+                repeatCount="indefinite"
+                dur="29.3s"
+                ref={repeatAnimateElem as any}
+              />
+            )}
           </circle>
         </g>
         <use href="#arrow" />
