@@ -1,11 +1,12 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 import { Dropdown, Menu } from 'antd';
-import React, { useRef } from 'react';
+import React, { ReactNode, useRef } from 'react';
 
-import clsx from 'clsx';
+import { formatDappURLToShow } from '@/isomorphic/dapp';
 import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
 import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
+import clsx from 'clsx';
 import {
   RCIconDappsDelete,
   RCIconDappsEdit,
@@ -13,6 +14,32 @@ import {
 } from '../../../../../../assets/icons/internal-homepage';
 
 import { DappFavicon } from '../../../../components/DappFavicon';
+
+const Indicator = ({ dapp }: { dapp: IDappWithTabInfo }) => {
+  if (!dapp.tab) {
+    return null;
+  }
+  return <div className="dapp-indicator" />;
+  // return dapp?.tab ? (
+  //   dapp.tab.status === 'loading' ? (
+  //     <img
+  //       className="dapp-indicator loading"
+  //       src="rabby-internal://assets/icons/dapps/dapp-loading.svg"
+  //     />
+  //   ) : (
+  //     <div className="dapp-indicator" />
+  //   )
+  // ) : null;
+};
+
+const IpfsTag = ({ prefix }: { prefix?: ReactNode }) => {
+  return (
+    <div className="tag ipfs-tag">
+      {prefix}
+      IPFS
+    </div>
+  );
+};
 
 type IOnOpDapp = (
   op: 'rename' | 'delete' | 'pin' | 'unpin',
@@ -135,16 +162,14 @@ export const DAppBlock = ({
           hideMainwinPopup('sidebar-dapp');
         }}
       >
-        {dapp.tab ? (
-          dapp.tab.status === 'loading' ? (
-            <img
-              className="dapp-indicator loading"
-              src="rabby-internal://assets/icons/dapps/dapp-loading.svg"
-            />
+        <div className={clsx('dapp-block-badge')}>
+          {dapp.origin?.startsWith('rabby-ipfs://') ||
+          (dapp.type as any) === 'ipfs' ? (
+            <IpfsTag prefix={<Indicator dapp={dapp} />} />
           ) : (
-            <div className="dapp-indicator" />
-          )
-        ) : null}
+            <Indicator dapp={dapp} />
+          )}
+        </div>
         <div
           className="anchor"
           onClick={(e) => {
@@ -164,7 +189,7 @@ export const DAppBlock = ({
           <div className="infos pr-[16px]">
             <h4 className="dapp-alias">{dapp.alias}</h4>
             <div className="dapp-url">
-              {dapp.origin?.replace(/^\w+:\/\//, '')}
+              {formatDappURLToShow(dapp.origin?.replace(/^[\w|-]+:\/\//, ''))}
             </div>
           </div>
         </div>

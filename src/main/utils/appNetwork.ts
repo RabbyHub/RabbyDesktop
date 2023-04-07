@@ -57,6 +57,7 @@ export async function checkUrlViaBrowserView(
   opts?: {
     timeout?: number;
     view?: BrowserView;
+    session?: Electron.Session;
     onMetaDataUpdated?: (meta: ISiteMetaData) => void;
   }
 ) {
@@ -71,12 +72,19 @@ export async function checkUrlViaBrowserView(
       },
     });
   }
-  const view = opts?.view || viewMngr.allocateView(false);
+  const sessionInstance = opts?.session || checkingViewSession;
+  const view =
+    opts?.view ||
+    viewMngr.allocateView({
+      webPreferences: {
+        session: sessionInstance,
+      },
+    });
 
   type Result =
     | {
         valid: true;
-        // some website would redirec to another origin, such as https://binance.com -> https://www.binance.com
+        // some website would redirect to another origin, such as https://binance.com -> https://www.binance.com
         finalUrl: string;
         isRedirectedOut?: boolean;
       }

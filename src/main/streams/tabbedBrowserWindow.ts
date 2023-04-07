@@ -1,12 +1,9 @@
 import { app, BrowserWindow, shell } from 'electron';
 
-import {
-  isUrlFromDapp,
-  parseDomainMeta,
-  parseQueryString,
-} from '@/isomorphic/url';
+import { isUrlFromDapp, parseQueryString } from '@/isomorphic/url';
 import { arraify } from '@/isomorphic/array';
 import { pickFavIconURLFromMeta } from '@/isomorphic/html';
+import { checkoutDappURL, makeDappHttpOrigin } from '@/isomorphic/dapp';
 import {
   EnumMatchDappType,
   IS_RUNTIME_PRODUCTION,
@@ -21,8 +18,10 @@ import {
 } from '../utils/ipcMainEvents';
 
 import {
+  getIpfsService,
   getRabbyExtViews,
   onMainWindowReady,
+  pushChangesToZPopupLayer,
   RABBYX_WINDOWID_S,
   toggleMaskViaOpenedRabbyxNotificationWindow,
 } from '../utils/stream-helpers';
@@ -212,9 +211,33 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
       isTargetDappBySecondaryOrigin: false,
     };
   }
+  const dappTypeInfo = checkoutDappURL(dappOrigin);
+  if (dappTypeInfo?.type === 'ipfs') {
+    const ipfsService = await getIpfsService();
+    if (!(await ipfsService.isExist(dappTypeInfo.ipfsCid))) {
+      pushChangesToZPopupLayer({
+        'ipfs-no-local-modal': {
+          visible: true,
+        },
+      });
+      throw new Error('IPFS CID not local file found');
+    }
+    if (!(await ipfsService.isValid(dappTypeInfo.ipfsCid))) {
+      pushChangesToZPopupLayer({
+        'ipfs-verify-failed-modal': {
+          visible: true,
+        },
+      });
+      throw new Error('IPFS CID verify failed');
+    }
+  }
 
   const currentUrl = evt.sender.getURL();
   const findResult = findDappsByOrigin(dappOrigin);
+
+  if (findResult.dapp) {
+    dappOrigin = makeDappHttpOrigin(findResult.dapp.origin);
+  }
 
   const openResult = await safeOpenURL(dappOrigin, {
     sourceURL: currentUrl,
@@ -345,10 +368,19 @@ onIpcMainInternalEvent(
   async (deledDappIds) => {
     const mainWin = await onMainWindowReady();
 
-    const dappIds = new Set(arraify(deledDappIds));
+    const dappIds = new Set(
+      arraify(deledDappIds).map((id) => id.toLocaleLowerCase())
+    );
 
     const tabsToClose = mainWin.tabs.filterTab((ctx) => {
-      return !!ctx.tab.relatedDappId && dappIds.has(ctx.tab.relatedDappId);
+      const checkouted = ctx.tab.relatedDappId
+        ? checkoutDappURL(ctx.tab.relatedDappId)
+        : null;
+      return (
+        !!ctx.tab.relatedDappId &&
+        !!checkouted &&
+        dappIds.has(checkouted.dappID)
+      );
     });
 
     tabsToClose.forEach((tab) => {
