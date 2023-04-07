@@ -1,4 +1,4 @@
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 export const CommonAccountList: React.FC<{
   title: string;
@@ -8,7 +8,7 @@ export const CommonAccountList: React.FC<{
   return (
     <section>
       <h2
-        className={classNames(
+        className={clsx(
           'mb-[12px]',
           'opacity-50',
           'text-[12px] text-white font-normal',
@@ -17,9 +17,7 @@ export const CommonAccountList: React.FC<{
       >
         {title}
       </h2>
-      <ul className={classNames('flex flex-col space-y-[12px] p-0')}>
-        {children}
-      </ul>
+      <ul className={clsx('flex flex-col space-y-[12px] p-0')}>{children}</ul>
     </section>
   );
 };

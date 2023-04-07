@@ -1,3 +1,4 @@
+import { useCopyAddress } from '@/renderer/hooks/useCopyAddress';
 import { ellipsis } from '@/renderer/utils/address';
 import {
   KEYRING_ICONS,
@@ -5,7 +6,7 @@ import {
   WALLET_BRAND_TYPES,
 } from '@/renderer/utils/constant';
 import { splitNumberByStep } from '@/renderer/utils/number';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import React from 'react';
 
 export interface Props {
@@ -43,18 +44,20 @@ export const AccountItem: React.FC<Props> = ({ checked, data, isBundle }) => {
   const displayAddress = React.useMemo(() => {
     switch (data.type) {
       case 'eth':
-        return ellipsis(data.data.address);
+        return data.data.address;
       case 'bn':
-        return ellipsis(data.apiKey);
+        return data.apiKey;
       case 'btc':
       default:
-        return ellipsis(data.address);
+        return data.address;
     }
   }, [data]);
 
+  const onCopy = useCopyAddress();
+
   return (
     <div
-      className={classNames(
+      className={clsx(
         'group',
         'flex items-center cursor-pointer',
         'rounded-[6px] overflow-hidden hover:bg-[#FFFFFF08] p-[14px]',
@@ -67,7 +70,7 @@ export const AccountItem: React.FC<Props> = ({ checked, data, isBundle }) => {
           <img src="rabby-internal://assets/icons/bundle/checked.svg" />
         ) : (
           <div
-            className={classNames(
+            className={clsx(
               'border border-[#FFFFFF4D] group-hover:border-white w-[16px] h-[16px] border-solid rounded-full'
             )}
           />
@@ -76,26 +79,32 @@ export const AccountItem: React.FC<Props> = ({ checked, data, isBundle }) => {
       <div className="mr-[7px]">
         <img className="w-[22px] h-[22px]" src={addressTypeIcon} alt="" />
       </div>
-      <div
-        className={classNames('text-white text-[12px]', 'flex-1 space-y-[6px]')}
-      >
+      <div className={clsx('text-white text-[12px]', 'flex-1 space-y-[6px]')}>
         <div
-          className={classNames(
-            'font-medium',
-            'opacity-70 group-hover:opacity-100'
-          )}
+          className={clsx('font-medium', 'opacity-70 group-hover:opacity-100')}
         >
           {data.nickname}
         </div>
-        <div className="opacity-50">{displayAddress}</div>
+        <div className="flex space-x-[5px] items-center">
+          <span className="opacity-50">{ellipsis(displayAddress)}</span>
+          <div
+            onClick={() => onCopy(displayAddress)}
+            className="opacity-60 hover:opacity-100"
+          >
+            <img
+              className="w-[14px]"
+              src="rabby-internal://assets/icons/address-management/copy-white.svg"
+            />
+          </div>
+        </div>
       </div>
       <div
-        className={classNames(
+        className={clsx(
           'text-white text-[12px]',
           'flex items-end flex-col space-y-[6px]'
         )}
       >
-        <div className={classNames('font-medium text-[14px]', 'opacity-70')}>
+        <div className={clsx('font-medium text-[14px]', 'opacity-70')}>
           ${splitNumberByStep(Number(data.balance)?.toFixed(2))}
         </div>
         <div className="opacity-60">balance</div>

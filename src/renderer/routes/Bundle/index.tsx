@@ -13,7 +13,7 @@ const HomeBundleInner = () => {
         <section
           className={classNames(
             'flex flex-col overflow-y-auto',
-            'w-[330px] px-[28px]'
+            'w-[358px] px-[28px]'
           )}
         >
           <BundleAccountList />
