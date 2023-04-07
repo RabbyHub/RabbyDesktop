@@ -68,6 +68,7 @@ export default function DApps() {
       title: 'Disconnect my wallets with all Dapps',
       content: <div className="h-[48px]" />,
       closable: true,
+      className: style.modalConfirm,
       onOk: async () => {
         await removeAllConnectedSites();
         toastMessage({
@@ -83,6 +84,7 @@ export default function DApps() {
       title: 'Close all open Dapps',
       content: <div className="h-[48px]" />,
       closable: true,
+      className: style.modalConfirm,
       onOk: async () => {
         await closeAllTabs();
         toastMessage({
