@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 import { maxBy, minBy, sortBy } from 'lodash';
-import { useInterval, usePrevious } from 'react-use';
+import { useInterval, useLocation, usePrevious } from 'react-use';
 import {
   TokenItem,
   TransferingNFTItem,
@@ -436,6 +436,11 @@ const Transactions = ({ updateNonce }: { updateNonce: number }) => {
   }, [currentAccount]);
 
   const [isShowAll, setIsShowAll] = useState(false);
+
+  const location = useLocation();
+  useEffect(() => {
+    setIsShowAll(false);
+  }, [location.hash]);
 
   if (isLoading) {
     return (
