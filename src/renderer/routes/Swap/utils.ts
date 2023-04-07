@@ -286,16 +286,23 @@ export const halfBetterRate = (
 ) => {
   if (
     full.balance_change.success &&
-    full.balance_change.usd_value_change &&
     half.balance_change.success &&
-    half.balance_change.usd_value_change
+    half.balance_change.receive_token_list[0].amount &&
+    full.balance_change.receive_token_list[0]?.amount
   ) {
-    const diff = new BigNumber(half.balance_change.usd_value_change)
-      .times(2)
-      .minus(full.balance_change.usd_value_change);
+    const halfReceive = new BigNumber(
+      half.balance_change.receive_token_list[0].amount
+    );
+
+    const fullREceive = new BigNumber(
+      full.balance_change.receive_token_list[0]?.amount
+    );
+    const diff = new BigNumber(halfReceive).times(2).minus(fullREceive);
 
     return diff.gt(0)
-      ? new BigNumber(diff.toPrecision(1)).times(100).toString(10)
+      ? new BigNumber(diff.div(fullREceive).toPrecision(1))
+          .times(100)
+          .toString(10)
       : null;
   }
   return null;

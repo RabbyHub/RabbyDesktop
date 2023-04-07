@@ -349,6 +349,7 @@ export const SwapToken = () => {
       debouncePayAmount &&
       feeAfterDiscount
     ) {
+      setActiveProvider((e) => (e ? { ...e, halfBetterRate: '' } : e));
       return getAllQuotes({
         userAddress,
         payToken,
@@ -461,7 +462,7 @@ export const SwapToken = () => {
     }, []);
 
   const handleBalance = useCallback(() => {
-    if (!payTokenIsNativeToken) {
+    if (!payTokenIsNativeToken && payToken) {
       setPayAmount(tokenAmountBn(payToken).toString(10));
     }
   }, [payToken, payTokenIsNativeToken]);
