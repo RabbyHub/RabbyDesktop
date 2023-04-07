@@ -121,7 +121,7 @@ export const Slippage = memo((props: SlippageProps) => {
           <span onClick={setRecommendValue} className="underline">
             {new BigNumber(recommendValue || 0).times(100).toString()}
           </span>
-          %;
+          %
         </span>
       );
     }

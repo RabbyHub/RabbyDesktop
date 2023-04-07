@@ -10,6 +10,7 @@ import { CHAINS_ENUM } from '@debank/common';
 import { DEX_ENUM } from '@rabby-wallet/rabby-swap';
 import { useAsync, useDebounce } from 'react-use';
 import ImgLock from '@/../assets/icons/swap/lock.svg';
+import IconRcTip from '@/../assets/icons/swap/tip-info.svg?rc';
 
 import { noop } from 'lodash';
 import { CEX, DEX } from '../constant';
@@ -390,7 +391,6 @@ const DexQuoteItem = (
           name: dexId,
           quote,
           gasPrice: preExecResult?.gasPrice,
-
           shouldApproveToken: !!preExecResult?.shouldApproveToken,
           shouldTwoStepApprove: !!preExecResult?.shouldTwoStepApprove,
           error: !preExecResult,
@@ -487,9 +487,12 @@ const CexQuoteItem = (props: {
   }, [data?.receive_token, bestAmount, isBestQuote]);
 
   const handleClick = () => {
-    message.info(
-      'CEX price is for reference only. Cannot be used for direct trading now.'
-    );
+    message.info({
+      className: 'text-[15px] font-medium ',
+      icon: <IconRcTip className="mr-8 -mb-4 text-20" />,
+      content:
+        'CEX price is for reference only. Cannot be used for direct trading now.',
+    });
   };
 
   return (

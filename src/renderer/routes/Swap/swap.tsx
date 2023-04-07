@@ -181,10 +181,13 @@ const Wrapper = styled.div`
 
     .btnBox {
       margin-top: auto;
+      padding-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
     .btn {
-      margin-top: 24px;
       width: 100%;
       height: 56px;
       box-shadow: none;
@@ -221,9 +224,8 @@ const supportChains = [...new Set(Object.values(DEX_SUPPORT_CHAINS).flat())];
 export const SwapToken = () => {
   const rbiSource = useRbiSource();
 
-  const [slippage, setSlippage] = useState('0.5');
+  const [slippageState, setSlippage] = useState('0.5');
   const [chain, setChain] = useState<CHAINS_ENUM>(CHAINS_ENUM.ETH);
-  const chainName = useMemo(() => CHAINS[chain].name, [chain]);
   const [payToken, setPayToken] = useState<TokenItem | undefined>(
     getChainDefaultToken(CHAINS_ENUM.ETH)
   );
@@ -241,6 +243,8 @@ export const SwapToken = () => {
       chain: searchParams.get('chain'),
     };
   }, [searchParams]);
+
+  const slippage = useMemo(() => slippageState || '0.1', [slippageState]);
 
   const payTokenIsNativeToken = useMemo(() => {
     if (payToken) {
@@ -319,7 +323,9 @@ export const SwapToken = () => {
   const setQuote = useCallback(
     (id: number) => (quote: TCexQuoteData | TDexQuoteData) => {
       if (id === fetchIdRef.current) {
-        setQuotesList((e) => [...e, quote]);
+        setQuotesList((e) =>
+          quote.name === DEX_ENUM.ONEINCH ? [quote, ...e] : [...e, quote]
+        );
       }
     },
     []
@@ -620,10 +626,24 @@ export const SwapToken = () => {
   }, [chain, payToken?.id, receiveToken?.id]);
 
   useEffect(() => {
-    if (!payToken || !receiveToken || !payAmount) {
+    if (
+      !payToken ||
+      !receiveToken ||
+      !payAmount ||
+      activeProvider?.error ||
+      !activeProvider?.quote
+    ) {
       setActiveProvider(undefined);
     }
-  }, [payToken, receiveToken, payAmount]);
+  }, [payToken, receiveToken, payAmount, activeProvider]);
+
+  const receiveSlippageLoading = useMemo(
+    () =>
+      activeProvider?.name
+        ? !quoteList?.find((e) => e.name === activeProvider.name)
+        : false,
+    [activeProvider?.name, quoteList]
+  );
 
   return (
     <Wrapper>
@@ -679,7 +699,7 @@ export const SwapToken = () => {
             </div>
             <div className="section">
               <div className="amountBox">
-                <div className="subText">Amount</div>
+                <div className="subText">{payToken?.symbol || ''} Amount</div>
                 <div
                   className={clsx(
                     'subText',
@@ -720,6 +740,7 @@ export const SwapToken = () => {
                     payToken={payToken}
                     receiveToken={receiveToken}
                     quoteWarning={activeProvider?.quoteWarning}
+                    loading={receiveSlippageLoading}
                   />
                   <div className="section">
                     <div className="subText text-14 text-white flex justify-between">
@@ -729,18 +750,20 @@ export const SwapToken = () => {
                         </span>
                         <span className="font-medium">{slippage}%</span>
                       </div>
-                      <div>
-                        <span className="text-white text-opacity-60">
-                          Minimum received:{' '}
-                        </span>
-                        <span className="font-medium">
-                          {miniReceivedAmount} {receiveToken?.symbol}
-                        </span>
-                      </div>
+                      {!receiveSlippageLoading && (
+                        <div>
+                          <span className="text-white text-opacity-60">
+                            Minimum received:{' '}
+                          </span>
+                          <span className="font-medium">
+                            {miniReceivedAmount} {receiveToken?.symbol}
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     <Slippage
-                      value={slippage}
+                      value={slippageState}
                       onChange={setSlippage}
                       recommendValue={
                         slippageValidInfo?.is_valid

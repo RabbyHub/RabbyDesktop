@@ -1,13 +1,21 @@
 import { TokenItem } from '@debank/rabby-api/dist/types';
-import { Tooltip } from 'antd';
+import { Skeleton, Tooltip } from 'antd';
 import BigNumber from 'bignumber.js';
-import { InsHTMLAttributes, useMemo } from 'react';
+import {
+  InsHTMLAttributes,
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import styled from 'styled-components';
 import ImgVerified from '@/../assets/icons/swap/verified.svg';
 import ImgWarning from '@/../assets/icons/swap/warning.svg';
 import ImgInfo from '@/../assets/icons/swap/info-outline.svg';
 import { formatAmount } from '@/renderer/utils/number';
 import clsx from 'clsx';
+import { SkeletonInputProps } from 'antd/lib/skeleton/Input';
 
 export const WarningOrChecked = ({
   quoteWarning: diffWarning,
@@ -91,6 +99,16 @@ const ReceiveWrapper = styled.div`
   }
 `;
 
+const SkeletonChildren = (
+  props: PropsWithChildren<SkeletonInputProps & { loading?: boolean }>
+) => {
+  const { loading = true, children, ...other } = props;
+  if (loading) {
+    return <Skeleton.Input active {...other} />;
+  }
+  return <>{children}</>;
+};
+
 interface ReceiveDetailsProps {
   payAmount: string | number;
   receiveRawAmount: string | number;
@@ -98,6 +116,7 @@ interface ReceiveDetailsProps {
   receiveToken: TokenItem;
   receiveTokenDecimals?: number;
   quoteWarning?: string;
+  loading?: boolean;
 }
 export const ReceiveDetails = (
   props: ReceiveDetailsProps & InsHTMLAttributes<HTMLDivElement>
@@ -109,8 +128,21 @@ export const ReceiveDetails = (
     receiveToken,
     receiveTokenDecimals,
     quoteWarning,
+    loading = false,
     ...other
   } = props;
+
+  const [reverse, setReverse] = useState(false);
+
+  const reverseRate = useCallback(() => {
+    setReverse((e) => !e);
+  }, []);
+
+  useEffect(() => {
+    if (payToken && receiveToken) {
+      setReverse(false);
+    }
+  }, [receiveToken, payToken]);
 
   const { receiveNum, payUsd, receiveUsd, rate, diff, isPositive, showLoss } =
     useMemo(() => {
@@ -126,10 +158,12 @@ export const ReceiveDetails = (
         payUsd: formatAmount(pay.toString(10)),
         receiveUsd: formatAmount(receive.toString(10)),
         rate: formatAmount(
-          new BigNumber(receiveAll).div(payAmount).toString(10)
+          new BigNumber(reverse ? payAmount : receiveAll)
+            .div(reverse ? receiveAll : payAmount)
+            .toString(10)
         ),
         isPositive: cut.gte(0),
-        diff: cut.toFixed(2), // .replace(/(\.0*[1-9][1-9]).*/, '$1')}`,
+        diff: cut.toFixed(2),
         showLoss: cut.lte(-5),
       };
     }, [
@@ -139,6 +173,7 @@ export const ReceiveDetails = (
       receiveToken.decimals,
       receiveToken.price,
       receiveTokenDecimals,
+      reverse,
     ]);
 
   return (
@@ -146,13 +181,18 @@ export const ReceiveDetails = (
       <div className="column">
         <span>Receive amount</span>
         <div className="right">
-          <span>
-            {receiveNum} {receiveToken.symbol}
-          </span>
-          <WarningOrChecked quoteWarning={quoteWarning} />
+          <SkeletonChildren
+            loading={loading}
+            style={{ maxWidth: 144, height: 20, opacity: 0.5 }}
+          >
+            <span>
+              {receiveNum} {receiveToken.symbol}
+            </span>
+            <WarningOrChecked quoteWarning={quoteWarning} />
+          </SkeletonChildren>
         </div>
       </div>
-      {quoteWarning && (
+      {!loading && quoteWarning && (
         <div className="warning">
           The offer may no longer be valid. Actual offer estimated through
           transaction simulation. You'll receive {quoteWarning}% less than the
@@ -163,35 +203,41 @@ export const ReceiveDetails = (
       <div className="column">
         <span>Rate</span>
         <div className="right">
-          <span>
-            1 {payToken.symbol} = {rate} {receiveToken.symbol}(
-            <span className={clsx('diffPercent', isPositive && 'positive')}>
-              {diff}%
-            </span>
-            )
-          </span>
-          <Tooltip
-            overlayClassName="rectangle max-w-[600px]"
-            title={
-              <div className="flex flex-col gap-2">
-                <div>
-                  Est. Payment: {payAmount}
-                  {payToken.symbol} ≈ ${payUsd}
-                </div>
-                <div>
-                  Est. Receiving: {receiveNum}
-                  {receiveToken.symbol} ≈ ${receiveUsd}
-                </div>
-                <div>Est. Difference: {diff}%</div>
-              </div>
-            }
+          <SkeletonChildren
+            loading={loading}
+            style={{ maxWidth: 182, height: 20, opacity: 0.5 }}
           >
-            <img src={ImgInfo} />
-          </Tooltip>
+            <span className="cursor-pointer" onClick={reverseRate}>
+              1 {reverse ? receiveToken.symbol : payToken.symbol} = {rate}{' '}
+              {reverse ? payToken.symbol : receiveToken.symbol} (
+              <span className={clsx('diffPercent', isPositive && 'positive')}>
+                {diff}%
+              </span>
+              )
+            </span>
+            <Tooltip
+              overlayClassName="rectangle max-w-[600px]"
+              title={
+                <div className="flex flex-col gap-2">
+                  <div>
+                    Est. Payment: {payAmount}
+                    {payToken.symbol} ≈ ${payUsd}
+                  </div>
+                  <div>
+                    Est. Receiving: {receiveNum}
+                    {receiveToken.symbol} ≈ ${receiveUsd}
+                  </div>
+                  <div>Est. Difference: {diff}%</div>
+                </div>
+              }
+            >
+              <img src={ImgInfo} />
+            </Tooltip>
+          </SkeletonChildren>
         </div>
       </div>
 
-      {showLoss && (
+      {!loading && showLoss && (
         <div className="warning rate">
           Selected offer differs greatly from current rate, may cause big losses
         </div>
