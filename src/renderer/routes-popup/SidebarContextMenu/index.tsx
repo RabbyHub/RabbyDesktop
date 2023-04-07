@@ -227,7 +227,7 @@ export const SidebarContextMenu = () => {
   if (pageInfo?.type !== 'sidebar-dapp') return null;
 
   return (
-    <div>
+    <div className={styles.winWrapper}>
       <Menu
         className={styles.dappDropdownMenu}
         onClick={handleMenuClick}
