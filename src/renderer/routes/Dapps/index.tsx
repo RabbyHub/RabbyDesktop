@@ -1,8 +1,12 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 import { setDappsOrder } from '@/renderer/ipcRequest/dapps';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
-import { useCallback, useState } from 'react';
 import { useOpenDapp } from '@/renderer/utils/react-router';
+import { useCallback, useState } from 'react';
+import { closeAllTabs } from '@/renderer/ipcRequest/mainwin';
+import { ModalConfirm } from '@/renderer/components/Modal/Confirm';
+import { toastMessage } from '@/renderer/components/TransparentToast';
+import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
 import { Empty } from './components/Empty';
 
 import ModalDeleteDapp from '../../components/ModalDeleteDapp';
@@ -14,8 +18,8 @@ import { DAppBlock } from './components/DAppBlock';
 import { SortableList } from './components/SortableList';
 import './index.less';
 
-import style from './index.module.less';
 import { NFTPanel } from './components/NFTPanel/NFTPanel';
+import style from './index.module.less';
 
 type IOnOpDapp = (
   op: 'rename' | 'delete' | 'pin' | 'unpin',
@@ -57,6 +61,38 @@ export default function DApps() {
     [pinDapp, unpinDapp]
   );
 
+  const { removeAllConnectedSites } = useConnectedSite();
+
+  const handleDisconnectAll = () => {
+    ModalConfirm({
+      title: 'Disconnect my wallets with all Dapps',
+      content: <div className="h-[48px]" />,
+      closable: true,
+      onOk: async () => {
+        await removeAllConnectedSites();
+        toastMessage({
+          content: 'All Dapps have been disconnected.',
+          type: 'success',
+        });
+      },
+    });
+  };
+
+  const handleCloseAll = () => {
+    ModalConfirm({
+      title: 'Close all open Dapps',
+      content: <div className="h-[48px]" />,
+      closable: true,
+      onOk: async () => {
+        await closeAllTabs();
+        toastMessage({
+          content: 'All Dapps have been closed.',
+          type: 'success',
+        });
+      },
+    });
+  };
+
   return (
     <div className={style.page}>
       <img
@@ -76,6 +112,22 @@ export default function DApps() {
             />
             Dapp Security Engine, provided by Rabby Desktop, offers better
             security for your Dapp use.
+          </div>
+          <div className={style.actionList}>
+            <div className={style.action} onClick={handleDisconnectAll}>
+              <img
+                src="rabby-internal://assets/icons/dapps/icon-disconnect.svg"
+                alt=""
+              />
+              Disconnect all
+            </div>
+            <div className={style.action} onClick={handleCloseAll}>
+              <img
+                src="rabby-internal://assets/icons/dapps/icon-close.svg"
+                alt=""
+              />
+              Close open Dapps
+            </div>
           </div>
         </header>
         <main className={style.main}>

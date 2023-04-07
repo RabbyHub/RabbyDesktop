@@ -138,8 +138,8 @@ const SIZE_MAP: Record<
   }
 > = {
   'sidebar-dapp': {
-    width: 140,
-    height: 148,
+    width: 210,
+    height: 306,
   },
 };
 

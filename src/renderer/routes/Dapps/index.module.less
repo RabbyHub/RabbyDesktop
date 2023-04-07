@@ -21,17 +21,10 @@
   }
 
   .header {
-    padding: 4px 48px 24px;
+    padding: 4px 18px 24px 48px;
 
-    .title {
-      font-weight: 510;
-      font-size: 28px;
-      line-height: 33px;
-
-      color: #ffffff;
-      margin-bottom: 11px;
-    }
-
+    display: flex;
+    align-items: center;
     .desc {
       font-weight: 400;
       font-size: 14px;
@@ -42,6 +35,42 @@
       display: flex;
       align-items: center;
       gap: 6px;
+    }
+
+    .action {
+      &List {
+        display: flex;
+        margin-left: auto;
+      }
+      padding: 0 20px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      cursor: pointer;
+      position: relative;
+      font-weight: 500;
+      font-size: 12px;
+      line-height: 14px;
+
+      color: #8697ff;
+
+      &:not(:last-child)::after {
+        content: '';
+        width: 1px;
+        height: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      &:first-child {
+        padding-left: 0;
+      }
+      &:last-child {
+        padding-right: 0;
+      }
     }
   }
   .main {

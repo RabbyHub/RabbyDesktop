@@ -212,6 +212,7 @@ export type RabbyXMethod = {
   'walletController.getConnectedSites': () => IConnectedSiteInfo[];
   'walletController.setRecentConnectedSites': (sites: ConnectedSite[]) => void;
   'walletController.getRecentConnectedSites': () => ConnectedSite[];
+  'walletController.removeAllRecentConnectedSites': () => void;
 
   'walletController.setSite': (siteInfo: ConnectedSite) => void;
   'walletController.getSite': (origin: string) => ConnectedSite;

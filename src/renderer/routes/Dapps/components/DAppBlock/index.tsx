@@ -86,7 +86,7 @@ export const DAppBlock = ({
                   icon: (
                     <img
                       className="dapp-dropdown-item-icon"
-                      src="rabby-internal://assets/icons/sidebar-context-menu/icon-pinned.svg"
+                      src="rabby-internal://assets/icons/sidebar-context-menu/icon-unpin.svg"
                     />
                   ),
                 }

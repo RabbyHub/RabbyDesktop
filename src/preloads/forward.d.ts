@@ -1,5 +1,7 @@
 /// <reference path="../isomorphic/type-helpers.d.ts" />
 
+import { ReactNode } from 'react';
+
 type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
 type IDisplayedAccountWithBalance =
   import('@/renderer/hooks/rabbyx/useAccountToDisplay').IDisplayedAccountWithBalance;
@@ -54,6 +56,12 @@ type ZViewStates = {
 
   'safe-queue-modal': {
     // nothing
+  };
+
+  'toast-zpopup-message': {
+    message?: ReactNode;
+    type?: 'success' | 'error' | 'warning' | 'info';
+    duration?: number;
   };
 };
 

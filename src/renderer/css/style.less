@@ -65,10 +65,10 @@ img {
   -webkit-app-region: drag;
 }
 
-.global-nodrag, [data-nodrag] {
+.global-nodrag,
+[data-nodrag] {
   -webkit-app-region: no-drag;
 }
-
 
 .ant-message {
   .ant-message-notice-content,
@@ -86,6 +86,9 @@ img {
       display: flex;
       align-items: center;
     }
+  }
+  .zpopup-toast .ant-message-notice-content {
+    background: #474c5a;
   }
 }
 
@@ -113,7 +116,7 @@ img {
     color: #fff;
     font-size: 13px;
     transition: all 0.3s ease-in-out;
-    margin: 0!important;
+    margin: 0 !important;
 
     &.ant-tabs-tab-active {
       background: #fff;
@@ -123,8 +126,6 @@ img {
       color: #fff;
     }
   }
-
-
 }
 
 .curve-modal {

@@ -135,10 +135,10 @@
     cursor: pointer;
     width: 100%;
     box-sizing: border-box;
-    border-left: 4px solid transparent;
-    padding-left: 16px;
+    padding-left: 20px;
     opacity: 0.8;
     overflow: hidden;
+    position: relative;
 
     font-size: 14px;
     color: #fff;
@@ -146,8 +146,16 @@
 
     &.active {
       background: rgba(0, 0, 0, 0.2);
-      border-left-color: var(--color-primary);
       opacity: 1;
+      &::before {
+        position: absolute;
+        content: '';
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 4px;
+        background-color: var(--color-primary);
+      }
     }
     &:not(.active):hover {
       background: rgba(0, 0, 0, 0.1);
@@ -228,42 +236,58 @@
     }
   }
 
-  .routeItemInner {
-    position: relative;
+  .routeItem:hover {
+    .dappIndicator {
+      .closeIcon {
+        display: block;
+      }
+      .loadingIcon,
+      .indicator {
+        display: none;
+      }
+    }
+  }
+
+  .dappIndicator {
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    width: 9px;
+    height: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(-50%);
+
     .indicator {
-      position: absolute;
-      top: 50%;
-      left: -10px;
       width: 4px;
       height: 4px;
       border-radius: 50%;
       background: var(--color-comment2);
-      transform: translate(-50%, -50%);
+    }
+    .closeIcon {
+      display: none;
+      cursor: pointer;
     }
 
     .loadingIcon {
       @iconSize: 16px;
-
-      position: absolute;
-      top: calc(50% - @iconSize / 2);
-      left: calc(-2px - @iconSize / 2);
-      transform: translateX(-50%);
       width: @iconSize;
       height: @iconSize;
     }
-
-    img.iconClose {
-      cursor: pointer;
-      position: absolute;
-      top: calc(50% - 10px);
-      right: 8px;
-      visibility: hidden;
-    }
-
-    &:hover img.iconClose {
-      visibility: visible;
-    }
   }
+
+  // img.iconClose {
+  //   cursor: pointer;
+  //   position: absolute;
+  //   top: calc(50% - 10px);
+  //   right: 8px;
+  //   visibility: hidden;
+  // }
+
+  // &:hover img.iconClose {
+  //   visibility: visible;
+  // }
 }
 
 .menuFold {
@@ -297,18 +321,9 @@
     flex-shrink: 0;
   }
 
-  > .pinnedList {
-    padding-right: 0;
+  .dappList {
+    flex: 1;
     overflow: overlay;
-    // max-height: 312px;
-    // flex: 1;
-  }
-
-  > .unpinnedList {
-    padding-right: 0;
-    overflow: overlay;
-    // min-height: 156px;
-    // flex: 1;
   }
 }
 

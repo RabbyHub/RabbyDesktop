@@ -82,9 +82,24 @@ export function useConnectedSite(currentOrigin?: string) {
     return connectedSiteMap?.[currentOrigin!] || null;
   }, [connectedSiteMap, currentOrigin]);
 
+  const removeConnectedSite = useCallback(
+    async (origin: string) => {
+      await walletController.removeConnectedSite(origin);
+      await fetchConnectedSite();
+    },
+    [fetchConnectedSite]
+  );
+
+  const removeAllConnectedSites = useCallback(async () => {
+    await walletController.removeAllRecentConnectedSites();
+    await fetchConnectedSite();
+  }, [fetchConnectedSite]);
+
   return {
     currentConnectedSite,
     connectedSiteMap,
     fetchConnectedSite,
+    removeConnectedSite,
+    removeAllConnectedSites,
   };
 }
