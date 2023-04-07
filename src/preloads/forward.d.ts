@@ -137,6 +137,10 @@ type ChannelForwardMessageType =
       type: 'refreshCurrentAccount';
     }
   | {
+      targetView: '*';
+      type: 'refreshConnectedSiteMap';
+    }
+  | {
       targetView: 'address-management';
       type: 'nothing-but-reserved';
     }
