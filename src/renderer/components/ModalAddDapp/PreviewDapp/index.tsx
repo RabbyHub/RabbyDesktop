@@ -2,7 +2,6 @@ import { putDapp } from '@/renderer/ipcRequest/dapps';
 import { LoadingOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useState } from 'react';
-import { makeDappHttpOrigin } from '@/isomorphic/dapp';
 import RabbyInput from '../../AntdOverwrite/Input';
 
 import { DappFavicon } from '../../DappFavicon';
@@ -15,7 +14,7 @@ interface PreviewDappProps {
   onOpen: (dapp: NonNullable<IDappsDetectResult['data']>) => void;
   loading?: boolean;
   isGoBack?: boolean;
-  onGoBackClick?: (dapp: Omit<IDapp, 'id' | 'type'>) => void;
+  onGoBackClick?: (dapp: IDapp) => void;
 }
 export const PreviewDapp = ({
   data,
@@ -111,7 +110,7 @@ export const PreviewDapp = ({
       </div>
       <PreviewWebview
         containerClassName={styles.previewTagContainer}
-        src={makeDappHttpOrigin(data.inputOrigin, 'preview')}
+        src={data.inputOrigin}
         loadingView={
           <div className={styles.previewEmpty}>
             <div>

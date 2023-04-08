@@ -57,24 +57,6 @@ type ZViewStates = {
   'safe-queue-modal': {
     // nothing
   };
-
-  'toast-zpopup-message': {
-    message?: ReactNode;
-    type?: 'success' | 'error' | 'warning' | 'info';
-    duration?: number;
-  };
-
-  'ipfs-add-failed-modal': {
-    // nothing
-  };
-
-  'ipfs-no-local-modal': {
-    // nothing
-  };
-
-  'ipfs-verify-failed-modal': {
-    // nothing
-  };
 };
 
 type IZPopupSubviewState = {

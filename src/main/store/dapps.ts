@@ -5,7 +5,6 @@ import {
   formatDapp,
   formatDapps,
   isValidDappType,
-  checkoutDappURL,
   normalizeProtocolBindingValues,
 } from '@/isomorphic/dapp';
 import { arraify } from '@/isomorphic/array';
@@ -28,12 +27,11 @@ import {
   maybeTrezorLikeBuiltInHttpPage,
   parseDomainMeta,
 } from '../../isomorphic/url';
-import { detectDapp, detectIPFSDapp } from '../utils/dapps';
+import { detectDapp } from '../utils/dapps';
 import { storeLog } from '../utils/log';
 import { makeStore } from '../utils/store';
 import { getAppProxyConfigForAxios } from './desktopApp';
 import { fetchImageBuffer } from '../utils/fetch';
-import { getIpfsService } from '../utils/stream-helpers';
 
 const IDappSchema: import('json-schema-typed').JSONSchema = {
   type: 'object',
@@ -80,14 +78,14 @@ export const dappStore = makeStore<{
     protocolDappsBinding: {
       type: 'object',
       patternProperties: {
-        '^(https?|ipfs|rabby-ipfs)://.+$': IProtocolBindingSchema,
+        '^https?://.+$': IProtocolBindingSchema,
       },
       default: {} as IProtocolDappBindings,
     },
     dappsMap: {
       type: 'object',
       patternProperties: {
-        '^(https?|ipfs|rabby-ipfs)://.+$': IDappSchema,
+        '^https://.+$': IDappSchema,
       },
       additionalProperties: false,
       default: {} as Record<IDapp['origin'], IDapp>,
@@ -95,7 +93,7 @@ export const dappStore = makeStore<{
     dappsLastOpenInfos: {
       type: 'object',
       patternProperties: {
-        '^(https?|ipfs|rabby-ipfs)://.+$': {
+        '^https://.+$': {
           type: 'object',
           properties: {
             finalURL: { type: 'string' },
@@ -194,8 +192,7 @@ export function findDappsByOrigin(
   dappOrigin: string,
   dapps: IDapp[] = getAllDapps()
 ) {
-  const cUrlInfo = canoicalizeDappUrl(dappOrigin);
-  const secondaryOrigin = cUrlInfo.secondaryOrigin;
+  const secondaryOrigin = canoicalizeDappUrl(dappOrigin).secondaryOrigin;
 
   const result: IMatchDappResult = {
     dappByOrigin: null as null | IDapp,
@@ -204,11 +201,6 @@ export function findDappsByOrigin(
   };
   dapps.find((dapp) => {
     if (dapp.origin === dappOrigin) {
-      result.dappByOrigin = dapp;
-    } else if (
-      dapp.type === 'ipfs' &&
-      dapp.origin.toLocaleLowerCase() === cUrlInfo.origin.toLocaleLowerCase()
-    ) {
       result.dappByOrigin = dapp;
     }
 
@@ -383,16 +375,6 @@ export async function repairDappsFieldsOnBootstrap() {
 handleIpcMainInvoke('detect-dapp', async (_, dappUrl) => {
   const allDapps = getAllDapps();
 
-  const urlResult = checkoutDappURL(dappUrl);
-
-  if (urlResult.type === 'ipfs') {
-    return {
-      result: await detectIPFSDapp(urlResult.dappID, {
-        existedDapps: allDapps,
-      }),
-    };
-  }
-
   const result = await detectDapp(dappUrl, {
     existedDapps: allDapps,
     proxyOnGrab: getAppProxyConfigForAxios(),
@@ -566,7 +548,7 @@ handleIpcMainInvoke('dapps-replace', (_, oldOrigin, newDapp) => {
   return {};
 });
 
-handleIpcMainInvoke('dapps-delete', async (_, dappToDel: IDapp) => {
+handleIpcMainInvoke('dapps-delete', (_, dappToDel: IDapp) => {
   const dappsMap = dappStore.get('dappsMap');
   const dapp = dappsMap[dappToDel.origin];
 
@@ -575,12 +557,6 @@ handleIpcMainInvoke('dapps-delete', async (_, dappToDel: IDapp) => {
       error: 'Not found',
       dapps: [],
     };
-  }
-
-  const dappTypeInfo = checkoutDappURL(dapp.origin);
-  if (dappTypeInfo?.type === 'ipfs') {
-    const ipfsService = await getIpfsService();
-    await ipfsService.removeFile(dappTypeInfo.ipfsCid);
   }
 
   const delResult = checkDelDapp(dappToDel.origin, { dappsMap });

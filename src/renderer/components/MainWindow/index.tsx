@@ -161,7 +161,7 @@ const router = createRouter([
         ),
       },
       {
-        path: 'dapps/:dappId',
+        path: 'dapps/:origin',
         element: (
           <DappViewWrapper>
             <TopNavBar />

@@ -7,7 +7,6 @@ import { permissionService } from '@/renderer/ipcRequest/rabbyx';
 import { navigateToDappRoute } from '@/renderer/utils/react-router';
 import { useNavigate } from 'react-router-dom';
 import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
-import { formatDappURLToShow } from '@/isomorphic/dapp';
 import styles from './index.module.less';
 import { DappFavicon } from '../DappFavicon';
 import { Modal } from '../Modal/Modal';
@@ -80,7 +79,7 @@ export default function ModalDeleteDapp({
               <div className="infos">
                 <h4 className="dapp-alias">{dapp.alias}</h4>
                 <div className="dapp-url">
-                  {formatDappURLToShow(dapp.origin?.replace(/^\w+:\/\//, ''))}
+                  {dapp.origin?.replace(/^\w+:\/\//, '')}
                 </div>
               </div>
             </a>

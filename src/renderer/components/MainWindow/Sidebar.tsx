@@ -24,9 +24,6 @@ import { Badge } from 'antd';
 import { usePrevious } from 'react-use';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
-import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
-import { CHAINS, CHAINS_ENUM } from '@debank/common';
-import { makeDappHttpOrigin } from '@/isomorphic/dapp';
 import { DappFavicon } from '../DappFavicon';
 import Hide from './Hide';
 import styles from './Sidebar.module.less';
@@ -83,7 +80,7 @@ const StaticEntries = [
   },
 ] as const;
 
-const DappRoutePattern = '/mainwin/dapps/:dappId';
+const DappRoutePatter = '/mainwin/dapps/:origin';
 
 const DappIndicator = ({ tab }: { tab?: chrome.tabs.Tab }) => {
   const handleClose: React.MouseEventHandler = (e) => {
@@ -160,8 +157,7 @@ const TabList = ({
   isFold?: boolean;
 }) => {
   const navigateToDapp = useNavigateToDappRoute();
-  const { connectedSiteMap } = useConnectedSite();
-  const rLoc = useLocation();
+  const location = useLocation();
   if (!dapps?.length) {
     return null;
   }
@@ -173,18 +169,12 @@ const TabList = ({
         const faviconUrl =
           dapp?.faviconBase64 || dapp?.faviconUrl || dapp.tab?.favIconUrl;
 
-        const origin = makeDappHttpOrigin(dapp.origin);
-        const chain = connectedSiteMap[origin]?.chain;
-
-        const matchedRoute = matchPath(DappRoutePattern, rLoc.pathname);
-        const matchedDappID = matchedRoute?.params.dappId || '';
-
         return (
           <li
             key={`dapp-${dapp.origin}`}
             className={classNames(
               styles.routeItem,
-              matchedDappID &&
+              matchPath(DappRoutePatter, location.pathname) &&
                 activeTabId &&
                 activeTabId === tab?.id &&
                 styles.active
@@ -252,13 +242,13 @@ export default function MainWindowSidebar() {
             location.pathname
           )
       ),
-      matchedDapp: matchPath(DappRoutePattern, location.pathname),
+      matchedDapp: matchPath(DappRoutePatter, location.pathname),
     };
   }, [location.pathname]);
   const prevMatchedDapp = usePrevious(matchedDapp);
 
   useEffect(() => {
-    if (prevMatchedDapp?.params.dappId !== matchedDapp?.params.dappId) {
+    if (prevMatchedDapp?.params.origin !== matchedDapp?.params.origin) {
       walletController.rejectAllApprovals();
     }
   }, [prevMatchedDapp, matchedDapp]);
@@ -276,7 +266,7 @@ export default function MainWindowSidebar() {
 
   useEffect(() => {
     if (matchedDapp) {
-      makeSureDappOpened(matchedDapp.params.dappId!);
+      makeSureDappOpened(matchedDapp.params.origin!);
     }
   }, [matchedDapp]);
 

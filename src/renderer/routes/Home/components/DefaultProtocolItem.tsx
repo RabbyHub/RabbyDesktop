@@ -25,7 +25,6 @@ import {
   isSameDomain,
   removeProtocolFromUrl,
 } from '@/renderer/utils/url';
-import { formatDappURLToShow } from '@/isomorphic/dapp';
 import * as Template from '../templates';
 import ScrollTopContext from './scrollTopContext';
 
@@ -312,11 +311,7 @@ const DefaultProtocolItem = ({
             {hasBinded && (
               <div className="protocol-bind">
                 <span className="protocol-dapp">
-                  (
-                  {/^https:\/\//.test(bindUrl)
-                    ? removeProtocolFromUrl(bindUrl)
-                    : formatDappURLToShow(bindUrl)}
-                  )
+                  ({removeProtocolFromUrl(bindUrl)})
                 </span>
               </div>
             )}
