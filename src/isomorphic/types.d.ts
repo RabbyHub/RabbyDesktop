@@ -489,6 +489,7 @@ type ISiteMetaData = {
 type IAppSession = {
   mainSession: Electron.Session;
   ipfsDappSession: Electron.Session;
+  trezorLikeWindowSession: Electron.Session;
   dappSafeViewSession: Electron.Session;
   checkingViewSession: Electron.Session;
   checkingProxySession: Electron.Session;

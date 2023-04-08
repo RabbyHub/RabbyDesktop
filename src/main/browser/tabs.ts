@@ -106,12 +106,16 @@ export class Tab {
     this.tabs = tabs;
 
     this.view = viewMngr.allocateView({
-      ...(this.relatedDappId &&
-        isIpfsHttpURL(this.relatedDappId) && {
-          webPreferences: {
-            partition: SPECIAL_SESSIONS.ipfsDappSession,
-          },
-        }),
+      // ...this.relatedDappId && isIpfsHttpURL(this.relatedDappId) && {
+      //   webPreferences: {
+      //     partition: SPECIAL_SESSIONS.ipfsDappSession,
+      //   },
+      // },
+      ...this.$meta.webuiType === 'ForTrezorLike' && {
+        webPreferences: {
+          partition: SPECIAL_SESSIONS.trezorLikeWindowSession,
+        }
+      }
     });
     this.id = this.view.webContents.id;
     this.window = ofWindow;

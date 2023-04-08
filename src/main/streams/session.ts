@@ -4,7 +4,7 @@ import path from 'path';
 import { app, protocol, session, shell } from 'electron';
 import { firstValueFrom } from 'rxjs';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
-import { isIpfsHttpURL, isRabbyXPage } from '@/isomorphic/url';
+import { isIpfsHttpURL, isRabbyXPage, safeParseURL } from '@/isomorphic/url';
 import { trimWebContentsUserAgent } from '@/isomorphic/string';
 import {
   IS_RUNTIME_PRODUCTION,
@@ -31,6 +31,7 @@ import { firstEl } from '../../isomorphic/array';
 import {
   getIpfsService,
   getRabbyExtId,
+  getSessionInsts,
   getWebuiExtId,
 } from '../utils/stream-helpers';
 import { checkOpenAction } from '../utils/tabs';
@@ -244,9 +245,46 @@ const registerCallbacks: {
       // const unregistered = protocol.unregisterProtocol(TARGET_PROTOCOL.slice(0, -1));
       // console.log(`unregistered: ${TARGET_PROTOCOL}`, unregistered);
 
+      if (ctx.sessionName === 'mainSession') {
+        const registerSuccess = ctx.session.protocol.interceptHttpProtocol(
+          TARGET_PROTOCOL.slice(0, -1),
+          async (request, callback) => {
+            const { ipfsDappSession, trezorLikeWindowSession } = await getSessionInsts();
+            console.log('[feat] [1]:: request', request);
+
+            if (!isIpfsHttpURL(request.url)) {
+              const isToBridge = safeParseURL(request.url)?.port == '21320';
+              callback({
+                url: request.url,
+                method: request.method,
+                headers: {
+                  ...request.headers,
+                  'Upgrade-Insecure-Requests': '0',
+                },
+                // @ts-expect-error
+                session: isToBridge ? trezorLikeWindowSession : null,
+              });
+              return;
+            }
+
+            callback({
+              url: request.url,
+              method: request.method,
+              headers: request.headers,
+
+              session: ipfsDappSession
+            });
+          }
+        );
+
+        return { registerSuccess, protocol: TARGET_PROTOCOL };
+      }
+
       const registerSuccess = ctx.session.protocol.interceptFileProtocol(
         TARGET_PROTOCOL.slice(0, -1),
         async (request, callback) => {
+          console.log('[feat] [2]:: request', request);
+
           if (!isIpfsHttpURL(request.url)) {
             callback({
               data: 'Not found',
@@ -314,12 +352,16 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   const ipfsDappSession = session.fromPartition(
     SPECIAL_SESSIONS.ipfsDappSession
   );
+  const trezorLikeWindowSession = session.fromPartition(
+    SPECIAL_SESSIONS.trezorLikeWindowSession
+  );
   const dappSafeViewSession = session.fromPartition('dappSafeView');
   const checkingViewSession = session.fromPartition('checkingView');
   const checkingProxySession = session.fromPartition('checkingProxy');
 
   const allSessions = {
     ipfsDappSession,
+    trezorLikeWindowSession,
     mainSession,
     dappSafeViewSession,
     checkingViewSession,
@@ -339,7 +381,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
     {
       inst: mainSession,
       name: 'mainSession',
-      includeFilters: [RABBY_INTERNAL_PROTOCOL, PROTOCOL_IPFS],
+      includeFilters: [RABBY_INTERNAL_PROTOCOL, PROTOCOL_IPFS, 'http:'],
     },
     {
       inst: ipfsDappSession,
@@ -349,12 +391,12 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
     {
       inst: checkingProxySession,
       name: 'checkingProxySession',
-      includeFilters: [RABBY_INTERNAL_PROTOCOL],
+      includeFilters: [RABBY_INTERNAL_PROTOCOL, PROTOCOL_IPFS],
     },
     {
       inst: checkingViewSession,
       name: 'checkingViewSession',
-      includeFilters: [RABBY_INTERNAL_PROTOCOL],
+      includeFilters: [RABBY_INTERNAL_PROTOCOL, PROTOCOL_IPFS],
     },
   ] as const;
 
