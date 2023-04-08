@@ -78,14 +78,14 @@ export const dappStore = makeStore<{
     protocolDappsBinding: {
       type: 'object',
       patternProperties: {
-        '^https?://.+$': IProtocolBindingSchema,
+        '^(https?|ipfs|rabby-ipfs)://.+$': IProtocolBindingSchema,
       },
       default: {} as IProtocolDappBindings,
     },
     dappsMap: {
       type: 'object',
       patternProperties: {
-        '^https://.+$': IDappSchema,
+        '^(https?|ipfs|rabby-ipfs)://.+$': IDappSchema,
       },
       additionalProperties: false,
       default: {} as Record<IDapp['origin'], IDapp>,
@@ -93,7 +93,7 @@ export const dappStore = makeStore<{
     dappsLastOpenInfos: {
       type: 'object',
       patternProperties: {
-        '^https://.+$': {
+        '^(https?|ipfs|rabby-ipfs)://.+$': {
           type: 'object',
           properties: {
             finalURL: { type: 'string' },
@@ -162,13 +162,25 @@ export const dappStore = makeStore<{
     dappStore.get('unpinnedList')
   );
 
-  dappStore.set('pinnedList', pinnedList);
-  dappStore.set('unpinnedList', unpinnedList);
+  dappStore.set(
+    'pinnedList',
+    pinnedList.filter((v) => !/^(ipfs|rabby-ipfs):\/\//.test(v))
+  );
+  dappStore.set(
+    'unpinnedList',
+    unpinnedList.filter((v) => !/^(ipfs|rabby-ipfs):\/\//.test(v))
+  );
   /* resort :end */
 
   /* coerce INextDapp :start */
   let changed = false;
   Object.entries(dappsMap).forEach(([k, v]) => {
+    // remove ipfs/rabby-ipfs dapps
+    if (/^(ipfs|rabby-ipfs):\/\//.test(k)) {
+      delete dappsMap[k];
+      changed = true;
+      return;
+    }
     if ((!v.id || !isValidDappType(v.type)) && k.startsWith('http')) {
       changed = true;
       fixTypedDappId(v);
@@ -217,6 +229,12 @@ export function findDappsByOrigin(
 
 export function getProtocolDappsBindings() {
   const protocolDappsBinding = dappStore.get('protocolDappsBinding') || {};
+  Object.entries(protocolDappsBinding).forEach(([k, v]) => {
+    // remove ipfs/rabby-ipfs dapps; 类型不大对？
+    if (/^(ipfs|rabby-ipfs):\/\//.test((v as any)?.origin)) {
+      delete protocolDappsBinding[k];
+    }
+  });
 
   return normalizeProtocolBindingValues(protocolDappsBinding);
 }
