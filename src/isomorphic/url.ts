@@ -257,21 +257,21 @@ export function extractIpfsCid(ipfsDappPath: string) {
   ) {
     const [, ipfsCid = ''] = ipfsDappPath.match(IPFS_REGEXPS.IPFS_REGEX) || [];
 
-    return ipfsCid;
+    return ipfsCid.replace(/\/$/, '');
   }
 
   if (IPFS_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX.test(ipfsDappPath)) {
     const [, ipfsCid = ''] =
       ipfsDappPath.match(IPFS_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX) || [];
 
-    return ipfsCid;
+    return ipfsCid.replace(/\/$/, '');
   }
 
   if (IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX.test(ipfsDappPath)) {
     const [, ipfsCid = ''] =
       ipfsDappPath.match(IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX) || [];
 
-    return ipfsCid;
+    return ipfsCid.replace(/\/$/, '');
   }
 
   return '';

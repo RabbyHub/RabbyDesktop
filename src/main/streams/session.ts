@@ -249,11 +249,9 @@ const registerCallbacks: {
         const registerSuccess = ctx.session.protocol.interceptHttpProtocol(
           TARGET_PROTOCOL.slice(0, -1),
           async (request, callback) => {
-            const { ipfsDappSession, trezorLikeWindowSession } = await getSessionInsts();
-            console.log('[feat] [1]:: request', request);
-
             if (!isIpfsHttpURL(request.url)) {
-              const isToBridge = safeParseURL(request.url)?.port == '21320';
+              console.log('[feat] [1] not ipfs:: request', request);
+
               callback({
                 url: request.url,
                 method: request.method,
@@ -261,14 +259,34 @@ const registerCallbacks: {
                   ...request.headers,
                   'Upgrade-Insecure-Requests': '0',
                 },
+                ...request.method.toUpperCase() === 'POST' && {
+                  uploadData: request.uploadData,
+                },
                 // @ts-expect-error
-                session: isToBridge ? trezorLikeWindowSession : null,
+                session: null,
+              });
+              return;
+            }
+
+            const { ipfsDappSession } = await getSessionInsts();
+            const checkouted = checkoutCustomSchemeHandlerInfo(
+              TARGET_PROTOCOL,
+              request.url
+            );
+
+            console.log('[feat] [1.1] ipfs:: checkouted', checkouted);
+            if (!checkouted) {
+              callback({
+                data: 'Not found',
+                mimeType: 'text/plain',
+                statusCode: 404,
               });
               return;
             }
 
             callback({
               url: request.url,
+              // url: `http://127.0.0.1:19900/${checkouted.fileRelPath}`,
               method: request.method,
               headers: request.headers,
 
@@ -383,6 +401,11 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
       name: 'mainSession',
       includeFilters: [RABBY_INTERNAL_PROTOCOL, PROTOCOL_IPFS, 'http:'],
     },
+    // {
+    //   inst: trezorLikeWindowSession,
+    //   name: 'trezorLikeWindowSession',
+    //   includeFilters: [RABBY_INTERNAL_PROTOCOL, PROTOCOL_IPFS, 'http:'],
+    // },
     {
       inst: ipfsDappSession,
       name: SPECIAL_SESSIONS.ipfsDappSession,

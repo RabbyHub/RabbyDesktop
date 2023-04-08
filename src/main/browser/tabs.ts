@@ -111,11 +111,11 @@ export class Tab {
       //     partition: SPECIAL_SESSIONS.ipfsDappSession,
       //   },
       // },
-      ...this.$meta.webuiType === 'ForTrezorLike' && {
-        webPreferences: {
-          partition: SPECIAL_SESSIONS.trezorLikeWindowSession,
-        }
-      }
+      // ...this.$meta.webuiType === 'ForTrezorLike' && {
+      //   webPreferences: {
+      //     partition: SPECIAL_SESSIONS.trezorLikeWindowSession,
+      //   }
+      // }
     });
     this.id = this.view.webContents.id;
     this.window = ofWindow;
