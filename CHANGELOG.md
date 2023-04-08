@@ -1,7 +1,17 @@
 
-v0.13.0 / 2023-04-08
+v0.13.1 / 2023-04-08
 ====================
 
+  * feat: revert ipfs (#348)
+  * Merge remote-tracking branch 'origin/publish/prod' into dev
+  * fix: not display change for unsupport chain (#341)
+  * Merge remote-tracking branch 'origin/publish/prod' into dev
+  * fix: transaction top margin
+
+v0.13.0-prod / 2023-04-08
+=========================
+
+  * Release v0.13.0-prod
   * chore: little fix.
   * fix: modal
   * fix: swap route (#346)
