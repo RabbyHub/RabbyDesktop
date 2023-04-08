@@ -52,11 +52,3 @@ export function isInvalidBase64(base64?: string) {
 export function trimWebContentsUserAgent(userAgent: string) {
   return userAgent.replace(/\sElectron\/\S+/, '');
 }
-
-export function normalizeIPFSPath(ipfsPath: string) {
-  return ipfsPath.replace(/\\/g, '/');
-}
-
-export function ucfirst(str = '') {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}

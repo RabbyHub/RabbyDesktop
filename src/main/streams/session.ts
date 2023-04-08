@@ -1,19 +1,13 @@
-import fs from 'fs';
+import { promises as fs } from 'fs';
 import path from 'path';
 
 import { app, protocol, session, shell } from 'electron';
 import { firstValueFrom } from 'rxjs';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
-import {
-  canoicalizeDappUrl,
-  isIpfsHttpURL,
-  isRabbyXPage,
-} from '@/isomorphic/url';
+import { isRabbyXPage } from '@/isomorphic/url';
 import { trimWebContentsUserAgent } from '@/isomorphic/string';
 import {
-  IPFS_LOCALHOST_DOMAIN,
   IS_RUNTIME_PRODUCTION,
-  PROTOCOL_IPFS,
   RABBY_INTERNAL_PROTOCOL,
 } from '../../isomorphic/constants';
 import {
@@ -34,19 +28,24 @@ import {
 } from './tabbedBrowserWindow';
 import { firstEl } from '../../isomorphic/array';
 import {
-  getIpfsService,
   getRabbyExtId,
   getWebuiExtId,
+  onMainWindowReady,
 } from '../utils/stream-helpers';
 import { checkOpenAction } from '../utils/tabs';
-import { getWindowFromWebContents, switchToBrowserTab } from '../utils/browser';
-import { rewriteSessionWebRequestHeaders } from '../utils/webRequest';
+import {
+  createTmpEmptyBrowser,
+  getWindowFromWebContents,
+  switchToBrowserTab,
+} from '../utils/browser';
+import {
+  rewriteSessionWebRequestHeaders,
+  supportHmrOnDev,
+} from '../utils/webRequest';
 import { checkProxyViaBrowserView, setSessionProxy } from '../utils/appNetwork';
 import { getAppProxyConf } from '../store/desktopApp';
 import { createTrezorLikeConnectPageWindow } from '../utils/hardwareConnect';
 import { getBlockchainExplorers } from '../store/dynamicConfig';
-import { checkoutCustomSchemeHandlerInfo } from '../utils/protocol';
-import { rewriteIpfsHtmlFile } from '../utils/file';
 
 const sesLog = getBindLog('session', 'bgGrey');
 
@@ -54,14 +53,14 @@ const manifestExists = async (dirPath: string) => {
   if (!dirPath) return false;
   const manifestPath = path.join(dirPath, 'manifest.json');
   try {
-    return fs.statSync(manifestPath).isFile();
+    return (await fs.stat(manifestPath)).isFile();
   } catch {
     return false;
   }
 };
 
 async function loadExtensions(sess: Electron.Session, extensionsPath: string) {
-  const subDirectories = fs.readdirSync(extensionsPath, {
+  const subDirectories = await fs.readdir(extensionsPath, {
     withFileTypes: true,
   });
 
@@ -77,7 +76,7 @@ async function loadExtensions(sess: Electron.Session, extensionsPath: string) {
           return extPath;
         }
 
-        const extSubDirs = fs.readdirSync(extPath, {
+        const extSubDirs = await fs.readdir(extPath, {
           withFileTypes: true,
         });
 
@@ -147,235 +146,77 @@ function checkProxyValidOnBootstrap() {
 
 protocol.registerSchemesAsPrivileged([
   {
-    scheme: RABBY_INTERNAL_PROTOCOL.slice(0, -1),
+    scheme: 'rabby-internal',
     privileges: { standard: true, supportFetchAPI: true },
   },
-  {
-    scheme: PROTOCOL_IPFS.slice(0, -1),
-    privileges: { standard: true, supportFetchAPI: true },
-  },
-  // {
-  //   scheme: 'file:'.slice(0, -1),
-  //   privileges: { standard: true, corsEnabled: false, allowServiceWorkers: true, supportFetchAPI: true },
-  // },
 ]);
-
-const registerCallbacks: {
-  protocol: string;
-  handler: (ctx: { session: Electron.Session; sessionName: string }) => {
-    protocol: string;
-    registerSuccess: boolean;
-  };
-}[] = [
-  {
-    protocol: RABBY_INTERNAL_PROTOCOL,
-    handler: (ctx) => {
-      const registerSuccess = ctx.session.protocol.registerFileProtocol(
-        RABBY_INTERNAL_PROTOCOL.slice(0, -1),
-        (request, callback) => {
-          const pathnameWithQuery = request.url.slice(
-            `${RABBY_INTERNAL_PROTOCOL}//`.length
-          );
-
-          const pathname = pathnameWithQuery.split('?')?.[0] || '';
-          const pathnameWithoutHash = pathname.split('#')?.[0] || '';
-
-          if (pathnameWithoutHash.startsWith('assets/')) {
-            callback({
-              path: getAssetPath(pathnameWithoutHash.slice('assets/'.length)),
-            });
-          } else if (pathnameWithoutHash.startsWith('local/')) {
-            callback({
-              path: getRendererPath(pathnameWithoutHash.slice('local/'.length)),
-            });
-          } else {
-            // TODO: give one 404 page
-            callback({
-              data: 'Not found',
-              mimeType: 'text/plain',
-            });
-          }
-        }
-      );
-
-      return { registerSuccess, protocol: RABBY_INTERNAL_PROTOCOL };
-    },
-  },
-  {
-    protocol: PROTOCOL_IPFS,
-    handler: (ctx) => {
-      const registerSuccess = ctx.session.protocol.registerFileProtocol(
-        PROTOCOL_IPFS.slice(0, -1),
-        async (request, callback) => {
-          const pathnameWithQuery = request.url.slice(
-            `${PROTOCOL_IPFS}//`.length
-          );
-
-          const pathname = pathnameWithQuery.split('?')?.[0] || '';
-          const pathnameWithoutHash = pathname.split('#')?.[0] || '';
-
-          const ipfsService = await getIpfsService();
-          let filePath = ipfsService.resolveFile(pathnameWithoutHash);
-
-          if (!fs.existsSync(filePath)) {
-            callback({ data: 'Not found', mimeType: 'text/plain' });
-            return;
-          }
-
-          if (fs.statSync(filePath).isDirectory()) {
-            filePath = path.join(filePath, './index.html');
-            filePath = rewriteIpfsHtmlFile(filePath);
-          }
-
-          if (!fs.existsSync(filePath)) {
-            callback({ data: 'Not found', mimeType: 'text/plain' });
-            return;
-          }
-
-          callback({
-            path: filePath,
-          });
-        }
-      );
-
-      return { registerSuccess, protocol: PROTOCOL_IPFS };
-    },
-  },
-  {
-    protocol: 'http:',
-    handler: (ctx) => {
-      const TARGET_PROTOCOL = 'http:';
-      // const unregistered = protocol.unregisterProtocol(TARGET_PROTOCOL.slice(0, -1));
-      // console.log(`unregistered: ${TARGET_PROTOCOL}`, unregistered);
-
-      const registerSuccess = ctx.session.protocol.interceptFileProtocol(
-        TARGET_PROTOCOL.slice(0, -1),
-        async (request, callback) => {
-          if (!isIpfsHttpURL(request.url)) {
-            // protocol.uninterceptProtocol('http');
-            callback({
-              data: 'Not found',
-              mimeType: 'text/plain',
-              statusCode: 404,
-            });
-            return;
-          }
-
-          const checkouted = checkoutCustomSchemeHandlerInfo(
-            TARGET_PROTOCOL,
-            request.url
-          );
-          if (!checkouted) {
-            callback({
-              data: 'Not found',
-              mimeType: 'text/plain',
-              statusCode: 404,
-            });
-            return;
-          }
-
-          const { fileRelPath } = checkouted;
-
-          const ipfsService = await getIpfsService();
-
-          let filePath = ipfsService.resolveFile(fileRelPath);
-
-          if (!fs.existsSync(filePath)) {
-            callback({
-              data: 'Not found',
-              mimeType: 'text/plain',
-              statusCode: 404,
-            });
-            return;
-          }
-
-          if (fs.statSync(filePath).isDirectory()) {
-            filePath = path.join(filePath, './index.html');
-            filePath = rewriteIpfsHtmlFile(filePath);
-          }
-
-          if (!fs.existsSync(filePath)) {
-            callback({
-              data: 'Not found',
-              mimeType: 'text/plain',
-              statusCode: 404,
-            });
-            return;
-          }
-
-          callback({ path: filePath });
-        }
-      );
-
-      return { registerSuccess, protocol: TARGET_PROTOCOL };
-    },
-  },
-];
 
 firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   // sub.unsubscribe();
-  const mainSession = session.defaultSession;
+  const sessionIns = session.defaultSession;
+
+  if (
+    !sessionIns.protocol.registerFileProtocol(
+      RABBY_INTERNAL_PROTOCOL.slice(0, -1),
+      (request, callback) => {
+        const pathnameWithQuery = request.url.slice(
+          `${RABBY_INTERNAL_PROTOCOL}//`.length
+        );
+
+        const pathname = pathnameWithQuery.split('?')?.[0] || '';
+        const pathnameWithoutHash = pathname.split('#')?.[0] || '';
+
+        if (pathnameWithoutHash.startsWith('assets/')) {
+          callback({
+            path: getAssetPath(pathnameWithoutHash.slice('assets/'.length)),
+          });
+        } else if (pathnameWithoutHash.startsWith('local/')) {
+          callback({
+            path: getRendererPath(pathnameWithoutHash.slice('local/'.length)),
+          });
+        } else {
+          // TODO: give one 404 page
+          callback({
+            data: 'Not found',
+            mimeType: 'text/plain',
+          });
+        }
+      }
+    )
+  ) {
+    if (!IS_RUNTIME_PRODUCTION) {
+      throw new Error(
+        `[initSession] Failed to register protocol ${RABBY_INTERNAL_PROTOCOL}`
+      );
+    } else {
+      console.error(`Failed to register protocol`);
+    }
+  }
 
   const dappSafeViewSession = session.fromPartition('dappSafeView');
   const checkingViewSession = session.fromPartition('checkingView');
   const checkingProxySession = session.fromPartition('checkingProxy');
-
-  const allSessions = {
-    mainSession,
+  valueToMainSubject('sessionReady', {
+    mainSession: sessionIns,
     dappSafeViewSession,
     checkingViewSession,
     checkingProxySession,
-  };
-
-  valueToMainSubject('sessionReady', allSessions);
-  Object.entries(allSessions).forEach(([name, sess]) => {
+  });
+  const allSessions = [
+    sessionIns,
+    dappSafeViewSession,
+    checkingViewSession,
+    checkingProxySession,
+  ];
+  allSessions.forEach((sess) => {
     // Remove Electron to closer emulate Chrome's UA
     const userAgent = trimWebContentsUserAgent(sess.getUserAgent());
     sess.setUserAgent(userAgent);
 
-    rewriteSessionWebRequestHeaders(sess, name as keyof IAppSession);
+    rewriteSessionWebRequestHeaders(sess);
   });
 
-  [
-    { inst: mainSession, name: 'mainSession' },
-    {
-      inst: checkingProxySession,
-      name: 'checkingProxySession',
-      filterProtocol: ['file:'],
-    },
-    {
-      inst: checkingViewSession,
-      name: 'checkingViewSession',
-      filterProtocol: ['file:', 'http:'],
-    },
-  ].forEach(({ inst, name, filterProtocol }) => {
-    registerCallbacks.forEach(({ protocol: prot, handler }) => {
-      if (filterProtocol?.includes(prot)) return;
-
-      const { registerSuccess, protocol: registeredProtocol } = handler({
-        session: inst,
-        sessionName: name,
-      });
-
-      if (!registerSuccess) {
-        if (!IS_RUNTIME_PRODUCTION) {
-          throw new Error(
-            `[initSession][session:${name}] Failed to register protocol ${registeredProtocol}`
-          );
-        } else {
-          console.error(
-            `[initSession][session:${name}] Failed to register protocol ${registeredProtocol}`
-          );
-        }
-      } else {
-        sesLog(
-          `[initSession][session:${name}] registered protocol ${registeredProtocol} success`
-        );
-      }
-    });
-  });
-
-  app.userAgentFallback = trimWebContentsUserAgent(mainSession.getUserAgent());
+  app.userAgentFallback = trimWebContentsUserAgent(sessionIns.getUserAgent());
 
   // must after sessionReady
   const result = checkProxyValidOnBootstrap();
@@ -383,7 +224,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   const realProxy = { ...result.appProxyConf, applied: false };
 
   if (result.shouldApplyProxyOnBoot) {
-    setSessionProxy(mainSession, realProxy);
+    setSessionProxy(sessionIns, realProxy);
     setSessionProxy(dappSafeViewSession, realProxy);
     setSessionProxy(checkingViewSession, realProxy);
 
@@ -397,12 +238,13 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   }
 
   valueToMainSubject('appRuntimeProxyConf', realProxy);
+  supportHmrOnDev(sessionIns);
 
-  mainSession.setPreloads([preloadPath]);
+  sessionIns.setPreloads([preloadPath]);
 
   // @notice: make sure all customized plugins loaded after ElectronChromeExtensions initialized
   const chromeExtensions = new ElectronChromeExtensions({
-    session: mainSession,
+    session: sessionIns,
 
     preloadPath,
 
@@ -548,13 +390,13 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
     },
   });
 
-  const webuiExtension = await mainSession.loadExtension(
+  const webuiExtension = await sessionIns.loadExtension(
     getAssetPath('desktop_shell'),
     { allowFileAccess: true }
   );
   valueToMainSubject('webuiExtensionReady', webuiExtension);
 
-  await loadExtensions(mainSession!, getAssetPath('chrome_exts'));
+  await loadExtensions(sessionIns!, getAssetPath('chrome_exts'));
 
   valueToMainSubject('electronChromeExtensionsReady', chromeExtensions);
 });

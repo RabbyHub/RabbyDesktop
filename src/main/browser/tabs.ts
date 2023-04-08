@@ -103,7 +103,7 @@ export class Tab {
     }
 
     this.tabs = tabs;
-    this.view = viewMngr.allocateView();
+    this.view = viewMngr.allocateView(false);
     this.id = this.view.webContents.id;
     this.window = ofWindow;
     this.windowId = ofWindow.id;
@@ -553,22 +553,21 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
   window?: BrowserWindow;
 
   private $meta: {
-    webuiType?: IShellWebUIType;
+    isOfMainWindow: boolean;
   } = {
-    webuiType: undefined,
+    isOfMainWindow: false,
   };
 
   constructor(
     browserWindow: BrowserWindow,
     opts: {
       isOfMainWindow?: boolean;
-      webuiType?: IShellWebUIType;
     }
   ) {
     super();
     this.window = browserWindow;
 
-    this.$meta.webuiType = opts?.webuiType;
+    this.$meta.isOfMainWindow = !!opts?.isOfMainWindow;
   }
 
   private _cleanup() {
@@ -591,10 +590,6 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
     }
   }
 
-  private get isOfMainWindow() {
-    return this.$meta.webuiType === 'MainWindow';
-  }
-
   get(tabId: chrome.tabs.Tab['id']) {
     return this.tabList.find((tab) => tab.id === tabId);
   }
@@ -605,11 +600,10 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
       {
         ...options,
         tabs: this,
-        webuiType: this.$meta.webuiType,
       },
     ] as const;
     const tab = (
-      options?.webuiType === 'MainWindow' && this.isOfMainWindow
+      options?.webuiType === 'MainWindow' && this.$meta.isOfMainWindow
         ? new MainWindowTab(...args)
         : new Tab(...args)
     ) as TTab;
@@ -637,7 +631,7 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
     this.emit('tab-destroyed', tab);
     if (this.tabList.length === 0) {
       this.emit('all-tabs-destroyed');
-      if (!this.isOfMainWindow) {
+      if (!this.$meta.isOfMainWindow) {
         this.destroy();
       } else {
         this._cleanup();

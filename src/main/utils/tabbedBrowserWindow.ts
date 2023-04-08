@@ -2,7 +2,6 @@ import { BrowserWindow } from 'electron';
 
 import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { EnumMatchDappType } from '@/isomorphic/constants';
-import { makeDappHttpOrigin } from '@/isomorphic/dapp';
 import TabbedBrowserWindow, {
   MainTabbedBrowserWindow,
   TabbedBrowserWindowOptions,
@@ -170,7 +169,7 @@ export function getOrCreateDappBoundTab(
   if (!existedTab) {
     const createdTab = mainTabbedWin.createTab({
       initDetails: { url: targetURL },
-      relatedDappId: makeDappHttpOrigin(matchedDappResult.dapp.id),
+      relatedDappId: matchedDappResult.dapp.id,
     });
 
     result.createdTab = createdTab;

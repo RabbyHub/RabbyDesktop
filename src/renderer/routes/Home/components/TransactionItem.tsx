@@ -68,19 +68,14 @@ const TransactionItemWrapper = styled.div`
     color: rgba(255, 255, 255, 0.3);
     position: absolute;
     left: 10px;
-    right: 10px;
     bottom: 5px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 
-    .tx-dapp-link {
+    .tx-dapp-link:not(.is-rabby) {
       color: rgba(255, 255, 255, 0.6);
       cursor: pointer;
       text-decoration: underline;
     }
   }
-
   .tx-hash {
     position: absolute;
     right: 16px;
@@ -467,7 +462,7 @@ const TransactionItem = ({
   const isFromRabby = useMemo(() => {
     if (!item.site) return false;
     const { origin } = item.site;
-    return origin?.startsWith('chrome-extension://');
+    return !/^https:\/\//.test(origin);
   }, [item]);
 
   const loadTxData = async () => {

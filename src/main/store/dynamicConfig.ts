@@ -132,7 +132,9 @@ export function getBlockchainExplorers() {
   return set;
 }
 
-export function isTargetScanLink(targetURL: string | ICanonalizedUrlInfo) {
+export function isTargetScanLink(
+  targetURL: string | ReturnType<typeof canoicalizeDappUrl>
+) {
   const parsedInfo =
     typeof targetURL === 'string' ? canoicalizeDappUrl(targetURL) : targetURL;
   const recordSet = getBlockchainExplorers();

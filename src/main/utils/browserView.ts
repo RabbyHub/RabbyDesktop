@@ -27,25 +27,18 @@ export class BrowserViewManager {
     }
   ) {}
 
-  allocateView(opts?: {
-    loadBlank?: boolean;
-    webPreferences?: BrowserViewConstructorOptions['webPreferences'];
-  }) {
+  allocateView(loadBlank = false) {
     let view = Object.values(this.idleViews)[0];
 
     if (!view || view.webContents.isDestroyed()) {
       view = new BrowserView({
         ...this.viewOpts,
-        webPreferences: {
-          ...this.viewOpts.webPreferences,
-          ...opts?.webPreferences,
-        },
       });
     }
 
     delete this.idleViews[view.webContents.id];
     this.busyViews[view.webContents.id] = view;
-    if (opts?.loadBlank) {
+    if (loadBlank) {
       view.webContents.loadURL('about:blank');
     }
 

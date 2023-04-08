@@ -14,7 +14,6 @@ import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import { RcIconClose, RcIconLoading } from '@/../assets/icons/readonly-modal';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { DappFavicon } from '@/renderer/components/DappFavicon';
-import { formatDappURLToShow } from '@/isomorphic/dapp';
 import styles from './DappReadonlyModal.module.less';
 import useDragHeadbar from '../../hooks/useDragheadbar';
 
@@ -33,7 +32,7 @@ function InnerRedirect({
 }: {
   nonSameOrigin: INonSameDomainAction;
   isLoadingFavicon?: boolean;
-  targetInfo: ICanonalizedUrlInfo;
+  targetInfo: ReturnType<typeof canoicalizeDappUrl>;
 }) {
   return (
     <>
@@ -57,9 +56,7 @@ function InnerRedirect({
               className={styles.avatar}
             />
           )}
-          <span className={styles.link}>
-            {formatDappURLToShow(targetInfo.origin)}
-          </span>
+          <span className={styles.link}>{targetInfo.origin}</span>
         </div>
       </header>
       <div className={classNames(styles.tipContainer, 'mt-30px pb-60px')}>

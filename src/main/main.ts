@@ -21,7 +21,6 @@ import './streams/webContents';
 import './streams/appProxy';
 import './streams/hid';
 import './streams/dapps';
-import './streams/ipfs';
 
 import './streams/developer';
 

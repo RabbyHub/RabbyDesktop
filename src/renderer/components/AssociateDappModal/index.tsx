@@ -12,7 +12,6 @@ import {
 } from '@/renderer/hooks/useDappsMngr';
 import { isDomainLikeStr, removeProtocolFromUrl } from '@/renderer/utils/url';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
-import { formatDappURLToShow } from '@/isomorphic/dapp';
 import { Modal, Props as ModalProps } from '../Modal/Modal';
 import styles from './index.module.less';
 import { toastMessage } from '../TransparentToast';
@@ -145,7 +144,7 @@ const DappItem = ({
       />
       <div className="flex-1 dapp-info">
         <p>{dapp.alias}</p>
-        <p>{formatDappURLToShow(dapp.origin)}</p>
+        <p>{removeProtocolFromUrl(dapp.origin)}</p>
       </div>
       {isBinded ? (
         <>
@@ -195,6 +194,10 @@ const BindDapp = ({
     return protocolDappsBinding[protocol.id];
   }, [protocolDappsBinding, protocol]);
 
+  const isDomainLikeKw = useMemo(() => {
+    return isDomainLikeStr(kw);
+  }, [kw]);
+
   const searchResult = useMemo(() => {
     if (!kw) return [];
     try {
@@ -209,18 +212,10 @@ const BindDapp = ({
     }
   }, [kw, dapps]);
 
-  // const shouldAdd = useMemo(() => {
-  //   if (isDomainLikeKw && searchResult.length <= 0) return true;
-  //   return false;
-  // }, [isDomainLikeKw, searchResult]);
-  // const shouldAdd = useMemo(() => {
-  //   if (searchResult.length <= 0) return true;
-  //   return false;
-  // }, [searchResult]);
-
   const shouldAdd = useMemo(() => {
-    return !!kw?.trim().length;
-  }, [kw]);
+    if (isDomainLikeKw && searchResult.length <= 0) return true;
+    return false;
+  }, [isDomainLikeKw, searchResult]);
 
   const handleBind = async (origin: string) => {
     await bindingDappsToProtocol(protocol.id, {
