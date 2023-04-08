@@ -7,8 +7,9 @@ export const BundleAccountList = () => {
 
   return (
     <CommonAccountList
+      isBundle
       titleClassName="mb-[20px] opacity-70"
-      title={`当前聚合的地址(${account.inBundleList.length})`}
+      title={`Bundle Addresses (${account.inBundleList.length})`}
     >
       {account.inBundleList.map((item) => (
         <AccountItem isBundle key={item.id} checked data={item} />

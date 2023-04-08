@@ -12,7 +12,6 @@ export const useBundleAccount = () => {
 
   const preCheck = React.useCallback(
     async (account: Partial<BundleAccount>) => {
-      console.log('check', account);
       if (account.type === 'bn') {
         if (!account.apiKey || !account.apiSecret) {
           return {
@@ -84,16 +83,14 @@ export const useBundleAccount = () => {
     [preCheck]
   );
 
-  const addToBundle = React.useCallback(
+  const toggleBundle = React.useCallback(
     async (account: BundleAccount) => {
-      const existed = accounts.find(
-        (acc) => acc.id === account.id && acc.inBundle
-      );
+      const existed = accounts.find((acc) => acc.id === account.id);
 
       if (existed) {
         window.rabbyDesktop.ipcRenderer.invoke('bundle-account-put', {
           ...account,
-          inBundle: true,
+          inBundle: !account.inBundle,
         });
         return;
       }
@@ -158,9 +155,16 @@ export const useBundleAccount = () => {
         nickname: acc.alianName,
         balance: acc.balance.toString(),
         data: acc,
+        inBundle: accounts.some((account) => {
+          return (
+            account.type === 'eth' &&
+            account.data.address === acc.address &&
+            account.inBundle
+          );
+        }),
       } as ETHAccount;
     });
-  }, [ethAccountList]);
+  }, [accounts, ethAccountList]);
 
   return {
     create,
@@ -171,6 +175,6 @@ export const useBundleAccount = () => {
     binanceList,
     btcList,
     ethList,
-    addToBundle,
+    toggleBundle,
   };
 };

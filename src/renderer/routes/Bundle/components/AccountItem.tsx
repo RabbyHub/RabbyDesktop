@@ -14,17 +14,11 @@ export interface Props {
   checked?: boolean;
   data: BundleAccount;
   isBundle?: boolean;
-  editable?: boolean;
 }
 
-export const AccountItem: React.FC<Props> = ({
-  checked,
-  data,
-  isBundle,
-  editable,
-}) => {
+export const AccountItem: React.FC<Props> = ({ checked, data, isBundle }) => {
   const {
-    account: { addToBundle },
+    account: { toggleBundle },
   } = useBundle();
   const brandName = React.useMemo(() => {
     switch (data.type) {
@@ -64,12 +58,16 @@ export const AccountItem: React.FC<Props> = ({
   }, [data]);
 
   const onCopy = useCopyAddress();
-  const onClickEdit = React.useCallback(() => {
-    console.log(123);
-  }, []);
+  const onClickEdit = React.useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      e.stopPropagation();
+      console.log(123);
+    },
+    []
+  );
   const onClick = React.useCallback(() => {
-    addToBundle(data);
-  }, [addToBundle, data]);
+    toggleBundle(data);
+  }, [toggleBundle, data]);
 
   return (
     <div
@@ -104,18 +102,16 @@ export const AccountItem: React.FC<Props> = ({
             'opacity-70 group-hover:opacity-100',
             'group'
           )}
+          onClick={onClickEdit}
         >
           <span>{data.nickname}</span>
-          {editable ? (
-            <img
-              onClick={onClickEdit}
-              className={clsx(
-                'group-hover:block hidden',
-                'opacity-70 hover:opacity-100'
-              )}
-              src="rabby-internal://assets/icons/bundle/edit.svg"
-            />
-          ) : null}
+          <img
+            className={clsx(
+              'group-hover:block hidden',
+              'opacity-70 hover:opacity-100'
+            )}
+            src="rabby-internal://assets/icons/bundle/edit.svg"
+          />
         </div>
         <div className="flex space-x-[5px] items-center">
           <span className="opacity-50">{ellipsis(displayAddress)}</span>
