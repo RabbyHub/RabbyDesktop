@@ -6,7 +6,6 @@ import clsx from 'clsx';
 export const InputItem: React.FC<InputProps> = (props) => {
   return (
     <RabbyInput
-      {...props}
       placeholder="Please input Address"
       className={clsx(
         'py-[15px] px-[24px] rounded-[8px]',
@@ -14,6 +13,7 @@ export const InputItem: React.FC<InputProps> = (props) => {
         'text-[15px] leading-[18px] text-white'
       )}
       autoFocus
+      {...props}
     />
   );
 };

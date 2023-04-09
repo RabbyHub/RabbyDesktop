@@ -1,3 +1,4 @@
+import { Tooltip } from 'antd';
 import clsx from 'clsx';
 
 const BundleNone = () => (
@@ -32,6 +33,7 @@ interface Props {
   isBundle?: boolean;
   onClickAdd?: () => void;
   canAdd?: boolean;
+  maxAccount?: number;
 }
 
 export const CommonAccountList: React.FC<Props> = ({
@@ -41,6 +43,7 @@ export const CommonAccountList: React.FC<Props> = ({
   isBundle,
   onClickAdd,
   canAdd,
+  maxAccount,
 }) => {
   const hasChildren = Array.isArray(children) && children.length > 0;
 
@@ -57,11 +60,16 @@ export const CommonAccountList: React.FC<Props> = ({
           {title}
         </h2>
         {canAdd && (
-          <img
-            onClick={onClickAdd}
-            className="opacity-60 hover:opacity-100 cursor-pointer"
-            src="rabby-internal://assets/icons/bundle/plus.svg"
-          />
+          <Tooltip
+            title={maxAccount ? `Maximum ${maxAccount} addresses` : null}
+            placement="left"
+          >
+            <img
+              onClick={onClickAdd}
+              className="opacity-60 hover:opacity-100 cursor-pointer"
+              src="rabby-internal://assets/icons/bundle/plus.svg"
+            />
+          </Tooltip>
         )}
       </div>
       <ul className={clsx('flex flex-col space-y-[12px] p-0')}>

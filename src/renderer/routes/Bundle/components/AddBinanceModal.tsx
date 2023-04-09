@@ -8,34 +8,37 @@ import React from 'react';
 import { InputItem } from './InputItem';
 
 const ERROR_MESSAGE = {
-  [ERROR.EXISTED]: 'This address is already added',
-  [ERROR.INVALID_KEY]: 'Invalid address',
+  [ERROR.PERMISSION_ERROR]:
+    'For your safety, please add an account that only has allowed "Enable Reading" in API restrictions.',
+  [ERROR.INVALID_KEY]: 'Invalid Key',
 };
 
-export const AddBTCModal: React.FC<ModalProps> = (props) => {
+export const AddBinanceModal: React.FC<ModalProps> = (props) => {
   const {
     account: { preCheck, create },
   } = useBundle();
   const [form] = Form.useForm<{
-    address: string;
+    apiKey: string;
+    apiSecret: string;
   }>();
   const [loading, setLoading] = React.useState(false);
   const { onCancel } = props;
 
   const onAdd = React.useCallback(async () => {
     setLoading(true);
-    const { address } = form.getFieldsValue();
+    const { apiKey, apiSecret } = form.getFieldsValue();
 
     const err = await preCheck({
-      type: 'btc',
-      address,
+      type: 'bn',
+      apiKey,
+      apiSecret,
     });
 
     if (err?.error) {
       form.setFields([
         {
-          name: 'address',
-          errors: [ERROR_MESSAGE[err.error] || 'Not a valid address'],
+          name: 'apiKey',
+          errors: [ERROR_MESSAGE[err.error] || 'Invalid address'],
         },
       ]);
       setLoading(false);
@@ -43,8 +46,9 @@ export const AddBTCModal: React.FC<ModalProps> = (props) => {
     }
 
     await create({
-      type: 'btc',
-      address,
+      type: 'bn',
+      apiKey,
+      apiSecret,
     });
     setLoading(false);
     form.resetFields();
@@ -54,17 +58,22 @@ export const AddBTCModal: React.FC<ModalProps> = (props) => {
   const onValuesChange = React.useCallback(() => {
     form.setFields([
       {
-        name: 'address',
+        name: 'apiKey',
+        errors: [],
+      },
+      {
+        name: 'apiSecret',
         errors: [],
       },
     ]);
   }, [form]);
 
-  const address = Form.useWatch('address', form);
-  const disabledSubmit = !address || loading;
+  const apiSecret = Form.useWatch('apiSecret', form);
+  const apiKey = Form.useWatch('apiKey', form);
+  const disabledSubmit = !apiKey || !apiSecret || loading;
 
   return (
-    <Modal {...props} width={1000} centered title="Add BTC address">
+    <Modal {...props} width={1000} centered title="Add Binance Account">
       <Form
         className={clsx(
           'px-[180px] pb-[80px] h-[485px]',
@@ -74,9 +83,14 @@ export const AddBTCModal: React.FC<ModalProps> = (props) => {
         form={form}
         onFinish={onAdd}
       >
-        <Form.Item name="address" className="w-full">
-          <InputItem />
-        </Form.Item>
+        <div className="w-full">
+          <Form.Item name="apiKey" className="w-full">
+            <InputItem placeholder="Key" />
+          </Form.Item>
+          <Form.Item name="apiSecret" className="w-full">
+            <InputItem type="password" placeholder="Secret" />
+          </Form.Item>
+        </div>
         <RabbyButton
           className="w-[240px] h-[52px]"
           loading={loading}
