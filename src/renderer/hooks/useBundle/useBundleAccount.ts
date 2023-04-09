@@ -10,6 +10,37 @@ export const useBundleAccount = () => {
   const { accountsList: ethAccountList, getAllAccountsToDisplay } =
     useAccountToDisplay();
 
+  const inBundleList = React.useMemo(() => {
+    return accounts.filter((acc) => acc.inBundle);
+  }, [accounts]);
+
+  const binanceList = React.useMemo(() => {
+    return accounts.filter((acc) => acc.type === 'bn') as BNAccount[];
+  }, [accounts]);
+
+  const btcList = React.useMemo(() => {
+    return accounts.filter((acc) => acc.type === 'btc') as BTCAccount[];
+  }, [accounts]);
+
+  const ethList = React.useMemo(() => {
+    return ethAccountList.map((acc) => {
+      return {
+        id: `${acc.type}.${acc.address}`,
+        type: 'eth',
+        nickname: acc.alianName,
+        balance: acc.balance.toString(),
+        data: acc,
+        inBundle: accounts.some((account) => {
+          return (
+            account.type === 'eth' &&
+            account.data.address === acc.address &&
+            account.inBundle
+          );
+        }),
+      } as ETHAccount;
+    });
+  }, [accounts, ethAccountList]);
+
   const preCheck = React.useCallback(
     async (account: Partial<BundleAccount>) => {
       if (account.type === 'bn') {
@@ -72,15 +103,32 @@ export const useBundleAccount = () => {
   );
 
   const create = React.useCallback(
-    async (account: BundleAccount) => {
+    async (account: Partial<BundleAccount>) => {
       if ((await preCheck(account)).error) {
         return;
       }
-      window.rabbyDesktop.ipcRenderer.invoke('bundle-account-post', account);
+      let nickname = account.nickname || '';
+
+      if (!nickname) {
+        let num = 1;
+        if (account.type === 'bn') {
+          nickname = 'Binance';
+          num = binanceList.length + 1;
+        } else if (account.type === 'btc') {
+          nickname = 'BTC';
+          num = btcList.length + 1;
+        }
+        nickname += ` ${num}`;
+      }
+      const newAccount: BundleAccount = {
+        ...(account as BundleAccount),
+        nickname,
+      };
+      window.rabbyDesktop.ipcRenderer.invoke('bundle-account-post', newAccount);
 
       return account;
     },
-    [preCheck]
+    [binanceList.length, btcList.length, preCheck]
   );
 
   const toggleBundle = React.useCallback(
@@ -134,37 +182,6 @@ export const useBundleAccount = () => {
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setAccounts]);
-
-  const inBundleList = React.useMemo(() => {
-    return accounts.filter((acc) => acc.inBundle);
-  }, [accounts]);
-
-  const binanceList = React.useMemo(() => {
-    return accounts.filter((acc) => acc.type === 'bn') as BNAccount[];
-  }, [accounts]);
-
-  const btcList = React.useMemo(() => {
-    return accounts.filter((acc) => acc.type === 'btc') as BTCAccount[];
-  }, [accounts]);
-
-  const ethList = React.useMemo(() => {
-    return ethAccountList.map((acc) => {
-      return {
-        id: `${acc.type}.${acc.address}`,
-        type: 'eth',
-        nickname: acc.alianName,
-        balance: acc.balance.toString(),
-        data: acc,
-        inBundle: accounts.some((account) => {
-          return (
-            account.type === 'eth' &&
-            account.data.address === acc.address &&
-            account.inBundle
-          );
-        }),
-      } as ETHAccount;
-    });
-  }, [accounts, ethAccountList]);
 
   return {
     create,

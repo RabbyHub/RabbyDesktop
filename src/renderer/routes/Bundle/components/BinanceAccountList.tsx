@@ -7,9 +7,9 @@ export const BinanceAccountList = () => {
   const list = account.binanceList.filter((item) => !item.inBundle);
 
   return (
-    <CommonAccountList title="Binance Account">
+    <CommonAccountList canAdd title="Binance Account">
       {list.map((item) => (
-        <AccountItem key={item.id} data={item} />
+        <AccountItem canDelete canEdit key={item.id} data={item} />
       ))}
     </CommonAccountList>
   );

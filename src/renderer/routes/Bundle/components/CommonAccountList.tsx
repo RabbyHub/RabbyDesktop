@@ -3,7 +3,7 @@ import clsx from 'clsx';
 const BundleNone = () => (
   <div
     className={clsx(
-      'py-[18px] w-full px-[46px]',
+      'py-[18px] w-full px-[46px] h-[66px]',
       'bg-[#FFFFFF05] rounded-[6px]',
       'text-[12px] text-[#FFFFFF4D] text-center leading-[15px]'
     )}
@@ -15,7 +15,8 @@ const BundleNone = () => (
 const CommonNone = () => (
   <div
     className={clsx(
-      'py-[24px] w-full',
+      'flex items-center justify-center',
+      'w-full h-[66px]',
       'border border-solid border-[#FFFFFF1A] rounded-[6px]',
       'text-[12px] text-[#FFFFFF4D] text-center font-normal'
     )}
@@ -24,26 +25,45 @@ const CommonNone = () => (
   </div>
 );
 
-export const CommonAccountList: React.FC<{
+interface Props {
   title: string;
   children: React.ReactNode;
   titleClassName?: string;
   isBundle?: boolean;
-}> = ({ children, title, titleClassName, isBundle }) => {
+  onClickAdd?: () => void;
+  canAdd?: boolean;
+}
+
+export const CommonAccountList: React.FC<Props> = ({
+  children,
+  title,
+  titleClassName,
+  isBundle,
+  onClickAdd,
+  canAdd,
+}) => {
   const hasChildren = Array.isArray(children) && children.length > 0;
 
   return (
     <section>
-      <h2
-        className={clsx(
-          'mb-[12px]',
-          'opacity-50',
-          'text-[12px] text-white font-normal',
-          titleClassName
+      <div className={clsx('flex justify-between items-center', 'mb-[12px]')}>
+        <h2
+          className={clsx(
+            'opacity-50 mb-0',
+            'text-[12px] text-white font-normal',
+            titleClassName
+          )}
+        >
+          {title}
+        </h2>
+        {canAdd && (
+          <img
+            onClick={onClickAdd}
+            className="opacity-60 hover:opacity-100 cursor-pointer"
+            src="rabby-internal://assets/icons/bundle/plus.svg"
+          />
         )}
-      >
-        {title}
-      </h2>
+      </div>
       <ul className={clsx('flex flex-col space-y-[12px] p-0')}>
         {hasChildren ? children : isBundle ? <BundleNone /> : <CommonNone />}
       </ul>

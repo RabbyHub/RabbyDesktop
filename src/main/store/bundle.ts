@@ -12,9 +12,10 @@
 
 import { PERSIS_STORE_PREFIX } from '@/isomorphic/constants';
 import { shortStringify, safeParse } from '@/isomorphic/json';
-import { nanoid } from 'nanoid';
 import { makeStore } from '../utils/store';
 import { emitIpcMainEvent, handleIpcMainInvoke } from '../utils/ipcMainEvents';
+
+const { nanoid } = require('nanoid');
 
 interface StoreProps {
   accounts: BundleAccount[];
