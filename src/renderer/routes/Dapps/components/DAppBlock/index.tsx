@@ -192,7 +192,7 @@ export const DAppBlock = ({
           <DappIcon
             origin={dapp.origin}
             src={dapp.faviconBase64 ? dapp.faviconBase64 : dapp.faviconUrl}
-            // chain={chain}
+            chain={chain}
           />
           <div className="infos pr-[16px]">
             <h4 className="dapp-alias">{dapp.alias}</h4>

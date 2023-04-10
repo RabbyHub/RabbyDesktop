@@ -208,8 +208,7 @@ const TabList = ({
             <DappIndicator tab={tab} />
             <div className={styles.routeItemInner}>
               <div className={styles.dappIcon}>
-                {/* <DappIcon origin={dapp.origin} src={faviconUrl} chain={chain} /> */}
-                <DappIcon origin={dapp.origin} src={faviconUrl} />
+                <DappIcon origin={dapp.origin} src={faviconUrl} chain={chain} />
               </div>
               <Hide visible={!isFold} className={styles.routeTitle}>
                 {dapp.alias || dapp.origin}

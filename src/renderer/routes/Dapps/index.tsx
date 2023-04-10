@@ -116,13 +116,13 @@ export default function DApps() {
             security for your Dapp use.
           </div>
           <div className={style.actionList}>
-            {/* <div className={style.action} onClick={handleDisconnectAll}>
+            <div className={style.action} onClick={handleDisconnectAll}>
               <img
                 src="rabby-internal://assets/icons/dapps/icon-disconnect.svg"
                 alt=""
               />
               Disconnect All Dapps
-            </div> */}
+            </div>
             <div className={style.action} onClick={handleCloseAll}>
               <img
                 src="rabby-internal://assets/icons/dapps/icon-close.svg"

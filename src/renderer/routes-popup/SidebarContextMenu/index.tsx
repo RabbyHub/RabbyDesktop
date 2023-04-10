@@ -67,17 +67,17 @@ export const SidebarContextMenu = () => {
           />
         ),
       },
-      // {
-      //   key: 'dapp-disconnect',
-      //   className: styles['dapp-dropdown-item'],
-      //   label: <span className="text">Disconnect</span>,
-      //   icon: (
-      //     <img
-      //       className={styles['dapp-dropdown-item-icon']}
-      //       src="rabby-internal://assets/icons/sidebar-context-menu/icon-disconnect.svg"
-      //     />
-      //   ),
-      // },
+      {
+        key: 'dapp-disconnect',
+        className: styles['dapp-dropdown-item'],
+        label: <span className="text">Disconnect</span>,
+        icon: (
+          <img
+            className={styles['dapp-dropdown-item-icon']}
+            src="rabby-internal://assets/icons/sidebar-context-menu/icon-disconnect.svg"
+          />
+        ),
+      },
       !pageInfo?.dappTabInfo?.id
         ? {
             key: 'dapp-delete',
@@ -108,17 +108,17 @@ export const SidebarContextMenu = () => {
       {
         type: 'divider' as const,
       },
-      // {
-      //   key: 'dapp-disconnect-all',
-      //   className: styles['dapp-dropdown-item'],
-      //   label: <span className="text">Disconnect All Dapps</span>,
-      //   icon: (
-      //     <img
-      //       className={styles['dapp-dropdown-item-icon']}
-      //       src="rabby-internal://assets/icons/sidebar-context-menu/icon-disconnect-all.svg"
-      //     />
-      //   ),
-      // },
+      {
+        key: 'dapp-disconnect-all',
+        className: styles['dapp-dropdown-item'],
+        label: <span className="text">Disconnect All Dapps</span>,
+        icon: (
+          <img
+            className={styles['dapp-dropdown-item-icon']}
+            src="rabby-internal://assets/icons/sidebar-context-menu/icon-disconnect-all.svg"
+          />
+        ),
+      },
       {
         key: 'dapp-close-all',
         className: styles['dapp-dropdown-item'],
