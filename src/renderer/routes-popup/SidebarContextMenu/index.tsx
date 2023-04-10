@@ -3,7 +3,10 @@ import {
   usePopupWinInfo,
   useZPopupLayerOnMain,
 } from '@/renderer/hooks/usePopupWinOnMainwin';
-import { toggleDappPinned } from '@/renderer/ipcRequest/dapps';
+import {
+  getLastOpenOriginByOrigin,
+  toggleDappPinned,
+} from '@/renderer/ipcRequest/dapps';
 import {
   closeAllTabs,
   closeTabFromInternalPage,
@@ -17,6 +20,7 @@ import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
 import { useMemo } from 'react';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
+import { canoicalizeDappUrl } from '@/isomorphic/url';
 import styles from './index.module.less';
 
 export const SidebarContextMenu = () => {
@@ -25,8 +29,27 @@ export const SidebarContextMenu = () => {
   const origin = pageInfo?.dappTabInfo?.origin || '';
   const dappInfo = useDapp(origin);
   const zActions = useZPopupLayerOnMain();
-  const { connectedSiteMap, removeConnectedSite, removeAllConnectedSites } =
-    useConnectedSite();
+  const { removeConnectedSite, removeAllConnectedSites } = useConnectedSite();
+
+  const disconnect = async (_origin: string, url?: string) => {
+    let current = url ? canoicalizeDappUrl(url)?.origin : '';
+    if (!current) {
+      current = await getLastOpenOriginByOrigin(_origin);
+    }
+    removeConnectedSite(current);
+    forwardMessageTo('*', 'refreshConnectedSiteMap', {});
+
+    showMainwinPopupview({
+      type: 'global-toast-popup',
+      state: {
+        toastType: 'toast-message',
+        data: {
+          type: 'success',
+          content: 'Disconnected',
+        },
+      },
+    });
+  };
 
   const items = useMemo(() => {
     if (!origin) {
@@ -173,21 +196,7 @@ export const SidebarContextMenu = () => {
         }
         break;
       case 'dapp-disconnect':
-        if (dappInfo && connectedSiteMap[origin]) {
-          removeConnectedSite(origin);
-        }
-        forwardMessageTo('*', 'refreshConnectedSiteMap', {});
-
-        showMainwinPopupview({
-          type: 'global-toast-popup',
-          state: {
-            toastType: 'toast-message',
-            data: {
-              type: 'success',
-              content: 'Disconnected',
-            },
-          },
-        });
+        disconnect(origin, pageInfo?.dappTabInfo?.url);
         break;
       case 'dapp-disconnect-all':
         removeAllConnectedSites();

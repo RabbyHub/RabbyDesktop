@@ -199,7 +199,11 @@ const TabList = ({
                 { x, y },
                 {
                   type: 'sidebar-dapp',
-                  dappTabInfo: { origin: dapp.origin, id: tab?.id },
+                  dappTabInfo: {
+                    origin: dapp.origin,
+                    id: tab?.id,
+                    url: tab?.url,
+                  },
                 }
               );
             }}
