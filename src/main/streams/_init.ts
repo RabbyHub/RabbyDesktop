@@ -98,16 +98,7 @@ const CONF = {
   // todo fix me
   ipfsServiceReady: {
     subject: new ReplaySubject(1),
-  } as IConf<
-    ReplaySubject<{
-      download: (cidString: string) => Promise<void>;
-      cancelDownload: () => Promise<void>;
-      resolveFile: (ipfsPath: string) => string;
-      isValid: (cid: string) => Promise<boolean>;
-      isExist: (cid: string) => Promise<boolean>;
-      removeFile: (cid: string) => Promise<void>;
-    }>
-  >,
+  } as IConf<ReplaySubject<import('../utils/ipfs').IpfsService>>,
 };
 
 type IMainSubjects = typeof CONF;

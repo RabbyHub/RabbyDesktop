@@ -240,76 +240,7 @@ const registerCallbacks: {
 
       return { registerSuccess, protocol: PROTOCOL_IPFS };
     },
-  },
-  {
-    protocol: 'http:',
-    handler: (ctx) => {
-      const TARGET_PROTOCOL = 'http:';
-      // const unregistered = protocol.unregisterProtocol(TARGET_PROTOCOL.slice(0, -1));
-      // console.log(`unregistered: ${TARGET_PROTOCOL}`, unregistered);
-
-      const registerSuccess = ctx.session.protocol.interceptFileProtocol(
-        TARGET_PROTOCOL.slice(0, -1),
-        async (request, callback) => {
-          if (!isIpfsHttpURL(request.url)) {
-            // protocol.uninterceptProtocol('http');
-            callback({
-              data: 'Not found',
-              mimeType: 'text/plain',
-              statusCode: 404,
-            });
-            return;
-          }
-
-          const checkouted = checkoutCustomSchemeHandlerInfo(
-            TARGET_PROTOCOL,
-            request.url
-          );
-          if (!checkouted) {
-            callback({
-              data: 'Not found',
-              mimeType: 'text/plain',
-              statusCode: 404,
-            });
-            return;
-          }
-
-          const { fileRelPath } = checkouted;
-
-          const ipfsService = await getIpfsService();
-
-          let filePath = ipfsService.resolveFile(fileRelPath);
-
-          if (!fs.existsSync(filePath)) {
-            callback({
-              data: 'Not found',
-              mimeType: 'text/plain',
-              statusCode: 404,
-            });
-            return;
-          }
-
-          if (fs.statSync(filePath).isDirectory()) {
-            filePath = path.join(filePath, './index.html');
-            filePath = rewriteIpfsHtmlFile(filePath);
-          }
-
-          if (!fs.existsSync(filePath)) {
-            callback({
-              data: 'Not found',
-              mimeType: 'text/plain',
-              statusCode: 404,
-            });
-            return;
-          }
-
-          callback({ path: filePath });
-        }
-      );
-
-      return { registerSuccess, protocol: TARGET_PROTOCOL };
-    },
-  },
+  }
 ];
 
 firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
@@ -337,7 +268,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   });
 
   [
-    { inst: mainSession, name: 'mainSession' },
+    { inst: mainSession, name: 'mainSession', filterProtocol: ['http:'] },
     {
       inst: checkingProxySession,
       name: 'checkingProxySession',

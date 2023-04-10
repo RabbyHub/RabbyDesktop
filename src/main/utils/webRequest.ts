@@ -1,5 +1,8 @@
 import { IS_RUNTIME_PRODUCTION, LOCALIPFS_BRAND } from '@/isomorphic/constants';
 import { trimWebContentsUserAgent } from '@/isomorphic/string';
+import { safeParseURL } from '@/isomorphic/url';
+import { getIpfsService } from './stream-helpers';
+import { extractIpfsPathname } from './ipfs';
 
 type ISendHeadersListener = Parameters<
   Electron.Session['webRequest']['onBeforeSendHeaders']
@@ -9,6 +12,12 @@ type HoF = (ctx: {
   details: Parameters<ISendHeadersListener>[0];
   retReqHeaders: typeof ctx.details.requestHeaders;
 }) => void;
+
+function findFirstHeader(headers: Record<string, any>, key: string) {
+  return Object.keys(headers).find(
+    (k) => k.toLowerCase() === key.toLowerCase()
+  );
+}
 
 function supportHmrOnDev(): HoF {
   // TODO: apply it on dev mode for dev-server
@@ -58,21 +67,40 @@ function supportModifyReqHeaders(fixedUserAgent: string): HoF {
   };
 }
 
+function supportRewriteOriginForIPFS(): HoF {
+  return (ctx) => {
+    const originK = findFirstHeader(ctx.retReqHeaders, 'origin');
+    if (originK && ctx.retReqHeaders[originK]?.startsWith('rabby-ipfs://')) {
+      const targetInfo = safeParseURL(ctx.details.url);
+      // console.log('[feat] supportRewriteOriginForIPFS:: targetInfo, ctx.retReqHeaders', targetInfo, ctx.retReqHeaders);
+      ctx.retReqHeaders[originK] = targetInfo?.origin || '*';
+      // console.log('[feat] supportRewriteOriginForIPFS:: ctx.retReqHeaders[originK]', ctx.retReqHeaders[originK]);
+    }
+  }
+}
+
 export function rewriteSessionWebRequestHeaders(
   sess: Electron.Session,
   sessionName?: keyof IAppSession
 ) {
+  const handleHMR = supportHmrOnDev();
+
   const fixedUserAgent = trimWebContentsUserAgent(sess.getUserAgent());
+  const handleModifyReqHeaders = supportModifyReqHeaders(fixedUserAgent);
+  const handleRewriteOriginForIPFS = supportRewriteOriginForIPFS();
+
   sess.webRequest.onBeforeSendHeaders((details, callback) => {
     const pipeCtx = {
       details,
       retReqHeaders: { ...details.requestHeaders },
     };
 
-    supportModifyReqHeaders(fixedUserAgent)(pipeCtx);
+    handleModifyReqHeaders(pipeCtx);
+    handleRewriteOriginForIPFS(pipeCtx);
     if (sessionName === 'mainSession') {
-      supportHmrOnDev()(pipeCtx);
+      handleHMR(pipeCtx);
     }
+
     if (
       details.url.includes(LOCALIPFS_BRAND) &&
       Object.keys(pipeCtx.retReqHeaders).find(
@@ -89,20 +117,67 @@ export function rewriteSessionWebRequestHeaders(
     callback({ cancel: false, requestHeaders: pipeCtx.retReqHeaders });
   });
 
-  // sess.webRequest.onBeforeRequest((details, callback) => {
-  //   if (details.url.startsWith('https://local.ipfs.')) {
-  //     callback({
-  //       redirectURL: details.url.replace('https://local.ipfs.', 'http://local.ipfs.'),
-  //       // redirectURL: details.url.replace(
-  //       //   'https://local.ipfs.',
-  //       //   'rabby-ipfs://'
-  //       // ),
-  //     });
-  //     return;
-  //   }
+  sess.webRequest.onBeforeRequest((details, callback) => {
+    ;(async () => {
+      const isReqFrontend = [
+        `mainFrame`,
+        `subFrame`,
+        `stylesheet`,
+        `script`,
+        `image`,
+        `font`,
+        `object`,
+        // `xhr`,
+        // `ping`,
+        // `cspReport`,
+        `media`,
+        // `webSocket`,
+        // `other`
+      ].includes(details.resourceType);
 
-  //   callback({});
-  // });
+      if (isReqFrontend && details.url.startsWith('http://local.ipfs.')) {
+        console.log('[feat] onBeforeRequest:: details.url', details.url);
+
+        const ipfsService = await getIpfsService();
+
+        const { pathnameWithoutHash: reqIpfsPathname } = extractIpfsPathname(details.url);
+        const checkResult = ipfsService.checkFileExist(reqIpfsPathname);
+        console.log('[feat] onBeforeRequest:: reqIpfsPathname', reqIpfsPathname);
+
+        if (checkResult?.filePath) {
+          console.log('[feat] onBeforeRequest:: checkResult?.filePath', checkResult?.filePath);
+          callback({
+            // redirectURL: details.url.replace('https://local.ipfs.', 'http://local.ipfs.'),
+            redirectURL: details.url.replace(
+              'http://local.ipfs.',
+              'rabby-ipfs://'
+            ),
+          });
+
+          return ;
+        };
+      }
+
+      callback({});
+    })();
+  });
+
+  // it's insecure for http-type dapp.
+  sess.webRequest.onHeadersReceived((details, callback) => {
+    const resHeaders = { ...details.responseHeaders };
+
+    if (details.url.startsWith('rabby-ipfs://')) {
+      const acaoKey = findFirstHeader(resHeaders, 'Access-Control-Allow-Origin');
+      // it maybe cause repeative value in headers `Access-Control-Allow-Origin`
+      if (acaoKey && !resHeaders[acaoKey]?.length) {
+        console.log('[feat] onHeadersReceived:: details.url', details.url);
+        resHeaders[acaoKey] = ['*'];
+      }
+    }
+    callback({
+      responseHeaders: resHeaders,
+    });
+  });
 
   // // trim `Permissions-Policy: interest-cohort=()` for all responses
   // sess.webRequest.onHeadersReceived((details, callback) => {
@@ -159,19 +234,6 @@ export function supportRewriteCORS(session: Electron.Session) {
     callback({
       cancel: false,
       requestHeaders: reqHeaders,
-    });
-  });
-
-  // it's insecure for http-type dapp.
-  session.webRequest.onHeadersReceived((details, callback) => {
-    const resHeaders = { ...details.responseHeaders };
-
-    // it maybe cause repeative value in headers `Access-Control-Allow-Origin`
-    if (!resHeaders['Access-Control-Allow-Origin']?.length) {
-      resHeaders['Access-Control-Allow-Origin'] = ['*'];
-    }
-    callback({
-      responseHeaders: resHeaders,
     });
   });
 }
