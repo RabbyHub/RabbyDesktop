@@ -24,6 +24,7 @@ import { Badge } from 'antd';
 import { usePrevious } from 'react-use';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
+import { useCurrentConnectedSite } from '@/renderer/hooks/useRabbyx';
 import { DappFavicon } from '../DappFavicon';
 import Hide from './Hide';
 import styles from './Sidebar.module.less';
@@ -118,26 +119,24 @@ const DappIndicator = ({ tab }: { tab?: chrome.tabs.Tab }) => {
 };
 
 const DappIcon = ({
-  origin,
   src,
-  chain,
+  origin,
+  tab,
 }: {
   origin: string;
+  tab?: chrome.tabs.Tab;
   src?: string;
-  chain?: CHAINS_ENUM;
 }) => {
-  const chainLogo = useMemo(() => {
-    if (chain) {
-      return CHAINS[chain]?.logo;
-    }
-    return null;
-  }, [chain]);
-
+  const currentConnectedSite = useCurrentConnectedSite({
+    origin,
+    tab,
+  });
   return (
-    <div className={styles.dappIconWithChain}>
-      <DappFavicon origin={origin} src={src} />
-      {chainLogo && <img src={chainLogo} alt="" className={styles.chainLogo} />}
-    </div>
+    <DappFavicon
+      origin={origin}
+      src={src}
+      chain={currentConnectedSite?.chain}
+    />
   );
 };
 
@@ -208,7 +207,11 @@ const TabList = ({
             <DappIndicator tab={tab} />
             <div className={styles.routeItemInner}>
               <div className={styles.dappIcon}>
-                <DappIcon origin={dapp.origin} src={faviconUrl} chain={chain} />
+                <DappIcon
+                  origin={dapp.origin}
+                  src={faviconUrl}
+                  tab={dapp.tab}
+                />
               </div>
               <Hide visible={!isFold} className={styles.routeTitle}>
                 {dapp.alias || dapp.origin}

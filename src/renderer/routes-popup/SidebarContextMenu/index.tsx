@@ -199,7 +199,7 @@ export const SidebarContextMenu = () => {
             toastType: 'toast-message',
             data: {
               type: 'success',
-              content: 'Disconnected',
+              content: 'All Dapps have been disconnected',
             },
           },
         });
@@ -212,7 +212,7 @@ export const SidebarContextMenu = () => {
             toastType: 'toast-message',
             data: {
               type: 'success',
-              content: 'Closed',
+              content: 'All Dapps have been closed',
             },
           },
         });

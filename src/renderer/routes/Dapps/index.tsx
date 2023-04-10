@@ -72,7 +72,7 @@ export default function DApps() {
       onOk: async () => {
         await removeAllConnectedSites();
         toastMessage({
-          content: 'All Dapps have been disconnected.',
+          content: 'All Dapps have been disconnected',
           type: 'success',
         });
       },
@@ -88,7 +88,7 @@ export default function DApps() {
       onOk: async () => {
         await closeAllTabs();
         toastMessage({
-          content: 'All Dapps have been closed.',
+          content: 'All Dapps have been closed',
           type: 'success',
         });
       },

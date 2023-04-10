@@ -1,6 +1,10 @@
 import { Image, ImageProps } from 'antd';
 import { useMemo } from 'react';
+import { CHAINS_ENUM } from '@/preloads/forward';
+import { CHAINS } from '@/renderer/utils/constant';
+import clsx from 'clsx';
 import { getOriginName, hashCode } from '../../utils';
+import './index.less';
 
 const bgColorList = [
   '#F69373',
@@ -31,26 +35,31 @@ const useFallbackImage = (origin: string) => {
 
 interface FaviconProps extends ImageProps {
   origin: string;
+  chain?: CHAINS_ENUM;
+  iconStyle?: React.CSSProperties;
 }
 
 export const DappFavicon = (props: FaviconProps) => {
-  const { origin, src, ...rest } = props;
+  const { origin, src, chain, rootClassName, ...rest } = props;
   const fallbackImage = useFallbackImage(origin);
+  const chainLogo = useMemo(() => {
+    if (chain) {
+      return CHAINS[chain]?.logo;
+    }
+    return null;
+  }, [chain]);
+
   return (
-    <Image
-      preview={false}
-      src={src || fallbackImage}
-      // todo
-      // placeholder={
-      //   <img
-      //     src={fallbackImage}
-      //     alt={origin}
-      //     style={rest.style}
-      //     className={rest.className}
-      //   />
-      // }
-      fallback={fallbackImage}
-      {...rest}
-    />
+    <div className={clsx('rabby-dapp-favicon', rootClassName)}>
+      <Image
+        preview={false}
+        src={src || fallbackImage}
+        fallback={fallbackImage}
+        {...rest}
+      />
+      {chainLogo && (
+        <img src={chainLogo} alt="" className="rabby-dapp-favicon-chain" />
+      )}
+    </div>
   );
 };
