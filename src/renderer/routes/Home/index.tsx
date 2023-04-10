@@ -71,6 +71,7 @@ const HomeWrapper = styled.div`
         flex: 1;
         position: relative;
         .update-at {
+          cursor: pointer;
           display: flex;
           font-size: 12px;
           line-height: 14px;
@@ -86,7 +87,6 @@ const HomeWrapper = styled.div`
           }
           .icon-refresh {
             display: block;
-            cursor: pointer;
             margin-left: 7px;
             @keyframes spining {
               0% {
@@ -569,7 +569,7 @@ const Home = () => {
 
               {curveData ? (
                 <div className="right" onClick={() => setCurveModalOpen(true)}>
-                  <div className="update-at">
+                  <div className="update-at" onClick={handleClickRefresh}>
                     {isLoadingRealTimeTokenList ||
                     isLoadingRealTimeProtocol ||
                     updateAt === 0 ? (
@@ -590,7 +590,6 @@ const Home = () => {
                           isLoadingRealTimeTokenList ||
                           isLoadingRealTimeProtocol,
                       })}
-                      onClick={handleClickRefresh}
                     />
                   </div>
                   {curveData.list.length > 0 && <Curve data={curveData} />}
