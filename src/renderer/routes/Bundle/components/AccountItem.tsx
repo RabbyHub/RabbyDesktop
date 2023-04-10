@@ -1,14 +1,11 @@
 import { useBundle } from '@/renderer/hooks/useBundle/useBundle';
 import { useCopyAddress } from '@/renderer/hooks/useCopyAddress';
 import { ellipsis } from '@/renderer/utils/address';
-import {
-  KEYRING_ICONS,
-  WALLET_BRAND_CONTENT,
-  WALLET_BRAND_TYPES,
-} from '@/renderer/utils/constant';
 import { splitNumberByStep } from '@/renderer/utils/number';
 import clsx from 'clsx';
 import React from 'react';
+import { useAccountItemAddress, useAccountItemIcon } from './useAccountItem';
+import { NicknameInput } from './NicknameInput';
 
 export interface Props {
   checked?: boolean;
@@ -26,44 +23,10 @@ export const AccountItem: React.FC<Props> = ({
   canDelete,
 }) => {
   const {
-    account: { toggleBundle, updateNickname, remove },
+    account: { toggleBundle, remove },
   } = useBundle();
-  const brandName = React.useMemo(() => {
-    switch (data.type) {
-      case 'eth':
-        return data.data.brandName as WALLET_BRAND_TYPES;
-      case 'bn':
-        return WALLET_BRAND_TYPES.Binance;
-      case 'btc':
-      default:
-        return WALLET_BRAND_TYPES.Bitcoin;
-    }
-  }, [data]);
-
-  const addressTypeIcon = React.useMemo(() => {
-    switch (data.type) {
-      case 'eth':
-        return (
-          KEYRING_ICONS[data.data.type] ||
-          WALLET_BRAND_CONTENT?.[brandName]?.image
-        );
-
-      default:
-        return WALLET_BRAND_CONTENT?.[brandName]?.image;
-    }
-  }, [brandName, data]);
-
-  const displayAddress = React.useMemo(() => {
-    switch (data.type) {
-      case 'eth':
-        return data.data.address;
-      case 'bn':
-        return data.apiKey;
-      case 'btc':
-      default:
-        return data.address;
-    }
-  }, [data]);
+  const addressTypeIcon = useAccountItemIcon(data);
+  const displayAddress = useAccountItemAddress(data);
 
   const onCopy = useCopyAddress();
   const onClickEdit = React.useCallback(
@@ -128,7 +91,8 @@ export const AccountItem: React.FC<Props> = ({
           <img className="w-[22px] h-[22px]" src={addressTypeIcon} alt="" />
         </div>
         <div className={clsx('text-white text-[12px]', 'flex-1 space-y-[6px]')}>
-          <div
+          <NicknameInput data={data} canEdit />
+          {/* <div
             className={clsx(
               'flex items-center space-x-[3px]',
               'font-medium text-[12px] leading-[16px]',
@@ -148,7 +112,7 @@ export const AccountItem: React.FC<Props> = ({
                 src="rabby-internal://assets/icons/bundle/edit.svg"
               />
             )}
-          </div>
+          </div> */}
           <div className="flex space-x-[5px] items-center">
             <span className="opacity-50">{ellipsis(displayAddress)}</span>
             <div

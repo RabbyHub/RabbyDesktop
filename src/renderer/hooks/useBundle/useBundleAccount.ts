@@ -1,9 +1,12 @@
 import { useAtom } from 'jotai';
 import React from 'react';
+import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { Binance } from './cex/binance/binance';
 import { bundleAccountsAtom } from './shared';
 import { ERROR } from './error';
 import { useAccountToDisplay } from '../rabbyx/useAccountToDisplay';
+
+const { nanoid } = require('nanoid');
 
 export const useBundleAccount = () => {
   const [accounts, setAccounts] = useAtom(bundleAccountsAtom);
@@ -121,12 +124,13 @@ export const useBundleAccount = () => {
         nickname += ` ${num}`;
       }
       const newAccount: BundleAccount = {
+        id: nanoid(),
         ...(account as BundleAccount),
         nickname,
       };
       window.rabbyDesktop.ipcRenderer.invoke('bundle-account-post', newAccount);
 
-      return account;
+      return newAccount;
     },
     [binanceList.length, btcList.length, preCheck]
   );
@@ -151,17 +155,24 @@ export const useBundleAccount = () => {
   );
 
   const updateNickname = React.useCallback(
-    (id: BundleAccount['id'], nickname: BundleAccount['nickname']) => {
+    async (id: BundleAccount['id'], nickname: BundleAccount['nickname']) => {
       const account = accounts.find((acc) => acc.id === id);
       if (!account) {
         return;
       }
+
+      if (account.type === 'eth') {
+        await walletController.updateAlianName(account.data.address, nickname);
+        await getAllAccountsToDisplay();
+        account.data.alianName = nickname;
+      }
+
       window.rabbyDesktop.ipcRenderer.invoke('bundle-account-put', {
         ...account,
         nickname,
       });
     },
-    [accounts]
+    [accounts, getAllAccountsToDisplay]
   );
 
   const remove = React.useCallback((id: string) => {
