@@ -23,6 +23,15 @@ import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
 import styles from './index.module.less';
 
+const toast = (message: string) => {
+  forwardMessageTo('main-window', 'toast-message', {
+    data: {
+      type: 'success',
+      content: message,
+    },
+  });
+};
+
 export const SidebarContextMenu = () => {
   const { pageInfo } = usePopupWinInfo('sidebar-dapp');
 
@@ -38,17 +47,7 @@ export const SidebarContextMenu = () => {
     }
     removeConnectedSite(current);
     forwardMessageTo('*', 'refreshConnectedSiteMap', {});
-
-    showMainwinPopupview({
-      type: 'global-toast-popup',
-      state: {
-        toastType: 'toast-message',
-        data: {
-          type: 'success',
-          content: 'Disconnected',
-        },
-      },
-    });
+    toast('Disconnected');
   };
 
   const items = useMemo(() => {
@@ -168,16 +167,7 @@ export const SidebarContextMenu = () => {
         const tabId = pageInfo?.dappTabInfo?.id;
         if (tabId) {
           closeTabFromInternalPage(tabId);
-          showMainwinPopupview({
-            type: 'global-toast-popup',
-            state: {
-              toastType: 'toast-message',
-              data: {
-                type: 'success',
-                content: 'Closed',
-              },
-            },
-          });
+          toast('Closed');
         }
         break;
       }
@@ -202,29 +192,11 @@ export const SidebarContextMenu = () => {
         removeAllConnectedSites();
         forwardMessageTo('*', 'refreshConnectedSiteMap', {});
 
-        showMainwinPopupview({
-          type: 'global-toast-popup',
-          state: {
-            toastType: 'toast-message',
-            data: {
-              type: 'success',
-              content: 'All Dapps have been disconnected',
-            },
-          },
-        });
+        toast('All Dapps have been disconnected');
         break;
       case 'dapp-close-all':
         closeAllTabs();
-        showMainwinPopupview({
-          type: 'global-toast-popup',
-          state: {
-            toastType: 'toast-message',
-            data: {
-              type: 'success',
-              content: 'All Dapps have been closed',
-            },
-          },
-        });
+        toast('All Dapps have been closed');
         break;
       default:
         break;

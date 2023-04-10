@@ -36,6 +36,7 @@ import { useMount } from 'ahooks';
 import { matomoRequestEvent } from '@/renderer/utils/matomo-request';
 import { fetchDapps } from '@/renderer/ipcRequest/dapps';
 import dayjs from 'dayjs';
+import { useToastMessage } from '@/renderer/hooks/useToastMessage';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -263,6 +264,8 @@ export function MainWindow() {
   useForwardFromInternalPage(router);
 
   useTransactionChanged();
+
+  useToastMessage();
 
   useAppUnlockEvents();
 
