@@ -140,7 +140,6 @@ const HomeWrapper = styled.div`
 `;
 
 const SwitchViewWrapper = styled.div`
-  flex: 1;
   display: flex;
   justify-content: flex-end;
   .switch-view {
@@ -598,76 +597,78 @@ const Home = () => {
                 </div>
               ) : null}
             </div>
-            <div className="flex justify-between items-center">
-              {isLoadingTokenList ? (
-                <Skeleton.Input
-                  active
-                  style={{
-                    width: '141px',
-                    height: '21px',
-                    borderRadius: '2px',
-                  }}
-                />
-              ) : (
-                <ChainList
-                  chainBalances={displayChainList}
-                  onChange={setSelectChainServerId}
-                />
-              )}
-              <SwitchViewWrapper>
-                <div className="switch-view">
-                  <div
-                    className={classNames('item', {
-                      active: currentView === VIEW_TYPE.DEFAULT,
-                    })}
-                    onClick={() => switchView(VIEW_TYPE.DEFAULT)}
-                  >
-                    Default
-                  </div>
-                  <div
-                    className={classNames('item', {
-                      active: currentView === VIEW_TYPE.CHANGE,
-                    })}
-                    onClick={() => switchView(VIEW_TYPE.CHANGE)}
-                  >
-                    Change
-                  </div>
-                </div>
-              </SwitchViewWrapper>
-            </div>
           </div>
           <div className="relative flex-1 h-0">
             <Transactions updateNonce={updateNonce} />
-            <PortfolioView
-              tokenList={displayTokenList}
-              historyTokenMap={historyTokenMap}
-              protocolList={displayProtocolList}
-              historyProtocolMap={historyProtocolMap}
-              protocolHistoryTokenPriceMap={tokenHistoryPriceMap}
-              selectChainServerId={selectChainServerId}
-              tokenHidden={{
-                isExpand: isTokenExpand,
-                hiddenCount: tokenHiddenCount,
-                hiddenUsdValue: tokenHiddenUsdValue,
-                expandTokensUsdValueChange,
-                setIsExpand: setIsTokenExpand,
-                isShowExpand: isShowTokenExpand,
-              }}
-              protocolHidden={{
-                isShowExpand: isShowProtocolExpand,
-                isExpand: isProtocolExpand,
-                hiddenCount: protocolHiddenCount,
-                hiddenUsdValue: protocolHiddenUsdValue,
-                setIsExpand: setIsProtocolExpand,
-              }}
-              isLoadingTokenList={isLoadingTokenList}
-              isLoadingProtocolList={isLoadingProtocol}
-              isLoadingProtocolHistory={isLoadingProtocolHistory}
-              supportHistoryChains={supportHistoryChains}
-              historyTokenDict={historyTokenDict}
-              chainList={displayChainList}
-              view={currentView}
-            />
+            <div className="flex-1 overflow-hidden h-full overflow-y-auto">
+              <div>
+                {isLoadingTokenList ? (
+                  <Skeleton.Input
+                    active
+                    style={{
+                      width: '141px',
+                      height: '21px',
+                      borderRadius: '2px',
+                    }}
+                  />
+                ) : (
+                  <ChainList
+                    chainBalances={displayChainList}
+                    onChange={setSelectChainServerId}
+                  />
+                )}
+                <SwitchViewWrapper className="my-[12px]">
+                  <div className="switch-view">
+                    <div
+                      className={classNames('item', {
+                        active: currentView === VIEW_TYPE.DEFAULT,
+                      })}
+                      onClick={() => switchView(VIEW_TYPE.DEFAULT)}
+                    >
+                      Default
+                    </div>
+                    <div
+                      className={classNames('item', {
+                        active: currentView === VIEW_TYPE.CHANGE,
+                      })}
+                      onClick={() => switchView(VIEW_TYPE.CHANGE)}
+                    >
+                      Change
+                    </div>
+                  </div>
+                </SwitchViewWrapper>
+              </div>
+              <PortfolioView
+                tokenList={displayTokenList}
+                historyTokenMap={historyTokenMap}
+                protocolList={displayProtocolList}
+                historyProtocolMap={historyProtocolMap}
+                protocolHistoryTokenPriceMap={tokenHistoryPriceMap}
+                selectChainServerId={selectChainServerId}
+                tokenHidden={{
+                  isExpand: isTokenExpand,
+                  hiddenCount: tokenHiddenCount,
+                  hiddenUsdValue: tokenHiddenUsdValue,
+                  expandTokensUsdValueChange,
+                  setIsExpand: setIsTokenExpand,
+                  isShowExpand: isShowTokenExpand,
+                }}
+                protocolHidden={{
+                  isShowExpand: isShowProtocolExpand,
+                  isExpand: isProtocolExpand,
+                  hiddenCount: protocolHiddenCount,
+                  hiddenUsdValue: protocolHiddenUsdValue,
+                  setIsExpand: setIsProtocolExpand,
+                }}
+                isLoadingTokenList={isLoadingTokenList}
+                isLoadingProtocolList={isLoadingProtocol}
+                isLoadingProtocolHistory={isLoadingProtocolHistory}
+                supportHistoryChains={supportHistoryChains}
+                historyTokenDict={historyTokenDict}
+                chainList={displayChainList}
+                view={currentView}
+              />
+            </div>
           </div>
         </HomeWrapper>
         <RightBar updateNonce={updateNonce} />

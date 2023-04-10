@@ -1,50 +1,10 @@
 import { DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
-import classNames from 'classnames';
 import styled from 'styled-components';
 import { useEffect, useMemo, useState } from 'react';
 import { CHAINS_LIST } from '@debank/common';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { formatUsdValue } from '@/renderer/utils/number';
-
-const ChainListWrapper = styled.ul`
-  display: flex;
-  flex-wrap: wrap;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  position: relative;
-  row-gap: 18px;
-  li {
-    cursor: pointer;
-    transition: opacity 0.3s;
-    margin-right: 4px;
-    display: flex;
-    align-items: center;
-    margin-right: 8px;
-    font-weight: 500;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.8);
-    .chain-logo {
-      width: 16px;
-      margin-right: 6px;
-    }
-    &.selected {
-      font-size: 14px;
-      line-height: 17px;
-      opacity: 1;
-      color: #fff;
-      .chain-logo {
-        width: 20px;
-      }
-    }
-    &.disabled {
-      opacity: 0.2;
-    }
-    &:nth-last-child(1) {
-      margin-right: 0;
-    }
-  }
-`;
+import clsx from 'clsx';
 
 const NoAssetsView = styled.div`
   font-weight: 400;
@@ -104,23 +64,39 @@ const ChainList = ({
   }
 
   return (
-    <ChainListWrapper id="chain-list">
+    <div
+      className={clsx(
+        'grid grid-cols-5',
+        'gap-[24px]',
+        'rounded-[6px] bg-[#FFFFFF05]',
+        'p-[28px]'
+      )}
+    >
       {chainBalances.map((item) => (
-        <li
+        <div
           id={`chain-icon-${item.id}`}
           key={item.id}
-          className={classNames({
+          className={clsx('flex space-x-[4px]', 'cursor-pointer', {
             selected: item.id === selectChainServerId,
-            disabled:
+            'opacity-30':
               selectChainServerId !== null && item.id !== selectChainServerId,
           })}
           onClick={() => handleSelectChain(item.id)}
         >
-          <img className="chain-logo" src={item.logo || item.logo_url} />
-          {formatUsdValue(item.usd_value)}
-        </li>
+          <img
+            className={clsx('w-[32px] h-[32px]')}
+            src={item.logo || item.logo_url}
+          />
+          <div className="flex flex-col space-y-[5px]">
+            <span className="text-[12px] opacity-70">On {item.name}</span>
+            <div className="text-[14px]">
+              <span>{formatUsdValue(item.usd_value)}</span>
+              <span className="text-[12px] opacity-70">1%</span>
+            </div>
+          </div>
+        </div>
       ))}
-    </ChainListWrapper>
+    </div>
   );
 };
 

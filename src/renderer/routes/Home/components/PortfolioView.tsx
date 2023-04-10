@@ -18,8 +18,6 @@ const PortfolioWrapper = styled.div`
   position: relative;
   height: 100%;
   .scroll-container {
-    // don't use overflow: overlay, it will cause zIndex problem
-    overflow: auto;
     height: 100%;
     padding-right: 14px;
     padding-top: 28px;
@@ -158,54 +156,50 @@ const PortfolioView = ({
 
   if (isEmpty) {
     return (
-      <div className="flex-1 overflow-hidden">
-        <PortfolioWrapper className="empty">
-          <img
-            className="icon-empty"
-            src="rabby-internal://assets/icons/home/asset-empty.svg"
-          />
-          <p className="text-empty">No assets</p>
-        </PortfolioWrapper>
-      </div>
+      <PortfolioWrapper className="empty">
+        <img
+          className="icon-empty"
+          src="rabby-internal://assets/icons/home/asset-empty.svg"
+        />
+        <p className="text-empty">No assets</p>
+      </PortfolioWrapper>
     );
   }
 
   return (
     <ScrollTopContext.Provider value={scrollTop}>
-      <div className="flex-1 overflow-hidden h-full">
-        <PortfolioWrapper>
-          <div className="scroll-container" onScroll={handleScroll}>
-            <TokenList
-              tokenList={tokenList}
-              historyTokenMap={historyTokenMap}
-              tokenHidden={tokenHidden}
-              isLoadingTokenList={isLoadingTokenList}
-              supportHistoryChains={supportHistoryChains}
-              showHistory={view === VIEW_TYPE.CHANGE}
+      <PortfolioWrapper>
+        <div className="scroll-container" onScroll={handleScroll}>
+          <TokenList
+            tokenList={tokenList}
+            historyTokenMap={historyTokenMap}
+            tokenHidden={tokenHidden}
+            isLoadingTokenList={isLoadingTokenList}
+            supportHistoryChains={supportHistoryChains}
+            showHistory={view === VIEW_TYPE.CHANGE}
+          />
+          <ProtocolList
+            protocolList={protocolList}
+            historyProtocolMap={historyProtocolMap}
+            protocolHistoryTokenPriceMap={protocolHistoryTokenPriceMap}
+            onRelateDapp={handleRelateDapp}
+            isLoading={isLoadingProtocolList}
+            supportHistoryChains={supportHistoryChains}
+            historyTokenDict={historyTokenDict}
+            isLoadingProtocolHistory={isLoadingProtocolHistory}
+            view={view}
+            protocolHidden={protocolHidden}
+          />
+          {relateDappProtocol && (
+            <AssociateDappModal
+              relateDappProtocol={relateDappProtocol}
+              open={relateDappModalOpen}
+              onCancel={() => setRelateDappModalOpen(false)}
+              onOk={() => setRelateDappModalOpen(false)}
             />
-            <ProtocolList
-              protocolList={protocolList}
-              historyProtocolMap={historyProtocolMap}
-              protocolHistoryTokenPriceMap={protocolHistoryTokenPriceMap}
-              onRelateDapp={handleRelateDapp}
-              isLoading={isLoadingProtocolList}
-              supportHistoryChains={supportHistoryChains}
-              historyTokenDict={historyTokenDict}
-              isLoadingProtocolHistory={isLoadingProtocolHistory}
-              view={view}
-              protocolHidden={protocolHidden}
-            />
-            {relateDappProtocol && (
-              <AssociateDappModal
-                relateDappProtocol={relateDappProtocol}
-                open={relateDappModalOpen}
-                onCancel={() => setRelateDappModalOpen(false)}
-                onOk={() => setRelateDappModalOpen(false)}
-              />
-            )}
-          </div>
-        </PortfolioWrapper>
-      </div>
+          )}
+        </div>
+      </PortfolioWrapper>
     </ScrollTopContext.Provider>
   );
 };
