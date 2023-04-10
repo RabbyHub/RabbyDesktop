@@ -157,7 +157,9 @@ const TitleWrapper = styled.div`
 
 const StyledModal = styled(Modal)`
   .ant-modal-content {
-    background-color: transparent;
+    background: var(--theme-modal-content-bg);
+    box-shadow: var(--theme-modal-content-shadow);
+    border-radius: 12px;
   }
   .ant-modal-body {
     height: 700px;
@@ -166,9 +168,6 @@ const StyledModal = styled(Modal)`
     display: flex;
     flex-direction: column;
     padding-top: 30px;
-    background: #525767;
-    box-shadow: 0px 24px 80px rgba(19, 20, 26, 0.18);
-    border-radius: 12px;
   }
   .container {
     height: 100%;
