@@ -3,7 +3,7 @@ import { Skeleton } from 'antd';
 import { usePrevious, useInterval } from 'react-use';
 import styled from 'styled-components';
 import classNames from 'classnames';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
 import { sortBy } from 'lodash';
 import { ellipsis } from '@/renderer/utils/address';
@@ -25,6 +25,7 @@ import {
   useZPopupLayerOnMain,
   useZViewsVisibleChanged,
 } from '@/renderer/hooks/usePopupWinOnMainwin';
+import { HomeTab } from '@/renderer/components/HomeTab/HomeTab';
 import { useSwitchView, VIEW_TYPE } from './hooks';
 
 import ChainList from './components/ChainList';
@@ -34,11 +35,9 @@ import RightBar from './components/RightBar';
 import Transactions from './components/Transactions';
 
 const HomeBody = styled.div`
-  display: flex;
-  padding-top: 24px;
   padding-left: 28px;
   padding-right: 28px;
-  height: calc(100vh - 64px - var(--mainwin-mainroute-topoffset));
+  height: calc(100vh - 118px - var(--mainwin-mainroute-topoffset));
 `;
 
 const Container = styled.div`
@@ -490,22 +489,12 @@ const Home = () => {
   }, 1000);
 
   const { showZSubview } = useZPopupLayerOnMain();
-  const navigateTo = useNavigate();
 
   return (
     <HomeBody>
+      <HomeTab />
       <Container>
         <HomeWrapper>
-          {/* TODO */}
-          <button
-            type="button"
-            onClick={() => {
-              navigateTo('/mainwin/home/bundle');
-            }}
-          >
-            Bundle
-          </button>
-
           <div className="header">
             <div className="top">
               <div className="left">

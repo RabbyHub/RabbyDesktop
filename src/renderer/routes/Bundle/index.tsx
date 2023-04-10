@@ -1,5 +1,6 @@
 import { BundleStateProvider } from '@/renderer/hooks/useBundle/useBundle';
 import classNames from 'classnames';
+import { HomeTab } from '@/renderer/components/HomeTab/HomeTab';
 import { BundleAccountList } from './components/BundleAccountList';
 import { BTCAccountList } from './components/BTCAccountList';
 import { BinanceAccountList } from './components/BinanceAccountList';
@@ -35,8 +36,13 @@ const HomeBundleInner = () => {
 
 export const HomeBundle = () => {
   return (
-    <BundleStateProvider>
-      <HomeBundleInner />
-    </BundleStateProvider>
+    <>
+      <div className="px-[28px] mt-[8px]">
+        <HomeTab />
+      </div>
+      <BundleStateProvider>
+        <HomeBundleInner />
+      </BundleStateProvider>
+    </>
   );
 };
