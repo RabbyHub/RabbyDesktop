@@ -2,6 +2,7 @@ import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { Button } from 'antd';
 import { ReactNode } from 'react';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
+import clsx from 'clsx';
 import { Modal } from '../Modal/Modal';
 import styles from './index.module.less';
 
@@ -89,7 +90,7 @@ export const IPFSNotSupportedModal = () => {
       onCancel={() => delayCloseSubview(150)}
     >
       <div className={styles.alertModalTitle}>IPFS Dapp is not enabled</div>
-      <div className={styles.alertModalContent}>
+      <div className={clsx(styles.alertModalContent, 'text-left')}>
         Please enable IPFS Dapp in settings. Please note that using IPFS may
         interfere with the operation of Trezor and Onekey wallets.
       </div>
