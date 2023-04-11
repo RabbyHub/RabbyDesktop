@@ -61,7 +61,7 @@ export default function AddAddressDropdown() {
         shouldOpen = false;
       }
 
-      if (shouldOpen) return;
+      if (!shouldOpen) return;
       zActions.showZSubview('add-address-modal', {
         keyringType: info.key,
       });
