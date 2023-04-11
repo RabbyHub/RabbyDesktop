@@ -10,6 +10,7 @@ import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
 
 import { CHAINS } from '@/renderer/utils/constant';
 import { CHAINS_ENUM } from '@debank/common/dist/chain-data';
+import { useCurrentConnectedSite } from '@/renderer/hooks/useRabbyx';
 import { DappFavicon } from '../../../../components/DappFavicon';
 
 // todo: move to components
@@ -61,34 +62,18 @@ type IOnOpDapp = (
 
 export const DAppBlock = ({
   dapp,
-  onAdd,
   onOpen,
   onOpDapp,
 }: React.PropsWithoutRef<{
   dapp?: IDappWithTabInfo;
-  onAdd?: () => void;
   onOpDapp?: IOnOpDapp;
   onOpen?: (dappOrigin: string) => void;
 }>) => {
   const ref = useRef<HTMLDivElement>(null);
-
-  if (onAdd) {
-    return (
-      <div
-        className="dapp-block is-add"
-        onClick={() => {
-          onAdd();
-        }}
-      >
-        <img
-          className="dapp-favicon"
-          src="rabby-internal://assets/icons/internal-homepage/icon-dapps-add.svg"
-          alt="add"
-        />
-        <div className="text">Add a Dapp</div>
-      </div>
-    );
-  }
+  const connectedSite = useCurrentConnectedSite({
+    origin: dapp?.origin || '',
+    tab: dapp?.tab,
+  });
 
   if (!dapp) return null;
 
@@ -189,10 +174,11 @@ export const DAppBlock = ({
             }
           }}
         >
-          <DappIcon
+          <DappFavicon
+            rootClassName="dapp-icon-with-chain"
             origin={dapp.origin}
             src={dapp.faviconBase64 ? dapp.faviconBase64 : dapp.faviconUrl}
-            // chain={chain}
+            chain={connectedSite?.chain}
           />
           <div className="infos pr-[16px]">
             <h4 className="dapp-alias">{dapp.alias}</h4>

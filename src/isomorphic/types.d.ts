@@ -277,6 +277,7 @@ type IPopupWinPageInfo = {
   dappTabInfo: {
     origin: string;
     id: chrome.tabs.Tab['id'];
+    url?: string;
   };
 };
 

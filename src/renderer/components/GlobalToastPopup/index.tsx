@@ -9,10 +9,6 @@ import { useRef } from 'react';
 import './index.less';
 import { toastMessage } from '../TransparentToast';
 
-message.config({
-  maxCount: 1,
-});
-
 hideMainwinPopupview('global-toast-popup');
 
 const TOASTKEY = 'global-toast-key';
@@ -20,7 +16,7 @@ export default function GlobalToastPopup() {
   useBodyClassNameOnMounted('global-toast-popup');
 
   const contentRef = useRef<any>(null);
-  const { delayHideView, hideView } = usePopupViewInfo('global-toast-popup', {
+  const { delayHideView } = usePopupViewInfo('global-toast-popup', {
     onVisibleChanged(payload) {
       if (!payload.visible) {
         return;
@@ -43,12 +39,14 @@ export default function GlobalToastPopup() {
           });
           break;
         case 'toast-message':
+          message.destroy(TOASTKEY);
           toastMessage({
+            key: TOASTKEY,
             type: payload.pageInfo.state.data.type,
             content: payload.pageInfo.state.data.content,
             duration: payload.pageInfo.state.data.duration || 3,
             onClose: () => {
-              hideView();
+              delayHideView(300);
             },
           });
           break;

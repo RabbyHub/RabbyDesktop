@@ -72,7 +72,7 @@ export default function DApps() {
       onOk: async () => {
         await removeAllConnectedSites();
         toastMessage({
-          content: 'All Dapps have been disconnected.',
+          content: 'All Dapps have been disconnected',
           type: 'success',
         });
       },
@@ -88,7 +88,7 @@ export default function DApps() {
       onOk: async () => {
         await closeAllTabs();
         toastMessage({
-          content: 'All Dapps have been closed.',
+          content: 'All Dapps have been closed',
           type: 'success',
         });
       },
@@ -116,13 +116,13 @@ export default function DApps() {
             security for your Dapp use.
           </div>
           <div className={style.actionList}>
-            {/* <div className={style.action} onClick={handleDisconnectAll}>
+            <div className={style.action} onClick={handleDisconnectAll}>
               <img
                 src="rabby-internal://assets/icons/dapps/icon-disconnect.svg"
                 alt=""
               />
               Disconnect All Dapps
-            </div> */}
+            </div>
             <div className={style.action} onClick={handleCloseAll}>
               <img
                 src="rabby-internal://assets/icons/dapps/icon-close.svg"
