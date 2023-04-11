@@ -423,7 +423,7 @@ export const SwapToken = () => {
       payToken &&
       receiveToken &&
       chain &&
-      debouncePayAmount &&
+      +debouncePayAmount > 0 &&
       feeAfterDiscount,
     [
       inSufficient,

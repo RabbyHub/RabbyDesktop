@@ -1,7 +1,7 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useState, useRef, useEffect } from 'react';
 import { CEXQuote, TokenItem } from '@debank/rabby-api/dist/types';
 import { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
-import { Skeleton, Tooltip, message } from 'antd';
+import { Skeleton, Tooltip } from 'antd';
 import styled from 'styled-components';
 import BigNumber from 'bignumber.js';
 import { formatAmount } from '@/renderer/utils/number';
@@ -46,6 +46,7 @@ const QuotesWrapper = styled.div`
 `;
 
 const ItemWrapper = styled.div`
+  position: relative;
   height: 72px;
   font-size: 16px;
   font-weight: medium;
@@ -59,6 +60,29 @@ const ItemWrapper = styled.div`
   border-radius: 6px;
 
   cursor: pointer;
+
+  .cexDisabledTips {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translateY(-20px);
+    opacity: 0;
+    width: 100%;
+    height: 0;
+    padding-left: 16px;
+    background: #000000;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    gap: 8px;
+    &.active {
+      height: 100%;
+      transform: translateY(0);
+      opacity: 1;
+      transition: opacity 0.35s, transform 0.35s;
+    }
+  }
 
   &:hover:not(.disabled) {
     background: rgba(134, 151, 255, 0.1);
@@ -80,7 +104,16 @@ const ItemWrapper = styled.div`
     cursor: not-allowed;
   }
   &.error {
-    opacity: 0.6;
+    & > * {
+      opacity: 0.6;
+    }
+    & > .cexDisabledTips {
+      opacity: 0;
+
+      &.active {
+        opacity: 1;
+      }
+    }
   }
 
   .info {
@@ -145,7 +178,6 @@ const DexQuoteItem = (
     preExecResult: QuotePreExecResultInfo;
   }
 ) => {
-  // const { name, logo, error, symbol, amount, diff, disabled } = props;
   const {
     quote,
     name: dexId,
@@ -493,14 +525,23 @@ const CexQuoteItem = (props: {
     return [center, right, disable];
   }, [data?.receive_token, bestAmount, isBestQuote]);
 
-  const handleClick = () => {
-    message.info({
-      className: 'text-[15px] font-medium ',
-      icon: <IconRcTip className="mr-8 -mb-4 text-20" />,
-      content:
-        'CEX price is for reference only. Cannot be used for direct trading now.',
+  const [disabledTips, setDisabledTips] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout>();
+
+  const handleClick = useCallback(() => {
+    setDisabledTips((e) => {
+      if (!e) {
+        clearTimeout(timerRef.current);
+        timerRef.current = setTimeout(() => {
+          setDisabledTips(false);
+        }, 3000);
+        return true;
+      }
+      return e;
     });
-  };
+  }, []);
+
+  useEffect(() => () => clearTimeout(timerRef.current), []);
 
   return (
     <ItemWrapper
@@ -513,6 +554,14 @@ const CexQuoteItem = (props: {
       </div>
       <div className="price">{middleContent}</div>
       <div className="diff">{rightContent}</div>
+
+      <div className={clsx('cexDisabledTips', disabledTips && 'active')}>
+        <IconRcTip className="text-14" />
+        <span>
+          CEX price is for reference only. Cannot be used for direct trading
+          now.
+        </span>
+      </div>
     </ItemWrapper>
   );
 };

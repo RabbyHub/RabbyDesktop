@@ -170,7 +170,7 @@ export const ReceiveDetails = (
           ? new BigNumber(rateBn.toPrecision(1, 0)).toString(10)
           : formatAmount(rateBn.toString(10)),
         sign: cut.eq(0) ? '' : cut.lt(0) ? '-' : '+',
-        diff: cut.toFixed(2),
+        diff: cut.abs().toFixed(2),
         showLoss: cut.lte(-5),
       };
     }, [
