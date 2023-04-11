@@ -644,6 +644,7 @@ export const SwapToken = () => {
         });
         return;
       }
+      if (activeProvider?.activeLoading || btnDisabled) return;
 
       if (!activeProvider?.error && activeProvider?.quote) {
         if (activeProvider?.shouldTwoStepApprove) {
@@ -678,13 +679,15 @@ export const SwapToken = () => {
       }
     },
     [
+      activeProvider?.activeLoading,
+      activeProvider?.error,
+      activeProvider?.quote,
+      activeProvider?.shouldTwoStepApprove,
+      btnDisabled,
       debouncePayAmount,
       payToken,
       receiveToken,
       gotoSwap,
-      activeProvider?.error,
-      activeProvider?.quote,
-      activeProvider?.shouldTwoStepApprove,
     ]
   );
 
