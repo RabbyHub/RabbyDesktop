@@ -258,7 +258,6 @@ const DefaultProtocolItem = ({
 
   const autoBindDapp = useCallback(async () => {
     const dappBindings = await fetchProtocolDappsBinding();
-    console.log('dappBindings', dappBindings);
     const siteUrl = protocol.site_url;
     const sameOrigin = dapps.find((dapp) =>
       isSameOrigin(dapp.origin, protocol.site_url)
