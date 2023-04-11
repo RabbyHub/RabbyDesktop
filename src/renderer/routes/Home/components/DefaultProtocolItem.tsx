@@ -132,6 +132,9 @@ const ProtocolHeader = styled.div`
         font-size: 12px;
         line-height: 14px;
         color: rgba(255, 255, 255, 0.5);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 350px;
       }
     }
     &::after {
