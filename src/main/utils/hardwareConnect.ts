@@ -1,4 +1,5 @@
 import { createWindow } from '../streams/tabbedBrowserWindow';
+import { emitIpcMainEvent } from './ipcMainEvents';
 import { onMainWindowReady, pushChangesToZPopupLayer } from './stream-helpers';
 
 function getConnectWinSize(

@@ -32,6 +32,7 @@ import {
   IPFSAddFailedModal,
   IPFSNoLodalModal,
   IPFSVerifyFailedModal,
+  IPFSNotSupportedModal,
 } from '@/renderer/components/IPFSAlertModal';
 import SwitchChainModal from '../../components/SwitchChainModal';
 
@@ -93,6 +94,7 @@ function App() {
       <IPFSAddFailedModal />
       <IPFSNoLodalModal />
       <IPFSVerifyFailedModal />
+      <IPFSNotSupportedModal />
     </>
   );
 }

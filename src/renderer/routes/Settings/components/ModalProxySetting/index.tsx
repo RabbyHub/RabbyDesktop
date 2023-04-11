@@ -197,6 +197,7 @@ export default function ModalProxySetting() {
               Modal.confirm({
                 title: 'Apply Proxy Settings',
                 content: `It's required to restart the app to apply the proxy settings, do you want to restart now?`,
+                okText: 'Restart',
                 onOk: () => {
                   applyProxyAndRelaunch();
                 },

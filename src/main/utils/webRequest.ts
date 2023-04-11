@@ -10,6 +10,12 @@ type HoF = (ctx: {
   retReqHeaders: typeof ctx.details.requestHeaders;
 }) => void;
 
+function findFirstHeader(headers: Record<string, any>, key: string) {
+  return Object.keys(headers).find(
+    (k) => k.toLowerCase() === key.toLowerCase()
+  );
+}
+
 function supportHmrOnDev(): HoF {
   // TODO: apply it on dev mode for dev-server
   return (ctx) => {
@@ -34,12 +40,13 @@ function supportHmrOnDev(): HoF {
 function supportModifyReqHeaders(fixedUserAgent: string): HoF {
   return (ctx) => {
     if (ctx.details.url.includes('local.ipfs.')) {
-      const kName = Object.keys(ctx.details.requestHeaders).find(
-        (k) => k.toLocaleLowerCase() === 'upgrade-insecure-requests'
+      const uirK = findFirstHeader(
+        ctx.retReqHeaders,
+        'Upgrade-Insecure-Requests'
       );
 
-      if (kName) {
-        ctx.retReqHeaders[kName] = '0';
+      if (uirK) {
+        ctx.retReqHeaders[uirK] = '0';
       }
     }
 
@@ -62,17 +69,22 @@ export function rewriteSessionWebRequestHeaders(
   sess: Electron.Session,
   sessionName?: keyof IAppSession
 ) {
+  const handleHMR = supportHmrOnDev();
+
   const fixedUserAgent = trimWebContentsUserAgent(sess.getUserAgent());
+  const handleModifyReqHeaders = supportModifyReqHeaders(fixedUserAgent);
+
   sess.webRequest.onBeforeSendHeaders((details, callback) => {
     const pipeCtx = {
       details,
       retReqHeaders: { ...details.requestHeaders },
     };
 
-    supportModifyReqHeaders(fixedUserAgent)(pipeCtx);
+    handleModifyReqHeaders(pipeCtx);
     if (sessionName === 'mainSession') {
-      supportHmrOnDev()(pipeCtx);
+      handleHMR(pipeCtx);
     }
+
     if (
       details.url.includes(LOCALIPFS_BRAND) &&
       Object.keys(pipeCtx.retReqHeaders).find(
@@ -88,21 +100,6 @@ export function rewriteSessionWebRequestHeaders(
 
     callback({ cancel: false, requestHeaders: pipeCtx.retReqHeaders });
   });
-
-  // sess.webRequest.onBeforeRequest((details, callback) => {
-  //   if (details.url.startsWith('https://local.ipfs.')) {
-  //     callback({
-  //       redirectURL: details.url.replace('https://local.ipfs.', 'http://local.ipfs.'),
-  //       // redirectURL: details.url.replace(
-  //       //   'https://local.ipfs.',
-  //       //   'rabby-ipfs://'
-  //       // ),
-  //     });
-  //     return;
-  //   }
-
-  //   callback({});
-  // });
 
   // // trim `Permissions-Policy: interest-cohort=()` for all responses
   // sess.webRequest.onHeadersReceived((details, callback) => {
@@ -159,19 +156,6 @@ export function supportRewriteCORS(session: Electron.Session) {
     callback({
       cancel: false,
       requestHeaders: reqHeaders,
-    });
-  });
-
-  // it's insecure for http-type dapp.
-  session.webRequest.onHeadersReceived((details, callback) => {
-    const resHeaders = { ...details.responseHeaders };
-
-    // it maybe cause repeative value in headers `Access-Control-Allow-Origin`
-    if (!resHeaders['Access-Control-Allow-Origin']?.length) {
-      resHeaders['Access-Control-Allow-Origin'] = ['*'];
-    }
-    callback({
-      responseHeaders: resHeaders,
     });
   });
 }

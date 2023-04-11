@@ -17,11 +17,15 @@ import {
   IS_RUNTIME_PRODUCTION,
 } from '@/isomorphic/constants';
 import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
-import { ModalConfirm } from '@/renderer/components/Modal/Confirm';
+import {
+  ModalConfirm,
+  ModalConfirmRelaunch,
+} from '@/renderer/components/Modal/Confirm';
 import { Switch } from '@/renderer/components/Switch/Switch';
 import { useCheckNewRelease } from '@/renderer/hooks/useAppUpdator';
 import { copyText } from '@/renderer/utils/clipboard';
 import { detectOS } from '@/isomorphic/os';
+import { ucfirst } from '@/isomorphic/string';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
 import { useProxyStateOnSettingPage } from './settingHooks';
@@ -148,7 +152,8 @@ const osType = detectOS();
 
 export function MainWindowSettings() {
   const appVerisons = useAppVersion();
-  const { settings, toggleEnableContentProtection } = useSettings();
+  const { settings, toggleEnableIPFSDapp, toggleEnableContentProtection } =
+    useSettings();
 
   const { setIsSettingProxy, customProxyServer, proxyType } =
     useProxyStateOnSettingPage();
@@ -157,7 +162,7 @@ export function MainWindowSettings() {
 
   const { fetchReleaseInfo } = useCheckNewRelease();
 
-  const { enable, toggleWhitelist } = useWhitelist();
+  const { enable: enabledWhiteList, toggleWhitelist } = useWhitelist();
 
   const [isShowingClearPendingModal, setIsShowingClearPendingModal] =
     useState(false);
@@ -223,7 +228,7 @@ export function MainWindowSettings() {
             />
           )}
           <ItemSwitch
-            checked={enable}
+            checked={enabledWhiteList}
             name={
               <>
                 <div className="flex flex-col gap-[4px]">
@@ -244,6 +249,40 @@ export function MainWindowSettings() {
                   : 'You can send assets to any address once disabled',
                 onOk: () => {
                   toggleWhitelist(nextEnabled);
+                },
+              });
+            }}
+          />
+        </div>
+      </div>
+
+      <div className={styles.settingBlock}>
+        <h4 className={styles.blockTitle}>Dapp</h4>
+        <div className={styles.itemList}>
+          <ItemSwitch
+            checked={settings.enableSupportIpfsDapp}
+            name={
+              <>
+                <div className="flex flex-col gap-[4px]">
+                  <span className="text-14 font-medium">IPFS</span>
+                  <span className="text-14 text-white opacity-[0.6]">
+                    Once enabled, you can use IPFS Dapp. However, Trezor and
+                    Onekey will be affected and can't be used properly.
+                  </span>
+                </div>
+              </>
+            }
+            icon="rabby-internal://assets/icons/mainwin-settings/icon-ipfs.svg"
+            onChange={(nextEnabled: boolean) => {
+              const keyAction = `${nextEnabled ? 'enable' : 'disable'}`;
+
+              ModalConfirmRelaunch({
+                height: 230,
+                title: `${ucfirst(keyAction)} IPFS Dapp`,
+                content: `It's required to restart the app to ${keyAction} IPFS dapp, do you want to restart now?`,
+                okText: 'Restart',
+                onOk: () => {
+                  toggleEnableIPFSDapp(nextEnabled);
                 },
               });
             }}

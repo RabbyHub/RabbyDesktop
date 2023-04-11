@@ -40,6 +40,7 @@ import {
 } from '../utils/tabbedBrowserWindow';
 import { safeOpenURL } from './dappSafeview';
 import { isTargetScanLink } from '../store/dynamicConfig';
+import { isEnableSupportIpfsDapp } from '../store/desktopApp';
 
 /**
  * @deprecated import members from '../utils/tabbedBrowserWindow' instead
@@ -201,18 +202,32 @@ onIpcMainEvent('__internal_webui-window-close', (_, winId, webContentsId) => {
 });
 
 handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
+  const result = {
+    shouldNavTabOnClient: false,
+    isOpenExternal: false,
+    isTargetDapp: false,
+    isTargetDappByOrigin: false,
+    isTargetDappBySecondaryOrigin: false,
+  };
+
   if (isTargetScanLink(dappOrigin)) {
     shell.openExternal(dappOrigin);
     return {
-      shouldNavTabOnClient: false,
+      ...result,
       isOpenExternal: true,
-      isTargetDapp: false,
-      isTargetDappByOrigin: false,
-      isTargetDappBySecondaryOrigin: false,
     };
   }
   const dappTypeInfo = checkoutDappURL(dappOrigin);
   if (dappTypeInfo?.type === 'ipfs') {
+    if (!isEnableSupportIpfsDapp()) {
+      pushChangesToZPopupLayer({
+        'ipfs-not-supported-modal': {
+          visible: true,
+        },
+      });
+      return result;
+    }
+
     const ipfsService = await getIpfsService();
     if (!(await ipfsService.isExist(dappTypeInfo.ipfsCid))) {
       pushChangesToZPopupLayer({
@@ -253,9 +268,9 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
   const isTargetDapp = isTargetDappByOrigin || isTargetDappBySecondaryOrigin;
 
   return {
-    shouldNavTabOnClient: isTargetDapp,
+    ...result,
+    shouldNavTabOnClient: dappTypeInfo?.type === 'ipfs' || isTargetDapp,
     openType: openResult.type,
-    isOpenExternal: false,
     isTargetDapp,
     isTargetDappByOrigin,
     isTargetDappBySecondaryOrigin,

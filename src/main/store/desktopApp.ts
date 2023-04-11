@@ -21,6 +21,7 @@ export const desktopAppStore = makeStore<{
     isMaximized?: boolean;
   };
   enableContentProtected: IDesktopAppState['enableContentProtected'];
+  enableSupportIpfsDapp: IDesktopAppState['enableSupportIpfsDapp'];
   proxyType: ISensitiveConfig['proxyType'];
   proxySettings: ISensitiveConfig['proxySettings'];
 
@@ -64,6 +65,10 @@ export const desktopAppStore = makeStore<{
     enableContentProtected: {
       type: 'boolean',
       default: !FORCE_DISABLE_CONTENT_PROTECTION,
+    },
+    enableSupportIpfsDapp: {
+      type: 'boolean',
+      default: false,
     },
     sidebarCollapsed: {
       type: 'boolean',
@@ -122,12 +127,18 @@ function getState() {
     firstStartApp: desktopAppStore.get('firstStartApp'),
     enableContentProtected:
       desktopAppStore.get('enableContentProtected') !== false,
+    enableSupportIpfsDapp:
+      desktopAppStore.get('enableSupportIpfsDapp') === true,
     sidebarCollapsed: desktopAppStore.get('sidebarCollapsed', false),
   };
 }
 
 export function isEnableContentProtected() {
   return desktopAppStore.get('enableContentProtected') !== false;
+}
+
+export function isEnableSupportIpfsDapp() {
+  return desktopAppStore.get('enableSupportIpfsDapp') === true;
 }
 
 export function getAppProxyConf() {
@@ -161,6 +172,11 @@ handleIpcMainInvoke('put-desktopAppState', (_, partialPayload) => {
     switch (key) {
       case 'enableContentProtected': {
         desktopAppStore.set('enableContentProtected', value !== false);
+        emitIpcMainEvent('__internal_main:app:relaunch');
+        break;
+      }
+      case 'enableSupportIpfsDapp': {
+        desktopAppStore.set('enableSupportIpfsDapp', !!value);
         emitIpcMainEvent('__internal_main:app:relaunch');
         break;
       }

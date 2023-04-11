@@ -98,6 +98,7 @@ type IDappWithTabInfo = IMergedDapp & {
 type IDesktopAppState = {
   firstStartApp: boolean;
   enableContentProtected: boolean;
+  enableSupportIpfsDapp: boolean;
   sidebarCollapsed: boolean;
 };
 

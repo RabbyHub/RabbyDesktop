@@ -300,6 +300,19 @@ export function useZPopupViewState<T extends keyof ZViewStates>(
     });
   }, [svType, setZViewsState]);
 
+  const delayCloseSubview = useCallback(
+    (timeout?: number) => {
+      if (timeout) {
+        setTimeout(() => {
+          closeSubview();
+        }, timeout);
+      } else {
+        closeSubview();
+      }
+    },
+    [closeSubview]
+  );
+
   const { visible: svVisible, state: svState } = zviewsState[svType] || {};
 
   const setSvState = useCallback(
@@ -328,6 +341,7 @@ export function useZPopupViewState<T extends keyof ZViewStates>(
      */
     pageInfo: zviewsState[svType],
     closeSubview,
+    delayCloseSubview,
   };
 }
 

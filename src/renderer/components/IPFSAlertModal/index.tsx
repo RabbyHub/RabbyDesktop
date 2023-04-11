@@ -1,6 +1,7 @@
 import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { Button } from 'antd';
 import { ReactNode } from 'react';
+import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { Modal } from '../Modal/Modal';
 import styles from './index.module.less';
 
@@ -72,5 +73,51 @@ export const IPFSVerifyFailedModal = () => {
       title="IPFS CID verification failed"
       content="The IPFS-CID value of the locally downloaded file is different from the IPFS-CID value when the file is added, causing security risks. The current Dapp cannot be opened."
     />
+  );
+};
+
+export const IPFSNotSupportedModal = () => {
+  const { svVisible, delayCloseSubview } = useZPopupViewState(
+    'ipfs-not-supported-modal'
+  );
+  return (
+    <Modal
+      width={490}
+      className={styles.alertModal}
+      centered
+      open={svVisible}
+      onCancel={() => delayCloseSubview(150)}
+    >
+      <div className={styles.alertModalTitle}>IPFS Dapp is not enabled</div>
+      <div className={styles.alertModalContent}>
+        Please enable IPFS Dapp in settings. Please note that using IPFS may
+        interfere with the operation of Trezor and Onekey wallets.
+      </div>
+      <footer className={styles.alertModalFooter}>
+        <Button
+          type="primary"
+          ghost
+          className={styles.alertModalBtn}
+          onClick={() => delayCloseSubview(150)}
+        >
+          Cancel
+        </Button>
+        <Button
+          type="primary"
+          className={styles.alertModalBtn}
+          onClick={() => {
+            delayCloseSubview(150);
+            forwardMessageTo('main-window', 'route-navigate', {
+              data: {
+                pathname: '/mainwin/settings',
+                params: {},
+              },
+            });
+          }}
+        >
+          Go to Settings
+        </Button>
+      </footer>
+    </Modal>
   );
 };

@@ -75,6 +75,10 @@ type ZViewStates = {
   'ipfs-verify-failed-modal': {
     // nothing
   };
+
+  'ipfs-not-supported-modal': {
+    // nothing
+  };
 };
 
 type IZPopupSubviewState = {

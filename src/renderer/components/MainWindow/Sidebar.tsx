@@ -182,16 +182,17 @@ const TabList = ({
                 styles.active
             )}
             onClick={async () => {
+              let shouldNav = false;
               if (dapp.tab) {
                 dappActions.onSelectDapp(dapp.tab);
+                shouldNav = true;
               } else {
-                await getLastOpenOriginByOrigin(dapp.origin).then(
-                  (lastOrigin) => {
-                    dappActions.onOpenDapp(lastOrigin);
-                  }
-                );
+                const lastOrigin = await getLastOpenOriginByOrigin(dapp.origin);
+                const openRes = await dappActions.onOpenDapp(lastOrigin);
+                shouldNav = !!openRes.shouldNavTabOnClient;
               }
-              navigateToDapp(dapp.origin);
+
+              if (shouldNav) navigateToDapp(dapp.origin);
             }}
             onContextMenu={(event) => {
               event?.preventDefault();

@@ -4,24 +4,14 @@ import path from 'path';
 import { app, protocol, session, shell } from 'electron';
 import { firstValueFrom } from 'rxjs';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
-import {
-  canoicalizeDappUrl,
-  isIpfsHttpURL,
-  isRabbyXPage,
-} from '@/isomorphic/url';
+import { isRabbyXPage } from '@/isomorphic/url';
 import { trimWebContentsUserAgent } from '@/isomorphic/string';
 import {
-  IPFS_LOCALHOST_DOMAIN,
   IS_RUNTIME_PRODUCTION,
   PROTOCOL_IPFS,
   RABBY_INTERNAL_PROTOCOL,
 } from '../../isomorphic/constants';
-import {
-  getAssetPath,
-  getRendererPath,
-  getShellPageUrl,
-  preloadPath,
-} from '../utils/app';
+import { getAssetPath, getShellPageUrl, preloadPath } from '../utils/app';
 import { getBindLog } from '../utils/log';
 import { fromMainSubject, valueToMainSubject } from './_init';
 import {
@@ -34,19 +24,26 @@ import {
 } from './tabbedBrowserWindow';
 import { firstEl } from '../../isomorphic/array';
 import {
-  getIpfsService,
   getRabbyExtId,
+  getSessionInsts,
   getWebuiExtId,
 } from '../utils/stream-helpers';
 import { checkOpenAction } from '../utils/tabs';
 import { getWindowFromWebContents, switchToBrowserTab } from '../utils/browser';
 import { rewriteSessionWebRequestHeaders } from '../utils/webRequest';
 import { checkProxyViaBrowserView, setSessionProxy } from '../utils/appNetwork';
-import { getAppProxyConf } from '../store/desktopApp';
+import {
+  desktopAppStore,
+  getAppProxyConf,
+  isEnableSupportIpfsDapp,
+} from '../store/desktopApp';
 import { createTrezorLikeConnectPageWindow } from '../utils/hardwareConnect';
 import { getBlockchainExplorers } from '../store/dynamicConfig';
-import { checkoutCustomSchemeHandlerInfo } from '../utils/protocol';
-import { rewriteIpfsHtmlFile } from '../utils/file';
+import { appInterpretors, registerSessionProtocol } from '../utils/protocol';
+import {
+  emitIpcMainEvent,
+  onIpcMainInternalEvent,
+} from '../utils/ipcMainEvents';
 
 const sesLog = getBindLog('session', 'bgGrey');
 
@@ -160,158 +157,6 @@ protocol.registerSchemesAsPrivileged([
   // },
 ]);
 
-const registerCallbacks: {
-  protocol: string;
-  handler: (ctx: { session: Electron.Session; sessionName: string }) => {
-    protocol: string;
-    registerSuccess: boolean;
-  };
-}[] = [
-  {
-    protocol: RABBY_INTERNAL_PROTOCOL,
-    handler: (ctx) => {
-      const registerSuccess = ctx.session.protocol.registerFileProtocol(
-        RABBY_INTERNAL_PROTOCOL.slice(0, -1),
-        (request, callback) => {
-          const pathnameWithQuery = request.url.slice(
-            `${RABBY_INTERNAL_PROTOCOL}//`.length
-          );
-
-          const pathname = pathnameWithQuery.split('?')?.[0] || '';
-          const pathnameWithoutHash = pathname.split('#')?.[0] || '';
-
-          if (pathnameWithoutHash.startsWith('assets/')) {
-            callback({
-              path: getAssetPath(pathnameWithoutHash.slice('assets/'.length)),
-            });
-          } else if (pathnameWithoutHash.startsWith('local/')) {
-            callback({
-              path: getRendererPath(pathnameWithoutHash.slice('local/'.length)),
-            });
-          } else {
-            // TODO: give one 404 page
-            callback({
-              data: 'Not found',
-              mimeType: 'text/plain',
-            });
-          }
-        }
-      );
-
-      return { registerSuccess, protocol: RABBY_INTERNAL_PROTOCOL };
-    },
-  },
-  {
-    protocol: PROTOCOL_IPFS,
-    handler: (ctx) => {
-      const registerSuccess = ctx.session.protocol.registerFileProtocol(
-        PROTOCOL_IPFS.slice(0, -1),
-        async (request, callback) => {
-          const pathnameWithQuery = request.url.slice(
-            `${PROTOCOL_IPFS}//`.length
-          );
-
-          const pathname = pathnameWithQuery.split('?')?.[0] || '';
-          const pathnameWithoutHash = pathname.split('#')?.[0] || '';
-
-          const ipfsService = await getIpfsService();
-          let filePath = ipfsService.resolveFile(pathnameWithoutHash);
-
-          if (!fs.existsSync(filePath)) {
-            callback({ data: 'Not found', mimeType: 'text/plain' });
-            return;
-          }
-
-          if (fs.statSync(filePath).isDirectory()) {
-            filePath = path.join(filePath, './index.html');
-            filePath = rewriteIpfsHtmlFile(filePath);
-          }
-
-          if (!fs.existsSync(filePath)) {
-            callback({ data: 'Not found', mimeType: 'text/plain' });
-            return;
-          }
-
-          callback({
-            path: filePath,
-          });
-        }
-      );
-
-      return { registerSuccess, protocol: PROTOCOL_IPFS };
-    },
-  },
-  {
-    protocol: 'http:',
-    handler: (ctx) => {
-      const TARGET_PROTOCOL = 'http:';
-      // const unregistered = protocol.unregisterProtocol(TARGET_PROTOCOL.slice(0, -1));
-      // console.log(`unregistered: ${TARGET_PROTOCOL}`, unregistered);
-
-      const registerSuccess = ctx.session.protocol.interceptFileProtocol(
-        TARGET_PROTOCOL.slice(0, -1),
-        async (request, callback) => {
-          if (!isIpfsHttpURL(request.url)) {
-            // protocol.uninterceptProtocol('http');
-            callback({
-              data: 'Not found',
-              mimeType: 'text/plain',
-              statusCode: 404,
-            });
-            return;
-          }
-
-          const checkouted = checkoutCustomSchemeHandlerInfo(
-            TARGET_PROTOCOL,
-            request.url
-          );
-          if (!checkouted) {
-            callback({
-              data: 'Not found',
-              mimeType: 'text/plain',
-              statusCode: 404,
-            });
-            return;
-          }
-
-          const { fileRelPath } = checkouted;
-
-          const ipfsService = await getIpfsService();
-
-          let filePath = ipfsService.resolveFile(fileRelPath);
-
-          if (!fs.existsSync(filePath)) {
-            callback({
-              data: 'Not found',
-              mimeType: 'text/plain',
-              statusCode: 404,
-            });
-            return;
-          }
-
-          if (fs.statSync(filePath).isDirectory()) {
-            filePath = path.join(filePath, './index.html');
-            filePath = rewriteIpfsHtmlFile(filePath);
-          }
-
-          if (!fs.existsSync(filePath)) {
-            callback({
-              data: 'Not found',
-              mimeType: 'text/plain',
-              statusCode: 404,
-            });
-            return;
-          }
-
-          callback({ path: filePath });
-        }
-      );
-
-      return { registerSuccess, protocol: TARGET_PROTOCOL };
-    },
-  },
-];
-
 firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   // sub.unsubscribe();
   const mainSession = session.defaultSession;
@@ -336,44 +181,36 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
     rewriteSessionWebRequestHeaders(sess, name as keyof IAppSession);
   });
 
-  [
-    { inst: mainSession, name: 'mainSession' },
-    {
-      inst: checkingProxySession,
-      name: 'checkingProxySession',
-      filterProtocol: ['file:'],
-    },
-    {
-      inst: checkingViewSession,
-      name: 'checkingViewSession',
-      filterProtocol: ['file:', 'http:'],
-    },
-  ].forEach(({ inst, name, filterProtocol }) => {
-    registerCallbacks.forEach(({ protocol: prot, handler }) => {
-      if (filterProtocol?.includes(prot)) return;
+  registerSessionProtocol(
+    [
+      { session: mainSession, name: 'mainSession' },
+      {
+        session: checkingProxySession,
+        name: 'checkingProxySession',
+      },
+      {
+        session: checkingViewSession,
+        name: 'checkingViewSession',
+      },
+    ],
+    appInterpretors['rabby-internal:']
+  );
+  registerSessionProtocol(
+    [
+      { session: mainSession, name: 'mainSession' },
+      {
+        session: checkingProxySession,
+        name: 'checkingProxySession',
+      },
+      {
+        session: checkingViewSession,
+        name: 'checkingViewSession',
+      },
+    ],
+    appInterpretors['rabby-ipfs:']
+  );
 
-      const { registerSuccess, protocol: registeredProtocol } = handler({
-        session: inst,
-        sessionName: name,
-      });
-
-      if (!registerSuccess) {
-        if (!IS_RUNTIME_PRODUCTION) {
-          throw new Error(
-            `[initSession][session:${name}] Failed to register protocol ${registeredProtocol}`
-          );
-        } else {
-          console.error(
-            `[initSession][session:${name}] Failed to register protocol ${registeredProtocol}`
-          );
-        }
-      } else {
-        sesLog(
-          `[initSession][session:${name}] registered protocol ${registeredProtocol} success`
-        );
-      }
-    });
-  });
+  emitIpcMainEvent('__internal_main:app:enable-ipfs-support', true);
 
   app.userAgentFallback = trimWebContentsUserAgent(mainSession.getUserAgent());
 
@@ -558,3 +395,23 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
 
   valueToMainSubject('electronChromeExtensionsReady', chromeExtensions);
 });
+
+let ipfsSupported = false;
+onIpcMainInternalEvent(
+  '__internal_main:app:enable-ipfs-support',
+  async (enabled) => {
+    if (!isEnableSupportIpfsDapp()) return;
+
+    if (ipfsSupported) return;
+    ipfsSupported = true;
+
+    const { mainSession } = await getSessionInsts();
+
+    registerSessionProtocol(
+      { session: mainSession, name: 'mainSession' },
+      appInterpretors['http:']
+    );
+
+    // mainSession.protocol.uninterceptProtocol('http');
+  }
+);
