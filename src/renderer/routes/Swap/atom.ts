@@ -24,11 +24,6 @@ export const activeProviderAtom = atom((get) => {
   const activeSwapTxs = get(activeSwapTxsAtom);
   const activeProviderOrigin = get(activeProviderOriginAtom);
 
-  console.log(
-    'activeProviderOrigin?.shouldApproveToken',
-    activeProviderOrigin?.shouldApproveToken,
-    activeProviderOrigin
-  );
   if (
     activeProviderOrigin?.activeTx &&
     !activeProviderOrigin?.shouldApproveToken &&
@@ -36,11 +31,6 @@ export const activeProviderAtom = atom((get) => {
       (e) => e.toLowerCase() === activeProviderOrigin?.activeTx?.toLowerCase()
     )
   ) {
-    console.log(
-      'activeProviderOrigin?.activeTx',
-      activeProviderOrigin?.shouldApproveToken,
-      activeProviderOrigin
-    );
     return {
       ...activeProviderOrigin,
       activeTx: undefined,
@@ -48,11 +38,5 @@ export const activeProviderAtom = atom((get) => {
     };
   }
 
-  if (!activeProviderOrigin?.activeTx) {
-    console.log(
-      'activeProviderOrigin?.activeTx',
-      activeProviderOrigin?.activeTx
-    );
-  }
   return activeProviderOrigin;
 });
