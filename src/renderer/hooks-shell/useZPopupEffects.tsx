@@ -26,7 +26,7 @@ export function useTipCannotUseTrezorLike() {
         onCancel: () => {
           delayCloseSubview(150);
         },
-        ...(svState?.reason === 'used-one' && {
+        ...(svState?.reasonType === 'used-one' && {
           title: `Unable to use ${ucfirst(svState.cannotUse)}`,
           content: (
             <>
@@ -43,7 +43,7 @@ export function useTipCannotUseTrezorLike() {
             );
           },
         }),
-        ...(svState?.reason === 'enabled-ipfs' && {
+        ...(svState?.reasonType === 'enabled-ipfs' && {
           title: `Unable to use ${ucfirst(svState.cannotUse)}`,
           content: (
             <>

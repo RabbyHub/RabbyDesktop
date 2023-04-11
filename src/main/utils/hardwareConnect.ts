@@ -1,5 +1,4 @@
 import { isEnableSupportIpfsDapp } from '../store/desktopApp';
-import { rabbyxQuery } from '../streams/rabbyIpcQuery/_base';
 import { createWindow } from '../streams/tabbedBrowserWindow';
 import { onMainWindowReady, pushChangesToZPopupLayer } from './stream-helpers';
 
@@ -40,6 +39,51 @@ function updateSubWindowRect(
 const trezorLikeState = {
   openedType: null as IHardwareConnectPageType | null,
 };
+export function getTrezorLikeCannotUse(openType: IHardwareConnectPageType) {
+  const reasons: ITrezorLikeCannotUserReason[] = [];
+
+  if (isEnableSupportIpfsDapp()) {
+    reasons.push({
+      reasonType: 'enabled-ipfs',
+      cannotUse: openType,
+    });
+  }
+
+  if (trezorLikeState.openedType && trezorLikeState.openedType !== openType) {
+    reasons.push({
+      reasonType: 'used-one',
+      haveUsed: trezorLikeState.openedType,
+      cannotUse: openType,
+    });
+  }
+
+  return reasons;
+}
+
+export function alertCannotUseDueTo(reason?: ITrezorLikeCannotUserReason) {
+  if (reason?.reasonType === 'enabled-ipfs') {
+    pushChangesToZPopupLayer({
+      'trezor-like-cannot-use': {
+        visible: true,
+        state: {
+          reasonType: 'enabled-ipfs',
+          cannotUse: reason.cannotUse,
+        },
+      },
+    });
+  } else if (reason?.reasonType === 'used-one') {
+    pushChangesToZPopupLayer({
+      'trezor-like-cannot-use': {
+        visible: true,
+        state: {
+          reasonType: reason.reasonType,
+          haveUsed: reason.haveUsed,
+          cannotUse: reason.cannotUse,
+        },
+      },
+    });
+  }
+}
 
 type IStopResult = {
   stopped: boolean;
@@ -53,34 +97,14 @@ export function stopOpenTrezorLikeWindow(options: {
     nextFunc: undefined,
   };
 
+  const reasons = getTrezorLikeCannotUse(options.openType);
+
   if (trezorLikeState.openedType) {
-    if (isEnableSupportIpfsDapp()) {
+    const reason = reasons[0];
+    if (reason) {
       result.stopped = true;
       result.nextFunc = () => {
-        pushChangesToZPopupLayer({
-          'trezor-like-cannot-use': {
-            visible: true,
-            state: {
-              reason: 'enabled-ipfs',
-              cannotUse: options.openType,
-            },
-          },
-        });
-      };
-    } else if (trezorLikeState.openedType !== options.openType) {
-      result.stopped = true;
-      result.nextFunc = () => {
-        rabbyxQuery('walletController.rejectAllApprovals', []);
-        pushChangesToZPopupLayer({
-          'trezor-like-cannot-use': {
-            visible: true,
-            state: {
-              reason: 'used-one',
-              haveUsed: trezorLikeState.openedType!,
-              cannotUse: options.openType,
-            },
-          },
-        });
+        alertCannotUseDueTo(reason);
       };
     }
   }
@@ -101,14 +125,9 @@ export function asyncDestroyWindowIfCannotUseTrezorLike(options: {
 
     setTimeout(() => {
       connWindow.destroy();
-      pushChangesToZPopupLayer({
-        'trezor-like-cannot-use': {
-          visible: true,
-          state: {
-            reason: 'enabled-ipfs',
-            cannotUse: options.openType,
-          },
-        },
+      alertCannotUseDueTo({
+        reasonType: 'enabled-ipfs',
+        cannotUse: options.openType,
       });
     }, timeoutVal);
   }

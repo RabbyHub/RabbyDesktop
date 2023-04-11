@@ -494,3 +494,14 @@ type IAppSession = {
   checkingViewSession: Electron.Session;
   checkingProxySession: Electron.Session;
 };
+
+type ITrezorLikeCannotUserReason =
+  | {
+      reasonType: 'used-one';
+      haveUsed: IHardwareConnectPageType;
+      cannotUse: IHardwareConnectPageType;
+    }
+  | {
+      reasonType: 'enabled-ipfs';
+      cannotUse: IHardwareConnectPageType;
+    };

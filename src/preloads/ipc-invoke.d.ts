@@ -207,6 +207,13 @@ type ChannelInvokePayload = {
       result: string;
     };
   };
+  'check-trezor-like-cannot-use': {
+    send: [openType: IHardwareConnectPageType];
+    response: {
+      reasons: ITrezorLikeCannotUserReason[];
+      couldContinue: boolean;
+    };
+  };
   'app-relaunch': {
     send: [reason: 'trezor-like-used'];
     response: void;

@@ -3,6 +3,7 @@ import React from 'react';
 import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { useConnectLedger } from '@/renderer/hooks/useConnectLedger';
+import { KEYRING_CLASS } from '@/renderer/utils/constant';
 import { ADD_DROPDOWN_LEFT_OFFSET, getAddDropdownKeyrings } from './constants';
 import styles from './index.module.less';
 
@@ -25,9 +26,42 @@ export default function AddAddressDropdown() {
   const connectLedger = useConnectLedger();
 
   const handleClick = React.useCallback(
-    (info: { key: string }) => {
+    async (info: { key: string }) => {
       connectLedger(info.key);
       hideView();
+
+      let shouldOpen = false;
+      try {
+        let checkHardwareKey: IHardwareConnectPageType | null = null;
+        switch (info.key) {
+          case KEYRING_CLASS.HARDWARE.TREZOR: {
+            checkHardwareKey = 'trezor';
+            break;
+          }
+          case KEYRING_CLASS.HARDWARE.ONEKEY: {
+            checkHardwareKey = 'onekey';
+            break;
+          }
+          default: {
+            shouldOpen = true;
+            break;
+          }
+        }
+
+        if (checkHardwareKey) {
+          const checkRes = await window.rabbyDesktop.ipcRenderer.invoke(
+            'check-trezor-like-cannot-use',
+            checkHardwareKey
+          );
+
+          shouldOpen = !!checkRes.couldContinue;
+        }
+      } catch (err) {
+        console.log(err);
+        shouldOpen = false;
+      }
+
+      if (shouldOpen) return;
       zActions.showZSubview('add-address-modal', {
         keyringType: info.key,
       });

@@ -78,16 +78,7 @@ type ZViewStates = {
     // nothing
   };
 
-  'trezor-like-cannot-use':
-    | {
-        reason: 'used-one';
-        haveUsed: IHardwareConnectPageType;
-        cannotUse: IHardwareConnectPageType;
-      }
-    | {
-        reason: 'enabled-ipfs';
-        cannotUse: IHardwareConnectPageType;
-      };
+  'trezor-like-cannot-use': ITrezorLikeCannotUserReason;
 };
 
 type IZPopupSubviewState = {
