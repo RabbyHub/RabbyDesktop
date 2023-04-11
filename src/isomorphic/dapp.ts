@@ -42,6 +42,7 @@ export function checkoutDappURL(dappPath: string) {
   }
 
   if (dappPath.startsWith('http')) {
+    // include https: http:
     const parsedInfo = canoicalizeDappUrl(dappPath);
 
     const ipfsCid = extractIpfsCid(parsedInfo.origin);
@@ -98,7 +99,7 @@ export function formatDapp(
 
   switch (finalType) {
     case 'ipfs': {
-      // formattedDapp.id = formattedDapp.origin = makeDappHttpOrigin(input.origin);
+      // formattedDapp.id = formattedDapp.origin = formatDappHttpOrigin(input.origin);
       break;
     }
     case 'http':
@@ -274,7 +275,7 @@ export function formatDappURLToShow(dappURL: string) {
   return normalizedURL;
 }
 
-export function makeDappHttpOrigin(
+export function formatDappHttpOrigin(
   dappURL: string | ReturnType<typeof checkoutDappURL>,
   sessionType: 'mainSession' | 'preview' = 'mainSession'
 ): string {

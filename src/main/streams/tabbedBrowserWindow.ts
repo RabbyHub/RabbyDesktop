@@ -3,7 +3,7 @@ import { app, BrowserWindow, shell } from 'electron';
 import { isUrlFromDapp, parseQueryString } from '@/isomorphic/url';
 import { arraify } from '@/isomorphic/array';
 import { pickFavIconURLFromMeta } from '@/isomorphic/html';
-import { checkoutDappURL, makeDappHttpOrigin } from '@/isomorphic/dapp';
+import { checkoutDappURL, formatDappHttpOrigin } from '@/isomorphic/dapp';
 import {
   EnumMatchDappType,
   IS_RUNTIME_PRODUCTION,
@@ -251,7 +251,7 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
   const findResult = findDappsByOrigin(dappOrigin);
   const isOpenAsHttp = dappTypeInfo?.type === 'ipfs';
   if (isOpenAsHttp && findResult.dapp) {
-    dappOrigin = makeDappHttpOrigin(dappTypeInfo);
+    dappOrigin = formatDappHttpOrigin(dappTypeInfo);
   }
 
   const openResult = await safeOpenURL(dappOrigin, {

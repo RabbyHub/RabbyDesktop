@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CHAINS, CHAINS_LIST } from '@debank/common';
 import { atom, useAtom } from 'jotai';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
-import { makeDappHttpOrigin } from '@/isomorphic/dapp';
+import { formatDappHttpOrigin } from '@/isomorphic/dapp';
 import { walletController } from '../ipcRequest/rabbyx';
 import { useMessageForwarded } from './useViewsMessage';
 import { getLastOpenOriginByOrigin } from '../ipcRequest/dapps';
@@ -141,7 +141,7 @@ export const useCurrentConnectedSite = ({
   }, [origin, tab?.url]);
 
   const httpOrigin = useMemo(
-    () => makeDappHttpOrigin(currentOrigin),
+    () => formatDappHttpOrigin(currentOrigin),
     [currentOrigin]
   );
 

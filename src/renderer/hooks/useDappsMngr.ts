@@ -2,7 +2,7 @@
 
 import {
   checkoutDappURL,
-  makeDappHttpOrigin,
+  formatDappHttpOrigin,
   makeDappURLToOpen,
   sortDappsBasedPinned,
 } from '@/isomorphic/dapp';
@@ -88,7 +88,7 @@ export function useDapps() {
     Object.keys(fixed).forEach((dappId) => {
       const checkoutedInfo = checkoutDappURL(dappId);
       if (checkoutedInfo.type === 'ipfs') {
-        fixed[makeDappHttpOrigin(dappId)] = fixed[dappId];
+        fixed[formatDappHttpOrigin(dappId)] = fixed[dappId];
         fixed[checkoutedInfo.dappID] = fixed[dappId];
       }
     });
