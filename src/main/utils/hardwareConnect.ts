@@ -53,24 +53,36 @@ export function stopOpenTrezorLikeWindow(options: {
     nextFunc: undefined,
   };
 
-  if (
-    trezorLikeState.openedType &&
-    trezorLikeState.openedType !== options.openType
-  ) {
-    result.stopped = true;
-    result.nextFunc = () => {
-      rabbyxQuery('walletController.rejectAllApprovals', []);
-      pushChangesToZPopupLayer({
-        'trezor-like-cannot-use': {
-          visible: true,
-          state: {
-            reason: 'used-one',
-            haveUsed: trezorLikeState.openedType!,
-            cannotUse: options.openType,
+  if (trezorLikeState.openedType) {
+    if (isEnableSupportIpfsDapp()) {
+      result.stopped = true;
+      result.nextFunc = () => {
+        pushChangesToZPopupLayer({
+          'trezor-like-cannot-use': {
+            visible: true,
+            state: {
+              reason: 'enabled-ipfs',
+              cannotUse: options.openType,
+            },
           },
-        },
-      });
-    };
+        });
+      };
+    } else if (trezorLikeState.openedType !== options.openType) {
+      result.stopped = true;
+      result.nextFunc = () => {
+        rabbyxQuery('walletController.rejectAllApprovals', []);
+        pushChangesToZPopupLayer({
+          'trezor-like-cannot-use': {
+            visible: true,
+            state: {
+              reason: 'used-one',
+              haveUsed: trezorLikeState.openedType!,
+              cannotUse: options.openType,
+            },
+          },
+        });
+      };
+    }
   }
 
   return result;
