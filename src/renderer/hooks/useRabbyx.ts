@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CHAINS, CHAINS_LIST } from '@debank/common';
 import { atom, useAtom } from 'jotai';
+import { canoicalizeDappUrl } from '@/isomorphic/url';
+import { makeDappHttpOrigin } from '@/isomorphic/dapp';
 import { walletController } from '../ipcRequest/rabbyx';
 import { useMessageForwarded } from './useViewsMessage';
+import { getLastOpenOriginByOrigin } from '../ipcRequest/dapps';
 
 const DEFAULT_ETH_CHAIN = CHAINS_LIST.find((chain) => chain.enum === 'ETH')!;
 
@@ -101,14 +104,14 @@ export function useConnectedSite(currentOrigin?: string) {
   const removeConnectedSite = useCallback(
     async (origin: string) => {
       await walletController.removeConnectedSite(origin);
-      await fetchConnectedSite();
+      await fetchConnectedSite(true);
     },
     [fetchConnectedSite]
   );
 
   const removeAllConnectedSites = useCallback(async () => {
     await walletController.removeAllRecentConnectedSites();
-    await fetchConnectedSite();
+    await fetchConnectedSite(true);
   }, [fetchConnectedSite]);
 
   return {
@@ -119,3 +122,28 @@ export function useConnectedSite(currentOrigin?: string) {
     removeAllConnectedSites,
   };
 }
+
+export const useCurrentConnectedSite = ({
+  origin,
+  tab,
+}: Pick<IDappWithTabInfo, 'origin' | 'tab'>) => {
+  const { connectedSiteMap } = useConnectedSite();
+  const [currentOrigin, setCurrentOrigin] = useState(origin);
+
+  useEffect(() => {
+    if (tab?.url) {
+      setCurrentOrigin(canoicalizeDappUrl(tab.url).origin);
+      return;
+    }
+    getLastOpenOriginByOrigin(origin).then((lastOpenOrigin) => {
+      setCurrentOrigin(lastOpenOrigin);
+    });
+  }, [origin, tab?.url]);
+
+  const httpOrigin = useMemo(
+    () => makeDappHttpOrigin(currentOrigin),
+    [currentOrigin]
+  );
+
+  return connectedSiteMap?.[httpOrigin] || null;
+};

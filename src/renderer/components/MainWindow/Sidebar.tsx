@@ -24,9 +24,7 @@ import { Badge } from 'antd';
 import { usePrevious } from 'react-use';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
-import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
-import { CHAINS, CHAINS_ENUM } from '@debank/common';
-import { makeDappHttpOrigin } from '@/isomorphic/dapp';
+import { useCurrentConnectedSite } from '@/renderer/hooks/useRabbyx';
 import { DappFavicon } from '../DappFavicon';
 import Hide from './Hide';
 import styles from './Sidebar.module.less';
@@ -121,26 +119,24 @@ const DappIndicator = ({ tab }: { tab?: chrome.tabs.Tab }) => {
 };
 
 const DappIcon = ({
-  origin,
   src,
-  chain,
+  origin,
+  tab,
 }: {
   origin: string;
+  tab?: chrome.tabs.Tab;
   src?: string;
-  chain?: CHAINS_ENUM;
 }) => {
-  const chainLogo = useMemo(() => {
-    if (chain) {
-      return CHAINS[chain]?.logo;
-    }
-    return null;
-  }, [chain]);
-
+  const currentConnectedSite = useCurrentConnectedSite({
+    origin,
+    tab,
+  });
   return (
-    <div className={styles.dappIconWithChain}>
-      <DappFavicon origin={origin} src={src} />
-      {chainLogo && <img src={chainLogo} alt="" className={styles.chainLogo} />}
-    </div>
+    <DappFavicon
+      origin={origin}
+      src={src}
+      chain={currentConnectedSite?.chain}
+    />
   );
 };
 
@@ -160,7 +156,6 @@ const TabList = ({
   isFold?: boolean;
 }) => {
   const navigateToDapp = useNavigateToDappRoute();
-  const { connectedSiteMap } = useConnectedSite();
   const rLoc = useLocation();
   if (!dapps?.length) {
     return null;
@@ -172,9 +167,6 @@ const TabList = ({
         const { tab } = dapp;
         const faviconUrl =
           dapp?.faviconBase64 || dapp?.faviconUrl || dapp.tab?.favIconUrl;
-
-        const origin = makeDappHttpOrigin(dapp.origin);
-        const chain = connectedSiteMap[origin]?.chain;
 
         const matchedRoute = matchPath(DappRoutePattern, rLoc.pathname);
         const matchedDappID = matchedRoute?.params.dappId || '';
@@ -210,7 +202,11 @@ const TabList = ({
                 { x, y },
                 {
                   type: 'sidebar-dapp',
-                  dappTabInfo: { origin: dapp.origin, id: tab?.id },
+                  dappTabInfo: {
+                    origin: dapp.origin,
+                    id: tab?.id,
+                    url: tab?.url,
+                  },
                 }
               );
             }}
@@ -218,8 +214,11 @@ const TabList = ({
             <DappIndicator tab={tab} />
             <div className={styles.routeItemInner}>
               <div className={styles.dappIcon}>
-                {/* <DappIcon origin={dapp.origin} src={faviconUrl} chain={chain} /> */}
-                <DappIcon origin={dapp.origin} src={faviconUrl} />
+                <DappIcon
+                  origin={dapp.origin}
+                  src={faviconUrl}
+                  tab={dapp.tab}
+                />
               </div>
               <Hide visible={!isFold} className={styles.routeTitle}>
                 {dapp.alias || dapp.origin}

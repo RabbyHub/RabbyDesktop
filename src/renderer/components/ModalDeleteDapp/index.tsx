@@ -11,6 +11,7 @@ import { formatDappURLToShow } from '@/isomorphic/dapp';
 import styles from './index.module.less';
 import { DappFavicon } from '../DappFavicon';
 import { Modal } from '../Modal/Modal';
+import { toastMessage } from '../TransparentToast';
 
 function useDelete(dapp: IDapp | null) {
   const { removeDapp } = useDapps();
@@ -24,6 +25,10 @@ function useDelete(dapp: IDapp | null) {
     setIsLoading(true);
     await permissionService.removeConnectedSite(dapp.origin);
     await removeDapp(dapp).finally(() => setIsLoading(false));
+    toastMessage({
+      type: 'success',
+      content: 'Deleted successfully',
+    });
   }, [removeDapp, dapp]);
 
   return {

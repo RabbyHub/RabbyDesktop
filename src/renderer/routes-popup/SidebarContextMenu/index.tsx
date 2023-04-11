@@ -3,7 +3,10 @@ import {
   usePopupWinInfo,
   useZPopupLayerOnMain,
 } from '@/renderer/hooks/usePopupWinOnMainwin';
-import { toggleDappPinned } from '@/renderer/ipcRequest/dapps';
+import {
+  getLastOpenOriginByOrigin,
+  toggleDappPinned,
+} from '@/renderer/ipcRequest/dapps';
 import {
   closeAllTabs,
   closeTabFromInternalPage,
@@ -17,7 +20,17 @@ import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
 import { useMemo } from 'react';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
+import { canoicalizeDappUrl } from '@/isomorphic/url';
 import styles from './index.module.less';
+
+const toast = (message: string) => {
+  forwardMessageTo('main-window', 'toast-message', {
+    data: {
+      type: 'success',
+      content: message,
+    },
+  });
+};
 
 export const SidebarContextMenu = () => {
   const { pageInfo } = usePopupWinInfo('sidebar-dapp');
@@ -25,8 +38,17 @@ export const SidebarContextMenu = () => {
   const origin = pageInfo?.dappTabInfo?.origin || '';
   const dappInfo = useDapp(origin);
   const zActions = useZPopupLayerOnMain();
-  const { connectedSiteMap, removeConnectedSite, removeAllConnectedSites } =
-    useConnectedSite();
+  const { removeConnectedSite, removeAllConnectedSites } = useConnectedSite();
+
+  const disconnect = async (_origin: string, url?: string) => {
+    let current = url ? canoicalizeDappUrl(url)?.origin : '';
+    if (!current) {
+      current = await getLastOpenOriginByOrigin(_origin);
+    }
+    removeConnectedSite(current);
+    forwardMessageTo('*', 'refreshConnectedSiteMap', {});
+    toast('Disconnected');
+  };
 
   const items = useMemo(() => {
     if (!origin) {
@@ -67,17 +89,17 @@ export const SidebarContextMenu = () => {
           />
         ),
       },
-      // {
-      //   key: 'dapp-disconnect',
-      //   className: styles['dapp-dropdown-item'],
-      //   label: <span className="text">Disconnect</span>,
-      //   icon: (
-      //     <img
-      //       className={styles['dapp-dropdown-item-icon']}
-      //       src="rabby-internal://assets/icons/sidebar-context-menu/icon-disconnect.svg"
-      //     />
-      //   ),
-      // },
+      {
+        key: 'dapp-disconnect',
+        className: styles['dapp-dropdown-item'],
+        label: <span className="text">Disconnect</span>,
+        icon: (
+          <img
+            className={styles['dapp-dropdown-item-icon']}
+            src="rabby-internal://assets/icons/sidebar-context-menu/icon-disconnect.svg"
+          />
+        ),
+      },
       !pageInfo?.dappTabInfo?.id
         ? {
             key: 'dapp-delete',
@@ -108,17 +130,17 @@ export const SidebarContextMenu = () => {
       {
         type: 'divider' as const,
       },
-      // {
-      //   key: 'dapp-disconnect-all',
-      //   className: styles['dapp-dropdown-item'],
-      //   label: <span className="text">Disconnect All Dapps</span>,
-      //   icon: (
-      //     <img
-      //       className={styles['dapp-dropdown-item-icon']}
-      //       src="rabby-internal://assets/icons/sidebar-context-menu/icon-disconnect-all.svg"
-      //     />
-      //   ),
-      // },
+      {
+        key: 'dapp-disconnect-all',
+        className: styles['dapp-dropdown-item'],
+        label: <span className="text">Disconnect All Dapps</span>,
+        icon: (
+          <img
+            className={styles['dapp-dropdown-item-icon']}
+            src="rabby-internal://assets/icons/sidebar-context-menu/icon-disconnect-all.svg"
+          />
+        ),
+      },
       {
         key: 'dapp-close-all',
         className: styles['dapp-dropdown-item'],
@@ -145,16 +167,7 @@ export const SidebarContextMenu = () => {
         const tabId = pageInfo?.dappTabInfo?.id;
         if (tabId) {
           closeTabFromInternalPage(tabId);
-          showMainwinPopupview({
-            type: 'global-toast-popup',
-            state: {
-              toastType: 'toast-message',
-              data: {
-                type: 'success',
-                content: 'Closed',
-              },
-            },
-          });
+          toast('Closed');
         }
         break;
       }
@@ -173,49 +186,17 @@ export const SidebarContextMenu = () => {
         }
         break;
       case 'dapp-disconnect':
-        if (dappInfo && connectedSiteMap[origin]) {
-          removeConnectedSite(origin);
-        }
-        forwardMessageTo('*', 'refreshConnectedSiteMap', {});
-
-        showMainwinPopupview({
-          type: 'global-toast-popup',
-          state: {
-            toastType: 'toast-message',
-            data: {
-              type: 'success',
-              content: 'Disconnected',
-            },
-          },
-        });
+        disconnect(origin, pageInfo?.dappTabInfo?.url);
         break;
       case 'dapp-disconnect-all':
         removeAllConnectedSites();
         forwardMessageTo('*', 'refreshConnectedSiteMap', {});
 
-        showMainwinPopupview({
-          type: 'global-toast-popup',
-          state: {
-            toastType: 'toast-message',
-            data: {
-              type: 'success',
-              content: 'Disconnected',
-            },
-          },
-        });
+        toast('All Dapps have been disconnected');
         break;
       case 'dapp-close-all':
         closeAllTabs();
-        showMainwinPopupview({
-          type: 'global-toast-popup',
-          state: {
-            toastType: 'toast-message',
-            data: {
-              type: 'success',
-              content: 'Closed',
-            },
-          },
-        });
+        toast('All Dapps have been closed');
         break;
       default:
         break;

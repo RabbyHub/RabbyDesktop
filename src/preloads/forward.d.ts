@@ -141,6 +141,17 @@ type ChannelForwardMessageType =
       type: 'refreshConnectedSiteMap';
     }
   | {
+      targetView: 'main-window';
+      type: 'toast-message';
+      payload: {
+        data: {
+          type: string;
+          content: string;
+          duration?: number;
+        };
+      };
+    }
+  | {
       targetView: 'address-management';
       type: 'nothing-but-reserved';
     }

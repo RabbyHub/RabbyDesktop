@@ -1,58 +1,21 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 import { Dropdown, Menu } from 'antd';
-import React, { ReactNode, useMemo, useRef } from 'react';
+import React, { ReactNode, useRef } from 'react';
 
-import { formatDappURLToShow, makeDappHttpOrigin } from '@/isomorphic/dapp';
+import { formatDappURLToShow } from '@/isomorphic/dapp';
 import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
 import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import clsx from 'clsx';
 
-import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
-import { CHAINS } from '@/renderer/utils/constant';
-import { CHAINS_ENUM } from '@debank/common/dist/chain-data';
+import { useCurrentConnectedSite } from '@/renderer/hooks/useRabbyx';
 import { DappFavicon } from '../../../../components/DappFavicon';
-
-// todo: move to components
-const DappIcon = ({
-  origin,
-  src,
-  chain,
-}: {
-  origin: string;
-  src?: string;
-  chain?: CHAINS_ENUM;
-}) => {
-  const chainLogo = useMemo(() => {
-    if (chain) {
-      return CHAINS[chain]?.logo;
-    }
-    return null;
-  }, [chain]);
-
-  return (
-    <div className="dapp-icon-with-chain">
-      <DappFavicon origin={origin} src={src} className="dapp-favicon" />
-      {chainLogo && <img src={chainLogo} alt="" className="chain-logo" />}
-    </div>
-  );
-};
 
 const Indicator = ({ dapp }: { dapp: IDappWithTabInfo }) => {
   if (!dapp.tab) {
     return null;
   }
   return <div className="dapp-indicator" />;
-  // return dapp?.tab ? (
-  //   dapp.tab.status === 'loading' ? (
-  //     <img
-  //       className="dapp-indicator loading"
-  //       src="rabby-internal://assets/icons/dapps/dapp-loading.svg"
-  //     />
-  //   ) : (
-  //     <div className="dapp-indicator" />
-  //   )
-  // ) : null;
 };
 
 const IpfsTag = ({ prefix }: { prefix?: ReactNode }) => {
@@ -71,37 +34,19 @@ type IOnOpDapp = (
 
 export const DAppBlock = ({
   dapp,
-  onAdd,
   onOpen,
   onOpDapp,
 }: React.PropsWithoutRef<{
   dapp?: IDappWithTabInfo;
-  onAdd?: () => void;
   onOpDapp?: IOnOpDapp;
   onOpen?: (dappOrigin: string) => void;
 }>) => {
   const ref = useRef<HTMLDivElement>(null);
-  const { connectedSiteMap } = useConnectedSite();
-  const origin = makeDappHttpOrigin(dapp?.origin || '');
-  const chain = connectedSiteMap[origin || '']?.chain;
 
-  if (onAdd) {
-    return (
-      <div
-        className="dapp-block is-add"
-        onClick={() => {
-          onAdd();
-        }}
-      >
-        <img
-          className="dapp-favicon"
-          src="rabby-internal://assets/icons/internal-homepage/icon-dapps-add.svg"
-          alt="add"
-        />
-        <div className="text">Add a Dapp</div>
-      </div>
-    );
-  }
+  const connectedSite = useCurrentConnectedSite({
+    origin: dapp?.origin || '',
+    tab: dapp?.tab,
+  });
 
   if (!dapp) return null;
 
@@ -207,10 +152,11 @@ export const DAppBlock = ({
             }
           }}
         >
-          <DappIcon
+          <DappFavicon
+            rootClassName="dapp-icon-with-chain"
             origin={dapp.origin}
             src={dapp.faviconBase64 ? dapp.faviconBase64 : dapp.faviconUrl}
-            // chain={chain}
+            chain={connectedSite?.chain}
           />
           <div className="infos pr-[16px]">
             <h4 className="dapp-alias">{dapp.alias}</h4>
