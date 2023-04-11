@@ -116,6 +116,7 @@ export function useDapps() {
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:dapps:changed',
       (event) => {
+        console.log('dapps:changed', event.dapps);
         if (event.dapps) setDapps(event.dapps);
         if (event.pinnedList) setPinnedList(event.pinnedList);
         if (event.unpinnedList) setUnpinnedList(event.unpinnedList);
@@ -209,6 +210,8 @@ export function useMatchDapp(origin?: string) {
       );
       if (findMatchDomain) {
         setDappInfo(findMatchDomain);
+      } else {
+        setDappInfo(null);
       }
     }
   }, [origin, dapps]);
