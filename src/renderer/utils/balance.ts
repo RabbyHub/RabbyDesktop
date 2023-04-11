@@ -1,5 +1,5 @@
 import { TokenItem } from '@debank/rabby-api/dist/types';
-import { useCallback } from 'react';
+import { useMemo } from 'react';
 import BigNumber from 'bignumber.js';
 import { DisplayProtocol } from '../hooks/useHistoryProtocol';
 
@@ -8,7 +8,7 @@ export const useTotalBalance = (
   protocolList: DisplayProtocol[],
   chain: string | null = null
 ) => {
-  const calc = useCallback(() => {
+  const calc = useMemo(() => {
     let tokens = tokenList;
     let protocols = protocolList;
     if (chain) {
@@ -21,6 +21,7 @@ export const useTotalBalance = (
       const usd = new BigNumber(token.amount).times(token.price);
       sum = sum.plus(usd);
     });
+
     protocols.forEach((protocol) => {
       protocol.portfolio_item_list.forEach((pool) => {
         sum = sum.plus(pool.stats.net_usd_value);
@@ -29,5 +30,5 @@ export const useTotalBalance = (
     return sum.toFixed();
   }, [chain, protocolList, tokenList]);
 
-  return calc();
+  return calc;
 };

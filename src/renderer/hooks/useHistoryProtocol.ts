@@ -59,6 +59,49 @@ const getNoHistoryPriceTokensFromProtocolList = (
   };
 };
 
+export const loadCachedProtocolList = async (addr: string) => {
+  const cachedProtocols = await walletOpenapi.getComplexProtocolList(addr);
+  return cachedProtocols.map((item) => ({
+    ...item,
+    usd_value: item.portfolio_item_list.reduce(
+      (sum, i) => sum + i.stats.net_usd_value,
+      0
+    ),
+  }));
+};
+
+export const loadRealTimeProtocolList = async (addr: string) => {
+  const result: DisplayProtocol[] = [];
+  const queue = new PQueue({ concurrency: 100 });
+
+  const waitQueueFinished = (q: PQueue) => {
+    return new Promise((resolve) => {
+      q.on('empty', () => {
+        if (q.pending <= 0) resolve(null);
+      });
+    });
+  };
+  const list = await walletOpenapi.getProtocolList(addr);
+
+  list.forEach((item) => {
+    queue.add(() => walletOpenapi.getProtocol({ addr, id: item.id }));
+  });
+  queue.on('completed', (r: ComplexProtocol) => {
+    if (r.portfolio_item_list.length > 0) {
+      result.push({
+        ...r,
+        usd_value: r.portfolio_item_list.reduce(
+          (sum, item) => sum + item.stats.net_usd_value,
+          0
+        ),
+      });
+    }
+  });
+  await waitQueueFinished(queue);
+
+  return result;
+};
+
 export default (
   address: string | undefined,
   nonce = 0,
@@ -96,7 +139,6 @@ export default (
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
     const result: DisplayProtocol[] = protocolListRef.current;
     const historyList: DisplayProtocol[] = [];
-    const queue = new PQueue({ concurrency: 100 });
     const waitQueueFinished = (q: PQueue) => {
       return new Promise((resolve) => {
         q.on('empty', () => {
@@ -107,36 +149,16 @@ export default (
     if (!isRealTimeLoadedRef.current && !isLoadingRealTimeRef.current) {
       setIsLoading(true);
       isLoadingRealTimeRef.current = true;
-      const cachedProtocols = await walletOpenapi.getComplexProtocolList(addr);
-      protocolListRef.current = cachedProtocols.map((item) => ({
-        ...item,
-        usd_value: item.portfolio_item_list.reduce(
-          (sum, i) => sum + i.stats.net_usd_value,
-          0
-        ),
-      }));
+      protocolListRef.current = await loadCachedProtocolList(addr);
       setIsLoading(false);
-      const list = await walletOpenapi.getProtocolList(addr);
-      if (list.length <= 0) {
-        isRealTimeLoadedRef.current = true;
-        isLoadingRealTimeRef.current = false;
-        setForceUpdate((prev) => !prev);
-      }
-      list.forEach((item) => {
-        queue.add(() => walletOpenapi.getProtocol({ addr, id: item.id }));
-      });
-      queue.on('completed', (r: ComplexProtocol) => {
-        if (r.portfolio_item_list.length > 0) {
-          result.push({
-            ...r,
-            usd_value: r.portfolio_item_list.reduce(
-              (sum, item) => sum + item.stats.net_usd_value,
-              0
-            ),
-          });
-        }
-      });
-      await waitQueueFinished(queue);
+      const list = await loadRealTimeProtocolList(addr);
+      // if (list.length <= 0) {
+      //   isRealTimeLoadedRef.current = true;
+      //   isLoadingRealTimeRef.current = false;
+      //   setForceUpdate((prev) => !prev);
+      // }
+
+      result.push(...list);
       isRealTimeLoadedRef.current = true;
       isLoadingRealTimeRef.current = false;
       setForceUpdate((prev) => !prev);

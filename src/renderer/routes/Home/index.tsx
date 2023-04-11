@@ -367,7 +367,6 @@ const Home = () => {
     }));
     return sortBy(list, (item) => item.usd_value).reverse();
   }, [usedChainList, protocolList, tokenList]);
-
   const totalBalance = useTotalBalance(tokenList, protocolList);
 
   const curveData = useCurve(currentAccount?.address, updateNonce);

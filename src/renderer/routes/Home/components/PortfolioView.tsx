@@ -16,9 +16,7 @@ const PortfolioWrapper = styled.div`
   padding-right: 0;
   border-radius: 8px;
   position: relative;
-  height: 100%;
   .scroll-container {
-    height: 100%;
     padding-right: 14px;
     padding-top: 28px;
     padding-bottom: 28px;

@@ -5,12 +5,15 @@ import { BundleAccountList } from './components/BundleAccountList';
 import { BTCAccountList } from './components/BTCAccountList';
 import { BinanceAccountList } from './components/BinanceAccountList';
 import { ETHAccountList } from './components/ETHAccountList';
+import { LeftContainer } from './components/LeftContainer';
 
 const HomeBundleInner = () => {
   return (
     <div className="overflow-hidden h-full">
       <main className="flex h-full">
-        <section className="flex-1">资产列表</section>
+        <section className="flex-1">
+          <LeftContainer />
+        </section>
         <section
           className={classNames(
             'flex flex-col overflow-y-auto',

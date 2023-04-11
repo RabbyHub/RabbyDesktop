@@ -1,7 +1,7 @@
 import { DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import styled from 'styled-components';
 import { useEffect, useMemo, useState } from 'react';
-import { CHAINS_LIST } from '@debank/common';
+// import { CHAINS_LIST } from '@debank/common';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { formatUsdValue } from '@/renderer/utils/number';
 import clsx from 'clsx';
@@ -29,18 +29,25 @@ const ChainList = ({
   const [selectChainServerId, setSelectChainServerId] = useState<null | string>(
     null
   );
-  const targetChain = useMemo(() => {
-    if (!selectChainServerId) return null;
-    const chain = CHAINS_LIST.find(
-      (item) => item.serverId === selectChainServerId
-    );
-    return chain || null;
-  }, [selectChainServerId]);
+  // const targetChain = useMemo(() => {
+  //   if (!selectChainServerId) return null;
+  //   const chain = CHAINS_LIST.find(
+  //     (item) => item.serverId === selectChainServerId
+  //   );
+  //   return chain || null;
+  // }, [selectChainServerId]);
 
   const reset = () => {
     setSelectChainServerId(null);
     onChange(null);
   };
+  const percentMap = useMemo(() => {
+    const total = chainBalances.reduce((acc, item) => acc + item.usd_value, 0);
+    return chainBalances.reduce((acc, item) => {
+      acc[item.id] = ((item.usd_value / total) * 100).toFixed(0);
+      return acc;
+    }, {} as Record<string, string>);
+  }, [chainBalances]);
 
   const handleSelectChain = async (serverId: string) => {
     if (chainBalances.length <= 1) return;
@@ -76,7 +83,7 @@ const ChainList = ({
         <div
           id={`chain-icon-${item.id}`}
           key={item.id}
-          className={clsx('flex space-x-[4px]', 'cursor-pointer', {
+          className={clsx('flex space-x-[9px]', 'cursor-pointer', {
             selected: item.id === selectChainServerId,
             'opacity-30':
               selectChainServerId !== null && item.id !== selectChainServerId,
@@ -91,7 +98,9 @@ const ChainList = ({
             <span className="text-[12px] opacity-70">On {item.name}</span>
             <div className="text-[14px]">
               <span>{formatUsdValue(item.usd_value)}</span>
-              <span className="text-[12px] opacity-70">1%</span>
+              <span className="text-[12px] opacity-70 ml-[8px]">
+                {percentMap[item.id]}%
+              </span>
             </div>
           </div>
         </div>
