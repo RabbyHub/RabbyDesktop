@@ -13,9 +13,8 @@ import { useOpenDapp } from '@/renderer/utils/react-router';
 import { useRequest, useSetState } from 'ahooks';
 import classNames from 'classnames';
 import { debounce } from 'lodash';
-import { canoicalizeDappUrl } from '@/isomorphic/url';
-import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { useUnmount } from 'react-use';
+import { stats } from '@/isomorphic/stats';
 import RabbyInput from '../../AntdOverwrite/Input';
 import { Props as ModalProps } from '../../Modal/Modal';
 import { toastMessage } from '../../TransparentToast';
@@ -24,80 +23,20 @@ import { useAddDappURL } from '../useAddDapp';
 import { Warning } from '../Warning';
 import styles from './index.module.less';
 
-const validateInput = (input: string, onReplace?: (v: string) => void) => {
-  const domain = input?.trim();
-  if (!domain) {
-    return {
-      validateStatus: 'success' as const,
-      help: '',
-    };
-  }
-
-  const hasProtocol = /^(\w+:)\/\//.test(domain);
-
-  const urlString = hasProtocol ? domain : `https://${domain}`;
-  try {
-    const url = new URL(urlString);
-    const rest = urlString.replace(`${url.protocol}//${url.hostname}`, '');
-
-    // todo detect is domain ?
-    if (
-      url.hostname.startsWith('.') ||
-      url.hostname.endsWith('.') ||
-      !url.hostname.includes('.')
-    ) {
-      return {
-        validateStatus: 'error' as const,
-        help: 'Input is not a domain',
-      };
-    }
-    // hostname 有转义
-    if (/^\w+:\/\//.test(rest)) {
-      return {
-        validateStatus: 'error' as const,
-        help: 'Input is not a domain',
-      };
-    }
-    if (url.hostname === domain) {
-      return null;
-    }
-
-    return {
-      validateStatus: 'error' as const,
-      help: (
-        <>
-          Input should not contain{' '}
-          {[
-            hasProtocol ? `${url.protocol}//` : null,
-            rest.length > 20 ? `${rest.substring(0, 20)}...` : rest,
-          ]
-            .filter(Boolean)
-            .map((v) => `"${v}"`)
-            .join(' and ')}
-          .
-          <br />
-          Maybe you want to add{' '}
-          <span
-            onClick={() => onReplace?.(url.hostname)}
-            className={styles.replaceLink}
-          >
-            {url.hostname}
-          </span>{' '}
-          ?
-        </>
-      ),
-    };
-  } catch (e) {
-    return {
-      validateStatus: 'error' as const,
-      help: 'Input is not a domain',
-    };
-  }
-};
-
 const statsInfo = {
   startTime: Date.now(),
   domain: '',
+};
+const report = (success: boolean) => {
+  const duration = Date.now() - statsInfo.startTime;
+  if (statsInfo.domain) {
+    stats.report('addDappDuration', {
+      duration,
+      success,
+      domain: statsInfo.domain,
+    });
+    statsInfo.domain = '';
+  }
 };
 
 const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
@@ -109,7 +48,11 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
 
   const { runAsync, loading, cancel } = useRequest(
     async (_url: string) => {
-      const url = _url.replace(/^\/?ipfs\/|^\w+:\/\//, '').replace(/\/$/, '');
+      const url = _url
+        .replace(/(^\/?ipfs\/)|(^ipfs:\/\/)/, '')
+        .replace(/\/$/, '');
+      statsInfo.domain = `ipfs://${url}`;
+      statsInfo.startTime = Date.now();
       const { success, error } = await downloadIPFS(`${url}`);
       if (!success) {
         return {
@@ -135,12 +78,14 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
           if (res.validateRes) {
             setState(res.validateRes);
           }
+          report(false);
           return;
         }
 
         const { data, error } = res;
 
         if (error) {
+          report(false);
           setState({
             validateStatus: 'error',
             help:
@@ -155,6 +100,7 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
               ),
           });
         } else {
+          report(true);
           setState({
             dappInfo: data,
             validateStatus: undefined,
@@ -274,6 +220,7 @@ export function AddIpfsDapp({
   }, [addUrl, check, form, initUrl]);
 
   useUnmount(() => {
+    report(false);
     cancelDownloadIPFS();
   });
 
@@ -333,7 +280,4 @@ export function AddIpfsDapp({
       ) : null}
     </>
   );
-}
-function onUnmount(arg0: () => void) {
-  throw new Error('Function not implemented.');
 }
