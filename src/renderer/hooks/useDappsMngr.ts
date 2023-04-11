@@ -1,6 +1,11 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 
-import { sortDappsBasedPinned } from '@/isomorphic/dapp';
+import {
+  checkoutDappURL,
+  makeDappHttpOrigin,
+  makeDappURLToOpen,
+  sortDappsBasedPinned,
+} from '@/isomorphic/dapp';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -74,9 +79,21 @@ export function useDapps() {
   const [originDapps, setDapps] = useAtom(dappsAtomic);
   const [pinnedList, setPinnedList] = useAtom(pinnedListAtomic);
   const [unpinnedList, setUnpinnedList] = useAtom(unpinnedListAtomic);
-  const [dappBoundTabIds, setDappsBoundTabIds] = useAtom(
+  const [dappBoundTabIdsOrig, setDappsBoundTabIds] = useAtom(
     dappsBoundTabIdsAtomic
   );
+
+  const dappBoundTabIds = useMemo(() => {
+    const fixed = { ...dappBoundTabIdsOrig };
+    Object.keys(fixed).forEach((dappId) => {
+      const checkoutedInfo = checkoutDappURL(dappId);
+      if (checkoutedInfo.type === 'ipfs') {
+        fixed[makeDappHttpOrigin(dappId)] = fixed[dappId];
+        fixed[checkoutedInfo.dappID] = fixed[dappId];
+      }
+    });
+    return fixed;
+  }, [dappBoundTabIdsOrig]);
 
   // only fetch dapps once for every call to hooks
   const calledRef = useRef(false);

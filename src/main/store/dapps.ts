@@ -5,6 +5,7 @@ import {
   formatDapp,
   formatDapps,
   isValidDappType,
+  checkoutDappURL,
   normalizeProtocolBindingValues,
 } from '@/isomorphic/dapp';
 import { arraify } from '@/isomorphic/array';
@@ -27,11 +28,12 @@ import {
   maybeTrezorLikeBuiltInHttpPage,
   parseDomainMeta,
 } from '../../isomorphic/url';
-import { detectDapp } from '../utils/dapps';
+import { detectDapp, detectIPFSDapp } from '../utils/dapps';
 import { storeLog } from '../utils/log';
 import { makeStore } from '../utils/store';
 import { getAppProxyConfigForAxios } from './desktopApp';
 import { fetchImageBuffer } from '../utils/fetch';
+import { getIpfsService } from '../utils/stream-helpers';
 
 const IDappSchema: import('json-schema-typed').JSONSchema = {
   type: 'object',
@@ -162,25 +164,13 @@ export const dappStore = makeStore<{
     dappStore.get('unpinnedList')
   );
 
-  dappStore.set(
-    'pinnedList',
-    pinnedList.filter((v) => !/^(ipfs|rabby-ipfs):\/\//.test(v))
-  );
-  dappStore.set(
-    'unpinnedList',
-    unpinnedList.filter((v) => !/^(ipfs|rabby-ipfs):\/\//.test(v))
-  );
+  dappStore.set('pinnedList', pinnedList);
+  dappStore.set('unpinnedList', unpinnedList);
   /* resort :end */
 
   /* coerce INextDapp :start */
   let changed = false;
   Object.entries(dappsMap).forEach(([k, v]) => {
-    // remove ipfs/rabby-ipfs dapps
-    if (/^(ipfs|rabby-ipfs):\/\//.test(k)) {
-      delete dappsMap[k];
-      changed = true;
-      return;
-    }
     if ((!v.id || !isValidDappType(v.type)) && k.startsWith('http')) {
       changed = true;
       fixTypedDappId(v);
@@ -204,7 +194,8 @@ export function findDappsByOrigin(
   dappOrigin: string,
   dapps: IDapp[] = getAllDapps()
 ) {
-  const secondaryOrigin = canoicalizeDappUrl(dappOrigin).secondaryOrigin;
+  const cUrlInfo = canoicalizeDappUrl(dappOrigin);
+  const secondaryOrigin = cUrlInfo.secondaryOrigin;
 
   const result: IMatchDappResult = {
     dappByOrigin: null as null | IDapp,
@@ -213,6 +204,11 @@ export function findDappsByOrigin(
   };
   dapps.find((dapp) => {
     if (dapp.origin === dappOrigin) {
+      result.dappByOrigin = dapp;
+    } else if (
+      dapp.type === 'ipfs' &&
+      dapp.origin.toLocaleLowerCase() === cUrlInfo.origin.toLocaleLowerCase()
+    ) {
       result.dappByOrigin = dapp;
     }
 
@@ -229,12 +225,6 @@ export function findDappsByOrigin(
 
 export function getProtocolDappsBindings() {
   const protocolDappsBinding = dappStore.get('protocolDappsBinding') || {};
-  Object.entries(protocolDappsBinding).forEach(([k, v]) => {
-    // remove ipfs/rabby-ipfs dapps; 类型不大对？
-    if (/^(ipfs|rabby-ipfs):\/\//.test((v as any)?.origin)) {
-      delete protocolDappsBinding[k];
-    }
-  });
 
   return normalizeProtocolBindingValues(protocolDappsBinding);
 }
@@ -392,6 +382,16 @@ export async function repairDappsFieldsOnBootstrap() {
 
 handleIpcMainInvoke('detect-dapp', async (_, dappUrl) => {
   const allDapps = getAllDapps();
+
+  const urlResult = checkoutDappURL(dappUrl);
+
+  if (urlResult.type === 'ipfs') {
+    return {
+      result: await detectIPFSDapp(urlResult.dappID, {
+        existedDapps: allDapps,
+      }),
+    };
+  }
 
   const result = await detectDapp(dappUrl, {
     existedDapps: allDapps,
@@ -566,7 +566,7 @@ handleIpcMainInvoke('dapps-replace', (_, oldOrigin, newDapp) => {
   return {};
 });
 
-handleIpcMainInvoke('dapps-delete', (_, dappToDel: IDapp) => {
+handleIpcMainInvoke('dapps-delete', async (_, dappToDel: IDapp) => {
   const dappsMap = dappStore.get('dappsMap');
   const dapp = dappsMap[dappToDel.origin];
 
@@ -575,6 +575,12 @@ handleIpcMainInvoke('dapps-delete', (_, dappToDel: IDapp) => {
       error: 'Not found',
       dapps: [],
     };
+  }
+
+  const dappTypeInfo = checkoutDappURL(dapp.origin);
+  if (dappTypeInfo?.type === 'ipfs') {
+    const ipfsService = await getIpfsService();
+    await ipfsService.removeFile(dappTypeInfo.ipfsCid);
   }
 
   const delResult = checkDelDapp(dappToDel.origin, { dappsMap });

@@ -3,11 +3,12 @@
 import { Dropdown, Menu } from 'antd';
 import React, { ReactNode, useMemo, useRef } from 'react';
 
-import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
-
-import clsx from 'clsx';
+import { formatDappURLToShow, makeDappHttpOrigin } from '@/isomorphic/dapp';
 import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
+import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
+import clsx from 'clsx';
 
+import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
 import { CHAINS } from '@/renderer/utils/constant';
 import { CHAINS_ENUM } from '@debank/common/dist/chain-data';
 import { DappFavicon } from '../../../../components/DappFavicon';
@@ -54,6 +55,15 @@ const Indicator = ({ dapp }: { dapp: IDappWithTabInfo }) => {
   // ) : null;
 };
 
+const IpfsTag = ({ prefix }: { prefix?: ReactNode }) => {
+  return (
+    <div className="tag ipfs-tag">
+      {prefix}
+      IPFS
+    </div>
+  );
+};
+
 type IOnOpDapp = (
   op: 'rename' | 'delete' | 'pin' | 'unpin',
   dapp: IDapp
@@ -71,6 +81,9 @@ export const DAppBlock = ({
   onOpen?: (dappOrigin: string) => void;
 }>) => {
   const ref = useRef<HTMLDivElement>(null);
+  const { connectedSiteMap } = useConnectedSite();
+  const origin = makeDappHttpOrigin(dapp?.origin || '');
+  const chain = connectedSiteMap[origin || '']?.chain;
 
   if (onAdd) {
     return (
@@ -176,7 +189,12 @@ export const DAppBlock = ({
         }}
       >
         <div className={clsx('dapp-block-badge')}>
-          <Indicator dapp={dapp} />
+          {dapp.origin?.startsWith('rabby-ipfs://') ||
+          (dapp.type as any) === 'ipfs' ? (
+            <IpfsTag prefix={<Indicator dapp={dapp} />} />
+          ) : (
+            <Indicator dapp={dapp} />
+          )}
         </div>
         <div
           className="anchor"
@@ -197,7 +215,7 @@ export const DAppBlock = ({
           <div className="infos pr-[16px]">
             <h4 className="dapp-alias">{dapp.alias}</h4>
             <div className="dapp-url">
-              {dapp.origin?.replace(/^\w+:\/\//, '')}
+              {formatDappURLToShow(dapp.origin?.replace(/^[\w|-]+:\/\//, ''))}
             </div>
           </div>
         </div>

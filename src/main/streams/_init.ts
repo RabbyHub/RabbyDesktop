@@ -17,14 +17,7 @@ const CONF = {
   sessionReady: {
     subject: new ReplaySubject(1),
     once: true,
-  } as IConf<
-    ReplaySubject<{
-      mainSession: Session;
-      dappSafeViewSession: Session;
-      checkingViewSession: Session;
-      checkingProxySession: Session;
-    }>
-  >,
+  } as IConf<ReplaySubject<IAppSession>>,
   electronChromeExtensionsReady: {
     subject: new ReplaySubject(1),
     once: true,
@@ -101,6 +94,20 @@ const CONF = {
   appRuntimeProxyConf: {
     subject: new ReplaySubject(1),
   } as IConf<ReplaySubject<IRunningAppProxyConf>>,
+
+  // todo fix me
+  ipfsServiceReady: {
+    subject: new ReplaySubject(1),
+  } as IConf<
+    ReplaySubject<{
+      download: (cidString: string) => Promise<void>;
+      cancelDownload: () => Promise<void>;
+      resolveFile: (ipfsPath: string) => string;
+      isValid: (cid: string) => Promise<boolean>;
+      isExist: (cid: string) => Promise<boolean>;
+      removeFile: (cid: string) => Promise<void>;
+    }>
+  >,
 };
 
 type IMainSubjects = typeof CONF;
