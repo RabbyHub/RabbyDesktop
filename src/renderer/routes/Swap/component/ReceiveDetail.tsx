@@ -220,6 +220,7 @@ export const ReceiveDetails = (
                   sign === '-' && 'negative'
                 )}
               >
+                {sign}
                 {diff}%
               </span>
               )
