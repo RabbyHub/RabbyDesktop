@@ -25,8 +25,8 @@ const TransactionWrapper = styled.div`
   max-height: 100%;
   overflow: hidden;
   position: absolute;
-  right: -358px;
-  width: 330px;
+  right: -330px;
+  width: 302px;
   top: 0;
 `;
 

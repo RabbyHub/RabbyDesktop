@@ -62,7 +62,6 @@ const HomeWrapper = styled.div`
     margin-bottom: 20px;
     .top {
       display: flex;
-      margin-bottom: 20px;
       .left {
         z-index: 2;
         margin-right: 40px;
@@ -547,7 +546,7 @@ const Home = () => {
                       active
                       style={{
                         width: '234px',
-                        height: '55px',
+                        height: '46px',
                         borderRadius: '2px',
                       }}
                     />
@@ -603,11 +602,7 @@ const Home = () => {
                 {isLoadingTokenList ? (
                   <Skeleton.Input
                     active
-                    style={{
-                      width: '141px',
-                      height: '21px',
-                      borderRadius: '2px',
-                    }}
+                    className="w-full h-[88px] rounded-[2px]"
                   />
                 ) : (
                   <ChainList

@@ -10,7 +10,7 @@ import IconSwap from '../../../../../assets/icons/home/swap.svg?rc';
 import { QueueIcon } from './QueueIcon';
 
 const RightBarWrapper = styled.div`
-  width: 330px;
+  width: 302px;
   margin-left: 28px;
   height: 100%;
   display: flex;

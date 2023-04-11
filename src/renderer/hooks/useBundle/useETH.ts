@@ -4,6 +4,7 @@ import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { formatChain, DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import { sortBy } from 'lodash';
 import { useTotalBalance } from '@/renderer/utils/balance';
+import { atom, useAtom } from 'jotai';
 import { useBundleAccount } from './useBundleAccount';
 import {
   loadCachedTokenList,
@@ -16,12 +17,16 @@ import {
   loadRealTimeProtocolList,
 } from '../useHistoryProtocol';
 
+const tokenListAtom = atom<TokenItem[]>([]);
+const protocolListAtom = atom<DisplayProtocol[]>([]);
+const usedChainListAtom = atom<DisplayChainWithWhiteLogo[]>([]);
+
+let lastIdsKey: string | undefined;
+
 export const useETH = () => {
-  const [tokenList, setTokenList] = React.useState<TokenItem[]>([]);
-  const [protocolList, setProtocolList] = React.useState<DisplayProtocol[]>([]);
-  const [usedChainList, setUsedChainList] = React.useState<
-    DisplayChainWithWhiteLogo[]
-  >([]);
+  const [tokenList, setTokenList] = useAtom(tokenListAtom);
+  const [protocolList, setProtocolList] = useAtom(protocolListAtom);
+  const [usedChainList, setUsedChainList] = useAtom(usedChainListAtom);
   const { inBundleList } = useBundleAccount();
   const ethAccounts = React.useMemo(
     () => inBundleList.filter((acc) => acc.type === 'eth') as ETHAccount[],
@@ -31,10 +36,15 @@ export const useETH = () => {
     () => ethAccounts.map((acc) => acc.id),
     [ethAccounts]
   );
+  const [loadingProtocol, setLoadingProtocol] = React.useState(false);
+  const [loadingToken, setLoadingToken] = React.useState(false);
+  const [loadingUsedChain, setLoadingUsedChain] = React.useState(false);
+  const loading = loadingProtocol || loadingToken || loadingUsedChain;
 
   const totalBalance = useTotalBalance(tokenList, protocolList);
 
   const getTokenList = React.useCallback(async () => {
+    setLoadingToken(true);
     const cachedListArray = await Promise.all(
       ethAccounts.map((acc) => loadCachedTokenList(acc.data.address))
     );
@@ -44,7 +54,7 @@ export const useETH = () => {
       ['usd_value', 'amount']
     );
     setTokenList(cachedList);
-
+    setLoadingToken(false);
     const realTimeListArray = await Promise.all(
       ethAccounts.map((acc) => loadRealTimeTokenList(acc.data.address))
     );
@@ -54,9 +64,10 @@ export const useETH = () => {
       ['usd_value', 'amount']
     );
     setTokenList(realTimeList);
-  }, [ethAccounts]);
+  }, [ethAccounts, setTokenList]);
 
   const getProtocolList = React.useCallback(async () => {
+    setLoadingProtocol(true);
     const cachedListArray = await Promise.all(
       ethAccounts.map((acc) => loadCachedProtocolList(acc.data.address))
     );
@@ -67,7 +78,7 @@ export const useETH = () => {
     );
 
     setProtocolList(cachedList);
-
+    setLoadingProtocol(false);
     // 顺序执行任务，最大并发数在函数内部控制
     const realTimeListArray = [];
     for (let i = 0; i < ethAccounts.length; i++) {
@@ -82,9 +93,10 @@ export const useETH = () => {
       ['usd_value', 'portfolio_item_list']
     );
     setProtocolList(realTimeList);
-  }, [ethAccounts]);
+  }, [ethAccounts, setProtocolList]);
 
   const getUsedChainList = React.useCallback(async () => {
+    setLoadingUsedChain(true);
     const listArray = await Promise.all(
       ethAccounts.map((acc) => walletOpenapi.usedChainList(acc.data.address))
     );
@@ -95,7 +107,8 @@ export const useETH = () => {
       []
     );
     setUsedChainList(list.map((chain) => formatChain(chain)));
-  }, [ethAccounts]);
+    setLoadingUsedChain(false);
+  }, [ethAccounts, setUsedChainList]);
 
   const getAssets = React.useCallback(async () => {
     getTokenList();
@@ -127,14 +140,19 @@ export const useETH = () => {
   }, [usedChainList, protocolList, tokenList]);
 
   // update when ethAccounts list changed
+  const idsKey = JSON.stringify(ethIds);
   React.useEffect(() => {
-    console.log('fetch getAssets');
+    if (lastIdsKey === idsKey) {
+      return;
+    }
     getAssets();
+    lastIdsKey = idsKey;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(ethIds)]);
+  }, [idsKey]);
 
   return {
     displayChainList,
     totalBalance,
+    loading,
   };
 };

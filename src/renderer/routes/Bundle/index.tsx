@@ -11,7 +11,7 @@ const HomeBundleInner = () => {
   return (
     <div className="overflow-hidden h-full">
       <main className="flex h-full">
-        <section className="flex-1">
+        <section className="flex-1 mt-[-1px]">
           <LeftContainer />
         </section>
         <section
