@@ -1,7 +1,7 @@
 /* eslint import/prefer-default-export: off */
 import path from 'path';
 import child_process from 'child_process';
-import { app, net } from 'electron';
+import { app, crashReporter, net } from 'electron';
 import * as Sentry from '@sentry/electron/main';
 
 import { filterAppChannel, getSentryEnv } from '@/isomorphic/env';
@@ -10,6 +10,7 @@ import {
   FRAME_MIN_SIZE,
 } from '../../isomorphic/const-size';
 import {
+  APP_NAME,
   IS_RUNTIME_PRODUCTION,
   SENTRY_DEBUG,
 } from '../../isomorphic/constants';
@@ -157,6 +158,16 @@ export function initMainProcessSentry() {
       // Return 'drop' to drop the event.
       beforeSend: (request) => (net.isOnline() ? 'send' : 'queue'),
     },
+  });
+
+  const crashDumps = path.join(app.getPath('userData'), 'app_crash_dumps');
+  app.setPath('crashDumps', crashDumps);
+
+  crashReporter.start({
+    productName: APP_NAME,
+    // ignoreSystemCrashHandler: true,
+    submitURL:
+      'https://o460488.ingest.sentry.io/api/4504751161868288/minidump/?sentry_key=520afbe8f6574cb3a39e6cb7296f9008',
   });
 }
 
