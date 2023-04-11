@@ -7,7 +7,7 @@ import {
   TokenItem,
 } from '@debank/rabby-api/dist/types';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
-import { VIEW_TYPE } from '../routes/Home/hooks';
+import { VIEW_TYPE } from '../routes/Home/type';
 
 export interface DisplayProtocol extends ComplexProtocol {
   usd_value: number;

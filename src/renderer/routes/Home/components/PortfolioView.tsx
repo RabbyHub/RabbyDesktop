@@ -6,8 +6,8 @@ import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import AssociateDappModal from '@/renderer/components/AssociateDappModal';
 import TokenList from './TokenList';
 import ProtocolList from './ProtocolList';
-import { VIEW_TYPE } from '../hooks';
 import ScrollTopContext from './scrollTopContext';
+import { VIEW_TYPE } from '../type';
 
 const PortfolioWrapper = styled.div`
   background: rgba(255, 255, 255, 0.03);

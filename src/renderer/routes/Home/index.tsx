@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useMemo, useRef, MouseEvent } from 'react';
+import { useEffect, useState, useMemo, useRef, MouseEvent } from 'react';
 import { Skeleton } from 'antd';
 import { usePrevious, useInterval } from 'react-use';
 import styled from 'styled-components';
 import classNames from 'classnames';
 import { useLocation } from 'react-router-dom';
-import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
 import { sortBy } from 'lodash';
 import { ellipsis } from '@/renderer/utils/address';
 import { formatNumber } from '@/renderer/utils/number';
@@ -14,25 +13,29 @@ import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import useCurve from '@/renderer/hooks/useCurve';
 import useHistoryTokenList from '@/renderer/hooks/useHistoryTokenList';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
-import useHistoryProtocol, {
-  DisplayProtocol,
-} from '@/renderer/hooks/useHistoryProtocol';
+import useHistoryProtocol from '@/renderer/hooks/useHistoryProtocol';
 import { toastCopiedWeb3Addr } from '@/renderer/components/TransparentToast';
 import { copyText } from '@/renderer/utils/clipboard';
 import { formatTimeReadable } from '@/renderer/utils/time';
-import BigNumber from 'bignumber.js';
 import {
   useZPopupLayerOnMain,
   useZViewsVisibleChanged,
 } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { HomeTab } from '@/renderer/components/HomeTab/HomeTab';
-import { useSwitchView, VIEW_TYPE } from './hooks';
-
+import { IDisplayedAccountWithBalance } from '@/preloads/forward';
+import {
+  useExpandList,
+  useExpandProtocolList,
+  useFilterProtoList,
+  useFilterTokenList,
+  useSwitchView,
+} from './hooks';
 import ChainList from './components/ChainList';
 import Curve, { CurveModal } from './components/Curve';
 import PortfolioView from './components/PortfolioView';
 import RightBar from './components/RightBar';
 import Transactions from './components/Transactions';
+import { VIEW_TYPE } from './type';
 
 const HomeBody = styled.div`
   padding-left: 28px;
@@ -162,136 +165,6 @@ const SwitchViewWrapper = styled.div`
   }
 `;
 
-const calcFilterPrice = (tokens: { usd_value?: number }[]) => {
-  const total = tokens.reduce((t, item) => (item.usd_value || 0) + t, 0);
-  return Math.min(total * 0.001, 1000);
-};
-const calcIsShowExpand = (tokens: { usd_value?: number }[]) => {
-  const filterPrice = calcFilterPrice(tokens);
-  if (tokens.length < 15) {
-    return false;
-  }
-  if (tokens.filter((item) => (item.usd_value || 0) < filterPrice).length < 3) {
-    return false;
-  }
-  return true;
-};
-const useExpandList = (
-  tokens: TokenItem[],
-  historyTokenMap: null | Record<string, TokenItem>,
-  supportHistoryChains: ServerChain[]
-) => {
-  const [isExpand, setIsExpand] = useState(false);
-  const filterPrice = useMemo(() => calcFilterPrice(tokens), [tokens]);
-  const isShowExpand = useMemo(() => calcIsShowExpand(tokens), [tokens]);
-  const { totalHidden, totalHiddenCount } = useMemo(() => {
-    if (!isShowExpand) {
-      return {
-        totalHidden: 0,
-        totalHiddenCount: 0,
-      };
-    }
-    return {
-      totalHidden: tokens.reduce((t, item) => {
-        const price = item.amount * item.price || 0;
-        if (price < filterPrice) {
-          return t + price;
-        }
-        return t;
-      }, 0),
-      totalHiddenCount: tokens.filter((item) => {
-        const price = item.amount * item.price || 0;
-        return price < filterPrice;
-      }).length,
-    };
-  }, [tokens, filterPrice, isShowExpand]);
-  const filterList = useMemo(() => {
-    if (!isShowExpand) {
-      return tokens;
-    }
-    if (isExpand) {
-      return tokens;
-    }
-    return tokens.filter(
-      (item) => (item.amount * item.price || 0) >= filterPrice
-    );
-  }, [isExpand, tokens, isShowExpand, filterPrice]);
-  const omitTokens = tokens.filter(
-    (item) => (item.amount * item.price || 0) < filterPrice
-  );
-  const usdValueChange = historyTokenMap
-    ? omitTokens.reduce((sum, item) => {
-        const key = `${item.chain}-${item.id}`;
-        const history = historyTokenMap[key];
-        if (!history) {
-          return sum + new BigNumber(item.amount).times(item.price).toNumber();
-        }
-        if (supportHistoryChains.find((chain) => chain.id === item.chain)) {
-          return (
-            sum +
-            (new BigNumber(item.amount).times(item.price).toNumber() -
-              new BigNumber(history.amount).times(history.price).toNumber())
-          );
-        }
-        return (
-          sum +
-          (new BigNumber(item.amount).times(item.price).toNumber() -
-            new BigNumber(item.amount).times(history.price).toNumber())
-        );
-      }, 0)
-    : 0;
-
-  return {
-    isExpand,
-    setIsExpand,
-    filterList,
-    filterPrice,
-    isShowExpand,
-    totalHidden,
-    totalHiddenCount,
-    usdValueChange,
-  };
-};
-const useExpandProtocolList = (protocols: DisplayProtocol[]) => {
-  const [isExpand, setIsExpand] = useState(false);
-  const filterPrice = useMemo(() => calcFilterPrice(protocols), [protocols]);
-  const isShowExpand = useMemo(() => calcIsShowExpand(protocols), [protocols]);
-  const { totalHidden, totalHiddenCount } = useMemo(() => {
-    return {
-      totalHidden: protocols.reduce((t, item) => {
-        const price = item.usd_value || 0;
-        if (price < filterPrice) {
-          return t + price;
-        }
-        return t;
-      }, 0),
-      totalHiddenCount: protocols.filter((item) => {
-        const price = item.usd_value || 0;
-        return price < filterPrice;
-      }).length,
-    };
-  }, [protocols, filterPrice]);
-  const filterList = useMemo(() => {
-    if (!isShowExpand) {
-      return protocols;
-    }
-    const result = isExpand
-      ? protocols
-      : protocols.filter((item) => (item.usd_value || 0) >= filterPrice);
-    return result;
-  }, [isExpand, protocols, isShowExpand, filterPrice]);
-
-  return {
-    isExpand,
-    setIsExpand,
-    filterList,
-    filterPrice,
-    isShowExpand,
-    totalHidden,
-    totalHiddenCount,
-  };
-};
-
 const Home = () => {
   const rerenderAtRef = useRef(0);
   const [curveModalOpen, setCurveModalOpen] = useState(false);
@@ -314,12 +187,7 @@ const Home = () => {
     isLoadingRealTime: isLoadingRealTimeTokenList,
   } = useHistoryTokenList(currentAccount?.address, updateNonce, currentView);
 
-  const filterTokenList = useMemo(() => {
-    const list: TokenItem[] = selectChainServerId
-      ? tokenList.filter((token) => token.chain === selectChainServerId)
-      : tokenList;
-    return sortBy(list, (i) => i.usd_value || 0).reverse();
-  }, [tokenList, selectChainServerId]);
+  const filterTokenList = useFilterTokenList(tokenList, selectChainServerId);
 
   const {
     protocolList,
@@ -371,53 +239,10 @@ const Home = () => {
   const curveData = useCurve(currentAccount?.address, updateNonce);
   const location = useLocation();
 
-  const filterProtocolList = useMemo(() => {
-    const list: DisplayProtocol[] = selectChainServerId
-      ? protocolList.filter(
-          (protocol) => protocol.chain === selectChainServerId
-        )
-      : protocolList;
-    return sortBy(
-      sortBy(
-        list.map((item) => {
-          item.portfolio_item_list = item.portfolio_item_list.map((i) => {
-            const assetList = i.asset_token_list;
-            let positiveList: TokenItem[] = [];
-            let negativeList: TokenItem[] = [];
-            assetList.forEach((j) => {
-              if (j.amount < 0) {
-                negativeList.push(j);
-              } else {
-                positiveList.push(j);
-              }
-            });
-            positiveList = sortBy(
-              positiveList,
-              (j) => j.amount * j.price
-            ).reverse();
-            negativeList = sortBy(
-              negativeList,
-              (j) => Math.abs(j.amount) * j.price
-            ).reverse();
-            return {
-              ...i,
-              asset_token_list: [...positiveList, ...negativeList],
-            };
-          });
-          return {
-            ...item,
-            portfolio_item_list: sortBy(item.portfolio_item_list, (i) => {
-              return (i.asset_token_list || []).reduce(
-                (sum, j) => sum + j.price * j.amount,
-                0
-              );
-            }).reverse(),
-          };
-        })
-      ),
-      (i) => i.usd_value || 0
-    ).reverse();
-  }, [protocolList, selectChainServerId]);
+  const filterProtocolList = useFilterProtoList(
+    protocolList,
+    selectChainServerId
+  );
   const {
     filterList: displayProtocolList,
     isShowExpand: isShowProtocolExpand,

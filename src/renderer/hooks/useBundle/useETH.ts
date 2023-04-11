@@ -154,5 +154,7 @@ export const useETH = () => {
     displayChainList,
     totalBalance,
     loading,
+    tokenList,
+    protocolList,
   };
 };
