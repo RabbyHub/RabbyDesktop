@@ -136,7 +136,7 @@ export const useCurrentConnectedSite = ({
       return;
     }
     getLastOpenOriginByOrigin(origin).then((lastOpenOrigin) => {
-      setCurrentOrigin(lastOpenOrigin);
+      setCurrentOrigin(lastOpenOrigin?.toLowerCase());
     });
   }, [origin, tab?.url]);
 
