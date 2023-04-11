@@ -1,8 +1,9 @@
-import { Image, ImageProps } from 'antd';
 import { useMemo } from 'react';
-import { CHAINS_ENUM } from '@/preloads/forward';
-import { CHAINS } from '@/renderer/utils/constant';
+import { Image, ImageProps } from 'antd';
 import clsx from 'clsx';
+
+import { CHAINS } from '@/renderer/utils/constant';
+import { covertIpfsHttpToRabbyIpfs } from '@/isomorphic/custom-scheme';
 import { getOriginName, hashCode } from '../../utils';
 import './index.less';
 
@@ -53,7 +54,7 @@ export const DappFavicon = (props: FaviconProps) => {
     <div className={clsx('rabby-dapp-favicon', rootClassName)}>
       <Image
         preview={false}
-        src={src || fallbackImage}
+        src={covertIpfsHttpToRabbyIpfs(src || fallbackImage)}
         fallback={fallbackImage}
         {...rest}
       />

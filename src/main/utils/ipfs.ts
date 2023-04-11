@@ -306,39 +306,3 @@ export const initIPFSModule = async () => {
 export type IpfsService = InstanceType<
   ExtractPromiseValue<ReturnType<typeof initIPFSModule>>['IpfsService']
 >;
-
-export function extractIpfsPathname(requestURL: string) {
-  if (requestURL.startsWith(PROTOCOL_IPFS)) {
-    const pathnameWithQuery = requestURL.slice(`${PROTOCOL_IPFS}//`.length);
-
-    const pathname = pathnameWithQuery.split('?')?.[0] || '';
-    const pathnameWithoutHash = pathname.split('#')?.[0] || '';
-
-    const ipfsCid = extractIpfsCid(requestURL);
-    const fsRelativePath = ensurePrefix(
-      pathnameWithoutHash,
-      `ipfs/${ipfsCid}/`
-    );
-
-    return {
-      pathname,
-      pathnameWithoutHash,
-      fsRelativePath,
-    };
-  }
-
-  const parsedInfo = canoicalizeDappUrl(requestURL);
-  const pathnameWithQuery = parsedInfo.urlInfo?.pathname || '';
-
-  const pathname = pathnameWithQuery.split('?')?.[0] || '';
-  const pathnameWithoutHash = pathname.split('#')?.[0] || '';
-
-  const ipfsCid = extractIpfsCid(requestURL);
-  const fsRelativePath = ensurePrefix(pathnameWithoutHash, `ipfs/${ipfsCid}/`);
-
-  return {
-    pathname,
-    pathnameWithoutHash,
-    fsRelativePath,
-  };
-}
