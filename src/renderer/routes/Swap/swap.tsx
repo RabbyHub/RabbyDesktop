@@ -13,10 +13,14 @@ import { useAsync, useDebounce } from 'react-use';
 import { formatAmount } from '@/renderer/utils/number';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import IconRcClose from '@/../assets/icons/swap/close.svg?rc';
+import IconRcLoading from '@/../assets/icons/swap/loading.svg?rc';
+import IconRcError from '@/../assets/icons/swap/error.svg?rc';
+
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { useRbiSource } from '@/renderer/hooks/useRbiSource';
 import BigNumber from 'bignumber.js';
 import { isSameAddress } from '@/renderer/utils/address';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { ChainRender, ChainSelect } from './component/ChainSelect';
 import { SwapIntro } from './component/Intro';
 import { DEX, getChainDefaultToken } from './constant';
@@ -35,9 +39,15 @@ import {
   tokenAmountBn,
   validSlippage,
 } from './utils';
-import { QuoteItemProps, QuoteProvider, Quotes } from './component/Quotes';
+import { Quotes } from './component/Quotes';
 import styles from './index.module.less';
-import { useInSwap, usePostSwap } from './hooks';
+import {
+  refreshIdAtom,
+  useInSwap,
+  usePostSwap,
+  useSwapOrApprovalLoading,
+} from './hooks';
+import { activeProviderAtom, activeProviderOriginAtom } from './atom';
 
 const Wrapper = styled.div`
   --max-swap-width: 1080px;
@@ -179,6 +189,14 @@ const Wrapper = styled.div`
       color: rgba(255, 255, 255, 0.8);
       font-size: 14px;
       font-weight: 400;
+      &.error {
+        font-weight: 400;
+        font-size: 14px;
+        color: #ff7878;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
     }
 
     .btnBox {
@@ -197,6 +215,10 @@ const Wrapper = styled.div`
       font-weight: medium;
       border-radius: 6px;
       position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
 
       &:hover {
         box-shadow: 0px 16px 40px rgba(29, 35, 74, 0.2);
@@ -235,8 +257,10 @@ export const SwapToken = () => {
   const [payAmount, setPayAmount] = useState('');
   const [debouncePayAmount, setDebouncePayAmount] = useState('');
 
-  const [refreshId, setRefreshId] = useState(0);
-  const [activeProvider, setActiveProvider] = useState<QuoteProvider>();
+  const [refreshId, setRefreshId] = useAtom(refreshIdAtom);
+
+  const activeProvider = useAtomValue(activeProviderAtom);
+  const setActiveProvider = useSetAtom(activeProviderOriginAtom);
 
   const [searchParams] = useSearchParams();
   const shouldResetState = useRef(false);
@@ -257,23 +281,26 @@ export const SwapToken = () => {
     return false;
   }, [chain, payToken]);
 
-  const chainSwitch = useCallback((c: CHAINS_ENUM, payTokenId?: string) => {
-    setChain(c);
-    setPayToken({
-      ...getChainDefaultToken(c),
-      ...(payTokenId ? { id: payTokenId } : {}),
-    });
-    setReceiveToken(undefined);
-    setPayAmount('');
-    setActiveProvider(undefined);
-  }, []);
+  const chainSwitch = useCallback(
+    (c: CHAINS_ENUM, payTokenId?: string) => {
+      setChain(c);
+      setPayToken({
+        ...getChainDefaultToken(c),
+        ...(payTokenId ? { id: payTokenId } : {}),
+      });
+      setReceiveToken(undefined);
+      setPayAmount('');
+      setActiveProvider(undefined);
+    },
+    [setActiveProvider]
+  );
 
   const isInSwap = useInSwap();
   const refresh = useCallback(() => {
     if (isInSwap) {
-      setRefreshId((e) => e + 1);
+      setRefreshId();
     }
-  }, [isInSwap]);
+  }, [isInSwap, setRefreshId]);
 
   useEffect(() => {
     if (isInSwap) {
@@ -295,7 +322,7 @@ export const SwapToken = () => {
     }
   }
 
-  const Insufficient = useMemo(
+  const inSufficient = useMemo(
     () =>
       payToken
         ? tokenAmountBn(payToken).lt(debouncePayAmount)
@@ -362,6 +389,7 @@ export const SwapToken = () => {
       });
     }
   }, [
+    setActiveProvider,
     setQuotesList,
     setQuote,
     refreshId,
@@ -390,19 +418,21 @@ export const SwapToken = () => {
 
   const renderQuotes = useMemo(
     () =>
+      !inSufficient &&
       userAddress &&
       payToken &&
       receiveToken &&
       chain &&
-      debouncePayAmount &&
+      +debouncePayAmount > 0 &&
       feeAfterDiscount,
     [
-      chain,
-      feeAfterDiscount,
-      debouncePayAmount,
+      inSufficient,
+      userAddress,
       payToken,
       receiveToken,
-      userAddress,
+      chain,
+      debouncePayAmount,
+      feeAfterDiscount,
     ]
   );
 
@@ -472,9 +502,9 @@ export const SwapToken = () => {
     setReceiveToken(payToken);
   }, [receiveToken, payToken]);
 
-  const selectQuote: QuoteItemProps['onClick'] = useCallback((data) => {
-    setActiveProvider(data);
-  }, []);
+  // const selectQuote: QuoteItemProps['onClick'] = useCallback((data) => {
+  //   setActiveProvider(data);
+  // }, []);
 
   const DexDisplayName = useMemo(
     () => DEX?.[activeProvider?.name as keyof typeof DEX]?.name || '',
@@ -482,7 +512,7 @@ export const SwapToken = () => {
   );
 
   const btnText = useMemo(() => {
-    if (Insufficient) {
+    if (inSufficient) {
       return 'Insufficient Balance';
     }
     if (activeProvider?.name) {
@@ -494,13 +524,14 @@ export const SwapToken = () => {
     return 'Select offer';
   }, [
     DexDisplayName,
-    Insufficient,
+    inSufficient,
     activeProvider?.name,
     payToken,
     receiveToken,
   ]);
 
   const btnDisabled =
+    inSufficient ||
     !payToken ||
     !receiveToken ||
     !debouncePayAmount ||
@@ -509,6 +540,10 @@ export const SwapToken = () => {
     !activeProvider?.quote;
 
   const addLocalSwapTx = usePostSwap();
+
+  const { subscribeTx } = useSwapOrApprovalLoading();
+
+  const [isInfiniteApproval, setIsInfiniteApproval] = useState(false);
 
   const gotoSwap = useCallback(
     async (unlimited = false) => {
@@ -519,6 +554,7 @@ export const SwapToken = () => {
         activeProvider?.gasPrice
       ) {
         try {
+          setIsInfiniteApproval(unlimited);
           const hash = await walletController.dexSwap(
             {
               chain,
@@ -526,7 +562,6 @@ export const SwapToken = () => {
               needApprove: activeProvider?.shouldApproveToken,
               spender: getSpender(activeProvider.name as DEX_ENUM, chain),
               pay_token_id: payToken.id,
-              gasPrice: activeProvider?.gasPrice,
               unlimited,
               shouldTwoStepApprove: activeProvider?.shouldTwoStepApprove,
             },
@@ -538,7 +573,24 @@ export const SwapToken = () => {
               },
             }
           );
-          if (hash && receiveToken) {
+
+          if (hash) {
+            setActiveProvider((e) =>
+              !e
+                ? e
+                : {
+                    ...e,
+                    activeLoading: true,
+                    activeTx: hash,
+                  }
+            );
+          }
+
+          if (hash && activeProvider?.shouldApproveToken) {
+            subscribeTx(hash);
+          }
+
+          if (hash && receiveToken && !activeProvider?.shouldApproveToken) {
             addLocalSwapTx(chain, hash, {
               payToken,
               receiveToken,
@@ -567,6 +619,8 @@ export const SwapToken = () => {
       chain,
       rbiSource,
       receiveToken,
+      setActiveProvider,
+      subscribeTx,
       addLocalSwapTx,
       debouncePayAmount,
       slippage,
@@ -651,6 +705,7 @@ export const SwapToken = () => {
 
   useEffect(() => {
     if (
+      inSufficient ||
       !payToken ||
       !receiveToken ||
       !debouncePayAmount ||
@@ -659,7 +714,14 @@ export const SwapToken = () => {
     ) {
       setActiveProvider(undefined);
     }
-  }, [payToken, receiveToken, debouncePayAmount, activeProvider]);
+  }, [
+    payToken,
+    receiveToken,
+    debouncePayAmount,
+    activeProvider,
+    inSufficient,
+    setActiveProvider,
+  ]);
 
   const receiveSlippageLoading = useMemo(
     () =>
@@ -723,12 +785,14 @@ export const SwapToken = () => {
             </div>
             <div className="section">
               <div className="amountBox">
-                <div className="subText">{payToken?.symbol || ''} Amount</div>
+                <div className="subText">
+                  Amount in {payToken?.symbol || ''}
+                </div>
                 <div
                   className={clsx(
                     'subText',
-                    !payTokenIsNativeToken && 'underline cursor-pointer',
-                    Insufficient && 'error'
+                    !payTokenIsNativeToken && 'underline cursor-pointer'
+                    // inSufficient && 'error'
                   )}
                   onClick={handleBalance}
                 >
@@ -750,6 +814,11 @@ export const SwapToken = () => {
               >
                 Splitting your trade in half may result in a{' '}
                 {activeProvider?.halfBetterRate}% better exchange rate.
+              </div>
+              <div
+                className={clsx('halfTips error', !inSufficient && 'hidden')}
+              >
+                <IconRcError /> <span>Insufficient Balance</span>
               </div>
             </div>
             {debouncePayAmount &&
@@ -806,7 +875,16 @@ export const SwapToken = () => {
                     size="large"
                     type="primary"
                     onClick={handleLimitedSwap}
-                    className={clsx('btn ', btnDisabled && 'disabled')}
+                    className={clsx(
+                      'btn ',
+                      (activeProvider?.activeLoading || btnDisabled) &&
+                        'disabled'
+                    )}
+                    icon={
+                      activeProvider?.activeLoading && !isInfiniteApproval ? (
+                        <IconRcLoading className="animate-spin" />
+                      ) : null
+                    }
                   >
                     Approve {debouncePayAmount} {payToken?.symbol} to{' '}
                     {DexDisplayName}{' '}
@@ -816,7 +894,16 @@ export const SwapToken = () => {
                     size="large"
                     type="primary"
                     onClick={handleUnlimitedSwap}
-                    className={clsx('btn ', btnDisabled && 'disabled')}
+                    className={clsx(
+                      'btn ',
+                      (activeProvider?.activeLoading || btnDisabled) &&
+                        'disabled'
+                    )}
+                    icon={
+                      activeProvider?.activeLoading && isInfiniteApproval ? (
+                        <IconRcLoading className="animate-spin" />
+                      ) : null
+                    }
                   >
                     Approve Unlimited {payToken?.symbol} to {DexDisplayName}{' '}
                   </Button>
@@ -826,7 +913,15 @@ export const SwapToken = () => {
                   size="large"
                   type="primary"
                   onClick={handleLimitedSwap}
-                  className={clsx('btn ', btnDisabled && 'disabled')}
+                  className={clsx(
+                    'btn ',
+                    (activeProvider?.activeLoading || btnDisabled) && 'disabled'
+                  )}
+                  icon={
+                    activeProvider?.activeLoading ? (
+                      <IconRcLoading className="animate-spin" />
+                    ) : null
+                  }
                 >
                   {btnText}
                 </Button>
@@ -843,7 +938,6 @@ export const SwapToken = () => {
                 payAmount={debouncePayAmount}
                 chain={chain}
                 userAddress={userAddress}
-                onClick={selectQuote}
                 activeName={activeProvider?.name}
                 slippage={slippage}
                 fee={feeAfterDiscount}

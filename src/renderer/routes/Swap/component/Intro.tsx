@@ -44,8 +44,8 @@ export const SwapIntro = () => {
     <Wrapper>
       <div className="title">Rabby Swap Aggregator</div>
       <div className="desc">
-        We find the best rates from top aggregators like 1inch, matcha,
-        Paraswap, and more. No hassle, just better swaps.
+        We find the best rates from top aggregators like 1inch, 0x, Paraswap,
+        and more. No hassle, just better swaps.
       </div>
 
       <div className="segment">What's more...</div>
