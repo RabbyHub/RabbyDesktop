@@ -1,4 +1,4 @@
-import { createReadStream, createWriteStream } from 'fs';
+import fsOrigin, { createReadStream, createWriteStream } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -14,10 +14,15 @@ import { type CID } from 'multiformats';
 import nodeFetch from 'node-fetch';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 
-import { formatProxyServerURL } from '@/isomorphic/url';
+import {
+  canoicalizeDappUrl,
+  extractIpfsCid,
+  formatProxyServerURL,
+} from '@/isomorphic/url';
 
 import { pipeline } from 'stream';
 import { promisify } from 'util';
+import { PROTOCOL_IPFS } from '@/isomorphic/constants';
 import { getAppRuntimeProxyConf } from './stream-helpers';
 
 const streamPipeline = promisify(pipeline);
@@ -198,7 +203,7 @@ export const initIPFSModule = async () => {
     }
   };
 
-  class IpfsService {
+  class IpfsServiceImpl implements IpfsService {
     public gateway: string;
 
     public rootPath: string;
@@ -281,8 +286,59 @@ export const initIPFSModule = async () => {
 
       return path.resolve(this.rootPath, ipfsPath);
     }
+
+    public checkFileExist(filePath: string) {
+      const filepath = this.resolveFile(filePath);
+
+      if (!fsOrigin.existsSync(filepath)) return null;
+
+      return {
+        type: fsOrigin.statSync(filepath).isDirectory() ? 'directory' : 'file',
+        filePath,
+      };
+    }
   }
   return {
-    IpfsService,
+    IpfsService: IpfsServiceImpl,
   };
 };
+
+export type IpfsService = InstanceType<
+  ExtractPromiseValue<ReturnType<typeof initIPFSModule>>['IpfsService']
+>;
+
+export function extractIpfsPathname(requestURL: string) {
+  if (requestURL.startsWith(PROTOCOL_IPFS)) {
+    const pathnameWithQuery = requestURL.slice(`${PROTOCOL_IPFS}//`.length);
+
+    const pathname = pathnameWithQuery.split('?')?.[0] || '';
+    const pathnameWithoutHash = pathname.split('#')?.[0] || '';
+
+    const ipfsCid = extractIpfsCid(requestURL);
+    const fsRelativePath = ensurePrefix(
+      pathnameWithoutHash,
+      `ipfs/${ipfsCid}/`
+    );
+
+    return {
+      pathname,
+      pathnameWithoutHash,
+      fsRelativePath,
+    };
+  }
+
+  const parsedInfo = canoicalizeDappUrl(requestURL);
+  const pathnameWithQuery = parsedInfo.urlInfo?.pathname || '';
+
+  const pathname = pathnameWithQuery.split('?')?.[0] || '';
+  const pathnameWithoutHash = pathname.split('#')?.[0] || '';
+
+  const ipfsCid = extractIpfsCid(requestURL);
+  const fsRelativePath = ensurePrefix(pathnameWithoutHash, `ipfs/${ipfsCid}/`);
+
+  return {
+    pathname,
+    pathnameWithoutHash,
+    fsRelativePath,
+  };
+}

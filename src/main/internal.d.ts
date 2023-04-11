@@ -211,6 +211,10 @@ type MainInternalsMessagePayload = {
     ];
     response: [];
   };
+  '__internal_main:app:toggle-ipfs-support': {
+    send: [enabled: boolean];
+    response: [];
+  };
 };
 
 type MainInternals = keyof MainInternalsMessagePayload;

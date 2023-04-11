@@ -1,4 +1,5 @@
 import { createWindow } from '../streams/tabbedBrowserWindow';
+import { emitIpcMainEvent } from './ipcMainEvents';
 import { onMainWindowReady, pushChangesToZPopupLayer } from './stream-helpers';
 
 function getConnectWinSize(
@@ -42,6 +43,8 @@ function updateSubWindowRect(
  */
 export async function createTrezorLikeConnectPageWindow(connectURL: string) {
   const mainWindow = (await onMainWindowReady()).window;
+
+  emitIpcMainEvent('__internal_main:app:toggle-ipfs-support', false);
 
   const tabbedWin = await createWindow({
     defaultTabUrl: connectURL,
@@ -92,6 +95,8 @@ export async function createTrezorLikeConnectPageWindow(connectURL: string) {
   // });
 
   connWindow.on('closed', async () => {
+    emitIpcMainEvent('__internal_main:app:toggle-ipfs-support', true);
+
     // const { backgroundWebContents } = await getRabbyExtViews();
     // backgroundWebContents.executeJavaScript(`window._TrezorConnect.dispose();`);
     // // backgroundWebContents.executeJavaScript(`window._TrezorConnect.cancel();`);
