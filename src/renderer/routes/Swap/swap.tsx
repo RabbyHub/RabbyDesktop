@@ -543,6 +543,8 @@ export const SwapToken = () => {
 
   const { subscribeTx } = useSwapOrApprovalLoading();
 
+  const [isInfiniteApproval, setIsInfiniteApproval] = useState(false);
+
   const gotoSwap = useCallback(
     async (unlimited = false) => {
       if (
@@ -552,6 +554,7 @@ export const SwapToken = () => {
         activeProvider?.gasPrice
       ) {
         try {
+          setIsInfiniteApproval(unlimited);
           const hash = await walletController.dexSwap(
             {
               chain,
@@ -878,7 +881,7 @@ export const SwapToken = () => {
                         'disabled'
                     )}
                     icon={
-                      activeProvider?.activeLoading ? (
+                      activeProvider?.activeLoading && !isInfiniteApproval ? (
                         <IconRcLoading className="animate-spin" />
                       ) : null
                     }
@@ -897,7 +900,7 @@ export const SwapToken = () => {
                         'disabled'
                     )}
                     icon={
-                      activeProvider?.activeLoading ? (
+                      activeProvider?.activeLoading && isInfiniteApproval ? (
                         <IconRcLoading className="animate-spin" />
                       ) : null
                     }
