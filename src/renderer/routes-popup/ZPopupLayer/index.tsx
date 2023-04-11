@@ -34,6 +34,7 @@ import {
   IPFSVerifyFailedModal,
   IPFSNotSupportedModal,
 } from '@/renderer/components/IPFSAlertModal';
+import { useTipCannotUseTrezorLike } from '@/renderer/hooks-shell/useZPopupEffects';
 import SwitchChainModal from '../../components/SwitchChainModal';
 
 import styles from './index.module.less';
@@ -77,6 +78,8 @@ function useReactOnZPopupMessage() {
 function App() {
   usePopupViewInfo('z-popup', { enableTopViewGuard: true });
   useReactOnZPopupMessage();
+
+  useTipCannotUseTrezorLike();
 
   return (
     <>

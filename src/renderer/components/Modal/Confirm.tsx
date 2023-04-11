@@ -43,7 +43,7 @@ export function ModalConfirmRelaunch({
   bodyStyle,
   ...other
 }: ModalFuncProps & { height?: number | string }) {
-  Modal.confirm({
+  return Modal.confirm({
     icon: <div />,
     closeIcon: (
       <img

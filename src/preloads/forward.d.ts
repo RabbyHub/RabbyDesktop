@@ -1,7 +1,5 @@
 /// <reference path="../isomorphic/type-helpers.d.ts" />
 
-import { ReactNode } from 'react';
-
 type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
 type IDisplayedAccountWithBalance =
   import('@/renderer/hooks/rabbyx/useAccountToDisplay').IDisplayedAccountWithBalance;
@@ -59,7 +57,7 @@ type ZViewStates = {
   };
 
   'toast-zpopup-message': {
-    message?: ReactNode;
+    message?: React.ReactNode;
     type?: 'success' | 'error' | 'warning' | 'info';
     duration?: number;
   };
@@ -79,6 +77,17 @@ type ZViewStates = {
   'ipfs-not-supported-modal': {
     // nothing
   };
+
+  'trezor-like-cannot-use':
+    | {
+        reason: 'used-one';
+        haveUsed: IHardwareConnectPageType;
+        cannotUse: IHardwareConnectPageType;
+      }
+    | {
+        reason: 'enabled-ipfs';
+        cannotUse: IHardwareConnectPageType;
+      };
 };
 
 type IZPopupSubviewState = {

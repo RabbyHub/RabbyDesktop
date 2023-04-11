@@ -1,5 +1,6 @@
+import { isEnableSupportIpfsDapp } from '../store/desktopApp';
+import { rabbyxQuery } from '../streams/rabbyIpcQuery/_base';
 import { createWindow } from '../streams/tabbedBrowserWindow';
-import { emitIpcMainEvent } from './ipcMainEvents';
 import { onMainWindowReady, pushChangesToZPopupLayer } from './stream-helpers';
 
 function getConnectWinSize(
@@ -35,13 +36,84 @@ function updateSubWindowRect(
 
   window.setBounds({ ...popupRect, x, y }, true);
 }
+
+const trezorLikeState = {
+  openedType: null as IHardwareConnectPageType | null,
+};
+
+type IStopResult = {
+  stopped: boolean;
+  nextFunc: (() => void) | undefined;
+};
+export function stopOpenTrezorLikeWindow(options: {
+  openType: IHardwareConnectPageType;
+}): IStopResult {
+  const result: IStopResult = {
+    stopped: false,
+    nextFunc: undefined,
+  };
+
+  if (
+    trezorLikeState.openedType &&
+    trezorLikeState.openedType !== options.openType
+  ) {
+    result.stopped = true;
+    result.nextFunc = () => {
+      rabbyxQuery('walletController.rejectAllApprovals', []);
+      pushChangesToZPopupLayer({
+        'trezor-like-cannot-use': {
+          visible: true,
+          state: {
+            reason: 'used-one',
+            haveUsed: trezorLikeState.openedType!,
+            cannotUse: options.openType,
+          },
+        },
+      });
+    };
+  }
+
+  return result;
+}
+
+export function asyncDestroyWindowIfCannotUseTrezorLike(options: {
+  openType: IHardwareConnectPageType;
+  trezorLikeWindow: Electron.BrowserWindow;
+  timeoutVal?: number;
+}) {
+  const connWindow = options.trezorLikeWindow;
+  const timeoutVal = options.timeoutVal || 250;
+
+  if (isEnableSupportIpfsDapp()) {
+    connWindow.hide();
+
+    setTimeout(() => {
+      connWindow.destroy();
+      pushChangesToZPopupLayer({
+        'trezor-like-cannot-use': {
+          visible: true,
+          state: {
+            reason: 'enabled-ipfs',
+            cannotUse: options.openType,
+          },
+        },
+      });
+    }, timeoutVal);
+  }
+}
+
 /**
  * @description it must be one tabbed window which is:
  *
  * 1. charged by rabbyx extension
  * 2. support chrome.tabs.* APIs
  */
-export async function createTrezorLikeConnectPageWindow(connectURL: string) {
+export async function createTrezorLikeConnectPageWindow(
+  connectURL: string,
+  options: {
+    openType: IHardwareConnectPageType;
+  }
+) {
   const mainWindow = (await onMainWindowReady()).window;
 
   const tabbedWin = await createWindow({
@@ -78,6 +150,8 @@ export async function createTrezorLikeConnectPageWindow(connectURL: string) {
       navigation: false,
     },
   });
+
+  trezorLikeState.openedType = options.openType;
 
   const connWindow = tabbedWin.window;
 
@@ -124,5 +198,12 @@ export async function createTrezorLikeConnectPageWindow(connectURL: string) {
   return {
     window: connWindow,
     tab,
+    asyncDestroyWindowIfNeed: () => {
+      asyncDestroyWindowIfCannotUseTrezorLike({
+        trezorLikeWindow: connWindow,
+        openType: options.openType,
+        timeoutVal: 250,
+      });
+    },
   };
 }

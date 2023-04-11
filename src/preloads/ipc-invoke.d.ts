@@ -207,6 +207,10 @@ type ChannelInvokePayload = {
       result: string;
     };
   };
+  'app-relaunch': {
+    send: [reason: 'trezor-like-used'];
+    response: void;
+  };
   [`__internal_rpc:rabbyx-rpc:query`]: {
     send: [query: Omit<IRabbyxRpcQuery, 'rpcId'>];
     response: {

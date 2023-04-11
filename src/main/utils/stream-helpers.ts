@@ -162,7 +162,9 @@ export async function getAllMainUIViews() {
   };
 
   const hash = {
-    mainWindow: mainWin.window.webContents,
+    mainWindow: mainWin.window.isDestroyed()
+      ? null
+      : mainWin.window.webContents,
     ...viewOnlyHash,
   };
 
@@ -171,7 +173,7 @@ export async function getAllMainUIViews() {
     viewOnlyHash,
     viewOnlyList: Object.values(viewOnlyHash),
     hash,
-    list: Object.values(hash),
+    list: Object.values(hash).filter(Boolean) as Electron.WebContents[],
   };
 }
 

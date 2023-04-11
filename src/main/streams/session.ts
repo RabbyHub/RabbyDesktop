@@ -27,6 +27,7 @@ import {
   getRabbyExtId,
   getSessionInsts,
   getWebuiExtId,
+  pushChangesToZPopupLayer,
 } from '../utils/stream-helpers';
 import { checkOpenAction } from '../utils/tabs';
 import { getWindowFromWebContents, switchToBrowserTab } from '../utils/browser';
@@ -37,13 +38,17 @@ import {
   getAppProxyConf,
   isEnableSupportIpfsDapp,
 } from '../store/desktopApp';
-import { createTrezorLikeConnectPageWindow } from '../utils/hardwareConnect';
+import {
+  createTrezorLikeConnectPageWindow,
+  stopOpenTrezorLikeWindow,
+} from '../utils/hardwareConnect';
 import { getBlockchainExplorers } from '../store/dynamicConfig';
 import { appInterpretors, registerSessionProtocol } from '../utils/protocol';
 import {
   emitIpcMainEvent,
   onIpcMainInternalEvent,
 } from '../utils/ipcMainEvents';
+import { rabbyxQuery } from './rabbyIpcQuery/_base';
 
 const sesLog = getBindLog('session', 'bgGrey');
 
@@ -269,9 +274,21 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
 
       switch (actionInfo.action) {
         case 'open-hardware-connect': {
-          const { window, tab } = await createTrezorLikeConnectPageWindow(
-            actionInfo.pageURL
-          );
+          const stopResult = stopOpenTrezorLikeWindow({
+            openType: actionInfo.type,
+          });
+
+          if (stopResult.stopped) {
+            stopResult.nextFunc?.();
+            return false;
+          }
+
+          const { window, tab, asyncDestroyWindowIfNeed } =
+            await createTrezorLikeConnectPageWindow(actionInfo.pageURL, {
+              openType: actionInfo.type,
+            });
+
+          asyncDestroyWindowIfNeed();
 
           return [tab.view!.webContents, window];
         }
