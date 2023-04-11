@@ -16,6 +16,7 @@ import ImgInfo from '@/../assets/icons/swap/info-outline.svg';
 import { formatAmount } from '@/renderer/utils/number';
 import clsx from 'clsx';
 import { SkeletonInputProps } from 'antd/lib/skeleton/Input';
+import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 
 const getQuoteLessWarning = (quoteWarning: string) =>
   `By transaction simulation, you'll receive ${quoteWarning} less than the current offer.`;
@@ -60,6 +61,12 @@ const ReceiveWrapper = styled.div`
       display: inline-flex;
       align-items: center;
       gap: 4px;
+      .receive {
+        max-width: 300px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
       img {
         width: 14px;
         height: 14px;
@@ -192,7 +199,10 @@ export const ReceiveDetails = (
             loading={loading}
             style={{ maxWidth: 144, height: 20, opacity: 0.5 }}
           >
-            <span>
+            <span
+              title={`${receiveNum} ${receiveToken.symbol}`}
+              className="receive"
+            >
               {receiveNum} {receiveToken.symbol}
             </span>
             <WarningOrChecked quoteWarning={quoteWarning} />
@@ -211,8 +221,28 @@ export const ReceiveDetails = (
             style={{ maxWidth: 182, height: 20, opacity: 0.5 }}
           >
             <span className="cursor-pointer" onClick={reverseRate}>
-              1 {reverse ? receiveToken.symbol : payToken.symbol} = {rate}{' '}
-              {reverse ? payToken.symbol : receiveToken.symbol} (
+              <span
+                title={`${1} ${
+                  reverse ? receiveToken.symbol : payToken.symbol
+                }`}
+              >
+                1{' '}
+                {ellipsisTokenSymbol(
+                  reverse ? receiveToken.symbol : payToken.symbol
+                )}{' '}
+              </span>
+              ={' '}
+              <span
+                title={`${rate} ${
+                  reverse ? payToken.symbol : receiveToken.symbol
+                }`}
+              >
+                {rate}{' '}
+                {ellipsisTokenSymbol(
+                  reverse ? payToken.symbol : receiveToken.symbol
+                )}
+              </span>
+              (
               <span
                 className={clsx(
                   'diffPercent',
