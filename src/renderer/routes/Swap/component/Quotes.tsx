@@ -1,7 +1,7 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useState, useRef, useEffect } from 'react';
 import { CEXQuote, TokenItem } from '@debank/rabby-api/dist/types';
 import { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
-import { Skeleton, Tooltip, message } from 'antd';
+import { Skeleton, Tooltip } from 'antd';
 import styled from 'styled-components';
 import BigNumber from 'bignumber.js';
 import { formatAmount } from '@/renderer/utils/number';
@@ -13,6 +13,7 @@ import ImgLock from '@/../assets/icons/swap/lock.svg';
 import IconRcTip from '@/../assets/icons/swap/tip-info.svg?rc';
 
 import { noop } from 'lodash';
+import { useSetAtom } from 'jotai';
 import { CEX, DEX } from '../constant';
 import {
   QuotePreExecResultInfo,
@@ -25,6 +26,7 @@ import {
 import { IconRefresh } from './IconRefresh';
 import { WarningOrChecked } from './ReceiveDetail';
 import { useVerifySdk } from '../hooks';
+import { activeProviderOriginAtom } from '../atom';
 
 const QuotesWrapper = styled.div`
   --green-color: #27c193;
@@ -44,6 +46,7 @@ const QuotesWrapper = styled.div`
 `;
 
 const ItemWrapper = styled.div`
+  position: relative;
   height: 72px;
   font-size: 16px;
   font-weight: medium;
@@ -57,6 +60,29 @@ const ItemWrapper = styled.div`
   border-radius: 6px;
 
   cursor: pointer;
+
+  .cexDisabledTips {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translateY(-20px);
+    opacity: 0;
+    width: 100%;
+    height: 0;
+    padding-left: 16px;
+    background: #000000;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    gap: 8px;
+    &.active {
+      height: 100%;
+      transform: translateY(0);
+      opacity: 1;
+      transition: opacity 0.35s, transform 0.35s;
+    }
+  }
 
   &:hover:not(.disabled) {
     background: rgba(134, 151, 255, 0.1);
@@ -78,7 +104,16 @@ const ItemWrapper = styled.div`
     cursor: not-allowed;
   }
   &.error {
-    opacity: 0.6;
+    & > * {
+      opacity: 0.6;
+    }
+    & > .cexDisabledTips {
+      opacity: 0;
+
+      &.active {
+        opacity: 1;
+      }
+    }
   }
 
   .info {
@@ -97,13 +132,15 @@ const ItemWrapper = styled.div`
     display: flex;
     align-items: center;
     gap: 6px;
-    .toToken {
-      color: #fff;
+    .receiveNum {
+      max-width: 210px;
       display: inline-block;
-      max-width: 200px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      .toToken {
+        color: #fff;
+      }
     }
   }
   .no-price {
@@ -122,17 +159,6 @@ const ItemWrapper = styled.div`
   }
 `;
 
-export type QuoteProvider = {
-  name: string;
-  error?: boolean;
-  quote: QuoteResult | null;
-  shouldApproveToken: boolean;
-  shouldTwoStepApprove: boolean;
-  halfBetterRate?: string;
-  quoteWarning?: string;
-  gasPrice?: number;
-};
-
 export interface QuoteItemProps {
   quote: QuoteResult | null;
   name: string;
@@ -147,7 +173,6 @@ export interface QuoteItemProps {
   userAddress: string;
   slippage: string;
   fee: string;
-  onClick: (provider: QuoteProvider) => void;
 }
 
 const DexQuoteItem = (
@@ -155,7 +180,6 @@ const DexQuoteItem = (
     preExecResult: QuotePreExecResultInfo;
   }
 ) => {
-  // const { name, logo, error, symbol, amount, diff, disabled } = props;
   const {
     quote,
     name: dexId,
@@ -170,7 +194,6 @@ const DexQuoteItem = (
     isBestQuote,
     slippage,
     fee,
-    onClick,
     preExecResult,
   } = props;
   const dexInfo = useMemo(() => DEX[dexId as keyof typeof DEX], [dexId]);
@@ -190,6 +213,8 @@ const DexQuoteItem = (
     payToken,
     receiveToken,
   });
+
+  const updateActiveQuoteProvider = useSetAtom(activeProviderOriginAtom);
 
   const {
     value: halfAmountQuotePreExecTxResult,
@@ -260,7 +285,7 @@ const DexQuoteItem = (
   ]);
 
   const [middleContent, rightContent, disabled] = useMemo(() => {
-    let center: React.ReactNode = <div className="ml-[66px]">-</div>;
+    let center: React.ReactNode = <div className="">-</div>;
     let right: React.ReactNode = '';
     let disable = false;
 
@@ -281,12 +306,12 @@ const DexQuoteItem = (
 
       const s = formatAmount(receivedTokeAmountBn.toString(10));
       center = (
-        <>
+        <span className="receiveNum" title={`${s} ${receiveToken.symbol}`}>
           <span className="toToken" title={s}>
             {s}
           </span>{' '}
           {receiveToken.symbol}
-        </>
+        </span>
       );
 
       right = (
@@ -298,14 +323,16 @@ const DexQuoteItem = (
       );
     }
     if (quote?.toTokenAmount && !preExecResult) {
-      center = <div className="ml-[66px]">-</div>;
-      right = <div className="text-opacity-60">Unable to execute</div>;
+      center = <div className="">-</div>;
+      right = (
+        <div className="text-opacity-60">Fail to simulate transaction</div>
+      );
       disable = true;
     }
 
     if (!isSdkDataPass) {
       disable = true;
-      center = <div className="ml-[66px]">-</div>;
+      center = <div className="">-</div>;
       right = (
         <div className="text-opacity-60">Security verification failed</div>
       );
@@ -339,10 +366,15 @@ const DexQuoteItem = (
         preExecResult?.swapPreExecTx?.balance_change.receive_token_list[0]
           ?.amount || 0
       )
-      .div(receivedTokeAmountBn)
-      .times(100);
+      .div(receivedTokeAmountBn);
 
-    return diff.gt(0.01) ? diff.toPrecision(2) : '';
+    const diffPercent = diff.times(100);
+
+    return diffPercent.gt(0.01)
+      ? `${diffPercent.toPrecision(2)}% (${formatAmount(diff.toString(10))} ${
+          receiveToken.symbol
+        })`
+      : '';
   }, [
     chain,
     payToken.id,
@@ -351,6 +383,7 @@ const DexQuoteItem = (
     quote?.toTokenDecimals,
     receiveToken.decimals,
     receiveToken.id,
+    receiveToken.symbol,
   ]);
 
   const CheckIcon = useCallback(() => {
@@ -368,7 +401,7 @@ const DexQuoteItem = (
 
   const handleClick = useCallback(() => {
     if (active || disabled) return;
-    onClick({
+    updateActiveQuoteProvider({
       name: dexId,
       quote,
       gasPrice: preExecResult?.gasPrice,
@@ -381,7 +414,7 @@ const DexQuoteItem = (
   }, [
     active,
     disabled,
-    onClick,
+    updateActiveQuoteProvider,
     dexId,
     quote,
     preExecResult,
@@ -392,7 +425,8 @@ const DexQuoteItem = (
   useDebounce(
     () => {
       if (active) {
-        onClick({
+        updateActiveQuoteProvider((e) => ({
+          ...e,
           name: dexId,
           quote,
           gasPrice: preExecResult?.gasPrice,
@@ -401,7 +435,7 @@ const DexQuoteItem = (
           error: !preExecResult,
           halfBetterRate: halfBetterRateString,
           quoteWarning,
-        });
+        }));
       }
     },
     300,
@@ -410,7 +444,7 @@ const DexQuoteItem = (
       halfBetterRateString,
       active,
       dexId,
-      onClick,
+      updateActiveQuoteProvider,
       quote,
       preExecResult,
     ]
@@ -427,7 +461,7 @@ const DexQuoteItem = (
         {!!preExecResult?.shouldApproveToken && (
           <Tooltip
             overlayClassName="rectangle max-w-[300px]"
-            title="Token is not approved for this aggregator"
+            title="Need to approve token before swap"
           >
             <img src={ImgLock} className="w-14 h-14" />
           </Tooltip>
@@ -452,12 +486,14 @@ const CexQuoteItem = (props: {
   const dexInfo = useMemo(() => CEX[name as keyof typeof CEX], [name]);
 
   const [middleContent, rightContent] = useMemo(() => {
-    let center: React.ReactNode = <div className="ml-[66px]">-</div>;
+    let center: React.ReactNode = <div className="">-</div>;
     let right: React.ReactNode = '';
     let disable = false;
 
     if (!data?.receive_token?.amount) {
-      right = <div className="text-opacity-60">Unable to fetch the price</div>;
+      right = (
+        <div className="text-opacity-60">This token pair is not supported</div>
+      );
       disable = true;
     }
 
@@ -471,12 +507,12 @@ const CexQuoteItem = (props: {
         .times(100);
       const s = formatAmount(receiveToken.amount.toString(10));
       center = (
-        <>
+        <span className="receiveNum" title={`${s} ${receiveToken.symbol}`}>
           <span className="toToken" title={s}>
             {s}
           </span>{' '}
           {receiveToken.symbol}
-        </>
+        </span>
       );
 
       right = (
@@ -491,14 +527,23 @@ const CexQuoteItem = (props: {
     return [center, right, disable];
   }, [data?.receive_token, bestAmount, isBestQuote]);
 
-  const handleClick = () => {
-    message.info({
-      className: 'text-[15px] font-medium ',
-      icon: <IconRcTip className="mr-8 -mb-4 text-20" />,
-      content:
-        'CEX price is for reference only. Cannot be used for direct trading now.',
+  const [disabledTips, setDisabledTips] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout>();
+
+  const handleClick = useCallback(() => {
+    setDisabledTips((e) => {
+      if (!e) {
+        clearTimeout(timerRef.current);
+        timerRef.current = setTimeout(() => {
+          setDisabledTips(false);
+        }, 3000);
+        return true;
+      }
+      return e;
     });
-  };
+  }, []);
+
+  useEffect(() => () => clearTimeout(timerRef.current), []);
 
   return (
     <ItemWrapper
@@ -511,6 +556,14 @@ const CexQuoteItem = (props: {
       </div>
       <div className="price">{middleContent}</div>
       <div className="diff">{rightContent}</div>
+
+      <div className={clsx('cexDisabledTips', disabledTips && 'active')}>
+        <IconRcTip className="text-14" />
+        <span>
+          CEX price is for reference only. Cannot be used for direct trading
+          now.
+        </span>
+      </div>
     </ItemWrapper>
   );
 };

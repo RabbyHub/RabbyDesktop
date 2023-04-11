@@ -318,7 +318,7 @@ export type RabbyXMethod = {
       spender: string;
       pay_token_id: string;
       unlimited: boolean;
-      gasPrice: number;
+      gasPrice?: number;
       shouldTwoStepApprove: boolean;
     },
     $ctx?: unknown

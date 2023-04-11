@@ -287,7 +287,7 @@ export const halfBetterRate = (
   if (
     full.balance_change.success &&
     half.balance_change.success &&
-    half.balance_change.receive_token_list[0].amount &&
+    half.balance_change.receive_token_list[0]?.amount &&
     full.balance_change.receive_token_list[0]?.amount
   ) {
     const halfReceive = new BigNumber(
