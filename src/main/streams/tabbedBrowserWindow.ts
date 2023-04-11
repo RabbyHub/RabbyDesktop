@@ -249,9 +249,9 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
 
   const currentUrl = evt.sender.getURL();
   const findResult = findDappsByOrigin(dappOrigin);
-
-  if (findResult.dapp) {
-    dappOrigin = makeDappHttpOrigin(findResult.dapp.origin);
+  const isOpenAsHttp = dappTypeInfo?.type === 'ipfs';
+  if (isOpenAsHttp && findResult.dapp) {
+    dappOrigin = makeDappHttpOrigin(dappTypeInfo);
   }
 
   const openResult = await safeOpenURL(dappOrigin, {
