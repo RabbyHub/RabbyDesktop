@@ -1,7 +1,19 @@
 
-v0.13.1 / 2023-04-08
+v0.14.0 / 2023-04-12
 ====================
 
+  * feat: revert revert ipfs (#352)
+  * feat: add crash reporter in main process. (#356)
+  * fix: dapp binding status will reset (#355)
+  * fix(swap): disable submit (#354)
+  * chore: RabbyX-v0.78.1-839d419 (#353)
+  * feat: swap (#351)
+  * feat: disconnect (#350)
+
+v0.13.1-prod / 2023-04-08
+=========================
+
+  * Release v0.13.1-prod
   * feat: revert ipfs (#348)
   * Merge remote-tracking branch 'origin/publish/prod' into dev
   * fix: not display change for unsupport chain (#341)
