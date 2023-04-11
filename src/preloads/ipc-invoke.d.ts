@@ -207,6 +207,17 @@ type ChannelInvokePayload = {
       result: string;
     };
   };
+  'check-trezor-like-cannot-use': {
+    send: [openType: IHardwareConnectPageType];
+    response: {
+      reasons: ITrezorLikeCannotUserReason[];
+      couldContinue: boolean;
+    };
+  };
+  'app-relaunch': {
+    send: [reason: 'trezor-like-used'];
+    response: void;
+  };
   [`__internal_rpc:rabbyx-rpc:query`]: {
     send: [query: Omit<IRabbyxRpcQuery, 'rpcId'>];
     response: {
@@ -220,6 +231,17 @@ type ChannelInvokePayload = {
       result: boolean;
       error?: string;
     };
+  };
+  'download-ipfs': {
+    send: [ipfsString: string];
+    response: {
+      error?: string | null;
+      success?: boolean;
+    };
+  };
+  'cancel-download-ipfs': {
+    send: [];
+    response: void;
   };
 } & RabbyxInvokePayload;
 

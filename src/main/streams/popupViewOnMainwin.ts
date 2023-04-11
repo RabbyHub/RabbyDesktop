@@ -479,7 +479,7 @@ const { handler: handler2 } = onIpcMainEvent(
         views = list;
         break;
       case 'main-window':
-        views = [hash.mainWindow];
+        views = hash.mainWindow ? [hash.mainWindow] : [];
         break;
       case 'dapps-management':
         views = [hash.dappsManagement];

@@ -14,11 +14,19 @@ import { safeParse, shortStringify } from '@/isomorphic/json';
 import { ensurePrefix, unPrefix } from '@/isomorphic/string';
 import { storeLog } from './log';
 
+let gAppUserDataPath = '';
 export function getAppUserDataPath() {
-  return app
-    .getPath('userData')
-    .replace('Electron', APP_NAME)
-    .replace('rabby-desktop', APP_NAME);
+  if (!gAppUserDataPath) {
+    gAppUserDataPath = app
+      .getPath('userData')
+      .replace('Electron', APP_NAME)
+      .replace('rabby-desktop', APP_NAME);
+  }
+  return gAppUserDataPath;
+}
+
+function getStoreRootPath() {
+  return path.resolve(getAppUserDataPath(), './local_data');
 }
 
 export function getAppInPkgDir() {
@@ -68,7 +76,7 @@ export function makeStore<T extends Record<string, any>>(
             default: false,
           },
         } as StoreOptions<T>['schema'],
-        cwd: path.resolve(getAppUserDataPath(), './local_data'),
+        cwd: getStoreRootPath(),
         encryptionKey: options.encryptionKey || baseName,
         fileExtension: 'dat',
       }) as AppStore<T>)

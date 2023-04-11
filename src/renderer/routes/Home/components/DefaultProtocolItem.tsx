@@ -25,6 +25,7 @@ import {
   isSameDomain,
   removeProtocolFromUrl,
 } from '@/renderer/utils/url';
+import { formatDappURLToShow } from '@/isomorphic/dapp';
 import { fetchProtocolDappsBinding } from '../../../ipcRequest/dapps';
 import * as Template from '../templates';
 import ScrollTopContext from './scrollTopContext';
@@ -132,6 +133,9 @@ const ProtocolHeader = styled.div`
         font-size: 12px;
         line-height: 14px;
         color: rgba(255, 255, 255, 0.5);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 350px;
       }
     }
     &::after {
@@ -317,7 +321,11 @@ const DefaultProtocolItem = ({
             {hasBinded && (
               <div className="protocol-bind">
                 <span className="protocol-dapp">
-                  ({removeProtocolFromUrl(bindUrl)})
+                  (
+                  {/^https:\/\//.test(bindUrl)
+                    ? removeProtocolFromUrl(bindUrl)
+                    : formatDappURLToShow(bindUrl)}
+                  )
                 </span>
               </div>
             )}

@@ -57,31 +57,34 @@ export function useSidebarDapps() {
       );
     }, []),
     onOpenDapp: useCallback(
-      (dappOrigin: string) => {
+      async (dappOrigin: string) => {
         const foundDapp = !dappOrigin
           ? null
           : allDapps.find((dapp) => {
               return dapp.origin === dappOrigin;
             });
 
-        if (activeTab && foundDapp) {
-          toggleLoadingView({
-            type: 'show',
-            tabId: activeTab.id!,
-            tabURL: dappOrigin,
-          });
-        }
-
-        window.rabbyDesktop.ipcRenderer
+        return window.rabbyDesktop.ipcRenderer
           .invoke('safe-open-dapp-tab', dappOrigin)
-          .then(({ openType }) => {
-            if (openType === 'create-tab') {
+          .then((res) => {
+            if (res.shouldNavTabOnClient) {
+              if (activeTab && foundDapp) {
+                toggleLoadingView({
+                  type: 'show',
+                  tabId: activeTab.id!,
+                  tabURL: dappOrigin,
+                });
+              }
+            }
+            if (res.openType === 'create-tab') {
               matomoRequestEvent({
                 category: 'My Dapp',
                 action: 'Visit Dapp',
                 label: dappOrigin,
               });
             }
+
+            return res;
           });
       },
       [activeTab, allDapps]

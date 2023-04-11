@@ -1,5 +1,5 @@
 import { atom, useAtom } from 'jotai';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect } from 'react';
 import { toggleMainWinTabAnimating } from '../ipcRequest/mainwin';
 import { useIsAnimating } from './useSidebar';
 
@@ -32,6 +32,25 @@ export function useSettings() {
         return {
           ...(prev as IDesktopAppState & object),
           enableContentProtected: result.state.enableContentProtected,
+        };
+      });
+    },
+    [setDesktopAppState]
+  );
+
+  const toggleEnableIPFSDapp = useCallback(
+    async (nextVal: boolean) => {
+      const result = await window.rabbyDesktop.ipcRenderer.invoke(
+        'put-desktopAppState',
+        {
+          enableSupportIpfsDapp: nextVal,
+        }
+      );
+
+      setDesktopAppState((prev) => {
+        return {
+          ...(prev as IDesktopAppState & object),
+          enableSupportIpfsDapp: result.state.enableSupportIpfsDapp,
         };
       });
     },
@@ -73,6 +92,7 @@ export function useSettings() {
     isAnimating,
     settings: {
       enableContentProtected: desktopAppState?.enableContentProtected !== false,
+      enableSupportIpfsDapp: !!desktopAppState?.enableSupportIpfsDapp,
       sidebarCollapsed: Boolean(
         desktopAppState?.sidebarCollapsed ??
           JSON.parse(localStorage.getItem('sidebarCollapsed') || 'false')
@@ -80,6 +100,7 @@ export function useSettings() {
     },
     fetchState,
     toggleEnableContentProtection,
+    toggleEnableIPFSDapp,
     toggleSidebarCollapsed,
   };
 }

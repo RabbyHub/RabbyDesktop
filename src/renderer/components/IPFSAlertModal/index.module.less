@@ -1,0 +1,45 @@
+.alertModal {
+  :global {
+    .ant-modal-body {
+      padding: 32px !important;
+    }
+    .ant-modal-close-x {
+      padding: 16px;
+    }
+  }
+
+  &Title {
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 22px;
+    text-align: center;
+    color: #ffffff;
+    margin-bottom: 20px;
+  }
+
+  &Content {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 22px;
+    color: #ffffff;
+    margin-bottom: 40px;
+    text-align: center;
+  }
+
+  &Footer {
+    text-align: center;
+  }
+
+  &Btn {
+    width: 180px;
+    height: 44px;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 18px;
+  }
+}
+
+.alertModalBtn + .alertModalBtn {
+  margin-left: 14px;
+}

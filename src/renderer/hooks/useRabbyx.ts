@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CHAINS, CHAINS_LIST } from '@debank/common';
 import { atom, useAtom } from 'jotai';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
+import { formatDappHttpOrigin } from '@/isomorphic/dapp';
 import { walletController } from '../ipcRequest/rabbyx';
 import { useMessageForwarded } from './useViewsMessage';
 import { getLastOpenOriginByOrigin } from '../ipcRequest/dapps';
@@ -135,9 +136,14 @@ export const useCurrentConnectedSite = ({
       return;
     }
     getLastOpenOriginByOrigin(origin).then((lastOpenOrigin) => {
-      setCurrentOrigin(lastOpenOrigin);
+      setCurrentOrigin(lastOpenOrigin?.toLowerCase());
     });
   }, [origin, tab?.url]);
 
-  return connectedSiteMap?.[currentOrigin] || null;
+  const httpOrigin = useMemo(
+    () => formatDappHttpOrigin(currentOrigin),
+    [currentOrigin]
+  );
+
+  return connectedSiteMap?.[httpOrigin] || null;
 };

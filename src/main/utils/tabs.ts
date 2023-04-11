@@ -24,7 +24,7 @@ export function checkOpenAction(
     }
   | {
       action: 'open-hardware-connect';
-      type: 'onekey' | 'trezor';
+      type: IHardwareConnectPageType;
       pageURL: string;
     } {
   const isFromExt = opts.fromUrl.startsWith('chrome-extension://');

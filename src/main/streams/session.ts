@@ -1,4 +1,4 @@
-import { promises as fs } from 'fs';
+import fs from 'fs';
 import path from 'path';
 
 import { app, protocol, session, shell } from 'electron';
@@ -8,14 +8,10 @@ import { isRabbyXPage } from '@/isomorphic/url';
 import { trimWebContentsUserAgent } from '@/isomorphic/string';
 import {
   IS_RUNTIME_PRODUCTION,
+  PROTOCOL_IPFS,
   RABBY_INTERNAL_PROTOCOL,
 } from '../../isomorphic/constants';
-import {
-  getAssetPath,
-  getRendererPath,
-  getShellPageUrl,
-  preloadPath,
-} from '../utils/app';
+import { getAssetPath, getShellPageUrl, preloadPath } from '../utils/app';
 import { getBindLog } from '../utils/log';
 import { fromMainSubject, valueToMainSubject } from './_init';
 import {
@@ -29,23 +25,30 @@ import {
 import { firstEl } from '../../isomorphic/array';
 import {
   getRabbyExtId,
+  getSessionInsts,
   getWebuiExtId,
-  onMainWindowReady,
+  pushChangesToZPopupLayer,
 } from '../utils/stream-helpers';
 import { checkOpenAction } from '../utils/tabs';
-import {
-  createTmpEmptyBrowser,
-  getWindowFromWebContents,
-  switchToBrowserTab,
-} from '../utils/browser';
-import {
-  rewriteSessionWebRequestHeaders,
-  supportHmrOnDev,
-} from '../utils/webRequest';
+import { getWindowFromWebContents, switchToBrowserTab } from '../utils/browser';
+import { rewriteSessionWebRequestHeaders } from '../utils/webRequest';
 import { checkProxyViaBrowserView, setSessionProxy } from '../utils/appNetwork';
-import { getAppProxyConf } from '../store/desktopApp';
-import { createTrezorLikeConnectPageWindow } from '../utils/hardwareConnect';
+import {
+  desktopAppStore,
+  getAppProxyConf,
+  isEnableSupportIpfsDapp,
+} from '../store/desktopApp';
+import {
+  createTrezorLikeConnectPageWindow,
+  stopOpenTrezorLikeWindow,
+} from '../utils/hardwareConnect';
 import { getBlockchainExplorers } from '../store/dynamicConfig';
+import { appInterpretors, registerSessionProtocol } from '../utils/protocol';
+import {
+  emitIpcMainEvent,
+  onIpcMainInternalEvent,
+} from '../utils/ipcMainEvents';
+import { rabbyxQuery } from './rabbyIpcQuery/_base';
 
 const sesLog = getBindLog('session', 'bgGrey');
 
@@ -53,14 +56,14 @@ const manifestExists = async (dirPath: string) => {
   if (!dirPath) return false;
   const manifestPath = path.join(dirPath, 'manifest.json');
   try {
-    return (await fs.stat(manifestPath)).isFile();
+    return fs.statSync(manifestPath).isFile();
   } catch {
     return false;
   }
 };
 
 async function loadExtensions(sess: Electron.Session, extensionsPath: string) {
-  const subDirectories = await fs.readdir(extensionsPath, {
+  const subDirectories = fs.readdirSync(extensionsPath, {
     withFileTypes: true,
   });
 
@@ -76,7 +79,7 @@ async function loadExtensions(sess: Electron.Session, extensionsPath: string) {
           return extPath;
         }
 
-        const extSubDirs = await fs.readdir(extPath, {
+        const extSubDirs = fs.readdirSync(extPath, {
           withFileTypes: true,
         });
 
@@ -146,77 +149,75 @@ function checkProxyValidOnBootstrap() {
 
 protocol.registerSchemesAsPrivileged([
   {
-    scheme: 'rabby-internal',
+    scheme: RABBY_INTERNAL_PROTOCOL.slice(0, -1),
     privileges: { standard: true, supportFetchAPI: true },
   },
+  {
+    scheme: PROTOCOL_IPFS.slice(0, -1),
+    privileges: { standard: true, supportFetchAPI: true },
+  },
+  // {
+  //   scheme: 'file:'.slice(0, -1),
+  //   privileges: { standard: true, corsEnabled: false, allowServiceWorkers: true, supportFetchAPI: true },
+  // },
 ]);
 
 firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   // sub.unsubscribe();
-  const sessionIns = session.defaultSession;
-
-  if (
-    !sessionIns.protocol.registerFileProtocol(
-      RABBY_INTERNAL_PROTOCOL.slice(0, -1),
-      (request, callback) => {
-        const pathnameWithQuery = request.url.slice(
-          `${RABBY_INTERNAL_PROTOCOL}//`.length
-        );
-
-        const pathname = pathnameWithQuery.split('?')?.[0] || '';
-        const pathnameWithoutHash = pathname.split('#')?.[0] || '';
-
-        if (pathnameWithoutHash.startsWith('assets/')) {
-          callback({
-            path: getAssetPath(pathnameWithoutHash.slice('assets/'.length)),
-          });
-        } else if (pathnameWithoutHash.startsWith('local/')) {
-          callback({
-            path: getRendererPath(pathnameWithoutHash.slice('local/'.length)),
-          });
-        } else {
-          // TODO: give one 404 page
-          callback({
-            data: 'Not found',
-            mimeType: 'text/plain',
-          });
-        }
-      }
-    )
-  ) {
-    if (!IS_RUNTIME_PRODUCTION) {
-      throw new Error(
-        `[initSession] Failed to register protocol ${RABBY_INTERNAL_PROTOCOL}`
-      );
-    } else {
-      console.error(`Failed to register protocol`);
-    }
-  }
+  const mainSession = session.defaultSession;
 
   const dappSafeViewSession = session.fromPartition('dappSafeView');
   const checkingViewSession = session.fromPartition('checkingView');
   const checkingProxySession = session.fromPartition('checkingProxy');
-  valueToMainSubject('sessionReady', {
-    mainSession: sessionIns,
+
+  const allSessions = {
+    mainSession,
     dappSafeViewSession,
     checkingViewSession,
     checkingProxySession,
-  });
-  const allSessions = [
-    sessionIns,
-    dappSafeViewSession,
-    checkingViewSession,
-    checkingProxySession,
-  ];
-  allSessions.forEach((sess) => {
+  };
+
+  valueToMainSubject('sessionReady', allSessions);
+  Object.entries(allSessions).forEach(([name, sess]) => {
     // Remove Electron to closer emulate Chrome's UA
     const userAgent = trimWebContentsUserAgent(sess.getUserAgent());
     sess.setUserAgent(userAgent);
 
-    rewriteSessionWebRequestHeaders(sess);
+    rewriteSessionWebRequestHeaders(sess, name as keyof IAppSession);
   });
 
-  app.userAgentFallback = trimWebContentsUserAgent(sessionIns.getUserAgent());
+  registerSessionProtocol(
+    [
+      { session: mainSession, name: 'mainSession' },
+      {
+        session: checkingProxySession,
+        name: 'checkingProxySession',
+      },
+      {
+        session: checkingViewSession,
+        name: 'checkingViewSession',
+      },
+    ],
+    appInterpretors['rabby-internal:']
+  );
+  registerSessionProtocol(
+    [
+      { session: mainSession, name: 'mainSession' },
+      {
+        session: checkingProxySession,
+        name: 'checkingProxySession',
+      },
+      {
+        session: checkingViewSession,
+        name: 'checkingViewSession',
+      },
+    ],
+    appInterpretors['rabby-ipfs:']
+  );
+
+  emitIpcMainEvent('__internal_main:app:enable-ipfs-support', true);
+
+  app.userAgentFallback = trimWebContentsUserAgent(mainSession.getUserAgent());
 
   // must after sessionReady
   const result = checkProxyValidOnBootstrap();
@@ -224,7 +225,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   const realProxy = { ...result.appProxyConf, applied: false };
 
   if (result.shouldApplyProxyOnBoot) {
-    setSessionProxy(sessionIns, realProxy);
+    setSessionProxy(mainSession, realProxy);
     setSessionProxy(dappSafeViewSession, realProxy);
     setSessionProxy(checkingViewSession, realProxy);
 
@@ -238,13 +239,12 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   }
 
   valueToMainSubject('appRuntimeProxyConf', realProxy);
-  supportHmrOnDev(sessionIns);
 
-  sessionIns.setPreloads([preloadPath]);
+  mainSession.setPreloads([preloadPath]);
 
   // @notice: make sure all customized plugins loaded after ElectronChromeExtensions initialized
   const chromeExtensions = new ElectronChromeExtensions({
-    session: sessionIns,
+    session: mainSession,
 
     preloadPath,
 
@@ -274,9 +274,21 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
 
       switch (actionInfo.action) {
         case 'open-hardware-connect': {
-          const { window, tab } = await createTrezorLikeConnectPageWindow(
-            actionInfo.pageURL
-          );
+          const stopResult = stopOpenTrezorLikeWindow({
+            openType: actionInfo.type,
+          });
+
+          if (stopResult.stopped) {
+            stopResult.nextFunc?.();
+            return false;
+          }
+
+          const { window, tab, asyncDestroyWindowIfNeed } =
+            await createTrezorLikeConnectPageWindow(actionInfo.pageURL, {
+              openType: actionInfo.type,
+            });
+
+          asyncDestroyWindowIfNeed();
 
           return [tab.view!.webContents, window];
         }
@@ -390,13 +402,33 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
     },
   });
 
-  const webuiExtension = await sessionIns.loadExtension(
+  const webuiExtension = await mainSession.loadExtension(
     getAssetPath('desktop_shell'),
     { allowFileAccess: true }
   );
   valueToMainSubject('webuiExtensionReady', webuiExtension);
 
-  await loadExtensions(sessionIns!, getAssetPath('chrome_exts'));
+  await loadExtensions(mainSession!, getAssetPath('chrome_exts'));
 
   valueToMainSubject('electronChromeExtensionsReady', chromeExtensions);
 });
+
+let ipfsSupported = false;
+onIpcMainInternalEvent(
+  '__internal_main:app:enable-ipfs-support',
+  async (enabled) => {
+    if (!isEnableSupportIpfsDapp()) return;
+
+    if (ipfsSupported) return;
+    ipfsSupported = true;
+
+    const { mainSession } = await getSessionInsts();
+
+    registerSessionProtocol(
+      { session: mainSession, name: 'mainSession' },
+      appInterpretors['http:']
+    );
+
+    // mainSession.protocol.uninterceptProtocol('http');
+  }
+);

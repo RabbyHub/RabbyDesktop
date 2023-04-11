@@ -6,16 +6,20 @@ import LRUCache from 'lru-cache';
 import { BrowserWindow } from 'electron';
 import { waitForMS } from '@/isomorphic/date';
 import { pickFavIconURLFromMeta } from '@/isomorphic/html';
+import { PROTOCOL_IPFS } from '@/isomorphic/constants';
+import { checkoutDappURL } from '@/isomorphic/dapp';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { AxiosElectronAdapter } from './axios';
 import { checkUrlViaBrowserView, CHROMIUM_NET_ERR_DESC } from './appNetwork';
 import { createPopupWindow } from './browser';
+import { getSessionInsts } from './stream-helpers';
 
 const DFLT_TIMEOUT = 8 * 1e3;
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const enum DETECT_ERR_CODES {
   NOT_HTTPS = 'NOT_HTTPS',
+  NOT_IPFS = 'NOT_IPFS',
   INACCESSIBLE = 'INACCESSIBLE',
   REDIRECTED_OUT = 'REDIRECTED_OUT',
   HTTPS_CERT_INVALID = 'HTTPS_CERT_INVALID',
@@ -133,6 +137,109 @@ export async function safeCapturePage(
   };
 }
 
+export async function detectIPFSDapp(
+  ipfsDappPath: string,
+  opts: {
+    existedDapps: IDapp[];
+  }
+): Promise<IDappsDetectResult<DETECT_ERR_CODES>> {
+  const inputOrigin = checkoutDappURL(ipfsDappPath).dappID;
+
+  const { urlInfo: dappOriginInfo, hostWithoutTLD: inputCoreName } =
+    canoicalizeDappUrl(inputOrigin);
+  if (dappOriginInfo?.protocol !== PROTOCOL_IPFS) {
+    return {
+      data: null,
+      error: {
+        type: DETECT_ERR_CODES.NOT_IPFS,
+        message: 'IPFS path should start with ipfs: or /ipfs/',
+      },
+    };
+  }
+
+  // const ipfsService = await getIpfsService();
+  // const dappEntry = ipfsService.resolveFile(ipfsDappPath);
+
+  // if (!fs.existsSync(dappEntry) || !fs.statSync(dappEntry).isDirectory()) {
+  //   return {
+  //     data: null,
+  //     error: {
+  //       type: DETECT_ERR_CODES.INACCESSIBLE,
+  //       message: 'IPFS path is not a directory',
+  //     },
+  //   };
+  // }
+
+  const formattedTargetURL = urlFormat(dappOriginInfo);
+  let fallbackFavicon: string | undefined;
+  let targetMetadata: ISiteMetaData | undefined;
+  const { mainSession } = await getSessionInsts();
+  const checkResult = await checkUrlViaBrowserView(formattedTargetURL, {
+    session: mainSession,
+    onMetaDataUpdated: (meta) => {
+      fallbackFavicon = pickFavIconURLFromMeta(meta);
+
+      targetMetadata = meta;
+    },
+    timeout: DFLT_TIMEOUT,
+  });
+
+  if (!checkResult.valid) {
+    if (checkResult.isTimeout) {
+      return {
+        data: null,
+        error: {
+          type: DETECT_ERR_CODES.TIMEOUT,
+          message:
+            'Access to Dapp timed out. Please check your network and retry.',
+        },
+      };
+    }
+
+    return {
+      data: null,
+      error: {
+        type: DETECT_ERR_CODES.INACCESSIBLE,
+        message: 'The Domain cannot be accessed.',
+      },
+    };
+  }
+
+  const { origin: finalOrigin } = canoicalizeDappUrl(checkResult.finalUrl);
+
+  const repeatedInputDapp = opts.existedDapps.find(
+    (item) => item.origin.toLowerCase() === inputOrigin.toLowerCase()
+  );
+  const repeatedFinalDapp = opts.existedDapps.find(
+    (item) => item.origin.toLowerCase() === finalOrigin.toLowerCase()
+  );
+
+  const data: IDappsDetectResult['data'] = {
+    inputOrigin,
+    isInputExistedDapp: !!repeatedInputDapp,
+    finalOrigin,
+    isFinalExistedDapp: !!repeatedFinalDapp,
+    icon: null,
+    recommendedAlias:
+      targetMetadata?.og?.site_name ||
+      targetMetadata?.og?.title ||
+      targetMetadata?.twitter_card?.site ||
+      targetMetadata?.twitter_card?.title ||
+      targetMetadata?.title ||
+      inputCoreName,
+    faviconUrl:
+      fallbackFavicon ||
+      targetMetadata?.og?.image ||
+      targetMetadata?.twitter_card?.image,
+    faviconBase64: undefined,
+  };
+
+  return {
+    data,
+    error: undefined,
+  };
+}
+
 export async function detectDapp(
   dappsUrl: string,
   opts: {
@@ -140,7 +247,6 @@ export async function detectDapp(
     proxyOnGrab?: AxiosProxyConfig;
   }
 ): Promise<IDappsDetectResult<DETECT_ERR_CODES>> {
-  const { proxyOnGrab } = opts;
   // TODO: process void url;
   const { origin: inputOrigin, hostWithoutTLD: inputCoreName } =
     canoicalizeDappUrl(dappsUrl);

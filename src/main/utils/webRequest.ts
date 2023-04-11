@@ -1,51 +1,104 @@
-import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import { IS_RUNTIME_PRODUCTION, LOCALIPFS_BRAND } from '@/isomorphic/constants';
 import { trimWebContentsUserAgent } from '@/isomorphic/string';
-// import { arraify } from '@/isomorphic/array';
 
-export function supportHmrOnDev(session: Electron.Session) {
+type ISendHeadersListener = Parameters<
+  Electron.Session['webRequest']['onBeforeSendHeaders']
+>[0] &
+  object;
+type HoF = (ctx: {
+  details: Parameters<ISendHeadersListener>[0];
+  retReqHeaders: typeof ctx.details.requestHeaders;
+}) => void;
+
+function findFirstHeader(headers: Record<string, any>, key: string) {
+  return Object.keys(headers).find(
+    (k) => k.toLowerCase() === key.toLowerCase()
+  );
+}
+
+function supportHmrOnDev(): HoF {
   // TODO: apply it on dev mode for dev-server
-  if (IS_RUNTIME_PRODUCTION) return;
+  return (ctx) => {
+    if (IS_RUNTIME_PRODUCTION) return;
 
-  session.webRequest.onBeforeSendHeaders((_details, callback) => {
-    let reqHeaders = _details.requestHeaders;
+    const retReqHeaders = ctx.retReqHeaders;
+
     if (
-      _details.url.startsWith('ws://') &&
-      reqHeaders.Origin === 'rabby-internal://local'
+      ctx.details.url.startsWith('ws://') &&
+      retReqHeaders.Origin === 'rabby-internal://local'
     ) {
-      reqHeaders = { ..._details.requestHeaders };
-
-      const urlInfo = new URL(_details.url);
+      const urlInfo = new URL(ctx.details.url);
       // leave here for debug
-      // console.debug('[debug] --onBeforeSendHeaders-- before', reqHeaders)
-      reqHeaders.Origin = `http://${urlInfo.host}`;
+      // console.debug('[debug] --onBeforeSendHeaders-- before', retReqHeaders)
+      retReqHeaders.Origin = `http://${urlInfo.host}`;
       // leave here for debug
       // console.debug('[debug] --onBeforeSendHeaders-- before', reqHeaders)
     }
-    callback({
-      cancel: false,
-      requestHeaders: reqHeaders,
-    });
-  });
+  };
 }
 
-export function rewriteSessionWebRequestHeaders(sess: Electron.Session) {
-  const fixedUserAgent = trimWebContentsUserAgent(sess.getUserAgent());
-  sess.webRequest.onBeforeSendHeaders((details, callback) => {
-    const requestHeaders = details.requestHeaders;
-    const uaKs = Object.keys(requestHeaders).filter(
+function supportModifyReqHeaders(fixedUserAgent: string): HoF {
+  return (ctx) => {
+    if (ctx.details.url.includes('local.ipfs.')) {
+      const uirK = findFirstHeader(
+        ctx.retReqHeaders,
+        'Upgrade-Insecure-Requests'
+      );
+
+      if (uirK) {
+        ctx.retReqHeaders[uirK] = '0';
+      }
+    }
+
+    const uaKs = Object.keys(ctx.retReqHeaders).filter(
       (k) => k.toLocaleLowerCase() === 'user-agent'
     );
     if (uaKs.length) {
       uaKs.forEach((uaK) => {
-        if (uaKs.length && requestHeaders[uaK]?.includes('Electron')) {
-          requestHeaders[uaK] = fixedUserAgent;
+        if (uaKs.length && ctx.retReqHeaders[uaK]?.includes('Electron')) {
+          ctx.retReqHeaders[uaK] = fixedUserAgent;
         }
       });
     } else {
-      requestHeaders['User-Agent'] = fixedUserAgent;
+      ctx.retReqHeaders['User-Agent'] = fixedUserAgent;
+    }
+  };
+}
+
+export function rewriteSessionWebRequestHeaders(
+  sess: Electron.Session,
+  sessionName?: keyof IAppSession
+) {
+  const handleHMR = supportHmrOnDev();
+
+  const fixedUserAgent = trimWebContentsUserAgent(sess.getUserAgent());
+  const handleModifyReqHeaders = supportModifyReqHeaders(fixedUserAgent);
+
+  sess.webRequest.onBeforeSendHeaders((details, callback) => {
+    const pipeCtx = {
+      details,
+      retReqHeaders: { ...details.requestHeaders },
+    };
+
+    handleModifyReqHeaders(pipeCtx);
+    if (sessionName === 'mainSession') {
+      handleHMR(pipeCtx);
     }
 
-    callback({ cancel: false, requestHeaders });
+    if (
+      details.url.includes(LOCALIPFS_BRAND) &&
+      Object.keys(pipeCtx.retReqHeaders).find(
+        (k) => k.toLocaleLowerCase() === 'upgrade-insecure-requests'
+      )
+    ) {
+      console.debug(
+        `[debug][${sessionName}] pipeCtx.retReqHeaders, details.url`,
+        pipeCtx.retReqHeaders,
+        details.url
+      );
+    }
+
+    callback({ cancel: false, requestHeaders: pipeCtx.retReqHeaders });
   });
 
   // // trim `Permissions-Policy: interest-cohort=()` for all responses
@@ -81,4 +134,28 @@ export function rewriteSessionWebRequestHeaders(sess: Electron.Session) {
 
   //   callback({});
   // });
+}
+
+/**
+ * @deprecated
+ */
+export function supportRewriteCORS(session: Electron.Session) {
+  session.webRequest.onBeforeSendHeaders((_details, callback) => {
+    let reqHeaders = _details.requestHeaders;
+    if (reqHeaders.Origin?.startsWith('rabby-ipfs://')) {
+      reqHeaders = { ..._details.requestHeaders };
+
+      const urlInfo = new URL(_details.url);
+      reqHeaders.Origin = `http://${urlInfo.host}`;
+    }
+
+    if (reqHeaders.Origin === 'rabby-ipfs://') {
+      reqHeaders.Origin = '*';
+    }
+
+    callback({
+      cancel: false,
+      requestHeaders: reqHeaders,
+    });
+  });
 }

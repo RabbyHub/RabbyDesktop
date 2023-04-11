@@ -211,6 +211,9 @@ onIpcMainEvent(
   }
 );
 
+onIpcMainEvent('__internal_rpc:app:reset-app', () => {
+  emitIpcMainEvent('__internal_main:app:reset-app');
+});
 const ResetDialogButtons = ['Cancel', 'Confirm'] as const;
 onIpcMainInternalEvent('__internal_main:app:reset-app', async () => {
   const cancleId = ResetDialogButtons.findIndex((x) => x === 'Cancel');
@@ -253,8 +256,15 @@ onIpcMainInternalEvent('__internal_main:app:reset-app', async () => {
     emitIpcMainEvent('__internal_main:app:relaunch');
   }
 });
-onIpcMainEvent('__internal_rpc:app:reset-app', () => {
-  emitIpcMainEvent('__internal_main:app:reset-app');
+handleIpcMainInvoke('app-relaunch', (_, reasonType) => {
+  switch (reasonType) {
+    case 'trezor-like-used': {
+      emitIpcMainEvent('__internal_main:app:relaunch');
+      break;
+    }
+    default:
+      break;
+  }
 });
 onIpcMainInternalEvent('__internal_main:app:relaunch', () => {
   if (IS_RUNTIME_PRODUCTION) {

@@ -28,6 +28,13 @@ import { RenameDappModal } from '@/renderer/components/ModalRenameDapp';
 import { DeleteDappModal } from '@/renderer/components/ModalDeleteDapp';
 import { pickVisibleFromZViewStates } from '@/renderer/utils/zviews';
 import { QueueModal } from '@/renderer/components/QueueModal/QueueModal';
+import {
+  IPFSAddFailedModal,
+  IPFSNoLodalModal,
+  IPFSVerifyFailedModal,
+  IPFSNotSupportedModal,
+} from '@/renderer/components/IPFSAlertModal';
+import { useTipCannotUseTrezorLike } from '@/renderer/hooks-shell/useZPopupEffects';
 import SwitchChainModal from '../../components/SwitchChainModal';
 
 import styles from './index.module.less';
@@ -72,6 +79,8 @@ function App() {
   usePopupViewInfo('z-popup', { enableTopViewGuard: true });
   useReactOnZPopupMessage();
 
+  useTipCannotUseTrezorLike();
+
   return (
     <>
       <SwitchChainModal />
@@ -84,6 +93,11 @@ function App() {
       <RenameDappModal />
       <DeleteDappModal />
       <QueueModal />
+      <ToastZPopupMessage />
+      <IPFSAddFailedModal />
+      <IPFSNoLodalModal />
+      <IPFSVerifyFailedModal />
+      <IPFSNotSupportedModal />
     </>
   );
 }

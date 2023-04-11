@@ -1,3 +1,4 @@
+import { isEnableSupportIpfsDapp } from '../store/desktopApp';
 import { createWindow } from '../streams/tabbedBrowserWindow';
 import { onMainWindowReady, pushChangesToZPopupLayer } from './stream-helpers';
 
@@ -34,13 +35,116 @@ function updateSubWindowRect(
 
   window.setBounds({ ...popupRect, x, y }, true);
 }
+
+const trezorLikeState = {
+  openedType: null as IHardwareConnectPageType | null,
+};
+export function getTrezorLikeCannotUse(openType: IHardwareConnectPageType) {
+  const reasons: ITrezorLikeCannotUserReason[] = [];
+
+  if (isEnableSupportIpfsDapp()) {
+    reasons.push({
+      reasonType: 'enabled-ipfs',
+      cannotUse: openType,
+    });
+  }
+
+  if (trezorLikeState.openedType && trezorLikeState.openedType !== openType) {
+    reasons.push({
+      reasonType: 'used-one',
+      haveUsed: trezorLikeState.openedType,
+      cannotUse: openType,
+    });
+  }
+
+  return reasons;
+}
+
+export function alertCannotUseDueTo(reason?: ITrezorLikeCannotUserReason) {
+  if (reason?.reasonType === 'enabled-ipfs') {
+    pushChangesToZPopupLayer({
+      'trezor-like-cannot-use': {
+        visible: true,
+        state: {
+          reasonType: 'enabled-ipfs',
+          cannotUse: reason.cannotUse,
+        },
+      },
+    });
+  } else if (reason?.reasonType === 'used-one') {
+    pushChangesToZPopupLayer({
+      'trezor-like-cannot-use': {
+        visible: true,
+        state: {
+          reasonType: reason.reasonType,
+          haveUsed: reason.haveUsed,
+          cannotUse: reason.cannotUse,
+        },
+      },
+    });
+  }
+}
+
+type IStopResult = {
+  stopped: boolean;
+  nextFunc: (() => void) | undefined;
+};
+export function stopOpenTrezorLikeWindow(options: {
+  openType: IHardwareConnectPageType;
+}): IStopResult {
+  const result: IStopResult = {
+    stopped: false,
+    nextFunc: undefined,
+  };
+
+  const reasons = getTrezorLikeCannotUse(options.openType);
+
+  if (trezorLikeState.openedType) {
+    const reason = reasons[0];
+    if (reason) {
+      result.stopped = true;
+      result.nextFunc = () => {
+        alertCannotUseDueTo(reason);
+      };
+    }
+  }
+
+  return result;
+}
+
+export function asyncDestroyWindowIfCannotUseTrezorLike(options: {
+  openType: IHardwareConnectPageType;
+  trezorLikeWindow: Electron.BrowserWindow;
+  timeoutVal?: number;
+}) {
+  const connWindow = options.trezorLikeWindow;
+  const timeoutVal = options.timeoutVal || 250;
+
+  if (isEnableSupportIpfsDapp()) {
+    connWindow.hide();
+
+    setTimeout(() => {
+      connWindow.destroy();
+      alertCannotUseDueTo({
+        reasonType: 'enabled-ipfs',
+        cannotUse: options.openType,
+      });
+    }, timeoutVal);
+  }
+}
+
 /**
  * @description it must be one tabbed window which is:
  *
  * 1. charged by rabbyx extension
  * 2. support chrome.tabs.* APIs
  */
-export async function createTrezorLikeConnectPageWindow(connectURL: string) {
+export async function createTrezorLikeConnectPageWindow(
+  connectURL: string,
+  options: {
+    openType: IHardwareConnectPageType;
+  }
+) {
   const mainWindow = (await onMainWindowReady()).window;
 
   const tabbedWin = await createWindow({
@@ -77,6 +181,8 @@ export async function createTrezorLikeConnectPageWindow(connectURL: string) {
       navigation: false,
     },
   });
+
+  trezorLikeState.openedType = options.openType;
 
   const connWindow = tabbedWin.window;
 
@@ -123,5 +229,12 @@ export async function createTrezorLikeConnectPageWindow(connectURL: string) {
   return {
     window: connWindow,
     tab,
+    asyncDestroyWindowIfNeed: () => {
+      asyncDestroyWindowIfCannotUseTrezorLike({
+        trezorLikeWindow: connWindow,
+        openType: options.openType,
+        timeoutVal: 250,
+      });
+    },
   };
 }
