@@ -17,6 +17,9 @@ import { formatAmount } from '@/renderer/utils/number';
 import clsx from 'clsx';
 import { SkeletonInputProps } from 'antd/lib/skeleton/Input';
 
+const getQuoteLessWarning = (quoteWarning: string) =>
+  `By transaction simulation, you'll receive ${quoteWarning} less than the current offer.`;
+
 export const WarningOrChecked = ({
   quoteWarning: diffWarning,
 }: {
@@ -27,8 +30,8 @@ export const WarningOrChecked = ({
       overlayClassName="rectangle max-w-[600px]"
       title={
         diffWarning
-          ? `The offer may no longer be valid. Actual offer estimated through transaction simulation. You'll receive ${diffWarning}% less than the current offer.`
-          : 'Validated by Rabby through transaction simulation'
+          ? getQuoteLessWarning(diffWarning)
+          : 'By transaction simulation, the quote is valid'
       }
     >
       <img
@@ -62,7 +65,9 @@ const ReceiveWrapper = styled.div`
         height: 14px;
       }
       .diffPercent {
-        color: #ff7878;
+        &.negative {
+          color: #ff7878;
+        }
         &.positive {
           color: #27c193;
         }
@@ -145,7 +150,7 @@ export const ReceiveDetails = (
     }
   }, [receiveToken, payToken]);
 
-  const { receiveNum, payUsd, receiveUsd, rate, diff, isPositive, showLoss } =
+  const { receiveNum, payUsd, receiveUsd, rate, diff, sign, showLoss } =
     useMemo(() => {
       const pay = new BigNumber(payAmount).times(payToken.price);
       const receiveAll = new BigNumber(receiveAmount).div(
@@ -153,17 +158,18 @@ export const ReceiveDetails = (
       );
       const receive = receiveAll.times(receiveToken.price);
       const cut = receive.minus(pay).div(pay).times(100);
+      const rateBn = new BigNumber(reverse ? payAmount : receiveAll).div(
+        reverse ? receiveAll : payAmount
+      );
 
       return {
         receiveNum: formatAmount(receiveAll.toString(10)),
         payUsd: formatAmount(pay.toString(10)),
         receiveUsd: formatAmount(receive.toString(10)),
-        rate: formatAmount(
-          new BigNumber(reverse ? payAmount : receiveAll)
-            .div(reverse ? receiveAll : payAmount)
-            .toString(10)
-        ),
-        isPositive: cut.gte(0),
+        rate: rateBn.lt(0.0001)
+          ? new BigNumber(rateBn.toPrecision(1, 0)).toString(10)
+          : formatAmount(rateBn.toString(10)),
+        sign: cut.eq(0) ? '' : cut.lt(0) ? '-' : '+',
         diff: cut.toFixed(2),
         showLoss: cut.lte(-5),
       };
@@ -194,11 +200,7 @@ export const ReceiveDetails = (
         </div>
       </div>
       {!loading && quoteWarning && (
-        <div className="warning">
-          The offer may no longer be valid. Actual offer estimated through
-          transaction simulation. You'll receive {quoteWarning}% less than the
-          current offer.
-        </div>
+        <div className="warning">{getQuoteLessWarning(quoteWarning)}</div>
       )}
 
       <div className="column">
@@ -211,7 +213,13 @@ export const ReceiveDetails = (
             <span className="cursor-pointer" onClick={reverseRate}>
               1 {reverse ? receiveToken.symbol : payToken.symbol} = {rate}{' '}
               {reverse ? payToken.symbol : receiveToken.symbol} (
-              <span className={clsx('diffPercent', isPositive && 'positive')}>
+              <span
+                className={clsx(
+                  'diffPercent',
+                  sign === '+' && 'positive',
+                  sign === '-' && 'negative'
+                )}
+              >
                 {diff}%
               </span>
               )

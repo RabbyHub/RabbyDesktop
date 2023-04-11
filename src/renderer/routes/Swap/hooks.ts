@@ -10,9 +10,10 @@ import {
 import BigNumber from 'bignumber.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Tx } from '@debank/rabby-api/dist/types';
-import { atom, useSetAtom } from 'jotai';
+import { atom, useAtomValue, useSetAtom } from 'jotai';
 import { useLocation } from 'react-router-dom';
 import { getRouter, getSpender, postSwap, postSwapParams } from './utils';
+import { activeProviderOriginAtom, activeSwapTxsAtom } from './atom';
 
 export function isSwapWrapToken(
   payTokenId: string,
@@ -150,6 +151,10 @@ export const useRefreshSwapTxList = () => {
   }, [setReFreshSwapList]);
 };
 
+export const refreshIdAtom = atom(0, (get, set) => {
+  set(refreshIdAtom, get(refreshIdAtom) + 1);
+});
+
 export const useOnSwapPushTx = (
   pushTxCb: (payload: Tx & { hash: string }) => void
 ) => {
@@ -167,6 +172,25 @@ export const useOnSwapPushTx = (
         }
       ),
     [pushTxCb]
+  );
+};
+
+export const useOnTxFinished = (
+  cb: (payload: { success: boolean; hash: string }) => void
+) => {
+  useEffect(
+    () =>
+      window.rabbyDesktop.ipcRenderer.on(
+        '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
+        (payload) => {
+          if (payload.event !== 'transactionChanged') return;
+
+          if (payload.data?.type === 'finished') {
+            cb(payload.data);
+          }
+        }
+      ),
+    [cb]
   );
 };
 
@@ -231,4 +255,48 @@ export const useInSwap = () => {
     () => location.pathname === '/mainwin/swap',
     [location.pathname]
   );
+};
+
+export const useSwapOrApprovalLoading = () => {
+  const refresh = useSetAtom(refreshIdAtom);
+  const setActiveSwapTxs = useSetAtom(activeSwapTxsAtom);
+  const setActiveProvider = useSetAtom(activeProviderOriginAtom);
+
+  const subscribeTx = useCallback(
+    (tx: string) => {
+      setActiveSwapTxs((e) => [...e, tx]);
+    },
+    [setActiveSwapTxs]
+  );
+
+  const completeTx: Parameters<typeof useOnTxFinished>[0] = useCallback(
+    (data) => {
+      if (!data?.success) {
+        setActiveProvider((e) =>
+          !e ? e : { ...e, activeLoading: false, activeTx: undefined }
+        );
+        setActiveSwapTxs((txs) =>
+          txs.filter((tx) => tx.toLowerCase() !== data?.hash?.toLowerCase())
+        );
+        return;
+      }
+
+      const timer: NodeJS.Timeout = setTimeout(() => {
+        refresh();
+      }, 1000);
+
+      return () => {
+        if (timer) {
+          clearTimeout(timer);
+        }
+      };
+    },
+    [refresh, setActiveProvider, setActiveSwapTxs]
+  );
+
+  useOnTxFinished(completeTx);
+
+  return {
+    subscribeTx,
+  };
 };

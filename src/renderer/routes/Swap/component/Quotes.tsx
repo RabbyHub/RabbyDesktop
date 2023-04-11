@@ -13,6 +13,7 @@ import ImgLock from '@/../assets/icons/swap/lock.svg';
 import IconRcTip from '@/../assets/icons/swap/tip-info.svg?rc';
 
 import { noop } from 'lodash';
+import { useSetAtom } from 'jotai';
 import { CEX, DEX } from '../constant';
 import {
   QuotePreExecResultInfo,
@@ -25,6 +26,7 @@ import {
 import { IconRefresh } from './IconRefresh';
 import { WarningOrChecked } from './ReceiveDetail';
 import { useVerifySdk } from '../hooks';
+import { activeProviderOriginAtom } from '../atom';
 
 const QuotesWrapper = styled.div`
   --green-color: #27c193;
@@ -122,17 +124,6 @@ const ItemWrapper = styled.div`
   }
 `;
 
-export type QuoteProvider = {
-  name: string;
-  error?: boolean;
-  quote: QuoteResult | null;
-  shouldApproveToken: boolean;
-  shouldTwoStepApprove: boolean;
-  halfBetterRate?: string;
-  quoteWarning?: string;
-  gasPrice?: number;
-};
-
 export interface QuoteItemProps {
   quote: QuoteResult | null;
   name: string;
@@ -147,7 +138,6 @@ export interface QuoteItemProps {
   userAddress: string;
   slippage: string;
   fee: string;
-  onClick: (provider: QuoteProvider) => void;
 }
 
 const DexQuoteItem = (
@@ -170,7 +160,6 @@ const DexQuoteItem = (
     isBestQuote,
     slippage,
     fee,
-    onClick,
     preExecResult,
   } = props;
   const dexInfo = useMemo(() => DEX[dexId as keyof typeof DEX], [dexId]);
@@ -190,6 +179,8 @@ const DexQuoteItem = (
     payToken,
     receiveToken,
   });
+
+  const updateActiveQuoteProvider = useSetAtom(activeProviderOriginAtom);
 
   const {
     value: halfAmountQuotePreExecTxResult,
@@ -260,7 +251,7 @@ const DexQuoteItem = (
   ]);
 
   const [middleContent, rightContent, disabled] = useMemo(() => {
-    let center: React.ReactNode = <div className="ml-[66px]">-</div>;
+    let center: React.ReactNode = <div className="">-</div>;
     let right: React.ReactNode = '';
     let disable = false;
 
@@ -298,14 +289,16 @@ const DexQuoteItem = (
       );
     }
     if (quote?.toTokenAmount && !preExecResult) {
-      center = <div className="ml-[66px]">-</div>;
-      right = <div className="text-opacity-60">Unable to execute</div>;
+      center = <div className="">-</div>;
+      right = (
+        <div className="text-opacity-60">Fail to simulate transaction</div>
+      );
       disable = true;
     }
 
     if (!isSdkDataPass) {
       disable = true;
-      center = <div className="ml-[66px]">-</div>;
+      center = <div className="">-</div>;
       right = (
         <div className="text-opacity-60">Security verification failed</div>
       );
@@ -339,10 +332,15 @@ const DexQuoteItem = (
         preExecResult?.swapPreExecTx?.balance_change.receive_token_list[0]
           ?.amount || 0
       )
-      .div(receivedTokeAmountBn)
-      .times(100);
+      .div(receivedTokeAmountBn);
 
-    return diff.gt(0.01) ? diff.toPrecision(2) : '';
+    const diffPercent = diff.times(100);
+
+    return diffPercent.gt(0.01)
+      ? `${diffPercent.toPrecision(2)}% (${formatAmount(diff.toString(10))} ${
+          receiveToken.symbol
+        })`
+      : '';
   }, [
     chain,
     payToken.id,
@@ -351,6 +349,7 @@ const DexQuoteItem = (
     quote?.toTokenDecimals,
     receiveToken.decimals,
     receiveToken.id,
+    receiveToken.symbol,
   ]);
 
   const CheckIcon = useCallback(() => {
@@ -368,7 +367,7 @@ const DexQuoteItem = (
 
   const handleClick = useCallback(() => {
     if (active || disabled) return;
-    onClick({
+    updateActiveQuoteProvider({
       name: dexId,
       quote,
       gasPrice: preExecResult?.gasPrice,
@@ -381,7 +380,7 @@ const DexQuoteItem = (
   }, [
     active,
     disabled,
-    onClick,
+    updateActiveQuoteProvider,
     dexId,
     quote,
     preExecResult,
@@ -392,7 +391,8 @@ const DexQuoteItem = (
   useDebounce(
     () => {
       if (active) {
-        onClick({
+        updateActiveQuoteProvider((e) => ({
+          ...e,
           name: dexId,
           quote,
           gasPrice: preExecResult?.gasPrice,
@@ -401,7 +401,7 @@ const DexQuoteItem = (
           error: !preExecResult,
           halfBetterRate: halfBetterRateString,
           quoteWarning,
-        });
+        }));
       }
     },
     300,
@@ -410,7 +410,7 @@ const DexQuoteItem = (
       halfBetterRateString,
       active,
       dexId,
-      onClick,
+      updateActiveQuoteProvider,
       quote,
       preExecResult,
     ]
@@ -427,7 +427,7 @@ const DexQuoteItem = (
         {!!preExecResult?.shouldApproveToken && (
           <Tooltip
             overlayClassName="rectangle max-w-[300px]"
-            title="Token is not approved for this aggregator"
+            title="Need to approve token before swap"
           >
             <img src={ImgLock} className="w-14 h-14" />
           </Tooltip>
@@ -452,12 +452,14 @@ const CexQuoteItem = (props: {
   const dexInfo = useMemo(() => CEX[name as keyof typeof CEX], [name]);
 
   const [middleContent, rightContent] = useMemo(() => {
-    let center: React.ReactNode = <div className="ml-[66px]">-</div>;
+    let center: React.ReactNode = <div className="">-</div>;
     let right: React.ReactNode = '';
     let disable = false;
 
     if (!data?.receive_token?.amount) {
-      right = <div className="text-opacity-60">Unable to fetch the price</div>;
+      right = (
+        <div className="text-opacity-60">This token pair is not supported</div>
+      );
       disable = true;
     }
 

@@ -199,7 +199,9 @@ const SlippageUsage = ({
           <SkeletonInput active style={{ height: 24, minWidth: 60 }} />
         )}
       </div>
-      <div className="text-14">{actual ? 'Actual' : 'Designated'} Slippage</div>
+      <div className="text-14">
+        {actual ? 'Actual Slippage' : 'Slippage tolerance'}
+      </div>
     </div>
   );
 };
