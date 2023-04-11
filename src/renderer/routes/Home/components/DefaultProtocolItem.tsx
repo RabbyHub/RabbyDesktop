@@ -26,6 +26,7 @@ import {
   removeProtocolFromUrl,
 } from '@/renderer/utils/url';
 import { formatDappURLToShow } from '@/isomorphic/dapp';
+import { fetchProtocolDappsBinding } from '../../../ipcRequest/dapps';
 import * as Template from '../templates';
 import ScrollTopContext from './scrollTopContext';
 
@@ -259,7 +260,8 @@ const DefaultProtocolItem = ({
     if (bindUrl) openDapp(bindUrl);
   }, [bindUrl, openDapp]);
 
-  useEffect(() => {
+  const autoBindDapp = useCallback(async () => {
+    const dappBindings = await fetchProtocolDappsBinding();
     const siteUrl = protocol.site_url;
     const sameOrigin = dapps.find((dapp) =>
       isSameOrigin(dapp.origin, protocol.site_url)
@@ -267,7 +269,7 @@ const DefaultProtocolItem = ({
     const sameDomain = dapps.find((dapp) =>
       isSameDomain(dapp.origin, protocol.site_url)
     );
-    if (protocolDappsBinding[protocol.id]) return;
+    if (dappBindings[protocol.id]) return;
     if (sameOrigin || sameDomain) {
       const target = sameOrigin || sameDomain;
       bindingDappsToProtocol(protocol.id, {
@@ -275,7 +277,11 @@ const DefaultProtocolItem = ({
         siteUrl,
       });
     }
-  }, [dapps, protocol, bindingDappsToProtocol, protocolDappsBinding]);
+  }, [bindingDappsToProtocol, dapps, protocol]);
+
+  useEffect(() => {
+    autoBindDapp();
+  }, [autoBindDapp]);
 
   const handleClickEditBind = () => {
     setPopoverOpen(false);
