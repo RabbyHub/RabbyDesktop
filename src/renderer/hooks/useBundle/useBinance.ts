@@ -13,7 +13,7 @@ type BinanceAssets = Awaited<ReturnType<Binance['getAssets']>>;
 export const useBinance = () => {
   const [balance, setBalance] = React.useState<string>('0');
   const [assets, setAssets] = React.useState<BinanceAssets[]>();
-  const { binanceList } = useBundleAccount();
+  const { inBundleList } = useBundleAccount();
   const [mergedFundingAsset, setMergedFundingAsset] = React.useState<
     BinanceAssets['fundingAsset']
   >([]);
@@ -22,11 +22,15 @@ export const useBinance = () => {
   >([]);
 
   const bnAccounts = React.useMemo<BNAccountWithAPI[]>(() => {
-    return binanceList.map((item) => ({
+    const accounts = inBundleList.filter(
+      (acc) => acc.type === 'bn'
+    ) as BNAccount[];
+
+    return accounts.map((item) => ({
       ...item,
       api: new Binance(item.apiKey, item.apiSecret),
     }));
-  }, [binanceList]);
+  }, [inBundleList]);
   const bnIds = React.useMemo(
     () => bnAccounts.map((item) => item.id),
     [bnAccounts]
@@ -68,7 +72,6 @@ export const useBinance = () => {
 
   // update when bnAccount list changed
   React.useEffect(() => {
-    console.log('getAssets');
     getAssets();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(bnIds)]);

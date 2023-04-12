@@ -9,7 +9,7 @@ export const bigNumberSum = (...values: (string | number | undefined)[]) => {
     return new BigNumber(prev).plus(curr).toString();
   }, '0');
 
-  return result;
+  return result as string;
 };
 
 /**

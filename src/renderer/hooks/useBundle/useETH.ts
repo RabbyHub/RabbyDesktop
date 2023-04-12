@@ -16,6 +16,7 @@ import {
   loadCachedProtocolList,
   loadRealTimeProtocolList,
 } from '../useHistoryProtocol';
+import { useAccountToDisplay } from '../rabbyx/useAccountToDisplay';
 
 const tokenListAtom = atom<TokenItem[]>([]);
 const protocolListAtom = atom<DisplayProtocol[]>([]);
@@ -28,6 +29,7 @@ export const useETH = () => {
   const [protocolList, setProtocolList] = useAtom(protocolListAtom);
   const [usedChainList, setUsedChainList] = useAtom(usedChainListAtom);
   const { inBundleList } = useBundleAccount();
+  const { getAllAccountsToDisplay } = useAccountToDisplay();
   const ethAccounts = React.useMemo(
     () => inBundleList.filter((acc) => acc.type === 'eth') as ETHAccount[],
     [inBundleList]
@@ -113,7 +115,13 @@ export const useETH = () => {
     getTokenList();
     getProtocolList();
     getUsedChainList();
-  }, [getProtocolList, getTokenList, getUsedChainList]);
+    getAllAccountsToDisplay();
+  }, [
+    getAllAccountsToDisplay,
+    getProtocolList,
+    getTokenList,
+    getUsedChainList,
+  ]);
 
   const displayChainList = React.useMemo(() => {
     const map: Record<string, number> = {};

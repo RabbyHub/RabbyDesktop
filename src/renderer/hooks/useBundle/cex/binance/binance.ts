@@ -111,8 +111,6 @@ export class Binance {
     // 获取所有 token 对应的 usdt 价值
     await this.getUSDTPrices();
 
-    console.log(assets);
-
     // 汇总
     const result = {
       fundingAsset: this.calcFundingAsset(assets[0]),

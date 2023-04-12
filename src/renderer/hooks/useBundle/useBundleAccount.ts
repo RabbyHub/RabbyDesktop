@@ -16,6 +16,25 @@ export const useBundleAccount = () => {
   const inBundleList = React.useMemo(() => {
     return accounts.filter((acc) => acc.inBundle);
   }, [accounts]);
+  // 余额占比
+  const percentMap = React.useMemo(() => {
+    const list = inBundleList.map((item) => {
+      return {
+        id: item.id!,
+        balance: Number((item.balance ?? '0') as string),
+      };
+    });
+    const total = list.reduce((acc, item) => acc + item.balance, 0);
+    return list.reduce((acc, item) => {
+      const b = item.balance;
+      let num = (b / total) * 100;
+      if (Number.isNaN(num)) {
+        num = 0;
+      }
+      acc[item.id] = num.toFixed(0);
+      return acc;
+    }, {} as Record<string, string>);
+  }, [inBundleList]);
 
   const binanceList = React.useMemo(() => {
     return accounts.filter((acc) => acc.type === 'bn') as BNAccount[];
@@ -218,5 +237,6 @@ export const useBundleAccount = () => {
     ethList,
     toggleBundle,
     preCheckMaxAccount,
+    percentMap,
   };
 };

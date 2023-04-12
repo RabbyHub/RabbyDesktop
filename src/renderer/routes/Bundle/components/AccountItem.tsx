@@ -23,20 +23,12 @@ export const AccountItem: React.FC<Props> = ({
   canDelete,
 }) => {
   const {
-    account: { toggleBundle, remove },
+    account: { toggleBundle, remove, percentMap },
   } = useBundle();
   const addressTypeIcon = useAccountItemIcon(data);
   const displayAddress = useAccountItemAddress(data);
 
   const onCopy = useCopyAddress();
-  const onClickEdit = React.useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!canEdit) return;
-      e.stopPropagation();
-      console.log(123);
-    },
-    [canEdit]
-  );
   const onClickDelete = React.useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       e.stopPropagation();
@@ -91,28 +83,7 @@ export const AccountItem: React.FC<Props> = ({
           <img className="w-[22px] h-[22px]" src={addressTypeIcon} alt="" />
         </div>
         <div className={clsx('text-white text-[12px]', 'flex-1 space-y-[6px]')}>
-          <NicknameInput data={data} canEdit />
-          {/* <div
-            className={clsx(
-              'flex items-center space-x-[3px]',
-              'font-medium text-[12px] leading-[16px]',
-              'opacity-70',
-              canEdit && 'group-hover:opacity-100',
-              'group'
-            )}
-            onClick={onClickEdit}
-          >
-            <span>{data.nickname}</span>
-            {canEdit && (
-              <img
-                className={clsx(
-                  'group-hover:block hidden',
-                  'opacity-70 hover:opacity-100'
-                )}
-                src="rabby-internal://assets/icons/bundle/edit.svg"
-              />
-            )}
-          </div> */}
+          <NicknameInput data={data} canEdit={canEdit} />
           <div className="flex space-x-[5px] items-center">
             <span className="opacity-50">{ellipsis(displayAddress)}</span>
             <div
@@ -130,17 +101,23 @@ export const AccountItem: React.FC<Props> = ({
           className={clsx(
             'h-full',
             'text-white text-[12px]',
-            'flex items-end flex-col space-y-[6px] justify-start'
+            'flex items-end flex-col space-y-[6px]'
           )}
         >
           <div
-            className={clsx('font-medium text-[12px]', 'opacity-70', {
-              hidden: data.balance === undefined,
-            })}
+            className={clsx(
+              'font-medium text-[12px] leading-[19px]',
+              'opacity-70',
+              {
+                hidden: data.balance === undefined,
+              }
+            )}
           >
             ${splitNumberByStep(Number(data.balance)?.toFixed(2))}
           </div>
-          {isBundle && <div className="opacity-60">balance</div>}
+          {isBundle && (
+            <div className="opacity-60">{percentMap[data.id!]}%</div>
+          )}
         </div>
       </div>
     </div>

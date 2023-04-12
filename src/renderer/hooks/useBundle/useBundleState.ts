@@ -1,3 +1,4 @@
+import { useBTC } from './useBTC';
 import { useBinance } from './useBinance';
 import { useBundleAccount } from './useBundleAccount';
 import { useETH } from './useETH';
@@ -18,10 +19,12 @@ export const useBundleState = () => {
   const account = useBundleAccount();
   const binance = useBinance();
   const eth = useETH();
+  const btc = useBTC();
 
   return {
     account,
     binance,
     eth,
+    btc,
   };
 };

@@ -62,7 +62,7 @@ export const NicknameInput: React.FC<Props> = ({ canEdit, data }) => {
         </div>
       ) : (
         <>
-          <span className="leading-[19px]">{data.nickname}</span>
+          <span className="leading-[19px]">{nickname}</span>
           {canEdit && (
             <img
               className={clsx(

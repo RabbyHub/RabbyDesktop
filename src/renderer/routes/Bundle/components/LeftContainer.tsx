@@ -3,6 +3,7 @@ import { useBundle } from '@/renderer/hooks/useBundle/useBundle';
 import clsx from 'clsx';
 import { formatNumber } from '@/renderer/utils/number';
 import { Skeleton } from 'antd';
+import { bigNumberSum } from '@/renderer/hooks/useBundle/util';
 import ChainList from '../../Home/components/ChainList';
 import PortfolioView from '../../Home/components/PortfolioView';
 import {
@@ -27,8 +28,10 @@ export const LeftContainer: React.FC = () => {
       loadingUsedChain,
       loadingProtocol,
       loadingToken,
-      getAssets,
+      ...eth
     },
+    btc,
+    binance,
   } = useBundle();
 
   const filterTokenList = useFilterTokenList(tokenList, selectChainServerId);
@@ -54,6 +57,16 @@ export const LeftContainer: React.FC = () => {
     setIsExpand: setIsProtocolExpand,
   } = useExpandProtocolList(filterProtocolList);
 
+  const onUpdate = () => {
+    eth.getAssets();
+    binance.getAssets();
+    btc.getAssets();
+  };
+
+  const balance = React.useMemo(() => {
+    return bigNumberSum(totalBalance, binance.balance, btc.balance);
+  }, [totalBalance, binance.balance, btc.balance]);
+
   return (
     <div
       className={clsx(
@@ -77,14 +90,14 @@ export const LeftContainer: React.FC = () => {
               className="w-[234px] h-[46px] rounded-[2px]"
             />
           ) : (
-            <span className="block">${formatNumber(totalBalance || 0)}</span>
+            <span className="block">${formatNumber(balance || 0)}</span>
           )}
         </div>
 
         <div className="absolute right-0 bottom-0">
           <UpdateButton
             loading={loadingProtocol || loadingToken}
-            onUpdate={getAssets}
+            onUpdate={onUpdate}
           />
         </div>
       </div>
