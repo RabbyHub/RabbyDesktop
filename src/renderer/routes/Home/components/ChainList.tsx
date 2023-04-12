@@ -44,7 +44,11 @@ const ChainList = ({
   const percentMap = useMemo(() => {
     const total = chainBalances.reduce((acc, item) => acc + item.usd_value, 0);
     return chainBalances.reduce((acc, item) => {
-      acc[item.id] = ((item.usd_value / total) * 100).toFixed(0);
+      let num = (item.usd_value / total) * 100;
+      if (Number.isNaN(num)) {
+        num = 0;
+      }
+      acc[item.id] = num.toFixed(0);
       return acc;
     }, {} as Record<string, string>);
   }, [chainBalances]);

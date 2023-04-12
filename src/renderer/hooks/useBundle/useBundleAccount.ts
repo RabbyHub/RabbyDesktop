@@ -5,6 +5,7 @@ import { Binance } from './cex/binance/binance';
 import { bundleAccountsAtom } from './shared';
 import { ERROR } from './error';
 import { useAccountToDisplay } from '../rabbyx/useAccountToDisplay';
+import { toastMaxAccount } from './util';
 
 const { nanoid } = require('nanoid');
 
@@ -183,6 +184,14 @@ export const useBundleAccount = () => {
     [accounts, getAllAccountsToDisplay]
   );
 
+  const preCheckMaxAccount = React.useCallback(() => {
+    if (accounts.length >= 15) {
+      toastMaxAccount();
+      return false;
+    }
+    return true;
+  }, [accounts]);
+
   // 初始化数据
   // 获取 bundle 账户和 eth 账户
   React.useEffect(() => {
@@ -208,5 +217,6 @@ export const useBundleAccount = () => {
     btcList,
     ethList,
     toggleBundle,
+    preCheckMaxAccount,
   };
 };

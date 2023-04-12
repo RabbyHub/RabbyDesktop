@@ -39,7 +39,6 @@ export const useETH = () => {
   const [loadingProtocol, setLoadingProtocol] = React.useState(false);
   const [loadingToken, setLoadingToken] = React.useState(false);
   const [loadingUsedChain, setLoadingUsedChain] = React.useState(false);
-  const loading = loadingProtocol || loadingToken || loadingUsedChain;
 
   const totalBalance = useTotalBalance(tokenList, protocolList);
 
@@ -153,8 +152,11 @@ export const useETH = () => {
   return {
     displayChainList,
     totalBalance,
-    loading,
+    loadingProtocol,
+    loadingToken,
+    loadingUsedChain,
     tokenList,
     protocolList,
+    getAssets,
   };
 };

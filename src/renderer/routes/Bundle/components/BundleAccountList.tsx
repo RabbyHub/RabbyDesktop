@@ -10,6 +10,7 @@ export const BundleAccountList = () => {
       isBundle
       titleClassName="mb-[8px] opacity-70"
       title={`Bundle Addresses (${account.inBundleList.length})`}
+      maxAccount={15}
     >
       {account.inBundleList.map((item) => (
         <AccountItem isBundle key={item.id} checked data={item} />

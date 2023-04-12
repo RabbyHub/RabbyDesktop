@@ -12,13 +12,23 @@ import {
   useExpandProtocolList,
 } from '../../Home/hooks';
 import { VIEW_TYPE } from '../../Home/type';
+import { UpdateButton } from '../../Home/components/UpdateButton';
 
 export const LeftContainer: React.FC = () => {
   const [selectChainServerId, setSelectChainServerId] = React.useState<
     string | null
   >(null);
   const {
-    eth: { displayChainList, totalBalance, tokenList, protocolList, loading },
+    eth: {
+      displayChainList,
+      totalBalance,
+      tokenList,
+      protocolList,
+      loadingUsedChain,
+      loadingProtocol,
+      loadingToken,
+      getAssets,
+    },
   } = useBundle();
 
   const filterTokenList = useFilterTokenList(tokenList, selectChainServerId);
@@ -51,7 +61,7 @@ export const LeftContainer: React.FC = () => {
         'flex flex-col'
       )}
     >
-      <div>
+      <div className="relative mb-[23px]">
         <h2
           className={clsx(
             'text-white text-[14px] opacity-70 leading-[17px]',
@@ -60,10 +70,8 @@ export const LeftContainer: React.FC = () => {
         >
           Combined Asset Value
         </h2>
-        <div
-          className={clsx('text-[46px] font-medium leading-none', 'mb-[23px]')}
-        >
-          {loading ? (
+        <div className={clsx('text-[46px] font-medium leading-none')}>
+          {loadingProtocol && loadingToken ? (
             <Skeleton.Input
               active
               className="w-[234px] h-[46px] rounded-[2px]"
@@ -72,10 +80,17 @@ export const LeftContainer: React.FC = () => {
             <span className="block">${formatNumber(totalBalance || 0)}</span>
           )}
         </div>
+
+        <div className="absolute right-0 bottom-0">
+          <UpdateButton
+            loading={loadingProtocol || loadingToken}
+            onUpdate={getAssets}
+          />
+        </div>
       </div>
       <section className="mt-[-3px] overflow-auto flex-1 pb-[20px]">
         <div className="mb-[20px]">
-          {loading ? (
+          {loadingUsedChain && loadingToken ? (
             <Skeleton.Input active className="w-full h-[88px] rounded-[2px]" />
           ) : (
             <ChainList
@@ -108,8 +123,8 @@ export const LeftContainer: React.FC = () => {
             hiddenUsdValue: protocolHiddenUsdValue,
             setIsExpand: setIsProtocolExpand,
           }}
-          isLoadingTokenList={loading}
-          isLoadingProtocolList={loading}
+          isLoadingTokenList={loadingToken}
+          isLoadingProtocolList={loadingProtocol}
           isLoadingProtocolHistory={false}
           supportHistoryChains={[]}
           historyTokenDict={{}}

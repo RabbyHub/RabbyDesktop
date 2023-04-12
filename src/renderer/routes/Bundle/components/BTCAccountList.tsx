@@ -5,9 +5,17 @@ import { CommonAccountList } from './CommonAccountList';
 import { AddBTCModal } from './AddBTCModal';
 
 export const BTCAccountList = () => {
-  const { account } = useBundle();
-  const list = account.btcList.filter((item) => !item.inBundle);
+  const {
+    account: { preCheckMaxAccount, btcList },
+  } = useBundle();
+  const list = btcList.filter((item) => !item.inBundle);
   const [openModal, setOpenModal] = React.useState(false);
+
+  const onOpenModal = React.useCallback(() => {
+    if (preCheckMaxAccount()) {
+      setOpenModal(false);
+    }
+  }, [preCheckMaxAccount]);
 
   return (
     <>
@@ -20,7 +28,7 @@ export const BTCAccountList = () => {
           <AccountItem canDelete canEdit key={item.id} data={item} />
         ))}
       </CommonAccountList>
-      <AddBTCModal open={openModal} onCancel={() => setOpenModal(false)} />
+      <AddBTCModal open={openModal} onCancel={onOpenModal} />
     </>
   );
 };

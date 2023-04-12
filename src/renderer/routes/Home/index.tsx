@@ -1,6 +1,6 @@
-import { useEffect, useState, useMemo, useRef, MouseEvent } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { Skeleton } from 'antd';
-import { usePrevious, useInterval } from 'react-use';
+import { usePrevious } from 'react-use';
 import styled from 'styled-components';
 import classNames from 'classnames';
 import { useLocation } from 'react-router-dom';
@@ -16,7 +16,6 @@ import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import useHistoryProtocol from '@/renderer/hooks/useHistoryProtocol';
 import { toastCopiedWeb3Addr } from '@/renderer/components/TransparentToast';
 import { copyText } from '@/renderer/utils/clipboard';
-import { formatTimeReadable } from '@/renderer/utils/time';
 import {
   useZPopupLayerOnMain,
   useZViewsVisibleChanged,
@@ -36,6 +35,7 @@ import PortfolioView from './components/PortfolioView';
 import RightBar from './components/RightBar';
 import Transactions from './components/Transactions';
 import { VIEW_TYPE } from './type';
+import { UpdateButton } from './components/UpdateButton';
 
 const HomeBody = styled.div`
   padding-left: 28px;
@@ -72,37 +72,6 @@ const HomeWrapper = styled.div`
       .right {
         flex: 1;
         position: relative;
-        .update-at {
-          cursor: pointer;
-          display: flex;
-          font-size: 12px;
-          line-height: 14px;
-          color: rgba(255, 255, 255, 0.6);
-          align-items: center;
-          position: absolute;
-          right: 0;
-          bottom: 0;
-          z-index: 2;
-          span {
-            margin-left: 4px;
-            margin-right: 4px;
-          }
-          .icon-refresh {
-            display: block;
-            margin-left: 7px;
-            @keyframes spining {
-              0% {
-                transform: rotate(0deg);
-              }
-              100% {
-                transform: rotate(360deg);
-              }
-            }
-            &.circling {
-              animation: spining 1.5s infinite linear;
-            }
-          }
-        }
       }
     }
     .current-address {
@@ -171,8 +140,6 @@ const Home = () => {
   const { currentAccount } = useCurrentAccount();
   const prevAccount = usePrevious(currentAccount);
   const [updateNonce, setUpdateNonce] = useState(0);
-  const [updateAt, setUpdateAt] = useState(0);
-  const [now, setNow] = useState(0);
   const [selectChainServerId, setSelectChainServerId] = useState<string | null>(
     null
   );
@@ -262,8 +229,7 @@ const Home = () => {
     setUsedChainList(chainList.map((chain) => formatChain(chain)));
   };
 
-  const handleClickRefresh = (e: MouseEvent<HTMLImageElement>) => {
-    e.stopPropagation();
+  const handleClickRefresh = () => {
     setUpdateNonce(updateNonce + 1);
   };
 
@@ -294,21 +260,6 @@ const Home = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location]);
-
-  useEffect(() => {
-    setUpdateAt(0);
-  }, [updateNonce]);
-
-  useEffect(() => {
-    if (!isLoadingRealTimeTokenList && !isLoadingRealTimeProtocol) {
-      const n = Date.now() - 1000;
-      setUpdateAt(Math.floor(n / 1000));
-    }
-  }, [isLoadingRealTimeTokenList, isLoadingRealTimeProtocol]);
-
-  useInterval(() => {
-    setNow(Math.floor(Date.now() / 1000));
-  }, 1000);
 
   const { showZSubview } = useZPopupLayerOnMain();
 
@@ -392,27 +343,12 @@ const Home = () => {
 
               {curveData ? (
                 <div className="right" onClick={() => setCurveModalOpen(true)}>
-                  <div className="update-at" onClick={handleClickRefresh}>
-                    {isLoadingRealTimeTokenList ||
-                    isLoadingRealTimeProtocol ||
-                    updateAt === 0 ? (
-                      'Updating data'
-                    ) : (
-                      <>
-                        Data updated{' '}
-                        <span className="text-white">
-                          {formatTimeReadable(now - updateAt)}
-                        </span>{' '}
-                        ago
-                      </>
-                    )}
-                    <img
-                      src="rabby-internal://assets/icons/home/asset-update.svg"
-                      className={classNames('icon-refresh', {
-                        circling:
-                          isLoadingRealTimeTokenList ||
-                          isLoadingRealTimeProtocol,
-                      })}
+                  <div className="absolute right-0 bottom-0 z-10">
+                    <UpdateButton
+                      loading={
+                        isLoadingRealTimeTokenList || isLoadingRealTimeProtocol
+                      }
+                      onUpdate={handleClickRefresh}
                     />
                   </div>
                   {curveData.list.length > 0 && <Curve data={curveData} />}

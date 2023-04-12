@@ -18,8 +18,9 @@ export const useTotalBalance = (
     let sum = new BigNumber(0);
 
     tokens.forEach((token) => {
-      const usd = new BigNumber(token.amount).times(token.price);
-      sum = sum.plus(usd);
+      sum = sum.plus(
+        token.usd_value ?? new BigNumber(token.amount).times(token.price)
+      );
     });
 
     protocols.forEach((protocol) => {
@@ -27,6 +28,7 @@ export const useTotalBalance = (
         sum = sum.plus(pool.stats.net_usd_value);
       });
     });
+
     return sum.toFixed();
   }, [chain, protocolList, tokenList]);
 
