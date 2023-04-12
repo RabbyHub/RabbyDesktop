@@ -64,7 +64,7 @@ const CurveThumbnail = ({ data, className }: CurveThumbnailProps) => {
     <CurveWrapper ref={divRef} className={className}>
       <AreaChart
         data={data?.list}
-        width={594}
+        width={480}
         height={height}
         style={{ position: 'absolute', right: 0, cursor: 'pointer' }}
       >

@@ -14,6 +14,15 @@ const NoAssetsView = styled.div`
   color: rgba(255, 255, 255, 0.3);
 `;
 
+const ChainListWrapper = styled.div`
+  row-gap: 24px;
+  column-gap: 5px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  @media screen and (max-width: 1440px) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+`;
+
 interface Chain extends DisplayChainWithWhiteLogo {
   usd_value: number;
 }
@@ -75,13 +84,8 @@ const ChainList = ({
   }
 
   return (
-    <div
-      className={clsx(
-        'grid grid-cols-5',
-        'gap-[24px]',
-        'rounded-[6px] bg-[#FFFFFF05]',
-        'p-[28px]'
-      )}
+    <ChainListWrapper
+      className={clsx('grid', 'rounded-[6px] bg-[#FFFFFF05]', 'p-[28px]')}
     >
       {chainBalances.map((item) => (
         <div
@@ -109,7 +113,7 @@ const ChainList = ({
           </div>
         </div>
       ))}
-    </div>
+    </ChainListWrapper>
   );
 };
 
