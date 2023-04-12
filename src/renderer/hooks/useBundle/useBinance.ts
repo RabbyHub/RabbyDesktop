@@ -1,4 +1,5 @@
 import React from 'react';
+import { DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import { saveBundleAccountsBalance } from './shared';
 import { Binance } from './cex/binance/binance';
 import { mergeList, bigNumberSum } from './util';
@@ -9,6 +10,8 @@ type BNAccountWithAPI = BNAccount & {
 };
 
 type BinanceAssets = Awaited<ReturnType<Binance['getAssets']>>;
+
+let lastUpdatedKey = '';
 
 export const useBinance = () => {
   const [balance, setBalance] = React.useState<string>('0');
@@ -31,12 +34,16 @@ export const useBinance = () => {
       api: new Binance(item.apiKey, item.apiSecret),
     }));
   }, [inBundleList]);
-  const bnIds = React.useMemo(
-    () => bnAccounts.map((item) => item.id),
+
+  const updatedKey = React.useMemo(
+    () => JSON.stringify(bnAccounts.map((acc) => acc.id)),
     [bnAccounts]
   );
 
-  const getAssets = React.useCallback(async () => {
+  const getAssets = async (force = false) => {
+    if (lastUpdatedKey === updatedKey && !force) {
+      return;
+    }
     // 获取所有资产
     const result = await Promise.all(
       bnAccounts.map((account) => account.api.getAssets())
@@ -68,13 +75,22 @@ export const useBinance = () => {
     saveBundleAccountsBalance(updateAccounts);
     // 更新 bn 的总余额
     setBalance(bigNumberSum(...balances));
-  }, [bnAccounts]);
 
-  // update when bnAccount list changed
-  React.useEffect(() => {
-    getAssets();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(bnIds)]);
+    lastUpdatedKey = updatedKey;
+  };
+
+  const chainData = {
+    usd_value: Number(balance),
+    id: 'binance',
+    // 假的 id
+    community_id: 9000020,
+    wrapped_token_id: 'binance',
+    name: 'Binance',
+    native_token_id: 'binance',
+    logo_url: 'rabby-internal://assets/icons/bundle/binance-chain.svg',
+  } as DisplayChainWithWhiteLogo & {
+    usd_value: number;
+  };
 
   return {
     getAssets,
@@ -82,5 +98,6 @@ export const useBinance = () => {
     mergedSpotAsset,
     balance,
     assets,
+    chainData,
   };
 };

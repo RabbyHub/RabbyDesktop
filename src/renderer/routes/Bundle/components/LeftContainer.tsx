@@ -3,7 +3,6 @@ import { useBundle } from '@/renderer/hooks/useBundle/useBundle';
 import clsx from 'clsx';
 import { formatNumber } from '@/renderer/utils/number';
 import { Skeleton } from 'antd';
-import { bigNumberSum } from '@/renderer/hooks/useBundle/util';
 import ChainList from '../../Home/components/ChainList';
 import PortfolioView from '../../Home/components/PortfolioView';
 import {
@@ -21,17 +20,15 @@ export const LeftContainer: React.FC = () => {
   >(null);
   const {
     eth: {
-      displayChainList,
-      totalBalance,
       tokenList,
       protocolList,
       loadingUsedChain,
       loadingProtocol,
       loadingToken,
-      ...eth
     },
-    btc,
-    binance,
+    bundleBalance,
+    bundleChainList,
+    refetchBundleAssets,
   } = useBundle();
 
   const filterTokenList = useFilterTokenList(tokenList, selectChainServerId);
@@ -57,16 +54,6 @@ export const LeftContainer: React.FC = () => {
     setIsExpand: setIsProtocolExpand,
   } = useExpandProtocolList(filterProtocolList);
 
-  const onUpdate = () => {
-    eth.getAssets();
-    binance.getAssets();
-    btc.getAssets();
-  };
-
-  const balance = React.useMemo(() => {
-    return bigNumberSum(totalBalance, binance.balance, btc.balance);
-  }, [totalBalance, binance.balance, btc.balance]);
-
   return (
     <div
       className={clsx(
@@ -90,14 +77,14 @@ export const LeftContainer: React.FC = () => {
               className="w-[234px] h-[46px] rounded-[2px]"
             />
           ) : (
-            <span className="block">${formatNumber(balance || 0)}</span>
+            <span className="block">${formatNumber(bundleBalance)}</span>
           )}
         </div>
 
         <div className="absolute right-0 bottom-0">
           <UpdateButton
             loading={loadingProtocol || loadingToken}
-            onUpdate={onUpdate}
+            onUpdate={refetchBundleAssets}
           />
         </div>
       </div>
@@ -107,7 +94,7 @@ export const LeftContainer: React.FC = () => {
             <Skeleton.Input active className="w-full h-[88px] rounded-[2px]" />
           ) : (
             <ChainList
-              chainBalances={displayChainList}
+              chainBalances={bundleChainList}
               onChange={setSelectChainServerId}
             />
           )}
@@ -117,7 +104,7 @@ export const LeftContainer: React.FC = () => {
           tokenList={displayTokenList}
           protocolList={displayProtocolList}
           selectChainServerId={selectChainServerId}
-          chainList={displayChainList}
+          chainList={bundleChainList}
           historyTokenMap={{}}
           historyProtocolMap={{}}
           protocolHistoryTokenPriceMap={{}}

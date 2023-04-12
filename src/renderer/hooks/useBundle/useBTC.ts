@@ -1,9 +1,12 @@
 import React from 'react';
 import Axios from 'axios';
 import { INITIAL_OPENAPI_URL } from '@/renderer/utils/constant';
+import { DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import { useBundleAccount } from './useBundleAccount';
 import { saveBundleAccountsBalance } from './shared';
 import { bigNumberSum } from './util';
+
+let lastUpdatedKey = '';
 
 /**
  * 调用 BTC API
@@ -17,7 +20,14 @@ export const useBTC = () => {
     [inBundleList]
   );
 
-  const getAssets = React.useCallback(async () => {
+  const updatedKey = React.useMemo(
+    () => JSON.stringify(btcAccounts.map((acc) => acc.id)),
+    [btcAccounts]
+  );
+  const getAssets = async (force = false) => {
+    if (lastUpdatedKey === updatedKey && !force) {
+      return;
+    }
     const balances = await Promise.all(
       btcAccounts.map((account) => {
         return Axios.get(`${INITIAL_OPENAPI_URL}/v1/user/btc_balance`, {
@@ -39,10 +49,25 @@ export const useBTC = () => {
     saveBundleAccountsBalance(updateAccounts);
     // 更新 bn 的总余额
     setBalance(bigNumberSum(...balances));
-  }, [btcAccounts]);
+    lastUpdatedKey = updatedKey;
+  };
+
+  const chainData = {
+    usd_value: Number(balance),
+    id: 'btc',
+    // 假的 id
+    community_id: 9000010,
+    wrapped_token_id: 'btc',
+    name: 'Bitcoin',
+    native_token_id: 'btc',
+    logo_url: 'rabby-internal://assets/icons/bundle/btc-chain.svg',
+  } as DisplayChainWithWhiteLogo & {
+    usd_value: number;
+  };
 
   return {
     balance,
+    chainData,
     getAssets,
   };
 };
