@@ -75,6 +75,17 @@ export const useBundleState = () => {
     return bigNumberSum(eth.balance, binance.balance, btc.balance) ?? '0';
   }, [eth.balance, binance.balance, btc.balance]);
 
+  const bundleTokenList = React.useMemo(() => {
+    const list = [];
+    if (hasEthAccount) {
+      list.push(...eth.tokenList);
+    }
+    if (hasBtcAccount && btc.tokenData) {
+      list.push(btc.tokenData);
+    }
+    return list;
+  }, [btc.tokenData, eth.tokenList, hasBtcAccount, hasEthAccount]);
+
   // update when ethAccounts list changed
   const idsKey = JSON.stringify(bundleIds);
   React.useEffect(() => {
@@ -90,6 +101,7 @@ export const useBundleState = () => {
     refetchBundleAssets,
     bundleChainList,
     bundleBalance,
+    bundleTokenList,
     account,
     binance,
     eth,

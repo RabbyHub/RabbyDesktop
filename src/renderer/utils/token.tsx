@@ -10,10 +10,10 @@ import { formatUsdValue } from './number';
 import { getCollectionDisplayName, PortfolioItemNft } from './nft';
 
 export const ellipsisTokenSymbol = (text: string, length = 6) => {
-  if (text.length <= length) return text;
+  if (text?.length <= length) return text;
 
   const regexp = new RegExp(`^(.{${length}})(.*)$`);
-  return text.replace(regexp, '$1...');
+  return text?.replace(regexp, '$1...');
 };
 
 export const getTokenSymbol = async (

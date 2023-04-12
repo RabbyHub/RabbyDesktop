@@ -3,6 +3,15 @@ import styled from 'styled-components';
 import { CHAINS } from '@debank/common';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 
+// 只是 bundle 里面需要扩展 btc
+const EXTENDS_CHAINS = {
+  ...CHAINS,
+  btc: {
+    serverId: 'btc',
+    logo: 'rabby-internal://assets/icons/bundle/btc-chain.svg',
+  },
+};
+
 const TokenWithChainWrapper = styled.div`
   position: relative;
   line-height: 0;
@@ -38,7 +47,7 @@ const TokenWithChain = ({
   hideChainIcon?: boolean;
 }) => {
   const chainServerId = token.chain;
-  const chain = Object.values(CHAINS).find(
+  const chain = Object.values(EXTENDS_CHAINS).find(
     (item) => item.serverId === chainServerId
   );
   return (

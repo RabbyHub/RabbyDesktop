@@ -2,6 +2,7 @@ import React from 'react';
 import Axios from 'axios';
 import { INITIAL_OPENAPI_URL } from '@/renderer/utils/constant';
 import { DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
+import { TokenItem } from '@debank/rabby-api/dist/types';
 import { useBundleAccount } from './useBundleAccount';
 import { saveBundleAccountsBalance } from './shared';
 import { bigNumberSum } from './util';
@@ -19,6 +20,7 @@ export const useBTC = () => {
     () => inBundleList.filter((acc) => acc.type === 'btc') as BTCAccount[],
     [inBundleList]
   );
+  const [assets, setAssets] = React.useState<TokenItem[]>();
 
   const updatedKey = React.useMemo(
     () => JSON.stringify(btcAccounts.map((acc) => acc.id)),
@@ -28,20 +30,31 @@ export const useBTC = () => {
     if (lastUpdatedKey === updatedKey && !force) {
       return;
     }
-    const balances = await Promise.all(
+    const result = await Promise.all(
       btcAccounts.map((account) => {
-        return Axios.get(`${INITIAL_OPENAPI_URL}/v1/user/btc_balance`, {
+        return Axios.get<
+          TokenItem & {
+            total_usd_value: number;
+          }
+        >(`${INITIAL_OPENAPI_URL}/v1/user/btc_balance`, {
           params: {
             id: account.address,
           },
-        }).then((res) => res.data.total_usd_value.toString());
+        }).then((res) => res.data);
       })
     );
 
+    result.forEach((item) => {
+      item.usd_value = item.total_usd_value;
+    });
+
+    setAssets(result);
+
+    const balances = result.map((item) => item.usd_value);
     const updateAccounts = btcAccounts.map((account, index) => {
       return {
         ...account,
-        balance: balances[index],
+        balance: balances[index]?.toString(),
       };
     });
 
@@ -65,9 +78,19 @@ export const useBTC = () => {
     usd_value: number;
   };
 
+  const tokenData = assets?.[0]
+    ? ({
+        ...assets?.[0],
+        chain: 'btc',
+        amount: assets?.reduce((acc, cur) => acc + cur.amount, 0),
+        usd_value: assets?.reduce((acc, cur) => acc + (cur.usd_value ?? 0), 0),
+      } as TokenItem)
+    : undefined;
+
   return {
     balance,
     chainData,
+    tokenData,
     getAssets,
   };
 };
