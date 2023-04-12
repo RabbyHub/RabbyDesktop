@@ -32,7 +32,7 @@ export function useTipCannotUseTrezorLike() {
             <>
               You have used {ucfirst(svState.haveUsed)}, which is in conflict
               with {ucfirst(svState.cannotUse)}. To connect with{' '}
-              {ucfirst(svState.haveUsed)}, please restart the app.
+              {ucfirst(svState.cannotUse)}, please restart the app.
             </>
           ),
           okText: 'Restart',
