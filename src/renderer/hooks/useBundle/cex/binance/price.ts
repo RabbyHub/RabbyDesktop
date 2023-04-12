@@ -64,6 +64,13 @@ class TokenPrice {
 
     return new BigNumber(value).times(price.value).toString();
   }
+
+  getPrice(symbol: string) {
+    if (symbol === USDT) {
+      return 1;
+    }
+    return this.prices[symbol]?.value;
+  }
 }
 
 export const tokenPrice = new TokenPrice();

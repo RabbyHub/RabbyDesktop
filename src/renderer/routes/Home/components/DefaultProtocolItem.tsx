@@ -301,6 +301,7 @@ const DefaultProtocolItem = ({
           width="20px"
           height="20px"
           noRound
+          hideChainIcon={protocol.chain === '0'}
         />
         <div className="flex flex-1 items-center">
           <div

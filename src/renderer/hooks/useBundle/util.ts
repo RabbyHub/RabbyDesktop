@@ -15,7 +15,7 @@ export const bigNumberSum = (...values: (string | number | undefined)[]) => {
 /**
  * 小于 10u 的返回 false
  */
-export const valueGreaterThan10 = (value: string, target = '10') => {
+export const valueGreaterThan10 = (value: any, target = '10') => {
   return new BigNumber(value).isGreaterThanOrEqualTo(target);
 };
 

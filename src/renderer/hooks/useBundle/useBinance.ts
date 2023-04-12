@@ -4,6 +4,14 @@ import { saveBundleAccountsBalance } from './shared';
 import { Binance } from './cex/binance/binance';
 import { mergeList, bigNumberSum } from './util';
 import { useBundleAccount } from './useBundleAccount';
+import { DisplayProtocol } from '../useHistoryProtocol';
+import {
+  toFinancePortfolioList,
+  toFundingPortfolioList,
+  toIsolatedMarginPortfolioList,
+  toMarginPortfolio,
+  toSpotPortfolioList,
+} from './cex/binance/util';
 
 type BNAccountWithAPI = BNAccount & {
   api: Binance;
@@ -92,6 +100,65 @@ export const useBinance = () => {
     usd_value: number;
   };
 
+  // 把币安资产数据转换成 rabby 资产数据类型
+  const protocolData = React.useMemo(() => {
+    // 资金账户
+    const fundingPortfolioList = toFundingPortfolioList(mergedFundingAsset);
+    // 现货账户
+    const spotPortfolioList = toSpotPortfolioList(mergedSpotAsset);
+    const otherPortfolioList =
+      assets?.flatMap((item) => {
+        // 理财账户(活期)
+        const flexibleList = toFinancePortfolioList(
+          item.financeAsset.flexible,
+          'Flexible'
+        );
+        // 理财账户(Staking)
+        const stakeList = toFinancePortfolioList(
+          item.financeAsset.stake,
+          'Stake'
+        );
+        // 理财账户(定期)
+        const LockedList = toFinancePortfolioList(
+          item.financeAsset.fixed,
+          'Locked'
+        );
+        // 全仓账户
+        const marginPortfolio = toMarginPortfolio(item.marginAsset);
+        // 逐仓账户
+        const isolatedMarginList = toIsolatedMarginPortfolioList(
+          item.isolatedMarginAsset
+        );
+
+        return [
+          ...flexibleList,
+          ...LockedList,
+          ...stakeList,
+          marginPortfolio,
+          ...isolatedMarginList,
+        ];
+      }) ?? [];
+
+    console.log(assets);
+    const data: DisplayProtocol = {
+      usd_value: Number(balance),
+      id: 'binance',
+      chain: '0',
+      name: 'Binance',
+      site_url: '',
+      logo_url: 'rabby-internal://assets/icons/bundle/binance-chain.svg',
+      has_supported_portfolio: false,
+      tvl: 0,
+      portfolio_item_list: [
+        ...fundingPortfolioList,
+        ...spotPortfolioList,
+        ...otherPortfolioList,
+      ],
+    };
+
+    return data;
+  }, [assets, balance, mergedFundingAsset, mergedSpotAsset]);
+
   return {
     getAssets,
     mergedFundingAsset,
@@ -99,5 +166,6 @@ export const useBinance = () => {
     balance,
     assets,
     chainData,
+    protocolData,
   };
 };
