@@ -209,6 +209,8 @@ export function useMatchDapp(origin?: string) {
       );
       if (findMatchDomain) {
         setDappInfo(findMatchDomain);
+      } else {
+        setDappInfo(null);
       }
     }
   }, [origin, dapps]);
