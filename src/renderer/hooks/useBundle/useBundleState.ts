@@ -6,7 +6,7 @@ import { useBundleAccount } from './useBundleAccount';
 import { useETH } from './useETH';
 import { bigNumberSum } from './util';
 
-let lastIdsKey: string | undefined;
+let lastUpdatedKey = '';
 
 /**
  * - 地址列表
@@ -25,7 +25,7 @@ export const useBundleState = () => {
   const binance = useBinance();
   const eth = useETH();
   const btc = useBTC();
-  const bundleIds = account.inBundleList.map((acc) => acc.id);
+  const updatedKey = JSON.stringify(account.inBundleList.map((acc) => acc.id));
 
   const hasEthAccount = React.useMemo(
     () => account.inBundleList.some((acc) => acc.type === 'eth'),
@@ -86,22 +86,33 @@ export const useBundleState = () => {
     return list;
   }, [btc.tokenData, eth.tokenList, hasBtcAccount, hasEthAccount]);
 
-  // update when ethAccounts list changed
-  const idsKey = JSON.stringify(bundleIds);
+  const bundleProtocolList = React.useMemo(() => {
+    const list = [];
+    if (hasEthAccount) {
+      list.push(...eth.protocolList);
+    }
+    if (hasBnAccount && binance.protocolData) {
+      list.push(binance.protocolData);
+    }
+    return list;
+  }, [binance.protocolData, eth.protocolList, hasBnAccount, hasEthAccount]);
+
+  // update when account list changed
   React.useEffect(() => {
-    if (lastIdsKey === idsKey) {
+    if (lastUpdatedKey === updatedKey) {
       return;
     }
     getAllAssets();
-    lastIdsKey = idsKey;
+    lastUpdatedKey = updatedKey;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idsKey]);
+  }, [updatedKey]);
 
   return {
     refetchBundleAssets,
     bundleChainList,
     bundleBalance,
     bundleTokenList,
+    bundleProtocolList,
     account,
     binance,
     eth,

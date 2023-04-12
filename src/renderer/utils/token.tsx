@@ -291,7 +291,9 @@ export function getTokens(
   const label = nftStr ? nftStr + separator + tokenStr : tokenStr;
   const icon = (
     <TokensIcons
-      icons={tokens.map((v) => v?.logo_url)}
+      icons={tokens
+        .filter((item) => item.chain !== '0')
+        .map((v) => v?.logo_url)}
       nftIcons={nfts?.map((n) => n.collection?.logo_url)}
     />
   );

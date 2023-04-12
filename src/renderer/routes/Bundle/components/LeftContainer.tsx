@@ -19,10 +19,11 @@ export const LeftContainer: React.FC = () => {
     string | null
   >(null);
   const {
-    eth: { protocolList, loadingUsedChain, loadingProtocol, loadingToken },
+    eth: { loadingUsedChain, loadingProtocol, loadingToken },
     bundleBalance,
     bundleChainList,
     bundleTokenList,
+    bundleProtocolList,
     refetchBundleAssets,
   } = useBundle();
 
@@ -31,7 +32,7 @@ export const LeftContainer: React.FC = () => {
     selectChainServerId
   );
   const filterProtocolList = useFilterProtoList(
-    protocolList,
+    bundleProtocolList,
     selectChainServerId
   );
   const {
