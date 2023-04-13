@@ -208,7 +208,7 @@ const StyledModal = styled(Modal)`
     color: rgba(255, 255, 255, 0.8);
     margin: 0 -28px;
     padding: 20px 28px;
-    border-bottom: 1px solid #6f7585;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     .left {
       text-align: left;
     }

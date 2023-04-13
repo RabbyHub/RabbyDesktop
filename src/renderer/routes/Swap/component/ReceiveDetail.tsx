@@ -44,7 +44,7 @@ export const WarningOrChecked = ({
 };
 
 const ReceiveWrapper = styled.div`
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 6px;
   padding: 20px 16px;
   font-size: 16px;
