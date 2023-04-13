@@ -18,8 +18,15 @@ import {
   Asset,
   IsolatedMarginAsset,
   TickerPriceResponse,
+  CoinInfoResponse,
 } from './type';
 import { valueGreaterThan10, bigNumberSum } from '../../util';
+
+// 不在该数组中的资产，不应被统计
+let enableTokens: string[] = [];
+const filterAsset = (data: { asset: string }) => {
+  return enableTokens.includes(data.asset);
+};
 
 export class Binance {
   apiKey: string;
@@ -108,6 +115,8 @@ export class Binance {
       this.stakingProductPosition('STAKING'),
     ]);
 
+    console.log('binance', assets);
+
     // 获取所有 token 对应的 usdt 价值
     await this.getUSDTPrices();
 
@@ -137,6 +146,7 @@ export class Binance {
 
   private calcFundingAsset(res: FundingWalletResponse): FundingAsset {
     return res
+      .filter(filterAsset)
       .map((item) => {
         const asset = item.asset;
         const value = bigNumberSum(item.free, item.locked, item.freeze);
@@ -163,6 +173,7 @@ export class Binance {
 
   private calcSpotAsset(res: UserAssetResponse): SpotAsset {
     return res
+      .filter(filterAsset)
       .map((item) => {
         const asset = item.asset;
         const value = bigNumberSum(item.free, item.locked, item.freeze);
@@ -210,7 +221,7 @@ export class Binance {
     const supplies: Asset[] = [];
     const borrows: Asset[] = [];
 
-    res.userAssets.forEach((item) => {
+    res.userAssets.filter(filterAsset).forEach((item) => {
       const netAssetBN = new BigNumber(item.netAsset);
 
       if (netAssetBN.gt(0)) {
@@ -280,7 +291,7 @@ export class Binance {
       const supplies: Asset[] = [];
       const borrows: Asset[] = [];
 
-      assets.forEach((o) => {
+      assets.filter(filterAsset).forEach((o) => {
         const netAssetBN = new BigNumber(o.netAsset);
         const borrowedBN = new BigNumber(o.borrowed);
 
@@ -326,6 +337,7 @@ export class Binance {
     res: SavingsFlexibleProductPositionResponse
   ): AssetWithRewards[] {
     return res
+      .filter(filterAsset)
       .map((item) => {
         const asset = item.asset;
         const value = new BigNumber(item.totalAmount)
@@ -370,6 +382,7 @@ export class Binance {
     res: SavingsCustomizedPositionResponse
   ): AssetWithRewards[] {
     return res
+      .filter(filterAsset)
       .map((item) => {
         const asset = item.asset;
         const value = item.principal;
@@ -412,6 +425,7 @@ export class Binance {
 
   private calcStake(res: StakingProductPositionResponse): AssetWithRewards[] {
     return res
+      .filter(filterAsset)
       .map((item) => {
         const asset = item.asset;
         const value = item.amount;
@@ -453,16 +467,29 @@ export class Binance {
       .filter((item) => valueGreaterThan10(item.usdtValue));
   }
 
-  private async getUSDTPrices() {
-    const symbols = tokenPrice.getUSDTSymbols();
-
-    if (!symbols.length) {
-      return;
+  // 部分 token 查询不到价格，需要过滤掉
+  private async filterToken(symbols: string[]) {
+    if (!enableTokens.length) {
+      const data = await this.invoke<CoinInfoResponse>('coinInfo');
+      enableTokens = data.filter((o) => o.trading).map((o) => o.coin);
     }
 
+    return symbols.filter((symbol) =>
+      enableTokens.some((token) => token === symbol)
+    );
+  }
+
+  private async getUSDTPrices() {
+    const symbols = tokenPrice.getSymbols();
+    const tokens = await this.filterToken(symbols);
+
+    if (!tokens.length) {
+      return;
+    }
+    const usdtSymbols = tokenPrice.getUSDTSymbols(tokens);
     const result = await this.invoke<TickerPriceResponse>('tickerPrice', [
       undefined,
-      symbols,
+      usdtSymbols,
     ]);
 
     tokenPrice.update(result);

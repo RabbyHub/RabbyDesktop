@@ -98,30 +98,10 @@ export const toMarginPortfolio = (
   return {
     ...basePortfolio,
     name: name as any,
-    detail_types: ['leading'],
+    detail_types: ['lending'],
     detail: {
-      supply_token_list: margin.supplies.map(
-        (o) =>
-          ({
-            name: o.asset,
-            symbol: o.asset,
-            usd_value: Number(o.usdtValue),
-            chain: '0',
-            id: o.asset,
-            amount: Number(o.value),
-          } as TokenItem)
-      ),
-      borrow_token_list: margin.borrows.map(
-        (o) =>
-          ({
-            name: o.asset,
-            symbol: o.asset,
-            usd_value: Number(o.usdtValue),
-            chain: '0',
-            id: o.asset,
-            amount: Number(o.value),
-          } as TokenItem)
-      ),
+      supply_token_list: margin.supplies.map(toTokenItem),
+      borrow_token_list: margin.borrows.map(toTokenItem),
       health_rate: margin.healthRate,
     } as any,
     stats: {

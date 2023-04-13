@@ -171,6 +171,11 @@ export type TickerPriceResponse = {
   price: string;
 }[];
 
+export type CoinInfoResponse = {
+  coin: string;
+  trading: string;
+}[];
+
 // 资金账户
 export type FundingAsset = Asset[];
 

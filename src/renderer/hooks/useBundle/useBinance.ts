@@ -139,7 +139,6 @@ export const useBinance = () => {
         ];
       }) ?? [];
 
-    console.log(assets);
     const data: DisplayProtocol = {
       usd_value: Number(balance),
       id: 'binance',

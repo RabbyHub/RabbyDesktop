@@ -40,13 +40,17 @@ class TokenPrice {
     this.symbols.add(symbol);
   }
 
-  getUSDTSymbols() {
+  getSymbols() {
     const symbols = [...this.symbols].filter((s) => {
       return (
         !this.prices[s] || Date.now() - this.prices[s].lastUpdate > this.expire
       );
     });
 
+    return symbols.filter((s) => s !== USDT);
+  }
+
+  getUSDTSymbols(symbols: string[]) {
     return symbols.filter((s) => s !== USDT).map((s) => `${s}${USDT}`);
   }
 
