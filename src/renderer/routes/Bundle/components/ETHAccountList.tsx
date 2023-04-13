@@ -14,7 +14,7 @@ export const ETHAccountList = () => {
       onClickAdd={() => {
         zActions.showZSubview('select-add-address-type-modal');
       }}
-      title="Imported wallet account"
+      title="Imported wallet address"
     >
       {list.map((item) => (
         <AccountItem canDelete canEdit key={item.id} data={item} />

@@ -17,7 +17,6 @@ export const useBundleAccount = () => {
   const inBundleList = React.useMemo(() => {
     return accounts.filter((acc) => acc.inBundle);
   }, [accounts]);
-  console.log(inBundleList);
   const binanceList = React.useMemo(() => {
     return accounts.filter((acc) => acc.type === 'bn') as BNAccount[];
   }, [accounts]);
