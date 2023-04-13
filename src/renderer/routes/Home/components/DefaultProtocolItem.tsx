@@ -70,7 +70,7 @@ const ProtocolItemWrapper = styled.div`
       text-align: center;
       top: 0;
       left: 0;
-      border-top-left-radius: 12px;
+      /* border-top-left-radius: 12px; */
       border-bottom-right-radius: 4px;
     }
     .proxy-info {
