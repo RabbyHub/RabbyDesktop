@@ -8,6 +8,10 @@ import { isWeb3Addr } from '@/isomorphic/web3';
 import { isMainWinShellWebUI } from '@/isomorphic/url';
 import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
 
+message.config({
+  top: 100,
+});
+
 const TIMEOUT_SEC = 3;
 
 type OpenParamters = Parameters<typeof message.open>;
@@ -22,7 +26,7 @@ export function toastMessage(config: OpenParamters[0]) {
           aria-label="check-circle"
           className="anticon anticon-check-circle"
         >
-          <RcIconToastSuccess className="w-[20px] h-[20px]" />
+          <RcIconToastSuccess className="w-[24px] h-[24px]" />
         </span>
       ),
     }),
