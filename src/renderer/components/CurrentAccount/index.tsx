@@ -1,6 +1,9 @@
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { useClickOutSide } from '@/renderer/hooks/useClick';
-import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
+import {
+  useZPopupLayerOnMain,
+  useZViewsVisibleChanged,
+} from '@/renderer/hooks/usePopupWinOnMainwin';
 import {
   hideMainwinPopupview,
   showMainwinPopupview,
@@ -10,7 +13,7 @@ import {
   WALLET_BRAND_CONTENT,
 } from '@/renderer/utils/constant';
 import clsx from 'clsx';
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   ADD_DROPDOWN_LEFT_OFFSET,
   getAddDropdownKeyrings,
@@ -40,6 +43,13 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
   );
   const zActions = useZPopupLayerOnMain();
 
+  const [addressManagementVisible, setAddressManagementVisible] =
+    useState(false);
+
+  useZViewsVisibleChanged((visibles) => {
+    setAddressManagementVisible(visibles['address-management']);
+  });
+
   if (!currentAccount?.alianName) {
     return null;
   }
@@ -58,7 +68,13 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
       <div className={styles.dockRight}>
         <span className={styles.addr}>{displayAddr}</span>
       </div>
-      <img src="rabby-internal://assets/icons/top-bar/select.svg" />
+      <img
+        src="rabby-internal://assets/icons/top-bar/select-top.svg"
+        className={clsx(
+          'transition-transform',
+          addressManagementVisible && 'transform rotate-180'
+        )}
+      />
     </div>
   );
 };
