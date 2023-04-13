@@ -24,3 +24,5 @@ export function isRabbyXCenteredWindowType(viewType?: string | null) {
     }
   }
 }
+
+export const RABBX_RIGHT_WINDOW_TYPES = ['Connect'];
