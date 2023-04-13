@@ -5,6 +5,7 @@ import { useBundle } from '@/renderer/hooks/useBundle/useBundle';
 import { Form } from 'antd';
 import clsx from 'clsx';
 import React from 'react';
+import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import { InputItem } from './InputItem';
 
 const ERROR_MESSAGE = {
@@ -72,8 +73,24 @@ export const AddBinanceModal: React.FC<ModalProps> = (props) => {
   const apiKey = Form.useWatch('apiKey', form);
   const disabledSubmit = !apiKey || !apiSecret || loading;
 
+  const openDocs = () => {
+    openExternalUrl(
+      'https://www.binance.com/en/support/faq/how-to-create-api-360002502072'
+    );
+  };
+
   return (
     <Modal {...props} width={1000} centered title="Add Binance Account">
+      <div
+        onClick={openDocs}
+        className={clsx(
+          'text-[#8697FF] text-[16px]',
+          'text-center mb-[40px] w-full mt-[-20px]',
+          'hover:underline cursor-pointer'
+        )}
+      >
+        How to create Binance API Key
+      </div>
       <Form
         className={clsx(
           'px-[180px] pb-[80px] h-[485px]',
