@@ -3,9 +3,13 @@ import Axios from 'axios';
 import { INITIAL_OPENAPI_URL } from '@/renderer/utils/constant';
 import { DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import { TokenItem } from '@debank/rabby-api/dist/types';
+import { atom, useAtom } from 'jotai';
 import { useBundleAccount } from './useBundleAccount';
 import { saveBundleAccountsBalance } from './shared';
 import { bigNumberSum } from './util';
+
+const balanceAtom = atom<string>('0');
+const assetsAtom = atom<TokenItem[]>([]);
 
 let lastUpdatedKey = '';
 
@@ -14,13 +18,13 @@ let lastUpdatedKey = '';
  * 不存储数据，只负责调用 API
  */
 export const useBTC = () => {
-  const [balance, setBalance] = React.useState('0');
+  const [balance, setBalance] = useAtom(balanceAtom);
+  const [assets, setAssets] = useAtom(assetsAtom);
   const { inBundleList } = useBundleAccount();
   const btcAccounts = React.useMemo(
     () => inBundleList.filter((acc) => acc.type === 'btc') as BTCAccount[],
     [inBundleList]
   );
-  const [assets, setAssets] = React.useState<TokenItem[]>();
   const [loading, setLoading] = React.useState(false);
 
   const updatedKey = React.useMemo(

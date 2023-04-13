@@ -358,9 +358,17 @@ const DefaultProtocolItem = ({
             </Popover>
           )}
         </div>
-        <span className="protocol-usd">
-          {formatUsdValue(protocol.usd_value)}
-        </span>
+        <div className="protocol-usd flex items-center justify-end gap-[7px]">
+          <span>{formatUsdValue(protocol.usd_value)}</span>
+          {protocol.id === 'binance' && (
+            <Tooltip title="Futures, options, and assets <$10 are not included">
+              <img
+                className="cursor-pointer"
+                src="rabby-internal://assets/icons/bundle/help.svg"
+              />
+            </Tooltip>
+          )}
+        </div>
       </ProtocolHeader>
       {[...typesMap].map(([k, v]) => {
         // 需要根据 common 匹配对应模板

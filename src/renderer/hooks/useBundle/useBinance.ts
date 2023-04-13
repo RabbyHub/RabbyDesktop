@@ -1,5 +1,6 @@
 import React from 'react';
 import { DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
+import { atom, useAtom } from 'jotai';
 import { saveBundleAccountsBalance } from './shared';
 import { Binance } from './cex/binance/binance';
 import { mergeList, bigNumberSum } from './util';
@@ -19,18 +20,20 @@ type BNAccountWithAPI = BNAccount & {
 
 type BinanceAssets = Awaited<ReturnType<Binance['getAssets']>>;
 
+const balanceAtom = atom<string>('0');
+const assetsAtom = atom<BinanceAssets[]>([]);
+const mergedFundingAssetAtom = atom<BinanceAssets['fundingAsset']>([]);
+const mergedSpotAssetAtom = atom<BinanceAssets['spotAsset']>([]);
 let lastUpdatedKey = '';
 
 export const useBinance = () => {
-  const [balance, setBalance] = React.useState<string>('0');
-  const [assets, setAssets] = React.useState<BinanceAssets[]>();
+  const [balance, setBalance] = useAtom(balanceAtom);
+  const [assets, setAssets] = useAtom(assetsAtom);
   const { inBundleList } = useBundleAccount();
-  const [mergedFundingAsset, setMergedFundingAsset] = React.useState<
-    BinanceAssets['fundingAsset']
-  >([]);
-  const [mergedSpotAsset, setMergedSpotAsset] = React.useState<
-    BinanceAssets['spotAsset']
-  >([]);
+  const [mergedFundingAsset, setMergedFundingAsset] = useAtom(
+    mergedFundingAssetAtom
+  );
+  const [mergedSpotAsset, setMergedSpotAsset] = useAtom(mergedSpotAssetAtom);
   const [loading, setLoading] = React.useState(false);
 
   const bnAccounts = React.useMemo<BNAccountWithAPI[]>(() => {
