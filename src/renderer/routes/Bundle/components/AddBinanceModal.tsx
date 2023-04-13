@@ -12,6 +12,7 @@ const ERROR_MESSAGE = {
   [ERROR.PERMISSION_ERROR]:
     'For your safety, please add an account that only has allowed "Enable Reading" in API restrictions.',
   [ERROR.INVALID_KEY]: 'Invalid Key',
+  [ERROR.EXISTED]: 'This address is already added',
 };
 
 export const AddBinanceModal: React.FC<ModalProps> = (props) => {
@@ -86,7 +87,7 @@ export const AddBinanceModal: React.FC<ModalProps> = (props) => {
         className={clsx(
           'text-[#8697FF] text-[16px]',
           'text-center mb-[40px] w-full mt-[-20px]',
-          'hover:underline cursor-pointer'
+          'underline cursor-pointer'
         )}
       >
         How to create Binance API Key

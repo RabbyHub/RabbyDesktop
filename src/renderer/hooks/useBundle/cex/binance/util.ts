@@ -102,7 +102,7 @@ export const toMarginPortfolio = (
     detail: {
       supply_token_list: margin.supplies.map(toTokenItem),
       borrow_token_list: margin.borrows.map(toTokenItem),
-      health_rate: margin.healthRate,
+      health_rate: Number(margin.healthRate),
     } as any,
     stats: {
       asset_usd_value,

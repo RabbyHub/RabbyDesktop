@@ -43,7 +43,8 @@ export const useETH = () => {
 
   const balance = useTotalBalance(tokenList, protocolList);
 
-  const getTokenList = React.useCallback(async () => {
+  const getTokenList = async () => {
+    const curUpdatedKey = lastUpdatedKey;
     setLoadingToken(true);
     const cachedListArray = await Promise.all(
       ethAccounts.map((acc) => loadCachedTokenList(acc.data.address))
@@ -58,15 +59,21 @@ export const useETH = () => {
     const realTimeListArray = await Promise.all(
       ethAccounts.map((acc) => loadRealTimeTokenList(acc.data.address))
     );
+
+    if (curUpdatedKey !== lastUpdatedKey) {
+      return;
+    }
+
     const realTimeList = mergeList(
       realTimeListArray.reduce((prev, curr) => [...prev, ...curr], []),
       'id',
       ['usd_value', 'amount']
     );
     setTokenList(realTimeList);
-  }, [ethAccounts, setTokenList]);
+  };
 
-  const getProtocolList = React.useCallback(async () => {
+  const getProtocolList = async () => {
+    const curUpdatedKey = lastUpdatedKey;
     setLoadingProtocol(true);
     const cachedListArray = await Promise.all(
       ethAccounts.map((acc) => loadCachedProtocolList(acc.data.address))
@@ -87,15 +94,19 @@ export const useETH = () => {
       const list = await loadRealTimeProtocolList(acc.data.address);
       realTimeListArray.push(list);
     }
+
+    if (curUpdatedKey !== lastUpdatedKey) {
+      return;
+    }
     const realTimeList = mergeList(
       realTimeListArray.reduce((prev, curr) => [...prev, ...curr], []),
       'id',
       ['usd_value', 'portfolio_item_list']
     );
     setProtocolList(realTimeList);
-  }, [ethAccounts, setProtocolList]);
+  };
 
-  const getUsedChainList = React.useCallback(async () => {
+  const getUsedChainList = async () => {
     setLoadingUsedChain(true);
     const listArray = await Promise.all(
       ethAccounts.map((acc) => walletOpenapi.usedChainList(acc.data.address))
@@ -108,17 +119,17 @@ export const useETH = () => {
     );
     setUsedChainList(list.map((chain) => formatChain(chain)));
     setLoadingUsedChain(false);
-  }, [ethAccounts, setUsedChainList]);
+  };
 
   const getAssets = async (force = false) => {
     if (lastUpdatedKey === updatedKey && !force) {
       return;
     }
+    lastUpdatedKey = updatedKey;
     getTokenList();
     getProtocolList();
     getUsedChainList();
     getAllAccountsToDisplay();
-    lastUpdatedKey = updatedKey;
   };
 
   const displayChainList = React.useMemo(() => {
