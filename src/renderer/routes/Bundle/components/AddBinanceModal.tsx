@@ -7,6 +7,7 @@ import clsx from 'clsx';
 import React from 'react';
 import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import { InputItem } from './InputItem';
+import { BundleSuccessModal } from './BundleSuccessModal';
 
 const ERROR_MESSAGE = {
   [ERROR.PERMISSION_ERROR]:
@@ -25,6 +26,8 @@ export const AddBinanceModal: React.FC<ModalProps> = (props) => {
   }>();
   const [loading, setLoading] = React.useState(false);
   const { onCancel } = props;
+  const [openSuccessModal, setOpenSuccessModal] = React.useState(false);
+  const [newAccount, setNewAccount] = React.useState<BundleAccount>();
 
   const onAdd = React.useCallback(async () => {
     setLoading(true);
@@ -47,15 +50,16 @@ export const AddBinanceModal: React.FC<ModalProps> = (props) => {
       return;
     }
 
-    await create({
+    const result = await create({
       type: 'bn',
       apiKey,
       apiSecret,
     });
+    setNewAccount(result);
     setLoading(false);
     form.resetFields();
-    onCancel?.();
-  }, [create, form, onCancel, preCheck]);
+    setOpenSuccessModal(true);
+  }, [create, form, preCheck]);
 
   const onValuesChange = React.useCallback(() => {
     form.setFields([
@@ -79,6 +83,19 @@ export const AddBinanceModal: React.FC<ModalProps> = (props) => {
       'https://www.binance.com/en/support/faq/how-to-create-api-360002502072'
     );
   };
+
+  if (openSuccessModal && newAccount) {
+    return (
+      <BundleSuccessModal
+        data={newAccount}
+        open={openSuccessModal}
+        onCancel={() => {
+          setOpenSuccessModal(false);
+          onCancel?.();
+        }}
+      />
+    );
+  }
 
   return (
     <Modal {...props} width={1000} centered title="Add Binance Account">
