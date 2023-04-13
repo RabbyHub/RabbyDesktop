@@ -81,7 +81,8 @@ export const AccountItem: React.FC<Props> = ({
           ) : (
             <div
               className={clsx(
-                'border border-[#FFFFFF4D] group-hover:border-white w-[16px] h-[16px] border-solid rounded-full'
+                'border border-[#FFFFFF4D] group-hover:border-white border-solid',
+                'w-[16px] h-[16px] rounded-full'
               )}
             />
           )}
@@ -91,9 +92,15 @@ export const AccountItem: React.FC<Props> = ({
         </div>
         <div className={clsx('text-white text-[12px]', 'flex-1 space-y-[6px]')}>
           <NicknameInput data={data} canEdit={canEdit} />
-          <div className="flex space-x-[5px] items-center">
+          <div className="flex space-x-[5px] items-center h-[14px]">
             <span className="opacity-50">{ellipsis(displayAddress)}</span>
-            <div onClick={onCopy} className="opacity-60 hover:opacity-100">
+            <div
+              onClick={onCopy}
+              className={clsx(
+                'group-hover:block hidden',
+                'opacity-60 hover:opacity-100'
+              )}
+            >
               <img
                 className="w-[14px]"
                 src="rabby-internal://assets/icons/address-management/copy-white.svg"

@@ -20,7 +20,7 @@ const RightBarWrapper = styled.div`
 
 const ActionList = styled.ul`
   list-style: none;
-  padding: 50px 0 0 0;
+  padding: 27px 0 0 0;
   display: flex;
   margin-bottom: 65px;
   justify-content: center;

@@ -72,7 +72,7 @@ export const CommonAccountList: React.FC<Props> = ({
           </Tooltip>
         )}
       </div>
-      <ul className={clsx('flex flex-col space-y-[12px] p-0')}>
+      <ul className={clsx('flex flex-col space-y-[12px]', 'm-0 p-0')}>
         {hasChildren ? children : isBundle ? <BundleNone /> : <CommonNone />}
       </ul>
     </section>

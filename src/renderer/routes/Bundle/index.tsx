@@ -17,13 +17,14 @@ const HomeBundleInner = () => {
         <section
           className={classNames(
             'flex flex-col overflow-y-auto',
-            'w-[358px] px-[28px]'
+            'w-[358px] px-[28px]',
+            'space-y-[24px]',
+            'mb-[24px]'
           )}
         >
           <BundleAccountList />
           <div
             className={classNames(
-              'my-[26px]',
               'border-0 border-b border-solid border-white',
               'opacity-[0.06]'
             )}
