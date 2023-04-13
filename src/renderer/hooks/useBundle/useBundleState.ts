@@ -107,6 +107,11 @@ export const useBundleState = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updatedKey]);
 
+  const loadingToken = eth.loadingToken || btc.loading;
+  const loadingProtocol = eth.loadingProtocol || binance.loading;
+  const loadingUsedChain =
+    eth.loadingUsedChain || btc.loading || binance.loading;
+
   return {
     refetchBundleAssets,
     bundleChainList,
@@ -117,5 +122,8 @@ export const useBundleState = () => {
     binance,
     eth,
     btc,
+    loadingToken,
+    loadingProtocol,
+    loadingUsedChain,
   };
 };

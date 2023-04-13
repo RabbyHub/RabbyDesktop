@@ -19,7 +19,9 @@ export const LeftContainer: React.FC = () => {
     string | null
   >(null);
   const {
-    eth: { loadingUsedChain, loadingProtocol, loadingToken },
+    loadingToken,
+    loadingProtocol,
+    loadingUsedChain,
     bundleBalance,
     bundleChainList,
     bundleTokenList,

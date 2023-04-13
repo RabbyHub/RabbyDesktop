@@ -21,6 +21,7 @@ export const useBTC = () => {
     [inBundleList]
   );
   const [assets, setAssets] = React.useState<TokenItem[]>();
+  const [loading, setLoading] = React.useState(false);
 
   const updatedKey = React.useMemo(
     () => JSON.stringify(btcAccounts.map((acc) => acc.id)),
@@ -30,6 +31,7 @@ export const useBTC = () => {
     if (lastUpdatedKey === updatedKey && !force) {
       return;
     }
+    setLoading(true);
     const result = await Promise.all(
       btcAccounts.map((account) => {
         return Axios.get<
@@ -63,6 +65,7 @@ export const useBTC = () => {
     // 更新 bn 的总余额
     setBalance(bigNumberSum(...balances));
     lastUpdatedKey = updatedKey;
+    setLoading(false);
   };
 
   const chainData = {
@@ -92,5 +95,6 @@ export const useBTC = () => {
     chainData,
     tokenData,
     getAssets,
+    loading,
   };
 };

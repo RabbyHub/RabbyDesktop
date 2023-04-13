@@ -31,6 +31,7 @@ export const useBinance = () => {
   const [mergedSpotAsset, setMergedSpotAsset] = React.useState<
     BinanceAssets['spotAsset']
   >([]);
+  const [loading, setLoading] = React.useState(false);
 
   const bnAccounts = React.useMemo<BNAccountWithAPI[]>(() => {
     const accounts = inBundleList.filter(
@@ -52,6 +53,7 @@ export const useBinance = () => {
     if (lastUpdatedKey === updatedKey && !force) {
       return;
     }
+    setLoading(true);
     // 获取所有资产
     const result = await Promise.all(
       bnAccounts.map((account) => account.api.getAssets())
@@ -85,6 +87,7 @@ export const useBinance = () => {
     setBalance(bigNumberSum(...balances));
 
     lastUpdatedKey = updatedKey;
+    setLoading(false);
   };
 
   const chainData = {
@@ -166,5 +169,6 @@ export const useBinance = () => {
     assets,
     chainData,
     protocolData,
+    loading,
   };
 };
