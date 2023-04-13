@@ -1,6 +1,7 @@
 import { useAtom } from 'jotai';
 import React from 'react';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { validate, Network } from 'bitcoin-address-validation';
 import { Binance } from './cex/binance/binance';
 import { bundleAccountsAtom } from './shared';
 import { ERROR } from './error';
@@ -82,6 +83,11 @@ export const useBundleAccount = () => {
         }
       } else if (account.type === 'btc') {
         if (!account.address) {
+          return {
+            error: ERROR.INVALID_ADDRESS,
+          };
+        }
+        if (!validate(account.address, Network.mainnet)) {
           return {
             error: ERROR.INVALID_ADDRESS,
           };

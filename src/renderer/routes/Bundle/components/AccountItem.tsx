@@ -1,5 +1,5 @@
 import { useBundle } from '@/renderer/hooks/useBundle/useBundle';
-import { useCopyAddress } from '@/renderer/hooks/useCopyAddress';
+import { useCopy } from '@/renderer/hooks/useCopy';
 import { ellipsis } from '@/renderer/utils/address';
 import { splitNumberByStep } from '@/renderer/utils/number';
 import clsx from 'clsx';
@@ -28,7 +28,7 @@ export const AccountItem: React.FC<Props> = ({
   const addressTypeIcon = useAccountItemIcon(data);
   const displayAddress = useAccountItemAddress(data);
 
-  const onCopy = useCopyAddress();
+  const copy = useCopy();
   const onClickDelete = React.useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       e.stopPropagation();
@@ -39,6 +39,13 @@ export const AccountItem: React.FC<Props> = ({
     [remove, data]
   );
 
+  const onCopy = React.useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      e.stopPropagation();
+      copy(displayAddress);
+    },
+    [copy, displayAddress]
+  );
   const onClick = React.useCallback(() => {
     toggleBundle(data);
   }, [toggleBundle, data]);
@@ -86,10 +93,7 @@ export const AccountItem: React.FC<Props> = ({
           <NicknameInput data={data} canEdit={canEdit} />
           <div className="flex space-x-[5px] items-center">
             <span className="opacity-50">{ellipsis(displayAddress)}</span>
-            <div
-              onClick={() => onCopy(displayAddress)}
-              className="opacity-60 hover:opacity-100"
-            >
+            <div onClick={onCopy} className="opacity-60 hover:opacity-100">
               <img
                 className="w-[14px]"
                 src="rabby-internal://assets/icons/address-management/copy-white.svg"
