@@ -94,10 +94,9 @@ handleIpcMainInvoke('bundle-account-post', (_, account: BundleAccount) => {
     };
   }
 
-  accounts.push({
-    ...account,
-    balance: '0',
-  });
+  account.balance = account.balance || '0';
+
+  accounts.push(account);
   bundleStore.set('accounts', accounts);
 
   emitIpcMainEvent('__internal_main:bundle:changed', {

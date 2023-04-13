@@ -17,26 +17,7 @@ export const useBundleAccount = () => {
   const inBundleList = React.useMemo(() => {
     return accounts.filter((acc) => acc.inBundle);
   }, [accounts]);
-  // 余额占比
-  const percentMap = React.useMemo(() => {
-    const list = inBundleList.map((item) => {
-      return {
-        id: item.id!,
-        balance: Number((item.balance ?? '0') as string),
-      };
-    });
-    const total = list.reduce((acc, item) => acc + item.balance, 0);
-    return list.reduce((acc, item) => {
-      const b = item.balance;
-      let num = (b / total) * 100;
-      if (Number.isNaN(num)) {
-        num = 0;
-      }
-      acc[item.id] = num.toFixed(0);
-      return acc;
-    }, {} as Record<string, string>);
-  }, [inBundleList]);
-
+  console.log(inBundleList);
   const binanceList = React.useMemo(() => {
     return accounts.filter((acc) => acc.type === 'bn') as BNAccount[];
   }, [accounts]);
@@ -63,6 +44,26 @@ export const useBundleAccount = () => {
       } as ETHAccount;
     });
   }, [accounts, ethAccountList]);
+
+  // 余额占比
+  const percentMap = React.useMemo(() => {
+    const list = inBundleList.map((item) => {
+      return {
+        id: item.id!,
+        balance: Number(item.balance ?? '0'),
+      };
+    });
+    const total = list.reduce((acc, item) => acc + item.balance, 0);
+    return list.reduce((acc, item) => {
+      const b = item.balance;
+      let num = (b / total) * 100;
+      if (Number.isNaN(num)) {
+        num = 0;
+      }
+      acc[item.id] = num.toFixed(0);
+      return acc;
+    }, {} as Record<string, string>);
+  }, [inBundleList]);
 
   const preCheck = React.useCallback(
     async (account: Partial<BundleAccount>) => {
@@ -192,8 +193,10 @@ export const useBundleAccount = () => {
         });
         return;
       }
+
       window.rabbyDesktop.ipcRenderer.invoke('bundle-account-post', {
         ...account,
+        balance: account.type === 'eth' ? account.data.balance.toString() : '0',
         inBundle: true,
       });
     },
