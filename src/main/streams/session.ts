@@ -28,15 +28,13 @@ import {
   getRabbyExtId,
   getSessionInsts,
   getWebuiExtId,
-  pushChangesToZPopupLayer,
 } from '../utils/stream-helpers';
 import { checkOpenAction } from '../utils/tabs';
 import { getWindowFromWebContents, switchToBrowserTab } from '../utils/browser';
 import { rewriteSessionWebRequestHeaders } from '../utils/webRequest';
 import { checkProxyViaBrowserView, setSessionProxy } from '../utils/appNetwork';
 import {
-  desktopAppStore,
-  getAppProxyConf,
+  getFullAppProxyConf,
   isEnableSupportIpfsDapp,
 } from '../store/desktopApp';
 import {
@@ -49,8 +47,6 @@ import {
   emitIpcMainEvent,
   onIpcMainInternalEvent,
 } from '../utils/ipcMainEvents';
-import { rabbyxQuery } from './rabbyIpcQuery/_base';
-import { getSystemProxyServer } from '../utils/systemConfig';
 
 const sesLog = getBindLog('session', 'bgGrey');
 
@@ -126,29 +122,13 @@ export async function defaultSessionReadyThen() {
 }
 
 async function checkProxyValidOnBootstrap() {
-  const appProxyConf = getAppProxyConf();
+  const appProxyConf = await getFullAppProxyConf();
 
   if (appProxyConf.proxyType === 'none') {
     return {
       shouldApplyProxyOnBoot: false,
       appProxyConf,
     };
-  }
-
-  if (appProxyConf.proxyType === 'system') {
-    const { config } = await getSystemProxyServer();
-    if (config && config.protocol === 'http') {
-      appProxyConf.systemProxySettings = {
-        protocol: config.protocol,
-        host: config.host,
-        port: coerceNumber(config.port, 0),
-      };
-
-      sesLog(
-        `[checkProxyValidOnBootstrap] proxy config from system:`,
-        appProxyConf.systemProxySettings
-      );
-    }
   }
 
   checkProxyViaBrowserView('https://google.com', appProxyConf).then(

@@ -133,11 +133,15 @@ type IProxySettings = {
 type IAppProxyConf = {
   proxyType: 'none' | 'system' | 'custom';
   proxySettings: IProxySettings;
+  // it can be used as axios's config property directly
   systemProxySettings?: {
-    protocol: 'https' | 'http';
+    protocol: 'http';
     host: string;
     port: number;
   };
+};
+type IPraticalAppProxyConf = IAppProxyConf & {
+  configForAxios: IAppProxyConf['systemProxySettings'];
 };
 
 type IRunningAppProxyConf = IAppProxyConf & { applied: boolean };

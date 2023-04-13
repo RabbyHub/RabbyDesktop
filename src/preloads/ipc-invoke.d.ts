@@ -127,8 +127,8 @@ type ChannelInvokePayload = {
   'get-proxyConfig': {
     send: [];
     response: {
-      persisted: IAppProxyConf;
       runtime: IRunningAppProxyConf;
+      systemProxy: IAppProxyConf['systemProxySettings'];
     };
   };
   'apply-proxyConfig': {

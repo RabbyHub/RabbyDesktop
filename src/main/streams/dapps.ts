@@ -1,13 +1,8 @@
-import { getAppProxyConf } from '../store/desktopApp';
-import { checkUrlViaBrowserView } from '../utils/appNetwork';
-import {
-  BrowserViewManager,
-  parseSiteMetaByWebContents,
-} from '../utils/browserView';
+import { getFullAppProxyConf } from '../store/desktopApp';
 import { safeCapturePage } from '../utils/dapps';
 import { parseWebsiteFavicon } from '../utils/fetch';
 import { handleIpcMainInvoke } from '../utils/ipcMainEvents';
-import { getSessionInsts, onMainWindowReady } from '../utils/stream-helpers';
+import { onMainWindowReady } from '../utils/stream-helpers';
 import { getTabbedWindowFromWebContents } from './tabbedBrowserWindow';
 
 handleIpcMainInvoke('parse-favicon', async (_, targetURL) => {
@@ -16,7 +11,7 @@ handleIpcMainInvoke('parse-favicon', async (_, targetURL) => {
     favicon: null as IParsedFavicon | null,
   };
   try {
-    const proxyConf = getAppProxyConf();
+    const proxyConf = await getFullAppProxyConf();
     const proxyOnParseFavicon =
       proxyConf.proxyType === 'custom'
         ? {

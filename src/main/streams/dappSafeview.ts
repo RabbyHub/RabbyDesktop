@@ -24,7 +24,7 @@ import {
 import { valueToMainSubject } from './_init';
 import { getAssetPath } from '../utils/app';
 import { parseWebsiteFavicon } from '../utils/fetch';
-import { getAppProxyConf } from '../store/desktopApp';
+import { getFullAppProxyConf } from '../store/desktopApp';
 import { findDappsByOrigin } from '../store/dapps';
 import { getOrCreateDappBoundTab } from '../utils/tabbedBrowserWindow';
 
@@ -194,7 +194,7 @@ export async function safeOpenURL(
   updateSubWindowPosition(targetWin, { baseView });
 
   try {
-    const proxyConf = getAppProxyConf();
+    const proxyConf = await getFullAppProxyConf();
     const proxyOnParseFavicon =
       proxyConf.proxyType === 'custom'
         ? {

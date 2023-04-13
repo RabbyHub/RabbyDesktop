@@ -5,7 +5,6 @@ import {
   type Protocol,
   getProxyWindows,
 } from 'get-proxy-settings';
-import type { AxiosRequestConfig } from 'axios';
 
 import { coerceNumber } from '@/isomorphic/primitive';
 import { parseScUtilProxyOutput } from '@/isomorphic/parser';
@@ -61,32 +60,40 @@ async function getWin32SystemHttpProxySettings(): Promise<ISimpleProxySetting | 
   return settings?.https || settings?.http || null;
 }
 
-type IGetSystemProxyServer = {
-  proxyURL: string;
+export type ISysProxyInfo = {
   config: ISimpleProxySetting | null;
-  configForAxios: Exclude<AxiosRequestConfig['proxy'], false> | null;
+  systemProxySettings: IAppProxyConf['systemProxySettings'];
 };
-export async function getSystemProxyServer(forceReload = false) {
-  const result: IGetSystemProxyServer = {
-    proxyURL: false as any,
-    config: null,
-    configForAxios: null,
+const state: {
+  fetched: boolean;
+  config: ISysProxyInfo['config'];
+} = {
+  fetched: false,
+  config: null,
+};
+export async function getSystemProxyInfo(forceReload = false) {
+  const result: ISysProxyInfo = {
+    config: state.config ? { ...state.config } : null,
+    systemProxySettings: undefined,
   };
-  if ((result.proxyURL as any) === false || forceReload) {
+  if (!state.fetched || forceReload) {
     result.config = isWin32
       ? await getWin32SystemHttpProxySettings()
       : await getDarwinSystemHttpProxySettings();
-    if (result.config) {
-      const port = coerceNumber(result.config.port, 0);
 
-      result.configForAxios = {
-        protocol: result.config.protocol,
-        host: result.config.host,
-        port,
-      };
-    } else {
-      result.proxyURL = '';
-    }
+    state.fetched = true;
+  }
+
+  if (result.config) {
+    const port = coerceNumber(result.config.port, 0);
+
+    result.systemProxySettings = {
+      protocol: result.config.protocol as 'http',
+      host: result.config.host,
+      port,
+    };
+  } else {
+    result.systemProxySettings = undefined;
   }
 
   return result;

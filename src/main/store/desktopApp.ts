@@ -14,6 +14,7 @@ import { safeParse, shortStringify } from '../../isomorphic/json';
 import { FRAME_DEFAULT_SIZE } from '../../isomorphic/const-size';
 import { emitIpcMainEvent, handleIpcMainInvoke } from '../utils/ipcMainEvents';
 import { makeStore } from '../utils/store';
+import { getSystemProxyInfo } from '../utils/systemConfig';
 
 export const desktopAppStore = makeStore<{
   firstStartApp: IDesktopAppState['firstStartApp'];
@@ -145,7 +146,7 @@ export function isEnableSupportIpfsDapp() {
   return desktopAppStore.get('enableSupportIpfsDapp') === true;
 }
 
-export function getAppProxyConf(): IAppProxyConf {
+function getAppProxyConf(): IAppProxyConf {
   return {
     proxyType: desktopAppStore.get('proxyType'),
     proxySettings: desktopAppStore.get('proxySettings'),
@@ -154,7 +155,7 @@ export function getAppProxyConf(): IAppProxyConf {
 }
 
 export function getOptionProxyForAxios(
-  proxyConf?: ReturnType<typeof getAppProxyConf>
+  proxyConf?: IAppProxyConf
 ): Exclude<AxiosRequestConfig['proxy'], false> {
   proxyConf = proxyConf || getAppProxyConf();
 
@@ -177,7 +178,7 @@ export function getOptionProxyForAxios(
 }
 
 export function getHttpsProxyAgentForRuntime(
-  proxyConf?: ReturnType<typeof getAppProxyConf>
+  proxyConf?: IAppProxyConf
 ): AxiosRequestConfig['httpsAgent'] {
   proxyConf = proxyConf || getAppProxyConf();
 
@@ -199,6 +200,33 @@ export function getHttpsProxyAgentForRuntime(
     );
   }
   return httpsProxyAgent;
+}
+
+export async function getFullAppProxyConf(opts?: {
+  refetchSystemProxyServer?: boolean;
+}) {
+  const appProxyConf = getAppProxyConf() as IPraticalAppProxyConf;
+
+  appProxyConf.systemProxySettings = (
+    await getSystemProxyInfo(opts?.refetchSystemProxyServer)
+  ).systemProxySettings;
+
+  let configForAxios: AxiosRequestConfig['proxy'];
+
+  if (appProxyConf.proxyType === 'system') {
+    configForAxios = appProxyConf.systemProxySettings;
+  } else if (appProxyConf.proxyType === 'custom') {
+    configForAxios = {
+      protocol: appProxyConf.proxySettings.protocol,
+      host: appProxyConf.proxySettings.hostname,
+      port: appProxyConf.proxySettings.port,
+    };
+  }
+
+  return {
+    ...appProxyConf,
+    configForAxios,
+  };
 }
 
 handleIpcMainInvoke('get-desktopAppState', () => {
