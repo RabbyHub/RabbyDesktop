@@ -160,9 +160,18 @@ export const useBundleAccount = () => {
     [binanceList.length, btcList.length, preCheck]
   );
 
-  const remove = React.useCallback((id: string) => {
-    window.rabbyDesktop.ipcRenderer.invoke('bundle-account-delete', id);
-  }, []);
+  const remove = React.useCallback(
+    (id: string) => {
+      const account = ethList.find((acc) => acc.id === id);
+      if (account?.type === 'eth') {
+        walletController
+          .removeAddress(account.data.address, account.data.type)
+          .then(getAllAccountsToDisplay);
+      }
+      window.rabbyDesktop.ipcRenderer.invoke('bundle-account-delete', id);
+    },
+    [ethList, getAllAccountsToDisplay]
+  );
 
   const toggleBundle = React.useCallback(
     async (account: BundleAccount) => {
@@ -171,7 +180,10 @@ export const useBundleAccount = () => {
       if (existed) {
         // eth 删除后不需要持久化存储在 bundle 列表里，这两个列表目前没做同步
         if (existed.type === 'eth' && account.inBundle && existed.id) {
-          remove(existed.id);
+          window.rabbyDesktop.ipcRenderer.invoke(
+            'bundle-account-delete',
+            existed.id
+          );
           return;
         }
         window.rabbyDesktop.ipcRenderer.invoke('bundle-account-put', {
@@ -185,7 +197,7 @@ export const useBundleAccount = () => {
         inBundle: true,
       });
     },
-    [accounts, remove]
+    [accounts]
   );
 
   const updateNickname = React.useCallback(

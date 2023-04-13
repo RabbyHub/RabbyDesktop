@@ -17,7 +17,7 @@ export const ETHAccountList = () => {
       title="Imported wallet account"
     >
       {list.map((item) => (
-        <AccountItem key={item.id} data={item} />
+        <AccountItem canDelete canEdit key={item.id} data={item} />
       ))}
     </CommonAccountList>
   );

@@ -118,7 +118,7 @@ export const AddBinanceModal: React.FC<ModalProps> = (props) => {
         form={form}
         onFinish={onAdd}
       >
-        <div className="w-full">
+        <div className="w-full space-y-[36px]">
           <Form.Item name="apiKey" className="w-full">
             <InputItem placeholder="Key" />
           </Form.Item>

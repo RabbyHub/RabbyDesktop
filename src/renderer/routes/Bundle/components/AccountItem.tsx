@@ -51,13 +51,13 @@ export const AccountItem: React.FC<Props> = ({
   }, [toggleBundle, data]);
 
   return (
-    <div className="flex justify-center items-center relative">
+    <div className="group flex justify-center items-center relative">
       {canDelete && (
         <div
           onClick={onClickDelete}
           className={clsx(
             'absolute left-[-21px]',
-            'opacity-0 hover:opacity-80 cursor-pointer'
+            'opacity-0 group-hover:opacity-80 cursor-pointer'
           )}
         >
           <img src="rabby-internal://assets/icons/bundle/trash.svg" />

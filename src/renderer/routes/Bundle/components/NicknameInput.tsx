@@ -65,10 +65,7 @@ export const NicknameInput: React.FC<Props> = ({ canEdit, data }) => {
           <span className="leading-[19px]">{nickname}</span>
           {canEdit && (
             <img
-              className={clsx(
-                'group-hover:block hidden',
-                'opacity-70 hover:opacity-100'
-              )}
+              className={clsx('w-[16px]', 'group-hover:block hidden')}
               src="rabby-internal://assets/icons/bundle/edit.svg"
             />
           )}
