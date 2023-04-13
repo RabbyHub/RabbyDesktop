@@ -1,5 +1,5 @@
 import { app, dialog, shell } from 'electron';
-import { getAppProxyConfigForAxios } from '../store/desktopApp';
+import { getOptionProxyForAxios } from '../store/desktopApp';
 import { AppUpdaterWin32, AppUpdaterDarwin } from '../updater/updater';
 import { IS_APP_PROD_BUILD } from '../utils/app';
 import { setSessionProxy } from '../utils/appNetwork';
@@ -23,7 +23,7 @@ async function getReleaseNote(version: string) {
       };
 
   return fetchText(releaseNoteURLs.markdown, {
-    proxy: getAppProxyConfigForAxios(),
+    proxy: getOptionProxyForAxios(),
   }).catch(() => ''); // TODO: report error
 }
 

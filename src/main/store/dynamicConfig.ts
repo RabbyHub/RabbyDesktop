@@ -14,7 +14,7 @@ import {
 } from '../utils/fetch';
 import { handleIpcMainInvoke } from '../utils/ipcMainEvents';
 import { cLog } from '../utils/log';
-import { getAppProxyConfigForAxios } from './desktopApp';
+import { getOptionProxyForAxios } from './desktopApp';
 
 const SchemaDomainMetas: import('json-schema-typed').JSONSchema = {
   type: 'object',
@@ -76,7 +76,7 @@ export const dynamicConfigStore = makeStore<IAppDynamicConfig>({
 const INTERVAL_SEC = IS_RUNTIME_PRODUCTION ? 5 * 60 : 60;
 function scheduleFetch() {
   const fetchData = () => {
-    fetchDynamicConfig({ proxy: getAppProxyConfigForAxios() }).then(
+    fetchDynamicConfig({ proxy: getOptionProxyForAxios() }).then(
       ({
         domain_metas,
         blockchain_explorers,

@@ -2,6 +2,10 @@
 
 import { app, screen, BrowserWindow } from 'electron';
 import { Subject, debounceTime } from 'rxjs';
+import type { AxiosRequestConfig } from 'axios';
+
+import { HttpsProxyAgent } from 'https-proxy-agent';
+import { formatProxyServerURL } from '@/isomorphic/url';
 import {
   FORCE_DISABLE_CONTENT_PROTECTION,
   PERSIS_STORE_PREFIX,
@@ -148,8 +152,10 @@ export function getAppProxyConf() {
   };
 }
 
-export function getAppProxyConfigForAxios() {
-  const proxyConf = getAppProxyConf();
+export function getOptionProxyForAxios(
+  proxyConf?: ReturnType<typeof getAppProxyConf>
+): Exclude<AxiosRequestConfig['proxy'], false> {
+  proxyConf = proxyConf || getAppProxyConf();
   return proxyConf.proxyType === 'custom'
     ? {
         protocol: proxyConf.proxySettings.protocol,
@@ -157,6 +163,21 @@ export function getAppProxyConfigForAxios() {
         port: proxyConf.proxySettings.port,
       }
     : undefined;
+}
+
+export function getHttpsProxyAgentForAxios(
+  proxyConf?: ReturnType<typeof getAppProxyConf>
+): AxiosRequestConfig['httpsAgent'] {
+  proxyConf = proxyConf || getAppProxyConf();
+
+  let httpsProxyAgent: HttpsProxyAgent | undefined;
+  if (proxyConf.proxyType === 'custom') {
+    httpsProxyAgent = new HttpsProxyAgent(
+      formatProxyServerURL(proxyConf.proxySettings)
+    );
+  }
+
+  return httpsProxyAgent;
 }
 
 handleIpcMainInvoke('get-desktopAppState', () => {
