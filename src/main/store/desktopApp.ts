@@ -145,10 +145,11 @@ export function isEnableSupportIpfsDapp() {
   return desktopAppStore.get('enableSupportIpfsDapp') === true;
 }
 
-export function getAppProxyConf() {
+export function getAppProxyConf(): IAppProxyConf {
   return {
     proxyType: desktopAppStore.get('proxyType'),
     proxySettings: desktopAppStore.get('proxySettings'),
+    systemProxySettings: undefined,
   };
 }
 
@@ -156,16 +157,26 @@ export function getOptionProxyForAxios(
   proxyConf?: ReturnType<typeof getAppProxyConf>
 ): Exclude<AxiosRequestConfig['proxy'], false> {
   proxyConf = proxyConf || getAppProxyConf();
-  return proxyConf.proxyType === 'custom'
-    ? {
-        protocol: proxyConf.proxySettings.protocol,
-        host: proxyConf.proxySettings.hostname,
-        port: proxyConf.proxySettings.port,
-      }
-    : undefined;
+
+  if (proxyConf.proxyType === 'custom') {
+    return {
+      protocol: proxyConf.proxySettings.protocol,
+      host: proxyConf.proxySettings.hostname,
+      port: proxyConf.proxySettings.port,
+    };
+  }
+  if (proxyConf.proxyType === 'system' && proxyConf.systemProxySettings) {
+    return {
+      protocol: proxyConf.systemProxySettings.protocol,
+      host: proxyConf.systemProxySettings.host,
+      port: proxyConf.systemProxySettings.port,
+    };
+  }
+
+  return undefined;
 }
 
-export function getHttpsProxyAgentForAxios(
+export function getHttpsProxyAgentForRuntime(
   proxyConf?: ReturnType<typeof getAppProxyConf>
 ): AxiosRequestConfig['httpsAgent'] {
   proxyConf = proxyConf || getAppProxyConf();
@@ -175,8 +186,18 @@ export function getHttpsProxyAgentForAxios(
     httpsProxyAgent = new HttpsProxyAgent(
       formatProxyServerURL(proxyConf.proxySettings)
     );
+  } else if (
+    proxyConf.proxyType === 'system' &&
+    proxyConf.systemProxySettings
+  ) {
+    httpsProxyAgent = new HttpsProxyAgent(
+      formatProxyServerURL({
+        protocol: proxyConf.systemProxySettings.protocol as 'http',
+        hostname: proxyConf.systemProxySettings.host,
+        port: proxyConf.systemProxySettings.port,
+      })
+    );
   }
-
   return httpsProxyAgent;
 }
 

@@ -6,6 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { isRabbyXPage } from '@/isomorphic/url';
 import { trimWebContentsUserAgent } from '@/isomorphic/string';
+import { coerceNumber } from '@/isomorphic/primitive';
 import {
   IS_RUNTIME_PRODUCTION,
   PROTOCOL_IPFS,
@@ -49,6 +50,7 @@ import {
   onIpcMainInternalEvent,
 } from '../utils/ipcMainEvents';
 import { rabbyxQuery } from './rabbyIpcQuery/_base';
+import { getSystemProxyServer } from '../utils/systemConfig';
 
 const sesLog = getBindLog('session', 'bgGrey');
 
@@ -123,7 +125,7 @@ export async function defaultSessionReadyThen() {
   return firstValueFrom(fromMainSubject('sessionReady'));
 }
 
-function checkProxyValidOnBootstrap() {
+async function checkProxyValidOnBootstrap() {
   const appProxyConf = getAppProxyConf();
 
   if (appProxyConf.proxyType === 'none') {
@@ -131,6 +133,22 @@ function checkProxyValidOnBootstrap() {
       shouldApplyProxyOnBoot: false,
       appProxyConf,
     };
+  }
+
+  if (appProxyConf.proxyType === 'system') {
+    const { config } = await getSystemProxyServer();
+    if (config && config.protocol === 'http') {
+      appProxyConf.systemProxySettings = {
+        protocol: config.protocol,
+        host: config.host,
+        port: coerceNumber(config.port, 0),
+      };
+
+      sesLog(
+        `[checkProxyValidOnBootstrap] proxy config from system:`,
+        appProxyConf.systemProxySettings
+      );
+    }
   }
 
   checkProxyViaBrowserView('https://google.com', appProxyConf).then(
@@ -220,7 +238,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   app.userAgentFallback = trimWebContentsUserAgent(mainSession.getUserAgent());
 
   // must after sessionReady
-  const result = checkProxyValidOnBootstrap();
+  const result = await checkProxyValidOnBootstrap();
 
   const realProxy = { ...result.appProxyConf, applied: false };
 

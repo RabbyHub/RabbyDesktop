@@ -123,14 +123,20 @@ type IAppDynamicConfig = {
   };
 };
 
+type IProxySettings = {
+  protocol: 'socks5' | 'http';
+  hostname: string;
+  port: number;
+  username?: string;
+  password?: string;
+};
 type IAppProxyConf = {
   proxyType: 'none' | 'system' | 'custom';
-  proxySettings: {
-    protocol: 'socks5' | 'http';
-    hostname: string;
+  proxySettings: IProxySettings;
+  systemProxySettings?: {
+    protocol: 'https' | 'http';
+    host: string;
     port: number;
-    username?: string;
-    password?: string;
   };
 };
 

@@ -14,16 +14,12 @@ import { type CID } from 'multiformats';
 import nodeFetch from 'node-fetch';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 
-import {
-  canoicalizeDappUrl,
-  extractIpfsCid,
-  formatProxyServerURL,
-} from '@/isomorphic/url';
+import { formatProxyServerURL } from '@/isomorphic/url';
 
 import { pipeline } from 'stream';
 import { promisify } from 'util';
-import { PROTOCOL_IPFS } from '@/isomorphic/constants';
 import { getAppRuntimeProxyConf } from './stream-helpers';
+import { getHttpsProxyAgentForRuntime } from '../store/desktopApp';
 
 const streamPipeline = promisify(pipeline);
 
@@ -58,15 +54,9 @@ export const initIPFSModule = async () => {
     const url = `${gateway.replace(/\/$/, '')}/ipfs/${cidString}?format=car`;
 
     const runtimeProxyConf = await getAppRuntimeProxyConf();
-    let proxyAgent: HttpsProxyAgent | null = null;
-    if (runtimeProxyConf.proxyType === 'custom') {
-      proxyAgent = new HttpsProxyAgent(
-        formatProxyServerURL(runtimeProxyConf.proxySettings)
-      );
-    }
     const res = await nodeFetch(url, {
       method: 'GET',
-      ...(proxyAgent && { agent: proxyAgent }),
+      agent: getHttpsProxyAgentForRuntime(runtimeProxyConf),
       signal: signal as any,
     });
 

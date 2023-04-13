@@ -157,6 +157,7 @@
     "eth-rpc-errors": "^4.0.3",
     "ethereumjs-util": "^7.1.5",
     "ethers": "^5.7.2",
+    "get-proxy-settings": "^0.1.13",
     "https-proxy-agent": "^5.0.1",
     "ipfs-core-types": "^0.14.0",
     "ipfs-unixfs-exporter": "^13.1.0",
