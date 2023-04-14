@@ -130,9 +130,8 @@ export const MainContainer: React.FC = () => {
         account: selectedAccount,
         backable: true,
       });
-      zActions.showZSubview('address-management', {
-        hidden: true,
-      });
+      zActions.hideZSubview('address-management');
+
       setSelectedAccount(undefined);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
