@@ -303,12 +303,12 @@ const DefaultProtocolItem = ({
           width="20px"
           height="20px"
           noRound
-          hideChainIcon={protocol.chain === '0'}
+          hideChainIcon={isBinance}
         />
         <div className="flex flex-1 items-center">
           {isBinance ? (
             <div className="protocol-info after:content-[none]">
-              <span className="protocol-name">{protocol.name}</span>
+              <span className="protocol-name normal-case">{protocol.name}</span>
             </div>
           ) : (
             <div
@@ -373,7 +373,9 @@ const DefaultProtocolItem = ({
               overlayClassName="max-w-full"
               title={
                 <div className="whitespace-nowrap">
-                  {'Futures, options, and assets <$10 are not included'}
+                  {
+                    'Futures, options, liquidity farming, and assets<$10 are not included'
+                  }
                 </div>
               }
             >

@@ -102,7 +102,7 @@ export class Binance {
             title: 'Binance API has become invalid',
             content: `${this.nickname} (${ellipsis(
               this.apiKey
-            )}) API has become invalid. It will be removed from Bundle Address.`,
+            )}) API has become invalid. It will be deleted and removed from Bundle Address.`,
             height: 220,
             okCancel: false,
           });
@@ -151,7 +151,7 @@ export class Binance {
       this.stakingProductPosition('STAKING'),
       this.stakingProductPosition('F_DEFI'),
       this.stakingProductPosition('L_DEFI'),
-      this.bswapLiquidity(),
+      // this.bswapLiquidity(),
     ]);
 
     console.log('binance', assets);
@@ -172,7 +172,7 @@ export class Binance {
           ...this.calcStake(assets[6]),
           ...this.calcStake(assets[7]),
           ...this.calcStake(assets[8]),
-          ...this.calcBswapLiquidity(assets[9]),
+          // ...this.calcBswapLiquidity(assets[9]),
         ],
       },
     };
@@ -342,7 +342,7 @@ export class Binance {
         const absValue = netAssetBN.abs().toString();
         borrows.push({
           asset: item.asset,
-          value: absValue,
+          value: item.borrowed,
           usdtValue: tokenPrice.getUSDTValue(item.asset, absValue),
         });
       }

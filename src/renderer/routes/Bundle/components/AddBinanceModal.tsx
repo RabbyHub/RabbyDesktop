@@ -14,6 +14,8 @@ const ERROR_MESSAGE = {
     'For your safety, please add an account that only has allowed "Enable Reading" in API restrictions.',
   [ERROR.INVALID_KEY]: 'Invalid Key',
   [ERROR.EXISTED]: 'This address is already added',
+  [ERROR.UNKNOWN]:
+    'Internet connection is unavailable. Your region is not supported by Binance.',
 };
 
 export const AddBinanceModal: React.FC<ModalProps> = (props) => {
@@ -43,7 +45,7 @@ export const AddBinanceModal: React.FC<ModalProps> = (props) => {
       form.setFields([
         {
           name: 'apiKey',
-          errors: [ERROR_MESSAGE[err.error] || 'Invalid address'],
+          errors: [ERROR_MESSAGE[err.error] || ERROR.INVALID_KEY],
         },
       ]);
       setLoading(false);
@@ -132,8 +134,8 @@ export const AddBinanceModal: React.FC<ModalProps> = (props) => {
         </div>
         <div className="flex items-center flex-col space-y-[22px]">
           <div className="text-[12px] text-[#FFFFFF99]">
-            Please ensure that the API key only has read-only access. No data
-            will be collected from Rabby.
+            We only support API key that has read-only access. No data will be
+            collected from Rabby.
           </div>
           <RabbyButton
             className="w-[240px] h-[52px]"

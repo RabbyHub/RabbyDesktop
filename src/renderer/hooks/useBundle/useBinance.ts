@@ -167,7 +167,7 @@ export const useBinance = () => {
     const data: DisplayProtocol = {
       usd_value: Number(balance),
       id: 'binance',
-      chain: '0',
+      chain: 'binance',
       name: 'Binance',
       site_url: '',
       logo_url: 'rabby-internal://assets/icons/bundle/binance-chain.svg',

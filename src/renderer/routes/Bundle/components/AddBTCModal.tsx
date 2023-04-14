@@ -11,6 +11,7 @@ import { BundleSuccessModal } from './BundleSuccessModal';
 const ERROR_MESSAGE = {
   [ERROR.EXISTED]: 'This address is already added',
   [ERROR.INVALID_KEY]: 'Invalid address',
+  [ERROR.UNKNOWN]: 'Unknown error',
 };
 
 export const AddBTCModal: React.FC<ModalProps> = (props) => {
@@ -38,7 +39,7 @@ export const AddBTCModal: React.FC<ModalProps> = (props) => {
       form.setFields([
         {
           name: 'address',
-          errors: [ERROR_MESSAGE[err.error] || 'Not a valid address'],
+          errors: [ERROR_MESSAGE[err.error] || ERROR.INVALID_ADDRESS],
         },
       ]);
       setLoading(false);
