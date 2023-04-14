@@ -31,6 +31,7 @@ export const AddressManagementModal: React.FC = () => {
           closeSubview();
         }
       }}
+      destroyPopupOnHide
     >
       <TriggerEl ref={divRef} className="w-[440px] h-40 absolute right-10" />
     </Dropdown>
