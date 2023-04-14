@@ -176,14 +176,33 @@ export type CoinInfoResponse = {
   trading: string;
 }[];
 
+export type BswapLiquidityResponse = {
+  poolId: number;
+  poolName: string;
+  updateTime: number;
+  liquidity: Record<string, number>;
+  share: {
+    shareAmount: number;
+    sharePercentage: number;
+    asset: Record<string, number>;
+  };
+}[];
+
+export type BswapUnclaimedRewardsResponse = {
+  totalUnclaimedRewards: Record<string, number>;
+  details: Record<string, Record<string, number>>;
+};
+
 // 资金账户
 export type FundingAsset = Asset[];
 
 // 现货账户
 export type SpotAsset = Asset[];
 
-export type AssetWithRewards = Asset & {
+export type AssetWithRewards = {
+  assets: Asset[];
   rewards: Asset[];
+  usdtValue: string;
 };
 // 理财账户
 export type FinanceAsset = {

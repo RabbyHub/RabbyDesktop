@@ -71,7 +71,7 @@ export const toFinancePortfolioList = (
       name: 'Earn' as any,
       detail: {
         description: name,
-        supply_token_list: [toTokenItem(asset)],
+        supply_token_list: asset.assets.map(toTokenItem),
         reward_token_list: asset.rewards.map(toTokenItem),
       } as any,
       stats: {

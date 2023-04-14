@@ -21,6 +21,8 @@ import {
   IsolatedMarginAsset,
   TickerPriceResponse,
   CoinInfoResponse,
+  BswapLiquidityResponse,
+  BswapUnclaimedRewardsResponse,
 } from './type';
 import { valueGreaterThan10, bigNumberSum } from '../../util';
 
@@ -149,6 +151,7 @@ export class Binance {
       this.stakingProductPosition('STAKING'),
       this.stakingProductPosition('F_DEFI'),
       this.stakingProductPosition('L_DEFI'),
+      this.bswapLiquidity(),
     ]);
 
     console.log('binance', assets);
@@ -169,11 +172,74 @@ export class Binance {
           ...this.calcStake(assets[6]),
           ...this.calcStake(assets[7]),
           ...this.calcStake(assets[8]),
+          ...this.calcBswapLiquidity(assets[9]),
         ],
       },
     };
 
     return result;
+  }
+
+  private async bswapLiquidity() {
+    const all = await this.invoke<BswapLiquidityResponse>('bswapLiquidity');
+    const list = all.filter((item) => item.share.shareAmount > 0);
+    const allRewards = await this.invoke<BswapUnclaimedRewardsResponse>(
+      'bswapUnclaimedRewards',
+      [
+        {
+          type: 1,
+        },
+      ]
+    );
+
+    return list.map((item) => {
+      const rewards = allRewards.details[item.poolName];
+
+      Object.keys(item.share.asset).forEach((o) => tokenPrice.addSymbol(o));
+      Object.keys(rewards).forEach((o) => tokenPrice.addSymbol(o));
+
+      return {
+        assets: item.share.asset,
+        rewards,
+      };
+    });
+  }
+
+  private calcBswapLiquidity(
+    res: Awaited<ReturnType<Binance['bswapLiquidity']>>
+  ): AssetWithRewards[] {
+    return res.map((item) => {
+      const assets = Object.keys(item.assets).map((key) => {
+        const value = item.assets[key].toString();
+        const usdtValue = tokenPrice.getUSDTValue(key, value);
+        this.plusBalance(usdtValue);
+        return {
+          asset: key,
+          value,
+          usdtValue,
+        };
+      });
+      const rewards = Object.keys(item.rewards).map((key) => {
+        const value = item.rewards[key].toString();
+        const usdtValue = tokenPrice.getUSDTValue(key, value);
+        this.plusBalance(usdtValue);
+        return {
+          asset: key,
+          value,
+          usdtValue,
+        };
+      });
+      const usdtValue = bigNumberSum(
+        ...assets.map((o) => o.usdtValue),
+        ...rewards.map((o) => o.usdtValue)
+      );
+
+      return {
+        assets,
+        rewards,
+        usdtValue,
+      };
+    });
   }
 
   private async fundingWallet() {
@@ -399,9 +465,13 @@ export class Binance {
         this.plusBalance(usdtValue);
 
         return {
-          asset,
-          value,
-          usdtValue,
+          assets: [
+            {
+              asset,
+              value,
+              usdtValue,
+            },
+          ],
           rewards: [
             {
               asset,
@@ -409,6 +479,7 @@ export class Binance {
               usdtValue: rewardUSDTValue,
             },
           ],
+          usdtValue,
         };
       })
       .filter((item) => valueGreaterThan10(item.usdtValue));
@@ -439,9 +510,13 @@ export class Binance {
         this.plusBalance(usdtValue);
 
         return {
-          asset,
-          value,
-          usdtValue,
+          assets: [
+            {
+              asset,
+              value,
+              usdtValue,
+            },
+          ],
           rewards: [
             {
               asset,
@@ -449,6 +524,7 @@ export class Binance {
               usdtValue: rewardUSDTValue,
             },
           ],
+          usdtValue,
         };
       })
       .filter((item) => valueGreaterThan10(item.usdtValue));
@@ -514,10 +590,15 @@ export class Binance {
         }
 
         return {
-          asset,
-          value,
-          usdtValue,
+          assets: [
+            {
+              asset,
+              value,
+              usdtValue,
+            },
+          ],
           rewards,
+          usdtValue,
         };
       })
       .filter((item) => valueGreaterThan10(item.usdtValue));
