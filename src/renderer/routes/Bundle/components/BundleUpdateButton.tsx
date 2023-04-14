@@ -2,15 +2,17 @@ import {
   UpdateButton,
   Props as UpdateButtonProps,
 } from '@/renderer/components/UpdateButton';
+import { useZViewsVisibleChanged } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { atom, useAtom } from 'jotai';
-import React from 'react';
-import { useInterval } from 'react-use';
+import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 type Props = Omit<UpdateButtonProps, 'updateAt'>;
 
 const updateAtAtom = atom(0);
 export const BundleUpdateButton: React.FC<Props> = ({ loading, onUpdate }) => {
   const [updateAt, setUpdateAt] = useAtom(updateAtAtom);
+  const location = useLocation();
 
   React.useEffect(() => {
     if (!loading) {
@@ -21,13 +23,27 @@ export const BundleUpdateButton: React.FC<Props> = ({ loading, onUpdate }) => {
     }
   }, [loading, setUpdateAt]);
 
-  useInterval(() => {
-    // 如果更新时间过期 1h 则自动触发更新
-    if (updateAt !== 0 && Date.now() / 1000 - updateAt > 3600) {
+  useZViewsVisibleChanged((visibles) => {
+    if (
+      updateAt !== 0 &&
+      Date.now() / 1000 - updateAt > 3600 &&
+      location.pathname === '/mainwin/home/bundle' &&
+      !Object.values(visibles).some((item) => item) // all closed
+    ) {
       onUpdate();
       setUpdateAt(0);
     }
-  }, 1000);
+  });
+
+  useEffect(() => {
+    if (location.pathname === '/mainwin/home/bundle') {
+      if (updateAt !== 0 && Date.now() / 1000 - updateAt > 3600) {
+        onUpdate();
+        setUpdateAt(0);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location]);
 
   const handleUpdate = () => {
     onUpdate();
