@@ -8,7 +8,7 @@ import {
 } from './type';
 import { tokenPrice } from './price';
 
-// TODO 类型需要修复
+// TODO rabby-api 里提供的类型和实际返回不符
 const basePortfolio = {
   detail_types: ['common'],
   asset_token_list: [],

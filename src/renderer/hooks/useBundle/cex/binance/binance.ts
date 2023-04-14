@@ -257,7 +257,9 @@ export class Binance {
     };
   }
 
-  private calcMarginAccount(res: MarginAccountResponse): MarginAsset {
+  private calcMarginAccount(
+    res: MarginAccountResponse
+  ): MarginAsset | undefined {
     const supplies: Asset[] = [];
     const borrows: Asset[] = [];
 
@@ -281,6 +283,10 @@ export class Binance {
 
       this.plusBalance(item.netAsset);
     });
+
+    if (!supplies.length && !borrows.length) {
+      return undefined;
+    }
 
     return {
       supplies,

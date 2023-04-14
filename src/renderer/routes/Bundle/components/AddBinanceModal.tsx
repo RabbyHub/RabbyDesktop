@@ -120,7 +120,7 @@ export const AddBinanceModal: React.FC<ModalProps> = (props) => {
       >
         <div className="w-full space-y-[36px]">
           <Form.Item name="apiKey" className="w-full">
-            <InputItem autoFocus placeholder="Api Key" />
+            <InputItem autoFocus placeholder="API Key" />
           </Form.Item>
           <Form.Item name="apiSecret" className="w-full">
             <InputItem

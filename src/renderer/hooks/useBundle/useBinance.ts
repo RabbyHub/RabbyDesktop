@@ -1,6 +1,7 @@
 import React from 'react';
 import { DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import { atom, useAtom } from 'jotai';
+import { sortBy } from 'lodash';
 import { saveBundleAccountsBalance } from './shared';
 import { Binance } from './cex/binance/binance';
 import { mergeList, bigNumberSum } from './util';
@@ -142,12 +143,13 @@ export const useBinance = () => {
           'Stake'
         );
         // 理财账户(定期)
-        const LockedList = toFinancePortfolioList(
+        const lockedList = toFinancePortfolioList(
           item.financeAsset.fixed,
           'Locked'
         );
         // 全仓账户
-        const marginPortfolio = toMarginPortfolio(item.marginAsset);
+        const marginPortfolio =
+          item.marginAsset && toMarginPortfolio(item.marginAsset);
         // 逐仓账户
         const isolatedMarginList = toIsolatedMarginPortfolioList(
           item.isolatedMarginAsset
@@ -155,10 +157,10 @@ export const useBinance = () => {
 
         return [
           ...flexibleList,
-          ...LockedList,
+          ...lockedList,
           ...stakeList,
-          marginPortfolio,
           ...isolatedMarginList,
+          ...(marginPortfolio ? [marginPortfolio] : []),
         ];
       }) ?? [];
 
@@ -177,6 +179,11 @@ export const useBinance = () => {
         ...otherPortfolioList,
       ],
     };
+
+    data.portfolio_item_list = sortBy(
+      data.portfolio_item_list,
+      (item) => item.stats.asset_usd_value
+    );
 
     return data;
   }, [assets, balance, mergedFundingAsset, mergedSpotAsset]);

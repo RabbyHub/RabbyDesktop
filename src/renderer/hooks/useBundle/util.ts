@@ -34,7 +34,6 @@ export const mergeList = <T>(
 
     if (index >= 0) {
       mergeKeys.forEach((k) => {
-        // TODO 需要测试下协议
         if (Array.isArray(item[k])) {
           result[index][k] = [
             ...(result[index][k] as any[]),
