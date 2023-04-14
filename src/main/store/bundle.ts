@@ -108,15 +108,26 @@ handleIpcMainInvoke('bundle-account-post', (_, account: BundleAccount) => {
 });
 
 handleIpcMainInvoke('bundle-account-put', (_, account: BundleAccount) => {
-  const accounts = bundleStore.get('accounts').map((item) => {
-    if (item.id === account.id) {
-      return account;
-    }
-    return item;
-  });
+  const oldAccount = bundleStore
+    .get('accounts')
+    .find((item) => item.id === account.id);
+
+  if (!oldAccount) {
+    return;
+  }
+  let accounts = [];
+  if (oldAccount.inBundle !== account.inBundle) {
+    accounts = bundleStore
+      .get('accounts')
+      .filter((item) => item.id !== account.id);
+    accounts.push(account);
+  } else {
+    accounts = bundleStore.get('accounts').map((item) => {
+      return item.id === account.id ? account : item;
+    });
+  }
 
   bundleStore.set('accounts', accounts);
-
   emitIpcMainEvent('__internal_main:bundle:changed', {
     accounts,
   });
