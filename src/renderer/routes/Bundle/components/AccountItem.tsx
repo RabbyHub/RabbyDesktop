@@ -4,6 +4,7 @@ import { ellipsis } from '@/renderer/utils/address';
 import { splitNumberByStep } from '@/renderer/utils/number';
 import clsx from 'clsx';
 import React from 'react';
+import BigNumber from 'bignumber.js';
 import { useAccountItemAddress, useAccountItemIcon } from './useAccountItem';
 import { NicknameInput } from './NicknameInput';
 
@@ -24,6 +25,7 @@ export const AccountItem: React.FC<Props> = ({
 }) => {
   const {
     account: { toggleBundle, remove, percentMap },
+    eth,
   } = useBundle();
   const addressTypeIcon = useAccountItemIcon(data);
   const displayAddress = useAccountItemAddress(data);
@@ -61,6 +63,18 @@ export const AccountItem: React.FC<Props> = ({
     }
     return p.toString();
   }, [isBundle, percentMap, data.id]);
+
+  const balance = React.useMemo(() => {
+    if (data.type !== 'eth') return data.balance;
+    const { address } = data.data;
+    const key = address.toLowerCase();
+    if (!eth.ethProtocolBalanceMap[key] || !eth.ethTokenBalanceMap[key])
+      return data.balance;
+    const protocol = eth.ethProtocolBalanceMap[key];
+    const token = eth.ethTokenBalanceMap[key];
+    if (!protocol || !token) return data.balance;
+    return new BigNumber(protocol || 0).plus(token || 0).toFixed();
+  }, [eth, data]);
 
   return (
     <div className="group flex justify-center items-center relative">
@@ -132,11 +146,11 @@ export const AccountItem: React.FC<Props> = ({
               'font-medium text-[12px] leading-[19px]',
               'opacity-70',
               {
-                hidden: data.balance === undefined,
+                hidden: balance === undefined,
               }
             )}
           >
-            ${splitNumberByStep(Number(data.balance)?.toFixed(2))}
+            ${splitNumberByStep(Number(balance)?.toFixed(2))}
           </div>
           {isBundle && <div className="opacity-60">{percent}%</div>}
         </div>

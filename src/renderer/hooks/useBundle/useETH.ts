@@ -2,7 +2,7 @@ import React from 'react';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { formatChain, DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
-import { useTotalBalance } from '@/renderer/utils/balance';
+import { useTotalBalance, calcAssetNetWorth } from '@/renderer/utils/balance';
 import { atom, useAtom } from 'jotai';
 import { useBundleAccount } from './useBundleAccount';
 import {
@@ -38,6 +38,12 @@ export const useETH = () => {
   const [loadingProtocol, setLoadingProtocol] = React.useState(false);
   const [loadingToken, setLoadingToken] = React.useState(false);
   const [loadingUsedChain, setLoadingUsedChain] = React.useState(false);
+  const [ethTokenBalanceMap, setEthTokenBalanceMap] = React.useState<
+    Record<string, string>
+  >({});
+  const [ethProtocolBalanceMap, setEthProtocolBalanceMap] = React.useState<
+    Record<string, string>
+  >({});
 
   const balance = useTotalBalance(tokenList, protocolList);
 
@@ -45,7 +51,14 @@ export const useETH = () => {
     const curUpdatedKey = lastUpdatedKey;
     setLoadingToken(true);
     const cachedListArray = await Promise.all(
-      ethAccounts.map((acc) => loadCachedTokenList(acc.data.address))
+      ethAccounts.map(async (acc) => {
+        const list = await loadCachedTokenList(acc.data.address);
+        setEthTokenBalanceMap({
+          ...ethTokenBalanceMap,
+          [acc.data.address.toLowerCase()]: calcAssetNetWorth(list, [], null),
+        });
+        return list;
+      })
     );
     const cachedList = mergeList(
       cachedListArray.reduce((prev, curr) => [...prev, ...curr], []),
@@ -54,27 +67,45 @@ export const useETH = () => {
     );
     setTokenList(cachedList);
     setLoadingToken(false);
-    const realTimeListArray = await Promise.all(
-      ethAccounts.map((acc) => loadRealTimeTokenList(acc.data.address))
-    );
+    // const realTimeListArray = await Promise.all(
+    //   ethAccounts.map(async (acc) => {
+    //     const list = await loadRealTimeTokenList(acc.data.address);
+    //     setEthTokenBalanceMap({
+    //       ...ethTokenBalanceMap,
+    //       [acc.data.address.toLowerCase()]: calcAssetNetWorth(list, [], null),
+    //     });
+    //     return list;
+    //   })
+    // );
 
-    if (curUpdatedKey !== lastUpdatedKey) {
-      return;
-    }
+    // if (curUpdatedKey !== lastUpdatedKey) {
+    //   return;
+    // }
 
-    const realTimeList = mergeList(
-      realTimeListArray.reduce((prev, curr) => [...prev, ...curr], []),
-      'id',
-      ['usd_value', 'amount']
-    );
-    setTokenList(realTimeList);
+    // const realTimeList = mergeList(
+    //   realTimeListArray.reduce((prev, curr) => [...prev, ...curr], []),
+    //   'id',
+    //   ['usd_value', 'amount']
+    // );
+    // setTokenList(realTimeList);
   };
 
   const getProtocolList = async () => {
     const curUpdatedKey = lastUpdatedKey;
     setLoadingProtocol(true);
     const cachedListArray = await Promise.all(
-      ethAccounts.map((acc) => loadCachedProtocolList(acc.data.address))
+      ethAccounts.map(async (acc) => {
+        const protocols = await loadCachedProtocolList(acc.data.address);
+        setEthProtocolBalanceMap({
+          ...ethProtocolBalanceMap,
+          [acc.data.address.toLowerCase()]: calcAssetNetWorth(
+            [],
+            protocols,
+            null
+          ),
+        });
+        return protocols;
+      })
     );
     const cachedList = mergeList(
       cachedListArray.reduce((prev, curr) => [...prev, ...curr], []),
@@ -85,23 +116,27 @@ export const useETH = () => {
     setProtocolList(cachedList);
     setLoadingProtocol(false);
     // 顺序执行任务，最大并发数在函数内部控制
-    const realTimeListArray = [];
-    for (let i = 0; i < ethAccounts.length; i++) {
-      const acc = ethAccounts[i];
-      // eslint-disable-next-line no-await-in-loop
-      const list = await loadRealTimeProtocolList(acc.data.address);
-      realTimeListArray.push(list);
-    }
+    // const realTimeListArray = [];
+    // for (let i = 0; i < ethAccounts.length; i++) {
+    //   const acc = ethAccounts[i];
+    //   // eslint-disable-next-line no-await-in-loop
+    //   const list = await loadRealTimeProtocolList(acc.data.address);
+    //   setEthProtocolBalanceMap({
+    //     ...ethProtocolBalanceMap,
+    //     [acc.data.address.toLowerCase()]: calcAssetNetWorth([], list, null),
+    //   });
+    //   realTimeListArray.push(list);
+    // }
 
-    if (curUpdatedKey !== lastUpdatedKey) {
-      return;
-    }
-    const realTimeList = mergeList(
-      realTimeListArray.reduce((prev, curr) => [...prev, ...curr], []),
-      'id',
-      ['usd_value', 'portfolio_item_list']
-    );
-    setProtocolList(realTimeList);
+    // if (curUpdatedKey !== lastUpdatedKey) {
+    //   return;
+    // }
+    // const realTimeList = mergeList(
+    //   realTimeListArray.reduce((prev, curr) => [...prev, ...curr], []),
+    //   'id',
+    //   ['usd_value', 'portfolio_item_list']
+    // );
+    // setProtocolList(realTimeList);
   };
 
   const getUsedChainList = async () => {
@@ -161,5 +196,7 @@ export const useETH = () => {
     tokenList,
     protocolList,
     getAssets,
+    ethTokenBalanceMap,
+    ethProtocolBalanceMap,
   };
 };
