@@ -168,14 +168,16 @@ const PortfolioView = ({
     <ScrollTopContext.Provider value={scrollTop}>
       <PortfolioWrapper>
         <div className="scroll-container" onScroll={handleScroll}>
-          <TokenList
-            tokenList={tokenList}
-            historyTokenMap={historyTokenMap}
-            tokenHidden={tokenHidden}
-            isLoadingTokenList={isLoadingTokenList}
-            supportHistoryChains={supportHistoryChains}
-            showHistory={view === VIEW_TYPE.CHANGE}
-          />
+          {selectChainServerId === 'binance' ? null : (
+            <TokenList
+              tokenList={tokenList}
+              historyTokenMap={historyTokenMap}
+              tokenHidden={tokenHidden}
+              isLoadingTokenList={isLoadingTokenList}
+              supportHistoryChains={supportHistoryChains}
+              showHistory={view === VIEW_TYPE.CHANGE}
+            />
+          )}
           <ProtocolList
             protocolList={protocolList}
             historyProtocolMap={historyProtocolMap}
