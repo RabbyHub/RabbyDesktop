@@ -50,5 +50,8 @@ export default function GlobalToastPopup() {
     delayHideView(300);
   });
 
+  // reset message top position, follow rectTopOffset
+  message.config({ top: 0 });
+
   return null;
 }

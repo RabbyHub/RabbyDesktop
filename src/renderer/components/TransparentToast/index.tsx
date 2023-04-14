@@ -7,10 +7,11 @@ import { useClickOutSide } from '@/renderer/hooks/useClick';
 import { isWeb3Addr } from '@/isomorphic/web3';
 import { isMainWinShellWebUI } from '@/isomorphic/url';
 import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
+import { TOAST_TOP } from '@/isomorphic/constants';
 
-// message.config({
-//   top: 80,
-// });
+message.config({
+  top: TOAST_TOP,
+});
 
 const TIMEOUT_SEC = 3;
 

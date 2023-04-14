@@ -18,13 +18,13 @@ import { MenuClickEventHandler } from 'rc-menu/lib/interface';
 
 import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
 import { useMemo } from 'react';
-import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
+import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
 import styles from './index.module.less';
 
 const toast = (message: string) => {
-  forwardMessageTo('main-window', 'toast-message', {
+  toastTopMessage({
     data: {
       type: 'success',
       content: message,

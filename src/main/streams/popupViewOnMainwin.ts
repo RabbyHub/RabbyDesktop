@@ -6,6 +6,7 @@ import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import {
   IS_RUNTIME_PRODUCTION,
   RABBY_POPUP_GHOST_VIEW_URL,
+  TOAST_TOP,
 } from '../../isomorphic/constants';
 import {
   emitIpcMainEvent,
@@ -142,7 +143,7 @@ function updateGlobalToastViewPos(
   const selfBounds = view.getBounds();
 
   popupRect.width = 600;
-  const topOffset = opts?.topOffset || 0;
+  const topOffset = opts?.topOffset || TOAST_TOP;
   globalToastPopupState.rectTopOffset = topOffset;
   popupRect = {
     ...popupRect,
