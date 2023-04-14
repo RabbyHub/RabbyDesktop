@@ -13,7 +13,10 @@ hideMainwinPopupview('global-toast-popup');
 
 const TOASTKEY = 'global-toast-key';
 export default function GlobalToastPopup() {
-  useBodyClassNameOnMounted('global-toast-popup');
+  useBodyClassNameOnMounted([
+    'global-toast-popup',
+    !IS_RUNTIME_PRODUCTION ? 'isDebug' : '',
+  ]);
 
   const contentRef = useRef<any>(null);
   const { delayHideView } = usePopupViewInfo('global-toast-popup', {
@@ -22,34 +25,20 @@ export default function GlobalToastPopup() {
         return;
       }
       switch (payload.pageInfo.state?.toastType) {
-        case 'foo':
-          message.destroy(TOASTKEY);
-          message.open({
-            type: 'error',
-            key: TOASTKEY,
-            content: <span ref={contentRef}>Nothing but for demo</span>,
-            onClose: () => {
-              delayHideView(300);
-            },
-            onClick: () => {
-              message.destroy(TOASTKEY);
-              delayHideView(300);
-            },
-            // duration: 0,
-          });
-          break;
-        case 'toast-message':
+        case 'toast-message': {
+          const data = payload.pageInfo.state.data;
           message.destroy(TOASTKEY);
           toastMessage({
             key: TOASTKEY,
-            type: payload.pageInfo.state.data.type,
-            content: payload.pageInfo.state.data.content,
-            duration: payload.pageInfo.state.data.duration || 3,
+            type: data.type,
+            content: <span ref={contentRef}>{data.content}</span>,
+            duration: data.duration || 3,
             onClose: () => {
               delayHideView(300);
             },
           });
           break;
+        }
         default:
           break;
       }

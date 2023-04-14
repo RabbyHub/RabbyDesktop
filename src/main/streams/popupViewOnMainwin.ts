@@ -28,14 +28,13 @@ import {
 import { getMainWindowTopOffset } from '../utils/browserView';
 import { notifyHideFindInPage } from '../utils/mainTabbedWin';
 
-const viewsState: Record<
-  PopupViewOnMainwinInfo['type'],
-  {
+const viewsState: {
+  [K in PopupViewOnMainwinInfo['type']]: {
     visible: boolean;
     readonly s_isModal?: boolean;
     modalWindow?: BrowserWindow;
-  }
-> = {
+  };
+} = {
   'add-address-dropdown': {
     visible: false,
   },
@@ -105,15 +104,6 @@ function updateSubviewPos(
       ...popupRect,
       ...selfBounds,
     };
-  } else if (viewType === 'global-toast-popup') {
-    popupRect.width = 600;
-    popupRect = {
-      ...popupRect,
-      height: 80,
-      // make it h-center
-      x: Math.floor((width - popupRect.width) / 2),
-      y: getMainWindowTopOffset(),
-    };
   } else if (typeof viewType === 'object') {
     popupRect = {
       ...popupRect,
@@ -129,6 +119,40 @@ function updateSubviewPos(
   } else if (!IS_RUNTIME_PRODUCTION) {
     console.error('updateSubviewPos: view is not attached to parentWindow!');
   }
+}
+
+const globalToastPopupState: Partial<
+  PickPopupViewPageInfo<'global-toast-popup'>['state'] & object
+> = { rectTopOffset: 0 };
+function updateGlobalToastViewPos(
+  parentWindow: BrowserWindow,
+  view: BrowserView,
+  opts?: {
+    topOffset?: number;
+  }
+) {
+  const [width, height] = parentWindow.getSize();
+  let popupRect = {
+    x: 0,
+    y: 0,
+    width,
+    height,
+  };
+
+  const selfBounds = view.getBounds();
+
+  popupRect.width = 600;
+  const topOffset = opts?.topOffset || 0;
+  globalToastPopupState.rectTopOffset = topOffset;
+  popupRect = {
+    ...popupRect,
+    height: 80,
+    // make it h-center
+    x: Math.floor((width - popupRect.width) / 2),
+    y: getMainWindowTopOffset() + topOffset,
+  };
+
+  return updateSubviewPos(parentWindow, view, popupRect);
 }
 
 const IS_DARWIN = process.platform === 'darwin';
@@ -338,8 +362,11 @@ const globalToastPopupReady = onMainWindowReady().then(async (mainWin) => {
   mainWindow.addBrowserView(globalToastPopup);
 
   const onTargetWinUpdate = () => {
-    if (viewsState['global-toast-popup'].visible)
-      updateSubviewPos(mainWindow, globalToastPopup, 'global-toast-popup');
+    if (viewsState['global-toast-popup'].visible) {
+      updateGlobalToastViewPos(mainWindow, globalToastPopup, {
+        topOffset: globalToastPopupState.rectTopOffset,
+      });
+    }
   };
   mainWindow.on('show', onTargetWinUpdate);
   mainWindow.on('move', onTargetWinUpdate);
@@ -396,22 +423,38 @@ const { handler } = onIpcMainInternalEvent(
 
       viewsState[payload.type].visible = true;
       if (!viewsState[payload.type].s_isModal) {
-        if (payload.type === 'add-address-dropdown') {
-          updateSubviewPos(
-            mainWindow,
-            targetView,
-            (payload.pageInfo as any).triggerRect
-          );
-        } else if (payload.type === 'in-dapp-find') {
-          const tabOrigin = (payload.pageInfo as any).searchInfo.tabOrigin;
+        switch (payload.type) {
+          case 'add-address-dropdown': {
+            updateSubviewPos(
+              mainWindow,
+              targetView,
+              (payload.pageInfo as any).triggerRect
+            );
+            break;
+          }
+          case 'in-dapp-find': {
+            const tabOrigin = (payload.pageInfo as any).searchInfo.tabOrigin;
 
-          updateSubviewPos(mainWindow, targetView, {
-            ...InDappFindSizes,
-            x: tabOrigin.x,
-            y: tabOrigin.y,
-          });
-        } else {
-          updateSubviewPos(mainWindow, targetView, payload.type);
+            updateSubviewPos(mainWindow, targetView, {
+              ...InDappFindSizes,
+              x: tabOrigin.x,
+              y: tabOrigin.y,
+            });
+            break;
+          }
+          case 'global-toast-popup': {
+            const pageInfo = payload.pageInfo as PopupViewOnMainwinInfo & {
+              type: typeof payload.type;
+            };
+
+            const topOffset = pageInfo.state?.rectTopOffset || 0;
+            updateGlobalToastViewPos(mainWindow, targetView, { topOffset });
+            break;
+          }
+          default: {
+            updateSubviewPos(mainWindow, targetView, payload.type);
+            break;
+          }
         }
         targetView.webContents.focus();
       } else {
