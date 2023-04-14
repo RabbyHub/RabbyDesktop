@@ -144,6 +144,10 @@ export const MainContainer: React.FC = () => {
     }
   }, [isDeleted, noAccount, zActions]);
 
+  if (noAccount) {
+    return null;
+  }
+
   return (
     <div className={styles.MainContainer}>
       <Header
