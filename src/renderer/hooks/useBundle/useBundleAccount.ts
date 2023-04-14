@@ -211,7 +211,7 @@ export const useBundleAccount = () => {
 
   const toggleBundle = React.useCallback(
     async (account: BundleAccount) => {
-      if (accounts.length >= 15) {
+      if (accounts.length >= 15 && account.inBundle) {
         toastMaxAccount();
         return;
       }
