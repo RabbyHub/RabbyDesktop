@@ -244,11 +244,13 @@ export class Binance {
   }
 
   private async fundingWallet() {
-    const res = await this.invoke<FundingWalletResponse>('fundingWallet');
+    const res = await this.invoke<FundingWalletResponse | undefined>(
+      'fundingWallet'
+    );
 
-    res.forEach(({ asset }) => tokenPrice.addSymbol(asset));
+    res?.forEach(({ asset }) => tokenPrice.addSymbol(asset));
 
-    return res;
+    return res ?? [];
   }
 
   private calcFundingAsset(res: FundingWalletResponse): FundingAsset {
@@ -271,11 +273,11 @@ export class Binance {
   }
 
   private async userAsset() {
-    const res = await this.invoke<UserAssetResponse>('userAsset');
+    const res = await this.invoke<UserAssetResponse | undefined>('userAsset');
 
-    res.forEach(({ asset }) => tokenPrice.addSymbol(asset));
+    res?.forEach(({ asset }) => tokenPrice.addSymbol(asset));
 
-    return res;
+    return res ?? [];
   }
 
   private calcSpotAsset(res: UserAssetResponse): SpotAsset {
@@ -308,7 +310,7 @@ export class Binance {
     ] as const;
     const userAssets: MarginAccountResponse['userAssets'] = [];
 
-    res.userAssets.forEach((item) => {
+    res?.userAssets?.forEach((item) => {
       // 有时候返回的数据是空的
       if (checkValues.every((key) => item[key] === '0')) {
         return;
@@ -375,7 +377,7 @@ export class Binance {
       'netAsset',
     ] as const;
 
-    res.assets.forEach((item) => {
+    res?.assets?.forEach((item) => {
       // 有时候返回的数据是空的
       if (
         checkValues.every(
@@ -437,13 +439,13 @@ export class Binance {
   }
 
   private async savingsFlexibleProductPosition() {
-    const res = await this.invoke<SavingsFlexibleProductPositionResponse>(
-      'savingsFlexibleProductPosition'
-    );
+    const res = await this.invoke<
+      SavingsFlexibleProductPositionResponse | undefined
+    >('savingsFlexibleProductPosition');
 
-    res.forEach(({ asset }) => tokenPrice.addSymbol(asset));
+    res?.forEach(({ asset }) => tokenPrice.addSymbol(asset));
 
-    return res;
+    return res ?? [];
   }
 
   private calcFlexible(
@@ -487,13 +489,13 @@ export class Binance {
   }
 
   private async savingsCustomizedPosition() {
-    const res = await this.invoke<SavingsCustomizedPositionResponse>(
-      'savingsCustomizedPosition'
-    );
+    const res = await this.invoke<
+      SavingsCustomizedPositionResponse | undefined
+    >('savingsCustomizedPosition');
 
-    res.forEach(({ asset }) => tokenPrice.addSymbol(asset));
+    res?.forEach(({ asset }) => tokenPrice.addSymbol(asset));
 
-    return res;
+    return res ?? [];
   }
 
   private calcFixed(
@@ -532,7 +534,7 @@ export class Binance {
   }
 
   private async stakingProductPosition(type: string) {
-    const res = await this.invoke<StakingProductPositionResponse>(
+    const res = await this.invoke<StakingProductPositionResponse | undefined>(
       'stakingProductPosition',
       [
         type,
@@ -542,13 +544,13 @@ export class Binance {
       ]
     );
 
-    res.forEach(({ asset, rewardAsset, extraRewardAsset }) => {
+    res?.forEach(({ asset, rewardAsset, extraRewardAsset }) => {
       tokenPrice.addSymbol(asset);
       tokenPrice.addSymbol(rewardAsset);
       tokenPrice.addSymbol(extraRewardAsset);
     });
 
-    return res;
+    return res ?? [];
   }
 
   private calcStake(res: StakingProductPositionResponse): AssetWithRewards[] {
