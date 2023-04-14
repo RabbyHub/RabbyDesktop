@@ -50,6 +50,18 @@ export const AccountItem: React.FC<Props> = ({
     toggleBundle(data);
   }, [toggleBundle, data]);
 
+  const percent = React.useMemo(() => {
+    if (!isBundle) {
+      return;
+    }
+    const p = Number(percentMap[data.id!]);
+
+    if (p < 1) {
+      return '< 1';
+    }
+    return p.toString();
+  }, [isBundle, percentMap, data.id]);
+
   return (
     <div className="group flex justify-center items-center relative">
       {canDelete && (
@@ -126,9 +138,7 @@ export const AccountItem: React.FC<Props> = ({
           >
             ${splitNumberByStep(Number(data.balance)?.toFixed(2))}
           </div>
-          {isBundle && (
-            <div className="opacity-60">{percentMap[data.id!]}%</div>
-          )}
+          {isBundle && <div className="opacity-60">{percent}%</div>}
         </div>
       </div>
     </div>
