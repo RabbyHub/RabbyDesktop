@@ -31,7 +31,7 @@ type ZViewStates = {
     showBackButton?: boolean;
   };
   'address-management': {
-    // nothing
+    hidden?: boolean;
   };
   'address-detail': {
     account: IDisplayedAccountWithBalance;

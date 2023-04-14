@@ -1,34 +1,32 @@
 import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import clsx from 'clsx';
+import { Dropdown } from 'antd';
 import { MainContainer } from './MainContainer';
-import { Modal } from '../Modal/Modal';
 
 export const AddressManagementModal: React.FC = () => {
-  const { svVisible, closeSubview } = useZPopupViewState('address-management');
+  const { svVisible, closeSubview, svState } =
+    useZPopupViewState('address-management');
+  const divRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (svVisible) {
+      divRef.current?.click();
+    }
+  }, [svVisible]);
 
   return (
-    <Modal
-      width={440}
-      onCancel={closeSubview}
-      open={svVisible}
-      title={null}
-      smallTitle
-      mask={false}
-      closable={false}
-      style={{
-        right: 10,
-        // --mainwin-headerblock-offset
-        top: 64,
-        position: 'absolute',
-      }}
-      bodyStyle={{
-        background: '#353945',
-        border: '1px solid rgba(255, 255, 255, 0.14)',
-        boxShadow: '0px 10px 30px rgba(19, 20, 26, 0.2)',
-        borderRadius: 12,
+    <Dropdown
+      overlayClassName={clsx(svState?.hidden && 'h-0 overflow-hidden')}
+      overlay={<MainContainer />}
+      trigger={['click']}
+      onOpenChange={(open) => {
+        if (!open) {
+          closeSubview();
+        }
       }}
     >
-      <MainContainer />
-    </Modal>
+      <div ref={divRef} className="w-[440px] h-40 absolute right-10 top-10  " />
+    </Dropdown>
   );
 };

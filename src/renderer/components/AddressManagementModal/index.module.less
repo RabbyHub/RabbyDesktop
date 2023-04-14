@@ -7,6 +7,10 @@
   padding-top: 30px;
   padding-bottom: 20px;
   max-height: 640px;
+  background: var(--theme-modal-content-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0px 10px 30px rgba(19, 20, 26, 0.2);
+  border-radius: 12px;
 
   .header {
     .divider {
@@ -51,13 +55,13 @@
     }
   }
   .footer {
-    padding-top: 14px;
+    padding-top: 20px;
 
     .button {
       margin: auto;
       height: 44px;
       width: 240px;
-      color: #fff;
+      color: rgba(255, 255, 255, 0.08);
       background: rgba(0, 0, 0, 0.3);
       display: flex;
       align-items: center;
@@ -66,6 +70,7 @@
       border-radius: 6px;
       .icon {
         margin-right: 6px;
+        opacity: 0.8;
       }
     }
   }
@@ -238,7 +243,7 @@
   background: #8697ff;
   border-radius: 6px;
   padding: 12px;
-  margin: 0 28px 16px;
+  margin: 0 32px 16px;
   display: flex;
   align-items: center;
   cursor: pointer;
