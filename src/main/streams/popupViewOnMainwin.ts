@@ -26,7 +26,6 @@ import {
   getWebuiURLBase,
   onMainWindowReady,
 } from '../utils/stream-helpers';
-import { getMainWindowTopOffset } from '../utils/browserView';
 import { notifyHideFindInPage } from '../utils/mainTabbedWin';
 
 const viewsState: {

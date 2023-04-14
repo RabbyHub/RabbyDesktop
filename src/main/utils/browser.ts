@@ -12,6 +12,7 @@ import { BrowserView, BrowserWindow } from 'electron';
 import { isEnableContentProtected } from '../store/desktopApp';
 import { getAssetPath } from './app';
 import { emitIpcMainEvent } from './ipcMainEvents';
+import { getMainWindowTopOffset } from './browserSize';
 
 export function getWindowFromWebContents(webContents: Electron.WebContents) {
   switch (webContents.getType()) {
@@ -335,7 +336,7 @@ export function parseRabbyxNotificationParams(
       result.finalBounds = {
         ...selfBounds,
         x: mainBounds.x + (mainBounds.width - selfBounds.width - 10),
-        y: mainBounds.y + 64,
+        y: mainBounds.y + 64 + getMainWindowTopOffset(),
       };
     }
 
