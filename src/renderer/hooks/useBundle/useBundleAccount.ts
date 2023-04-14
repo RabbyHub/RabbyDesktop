@@ -2,6 +2,8 @@ import { useAtom } from 'jotai';
 import React from 'react';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { validate, Network } from 'bitcoin-address-validation';
+import { toastMessage } from '@/renderer/components/TransparentToast';
+import { ellipsis } from '@/renderer/utils/address';
 import { Binance } from './cex/binance/binance';
 import { bundleAccountsAtom } from './shared';
 import { ERROR } from './error';
@@ -166,15 +168,39 @@ export const useBundleAccount = () => {
 
   const remove = React.useCallback(
     (id: string) => {
-      const account = ethList.find((acc) => acc.id === id);
-      if (account?.type === 'eth') {
+      const ethAccount = ethList.find((acc) => acc.id === id);
+
+      if (ethAccount?.type === 'eth') {
         walletController
-          .removeAddress(account.data.address, account.data.type)
+          .removeAddress(ethAccount.data.address, ethAccount.data.type)
           .then(getAllAccountsToDisplay);
       }
       window.rabbyDesktop.ipcRenderer.invoke('bundle-account-delete', id);
+
+      const account = accounts.find((acc) => acc.id === id) || ethAccount;
+      if (!account) return;
+      // toast 提示
+      let address = '';
+      switch (account.type) {
+        case 'eth':
+          address = account.data.address;
+          break;
+        case 'bn':
+          address = account.apiKey;
+          break;
+        case 'btc':
+          address = account.address;
+          break;
+        default:
+          break;
+      }
+
+      toastMessage({
+        type: 'success',
+        content: `${ellipsis(address)} deleted`,
+      });
     },
-    [ethList, getAllAccountsToDisplay]
+    [accounts, ethList, getAllAccountsToDisplay]
   );
 
   const toggleBundle = React.useCallback(
