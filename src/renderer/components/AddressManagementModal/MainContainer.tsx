@@ -130,6 +130,8 @@ export const MainContainer: React.FC = () => {
         account: selectedAccount,
         backable: true,
       });
+      zActions.hideZSubview('address-management');
+
       setSelectedAccount(undefined);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -140,6 +142,10 @@ export const MainContainer: React.FC = () => {
       zActions.hideZSubview('address-management');
     }
   }, [isDeleted, noAccount, zActions]);
+
+  if (noAccount) {
+    return null;
+  }
 
   return (
     <div className={styles.MainContainer}>

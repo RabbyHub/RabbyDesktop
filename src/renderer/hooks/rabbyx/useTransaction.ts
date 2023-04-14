@@ -1,8 +1,8 @@
-import { toastMessage } from '@/renderer/components/TransparentToast';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { message } from 'antd';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
+import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { useCurrentAccount } from './useAccount';
 
 const DEBUG_DURACTION = 0;
@@ -17,39 +17,58 @@ export function useTransactionChanged() {
           default:
             break;
           case 'push-failed': {
-            toastMessage({
-              type: 'error',
-              content: 'Transaction push failed',
-              className: 'rabbyx-tx-changed-tip',
-              // duration: DEBUG_DURACTION,
+            showMainwinPopupview({
+              type: 'global-toast-popup',
+              state: {
+                toastType: 'toast-message',
+                data: {
+                  type: 'error',
+                  content: 'Transaction push failed',
+                },
+              },
             });
+
             break;
           }
           case 'submitted': {
-            toastMessage({
-              type: 'success',
-              content: 'Transaction submitted',
-              className: 'rabbyx-tx-changed-tip',
-              // duration: DEBUG_DURACTION,
+            showMainwinPopupview({
+              type: 'global-toast-popup',
+              state: {
+                toastType: 'toast-message',
+                data: {
+                  type: 'success',
+                  content: 'Transaction submitted',
+                },
+              },
             });
+
             break;
           }
           case 'finished': {
             if (payload.data?.success) {
-              toastMessage({
-                type: 'success',
-                content: 'Transaction success',
-                className: 'rabbyx-tx-changed-tip',
-                // duration: DEBUG_DURACTION,
+              showMainwinPopupview({
+                type: 'global-toast-popup',
+                state: {
+                  toastType: 'toast-message',
+                  data: {
+                    type: 'success',
+                    content: 'Transaction success',
+                  },
+                },
               });
             } else {
-              toastMessage({
-                type: 'error',
-                content: 'Transaction failed',
-                className: 'rabbyx-tx-changed-tip',
-                // duration: DEBUG_DURACTION,
+              showMainwinPopupview({
+                type: 'global-toast-popup',
+                state: {
+                  toastType: 'toast-message',
+                  data: {
+                    type: 'error',
+                    content: 'Transaction failed',
+                  },
+                },
               });
             }
+
             break;
           }
         }

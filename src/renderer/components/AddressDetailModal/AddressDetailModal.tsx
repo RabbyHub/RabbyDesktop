@@ -17,6 +17,10 @@ export const AddressDetailModal: React.FC = () => {
   const { updateBalance } = useAccountToDisplay();
   const [balance, setBalance] = React.useState(svState?.account?.balance);
 
+  const back = React.useCallback(() => {
+    closeSubview();
+  }, [closeSubview]);
+
   const handleDelete = React.useCallback(
     async (account: IDisplayedAccountWithBalance) => {
       await removeAddress([account.address, account.type, account.brandName]);
@@ -44,8 +48,7 @@ export const AddressDetailModal: React.FC = () => {
       title="Address Detail"
       onCancel={closeSubview}
       open={svVisible}
-      backable={svState.backable}
-      onBack={closeSubview}
+      onBack={back}
     >
       <AccountDetail
         onClose={closeSubview}

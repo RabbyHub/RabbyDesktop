@@ -3,12 +3,16 @@ import {
   SAFE_WEBPREFERENCES,
   RABBY_BLANKPAGE_RELATIVE_URL,
 } from '@/isomorphic/constants';
-import { isRabbyXCenteredWindowType } from '@/isomorphic/rabbyx';
+import {
+  RABBX_RIGHT_WINDOW_TYPES,
+  isRabbyXCenteredWindowType,
+} from '@/isomorphic/rabbyx';
 import { roundRectValue } from '@/isomorphic/shape';
 import { BrowserView, BrowserWindow } from 'electron';
 import { isEnableContentProtected } from '../store/desktopApp';
 import { getAssetPath } from './app';
 import { emitIpcMainEvent } from './ipcMainEvents';
+import { getMainWindowTopOffset } from './browserSize';
 
 export function getWindowFromWebContents(webContents: Electron.WebContents) {
   switch (webContents.getType()) {
@@ -324,6 +328,18 @@ export function parseRabbyxNotificationParams(
       x: mainBounds.x + (mainBounds.width - selfBounds.width) / 2,
       y: mainBounds.y + (mainBounds.height - selfBounds.height) / 2,
     };
+
+    if (
+      signApprovalType &&
+      RABBX_RIGHT_WINDOW_TYPES.includes(signApprovalType)
+    ) {
+      result.finalBounds = {
+        ...selfBounds,
+        x: mainBounds.x + (mainBounds.width - selfBounds.width - 10),
+        y: mainBounds.y + 64 + getMainWindowTopOffset(),
+      };
+    }
+
     result.shouldPosCenter = true;
   }
 

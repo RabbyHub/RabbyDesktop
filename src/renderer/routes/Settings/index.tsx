@@ -241,7 +241,7 @@ export function MainWindowSettings() {
             }
             icon="rabby-internal://assets/icons/send-token/whitelist.svg"
             onChange={(nextEnabled: boolean) => {
-              ModalConfirm({
+              ModalConfirmRelaunch({
                 height: 268,
                 title: `${nextEnabled ? 'Enable' : 'Disable'} Whitelist`,
                 content: nextEnabled

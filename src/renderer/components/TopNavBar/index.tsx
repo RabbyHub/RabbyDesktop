@@ -28,8 +28,8 @@ import { copyText } from '@/renderer/utils/clipboard';
 import { useMatchURLBaseConfig } from '@/renderer/hooks-ipc/useAppDynamicConfig';
 import { useWindowState } from '@/renderer/hooks-shell/useWindowState';
 import { formatDappURLToShow } from '@/isomorphic/dapp';
+import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
 import styles from './index.module.less';
-import { toastMessage } from '../TransparentToast';
 
 const isDarwin = detectOS() === 'darwin';
 
@@ -154,11 +154,12 @@ export const TopNavBar = () => {
           onClick={async () => {
             if (!dappURLToShow) return;
             await copyText(dappURLToShow);
-            toastMessage({
-              type: 'success',
-              content: 'Copied url',
-              className: 'mainwindow-default-tip',
-              duration: 1,
+
+            toastTopMessage({
+              data: {
+                type: 'success',
+                content: 'Copied url',
+              },
             });
           }}
         >

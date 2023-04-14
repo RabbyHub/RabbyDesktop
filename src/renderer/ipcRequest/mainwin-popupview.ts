@@ -35,3 +35,21 @@ export function hideMainwinPopupview(
     }, 200);
   }
 }
+
+export function toastTopMessage(
+  state: Omit<
+    PickPopupViewPageInfo<'global-toast-popup'>['state'] & {
+      toastType: 'toast-message';
+    },
+    'toastType'
+  > &
+    object
+) {
+  return showMainwinPopupview({
+    type: 'global-toast-popup',
+    state: {
+      ...state,
+      toastType: 'toast-message',
+    },
+  });
+}

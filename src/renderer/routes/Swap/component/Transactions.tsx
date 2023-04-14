@@ -35,7 +35,7 @@ const EmptyWrapper = styled.div`
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
   height: 260px;
 
@@ -99,7 +99,7 @@ const Wrapper = styled.div`
 
   .txBox {
     padding: 0 40px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 8px;
     height: 108px;
     margin-bottom: 32px;

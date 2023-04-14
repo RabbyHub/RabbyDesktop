@@ -98,7 +98,7 @@ const Wrapper = styled.div`
     min-height: 640px;
 
     background: rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 8px;
     padding: 24px;
   }
@@ -108,7 +108,7 @@ const Wrapper = styled.div`
     min-height: 640px;
 
     background: rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 8px;
     padding: 24px;
 
@@ -231,7 +231,7 @@ const Wrapper = styled.div`
         content: '';
         width: calc(100% + 50px);
         height: 0;
-        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
       }
       &.disabled {
         opacity: 0.6;

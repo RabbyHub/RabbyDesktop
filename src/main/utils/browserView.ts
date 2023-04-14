@@ -113,12 +113,6 @@ export function pickMainWindowLayouts() {
   return sidebarCollapsed ? NativeLayoutsCollapsed : NativeLayouts;
 }
 
-export function getMainWindowTopOffset() {
-  return process.platform === 'darwin'
-    ? 0
-    : NativeAppSizes.windowTitlebarHeight;
-}
-
 export function patchTabbedBrowserWebContents(
   wc: Electron.WebContents,
   options: {

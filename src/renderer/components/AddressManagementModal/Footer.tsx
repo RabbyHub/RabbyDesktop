@@ -4,7 +4,7 @@ import React from 'react';
 import styles from './index.module.less';
 
 export const Footer: React.FC = () => {
-  const { showZSubview } = useZPopupLayerOnMain();
+  const { showZSubview, hideZSubview } = useZPopupLayerOnMain();
   return (
     <section className={styles.footer}>
       <Button
@@ -17,6 +17,7 @@ export const Footer: React.FC = () => {
         className={styles.button}
         onClick={() => {
           showZSubview('select-add-address-type-modal');
+          hideZSubview('address-management');
         }}
       >
         Add Address

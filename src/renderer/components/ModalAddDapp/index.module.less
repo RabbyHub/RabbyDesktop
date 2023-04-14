@@ -97,7 +97,7 @@
   .tab {
     &Panel {
       padding: 18px;
-      border: 1px solid #616676;
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-top: none;
       border-radius: 0 0 6px 6px;
       min-height: 573px;
@@ -109,8 +109,8 @@
       border-radius: 6px 6px 0 0;
 
       .tabItem {
-        border-top: 1px solid #616676;
-        border-bottom: 1px solid #616676;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         width: 25%;
         height: 41px;
         text-align: center;
@@ -122,15 +122,15 @@
         font-weight: 400;
         font-size: 14px;
         line-height: 17px;
-        background-color: #4b505f;
+        background-color: #393e4b;
 
         &:first-child {
           border-radius: 6px 0 0 0;
-          border-left: 1px solid #616676;
+          border-left: 1px solid rgba(255, 255, 255, 0.1);
         }
         &:last-child {
           border-radius: 0 6px 0 0;
-          border-right: 1px solid #616676;
+          border-right: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         &Active {
@@ -141,12 +141,12 @@
           color: #ffffff;
           padding: 17px 18px 6px 18px;
           width: 289px;
-          border: 1px solid #616676;
+          border: 1px solid rgba(255, 255, 255, 0.1);
           border-bottom: 0;
           border-right: 0;
           border-radius: 6px 0 0 0;
           position: relative;
-          background: #525767;
+          background: var(--theme-modal-content-bg);
           flex-shrink: 0;
 
           &::after {
@@ -206,7 +206,7 @@
 .toast {
   :global {
     .ant-message-notice-content {
-      background-color: #474c5a;
+      background-color: rgba(0, 0, 0, 0.9);
       padding: 16px;
       backdrop-filter: blur(20px);
       min-width: 156px;
@@ -215,8 +215,8 @@
       .ant-message-custom-content {
         display: inline-flex;
         align-items: center;
-        font-size: 15px;
-        line-height: 16px;
+        font-size: 16px;
+        color: #ffffff;
       }
     }
   }
