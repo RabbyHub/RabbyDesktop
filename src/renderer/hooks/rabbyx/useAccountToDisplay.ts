@@ -18,6 +18,7 @@ export const useAccountToDisplay = () => {
   const [loadingAccounts, setLoading] = useAtom(loadingAtom);
 
   const getAllAccountsToDisplay = React.useCallback(async () => {
+    if (loadingAccounts) return;
     setLoading(true);
 
     const [displayedKeyrings, allAlianNames] = await Promise.all([
@@ -60,7 +61,7 @@ export const useAccountToDisplay = () => {
       const withBalanceList = sortAccountsByBalance(result);
       setAccountsList(withBalanceList);
     }
-  }, [setAccountsList, setLoading]);
+  }, [loadingAccounts, setAccountsList, setLoading]);
 
   const removeAccount = React.useCallback(
     async (payload: Parameters<typeof walletController.removeAddress>) => {

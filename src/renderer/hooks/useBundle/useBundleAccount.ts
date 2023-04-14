@@ -291,7 +291,12 @@ export const useBundleAccount = () => {
     accounts.forEach((account) => {
       if (account.type === 'eth' && account.id) {
         if (
-          !ethAccountList.find((acc) => acc.address === account.data.address)
+          !ethAccountList.find(
+            (acc) =>
+              acc.address === account.data.address &&
+              acc.type === account.data.type &&
+              acc.brandName === account.data.brandName
+          )
         ) {
           remove(account.id, false);
         }
