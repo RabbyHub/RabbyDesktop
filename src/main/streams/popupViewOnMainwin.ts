@@ -140,8 +140,6 @@ function updateGlobalToastViewPos(
     height,
   };
 
-  const selfBounds = view.getBounds();
-
   popupRect.width = 600;
   const topOffset = opts?.topOffset || TOAST_TOP;
   globalToastPopupState.rectTopOffset = topOffset;
@@ -150,7 +148,7 @@ function updateGlobalToastViewPos(
     height: 80,
     // make it h-center
     x: Math.floor((width - popupRect.width) / 2),
-    y: getMainWindowTopOffset() + topOffset,
+    y: topOffset,
   };
 
   return updateSubviewPos(parentWindow, view, popupRect);
