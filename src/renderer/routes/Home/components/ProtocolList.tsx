@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import classNames from 'classnames';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
-import { VIEW_TYPE } from '../hooks';
+import { VIEW_TYPE } from '../type';
 import HistoryProtocolItem, {
   LoadingProtocolItem,
 } from './HistoryProtocolItem';

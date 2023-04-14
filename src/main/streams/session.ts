@@ -6,6 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { isRabbyXPage } from '@/isomorphic/url';
 import { trimWebContentsUserAgent } from '@/isomorphic/string';
+import { coerceNumber } from '@/isomorphic/primitive';
 import {
   IS_RUNTIME_PRODUCTION,
   PROTOCOL_IPFS,
@@ -27,15 +28,13 @@ import {
   getRabbyExtId,
   getSessionInsts,
   getWebuiExtId,
-  pushChangesToZPopupLayer,
 } from '../utils/stream-helpers';
 import { checkOpenAction } from '../utils/tabs';
 import { getWindowFromWebContents, switchToBrowserTab } from '../utils/browser';
 import { rewriteSessionWebRequestHeaders } from '../utils/webRequest';
 import { checkProxyViaBrowserView, setSessionProxy } from '../utils/appNetwork';
 import {
-  desktopAppStore,
-  getAppProxyConf,
+  getFullAppProxyConf,
   isEnableSupportIpfsDapp,
 } from '../store/desktopApp';
 import {
@@ -48,7 +47,6 @@ import {
   emitIpcMainEvent,
   onIpcMainInternalEvent,
 } from '../utils/ipcMainEvents';
-import { rabbyxQuery } from './rabbyIpcQuery/_base';
 
 const sesLog = getBindLog('session', 'bgGrey');
 
@@ -123,8 +121,8 @@ export async function defaultSessionReadyThen() {
   return firstValueFrom(fromMainSubject('sessionReady'));
 }
 
-function checkProxyValidOnBootstrap() {
-  const appProxyConf = getAppProxyConf();
+async function checkProxyValidOnBootstrap() {
+  const appProxyConf = await getFullAppProxyConf();
 
   if (appProxyConf.proxyType === 'none') {
     return {
@@ -220,7 +218,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
   app.userAgentFallback = trimWebContentsUserAgent(mainSession.getUserAgent());
 
   // must after sessionReady
-  const result = checkProxyValidOnBootstrap();
+  const result = await checkProxyValidOnBootstrap();
 
   const realProxy = { ...result.appProxyConf, applied: false };
 

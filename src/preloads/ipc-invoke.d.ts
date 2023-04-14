@@ -127,8 +127,8 @@ type ChannelInvokePayload = {
   'get-proxyConfig': {
     send: [];
     response: {
-      persisted: IAppProxyConf;
       runtime: IRunningAppProxyConf;
+      systemProxy: IAppProxyConf['systemProxySettings'];
     };
   };
   'apply-proxyConfig': {
@@ -242,6 +242,40 @@ type ChannelInvokePayload = {
   'cancel-download-ipfs': {
     send: [];
     response: void;
+  };
+  'binance-sdk': {
+    send: [
+      {
+        apiKey: string;
+        apiSecret: string;
+        method: string;
+        params?: any[];
+      }
+    ];
+    response: any;
+  };
+  // Bundle
+  'bundle-account-post': {
+    send: [account: BundleAccount];
+    response: {
+      error?: string;
+    };
+  };
+  'bundle-account-put': {
+    send: [account: BundleAccount];
+    response: any;
+  };
+  'bundle-account-delete': {
+    send: [id: string];
+    response: any;
+  };
+  'bundle-account-init': {
+    send: [];
+    response: any;
+  };
+  'bundle-account-update-balance': {
+    send: [{ id?: string; balance?: string }[]];
+    response: any;
   };
 } & RabbyxInvokePayload;
 

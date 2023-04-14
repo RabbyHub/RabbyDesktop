@@ -60,6 +60,42 @@ function ToastContent({
 
 const inMainWin = isMainWinShellWebUI(window.location.href);
 
+export function toastCopied(
+  text: string,
+  options?: {
+    triggerEl?: HTMLElement | EventTarget;
+  }
+) {
+  toastMessage({
+    icon: null,
+    key: TOAST_KEY,
+    content: (
+      <ToastContent
+        onClickOutside={(sourceEvt) => {
+          if (inMainWin) return;
+          if (
+            options?.triggerEl instanceof Element &&
+            (sourceEvt?.target as HTMLElement)?.contains(
+              options?.triggerEl as any
+            )
+          ) {
+            return;
+          }
+
+          message.destroy(TOAST_KEY);
+        }}
+      >
+        <div className="flex items-center">
+          <RcIconToastSuccess className="mr-6px w-[16px] h-[16px]" />
+          <span style={{ color: '#27C193' }}>Copied:</span>
+        </div>
+        <div>{text}</div>
+      </ToastContent>
+    ),
+    duration: TIMEOUT_SEC,
+  });
+}
+
 export async function toastCopiedWeb3Addr(
   text: string,
   options?: {
@@ -67,34 +103,7 @@ export async function toastCopiedWeb3Addr(
   }
 ) {
   if (isWeb3Addr(text)) {
-    toastMessage({
-      icon: null,
-      key: TOAST_KEY,
-      content: (
-        <ToastContent
-          onClickOutside={(sourceEvt) => {
-            if (inMainWin) return;
-            if (
-              options?.triggerEl instanceof Element &&
-              (sourceEvt?.target as HTMLElement)?.contains(
-                options?.triggerEl as any
-              )
-            ) {
-              return;
-            }
-
-            message.destroy(TOAST_KEY);
-          }}
-        >
-          <div className="flex items-center">
-            <RcIconToastSuccess className="mr-6px w-[16px] h-[16px]" />
-            <span style={{ color: '#27C193' }}>Copied:</span>
-          </div>
-          <div className="text-12">{text}</div>
-        </ToastContent>
-      ),
-      duration: TIMEOUT_SEC,
-    });
+    toastCopied(text, options);
   }
 }
 

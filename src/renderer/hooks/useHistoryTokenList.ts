@@ -1,16 +1,30 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { usePrevious } from 'react-use';
 import BigNumber from 'bignumber.js';
 import PQueue from 'p-queue';
 import { groupBy } from 'lodash';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
-import { VIEW_TYPE } from '@/renderer/routes/Home/hooks';
+import { VIEW_TYPE } from '@/renderer/routes/Home/type';
 
 export interface TokenWithHistoryItem {
   current: TokenItem;
   history: TokenItem;
 }
+
+export const loadCachedTokenList = async (addr: string) => {
+  const list = await walletOpenapi.getCachedTokenList(addr);
+  return list.map((item) => ({
+    ...item,
+    usd_value: new BigNumber(item.amount).times(item.price).toNumber(),
+  }));
+};
+export const loadRealTimeTokenList = async (addr: string) => {
+  const list = await walletOpenapi.listToken(addr);
+  return list.map((item) => ({
+    ...item,
+    usd_value: new BigNumber(item.amount).times(item.price).toNumber(),
+  }));
+};
 
 export default (
   address: string | undefined,
@@ -31,11 +45,7 @@ export default (
     if (isHistoryLoadedRef.current) return;
     try {
       setIsLoading(true);
-      const cachedList = await walletOpenapi.getCachedTokenList(addr);
-      tokenListRef.current = cachedList.map((item) => ({
-        ...item,
-        usd_value: new BigNumber(item.amount).times(item.price).toNumber(),
-      }));
+      tokenListRef.current = await loadCachedTokenList(addr);
       setIsLoading(false);
     } catch (e) {
       setIsLoading(false);
@@ -46,11 +56,7 @@ export default (
     if (isRealTimeLoadedRef.current) return;
     try {
       setIsLoadingRealTime(true);
-      const list = await walletOpenapi.listToken(addr);
-      tokenListRef.current = list.map((item) => ({
-        ...item,
-        usd_value: new BigNumber(item.amount).times(item.price).toNumber(),
-      }));
+      tokenListRef.current = await loadRealTimeTokenList(addr);
       setIsLoadingRealTime(false);
       isRealTimeLoadedRef.current = true;
     } catch (e) {

@@ -132,7 +132,9 @@ function SwitchChainModalInner({
     if (!keyword) {
       return {
         pinnedChains: pinned.sort(sortFn),
-        unpinnedChains: unpinned.sort(sortFn),
+        unpinnedChains: unpinned
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .sort(sortFn),
       };
     }
 
