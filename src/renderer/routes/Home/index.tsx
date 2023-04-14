@@ -21,7 +21,6 @@ import {
   useZViewsVisibleChanged,
 } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { HomeTab } from '@/renderer/components/HomeTab/HomeTab';
-import { IDisplayedAccountWithBalance } from '@/preloads/forward';
 import {
   useExpandList,
   useExpandProtocolList,
