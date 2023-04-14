@@ -17,10 +17,7 @@ import {
   IS_RUNTIME_PRODUCTION,
 } from '@/isomorphic/constants';
 import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
-import {
-  ModalConfirm,
-  ModalConfirmRelaunch,
-} from '@/renderer/components/Modal/Confirm';
+import { ModalConfirmInSettings } from '@/renderer/components/Modal/Confirm';
 import { Switch } from '@/renderer/components/Switch/Switch';
 import { useCheckNewRelease } from '@/renderer/hooks/useAppUpdator';
 import { copyText } from '@/renderer/utils/clipboard';
@@ -241,12 +238,16 @@ export function MainWindowSettings() {
             }
             icon="rabby-internal://assets/icons/send-token/whitelist.svg"
             onChange={(nextEnabled: boolean) => {
-              ModalConfirm({
-                height: 268,
+              ModalConfirmInSettings({
+                height: 230,
                 title: `${nextEnabled ? 'Enable' : 'Disable'} Whitelist`,
-                content: nextEnabled
-                  ? 'Once enabled, you can only send assets to the addresses in the whitelist using Rabby.'
-                  : 'You can send assets to any address once disabled',
+                content: nextEnabled ? (
+                  'Once enabled, you can only send assets to the addresses in the whitelist using Rabby.'
+                ) : (
+                  <div className="text-center">
+                    You can send assets to any address once disabled.
+                  </div>
+                ),
                 onOk: () => {
                   toggleWhitelist(nextEnabled);
                 },
@@ -276,7 +277,7 @@ export function MainWindowSettings() {
             onChange={(nextEnabled: boolean) => {
               const keyAction = `${nextEnabled ? 'enable' : 'disable'}`;
 
-              ModalConfirmRelaunch({
+              ModalConfirmInSettings({
                 height: 230,
                 title: `${ucfirst(keyAction)} IPFS Dapp`,
                 content: `It's required to restart the app to ${keyAction} IPFS dapp, do you want to restart now?`,

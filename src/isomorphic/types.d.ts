@@ -337,18 +337,15 @@ type PopupViewOnMainwinInfo =
     }
   | {
       type: 'global-toast-popup';
-      state?:
-        | {
-            toastType?: 'foo';
-          }
-        | {
-            toastType: 'toast-message';
-            data: {
-              type: 'success' | 'error' | 'warning';
-              content?: string;
-              duration?: number;
-            };
-          };
+      state?: {
+        toastType: 'toast-message';
+        rectTopOffset?: number;
+        data: {
+          type: 'success' | 'error' | 'warning';
+          content?: string;
+          duration?: number;
+        };
+      };
     }
   | {
       type: 'in-dapp-find';
@@ -357,6 +354,9 @@ type PopupViewOnMainwinInfo =
         tabOrigin: { x: number; y: number };
       };
     };
+
+type PickPopupViewPageInfo<T extends PopupViewOnMainwinInfo['type']> =
+  PopupViewOnMainwinInfo & { type: T };
 
 type IShellNavInfo = {
   tabExists: boolean;

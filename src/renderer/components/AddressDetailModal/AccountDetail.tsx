@@ -39,10 +39,13 @@ export const AccountDetail: React.FC<Props> = ({
   const brandName = account.brandName as WALLET_BRAND_TYPES;
   const isSafe = account.type === KEYRING_CLASS.GNOSIS;
   const [, copyToClipboard] = useCopyToClipboard();
-  const onCopy = React.useCallback(() => {
-    copyToClipboard(account.address);
-    toastCopiedWeb3Addr(account.address);
-  }, [account.address, copyToClipboard]);
+  const onCopy = React.useCallback(
+    (e: React.MouseEvent) => {
+      copyToClipboard(account.address);
+      toastCopiedWeb3Addr(account.address, { triggerEl: e.target });
+    },
+    [account.address, copyToClipboard]
+  );
   const source = useAddressSource({
     type: account.type,
     brandName,

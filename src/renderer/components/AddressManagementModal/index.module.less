@@ -1,15 +1,20 @@
-@import "@/renderer/css/mixins.less";
+@import '@/renderer/css/mixins.less';
 .MainContainer {
   color: #fff;
   position: relative;
   display: flex;
   flex-direction: column;
+  padding-top: 30px;
   padding-bottom: 20px;
-  height: 607px;
+  max-height: 640px;
+  background: var(--theme-dropdown-bg);
+  border: var(--theme-dropdown-border);
+  box-shadow: var(--theme-dropdown-shadow);
+  border-radius: 12px;
 
   .header {
     .divider {
-      color: #FFFFFF;
+      color: #ffffff;
       opacity: 0.3;
       text-align: center;
       margin-bottom: 16px;
@@ -21,7 +26,7 @@
         &::after,
         &::before {
           content: '';
-          border-bottom: 1px solid #E5E9EF;
+          border-bottom: 1px solid #e5e9ef;
           position: absolute;
           width: 52px;
           top: 50%;
@@ -38,7 +43,7 @@
     }
   }
   .body {
-    overflow-y: auto;
+    overflow-y: overlay;
     flex: 1;
     .chrome-like-scrollbar();
 
@@ -47,25 +52,28 @@
       &:last-child {
         margin-bottom: 0;
       }
+      &:last-child {
+        margin-bottom: 0;
+      }
     }
   }
   .footer {
-    padding-top: 14px;
+    padding-top: 20px;
 
     .button {
       margin: auto;
       height: 44px;
       width: 240px;
-      color: #fff;
-      background: rgba(255, 255, 255, 0.2);
+      color: rgba(255, 255, 255, 0.8);
+      background: rgba(0, 0, 0, 0.3);
       display: flex;
       align-items: center;
       place-content: center;
       border: none;
-      border-radius: 4px;
-
+      border-radius: 6px;
       .icon {
         margin-right: 6px;
+        opacity: 0.8;
       }
     }
   }
@@ -97,7 +105,8 @@
   .container {
     display: flex;
     align-items: center;
-    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
     border-radius: 6px;
     flex: 1;
   }
@@ -112,8 +121,7 @@
     border-bottom-left-radius: 6px;
     cursor: pointer;
     &:hover {
-      background: rgba(134, 151, 255, 0.1);
-
+      background: rgba(255, 255, 255, 0.08);
       .checkIcon {
         .check {
           display: block;
@@ -157,7 +165,7 @@
     border-top-right-radius: 6px;
     border-bottom-right-radius: 6px;
     &:hover {
-      background: rgba(134, 151, 255, 0.1);
+      background: rgba(255, 255, 255, 0.08);
       .arrowHover {
         display: block;
       }
@@ -223,6 +231,10 @@
         }
       }
 
+      .name {
+        font-weight: 700;
+      }
+
       .icon {
         cursor: pointer;
       }
@@ -231,9 +243,9 @@
 }
 
 .CurrentAccount {
-  background: #8697FF;
+  background: #8697ff;
   border-radius: 6px;
-  padding: 18px 16px;
+  padding: 12px;
   margin: 0 32px 16px;
   display: flex;
   align-items: center;
@@ -256,6 +268,7 @@
     display: flex;
     flex-direction: column;
     font-size: 15px;
+    line-height: 18px;
     flex: 1;
 
     .part {
@@ -265,6 +278,18 @@
 
       &:last-child {
         margin-bottom: 0;
+      }
+
+      &.partAddress {
+        font-size: 12px;
+
+        .balance {
+          margin-left: 8px;
+        }
+      }
+
+      .name {
+        font-weight: 700;
       }
 
       > * {

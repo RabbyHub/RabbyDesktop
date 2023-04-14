@@ -10,8 +10,8 @@ import { StyledModal as CModal } from './ContactEditModal';
 
 const StyledModal = styled(CModal)`
   .ant-modal-content {
-    background: #525767;
-    box-shadow: 0px 24px 80px rgba(19, 20, 26, 0.18);
+    background: var(--theme-modal-content-bg);
+    box-shadow: var(--theme-modal-content-shadow);
   }
   .ant-modal-header {
     padding-bottom: 0;

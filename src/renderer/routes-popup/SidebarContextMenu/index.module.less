@@ -6,10 +6,9 @@
 .dappDropdownMenu {
   padding-top: 7px;
   padding-bottom: 7px;
-  background: #525767;
-  // background-color: #353945;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  // box-shadow: 0px 24px 32px rgba(15, 27, 52, 0.14);
+  background: var(--theme-dropdown-bg);
+  border: var(--theme-dropdown-border);
+  box-shadow: var(--theme-dropdown-shadow);
   border-radius: 8px;
   font-family: var(--default-font);
 
@@ -35,8 +34,8 @@
     }
   }
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid #535761;
     box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.07);
     border-radius: 4px;
   }

@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { message, Table } from 'antd';
+import { Table, message } from 'antd';
 import React from 'react';
 import dayjs from 'dayjs';
 import clsx from 'clsx';
@@ -15,6 +15,7 @@ import { AccountListSkeleton } from './AccountListSkeleton';
 import { fetchAccountsInfo, HDManagerStateContext, Account } from './utils';
 import { AliasName } from './AliasName';
 import { ChainList } from './ChainList';
+import { toastCopiedWeb3Addr } from '../TransparentToast';
 
 export interface Props {
   loading: boolean;
@@ -52,8 +53,9 @@ export const AccountList: React.FC<Props> = ({
     []
   );
   const [, copyToClipboard] = useCopyToClipboard();
-  const copy = React.useCallback((value: string) => {
+  const copy = React.useCallback((value: string, e: React.MouseEvent) => {
     copyToClipboard(value);
+    toastCopiedWeb3Addr(value, { triggerEl: e?.target });
   }, []);
 
   React.useEffect(() => {
@@ -246,7 +248,7 @@ export const AccountList: React.FC<Props> = ({
               <div className="cell-address">
                 <span>{value.toLowerCase()}</span>
                 <img
-                  onClick={() => copy(value.toLowerCase())}
+                  onClick={(e) => copy(value.toLowerCase(), e)}
                   className="copy-icon"
                   src="rabby-internal://assets/icons/hd-manager/copy.svg"
                 />

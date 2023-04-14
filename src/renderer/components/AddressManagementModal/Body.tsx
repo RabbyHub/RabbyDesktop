@@ -1,5 +1,6 @@
 import { IDisplayedAccountWithBalance } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
 import React from 'react';
+import clsx from 'clsx';
 import { AccountItem } from './AccountItem';
 import styles from './index.module.less';
 
@@ -44,8 +45,12 @@ export const Body: React.FC<Props> = ({
 
   return (
     <section className={styles.body}>
-      <div className={styles.group}>{accounts.map(renderAccountItem)}</div>
-      <div className={styles.group}>{contacts.map(renderAccountItem)}</div>
+      {!!accounts?.length && (
+        <div className={styles.group}>{accounts.map(renderAccountItem)}</div>
+      )}
+      {!!contacts?.length && (
+        <div className={styles.group}>{contacts.map(renderAccountItem)}</div>
+      )}
     </section>
   );
 };

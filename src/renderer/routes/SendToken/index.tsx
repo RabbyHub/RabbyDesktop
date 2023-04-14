@@ -44,7 +44,7 @@ const MaxButton = styled.img`
 
 const SendTokenWrapper = styled.div`
   padding: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
   margin: 0 auto;
   width: 600px;
@@ -225,7 +225,7 @@ const SendTokenWrapper = styled.div`
       top: 0;
       left: -24px;
       width: 598px;
-      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
   }
 `;
@@ -1150,7 +1150,7 @@ const SendToken = memo(() => {
   const { currentAccount } = useCurrentAccount();
   return (
     <Wrapper>
-      <SendTokenInner key={`${currentAccount?.address}`} />;
+      <SendTokenInner key={`${currentAccount?.address}`} />
     </Wrapper>
   );
 });

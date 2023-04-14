@@ -31,7 +31,7 @@ type ZViewStates = {
     showBackButton?: boolean;
   };
   'address-management': {
-    // nothing
+    hidden?: boolean;
   };
   'address-detail': {
     account: IDisplayedAccountWithBalance;
@@ -86,7 +86,7 @@ type IZPopupSubviewState = {
 };
 
 type IZPopupSubviewVisibleState = {
-  [K in keyof ZViewStates]: { visible: boolean };
+  [K in keyof ZViewStates]: boolean;
 };
 
 type IZCallbackPayload<SV extends keyof ZViewStates> = {
