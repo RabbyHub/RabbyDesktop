@@ -6,6 +6,8 @@ import { Form } from 'antd';
 import clsx from 'clsx';
 import React from 'react';
 import { openExternalUrl } from '@/renderer/ipcRequest/app';
+import { saveBundleAccountsBalance } from '@/renderer/hooks/useBundle/shared';
+import { Binance } from '@/renderer/hooks/useBundle/cex/binance/binance';
 import { InputItem } from './InputItem';
 import { BundleSuccessModal } from './BundleSuccessModal';
 
@@ -21,6 +23,7 @@ const ERROR_MESSAGE = {
 export const AddBinanceModal: React.FC<ModalProps> = (props) => {
   const {
     account: { preCheck, create },
+    binance: { getAssetByAccount },
   } = useBundle();
   const [form] = Form.useForm<{
     apiKey: string;
@@ -52,16 +55,38 @@ export const AddBinanceModal: React.FC<ModalProps> = (props) => {
       return;
     }
 
-    const result = await create({
+    const result = (await create({
       type: 'bn',
       apiKey,
       apiSecret,
-    });
+    })) as BNAccount;
     setNewAccount(result);
     setLoading(false);
     form.resetFields();
     setOpenSuccessModal(true);
-  }, [create, form, preCheck]);
+
+    const accountWithApi = {
+      ...result,
+      api: new Binance({
+        apiKey: result.apiKey,
+        apiSecret: result.apiSecret,
+        nickname: result.nickname,
+      }),
+    };
+
+    getAssetByAccount(accountWithApi).then((res) => {
+      if (!res?.balance) {
+        console.error('Failed to get balance from Binance', res);
+        return;
+      }
+      saveBundleAccountsBalance([
+        {
+          id: result!.id,
+          balance: res?.balance,
+        },
+      ]);
+    });
+  }, [create, form, getAssetByAccount, preCheck]);
 
   const onValuesChange = React.useCallback(() => {
     form.setFields([

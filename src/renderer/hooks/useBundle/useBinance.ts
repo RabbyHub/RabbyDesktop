@@ -57,6 +57,23 @@ export const useBinance = () => {
     [bnInBundleAccounts]
   );
 
+  const getAssetByAccount = async (account: BNAccountWithAPI) => {
+    try {
+      const res = await account.api.getAssets();
+      const _balance = account.api.getBalance();
+      return {
+        ...res,
+        balance: _balance,
+      };
+    } catch (e: any) {
+      if (e.message === ERROR.INVALID_KEY) {
+        remove(account.id!);
+        return;
+      }
+      throw e;
+    }
+  };
+
   const getAssets = async (force = false) => {
     if (lastUpdatedKey === updatedKey && !force) {
       return;
@@ -64,20 +81,10 @@ export const useBinance = () => {
     setLoading(true);
     // 获取所有资产，key 无效的直接删除并忽略结果
     const result = (
-      await Promise.all(
-        bnAccounts.map(async (account) => {
-          try {
-            return await account.api.getAssets();
-          } catch (e: any) {
-            if (e.message === ERROR.INVALID_KEY) {
-              remove(account.id!);
-              return;
-            }
-            throw e;
-          }
-        })
-      )
-    ).filter(Boolean) as BinanceAssets[];
+      await Promise.all(bnAccounts.map(getAssetByAccount))
+    ).filter(Boolean) as (BinanceAssets & {
+      balance: string;
+    })[];
 
     setAssets(result);
 
@@ -191,6 +198,7 @@ export const useBinance = () => {
   }, [assets, balance, mergedFundingAsset, mergedSpotAsset]);
 
   return {
+    getAssetByAccount,
     getAssets,
     mergedFundingAsset,
     mergedSpotAsset,
