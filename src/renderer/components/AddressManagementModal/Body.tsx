@@ -45,7 +45,9 @@ export const Body: React.FC<Props> = ({
   return (
     <section className={styles.body}>
       <div className={styles.group}>{accounts.map(renderAccountItem)}</div>
-      <div className={styles.group}>{contacts.map(renderAccountItem)}</div>
+      {!!contacts?.length && (
+        <div className={styles.group}>{contacts.map(renderAccountItem)}</div>
+      )}
     </section>
   );
 };
