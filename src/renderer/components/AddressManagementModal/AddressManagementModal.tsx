@@ -11,7 +11,7 @@ const TriggerEl = styled.div`
 `;
 
 export const AddressManagementModal: React.FC = () => {
-  const { svVisible } = useZPopupViewState('address-management');
+  const { svVisible, closeSubview } = useZPopupViewState('address-management');
   const divRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -25,6 +25,11 @@ export const AddressManagementModal: React.FC = () => {
       overlayClassName={clsx(!svVisible && 'h-0 overflow-hidden')}
       overlay={<MainContainer />}
       trigger={['click']}
+      onOpenChange={(open) => {
+        if (!open) {
+          closeSubview();
+        }
+      }}
       destroyPopupOnHide
     >
       <TriggerEl ref={divRef} className="w-[440px] h-40 absolute right-10" />
