@@ -5,6 +5,7 @@ import { useBundle } from '@/renderer/hooks/useBundle/useBundle';
 import { Form } from 'antd';
 import clsx from 'clsx';
 import React from 'react';
+import { saveBundleAccountsBalance } from '@/renderer/hooks/useBundle/shared';
 import { InputItem } from './InputItem';
 import { BundleSuccessModal } from './BundleSuccessModal';
 
@@ -17,6 +18,7 @@ const ERROR_MESSAGE = {
 export const AddBTCModal: React.FC<ModalProps> = (props) => {
   const {
     account: { preCheck, create },
+    btc: { getAssetByAccount },
   } = useBundle();
   const [form] = Form.useForm<{
     address: string;
@@ -55,7 +57,16 @@ export const AddBTCModal: React.FC<ModalProps> = (props) => {
     setLoading(false);
     form.resetFields();
     setOpenSuccessModal(true);
-  }, [create, form, preCheck]);
+
+    getAssetByAccount(result as BTCAccount).then(({ usd_value }) => {
+      saveBundleAccountsBalance([
+        {
+          id: result!.id,
+          balance: usd_value?.toString(),
+        },
+      ]);
+    });
+  }, [create, form, getAssetByAccount, preCheck]);
 
   const onValuesChange = React.useCallback(() => {
     form.setFields([

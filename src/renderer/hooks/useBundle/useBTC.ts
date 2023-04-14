@@ -31,28 +31,30 @@ export const useBTC = () => {
     () => JSON.stringify(btcInBundleAccounts.map((acc) => acc.id)),
     [btcInBundleAccounts]
   );
+
+  const getAssetByAccount = (acc: BTCAccount) => {
+    return Axios.get<
+      TokenItem & {
+        total_usd_value: number;
+      }
+    >(`${INITIAL_OPENAPI_URL}/v1/user/btc_balance`, {
+      params: {
+        id: acc.address,
+      },
+    })
+      .then((res) => res.data)
+      .then((res) => {
+        res.usd_value = res.total_usd_value;
+        return res;
+      });
+  };
+
   const getAssets = async (force = false) => {
     if (lastUpdatedKey === updatedKey && !force) {
       return;
     }
     setLoading(true);
-    const result = await Promise.all(
-      btcList.map((account) => {
-        return Axios.get<
-          TokenItem & {
-            total_usd_value: number;
-          }
-        >(`${INITIAL_OPENAPI_URL}/v1/user/btc_balance`, {
-          params: {
-            id: account.address,
-          },
-        }).then((res) => res.data);
-      })
-    );
-
-    result.forEach((item) => {
-      item.usd_value = item.total_usd_value;
-    });
+    const result = await Promise.all(btcList.map(getAssetByAccount));
 
     setAssets(result);
 
@@ -103,6 +105,7 @@ export const useBTC = () => {
     chainData,
     tokenData,
     getAssets,
+    getAssetByAccount,
     loading,
   };
 };
