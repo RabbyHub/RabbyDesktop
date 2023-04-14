@@ -36,7 +36,7 @@ export const ModalConfirm = ({
     ...other,
   });
 
-export function ModalConfirmRelaunch({
+export function ModalConfirmInSettings({
   className,
   cancelButtonProps,
   height,

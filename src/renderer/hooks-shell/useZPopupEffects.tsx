@@ -1,12 +1,14 @@
 import { useCallback, useLayoutEffect, useRef } from 'react';
 import { ucfirst } from '@/isomorphic/string';
 import { useZPopupViewState } from '../hooks/usePopupWinOnMainwin';
-import { ModalConfirmRelaunch } from '../components/Modal/Confirm';
+import { ModalConfirmInSettings } from '../components/Modal/Confirm';
 import { forwardMessageTo } from '../hooks/useViewsMessage';
 
 const TREZOR_LIKE_KEY = 'trezor-like-cannot-use' as const;
 export function useTipCannotUseTrezorLike() {
-  const modalRef = useRef<null | ReturnType<typeof ModalConfirmRelaunch>>(null);
+  const modalRef = useRef<null | ReturnType<typeof ModalConfirmInSettings>>(
+    null
+  );
 
   const { svVisible, svState, delayCloseSubview } =
     useZPopupViewState(TREZOR_LIKE_KEY);
@@ -20,7 +22,7 @@ export function useTipCannotUseTrezorLike() {
     if (svVisible) {
       clear();
 
-      modalRef.current = ModalConfirmRelaunch({
+      modalRef.current = ModalConfirmInSettings({
         height: 250,
         closable: true,
         onCancel: () => {
