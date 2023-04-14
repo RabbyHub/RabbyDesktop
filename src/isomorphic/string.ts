@@ -1,3 +1,5 @@
+import { APP_NAME } from './constants';
+
 export function ensurePrefix(str = '', prefix = '/') {
   return str.startsWith(prefix) ? str : prefix + str;
 }
@@ -49,14 +51,35 @@ export function isInvalidBase64(base64?: string) {
   return !base64.split(';base64,')?.[1];
 }
 
-export function trimWebContentsUserAgent(userAgent: string) {
-  return userAgent.replace(/\sElectron\/\S+/, '');
-}
-
-export function normalizeIPFSPath(ipfsPath: string) {
-  return ipfsPath.replace(/\\/g, '/');
+export function kebabToCamel(str = '') {
+  return str.replace(/-([a-zA-Z])/g, (g) => g[1].toUpperCase());
 }
 
 export function ucfirst(str = '') {
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+const UA_APP_NAME = ucfirst(kebabToCamel(APP_NAME));
+
+export function trimWebContentsUserAgent(
+  userAgent: string,
+  options?: {
+    simulateBrowser?: boolean;
+  }
+) {
+  if (!options?.simulateBrowser) {
+    return userAgent.replace(
+      new RegExp(`\\s${APP_NAME}/`, ''),
+      ` ${UA_APP_NAME}/`
+    );
+  }
+
+  userAgent = userAgent.replace(/\sElectron\/\S+/, '');
+  userAgent = userAgent.replace(new RegExp(`\\s${APP_NAME}/\\S+`, ''), '');
+
+  return userAgent;
+}
+
+export function normalizeIPFSPath(ipfsPath: string) {
+  return ipfsPath.replace(/\\/g, '/');
 }
