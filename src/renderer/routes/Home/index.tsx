@@ -36,6 +36,8 @@ import Transactions from './components/Transactions';
 import { VIEW_TYPE } from './type';
 import { HomeUpdateButton } from './components/HomeUpdateButton';
 
+import './index.less';
+
 const HomeBody = styled.div`
   padding-left: 28px;
   padding-right: 28px;
@@ -357,7 +359,7 @@ const Home = () => {
           </div>
           <div className="relative flex-1 h-0">
             <Transactions updateNonce={updateNonce} />
-            <div className="flex-1 overflow-hidden h-full overflow-y-auto">
+            <div className="flex-1 h-full static-width-wrapper disable-mouseevents-on-ant-modal-open">
               <div>
                 {isLoadingTokenList ? (
                   <Skeleton.Input
