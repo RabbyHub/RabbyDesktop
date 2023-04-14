@@ -34,7 +34,7 @@ export const UpdateButton: React.FC<Props> = ({
       className={clsx('text-[12px] text-[#ffffff99] cursor-pointer')}
       onClick={handleClickRefresh}
     >
-      {loading || updateAt === 0 ? (
+      {loading || updateAt === 0 || now === 0 ? (
         'Updating data'
       ) : (
         <>

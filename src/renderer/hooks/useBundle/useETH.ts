@@ -5,20 +5,15 @@ import { formatChain, DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import { useTotalBalance, calcAssetNetWorth } from '@/renderer/utils/balance';
 import { atom, useAtom } from 'jotai';
 import { useBundleAccount } from './useBundleAccount';
-import {
-  loadCachedTokenList,
-  loadRealTimeTokenList,
-} from '../useHistoryTokenList';
+import { loadCachedTokenList } from '../useHistoryTokenList';
 import { mergeList } from './util';
-import {
-  DisplayProtocol,
-  loadCachedProtocolList,
-  loadRealTimeProtocolList,
-} from '../useHistoryProtocol';
+import { DisplayProtocol, loadCachedProtocolList } from '../useHistoryProtocol';
 
 const tokenListAtom = atom<TokenItem[]>([]);
 const protocolListAtom = atom<DisplayProtocol[]>([]);
 const usedChainListAtom = atom<DisplayChainWithWhiteLogo[]>([]);
+const ethTokenBalanceMapAtom = atom<Record<string, string>>({});
+const ethProtocolBalanceMapAtom = atom<Record<string, string>>({});
 
 let lastUpdatedKey = '';
 
@@ -38,12 +33,12 @@ export const useETH = () => {
   const [loadingProtocol, setLoadingProtocol] = React.useState(false);
   const [loadingToken, setLoadingToken] = React.useState(false);
   const [loadingUsedChain, setLoadingUsedChain] = React.useState(false);
-  const [ethTokenBalanceMap, setEthTokenBalanceMap] = React.useState<
-    Record<string, string>
-  >({});
-  const [ethProtocolBalanceMap, setEthProtocolBalanceMap] = React.useState<
-    Record<string, string>
-  >({});
+  const [ethTokenBalanceMap, setEthTokenBalanceMap] = useAtom(
+    ethTokenBalanceMapAtom
+  );
+  const [ethProtocolBalanceMap, setEthProtocolBalanceMap] = useAtom(
+    ethProtocolBalanceMapAtom
+  );
 
   const balance = useTotalBalance(tokenList, protocolList);
 
