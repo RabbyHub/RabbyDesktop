@@ -3,10 +3,7 @@ import {
   useAccountToDisplay,
 } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
 import { useAddressManagement } from '@/renderer/hooks/rabbyx/useAddressManagement';
-import {
-  useZPopupLayerOnMain,
-  useZPopupViewState,
-} from '@/renderer/hooks/usePopupWinOnMainwin';
+import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import React from 'react';
 import { Modal } from '../Modal/Modal';
@@ -19,12 +16,10 @@ export const AddressDetailModal: React.FC = () => {
     useAddressManagement();
   const { updateBalance } = useAccountToDisplay();
   const [balance, setBalance] = React.useState(svState?.account?.balance);
-  const zActions = useZPopupLayerOnMain();
 
   const back = React.useCallback(() => {
     closeSubview();
-    zActions.showZSubview('address-management');
-  }, [closeSubview, zActions]);
+  }, [closeSubview]);
 
   const handleDelete = React.useCallback(
     async (account: IDisplayedAccountWithBalance) => {
@@ -53,7 +48,6 @@ export const AddressDetailModal: React.FC = () => {
       title="Address Detail"
       onCancel={closeSubview}
       open={svVisible}
-      backable={svState.backable}
       onBack={back}
     >
       <AccountDetail

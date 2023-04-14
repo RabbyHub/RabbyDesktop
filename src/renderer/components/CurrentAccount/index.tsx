@@ -72,7 +72,7 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
         src="rabby-internal://assets/icons/top-bar/select-top.svg"
         className={clsx(
           'transition-transform',
-          addressManagementVisible && 'transform rotate-180'
+          !addressManagementVisible && 'transform rotate-180'
         )}
       />
     </div>
