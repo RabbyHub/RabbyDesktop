@@ -119,7 +119,7 @@ export const useBinance = () => {
     wrapped_token_id: 'binance',
     name: 'Binance',
     native_token_id: 'binance',
-    logo_url: 'rabby-internal://assets/icons/bundle/binance-chain.svg',
+    logo_url: 'rabby-internal://assets/icons/bundle/binance-chain.png',
   } as DisplayChainWithWhiteLogo & {
     usd_value: number;
   };
@@ -131,7 +131,7 @@ export const useBinance = () => {
     // 现货账户
     const spotPortfolioList = toSpotPortfolioList(mergedSpotAsset);
     const otherPortfolioList =
-      assets?.flatMap((item) => {
+      assets?.flatMap((item, index) => {
         // 理财账户(活期)
         const flexibleList = toFinancePortfolioList(
           item.financeAsset.flexible,
@@ -170,7 +170,7 @@ export const useBinance = () => {
       chain: 'binance',
       name: 'Binance',
       site_url: '',
-      logo_url: 'rabby-internal://assets/icons/bundle/binance-chain.svg',
+      logo_url: 'rabby-internal://assets/icons/bundle/binance-chain.png',
       has_supported_portfolio: false,
       tvl: 0,
       portfolio_item_list: [

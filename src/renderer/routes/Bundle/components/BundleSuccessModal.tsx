@@ -27,8 +27,13 @@ export const BundleSuccessModal: React.FC<Props> = ({ data, ...props }) => {
         >
           <img className="w-[26px] h-[26px]" src={iconUrl} />
           <div className="text-white text-left">
-            <NicknameInput data={data} canEdit />
-            <span className="text-[13px] opacity-60">{ellipsis(address)}</span>
+            <NicknameInput
+              textClassName={clsx('text-[17px] text-white')}
+              inputClassName={clsx('text-[15px]')}
+              data={data}
+              canEdit
+            />
+            <span className="text-[15px] opacity-60">{ellipsis(address)}</span>
           </div>
         </div>
       </SuccessContent>

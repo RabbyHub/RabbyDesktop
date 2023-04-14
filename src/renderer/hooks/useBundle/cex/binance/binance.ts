@@ -152,7 +152,7 @@ export class Binance {
       this.stakingProductPosition('STAKING'),
       this.stakingProductPosition('F_DEFI'),
       this.stakingProductPosition('L_DEFI'),
-      // this.bswapLiquidity(),
+      this.bswapLiquidity(),
     ]);
 
     console.log('binance', assets);
@@ -173,7 +173,7 @@ export class Binance {
           ...this.calcStake(assets[6]),
           ...this.calcStake(assets[7]),
           ...this.calcStake(assets[8]),
-          // ...this.calcBswapLiquidity(assets[9]),
+          ...this.calcBswapLiquidity(assets[9]),
         ],
       },
     };

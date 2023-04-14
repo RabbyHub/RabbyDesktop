@@ -60,7 +60,7 @@ const LogoWalletConnect =
   'rabby-internal://assets/icons/walletlogo/walletconnect28.svg';
 const IconWalletConnect =
   'rabby-internal://assets/icons/walletlogo/walletconnect28.svg';
-const IconBinance = 'rabby-internal://assets/icons/walletlogo/binance.svg';
+const IconBinance = 'rabby-internal://assets/icons/walletlogo/binance.png';
 const IconBitcoin = 'rabby-internal://assets/icons/walletlogo/bitcoin.svg';
 
 export { CHAINS, CHAINS_ENUM };
