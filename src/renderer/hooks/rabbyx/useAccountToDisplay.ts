@@ -88,12 +88,13 @@ export const useAccountToDisplay = () => {
           case 'unlock':
           case 'accountsChanged':
           case 'rabby:chainChanged': {
-            console.log('init');
+            console.log('accountsChanged');
+            getAllAccountsToDisplay();
           }
         }
       }
     );
-  }, []);
+  }, [getAllAccountsToDisplay]);
 
   const updateBalance = React.useCallback(
     async (address: string) => {

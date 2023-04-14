@@ -9,6 +9,7 @@ import { bundleAccountsAtom } from './shared';
 import { ERROR } from './error';
 import { useAccountToDisplay } from '../rabbyx/useAccountToDisplay';
 import { toastMaxAccount } from './util';
+import { useAddressManagement } from '../rabbyx/useAddressManagement';
 
 const { nanoid } = require('nanoid');
 
@@ -16,6 +17,7 @@ export const useBundleAccount = () => {
   const [accounts, setAccounts] = useAtom(bundleAccountsAtom);
   const { accountsList: ethAccountList, getAllAccountsToDisplay } =
     useAccountToDisplay();
+  const { removeAddress } = useAddressManagement();
   const inBundleList = React.useMemo(() => {
     return accounts.filter((acc) => acc.inBundle);
   }, [accounts]);
@@ -171,9 +173,7 @@ export const useBundleAccount = () => {
       const ethAccount = ethList.find((acc) => acc.id === id);
 
       if (ethAccount?.type === 'eth') {
-        walletController
-          .removeAddress(ethAccount.data.address, ethAccount.data.type)
-          .then(getAllAccountsToDisplay);
+        removeAddress([ethAccount.data.address, ethAccount.data.type]);
       }
       window.rabbyDesktop.ipcRenderer.invoke('bundle-account-delete', id);
 
@@ -200,7 +200,7 @@ export const useBundleAccount = () => {
         content: `${ellipsis(address)} deleted`,
       });
     },
-    [accounts, ethList, getAllAccountsToDisplay]
+    [accounts, ethList, removeAddress]
   );
 
   const toggleBundle = React.useCallback(
@@ -241,7 +241,6 @@ export const useBundleAccount = () => {
 
       if (account.type === 'eth') {
         await walletController.updateAlianName(account.data.address, nickname);
-        await getAllAccountsToDisplay();
         account.data.alianName = nickname;
       }
 
@@ -250,7 +249,7 @@ export const useBundleAccount = () => {
         nickname,
       });
     },
-    [accounts, getAllAccountsToDisplay]
+    [accounts]
   );
 
   const preCheckMaxAccount = React.useCallback(() => {
