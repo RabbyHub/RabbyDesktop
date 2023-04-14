@@ -68,7 +68,6 @@ export const useBinance = () => {
     } catch (e: any) {
       if (e.message === ERROR.INVALID_KEY) {
         remove(account.id!);
-        return;
       }
       throw e;
     }
@@ -80,17 +79,19 @@ export const useBinance = () => {
     }
     setLoading(true);
     // 获取所有资产，key 无效的直接删除并忽略结果
-    const result = (
-      await Promise.all(bnAccounts.map(getAssetByAccount))
-    ).filter(Boolean) as (BinanceAssets & {
-      balance: string;
-    })[];
+    const result = await Promise.all(bnAccounts.map(getAssetByAccount));
 
-    setAssets(result);
+    const inBundleAssets = result.filter((item, index) => {
+      return (
+        item &&
+        bnInBundleAccounts.some((acc) => acc.id === bnAccounts[index].id)
+      );
+    });
+    setAssets(inBundleAssets);
 
     // 计算合并资产
-    const fundingAssets = result.flatMap((item) => item.fundingAsset);
-    const spotAssets = result.flatMap((item) => item.spotAsset);
+    const fundingAssets = inBundleAssets.flatMap((item) => item.fundingAsset);
+    const spotAssets = inBundleAssets.flatMap((item) => item.spotAsset);
 
     setMergedFundingAsset(
       mergeList(fundingAssets, 'asset', ['usdtValue', 'value'])
@@ -140,7 +141,7 @@ export const useBinance = () => {
     // 现货账户
     const spotPortfolioList = toSpotPortfolioList(mergedSpotAsset);
     const otherPortfolioList =
-      assets?.flatMap((item, index) => {
+      assets?.flatMap((item) => {
         // 理财账户(活期)
         const flexibleList = toFinancePortfolioList(
           item.financeAsset.flexible,

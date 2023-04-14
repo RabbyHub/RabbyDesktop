@@ -373,9 +373,7 @@ const DefaultProtocolItem = ({
               overlayClassName="max-w-full"
               title={
                 <div className="whitespace-nowrap">
-                  {
-                    'Futures, options, liquidity farming, and assets<$10 are not included'
-                  }
+                  {'Futures, options, and assets<$10 are not included'}
                 </div>
               }
             >

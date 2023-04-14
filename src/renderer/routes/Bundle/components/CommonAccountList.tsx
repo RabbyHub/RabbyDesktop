@@ -1,4 +1,3 @@
-import { Tooltip } from 'antd';
 import clsx from 'clsx';
 
 const BundleNone = () => (

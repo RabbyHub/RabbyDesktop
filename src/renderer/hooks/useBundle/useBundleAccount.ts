@@ -173,7 +173,11 @@ export const useBundleAccount = () => {
       const ethAccount = ethList.find((acc) => acc.id === id);
 
       if (ethAccount?.type === 'eth') {
-        removeAddress([ethAccount.data.address, ethAccount.data.type]);
+        removeAddress([
+          ethAccount.data.address,
+          ethAccount.data.type,
+          ethAccount.data.brandName,
+        ]);
       }
       window.rabbyDesktop.ipcRenderer.invoke('bundle-account-delete', id);
 
@@ -205,6 +209,10 @@ export const useBundleAccount = () => {
 
   const toggleBundle = React.useCallback(
     async (account: BundleAccount) => {
+      if (accounts.length >= 15) {
+        toastMaxAccount();
+        return;
+      }
       const existed = accounts.find((acc) => acc.id === account.id);
 
       if (existed) {

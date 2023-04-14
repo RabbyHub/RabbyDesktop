@@ -317,6 +317,10 @@ export default function MainWindowSidebar() {
                     );
                   }
                   const isHome = sE.path === '/mainwin/home';
+                  const pathname =
+                    location.pathname === '/mainwin/home/bundle'
+                      ? '/mainwin/home'
+                      : location.pathname;
 
                   return (
                     <li
@@ -328,7 +332,7 @@ export default function MainWindowSidebar() {
                             path: sE.path,
                             // end: false,
                           },
-                          location.pathname
+                          pathname
                         ) && styles.active
                       )}
                       onClick={() => {
