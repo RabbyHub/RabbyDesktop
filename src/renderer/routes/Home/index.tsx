@@ -35,7 +35,7 @@ import PortfolioView from './components/PortfolioView';
 import RightBar from './components/RightBar';
 import Transactions from './components/Transactions';
 import { VIEW_TYPE } from './type';
-import { UpdateButton } from './components/UpdateButton';
+import { HomeUpdateButton } from './components/HomeUpdateButton';
 
 const HomeBody = styled.div`
   padding-left: 28px;
@@ -344,7 +344,7 @@ const Home = () => {
               {curveData ? (
                 <div className="right" onClick={() => setCurveModalOpen(true)}>
                   <div className="absolute right-0 bottom-0 z-10">
-                    <UpdateButton
+                    <HomeUpdateButton
                       loading={
                         isLoadingRealTimeTokenList || isLoadingRealTimeProtocol
                       }

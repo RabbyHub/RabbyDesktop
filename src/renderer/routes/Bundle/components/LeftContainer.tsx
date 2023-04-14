@@ -12,7 +12,7 @@ import {
   useExpandProtocolList,
 } from '../../Home/hooks';
 import { VIEW_TYPE } from '../../Home/type';
-import { UpdateButton } from '../../Home/components/UpdateButton';
+import { BundleUpdateButton } from './BundleUpdateButton';
 
 export const LeftContainer: React.FC = () => {
   const [selectChainServerId, setSelectChainServerId] = React.useState<
@@ -83,7 +83,7 @@ export const LeftContainer: React.FC = () => {
         </div>
 
         <div className="absolute right-0 bottom-0">
-          <UpdateButton
+          <BundleUpdateButton
             loading={loadingProtocol || loadingToken}
             onUpdate={refetchBundleAssets}
           />

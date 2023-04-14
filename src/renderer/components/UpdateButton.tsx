@@ -6,11 +6,15 @@ import { useInterval } from 'react-use';
 export interface Props {
   loading: boolean;
   onUpdate: () => void;
+  updateAt: number;
 }
 
-export const UpdateButton: React.FC<Props> = ({ loading, onUpdate }) => {
+export const UpdateButton: React.FC<Props> = ({
+  loading,
+  onUpdate,
+  updateAt,
+}) => {
   const [now, setNow] = React.useState(0);
-  const [updateAt, setUpdateAt] = React.useState(0);
 
   useInterval(() => {
     setNow(Math.floor(Date.now() / 1000));
@@ -20,17 +24,9 @@ export const UpdateButton: React.FC<Props> = ({ loading, onUpdate }) => {
     setNow(Math.floor(Date.now() / 1000));
   }, []);
 
-  React.useEffect(() => {
-    if (!loading) {
-      const n = Date.now() - 1000;
-      setUpdateAt(Math.floor(n / 1000));
-    }
-  }, [loading]);
-
   const handleClickRefresh = (e: React.MouseEvent<HTMLImageElement>) => {
     e.stopPropagation();
     onUpdate();
-    setUpdateAt(0);
   };
 
   return (
