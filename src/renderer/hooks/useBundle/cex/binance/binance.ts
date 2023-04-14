@@ -1,5 +1,7 @@
 import { isBoolean } from 'lodash';
 import BigNumber from 'bignumber.js';
+import { ModalConfirm } from '@/renderer/components/Modal/Confirm';
+import { ellipsis } from '@/renderer/utils/address';
 import { ERROR } from '../../error';
 import { tokenPrice } from './price';
 import {
@@ -33,6 +35,10 @@ export class Binance {
 
   apiSecret: string;
 
+  enableInvalidKeyModal = true;
+
+  nickname?: string;
+
   // 总资产余额
   private totalBalance = new BigNumber(0);
 
@@ -59,10 +65,24 @@ export class Binance {
     this.balance = new BigNumber(0);
   }
 
-  constructor(apiKey: string, apiSecret: string) {
+  constructor({
+    apiKey,
+    apiSecret,
+    enableInvalidKeyModal = true,
+    nickname,
+  }: {
+    apiKey: string;
+    apiSecret: string;
+    enableInvalidKeyModal?: boolean;
+    nickname?: string;
+  }) {
     this.apiKey = apiKey;
     this.apiSecret = apiSecret;
+    this.enableInvalidKeyModal = enableInvalidKeyModal;
+    this.nickname = nickname;
   }
+
+  private visibleInvalidKeyModal = false;
 
   private async invoke<T>(method: string, params?: any[]): Promise<T> {
     try {
@@ -72,9 +92,23 @@ export class Binance {
         method,
         params,
       });
-    } catch (e) {
-      console.error(e);
-      throw new Error(ERROR.INVALID_KEY);
+    } catch (e: any) {
+      if (e.message.includes(ERROR.INVALID_KEY)) {
+        if (!this.visibleInvalidKeyModal && this.enableInvalidKeyModal) {
+          this.visibleInvalidKeyModal = true;
+          ModalConfirm({
+            title: 'Binance Api已失效',
+            content: `${this.nickname} (${ellipsis(
+              this.apiKey
+            )}) Api 已经失效，将会被删除`,
+            height: 220,
+            okCancel: false,
+          });
+        }
+        throw new Error(ERROR.INVALID_KEY);
+      }
+      // 未知错误
+      throw new Error(ERROR.UNKNOWN);
     }
   }
 
@@ -113,6 +147,8 @@ export class Binance {
       this.savingsFlexibleProductPosition(),
       this.savingsCustomizedPosition(),
       this.stakingProductPosition('STAKING'),
+      this.stakingProductPosition('F_DEFI'),
+      this.stakingProductPosition('L_DEFI'),
     ]);
 
     console.log('binance', assets);
@@ -129,7 +165,11 @@ export class Binance {
       financeAsset: {
         flexible: this.calcFlexible(assets[4]),
         fixed: this.calcFixed(assets[5]),
-        stake: this.calcStake(assets[6]),
+        stake: [
+          ...this.calcStake(assets[6]),
+          ...this.calcStake(assets[7]),
+          ...this.calcStake(assets[8]),
+        ],
       },
     };
 
@@ -411,7 +451,12 @@ export class Binance {
   private async stakingProductPosition(type: string) {
     const res = await this.invoke<StakingProductPositionResponse>(
       'stakingProductPosition',
-      [type]
+      [
+        type,
+        {
+          size: 100,
+        },
+      ]
     );
 
     res.forEach(({ asset, rewardAsset, extraRewardAsset }) => {
@@ -446,22 +491,27 @@ export class Binance {
 
         this.plusBalance(usdtValue);
 
+        const rewards = [
+          {
+            asset: item.rewardAsset,
+            value: item.rewardAmt,
+            usdtValue: rewardUSDTValue,
+          },
+        ];
+
+        if (item.extraRewardAsset) {
+          rewards.push({
+            asset: item.extraRewardAsset,
+            value: item.estExtraRewardAmt,
+            usdtValue: extraRewardUSDTValue,
+          });
+        }
+
         return {
           asset,
           value,
           usdtValue,
-          rewards: [
-            {
-              asset: item.rewardAsset,
-              value: item.rewardAmt,
-              usdtValue: rewardUSDTValue,
-            },
-            {
-              asset: item.extraRewardAsset,
-              value: item.estExtraRewardAmt,
-              usdtValue: extraRewardUSDTValue,
-            },
-          ],
+          rewards,
         };
       })
       .filter((item) => valueGreaterThan10(item.usdtValue));

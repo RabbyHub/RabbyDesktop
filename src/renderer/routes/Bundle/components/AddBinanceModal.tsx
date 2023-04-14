@@ -120,10 +120,14 @@ export const AddBinanceModal: React.FC<ModalProps> = (props) => {
       >
         <div className="w-full space-y-[36px]">
           <Form.Item name="apiKey" className="w-full">
-            <InputItem placeholder="Api Key" />
+            <InputItem autoFocus placeholder="Api Key" />
           </Form.Item>
           <Form.Item name="apiSecret" className="w-full">
-            <InputItem type="password" placeholder="Secret Key" />
+            <InputItem
+              autoFocus={false}
+              type="password"
+              placeholder="Secret Key"
+            />
           </Form.Item>
         </div>
         <RabbyButton

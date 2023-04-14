@@ -23,6 +23,13 @@ handleIpcMainInvoke(
       httpsAgent: getHttpsProxyAgentForRuntime(appProxyConf),
     });
 
-    return (await client[method](...params)).data;
+    try {
+      return (await client[method](...params)).data;
+    } catch (e: any) {
+      if (e?.response?.data?.code === -2008) {
+        throw new Error('INVALID_KEY');
+      }
+      throw e;
+    }
   }
 );

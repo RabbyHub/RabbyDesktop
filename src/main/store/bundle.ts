@@ -160,5 +160,8 @@ handleIpcMainInvoke(
     });
 
     bundleStore.set('accounts', newAccounts);
+    emitIpcMainEvent('__internal_main:bundle:changed', {
+      accounts: newAccounts,
+    });
   }
 );

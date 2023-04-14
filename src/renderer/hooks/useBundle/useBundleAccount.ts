@@ -73,7 +73,11 @@ export const useBundleAccount = () => {
           };
         }
 
-        const bn = new Binance(account.apiKey, account.apiSecret);
+        const bn = new Binance({
+          apiKey: account.apiKey,
+          apiSecret: account.apiSecret,
+          enableInvalidKeyModal: false,
+        });
         try {
           await bn.checkPermission();
         } catch (error: any) {

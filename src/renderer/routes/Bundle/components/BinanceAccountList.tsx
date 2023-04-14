@@ -15,7 +15,7 @@ export const BinanceAccountList = () => {
   const [openModal, setOpenModal] = React.useState(false);
 
   const onClickAdd = React.useCallback(() => {
-    if (list.length >= MAX_ACCOUNT) {
+    if (binanceList.length >= MAX_ACCOUNT) {
       toastMaxAccount();
       return;
     }
@@ -23,7 +23,7 @@ export const BinanceAccountList = () => {
     if (preCheckMaxAccount()) {
       setOpenModal(true);
     }
-  }, [list.length, preCheckMaxAccount]);
+  }, [binanceList.length, preCheckMaxAccount]);
 
   return (
     <>

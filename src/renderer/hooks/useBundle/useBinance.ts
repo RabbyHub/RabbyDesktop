@@ -13,6 +13,7 @@ import {
   toMarginPortfolio,
   toSpotPortfolioList,
 } from './cex/binance/util';
+import { ERROR } from './error';
 
 type BNAccountWithAPI = BNAccount & {
   api: Binance;
@@ -29,7 +30,7 @@ let lastUpdatedKey = '';
 export const useBinance = () => {
   const [balance, setBalance] = useAtom(balanceAtom);
   const [assets, setAssets] = useAtom(assetsAtom);
-  const { inBundleList } = useBundleAccount();
+  const { inBundleList, remove } = useBundleAccount();
   const [mergedFundingAsset, setMergedFundingAsset] = useAtom(
     mergedFundingAssetAtom
   );
@@ -43,7 +44,11 @@ export const useBinance = () => {
 
     return accounts.map((item) => ({
       ...item,
-      api: new Binance(item.apiKey, item.apiSecret),
+      api: new Binance({
+        apiKey: item.apiKey,
+        apiSecret: item.apiSecret,
+        nickname: item.nickname,
+      }),
     }));
   }, [inBundleList]);
 
@@ -57,10 +62,22 @@ export const useBinance = () => {
       return;
     }
     setLoading(true);
-    // 获取所有资产
-    const result = await Promise.all(
-      bnAccounts.map((account) => account.api.getAssets())
-    );
+    // 获取所有资产，key 无效的直接删除并忽略结果
+    const result = (
+      await Promise.all(
+        bnAccounts.map(async (account) => {
+          try {
+            return await account.api.getAssets();
+          } catch (e: any) {
+            if (e.message === ERROR.INVALID_KEY) {
+              remove(account.id!);
+              return;
+            }
+            throw e;
+          }
+        })
+      )
+    ).filter(Boolean) as BinanceAssets[];
 
     setAssets(result);
 
