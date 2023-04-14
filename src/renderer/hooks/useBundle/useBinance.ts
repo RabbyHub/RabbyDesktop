@@ -31,19 +31,18 @@ let lastUpdatedKey = '';
 export const useBinance = () => {
   const [balance, setBalance] = useAtom(balanceAtom);
   const [assets, setAssets] = useAtom(assetsAtom);
-  const { inBundleList, remove } = useBundleAccount();
+  const { inBundleList, binanceList, remove } = useBundleAccount();
   const [mergedFundingAsset, setMergedFundingAsset] = useAtom(
     mergedFundingAssetAtom
   );
   const [mergedSpotAsset, setMergedSpotAsset] = useAtom(mergedSpotAssetAtom);
   const [loading, setLoading] = React.useState(false);
 
+  const bnInBundleAccounts = React.useMemo<BNAccount[]>(() => {
+    return inBundleList.filter((acc) => acc.type === 'bn') as BNAccount[];
+  }, [inBundleList]);
   const bnAccounts = React.useMemo<BNAccountWithAPI[]>(() => {
-    const accounts = inBundleList.filter(
-      (acc) => acc.type === 'bn'
-    ) as BNAccount[];
-
-    return accounts.map((item) => ({
+    return binanceList.map((item) => ({
       ...item,
       api: new Binance({
         apiKey: item.apiKey,
@@ -51,11 +50,11 @@ export const useBinance = () => {
         nickname: item.nickname,
       }),
     }));
-  }, [inBundleList]);
+  }, [binanceList]);
 
   const updatedKey = React.useMemo(
-    () => JSON.stringify(bnAccounts.map((acc) => acc.id)),
-    [bnAccounts]
+    () => JSON.stringify(bnInBundleAccounts.map((acc) => acc.id)),
+    [bnInBundleAccounts]
   );
 
   const getAssets = async (force = false) => {
@@ -104,8 +103,11 @@ export const useBinance = () => {
 
     // 持久化余额
     saveBundleAccountsBalance(updateAccounts);
-    // 更新 bn 的总余额
-    setBalance(bigNumberSum(...balances));
+    // 更新在 bundle 里的 bn 的总余额
+    const inBundleBalances = bnInBundleAccounts.map((acc) => {
+      return updateAccounts.find((item) => item.id === acc.id)?.balance ?? '0';
+    });
+    setBalance(bigNumberSum(...inBundleBalances));
 
     lastUpdatedKey = updatedKey;
     setLoading(false);

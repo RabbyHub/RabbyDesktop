@@ -20,16 +20,16 @@ let lastUpdatedKey = '';
 export const useBTC = () => {
   const [balance, setBalance] = useAtom(balanceAtom);
   const [assets, setAssets] = useAtom(assetsAtom);
-  const { inBundleList } = useBundleAccount();
-  const btcAccounts = React.useMemo(
+  const { inBundleList, btcList } = useBundleAccount();
+  const btcInBundleAccounts = React.useMemo(
     () => inBundleList.filter((acc) => acc.type === 'btc') as BTCAccount[],
     [inBundleList]
   );
   const [loading, setLoading] = React.useState(false);
 
   const updatedKey = React.useMemo(
-    () => JSON.stringify(btcAccounts.map((acc) => acc.id)),
-    [btcAccounts]
+    () => JSON.stringify(btcInBundleAccounts.map((acc) => acc.id)),
+    [btcInBundleAccounts]
   );
   const getAssets = async (force = false) => {
     if (lastUpdatedKey === updatedKey && !force) {
@@ -37,7 +37,7 @@ export const useBTC = () => {
     }
     setLoading(true);
     const result = await Promise.all(
-      btcAccounts.map((account) => {
+      btcList.map((account) => {
         return Axios.get<
           TokenItem & {
             total_usd_value: number;
@@ -57,7 +57,7 @@ export const useBTC = () => {
     setAssets(result);
 
     const balances = result.map((item) => item.usd_value);
-    const updateAccounts = btcAccounts.map((account, index) => {
+    const updateAccounts = btcList.map((account, index) => {
       return {
         ...account,
         balance: balances[index]?.toString(),
@@ -66,8 +66,12 @@ export const useBTC = () => {
 
     // 持久化余额
     saveBundleAccountsBalance(updateAccounts);
-    // 更新 bn 的总余额
-    setBalance(bigNumberSum(...balances));
+    // 更新在 bundle 里的 bn 的总余额
+    const inBundleBalances = btcInBundleAccounts.map((acc) => {
+      return updateAccounts.find((item) => item.id === acc.id)?.balance ?? '0';
+    });
+    setBalance(bigNumberSum(...inBundleBalances));
+
     lastUpdatedKey = updatedKey;
     setLoading(false);
   };
