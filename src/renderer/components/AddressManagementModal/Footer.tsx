@@ -17,6 +17,9 @@ export const Footer: React.FC = () => {
         className={styles.button}
         onClick={() => {
           showZSubview('select-add-address-type-modal');
+          showZSubview('address-management', {
+            hidden: true,
+          });
         }}
       >
         Add Address
