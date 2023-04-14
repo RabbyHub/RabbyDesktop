@@ -45,12 +45,12 @@ export const Body: React.FC<Props> = ({
 
   return (
     <section className={styles.body}>
-      <div className={clsx(styles.group, !accounts?.length && 'hidden')}>
-        {accounts.map(renderAccountItem)}
-      </div>
-      <div className={clsx(styles.group, !contacts?.length && 'hidden')}>
-        {contacts.map(renderAccountItem)}
-      </div>
+      {!!accounts?.length && (
+        <div className={styles.group}>{accounts.map(renderAccountItem)}</div>
+      )}
+      {!!contacts?.length && (
+        <div className={styles.group}>{contacts.map(renderAccountItem)}</div>
+      )}
     </section>
   );
 };
