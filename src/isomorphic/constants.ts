@@ -76,4 +76,4 @@ export const enum EnumMatchDappType {
   bySecondaryDomain,
 }
 
-export const TOAST_TOP = 80;
+export const TOAST_TOP = 70;
