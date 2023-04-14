@@ -97,10 +97,10 @@ export class Binance {
         if (!this.visibleInvalidKeyModal && this.enableInvalidKeyModal) {
           this.visibleInvalidKeyModal = true;
           ModalConfirm({
-            title: 'Binance Api已失效',
+            title: 'Binance API has become invalid',
             content: `${this.nickname} (${ellipsis(
               this.apiKey
-            )}) Api 已经失效，将会被删除`,
+            )}) API has become invalid. It will be removed from Bundle Address.`,
             height: 220,
             okCancel: false,
           });

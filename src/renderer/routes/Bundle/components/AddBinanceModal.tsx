@@ -130,15 +130,21 @@ export const AddBinanceModal: React.FC<ModalProps> = (props) => {
             />
           </Form.Item>
         </div>
-        <RabbyButton
-          className="w-[240px] h-[52px]"
-          loading={loading}
-          disabled={disabledSubmit}
-          type="primary"
-          htmlType="submit"
-        >
-          Add
-        </RabbyButton>
+        <div className="flex items-center flex-col space-y-[22px]">
+          <div className="text-[12px] text-[#FFFFFF99]">
+            Please ensure that the API key only has read-only access. No data
+            will be collected from Rabby.
+          </div>
+          <RabbyButton
+            className="w-[240px] h-[52px]"
+            loading={loading}
+            disabled={disabledSubmit}
+            type="primary"
+            htmlType="submit"
+          >
+            Add
+          </RabbyButton>
+        </div>
       </Form>
     </Modal>
   );
