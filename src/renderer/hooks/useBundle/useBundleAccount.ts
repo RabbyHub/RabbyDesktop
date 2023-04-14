@@ -287,6 +287,7 @@ export const useBundleAccount = () => {
 
   // eth 地址列表更新时同步 bundle 地址列表
   React.useEffect(() => {
+    if (!ethAccountList.length) return;
     accounts.forEach((account) => {
       if (account.type === 'eth' && account.id) {
         if (
