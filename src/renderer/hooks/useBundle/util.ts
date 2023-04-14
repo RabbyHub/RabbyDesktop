@@ -6,7 +6,7 @@ import { BigNumber } from 'bignumber.js';
  */
 export const bigNumberSum = (...values: (string | number | undefined)[]) => {
   const result = values.reduce((prev = 0, curr = 0) => {
-    return new BigNumber(prev).plus(curr).toString();
+    return new BigNumber(prev).plus(curr).toFixed();
   }, '0');
 
   return result as string;
