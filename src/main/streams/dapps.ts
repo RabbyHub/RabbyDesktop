@@ -1,13 +1,16 @@
-import { getAppProxyConf } from '../store/desktopApp';
-import { checkUrlViaBrowserView } from '../utils/appNetwork';
-import {
-  BrowserViewManager,
-  parseSiteMetaByWebContents,
-} from '../utils/browserView';
+import { getFullAppProxyConf } from '../store/desktopApp';
 import { safeCapturePage } from '../utils/dapps';
 import { parseWebsiteFavicon } from '../utils/fetch';
-import { handleIpcMainInvoke } from '../utils/ipcMainEvents';
-import { getSessionInsts, onMainWindowReady } from '../utils/stream-helpers';
+import {
+  handleIpcMainInvoke,
+  onIpcMainInternalEvent,
+  sendToWebContents,
+} from '../utils/ipcMainEvents';
+import {
+  getAllMainUIViews,
+  getAllMainUIWindows,
+  onMainWindowReady,
+} from '../utils/stream-helpers';
 import { getTabbedWindowFromWebContents } from './tabbedBrowserWindow';
 
 handleIpcMainInvoke('parse-favicon', async (_, targetURL) => {
@@ -16,7 +19,7 @@ handleIpcMainInvoke('parse-favicon', async (_, targetURL) => {
     favicon: null as IParsedFavicon | null,
   };
   try {
-    const proxyConf = getAppProxyConf();
+    const proxyConf = await getFullAppProxyConf();
     const proxyOnParseFavicon =
       proxyConf.proxyType === 'custom'
         ? {
@@ -69,5 +72,29 @@ handleIpcMainInvoke(
     return {
       result: true,
     };
+  }
+);
+
+onIpcMainInternalEvent(
+  '__internal_main:dapps:changed',
+  async ({ dapps, pinnedList, unpinnedList, protocolDappsBinding }) => {
+    const [{ windowList }, { viewOnlyList }] = await Promise.all([
+      getAllMainUIWindows(),
+      getAllMainUIViews(),
+    ]);
+
+    const viewSet = new Set([
+      ...windowList.map((win) => win.webContents),
+      ...viewOnlyList.map((view) => view),
+    ]);
+
+    viewSet.forEach((webContents) => {
+      sendToWebContents(webContents, '__internal_push:dapps:changed', {
+        dapps,
+        pinnedList,
+        unpinnedList,
+        protocolDappsBinding,
+      });
+    });
   }
 );

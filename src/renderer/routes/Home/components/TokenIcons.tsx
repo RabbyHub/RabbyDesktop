@@ -2,6 +2,7 @@
 import React from 'react';
 import { wrapUrlInImgOrDefault } from '@/renderer/utils/token';
 import styled from 'styled-components';
+import clsx from 'clsx';
 
 const TokenIconsWrapper = styled.div`
   flex: none;
@@ -39,7 +40,11 @@ const TokensIcons = React.memo(
       ...icons.map((v) => wrapUrlInImgOrDefault(v, defaultWidth)),
     ];
     return (
-      <TokenIconsWrapper className="tokenIcons">
+      <TokenIconsWrapper
+        className={clsx('tokenIcons', {
+          'mr-5px': !!imgs.length,
+        })}
+      >
         {imgs.map((v, i) => (
           <div style={{ marginLeft: i === 0 ? undefined : `-${2 * i}px` }}>
             {v}

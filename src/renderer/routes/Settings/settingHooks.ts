@@ -1,11 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Form, InputProps, message } from 'antd';
+import { type FormInstance, type InputProps, message } from 'antd';
 import { atom, useAtom } from 'jotai';
 
-import {
-  applyProxyConfig,
-  validateProxyConfig,
-} from '@/renderer/ipcRequest/app';
+import { validateProxyConfig } from '@/renderer/ipcRequest/app';
 import { formatProxyServerURL } from '@/isomorphic/url';
 import { ensurePrefix } from '@/isomorphic/string';
 
@@ -34,45 +31,87 @@ export function useProxyStateOnSettingPage() {
   };
 }
 
-export function useSettingProxyModal() {
-  const [proxyCustomForm] = Form.useForm();
+const localProxyTypeAtom = atom<IRunningAppProxyConf['proxyType']>('none');
+export function useLocalProxyType() {
+  const [localProxyType] = useAtom(localProxyTypeAtom);
+
+  return { localProxyType };
+}
+export function useSettingProxyModal({
+  proxyCustomForm,
+  isTopLevelComponent = false,
+}: {
+  proxyCustomForm: FormInstance<any>;
+  isTopLevelComponent?: boolean;
+}) {
   const [appProxyConf, setAppProxyConf] = useAtom(appProxyConfAtom);
   const [isSettingProxy, setIsSettingProxy] = useAtom(isSettingProxyAtom);
+  const [localProxyType, setLocalProxyTypeOrig] = useAtom(localProxyTypeAtom);
 
-  const [localProxyType, setLocalProxyType] = useState(appProxyConf.proxyType);
+  const fetchProxyConf = useCallback(
+    async (opts?: { dontUpdateLocalProxyType?: boolean }) => {
+      return window.rabbyDesktop.ipcRenderer
+        .invoke('get-proxyConfig')
+        .then((result) => {
+          const runtimeConf = result.runtime;
 
-  const fetchProxyConf = useCallback(() => {
-    window.rabbyDesktop.ipcRenderer.invoke('get-proxyConfig').then((result) => {
-      const { persisted } = result;
-      const runtimeConf = result.runtime;
+          setAppProxyConf((prev) => {
+            const nextVal: typeof runtimeConf = {
+              proxyType: runtimeConf.proxyType,
+              proxySettings: {
+                ...prev.proxySettings,
+                ...runtimeConf.proxySettings,
+              },
+              systemProxySettings: result.systemProxy,
+              applied: runtimeConf.applied,
+            };
+            if (!opts?.dontUpdateLocalProxyType) {
+              setLocalProxyTypeOrig(nextVal.proxyType);
+            }
 
-      setAppProxyConf((prev) => {
-        const nextVal = {
-          proxyType: runtimeConf.proxyType,
-          proxySettings: {
-            ...prev.proxySettings,
-            ...runtimeConf.proxySettings,
-          },
-          applied: runtimeConf.applied,
-        };
-        setLocalProxyType(nextVal.proxyType);
-        proxyCustomForm.setFieldsValue(nextVal.proxySettings);
+            proxyCustomForm.setFieldsValue(nextVal.proxySettings);
 
-        return nextVal;
-      });
-    });
-  }, [setAppProxyConf, proxyCustomForm]);
+            return nextVal;
+          });
+        });
+    },
+    [setAppProxyConf, setLocalProxyTypeOrig, proxyCustomForm]
+  );
+
+  const setLocalProxyType = useCallback(
+    (type: IRunningAppProxyConf['proxyType']) => {
+      if (type === 'system') {
+        fetchProxyConf({ dontUpdateLocalProxyType: true }).finally(() => {
+          setLocalProxyTypeOrig(type);
+        });
+      } else {
+        setLocalProxyTypeOrig(type);
+      }
+    },
+    [fetchProxyConf, setLocalProxyTypeOrig]
+  );
 
   const applyProxyAndRelaunch = useCallback(() => {
-    applyProxyConfig({
+    window.rabbyDesktop.ipcRenderer.invoke('apply-proxyConfig', {
       proxyType: localProxyType,
-      proxySettings: proxyCustomForm.getFieldsValue(),
+      proxySettings: {
+        ...appProxyConf.proxySettings,
+        ...proxyCustomForm.getFieldsValue(),
+      },
     });
-  }, [localProxyType, proxyCustomForm]);
+  }, [localProxyType, appProxyConf, proxyCustomForm]);
 
   useEffect(() => {
-    fetchProxyConf();
-  }, [fetchProxyConf]);
+    if (isTopLevelComponent) {
+      fetchProxyConf();
+    }
+  }, [isTopLevelComponent, fetchProxyConf]);
+
+  useEffect(() => {
+    if (!isSettingProxy) {
+      setLocalProxyTypeOrig(appProxyConf.proxyType);
+    }
+  }, [isSettingProxy, setLocalProxyTypeOrig, appProxyConf.proxyType]);
 
   return {
     isSettingProxy,
@@ -81,9 +120,9 @@ export function useSettingProxyModal() {
     localProxyType,
     setLocalProxyType,
 
-    proxyType: appProxyConf.proxyType,
-    proxyCustomForm,
+    appProxyConf,
     isProxyApplied: appProxyConf.applied,
+    proxyCustomForm,
 
     applyProxyAndRelaunch,
   };

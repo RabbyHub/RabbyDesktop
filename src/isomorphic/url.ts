@@ -466,15 +466,6 @@ export function formatAxiosProxyConfig(conf: AxiosProxyConfig) {
   return `${filterProxyProtocol(conf.protocol)}://${conf.host}:${conf.port}`;
 }
 
-export function coercePort(input: any) {
-  let result = Number.parseInt(input, 10);
-  if (Number.isNaN(result)) {
-    result = 80;
-  }
-
-  return result || 80;
-}
-
 export function getBuiltinViewType(urlInfo: URL | Location) {
   if (urlInfo.protocol === 'chrome-extension:') {
     return 'chrome-extension';

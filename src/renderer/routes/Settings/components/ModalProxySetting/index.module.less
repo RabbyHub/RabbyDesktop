@@ -1,4 +1,5 @@
 .ModalProxySetting {
+  @input-height: 52px;
   :global {
     .ant-modal-header {
       padding: 0;
@@ -30,6 +31,7 @@
       padding-top: 24px;
       width: 480px;
       min-height: 300px;
+      // height: 648px;
       background-color: #525767;
     }
 
@@ -37,18 +39,38 @@
       padding: 36px 24px;
     }
 
+    .proxy-custom-form, .proxy-display-form {
+      height: 387px;
+    }
+
     .proxy-custom-form.disabled {
       pointer-events: none;
       opacity: 0.5;
     }
+    .proxy-display-form .info-text {
+      color: var(--color-purewhite);
+    }
+    .proxy-display-form.disabled {
+      cursor: default;
+      opacity: 0.5;
+    }
 
-    .input-field {
+    .input-field, .display-input-field {
       .ant-form-item-control-input,
       .ant-form-item-control-input-content,
-      .ant-input {
-        height: 52px;
+      .ant-input,
+      .placeholder-input {
+        height: @input-height;
       }
 
+      .placeholder-input {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+      }
+    }
+
+    .input-field {
       .ant-form-item-control-input-content {
         background-color: rgba(255, 255, 255, 0.1);
         border-radius: 6px;

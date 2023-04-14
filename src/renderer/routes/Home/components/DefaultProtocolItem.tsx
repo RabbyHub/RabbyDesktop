@@ -70,7 +70,7 @@ const ProtocolItemWrapper = styled.div`
       text-align: center;
       top: 0;
       left: 0;
-      border-top-left-radius: 12px;
+      /* border-top-left-radius: 12px; */
       border-bottom-right-radius: 4px;
     }
     .proxy-info {
@@ -292,6 +292,8 @@ const DefaultProtocolItem = ({
     setPopoverOpen(false);
   }, [scrollTop]);
 
+  const isBinance = protocol.id === 'binance';
+
   return (
     <ProtocolWrapper>
       <ProtocolHeader>
@@ -301,35 +303,42 @@ const DefaultProtocolItem = ({
           width="20px"
           height="20px"
           noRound
+          hideChainIcon={isBinance}
         />
         <div className="flex flex-1 items-center">
-          <div
-            className={classNames('protocol-info', {
-              'has-bind': hasBinded,
-            })}
-            onClick={() =>
-              hasBinded ? handleClickProtocolName() : onClickRelate(protocol)
-            }
-          >
-            <span className="protocol-name">{protocol.name}</span>
-            {!hasBinded && (
-              <img
-                src="rabby-internal://assets/icons/home/dapp-relate.svg"
-                className="icon-relate"
-              />
-            )}
-            {hasBinded && (
-              <div className="protocol-bind">
-                <span className="protocol-dapp">
-                  (
-                  {/^https:\/\//.test(bindUrl)
-                    ? removeProtocolFromUrl(bindUrl)
-                    : formatDappURLToShow(bindUrl)}
-                  )
-                </span>
-              </div>
-            )}
-          </div>
+          {isBinance ? (
+            <div className="protocol-info after:content-[none]">
+              <span className="protocol-name normal-case">{protocol.name}</span>
+            </div>
+          ) : (
+            <div
+              className={classNames('protocol-info', {
+                'has-bind': hasBinded,
+              })}
+              onClick={() =>
+                hasBinded ? handleClickProtocolName() : onClickRelate(protocol)
+              }
+            >
+              <span className="protocol-name">{protocol.name}</span>
+              {!hasBinded && (
+                <img
+                  src="rabby-internal://assets/icons/home/dapp-relate.svg"
+                  className="icon-relate"
+                />
+              )}
+              {hasBinded && (
+                <div className="protocol-bind">
+                  <span className="protocol-dapp">
+                    (
+                    {/^https:\/\//.test(bindUrl)
+                      ? removeProtocolFromUrl(bindUrl)
+                      : formatDappURLToShow(bindUrl)}
+                    )
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
           {hasBinded && (
             <Popover
               trigger="click"
@@ -357,9 +366,24 @@ const DefaultProtocolItem = ({
             </Popover>
           )}
         </div>
-        <span className="protocol-usd">
-          {formatUsdValue(protocol.usd_value)}
-        </span>
+        <div className="protocol-usd flex items-center justify-end gap-[7px]">
+          <span>{formatUsdValue(protocol.usd_value)}</span>
+          {isBinance && (
+            <Tooltip
+              overlayClassName="max-w-full"
+              title={
+                <div className="whitespace-nowrap">
+                  {'Futures, options, and assets<$10 are not included'}
+                </div>
+              }
+            >
+              <img
+                className="cursor-pointer"
+                src="rabby-internal://assets/icons/bundle/help.svg"
+              />
+            </Tooltip>
+          )}
+        </div>
       </ProtocolHeader>
       {[...typesMap].map(([k, v]) => {
         // 需要根据 common 匹配对应模板

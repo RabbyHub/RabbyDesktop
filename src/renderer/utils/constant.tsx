@@ -60,6 +60,9 @@ const LogoWalletConnect =
   'rabby-internal://assets/icons/walletlogo/walletconnect28.svg';
 const IconWalletConnect =
   'rabby-internal://assets/icons/walletlogo/walletconnect28.svg';
+const IconBinance = 'rabby-internal://assets/icons/walletlogo/binance.png';
+const IconBitcoin = 'rabby-internal://assets/icons/walletlogo/bitcoin.svg';
+
 export { CHAINS, CHAINS_ENUM };
 
 export const KEYRING_TYPE = {
@@ -258,6 +261,7 @@ export enum BRAND_WALLET_CONNECT_TYPE {
   GnosisConnect = 'GnosisConnect',
   GridPlusConnect = 'GridPlusConnect',
   QRCodeBase = 'QR Hardware Wallet Device',
+  Bundle = 'Bundle',
 }
 
 export const WALLETCONNECT_STATUS_MAP = {
@@ -324,6 +328,8 @@ export enum WALLET_BRAND_TYPES {
   DEFIANT = 'Defiant',
   AIRGAP = 'AirGap',
   WalletConnect = 'WalletConnect',
+  Binance = 'Binance',
+  Bitcoin = 'Bitcoin',
 }
 
 enum WALLET_BRAND_CATEGORY {
@@ -524,6 +530,24 @@ export const WALLET_BRAND_CONTENT: {
     image: LogoWalletConnect,
     connectType: BRAND_WALLET_CONNECT_TYPE.WalletConnect,
     category: WALLET_BRAND_CATEGORY.MOBILE,
+  },
+  [WALLET_BRAND_TYPES.Binance]: {
+    id: 101,
+    name: 'Binance',
+    brand: WALLET_BRAND_TYPES.Binance,
+    icon: IconBinance,
+    image: IconBinance,
+    connectType: BRAND_WALLET_CONNECT_TYPE.Bundle,
+    category: WALLET_BRAND_CATEGORY.INSTITUTIONAL,
+  },
+  [WALLET_BRAND_TYPES.Bitcoin]: {
+    id: 102,
+    name: 'BTC',
+    brand: WALLET_BRAND_TYPES.Binance,
+    icon: IconBitcoin,
+    image: IconBitcoin,
+    connectType: BRAND_WALLET_CONNECT_TYPE.Bundle,
+    category: WALLET_BRAND_CATEGORY.INSTITUTIONAL,
   },
 };
 

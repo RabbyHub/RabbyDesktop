@@ -7,10 +7,15 @@ type Account = import('@/isomorphic/types/rabbyx').Account;
 
 export interface Props {
   onSuccess: () => void;
-  accounts: Account[];
+  accounts?: Account[];
+  children: React.ReactNode;
 }
 
-export const SuccessContent: React.FC<Props> = ({ accounts, onSuccess }) => {
+export const SuccessContent: React.FC<Props> = ({
+  accounts,
+  onSuccess,
+  children,
+}) => {
   return (
     <div className={styles.ImportSuccessful}>
       <div className={styles.container}>
@@ -22,11 +27,11 @@ export const SuccessContent: React.FC<Props> = ({ accounts, onSuccess }) => {
           />
         </div>
         <h1 className={styles.title}>Imported Successfully</h1>
-
         <div className={styles.addressList}>
-          {accounts.map((account: any) => (
-            <AddressItem {...account} key={account.address} />
-          ))}
+          {children ??
+            accounts?.map((account: any) => (
+              <AddressItem {...account} key={account.address} />
+            ))}
         </div>
 
         <Button

@@ -123,15 +123,25 @@ type IAppDynamicConfig = {
   };
 };
 
+type IProxySettings = {
+  protocol: 'socks5' | 'http';
+  hostname: string;
+  port: number;
+  username?: string;
+  password?: string;
+};
 type IAppProxyConf = {
   proxyType: 'none' | 'system' | 'custom';
-  proxySettings: {
-    protocol: 'socks5' | 'http';
-    hostname: string;
+  proxySettings: IProxySettings;
+  // it can be used as axios's config property directly
+  systemProxySettings?: {
+    protocol: 'http';
+    host: string;
     port: number;
-    username?: string;
-    password?: string;
   };
+};
+type IPraticalAppProxyConf = IAppProxyConf & {
+  configForAxios: IAppProxyConf['systemProxySettings'];
 };
 
 type IRunningAppProxyConf = IAppProxyConf & { applied: boolean };
@@ -505,3 +515,28 @@ type ITrezorLikeCannotUserReason =
       reasonType: 'enabled-ipfs';
       cannotUse: IHardwareConnectPageType;
     };
+// --------- BUNDLE -----------
+interface CommonBundleAccount {
+  id?: string;
+  type: 'bn' | 'btc' | 'eth';
+  nickname: string;
+  balance?: string;
+  inBundle?: boolean;
+}
+interface BNAccount extends CommonBundleAccount {
+  type: 'bn';
+  apiKey: string;
+  apiSecret: string;
+}
+
+interface BTCAccount extends CommonBundleAccount {
+  type: 'btc';
+  address: string;
+}
+
+interface ETHAccount extends CommonBundleAccount {
+  type: 'eth';
+  data: IDisplayedAccountWithBalance;
+}
+
+type BundleAccount = BTCAccount | BNAccount | ETHAccount;

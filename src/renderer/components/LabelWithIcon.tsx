@@ -18,9 +18,6 @@ const Wrapper = styled.div`
   .container img {
     margin-right: 6px;
   }
-  .label {
-    margin-left: 5px;
-  }
 `;
 
 type Props = {

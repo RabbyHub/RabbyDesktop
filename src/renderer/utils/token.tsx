@@ -10,10 +10,10 @@ import { formatUsdValue } from './number';
 import { getCollectionDisplayName, PortfolioItemNft } from './nft';
 
 export const ellipsisTokenSymbol = (text: string, length = 6) => {
-  if (text.length <= length) return text;
+  if (text?.length <= length) return text;
 
   const regexp = new RegExp(`^(.{${length}})(.*)$`);
-  return text.replace(regexp, '$1...');
+  return text?.replace(regexp, '$1...');
 };
 
 export const getTokenSymbol = async (
@@ -291,7 +291,9 @@ export function getTokens(
   const label = nftStr ? nftStr + separator + tokenStr : tokenStr;
   const icon = (
     <TokensIcons
-      icons={tokens.map((v) => v?.logo_url)}
+      icons={tokens
+        .filter((item) => item.chain !== '0')
+        .map((v) => v?.logo_url)}
       nftIcons={nfts?.map((n) => n.collection?.logo_url)}
     />
   );
