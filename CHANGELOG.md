@@ -1,7 +1,23 @@
 
-v0.14.0 / 2023-04-12
+v0.15.0 / 2023-04-15
 ====================
 
+  * fix: bundle balance (#364)
+  * fix: bignumber (#363)
+  * feat: use overlay for assets/protocol view. (#365)
+  * fix: copy addr font size (#362)
+  * chore: code cleanup.
+  * feat: theme color (#349)
+  * feat: bundle (#340)
+  * fix: fix app name in ua, keep `Electron` flag in webContents's frame. (#360)
+  * fix: sort chain (#359)
+  * fix: tips about conflict between trezor/onekey (#358)
+  * fix: dapp display not update after IPFS dapp deleted (#357)
+
+v0.14.0-prod / 2023-04-12
+=========================
+
+  * Release v0.14.0-prod
   * feat: revert revert ipfs (#352)
   * feat: add crash reporter in main process. (#356)
   * fix: dapp binding status will reset (#355)
