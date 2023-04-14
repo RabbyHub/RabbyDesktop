@@ -169,7 +169,7 @@ export const useBundleAccount = () => {
   );
 
   const remove = React.useCallback(
-    (id: string) => {
+    (id: string, showToast = true) => {
       const ethAccount = ethList.find((acc) => acc.id === id);
 
       if (ethAccount?.type === 'eth') {
@@ -199,10 +199,12 @@ export const useBundleAccount = () => {
           break;
       }
 
-      toastMessage({
-        type: 'success',
-        content: `${ellipsis(address)} deleted`,
-      });
+      if (showToast) {
+        toastMessage({
+          type: 'success',
+          content: `${ellipsis(address)} deleted`,
+        });
+      }
     },
     [accounts, ethList, removeAddress]
   );
@@ -282,6 +284,19 @@ export const useBundleAccount = () => {
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setAccounts]);
+
+  // eth 地址列表更新时同步 bundle 地址列表
+  React.useEffect(() => {
+    accounts.forEach((account) => {
+      if (account.type === 'eth' && account.id) {
+        if (
+          !ethAccountList.find((acc) => acc.address === account.data.address)
+        ) {
+          remove(account.id, false);
+        }
+      }
+    });
+  }, [ethAccountList, accounts, remove]);
 
   return {
     create,
