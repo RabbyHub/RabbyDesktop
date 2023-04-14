@@ -28,6 +28,7 @@ import { copyText } from '@/renderer/utils/clipboard';
 import { useMatchURLBaseConfig } from '@/renderer/hooks-ipc/useAppDynamicConfig';
 import { useWindowState } from '@/renderer/hooks-shell/useWindowState';
 import { formatDappURLToShow } from '@/isomorphic/dapp';
+import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import styles from './index.module.less';
 import { toastMessage } from '../TransparentToast';
 
@@ -154,11 +155,29 @@ export const TopNavBar = () => {
           onClick={async () => {
             if (!dappURLToShow) return;
             await copyText(dappURLToShow);
-            toastMessage({
-              type: 'success',
-              content: 'Copied url',
-              className: 'mainwindow-default-tip',
-              duration: 1,
+            // showMainwinPopupview({
+            //   type: 'global-toast-popup',
+            //   state: {
+            //     toastType: 'toast-message',
+
+            //     data: {
+            //       type: 'success',
+            //       content: 'Copied url',
+            //       duration: 10,
+            //       // className: 'mainwindow-default-tip',
+            //     },
+            //   },
+            // });
+            showMainwinPopupview({
+              type: 'global-toast-popup',
+              state: {
+                toastType: 'toast-message',
+                data: {
+                  type: 'success',
+                  content: 'Disconnected',
+                  duration: 10,
+                },
+              },
             });
           }}
         >

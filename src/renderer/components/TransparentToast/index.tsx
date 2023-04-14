@@ -8,9 +8,9 @@ import { isWeb3Addr } from '@/isomorphic/web3';
 import { isMainWinShellWebUI } from '@/isomorphic/url';
 import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
 
-message.config({
-  top: 80,
-});
+// message.config({
+//   top: 80,
+// });
 
 const TIMEOUT_SEC = 3;
 
