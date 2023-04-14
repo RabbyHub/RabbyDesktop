@@ -1,8 +1,14 @@
-import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
 import React, { useEffect, useRef } from 'react';
 import clsx from 'clsx';
 import { Dropdown } from 'antd';
+import styled from 'styled-components';
+
+import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { MainContainer } from './MainContainer';
+
+const TriggerEl = styled.div`
+  top: calc(var(--mainwin-mainroute-topoffset) + 10px);
+`;
 
 export const AddressManagementModal: React.FC = () => {
   const { svVisible, closeSubview, svState } =
@@ -26,7 +32,7 @@ export const AddressManagementModal: React.FC = () => {
         }
       }}
     >
-      <div ref={divRef} className="w-[440px] h-40 absolute right-10 top-10  " />
+      <TriggerEl ref={divRef} className="w-[440px] h-40 absolute right-10" />
     </Dropdown>
   );
 };
