@@ -1,7 +1,6 @@
 /// <reference path="../renderer/preload.d.ts" />
 
-import './store/dapps';
-import './store/desktopApp';
+import './store';
 
 import './streams/tabbedBrowserWindow';
 import './streams/mainWindow';
@@ -23,8 +22,9 @@ import './streams/hid';
 import './streams/dapps';
 import './streams/ipfs';
 import './streams/trezorLike';
+
+import './streams/bundle';
 import './streams/cex/binance';
-import './store/bundle';
 
 import './streams/developer';
 

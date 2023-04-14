@@ -1,15 +1,7 @@
 import { BrowserWindow } from 'electron';
 
-import {
-  onIpcMainEvent,
-  onIpcMainInternalEvent,
-  sendToWebContents,
-} from '../utils/ipcMainEvents';
-import {
-  forwardToMainWebContents,
-  getAllMainUIViews,
-  getAllMainUIWindows,
-} from '../utils/stream-helpers';
+import { onIpcMainEvent, onIpcMainInternalEvent } from '../utils/ipcMainEvents';
+import { forwardToMainWebContents } from '../utils/stream-helpers';
 import { getWindowFromBrowserWindow } from './tabbedBrowserWindow';
 import { setListeners, setOpenHandlerForWebContents } from './webContents';
 
@@ -46,30 +38,6 @@ onIpcMainEvent(
 );
 
 onIpcMainInternalEvent(
-  '__internal_main:dapps:changed',
-  async ({ dapps, pinnedList, unpinnedList, protocolDappsBinding }) => {
-    const [{ windowList }, { viewOnlyList }] = await Promise.all([
-      getAllMainUIWindows(),
-      getAllMainUIViews(),
-    ]);
-
-    const viewSet = new Set([
-      ...windowList.map((win) => win.webContents),
-      ...viewOnlyList.map((view) => view),
-    ]);
-
-    viewSet.forEach((webContents) => {
-      sendToWebContents(webContents, '__internal_push:dapps:changed', {
-        dapps,
-        pinnedList,
-        unpinnedList,
-        protocolDappsBinding,
-      });
-    });
-  }
-);
-
-onIpcMainInternalEvent(
   '__internal_main:tabbed-window:view-added',
   ({ webContents, window, tabbedWindow }) => {
     // const isMainContentsForTabbedWindow = !!tabbedWindow;
@@ -82,27 +50,6 @@ onIpcMainInternalEvent(
     setOpenHandlerForWebContents({
       webContents,
       parentTabbedWin: tabbedWin,
-    });
-  }
-);
-
-onIpcMainInternalEvent(
-  '__internal_main:bundle:changed',
-  async ({ accounts }) => {
-    const [{ windowList }, { viewOnlyList }] = await Promise.all([
-      getAllMainUIWindows(),
-      getAllMainUIViews(),
-    ]);
-
-    const viewSet = new Set([
-      ...windowList.map((win) => win.webContents),
-      ...viewOnlyList.map((view) => view),
-    ]);
-
-    viewSet.forEach((webContents) => {
-      sendToWebContents(webContents, '__internal_push:bundle:changed', {
-        accounts,
-      });
     });
   }
 );
