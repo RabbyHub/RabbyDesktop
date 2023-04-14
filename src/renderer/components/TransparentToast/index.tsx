@@ -89,7 +89,7 @@ export function toastCopied(
           <RcIconToastSuccess className="mr-6px w-[16px] h-[16px]" />
           <span style={{ color: '#27C193' }}>Copied:</span>
         </div>
-        <div>{text}</div>
+        <div className="text-12">{text}</div>
       </ToastContent>
     ),
     duration: TIMEOUT_SEC,
