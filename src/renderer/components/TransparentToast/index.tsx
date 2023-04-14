@@ -9,7 +9,7 @@ import { isMainWinShellWebUI } from '@/isomorphic/url';
 import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
 
 message.config({
-  top: 100,
+  top: 80,
 });
 
 const TIMEOUT_SEC = 3;
@@ -26,7 +26,7 @@ export function toastMessage(config: OpenParamters[0]) {
           aria-label="check-circle"
           className="anticon anticon-check-circle"
         >
-          <RcIconToastSuccess className="w-[24px] h-[24px]" />
+          <RcIconToastSuccess className="w-[20px] h-[20px]" />
         </span>
       ),
     }),
