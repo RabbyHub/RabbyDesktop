@@ -105,6 +105,7 @@ export class Binance {
             )}) API has become invalid. It will be deleted and removed from Bundle Address.`,
             height: 220,
             okCancel: false,
+            okText: 'OK',
           });
         }
         throw new Error(ERROR.INVALID_KEY);
