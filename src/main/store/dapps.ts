@@ -31,7 +31,7 @@ import {
 import { detectDapp, detectIPFSDapp } from '../utils/dapps';
 import { storeLog } from '../utils/log';
 import { makeStore } from '../utils/store';
-import { getAppProxyConfigForAxios } from './desktopApp';
+import { getOptionProxyForAxios } from './desktopApp';
 import { fetchImageBuffer } from '../utils/fetch';
 import { getIpfsService } from '../utils/stream-helpers';
 
@@ -358,7 +358,7 @@ export async function repairDappsFieldsOnBootstrap() {
         try {
           const faviconBuf = await fetchImageBuffer(dapp.faviconUrl, {
             timeout: 2 * 1e3,
-            proxy: getAppProxyConfigForAxios(),
+            proxy: getOptionProxyForAxios(),
           });
 
           dapp.faviconBase64 = nativeImage
@@ -395,7 +395,7 @@ handleIpcMainInvoke('detect-dapp', async (_, dappUrl) => {
 
   const result = await detectDapp(dappUrl, {
     existedDapps: allDapps,
-    proxyOnGrab: getAppProxyConfigForAxios(),
+    proxyOnGrab: getOptionProxyForAxios(),
   });
 
   return {

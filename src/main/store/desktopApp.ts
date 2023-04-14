@@ -2,6 +2,10 @@
 
 import { app, screen, BrowserWindow } from 'electron';
 import { Subject, debounceTime } from 'rxjs';
+import type { AxiosRequestConfig } from 'axios';
+
+import { HttpsProxyAgent } from 'https-proxy-agent';
+import { formatProxyServerURL } from '@/isomorphic/url';
 import {
   FORCE_DISABLE_CONTENT_PROTECTION,
   PERSIS_STORE_PREFIX,
@@ -10,6 +14,7 @@ import { safeParse, shortStringify } from '../../isomorphic/json';
 import { FRAME_DEFAULT_SIZE } from '../../isomorphic/const-size';
 import { emitIpcMainEvent, handleIpcMainInvoke } from '../utils/ipcMainEvents';
 import { makeStore } from '../utils/store';
+import { getSystemProxyInfo } from '../utils/systemConfig';
 
 export const desktopAppStore = makeStore<{
   firstStartApp: IDesktopAppState['firstStartApp'];
@@ -141,22 +146,87 @@ export function isEnableSupportIpfsDapp() {
   return desktopAppStore.get('enableSupportIpfsDapp') === true;
 }
 
-export function getAppProxyConf() {
+function getAppProxyConf(): IAppProxyConf {
   return {
     proxyType: desktopAppStore.get('proxyType'),
     proxySettings: desktopAppStore.get('proxySettings'),
+    systemProxySettings: undefined,
   };
 }
 
-export function getAppProxyConfigForAxios() {
-  const proxyConf = getAppProxyConf();
-  return proxyConf.proxyType === 'custom'
-    ? {
-        protocol: proxyConf.proxySettings.protocol,
-        host: proxyConf.proxySettings.hostname,
-        port: proxyConf.proxySettings.port,
-      }
-    : undefined;
+export function getOptionProxyForAxios(
+  proxyConf?: IAppProxyConf
+): Exclude<AxiosRequestConfig['proxy'], false> {
+  proxyConf = proxyConf || getAppProxyConf();
+
+  if (proxyConf.proxyType === 'custom') {
+    return {
+      protocol: proxyConf.proxySettings.protocol,
+      host: proxyConf.proxySettings.hostname,
+      port: proxyConf.proxySettings.port,
+    };
+  }
+  if (proxyConf.proxyType === 'system' && proxyConf.systemProxySettings) {
+    return {
+      protocol: proxyConf.systemProxySettings.protocol,
+      host: proxyConf.systemProxySettings.host,
+      port: proxyConf.systemProxySettings.port,
+    };
+  }
+
+  return undefined;
+}
+
+export function getHttpsProxyAgentForRuntime(
+  proxyConf?: IAppProxyConf
+): AxiosRequestConfig['httpsAgent'] {
+  proxyConf = proxyConf || getAppProxyConf();
+
+  let httpsProxyAgent: HttpsProxyAgent | undefined;
+  if (proxyConf.proxyType === 'custom') {
+    httpsProxyAgent = new HttpsProxyAgent(
+      formatProxyServerURL(proxyConf.proxySettings)
+    );
+  } else if (
+    proxyConf.proxyType === 'system' &&
+    proxyConf.systemProxySettings
+  ) {
+    httpsProxyAgent = new HttpsProxyAgent(
+      formatProxyServerURL({
+        protocol: proxyConf.systemProxySettings.protocol as 'http',
+        hostname: proxyConf.systemProxySettings.host,
+        port: proxyConf.systemProxySettings.port,
+      })
+    );
+  }
+  return httpsProxyAgent;
+}
+
+export async function getFullAppProxyConf(opts?: {
+  refetchSystemProxyServer?: boolean;
+}) {
+  const appProxyConf = getAppProxyConf() as IPraticalAppProxyConf;
+
+  appProxyConf.systemProxySettings = (
+    await getSystemProxyInfo(opts?.refetchSystemProxyServer)
+  ).systemProxySettings;
+
+  let configForAxios: AxiosRequestConfig['proxy'];
+
+  if (appProxyConf.proxyType === 'system') {
+    configForAxios = appProxyConf.systemProxySettings;
+  } else if (appProxyConf.proxyType === 'custom') {
+    configForAxios = {
+      protocol: appProxyConf.proxySettings.protocol,
+      host: appProxyConf.proxySettings.hostname,
+      port: appProxyConf.proxySettings.port,
+    };
+  }
+
+  return {
+    ...appProxyConf,
+    configForAxios,
+  };
 }
 
 handleIpcMainInvoke('get-desktopAppState', () => {

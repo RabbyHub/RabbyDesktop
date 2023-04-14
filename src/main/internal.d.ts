@@ -215,6 +215,14 @@ type MainInternalsMessagePayload = {
     send: [enabled: boolean];
     response: [];
   };
+  '__internal_main:bundle:changed': {
+    send: [
+      {
+        accounts?: BundleAccount[];
+      }
+    ];
+    response: [];
+  };
 };
 
 type MainInternals = keyof MainInternalsMessagePayload;

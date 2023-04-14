@@ -1,5 +1,5 @@
-import { coercePort } from '@/isomorphic/url';
-import { desktopAppStore } from '../store/desktopApp';
+import { coerceInteger } from '@/isomorphic/primitive';
+import { desktopAppStore, getFullAppProxyConf } from '../store/desktopApp';
 import { checkProxyViaBrowserView } from '../utils/appNetwork';
 import { emitIpcMainEvent, handleIpcMainInvoke } from '../utils/ipcMainEvents';
 import { getAppRuntimeProxyConf } from '../utils/stream-helpers';
@@ -28,15 +28,13 @@ handleIpcMainInvoke('check-proxyConfig', async (evt, payload) => {
   return { valid, errMsg };
 });
 
-handleIpcMainInvoke('get-proxyConfig', async (evt) => {
-  const proxyType = desktopAppStore.get('proxyType');
-  const proxySettings = desktopAppStore.get('proxySettings');
+handleIpcMainInvoke('get-proxyConfig', async (_) => {
+  const appProxyInfo = await getFullAppProxyConf({
+    refetchSystemProxyServer: true,
+  });
 
   return {
-    persisted: {
-      proxyType,
-      proxySettings,
-    },
+    systemProxy: appProxyInfo.systemProxySettings,
     runtime: await getAppRuntimeProxyConf(),
   };
 });
@@ -44,7 +42,7 @@ handleIpcMainInvoke('get-proxyConfig', async (evt) => {
 handleIpcMainInvoke('apply-proxyConfig', async (evt, conf) => {
   // TODO: check input data
   desktopAppStore.set('proxyType', conf.proxyType);
-  conf.proxySettings.port = coercePort(conf.proxySettings.port);
+  conf.proxySettings.port = coerceInteger(conf.proxySettings.port, 80);
   desktopAppStore.set('proxySettings', conf.proxySettings);
 
   emitIpcMainEvent('__internal_main:app:relaunch');

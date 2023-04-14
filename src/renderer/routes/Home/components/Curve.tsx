@@ -34,6 +34,7 @@ const CurveWrapper = styled.div`
   width: 100%;
   height: 100%;
   z-index: 1;
+  width: 430px;
   -webkit-mask-image: -webkit-gradient(
     linear,
     left top,
@@ -43,7 +44,13 @@ const CurveWrapper = styled.div`
   );
 
   &:hover {
-    -webkit-mask-image: none;
+    -webkit-mask-image: -webkit-gradient(
+      linear,
+      left top,
+      right top,
+      from(rgba(255, 255, 255, 0.4)),
+      to(rgba(255, 255, 255, 1))
+    );
   }
 `;
 
@@ -64,7 +71,7 @@ const CurveThumbnail = ({ data, className }: CurveThumbnailProps) => {
     <CurveWrapper ref={divRef} className={className}>
       <AreaChart
         data={data?.list}
-        width={594}
+        width={430}
         height={height}
         style={{ position: 'absolute', right: 0, cursor: 'pointer' }}
       >

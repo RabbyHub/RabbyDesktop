@@ -37,6 +37,7 @@ import { matomoRequestEvent } from '@/renderer/utils/matomo-request';
 import { fetchDapps } from '@/renderer/ipcRequest/dapps';
 import dayjs from 'dayjs';
 import { useToastMessage } from '@/renderer/hooks/useToastMessage';
+import { HomeBundle } from '@/renderer/routes/Bundle';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -151,6 +152,10 @@ const router = createRouter([
           } as MainWindowRouteData;
         },
         element: <Home />,
+      },
+      {
+        path: 'home/bundle',
+        element: <HomeBundle />,
       },
       {
         path: 'home/send-token',
