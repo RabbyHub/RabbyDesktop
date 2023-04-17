@@ -151,7 +151,7 @@ const router = createRouter([
             routeCSSKeyword: 'home_assets',
           } as MainWindowRouteData;
         },
-        element: <Home />,
+        element: null, // delegate to MainRoute
       },
       {
         path: 'home/bundle',
@@ -190,7 +190,7 @@ const router = createRouter([
       },
       {
         path: 'swap',
-        element: <Swap />,
+        element: null, // delegate to MainRoute
       },
 
       {
