@@ -242,9 +242,14 @@ export const useBundleAccount = () => {
     [accounts]
   );
 
+  const allAccounts = React.useMemo(
+    () => [...accounts, ...ethList],
+    [accounts, ethList]
+  );
+
   const updateNickname = React.useCallback(
     async (id: BundleAccount['id'], nickname: BundleAccount['nickname']) => {
-      const account = accounts.find((acc) => acc.id === id);
+      const account = allAccounts.find((acc) => acc.id === id);
       if (!account) {
         return;
       }
@@ -259,7 +264,7 @@ export const useBundleAccount = () => {
         nickname,
       });
     },
-    [accounts]
+    [allAccounts]
   );
 
   const preCheckMaxAccount = React.useCallback(() => {
