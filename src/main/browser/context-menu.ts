@@ -311,6 +311,61 @@ function buildInspectKitsMenu(opts: ChromeContextMenuOptions) {
   return inspectKitsMenu;
 }
 
+function buildPerfKitsMenu(opts: ChromeContextMenuOptions) {
+  const { params } = opts;
+
+  const perfKitsMenu = new Menu();
+
+  // this only mock crashed event to trigger post-process, not real crashed
+  appendMenu(perfKitsMenu, {
+    label: 'Mock MainWindow WebContents Crashed',
+    click: () => {
+      emitIpcMainEvent('__internal_main:mainwindow:webContents-crashed');
+    },
+  });
+
+  appendMenuSeparator(perfKitsMenu);
+
+  // this really crashed the main window by increasing memory usage
+  appendMenu(perfKitsMenu, {
+    label: 'Trigger MainWindow WebContents Crashed',
+    click: async () => {
+      const mainTabbedWin = await onMainWindowReady();
+
+      // const memUsage = process.memoryUsage();
+      // const toCrashDelta = (
+      //   memUsage.heapTotal - memUsage.heapUsed + 1e9
+      // );
+      // console.debug('[debug] toCrashDelta on mainProcess: ' + toCrashDelta);
+
+      // trigger crash by increasing memory usage
+      mainTabbedWin.window.webContents.executeJavaScript(`
+        ;(() => {
+          const all = [];
+          let big = [];
+          all.push(big);
+
+          const leftHeapSize = performance.memory.totalJSHeapSize - performance.memory.usedJSHeapSize;
+          const toCrashDelta = leftHeapSize + 1e9;
+
+          for (let i = 0; i < toCrashDelta; i++) {
+            const newLen = big.push(Math.random());
+            if (newLen % 500000 === 0) {
+              big = [];
+              all.push(big);
+              console.log('all.length: ' + all.length);
+              console.log('heapTotal: ' + Math.round(performance.memory.totalJSHeapSize / 1e6));
+            }
+          }
+          console.log(all.length);
+        })();
+      `);
+    },
+  });
+
+  return perfKitsMenu;
+}
+
 async function buildOpenedTabsMenu(opts: ChromeContextMenuOptions) {
   const mainTabbedWin = await onMainWindowReady();
 
@@ -523,6 +578,11 @@ async function buildChromeContextMenu(
     append({
       label: 'Views Kits',
       submenu: buildInspectKitsMenu(opts),
+    });
+
+    append({
+      label: 'Perf Kits',
+      submenu: buildPerfKitsMenu(opts),
     });
 
     append({

@@ -223,6 +223,10 @@ type MainInternalsMessagePayload = {
     ];
     response: [];
   };
+  '__internal_main:mainwindow:webContents-crashed': {
+    send: [];
+    response: [];
+  };
 };
 
 type MainInternals = keyof MainInternalsMessagePayload;
