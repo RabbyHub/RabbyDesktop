@@ -321,6 +321,7 @@ export const SwapToken = () => {
       chainSwitch(target?.enum, pageInfo.payTokenId);
     }
   }
+  shouldResetState.current = false;
 
   const inSufficient = useMemo(
     () =>
