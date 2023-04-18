@@ -36,7 +36,7 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
   const navigate = useNavigate();
 
   const openScanUrl = useCallback(() => {
-    if (isNativeToken || !chainItem?.scanLink || !token.id) {
+    if (isNativeToken || !chainItem?.scanLink || !token?.id) {
       return;
     }
     const link = chainItem?.scanLink?.replace(
@@ -44,7 +44,7 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
       `/address/${token?.id}`
     );
     openExternalUrl(link);
-  }, [chainItem?.scanLink, isNativeToken, token.id]);
+  }, [chainItem?.scanLink, isNativeToken, token?.id]);
 
   const buttons = useMemo(
     () => [
@@ -68,7 +68,7 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
           }
         },
         disabled: !supportChains.includes(chainItem?.enum),
-        disbaledTip: 'The token on this chain is not supported',
+        disbaledTip: 'Tokens on this chain are not supported for swap',
       },
       {
         name: 'Send',
@@ -125,12 +125,9 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
             trigger={['click']}
             title={btn?.disbaledTip}
             open={!btn.disabled ? false : undefined}
+            overlayClassName="max-w-[500px]"
             overlayInnerStyle={{
               padding: '8px 12px',
-              paddingRight: 4,
-              maxWidth: 233,
-              fontSize: 15,
-              fontWeight: 500,
             }}
           >
             <Button
