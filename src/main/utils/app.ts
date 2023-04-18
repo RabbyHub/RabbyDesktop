@@ -2,6 +2,8 @@
 import path from 'path';
 import child_process from 'child_process';
 import { app, crashReporter, net } from 'electron';
+import logger from 'electron-log';
+
 import * as Sentry from '@sentry/electron/main';
 
 import { filterAppChannel, getSentryEnv } from '@/isomorphic/env';
@@ -130,6 +132,15 @@ export function getMainProcessAppChannel() {
  * @warning make sure calling after app's userData setup
  */
 export function initMainProcessSentry() {
+  process.on('unhandledRejection', (error) => {
+    logger.info(error);
+    Sentry.captureException(error);
+  });
+  process.on('uncaughtException', (err) => {
+    logger.error(err);
+    Sentry.captureException(err);
+  });
+
   Sentry.init({
     dsn: !IS_RUNTIME_PRODUCTION
       ? ''
