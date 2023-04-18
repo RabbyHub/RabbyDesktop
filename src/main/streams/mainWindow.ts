@@ -378,3 +378,20 @@ onIpcMainInternalEvent(
     );
   }
 );
+
+onIpcMainInternalEvent(
+  '__internal_main:mainwindow:webContents-crashed',
+  async () => {
+    const mainTabbedWin = await onMainWindowReady();
+
+    await dialog.showMessageBox(mainTabbedWin.window, {
+      title: 'Error Occured',
+      type: 'info',
+      message: !IS_RUNTIME_PRODUCTION
+        ? 'Opps! Some error occured. Save entry file to restart app.'
+        : 'Opps! Some error occured. Click OK to relaunch Rabby Desktop.',
+    });
+
+    emitIpcMainEvent('__internal_main:app:relaunch');
+  }
+);

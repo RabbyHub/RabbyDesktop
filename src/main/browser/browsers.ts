@@ -82,6 +82,12 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
 
     this.window.webContents.loadURL(webuiUrl);
 
+    if (this.isMainWindow()) {
+      this.window.webContents.on('crashed', () => {
+        emitIpcMainEvent('__internal_main:mainwindow:webContents-crashed');
+      });
+    }
+
     this.tabs = new Tabs(this.window, {
       webuiType: this.$meta.webuiType,
     });
