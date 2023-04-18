@@ -89,6 +89,14 @@ const TokenList = ({
   const isBundlePage = location.pathname === '/mainwin/home/bundle';
 
   const [selectedToken, setSelectedToken] = useState<TokenItem>();
+
+  const handleClickToken = useCallback((t: TokenItem) => {
+    if (!t || !getChain(t?.chain)) {
+      return;
+    }
+    setSelectedToken(t);
+  }, []);
+
   const cancelTokenActionModal = () => {
     setSelectedToken(undefined);
   };
@@ -179,7 +187,7 @@ const TokenList = ({
         {tokenList.map((token) => (
           <TokenItemComp
             className={clsx(!isBundlePage && 'cursor-pointer')}
-            onTokenClick={isBundlePage ? undefined : setSelectedToken}
+            onTokenClick={isBundlePage ? undefined : handleClickToken}
             token={token}
             historyToken={
               showHistory

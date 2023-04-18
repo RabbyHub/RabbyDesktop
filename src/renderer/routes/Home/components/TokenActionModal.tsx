@@ -1,7 +1,6 @@
 import { IconLink } from '@/../assets/icons/mainwin-settings';
 import { Modal, Props as ModalProps } from '@/renderer/components/Modal/Modal';
 import { ellipsis } from '@/renderer/utils/address';
-import { formatTokenAmount, formatUsdValue } from '@/renderer/utils/number';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import { Button, Tooltip } from 'antd';
 import { useCallback, useMemo } from 'react';
@@ -100,8 +99,8 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
   return (
     <div className="flex flex-col h-full text-white">
       <div className="flex items-center">
-        <img src={token.logo_url} className="w-28 h-28" />
-        <div className="ml-6 mr-10 text-[24px] leading-[29px] font-medium">
+        <img src={token.logo_url} className="w-[34px]" />
+        <div className="mx-[15px] text-[30px] leading-[36px] font-medium max-w-[276px] overflow-hidden overflow-ellipsis whitespace-nowrap">
           {token.symbol}
         </div>
 
@@ -120,18 +119,7 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
         </div>
       </div>
 
-      <div className="mt-[36px] mb-8 text-[16px] text-white">
-        {token.symbol} Balance
-      </div>
-
-      <div className="text-[36px] font-bold">
-        {formatTokenAmount(token.amount)}
-        <span className="ml-2 text-[16px] font-normal leading-[19px]">
-          ≈ {formatUsdValue(token?.usd_value || 0)}
-        </span>
-      </div>
-
-      <div className="mt-auto flex justify-between flex items-center gap-14">
+      <div className="mt-auto flex justify-between flex items-center gap-12">
         {buttons.map((btn) => (
           <Tooltip
             trigger={['click']}
@@ -148,12 +136,12 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
             <Button
               type="primary"
               className={clsx(
-                'w-[175px] h-[50px] rounded-[6px] flex justify-center gap-10 items-center text-[16px] font-medium ',
+                'w-[165px] h-[50px] rounded-[6px] flex pl-[32px] items-center text-[16px] font-medium ',
                 btn.disabled && 'cursor-not-allowed opacity-30'
               )}
               onClick={btn.onClick}
             >
-              <img src={btn.icon} className="w-[34px]" />
+              <img src={btn.icon} className="w-[34px] mr-6" />
               <span>{btn.name}</span>
             </Button>
           </Tooltip>
@@ -165,25 +153,21 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
 
 const StyledModal = styled(Modal)`
   .ant-modal-close-x {
-    padding-top: 35px;
-    padding-right: 28px;
+    padding-top: 30px;
+    padding-right: 30px;
   }
 `;
 
 export const TokenActionModal = (props: tokenContainer & ModalProps) => {
   const { token, handleReceiveClick, ...other } = props;
 
-  if (!token?.chain || !getChain(token?.chain)) {
-    return null;
-  }
-
   return (
     <StyledModal
-      width={620}
+      width={584}
       centered
       bodyStyle={{
-        height: 290,
-        padding: 34,
+        height: 224,
+        padding: '40px 32px',
       }}
       title={null}
       open={!!token}
