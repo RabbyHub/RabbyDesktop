@@ -1,3 +1,4 @@
+import { TipsWrapper } from '@/renderer/components/TipWrapper';
 import clsx from 'clsx';
 
 const BundleNone = () => (
@@ -33,6 +34,8 @@ interface Props {
   onClickAdd?: () => void;
   canAdd?: boolean;
   maxAccount?: number;
+  hoverTips?: string;
+  clickTips?: string;
 }
 
 export const CommonAccountList: React.FC<Props> = ({
@@ -42,6 +45,8 @@ export const CommonAccountList: React.FC<Props> = ({
   isBundle,
   onClickAdd,
   canAdd,
+  hoverTips,
+  clickTips,
 }) => {
   const hasChildren = Array.isArray(children) && children.length > 0;
 
@@ -58,11 +63,16 @@ export const CommonAccountList: React.FC<Props> = ({
           {title}
         </h2>
         {canAdd && (
-          <img
-            onClick={onClickAdd}
-            className="opacity-60 hover:opacity-100 cursor-pointer"
-            src="rabby-internal://assets/icons/bundle/plus.svg"
-          />
+          <TipsWrapper
+            hoverTips={hoverTips}
+            clickTips={!canAdd ? clickTips : undefined}
+          >
+            <img
+              onClick={onClickAdd}
+              className="opacity-60 hover:opacity-100 cursor-pointer"
+              src="rabby-internal://assets/icons/bundle/plus.svg"
+            />
+          </TipsWrapper>
         )}
       </div>
       <ul className={clsx('flex flex-col space-y-[12px]', 'm-0 p-0')}>

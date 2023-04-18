@@ -5,6 +5,7 @@ import { splitNumberByStep } from '@/renderer/utils/number';
 import clsx from 'clsx';
 import React from 'react';
 import BigNumber from 'bignumber.js';
+import { TipsWrapper } from '@/renderer/components/TipWrapper';
 import { useAccountItemAddress, useAccountItemIcon } from './useAccountItem';
 import { NicknameInput } from './NicknameInput';
 
@@ -95,12 +96,17 @@ export const AccountItem: React.FC<Props> = ({
           {checked ? (
             <img src="rabby-internal://assets/icons/bundle/checked.svg" />
           ) : (
-            <div
-              className={clsx(
-                'border border-[#FFFFFF4D] group-hover:border-white border-solid',
-                'w-[16px] h-[16px] rounded-full'
-              )}
-            />
+            <TipsWrapper
+              hoverTips="Add to bundle"
+              clickTips="Maximum 15 addresses"
+            >
+              <div
+                className={clsx(
+                  'border border-[#FFFFFF4D] group-hover:border-white border-solid',
+                  'w-[16px] h-[16px] rounded-full'
+                )}
+              />
+            </TipsWrapper>
           )}
         </div>
         <div className="mr-[7px]">

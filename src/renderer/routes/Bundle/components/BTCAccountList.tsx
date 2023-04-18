@@ -23,6 +23,7 @@ export const BTCAccountList = () => {
         onClickAdd={() => setOpenModal(true)}
         canAdd
         title="BTC Address"
+        hoverTips="Add address"
       >
         {list.map((item) => (
           <AccountItem canDelete canEdit key={item.id} data={item} />

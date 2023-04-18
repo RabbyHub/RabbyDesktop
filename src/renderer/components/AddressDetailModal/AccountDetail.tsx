@@ -20,10 +20,10 @@ import { useForwardTo } from '@/renderer/hooks/useViewsMessage';
 import styles from './index.module.less';
 import { AccountDetailItem } from './AccountDetailItem';
 import { useAccountInfo } from '../AddressManagementModal/useAccountInfo';
-import { toastCopiedWeb3Addr } from '../TransparentToast';
 import RabbyInput from '../AntdOverwrite/Input';
 import { SafeItem } from './SafeItem';
 import { WhitelistSwitch } from './WhitelistSwitch';
+import { TipsWrapper } from '../TipWrapper';
 
 export interface Props {
   onClose: () => void;
@@ -42,7 +42,6 @@ export const AccountDetail: React.FC<Props> = ({
   const onCopy = React.useCallback(
     (e: React.MouseEvent) => {
       copyToClipboard(account.address);
-      toastCopiedWeb3Addr(account.address, { triggerEl: e.target });
     },
     [account.address, copyToClipboard]
   );
@@ -91,11 +90,13 @@ export const AccountDetail: React.FC<Props> = ({
           description={
             <div className={styles.address}>
               <span className={styles.text}>{account.address}</span>
-              <img
-                className={styles.copy}
-                onClick={onCopy}
-                src="rabby-internal://assets/icons/address-management/copy-white.svg"
-              />
+              <TipsWrapper hoverTips="Copy" clickTips="Copied">
+                <img
+                  className={styles.copy}
+                  onClick={onCopy}
+                  src="rabby-internal://assets/icons/address-management/copy-white.svg"
+                />
+              </TipsWrapper>
             </div>
           }
         />

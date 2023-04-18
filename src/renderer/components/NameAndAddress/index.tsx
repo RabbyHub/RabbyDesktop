@@ -5,6 +5,7 @@ import clsx from 'classnames';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { useCopyAddress } from '@/renderer/hooks/useCopyAddress';
 import IconCopy from '../../../../assets/icons/common/copy.svg?rc';
+import { TipsWrapper } from '../TipWrapper';
 
 interface NameAndAddressProps {
   className?: string;
@@ -57,15 +58,17 @@ const NameAndAddress = ({
           <>
             ({shortAddress}{' '}
             {!noCopy && (
-              <IconCopy
-                className={clsx(
-                  'ml-4 cursor-pointer opacity-40',
-                  copyIconClass
-                )}
-                onClick={() => {
-                  copyAddress(address);
-                }}
-              />
+              <TipsWrapper hoverTips="Copy" clickTips="Copied">
+                <IconCopy
+                  className={clsx(
+                    'ml-4 cursor-pointer opacity-40',
+                    copyIconClass
+                  )}
+                  onClick={() => {
+                    copyAddress(address);
+                  }}
+                />
+              </TipsWrapper>
             )}{' '}
             )
           </>
@@ -73,15 +76,17 @@ const NameAndAddress = ({
           <>
             {shortAddress}{' '}
             {!noCopy && (
-              <IconCopy
-                className={clsx(
-                  'ml-4 cursor-pointer opacity-40',
-                  copyIconClass
-                )}
-                onClick={() => {
-                  copyAddress(address);
-                }}
-              />
+              <TipsWrapper hoverTips="Copy" clickTips="Copied">
+                <IconCopy
+                  className={clsx(
+                    'ml-4 cursor-pointer opacity-40',
+                    copyIconClass
+                  )}
+                  onClick={() => {
+                    copyAddress(address);
+                  }}
+                />
+              </TipsWrapper>
             )}
           </>
         )}

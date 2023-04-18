@@ -32,6 +32,8 @@ export const BinanceAccountList = () => {
         canAdd
         onClickAdd={onClickAdd}
         title="Binance Account"
+        hoverTips="Add account"
+        clickTips="Maximum 3 Binance account"
       >
         {list.map((item) => (
           <AccountItem canDelete canEdit key={item.id} data={item} />

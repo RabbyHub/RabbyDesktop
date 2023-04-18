@@ -19,6 +19,7 @@ import { useSetState } from 'react-use';
 
 import { Modal } from '../Modal/Modal';
 import styles from './index.module.less';
+import { TipsWrapper } from '../TipWrapper';
 
 interface ReceiveContentProps {
   onCancel?: () => void;
@@ -151,15 +152,17 @@ const ReceiveContent = ({ onCancel, chain, token }: ReceiveContentProps) => {
           </div>
         </div>
         <div className={styles.receiveAddress}>{currentAccount?.address}</div>
-        <Button
-          className={styles.receiveBtn}
-          onClick={() => {
-            copy(currentAccount?.address);
-          }}
-        >
-          <img src="rabby-internal://assets/icons/receive/copy.svg" alt="" />
-          Copy address
-        </Button>
+        <TipsWrapper clickTips="Copied">
+          <Button
+            className={styles.receiveBtn}
+            onClick={() => {
+              copy(currentAccount?.address);
+            }}
+          >
+            <img src="rabby-internal://assets/icons/receive/copy.svg" alt="" />
+            Copy address
+          </Button>
+        </TipsWrapper>
       </div>
     </div>
   );
