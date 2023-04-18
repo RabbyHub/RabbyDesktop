@@ -1,5 +1,8 @@
 import { useShellWallet } from '@/renderer/hooks-shell/useShellWallet';
 
+/**
+ * @deprecated
+ */
 export function ShellWalletProvider({
   children,
 }: {

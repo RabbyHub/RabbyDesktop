@@ -7,6 +7,8 @@ import '@/renderer/css/windicss';
 import '@/renderer/utils/rendererReport';
 import '@/renderer/ipcRequest/zPopupMessage';
 
+import { RabbyShellProvider } from '@/renderer/hooks-shell/useShellWallet';
+
 import { MainWindow } from '@/renderer/components/MainWindow';
 import Topbar from '@/renderer/components/Topbar';
 
@@ -23,7 +25,11 @@ switch (shellUIType) {
     container.id = 'root';
     document.body.appendChild(container);
     const root = createRoot(container);
-    root.render(<MainWindow />);
+    root.render(
+      <RabbyShellProvider>
+        <MainWindow />
+      </RabbyShellProvider>
+    );
     break;
   }
   case 'Prompt': {
@@ -31,7 +37,11 @@ switch (shellUIType) {
     container.id = 'root';
     document.body.appendChild(container);
     const root = createRoot(container);
-    root.render(<AlertWindowPrompt />);
+    root.render(
+      <RabbyShellProvider>
+        <AlertWindowPrompt />
+      </RabbyShellProvider>
+    );
     break;
   }
   case 'ForTrezorLike': {
@@ -39,7 +49,11 @@ switch (shellUIType) {
 
     const container = document.getElementById('topbar')!;
     const root = createRoot(container);
-    root.render(<HardwareConnectTopbar />);
+    root.render(
+      <RabbyShellProvider>
+        <HardwareConnectTopbar />
+      </RabbyShellProvider>
+    );
     break;
   }
   case 'RabbyX-NotificationWindow': {
@@ -53,7 +67,11 @@ switch (shellUIType) {
 
     const container = document.getElementById('topbar')!;
     const root = createRoot(container);
-    root.render(<Topbar />);
+    root.render(
+      <RabbyShellProvider>
+        <Topbar />
+      </RabbyShellProvider>
+    );
     break;
   }
 }

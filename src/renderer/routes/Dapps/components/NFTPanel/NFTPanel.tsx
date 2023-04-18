@@ -2,6 +2,7 @@ import Hide from '@/renderer/components/MainWindow/Hide';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import classNames from 'classnames';
 import React from 'react';
+import { useSubscribeRpm } from '@/renderer/hooks-shell/useShellWallet';
 import { MintedSuccessful } from './MintedSuccessful';
 import { StepGroup } from './StepGroup';
 import { MintedData } from './util';
@@ -41,21 +42,20 @@ export const NFTPanel = () => {
     walletController.mintedRabbyTotal().then((n) => setTotal(Number(n)));
   }, []);
 
+  const subscribeRpm = useSubscribeRpm();
+
   React.useEffect(() => {
     getTotal();
     checkEndDateTime();
     checkMinted();
     // watch account change and recheck
-    return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
-      (payload) => {
-        if (payload.event === 'accountsChanged') {
-          checkMinted();
-          getTotal();
-        }
+    return subscribeRpm((payload) => {
+      if (payload.event === 'accountsChanged') {
+        checkMinted();
+        getTotal();
       }
-    );
-  }, [checkMinted, checkEndDateTime, getTotal]);
+    });
+  }, [subscribeRpm, checkMinted, checkEndDateTime, getTotal]);
 
   const visible = !isLoading && !isEventEnd;
 

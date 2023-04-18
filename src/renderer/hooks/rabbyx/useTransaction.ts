@@ -3,78 +3,78 @@ import { message } from 'antd';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
+import { useSubscribeRpm } from '@/renderer/hooks-shell/useShellWallet';
 import { useCurrentAccount } from './useAccount';
 
 const DEBUG_DURACTION = 0;
 
 export function useTransactionChanged() {
-  useEffect(() => {
-    return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
-      (payload) => {
-        if (payload.event !== 'transactionChanged') return;
-        switch (payload.data?.type) {
-          default:
-            break;
-          case 'push-failed': {
-            showMainwinPopupview({
-              type: 'global-toast-popup',
-              state: {
-                toastType: 'toast-message',
-                data: {
-                  type: 'error',
-                  content: 'Transaction push failed',
-                },
-              },
-            });
+  const subscribeRpm = useSubscribeRpm();
 
-            break;
-          }
-          case 'submitted': {
+  useEffect(() => {
+    subscribeRpm((payload) => {
+      if (payload.event !== 'transactionChanged') return;
+      switch (payload.data?.type) {
+        default:
+          break;
+        case 'push-failed': {
+          showMainwinPopupview({
+            type: 'global-toast-popup',
+            state: {
+              toastType: 'toast-message',
+              data: {
+                type: 'error',
+                content: 'Transaction push failed',
+              },
+            },
+          });
+
+          break;
+        }
+        case 'submitted': {
+          showMainwinPopupview({
+            type: 'global-toast-popup',
+            state: {
+              toastType: 'toast-message',
+              data: {
+                type: 'success',
+                content: 'Transaction submitted',
+              },
+            },
+          });
+
+          break;
+        }
+        case 'finished': {
+          if (payload.data?.success) {
             showMainwinPopupview({
               type: 'global-toast-popup',
               state: {
                 toastType: 'toast-message',
                 data: {
                   type: 'success',
-                  content: 'Transaction submitted',
+                  content: 'Transaction success',
                 },
               },
             });
-
-            break;
-          }
-          case 'finished': {
-            if (payload.data?.success) {
-              showMainwinPopupview({
-                type: 'global-toast-popup',
-                state: {
-                  toastType: 'toast-message',
-                  data: {
-                    type: 'success',
-                    content: 'Transaction success',
-                  },
+          } else {
+            showMainwinPopupview({
+              type: 'global-toast-popup',
+              state: {
+                toastType: 'toast-message',
+                data: {
+                  type: 'error',
+                  content: 'Transaction failed',
                 },
-              });
-            } else {
-              showMainwinPopupview({
-                type: 'global-toast-popup',
-                state: {
-                  toastType: 'toast-message',
-                  data: {
-                    type: 'error',
-                    content: 'Transaction failed',
-                  },
-                },
-              });
-            }
-
-            break;
+              },
+            });
           }
+
+          break;
         }
       }
-    );
-  }, []);
+    });
+  }, [subscribeRpm]);
 }
 
 const pendingTxCountAtom = atom(0);
@@ -95,24 +95,23 @@ export function useTransactionPendingCount() {
       });
   }, [currentAccount?.address, setPendingTxCount]);
 
+  const subscribeRpm = useSubscribeRpm();
+
   useEffect(() => {
     fetchCount();
 
-    return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
-      (payload) => {
-        if (
-          !['transactionChanged', 'clearPendingTransactions'].includes(
-            payload.event
-          )
-        ) {
-          return;
-        }
-
-        fetchCount();
+    return subscribeRpm((payload) => {
+      if (
+        !['transactionChanged', 'clearPendingTransactions'].includes(
+          payload.event
+        )
+      ) {
+        return;
       }
-    );
-  }, [fetchCount]);
+
+      fetchCount();
+    });
+  }, [subscribeRpm, fetchCount]);
 
   return pendingTxCount;
 }

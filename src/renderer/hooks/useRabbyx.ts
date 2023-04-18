@@ -6,6 +6,7 @@ import { formatDappHttpOrigin } from '@/isomorphic/dapp';
 import { walletController } from '../ipcRequest/rabbyx';
 import { useMessageForwarded } from './useViewsMessage';
 import { getLastOpenOriginByOrigin } from '../ipcRequest/dapps';
+import { useSubscribeRpm } from '../hooks-shell/useShellWallet';
 
 const DEFAULT_ETH_CHAIN = CHAINS_LIST.find((chain) => chain.enum === 'ETH')!;
 
@@ -62,40 +63,39 @@ export function useConnectedSite(currentOrigin?: string) {
     }
   );
 
+  const subscribeRpm = useSubscribeRpm();
+
   useEffect(() => {
     fetchConnectedSite();
 
-    return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
-      (payload) => {
-        switch (payload.event) {
-          default:
-            break;
-          case 'rabby:chainChanged': {
-            const chain =
-              CHAINS_LIST.find(
-                (chainItem) =>
-                  chainItem.hex === payload.data?.hex ||
-                  chainItem.name === payload.data?.name ||
-                  chainItem.enum === payload.data?.enum
-              ) || DEFAULT_ETH_CHAIN;
+    return subscribeRpm((payload) => {
+      switch (payload.event) {
+        default:
+          break;
+        case 'rabby:chainChanged': {
+          const chain =
+            CHAINS_LIST.find(
+              (chainItem) =>
+                chainItem.hex === payload.data?.hex ||
+                chainItem.name === payload.data?.name ||
+                chainItem.enum === payload.data?.enum
+            ) || DEFAULT_ETH_CHAIN;
 
-            const data: IConnectedSiteToDisplay = {
-              origin: payload.origin!,
-              isConnected: !!payload.data?.hex,
-              chain: chain.enum,
-              chainHex: chain.hex,
-              chainName: chain.name,
-            };
-            setConnectedSiteMap((prev) => ({
-              ...prev,
-              [data.origin]: { ...data },
-            }));
-          }
+          const data: IConnectedSiteToDisplay = {
+            origin: payload.origin!,
+            isConnected: !!payload.data?.hex,
+            chain: chain.enum,
+            chainHex: chain.hex,
+            chainName: chain.name,
+          };
+          setConnectedSiteMap((prev) => ({
+            ...prev,
+            [data.origin]: { ...data },
+          }));
         }
       }
-    );
-  }, [setConnectedSiteMap, fetchConnectedSite]);
+    });
+  }, [subscribeRpm, setConnectedSiteMap, fetchConnectedSite]);
 
   const currentConnectedSite = useMemo(() => {
     return connectedSiteMap?.[currentOrigin!] || null;

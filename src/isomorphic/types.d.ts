@@ -13,7 +13,7 @@ interface ProgressInfo {
   bytesPerSecond: number;
 }
 
-type RabbyEvent = {
+type RabbyXEvent = {
   event: string;
   data?: any;
   origin?: string;

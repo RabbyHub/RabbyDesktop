@@ -5,7 +5,6 @@ import {
   RabbyXContollerNS,
   RabbyXMethods,
 } from '@/isomorphic/types/rabbyx';
-import { randString } from 'isomorphic/string';
 
 function fixArgs(
   key: keyof RabbyXMethods,
@@ -20,24 +19,8 @@ function fixArgs(
   return newArgs;
 }
 
-export function waitRabbyXGhostBgLoaded() {
-  const reqid = randString(16);
-  return new Promise<{ rabbyxExtId: string }>((resolve) => {
-    const dispose = window.rabbyDesktop?.ipcRenderer.on(
-      '__internal_rpc:rabbyx:waitExtBgGhostLoaded',
-      (event) => {
-        if (event.reqid === reqid) {
-          dispose?.();
-          resolve({ rabbyxExtId: event.rabbyxExtId });
-        }
-      }
-    );
-
-    window.rabbyDesktop?.ipcRenderer.sendMessage(
-      '__internal_rpc:rabbyx:waitExtBgGhostLoaded',
-      reqid
-    );
-  });
+export async function waitRabbyXGhostBgLoaded() {
+  return window.rabbyDesktop?.ipcRenderer.invoke('rabbyx:waitExtBgGhostLoaded');
 }
 
 /**

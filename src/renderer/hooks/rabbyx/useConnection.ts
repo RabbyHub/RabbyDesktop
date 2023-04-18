@@ -4,6 +4,7 @@ import { getOriginFromUrl } from '@/isomorphic/url';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSubscribeRpm } from '@/renderer/hooks-shell/useShellWallet';
 import { usePreference } from './usePreference';
 import useDebounceValue from '../useDebounceValue';
 
@@ -43,21 +44,21 @@ export function useCurrentConnection(
     [currentSite, getCurrentSite]
   );
 
+  const subscribeRpm = useSubscribeRpm();
+
   useEffect(() => {
     getCurrentSite();
-    return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
-      (payload) => {
-        switch (payload.event) {
-          default:
-            break;
-          case 'rabby:chainChanged': {
-            getCurrentSite();
-          }
+
+    return subscribeRpm((payload) => {
+      switch (payload.event) {
+        default:
+          break;
+        case 'rabby:chainChanged': {
+          getCurrentSite();
         }
       }
-    );
-  }, [getCurrentSite, nonce]);
+    });
+  }, [subscribeRpm, getCurrentSite, nonce]);
 
   const removeConnectedSite = useCallback(
     async (origin: string) => {

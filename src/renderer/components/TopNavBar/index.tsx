@@ -29,6 +29,7 @@ import { useMatchURLBaseConfig } from '@/renderer/hooks-ipc/useAppDynamicConfig'
 import { useWindowState } from '@/renderer/hooks-shell/useWindowState';
 import { formatDappURLToShow } from '@/isomorphic/dapp';
 import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
+import { useSubscribeRpm } from '@/renderer/hooks-shell/useShellWallet';
 import styles from './index.module.less';
 
 const isDarwin = detectOS() === 'darwin';
@@ -102,21 +103,18 @@ export const TopNavBar = () => {
 
   const { onDarwinToggleMaxmize } = useWindowState();
 
-  useEffect(
-    () =>
-      window.rabbyDesktop.ipcRenderer.on(
-        '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
-        (payload) => {
-          if (payload.event !== 'createSession') return;
-          const { data } = payload;
-          const [tabId] = data.split('-');
-          if (Number(tabId) === activeTab?.id) {
-            setNonce(nonce + 1);
-          }
-        }
-      ),
-    [nonce, activeTab]
-  );
+  const subscribeRpm = useSubscribeRpm();
+
+  useEffect(() => {
+    return subscribeRpm((payload) => {
+      if (payload.event !== 'createSession') return;
+      const { data } = payload;
+      const [tabId] = data.split('-');
+      if (Number(tabId) === activeTab?.id) {
+        setNonce((prev) => prev + 1);
+      }
+    });
+  }, [subscribeRpm, activeTab?.id]);
 
   const dappURLToShow = useMemo(() => {
     return formatDappURLToShow(activeTab?.url || '');

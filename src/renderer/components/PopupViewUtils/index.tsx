@@ -19,6 +19,9 @@ function useCloseOnCrash() {
   }, [matches]);
 }
 
+/**
+ * @deprecated
+ */
 export function useResetToCurrentPage() {
   const location = useLocation();
   const nav = useNavigate();
