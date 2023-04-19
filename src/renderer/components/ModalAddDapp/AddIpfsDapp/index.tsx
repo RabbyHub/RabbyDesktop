@@ -1,5 +1,5 @@
 import { LoadingOutlined } from '@ant-design/icons';
-import { Form, message } from 'antd';
+import { Form } from 'antd';
 import { ReactNode, useEffect } from 'react';
 
 import {
@@ -17,7 +17,6 @@ import { useUnmount } from 'react-use';
 import { stats } from '@/isomorphic/stats';
 import RabbyInput from '../../AntdOverwrite/Input';
 import { Props as ModalProps } from '../../Modal/Modal';
-import { toastMessage } from '../../TransparentToast';
 import { PreviewDapp } from '../PreviewDapp';
 import { useAddDappURL } from '../useAddDapp';
 import { Warning } from '../Warning';
@@ -191,11 +190,7 @@ export function AddIpfsDapp({
       },
       urls
     );
-    toastMessage({
-      type: 'success',
-      content: 'Add success',
-      className: styles.toast,
-    });
+
     const nextState = {
       dappInfo: {
         ...dappInfo,

@@ -1,3 +1,5 @@
+import { useClickOutSide } from '@/renderer/hooks/useClick';
+import useDebounceValue from '@/renderer/hooks/useDebounceValue';
 import { Tooltip, TooltipProps } from 'antd';
 import {
   cloneElement,
@@ -16,6 +18,7 @@ export const TipsWrapper = (
     size?: number;
     iconClassName?: string;
     children: React.ReactElement;
+    defaultClicked?: true;
   }
 ) => {
   const {
@@ -25,6 +28,7 @@ export const TipsWrapper = (
     size,
     iconClassName,
     children,
+    defaultClicked,
     ...others
   } = props;
   const trigger = useMemo(() => {
@@ -37,20 +41,34 @@ export const TipsWrapper = (
     }
     return arr;
   }, [clickTips, hoverTips]);
-  const [clicked, setClicked] = useState<boolean | undefined>();
+
+  const divRef = useRef<HTMLDivElement>(null);
 
   const timerRef = useRef<NodeJS.Timeout>();
+  const timer2Ref = useRef<NodeJS.Timeout>();
+
+  const [clicked, setClicked] = useState<boolean | undefined>(defaultClicked);
+
+  const closeClickedTips = useCallback(() => {
+    setClicked(undefined);
+  }, []);
 
   const handleClick = useCallback(() => {
     setClicked(true);
     clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      setClicked(false);
-      setClicked(undefined);
-    }, timeOut);
-  }, [timeOut]);
+    timerRef.current = setTimeout(closeClickedTips, timeOut);
+  }, [closeClickedTips, timeOut]);
 
-  useEffect(() => () => clearTimeout(timerRef.current), []);
+  const clearTimer = useCallback(() => {
+    clearTimeout(timerRef.current);
+    clearTimeout(timer2Ref.current);
+  }, []);
+
+  const resetState = useCallback(() => {
+    clearTimer();
+    timerRef.current = setTimeout(() => setClicked(false), timeOut);
+    timer2Ref.current = setTimeout(() => setClicked(undefined), timeOut + 100);
+  }, [clearTimer, timeOut]);
 
   const child = useMemo(() => {
     return children && clickTips
@@ -64,12 +82,29 @@ export const TipsWrapper = (
       : children;
   }, [children, clickTips, handleClick]);
 
+  useClickOutSide(divRef, closeClickedTips);
+
+  // const debounceClicked = useDebounceValue(clicked, 200);
+
+  useEffect(() => {
+    if (clicked) {
+      resetState();
+    }
+  }, [clicked, resetState, timeOut]);
+
+  useEffect(
+    () => () => {
+      clearTimeout(timerRef.current);
+      clearTimeout(timer2Ref.current);
+    },
+    []
+  );
+
   return (
     <Tooltip
-      mouseEnterDelay={0.1}
       open={clicked}
       trigger={trigger}
-      title={clicked ? clickTips : hoverTips}
+      title={<div ref={divRef}>{clicked ? clickTips : hoverTips}</div>}
       {...others}
     >
       {child}

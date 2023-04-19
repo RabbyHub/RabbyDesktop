@@ -66,6 +66,10 @@ export const CommonAccountList: React.FC<Props> = ({
           <TipsWrapper
             hoverTips={hoverTips}
             clickTips={!canAdd ? clickTips : undefined}
+            placement="topRight"
+            align={{
+              targetOffset: [-16, 0],
+            }}
           >
             <img
               onClick={onClickAdd}

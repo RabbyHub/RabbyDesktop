@@ -1,17 +1,19 @@
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import React from 'react';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { validate, Network } from 'bitcoin-address-validation';
 import { toastMessage } from '@/renderer/components/TransparentToast';
 import { ellipsis } from '@/renderer/utils/address';
 import { Binance } from './cex/binance/binance';
-import { bundleAccountsAtom } from './shared';
+import { bundleAccountsAtom, bundleAccountsNumAtom } from './shared';
 import { ERROR } from './error';
 import { useAccountToDisplay } from '../rabbyx/useAccountToDisplay';
 import { toastMaxAccount } from './util';
 import { useAddressManagement } from '../rabbyx/useAddressManagement';
 
 const { nanoid } = require('nanoid');
+
+export const useBundleIsMax = () => useAtomValue(bundleAccountsNumAtom) >= 15;
 
 export const useBundleAccount = () => {
   const [accounts, setAccounts] = useAtom(bundleAccountsAtom);

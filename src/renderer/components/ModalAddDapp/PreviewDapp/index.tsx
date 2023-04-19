@@ -1,13 +1,14 @@
 import { putDapp } from '@/renderer/ipcRequest/dapps';
 import { LoadingOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { formatDappHttpOrigin } from '@/isomorphic/dapp';
 import RabbyInput from '../../AntdOverwrite/Input';
 
 import { DappFavicon } from '../../DappFavicon';
 import { PreviewWebview } from '../../DappView/PreviewWebview';
 import styles from './index.module.less';
+import { TipsWrapper } from '../../TipWrapper';
 
 interface PreviewDappProps {
   data: NonNullable<IDappsDetectResult['data']>;
@@ -26,6 +27,18 @@ export const PreviewDapp = ({
   onGoBackClick,
 }: PreviewDappProps) => {
   const [input, setInput] = useState(data.recommendedAlias);
+
+  const [showAddedTips, setShowAddedTips] = useState(false);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (showAddedTips && !data?.isInputExistedDapp && !isGoBack) {
+      timer = setTimeout(() => {
+        setShowAddedTips(false);
+      }, 3000);
+    }
+    return () => clearTimeout(timer);
+  }, [showAddedTips, data?.isInputExistedDapp, isGoBack]);
 
   return (
     <div className={styles.preview}>
@@ -78,15 +91,20 @@ export const PreviewDapp = ({
                     Go back to bind Dapp
                   </Button>
                 ) : (
-                  <Button
-                    type="primary"
-                    className={styles.previewBtnSuccess}
-                    onClick={() => {
-                      onOpen?.(data);
-                    }}
+                  <TipsWrapper
+                    clickTips="Added"
+                    defaultClicked={showAddedTips || undefined}
                   >
-                    Open
-                  </Button>
+                    <Button
+                      type="primary"
+                      className={styles.previewBtnSuccess}
+                      onClick={() => {
+                        onOpen?.(data);
+                      }}
+                    >
+                      Open
+                    </Button>
+                  </TipsWrapper>
                 )
               ) : (
                 <Button
@@ -100,6 +118,7 @@ export const PreviewDapp = ({
                     } else {
                       onAdd(data);
                     }
+                    setShowAddedTips(true);
                   }}
                 >
                   Add

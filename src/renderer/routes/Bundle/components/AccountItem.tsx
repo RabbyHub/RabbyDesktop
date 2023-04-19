@@ -6,6 +6,7 @@ import clsx from 'clsx';
 import React from 'react';
 import BigNumber from 'bignumber.js';
 import { TipsWrapper } from '@/renderer/components/TipWrapper';
+import { useBundleIsMax } from '@/renderer/hooks/useBundle/useBundleAccount';
 import { useAccountItemAddress, useAccountItemIcon } from './useAccountItem';
 import { NicknameInput } from './NicknameInput';
 
@@ -28,6 +29,8 @@ export const AccountItem: React.FC<Props> = ({
     account: { toggleBundle, remove, percentMap },
     eth,
   } = useBundle();
+  const bundleIsMax = useBundleIsMax();
+
   const addressTypeIcon = useAccountItemIcon(data);
   const displayAddress = useAccountItemAddress(data);
 
@@ -94,11 +97,13 @@ export const AccountItem: React.FC<Props> = ({
       >
         <div className="mr-[15px]">
           {checked ? (
-            <img src="rabby-internal://assets/icons/bundle/checked.svg" />
+            <TipsWrapper hoverTips="Remove from bundle">
+              <img src="rabby-internal://assets/icons/bundle/checked.svg" />
+            </TipsWrapper>
           ) : (
             <TipsWrapper
               hoverTips="Add to bundle"
-              clickTips="Maximum 15 addresses"
+              clickTips={bundleIsMax ? 'Maximum 15 addresses' : undefined}
             >
               <div
                 className={clsx(
@@ -116,18 +121,20 @@ export const AccountItem: React.FC<Props> = ({
           <NicknameInput data={data} canEdit={canEdit} />
           <div className="flex space-x-[5px] items-center h-[14px]">
             <span className="opacity-50">{ellipsis(displayAddress)}</span>
-            <div
-              onClick={onCopy}
-              className={clsx(
-                'group-hover:block hidden',
-                'opacity-60 hover:opacity-100'
-              )}
-            >
-              <img
-                className="w-[14px]"
-                src="rabby-internal://assets/icons/address-management/copy-white.svg"
-              />
-            </div>
+            <TipsWrapper hoverTips="Copy" clickTips="Copied">
+              <div
+                onClick={onCopy}
+                className={clsx(
+                  'group-hover:block hidden',
+                  'opacity-60 hover:opacity-100'
+                )}
+              >
+                <img
+                  className="w-[14px]"
+                  src="rabby-internal://assets/icons/address-management/copy-white.svg"
+                />
+              </div>
+            </TipsWrapper>
           </div>
         </div>
         <div

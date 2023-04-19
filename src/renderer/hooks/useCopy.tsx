@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useCopyToClipboard } from 'react-use';
-import { toastCopied } from '../components/TransparentToast';
+// import { toastCopied } from '../components/TransparentToast';
 
 export const useCopy = () => {
   const [, copyToClipboard] = useCopyToClipboard();
@@ -8,7 +8,7 @@ export const useCopy = () => {
   const copy = useCallback(
     (address: string) => {
       copyToClipboard(address);
-      toastCopied(address);
+      // toastCopied(address);
     },
     [copyToClipboard]
   );
