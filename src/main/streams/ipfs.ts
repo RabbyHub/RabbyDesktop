@@ -35,3 +35,18 @@ handleIpcMainInvoke('cancel-download-ipfs', async (_) => {
   const ipfsService = await getIpfsService();
   await ipfsService.cancelDownload();
 });
+
+handleIpcMainInvoke('resolve-ipns', async (_, ens) => {
+  const ipfsService = await getIpfsService();
+  try {
+    const ipfs = await ipfsService.resolveIPNS(ens);
+    return {
+      result: ipfs,
+    };
+  } catch (e) {
+    return {
+      error: (e as any).message,
+      result: null,
+    };
+  }
+});

@@ -18,13 +18,38 @@ const Indicator = ({ dapp }: { dapp: IDappWithTabInfo }) => {
   return <div className="dapp-indicator" />;
 };
 
-const IpfsTag = ({ prefix }: { prefix?: ReactNode }) => {
-  return (
-    <div className="tag ipfs-tag">
-      {prefix}
-      IPFS
-    </div>
-  );
+const DappBadge = ({
+  indicator,
+  type,
+}: {
+  indicator: ReactNode;
+  type: string;
+}) => {
+  if (type === 'ipfs') {
+    return (
+      <div className="tag tag-ipfs">
+        {indicator}
+        IPFS
+      </div>
+    );
+  }
+  if (type === 'ens') {
+    return (
+      <div className="tag tag-ens">
+        {indicator}
+        ENS
+      </div>
+    );
+  }
+  if (type === 'local') {
+    return (
+      <div className="tag tag-local">
+        {indicator}
+        Local
+      </div>
+    );
+  }
+  return indicator;
 };
 
 type IOnOpDapp = (
@@ -134,12 +159,7 @@ export const DAppBlock = ({
         }}
       >
         <div className={clsx('dapp-block-badge')}>
-          {dapp.origin?.startsWith('rabby-ipfs://') ||
-          (dapp.type as any) === 'ipfs' ? (
-            <IpfsTag prefix={<Indicator dapp={dapp} />} />
-          ) : (
-            <Indicator dapp={dapp} />
-          )}
+          <DappBadge type={dapp.type} indicator={<Indicator dapp={dapp} />} />
         </div>
         <div
           className="anchor"

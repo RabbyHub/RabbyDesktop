@@ -277,6 +277,17 @@ type ChannelInvokePayload = {
     send: [{ id?: string; balance?: string }[]];
     response: any;
   };
+  'resolve-ipns': {
+    send: [name: string];
+    response: {
+      result: string | null;
+      error?: string | null;
+    };
+  };
+  'open-directory': {
+    send: [];
+    response: Electron.OpenDialogReturnValue;
+  };
 } & RabbyxInvokePayload;
 
 type IInvokesKey = keyof ChannelInvokePayload;

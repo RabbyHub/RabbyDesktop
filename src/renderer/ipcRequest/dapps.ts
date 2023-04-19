@@ -182,3 +182,7 @@ export async function downloadIPFS(cid: string) {
 export async function cancelDownloadIPFS() {
   return window.rabbyDesktop.ipcRenderer.invoke('cancel-download-ipfs');
 }
+
+export async function resolveIPNS(ens: string) {
+  return window.rabbyDesktop.ipcRenderer.invoke('resolve-ipns', ens);
+}

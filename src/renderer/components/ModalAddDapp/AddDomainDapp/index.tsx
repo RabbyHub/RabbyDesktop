@@ -430,6 +430,14 @@ export function AddDomainDapp({
       </Form>
       {isShowExample && (
         <DomainExample
+          title="Domain examples:"
+          domains={[
+            'uniswap.org',
+            'lido.fi',
+            'compound.finance',
+            'curve.fi',
+            'aave.com',
+          ]}
           onDomainClick={(domain) => {
             form.setFieldsValue({ url: domain });
             handleCheck();

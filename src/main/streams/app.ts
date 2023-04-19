@@ -274,6 +274,12 @@ onIpcMainInternalEvent('__internal_main:app:relaunch', () => {
   }
 });
 
+handleIpcMainInvoke('open-directory', () => {
+  return dialog.showOpenDialog({
+    properties: ['openDirectory'],
+  });
+});
+
 export default function bootstrap() {
   app.setPath('userData', getAppUserDataPath());
   if (!IS_RUNTIME_PRODUCTION) {

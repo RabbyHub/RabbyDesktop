@@ -44,7 +44,9 @@
       width: 32px;
       height: 32px;
       flex-shrink: 0;
-
+      .ant-image {
+        width: 100%;
+      }
       img {
         border-radius: 5px;
       }
@@ -70,9 +72,15 @@
         background: #5b5e68;
         margin-left: 0;
       }
-    }
-    .ipfs-tag {
-      background: #00d0d0;
+      &-ipfs {
+        background: #00d0d0;
+      }
+      &-ens {
+        background: #75a4ff;
+      }
+      &-local {
+        background: #f4bd3c;
+      }
     }
     .dapp-indicator {
       margin-left: 5px;

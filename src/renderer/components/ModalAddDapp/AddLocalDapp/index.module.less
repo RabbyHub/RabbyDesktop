@@ -1,0 +1,120 @@
+@import '@/renderer/css/mixins.less';
+
+@previewBoxRadius: 8px;
+.content {
+  padding: 30px;
+  min-height: 718px;
+}
+.title {
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 24px;
+  text-align: center;
+  color: #ffffff;
+  margin-bottom: 16px;
+}
+.form {
+  height: 92px;
+}
+
+.replaceLink {
+  text-decoration: underline;
+  cursor: pointer;
+  text-underline-offset: 3px;
+}
+
+.input.input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  height: 56px;
+  padding: 16px;
+  &:focus,
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+  box-shadow: none !important;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+
+  color: #ffffff;
+  position: relative;
+
+  :global {
+    .ant-input {
+      border-radius: 0;
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 18px;
+    }
+    .ant-input-clear-icon {
+      color: #fff;
+    }
+  }
+
+  &Suffix {
+    font-size: 16px;
+    img {
+      cursor: pointer;
+    }
+  }
+  :global {
+    .ant-form-item {
+      margin-bottom: 0;
+    }
+    .ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled):hover {
+      border-color: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper,
+    .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper:hover {
+      border-color: #ff7f7f;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .ant-form-item-explain-error {
+      color: #ff7f7f;
+    }
+
+    .ant-form-item-explain {
+      margin-top: 12px;
+      margin-bottom: 0;
+      transition: none;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 14px;
+    }
+    .ant-form-item-explain-success {
+      color: rgba(255, 255, 255, 0.6);
+    }
+  }
+}
+
+.intro {
+  min-height: 444px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  text-align: center;
+  padding-top: 150px;
+
+  &Img {
+    margin-bottom: 24px;
+  }
+
+  &Title {
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 21px;
+    color: #ffffff;
+    margin-bottom: 7px;
+  }
+
+  &Desc {
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 18px;
+
+    color: rgba(255, 255, 255, 0.6);
+  }
+}

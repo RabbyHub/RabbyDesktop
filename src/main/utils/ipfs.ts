@@ -193,6 +193,24 @@ export const initIPFSModule = async () => {
     }
   };
 
+  const resolveIPNS = async (gateway: string, name: string) => {
+    const url = `${gateway.replace(
+      /\/$/,
+      ''
+    )}/api/v0/name/resolve?arg=${name}&recursive=true&nocache=true`;
+
+    const runtimeProxyConf = await getAppRuntimeProxyConf();
+    const res = await nodeFetch(url, {
+      method: 'POST',
+      agent: getHttpsProxyAgentForRuntime(runtimeProxyConf),
+    });
+    if (!res.ok) {
+      throw new Error(`unexpected response ${res.statusText}`);
+    }
+    const json = await res.json();
+    return json.Path as string;
+  };
+
   class IpfsServiceImpl implements IpfsService {
     public gateway: string;
 
@@ -286,6 +304,10 @@ export const initIPFSModule = async () => {
         type: fsOrigin.statSync(filepath).isDirectory() ? 'directory' : 'file',
         filePath,
       };
+    }
+
+    public resolveIPNS(ipns: string) {
+      return resolveIPNS(this.gateway, ipns);
     }
   }
   return {

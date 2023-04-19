@@ -6,6 +6,8 @@ import { Modal, Props as ModalProps } from '../Modal/Modal';
 import { AddDomainDapp } from './AddDomainDapp';
 import styles from './index.module.less';
 import { AddIpfsDapp } from './AddIpfsDapp';
+import { AddEnsDapp } from './AddEnsDapp';
+import { AddLocalDapp } from './AddLocalDapp';
 
 export function AddDapp({
   url,
@@ -31,21 +33,13 @@ export function AddDapp({
         key: 'ipfs',
       },
       {
-        name: (
-          <>
-            ENS <span className={styles.tagSoon}>Soon</span>
-          </>
-        ),
+        name: 'ENS',
+        title: 'Add a Dapp via ENS',
         key: 'ens',
-        disabled: true,
       },
       {
-        name: (
-          <>
-            Local file <span className={styles.tagSoon}>Soon</span>
-          </>
-        ),
-        disabled: true,
+        name: 'Local file',
+        title: 'Add Dapp via local file path',
         key: 'file',
       },
     ],
@@ -68,9 +62,6 @@ export function AddDapp({
                   isActive && styles.tabItemActive
                 )}
                 onClick={() => {
-                  if (tab.disabled) {
-                    return;
-                  }
                   setInnerUrl('');
                   setActiveTab(tab.key);
                 }}
@@ -100,6 +91,8 @@ export function AddDapp({
         <div className={styles.tabPanel}>
           {activeTab === 'domain' && <AddDomainDapp url={innerUrl} {...rest} />}
           {activeTab === 'ipfs' && <AddIpfsDapp url={innerUrl} {...rest} />}
+          {activeTab === 'ens' && <AddEnsDapp url={innerUrl} {...rest} />}
+          {activeTab === 'file' && <AddLocalDapp url={innerUrl} {...rest} />}
         </div>
       </div>
     </div>
