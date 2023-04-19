@@ -460,14 +460,28 @@ handleIpcMainInvoke('detect-dapp', async (_, dappUrl) => {
   };
 });
 
-handleIpcMainInvoke('get-dapp', (_, dappOrigin) => {
+handleIpcMainInvoke('get-dapp', (_, dappId) => {
   // TODO: if not found, return error
-  const dapp = dappStore.get('dappsMap')[dappOrigin];
-  const isPinned = !!dappStore.get('pinnedList').find((d) => d === dappOrigin);
+  const dapp = findDappsById(dappId);
+
+  if (!dapp) {
+    return {
+      error: `dapp ${dappId} not found`,
+      data: {
+        dapp: null,
+        isPinned: false,
+      },
+    };
+  }
+
+  const isPinned = !!dappStore.get('pinnedList').find((d) => d === dappId);
 
   return {
-    dapp,
-    isPinned,
+    error: null,
+    data: {
+      dapp,
+      isPinned,
+    },
   };
 });
 

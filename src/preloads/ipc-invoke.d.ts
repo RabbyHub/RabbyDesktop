@@ -37,8 +37,11 @@ type ChannelInvokePayload = {
   'get-dapp': {
     send: [origin: IDapp['origin']];
     response: {
-      dapp: IDapp | null;
-      isPinned: boolean;
+      error?: string | null;
+      data: {
+        dapp: IDapp | null;
+        isPinned: boolean;
+      };
     };
   };
   'dapps-post': {

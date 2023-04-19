@@ -6,9 +6,13 @@ export async function getDapp(dappOrigin: string) {
   return window.rabbyDesktop.ipcRenderer
     .invoke('get-dapp', dappOrigin)
     .then((event) => {
+      if (event.error) {
+        throw new Error(event.error);
+      }
+
       return {
-        ...event.dapp,
-        isPinned: event.dapp ? event.isPinned : false,
+        ...event.data.dapp,
+        isPinned: event.data.dapp ? event.data.isPinned : false,
       };
     });
 }
