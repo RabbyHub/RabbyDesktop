@@ -42,23 +42,23 @@ type ChannelInvokePayload = {
     };
   };
   'dapps-post': {
-    send: [dapp: IDapp];
+    send: [dapp: IDappPartial];
     response: {
       error?: string;
     };
   };
   'dapps-put': {
-    send: [dapp: IDapp];
+    send: [dapp: IDappPartial];
     response: void;
   };
   'dapps-replace': {
-    send: [idsToDel: string | string[], newDapp: IDapp];
+    send: [idsToDel: string | string[], newDapp: IDappPartial];
     response: {
       error?: string | null;
     };
   };
   'dapps-delete': {
-    send: [dapp: IDapp];
+    send: [dapp: Pick<IDapp, 'id' | 'origin'>];
     response: {
       error?: string;
     };
@@ -287,6 +287,12 @@ type ChannelInvokePayload = {
   'open-directory': {
     send: [];
     response: Electron.OpenDialogReturnValue;
+  };
+  'get-webui-ext-navinfo': {
+    send: [tabId: number];
+    response: {
+      tabNavInfo: IShellNavInfo;
+    };
   };
 } & RabbyxInvokePayload;
 

@@ -1,4 +1,4 @@
-import { formatDappHttpOrigin } from '@/isomorphic/dapp';
+import { checkoutDappURL, formatDappHttpOrigin } from '@/isomorphic/dapp';
 import { canoicalizeDappUrl, isURLForIpfsDapp } from '@/isomorphic/url';
 import type { ChromeTabWithOrigin } from '../hooks-shell/useWindowTabs';
 
@@ -41,7 +41,7 @@ export function findTabByTabID(
   }
 ) {
   const idxToMap = isURLForIpfsDapp(dapp.origin)
-    ? formatDappHttpOrigin(dapp.origin)
+    ? checkoutDappURL(dapp.origin).dappHttpID
     : dapp.origin;
   const tabId = dappBoundTabIds[idxToMap];
   const tab = tabsGroupById[tabId];

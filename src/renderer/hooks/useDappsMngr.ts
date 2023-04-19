@@ -3,7 +3,6 @@
 import {
   checkoutDappURL,
   formatDappHttpOrigin,
-  makeDappURLToOpen,
   sortDappsBasedPinned,
 } from '@/isomorphic/dapp';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
@@ -11,12 +10,10 @@ import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useWindowTabs } from '../hooks-shell/useWindowTabs';
 import {
-  deleteDapp,
   detectDapps,
   fetchDapps,
   fetchProtocolDappsBinding,
   getDapp,
-  putDapp,
   putProtocolDappsBinding,
   toggleDappPinned,
 } from '../ipcRequest/dapps';
@@ -86,10 +83,10 @@ export function useDapps() {
   const dappBoundTabIds = useMemo(() => {
     const fixed = { ...dappBoundTabIdsOrig };
     Object.keys(fixed).forEach((dappId) => {
-      const checkoutedInfo = checkoutDappURL(dappId);
-      if (checkoutedInfo.type === 'ipfs') {
+      const checkedOutDappURLInfo = checkoutDappURL(dappId);
+      if (checkedOutDappURLInfo.type === 'ipfs') {
         fixed[formatDappHttpOrigin(dappId)] = fixed[dappId];
-        fixed[checkoutedInfo.dappID] = fixed[dappId];
+        fixed[checkedOutDappURLInfo.dappID] = fixed[dappId];
       }
     });
     return fixed;
@@ -124,12 +121,8 @@ export function useDapps() {
     );
   }, [setDappsBoundTabIds, setPinnedList, setUnpinnedList, setDapps]);
 
-  const renameDapp = useCallback(async (dapp: IDapp, alias: string) => {
-    putDapp({ ...dapp, alias });
-  }, []);
-
-  const removeDapp = useCallback(async (dapp: IDapp) => {
-    return deleteDapp(dapp);
+  const renameDapp = useCallback(async (dapp: IDappPartial, alias: string) => {
+    window.rabbyDesktop.ipcRenderer.invoke('dapps-put', { ...dapp, alias });
   }, []);
 
   const pinDapp = useCallback((dappOrigin: string) => {
@@ -163,7 +156,6 @@ export function useDapps() {
     dappBoundTabIds,
     detectDapps,
     renameDapp,
-    removeDapp,
     pinDapp,
     unpinDapp,
   };

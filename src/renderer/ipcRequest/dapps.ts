@@ -38,7 +38,7 @@ export async function detectDapps(dappUrl: string) {
     });
 }
 
-export async function addDapp(dapp: IDapp) {
+export async function addDapp(dapp: IDappPartial) {
   const res = window.rabbyDesktop.ipcRenderer.invoke('dapps-post', dapp);
   res.then((r) => {
     if (!r.error) {
@@ -52,13 +52,9 @@ export async function addDapp(dapp: IDapp) {
   return res;
 }
 
-export async function putDapp(dapp: IDapp) {
-  return window.rabbyDesktop.ipcRenderer.invoke('dapps-put', dapp);
-}
-
 export async function replaceDapp(
   dappIdsToDel: string | string[],
-  dapp: IDapp
+  dapp: IDappPartial
 ) {
   return window.rabbyDesktop.ipcRenderer.invoke(
     'dapps-replace',

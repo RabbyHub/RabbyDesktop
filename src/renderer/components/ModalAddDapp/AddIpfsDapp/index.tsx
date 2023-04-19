@@ -155,9 +155,9 @@ export function AddIpfsDapp({
   });
 
   const { runAsync: runAddDapp, loading: isAddLoading } = useRequest(
-    (dapp, urls?: string[]) => {
+    (dapp, ids?: string[]) => {
       return Promise.all([
-        urls ? replaceDapp(urls, dapp) : addDapp(dapp),
+        ids ? replaceDapp(ids, dapp) : addDapp(dapp),
         sleep(500),
       ]);
     },

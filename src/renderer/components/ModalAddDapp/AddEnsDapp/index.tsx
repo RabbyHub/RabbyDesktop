@@ -16,6 +16,9 @@ import { debounce } from 'lodash';
 import { useUnmount } from 'react-use';
 import { stats } from '@/isomorphic/stats';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { extractIpfsCid } from '@/isomorphic/url';
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import { formatEnsDappOrigin } from '@/isomorphic/dapp';
 import RabbyInput from '../../AntdOverwrite/Input';
 import { Props as ModalProps } from '../../Modal/Modal';
 import { toastMessage } from '../../TransparentToast';
@@ -88,7 +91,7 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
           },
         };
       }
-      return detectDapps(`rabby-ipfs://${cid}`);
+      return detectDapps(formatEnsDappOrigin(url, cid));
     },
     {
       manual: true,
@@ -172,7 +175,7 @@ export function AddEnsDapp({
   onOpenDapp?: (origin: string) => void;
   url?: string;
   isGoBack?: boolean;
-  onGoBackClick?: (dapp: IDapp) => void;
+  onGoBackClick?: (dapp: IDappPartial) => void;
 }) {
   const [form] = Form.useForm();
   const openDapp = useOpenDapp();
@@ -187,10 +190,17 @@ export function AddEnsDapp({
     },
   });
 
-  const { runAsync: runAddDapp, loading: isAddLoading } = useRequest(
-    (dapp, urls?: string[]) => {
+  type TParams = [
+    Parameters<typeof addDapp>[0],
+    Parameters<typeof replaceDapp>[0]?
+  ];
+  const { runAsync: runAddDapp, loading: isAddLoading } = useRequest<
+    [{ error?: string | null | undefined }, unknown],
+    TParams
+  >(
+    (dapp, ids?) => {
       return Promise.all([
-        urls ? replaceDapp(urls, dapp) : addDapp(dapp),
+        ids ? replaceDapp(ids, dapp) : addDapp(dapp),
         sleep(500),
       ]);
     },
@@ -215,12 +225,20 @@ export function AddEnsDapp({
     dappInfo: NonNullable<IDappsDetectResult['data']>,
     urls?: string[]
   ) => {
+    const ensAddr = form.getFieldValue('url');
+
     await runAddDapp(
       {
         origin: dappInfo.inputOrigin,
         alias: dappInfo.recommendedAlias,
         faviconBase64: dappInfo.faviconBase64,
         faviconUrl: dappInfo.faviconUrl,
+        type: 'ens',
+        extraInfo: {
+          ensAddr,
+          ipfsCid: extractIpfsCid(dappInfo.inputOrigin),
+          dappAddSource: 'ens-addr',
+        },
       },
       urls
     );
@@ -298,7 +316,11 @@ export function AddEnsDapp({
       {isShowExample && (
         <DomainExample
           title="ENS examples:"
-          domains={['uniswap.eth', 'curve.eth']}
+          domains={[
+            !IS_RUNTIME_PRODUCTION ? '1inch.eth' : '',
+            'uniswap.eth',
+            'curve.eth',
+          ].filter(Boolean)}
           onDomainClick={(domain) => {
             form.setFieldsValue({ url: domain });
             handleCheck();

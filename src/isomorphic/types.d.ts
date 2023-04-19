@@ -47,10 +47,17 @@ type IPreviewDappViewChanges =
       rect?: null | DappViewRect;
     };
 
+type IDappAddSource = 'https' | 'ipfs-cid' | 'ens-addr' | 'local-fs';
 type IDappType = INextDapp['type'];
 type INextDapp = {
   id: string;
   alias: string;
+  extraInfo?: {
+    ipfsCid?: string;
+    ensAddr?: string;
+    dappAddSource?: IDappAddSource;
+    localPath?: string;
+  };
   faviconUrl?: string;
   faviconBase64?: string;
 } & (
@@ -66,7 +73,28 @@ type INextDapp = {
       type: 'ipfs';
       origin: string | `rabby-ipfs://${string}${string}`;
     }
+  | {
+      type: 'ens';
+      origin: string | `rabby-ens://${string}${string}`;
+    }
 );
+
+type IDappPartial = Omit<INextDapp, 'id' | 'type'> & {
+  id?: INextDapp['id'];
+  type?: INextDapp['type'];
+};
+
+type ICheckedOutDappURL = {
+  type: 'unknown' | 'ipfs' | 'ens' | 'http';
+  dappID: string;
+  dappOrigin: string;
+  dappHttpID: string;
+  /** @description this is also used as `dappTabID` */
+  dappOriginToShow: string;
+  dappURLToPrview: string;
+  ipfsCid: string;
+  ensAddr: string;
+};
 
 type IHttpDapp = INextDapp & { type: 'http' };
 /**
@@ -363,6 +391,7 @@ type IShellNavInfo = {
   canGoForward?: boolean;
   canGoBack?: boolean;
   tabUrl: string;
+  dapp?: IDapp;
   dappSecurityCheckResult: ISecurityCheckResult | null;
 };
 

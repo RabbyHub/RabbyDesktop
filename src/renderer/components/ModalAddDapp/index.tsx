@@ -17,7 +17,7 @@ export function AddDapp({
   onOpenDapp?: (origin: string) => void;
   url?: string;
   isGoBack?: boolean;
-  onGoBackClick?: (dapp: IDapp) => void;
+  onGoBackClick?: (dapp: IDappPartial) => void;
 }) {
   const [innerUrl, setInnerUrl] = useState(url || '');
   const tabs = useMemo(
@@ -109,7 +109,7 @@ export default function ModalAddDapp({
     onOpenDapp?: (origin: string) => void;
     url?: string;
     isGoBack?: boolean;
-    onGoBackClick?: (dapp: IDapp) => void;
+    onGoBackClick?: (dapp: IDappPartial) => void;
   }
 >) {
   return (

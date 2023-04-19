@@ -8,14 +8,13 @@ import { navigateToDappRoute } from '@/renderer/utils/react-router';
 import { useNavigate } from 'react-router-dom';
 import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { formatDappURLToShow } from '@/isomorphic/dapp';
+import { deleteDapp } from '@/renderer/ipcRequest/dapps';
 import styles from './index.module.less';
 import { DappFavicon } from '../DappFavicon';
 import { Modal } from '../Modal/Modal';
 import { toastMessage } from '../TransparentToast';
 
 function useDelete(dapp: IDapp | null) {
-  const { removeDapp } = useDapps();
-
   const [isLoading, setIsLoading] = useState(false);
 
   const doDelete = useCallback(async () => {
@@ -24,12 +23,12 @@ function useDelete(dapp: IDapp | null) {
     }
     setIsLoading(true);
     await permissionService.removeConnectedSite(dapp.origin);
-    await removeDapp(dapp).finally(() => setIsLoading(false));
+    await deleteDapp(dapp).finally(() => setIsLoading(false));
     toastMessage({
       type: 'success',
       content: 'Deleted successfully',
     });
-  }, [removeDapp, dapp]);
+  }, [dapp]);
 
   return {
     doDelete,
@@ -85,7 +84,7 @@ export default function ModalDeleteDapp({
               <div className="infos">
                 <h4 className="dapp-alias">{dapp.alias}</h4>
                 <div className="dapp-url">
-                  {formatDappURLToShow(dapp.origin?.replace(/^\w+:\/\//, ''))}
+                  {formatDappURLToShow(dapp.origin)}
                 </div>
               </div>
             </a>

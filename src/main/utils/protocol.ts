@@ -1,8 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 
+import logger from 'electron-log';
+
 import {
   IS_RUNTIME_PRODUCTION,
+  PROTOCOL_ENS,
   PROTOCOL_IPFS,
   RABBY_INTERNAL_PROTOCOL,
 } from '@/isomorphic/constants';
@@ -10,54 +13,19 @@ import { ensurePrefix } from '@/isomorphic/string';
 import {
   canoicalizeDappUrl,
   extractIpfsCid,
+  extractIpfsInfo,
   isIpfsHttpURL,
+  splitPathname,
 } from '@/isomorphic/url';
 import { arraify } from '@/isomorphic/array';
+import { checkoutDappURL } from '@/isomorphic/dapp';
 import { getBindLog } from './log';
 import { getIpfsService } from './stream-helpers';
 import { rewriteIpfsHtmlFile } from './file';
 import { getAssetPath, getRendererPath } from './app';
+import { findDappsById } from '../store/dapps';
 
 const protocolLog = getBindLog('session', 'bgGrey');
-
-export function checkoutCustomSchemeHandlerInfo(
-  tProtocol: string,
-  requestURL: string
-) {
-  if (tProtocol === 'http:') {
-    // it's http://local.ipfs.<cid>
-    const parsedInfo = canoicalizeDappUrl(requestURL);
-    const pathnameWithQuery = parsedInfo.urlInfo?.pathname || '';
-
-    const pathname = pathnameWithQuery.split('?')?.[0] || '';
-    const pathnameWithoutHash = pathname.split('#')?.[0] || '';
-
-    const ipfsCid = extractIpfsCid(requestURL);
-    const fileRelPath = ensurePrefix(pathnameWithoutHash, `ipfs/${ipfsCid}/`);
-
-    return {
-      ipfsCid,
-      fileRelPath,
-    };
-  } // it's file://ipfs.<cid>/..., we don't support it yet.
-  const pathnameWithQuery = requestURL.slice(`${tProtocol}//`.length);
-
-  const pathname = pathnameWithQuery.split('?')?.[0] || '';
-  const pathnameWithoutHash = pathname.split('#')?.[0] || '';
-
-  const [urlOrigin, ...restParts] = pathnameWithoutHash.split('/');
-
-  const ipfsCid = urlOrigin.split('.').slice(-1)[0];
-
-  const fileRelPath = ensurePrefix(restParts.join('/'), `${ipfsCid}/`);
-
-  return {
-    ipfsCid,
-    fileRelPath,
-  };
-
-  return null;
-}
 
 type IRegisterProtocolSessionDesc = { session: Electron.Session; name: string };
 type IRegisterProtocolHandler<
@@ -145,12 +113,13 @@ export const appInterpretors = {
           });
           return;
         }
+        const checkedOutDappURLInfo = checkoutDappURL(request.url);
 
-        const checkouted = checkoutCustomSchemeHandlerInfo(
-          TARGET_PROTOCOL,
-          request.url
-        );
-        if (!checkouted) {
+        const { pathnameWithQuery } = extractIpfsInfo(request.url);
+        const dapp = findDappsById(checkedOutDappURLInfo.dappID);
+
+        if (!dapp) {
+          logger.error(`dapp not found for: ${request.url}`);
           callback({
             data: 'Not found',
             mimeType: 'text/plain',
@@ -159,11 +128,12 @@ export const appInterpretors = {
           return;
         }
 
-        const { fileRelPath } = checkouted;
+        const { ipfsCid } = checkoutDappURL(dapp.origin);
+        const { fsRelativePath } = splitPathname(pathnameWithQuery, ipfsCid);
 
         const ipfsService = await getIpfsService();
 
-        let filePath = ipfsService.resolveFile(fileRelPath);
+        let filePath = ipfsService.resolveFile(fsRelativePath);
 
         if (!fs.existsSync(filePath)) {
           callback({
@@ -198,15 +168,12 @@ export const appInterpretors = {
     const registerSuccess = ctx.session.protocol.registerFileProtocol(
       PROTOCOL_IPFS.slice(0, -1),
       async (request, callback) => {
-        const pathnameWithQuery = request.url.slice(
-          `${PROTOCOL_IPFS}//`.length
-        );
+        const reqURLInfo = extractIpfsInfo(request.url);
 
-        const pathname = pathnameWithQuery.split('?')?.[0] || '';
-        const pathnameWithoutHash = pathname.split('#')?.[0] || '';
+        const { fsRelativePath } = reqURLInfo;
 
         const ipfsService = await getIpfsService();
-        let filePath = ipfsService.resolveFile(pathnameWithoutHash);
+        let filePath = ipfsService.resolveFile(fsRelativePath);
 
         if (!fs.existsSync(filePath)) {
           callback({ data: 'Not found', mimeType: 'text/plain' });

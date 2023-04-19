@@ -12,6 +12,10 @@ export function unPrefix(str = '', prefix = '/') {
   return str.startsWith(prefix) ? str.slice(prefix.length) : str;
 }
 
+export function unSuffix(str = '', suffix = '/') {
+  return str.endsWith(suffix) ? str.slice(0, -suffix.length) : str;
+}
+
 export function randString(length = 10) {
   const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
   let result = '';

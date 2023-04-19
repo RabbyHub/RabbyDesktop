@@ -49,7 +49,7 @@ const DappBadge = ({
       </div>
     );
   }
-  return indicator;
+  return <>{indicator}</>;
 };
 
 type IOnOpDapp = (
@@ -180,9 +180,7 @@ export const DAppBlock = ({
           />
           <div className="infos pr-[16px]">
             <h4 className="dapp-alias">{dapp.alias}</h4>
-            <div className="dapp-url">
-              {formatDappURLToShow(dapp.origin?.replace(/^[\w|-]+:\/\//, ''))}
-            </div>
+            <div className="dapp-url">{formatDappURLToShow(dapp.origin)}</div>
           </div>
         </div>
 

@@ -1,5 +1,7 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 
+import logger from 'electron-log';
+
 import {
   fillUnpinnedList,
   formatDapp,
@@ -7,6 +9,7 @@ import {
   isValidDappType,
   checkoutDappURL,
   normalizeProtocolBindingValues,
+  formatDappToStore,
 } from '@/isomorphic/dapp';
 import { arraify } from '@/isomorphic/array';
 import { nativeImage } from 'electron';
@@ -28,7 +31,7 @@ import {
   maybeTrezorLikeBuiltInHttpPage,
   parseDomainMeta,
 } from '../../isomorphic/url';
-import { detectDapp, detectIPFSDapp } from '../utils/dapps';
+import { detectEnsDapp, detectHttpDapp, detectIPFSDapp } from '../utils/dapps';
 import { storeLog } from '../utils/log';
 import { makeStore } from '../utils/store';
 import { getOptionProxyForAxios } from './desktopApp';
@@ -43,6 +46,32 @@ const IDappSchema: import('json-schema-typed').JSONSchema = {
     origin: { type: 'string' },
     faviconUrl: { type: 'string' },
     faviconBase64: { type: 'string' },
+    type: {
+      type: 'string',
+      enum: ['http', 'ipfs', 'ens', 'local'],
+      default: 'http',
+    },
+    extraInfo: {
+      type: 'object',
+      properties: {
+        dappAddSource: {
+          type: 'string',
+          enum: [
+            'https' as IDappAddSource,
+            'ipfs-cid' as IDappAddSource,
+            'ens-addr' as IDappAddSource,
+            'local-fs' as IDappAddSource,
+          ],
+          default: 'https',
+        },
+        // for ipfs
+        ipfsCid: { type: 'string', default: '' },
+        // for ens
+        ensAddr: { type: 'string', default: '' },
+        // for local
+        localPath: { type: 'string', default: '' },
+      },
+    },
   },
 };
 
@@ -80,14 +109,14 @@ export const dappStore = makeStore<{
     protocolDappsBinding: {
       type: 'object',
       patternProperties: {
-        '^(https?|ipfs|rabby-ipfs)://.+$': IProtocolBindingSchema,
+        '^(https?|rabby-ipfs|rabby-ens)://.+$': IProtocolBindingSchema,
       },
       default: {} as IProtocolDappBindings,
     },
     dappsMap: {
       type: 'object',
       patternProperties: {
-        '^(https?|ipfs|rabby-ipfs)://.+$': IDappSchema,
+        '^(https?|rabby-ipfs|rabby-ens)://.+$': IDappSchema,
       },
       additionalProperties: false,
       default: {} as Record<IDapp['origin'], IDapp>,
@@ -95,7 +124,7 @@ export const dappStore = makeStore<{
     dappsLastOpenInfos: {
       type: 'object',
       patternProperties: {
-        '^(https?|ipfs|rabby-ipfs)://.+$': {
+        '^(https?|rabby-ipfs|rabby-ens)://.+$': {
           type: 'object',
           properties: {
             finalURL: { type: 'string' },
@@ -221,6 +250,26 @@ export function findDappsByOrigin(
   result.dapp = result.dappByOrigin || result.dappBySecondaryDomainOrigin;
 
   return result;
+}
+export function findDappsById(
+  dappId: IDapp['id'],
+  dapps: IDapp[] = getAllDapps()
+) {
+  dappId = checkoutDappURL(dappId).dappID;
+
+  return dapps.find((dapp) => {
+    if (dapp.id === dappId) {
+      return dapp;
+    }
+    if (
+      dapp.type === 'ipfs' &&
+      dapp.id.toLocaleLowerCase() === dappId.toLocaleLowerCase()
+    ) {
+      return dapp;
+    }
+
+    return false;
+  });
 }
 
 export function getProtocolDappsBindings() {
@@ -378,22 +427,30 @@ export async function repairDappsFieldsOnBootstrap() {
 }
 
 // const allDapps = getAllDapps();
-// detectDapp('https://debank.com', allDapps);
+// detectHttpDapp('https://debank.com', allDapps);
 
 handleIpcMainInvoke('detect-dapp', async (_, dappUrl) => {
   const allDapps = getAllDapps();
 
-  const urlResult = checkoutDappURL(dappUrl);
+  const checkedOutDappURLInfo = checkoutDappURL(dappUrl);
 
-  if (urlResult.type === 'ipfs') {
+  if (checkedOutDappURLInfo.type === 'ipfs') {
+    if (checkedOutDappURLInfo.ensAddr) {
+      return {
+        result: await detectEnsDapp(checkedOutDappURLInfo, {
+          existedDapps: allDapps,
+        }),
+      };
+    }
+
     return {
-      result: await detectIPFSDapp(urlResult.dappID, {
+      result: await detectIPFSDapp(checkedOutDappURLInfo.dappID, {
         existedDapps: allDapps,
       }),
     };
   }
 
-  const result = await detectDapp(dappUrl, {
+  const result = await detectHttpDapp(dappUrl, {
     existedDapps: allDapps,
     proxyOnGrab: getOptionProxyForAxios(),
   });
@@ -431,21 +488,23 @@ handleIpcMainInvoke('dapps-fetch', () => {
 });
 
 function checkAddDapp(
-  newDapp: IDapp,
+  inputDapp: IDappPartial,
   rets: {
     dappsMap: Record<string, IDapp>;
     unpinnedList: string[];
   }
 ) {
-  fixTypedDappId(newDapp);
+  const newDapp = formatDappToStore(inputDapp);
 
   const {
     dappsMap = dappStore.get('dappsMap'),
     unpinnedList = dappStore.get('unpinnedList'),
   } = rets || {};
-  dappsMap[newDapp.origin] = newDapp;
+  dappsMap[newDapp.id] = newDapp;
 
-  unpinnedList.push(newDapp.origin);
+  if (!unpinnedList.includes(newDapp.id)) {
+    unpinnedList.push(newDapp.id);
+  }
 
   return {
     dappsMap,
@@ -453,7 +512,7 @@ function checkAddDapp(
   };
 }
 
-handleIpcMainInvoke('dapps-post', (_, dapp: IDapp) => {
+handleIpcMainInvoke('dapps-post', (_, dapp) => {
   const dappsMap = dappStore.get('dappsMap');
 
   if (dappsMap[dapp.origin]) {
@@ -478,7 +537,7 @@ handleIpcMainInvoke('dapps-post', (_, dapp: IDapp) => {
   return {};
 });
 
-handleIpcMainInvoke('dapps-put', (_, dapp: IDapp) => {
+handleIpcMainInvoke('dapps-put', (_, dapp) => {
   // TODO: is there mutex?
   const dappsMap = dappStore.get('dappsMap');
 
@@ -494,16 +553,16 @@ handleIpcMainInvoke('dapps-put', (_, dapp: IDapp) => {
 });
 
 function checkDelDapp(
-  originToDel: IDapp['origin'] | IDapp['origin'][],
+  idToDel: IDapp['id'] | IDapp['id'][],
   rets: {
     dappsMap: Record<string, IDapp>;
     dappsLastOpenInfos?: Record<string, IDappLastOpenInfo>;
     protocolDappsBinding?: IProtocolDappBindings;
-    pinnedList?: IDapp['origin'][];
-    unpinnedList?: IDapp['origin'][];
+    pinnedList?: IDapp['id'][];
+    unpinnedList?: IDapp['id'][];
   }
 ) {
-  const dappIdsToDel = arraify(originToDel);
+  const dappIdsToDel = arraify(idToDel);
   const idsSet = new Set(dappIdsToDel);
 
   const {
@@ -535,10 +594,10 @@ function checkDelDapp(
   };
 }
 
-handleIpcMainInvoke('dapps-replace', (_, oldOrigin, newDapp) => {
+handleIpcMainInvoke('dapps-replace', (_, oldId, newDapp) => {
   const dappsMap = dappStore.get('dappsMap');
 
-  const delResult = checkDelDapp(oldOrigin, { dappsMap });
+  const delResult = checkDelDapp(oldId, { dappsMap });
   emitIpcMainEvent(
     '__internal_main:app:close-tab-on-del-dapp',
     delResult.dappIdsToDel
@@ -566,9 +625,11 @@ handleIpcMainInvoke('dapps-replace', (_, oldOrigin, newDapp) => {
   return {};
 });
 
-handleIpcMainInvoke('dapps-delete', async (_, dappToDel: IDapp) => {
+handleIpcMainInvoke('dapps-delete', async (_, dappToDel) => {
   const dappsMap = dappStore.get('dappsMap');
-  const dapp = dappsMap[dappToDel.origin];
+
+  const dappID = checkoutDappURL(dappToDel.origin).dappID;
+  const dapp = dappsMap[dappID];
 
   if (!dapp) {
     return {
@@ -577,13 +638,19 @@ handleIpcMainInvoke('dapps-delete', async (_, dappToDel: IDapp) => {
     };
   }
 
-  const dappTypeInfo = checkoutDappURL(dapp.origin);
-  if (dappTypeInfo?.type === 'ipfs') {
-    const ipfsService = await getIpfsService();
-    await ipfsService.removeFile(dappTypeInfo.ipfsCid);
+  try {
+    const dappTypeInfo = checkoutDappURL(dapp.origin);
+    if (dappTypeInfo?.type === 'ipfs') {
+      const ipfsService = await getIpfsService();
+      if (await ipfsService.isExist(dappTypeInfo.ipfsCid)) {
+        await ipfsService.removeFile(dappTypeInfo.ipfsCid);
+      }
+    }
+  } catch (err) {
+    logger.error(err);
   }
 
-  const delResult = checkDelDapp(dappToDel.origin, { dappsMap });
+  const delResult = checkDelDapp(dappID, { dappsMap });
   emitIpcMainEvent(
     '__internal_main:app:close-tab-on-del-dapp',
     delResult.dappIdsToDel

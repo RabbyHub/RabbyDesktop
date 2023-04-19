@@ -1,11 +1,7 @@
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { BrowserWindow, session } from 'electron';
 import { formatDappHttpOrigin } from '@/isomorphic/dapp';
-import {
-  integrateQueryToUrl,
-  isIpfsDappID,
-  isIpfsHttpURL,
-} from '../../isomorphic/url';
+import { integrateQueryToUrl, isIpfsDappID } from '../../isomorphic/url';
 import { emitIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { MainWindowTab, Tab, Tabs } from './tabs';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';

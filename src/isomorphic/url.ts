@@ -1,10 +1,14 @@
 import { AxiosProxyConfig } from 'axios';
 import {
+  ENS_LOCALHOST_DOMAIN,
   IPFS_LOCALHOST_DOMAIN,
   LOCALIPFS_BRAND,
+  PROTOCOL_ENS,
+  PROTOCOL_IPFS,
   RABBY_INTERNAL_PROTOCOL,
   RABBY_LOCAL_URLBASE,
 } from './constants';
+import { ensurePrefix, unPrefix } from './string';
 
 export function safeParseURL(url: string): URL | null {
   try {
@@ -67,6 +71,23 @@ export function integrateQueryToUrl(
   ].join('');
 }
 
+export const query2obj = (str: string) => {
+  const res: Record<string, string> = {};
+  str.replace(/([^=?#&]*)=([^?#&]*)/g, (_, $1: string, $2: string) => {
+    res[decodeURIComponent($1)] = decodeURIComponent($2);
+    return '';
+  });
+  return res;
+};
+
+export const obj2query = (obj: Record<string, string>) => {
+  return Object.keys(obj)
+    .map((key) => {
+      return `${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`;
+    })
+    .join('&');
+};
+
 export function isRabbyShellURL(url: string) {
   return url.startsWith('chrome-extension://') && url.includes('/webui.html');
 }
@@ -124,12 +145,14 @@ export function checkHardwareConnectPage(url: string) {
 
 export function isUrlFromDapp(url: string) {
   return (
-    !url.startsWith(RABBY_INTERNAL_PROTOCOL) &&
-    !url.startsWith('chrome-extension:') &&
-    (url.startsWith('https:') ||
-      // ipfs support
-      (url.startsWith('http:') && url.includes(`.${IPFS_LOCALHOST_DOMAIN}`)) ||
-      (url.startsWith('http:') && url.includes(`${LOCALIPFS_BRAND}.`)))
+    (!url.startsWith(RABBY_INTERNAL_PROTOCOL) &&
+      !url.startsWith('chrome-extension:') &&
+      (url.startsWith('https:') ||
+        // ipfs support
+        (url.startsWith('http:') &&
+          url.includes(`.${IPFS_LOCALHOST_DOMAIN}`)) ||
+        (url.startsWith('http:') && url.includes(`${LOCALIPFS_BRAND}.`)))) ||
+    (url.startsWith('http:') && url.includes(`${ENS_LOCALHOST_DOMAIN}`))
   );
 }
 
@@ -240,56 +263,183 @@ export function isInternalProtocol(url: string) {
   ].some((protocol) => url.startsWith(protocol));
 }
 
+export function splitPathname(pathnameWithQuery: string, ipfsCid = '') {
+  pathnameWithQuery = unPrefix(pathnameWithQuery, '/');
+
+  const [pathname, pathnameSearch] = pathnameWithQuery.split('?') || [];
+  const pathnameWithoutHash = pathname.split('#')?.[0] || '';
+
+  const fsRelativePath = ipfsCid
+    ? ensurePrefix(pathnameWithQuery, `./ipfs/${ipfsCid}/`)
+    : '';
+
+  return {
+    pathnameWithQuery,
+    pathname,
+    pathnameSearch,
+    pathnameWithoutHash,
+    fsRelativePath,
+  };
+}
+
 export const IPFS_REGEXPS = {
-  IPFS_REGEX: /^(?:ipfs|rabby-ipfs):\/\/([a-zA-Z0-9]+)(\/.*)?$/i,
+  ID_IPFS_REGEX: /^(?:ipfs|rabby-ipfs):\/\/([a-zA-Z0-9]+)(\/.*)?$/i,
+  ID_ENS_REGEX: /^rabby-ens:\/\/(.+).localens(\/[a-zA-Z0-9]+)?(\/.*)?$/i,
+
+  // IPFS_ENS_REGEX: /^(?:ipfs|rabby-ipfs):\/\/([^\\]+\.eth)\.localens\.([a-zA-Z0-9]+)(\/.*)?$/i,
+  IPFS_ENS_REGEX:
+    /^(?:ipfs|rabby-ipfs):\/\/([^\\]+\.eth)\.localens(\.[a-zA-Z0-9]+)?(\/.*)?$/i,
+
   LOCALIPFS_BRAND_REGEX: /^http:\/\/local.ipfs\.([a-zA-Z0-9]+)(\/.*)?$/i,
   LOCALIPFS_MAINDOMAIN_REGEX: /^http:\/\/([a-zA-Z0-9]+)\.local\.ipfs(\/.*)?$/i,
+
+  LOCALENS_REGEX:
+    /^http:\/\/([^\\]+[.-]eth)\.localens(\.[a-zA-Z0-9]+)?(\/.*)?$/i,
 };
 
-export function extractIpfsCid(ipfsDappPath: string) {
-  if (ipfsDappPath.startsWith('/ipfs/')) {
-    return ipfsDappPath.split('/')[2] || '';
-  }
-
-  if (
-    ipfsDappPath.startsWith('rabby-ipfs:') ||
-    ipfsDappPath.startsWith('ipfs:')
-  ) {
-    const [, ipfsCid = ''] = ipfsDappPath.match(IPFS_REGEXPS.IPFS_REGEX) || [];
-
-    return ipfsCid;
-  }
-
-  if (IPFS_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX.test(ipfsDappPath)) {
-    const [, ipfsCid = ''] =
-      ipfsDappPath.match(IPFS_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX) || [];
-
-    return ipfsCid;
-  }
-
-  if (IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX.test(ipfsDappPath)) {
-    const [, ipfsCid = ''] =
-      ipfsDappPath.match(IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX) || [];
-
-    return ipfsCid;
-  }
-
-  return '';
+export function isIpfsDappID(dappURL: string) {
+  return (
+    IPFS_REGEXPS.ID_IPFS_REGEX.test(dappURL) ||
+    IPFS_REGEXPS.ID_ENS_REGEX.test(dappURL)
+  );
 }
 
 export function isIpfsHttpURL(dappURL: string) {
   return (
     IPFS_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX.test(dappURL) ||
-    IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX.test(dappURL)
+    IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX.test(dappURL) ||
+    IPFS_REGEXPS.LOCALENS_REGEX.test(dappURL)
   );
 }
 
-export function isIpfsDappID(dappURL: string) {
-  return IPFS_REGEXPS.IPFS_REGEX.test(dappURL);
+export function isURLForIpfsDapp(dappURL: string) {
+  return (
+    isIpfsHttpURL(dappURL) ||
+    isIpfsDappID(dappURL) ||
+    IPFS_REGEXPS.IPFS_ENS_REGEX.test(dappURL) ||
+    IPFS_REGEXPS.LOCALENS_REGEX.test(dappURL)
+  );
 }
 
-export function isURLForIpfsDapp(dappURL: string) {
-  return isIpfsHttpURL(dappURL) || isIpfsDappID(dappURL);
+export function normalizeENSDomainPatterns(input: string) {
+  let ensDomain = '';
+  let ensAsSubdomain = '';
+  if (input.includes('-')) {
+    ensAsSubdomain = input;
+    // TODO: find last dash and replace it with dot
+    ensDomain = input.replace('-', '.');
+  } else if (input.includes('.')) {
+    ensDomain = input;
+    ensAsSubdomain = input.replace('.', '-');
+  }
+
+  return { ensDomain, ensAsSubdomain };
+}
+
+export function extractIpfsInfo(maybeIpfsDappPath: string) {
+  let result = {
+    addSource: 'ipfs' as IDappAddSource & ('ipfs-cid' | 'ens-addr'),
+    ensAddr: '',
+    ipfsCid: '',
+    ...splitPathname(''),
+  };
+
+  if (maybeIpfsDappPath.startsWith('/ipfs/')) {
+    result.ipfsCid = maybeIpfsDappPath.split('/')[2] || '';
+    return result;
+  }
+
+  if (
+    maybeIpfsDappPath.includes('.localens') &&
+    IPFS_REGEXPS.LOCALENS_REGEX.test(maybeIpfsDappPath)
+  ) {
+    const [, ensAddr, ipfsCidWithDot, pathnameWithQuery] =
+      maybeIpfsDappPath.match(IPFS_REGEXPS.LOCALENS_REGEX) || [];
+
+    result.ipfsCid = unPrefix(ipfsCidWithDot, '.');
+    result.pathnameWithQuery = pathnameWithQuery;
+
+    if (ensAddr) {
+      result.ensAddr = normalizeENSDomainPatterns(ensAddr).ensDomain;
+      result.addSource = 'ens-addr';
+    }
+  } else if (
+    maybeIpfsDappPath.includes('.localens') &&
+    IPFS_REGEXPS.IPFS_ENS_REGEX.test(maybeIpfsDappPath)
+  ) {
+    const [, ensAddr, ipfsCidWithDot, pathnameWithQuery] =
+      maybeIpfsDappPath.match(IPFS_REGEXPS.IPFS_ENS_REGEX) || [];
+
+    result.ipfsCid = unPrefix(ipfsCidWithDot, '.');
+    result.pathnameWithQuery = pathnameWithQuery;
+
+    if (ensAddr) {
+      result.ensAddr = normalizeENSDomainPatterns(ensAddr).ensDomain;
+      result.addSource = 'ens-addr';
+    }
+  } else if (IPFS_REGEXPS.ID_IPFS_REGEX.test(maybeIpfsDappPath)) {
+    const [, ipfsCid = '', pathnameWithQuery] =
+      maybeIpfsDappPath.match(IPFS_REGEXPS.ID_IPFS_REGEX) || [];
+
+    result.ipfsCid = ipfsCid;
+    result.pathnameWithQuery = pathnameWithQuery;
+  } else if (IPFS_REGEXPS.ID_ENS_REGEX.test(maybeIpfsDappPath)) {
+    // rabby-ens://<ENSDOMAIN>.localens
+    const [, ensAddr, ipfsCidWithSlash = '', pathnameWithQuery] =
+      maybeIpfsDappPath.match(IPFS_REGEXPS.ID_ENS_REGEX) || [];
+
+    result.addSource = 'ens-addr';
+    result.ensAddr = normalizeENSDomainPatterns(ensAddr).ensDomain;
+    result.ipfsCid = ipfsCidWithSlash ? unPrefix(ipfsCidWithSlash, '/') : '';
+    result.pathnameWithQuery = pathnameWithQuery;
+  } else if (IPFS_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX.test(maybeIpfsDappPath)) {
+    const [, ipfsCid = '', pathnameWithQuery] =
+      maybeIpfsDappPath.match(IPFS_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX) || [];
+
+    result.ipfsCid = ipfsCid;
+    result.pathnameWithQuery = pathnameWithQuery;
+    return result;
+  } else if (IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX.test(maybeIpfsDappPath)) {
+    const [, ipfsCid = '', pathnameWithQuery] =
+      maybeIpfsDappPath.match(IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX) || [];
+
+    result.ipfsCid = ipfsCid;
+    result.pathnameWithQuery = pathnameWithQuery;
+    return result;
+  } else if (IPFS_REGEXPS.LOCALENS_REGEX.test(maybeIpfsDappPath)) {
+    const [, ipfsCid, ensAddr, pathnameWithQuery] =
+      maybeIpfsDappPath.match(IPFS_REGEXPS.LOCALENS_REGEX) || [];
+
+    result.ensAddr = normalizeENSDomainPatterns(ensAddr).ensDomain;
+    result.ipfsCid = ipfsCid;
+    result.pathnameWithQuery = pathnameWithQuery;
+    return result;
+  }
+
+  result = {
+    ...result,
+    ...splitPathname(result.pathnameWithQuery, result.ipfsCid),
+  };
+
+  return result;
+}
+
+export function formatEnsDappIdURL(ensAddr: string, ipfsCid?: string) {
+  // return `rabby-ens://${ensAddr}.localens${ipfsCid ? ensurePrefix(ipfsCid, '/') : ''}`;
+  return `rabby-ens://${ensAddr}.localens`;
+}
+
+/**
+ * @description extract ipfs cid from ipfs dapp path
+ * @sample
+ *
+ * /ipfs/QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV --> QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV
+ * rabby-ipfs://QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV --> QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV
+ * ipfs://QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV --> QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV
+ * rabby-ens://1inch.eth.localens.QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV --> QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV
+ */
+export function extractIpfsCid(ipfsDappPath: string) {
+  return extractIpfsInfo(ipfsDappPath).ipfsCid;
 }
 
 export function canoicalizeDappUrl(url: string): ICanonalizedUrlInfo {
@@ -298,22 +448,31 @@ export function canoicalizeDappUrl(url: string): ICanonalizedUrlInfo {
   const hostname = urlInfo?.hostname || '';
   const isDapp =
     (!!urlInfo?.protocol &&
-      ['https:', 'ipfs:', 'rabby-ipfs:'].includes(urlInfo?.protocol)) ||
+      ['https:', 'ipfs:', PROTOCOL_IPFS, PROTOCOL_ENS].includes(
+        urlInfo?.protocol
+      )) ||
     isIpfsHttpURL(url);
 
-  const origin = ['ipfs:', 'rabby-ipfs:'].includes(urlInfo?.protocol || '')
-    ? `rabby-ipfs://${extractIpfsCid(url)}`
-    : urlInfo?.origin ||
+  let dappOrigin = '';
+  if (['ipfs:', 'rabby-ipfs:'].includes(urlInfo?.protocol || '')) {
+    dappOrigin = `rabby-ipfs://${extractIpfsCid(url)}`;
+  } else if (['rabby-ens:'].includes(urlInfo?.protocol || '')) {
+    const { ensAddr, ipfsCid } = extractIpfsInfo(url);
+    dappOrigin = formatEnsDappIdURL(ensAddr, ipfsCid);
+  } else {
+    dappOrigin =
+      urlInfo?.origin ||
       `${urlInfo?.protocol}//${hostname}${
         urlInfo?.port ? `:${urlInfo?.port}` : ''
       }`;
+  }
 
   const domainInfo = getDomainFromHostname(hostname);
 
   return {
     urlInfo,
     isDapp,
-    origin,
+    origin: dappOrigin,
     hostname,
     fullDomain: urlInfo?.host || '',
     ...domainInfo,
