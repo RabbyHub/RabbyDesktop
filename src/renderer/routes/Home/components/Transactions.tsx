@@ -17,6 +17,7 @@ import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 // eslint-disable-next-line import/no-cycle
 import { TransactionModal } from '@/renderer/components/TransactionsModal';
+import { useSubscribeRpm } from '@/renderer/hooks-shell/useShellWallet';
 import TransactionItem, { LoadingTransactionItem } from './TransactionItem';
 
 const TransactionWrapper = styled.div`
@@ -409,31 +410,30 @@ const Transactions = ({ updateNonce }: { updateNonce: number }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentAccount, updateNonce]);
 
+  const subscribeRpm = useSubscribeRpm();
+
   useEffect(() => {
     if (!currentAccount) return;
-    return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
-      (payload) => {
-        if (payload.event === 'clearPendingTransactions') {
+    return subscribeRpm((payload) => {
+      if (payload.event === 'clearPendingTransactions') {
+        initLocalTxs(currentAccount.address);
+        return;
+      }
+      if (payload.event !== 'transactionChanged') return;
+      switch (payload.data?.type) {
+        default:
+          break;
+        case 'submitted': {
           initLocalTxs(currentAccount.address);
-          return;
+          break;
         }
-        if (payload.event !== 'transactionChanged') return;
-        switch (payload.data?.type) {
-          default:
-            break;
-          case 'submitted': {
-            initLocalTxs(currentAccount.address);
-            break;
-          }
-          case 'finished': {
-            initLocalTxs(currentAccount.address);
-            break;
-          }
+        case 'finished': {
+          initLocalTxs(currentAccount.address);
+          break;
         }
       }
-    );
-  }, [currentAccount]);
+    });
+  }, [subscribeRpm, currentAccount]);
 
   const [isShowAll, setIsShowAll] = useState(false);
 

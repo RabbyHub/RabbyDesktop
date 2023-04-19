@@ -12,6 +12,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Tx } from '@debank/rabby-api/dist/types';
 import { atom, useAtomValue, useSetAtom } from 'jotai';
 import { useLocation } from 'react-router-dom';
+import { useSubscribeRpm } from '@/renderer/hooks-shell/useShellWallet';
 import { getRouter, getSpender, postSwap, postSwapParams } from './utils';
 import { activeProviderOriginAtom, activeSwapTxsAtom } from './atom';
 
@@ -158,39 +159,37 @@ export const refreshIdAtom = atom(0, (get, set) => {
 export const useOnSwapPushTx = (
   pushTxCb: (payload: Tx & { hash: string }) => void
 ) => {
+  const subscribeRpm = useSubscribeRpm();
+
   useEffect(
     () =>
-      window.rabbyDesktop.ipcRenderer.on(
-        '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
-        (payload) => {
-          if (payload.event !== 'transactionChanged') return;
+      subscribeRpm((payload) => {
+        if (payload.event !== 'transactionChanged') return;
 
-          const { type, ...data } = payload.data || {};
-          if (payload.data?.type === 'push-tx') {
-            pushTxCb(data);
-          }
+        const { type, ...data } = payload.data || {};
+        if (payload.data?.type === 'push-tx') {
+          pushTxCb(data);
         }
-      ),
-    [pushTxCb]
+      }),
+    [subscribeRpm, pushTxCb]
   );
 };
 
 export const useOnTxFinished = (
   cb: (payload: { success: boolean; hash: string }) => void
 ) => {
+  const subscribeRpm = useSubscribeRpm();
+
   useEffect(
     () =>
-      window.rabbyDesktop.ipcRenderer.on(
-        '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
-        (payload) => {
-          if (payload.event !== 'transactionChanged') return;
+      subscribeRpm((payload) => {
+        if (payload.event !== 'transactionChanged') return;
 
-          if (payload.data?.type === 'finished') {
-            cb(payload.data);
-          }
+        if (payload.data?.type === 'finished') {
+          cb(payload.data);
         }
-      ),
-    [cb]
+      }),
+    [subscribeRpm, cb]
   );
 };
 

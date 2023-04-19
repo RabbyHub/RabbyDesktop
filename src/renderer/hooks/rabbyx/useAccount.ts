@@ -4,6 +4,7 @@ import * as Sentry from '@sentry/react';
 
 import { Account, RabbyAccount } from '@/isomorphic/types/rabbyx';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { useSubscribeRpm } from '@/renderer/hooks-shell/useShellWallet';
 import { useMessageForwarded } from '../useViewsMessage';
 
 type AccountWithName = Account & { alianName: string };
@@ -43,24 +44,23 @@ export function useCurrentAccount() {
     [fetchCurrentAccount]
   );
 
+  const subscribeRpm = useSubscribeRpm();
+
   useEffect(() => {
     fetchCurrentAccount();
 
-    return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
-      (payload) => {
-        switch (payload.event) {
-          default:
-            break;
-          case 'unlock':
-          case 'accountsChanged':
-          case 'rabby:chainChanged': {
-            fetchCurrentAccount();
-          }
+    return subscribeRpm((payload) => {
+      switch (payload.event) {
+        default:
+          break;
+        case 'unlock':
+        case 'accountsChanged':
+        case 'rabby:chainChanged': {
+          fetchCurrentAccount();
         }
       }
-    );
-  }, [fetchCurrentAccount]);
+    });
+  }, [subscribeRpm, fetchCurrentAccount]);
 
   useMessageForwarded(
     {

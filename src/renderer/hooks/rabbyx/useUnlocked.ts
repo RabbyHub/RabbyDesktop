@@ -1,3 +1,4 @@
+import { useSubscribeRpm } from '@/renderer/hooks-shell/useShellWallet';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { atom, useAtom } from 'jotai';
 import { useEffect } from 'react';
@@ -27,23 +28,22 @@ export function useUnlocked(isTop = false) {
 export function useAppUnlockEvents() {
   const { setIsUnlocked } = useUnlocked(false);
 
+  const subscribeRpm = useSubscribeRpm();
+
   useEffect(() => {
-    return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
-      (payload) => {
-        switch (payload.event) {
-          default:
-            break;
-          case 'lock': {
-            setIsUnlocked(false);
-            break;
-          }
-          case 'unlock': {
-            setIsUnlocked(true);
-            break;
-          }
+    return subscribeRpm((payload) => {
+      switch (payload.event) {
+        default:
+          break;
+        case 'lock': {
+          setIsUnlocked(false);
+          break;
+        }
+        case 'unlock': {
+          setIsUnlocked(true);
+          break;
         }
       }
-    );
-  }, [setIsUnlocked]);
+    });
+  }, [subscribeRpm, setIsUnlocked]);
 }

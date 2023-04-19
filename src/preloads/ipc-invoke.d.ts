@@ -5,6 +5,12 @@ type RabbyxInvokePayload = {
       version: ReturnType<Electron.App['getVersion']>;
     };
   };
+  'rabbyx:waitExtBgGhostLoaded': {
+    send: [];
+    response: {
+      rabbyxExtId: string;
+    };
+  };
 };
 
 type ChannelInvokePayload = {

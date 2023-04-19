@@ -1,8 +1,9 @@
 import type { DisplayedKeyring } from '@/isomorphic/types/rabbyx';
+import { useSubscribeRpm } from '@/renderer/hooks-shell/useShellWallet';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { sortAccountsByBalance } from '@/renderer/utils/account';
 import { atom, useAtom } from 'jotai';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 type IDisplayedAccount = Required<DisplayedKeyring['accounts'][number]>;
 export type IDisplayedAccountWithBalance = IDisplayedAccount & {
@@ -79,23 +80,22 @@ export const useAccountToDisplay = () => {
     [getAllAccountsToDisplay, setAccountsList]
   );
 
-  React.useEffect(() => {
-    return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
-      (payload) => {
-        switch (payload.event) {
-          default:
-            break;
-          case 'unlock':
-          case 'accountsChanged':
-          case 'rabby:chainChanged': {
-            console.log('accountsChanged');
-            getAllAccountsToDisplay();
-          }
+  const subscribeRpm = useSubscribeRpm();
+
+  useEffect(() => {
+    return subscribeRpm((payload) => {
+      switch (payload.event) {
+        default:
+          break;
+        case 'unlock':
+        case 'accountsChanged':
+        case 'rabby:chainChanged': {
+          console.log('accountsChanged');
+          getAllAccountsToDisplay();
         }
       }
-    );
-  }, [getAllAccountsToDisplay]);
+    });
+  }, [subscribeRpm, getAllAccountsToDisplay]);
 
   const updateBalance = React.useCallback(
     async (address: string) => {

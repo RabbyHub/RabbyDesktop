@@ -38,6 +38,7 @@ import { fetchDapps } from '@/renderer/ipcRequest/dapps';
 import dayjs from 'dayjs';
 import { useToastMessage } from '@/renderer/hooks/useToastMessage';
 import { HomeBundle } from '@/renderer/routes/Bundle';
+import { useSubscribeRpm } from '@/renderer/hooks-shell/useShellWallet';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -245,21 +246,20 @@ function useAccountsGuard(nav: (path: string) => void) {
     }
   }, [localHasFetched, nav, accounts]);
 
+  const subscribeRpm = useSubscribeRpm();
+
   useEffect(() => {
-    return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
-      (payload) => {
-        switch (payload.event) {
-          default:
-            break;
-          case 'accountsChanged':
-          case 'rabby:chainChanged': {
-            fetchAccounts();
-          }
+    return subscribeRpm((payload) => {
+      switch (payload.event) {
+        default:
+          break;
+        case 'accountsChanged':
+        case 'rabby:chainChanged': {
+          fetchAccounts();
         }
       }
-    );
-  }, [fetchAccounts]);
+    });
+  }, [subscribeRpm, fetchAccounts]);
 
   return { fetchAccounts };
 }

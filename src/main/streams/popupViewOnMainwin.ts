@@ -494,21 +494,6 @@ onIpcMainEvent(
   }
 );
 
-onIpcMainEvent(
-  '__internal_rpc:rabbyx:on-session-broadcast',
-  async (_, payload) => {
-    const { viewOnlyList } = await getAllMainUIViews();
-    viewOnlyList.forEach((webContents) => {
-      // forward to main window
-      sendToWebContents(
-        webContents,
-        '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
-        payload
-      );
-    });
-  }
-);
-
 const { handler: handler2 } = onIpcMainEvent(
   '__internal_forward:views:channel-message',
   async (_, payload) => {

@@ -58,7 +58,6 @@ type M2RChanneMessagePayload = {
     previousUrl: string;
     currentUrl: string;
   };
-  '__internal_push:rabbyx:session-broadcast-forward-to-desktop': RabbyEvent;
 
   '__internal_push:rabbyx:get-dapp-screenshot': {
     reqId: string;
@@ -290,16 +289,6 @@ type ChannelMessagePayload = {
     response: [];
   };
 
-  '__internal_rpc:rabbyx:waitExtBgGhostLoaded': {
-    send: [reqid: string];
-    response: [
-      {
-        reqid: string;
-        rabbyxExtId: string;
-      }
-    ];
-  };
-
   '__internal_rpc:rabbyx:close-signwin': {
     send: [];
     response: [];
@@ -314,6 +303,7 @@ type ChannelMessagePayload = {
     response: [];
   };
 
+  /** @deprecated */
   '__internal_rpc:rabbyx:on-session-broadcast': {
     send: [
       {
@@ -334,6 +324,7 @@ interface Window {
   // for built-in webview
   rabbyDesktop: {
     readonly appVersion: string;
+    readonly rabbyxExtId?: string;
     ipcRenderer: {
       /* send message to main process */
       sendMessage<T extends IChannelsKey>(

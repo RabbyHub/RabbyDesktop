@@ -1,4 +1,5 @@
 import PortMessage from '@/extension-wallet/utils/message/portMessage';
+import RabbyxPortMessage from '@/extension-wallet/utils/message/RabbyxPortMessage';
 import type {
   RabbyXContollerMethods,
   RabbyXContollerMeththodNames,
@@ -66,4 +67,15 @@ export function makeShellWallet<
   });
 
   return wallet;
+}
+
+export function makeRabbyXPortMessage(rabbyxExtId: string) {
+  const rpm = new RabbyxPortMessage({ rabbyxExtId });
+
+  rpm.connect('rabbyxToDesktop');
+
+  // trigger the port in rabbyx background to build session
+  rpm.request({});
+
+  return rpm;
 }

@@ -434,6 +434,9 @@ export type RabbyXMethod = {
   ) => ConnectedSite | void;
   'permissionService.removeConnectedSite': (origin: string) => void;
 
+  /**
+   * @deprecated
+   */
   'sessionService.broadcastEvent': (
     ev: string,
     data?: any,

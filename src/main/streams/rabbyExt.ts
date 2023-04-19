@@ -47,36 +47,6 @@ handleIpcMainInvoke('__internal_rpc:rabbyx-rpc:query', async (_, query) => {
     });
 });
 
-onIpcMainEvent(
-  '__internal_rpc:rabbyx:on-session-broadcast',
-  async (_, payload) => {
-    const tabbedWin = await onMainWindowReady();
-    // TODO: leave here for debug
-    // console.log('[debug] payload', payload);
-
-    // forward to main window
-    sendToWebContents(
-      tabbedWin.window.webContents,
-      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
-      payload
-    );
-
-    switch (payload.event) {
-      case 'rabby:chainChanged': {
-        break;
-      }
-      case 'lock': {
-        break;
-      }
-      case 'unlock': {
-        break;
-      }
-      default:
-        break;
-    }
-  }
-);
-
 const maskReady = getRabbyExtId().then(async () => {
   const rabbyNotificationGasket = createPopupView();
   rabbyNotificationGasket.setBounds({ x: -100, y: -100, width: 1, height: 1 });
@@ -136,18 +106,14 @@ Promise.all([maskReady, bgWcReady, rabbyxInitialized]).then(
   }
 );
 
-onIpcMainEvent(
-  '__internal_rpc:rabbyx:waitExtBgGhostLoaded',
-  async (evt, reqid) => {
-    await bgWcReady;
-    const extId = await getRabbyExtId();
+handleIpcMainInvoke('rabbyx:waitExtBgGhostLoaded', async () => {
+  await bgWcReady;
+  const extId = await getRabbyExtId();
 
-    evt.reply('__internal_rpc:rabbyx:waitExtBgGhostLoaded', {
-      reqid,
-      rabbyxExtId: extId,
-    });
-  }
-);
+  return {
+    rabbyxExtId: extId,
+  };
+});
 
 onIpcMainInternalEvent('__internal_main:dev', async (payload) => {
   switch (payload.type) {
