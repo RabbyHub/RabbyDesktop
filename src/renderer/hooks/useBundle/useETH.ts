@@ -4,10 +4,12 @@ import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { formatChain, DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import { useTotalBalance, calcAssetNetWorth } from '@/renderer/utils/balance';
 import { atom, useAtom } from 'jotai';
+import BigNumber from 'bignumber.js';
 import { useBundleAccount } from './useBundleAccount';
 import { loadCachedTokenList } from '../useHistoryTokenList';
 import { mergeList } from './util';
 import { DisplayProtocol, loadCachedProtocolList } from '../useHistoryProtocol';
+import { saveBundleAccountsBalance } from './shared';
 
 const tokenListAtom = atom<TokenItem[]>([]);
 const protocolListAtom = atom<DisplayProtocol[]>([]);
@@ -48,10 +50,10 @@ export const useETH = () => {
     const cachedListArray = await Promise.all(
       ethAccounts.map(async (acc) => {
         const list = await loadCachedTokenList(acc.data.address);
-        setEthTokenBalanceMap({
-          ...ethTokenBalanceMap,
+        setEthTokenBalanceMap((prev) => ({
+          ...prev,
           [acc.data.address.toLowerCase()]: calcAssetNetWorth(list, [], null),
-        });
+        }));
         return list;
       })
     );
@@ -91,14 +93,14 @@ export const useETH = () => {
     const cachedListArray = await Promise.all(
       ethAccounts.map(async (acc) => {
         const protocols = await loadCachedProtocolList(acc.data.address);
-        setEthProtocolBalanceMap({
-          ...ethProtocolBalanceMap,
+        setEthProtocolBalanceMap((prev) => ({
+          ...prev,
           [acc.data.address.toLowerCase()]: calcAssetNetWorth(
             [],
             protocols,
             null
           ),
-        });
+        }));
         return protocols;
       })
     );
@@ -181,6 +183,30 @@ export const useETH = () => {
     }));
     return list;
   }, [usedChainList, protocolList, tokenList]);
+
+  React.useEffect(() => {
+    const newAccounts = ethAccounts.map((acc) => {
+      const key = acc.data.address.toLowerCase();
+      const protocol = ethProtocolBalanceMap[key];
+      const token = ethTokenBalanceMap[key];
+      const newBalance = new BigNumber(protocol || 0)
+        .plus(token || 0)
+        .toFixed();
+
+      return {
+        ...acc,
+        balance: newBalance,
+        data: {
+          ...acc.data,
+          balance: newBalance,
+        },
+      };
+    });
+
+    saveBundleAccountsBalance(newAccounts);
+    // 无视 accounts 的变动，因为我们就是要更新 accounts
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ethTokenBalanceMap, ethProtocolBalanceMap]);
 
   return {
     displayChainList,

@@ -1,7 +1,19 @@
 
-v0.15.0 / 2023-04-15
+v0.16.0 / 2023-04-18
 ====================
 
+  * Revert "feat: support eos evm (#371)" (#372)
+  * chore: upgrade rabbyx core to v0.79.1
+  * feat: add TokenActionModal (#369)
+  * feat: support eos evm (#371)
+  * fix: improve memory & perf. (#367)
+  * fix: update eth alias (#366)
+  * fix: eth balance (#368)
+
+v0.15.0-prod / 2023-04-15
+=========================
+
+  * Release v0.15.0-prod
   * fix: bundle balance (#364)
   * fix: bignumber (#363)
   * feat: use overlay for assets/protocol view. (#365)

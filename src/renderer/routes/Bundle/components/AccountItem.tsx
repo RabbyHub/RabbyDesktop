@@ -64,17 +64,7 @@ export const AccountItem: React.FC<Props> = ({
     return p.toString();
   }, [isBundle, percentMap, data.id]);
 
-  const balance = React.useMemo(() => {
-    if (data.type !== 'eth') return data.balance;
-    const { address } = data.data;
-    const key = address.toLowerCase();
-    if (!eth.ethProtocolBalanceMap[key] || !eth.ethTokenBalanceMap[key])
-      return data.balance;
-    const protocol = eth.ethProtocolBalanceMap[key];
-    const token = eth.ethTokenBalanceMap[key];
-    if (!protocol || !token) return data.balance;
-    return new BigNumber(protocol || 0).plus(token || 0).toFixed();
-  }, [eth, data]);
+  const balance = data.balance;
 
   return (
     <div className="group flex justify-center items-center relative">

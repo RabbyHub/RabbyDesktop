@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { Skeleton } from 'antd';
 import { TokenItem } from '@debank/rabby-api/dist/types';
@@ -10,6 +10,7 @@ import {
 } from '@/renderer/utils/number';
 import TokenWithChain from '@/renderer/components/TokenWithChain';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
+import clsx from 'clsx';
 
 const TokenItemWrapper = styled.li`
   font-size: 15px;
@@ -140,10 +141,14 @@ const TokenItemComp = ({
   token,
   historyToken,
   supportHistory,
+  onTokenClick,
+  className,
 }: {
   token: TokenItem;
   historyToken?: TokenItem;
   supportHistory: boolean;
+  onTokenClick?: (token: TokenItem) => void;
+  className?: string;
 }) => {
   const amountChange = useMemo(() => {
     if (!historyToken || !supportHistory) return 0;
@@ -174,9 +179,16 @@ const TokenItemComp = ({
     };
   }, [token, historyToken, supportHistory]);
 
+  const handleToken = useCallback(() => {
+    onTokenClick?.(token);
+  }, [onTokenClick, token]);
+
   return (
-    <TokenItemWrapper className="td" key={`${token.chain}-${token.id}`}>
-      <TokenLogoField>
+    <TokenItemWrapper
+      className={clsx('td', className)}
+      key={`${token.chain}-${token.id}`}
+    >
+      <TokenLogoField onClick={handleToken}>
         <TokenWithChain token={token} width="24px" height="24px" />
         <span className="token-symbol" title={token.symbol}>
           {ellipsisTokenSymbol(token.symbol)}
