@@ -6,6 +6,9 @@ import {
 } from 'electron';
 import { formatDappURLToShow } from '../isomorphic/dapp';
 
+// increase the max listeners to avoid the warning or memory leak
+ipcRenderer.setMaxListeners(50);
+
 export const ipcRendererObj = {
   sendMessage<T extends IChannelsKey>(
     channel: T,
