@@ -1,4 +1,3 @@
-import { eventBus } from '@/renderer/utils-shell/eventBus';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { dialog } from 'electron';
 import type { MainWindowTab } from '../browser/tabs';
