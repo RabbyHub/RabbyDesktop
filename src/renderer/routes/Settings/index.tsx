@@ -21,7 +21,7 @@ import { ModalConfirmInSettings } from '@/renderer/components/Modal/Confirm';
 import { Switch } from '@/renderer/components/Switch/Switch';
 import { useCheckNewRelease } from '@/renderer/hooks/useAppUpdator';
 import { copyText } from '@/renderer/utils/clipboard';
-import { detectOS } from '@/isomorphic/os';
+import { detectClientOS } from '@/isomorphic/os';
 import { ucfirst } from '@/isomorphic/string';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
@@ -145,7 +145,7 @@ const ProxyText = styled.div`
   }
 `;
 
-const osType = detectOS();
+const osType = detectClientOS();
 
 export function MainWindowSettings() {
   const appVerisons = useAppVersion();

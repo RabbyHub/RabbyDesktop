@@ -30,12 +30,12 @@ type ChannelInvokePayload = {
     send: [];
     response: {
       dapps: IDapp[];
-      pinnedList: IDapp['origin'][];
-      unpinnedList: IDapp['origin'][];
+      pinnedList: IDapp['id'][];
+      unpinnedList: IDapp['id'][];
     };
   };
   'get-dapp': {
-    send: [origin: IDapp['origin']];
+    send: [dappID: IDapp['id']];
     response: {
       error?: string | null;
       data: {

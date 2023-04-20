@@ -227,6 +227,10 @@ type MainInternalsMessagePayload = {
     send: [];
     response: [];
   };
+  '__internal_main:app:cache-dapp-id-to-abspath': {
+    send: [dappId: string, absPath: string];
+    response: [];
+  };
 };
 
 type MainInternals = keyof MainInternalsMessagePayload;

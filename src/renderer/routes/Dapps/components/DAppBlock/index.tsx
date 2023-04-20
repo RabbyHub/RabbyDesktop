@@ -3,7 +3,7 @@
 import { Dropdown, Menu } from 'antd';
 import React, { ReactNode, useRef } from 'react';
 
-import { formatDappURLToShow } from '@/isomorphic/dapp';
+import { getDappURLToShow } from '@/isomorphic/dapp';
 import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
 import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import clsx from 'clsx';
@@ -41,7 +41,7 @@ const DappBadge = ({
       </div>
     );
   }
-  if (type === 'local') {
+  if (type === 'localfs') {
     return (
       <div className="tag tag-local">
         {indicator}
@@ -64,7 +64,7 @@ export const DAppBlock = ({
 }: React.PropsWithoutRef<{
   dapp?: IDappWithTabInfo;
   onOpDapp?: IOnOpDapp;
-  onOpen?: (dappOrigin: string) => void;
+  onOpen?: (dappOrigin: INextDapp['origin']) => void;
 }>) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -180,7 +180,7 @@ export const DAppBlock = ({
           />
           <div className="infos pr-[16px]">
             <h4 className="dapp-alias">{dapp.alias}</h4>
-            <div className="dapp-url">{formatDappURLToShow(dapp.origin)}</div>
+            <div className="dapp-url">{getDappURLToShow(dapp)}</div>
           </div>
         </div>
 

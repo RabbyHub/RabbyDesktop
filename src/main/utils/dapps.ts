@@ -1,18 +1,23 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 
+import fs from 'fs';
+import path from 'path';
+
 import { format as urlFormat } from 'url';
 import Axios, { AxiosError, AxiosProxyConfig } from 'axios';
 import LRUCache from 'lru-cache';
 import { BrowserWindow } from 'electron';
 import { waitForMS } from '@/isomorphic/date';
 import { pickFavIconURLFromMeta } from '@/isomorphic/html';
-import { PROTOCOL_ENS, PROTOCOL_IPFS } from '@/isomorphic/constants';
+import { PROTOCOL_IPFS } from '@/isomorphic/constants';
 import { checkoutDappURL } from '@/isomorphic/dapp';
+import { unPrefix } from '@/isomorphic/string';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { AxiosElectronAdapter } from './axios';
 import { checkUrlViaBrowserView, CHROMIUM_NET_ERR_DESC } from './appNetwork';
 import { createPopupWindow } from './browser';
 import { getSessionInsts } from './stream-helpers';
+import { emitIpcMainEvent } from './ipcMainEvents';
 
 const DFLT_TIMEOUT = 8 * 1e3;
 
@@ -20,6 +25,8 @@ const DFLT_TIMEOUT = 8 * 1e3;
 const enum DETECT_ERR_CODES {
   NOT_HTTPS = 'NOT_HTTPS',
   NOT_IPFS = 'NOT_IPFS',
+  NOT_LOCALFS = 'NOT_LOCALFS',
+
   INACCESSIBLE = 'INACCESSIBLE',
   REDIRECTED_OUT = 'REDIRECTED_OUT',
   HTTPS_CERT_INVALID = 'HTTPS_CERT_INVALID',
@@ -137,6 +144,127 @@ export async function safeCapturePage(
   };
 }
 
+export async function detectLocalDapp(
+  localDappPath: ICheckedOutDappURL | string,
+  opts: {
+    existedDapps: IDapp[];
+  }
+): Promise<IDappsDetectResult<DETECT_ERR_CODES>> {
+  const checkedOutDappInfo =
+    typeof localDappPath === 'string'
+      ? checkoutDappURL(localDappPath)
+      : localDappPath;
+  const inputOrigin = checkedOutDappInfo.dappOrigin;
+
+  emitIpcMainEvent(
+    '__internal_main:app:cache-dapp-id-to-abspath',
+    checkedOutDappInfo.localFSID,
+    checkedOutDappInfo.localFSPath
+  );
+
+  const absPath = unPrefix(checkedOutDappInfo.localFSPath, '/');
+
+  if (!fs.existsSync(absPath)) {
+    return {
+      data: null,
+      error: {
+        type: DETECT_ERR_CODES.INACCESSIBLE,
+        message: `The path doesn't exist.`,
+      },
+    };
+  }
+  if (!fs.statSync(absPath).isDirectory()) {
+    return {
+      data: null,
+      error: {
+        type: DETECT_ERR_CODES.INACCESSIBLE,
+        message: `The path isn't a directory`,
+      },
+    };
+  }
+  if (!fs.existsSync(path.resolve(absPath, './index.html'))) {
+    return {
+      data: null,
+      error: {
+        type: DETECT_ERR_CODES.INACCESSIBLE,
+        message: `The directory doesn't contain index.html`,
+      },
+    };
+  }
+
+  let fallbackFavicon: string | undefined;
+  let targetMetadata: ISiteMetaData | undefined;
+  const { mainSession } = await getSessionInsts();
+  const checkResult = await checkUrlViaBrowserView(
+    checkedOutDappInfo.dappURLToPrview,
+    {
+      session: mainSession,
+      onMetaDataUpdated: (meta) => {
+        fallbackFavicon = pickFavIconURLFromMeta(meta);
+
+        targetMetadata = meta;
+      },
+      timeout: DFLT_TIMEOUT,
+    }
+  );
+
+  if (!checkResult.valid) {
+    if (checkResult.isTimeout) {
+      return {
+        data: null,
+        error: {
+          type: DETECT_ERR_CODES.TIMEOUT,
+          message:
+            'Access to Dapp timed out. Please check your network and retry.',
+        },
+      };
+    }
+
+    return {
+      data: null,
+      error: {
+        type: DETECT_ERR_CODES.INACCESSIBLE,
+        message: 'The Domain cannot be accessed.',
+      },
+    };
+  }
+
+  const { origin: finalOrigin } = canoicalizeDappUrl(checkResult.finalUrl);
+
+  const repeatedInputDapp = opts.existedDapps.find(
+    (item) => item.origin.toLowerCase() === inputOrigin.toLowerCase()
+  );
+  const repeatedFinalDapp = opts.existedDapps.find(
+    (item) => item.origin.toLowerCase() === finalOrigin.toLowerCase()
+  );
+
+  const data: IDappsDetectResult['data'] = {
+    preparedDappId: checkedOutDappInfo.dappID,
+    inputOrigin,
+    isInputExistedDapp: !!repeatedInputDapp,
+    finalOrigin,
+    isFinalExistedDapp: !!repeatedFinalDapp,
+    icon: null,
+    recommendedAlias:
+      targetMetadata?.og?.site_name ||
+      targetMetadata?.og?.title ||
+      targetMetadata?.twitter_card?.site ||
+      targetMetadata?.twitter_card?.title ||
+      targetMetadata?.title ||
+      '',
+    faviconUrl:
+      fallbackFavicon ||
+      targetMetadata?.og?.image ||
+      targetMetadata?.twitter_card?.image,
+    faviconBase64: undefined,
+  };
+
+  return {
+    data,
+    error: undefined,
+  };
+}
+
 /**
  * @description only ipfs supported now
  */
@@ -194,7 +322,7 @@ export async function detectEnsDapp(
       data: null,
       error: {
         type: DETECT_ERR_CODES.INACCESSIBLE,
-        message: 'The Domain cannot be accessed.',
+        message: 'The ENS domain cannot be accessed.',
       },
     };
   }

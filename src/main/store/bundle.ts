@@ -12,11 +12,10 @@
 
 import { PERSIS_STORE_PREFIX } from '@/isomorphic/constants';
 import { shortStringify, safeParse } from '@/isomorphic/json';
+// @ts-expect-error
 import { nanoid } from 'nanoid';
 import { makeStore } from '../utils/store';
 import { emitIpcMainEvent, handleIpcMainInvoke } from '../utils/ipcMainEvents';
-
-// @ts-expect-error
 
 export interface StoreProps {
   accounts: BundleAccount[];

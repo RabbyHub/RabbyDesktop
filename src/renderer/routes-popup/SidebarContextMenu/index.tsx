@@ -35,8 +35,9 @@ const toast = (message: string) => {
 export const SidebarContextMenu = () => {
   const { pageInfo } = usePopupWinInfo('sidebar-dapp');
 
-  const origin = pageInfo?.dappTabInfo?.origin || '';
-  const dappInfo = useDapp(origin);
+  const dappID = pageInfo?.dappTabInfo.dappID;
+  const dappOrigin = pageInfo?.dappTabInfo?.dappOrigin || '';
+  const dappInfo = useDapp(dappID);
   const zActions = useZPopupLayerOnMain();
   const { removeConnectedSite, removeAllConnectedSites } = useConnectedSite();
 
@@ -51,7 +52,7 @@ export const SidebarContextMenu = () => {
   };
 
   const items = useMemo(() => {
-    if (!origin) {
+    if (!dappID) {
       return [];
     }
     return [
@@ -153,15 +154,15 @@ export const SidebarContextMenu = () => {
         ),
       },
     ];
-  }, [dappInfo?.isPinned, origin, pageInfo?.dappTabInfo?.id]);
+  }, [dappInfo?.isPinned, dappID, pageInfo?.dappTabInfo?.id]);
 
   const handleMenuClick: MenuClickEventHandler = ({ key }) => {
     switch (key) {
       case 'dapp-pin':
-        toggleDappPinned(origin, true);
+        toggleDappPinned(dappID!, true);
         break;
       case 'dapp-unpin':
-        toggleDappPinned(origin, false);
+        toggleDappPinned(dappID!, false);
         break;
       case 'dapp-close': {
         const tabId = pageInfo?.dappTabInfo?.id;
@@ -186,7 +187,7 @@ export const SidebarContextMenu = () => {
         }
         break;
       case 'dapp-disconnect':
-        disconnect(origin, pageInfo?.dappTabInfo?.url);
+        disconnect(dappOrigin, pageInfo?.dappTabInfo?.url);
         break;
       case 'dapp-disconnect-all':
         removeAllConnectedSites();
@@ -204,7 +205,7 @@ export const SidebarContextMenu = () => {
     hideMainwinPopup('sidebar-dapp');
   };
 
-  if (!origin) return null;
+  if (!dappID || !dappOrigin) return null;
   if (pageInfo?.type !== 'sidebar-dapp') return null;
 
   return (

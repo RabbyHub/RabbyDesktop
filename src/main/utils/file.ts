@@ -35,3 +35,30 @@ export function rewriteIpfsHtmlFile(inputFilePath: string) {
   fs.writeFileSync(tmpFilePath, resultHtmlStr);
   return tmpFilePath;
 }
+
+export const enum CheckResultType {
+  NOT_EXIST = 0,
+  NOT_DIRECTORY = 1,
+  NO_INDEXHTML = 2,
+}
+export function checkDappEntryDirectory(
+  entryPath: string,
+  opts?: {
+    checkIndexHtml?: boolean;
+  }
+) {
+  const checkResult = {
+    error: null as CheckResultType | null,
+  };
+
+  const indexHtmlAbsPath = path.join(entryPath, './index.html');
+  if (!entryPath || !fs.existsSync(entryPath)) {
+    checkResult.error = CheckResultType.NOT_EXIST;
+  } else if (!fs.statSync(entryPath).isDirectory()) {
+    checkResult.error = CheckResultType.NOT_DIRECTORY;
+  } else if (opts?.checkIndexHtml && !fs.existsSync(indexHtmlAbsPath)) {
+    checkResult.error = CheckResultType.NO_INDEXHTML;
+  }
+
+  return checkResult;
+}

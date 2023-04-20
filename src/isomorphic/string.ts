@@ -1,4 +1,5 @@
 import { APP_NAME } from './constants';
+import { getSha256 } from './crypto/sha256';
 
 export function ensurePrefix(str = '', prefix = '/') {
   return str.startsWith(prefix) ? str : prefix + str;
@@ -86,4 +87,15 @@ export function trimWebContentsUserAgent(
 
 export function normalizeIPFSPath(ipfsPath: string) {
   return ipfsPath.replace(/\\/g, '/');
+}
+
+export function encodeAbsPath(inputFilepath: string) {
+  return getSha256(inputFilepath);
+}
+
+export function decodeAbsPath(
+  hashValue: string,
+  hashPathMap: Record<string, string>
+) {
+  return hashPathMap[hashValue] || '';
 }

@@ -1,6 +1,5 @@
-import { checkoutDappURL } from '@/isomorphic/dapp';
-import { canoicalizeDappUrl, extractDappInfoFromURL } from '@/isomorphic/url';
-import { DAPP_TYPE_TO_OPEN_AS_HTTP } from '@/isomorphic/constants';
+import { checkoutDappURL, isOpenedAsHttpDappType } from '@/isomorphic/dapp';
+import { canoicalizeDappUrl } from '@/isomorphic/url';
 import type { ChromeTabWithOrigin } from '../hooks-shell/useWindowTabs';
 
 export type IDappWithTabInfo = IMergedDapp & {
@@ -41,13 +40,15 @@ export function findTabByTabID(
     dappBoundTabIds: IDappBoundTabIds;
   }
 ) {
-  const idxToMap = DAPP_TYPE_TO_OPEN_AS_HTTP.includes(
-    extractDappInfoFromURL(dapp.origin).type
-  )
-    ? checkoutDappURL(dapp.origin).dappHttpID
-    : dapp.origin;
-  const tabId = dappBoundTabIds[idxToMap];
-  const tab = tabsGroupById[tabId];
+  const checkedOutDappInfo =
+    dapp.type === 'localfs'
+      ? checkoutDappURL(dapp.id)
+      : checkoutDappURL(dapp.origin);
 
+  const isOpenedAsHttp = isOpenedAsHttpDappType(checkedOutDappInfo.type);
+
+  const idxToMap = isOpenedAsHttp ? checkedOutDappInfo.dappHttpID : dapp.origin;
+
+  const tab = tabsGroupById[dappBoundTabIds[idxToMap]];
   return tab || null;
 }

@@ -16,6 +16,7 @@ import { debounce } from 'lodash';
 import { useUnmount } from 'react-use';
 import { stats } from '@/isomorphic/stats';
 import { openDirectory } from '@/renderer/ipcRequest/app';
+import { ensurePrefix } from '@/isomorphic/string';
 import RabbyInput from '../../AntdOverwrite/Input';
 import { Props as ModalProps } from '../../Modal/Modal';
 import { toastMessage } from '../../TransparentToast';
@@ -52,7 +53,7 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
     async (url: string) => {
       statsInfo.startTime = Date.now();
       // todo
-      return detectDapps(`rabby-ipfs://${url}`);
+      return detectDapps(ensurePrefix(url, 'file://'));
     },
     {
       manual: true,
@@ -174,6 +175,7 @@ export function AddLocalDapp({
   ) => {
     await runAddDapp(
       {
+        id: dappInfo.preparedDappId,
         origin: dappInfo.inputOrigin,
         alias: dappInfo.recommendedAlias,
         faviconBase64: dappInfo.faviconBase64,

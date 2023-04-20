@@ -24,9 +24,17 @@ function makeIpfsDappHttpId(
         type: 'ens';
         ensAddr: string;
       }
+    | {
+        type: 'localfs';
+        localFSID: string;
+      }
 ) {
   if (opts.type === 'ens') {
     return `http://${opts.ensAddr}.localens`;
+  }
+
+  if (opts.type === 'localfs') {
+    return `http://${opts.localFSID}.local.fs`;
   }
 
   return `http://${LOCALIPFS_BRAND}.${opts.ipfsCid}`;
@@ -41,17 +49,21 @@ export function formatEnsDappOrigin(ensAddr: string, ipfsCid?: string) {
   return `rabby-ens://${ensAddr}.localens`;
 }
 
+// console.debug('test checkoutDappURL', checkoutDappURL(`file:///C:/Users/admin/path/to`));
 export function checkoutDappURL(dappPath: string): ICheckedOutDappURL {
   const result = {
+    inputURL: dappPath,
     type: 'unknown' as const,
-    dappID: '' as const,
-    dappOrigin: '' as const,
-    dappOriginToShow: '' as const,
-    dappHttpID: '' as const,
-    dappTabID: '' as const,
-    dappURLToPrview: '' as const,
-    ipfsCid: '' as const,
-    ensAddr: '' as const,
+    dappID: '',
+    dappOrigin: '',
+    dappOriginToShow: '',
+    dappHttpID: '',
+    dappURLToPrview: '',
+    ipfsCid: '',
+    ensAddr: '',
+    localFSID: '',
+    localFSPath: '',
+    pathnameWithQuery: '',
   };
 
   const dappInfo = extractDappInfoFromURL(dappPath);
@@ -69,6 +81,7 @@ export function checkoutDappURL(dappPath: string): ICheckedOutDappURL {
       dappOrigin: dappPath,
       dappOriginToShow: `ens://${dappInfo.ensAddr}`,
       dappURLToPrview: dappInfo.ipfsCid ? urls.dappOrigin : urls.dappID,
+      pathnameWithQuery: dappInfo.pathnameWithQuery,
       dappHttpID: makeIpfsDappHttpId({
         type: 'ens',
         ensAddr: dappInfo.ensAddr,
@@ -90,6 +103,7 @@ export function checkoutDappURL(dappPath: string): ICheckedOutDappURL {
         dappOrigin: formatEnsDappOrigin(ensAddr, ipfsCid),
         dappOriginToShow: `ens://${ensAddr}`,
         dappURLToPrview: `rabby-ipfs://${ipfsCid}`,
+        pathnameWithQuery: dappInfo.pathnameWithQuery,
         dappHttpID: makeIpfsDappHttpId({ type: 'ens', ensAddr }),
         ipfsCid,
         ensAddr,
@@ -105,8 +119,31 @@ export function checkoutDappURL(dappPath: string): ICheckedOutDappURL {
       dappOrigin: `rabby-ipfs://${ipfsCid}`,
       dappOriginToShow: `ipfs://${ipfsCid}`,
       dappURLToPrview: `rabby-ipfs://${ipfsCid}`,
+      pathnameWithQuery: dappInfo.pathnameWithQuery,
       dappHttpID: makeIpfsDappHttpId({ type: 'ipfs', ipfsCid }),
       ipfsCid,
+    };
+  }
+
+  if (dappInfo.type === 'localfs') {
+    const dappHttpID = makeIpfsDappHttpId({
+      type: 'localfs',
+      localFSID: dappInfo.localFSID,
+    });
+
+    return {
+      ...result,
+      type: 'localfs' as const,
+      dappID: dappInfo.fileURLPosix || '',
+      dappOrigin: `rabby-fs://${dappInfo.localFSID}`,
+      dappOriginToShow: dappInfo.fileURL || '',
+      // dappURLToPrview: `rabby-fs://${dappInfo.localFSID}`,
+      // dappURLToPrview: `rabby-fs://${dappInfo.localFSID}`,
+      dappURLToPrview: `rabby-fs://${dappInfo.localFSID}`,
+      pathnameWithQuery: dappInfo.pathnameWithQuery,
+      dappHttpID,
+      localFSID: dappInfo.localFSID || '',
+      localFSPath: dappInfo.localFSPath || '',
     };
   }
 
@@ -126,6 +163,7 @@ export function checkoutDappURL(dappPath: string): ICheckedOutDappURL {
         dappOrigin: `rabby-ipfs://${ipfsCid}`,
         dappOriginToShow: `ipfs://${ipfsCid}`,
         dappURLToPrview: makeIpfsDappHttpId({ type: 'ipfs', ipfsCid }), // pointless for this kind of case
+        pathnameWithQuery: dappInfo.pathnameWithQuery,
         dappHttpID,
         ipfsCid,
       };
@@ -138,6 +176,7 @@ export function checkoutDappURL(dappPath: string): ICheckedOutDappURL {
       dappOrigin: parsedInfo.origin,
       dappOriginToShow: parsedInfo.origin,
       dappURLToPrview: parsedInfo.origin,
+      pathnameWithQuery: dappInfo.pathnameWithQuery,
       dappHttpID: parsedInfo.origin,
       ipfsCid: '',
     };
@@ -154,17 +193,21 @@ export function formatDapp(
 ): IDapp | null {
   if (!input?.origin) return null;
 
-  const checkedOutDappURLInfo = checkoutDappURL(input.origin);
+  // const checkedOutDappURLInfo = checkoutDappURL(input.origin);
   const faviconBase64 = input?.faviconBase64 || ('' as IDapp['faviconBase64']);
 
-  let finalType = input?.type;
-  if (checkedOutDappURLInfo.type === 'ipfs') {
-    finalType = 'ipfs';
-  }
+  // let finalType = input?.type;
+  // if (checkedOutDappURLInfo.type === 'ipfs') {
+  //   finalType = 'ipfs';
+  // } else if (checkedOutDappURLInfo.type === 'ens') {
+  //   finalType = 'ens';
+  // } else if (checkedOutDappURLInfo.type === 'localfs') {
+  //   finalType = 'localfs';
+  // }
 
   const formattedDapp = {
     id: input.id || input.origin,
-    type: finalType,
+    type: input?.type,
     alias: input?.alias || ('' as IDapp['alias']),
     origin: input.origin as IDapp['origin'],
     faviconUrl:
@@ -176,20 +219,23 @@ export function formatDapp(
       ...input?.extraInfo,
       // TODO: narrow down the type of dappAddSource
       dappAddSource:
-        finalType === 'http' ? 'https' : input?.extraInfo?.dappAddSource,
+        input?.type === 'http' ? 'https' : input?.extraInfo?.dappAddSource,
     },
   } as IDapp;
 
-  switch (finalType) {
+  switch (input?.type) {
     case 'ens': {
       break;
     }
     case 'ipfs': {
       break;
     }
+    case 'localfs': {
+      break;
+    }
     case 'http':
     default: {
-      input.type = 'http';
+      formattedDapp.type = 'http';
       break;
     }
   }
@@ -217,7 +263,7 @@ export function varyDappPinned(dapps: IDapp[], pinnedList: string[]) {
   const pinnedDapps: IDapp[] = [];
   const unpinnedDapps: IDapp[] = [];
   formatDapps(dapps).forEach((dapp) => {
-    if (pinnedSet.has(dapp.origin)) {
+    if (pinnedSet.has(dapp.id)) {
       pinnedDapps.push(dapp);
     } else {
       unpinnedDapps.push(dapp);
@@ -242,9 +288,9 @@ export function fillUnpinnedList(
 
   const dappList = Array.isArray(dapps) ? dapps : Object.values(dapps);
   dappList.forEach((dapp) => {
-    const dappOrigin = dapp.origin;
-    if (!pinnedSet.has(dappOrigin) && !unpinnedSet.has(dappOrigin)) {
-      otherUnpinnedList.push(dappOrigin);
+    const dappID = dapp.id;
+    if (!pinnedSet.has(dappID) && !unpinnedSet.has(dappID)) {
+      otherUnpinnedList.push(dappID);
     }
   });
 
@@ -280,34 +326,37 @@ export function sortDappsBasedPinned(
 
   const tmpRet = {} as Parameters<typeof parseDomainMeta>[2];
   const dappsHash = dapps.reduce((acc, dapp) => {
-    acc[dapp.origin] = dapp;
+    acc[dapp.id] = dapp;
 
-    const dMeta = parseDomainMeta(dapp.origin, dapps, tmpRet);
-    secondaryDomainMeta[dMeta.secondaryDomain] =
-      secondaryDomainMeta[dMeta.secondaryDomain] || dMeta;
+    if (dapp.type === 'http') {
+      const dMeta = parseDomainMeta(dapp.id, dapps, tmpRet);
 
-    if (dMeta.is2ndaryDomain) {
-      acc[dapp.origin].secondDomainMeta = dMeta;
+      secondaryDomainMeta[dMeta.secondaryDomain] =
+        secondaryDomainMeta[dMeta.secondaryDomain] || dMeta;
+
+      if (dMeta.is2ndaryDomain) {
+        acc[dapp.id].secondDomainMeta = dMeta;
+      }
     }
     return acc;
-  }, {} as Record<IDapp['origin'], IDappWithDomainMeta>);
+  }, {} as Record<IDapp['id'], IDappWithDomainMeta>);
 
   const pinnedDapps: IMergedDapp[] = [];
   const unpinnedDapps: IMergedDapp[] = [];
 
-  pinnedList.forEach((dappOrigin) => {
-    if (dappsHash[dappOrigin]) {
+  pinnedList.forEach((dappID) => {
+    if (dappsHash[dappID]) {
       pinnedDapps.push({
-        ...dappsHash[dappOrigin],
+        ...dappsHash[dappID],
         isPinned: true,
       });
     }
   });
 
-  unpinnedList.forEach((dappOrigin) => {
-    if (dappsHash[dappOrigin]) {
+  unpinnedList.forEach((dappID) => {
+    if (dappsHash[dappID]) {
       unpinnedDapps.push({
-        ...dappsHash[dappOrigin],
+        ...dappsHash[dappID],
         isPinned: false,
       });
     }
@@ -333,9 +382,15 @@ export function normalizeProtocolBindingValues(
   }, {} as IProtocolDappBindings);
 }
 
-const VALID_TYPES = ['http', 'ipfs'];
-export function isValidDappType(type: string) {
-  return type && VALID_TYPES.includes(type);
+const VALID_TYPES = ['http', 'ipfs', 'ens', 'localfs'] as IValidDappType[];
+export function isValidDappType(type: string): type is IValidDappType {
+  return !!type && VALID_TYPES.includes(type as any);
+}
+
+export function isOpenedAsHttpDappType(
+  type: string
+): type is Exclude<IValidDappType, 'http'> {
+  return !!type && DAPP_TYPE_TO_OPEN_AS_HTTP.includes(type as any);
 }
 
 export function formatDappURLToShow(dappURL: string) {
@@ -345,7 +400,14 @@ export function formatDappURLToShow(dappURL: string) {
 
   const checkedOutDappURLInfo = checkoutDappURL(dappURL);
 
-  if (DAPP_TYPE_TO_OPEN_AS_HTTP.includes(checkedOutDappURLInfo.type as any)) {
+  if (isOpenedAsHttpDappType(checkedOutDappURLInfo.type)) {
+    if (
+      checkedOutDappURLInfo.type === 'localfs' &&
+      !checkedOutDappURLInfo.localFSPath
+    ) {
+      return checkedOutDappURLInfo.dappOrigin;
+    }
+
     normalizedURL = checkedOutDappURLInfo.dappOriginToShow;
   } else {
     normalizedURL = dappURL;
@@ -354,8 +416,15 @@ export function formatDappURLToShow(dappURL: string) {
   return normalizedURL;
 }
 
+export function getDappURLToShow(dapp: IDappPartial) {
+  if (dapp.id) return formatDappURLToShow(dapp.id);
+  if (dapp.origin) return formatDappURLToShow(dapp.origin);
+
+  return '';
+}
+
 export function formatDappHttpOrigin(
-  dappURL: string | ReturnType<typeof checkoutDappURL>
+  dappURL: string | ICheckedOutDappURL
 ): string {
   if (!dappURL) return dappURL;
 
@@ -364,7 +433,8 @@ export function formatDappHttpOrigin(
 
   switch (checkoutResult.type) {
     case 'ipfs':
-    case 'ens': {
+    case 'ens':
+    case 'localfs': {
       return checkoutResult.dappHttpID;
     }
     default:
@@ -389,21 +459,21 @@ export function formatDappToStore(
     dappAddSource?: (INextDapp['extraInfo'] & object)['dappAddSource'] & string;
   }
 ): IDapp {
-  const dappInfo = extractDappInfoFromURL(retDapp.origin);
+  const dappURLInfo = checkoutDappURL(retDapp.id || retDapp.origin);
 
-  if (dappInfo.type === 'ens') {
+  if (dappURLInfo.type === 'ens') {
     retDapp.type = 'ens';
     retDapp.id = makeDappAboutURLs({
       type: 'ens',
-      ensAddr: dappInfo.ensAddr,
+      ensAddr: dappURLInfo.ensAddr,
     }).dappID;
 
     retDapp.extraInfo = {
       ...retDapp.extraInfo,
-      ensAddr: dappInfo.ensAddr,
+      ensAddr: dappURLInfo.ensAddr,
     };
-  } else if (dappInfo.type === 'ipfs') {
-    let dappId = `rabby-ipfs://${dappInfo.ipfsCid}`;
+  } else if (dappURLInfo.type === 'ipfs') {
+    let dappId = `rabby-ipfs://${dappURLInfo.ipfsCid}`;
     if (retDapp?.extraInfo?.ensAddr) {
       dappId = makeDappAboutURLs({
         type: 'ens',
@@ -418,11 +488,25 @@ export function formatDappToStore(
 
     retDapp.extraInfo = {
       ...retDapp.extraInfo,
-      ipfsCid: dappInfo.ipfsCid,
+      ipfsCid: dappURLInfo.ipfsCid,
       dappAddSource:
         retDapp?.extraInfo?.dappAddSource ||
         options?.dappAddSource ||
         'ipfs-cid',
+    };
+  } else if (dappURLInfo.type === 'localfs') {
+    if (!dappURLInfo.localFSPath) {
+      throw new Error(
+        `localFSPath is required on persist dapp, make sure your input dapp partial is valid`
+      );
+    }
+    retDapp.id = dappURLInfo.dappID;
+    retDapp.origin = dappURLInfo.dappOrigin;
+
+    retDapp.type = 'localfs';
+    retDapp.extraInfo = {
+      ...retDapp.extraInfo,
+      dappAddSource: 'localfs',
     };
   } else {
     retDapp.id = retDapp.origin;

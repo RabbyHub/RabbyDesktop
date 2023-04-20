@@ -88,7 +88,7 @@ export const DappTypeNotSupportedModal = () => {
         return 'ENS';
       case 'ipfs':
         return 'IPFS';
-      case 'local':
+      case 'localfs':
         return 'Local';
       default:
         return 'Special Type';

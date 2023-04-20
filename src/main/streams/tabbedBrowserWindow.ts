@@ -3,9 +3,8 @@ import { app, BrowserWindow, shell } from 'electron';
 import { parseQueryString } from '@/isomorphic/url';
 import { arraify } from '@/isomorphic/array';
 import { pickFavIconURLFromMeta } from '@/isomorphic/html';
-import { checkoutDappURL, formatDappHttpOrigin } from '@/isomorphic/dapp';
+import { checkoutDappURL, isOpenedAsHttpDappType } from '@/isomorphic/dapp';
 import {
-  DAPP_TYPE_TO_OPEN_AS_HTTP,
   EnumMatchDappType,
   IS_RUNTIME_PRODUCTION,
 } from '../../isomorphic/constants';
@@ -46,6 +45,7 @@ import {
 import { safeOpenURL } from './dappSafeview';
 import { isTargetScanLink } from '../store/dynamicConfig';
 import { isEnableSupportIpfsDapp } from '../store/desktopApp';
+import { checkDappEntryDirectory, CheckResultType } from '../utils/file';
 
 /**
  * @deprecated import members from '../utils/tabbedBrowserWindow' instead
@@ -225,44 +225,66 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
     };
   }
   const checkedOutDappURLInfo = checkoutDappURL(dappOrigin);
-  if (DAPP_TYPE_TO_OPEN_AS_HTTP.includes(checkedOutDappURLInfo?.type as any)) {
+  if (isOpenedAsHttpDappType(checkedOutDappURLInfo?.type)) {
     if (!isEnableSupportIpfsDapp()) {
       pushChangesToZPopupLayer({
         'modal-dapp-type-not-supported': {
           visible: true,
           state: {
-            tipType: checkedOutDappURLInfo?.type,
+            tipType: checkedOutDappURLInfo?.type as IValidDappType,
           },
         },
       });
       return result;
     }
 
-    const ipfsService = await getIpfsService();
-    if (!(await ipfsService.isExist(checkedOutDappURLInfo.ipfsCid))) {
-      pushChangesToZPopupLayer({
-        'ipfs-no-local-modal': {
-          visible: true,
-        },
-      });
-      throw new Error('IPFS CID not local file found');
-    }
-    if (!(await ipfsService.isValid(checkedOutDappURLInfo.ipfsCid))) {
-      pushChangesToZPopupLayer({
-        'ipfs-verify-failed-modal': {
-          visible: true,
-        },
-      });
-      throw new Error('IPFS CID verify failed');
+    switch (checkedOutDappURLInfo.type) {
+      case 'ipfs':
+      case 'ens': {
+        const ipfsService = await getIpfsService();
+        if (!(await ipfsService.isExist(checkedOutDappURLInfo.ipfsCid))) {
+          pushChangesToZPopupLayer({
+            'ipfs-no-local-modal': {
+              visible: true,
+            },
+          });
+          throw new Error('IPFS CID not local file found');
+        }
+        if (!(await ipfsService.isValid(checkedOutDappURLInfo.ipfsCid))) {
+          pushChangesToZPopupLayer({
+            'ipfs-verify-failed-modal': {
+              visible: true,
+            },
+          });
+          throw new Error('IPFS CID verify failed');
+        }
+        break;
+      }
+      case 'localfs': {
+        const checkResult = checkDappEntryDirectory(
+          checkedOutDappURLInfo.localFSPath
+        );
+        if (checkResult.error) {
+          if (checkResult.error === CheckResultType.NO_INDEXHTML) {
+            throw new Error('index.html not found for local dapp');
+          } else {
+            throw new Error('Local dapp entry directory invali');
+          }
+        }
+        break;
+      }
+      default: {
+        throw new Error(
+          `Dapp with type ${checkedOutDappURLInfo.type} not supported now.`
+        );
+      }
     }
   }
 
   const currentUrl = evt.sender.getURL();
   const findResult = findDappsByOrigin(checkedOutDappURLInfo.dappOrigin);
 
-  const isOpenAsHttp = DAPP_TYPE_TO_OPEN_AS_HTTP.includes(
-    checkedOutDappURLInfo?.type as any
-  );
+  const isOpenAsHttp = isOpenedAsHttpDappType(checkedOutDappURLInfo?.type);
   if (isOpenAsHttp && findResult.dapp) {
     dappOrigin = checkedOutDappURLInfo.dappHttpID;
   }
@@ -525,6 +547,7 @@ app.on('quit', async () => {
   const lastOpenInfos: IDappLastOpenInfo[] = [];
   allOpenedTabs.forEach((tab) => {
     const lastOpenInfo = tab.makeTabLastOpenInfo()!;
+
     if (lastOpenInfo) {
       lastOpenInfos.push(lastOpenInfo);
     }

@@ -47,7 +47,7 @@ type IPreviewDappViewChanges =
       rect?: null | DappViewRect;
     };
 
-type IDappAddSource = 'https' | 'ipfs-cid' | 'ens-addr' | 'local-fs';
+type IDappAddSource = 'https' | 'ipfs-cid' | 'ens-addr' | 'localfs';
 
 type INextDapp = {
   id: string;
@@ -78,7 +78,7 @@ type INextDapp = {
       origin: string | `rabby-ens://${string}${string}`;
     }
   | {
-      type: 'local';
+      type: 'localfs';
       origin: string | `rabby-fs://${string}${string}`;
     }
 );
@@ -92,15 +92,22 @@ type IDappPartial = Omit<INextDapp, 'id' | 'type'> & {
 };
 
 type ICheckedOutDappURL = {
+  inputURL: string;
   type: INextDapp['type'];
   dappID: string;
   dappOrigin: string;
-  dappHttpID: string;
   /** @description this is also used as `dappTabID` */
+  dappHttpID: string;
   dappOriginToShow: string;
   dappURLToPrview: string;
   ipfsCid: string;
   ensAddr: string;
+
+  /** @description only useful for dapp with type 'localfs' */
+  localFSID: string;
+  localFSPath: string;
+
+  pathnameWithQuery: string;
 };
 
 type IHttpDapp = INextDapp & { type: 'http' };
@@ -187,6 +194,7 @@ type ISensitiveConfig = {
 
 type IDappsDetectResult<T extends string = string> = {
   data: null | {
+    preparedDappId?: string;
     finalOrigin: string;
     isFinalExistedDapp?: boolean;
     inputOrigin: string;
@@ -321,7 +329,8 @@ type IHardwareConnectPageType = 'onekey' | 'trezor';
 type IPopupWinPageInfo = {
   type: 'sidebar-dapp';
   dappTabInfo: {
-    origin: string;
+    dappID: string;
+    dappOrigin: string;
     id: chrome.tabs.Tab['id'];
     url?: string;
   };

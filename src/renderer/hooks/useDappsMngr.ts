@@ -3,6 +3,7 @@
 import {
   checkoutDappURL,
   formatDappHttpOrigin,
+  isOpenedAsHttpDappType,
   sortDappsBasedPinned,
 } from '@/isomorphic/dapp';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
@@ -15,7 +16,6 @@ import {
   fetchProtocolDappsBinding,
   getDapp,
   putProtocolDappsBinding,
-  toggleDappPinned,
 } from '../ipcRequest/dapps';
 import { findTabByTabID } from '../utils/tab';
 
@@ -84,7 +84,7 @@ export function useDapps() {
     const fixed = { ...dappBoundTabIdsOrig };
     Object.keys(fixed).forEach((dappId) => {
       const checkedOutDappURLInfo = checkoutDappURL(dappId);
-      if (checkedOutDappURLInfo.type === 'ipfs') {
+      if (isOpenedAsHttpDappType(checkedOutDappURLInfo.type)) {
         fixed[formatDappHttpOrigin(dappId)] = fixed[dappId];
         fixed[checkedOutDappURLInfo.dappID] = fixed[dappId];
       }
@@ -125,14 +125,6 @@ export function useDapps() {
     window.rabbyDesktop.ipcRenderer.invoke('dapps-put', { ...dapp, alias });
   }, []);
 
-  const pinDapp = useCallback((dappOrigin: string) => {
-    toggleDappPinned([dappOrigin], true);
-  }, []);
-
-  const unpinDapp = useCallback((dappOrigin: string) => {
-    toggleDappPinned([dappOrigin], false);
-  }, []);
-
   const staticsSummary = useMemo(() => {
     const {
       secondaryDomainMeta,
@@ -156,29 +148,27 @@ export function useDapps() {
     dappBoundTabIds,
     detectDapps,
     renameDapp,
-    pinDapp,
-    unpinDapp,
   };
 }
 
-export function useDapp(origin?: string) {
+export function useDapp(dappID?: string) {
   const [dappInfo, setDappInfo] = useState<Partial<IMergedDapp> | null>(null);
 
   useEffect(() => {
-    if (!origin) {
+    if (!dappID) {
       setDappInfo(null);
       return;
     }
 
-    getDapp(origin).then((newVal) => {
+    getDapp(dappID).then((newVal) => {
       setDappInfo(newVal);
     });
-  }, [origin]);
+  }, [dappID]);
 
   return dappInfo;
 }
 
-export function useMatchDapp(origin?: string) {
+export function useMatchDappByOrigin(origin?: string) {
   // 先根据 origin 匹配 Dapp，无匹配项后再用 domain 匹配一次
   const { dapps } = useDapps();
   const [dappInfo, setDappInfo] = useState<Partial<IMergedDapp> | null>(null);

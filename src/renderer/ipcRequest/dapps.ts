@@ -2,9 +2,9 @@ import { arraify } from '@/isomorphic/array';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { matomoRequestEvent } from '../utils/matomo-request';
 
-export async function getDapp(dappOrigin: string) {
+export async function getDapp(dappID: IDapp['id']) {
   return window.rabbyDesktop.ipcRenderer
-    .invoke('get-dapp', dappOrigin)
+    .invoke('get-dapp', dappID)
     .then((event) => {
       if (event.error) {
         throw new Error(event.error);
@@ -84,10 +84,10 @@ export async function deleteDapp(dapp: IDapp) {
 }
 
 export async function toggleDappPinned(
-  dappOrigin: string | string[],
+  dappIDs: string | string[],
   nextPinned = true
 ) {
-  const dappOrigins = arraify(dappOrigin);
+  const dappOrigins = arraify(dappIDs);
 
   return window.rabbyDesktop.ipcRenderer
     .invoke('dapps-togglepin', dappOrigins, nextPinned)
@@ -96,7 +96,7 @@ export async function toggleDappPinned(
         matomoRequestEvent({
           category: 'My Dapp',
           action: 'Pin Dapp',
-          label: Array.isArray(dappOrigin) ? dappOrigin.join(',') : dappOrigin,
+          label: Array.isArray(dappIDs) ? dappIDs.join(',') : dappIDs,
         });
       }
       return r;
