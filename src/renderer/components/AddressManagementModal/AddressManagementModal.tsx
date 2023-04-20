@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import clsx from 'clsx';
 import { Dropdown } from 'antd';
 import styled from 'styled-components';
@@ -12,18 +12,12 @@ const TriggerEl = styled.div`
 
 export const AddressManagementModal: React.FC = () => {
   const { svVisible, closeSubview } = useZPopupViewState('address-management');
-  const divRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (svVisible) {
-      divRef.current?.click();
-    }
-  }, [svVisible]);
 
   return (
     <Dropdown
       overlayClassName={clsx(!svVisible && 'h-0 overflow-hidden')}
       overlay={<MainContainer />}
+      open={svVisible}
       trigger={['click']}
       onOpenChange={(open) => {
         if (!open) {
@@ -32,7 +26,7 @@ export const AddressManagementModal: React.FC = () => {
       }}
       destroyPopupOnHide
     >
-      <TriggerEl ref={divRef} className="w-[440px] h-40 absolute right-10" />
+      <TriggerEl className="w-[440px] h-40 absolute right-10" />
     </Dropdown>
   );
 };
