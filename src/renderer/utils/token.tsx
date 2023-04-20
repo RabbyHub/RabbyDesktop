@@ -4,10 +4,13 @@ import { TokenItem } from '@debank/rabby-api/dist/types';
 import { Contract, providers } from 'ethers';
 import { hexToString } from 'web3-utils';
 import styled from 'styled-components';
+import { PropsWithChildren, useCallback } from 'react';
+import clsx from 'clsx';
 import LabelWithIcon from '@/renderer/components/LabelWithIcon';
 import TokensIcons from '../routes/Home/components/TokenIcons';
 import { formatUsdValue } from './number';
 import { getCollectionDisplayName, PortfolioItemNft } from './nft';
+import { useTokenAction } from '../routes/Home/components/TokenActionModal';
 
 export const ellipsisTokenSymbol = (text: string, length = 6) => {
   if (text?.length <= length) return text;
@@ -275,20 +278,60 @@ const DebtTag = styled.div`
   margin-left: 6px;
 `;
 
+const TokenAction = (
+  props: PropsWithChildren<{ enableAction?: boolean; token: TokenItem }>
+) => {
+  const { token, enableAction = true, children } = props;
+  const { enableTokenAction, setTokenAction } = useTokenAction();
+
+  const handleClick = useCallback(() => {
+    if (enableAction && enableTokenAction) {
+      setTokenAction(token);
+    }
+  }, [enableAction, enableTokenAction, setTokenAction, token]);
+
+  return (
+    <span
+      onClick={handleClick}
+      className={clsx(
+        enableAction &&
+          enableTokenAction &&
+          'hover:underline hover:text-blue-light cursor-pointer'
+      )}
+    >
+      {children}
+    </span>
+  );
+};
+
 export function getTokens(
   tokens: TokenItem[] = [],
   separator = ' + ',
   isDebt = false,
-  nfts?: PortfolioItemNft[]
+  nfts?: PortfolioItemNft[],
+  enableAction?: boolean
 ) {
   const tokenStr = tokens
     .filter((item) => !!item)
-    .map((token) => ellipsisTokenSymbol(token.symbol))
-    .join(separator);
+    .map((token, idx) => (
+      <span key={token.id}>
+        {idx !== 0 && separator}
+        <TokenAction enableAction={enableAction} token={token}>
+          {ellipsisTokenSymbol(token.symbol)}
+        </TokenAction>
+      </span>
+    ));
+
   const nftStr = nfts
     ?.map((n) => getCollectionDisplayName(n.collection))
     .join(separator);
-  const label = nftStr ? nftStr + separator + tokenStr : tokenStr;
+  const label = nftStr ? (
+    <>
+      {nftStr} {separator} {tokenStr}
+    </>
+  ) : (
+    tokenStr
+  );
   const icon = (
     <TokensIcons
       icons={tokens

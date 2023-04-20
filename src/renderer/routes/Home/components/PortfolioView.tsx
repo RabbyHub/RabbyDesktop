@@ -8,6 +8,7 @@ import TokenList from './TokenList';
 import ProtocolList from './ProtocolList';
 import ScrollTopContext from './scrollTopContext';
 import { VIEW_TYPE } from '../type';
+import { TokenActionModal } from './TokenActionModal';
 
 const PortfolioWrapper = styled.div`
   background: rgba(255, 255, 255, 0.03);
@@ -200,6 +201,8 @@ const PortfolioView = ({
           )}
         </div>
       </PortfolioWrapper>
+
+      <TokenActionModal />
     </ScrollTopContext.Provider>
   );
 };

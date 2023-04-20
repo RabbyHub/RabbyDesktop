@@ -143,12 +143,14 @@ const TokenItemComp = ({
   supportHistory,
   onTokenClick,
   className,
+  tokenClassName,
 }: {
   token: TokenItem;
   historyToken?: TokenItem;
   supportHistory: boolean;
   onTokenClick?: (token: TokenItem) => void;
   className?: string;
+  tokenClassName?: string;
 }) => {
   const amountChange = useMemo(() => {
     if (!historyToken || !supportHistory) return 0;
@@ -188,9 +190,13 @@ const TokenItemComp = ({
       className={clsx('td', className)}
       key={`${token.chain}-${token.id}`}
     >
-      <TokenLogoField onClick={handleToken}>
+      <TokenLogoField>
         <TokenWithChain token={token} width="24px" height="24px" />
-        <span className="token-symbol" title={token.symbol}>
+        <span
+          className={clsx('token-symbol', tokenClassName)}
+          title={token.symbol}
+          onClick={handleToken}
+        >
           {ellipsisTokenSymbol(token.symbol)}
         </span>
         {/* <div className="token-actions">
