@@ -228,7 +228,14 @@ type MainInternalsMessagePayload = {
     response: [];
   };
   '__internal_main:app:cache-dapp-id-to-abspath': {
-    send: [dappId: string, absPath: string];
+    send: [
+      maps: {
+        [dappId: string]: string;
+      },
+      opts?: {
+        cleanOld?: boolean;
+      }
+    ];
     response: [];
   };
 };

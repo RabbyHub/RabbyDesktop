@@ -289,6 +289,7 @@ export function splitPathname(pathnameWithQuery: string, ipfsCid = '') {
  *
  * file:///c/Users/admin/foo/path --> /C:/Users/admin/foo/path
  * /c/Users/admin/foo/path --> /C:/Users/admin/foo/path
+ * /Users/admin/foo/path --> /Users/admin/foo/path
  */
 export function normalizeLocalAbsPath(
   inputPath: string,
@@ -325,6 +326,7 @@ export function normalizeLocalAbsPath(
 // console.debug('test:: normalizeLocalAbsPath', normalizeLocalAbsPath('file:///c/Users/admin/foo/path'))
 // console.debug('test:: normalizeLocalAbsPath', normalizeLocalAbsPath('/c/Users/admin/foo/path'))
 // console.debug('test:: normalizeLocalAbsPath', normalizeLocalAbsPath('/c:/Users/admin/foo/path'))
+// console.debug('test:: normalizeLocalAbsPath', normalizeLocalAbsPath('/Users/admin/foo/path'))
 
 const DAPP_URL_REGEXPS = {
   ID_IPFS_REGEX: /^(?:ipfs|rabby-ipfs):\/\/([a-zA-Z0-9]+)(\/.*)?$/i,

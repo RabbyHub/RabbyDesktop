@@ -156,11 +156,9 @@ export async function detectLocalDapp(
       : localDappPath;
   const inputOrigin = checkedOutDappInfo.dappOrigin;
 
-  emitIpcMainEvent(
-    '__internal_main:app:cache-dapp-id-to-abspath',
-    checkedOutDappInfo.localFSID,
-    checkedOutDappInfo.localFSPath
-  );
+  emitIpcMainEvent('__internal_main:app:cache-dapp-id-to-abspath', {
+    [checkedOutDappInfo.localFSID]: checkedOutDappInfo.localFSPath,
+  });
 
   const absPath = unPrefix(checkedOutDappInfo.localFSPath, '/');
 

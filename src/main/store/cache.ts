@@ -26,12 +26,16 @@ export const cacheStore = makeStore<{
 
 onIpcMainInternalEvent(
   '__internal_main:app:cache-dapp-id-to-abspath',
-  (dappId, absPath) => {
-    const dappIdToAbsPathMap = cacheStore.get('dappIdToAbsPathMap');
+  (maps, opts) => {
+    let dappIdToAbsPathMap = cacheStore.get('dappIdToAbsPathMap');
+
+    if (opts?.cleanOld) {
+      dappIdToAbsPathMap = {};
+    }
 
     cacheStore.set('dappIdToAbsPathMap', {
       ...dappIdToAbsPathMap,
-      [dappId]: absPath,
+      ...maps,
     });
   }
 );

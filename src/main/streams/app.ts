@@ -1,5 +1,6 @@
 import { app, BrowserWindow, dialog, shell } from 'electron';
 
+import { checkoutDappURL } from '@/isomorphic/dapp';
 import {
   APP_NAME,
   IS_RUNTIME_PRODUCTION,
@@ -54,6 +55,7 @@ import { checkForceUpdate } from '../updater/force_update';
 import { getOrCreateDappBoundTab } from '../utils/tabbedBrowserWindow';
 import { MainTabbedBrowserWindow } from '../browser/browsers';
 import { notifyHidePopupWindowOnMain } from '../utils/mainTabbedWin';
+import { dappStore } from '../store/dapps';
 
 const appLog = getBindLog('appStream', 'bgGrey');
 
@@ -280,6 +282,27 @@ handleIpcMainInvoke('open-directory', () => {
   });
 });
 
+export function initAppStoreCache() {
+  const localFSDappsCacheMap: Record<string, string> = {};
+
+  const dappsMap = dappStore.get('dappsMap');
+
+  Object.values(dappsMap).forEach((dapp) => {
+    if (dapp.type === 'localfs') {
+      const checkoutedDappURLInfo = checkoutDappURL(dapp.id);
+      if (checkoutedDappURLInfo.localFSPath) {
+        localFSDappsCacheMap[checkoutedDappURLInfo.localFSID] =
+          checkoutedDappURLInfo.localFSPath;
+      }
+    }
+  });
+  emitIpcMainEvent(
+    '__internal_main:app:cache-dapp-id-to-abspath',
+    localFSDappsCacheMap,
+    { cleanOld: true }
+  );
+}
+
 export default function bootstrap() {
   app.setPath('userData', getAppUserDataPath());
   if (!IS_RUNTIME_PRODUCTION) {
@@ -287,6 +310,7 @@ export default function bootstrap() {
     app.setName(APP_NAME);
   }
   initMainProcessSentry();
+  initAppStoreCache();
 
   // eslint-disable-next-line promise/catch-or-return
   app.whenReady().then(async () => {
