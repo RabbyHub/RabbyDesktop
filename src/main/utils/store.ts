@@ -25,6 +25,16 @@ export function getAppUserDataPath() {
   return gAppUserDataPath;
 }
 
+export function getClientAppPaths() {
+  const userDataPath = getAppUserDataPath();
+
+  return {
+    userDataPath,
+    storeRootPath: path.resolve(userDataPath, './local_data'),
+    ipfsRootPath: path.join(userDataPath, './local_cache/ipfs-store'),
+  };
+}
+
 function getStoreRootPath() {
   return path.resolve(getAppUserDataPath(), './local_data');
 }

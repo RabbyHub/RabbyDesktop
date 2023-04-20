@@ -10,6 +10,7 @@ import {
   Menu,
   MenuItem,
   dialog,
+  shell,
 } from 'electron';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 import { findDappsByOrigin } from '../store/dapps';
@@ -26,6 +27,7 @@ import {
   getWebuiExtId,
   onMainWindowReady,
 } from '../utils/stream-helpers';
+import { getClientAppPaths } from '../utils/store';
 
 const LABELS = {
   openInNewTab: (type: 'link' | Electron.ContextMenuParams['mediaType']) =>
@@ -193,6 +195,35 @@ function buildRabbyXDebugMenu(opts: ChromeContextMenuOptions) {
   });
 
   return menu;
+}
+
+function buildPathKitsMenu(opts: ChromeContextMenuOptions) {
+  const { params } = opts;
+
+  const pathKitsMenu = new Menu();
+
+  appendMenu(pathKitsMenu, {
+    label: `open - userDataPath`,
+    click: () => {
+      shell.openExternal(getClientAppPaths().userDataPath);
+    },
+  });
+
+  appendMenu(pathKitsMenu, {
+    label: `open - store rootPath`,
+    click: () => {
+      shell.openExternal(getClientAppPaths().storeRootPath);
+    },
+  });
+
+  appendMenu(pathKitsMenu, {
+    label: `open - IPFS Local rootPath`,
+    click: () => {
+      shell.openExternal(getClientAppPaths().ipfsRootPath);
+    },
+  });
+
+  return pathKitsMenu;
 }
 
 function buildInspectKitsMenu(opts: ChromeContextMenuOptions) {
@@ -588,6 +619,11 @@ async function buildChromeContextMenu(
     append({
       label: 'Opened Tabs in Main Window',
       submenu: await buildOpenedTabsMenu(opts),
+    });
+
+    append({
+      label: 'Fast Paths',
+      submenu: buildPathKitsMenu(opts),
     });
 
     appendSeparator();
