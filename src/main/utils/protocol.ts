@@ -5,16 +5,12 @@ import logger from 'electron-log';
 
 import {
   IS_RUNTIME_PRODUCTION,
-  PROTOCOL_ENS,
   PROTOCOL_IPFS,
   RABBY_INTERNAL_PROTOCOL,
 } from '@/isomorphic/constants';
-import { ensurePrefix } from '@/isomorphic/string';
 import {
-  canoicalizeDappUrl,
-  extractIpfsCid,
   extractIpfsInfo,
-  isIpfsHttpURL,
+  isHttpURLForSpecialDapp,
   splitPathname,
 } from '@/isomorphic/url';
 import { arraify } from '@/isomorphic/array';
@@ -104,7 +100,7 @@ export const appInterpretors = {
     const registerSuccess = ctx.session.protocol.interceptFileProtocol(
       TARGET_PROTOCOL.slice(0, -1),
       async (request, callback) => {
-        if (!isIpfsHttpURL(request.url)) {
+        if (!isHttpURLForSpecialDapp(request.url)) {
           // protocol.uninterceptProtocol('http');
           callback({
             data: 'Not found',
@@ -114,22 +110,31 @@ export const appInterpretors = {
           return;
         }
         const checkedOutDappURLInfo = checkoutDappURL(request.url);
+        const urlIpfsInfo = extractIpfsInfo(request.url);
 
-        const { pathnameWithQuery } = extractIpfsInfo(request.url);
-        const dapp = findDappsById(checkedOutDappURLInfo.dappID);
+        let ipfsCid = '';
+        if (urlIpfsInfo.ipfsCid) {
+          ipfsCid = urlIpfsInfo.ipfsCid;
+        } else {
+          const dapp = findDappsById(checkedOutDappURLInfo.dappID);
 
-        if (!dapp) {
-          logger.error(`dapp not found for: ${request.url}`);
-          callback({
-            data: 'Not found',
-            mimeType: 'text/plain',
-            statusCode: 404,
-          });
-          return;
+          if (!dapp) {
+            logger.error(`dapp not found for: ${request.url}`);
+            callback({
+              data: 'Not found',
+              mimeType: 'text/plain',
+              statusCode: 404,
+            });
+            return;
+          }
+
+          ipfsCid = extractIpfsInfo(dapp.origin).ipfsCid;
         }
 
-        const { ipfsCid } = checkoutDappURL(dapp.origin);
-        const { fsRelativePath } = splitPathname(pathnameWithQuery, ipfsCid);
+        const { fsRelativePath } = splitPathname(
+          urlIpfsInfo.pathnameWithQuery,
+          ipfsCid
+        );
 
         const ipfsService = await getIpfsService();
 

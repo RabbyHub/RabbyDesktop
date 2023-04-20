@@ -1,7 +1,7 @@
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { BrowserWindow, session } from 'electron';
 import { formatDappHttpOrigin } from '@/isomorphic/dapp';
-import { integrateQueryToUrl, isIpfsDappID } from '../../isomorphic/url';
+import { integrateQueryToUrl, isSpecialDappID } from '../../isomorphic/url';
 import { emitIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import { MainWindowTab, Tab, Tabs } from './tabs';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
@@ -145,7 +145,7 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
 
       if (tab.relatedDappId) {
         acc[tab.relatedDappId] = tab.view!.webContents.id;
-        if (isIpfsDappID(tab.relatedDappId)) {
+        if (isSpecialDappID(tab.relatedDappId)) {
           acc[formatDappHttpOrigin(tab.relatedDappId)] =
             tab.view!.webContents.id;
         }

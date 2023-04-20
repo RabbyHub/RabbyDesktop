@@ -6,7 +6,6 @@ import { firstValueFrom } from 'rxjs';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { isRabbyXPage } from '@/isomorphic/url';
 import { trimWebContentsUserAgent } from '@/isomorphic/string';
-import { coerceNumber } from '@/isomorphic/primitive';
 import {
   IS_RUNTIME_PRODUCTION,
   PROTOCOL_IPFS,

@@ -92,7 +92,7 @@ type IDappPartial = Omit<INextDapp, 'id' | 'type'> & {
 };
 
 type ICheckedOutDappURL = {
-  type: IValidDappType;
+  type: INextDapp['type'];
   dappID: string;
   dappOrigin: string;
   dappHttpID: string;
