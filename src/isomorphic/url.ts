@@ -152,15 +152,15 @@ export function checkHardwareConnectPage(url: string) {
 }
 
 export function isUrlFromDapp(url: string) {
-  return (
-    (!url.startsWith(RABBY_INTERNAL_PROTOCOL) &&
-      !url.startsWith('chrome-extension:') &&
-      (url.startsWith('https:') ||
-        // ipfs support
-        (url.startsWith('http:') && url.includes(`.${LOCALIPFS_BRAND}`)) ||
-        (url.startsWith('http:') && url.includes(`.${LOCALFS_BRAND}`)))) ||
-    (url.startsWith('http:') && url.includes(`${ENS_LOCALHOST_DOMAIN}`))
-  );
+  if (url.startsWith('https:')) return true;
+
+  if (url.startsWith('http:')) {
+    if (url.includes(`${LOCALIPFS_BRAND}.`)) return true;
+    if (url.includes(`${LOCALFS_BRAND}.`)) return true;
+    if (url.includes(`${ENS_LOCALHOST_DOMAIN}`)) return true;
+  }
+
+  return false;
 }
 
 export function getShellUIType(url: string) {
