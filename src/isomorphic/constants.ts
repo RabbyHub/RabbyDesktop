@@ -16,7 +16,7 @@ export const IPFS_LOCALHOST_DOMAIN = `local.ipfs`;
 export const LOCALIPFS_BRAND = IPFS_LOCALHOST_DOMAIN;
 export const ENS_LOCALHOST_DOMAIN = `eth.localens`;
 
-export const DAPP_TYPE_TO_OPEN_AS_HTTP = ['ipfs', 'ens'] as const;
+export const DAPP_TYPE_TO_OPEN_AS_HTTP = ['ipfs', 'ens', 'local'] as const;
 
 // only useful in dev mode
 let DEV_SERVER_PORT = 1212;

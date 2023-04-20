@@ -48,7 +48,7 @@ type IPreviewDappViewChanges =
     };
 
 type IDappAddSource = 'https' | 'ipfs-cid' | 'ens-addr' | 'local-fs';
-type IDappType = INextDapp['type'];
+
 type INextDapp = {
   id: string;
   alias: string;
@@ -77,7 +77,14 @@ type INextDapp = {
       type: 'ens';
       origin: string | `rabby-ens://${string}${string}`;
     }
+  | {
+      type: 'local';
+      origin: string | `rabby-fs://${string}${string}`;
+    }
 );
+
+type IDappType = INextDapp['type'];
+type IValidDappType = Exclude<INextDapp['type'], 'unknown'>;
 
 type IDappPartial = Omit<INextDapp, 'id' | 'type'> & {
   id?: INextDapp['id'];
@@ -85,7 +92,7 @@ type IDappPartial = Omit<INextDapp, 'id' | 'type'> & {
 };
 
 type ICheckedOutDappURL = {
-  type: 'unknown' | 'ipfs' | 'ens' | 'http';
+  type: IValidDappType;
   dappID: string;
   dappOrigin: string;
   dappHttpID: string;

@@ -1,6 +1,6 @@
 import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { Button } from 'antd';
-import { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import clsx from 'clsx';
 import { Modal } from '../Modal/Modal';
@@ -77,10 +77,24 @@ export const IPFSVerifyFailedModal = () => {
   );
 };
 
-export const IPFSNotSupportedModal = () => {
-  const { svVisible, delayCloseSubview } = useZPopupViewState(
-    'ipfs-not-supported-modal'
+export const DappTypeNotSupportedModal = () => {
+  const { svVisible, svState, delayCloseSubview } = useZPopupViewState(
+    'modal-dapp-type-not-supported'
   );
+
+  const dappTypeKW = useMemo(() => {
+    switch (svState?.tipType) {
+      case 'ens':
+        return 'ENS';
+      case 'ipfs':
+        return 'IPFS';
+      case 'local':
+        return 'Local';
+      default:
+        return 'Special Type';
+    }
+  }, [svState?.tipType]);
+
   return (
     <Modal
       width={490}
@@ -89,10 +103,13 @@ export const IPFSNotSupportedModal = () => {
       open={svVisible}
       onCancel={() => delayCloseSubview(150)}
     >
-      <div className={styles.alertModalTitle}>IPFS Dapp is not enabled</div>
+      <div className={styles.alertModalTitle}>
+        {dappTypeKW} Dapp is not enabled
+      </div>
       <div className={clsx(styles.alertModalContent, 'text-left')}>
-        Please enable IPFS Dapp in settings. Please note that using IPFS may
-        interfere with the operation of Trezor and Onekey wallets.
+        Please enable Special Type Dapp in settings. Please note that using{' '}
+        {dappTypeKW} may interfere with the operation of Trezor and Onekey
+        wallets.
       </div>
       <footer className={styles.alertModalFooter}>
         <Button

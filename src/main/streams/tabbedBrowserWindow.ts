@@ -225,11 +225,14 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
     };
   }
   const checkedOutDappURLInfo = checkoutDappURL(dappOrigin);
-  if (checkedOutDappURLInfo?.type === 'ipfs') {
+  if (DAPP_TYPE_TO_OPEN_AS_HTTP.includes(checkedOutDappURLInfo?.type as any)) {
     if (!isEnableSupportIpfsDapp()) {
       pushChangesToZPopupLayer({
-        'ipfs-not-supported-modal': {
+        'modal-dapp-type-not-supported': {
           visible: true,
+          state: {
+            tipType: checkedOutDappURLInfo?.type,
+          },
         },
       });
       return result;

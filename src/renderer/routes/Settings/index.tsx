@@ -265,10 +265,11 @@ export function MainWindowSettings() {
             name={
               <>
                 <div className="flex flex-col gap-[4px]">
-                  <span className="text-14 font-medium">IPFS</span>
+                  <span className="text-14 font-medium">IPFS/ENS/Local</span>
                   <span className="text-14 text-white opacity-[0.6]">
-                    Once enabled, you can use IPFS Dapp. However, Trezor and
-                    Onekey will be affected and can't be used properly.
+                    Once enabled, you can use IPFS/ENS/Local Dapp. However,
+                    Trezor and Onekey will be affected and can't be used
+                    properly.
                   </span>
                 </div>
               </>
