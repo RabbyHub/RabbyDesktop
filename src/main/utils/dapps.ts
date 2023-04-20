@@ -156,7 +156,10 @@ export async function detectLocalDapp(
       : localDappPath;
   const inputOrigin = checkedOutDappInfo.dappOrigin;
 
-  const absPath = unPrefix(checkedOutDappInfo.localFSPath, '/');
+  const absPath =
+    process.platform === 'win32'
+      ? unPrefix(checkedOutDappInfo.localFSPath, '/')
+      : checkedOutDappInfo.localFSPath;
 
   if (!fs.existsSync(absPath)) {
     return {
