@@ -26,7 +26,7 @@ type tokenContainer = {
 };
 const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
   const chainItem = getChain(token?.chain);
-  const chianLogo =
+  const chainLogo =
     chainItem?.logo || 'rabby-internal://assets/icons/common/token-default.svg';
 
   const isNativeToken = chainItem.nativeTokenAddress === token?.id;
@@ -101,7 +101,13 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
   return (
     <div className="flex flex-col h-full text-white">
       <div className="flex items-center">
-        <img src={token.logo_url} className="w-[34px] rounded-full" />
+        <img
+          src={
+            token.logo_url ||
+            'rabby-internal://assets/icons/common/token-default.svg'
+          }
+          className="w-[34px] rounded-full"
+        />
         <div className="mx-[15px] text-[30px] leading-[36px] font-medium max-w-[276px] overflow-hidden overflow-ellipsis whitespace-nowrap">
           {token.symbol}
         </div>
@@ -113,7 +119,7 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
             !isNativeToken && 'cursor-pointer'
           )}
         >
-          <img src={chianLogo} className="w-14 h-14" />
+          <img src={chainLogo} className="w-14 h-14" />
           <span className="text-white text-opacity-60">{tokenAddrDisplay}</span>
           {!isNativeToken && (
             <img src={IconLink} className="w-14 h-14 opacity-60" />
