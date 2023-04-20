@@ -8,6 +8,7 @@ import { isRabbyXPage } from '@/isomorphic/url';
 import { trimWebContentsUserAgent } from '@/isomorphic/string';
 import {
   IS_RUNTIME_PRODUCTION,
+  PROTOCOL_ENS,
   PROTOCOL_IPFS,
   RABBY_INTERNAL_PROTOCOL,
 } from '../../isomorphic/constants';
@@ -153,6 +154,10 @@ protocol.registerSchemesAsPrivileged([
     scheme: PROTOCOL_IPFS.slice(0, -1),
     privileges: { standard: true, supportFetchAPI: true },
   },
+  {
+    scheme: PROTOCOL_ENS.slice(0, -1),
+    privileges: { standard: true, supportFetchAPI: true },
+  },
   // {
   //   scheme: 'file:'.slice(0, -1),
   //   privileges: { standard: true, corsEnabled: false, allowServiceWorkers: true, supportFetchAPI: true },
@@ -210,6 +215,15 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
       },
     ],
     appInterpretors['rabby-ipfs:']
+  );
+  registerSessionProtocol(
+    [
+      {
+        session: checkingViewSession,
+        name: 'checkingViewSession',
+      },
+    ],
+    appInterpretors['rabby-ens:']
   );
 
   emitIpcMainEvent('__internal_main:app:enable-ipfs-support', true);
