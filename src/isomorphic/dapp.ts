@@ -415,10 +415,12 @@ export function formatDappToStore(
     let dappId = `rabby-ipfs://${ipfsCid}`;
     if (retDapp?.extraInfo?.ensAddr) {
       dappId = formatEnsDappIdURL(retDapp?.extraInfo?.ensAddr, ipfsCid);
+      retDapp.type = 'ens';
+    } else {
+      retDapp.type = 'ipfs';
     }
 
     retDapp.id = dappId;
-    retDapp.type = 'ipfs';
 
     retDapp.extraInfo = {
       ...retDapp.extraInfo,
