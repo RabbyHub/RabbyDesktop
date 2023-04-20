@@ -434,15 +434,15 @@ handleIpcMainInvoke('detect-dapp', async (_, dappUrl) => {
 
   const checkedOutDappURLInfo = checkoutDappURL(dappUrl);
 
-  if (checkedOutDappURLInfo.type === 'ipfs') {
-    if (checkedOutDappURLInfo.ensAddr) {
-      return {
-        result: await detectEnsDapp(checkedOutDappURLInfo, {
-          existedDapps: allDapps,
-        }),
-      };
-    }
+  if (checkedOutDappURLInfo.type === 'ens') {
+    return {
+      result: await detectEnsDapp(checkedOutDappURLInfo, {
+        existedDapps: allDapps,
+      }),
+    };
+  }
 
+  if (checkedOutDappURLInfo.type === 'ipfs') {
     return {
       result: await detectIPFSDapp(checkedOutDappURLInfo.dappID, {
         existedDapps: allDapps,

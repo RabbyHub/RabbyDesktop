@@ -1,4 +1,8 @@
-import { DAPP_TYPE_TO_OPEN_AS_HTTP, LOCALIPFS_BRAND } from './constants';
+import {
+  DAPP_TYPE_TO_OPEN_AS_HTTP,
+  LOCALIPFS_BRAND,
+  PROTOCOL_ENS,
+} from './constants';
 import { ensurePrefix, isInvalidBase64, unPrefix } from './string';
 import {
   canoicalizeDappUrl,
@@ -8,7 +12,6 @@ import {
   IPFS_REGEXPS,
   isIpfsHttpURL,
   isURLForIpfsDapp,
-  normalizeENSDomainPatterns,
   parseDomainMeta,
 } from './url';
 
@@ -17,18 +20,21 @@ export function isValidDappAlias(alias: string) {
 }
 
 function makeIpfsDappHttpId(
-  ipfsCid: string,
-  opts?: {
-    ensAddr?: string;
-  }
+  opts:
+    | {
+        type: 'ipfs';
+        ipfsCid: string;
+      }
+    | {
+        type: 'ens';
+        ensAddr: string;
+      }
 ) {
-  if (opts?.ensAddr) {
-    return `http://${
-      normalizeENSDomainPatterns(opts?.ensAddr).ensDomain
-    }.localens`;
+  if (opts.type === 'ens') {
+    return `http://${opts.ensAddr}.localens`;
   }
 
-  return `http://${LOCALIPFS_BRAND}.${ipfsCid}`;
+  return `http://${LOCALIPFS_BRAND}.${opts.ipfsCid}`;
 }
 
 export function formatEnsDappOrigin(ensAddr: string, ipfsCid?: string) {
@@ -52,6 +58,20 @@ export function checkoutDappURL(dappPath: string): ICheckedOutDappURL {
     ipfsCid: '' as const,
     ensAddr: '' as const,
   };
+
+  if (dappPath.startsWith(PROTOCOL_ENS)) {
+    const ensAddr = canoicalizeDappUrl(dappPath).hostname;
+    return {
+      ...result,
+      type: 'ens' as const,
+      dappID: dappPath,
+      dappOrigin: dappPath,
+      dappOriginToShow: `ens://${ensAddr}`,
+      dappURLToPrview: `rabby-ens://${ensAddr}`,
+      dappHttpID: makeIpfsDappHttpId({ type: 'ens', ensAddr }),
+    };
+  }
+
   if (dappPath.startsWith('/ipfs/') || isURLForIpfsDapp(dappPath)) {
     const { ipfsCid, addSource, ensAddr } = extractIpfsInfo(dappPath);
 
@@ -63,7 +83,7 @@ export function checkoutDappURL(dappPath: string): ICheckedOutDappURL {
         dappOrigin: formatEnsDappOrigin(ensAddr, ipfsCid),
         dappOriginToShow: `ens://${ensAddr}`,
         dappURLToPrview: `rabby-ipfs://${ipfsCid}`,
-        dappHttpID: makeIpfsDappHttpId(ipfsCid, { ensAddr }),
+        dappHttpID: makeIpfsDappHttpId({ type: 'ens', ensAddr }),
         ipfsCid,
         ensAddr,
       };
@@ -78,7 +98,7 @@ export function checkoutDappURL(dappPath: string): ICheckedOutDappURL {
       dappOrigin: `rabby-ipfs://${ipfsCid}`,
       dappOriginToShow: `ipfs://${ipfsCid}`,
       dappURLToPrview: `rabby-ipfs://${ipfsCid}`,
-      dappHttpID: makeIpfsDappHttpId(ipfsCid),
+      dappHttpID: makeIpfsDappHttpId({ type: 'ipfs', ipfsCid }),
       ipfsCid,
     };
   }
@@ -90,7 +110,7 @@ export function checkoutDappURL(dappPath: string): ICheckedOutDappURL {
     const ipfsCid = extractIpfsCid(parsedInfo.origin);
 
     if (ipfsCid) {
-      const dappHttpID = makeIpfsDappHttpId(ipfsCid);
+      const dappHttpID = makeIpfsDappHttpId({ type: 'ipfs', ipfsCid });
 
       return {
         ...result,
@@ -98,7 +118,7 @@ export function checkoutDappURL(dappPath: string): ICheckedOutDappURL {
         dappID: `rabby-ipfs://${ipfsCid}`,
         dappOrigin: `rabby-ipfs://${ipfsCid}`,
         dappOriginToShow: `ipfs://${ipfsCid}`,
-        dappURLToPrview: makeIpfsDappHttpId(ipfsCid), // pointless for this kind of case
+        dappURLToPrview: makeIpfsDappHttpId({ type: 'ipfs', ipfsCid }), // pointless for this kind of case
         dappHttpID,
         ipfsCid,
       };
