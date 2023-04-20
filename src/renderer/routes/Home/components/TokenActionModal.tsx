@@ -101,7 +101,7 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
   return (
     <div className="flex flex-col h-full text-white">
       <div className="flex items-center">
-        <img src={token.logo_url} className="w-[34px]" />
+        <img src={token.logo_url} className="w-[34px] rounded-full" />
         <div className="mx-[15px] text-[30px] leading-[36px] font-medium max-w-[276px] overflow-hidden overflow-ellipsis whitespace-nowrap">
           {token.symbol}
         </div>
