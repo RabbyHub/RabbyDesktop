@@ -206,6 +206,7 @@ const TabList = ({
                   dappTabInfo: {
                     dappID: dapp.id,
                     dappOrigin: dapp.origin,
+                    dappType: dapp.type,
                     id: tab?.id,
                     url: tab?.url,
                   },

@@ -21,6 +21,7 @@ import { useMemo } from 'react';
 import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
+import { checkoutDappURL, isOpenedAsHttpDappType } from '@/isomorphic/dapp';
 import styles from './index.module.less';
 
 const toast = (message: string) => {
@@ -36,7 +37,12 @@ export const SidebarContextMenu = () => {
   const { pageInfo } = usePopupWinInfo('sidebar-dapp');
 
   const dappID = pageInfo?.dappTabInfo.dappID;
-  const dappOrigin = pageInfo?.dappTabInfo?.dappOrigin || '';
+  const dappOrigin = useMemo(() => {
+    if (!pageInfo?.dappTabInfo.dappType)
+      return pageInfo?.dappTabInfo.dappOrigin;
+
+    return checkoutDappURL(pageInfo?.dappTabInfo.dappID).dappHttpID;
+  }, [pageInfo?.dappTabInfo]);
   const dappInfo = useDapp(dappID);
   const zActions = useZPopupLayerOnMain();
   const { removeConnectedSite, removeAllConnectedSites } = useConnectedSite();
@@ -186,9 +192,10 @@ export const SidebarContextMenu = () => {
           });
         }
         break;
-      case 'dapp-disconnect':
-        disconnect(dappOrigin, pageInfo?.dappTabInfo?.url);
+      case 'dapp-disconnect': {
+        if (dappOrigin) disconnect(dappOrigin, pageInfo?.dappTabInfo?.url);
         break;
+      }
       case 'dapp-disconnect-all':
         removeAllConnectedSites();
         forwardMessageTo('*', 'refreshConnectedSiteMap', {});
