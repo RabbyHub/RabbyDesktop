@@ -301,6 +301,7 @@ export function normalizeLocalAbsPath(
   }
 
   absPath = ensurePrefix(absPath, '/');
+  absPath = unSuffix(absPath, '/');
 
   let posixAbsPath = ensurePrefix(absPath, '/');
   posixAbsPath = posixAbsPath.replace(

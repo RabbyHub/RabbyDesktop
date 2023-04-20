@@ -156,10 +156,6 @@ export async function detectLocalDapp(
       : localDappPath;
   const inputOrigin = checkedOutDappInfo.dappOrigin;
 
-  emitIpcMainEvent('__internal_main:app:cache-dapp-id-to-abspath', {
-    [checkedOutDappInfo.localFSID]: checkedOutDappInfo.localFSPath,
-  });
-
   const absPath = unPrefix(checkedOutDappInfo.localFSPath, '/');
 
   if (!fs.existsSync(absPath)) {
@@ -189,6 +185,10 @@ export async function detectLocalDapp(
       },
     };
   }
+
+  emitIpcMainEvent('__internal_main:app:cache-dapp-id-to-abspath', {
+    [checkedOutDappInfo.localFSID]: checkedOutDappInfo.localFSPath,
+  });
 
   let fallbackFavicon: string | undefined;
   let targetMetadata: ISiteMetaData | undefined;
