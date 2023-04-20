@@ -37,7 +37,7 @@ export default function DApps() {
   const onClickDapp: IOnOpDapp = useCallback((op, dapp: IDapp) => {
     switch (op) {
       case 'unpin': {
-        toggleDappPinned([dapp.id], true);
+        toggleDappPinned([dapp.id], false);
         break;
       }
       case 'pin': {
