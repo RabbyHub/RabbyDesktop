@@ -107,8 +107,8 @@ export const DappTypeNotSupportedModal = () => {
         {dappTypeKW} Dapp is not enabled
       </div>
       <div className={clsx(styles.alertModalContent, 'text-left')}>
-        Please enable Special Type Dapp in settings. Please note that using{' '}
-        {dappTypeKW} may interfere with the operation of Trezor and Onekey
+        Please enable {dappTypeKW} Dapp in settings. Please note that using{' '}
+        {dappTypeKW} Dapp may interfere with the operation of Trezor and Onekey
         wallets.
       </div>
       <footer className={styles.alertModalFooter}>
