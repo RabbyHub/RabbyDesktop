@@ -1,3 +1,5 @@
+import child_process from 'child_process';
+
 import {
   canoicalizeDappUrl,
   isInternalProtocol,
@@ -197,6 +199,14 @@ function buildRabbyXDebugMenu(opts: ChromeContextMenuOptions) {
   return menu;
 }
 
+function openLocalDir(dirname: string) {
+  if (process.platform === 'win32') {
+    shell.openExternal(dirname);
+  }
+
+  child_process.execSync(`open '${dirname}'`);
+}
+
 function buildPathKitsMenu(opts: ChromeContextMenuOptions) {
   const { params } = opts;
 
@@ -205,21 +215,21 @@ function buildPathKitsMenu(opts: ChromeContextMenuOptions) {
   appendMenu(pathKitsMenu, {
     label: `open - userDataPath`,
     click: () => {
-      shell.openExternal(getClientAppPaths().userDataPath);
+      openLocalDir(getClientAppPaths().userDataPath);
     },
   });
 
   appendMenu(pathKitsMenu, {
     label: `open - store rootPath`,
     click: () => {
-      shell.openExternal(getClientAppPaths().storeRootPath);
+      openLocalDir(getClientAppPaths().storeRootPath);
     },
   });
 
   appendMenu(pathKitsMenu, {
     label: `open - IPFS Local rootPath`,
     click: () => {
-      shell.openExternal(getClientAppPaths().ipfsRootPath);
+      openLocalDir(getClientAppPaths().ipfsRootPath);
     },
   });
 
