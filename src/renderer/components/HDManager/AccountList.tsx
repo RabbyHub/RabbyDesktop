@@ -15,7 +15,7 @@ import { AccountListSkeleton } from './AccountListSkeleton';
 import { fetchAccountsInfo, HDManagerStateContext, Account } from './utils';
 import { AliasName } from './AliasName';
 import { ChainList } from './ChainList';
-import { toastCopiedWeb3Addr } from '../TransparentToast';
+import { TipsWrapper } from '../TipWrapper';
 
 export interface Props {
   loading: boolean;
@@ -53,9 +53,8 @@ export const AccountList: React.FC<Props> = ({
     []
   );
   const [, copyToClipboard] = useCopyToClipboard();
-  const copy = React.useCallback((value: string, e: React.MouseEvent) => {
+  const copy = React.useCallback((value: string) => {
     copyToClipboard(value);
-    toastCopiedWeb3Addr(value, { triggerEl: e?.target });
   }, []);
 
   React.useEffect(() => {
@@ -247,11 +246,13 @@ export const AccountList: React.FC<Props> = ({
             value ? (
               <div className="cell-address">
                 <span>{value.toLowerCase()}</span>
-                <img
-                  onClick={(e) => copy(value.toLowerCase(), e)}
-                  className="copy-icon"
-                  src="rabby-internal://assets/icons/hd-manager/copy.svg"
-                />
+                <TipsWrapper hoverTips="Copy" clickTips="Copied">
+                  <img
+                    onClick={() => copy(value.toLowerCase())}
+                    className="copy-icon"
+                    src="rabby-internal://assets/icons/hd-manager/copy.svg"
+                  />
+                </TipsWrapper>
               </div>
             ) : (
               <AccountListSkeleton align="left" height={28} width={300}>

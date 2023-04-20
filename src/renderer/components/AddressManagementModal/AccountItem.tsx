@@ -11,11 +11,12 @@ import {
 import { splitNumberByStep } from '@/renderer/utils/number';
 import { Tooltip } from 'antd';
 import clsx from 'clsx';
-import React from 'react';
+import React, { useState } from 'react';
 import { useCopyToClipboard } from 'react-use';
 import styles from './index.module.less';
 import { useAccountInfo } from './useAccountInfo';
 import { TipsWrapper } from '../TipWrapper';
+import { DeleteWrapper } from '../DeleteWrapper';
 
 interface Props {
   account: IDisplayedAccountWithBalance;
@@ -85,9 +86,22 @@ export const AccountItem: React.FC<Props> = ({
     );
   }, [account.address, account.brandName, highlightedAddresses]);
 
+  const [close, setClose] = useState(false);
+
   return (
-    <section className={styles.AccountItem}>
-      <div onClick={onClickDelete} className={styles.trash}>
+    <DeleteWrapper
+      onCancelDelete={() => {
+        setClose(false);
+      }}
+      className={clsx(styles.AccountItem, 'relative')}
+      closeClassName="w-[calc(100%-32px)]"
+      onConfirmDelete={onClickDelete}
+      showClose={close}
+    >
+      <div
+        onClick={() => setClose(true)}
+        className={clsx(styles.trash, close && 'opacity-0')}
+      >
         <img src="rabby-internal://assets/icons/address-management/trash.svg" />
       </div>
       <div className={styles.container}>
@@ -169,6 +183,6 @@ export const AccountItem: React.FC<Props> = ({
           />
         </div>
       </div>
-    </section>
+    </DeleteWrapper>
   );
 };

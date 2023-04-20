@@ -3,10 +3,11 @@ import { useCopy } from '@/renderer/hooks/useCopy';
 import { ellipsis } from '@/renderer/utils/address';
 import { splitNumberByStep } from '@/renderer/utils/number';
 import clsx from 'clsx';
-import React from 'react';
+import React, { useState } from 'react';
 import BigNumber from 'bignumber.js';
 import { TipsWrapper } from '@/renderer/components/TipWrapper';
 import { useBundleIsMax } from '@/renderer/hooks/useBundle/useBundleAccount';
+import { DeleteWrapper } from '@/renderer/components/DeleteWrapper';
 import { useAccountItemAddress, useAccountItemIcon } from './useAccountItem';
 import { NicknameInput } from './NicknameInput';
 
@@ -69,12 +70,20 @@ export const AccountItem: React.FC<Props> = ({
   }, [isBundle, percentMap, data.id]);
 
   const balance = data.balance;
+  const [close, setClose] = useState(false);
 
   return (
-    <div className="group flex justify-center items-center relative">
-      {canDelete && (
+    <DeleteWrapper
+      className="group flex justify-center items-center relative"
+      showClose={close}
+      onCancelDelete={() => {
+        setClose(false);
+      }}
+      onConfirmDelete={onClickDelete}
+    >
+      {canDelete && !close && (
         <div
-          onClick={onClickDelete}
+          onClick={() => setClose(true)}
           className={clsx(
             'absolute left-[-21px]',
             'opacity-0 group-hover:opacity-80 cursor-pointer'
@@ -158,6 +167,6 @@ export const AccountItem: React.FC<Props> = ({
           {isBundle && <div className="opacity-60">{percent}%</div>}
         </div>
       </div>
-    </div>
+    </DeleteWrapper>
   );
 };

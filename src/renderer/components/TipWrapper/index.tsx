@@ -1,5 +1,4 @@
 import { useClickOutSide } from '@/renderer/hooks/useClick';
-import useDebounceValue from '@/renderer/hooks/useDebounceValue';
 import { Tooltip, TooltipProps } from 'antd';
 import {
   cloneElement,
@@ -45,29 +44,23 @@ export const TipsWrapper = (
   const divRef = useRef<HTMLDivElement>(null);
 
   const timerRef = useRef<NodeJS.Timeout>();
-  const timer2Ref = useRef<NodeJS.Timeout>();
 
   const [clicked, setClicked] = useState<boolean | undefined>(defaultClicked);
 
-  const closeClickedTips = useCallback(() => {
-    setClicked(undefined);
-  }, []);
-
   const handleClick = useCallback(() => {
-    setClicked(true);
     clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(closeClickedTips, timeOut);
-  }, [closeClickedTips, timeOut]);
+    setTimeout(() => {
+      setClicked(true);
+    });
+  }, []);
 
   const clearTimer = useCallback(() => {
     clearTimeout(timerRef.current);
-    clearTimeout(timer2Ref.current);
   }, []);
 
   const resetState = useCallback(() => {
     clearTimer();
-    timerRef.current = setTimeout(() => setClicked(false), timeOut);
-    timer2Ref.current = setTimeout(() => setClicked(undefined), timeOut + 100);
+    timerRef.current = setTimeout(() => setClicked(undefined), timeOut + 100);
   }, [clearTimer, timeOut]);
 
   const child = useMemo(() => {
@@ -82,9 +75,13 @@ export const TipsWrapper = (
       : children;
   }, [children, clickTips, handleClick]);
 
-  useClickOutSide(divRef, closeClickedTips);
+  const clickOutsideCloseClickedTips = useCallback(() => {
+    clearTimer();
 
-  // const debounceClicked = useDebounceValue(clicked, 200);
+    setClicked(undefined);
+  }, [clearTimer]);
+
+  useClickOutSide(divRef, clickOutsideCloseClickedTips);
 
   useEffect(() => {
     if (clicked) {
@@ -95,13 +92,15 @@ export const TipsWrapper = (
   useEffect(
     () => () => {
       clearTimeout(timerRef.current);
-      clearTimeout(timer2Ref.current);
     },
     []
   );
 
   return (
     <Tooltip
+      motion={{
+        motionLeaveImmediately: true,
+      }}
       open={clicked}
       trigger={trigger}
       title={<div ref={divRef}>{clicked ? clickTips : hoverTips}</div>}

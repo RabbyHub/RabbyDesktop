@@ -7,6 +7,7 @@ import React, { useEffect, useLayoutEffect, useMemo } from 'react';
 import { matchPath, useLocation, useNavigate } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
 import styled from 'styled-components';
+import { useTransition, animated } from '@react-spring/web';
 
 import {
   IDappWithTabInfo,
@@ -157,13 +158,18 @@ const TabList = ({
 }) => {
   const navigateToDapp = useNavigateToDappRoute();
   const rLoc = useLocation();
-  if (!dapps?.length) {
-    return null;
-  }
+
+  const transitions = useTransition(dapps, {
+    initial: { scale: 1, opacity: 1 },
+    enter: { scale: 1, opacity: 1 },
+    leave: { scale: 0, opacity: 0 },
+    config: { duration: 300 },
+    keys: (dapp) => dapp.origin,
+  });
 
   return (
     <ul className={classNames(styles.routeList, className)} style={style}>
-      {dapps.map((dapp) => {
+      {transitions((s, dapp) => {
         const { tab } = dapp;
         const faviconUrl =
           dapp?.faviconBase64 || dapp?.faviconUrl || dapp.tab?.favIconUrl;
@@ -172,7 +178,8 @@ const TabList = ({
         const matchedDappID = matchedRoute?.params.dappId || '';
 
         return (
-          <li
+          <animated.li
+            style={s}
             key={`dapp-${dapp.origin}`}
             className={classNames(
               styles.routeItem,
@@ -225,7 +232,7 @@ const TabList = ({
                 {dapp.alias || dapp.origin}
               </Hide>
             </div>
-          </li>
+          </animated.li>
         );
       })}
     </ul>

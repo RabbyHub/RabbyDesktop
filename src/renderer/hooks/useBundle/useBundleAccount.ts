@@ -202,10 +202,10 @@ export const useBundleAccount = () => {
       }
 
       if (showToast) {
-        toastMessage({
-          type: 'success',
-          content: `${ellipsis(address)} deleted`,
-        });
+        // toastMessage({
+        //   type: 'success',
+        //   content: `${ellipsis(address)} deleted`,
+        // });
       }
     },
     [accounts, ethList, removeAddress]
