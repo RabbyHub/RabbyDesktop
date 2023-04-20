@@ -13,10 +13,9 @@ export const PROTOCOL_IPFS = 'rabby-ipfs:';
 export const PROTOCOL_ENS = 'rabby-ens:';
 export const PROTOCOL_LOCALFS = 'rabby-fs:';
 
-export const IPFS_LOCALHOST_DOMAIN = `local.ipfs`;
-export const LOCALIPFS_BRAND = IPFS_LOCALHOST_DOMAIN;
+export const LOCALIPFS_BRAND = `local.ipfs`;
+export const LOCALFS_BRAND = `local.fs`;
 export const ENS_LOCALHOST_DOMAIN = `eth.localens`;
-export const LOCAL_LOCALHOST_DOMAIN = `local.fs`;
 
 export const DAPP_TYPE_TO_OPEN_AS_HTTP = [
   'ipfs',

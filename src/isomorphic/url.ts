@@ -1,9 +1,9 @@
 import { AxiosProxyConfig } from 'axios';
 import {
   ENS_LOCALHOST_DOMAIN,
-  IPFS_LOCALHOST_DOMAIN,
   IS_RUNTIME_PRODUCTION,
   LOCALIPFS_BRAND,
+  LOCALFS_BRAND,
   PROTOCOL_ENS,
   PROTOCOL_IPFS,
   RABBY_INTERNAL_PROTOCOL,
@@ -151,9 +151,8 @@ export function isUrlFromDapp(url: string) {
       !url.startsWith('chrome-extension:') &&
       (url.startsWith('https:') ||
         // ipfs support
-        (url.startsWith('http:') &&
-          url.includes(`.${IPFS_LOCALHOST_DOMAIN}`)) ||
-        (url.startsWith('http:') && url.includes(`${LOCALIPFS_BRAND}.`)))) ||
+        (url.startsWith('http:') && url.includes(`.${LOCALIPFS_BRAND}`)) ||
+        (url.startsWith('http:') && url.includes(`.${LOCALFS_BRAND}`)))) ||
     (url.startsWith('http:') && url.includes(`${ENS_LOCALHOST_DOMAIN}`))
   );
 }
@@ -295,7 +294,7 @@ export function normalizeLocalAbsPath(
   inputPath: string,
   platform = getOSPlatform()
 ) {
-  let absPath = inputPath;
+  let absPath = inputPath || '';
   if (absPath.startsWith('file://')) {
     absPath = absPath.slice('file://'.length);
   }
@@ -338,11 +337,11 @@ const DAPP_URL_REGEXPS = {
   IPFS_ENS_REGEX:
     /^(?:ipfs|rabby-ipfs):\/\/([^\\]+\.eth)\.localens(\.[a-zA-Z0-9]+)?(\/.*)?$/i,
 
-  LOCALIPFS_BRAND_REGEX: /^http:\/\/local.ipfs\.([a-zA-Z0-9]+)(\/.*)?$/i,
+  LOCALIPFS_BRAND_REGEX: /^http:\/\/local\.ipfs\.([a-zA-Z0-9]+)(\/.*)?$/i,
   LOCALIPFS_MAINDOMAIN_REGEX: /^http:\/\/([a-zA-Z0-9]+)\.local\.ipfs(\/.*)?$/i,
 
   LOCALENS_REGEX: /^http:\/\/([^\\]+[.-]eth)\.localens(\/.*)?$/i,
-  LOCALFS_MAINDOMAIN_REGEX: /^http:\/\/([a-zA-Z0-9]+)\.local\.fs(\/.*)?$/i,
+  LOCALFS_BRAND_REGEX: /^http:\/\/local\.fs\.([a-zA-Z0-9]+)(\/.*)?$/i,
 };
 
 export function isSpecialDappID(dappURL: string) {
@@ -365,7 +364,7 @@ export function isHttpURLForSpecialDapp(dappURL: string) {
     DAPP_URL_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX.test(dappURL) ||
     DAPP_URL_REGEXPS.LOCALIPFS_BRAND_REGEX.test(dappURL) ||
     DAPP_URL_REGEXPS.LOCALENS_REGEX.test(dappURL) ||
-    DAPP_URL_REGEXPS.LOCALFS_MAINDOMAIN_REGEX.test(dappURL)
+    DAPP_URL_REGEXPS.LOCALFS_BRAND_REGEX.test(dappURL)
   );
 }
 
@@ -420,9 +419,9 @@ export function extractDappInfoFromURL(dappURL: string): IDappInfoFromURL {
   }
 
   // ----------------------- localfs --------------------------------
-  if (DAPP_URL_REGEXPS.LOCALFS_MAINDOMAIN_REGEX.test(dappURL)) {
+  if (DAPP_URL_REGEXPS.LOCALFS_BRAND_REGEX.test(dappURL)) {
     const [, localFSID, pathnameWithQuery] =
-      dappURL.match(DAPP_URL_REGEXPS.LOCALFS_MAINDOMAIN_REGEX) || [];
+      dappURL.match(DAPP_URL_REGEXPS.LOCALFS_BRAND_REGEX) || [];
 
     return { type: 'localfs', localFSID, pathnameWithQuery };
   }
