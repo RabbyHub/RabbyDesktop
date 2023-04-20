@@ -276,8 +276,11 @@ onIpcMainInternalEvent('__internal_main:app:relaunch', () => {
   }
 });
 
-handleIpcMainInvoke('open-directory', () => {
-  return dialog.showOpenDialog({
+handleIpcMainInvoke('open-directory', async (evt) => {
+  const mainTabbedWin = await onMainWindowReady();
+  const browserWindow = BrowserWindow.fromWebContents(evt.sender);
+
+  return dialog.showOpenDialog(browserWindow || mainTabbedWin.window, {
     properties: ['openDirectory'],
   });
 });
