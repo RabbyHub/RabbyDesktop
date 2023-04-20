@@ -85,7 +85,7 @@ export function trimWebContentsUserAgent(
   return userAgent;
 }
 
-export function normalizeIPFSPath(ipfsPath: string) {
+export function normalizeBackSlashInPath(ipfsPath: string) {
   return ipfsPath.replace(/\\/g, '/');
 }
 

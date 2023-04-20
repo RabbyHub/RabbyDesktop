@@ -2,7 +2,7 @@ import fsOrigin, { createReadStream, createWriteStream } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
 
-import { ensurePrefix, normalizeIPFSPath } from '@/isomorphic/string';
+import { ensurePrefix, normalizeBackSlashInPath } from '@/isomorphic/string';
 
 // import { CarReader } from '@ipld/car';
 // import { recursive, walkPath } from 'ipfs-unixfs-exporter';
@@ -287,7 +287,7 @@ export const initIPFSModule = async () => {
     }
 
     public resolveFile(filePath: string) {
-      let ipfsPath = normalizeIPFSPath(filePath);
+      let ipfsPath = normalizeBackSlashInPath(filePath);
       if (ipfsPath.startsWith('/ipfs/')) ipfsPath = `.${ipfsPath}`;
       else if (ipfsPath.startsWith('ipfs/')) ipfsPath = `./${ipfsPath}`;
       ipfsPath = ensurePrefix(ipfsPath, './ipfs/');

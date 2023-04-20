@@ -9,7 +9,13 @@ import {
   RABBY_INTERNAL_PROTOCOL,
   RABBY_LOCAL_URLBASE,
 } from './constants';
-import { encodeAbsPath, ensurePrefix, unPrefix, unSuffix } from './string';
+import {
+  encodeAbsPath,
+  ensurePrefix,
+  normalizeBackSlashInPath,
+  unPrefix,
+  unSuffix,
+} from './string';
 import { getOSPlatform } from './os';
 
 export function safeParseURL(url: string): URL | null {
@@ -309,10 +315,12 @@ export function normalizeLocalAbsPath(
     (_, driver) => `${driver.toLowerCase()}/`
   );
 
-  const win32AbsPath = posixAbsPath.replace(
+  let win32AbsPath = posixAbsPath.replace(
     /^(\/[a-z])\//i,
     (_, driver) => `${driver.toUpperCase()}:/`
   );
+
+  win32AbsPath = normalizeBackSlashInPath(win32AbsPath);
 
   return {
     inputPath,
