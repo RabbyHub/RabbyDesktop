@@ -65,7 +65,7 @@ export const LeftContainer: React.FC = () => {
       <div className="relative mb-[23px]">
         <h2
           className={clsx(
-            'text-white text-[14px] opacity-70 leading-[17px]',
+            'text-white text-[14px] opacity-70 leading-none',
             'mb-[20px]'
           )}
         >
