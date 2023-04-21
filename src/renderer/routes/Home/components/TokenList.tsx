@@ -3,9 +3,7 @@ import classNames from 'classnames';
 import { Skeleton } from 'antd';
 import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
 import { formatNumber, formatUsdValue } from '@/renderer/utils/number';
-import clsx from 'clsx';
 import TokenItemComp, { LoadingTokenItem } from './TokenItem';
-import { useTokenAction } from './TokenActionModal';
 
 const ExpandItem = styled.div`
   display: flex;
@@ -81,8 +79,6 @@ const TokenList = ({
   };
   showHistory: boolean;
 }) => {
-  const { enableTokenAction, setTokenAction } = useTokenAction();
-
   const handleClickExpandToken = () => {
     tokenHidden.setIsExpand(!tokenHidden.isExpand);
   };
@@ -150,11 +146,6 @@ const TokenList = ({
         </li>
         {tokenList.map((token) => (
           <TokenItemComp
-            tokenClassName={clsx(
-              enableTokenAction &&
-                'hover:underline hover:text-blue-light cursor-pointer'
-            )}
-            onTokenClick={setTokenAction}
             token={token}
             historyToken={
               showHistory

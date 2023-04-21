@@ -1,20 +1,27 @@
+import { TokenItem } from '@debank/rabby-api/dist/types';
+import { Button, Tooltip } from 'antd';
+import {
+  useCallback,
+  useMemo,
+  useState,
+  memo,
+  PropsWithChildren,
+  DetailedHTMLProps,
+} from 'react';
+import clsx from 'clsx';
+import styled from 'styled-components';
+import { DEX_SUPPORT_CHAINS } from '@rabby-wallet/rabby-swap';
+import { useNavigate } from 'react-router-dom';
+import { atom, useAtomValue, useSetAtom } from 'jotai';
 import { IconLink } from '@/../assets/icons/mainwin-settings';
 import { Modal } from '@/renderer/components/Modal/Modal';
 import { ellipsis } from '@/renderer/utils/address';
-import { TokenItem } from '@debank/rabby-api/dist/types';
-import { Button, Tooltip } from 'antd';
-import { useCallback, useMemo, useState, memo } from 'react';
 import { openExternalUrl } from '@/renderer/ipcRequest/app';
-import clsx from 'clsx';
 import IconReceive from '@/../assets/icons/home-widgets/receive.svg';
 import IconSend from '@/../assets/icons/home-widgets/send.svg';
 import IconSwap from '@/../assets/icons/home-widgets/swap.svg';
-import styled from 'styled-components';
-import { DEX_SUPPORT_CHAINS } from '@rabby-wallet/rabby-swap';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { obj2query } from '@/renderer/utils/url';
 import { getChain } from '@/renderer/utils';
-import { atom, useAtomValue, useSetAtom } from 'jotai';
 import { ReceiveModal } from '@/renderer/components/ReceiveModal';
 
 const supportChains = [...new Set(Object.values(DEX_SUPPORT_CHAINS).flat())];
@@ -165,17 +172,17 @@ const StyledModal = styled(Modal)`
 
 export const actionTokenAtom = atom<TokenItem | undefined>(undefined);
 
+export const isSupportToken = (token?: TokenItem) => {
+  return token && getChain(token?.chain);
+};
+
 export const useTokenAction = () => {
   const setToken = useSetAtom(actionTokenAtom);
   const cancelTokenAction = useCallback(() => {
     setToken(undefined);
   }, [setToken]);
 
-  const location = useLocation();
-  const enableTokenAction = useMemo(
-    () => location.pathname !== '/mainwin/home/bundle',
-    [location.pathname]
-  );
+  const enableTokenAction = true;
 
   const handleClickToken = useCallback(
     (t: TokenItem) => {
@@ -192,6 +199,45 @@ export const useTokenAction = () => {
     setTokenAction: handleClickToken,
     cancelTokenAction,
   };
+};
+
+export const TokenActionSymbol = ({
+  token,
+  enable = true,
+  className,
+  onClick,
+  children,
+  ...others
+}: DetailedHTMLProps<React.HTMLAttributes<HTMLSpanElement>, HTMLSpanElement> & {
+  token: TokenItem;
+  enable?: boolean;
+}) => {
+  const isSupport = useMemo(
+    () => enable && isSupportToken(token),
+    [enable, token]
+  );
+  const { setTokenAction } = useTokenAction();
+  const handleClick: React.MouseEventHandler<HTMLSpanElement> = useCallback(
+    (e) => {
+      if (isSupport) {
+        setTokenAction(token);
+      }
+      onClick?.(e);
+    },
+    [isSupport, onClick, setTokenAction, token]
+  );
+  return (
+    <span
+      onClick={handleClick}
+      className={clsx(
+        className,
+        isSupport && 'hover:underline hover:text-blue-light cursor-pointer'
+      )}
+      {...others}
+    >
+      {children || ellipsis(token.symbol)}
+    </span>
+  );
 };
 
 export const TokenActionModal = memo(() => {

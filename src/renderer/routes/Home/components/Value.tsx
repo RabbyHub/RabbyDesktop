@@ -13,6 +13,7 @@ import {
 } from '@/renderer/utils/nft';
 import BigNumber from 'bignumber.js';
 import styled from 'styled-components';
+import { TokenActionSymbol } from '@/renderer/components/TokenActionModal';
 import { Table } from './Table';
 
 const Col = Table.Col;
@@ -63,7 +64,12 @@ const TokensAmount = ({
         .filter((item) => !!item)
         .map((item) => (
           <TokenAmountWrapper>
-            {formatAmount(item.amount)} {ellipsisTokenSymbol(item.symbol)}
+            <span>
+              {formatAmount(item.amount)}{' '}
+              <TokenActionSymbol token={item}>
+                {ellipsisTokenSymbol(item.symbol)}
+              </TokenActionSymbol>
+            </span>
             {isDebt ? <DebtTag>Debt</DebtTag> : null}
             {item.price !== 0 &&
               withPrice &&
