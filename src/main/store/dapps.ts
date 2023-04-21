@@ -27,6 +27,7 @@ import {
 import { safeParse, shortStringify } from '../../isomorphic/json';
 import {
   canoicalizeDappUrl,
+  extractDappInfoFromURL,
   getOriginFromUrl,
   isUrlFromDapp,
   maybeTrezorLikeBuiltInHttpPage,
@@ -204,6 +205,20 @@ export const dappStore = makeStore<{
       changed = true;
       v.id = v.id || v.origin;
       v.type = v.type || 'http';
+    } else {
+      const urlDappInfo = extractDappInfoFromURL(k);
+      switch (urlDappInfo.type) {
+        case 'ens':
+        case 'http':
+        case 'localfs':
+        case 'ipfs': {
+          changed = true;
+          v.type = urlDappInfo.type;
+          break;
+        }
+        default:
+          break;
+      }
     }
   });
   if (changed) {
