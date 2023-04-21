@@ -140,7 +140,7 @@ type IDappWithTabInfo = IMergedDapp & {
 type IDesktopAppState = {
   firstStartApp: boolean;
   enableContentProtected: boolean;
-  enableSupportIpfsDapp: boolean;
+  enableServeDappByHttp: boolean;
   sidebarCollapsed: boolean;
 };
 

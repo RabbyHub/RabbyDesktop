@@ -1,5 +1,6 @@
 import { useCallback, useLayoutEffect, useRef } from 'react';
 import { ucfirst } from '@/isomorphic/string';
+import { APP_BRANDNAME } from '@/isomorphic/constants';
 import { useZPopupViewState } from '../hooks/usePopupWinOnMainwin';
 import { ModalConfirmInSettings } from '../components/Modal/Confirm';
 import { forwardMessageTo } from '../hooks/useViewsMessage';
@@ -34,7 +35,7 @@ export function useTipCannotUseTrezorLike() {
             <>
               You have used {ucfirst(svState.haveUsed)}, which is in conflict
               with {ucfirst(svState.cannotUse)}. To connect with{' '}
-              {ucfirst(svState.cannotUse)}, please restart the app.
+              {ucfirst(svState.cannotUse)}, please restart the {APP_BRANDNAME}.
             </>
           ),
           okText: 'Restart',
@@ -49,9 +50,9 @@ export function useTipCannotUseTrezorLike() {
           title: `Unable to use ${ucfirst(svState.cannotUse)}`,
           content: (
             <>
-              When IPFS is enabled, {ucfirst(svState.cannotUse)} can't be used
-              properly. To use {ucfirst(svState.cannotUse)}, please disable IPFS
-              in "Settings"
+              When Decentralized app is enabled, {ucfirst(svState.cannotUse)}{' '}
+              can't be used properly. To use {ucfirst(svState.cannotUse)},
+              please disable Decentralized app in "Settings"
             </>
           ),
           okText: 'Go to Settings',
