@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { GasLevel, TokenItem } from '@debank/rabby-api/dist/types';
 import { maxBy, minBy } from 'lodash';
-import { useMatchDappByOrigin } from '@/renderer/hooks/useDappsMngr';
 import { IconWithChain } from '@/renderer/components/TokenWithChain';
 import NameAndAddress from '@/renderer/components/NameAndAddress';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
@@ -449,7 +448,6 @@ const TransactionItem = ({
     if (item.protocol?.logoUrl) return item.protocol.logoUrl;
     return null;
   }, [item, isCancel, isSend, isReceive]);
-  // const dapp = useMatchDappByOrigin(item.site?.origin);
   const originTx = minBy(item.txs, (tx) => tx.createdAt);
 
   const [txQueues, setTxQueues] = useState<

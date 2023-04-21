@@ -448,13 +448,32 @@ export function formatDappHttpOrigin(
   return checkoutResult.dappURLToPrview;
 }
 
-// TODO: support ens type?
+/**
+ * @description format url to open on client
+ *
+ * @sample
+ * - url = 'http://curve.eth.localens';
+ * - url = 'rabby-ens://curve.eth.localens';
+ * - url = 'rabby-fs://baa59086abfeb7019dcafc9eeb37c12c19fbb744155ead43478810ee5997c0aa';
+ * - url = 'rabby-ipfs://QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV';
+ *
+ * @param url
+ */
 export function makeDappURLToOpen(url: string) {
-  if (isIpfsHttpURL(url)) {
-    const ipfsCid = extractIpfsCid(url);
-    return `rabby-ipfs://${ipfsCid}`;
+  const checkoutedDappURLInfo = checkoutDappURL(url);
+
+  switch (checkoutedDappURLInfo.type) {
+    case 'ipfs':
+      return checkoutedDappURLInfo.dappHttpID;
+    case 'ens':
+      return url;
+    case 'localfs':
+      return checkoutedDappURLInfo.dappOrigin;
+    default:
+    case 'http': {
+      return checkoutedDappURLInfo.dappHttpID;
+    }
   }
-  return url;
 }
 
 export function formatDappToStore(
@@ -523,4 +542,35 @@ export function formatDappToStore(
   }
 
   return retDapp as IDapp;
+}
+
+export function matchDappsByOrigin(
+  dappOrigin: IDapp['origin'] | ICheckedOutDappURL,
+  dapps: IDapp[]
+) {
+  const dappInfoToMatch =
+    typeof dappOrigin === 'string' ? checkoutDappURL(dappOrigin) : dappOrigin;
+
+  return dapps.find((dapp) => {
+    if (dappInfoToMatch.type !== dapp.type) return false;
+
+    if (
+      dappInfoToMatch.type === 'localfs' &&
+      dappInfoToMatch.dappOrigin === dapp.origin
+    ) {
+      return dapp;
+    }
+
+    if (
+      (dappInfoToMatch.type === 'ipfs' || dappInfoToMatch.type === 'ens') &&
+      dapp.id.toLocaleLowerCase() === dappInfoToMatch.dappID.toLocaleLowerCase()
+    ) {
+      return dapp;
+    }
+
+    // http type
+    if (dapp.id === dappInfoToMatch.dappID) return dapp;
+
+    return false;
+  });
 }
