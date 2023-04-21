@@ -25,7 +25,9 @@ export const TransactionWebsite = ({
     [openDapp, dappOrigin]
   );
 
-  const url = formatDappURLToShow(dappOrigin);
+  const url = formatDappURLToShow(
+    dapp?.type === 'localfs' ? dapp.id : dappOrigin
+  );
 
   if (!dapp || !dapp.alias) {
     return (

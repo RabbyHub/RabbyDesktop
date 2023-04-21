@@ -273,7 +273,7 @@ export function AddDomainDapp({
   isGoBack?: boolean;
   onGoBackClick?: (dapp: IDapp) => void;
 }) {
-  const { dapps } = useDapps();
+  const { dapps } = useDapps({ fetchByDefault: true });
   const [form] = Form.useForm();
   const openDapp = useOpenDapp();
   const [addUrl, setAddUrl] = useAddDappURL();

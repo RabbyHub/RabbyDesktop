@@ -386,6 +386,37 @@ export function normalizeProtocolBindingValues(
   }, {} as IProtocolDappBindings);
 }
 
+export function matchDappsByOrigin(
+  dappOrigin: IDapp['origin'] | ICheckedOutDappURL,
+  dapps: IDapp[]
+) {
+  const dappInfoToMatch =
+    typeof dappOrigin === 'string' ? checkoutDappURL(dappOrigin) : dappOrigin;
+
+  return dapps.find((dapp) => {
+    if (dappInfoToMatch.type !== dapp.type) return false;
+
+    if (
+      dappInfoToMatch.type === 'localfs' &&
+      dappInfoToMatch.dappOrigin === dapp.origin
+    ) {
+      return dapp;
+    }
+
+    if (
+      (dappInfoToMatch.type === 'ipfs' || dappInfoToMatch.type === 'ens') &&
+      dapp.id.toLocaleLowerCase() === dappInfoToMatch.dappID.toLocaleLowerCase()
+    ) {
+      return dapp;
+    }
+
+    // http type
+    if (dapp.id === dappInfoToMatch.dappID) return dapp;
+
+    return false;
+  });
+}
+
 const VALID_TYPES = ['http', 'ipfs', 'ens', 'localfs'] as IValidDappType[];
 export function isValidDappType(type: string): type is IValidDappType {
   return !!type && VALID_TYPES.includes(type as any);
@@ -397,7 +428,16 @@ export function isOpenedAsHttpDappType(
   return !!type && DAPP_TYPE_TO_OPEN_AS_HTTP.includes(type as any);
 }
 
-export function formatDappURLToShow(dappURL: string) {
+export function formatDappURLToShow(
+  dappURL: string,
+  opts?: {
+    isDebug?: boolean;
+    /**
+     * @description dapps detail list to match
+     */
+    dapps?: IDapp[];
+  }
+) {
   if (!dappURL) return '';
 
   let normalizedURL;
@@ -405,10 +445,19 @@ export function formatDappURLToShow(dappURL: string) {
   const checkedOutDappURLInfo = checkoutDappURL(dappURL);
 
   if (isOpenedAsHttpDappType(checkedOutDappURLInfo.type)) {
-    if (
-      checkedOutDappURLInfo.type === 'localfs' &&
-      !checkedOutDappURLInfo.localFSPath
-    ) {
+    if (checkedOutDappURLInfo.type === 'localfs') {
+      if (checkedOutDappURLInfo.localFSPath)
+        return checkedOutDappURLInfo.dappOriginToShow;
+      if (!checkedOutDappURLInfo.localFSPath && opts?.dapps) {
+        const matchedDapp = matchDappsByOrigin(
+          checkedOutDappURLInfo,
+          opts?.dapps
+        );
+        if (matchedDapp) {
+          return checkoutDappURL(matchedDapp.id).dappOriginToShow;
+        }
+      }
+
       return checkedOutDappURLInfo.dappOrigin;
     }
 
@@ -418,13 +467,6 @@ export function formatDappURLToShow(dappURL: string) {
   }
 
   return normalizedURL;
-}
-
-export function getDappURLToShow(dapp: IDappPartial) {
-  if (dapp.id) return formatDappURLToShow(dapp.id);
-  if (dapp.origin) return formatDappURLToShow(dapp.origin);
-
-  return '';
 }
 
 export function formatDappHttpOrigin(
@@ -542,35 +584,4 @@ export function formatDappToStore(
   }
 
   return retDapp as IDapp;
-}
-
-export function matchDappsByOrigin(
-  dappOrigin: IDapp['origin'] | ICheckedOutDappURL,
-  dapps: IDapp[]
-) {
-  const dappInfoToMatch =
-    typeof dappOrigin === 'string' ? checkoutDappURL(dappOrigin) : dappOrigin;
-
-  return dapps.find((dapp) => {
-    if (dappInfoToMatch.type !== dapp.type) return false;
-
-    if (
-      dappInfoToMatch.type === 'localfs' &&
-      dappInfoToMatch.dappOrigin === dapp.origin
-    ) {
-      return dapp;
-    }
-
-    if (
-      (dappInfoToMatch.type === 'ipfs' || dappInfoToMatch.type === 'ens') &&
-      dapp.id.toLocaleLowerCase() === dappInfoToMatch.dappID.toLocaleLowerCase()
-    ) {
-      return dapp;
-    }
-
-    // http type
-    if (dapp.id === dappInfoToMatch.dappID) return dapp;
-
-    return false;
-  });
 }

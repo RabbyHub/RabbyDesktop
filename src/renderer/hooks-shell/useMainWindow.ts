@@ -19,7 +19,7 @@ export function useSidebarDapps() {
     pinnedDapps,
     unpinnedDapps,
     dappBoundTabIds,
-  } = useDapps();
+  } = useDapps({ fetchByDefault: true });
 
   const dappsInSidebar = useMemo(() => {
     const unpinnedOpenedDapps: IDappWithTabInfo[] = [];

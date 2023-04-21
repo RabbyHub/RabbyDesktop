@@ -3,12 +3,13 @@
 import { Dropdown, Menu } from 'antd';
 import React, { ReactNode, useRef } from 'react';
 
-import { getDappURLToShow } from '@/isomorphic/dapp';
+import { formatDappURLToShow } from '@/isomorphic/dapp';
 import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
 import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import clsx from 'clsx';
 
 import { useCurrentConnectedSite } from '@/renderer/hooks/useRabbyx';
+import { useDapps } from '@/renderer/hooks/useDappsMngr';
 import { DappFavicon } from '../../../../components/DappFavicon';
 
 const Indicator = ({ dapp }: { dapp: IDappWithTabInfo }) => {
@@ -72,6 +73,8 @@ export const DAppBlock = ({
     origin: dapp?.origin || '',
     tab: dapp?.tab,
   });
+
+  const { dapps } = useDapps();
 
   if (!dapp) return null;
 
@@ -181,7 +184,10 @@ export const DAppBlock = ({
           <div className="infos pr-[16px]">
             <h4 className="dapp-alias">{dapp.alias}</h4>
             <div className="dapp-url">
-              {getDappURLToShow(dapp)?.replace(/^\w+:\/\/\/?/, '')}
+              {formatDappURLToShow(dapp.id || dapp.origin, { dapps }).replace(
+                /^\w+:\/\/\/?/,
+                ''
+              )}
             </div>
           </div>
         </div>

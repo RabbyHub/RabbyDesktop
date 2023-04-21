@@ -73,7 +73,11 @@ export function useProtocolDappsBinding() {
   };
 }
 
-export function useDapps() {
+/**
+ * @description by default, it will NOT fetch dapps from main process,
+ * you should specify `fetchByDefault` to `true` if you want to fetch dapps
+ */
+export function useDapps(options?: { fetchByDefault?: boolean }) {
   const [originDapps, setDapps] = useAtom(dappsAtomic);
   const [pinnedList, setPinnedList] = useAtom(pinnedListAtomic);
   const [unpinnedList, setUnpinnedList] = useAtom(unpinnedListAtomic);
@@ -94,7 +98,7 @@ export function useDapps() {
   }, [dappBoundTabIdsOrig]);
 
   // only fetch dapps once for every call to hooks
-  const calledRef = useRef(false);
+  const calledRef = useRef(!options?.fetchByDefault);
   useEffect(() => {
     if (calledRef.current) return;
 

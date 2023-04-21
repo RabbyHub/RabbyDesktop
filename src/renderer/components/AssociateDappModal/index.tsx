@@ -11,7 +11,7 @@ import {
   useTabedDapps,
 } from '@/renderer/hooks/useDappsMngr';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
-import { getDappURLToShow } from '@/isomorphic/dapp';
+import { formatDappURLToShow } from '@/isomorphic/dapp';
 import { Modal, Props as ModalProps } from '../Modal/Modal';
 import styles from './index.module.less';
 import { toastMessage } from '../TransparentToast';
@@ -144,7 +144,7 @@ const DappItem = ({
       />
       <div className="flex-1 dapp-info">
         <p>{dapp.alias}</p>
-        <p>{getDappURLToShow(dapp)}</p>
+        <p>{formatDappURLToShow(dapp.id || dapp.origin)}</p>
       </div>
       {isBinded ? (
         <>
@@ -247,7 +247,7 @@ const BindDapp = ({
     }, 100);
   };
 
-  const handleBack = (dapp: IDapp) => {
+  const handleBack = (dapp: IDappPartial) => {
     setKw(dapp.alias);
     setOpenAddDapp(false);
   };

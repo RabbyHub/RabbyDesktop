@@ -25,7 +25,7 @@ function useRename(dapp: IDapp | null) {
     []
   );
 
-  const { renameDapp } = useDapps();
+  const { renameDapp } = useDapps({ fetchByDefault: true });
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -68,6 +68,8 @@ export default function ModalRenameDapp({
   const { alias, onAliasChange, isValidAlias, doRename, isLoading } =
     useRename(dapp);
 
+  const { dapps } = useDapps({ fetchByDefault: true });
+
   return (
     <Modal
       width={560}
@@ -88,7 +90,7 @@ export default function ModalRenameDapp({
             alt={dapp?.faviconUrl}
           />
           <div className={styles.dappUrl} title={dapp?.origin}>
-            {formatDappURLToShow(dapp.id || dapp.origin)}
+            {formatDappURLToShow(dapp.id || dapp.origin, { dapps })}
           </div>
           <div className={styles.modifyWrapper}>
             <RabbyInput
