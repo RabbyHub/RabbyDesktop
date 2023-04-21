@@ -48,6 +48,14 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
 
   const { runAsync, loading, cancel } = useRequest(
     async (_url: string) => {
+      if (!_url) {
+        return {
+          validateRes: {
+            validateStatus: undefined,
+            help: '',
+          },
+        };
+      }
       const url = _url
         .replace(/(^\/?ipfs\/)|(^ipfs:\/\/)/, '')
         .replace(/\/$/, '');
@@ -175,7 +183,7 @@ export function AddIpfsDapp({
     await check(url);
   };
 
-  // const handleCheckDebounce = debounce(handleCheck, 700);
+  const handleCheckDebounce = debounce(handleCheck, 700);
   // const zActions = useZPopupLayerOnMain();
 
   const handleAdd = async (
@@ -233,12 +241,7 @@ export function AddIpfsDapp({
           state?.validateStatus !== 'error' && state?.help && styles.formHasHelp
         )}
         onFinish={handleCheck}
-        onFieldsChange={() => {
-          setState({
-            validateStatus: undefined,
-            help: '',
-          });
-        }}
+        onFieldsChange={handleCheckDebounce}
       >
         <Form.Item
           name="url"

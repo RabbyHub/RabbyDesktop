@@ -53,6 +53,14 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
 
   const { runAsync, loading, cancel } = useRequest(
     async (url: string) => {
+      if (!url) {
+        return {
+          validateRes: {
+            validateStatus: undefined,
+            help: '',
+          },
+        };
+      }
       statsInfo.startTime = Date.now();
       statsInfo.domain = `ens://${url}`;
       if (!url.endsWith('.eth')) {
@@ -70,7 +78,7 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
           return {
             validateRes: {
               validateStatus: 'error' as const,
-              help: 'Can not get the ipfs cid from the ENS domain name',
+              help: 'We only support access to ENS domain names that resolve to an IPFS-CID',
             },
           };
         }
@@ -78,7 +86,7 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
         return {
           validateRes: {
             validateStatus: 'error' as const,
-            help: 'Can not get the ipfs cid from the ENS domain name',
+            help: 'We only support access to ENS domain names that resolve to an IPFS-CID',
           },
         };
       }
@@ -100,7 +108,7 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
         setState({
           dappInfo: null,
           validateStatus: undefined,
-          help: 'Downloading files on IPFS to local, please wait a moment...',
+          help: 'Downloading files to local, please wait a moment',
         });
       },
       onError: (e) => {
@@ -219,7 +227,7 @@ export function AddEnsDapp({
     await check(url);
   };
 
-  // const handleCheckDebounce = debounce(handleCheck, 700);
+  const handleCheckDebounce = debounce(handleCheck, 700);
   // const zActions = useZPopupLayerOnMain();
 
   const handleAdd = async (
@@ -285,6 +293,7 @@ export function AddEnsDapp({
           state?.validateStatus !== 'error' && state?.help && styles.formHasHelp
         )}
         onFinish={handleCheck}
+        onFieldsChange={handleCheckDebounce}
       >
         <Form.Item
           name="url"
