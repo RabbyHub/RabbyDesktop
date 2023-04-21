@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import styled from 'styled-components';
 import { Skeleton } from 'antd';
 import { TokenItem } from '@debank/rabby-api/dist/types';
@@ -11,6 +11,7 @@ import {
 import TokenWithChain from '@/renderer/components/TokenWithChain';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 import clsx from 'clsx';
+import { TokenActionSymbol } from '@/renderer/components/TokenActionModal';
 
 const TokenItemWrapper = styled.li`
   font-size: 15px;
@@ -141,14 +142,14 @@ const TokenItemComp = ({
   token,
   historyToken,
   supportHistory,
-  onTokenClick,
   className,
+  tokenClassName,
 }: {
   token: TokenItem;
   historyToken?: TokenItem;
   supportHistory: boolean;
-  onTokenClick?: (token: TokenItem) => void;
   className?: string;
+  tokenClassName?: string;
 }) => {
   const amountChange = useMemo(() => {
     if (!historyToken || !supportHistory) return 0;
@@ -179,20 +180,20 @@ const TokenItemComp = ({
     };
   }, [token, historyToken, supportHistory]);
 
-  const handleToken = useCallback(() => {
-    onTokenClick?.(token);
-  }, [onTokenClick, token]);
-
   return (
     <TokenItemWrapper
       className={clsx('td', className)}
       key={`${token.chain}-${token.id}`}
     >
-      <TokenLogoField onClick={handleToken}>
+      <TokenLogoField>
         <TokenWithChain token={token} width="24px" height="24px" />
-        <span className="token-symbol" title={token.symbol}>
+        <TokenActionSymbol
+          className={clsx('token-symbol', tokenClassName)}
+          title={token.symbol}
+          token={token}
+        >
           {ellipsisTokenSymbol(token.symbol)}
-        </span>
+        </TokenActionSymbol>
         {/* <div className="token-actions">
           <Tooltip title="Swap">
             <IconSwap className="icon icon-swap" onClick={handleClickSwap} />
@@ -212,7 +213,12 @@ const TokenItemComp = ({
       </TokenLogoField>
       <TokenPriceField>{`$${formatPrice(token.price)}`}</TokenPriceField>
       <TokenAmountField>
-        {formatAmount(token.amount)} {ellipsisTokenSymbol(token.symbol)}
+        <span>
+          {formatAmount(token.amount)}{' '}
+          <TokenActionSymbol token={token}>
+            {ellipsisTokenSymbol(token.symbol)}
+          </TokenActionSymbol>
+        </span>
         {historyToken && Math.abs(amountChange * token.price) >= 0.01 && (
           <div
             className={classNames('price-change', {

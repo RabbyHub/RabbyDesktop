@@ -11,6 +11,7 @@ import {
 } from '@/renderer/utils/number';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
+import { TokenActionSymbol } from '@/renderer/components/TokenActionModal';
 
 const PoolItemWrapper = styled.div`
   padding-top: 25px;
@@ -370,7 +371,13 @@ const TokenItemComp = ({
       </div>
       <div className="token-price">${formatPrice(token.price)}</div>
       <div className="token-amount">
-        {`${formatAmount(token.amount)}`} {ellipsisTokenSymbol(token.symbol)}
+        <span>
+          {`${formatAmount(token.amount)}`}{' '}
+          <TokenActionSymbol token={token}>
+            {ellipsisTokenSymbol(token.symbol)}
+          </TokenActionSymbol>
+        </span>
+
         {!isLoadingProtocolHistory &&
           supportHistory &&
           tokenHistory &&

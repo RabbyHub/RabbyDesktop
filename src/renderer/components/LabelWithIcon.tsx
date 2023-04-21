@@ -21,7 +21,7 @@ const Wrapper = styled.div`
 `;
 
 type Props = {
-  label: string | JSX.Element | undefined;
+  label: React.ReactNode;
   icon: JSX.Element;
   maxWidth?: number;
   style?: React.CSSProperties;
