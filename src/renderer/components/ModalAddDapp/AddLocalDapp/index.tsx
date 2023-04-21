@@ -164,6 +164,10 @@ export function AddLocalDapp({
       validateStatus: undefined,
       help: '',
     });
+    if (!url?.trim()) {
+      return;
+    }
+
     await check(url);
   };
 
@@ -200,6 +204,16 @@ export function AddLocalDapp({
     onAddedDapp?.(dappInfo.inputOrigin);
   };
 
+  const handleOpenDirecotry = () => {
+    openDirectory().then((res) => {
+      const url = res.filePaths[0];
+      form.setFieldsValue({ url });
+      if (url) {
+        handleCheck();
+      }
+    });
+  };
+
   const isShowExample = !state?.dappInfo && !state.help && !loading;
   const isShowWarning =
     state.validateStatus === 'error' && state.help && !loading;
@@ -226,6 +240,7 @@ export function AddLocalDapp({
           state?.validateStatus !== 'error' && state?.help && styles.formHasHelp
         )}
         onFinish={handleCheck}
+        onFieldsChange={handleCheckDebounce}
       >
         <Form.Item
           name="url"
@@ -237,19 +252,13 @@ export function AddLocalDapp({
             className={styles.input}
             autoFocus
             spellCheck={false}
-            onChange={handleCheckDebounce}
             suffix={
               <span className={styles.inputSuffix}>
                 {loading ? (
                   <LoadingOutlined />
                 ) : (
                   <img
-                    onClick={() => {
-                      openDirectory().then((res) => {
-                        form.setFieldsValue({ url: res.filePaths[0] });
-                        handleCheck();
-                      });
-                    }}
+                    onClick={handleOpenDirecotry}
                     src="rabby-internal://assets/icons/add-dapp/icon-open-folder.svg"
                   />
                 )}
@@ -264,6 +273,7 @@ export function AddLocalDapp({
             src="rabby-internal://assets/icons/add-dapp/icon-folder.svg"
             alt=""
             className={styles.introImg}
+            onClick={handleOpenDirecotry}
           />
           <div className={styles.introTitle}>
             Select the local file path of the Dapp

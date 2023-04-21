@@ -233,6 +233,12 @@ export function AddIpfsDapp({
           state?.validateStatus !== 'error' && state?.help && styles.formHasHelp
         )}
         onFinish={handleCheck}
+        onFieldsChange={() => {
+          setState({
+            validateStatus: undefined,
+            help: '',
+          });
+        }}
       >
         <Form.Item
           name="url"
