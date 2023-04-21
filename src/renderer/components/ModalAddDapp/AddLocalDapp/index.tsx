@@ -52,6 +52,7 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
   const { runAsync, loading, cancel } = useRequest(
     async (url: string) => {
       statsInfo.startTime = Date.now();
+      statsInfo.domain = `file://${url}`;
       // todo
       return detectDapps(ensurePrefix(url, 'file://'));
     },

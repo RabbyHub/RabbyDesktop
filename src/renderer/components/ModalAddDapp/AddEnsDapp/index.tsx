@@ -54,6 +54,7 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
   const { runAsync, loading, cancel } = useRequest(
     async (url: string) => {
       statsInfo.startTime = Date.now();
+      statsInfo.domain = `ens://${url}`;
       if (!url.endsWith('.eth')) {
         return {
           validateRes: {
@@ -318,7 +319,6 @@ export function AddEnsDapp({
           title="ENS examples:"
           domains={[
             !IS_RUNTIME_PRODUCTION ? '1inch.eth' : '',
-            'uniswap.eth',
             'curve.eth',
           ].filter(Boolean)}
           onDomainClick={(domain) => {
