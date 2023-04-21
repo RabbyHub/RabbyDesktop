@@ -1,5 +1,5 @@
 import { formatDappURLToShow, makeDappURLToOpen } from '@/isomorphic/dapp';
-import { useMatchDapp } from '@/renderer/hooks/useDappsMngr';
+import { useMatchDappByOrigin } from '@/renderer/hooks/useDappsMngr';
 import { useOpenDapp } from '@/renderer/utils/react-router';
 import { Tooltip } from 'antd';
 import { useCallback } from 'react';
@@ -13,30 +13,32 @@ export const TransactionWebsite = ({
   className,
 }: TransactionWebsiteProps) => {
   const openDapp = useOpenDapp();
-  const dapp = useMatchDapp(makeDappURLToOpen(_origin));
-  const origin = dapp?.origin || _origin;
+  const dapp = useMatchDappByOrigin(makeDappURLToOpen(_origin));
+  const dappOrigin = dapp?.origin || _origin;
 
   const handleClick: React.MouseEventHandler<HTMLAnchorElement> = useCallback(
     (e) => {
       e.preventDefault();
       e.stopPropagation();
-      openDapp(origin);
+      openDapp(dappOrigin);
     },
-    [openDapp, origin]
+    [openDapp, dappOrigin]
   );
 
-  const url = formatDappURLToShow(origin);
+  const url = formatDappURLToShow(
+    dapp?.type === 'localfs' ? dapp.id : dappOrigin
+  );
 
   if (!dapp || !dapp.alias) {
     return (
-      <a href={origin} className={className} onClick={handleClick}>
+      <a href={dappOrigin} className={className} onClick={handleClick}>
         {url}
       </a>
     );
   }
   return (
     <Tooltip title={url} overlayStyle={{ maxWidth: 200 }}>
-      <a href={origin} className={className} onClick={handleClick}>
+      <a href={dappOrigin} className={className} onClick={handleClick}>
         {dapp.alias}
       </a>
     </Tooltip>

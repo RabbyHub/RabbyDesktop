@@ -21,6 +21,7 @@ import { useMemo } from 'react';
 import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
+import { checkoutDappURL, isOpenedAsHttpDappType } from '@/isomorphic/dapp';
 import styles from './index.module.less';
 
 const toast = (message: string) => {
@@ -35,8 +36,14 @@ const toast = (message: string) => {
 export const SidebarContextMenu = () => {
   const { pageInfo } = usePopupWinInfo('sidebar-dapp');
 
-  const origin = pageInfo?.dappTabInfo?.origin || '';
-  const dappInfo = useDapp(origin);
+  const dappID = pageInfo?.dappTabInfo.dappID;
+  const dappOrigin = useMemo(() => {
+    if (!pageInfo?.dappTabInfo.dappType)
+      return pageInfo?.dappTabInfo.dappOrigin;
+
+    return checkoutDappURL(pageInfo?.dappTabInfo.dappID).dappHttpID;
+  }, [pageInfo?.dappTabInfo]);
+  const dappInfo = useDapp(dappID);
   const zActions = useZPopupLayerOnMain();
   const { removeConnectedSite, removeAllConnectedSites } = useConnectedSite();
 
@@ -51,7 +58,7 @@ export const SidebarContextMenu = () => {
   };
 
   const items = useMemo(() => {
-    if (!origin) {
+    if (!dappID) {
       return [];
     }
     return [
@@ -153,15 +160,15 @@ export const SidebarContextMenu = () => {
         ),
       },
     ];
-  }, [dappInfo?.isPinned, origin, pageInfo?.dappTabInfo?.id]);
+  }, [dappInfo?.isPinned, dappID, pageInfo?.dappTabInfo?.id]);
 
   const handleMenuClick: MenuClickEventHandler = ({ key }) => {
     switch (key) {
       case 'dapp-pin':
-        toggleDappPinned(origin, true);
+        toggleDappPinned(dappID!, true);
         break;
       case 'dapp-unpin':
-        toggleDappPinned(origin, false);
+        toggleDappPinned(dappID!, false);
         break;
       case 'dapp-close': {
         const tabId = pageInfo?.dappTabInfo?.id;
@@ -185,9 +192,10 @@ export const SidebarContextMenu = () => {
           });
         }
         break;
-      case 'dapp-disconnect':
-        disconnect(origin, pageInfo?.dappTabInfo?.url);
+      case 'dapp-disconnect': {
+        if (dappOrigin) disconnect(dappOrigin, pageInfo?.dappTabInfo?.url);
         break;
+      }
       case 'dapp-disconnect-all':
         removeAllConnectedSites();
         forwardMessageTo('*', 'refreshConnectedSiteMap', {});
@@ -204,7 +212,7 @@ export const SidebarContextMenu = () => {
     hideMainwinPopup('sidebar-dapp');
   };
 
-  if (!origin) return null;
+  if (!dappID || !dappOrigin) return null;
   if (pageInfo?.type !== 'sidebar-dapp') return null;
 
   return (

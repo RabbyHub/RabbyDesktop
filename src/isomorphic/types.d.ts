@@ -47,10 +47,17 @@ type IPreviewDappViewChanges =
       rect?: null | DappViewRect;
     };
 
-type IDappType = INextDapp['type'];
+type IDappAddSource = 'https' | 'ipfs-cid' | 'ens-addr' | 'localfs';
+
 type INextDapp = {
   id: string;
   alias: string;
+  extraInfo?: {
+    ipfsCid?: string;
+    ensAddr?: string;
+    dappAddSource?: IDappAddSource;
+    localPath?: string;
+  };
   faviconUrl?: string;
   faviconBase64?: string;
 } & (
@@ -66,7 +73,42 @@ type INextDapp = {
       type: 'ipfs';
       origin: string | `rabby-ipfs://${string}${string}`;
     }
+  | {
+      type: 'ens';
+      origin: string | `rabby-ens://${string}${string}`;
+    }
+  | {
+      type: 'localfs';
+      origin: string | `rabby-fs://${string}${string}`;
+    }
 );
+
+type IDappType = INextDapp['type'];
+type IValidDappType = Exclude<INextDapp['type'], 'unknown'>;
+
+type IDappPartial = Omit<INextDapp, 'id' | 'type'> & {
+  id?: INextDapp['id'];
+  type?: INextDapp['type'];
+};
+
+type ICheckedOutDappURL = {
+  inputURL: string;
+  type: INextDapp['type'];
+  dappID: string;
+  dappOrigin: string;
+  /** @description this is also used as `dappTabID` */
+  dappHttpID: string;
+  dappOriginToShow: string;
+  dappURLToPrview: string;
+  ipfsCid: string;
+  ensAddr: string;
+
+  /** @description only useful for dapp with type 'localfs' */
+  localFSID: string;
+  localFSPath: string;
+
+  pathnameWithQuery: string;
+};
 
 type IHttpDapp = INextDapp & { type: 'http' };
 /**
@@ -152,6 +194,7 @@ type ISensitiveConfig = {
 
 type IDappsDetectResult<T extends string = string> = {
   data: null | {
+    preparedDappId?: string;
     finalOrigin: string;
     isFinalExistedDapp?: boolean;
     inputOrigin: string;
@@ -286,7 +329,9 @@ type IHardwareConnectPageType = 'onekey' | 'trezor';
 type IPopupWinPageInfo = {
   type: 'sidebar-dapp';
   dappTabInfo: {
-    origin: string;
+    dappID: string;
+    dappOrigin: string;
+    dappType: INextDapp['type'];
     id: chrome.tabs.Tab['id'];
     url?: string;
   };
@@ -363,6 +408,7 @@ type IShellNavInfo = {
   canGoForward?: boolean;
   canGoBack?: boolean;
   tabUrl: string;
+  dapp?: IDapp;
   dappSecurityCheckResult: ISecurityCheckResult | null;
 };
 

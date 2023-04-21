@@ -74,7 +74,7 @@ export const SortableList = ({
   renderItem,
 }: SortableListProps) => {
   const items = useMemo(
-    () => data.map((item) => ({ ...item, id: item.origin })),
+    () => data.map((item) => ({ ...item, id: item.id })),
     [data]
   );
   const [active, setActive] = useState<Active | null>(null);

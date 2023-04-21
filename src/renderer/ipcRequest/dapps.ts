@@ -2,13 +2,17 @@ import { arraify } from '@/isomorphic/array';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { matomoRequestEvent } from '../utils/matomo-request';
 
-export async function getDapp(dappOrigin: string) {
+export async function getDapp(dappID: IDapp['id']) {
   return window.rabbyDesktop.ipcRenderer
-    .invoke('get-dapp', dappOrigin)
+    .invoke('get-dapp', dappID)
     .then((event) => {
+      if (event.error) {
+        throw new Error(event.error);
+      }
+
       return {
-        ...event.dapp,
-        isPinned: event.dapp ? event.isPinned : false,
+        ...event.data.dapp,
+        isPinned: event.data.dapp ? event.data.isPinned : false,
       };
     });
 }
@@ -38,7 +42,7 @@ export async function detectDapps(dappUrl: string) {
     });
 }
 
-export async function addDapp(dapp: IDapp) {
+export async function addDapp(dapp: IDappPartial) {
   const res = window.rabbyDesktop.ipcRenderer.invoke('dapps-post', dapp);
   res.then((r) => {
     if (!r.error) {
@@ -52,13 +56,9 @@ export async function addDapp(dapp: IDapp) {
   return res;
 }
 
-export async function putDapp(dapp: IDapp) {
-  return window.rabbyDesktop.ipcRenderer.invoke('dapps-put', dapp);
-}
-
 export async function replaceDapp(
   dappIdsToDel: string | string[],
-  dapp: IDapp
+  dapp: IDappPartial
 ) {
   return window.rabbyDesktop.ipcRenderer.invoke(
     'dapps-replace',
@@ -84,10 +84,10 @@ export async function deleteDapp(dapp: IDapp) {
 }
 
 export async function toggleDappPinned(
-  dappOrigin: string | string[],
+  dappIDs: string | string[],
   nextPinned = true
 ) {
-  const dappOrigins = arraify(dappOrigin);
+  const dappOrigins = arraify(dappIDs);
 
   return window.rabbyDesktop.ipcRenderer
     .invoke('dapps-togglepin', dappOrigins, nextPinned)
@@ -96,7 +96,7 @@ export async function toggleDappPinned(
         matomoRequestEvent({
           category: 'My Dapp',
           action: 'Pin Dapp',
-          label: Array.isArray(dappOrigin) ? dappOrigin.join(',') : dappOrigin,
+          label: Array.isArray(dappIDs) ? dappIDs.join(',') : dappIDs,
         });
       }
       return r;
@@ -181,4 +181,8 @@ export async function downloadIPFS(cid: string) {
 
 export async function cancelDownloadIPFS() {
   return window.rabbyDesktop.ipcRenderer.invoke('cancel-download-ipfs');
+}
+
+export async function resolveIPNS(ens: string) {
+  return window.rabbyDesktop.ipcRenderer.invoke('resolve-ipns', ens);
 }

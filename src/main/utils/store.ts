@@ -25,6 +25,20 @@ export function getAppUserDataPath() {
   return gAppUserDataPath;
 }
 
+// maybe we need to check if the path is writable
+const ProfileDir = process.env.HOME || process.env.USERPROFILE || '';
+
+export function getClientAppPaths() {
+  const userDataPath = getAppUserDataPath();
+
+  return {
+    userDataPath,
+    storeRootPath: path.resolve(userDataPath, './local_data'),
+    ipfsRootPath: path.join(userDataPath, './local_cache/ipfs-store'),
+    localFSRootPath: path.join(ProfileDir, './.rabby-desktop/local_fs'),
+  };
+}
+
 function getStoreRootPath() {
   return path.resolve(getAppUserDataPath(), './local_data');
 }
@@ -62,6 +76,8 @@ export function makeStore<T extends Record<string, any>>(
     schema: options.schema,
     cwd: getAppUserDataPath(),
     fileExtension: 'json',
+    encryptionKey: undefined,
+    clearInvalidConfig: false,
   };
 
   const store = IS_RUNTIME_PRODUCTION

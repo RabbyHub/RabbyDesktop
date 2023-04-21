@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { canoicalizeDappUrl } from '@/isomorphic/url';
-import { getNavInfoByTabId } from '../ipcRequest/mainwin';
 import { useWindowTabs } from './useWindowTabs';
 
 export function useDappNavigation() {
@@ -12,9 +11,11 @@ export function useDappNavigation() {
   useEffect(() => {
     if (!activeTab?.id) return;
 
-    getNavInfoByTabId(activeTab.id).then((res) => {
-      setSelectedTabInfo(res);
-    });
+    window.rabbyDesktop.ipcRenderer
+      .invoke('get-webui-ext-navinfo', activeTab.id)
+      .then((res) => {
+        setSelectedTabInfo(res.tabNavInfo);
+      });
   }, [activeTab?.id, activeTab?.url]);
 
   const navActions = {

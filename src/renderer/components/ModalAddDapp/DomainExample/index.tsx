@@ -1,23 +1,21 @@
 import styles from './index.module.less';
 
-const list = [
-  'uniswap.org',
-  'lido.fi',
-  'compound.finance',
-  'curve.fi',
-  'aave.com',
-];
-
 interface DomainExampleProps {
   onDomainClick: (domain: string) => void;
+  title: string;
+  domains: string[];
 }
 
-export const DomainExample = ({ onDomainClick }: DomainExampleProps) => {
+export const DomainExample = ({
+  onDomainClick,
+  title,
+  domains,
+}: DomainExampleProps) => {
   return (
     <div className={styles.container}>
-      <div className={styles.label}>Domain examples:</div>
+      <div className={styles.label}>{title}</div>
       <div className={styles.list}>
-        {list.map((item) => (
+        {domains.map((item) => (
           <div
             className={styles.item}
             key={item}

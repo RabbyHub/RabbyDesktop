@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
-import { setDappsOrder } from '@/renderer/ipcRequest/dapps';
+import { setDappsOrder, toggleDappPinned } from '@/renderer/ipcRequest/dapps';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { useOpenDapp } from '@/renderer/utils/react-router';
 import { useCallback, useState } from 'react';
@@ -27,39 +27,35 @@ type IOnOpDapp = (
 ) => void;
 
 export default function DApps() {
-  const { dapps, pinDapp, unpinDapp, pinnedDapps, unpinnedDapps } =
-    useTabedDapps();
+  const { dapps, pinnedDapps, unpinnedDapps } = useTabedDapps();
 
   const openDapp = useOpenDapp();
 
   const [renamingDapp, setRenamingDapp] = useState<IDapp | null>(null);
   const [deletingDapp, setDeletingDapp] = useState<IDapp | null>(null);
 
-  const onClickDapp: IOnOpDapp = useCallback(
-    (op, dapp: IDapp) => {
-      switch (op) {
-        case 'unpin': {
-          unpinDapp(dapp.origin);
-          break;
-        }
-        case 'pin': {
-          pinDapp(dapp.origin);
-          break;
-        }
-        case 'delete': {
-          setDeletingDapp(dapp);
-          break;
-        }
-        case 'rename': {
-          setRenamingDapp(dapp);
-          break;
-        }
-        default:
-          break;
+  const onClickDapp: IOnOpDapp = useCallback((op, dapp: IDapp) => {
+    switch (op) {
+      case 'unpin': {
+        toggleDappPinned([dapp.id], false);
+        break;
       }
-    },
-    [pinDapp, unpinDapp]
-  );
+      case 'pin': {
+        toggleDappPinned([dapp.id], true);
+        break;
+      }
+      case 'delete': {
+        setDeletingDapp(dapp);
+        break;
+      }
+      case 'rename': {
+        setRenamingDapp(dapp);
+        break;
+      }
+      default:
+        break;
+    }
+  }, []);
 
   const { removeAllConnectedSites } = useConnectedSite();
 
@@ -140,7 +136,7 @@ export default function DApps() {
                   data={pinnedDapps}
                   onChange={(v) => {
                     setDappsOrder({
-                      pinnedList: v.map((item) => item.origin),
+                      pinnedList: v.map((item) => item.id),
                     });
                   }}
                   renderItem={(dapp) => {
@@ -158,7 +154,7 @@ export default function DApps() {
                   data={unpinnedDapps}
                   onChange={(v) => {
                     setDappsOrder({
-                      unpinnedList: v.map((item) => item.origin),
+                      unpinnedList: v.map((item) => item.id),
                     });
                   }}
                   renderItem={(dapp) => {

@@ -3,7 +3,10 @@ import classnames from 'classnames';
 import { ModalProps, Button } from 'antd';
 import { useDapps } from 'renderer/hooks/useDappsMngr';
 import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
-import { isValidDappAlias } from '../../../isomorphic/dapp';
+import {
+  formatDappURLToShow,
+  isValidDappAlias,
+} from '../../../isomorphic/dapp';
 
 import styles from './index.module.less';
 import { DappFavicon } from '../DappFavicon';
@@ -22,7 +25,7 @@ function useRename(dapp: IDapp | null) {
     []
   );
 
-  const { renameDapp } = useDapps();
+  const { renameDapp } = useDapps({ fetchByDefault: true });
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -65,6 +68,8 @@ export default function ModalRenameDapp({
   const { alias, onAliasChange, isValidAlias, doRename, isLoading } =
     useRename(dapp);
 
+  const { dapps } = useDapps({ fetchByDefault: true });
+
   return (
     <Modal
       width={560}
@@ -85,7 +90,7 @@ export default function ModalRenameDapp({
             alt={dapp?.faviconUrl}
           />
           <div className={styles.dappUrl} title={dapp?.origin}>
-            {dapp?.origin?.replace(/^\w+:\/\//, '')}
+            {formatDappURLToShow(dapp.id || dapp.origin, { dapps })}
           </div>
           <div className={styles.modifyWrapper}>
             <RabbyInput

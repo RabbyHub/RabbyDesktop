@@ -15,6 +15,8 @@ import classNames from 'classnames';
 import { debounce } from 'lodash';
 import { useUnmount } from 'react-use';
 import { stats } from '@/isomorphic/stats';
+import { openDirectory } from '@/renderer/ipcRequest/app';
+import { ensurePrefix } from '@/isomorphic/string';
 import RabbyInput from '../../AntdOverwrite/Input';
 import { Props as ModalProps } from '../../Modal/Modal';
 import { toastMessage } from '../../TransparentToast';
@@ -22,6 +24,7 @@ import { PreviewDapp } from '../PreviewDapp';
 import { useAddDappURL } from '../useAddDapp';
 import { Warning } from '../Warning';
 import styles from './index.module.less';
+import { DomainExample } from '../DomainExample';
 
 const statsInfo = {
   startTime: Date.now(),
@@ -47,8 +50,8 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
   }>({});
 
   const { runAsync, loading, cancel } = useRequest(
-    async (_url: string) => {
-      if (!_url) {
+    async (url: string) => {
+      if (!url) {
         return {
           validateRes: {
             validateStatus: undefined,
@@ -56,21 +59,10 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
           },
         };
       }
-      const url = _url
-        .replace(/(^\/?ipfs\/)|(^ipfs:\/\/)/, '')
-        .replace(/\/$/, '');
-      statsInfo.domain = `ipfs://${url}`;
       statsInfo.startTime = Date.now();
-      const { success, error } = await downloadIPFS(`${url}`);
-      if (!success) {
-        return {
-          validateRes: {
-            validateStatus: 'error' as const,
-            help: error || '',
-          },
-        };
-      }
-      return detectDapps(`rabby-ipfs://${url}`);
+      statsInfo.domain = `file://${url}`;
+      // todo
+      return detectDapps(ensurePrefix(url, 'file://'));
     },
     {
       manual: true,
@@ -78,7 +70,7 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
         setState({
           dappInfo: null,
           validateStatus: undefined,
-          help: 'Downloading files on IPFS to local, please wait a moment...',
+          help: '',
         });
       },
       onSuccess(res) {
@@ -136,7 +128,7 @@ const sleep = (time: number) => {
   });
 };
 
-export function AddIpfsDapp({
+export function AddLocalDapp({
   onAddedDapp,
   onOpenDapp,
   url: initUrl,
@@ -180,6 +172,10 @@ export function AddIpfsDapp({
       validateStatus: undefined,
       help: '',
     });
+    if (!url?.trim()) {
+      return;
+    }
+
     await check(url);
   };
 
@@ -192,6 +188,7 @@ export function AddIpfsDapp({
   ) => {
     await runAddDapp(
       {
+        id: dappInfo.preparedDappId,
         origin: dappInfo.inputOrigin,
         alias: dappInfo.recommendedAlias,
         faviconBase64: dappInfo.faviconBase64,
@@ -213,6 +210,16 @@ export function AddIpfsDapp({
     setState(nextState);
 
     onAddedDapp?.(dappInfo.inputOrigin);
+  };
+
+  const handleOpenDirecotry = () => {
+    openDirectory().then((res) => {
+      const url = res.filePaths[0];
+      form.setFieldsValue({ url });
+      if (url) {
+        handleCheck();
+      }
+    });
   };
 
   const isShowExample = !state?.dappInfo && !state.help && !loading;
@@ -251,7 +258,6 @@ export function AddIpfsDapp({
         >
           <RabbyInput
             className={styles.input}
-            placeholder="Input the IPFS"
             autoFocus
             spellCheck={false}
             suffix={
@@ -260,10 +266,8 @@ export function AddIpfsDapp({
                   <LoadingOutlined />
                 ) : (
                   <img
-                    onClick={() => {
-                      handleCheck();
-                    }}
-                    src="rabby-internal://assets/icons/add-dapp/icon-search.svg"
+                    onClick={handleOpenDirecotry}
+                    src="rabby-internal://assets/icons/add-dapp/icon-open-folder.svg"
                   />
                 )}
               </span>
@@ -271,6 +275,22 @@ export function AddIpfsDapp({
           />
         </Form.Item>
       </Form>
+      {isShowExample && (
+        <div className={styles.intro}>
+          <img
+            src="rabby-internal://assets/icons/add-dapp/icon-folder.svg"
+            alt=""
+            className={styles.introImg}
+            onClick={handleOpenDirecotry}
+          />
+          <div className={styles.introTitle}>
+            Select the local file path of the Dapp
+          </div>
+          <div className={styles.introDesc}>
+            Make sure “index.html” exists in the folder
+          </div>
+        </div>
+      )}
       {isShowWarning && <Warning>{state.help}</Warning>}
       {state.dappInfo && !loading ? (
         <PreviewDapp

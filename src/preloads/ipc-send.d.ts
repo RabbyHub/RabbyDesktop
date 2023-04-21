@@ -19,6 +19,12 @@ type ChannelSendSyncPayload = {
       // mutextId: string;
     };
   };
+  '__internal_rpc:dapp:get-dapp-by-url': {
+    send: [params: { dappURL: string }];
+    returnValue: {
+      dapp?: IDapp | null;
+    };
+  };
 };
 
 type IpcMainSendSyncEvent<RT> = Omit<

@@ -1,4 +1,5 @@
 import { APP_NAME } from './constants';
+import { getSha256 } from './crypto/sha256';
 
 export function ensurePrefix(str = '', prefix = '/') {
   return str.startsWith(prefix) ? str : prefix + str;
@@ -10,6 +11,10 @@ export function ensureSuffix(str = '', suffix = '/') {
 
 export function unPrefix(str = '', prefix = '/') {
   return str.startsWith(prefix) ? str.slice(prefix.length) : str;
+}
+
+export function unSuffix(str = '', suffix = '/') {
+  return str.endsWith(suffix) ? str.slice(0, -suffix.length) : str;
 }
 
 export function randString(length = 10) {
@@ -80,6 +85,17 @@ export function trimWebContentsUserAgent(
   return userAgent;
 }
 
-export function normalizeIPFSPath(ipfsPath: string) {
+export function normalizeBackSlashInPath(ipfsPath: string) {
   return ipfsPath.replace(/\\/g, '/');
+}
+
+export function encodeAbsPath(inputFilepath: string) {
+  return getSha256(inputFilepath);
+}
+
+export function decodeAbsPath(
+  hashValue: string,
+  hashPathMap: Record<string, string>
+) {
+  return hashPathMap[hashValue] || '';
 }

@@ -93,15 +93,6 @@ type ChannelMessagePayload = {
       }
     ];
   };
-  '__internal_rpc:webui-ext:navinfo': {
-    send: [reqid: string, tabId: number];
-    response: [
-      {
-        reqid: string;
-        tabNavInfo: IShellNavInfo;
-      }
-    ];
-  };
   'rabby-extension-id': {
     send: [];
     response: [

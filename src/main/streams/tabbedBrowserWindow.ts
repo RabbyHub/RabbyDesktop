@@ -1,9 +1,9 @@
 import { app, BrowserWindow, shell } from 'electron';
 
-import { isUrlFromDapp, parseQueryString } from '@/isomorphic/url';
+import { parseQueryString } from '@/isomorphic/url';
 import { arraify } from '@/isomorphic/array';
 import { pickFavIconURLFromMeta } from '@/isomorphic/html';
-import { checkoutDappURL, formatDappHttpOrigin } from '@/isomorphic/dapp';
+import { checkoutDappURL, isOpenedAsHttpDappType } from '@/isomorphic/dapp';
 import {
   EnumMatchDappType,
   IS_RUNTIME_PRODUCTION,
@@ -29,8 +29,12 @@ import {
   parseRabbyxNotificationParams,
   isPopupWindowHidden,
 } from '../utils/browser';
-import { getOrPutCheckResult } from '../utils/dapps';
-import { dappStore, findDappsByOrigin, getAllDapps } from '../store/dapps';
+import {
+  dappStore,
+  findDappsById,
+  findDappsByOrigin,
+  getAllDapps,
+} from '../store/dapps';
 import { cLog } from '../utils/log';
 
 import {
@@ -41,6 +45,7 @@ import {
 import { safeOpenURL } from './dappSafeview';
 import { isTargetScanLink } from '../store/dynamicConfig';
 import { isEnableSupportIpfsDapp } from '../store/desktopApp';
+import { checkDappEntryDirectory, CheckResultType } from '../utils/file';
 
 /**
  * @deprecated import members from '../utils/tabbedBrowserWindow' instead
@@ -150,38 +155,40 @@ onIpcMainEvent('__internal_rpc:rabbyx:close-signwin', async () => {
   });
 });
 
-onIpcMainEvent(
-  '__internal_rpc:webui-ext:navinfo',
-  async (event, reqid, tabId) => {
-    const webContents = event.sender;
-    const tabbedWin = getTabbedWindowFromWebContents(webContents);
-    if (!tabbedWin) return;
-
-    const tab = tabbedWin.tabs.get(tabId);
-    // TODO: always respond message
-    if (!tab || !tab.view) return;
-
-    const tabUrl = tab.view.webContents!.getURL();
-    const checkResult = isUrlFromDapp(tabUrl)
-      ? await getOrPutCheckResult(tabUrl, { updateOnSet: false })
-      : null;
-
-    const isDestroyed = !tab.view || tab.view.webContents.isDestroyed();
-
-    event.reply('__internal_rpc:webui-ext:navinfo', {
-      reqid,
-      tabNavInfo: {
-        tabExists: !!tab,
-        tabUrl,
-        dappSecurityCheckResult: checkResult,
-        canGoBack: isDestroyed ? false : !!tab.view?.webContents?.canGoBack(),
-        canGoForward: isDestroyed
-          ? false
-          : !!tab.view?.webContents?.canGoForward(),
-      },
-    });
+handleIpcMainInvoke('get-webui-ext-navinfo', async (event, tabId) => {
+  const webContents = event.sender;
+  const tabbedWin = getTabbedWindowFromWebContents(webContents);
+  const tab = tabbedWin?.tabs.get(tabId);
+  // TODO: always respond message
+  if (!tab || !tab.view) {
+    throw new Error('tab not found');
   }
-);
+
+  const tabUrl = tab.view.webContents!.getURL();
+  // const checkResult = isUrlFromDapp(tabUrl)
+  //   ? await getOrPutCheckResult(tabUrl, { updateOnSet: false })
+  //   : null;
+
+  const isDestroyed = !tab.view || tab.view.webContents.isDestroyed();
+
+  let dapp: IDapp | undefined;
+  if (tabbedWin?.isMainWindow() && tab.relatedDappId) {
+    dapp = findDappsById(tab.relatedDappId, getAllDapps()) || undefined;
+  }
+
+  return {
+    tabNavInfo: {
+      tabExists: !!tab,
+      tabUrl,
+      dapp,
+      dappSecurityCheckResult: null,
+      canGoBack: isDestroyed ? false : !!tab.view?.webContents?.canGoBack(),
+      canGoForward: isDestroyed
+        ? false
+        : !!tab.view?.webContents?.canGoForward(),
+    },
+  };
+});
 
 onIpcMainEvent('__internal_rpc:browser-dev:openDevTools', (evt) => {
   if (!IS_RUNTIME_PRODUCTION) {
@@ -217,41 +224,69 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
       isOpenExternal: true,
     };
   }
-  const dappTypeInfo = checkoutDappURL(dappOrigin);
-  if (dappTypeInfo?.type === 'ipfs') {
+  const checkedOutDappURLInfo = checkoutDappURL(dappOrigin);
+  if (isOpenedAsHttpDappType(checkedOutDappURLInfo?.type)) {
     if (!isEnableSupportIpfsDapp()) {
       pushChangesToZPopupLayer({
-        'ipfs-not-supported-modal': {
+        'modal-dapp-type-not-supported': {
           visible: true,
+          state: {
+            tipType: checkedOutDappURLInfo?.type as IValidDappType,
+          },
         },
       });
       return result;
     }
 
-    const ipfsService = await getIpfsService();
-    if (!(await ipfsService.isExist(dappTypeInfo.ipfsCid))) {
-      pushChangesToZPopupLayer({
-        'ipfs-no-local-modal': {
-          visible: true,
-        },
-      });
-      throw new Error('IPFS CID not local file found');
-    }
-    if (!(await ipfsService.isValid(dappTypeInfo.ipfsCid))) {
-      pushChangesToZPopupLayer({
-        'ipfs-verify-failed-modal': {
-          visible: true,
-        },
-      });
-      throw new Error('IPFS CID verify failed');
+    switch (checkedOutDappURLInfo.type) {
+      case 'ipfs':
+      case 'ens': {
+        const ipfsService = await getIpfsService();
+        if (!(await ipfsService.isExist(checkedOutDappURLInfo.ipfsCid))) {
+          pushChangesToZPopupLayer({
+            'ipfs-no-local-modal': {
+              visible: true,
+            },
+          });
+          throw new Error('IPFS CID not local file found');
+        }
+        if (!(await ipfsService.isValid(checkedOutDappURLInfo.ipfsCid))) {
+          pushChangesToZPopupLayer({
+            'ipfs-verify-failed-modal': {
+              visible: true,
+            },
+          });
+          throw new Error('IPFS CID verify failed');
+        }
+        break;
+      }
+      case 'localfs': {
+        const checkResult = checkDappEntryDirectory(
+          checkedOutDappURLInfo.localFSPath
+        );
+        if (checkResult.error) {
+          if (checkResult.error === CheckResultType.NO_INDEXHTML) {
+            throw new Error('index.html not found for local dapp');
+          } else {
+            throw new Error('Local dapp entry directory invali');
+          }
+        }
+        break;
+      }
+      default: {
+        throw new Error(
+          `Dapp with type ${checkedOutDappURLInfo.type} not supported now.`
+        );
+      }
     }
   }
 
   const currentUrl = evt.sender.getURL();
-  const findResult = findDappsByOrigin(dappOrigin);
-  const isOpenAsHttp = dappTypeInfo?.type === 'ipfs';
+  const findResult = findDappsByOrigin(checkedOutDappURLInfo.dappOrigin);
+
+  const isOpenAsHttp = isOpenedAsHttpDappType(checkedOutDappURLInfo?.type);
   if (isOpenAsHttp && findResult.dapp) {
-    dappOrigin = formatDappHttpOrigin(dappTypeInfo);
+    dappOrigin = checkedOutDappURLInfo.dappHttpID;
   }
 
   const openResult = await safeOpenURL(dappOrigin, {
@@ -269,7 +304,7 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
 
   return {
     ...result,
-    shouldNavTabOnClient: dappTypeInfo?.type === 'ipfs' || isTargetDapp,
+    shouldNavTabOnClient: isOpenAsHttp || isTargetDapp,
     openType: openResult.type,
     isTargetDapp,
     isTargetDappByOrigin,
@@ -512,6 +547,7 @@ app.on('quit', async () => {
   const lastOpenInfos: IDappLastOpenInfo[] = [];
   allOpenedTabs.forEach((tab) => {
     const lastOpenInfo = tab.makeTabLastOpenInfo()!;
+
     if (lastOpenInfo) {
       lastOpenInfos.push(lastOpenInfo);
     }
