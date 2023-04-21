@@ -43,14 +43,14 @@ export function useSettings() {
       const result = await window.rabbyDesktop.ipcRenderer.invoke(
         'put-desktopAppState',
         {
-          enableSupportIpfsDapp: nextVal,
+          enableServeDappByHttp: nextVal,
         }
       );
 
       setDesktopAppState((prev) => {
         return {
           ...(prev as IDesktopAppState & object),
-          enableSupportIpfsDapp: result.state.enableSupportIpfsDapp,
+          enableServeDappByHttp: result.state.enableServeDappByHttp,
         };
       });
     },
@@ -92,7 +92,7 @@ export function useSettings() {
     isAnimating,
     settings: {
       enableContentProtected: desktopAppState?.enableContentProtected !== false,
-      enableSupportIpfsDapp: !!desktopAppState?.enableSupportIpfsDapp,
+      enableServeDappByHttp: !!desktopAppState?.enableServeDappByHttp,
       sidebarCollapsed: Boolean(
         desktopAppState?.sidebarCollapsed ??
           JSON.parse(localStorage.getItem('sidebarCollapsed') || 'false')

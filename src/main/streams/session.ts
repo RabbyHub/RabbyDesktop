@@ -36,7 +36,7 @@ import { rewriteSessionWebRequestHeaders } from '../utils/webRequest';
 import { checkProxyViaBrowserView, setSessionProxy } from '../utils/appNetwork';
 import {
   getFullAppProxyConf,
-  isEnableSupportIpfsDapp,
+  isEnableServeDappByHttp,
 } from '../store/desktopApp';
 import {
   createTrezorLikeConnectPageWindow,
@@ -447,7 +447,7 @@ let ipfsSupported = false;
 onIpcMainInternalEvent(
   '__internal_main:app:enable-ipfs-support',
   async (enabled) => {
-    if (!isEnableSupportIpfsDapp()) return;
+    if (!isEnableServeDappByHttp()) return;
 
     if (ipfsSupported) return;
     ipfsSupported = true;

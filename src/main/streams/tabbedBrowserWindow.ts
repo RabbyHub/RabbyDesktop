@@ -44,7 +44,7 @@ import {
 } from '../utils/tabbedBrowserWindow';
 import { safeOpenURL } from './dappSafeview';
 import { isTargetScanLink } from '../store/dynamicConfig';
-import { isEnableSupportIpfsDapp } from '../store/desktopApp';
+import { isEnableServeDappByHttp } from '../store/desktopApp';
 import { checkDappEntryDirectory, CheckResultType } from '../utils/file';
 
 /**
@@ -226,7 +226,7 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
   }
   const checkedOutDappURLInfo = checkoutDappURL(dappOrigin);
   if (isOpenedAsHttpDappType(checkedOutDappURLInfo?.type)) {
-    if (!isEnableSupportIpfsDapp()) {
+    if (!isEnableServeDappByHttp()) {
       pushChangesToZPopupLayer({
         'modal-dapp-type-not-supported': {
           visible: true,
