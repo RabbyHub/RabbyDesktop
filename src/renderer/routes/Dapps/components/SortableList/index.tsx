@@ -74,11 +74,14 @@ export const SortableItem = (
 
 interface SortableListProps {
   data?: IDappWithTabInfo[];
+  // 为了跳过leave动画
+  otherData?: IDappWithTabInfo[];
   onChange?(items: IDappWithTabInfo[]): void;
   renderItem?(item: IDappWithTabInfo): ReactNode;
 }
 export const SortableList = ({
   data = [],
+  otherData,
   onChange,
   renderItem,
 }: SortableListProps) => {
@@ -128,6 +131,9 @@ export const SortableList = ({
     >
       <SortableContext items={items} strategy={rectSortingStrategy}>
         {transitions((style, item) => {
+          if (otherData && otherData.find((e) => e.origin === item.origin)) {
+            return null;
+          }
           return (
             <SortableItem id={item.id} key={item.id} style={style}>
               {renderItem?.(item)}

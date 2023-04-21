@@ -11,6 +11,8 @@ import clsx from 'clsx';
 import { useCurrentConnectedSite } from '@/renderer/hooks/useRabbyx';
 import { DappFavicon } from '../../../../components/DappFavicon';
 
+import styles from '../../index.module.less';
+
 const Indicator = ({ dapp }: { dapp: IDappWithTabInfo }) => {
   if (!dapp.tab) {
     return null;
@@ -53,7 +55,9 @@ export const DAppBlock = ({
   return (
     <Dropdown
       overlayClassName="dapps-dropdown-operations"
-      getPopupContainer={() => ref.current || document.body}
+      getPopupContainer={() =>
+        document.querySelector(`.${styles.main}`) || document.body
+      }
       trigger={['contextMenu']}
       // open
       overlay={
