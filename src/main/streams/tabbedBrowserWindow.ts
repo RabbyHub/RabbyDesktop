@@ -140,7 +140,7 @@ export async function createRabbyxNotificationWindow({
     toggleMaskViaOpenedRabbyxNotificationWindow();
   });
 
-  win.tabs.tabList[0]?._patchWindowClose();
+  win.tabs.tabList[0]?._patchWindowBuiltInMethods();
 
   RABBYX_WINDOWID_S.add(windowId);
   toggleMaskViaOpenedRabbyxNotificationWindow();
