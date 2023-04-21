@@ -1,4 +1,4 @@
-import { isEnableSupportIpfsDapp } from '../store/desktopApp';
+import { isEnableServeDappByHttp } from '../store/desktopApp';
 import { createWindow } from '../streams/tabbedBrowserWindow';
 import { onMainWindowReady, pushChangesToZPopupLayer } from './stream-helpers';
 
@@ -42,7 +42,7 @@ const trezorLikeState = {
 export function getTrezorLikeCannotUse(openType: IHardwareConnectPageType) {
   const reasons: ITrezorLikeCannotUserReason[] = [];
 
-  if (isEnableSupportIpfsDapp()) {
+  if (isEnableServeDappByHttp()) {
     reasons.push({
       reasonType: 'enabled-ipfs',
       cannotUse: openType,
@@ -120,7 +120,7 @@ export function asyncDestroyWindowIfCannotUseTrezorLike(options: {
   const connWindow = options.trezorLikeWindow;
   const timeoutVal = options.timeoutVal || 250;
 
-  if (isEnableSupportIpfsDapp()) {
+  if (isEnableServeDappByHttp()) {
     connWindow.hide();
 
     setTimeout(() => {

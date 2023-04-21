@@ -2,7 +2,7 @@ import { Modal, ModalFuncProps } from 'antd';
 import clsx from 'clsx';
 
 import styles from './confirm.module.less';
-import stylesRelaunch from './confirmRelaunch.module.less';
+import stylesConfirmInSettings from './confirmInSettings.module.less';
 
 export const ModalConfirm = ({
   className,
@@ -52,7 +52,7 @@ export function ModalConfirmInSettings({
       />
     ),
     closable: true,
-    className: clsx(stylesRelaunch.confirmRelaunch, className),
+    className: clsx(stylesConfirmInSettings.confirmInSettings, className),
     centered: true,
     width: '480px',
     autoFocusButton: null,

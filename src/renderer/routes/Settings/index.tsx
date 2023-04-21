@@ -13,6 +13,7 @@ import { Button, message, Modal, SwitchProps, Tooltip } from 'antd';
 import { useSettings } from '@/renderer/hooks/useSettings';
 import styled from 'styled-components';
 import {
+  APP_BRANDNAME,
   FORCE_DISABLE_CONTENT_PROTECTION,
   IS_RUNTIME_PRODUCTION,
 } from '@/isomorphic/constants';
@@ -164,14 +165,6 @@ export function MainWindowSettings() {
   const [isShowingClearPendingModal, setIsShowingClearPendingModal] =
     useState(false);
 
-  const versionStr = [
-    `Version: ${appVerisons.version || '-'}`,
-    appVerisons.appChannel === 'prod' ? '' : `-${appVerisons.appChannel}`,
-    appVerisons.appChannel === 'prod' ? '' : ` (${appVerisons.gitRef})`,
-  ]
-    .filter(Boolean)
-    .join('');
-
   return (
     <div className={styles.settingsPage}>
       {/* TODO: implement Update Area */}
@@ -242,7 +235,10 @@ export function MainWindowSettings() {
                 height: 230,
                 title: `${nextEnabled ? 'Enable' : 'Disable'} Whitelist`,
                 content: nextEnabled ? (
-                  'Once enabled, you can only send assets to the addresses in the whitelist using Rabby.'
+                  <>
+                    Once enabled, you can only send assets to the addresses in
+                    the whitelist using Rabby.
+                  </>
                 ) : (
                   <div className="text-center">
                     You can send assets to any address once disabled.
@@ -261,11 +257,13 @@ export function MainWindowSettings() {
         <h4 className={styles.blockTitle}>Dapp</h4>
         <div className={styles.itemList}>
           <ItemSwitch
-            checked={settings.enableSupportIpfsDapp}
+            checked={settings.enableServeDappByHttp}
             name={
               <>
                 <div className="flex flex-col gap-[4px]">
-                  <span className="text-14 font-medium">IPFS/ENS/Local</span>
+                  <span className="text-14 font-medium">
+                    Enable Decentralized app
+                  </span>
                   <span className="text-14 text-white opacity-[0.6]">
                     Once enabled, you can use IPFS/ENS/Local Dapp. However,
                     Trezor and Onekey will be affected and can't be used
@@ -274,14 +272,19 @@ export function MainWindowSettings() {
                 </div>
               </>
             }
-            icon="rabby-internal://assets/icons/mainwin-settings/icon-ipfs.svg"
+            icon="rabby-internal://assets/icons/mainwin-settings/icon-dapp.svg"
             onChange={(nextEnabled: boolean) => {
               const keyAction = `${nextEnabled ? 'enable' : 'disable'}`;
 
               ModalConfirmInSettings({
                 height: 230,
-                title: `${ucfirst(keyAction)} IPFS Dapp`,
-                content: `It's required to restart the app to ${keyAction} IPFS dapp, do you want to restart now?`,
+                title: `${ucfirst(keyAction)} Decentralized app`,
+                content: (
+                  <div className="break-words text-left">
+                    It's required to restart client to {keyAction} Decentralized
+                    app, do you want to restart now?
+                  </div>
+                ),
                 okText: 'Restart',
                 onOk: () => {
                   toggleEnableIPFSDapp(nextEnabled);

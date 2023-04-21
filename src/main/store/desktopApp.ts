@@ -26,7 +26,7 @@ export const desktopAppStore = makeStore<{
     isMaximized?: boolean;
   };
   enableContentProtected: IDesktopAppState['enableContentProtected'];
-  enableSupportIpfsDapp: IDesktopAppState['enableSupportIpfsDapp'];
+  enableServeDappByHttp: IDesktopAppState['enableServeDappByHttp'];
   proxyType: ISensitiveConfig['proxyType'];
   proxySettings: ISensitiveConfig['proxySettings'];
 
@@ -71,7 +71,7 @@ export const desktopAppStore = makeStore<{
       type: 'boolean',
       default: !FORCE_DISABLE_CONTENT_PROTECTION,
     },
-    enableSupportIpfsDapp: {
+    enableServeDappByHttp: {
       type: 'boolean',
       default: false,
     },
@@ -120,6 +120,16 @@ export const desktopAppStore = makeStore<{
   deserialize: (data) => safeParse(data, {}),
 
   watch: true,
+
+  migrations: {
+    '>= 0.16.0': (store) => {
+      if (typeof store.get('enableSupportIpfsDapp') === 'boolean') {
+        store.set('enableServeDappByHttp', store.get('enableSupportIpfsDapp'));
+        // @ts-expect-error
+        store.delete('enableSupportIpfsDapp');
+      }
+    },
+  },
 });
 
 // force disable it
@@ -132,8 +142,8 @@ function getState() {
     firstStartApp: desktopAppStore.get('firstStartApp'),
     enableContentProtected:
       desktopAppStore.get('enableContentProtected') !== false,
-    enableSupportIpfsDapp:
-      desktopAppStore.get('enableSupportIpfsDapp') === true,
+    enableServeDappByHttp:
+      desktopAppStore.get('enableServeDappByHttp') === true,
     sidebarCollapsed: desktopAppStore.get('sidebarCollapsed', false),
   };
 }
@@ -142,8 +152,8 @@ export function isEnableContentProtected() {
   return desktopAppStore.get('enableContentProtected') !== false;
 }
 
-export function isEnableSupportIpfsDapp() {
-  return desktopAppStore.get('enableSupportIpfsDapp') === true;
+export function isEnableServeDappByHttp() {
+  return desktopAppStore.get('enableServeDappByHttp') === true;
 }
 
 function getAppProxyConf(): IAppProxyConf {
@@ -245,8 +255,8 @@ handleIpcMainInvoke('put-desktopAppState', (_, partialPayload) => {
         emitIpcMainEvent('__internal_main:app:relaunch');
         break;
       }
-      case 'enableSupportIpfsDapp': {
-        desktopAppStore.set('enableSupportIpfsDapp', !!value);
+      case 'enableServeDappByHttp': {
+        desktopAppStore.set('enableServeDappByHttp', !!value);
         emitIpcMainEvent('__internal_main:app:relaunch');
         break;
       }
