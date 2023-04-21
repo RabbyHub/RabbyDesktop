@@ -2,7 +2,7 @@ import { atom } from 'jotai';
 
 export const bundleAccountsAtom = atom<BundleAccount[]>([]);
 export const bundleAccountsNumAtom = atom(
-  (get) => get(bundleAccountsAtom).length
+  (get) => get(bundleAccountsAtom).filter((acc) => acc.inBundle).length
 );
 
 export const saveBundleAccountsBalance = (

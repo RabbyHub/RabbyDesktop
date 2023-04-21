@@ -2,8 +2,6 @@ import { useAtom, useAtomValue } from 'jotai';
 import React from 'react';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { validate, Network } from 'bitcoin-address-validation';
-import { toastMessage } from '@/renderer/components/TransparentToast';
-import { ellipsis } from '@/renderer/utils/address';
 import { Binance } from './cex/binance/binance';
 import { bundleAccountsAtom, bundleAccountsNumAtom } from './shared';
 import { ERROR } from './error';
@@ -20,6 +18,7 @@ export const useBundleAccount = () => {
   const { accountsList: ethAccountList, getAllAccountsToDisplay } =
     useAccountToDisplay();
   const { removeAddress } = useAddressManagement();
+  const bundleIsMax = useBundleIsMax();
   const inBundleList = React.useMemo(() => {
     return accounts.filter((acc) => acc.inBundle);
   }, [accounts]);
@@ -213,7 +212,7 @@ export const useBundleAccount = () => {
 
   const toggleBundle = React.useCallback(
     async (account: BundleAccount) => {
-      if (accounts.length >= 15 && !account.inBundle) {
+      if (bundleIsMax && !account.inBundle) {
         toastMaxAccount();
         return;
       }
@@ -241,7 +240,7 @@ export const useBundleAccount = () => {
         inBundle: true,
       });
     },
-    [accounts]
+    [accounts, bundleIsMax]
   );
 
   const allAccounts = React.useMemo(
@@ -270,12 +269,12 @@ export const useBundleAccount = () => {
   );
 
   const preCheckMaxAccount = React.useCallback(() => {
-    if (accounts.length >= 15) {
+    if (bundleIsMax) {
       toastMaxAccount();
       return false;
     }
     return true;
-  }, [accounts]);
+  }, [bundleIsMax]);
 
   // 初始化数据
   // 获取 bundle 账户和 eth 账户

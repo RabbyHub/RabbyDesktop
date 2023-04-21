@@ -4,7 +4,6 @@ import { ellipsis } from '@/renderer/utils/address';
 import { splitNumberByStep } from '@/renderer/utils/number';
 import clsx from 'clsx';
 import React, { useState } from 'react';
-import BigNumber from 'bignumber.js';
 import { TipsWrapper } from '@/renderer/components/TipWrapper';
 import { useBundleIsMax } from '@/renderer/hooks/useBundle/useBundleAccount';
 import { DeleteWrapper } from '@/renderer/components/DeleteWrapper';
@@ -31,7 +30,6 @@ export const AccountItem: React.FC<Props> = ({
     eth,
   } = useBundle();
   const bundleIsMax = useBundleIsMax();
-
   const addressTypeIcon = useAccountItemIcon(data);
   const displayAddress = useAccountItemAddress(data);
 
