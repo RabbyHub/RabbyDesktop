@@ -157,6 +157,11 @@ export class Tab {
       if (isDappViewLoadingForTab(this.id)) hideLoadingView();
     });
 
+    this._patchWindowBuiltInMethods();
+  }
+
+  /** @internal */
+  _patchWindowBuiltInMethods() {
     patchTabbedBrowserWebContents(this.view!.webContents, {
       windowId: this.windowId,
     });
