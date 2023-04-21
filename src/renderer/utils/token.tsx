@@ -8,6 +8,7 @@ import LabelWithIcon from '@/renderer/components/LabelWithIcon';
 import TokensIcons from '../routes/Home/components/TokenIcons';
 import { formatUsdValue } from './number';
 import { getCollectionDisplayName, PortfolioItemNft } from './nft';
+import { TokenActionSymbol } from '../components/TokenActionModal';
 
 export const ellipsisTokenSymbol = (text: string, length = 6) => {
   if (text?.length <= length) return text;
@@ -279,16 +280,30 @@ export function getTokens(
   tokens: TokenItem[] = [],
   separator = ' + ',
   isDebt = false,
-  nfts?: PortfolioItemNft[]
+  nfts?: PortfolioItemNft[],
+  enableAction?: boolean
 ) {
   const tokenStr = tokens
     .filter((item) => !!item)
-    .map((token) => ellipsisTokenSymbol(token.symbol))
-    .join(separator);
+    .map((token, idx) => (
+      <span key={token.id}>
+        {idx !== 0 && separator}
+        <TokenActionSymbol enable={enableAction} token={token}>
+          {ellipsisTokenSymbol(token.symbol)}
+        </TokenActionSymbol>
+      </span>
+    ));
+
   const nftStr = nfts
     ?.map((n) => getCollectionDisplayName(n.collection))
     .join(separator);
-  const label = nftStr ? nftStr + separator + tokenStr : tokenStr;
+  const label = nftStr ? (
+    <>
+      {nftStr} {separator} {tokenStr}
+    </>
+  ) : (
+    tokenStr
+  );
   const icon = (
     <TokensIcons
       icons={tokens

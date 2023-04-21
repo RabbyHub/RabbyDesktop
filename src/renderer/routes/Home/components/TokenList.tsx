@@ -3,13 +3,7 @@ import classNames from 'classnames';
 import { Skeleton } from 'antd';
 import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
 import { formatNumber, formatUsdValue } from '@/renderer/utils/number';
-import { ReceiveModal } from '@/renderer/components/ReceiveModal';
-import { useCallback, useState } from 'react';
-import { getChain } from '@/renderer/utils';
-import { useLocation } from 'react-router-dom';
-import clsx from 'clsx';
 import TokenItemComp, { LoadingTokenItem } from './TokenItem';
-import { TokenActionModal } from './TokenActionModal';
 
 const ExpandItem = styled.div`
   display: flex;
@@ -85,43 +79,9 @@ const TokenList = ({
   };
   showHistory: boolean;
 }) => {
-  const location = useLocation();
-  const isBundlePage = location.pathname === '/mainwin/home/bundle';
-
-  const [selectedToken, setSelectedToken] = useState<TokenItem>();
-
-  const handleClickToken = useCallback((t: TokenItem) => {
-    if (!t || !getChain(t?.chain)) {
-      return;
-    }
-    setSelectedToken(t);
-  }, []);
-
-  const cancelTokenActionModal = () => {
-    setSelectedToken(undefined);
-  };
-
   const handleClickExpandToken = () => {
     tokenHidden.setIsExpand(!tokenHidden.isExpand);
   };
-
-  const [state, setState] = useState<{
-    isShowReceiveModal: boolean;
-    token?: string;
-    chain?: CHAINS_ENUM;
-  }>({
-    isShowReceiveModal: false,
-    token: undefined,
-    chain: undefined,
-  });
-
-  const handleReceiveClick = useCallback((token: TokenItem) => {
-    setState({
-      isShowReceiveModal: true,
-      token: token.symbol,
-      chain: getChain(token.chain)?.enum,
-    });
-  }, []);
 
   if (isLoadingTokenList) {
     return (
@@ -186,8 +146,6 @@ const TokenList = ({
         </li>
         {tokenList.map((token) => (
           <TokenItemComp
-            className={clsx(!isBundlePage && 'cursor-pointer')}
-            onTokenClick={isBundlePage ? undefined : handleClickToken}
             token={token}
             historyToken={
               showHistory
@@ -240,24 +198,6 @@ const TokenList = ({
           </ExpandItem>
         )}
       </ul>
-      <ReceiveModal
-        open={state.isShowReceiveModal}
-        token={state.token}
-        chain={state.chain}
-        onCancel={() => {
-          setState({
-            isShowReceiveModal: false,
-            token: undefined,
-            chain: undefined,
-          });
-        }}
-      />
-      <TokenActionModal
-        open={!!selectedToken}
-        token={selectedToken}
-        onCancel={cancelTokenActionModal}
-        handleReceiveClick={handleReceiveClick}
-      />
     </>
   );
 };

@@ -1,5 +1,5 @@
 import { LoadingOutlined } from '@ant-design/icons';
-import { Form } from 'antd';
+import { Form, message } from 'antd';
 import { ReactNode, useEffect } from 'react';
 
 import {
@@ -15,12 +15,18 @@ import classNames from 'classnames';
 import { debounce } from 'lodash';
 import { useUnmount } from 'react-use';
 import { stats } from '@/isomorphic/stats';
+import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { extractIpfsCid } from '@/isomorphic/url';
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import { formatEnsDappOrigin } from '@/isomorphic/dapp';
 import RabbyInput from '../../AntdOverwrite/Input';
 import { Props as ModalProps } from '../../Modal/Modal';
+import { toastMessage } from '../../TransparentToast';
 import { PreviewDapp } from '../PreviewDapp';
 import { useAddDappURL } from '../useAddDapp';
 import { Warning } from '../Warning';
 import styles from './index.module.less';
+import { DomainExample } from '../DomainExample';
 
 const statsInfo = {
   startTime: Date.now(),
@@ -46,8 +52,8 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
   }>({});
 
   const { runAsync, loading, cancel } = useRequest(
-    async (_url: string) => {
-      if (!_url) {
+    async (url: string) => {
+      if (!url) {
         return {
           validateRes: {
             validateStatus: undefined,
@@ -55,12 +61,37 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
           },
         };
       }
-      const url = _url
-        .replace(/(^\/?ipfs\/)|(^ipfs:\/\/)/, '')
-        .replace(/\/$/, '');
-      statsInfo.domain = `ipfs://${url}`;
       statsInfo.startTime = Date.now();
-      const { success, error } = await downloadIPFS(`${url}`);
+      statsInfo.domain = `ens://${url}`;
+      if (!url.endsWith('.eth')) {
+        return {
+          validateRes: {
+            validateStatus: 'error' as const,
+            help: 'Please enter a valid ENS domain name',
+          },
+        };
+      }
+      let contentHash = '';
+      try {
+        contentHash = await walletController.getEnsContentHash(url);
+        if (!contentHash || !/^ipfs:\/\//.test(contentHash)) {
+          return {
+            validateRes: {
+              validateStatus: 'error' as const,
+              help: 'We only support access to ENS domain names that resolve to an IPFS-CID',
+            },
+          };
+        }
+      } catch (e) {
+        return {
+          validateRes: {
+            validateStatus: 'error' as const,
+            help: 'We only support access to ENS domain names that resolve to an IPFS-CID',
+          },
+        };
+      }
+      const cid = contentHash.replace(/^ipfs:\/\//, '');
+      const { success, error } = await downloadIPFS(`${cid}`);
       if (!success) {
         return {
           validateRes: {
@@ -69,7 +100,7 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
           },
         };
       }
-      return detectDapps(`rabby-ipfs://${url}`);
+      return detectDapps(formatEnsDappOrigin(url, cid));
     },
     {
       manual: true,
@@ -77,7 +108,14 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
         setState({
           dappInfo: null,
           validateStatus: undefined,
-          help: 'Downloading files on IPFS to local, please wait a moment...',
+          help: 'Downloading files to local, please wait a moment',
+        });
+      },
+      onError: (e) => {
+        setState({
+          dappInfo: null,
+          validateStatus: undefined,
+          help: e.message,
         });
       },
       onSuccess(res) {
@@ -135,7 +173,7 @@ const sleep = (time: number) => {
   });
 };
 
-export function AddIpfsDapp({
+export function AddEnsDapp({
   onAddedDapp,
   onOpenDapp,
   url: initUrl,
@@ -146,7 +184,7 @@ export function AddIpfsDapp({
   onOpenDapp?: (origin: string) => void;
   url?: string;
   isGoBack?: boolean;
-  onGoBackClick?: (dapp: IDapp) => void;
+  onGoBackClick?: (dapp: IDappPartial) => void;
 }) {
   const [form] = Form.useForm();
   const openDapp = useOpenDapp();
@@ -161,8 +199,15 @@ export function AddIpfsDapp({
     },
   });
 
-  const { runAsync: runAddDapp, loading: isAddLoading } = useRequest(
-    (dapp, ids?: string[]) => {
+  type TParams = [
+    Parameters<typeof addDapp>[0],
+    Parameters<typeof replaceDapp>[0]?
+  ];
+  const { runAsync: runAddDapp, loading: isAddLoading } = useRequest<
+    [{ error?: string | null | undefined }, unknown],
+    TParams
+  >(
+    (dapp, ids?) => {
       return Promise.all([
         ids ? replaceDapp(ids, dapp) : addDapp(dapp),
         sleep(500),
@@ -189,16 +234,28 @@ export function AddIpfsDapp({
     dappInfo: NonNullable<IDappsDetectResult['data']>,
     urls?: string[]
   ) => {
+    const ensAddr = form.getFieldValue('url');
+
     await runAddDapp(
       {
         origin: dappInfo.inputOrigin,
         alias: dappInfo.recommendedAlias,
         faviconBase64: dappInfo.faviconBase64,
         faviconUrl: dappInfo.faviconUrl,
+        type: 'ens',
+        extraInfo: {
+          ensAddr,
+          ipfsCid: extractIpfsCid(dappInfo.inputOrigin),
+          dappAddSource: 'ens-addr',
+        },
       },
       urls
     );
-
+    toastMessage({
+      type: 'success',
+      content: 'Add success',
+      className: styles.toast,
+    });
     const nextState = {
       dappInfo: {
         ...dappInfo,
@@ -246,7 +303,7 @@ export function AddIpfsDapp({
         >
           <RabbyInput
             className={styles.input}
-            placeholder="Input the IPFS"
+            placeholder="Input the ENS"
             autoFocus
             spellCheck={false}
             suffix={
@@ -266,6 +323,19 @@ export function AddIpfsDapp({
           />
         </Form.Item>
       </Form>
+      {isShowExample && (
+        <DomainExample
+          title="ENS examples:"
+          domains={[
+            !IS_RUNTIME_PRODUCTION ? '1inch.eth' : '',
+            'curve.eth',
+          ].filter(Boolean)}
+          onDomainClick={(domain) => {
+            form.setFieldsValue({ url: domain });
+            handleCheck();
+          }}
+        />
+      )}
       {isShowWarning && <Warning>{state.help}</Warning>}
       {state.dappInfo && !loading ? (
         <PreviewDapp

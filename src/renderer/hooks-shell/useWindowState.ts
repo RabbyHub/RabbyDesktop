@@ -1,10 +1,10 @@
 import { isForTrezorLikeWebUI, isMainWinShellWebUI } from '@/isomorphic/url';
-import { detectOS } from '@/isomorphic/os';
+import { detectClientOS } from '@/isomorphic/os';
 import { useCallback, useEffect } from 'react';
 import { atom, useAtom } from 'jotai';
 import { useMainWindowEventsToast } from './useMainWindowEvents';
 
-const OS_TYPE = detectOS();
+const OS_TYPE = detectClientOS();
 const isDarwin = OS_TYPE === 'darwin';
 
 const winStateAtom = atom<chrome.windows.windowStateEnum | void>(undefined);

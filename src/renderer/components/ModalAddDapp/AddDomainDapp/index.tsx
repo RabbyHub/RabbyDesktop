@@ -272,7 +272,7 @@ export function AddDomainDapp({
   isGoBack?: boolean;
   onGoBackClick?: (dapp: IDapp) => void;
 }) {
-  const { dapps } = useDapps();
+  const { dapps } = useDapps({ fetchByDefault: true });
   const [form] = Form.useForm();
   const openDapp = useOpenDapp();
   const [addUrl, setAddUrl] = useAddDappURL();
@@ -425,6 +425,14 @@ export function AddDomainDapp({
       </Form>
       {isShowExample && (
         <DomainExample
+          title="Domain examples:"
+          domains={[
+            'uniswap.org',
+            'lido.fi',
+            'compound.finance',
+            'curve.fi',
+            'aave.com',
+          ]}
           onDomainClick={(domain) => {
             form.setFieldsValue({ url: domain });
             handleCheck();

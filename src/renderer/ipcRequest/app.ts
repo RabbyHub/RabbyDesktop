@@ -22,3 +22,7 @@ export function validateProxyConfig(
 export function getReleaseNoteByVersion(version?: string) {
   return window.rabbyDesktop.ipcRenderer.invoke('get-release-note', version);
 }
+
+export function openDirectory() {
+  return window.rabbyDesktop.ipcRenderer.invoke('open-directory');
+}

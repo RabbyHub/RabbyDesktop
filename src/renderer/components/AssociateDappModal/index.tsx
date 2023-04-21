@@ -10,7 +10,6 @@ import {
   useProtocolDappsBinding,
   useTabedDapps,
 } from '@/renderer/hooks/useDappsMngr';
-import { isDomainLikeStr, removeProtocolFromUrl } from '@/renderer/utils/url';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 import { formatDappURLToShow } from '@/isomorphic/dapp';
 import { usePrevious } from 'react-use';
@@ -152,7 +151,7 @@ const DappItem = ({
       />
       <div className="flex-1 dapp-info">
         <p>{dapp.alias}</p>
-        <p>{formatDappURLToShow(dapp.origin)}</p>
+        <p>{formatDappURLToShow(dapp.id || dapp.origin)}</p>
       </div>
       <TipsWrapper
         clickTips="Added"
@@ -259,7 +258,7 @@ const BindDapp = ({
     }, 100);
   };
 
-  const handleBack = (dapp: IDapp) => {
+  const handleBack = (dapp: IDappPartial) => {
     setKw(dapp.alias);
     setOpenAddDapp(false);
   };

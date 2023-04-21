@@ -211,7 +211,9 @@ const TabList = ({
                 {
                   type: 'sidebar-dapp',
                   dappTabInfo: {
-                    origin: dapp.origin,
+                    dappID: dapp.id,
+                    dappOrigin: dapp.origin,
+                    dappType: dapp.type,
                     id: tab?.id,
                     url: tab?.url,
                   },

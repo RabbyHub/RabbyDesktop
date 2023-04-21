@@ -19,7 +19,7 @@ import {
   ForwardedRef,
   useMemo,
 } from 'react';
-import { detectOS } from '@/isomorphic/os';
+import { detectClientOS } from '@/isomorphic/os';
 import classNames from 'classnames';
 
 import { useCurrentConnection } from '@/renderer/hooks/rabbyx/useConnection';
@@ -32,7 +32,7 @@ import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
 import styles from './index.module.less';
 // import { TipsWrapper } from '../TipWrapper';
 
-const isDarwin = detectOS() === 'darwin';
+const isDarwin = detectClientOS() === 'darwin';
 
 const RiskArea = ({
   style,
@@ -120,8 +120,11 @@ export const TopNavBar = () => {
   );
 
   const dappURLToShow = useMemo(() => {
+    if (selectedTabInfo?.dapp?.type === 'localfs') {
+      return formatDappURLToShow(selectedTabInfo?.dapp?.id || '');
+    }
     return formatDappURLToShow(activeTab?.url || '');
-  }, [activeTab?.url]);
+  }, [selectedTabInfo?.dapp, activeTab?.url]);
 
   return (
     <div className={styles.main} onDoubleClick={onDarwinToggleMaxmize}>

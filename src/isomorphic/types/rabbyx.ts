@@ -439,6 +439,8 @@ export type RabbyXMethod = {
     data?: any,
     origin?: string
   ) => void;
+
+  'walletController.getEnsContentHash': (name: string) => string;
 } & {
   'openapi.setHost': OpenApiService['setHost'];
   'openapi.getHost': OpenApiService['getHost'];

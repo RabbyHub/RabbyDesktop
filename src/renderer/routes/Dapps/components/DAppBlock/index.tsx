@@ -9,6 +9,7 @@ import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import clsx from 'clsx';
 
 import { useCurrentConnectedSite } from '@/renderer/hooks/useRabbyx';
+import { useDapps } from '@/renderer/hooks/useDappsMngr';
 import { DappFavicon } from '../../../../components/DappFavicon';
 
 import styles from '../../index.module.less';
@@ -20,13 +21,38 @@ const Indicator = ({ dapp }: { dapp: IDappWithTabInfo }) => {
   return <div className="dapp-indicator" />;
 };
 
-const IpfsTag = ({ prefix }: { prefix?: ReactNode }) => {
-  return (
-    <div className="tag ipfs-tag">
-      {prefix}
-      IPFS
-    </div>
-  );
+const DappBadge = ({
+  indicator,
+  type,
+}: {
+  indicator: ReactNode;
+  type: string;
+}) => {
+  if (type === 'ipfs') {
+    return (
+      <div className="tag tag-ipfs">
+        {indicator}
+        IPFS
+      </div>
+    );
+  }
+  if (type === 'ens') {
+    return (
+      <div className="tag tag-ens">
+        {indicator}
+        ENS
+      </div>
+    );
+  }
+  if (type === 'localfs') {
+    return (
+      <div className="tag tag-local">
+        {indicator}
+        Local
+      </div>
+    );
+  }
+  return <>{indicator}</>;
 };
 
 type IOnOpDapp = (
@@ -41,7 +67,7 @@ export const DAppBlock = ({
 }: React.PropsWithoutRef<{
   dapp?: IDappWithTabInfo;
   onOpDapp?: IOnOpDapp;
-  onOpen?: (dappOrigin: string) => void;
+  onOpen?: (dappOrigin: INextDapp['origin']) => void;
 }>) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -49,6 +75,8 @@ export const DAppBlock = ({
     origin: dapp?.origin || '',
     tab: dapp?.tab,
   });
+
+  const { dapps } = useDapps();
 
   if (!dapp) return null;
 
@@ -138,12 +166,7 @@ export const DAppBlock = ({
         }}
       >
         <div className={clsx('dapp-block-badge')}>
-          {dapp.origin?.startsWith('rabby-ipfs://') ||
-          (dapp.type as any) === 'ipfs' ? (
-            <IpfsTag prefix={<Indicator dapp={dapp} />} />
-          ) : (
-            <Indicator dapp={dapp} />
-          )}
+          <DappBadge type={dapp.type} indicator={<Indicator dapp={dapp} />} />
         </div>
         <div
           className="anchor"
@@ -165,7 +188,10 @@ export const DAppBlock = ({
           <div className="infos pr-[16px]">
             <h4 className="dapp-alias">{dapp.alias}</h4>
             <div className="dapp-url">
-              {formatDappURLToShow(dapp.origin?.replace(/^[\w|-]+:\/\//, ''))}
+              {formatDappURLToShow(dapp.id || dapp.origin, { dapps }).replace(
+                /^\w+:\/\/\/?/,
+                ''
+              )}
             </div>
           </div>
         </div>

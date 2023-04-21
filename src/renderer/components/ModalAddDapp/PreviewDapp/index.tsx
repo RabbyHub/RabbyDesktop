@@ -1,8 +1,7 @@
-import { putDapp } from '@/renderer/ipcRequest/dapps';
 import { LoadingOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useEffect, useRef, useState } from 'react';
-import { formatDappHttpOrigin } from '@/isomorphic/dapp';
+import { checkoutDappURL } from '@/isomorphic/dapp';
 import RabbyInput from '../../AntdOverwrite/Input';
 
 import { DappFavicon } from '../../DappFavicon';
@@ -60,7 +59,7 @@ export const PreviewDapp = ({
               onChange={(e) => {
                 const v = e.target.value;
                 if (data.isInputExistedDapp) {
-                  putDapp({
+                  window.rabbyDesktop.ipcRenderer.invoke('dapps-put', {
                     origin: data.inputOrigin,
                     alias: v || '-',
                   });
@@ -130,7 +129,7 @@ export const PreviewDapp = ({
       </div>
       <PreviewWebview
         containerClassName={styles.previewTagContainer}
-        src={formatDappHttpOrigin(data.inputOrigin, 'preview')}
+        src={checkoutDappURL(data.inputOrigin).dappURLToPrview}
         loadingView={
           <div className={styles.previewEmpty}>
             <div>

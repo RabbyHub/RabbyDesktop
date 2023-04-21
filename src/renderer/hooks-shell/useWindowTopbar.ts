@@ -10,7 +10,6 @@ import { fetchDapps } from '@/renderer/ipcRequest/dapps';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 
 import { useWindowState } from './useWindowState';
-import { getNavInfoByTabId } from '../ipcRequest/mainwin';
 
 export function useWinTriples() {
   const {
@@ -256,9 +255,11 @@ export function useSelectedTabInfo(activeTab?: ChromeTab | null) {
   const [selectedTabInfo, setSelectedTabInfo] = useState<IShellNavInfo>();
   useEffect(() => {
     if (!activeTab?.id) return;
-    getNavInfoByTabId(activeTab.id).then((info) => {
-      setSelectedTabInfo(info);
-    });
+    window.rabbyDesktop.ipcRenderer
+      .invoke('get-webui-ext-navinfo', activeTab.id)
+      .then((res) => {
+        setSelectedTabInfo(res.tabNavInfo);
+      });
   }, [activeTab?.id, activeTab?.url]);
 
   return selectedTabInfo;

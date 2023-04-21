@@ -1,10 +1,22 @@
 import { AxiosProxyConfig } from 'axios';
 import {
-  IPFS_LOCALHOST_DOMAIN,
+  ENS_LOCALHOST_DOMAIN,
+  IS_RUNTIME_PRODUCTION,
   LOCALIPFS_BRAND,
+  LOCALFS_BRAND,
+  PROTOCOL_ENS,
+  PROTOCOL_IPFS,
   RABBY_INTERNAL_PROTOCOL,
   RABBY_LOCAL_URLBASE,
 } from './constants';
+import {
+  encodeAbsPath,
+  ensurePrefix,
+  normalizeBackSlashInPath,
+  unPrefix,
+  unSuffix,
+} from './string';
+import { getOSPlatform } from './os';
 
 export function safeParseURL(url: string): URL | null {
   try {
@@ -67,6 +79,23 @@ export function integrateQueryToUrl(
   ].join('');
 }
 
+export const query2obj = (str: string) => {
+  const res: Record<string, string> = {};
+  str.replace(/([^=?#&]*)=([^?#&]*)/g, (_, $1: string, $2: string) => {
+    res[decodeURIComponent($1)] = decodeURIComponent($2);
+    return '';
+  });
+  return res;
+};
+
+export const obj2query = (obj: Record<string, string>) => {
+  return Object.keys(obj)
+    .map((key) => {
+      return `${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`;
+    })
+    .join('&');
+};
+
 export function isRabbyShellURL(url: string) {
   return url.startsWith('chrome-extension://') && url.includes('/webui.html');
 }
@@ -123,14 +152,15 @@ export function checkHardwareConnectPage(url: string) {
 }
 
 export function isUrlFromDapp(url: string) {
-  return (
-    !url.startsWith(RABBY_INTERNAL_PROTOCOL) &&
-    !url.startsWith('chrome-extension:') &&
-    (url.startsWith('https:') ||
-      // ipfs support
-      (url.startsWith('http:') && url.includes(`.${IPFS_LOCALHOST_DOMAIN}`)) ||
-      (url.startsWith('http:') && url.includes(`${LOCALIPFS_BRAND}.`)))
-  );
+  if (url.startsWith('https:')) return true;
+
+  if (url.startsWith('http:')) {
+    if (url.includes(`${LOCALIPFS_BRAND}.`)) return true;
+    if (url.includes(`${LOCALFS_BRAND}.`)) return true;
+    if (url.includes(`${ENS_LOCALHOST_DOMAIN}`)) return true;
+  }
+
+  return false;
 }
 
 export function getShellUIType(url: string) {
@@ -240,56 +270,349 @@ export function isInternalProtocol(url: string) {
   ].some((protocol) => url.startsWith(protocol));
 }
 
-export const IPFS_REGEXPS = {
-  IPFS_REGEX: /^(?:ipfs|rabby-ipfs):\/\/([a-zA-Z0-9]+)(\/.*)?$/i,
-  LOCALIPFS_BRAND_REGEX: /^http:\/\/local.ipfs\.([a-zA-Z0-9]+)(\/.*)?$/i,
+export function splitPathname(pathnameWithQuery: string, ipfsCid = '') {
+  pathnameWithQuery = unPrefix(pathnameWithQuery, '/');
+
+  const [pathname, pathnameSearch] = pathnameWithQuery.split('?') || [];
+  const pathnameWithoutHash = pathname.split('#')?.[0] || '';
+
+  const fsRelativePath = ipfsCid
+    ? ensurePrefix(pathnameWithQuery, `./ipfs/${ipfsCid}/`)
+    : '';
+
+  return {
+    pathnameWithQuery,
+    pathname,
+    pathnameSearch,
+    pathnameWithoutHash,
+    fsRelativePath,
+  };
+}
+
+/**
+ * @description convert absolute path to win32 absolute path
+ * @sample
+ *
+ * file:///c/Users/admin/foo/path --> /C:/Users/admin/foo/path
+ * /c/Users/admin/foo/path --> /C:/Users/admin/foo/path
+ * /Users/admin/foo/path --> /Users/admin/foo/path
+ */
+export function normalizeLocalAbsPath(
+  inputPath: string,
+  platform = getOSPlatform()
+) {
+  let absPath = inputPath || '';
+  if (absPath.startsWith('file://')) {
+    absPath = absPath.slice('file://'.length);
+  }
+
+  absPath = ensurePrefix(absPath, '/');
+  absPath = unSuffix(absPath, '/');
+
+  let posixAbsPath = ensurePrefix(absPath, '/');
+  posixAbsPath = posixAbsPath.replace(
+    /^(\/[a-z]):?\//i,
+    (_, driver) => `${driver.toLowerCase()}/`
+  );
+
+  let win32AbsPath = posixAbsPath.replace(
+    /^(\/[a-z])\//i,
+    (_, driver) => `${driver.toUpperCase()}:/`
+  );
+
+  win32AbsPath = normalizeBackSlashInPath(win32AbsPath);
+
+  return {
+    inputPath,
+    posixAbsPath,
+    win32AbsPath,
+    absPath: platform === 'win32' ? win32AbsPath : posixAbsPath,
+    fileURL: `file://${win32AbsPath}`,
+    fileURLPosix: `file://${posixAbsPath}`,
+  };
+}
+
+// console.debug('test:: normalizeLocalAbsPath', normalizeLocalAbsPath('file:///c/Users/admin/foo/path'))
+// console.debug('test:: normalizeLocalAbsPath', normalizeLocalAbsPath('/c/Users/admin/foo/path'))
+// console.debug('test:: normalizeLocalAbsPath', normalizeLocalAbsPath('/c:/Users/admin/foo/path'))
+// console.debug('test:: normalizeLocalAbsPath', normalizeLocalAbsPath('/Users/admin/foo/path'))
+
+const DAPP_URL_REGEXPS = {
+  ID_IPFS_REGEX: /^(?:ipfs|rabby-ipfs):\/\/([a-zA-Z0-9]+)(\/.*)?$/i,
+  ID_ENS_REGEX: /^rabby-ens:\/\/(.+).localens(\/[a-zA-Z0-9]+)?(\/.*)?$/i,
+  // rabby-fs:///<realpath>, use slash on all platforms, though on windows
+  ID_LOCALFS_REGEX: /^rabby-fs:\/\/([a-zA-Z0-9]+)(\/.*)?$/i,
+
+  INPUT_LOCAL_REGEX: /^file:\/\/(.*)?$/i,
+
+  IPFS_ENS_REGEX:
+    /^(?:ipfs|rabby-ipfs):\/\/([^\\]+\.eth)\.localens(\.[a-zA-Z0-9]+)?(\/.*)?$/i,
+
+  LOCALIPFS_BRAND_REGEX: /^http:\/\/local\.ipfs\.([a-zA-Z0-9]+)(\/.*)?$/i,
   LOCALIPFS_MAINDOMAIN_REGEX: /^http:\/\/([a-zA-Z0-9]+)\.local\.ipfs(\/.*)?$/i,
+
+  LOCALENS_REGEX: /^http:\/\/([^\\]+[.-]eth)\.localens(\/.*)?$/i,
+  LOCALFS_BRAND_REGEX: /^http:\/\/local\.fs\.([a-zA-Z0-9]+)(\/.*)?$/i,
 };
 
-export function extractIpfsCid(ipfsDappPath: string) {
-  if (ipfsDappPath.startsWith('/ipfs/')) {
-    return ipfsDappPath.split('/')[2] || '';
-  }
-
-  if (
-    ipfsDappPath.startsWith('rabby-ipfs:') ||
-    ipfsDappPath.startsWith('ipfs:')
-  ) {
-    const [, ipfsCid = ''] = ipfsDappPath.match(IPFS_REGEXPS.IPFS_REGEX) || [];
-
-    return ipfsCid;
-  }
-
-  if (IPFS_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX.test(ipfsDappPath)) {
-    const [, ipfsCid = ''] =
-      ipfsDappPath.match(IPFS_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX) || [];
-
-    return ipfsCid;
-  }
-
-  if (IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX.test(ipfsDappPath)) {
-    const [, ipfsCid = ''] =
-      ipfsDappPath.match(IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX) || [];
-
-    return ipfsCid;
-  }
-
-  return '';
+export function isSpecialDappID(dappURL: string) {
+  return (
+    DAPP_URL_REGEXPS.ID_IPFS_REGEX.test(dappURL) ||
+    DAPP_URL_REGEXPS.ID_ENS_REGEX.test(dappURL) ||
+    DAPP_URL_REGEXPS.ID_LOCALFS_REGEX.test(dappURL)
+  );
 }
 
 export function isIpfsHttpURL(dappURL: string) {
   return (
-    IPFS_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX.test(dappURL) ||
-    IPFS_REGEXPS.LOCALIPFS_BRAND_REGEX.test(dappURL)
+    DAPP_URL_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX.test(dappURL) ||
+    DAPP_URL_REGEXPS.LOCALIPFS_BRAND_REGEX.test(dappURL)
   );
 }
 
-export function isIpfsDappID(dappURL: string) {
-  return IPFS_REGEXPS.IPFS_REGEX.test(dappURL);
+export function isHttpURLForSpecialDapp(dappURL: string) {
+  return (
+    DAPP_URL_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX.test(dappURL) ||
+    DAPP_URL_REGEXPS.LOCALIPFS_BRAND_REGEX.test(dappURL) ||
+    DAPP_URL_REGEXPS.LOCALENS_REGEX.test(dappURL) ||
+    DAPP_URL_REGEXPS.LOCALFS_BRAND_REGEX.test(dappURL)
+  );
 }
 
-export function isURLForIpfsDapp(dappURL: string) {
-  return isIpfsHttpURL(dappURL) || isIpfsDappID(dappURL);
+type IDappInfoFromURL =
+  | {
+      type: IValidDappType & 'ens';
+      ensAddr: string;
+      pathnameWithQuery: string;
+      ipfsCid?: string;
+    }
+  | {
+      type: IValidDappType & 'ipfs';
+      ipfsCid: string;
+      pathnameWithQuery: string;
+      ensAddr?: string;
+    }
+  | {
+      type: IValidDappType & 'localfs';
+      localFSID: string;
+      localFSPath?: string;
+      fileURL?: string;
+      fileURLPosix?: string;
+      pathnameWithQuery: string;
+    }
+  | {
+      type: 'http';
+      pathnameWithQuery: string;
+    };
+export function extractDappInfoFromURL(dappURL: string): IDappInfoFromURL {
+  // ----------------------- ens --------------------------------
+  if (DAPP_URL_REGEXPS.ID_ENS_REGEX.test(dappURL)) {
+    const [, ensAddr, ipfsCidWithSlash = '', pathnameWithQuery] =
+      dappURL.match(DAPP_URL_REGEXPS.ID_ENS_REGEX) || [];
+
+    const ipfsCid = ipfsCidWithSlash ? unPrefix(ipfsCidWithSlash, '/') : '';
+
+    return { type: 'ens', ensAddr, ipfsCid, pathnameWithQuery };
+  }
+  if (DAPP_URL_REGEXPS.IPFS_ENS_REGEX.test(dappURL)) {
+    const [, ensAddr, ipfsCidWithDot, pathnameWithQuery] =
+      dappURL.match(DAPP_URL_REGEXPS.IPFS_ENS_REGEX) || [];
+
+    const ipfsCid = ipfsCidWithDot ? unPrefix(ipfsCidWithDot, '.') : '';
+
+    return { type: 'ens', ensAddr, ipfsCid, pathnameWithQuery };
+  }
+  if (DAPP_URL_REGEXPS.LOCALENS_REGEX.test(dappURL)) {
+    const [, ensAddr, pathnameWithQuery] =
+      dappURL.match(DAPP_URL_REGEXPS.LOCALENS_REGEX) || [];
+
+    return { type: 'ens', ensAddr, pathnameWithQuery };
+  }
+
+  // ----------------------- localfs --------------------------------
+  if (DAPP_URL_REGEXPS.LOCALFS_BRAND_REGEX.test(dappURL)) {
+    const [, localFSID, pathnameWithQuery] =
+      dappURL.match(DAPP_URL_REGEXPS.LOCALFS_BRAND_REGEX) || [];
+
+    return { type: 'localfs', localFSID, pathnameWithQuery };
+  }
+
+  if (DAPP_URL_REGEXPS.ID_LOCALFS_REGEX.test(dappURL)) {
+    const [, localFSID, pathnameWithQuery = ''] =
+      dappURL.match(DAPP_URL_REGEXPS.ID_LOCALFS_REGEX) || [];
+
+    return {
+      type: 'localfs',
+      localFSID: unSuffix(localFSID, '/'),
+      pathnameWithQuery,
+      localFSPath: '',
+      fileURL: '',
+      fileURLPosix: '',
+    };
+  }
+
+  if (DAPP_URL_REGEXPS.INPUT_LOCAL_REGEX.test(dappURL)) {
+    const [, oLocalFSPath] =
+      dappURL.match(DAPP_URL_REGEXPS.INPUT_LOCAL_REGEX) || [];
+    const absPathInfo = normalizeLocalAbsPath(oLocalFSPath);
+
+    return {
+      type: 'localfs',
+      localFSID: encodeAbsPath(absPathInfo.absPath),
+      pathnameWithQuery: '',
+      localFSPath: absPathInfo.absPath,
+      fileURL: absPathInfo.fileURL,
+      fileURLPosix: absPathInfo.fileURLPosix,
+    };
+  }
+
+  // ----------------------- ipfs --------------------------------
+  if (DAPP_URL_REGEXPS.ID_IPFS_REGEX.test(dappURL)) {
+    const [, ipfsCid = '', pathnameWithQuery] =
+      dappURL.match(DAPP_URL_REGEXPS.ID_IPFS_REGEX) || [];
+
+    return { type: 'ipfs', ipfsCid, pathnameWithQuery };
+  }
+  if (DAPP_URL_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX.test(dappURL)) {
+    const [, ipfsCid = '', pathnameWithQuery] =
+      dappURL.match(DAPP_URL_REGEXPS.LOCALIPFS_MAINDOMAIN_REGEX) || [];
+
+    return { type: 'ipfs', ipfsCid, pathnameWithQuery };
+  }
+  if (DAPP_URL_REGEXPS.LOCALIPFS_BRAND_REGEX.test(dappURL)) {
+    const [, ipfsCid = '', pathnameWithQuery] =
+      dappURL.match(DAPP_URL_REGEXPS.LOCALIPFS_BRAND_REGEX) || [];
+
+    return { type: 'ipfs', ipfsCid, pathnameWithQuery };
+  }
+
+  // ----------------------- http(s) --------------------------------
+  return {
+    type: 'http',
+    pathnameWithQuery: safeParseURL(dappURL)?.pathname || '',
+  };
+}
+
+// console.debug('test extractDappInfoFromURL', extractDappInfoFromURL(`file:///C:/Users/admin/path/to`));
+export function makeDappAboutURLs(
+  input:
+    | {
+        type: IValidDappType & 'ens';
+        ensAddr: string;
+        ipfsCid?: string;
+      }
+    | {
+        type: IValidDappType & 'ipfs';
+        ipfsCid: string;
+      }
+    | {
+        type: IValidDappType & 'localfs';
+        localFSID: string;
+      }
+    | {
+        type: IValidDappType & 'http';
+        httpsURL: string;
+      }
+) {
+  const result = {
+    dappID: '',
+    dappOrigin: '',
+  };
+  if (input.type === 'ens') {
+    result.dappID = `rabby-ens://${input.ensAddr}.localens`;
+
+    if (
+      !IS_RUNTIME_PRODUCTION &&
+      !DAPP_URL_REGEXPS.ID_ENS_REGEX.test(result.dappID)
+    )
+      throw new Error(`Invalid ens id ${result.dappID}`);
+
+    if (input.ipfsCid) {
+      result.dappOrigin = `rabby-ipfs://${input.ensAddr}.localens.${input.ipfsCid}`;
+
+      if (
+        !IS_RUNTIME_PRODUCTION &&
+        !DAPP_URL_REGEXPS.IPFS_ENS_REGEX.test(result.dappOrigin)
+      )
+        throw new Error(`Invalid ens origin ${result.dappOrigin}`);
+    }
+  } else if (input.type === 'ipfs') {
+    result.dappID = `rabby-ipfs://${input.ipfsCid}`;
+
+    if (
+      !IS_RUNTIME_PRODUCTION &&
+      !DAPP_URL_REGEXPS.ID_IPFS_REGEX.test(result.dappID)
+    )
+      throw new Error(`Invalid ipfs dapp id ${result.dappID}`);
+
+    result.dappOrigin = `rabby-ipfs://${input.ipfsCid}`;
+    if (
+      !IS_RUNTIME_PRODUCTION &&
+      !DAPP_URL_REGEXPS.IPFS_ENS_REGEX.test(result.dappOrigin)
+    )
+      throw new Error(`Invalid ipfs origin ${result.dappOrigin}`);
+  } else if (input.type === 'localfs') {
+    result.dappID = `rabby-fs://${input.localFSID}`;
+
+    if (
+      !IS_RUNTIME_PRODUCTION &&
+      !DAPP_URL_REGEXPS.ID_LOCALFS_REGEX.test(result.dappID)
+    )
+      throw new Error(`Invalid local fs dapp id ${result.dappID}`);
+
+    result.dappOrigin = result.dappID;
+  } else {
+    result.dappID = input.httpsURL;
+    result.dappOrigin = input.httpsURL;
+  }
+
+  return result;
+}
+
+export function extractIpfsInfo(maybeIpfsDappPath: string) {
+  const result = {
+    addSource: '' as IDappAddSource & ('ipfs-cid' | 'ens-addr'),
+    ensAddr: '',
+    ipfsCid: '',
+    ...splitPathname(''),
+  };
+
+  if (maybeIpfsDappPath.startsWith('/ipfs/')) {
+    result.ipfsCid = maybeIpfsDappPath.split('/')[2] || '';
+    return result;
+  }
+
+  const urlDappInfo = extractDappInfoFromURL(maybeIpfsDappPath);
+
+  if (urlDappInfo.type === 'ens') {
+    result.ensAddr = urlDappInfo.ensAddr;
+    result.addSource = 'ens-addr';
+    result.ipfsCid = urlDappInfo.ipfsCid || '';
+    result.pathnameWithQuery = urlDappInfo.pathnameWithQuery;
+  } else if (urlDappInfo.type === 'ipfs') {
+    result.ipfsCid = urlDappInfo.ipfsCid;
+    result.pathnameWithQuery = urlDappInfo.pathnameWithQuery;
+  } else if (urlDappInfo.type === 'http') {
+    result.pathnameWithQuery = urlDappInfo.pathnameWithQuery;
+  }
+
+  return {
+    ...result,
+    ...splitPathname(result.pathnameWithQuery, result.ipfsCid),
+  };
+}
+
+/**
+ * @description extract ipfs cid from ipfs dapp path
+ * @sample
+ *
+ * /ipfs/QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV --> QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV
+ * rabby-ipfs://QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV --> QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV
+ * ipfs://QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV --> QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV
+ * rabby-ens://1inch.eth.localens.QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV --> QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV
+ */
+export function extractIpfsCid(ipfsDappPath: string) {
+  return extractIpfsInfo(ipfsDappPath).ipfsCid;
 }
 
 export function canoicalizeDappUrl(url: string): ICanonalizedUrlInfo {
@@ -298,22 +621,42 @@ export function canoicalizeDappUrl(url: string): ICanonalizedUrlInfo {
   const hostname = urlInfo?.hostname || '';
   const isDapp =
     (!!urlInfo?.protocol &&
-      ['https:', 'ipfs:', 'rabby-ipfs:'].includes(urlInfo?.protocol)) ||
+      ['https:', 'ipfs:', PROTOCOL_IPFS, PROTOCOL_ENS].includes(
+        urlInfo?.protocol
+      )) ||
     isIpfsHttpURL(url);
 
-  const origin = ['ipfs:', 'rabby-ipfs:'].includes(urlInfo?.protocol || '')
-    ? `rabby-ipfs://${extractIpfsCid(url)}`
-    : urlInfo?.origin ||
+  const dappURLInfo = extractDappInfoFromURL(url);
+
+  let dappOrigin = '';
+  if (['ipfs:', 'rabby-ipfs:'].includes(urlInfo?.protocol || '')) {
+    dappOrigin = `rabby-ipfs://${extractIpfsCid(url)}`;
+  } else if (['rabby-ens:'].includes(urlInfo?.protocol || '')) {
+    const { ensAddr, ipfsCid } = extractIpfsInfo(url);
+    dappOrigin = makeDappAboutURLs({
+      type: 'ens',
+      ensAddr,
+      ipfsCid,
+    }).dappOrigin;
+  } else if (dappURLInfo.type === 'localfs') {
+    dappOrigin = makeDappAboutURLs({
+      type: 'localfs',
+      localFSID: dappURLInfo.localFSID,
+    }).dappOrigin;
+  } else {
+    dappOrigin =
+      urlInfo?.origin ||
       `${urlInfo?.protocol}//${hostname}${
         urlInfo?.port ? `:${urlInfo?.port}` : ''
       }`;
+  }
 
   const domainInfo = getDomainFromHostname(hostname);
 
   return {
     urlInfo,
     isDapp,
-    origin,
+    origin: dappOrigin,
     hostname,
     fullDomain: urlInfo?.host || '',
     ...domainInfo,

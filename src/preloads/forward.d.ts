@@ -74,7 +74,8 @@ type ZViewStates = {
     // nothing
   };
 
-  'ipfs-not-supported-modal': {
+  'modal-dapp-type-not-supported': {
+    tipType?: IValidDappType;
     // nothing
   };
 

@@ -21,7 +21,7 @@ import { ModalConfirmInSettings } from '@/renderer/components/Modal/Confirm';
 import { Switch } from '@/renderer/components/Switch/Switch';
 import { useCheckNewRelease } from '@/renderer/hooks/useAppUpdator';
 import { copyText } from '@/renderer/utils/clipboard';
-import { detectOS } from '@/isomorphic/os';
+import { detectClientOS } from '@/isomorphic/os';
 import { ucfirst } from '@/isomorphic/string';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
@@ -145,7 +145,7 @@ const ProxyText = styled.div`
   }
 `;
 
-const osType = detectOS();
+const osType = detectClientOS();
 
 export function MainWindowSettings() {
   const appVerisons = useAppVersion();
@@ -265,10 +265,11 @@ export function MainWindowSettings() {
             name={
               <>
                 <div className="flex flex-col gap-[4px]">
-                  <span className="text-14 font-medium">IPFS</span>
+                  <span className="text-14 font-medium">IPFS/ENS/Local</span>
                   <span className="text-14 text-white opacity-[0.6]">
-                    Once enabled, you can use IPFS Dapp. However, Trezor and
-                    Onekey will be affected and can't be used properly.
+                    Once enabled, you can use IPFS/ENS/Local Dapp. However,
+                    Trezor and Onekey will be affected and can't be used
+                    properly.
                   </span>
                 </div>
               </>

@@ -3,7 +3,8 @@
 import {
   checkoutDappURL,
   formatDappHttpOrigin,
-  makeDappURLToOpen,
+  isOpenedAsHttpDappType,
+  matchDappsByOrigin,
   sortDappsBasedPinned,
 } from '@/isomorphic/dapp';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
@@ -11,14 +12,11 @@ import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useWindowTabs } from '../hooks-shell/useWindowTabs';
 import {
-  deleteDapp,
   detectDapps,
   fetchDapps,
   fetchProtocolDappsBinding,
   getDapp,
-  putDapp,
   putProtocolDappsBinding,
-  toggleDappPinned,
 } from '../ipcRequest/dapps';
 import { findTabByTabID } from '../utils/tab';
 
@@ -75,7 +73,11 @@ export function useProtocolDappsBinding() {
   };
 }
 
-export function useDapps() {
+/**
+ * @description by default, it will NOT fetch dapps from main process,
+ * you should specify `fetchByDefault` to `true` if you want to fetch dapps
+ */
+export function useDapps(options?: { fetchByDefault?: boolean }) {
   const [originDapps, setDapps] = useAtom(dappsAtomic);
   const [pinnedList, setPinnedList] = useAtom(pinnedListAtomic);
   const [unpinnedList, setUnpinnedList] = useAtom(unpinnedListAtomic);
@@ -86,17 +88,17 @@ export function useDapps() {
   const dappBoundTabIds = useMemo(() => {
     const fixed = { ...dappBoundTabIdsOrig };
     Object.keys(fixed).forEach((dappId) => {
-      const checkoutedInfo = checkoutDappURL(dappId);
-      if (checkoutedInfo.type === 'ipfs') {
+      const checkedOutDappURLInfo = checkoutDappURL(dappId);
+      if (isOpenedAsHttpDappType(checkedOutDappURLInfo.type)) {
         fixed[formatDappHttpOrigin(dappId)] = fixed[dappId];
-        fixed[checkoutedInfo.dappID] = fixed[dappId];
+        fixed[checkedOutDappURLInfo.dappID] = fixed[dappId];
       }
     });
     return fixed;
   }, [dappBoundTabIdsOrig]);
 
   // only fetch dapps once for every call to hooks
-  const calledRef = useRef(false);
+  const calledRef = useRef(!options?.fetchByDefault);
   useEffect(() => {
     if (calledRef.current) return;
 
@@ -124,20 +126,8 @@ export function useDapps() {
     );
   }, [setDappsBoundTabIds, setPinnedList, setUnpinnedList, setDapps]);
 
-  const renameDapp = useCallback(async (dapp: IDapp, alias: string) => {
-    putDapp({ ...dapp, alias });
-  }, []);
-
-  const removeDapp = useCallback(async (dapp: IDapp) => {
-    return deleteDapp(dapp);
-  }, []);
-
-  const pinDapp = useCallback((dappOrigin: string) => {
-    toggleDappPinned([dappOrigin], true);
-  }, []);
-
-  const unpinDapp = useCallback((dappOrigin: string) => {
-    toggleDappPinned([dappOrigin], false);
+  const renameDapp = useCallback(async (dapp: IDappPartial, alias: string) => {
+    window.rabbyDesktop.ipcRenderer.invoke('dapps-put', { ...dapp, alias });
   }, []);
 
   const staticsSummary = useMemo(() => {
@@ -163,56 +153,54 @@ export function useDapps() {
     dappBoundTabIds,
     detectDapps,
     renameDapp,
-    removeDapp,
-    pinDapp,
-    unpinDapp,
   };
 }
 
-export function useDapp(origin?: string) {
+export function useDapp(dappID?: string) {
   const [dappInfo, setDappInfo] = useState<Partial<IMergedDapp> | null>(null);
 
   useEffect(() => {
-    if (!origin) {
+    if (!dappID) {
       setDappInfo(null);
       return;
     }
 
-    getDapp(origin).then((newVal) => {
+    getDapp(dappID).then((newVal) => {
       setDappInfo(newVal);
     });
-  }, [origin]);
+  }, [dappID]);
 
   return dappInfo;
 }
 
-export function useMatchDapp(origin?: string) {
-  // 先根据 origin 匹配 Dapp，无匹配项后再用 domain 匹配一次
+export function useMatchDappByOrigin(origin?: string) {
   const { dapps } = useDapps();
-  const [dappInfo, setDappInfo] = useState<Partial<IMergedDapp> | null>(null);
 
-  useEffect(() => {
-    if (!origin) {
-      setDappInfo(null);
-      return;
+  const dappInfo = useMemo(() => {
+    if (!origin) return null;
+
+    const dappInfoToMatch = checkoutDappURL(origin);
+
+    if (dappInfoToMatch.type !== 'http') {
+      const matchedDapp = matchDappsByOrigin(dappInfoToMatch, dapps);
+
+      return matchedDapp;
     }
 
+    // 对 http 类型的 dapp，先根据 origin 匹配 Dapp，无匹配项后再用 domain 匹配一次
     const findExact = dapps.find(
       (item) => item.origin.toLowerCase() === origin.toLowerCase()
     );
     if (findExact) {
-      setDappInfo(findExact);
-    } else {
-      const { secondaryOrigin } = canoicalizeDappUrl(origin);
-      const findMatchDomain = dapps.find(
-        (item) => item.origin === secondaryOrigin
-      );
-      if (findMatchDomain) {
-        setDappInfo(findMatchDomain);
-      } else {
-        setDappInfo(null);
-      }
+      return findExact;
     }
+
+    const { secondaryOrigin } = canoicalizeDappUrl(origin);
+    const findMatchDomain = dapps.find(
+      (item) => item.origin === secondaryOrigin
+    );
+
+    return findMatchDomain || null;
   }, [origin, dapps]);
 
   return dappInfo;

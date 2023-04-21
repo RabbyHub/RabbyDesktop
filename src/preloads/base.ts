@@ -5,6 +5,10 @@ import {
   nativeImage,
 } from 'electron';
 import { formatDappURLToShow } from '../isomorphic/dapp';
+import { extractDappInfoFromURL } from '../isomorphic/url';
+
+// increase the max listeners to avoid the warning or memory leak
+ipcRenderer.setMaxListeners(50);
 
 export const ipcRendererObj = {
   sendMessage<T extends IChannelsKey>(
@@ -62,6 +66,18 @@ export const rendererHelpers: Window['rabbyDesktop']['rendererHelpers'] = {
   },
 
   formatDappURLToShow: (dappURL) => {
+    const urlDappInfo = extractDappInfoFromURL(dappURL);
+    if (urlDappInfo.type === 'localfs') {
+      // notice: this would block UI thread
+      const { dapp } = ipcRendererObj.sendSync(
+        '__internal_rpc:dapp:get-dapp-by-url',
+        {
+          dappURL,
+        }
+      );
+      return formatDappURLToShow(dapp?.id || dappURL);
+    }
+
     return formatDappURLToShow(dappURL);
   },
 };

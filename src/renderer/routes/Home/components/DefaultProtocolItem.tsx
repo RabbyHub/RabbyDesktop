@@ -332,7 +332,7 @@ const DefaultProtocolItem = ({
                     (
                     {/^https:\/\//.test(bindUrl)
                       ? removeProtocolFromUrl(bindUrl)
-                      : formatDappURLToShow(bindUrl)}
+                      : formatDappURLToShow(bindUrl, { dapps })}
                     )
                   </span>
                 </div>

@@ -32,7 +32,7 @@ import {
   IPFSAddFailedModal,
   IPFSNoLodalModal,
   IPFSVerifyFailedModal,
-  IPFSNotSupportedModal,
+  DappTypeNotSupportedModal,
 } from '@/renderer/components/IPFSAlertModal';
 import { useTipCannotUseTrezorLike } from '@/renderer/hooks-shell/useZPopupEffects';
 import SwitchChainModal from '../../components/SwitchChainModal';
@@ -97,7 +97,7 @@ function App() {
       <IPFSAddFailedModal />
       <IPFSNoLodalModal />
       <IPFSVerifyFailedModal />
-      <IPFSNotSupportedModal />
+      <DappTypeNotSupportedModal />
     </>
   );
 }

@@ -6,10 +6,11 @@ import { firstValueFrom } from 'rxjs';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { isRabbyXPage } from '@/isomorphic/url';
 import { trimWebContentsUserAgent } from '@/isomorphic/string';
-import { coerceNumber } from '@/isomorphic/primitive';
 import {
   IS_RUNTIME_PRODUCTION,
+  PROTOCOL_ENS,
   PROTOCOL_IPFS,
+  PROTOCOL_LOCALFS,
   RABBY_INTERNAL_PROTOCOL,
 } from '../../isomorphic/constants';
 import { getAssetPath, getShellPageUrl, preloadPath } from '../utils/app';
@@ -154,6 +155,14 @@ protocol.registerSchemesAsPrivileged([
     scheme: PROTOCOL_IPFS.slice(0, -1),
     privileges: { standard: true, supportFetchAPI: true },
   },
+  {
+    scheme: PROTOCOL_ENS.slice(0, -1),
+    privileges: { standard: true, supportFetchAPI: true },
+  },
+  {
+    scheme: PROTOCOL_LOCALFS.slice(0, -1),
+    privileges: { standard: true, supportFetchAPI: true },
+  },
   // {
   //   scheme: 'file:'.slice(0, -1),
   //   privileges: { standard: true, corsEnabled: false, allowServiceWorkers: true, supportFetchAPI: true },
@@ -211,6 +220,29 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
       },
     ],
     appInterpretors['rabby-ipfs:']
+  );
+  registerSessionProtocol(
+    [
+      {
+        session: checkingViewSession,
+        name: 'checkingViewSession',
+      },
+    ],
+    appInterpretors['rabby-ens:']
+  );
+  registerSessionProtocol(
+    [
+      { session: mainSession, name: 'mainSession' },
+      {
+        session: checkingProxySession,
+        name: 'checkingProxySession',
+      },
+      {
+        session: checkingViewSession,
+        name: 'checkingViewSession',
+      },
+    ],
+    appInterpretors['rabby-fs:']
   );
 
   emitIpcMainEvent('__internal_main:app:enable-ipfs-support', true);

@@ -1,19 +1,28 @@
-import { IconLink } from '@/../assets/icons/mainwin-settings';
-import { Modal, Props as ModalProps } from '@/renderer/components/Modal/Modal';
-import { ellipsis } from '@/renderer/utils/address';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import { Button, Tooltip } from 'antd';
-import { useCallback, useMemo } from 'react';
-import { openExternalUrl } from '@/renderer/ipcRequest/app';
+import {
+  useCallback,
+  useMemo,
+  useState,
+  memo,
+  PropsWithChildren,
+  DetailedHTMLProps,
+} from 'react';
 import clsx from 'clsx';
-import IconReceive from '@/../assets/icons/home-widgets/receive.svg';
-import IconSend from '@/../assets/icons/home-widgets/send.svg';
-import IconSwap from '@/../assets/icons/home-widgets/swap.svg';
 import styled from 'styled-components';
 import { DEX_SUPPORT_CHAINS } from '@rabby-wallet/rabby-swap';
 import { useNavigate } from 'react-router-dom';
+import { atom, useAtomValue, useSetAtom } from 'jotai';
+import { IconLink } from '@/../assets/icons/mainwin-settings';
+import { Modal } from '@/renderer/components/Modal/Modal';
+import { ellipsis } from '@/renderer/utils/address';
+import { openExternalUrl } from '@/renderer/ipcRequest/app';
+import IconReceive from '@/../assets/icons/home-widgets/receive.svg';
+import IconSend from '@/../assets/icons/home-widgets/send.svg';
+import IconSwap from '@/../assets/icons/home-widgets/swap.svg';
 import { obj2query } from '@/renderer/utils/url';
 import { getChain } from '@/renderer/utils';
+import { ReceiveModal } from '@/renderer/components/ReceiveModal';
 
 const supportChains = [...new Set(Object.values(DEX_SUPPORT_CHAINS).flat())];
 
@@ -24,7 +33,7 @@ type tokenContainer = {
 };
 const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
   const chainItem = getChain(token?.chain);
-  const chianLogo =
+  const chainLogo =
     chainItem?.logo || 'rabby-internal://assets/icons/common/token-default.svg';
 
   const isNativeToken = chainItem.nativeTokenAddress === token?.id;
@@ -99,7 +108,13 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
   return (
     <div className="flex flex-col h-full text-white">
       <div className="flex items-center">
-        <img src={token.logo_url} className="w-[34px]" />
+        <img
+          src={
+            token.logo_url ||
+            'rabby-internal://assets/icons/common/token-default.svg'
+          }
+          className="w-[34px] rounded-full"
+        />
         <div className="mx-[15px] text-[30px] leading-[36px] font-medium max-w-[276px] overflow-hidden overflow-ellipsis whitespace-nowrap">
           {token.symbol}
         </div>
@@ -111,7 +126,7 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
             !isNativeToken && 'cursor-pointer'
           )}
         >
-          <img src={chianLogo} className="w-14 h-14" />
+          <img src={chainLogo} className="w-14 h-14" />
           <span className="text-white text-opacity-60">{tokenAddrDisplay}</span>
           {!isNativeToken && (
             <img src={IconLink} className="w-14 h-14 opacity-60" />
@@ -155,26 +170,128 @@ const StyledModal = styled(Modal)`
   }
 `;
 
-export const TokenActionModal = (props: tokenContainer & ModalProps) => {
-  const { token, handleReceiveClick, ...other } = props;
+export const actionTokenAtom = atom<TokenItem | undefined>(undefined);
 
+export const isSupportToken = (token?: TokenItem) => {
+  return token && getChain(token?.chain);
+};
+
+export const useTokenAction = () => {
+  const setToken = useSetAtom(actionTokenAtom);
+  const cancelTokenAction = useCallback(() => {
+    setToken(undefined);
+  }, [setToken]);
+
+  const enableTokenAction = true;
+
+  const handleClickToken = useCallback(
+    (t: TokenItem) => {
+      if (!enableTokenAction || !t || !getChain(t?.chain)) {
+        return;
+      }
+      setToken(t);
+    },
+    [enableTokenAction, setToken]
+  );
+
+  return {
+    enableTokenAction,
+    setTokenAction: handleClickToken,
+    cancelTokenAction,
+  };
+};
+
+export const TokenActionSymbol = ({
+  token,
+  enable = true,
+  className,
+  onClick,
+  children,
+  ...others
+}: DetailedHTMLProps<React.HTMLAttributes<HTMLSpanElement>, HTMLSpanElement> & {
+  token: TokenItem;
+  enable?: boolean;
+}) => {
+  const isSupport = useMemo(
+    () => enable && isSupportToken(token),
+    [enable, token]
+  );
+  const { setTokenAction } = useTokenAction();
+  const handleClick: React.MouseEventHandler<HTMLSpanElement> = useCallback(
+    (e) => {
+      if (isSupport) {
+        setTokenAction(token);
+      }
+      onClick?.(e);
+    },
+    [isSupport, onClick, setTokenAction, token]
+  );
   return (
-    <StyledModal
-      width={584}
-      centered
-      bodyStyle={{
-        height: 224,
-        padding: '40px 32px',
-      }}
-      title={null}
-      open={!!token}
-      {...other}
+    <span
+      onClick={handleClick}
+      className={clsx(
+        className,
+        isSupport && 'hover:underline hover:text-blue-light cursor-pointer'
+      )}
+      {...others}
     >
-      <Container
-        token={token}
-        onCancel={other.onCancel}
-        handleReceiveClick={handleReceiveClick}
-      />
-    </StyledModal>
+      {children || ellipsis(token.symbol)}
+    </span>
   );
 };
+
+export const TokenActionModal = memo(() => {
+  const currentToken = useAtomValue(actionTokenAtom);
+  const { cancelTokenAction } = useTokenAction();
+  const [state, setState] = useState<{
+    isShowReceiveModal: boolean;
+    token?: string;
+    chain?: CHAINS_ENUM;
+  }>({
+    isShowReceiveModal: false,
+    token: undefined,
+    chain: undefined,
+  });
+
+  const handleReceiveClick = useCallback((token: TokenItem) => {
+    setState({
+      isShowReceiveModal: true,
+      token: token.symbol,
+      chain: getChain(token.chain)?.enum,
+    });
+  }, []);
+
+  return (
+    <>
+      <StyledModal
+        width={584}
+        centered
+        bodyStyle={{
+          height: 224,
+          padding: '40px 32px',
+        }}
+        title={null}
+        open={!!currentToken}
+        onCancel={cancelTokenAction}
+      >
+        <Container
+          token={currentToken}
+          onCancel={cancelTokenAction}
+          handleReceiveClick={handleReceiveClick}
+        />
+      </StyledModal>
+      <ReceiveModal
+        open={state.isShowReceiveModal}
+        token={state.token}
+        chain={state.chain}
+        onCancel={() => {
+          setState({
+            isShowReceiveModal: false,
+            token: undefined,
+            chain: undefined,
+          });
+        }}
+      />
+    </>
+  );
+});
