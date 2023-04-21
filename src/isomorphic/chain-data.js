@@ -46,6 +46,8 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["TOMB"] = "TOMB";
     CHAINS_ENUM["PZE"] = "PZE";
     CHAINS_ENUM["ERA"] = "ERA";
+    CHAINS_ENUM["EOS"] = "EOS";
+    CHAINS_ENUM["CORE"] = "CORE";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -779,6 +781,38 @@ export const CHAINS_RAW = {
         hex: "0x144",
         scanLink: "https://explorer.zksync.io/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/era/e21641a19fe6b8c5d05337dacae17b6e.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+    },
+    [CHAINS_ENUM.EOS]: {
+        id: 17777,
+        serverId: 'eos',
+        network: '17777',
+        name: 'EOS EVM',
+        nativeTokenSymbol: "EOS",
+        nativeTokenAddress: "eos",
+        enum: CHAINS_ENUM.EOS,
+        hex: "0x4571",
+        scanLink: "https://explorer.evm.eosnetwork.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/eos/7e3122a9ce6f9d522e6d5519d43b6a72.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+    },
+    [CHAINS_ENUM.CORE]: {
+        id: 1116,
+        serverId: 'core',
+        network: '1116',
+        name: 'CORE',
+        nativeTokenSymbol: "CORE",
+        nativeTokenAddress: "core",
+        enum: CHAINS_ENUM.CORE,
+        hex: "0x45c",
+        scanLink: "https://scan.coredao.org/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/core/ccc02f660e5dd410b23ca3250ae7c060.png",
         nativeTokenDecimals: 18,
         eip: {
             "1559": false,
