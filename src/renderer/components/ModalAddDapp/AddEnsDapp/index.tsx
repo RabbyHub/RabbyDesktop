@@ -108,7 +108,7 @@ const useCheckDapp = ({ onReplace }: { onReplace?: (v: string) => void }) => {
         setState({
           dappInfo: null,
           validateStatus: undefined,
-          help: 'Downloading files to local, please wait a moment',
+          help: 'Downloading files to local, please wait a moment...',
         });
       },
       onError: (e) => {
