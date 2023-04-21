@@ -1,5 +1,6 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 
+import { nativeImage } from 'electron';
 import logger from 'electron-log';
 
 import {
@@ -10,14 +11,15 @@ import {
   checkoutDappURL,
   normalizeProtocolBindingValues,
   formatDappToStore,
+  matchDappsByOrigin,
 } from '@/isomorphic/dapp';
 import { arraify } from '@/isomorphic/array';
-import { nativeImage } from 'electron';
 import {
   emitIpcMainEvent,
   handleIpcMainInvoke,
   onIpcMainEvent,
   onIpcMainInternalEvent,
+  onIpcMainSyncEvent,
 } from '../utils/ipcMainEvents';
 import {
   EnumOpenDappAction,
@@ -953,3 +955,19 @@ onIpcMainInternalEvent(
     }
   }
 );
+
+onIpcMainSyncEvent('__internal_rpc:dapp:get-dapp-by-url', (evt, params) => {
+  const { dappURL } = params;
+
+  let foundDapp = null;
+
+  try {
+    foundDapp = matchDappsByOrigin(dappURL, getAllDapps());
+  } catch (err) {
+    logger.error(err);
+  } finally {
+    evt.returnValue = {
+      dapp: foundDapp,
+    };
+  }
+});
