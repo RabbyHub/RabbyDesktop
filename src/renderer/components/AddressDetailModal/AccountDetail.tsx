@@ -1,10 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   IDisplayedAccountWithBalance,
   useAccountToDisplay,
 } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
 import { useCopyToClipboard } from 'react-use';
+import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
 import { splitNumberByStep } from '@/renderer/utils/number';
 import {
   KEYRING_CLASS,
@@ -14,16 +15,17 @@ import {
 } from '@/renderer/utils/constant';
 import { useAddressSource } from '@/renderer/hooks/rabbyx/useAddressSource';
 import QRCode from 'qrcode.react';
-import { Popover } from 'antd';
+import { Popover, message } from 'antd';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { useForwardTo } from '@/renderer/hooks/useViewsMessage';
 import styles from './index.module.less';
 import { AccountDetailItem } from './AccountDetailItem';
 import { useAccountInfo } from '../AddressManagementModal/useAccountInfo';
-import { toastCopiedWeb3Addr } from '../TransparentToast';
 import RabbyInput from '../AntdOverwrite/Input';
 import { SafeItem } from './SafeItem';
 import { WhitelistSwitch } from './WhitelistSwitch';
+import { TipsWrapper } from '../TipWrapper';
+import { DeleteWrapper } from '../DeleteWrapper';
 
 export interface Props {
   onClose: () => void;
@@ -42,7 +44,6 @@ export const AccountDetail: React.FC<Props> = ({
   const onCopy = React.useCallback(
     (e: React.MouseEvent) => {
       copyToClipboard(account.address);
-      toastCopiedWeb3Addr(account.address, { triggerEl: e.target });
     },
     [account.address, copyToClipboard]
   );
@@ -83,22 +84,28 @@ export const AccountDetail: React.FC<Props> = ({
     setAliasInput(account.alianName);
   }, []);
 
+  const [close, setClose] = useState(false);
+
+  const renderDesc = useMemo(
+    () => (
+      <div className={styles.address}>
+        <span className={styles.text}>{account.address}</span>
+        <TipsWrapper hoverTips="Copy" clickTips="Copied">
+          <img
+            className={styles.copy}
+            onClick={onCopy}
+            src="rabby-internal://assets/icons/address-management/copy-white.svg"
+          />
+        </TipsWrapper>
+      </div>
+    ),
+    [account.address]
+  );
+
   return (
     <div className={styles.AccountDetail}>
       <section className={styles.part}>
-        <AccountDetailItem
-          headline="Address"
-          description={
-            <div className={styles.address}>
-              <span className={styles.text}>{account.address}</span>
-              <img
-                className={styles.copy}
-                onClick={onCopy}
-                src="rabby-internal://assets/icons/address-management/copy-white.svg"
-              />
-            </div>
-          }
-        />
+        <AccountDetailItem headline="Address" description={renderDesc} />
         <AccountDetailItem headline="Address Note">
           {editing ? (
             <RabbyInput
@@ -162,15 +169,31 @@ export const AccountDetail: React.FC<Props> = ({
           <WhitelistSwitch account={account} />
         </AccountDetailItem>
       </section>
-      <section className={styles.part}>
+      <DeleteWrapper
+        timeout={0}
+        className={styles.part}
+        onCancelDelete={() => {
+          setClose(false);
+        }}
+        onConfirmDelete={() => {
+          onDelete(account);
+          toastTopMessage({
+            data: {
+              type: 'success',
+              content: 'Deleted successfully',
+            },
+          });
+        }}
+        showClose={close}
+      >
         <AccountDetailItem
-          onClick={() => onDelete(account)}
+          onClick={() => setClose(true)}
           className={styles.deleteAddress}
           headline="Delete Address"
         >
           <img src="rabby-internal://assets/icons/address-management/next.svg" />
         </AccountDetailItem>
-      </section>
+      </DeleteWrapper>
     </div>
   );
 };

@@ -6,6 +6,7 @@ import classNames from 'classnames';
 import { useLocation } from 'react-router-dom';
 import { sortBy } from 'lodash';
 import { ellipsis } from '@/renderer/utils/address';
+import { TipsWrapper } from '@/renderer/components/TipWrapper';
 import { formatNumber } from '@/renderer/utils/number';
 import { formatChain, DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import { useTotalBalance } from '@/renderer/utils/balance';
@@ -14,7 +15,6 @@ import useCurve from '@/renderer/hooks/useCurve';
 import useHistoryTokenList from '@/renderer/hooks/useHistoryTokenList';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import useHistoryProtocol from '@/renderer/hooks/useHistoryProtocol';
-import { toastCopiedWeb3Addr } from '@/renderer/components/TransparentToast';
 import { copyText } from '@/renderer/utils/clipboard';
 import {
   useZPopupLayerOnMain,
@@ -285,20 +285,19 @@ const Home = () => {
                   </div>
                 ) : (
                   <div className="current-address">
-                    <span
-                      className="inline-flex items-center"
-                      onClick={async () => {
-                        if (!currentAccount?.address) return;
-
-                        await copyText(currentAccount.address);
-                        toastCopiedWeb3Addr(currentAccount.address);
-                      }}
-                    >
+                    <span className="inline-flex items-center">
                       {ellipsis(currentAccount?.address || '')}
-                      <img
-                        className="icon"
-                        src="rabby-internal://assets/icons/home/copy.svg"
-                      />
+                      <TipsWrapper hoverTips="Copy" clickTips="Copied">
+                        <img
+                          onClick={async () => {
+                            if (!currentAccount?.address) return;
+
+                            await copyText(currentAccount.address);
+                          }}
+                          className="icon"
+                          src="rabby-internal://assets/icons/home/copy.svg"
+                        />
+                      </TipsWrapper>
                     </span>
 
                     <span
@@ -310,10 +309,12 @@ const Home = () => {
                         });
                       }}
                     >
-                      <img
-                        className="icon"
-                        src="rabby-internal://assets/icons/home/info.svg"
-                      />
+                      <TipsWrapper hoverTips="Address Detail">
+                        <img
+                          className="icon"
+                          src="rabby-internal://assets/icons/home/info.svg"
+                        />
+                      </TipsWrapper>
                     </span>
                   </div>
                 )}

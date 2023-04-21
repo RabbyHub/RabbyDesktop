@@ -10,6 +10,7 @@ import { usePreference } from '@/renderer/hooks/rabbyx/usePreference';
 import { Chain, CHAINS_ENUM, CHAINS_LIST } from '@debank/common';
 import styles from './index.module.less';
 import RabbyInput from '../AntdOverwrite/Input';
+import { TipsWrapper } from '../TipWrapper';
 
 type OnPinnedChanged = (
   chain: import('@debank/common').CHAINS_ENUM,
@@ -52,19 +53,21 @@ function ChainItem({
           <img src={chain.logo} className={styles.chainItemIcon} />
           <div className={styles.chainItemName}>{chain.name}</div>
         </div>
-        <img
-          className={clsx(styles.chainItemStar, pinned ? styles.block : '')}
-          src={
-            pinned
-              ? 'rabby-internal://assets/icons/swap/pinned.svg'
-              : 'rabby-internal://assets/icons/swap/unpinned.svg'
-          }
-          onClick={(evt) => {
-            evt.stopPropagation();
-            onPinnedChange?.(chain.enum, !pinned);
-          }}
-          alt=""
-        />
+        <TipsWrapper hoverTips={pinned ? 'Unpin Chain' : 'Pin Chain'}>
+          <img
+            className={clsx(styles.chainItemStar, pinned ? styles.block : '')}
+            src={
+              pinned
+                ? 'rabby-internal://assets/icons/swap/pinned.svg'
+                : 'rabby-internal://assets/icons/swap/unpinned.svg'
+            }
+            onClick={(evt) => {
+              evt.stopPropagation();
+              onPinnedChange?.(chain.enum, !pinned);
+            }}
+            alt=""
+          />
+        </TipsWrapper>
         {checked && (
           <img
             className={styles.chainItemChecked}

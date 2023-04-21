@@ -1,4 +1,4 @@
-import { toastMessage } from '@/renderer/components/TransparentToast';
+// import { toastMessage } from '@/renderer/components/TransparentToast';
 import { BigNumber } from 'bignumber.js';
 
 /**
@@ -62,8 +62,8 @@ export const mergeList = <T>(
 };
 
 export const toastMaxAccount = () => {
-  toastMessage({
-    type: 'warning',
-    content: 'Maximum address limit reached',
-  });
+  // toastMessage({
+  //   type: 'warning',
+  //   content: 'Maximum address limit reached',
+  // });
 };

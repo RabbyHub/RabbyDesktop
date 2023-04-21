@@ -14,7 +14,6 @@ import { useDapps } from 'renderer/hooks/useDappsMngr';
 import { useUnmount } from 'react-use';
 import RabbyInput from '../../AntdOverwrite/Input';
 import { Props as ModalProps } from '../../Modal/Modal';
-import { toastMessage } from '../../TransparentToast';
 import { DomainExample } from '../DomainExample';
 import { PreviewDapp } from '../PreviewDapp';
 import { useAddDappURL } from '../useAddDapp';
@@ -337,11 +336,7 @@ export function AddDomainDapp({
       },
       urls
     );
-    toastMessage({
-      type: 'success',
-      content: 'Add success',
-      className: styles.toast,
-    });
+
     const nextState = {
       dappInfo: {
         ...dappInfo,

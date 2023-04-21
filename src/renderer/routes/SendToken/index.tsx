@@ -25,9 +25,9 @@ import AccountCard from '@/renderer/components/AccountCard';
 import AddressViewer from '@/renderer/components/AddressViewer';
 import { ModalConfirm } from '@/renderer/components/Modal/Confirm';
 import { copyText } from '@/renderer/utils/clipboard';
-import { toastCopiedWeb3Addr } from '@/renderer/components/TransparentToast';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import { useRbiSource } from '@/renderer/hooks/useRbiSource';
+import { TipsWrapper } from '@/renderer/components/TipWrapper';
 import GasSelector from './components/GasSelector';
 import GasReserved from './components/GasReserved';
 import { ChainSelect } from '../Swap/component/ChainSelect';
@@ -764,7 +764,6 @@ const SendTokenInner = () => {
 
   const handleCopyContractAddress = useCallback((s: string) => {
     copyText(s);
-    toastCopiedWeb3Addr(s);
   }, []);
 
   const initByCache = async () => {
@@ -1039,11 +1038,13 @@ const SendTokenInner = () => {
                 <span>Contract Address</span>
                 <span className="flex">
                   <AddressViewer address={currentToken.id} />
-                  <img
-                    src="rabby-internal://assets/icons/home/copy.svg"
-                    className="icon icon-copy"
-                    onClick={() => handleCopyContractAddress(currentToken.id)}
-                  />
+                  <TipsWrapper hoverTips="Copy" clickTips="Copied">
+                    <img
+                      src="rabby-internal://assets/icons/home/copy.svg"
+                      className="icon icon-copy"
+                      onClick={() => handleCopyContractAddress(currentToken.id)}
+                    />
+                  </TipsWrapper>
                 </span>
               </div>
             ) : (

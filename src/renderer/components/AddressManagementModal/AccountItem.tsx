@@ -11,11 +11,12 @@ import {
 import { splitNumberByStep } from '@/renderer/utils/number';
 import { Tooltip } from 'antd';
 import clsx from 'clsx';
-import React from 'react';
+import React, { useState } from 'react';
 import { useCopyToClipboard } from 'react-use';
-import { toastCopiedWeb3Addr } from '../TransparentToast';
 import styles from './index.module.less';
 import { useAccountInfo } from './useAccountInfo';
+import { TipsWrapper } from '../TipWrapper';
+import { DeleteWrapper } from '../DeleteWrapper';
 
 interface Props {
   account: IDisplayedAccountWithBalance;
@@ -61,7 +62,6 @@ export const AccountItem: React.FC<Props> = ({
     (e) => {
       e.stopPropagation();
       copyToClipboard(account.address);
-      toastCopiedWeb3Addr(account.address, { triggerEl: e.target });
     },
     [account.address, copyToClipboard]
   );
@@ -86,9 +86,22 @@ export const AccountItem: React.FC<Props> = ({
     );
   }, [account.address, account.brandName, highlightedAddresses]);
 
+  const [close, setClose] = useState(false);
+
   return (
-    <section className={styles.AccountItem}>
-      <div onClick={onClickDelete} className={styles.trash}>
+    <DeleteWrapper
+      onCancelDelete={() => {
+        setClose(false);
+      }}
+      className={clsx(styles.AccountItem, 'relative')}
+      closeClassName="w-[calc(100%-32px)]"
+      onConfirmDelete={onClickDelete}
+      showClose={close}
+    >
+      <div
+        onClick={() => setClose(true)}
+        className={clsx(styles.trash, close && 'opacity-0')}
+      >
         <img src="rabby-internal://assets/icons/address-management/trash.svg" />
       </div>
       <div className={styles.container}>
@@ -116,28 +129,35 @@ export const AccountItem: React.FC<Props> = ({
                   </div>
                 </Tooltip>
               )}
-              <div
-                onClick={onTogglePin}
-                className={clsx(
-                  styles.pin,
-                  styles.icon,
-                  pinned && styles.pinned
-                )}
-              >
-                {pinned ? (
-                  <img src="rabby-internal://assets/icons/address-management/pin.svg" />
-                ) : (
-                  <img src="rabby-internal://assets/icons/address-management/unpin.svg" />
-                )}
-              </div>
+              <TipsWrapper hoverTips={pinned ? 'Unpin address' : 'Pin address'}>
+                <div
+                  onClick={onTogglePin}
+                  className={clsx(
+                    styles.pin,
+                    styles.icon,
+                    pinned && styles.pinned
+                  )}
+                >
+                  {pinned ? (
+                    <img src="rabby-internal://assets/icons/address-management/pin.svg" />
+                  ) : (
+                    <img src="rabby-internal://assets/icons/address-management/unpin.svg" />
+                  )}
+                </div>
+              </TipsWrapper>
             </div>
             <div className={clsx(styles.part, styles.partAddress)}>
               <div title={formatAddressTooltip} className={styles.address}>
                 {ellipsis(account.address)}
               </div>
-              <div onClick={onCopy} className={clsx(styles.copy, styles.icon)}>
-                <img src="rabby-internal://assets/icons/address-management/copy-white.svg" />
-              </div>
+              <TipsWrapper hoverTips="Copy" clickTips="Copied">
+                <div
+                  onClick={onCopy}
+                  className={clsx(styles.copy, styles.icon)}
+                >
+                  <img src="rabby-internal://assets/icons/address-management/copy-white.svg" />
+                </div>
+              </TipsWrapper>
               <div className={styles.balance}>
                 ${splitNumberByStep(account.balance?.toFixed(2))}
               </div>
@@ -165,6 +185,6 @@ export const AccountItem: React.FC<Props> = ({
           />
         </div>
       </div>
-    </section>
+    </DeleteWrapper>
   );
 };

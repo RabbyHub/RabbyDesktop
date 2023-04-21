@@ -134,6 +134,7 @@ export default function DApps() {
               <div className="dapp-matrix">
                 <SortableList
                   data={pinnedDapps}
+                  otherData={unpinnedDapps}
                   onChange={(v) => {
                     setDappsOrder({
                       pinnedList: v.map((item) => item.id),
@@ -152,6 +153,7 @@ export default function DApps() {
                 />
                 <SortableList
                   data={unpinnedDapps}
+                  otherData={pinnedDapps}
                   onChange={(v) => {
                     setDappsOrder({
                       unpinnedList: v.map((item) => item.id),

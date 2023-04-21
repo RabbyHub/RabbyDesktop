@@ -3,8 +3,10 @@ import { useCopy } from '@/renderer/hooks/useCopy';
 import { ellipsis } from '@/renderer/utils/address';
 import { splitNumberByStep } from '@/renderer/utils/number';
 import clsx from 'clsx';
-import React from 'react';
-import BigNumber from 'bignumber.js';
+import React, { useState } from 'react';
+import { TipsWrapper } from '@/renderer/components/TipWrapper';
+import { useBundleIsMax } from '@/renderer/hooks/useBundle/useBundleAccount';
+import { DeleteWrapper } from '@/renderer/components/DeleteWrapper';
 import { useAccountItemAddress, useAccountItemIcon } from './useAccountItem';
 import { NicknameInput } from './NicknameInput';
 
@@ -27,6 +29,7 @@ export const AccountItem: React.FC<Props> = ({
     account: { toggleBundle, remove, percentMap },
     eth,
   } = useBundle();
+  const bundleIsMax = useBundleIsMax();
   const addressTypeIcon = useAccountItemIcon(data);
   const displayAddress = useAccountItemAddress(data);
 
@@ -65,12 +68,20 @@ export const AccountItem: React.FC<Props> = ({
   }, [isBundle, percentMap, data.id]);
 
   const balance = data.balance;
+  const [close, setClose] = useState(false);
 
   return (
-    <div className="group flex justify-center items-center relative">
-      {canDelete && (
+    <DeleteWrapper
+      className="group flex justify-center items-center relative"
+      showClose={close}
+      onCancelDelete={() => {
+        setClose(false);
+      }}
+      onConfirmDelete={onClickDelete}
+    >
+      {canDelete && !close && (
         <div
-          onClick={onClickDelete}
+          onClick={() => setClose(true)}
           className={clsx(
             'absolute left-[-21px]',
             'opacity-0 group-hover:opacity-80 cursor-pointer'
@@ -93,14 +104,22 @@ export const AccountItem: React.FC<Props> = ({
       >
         <div className="mr-[15px]">
           {checked ? (
-            <img src="rabby-internal://assets/icons/bundle/checked.svg" />
+            <TipsWrapper hoverTips="Remove from bundle">
+              <img src="rabby-internal://assets/icons/bundle/checked.svg" />
+            </TipsWrapper>
           ) : (
-            <div
-              className={clsx(
-                'border border-[#FFFFFF4D] group-hover:border-white border-solid',
-                'w-[16px] h-[16px] rounded-full'
-              )}
-            />
+            <TipsWrapper
+              hoverTips="Add to bundle"
+              clickTips={bundleIsMax ? 'Maximum 15 addresses' : undefined}
+              showConfirmIcon={false}
+            >
+              <div
+                className={clsx(
+                  'border border-[#FFFFFF4D] group-hover:border-white border-solid',
+                  'w-[16px] h-[16px] rounded-full'
+                )}
+              />
+            </TipsWrapper>
           )}
         </div>
         <div className="mr-[7px]">
@@ -110,18 +129,20 @@ export const AccountItem: React.FC<Props> = ({
           <NicknameInput data={data} canEdit={canEdit} />
           <div className="flex space-x-[5px] items-center h-[14px]">
             <span className="opacity-50">{ellipsis(displayAddress)}</span>
-            <div
-              onClick={onCopy}
-              className={clsx(
-                'group-hover:block hidden',
-                'opacity-60 hover:opacity-100'
-              )}
-            >
-              <img
-                className="w-[14px]"
-                src="rabby-internal://assets/icons/address-management/copy-white.svg"
-              />
-            </div>
+            <TipsWrapper hoverTips="Copy" clickTips="Copied">
+              <div
+                onClick={onCopy}
+                className={clsx(
+                  'group-hover:block hidden',
+                  'opacity-60 hover:opacity-100'
+                )}
+              >
+                <img
+                  className="w-[14px]"
+                  src="rabby-internal://assets/icons/address-management/copy-white.svg"
+                />
+              </div>
+            </TipsWrapper>
           </div>
         </div>
         <div
@@ -145,6 +166,6 @@ export const AccountItem: React.FC<Props> = ({
           {isBundle && <div className="opacity-60">{percent}%</div>}
         </div>
       </div>
-    </div>
+    </DeleteWrapper>
   );
 };

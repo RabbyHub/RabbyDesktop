@@ -7,6 +7,7 @@ import React, { useEffect, useLayoutEffect, useMemo } from 'react';
 import { matchPath, useLocation, useNavigate } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
 import styled from 'styled-components';
+import { useTransition, animated } from '@react-spring/web';
 
 import {
   IDappWithTabInfo,
@@ -147,6 +148,7 @@ const TabList = ({
   dappActions,
   style,
   isFold,
+  otherDapps,
 }: {
   style?: React.CSSProperties;
   className?: string;
@@ -154,25 +156,34 @@ const TabList = ({
   activeTabId?: chrome.tabs.Tab['id'];
   dappActions: ReturnType<typeof useSidebarDapps>['dappActions'];
   isFold?: boolean;
+  otherDapps?: IDappWithTabInfo[];
 }) => {
   const navigateToDapp = useNavigateToDappRoute();
   const rLoc = useLocation();
-  if (!dapps?.length) {
-    return null;
-  }
+
+  const transitions = useTransition(dapps, {
+    initial: { scale: 1 },
+    enter: { scale: 1 },
+    leave: { scale: 0 },
+    config: { duration: 300 },
+    keys: (dapp) => dapp.origin,
+  });
 
   return (
     <ul className={classNames(styles.routeList, className)} style={style}>
-      {dapps.map((dapp) => {
+      {transitions((s, dapp) => {
         const { tab } = dapp;
         const faviconUrl =
           dapp?.faviconBase64 || dapp?.faviconUrl || dapp.tab?.favIconUrl;
 
         const matchedRoute = matchPath(DappRoutePattern, rLoc.pathname);
         const matchedDappID = matchedRoute?.params.dappId || '';
-
+        if (otherDapps && otherDapps.find((e) => e.origin === dapp.origin)) {
+          return null;
+        }
         return (
-          <li
+          <animated.li
+            style={s}
             key={`dapp-${dapp.origin}`}
             className={classNames(
               styles.routeItem,
@@ -227,7 +238,7 @@ const TabList = ({
                 {dapp.alias || dapp.origin}
               </Hide>
             </div>
-          </li>
+          </animated.li>
         );
       })}
     </ul>
@@ -387,6 +398,7 @@ export default function MainWindowSidebar() {
                   className={styles.pinnedList}
                   dappActions={dappActions}
                   dapps={pinnedDapps}
+                  otherDapps={unpinnedOpenedDapps}
                   activeTabId={activeTab?.id}
                   isFold={secondAnim}
                 />
@@ -394,6 +406,7 @@ export default function MainWindowSidebar() {
                   className={styles.unpinnedList}
                   dappActions={dappActions}
                   dapps={unpinnedOpenedDapps}
+                  otherDapps={pinnedDapps}
                   activeTabId={activeTab?.id}
                   isFold={secondAnim}
                 />

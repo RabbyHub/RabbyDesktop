@@ -9,6 +9,8 @@ import {
   MouseSensor,
   DragOverlay,
 } from '@dnd-kit/core';
+import { useTransition, animated, AnimatedProps } from '@react-spring/web';
+
 import {
   SortableContext,
   arrayMove,
@@ -29,9 +31,12 @@ import React, {
 import { DAppBlock } from '../DAppBlock';
 
 export const SortableItem = (
-  props: PropsWithChildren<{ id: string | number }>
+  props: PropsWithChildren<{
+    id: string | number;
+    style?: AnimatedProps<{ style: CSSProperties }>['style'];
+  }>
 ) => {
-  const { id, children } = props;
+  const { id, children, style: s } = props;
   const {
     attributes,
     isDragging,
@@ -49,27 +54,34 @@ export const SortableItem = (
   //   }),
   //   [attributes, listeners, setActivatorNodeRef]
   // );
-  const style: CSSProperties = {
-    opacity: isDragging ? 0.4 : undefined,
-    transform: CSS.Translate.toString(transform),
-    transition,
-    outline: 'none',
-  };
+  const style = useMemo(
+    () => ({
+      opacity: isDragging ? 0.4 : undefined,
+      transform: CSS.Translate.toString(transform),
+      transition,
+      outline: 'none',
+      ...s,
+    }),
+    [isDragging, transform, transition, s]
+  );
 
   return (
-    <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
+    <animated.div ref={setNodeRef} style={style} {...listeners} {...attributes}>
       {children}
-    </div>
+    </animated.div>
   );
 };
 
 interface SortableListProps {
   data?: IDappWithTabInfo[];
+  // 为了跳过leave动画
+  otherData?: IDappWithTabInfo[];
   onChange?(items: IDappWithTabInfo[]): void;
   renderItem?(item: IDappWithTabInfo): ReactNode;
 }
 export const SortableList = ({
   data = [],
+  otherData,
   onChange,
   renderItem,
 }: SortableListProps) => {
@@ -89,6 +101,15 @@ export const SortableList = ({
       },
     })
   );
+
+  const transitions = useTransition(items, {
+    initial: { scale: 1 },
+    enter: { scale: 1 },
+    leave: { scale: 0 },
+    config: { duration: 300 },
+    keys: (d) => d?.origin,
+  });
+
   return (
     <DndContext
       sensors={sensors}
@@ -109,9 +130,12 @@ export const SortableList = ({
       }}
     >
       <SortableContext items={items} strategy={rectSortingStrategy}>
-        {items.map((item) => {
+        {transitions((style, item) => {
+          if (otherData && otherData.find((e) => e.origin === item.origin)) {
+            return null;
+          }
           return (
-            <SortableItem id={item.id} key={item.id}>
+            <SortableItem id={item.id} key={item.id} style={style}>
               {renderItem?.(item)}
             </SortableItem>
           );

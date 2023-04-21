@@ -12,9 +12,9 @@ import { Tooltip } from 'antd';
 import clsx from 'clsx';
 import React from 'react';
 import { useCopyToClipboard } from 'react-use';
-import { toastCopiedWeb3Addr } from '../TransparentToast';
 import styles from './index.module.less';
 import { useAccountInfo } from './useAccountInfo';
+import { TipsWrapper } from '../TipWrapper';
 
 interface Props {
   account: IDisplayedAccountWithBalance;
@@ -52,7 +52,6 @@ export const CurrentAccount: React.FC<Props> = ({ account, onClick }) => {
     (e: React.MouseEvent) => {
       e.stopPropagation();
       copyToClipboard(account.address);
-      toastCopiedWeb3Addr(account.address, { triggerEl: e.target });
     },
     [account.address, copyToClipboard]
   );
@@ -87,9 +86,11 @@ export const CurrentAccount: React.FC<Props> = ({ account, onClick }) => {
           <div title={formatAddressTooltip} className={styles.address}>
             {ellipsis(account.address)}
           </div>
-          <div onClick={onCopy} className={clsx(styles.copy, styles.icon)}>
-            <img src="rabby-internal://assets/icons/address-management/copy-white.svg" />
-          </div>
+          <TipsWrapper hoverTips="Copy" clickTips="Copied">
+            <div onClick={onCopy} className={clsx(styles.copy, styles.icon)}>
+              <img src="rabby-internal://assets/icons/address-management/copy-white.svg" />
+            </div>
+          </TipsWrapper>
         </div>
       </div>
       <div className={styles.balance}>

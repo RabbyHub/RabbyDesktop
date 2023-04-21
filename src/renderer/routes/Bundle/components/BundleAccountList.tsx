@@ -8,7 +8,7 @@ export const BundleAccountList = () => {
   return (
     <CommonAccountList
       isBundle
-      titleClassName="mb-[8px] opacity-70"
+      titleClassName="mb-[8px] opacity-70 leading-none"
       title={`Bundle Addresses (${account.inBundleList.length})`}
       maxAccount={15}
     >

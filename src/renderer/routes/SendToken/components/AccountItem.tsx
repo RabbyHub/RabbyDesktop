@@ -6,9 +6,9 @@ import { ellipsis, isSameAddress } from '@/renderer/utils/address';
 import { IDisplayedAccountWithBalance } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
 import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
 import { copyText } from '@/renderer/utils/clipboard';
-import { toastCopiedWeb3Addr } from '@/renderer/components/TransparentToast';
 import { KEYRING_ICONS, WALLET_BRAND_CONTENT } from '@/renderer/utils/constant';
 import { splitNumberByStep } from '@/renderer/utils/number';
+import { TipsWrapper } from '@/renderer/components/TipWrapper';
 
 const AccountItemWrapper = styled.div`
   padding: 10px 16px;
@@ -89,7 +89,6 @@ export const AccountItem = ({
   const handleClickCopy = (e: React.MouseEvent<HTMLImageElement>) => {
     e.stopPropagation();
     copyText(account.address);
-    toastCopiedWeb3Addr(account.address);
   };
   const handleClickItem = () => {
     if (disabled) {
@@ -132,12 +131,14 @@ export const AccountItem = ({
         </div>
         <div className="address" title={account.address} ref={addressElement}>
           <div className="addr">{ellipsis(account.address)}</div>
-          <div className="cursor-pointer" onClick={handleClickCopy}>
-            <img
-              className="icon-copy"
-              src="rabby-internal://assets/icons/send-token/copy.svg"
-            />
-          </div>
+          <TipsWrapper hoverTips="Copy" clickTips="Copied">
+            <div className="cursor-pointer" onClick={handleClickCopy}>
+              <img
+                className="icon-copy"
+                src="rabby-internal://assets/icons/send-token/copy.svg"
+              />
+            </div>
+          </TipsWrapper>
         </div>
       </div>
       <div className="text-13  mb-0">

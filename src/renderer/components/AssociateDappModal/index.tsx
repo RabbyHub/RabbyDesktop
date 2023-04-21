@@ -12,10 +12,12 @@ import {
 } from '@/renderer/hooks/useDappsMngr';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 import { formatDappURLToShow } from '@/isomorphic/dapp';
+import { usePrevious } from 'react-use';
+import clsx from 'clsx';
 import { Modal, Props as ModalProps } from '../Modal/Modal';
 import styles from './index.module.less';
-import { toastMessage } from '../TransparentToast';
 import { DappFavicon } from '../DappFavicon';
+import { TipsWrapper } from '../TipWrapper';
 
 const BindDappWrapper = styled.div`
   padding: 32px 60px;
@@ -135,6 +137,12 @@ const DappItem = ({
   isBinded: boolean;
   protocol: DisplayProtocol;
 }) => {
+  const previousBind = usePrevious(isBinded);
+  const tip = useMemo(
+    () => previousBind === false && isBinded,
+    [isBinded, previousBind]
+  );
+
   return (
     <DappItemWrapper>
       <DappFavicon
@@ -146,32 +154,35 @@ const DappItem = ({
         <p>{dapp.alias}</p>
         <p>{formatDappURLToShow(dapp.id || dapp.origin)}</p>
       </div>
-      {isBinded ? (
-        <>
-          <div className="binded-tip">
-            <img
-              src="rabby-internal://assets/icons/home/success.svg"
-              className="icon-success"
-            />
-            Bound to {protocol.name}
-          </div>
-          <Button
-            type="primary"
-            className="open-button rounded"
-            onClick={() => onOpen(dapp.origin)}
-          >
-            Open
-          </Button>
-        </>
-      ) : (
-        <Button
-          type="primary"
-          className="w-[72px] rounded"
-          onClick={() => onBind(dapp.origin)}
-        >
-          Bind
-        </Button>
-      )}
+
+      <div className="flex items-center">
+        <div className={clsx('binded-tip', isBinded ? 'block' : 'hidden')}>
+          <img
+            src="rabby-internal://assets/icons/home/success.svg"
+            className="icon-success"
+          />
+          Bound to {protocol.name}
+        </div>
+        <TipsWrapper clickTips="Added" defaultClicked={tip}>
+          {isBinded ? (
+            <Button
+              type="primary"
+              className="open-button rounded"
+              onClick={() => onOpen(dapp.origin)}
+            >
+              Open
+            </Button>
+          ) : (
+            <Button
+              type="primary"
+              className="w-[72px] rounded"
+              onClick={() => onBind(dapp.origin)}
+            >
+              Bind
+            </Button>
+          )}
+        </TipsWrapper>
+      </div>
     </DappItemWrapper>
   );
 };
@@ -225,10 +236,6 @@ const BindDapp = ({
     await bindingDappsToProtocol(protocol.id, {
       origin,
       siteUrl: protocol.site_url,
-    });
-    toastMessage({
-      type: 'success',
-      content: 'Binding success',
     });
   };
 
