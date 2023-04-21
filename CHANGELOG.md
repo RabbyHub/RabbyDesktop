@@ -1,7 +1,22 @@
 
-v0.16.0 / 2023-04-18
+v0.17.0 / 2023-04-22
 ====================
 
+  * chore: literals change.
+  * chore: update data.
+  * feat: copy tips (#370)
+  * feat: support core chain (#378)
+  * feat: upgrade rabbyx to 0.80.0 (#380)
+  * feat: adjust UI/literals about dapp support. (#379)
+  * feat: ens (#374)
+  * feat: Protocol support token modal (#377)
+  * feat: support eos evm (#373)
+  * feat: increase the max listeners of ipcRenderer to avoid the memory leak in renderer process. (#376)
+
+v0.16.0-prod / 2023-04-18
+=========================
+
+  * Release v0.16.0-prod
   * Revert "feat: support eos evm (#371)" (#372)
   * chore: upgrade rabbyx core to v0.79.1
   * feat: add TokenActionModal (#369)
