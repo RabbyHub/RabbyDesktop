@@ -129,20 +129,22 @@ export const AccountItem: React.FC<Props> = ({
                   </div>
                 </Tooltip>
               )}
-              <div
-                onClick={onTogglePin}
-                className={clsx(
-                  styles.pin,
-                  styles.icon,
-                  pinned && styles.pinned
-                )}
-              >
-                {pinned ? (
-                  <img src="rabby-internal://assets/icons/address-management/pin.svg" />
-                ) : (
-                  <img src="rabby-internal://assets/icons/address-management/unpin.svg" />
-                )}
-              </div>
+              <TipsWrapper hoverTips={pinned ? 'Unpin address' : 'Pin address'}>
+                <div
+                  onClick={onTogglePin}
+                  className={clsx(
+                    styles.pin,
+                    styles.icon,
+                    pinned && styles.pinned
+                  )}
+                >
+                  {pinned ? (
+                    <img src="rabby-internal://assets/icons/address-management/pin.svg" />
+                  ) : (
+                    <img src="rabby-internal://assets/icons/address-management/unpin.svg" />
+                  )}
+                </div>
+              </TipsWrapper>
             </div>
             <div className={clsx(styles.part, styles.partAddress)}>
               <div title={formatAddressTooltip} className={styles.address}>

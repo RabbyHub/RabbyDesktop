@@ -10,6 +10,7 @@ import clsx from 'clsx';
 
 import { useCurrentConnectedSite } from '@/renderer/hooks/useRabbyx';
 import { useDapps } from '@/renderer/hooks/useDappsMngr';
+import { TipsWrapper } from '@/renderer/components/TipWrapper';
 import { DappFavicon } from '../../../../components/DappFavicon';
 
 import styles from '../../index.module.less';
@@ -195,20 +196,21 @@ export const DAppBlock = ({
             </div>
           </div>
         </div>
-
-        <div
-          className={clsx('menu-entry', dapp.isPinned && 'is-pinned')}
-          style={{
-            // todo
-            backgroundImage: `url(rabby-internal://assets/icons/internal-homepage/${
-              dapp.isPinned ? 'icon-pin-fill.svg' : 'icon-pin.svg'
-            })`,
-          }}
-          onClickCapture={(evt) => {
-            evt.stopPropagation();
-            onOpDapp?.(dapp.isPinned ? 'unpin' : 'pin', dapp);
-          }}
-        />
+        <TipsWrapper hoverTips={dapp.isPinned ? 'Unpin Dapp' : 'Pin Dapp'}>
+          <div
+            className={clsx('menu-entry', dapp.isPinned && 'is-pinned')}
+            style={{
+              // todo
+              backgroundImage: `url(rabby-internal://assets/icons/internal-homepage/${
+                dapp.isPinned ? 'icon-pin-fill.svg' : 'icon-pin.svg'
+              })`,
+            }}
+            onClickCapture={(evt) => {
+              evt.stopPropagation();
+              onOpDapp?.(dapp.isPinned ? 'unpin' : 'pin', dapp);
+            }}
+          />
+        </TipsWrapper>
       </div>
     </Dropdown>
   );

@@ -64,6 +64,7 @@ export const CommonAccountList: React.FC<Props> = ({
         </h2>
         {canAdd && (
           <TipsWrapper
+            showConfirmIcon={false}
             hoverTips={hoverTips}
             clickTips={!canAdd ? clickTips : undefined}
             placement="topRight"

@@ -111,6 +111,7 @@ export const AccountItem: React.FC<Props> = ({
             <TipsWrapper
               hoverTips="Add to bundle"
               clickTips={bundleIsMax ? 'Maximum 15 addresses' : undefined}
+              showConfirmIcon={false}
             >
               <div
                 className={clsx(

@@ -50,6 +50,7 @@ export const TipsWrapper = (
     iconClassName?: string;
     children: React.ReactElement;
     defaultClicked?: boolean;
+    showConfirmIcon?: boolean;
   }
 ) => {
   const {
@@ -60,6 +61,7 @@ export const TipsWrapper = (
     iconClassName,
     children,
     defaultClicked,
+    showConfirmIcon = true,
     ...others
   } = props;
 
@@ -149,7 +151,9 @@ export const TipsWrapper = (
       title={
         <div className="flex items-center gap-4">
           {clicked ? <span>{clickTips}</span> : hoverTips}{' '}
-          {clicked && <img src={IconConfirm} className="w-12 h-8" />}
+          {clicked && showConfirmIcon && (
+            <img src={IconConfirm} className="w-12 h-8" />
+          )}
         </div>
       }
       {...others}

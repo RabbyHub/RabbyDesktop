@@ -148,6 +148,7 @@ const TabList = ({
   dappActions,
   style,
   isFold,
+  otherDapps,
 }: {
   style?: React.CSSProperties;
   className?: string;
@@ -155,6 +156,7 @@ const TabList = ({
   activeTabId?: chrome.tabs.Tab['id'];
   dappActions: ReturnType<typeof useSidebarDapps>['dappActions'];
   isFold?: boolean;
+  otherDapps?: IDappWithTabInfo[];
 }) => {
   const navigateToDapp = useNavigateToDappRoute();
   const rLoc = useLocation();
@@ -176,7 +178,9 @@ const TabList = ({
 
         const matchedRoute = matchPath(DappRoutePattern, rLoc.pathname);
         const matchedDappID = matchedRoute?.params.dappId || '';
-
+        if (otherDapps && otherDapps.find((e) => e.origin === dapp.origin)) {
+          return null;
+        }
         return (
           <animated.li
             style={s}
@@ -394,6 +398,7 @@ export default function MainWindowSidebar() {
                   className={styles.pinnedList}
                   dappActions={dappActions}
                   dapps={pinnedDapps}
+                  otherDapps={unpinnedOpenedDapps}
                   activeTabId={activeTab?.id}
                   isFold={secondAnim}
                 />
@@ -401,6 +406,7 @@ export default function MainWindowSidebar() {
                   className={styles.unpinnedList}
                   dappActions={dappActions}
                   dapps={unpinnedOpenedDapps}
+                  otherDapps={pinnedDapps}
                   activeTabId={activeTab?.id}
                   isFold={secondAnim}
                 />
