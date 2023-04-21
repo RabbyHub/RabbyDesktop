@@ -460,7 +460,6 @@ export function formatDappHttpOrigin(
  * @param url
  */
 export function makeDappURLToOpen(url: string) {
-  url = 'rabby-ipfs://QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV';
   const checkoutedDappURLInfo = checkoutDappURL(url);
 
   switch (checkoutedDappURLInfo.type) {
