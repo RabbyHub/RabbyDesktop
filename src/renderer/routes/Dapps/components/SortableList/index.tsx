@@ -100,9 +100,9 @@ export const SortableList = ({
   );
 
   const transitions = useTransition(items, {
-    initial: { scale: 1, opacity: 1 },
-    enter: { scale: 1, opacity: 1 },
-    leave: { scale: 0, opacity: 0 },
+    initial: { scale: 1 },
+    enter: { scale: 1 },
+    leave: { scale: 0 },
     config: { duration: 300 },
     keys: (d) => d?.origin,
   });

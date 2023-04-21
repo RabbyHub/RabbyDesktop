@@ -1,5 +1,5 @@
-import { useClickOutSide } from '@/renderer/hooks/useClick';
 import { Tooltip, TooltipProps } from 'antd';
+import { atom, useAtom, useSetAtom } from 'jotai';
 import {
   cloneElement,
   useCallback,
@@ -9,6 +9,38 @@ import {
   useState,
 } from 'react';
 
+import IconConfirm from '@/../assets/icons/checkbox/confirm.svg';
+
+const { nanoid } = require('nanoid');
+
+const tipIdAtom = atom('');
+const tipTimerAtom = atom<NodeJS.Timeout | undefined>(undefined);
+const setTipTimerAtom = atom(null, (get, set, update: [string, number]) => {
+  clearTimeout(get(tipTimerAtom));
+  set(tipIdAtom, update[0]);
+  set(
+    tipTimerAtom,
+    setTimeout(() => {
+      set(tipIdAtom, '');
+      set(tipTimerAtom, undefined);
+    }, update[1])
+  );
+});
+
+const mouseEnterAtom = atom(null, (get, set, update: string) => {
+  if (!(get(tipIdAtom) === update && get(tipTimerAtom))) {
+    set(tipTimerAtom, undefined);
+    set(tipIdAtom, update);
+  }
+});
+
+const mouseLeaveAtom = atom(null, (get, set, update: string) => {
+  if (!(get(tipIdAtom) === update && get(tipTimerAtom))) {
+    set(tipTimerAtom, undefined);
+    set(tipIdAtom, '');
+  }
+});
+
 export const TipsWrapper = (
   props: TooltipProps & {
     hoverTips?: string;
@@ -17,7 +49,7 @@ export const TipsWrapper = (
     size?: number;
     iconClassName?: string;
     children: React.ReactElement;
-    defaultClicked?: true;
+    defaultClicked?: boolean;
   }
 ) => {
   const {
@@ -30,64 +62,71 @@ export const TipsWrapper = (
     defaultClicked,
     ...others
   } = props;
-  const trigger = useMemo(() => {
-    const arr: TooltipProps['trigger'] = [];
-    if (clickTips) {
-      arr.push('click');
-    }
-    if (hoverTips) {
-      arr.push('hover');
-    }
-    return arr;
-  }, [clickTips, hoverTips]);
 
-  const divRef = useRef<HTMLDivElement>(null);
+  const id = useRef(nanoid());
+  const [currentTipsId, setCurrentTipsId] = useAtom(tipIdAtom);
+  const setTimer = useSetAtom(setTipTimerAtom);
+  const mouseLeave = useSetAtom(mouseLeaveAtom);
+  const mouseEnter = useSetAtom(mouseEnterAtom);
 
   const timerRef = useRef<NodeJS.Timeout>();
 
-  const [clicked, setClicked] = useState<boolean | undefined>(defaultClicked);
+  const [clicked, setClicked] = useState<boolean | undefined>(false);
 
   const handleClick = useCallback(() => {
-    clearTimeout(timerRef.current);
-    setTimeout(() => {
-      setClicked(true);
-    });
+    setClicked(true);
   }, []);
-
-  const clearTimer = useCallback(() => {
-    clearTimeout(timerRef.current);
-  }, []);
-
-  const resetState = useCallback(() => {
-    clearTimer();
-    timerRef.current = setTimeout(() => setClicked(undefined), timeOut + 100);
-  }, [clearTimer, timeOut]);
 
   const child = useMemo(() => {
-    return children && clickTips
+    return children
       ? cloneElement(children as React.ReactElement, {
           ...children.props,
           onClick: (...args: any[]) => {
             children?.props?.onClick?.(...args);
-            handleClick();
+            if (clickTips) {
+              handleClick();
+              setTimer([id.current, timeOut]);
+            }
+          },
+          onMouseEnter: (...args: any[]) => {
+            children?.props?.onMouseEnter?.(...args);
+            if (hoverTips) {
+              mouseEnter(id.current);
+            }
+          },
+          onMouseLeave: (...args: any[]) => {
+            children?.props?.onMouseLeave?.(...args);
+            if (hoverTips) {
+              mouseLeave(id.current);
+            }
           },
         })
       : children;
-  }, [children, clickTips, handleClick]);
-
-  const clickOutsideCloseClickedTips = useCallback(() => {
-    clearTimer();
-
-    setClicked(undefined);
-  }, [clearTimer]);
-
-  useClickOutSide(divRef, clickOutsideCloseClickedTips);
+  }, [
+    children,
+    clickTips,
+    handleClick,
+    hoverTips,
+    mouseEnter,
+    mouseLeave,
+    setTimer,
+    timeOut,
+  ]);
 
   useEffect(() => {
-    if (clicked) {
-      resetState();
+    if (defaultClicked) {
+      handleClick();
+      setTimer([id.current, timeOut]);
     }
-  }, [clicked, resetState, timeOut]);
+  }, [defaultClicked, handleClick, setTimer, timeOut]);
+
+  useEffect(() => {
+    if (currentTipsId !== id.current) {
+      setTimeout(() => {
+        setClicked(false);
+      }, 200);
+    }
+  }, [currentTipsId]);
 
   useEffect(
     () => () => {
@@ -96,14 +135,23 @@ export const TipsWrapper = (
     []
   );
 
+  const open = useMemo(() => {
+    if (!hoverTips && clickTips) {
+      return currentTipsId === id.current && clicked;
+    }
+    return currentTipsId === id.current;
+  }, [clickTips, clicked, currentTipsId, hoverTips]);
+
   return (
     <Tooltip
-      motion={{
-        motionLeaveImmediately: true,
-      }}
-      open={clicked}
-      trigger={trigger}
-      title={<div ref={divRef}>{clicked ? clickTips : hoverTips}</div>}
+      open={open}
+      mouseEnterDelay={0.1}
+      title={
+        <div className="flex items-center gap-4">
+          {clicked ? <span>{clickTips}</span> : hoverTips}{' '}
+          {clicked && <img src={IconConfirm} className="w-12 h-8" />}
+        </div>
+      }
       {...others}
     >
       {child}

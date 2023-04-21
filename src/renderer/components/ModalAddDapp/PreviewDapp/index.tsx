@@ -1,7 +1,7 @@
 import { putDapp } from '@/renderer/ipcRequest/dapps';
 import { LoadingOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { formatDappHttpOrigin } from '@/isomorphic/dapp';
 import RabbyInput from '../../AntdOverwrite/Input';
 
@@ -29,16 +29,19 @@ export const PreviewDapp = ({
   const [input, setInput] = useState(data.recommendedAlias);
 
   const [showAddedTips, setShowAddedTips] = useState(false);
+  const addRef = useRef(false);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (showAddedTips && !data?.isInputExistedDapp && !isGoBack) {
+    if (!loading && addRef.current && !data?.isInputExistedDapp) {
+      setShowAddedTips(true);
+      addRef.current = false;
       timer = setTimeout(() => {
         setShowAddedTips(false);
-      }, 3000);
+      }, 1000);
     }
     return () => clearTimeout(timer);
-  }, [showAddedTips, data?.isInputExistedDapp, isGoBack]);
+  }, [showAddedTips, data?.isInputExistedDapp, loading]);
 
   return (
     <div className={styles.preview}>
@@ -67,34 +70,31 @@ export const PreviewDapp = ({
             />
           </div>
         </div>
-        <div className={styles.previewAction}>
-          {loading ? (
-            <div className={styles.previewLoading}>
-              <LoadingOutlined />
-            </div>
-          ) : (
-            <>
-              {data?.isInputExistedDapp ? (
-                isGoBack ? (
-                  <Button
-                    type="primary"
-                    className={styles.previewBtnSuccess}
-                    onClick={() => {
-                      onGoBackClick?.({
-                        origin: data.inputOrigin,
-                        alias: input || '-',
-                        faviconBase64: data.faviconBase64,
-                        faviconUrl: data.faviconUrl,
-                      });
-                    }}
-                  >
-                    Go back to bind Dapp
-                  </Button>
-                ) : (
-                  <TipsWrapper
-                    clickTips="Added"
-                    defaultClicked={showAddedTips || undefined}
-                  >
+        <TipsWrapper clickTips="Added" defaultClicked={showAddedTips}>
+          <div className={styles.previewAction}>
+            {loading ? (
+              <div className={styles.previewLoading}>
+                <LoadingOutlined />
+              </div>
+            ) : (
+              <>
+                {data?.isInputExistedDapp ? (
+                  isGoBack ? (
+                    <Button
+                      type="primary"
+                      className={styles.previewBtnSuccess}
+                      onClick={() => {
+                        onGoBackClick?.({
+                          origin: data.inputOrigin,
+                          alias: input || '-',
+                          faviconBase64: data.faviconBase64,
+                          faviconUrl: data.faviconUrl,
+                        });
+                      }}
+                    >
+                      Go back to bind Dapp
+                    </Button>
+                  ) : (
                     <Button
                       type="primary"
                       className={styles.previewBtnSuccess}
@@ -104,29 +104,29 @@ export const PreviewDapp = ({
                     >
                       Open
                     </Button>
-                  </TipsWrapper>
-                )
-              ) : (
-                <Button
-                  type="primary"
-                  onClick={() => {
-                    if (input) {
-                      onAdd({
-                        ...data,
-                        recommendedAlias: input,
-                      });
-                    } else {
-                      onAdd(data);
-                    }
-                    setShowAddedTips(true);
-                  }}
-                >
-                  Add
-                </Button>
-              )}
-            </>
-          )}
-        </div>
+                  )
+                ) : (
+                  <Button
+                    type="primary"
+                    onClick={() => {
+                      if (input) {
+                        onAdd({
+                          ...data,
+                          recommendedAlias: input,
+                        });
+                      } else {
+                        onAdd(data);
+                      }
+                      addRef.current = true;
+                    }}
+                  >
+                    Add
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
+        </TipsWrapper>
       </div>
       <PreviewWebview
         containerClassName={styles.previewTagContainer}

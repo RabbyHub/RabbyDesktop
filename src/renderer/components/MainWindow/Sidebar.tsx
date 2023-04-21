@@ -160,9 +160,9 @@ const TabList = ({
   const rLoc = useLocation();
 
   const transitions = useTransition(dapps, {
-    initial: { scale: 1, opacity: 1 },
-    enter: { scale: 1, opacity: 1 },
-    leave: { scale: 0, opacity: 0 },
+    initial: { scale: 1 },
+    enter: { scale: 1 },
+    leave: { scale: 0 },
     config: { duration: 300 },
     keys: (dapp) => dapp.origin,
   });

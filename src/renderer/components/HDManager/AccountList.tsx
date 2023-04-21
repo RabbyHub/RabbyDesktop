@@ -111,17 +111,17 @@ export const AccountList: React.FC<Props> = ({
 
         // update current account list
         await createTask(() => getCurrentAccounts());
-        message.success({
-          content: 'The address is added to Rabby',
-        });
+        // message.success({
+        //   content: 'The address is added to Rabby',
+        // });
       } else {
         await createTask(() =>
           walletController.removeAddress(account.address, keyring)
         );
         removeCurrentAccount(account.address);
-        message.success({
-          content: 'The address is removed from Rabby',
-        });
+        // message.success({
+        //   content: 'The address is removed from Rabby',
+        // });
       }
 
       // update sidebar account list

@@ -30,7 +30,7 @@ import { useWindowState } from '@/renderer/hooks-shell/useWindowState';
 import { formatDappURLToShow } from '@/isomorphic/dapp';
 import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
 import styles from './index.module.less';
-import { TipsWrapper } from '../TipWrapper';
+// import { TipsWrapper } from '../TipWrapper';
 
 const isDarwin = detectOS() === 'darwin';
 
@@ -155,15 +155,21 @@ export const TopNavBar = () => {
           onClick={async () => {
             if (!dappURLToShow) return;
             await copyText(dappURLToShow);
+            toastTopMessage({
+              data: {
+                type: 'success',
+                content: 'Copied url',
+              },
+            });
           }}
         >
-          <TipsWrapper
+          {/* <TipsWrapper
             placement="bottom"
             hoverTips="Copy URL"
             clickTips="Copied"
-          >
-            <span>{dappURLToShow}</span>
-          </TipsWrapper>
+          > */}
+          <span>{dappURLToShow}</span>
+          {/* </TipsWrapper> */}
         </div>
         <div className={clsx(styles.historyBar)}>
           <RcIconHistoryGoBack

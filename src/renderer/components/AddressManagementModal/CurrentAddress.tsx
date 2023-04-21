@@ -14,6 +14,7 @@ import React from 'react';
 import { useCopyToClipboard } from 'react-use';
 import styles from './index.module.less';
 import { useAccountInfo } from './useAccountInfo';
+import { TipsWrapper } from '../TipWrapper';
 
 interface Props {
   account: IDisplayedAccountWithBalance;
@@ -85,9 +86,11 @@ export const CurrentAccount: React.FC<Props> = ({ account, onClick }) => {
           <div title={formatAddressTooltip} className={styles.address}>
             {ellipsis(account.address)}
           </div>
-          <div onClick={onCopy} className={clsx(styles.copy, styles.icon)}>
-            <img src="rabby-internal://assets/icons/address-management/copy-white.svg" />
-          </div>
+          <TipsWrapper hoverTips="Copy" clickTips="Copied">
+            <div onClick={onCopy} className={clsx(styles.copy, styles.icon)}>
+              <img src="rabby-internal://assets/icons/address-management/copy-white.svg" />
+            </div>
+          </TipsWrapper>
         </div>
       </div>
       <div className={styles.balance}>
