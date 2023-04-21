@@ -3,7 +3,10 @@ import classnames from 'classnames';
 import { ModalProps, Button } from 'antd';
 import { useDapps } from 'renderer/hooks/useDappsMngr';
 import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
-import { isValidDappAlias } from '../../../isomorphic/dapp';
+import {
+  formatDappURLToShow,
+  isValidDappAlias,
+} from '../../../isomorphic/dapp';
 
 import styles from './index.module.less';
 import { DappFavicon } from '../DappFavicon';
@@ -85,7 +88,7 @@ export default function ModalRenameDapp({
             alt={dapp?.faviconUrl}
           />
           <div className={styles.dappUrl} title={dapp?.origin}>
-            {dapp?.origin?.replace(/^\w+:\/\//, '')}
+            {formatDappURLToShow(dapp.id || dapp.origin)}
           </div>
           <div className={styles.modifyWrapper}>
             <RabbyInput
