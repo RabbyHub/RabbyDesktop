@@ -13,6 +13,7 @@ import {
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 import { formatDappURLToShow } from '@/isomorphic/dapp';
 import { usePrevious } from 'react-use';
+import clsx from 'clsx';
 import { Modal, Props as ModalProps } from '../Modal/Modal';
 import styles from './index.module.less';
 import { DappFavicon } from '../DappFavicon';
@@ -153,22 +154,17 @@ const DappItem = ({
         <p>{dapp.alias}</p>
         <p>{formatDappURLToShow(dapp.id || dapp.origin)}</p>
       </div>
-      <TipsWrapper
-        clickTips="Added"
-        defaultClicked={tip}
-        align={{
-          targetOffset: [-65, 0],
-        }}
-      >
-        {isBinded ? (
-          <div className="flex">
-            <div className="binded-tip">
-              <img
-                src="rabby-internal://assets/icons/home/success.svg"
-                className="icon-success"
-              />
-              Bound to {protocol.name}
-            </div>
+
+      <div className="flex items-center">
+        <div className={clsx('binded-tip', isBinded ? 'block' : 'hidden')}>
+          <img
+            src="rabby-internal://assets/icons/home/success.svg"
+            className="icon-success"
+          />
+          Bound to {protocol.name}
+        </div>
+        <TipsWrapper clickTips="Added" defaultClicked={tip}>
+          {isBinded ? (
             <Button
               type="primary"
               className="open-button rounded"
@@ -176,17 +172,17 @@ const DappItem = ({
             >
               Open
             </Button>
-          </div>
-        ) : (
-          <Button
-            type="primary"
-            className="w-[72px] rounded"
-            onClick={() => onBind(dapp.origin)}
-          >
-            Bind
-          </Button>
-        )}
-      </TipsWrapper>
+          ) : (
+            <Button
+              type="primary"
+              className="w-[72px] rounded"
+              onClick={() => onBind(dapp.origin)}
+            >
+              Bind
+            </Button>
+          )}
+        </TipsWrapper>
+      </div>
     </DappItemWrapper>
   );
 };

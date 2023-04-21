@@ -251,11 +251,11 @@ export function AddEnsDapp({
       },
       urls
     );
-    toastMessage({
-      type: 'success',
-      content: 'Add success',
-      className: styles.toast,
-    });
+    // toastMessage({
+    //   type: 'success',
+    //   content: 'Add success',
+    //   className: styles.toast,
+    // });
     const nextState = {
       dappInfo: {
         ...dappInfo,

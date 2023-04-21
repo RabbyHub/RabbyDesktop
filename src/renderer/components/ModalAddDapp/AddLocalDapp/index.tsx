@@ -196,11 +196,11 @@ export function AddLocalDapp({
       },
       urls
     );
-    toastMessage({
-      type: 'success',
-      content: 'Add success',
-      className: styles.toast,
-    });
+    // toastMessage({
+    //   type: 'success',
+    //   content: 'Add success',
+    //   className: styles.toast,
+    // });
     const nextState = {
       dappInfo: {
         ...dappInfo,
