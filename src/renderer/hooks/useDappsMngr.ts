@@ -4,6 +4,7 @@ import {
   checkoutDappURL,
   formatDappHttpOrigin,
   isOpenedAsHttpDappType,
+  matchDappsByOrigin,
   sortDappsBasedPinned,
 } from '@/isomorphic/dapp';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
@@ -169,32 +170,33 @@ export function useDapp(dappID?: string) {
 }
 
 export function useMatchDappByOrigin(origin?: string) {
-  // 先根据 origin 匹配 Dapp，无匹配项后再用 domain 匹配一次
   const { dapps } = useDapps();
-  const [dappInfo, setDappInfo] = useState<Partial<IMergedDapp> | null>(null);
 
-  useEffect(() => {
-    if (!origin) {
-      setDappInfo(null);
-      return;
+  const dappInfo = useMemo(() => {
+    if (!origin) return null;
+
+    const dappInfoToMatch = checkoutDappURL(origin);
+
+    if (dappInfoToMatch.type !== 'http') {
+      const matchedDapp = matchDappsByOrigin(dappInfoToMatch, dapps);
+
+      return matchedDapp;
     }
 
+    // 对 http 类型的 dapp，先根据 origin 匹配 Dapp，无匹配项后再用 domain 匹配一次
     const findExact = dapps.find(
       (item) => item.origin.toLowerCase() === origin.toLowerCase()
     );
     if (findExact) {
-      setDappInfo(findExact);
-    } else {
-      const { secondaryOrigin } = canoicalizeDappUrl(origin);
-      const findMatchDomain = dapps.find(
-        (item) => item.origin === secondaryOrigin
-      );
-      if (findMatchDomain) {
-        setDappInfo(findMatchDomain);
-      } else {
-        setDappInfo(null);
-      }
+      return findExact;
     }
+
+    const { secondaryOrigin } = canoicalizeDappUrl(origin);
+    const findMatchDomain = dapps.find(
+      (item) => item.origin === secondaryOrigin
+    );
+
+    return findMatchDomain || null;
   }, [origin, dapps]);
 
   return dappInfo;
