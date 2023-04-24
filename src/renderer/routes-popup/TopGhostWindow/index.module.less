@@ -1,0 +1,33 @@
+.TopGhostWindow {
+  overflow: hidden;
+  height: 100vh;
+}
+
+.winWrapper {
+  width: 100%;
+  height: 100%;
+
+  :global {
+    .trigger-ele-placeholder {
+      &.isDebug {
+        outline: 1px solid rgba(var(--color-primary-rgb), 0.5);
+      }
+      &:not(.isDebug) {
+        visibility: hidden;
+        background: transparent;
+        color: transparent;
+      }
+    }
+  }
+}
+
+:global {
+  .win-top-ghost-window {
+    width: 100%;
+    height: 100%;
+  }
+
+  .win-top-ghost-window.isDebug {
+    background-color: rgba(var(--color-primary-rgb), 0.2);
+  }
+}

@@ -18,6 +18,7 @@ import {
   forwardRef,
   ForwardedRef,
   useMemo,
+  useRef,
 } from 'react';
 import { detectClientOS } from '@/isomorphic/os';
 import classNames from 'classnames';
@@ -28,7 +29,7 @@ import { copyText } from '@/renderer/utils/clipboard';
 import { useMatchURLBaseConfig } from '@/renderer/hooks-ipc/useAppDynamicConfig';
 import { useWindowState } from '@/renderer/hooks-shell/useWindowState';
 import { formatDappURLToShow } from '@/isomorphic/dapp';
-import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
+import { useGhostTooltip } from '@/renderer/routes-popup/TopGhostWindow/useGhostWindow';
 import styles from './index.module.less';
 // import { TipsWrapper } from '../TipWrapper';
 
@@ -126,6 +127,15 @@ export const TopNavBar = () => {
     return formatDappURLToShow(activeTab?.url || '');
   }, [selectedTabInfo?.dapp, activeTab?.url]);
 
+  const [{ showTooltip, hideTooltip }] = useGhostTooltip({
+    mode: 'controlled',
+    defaultTooltipProps: {
+      title: 'You should never see this tooltip',
+      placement: 'bottom',
+    },
+  });
+  const autoHideOnMouseLeaveRef = useRef(true);
+
   return (
     <div className={styles.main} onDoubleClick={onDarwinToggleMaxmize}>
       {/* keep this element in first to make it bottom, or move it last to make it top */}
@@ -153,17 +163,58 @@ export const TopNavBar = () => {
           />
         )}
         <div
-          className={styles.url}
+          className={clsx(styles.url, 'h-[100%] flex items-center')}
           style={{ ...(navTextColor && { color: navTextColor }) }}
-          onClick={async () => {
+          onClick={async (event) => {
             if (!dappURLToShow) return;
             await copyText(dappURLToShow);
-            toastTopMessage({
-              data: {
-                type: 'success',
-                content: 'Copied url',
+
+            const rect = (event.target as HTMLDivElement)
+              .getBoundingClientRect()
+              .toJSON();
+
+            showTooltip(
+              // adjust the position based on the rect of trigger element
+              {
+                ...rect,
+                left: event.clientX - 30 / 2,
+                top: event.clientY,
+                height: 10,
+                width: 30,
               },
-            });
+              {
+                title: 'Copied url',
+                placement: 'bottomLeft',
+              },
+              { autoHideTimeout: 0 }
+            );
+          }}
+          onMouseEnter={(event) => {
+            if (!dappURLToShow) return;
+
+            const rect = (event.target as HTMLDivElement)
+              .getBoundingClientRect()
+              .toJSON();
+
+            showTooltip(
+              // adjust the position based on the rect of trigger element
+              {
+                ...rect,
+                x: event.clientX,
+                y: event.clientY,
+                height: rect.height - 20,
+              },
+              {
+                title: dappURLToShow,
+              }
+            );
+          }}
+          onMouseLeave={() => {
+            if (autoHideOnMouseLeaveRef.current) {
+              hideTooltip(0);
+            }
+
+            autoHideOnMouseLeaveRef.current = true;
           }}
         >
           {/* <TipsWrapper

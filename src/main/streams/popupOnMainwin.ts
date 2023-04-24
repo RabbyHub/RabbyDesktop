@@ -1,6 +1,5 @@
 import { BrowserWindow } from 'electron';
 
-import { InDappFindSizes } from '@/isomorphic/const-size-next';
 import {
   IS_RUNTIME_PRODUCTION,
   RABBY_POPUP_GHOST_VIEW_URL,
@@ -14,23 +13,21 @@ import { valueToMainSubject } from './_init';
 import {
   createPopupWindow,
   hidePopupWindow,
-  isPopupWindowHidden,
   showPopupWindow,
 } from '../utils/browser';
 import {
   getAllMainUIWindows,
   onMainWindowReady,
 } from '../utils/stream-helpers';
-import { MainWindowTab } from '../browser/tabs';
 
 async function hidePopupOnMainWindow(
-  targetWin: BrowserWindow | null,
+  mainWin: BrowserWindow | null,
   type: IPopupWinPageInfo['type']
 ) {
-  if (!targetWin || targetWin.isDestroyed()) return;
+  if (!mainWin || mainWin.isDestroyed()) return;
 
   sendToWebContents(
-    targetWin.webContents,
+    mainWin.webContents,
     '__internal_push:popupwin-on-mainwin:on-visiblechange',
     {
       type,
@@ -38,106 +35,8 @@ async function hidePopupOnMainWindow(
     }
   );
 
-  hidePopupWindow(targetWin);
+  hidePopupWindow(mainWin);
 }
-
-function updateSubWindowRect(
-  parentWin: BrowserWindow,
-  window: BrowserWindow,
-  windowRect?: Electron.Point & { width?: number; height?: number }
-) {
-  if (window.isDestroyed()) return;
-
-  const popupRect = {
-    // TODO: use dynamic position
-    x: 5,
-    y: 5,
-    width: 100,
-    height: 100,
-    ...windowRect,
-  };
-
-  window.setSize(popupRect.width, popupRect.height);
-
-  // get bounds
-  const pWinBounds = parentWin.getBounds();
-  const selfViewBounds = window.getBounds();
-
-  // top-right
-  let x = pWinBounds.x + popupRect.x + popupRect.width - selfViewBounds.width;
-  let y = pWinBounds.y + popupRect.y + /* padding */ 1;
-
-  // Convert to ints
-  x = Math.floor(x);
-  y = Math.floor(y);
-
-  window.setBounds({ ...popupRect, x, y }, true);
-}
-
-const sidebarAppContextMenuReady = onMainWindowReady().then(async (mainWin) => {
-  const targetWin = mainWin.window;
-
-  const sidebarAppContextMenuPopup = createPopupWindow({
-    parent: mainWin.window,
-    transparent: true,
-    hasShadow: false,
-    closable: false,
-  });
-
-  // disable close by shortcut
-  sidebarAppContextMenuPopup.on('close', (evt) => {
-    evt.preventDefault();
-
-    return false;
-  });
-
-  updateSubWindowRect(mainWin.window, sidebarAppContextMenuPopup);
-  const onTargetWinUpdate = () => {
-    if (sidebarAppContextMenuPopup.isVisible())
-      hidePopupOnMainWindow(
-        sidebarAppContextMenuPopup,
-        'sidebar-dapp-contextmenu'
-      );
-  };
-  targetWin.on('show', onTargetWinUpdate);
-  targetWin.on('move', onTargetWinUpdate);
-  targetWin.on('resized', onTargetWinUpdate);
-  targetWin.on('unmaximize', onTargetWinUpdate);
-  targetWin.on('restore', onTargetWinUpdate);
-
-  mainWin.tabs.on('tab-focused', () => {
-    hidePopupOnMainWindow(
-      sidebarAppContextMenuPopup,
-      'sidebar-dapp-contextmenu'
-    );
-  });
-
-  mainWin.window.on('focus', () => {
-    hidePopupOnMainWindow(
-      sidebarAppContextMenuPopup,
-      'sidebar-dapp-contextmenu'
-    );
-  });
-
-  await sidebarAppContextMenuPopup.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}#/popup__sidebar-dapp`
-  );
-
-  // debug-only
-  if (!IS_RUNTIME_PRODUCTION) {
-    // sidebarAppContextMenuPopup.webContents.openDevTools({ mode: 'detach' });
-  }
-
-  hidePopupWindow(sidebarAppContextMenuPopup);
-
-  return sidebarAppContextMenuPopup;
-});
-
-Promise.all([sidebarAppContextMenuReady]).then((wins) => {
-  valueToMainSubject('popupWindowOnMain', {
-    sidebarContext: wins[0],
-  });
-});
 
 const SIZE_MAP: Record<
   IPopupWinPageInfo['type'],
@@ -149,6 +48,10 @@ const SIZE_MAP: Record<
   'sidebar-dapp-contextmenu': {
     width: 210,
     height: 306,
+  },
+  'top-ghost-window': {
+    width: 1366,
+    height: 768,
   },
 };
 
@@ -169,21 +72,208 @@ function pickWH(
   return result;
 }
 
+function updateSubWindowRect({
+  parentWin,
+  window,
+  windowType,
+  nextRect,
+}: {
+  parentWin: BrowserWindow;
+  window: BrowserWindow;
+  windowType: IPopupWinPageInfo['type'];
+  nextRect?: Electron.Point & Partial<Electron.Rectangle>;
+}) {
+  if (window.isDestroyed()) return;
+
+  const popupRect = {
+    x: 0,
+    y: 0,
+    ...nextRect,
+    ...pickWH(windowType, { width: nextRect?.width, height: nextRect?.height }),
+    ...(windowType === 'top-ghost-window' && {
+      ...parentWin.getBounds(),
+      x: 0,
+      y: 0,
+    }),
+  };
+
+  window.setSize(popupRect.width, popupRect.height);
+
+  // get bounds
+  const pWinBounds = parentWin.getBounds();
+  const selfViewBounds = window.getBounds();
+
+  // top-right
+  let x = pWinBounds.x + popupRect.x + popupRect.width - selfViewBounds.width;
+  let y = pWinBounds.y + popupRect.y + /* padding */ 1;
+
+  // Convert to ints
+  x = Math.floor(x);
+  y = Math.floor(y);
+
+  window.setBounds({ ...popupRect, x, y }, true);
+}
+
+const sidebarAppContextMenuReady = onMainWindowReady().then(
+  async (mainTabbedWin) => {
+    const mainWin = mainTabbedWin.window;
+
+    const sidebarAppContextMenuPopup = createPopupWindow({
+      parent: mainTabbedWin.window,
+      transparent: true,
+      hasShadow: false,
+      closable: false,
+    });
+
+    // disable close by shortcut
+    sidebarAppContextMenuPopup.on('close', (evt) => {
+      evt.preventDefault();
+
+      return false;
+    });
+
+    updateSubWindowRect({
+      parentWin: mainTabbedWin.window,
+      window: sidebarAppContextMenuPopup,
+      windowType: 'sidebar-dapp-contextmenu',
+    });
+    const onTargetWinUpdate = () => {
+      if (sidebarAppContextMenuPopup.isVisible())
+        hidePopupOnMainWindow(
+          sidebarAppContextMenuPopup,
+          'sidebar-dapp-contextmenu'
+        );
+    };
+    mainWin.on('show', onTargetWinUpdate);
+    mainWin.on('move', onTargetWinUpdate);
+    mainWin.on('resized', onTargetWinUpdate);
+    mainWin.on('unmaximize', onTargetWinUpdate);
+    mainWin.on('restore', onTargetWinUpdate);
+
+    mainTabbedWin.tabs.on('tab-focused', () => {
+      hidePopupOnMainWindow(
+        sidebarAppContextMenuPopup,
+        'sidebar-dapp-contextmenu'
+      );
+    });
+
+    mainTabbedWin.window.on('focus', () => {
+      hidePopupOnMainWindow(
+        sidebarAppContextMenuPopup,
+        'sidebar-dapp-contextmenu'
+      );
+    });
+
+    await sidebarAppContextMenuPopup.webContents.loadURL(
+      `${RABBY_POPUP_GHOST_VIEW_URL}#/popup__sidebar-dapp`
+    );
+
+    // debug-only
+    if (!IS_RUNTIME_PRODUCTION) {
+      // sidebarAppContextMenuPopup.webContents.openDevTools({ mode: 'detach' });
+    }
+
+    hidePopupWindow(sidebarAppContextMenuPopup);
+
+    return sidebarAppContextMenuPopup;
+  }
+);
+
+const ghostFloatingWindowReady = onMainWindowReady().then(
+  async (mainTabbedWin) => {
+    const mainWin = mainTabbedWin.window;
+
+    const ghostFloatingWindow = createPopupWindow({
+      parent: mainTabbedWin.window,
+      transparent: true,
+      hasShadow: false,
+      closable: false,
+    });
+
+    // disable close by shortcut
+    ghostFloatingWindow.on('close', (evt) => {
+      evt.preventDefault();
+
+      return false;
+    });
+
+    ghostFloatingWindow.on('focus', () => {
+      if (IS_RUNTIME_PRODUCTION) {
+        ghostFloatingWindow.blur();
+        ghostFloatingWindow.blurWebView();
+      }
+    });
+
+    // don't accept mouse events
+    ghostFloatingWindow.setIgnoreMouseEvents(true);
+
+    updateSubWindowRect({
+      parentWin: mainTabbedWin.window,
+      window: ghostFloatingWindow,
+      windowType: 'top-ghost-window',
+    });
+    const onTargetWinUpdate = () => {
+      if (ghostFloatingWindow.isVisible()) {
+        updateSubWindowRect({
+          parentWin: mainTabbedWin.window,
+          window: ghostFloatingWindow,
+          windowType: 'top-ghost-window',
+        });
+      }
+    };
+    mainWin.on('show', onTargetWinUpdate);
+    mainWin.on('move', onTargetWinUpdate);
+    mainWin.on('resized', onTargetWinUpdate);
+    mainWin.on('unmaximize', onTargetWinUpdate);
+    mainWin.on('restore', onTargetWinUpdate);
+
+    await ghostFloatingWindow.webContents.loadURL(
+      `${RABBY_POPUP_GHOST_VIEW_URL}?view=top-ghost-window`
+    );
+
+    // debug-only
+    if (!IS_RUNTIME_PRODUCTION) {
+      ghostFloatingWindow.webContents.openDevTools({ mode: 'detach' });
+    }
+
+    showPopupWindow(ghostFloatingWindow);
+    // hidePopupWindow(ghostFloatingWindow);
+
+    return ghostFloatingWindow;
+  }
+);
+
+Promise.all([sidebarAppContextMenuReady, ghostFloatingWindowReady]).then(
+  (wins) => {
+    valueToMainSubject('popupWindowOnMain', {
+      sidebarContext: wins[0],
+      ghostFloatingWindow: wins[1],
+    });
+  }
+);
+
 const { handler: handlerToggleShowPopupWins } = onIpcMainInternalEvent(
   '__internal_main:popupwin-on-mainwin:toggle-show',
   async (payload) => {
-    const mainWindow = (await onMainWindowReady()).window;
-    const { popupOnly } = await getAllMainUIWindows();
+    const { popupOnly, windows } = await getAllMainUIWindows();
+    const mainWin = windows['main-window'];
 
     const targetWin = popupOnly[payload.type] || null;
 
-    if (!targetWin) return;
+    if (!targetWin) {
+      console.warn('popup window not found: ', payload.type);
+      return;
+    }
 
     if (payload.nextShow) {
-      updateSubWindowRect(mainWindow, targetWin, {
-        x: payload.rect.x,
-        y: payload.rect.y,
-        ...pickWH(payload.type, payload.rect),
+      updateSubWindowRect({
+        parentWin: mainWin,
+        window: targetWin,
+        windowType: payload.type,
+        nextRect: {
+          x: payload.rect.x,
+          y: payload.rect.y,
+        },
       });
       sendToWebContents(
         targetWin.webContents,

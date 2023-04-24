@@ -15,6 +15,8 @@ import SecurityCheck from '@/renderer/routes-popup/SecurityCheck/SecurityCheck';
 import SecurityAddressbarPopup from '@/renderer/routes-popup/SecurityAddressbarPopup/SecurityAddressbarPopup';
 
 import { SidebarContextMenu } from '@/renderer/routes-popup/SidebarContextMenu';
+import TopGhostWindow from '@/renderer/routes-popup/TopGhostWindow';
+
 import SelectDevicesWindow from '@/renderer/routes-popup/SelectDevicesWindow';
 
 import { parseQueryString } from '@/isomorphic/url';
@@ -69,6 +71,9 @@ switch (parseQueryString().view) {
     break;
   case 'in-dapp-find':
     root.render(<InDappFindWindow />);
+    break;
+  case 'top-ghost-window':
+    root.render(<TopGhostWindow />);
     break;
   default:
     root.render(<App />);

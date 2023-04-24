@@ -2,14 +2,12 @@ import { BrowserView, BrowserWindow } from 'electron';
 
 import { roundRectValue } from '@/isomorphic/shape';
 import { InDappFindSizes } from '@/isomorphic/const-size-next';
-import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import {
   IS_RUNTIME_PRODUCTION,
   RABBY_POPUP_GHOST_VIEW_URL,
   TOAST_TOP,
 } from '../../isomorphic/constants';
 import {
-  emitIpcMainEvent,
   onIpcMainEvent,
   onIpcMainInternalEvent,
   sendToWebContents,
@@ -23,6 +21,7 @@ import {
 } from '../utils/browser';
 import {
   getAllMainUIViews,
+  getAllMainUIWindows,
   getWebuiURLBase,
   onMainWindowReady,
 } from '../utils/stream-helpers';
@@ -514,6 +513,7 @@ const { handler: handler2 } = onIpcMainEvent(
   async (_, payload) => {
     let views: BrowserView['webContents'][] = [];
     const { hash, list } = await getAllMainUIViews();
+    const { windows } = await getAllMainUIWindows();
 
     switch (payload.targetView) {
       case '*':
@@ -527,6 +527,9 @@ const { handler: handler2 } = onIpcMainEvent(
         break;
       case 'z-popup':
         views = [hash.zPopup];
+        break;
+      case 'top-ghost-window':
+        views = [windows['top-ghost-window'].webContents];
         break;
       default: {
         if (!IS_RUNTIME_PRODUCTION) {

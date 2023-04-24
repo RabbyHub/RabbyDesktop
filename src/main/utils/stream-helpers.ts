@@ -116,13 +116,14 @@ export function updateMainWindowActiveTabRect(
 }
 
 export async function getAllMainUIWindows() {
-  const [mainWin, { sidebarContext }] = await Promise.all([
+  const [mainWin, { sidebarContext, ghostFloatingWindow }] = await Promise.all([
     await onMainWindowReady(),
     await firstValueFrom(fromMainSubject('popupWindowOnMain')),
   ]);
 
   const popupOnly: Record<IPopupWinPageInfo['type'], Electron.BrowserWindow> = {
     'sidebar-dapp-contextmenu': sidebarContext,
+    'top-ghost-window': ghostFloatingWindow,
   } as const;
 
   const windows = {

@@ -75,6 +75,7 @@ const CONF = {
   } as IConf<
     ReplaySubject<{
       sidebarContext: BrowserWindow;
+      ghostFloatingWindow: BrowserWindow;
     }>
   >,
   popupViewsOnMainwinReady: {
