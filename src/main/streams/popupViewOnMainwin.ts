@@ -22,6 +22,7 @@ import {
 import {
   getAllMainUIViews,
   getAllMainUIWindows,
+  getOrSetDebugStates,
   getWebuiURLBase,
   onMainWindowReady,
 } from '../utils/stream-helpers';
@@ -508,9 +509,9 @@ onIpcMainEvent(
   }
 );
 
-const { handler: handler2 } = onIpcMainEvent(
-  '__internal_forward:views:channel-message',
-  async (_, payload) => {
+const { handler: handlerChannelMessage } = onIpcMainInternalEvent(
+  '__internal_main:views:channel-message',
+  async (payload) => {
     let views: BrowserView['webContents'][] = [];
     const { hash, list } = await getAllMainUIViews();
     const { windows } = await getAllMainUIWindows();
@@ -528,12 +529,31 @@ const { handler: handler2 } = onIpcMainEvent(
       case 'z-popup':
         views = [hash.zPopup];
         break;
-      case 'top-ghost-window':
-        views = [windows['top-ghost-window'].webContents];
+      case 'top-ghost-window': {
+        views = [
+          windows['top-ghost-window'].webContents,
+          windows['main-window'].webContents,
+        ];
+
+        if (payload.type === 'debug:toggle-highlight') {
+          const { nextStates } = await getOrSetDebugStates((prevStates) => ({
+            isGhostWindowDebugHighlighted:
+              payload.payload.isHighlight ??
+              !prevStates.isGhostWindowDebugHighlighted,
+          }));
+
+          payload.payload.isHighlight =
+            nextStates.isGhostWindowDebugHighlighted;
+        }
         break;
+      }
       default: {
         if (!IS_RUNTIME_PRODUCTION) {
-          throw new Error(`Unknown targetView: ${(payload as any).targetView}`);
+          throw new Error(
+            `[popupViewOnMainwin] Unknown targetView: ${
+              (payload as any).targetView
+            }`
+          );
         }
         return;
       }
@@ -545,6 +565,6 @@ const { handler: handler2 } = onIpcMainEvent(
   }
 );
 
-onIpcMainInternalEvent('__internal_main:views:channel-message', (payload) => {
-  handler2(null as any, payload);
+onIpcMainEvent('__internal_forward:views:channel-message', (_, payload) => {
+  handlerChannelMessage(payload);
 });

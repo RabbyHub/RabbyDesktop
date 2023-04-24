@@ -25,9 +25,12 @@ import { getWindowFromWebContents, switchToBrowserTab } from '../utils/browser';
 import { appendMenu, appendMenuSeparator } from '../utils/context-menu';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import {
+  forwardMessageToWebContents,
+  getOrSetDebugStates,
   getRabbyExtViews,
   getWebuiExtId,
   onMainWindowReady,
+  getAllMainUIWindows,
 } from '../utils/stream-helpers';
 import { getClientAppPaths } from '../utils/store';
 
@@ -338,6 +341,28 @@ function buildInspectKitsMenu(opts: ChromeContextMenuOptions) {
       emitIpcMainEvent('__internal_main:dev', {
         type: 'loading-view:inspect',
       });
+    },
+  });
+
+  appendMenuSeparator(inspectKitsMenu);
+  // appendMenu(inspectKitsMenu, {
+  //   label: `Toggle top-ghost-window Debug Highlight`,
+  //   click: async () => {
+  //     const { windows } = await getAllMainUIWindows();
+
+  //     forwardMessageToWebContents(windows['top-ghost-window'].webContents, {
+  //       targetView: 'top-ghost-window',
+  //       type: 'debug:toggle-highlight',
+  //       payload: {},
+  //     });
+  //   },
+  // });
+  appendMenu(inspectKitsMenu, {
+    label: `Inspect top-ghost-window`,
+    click: async () => {
+      const { windows } = await getAllMainUIWindows();
+
+      windows['top-ghost-window'].webContents.openDevTools({ mode: 'detach' });
     },
   });
 

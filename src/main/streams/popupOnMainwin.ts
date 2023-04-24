@@ -233,7 +233,7 @@ const ghostFloatingWindowReady = onMainWindowReady().then(
 
     // debug-only
     if (!IS_RUNTIME_PRODUCTION) {
-      ghostFloatingWindow.webContents.openDevTools({ mode: 'detach' });
+      // ghostFloatingWindow.webContents.openDevTools({ mode: 'detach' });
     }
 
     showPopupWindow(ghostFloatingWindow);

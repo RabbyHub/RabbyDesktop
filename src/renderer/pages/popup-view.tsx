@@ -15,11 +15,11 @@ import SecurityCheck from '@/renderer/routes-popup/SecurityCheck/SecurityCheck';
 import SecurityAddressbarPopup from '@/renderer/routes-popup/SecurityAddressbarPopup/SecurityAddressbarPopup';
 
 import { SidebarContextMenu } from '@/renderer/routes-popup/SidebarContextMenu';
-import TopGhostWindow from '@/renderer/routes-popup/TopGhostWindow';
 
 import SelectDevicesWindow from '@/renderer/routes-popup/SelectDevicesWindow';
 
 import { parseQueryString } from '@/isomorphic/url';
+import TopGhostWindow from '@/renderer/routes-popup/TopGhostWindow';
 import RabbyNotificationGasket from '../routes-popup/RabbyNotificationGasket';
 import MainWindowAddAddress from '../routes-popup/MainWindowAddAddress';
 import MainWindowDappManagement from '../routes-popup/MainWindowDappManagement';

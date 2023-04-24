@@ -149,6 +149,10 @@ type MainInternalsMessagePayload = {
           type: 'app:test-prompt';
           callerWebContents?: Electron.WebContents;
         }
+      | {
+          type: 'top-ghost-window:toggle-debug-highlight';
+          isHighlight: boolean;
+        }
     ];
     response: [];
   };

@@ -407,6 +407,10 @@ type PopupViewOnMainwinInfo =
 type PickPopupViewPageInfo<T extends PopupViewOnMainwinInfo['type']> =
   PopupViewOnMainwinInfo & { type: T };
 
+type IDebugStates = {
+  isGhostWindowDebugHighlighted: boolean;
+};
+
 type IShellNavInfo = {
   tabExists: boolean;
   canGoForward?: boolean;

@@ -7,15 +7,31 @@ import { useBodyClassNameOnMounted } from '@/renderer/hooks/useMountedEffect';
 import { useMessageForwarded } from '@/renderer/hooks/useViewsMessage';
 import { atom, useAtom } from 'jotai';
 import { Tooltip } from 'antd';
+import { useState } from 'react';
 import styles from './index.module.less';
 
 const eleTooltipsAtom = atom<(ITriggerTooltipOnGhost & object)[]>([]);
 
 export default function TopGhostWindow() {
   const [eleTooltips, setEleTooltips] = useAtom(eleTooltipsAtom);
+  const [isGhostWindowDebugHighlighted, setIsGhostWindowDebugHighlighted] =
+    useState(false);
 
   useBodyClassNameOnMounted(
-    clsx(['win-top-ghost-window', !IS_RUNTIME_PRODUCTION && 'isDebug'])
+    clsx([
+      'win-top-ghost-window',
+      !IS_RUNTIME_PRODUCTION && isGhostWindowDebugHighlighted && 'isDebug',
+    ])
+  );
+
+  useMessageForwarded(
+    {
+      targetView: 'top-ghost-window',
+      type: 'debug:toggle-highlight',
+    },
+    (data) => {
+      setIsGhostWindowDebugHighlighted(!!data.payload.isHighlight);
+    }
   );
 
   useMessageForwarded(
@@ -81,7 +97,9 @@ export default function TopGhostWindow() {
               }}
               className={clsx(
                 'trigger-ele-placeholder',
-                !IS_RUNTIME_PRODUCTION && 'isDebug'
+                !IS_RUNTIME_PRODUCTION &&
+                  isGhostWindowDebugHighlighted &&
+                  'isDebug'
               )}
             />
           </Tooltip>

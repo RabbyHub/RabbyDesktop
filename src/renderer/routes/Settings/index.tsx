@@ -24,6 +24,10 @@ import { useCheckNewRelease } from '@/renderer/hooks/useAppUpdator';
 import { copyText } from '@/renderer/utils/clipboard';
 import { detectClientOS } from '@/isomorphic/os';
 import { ucfirst } from '@/isomorphic/string';
+import {
+  forwardMessageTo,
+  useMessageForwarded,
+} from '@/renderer/hooks/useViewsMessage';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
 import { useProxyStateOnSettingPage } from './settingHooks';
@@ -147,6 +151,79 @@ const ProxyText = styled.div`
 `;
 
 const osType = detectClientOS();
+
+function DeveloperKitsParts() {
+  const [isGhostWindowDebugHighlighted, setIsGhostWindowDebugHighlighted] =
+    useState(false);
+
+  return (
+    <>
+      {!IS_RUNTIME_PRODUCTION && (
+        <div className={styles.settingBlock}>
+          <h4 className={styles.blockTitle}>Developer Kits</h4>
+          <div className={styles.itemList}>
+            <ItemText
+              name="Devices"
+              icon="rabby-internal://assets/icons/developer-kits/usb.svg"
+              // onClick={() => {
+              //   setIsViewingDevices(true);
+              // }}
+            >
+              <Button
+                type="primary"
+                ghost
+                onClick={(evt) => {
+                  evt.stopPropagation();
+                  testRequestDevice();
+                }}
+              >
+                <code>hid.requestDevices()</code>
+              </Button>
+            </ItemText>
+            <ItemSwitch
+              checked={isGhostWindowDebugHighlighted}
+              icon="rabby-internal://assets/icons/developer-kits/ghost.svg"
+              name={
+                <>
+                  <div className="flex flex-col gap-[4px]">
+                    <span className="text-14 font-medium">
+                      Toggle Ghost Window Highlight
+                    </span>
+                    <span className="text-14 text-white opacity-[0.6]" />
+                  </div>
+                </>
+              }
+              onChange={(nextEnabled: boolean) => {
+                setIsGhostWindowDebugHighlighted(nextEnabled);
+                forwardMessageTo('top-ghost-window', 'debug:toggle-highlight', {
+                  payload: {
+                    isHighlight: nextEnabled,
+                  },
+                });
+              }}
+            />
+            <ItemAction
+              name={<span className={styles.dangerText}>Reset App</span>}
+              icon="rabby-internal://assets/icons/mainwin-settings/reset.svg"
+              onClick={() => {
+                requestResetApp();
+              }}
+            />
+            <ItemAction
+              name={<span className={styles.dangerText}>Reset Signs</span>}
+              icon="rabby-internal://assets/icons/mainwin-settings/reset.svg"
+              onClick={() => {
+                window.rabbyDesktop.ipcRenderer.sendMessage(
+                  '__internal_rpc:app:reset-rabbyx-approvals'
+                );
+              }}
+            />
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
 
 export function MainWindowSettings() {
   const appVerisons = useAppVersion();
@@ -410,47 +487,7 @@ export function MainWindowSettings() {
         </div>
       </div>
 
-      {!IS_RUNTIME_PRODUCTION && (
-        <div className={styles.settingBlock}>
-          <h4 className={styles.blockTitle}>Developer Kits</h4>
-          <div className={styles.itemList}>
-            <ItemText
-              name="Devices"
-              icon="rabby-internal://assets/icons/developer-kits/usb.svg"
-              // onClick={() => {
-              //   setIsViewingDevices(true);
-              // }}
-            >
-              <Button
-                type="primary"
-                ghost
-                onClick={(evt) => {
-                  evt.stopPropagation();
-                  testRequestDevice();
-                }}
-              >
-                <code>hid.requestDevices()</code>
-              </Button>
-            </ItemText>
-            <ItemAction
-              name={<span className={styles.dangerText}>Reset App</span>}
-              icon="rabby-internal://assets/icons/mainwin-settings/reset.svg"
-              onClick={() => {
-                requestResetApp();
-              }}
-            />
-            <ItemAction
-              name={<span className={styles.dangerText}>Reset Signs</span>}
-              icon="rabby-internal://assets/icons/mainwin-settings/reset.svg"
-              onClick={() => {
-                window.rabbyDesktop.ipcRenderer.sendMessage(
-                  '__internal_rpc:app:reset-rabbyx-approvals'
-                );
-              }}
-            />
-          </div>
-        </div>
-      )}
+      <DeveloperKitsParts />
       <ClearPendingModal
         open={isShowingClearPendingModal}
         onClose={() => {

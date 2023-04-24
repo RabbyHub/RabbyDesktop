@@ -208,6 +208,13 @@ type ChannelForwardMessageType =
       payload: ITriggerTooltipOnGhost;
     }
   | {
+      targetView: 'top-ghost-window' | 'main-window';
+      type: 'debug:toggle-highlight';
+      payload: {
+        isHighlight?: boolean;
+      };
+    }
+  | {
       targetView: '*' | 'main-window' | 'z-popup';
       type: 'consume-subview-openid';
       payload: IZCallbackPayload<keyof ZViewStates>;
