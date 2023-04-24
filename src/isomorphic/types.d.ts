@@ -327,7 +327,7 @@ type IRabbyxRpcResponse = {
 
 type IHardwareConnectPageType = 'onekey' | 'trezor';
 type IPopupWinPageInfo = {
-  type: 'sidebar-dapp';
+  type: 'sidebar-dapp-contextmenu';
   dappTabInfo: {
     dappID: string;
     dappOrigin: string;

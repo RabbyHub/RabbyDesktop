@@ -213,7 +213,7 @@ const TabList = ({
               showMainwinPopup(
                 { x, y },
                 {
-                  type: 'sidebar-dapp',
+                  type: 'sidebar-dapp-contextmenu',
                   dappTabInfo: {
                     dappID: dapp.id,
                     dappOrigin: dapp.origin,

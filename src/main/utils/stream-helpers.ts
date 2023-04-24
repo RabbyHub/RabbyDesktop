@@ -122,7 +122,7 @@ export async function getAllMainUIWindows() {
   ]);
 
   const popupOnly: Record<IPopupWinPageInfo['type'], Electron.BrowserWindow> = {
-    'sidebar-dapp': sidebarContext,
+    'sidebar-dapp-contextmenu': sidebarContext,
   } as const;
 
   const windows = {

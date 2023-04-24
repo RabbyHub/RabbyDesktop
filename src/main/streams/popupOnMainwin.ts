@@ -74,10 +74,10 @@ function updateSubWindowRect(
   window.setBounds({ ...popupRect, x, y }, true);
 }
 
-const sidebarReady = onMainWindowReady().then(async (mainWin) => {
+const sidebarAppContextMenuReady = onMainWindowReady().then(async (mainWin) => {
   const targetWin = mainWin.window;
 
-  const sidebarAppPopup = createPopupWindow({
+  const sidebarAppContextMenuPopup = createPopupWindow({
     parent: mainWin.window,
     transparent: true,
     hasShadow: false,
@@ -85,16 +85,19 @@ const sidebarReady = onMainWindowReady().then(async (mainWin) => {
   });
 
   // disable close by shortcut
-  sidebarAppPopup.on('close', (evt) => {
+  sidebarAppContextMenuPopup.on('close', (evt) => {
     evt.preventDefault();
 
     return false;
   });
 
-  updateSubWindowRect(mainWin.window, sidebarAppPopup);
+  updateSubWindowRect(mainWin.window, sidebarAppContextMenuPopup);
   const onTargetWinUpdate = () => {
-    if (sidebarAppPopup.isVisible())
-      hidePopupOnMainWindow(sidebarAppPopup, 'sidebar-dapp');
+    if (sidebarAppContextMenuPopup.isVisible())
+      hidePopupOnMainWindow(
+        sidebarAppContextMenuPopup,
+        'sidebar-dapp-contextmenu'
+      );
   };
   targetWin.on('show', onTargetWinUpdate);
   targetWin.on('move', onTargetWinUpdate);
@@ -103,28 +106,34 @@ const sidebarReady = onMainWindowReady().then(async (mainWin) => {
   targetWin.on('restore', onTargetWinUpdate);
 
   mainWin.tabs.on('tab-focused', () => {
-    hidePopupOnMainWindow(sidebarAppPopup, 'sidebar-dapp');
+    hidePopupOnMainWindow(
+      sidebarAppContextMenuPopup,
+      'sidebar-dapp-contextmenu'
+    );
   });
 
   mainWin.window.on('focus', () => {
-    hidePopupOnMainWindow(sidebarAppPopup, 'sidebar-dapp');
+    hidePopupOnMainWindow(
+      sidebarAppContextMenuPopup,
+      'sidebar-dapp-contextmenu'
+    );
   });
 
-  await sidebarAppPopup.webContents.loadURL(
+  await sidebarAppContextMenuPopup.webContents.loadURL(
     `${RABBY_POPUP_GHOST_VIEW_URL}#/popup__sidebar-dapp`
   );
 
   // debug-only
   if (!IS_RUNTIME_PRODUCTION) {
-    // sidebarAppPopup.webContents.openDevTools({ mode: 'detach' });
+    // sidebarAppContextMenuPopup.webContents.openDevTools({ mode: 'detach' });
   }
 
-  hidePopupWindow(sidebarAppPopup);
+  hidePopupWindow(sidebarAppContextMenuPopup);
 
-  return sidebarAppPopup;
+  return sidebarAppContextMenuPopup;
 });
 
-Promise.all([sidebarReady]).then((wins) => {
+Promise.all([sidebarAppContextMenuReady]).then((wins) => {
   valueToMainSubject('popupWindowOnMain', {
     sidebarContext: wins[0],
   });
@@ -137,7 +146,7 @@ const SIZE_MAP: Record<
     height: number;
   }
 > = {
-  'sidebar-dapp': {
+  'sidebar-dapp-contextmenu': {
     width: 210,
     height: 306,
   },
