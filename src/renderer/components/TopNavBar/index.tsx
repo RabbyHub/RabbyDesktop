@@ -181,61 +181,68 @@ export const TopNavBar = () => {
         <div
           className={clsx(styles.url, 'h-[100%] flex items-center')}
           style={{ ...(navTextColor && { color: navTextColor }) }}
-          onClick={async () => {
-            if (!dappURLToShow) return;
-            await copyText(dappURLToShow);
-
-            showTooltip(
-              // adjust the position based on the rect of trigger element
-              {
-                ...hoverPosition.current,
-              },
-              {
-                title: 'Copied',
-                placement: 'bottom',
-              },
-              { autoHideTimeout: 3000 }
-            );
-            autoHideOnMouseLeaveRef.current = false;
-            autoHideTimer.current = setTimeout(() => {
-              autoHideOnMouseLeaveRef.current = true;
-              hideTooltip(0);
-            }, 3000);
-          }}
-          onMouseEnter={(event) => {
-            if (!dappURLToShow) return;
-            if (!autoHideOnMouseLeaveRef.current) return;
-
-            const rect = (event.target as HTMLDivElement)
-              .getBoundingClientRect()
-              .toJSON();
-
-            hoverPosition.current = {
-              ...rect,
-              left: event.clientX,
-              top: rect.y + 20,
-              height: 5,
-              width: 30,
-            };
-
-            showTooltip(
-              // adjust the position based on the rect of trigger element
-              {
-                ...hoverPosition.current,
-              },
-              {
-                title: 'Copy URL',
-                placement: 'bottom',
-              }
-            );
-          }}
-          onMouseLeave={() => {
-            if (autoHideOnMouseLeaveRef.current) {
-              hideTooltip(0);
-            }
-          }}
         >
-          {dappURLToShow}
+          <span
+            className={clsx(
+              styles.copyTrigger,
+              'h-[100%] inline-flex items-center'
+            )}
+            onClick={async () => {
+              if (!dappURLToShow) return;
+              await copyText(dappURLToShow);
+
+              showTooltip(
+                // adjust the position based on the rect of trigger element
+                {
+                  ...hoverPosition.current,
+                },
+                {
+                  title: 'Copied',
+                  placement: 'bottom',
+                },
+                { autoHideTimeout: 3000 }
+              );
+              autoHideOnMouseLeaveRef.current = false;
+              autoHideTimer.current = setTimeout(() => {
+                autoHideOnMouseLeaveRef.current = true;
+                hideTooltip(0);
+              }, 3000);
+            }}
+            onMouseEnter={(event) => {
+              if (!dappURLToShow) return;
+              if (!autoHideOnMouseLeaveRef.current) return;
+
+              const rect = (event.target as HTMLDivElement)
+                .getBoundingClientRect()
+                .toJSON();
+
+              hoverPosition.current = {
+                ...rect,
+                left: Math.min(event.clientX, rect.x + rect.width - 30),
+                top: rect.y + 20,
+                height: 5,
+                width: 30,
+              };
+
+              showTooltip(
+                // adjust the position based on the rect of trigger element
+                {
+                  ...hoverPosition.current,
+                },
+                {
+                  title: 'Copy URL',
+                  placement: 'bottom',
+                }
+              );
+            }}
+            onMouseLeave={() => {
+              if (autoHideOnMouseLeaveRef.current) {
+                hideTooltip(0);
+              }
+            }}
+          >
+            {dappURLToShow}
+          </span>
         </div>
         <div className={clsx(styles.historyBar)}>
           <RcIconHistoryGoBack
