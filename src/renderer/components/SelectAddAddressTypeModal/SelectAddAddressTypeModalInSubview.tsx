@@ -21,6 +21,7 @@ export const SelectAddAddressTypeModalInSubview: React.FC = () => {
         showBackButton: true,
       });
       setKeyringType(undefined);
+      closeSubview();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [keyringType]);
