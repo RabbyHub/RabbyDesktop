@@ -13,7 +13,6 @@ import { Button, message, Modal, SwitchProps, Tooltip } from 'antd';
 import { useSettings } from '@/renderer/hooks/useSettings';
 import styled from 'styled-components';
 import {
-  APP_BRANDNAME,
   FORCE_DISABLE_CONTENT_PROTECTION,
   IS_RUNTIME_PRODUCTION,
 } from '@/isomorphic/constants';
@@ -24,10 +23,8 @@ import { useCheckNewRelease } from '@/renderer/hooks/useAppUpdator';
 import { copyText } from '@/renderer/utils/clipboard';
 import { detectClientOS } from '@/isomorphic/os';
 import { ucfirst } from '@/isomorphic/string';
-import {
-  forwardMessageTo,
-  useMessageForwarded,
-} from '@/renderer/hooks/useViewsMessage';
+import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
+import { atom, useAtom } from 'jotai';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
 import { useProxyStateOnSettingPage } from './settingHooks';
@@ -152,9 +149,11 @@ const ProxyText = styled.div`
 
 const osType = detectClientOS();
 
+const debugStateAtom =
+  atom<IDebugStates['isGhostWindowDebugHighlighted']>(false);
 function DeveloperKitsParts() {
   const [isGhostWindowDebugHighlighted, setIsGhostWindowDebugHighlighted] =
-    useState(false);
+    useAtom(debugStateAtom);
 
   return (
     <>
