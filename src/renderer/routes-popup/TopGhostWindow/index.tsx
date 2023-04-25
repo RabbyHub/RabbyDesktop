@@ -2,7 +2,7 @@ import clsx from 'clsx';
 
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 
-import '@/renderer/css/ant-message.less';
+import '@/renderer/css/style.less';
 import { useBodyClassNameOnMounted } from '@/renderer/hooks/useMountedEffect';
 import { useMessageForwarded } from '@/renderer/hooks/useViewsMessage';
 import { atom, useAtom } from 'jotai';

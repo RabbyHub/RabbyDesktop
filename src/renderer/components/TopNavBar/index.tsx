@@ -30,6 +30,7 @@ import { useMatchURLBaseConfig } from '@/renderer/hooks-ipc/useAppDynamicConfig'
 import { useWindowState } from '@/renderer/hooks-shell/useWindowState';
 import { formatDappURLToShow } from '@/isomorphic/dapp';
 import { useGhostTooltip } from '@/renderer/routes-popup/TopGhostWindow/useGhostWindow';
+import { useLocation } from 'react-router-dom';
 import styles from './index.module.less';
 // import { TipsWrapper } from '../TipWrapper';
 
@@ -135,6 +136,21 @@ export const TopNavBar = () => {
     },
   });
   const autoHideOnMouseLeaveRef = useRef(true);
+  const hoverPosition = useRef<any>();
+
+  const autoHideTimer = useRef<NodeJS.Timeout>();
+
+  const l = useLocation();
+
+  useEffect(
+    () => () => {
+      hideTooltip(0);
+      autoHideOnMouseLeaveRef.current = true;
+      clearInterval(autoHideTimer.current);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [l]
+  );
 
   return (
     <div className={styles.main} onDoubleClick={onDarwinToggleMaxmize}>
@@ -165,36 +181,41 @@ export const TopNavBar = () => {
         <div
           className={clsx(styles.url, 'h-[100%] flex items-center')}
           style={{ ...(navTextColor && { color: navTextColor }) }}
-          onClick={async (event) => {
+          onClick={async () => {
             if (!dappURLToShow) return;
             await copyText(dappURLToShow);
-
-            const rect = (event.target as HTMLDivElement)
-              .getBoundingClientRect()
-              .toJSON();
 
             showTooltip(
               // adjust the position based on the rect of trigger element
               {
-                ...rect,
-                left: event.clientX - 30 / 2,
-                top: event.clientY,
-                height: 10,
-                width: 30,
+                ...hoverPosition.current,
               },
               {
-                title: 'Copied url',
-                placement: 'bottomLeft',
+                title: 'Copied',
+                placement: 'bottom',
               },
-              { autoHideTimeout: 0 }
+              { autoHideTimeout: 3000 }
             );
+            autoHideOnMouseLeaveRef.current = false;
+            autoHideTimer.current = setTimeout(() => {
+              autoHideOnMouseLeaveRef.current = true;
+              hideTooltip(0);
+            }, 3000);
           }}
           onMouseEnter={(event) => {
             if (!dappURLToShow) return;
+            if (!autoHideOnMouseLeaveRef.current) return;
 
             const rect = (event.target as HTMLDivElement)
               .getBoundingClientRect()
               .toJSON();
+
+            hoverPosition.current = {
+              ...rect,
+              x: event.clientX,
+              y: event.clientY,
+              height: rect.height - 20,
+            };
 
             showTooltip(
               // adjust the position based on the rect of trigger element
@@ -205,7 +226,8 @@ export const TopNavBar = () => {
                 height: rect.height - 20,
               },
               {
-                title: dappURLToShow,
+                title: 'Copy URL',
+                placement: 'bottom',
               }
             );
           }}
@@ -213,17 +235,9 @@ export const TopNavBar = () => {
             if (autoHideOnMouseLeaveRef.current) {
               hideTooltip(0);
             }
-
-            autoHideOnMouseLeaveRef.current = true;
           }}
         >
-          {/* <TipsWrapper
-            placement="bottom"
-            hoverTips="Copy URL"
-            clickTips="Copied"
-          > */}
-          <span>{dappURLToShow}</span>
-          {/* </TipsWrapper> */}
+          {dappURLToShow}
         </div>
         <div className={clsx(styles.historyBar)}>
           <RcIconHistoryGoBack
