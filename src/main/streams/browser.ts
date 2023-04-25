@@ -1,17 +1,7 @@
-import { BrowserWindow } from 'electron';
-
 import { onIpcMainEvent, onIpcMainInternalEvent } from '../utils/ipcMainEvents';
 import { forwardToMainWebContents } from '../utils/stream-helpers';
 import { getWindowFromBrowserWindow } from './tabbedBrowserWindow';
 import { setListeners, setOpenHandlerForWebContents } from './webContents';
-
-onIpcMainEvent(
-  '__internal_rpc:browser:set-ignore-mouse-events',
-  (event, ...args) => {
-    const win = BrowserWindow.fromWebContents(event.sender);
-    win?.setIgnoreMouseEvents(...args);
-  }
-);
 
 onIpcMainEvent(
   '__internal_forward:main-window:close-tab',

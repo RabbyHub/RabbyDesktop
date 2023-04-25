@@ -1,8 +1,15 @@
-import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { BrowserWindow, session } from 'electron';
+import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
+import * as Sentry from '@sentry/electron/main';
+import { SimplePool } from '@/isomorphic/pool';
+
 import { formatDappHttpOrigin } from '@/isomorphic/dapp';
 import { integrateQueryToUrl, isSpecialDappID } from '../../isomorphic/url';
-import { emitIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
+import {
+  emitIpcMainEvent,
+  onIpcMainEvent,
+  sendToWebContents,
+} from '../utils/ipcMainEvents';
 import { MainWindowTab, Tab, Tabs } from './tabs';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 
@@ -48,6 +55,8 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
     webuiType: undefined,
   };
 
+  private _perfInfoPool = new SimplePool<IWebviewPerfInfo>();
+
   constructor(options: TabbedBrowserWindowOptions) {
     this.session = options.session || session.defaultSession;
     this.extensions = options.extensions;
@@ -79,8 +88,39 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
     this.window.webContents.loadURL(webuiUrl);
 
     if (this.isMainWindow()) {
-      this.window.webContents.on('crashed', () => {
+      const disposeOnReportPerfInfo = onIpcMainEvent(
+        '__internal_rpc:browser:report-perf-info',
+        (evt, perfInfo) => {
+          if (evt.sender !== this.window.webContents) return;
+
+          this._perfInfoPool.push(perfInfo);
+        }
+      );
+
+      this.window.webContents.on('crashed', (event, killed) => {
         emitIpcMainEvent('__internal_main:mainwindow:webContents-crashed');
+        disposeOnReportPerfInfo();
+
+        const perfInfos = this._perfInfoPool.getPool();
+
+        const perfItem = perfInfos[perfInfos.length - 1];
+        const lastWaterMark = !perfItem
+          ? null
+          : perfItem.memoryInfo.usedJSHeapSize /
+            perfItem.memoryInfo.totalJSHeapSize;
+
+        Sentry.captureEvent({
+          message: 'WebContents Crashed',
+          tags: {
+            type: 'MainWindow',
+          },
+          extra: {
+            lastWaterMark,
+            perfInfos,
+            event,
+            killed,
+          },
+        });
       });
     }
 
