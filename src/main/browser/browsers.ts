@@ -28,6 +28,16 @@ export type TabbedBrowserWindowOptions = {
   defaultOpen?: boolean;
 };
 
+const CRASH_REASONS = [
+  // 'clean-exit',
+  'abnormal-exit',
+  'killed',
+  'crashed',
+  'oom',
+  'launch-failed',
+  'integrity-failure',
+];
+
 export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
   window: BrowserWindow;
 
@@ -97,8 +107,10 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
         }
       );
 
-      this.window.webContents.on('crashed', (event, killed) => {
-        emitIpcMainEvent('__internal_main:mainwindow:webContents-crashed');
+      this.window.webContents.on('render-process-gone', (_, details) => {
+        if (CRASH_REASONS.includes(details.reason)) {
+          emitIpcMainEvent('__internal_main:mainwindow:webContents-crashed');
+        }
         disposeOnReportPerfInfo();
 
         // sort by time desc
@@ -115,14 +127,14 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
         Sentry.captureEvent({
           message: 'WebContents Crashed',
           tags: {
-            type: 'MainWindow',
+            webContentsType: 'MainWindow',
+            goneReason: details.reason,
           },
           extra: {
             lastWaterMark,
             lastPerfItem,
             perfInfos,
-            event,
-            killed,
+            details,
           },
         });
       });
