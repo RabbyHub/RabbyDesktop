@@ -23,8 +23,6 @@ export const Modal: React.FC<Props> = ({
   return (
     <AntdModal
       width={1000}
-      maskTransitionName=""
-      transitionName=""
       {...props}
       className={classNames('RabbyModal', props.className, {
         'small-title': smallTitle,
