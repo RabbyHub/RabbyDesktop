@@ -1,7 +1,19 @@
 
-v0.17.0 / 2023-04-22
+v0.17.1 / 2023-04-25
 ====================
 
+  * style: tuning.
+  * fix: resume modal transition (#386)
+  * fix (#385)
+  * fix: if local type dapp existed, pinnedList/unpinnedList can not be resorted. (#384)
+  * feat: control modal's open (#381)
+  * feat: report its memory info on mainWindow's webview crashed. (#383)
+  * feat: support tooltip on ghost window, which could be over Dapp View. (#382)
+
+v0.17.0-prod / 2023-04-22
+=========================
+
+  * Release v0.17.0-prod
   * chore: literals change.
   * chore: update data.
   * feat: copy tips (#370)
