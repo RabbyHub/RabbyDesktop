@@ -18,6 +18,7 @@ import {
   forwardRef,
   ForwardedRef,
   useMemo,
+  useRef,
 } from 'react';
 import { detectClientOS } from '@/isomorphic/os';
 import classNames from 'classnames';
@@ -28,7 +29,8 @@ import { copyText } from '@/renderer/utils/clipboard';
 import { useMatchURLBaseConfig } from '@/renderer/hooks-ipc/useAppDynamicConfig';
 import { useWindowState } from '@/renderer/hooks-shell/useWindowState';
 import { formatDappURLToShow } from '@/isomorphic/dapp';
-import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
+import { useGhostTooltip } from '@/renderer/routes-popup/TopGhostWindow/useGhostWindow';
+import { useLocation } from 'react-router-dom';
 import styles from './index.module.less';
 // import { TipsWrapper } from '../TipWrapper';
 
@@ -126,6 +128,30 @@ export const TopNavBar = () => {
     return formatDappURLToShow(activeTab?.url || '');
   }, [selectedTabInfo?.dapp, activeTab?.url]);
 
+  const [{ showTooltip, hideTooltip }] = useGhostTooltip({
+    mode: 'controlled',
+    defaultTooltipProps: {
+      title: 'You should never see this tooltip',
+      placement: 'bottom',
+    },
+  });
+  const autoHideOnMouseLeaveRef = useRef(true);
+  const hoverPosition = useRef<any>();
+
+  const autoHideTimer = useRef<NodeJS.Timeout>();
+
+  const l = useLocation();
+
+  useEffect(
+    () => () => {
+      hideTooltip(0);
+      autoHideOnMouseLeaveRef.current = true;
+      clearInterval(autoHideTimer.current);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [l]
+  );
+
   return (
     <div className={styles.main} onDoubleClick={onDarwinToggleMaxmize}>
       {/* keep this element in first to make it bottom, or move it last to make it top */}
@@ -153,26 +179,65 @@ export const TopNavBar = () => {
           />
         )}
         <div
-          className={styles.url}
+          className={clsx(styles.url, 'h-[100%] flex items-center')}
           style={{ ...(navTextColor && { color: navTextColor }) }}
           onClick={async () => {
             if (!dappURLToShow) return;
             await copyText(dappURLToShow);
-            toastTopMessage({
-              data: {
-                type: 'success',
-                content: 'Copied url',
+
+            showTooltip(
+              // adjust the position based on the rect of trigger element
+              {
+                ...hoverPosition.current,
               },
-            });
+              {
+                title: 'Copied',
+                placement: 'bottom',
+              },
+              { autoHideTimeout: 3000 }
+            );
+            autoHideOnMouseLeaveRef.current = false;
+            autoHideTimer.current = setTimeout(() => {
+              autoHideOnMouseLeaveRef.current = true;
+              hideTooltip(0);
+            }, 3000);
+          }}
+          onMouseEnter={(event) => {
+            if (!dappURLToShow) return;
+            if (!autoHideOnMouseLeaveRef.current) return;
+
+            const rect = (event.target as HTMLDivElement)
+              .getBoundingClientRect()
+              .toJSON();
+
+            hoverPosition.current = {
+              ...rect,
+              x: event.clientX,
+              y: event.clientY,
+              height: rect.height - 20,
+            };
+
+            showTooltip(
+              // adjust the position based on the rect of trigger element
+              {
+                ...rect,
+                x: event.clientX,
+                y: event.clientY,
+                height: rect.height - 20,
+              },
+              {
+                title: 'Copy URL',
+                placement: 'bottom',
+              }
+            );
+          }}
+          onMouseLeave={() => {
+            if (autoHideOnMouseLeaveRef.current) {
+              hideTooltip(0);
+            }
           }}
         >
-          {/* <TipsWrapper
-            placement="bottom"
-            hoverTips="Copy URL"
-            clickTips="Copied"
-          > */}
-          <span>{dappURLToShow}</span>
-          {/* </TipsWrapper> */}
+          {dappURLToShow}
         </div>
         <div className={clsx(styles.historyBar)}>
           <RcIconHistoryGoBack

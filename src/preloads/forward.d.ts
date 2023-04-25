@@ -10,6 +10,17 @@ type SVState<T extends object> = { visible: boolean } & {
   state?: T;
 };
 
+type ITriggerTooltipOnGhost = {
+  triggerId: string;
+  triggerElementRect?: Omit<DOMRectReadOnly, 'toJSON'>;
+  tooltipProps?: Omit<
+    import('antd').TooltipProps,
+    'title' | 'overlay' | 'openOpenChange'
+  > & {
+    title?: string;
+  };
+};
+
 type ZViewStates = {
   'switch-chain': {
     value?: CHAINS_ENUM;
@@ -175,6 +186,32 @@ type ChannelForwardMessageType =
       payload: {
         svOpenId: string;
         subView: keyof ZViewStates;
+      };
+    }
+  // | {
+  //     targetView: 'top-ghost-window';
+  //     type: 'open-antd-message';
+  //     payload: {
+  //       triggerElementRect?: Omit<DOMRectReadOnly, 'toJSON'>;
+  //       openMessageArgs?: Omit<
+  //         import('antd/lib/message').ArgsProps,
+  //         'content' | 'icon'
+  //       > & {
+  //         iconSrc?: string;
+  //         content: string;
+  //       };
+  //     };
+  //   }
+  | {
+      targetView: 'top-ghost-window';
+      type: 'trigger-tooltip';
+      payload: ITriggerTooltipOnGhost;
+    }
+  | {
+      targetView: 'top-ghost-window' | 'main-window';
+      type: 'debug:toggle-highlight';
+      payload: {
+        isHighlight?: boolean;
       };
     }
   | {

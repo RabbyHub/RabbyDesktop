@@ -34,7 +34,7 @@ const toast = (message: string) => {
 };
 
 export const SidebarContextMenu = () => {
-  const { pageInfo } = usePopupWinInfo('sidebar-dapp');
+  const { pageInfo } = usePopupWinInfo('sidebar-dapp-contextmenu');
 
   const dappID = pageInfo?.dappTabInfo.dappID;
   const dappOrigin = useMemo(() => {
@@ -209,11 +209,11 @@ export const SidebarContextMenu = () => {
       default:
         break;
     }
-    hideMainwinPopup('sidebar-dapp');
+    hideMainwinPopup('sidebar-dapp-contextmenu');
   };
 
   if (!dappID || !dappOrigin) return null;
-  if (pageInfo?.type !== 'sidebar-dapp') return null;
+  if (pageInfo?.type !== 'sidebar-dapp-contextmenu') return null;
 
   return (
     <div className={styles.winWrapper}>

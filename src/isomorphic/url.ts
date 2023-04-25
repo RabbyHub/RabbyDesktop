@@ -205,6 +205,7 @@ function _isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
       );
     case 'dapps-management':
     case 'global-toast-popup':
+    case 'top-ghost-window':
       return (
         url.startsWith(RABBY_LOCAL_URLBASE) &&
         urlInfo.pathname === '/popup-view.html' &&
@@ -215,22 +216,23 @@ function _isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
   }
 }
 
+const BUILTIN_VIEWS_TO_CHECK = [
+  'main-window',
+  'address-management',
+  'add-address-dropdown',
+  'dapps-management',
+  'z-popup',
+  'global-toast-popup',
+  // 'select-devices'
+  'top-ghost-window',
+] as IBuiltinViewName[];
+
 export function isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
   switch (viewType) {
     default:
       return _isBuiltinView(url, viewType);
     case '*':
-      return (
-        [
-          'main-window',
-          'address-management',
-          'add-address-dropdown',
-          'dapps-management',
-          'z-popup',
-          'global-toast-popup',
-          // 'select-devices'
-        ] as IBuiltinViewName[]
-      ).some((view) => _isBuiltinView(url, view));
+      return BUILTIN_VIEWS_TO_CHECK.some((view) => _isBuiltinView(url, view));
   }
 }
 

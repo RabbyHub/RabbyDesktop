@@ -134,11 +134,12 @@ app.on('web-contents-created', async (evtApp, webContents) => {
     const { popupOnly } = await getAllMainUIWindows();
 
     if (
-      BrowserWindow.fromWebContents(webContents) === popupOnly['sidebar-dapp']
+      BrowserWindow.fromWebContents(webContents) ===
+      popupOnly['sidebar-dapp-contextmenu']
     ) {
       if (IS_RUNTIME_PRODUCTION) return;
     } else {
-      notifyHidePopupWindowOnMain('sidebar-dapp');
+      notifyHidePopupWindowOnMain('sidebar-dapp-contextmenu');
     }
 
     const menu = await buildChromeContextMenu({

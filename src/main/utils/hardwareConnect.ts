@@ -217,7 +217,7 @@ export async function createTrezorLikeConnectPageWindow(
   updateSubWindowRect(mainWindow, connWindow);
   const onMainWindowUpdate = () => {
     // if (connWindow.isVisible())
-    //   hidePopupOnMainWindow(connWindow, 'sidebar-dapp');
+    //   hidePopupOnMainWindow(connWindow, 'sidebar-dapp-contextmenu');
     updateSubWindowRect(mainWindow, connWindow);
   };
   mainWindow.on('show', onMainWindowUpdate);

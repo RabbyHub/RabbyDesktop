@@ -326,16 +326,20 @@ type IRabbyxRpcResponse = {
 };
 
 type IHardwareConnectPageType = 'onekey' | 'trezor';
-type IPopupWinPageInfo = {
-  type: 'sidebar-dapp';
-  dappTabInfo: {
-    dappID: string;
-    dappOrigin: string;
-    dappType: INextDapp['type'];
-    id: chrome.tabs.Tab['id'];
-    url?: string;
-  };
-};
+type IPopupWinPageInfo =
+  | {
+      type: 'sidebar-dapp-contextmenu';
+      dappTabInfo: {
+        dappID: string;
+        dappOrigin: string;
+        dappType: INextDapp['type'];
+        id: chrome.tabs.Tab['id'];
+        url?: string;
+      };
+    }
+  | {
+      type: 'top-ghost-window';
+    };
 
 type ISelectDeviceState = {
   selectId: string;
@@ -403,6 +407,10 @@ type PopupViewOnMainwinInfo =
 type PickPopupViewPageInfo<T extends PopupViewOnMainwinInfo['type']> =
   PopupViewOnMainwinInfo & { type: T };
 
+type IDebugStates = {
+  isGhostWindowDebugHighlighted: boolean;
+};
+
 type IShellNavInfo = {
   tabExists: boolean;
   canGoForward?: boolean;
@@ -433,7 +441,10 @@ type IProtocolDappBindings = Record<
 
 type IDappBoundTabIds = Record<IDapp['id'], number>;
 
-type IBuiltinViewName = PopupViewOnMainwinInfo['type'] | 'main-window';
+type IBuiltinViewName =
+  | PopupViewOnMainwinInfo['type']
+  | IPopupWinPageInfo['type']
+  | 'main-window';
 
 type INonSameDomainAction = {
   url: string;

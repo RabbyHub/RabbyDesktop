@@ -68,11 +68,11 @@ export function forwardMessageTo<
     'type' | 'targetView'
   >
 ) {
-  if (!isBuiltinView(window.location.href, targetView)) {
-    console.warn(
-      `[forwardMessageTo] it's not expected to send message from non built-in view '${targetView}'.`
-    );
-  }
+  // if (!isBuiltinView(window.location.href, targetView)) {
+  //   console.warn(
+  //     `[forwardMessageTo] it's not expected to send message from non built-in view '${targetView}'.`
+  //   );
+  // }
 
   window.rabbyDesktop.ipcRenderer.sendMessage(
     '__internal_forward:views:channel-message',

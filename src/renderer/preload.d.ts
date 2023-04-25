@@ -280,6 +280,10 @@ type ChannelMessagePayload = {
     send: [winId: number, webContentsId: number];
     response: [];
   };
+  '__internal_rpc:top-ghost-window:toggle-visible': {
+    send: [nextVisible: boolean];
+    response: [];
+  };
 
   '__internal_rpc:rabbyx:waitExtBgGhostLoaded': {
     send: [reqid: string];

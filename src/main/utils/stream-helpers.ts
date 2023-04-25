@@ -1,4 +1,4 @@
-import { firstValueFrom, lastValueFrom } from 'rxjs';
+import { firstValueFrom, lastValueFrom, startWith } from 'rxjs';
 import { fromMainSubject, valueToMainSubject } from '../streams/_init';
 import { emitIpcMainEvent } from './ipcMainEvents';
 
@@ -116,13 +116,14 @@ export function updateMainWindowActiveTabRect(
 }
 
 export async function getAllMainUIWindows() {
-  const [mainWin, { sidebarContext }] = await Promise.all([
+  const [mainWin, { sidebarContext, ghostFloatingWindow }] = await Promise.all([
     await onMainWindowReady(),
     await firstValueFrom(fromMainSubject('popupWindowOnMain')),
   ]);
 
   const popupOnly: Record<IPopupWinPageInfo['type'], Electron.BrowserWindow> = {
-    'sidebar-dapp': sidebarContext,
+    'sidebar-dapp-contextmenu': sidebarContext,
+    'top-ghost-window': ghostFloatingWindow,
   } as const;
 
   const windows = {
@@ -191,6 +192,13 @@ export async function pushChangesToZPopupLayer(
   });
 }
 
+export async function forwardMessageToWebContents(
+  wc: Electron.WebContents,
+  payload: ChannelForwardMessageType
+) {
+  wc.send('__internal_forward:views:channel-message', payload);
+}
+
 export function startSelectDevices(selectId: string) {
   pushChangesToZPopupLayer({
     'gasket-modal-like-window': {
@@ -228,4 +236,23 @@ export async function getAppRuntimeProxyConf() {
 
 export async function getIpfsService() {
   return firstValueFrom(fromMainSubject('ipfsServiceReady'));
+}
+
+const debugStates: IDebugStates = {
+  isGhostWindowDebugHighlighted: false,
+};
+export async function getOrSetDebugStates(
+  partials?:
+    | Partial<IDebugStates>
+    | ((prevStates: IDebugStates) => Partial<IDebugStates>)
+) {
+  const prevStates = { ...debugStates };
+
+  if (partials) {
+    partials =
+      typeof partials === 'function' ? partials({ ...prevStates }) : partials;
+    Object.assign(debugStates, partials);
+  }
+
+  return { prevStates, nextStates: debugStates };
 }

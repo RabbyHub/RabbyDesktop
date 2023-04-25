@@ -163,7 +163,7 @@ export const DAppBlock = ({
         className="dapp-block"
         ref={ref}
         onContextMenu={() => {
-          hideMainwinPopup('sidebar-dapp');
+          hideMainwinPopup('sidebar-dapp-contextmenu');
         }}
       >
         <div className={clsx('dapp-block-badge')}>

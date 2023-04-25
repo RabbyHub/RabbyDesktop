@@ -25,7 +25,7 @@ export function useClickOutSide(
 export function useClickMainWindowHideContextMenu() {
   useLayoutEffect(() => {
     const listener = () => {
-      hideMainwinPopup('sidebar-dapp');
+      hideMainwinPopup('sidebar-dapp-contextmenu');
     };
     document.body.addEventListener('click', listener);
 
