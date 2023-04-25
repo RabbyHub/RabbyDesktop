@@ -188,6 +188,8 @@ const ghostFloatingWindowReady = onMainWindowReady().then(
       transparent: true,
       hasShadow: false,
       closable: false,
+      focusable: false,
+      alwaysOnTop: false, // set it to false to make it not on top of other APP's windows
     });
 
     // disable close by shortcut
@@ -205,7 +207,7 @@ const ghostFloatingWindowReady = onMainWindowReady().then(
     });
 
     // don't accept mouse events
-    ghostFloatingWindow.setIgnoreMouseEvents(true);
+    ghostFloatingWindow.setIgnoreMouseEvents(true, { forward: true });
 
     updateSubWindowRect({
       parentWin: mainTabbedWin.window,
