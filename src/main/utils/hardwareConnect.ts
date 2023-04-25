@@ -1,6 +1,11 @@
 import { isEnableServeDappByHttp } from '../store/desktopApp';
 import { createWindow } from '../streams/tabbedBrowserWindow';
-import { onMainWindowReady, pushChangesToZPopupLayer } from './stream-helpers';
+import {
+  forwardMessageToWebContents,
+  getZPopupLayerWebContents,
+  onMainWindowReady,
+  pushChangesToZPopupLayer,
+} from './stream-helpers';
 
 function getConnectWinSize(
   pWinBounds: Pick<Electron.Rectangle, 'width' | 'height'>
@@ -175,6 +180,16 @@ export async function createTrezorLikeConnectPageWindow(
     },
   });
 
+  const zPopupWc = await getZPopupLayerWebContents();
+  forwardMessageToWebContents(zPopupWc, {
+    targetView: 'z-popup',
+    type: 'hardward-conn-window-opened-changed',
+    payload: {
+      opened: true,
+      type: options.openType === 'onekey' ? 'Onekey' : 'Trezor',
+    },
+  });
+
   const tab = tabbedWin.createTab({
     topbarStacks: {
       tabs: false,
@@ -206,6 +221,14 @@ export async function createTrezorLikeConnectPageWindow(
     pushChangesToZPopupLayer({
       'gasket-modal-like-window': {
         visible: false,
+      },
+    });
+    forwardMessageToWebContents(zPopupWc, {
+      targetView: 'z-popup',
+      type: 'hardward-conn-window-opened-changed',
+      payload: {
+        opened: false,
+        type: options.openType === 'onekey' ? 'Onekey' : 'Trezor',
       },
     });
   });

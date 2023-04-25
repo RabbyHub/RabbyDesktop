@@ -177,6 +177,11 @@ export async function getAllMainUIViews() {
   };
 }
 
+export async function getZPopupLayerWebContents() {
+  const { viewOnlyHash } = await getAllMainUIViews();
+  return viewOnlyHash.zPopup;
+}
+
 export async function pushChangesToZPopupLayer(
   partials: (ChannelForwardMessageType & {
     type: 'update-subview-state';
@@ -189,6 +194,13 @@ export async function pushChangesToZPopupLayer(
     type: 'update-subview-state',
     partials,
   });
+}
+
+export async function forwardMessageToWebContents(
+  wc: Electron.WebContents,
+  payload: ChannelForwardMessageType
+) {
+  wc.send('__internal_forward:views:channel-message', payload);
 }
 
 export function startSelectDevices(selectId: string) {
@@ -208,9 +220,24 @@ export function startSelectDevices(selectId: string) {
       },
     },
   });
+
+  getZPopupLayerWebContents().then((zPopupWc) => {
+    forwardMessageToWebContents(zPopupWc, {
+      targetView: 'z-popup',
+      type: 'hardward-conn-window-opened-changed',
+      payload: { opened: true, type: 'Ledger' },
+    });
+  });
 }
 
 export function stopSelectDevices() {
+  getZPopupLayerWebContents().then((zPopupWc) => {
+    forwardMessageToWebContents(zPopupWc, {
+      targetView: 'z-popup',
+      type: 'hardward-conn-window-opened-changed',
+      payload: { opened: false, type: 'Ledger' },
+    });
+  });
   emitIpcMainEvent('__internal_main:popupview-on-mainwin:toggle-show', {
     nextShow: false,
     type: 'select-devices',
