@@ -1,8 +1,15 @@
-import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
 import { BrowserWindow, session } from 'electron';
+import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
+import * as Sentry from '@sentry/electron/main';
+import { SimplePool } from '@/isomorphic/pool';
+
 import { formatDappHttpOrigin } from '@/isomorphic/dapp';
 import { integrateQueryToUrl, isSpecialDappID } from '../../isomorphic/url';
-import { emitIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
+import {
+  emitIpcMainEvent,
+  onIpcMainEvent,
+  sendToWebContents,
+} from '../utils/ipcMainEvents';
 import { MainWindowTab, Tab, Tabs } from './tabs';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 
@@ -20,6 +27,16 @@ export type TabbedBrowserWindowOptions = {
 
   defaultOpen?: boolean;
 };
+
+const CRASH_REASONS = [
+  // 'clean-exit',
+  'abnormal-exit',
+  'killed',
+  'crashed',
+  'oom',
+  'launch-failed',
+  'integrity-failure',
+];
 
 export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
   window: BrowserWindow;
@@ -47,6 +64,8 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
     defaultOpen: true,
     webuiType: undefined,
   };
+
+  private _perfInfoPool = new SimplePool<IWebviewPerfInfo>();
 
   constructor(options: TabbedBrowserWindowOptions) {
     this.session = options.session || session.defaultSession;
@@ -79,8 +98,45 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
     this.window.webContents.loadURL(webuiUrl);
 
     if (this.isMainWindow()) {
-      this.window.webContents.on('crashed', () => {
-        emitIpcMainEvent('__internal_main:mainwindow:webContents-crashed');
+      const disposeOnReportPerfInfo = onIpcMainEvent(
+        '__internal_rpc:browser:report-perf-info',
+        (evt, perfInfo) => {
+          if (evt.sender !== this.window.webContents) return;
+
+          this._perfInfoPool.push(perfInfo);
+        }
+      );
+
+      this.window.webContents.on('render-process-gone', (_, details) => {
+        if (CRASH_REASONS.includes(details.reason)) {
+          emitIpcMainEvent('__internal_main:mainwindow:webContents-crashed');
+        }
+        disposeOnReportPerfInfo();
+
+        // sort by time desc
+        const perfInfos = this._perfInfoPool
+          .getPool()
+          .sort((a, b) => b.time - a.time);
+
+        const lastPerfItem = perfInfos[0];
+        const lastWaterMark = !lastPerfItem
+          ? null
+          : lastPerfItem.memoryInfo.usedJSHeapSize /
+            lastPerfItem.memoryInfo.totalJSHeapSize;
+
+        Sentry.captureEvent({
+          message: 'WebContents Crashed',
+          tags: {
+            webContentsType: 'MainWindow',
+            goneReason: details.reason,
+          },
+          extra: {
+            lastWaterMark,
+            lastPerfItem,
+            perfInfos,
+            details,
+          },
+        });
       });
     }
 

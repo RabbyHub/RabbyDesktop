@@ -195,8 +195,8 @@ type ChannelMessagePayload = {
     send: [];
     response: [];
   };
-  '__internal_rpc:browser:set-ignore-mouse-events': {
-    send: [ignore: boolean, options?: Electron.IgnoreMouseEventsOptions];
+  '__internal_rpc:browser:report-perf-info': {
+    send: [perfInfo: IWebviewPerfInfo];
     response: [];
   };
   '__internal_rpc:browser-dev:openDevTools': {

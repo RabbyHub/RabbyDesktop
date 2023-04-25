@@ -361,6 +361,15 @@ type ISelectDeviceState = {
     }
 );
 
+type IWebviewPerfInfo = {
+  time: number;
+  memoryInfo: {
+    totalJSHeapSize: number;
+    usedJSHeapSize: number;
+    jsHeapSizeLimit: number;
+  };
+};
+
 type PopupViewOnMainwinInfo =
   | {
       type: 'add-address-dropdown';

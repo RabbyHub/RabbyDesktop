@@ -3,6 +3,8 @@ import { detectClientOS } from '@/isomorphic/os';
 import { useCallback, useEffect } from 'react';
 import { atom, useAtom } from 'jotai';
 import { useMainWindowEventsToast } from './useMainWindowEvents';
+import { useInterval } from '../hooks/useTimer';
+import { getPerfInfo } from '../utils/performance';
 
 const OS_TYPE = detectClientOS();
 const isDarwin = OS_TYPE === 'darwin';
@@ -119,6 +121,13 @@ export function useMainWindowEvents() {
       }
     );
   }, [setWinState]);
+
+  useInterval(() => {
+    window.rabbyDesktop.ipcRenderer.sendMessage(
+      '__internal_rpc:browser:report-perf-info',
+      getPerfInfo()
+    );
+  }, 3000);
 
   useMainWindowEventsToast();
 }
