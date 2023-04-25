@@ -212,8 +212,8 @@ export const TopNavBar = () => {
 
             hoverPosition.current = {
               ...rect,
-              left: event.clientX - 30 / 2,
-              top: event.clientY - 20,
+              left: event.clientX,
+              top: rect.y + 20,
               height: 5,
               width: 30,
             };
