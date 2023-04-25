@@ -212,18 +212,16 @@ export const TopNavBar = () => {
 
             hoverPosition.current = {
               ...rect,
-              x: event.clientX,
-              y: event.clientY,
-              height: rect.height - 20,
+              left: event.clientX - 30 / 2,
+              top: event.clientY - 20,
+              height: 5,
+              width: 30,
             };
 
             showTooltip(
               // adjust the position based on the rect of trigger element
               {
-                ...rect,
-                x: event.clientX,
-                y: event.clientY,
-                height: rect.height - 20,
+                ...hoverPosition.current,
               },
               {
                 title: 'Copy URL',
