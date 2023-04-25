@@ -101,13 +101,16 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
         emitIpcMainEvent('__internal_main:mainwindow:webContents-crashed');
         disposeOnReportPerfInfo();
 
-        const perfInfos = this._perfInfoPool.getPool();
+        // sort by time desc
+        const perfInfos = this._perfInfoPool
+          .getPool()
+          .sort((a, b) => b.time - a.time);
 
-        const perfItem = perfInfos[perfInfos.length - 1];
-        const lastWaterMark = !perfItem
+        const lastPerfItem = perfInfos[0];
+        const lastWaterMark = !lastPerfItem
           ? null
-          : perfItem.memoryInfo.usedJSHeapSize /
-            perfItem.memoryInfo.totalJSHeapSize;
+          : lastPerfItem.memoryInfo.usedJSHeapSize /
+            lastPerfItem.memoryInfo.totalJSHeapSize;
 
         Sentry.captureEvent({
           message: 'WebContents Crashed',
@@ -116,6 +119,7 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
           },
           extra: {
             lastWaterMark,
+            lastPerfItem,
             perfInfos,
             event,
             killed,
