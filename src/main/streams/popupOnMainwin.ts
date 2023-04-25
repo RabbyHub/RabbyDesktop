@@ -303,3 +303,19 @@ onIpcMainEvent(
     handlerToggleShowPopupWins(payload);
   }
 );
+
+onIpcMainEvent(
+  '__internal_rpc:top-ghost-window:toggle-visible',
+  async (_, nextVisible) => {
+    const ghostFloatingWindow = await ghostFloatingWindowReady;
+
+    // don't toggle window's visibility in dev mode
+    if (!IS_RUNTIME_PRODUCTION) return;
+
+    if (nextVisible) {
+      showPopupWindow(ghostFloatingWindow);
+    } else {
+      hidePopupWindow(ghostFloatingWindow);
+    }
+  }
+);

@@ -184,11 +184,33 @@ function DeveloperKitsParts() {
               icon="rabby-internal://assets/icons/developer-kits/ghost.svg"
               name={
                 <>
-                  <div className="flex flex-col gap-[4px]">
-                    <span className="text-14 font-medium">
-                      Toggle Ghost Window Highlight
-                    </span>
-                    <span className="text-14 text-white opacity-[0.6]" />
+                  <div>
+                    <Tooltip
+                      trigger="hover"
+                      title={
+                        <>
+                          <ul className="pl-[12px] pl-[8px] pt-[8px]">
+                            <li>
+                              As enabled, the ghost window will be highlighted
+                              with light blue background.
+                            </li>
+                            <li className="mt-[8px]">
+                              but on prodution, ONLY when there's element need
+                              to be rendered in the ghost window.
+                            </li>
+                          </ul>
+                        </>
+                      }
+                    >
+                      <span className="text-14 font-medium">
+                        Toggle Ghost Window Highlight
+                        <img
+                          className="ml-[4px] w-[18px] h-[18px] inline-block"
+                          src="rabby-internal://assets/icons/mainwin-settings/info.svg"
+                          alt=""
+                        />
+                      </span>
+                    </Tooltip>
                   </div>
                 </>
               }

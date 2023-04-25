@@ -7,7 +7,7 @@ import { useBodyClassNameOnMounted } from '@/renderer/hooks/useMountedEffect';
 import { useMessageForwarded } from '@/renderer/hooks/useViewsMessage';
 import { atom, useAtom } from 'jotai';
 import { Tooltip } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
 const eleTooltipsAtom = atom<(ITriggerTooltipOnGhost & object)[]>([]);
@@ -16,6 +16,13 @@ export default function TopGhostWindow() {
   const [eleTooltips, setEleTooltips] = useAtom(eleTooltipsAtom);
   const [isGhostWindowDebugHighlighted, setIsGhostWindowDebugHighlighted] =
     useState(false);
+
+  useEffect(() => {
+    window.rabbyDesktop.ipcRenderer.sendMessage(
+      '__internal_rpc:top-ghost-window:toggle-visible',
+      !!eleTooltips.length
+    );
+  }, [eleTooltips.length]);
 
   useBodyClassNameOnMounted(
     clsx([
