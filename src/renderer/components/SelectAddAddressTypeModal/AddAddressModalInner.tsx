@@ -60,8 +60,6 @@ export const AddAddressModalInner: React.FC<Props> = ({
         open={visible}
         title="Add Contacts"
         subtitle="You can also use it as a watch-only address"
-        backable={showBackButton}
-        onBack={onBack}
         destroyOnClose
         onCancel={onCancel}
         footer={null}
@@ -76,8 +74,6 @@ export const AddAddressModalInner: React.FC<Props> = ({
         centered
         open={visible}
         title="Wallet Connect"
-        backable={showBackButton}
-        onBack={onBack}
         destroyOnClose
         onCancel={onCancel}
         footer={null}
@@ -92,8 +88,6 @@ export const AddAddressModalInner: React.FC<Props> = ({
         centered
         open={visible}
         title="Safe"
-        backable={showBackButton}
-        onBack={onBack}
         destroyOnClose
         onCancel={onCancel}
         footer={null}
@@ -117,8 +111,6 @@ export const AddAddressModalInner: React.FC<Props> = ({
         destroyOnClose
         keyringType={keyringType}
         footer={null}
-        backable={showBackButton}
-        onBack={onBack}
         showEntryButton={showEntryButton}
       />
     );

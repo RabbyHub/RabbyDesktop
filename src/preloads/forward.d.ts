@@ -215,6 +215,14 @@ type ChannelForwardMessageType =
       };
     }
   | {
+      targetView: 'z-popup';
+      type: 'hardward-conn-window-opened-changed';
+      payload: {
+        type: HDManagerType;
+        opened: boolean;
+      };
+    }
+  | {
       targetView: '*' | 'main-window' | 'z-popup';
       type: 'consume-subview-openid';
       payload: IZCallbackPayload<keyof ZViewStates>;

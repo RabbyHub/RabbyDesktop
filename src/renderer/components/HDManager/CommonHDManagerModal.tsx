@@ -1,6 +1,6 @@
 import './index.less';
 import { Button } from 'antd';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { HARDWARE_KEYRING_TYPES } from '@/renderer/utils/constant';
 import { useShellWallet } from '@/renderer/hooks-shell/useShellWallet';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
@@ -9,6 +9,7 @@ import { LedgerManager } from './LedgerManager';
 import { OneKeyManager } from './OnekeyManager';
 import { TrezorManager } from './TrezorManager';
 import { Modal, Props as ModalProps } from '../Modal/Modal';
+import { useHDManagerConnecWindowOpen } from './useHDManager';
 
 const MANAGER_MAP = {
   [HARDWARE_KEYRING_TYPES.Ledger.type]: LedgerManager,
@@ -39,7 +40,17 @@ export const CommonHDManagerModal: React.FC<Props> = ({
     connected: false,
   });
   const idRef = React.useRef<number | null>(null);
-  const isLedger = keyring === HARDWARE_KEYRING_TYPES.Ledger.type;
+
+  const { isLedger, HDManagerType } = useMemo(() => {
+    return {
+      isLedger: keyring === HARDWARE_KEYRING_TYPES.Ledger.type,
+      HDManagerType: Object.values(HARDWARE_KEYRING_TYPES).find(
+        (t) => t.type === keyring
+      )?.brandName as HDManagerType,
+    };
+  }, [keyring]);
+
+  const { isConnectWindowOpened } = useHDManagerConnecWindowOpen(HDManagerType);
 
   const closeConnect = React.useCallback(async () => {
     return walletController.requestKeyring(keyring, 'cleanUp', idRef.current);
@@ -126,8 +137,20 @@ export const CommonHDManagerModal: React.FC<Props> = ({
     cleanupModal();
     closeConnect();
   };
+
   return (
-    <Modal {...props} onCancel={handleClose}>
+    <Modal
+      {...props}
+      style={{
+        ...props.style,
+        ...(isConnectWindowOpened && { visibility: 'hidden' }),
+      }}
+      maskStyle={{
+        ...props.maskStyle,
+        ...(isConnectWindowOpened && { visibility: 'hidden' }),
+      }}
+      onCancel={handleClose}
+    >
       <HDManagerStateProvider keyringId={idRef.current} keyring={keyring}>
         <div className="HDManager">
           {connectReq.connected ? (
