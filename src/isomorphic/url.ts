@@ -320,6 +320,7 @@ export function normalizeLocalAbsPath(
     (_, driver) => `${driver.toUpperCase()}:/`
   );
 
+  posixAbsPath = normalizeBackSlashInPath(posixAbsPath);
   win32AbsPath = normalizeBackSlashInPath(win32AbsPath);
 
   return {

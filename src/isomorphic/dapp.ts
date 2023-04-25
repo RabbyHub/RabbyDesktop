@@ -285,15 +285,23 @@ export function fillUnpinnedList(
   pinnedList: string[],
   unpinnedList: string[]
 ) {
-  const pinnedSet = new Set(pinnedList);
-  const unpinnedSet = new Set(unpinnedList);
+  const pinnedSet = new Set(
+    pinnedList.map((dappID) => checkoutDappURL(dappID).dappID)
+  );
+  const unpinnedSet = new Set(
+    unpinnedList.map((dappID) => checkoutDappURL(dappID).dappID)
+  );
 
   const otherUnpinnedList: IDapp['origin'][] = [];
 
   const dappList = Array.isArray(dapps) ? dapps : Object.values(dapps);
   dappList.forEach((dapp) => {
-    const dappID = dapp.id;
-    if (!pinnedSet.has(dappID) && !unpinnedSet.has(dappID)) {
+    const dappID = checkoutDappURL(dapp.id).dappID;
+
+    if (pinnedSet.has(dappID)) {
+      // auto normalize dappID
+      unpinnedSet.delete(dappID);
+    } else if (!unpinnedSet.has(dappID)) {
       otherUnpinnedList.push(dappID);
     }
   });

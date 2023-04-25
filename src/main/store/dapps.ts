@@ -202,7 +202,7 @@ export const dappStore = makeStore<{
 
   /* coerce INextDapp :start */
   let changed = false;
-  Object.entries(dappsMap).forEach(([k, v]) => {
+  Object.entries({ ...dappsMap }).forEach(([k, v]) => {
     if ((!v.id || !isValidDappType(v.type)) && k.startsWith('http')) {
       changed = true;
       v.id = v.id || v.origin;
@@ -212,10 +212,23 @@ export const dappStore = makeStore<{
       switch (urlDappInfo.type) {
         case 'ens':
         case 'http':
-        case 'localfs':
         case 'ipfs': {
           changed = true;
           v.type = urlDappInfo.type;
+          break;
+        }
+        case 'localfs': {
+          changed = true;
+          v.type = urlDappInfo.type;
+          const oldId = k;
+          // enforce all id to posix file:/// format
+          const checkoutedDappURLInfo = checkoutDappURL(oldId);
+          v.id = checkoutedDappURLInfo.dappID;
+          if (v.id !== oldId) {
+            delete dappsMap[oldId];
+            v.origin = checkoutedDappURLInfo.dappOrigin;
+            dappsMap[v.id] = v;
+          }
           break;
         }
         default:
@@ -772,7 +785,10 @@ handleIpcMainInvoke('dapps-setOrder', (_, { pinnedList, unpinnedList }) => {
 
   // TODO: validate
   if (Array.isArray(pinnedList)) {
-    pinnedList = pinnedList.filter((dappID) => !!dappID && dappsMap[dappID]);
+    pinnedList = pinnedList
+      .map((dappId) => checkoutDappURL(dappId).dappID)
+      .filter((dappID) => !!dappID && dappsMap[dappID]);
+
     const currentPinnedList = dappStore.get('pinnedList');
 
     if (pinnedList.length !== currentPinnedList.length) {
