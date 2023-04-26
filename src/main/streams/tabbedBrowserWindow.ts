@@ -1,4 +1,6 @@
 import { app, BrowserWindow, shell } from 'electron';
+import * as Sentry from '@sentry/electron/main';
+import { omit } from 'lodash';
 
 import { parseQueryString } from '@/isomorphic/url';
 import { arraify } from '@/isomorphic/array';
@@ -46,6 +48,7 @@ import { safeOpenURL } from './dappSafeview';
 import { isTargetScanLink } from '../store/dynamicConfig';
 import { isEnableServeDappByHttp } from '../store/desktopApp';
 import { checkDappEntryDirectory, CheckResultType } from '../utils/file';
+import { safeRunInMainProcess } from '../utils/fn';
 
 /**
  * @deprecated import members from '../utils/tabbedBrowserWindow' instead
@@ -458,8 +461,27 @@ onIpcMainInternalEvent(
 
     const isSameFavicon = dapp.faviconUrl === toCompare;
 
+    safeRunInMainProcess(() => {
+      if (!isSameFavicon && dapp.type === 'http') {
+        Sentry.captureEvent({
+          message: `Expect: Update Dapp's faviconURL`,
+          tags: {
+            dappOrigin: dapp.origin,
+            oldFaviconURL: dapp.faviconUrl,
+            newFaviconURL: toCompare,
+            hasFaviconBase64: !!dapp.faviconBase64,
+          },
+          extra: {
+            dapp: omit(dapp, 'faviconBase64'),
+            optionalFavicons: favicons,
+          },
+        });
+      }
+    });
+
     if (!isSameFavicon || matchedType === EnumMatchDappType.byOrigin) {
       dapp.faviconUrl = toCompare;
+      dapp.faviconBase64 = '';
       dappStore.set('dappsMap', dappsMap);
     }
   }
