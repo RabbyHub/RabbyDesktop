@@ -20,6 +20,8 @@ import {
   onMainWindowReady,
 } from '../utils/stream-helpers';
 
+const isDarwin = process.platform === 'darwin';
+
 async function hidePopupOnMainWindow(
   mainWin: BrowserWindow | null,
   type: IPopupWinPageInfo['type']
@@ -207,7 +209,7 @@ const ghostFloatingWindowReady = onMainWindowReady().then(
     });
 
     // don't accept mouse events
-    ghostFloatingWindow.setIgnoreMouseEvents(true, { forward: true });
+    ghostFloatingWindow.setIgnoreMouseEvents(true, { forward: isDarwin });
 
     updateSubWindowRect({
       parentWin: mainTabbedWin.window,
