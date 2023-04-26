@@ -103,7 +103,7 @@ const ChainList = ({
             src={item.logo || item.logo_url}
           />
           <div className="flex flex-col space-y-[5px] hover:text-[#8697FF]">
-            <span className="text-[12px] opacity-70">On {item.name}</span>
+            <span className="text-[12px] opacity-70">{item.name}</span>
             <div className="text-[14px]">
               <span>{formatUsdValue(item.usd_value)}</span>
               <span className="text-[12px] opacity-70 ml-[8px]">
