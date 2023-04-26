@@ -1,7 +1,15 @@
 
-v0.17.1 / 2023-04-25
+v0.17.2 / 2023-04-26
 ====================
 
+  * feat: report on dapp's faviconURL will be updated, cleanup `faviconBase64` if faviconURL updated.
+  * feat: rm on in chainlist (#388)
+  * fix: we should't let  mousevents forward on windows. (#387)
+
+v0.17.1-prod / 2023-04-25
+=========================
+
+  * Release v0.17.1-prod
   * style: tuning.
   * fix: resume modal transition (#386)
   * fix (#385)
