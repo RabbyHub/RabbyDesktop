@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import BigNumber from 'bignumber.js';
 import PQueue from 'p-queue';
-import { groupBy, set } from 'lodash';
+import { groupBy } from 'lodash';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { VIEW_TYPE } from '@/renderer/routes/Home/type';
