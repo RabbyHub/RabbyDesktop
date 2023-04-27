@@ -154,7 +154,6 @@ const Home = () => {
     isLoading: isLoadingTokenList,
     isLoadingRealTime: isLoadingRealTimeTokenList,
   } = useHistoryTokenList(currentAccount?.address, updateNonce, currentView);
-
   const filterTokenList = useFilterTokenList(tokenList, selectChainServerId);
 
   const {

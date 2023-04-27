@@ -75,11 +75,15 @@ export default (address: string | undefined, nonce: number) => {
   const select = useCallback(() => formChartData(data), [data]);
 
   const fetch = async (addr: string) => {
-    setIsLoading(true);
     const curve = await walletOpenapi.getNetCurve(addr);
     setData(curve);
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    setIsLoading(true);
+    setData([]);
+  }, [address]);
 
   useEffect(() => {
     if (!address) return;

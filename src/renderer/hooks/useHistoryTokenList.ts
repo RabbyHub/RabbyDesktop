@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import BigNumber from 'bignumber.js';
 import PQueue from 'p-queue';
-import { groupBy } from 'lodash';
+import { groupBy, set } from 'lodash';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { VIEW_TYPE } from '@/renderer/routes/Home/type';
@@ -44,7 +44,6 @@ export default (
   const loadCache = async (addr: string) => {
     if (isHistoryLoadedRef.current) return;
     try {
-      setIsLoading(true);
       tokenListRef.current = await loadCachedTokenList(addr);
       setIsLoading(false);
     } catch (e) {
@@ -55,7 +54,6 @@ export default (
   const loadRealTime = async (addr: string) => {
     if (isRealTimeLoadedRef.current) return;
     try {
-      setIsLoadingRealTime(true);
       tokenListRef.current = await loadRealTimeTokenList(addr);
       setIsLoadingRealTime(false);
       isRealTimeLoadedRef.current = true;
@@ -182,12 +180,17 @@ export default (
   }, []);
 
   useEffect(() => {
-    tokenListRef.current = [];
     isRealTimeLoadedRef.current = false;
     isHistoryLoadedRef.current = false;
-    setHistoryTokenMap({});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, nonce]);
+
+  useEffect(() => {
+    tokenListRef.current = [];
+    setIsLoading(true);
+    setIsLoadingRealTime(true);
+    setHistoryTokenMap({});
+  }, [address]);
 
   useEffect(() => {
     if (!address) return;
