@@ -12,14 +12,14 @@ import { useDebounce } from 'react-use';
 import ImgLock from '@/../assets/icons/swap/lock.svg';
 import IconRcTip from '@/../assets/icons/swap/tip-info.svg?rc';
 import IconRcGas from '@/../assets/icons/swap/gas.svg?rc';
-import IconQuoteLoading from '@/../assets/icons/swap/quote-loading.svg?rc';
 
 import { useSetAtom } from 'jotai';
-import { CEX, DEX } from '../constant';
+import { CEX } from '../constant';
 import { QuotePreExecResultInfo, isSwapWrapToken } from '../utils';
 import { WarningOrChecked } from './ReceiveDetail';
 import { useVerifySdk } from '../hooks';
 import { activeProviderOriginAtom } from '../atom';
+import { QuoteLogo } from './QuoteLogo';
 
 const ItemWrapper = styled.div`
   position: relative;
@@ -73,6 +73,7 @@ const ItemWrapper = styled.div`
     border-radius: 6px;
   }
   &.disabled {
+    height: 56px;
     border-color: transparent;
     box-shadow: none;
     background: rgba(0, 0, 0, 0.08);
@@ -92,31 +93,11 @@ const ItemWrapper = styled.div`
     }
   }
 
-  .info {
-    width: 144px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 16px;
-    color: rgba(255, 255, 255, 0.8);
-    font-weight: 500;
-    .logo {
-      width: 32px;
-      height: 32px;
-    }
-  }
-
   &.cex {
     height: 56px;
-
+    background-color: transparent;
     border-width: 0.5px;
     border-color: rgba(255, 255, 255, 0.2);
-    .info {
-      .logo {
-        width: 24px;
-        height: 24px;
-      }
-    }
   }
 
   .price {
@@ -192,7 +173,6 @@ export const DexQuoteItem = (
     preExecResult,
     quoteProviderInfo,
   } = props;
-  // const dexInfo = useMemo(() => DEX[dexId as keyof typeof DEX], [dexId]);
 
   const { isSdkDataPass } = useVerifySdk({
     chain,
@@ -212,72 +192,6 @@ export const DexQuoteItem = (
 
   const updateActiveQuoteProvider = useSetAtom(activeProviderOriginAtom);
 
-  // const {
-  //   value: halfAmountQuotePreExecTxResult,
-  //   error: halfAmountQuoteError,
-  //   loading: halfAmountQuoteLoading,
-  // } = useAsync(async () => {
-  //   if (active) {
-  //     const halfAmount = new BigNumber(payAmount).div(2).toString(10);
-  //     const halfAmountQuoteInfo = await getDexQuote({
-  //       payToken,
-  //       receiveToken,
-  //       userAddress,
-  //       slippage,
-  //       fee,
-  //       chain,
-  //       dexId: dexId as DEX_ENUM,
-  //       payAmount: halfAmount,
-  //     });
-  //     if (!halfAmountQuoteInfo?.data) {
-  //       throw new Error('half quote failed');
-  //     }
-  //     const result = await getPreExecResult({
-  //       userAddress,
-  //       chain,
-  //       payToken,
-  //       receiveToken,
-  //       payAmount: halfAmount,
-  //       quote: halfAmountQuoteInfo?.data,
-  //       dexId: dexId as DEX_ENUM,
-  //     });
-  //     return result;
-  //   }
-  //   return null;
-  // }, [
-  //   active,
-  //   chain,
-  //   dexId,
-  //   fee,
-  //   payAmount,
-  //   payToken,
-  //   receiveToken,
-  //   slippage,
-  //   userAddress,
-  // ]);
-  // const halfBetterRateString = useMemo(() => {
-  //   if (
-  //     active &&
-  //     !halfAmountQuoteLoading &&
-  //     !halfAmountQuoteError &&
-  //     halfAmountQuotePreExecTxResult &&
-  //     preExecResult
-  //   ) {
-  //     return (
-  //       halfBetterRate(
-  //         preExecResult?.swapPreExecTx,
-  //         halfAmountQuotePreExecTxResult?.swapPreExecTx
-  //       ) || ''
-  //     );
-  //   }
-  //   return '';
-  // }, [
-  //   active,
-  //   halfAmountQuoteLoading,
-  //   halfAmountQuoteError,
-  //   halfAmountQuotePreExecTxResult,
-  //   preExecResult,
-  // ]);
   const halfBetterRateString = '';
 
   const [
@@ -486,17 +400,21 @@ export const DexQuoteItem = (
       onClick={handleClick}
       className={clsx(active && 'active', disabled && 'disabled error')}
     >
-      <div className={clsx('info', isWrapTokensWap && 'w-[208px]')}>
-        <div className="logo relative">
-          <img className="logo" src={quoteProviderInfo.logo} />
-          {isLoading && (
-            <div className="absolute w-40 h-40 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <IconQuoteLoading className="text-[40px]  animate-spin" />
-            </div>
-          )}
-        </div>
-        <div className="flex flex-col">
-          <div>
+      <QuoteLogo
+        size={32}
+        loadingSize={40}
+        logo={quoteProviderInfo.logo}
+        isLoading={isLoading}
+      />
+
+      <div className="flex flex-col justify-center ml-12 flex-1 text-16 font-medium text-white ">
+        <div className="flex items-center">
+          <div
+            className={clsx(
+              'flex items-center gap-4 w-[122px] text-white text-opacity-80',
+              isWrapTokensWap && 'mr-[42px]'
+            )}
+          >
             <span>{quoteProviderInfo.name}</span>
             {!!preExecResult?.shouldApproveToken && (
               <Tooltip
@@ -507,35 +425,38 @@ export const DexQuoteItem = (
               </Tooltip>
             )}
           </div>
-          {!disabled && (
-            <div className="flex items-center gap-2">
-              <IconRcGas className="text-[16px]" />
-              <span className="text-13 text-white text-opacity-60">
-                {preExecResult?.gasUsd}
-              </span>
+
+          <div className="flex flex-col">
+            <div className="price">
+              {middleContent}
+              <CheckIcon />
             </div>
-          )}
+          </div>
+          {!isBestQuote && <div className="diff">{rightContent}</div>}
         </div>
-      </div>
-      <div className="flex flex-col">
-        <div className="price">
-          {middleContent}
-          <CheckIcon />
-        </div>
+
         {!disabled && (
-          <span className="text-13 text-white text-opacity-60">
-            {receivedTokenUsd}
-          </span>
+          <div className="flex items-center text-13 text-white text-opacity-60">
+            <div
+              className={clsx(
+                'flex items-center gap-2 w-[122px]',
+                isWrapTokensWap && 'mr-[42px]'
+              )}
+            >
+              <IconRcGas className="text-[14px]" />
+              <span>{preExecResult?.gasUsd}</span>
+            </div>
+
+            <span>{receivedTokenUsd}</span>
+
+            {!isBestQuote && (
+              <span className="ml-auto text-right">{diffReceivedTokenUsd}</span>
+            )}
+          </div>
         )}
       </div>
-      <div className="flex flex-col ml-auto">
-        <div className="diff">{rightContent}</div>
-        {!isBestQuote && !disabled && (
-          <span className="text-13 text-white text-opacity-60 text-right">
-            {diffReceivedTokenUsd}
-          </span>
-        )}
-      </div>
+
+      {isBestQuote && <div className="diff">{rightContent}</div>}
     </ItemWrapper>
   );
 };
@@ -615,21 +536,24 @@ export const CexQuoteItem = (props: {
       className={clsx('cex disabled', !data?.receive_token?.amount && 'error')}
       onClick={handleClick}
     >
-      <div className="info">
-        <div className="logo relative flex items-center">
-          <img className="logo" src={dexInfo.logo} />
-          {isLoading && (
-            <div className="absolute w-[30px] h-[30px] left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <IconQuoteLoading className="text-[30px]  animate-spin" />
-            </div>
-          )}
+      <QuoteLogo logo={dexInfo.logo} isLoading={isLoading} />
+
+      <div className="flex flex-col justify-center ml-12 flex-1 text-16 font-medium text-white ">
+        <div className="flex items-center">
+          <div
+            className={clsx(
+              'flex items-center gap-4 w-[122px] text-white text-opacity-80'
+            )}
+          >
+            <span>{dexInfo.name}</span>
+          </div>
+
+          <div className="flex flex-col">
+            <div className="price">{middleContent}</div>
+          </div>
+          <div className="diff">{rightContent}</div>
         </div>
-
-        <span>{dexInfo.name}</span>
       </div>
-
-      <div className="price">{middleContent}</div>
-      <div className="diff">{rightContent}</div>
 
       <div className={clsx('cexDisabledTips', disabledTips && 'active')}>
         <IconRcTip className="text-14" />

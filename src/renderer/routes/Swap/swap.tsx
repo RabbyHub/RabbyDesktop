@@ -168,11 +168,14 @@ const Wrapper = styled.div`
       font-size: 20px;
       font-weight: medium;
       color: #ffffff;
+      box-shadow: none;
       &:focus,
-      &:hover {
+      &:hover,
+      &:active {
         border: 1px solid rgba(255, 255, 255, 0.8);
         box-shadow: none;
       }
+
       &:placeholder-shown {
         opacity: 0.6;
       }
@@ -846,15 +849,7 @@ export const SwapToken = () => {
                   </span>
                 }
               />
-              {/* <div
-                className={clsx(
-                  'halfTips',
-                  !activeProvider?.halfBetterRate && 'hidden'
-                )}
-              >
-                Splitting your trade in half may result in a{' '}
-                {activeProvider?.halfBetterRate}% better exchange rate.
-              </div> */}
+
               <div
                 className={clsx('halfTips error', !inSufficient && 'hidden')}
               >
@@ -875,7 +870,11 @@ export const SwapToken = () => {
                     quoteWarning={activeProvider?.quoteWarning}
                     loading={receiveSlippageLoading}
                   />
-                  {!isWrapToken && (
+                  {isWrapToken ? (
+                    <div className="mb-18 text-white">
+                      There is no fee and slippage for this trade
+                    </div>
+                  ) : (
                     <div className="section">
                       <div className="subText text-14 text-white flex justify-between">
                         <div>

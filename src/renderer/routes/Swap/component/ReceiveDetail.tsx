@@ -239,7 +239,7 @@ export const ReceiveDetails = (
         <Tooltip
           overlayClassName="rectangle max-w-[600px]"
           title={
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-4 py-[5px] text-13">
               <div>
                 Est. Payment: {payAmount}
                 {payToken.symbol} ≈ ${payUsd}
