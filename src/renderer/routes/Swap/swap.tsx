@@ -10,7 +10,7 @@ import { useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { useAsync, useDebounce } from 'react-use';
-import { formatAmount } from '@/renderer/utils/number';
+import { formatAmount, formatUsdValue } from '@/renderer/utils/number';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import IconRcClose from '@/../assets/icons/swap/close.svg?rc';
 import IconRcLoading from '@/../assets/icons/swap/loading.svg?rc';
@@ -41,13 +41,12 @@ import {
 } from './utils';
 import { Quotes } from './component/Quotes';
 import styles from './index.module.less';
+import { useInSwap, usePostSwap, useSwapOrApprovalLoading } from './hooks';
 import {
+  activeProviderAtom,
+  activeProviderOriginAtom,
   refreshIdAtom,
-  useInSwap,
-  usePostSwap,
-  useSwapOrApprovalLoading,
-} from './hooks';
-import { activeProviderAtom, activeProviderOriginAtom } from './atom';
+} from './atom';
 
 const Wrapper = styled.div`
   --max-swap-width: 1080px;
@@ -355,18 +354,34 @@ export const SwapToken = () => {
     (TCexQuoteData | TDexQuoteData)[]
   >([]);
 
+  useEffect(() => {
+    setQuotesList([]);
+  }, [payToken?.id, receiveToken?.id, chain, debouncePayAmount]);
+
   const setQuote = useCallback(
     (id: number) => (quote: TCexQuoteData | TDexQuoteData) => {
       if (id === fetchIdRef.current) {
-        setQuotesList((e) =>
-          quote.name === DEX_ENUM.ONEINCH ? [quote, ...e] : [...e, quote]
-        );
+        setQuotesList((e) => {
+          const index = e.findIndex((q) => q.name === quote.name);
+          setActiveProvider((activeQuote) => {
+            if (activeQuote?.name === quote.name) {
+              return undefined;
+            }
+            return activeQuote;
+          });
+
+          const v = { ...quote, loading: false };
+          if (index === -1) {
+            return v.name === DEX_ENUM.ONEINCH ? [v, ...e] : [...e, v];
+          }
+          e[index] = v;
+          return [...e];
+        });
       }
     },
-    []
+    [setActiveProvider]
   );
   const { loading: quoteLoading, error: quotesError } = useAsync(async () => {
-    setQuotesList([]);
     fetchIdRef.current += 1;
     if (
       userAddress &&
@@ -378,6 +393,7 @@ export const SwapToken = () => {
       feeAfterDiscount
     ) {
       setActiveProvider((e) => (e ? { ...e, halfBetterRate: '' } : e));
+      setQuotesList((e) => e.map((q) => ({ ...q, loading: true })));
       return getAllQuotes({
         userAddress,
         payToken,
@@ -735,6 +751,15 @@ export const SwapToken = () => {
     [activeProvider?.name, quoteList]
   );
 
+  const isWrapToken = useMemo(
+    () =>
+      payToken?.id &&
+      receiveToken?.id &&
+      chain &&
+      isSwapWrapToken(payToken?.id, receiveToken?.id, chain),
+    [chain, payToken?.id, receiveToken?.id]
+  );
+
   return (
     <Wrapper>
       <div className="header">
@@ -809,8 +834,19 @@ export const SwapToken = () => {
                 showCount={false}
                 value={payAmount}
                 onChange={handleAmountChange}
+                suffix={
+                  <span className="text-white text-opacity-60 text-14">
+                    {payAmount
+                      ? `≈ ${formatUsdValue(
+                          new BigNumber(payAmount)
+                            .times(payToken?.price || 0)
+                            .toString(10)
+                        )}`
+                      : ''}
+                  </span>
+                }
               />
-              <div
+              {/* <div
                 className={clsx(
                   'halfTips',
                   !activeProvider?.halfBetterRate && 'hidden'
@@ -818,7 +854,7 @@ export const SwapToken = () => {
               >
                 Splitting your trade in half may result in a{' '}
                 {activeProvider?.halfBetterRate}% better exchange rate.
-              </div>
+              </div> */}
               <div
                 className={clsx('halfTips error', !inSufficient && 'hidden')}
               >
@@ -839,36 +875,37 @@ export const SwapToken = () => {
                     quoteWarning={activeProvider?.quoteWarning}
                     loading={receiveSlippageLoading}
                   />
-                  <div className="section">
-                    <div className="subText text-14 text-white flex justify-between">
-                      <div>
-                        <span className="text-white text-opacity-60">
-                          Slippage tolerance:{' '}
-                        </span>
-                        <span className="font-medium">{slippage}%</span>
-                      </div>
-                      {!receiveSlippageLoading && (
+                  {!isWrapToken && (
+                    <div className="section">
+                      <div className="subText text-14 text-white flex justify-between">
                         <div>
                           <span className="text-white text-opacity-60">
-                            Minimum received:{' '}
+                            Slippage tolerance:{' '}
                           </span>
-                          <span className="font-medium">
-                            {miniReceivedAmount} {receiveToken?.symbol}
-                          </span>
+                          <span className="font-medium">{slippage}%</span>
                         </div>
-                      )}
+                        {!receiveSlippageLoading && (
+                          <div>
+                            <span className="text-white text-opacity-60">
+                              Minimum received:{' '}
+                            </span>
+                            <span className="font-medium">
+                              {miniReceivedAmount} {receiveToken?.symbol}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <Slippage
+                        value={slippageState}
+                        onChange={setSlippage}
+                        recommendValue={
+                          slippageValidInfo?.is_valid
+                            ? undefined
+                            : slippageValidInfo?.suggest_slippage
+                        }
+                      />
                     </div>
-
-                    <Slippage
-                      value={slippageState}
-                      onChange={setSlippage}
-                      recommendValue={
-                        slippageValidInfo?.is_valid
-                          ? undefined
-                          : slippageValidInfo?.suggest_slippage
-                      }
-                    />
-                  </div>
+                  )}
                 </>
               )}
 

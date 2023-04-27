@@ -16,6 +16,7 @@ import {
 } from '@rabby-wallet/rabby-swap';
 import { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
 import BigNumber from 'bignumber.js';
+import { formatUsdValue } from '@/renderer/utils/number';
 import { SWAP_FEE_ADDRESS, DEX, ETH_USDT_CONTRACT, CEX } from './constant';
 
 export const tokenAmountBn = (token: TokenItem) =>
@@ -198,6 +199,7 @@ export const getPreExecResult = async ({
 
   let nextNonce = nonce;
   const pendingTx: Tx[] = [];
+  let gasUsed = 0;
 
   const approveToken = async (amount: string) => {
     const tokenApproveParams = await walletController.generateApproveTokenTx({
@@ -214,6 +216,7 @@ export const getPreExecResult = async ({
       gasPrice: `0x${new BigNumber(gasPrice).toString(16)}`,
       gas: '0x0',
     };
+
     const tokenApprovePreExecTx = await walletOpenapi.preExecTx({
       tx: tokenApproveTx,
       origin: INTERNAL_REQUEST_ORIGIN,
@@ -225,6 +228,7 @@ export const getPreExecResult = async ({
     if (!tokenApprovePreExecTx?.pre_exec?.success) {
       throw new Error('pre_exec_tx error');
     }
+    gasUsed += tokenApprovePreExecTx.gas.gas_used;
 
     pendingTx.push({
       ...tokenApproveTx,
@@ -272,11 +276,20 @@ export const getPreExecResult = async ({
     throw new Error('pre_exec_tx error');
   }
 
+  gasUsed += swapPreExecTx.gas.gas_used;
+
   return {
     shouldApproveToken: !tokenApproved,
     shouldTwoStepApprove,
     swapPreExecTx,
     gasPrice,
+    gasUsd: formatUsdValue(
+      new BigNumber(gasUsed)
+        .times(gasPrice)
+        .div(10 ** swapPreExecTx.native_token.decimals)
+        .times(swapPreExecTx.native_token.price)
+        .toString(10)
+    ),
   };
 };
 
@@ -328,6 +341,7 @@ export type TDexQuoteData = {
   name: string;
   isDex: true;
   preExecResult: QuotePreExecResultInfo;
+  loading?: boolean;
 };
 export const getDexQuote = async ({
   payToken,
@@ -429,6 +443,7 @@ export type TCexQuoteData = {
   data: null | CEXQuote;
   name: string;
   isDex: false;
+  loading?: boolean;
 };
 const getCexQuote = async (
   params: getAllCexQuotesParams & {
@@ -480,6 +495,12 @@ export const getAllQuotes = async (
     setQuote: (quote: TCexQuoteData | TDexQuoteData) => void;
   }
 ) => {
+  if (
+    isSwapWrapToken(params.payToken.id, params.receiveToken.id, params.chain)
+  ) {
+    return getDexQuote({ ...params, dexId: DEX_ENUM.ONEINCH });
+  }
+
   return Promise.all([
     ...(Object.keys(DEX) as DEX_ENUM[]).map((dexId) =>
       getDexQuote({ ...params, dexId })

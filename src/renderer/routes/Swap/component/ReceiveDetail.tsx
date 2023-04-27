@@ -18,25 +18,28 @@ import clsx from 'clsx';
 import { SkeletonInputProps } from 'antd/lib/skeleton/Input';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 
-const getQuoteLessWarning = (quoteWarning: string) =>
-  `By transaction simulation, you'll receive ${quoteWarning} less than the current offer.`;
+const getQuoteLessWarning = ([receive, diff]: [string, string]) =>
+  `The receiving amount is estimated from Rabby transaction simulation. The offer provided by dex is ${receive}. You'll receive ${diff}  less than the expected offer.`;
 
 export const WarningOrChecked = ({
-  quoteWarning: diffWarning,
+  quoteWarning,
 }: {
-  quoteWarning?: string;
+  quoteWarning?: [string, string];
 }) => {
   return (
     <Tooltip
-      overlayClassName="rectangle max-w-[600px]"
+      overlayClassName={clsx(
+        'rectangle',
+        quoteWarning ? 'max-w-[344px]' : 'max-w-[600px]'
+      )}
       title={
-        diffWarning
-          ? getQuoteLessWarning(diffWarning)
+        quoteWarning
+          ? getQuoteLessWarning(quoteWarning)
           : 'By transaction simulation, the quote is valid'
       }
     >
       <img
-        src={diffWarning ? ImgWarning : ImgVerified}
+        src={quoteWarning ? ImgWarning : ImgVerified}
         className="w-[14px] h-[14px]"
       />
     </Tooltip>
@@ -47,8 +50,21 @@ const ReceiveWrapper = styled.div`
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 6px;
   padding: 20px 16px;
-  font-size: 16px;
+  font-size: 18px;
   color: white;
+
+  .rate {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+  }
+  .diffPercent {
+    &.negative {
+      color: #ff7878;
+    }
+    &.positive {
+      color: #27c193;
+    }
+  }
   .column {
     display: flex;
     justify-content: space-between;
@@ -70,14 +86,6 @@ const ReceiveWrapper = styled.div`
       img {
         width: 14px;
         height: 14px;
-      }
-      .diffPercent {
-        &.negative {
-          color: #ff7878;
-        }
-        &.positive {
-          color: #27c193;
-        }
       }
     }
   }
@@ -128,7 +136,7 @@ interface ReceiveDetailsProps {
   payToken: TokenItem;
   receiveToken: TokenItem;
   receiveTokenDecimals?: number;
-  quoteWarning?: string;
+  quoteWarning?: [string, string];
   loading?: boolean;
 }
 export const ReceiveDetails = (
@@ -213,9 +221,49 @@ export const ReceiveDetails = (
         <div className="warning">{getQuoteLessWarning(quoteWarning)}</div>
       )}
 
-      <div className="column">
-        <span>Rate</span>
-        <div className="right">
+      <div className="flex justify-end items-center gap-6 text-[13px] text-white text-opacity-60 ">
+        <span>
+          ${receiveUsd} (
+          <span
+            className={clsx(
+              'diffPercent',
+              sign === '+' && 'positive',
+              sign === '-' && 'negative'
+            )}
+          >
+            {sign}
+            {diff}%
+          </span>
+          )
+        </span>
+        <Tooltip
+          overlayClassName="rectangle max-w-[600px]"
+          title={
+            <div className="flex flex-col gap-2">
+              <div>
+                Est. Payment: {payAmount}
+                {payToken.symbol} ≈ ${payUsd}
+              </div>
+              <div>
+                Est. Receiving: {receiveNum}
+                {receiveToken.symbol} ≈ ${receiveUsd}
+              </div>
+              <div>Est. Difference: {diff}%</div>
+            </div>
+          }
+        >
+          <img src={ImgInfo} />
+        </Tooltip>
+      </div>
+
+      {!loading && showLoss && (
+        <div className="warning rate">
+          Selected offer differs greatly from current rate, may cause big losses
+        </div>
+      )}
+      <div className="column mt-20">
+        <span className="rate">Rate</span>
+        <div className="right text-14">
           <SkeletonChildren
             loading={loading}
             style={{ maxWidth: 182, height: 20, opacity: 0.5 }}
@@ -242,46 +290,10 @@ export const ReceiveDetails = (
                   reverse ? payToken.symbol : receiveToken.symbol
                 )}
               </span>
-              (
-              <span
-                className={clsx(
-                  'diffPercent',
-                  sign === '+' && 'positive',
-                  sign === '-' && 'negative'
-                )}
-              >
-                {sign}
-                {diff}%
-              </span>
-              )
             </span>
-            <Tooltip
-              overlayClassName="rectangle max-w-[600px]"
-              title={
-                <div className="flex flex-col gap-2">
-                  <div>
-                    Est. Payment: {payAmount}
-                    {payToken.symbol} ≈ ${payUsd}
-                  </div>
-                  <div>
-                    Est. Receiving: {receiveNum}
-                    {receiveToken.symbol} ≈ ${receiveUsd}
-                  </div>
-                  <div>Est. Difference: {diff}%</div>
-                </div>
-              }
-            >
-              <img src={ImgInfo} />
-            </Tooltip>
           </SkeletonChildren>
         </div>
       </div>
-
-      {!loading && showLoss && (
-        <div className="warning rate">
-          Selected offer differs greatly from current rate, may cause big losses
-        </div>
-      )}
     </ReceiveWrapper>
   );
 };
