@@ -1,5 +1,5 @@
 import { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
-import { atom, useSetAtom } from 'jotai';
+import { atom } from 'jotai';
 
 export type QuoteProvider = {
   name: string;
@@ -8,11 +8,16 @@ export type QuoteProvider = {
   shouldApproveToken: boolean;
   shouldTwoStepApprove: boolean;
   halfBetterRate?: string;
-  quoteWarning?: string;
+  quoteWarning?: [string, string];
   gasPrice?: number;
   activeLoading?: boolean;
   activeTx?: string;
+  actualReceiveAmount: string | number;
 };
+
+export const refreshIdAtom = atom(0, (get, set) => {
+  set(refreshIdAtom, get(refreshIdAtom) + 1);
+});
 
 export const activeSwapTxsAtom = atom<string[]>([]);
 

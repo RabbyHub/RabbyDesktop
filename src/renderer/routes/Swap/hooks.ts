@@ -13,7 +13,11 @@ import { Tx } from '@debank/rabby-api/dist/types';
 import { atom, useAtomValue, useSetAtom } from 'jotai';
 import { useLocation } from 'react-router-dom';
 import { getRouter, getSpender, postSwap, postSwapParams } from './utils';
-import { activeProviderOriginAtom, activeSwapTxsAtom } from './atom';
+import {
+  activeProviderOriginAtom,
+  activeSwapTxsAtom,
+  refreshIdAtom,
+} from './atom';
 
 export function isSwapWrapToken(
   payTokenId: string,
@@ -151,9 +155,9 @@ export const useRefreshSwapTxList = () => {
   }, [setReFreshSwapList]);
 };
 
-export const refreshIdAtom = atom(0, (get, set) => {
-  set(refreshIdAtom, get(refreshIdAtom) + 1);
-});
+// export const refreshIdAtom = atom(0, (get, set) => {
+//   set(refreshIdAtom, get(refreshIdAtom) + 1);
+// });
 
 export const useOnSwapPushTx = (
   pushTxCb: (payload: Tx & { hash: string }) => void
