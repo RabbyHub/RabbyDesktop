@@ -531,23 +531,33 @@ export const SwapToken = () => {
     [activeProvider?.name]
   );
 
+  const isWrapToken = useMemo(
+    () =>
+      payToken?.id &&
+      receiveToken?.id &&
+      chain &&
+      isSwapWrapToken(payToken?.id, receiveToken?.id, chain),
+    [chain, payToken?.id, receiveToken?.id]
+  );
+
   const btnText = useMemo(() => {
     if (inSufficient) {
       return 'Insufficient Balance';
     }
     if (activeProvider?.name) {
-      return `Swap via ${DexDisplayName}`;
+      return `Swap via ${isWrapToken ? 'Wrap Contract' : DexDisplayName}`;
     }
     if (!receiveToken || !payToken) {
       return 'Select token';
     }
     return 'Select offer';
   }, [
-    DexDisplayName,
     inSufficient,
     activeProvider?.name,
-    payToken,
     receiveToken,
+    payToken,
+    isWrapToken,
+    DexDisplayName,
   ]);
 
   const btnDisabled =
@@ -752,15 +762,6 @@ export const SwapToken = () => {
         ? !quoteList?.find((e) => e.name === activeProvider?.name)
         : false,
     [activeProvider?.name, quoteList]
-  );
-
-  const isWrapToken = useMemo(
-    () =>
-      payToken?.id &&
-      receiveToken?.id &&
-      chain &&
-      isSwapWrapToken(payToken?.id, receiveToken?.id, chain),
-    [chain, payToken?.id, receiveToken?.id]
   );
 
   const disableBtn = useMemo(
