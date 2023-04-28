@@ -153,6 +153,7 @@ type IAppDynamicConfig = {
         navBgColorLight?: string;
         navBgColorDark?: string;
         faviconURL?: string;
+        shouldSimulateBrowser?: boolean;
       };
     };
   };

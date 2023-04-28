@@ -1,4 +1,4 @@
-import { safeParseURL } from './url';
+import { canoicalizeDappUrl, safeParseURL } from './url';
 
 export function matchURLHead(
   inputURL?: string,
@@ -26,4 +26,40 @@ export function matchURLHead(
   }
 
   return urlConfByHead;
+}
+
+export function matchURLHeadV2(
+  inputURL?: string,
+  url_head?: (IAppDynamicConfig['domain_metas'] & object)['url_head']
+) {
+  if (!inputURL) return;
+  if (!url_head) return;
+
+  const urlInfo = canoicalizeDappUrl(inputURL);
+  if (!urlInfo?.secondaryDomain) return;
+
+  const result: {
+    urlConfByHostname: typeof url_head[any] | null;
+    urlConfByMainDomain: typeof url_head[any] | null;
+    finalMatchedConf: typeof url_head[any] | null;
+  } = {
+    urlConfByHostname: null,
+    urlConfByMainDomain: null,
+    finalMatchedConf: null,
+  };
+
+  Object.keys(url_head).find((urlHead) => {
+    if (urlInfo.hostname === urlHead) {
+      result.urlConfByHostname = url_head[urlHead];
+    } else if (urlInfo.secondaryDomain === urlHead) {
+      result.urlConfByMainDomain = url_head[urlHead];
+    }
+
+    return result.urlConfByHostname || result.urlConfByMainDomain;
+  });
+
+  result.finalMatchedConf =
+    result.urlConfByHostname || result.urlConfByMainDomain;
+
+  return result;
 }
