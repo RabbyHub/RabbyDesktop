@@ -78,12 +78,14 @@ interface SortableListProps {
   otherData?: IDappWithTabInfo[];
   onChange?(items: IDappWithTabInfo[]): void;
   renderItem?(item: IDappWithTabInfo): ReactNode;
+  disabled?: boolean;
 }
 export const SortableList = ({
   data = [],
   otherData,
   onChange,
   renderItem,
+  disabled,
 }: SortableListProps) => {
   const items = useMemo(
     () => data.map((item) => ({ ...item, id: item.id })),
@@ -109,6 +111,16 @@ export const SortableList = ({
     config: { duration: 300 },
     keys: (d) => d?.origin,
   });
+
+  if (disabled) {
+    return (
+      <>
+        {data?.map((item) => (
+          <div key={item.id}>{renderItem?.(item)}</div>
+        ))}
+      </>
+    );
+  }
 
   return (
     <DndContext

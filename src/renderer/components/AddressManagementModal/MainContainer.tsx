@@ -11,10 +11,12 @@ import { groupBy } from 'lodash';
 import React from 'react';
 import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
+import { useRequest } from 'ahooks';
 import styles from './index.module.less';
 import { Body } from './Body';
 import { Footer } from './Footer';
 import { Header } from './Header';
+import { RefreshButton } from './RefreshButton';
 
 export const MainContainer: React.FC = () => {
   const { getHighlightedAddressesAsync, removeAddress, highlightedAddresses } =
@@ -24,6 +26,7 @@ export const MainContainer: React.FC = () => {
     accountsList,
     loadingAccounts,
     updateBalance,
+    updateAllBalance,
   } = useAccountToDisplay();
   const { init: whitelistInit } = useWhitelist();
   const { currentAccount, switchAccount } = useCurrentAccount();
@@ -109,6 +112,14 @@ export const MainContainer: React.FC = () => {
     [removeAddress, getHighlightedAddressesAsync]
   );
 
+  const {
+    runAsync: handleUpdateAllBalance,
+    loading: isUpdateAllBalanceLoading,
+  } = useRequest(updateAllBalance, {
+    manual: true,
+    onSuccess: () => {},
+  });
+
   React.useEffect(() => {
     getHighlightedAddressesAsync().then(getAllAccountsToDisplay);
   }, [getHighlightedAddressesAsync, getAllAccountsToDisplay]);
@@ -149,9 +160,14 @@ export const MainContainer: React.FC = () => {
 
   return (
     <div className={styles.MainContainer}>
+      <RefreshButton
+        loading={isUpdateAllBalanceLoading}
+        onClick={handleUpdateAllBalance}
+      />
       <Header
         onSelect={setSelectedAccount}
         currentAccount={currentDisplayAccount}
+        isUpdatingBalance={isUpdateAllBalanceLoading}
       />
       <Body
         onSelect={setSelectedAccount}
@@ -159,6 +175,7 @@ export const MainContainer: React.FC = () => {
         onDelete={handleDelete}
         accounts={sortedAccountsList}
         contacts={watchSortedAccountsList}
+        isUpdatingBalance={isUpdateAllBalanceLoading}
       />
       <Footer />
     </div>

@@ -49,7 +49,7 @@ const SIZE_MAP: Record<
 > = {
   'sidebar-dapp-contextmenu': {
     width: 210,
-    height: 306,
+    height: 350,
   },
   'top-ghost-window': {
     width: 1366,
