@@ -102,7 +102,7 @@ export const SidebarContextMenu = () => {
       {
         key: 'dapp-home',
         className: styles['dapp-dropdown-item'],
-        label: <span className="text">Dapp Home</span>,
+        label: <span className="text">Open HomePage</span>,
         icon: (
           <img
             className={styles['dapp-dropdown-item-icon']}

@@ -150,7 +150,7 @@ export const DAppBlock = ({
             {
               key: 'dapp-home',
               className: 'dapp-dropdown-item',
-              label: <span className="text">Dapp Home</span>,
+              label: <span className="text">Open HomePage</span>,
               icon: (
                 <img
                   className="dapp-dropdown-item-icon"

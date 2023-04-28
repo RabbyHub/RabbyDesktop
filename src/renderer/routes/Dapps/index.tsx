@@ -163,7 +163,7 @@ export default function DApps() {
                 setSearch(e.target.value);
               }}
               className={style.search}
-              placeholder="Search Dapps"
+              placeholder="Search by name or information"
               spellCheck={false}
               suffix={
                 <img

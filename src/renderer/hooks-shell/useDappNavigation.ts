@@ -37,9 +37,14 @@ export function useDappNavigation() {
       );
     }, [activeTab?.id]),
     onHomeButtonClick: useCallback(() => {
-      // todo open home page
-      // window.rabbyDesktop.ipcRenderer.invoke('safe-open-dapp-tab', dappUrl)
-    }, []),
+      if (!selectedTabInfo?.dapp?.origin) {
+        return;
+      }
+      window.rabbyDesktop.ipcRenderer.invoke(
+        'safe-open-dapp-tab',
+        selectedTabInfo?.dapp?.origin
+      );
+    }, [selectedTabInfo?.dapp?.origin]),
   };
 
   return {
