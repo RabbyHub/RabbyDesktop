@@ -17,7 +17,7 @@ export const QuoteLoading = ({
   return (
     <div className="flex-1 py-12 px-16 flex item-center rounded-[6px] border-solid border-[0.5px] border-white border-opacity-20">
       <QuoteLogo logo={logo} size={24} isLoading />
-      <span className="ml-[17px] text-16 font-medium text-white text-opacity-80">
+      <span className="ml-[17px] text-16 font-medium text-white text-opacity-80 flex items-center ">
         {name}
       </span>
       <div className="ml-auto mr-[100px] flex item-center">

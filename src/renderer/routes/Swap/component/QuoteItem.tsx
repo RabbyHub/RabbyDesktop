@@ -76,7 +76,7 @@ const ItemWrapper = styled.div`
     height: 56px;
     border-color: transparent;
     box-shadow: none;
-    background: rgba(0, 0, 0, 0.08);
+    background-color: transparent;
     border-radius: 6px;
     cursor: not-allowed;
   }
@@ -401,8 +401,8 @@ export const DexQuoteItem = (
       className={clsx(active && 'active', disabled && 'disabled error')}
     >
       <QuoteLogo
-        size={32}
-        loadingSize={40}
+        size={disabled ? 24 : 32}
+        loadingSize={disabled ? 32 : 40}
         logo={quoteProviderInfo.logo}
         isLoading={isLoading}
       />
