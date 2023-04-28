@@ -3,7 +3,7 @@
 import { showMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import { useNavigateToDappRoute } from '@/renderer/utils/react-router';
 import classNames from 'classnames';
-import React, { useEffect, useLayoutEffect, useMemo } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { matchPath, useLocation, useNavigate } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
 import styled from 'styled-components';
@@ -141,6 +141,35 @@ const DappIcon = ({
   );
 };
 
+function useAutoScrollToActiveTab(currentDappID?: string) {
+  const dappListRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const ele = dappListRef.current;
+
+    if (!ele) return;
+    if (!currentDappID) return;
+
+    const timer = setTimeout(() => {
+      const activeTabLi: HTMLLIElement | null = ele.querySelector(
+        'ul > li[data-activetab="true"]'
+      );
+
+      // activeTabLi?.scrollIntoViewIfNeeded();
+      activeTabLi?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end',
+        inline: 'nearest',
+      });
+    }, 350);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [currentDappID]);
+
+  return { dappListRef };
+}
+
 const TabList = ({
   className,
   dapps,
@@ -181,6 +210,10 @@ const TabList = ({
         if (otherDapps && otherDapps.find((e) => e.origin === dapp.origin)) {
           return null;
         }
+
+        const isActiveTab =
+          matchedDappID && activeTabId && activeTabId === tab?.id;
+
         return (
           <animated.li
             style={s}
@@ -192,6 +225,7 @@ const TabList = ({
                 activeTabId === tab?.id &&
                 styles.active
             )}
+            data-activetab={isActiveTab ? 'true' : 'false'}
             onClick={async () => {
               let shouldNav = false;
               if (dapp.tab) {
@@ -299,6 +333,8 @@ export default function MainWindowSidebar() {
 
   const pendingTxCount = useTransactionPendingCount();
 
+  const { dappListRef } = useAutoScrollToActiveTab(matchedDapp?.params?.dappId);
+
   return (
     <Transition in={!settings.sidebarCollapsed} timeout={500}>
       {(state) => {
@@ -393,7 +429,7 @@ export default function MainWindowSidebar() {
                 })}
               </ul>
 
-              <div className={styles.dappList}>
+              <div ref={dappListRef} className={styles.dappList}>
                 <TabList
                   className={styles.pinnedList}
                   dappActions={dappActions}
