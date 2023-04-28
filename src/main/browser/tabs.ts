@@ -120,6 +120,11 @@ export class Tab {
       webContents: this.view!.webContents,
       window: ofWindow,
     });
+    emitIpcMainEvent('__internal_main:tabbed-window:tab-added', {
+      webContents: this.view!.webContents,
+      window: ofWindow,
+      relatedDappId: this.$meta.relatedDappId,
+    });
 
     this.view?.webContents.on('focus', () => {
       this.tabs.emit('tab-focused');

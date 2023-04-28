@@ -5,6 +5,17 @@ type MainInternalsMessagePayload = {
         webContents: Electron.WebContents;
         window: Electron.BrowserWindow;
         tabbedWindow?: any;
+        relatedDappId?: IDapp['id'];
+      }
+    ];
+    response: [];
+  };
+  '__internal_main:tabbed-window:tab-added': {
+    send: [
+      {
+        webContents: Electron.WebContents;
+        window: Electron.BrowserWindow;
+        relatedDappId?: IDapp['id'];
       }
     ];
     response: [];
