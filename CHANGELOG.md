@@ -1,7 +1,21 @@
 
-v0.17.2 / 2023-04-26
+v0.18.0 / 2023-04-28
 ====================
 
+  * swap fix (#398)
+  * feat: dapp search & refresh all balance & scam & go home (#392)
+  * feat: swap change (#394)
+  * feat: report mainWindow's event listeners count. (#395)
+  * feat: support simulate browser by UA for some specific dapps. (#393)
+  * chore: cleanup deps.
+  * feat: upgrade rabbyx to 0.81.0 (#391)
+  * feat: support flare chain (#390)
+  * fix: home page assets refresh (#389)
+
+v0.17.2-prod / 2023-04-26
+=========================
+
+  * Release v0.17.2-prod
   * feat: report on dapp's faviconURL will be updated, cleanup `faviconBase64` if faviconURL updated.
   * feat: rm on in chainlist (#388)
   * fix: we should't let  mousevents forward on windows. (#387)
