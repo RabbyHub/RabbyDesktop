@@ -67,6 +67,8 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
 
   private _perfInfoPool = new SimplePool<IWebviewPerfInfo>();
 
+  private _listenerReportPool = new SimplePool<IEventEmitterListenerReport>(3);
+
   constructor(options: TabbedBrowserWindowOptions) {
     this.session = options.session || session.defaultSession;
     this.extensions = options.extensions;
@@ -98,12 +100,20 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
     this.window.webContents.loadURL(webuiUrl);
 
     if (this.isMainWindow()) {
+      this.window.setMaxListeners(100);
       const disposeOnReportPerfInfo = onIpcMainEvent(
         '__internal_rpc:browser:report-perf-info',
         (evt, perfInfo) => {
           if (evt.sender !== this.window.webContents) return;
 
           this._perfInfoPool.push(perfInfo);
+
+          const listenerCountRpoert = this._getAllEventsListenerCount();
+          this._listenerReportPool.push(listenerCountRpoert);
+          // TODO: leave here for debug
+          // if (!IS_RUNTIME_PRODUCTION) {
+          //   console.debug('listenerCountRpoert', listenerCountRpoert);
+          // }
         }
       );
 
@@ -135,6 +145,7 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
             lastPerfItem,
             perfInfos,
             details,
+            listenerReport: this._listenerReportPool.getPool(),
           },
         });
       });
@@ -190,6 +201,23 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
         });
       }
     });
+  }
+
+  private _getAllEventsListenerCount() {
+    return this.window.eventNames().reduce(
+      (accu, event) => {
+        const count = this.window.listenerCount(event);
+        // TODO: ignore symbol type event temporarily
+        if (typeof event === 'string') accu.events[event] = count;
+        accu.total += count;
+
+        return accu;
+      },
+      {
+        total: 0,
+        events: {},
+      } as IEventEmitterListenerReport
+    );
   }
 
   private _pushDappsBoundIds() {

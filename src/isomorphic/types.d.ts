@@ -370,6 +370,11 @@ type IWebviewPerfInfo = {
   };
 };
 
+type IEventEmitterListenerReport = {
+  total: number;
+  events: Record<string, number>;
+};
+
 type PopupViewOnMainwinInfo =
   | {
       type: 'add-address-dropdown';
