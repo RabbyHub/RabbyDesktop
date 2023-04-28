@@ -14,6 +14,8 @@ import { getAssetPath } from './app';
 import { emitIpcMainEvent } from './ipcMainEvents';
 import { getMainWindowTopOffset } from './browserSize';
 
+const isDarwin = process.platform === 'darwin';
+
 export function getWindowFromWebContents(webContents: Electron.WebContents) {
   switch (webContents.getType()) {
     case 'remote':
@@ -297,7 +299,7 @@ export function parseRabbyxNotificationParams(
   }
 ) {
   const mainBounds = mainWindow.getBounds();
-  const topOffset = isWin32 ? NativeAppSizes.windowTitlebarHeight : 0;
+  const topOffset = getMainWindowTopOffset();
 
   const { signApprovalType, details } = opts || {};
 
@@ -336,7 +338,10 @@ export function parseRabbyxNotificationParams(
       result.finalBounds = {
         ...selfBounds,
         x: mainBounds.x + (mainBounds.width - selfBounds.width - 10),
-        y: mainBounds.y + 64 + getMainWindowTopOffset(),
+        y:
+          mainBounds.y +
+          (isDarwin ? 64 : NativeAppSizes.mainWindowDappTopOffset) +
+          getMainWindowTopOffset(),
       };
     }
 
@@ -379,7 +384,6 @@ export function hideLoadingView() {
   });
 }
 
-const isDarwin = process.platform === 'darwin';
 export function getTitlebarOffsetForMacOS() {
   return isDarwin ? 28 : 0;
 }

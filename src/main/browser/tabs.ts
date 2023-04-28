@@ -22,6 +22,7 @@ import {
   notifyShowFindInPage,
   notifyHideFindInPage,
 } from '../utils/mainTabbedWin';
+import { getMainWindowTopOffset } from '../utils/browserSize';
 
 const viewMngr = new BrowserViewManager(
   {
@@ -51,8 +52,7 @@ type ITabOptions = {
 };
 
 const dappViewTopOffset =
-  NativeAppSizes.mainWindowDappTopOffset +
-  (isDarwin ? 0 : NativeAppSizes.windowTitlebarHeight);
+  NativeAppSizes.mainWindowDappTopOffset + getMainWindowTopOffset();
 
 const DEFAULT_TOPBAR_STACKS = {
   tabs: true,
