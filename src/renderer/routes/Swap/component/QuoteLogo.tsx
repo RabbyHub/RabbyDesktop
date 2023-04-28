@@ -38,7 +38,7 @@ export const QuoteLogo = ({
         style={logoStyle}
         className="relative flex items-center justify-center"
       >
-        <img style={logoStyle} src={logo} />
+        <img style={logoStyle} className="rounded-full" src={logo} />
         {isLoading && (
           <div
             style={loadingStyle}

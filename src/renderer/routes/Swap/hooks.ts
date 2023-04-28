@@ -1,6 +1,6 @@
 import { isSameAddress } from '@/renderer/utils/address';
 import { ValidateTokenParam } from '@/renderer/utils/token';
-import { CHAINS, CHAINS_ENUM } from '@debank/common';
+import { CHAINS, CHAINS_ENUM, CHAINS_LIST } from '@debank/common';
 import { DEX_ENUM, WrapTokenAddressMap } from '@rabby-wallet/rabby-swap';
 import {
   decodeCalldata,
@@ -210,7 +210,16 @@ export const usePostSwap = () => {
         const data = pushTxs.current[key];
         const swapData = localSwapTxs.current[key];
         const { hash: _, ...tx } = data;
-        await postSwap({ ...swapData, tx });
+        const isWrapSwap = isSwapWrapToken(
+          swapData.payToken.id,
+          swapData.receiveToken.id,
+          CHAINS_LIST.find((e) => e.serverId === swapData.payToken.chain)?.enum
+        );
+        await postSwap({
+          ...swapData,
+          tx,
+          slippage: isWrapSwap ? '0' : swapData.slippage,
+        });
 
         delete pushTxs.current[key];
         delete localSwapTxs.current[key];
@@ -275,15 +284,12 @@ export const useSwapOrApprovalLoading = () => {
 
   const completeTx: Parameters<typeof useOnTxFinished>[0] = useCallback(
     (data) => {
-      if (!data?.success) {
-        setActiveProvider((e) =>
-          !e ? e : { ...e, activeLoading: false, activeTx: undefined }
-        );
-        setActiveSwapTxs((txs) =>
-          txs.filter((tx) => tx.toLowerCase() !== data?.hash?.toLowerCase())
-        );
-        return;
-      }
+      setActiveProvider((e) =>
+        !e ? e : { ...e, activeLoading: false, activeTx: undefined }
+      );
+      setActiveSwapTxs((txs) =>
+        txs.filter((tx) => tx.toLowerCase() !== data?.hash?.toLowerCase())
+      );
 
       const timer: NodeJS.Timeout = setTimeout(() => {
         refresh();
