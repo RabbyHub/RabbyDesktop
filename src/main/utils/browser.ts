@@ -340,7 +340,7 @@ export function parseRabbyxNotificationParams(
         x: mainBounds.x + (mainBounds.width - selfBounds.width - 10),
         y:
           mainBounds.y +
-          (isDarwin ? 64 : NativeAppSizes.mainWindowDappTopOffset) +
+          NativeAppSizes.mainWindowDappTopOffset +
           getMainWindowTopOffset(),
       };
     }
