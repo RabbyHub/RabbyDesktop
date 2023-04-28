@@ -20,7 +20,7 @@ export const Footer: React.FC = () => {
           hideZSubview('address-management');
         }}
       >
-        Add Address
+        New Address
       </Button>
     </section>
   );

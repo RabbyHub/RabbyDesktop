@@ -10,6 +10,7 @@ import { useConnectedSite } from '@/renderer/hooks/useRabbyx';
 import { Dropdown, Menu } from 'antd';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import { useDebounce } from 'ahooks';
+import { formatDappURLToShow } from '@/isomorphic/dapp';
 import { Empty } from './components/Empty';
 
 import ModalDeleteDapp from '../../components/ModalDeleteDapp';
@@ -36,9 +37,13 @@ const findDapps = (dapps: IDappWithTabInfo[], input: string) => {
     return dapps;
   }
   return dapps.filter((dapp) => {
+    const origin = formatDappURLToShow(dapp.id || dapp.origin, {
+      dapps,
+    }).replace(/^\w+:\/\/\/?/, '');
+
     return (
       dapp.alias?.toLowerCase().includes(input.toLowerCase()) ||
-      dapp.origin?.toLowerCase().includes(input.toLowerCase())
+      origin?.toLowerCase().includes(input.toLowerCase())
     );
   });
 };
