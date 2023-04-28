@@ -12,6 +12,7 @@ export type QuoteProvider = {
   gasPrice?: number;
   activeLoading?: boolean;
   activeTx?: string;
+  actualReceiveAmount: string | number;
 };
 
 export const refreshIdAtom = atom(0, (get, set) => {

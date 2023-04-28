@@ -366,12 +366,12 @@ export const SwapToken = () => {
       if (id === fetchIdRef.current) {
         setQuotesList((e) => {
           const index = e.findIndex((q) => q.name === quote.name);
-          setActiveProvider((activeQuote) => {
-            if (activeQuote?.name === quote.name) {
-              return undefined;
-            }
-            return activeQuote;
-          });
+          // setActiveProvider((activeQuote) => {
+          //   if (activeQuote?.name === quote.name) {
+          //     return undefined;
+          //   }
+          //   return activeQuote;
+          // });
 
           const v = { ...quote, loading: false };
           if (index === -1) {
@@ -382,7 +382,7 @@ export const SwapToken = () => {
         });
       }
     },
-    [setActiveProvider]
+    []
   );
   const { loading: quoteLoading, error: quotesError } = useAsync(async () => {
     fetchIdRef.current += 1;
@@ -864,7 +864,7 @@ export const SwapToken = () => {
                   <ReceiveDetails
                     className="section"
                     payAmount={debouncePayAmount}
-                    receiveRawAmount={activeProvider?.quote?.toTokenAmount}
+                    receiveRawAmount={activeProvider?.actualReceiveAmount}
                     payToken={payToken}
                     receiveToken={receiveToken}
                     quoteWarning={activeProvider?.quoteWarning}

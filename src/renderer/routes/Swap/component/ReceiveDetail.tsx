@@ -167,11 +167,9 @@ export const ReceiveDetails = (
 
   const { receiveNum, payUsd, receiveUsd, rate, diff, sign, showLoss } =
     useMemo(() => {
-      const pay = new BigNumber(payAmount).times(payToken.price);
-      const receiveAll = new BigNumber(receiveAmount).div(
-        10 ** (receiveTokenDecimals || receiveToken.decimals)
-      );
-      const receive = receiveAll.times(receiveToken.price);
+      const pay = new BigNumber(payAmount).times(payToken.price || 0);
+      const receiveAll = new BigNumber(receiveAmount);
+      const receive = receiveAll.times(receiveToken.price || 0);
       const cut = receive.minus(pay).div(pay).times(100);
       const rateBn = new BigNumber(reverse ? payAmount : receiveAll).div(
         reverse ? receiveAll : payAmount
@@ -188,15 +186,7 @@ export const ReceiveDetails = (
         diff: cut.abs().toFixed(2),
         showLoss: cut.lte(-5),
       };
-    }, [
-      payAmount,
-      payToken.price,
-      receiveAmount,
-      receiveToken.decimals,
-      receiveToken.price,
-      receiveTokenDecimals,
-      reverse,
-    ]);
+    }, [payAmount, payToken.price, receiveAmount, receiveToken.price, reverse]);
 
   return (
     <ReceiveWrapper {...other}>
@@ -221,7 +211,12 @@ export const ReceiveDetails = (
         <div className="warning">{getQuoteLessWarning(quoteWarning)}</div>
       )}
 
-      <div className="flex justify-end items-center gap-6 text-[13px] text-white text-opacity-60 ">
+      <div
+        className={clsx(
+          'flex justify-end items-center gap-6 text-[13px] text-white text-opacity-60 ',
+          loading && 'opacity-0'
+        )}
+      >
         <span>
           ${receiveUsd} (
           <span
@@ -248,7 +243,10 @@ export const ReceiveDetails = (
                 Est. Receiving: {receiveNum}
                 {receiveToken.symbol} ≈ ${receiveUsd}
               </div>
-              <div>Est. Difference: {diff}%</div>
+              <div>
+                Est. Difference: {sign}
+                {diff}%
+              </div>
             </div>
           }
         >

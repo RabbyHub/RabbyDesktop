@@ -11,7 +11,7 @@ import { DEX_ENUM } from '@rabby-wallet/rabby-swap';
 import { useDebounce } from 'react-use';
 import ImgLock from '@/../assets/icons/swap/lock.svg';
 import IconRcTip from '@/../assets/icons/swap/tip-info.svg?rc';
-import IconRcGas from '@/../assets/icons/swap/gas.svg?rc';
+import IconGas from '@/../assets/icons/swap/gas.svg';
 
 import { useSetAtom } from 'jotai';
 import { CEX } from '../constant';
@@ -25,7 +25,6 @@ const ItemWrapper = styled.div`
   position: relative;
   height: 72px;
   font-size: 16px;
-  font-weight: medium;
   padding: 0 16px;
   display: flex;
   align-items: center;
@@ -111,6 +110,8 @@ const ItemWrapper = styled.div`
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.8);
       .toToken {
         color: #fff;
       }
@@ -121,6 +122,7 @@ const ItemWrapper = styled.div`
   }
 
   .percent {
+    font-weight: 500;
     color: var(--green-color);
     &.red {
       color: var(--red-color);
@@ -212,14 +214,14 @@ export const DexQuoteItem = (
       disable = true;
     }
 
-    if (quote?.toTokenAmount) {
+    const actualReceiveAmount =
+      preExecResult?.swapPreExecTx.balance_change.receive_token_list[0]?.amount;
+    if (actualReceiveAmount) {
       const bestQuoteAmount = new BigNumber(bestAmount);
-      const receivedTokeAmountBn = new BigNumber(quote?.toTokenAmount).div(
-        10 ** (quote?.toTokenDecimals || receiveToken.decimals)
-      );
-      const percent = new BigNumber(quote?.toTokenAmount)
-        .minus(bestQuoteAmount || 0)
-        .div(bestQuoteAmount)
+      const receivedTokeAmountBn = new BigNumber(actualReceiveAmount || 0);
+      const percent = new BigNumber(actualReceiveAmount)
+        .minus(bestAmount || 0)
+        .div(bestAmount)
         .times(100);
 
       receivedUsd = formatUsdValue(
@@ -227,7 +229,7 @@ export const DexQuoteItem = (
       );
 
       diffUsd = formatUsdValue(
-        new BigNumber(quote?.toTokenAmount)
+        new BigNumber(actualReceiveAmount)
           .minus(bestQuoteAmount || 0)
           .div(10 ** (quote?.toTokenDecimals || receiveToken.decimals))
           .times(receiveToken.price || 0)
@@ -311,8 +313,7 @@ export const DexQuoteItem = (
                   .receive_token_list[0]?.amount || 0
               )
               .toString(10)
-          )} ${receiveToken.symbol}
-          )}`,
+          )} ${receiveToken.symbol})`,
         ] as [string, string])
       : undefined;
   }, [
@@ -350,6 +351,9 @@ export const DexQuoteItem = (
       error: !preExecResult,
       halfBetterRate: halfBetterRateString,
       quoteWarning,
+      actualReceiveAmount:
+        preExecResult?.swapPreExecTx.balance_change.receive_token_list[0]
+          ?.amount || '',
     });
   }, [
     active,
@@ -375,6 +379,9 @@ export const DexQuoteItem = (
           error: !preExecResult,
           halfBetterRate: halfBetterRateString,
           quoteWarning,
+          actualReceiveAmount:
+            preExecResult?.swapPreExecTx.balance_change.receive_token_list[0]
+              ?.amount || '',
         }));
       }
     },
@@ -407,7 +414,7 @@ export const DexQuoteItem = (
         isLoading={isLoading}
       />
 
-      <div className="flex flex-col justify-center ml-12 flex-1 text-16 font-medium text-white ">
+      <div className="flex flex-col justify-center ml-12 flex-1 text-16  text-white ">
         <div className="flex items-center">
           <div
             className={clsx(
@@ -436,14 +443,14 @@ export const DexQuoteItem = (
         </div>
 
         {!disabled && (
-          <div className="flex items-center text-13 text-white text-opacity-60">
+          <div className="flex items-center text-12 text-white text-opacity-80 mt-4">
             <div
               className={clsx(
-                'flex items-center gap-2 w-[122px]',
+                'flex items-center gap-4 w-[122px]',
                 isWrapTokensWap && 'mr-[42px]'
               )}
             >
-              <IconRcGas className="text-[14px]" />
+              <img src={IconGas} className="w-14 h-14 relative top-[-1px]" />
               <span>{preExecResult?.gasUsd}</span>
             </div>
 
@@ -487,7 +494,6 @@ export const CexQuoteItem = (props: {
       const bestQuoteAmount = new BigNumber(bestAmount);
       const receiveToken = data.receive_token;
       const percent = new BigNumber(receiveToken.amount)
-        .times(10 ** receiveToken.decimals)
         .minus(bestQuoteAmount || 0)
         .div(bestQuoteAmount)
         .times(100);
@@ -538,7 +544,7 @@ export const CexQuoteItem = (props: {
     >
       <QuoteLogo logo={dexInfo.logo} isLoading={isLoading} />
 
-      <div className="flex flex-col justify-center ml-12 flex-1 text-16 font-medium text-white ">
+      <div className="flex flex-col justify-center ml-12 flex-1 text-16  text-white ">
         <div className="flex items-center">
           <div
             className={clsx(

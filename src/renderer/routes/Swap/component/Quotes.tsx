@@ -57,16 +57,17 @@ export const Quotes = (props: QuotesProps) => {
             if (!quote.preExecResult) {
               return new BigNumber(0);
             }
-            return new BigNumber(quote?.data?.toTokenAmount || 0);
+            return new BigNumber(
+              quote?.preExecResult.swapPreExecTx.balance_change
+                .receive_token_list[0].amount || 0
+            );
           }
 
-          return new BigNumber(quote?.data?.receive_token?.amount || 0).times(
-            10 ** other.receiveToken.decimals
-          );
+          return new BigNumber(quote?.data?.receive_token?.amount || 0);
         };
         return getNumber(b).minus(getNumber(a)).toNumber();
       }),
-    [list, other?.receiveToken?.decimals]
+    [list]
   );
 
   const fetchedList = useMemo(() => list.map((e) => e.name), [list]);
@@ -87,7 +88,10 @@ export const Quotes = (props: QuotesProps) => {
               quote={dex?.data}
               name={dex?.name}
               isBestQuote
-              bestAmount={dex?.data?.toTokenAmount || '0'}
+              bestAmount={`${
+                dex?.preExecResult?.swapPreExecTx.balance_change
+                  .receive_token_list[0]?.amount || '0'
+              }`}
               active={activeName === dex?.name}
               isLoading={dex.loading}
               quoteProviderInfo={{
@@ -124,10 +128,11 @@ export const Quotes = (props: QuotesProps) => {
           const bestQuote = sortedList?.[0];
           const bestAmount =
             (bestQuote?.isDex
-              ? bestQuote?.data?.toTokenAmount
-              : new BigNumber(bestQuote.data?.receive_token.amount || '0')
-                  .times(10 ** other.receiveToken.decimals)
-                  .toString(10)) || '0';
+              ? bestQuote?.preExecResult?.swapPreExecTx.balance_change
+                  .receive_token_list[0]?.amount
+              : new BigNumber(
+                  bestQuote.data?.receive_token.amount || '0'
+                ).toString(10)) || '0';
           if (isDex) {
             return (
               <DexQuoteItem

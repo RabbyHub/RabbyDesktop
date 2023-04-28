@@ -20,7 +20,7 @@ export const QuoteLoading = ({
       <span className="ml-[17px] text-16 font-medium text-white text-opacity-80 flex items-center ">
         {name}
       </span>
-      <div className="ml-auto mr-[100px] flex item-center">
+      <div className="ml-auto gap-[100px] flex  justify-between items-center">
         <Skeleton.Input
           active
           block
@@ -31,12 +31,12 @@ export const QuoteLoading = ({
             opacity: '0.5',
           }}
         />
-      </div>
 
-      <Skeleton.Input
-        active
-        style={{ borderRadius: '6px', width: 68, height: 20, opacity: '0.5' }}
-      />
+        <Skeleton.Input
+          active
+          style={{ borderRadius: '6px', width: 68, height: 20, opacity: '0.5' }}
+        />
+      </div>
     </div>
   );
 };
