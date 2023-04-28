@@ -48,6 +48,7 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["ERA"] = "ERA";
     CHAINS_ENUM["EOS"] = "EOS";
     CHAINS_ENUM["CORE"] = "CORE";
+    CHAINS_ENUM["FLR"] = "FLR";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -813,6 +814,22 @@ export const CHAINS_RAW = {
         hex: "0x45c",
         scanLink: "https://scan.coredao.org/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/core/ccc02f660e5dd410b23ca3250ae7c060.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+    },
+    [CHAINS_ENUM.FLR]: {
+        id: 14,
+        serverId: 'flr',
+        network: '14',
+        name: 'Flare',
+        nativeTokenSymbol: "FLR",
+        nativeTokenAddress: "flr",
+        enum: CHAINS_ENUM.FLR,
+        hex: "0xe",
+        scanLink: "https://flare-explorer.flare.network/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/flr/9ee03d5d7036ad9024e81d55596bb4dc.png",
         nativeTokenDecimals: 18,
         eip: {
             "1559": false,
