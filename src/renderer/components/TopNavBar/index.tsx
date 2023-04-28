@@ -7,6 +7,7 @@ import {
   RcIconReload,
   RcIconStopload,
   RcIconShield,
+  RcIconHome,
 } from '@/../assets/icons/top-bar';
 
 import { Divider } from 'antd';
@@ -272,6 +273,10 @@ export const TopNavBar = () => {
               onClick={navActions.onReloadButtonClick}
             />
           )}
+          <RcIconHome
+            style={{ color: navIconColor }}
+            onClick={navActions.onHomeButtonClick}
+          />
         </div>
         <div className={styles.connectChainBox}>
           <ConnectedChain

@@ -1,6 +1,5 @@
 import { IDisplayedAccountWithBalance } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
 import React from 'react';
-import clsx from 'clsx';
 import { AccountItem } from './AccountItem';
 import styles from './index.module.less';
 
@@ -10,6 +9,7 @@ interface Props {
   onSelect: (account: IDisplayedAccountWithBalance) => void;
   onSwitchAccount: (account: IDisplayedAccountWithBalance) => void;
   onDelete: (account: IDisplayedAccountWithBalance) => void;
+  isUpdatingBalance?: boolean;
 }
 
 export const Body: React.FC<Props> = ({
@@ -18,6 +18,7 @@ export const Body: React.FC<Props> = ({
   onSelect,
   onSwitchAccount,
   onDelete,
+  isUpdatingBalance,
 }) => {
   const renderAccountItem = React.useCallback(
     (account: IDisplayedAccountWithBalance) => {
@@ -37,10 +38,11 @@ export const Body: React.FC<Props> = ({
           }}
           account={account}
           key={account.address + account.type}
+          isUpdatingBalance={isUpdatingBalance}
         />
       );
     },
-    [onDelete, onSelect, onSwitchAccount]
+    [isUpdatingBalance, onDelete, onSelect, onSwitchAccount]
   );
 
   return (

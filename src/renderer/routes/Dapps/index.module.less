@@ -37,44 +37,33 @@
       gap: 6px;
     }
 
-    .action {
-      &List {
-        display: flex;
-        margin-left: auto;
-      }
-      padding: 0 20px;
+    .extra {
+      margin-left: auto;
       display: flex;
-      gap: 6px;
-      align-items: center;
-      cursor: pointer;
-      position: relative;
-      font-weight: 500;
+      gap: 10px;
+
+      &More {
+        cursor: pointer;
+      }
+    }
+
+    .search {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      box-shadow: none !important;
+      color: #fff;
+      width: 247px;
+      height: 36px;
+      padding-left: 15px;
+      padding-right: 15px;
+      font-weight: 400;
       font-size: 12px;
       line-height: 14px;
-
-      color: #8697ff;
-
-      &:not(:last-child)::after {
-        content: '';
-        width: 1px;
-        height: 10px;
-        background: rgba(255, 255, 255, 0.1);
-        position: absolute;
-        right: 0;
-        top: 50%;
-        transform: translateY(-50%);
-      }
-
-      &:first-child {
-        padding-left: 0;
-      }
-      &:last-child {
-        padding-right: 0;
-      }
     }
   }
   .main {
-    height: calc(100vh - 112px - var(--mainwin-mainroute-topoffset));
+    height: calc(100vh - 130px - var(--mainwin-mainroute-topoffset));
     // padding: 20px 48px;
     // if remove NFTPanel, the padding-bottom should be removed
     padding: 20px 48px 200px;

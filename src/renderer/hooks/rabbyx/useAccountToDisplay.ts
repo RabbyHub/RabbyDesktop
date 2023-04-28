@@ -2,6 +2,7 @@ import type { DisplayedKeyring } from '@/isomorphic/types/rabbyx';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { sortAccountsByBalance } from '@/renderer/utils/account';
 import { atom, useAtom } from 'jotai';
+import PQueue from 'p-queue';
 import React from 'react';
 
 type IDisplayedAccount = Required<DisplayedKeyring['accounts'][number]>;
@@ -118,11 +119,41 @@ export const useAccountToDisplay = () => {
     [setAccountsList]
   );
 
+  const updateAllBalance = React.useCallback(async () => {
+    const queue = new PQueue({ concurrency: 10 });
+    let hasError = false;
+    const result = await queue.addAll(
+      (accountsList || []).map((item) => {
+        return async () => {
+          try {
+            const balance = await walletController.getAddressBalance(
+              item.address
+            );
+            return {
+              ...item,
+              balance: balance?.total_usd_value || 0,
+            };
+          } catch (e) {
+            hasError = true;
+            return item;
+          }
+        };
+      })
+    );
+
+    setAccountsList(result);
+
+    if (hasError) {
+      throw new Error('updateAllBalance error');
+    }
+  }, [accountsList, setAccountsList]);
+
   return {
     accountsList,
     loadingAccounts,
     getAllAccountsToDisplay,
     removeAccount,
     updateBalance,
+    updateAllBalance,
   };
 };

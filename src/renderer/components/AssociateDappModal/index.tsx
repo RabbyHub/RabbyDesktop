@@ -267,7 +267,7 @@ const BindDapp = ({
           value={kw}
           onChange={(e) => setKw(e.target.value)}
           className={styles.input}
-          placeholder="Input the Dapp name or domain"
+          placeholder="Input the Dapp name or information"
           autoFocus
           spellCheck={false}
           suffix={
