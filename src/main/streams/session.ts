@@ -378,6 +378,14 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
       }
     },
 
+    getTabbedBrowserWindowBehavior: (ctx) => {
+      const tabbedWin = getWindowFromBrowserWindow(ctx.window);
+
+      return {
+        keepRefWindowOnAllTabsClosed: !!tabbedWin?.isMainWindow(),
+      };
+    },
+
     selectTab: (tab, browserWindow) => {
       const win = getWindowFromBrowserWindow(browserWindow);
       win?.tabs.select(tab.id);
