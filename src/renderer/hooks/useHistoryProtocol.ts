@@ -137,7 +137,7 @@ export default (
 
   const fetchData = async (addr: string, view: VIEW_TYPE) => {
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
-    const result: DisplayProtocol[] = protocolListRef.current;
+    let result: DisplayProtocol[] = protocolListRef.current;
     const historyList: DisplayProtocol[] = [];
     const waitQueueFinished = (q: PQueue) => {
       return new Promise((resolve) => {
@@ -147,8 +147,8 @@ export default (
       });
     };
     if (!isRealTimeLoadedRef.current && !isLoadingRealTimeRef.current) {
-      setIsLoading(true);
       isLoadingRealTimeRef.current = true;
+      result = [];
       protocolListRef.current = await loadCachedProtocolList(addr);
       setIsLoading(false);
       const list = await loadRealTimeProtocolList(addr);
@@ -269,11 +269,15 @@ export default (
     isRealTimeLoadedRef.current = false;
     isLoadingHistoryRef.current = false;
     isLoadingRealTimeRef.current = false;
+  }, [address, nonce]);
+
+  useEffect(() => {
     protocolListRef.current = [];
     setHistoryProtocolMap({});
     setTokenHistoryPriceMap({});
     setHistoryTokenDict({});
-  }, [address, nonce]);
+    setIsLoading(false);
+  }, [address]);
 
   useEffect(() => {
     if (!address) return;
