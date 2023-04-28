@@ -231,7 +231,6 @@ export const DexQuoteItem = (
       diffUsd = formatUsdValue(
         new BigNumber(actualReceiveAmount)
           .minus(bestQuoteAmount || 0)
-          .div(10 ** (quote?.toTokenDecimals || receiveToken.decimals))
           .times(receiveToken.price || 0)
           .toString(10)
       );
@@ -272,11 +271,9 @@ export const DexQuoteItem = (
     return [center, right, disable, receivedUsd, diffUsd];
   }, [
     quote?.toTokenAmount,
-    quote?.toTokenDecimals,
     preExecResult,
     isSdkDataPass,
     bestAmount,
-    receiveToken.decimals,
     receiveToken.price,
     receiveToken.symbol,
     isBestQuote,
@@ -443,7 +440,7 @@ export const DexQuoteItem = (
         </div>
 
         {!disabled && (
-          <div className="flex items-center text-12 text-white text-opacity-80 mt-4">
+          <div className="flex items-center text-13 text-white text-opacity-80 mt-4">
             <div
               className={clsx(
                 'flex items-center gap-4 w-[122px]',

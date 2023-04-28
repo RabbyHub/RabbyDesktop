@@ -213,7 +213,7 @@ export const ReceiveDetails = (
 
       <div
         className={clsx(
-          'flex justify-end items-center gap-6 text-[13px] text-white text-opacity-60 ',
+          'flex justify-end items-center gap-6 text-[13px] text-white text-opacity-80 ',
           loading && 'opacity-0'
         )}
       >

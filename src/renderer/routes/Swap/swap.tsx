@@ -763,6 +763,19 @@ export const SwapToken = () => {
     [chain, payToken?.id, receiveToken?.id]
   );
 
+  const disableBtn = useMemo(
+    () =>
+      activeProvider?.activeLoading ||
+      btnDisabled ||
+      !quoteList.some((e) => e.name === activeProvider?.name),
+    [
+      activeProvider?.activeLoading,
+      activeProvider?.name,
+      btnDisabled,
+      quoteList,
+    ]
+  );
+
   return (
     <Wrapper>
       <div className="header">
@@ -838,7 +851,7 @@ export const SwapToken = () => {
                 value={payAmount}
                 onChange={handleAmountChange}
                 suffix={
-                  <span className="text-white text-opacity-60 text-14">
+                  <span className="text-white text-opacity-80 text-13">
                     {payAmount
                       ? `≈ ${formatUsdValue(
                           new BigNumber(payAmount)
@@ -915,11 +928,7 @@ export const SwapToken = () => {
                     size="large"
                     type="primary"
                     onClick={handleLimitedSwap}
-                    className={clsx(
-                      'btn ',
-                      (activeProvider?.activeLoading || btnDisabled) &&
-                        'disabled'
-                    )}
+                    className={clsx('btn ', disableBtn && 'disabled')}
                     icon={
                       activeProvider?.activeLoading && !isInfiniteApproval ? (
                         <IconRcLoading className="animate-spin" />
@@ -934,11 +943,7 @@ export const SwapToken = () => {
                     size="large"
                     type="primary"
                     onClick={handleUnlimitedSwap}
-                    className={clsx(
-                      'btn ',
-                      (activeProvider?.activeLoading || btnDisabled) &&
-                        'disabled'
-                    )}
+                    className={clsx('btn ', disableBtn && 'disabled')}
                     icon={
                       activeProvider?.activeLoading && isInfiniteApproval ? (
                         <IconRcLoading className="animate-spin" />
@@ -953,10 +958,7 @@ export const SwapToken = () => {
                   size="large"
                   type="primary"
                   onClick={handleLimitedSwap}
-                  className={clsx(
-                    'btn ',
-                    (activeProvider?.activeLoading || btnDisabled) && 'disabled'
-                  )}
+                  className={clsx('btn ', disableBtn && 'disabled')}
                   icon={
                     activeProvider?.activeLoading ? (
                       <IconRcLoading className="animate-spin" />
