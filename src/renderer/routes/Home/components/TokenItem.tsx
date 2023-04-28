@@ -171,7 +171,7 @@ const TokenItemComp = ({
     const valueChange =
       token.amount * token.price - historyAmount * historyToken.price;
     let percentage = valueChange === 0 ? 0 : valueChange / historyValue;
-    if (historyAmount === 0) {
+    if (historyAmount === 0 || historyValue === 0) {
       percentage = 1;
     }
     return {
