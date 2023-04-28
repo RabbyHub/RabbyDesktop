@@ -22,6 +22,7 @@ import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { checkoutDappURL, isOpenedAsHttpDappType } from '@/isomorphic/dapp';
+import { useOpenDapp } from '@/renderer/utils/react-router';
 import styles from './index.module.less';
 
 const toast = (message: string) => {
@@ -56,6 +57,8 @@ export const SidebarContextMenu = () => {
     forwardMessageTo('*', 'refreshConnectedSiteMap', {});
     toast('Disconnected');
   };
+
+  const openDapp = useOpenDapp();
 
   const items = useMemo(() => {
     if (!dappID) {
@@ -93,6 +96,17 @@ export const SidebarContextMenu = () => {
           <img
             className={styles['dapp-dropdown-item-icon']}
             src="rabby-internal://assets/icons/sidebar-context-menu/icon-edit.svg"
+          />
+        ),
+      },
+      {
+        key: 'dapp-home',
+        className: styles['dapp-dropdown-item'],
+        label: <span className="text">Open HomePage</span>,
+        icon: (
+          <img
+            className={styles['dapp-dropdown-item-icon']}
+            src="rabby-internal://assets/icons/sidebar-context-menu/icon-home.svg"
           />
         ),
       },
@@ -183,6 +197,11 @@ export const SidebarContextMenu = () => {
           zActions.showZSubview('rename-dapp-modal', {
             dapp: dappInfo as IDapp,
           });
+        }
+        break;
+      case 'dapp-home':
+        if (dappInfo?.origin) {
+          openDapp(dappInfo.origin);
         }
         break;
       case 'dapp-delete':

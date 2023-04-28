@@ -8,7 +8,7 @@ import {
   WALLET_BRAND_TYPES,
 } from '@/renderer/utils/constant';
 import { splitNumberByStep } from '@/renderer/utils/number';
-import { Tooltip } from 'antd';
+import { Skeleton, Tooltip } from 'antd';
 import clsx from 'clsx';
 import React from 'react';
 import { useCopyToClipboard } from 'react-use';
@@ -19,9 +19,14 @@ import { TipsWrapper } from '../TipWrapper';
 interface Props {
   account: IDisplayedAccountWithBalance;
   onClick: React.MouseEventHandler<HTMLDivElement>;
+  isUpdatingBalance?: boolean;
 }
 
-export const CurrentAccount: React.FC<Props> = ({ account, onClick }) => {
+export const CurrentAccount: React.FC<Props> = ({
+  account,
+  onClick,
+  isUpdatingBalance,
+}) => {
   const { whitelist, enable } = useWhitelist();
   const brandName = account.brandName as WALLET_BRAND_TYPES;
   const accountInfo = useAccountInfo(account.type, account.address);
@@ -94,7 +99,18 @@ export const CurrentAccount: React.FC<Props> = ({ account, onClick }) => {
         </div>
       </div>
       <div className={styles.balance}>
-        ${splitNumberByStep(account.balance?.toFixed(2))}
+        {isUpdatingBalance ? (
+          <Skeleton.Input
+            active
+            style={{
+              width: 96,
+              height: 24,
+              borderRadius: 2,
+            }}
+          />
+        ) : (
+          <>${splitNumberByStep(account.balance?.toFixed(2))}</>
+        )}
       </div>
       <div className={styles.action}>
         <img

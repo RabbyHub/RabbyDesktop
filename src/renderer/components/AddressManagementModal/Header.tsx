@@ -6,9 +6,14 @@ import { CurrentAccount } from './CurrentAddress';
 interface Props {
   currentAccount?: IDisplayedAccountWithBalance;
   onSelect: (account: IDisplayedAccountWithBalance) => void;
+  isUpdatingBalance?: boolean;
 }
 
-export const Header: React.FC<Props> = ({ currentAccount, onSelect }) => {
+export const Header: React.FC<Props> = ({
+  currentAccount,
+  onSelect,
+  isUpdatingBalance,
+}) => {
   return (
     <section className={styles.header}>
       {currentAccount && (
@@ -18,6 +23,7 @@ export const Header: React.FC<Props> = ({ currentAccount, onSelect }) => {
             onSelect(currentAccount);
           }}
           account={currentAccount}
+          isUpdatingBalance={isUpdatingBalance}
         />
       )}
       <div className={styles.divider}>
