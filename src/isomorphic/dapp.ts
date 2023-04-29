@@ -2,6 +2,7 @@ import {
   DAPP_TYPE_TO_OPEN_AS_HTTP,
   LOCALFS_BRAND,
   LOCALIPFS_BRAND,
+  PROTOCOLS_SUPPORTED_TO_OPEN,
 } from './constants';
 import { ensurePrefix, isInvalidBase64 } from './string';
 import {
@@ -434,6 +435,12 @@ export function isOpenedAsHttpDappType(
   type: string
 ): type is Exclude<IValidDappType, 'http'> {
   return !!type && DAPP_TYPE_TO_OPEN_AS_HTTP.includes(type as any);
+}
+
+export function isProtocolKeepInApp(dappOrigin: string) {
+  return PROTOCOLS_SUPPORTED_TO_OPEN.some((protocol) =>
+    dappOrigin.startsWith(protocol)
+  );
 }
 
 export function formatDappURLToShow(
