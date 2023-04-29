@@ -53,7 +53,7 @@ function InnerRedirect({
                 nonSameOrigin.favIcon?.faviconBase64 ||
                 nonSameOrigin.favIcon?.faviconUrl
               }
-              origin={targetInfo.secondaryDomain[0].toLocaleUpperCase()}
+              origin={targetInfo.secondaryDomain[0]?.toLocaleUpperCase()}
               className={styles.avatar}
             />
           )}
