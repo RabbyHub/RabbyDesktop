@@ -116,6 +116,10 @@ export async function setDappsOrder(payload: {
     });
 }
 
+export async function customizeDappFaviconURL (dapp: IDappPartial, faviconUrlCustomized: string) {
+  window.rabbyDesktop.ipcRenderer.invoke('dapps-put', { ...dapp, faviconUrlCustomized });
+}
+
 export async function putProtocolDappsBinding(
   protocolDappsMap: IProtocolDappBindings
 ): Promise<void>;

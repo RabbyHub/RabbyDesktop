@@ -218,6 +218,7 @@ export function formatDapp(
       patchesData?.faviconUrl ||
       input?.faviconUrl ||
       ('' as IDapp['faviconUrl']),
+    faviconUrlCustomized: input?.faviconUrlCustomized || '',
     faviconBase64: isInvalidBase64(faviconBase64) ? '' : faviconBase64,
     extraInfo: {
       ...input?.extraInfo,

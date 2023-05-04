@@ -1,0 +1,166 @@
+.editIconModal {
+  :global {
+    .ant-modal-body {
+      padding: 56px 48px 48px 48px !important;
+    }
+    .ant-modal-close-x {
+      font-size: 24px;
+      padding: 24px;
+    }
+  }
+}
+
+.editIconDapp {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+
+  .faviconList {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: overlay;
+    overflow-y: hidden;
+    max-width: 100%;
+    padding-top: 4px;
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-bottom: 24px;
+    margin-bottom: 12px;
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 10px;
+      width: 4px;
+    }
+
+    .dappFavIconWrapper + .dappFavIconWrapper {
+      margin-left: 12px;
+    }
+  }
+
+  .dappFavIconWrapper {
+    position: relative;
+    padding: 4px 12px;
+    cursor: pointer;
+
+    &.selected {
+      outline: 1px solid var(--color-primary);
+    }
+
+    .dappFaviconSizes {
+      // position: absolute;
+      // bottom: 0;
+      // left: 0;
+      background: #f5f6fa;
+      padding: 4px 8px;
+      border: 1px solid #e5e9ef;
+      border-radius: 4px;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 14px;
+      color: #707280;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .dappFaviconImgRoot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    margin-bottom: 16px;
+  }
+
+  .dappFavicon {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 12px;
+    display: block;
+    margin: 0 auto;
+    border-radius: 4px;
+  }
+
+  .dappUrl {
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 19px;
+    margin-bottom: 24px;
+
+    text-align: center;
+    color: #fff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    user-select: text;
+  }
+
+  .modifyWrapper {
+    display: flex;
+    position: relative;
+
+    .aliasInput {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      height: 56px;
+      padding: 18px 16px;
+      font-size: 15px;
+      line-height: 18px;
+      font-weight: 500;
+      &:focus,
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+      }
+      color: #fff;
+      box-shadow: none !important;
+
+      :global {
+        .ant-input-clear-icon {
+          color: #fff;
+        }
+      }
+    }
+    :global {
+      .ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled):hover {
+        border-color: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper,
+      .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper:hover {
+        border-color: #ff6f6f;
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .ant-form-item-explain-error {
+        color: #ff6f6f;
+      }
+      .ant-image {
+        display: block;
+      }
+    }
+    margin-bottom: 45px;
+  }
+
+  .button.button {
+    margin: auto auto 0 auto;
+    width: 240px;
+    height: 56px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 19px;
+    display: block;
+    &:disabled {
+      background: #707280 !important;
+      border: none;
+      opacity: 1;
+    }
+  }
+}

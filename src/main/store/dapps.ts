@@ -54,6 +54,7 @@ const IDappSchema: import('json-schema-typed').JSONSchema = {
     // stricted canonical url, only includes protocols, host(maybe with port), pathname
     origin: { type: 'string' },
     faviconUrl: { type: 'string' },
+    faviconUrlCustomized: { type: 'string', default: '' },
     faviconBase64: { type: 'string' },
     type: {
       type: 'string',

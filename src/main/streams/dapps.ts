@@ -1,6 +1,6 @@
-import { getFullAppProxyConf } from '../store/desktopApp';
+import { pickFavIconURLFromMeta } from '@/isomorphic/html';
+import { checkUrlViaBrowserView } from '../utils/appNetwork';
 import { safeCapturePage } from '../utils/dapps';
-import { parseWebsiteFavicon } from '../utils/fetch';
 import {
   handleIpcMainInvoke,
   onIpcMainInternalEvent,
@@ -9,6 +9,7 @@ import {
 import {
   getAllMainUIViews,
   getAllMainUIWindows,
+  getSessionInsts,
   onMainWindowReady,
 } from '../utils/stream-helpers';
 import { getTabbedWindowFromWebContents } from './tabbedBrowserWindow';
@@ -16,26 +17,23 @@ import { getTabbedWindowFromWebContents } from './tabbedBrowserWindow';
 handleIpcMainInvoke('parse-favicon', async (_, targetURL) => {
   const result = {
     error: null,
-    favicon: null as IParsedFavicon | null,
+    metaData: null as ISiteMetaData | null,
   };
-  try {
-    const proxyConf = await getFullAppProxyConf();
-    const proxyOnParseFavicon =
-      proxyConf.proxyType === 'custom'
-        ? {
-            protocol: proxyConf.proxySettings.protocol,
-            host: proxyConf.proxySettings.hostname,
-            port: proxyConf.proxySettings.port,
-          }
-        : undefined;
 
-    result.favicon = await parseWebsiteFavicon(targetURL, {
-      timeout: 3000,
-      proxy: proxyOnParseFavicon,
-    });
-  } catch (e: any) {
-    result.error = e.message;
-  }
+  let fallbackFavicon: string | undefined;
+  let targetMetadata: ISiteMetaData | undefined;
+  const { mainSession } = await getSessionInsts();
+  await checkUrlViaBrowserView(targetURL, {
+    session: mainSession,
+    onMetaDataUpdated: (meta) => {
+      fallbackFavicon = pickFavIconURLFromMeta(meta);
+
+      targetMetadata = meta;
+    },
+    timeout: 8 * 1e3,
+  });
+
+  result.metaData = targetMetadata || null;
 
   return result;
 });

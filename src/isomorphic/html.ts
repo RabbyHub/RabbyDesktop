@@ -1,18 +1,23 @@
 import { coerceNumber } from './primitive';
 
 export function parseFavIconSize(
+  input?: string
+) {
+  if (!input) return { size: 0, x: 0, y: 0 };
+  const parsed = input.toLowerCase().split('x');
+  const x = coerceNumber(parsed[0], 0);
+  const y = coerceNumber(parsed[1], 0);
+
+  return { size: x, x, y };
+}
+
+function parseFavIconSizes(
   inputSizes: ISiteMetaData['favicons'][number]['sizes']
 ) {
   const sizes = inputSizes
     .split(' ')
     .filter(Boolean)
-    .map((s) => {
-      const parsed = s.toLowerCase().split('x');
-      const x = coerceNumber(parsed[0], 0);
-      const y = coerceNumber(parsed[1], 0);
-
-      return { size: x, x, y };
-    });
+    .map((s) => parseFavIconSize(s));
 
   return sizes;
 }
@@ -20,7 +25,7 @@ export function parseFavIconSize(
 const findLargestFavIcon = (icons: ISiteMetaData['favicons']) => {
   let largest = null as { href: string; size: number } | null;
   icons.forEach((icon) => {
-    const sizes = parseFavIconSize(icon.sizes);
+    const sizes = parseFavIconSizes(icon.sizes);
     /**
      * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link
      * link 的 sizes 字段可以写多个长宽比，以空格拆分，且 100x100 和 100X100 都是合法的

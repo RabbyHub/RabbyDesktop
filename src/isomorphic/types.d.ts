@@ -59,6 +59,7 @@ type INextDapp = {
     localPath?: string;
   };
   faviconUrl?: string;
+  faviconUrlCustomized?: string;
   faviconBase64?: string;
 } & (
   | {

@@ -57,7 +57,7 @@ const DappBadge = ({
 };
 
 type IOnOpDapp = (
-  op: 'rename' | 'delete' | 'pin' | 'unpin' | 'open',
+  op: 'rename' | 'edit-icon' | 'delete' | 'pin' | 'unpin' | 'open',
   dapp: IDapp
 ) => void;
 
@@ -102,6 +102,9 @@ export const DAppBlock = ({
               case 'dapp-rename':
                 onOpDapp?.('rename', dapp);
                 break;
+              case 'dapp-edit-icon':
+                onOpDapp?.('edit-icon', dapp);
+                break;
               case 'dapp-home':
                 onOpDapp?.('open', dapp);
                 break;
@@ -140,6 +143,17 @@ export const DAppBlock = ({
               key: 'dapp-rename',
               className: 'dapp-dropdown-item',
               label: <span className="text">Rename</span>,
+              icon: (
+                <img
+                  className="dapp-dropdown-item-icon"
+                  src="rabby-internal://assets/icons/sidebar-context-menu/icon-edit.svg"
+                />
+              ),
+            },
+            {
+              key: 'dapp-edit-icon',
+              className: 'dapp-dropdown-item',
+              label: <span className="text">Pick Icon</span>,
               icon: (
                 <img
                   className="dapp-dropdown-item-icon"

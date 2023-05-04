@@ -82,7 +82,7 @@ export async function fetchImageBuffer(
 }
 
 /**
- *
+ * @deprecated
  * @param websiteBaseURL assume it is a valid baseURL like `${protocol}://${host}` without suffix
  */
 export async function parseWebsiteFavicon(

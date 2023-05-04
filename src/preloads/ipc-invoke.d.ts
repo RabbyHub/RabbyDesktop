@@ -175,7 +175,7 @@ type ChannelInvokePayload = {
     send: [targetURL: string];
     response: {
       error?: string | null;
-      favicon: IParsedFavicon | null;
+      metaData: ISiteMetaData | null
     };
   };
   'preview-dapp': {

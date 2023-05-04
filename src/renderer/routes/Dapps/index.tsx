@@ -15,6 +15,7 @@ import { Empty } from './components/Empty';
 
 import ModalDeleteDapp from '../../components/ModalDeleteDapp';
 import ModalRenameDapp from '../../components/ModalRenameDapp';
+import ModalEditIconDapp from '@/renderer/components/ModalEditIconDapp';
 import { useTabedDapps } from '../../hooks/useDappsMngr';
 
 import { DAppBlock } from './components/DAppBlock';
@@ -27,7 +28,7 @@ import style from './index.module.less';
 import { NoResults } from './components/NoResults';
 
 type IOnOpDapp = (
-  op: 'rename' | 'delete' | 'pin' | 'unpin' | 'open',
+  op: 'rename' | 'edit-icon' | 'delete' | 'pin' | 'unpin' | 'open',
   dapp: IDapp
 ) => void;
 
@@ -58,6 +59,7 @@ export default function DApps() {
   const openDapp = useOpenDapp();
 
   const [renamingDapp, setRenamingDapp] = useState<IDapp | null>(null);
+  const [editingIconDapp, setEditingIconDapp] = useState<IDapp | null>(null);
   const [deletingDapp, setDeletingDapp] = useState<IDapp | null>(null);
   const [search, setSearch] = useState('');
 
@@ -92,6 +94,10 @@ export default function DApps() {
         }
         case 'rename': {
           setRenamingDapp(dapp);
+          break;
+        }
+        case 'edit-icon': {
+          setEditingIconDapp(dapp);
           break;
         }
         case 'open': {
@@ -284,6 +290,14 @@ export default function DApps() {
             <Empty />
           )}
         </main>
+
+        <ModalEditIconDapp
+          destroyOnClose
+          open={!!editingIconDapp}
+          dapp={editingIconDapp}
+          onCancel={() => setEditingIconDapp(null)}
+          onFinished={() => setEditingIconDapp(null)}
+        />
 
         <ModalRenameDapp
           destroyOnClose
