@@ -164,6 +164,9 @@ type MainInternalsMessagePayload = {
           type: 'top-ghost-window:toggle-debug-highlight';
           isHighlight: boolean;
         }
+      | {
+          type: 'child_process:_notifyUpdatingWindow';
+        }
     ];
     response: [];
   };

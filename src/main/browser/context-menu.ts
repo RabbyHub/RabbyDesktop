@@ -390,8 +390,6 @@ function buildPerfKitsMenu(opts: ChromeContextMenuOptions) {
     },
   });
 
-  appendMenuSeparator(perfKitsMenu);
-
   // this really crashed the main window by increasing memory usage
   appendMenu(perfKitsMenu, {
     label: 'Trigger MainWindow WebContents Crashed',
@@ -428,6 +426,19 @@ function buildPerfKitsMenu(opts: ChromeContextMenuOptions) {
       `);
     },
   });
+
+  appendMenuSeparator(perfKitsMenu);
+
+  if (process.platform === 'darwin') {
+    appendMenu(perfKitsMenu, {
+      label: 'Mock macOS open notifyUpdatingWindow',
+      click: () => {
+        emitIpcMainEvent('__internal_main:dev', {
+          type: 'child_process:_notifyUpdatingWindow',
+        });
+      },
+    });
+  }
 
   return perfKitsMenu;
 }

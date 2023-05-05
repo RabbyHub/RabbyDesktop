@@ -4,7 +4,11 @@ import { AppUpdaterWin32, AppUpdaterDarwin } from '../updater/updater';
 import { IS_APP_PROD_BUILD } from '../utils/app';
 import { setSessionProxy } from '../utils/appNetwork';
 import { fetchText } from '../utils/fetch';
-import { handleIpcMainInvoke, onIpcMainEvent } from '../utils/ipcMainEvents';
+import {
+  handleIpcMainInvoke,
+  onIpcMainEvent,
+  onIpcMainInternalEvent,
+} from '../utils/ipcMainEvents';
 import { getBindLog } from '../utils/log';
 import {
   getAppRuntimeProxyConf,
@@ -219,4 +223,11 @@ handleIpcMainInvoke('get-release-note', async (event, version) => {
     error: null,
     result: await getReleaseNote(version),
   };
+});
+
+onIpcMainInternalEvent('__internal_main:dev', async (payload) => {
+  if (payload.type !== 'child_process:_notifyUpdatingWindow') return;
+
+  const autoUpdater = (await getAutoUpdater()) as AppUpdaterDarwin;
+  autoUpdater._spawnNotifyInstall();
 });
