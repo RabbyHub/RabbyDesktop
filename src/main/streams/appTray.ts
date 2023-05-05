@@ -14,15 +14,13 @@ const getTrayIconByTheme = () => {
 function buildPopUpContextMenu() {
   const menu = new Menu();
 
-  if (isDarwin) {
-    appendMenu(menu, {
-      label: 'Show',
-      click: async () => {
-        emitIpcMainEvent('__internal_main:mainwindow:show');
-      },
-    });
-    appendMenuSeparator(menu);
-  }
+  appendMenu(menu, {
+    label: 'Show',
+    click: async () => {
+      emitIpcMainEvent('__internal_main:mainwindow:show');
+    },
+  });
+  appendMenuSeparator(menu);
 
   appendMenu(menu, {
     label: 'Exit',
@@ -38,6 +36,7 @@ export function setupAppTray() {
   const appTray = new Tray(getTrayIconByTheme());
 
   if (!isDarwin) {
+    appTray.setToolTip(APP_BRANDNAME);
     appTray.addListener('click', () => {
       emitIpcMainEvent('__internal_main:mainwindow:show');
     });
@@ -46,7 +45,6 @@ export function setupAppTray() {
       appTray.popUpContextMenu(buildPopUpContextMenu());
     });
   } else {
-    appTray.setToolTip(APP_BRANDNAME);
     appTray.addListener('click', () => {
       appTray.popUpContextMenu(buildPopUpContextMenu());
     });
