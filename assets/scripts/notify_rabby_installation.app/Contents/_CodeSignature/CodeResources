@@ -6,19 +6,19 @@
 	<dict>
 		<key>Resources/Scripts/main.scpt</key>
 		<data>
-		uoj0jVGFmg3My4ogAH48KHppaUE=
-		</data>
-		<key>Resources/applet.icns</key>
-		<data>
-		rwvbjbM1JYG8HmhYIwGE4g99Vow=
-		</data>
-		<key>Resources/applet.rsrc</key>
-		<data>
-		OkswFJUMqs0KtyI99IGab26mg3g=
+		GMKkMX4Uge/1NB6W1LUSJeoVQ9E=
 		</data>
 		<key>Resources/description.rtfd/TXT.rtf</key>
 		<data>
 		/d7tPBcgU0GKw0ES77/zPz/l0oo=
+		</data>
+		<key>Resources/notify_rabby_installation.icns</key>
+		<data>
+		rwvbjbM1JYG8HmhYIwGE4g99Vow=
+		</data>
+		<key>Resources/notify_rabby_installation.rsrc</key>
+		<data>
+		3v1Do8gs0kF8W1FKimY2ev/1vh8=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -27,33 +27,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			uoj0jVGFmg3My4ogAH48KHppaUE=
+			GMKkMX4Uge/1NB6W1LUSJeoVQ9E=
 			</data>
 			<key>hash2</key>
 			<data>
-			sck4/2I4QXZdXV96c/tVzL68b/RrCwW2VjUw9CSaG+8=
-			</data>
-		</dict>
-		<key>Resources/applet.icns</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			rwvbjbM1JYG8HmhYIwGE4g99Vow=
-			</data>
-			<key>hash2</key>
-			<data>
-			8cuwF1kcCr4vgDbgZdJR3uTZpSyNbKsrJ/kG4KvXWeQ=
-			</data>
-		</dict>
-		<key>Resources/applet.rsrc</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			OkswFJUMqs0KtyI99IGab26mg3g=
-			</data>
-			<key>hash2</key>
-			<data>
-			DePXBU3mD+8CA9RZWCDi+is6/+op7Zig9LoI8OWC+m0=
+			cxkukzNtEz9I1FLrunKlJqJdmeFE0YrEAHeUjXHMK3w=
 			</data>
 		</dict>
 		<key>Resources/description.rtfd/TXT.rtf</key>
@@ -65,6 +43,28 @@
 			<key>hash2</key>
 			<data>
 			8Io4ZpPXPgxPCvAFhSv1791fiEZKYndE4qlqtDlEBXQ=
+			</data>
+		</dict>
+		<key>Resources/notify_rabby_installation.icns</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			rwvbjbM1JYG8HmhYIwGE4g99Vow=
+			</data>
+			<key>hash2</key>
+			<data>
+			8cuwF1kcCr4vgDbgZdJR3uTZpSyNbKsrJ/kG4KvXWeQ=
+			</data>
+		</dict>
+		<key>Resources/notify_rabby_installation.rsrc</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			3v1Do8gs0kF8W1FKimY2ev/1vh8=
+			</data>
+			<key>hash2</key>
+			<data>
+			EEnPL0qvX8EJZMfN44gSBQbleueItGzkcGYXKUGznbA=
 			</data>
 		</dict>
 	</dict>

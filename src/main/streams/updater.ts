@@ -8,6 +8,7 @@ import {
   handleIpcMainInvoke,
   onIpcMainEvent,
   onIpcMainInternalEvent,
+  onceIpcMainInternalEvent,
 } from '../utils/ipcMainEvents';
 import { getBindLog } from '../utils/log';
 import {
@@ -226,8 +227,27 @@ handleIpcMainInvoke('get-release-note', async (event, version) => {
 });
 
 onIpcMainInternalEvent('__internal_main:dev', async (payload) => {
-  if (payload.type !== 'child_process:_notifyUpdatingWindow') return;
-
   const autoUpdater = (await getAutoUpdater()) as AppUpdaterDarwin;
-  autoUpdater._spawnNotifyInstall();
+  switch (payload.type) {
+    case 'child_process:_notifyUpdatingWindow': {
+      autoUpdater._spawnNotifyInstall();
+      break;
+    }
+    case 'child_process:_notifyKillUpdatingWindow': {
+      autoUpdater._killAllNotifyInstall();
+      break;
+    }
+    default:
+      break;
+  }
 });
+
+onceIpcMainInternalEvent(
+  '__internal_main:mainwindow:will-show-on-bootstrap',
+  async () => {
+    if (process.platform !== 'darwin') return;
+
+    const autoUpdater = (await getAutoUpdater()) as AppUpdaterDarwin;
+    autoUpdater._killAllNotifyInstall();
+  }
+);

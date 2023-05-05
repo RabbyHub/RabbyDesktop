@@ -2,12 +2,15 @@ import fs from 'fs';
 import path from 'path';
 import child_process from 'child_process';
 
+import * as Sentry from '@sentry/electron/main';
+
 import { NsisUpdater, MacUpdater } from 'electron-updater';
 import eLog from 'electron-log';
 
 import type { GenericServerOptions } from 'builder-util-runtime';
 
 import { getAppCacheDir } from 'electron-updater/out/AppAdapter';
+
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 import { getAssetPath } from '../utils/app';
 
@@ -110,11 +113,30 @@ export class AppUpdaterDarwin extends MacUpdater {
   }
 
   /**
-   * @dev chmod -R 777 notify_update.app if necessary
+   * @dev chmod -R 777 notify_rabby_installation.app if necessary
    */
   _spawnNotifyInstall() {
-    const notifyInstallApp = getAssetPath('./scripts/notify_update.app');
+    const notifyInstallApp = getAssetPath(
+      './scripts/notify_rabby_installation.app'
+    );
     child_process.spawn('open', [notifyInstallApp], {});
+  }
+
+  _killAllNotifyInstall() {
+    try {
+      const ret = child_process.execSync(
+        `ps aux | grep "notify_rabby_installation" | grep -v grep | wc -l | xargs echo`
+      );
+      const retStr = ret?.toString();
+
+      if (retStr !== '0') {
+        child_process.spawn('killall', ['-9', 'notify_rabby_installation'], {});
+      }
+    } catch (err) {
+      console.warn('[AppUpdaterDarwin] _killAllNotifyInstall error');
+      console.error(err);
+      Sentry.captureException(err);
+    }
   }
 
   quitAndInstall(): void {

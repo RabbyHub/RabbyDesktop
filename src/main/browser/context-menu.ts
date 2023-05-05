@@ -366,6 +366,27 @@ function buildInspectKitsMenu(opts: ChromeContextMenuOptions) {
     },
   });
 
+  if (process.platform === 'darwin') {
+    appendMenuSeparator(inspectKitsMenu);
+    appendMenu(inspectKitsMenu, {
+      label: 'Mock macOS open notifyUpdatingWindow',
+      click: () => {
+        emitIpcMainEvent('__internal_main:dev', {
+          type: 'child_process:_notifyUpdatingWindow',
+        });
+      },
+    });
+
+    appendMenu(inspectKitsMenu, {
+      label: 'Mock macOS kill all notifyUpdatingWindow',
+      click: () => {
+        emitIpcMainEvent('__internal_main:dev', {
+          type: 'child_process:_notifyKillUpdatingWindow',
+        });
+      },
+    });
+  }
+
   appendMenuSeparator(inspectKitsMenu);
   appendMenu(inspectKitsMenu, {
     label: `Reset App`,
@@ -389,6 +410,8 @@ function buildPerfKitsMenu(opts: ChromeContextMenuOptions) {
       emitIpcMainEvent('__internal_main:mainwindow:webContents-crashed');
     },
   });
+
+  appendMenuSeparator(perfKitsMenu);
 
   // this really crashed the main window by increasing memory usage
   appendMenu(perfKitsMenu, {
@@ -426,19 +449,6 @@ function buildPerfKitsMenu(opts: ChromeContextMenuOptions) {
       `);
     },
   });
-
-  appendMenuSeparator(perfKitsMenu);
-
-  if (process.platform === 'darwin') {
-    appendMenu(perfKitsMenu, {
-      label: 'Mock macOS open notifyUpdatingWindow',
-      click: () => {
-        emitIpcMainEvent('__internal_main:dev', {
-          type: 'child_process:_notifyUpdatingWindow',
-        });
-      },
-    });
-  }
 
   return perfKitsMenu;
 }

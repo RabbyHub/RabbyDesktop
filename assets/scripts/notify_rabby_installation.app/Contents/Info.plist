@@ -7,11 +7,11 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
-	<string>applet</string>
+	<string>notify_rabby_installation</string>
 	<key>CFBundleIconFile</key>
-	<string>applet</string>
+	<string>notify_rabby_installation</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.apple.ScriptEditor.id.Rabby-Installation</string>
+	<string>com.apple.ScriptEditor.id.notify_rabby_installation</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -53,8 +53,6 @@
 	<string>This script needs access to administer this system to run.</string>
 	<key>OSAAppletShowStartupScreen</key>
 	<false/>
-	<key>OSAAppletStayOpen</key>
-	<true/>
 	<key>WindowState</key>
 	<dict>
 		<key>bundleDividerCollapsed</key>
@@ -68,9 +66,9 @@
 		<key>name</key>
 		<string>ScriptWindowState</string>
 		<key>positionOfDivider</key>
-		<real>392</real>
+		<real>296</real>
 		<key>savedFrame</key>
-		<string>1566 522 700 678 0 0 2560 1415 </string>
+		<string>1155 471 700 678 0 0 2560 1415 </string>
 		<key>selectedTab</key>
 		<string>log</string>
 	</dict>
