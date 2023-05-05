@@ -31,6 +31,7 @@ export const desktopAppStore = makeStore<{
   proxySettings: ISensitiveConfig['proxySettings'];
 
   sidebarCollapsed: IDesktopAppState['sidebarCollapsed'];
+  tipedHideMainWindowOnWindows: IDesktopAppState['tipedHideMainWindowOnWindows'];
 }>({
   name: `${PERSIS_STORE_PREFIX}desktopApp`,
 
@@ -76,6 +77,10 @@ export const desktopAppStore = makeStore<{
       default: false,
     },
     sidebarCollapsed: {
+      type: 'boolean',
+      default: false,
+    },
+    tipedHideMainWindowOnWindows: {
       type: 'boolean',
       default: false,
     },
@@ -145,6 +150,11 @@ function getState() {
     enableServeDappByHttp:
       desktopAppStore.get('enableServeDappByHttp') === true,
     sidebarCollapsed: desktopAppStore.get('sidebarCollapsed', false),
+
+    tipedHideMainWindowOnWindows: desktopAppStore.get(
+      'tipedHideMainWindowOnWindows',
+      false
+    ),
   };
 }
 

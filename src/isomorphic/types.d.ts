@@ -142,6 +142,8 @@ type IDesktopAppState = {
   enableContentProtected: boolean;
   enableServeDappByHttp: boolean;
   sidebarCollapsed: boolean;
+
+  tipedHideMainWindowOnWindows: boolean;
 };
 
 type IAppDynamicConfig = {

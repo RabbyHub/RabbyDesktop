@@ -1,4 +1,5 @@
 import { app, Menu, Tray } from 'electron';
+import { APP_BRANDNAME } from '@/isomorphic/constants';
 import { getAssetPath } from '../utils/app';
 import { appendMenu, appendMenuSeparator } from '../utils/context-menu';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
@@ -45,6 +46,7 @@ export function setupAppTray() {
       appTray.popUpContextMenu(buildPopUpContextMenu());
     });
   } else {
+    appTray.setToolTip(APP_BRANDNAME);
     appTray.addListener('click', () => {
       appTray.popUpContextMenu(buildPopUpContextMenu());
     });

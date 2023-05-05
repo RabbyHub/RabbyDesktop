@@ -176,18 +176,6 @@ app.on('activate', (_, hasVisibleWindows) => {
   if (!hasVisibleWindows) emitIpcMainEvent('__internal_main:mainwindow:show');
 });
 
-onIpcMainEvent('__internal_rpc:main-window:click-close', async (evt) => {
-  const { sender } = evt;
-  const tabbedWin = getTabbedWindowFromWebContents(sender);
-  const mainTabbedWin = await onMainWindowReady();
-  if (tabbedWin === mainTabbedWin) {
-    app.quit();
-    return;
-  }
-
-  tabbedWin?.destroy();
-});
-
 handleIpcMainInvoke('get-app-version', (_) => {
   return {
     version: app.getVersion(),
@@ -384,7 +372,7 @@ export default function bootstrap() {
       app.dock.setIcon(getAssetPath('icon.png'));
     }
 
-    setupAppTray();
+    valueToMainSubject('appTray', setupAppTray());
 
     const splashWin = new BrowserWindow(
       getBrowserWindowOpts(
