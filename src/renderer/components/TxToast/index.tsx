@@ -84,10 +84,6 @@ const openNotification = (
   };
   const id = p.id;
 
-  if (p.chain && p.hash) {
-    close(id, false);
-  }
-
   setTimeout(() => {
     notification.open({
       key: id,
@@ -126,7 +122,7 @@ const openNotification = (
             </div>
           )}
           <ProgressBar
-            duration={5000}
+            duration={8000}
             id={id}
             onClose={close}
             key={`${p.type}-${id}`}
