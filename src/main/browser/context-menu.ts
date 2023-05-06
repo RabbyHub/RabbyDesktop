@@ -140,19 +140,19 @@ function buildRabbyXDebugMenu(opts: ChromeContextMenuOptions) {
   appendMenu(menu, {
     label: `Trigger notification: Tx completed`,
     click: async () => {
-      const { backgroundWebContents } = await getRabbyExtViews();
+      // const { backgroundWebContents } = await getRabbyExtViews();
 
-      backgroundWebContents.executeJavaScript(`
-        chrome.notifications.create('https://polygonscan.com/tx/0x9c9d39c5e99074552c7caa33e2c3cedd25c9a21ed4190b7c9b48be3ea0111776_randomId_=1672918371781', {
-          "type": "basic",
-          "title": "🎉 Transaction completed",
-          "iconUrl": chrome.extension.getURL('images/icon-64.png'),
-          "message": "click to view more information",
-          "priority": 2
-        });
-      `);
+      // backgroundWebContents.executeJavaScript(`
+      //   chrome.notifications.create('https://polygonscan.com/tx/0x9c9d39c5e99074552c7caa33e2c3cedd25c9a21ed4190b7c9b48be3ea0111776_randomId_=1672918371781', {
+      //     "type": "basic",
+      //     "title": "🎉 Transaction completed",
+      //     "iconUrl": chrome.extension.getURL('images/icon-64.png'),
+      //     "message": "click to view more information",
+      //     "priority": 2
+      //   });
+      // `);
 
-      rabbyxQuery('sessionService.broadcastEvent', [
+      rabbyxQuery('sessionService.broadcastToDesktopOnly', [
         'transactionChanged',
         {
           type: 'finished',
@@ -166,18 +166,18 @@ function buildRabbyXDebugMenu(opts: ChromeContextMenuOptions) {
   appendMenu(menu, {
     label: `Trigger notification: Tx push-failed`,
     click: async () => {
-      const { backgroundWebContents } = await getRabbyExtViews();
+      // const { backgroundWebContents } = await getRabbyExtViews();
 
-      backgroundWebContents.executeJavaScript(`
-        chrome.notifications.create({
-          "type": "basic",
-          "title": "Transaction push failed",
-          "iconUrl": chrome.extension.getURL('images/icon-64.png'),
-          "message": "Transaction push failed",
-        });
-      `);
+      // backgroundWebContents.executeJavaScript(`
+      //   chrome.notifications.create({
+      //     "type": "basic",
+      //     "title": "Transaction push failed",
+      //     "iconUrl": chrome.extension.getURL('images/icon-64.png'),
+      //     "message": "Transaction push failed",
+      //   });
+      // `);
 
-      rabbyxQuery('sessionService.broadcastEvent', [
+      rabbyxQuery('sessionService.broadcastToDesktopOnly', [
         'transactionChanged',
         { type: 'push-failed' },
       ]);
@@ -186,18 +186,18 @@ function buildRabbyXDebugMenu(opts: ChromeContextMenuOptions) {
   appendMenu(menu, {
     label: `Trigger notification: Tx submitted`,
     click: async () => {
-      const { backgroundWebContents } = await getRabbyExtViews();
+      // const { backgroundWebContents } = await getRabbyExtViews();
 
-      backgroundWebContents.executeJavaScript(`
-        chrome.notifications.create('https://polygonscan.com/tx/0x9c9d39c5e99074552c7caa33e2c3cedd25c9a21ed4190b7c9b48be3ea0111776_randomId_=1672918371781', {
-          "type": "basic",
-          "title": "Transaction submitted",
-          "iconUrl": chrome.extension.getURL('images/icon-64.png'),
-          "message": "click to view more information",
-        });
-      `);
+      // backgroundWebContents.executeJavaScript(`
+      //   chrome.notifications.create('https://polygonscan.com/tx/0x9c9d39c5e99074552c7caa33e2c3cedd25c9a21ed4190b7c9b48be3ea0111776_randomId_=1672918371781', {
+      //     "type": "basic",
+      //     "title": "Transaction submitted",
+      //     "iconUrl": chrome.extension.getURL('images/icon-64.png'),
+      //     "message": "click to view more information",
+      //   });
+      // `);
 
-      rabbyxQuery('sessionService.broadcastEvent', [
+      rabbyxQuery('sessionService.broadcastToDesktopOnly', [
         'transactionChanged',
         {
           type: 'submitted',
