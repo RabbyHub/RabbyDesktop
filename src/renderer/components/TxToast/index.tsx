@@ -4,17 +4,15 @@ import {
   RcIconToastTxSubmitted,
 } from '@/../assets/icons/global-toast';
 import RcIconExternalLink from '@/../assets/icons/tx-toast/external-link.svg?rc';
-import {
-  usePopupViewInfo,
-  usePopupWinInfo,
-  useZPopupViewState,
-} from '@/renderer/hooks/usePopupWinOnMainwin';
-import { CHAINS } from '@/renderer/utils/constant';
+import { usePopupViewInfo } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { notification } from 'antd';
 import clsx from 'clsx';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { openExternalUrl } from '@/renderer/ipcRequest/app';
+import { CHAINS } from '@/renderer/utils/constant';
 import styles from './style.module.less';
+
+const { nanoid } = require('nanoid');
 
 const IconType = ({
   type,
@@ -72,17 +70,23 @@ const openNotification = (
   p: TxNotificationProps & {
     onClose: (id: string) => void;
     onOpen: (id: string) => void;
+    id: string;
   }
 ) => {
   const close = (id: string, closePopup = true) => {
     notification.close(id);
     if (closePopup) {
-      p.onClose(id);
+      // after hiding animation
+      setTimeout(() => {
+        p.onClose(id);
+      }, 200);
     }
   };
-  const id = `${p.chain}-${p.hash}`;
+  const id = p.id;
 
-  close(id, false);
+  if (p.chain && p.hash) {
+    close(id, false);
+  }
 
   setTimeout(() => {
     notification.open({
@@ -108,9 +112,13 @@ const openNotification = (
             <div
               className="text-white text-12 font-medium pl-[28px] flex items-center gap-8 cursor-pointer"
               onClick={() => {
-                openExternalUrl(
-                  `${CHAINS?.[p?.chain]?.scan.replace(/_s_/, p.hash)}`
+                const link = CHAINS?.[p?.chain]?.scanLink?.replace(
+                  /_s_/,
+                  p.hash
                 );
+                if (link) {
+                  openExternalUrl(link);
+                }
               }}
             >
               <span>View on {CHAINS?.[p?.chain]?.name} Explore</span>
@@ -144,7 +152,7 @@ const openNotification = (
   }, 200);
 };
 
-function notifyAjudstSize(txNotificationCount: number) {
+function notifyAdjustSize(txNotificationCount: number) {
   window.rabbyDesktop.ipcRenderer.sendMessage(
     '__internal_rpc:popupview-on-mainwin:adjust-rect',
     {
@@ -158,7 +166,6 @@ function notifyAjudstSize(txNotificationCount: number) {
 
 export const TxToast = () => {
   const { pageInfo, hideView } = usePopupViewInfo('right-side-popup');
-  const { chain, hash, type, title } = pageInfo?.state || {};
 
   const [_, setList] = useState<string[]>([]);
 
@@ -169,7 +176,7 @@ export const TxToast = () => {
         if (v.length === 0) {
           hideView();
         } else {
-          notifyAjudstSize(v.length);
+          notifyAdjustSize(v.length);
         }
 
         return v;
@@ -181,25 +188,24 @@ export const TxToast = () => {
   const onOpen = useCallback((id: string) => {
     setList((e) => {
       const result = [...e, id];
-      notifyAjudstSize(result.length);
+      notifyAdjustSize(Math.max(2, result.length));
 
       return result;
     });
   }, []);
 
   useEffect(() => {
-    if (title && type) {
-      const id = `${chain}-${hash}`;
+    if (pageInfo?.state) {
+      const { chain, hash } = pageInfo?.state;
+      const id = `${chain}-${hash || nanoid()}`;
       onOpen(id);
       openNotification({
-        chain,
-        hash,
-        type,
-        title,
+        ...pageInfo?.state,
         onClose,
         onOpen,
+        id,
       });
     }
-  }, [chain, hash, type, title, onClose, onOpen]);
+  }, [pageInfo?.state, onClose, onOpen]);
   return null;
 };

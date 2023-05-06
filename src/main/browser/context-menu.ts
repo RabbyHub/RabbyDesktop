@@ -14,6 +14,7 @@ import {
   dialog,
   shell,
 } from 'electron';
+import { CHAINS_ENUM } from '@/isomorphic/chain-data';
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
 import { findDappsByOrigin } from '../store/dapps';
 import { safeOpenURL } from '../streams/dappSafeview';
@@ -158,7 +159,7 @@ function buildRabbyXDebugMenu(opts: ChromeContextMenuOptions) {
           type: 'finished',
           success: true,
           hash: '0x9c9d39c5e99074552c7caa33e2c3cedd25c9a21ed4190b7c9b48be3ea0111776',
-          chain: 'polygon',
+          chain: CHAINS_ENUM.POLYGON,
         },
       ]);
     },
@@ -202,7 +203,7 @@ function buildRabbyXDebugMenu(opts: ChromeContextMenuOptions) {
         {
           type: 'submitted',
           hash: '0x9c9d39c5e99074552c7caa33e2c3cedd25c9a21ed4190b7c9b48be3ea0111776',
-          chain: 'polygon',
+          chain: CHAINS_ENUM.POLYGON,
         },
       ]);
     },
