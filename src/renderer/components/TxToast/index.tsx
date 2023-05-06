@@ -147,7 +147,7 @@ const openNotification = (
           className="w-14"
         />
       ),
-      className: styles.container,
+      className: clsx(styles.container, !p.hash && styles.noScan),
     });
   }, 200);
 };
