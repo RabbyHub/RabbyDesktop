@@ -265,7 +265,7 @@ const Home = () => {
       setUpdateNonce((prev) => {
         return prev + 1;
       });
-    }, 5000);
+    }, 8000);
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
       (payload) => {
