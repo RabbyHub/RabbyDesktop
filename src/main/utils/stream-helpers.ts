@@ -276,3 +276,7 @@ export async function getOrSetDebugStates(
 
   return { prevStates, nextStates: debugStates };
 }
+
+export async function getAppTray() {
+  return firstValueFrom(fromMainSubject('appTray'));
+}

@@ -17,10 +17,13 @@ import {
 } from '../utils/screen';
 import {
   getAllMainUIViews,
+  getAppTray,
   getRabbyExtViews,
   onMainWindowReady,
   updateMainWindowActiveTabRect,
 } from '../utils/stream-helpers';
+import { getTabbedWindowFromWebContents } from './tabbedBrowserWindow';
+import { desktopAppStore } from '../store/desktopApp';
 
 const ResetDialogButtons = ['Cancel', 'Confirm'] as const;
 const cancleId = ResetDialogButtons.findIndex((x) => x === 'Cancel');
@@ -211,6 +214,38 @@ async function getLatestCapturedActiveTab() {
 
   return latestOne;
 }
+
+onIpcMainEvent('__internal_rpc:main-window:click-close', async (evt) => {
+  const { sender } = evt;
+  const tabbedWin = getTabbedWindowFromWebContents(sender);
+  const mainTabbedWin = await onMainWindowReady();
+
+  if (tabbedWin === mainTabbedWin) {
+    mainTabbedWin.window.hide();
+    const appTray = await getAppTray();
+
+    if (!desktopAppStore.get('tipedHideMainWindowOnWindows', false)) {
+      if (process.platform === 'win32') {
+        appTray.displayBalloon({
+          title: 'Rabby Desktop',
+          iconType: 'info',
+          content: `The application has been minimized to the Windows taskbar. You can click on the application icon to open it again.`,
+          noSound: false,
+          respectQuietTime: true,
+        });
+        desktopAppStore.set('tipedHideMainWindowOnWindows', true);
+      } else if (process.platform === 'darwin') {
+        // TODO: should we tooltip on macos?
+        desktopAppStore.set('tipedHideMainWindowOnWindows', true);
+      }
+    }
+
+    return;
+  }
+
+  tabbedWin?.window?.hide();
+  tabbedWin?.destroy();
+});
 
 /**
  * @description useless now, it's cost too much time to capture the whole page on animating

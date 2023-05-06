@@ -172,20 +172,14 @@ app.on('window-all-closed', () => {
   app.quit();
 });
 
-app.on('activate', (_, hasVisibleWindows) => {
-  if (!hasVisibleWindows) emitIpcMainEvent('__internal_main:mainwindow:show');
-});
-
-onIpcMainEvent('__internal_rpc:main-window:click-close', async (evt) => {
-  const { sender } = evt;
-  const tabbedWin = getTabbedWindowFromWebContents(sender);
+// on Darwin, clicking icon in dock will trigger `activate` event
+app.on('activate', async (_, hasVisibleWindows) => {
   const mainTabbedWin = await onMainWindowReady();
-  if (tabbedWin === mainTabbedWin) {
-    app.quit();
-    return;
+  if (!hasVisibleWindows) {
+    emitIpcMainEvent('__internal_main:mainwindow:show');
+  } else if (isDarwin && !mainTabbedWin.window.isVisible()) {
+    emitIpcMainEvent('__internal_main:mainwindow:show');
   }
-
-  tabbedWin?.destroy();
 });
 
 handleIpcMainInvoke('get-app-version', (_) => {
@@ -384,7 +378,7 @@ export default function bootstrap() {
       app.dock.setIcon(getAssetPath('icon.png'));
     }
 
-    setupAppTray();
+    valueToMainSubject('appTray', setupAppTray());
 
     const splashWin = new BrowserWindow(
       getBrowserWindowOpts(
