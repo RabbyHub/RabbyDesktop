@@ -313,7 +313,7 @@ const rightSidePopupWindowReady = onMainWindowReady().then(
 
     // debug-only
     if (!IS_RUNTIME_PRODUCTION) {
-      rightSidePopupWindow.webContents.openDevTools({ mode: 'detach' });
+      // rightSidePopupWindow.webContents.openDevTools({ mode: 'detach' });
       showPopupWindow(rightSidePopupWindow);
     } else {
       hidePopupWindow(rightSidePopupWindow);
