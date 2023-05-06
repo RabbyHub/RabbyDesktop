@@ -151,6 +151,7 @@ export async function getAllMainUIViews() {
     'z-popup': mainViews.zPopup,
     'global-toast-popup': mainViews.globalToastPopup,
     'in-dapp-find': mainViews.inDappFind,
+    'right-side-popup': mainViews.rightSidePopup,
   };
 
   const viewOnlyHash = {
@@ -160,6 +161,7 @@ export async function getAllMainUIViews() {
     zPopup: mainViews.zPopup.webContents,
     globalToastPopup: mainViews.globalToastPopup.webContents,
     inDappFind: mainViews.inDappFind.webContents,
+    rightSidePopup: mainViews.rightSidePopup.webContents,
   };
 
   const hash = {

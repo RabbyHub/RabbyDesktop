@@ -87,13 +87,15 @@ function updateSubWindowRect({
 }) {
   if (window.isDestroyed()) return;
 
+  const pBounds = parentWin.getBounds();
+
   const popupRect = {
     x: 0,
     y: 0,
     ...nextRect,
     ...pickWH(windowType, { width: nextRect?.width, height: nextRect?.height }),
     ...(windowType === 'top-ghost-window' && {
-      ...parentWin.getBounds(),
+      ...pBounds,
       x: 0,
       y: 0,
     }),

@@ -13,6 +13,8 @@ export const NativeAppSizes = {
 
   rabbyxNotificationWindowWidth: 400,
 
+  rightSidePopupWindowWidth: 400,
+
   trezorLikeConnectionWindowHeaderHeight: 52,
 };
 
@@ -38,4 +40,9 @@ export const InDappFindSizes = {
   shadowBottomOffset,
   width: 356 + shadowRightOffset,
   height: 52 + shadowBottomOffset,
+};
+
+export const RightSidePopupContentsSizes = {
+  rightSideTxNotificationItemHeight: 78,
+  rightSideTxNotificationItemVPaddingOffset: 16,
 };

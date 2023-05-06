@@ -89,6 +89,7 @@ const CONF = {
       zPopup: BrowserView;
       globalToastPopup: BrowserView;
       inDappFind: BrowserView;
+      rightSidePopup: BrowserView;
     }>
   >,
 

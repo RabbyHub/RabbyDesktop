@@ -93,6 +93,17 @@ type MainInternalsMessagePayload = {
     ];
     response: [];
   };
+  '__internal_main:popupview-on-mainwin:adjust-rect': {
+    send: [
+      {
+        type: PopupViewOnMainwinInfo['type'] & 'right-side-popup';
+        contents: {
+          txNotificationCount: number;
+        };
+      }
+    ];
+    response: [];
+  };
   '__internal_main:views:channel-message': {
     send: [ChannelForwardMessageType];
     response: [];

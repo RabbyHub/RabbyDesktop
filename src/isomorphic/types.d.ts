@@ -419,6 +419,15 @@ type PopupViewOnMainwinInfo =
         tabId: number;
         tabOrigin: { x: number; y: number };
       };
+    }
+  | {
+      type: 'right-side-popup';
+      state: {
+        type: 'success' | 'submit' | 'failed';
+        chain: CHAINS_ENUM;
+        hash?: string;
+        title: string;
+      };
     };
 
 type PickPopupViewPageInfo<T extends PopupViewOnMainwinInfo['type']> =

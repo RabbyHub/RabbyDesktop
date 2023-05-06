@@ -1,0 +1,51 @@
+@keyframes trackProgress {
+  0% {
+    transform: scaleX(1);
+  }
+  100% {
+    transform: scaleX(0);
+  }
+}
+.container {
+  position: relative;
+  background: rgba(0, 0, 0, 0.9);
+  border-radius: 6px;
+  padding: 14px;
+  padding-bottom: 20px;
+  margin-bottom: 12px;
+  &.noScan {
+    padding-top: 18px;
+    padding-bottom: 16px;
+  }
+
+  .progressBar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    transform-origin: left;
+    background: #8697ff;
+    animation: trackProgress linear 1 forwards;
+    animation-play-state: running;
+  }
+  &:hover .progressBar {
+    animation-play-state: paused;
+  }
+
+  .progressTrack {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: rgba(255; 255; 255, 0.15);
+  }
+
+  & :global {
+    .ant-notification-notice-close {
+      top: 14px;
+      right: 14px;
+    }
+  }
+}

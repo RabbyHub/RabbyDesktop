@@ -439,6 +439,11 @@ export type RabbyXMethod = {
     data?: any,
     origin?: string
   ) => void;
+  'sessionService.broadcastToDesktopOnly': (
+    ev: string,
+    data?: any,
+    origin?: string
+  ) => void;
 
   'walletController.getEnsContentHash': (name: string) => string;
 } & {

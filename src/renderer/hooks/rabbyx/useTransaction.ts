@@ -18,13 +18,11 @@ export function useTransactionChanged() {
             break;
           case 'push-failed': {
             showMainwinPopupview({
-              type: 'global-toast-popup',
+              type: 'right-side-popup',
               state: {
-                toastType: 'toast-message',
-                data: {
-                  type: 'error',
-                  content: 'Transaction push failed',
-                },
+                type: 'failed',
+                chain: payload.data.chain,
+                title: 'Transaction push failed',
               },
             });
 
@@ -32,13 +30,12 @@ export function useTransactionChanged() {
           }
           case 'submitted': {
             showMainwinPopupview({
-              type: 'global-toast-popup',
+              type: 'right-side-popup',
               state: {
-                toastType: 'toast-message',
-                data: {
-                  type: 'success',
-                  content: 'Transaction submitted',
-                },
+                type: 'submit',
+                chain: payload.data.chain,
+                hash: payload.data.hash,
+                title: 'Transaction submitted',
               },
             });
 
@@ -47,24 +44,22 @@ export function useTransactionChanged() {
           case 'finished': {
             if (payload.data?.success) {
               showMainwinPopupview({
-                type: 'global-toast-popup',
+                type: 'right-side-popup',
                 state: {
-                  toastType: 'toast-message',
-                  data: {
-                    type: 'success',
-                    content: 'Transaction success',
-                  },
+                  type: 'success',
+                  chain: payload.data.chain,
+                  hash: payload.data.hash,
+                  title: 'Transaction completed',
                 },
               });
             } else {
               showMainwinPopupview({
-                type: 'global-toast-popup',
+                type: 'right-side-popup',
                 state: {
-                  toastType: 'toast-message',
-                  data: {
-                    type: 'error',
-                    content: 'Transaction failed',
-                  },
+                  type: 'failed',
+                  chain: payload.data.chain,
+                  hash: payload.data.hash,
+                  title: 'Transaction failed',
                 },
               });
             }
