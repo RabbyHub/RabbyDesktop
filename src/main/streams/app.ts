@@ -410,6 +410,7 @@ export default function bootstrap() {
     splashWin.destroy();
     setTimeout(() => {
       emitIpcMainEvent('__internal_main:mainwindow:show', true);
+      emitIpcMainEvent('__internal_main:mainwindow:will-show-on-bootstrap');
     }, 200);
 
     if (!useBuiltInPwd) {

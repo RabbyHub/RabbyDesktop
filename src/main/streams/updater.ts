@@ -4,7 +4,12 @@ import { AppUpdaterWin32, AppUpdaterDarwin } from '../updater/updater';
 import { IS_APP_PROD_BUILD } from '../utils/app';
 import { setSessionProxy } from '../utils/appNetwork';
 import { fetchText } from '../utils/fetch';
-import { handleIpcMainInvoke, onIpcMainEvent } from '../utils/ipcMainEvents';
+import {
+  handleIpcMainInvoke,
+  onIpcMainEvent,
+  onIpcMainInternalEvent,
+  onceIpcMainInternalEvent,
+} from '../utils/ipcMainEvents';
 import { getBindLog } from '../utils/log';
 import {
   getAppRuntimeProxyConf,
@@ -220,3 +225,29 @@ handleIpcMainInvoke('get-release-note', async (event, version) => {
     result: await getReleaseNote(version),
   };
 });
+
+onIpcMainInternalEvent('__internal_main:dev', async (payload) => {
+  const autoUpdater = (await getAutoUpdater()) as AppUpdaterDarwin;
+  switch (payload.type) {
+    case 'child_process:_notifyUpdatingWindow': {
+      autoUpdater._spawnNotifyInstall();
+      break;
+    }
+    case 'child_process:_notifyKillUpdatingWindow': {
+      autoUpdater._killAllNotifyInstall();
+      break;
+    }
+    default:
+      break;
+  }
+});
+
+onceIpcMainInternalEvent(
+  '__internal_main:mainwindow:will-show-on-bootstrap',
+  async () => {
+    if (process.platform !== 'darwin') return;
+
+    const autoUpdater = (await getAutoUpdater()) as AppUpdaterDarwin;
+    autoUpdater._killAllNotifyInstall();
+  }
+);
