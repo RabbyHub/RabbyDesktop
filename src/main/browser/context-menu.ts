@@ -366,6 +366,27 @@ function buildInspectKitsMenu(opts: ChromeContextMenuOptions) {
     },
   });
 
+  if (process.platform === 'darwin') {
+    appendMenuSeparator(inspectKitsMenu);
+    appendMenu(inspectKitsMenu, {
+      label: 'Mock macOS open notifyUpdatingWindow',
+      click: () => {
+        emitIpcMainEvent('__internal_main:dev', {
+          type: 'child_process:_notifyUpdatingWindow',
+        });
+      },
+    });
+
+    appendMenu(inspectKitsMenu, {
+      label: 'Mock macOS kill all notifyUpdatingWindow',
+      click: () => {
+        emitIpcMainEvent('__internal_main:dev', {
+          type: 'child_process:_notifyKillUpdatingWindow',
+        });
+      },
+    });
+  }
+
   appendMenuSeparator(inspectKitsMenu);
   appendMenu(inspectKitsMenu, {
     label: `Reset App`,

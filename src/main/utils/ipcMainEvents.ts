@@ -84,6 +84,15 @@ export function onIpcMainInternalEvent<T extends MainInternals = MainInternals>(
   return dispose;
 }
 
+export function onceIpcMainInternalEvent<
+  T extends MainInternals = MainInternals
+>(
+  eventName: T,
+  handler: (...args: MainInternalsMessagePayload[T]['send']) => any
+) {
+  ipcMain.once(eventName, handler as any);
+}
+
 export function sendToWebContents<T extends IPushEvents = IPushEvents>(
   webContents: Electron.WebContents | null | undefined,
   eventName: T & string,

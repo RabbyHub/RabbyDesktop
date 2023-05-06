@@ -164,6 +164,11 @@ type MainInternalsMessagePayload = {
           type: 'top-ghost-window:toggle-debug-highlight';
           isHighlight: boolean;
         }
+      | {
+          type:
+            | 'child_process:_notifyUpdatingWindow'
+            | 'child_process:_notifyKillUpdatingWindow';
+        }
     ];
     response: [];
   };
@@ -181,6 +186,10 @@ type MainInternalsMessagePayload = {
   };
   '__internal_main:app:close-tab-on-del-dapp': {
     send: [dappIds: string | string[]];
+    response: [];
+  };
+  '__internal_main:mainwindow:will-show-on-bootstrap': {
+    send: [];
     response: [];
   };
   '__internal_main:mainwindow:dapp-tabs-to-be-closed': {
