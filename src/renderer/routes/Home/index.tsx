@@ -50,7 +50,6 @@ const Container = styled.div`
   max-width: 1738px;
   width: 100%;
   margin: 0 auto;
-  padding-bottom: 28px;
 `;
 
 const HomeWrapper = styled.div`
