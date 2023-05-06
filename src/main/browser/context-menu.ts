@@ -154,7 +154,12 @@ function buildRabbyXDebugMenu(opts: ChromeContextMenuOptions) {
 
       rabbyxQuery('sessionService.broadcastEvent', [
         'transactionChanged',
-        { type: 'finished', success: true },
+        {
+          type: 'finished',
+          success: true,
+          hash: '0x9c9d39c5e99074552c7caa33e2c3cedd25c9a21ed4190b7c9b48be3ea0111776',
+          chain: 'polygon',
+        },
       ]);
     },
   });
@@ -194,7 +199,11 @@ function buildRabbyXDebugMenu(opts: ChromeContextMenuOptions) {
 
       rabbyxQuery('sessionService.broadcastEvent', [
         'transactionChanged',
-        { type: 'submitted' },
+        {
+          type: 'submitted',
+          hash: '0x9c9d39c5e99074552c7caa33e2c3cedd25c9a21ed4190b7c9b48be3ea0111776',
+          chain: 'polygon',
+        },
       ]);
     },
   });

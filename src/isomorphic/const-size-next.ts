@@ -13,6 +13,8 @@ export const NativeAppSizes = {
 
   rabbyxNotificationWindowWidth: 400,
 
+  rightSidePopupWindowWidth: 400,
+
   trezorLikeConnectionWindowHeaderHeight: 52,
 };
 

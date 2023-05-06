@@ -4,7 +4,10 @@ import {
   RcIconToastTxSubmitted,
 } from '@/../assets/icons/global-toast';
 import RcIconExternalLink from '@/../assets/icons/tx-toast/external-link.svg?rc';
-import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
+import {
+  usePopupWinInfo,
+  useZPopupViewState,
+} from '@/renderer/hooks/usePopupWinOnMainwin';
 import { CHAINS } from '@/renderer/utils/constant';
 import { notification } from 'antd';
 import clsx from 'clsx';
@@ -141,9 +144,8 @@ const openNotification = (
 };
 
 export const TxToast = () => {
-  const { svVisible, svState, setSvState, closeSubview } =
-    useZPopupViewState('tx-notification');
-  const { chain, hash, type, title } = svState || {};
+  const { pageInfo, hideWindow } = usePopupWinInfo('right-side-popup');
+  const { chain, hash, type, title } = pageInfo?.state || {};
 
   const [_, setList] = useState<string[]>([]);
 
@@ -152,12 +154,12 @@ export const TxToast = () => {
       setList((l) => {
         const v = l.filter((e) => e !== id);
         if (v.length === 0) {
-          closeSubview();
+          hideWindow();
         }
         return v;
       });
     },
-    [closeSubview]
+    [hideWindow]
   );
 
   const onOpen = useCallback((id: string) => {

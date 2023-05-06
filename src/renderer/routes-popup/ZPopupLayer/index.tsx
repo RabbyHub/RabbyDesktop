@@ -35,7 +35,6 @@ import {
   DappTypeNotSupportedModal,
 } from '@/renderer/components/IPFSAlertModal';
 import { useTipCannotUseTrezorLike } from '@/renderer/hooks-shell/useZPopupEffects';
-import { TxToast } from '@/renderer/components/TxToast';
 import SwitchChainModal from '../../components/SwitchChainModal';
 
 import styles from './index.module.less';
@@ -99,7 +98,6 @@ function App() {
       <IPFSNoLodalModal />
       <IPFSVerifyFailedModal />
       <DappTypeNotSupportedModal />
-      <TxToast />
     </>
   );
 }

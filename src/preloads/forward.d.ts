@@ -73,13 +73,6 @@ type ZViewStates = {
     duration?: number;
   };
 
-  'tx-notification': {
-    type: 'success' | 'submit' | 'failed';
-    chain: CHAINS_ENUM;
-    hash?: string;
-    title: string;
-  };
-
   'ipfs-add-failed-modal': {
     // nothing
   };

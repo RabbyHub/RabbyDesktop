@@ -20,6 +20,7 @@ import SelectDevicesWindow from '@/renderer/routes-popup/SelectDevicesWindow';
 
 import { parseQueryString } from '@/isomorphic/url';
 import TopGhostWindow from '@/renderer/routes-popup/TopGhostWindow';
+import RightSidePopupWindow from '@/renderer/routes-popup/RightSidePopupWindow';
 import RabbyNotificationGasket from '../routes-popup/RabbyNotificationGasket';
 import MainWindowAddAddress from '../routes-popup/MainWindowAddAddress';
 import MainWindowDappManagement from '../routes-popup/MainWindowDappManagement';
@@ -74,6 +75,9 @@ switch (parseQueryString().view) {
     break;
   case 'top-ghost-window':
     root.render(<TopGhostWindow />);
+    break;
+  case 'right-side-popup':
+    root.render(<RightSidePopupWindow />);
     break;
   default:
     root.render(<App />);
