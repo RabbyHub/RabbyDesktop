@@ -76,6 +76,7 @@ const CONF = {
     ReplaySubject<{
       sidebarContext: BrowserWindow;
       ghostFloatingWindow: BrowserWindow;
+      rightSidePopupWindow: BrowserWindow;
     }>
   >,
   popupViewsOnMainwinReady: {
@@ -89,7 +90,6 @@ const CONF = {
       zPopup: BrowserView;
       globalToastPopup: BrowserView;
       inDappFind: BrowserView;
-      rightSidePopup: BrowserView;
     }>
   >,
 

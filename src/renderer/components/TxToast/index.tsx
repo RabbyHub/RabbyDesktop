@@ -4,7 +4,10 @@ import {
   RcIconToastTxSubmitted,
 } from '@/../assets/icons/global-toast';
 import RcIconExternalLink from '@/../assets/icons/tx-toast/external-link.svg?rc';
-import { usePopupViewInfo } from '@/renderer/hooks/usePopupWinOnMainwin';
+import {
+  usePopupViewInfo,
+  usePopupWinInfo,
+} from '@/renderer/hooks/usePopupWinOnMainwin';
 import { notification } from 'antd';
 import clsx from 'clsx';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -152,9 +155,9 @@ const openNotification = (
   }, 200);
 };
 
-function notifyAdjustSize(txNotificationCount: number) {
+function notifyAdjustRect(txNotificationCount: number) {
   window.rabbyDesktop.ipcRenderer.sendMessage(
-    '__internal_rpc:popupview-on-mainwin:adjust-rect',
+    '__internal_rpc:popup-on-mainwin:adjust-rect',
     {
       type: 'right-side-popup',
       contents: {
@@ -165,30 +168,23 @@ function notifyAdjustSize(txNotificationCount: number) {
 }
 
 export const TxToast = () => {
-  const { pageInfo, hideView } = usePopupViewInfo('right-side-popup');
+  const { pageInfo } = usePopupWinInfo('right-side-popup');
 
   const [_, setList] = useState<string[]>([]);
 
-  const onClose = useCallback(
-    (id: string) => {
-      setList((l) => {
-        const v = l.filter((e) => e !== id);
-        if (v.length === 0) {
-          hideView();
-        } else {
-          notifyAdjustSize(v.length);
-        }
+  const onClose = useCallback((id: string) => {
+    setList((l) => {
+      const v = l.filter((e) => e !== id);
+      notifyAdjustRect(v.length);
 
-        return v;
-      });
-    },
-    [hideView]
-  );
+      return v;
+    });
+  }, []);
 
   const onOpen = useCallback((id: string) => {
     setList((e) => {
       const result = [...e, id];
-      notifyAdjustSize(Math.max(2, result.length));
+      notifyAdjustRect(Math.max(2, result.length));
 
       return result;
     });

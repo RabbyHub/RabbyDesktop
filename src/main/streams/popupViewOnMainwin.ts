@@ -1,11 +1,7 @@
 import { BrowserView, BrowserWindow } from 'electron';
 
 import { roundRectValue } from '@/isomorphic/shape';
-import {
-  InDappFindSizes,
-  NativeAppSizes,
-  RightSidePopupContentsSizes,
-} from '@/isomorphic/const-size-next';
+import { InDappFindSizes } from '@/isomorphic/const-size-next';
 import {
   IS_RUNTIME_PRODUCTION,
   RABBY_POPUP_GHOST_VIEW_URL,
@@ -60,9 +56,6 @@ const viewsState: {
   'global-toast-popup': {
     visible: false,
   },
-  'right-side-popup': {
-    visible: false,
-  },
 };
 
 async function hidePopupViewOnWindow(
@@ -91,29 +84,11 @@ async function hidePopupViewOnWindow(
   viewsState[type].visible = false;
 }
 
-function getRightSidePopupViewBounds(
+function updateSubviewPos(
   parentWindow: BrowserWindow,
-  actualHeight: number
+  view: BrowserView,
+  viewType?: PopupViewOnMainwinInfo['type'] | Electron.Rectangle
 ) {
-  const pBounds = parentWindow.getBounds();
-
-  return {
-    width: NativeAppSizes.rightSidePopupWindowWidth,
-    height: actualHeight,
-    x: pBounds.width - NativeAppSizes.rightSidePopupWindowWidth,
-    y: pBounds.height - actualHeight,
-  };
-}
-
-function updateSubviewPos({
-  parentWindow,
-  view,
-  viewTypeOrRect,
-}: {
-  parentWindow: BrowserWindow;
-  view: BrowserView;
-  viewTypeOrRect?: PopupViewOnMainwinInfo['type'] | Electron.Rectangle;
-}) {
   const [width, height] = parentWindow.getSize();
   let popupRect = {
     x: 0,
@@ -122,23 +97,17 @@ function updateSubviewPos({
     height,
   };
 
-  if (viewTypeOrRect === 'add-address-dropdown') {
+  if (viewType === 'add-address-dropdown') {
     const selfBounds = view.getBounds();
 
     popupRect = {
       ...popupRect,
       ...selfBounds,
     };
-  } else if (viewTypeOrRect === 'right-side-popup') {
-    // keep self height by default, we will do `adjust-rect` later
-    popupRect = getRightSidePopupViewBounds(
-      parentWindow,
-      Math.max(view.getBounds().height, 0)
-    );
-  } else if (typeof viewTypeOrRect === 'object') {
+  } else if (typeof viewType === 'object') {
     popupRect = {
       ...popupRect,
-      ...viewTypeOrRect,
+      ...viewType,
     };
   }
 
@@ -181,7 +150,7 @@ function updateGlobalToastViewPos(
     y: topOffset,
   };
 
-  return updateSubviewPos({ parentWindow, view, viewTypeOrRect: popupRect });
+  return updateSubviewPos(parentWindow, view, popupRect);
 }
 
 const IS_DARWIN = process.platform === 'darwin';
@@ -222,7 +191,7 @@ async function showModalPopup(
   viewsState[viewType].modalWindow = modalWindow;
   modalWindow.addBrowserView(targetView);
 
-  updateSubviewPos({ parentWindow: modalWindow, view: targetView });
+  updateSubviewPos(modalWindow, targetView);
   targetView.webContents.focus();
 
   showPopupWindow(modalWindow);
@@ -250,11 +219,7 @@ const addAddressReady = onMainWindowReady().then(async (mainWin) => {
 
   const onTargetWinUpdate = () => {
     if (viewsState['add-address-dropdown'].visible)
-      updateSubviewPos({
-        parentWindow: mainWindow,
-        view: addAddressPopup,
-        viewTypeOrRect: 'add-address-dropdown',
-      });
+      updateSubviewPos(mainWindow, addAddressPopup, 'add-address-dropdown');
   };
   mainWindow.on('show', onTargetWinUpdate);
   mainWindow.on('move', onTargetWinUpdate);
@@ -285,11 +250,7 @@ const dappsManagementReady = onMainWindowReady().then(async (mainWin) => {
 
   const onTargetWinUpdate = () => {
     if (viewsState['dapps-management'].visible)
-      updateSubviewPos({
-        parentWindow: mainWindow,
-        view: dappsManagementPopup,
-        viewTypeOrRect: 'dapps-management',
-      });
+      updateSubviewPos(mainWindow, dappsManagementPopup, 'dapps-management');
   };
   mainWindow.on('show', onTargetWinUpdate);
   mainWindow.on('move', onTargetWinUpdate);
@@ -338,11 +299,7 @@ const inDappFindReady = onMainWindowReady().then(async (mainWin) => {
   const onTargetWinUpdate = () => {
     if (viewsState['in-dapp-find'].visible) {
       const oldBounds = inDappFindPopup.getBounds();
-      updateSubviewPos({
-        parentWindow: mainWindow,
-        view: inDappFindPopup,
-        viewTypeOrRect: oldBounds,
-      });
+      updateSubviewPos(mainWindow, inDappFindPopup, oldBounds);
     }
   };
   mainWindow.on('show', onTargetWinUpdate);
@@ -373,12 +330,7 @@ const zPopupReady = onMainWindowReady().then(async (mainWin) => {
   mainWindow.addBrowserView(zPopup);
 
   const onTargetWinUpdate = () => {
-    if (viewsState['z-popup'].visible)
-      updateSubviewPos({
-        parentWindow: mainWindow,
-        view: zPopup,
-        viewTypeOrRect: 'z-popup',
-      });
+    if (viewsState['z-popup'].visible) updateSubviewPos(mainWindow, zPopup);
   };
   mainWindow.on('show', onTargetWinUpdate);
   mainWindow.on('move', onTargetWinUpdate);
@@ -434,42 +386,6 @@ const globalToastPopupReady = onMainWindowReady().then(async (mainWin) => {
   return globalToastPopup;
 });
 
-const rightSidePopupViewReady = onMainWindowReady().then(async (mainWin) => {
-  const mainWindow = mainWin.window;
-
-  const rightSidePopup = createPopupView({});
-
-  mainWindow.addBrowserView(rightSidePopup);
-
-  // const onTargetWinUpdate = () => {
-  //   if (viewsState['right-side-popup'].visible) {
-  //     updateSubviewPos({
-  //       parentWindow: mainWindow,
-  //       view: rightSidePopup,
-  //       viewTypeOrRect: 'right-side-popup',
-  //     });
-  //   }
-  // };
-  // mainWindow.on('show', onTargetWinUpdate);
-  // mainWindow.on('move', onTargetWinUpdate);
-  // mainWindow.on('resized', onTargetWinUpdate);
-  // mainWindow.on('unmaximize', onTargetWinUpdate);
-  // mainWindow.on('restore', onTargetWinUpdate);
-
-  await rightSidePopup.webContents.loadURL(
-    `${RABBY_POPUP_GHOST_VIEW_URL}?view=right-side-popup#/`
-  );
-
-  // debug-only
-  if (!IS_RUNTIME_PRODUCTION) {
-    // rightSidePopup.webContents.openDevTools({ mode: 'detach' });
-  }
-
-  hidePopupView(rightSidePopup);
-
-  return rightSidePopup;
-});
-
 Promise.all([
   addAddressReady,
   dappsManagementReady,
@@ -477,7 +393,6 @@ Promise.all([
   inDappFindReady,
   zPopupReady,
   globalToastPopupReady,
-  rightSidePopupViewReady,
 ]).then((wins) => {
   valueToMainSubject('popupViewsOnMainwinReady', {
     addAddress: wins[0],
@@ -486,11 +401,10 @@ Promise.all([
     inDappFind: wins[3],
     zPopup: wins[4],
     globalToastPopup: wins[5],
-    rightSidePopup: wins[6],
   });
 });
 
-const { handler: handlerToggleShow } = onIpcMainInternalEvent(
+const { handler } = onIpcMainInternalEvent(
   '__internal_main:popupview-on-mainwin:toggle-show',
   async (payload) => {
     const mainTabbedWin = await onMainWindowReady();
@@ -509,24 +423,20 @@ const { handler: handlerToggleShow } = onIpcMainInternalEvent(
       if (!viewsState[payload.type].s_isModal) {
         switch (payload.type) {
           case 'add-address-dropdown': {
-            updateSubviewPos({
-              parentWindow: mainWindow,
-              view: targetView,
-              viewTypeOrRect: (payload.pageInfo as any).triggerRect,
-            });
+            updateSubviewPos(
+              mainWindow,
+              targetView,
+              (payload.pageInfo as any).triggerRect
+            );
             break;
           }
           case 'in-dapp-find': {
             const tabOrigin = (payload.pageInfo as any).searchInfo.tabOrigin;
 
-            updateSubviewPos({
-              parentWindow: mainWindow,
-              view: targetView,
-              viewTypeOrRect: {
-                ...InDappFindSizes,
-                x: tabOrigin.x,
-                y: tabOrigin.y,
-              },
+            updateSubviewPos(mainWindow, targetView, {
+              ...InDappFindSizes,
+              x: tabOrigin.x,
+              y: tabOrigin.y,
             });
             break;
           }
@@ -540,11 +450,7 @@ const { handler: handlerToggleShow } = onIpcMainInternalEvent(
             break;
           }
           default: {
-            updateSubviewPos({
-              parentWindow: mainWindow,
-              view: targetView,
-              viewTypeOrRect: payload.type,
-            });
+            updateSubviewPos(mainWindow, targetView, payload.type);
             break;
           }
         }
@@ -584,50 +490,7 @@ const { handler: handlerToggleShow } = onIpcMainInternalEvent(
 onIpcMainEvent(
   '__internal_rpc:popupview-on-mainwin:toggle-show',
   (_, payload) => {
-    handlerToggleShow(payload);
-  }
-);
-
-const { handler: handlerAdjustRect } = onIpcMainInternalEvent(
-  '__internal_main:popupview-on-mainwin:adjust-rect',
-  async (payload) => {
-    switch (payload.type) {
-      case 'right-side-popup': {
-        const txNotifyCount = payload.contents.txNotificationCount;
-        const { views } = await getAllMainUIViews();
-        const mainTabbedWin = await onMainWindowReady();
-
-        const actualHeight = !txNotifyCount
-          ? 0
-          : txNotifyCount *
-              RightSidePopupContentsSizes.rightSideTxNotificationItemHeight +
-            RightSidePopupContentsSizes.rightSideTxNotificationItemVPaddingOffset *
-              2;
-
-        const popupRect = getRightSidePopupViewBounds(
-          mainTabbedWin.window,
-          actualHeight
-        );
-        updateSubviewPos({
-          parentWindow: mainTabbedWin.window,
-          view: views[payload.type],
-          viewTypeOrRect: popupRect,
-        });
-
-        break;
-      }
-      default: {
-        console.error(`[popupview-on-mainwin] unknown type: ${payload.type}`);
-        break;
-      }
-    }
-  }
-);
-
-onIpcMainEvent(
-  '__internal_rpc:popupview-on-mainwin:adjust-rect',
-  (_, payload) => {
-    handlerAdjustRect(payload);
+    handler(payload);
   }
 );
 

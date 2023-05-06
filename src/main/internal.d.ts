@@ -93,10 +93,10 @@ type MainInternalsMessagePayload = {
     ];
     response: [];
   };
-  '__internal_main:popupview-on-mainwin:adjust-rect': {
+  '__internal_main:popup-on-mainwin:adjust-rect': {
     send: [
       {
-        type: PopupViewOnMainwinInfo['type'] & 'right-side-popup';
+        type: IPopupWinPageInfo['type'] & 'right-side-popup';
         contents: {
           txNotificationCount: number;
         };

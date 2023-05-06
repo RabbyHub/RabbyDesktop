@@ -3,7 +3,9 @@ import { message } from 'antd';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
+import { showMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import { useCurrentAccount } from './useAccount';
+import { useZPopupLayerOnMain } from '../usePopupWinOnMainwin';
 
 const DEBUG_DURACTION = 0;
 
@@ -17,51 +19,63 @@ export function useTransactionChanged() {
           default:
             break;
           case 'push-failed': {
-            showMainwinPopupview({
-              type: 'right-side-popup',
-              state: {
-                type: 'failed',
-                chain: payload.data.chain,
-                title: 'Transaction push failed',
-              },
-            });
+            showMainwinPopup(
+              { x: 0, y: 0 },
+              {
+                type: 'right-side-popup',
+                state: {
+                  type: 'failed',
+                  chain: payload.data.chain,
+                  title: 'Transaction push failed',
+                },
+              }
+            );
 
             break;
           }
           case 'submitted': {
-            showMainwinPopupview({
-              type: 'right-side-popup',
-              state: {
-                type: 'submit',
-                chain: payload.data.chain,
-                hash: payload.data.hash,
-                title: 'Transaction submitted',
-              },
-            });
+            showMainwinPopup(
+              { x: 0, y: 0 },
+              {
+                type: 'right-side-popup',
+                state: {
+                  type: 'submit',
+                  chain: payload.data.chain,
+                  hash: payload.data.hash,
+                  title: 'Transaction submitted',
+                },
+              }
+            );
 
             break;
           }
           case 'finished': {
             if (payload.data?.success) {
-              showMainwinPopupview({
-                type: 'right-side-popup',
-                state: {
-                  type: 'success',
-                  chain: payload.data.chain,
-                  hash: payload.data.hash,
-                  title: 'Transaction completed',
-                },
-              });
+              showMainwinPopup(
+                { x: 0, y: 0 },
+                {
+                  type: 'right-side-popup',
+                  state: {
+                    type: 'success',
+                    chain: payload.data.chain,
+                    hash: payload.data.hash,
+                    title: 'Transaction completed',
+                  },
+                }
+              );
             } else {
-              showMainwinPopupview({
-                type: 'right-side-popup',
-                state: {
-                  type: 'failed',
-                  chain: payload.data.chain,
-                  hash: payload.data.hash,
-                  title: 'Transaction failed',
-                },
-              });
+              showMainwinPopup(
+                { x: 0, y: 0 },
+                {
+                  type: 'right-side-popup',
+                  state: {
+                    type: 'failed',
+                    chain: payload.data.chain,
+                    hash: payload.data.hash,
+                    title: 'Transaction failed',
+                  },
+                }
+              );
             }
 
             break;

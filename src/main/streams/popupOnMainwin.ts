@@ -1,6 +1,10 @@
 import { BrowserWindow } from 'electron';
 
 import {
+  NativeAppSizes,
+  RightSidePopupContentsSizes,
+} from '@/isomorphic/const-size-next';
+import {
   IS_RUNTIME_PRODUCTION,
   RABBY_POPUP_GHOST_VIEW_URL,
 } from '../../isomorphic/constants';
@@ -19,6 +23,7 @@ import {
   getAllMainUIWindows,
   onMainWindowReady,
 } from '../utils/stream-helpers';
+import { getMainWindowTopOffset } from '../utils/browserSize';
 
 const isDarwin = process.platform === 'darwin';
 
@@ -55,6 +60,10 @@ const SIZE_MAP: Record<
     width: 1366,
     height: 768,
   },
+  'right-side-popup': {
+    width: NativeAppSizes.rightSidePopupWindowWidth,
+    height: 0,
+  },
 };
 
 function pickWH(
@@ -72,6 +81,30 @@ function pickWH(
   result.height = Math.round(result.height);
 
   return result;
+}
+
+const rightSidePopupState = {
+  notifyCount: 0,
+};
+function getRightSidePopupViewBounds(parentWindow: BrowserWindow) {
+  const pBounds = parentWindow.getBounds();
+
+  const fullHeight = pBounds.height - getMainWindowTopOffset();
+
+  let actualHeight = !rightSidePopupState.notifyCount
+    ? 0
+    : rightSidePopupState.notifyCount *
+        RightSidePopupContentsSizes.rightSideTxNotificationItemHeight +
+      RightSidePopupContentsSizes.rightSideTxNotificationItemVPaddingOffset * 2;
+
+  actualHeight = Math.max(actualHeight, Math.round(fullHeight / 2));
+
+  return {
+    width: NativeAppSizes.rightSidePopupWindowWidth,
+    height: actualHeight,
+    x: pBounds.width - NativeAppSizes.rightSidePopupWindowWidth,
+    y: pBounds.height - actualHeight,
+  };
 }
 
 function updateSubWindowRect({
@@ -98,6 +131,10 @@ function updateSubWindowRect({
       ...pBounds,
       x: 0,
       y: 0,
+    }),
+    ...(windowType === 'right-side-popup' && {
+      ...window.getBounds(),
+      ...getRightSidePopupViewBounds(parentWin),
     }),
   };
 
@@ -249,14 +286,75 @@ const ghostFloatingWindowReady = onMainWindowReady().then(
   }
 );
 
-Promise.all([sidebarAppContextMenuReady, ghostFloatingWindowReady]).then(
-  (wins) => {
-    valueToMainSubject('popupWindowOnMain', {
-      sidebarContext: wins[0],
-      ghostFloatingWindow: wins[1],
+const rightSidePopupWindowReady = onMainWindowReady().then(
+  async (mainTabbedWin) => {
+    const mainWin = mainTabbedWin.window;
+
+    const rightSidePopupWindow = createPopupWindow({
+      parent: mainTabbedWin.window,
+      transparent: true,
+      hasShadow: false,
+      closable: false,
+      focusable: true,
+      alwaysOnTop: false,
     });
+
+    // disable close by shortcut
+    rightSidePopupWindow.on('close', (evt) => {
+      evt.preventDefault();
+
+      return false;
+    });
+
+    updateSubWindowRect({
+      parentWin: mainTabbedWin.window,
+      window: rightSidePopupWindow,
+      windowType: 'right-side-popup',
+    });
+    const onTargetWinUpdate = () => {
+      if (rightSidePopupWindow.isVisible()) {
+        updateSubWindowRect({
+          parentWin: mainTabbedWin.window,
+          window: rightSidePopupWindow,
+          windowType: 'right-side-popup',
+        });
+      }
+    };
+    mainWin.on('show', onTargetWinUpdate);
+    mainWin.on('move', onTargetWinUpdate);
+    mainWin.on('resized', onTargetWinUpdate);
+    mainWin.on('unmaximize', onTargetWinUpdate);
+    mainWin.on('restore', onTargetWinUpdate);
+
+    await rightSidePopupWindow.webContents.loadURL(
+      `${RABBY_POPUP_GHOST_VIEW_URL}?view=right-side-popup`
+    );
+
+    rightSidePopupWindow.setIgnoreMouseEvents(true);
+
+    // debug-only
+    if (!IS_RUNTIME_PRODUCTION) {
+      // rightSidePopupWindow.webContents.openDevTools({ mode: 'detach' });
+    }
+
+    // hidePopupWindow(rightSidePopupWindow);
+    showPopupWindow(rightSidePopupWindow);
+
+    return rightSidePopupWindow;
   }
 );
+
+Promise.all([
+  sidebarAppContextMenuReady,
+  ghostFloatingWindowReady,
+  rightSidePopupWindowReady,
+]).then((wins) => {
+  valueToMainSubject('popupWindowOnMain', {
+    sidebarContext: wins[0],
+    ghostFloatingWindow: wins[1],
+    rightSidePopupWindow: wins[2],
+  });
+});
 
 const { handler: handlerToggleShowPopupWins } = onIpcMainInternalEvent(
   '__internal_main:popupwin-on-mainwin:toggle-show',
@@ -323,3 +421,38 @@ onIpcMainEvent(
     }
   }
 );
+
+const { handler: handlerSetIgnoreMouseEvents } = onIpcMainInternalEvent(
+  '__internal_main:popup-on-mainwin:adjust-rect',
+  async (payload) => {
+    switch (payload.type) {
+      case 'right-side-popup': {
+        const window = await rightSidePopupWindowReady;
+        const txNotifyCount = payload.contents?.txNotificationCount || 0;
+
+        rightSidePopupState.notifyCount = txNotifyCount;
+
+        window.setIgnoreMouseEvents(!txNotifyCount);
+
+        // const mainTabbedWin = await onMainWindowReady();
+        // const popupRect = getRightSidePopupViewBounds(mainTabbedWin.window);
+        // updateSubWindowRect({
+        //   parentWin: mainTabbedWin.window,
+        //   window,
+        //   windowType: 'right-side-popup',
+        //   nextRect: popupRect,
+        // });
+
+        break;
+      }
+      default: {
+        console.error(`[popupview-on-mainwin] unknown type: ${payload.type}`);
+        break;
+      }
+    }
+  }
+);
+
+onIpcMainEvent('__internal_rpc:popup-on-mainwin:adjust-rect', (_, payload) => {
+  handlerSetIgnoreMouseEvents(payload);
+});
