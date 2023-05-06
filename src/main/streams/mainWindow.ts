@@ -243,6 +243,7 @@ onIpcMainEvent('__internal_rpc:main-window:click-close', async (evt) => {
     return;
   }
 
+  tabbedWin?.window?.hide();
   tabbedWin?.destroy();
 });
 

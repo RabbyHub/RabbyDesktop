@@ -172,8 +172,14 @@ app.on('window-all-closed', () => {
   app.quit();
 });
 
-app.on('activate', (_, hasVisibleWindows) => {
-  if (!hasVisibleWindows) emitIpcMainEvent('__internal_main:mainwindow:show');
+// on Darwin, clicking icon in dock will trigger `activate` event
+app.on('activate', async (_, hasVisibleWindows) => {
+  const mainTabbedWin = await onMainWindowReady();
+  if (!hasVisibleWindows) {
+    emitIpcMainEvent('__internal_main:mainwindow:show');
+  } else if (isDarwin && !mainTabbedWin.window.isVisible()) {
+    emitIpcMainEvent('__internal_main:mainwindow:show');
+  }
 });
 
 handleIpcMainInvoke('get-app-version', (_) => {
