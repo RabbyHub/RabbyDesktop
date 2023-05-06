@@ -165,6 +165,20 @@ function buildRabbyXDebugMenu(opts: ChromeContextMenuOptions) {
     },
   });
   appendMenu(menu, {
+    label: `Trigger notification: Tx failed`,
+    click: async () => {
+      rabbyxQuery('sessionService.broadcastToDesktopOnly', [
+        'transactionChanged',
+        {
+          type: 'finished',
+          success: false,
+          hash: '0x9c9d39c5e99074552c7caa33e2c3cedd25c9a21ed4190b7c9b48be3ea0111776',
+          chain: CHAINS_ENUM.POLYGON,
+        },
+      ]);
+    },
+  });
+  appendMenu(menu, {
     label: `Trigger notification: Tx push-failed`,
     click: async () => {
       // const { backgroundWebContents } = await getRabbyExtViews();
