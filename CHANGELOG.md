@@ -1,7 +1,26 @@
 
-v0.18.0 / 2023-04-28
+v0.19.0 / 2023-05-06
 ====================
 
+  * feat(TxToast): adjust progress bar height and assets update interval (#411)
+  * feat(TxToast): adjust timeout;updaet origin state (#410)
+  * feat: tx toast (#406)
+  * feat: support safe on op, arb, aurora (#401)
+  * fix: scrollbar (#408)
+  * feat: update balance after transaction success (#409)
+  * feat: hide mainWindow on click its close button, rather than quit app. (#403)
+  * feat: forward unsupported protocol to system. (#399)
+  * feat: support wemix chain (#400)
+  * feat: mock installation progress when updating on macOS. (#402)
+  * fix: refresh balance loading icon (#407)
+  * Revert "feat: tx toast (#404)" (#405)
+  * feat: tx toast (#404)
+  * fix: keep mainWindow refed by electronChromeExtension as all tabs closed. (#396)
+
+v0.18.0-prod / 2023-04-28
+=========================
+
+  * Release v0.18.0-prod
   * swap fix (#398)
   * feat: dapp search & refresh all balance & scam & go home (#392)
   * feat: swap change (#394)
