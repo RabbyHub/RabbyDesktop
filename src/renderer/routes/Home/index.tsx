@@ -263,7 +263,6 @@ const Home = () => {
 
   useEffect(() => {
     const updateFn = debounce(() => {
-      console.log('trigger update');
       setUpdateNonce((prev) => {
         return prev + 1;
       });
