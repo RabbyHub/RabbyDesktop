@@ -1,6 +1,5 @@
 import { BrowserWindow } from 'electron';
 
-import { NativeAppSizes } from '@/isomorphic/const-size-next';
 import {
   IS_RUNTIME_PRODUCTION,
   RABBY_POPUP_GHOST_VIEW_URL,
@@ -56,10 +55,6 @@ const SIZE_MAP: Record<
     width: 1366,
     height: 768,
   },
-  'right-side-popup': {
-    width: NativeAppSizes.rightSidePopupWindowWidth,
-    height: 0,
-  },
 };
 
 function pickWH(
@@ -102,13 +97,6 @@ function updateSubWindowRect({
     ...(windowType === 'top-ghost-window' && {
       ...pBounds,
       x: 0,
-      y: 0,
-    }),
-    ...(windowType === 'right-side-popup' && {
-      ...pBounds,
-      width: NativeAppSizes.rightSidePopupWindowWidth,
-      // x: (pBounds.x + pBounds.width) - NativeAppSizes.rightSidePopupWindowWidth,
-      x: pBounds.width - NativeAppSizes.rightSidePopupWindowWidth,
       y: 0,
     }),
   };
@@ -261,79 +249,14 @@ const ghostFloatingWindowReady = onMainWindowReady().then(
   }
 );
 
-const rightSidePopupWindowReady = onMainWindowReady().then(
-  async (mainTabbedWin) => {
-    const mainWin = mainTabbedWin.window;
-
-    const rightSidePopupWindow = createPopupWindow({
-      parent: mainTabbedWin.window,
-      transparent: true,
-      hasShadow: false,
-      closable: false,
-      focusable: true,
+Promise.all([sidebarAppContextMenuReady, ghostFloatingWindowReady]).then(
+  (wins) => {
+    valueToMainSubject('popupWindowOnMain', {
+      sidebarContext: wins[0],
+      ghostFloatingWindow: wins[1],
     });
-
-    // disable close by shortcut
-    rightSidePopupWindow.on('close', (evt) => {
-      evt.preventDefault();
-
-      return false;
-    });
-
-    rightSidePopupWindow.on('focus', () => {
-      if (IS_RUNTIME_PRODUCTION) {
-        rightSidePopupWindow.blur();
-        rightSidePopupWindow.blurWebView();
-      }
-    });
-
-    updateSubWindowRect({
-      parentWin: mainTabbedWin.window,
-      window: rightSidePopupWindow,
-      windowType: 'right-side-popup',
-    });
-    const onTargetWinUpdate = () => {
-      if (rightSidePopupWindow.isVisible()) {
-        updateSubWindowRect({
-          parentWin: mainTabbedWin.window,
-          window: rightSidePopupWindow,
-          windowType: 'right-side-popup',
-        });
-      }
-    };
-    mainWin.on('show', onTargetWinUpdate);
-    mainWin.on('move', onTargetWinUpdate);
-    mainWin.on('resized', onTargetWinUpdate);
-    mainWin.on('unmaximize', onTargetWinUpdate);
-    mainWin.on('restore', onTargetWinUpdate);
-
-    await rightSidePopupWindow.webContents.loadURL(
-      `${RABBY_POPUP_GHOST_VIEW_URL}?view=right-side-popup`
-    );
-
-    // debug-only
-    if (!IS_RUNTIME_PRODUCTION) {
-      // rightSidePopupWindow.webContents.openDevTools({ mode: 'detach' });
-      showPopupWindow(rightSidePopupWindow);
-    } else {
-      hidePopupWindow(rightSidePopupWindow);
-    }
-
-    return rightSidePopupWindow;
   }
 );
-
-Promise.all([
-  sidebarAppContextMenuReady,
-  ghostFloatingWindowReady,
-  rightSidePopupWindowReady,
-]).then((wins) => {
-  valueToMainSubject('popupWindowOnMain', {
-    sidebarContext: wins[0],
-    ghostFloatingWindow: wins[1],
-    rightSidePopupWindow: wins[2],
-  });
-});
 
 const { handler: handlerToggleShowPopupWins } = onIpcMainInternalEvent(
   '__internal_main:popupwin-on-mainwin:toggle-show',

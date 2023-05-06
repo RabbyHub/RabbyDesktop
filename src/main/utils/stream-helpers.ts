@@ -116,10 +116,7 @@ export function updateMainWindowActiveTabRect(
 }
 
 export async function getAllMainUIWindows() {
-  const [
-    mainWin,
-    { sidebarContext, ghostFloatingWindow, rightSidePopupWindow },
-  ] = await Promise.all([
+  const [mainWin, { sidebarContext, ghostFloatingWindow }] = await Promise.all([
     await onMainWindowReady(),
     await firstValueFrom(fromMainSubject('popupWindowOnMain')),
   ]);
@@ -127,7 +124,6 @@ export async function getAllMainUIWindows() {
   const popupOnly: Record<IPopupWinPageInfo['type'], Electron.BrowserWindow> = {
     'sidebar-dapp-contextmenu': sidebarContext,
     'top-ghost-window': ghostFloatingWindow,
-    'right-side-popup': rightSidePopupWindow,
   } as const;
 
   const windows = {
@@ -155,6 +151,7 @@ export async function getAllMainUIViews() {
     'z-popup': mainViews.zPopup,
     'global-toast-popup': mainViews.globalToastPopup,
     'in-dapp-find': mainViews.inDappFind,
+    'right-side-popup': mainViews.rightSidePopup,
   };
 
   const viewOnlyHash = {
@@ -164,6 +161,7 @@ export async function getAllMainUIViews() {
     zPopup: mainViews.zPopup.webContents,
     globalToastPopup: mainViews.globalToastPopup.webContents,
     inDappFind: mainViews.inDappFind.webContents,
+    rightSidePopup: mainViews.rightSidePopup.webContents,
   };
 
   const hash = {

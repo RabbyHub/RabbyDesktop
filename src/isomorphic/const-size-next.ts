@@ -41,3 +41,8 @@ export const InDappFindSizes = {
   width: 356 + shadowRightOffset,
   height: 52 + shadowBottomOffset,
 };
+
+export const RightSidePopupContentsSizes = {
+  rightSideTxNotificationItemHeight: 78,
+  rightSideTxNotificationItemVPaddingOffset: 16,
+};

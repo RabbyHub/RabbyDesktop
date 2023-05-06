@@ -3,15 +3,11 @@ import { message } from 'antd';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
-import { showMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import { useCurrentAccount } from './useAccount';
-import { useZPopupLayerOnMain } from '../usePopupWinOnMainwin';
 
 const DEBUG_DURACTION = 0;
 
 export function useTransactionChanged() {
-  const ZActions = useZPopupLayerOnMain();
-
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
@@ -21,63 +17,51 @@ export function useTransactionChanged() {
           default:
             break;
           case 'push-failed': {
-            showMainwinPopup(
-              { x: 0, y: 0 },
-              {
-                type: 'right-side-popup',
-                state: {
-                  type: 'failed',
-                  chain: payload.data.chain,
-                  title: 'Transaction push failed',
-                },
-              }
-            );
+            showMainwinPopupview({
+              type: 'right-side-popup',
+              state: {
+                type: 'failed',
+                chain: payload.data.chain,
+                title: 'Transaction push failed',
+              },
+            });
 
             break;
           }
           case 'submitted': {
-            showMainwinPopup(
-              { x: 0, y: 0 },
-              {
-                type: 'right-side-popup',
-                state: {
-                  type: 'submit',
-                  chain: payload.data.chain,
-                  hash: payload.data.hash,
-                  title: 'Transaction submitted',
-                },
-              }
-            );
+            showMainwinPopupview({
+              type: 'right-side-popup',
+              state: {
+                type: 'submit',
+                chain: payload.data.chain,
+                hash: payload.data.hash,
+                title: 'Transaction submitted',
+              },
+            });
 
             break;
           }
           case 'finished': {
             if (payload.data?.success) {
-              showMainwinPopup(
-                { x: 0, y: 0 },
-                {
-                  type: 'right-side-popup',
-                  state: {
-                    type: 'success',
-                    chain: payload.data.chain,
-                    hash: payload.data.hash,
-                    title: 'Transaction completed',
-                  },
-                }
-              );
+              showMainwinPopupview({
+                type: 'right-side-popup',
+                state: {
+                  type: 'success',
+                  chain: payload.data.chain,
+                  hash: payload.data.hash,
+                  title: 'Transaction completed',
+                },
+              });
             } else {
-              showMainwinPopup(
-                { x: 0, y: 0 },
-                {
-                  type: 'right-side-popup',
-                  state: {
-                    type: 'failed',
-                    chain: payload.data.chain,
-                    hash: payload.data.hash,
-                    title: 'Transaction failed',
-                  },
-                }
-              );
+              showMainwinPopupview({
+                type: 'right-side-popup',
+                state: {
+                  type: 'failed',
+                  chain: payload.data.chain,
+                  hash: payload.data.hash,
+                  title: 'Transaction failed',
+                },
+              });
             }
 
             break;
@@ -85,7 +69,7 @@ export function useTransactionChanged() {
         }
       }
     );
-  }, [ZActions]);
+  }, []);
 }
 
 const pendingTxCountAtom = atom(0);

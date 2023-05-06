@@ -5,6 +5,7 @@ import {
 } from '@/../assets/icons/global-toast';
 import RcIconExternalLink from '@/../assets/icons/tx-toast/external-link.svg?rc';
 import {
+  usePopupViewInfo,
   usePopupWinInfo,
   useZPopupViewState,
 } from '@/renderer/hooks/usePopupWinOnMainwin';
@@ -143,8 +144,20 @@ const openNotification = (
   }, 200);
 };
 
+function notifyAjudstSize(txNotificationCount: number) {
+  window.rabbyDesktop.ipcRenderer.sendMessage(
+    '__internal_rpc:popupview-on-mainwin:adjust-rect',
+    {
+      type: 'right-side-popup',
+      contents: {
+        txNotificationCount,
+      },
+    }
+  );
+}
+
 export const TxToast = () => {
-  const { pageInfo, hideWindow } = usePopupWinInfo('right-side-popup');
+  const { pageInfo, hideView } = usePopupViewInfo('right-side-popup');
   const { chain, hash, type, title } = pageInfo?.state || {};
 
   const [_, setList] = useState<string[]>([]);
@@ -154,16 +167,24 @@ export const TxToast = () => {
       setList((l) => {
         const v = l.filter((e) => e !== id);
         if (v.length === 0) {
-          hideWindow();
+          hideView();
+        } else {
+          notifyAjudstSize(v.length);
         }
+
         return v;
       });
     },
-    [hideWindow]
+    [hideView]
   );
 
   const onOpen = useCallback((id: string) => {
-    setList((e) => [...e, id]);
+    setList((e) => {
+      const result = [...e, id];
+      notifyAjudstSize(result.length);
+
+      return result;
+    });
   }, []);
 
   useEffect(() => {
