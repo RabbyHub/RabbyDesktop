@@ -4,10 +4,13 @@ import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { useCurrentAccount } from './useAccount';
+import { useZPopupLayerOnMain } from '../usePopupWinOnMainwin';
 
 const DEBUG_DURACTION = 0;
 
 export function useTransactionChanged() {
+  const ZActions = useZPopupLayerOnMain();
+
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
@@ -17,55 +20,38 @@ export function useTransactionChanged() {
           default:
             break;
           case 'push-failed': {
-            showMainwinPopupview({
-              type: 'global-toast-popup',
-              state: {
-                toastType: 'toast-message',
-                data: {
-                  type: 'error',
-                  content: 'Transaction push failed',
-                },
-              },
+            ZActions.showZSubview('tx-notification', {
+              type: 'failed',
+              chain: payload.data.chain,
+              title: 'Transaction push failed',
             });
 
             break;
           }
           case 'submitted': {
-            showMainwinPopupview({
-              type: 'global-toast-popup',
-              state: {
-                toastType: 'toast-message',
-                data: {
-                  type: 'success',
-                  content: 'Transaction submitted',
-                },
-              },
+            ZActions.showZSubview('tx-notification', {
+              type: 'submit',
+              chain: payload.data.chain,
+              hash: payload.data.hash,
+              title: 'Transaction submitted',
             });
 
             break;
           }
           case 'finished': {
             if (payload.data?.success) {
-              showMainwinPopupview({
-                type: 'global-toast-popup',
-                state: {
-                  toastType: 'toast-message',
-                  data: {
-                    type: 'success',
-                    content: 'Transaction success',
-                  },
-                },
+              ZActions.showZSubview('tx-notification', {
+                type: 'success',
+                chain: payload.data.chain,
+                hash: payload.data.hash,
+                title: 'Transaction completed',
               });
             } else {
-              showMainwinPopupview({
-                type: 'global-toast-popup',
-                state: {
-                  toastType: 'toast-message',
-                  data: {
-                    type: 'error',
-                    content: 'Transaction failed',
-                  },
-                },
+              ZActions.showZSubview('tx-notification', {
+                type: 'failed',
+                chain: payload.data.chain,
+                hash: payload.data.hash,
+                title: 'Transaction failed',
               });
             }
 
@@ -74,7 +60,7 @@ export function useTransactionChanged() {
         }
       }
     );
-  }, []);
+  }, [ZActions]);
 }
 
 const pendingTxCountAtom = atom(0);
