@@ -19,10 +19,16 @@ export const RefreshButton: React.FC<Props> = ({ loading, onClick }) => {
   return (
     <Tooltip title="Update balance data" placement="left" trigger={['hover']}>
       <div className={styles.refreshButton} onClick={handleClick}>
-        <img
-          className={clsx(loading && 'animate-spin')}
-          src="rabby-internal://assets/icons/address-management/refresh.svg"
-        />
+        {loading ? (
+          <div className="w-[20px] h-[20px] flex items-center justify-center">
+            <img
+              src="rabby-internal://assets/icons/address-management/loading.svg"
+              className="w-[16px]"
+            />
+          </div>
+        ) : (
+          <img src="rabby-internal://assets/icons/address-management/refresh.svg" />
+        )}
       </div>
     </Tooltip>
   );
