@@ -4,7 +4,7 @@ import { usePrevious } from 'react-use';
 import styled from 'styled-components';
 import classNames from 'classnames';
 import { useLocation } from 'react-router-dom';
-import { sortBy } from 'lodash';
+import { sortBy, debounce } from 'lodash';
 import { ellipsis } from '@/renderer/utils/address';
 import { TipsWrapper } from '@/renderer/components/TipWrapper';
 import { formatNumber } from '@/renderer/utils/number';
@@ -260,6 +260,28 @@ const Home = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location]);
+
+  useEffect(() => {
+    const updateFn = debounce(() => {
+      console.log('trigger update');
+      setUpdateNonce((prev) => {
+        return prev + 1;
+      });
+    }, 5000);
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
+      (payload) => {
+        if (
+          payload.event !== 'transactionChanged' ||
+          payload.data?.type !== 'finished'
+        )
+          return;
+        if (payload.data?.success) {
+          updateFn();
+        }
+      }
+    );
+  }, []);
 
   const { showZSubview } = useZPopupLayerOnMain();
 
