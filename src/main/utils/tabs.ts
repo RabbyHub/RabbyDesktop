@@ -1,5 +1,5 @@
 import { checkHardwareConnectPage, isRabbyXPage } from '@/isomorphic/url';
-import { isProtocolKeepInApp } from '@/isomorphic/dapp';
+import { isProtocolLeaveInApp } from '@/isomorphic/dapp';
 import { Tabs } from '../browser/tabs';
 
 export function checkOpenAction(
@@ -28,7 +28,7 @@ export function checkOpenAction(
       type: IHardwareConnectPageType;
       pageURL: string;
     } {
-  if (!isProtocolKeepInApp(opts.toUrl)) {
+  if (!isProtocolLeaveInApp(opts.toUrl)) {
     return {
       action: 'open-external',
       externalUrl: opts.toUrl,

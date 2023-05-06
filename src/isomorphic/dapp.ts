@@ -437,7 +437,7 @@ export function isOpenedAsHttpDappType(
   return !!type && DAPP_TYPE_TO_OPEN_AS_HTTP.includes(type as any);
 }
 
-export function isProtocolKeepInApp(dappOrigin: string) {
+export function isProtocolLeaveInApp(dappOrigin: string) {
   return PROTOCOLS_SUPPORTED_TO_OPEN.some((protocol) =>
     dappOrigin.startsWith(protocol)
   );

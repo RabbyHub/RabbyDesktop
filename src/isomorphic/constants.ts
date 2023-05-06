@@ -37,7 +37,7 @@ export const PROTOCOLS_SUPPORTED_TO_OPEN = [
 
   'localfs://' as const,
   'rabby-fs://' as const,
-  'file://' as const,
+  // 'file://' as const,
 
   'chrome-extension://' as const,
 ];

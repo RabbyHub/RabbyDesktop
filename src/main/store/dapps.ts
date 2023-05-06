@@ -12,7 +12,7 @@ import {
   normalizeProtocolBindingValues,
   formatDappToStore,
   matchDappsByOrigin,
-  isProtocolKeepInApp,
+  isProtocolLeaveInApp,
 } from '@/isomorphic/dapp';
 import { arraify } from '@/isomorphic/array';
 import {
@@ -406,7 +406,7 @@ export function parseDappRedirect(
 
   const isToExtension = targetURL.startsWith('chrome-extension://');
 
-  if (!isProtocolKeepInApp(targetURL)) {
+  if (!isProtocolLeaveInApp(targetURL)) {
     result.shouldOpenExternal = true;
     result.finalAction = EnumOpenDappAction.openExternal;
   } else if (

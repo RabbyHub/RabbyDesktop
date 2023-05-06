@@ -8,7 +8,7 @@ import { pickFavIconURLFromMeta } from '@/isomorphic/html';
 import {
   checkoutDappURL,
   isOpenedAsHttpDappType,
-  isProtocolKeepInApp,
+  isProtocolLeaveInApp,
 } from '@/isomorphic/dapp';
 import {
   EnumMatchDappType,
@@ -224,7 +224,7 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
     isTargetDappBySecondaryOrigin: false,
   };
 
-  if (!isProtocolKeepInApp(dappOrigin)) {
+  if (!isProtocolLeaveInApp(dappOrigin)) {
     shell.openExternal(dappOrigin);
     return result;
   }
