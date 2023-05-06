@@ -5,7 +5,11 @@ import { omit } from 'lodash';
 import { parseQueryString } from '@/isomorphic/url';
 import { arraify } from '@/isomorphic/array';
 import { pickFavIconURLFromMeta } from '@/isomorphic/html';
-import { checkoutDappURL, isOpenedAsHttpDappType } from '@/isomorphic/dapp';
+import {
+  checkoutDappURL,
+  isOpenedAsHttpDappType,
+  isProtocolLeaveInApp,
+} from '@/isomorphic/dapp';
 import {
   EnumMatchDappType,
   IS_RUNTIME_PRODUCTION,
@@ -219,6 +223,11 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
     isTargetDappByOrigin: false,
     isTargetDappBySecondaryOrigin: false,
   };
+
+  if (!isProtocolLeaveInApp(dappOrigin)) {
+    shell.openExternal(dappOrigin);
+    return result;
+  }
 
   if (isTargetScanLink(dappOrigin)) {
     shell.openExternal(dappOrigin);

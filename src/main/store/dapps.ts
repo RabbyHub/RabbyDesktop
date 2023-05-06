@@ -12,6 +12,7 @@ import {
   normalizeProtocolBindingValues,
   formatDappToStore,
   matchDappsByOrigin,
+  isProtocolLeaveInApp,
 } from '@/isomorphic/dapp';
 import { arraify } from '@/isomorphic/array';
 import {
@@ -367,11 +368,25 @@ export function parseDappRedirect(
     isServerSideRedirect = false,
   } = opts || {};
 
-  const isFromDapp = isUrlFromDapp(currentURL);
-
   const currentInfo = parseDappUrl(currentURL, dapps);
   const targetInfo = parseDappUrl(targetURL, dapps);
-  const isToSameOrigin = currentInfo.origin === targetInfo.origin;
+
+  const result = {
+    currentInfo,
+    targetInfo,
+
+    isFromDapp: isUrlFromDapp(currentURL),
+    isToSameOrigin: currentInfo.origin === targetInfo.origin,
+    /** @deprecated */
+    couldKeepTab: false,
+    /** @deprecated */
+    allowOpenTab: false,
+    /** @deprecated */
+    shouldOpenExternal: blockchain_explorers.has(targetInfo.secondaryDomain),
+    finalAction: EnumOpenDappAction.deny as EnumOpenDappAction,
+    maybeRedirectInSPA: false,
+    isToExtension: false,
+  };
 
   const domainMetaCache: Record<
     I2ndDomainMeta['secondaryDomain'],
@@ -380,61 +395,46 @@ export function parseDappRedirect(
   parseDomainMeta(currentURL, dapps, domainMetaCache);
   parseDomainMeta(targetURL, dapps, domainMetaCache);
 
-  let finalAction: EnumOpenDappAction = EnumOpenDappAction.deny;
-
-  const couldKeepTab =
+  result.couldKeepTab =
     currentInfo.secondaryDomain === targetInfo.secondaryDomain &&
     !!domainMetaCache[currentInfo.secondaryDomain]
       ?.secondaryDomainOriginExisted;
-  const allowOpenTab =
+  result.allowOpenTab =
     !!domainMetaCache[targetInfo.secondaryDomain]?.secondaryDomainOriginExisted;
 
-  const maybeRedirectInSPA = isFromDapp && isToSameOrigin;
+  result.maybeRedirectInSPA = result.isFromDapp && result.isToSameOrigin;
 
   const isToExtension = targetURL.startsWith('chrome-extension://');
 
-  let shouldOpenExternal = blockchain_explorers.has(targetInfo.secondaryDomain);
-  if (
+  if (!isProtocolLeaveInApp(targetURL)) {
+    result.shouldOpenExternal = true;
+    result.finalAction = EnumOpenDappAction.openExternal;
+  } else if (
     isForTrezorLikeConnection &&
     !isToExtension &&
     !maybeTrezorLikeBuiltInHttpPage(targetURL)
   ) {
-    shouldOpenExternal = true;
-    finalAction = EnumOpenDappAction.openExternal;
+    result.shouldOpenExternal = true;
+    result.finalAction = EnumOpenDappAction.openExternal;
   } else if (isServerSideRedirect && targetInfo.matchDappResult.dapp) {
-    finalAction = EnumOpenDappAction.leaveInTab;
+    result.finalAction = EnumOpenDappAction.leaveInTab;
   } else if (
     isFromExistedTab &&
     targetInfo.matchDappResult.dapp &&
-    !isToSameOrigin
+    !result.isToSameOrigin
   ) {
-    finalAction = EnumOpenDappAction.safeOpenOrSwitchToAnotherTab;
+    result.finalAction = EnumOpenDappAction.safeOpenOrSwitchToAnotherTab;
   } else if (
     isFromExistedTab &&
     currentInfo.matchDappResult.dappBySecondaryDomainOrigin &&
     currentInfo.secondaryDomain === targetInfo.secondaryDomain
   ) {
-    finalAction = EnumOpenDappAction.leaveInTab;
-  } else if (isFromDapp && !isToSameOrigin) {
-    finalAction = EnumOpenDappAction.safeOpenOrSwitchToAnotherTab;
+    result.finalAction = EnumOpenDappAction.leaveInTab;
+  } else if (result.isFromDapp && !result.isToSameOrigin) {
+    result.finalAction = EnumOpenDappAction.safeOpenOrSwitchToAnotherTab;
   }
 
-  return {
-    currentInfo,
-    targetInfo,
-
-    isFromDapp,
-    isToSameOrigin,
-    /** @deprecated */
-    couldKeepTab,
-    /** @deprecated */
-    allowOpenTab,
-    /** @deprecated */
-    shouldOpenExternal,
-    finalAction,
-    maybeRedirectInSPA,
-    isToExtension,
-  };
+  return result;
 }
 
 export async function repairDappsFieldsOnBootstrap() {

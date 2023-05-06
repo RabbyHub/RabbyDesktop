@@ -1,4 +1,5 @@
 import { checkHardwareConnectPage, isRabbyXPage } from '@/isomorphic/url';
+import { isProtocolLeaveInApp } from '@/isomorphic/dapp';
 import { Tabs } from '../browser/tabs';
 
 export function checkOpenAction(
@@ -27,6 +28,13 @@ export function checkOpenAction(
       type: IHardwareConnectPageType;
       pageURL: string;
     } {
+  if (!isProtocolLeaveInApp(opts.toUrl)) {
+    return {
+      action: 'open-external',
+      externalUrl: opts.toUrl,
+    };
+  }
+
   const isFromExt = opts.fromUrl.startsWith('chrome-extension://');
   const isToExt = opts.toUrl.startsWith('chrome-extension://');
 

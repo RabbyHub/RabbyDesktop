@@ -25,6 +25,23 @@ export const DAPP_TYPE_TO_OPEN_AS_HTTP = [
   'localfs',
 ] as IValidDappType[];
 
+export const PROTOCOLS_SUPPORTED_TO_OPEN = [
+  'http://' as const,
+  'https://' as const,
+
+  'ipfs://' as const,
+  'rabby-ipfs://' as const,
+
+  'ens://' as const,
+  'rabby-ens://' as const,
+
+  'localfs://' as const,
+  'rabby-fs://' as const,
+  // 'file://' as const,
+
+  'chrome-extension://' as const,
+];
+
 // only useful in dev mode
 let DEV_SERVER_PORT = 1212;
 try {
