@@ -110,7 +110,7 @@ const openNotification = (
         <div>
           {p.hash && (
             <div
-              className="text-white text-12 font-medium pl-[28px] flex items-center gap-8 cursor-pointer"
+              className="text-white text-12 opacity-80 font-medium pl-[28px] flex items-center gap-8 cursor-pointer"
               onClick={() => {
                 const link = CHAINS?.[p?.chain]?.scanLink?.replace(
                   /_s_/,
