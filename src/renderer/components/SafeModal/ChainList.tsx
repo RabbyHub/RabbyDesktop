@@ -9,6 +9,9 @@ const SUPPORT_CHAINS = [
   CHAINS_ENUM.POLYGON,
   CHAINS_ENUM.GNOSIS,
   CHAINS_ENUM.AVAX,
+  CHAINS_ENUM.OP,
+  CHAINS_ENUM.ARBITRUM,
+  CHAINS_ENUM.AURORA,
 ];
 
 const chainList = Object.values(CHAINS).sort((a, b) => {
