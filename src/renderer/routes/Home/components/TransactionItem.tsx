@@ -93,13 +93,53 @@ const TransactionItemWrapper = styled.div`
     text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
     display: none;
   }
+  &.scam {
+    padding-top: 30px;
+    .token-with-chain {
+      opacity: 0.3;
+    }
+    .tx-explain {
+      &-title {
+        color: rgba(255, 255, 255, 0.3);
+      }
+      &-desc {
+        color: rgba(255, 255, 255, 0.15);
+      }
+    }
+    .token-change {
+      color: rgba(255, 255, 255, 0.3);
+    }
+    .tx-time {
+      left: 66px;
+    }
+  }
   &.failed {
     padding-top: 30px;
-    .tx-explain {
+    .token-with-chain {
       opacity: 0.3;
+    }
+    .tx-explain {
+      &-title {
+        color: rgba(255, 255, 255, 0.3);
+      }
+      &-desc {
+        color: rgba(255, 255, 255, 0.15);
+      }
+    }
+    .token-change {
+      color: rgba(255, 255, 255, 0.3);
     }
     .tx-time {
       left: 29px;
+    }
+  }
+  &.scam.failed {
+    .tx-time {
+      left: 90px;
+    }
+    .failed-tag {
+      left: 66px;
+      border-bottom-left-radius: 4px;
     }
   }
   &.pending {
@@ -207,13 +247,31 @@ const CompletedTag = styled.div`
   }
 `;
 
-const FailedTag = styled.img`
+const ScamTag = styled.div`
   position: absolute;
   left: 0;
   top: 0;
-  background: #616675;
-  width: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+  color: rgba(255, 255, 255, 0.3);
+  padding: 3px 7px;
   border-bottom-right-radius: 4px;
+  display: flex;
+  align-items: center;
+`;
+
+const FailedTag = styled.div`
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 4px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-bottom-right-radius: 4px;
+  .icon-failed {
+    display: block;
+  }
 `;
 
 const TxExplain = styled.div`
@@ -424,11 +482,12 @@ const TransactionItem = ({
   item: TransactionDataItem;
   canCancel?: boolean;
 }) => {
-  const { isPending, isCompleted, isFailed } = useMemo(() => {
+  const { isPending, isCompleted, isFailed, isScam } = useMemo(() => {
     return {
       isPending: item.status === 'pending',
       isCompleted: item.status === 'completed',
       isFailed: item.status === 'failed',
+      isScam: item.isScam,
     };
   }, [item]);
 
@@ -668,14 +727,18 @@ const TransactionItem = ({
         pending: isPending,
         completed: isCompleted,
         failed: isFailed,
+        scam: isScam,
       })}
     >
+      {isScam && <ScamTag>Scam tx</ScamTag>}
       {isFailed && (
         <Tooltip title="Transaction failed">
-          <FailedTag
-            className="icon-failed"
-            src="rabby-internal://assets/icons/home/tx-failed.svg"
-          />
+          <FailedTag className="failed-tag">
+            <img
+              src="rabby-internal://assets/icons/home/tx-failed.svg"
+              className="icon-failed"
+            />
+          </FailedTag>
         </Tooltip>
       )}
       {isPending && (

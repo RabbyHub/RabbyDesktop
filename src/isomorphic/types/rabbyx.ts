@@ -134,6 +134,7 @@ export interface TransactionDataItem {
   rawTx?: Tx;
   txs?: TransactionHistoryItem[];
   site?: ConnectedSite;
+  isScam?: boolean;
 }
 
 export interface TransactionGroup {
