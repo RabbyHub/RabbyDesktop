@@ -115,6 +115,8 @@ export async function safeOpenURL(
     targetMatchedDappResult: IMatchDappResult;
     _targetwin?: BrowserWindow;
     redirectSourceTab?: import('../browser/tabs').Tab;
+    isFromInternalRenderer?: boolean;
+    dontReloadOnSwitchToActiveTab?: boolean;
   }
 ): Promise<SafeOpenResult> {
   const mainTabbedWin = await onMainWindowReady();
@@ -149,6 +151,13 @@ export async function safeOpenURL(
           const openedSecondaryDomain =
             canoicalizeDappUrl(openedTabURL).secondaryDomain;
           shouldLoad = targetInfo.secondaryDomain === openedSecondaryDomain;
+        }
+
+        if (
+          opts?.isFromInternalRenderer &&
+          opts?.dontReloadOnSwitchToActiveTab
+        ) {
+          shouldLoad = false;
         }
       }
 

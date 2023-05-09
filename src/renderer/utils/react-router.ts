@@ -23,14 +23,14 @@ export function useOpenDapp() {
   const forwardToMain = useForwardTo('main-window');
 
   return useCallback(
-    (dappUrl: string) => {
+    (dappUrl: string, opts?: ISafeOpenDappTabOptions) => {
       if (!isMainWindow) {
         forwardToMain('open-dapp', { data: { dappURL: dappUrl } });
         return;
       }
 
       window.rabbyDesktop.ipcRenderer
-        .invoke('safe-open-dapp-tab', dappUrl)
+        .invoke('safe-open-dapp-tab', dappUrl, opts)
         .then(({ shouldNavTabOnClient, openType }) => {
           if (shouldNavTabOnClient) {
             navigateToDapp(dappUrl);
