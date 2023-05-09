@@ -28,6 +28,7 @@ import { copyText } from '@/renderer/utils/clipboard';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import { useRbiSource } from '@/renderer/hooks/useRbiSource';
 import { TipsWrapper } from '@/renderer/components/TipWrapper';
+import IconRcLoading from '@/../assets/icons/swap/loading.svg?rc';
 import GasSelector from './components/GasSelector';
 import GasReserved from './components/GasReserved';
 import { ChainSelect } from '../Swap/component/ChainSelect';
@@ -179,6 +180,10 @@ const SendTokenWrapper = styled.div`
     font-weight: 500;
     font-size: 20px;
     line-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 
     &:hover {
       box-shadow: 0px 16px 40px rgba(29, 35, 74, 0.2);
@@ -430,7 +435,6 @@ const SendTokenInner = () => {
     to: string;
     amount: string;
   }) => {
-    setIsSubmitLoading(true);
     const target = Object.values(CHAINS).find(
       (item) => item.serverId === currentToken.chain
     )!;
@@ -508,6 +512,12 @@ const SendTokenInner = () => {
           },
         },
       })) as string;
+
+      form.setFieldsValue({
+        ...form.getFieldsValue(),
+        amount: '',
+      });
+
       lastSubmitRef.current = {
         hash,
         token: currentToken,
@@ -516,7 +526,6 @@ const SendTokenInner = () => {
     } catch (e: any) {
       message.error(e.message);
     } finally {
-      setIsSubmitLoading(false);
       setAmountFocus(true);
     }
   };
@@ -1111,12 +1120,16 @@ const SendTokenInner = () => {
           )}
           <div className="footer flex justify-center">
             <Button
-              disabled={!canSubmit}
+              disabled={!canSubmit || isSubmitLoading}
               type="primary"
               htmlType="submit"
               size="large"
               className="sendBtn"
-              loading={isSubmitLoading}
+              icon={
+                isSubmitLoading ? (
+                  <IconRcLoading className="animate-spin" />
+                ) : null
+              }
             >
               Send
             </Button>
