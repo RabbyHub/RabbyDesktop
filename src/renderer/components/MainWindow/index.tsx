@@ -124,7 +124,7 @@ const router = createRouter([
     ],
   },
   {
-    path: 'main-loading',
+    path: '/main-loading',
     loader: () => {
       return {
         routeCSSKeyword: 'mainwin_loading',
@@ -230,20 +230,17 @@ const router = createRouter([
 /**
  * @description make sure use this hooks only once at top-level component in whole app
  */
-function useAccountsGuard(nav: (path: string) => void) {
+function useAccountsGuard() {
   const { fetchAccounts } = useAccounts({
-    onFetchStageChanged: useCallback(
-      (ctx) => {
-        if (ctx.state === 'FINISHED') {
-          if (ctx.accounts.length) {
-            nav('/mainwin/home');
-          } else {
-            nav('/welcome/getting-started');
-          }
+    onFetchStageChanged: useCallback((ctx) => {
+      if (ctx.state === 'FINISHED') {
+        if (!ctx.accounts.length) {
+          router.navigate('/welcome/getting-started');
+        } else if (!router.state.location.pathname.startsWith('/mainwin/')) {
+          router.navigate('/mainwin/home');
         }
-      },
-      [nav]
-    ),
+      }
+    }, []),
   });
 
   useMessageForwarded(
@@ -306,7 +303,7 @@ export function MainWindow() {
       });
   });
 
-  useAccountsGuard(router.navigate);
+  useAccountsGuard();
   useMount(() => {
     logGetUserDapp();
   });
