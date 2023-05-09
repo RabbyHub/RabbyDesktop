@@ -332,6 +332,8 @@ export default function bootstrap() {
     const shellExts = await getElectronChromeExtensions();
 
     const lastMainWinPos = getMainWinLastPosition();
+    await getRabbyExtViews();
+
     // init window
     const mainWindow = (await createWindow({
       defaultTabUrl: '',
@@ -397,7 +399,6 @@ export default function bootstrap() {
     );
     splashWin.webContents.loadURL(RABBY_SPALSH_URL);
 
-    await getRabbyExtViews();
     const { useBuiltInPwd } = await tryAutoUnlockRabbyX();
     appLog(`autoUnlock ${useBuiltInPwd ? 'success' : 'failed'}`);
 
