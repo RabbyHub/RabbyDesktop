@@ -193,7 +193,7 @@ type ChannelInvokePayload = {
     };
   };
   'safe-open-dapp-tab': {
-    send: [dappOrigin: string];
+    send: [dappOrigin: string, opts?: ISafeOpenDappTabOptions];
     response: ISafeOpenDappTabResult;
   };
   'fetch-dapp-last-open-infos': {

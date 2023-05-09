@@ -20,7 +20,7 @@ export const TransactionWebsite = ({
     (e) => {
       e.preventDefault();
       e.stopPropagation();
-      openDapp(dappOrigin);
+      openDapp(dappOrigin, { dontReloadOnSwitchToActiveTab: true });
     },
     [openDapp, dappOrigin]
   );

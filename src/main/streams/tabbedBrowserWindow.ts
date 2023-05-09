@@ -215,7 +215,7 @@ onIpcMainEvent('__internal_webui-window-close', (_, winId, webContentsId) => {
   tabToClose?.destroy();
 });
 
-handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
+handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin, opts) => {
   const result = {
     shouldNavTabOnClient: false,
     isOpenExternal: false,
@@ -304,6 +304,8 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin) => {
   const openResult = await safeOpenURL(dappOrigin, {
     sourceURL: currentUrl,
     targetMatchedDappResult: findResult,
+    isFromInternalRenderer: true,
+    dontReloadOnSwitchToActiveTab: opts?.dontReloadOnSwitchToActiveTab,
   }).then((res) => {
     res.activeTab();
     return res;

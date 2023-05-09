@@ -68,7 +68,7 @@ export const DAppBlock = ({
 }: React.PropsWithoutRef<{
   dapp?: IDappWithTabInfo;
   onOpDapp?: IOnOpDapp;
-  onOpen?: (dappOrigin: INextDapp['origin']) => void;
+  onOpen?: (dapp: IDappWithTabInfo) => void;
 }>) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -187,11 +187,8 @@ export const DAppBlock = ({
           className="anchor"
           onClick={(e) => {
             e.preventDefault();
-            if (onOpen) {
-              getLastOpenOriginByOrigin(dapp.origin).then((lastOrigin) => {
-                onOpen(lastOrigin);
-              });
-            }
+
+            onOpen?.(dapp);
           }}
         >
           <DappFavicon

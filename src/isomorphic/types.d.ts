@@ -626,3 +626,7 @@ type BundleAccount = BTCAccount | BNAccount | ETHAccount;
 
 // corresponding to the type in the HARDWARE_KEYRING_TYPES brandName
 type HDManagerType = ['Trezor', 'Ledger', 'Onekey'][number];
+
+type ISafeOpenDappTabOptions = {
+  dontReloadOnSwitchToActiveTab?: boolean;
+};

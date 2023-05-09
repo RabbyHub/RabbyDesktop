@@ -1,5 +1,9 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
-import { setDappsOrder, toggleDappPinned } from '@/renderer/ipcRequest/dapps';
+import {
+  getLastOpenOriginByOrigin,
+  setDappsOrder,
+  toggleDappPinned,
+} from '@/renderer/ipcRequest/dapps';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { useOpenDapp } from '@/renderer/utils/react-router';
 import { useCallback, useMemo, useState } from 'react';
@@ -103,6 +107,17 @@ export default function DApps() {
         default:
           break;
       }
+    },
+    [openDapp]
+  );
+
+  const onClickDappBlock = useCallback(
+    async (dapp: IDappWithTabInfo) => {
+      let targetOrigin = dapp.origin;
+      if (!dapp.tab) {
+        targetOrigin = await getLastOpenOriginByOrigin(dapp.origin);
+      }
+      openDapp(targetOrigin, { dontReloadOnSwitchToActiveTab: !!dapp.tab });
     },
     [openDapp]
   );
@@ -246,7 +261,7 @@ export default function DApps() {
                       renderItem={(dapp) => {
                         return (
                           <DAppBlock
-                            onOpen={openDapp}
+                            onOpen={onClickDappBlock}
                             key={dapp.origin}
                             dapp={dapp}
                             onOpDapp={onClickDapp}
@@ -266,7 +281,7 @@ export default function DApps() {
                       renderItem={(dapp) => {
                         return (
                           <DAppBlock
-                            onOpen={openDapp}
+                            onOpen={onClickDappBlock}
                             key={dapp.origin}
                             dapp={dapp}
                             onOpDapp={onClickDapp}
