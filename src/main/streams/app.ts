@@ -70,6 +70,17 @@ const DENY_ACTION = { action: 'deny' } as const;
 //   appLog(`set proxy server: ${proxyServer}`);
 // }
 
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    // Someone tried to run a second instance, we should focus our window.
+    emitIpcMainEvent('__internal_main:mainwindow:show');
+  });
+}
+
 app.on('web-contents-created', async (evtApp, webContents) => {
   const type = webContents.getType();
   const wcUrl = webContents.getURL();
