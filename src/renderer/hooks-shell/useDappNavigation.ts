@@ -42,7 +42,10 @@ export function useDappNavigation() {
       }
       window.rabbyDesktop.ipcRenderer.invoke(
         'safe-open-dapp-tab',
-        selectedTabInfo?.dapp?.origin
+        selectedTabInfo?.dapp?.origin,
+        {
+          dontReloadOnSwitchToActiveTab: false,
+        }
       );
     }, [selectedTabInfo?.dapp?.origin]),
   };
