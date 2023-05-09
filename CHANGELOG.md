@@ -1,7 +1,13 @@
 
-v0.20.0 / 2023-05-09
+v0.20.1 / 2023-05-09
 ====================
 
+  * Revert "feat: improve redirect between `welcome/getting-started` and `mainwin/*` (#414)"
+
+v0.20.0-prod / 2023-05-09
+=========================
+
+  * Release v0.20.0-prod
   * fix: allow customize reload-behavior on switching to active tab. (#418)
   * fix: dont redirect back to home if only switch account. (#417)
   * feat: reset amount after submitting tx (#416)
