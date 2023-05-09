@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import {
   createHashRouter as createRouter,
   RouterProvider,
@@ -8,7 +8,7 @@ import {
 
 import DApps from '@/renderer/routes/Dapps';
 import GettingStarted from '@/renderer/routes/Welcome/GettingStarted';
-import MainWindowLoading from '@/renderer/routes/MainWindowLoading';
+import Home from '@/renderer/routes/Home';
 import ImportHome from '@/renderer/routes/Import/ImportHome';
 import ImportByPrivateKey from '@/renderer/routes/ImportBy/ImportByPrivateKey';
 import ImportSetPassword from '@/renderer/routes/Import/ImportSetPassword';
@@ -30,6 +30,7 @@ import {
   useMessageForwardToMainwin,
 } from '@/renderer/hooks/useViewsMessage';
 import { navigateToDappRoute } from '@/renderer/utils/react-router';
+import { Swap } from '@/renderer/routes/Swap';
 import { ErrorBoundary } from '@sentry/react';
 import { useMount } from 'ahooks';
 import { matomoRequestEvent } from '@/renderer/utils/matomo-request';
@@ -61,8 +62,9 @@ const logGetUserDapp = async () => {
 };
 
 function WelcomeWrapper() {
-  const { isFinishedFetchAccounts, accounts } = useAccounts();
-  if (isFinishedFetchAccounts && accounts.length) {
+  const { localHasFetched, accounts } = useAccounts();
+
+  if (localHasFetched && accounts.length) {
     return <Navigate to="/mainwin/home" />;
   }
 
@@ -70,6 +72,19 @@ function WelcomeWrapper() {
 }
 
 function MainWrapper() {
+  const { localHasFetched, accounts, fetchAccounts } = useAccounts();
+
+  useMessageForwarded(
+    { targetView: 'main-window', type: 'on-deleted-account' },
+    () => {
+      fetchAccounts();
+    }
+  );
+
+  if (localHasFetched && !accounts.length) {
+    return <Navigate to="/welcome/getting-started" />;
+  }
+
   return (
     <RequireUnlock>
       <div className={styles.mainWindow}>
@@ -122,15 +137,6 @@ const router = createRouter([
         ],
       },
     ],
-  },
-  {
-    path: '/main-loading',
-    loader: () => {
-      return {
-        routeCSSKeyword: 'mainwin_loading',
-      } as MainWindowRouteData;
-    },
-    element: <MainWindowLoading />,
   },
   {
     path: '/mainwin',
@@ -223,35 +229,23 @@ const router = createRouter([
   },
   {
     path: '*',
-    element: <Navigate to="/main-loading" />,
+    element: <Navigate to="/mainwin/home" />,
   },
 ]);
 
 /**
  * @description make sure use this hooks only once at top-level component in whole app
  */
-function useAccountsGuard() {
-  const { fetchAccounts } = useAccounts({
-    onFetchStageChanged: useCallback((ctx) => {
-      if (ctx.state === 'FINISHED') {
-        if (!ctx.accounts.length) {
-          router.navigate('/welcome/getting-started');
-        } else if (!router.state.location.pathname.startsWith('/mainwin/')) {
-          router.navigate('/mainwin/home');
-        }
-      }
-    }, []),
-  });
-
-  useMessageForwarded(
-    { targetView: 'main-window', type: 'on-deleted-account' },
-    () => {
-      fetchAccounts();
-    }
-  );
+function useAccountsGuard(nav: (path: string) => void) {
+  const { localHasFetched, accounts, fetchAccounts } = useAccounts();
 
   useEffect(() => {
-    // NOTICE: events wouldn'd trigger on account deleted
+    if (localHasFetched && !accounts.length) {
+      nav('/welcome/getting-started');
+    }
+  }, [localHasFetched, nav, accounts]);
+
+  useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
       (payload) => {
@@ -303,7 +297,7 @@ export function MainWindow() {
       });
   });
 
-  useAccountsGuard();
+  useAccountsGuard(router.navigate);
   useMount(() => {
     logGetUserDapp();
   });

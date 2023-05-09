@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { atom, useAtom } from 'jotai';
 import * as Sentry from '@sentry/react';
 
@@ -79,44 +79,12 @@ export function useCurrentAccount() {
   };
 }
 
-const enum FetchAccountsState {
-  IDLE = 'IDLE',
-  PENDING = 'PENDING',
-  FINISHED = 'FINISHED',
-}
-
-const fetchAccountsAtom = atom<FetchAccountsState>(FetchAccountsState.IDLE);
-
-export function useAccountFetchStage() {
-  const [fetchAccountsState] = useAtom(fetchAccountsAtom);
-
-  return {
-    isFinishedFetchAccounts: fetchAccountsState === FetchAccountsState.FINISHED,
-  };
-}
-
-export function useAccounts(opts?: {
-  onFetchStageChanged(ctx: {
-    state: FetchAccountsState;
-    accounts: AccountWithName[];
-  }): void;
-}) {
+export function useAccounts() {
   const [accounts, setAccounts] = useAtom(accountsAtom);
 
-  const { onFetchStageChanged } = opts || {};
-
-  const [fetchAccountsState, setAccountsFetchState] =
-    useAtom(fetchAccountsAtom);
-  const isFetchingRef = useRef(false);
+  const [hasFetched, setHasFetched] = useState(false);
   const fetchAccounts = useCallback(async () => {
-    if (isFetchingRef.current) return;
-
-    setAccountsFetchState(FetchAccountsState.PENDING);
-    onFetchStageChanged?.({
-      state: FetchAccountsState.PENDING,
-      accounts: [],
-    });
-    isFetchingRef.current = true;
+    setHasFetched(false);
 
     let nextAccounts: AccountWithName[] = [];
     try {
@@ -142,14 +110,9 @@ export function useAccounts(opts?: {
       Sentry.captureException(err);
     } finally {
       setAccounts(nextAccounts);
-      setAccountsFetchState(FetchAccountsState.FINISHED);
-      onFetchStageChanged?.({
-        state: FetchAccountsState.FINISHED,
-        accounts: nextAccounts,
-      });
-      isFetchingRef.current = false;
+      setHasFetched(true);
     }
-  }, [onFetchStageChanged, setAccountsFetchState, setAccounts]);
+  }, [setAccounts]);
 
   useEffect(() => {
     fetchAccounts();
@@ -158,6 +121,6 @@ export function useAccounts(opts?: {
   return {
     accounts,
     fetchAccounts,
-    isFinishedFetchAccounts: fetchAccountsState === FetchAccountsState.FINISHED,
+    localHasFetched: hasFetched,
   };
 }
