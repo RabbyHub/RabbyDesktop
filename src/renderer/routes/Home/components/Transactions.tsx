@@ -369,6 +369,7 @@ const Transactions = ({ updateNonce }: { updateNonce: number }) => {
         otherAddr: item.other_addr,
         name: item.tx?.name,
         timeAt: item.time_at * 1000,
+        isScam: item.is_scam,
       };
       if (localTx) {
         data.rawTx = localTx.rawTx;
