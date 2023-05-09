@@ -1,7 +1,19 @@
 
-v0.19.0 / 2023-05-06
+v0.20.0 / 2023-05-09
 ====================
 
+  * fix: allow customize reload-behavior on switching to active tab. (#418)
+  * fix: dont redirect back to home if only switch account. (#417)
+  * feat: reset amount after submitting tx (#416)
+  * feat: improve redirect between `welcome/getting-started` and `mainwin/*` (#414)
+  * fix: scrollbar color (#412)
+  * fix: font-face 'SF Pro' on prod. (#415)
+  * feat: home page history list add  scam tx tag (#413)
+
+v0.19.0-prod / 2023-05-06
+=========================
+
+  * Release v0.19.0-prod
   * feat(TxToast): adjust progress bar height and assets update interval (#411)
   * feat(TxToast): adjust timeout;updaet origin state (#410)
   * feat: tx toast (#406)
