@@ -621,6 +621,7 @@ export const SwapToken = () => {
           }
 
           if (hash && receiveToken && !activeProvider?.shouldApproveToken) {
+            setPayAmount('');
             addLocalSwapTx(chain, hash, {
               payToken,
               receiveToken,
