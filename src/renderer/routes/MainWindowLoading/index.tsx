@@ -3,7 +3,7 @@ import styles from './index.module.less';
 export default function MainWindowLoading() {
   return (
     <div className={styles.pageLoading}>
-      <div className={styles.container}>
+      {/* <div className={styles.container}>
         <img
           src="rabby-internal://assets/icons/welcome/logo.svg"
           alt=""
@@ -14,7 +14,7 @@ export default function MainWindowLoading() {
           alt=""
           className={styles.slogan}
         />
-      </div>
+      </div> */}
     </div>
   );
 }
