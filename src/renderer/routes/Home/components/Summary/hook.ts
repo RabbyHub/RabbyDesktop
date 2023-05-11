@@ -1,15 +1,18 @@
-import { isNil, omitBy } from 'lodash';
 import { useAsync } from 'react-use';
 import { useEffect, useMemo } from 'react';
 import { atom, useAtomValue, useSetAtom } from 'jotai';
-import { Coin, Tokens } from './type';
+import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import {
   sumGrossWorth,
   groupAssets,
   MINI_ASSET_ID,
   MINI_DEBT_ID,
+  SummaryData,
+  Tokens,
 } from './assets';
 import { formatNetworth } from './utils';
+
+export type Summary = ReturnType<typeof useFetchSummary>;
 
 const summaryLoadingAtom = atom(false);
 const summaryDataAtom = atom<Summary>([]);
@@ -20,26 +23,12 @@ export const useFetchSummary = (
   updateNonce: number
 ) => {
   const { value, loading } = useAsync(async (): Promise<
-    | {
-        coin_list: Coin[];
-        token_list: Tokens[];
-      }
-    | undefined
+    SummaryData | undefined
   > => {
     if (addr) {
-      return fetch(
-        `https://asset-list.rabby-api.debank.dbkops.com/v1/user/summarized_asset_list?${new URLSearchParams(
-          omitBy({ id: addr, chain_id: chain }, isNil) as Record<string, string>
-        ).toString()}`
-      ).then((res) => {
-        if (res.ok) {
-          return res.json();
-        }
-        throw new Error(res.statusText);
-      });
+      return walletOpenapi.getSummarizedAssetList(addr, chain || undefined);
     }
   }, [addr, chain, updateNonce]);
-
   const data = useMemo(
     () => (value ? sumGrossWorth(value) : undefined),
     [value]
@@ -97,5 +86,3 @@ export const useGetSummaryInfo = () => {
     summary,
   };
 };
-
-export type Summary = ReturnType<typeof useFetchSummary>;

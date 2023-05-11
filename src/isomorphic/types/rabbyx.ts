@@ -505,6 +505,7 @@ export type RabbyXMethod = {
   'openapi.getCEXSwapQuote': OpenApiService['getCEXSwapQuote'];
   'openapi.getSwapTradeList': OpenApiService['getSwapTradeList'];
   'openapi.postSwap': OpenApiService['postSwap'];
+  'openapi.getSummarizedAssetList': OpenApiService['getSummarizedAssetList'];
 };
 
 export type RabbyXMethods = {

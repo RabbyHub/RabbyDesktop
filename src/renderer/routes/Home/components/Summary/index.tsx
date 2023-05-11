@@ -30,7 +30,7 @@ export const Summary = () => {
           </TipsWrapper>
         </div>
       </div>
-      {summary.map((e) => {
+      {summary?.map((e) => {
         const isSmallAssets = [MINI_ASSET_ID, MINI_DEBT_ID].includes(e.id);
         const smallAssetsClass =
           'font-normal text-12 text-[#fff] text-opacity-50';
@@ -89,7 +89,7 @@ export const Summary = () => {
           </li>
         );
       })}
-      {!loading && summary.length && (
+      {!loading && !!summary.length && (
         <div className="text-14 text-[#fff] text-opacity-50 mt-[22px] pl-12">
           All assets in protocols (e.g. LP tokens) are resolved to the
           underlying assets for statistical calculations

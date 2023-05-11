@@ -1,6 +1,12 @@
 /* eslint-disable no-continue */
-import { Coin, Tokens } from './type';
+import openApi from '@/renderer/utils/openapi';
 import { numFormat, numSeparate } from './utils';
+
+export type SummaryData = Awaited<
+  ReturnType<typeof openApi.getSummarizedAssetList>
+>;
+type Coin = SummaryData['coin_list'][number];
+export type Tokens = SummaryData['token_list'][number];
 
 type AssetsClassify = {
   coin_list: Coin[];
@@ -192,7 +198,7 @@ const computeDelta = (pre?: AssetSummaryItem, next?: AssetSummaryItem) => {
   return {
     id: meta!.id,
     symbol: meta!.symbol,
-    logo: (meta as Coin).logo || (meta as Tokens).logo_url,
+    logo: (meta as Tokens).logo_url,
     isLoss: delta < 0,
     netWorthChangeValue: delta,
     netWorthChange: numFormat(delta, 0, '$', true),
