@@ -1,6 +1,7 @@
 import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { Button } from 'antd';
 import React from 'react';
+import { useAccountFetchStage } from '@/renderer/hooks/rabbyx/useAccount';
 import styles from './GettingStarted.module.less';
 import InviteCodeModal from './InviteCodeModal';
 import { useInvited } from './useInvited';
@@ -9,6 +10,7 @@ export default function GettingStarted() {
   const { showZSubview } = useZPopupLayerOnMain();
   const [visibleInviteCodeModal, setVisibleInviteCodeModal] =
     React.useState(false);
+  const { isFinishedFetchAccounts } = useAccountFetchStage();
   const { isInvited } = useInvited();
 
   const onClickButton = React.useCallback(() => {
@@ -50,6 +52,7 @@ export default function GettingStarted() {
           type="primary"
           className={styles['btn-start']}
           onClick={onClickButton}
+          disabled={!isFinishedFetchAccounts}
         >
           Get started
         </Button>
