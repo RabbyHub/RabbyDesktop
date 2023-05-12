@@ -350,7 +350,7 @@ const SendTokenInner = () => {
   const canSubmit =
     isValidAddress(form.getFieldValue('to')) &&
     !balanceError &&
-    new BigNumber(form.getFieldValue('amount')).isGreaterThan(0) &&
+    new BigNumber(form.getFieldValue('amount')).gte(0) &&
     !isLoading &&
     (!whitelistEnabled || temporaryGrant || toAddressInWhitelist);
   const isNativeToken = currentToken.id === CHAINS[chain].nativeTokenAddress;
