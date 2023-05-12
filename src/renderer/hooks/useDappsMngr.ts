@@ -153,6 +153,8 @@ export function useDapps(options?: { fetchByDefault?: boolean }) {
     dappBoundTabIds,
     detectDapps,
     renameDapp,
+    mutatePinnedList: setPinnedList,
+    mutateUnpinnedList: setUnpinnedList,
   };
 }
 
