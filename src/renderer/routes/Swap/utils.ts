@@ -498,7 +498,7 @@ export const getAllQuotes = async (
   if (
     isSwapWrapToken(params.payToken.id, params.receiveToken.id, params.chain)
   ) {
-    return getDexQuote({ ...params, dexId: DEX_ENUM.ONEINCH });
+    return getDexQuote({ ...params, dexId: DEX_ENUM.WRAPTOKEN });
   }
 
   return Promise.all([
