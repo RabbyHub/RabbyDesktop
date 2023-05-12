@@ -1,7 +1,20 @@
 
-v0.20.1 / 2023-05-09
+v0.21.0 / 2023-05-12
 ====================
 
+  * chore: sync data.
+  * feat: support meter chain and etc chain (#422)
+  * feat: upgrade rabbyx to 0.85.0
+  * fix: paraswap quote (#421)
+  * feat: allow send 0 token (#423)
+  * fix: dapps sort splash (#424)
+  * fix: make sure create mainWindow AFTER rabby background ready. (#420)
+  * feat: avoid repeative app instances. (#419)
+
+v0.20.1-prod / 2023-05-09
+=========================
+
+  * Release v0.20.1-prod
   * Revert "feat: improve redirect between `welcome/getting-started` and `mainwin/*` (#414)"
 
 v0.20.0-prod / 2023-05-09
