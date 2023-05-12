@@ -5,8 +5,8 @@ index ed59c82..441b656 100644
 @@ -71,8 +71,9 @@ function notarizeAndWaitForNotaryTool(opts) {
                  ...authorizationArgs(opts),
                  '--wait',
-                 '--output-format',
 +                !opts.noS3Acceleration ? '' : '--no-s3-acceleration',
+                 '--output-format',
                  'json',
 -            ];
 +            ].filter(Boolean);

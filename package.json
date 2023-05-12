@@ -33,7 +33,7 @@
     "build:renderer": "npm run clean:renderer && cross-env-shell NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
     "clean:renderer": "rimraf release/app/dist/renderer && rimraf assets/desktop_shell",
     "preinstall": "npm run install:native",
-    "postinstall": "npm run depcheck && npm run install:rabbyX && npm run sync:chain-data",
+    "postinstall": "patch-package && npm run depcheck && npm run install:rabbyX && npm run sync:chain-data",
     "depcheck": "ts-node .erb/scripts/check-native-dep.js && electron-builder install-app-deps && cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.dev.dll.ts",
     "install:native": "cd release/app && npm install && cd ../",
     "install:rabbyX": "sh scripts/install_rabbyx.sh",
