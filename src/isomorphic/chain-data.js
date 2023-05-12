@@ -49,6 +49,9 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["EOS"] = "EOS";
     CHAINS_ENUM["CORE"] = "CORE";
     CHAINS_ENUM["FLR"] = "FLR";
+    CHAINS_ENUM["WEMIX"] = "WEMIX";
+    CHAINS_ENUM["METER"] = "METER";
+    CHAINS_ENUM["ETC"] = "ETC";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -645,8 +648,8 @@ export const CHAINS_RAW = {
     },
     [CHAINS_ENUM.STEP]: {
         id: 1234,
-        serverId: 'step',
-        network: '1234',
+        serverId: "step",
+        network: "1234",
         name: "Step",
         nativeTokenSymbol: "FITFI",
         nativeTokenAddress: "step",
@@ -661,8 +664,8 @@ export const CHAINS_RAW = {
     },
     [CHAINS_ENUM.KAVA]: {
         id: 2222,
-        serverId: 'kava',
-        network: '2222',
+        serverId: "kava",
+        network: "2222",
         name: "Kava",
         nativeTokenSymbol: "KAVA",
         nativeTokenAddress: "kava",
@@ -677,8 +680,8 @@ export const CHAINS_RAW = {
     },
     [CHAINS_ENUM.MADA]: {
         id: 2001,
-        serverId: 'mada',
-        network: '2001',
+        serverId: "mada",
+        network: "2001",
         name: "Milkomeda",
         nativeTokenSymbol: "milkADA",
         nativeTokenAddress: "mada",
@@ -693,8 +696,8 @@ export const CHAINS_RAW = {
     },
     [CHAINS_ENUM.CFX]: {
         id: 1030,
-        serverId: 'cfx',
-        network: '1030',
+        serverId: "cfx",
+        network: "1030",
         name: "Conflux",
         nativeTokenSymbol: "CFX",
         nativeTokenAddress: "cfx",
@@ -709,8 +712,8 @@ export const CHAINS_RAW = {
     },
     [CHAINS_ENUM.BRISE]: {
         id: 32520,
-        serverId: 'brise',
-        network: '32520',
+        serverId: "brise",
+        network: "32520",
         name: "Bitgert",
         nativeTokenSymbol: "BRISE",
         nativeTokenAddress: "brise",
@@ -725,8 +728,8 @@ export const CHAINS_RAW = {
     },
     [CHAINS_ENUM.CKB]: {
         id: 71402,
-        serverId: 'ckb',
-        network: '71402',
+        serverId: "ckb",
+        network: "71402",
         name: "Godwoken",
         nativeTokenSymbol: "CKB",
         nativeTokenAddress: "ckb",
@@ -741,8 +744,8 @@ export const CHAINS_RAW = {
     },
     [CHAINS_ENUM.TOMB]: {
         id: 6969,
-        serverId: 'tomb',
-        network: '6969',
+        serverId: "tomb",
+        network: "6969",
         name: "Tomb Chain",
         nativeTokenSymbol: "TOMB",
         nativeTokenAddress: "tomb",
@@ -757,8 +760,8 @@ export const CHAINS_RAW = {
     },
     [CHAINS_ENUM.PZE]: {
         id: 1101,
-        serverId: 'pze',
-        network: '1101',
+        serverId: "pze",
+        network: "1101",
         name: "Polygon zkEVM",
         nativeTokenSymbol: "ETH",
         nativeTokenAddress: "pze",
@@ -773,9 +776,9 @@ export const CHAINS_RAW = {
     },
     [CHAINS_ENUM.ERA]: {
         id: 324,
-        serverId: 'era',
-        network: '324',
-        name: 'zkSync Era',
+        serverId: "era",
+        network: "324",
+        name: "zkSync Era",
         nativeTokenSymbol: "ETH",
         nativeTokenAddress: "era",
         enum: CHAINS_ENUM.ERA,
@@ -789,9 +792,9 @@ export const CHAINS_RAW = {
     },
     [CHAINS_ENUM.EOS]: {
         id: 17777,
-        serverId: 'eos',
-        network: '17777',
-        name: 'EOS EVM',
+        serverId: "eos",
+        network: "17777",
+        name: "EOS EVM",
         nativeTokenSymbol: "EOS",
         nativeTokenAddress: "eos",
         enum: CHAINS_ENUM.EOS,
@@ -805,9 +808,9 @@ export const CHAINS_RAW = {
     },
     [CHAINS_ENUM.CORE]: {
         id: 1116,
-        serverId: 'core',
-        network: '1116',
-        name: 'CORE',
+        serverId: "core",
+        network: "1116",
+        name: "CORE",
         nativeTokenSymbol: "CORE",
         nativeTokenAddress: "core",
         enum: CHAINS_ENUM.CORE,
@@ -821,9 +824,9 @@ export const CHAINS_RAW = {
     },
     [CHAINS_ENUM.FLR]: {
         id: 14,
-        serverId: 'flr',
-        network: '14',
-        name: 'Flare',
+        serverId: "flr",
+        network: "14",
+        name: "Flare",
         nativeTokenSymbol: "FLR",
         nativeTokenAddress: "flr",
         enum: CHAINS_ENUM.FLR,
@@ -834,6 +837,54 @@ export const CHAINS_RAW = {
         eip: {
             "1559": false,
         },
-    }
+    },
+    [CHAINS_ENUM.WEMIX]: {
+        id: 1111,
+        serverId: "wemix",
+        network: "1111",
+        name: "WEMIX",
+        nativeTokenSymbol: "WEMIX",
+        nativeTokenAddress: "wemix",
+        enum: CHAINS_ENUM.WEMIX,
+        hex: "0x457",
+        scanLink: "https://explorer.wemix.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/wemix/d1ba88d1df6cca0b0cb359c36a09c054.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+    },
+    [CHAINS_ENUM.METER]: {
+        id: 82,
+        serverId: "mtr",
+        network: "82",
+        name: "Meter",
+        nativeTokenSymbol: "MTR",
+        nativeTokenAddress: "mtr",
+        enum: CHAINS_ENUM.METER,
+        hex: "0x52",
+        scanLink: "https://scan.meter.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/mtr/2dc6f079f52ca22778eb684e1ce650b3.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+    },
+    [CHAINS_ENUM.ETC]: {
+        id: 61,
+        serverId: "etc",
+        network: "61",
+        name: "Ethereum Classic",
+        nativeTokenSymbol: "ETC",
+        nativeTokenAddress: "etc",
+        enum: CHAINS_ENUM.ETC,
+        hex: "0x3d",
+        scanLink: "https://blockscout.com/etc/mainnet/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/etc/7ccf90ee6822ab440fb603337da256fa.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+    },
 };
 export const CHAINS_RAW_LIST = Object.values(CHAINS_RAW);
