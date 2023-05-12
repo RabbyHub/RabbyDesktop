@@ -34,6 +34,7 @@ exports.default = async function notarizeMacos(context) {
     appPath: `${appOutDir}/${appName}.app`,
     appleId: process.env.RABBY_APPLE_ID,
     appleIdPassword: process.env.RABBY_APPLE_ID_PASS,
+    noS3Acceleration: true,
   });
 
   console.log(`Notarizied app ${appName}...`);
