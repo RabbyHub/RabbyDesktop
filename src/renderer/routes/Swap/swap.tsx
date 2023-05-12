@@ -375,7 +375,7 @@ export const SwapToken = () => {
 
           const v = { ...quote, loading: false };
           if (index === -1) {
-            return v.name === DEX_ENUM.ONEINCH ? [v, ...e] : [...e, v];
+            return [...e, v];
           }
           e[index] = v;
           return [...e];

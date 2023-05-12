@@ -131,6 +131,9 @@ export const getRouter = (dexId: DEX_ENUM, chain: CHAINS_ENUM) => {
 };
 
 export const getSpender = (dexId: DEX_ENUM, chain: CHAINS_ENUM) => {
+  if (dexId === DEX_ENUM.WRAPTOKEN) {
+    return '';
+  }
   const list =
     DEX_SPENDER_WHITELIST[dexId as keyof typeof DEX_SPENDER_WHITELIST];
   return list[chain as keyof typeof list];
@@ -498,7 +501,10 @@ export const getAllQuotes = async (
   if (
     isSwapWrapToken(params.payToken.id, params.receiveToken.id, params.chain)
   ) {
-    return getDexQuote({ ...params, dexId: DEX_ENUM.ONEINCH });
+    return getDexQuote({
+      ...params,
+      dexId: DEX_ENUM.WRAPTOKEN,
+    });
   }
 
   return Promise.all([

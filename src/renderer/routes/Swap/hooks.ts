@@ -218,6 +218,7 @@ export const usePostSwap = () => {
         await postSwap({
           ...swapData,
           tx,
+          dexId: isWrapSwap ? '' : swapData.dexId,
           slippage: isWrapSwap ? '0' : swapData.slippage,
         });
 
