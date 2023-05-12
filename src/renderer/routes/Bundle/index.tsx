@@ -19,7 +19,7 @@ const HomeBundleInner = () => {
             'flex flex-col overflow-y-auto',
             'w-[358px] px-[28px]',
             'space-y-[24px]',
-            'mb-[24px]'
+            'pb-[20px]'
           )}
         >
           <BundleAccountList />
