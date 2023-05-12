@@ -7,7 +7,7 @@ import { TCexQuoteData, TDexQuoteData, isSwapWrapToken } from '../utils';
 import { IconRefresh } from './IconRefresh';
 import { QuoteListLoading, QuoteLoading } from './QuoteLoading';
 import { CexQuoteItem, DexQuoteItem, QuoteItemProps } from './QuoteItem';
-import { DEX } from '../constant';
+import { DEX_WITH_WRAP } from '../constant';
 
 const QuotesWrapper = styled.div`
   --green-color: #27c193;
@@ -143,7 +143,9 @@ export const Quotes = (props: QuotesProps) => {
                 bestAmount={`${bestAmount}`}
                 active={activeName === name}
                 isLoading={params.loading}
-                quoteProviderInfo={DEX[name as keyof typeof DEX]}
+                quoteProviderInfo={
+                  DEX_WITH_WRAP[name as keyof typeof DEX_WITH_WRAP]
+                }
                 {...other}
               />
             );

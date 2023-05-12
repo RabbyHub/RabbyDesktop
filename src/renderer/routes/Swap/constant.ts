@@ -25,6 +25,15 @@ export const DEX = {
   },
 };
 
+export const DEX_WITH_WRAP = {
+  ...DEX,
+  [DEX_ENUM.WRAPTOKEN]: {
+    logo: 'rabby-internal://assets/icons/common/token-default.svg',
+    name: 'Wrap Contract',
+    chains: DEX_SUPPORT_CHAINS.WrapToken,
+  },
+};
+
 export const CEX = {
   binance: {
     name: 'Binance',

@@ -256,7 +256,7 @@ const Transaction = forwardRef<HTMLDivElement, TransactionProps>(
             </Tooltip>
           )}
           <span>{!isPending && sinceTime(time)}</span>
-          <span>Aggregator: {targetDex}</span>
+          {!!targetDex && <span>Aggregator: {targetDex}</span>}
 
           {!loading ? (
             <span className="ml-auto">GasFee: {gasUsed}</span>
