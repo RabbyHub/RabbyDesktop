@@ -57,6 +57,8 @@ export default function DApps() {
     dapps,
     pinnedDapps: _pinnedDapps,
     unpinnedDapps: _unpinnedDapps,
+    mutatePinnedList,
+    mutateUnpinnedList,
   } = useTabedDapps();
 
   const openDapp = useOpenDapp();
@@ -254,8 +256,10 @@ export default function DApps() {
                       otherData={unpinnedDapps}
                       disabled={!!search?.trim()}
                       onChange={(v) => {
+                        const ids = v.map((item) => item.id);
+                        mutatePinnedList(ids);
                         setDappsOrder({
-                          pinnedList: v.map((item) => item.id),
+                          pinnedList: ids,
                         });
                       }}
                       renderItem={(dapp) => {
@@ -274,8 +278,10 @@ export default function DApps() {
                       otherData={pinnedDapps}
                       disabled={!!search?.trim()}
                       onChange={(v) => {
+                        const ids = v.map((item) => item.id);
+                        mutateUnpinnedList(ids);
                         setDappsOrder({
-                          unpinnedList: v.map((item) => item.id),
+                          unpinnedList: ids,
                         });
                       }}
                       renderItem={(dapp) => {
