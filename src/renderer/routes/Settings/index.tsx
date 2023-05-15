@@ -13,6 +13,7 @@ import { Button, message, Modal, SwitchProps, Tooltip } from 'antd';
 import { useSettings } from '@/renderer/hooks/useSettings';
 import styled from 'styled-components';
 import {
+  APP_BRANDNAME,
   FORCE_DISABLE_CONTENT_PROTECTION,
   IS_RUNTIME_PRODUCTION,
 } from '@/isomorphic/constants';
@@ -70,28 +71,6 @@ function ItemPartialLeft({ name, icon }: Pick<TypedProps, 'name' | 'icon'>) {
   );
 }
 
-function ItemLink({
-  children,
-  useChevron = false,
-  ...props
-}: React.PropsWithChildren<Omit<TypedProps & { type: 'link' }, 'type'>>) {
-  return (
-    <div
-      className={classNames(styles.typedItem, styles.pointer, props.className)}
-      onClick={() => {
-        openExternalUrl(props.link);
-      }}
-    >
-      <ItemPartialLeft name={props.name} icon={props.icon} />
-      <div className={styles.itemRight}>
-        <div className={styles.itemArrow}>
-          {useChevron ? <img src={IconChevronRight} /> : <img src={IconLink} />}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function ItemText({
   children,
   ...props
@@ -129,6 +108,35 @@ function ItemSwitch({
       <div className={styles.itemRight}>
         <Switch checked={props.checked} onChange={props.onChange} />
       </div>
+    </div>
+  );
+}
+
+function FooterLink({
+  className,
+  name,
+  iconURL,
+  text,
+  link,
+}: React.PropsWithChildren<{
+  className?: string;
+  name?: string;
+  iconURL?: string;
+  text?: string;
+  link: string;
+}>) {
+  return (
+    <div
+      className={classNames(styles.footerLinkItem, className)}
+      onClick={() => {
+        openExternalUrl(link);
+      }}
+    >
+      {iconURL ? (
+        <img alt={name} src={iconURL} />
+      ) : (
+        <span className={styles.text}>{text || name}</span>
+      )}
     </div>
   );
 }
@@ -271,247 +279,262 @@ export function MainWindowSettings() {
       {/* TODO: implement Update Area */}
       <div />
 
-      <ModalProxySetting />
-      <ModalDevices />
-
-      <div className={styles.settingBlock}>
-        <h4 className={styles.blockTitle}>Security</h4>
-        <div className={styles.itemList}>
-          {!FORCE_DISABLE_CONTENT_PROTECTION && (
+      <div className={styles.settingItems}>
+        <div className={styles.settingBlock}>
+          <h4 className={styles.blockTitle}>Security</h4>
+          <div className={styles.itemList}>
+            {!FORCE_DISABLE_CONTENT_PROTECTION && (
+              <ItemSwitch
+                checked={settings.enableContentProtected}
+                name={
+                  <>
+                    <Tooltip
+                      trigger="hover"
+                      title="Once enabled, content in Rabby will be hidden during screen recording."
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center' }}>
+                        Screen Capture Protection
+                        <img
+                          className={styles.nameTooltipIcon}
+                          src={IconTooltipInfo}
+                          style={{
+                            position: 'relative',
+                            top: 1,
+                          }}
+                        />
+                      </span>
+                    </Tooltip>
+                  </>
+                }
+                icon="rabby-internal://assets/icons/mainwin-settings/content-protection.svg"
+                onChange={(nextEnabled: boolean) => {
+                  Modal.confirm({
+                    title: 'Restart Confirmation',
+                    content: (
+                      <>
+                        It's required to restart Rabby App to apply this change.{' '}
+                        <br />
+                        Do you confirm to {nextEnabled
+                          ? 'enable'
+                          : 'disable'}{' '}
+                        it?
+                      </>
+                    ),
+                    onOk: () => {
+                      toggleEnableContentProtection(nextEnabled);
+                    },
+                  });
+                }}
+              />
+            )}
             <ItemSwitch
-              checked={settings.enableContentProtected}
+              checked={enabledWhiteList}
               name={
                 <>
-                  <Tooltip
-                    trigger="hover"
-                    title="Once enabled, content in Rabby will be hidden during screen recording."
-                  >
-                    <span style={{ display: 'flex', alignItems: 'center' }}>
-                      Screen Capture Protection
-                      <img
-                        className={styles.nameTooltipIcon}
-                        src={IconTooltipInfo}
-                        style={{
-                          position: 'relative',
-                          top: 1,
-                        }}
-                      />
+                  <div className="flex flex-col gap-[4px]">
+                    <span className="text-14 font-medium">Whitelist</span>
+                    <span className="text-14 text-white opacity-[0.6]">
+                      You can only send assets to whitelisted address
                     </span>
-                  </Tooltip>
+                  </div>
                 </>
               }
-              icon="rabby-internal://assets/icons/mainwin-settings/content-protection.svg"
+              icon="rabby-internal://assets/icons/send-token/whitelist.svg"
               onChange={(nextEnabled: boolean) => {
-                Modal.confirm({
-                  title: 'Restart Confirmation',
-                  content: (
+                ModalConfirmInSettings({
+                  height: 230,
+                  title: `${nextEnabled ? 'Enable' : 'Disable'} Whitelist`,
+                  content: nextEnabled ? (
                     <>
-                      It's required to restart Rabby App to apply this change.{' '}
-                      <br />
-                      Do you confirm to {nextEnabled ? 'enable' : 'disable'} it?
+                      Once enabled, you can only send assets to the addresses in
+                      the whitelist using Rabby.
                     </>
+                  ) : (
+                    <div className="text-center">
+                      You can send assets to any address once disabled.
+                    </div>
                   ),
                   onOk: () => {
-                    toggleEnableContentProtection(nextEnabled);
+                    toggleWhitelist(nextEnabled);
                   },
                 });
               }}
             />
-          )}
-          <ItemSwitch
-            checked={enabledWhiteList}
-            name={
-              <>
-                <div className="flex flex-col gap-[4px]">
-                  <span className="text-14 font-medium">Whitelist</span>
-                  <span className="text-14 text-white opacity-[0.6]">
-                    You can only send assets to whitelisted address
-                  </span>
-                </div>
-              </>
-            }
-            icon="rabby-internal://assets/icons/send-token/whitelist.svg"
-            onChange={(nextEnabled: boolean) => {
-              ModalConfirmInSettings({
-                height: 230,
-                title: `${nextEnabled ? 'Enable' : 'Disable'} Whitelist`,
-                content: nextEnabled ? (
-                  <>
-                    Once enabled, you can only send assets to the addresses in
-                    the whitelist using Rabby.
-                  </>
-                ) : (
-                  <div className="text-center">
-                    You can send assets to any address once disabled.
+          </div>
+        </div>
+
+        <div className={styles.settingBlock}>
+          <h4 className={styles.blockTitle}>Dapp</h4>
+          <div className={styles.itemList}>
+            <ItemSwitch
+              checked={settings.enableServeDappByHttp}
+              name={
+                <>
+                  <div className="flex flex-col gap-[4px]">
+                    <span className="text-14 font-medium">
+                      Enable Decentralized app
+                    </span>
+                    <span className="text-14 text-white opacity-[0.6]">
+                      Once enabled, you can use IPFS/ENS/Local Dapp. However,
+                      Trezor and Onekey will be affected and can't be used
+                      properly.
+                    </span>
                   </div>
-                ),
-                onOk: () => {
-                  toggleWhitelist(nextEnabled);
-                },
-              });
-            }}
-          />
-        </div>
-      </div>
-
-      <div className={styles.settingBlock}>
-        <h4 className={styles.blockTitle}>Dapp</h4>
-        <div className={styles.itemList}>
-          <ItemSwitch
-            checked={settings.enableServeDappByHttp}
-            name={
-              <>
-                <div className="flex flex-col gap-[4px]">
-                  <span className="text-14 font-medium">
-                    Enable Decentralized app
-                  </span>
-                  <span className="text-14 text-white opacity-[0.6]">
-                    Once enabled, you can use IPFS/ENS/Local Dapp. However,
-                    Trezor and Onekey will be affected and can't be used
-                    properly.
-                  </span>
-                </div>
-              </>
-            }
-            icon="rabby-internal://assets/icons/mainwin-settings/icon-dapp.svg"
-            onChange={(nextEnabled: boolean) => {
-              const keyAction = `${nextEnabled ? 'enable' : 'disable'}`;
-
-              ModalConfirmInSettings({
-                height: 230,
-                title: `${ucfirst(keyAction)} Decentralized app`,
-                content: (
-                  <div className="break-words text-left">
-                    It's required to restart client to {keyAction} Decentralized
-                    app, do you want to restart now?
-                  </div>
-                ),
-                okText: 'Restart',
-                onOk: () => {
-                  toggleEnableIPFSDapp(nextEnabled);
-                },
-              });
-            }}
-          />
-        </div>
-      </div>
-
-      <div className={styles.settingBlock}>
-        <h4 className={styles.blockTitle}>Network</h4>
-        <div className={styles.itemList}>
-          <ItemAction
-            name={
-              <ProxyText>
-                {proxyType === 'custom' && (
-                  <Tooltip title={customProxyServer}>
-                    <span>Proxy: Custom</span>
-                  </Tooltip>
-                )}
-                {proxyType === 'system' && <span>Proxy: System</span>}
-                {proxyType === 'none' && <span>Proxy: None</span>}
-              </ProxyText>
-            }
-            onClick={() => {
-              setIsSettingProxy(true);
-            }}
-            icon="rabby-internal://assets/icons/mainwin-settings/proxy.svg"
-          >
-            <img src={IconChevronRight} />
-          </ItemAction>
-        </div>
-      </div>
-
-      <div className={styles.settingBlock}>
-        <h4 className={styles.blockTitle}>About</h4>
-        <div className={styles.itemList}>
-          <ItemAction
-            name={[
-              `Version: ${appVerisons.version || '-'}`,
-              appVerisons.appChannel === 'prod'
-                ? ''
-                : `-${appVerisons.appChannel}`,
-              appVerisons.appChannel === 'prod'
-                ? ''
-                : ` (${appVerisons.gitRef})`,
-            ]
-              .filter(Boolean)
-              .join('')}
-            icon="rabby-internal://assets/icons/mainwin-settings/info.svg"
-            onClick={(evt) => {
-              if (
-                (osType === 'win32' && evt.ctrlKey && evt.altKey) ||
-                (osType === 'darwin' && evt.metaKey && evt.altKey)
-              ) {
-                copyText(
-                  [
-                    `Version: ${appVerisons.version || '-'}`,
-                    `Channel: ${appVerisons.appChannel}`,
-                    `Revision: ${appVerisons.gitRef}`,
-                  ].join('; ')
-                );
-                message.open({
-                  type: 'info',
-                  content: 'Copied Version Info',
-                });
-                return;
+                </>
               }
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-dapp.svg"
+              onChange={(nextEnabled: boolean) => {
+                const keyAction = `${nextEnabled ? 'enable' : 'disable'}`;
 
-              fetchReleaseInfo().then((releseInfo) => {
-                message.open({
-                  type: 'info',
-                  content: !releseInfo?.hasNewRelease
-                    ? 'It is the latest version.'
-                    : 'New version is available',
+                ModalConfirmInSettings({
+                  height: 230,
+                  title: `${ucfirst(keyAction)} Decentralized app`,
+                  content: (
+                    <div className="break-words text-left">
+                      It's required to restart client to {keyAction}{' '}
+                      Decentralized app, do you want to restart now?
+                    </div>
+                  ),
+                  okText: 'Restart',
+                  onOk: () => {
+                    toggleEnableIPFSDapp(nextEnabled);
+                  },
                 });
-              });
-            }}
-          >
-            <div
-              className="flex items-center gap-[20px]"
-              onClick={(e) => e.stopPropagation()}
+              }}
+            />
+          </div>
+        </div>
+
+        <div className={styles.settingBlock}>
+          <h4 className={styles.blockTitle}>Network</h4>
+          <div className={styles.itemList}>
+            <ItemAction
+              name={
+                <ProxyText>
+                  {proxyType === 'custom' && (
+                    <Tooltip title={customProxyServer}>
+                      <span>Proxy: Custom</span>
+                    </Tooltip>
+                  )}
+                  {proxyType === 'system' && <span>Proxy: System</span>}
+                  {proxyType === 'none' && <span>Proxy: None</span>}
+                </ProxyText>
+              }
+              onClick={() => {
+                setIsSettingProxy(true);
+              }}
+              icon="rabby-internal://assets/icons/mainwin-settings/proxy.svg"
             >
-              <ChangeLog />
-              <AutoUpdate />
-            </div>
-          </ItemAction>
-          {/* <ItemLink name='User Agreement' /> */}
-          <ItemLink
-            name="Privacy Policy"
-            link="https://rabby.io/docs/privacy/"
-            icon="rabby-internal://assets/icons/mainwin-settings/privacy.svg"
-          />
-          <ItemLink
+              <img src={IconChevronRight} />
+            </ItemAction>
+          </div>
+        </div>
+
+        <div className={styles.settingBlock}>
+          <h4 className={styles.blockTitle}>About</h4>
+          <div className={styles.itemList}>
+            <ItemAction
+              name={[
+                `Version: ${appVerisons.version || '-'}`,
+                appVerisons.appChannel === 'prod'
+                  ? ''
+                  : `-${appVerisons.appChannel}`,
+                appVerisons.appChannel === 'prod'
+                  ? ''
+                  : ` (${appVerisons.gitRef})`,
+              ]
+                .filter(Boolean)
+                .join('')}
+              icon="rabby-internal://assets/icons/mainwin-settings/info.svg"
+              onClick={(evt) => {
+                if (
+                  (osType === 'win32' && evt.ctrlKey && evt.altKey) ||
+                  (osType === 'darwin' && evt.metaKey && evt.altKey)
+                ) {
+                  copyText(
+                    [
+                      `Version: ${appVerisons.version || '-'}`,
+                      `Channel: ${appVerisons.appChannel}`,
+                      `Revision: ${appVerisons.gitRef}`,
+                    ].join('; ')
+                  );
+                  message.open({
+                    type: 'info',
+                    content: 'Copied Version Info',
+                  });
+                  return;
+                }
+
+                fetchReleaseInfo().then((releseInfo) => {
+                  message.open({
+                    type: 'info',
+                    content: !releseInfo?.hasNewRelease
+                      ? 'It is the latest version.'
+                      : 'New version is available',
+                  });
+                });
+              }}
+            >
+              <div
+                className="flex items-center gap-[20px]"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ChangeLog />
+                <AutoUpdate />
+              </div>
+            </ItemAction>
+          </div>
+        </div>
+        <div className={styles.settingBlock}>
+          <div className={styles.itemList}>
+            <ItemAction
+              name="Clear Pending"
+              onClick={() => {
+                setIsShowingClearPendingModal(true);
+              }}
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-clear.svg"
+            >
+              <img src={IconChevronRight} />
+            </ItemAction>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.settingItems}>
+        <DeveloperKitsParts />
+      </div>
+
+      <div className={styles.settingFooter}>
+        <div className={styles.brandName}>{APP_BRANDNAME}</div>
+
+        <div className={styles.divider} />
+
+        <div className={styles.links}>
+          <FooterLink
             name="Website"
             link="https://rabby.io/"
-            icon="rabby-internal://assets/icons/mainwin-settings/homesite.svg"
+            iconURL="rabby-internal://assets/icons/mainwin-settings/homesite.svg"
           />
-          <ItemLink
+          <FooterLink
             name="Discord"
             link="https://discord.gg/seFBCWmUre"
-            icon="rabby-internal://assets/icons/mainwin-settings/discord.svg"
+            iconURL="rabby-internal://assets/icons/mainwin-settings/discord.svg"
           />
-          <ItemLink
+          <FooterLink
             name="Twitter"
             link="https://twitter.com/Rabby_io"
-            icon="rabby-internal://assets/icons/mainwin-settings/twitter.svg"
+            iconURL="rabby-internal://assets/icons/mainwin-settings/twitter.svg"
           />
-        </div>
-      </div>
-      <div className={styles.settingBlock}>
-        <div className={styles.itemList}>
-          <ItemAction
-            name="Clear Pending"
-            onClick={() => {
-              setIsShowingClearPendingModal(true);
-            }}
-            icon="rabby-internal://assets/icons/mainwin-settings/icon-clear.svg"
-          >
-            <img src={IconChevronRight} />
-          </ItemAction>
+          <FooterLink
+            name="Privacy Policy"
+            link="https://rabby.io/docs/privacy/"
+          />
         </div>
       </div>
 
-      <DeveloperKitsParts />
+      <ModalProxySetting />
+      <ModalDevices />
+
       <ClearPendingModal
         open={isShowingClearPendingModal}
         onClose={() => {

@@ -1,9 +1,12 @@
 .settingsPage {
+  height: 100vh;
+  max-height: var(--mainwin-mainroute-height);
   box-sizing: border-box;
   padding-top: 24px;
   padding-left: 48px;
   padding-right: 48px;
-  padding-bottom: 48px;
+  padding-bottom: 24px;
+  overflow: overlay;
 
   :global {
     .auto-update {
@@ -16,6 +19,10 @@
       font-size: 14px;
     }
   }
+}
+
+.settingItems + .settingItems {
+  margin-top: 24px;
 }
 
 .settingBlock {
@@ -104,4 +111,69 @@
 .dangerText {
   color: rgb(229 29 29 / 70%);
   font-weight: bold;
+}
+
+.settingFooter {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .brandName {
+    font-family: 'SF Pro';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 17px;
+    color: var(--color-purewhite);
+
+    opacity: 0.7;
+  }
+
+  .divider {
+    margin-left: 18px;
+    margin-right: 18px;
+    width: 1px;
+    height: 12px;
+    box-sizing: border-box;
+    border-left: 1px solid #fefefe;
+    opacity: 0.4;
+  }
+
+  @icon-size: 17px;
+  .links {
+    // margin-left: 18px;
+    // padding-left: 18px;
+    // border-left: 1px solid #fefefe;
+    height: @icon-size;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    opacity: 0.4;
+  }
+
+  .footerLinkItem {
+    cursor: pointer;
+
+    & + .footerLinkItem {
+      margin-left: 16px;
+    }
+
+    img {
+      width: @icon-size;
+      height: @icon-size;
+    }
+
+    .text {
+      font-family: 'SF Pro';
+      font-style: normal;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 14px;
+      text-decoration-line: underline;
+
+      color: var(--color-purewhite);
+    }
+  }
 }
