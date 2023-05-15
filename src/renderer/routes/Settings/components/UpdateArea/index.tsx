@@ -1,9 +1,13 @@
 import { useMemo, useState } from 'react';
 import classNames from 'classnames';
+import { message } from 'antd';
 
+// @ts-expect-error
 import ReactMarkdown from 'react-markdown';
+// @ts-expect-error
 import remarkGfm from 'remark-gfm';
 
+import { detectClientOS } from '@/isomorphic/os';
 import {
   useCheckNewRelease,
   useCurrentVersionReleaseNote,
@@ -12,20 +16,26 @@ import styles from './index.module.less';
 
 import RcInactiveBg from './inactive-bg.svg?rc';
 import NoVersionURL from './no-new-version.svg';
+import UpdateAndVerify from '../UpdateAndVerify';
+
+const osType = detectClientOS();
 
 interface UpdateAreaProps {
   className?: string;
 }
 export const UpdateArea = ({ className }: UpdateAreaProps) => {
-  const { currentVersionReleaseNote, appVersion } =
-    useCurrentVersionReleaseNote();
+  const {
+    copyCurrentVersionInfo,
+    currentVersionReleaseNote,
+    versionTextToShow,
+  } = useCurrentVersionReleaseNote();
 
   const { releaseCheckInfo, fetchLatestReleaseInfo } = useCheckNewRelease();
 
   const tabs = useMemo(
     () => [
       {
-        title: `Current Version: ${appVersion}`,
+        title: `Current Version: ${versionTextToShow}`,
         key: 'currentVersion' as const,
       },
       {
@@ -40,7 +50,7 @@ export const UpdateArea = ({ className }: UpdateAreaProps) => {
         key: 'lastestVersion' as const,
       },
     ],
-    [appVersion, releaseCheckInfo]
+    [versionTextToShow, releaseCheckInfo]
   );
   const [activeTab, setActiveTab] = useState(tabs[0].key);
 
@@ -52,17 +62,22 @@ export const UpdateArea = ({ className }: UpdateAreaProps) => {
           return (
             <div
               className={classNames(styles.tabItem, isActive && styles.active)}
-              onClick={() => {
+              onClick={(evt) => {
                 if (tab.key === 'lastestVersion') {
-                  fetchLatestReleaseInfo().then((releseInfo) => {
-                    // message.open({
-                    //   type: 'info',
-                    //   content: !releseInfo?.hasNewRelease
-                    //     ? 'It is the latest version.'
-                    //     : 'New version is available',
-                    // });
-                  });
+                  fetchLatestReleaseInfo();
+                } else if (tab.key === 'currentVersion') {
+                  if (
+                    (osType === 'win32' && evt.ctrlKey && evt.altKey) ||
+                    (osType === 'darwin' && evt.metaKey && evt.altKey)
+                  ) {
+                    copyCurrentVersionInfo();
+                    message.open({
+                      type: 'info',
+                      content: 'Copied Version Info',
+                    });
+                  }
                 }
+
                 setActiveTab(tab.key);
               }}
               key={tab.key}
@@ -84,13 +99,7 @@ export const UpdateArea = ({ className }: UpdateAreaProps) => {
         )}
 
         {activeTab === 'lastestVersion' &&
-          (releaseCheckInfo.hasNewRelease ? (
-            <div className={styles.changeLogContent}>
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {releaseCheckInfo.releaseNote || ''}
-              </ReactMarkdown>
-            </div>
-          ) : (
+          (!releaseCheckInfo.hasNewRelease ? (
             <div
               className={classNames(
                 styles.noNewVersion,
@@ -100,6 +109,17 @@ export const UpdateArea = ({ className }: UpdateAreaProps) => {
               <img src={NoVersionURL} className="w-[52px] h-[52px]" />
               <span className={styles.noVersionText}>No New Version</span>
             </div>
+          ) : (
+            <>
+              <div className={styles.changeLogContent}>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {releaseCheckInfo.releaseNote || ''}
+                </ReactMarkdown>
+              </div>
+              <div className={styles.updateOpLine}>
+                <UpdateAndVerify />
+              </div>
+            </>
           ))}
       </div>
     </div>

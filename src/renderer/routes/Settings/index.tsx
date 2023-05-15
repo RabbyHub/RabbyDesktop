@@ -5,11 +5,10 @@ import { openExternalUrl, requestResetApp } from '@/renderer/ipcRequest/app';
 import { useAppVersion } from '@/renderer/hooks/useMainBridge';
 import {
   IconChevronRight,
-  IconLink,
   IconTooltipInfo,
 } from '@/../assets/icons/mainwin-settings';
 
-import { Button, message, Modal, SwitchProps, Tooltip } from 'antd';
+import { Button, Modal, SwitchProps, Tooltip } from 'antd';
 import { useSettings } from '@/renderer/hooks/useSettings';
 import styled from 'styled-components';
 import {
@@ -21,7 +20,6 @@ import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
 import { ModalConfirmInSettings } from '@/renderer/components/Modal/Confirm';
 import { Switch } from '@/renderer/components/Switch/Switch';
 import { useCheckNewRelease } from '@/renderer/hooks/useAppUpdator';
-import { copyText } from '@/renderer/utils/clipboard';
 import { detectClientOS } from '@/isomorphic/os';
 import { ucfirst } from '@/isomorphic/string';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
@@ -29,10 +27,8 @@ import { atom, useAtom } from 'jotai';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
 import { useProxyStateOnSettingPage } from './settingHooks';
-import { AutoUpdate } from './components/AutoUpdate';
 import ModalDevices from './components/ModalDevices';
 import { testRequestDevice } from './components/ModalDevices/useFilteredDevices';
-import { ChangeLog } from './components/ChangeLog';
 import { ClearPendingModal } from './components/ClearPendingModal';
 import { UpdateArea } from './components/UpdateArea';
 
@@ -134,7 +130,9 @@ function FooterLink({
       }}
     >
       {iconURL ? (
-        <img alt={name} src={iconURL} />
+        <Tooltip placement="top" title={name}>
+          <img alt={name} src={iconURL} />
+        </Tooltip>
       ) : (
         <span className={styles.text}>{text || name}</span>
       )}
@@ -429,61 +427,6 @@ export function MainWindowSettings() {
           </div>
         </div>
 
-        <div className={styles.settingBlock}>
-          <h4 className={styles.blockTitle}>About</h4>
-          <div className={styles.itemList}>
-            <ItemAction
-              name={[
-                `Version: ${appVerisons.version || '-'}`,
-                appVerisons.appChannel === 'prod'
-                  ? ''
-                  : `-${appVerisons.appChannel}`,
-                appVerisons.appChannel === 'prod'
-                  ? ''
-                  : ` (${appVerisons.gitRef})`,
-              ]
-                .filter(Boolean)
-                .join('')}
-              icon="rabby-internal://assets/icons/mainwin-settings/info.svg"
-              onClick={(evt) => {
-                if (
-                  (osType === 'win32' && evt.ctrlKey && evt.altKey) ||
-                  (osType === 'darwin' && evt.metaKey && evt.altKey)
-                ) {
-                  copyText(
-                    [
-                      `Version: ${appVerisons.version || '-'}`,
-                      `Channel: ${appVerisons.appChannel}`,
-                      `Revision: ${appVerisons.gitRef}`,
-                    ].join('; ')
-                  );
-                  message.open({
-                    type: 'info',
-                    content: 'Copied Version Info',
-                  });
-                  return;
-                }
-
-                fetchLatestReleaseInfo().then((releseInfo) => {
-                  message.open({
-                    type: 'info',
-                    content: !releseInfo?.hasNewRelease
-                      ? 'It is the latest version.'
-                      : 'New version is available',
-                  });
-                });
-              }}
-            >
-              <div
-                className="flex items-center gap-[20px]"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <ChangeLog />
-                <AutoUpdate />
-              </div>
-            </ItemAction>
-          </div>
-        </div>
         <div className={styles.settingBlock}>
           <div className={styles.itemList}>
             <ItemAction

@@ -210,6 +210,13 @@ type ChannelInvokePayload = {
       result: string;
     };
   };
+  'verify-update-package': {
+    send: [];
+    response: {
+      error?: string | null;
+      isValid: boolean;
+    };
+  };
   'check-trezor-like-cannot-use': {
     send: [openType: IHardwareConnectPageType];
     response: {
