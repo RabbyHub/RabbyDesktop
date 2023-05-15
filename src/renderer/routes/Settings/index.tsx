@@ -34,6 +34,7 @@ import ModalDevices from './components/ModalDevices';
 import { testRequestDevice } from './components/ModalDevices/useFilteredDevices';
 import { ChangeLog } from './components/ChangeLog';
 import { ClearPendingModal } from './components/ClearPendingModal';
+import { UpdateArea } from './components/UpdateArea';
 
 type TypedProps = {
   name: React.ReactNode;
@@ -265,9 +266,7 @@ export function MainWindowSettings() {
   const { setIsSettingProxy, customProxyServer, proxyType } =
     useProxyStateOnSettingPage();
 
-  // const { setIsViewingDevices } = useIsViewingDevices();
-
-  const { fetchReleaseInfo } = useCheckNewRelease();
+  const { fetchLatestReleaseInfo } = useCheckNewRelease();
 
   const { enable: enabledWhiteList, toggleWhitelist } = useWhitelist();
 
@@ -277,7 +276,7 @@ export function MainWindowSettings() {
   return (
     <div className={styles.settingsPage}>
       {/* TODO: implement Update Area */}
-      <div />
+      <UpdateArea />
 
       <div className={styles.settingItems}>
         <div className={styles.settingBlock}>
@@ -465,7 +464,7 @@ export function MainWindowSettings() {
                   return;
                 }
 
-                fetchReleaseInfo().then((releseInfo) => {
+                fetchLatestReleaseInfo().then((releseInfo) => {
                   message.open({
                     type: 'info',
                     content: !releseInfo?.hasNewRelease

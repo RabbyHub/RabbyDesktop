@@ -4,6 +4,7 @@
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useState } from 'react';
 import { randString } from '../../isomorphic/string';
+import { getReleaseNoteByVersion } from '../ipcRequest/app';
 
 async function checkIfNewRelease() {
   const reqid = randString();
@@ -81,11 +82,30 @@ const releaseCheckInfoAtom = atom({
 const downloadInfoAtom = atom(null as null | IAppUpdatorDownloadProgress);
 const isDownloadingAtom = atom(false);
 
+export function useCurrentVersionReleaseNote() {
+  const [currentVersionReleaseNote, setCurrentVersionReleaseNote] =
+    useState<string>();
+
+  const fetchCurrentVersionReleaseNote = useCallback(async () => {
+    const res = await getReleaseNoteByVersion();
+    setCurrentVersionReleaseNote(res.result);
+  }, []);
+
+  useEffect(() => {
+    fetchCurrentVersionReleaseNote();
+  }, [fetchCurrentVersionReleaseNote]);
+
+  return {
+    currentVersionReleaseNote,
+    appVersion: window.rabbyDesktop.appVersion,
+  };
+}
+
 export function useCheckNewRelease(opts?: { isWindowTop?: boolean }) {
   const { isWindowTop } = opts || {};
   const [releaseCheckInfo, setReleaseCheckInfo] = useAtom(releaseCheckInfoAtom);
 
-  const fetchReleaseInfo = useCallback(async () => {
+  const fetchLatestReleaseInfo = useCallback(async () => {
     // eslint-disable-next-line promise/catch-or-return
     const newVal = await checkIfNewRelease();
     setReleaseCheckInfo(newVal);
@@ -94,25 +114,25 @@ export function useCheckNewRelease(opts?: { isWindowTop?: boolean }) {
   }, [setReleaseCheckInfo]);
 
   useEffect(() => {
-    fetchReleaseInfo();
+    fetchLatestReleaseInfo();
     if (!isWindowTop) {
       return;
     }
 
     const timer = setInterval(() => {
-      fetchReleaseInfo();
+      fetchLatestReleaseInfo();
     }, 1000 * 60 * 60 * 0.5);
 
     return () => {
       clearInterval(timer);
     };
-  }, [isWindowTop, fetchReleaseInfo, setReleaseCheckInfo]);
+  }, [isWindowTop, fetchLatestReleaseInfo, setReleaseCheckInfo]);
 
   return {
     hasNewRelease: releaseCheckInfo.hasNewRelease,
     releaseCheckInfo,
     setReleaseCheckInfo,
-    fetchReleaseInfo,
+    fetchLatestReleaseInfo,
   };
 }
 

@@ -1,0 +1,115 @@
+.updateAreaInSettings {
+  @border-color: #555863;
+  @radius-value: 6px;
+  @tab-body-changelog-h: 200px;
+  @tab-after-update-op-h: 77px;
+
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 20px;
+  border-radius: @radius-value;
+  position: relative;
+
+  color: var(--color-purewhite);
+
+  .tabHeads {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tabItem {
+    cursor: pointer;
+    height: 50px;
+    width: (1 / 2) * 100%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+
+    // background: rgba(0, 0, 0, 0.05);
+    color: rgba(255, 255, 255, 0.5);
+
+    text-align: center;
+    vertical-align: middle;
+
+    &.active {
+      color: var(--color-purewhite);
+      border-top: 1px solid @border-color;
+      border-top-left-radius: @radius-value;
+
+      &::after {
+        display: none;
+      }
+    }
+
+    &:first-child {
+      &.active {
+        border-radius: @radius-value 0 0 0;
+        border-left: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .inactiveBg {
+        transform: rotateY(180deg);
+      }
+    }
+    &.active:last-child {
+      border-radius: 0 6px 0 0;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .inactiveBg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+    }
+
+    &.active .inactiveBg {
+      display: none;
+    }
+  }
+
+  // .tabItem .releaseTabHeader {
+  //   font-family: 'SF Pro';
+  //   font-style: normal;
+  //   font-weight: 510;
+  //   font-size: 16px;
+  //   line-height: 19px;
+  // }
+
+  .tabHeadUpdateBadge {
+    height: 15px;
+    font-size: 12px;
+    background: #8697ff;
+    padding: 2px 4px;
+    margin-left: 6px;
+    border-radius: @radius-value @radius-value @radius-value 0;
+  }
+
+  .tabBody {
+    border-left: 1px solid @border-color;
+    border-right: 1px solid @border-color;
+    border-bottom: 1px solid @border-color;
+    border-bottom-left-radius: @radius-value;
+    border-bottom-right-radius: @radius-value;
+
+    // height: @tab-body-changelog-h + @tab-after-update-op-h;
+  }
+
+  .changeLogContent {
+    padding: 20px;
+    overflow-y: overlay;
+    height: @tab-body-changelog-h;
+
+    * {
+      color: var(--color-purewhite) !important;
+    }
+  }
+
+  .updateOpLine {
+    height: @tab-after-update-op-h;
+  }
+}
