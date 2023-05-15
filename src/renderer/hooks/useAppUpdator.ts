@@ -170,6 +170,8 @@ export function useAppUpdator() {
 
   const onDownload: OnDownloadFunc = useCallback(
     (info) => {
+      // mock failed
+      // info = { progress: null, isEnd: true, downloadFailed: true }
       setDownloadInfo(info);
       setStepDownloadUpdate(
         info?.isEnd ? (info?.downloadFailed ? 'error' : 'finish') : 'process'
@@ -213,14 +215,11 @@ export function useAppUpdator() {
     stepVerification,
     isDownloaded:
       releaseCheckInfo.hasNewRelease && !!downloadInfo && downloadInfo.isEnd,
+    isDownloadedFailed: downloadInfo?.isEnd && !!downloadInfo.downloadFailed,
     /**
      * @deprecated use stepDownloadUpdate instead
      */
     isDownloading: stepDownloadUpdate === 'process',
-    /**
-     * @deprecated use stepDownloadUpdate instead
-     */
-    isDownloadedFailed: downloadInfo?.isEnd && !!downloadInfo.downloadFailed,
     progress: downloadInfo?.progress,
     requestDownload,
     downloadInfo,

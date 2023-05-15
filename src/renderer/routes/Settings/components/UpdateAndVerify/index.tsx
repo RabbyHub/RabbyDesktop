@@ -16,9 +16,9 @@ function UpdateAndVerifyButton({
 }>) {
   const {
     releaseCheckInfo,
+    stepDownloadUpdate,
     stepVerification,
     verifyDownloadedPackage,
-    isDownloading,
     isDownloaded,
     isDownloadedFailed,
     requestDownload,
@@ -29,7 +29,7 @@ function UpdateAndVerifyButton({
     return null;
   }
 
-  if (isDownloading) {
+  if (stepDownloadUpdate === 'process') {
     return (
       <div
         className={classNames(
@@ -48,7 +48,7 @@ function UpdateAndVerifyButton({
     );
   }
 
-  if (isDownloaded) {
+  if (isDownloaded && !isDownloadedFailed) {
     if (stepVerification !== 'finish') {
       return (
         <div
@@ -72,30 +72,26 @@ function UpdateAndVerifyButton({
       );
     }
 
-    // TODO: deal with stepVerification === 'error'
-
-    if (!isDownloadedFailed) {
-      return (
-        <div
-          className={classNames(
-            styles.updateAndVerifyBtn,
-            className,
-            styles['is-downloaded']
-          )}
-          onClick={(evt) => {
-            evt.stopPropagation();
-            quitAndUpgrade();
-          }}
-        >
-          <img
-            src="rabby-internal://assets/icons/update/install.svg"
-            className={classNames(styles.btnIcon)}
-            alt=""
-          />
-          <div className={styles.btnText}>Install Now</div>
-        </div>
-      );
-    }
+    return (
+      <div
+        className={classNames(
+          styles.updateAndVerifyBtn,
+          className,
+          styles['is-downloaded']
+        )}
+        onClick={(evt) => {
+          evt.stopPropagation();
+          quitAndUpgrade();
+        }}
+      >
+        <img
+          src="rabby-internal://assets/icons/update/install.svg"
+          className={classNames(styles.btnIcon)}
+          alt=""
+        />
+        <div className={styles.btnText}>Install Now</div>
+      </div>
+    );
   }
 
   return (
@@ -111,7 +107,9 @@ function UpdateAndVerifyButton({
         className={classNames(styles.btnIcon)}
         alt=""
       />
-      <div className={styles.btnText}>Update Rabby</div>
+      <div className={styles.btnText}>
+        {stepDownloadUpdate === 'error' ? 'Retry Update' : 'Update Rabby'}
+      </div>
     </div>
   );
 }
@@ -125,8 +123,8 @@ export default function UpdateAndVerify({
     releaseCheckInfo,
     stepVerification,
     stepDownloadUpdate,
-    isDownloading,
     isDownloaded,
+    isDownloadedFailed,
     progress,
   } = useAppUpdator();
 
@@ -178,23 +176,25 @@ export default function UpdateAndVerify({
                     </>
                   )}
                   {stepDownloadUpdate === 'finish' && 'Download Progress: 100%'}
+                  {stepDownloadUpdate === 'error' && 'Download Update'}
                 </>
               </span>
             }
             description={
               <p className={styles.stepExplaination}>
-                {isDownloading && (
+                {stepDownloadUpdate === 'process' && (
                   <>
                     Connecting to the server, server address:
                     <span className="underline ml-[2px]">
                       https://download.rabby.io/
                       {detectClientOS() === 'darwin'
-                        ? 'latest.dmg'
-                        : 'latest.exe'}
+                        ? 'rabby-desktop-latest.dmg'
+                        : 'rabby-desktop-latest.exe'}
                     </span>
                   </>
                 )}
-                {isDownloaded && 'Downloaded File'}
+                {isDownloaded && !isDownloadedFailed && 'Downloaded File'}
+                {isDownloaded && isDownloadedFailed && 'Download Failed'}
               </p>
             }
           />
