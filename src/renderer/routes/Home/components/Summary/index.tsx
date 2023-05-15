@@ -12,8 +12,10 @@ export const Summary = () => {
 
   return (
     <div className="px-2">
-      <div className="inline-flex w-full mb-[14px] text-[#fff] opacity-80 px-12">
-        <div className="w-[22%]">Asset</div>
+      <div className="inline-flex w-full mb-[14px] px-12 text-12 text-white text-opacity-50">
+        <div className="w-[22%] text-white text-opacity-80 font-medium">
+          Asset
+        </div>
         <div className="w-[16%]">Price</div>
         <div className="w-[22%]">Amount</div>
         <div className="w-[16%]">USD Value</div>
@@ -21,7 +23,7 @@ export const Summary = () => {
           <span>Percent </span>
           <TipsWrapper hoverTips="Asset value divided by total net worth">
             <img
-              className="w-12 h-12"
+              className="w-12 h-12 opacity-50"
               src="rabby-internal://assets/icons/home/info.svg"
             />
           </TipsWrapper>
