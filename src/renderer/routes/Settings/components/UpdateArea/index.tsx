@@ -11,6 +11,7 @@ import {
 import styles from './index.module.less';
 
 import RcInactiveBg from './inactive-bg.svg?rc';
+import NoVersionURL from './no-new-version.svg';
 
 interface UpdateAreaProps {
   className?: string;
@@ -82,13 +83,24 @@ export const UpdateArea = ({ className }: UpdateAreaProps) => {
           </div>
         )}
 
-        {activeTab === 'lastestVersion' && releaseCheckInfo.hasNewRelease && (
-          <div className={styles.changeLogContent}>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {releaseCheckInfo.releaseNote || ''}
-            </ReactMarkdown>
-          </div>
-        )}
+        {activeTab === 'lastestVersion' &&
+          (releaseCheckInfo.hasNewRelease ? (
+            <div className={styles.changeLogContent}>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {releaseCheckInfo.releaseNote || ''}
+              </ReactMarkdown>
+            </div>
+          ) : (
+            <div
+              className={classNames(
+                styles.noNewVersion,
+                styles.changeLogContent
+              )}
+            >
+              <img src={NoVersionURL} className="w-[52px] h-[52px]" />
+              <span className={styles.noVersionText}>No New Version</span>
+            </div>
+          ))}
       </div>
     </div>
   );
