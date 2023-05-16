@@ -42,4 +42,46 @@
       }
     }
   }
+
+  .custom-rpc-tooltip {
+    &.avaliable {
+      .ant-tooltip-inner {
+        &::before {
+          background-color: #27c193;
+        }
+        color: #27c193;
+      }
+    }
+    &.unavaliable {
+      .ant-tooltip-inner {
+        &::before {
+          background-color: #ec5151;
+        }
+        color: #ec5151;
+      }
+    }
+    .ant-tooltip-inner {
+      padding: 10px;
+      // display: flex;
+      // align-items: center;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 14px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+      width: 100%;
+
+      &::before {
+        content: '';
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 100%;
+        margin-right: 5px;
+        flex-shrink: 0;
+      }
+    }
+  }
 }

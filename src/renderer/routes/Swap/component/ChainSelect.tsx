@@ -6,6 +6,8 @@ import IconRcSwapArrowDownTriangle from '@/../assets/icons/swap/arrow-caret-down
 
 import styled from 'styled-components';
 import { useSwitchChainModal } from '@/renderer/hooks/useSwitchChainModal';
+import ChainIcon from '@/renderer/components/ChainIcon';
+import { useCustomRPC } from '@/renderer/hooks/useCustomRPC';
 
 const ChainSelectWrapper = styled.div`
   display: flex;
@@ -14,10 +16,15 @@ const ChainSelectWrapper = styled.div`
   cursor: pointer;
 
   .logo {
-    width: 23px;
-    height: 23px;
+    width: 24px;
+    height: 24px;
     border-radius: 2px;
-    overflow: hidden;
+    /* overflow: hidden; */
+
+    img {
+      width: 100%;
+      height: 100%;
+    }
   }
 
   .name {
@@ -60,6 +67,7 @@ export const ChainSelect = ({
       title,
       disabledTips,
       supportChains,
+      isShowCustomRPC: true,
     });
   }, [disabledTips, open, supportChains, title, value]);
   const handleClickSelector = () => {
@@ -78,7 +86,13 @@ export const ChainSelect = ({
           )
         ) : (
           <>
-            <img src={CHAINS[value].logo} className="logo" />
+            {/* <img src={CHAINS[value].logo} className="logo" /> */}
+            <ChainIcon
+              chain={value}
+              className="logo"
+              showCustomRPCToolTip
+              isShowCustomRPC
+            />
             <span className="name">{CHAINS[value].name}</span>
             {!readonly && (
               <IconRcSwapArrowDownTriangle
@@ -132,7 +146,13 @@ export const ChainRender = ({
 }: { chain: CHAINS_ENUM } & InsHTMLAttributes<HTMLDivElement>) => {
   return (
     <ChainWrapper {...other}>
-      <img className="logo" src={CHAINS[chain].logo} alt={CHAINS[chain].name} />
+      {/* <img className="logo" src={CHAINS[chain].logo} alt={CHAINS[chain].name} /> */}
+      <ChainIcon
+        chain={chain}
+        className="logo"
+        showCustomRPCToolTip
+        isShowCustomRPC
+      />
       <span className="name">{CHAINS[chain].name}</span>
       <img className="down" src={ImgArrowDown} alt="" />
     </ChainWrapper>

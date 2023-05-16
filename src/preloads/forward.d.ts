@@ -28,6 +28,7 @@ type ZViewStates = {
     supportChains?: CHAINS_ENUM[];
     disabledTips?: string;
     isCancel?: boolean;
+    isShowCustomRPC?: boolean;
   };
   'security-notification': ISecurityNotificationPayload;
   'add-address-dropdown': {

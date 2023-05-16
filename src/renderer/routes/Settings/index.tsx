@@ -31,6 +31,7 @@ import ModalDevices from './components/ModalDevices';
 import { testRequestDevice } from './components/ModalDevices/useFilteredDevices';
 import { ClearPendingModal } from './components/ClearPendingModal';
 import { UpdateArea } from './components/UpdateArea';
+import { CustomRPCModal } from './components/CustomRPCModal';
 
 type TypedProps = {
   name: React.ReactNode;
@@ -270,7 +271,7 @@ export function MainWindowSettings() {
 
   const [isShowingClearPendingModal, setIsShowingClearPendingModal] =
     useState(false);
-
+  const [isShowCustomRPCModal, setIsShowCustomRPCModal] = useState(false);
   return (
     <div className={styles.settingsPage}>
       {/* TODO: implement Update Area */}
@@ -361,7 +362,7 @@ export function MainWindowSettings() {
         </div>
 
         <div className={styles.settingBlock}>
-          <h4 className={styles.blockTitle}>Dapp</h4>
+          <h4 className={styles.blockTitle}>General</h4>
           <div className={styles.itemList}>
             <ItemSwitch
               checked={settings.enableServeDappByHttp}
@@ -399,6 +400,22 @@ export function MainWindowSettings() {
                 });
               }}
             />
+          </div>
+          <div
+            className={styles.itemList}
+            style={{
+              marginTop: 24,
+            }}
+          >
+            <ItemAction
+              name="Custom RPC"
+              onClick={() => {
+                setIsShowCustomRPCModal(true);
+              }}
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-custom-rpc.svg"
+            >
+              <img src={IconChevronRight} />
+            </ItemAction>
           </div>
         </div>
 
@@ -481,6 +498,12 @@ export function MainWindowSettings() {
         open={isShowingClearPendingModal}
         onClose={() => {
           setIsShowingClearPendingModal(false);
+        }}
+      />
+      <CustomRPCModal
+        open={isShowCustomRPCModal}
+        onClose={() => {
+          setIsShowCustomRPCModal(false);
         }}
       />
     </div>
