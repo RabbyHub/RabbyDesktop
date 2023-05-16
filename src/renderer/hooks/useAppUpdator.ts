@@ -85,6 +85,8 @@ const releaseCheckInfoAtom = atom({
   releaseVersion: null,
 } as IAppUpdatorCheckResult);
 const downloadInfoAtom = atom(null as null | IAppUpdatorDownloadProgress);
+
+const checkConnectionAtom = atom<IAppUpdatorProcessStep>('wait');
 const downloadStepAtom = atom<IAppUpdatorProcessStep>('wait');
 const verifyStepAtom = atom<IAppUpdatorProcessStep>('wait');
 
@@ -166,6 +168,7 @@ export function useCheckNewRelease(opts?: { isWindowTop?: boolean }) {
 }
 
 const isMockFailed = {
+  Connected: !IS_RUNTIME_PRODUCTION && false,
   Download: !IS_RUNTIME_PRODUCTION && false,
   Verify: !IS_RUNTIME_PRODUCTION && false,
 };
@@ -173,6 +176,8 @@ const isMockFailed = {
 export function useAppUpdator() {
   const [releaseCheckInfo] = useAtom(releaseCheckInfoAtom);
   const [downloadInfo, setDownloadInfo] = useAtom(downloadInfoAtom);
+  const [stepCheckConnected, setStepCheckConnected] =
+    useAtom(checkConnectionAtom);
   const [stepDownloadUpdate, setStepDownloadUpdate] = useAtom(downloadStepAtom);
   const [stepVerification, setStepVerification] = useAtom(verifyStepAtom);
 
@@ -195,6 +200,34 @@ export function useAppUpdator() {
     await startDownload({ onDownload });
     setStepDownloadUpdate('process');
   }, [onDownload, setStepDownloadUpdate]);
+
+  const checkDownloadAvailble = useCallback(async () => {
+    setStepCheckConnected('process');
+    setStepDownloadUpdate('process');
+
+    let isValid = false;
+
+    try {
+      const [res] = await Promise.all([
+        window.rabbyDesktop.ipcRenderer.invoke('check-download-availble'),
+        // await 1second
+        new Promise<void>((resolve) => {
+          setTimeout(resolve, 1500);
+        }),
+      ]);
+
+      if (isMockFailed.Connected) res.isValid = false;
+      isValid = res.isValid;
+    } catch (err) {
+      isValid = false;
+    }
+    setStepCheckConnected(isValid ? 'finish' : 'error');
+    if (!isValid) {
+      setStepDownloadUpdate('wait');
+    }
+
+    return isValid;
+  }, [setStepCheckConnected, setStepDownloadUpdate]);
 
   const verifyDownloadedPackage = useCallback(async () => {
     if (stepDownloadUpdate !== 'finish') {
@@ -225,6 +258,9 @@ export function useAppUpdator() {
 
   return {
     releaseCheckInfo,
+    stepCheckConnected,
+    checkDownloadAvailble,
+
     stepDownloadUpdate,
     stepVerification,
     isDownloaded:
@@ -238,7 +274,6 @@ export function useAppUpdator() {
     requestDownload,
     downloadInfo,
     quitAndUpgrade,
-
     verifyDownloadedPackage,
   };
 }

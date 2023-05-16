@@ -16,6 +16,8 @@ function UpdateAndVerifyButton({
 }>) {
   const {
     releaseCheckInfo,
+    stepCheckConnected,
+    checkDownloadAvailble,
     stepDownloadUpdate,
     stepVerification,
     verifyDownloadedPackage,
@@ -43,7 +45,11 @@ function UpdateAndVerifyButton({
           className={classNames(styles.btnIcon, styles['is-animate'])}
           alt=""
         />
-        <div className={styles.btnText}>Downloading...</div>
+        <div className={styles.btnText}>
+          {stepCheckConnected === 'process'
+            ? 'Connecting...'
+            : 'Downloading...'}
+        </div>
       </div>
     );
   }
@@ -97,9 +103,14 @@ function UpdateAndVerifyButton({
   return (
     <div
       className={classNames(styles.updateAndVerifyBtn, className)}
-      onClick={(evt) => {
+      onClick={async (evt) => {
         evt.stopPropagation();
-        requestDownload();
+        if (stepCheckConnected !== 'finish') {
+          const isValid = await checkDownloadAvailble();
+          if (isValid) {
+            requestDownload();
+          }
+        }
       }}
     >
       <img
@@ -108,11 +119,19 @@ function UpdateAndVerifyButton({
         alt=""
       />
       <div className={styles.btnText}>
-        {stepDownloadUpdate === 'error' ? 'Retry Update' : 'Update'}
+        {stepCheckConnected === 'error' || stepDownloadUpdate === 'error'
+          ? 'Retry Update'
+          : 'Update'}
       </div>
     </div>
   );
 }
+
+const PSUDO_CHECK_CONNECT_URL = `https://download.rabby.io/${
+  detectClientOS() === 'darwin'
+    ? 'rabby-desktop-latest.dmg'
+    : 'rabby-desktop-latest.exe'
+}`;
 
 export default function UpdateAndVerify({
   className,
@@ -121,6 +140,7 @@ export default function UpdateAndVerify({
 }>) {
   const {
     releaseCheckInfo,
+    stepCheckConnected,
     stepVerification,
     stepDownloadUpdate,
     isDownloaded,
@@ -142,7 +162,7 @@ export default function UpdateAndVerify({
   return (
     <div className={classNames(styles.updateAndVerify, className)}>
       <UpdateAndVerifyButton />
-      {currentStep > 0 && (
+      {(currentStep > 0 || stepCheckConnected === 'error') && (
         <Steps
           direction="vertical"
           size="small"
@@ -153,7 +173,9 @@ export default function UpdateAndVerify({
           <Steps.Step
             className={styles.stepItem}
             stepIndex={1}
-            status={stepDownloadUpdate}
+            status={
+              stepCheckConnected === 'error' ? 'error' : stepDownloadUpdate
+            }
             icons={{
               finish: <RcIconStepFinish className={styles.stepIconSvg} />,
               error: <RcIconStepError className={styles.stepIconSvg} />,
@@ -166,35 +188,47 @@ export default function UpdateAndVerify({
                 )}
               >
                 <>
-                  {stepDownloadUpdate === 'wait' && 'Download Update'}
+                  {stepDownloadUpdate === 'wait' && 'Download Files'}
+                  {stepDownloadUpdate === 'error' && 'Download Files'}
                   {stepDownloadUpdate === 'process' && (
                     <>
-                      Download Files -{' '}
-                      {`${(progress?.percent || 0).toFixed(0)}%`}
+                      Download Files
+                      {stepCheckConnected === 'finish' &&
+                        ` - ${(progress?.percent || 0).toFixed(0)}%`}
                     </>
                   )}
                   {stepDownloadUpdate === 'finish' && 'Download Progress: 100%'}
-                  {stepDownloadUpdate === 'error' && 'Download Update'}
                 </>
               </span>
             }
             description={
-              <p className={styles.stepExplaination}>
-                {stepDownloadUpdate === 'process' && (
-                  <>
-                    Connected to the server, server address:
-                    <span className="underline ml-[2px]">
-                      https://download.rabby.io/
-                      {detectClientOS() === 'darwin'
-                        ? 'rabby-desktop-latest.dmg'
-                        : 'rabby-desktop-latest.exe'}
-                    </span>
-                    <p className="mt-[8px]">Downloading files</p>
-                  </>
+              <div className={styles.stepExplaination}>
+                {stepDownloadUpdate === 'process' &&
+                  stepCheckConnected === 'process' && (
+                    <>
+                      Connecting to the server, server address:
+                      <span className="underline ml-[2px]">
+                        {PSUDO_CHECK_CONNECT_URL}
+                      </span>
+                    </>
+                  )}
+                {stepDownloadUpdate === 'process' &&
+                  stepCheckConnected === 'finish' && (
+                    <>
+                      Connected to the server, server address:
+                      <span className="underline ml-[2px]">
+                        {PSUDO_CHECK_CONNECT_URL}
+                      </span>
+                      <div className="mt-[8px]">Downloading files</div>
+                    </>
+                  )}
+                {stepCheckConnected === 'error' && (
+                  <>Fail to connect to the server</>
                 )}
+
                 {isDownloaded && !isDownloadedFailed && 'Download complete'}
                 {isDownloaded && isDownloadedFailed && 'Fail to download file'}
-              </p>
+              </div>
             }
           />
           <Steps.Step
@@ -216,13 +250,13 @@ export default function UpdateAndVerify({
               </span>
             }
             description={
-              <p className={styles.stepExplaination}>
+              <div className={styles.stepExplaination}>
                 {stepVerification === 'process' && 'Verifying...'}
                 {stepVerification === 'finish' &&
                   'The digital signature of the downloaded file is verified by Rabby Official. Please install and re-launch the app.'}
                 {stepVerification === 'error' &&
                   'Fail to verify file digital signature'}
-              </p>
+              </div>
             }
           />
         </Steps>

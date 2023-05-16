@@ -210,6 +210,14 @@ type ChannelInvokePayload = {
       result: string;
     };
   };
+  'check-download-availble': {
+    send: [];
+    response: {
+      error?: string | null;
+      isValid: boolean;
+      downloadURL: string;
+    };
+  };
   'verify-update-package': {
     send: [];
     response: {
