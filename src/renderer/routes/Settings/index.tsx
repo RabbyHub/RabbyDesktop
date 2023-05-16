@@ -33,6 +33,7 @@ import ModalDevices from './components/ModalDevices';
 import { testRequestDevice } from './components/ModalDevices/useFilteredDevices';
 import { ChangeLog } from './components/ChangeLog';
 import { ClearPendingModal } from './components/ClearPendingModal';
+import { CustomRPCModal } from './components/CustomRPCModal';
 
 type TypedProps = {
   name: React.ReactNode;
@@ -265,7 +266,7 @@ export function MainWindowSettings() {
 
   const [isShowingClearPendingModal, setIsShowingClearPendingModal] =
     useState(false);
-
+  const [isShowCustomRPCModal, setIsShowCustomRPCModal] = useState(false);
   return (
     <div className={styles.settingsPage}>
       {/* TODO: implement Update Area */}
@@ -508,6 +509,15 @@ export function MainWindowSettings() {
           >
             <img src={IconChevronRight} />
           </ItemAction>
+          <ItemAction
+            name="Custom RPC"
+            onClick={() => {
+              setIsShowCustomRPCModal(true);
+            }}
+            icon="rabby-internal://assets/icons/mainwin-settings/icon-clear.svg"
+          >
+            <img src={IconChevronRight} />
+          </ItemAction>
         </div>
       </div>
 
@@ -516,6 +526,12 @@ export function MainWindowSettings() {
         open={isShowingClearPendingModal}
         onClose={() => {
           setIsShowingClearPendingModal(false);
+        }}
+      />
+      <CustomRPCModal
+        open={isShowCustomRPCModal}
+        onClose={() => {
+          setIsShowCustomRPCModal(false);
         }}
       />
     </div>
