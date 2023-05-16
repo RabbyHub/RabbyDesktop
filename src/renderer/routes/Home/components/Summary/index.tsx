@@ -63,7 +63,7 @@ export const Summary = () => {
                   {isSmallAssets ? e.symbol : ellipsisTokenSymbol(e.symbol)}
                 </span>
                 {e.amount < 0 ? (
-                  <div className="ml-2 rounded-[4px] text-[10px] px-6 py-2 text-[#FE815F] border-solid border border-[#FE815F]">
+                  <div className="ml-6 rounded-[4px] text-[10px] px-[5px] py-2 text-[#ff6565] border-solid border border-[#ff6565]">
                     DEBT
                   </div>
                 ) : null}
