@@ -10,6 +10,7 @@ import remarkGfm from 'remark-gfm';
 import { detectClientOS } from '@/isomorphic/os';
 import ChangeLogContent from '@/renderer/components/ChangeLogContent';
 import {
+  useUpdateAppStates,
   useCheckNewRelease,
   useCurrentVersionReleaseNote,
 } from '../../../../hooks/useAppUpdator';
@@ -25,6 +26,7 @@ interface UpdateAreaProps {
   className?: string;
 }
 export const UpdateArea = ({ className }: UpdateAreaProps) => {
+  const { stepDownloadUpdate } = useUpdateAppStates();
   const {
     copyCurrentVersionInfo,
     currentVersionReleaseNote,
@@ -127,7 +129,12 @@ export const UpdateArea = ({ className }: UpdateAreaProps) => {
               <ChangeLogContent className={styles.changeLogContainer}>
                 {releaseCheckInfo.releaseNote || ''}
               </ChangeLogContent>
-              <div className={styles.updateOpLine}>
+              <div
+                className={classNames(
+                  styles.updateOpLine,
+                  stepDownloadUpdate === 'wait' && styles.waitToStart
+                )}
+              >
                 <UpdateAndVerify />
               </div>
             </>

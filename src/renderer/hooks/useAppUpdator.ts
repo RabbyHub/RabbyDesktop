@@ -174,14 +174,35 @@ const isMockFailed = {
   Verify: !IS_RUNTIME_PRODUCTION && false,
 };
 
-export function useAppUpdator() {
-  const [releaseCheckInfo] = useAtom(releaseCheckInfoAtom);
-  const [downloadInfo, setDownloadInfo] = useAtom(downloadInfoAtom);
+export function useUpdateAppStates() {
   const [stepCheckConnected, setStepCheckConnected] =
     useAtom(checkConnectionAtom);
   const [stepDownloadUpdate, setStepDownloadUpdate] = useAtom(downloadStepAtom);
   const [stepVerification, setStepVerification] = useAtom(verifyStepAtom);
+
+  return {
+    stepCheckConnected,
+    setStepCheckConnected,
+    stepDownloadUpdate,
+    setStepDownloadUpdate,
+    stepVerification,
+    setStepVerification,
+  };
+}
+
+export function useAppUpdator() {
+  const [releaseCheckInfo] = useAtom(releaseCheckInfoAtom);
+  const [downloadInfo, setDownloadInfo] = useAtom(downloadInfoAtom);
   const [appUpdateURL, setAppUpdateURL] = useAtom(appUpdateURlAtom);
+
+  const {
+    stepCheckConnected,
+    setStepCheckConnected,
+    stepDownloadUpdate,
+    setStepDownloadUpdate,
+    stepVerification,
+    setStepVerification,
+  } = useUpdateAppStates();
 
   const onDownload: OnDownloadFunc = useCallback(
     (info) => {

@@ -233,8 +233,12 @@ export default function UpdateAndVerify({
                     >
                       Connecting to the server, server address:
                       <span
-                        className="underline cursor-pointer ml-[2px]"
+                        className={classNames(
+                          'underline ml-[2px]',
+                          appUpdateURL && 'cursor-pointer'
+                        )}
                         onClick={() => {
+                          if (!appUpdateURL) return;
                           openExternalUrl(appUpdateURL);
                         }}
                       >
@@ -246,8 +250,12 @@ export default function UpdateAndVerify({
                   <div className={classNames(styles.stepSubStep)}>
                     Connected to the server, server address:
                     <span
-                      className="underline cursor-pointer ml-[2px]"
+                      className={classNames(
+                        'underline ml-[2px]',
+                        appUpdateURL && 'cursor-pointer'
+                      )}
                       onClick={() => {
+                        if (!appUpdateURL) return;
                         openExternalUrl(appUpdateURL);
                       }}
                     >
