@@ -1,6 +1,5 @@
 /* eslint-disable no-continue */
 import openApi from '@/renderer/utils/openapi';
-import { numFormat, numSeparate } from './utils';
 
 export type SummaryData = Awaited<
   ReturnType<typeof openApi.getSummarizedAssetList>
@@ -29,7 +28,7 @@ export const sumGrossWorth = (data: AssetsClassify) => {
         // token id 不同链存在重复
         id: x.id + ((x as Tokens).chain || ''),
         _value,
-        _netWorth: numFormat(_value, 0, '$'),
+        // _netWorth: numFormat(_value, 0, '$'),
       };
     })
     .sort((m, n) => (m._value > n._value ? -1 : 1));
@@ -49,11 +48,11 @@ export const sumGrossWorth = (data: AssetsClassify) => {
 
   return {
     totalAssets,
-    _totalAssets: numFormat(totalAssets, 0, '$'),
+    // _totalAssets: numFormat(totalAssets, 0, '$'),
     totalDebit,
-    _totalDebit: numFormat(absTotalDebit, 0, '$'),
+    // _totalDebit: numFormat(absTotalDebit, 0, '$'),
     netWorth,
-    _netWorth: numFormat(netWorth, 0, '$'),
+    // _netWorth: numFormat(netWorth, 0, '$'),
     _debitPercent:
       netWorth === 0
         ? ''
@@ -64,7 +63,7 @@ export const sumGrossWorth = (data: AssetsClassify) => {
 
 export type AssetSummaryItem = (Coin | Tokens) & {
   _value: number;
-  _netWorth: string;
+  // _netWorth: string;
   // _percent: number;
 };
 
@@ -91,17 +90,17 @@ export type AssetChangeItem = {
   logo?: string;
 
   netWorthChangeValue: number;
-  netWorthChange: string;
-  preNetWorth: string;
-  nextNetWorth: string;
-  balanceChange: string;
+  // netWorthChange: string;
+  // preNetWorth: string;
+  // nextNetWorth: string;
+  // balanceChange: string;
   balanceDelta: number;
-  preBalance: string;
-  nextBalance: string;
-  priceChange: string;
-  prePrice: string;
+  // preBalance: string;
+  // nextBalance: string;
+  // priceChange: string;
+  // prePrice: string;
   priceDelta: number;
-  nextPrice: string;
+  // nextPrice: string;
   isLoss: boolean;
 };
 
@@ -171,7 +170,7 @@ export const groupAssets = (
 
   [miniAssets, miniDebts].forEach((x) => {
     if (x._value) {
-      x._netWorth = numFormat(x._value, 0, '$');
+      // x._netWorth = numFormat(x._value, 0, '$');
       x._percent = baseWorth === 0 ? 0 : (Math.abs(x._value) / baseWorth) * 100;
       result.push(x);
     }
@@ -201,24 +200,24 @@ const computeDelta = (pre?: AssetSummaryItem, next?: AssetSummaryItem) => {
     logo: (meta as Tokens).logo_url,
     isLoss: delta < 0,
     netWorthChangeValue: delta,
-    netWorthChange: numFormat(delta, 0, '$', true),
-    preNetWorth: pre?._netWorth ?? '$0',
-    nextNetWorth: next?._netWorth ?? '$0',
+    // netWorthChange: numFormat(delta, 0, '$', true),
+    // preNetWorth: pre?._netWorth ?? '$0',
+    // nextNetWorth: next?._netWorth ?? '$0',
     balanceDelta: (next?.amount || 0) - (pre?.amount || 0),
-    balanceChange: numSeparate(
-      (next?.amount || 0) - (pre?.amount || 0),
-      4,
-      true,
-      true
-    ),
-    preBalance: pre ? numSeparate(pre.amount, 4, true) : '0',
-    nextBalance: next ? numSeparate(next.amount, 4, true) : '0',
+    // balanceChange: numSeparate(
+    //   (next?.amount || 0) - (pre?.amount || 0),
+    //   4,
+    //   true,
+    //   true
+    // ),
+    // preBalance: pre ? numSeparate(pre.amount, 4, true) : '0',
+    // nextBalance: next ? numSeparate(next.amount, 4, true) : '0',
     priceDelta: priceDeltaPercent ? priceDelta : 0,
-    priceChange: priceDeltaPercent
-      ? `${numSeparate(priceDeltaPercent, 2, true, true)}%`
-      : '-',
-    prePrice: pre ? numFormat(pre.price, 2, '$') : '-',
-    nextPrice: next ? numFormat(next.price, 2, '$') : '-',
+    // priceChange: priceDeltaPercent
+    //   ? `${numSeparate(priceDeltaPercent, 2, true, true)}%`
+    //   : '-',
+    // prePrice: pre ? numFormat(pre.price, 2, '$') : '-',
+    // nextPrice: next ? numFormat(next.price, 2, '$') : '-',
   };
 };
 

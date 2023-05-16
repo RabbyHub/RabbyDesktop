@@ -85,7 +85,9 @@ export const Summary = () => {
                 {isNil(e.amount) ? '-' : formatAmount(Math.abs(e.amount || 0))}{' '}
                 {isNil(e.amount) ? '' : e.symbol}
               </div>
-              <div className="w-[16%]">{e._netWorth}</div>
+              <div className="w-[16%]">
+                {formatUsdValue(Math.abs(e._value))}
+              </div>
               <div className="w-[24%] relative h-[44px]">
                 <div
                   className={clsx(
