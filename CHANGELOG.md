@@ -1,7 +1,21 @@
 
-v0.21.0 / 2023-05-12
+v0.22.0 / 2023-05-16
 ====================
 
+  * chore: adjust.
+  * fix: style fix.
+  * chore: tuning. (#432)
+  * feat: style tuning. (#431)
+  * feat: tuning styles of settings page. (#430)
+  * fix: custom rpc bugs (#428)
+  * fix:comment out unused formatted fields (#429)
+  * feat: better release information views on settings page. (#425)
+  * Feat: summary (#426)
+
+v0.21.0-reg / 2023-05-12
+========================
+
+  * Release v0.21.0-prod
   * chore: sync data.
   * feat: support meter chain and etc chain (#422)
   * feat: upgrade rabbyx to 0.85.0
