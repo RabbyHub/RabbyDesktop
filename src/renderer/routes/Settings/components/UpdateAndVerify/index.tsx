@@ -241,22 +241,29 @@ export default function UpdateAndVerify({
                       </span>
                     </div>
                   )}
-                {
-                  /* stepDownloadUpdate === 'process' && */
+                {stepCheckConnected === 'finish' && (
+                  <div className={classNames(styles.stepSubStep)}>
+                    Connected to the server, server address:
+                    <span className="underline ml-[2px]">
+                      {PSUDO_CHECK_CONNECT_URL}
+                    </span>
+                  </div>
+                )}
+                {stepDownloadUpdate === 'process' &&
                   stepCheckConnected === 'finish' && (
-                    <div className={classNames(styles.stepSubStep)}>
-                      Connected to the server, server address:
-                      <span className="underline ml-[2px]">
-                        {PSUDO_CHECK_CONNECT_URL}
-                      </span>
-                      {stepDownloadUpdate === 'process' && (
-                        <div className="mt-[8px]">Downloading files</div>
+                    <div
+                      className={classNames(
+                        styles.stepSubStep,
+                        styles.activeSubStep
                       )}
+                    >
+                      Downloading files
                     </div>
-                  )
-                }
+                  )}
                 {stepCheckConnected === 'error' && (
-                  <>Fail to connect to the server</>
+                  <div className={classNames(styles.stepSubStep)}>
+                    Fail to connect to the server
+                  </div>
                 )}
 
                 {isDownloaded && !isDownloadedFailed && (

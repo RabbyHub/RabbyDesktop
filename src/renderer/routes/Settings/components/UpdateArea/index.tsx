@@ -8,6 +8,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 import { detectClientOS } from '@/isomorphic/os';
+import ChangeLogContent from '@/renderer/components/ChangeLogContent';
 import {
   useCheckNewRelease,
   useCurrentVersionReleaseNote,
@@ -102,11 +103,9 @@ export const UpdateArea = ({ className }: UpdateAreaProps) => {
 
       <div className={styles.tabBody}>
         {activeTab === 'currentVersion' && (
-          <div className={styles.changeLogContent}>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {currentVersionReleaseNote || ''}
-            </ReactMarkdown>
-          </div>
+          <ChangeLogContent className={styles.changeLogContainer}>
+            {currentVersionReleaseNote || ''}
+          </ChangeLogContent>
         )}
 
         {activeTab === 'lastestVersion' &&
@@ -114,7 +113,7 @@ export const UpdateArea = ({ className }: UpdateAreaProps) => {
             <div
               className={classNames(
                 styles.noNewVersion,
-                styles.changeLogContent
+                styles.changeLogContainer
               )}
             >
               <img src={NoVersionURL} className="w-[52px] h-[52px]" />
@@ -125,11 +124,9 @@ export const UpdateArea = ({ className }: UpdateAreaProps) => {
             </div>
           ) : (
             <>
-              <div className={styles.changeLogContent}>
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {releaseCheckInfo.releaseNote || ''}
-                </ReactMarkdown>
-              </div>
+              <ChangeLogContent className={styles.changeLogContainer}>
+                {releaseCheckInfo.releaseNote || ''}
+              </ChangeLogContent>
               <div className={styles.updateOpLine}>
                 <UpdateAndVerify />
               </div>

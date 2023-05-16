@@ -1,0 +1,74 @@
+.changeLog {
+  &Modal {
+    :global {
+      .ant-modal-body {
+        padding: 32px !important;
+      }
+      .ant-modal-close-x {
+        padding: 24px;
+      }
+    }
+  }
+  &Btn {
+    border: 1px solid #8697ff;
+    border-radius: 4px;
+    padding-right: 9px;
+    padding-left: 9px;
+    img {
+      margin-right: 6px;
+    }
+
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 17px;
+
+    &:hover {
+      box-shadow: none;
+    }
+  }
+  &Header {
+    margin-bottom: 26px;
+  }
+  &Title {
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 24px;
+    text-align: center;
+    color: #ffffff;
+    margin-bottom: 9px;
+  }
+  &Version {
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 19px;
+    text-align: center;
+    color: #ffffff;
+  }
+
+  &Container {
+    overflow: auto;
+    padding: 26px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-bottom: 32px;
+    max-height: 354px;
+    color: #fff;
+  }
+
+  &Footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    :global {
+      .auto-update {
+        width: 200px !important;
+        height: 48px !important;
+        padding-left: 12px;
+        padding-right: 12px;
+        gap: 8px;
+        justify-content: center;
+      }
+    }
+  }
+}
