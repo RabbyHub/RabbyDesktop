@@ -5,6 +5,7 @@ import type { UpdateDownloadedEvent } from 'electron-updater/out/main';
 
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 
+import { ensureSuffix, unPrefix } from '@/isomorphic/string';
 import { getOptionProxyForAxios } from '../store/desktopApp';
 import { getFileSha512 } from '../utils/security';
 import {
@@ -170,7 +171,10 @@ handleIpcMainInvoke('check-download-availble', async () => {
   }
 
   const filePath = checker.updateInfo.files[0]?.url || checker.updateInfo.path;
-  const downloadURL = `${getAppUpdaterURL()}/${filePath}`;
+  const downloadURL = `${ensureSuffix(getAppUpdaterURL(), '/')}${unPrefix(
+    filePath,
+    '/'
+  )}`;
 
   return { error: null, isValid: !!checker, downloadURL };
 });

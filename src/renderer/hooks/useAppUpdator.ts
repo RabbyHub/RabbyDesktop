@@ -89,6 +89,7 @@ const downloadInfoAtom = atom(null as null | IAppUpdatorDownloadProgress);
 const checkConnectionAtom = atom<IAppUpdatorProcessStep>('wait');
 const downloadStepAtom = atom<IAppUpdatorProcessStep>('wait');
 const verifyStepAtom = atom<IAppUpdatorProcessStep>('wait');
+const appUpdateURlAtom = atom<string>('');
 
 export function useCurrentVersionReleaseNote() {
   const [currentVersionReleaseNote, setCurrentVersionReleaseNote] =
@@ -180,6 +181,7 @@ export function useAppUpdator() {
     useAtom(checkConnectionAtom);
   const [stepDownloadUpdate, setStepDownloadUpdate] = useAtom(downloadStepAtom);
   const [stepVerification, setStepVerification] = useAtom(verifyStepAtom);
+  const [appUpdateURL, setAppUpdateURL] = useAtom(appUpdateURlAtom);
 
   const onDownload: OnDownloadFunc = useCallback(
     (info) => {
@@ -218,6 +220,8 @@ export function useAppUpdator() {
 
       if (isMockFailed.Connected) res.isValid = false;
       isValid = res.isValid;
+
+      setAppUpdateURL(res.downloadURL);
     } catch (err) {
       isValid = false;
     }
@@ -227,7 +231,7 @@ export function useAppUpdator() {
     }
 
     return isValid;
-  }, [setStepCheckConnected, setStepDownloadUpdate]);
+  }, [setAppUpdateURL, setStepCheckConnected, setStepDownloadUpdate]);
 
   const isVerifyingRef = useRef(false);
   const verifyDownloadedPackage = useCallback(async () => {
@@ -264,6 +268,7 @@ export function useAppUpdator() {
   }, [stepDownloadUpdate, setStepVerification]);
 
   return {
+    appUpdateURL,
     releaseCheckInfo,
     stepCheckConnected,
     checkDownloadAvailble,

@@ -4,6 +4,7 @@ import { Steps } from 'antd';
 import { useEffect, useMemo } from 'react';
 import { detectClientOS } from '@/isomorphic/os';
 import LoadingDots from '@/renderer/components/LoadingDots';
+import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import { useAppUpdator } from '../../../../hooks/useAppUpdator';
 import styles from './index.module.less';
 
@@ -151,18 +152,13 @@ function UpdateAndVerifyButton({
   );
 }
 
-const PSUDO_CHECK_CONNECT_URL = `https://download.rabby.io/${
-  detectClientOS() === 'darwin'
-    ? 'rabby-desktop-latest.dmg'
-    : 'rabby-desktop-latest.exe'
-}`;
-
 export default function UpdateAndVerify({
   className,
 }: React.PropsWithChildren<{
   className?: string;
 }>) {
   const {
+    appUpdateURL,
     releaseCheckInfo,
     stepCheckConnected,
     stepVerification,
@@ -236,16 +232,26 @@ export default function UpdateAndVerify({
                       )}
                     >
                       Connecting to the server, server address:
-                      <span className="underline ml-[2px]">
-                        {PSUDO_CHECK_CONNECT_URL}
+                      <span
+                        className="underline cursor-pointer ml-[2px]"
+                        onClick={() => {
+                          openExternalUrl(appUpdateURL);
+                        }}
+                      >
+                        {appUpdateURL || '-'}
                       </span>
                     </div>
                   )}
                 {stepCheckConnected === 'finish' && (
                   <div className={classNames(styles.stepSubStep)}>
                     Connected to the server, server address:
-                    <span className="underline ml-[2px]">
-                      {PSUDO_CHECK_CONNECT_URL}
+                    <span
+                      className="underline cursor-pointer ml-[2px]"
+                      onClick={() => {
+                        openExternalUrl(appUpdateURL);
+                      }}
+                    >
+                      {appUpdateURL || '-'}
                     </span>
                   </div>
                 )}
