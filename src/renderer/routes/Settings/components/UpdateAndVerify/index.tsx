@@ -234,8 +234,8 @@ export default function UpdateAndVerify({
                       Connecting to the server, server address:
                       <span
                         className={classNames(
-                          'underline ml-[2px]',
-                          appUpdateURL && 'cursor-pointer'
+                          'ml-[2px]',
+                          appUpdateURL && 'underline cursor-pointer'
                         )}
                         onClick={() => {
                           if (!appUpdateURL) return;
@@ -251,8 +251,8 @@ export default function UpdateAndVerify({
                     Connected to the server, server address:
                     <span
                       className={classNames(
-                        'underline ml-[2px]',
-                        appUpdateURL && 'cursor-pointer'
+                        'ml-[2px]',
+                        appUpdateURL && 'underline cursor-pointer'
                       )}
                       onClick={() => {
                         if (!appUpdateURL) return;
