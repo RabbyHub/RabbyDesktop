@@ -225,6 +225,7 @@ type IAppUpdatorCheckResult =
       releaseNote: null;
     };
 
+type IAppUpdatorProcessStep = 'wait' | 'process' | 'finish' | 'error';
 type IAppUpdatorDownloadProgress =
   | {
       progress: ProgressInfo;
