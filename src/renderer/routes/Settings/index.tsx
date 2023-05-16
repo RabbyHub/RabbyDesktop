@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import classNames from 'classnames';
 import { openExternalUrl, requestResetApp } from '@/renderer/ipcRequest/app';
 
-import { useAppVersion } from '@/renderer/hooks/useMainBridge';
 import {
   IconChevronRight,
   IconTooltipInfo,
@@ -19,7 +18,6 @@ import {
 import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
 import { ModalConfirmInSettings } from '@/renderer/components/Modal/Confirm';
 import { Switch } from '@/renderer/components/Switch/Switch';
-import { useCheckNewRelease } from '@/renderer/hooks/useAppUpdator';
 import { detectClientOS } from '@/isomorphic/os';
 import { ucfirst } from '@/isomorphic/string';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
@@ -155,8 +153,6 @@ const ProxyText = styled.div`
   }
 `;
 
-const osType = detectClientOS();
-
 const debugStateAtom =
   atom<IDebugStates['isGhostWindowDebugHighlighted']>(false);
 function DeveloperKitsParts() {
@@ -258,14 +254,11 @@ function DeveloperKitsParts() {
 }
 
 export function MainWindowSettings() {
-  const appVerisons = useAppVersion();
   const { settings, toggleEnableIPFSDapp, toggleEnableContentProtection } =
     useSettings();
 
   const { setIsSettingProxy, customProxyServer, proxyType } =
     useProxyStateOnSettingPage();
-
-  const { fetchLatestReleaseInfo } = useCheckNewRelease();
 
   const { enable: enabledWhiteList, toggleWhitelist } = useWhitelist();
 
@@ -274,7 +267,6 @@ export function MainWindowSettings() {
   const [isShowCustomRPCModal, setIsShowCustomRPCModal] = useState(false);
   return (
     <div className={styles.settingsPage}>
-      {/* TODO: implement Update Area */}
       <UpdateArea />
 
       <div className={styles.settingItems}>

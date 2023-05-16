@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { message } from 'antd';
 
@@ -14,7 +14,7 @@ import {
 } from '../../../../hooks/useAppUpdator';
 import styles from './index.module.less';
 
-import RcInactiveBg from './inactive-bg.svg?rc';
+import inactiveBg from './inactive-bg.svg';
 import NoVersionURL from './no-new-version.svg';
 import UpdateAndVerify from '../UpdateAndVerify';
 
@@ -57,34 +57,45 @@ export const UpdateArea = ({ className }: UpdateAreaProps) => {
   return (
     <div className={classNames(styles.updateAreaInSettings, className)}>
       <div className={styles.tabHeads}>
-        {tabs.map((tab) => {
+        {tabs.map((tab, idx) => {
           const isActive = tab.key === activeTab;
           return (
-            <div
-              className={classNames(styles.tabItem, isActive && styles.active)}
-              onClick={(evt) => {
-                if (tab.key === 'lastestVersion') {
-                  fetchLatestReleaseInfo();
-                } else if (tab.key === 'currentVersion') {
-                  if (
-                    (osType === 'win32' && evt.ctrlKey && evt.altKey) ||
-                    (osType === 'darwin' && evt.metaKey && evt.altKey)
-                  ) {
-                    copyCurrentVersionInfo();
-                    message.open({
-                      type: 'info',
-                      content: 'Copied Version Info',
-                    });
+            <React.Fragment key={tab.key}>
+              <div
+                className={classNames(
+                  styles.tabItem,
+                  isActive && styles.active
+                )}
+                onClick={(evt) => {
+                  if (tab.key === 'lastestVersion') {
+                    fetchLatestReleaseInfo();
+                  } else if (tab.key === 'currentVersion') {
+                    if (
+                      (osType === 'win32' && evt.ctrlKey && evt.altKey) ||
+                      (osType === 'darwin' && evt.metaKey && evt.altKey)
+                    ) {
+                      copyCurrentVersionInfo();
+                      message.open({
+                        type: 'info',
+                        content: 'Copied Version Info',
+                      });
+                    }
                   }
-                }
 
-                setActiveTab(tab.key);
-              }}
-              key={tab.key}
-            >
-              <RcInactiveBg className={styles.inactiveBg} />
-              {tab.title}
-            </div>
+                  setActiveTab(tab.key);
+                }}
+              >
+                {tab.title}
+              </div>
+              {idx !== tabs.length - 1 && (
+                <div
+                  className={styles.splitLine}
+                  style={{
+                    backgroundImage: `url(${inactiveBg})`,
+                  }}
+                />
+              )}
+            </React.Fragment>
           );
         })}
       </div>
@@ -107,7 +118,10 @@ export const UpdateArea = ({ className }: UpdateAreaProps) => {
               )}
             >
               <img src={NoVersionURL} className="w-[52px] h-[52px]" />
-              <span className={styles.noVersionText}>No New Version</span>
+              <span className={styles.noVersionText}>
+                No new version available; you are already using the latest
+                release.
+              </span>
             </div>
           ) : (
             <>

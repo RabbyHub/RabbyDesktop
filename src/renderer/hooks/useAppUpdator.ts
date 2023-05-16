@@ -3,6 +3,9 @@
 
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+
 import { randString } from '../../isomorphic/string';
 import { getReleaseNoteByVersion } from '../ipcRequest/app';
 import { useAppVersion } from './useMainBridge';
@@ -162,6 +165,11 @@ export function useCheckNewRelease(opts?: { isWindowTop?: boolean }) {
   };
 }
 
+const isMockFailed = {
+  Download: !IS_RUNTIME_PRODUCTION && false,
+  Verify: !IS_RUNTIME_PRODUCTION && false,
+};
+
 export function useAppUpdator() {
   const [releaseCheckInfo] = useAtom(releaseCheckInfoAtom);
   const [downloadInfo, setDownloadInfo] = useAtom(downloadInfoAtom);
@@ -171,7 +179,10 @@ export function useAppUpdator() {
   const onDownload: OnDownloadFunc = useCallback(
     (info) => {
       // mock failed
-      // info = { progress: null, isEnd: true, downloadFailed: true }
+      if (isMockFailed.Download) {
+        info = { progress: null, isEnd: true, downloadFailed: true };
+      }
+
       setDownloadInfo(info);
       setStepDownloadUpdate(
         info?.isEnd ? (info?.downloadFailed ? 'error' : 'finish') : 'process'
@@ -200,6 +211,9 @@ export function useAppUpdator() {
           setTimeout(resolve, 2000);
         }),
       ]);
+
+      if (isMockFailed.Verify) res.isValid = false;
+
       setStepVerification(res.isValid ? 'finish' : 'error');
       return res.isValid;
     } catch (err) {

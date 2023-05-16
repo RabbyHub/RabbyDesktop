@@ -89,7 +89,7 @@ function UpdateAndVerifyButton({
           className={classNames(styles.btnIcon)}
           alt=""
         />
-        <div className={styles.btnText}>Install Now</div>
+        <div className={styles.btnText}>Install and Re-launch</div>
       </div>
     );
   }
@@ -108,7 +108,7 @@ function UpdateAndVerifyButton({
         alt=""
       />
       <div className={styles.btnText}>
-        {stepDownloadUpdate === 'error' ? 'Retry Update' : 'Update Rabby'}
+        {stepDownloadUpdate === 'error' ? 'Retry Update' : 'Update'}
       </div>
     </div>
   );
@@ -169,10 +169,8 @@ export default function UpdateAndVerify({
                   {stepDownloadUpdate === 'wait' && 'Download Update'}
                   {stepDownloadUpdate === 'process' && (
                     <>
-                      Download Progress:{' '}
-                      {!progress?.percent
-                        ? '-'
-                        : `${(progress.percent || 0).toFixed(0)}%`}
+                      Download Files -{' '}
+                      {`${(progress?.percent || 0).toFixed(0)}%`}
                     </>
                   )}
                   {stepDownloadUpdate === 'finish' && 'Download Progress: 100%'}
@@ -184,17 +182,18 @@ export default function UpdateAndVerify({
               <p className={styles.stepExplaination}>
                 {stepDownloadUpdate === 'process' && (
                   <>
-                    Connecting to the server, server address:
+                    Connected to the server, server address:
                     <span className="underline ml-[2px]">
                       https://download.rabby.io/
                       {detectClientOS() === 'darwin'
                         ? 'rabby-desktop-latest.dmg'
                         : 'rabby-desktop-latest.exe'}
                     </span>
+                    <p className="mt-[8px]">Downloading files</p>
                   </>
                 )}
-                {isDownloaded && !isDownloadedFailed && 'Downloaded File'}
-                {isDownloaded && isDownloadedFailed && 'Download Failed'}
+                {isDownloaded && !isDownloadedFailed && 'Download complete'}
+                {isDownloaded && isDownloadedFailed && 'Fail to download file'}
               </p>
             }
           />
@@ -213,14 +212,16 @@ export default function UpdateAndVerify({
                   stepVerification === 'finish' && styles.J_finished
                 )}
               >
-                Verify Downloaded File
+                Verify file digital signature
               </span>
             }
             description={
               <p className={styles.stepExplaination}>
                 {stepVerification === 'process' && 'Verifying...'}
-                {stepVerification === 'finish' && 'Verify success!'}
-                {stepVerification === 'error' && 'Verify failed.'}
+                {stepVerification === 'finish' &&
+                  'The digital signature of the downloaded file is verified by Rabby Official. Please install and re-launch the app.'}
+                {stepVerification === 'error' &&
+                  'Fail to verify file digital signature'}
               </p>
             }
           />

@@ -1,6 +1,9 @@
 .updateAreaInSettings {
   @border-color: #555863;
   @radius-value: 6px;
+  @tab-header-h: 50px;
+  @tab-header-inactive-bg: rgba(0, 0, 0, 0.05);
+
   @tab-body-changelog-h: 200px;
   @tab-after-update-op-h: 77px;
 
@@ -20,16 +23,22 @@
 
   .tabItem {
     cursor: pointer;
-    height: 50px;
+    height: @tab-header-h;
     width: (1 / 2) * 100%;
-    flex-shrink: 0;
+    flex-shrink: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-
-    // background: rgba(0, 0, 0, 0.05);
     color: rgba(255, 255, 255, 0.5);
+    background-color: @tab-header-inactive-bg;
+    border-top: 1px solid @border-color;
+    border-bottom: 1px solid @border-color;
+
+    &.active {
+      background-color: transparent;
+      border-bottom-color: transparent;
+    }
 
     text-align: center;
     vertical-align: middle;
@@ -37,7 +46,6 @@
     &.active {
       color: var(--color-purewhite);
       border-top: 1px solid @border-color;
-      border-top-left-radius: @radius-value;
 
       &::after {
         display: none;
@@ -45,40 +53,33 @@
     }
 
     &:first-child {
-      &.active {
-        border-radius: @radius-value 0 0 0;
-        border-left: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      .inactiveBg {
-        transform: rotateY(180deg);
-      }
-    }
-    &.active:last-child {
-      border-radius: 0 6px 0 0;
-      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      border-top-left-radius: @radius-value;
+      border-left: 1px solid @border-color;
     }
 
-    .inactiveBg {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-    }
-
-    &.active .inactiveBg {
-      display: none;
+    &:last-child {
+      border-top-right-radius: @radius-value;
+      border-right: 1px solid @border-color;
     }
   }
 
-  // .tabItem .releaseTabHeader {
-  //   font-family: 'SF Pro';
-  //   font-style: normal;
-  //   font-weight: 510;
-  //   font-size: 16px;
-  //   line-height: 19px;
-  // }
+  .tabItem + .splitLine {
+    transform: rotateY(180deg);
+  }
+
+  .tabItem.active + .splitLine {
+    transform: rotateY(0);
+  }
+
+  .splitLine {
+    height: @tab-header-h;
+    width: 25px;
+    position: relative;
+    display: block;
+    flex-shrink: 0;
+    background-position: 0;
+    background-repeat: no-repeat;
+  }
 
   .tabHeadUpdateBadge {
     height: 15px;

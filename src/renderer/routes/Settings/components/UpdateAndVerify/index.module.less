@@ -1,13 +1,16 @@
 .updateAndVerify {
+  @color-wait: rgba(255, 255, 255, 0.6);
+
   .updateAndVerifyBtn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
 
     background: var(--color-primary);
     border-radius: 4px;
     padding: 10px 12px;
     // padding-right: 0;
-    // min-width: 148px;
+    min-width: 148px;
     gap: 6px;
     font-weight: 500;
     font-size: 14px;
@@ -72,6 +75,28 @@
       color: transparent;
     }
 
+    .ant-steps-item-wait:local(.stepItem) {
+      :local(.stepTitle), :local(.stepExplaination) {
+        color: @color-wait;
+      }
+
+      .ant-steps-item-icon .ant-steps-icon {
+        background-color: rgba(255, 255, 255, 0.3);
+      }
+    }
+
+    .ant-steps-item-process:local(.stepItem) {
+      .ant-steps-item-icon .ant-steps-icon {
+        background-color: var(--color-primary);
+      }
+    }
+
+    .ant-steps-item-error:local(.stepItem) {
+      :local(.stepTitle), :local(.stepExplaination) {
+        color: var(--color-red);
+      }
+    }
+
     .ant-steps-item:local(.stepItem) .ant-steps-item-icon {
       display: inline-flex;
       align-items: center;
@@ -81,7 +106,6 @@
       border-color: transparent;
 
       .ant-steps-icon {
-        background-color: var(--color-primary);
         color: transparent;
         border-radius: 50%;
         width: 14px;
@@ -119,7 +143,6 @@
     font-weight: 400;
     font-size: 12px;
     line-height: 14px;
-    color: var(--color-purewhite);
-    opacity: 0.6;
+    color: @color-wait;
   }
 }
