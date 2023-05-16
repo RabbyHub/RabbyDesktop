@@ -44,6 +44,7 @@
   }
 
   .custom-rpc-tooltip {
+    max-width: 360px;
     &.avaliable {
       .ant-tooltip-inner {
         &::before {
@@ -67,20 +68,19 @@
       font-weight: 400;
       font-size: 12px;
       line-height: 14px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      min-width: 0;
       width: 100%;
+      position: relative;
+      padding-left: 21px;
 
       &::before {
-        content: '';
-        display: inline-block;
+        position: absolute;
+        content: ' ';
+        display: block;
         width: 6px;
         height: 6px;
         border-radius: 100%;
-        margin-right: 5px;
-        flex-shrink: 0;
+        left: 10px;
+        top: 14px;
       }
     }
   }
