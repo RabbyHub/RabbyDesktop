@@ -11,8 +11,8 @@ export const Summary = () => {
   const { loading, summary } = useGetSummaryInfo();
 
   return (
-    <div className="px-2">
-      <div className="inline-flex w-full mb-[14px] px-12 text-12 text-white text-opacity-50">
+    <div className="px-2 leading-[0]">
+      <div className="inline-flex w-full mb-[15px] px-12 text-12 leading-[1] text-white text-opacity-50">
         <div className="w-[22%] text-white text-opacity-80 font-medium">
           Asset
         </div>
@@ -59,11 +59,17 @@ export const Summary = () => {
                   }
                   className="w-24 h-24 rounded-full mr-18"
                 />
-                <span className="font-bold">
+                <span
+                  className={clsx(
+                    isSmallAssets
+                      ? 'text-12 text-[#9094a1] font-normal'
+                      : 'font-bold'
+                  )}
+                >
                   {isSmallAssets ? e.symbol : ellipsisTokenSymbol(e.symbol)}
                 </span>
                 {e.amount < 0 ? (
-                  <div className="ml-[6px] rounded-[4px] text-[10px] px-[5px] py-2 text-[#ff6565] border-solid border border-[#ff6565]">
+                  <div className="ml-[5px] rounded-[4px] text-[10px] font-bold leading-[12px] px-[5px] py-2 text-[#ff6565] border-solid border border-[#ff6565]">
                     DEBT
                   </div>
                 ) : null}
@@ -97,7 +103,7 @@ export const Summary = () => {
         })}
 
       {!loading && !!summary.length && (
-        <div className="text-14 text-[#fff] text-opacity-50 mt-[22px] pl-12">
+        <div className="text-14 text-[#9094a1] font-normal  mt-[22px] pl-12">
           All assets in protocols (e.g. LP tokens) are resolved to the
           underlying assets for statistical calculations
         </div>
