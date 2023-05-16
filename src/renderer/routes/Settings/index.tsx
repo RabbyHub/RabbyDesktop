@@ -394,6 +394,15 @@ export function MainWindowSettings() {
               });
             }}
           />
+          <ItemAction
+            name="Custom RPC"
+            onClick={() => {
+              setIsShowCustomRPCModal(true);
+            }}
+            icon="rabby-internal://assets/icons/mainwin-settings/icon-custom-rpc.svg"
+          >
+            <img src={IconChevronRight} />
+          </ItemAction>
         </div>
       </div>
 
@@ -504,15 +513,6 @@ export function MainWindowSettings() {
             name="Clear Pending"
             onClick={() => {
               setIsShowingClearPendingModal(true);
-            }}
-            icon="rabby-internal://assets/icons/mainwin-settings/icon-clear.svg"
-          >
-            <img src={IconChevronRight} />
-          </ItemAction>
-          <ItemAction
-            name="Custom RPC"
-            onClick={() => {
-              setIsShowCustomRPCModal(true);
             }}
             icon="rabby-internal://assets/icons/mainwin-settings/icon-clear.svg"
           >
