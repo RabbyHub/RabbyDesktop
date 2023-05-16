@@ -93,6 +93,7 @@ export const EditCustomRPCModal = ({
               label="RPC URL"
               name="url"
               requiredMark={false}
+              normalize={(value) => value?.trim()}
               rules={[
                 {
                   validator: (_, value) => {

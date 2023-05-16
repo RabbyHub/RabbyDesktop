@@ -29,6 +29,7 @@ type ZViewStates = {
     disabledTips?: string;
     isCancel?: boolean;
     isShowCustomRPC?: boolean;
+    isCheckCustomRPC?: boolean;
   };
   'security-notification': ISecurityNotificationPayload;
   'add-address-dropdown': {

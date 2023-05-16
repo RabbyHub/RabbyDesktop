@@ -19,6 +19,9 @@ export function useCustomRPC() {
 
   const pingCustomRPC = useCallback(
     async (chain: CHAINS_ENUM) => {
+      if (!store[chain]?.enable) {
+        return true;
+      }
       try {
         setStatus((pre) => {
           return {
@@ -33,6 +36,7 @@ export function useCustomRPC() {
             [chain]: v ? 'avaliable' : 'unavaliable',
           };
         });
+        return v;
       } catch (e) {
         setStatus((pre) => {
           return {
@@ -42,7 +46,7 @@ export function useCustomRPC() {
         });
       }
     },
-    [setStatus]
+    [setStatus, store]
   );
 
   const setCustomRPC = useCallback(
@@ -89,6 +93,10 @@ export function useCustomRPC() {
     [store, status]
   );
 
+  const checkAllRPCStatus = useCallback(async () => {
+    await Promise.all(Object.keys(store).map((chain) => pingCustomRPC(chain)));
+  }, [pingCustomRPC, store]);
+
   return {
     data: store,
     status,
@@ -98,5 +106,6 @@ export function useCustomRPC() {
     deleteCustomRPC,
     pingCustomRPC,
     getRPCStatus,
+    checkAllRPCStatus,
   };
 }

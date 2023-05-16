@@ -103,6 +103,7 @@ function SwitchChainModalInner({
   supportChains,
   disabledTips,
   isShowCustomRPC,
+  isCheckCustomRPC,
 }: {
   value?: CHAINS_ENUM;
   onChange: (v: CHAINS_ENUM) => void;
@@ -110,6 +111,7 @@ function SwitchChainModalInner({
   supportChains?: CHAINS_ENUM[];
   disabledTips?: React.ReactNode;
   isShowCustomRPC?: boolean;
+  isCheckCustomRPC?: boolean;
 }) {
   useBodyClassNameOnMounted('switch-chain-subview');
 
@@ -170,17 +172,20 @@ function SwitchChainModalInner({
     [setChainPinned]
   );
 
-  const { getAllRPC, getRPCStatus } = useCustomRPC();
+  const { getAllRPC, pingCustomRPC } = useCustomRPC();
 
   useEffect(() => {
-    if (isShowCustomRPC) {
+    if (isShowCustomRPC || isCheckCustomRPC) {
       getAllRPC();
     }
-  }, [getAllRPC, isShowCustomRPC]);
+  }, [getAllRPC, isCheckCustomRPC, isShowCustomRPC]);
 
-  const handleChange = (chain: CHAINS_ENUM) => {
+  const handleChange = async (chain: CHAINS_ENUM) => {
     onChange?.(chain);
-    if (isShowCustomRPC && getRPCStatus(chain) === 'unavaliable') {
+    if (
+      (isShowCustomRPC || isCheckCustomRPC) &&
+      !(await pingCustomRPC(chain))
+    ) {
       toastTopMessage({
         data: {
           type: 'error',

@@ -293,7 +293,7 @@ export const TopNavBar = () => {
             onClick={() => {
               open({
                 value: currentSite ? currentSite.chain : CHAINS_ENUM.ETH,
-                isShowCustomRPC: true,
+                isCheckCustomRPC: true,
               });
             }}
           />

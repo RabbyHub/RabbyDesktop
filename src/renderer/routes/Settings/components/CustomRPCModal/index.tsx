@@ -22,10 +22,12 @@ export const CustomRPCModal = ({ open, onClose }: CustomRPCModalProps) => {
     isShowEditModal: boolean;
     chain?: CHAINS_ENUM | null;
     rpc?: RPCItem | null;
+    isAdd?: boolean;
   }>({
     isShowEditModal: false,
     chain: null,
     rpc: null,
+    isAdd: false,
   });
 
   const list = useMemo(() => {
@@ -42,6 +44,7 @@ export const CustomRPCModal = ({ open, onClose }: CustomRPCModalProps) => {
       isShowEditModal: true,
       chain,
       rpc: data[chain],
+      isAdd: true,
     });
   });
 
@@ -64,11 +67,15 @@ export const CustomRPCModal = ({ open, onClose }: CustomRPCModalProps) => {
       isShowEditModal: true,
       chain: id,
       rpc,
+      isAdd: false,
     });
   };
 
   const handleEdit = async (chain: CHAINS_ENUM, url: string) => {
     await setCustomRPC(chain, url);
+    if (state.isAdd) {
+      message.success('Added');
+    }
     setState({
       isShowEditModal: false,
       chain: null,

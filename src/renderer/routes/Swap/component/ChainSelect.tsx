@@ -67,7 +67,7 @@ export const ChainSelect = ({
       title,
       disabledTips,
       supportChains,
-      isShowCustomRPC: true,
+      isCheckCustomRPC: true,
     });
   }, [disabledTips, open, supportChains, title, value]);
   const handleClickSelector = () => {

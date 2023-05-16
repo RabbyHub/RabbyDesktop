@@ -55,29 +55,35 @@ const UnavaliableIcon = styled.div`
 
 const TooltipContent = styled.div`
   display: flex;
-  align-items: center;
-  max-width: 280px;
-  span {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex: 1;
-  }
+  /* align-items: center; */
+  align-items: flex-start;
   .alert-icon {
-    width: 6px;
-    height: 6px;
-    border-radius: 100%;
+    flex-shrink: 0;
     margin-right: 5px;
+    position: relative;
+    height: 14px;
+    width: 6px;
+    &::before {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      content: ' ';
+      display: block;
+      width: 6px;
+      height: 6px;
+      border-radius: 100%;
+    }
   }
   &.avaliable {
     color: #27c193;
-    .alert-icon {
+    .alert-icon::before {
       background-color: #27c193;
     }
   }
   &.unavaliable {
     color: #ec5151;
-    .alert-icon {
+    .alert-icon::before {
       background-color: #ec5151;
     }
   }
@@ -166,6 +172,9 @@ const ChainIcon = ({
       }}
       overlayInnerStyle={{
         padding: 10,
+      }}
+      overlayStyle={{
+        maxWidth: 360,
       }}
       title={
         currentRPC &&
