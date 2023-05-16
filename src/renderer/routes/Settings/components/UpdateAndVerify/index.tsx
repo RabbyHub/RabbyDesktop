@@ -247,7 +247,9 @@ export default function UpdateAndVerify({
                     </div>
                   )}
                 {stepCheckConnected === 'finish' && (
-                  <div className={classNames(styles.stepSubStep)}>
+                  <div
+                    className={classNames(styles.stepSubStep, styles.confirmed)}
+                  >
                     Connected to the server, server address:
                     <span
                       className={classNames(
@@ -321,10 +323,17 @@ export default function UpdateAndVerify({
                     Verifying file digital signature...
                   </span>
                 )}
-                {stepVerification === 'finish' &&
-                  'The digital signature of the downloaded file is verified by Rabby Official. Please install and re-launch the app.'}
-                {stepVerification === 'error' &&
-                  'Fail to verify file digital signature'}
+                {stepVerification === 'finish' && (
+                  <span className={classNames(styles.stepSubStep)}>
+                    The digital signature of the downloaded file is verified by
+                    Rabby Official. Please install and re-launch the app.
+                  </span>
+                )}
+                {stepVerification === 'error' && (
+                  <span className={classNames(styles.stepSubStep)}>
+                    Fail to verify file digital signature
+                  </span>
+                )}
               </div>
             }
           />

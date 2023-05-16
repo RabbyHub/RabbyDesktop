@@ -323,7 +323,7 @@ export function MainWindowSettings() {
                 <>
                   <div className="flex flex-col gap-[4px]">
                     <span className="text-14 font-medium">Whitelist</span>
-                    <span className="text-14 text-white opacity-[0.6]">
+                    <span className="text-12 text-white opacity-[0.6]">
                       You can only send assets to whitelisted address
                     </span>
                   </div>
@@ -364,7 +364,7 @@ export function MainWindowSettings() {
                     <span className="text-14 font-medium">
                       Enable Decentralized app
                     </span>
-                    <span className="text-14 text-white opacity-[0.6]">
+                    <span className="text-12 text-white opacity-[0.6]">
                       Once enabled, you can use IPFS/ENS/Local Dapp. However,
                       Trezor and Onekey will be affected and can't be used
                       properly.
