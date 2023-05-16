@@ -1,5 +1,5 @@
-import { Tooltip } from 'antd';
-import { useCallback, useMemo, useState } from 'react';
+import { message, Tooltip } from 'antd';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import clsx from 'clsx';
 
 import { Modal as RModal } from '@/renderer/components/Modal/Modal';
@@ -8,9 +8,12 @@ import { useBodyClassNameOnMounted } from '@/renderer/hooks/useMountedEffect';
 import IconRcSearch from '@/../assets/icons/swap/search.svg?rc';
 import { usePreference } from '@/renderer/hooks/rabbyx/usePreference';
 import { Chain, CHAINS_ENUM, CHAINS_LIST } from '@debank/common';
+import { useCustomRPC } from '@/renderer/hooks/useCustomRPC';
+import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
 import styles from './index.module.less';
 import RabbyInput from '../AntdOverwrite/Input';
 import { TipsWrapper } from '../TipWrapper';
+import ChainIcon from '../ChainIcon';
 
 type OnPinnedChanged = (
   chain: import('@debank/common').CHAINS_ENUM,
@@ -25,6 +28,7 @@ function ChainItem({
   checked,
   support = true,
   disabledTips,
+  isShowCustomRPC,
 }: {
   chain: import('@debank/common').Chain;
   pinned: boolean;
@@ -33,6 +37,7 @@ function ChainItem({
   onPinnedChange?: OnPinnedChanged;
   support?: boolean;
   disabledTips?: React.ReactNode;
+  isShowCustomRPC?: boolean;
 }) {
   return (
     <Tooltip
@@ -50,7 +55,12 @@ function ChainItem({
         onClick={support ? onClick : undefined}
       >
         <div className={styles.chainItemLeft}>
-          <img src={chain.logo} className={styles.chainItemIcon} />
+          {/* <img src={chain.logo} className={styles.chainItemIcon} /> */}
+          <ChainIcon
+            chain={chain.enum}
+            className={styles.chainItemIcon}
+            isShowCustomRPC={isShowCustomRPC}
+          />
           <div className={styles.chainItemName}>{chain.name}</div>
         </div>
         <TipsWrapper hoverTips={pinned ? 'Unpin Chain' : 'Pin Chain'}>
@@ -92,12 +102,14 @@ function SwitchChainModalInner({
   title = 'Select chain',
   supportChains,
   disabledTips,
+  isShowCustomRPC,
 }: {
   value?: CHAINS_ENUM;
   onChange: (v: CHAINS_ENUM) => void;
   title?: string;
   supportChains?: CHAINS_ENUM[];
   disabledTips?: React.ReactNode;
+  isShowCustomRPC?: boolean;
 }) {
   useBodyClassNameOnMounted('switch-chain-subview');
 
@@ -158,6 +170,26 @@ function SwitchChainModalInner({
     [setChainPinned]
   );
 
+  const { getAllRPC, getRPCStatus } = useCustomRPC();
+
+  useEffect(() => {
+    if (isShowCustomRPC) {
+      getAllRPC();
+    }
+  }, [getAllRPC, isShowCustomRPC]);
+
+  const handleChange = (chain: CHAINS_ENUM) => {
+    onChange?.(chain);
+    if (isShowCustomRPC && getRPCStatus(chain) === 'unavaliable') {
+      toastTopMessage({
+        data: {
+          type: 'error',
+          content: 'The custom RPC is unavailable',
+        },
+      });
+    }
+  };
+
   return (
     <div className={styles.SwitchChainModalInner}>
       <div className={styles.title}>{title}</div>
@@ -184,8 +216,8 @@ function SwitchChainModalInner({
                     key={`chain-${chain.id}`}
                     chain={chain}
                     pinned
-                    onClick={async () => {
-                      await onChange(chain.enum);
+                    onClick={() => {
+                      handleChange(chain.enum);
                     }}
                     onPinnedChange={onPinnedChange}
                     checked={value === chain.enum}
@@ -193,6 +225,7 @@ function SwitchChainModalInner({
                       supportChains ? supportChains?.includes(chain.enum) : true
                     }
                     disabledTips={disabledTips}
+                    isShowCustomRPC={isShowCustomRPC}
                   />
                 );
               })}
@@ -205,8 +238,8 @@ function SwitchChainModalInner({
                   key={`chain-${chain.id}`}
                   chain={chain}
                   pinned={false}
-                  onClick={async () => {
-                    await onChange(chain.enum);
+                  onClick={() => {
+                    handleChange(chain.enum);
                   }}
                   onPinnedChange={onPinnedChange}
                   checked={value === chain.enum}
@@ -214,6 +247,7 @@ function SwitchChainModalInner({
                     supportChains ? supportChains?.includes(chain.enum) : true
                   }
                   disabledTips={disabledTips}
+                  isShowCustomRPC={isShowCustomRPC}
                 />
               );
             })}

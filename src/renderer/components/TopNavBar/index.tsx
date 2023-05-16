@@ -33,6 +33,7 @@ import { formatDappURLToShow } from '@/isomorphic/dapp';
 import { useGhostTooltip } from '@/renderer/routes-popup/TopGhostWindow/useGhostWindow';
 import { useLocation } from 'react-router-dom';
 import styles from './index.module.less';
+import ChainIcon from '../ChainIcon';
 // import { TipsWrapper } from '../TipWrapper';
 
 const isDarwin = detectClientOS() === 'darwin';
@@ -70,7 +71,14 @@ const ConnectedChain = forwardRef(
   ) => {
     return (
       <div className={clsx(styles.chain, className)} ref={ref} {...others}>
-        <img className={styles.logo} src={CHAINS[chain].logo} alt={chain} />
+        {/* <img className={styles.logo} src={CHAINS[chain].logo} alt={chain} /> */}
+        <ChainIcon
+          className={styles.logo}
+          chain={chain}
+          isShowCustomRPC
+          showCustomRPCToolTip
+          isShowTooltipOnTop
+        />
         <span className={styles.chainName}>{CHAINS[chain].name}</span>
         <img src={IconArrowDown} alt="" />
       </div>
@@ -285,6 +293,7 @@ export const TopNavBar = () => {
             onClick={() => {
               open({
                 value: currentSite ? currentSite.chain : CHAINS_ENUM.ETH,
+                isShowCustomRPC: true,
               });
             }}
           />

@@ -2,8 +2,14 @@
 /// <reference path="../../renderer/preload.d.ts" />
 
 import { atom, useAtom } from 'jotai';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+
 import { randString } from '../../isomorphic/string';
+import { getReleaseNoteByVersion } from '../ipcRequest/app';
+import { useAppVersion } from './useMainBridge';
+import { copyText } from '../utils/clipboard';
 
 async function checkIfNewRelease() {
   const reqid = randString();
@@ -79,13 +85,58 @@ const releaseCheckInfoAtom = atom({
   releaseVersion: null,
 } as IAppUpdatorCheckResult);
 const downloadInfoAtom = atom(null as null | IAppUpdatorDownloadProgress);
-const isDownloadingAtom = atom(false);
+
+const checkConnectionAtom = atom<IAppUpdatorProcessStep>('wait');
+const downloadStepAtom = atom<IAppUpdatorProcessStep>('wait');
+const verifyStepAtom = atom<IAppUpdatorProcessStep>('wait');
+
+export function useCurrentVersionReleaseNote() {
+  const [currentVersionReleaseNote, setCurrentVersionReleaseNote] =
+    useState<string>();
+
+  const fetchCurrentVersionReleaseNote = useCallback(async () => {
+    const res = await getReleaseNoteByVersion();
+    setCurrentVersionReleaseNote(res.result);
+  }, []);
+
+  useEffect(() => {
+    fetchCurrentVersionReleaseNote();
+  }, [fetchCurrentVersionReleaseNote]);
+
+  const appVerisons = useAppVersion();
+  const versionTextToShow = useMemo(() => {
+    return [
+      `${appVerisons.version || '-'}`,
+      appVerisons.appChannel === 'prod' ? '' : `-${appVerisons.appChannel}`,
+      appVerisons.appChannel === 'prod' ? '' : ` (${appVerisons.gitRef})`,
+    ]
+      .filter(Boolean)
+      .join('');
+  }, [appVerisons]);
+
+  const copyCurrentVersionInfo = useCallback(() => {
+    copyText(
+      [
+        `Version: ${appVerisons.version || '-'}`,
+        `Channel: ${appVerisons.appChannel}`,
+        `Revision: ${appVerisons.gitRef}`,
+      ].join('; ')
+    );
+  }, [appVerisons.version, appVerisons.appChannel, appVerisons.gitRef]);
+
+  return {
+    versionTextToShow,
+    copyCurrentVersionInfo,
+    currentVersionReleaseNote,
+    appVersion: window.rabbyDesktop.appVersion,
+  };
+}
 
 export function useCheckNewRelease(opts?: { isWindowTop?: boolean }) {
   const { isWindowTop } = opts || {};
   const [releaseCheckInfo, setReleaseCheckInfo] = useAtom(releaseCheckInfoAtom);
 
-  const fetchReleaseInfo = useCallback(async () => {
+  const fetchLatestReleaseInfo = useCallback(async () => {
     // eslint-disable-next-line promise/catch-or-return
     const newVal = await checkIfNewRelease();
     setReleaseCheckInfo(newVal);
@@ -94,55 +145,135 @@ export function useCheckNewRelease(opts?: { isWindowTop?: boolean }) {
   }, [setReleaseCheckInfo]);
 
   useEffect(() => {
-    fetchReleaseInfo();
+    fetchLatestReleaseInfo();
     if (!isWindowTop) {
       return;
     }
 
     const timer = setInterval(() => {
-      fetchReleaseInfo();
+      fetchLatestReleaseInfo();
     }, 1000 * 60 * 60 * 0.5);
 
     return () => {
       clearInterval(timer);
     };
-  }, [isWindowTop, fetchReleaseInfo, setReleaseCheckInfo]);
+  }, [isWindowTop, fetchLatestReleaseInfo, setReleaseCheckInfo]);
 
   return {
     hasNewRelease: releaseCheckInfo.hasNewRelease,
     releaseCheckInfo,
     setReleaseCheckInfo,
-    fetchReleaseInfo,
+    fetchLatestReleaseInfo,
   };
 }
+
+const isMockFailed = {
+  Connected: !IS_RUNTIME_PRODUCTION && false,
+  Download: !IS_RUNTIME_PRODUCTION && false,
+  Verify: !IS_RUNTIME_PRODUCTION && false,
+};
 
 export function useAppUpdator() {
   const [releaseCheckInfo] = useAtom(releaseCheckInfoAtom);
   const [downloadInfo, setDownloadInfo] = useAtom(downloadInfoAtom);
-  const [isDownloading, setIsDownloading] = useAtom(isDownloadingAtom);
+  const [stepCheckConnected, setStepCheckConnected] =
+    useAtom(checkConnectionAtom);
+  const [stepDownloadUpdate, setStepDownloadUpdate] = useAtom(downloadStepAtom);
+  const [stepVerification, setStepVerification] = useAtom(verifyStepAtom);
 
   const onDownload: OnDownloadFunc = useCallback(
     (info) => {
+      // mock failed
+      if (isMockFailed.Download) {
+        info = { progress: null, isEnd: true, downloadFailed: true };
+      }
+
       setDownloadInfo(info);
-      setIsDownloading(!!info && !info.isEnd);
+      setStepDownloadUpdate(
+        info?.isEnd ? (info?.downloadFailed ? 'error' : 'finish') : 'process'
+      );
     },
-    [setDownloadInfo, setIsDownloading]
+    [setDownloadInfo, setStepDownloadUpdate]
   );
 
   const requestDownload = useCallback(async () => {
     await startDownload({ onDownload });
-    setIsDownloading(true);
-  }, [onDownload, setIsDownloading]);
+    setStepDownloadUpdate('process');
+  }, [onDownload, setStepDownloadUpdate]);
+
+  const checkDownloadAvailble = useCallback(async () => {
+    setStepCheckConnected('process');
+    setStepDownloadUpdate('process');
+
+    let isValid = false;
+
+    try {
+      const [res] = await Promise.all([
+        window.rabbyDesktop.ipcRenderer.invoke('check-download-availble'),
+        // await 1second
+        new Promise<void>((resolve) => {
+          setTimeout(resolve, 1500);
+        }),
+      ]);
+
+      if (isMockFailed.Connected) res.isValid = false;
+      isValid = res.isValid;
+    } catch (err) {
+      isValid = false;
+    }
+    setStepCheckConnected(isValid ? 'finish' : 'error');
+    if (!isValid) {
+      setStepDownloadUpdate('wait');
+    }
+
+    return isValid;
+  }, [setStepCheckConnected, setStepDownloadUpdate]);
+
+  const verifyDownloadedPackage = useCallback(async () => {
+    if (stepDownloadUpdate !== 'finish') {
+      console.error(`stepDownloadUpdate is not finish`);
+      return false;
+    }
+
+    setStepVerification('process');
+    try {
+      const [res] = await Promise.all([
+        window.rabbyDesktop.ipcRenderer.invoke('verify-update-package'),
+        // await 2second
+        new Promise<void>((resolve) => {
+          setTimeout(resolve, 2000);
+        }),
+      ]);
+
+      if (isMockFailed.Verify) res.isValid = false;
+
+      setStepVerification(res.isValid ? 'finish' : 'error');
+      return res.isValid;
+    } catch (err) {
+      setStepVerification('error');
+    }
+
+    return false;
+  }, [stepDownloadUpdate, setStepVerification]);
 
   return {
     releaseCheckInfo,
-    isDownloading,
+    stepCheckConnected,
+    checkDownloadAvailble,
+
+    stepDownloadUpdate,
+    stepVerification,
     isDownloaded:
       releaseCheckInfo.hasNewRelease && !!downloadInfo && downloadInfo.isEnd,
     isDownloadedFailed: downloadInfo?.isEnd && !!downloadInfo.downloadFailed,
+    /**
+     * @deprecated use stepDownloadUpdate instead
+     */
+    isDownloading: stepDownloadUpdate === 'process',
     progress: downloadInfo?.progress,
     requestDownload,
     downloadInfo,
     quitAndUpgrade,
+    verifyDownloadedPackage,
   };
 }

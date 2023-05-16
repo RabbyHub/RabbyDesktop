@@ -20,7 +20,7 @@ const buildchannel = (process as any).buildchannel || 'reg';
 const ARCH = (process as any).buildarch || process.arch;
 const PLATFORM = process.platform;
 
-function getAppUpdaterURL(): string {
+export function getAppUpdaterURL(): string {
   if (!IS_RUNTIME_PRODUCTION)
     return `https://download.rabby.io/wallet-desktop-updater-test/${PLATFORM}-${ARCH}/`;
 

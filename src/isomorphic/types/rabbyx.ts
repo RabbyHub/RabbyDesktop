@@ -164,6 +164,11 @@ export interface SwapState {
 type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
 type OpenApiService = import('@debank/rabby-api').OpenApiService;
 
+export interface RPCItem {
+  url: string;
+  enable: boolean;
+}
+
 export type RabbyXMethod = {
   'walletController.requestETHRpc': (
     data: { method: string; params: any },
@@ -283,8 +288,6 @@ export type RabbyXMethod = {
   'walletController.setLastSelectedSwapChain': (dexId: CHAINS_ENUM) => void;
 
   'walletController.setUnlimitedAllowance': (bool: boolean) => void;
-
-  'walletController.getCustomRpcByChain': (chain: CHAINS_ENUM) => string;
 
   'walletController.getERC20Allowance': (
     chainServerId: string,
@@ -417,6 +420,17 @@ export type RabbyXMethod = {
   'walletController.execGnosisTransaction': (
     account: IDisplayedAccountWithBalance
   ) => void;
+
+  'walletController.setCustomRPC': (chain: CHAINS_ENUM, url: string) => void;
+  'walletController.removeCustomRPC': (chain: CHAINS_ENUM) => void;
+  'walletController.getAllCustomRPC': () => Record<string, RPCItem>;
+  'walletController.getCustomRpcByChain': (chain: CHAINS_ENUM) => RPCItem;
+  'walletController.pingCustomRPC': (chain: CHAINS_ENUM) => boolean;
+  'walletController.setRPCEnable': (
+    chain: CHAINS_ENUM,
+    enable: boolean
+  ) => void;
+  'walletController.validateRPC': (url: string, chainId: number) => boolean;
 
   'permissionService.addConnectedSite': (
     origin: string,

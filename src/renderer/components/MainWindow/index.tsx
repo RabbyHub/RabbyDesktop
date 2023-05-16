@@ -37,6 +37,7 @@ import { fetchDapps } from '@/renderer/ipcRequest/dapps';
 import dayjs from 'dayjs';
 import { useToastMessage } from '@/renderer/hooks/useToastMessage';
 import { HomeBundle } from '@/renderer/routes/Bundle';
+import { useCustomRPC } from '@/renderer/hooks/useCustomRPC';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -303,9 +304,12 @@ export function MainWindow() {
       });
   });
 
+  const { getAllRPC } = useCustomRPC();
+
   useAccountsGuard();
   useMount(() => {
     logGetUserDapp();
+    getAllRPC();
   });
 
   return (
