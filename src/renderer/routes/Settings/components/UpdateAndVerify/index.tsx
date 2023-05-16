@@ -2,7 +2,6 @@ import classNames from 'classnames';
 import { Steps } from 'antd';
 
 import { useEffect, useMemo } from 'react';
-import { detectClientOS } from '@/isomorphic/os';
 import LoadingDots from '@/renderer/components/LoadingDots';
 import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import { useAppUpdator } from '../../../../hooks/useAppUpdator';
@@ -217,7 +216,7 @@ export default function UpdateAndVerify({
                         ` - ${(progress?.percent || 0).toFixed(0)}%`}
                     </span>
                   )}
-                  {stepDownloadUpdate === 'finish' && 'Download files: 100%'}
+                  {stepDownloadUpdate === 'finish' && 'Download files - 100%'}
                 </>
               </span>
             }
