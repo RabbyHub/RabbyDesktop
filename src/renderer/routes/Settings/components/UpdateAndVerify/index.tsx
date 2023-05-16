@@ -217,7 +217,7 @@ export default function UpdateAndVerify({
                         ` - ${(progress?.percent || 0).toFixed(0)}%`}
                     </span>
                   )}
-                  {stepDownloadUpdate === 'finish' && 'Download Progress: 100%'}
+                  {stepDownloadUpdate === 'finish' && 'Download files: 100%'}
                 </>
               </span>
             }
