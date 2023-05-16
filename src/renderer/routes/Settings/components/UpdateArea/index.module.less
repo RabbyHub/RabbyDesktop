@@ -53,9 +53,10 @@
       font-size: 12px;
       background: #8697ff;
       color: rgba(255, 255, 255, 1);
-      padding: 2px 4px;
+      padding: 2px 8px;
       margin-left: 6px;
-      border-radius: @radius-value @radius-value @radius-value 0;
+      border-radius: 10px;
+      border-bottom-left-radius: 0;
     }
 
     &.active {
@@ -107,6 +108,7 @@
   // markdown container
   .changeLogContainer {
     padding: 20px;
+    line-height: 20px;
     // overflow-y: overlay;
     // min-height: @tab-body-changelog-h;
 
@@ -150,7 +152,7 @@
   .updateOpLine {
     min-height: @tab-after-update-op-h;
     padding: 20px;
-    padding-bottom: 0;
+    padding-bottom: 10px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 
     &.waitToStart {

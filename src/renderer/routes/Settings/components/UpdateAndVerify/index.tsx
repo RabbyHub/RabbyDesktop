@@ -58,12 +58,12 @@ function UpdateAndVerifyButton({
           {stepCheckConnected === 'process' ? (
             <>
               Connecting
-              <LoadingDots className="inline-block w-[12px]" />
+              <LoadingDots className="inline-block w-[14px]" />
             </>
           ) : (
             <>
               Downloading
-              <LoadingDots className="inline-block w-[12px]" />
+              <LoadingDots className="inline-block w-[14px]" />
             </>
           )}
         </div>
@@ -96,7 +96,7 @@ function UpdateAndVerifyButton({
           <div className={classNames(styles.btnText)}>
             Verify Update
             {stepVerification === 'process' && (
-              <LoadingDots className="inline-block w-[12px]" />
+              <LoadingDots className="inline-block w-[14px]" />
             )}
           </div>
         </div>

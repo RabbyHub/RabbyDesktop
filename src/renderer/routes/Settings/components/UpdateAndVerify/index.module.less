@@ -106,6 +106,10 @@
     .ant-steps-item-finish :local(.stepTitle.J_finished) {
       color: var(--color-green);
     }
+
+    .ant-steps-item:first-child .ant-steps-item-description:last-child {
+      margin-bottom: 5px;
+    }
   }
 
   .stepItem::global(.ant-steps-item-wait) .stepExplaination {
@@ -120,7 +124,7 @@
   .stepTitle {
     font-family: 'SF Pro';
     font-style: normal;
-    font-weight: 510;
+    font-weight: 500;
     font-size: 13px;
     line-height: 16px;
     color: var(--color-primary);
