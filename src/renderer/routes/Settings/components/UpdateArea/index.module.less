@@ -25,6 +25,7 @@
     cursor: pointer;
     height: @tab-header-h;
     width: (1 / 2) * 100%;
+    font-size: 15px;
     flex-shrink: 1;
     display: flex;
     align-items: center;
@@ -36,12 +37,26 @@
     border-bottom: 1px solid @border-color;
 
     &.active {
+      font-size: 15px;
+      font-weight: bold;
+      color: rgba(255, 255, 255, 1);
       background-color: transparent;
       border-bottom-color: transparent;
     }
 
     text-align: center;
     vertical-align: middle;
+
+    .tabHeadUpdateBadge {
+      height: 15px;
+      font-weight: normal;
+      font-size: 12px;
+      background: #8697ff;
+      color: rgba(255, 255, 255, 1);
+      padding: 2px 4px;
+      margin-left: 6px;
+      border-radius: @radius-value @radius-value @radius-value 0;
+    }
 
     &.active {
       color: var(--color-purewhite);
@@ -81,29 +96,31 @@
     background-repeat: no-repeat;
   }
 
-  .tabHeadUpdateBadge {
-    height: 15px;
-    font-size: 12px;
-    background: #8697ff;
-    padding: 2px 4px;
-    margin-left: 6px;
-    border-radius: @radius-value @radius-value @radius-value 0;
-  }
-
   .tabBody {
     border-left: 1px solid @border-color;
     border-right: 1px solid @border-color;
     border-bottom: 1px solid @border-color;
     border-bottom-left-radius: @radius-value;
     border-bottom-right-radius: @radius-value;
-
-    // height: @tab-body-changelog-h + @tab-after-update-op-h;
   }
 
+  // markdown container
   .changeLogContent {
     padding: 20px;
-    overflow-y: overlay;
-    height: @tab-body-changelog-h;
+    // overflow-y: overlay;
+    min-height: @tab-body-changelog-h;
+
+    > p:last-child {
+      margin-bottom: 0;
+    }
+
+    > ul {
+      padding-left: 16px;
+    }
+
+    > ul li, p {
+      font-size: 12px;
+    }
 
     * {
       color: var(--color-purewhite) !important;

@@ -392,13 +392,7 @@ export function MainWindowSettings() {
                 });
               }}
             />
-          </div>
-          <div
-            className={styles.itemList}
-            style={{
-              marginTop: 24,
-            }}
-          >
+
             <ItemAction
               name="Custom RPC"
               onClick={() => {
@@ -408,12 +402,6 @@ export function MainWindowSettings() {
             >
               <img src={IconChevronRight} />
             </ItemAction>
-          </div>
-        </div>
-
-        <div className={styles.settingBlock}>
-          <h4 className={styles.blockTitle}>Network</h4>
-          <div className={styles.itemList}>
             <ItemAction
               name={
                 <ProxyText>
@@ -433,11 +421,7 @@ export function MainWindowSettings() {
             >
               <img src={IconChevronRight} />
             </ItemAction>
-          </div>
-        </div>
 
-        <div className={styles.settingBlock}>
-          <div className={styles.itemList}>
             <ItemAction
               name="Clear Pending"
               onClick={() => {
