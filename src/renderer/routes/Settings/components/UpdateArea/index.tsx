@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { message } from 'antd';
 
@@ -9,6 +9,7 @@ import remarkGfm from 'remark-gfm';
 
 import { detectClientOS } from '@/isomorphic/os';
 import ChangeLogContent from '@/renderer/components/ChangeLogContent';
+import { useLocation } from 'react-router-dom';
 import {
   useUpdateAppStates,
   useCheckNewRelease,
@@ -56,6 +57,13 @@ export const UpdateArea = ({ className }: UpdateAreaProps) => {
     [versionTextToShow, releaseCheckInfo]
   );
   const [activeTab, setActiveTab] = useState(tabs[0].key);
+
+  const rLoc = useLocation();
+  useEffect(() => {
+    if (rLoc.state?.activeUpdateTab) {
+      setActiveTab(tabs[1].key);
+    }
+  }, [rLoc.state, tabs]);
 
   return (
     <div className={classNames(styles.updateAreaInSettings, className)}>

@@ -15,7 +15,11 @@ export default function ModalUpdateInHome() {
 
   const nav = useNavigate();
   const onGoToSettings = useCallback(() => {
-    nav('/mainwin/settings');
+    nav('/mainwin/settings', {
+      state: {
+        activeUpdateTab: true,
+      },
+    });
     setHasShown(true);
   }, [nav, setHasShown]);
 
