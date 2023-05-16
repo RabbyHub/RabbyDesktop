@@ -52,7 +52,7 @@ export default function ModalUpdateInHome() {
       <footer className={styles.changeLogFooter}>
         <Button
           type="primary"
-          className="w-[200px] h-[48px] radius-[4px]"
+          className="w-[200px] h-[48px] rounded-[4px]"
           onClick={onGoToSettings}
         >
           Go update in Settings
