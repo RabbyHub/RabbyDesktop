@@ -10,7 +10,6 @@ import {
   SummaryData,
   Tokens,
 } from './assets';
-import { formatNetworth } from './utils';
 
 export type Summary = ReturnType<typeof useFetchSummary>;
 
@@ -60,7 +59,7 @@ export const useFetchSummary = (
           : x.id === MINI_DEBT_ID
           ? 'Other small debts'
           : x.symbol,
-      _netWorth: formatNetworth(Math.abs(x._value)),
+      // _netWorth: formatNetworth(Math.abs(x._value)),
     }));
   }, [chain, list]);
 
