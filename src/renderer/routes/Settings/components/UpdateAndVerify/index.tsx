@@ -46,7 +46,7 @@ function UpdateAndVerifyButton({
           styles.updateAndVerifyBtn,
           className,
           styles['is-downloading'],
-          stepCheckConnected === 'process' && styles.disabledDueToLoading
+          styles.disabledDueToLoading
         )}
       >
         {/* <img
