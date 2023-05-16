@@ -103,7 +103,7 @@ export const Summary = () => {
         })}
 
       {!loading && !!summary.length && (
-        <div className="text-14 text-[#9094a1] font-normal  mt-[22px] pl-12">
+        <div className="text-12 text-[#9094a1] font-normal  mt-[22px] pl-12">
           All assets in protocols (e.g. LP tokens) are resolved to the
           underlying assets for statistical calculations
         </div>
