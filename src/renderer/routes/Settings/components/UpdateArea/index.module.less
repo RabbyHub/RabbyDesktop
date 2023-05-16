@@ -53,9 +53,10 @@
       font-size: 12px;
       background: #8697ff;
       color: rgba(255, 255, 255, 1);
-      padding: 2px 4px;
+      padding: 2px 8px;
       margin-left: 6px;
-      border-radius: @radius-value @radius-value @radius-value 0;
+      border-radius: 10px;
+      border-bottom-left-radius: 0;
     }
 
     &.active {
@@ -107,10 +108,11 @@
   // markdown container
   .changeLogContainer {
     padding: 20px;
+    line-height: 20px;
     // overflow-y: overlay;
-    min-height: @tab-body-changelog-h;
+    // min-height: @tab-body-changelog-h;
 
-    > p:last-child {
+    > ul, p:last-child {
       margin-bottom: 0;
     }
 
@@ -131,6 +133,7 @@
       align-items: center;
       justify-content: center;
       flex-direction: column;
+      min-height: 200px;
 
       .noVersionText {
         margin-top: 22px;
@@ -142,7 +145,7 @@
         display: flex;
         align-items: center;
 
-        color: rgba(255, 255, 255, 0.4) !important;
+        color: rgba(255, 255, 255, 0.3) !important;
       }
     }
   }
@@ -150,7 +153,11 @@
   .updateOpLine {
     min-height: @tab-after-update-op-h;
     padding: 20px;
-    padding-bottom: 0;
+    padding-bottom: 10px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+    &.waitToStart {
+      padding-bottom: 20px;
+    }
   }
 }

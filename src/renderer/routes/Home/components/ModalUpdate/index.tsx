@@ -15,7 +15,11 @@ export default function ModalUpdateInHome() {
 
   const nav = useNavigate();
   const onGoToSettings = useCallback(() => {
-    nav('/mainwin/settings');
+    nav('/mainwin/settings', {
+      state: {
+        activeUpdateTab: true,
+      },
+    });
     setHasShown(true);
   }, [nav, setHasShown]);
 
@@ -48,7 +52,7 @@ export default function ModalUpdateInHome() {
       <footer className={styles.changeLogFooter}>
         <Button
           type="primary"
-          className="w-[200px] h-[48px] radius-[6px]"
+          className="w-[200px] h-[48px] radius-[4px]"
           onClick={onGoToSettings}
         >
           Go update in Settings

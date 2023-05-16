@@ -4,6 +4,7 @@ import { Steps } from 'antd';
 import { useEffect, useMemo } from 'react';
 import { detectClientOS } from '@/isomorphic/os';
 import LoadingDots from '@/renderer/components/LoadingDots';
+import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import { useAppUpdator } from '../../../../hooks/useAppUpdator';
 import styles from './index.module.less';
 
@@ -57,12 +58,12 @@ function UpdateAndVerifyButton({
           {stepCheckConnected === 'process' ? (
             <>
               Connecting
-              <LoadingDots className="inline-block w-[12px]" />
+              <LoadingDots className="inline-block w-[14px]" />
             </>
           ) : (
             <>
               Downloading
-              <LoadingDots className="inline-block w-[12px]" />
+              <LoadingDots className="inline-block w-[14px]" />
             </>
           )}
         </div>
@@ -95,7 +96,7 @@ function UpdateAndVerifyButton({
           <div className={classNames(styles.btnText)}>
             Verify Update
             {stepVerification === 'process' && (
-              <LoadingDots className="inline-block w-[12px]" />
+              <LoadingDots className="inline-block w-[14px]" />
             )}
           </div>
         </div>
@@ -151,18 +152,13 @@ function UpdateAndVerifyButton({
   );
 }
 
-const PSUDO_CHECK_CONNECT_URL = `https://download.rabby.io/${
-  detectClientOS() === 'darwin'
-    ? 'rabby-desktop-latest.dmg'
-    : 'rabby-desktop-latest.exe'
-}`;
-
 export default function UpdateAndVerify({
   className,
 }: React.PropsWithChildren<{
   className?: string;
 }>) {
   const {
+    appUpdateURL,
     releaseCheckInfo,
     stepCheckConnected,
     stepVerification,
@@ -236,16 +232,36 @@ export default function UpdateAndVerify({
                       )}
                     >
                       Connecting to the server, server address:
-                      <span className="underline ml-[2px]">
-                        {PSUDO_CHECK_CONNECT_URL}
+                      <span
+                        className={classNames(
+                          'ml-[2px]',
+                          appUpdateURL && 'underline cursor-pointer'
+                        )}
+                        onClick={() => {
+                          if (!appUpdateURL) return;
+                          openExternalUrl(appUpdateURL);
+                        }}
+                      >
+                        {appUpdateURL || '-'}
                       </span>
                     </div>
                   )}
                 {stepCheckConnected === 'finish' && (
-                  <div className={classNames(styles.stepSubStep)}>
+                  <div
+                    className={classNames(styles.stepSubStep, styles.confirmed)}
+                  >
                     Connected to the server, server address:
-                    <span className="underline ml-[2px]">
-                      {PSUDO_CHECK_CONNECT_URL}
+                    <span
+                      className={classNames(
+                        'ml-[2px]',
+                        appUpdateURL && 'underline cursor-pointer'
+                      )}
+                      onClick={() => {
+                        if (!appUpdateURL) return;
+                        openExternalUrl(appUpdateURL);
+                      }}
+                    >
+                      {appUpdateURL || '-'}
                     </span>
                   </div>
                 )}
@@ -307,10 +323,17 @@ export default function UpdateAndVerify({
                     Verifying file digital signature...
                   </span>
                 )}
-                {stepVerification === 'finish' &&
-                  'The digital signature of the downloaded file is verified by Rabby Official. Please install and re-launch the app.'}
-                {stepVerification === 'error' &&
-                  'Fail to verify file digital signature'}
+                {stepVerification === 'finish' && (
+                  <span className={classNames(styles.stepSubStep)}>
+                    The digital signature of the downloaded file is verified by
+                    Rabby Official. Please install and re-launch the app.
+                  </span>
+                )}
+                {stepVerification === 'error' && (
+                  <span className={classNames(styles.stepSubStep)}>
+                    Fail to verify file digital signature
+                  </span>
+                )}
               </div>
             }
           />

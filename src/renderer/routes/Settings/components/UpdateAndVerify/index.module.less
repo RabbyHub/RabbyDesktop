@@ -1,5 +1,6 @@
 .updateAndVerify {
   @color-wait: rgba(255, 255, 255, 0.6);
+  @color-confirmed: rgba(255, 255, 255, 0.6);
   @color-active-subitem: rgba(255, 255, 255, 1);
 
   .updateAndVerifyBtn {
@@ -10,10 +11,9 @@
     background: var(--color-primary);
     border-radius: 4px;
     padding: 10px 12px;
-    // padding-right: 0;
     min-width: 148px;
     gap: 6px;
-    font-weight: 500;
+    font-weight: bold;
     font-size: 14px;
     line-height: 17px;
     color: var(--color-purewhite);
@@ -107,6 +107,10 @@
     .ant-steps-item-finish :local(.stepTitle.J_finished) {
       color: var(--color-green);
     }
+
+    .ant-steps-item:first-child .ant-steps-item-description:last-child {
+      margin-bottom: 5px;
+    }
   }
 
   .stepItem::global(.ant-steps-item-wait) .stepExplaination {
@@ -121,7 +125,7 @@
   .stepTitle {
     font-family: 'SF Pro';
     font-style: normal;
-    font-weight: 510;
+    font-weight: 500;
     font-size: 13px;
     line-height: 16px;
     color: var(--color-primary);
@@ -141,6 +145,9 @@
   }
   .stepSubStep + .stepSubStep {
     margin-top: 8px;
+  }
+  .stepSubStep.confirmed {
+    color: @color-confirmed;
   }
 
   .activeSubStep {

@@ -89,6 +89,7 @@ const downloadInfoAtom = atom(null as null | IAppUpdatorDownloadProgress);
 const checkConnectionAtom = atom<IAppUpdatorProcessStep>('wait');
 const downloadStepAtom = atom<IAppUpdatorProcessStep>('wait');
 const verifyStepAtom = atom<IAppUpdatorProcessStep>('wait');
+const appUpdateURlAtom = atom<string>('');
 
 export function useCurrentVersionReleaseNote() {
   const [currentVersionReleaseNote, setCurrentVersionReleaseNote] =
@@ -173,13 +174,35 @@ const isMockFailed = {
   Verify: !IS_RUNTIME_PRODUCTION && false,
 };
 
-export function useAppUpdator() {
-  const [releaseCheckInfo] = useAtom(releaseCheckInfoAtom);
-  const [downloadInfo, setDownloadInfo] = useAtom(downloadInfoAtom);
+export function useUpdateAppStates() {
   const [stepCheckConnected, setStepCheckConnected] =
     useAtom(checkConnectionAtom);
   const [stepDownloadUpdate, setStepDownloadUpdate] = useAtom(downloadStepAtom);
   const [stepVerification, setStepVerification] = useAtom(verifyStepAtom);
+
+  return {
+    stepCheckConnected,
+    setStepCheckConnected,
+    stepDownloadUpdate,
+    setStepDownloadUpdate,
+    stepVerification,
+    setStepVerification,
+  };
+}
+
+export function useAppUpdator() {
+  const [releaseCheckInfo] = useAtom(releaseCheckInfoAtom);
+  const [downloadInfo, setDownloadInfo] = useAtom(downloadInfoAtom);
+  const [appUpdateURL, setAppUpdateURL] = useAtom(appUpdateURlAtom);
+
+  const {
+    stepCheckConnected,
+    setStepCheckConnected,
+    stepDownloadUpdate,
+    setStepDownloadUpdate,
+    stepVerification,
+    setStepVerification,
+  } = useUpdateAppStates();
 
   const onDownload: OnDownloadFunc = useCallback(
     (info) => {
@@ -218,6 +241,8 @@ export function useAppUpdator() {
 
       if (isMockFailed.Connected) res.isValid = false;
       isValid = res.isValid;
+
+      setAppUpdateURL(res.downloadURL);
     } catch (err) {
       isValid = false;
     }
@@ -227,7 +252,7 @@ export function useAppUpdator() {
     }
 
     return isValid;
-  }, [setStepCheckConnected, setStepDownloadUpdate]);
+  }, [setAppUpdateURL, setStepCheckConnected, setStepDownloadUpdate]);
 
   const isVerifyingRef = useRef(false);
   const verifyDownloadedPackage = useCallback(async () => {
@@ -264,6 +289,7 @@ export function useAppUpdator() {
   }, [stepDownloadUpdate, setStepVerification]);
 
   return {
+    appUpdateURL,
     releaseCheckInfo,
     stepCheckConnected,
     checkDownloadAvailble,
