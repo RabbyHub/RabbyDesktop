@@ -9,6 +9,7 @@ import ProtocolList from './ProtocolList';
 import ScrollTopContext from './scrollTopContext';
 import { VIEW_TYPE } from '../type';
 import { TokenActionModal } from '../../../components/TokenActionModal';
+import { Summary } from './Summary';
 
 const PortfolioWrapper = styled.div`
   background: rgba(255, 255, 255, 0.03);
@@ -169,7 +170,8 @@ const PortfolioView = ({
     <ScrollTopContext.Provider value={scrollTop}>
       <PortfolioWrapper>
         <div className="scroll-container" onScroll={handleScroll}>
-          {selectChainServerId === 'binance' ? null : (
+          {view === VIEW_TYPE.SUMMARY ||
+          selectChainServerId === 'binance' ? null : (
             <TokenList
               tokenList={tokenList}
               historyTokenMap={historyTokenMap}
@@ -179,18 +181,22 @@ const PortfolioView = ({
               showHistory={view === VIEW_TYPE.CHANGE}
             />
           )}
-          <ProtocolList
-            protocolList={protocolList}
-            historyProtocolMap={historyProtocolMap}
-            protocolHistoryTokenPriceMap={protocolHistoryTokenPriceMap}
-            onRelateDapp={handleRelateDapp}
-            isLoading={isLoadingProtocolList}
-            supportHistoryChains={supportHistoryChains}
-            historyTokenDict={historyTokenDict}
-            isLoadingProtocolHistory={isLoadingProtocolHistory}
-            view={view}
-            protocolHidden={protocolHidden}
-          />
+          {view === VIEW_TYPE.SUMMARY ? (
+            <Summary />
+          ) : (
+            <ProtocolList
+              protocolList={protocolList}
+              historyProtocolMap={historyProtocolMap}
+              protocolHistoryTokenPriceMap={protocolHistoryTokenPriceMap}
+              onRelateDapp={handleRelateDapp}
+              isLoading={isLoadingProtocolList}
+              supportHistoryChains={supportHistoryChains}
+              historyTokenDict={historyTokenDict}
+              isLoadingProtocolHistory={isLoadingProtocolHistory}
+              view={view}
+              protocolHidden={protocolHidden}
+            />
+          )}
           {relateDappProtocol && (
             <AssociateDappModal
               relateDappProtocol={relateDappProtocol}

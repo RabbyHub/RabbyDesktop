@@ -37,6 +37,7 @@ import { VIEW_TYPE } from './type';
 import { HomeUpdateButton } from './components/HomeUpdateButton';
 
 import './index.less';
+import { useFetchSummary } from './components/Summary/hook';
 
 const HomeBody = styled.div`
   padding-left: 28px;
@@ -165,6 +166,9 @@ const Home = () => {
     supportHistoryChains,
     historyTokenDict,
   } = useHistoryProtocol(currentAccount?.address, updateNonce, currentView);
+
+  useFetchSummary(currentAccount?.address, selectChainServerId, updateNonce);
+
   const {
     filterList: displayTokenList,
     isShowExpand: isShowTokenExpand,
@@ -410,9 +414,18 @@ const Home = () => {
                     >
                       Change
                     </div>
+                    <div
+                      className={classNames('item', {
+                        active: currentView === VIEW_TYPE.SUMMARY,
+                      })}
+                      onClick={() => switchView(VIEW_TYPE.SUMMARY)}
+                    >
+                      Summary
+                    </div>
                   </div>
                 </SwitchViewWrapper>
               </div>
+
               <PortfolioView
                 tokenList={displayTokenList}
                 historyTokenMap={historyTokenMap}
