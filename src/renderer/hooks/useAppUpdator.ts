@@ -2,7 +2,7 @@
 /// <reference path="../../renderer/preload.d.ts" />
 
 import { atom, useAtom } from 'jotai';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 
@@ -229,11 +229,16 @@ export function useAppUpdator() {
     return isValid;
   }, [setStepCheckConnected, setStepDownloadUpdate]);
 
+  const isVerifyingRef = useRef(false);
   const verifyDownloadedPackage = useCallback(async () => {
     if (stepDownloadUpdate !== 'finish') {
       console.error(`stepDownloadUpdate is not finish`);
       return false;
     }
+
+    if (isVerifyingRef.current) return;
+
+    isVerifyingRef.current = true;
 
     setStepVerification('process');
     try {
@@ -251,6 +256,8 @@ export function useAppUpdator() {
       return res.isValid;
     } catch (err) {
       setStepVerification('error');
+    } finally {
+      isVerifyingRef.current = true;
     }
 
     return false;

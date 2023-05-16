@@ -1,5 +1,6 @@
 .updateAndVerify {
   @color-wait: rgba(255, 255, 255, 0.6);
+  @color-active-subitem: rgba(255, 255, 255, 1);
 
   .updateAndVerifyBtn {
     display: inline-flex;
@@ -18,7 +19,7 @@
     color: var(--color-purewhite);
     transition: width var(--mainwin-sidebar-animation-second);
     cursor: pointer;
-    &:hover {
+    &:not(.disabledDueToLoading):hover {
       opacity: 0.9;
     }
 
@@ -39,34 +40,23 @@
     .autoUpdateAction {
       margin-left: auto;
     }
-    a {
-      color: var(--color-purewhite);
-      text-decoration: underline;
-      font-weight: 700;
-      font-size: 16px;
-      line-height: 19px;
-    }
 
-    &.is-downloading,
-    &.is-downloaded {
-      a {
-        color: var(--color-purewhite);
-        text-decoration: underline;
-        font-weight: 500;
-        font-size: 16px;
-        line-height: 19px;
-      }
-    }
     &.is-downloaded {
       background: var(--color-green);
+    }
+
+    &.disabledDueToLoading {
+      cursor: default;
+      background-color: rbga(--color-primary-rgb, 0.5);
+      color:rgba(255, 255, 255, 0.7);
     }
   }
 
   :global {
     .ant-steps-item:local(.stepItem) .ant-steps-item-container > .ant-steps-item-tail::after {
       background-color: rgba(255, 255, 255, 0.2) !important;
-      top: -30%;
-      height: 160%;
+      top: 0;
+      height: 100%;
       position: relative;
     }
     .ant-steps-item-process:local(.stepItem) .ant-steps-icon,
@@ -144,5 +134,16 @@
     font-size: 12px;
     line-height: 14px;
     color: @color-wait;
+  }
+
+  .stepSubStep:first-child {
+    margin-top: 4px;
+  }
+  .stepSubStep + .stepSubStep {
+    margin-top: 8px;
+  }
+
+  .activeSubStep {
+    color: @color-active-subitem;
   }
 }

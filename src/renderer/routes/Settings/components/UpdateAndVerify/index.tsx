@@ -1,8 +1,9 @@
 import classNames from 'classnames';
 import { Steps } from 'antd';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { detectClientOS } from '@/isomorphic/os';
+import LoadingDots from '@/renderer/components/LoadingDots';
 import { useAppUpdator } from '../../../../hooks/useAppUpdator';
 import styles from './index.module.less';
 
@@ -27,6 +28,12 @@ function UpdateAndVerifyButton({
     quitAndUpgrade,
   } = useAppUpdator();
 
+  useEffect(() => {
+    if (stepDownloadUpdate === 'finish') {
+      verifyDownloadedPackage();
+    }
+  }, [stepDownloadUpdate, verifyDownloadedPackage]);
+
   if (!releaseCheckInfo.hasNewRelease) {
     return null;
   }
@@ -37,18 +44,27 @@ function UpdateAndVerifyButton({
         className={classNames(
           styles.updateAndVerifyBtn,
           className,
-          styles['is-downloading']
+          styles['is-downloading'],
+          stepCheckConnected === 'process' && styles.disabledDueToLoading
         )}
       >
-        <img
+        {/* <img
           src="rabby-internal://assets/icons/update/downloading.svg"
           className={classNames(styles.btnIcon, styles['is-animate'])}
           alt=""
-        />
-        <div className={styles.btnText}>
-          {stepCheckConnected === 'process'
-            ? 'Connecting...'
-            : 'Downloading...'}
+        /> */}
+        <div className={classNames(styles.btnText)}>
+          {stepCheckConnected === 'process' ? (
+            <>
+              Connecting
+              <LoadingDots className="inline-block w-[12px]" />
+            </>
+          ) : (
+            <>
+              Downloading
+              <LoadingDots className="inline-block w-[12px]" />
+            </>
+          )}
         </div>
       </div>
     );
@@ -58,22 +74,30 @@ function UpdateAndVerifyButton({
     if (stepVerification !== 'finish') {
       return (
         <div
-          className={classNames(styles.updateAndVerifyBtn, className)}
+          className={classNames(
+            styles.updateAndVerifyBtn,
+            className,
+            stepVerification === 'process' && styles.disabledDueToLoading
+          )}
           onClick={(evt) => {
             if (stepVerification === 'wait') {
               verifyDownloadedPackage();
             }
           }}
         >
-          <img
+          {/* <img
             src="rabby-internal://assets/icons/update/processing.svg"
             className={classNames(
               styles.btnIcon,
               stepVerification === 'process' && styles['is-animate']
             )}
-            alt=""
-          />
-          <div className={styles.btnText}>Verify Update</div>
+          /> */}
+          <div className={classNames(styles.btnText)}>
+            Verify Update
+            {stepVerification === 'process' && (
+              <LoadingDots className="inline-block w-[12px]" />
+            )}
+          </div>
         </div>
       );
     }
@@ -90,11 +114,11 @@ function UpdateAndVerifyButton({
           quitAndUpgrade();
         }}
       >
-        <img
+        {/* <img
           src="rabby-internal://assets/icons/update/install.svg"
           className={classNames(styles.btnIcon)}
           alt=""
-        />
+        /> */}
         <div className={styles.btnText}>Install and Re-launch</div>
       </div>
     );
@@ -108,16 +132,16 @@ function UpdateAndVerifyButton({
         if (stepCheckConnected !== 'finish') {
           const isValid = await checkDownloadAvailble();
           if (isValid) {
-            requestDownload();
+            await requestDownload();
           }
         }
       }}
     >
-      <img
+      {/* <img
         src="rabby-internal://assets/icons/update/download.svg"
         className={classNames(styles.btnIcon)}
         alt=""
-      />
+      /> */}
       <div className={styles.btnText}>
         {stepCheckConnected === 'error' || stepDownloadUpdate === 'error'
           ? 'Retry Update'
@@ -188,14 +212,14 @@ export default function UpdateAndVerify({
                 )}
               >
                 <>
-                  {stepDownloadUpdate === 'wait' && 'Download Files'}
-                  {stepDownloadUpdate === 'error' && 'Download Files'}
+                  {['wait', 'error'].includes(stepDownloadUpdate) &&
+                    'Download Files'}
                   {stepDownloadUpdate === 'process' && (
-                    <>
+                    <span>
                       Download Files
                       {stepCheckConnected === 'finish' &&
                         ` - ${(progress?.percent || 0).toFixed(0)}%`}
-                    </>
+                    </span>
                   )}
                   {stepDownloadUpdate === 'finish' && 'Download Progress: 100%'}
                 </>
@@ -205,29 +229,51 @@ export default function UpdateAndVerify({
               <div className={styles.stepExplaination}>
                 {stepDownloadUpdate === 'process' &&
                   stepCheckConnected === 'process' && (
-                    <>
+                    <div
+                      className={classNames(
+                        styles.stepSubStep,
+                        styles.activeSubStep
+                      )}
+                    >
                       Connecting to the server, server address:
                       <span className="underline ml-[2px]">
                         {PSUDO_CHECK_CONNECT_URL}
                       </span>
-                    </>
+                    </div>
                   )}
+                {stepCheckConnected === 'finish' && (
+                  <div className={classNames(styles.stepSubStep)}>
+                    Connected to the server, server address:
+                    <span className="underline ml-[2px]">
+                      {PSUDO_CHECK_CONNECT_URL}
+                    </span>
+                  </div>
+                )}
                 {stepDownloadUpdate === 'process' &&
                   stepCheckConnected === 'finish' && (
-                    <>
-                      Connected to the server, server address:
-                      <span className="underline ml-[2px]">
-                        {PSUDO_CHECK_CONNECT_URL}
-                      </span>
-                      <div className="mt-[8px]">Downloading files</div>
-                    </>
+                    <div
+                      className={classNames(
+                        styles.stepSubStep,
+                        styles.activeSubStep
+                      )}
+                    >
+                      Downloading files
+                    </div>
                   )}
                 {stepCheckConnected === 'error' && (
-                  <>Fail to connect to the server</>
+                  <div className={classNames(styles.stepSubStep)}>
+                    Fail to connect to the server
+                  </div>
                 )}
 
-                {isDownloaded && !isDownloadedFailed && 'Download complete'}
-                {isDownloaded && isDownloadedFailed && 'Fail to download file'}
+                {isDownloaded && !isDownloadedFailed && (
+                  <div className={styles.stepSubStep}>Download complete</div>
+                )}
+                {isDownloaded && isDownloadedFailed && (
+                  <div className={styles.stepSubStep}>
+                    Fail to download file
+                  </div>
+                )}
               </div>
             }
           />
@@ -251,7 +297,16 @@ export default function UpdateAndVerify({
             }
             description={
               <div className={styles.stepExplaination}>
-                {stepVerification === 'process' && 'Verifying...'}
+                {stepVerification === 'process' && (
+                  <span
+                    className={classNames(
+                      styles.stepSubStep,
+                      styles.activeSubStep
+                    )}
+                  >
+                    Verifying file digital signature...
+                  </span>
+                )}
                 {stepVerification === 'finish' &&
                   'The digital signature of the downloaded file is verified by Rabby Official. Please install and re-launch the app.'}
                 {stepVerification === 'error' &&
