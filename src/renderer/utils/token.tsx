@@ -330,3 +330,16 @@ export function getUsd(tokens: TokenItem[] = []) {
     }, 0)
   )}`;
 }
+
+export type PortfolioItemToken = {
+  logo_url: string;
+  amount: number;
+  symbol: string;
+  display_symbol?: string;
+  optimized_symbol?: string;
+  price: number;
+  id: string;
+  chain: string;
+  claimable_amount?: number;
+  is_custom?: boolean;
+};

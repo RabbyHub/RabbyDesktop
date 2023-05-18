@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
 import dayjs from 'dayjs';
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import {
@@ -6,14 +6,23 @@ import {
   formatAmount,
   formatNumber,
 } from '@/renderer/utils/number';
-import { getTokens, ellipsisTokenSymbol, getUsd } from '@/renderer/utils/token';
+import {
+  getTokens,
+  ellipsisTokenSymbol,
+  getUsd,
+  PortfolioItemToken,
+} from '@/renderer/utils/token';
 import {
   getCollectionDisplayName,
+  polyNfts,
   PortfolioItemNft,
 } from '@/renderer/utils/nft';
 import BigNumber from 'bignumber.js';
 import styled from 'styled-components';
 import { TokenActionSymbol } from '@/renderer/components/TokenActionModal';
+import LabelWithIcon from '@/renderer/components/LabelWithIcon';
+import { IconWithChain } from '@/renderer/components/TokenWithChain';
+import { TipsWrapper } from '@/renderer/components/TipWrapper';
 import { Table } from './Table';
 
 const Col = Table.Col;
@@ -232,4 +241,115 @@ export const BlancesWithNfts = ({
       <TokensAmount tokens={tokens} />
     </Col>
   );
+};
+
+export const NFTTable = ({
+  name,
+  tokens,
+}: {
+  name: string;
+  tokens?: PortfolioItemNft[];
+}) => {
+  const headers = useMemo(() => [name, 'Balance', 'USD Value'], [name]);
+
+  const nfts = useMemo(
+    () =>
+      tokens?.length
+        ? polyNfts(tokens)
+            .sort((m, n) => (n.amount || 0) - (m.amount || 0))
+            .map((x) => {
+              const collection = x.collection;
+              const collectionName = getCollectionDisplayName(collection);
+
+              return {
+                ...x,
+                collectionName,
+              };
+            })
+        : [],
+    [tokens]
+  );
+
+  return tokens?.length ? (
+    <Table>
+      <Table.Header headers={headers} />
+      <Table.Body>
+        {nfts?.map((x, i) => (
+          <Table.Row key={x.id}>
+            <Col>
+              <LabelWithIcon
+                icon={
+                  <div className="mr-5px">
+                    <IconWithChain
+                      chainServerId="eth"
+                      width="22px"
+                      height="22px"
+                      iconUrl={x.collection.logo_url}
+                      hideChainIcon
+                      noRound
+                    />
+                  </div>
+                }
+                label={x.collectionName}
+              />
+            </Col>
+            <Col>
+              <div>
+                {x.collectionName} x{x.amount}
+              </div>
+            </Col>
+            <Col>
+              <span>-</span>
+              <TipsWrapper hoverTips="NFT value not included in the net worth of this protocol">
+                <img
+                  className="w-14 h-14 ml-4"
+                  src="rabby-internal://assets/icons/home/info.svg"
+                />
+              </TipsWrapper>
+            </Col>
+          </Table.Row>
+        ))}
+      </Table.Body>
+    </Table>
+  ) : null;
+};
+
+export const TokenTable = ({
+  name,
+  tokens,
+}: {
+  name: string;
+  tokens?: PortfolioItemToken[];
+}) => {
+  const headers = useMemo(() => [name, 'Balance', 'USD Value'], [name]);
+
+  const _tokens = useMemo(
+    () =>
+      tokens?.length
+        ? tokens
+            ?.map((x) => ({
+              ...x,
+              _netWorth: x.amount * x.price,
+            }))
+            .sort((m, n) => n._netWorth - m._netWorth)
+        : [],
+    [tokens]
+  );
+
+  return _tokens?.length > 0 ? (
+    <Table>
+      <Table.Header headers={headers} />
+      <Table.Body>
+        {_tokens?.map((token: any) => {
+          return (
+            <Table.Row key={token?.id}>
+              <Token value={token} />
+              <Balance value={token} />
+              <USDValue value={token._netWorth} />
+            </Table.Row>
+          );
+        })}
+      </Table.Body>
+    </Table>
+  ) : null;
 };
