@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 
+import localCurrentVersionReleaseNote from '@/renderer/changeLogs/currentVersion.md';
 import { randString } from '../../isomorphic/string';
 import { getReleaseNoteByVersion } from '../ipcRequest/app';
 import { useAppVersion } from './useMainBridge';
@@ -93,11 +94,14 @@ const appUpdateURlAtom = atom<string>('');
 
 export function useCurrentVersionReleaseNote() {
   const [currentVersionReleaseNote, setCurrentVersionReleaseNote] =
-    useState<string>();
+    useState<string>(localCurrentVersionReleaseNote);
 
   const fetchCurrentVersionReleaseNote = useCallback(async () => {
     const res = await getReleaseNoteByVersion();
-    setCurrentVersionReleaseNote(res.result);
+    const releaseNote = res.result?.trim();
+    if (releaseNote) {
+      setCurrentVersionReleaseNote(releaseNote);
+    }
   }, []);
 
   useEffect(() => {

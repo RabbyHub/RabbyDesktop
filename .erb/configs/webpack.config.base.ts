@@ -62,6 +62,10 @@ const configuration: webpack.Configuration = {
           },
         },
       },
+      {
+        test: /\.md$/,
+        type: 'asset/source',
+      },
     ],
   },
 
