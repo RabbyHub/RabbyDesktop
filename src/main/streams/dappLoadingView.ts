@@ -1,5 +1,8 @@
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
-import { RABBY_LOADING_URL } from '../../isomorphic/constants';
+import {
+  IS_RUNTIME_PRODUCTION,
+  RABBY_LOADING_URL,
+} from '../../isomorphic/constants';
 import {
   createPopupView,
   isDappViewLoading,
@@ -60,6 +63,10 @@ onMainWindowReady().then((tabbedWin) => {
   dappLoadingView.webContents.loadURL(RABBY_LOADING_URL);
 
   valueToMainSubject('dappLoadingView', dappLoadingView);
+
+  if (!IS_RUNTIME_PRODUCTION) {
+    // dappLoadingView.webContents.openDevTools({ mode: 'detach' });
+  }
 
   updateViewPosition(dappLoadingView, false);
 });
