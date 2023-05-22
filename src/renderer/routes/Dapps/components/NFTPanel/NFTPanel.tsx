@@ -2,16 +2,28 @@ import Hide from '@/renderer/components/MainWindow/Hide';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import classNames from 'classnames';
 import React from 'react';
+import clsx from 'clsx';
+import { useSettings } from '@/renderer/hooks/useSettings';
+import { useAtom } from 'jotai';
+import { atomWithStorage } from 'jotai/utils';
 import { MintedSuccessful } from './MintedSuccessful';
 import { StepGroup } from './StepGroup';
 import { MintedData } from './util';
 import { ZoraTip } from './ZoraTip';
+import styles from './style.module.less';
+
+const nftIsCollapsedAtom = atomWithStorage('nftIsCollapsed', false);
 
 export const NFTPanel = () => {
   const [isEventEnd, setIsEventEnd] = React.useState(false);
   const [total, setTotal] = React.useState(0);
   const [mintedData, setMintedData] = React.useState<MintedData>();
   const [isLoading, setIsLoading] = React.useState(true);
+
+  const { settings } = useSettings();
+
+  const [nftIsCollapsed, setNftIsCollapsed] = useAtom(nftIsCollapsedAtom);
+  const isFold = settings.sidebarCollapsed;
 
   const checkMinted = React.useCallback(() => {
     setIsLoading(true);
@@ -64,9 +76,10 @@ export const NFTPanel = () => {
       <div
         className={classNames(
           'flex fixed w-[933px] top-auto mx-auto rounded-[8px]',
-          'bg-[#2D313E] text-white shadow-xl overflow-hidden',
+          'bg-[#2D313E] text-white shadow-xl',
           mintedData ? 'w-[755px] inset-[50px]' : 'w-[933px] inset-[20px]',
-          'transition-all duration-300 ease-in-out'
+          ' transition-all duration-300 ease-in-out ',
+          nftIsCollapsed ? styles.fold : styles.unfold
         )}
       >
         <div
@@ -144,6 +157,44 @@ export const NFTPanel = () => {
             />
           )}
         </div>
+
+        <div
+          className=" absolute right-[-10px] top-[-10px] cursor-pointer w-28 h-28 rounded-full  flex items-center justify-center"
+          onClick={() => {
+            setNftIsCollapsed(true);
+          }}
+        >
+          <img
+            src="rabby-internal://assets/icons/mint/mint-close.svg"
+            className="w-24 h-24"
+          />
+        </div>
+      </div>
+
+      <div
+        className={clsx(
+          'fixed top-auto ml-[48px] group w-[56px] flex items-center',
+          isFold ? 'left-[66px]' : 'left-[var(--mainwin-sidebar-w)]',
+          mintedData ? 'inset-[50px] h-[94px]' : 'inset-[20px] h-[142px] '
+        )}
+      >
+        <img
+          onClick={() => {
+            setNftIsCollapsed(false);
+          }}
+          src={
+            mintedData
+              ? 'rabby-internal://assets/icons/mint/mint-badge.png'
+              : 'rabby-internal://assets/icons/mint/unmint-badge.png'
+          }
+          className={classNames(
+            styles.shadow,
+            'w-[56px] h-[56px] transition-all duration-300 ease-in-out',
+            nftIsCollapsed
+              ? 'opacity-100 cursor-pointer delay-250  duration-50'
+              : 'opacity-0 pointer-events-none duration-300'
+          )}
+        />
       </div>
     </Hide>
   );
