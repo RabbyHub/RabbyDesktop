@@ -256,10 +256,7 @@ const ProtocolItem = ({
         }, 0);
         sum += change;
       } else {
-        const change = portfolio.asset_token_list.reduce((res, item) => {
-          return res + item.price * item.amount;
-        }, 0);
-        sum += change;
+        sum += 0;
       }
     });
     const valueChange = protocol.usd_value - sum;
@@ -367,7 +364,7 @@ const ProtocolItem = ({
             }${Math.abs(historyProtocolUsdValue.percentage * 100).toFixed(
               2
             )}% (${formatUsdValue(
-              historyProtocolUsdValue.historyUsdValueChange
+              Math.abs(historyProtocolUsdValue.historyUsdValueChange)
             )})`}</UsdValueChangeWrapper>
           )}
         </div>

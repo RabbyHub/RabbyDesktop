@@ -11,6 +11,8 @@ import Vesting from './Vesting';
 import NFTCommon from './NFTCommon';
 import NFTLending from './NFTLending';
 import NFTFraction from './NFTFraction';
+import NFTP2PBorrower from './NFTP2PBorrower';
+import NFTP2PLender from './NFTP2PLender';
 
 export {
   Common,
@@ -26,4 +28,6 @@ export {
   NFTCommon,
   NFTLending,
   NFTFraction,
+  NFTP2PBorrower,
+  NFTP2PLender,
 };
