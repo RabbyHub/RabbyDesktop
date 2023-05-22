@@ -117,7 +117,7 @@ const openNotification = (
                 }
               }}
             >
-              <span>View on {CHAINS?.[p?.chain]?.name} Explore</span>
+              <span>View on {CHAINS?.[p?.chain]?.name} Explorer</span>
               <RcIconExternalLink className="text-14" />
             </div>
           )}
