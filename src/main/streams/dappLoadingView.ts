@@ -78,13 +78,13 @@ const dispose = onIpcMainInternalEvent(
 
     switch (payload.type) {
       case 'show': {
-        const findResult = findDappsByOrigin(payload.tabURL);
-        const dapp =
-          findResult.dappByOrigin || findResult.dappBySecondaryDomainOrigin;
-        payload.dapp = dapp;
+        // const findResult = findDappsByOrigin(payload.tabURL);
+        // const dapp =
+        //   findResult.dappByOrigin || findResult.dappBySecondaryDomainOrigin;
+        // payload.dapp = dapp;
 
-        putDappLoadingViewState({ loadingTabId: payload.tabId });
-        updateViewPosition(dappLoadingView, !!dapp);
+        // putDappLoadingViewState({ loadingTabId: payload.tabId });
+        // updateViewPosition(dappLoadingView, !!dapp);
         break;
       }
       case 'hide': {
