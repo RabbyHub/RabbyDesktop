@@ -1,14 +1,3 @@
-import { randString } from '@/isomorphic/string';
-
-export function toggleLoadingView(
-  payload: ChannelMessagePayload['__internal_rpc:mainwindow:toggle-loading-view']['send'][0]
-) {
-  window.rabbyDesktop.ipcRenderer.sendMessage(
-    '__internal_rpc:mainwindow:toggle-loading-view',
-    payload
-  );
-}
-
 export async function toggleMainWinTabAnimating(
   payload: ChannelInvokePayload['toggle-activetab-animating']['send'][0]
 ) {

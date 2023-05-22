@@ -2,7 +2,6 @@ import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useDapps } from '../hooks/useDappsMngr';
-import { toggleLoadingView } from '../ipcRequest/mainwin';
 import { matomoRequestEvent } from '../utils/matomo-request';
 import { navigateToDappRoute } from '../utils/react-router';
 import { findTabByTabID } from '../utils/tab';
@@ -69,11 +68,14 @@ export function useSidebarDapps() {
           .then((res) => {
             if (res.shouldNavTabOnClient) {
               if (activeTab && foundDapp) {
-                toggleLoadingView({
-                  type: 'show',
-                  tabId: activeTab.id!,
-                  tabURL: dappOrigin,
-                });
+                window.rabbyDesktop.ipcRenderer.sendMessage(
+                  '__internal_rpc:mainwindow:toggle-loading-view',
+                  {
+                    type: 'show',
+                    tabId: activeTab.id!,
+                    tabURL: dappOrigin,
+                  }
+                );
               }
             }
             if (res.openType === 'create-tab') {
