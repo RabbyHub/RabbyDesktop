@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 
+import localCurrentVersionReleaseNote from '@/renderer/changeLogs/currentVersion.md';
 import { randString } from '../../isomorphic/string';
 import { getReleaseNoteByVersion } from '../ipcRequest/app';
 import { useAppVersion } from './useMainBridge';
@@ -92,17 +93,20 @@ const verifyStepAtom = atom<IAppUpdatorProcessStep>('wait');
 const appUpdateURlAtom = atom<string>('');
 
 export function useCurrentVersionReleaseNote() {
-  const [currentVersionReleaseNote, setCurrentVersionReleaseNote] =
-    useState<string>();
+  // const [currentVersionReleaseNote, setCurrentVersionReleaseNote] =
+  //   useState<string>(localCurrentVersionReleaseNote);
 
-  const fetchCurrentVersionReleaseNote = useCallback(async () => {
-    const res = await getReleaseNoteByVersion();
-    setCurrentVersionReleaseNote(res.result);
-  }, []);
+  // const fetchCurrentVersionReleaseNote = useCallback(async () => {
+  //   const res = await getReleaseNoteByVersion();
+  //   const releaseNote = res.result?.trim();
+  //   if (releaseNote) {
+  //     setCurrentVersionReleaseNote(releaseNote);
+  //   }
+  // }, []);
 
-  useEffect(() => {
-    fetchCurrentVersionReleaseNote();
-  }, [fetchCurrentVersionReleaseNote]);
+  // useEffect(() => {
+  //   fetchCurrentVersionReleaseNote();
+  // }, [fetchCurrentVersionReleaseNote]);
 
   const appVerisons = useAppVersion();
   const versionTextToShow = useMemo(() => {
@@ -128,7 +132,7 @@ export function useCurrentVersionReleaseNote() {
   return {
     versionTextToShow,
     copyCurrentVersionInfo,
-    currentVersionReleaseNote,
+    currentVersionReleaseNote: localCurrentVersionReleaseNote,
     appVersion: window.rabbyDesktop.appVersion,
   };
 }
