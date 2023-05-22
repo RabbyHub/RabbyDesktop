@@ -21,6 +21,7 @@ import { useRbiSource } from '@/renderer/hooks/useRbiSource';
 import BigNumber from 'bignumber.js';
 import { isSameAddress } from '@/renderer/utils/address';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 import { ChainRender, ChainSelect } from './component/ChainSelect';
 import { SwapIntro } from './component/Intro';
 import { DEX, getChainDefaultToken } from './constant';
@@ -937,7 +938,8 @@ export const SwapToken = () => {
                       ) : null
                     }
                   >
-                    Approve {debouncePayAmount} {payToken?.symbol} to{' '}
+                    Approve {ellipsisTokenSymbol(debouncePayAmount, 16)}{' '}
+                    {ellipsisTokenSymbol(payToken?.symbol || '', 5)} to{' '}
                     {DexDisplayName}{' '}
                   </Button>
 
