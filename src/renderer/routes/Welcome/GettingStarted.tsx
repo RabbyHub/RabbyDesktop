@@ -1,39 +1,19 @@
+import { useAccountFetchStage } from '@/renderer/hooks/rabbyx/useAccount';
 import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { Button } from 'antd';
 import React from 'react';
-import { useAccountFetchStage } from '@/renderer/hooks/rabbyx/useAccount';
 import styles from './GettingStarted.module.less';
-import InviteCodeModal from './InviteCodeModal';
-import { useInvited } from './useInvited';
 
 export default function GettingStarted() {
   const { showZSubview } = useZPopupLayerOnMain();
-  const [visibleInviteCodeModal, setVisibleInviteCodeModal] =
-    React.useState(false);
+
   const { isFinishedFetchAccounts } = useAccountFetchStage();
-  const { isInvited } = useInvited();
 
   const onClickButton = React.useCallback(() => {
-    if (!isInvited) {
-      setVisibleInviteCodeModal(true);
-      return;
-    }
     showZSubview('select-add-address-type-modal', {
       showEntryButton: true,
     });
-  }, [showZSubview, isInvited]);
-
-  const handleCancelModal = React.useCallback(
-    (isValid: boolean) => {
-      if (isValid) {
-        showZSubview('select-add-address-type-modal', {
-          showEntryButton: true,
-        });
-      }
-      setVisibleInviteCodeModal(false);
-    },
-    [showZSubview]
-  );
+  }, [showZSubview]);
 
   return (
     <div className={styles['page-welcome']}>
@@ -57,11 +37,6 @@ export default function GettingStarted() {
           Get started
         </Button>
       </div>
-
-      <InviteCodeModal
-        open={visibleInviteCodeModal}
-        onCancel={handleCancelModal}
-      />
     </div>
   );
 }
