@@ -120,7 +120,7 @@
   },
   "dependencies": {
     "@binance/connector": "^2.0.1",
-    "@debank/common": "^0.2.36",
+    "@debank/common": "^0.2.37",
     "@debank/festats": "^1.0.3",
     "@debank/parse-favicon": "^0.1.1",
     "@debank/rabby-api": "^0.5.31",
