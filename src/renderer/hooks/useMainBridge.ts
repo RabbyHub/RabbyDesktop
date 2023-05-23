@@ -9,8 +9,8 @@ import { useEffect, useState } from 'react';
 
 export function useAppVersion() {
   const [versions, setVersions] = useState<IAppVersions>({
-    version: '',
-    appChannel: 'reg',
+    version: window.rabbyDesktop.appVersion,
+    appChannel: 'prod',
     gitRef: '',
   });
 
