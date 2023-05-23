@@ -1,7 +1,21 @@
 
-v0.22.0 / 2023-05-16
+v0.23.0 / 2023-05-23
 ====================
 
+  * feat: upgrade rabbyx to 0.86.1 (#440)
+  * feat: update currentVersion.md
+  * feat: NFT P2P Lender 、Borrower (#433)
+  * feat: disable loadingView. (#436)
+  * feat: use local releaseNote first. (#435)
+  * feat: remove invited code (#439)
+  * Add collapsible NFTPanel with badge icon (#438)
+  * feat:ellipsis swap's approve button (#434)
+  * typo: Explorer (#437)
+
+v0.22.0-prod / 2023-05-16
+=========================
+
+  * Release v0.22.0-prod
   * chore: adjust.
   * fix: style fix.
   * chore: tuning. (#432)
