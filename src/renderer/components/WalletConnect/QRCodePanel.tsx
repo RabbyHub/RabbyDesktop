@@ -18,16 +18,16 @@ export const QRCodePanel: React.FC<Props> = ({ uri, onReload }) => {
         onMouseLeave={() => setIsHover(false)}
       >
         <div className="bg-white p-4 rounded">
-          <QRCode value={uri} size={180} />
+          <QRCode value={uri} size={170} />
         </div>
 
-        {isHover && (
+        {/* {isHover && (
           <div className={styles.ReloadMask} onClick={onReload}>
             <div className={styles.Icon}>
               <img src="rabby-internal://assets/icons/walletconnect/refresh.svg" />
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

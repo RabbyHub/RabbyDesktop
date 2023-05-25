@@ -3,6 +3,7 @@ import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
 import { ellipsis, isSameAddress } from '@/renderer/utils/address';
 import {
   KEYRINGS_LOGOS,
+  KEYRING_CLASS,
   KEYRING_TYPE_TEXT,
   WALLET_BRAND_CONTENT,
   WALLET_BRAND_TYPES,
@@ -15,6 +16,10 @@ import { useCopyToClipboard } from 'react-use';
 import styles from './index.module.less';
 import { useAccountInfo } from './useAccountInfo';
 import { TipsWrapper } from '../TipWrapper';
+import { SignalBridge } from '../ConnectStatus/SignalBridge';
+import { SessionStatusBar } from '../WalletConnect/SessionStatusBar';
+import { GridPlusStatusBar } from '../ConnectStatus/GridPlusStatusBar';
+import { LedgerStatusBar } from '../ConnectStatus/LedgerStatusBar';
 
 interface Props {
   account: IDisplayedAccountWithBalance;
@@ -63,61 +68,78 @@ export const CurrentAccount: React.FC<Props> = ({
 
   return (
     <section onClick={onClick} className={styles.CurrentAccount}>
-      <div className={styles.logo}>
-        <img src={addressTypeIcon} alt={account.brandName} />
-      </div>
-      <div className={styles.content}>
-        <div className={clsx(styles.part, styles.partName)}>
-          <div className={styles.name}>{account.alianName}</div>
-          {accountInfo && (
-            <div className={styles.index}>#{accountInfo.index}</div>
-          )}
-          {isInWhitelist && (
-            <Tooltip
-              overlayClassName="rectangle"
-              placement="top"
-              title="Whitelisted address"
-            >
-              <div className={styles.whitelist}>
-                <img
-                  width={16}
-                  src="rabby-internal://assets/icons/address-management/whitelist-white.svg"
-                />
-              </div>
-            </Tooltip>
-          )}
+      <div className="flex items-center">
+        <div className={styles.logo}>
+          <img src={addressTypeIcon} alt={account.brandName} />
+          <SignalBridge {...account} className="right-[0px] bottom-[0px]" />
         </div>
-        <div className={clsx(styles.part, styles.partAddress)}>
-          <div title={formatAddressTooltip} className={styles.address}>
-            {ellipsis(account.address)}
+        <div className={styles.content}>
+          <div className={clsx(styles.part, styles.partName)}>
+            <div className={styles.name}>{account.alianName}</div>
+            {accountInfo && (
+              <div className={styles.index}>#{accountInfo.index}</div>
+            )}
+            {isInWhitelist && (
+              <Tooltip
+                overlayClassName="rectangle"
+                placement="top"
+                title="Whitelisted address"
+              >
+                <div className={styles.whitelist}>
+                  <img
+                    width={16}
+                    src="rabby-internal://assets/icons/address-management/whitelist-white.svg"
+                  />
+                </div>
+              </Tooltip>
+            )}
           </div>
-          <TipsWrapper hoverTips="Copy" clickTips="Copied">
-            <div onClick={onCopy} className={clsx(styles.copy, styles.icon)}>
-              <img src="rabby-internal://assets/icons/address-management/copy-white.svg" />
+          <div className={clsx(styles.part, styles.partAddress)}>
+            <div title={formatAddressTooltip} className={styles.address}>
+              {ellipsis(account.address)}
             </div>
-          </TipsWrapper>
+            <TipsWrapper hoverTips="Copy" clickTips="Copied">
+              <div onClick={onCopy} className={clsx(styles.copy, styles.icon)}>
+                <img src="rabby-internal://assets/icons/address-management/copy-white.svg" />
+              </div>
+            </TipsWrapper>
+          </div>
+        </div>
+        <div className={styles.balance}>
+          {isUpdatingBalance ? (
+            <Skeleton.Input
+              active
+              style={{
+                width: 96,
+                height: 24,
+                borderRadius: 2,
+              }}
+            />
+          ) : (
+            <>${splitNumberByStep(account.balance?.toFixed(2))}</>
+          )}
+        </div>
+        <div className={styles.action}>
+          <img
+            className={styles.arrow}
+            src="rabby-internal://assets/icons/address-management/arrow-right-white.svg"
+          />
         </div>
       </div>
-      <div className={styles.balance}>
-        {isUpdatingBalance ? (
-          <Skeleton.Input
-            active
-            style={{
-              width: 96,
-              height: 24,
-              borderRadius: 2,
-            }}
-          />
-        ) : (
-          <>${splitNumberByStep(account.balance?.toFixed(2))}</>
-        )}
-      </div>
-      <div className={styles.action}>
-        <img
-          className={styles.arrow}
-          src="rabby-internal://assets/icons/address-management/arrow-right-white.svg"
+
+      {account.type === KEYRING_CLASS.WALLETCONNECT && (
+        <SessionStatusBar
+          address={account.address || ''}
+          brandName={account.brandName || ''}
+          className="mt-[12px] text-white bg-[#0000001A]"
         />
-      </div>
+      )}
+      {account.type === KEYRING_CLASS.HARDWARE.LEDGER && (
+        <LedgerStatusBar className="mt-[12px] text-white bg-[#0000001A]" />
+      )}
+      {account.type === KEYRING_CLASS.HARDWARE.GRIDPLUS && (
+        <GridPlusStatusBar className="mt-[12px] text-white bg-[#0000001A]" />
+      )}
     </section>
   );
 };

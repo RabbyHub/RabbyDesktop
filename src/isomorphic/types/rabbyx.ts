@@ -349,7 +349,7 @@ export type RabbyXMethod = {
 
   'walletController.initWalletConnect': (
     brandName: string,
-    bridge?: string
+    curStashId: number | null
   ) => {
     uri: string;
     stashId: number | null;
@@ -358,7 +358,9 @@ export type RabbyXMethod = {
     address: string,
     brandName: string,
     bridge?: string,
-    stashId?: number
+    stashId?: number,
+    realBrandName?: string,
+    realBrandUrl?: string
   ) => Account[];
   'walletController.updateAddressBalanceCache': (
     address: string,
@@ -447,6 +449,23 @@ export type RabbyXMethod = {
   ) => void;
 
   'walletController.getEnsContentHash': (name: string) => string;
+  'walletController.getWalletConnectSessionStatus': (
+    address: string,
+    brandName: string
+  ) => WalletConnectSessionStatus;
+  'walletController.getCommonWalletConnectInfo': (
+    address: string
+  ) => Account & {
+    realBrandName?: string;
+  };
+  'walletController.killWalletConnectConnector': (
+    address: string,
+    brandName: string,
+    resetConnect: boolean,
+    silent?: boolean
+  ) => void;
+  'walletController.gridPlusIsConnect': () => boolean;
+  'walletController.isUseLedgerLive': () => boolean;
 } & {
   'openapi.setHost': OpenApiService['setHost'];
   'openapi.getHost': OpenApiService['getHost'];

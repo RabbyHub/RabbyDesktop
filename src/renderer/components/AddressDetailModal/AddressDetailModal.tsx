@@ -8,6 +8,7 @@ import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import React from 'react';
 import { Modal } from '../Modal/Modal';
 import { AccountDetail } from './AccountDetail';
+import { CommonPopupProvider } from '../CommonPopup/CommonPopupProvider';
 
 export const AddressDetailModal: React.FC = () => {
   const { svVisible, svState, closeSubview } =
@@ -49,15 +50,18 @@ export const AddressDetailModal: React.FC = () => {
       onCancel={closeSubview}
       open={svVisible}
       onBack={back}
+      className="overflow-hidden"
     >
-      <AccountDetail
-        onClose={closeSubview}
-        onDelete={handleDelete}
-        account={{
-          ...svState.account,
-          balance: balance ?? 0,
-        }}
-      />
+      <CommonPopupProvider>
+        <AccountDetail
+          onClose={closeSubview}
+          onDelete={handleDelete}
+          account={{
+            ...svState.account,
+            balance: balance ?? 0,
+          }}
+        />
+      </CommonPopupProvider>
     </Modal>
   );
 };

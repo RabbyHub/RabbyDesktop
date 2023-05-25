@@ -3,12 +3,14 @@ import {
   useZPopupLayerOnMain,
   useZPopupViewState,
 } from '@/renderer/hooks/usePopupWinOnMainwin';
+import { WALLET_BRAND_TYPES } from '@/renderer/utils/constant';
 import { Modal } from '../Modal/Modal';
 import { SelectModalContent } from './SelectModalContent';
 
 export const SelectAddAddressTypeModalInSubview: React.FC = () => {
   const { showZSubview } = useZPopupLayerOnMain();
   const [keyringType, setKeyringType] = React.useState<string>();
+  const [brand, setBrand] = React.useState<WALLET_BRAND_TYPES>();
   const { svVisible, svState, closeSubview } = useZPopupViewState(
     'select-add-address-type-modal'
   );
@@ -17,6 +19,7 @@ export const SelectAddAddressTypeModalInSubview: React.FC = () => {
     if (keyringType) {
       showZSubview('add-address-modal', {
         keyringType,
+        brand,
         showEntryButton: !!svState?.showEntryButton,
         showBackButton: true,
       });
@@ -36,7 +39,12 @@ export const SelectAddAddressTypeModalInSubview: React.FC = () => {
       onCancel={closeSubview}
       footer={null}
     >
-      <SelectModalContent onSelectType={setKeyringType} />
+      <SelectModalContent
+        onSelectType={(type, _brand) => {
+          setKeyringType(type);
+          setBrand(_brand);
+        }}
+      />
     </Modal>
   );
 };

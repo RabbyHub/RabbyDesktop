@@ -1,5 +1,7 @@
 /// <reference path="../isomorphic/type-helpers.d.ts" />
 
+import { WALLET_BRAND_TYPES } from '@/renderer/utils/constant';
+
 type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
 type IDisplayedAccountWithBalance =
   import('@/renderer/hooks/rabbyx/useAccountToDisplay').IDisplayedAccountWithBalance;
@@ -40,6 +42,7 @@ type ZViewStates = {
     keyringType: string;
     showEntryButton?: boolean;
     showBackButton?: boolean;
+    brand?: WALLET_BRAND_TYPES;
   };
   'address-management': {
     hidden?: boolean;

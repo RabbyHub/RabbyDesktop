@@ -26,6 +26,9 @@ import { SafeItem } from './SafeItem';
 import { WhitelistSwitch } from './WhitelistSwitch';
 import { TipsWrapper } from '../TipWrapper';
 import { DeleteWrapper } from '../DeleteWrapper';
+import { GridPlusStatusBar } from '../ConnectStatus/GridPlusStatusBar';
+import { LedgerStatusBar } from '../ConnectStatus/LedgerStatusBar';
+import { SessionStatusBar } from '../WalletConnect/SessionStatusBar';
 
 export interface Props {
   onClose: () => void;
@@ -145,7 +148,26 @@ export const AccountDetail: React.FC<Props> = ({
             />
           </Popover>
         </AccountDetailItem>
-        <AccountDetailItem headline="Source">
+        <AccountDetailItem
+          headline="Source"
+          append={
+            <>
+              {account.type === KEYRING_CLASS.WALLETCONNECT && (
+                <SessionStatusBar
+                  address={account.address || ''}
+                  brandName={account.brandName || ''}
+                  className="mt-[-10px] mb-[10px] text-white bg-[#FFFFFF1A]"
+                />
+              )}
+              {account.type === KEYRING_CLASS.HARDWARE.LEDGER && (
+                <LedgerStatusBar className="mt-[-10px] mb-[10px] text-white bg-[#FFFFFF1A]" />
+              )}
+              {account.type === KEYRING_CLASS.HARDWARE.GRIDPLUS && (
+                <GridPlusStatusBar className="mt-[-10px] mb-[10px] text-white bg-[#FFFFFF1A]" />
+              )}
+            </>
+          }
+        >
           <div className={styles.source}>
             <img
               className="w-[18px] h-[18px]"

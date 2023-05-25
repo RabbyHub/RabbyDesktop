@@ -630,3 +630,13 @@ type HDManagerType = ['Trezor', 'Ledger', 'Onekey'][number];
 type ISafeOpenDappTabOptions = {
   dontReloadOnSwitchToActiveTab?: boolean;
 };
+
+type WalletConnectSessionStatus =
+  | 'CONNECTED'
+  | 'DISCONNECTED'
+  | 'RECEIVED'
+  | 'EXPIRED'
+  | 'ACCOUNT_ERROR'
+  | 'BRAND_NAME_ERROR'
+  | 'REJECTED'
+  | 'ADDRESS_DUPLICATE';

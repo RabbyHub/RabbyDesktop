@@ -8,7 +8,7 @@ type Account = import('@/isomorphic/types/rabbyx').Account;
 export interface Props {
   onSuccess: () => void;
   accounts?: Account[];
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export const SuccessContent: React.FC<Props> = ({
