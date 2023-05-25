@@ -1,12 +1,16 @@
 import { useShellWallet } from '@/renderer/hooks-shell/useShellWallet';
 
 /**
- * @description make sure use this hooks only once at top-level component in whole app
+ * @description make sure use this hooks only once at top-level component in whole page-level app
  *
  * `useShellWallet` is a custom hook that returns a `walletController` object, which made by
- * `makeShellWallet`. all events broadcast from rabbyx's backend will be handled by `walletController`.
- * So if you need to subscribe to events, you should wrap your component with `ShellWalletProvider`, then
- * you can subscribe to events by `walletController.addEventListener(..., handler)`.
+ * `makeShellWallet`. See src/renderer/utils-shell/shell-wallet.ts to get details. In process
+ * of `makeShellWallet`, we register listener for all events broadcast from rabbyx's background,
+ * which would be handled by `eventBus`.
+ *
+ * So if you need to subscribe to events in React Component, you should wrap your component with
+ * `ShellWalletProvider`, then you can subscribe to events by `eventBus.addEventListener(..., handler)`,
+ * remember dipose it by `eventBus.removeEventListener(..., handler)`.
  *
  */
 export function ShellWalletProvider({
