@@ -103,22 +103,7 @@ export class Tab {
     }
 
     this.tabs = tabs;
-    const isMainWindow = this.$meta.webuiType === 'MainWindow';
-    this.view = viewMngr.allocateView({
-      ...(isMainWindow && {
-        webPreferences: {
-          zoomFactor: 0.9,
-        },
-      }),
-    });
-
-    if (this.$meta.webuiType === 'MainWindow') {
-      // // every level means about 20% zoom in/out
-      // this.view.webContents.setVisualZoomLevelLimits(-2, 0);
-
-      // zoom by default
-      this.view.webContents.setZoomFactor(0.9);
-    }
+    this.view = viewMngr.allocateView();
 
     this.id = this.view.webContents.id;
     this.window = ofWindow;
@@ -140,6 +125,7 @@ export class Tab {
       webContents: this.view!.webContents,
       window: ofWindow,
       relatedDappId: this.$meta.relatedDappId,
+      isMainTabbedWindow: this.$meta.webuiType === 'MainWindow',
     });
 
     this.view?.webContents.on('focus', () => {

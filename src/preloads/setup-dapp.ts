@@ -1,5 +1,6 @@
-import { contextBridge } from 'electron';
-import { isUrlFromDapp } from '../isomorphic/url';
+import { contextBridge, webFrame } from 'electron';
+import { formatZoomValue } from '../isomorphic/primitive';
+
 import { ipcRendererObj } from './base';
 
 async function __rbCheckRequestable(reqData: any) {
@@ -21,25 +22,47 @@ async function __rbCheckRequestable(reqData: any) {
   }
 }
 
-export function setupDapp() {
-  if (!isUrlFromDapp(window.location.href)) {
+export async function setupDappZoomEvents() {
+  const checkResult = await ipcRendererObj.invoke(
+    '__internal_rpc:mainwindow:is-dapp-view'
+  );
+  if (!checkResult.isDappView) {
     return;
   }
 
-  try {
-    contextBridge.exposeInMainWorld(
-      '__rbCheckRequestable',
-      __rbCheckRequestable
-    );
-  } catch (e) {
-    Object.defineProperty(window, '__rbCheckRequestable', {
-      value: __rbCheckRequestable,
-      writable: false,
-      configurable: false,
-    });
+  const dispose = ipcRendererObj.on(
+    '__internal_push:mainwindow:set-dapp-view-zoom',
+    ({ zoomPercent }) => {
+      webFrame.setZoomFactor(formatZoomValue(zoomPercent).zoomFactor);
+    }
+  );
+
+  document.addEventListener('beforeunload', () => {
+    dispose?.();
+  });
+}
+
+export async function setupDapp() {
+  const checkResult = await ipcRendererObj.invoke(
+    '__internal_rpc:mainwindow:is-dapp-view'
+  );
+  if (!checkResult.isDappView) {
+    return;
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    try {
+      contextBridge.exposeInMainWorld(
+        '__rbCheckRequestable',
+        __rbCheckRequestable
+      );
+    } catch (e) {
+      Object.defineProperty(window, '__rbCheckRequestable', {
+        value: __rbCheckRequestable,
+        writable: false,
+        configurable: false,
+      });
+    }
     const orig = (window as any).__rbCheckRequestable;
 
     const decriptor = Object.getOwnPropertyDescriptor(
@@ -54,4 +77,6 @@ export function setupDapp() {
       configurable: false,
     });
   });
+
+  setupDappZoomEvents();
 }

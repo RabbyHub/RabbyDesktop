@@ -7,7 +7,7 @@ import {
   IconTooltipInfo,
 } from '@/../assets/icons/mainwin-settings';
 
-import { Button, Modal, SwitchProps, Tooltip } from 'antd';
+import { Button, Modal, Slider, SwitchProps, Tooltip } from 'antd';
 import { useSettings } from '@/renderer/hooks/useSettings';
 import styled from 'styled-components';
 import {
@@ -22,6 +22,7 @@ import { detectClientOS } from '@/isomorphic/os';
 import { ucfirst } from '@/isomorphic/string';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { atom, useAtom } from 'jotai';
+import { formatZoomValue } from '@/isomorphic/primitive';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
 import { useProxyStateOnSettingPage } from './settingHooks';
@@ -254,8 +255,12 @@ function DeveloperKitsParts() {
 }
 
 export function MainWindowSettings() {
-  const { settings, toggleEnableIPFSDapp, toggleEnableContentProtection } =
-    useSettings();
+  const {
+    settings,
+    toggleEnableIPFSDapp,
+    toggleEnableContentProtection,
+    adjustDappViewZoomPercent,
+  } = useSettings();
 
   const { setIsSettingProxy, customProxyServer, proxyType } =
     useProxyStateOnSettingPage();
@@ -265,6 +270,7 @@ export function MainWindowSettings() {
   const [isShowingClearPendingModal, setIsShowingClearPendingModal] =
     useState(false);
   const [isShowCustomRPCModal, setIsShowCustomRPCModal] = useState(false);
+
   return (
     <div className={styles.settingsPage}>
       <UpdateArea />
@@ -430,6 +436,24 @@ export function MainWindowSettings() {
               icon="rabby-internal://assets/icons/mainwin-settings/icon-clear.svg"
             >
               <img src={IconChevronRight} />
+            </ItemAction>
+
+            <ItemAction
+              name="Adjust Dapp Zoom"
+              onClick={() => {
+                // setIsShowingClearPendingModal(true);
+              }}
+              // icon="rabby-internal://assets/icons/mainwin-settings/icon-clear.svg"
+            >
+              <Slider
+                className="w-[200px]"
+                value={settings.experimentalDappViewZoomPercent}
+                min={60}
+                max={100}
+                onChange={(value) => {
+                  adjustDappViewZoomPercent(value);
+                }}
+              />
             </ItemAction>
           </div>
         </div>

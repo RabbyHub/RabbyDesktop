@@ -1,5 +1,6 @@
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { dialog } from 'electron';
+import { formatZoomValue } from '@/isomorphic/primitive';
 import type { MainWindowTab } from '../browser/tabs';
 import { captureWebContents, hideLoadingView } from '../utils/browser';
 import {
@@ -411,6 +412,38 @@ onIpcMainInternalEvent(
       '__internal_push:mainwindow:update-findresult-in-page',
       payload
     );
+  }
+);
+
+handleIpcMainInvoke('__internal_rpc:mainwindow:is-dapp-view', async (evt) => {
+  const webContents = evt.sender;
+  const mainTabbedWin = await onMainWindowReady();
+  const foundTab = mainTabbedWin.tabs.tabList.find(
+    (tab) => tab.view?.webContents === webContents
+  );
+
+  return {
+    isDappView: !!foundTab,
+  };
+});
+
+onIpcMainInternalEvent(
+  '__internal_main:mainwindow:adjust-all-views-zoom-percent',
+  async (zoomPercent) => {
+    const mainTabbedWin = await onMainWindowReady();
+
+    mainTabbedWin.tabs.tabList.forEach((tab) => {
+      const webContents = tab.view?.webContents;
+      if (!webContents) return;
+
+      sendToWebContents(
+        webContents,
+        '__internal_push:mainwindow:set-dapp-view-zoom',
+        {
+          zoomPercent: formatZoomValue(zoomPercent).zoomPercent,
+        }
+      );
+    });
   }
 );
 

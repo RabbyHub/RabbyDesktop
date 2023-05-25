@@ -103,3 +103,5 @@ export const enum EnumMatchDappType {
 }
 
 export const TOAST_TOP = 70;
+
+export const DEFAULT_DAPPVIEW_ZOOM_PERCENT = 90;

@@ -13,3 +13,15 @@ export function coerceInteger(input: any, fallback = 0) {
 
   return output;
 }
+
+export function formatZoomValue(zoomPercent: number) {
+  zoomPercent = Math.max(zoomPercent, 60);
+  zoomPercent = Math.min(zoomPercent, 100);
+  const zoomFactor = parseFloat(((zoomPercent / 100) as any).toFixed(1));
+
+  return {
+    zoomPercent,
+    zoomFactor,
+    zoomPercentText: `${zoomPercent}%`,
+  };
+}
