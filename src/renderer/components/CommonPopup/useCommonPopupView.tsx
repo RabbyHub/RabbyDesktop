@@ -54,5 +54,5 @@ export const CommonPopupContext = createContext<{
 export const useCommonPopupView = () => {
   const { commonPopupView } = useContext(CommonPopupContext);
 
-  return commonPopupView;
+  return commonPopupView ?? {};
 };
