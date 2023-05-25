@@ -261,6 +261,13 @@ export async function getFullAppProxyConf(opts?: {
   };
 }
 
+export function getMainWindowDappViewZoomPercent() {
+  return desktopAppStore.get(
+    'experimentalDappViewZoomPercent',
+    DEFAULT_DAPPVIEW_ZOOM_PERCENT
+  );
+}
+
 handleIpcMainInvoke('get-desktopAppState', () => {
   desktopAppStore.set('firstStartApp', false);
 

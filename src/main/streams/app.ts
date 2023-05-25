@@ -13,7 +13,10 @@ import {
 } from '../../isomorphic/url';
 import buildChromeContextMenu from '../browser/context-menu';
 import { setupMenu } from '../browser/menu';
-import { storeMainWinPosition } from '../store/desktopApp';
+import {
+  getMainWindowDappViewZoomPercent,
+  storeMainWinPosition,
+} from '../store/desktopApp';
 import {
   getAssetPath,
   getBrowserWindowOpts,
@@ -121,6 +124,7 @@ app.on('web-contents-created', async (evtApp, webContents) => {
             } else {
               const tab = mainTabbedWin.createTab({
                 initDetails: details,
+                dappZoomPercent: getMainWindowDappViewZoomPercent(),
               });
               tab?.loadURL(details.url);
             }

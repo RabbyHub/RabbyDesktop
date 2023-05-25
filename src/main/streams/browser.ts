@@ -2,6 +2,7 @@ import { matchURLHeadV2 } from '@/isomorphic/app-config';
 
 import { trimWebContentsUserAgent } from '@/isomorphic/string';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import { formatZoomValue } from '@/isomorphic/primitive';
 import { dynamicConfigStore } from '../store/dynamicConfig';
 import {
   onIpcMainEvent,
@@ -93,6 +94,8 @@ onIpcMainInternalEvent(
         // webContents.openDevTools({ mode: 'detach' });
       }
 
+      // only trigger cache zoomFactor, it's no effect for opened webContents
+      webContents.setZoomFactor(formatZoomValue(zoomPercent).zoomFactor);
       sendToWebContents(
         webContents,
         '__internal_push:mainwindow:set-dapp-view-zoom',

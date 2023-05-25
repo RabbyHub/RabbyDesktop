@@ -6,7 +6,11 @@ import {
   NativeLayouts,
   NativeLayoutsCollapsed,
 } from '@/isomorphic/const-size-next';
-import { EnumMatchDappType } from '@/isomorphic/constants';
+import {
+  DEFAULT_DAPPVIEW_ZOOM_PERCENT,
+  EnumMatchDappType,
+} from '@/isomorphic/constants';
+import { formatZoomValue } from '@/isomorphic/primitive';
 import { NATIVE_HEADER_H } from '../../isomorphic/const-size-classical';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
@@ -48,6 +52,7 @@ type ITabOptions = {
   };
   initDetails?: Partial<chrome.tabs.CreateProperties>;
   webuiType?: IShellWebUIType;
+  dappZoomPercent?: number;
   relatedDappId?: string;
 };
 
@@ -75,11 +80,13 @@ export class Tab {
     initDetails: ITabOptions['initDetails'];
     topbarStacks: ITabOptions['topbarStacks'];
     webuiType?: IShellWebUIType;
+    dappZoomPercent?: number;
     relatedDappId: ITabOptions['relatedDappId'];
   } = {
     initDetails: {},
     topbarStacks: { ...DEFAULT_TOPBAR_STACKS },
     webuiType: undefined,
+    dappZoomPercent: DEFAULT_DAPPVIEW_ZOOM_PERCENT,
     relatedDappId: '',
   };
 
@@ -103,7 +110,22 @@ export class Tab {
     }
 
     this.tabs = tabs;
-    this.view = viewMngr.allocateView();
+    let dappZoomPercent = tabOptions.dappZoomPercent;
+    if (this.$meta.webuiType === 'MainWindow') {
+      if (!dappZoomPercent) {
+        console.warn(
+          'dappZoomPercent is not set for main window, use default value'
+        );
+        dappZoomPercent = DEFAULT_DAPPVIEW_ZOOM_PERCENT;
+      }
+    } else {
+      dappZoomPercent = 100;
+    }
+    this.view = viewMngr.allocateView({
+      webPreferences: {
+        zoomFactor: formatZoomValue(dappZoomPercent).zoomFactor,
+      },
+    });
 
     this.id = this.view.webContents.id;
     this.window = ofWindow;
