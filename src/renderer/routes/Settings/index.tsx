@@ -361,43 +361,6 @@ export function MainWindowSettings() {
         <div className={styles.settingBlock}>
           <h4 className={styles.blockTitle}>General</h4>
           <div className={styles.itemList}>
-            <ItemSwitch
-              checked={settings.enableServeDappByHttp}
-              name={
-                <>
-                  <div className="flex flex-col gap-[4px]">
-                    <span className="text-14 font-medium">
-                      Enable Decentralized app
-                    </span>
-                    <span className="text-12 text-white opacity-[0.6]">
-                      Once enabled, you can use IPFS/ENS/Local Dapp. However,
-                      Trezor and Onekey will be affected and can't be used
-                      properly.
-                    </span>
-                  </div>
-                </>
-              }
-              icon="rabby-internal://assets/icons/mainwin-settings/icon-dapp.svg"
-              onChange={(nextEnabled: boolean) => {
-                const keyAction = `${nextEnabled ? 'enable' : 'disable'}`;
-
-                ModalConfirmInSettings({
-                  height: 230,
-                  title: `${ucfirst(keyAction)} Decentralized app`,
-                  content: (
-                    <div className="break-words text-left">
-                      It's required to restart client to {keyAction}{' '}
-                      Decentralized app, do you want to restart now?
-                    </div>
-                  ),
-                  okText: 'Restart',
-                  onOk: () => {
-                    toggleEnableIPFSDapp(nextEnabled);
-                  },
-                });
-              }}
-            />
-
             <ItemAction
               name="Custom RPC"
               onClick={() => {
@@ -436,6 +399,48 @@ export function MainWindowSettings() {
             >
               <img src={IconChevronRight} />
             </ItemAction>
+          </div>
+        </div>
+
+        <div className={styles.settingBlock}>
+          <h4 className={styles.blockTitle}>Dapp</h4>
+          <div className={styles.itemList}>
+            <ItemSwitch
+              checked={settings.enableServeDappByHttp}
+              name={
+                <>
+                  <div className="flex flex-col gap-[4px]">
+                    <span className="text-14 font-medium">
+                      Enable Decentralized app
+                    </span>
+                    <span className="text-12 text-white opacity-[0.6]">
+                      Once enabled, you can use IPFS/ENS/Local Dapp. However,
+                      Trezor and Onekey will be affected and can't be used
+                      properly.
+                    </span>
+                  </div>
+                </>
+              }
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-dapp.svg"
+              onChange={(nextEnabled: boolean) => {
+                const keyAction = `${nextEnabled ? 'enable' : 'disable'}`;
+
+                ModalConfirmInSettings({
+                  height: 230,
+                  title: `${ucfirst(keyAction)} Decentralized app`,
+                  content: (
+                    <div className="break-words text-left">
+                      It's required to restart client to {keyAction}{' '}
+                      Decentralized app, do you want to restart now?
+                    </div>
+                  ),
+                  okText: 'Restart',
+                  onOk: () => {
+                    toggleEnableIPFSDapp(nextEnabled);
+                  },
+                });
+              }}
+            />
 
             <ItemText
               name="Dapp Zoom Ratio"
@@ -446,15 +451,15 @@ export function MainWindowSettings() {
                 value={settings.experimentalDappViewZoomPercent}
                 marks={{
                   [DAPP_ZOOM_VALUES.MIN_ZOOM_PERCENT]: {
-                    style: { color: '#fff' },
+                    style: { color: '#fff', fontSize: 12 },
                     label: `${DAPP_ZOOM_VALUES.MIN_ZOOM_PERCENT}%`,
                   },
                   [DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT]: {
-                    style: { color: '#fff' },
+                    style: { color: '#fff', fontSize: 12 },
                     label: `${DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT}%`,
                   },
                   [DAPP_ZOOM_VALUES.MAX_ZOOM_PERCENT]: {
-                    style: { color: '#fff' },
+                    style: { color: '#fff', fontSize: 12 },
                     label: `${DAPP_ZOOM_VALUES.MAX_ZOOM_PERCENT}%`,
                   },
                 }}
