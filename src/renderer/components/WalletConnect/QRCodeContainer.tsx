@@ -4,15 +4,33 @@ import { WALLET_BRAND_TYPES } from '@/renderer/utils/constant';
 import { QRCodePanel } from './QRCodePanel';
 import { URLPanel } from './URLPanel';
 import { ConnectStatus } from './ConnectStatus';
+import { useSessionStatus } from './useSessionStatus';
+
+type Account = import('@/isomorphic/types/rabbyx').Account;
 
 interface Props {
   uri: string;
   onReload: () => void;
   brand: WALLET_BRAND_TYPES;
+  account?: Account;
 }
 
-export const QRCodeContainer: React.FC<Props> = ({ uri, brand, onReload }) => {
+export const QRCodeContainer: React.FC<Props> = ({
+  uri,
+  brand,
+  onReload,
+  account,
+}) => {
   const [tab, setTab] = React.useState<'QRCode' | 'URL'>('QRCode');
+  const { status } = useSessionStatus(account);
+
+  React.useEffect(() => {
+    // refresh when status is not connected
+    if (status && status !== 'CONNECTED') {
+      onReload();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
 
   return (
     <>
@@ -34,7 +52,11 @@ export const QRCodeContainer: React.FC<Props> = ({ uri, brand, onReload }) => {
         ]}
       />
 
-      <ConnectStatus className="mt-[32px]" brandName={brand} />
+      <ConnectStatus
+        account={account}
+        className="mt-[32px]"
+        brandName={brand}
+      />
     </>
   );
 };

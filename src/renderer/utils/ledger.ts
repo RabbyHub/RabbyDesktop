@@ -30,7 +30,7 @@ export const useLedgerDeviceConnected = () => {
   };
 
   const detectDevice = async () => {
-    setConnected(true);
+    // setConnected(true);
   };
 
   React.useEffect(() => {

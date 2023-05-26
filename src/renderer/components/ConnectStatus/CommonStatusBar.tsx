@@ -32,7 +32,10 @@ export const CommonStatusBar: React.FC<Props> = ({
       </div>
 
       <div
-        onClick={onClickButton}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClickButton(e);
+        }}
         className={clsx(
           'underline cursor-pointer',
           'absolute right-[8px] top-[6px]'

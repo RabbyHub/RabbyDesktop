@@ -7,28 +7,28 @@ export const SwitchAddress: React.FC = () => {
 
   React.useEffect(() => {
     setTitle('How to switch');
-    setHeight(420);
+    setHeight(440);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const url = React.useMemo(() => {
     switch (account?.brandName) {
       case WALLET_BRAND_TYPES.METAMASK:
-        return '/images/wallet/switch-address-metamask.png';
+        return 'rabby-internal:/assets/imgs/wallet/switch-address-metamask.png';
       case WALLET_BRAND_TYPES.TP:
-        return '/images/wallet/switch-address-tp.png';
+        return 'rabby-internal:/assets/imgs/wallet/switch-address-tp.png';
       case WALLET_BRAND_TYPES.IMTOKEN:
-        return '/images/wallet/switch-address-imtoken.png';
+        return 'rabby-internal:/assets/imgs/wallet/switch-address-imtoken.png';
       case WALLET_BRAND_TYPES.TRUSTWALLET:
-        return '/images/wallet/switch-address-trustwallet.png';
+        return 'rabby-internal:/assets/imgs/wallet/switch-address-trustwallet.png';
       default:
-        return '/images/wallet/switch-address-common.png';
+        return 'rabby-internal:/assets/imgs/wallet/switch-address-common.png';
     }
   }, [account?.brandName]);
 
   return (
-    <div className="p-[10px]">
-      <img src={url} className="w-full" />
+    <div className="h-[360px] text-center">
+      <img src={url} className="h-full" />
     </div>
   );
 };

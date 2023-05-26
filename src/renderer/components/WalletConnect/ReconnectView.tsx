@@ -104,6 +104,7 @@ export const ReconnectView: React.FC = () => {
           uri={qrCodeContent}
           onReload={handleRefreshQrCode}
           brand={currentAccount.brandName as WALLET_BRAND_TYPES}
+          account={currentAccount}
         />
       )}
     </div>

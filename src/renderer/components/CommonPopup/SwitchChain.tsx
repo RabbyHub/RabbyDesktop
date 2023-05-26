@@ -14,15 +14,15 @@ export const SwitchChain: React.FC = () => {
   const url = React.useMemo(() => {
     switch (account?.brandName) {
       case WALLET_BRAND_TYPES.METAMASK:
-        return '/images/wallet/switch-chain-metamask.png';
+        return 'rabby-internal:/assets/imgs/wallet/switch-chain-metamask.png';
       case WALLET_BRAND_TYPES.TP:
-        return '/images/wallet/switch-chain-tp.png';
+        return 'rabby-internal:/assets/imgs/wallet/switch-chain-tp.png';
       case WALLET_BRAND_TYPES.IMTOKEN:
-        return '/images/wallet/switch-chain-imtoken.png';
+        return 'rabby-internal:/assets/imgs/wallet/switch-chain-imtoken.png';
       case WALLET_BRAND_TYPES.TRUSTWALLET:
-        return '/images/wallet/switch-chain-trustwallet.png';
+        return 'rabby-internal:/assets/imgs/wallet/switch-chain-trustwallet.png';
       default:
-        return '/images/wallet/switch-chain-common.png';
+        return 'rabby-internal:/assets/imgs/wallet/switch-chain-common.png';
     }
   }, [account?.brandName]);
   return (

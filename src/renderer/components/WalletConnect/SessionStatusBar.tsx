@@ -49,8 +49,7 @@ export const SessionStatusBar: React.FC<Props> = ({
     }
   }, [status]);
 
-  const handleButton = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.stopPropagation();
+  const handleButton = () => {
     setAccount({
       address,
       brandName,
@@ -73,7 +72,9 @@ export const SessionStatusBar: React.FC<Props> = ({
         return (
           <>
             <div>Connected but unable to sign.</div>
-            <div>Please switch to the correct address in mobile wallet</div>
+            <div className="mt-[5px]">
+              Please switch to the correct address in mobile wallet
+            </div>
           </>
         );
 
