@@ -6,6 +6,8 @@ import {
 
 import { useEffect, useMemo } from 'react';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
+import { numberToHex } from '@/isomorphic/primitive';
+import { usePrevious } from 'react-use';
 import SvgIconDeviceManufacturer from './device-manufacturer.svg?rc';
 import { useIsViewingDevices } from '../../settingHooks';
 import styles from './index.module.less';
@@ -23,11 +25,13 @@ export default function DeviceViewHID() {
   } = useFilteredDevices('hid');
 
   const { isViewingDevices } = useIsViewingDevices();
+  const isPreViewingDevices = usePrevious(isViewingDevices);
 
   useEffect(() => {
-    if (!isViewingDevices) return;
-    fetchDevices();
-  }, [isViewingDevices, fetchDevices]);
+    if (!isPreViewingDevices && isViewingDevices) {
+      fetchDevices();
+    }
+  }, [isPreViewingDevices, isViewingDevices, fetchDevices]);
 
   const filteredHidDevices = useMemo(() => {
     if (!debouncedKeyword) return hidDevices;
@@ -113,7 +117,9 @@ export default function DeviceViewHID() {
                         <DeviceAttr
                           className={styles.J_VENDORID}
                           label="VendorId"
-                          value={deviceItem.vendorId}
+                          value={`${deviceItem.vendorId} (${numberToHex(
+                            deviceItem.vendorId
+                          )})`}
                         />
                         <DeviceAttr
                           label="SN"

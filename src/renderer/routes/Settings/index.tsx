@@ -24,7 +24,10 @@ import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { atom, useAtom } from 'jotai';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
-import { useProxyStateOnSettingPage } from './settingHooks';
+import {
+  useIsViewingDevices,
+  useProxyStateOnSettingPage,
+} from './settingHooks';
 import ModalDevices from './components/ModalDevices';
 import { testRequestDevice } from './components/ModalDevices/useFilteredDevices';
 import { ClearPendingModal } from './components/ClearPendingModal';
@@ -159,96 +162,99 @@ function DeveloperKitsParts() {
   const [isGhostWindowDebugHighlighted, setIsGhostWindowDebugHighlighted] =
     useAtom(debugStateAtom);
 
+  const { setIsViewingDevices } = useIsViewingDevices();
+
+  if (IS_RUNTIME_PRODUCTION) return null;
+
   return (
     <>
-      {!IS_RUNTIME_PRODUCTION && (
-        <div className={styles.settingBlock}>
-          <h4 className={styles.blockTitle}>Developer Kits</h4>
-          <div className={styles.itemList}>
-            <ItemText
-              name="Devices"
-              icon="rabby-internal://assets/icons/developer-kits/usb.svg"
-              // onClick={() => {
-              //   setIsViewingDevices(true);
-              // }}
+      <div className={styles.settingBlock}>
+        <h4 className={styles.blockTitle}>Developer Kits</h4>
+        <div className={styles.itemList}>
+          <ItemAction
+            name="Devices"
+            icon="rabby-internal://assets/icons/developer-kits/usb.svg"
+            onClick={() => {
+              setIsViewingDevices(true);
+            }}
+          >
+            <Button
+              type="primary"
+              ghost
+              onClick={(evt) => {
+                evt.stopPropagation();
+                testRequestDevice();
+              }}
             >
-              <Button
-                type="primary"
-                ghost
-                onClick={(evt) => {
-                  evt.stopPropagation();
-                  testRequestDevice();
-                }}
-              >
-                <code>hid.requestDevices()</code>
-              </Button>
-            </ItemText>
-            <ItemSwitch
-              checked={isGhostWindowDebugHighlighted}
-              icon="rabby-internal://assets/icons/developer-kits/ghost.svg"
-              name={
-                <>
-                  <div>
-                    <Tooltip
-                      trigger="hover"
-                      title={
-                        <>
-                          <ul className="pl-[12px] pl-[8px] pt-[8px]">
-                            <li>
-                              On development, ghost window is always visible,
-                              but it's transparent by default, you can enable
-                              this option to make it highlighted with light blue
-                              background.
-                            </li>
-                            <li className="mt-[8px]">
-                              On prodution, ghost window only visible if there's
-                              element need to be rendered, and it ALWAYS has a
-                              transparent background.
-                            </li>
-                          </ul>
-                        </>
-                      }
-                    >
-                      <span className="text-14 font-medium">
-                        Toggle Ghost Window Highlight
-                        <img
-                          className="ml-[4px] w-[18px] h-[18px] inline-block"
-                          src="rabby-internal://assets/icons/mainwin-settings/info.svg"
-                          alt=""
-                        />
-                      </span>
-                    </Tooltip>
-                  </div>
-                </>
-              }
-              onChange={(nextEnabled: boolean) => {
-                setIsGhostWindowDebugHighlighted(nextEnabled);
-                forwardMessageTo('top-ghost-window', 'debug:toggle-highlight', {
-                  payload: {
-                    isHighlight: nextEnabled,
-                  },
-                });
-              }}
-            />
-            <ItemAction
-              name={<span className={styles.dangerText}>Reset App</span>}
-              icon="rabby-internal://assets/icons/mainwin-settings/reset.svg"
-              onClick={() => {
-                requestResetApp();
-              }}
-            />
-            <ItemAction
-              name={<span className={styles.dangerText}>Reset Signs</span>}
-              icon="rabby-internal://assets/icons/mainwin-settings/reset.svg"
-              onClick={() => {
-                window.rabbyDesktop.ipcRenderer.sendMessage(
-                  '__internal_rpc:app:reset-rabbyx-approvals'
-                );
-              }}
-            />
-          </div>
+              <code>hid.requestDevices()</code>
+            </Button>
+          </ItemAction>
+          <ItemSwitch
+            checked={isGhostWindowDebugHighlighted}
+            icon="rabby-internal://assets/icons/developer-kits/ghost.svg"
+            name={
+              <>
+                <div>
+                  <Tooltip
+                    trigger="hover"
+                    title={
+                      <>
+                        <ul className="pl-[12px] pl-[8px] pt-[8px]">
+                          <li>
+                            On development, ghost window is always visible, but
+                            it's transparent by default, you can enable this
+                            option to make it highlighted with light blue
+                            background.
+                          </li>
+                          <li className="mt-[8px]">
+                            On prodution, ghost window only visible if there's
+                            element need to be rendered, and it ALWAYS has a
+                            transparent background.
+                          </li>
+                        </ul>
+                      </>
+                    }
+                  >
+                    <span className="text-14 font-medium">
+                      Toggle Ghost Window Highlight
+                      <img
+                        className="ml-[4px] w-[18px] h-[18px] inline-block"
+                        src="rabby-internal://assets/icons/mainwin-settings/info.svg"
+                        alt=""
+                      />
+                    </span>
+                  </Tooltip>
+                </div>
+              </>
+            }
+            onChange={(nextEnabled: boolean) => {
+              setIsGhostWindowDebugHighlighted(nextEnabled);
+              forwardMessageTo('top-ghost-window', 'debug:toggle-highlight', {
+                payload: {
+                  isHighlight: nextEnabled,
+                },
+              });
+            }}
+          />
+          <ItemAction
+            name={<span className={styles.dangerText}>Reset App</span>}
+            icon="rabby-internal://assets/icons/mainwin-settings/reset.svg"
+            onClick={() => {
+              requestResetApp();
+            }}
+          />
+          <ItemAction
+            name={<span className={styles.dangerText}>Reset Signs</span>}
+            icon="rabby-internal://assets/icons/mainwin-settings/reset.svg"
+            onClick={() => {
+              window.rabbyDesktop.ipcRenderer.sendMessage(
+                '__internal_rpc:app:reset-rabbyx-approvals'
+              );
+            }}
+          />
         </div>
-      )}
+      </div>
+      <ModalDevices />
     </>
   );
 }
@@ -478,7 +484,7 @@ export function MainWindowSettings() {
       </div>
 
       <div className={styles.settingItems}>
-        <DeveloperKitsParts />
+        {!IS_RUNTIME_PRODUCTION && <DeveloperKitsParts />}
       </div>
 
       <div className={styles.settingFooter}>
@@ -510,7 +516,6 @@ export function MainWindowSettings() {
       </div>
 
       <ModalProxySetting />
-      <ModalDevices />
 
       <ClearPendingModal
         open={isShowingClearPendingModal}
