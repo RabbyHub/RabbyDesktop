@@ -1,4 +1,4 @@
-import { isRabbyXCenteredWindowType } from '../isomorphic/rabbyx';
+import { getRabbyXWindowPosition } from '../isomorphic/rabbyx';
 import { parseQueryString } from '../isomorphic/url';
 
 export function setupClass() {
@@ -12,7 +12,8 @@ export function setupClass() {
     if (
       window.location.protocol === 'chrome-extension:' &&
       window.location.pathname === '/notification.html' &&
-      isRabbyXCenteredWindowType(parseQueryString(window.location.search).type)
+      getRabbyXWindowPosition(parseQueryString(window.location.search).type) ===
+        'center'
     ) {
       document.documentElement.classList.add(
         osCls,

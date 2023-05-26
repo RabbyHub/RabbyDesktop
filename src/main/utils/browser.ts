@@ -3,10 +3,7 @@ import {
   SAFE_WEBPREFERENCES,
   RABBY_BLANKPAGE_RELATIVE_URL,
 } from '@/isomorphic/constants';
-import {
-  RABBX_RIGHT_WINDOW_TYPES,
-  isRabbyXCenteredWindowType,
-} from '@/isomorphic/rabbyx';
+import { getRabbyXWindowPosition } from '@/isomorphic/rabbyx';
 import { roundRectValue } from '@/isomorphic/shape';
 import { BrowserView, BrowserWindow } from 'electron';
 import { isEnableContentProtected } from '../store/desktopApp';
@@ -313,7 +310,18 @@ export function parseRabbyxNotificationParams(
     height: details?.height || 400,
   };
 
-  if (!isRabbyXCenteredWindowType(signApprovalType)) {
+  const rWinPos = getRabbyXWindowPosition(signApprovalType);
+  if (rWinPos === 'right-pinned') {
+    result.finalBounds = {
+      ...selfBounds,
+      x: mainBounds.x + (mainBounds.width - selfBounds.width - 10),
+      y:
+        mainBounds.y +
+        NativeAppSizes.mainWindowDappTopOffset +
+        getMainWindowTopOffset(),
+    };
+    // result.shouldPosCenter = true;
+  } else if (rWinPos !== 'center') {
     // dock right
     const maxHeight = mainBounds.height - topOffset;
     const maxWith = isWin32 ? rWinWidth - 1 : rWinWidth;
@@ -330,20 +338,6 @@ export function parseRabbyxNotificationParams(
       x: mainBounds.x + (mainBounds.width - selfBounds.width) / 2,
       y: mainBounds.y + (mainBounds.height - selfBounds.height) / 2,
     };
-
-    if (
-      signApprovalType &&
-      RABBX_RIGHT_WINDOW_TYPES.includes(signApprovalType)
-    ) {
-      result.finalBounds = {
-        ...selfBounds,
-        x: mainBounds.x + (mainBounds.width - selfBounds.width - 10),
-        y:
-          mainBounds.y +
-          NativeAppSizes.mainWindowDappTopOffset +
-          getMainWindowTopOffset(),
-      };
-    }
 
     result.shouldPosCenter = true;
   }
@@ -362,7 +356,7 @@ export async function captureWebContents(webContents: Electron.WebContents) {
 }
 
 const dappLoadingViewState = {
-  loadingTabId: -1 as number | false,
+  loadingTabId: -1 as number,
 };
 export function isDappViewLoadingForTab(tabId: number) {
   return (
