@@ -15,6 +15,9 @@ type ChannelPushToWebContents = {
       result: Electron.Result | null;
     };
   };
+  '__internal_push:mainwindow:set-dapp-view-zoom': {
+    zoomPercent: number;
+  };
   '__internal_push:mainwindow:opened-dapp-tab': {
     dappId: string;
     dappOrigin: string;

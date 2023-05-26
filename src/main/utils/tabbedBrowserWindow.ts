@@ -14,7 +14,10 @@ import {
 } from './stream-helpers';
 import { getWindowFromWebContents } from './browser';
 
-import { isEnableContentProtected } from '../store/desktopApp';
+import {
+  getMainWindowDappViewZoomPercent,
+  isEnableContentProtected,
+} from '../store/desktopApp';
 import { findDappsByOrigin, getAllDapps } from '../store/dapps';
 import { Tab } from '../browser/tabs';
 import { sendToWebContents } from './ipcMainEvents';
@@ -171,6 +174,7 @@ export function getOrCreateDappBoundTab(
     const createdTab = mainTabbedWin.createTab({
       initDetails: { url: targetURL },
       relatedDappId: checkoutDappURL(matchedDappResult.dapp.origin).dappHttpID,
+      dappZoomPercent: getMainWindowDappViewZoomPercent(),
     });
 
     result.createdTab = createdTab;

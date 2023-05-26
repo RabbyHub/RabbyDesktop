@@ -15,6 +15,7 @@ type MainInternalsMessagePayload = {
       {
         webContents: Electron.WebContents;
         window: Electron.BrowserWindow;
+        isMainTabbedWindow: boolean;
         relatedDappId?: IDapp['id'];
       }
     ];
@@ -64,6 +65,10 @@ type MainInternalsMessagePayload = {
   };
   '__internal_main:mainwindow:sidebar-collapsed-changed': {
     send: [collapsed: boolean];
+    response: [];
+  };
+  '__internal_main:mainwindow:adjust-all-views-zoom-percent': {
+    send: [zoomPercent: number];
     response: [];
   };
   '__internal_main:mainwindow:toggle-animating': {

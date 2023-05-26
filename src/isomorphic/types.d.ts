@@ -144,6 +144,8 @@ type IDesktopAppState = {
   sidebarCollapsed: boolean;
 
   tipedHideMainWindowOnWindows: boolean;
+
+  experimentalDappViewZoomPercent: number;
 };
 
 type IAppDynamicConfig = {

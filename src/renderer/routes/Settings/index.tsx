@@ -7,18 +7,18 @@ import {
   IconTooltipInfo,
 } from '@/../assets/icons/mainwin-settings';
 
-import { Button, Modal, SwitchProps, Tooltip } from 'antd';
+import { Button, Modal, Slider, SwitchProps, Tooltip } from 'antd';
 import { useSettings } from '@/renderer/hooks/useSettings';
 import styled from 'styled-components';
 import {
   APP_BRANDNAME,
+  DAPP_ZOOM_VALUES,
   FORCE_DISABLE_CONTENT_PROTECTION,
   IS_RUNTIME_PRODUCTION,
 } from '@/isomorphic/constants';
 import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
 import { ModalConfirmInSettings } from '@/renderer/components/Modal/Confirm';
 import { Switch } from '@/renderer/components/Switch/Switch';
-import { detectClientOS } from '@/isomorphic/os';
 import { ucfirst } from '@/isomorphic/string';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { atom, useAtom } from 'jotai';
@@ -254,8 +254,12 @@ function DeveloperKitsParts() {
 }
 
 export function MainWindowSettings() {
-  const { settings, toggleEnableIPFSDapp, toggleEnableContentProtection } =
-    useSettings();
+  const {
+    settings,
+    toggleEnableIPFSDapp,
+    toggleEnableContentProtection,
+    adjustDappViewZoomPercent,
+  } = useSettings();
 
   const { setIsSettingProxy, customProxyServer, proxyType } =
     useProxyStateOnSettingPage();
@@ -265,6 +269,7 @@ export function MainWindowSettings() {
   const [isShowingClearPendingModal, setIsShowingClearPendingModal] =
     useState(false);
   const [isShowCustomRPCModal, setIsShowCustomRPCModal] = useState(false);
+
   return (
     <div className={styles.settingsPage}>
       <UpdateArea />
@@ -356,43 +361,6 @@ export function MainWindowSettings() {
         <div className={styles.settingBlock}>
           <h4 className={styles.blockTitle}>General</h4>
           <div className={styles.itemList}>
-            <ItemSwitch
-              checked={settings.enableServeDappByHttp}
-              name={
-                <>
-                  <div className="flex flex-col gap-[4px]">
-                    <span className="text-14 font-medium">
-                      Enable Decentralized app
-                    </span>
-                    <span className="text-12 text-white opacity-[0.6]">
-                      Once enabled, you can use IPFS/ENS/Local Dapp. However,
-                      Trezor and Onekey will be affected and can't be used
-                      properly.
-                    </span>
-                  </div>
-                </>
-              }
-              icon="rabby-internal://assets/icons/mainwin-settings/icon-dapp.svg"
-              onChange={(nextEnabled: boolean) => {
-                const keyAction = `${nextEnabled ? 'enable' : 'disable'}`;
-
-                ModalConfirmInSettings({
-                  height: 230,
-                  title: `${ucfirst(keyAction)} Decentralized app`,
-                  content: (
-                    <div className="break-words text-left">
-                      It's required to restart client to {keyAction}{' '}
-                      Decentralized app, do you want to restart now?
-                    </div>
-                  ),
-                  okText: 'Restart',
-                  onOk: () => {
-                    toggleEnableIPFSDapp(nextEnabled);
-                  },
-                });
-              }}
-            />
-
             <ItemAction
               name="Custom RPC"
               onClick={() => {
@@ -431,6 +399,80 @@ export function MainWindowSettings() {
             >
               <img src={IconChevronRight} />
             </ItemAction>
+          </div>
+        </div>
+
+        <div className={styles.settingBlock}>
+          <h4 className={styles.blockTitle}>Dapp</h4>
+          <div className={styles.itemList}>
+            <ItemSwitch
+              checked={settings.enableServeDappByHttp}
+              name={
+                <>
+                  <div className="flex flex-col gap-[4px]">
+                    <span className="text-14 font-medium">
+                      Enable Decentralized app
+                    </span>
+                    <span className="text-12 text-white opacity-[0.6]">
+                      Once enabled, you can use IPFS/ENS/Local Dapp. However,
+                      Trezor and Onekey will be affected and can't be used
+                      properly.
+                    </span>
+                  </div>
+                </>
+              }
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-dapp.svg"
+              onChange={(nextEnabled: boolean) => {
+                const keyAction = `${nextEnabled ? 'enable' : 'disable'}`;
+
+                ModalConfirmInSettings({
+                  height: 230,
+                  title: `${ucfirst(keyAction)} Decentralized app`,
+                  content: (
+                    <div className="break-words text-left">
+                      It's required to restart client to {keyAction}{' '}
+                      Decentralized app, do you want to restart now?
+                    </div>
+                  ),
+                  okText: 'Restart',
+                  onOk: () => {
+                    toggleEnableIPFSDapp(nextEnabled);
+                  },
+                });
+              }}
+            />
+
+            <ItemText
+              name="Dapp Zoom Ratio"
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-dapp-zoom.svg"
+            >
+              <Slider
+                className="w-[300px]"
+                value={settings.experimentalDappViewZoomPercent}
+                marks={{
+                  [DAPP_ZOOM_VALUES.MIN_ZOOM_PERCENT]: {
+                    style: { color: '#fff', fontSize: 12 },
+                    label: `${DAPP_ZOOM_VALUES.MIN_ZOOM_PERCENT}%`,
+                  },
+                  [DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT]: {
+                    style: { color: '#fff', fontSize: 12 },
+                    label: `${DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT}%`,
+                  },
+                  [DAPP_ZOOM_VALUES.MAX_ZOOM_PERCENT]: {
+                    style: { color: '#fff', fontSize: 12 },
+                    label: `${DAPP_ZOOM_VALUES.MAX_ZOOM_PERCENT}%`,
+                  },
+                }}
+                tooltip={{
+                  formatter: (value) => `${value}%`,
+                }}
+                min={DAPP_ZOOM_VALUES.MIN_ZOOM_PERCENT}
+                max={DAPP_ZOOM_VALUES.MAX_ZOOM_PERCENT}
+                onChange={(value) => {
+                  adjustDappViewZoomPercent(value);
+                }}
+              />
+            </ItemText>
           </div>
         </div>
       </div>

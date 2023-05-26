@@ -36,6 +36,7 @@ import { rewriteSessionWebRequestHeaders } from '../utils/webRequest';
 import { checkProxyViaBrowserView, setSessionProxy } from '../utils/appNetwork';
 import {
   getFullAppProxyConf,
+  getMainWindowDappViewZoomPercent,
   isEnableServeDappByHttp,
 } from '../store/desktopApp';
 import {
@@ -344,6 +345,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
               navigation: win.getMeta().hasNavigationBar,
             },
             initDetails: details,
+            dappZoomPercent: getMainWindowDappViewZoomPercent(),
           });
 
           if (details.url) tab.loadURL(details.url);

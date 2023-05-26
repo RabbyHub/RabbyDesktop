@@ -243,6 +243,12 @@ type ChannelInvokePayload = {
       error?: Error;
     };
   };
+  [`__internal_rpc:mainwindow:is-dapp-view`]: {
+    send: [];
+    response: {
+      isDappView?: boolean;
+    };
+  };
   [`__outer_rpc:check-if-requestable`]: {
     send: [reqData?: any];
     response: {
