@@ -6,10 +6,7 @@ import {
   NativeLayouts,
   NativeLayoutsCollapsed,
 } from '@/isomorphic/const-size-next';
-import {
-  DEFAULT_DAPPVIEW_ZOOM_PERCENT,
-  EnumMatchDappType,
-} from '@/isomorphic/constants';
+import { DAPP_ZOOM_VALUES, EnumMatchDappType } from '@/isomorphic/constants';
 import { formatZoomValue } from '@/isomorphic/primitive';
 import { NATIVE_HEADER_H } from '../../isomorphic/const-size-classical';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
@@ -86,7 +83,7 @@ export class Tab {
     initDetails: {},
     topbarStacks: { ...DEFAULT_TOPBAR_STACKS },
     webuiType: undefined,
-    dappZoomPercent: DEFAULT_DAPPVIEW_ZOOM_PERCENT,
+    dappZoomPercent: DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT,
     relatedDappId: '',
   };
 
@@ -116,7 +113,7 @@ export class Tab {
         console.warn(
           'dappZoomPercent is not set for main window, use default value'
         );
-        dappZoomPercent = DEFAULT_DAPPVIEW_ZOOM_PERCENT;
+        dappZoomPercent = DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT;
       }
     } else {
       dappZoomPercent = 100;

@@ -7,7 +7,7 @@ import type { AxiosRequestConfig } from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { formatProxyServerURL } from '@/isomorphic/url';
 import {
-  DEFAULT_DAPPVIEW_ZOOM_PERCENT,
+  DAPP_ZOOM_VALUES,
   FORCE_DISABLE_CONTENT_PROTECTION,
   PERSIS_STORE_PREFIX,
 } from '../../isomorphic/constants';
@@ -89,7 +89,7 @@ export const desktopAppStore = makeStore<{
     },
     experimentalDappViewZoomPercent: {
       type: 'number',
-      default: DEFAULT_DAPPVIEW_ZOOM_PERCENT,
+      default: DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT,
     },
     proxyType: {
       type: 'string',
@@ -165,7 +165,7 @@ function getState() {
 
     experimentalDappViewZoomPercent: desktopAppStore.get(
       'experimentalDappViewZoomPercent',
-      DEFAULT_DAPPVIEW_ZOOM_PERCENT
+      DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT
     ),
   };
 }
@@ -264,7 +264,7 @@ export async function getFullAppProxyConf(opts?: {
 export function getMainWindowDappViewZoomPercent() {
   return desktopAppStore.get(
     'experimentalDappViewZoomPercent',
-    DEFAULT_DAPPVIEW_ZOOM_PERCENT
+    DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT
   );
 }
 

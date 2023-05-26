@@ -12,17 +12,16 @@ import { useSettings } from '@/renderer/hooks/useSettings';
 import styled from 'styled-components';
 import {
   APP_BRANDNAME,
+  DAPP_ZOOM_VALUES,
   FORCE_DISABLE_CONTENT_PROTECTION,
   IS_RUNTIME_PRODUCTION,
 } from '@/isomorphic/constants';
 import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
 import { ModalConfirmInSettings } from '@/renderer/components/Modal/Confirm';
 import { Switch } from '@/renderer/components/Switch/Switch';
-import { detectClientOS } from '@/isomorphic/os';
 import { ucfirst } from '@/isomorphic/string';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { atom, useAtom } from 'jotai';
-import { formatZoomValue } from '@/isomorphic/primitive';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
 import { useProxyStateOnSettingPage } from './settingHooks';
@@ -438,23 +437,37 @@ export function MainWindowSettings() {
               <img src={IconChevronRight} />
             </ItemAction>
 
-            <ItemAction
-              name="Adjust Dapp Zoom"
-              onClick={() => {
-                // setIsShowingClearPendingModal(true);
-              }}
-              // icon="rabby-internal://assets/icons/mainwin-settings/icon-clear.svg"
+            <ItemText
+              name="Dapp Zoom Ratio"
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-dapp-zoom.svg"
             >
               <Slider
-                className="w-[200px]"
+                className="w-[300px]"
                 value={settings.experimentalDappViewZoomPercent}
-                min={60}
-                max={100}
+                marks={{
+                  [DAPP_ZOOM_VALUES.MIN_ZOOM_PERCENT]: {
+                    style: { color: '#fff' },
+                    label: `${DAPP_ZOOM_VALUES.MIN_ZOOM_PERCENT}%`,
+                  },
+                  [DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT]: {
+                    style: { color: '#fff' },
+                    label: `${DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT}%`,
+                  },
+                  [DAPP_ZOOM_VALUES.MAX_ZOOM_PERCENT]: {
+                    style: { color: '#fff' },
+                    label: `${DAPP_ZOOM_VALUES.MAX_ZOOM_PERCENT}%`,
+                  },
+                }}
+                tooltip={{
+                  formatter: (value) => `${value}%`,
+                }}
+                min={DAPP_ZOOM_VALUES.MIN_ZOOM_PERCENT}
+                max={DAPP_ZOOM_VALUES.MAX_ZOOM_PERCENT}
                 onChange={(value) => {
                   adjustDappViewZoomPercent(value);
                 }}
               />
-            </ItemAction>
+            </ItemText>
           </div>
         </div>
       </div>

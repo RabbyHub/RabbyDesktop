@@ -1,6 +1,7 @@
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
-import { DEFAULT_DAPPVIEW_ZOOM_PERCENT } from '@/isomorphic/constants';
+import { DAPP_ZOOM_VALUES } from '@/isomorphic/constants';
+import { formatZoomValue } from '@/isomorphic/primitive';
 import { toggleMainWinTabAnimating } from '../ipcRequest/mainwin';
 import { useIsAnimating } from './useSidebar';
 
@@ -60,6 +61,8 @@ export function useSettings() {
 
   const adjustDappViewZoomPercent = useCallback(
     async (nextVal: number) => {
+      nextVal = formatZoomValue(nextVal).zoomPercent;
+
       const result = await window.rabbyDesktop.ipcRenderer.invoke(
         'put-desktopAppState',
         {
@@ -120,7 +123,7 @@ export function useSettings() {
       ),
       experimentalDappViewZoomPercent:
         desktopAppState?.experimentalDappViewZoomPercent ??
-        DEFAULT_DAPPVIEW_ZOOM_PERCENT,
+        DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT,
     },
     fetchState,
     toggleEnableContentProtection,

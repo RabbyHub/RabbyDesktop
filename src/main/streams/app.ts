@@ -24,6 +24,7 @@ import {
   relaunchApp,
   initMainProcessSentry,
   getAppProjRefName,
+  logsOnAppBootstrap,
 } from '../utils/app';
 import {
   emitIpcMainEvent,
@@ -324,6 +325,8 @@ export default function bootstrap() {
   }
   initMainProcessSentry();
   initAppStoreCache();
+
+  logsOnAppBootstrap();
 
   // eslint-disable-next-line promise/catch-or-return
   app.whenReady().then(async () => {
