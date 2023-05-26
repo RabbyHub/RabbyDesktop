@@ -1,6 +1,18 @@
-import { app, dialog, shell } from 'electron';
+import { app, dialog, shell, net } from 'electron';
+import logger from 'electron-log';
+import * as Sentry from '@sentry/electron/main';
+import type { UpdateDownloadedEvent } from 'electron-updater/out/main';
+
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+
+import { ensureSuffix, unPrefix } from '@/isomorphic/string';
 import { getOptionProxyForAxios } from '../store/desktopApp';
-import { AppUpdaterWin32, AppUpdaterDarwin } from '../updater/updater';
+import { getFileSha512 } from '../utils/security';
+import {
+  AppUpdaterWin32,
+  AppUpdaterDarwin,
+  getAppUpdaterURL,
+} from '../updater/updater';
 import { IS_APP_PROD_BUILD } from '../utils/app';
 import { setSessionProxy } from '../utils/appNetwork';
 import { fetchText } from '../utils/fetch';
@@ -34,14 +46,14 @@ async function getReleaseNote(version: string) {
 
 let gAutoUpdater: AppUpdaterWin32 | AppUpdaterDarwin;
 
-const state = {
+const downloadState = {
   downloadP: null as null | Promise<any>,
   checker: null as null | import('electron-updater/out/main').UpdateCheckResult,
 };
 
 function resetDownload() {
-  state.downloadP = null;
-  state.checker = null;
+  downloadState.downloadP = null;
+  downloadState.checker = null;
 }
 
 async function getAutoUpdater() {
@@ -137,14 +149,46 @@ function isUnsignedPkg(err?: any) {
   );
 }
 
+const verifyState: {
+  downloadedFileAbsPath: string | UpdateDownloadedEvent['downloadedFile'];
+  expectedSha512: string;
+} = {
+  downloadedFileAbsPath: '',
+  expectedSha512: '',
+};
+
+handleIpcMainInvoke('check-download-availble', async () => {
+  if (!net.isOnline()) {
+    return { error: null, isValid: false, downloadURL: '' };
+  }
+
+  const autoUpdater = await getAutoUpdater();
+  const checker = await autoUpdater.checkForUpdates();
+  downloadState.checker = checker;
+
+  if (!checker) {
+    return { error: null, isValid: false, downloadURL: '' };
+  }
+
+  const filePath = checker.updateInfo.files[0]?.url || checker.updateInfo.path;
+  const downloadURL = `${ensureSuffix(getAppUpdaterURL(), '/')}${unPrefix(
+    filePath,
+    '/'
+  )}`;
+
+  return { error: null, isValid: !!checker, downloadURL };
+});
+
 onIpcMainEvent('start-download', async (event, reqid) => {
   const autoUpdater = await getAutoUpdater();
   const checker = await autoUpdater.checkForUpdates();
   if (!checker) return;
 
-  state.checker = checker;
+  downloadState.checker = checker;
 
-  autoUpdater.cleanDownloadedCache();
+  if (IS_RUNTIME_PRODUCTION) {
+    autoUpdater.cleanDownloadedCache();
+  }
 
   // autoUpdater
   event.reply('start-download', { reqid });
@@ -163,6 +207,8 @@ onIpcMainEvent('start-download', async (event, reqid) => {
 
   autoUpdater.on('update-downloaded', (info) => {
     log('autoUpdater:: update-downloaded', info);
+    verifyState.downloadedFileAbsPath = info.downloadedFile;
+    verifyState.expectedSha512 = info.files[0]?.sha512;
 
     event.reply('download-release-progress-updated', {
       originReqId: reqid,
@@ -173,8 +219,10 @@ onIpcMainEvent('start-download', async (event, reqid) => {
     });
   });
 
-  if (!state.downloadP) {
-    state.downloadP = autoUpdater.downloadUpdate(checker.cancellationToken);
+  if (!downloadState.downloadP) {
+    downloadState.downloadP = autoUpdater.downloadUpdate(
+      checker.cancellationToken
+    );
   }
 
   let downloadFailed = true;
@@ -183,7 +231,7 @@ onIpcMainEvent('start-download', async (event, reqid) => {
     // if (!IS_RUNTIME_PRODUCTION) {
     //   throw new Error('not signed');
     // }
-    await state.downloadP;
+    await downloadState.downloadP;
     downloadFailed = false;
   } catch (err: any) {
     console.warn('updater download err:');
@@ -223,6 +271,50 @@ handleIpcMainInvoke('get-release-note', async (event, version) => {
   return {
     error: null,
     result: await getReleaseNote(version),
+  };
+});
+
+handleIpcMainInvoke('verify-update-package', async (event) => {
+  if (!verifyState.downloadedFileAbsPath) {
+    return {
+      error: 'no downloaded file',
+      isValid: false,
+    };
+  }
+  if (!verifyState.expectedSha512) {
+    return {
+      error: `don't know sha512 of downloaded file`,
+      isValid: false,
+    };
+  }
+
+  const actualSha512 = await getFileSha512(verifyState.downloadedFileAbsPath);
+
+  if (actualSha512 !== verifyState.expectedSha512) {
+    logger.error(
+      `[verify-update-package] failed, expect sha512 ${verifyState.expectedSha512} but got ${actualSha512}}`
+    );
+
+    Sentry.captureException({
+      message: `Verify update package failed`,
+      tags: {
+        appVersion: app.getVersion(),
+      },
+      extra: {
+        expectSha512: verifyState.expectedSha512,
+        actualSha512,
+      },
+    });
+
+    return {
+      error: `sha512 of downloaded file is not matched`,
+      isValid: false,
+    };
+  }
+
+  return {
+    error: null,
+    isValid: true,
   };
 });
 

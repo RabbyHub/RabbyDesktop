@@ -1,0 +1,156 @@
+.updateAndVerify {
+  @color-wait: rgba(255, 255, 255, 0.6);
+  @color-confirmed: rgba(255, 255, 255, 0.6);
+  @color-active-subitem: rgba(255, 255, 255, 1);
+
+  .updateAndVerifyBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--color-primary);
+    border-radius: 4px;
+    padding: 10px 12px;
+    min-width: 148px;
+    gap: 6px;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 17px;
+    color: var(--color-purewhite);
+    transition: width var(--mainwin-sidebar-animation-second);
+    cursor: pointer;
+    &:not(.disabledDueToLoading):hover {
+      opacity: 0.9;
+    }
+
+    .btnIcon {
+      width: 20px;
+      height: 20px;
+
+      &.is-animate :global {
+        animation: rotate 1.5s linear infinite;
+      }
+    }
+
+    .btnText {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .autoUpdateAction {
+      margin-left: auto;
+    }
+
+    &.is-downloaded {
+      background: var(--color-green);
+    }
+
+    &.disabledDueToLoading {
+      cursor: default;
+      background-color: rgba(var(--color-primary-rgb), 0.5);
+      color:rgba(255, 255, 255, 0.7);
+    }
+  }
+
+  :global {
+    .ant-steps-item:local(.stepItem) .ant-steps-item-container > .ant-steps-item-tail::after {
+      background-color: rgba(255, 255, 255, 0.2) !important;
+      top: 0;
+      height: 100%;
+      position: relative;
+    }
+    .ant-steps-item-process:local(.stepItem) .ant-steps-icon,
+    .ant-steps-item-wait:local(.stepItem) .ant-steps-icon {
+      // hide step number
+      color: transparent;
+    }
+
+    .ant-steps-item-wait:local(.stepItem) {
+      :local(.stepTitle), :local(.stepExplaination) {
+        color: @color-wait;
+      }
+
+      .ant-steps-item-icon .ant-steps-icon {
+        background-color: rgba(255, 255, 255, 0.3);
+      }
+    }
+
+    .ant-steps-item-process:local(.stepItem) {
+      .ant-steps-item-icon .ant-steps-icon {
+        background-color: var(--color-primary);
+      }
+    }
+
+    .ant-steps-item-error:local(.stepItem) {
+      :local(.stepTitle), :local(.stepExplaination) {
+        color: var(--color-red);
+      }
+    }
+
+    .ant-steps-item:local(.stepItem) .ant-steps-item-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      color: transparent;
+      border-color: transparent;
+
+      .ant-steps-icon {
+        color: transparent;
+        border-radius: 50%;
+        width: 14px;
+        height: 14px;
+      }
+    }
+
+    .ant-steps-item-finish .ant-steps-item-title,
+    .ant-steps-item-finish :local(.stepTitle.J_finished) {
+      color: var(--color-green);
+    }
+
+    .ant-steps-item:first-child .ant-steps-item-description:last-child {
+      margin-bottom: 5px;
+    }
+  }
+
+  .stepItem::global(.ant-steps-item-wait) .stepExplaination {
+    visibility: hidden;
+  }
+
+  .stepItem .stepIconSvg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .stepTitle {
+    font-family: 'SF Pro';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 16px;
+    color: var(--color-primary);
+  }
+
+  .stepExplaination {
+    font-family: 'SF Pro';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+    color: @color-wait;
+  }
+
+  .stepSubStep:first-child {
+    margin-top: 4px;
+  }
+  .stepSubStep + .stepSubStep {
+    margin-top: 8px;
+  }
+  .stepSubStep.confirmed {
+    color: @color-confirmed;
+  }
+
+  .activeSubStep {
+    color: @color-active-subitem;
+  }
+}

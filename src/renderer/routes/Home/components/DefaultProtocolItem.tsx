@@ -46,6 +46,8 @@ const TemplateDict = {
   nft_common: Template.NFTCommon,
   nft_lending: Template.NFTLending,
   nft_fraction: Template.NFTFraction,
+  nft_p2p_borrower: Template.NFTP2PBorrower,
+  nft_p2p_lender: Template.NFTP2PLender,
 };
 
 const ProtocolItemWrapper = styled.div`

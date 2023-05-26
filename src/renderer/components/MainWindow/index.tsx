@@ -37,6 +37,8 @@ import { fetchDapps } from '@/renderer/ipcRequest/dapps';
 import dayjs from 'dayjs';
 import { useToastMessage } from '@/renderer/hooks/useToastMessage';
 import { HomeBundle } from '@/renderer/routes/Bundle';
+import { useCustomRPC } from '@/renderer/hooks/useCustomRPC';
+import ModalUpdateInHome from '@/renderer/routes/Home/components/ModalUpdate';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -80,6 +82,8 @@ function MainWrapper() {
         <MainRoute>
           <Outlet />
         </MainRoute>
+
+        <ModalUpdateInHome />
       </div>
     </RequireUnlock>
   );
@@ -304,9 +308,12 @@ export function MainWindow() {
       });
   });
 
+  const { getAllRPC } = useCustomRPC();
+
   useAccountsGuard();
   useMount(() => {
     logGetUserDapp();
+    getAllRPC();
   });
 
   return (

@@ -13,7 +13,10 @@ import {
 } from '../../isomorphic/url';
 import buildChromeContextMenu from '../browser/context-menu';
 import { setupMenu } from '../browser/menu';
-import { storeMainWinPosition } from '../store/desktopApp';
+import {
+  getMainWindowDappViewZoomPercent,
+  storeMainWinPosition,
+} from '../store/desktopApp';
 import {
   getAssetPath,
   getBrowserWindowOpts,
@@ -21,6 +24,7 @@ import {
   relaunchApp,
   initMainProcessSentry,
   getAppProjRefName,
+  logsOnAppBootstrap,
 } from '../utils/app';
 import {
   emitIpcMainEvent,
@@ -121,6 +125,7 @@ app.on('web-contents-created', async (evtApp, webContents) => {
             } else {
               const tab = mainTabbedWin.createTab({
                 initDetails: details,
+                dappZoomPercent: getMainWindowDappViewZoomPercent(),
               });
               tab?.loadURL(details.url);
             }
@@ -320,6 +325,8 @@ export default function bootstrap() {
   }
   initMainProcessSentry();
   initAppStoreCache();
+
+  logsOnAppBootstrap();
 
   // eslint-disable-next-line promise/catch-or-return
   app.whenReady().then(async () => {

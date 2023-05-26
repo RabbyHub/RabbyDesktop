@@ -1,0 +1,163 @@
+.updateAreaInSettings {
+  @border-color: #555863;
+  @radius-value: 6px;
+  @tab-header-h: 50px;
+  @tab-header-inactive-bg: rgba(0, 0, 0, 0.05);
+
+  @tab-body-changelog-h: 200px;
+  @tab-after-update-op-h: 77px;
+
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 20px;
+  border-radius: @radius-value;
+  position: relative;
+
+  color: var(--color-purewhite);
+
+  .tabHeads {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tabItem {
+    cursor: pointer;
+    height: @tab-header-h;
+    width: (1 / 2) * 100%;
+    font-size: 15px;
+    flex-shrink: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    color: rgba(255, 255, 255, 0.5);
+    background-color: @tab-header-inactive-bg;
+    border-top: 1px solid @border-color;
+    border-bottom: 1px solid @border-color;
+
+    &.active {
+      font-size: 15px;
+      font-weight: bold;
+      color: rgba(255, 255, 255, 1);
+      background-color: transparent;
+      border-bottom-color: transparent;
+    }
+
+    text-align: center;
+    vertical-align: middle;
+
+    .tabHeadUpdateBadge {
+      height: 15px;
+      font-weight: normal;
+      font-size: 12px;
+      background: #8697ff;
+      color: rgba(255, 255, 255, 1);
+      padding: 2px 8px;
+      margin-left: 6px;
+      border-radius: 10px;
+      border-bottom-left-radius: 0;
+    }
+
+    &.active {
+      color: var(--color-purewhite);
+      border-top: 1px solid @border-color;
+
+      &::after {
+        display: none;
+      }
+    }
+
+    &:first-child {
+      border-top-left-radius: @radius-value;
+      border-left: 1px solid @border-color;
+    }
+
+    &:last-child {
+      border-top-right-radius: @radius-value;
+      border-right: 1px solid @border-color;
+    }
+  }
+
+  .tabItem + .splitLine {
+    transform: rotateY(180deg);
+  }
+
+  .tabItem.active + .splitLine {
+    transform: rotateY(0);
+  }
+
+  .splitLine {
+    height: @tab-header-h;
+    width: 25px;
+    position: relative;
+    display: block;
+    flex-shrink: 0;
+    background-position: 0;
+    background-repeat: no-repeat;
+  }
+
+  .tabBody {
+    border-left: 1px solid @border-color;
+    border-right: 1px solid @border-color;
+    border-bottom: 1px solid @border-color;
+    border-bottom-left-radius: @radius-value;
+    border-bottom-right-radius: @radius-value;
+  }
+
+  // markdown container
+  .changeLogContainer {
+    padding: 20px;
+    line-height: 20px;
+    // overflow-y: overlay;
+    // min-height: @tab-body-changelog-h;
+
+    > ul, p:last-child {
+      margin-bottom: 0;
+    }
+
+    > ul {
+      padding-left: 16px;
+    }
+
+    > ul li, p {
+      font-size: 12px;
+    }
+
+    * {
+      color: var(--color-purewhite) !important;
+    }
+
+    &.noNewVersion {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      min-height: 200px;
+
+      .noVersionText {
+        margin-top: 22px;
+        font-family: 'SF Pro';
+        font-style: normal;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 21px;
+        display: flex;
+        align-items: center;
+
+        color: rgba(255, 255, 255, 0.3) !important;
+      }
+    }
+  }
+
+  .updateOpLine {
+    min-height: @tab-after-update-op-h;
+    padding: 20px;
+    padding-bottom: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+    &.waitToStart {
+      padding-bottom: 20px;
+    }
+  }
+}

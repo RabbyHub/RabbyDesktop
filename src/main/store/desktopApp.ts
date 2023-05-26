@@ -7,6 +7,7 @@ import type { AxiosRequestConfig } from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { formatProxyServerURL } from '@/isomorphic/url';
 import {
+  DAPP_ZOOM_VALUES,
   FORCE_DISABLE_CONTENT_PROTECTION,
   PERSIS_STORE_PREFIX,
 } from '../../isomorphic/constants';
@@ -32,6 +33,8 @@ export const desktopAppStore = makeStore<{
 
   sidebarCollapsed: IDesktopAppState['sidebarCollapsed'];
   tipedHideMainWindowOnWindows: IDesktopAppState['tipedHideMainWindowOnWindows'];
+
+  experimentalDappViewZoomPercent: IDesktopAppState['experimentalDappViewZoomPercent'];
 }>({
   name: `${PERSIS_STORE_PREFIX}desktopApp`,
 
@@ -83,6 +86,10 @@ export const desktopAppStore = makeStore<{
     tipedHideMainWindowOnWindows: {
       type: 'boolean',
       default: false,
+    },
+    experimentalDappViewZoomPercent: {
+      type: 'number',
+      default: DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT,
     },
     proxyType: {
       type: 'string',
@@ -154,6 +161,11 @@ function getState() {
     tipedHideMainWindowOnWindows: desktopAppStore.get(
       'tipedHideMainWindowOnWindows',
       false
+    ),
+
+    experimentalDappViewZoomPercent: desktopAppStore.get(
+      'experimentalDappViewZoomPercent',
+      DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT
     ),
   };
 }
@@ -249,6 +261,13 @@ export async function getFullAppProxyConf(opts?: {
   };
 }
 
+export function getMainWindowDappViewZoomPercent() {
+  return desktopAppStore.get(
+    'experimentalDappViewZoomPercent',
+    DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT
+  );
+}
+
 handleIpcMainInvoke('get-desktopAppState', () => {
   desktopAppStore.set('firstStartApp', false);
 
@@ -276,6 +295,14 @@ handleIpcMainInvoke('put-desktopAppState', (_, partialPayload) => {
         emitIpcMainEvent(
           '__internal_main:mainwindow:sidebar-collapsed-changed',
           collapsed
+        );
+        break;
+      }
+      case 'experimentalDappViewZoomPercent': {
+        desktopAppStore.set('experimentalDappViewZoomPercent', value);
+        emitIpcMainEvent(
+          '__internal_main:mainwindow:adjust-all-views-zoom-percent',
+          value as number
         );
         break;
       }

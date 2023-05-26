@@ -10,7 +10,7 @@ import { extractDappInfoFromURL } from '../isomorphic/url';
 // increase the max listeners to avoid the warning or memory leak
 ipcRenderer.setMaxListeners(50);
 
-export const ipcRendererObj = {
+export const ipcRendererObj: Window['rabbyDesktop']['ipcRenderer'] = {
   sendMessage<T extends IChannelsKey>(
     channel: T,
     ...args: ChannelMessagePayload[T]['send']

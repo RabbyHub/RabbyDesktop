@@ -52,6 +52,7 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["WEMIX"] = "WEMIX";
     CHAINS_ENUM["METER"] = "METER";
     CHAINS_ENUM["ETC"] = "ETC";
+    CHAINS_ENUM["FSN"] = "FSN";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -881,6 +882,22 @@ export const CHAINS_RAW = {
         hex: "0x3d",
         scanLink: "https://blockscout.com/etc/mainnet/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/etc/7ccf90ee6822ab440fb603337da256fa.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+    },
+    [CHAINS_ENUM.FSN]: {
+        id: 32659,
+        serverId: "fsn",
+        network: "32659",
+        name: "Fusion",
+        nativeTokenSymbol: "FSN",
+        nativeTokenAddress: "fsn",
+        enum: CHAINS_ENUM.FSN,
+        hex: "0x7f93",
+        scanLink: "https://fsnscan.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/fsn/047789979f0b5733602b29517753bdf3.png",
         nativeTokenDecimals: 18,
         eip: {
             "1559": false,

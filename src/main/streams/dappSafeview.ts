@@ -166,7 +166,7 @@ export async function safeOpenURL(
         openedTab,
         activeTab: async () => {
           if (shouldLoad) {
-            openedTab.view?.webContents.loadURL(targetURL);
+            openedTab.loadURL(targetURL);
           }
           switchToBrowserTab(openedTab.id, mainTabbedWin);
         },

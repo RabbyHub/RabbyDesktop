@@ -1,5 +1,8 @@
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
-import { RABBY_LOADING_URL } from '../../isomorphic/constants';
+import {
+  IS_RUNTIME_PRODUCTION,
+  RABBY_LOADING_URL,
+} from '../../isomorphic/constants';
 import {
   createPopupView,
   isDappViewLoading,
@@ -61,6 +64,10 @@ onMainWindowReady().then((tabbedWin) => {
 
   valueToMainSubject('dappLoadingView', dappLoadingView);
 
+  if (!IS_RUNTIME_PRODUCTION) {
+    // dappLoadingView.webContents.openDevTools({ mode: 'detach' });
+  }
+
   updateViewPosition(dappLoadingView, false);
 });
 
@@ -71,13 +78,13 @@ const dispose = onIpcMainInternalEvent(
 
     switch (payload.type) {
       case 'show': {
-        const findResult = findDappsByOrigin(payload.tabURL);
-        const dapp =
-          findResult.dappByOrigin || findResult.dappBySecondaryDomainOrigin;
-        payload.dapp = dapp;
+        // const findResult = findDappsByOrigin(payload.tabURL);
+        // const dapp =
+        //   findResult.dappByOrigin || findResult.dappBySecondaryDomainOrigin;
+        // payload.dapp = dapp;
 
-        putDappLoadingViewState({ loadingTabId: payload.tabId });
-        updateViewPosition(dappLoadingView, !!dapp);
+        // putDappLoadingViewState({ loadingTabId: payload.tabId });
+        // updateViewPosition(dappLoadingView, !!dapp);
         break;
       }
       case 'hide': {

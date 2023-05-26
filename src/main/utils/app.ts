@@ -17,6 +17,11 @@ import {
   SENTRY_DEBUG,
 } from '../../isomorphic/constants';
 import { getWindowBoundsInWorkArea } from './screen';
+import {
+  desktopAppStore,
+  getFullAppProxyConf,
+  getMainWindowDappViewZoomPercent,
+} from '../store/desktopApp';
 
 const PROJ_ROOT = path.join(__dirname, '../../../');
 
@@ -128,6 +133,7 @@ export function getMainProcessAppChannel() {
   return filterAppChannel((process as any).buildchannel);
 }
 
+let sentryInited = false;
 /**
  * @warning make sure calling after app's userData setup
  */
@@ -180,6 +186,8 @@ export function initMainProcessSentry() {
     submitURL:
       'https://o460488.ingest.sentry.io/api/4504751161868288/minidump/?sentry_key=520afbe8f6574cb3a39e6cb7296f9008',
   });
+
+  sentryInited = true;
 }
 
 export const IS_REG_BUILD = (process as any).buildchannel === 'reg';
@@ -207,4 +215,24 @@ export function getAppProjRefName() {
   }
   // git log --format="%h" -n 1
   return child_process.execSync('git log --format="%h" -n 1').toString().trim();
+}
+
+export async function logsOnAppBootstrap() {
+  if (!sentryInited) {
+    console.error('sentry not inited');
+    return;
+  }
+
+  Sentry.captureEvent({
+    message: 'UserSetting',
+    level: 'info',
+    tags: {
+      reportTime: 'bootstrap',
+    },
+    extra: {
+      dappRatio: getMainWindowDappViewZoomPercent(),
+      sidebarCollapsed: desktopAppStore.get('sidebarCollapsed'),
+      proxyType: (await getFullAppProxyConf()).proxyType,
+    },
+  });
 }

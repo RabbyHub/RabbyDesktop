@@ -1,0 +1,19 @@
+.fold {
+  pointer-events: none;
+  transform: translateX(
+      calc(0px - ((100vw - 100%) / 2 - 66px - 48px) + 56px + 10px)
+    )
+    scale(0.5);
+  transform-origin: left;
+  opacity: 0;
+}
+
+.unfold {
+  transform: translate(0) scale(1);
+  transform-origin: left;
+  opacity: 1;
+}
+
+.shadow:hover {
+  filter: drop-shadow(0px 8px 16px rgba(1, 1, 1, 0.2));
+}

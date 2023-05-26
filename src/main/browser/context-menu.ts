@@ -26,14 +26,13 @@ import { getWindowFromWebContents, switchToBrowserTab } from '../utils/browser';
 import { appendMenu, appendMenuSeparator } from '../utils/context-menu';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import {
-  forwardMessageToWebContents,
-  getOrSetDebugStates,
   getRabbyExtViews,
   getWebuiExtId,
   onMainWindowReady,
   getAllMainUIWindows,
 } from '../utils/stream-helpers';
 import { getClientAppPaths } from '../utils/store';
+import { getMainWindowDappViewZoomPercent } from '../store/desktopApp';
 
 const LABELS = {
   openInNewTab: (type: 'link' | Electron.ContextMenuParams['mediaType']) =>
@@ -294,6 +293,7 @@ function buildInspectKitsMenu(opts: ChromeContextMenuOptions) {
           url: targetURL,
           active: true,
         },
+        dappZoomPercent: getMainWindowDappViewZoomPercent(),
       });
     },
   });

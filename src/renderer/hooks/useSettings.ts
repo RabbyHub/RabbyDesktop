@@ -1,5 +1,7 @@
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
+import { DAPP_ZOOM_VALUES } from '@/isomorphic/constants';
+import { formatZoomValue } from '@/isomorphic/primitive';
 import { toggleMainWinTabAnimating } from '../ipcRequest/mainwin';
 import { useIsAnimating } from './useSidebar';
 
@@ -57,6 +59,28 @@ export function useSettings() {
     [setDesktopAppState]
   );
 
+  const adjustDappViewZoomPercent = useCallback(
+    async (nextVal: number) => {
+      nextVal = formatZoomValue(nextVal).zoomPercent;
+
+      const result = await window.rabbyDesktop.ipcRenderer.invoke(
+        'put-desktopAppState',
+        {
+          experimentalDappViewZoomPercent: nextVal,
+        }
+      );
+
+      setDesktopAppState((prev) => {
+        return {
+          ...(prev as IDesktopAppState & object),
+          experimentalDappViewZoomPercent:
+            result.state.experimentalDappViewZoomPercent,
+        };
+      });
+    },
+    [setDesktopAppState]
+  );
+
   const { isAnimating, setIsAnimating } = useIsAnimating();
   const toggleSidebarCollapsed = useCallback(
     async (nextVal: boolean) => {
@@ -97,10 +121,14 @@ export function useSettings() {
         desktopAppState?.sidebarCollapsed ??
           JSON.parse(localStorage.getItem('sidebarCollapsed') || 'false')
       ),
+      experimentalDappViewZoomPercent:
+        desktopAppState?.experimentalDappViewZoomPercent ??
+        DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT,
     },
     fetchState,
     toggleEnableContentProtection,
     toggleEnableIPFSDapp,
     toggleSidebarCollapsed,
+    adjustDappViewZoomPercent,
   };
 }

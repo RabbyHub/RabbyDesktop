@@ -144,6 +144,8 @@ type IDesktopAppState = {
   sidebarCollapsed: boolean;
 
   tipedHideMainWindowOnWindows: boolean;
+
+  experimentalDappViewZoomPercent: number;
 };
 
 type IAppDynamicConfig = {
@@ -225,6 +227,7 @@ type IAppUpdatorCheckResult =
       releaseNote: null;
     };
 
+type IAppUpdatorProcessStep = 'wait' | 'process' | 'finish' | 'error';
 type IAppUpdatorDownloadProgress =
   | {
       progress: ProgressInfo;

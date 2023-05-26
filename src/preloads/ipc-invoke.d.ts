@@ -210,6 +210,21 @@ type ChannelInvokePayload = {
       result: string;
     };
   };
+  'check-download-availble': {
+    send: [];
+    response: {
+      error?: string | null;
+      isValid: boolean;
+      downloadURL: string;
+    };
+  };
+  'verify-update-package': {
+    send: [];
+    response: {
+      error?: string | null;
+      isValid: boolean;
+    };
+  };
   'check-trezor-like-cannot-use': {
     send: [openType: IHardwareConnectPageType];
     response: {
@@ -226,6 +241,12 @@ type ChannelInvokePayload = {
     response: {
       result: any;
       error?: Error;
+    };
+  };
+  [`__internal_rpc:mainwindow:is-dapp-view`]: {
+    send: [];
+    response: {
+      isDappView?: boolean;
     };
   };
   [`__outer_rpc:check-if-requestable`]: {

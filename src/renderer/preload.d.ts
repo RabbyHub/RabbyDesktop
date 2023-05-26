@@ -358,11 +358,11 @@ interface Window {
         <T extends IChannelsKey>(
           channel: T,
           func: (...args: ChannelMessagePayload[T]['response']) => void
-        ): (() => void) | undefined;
+        ): (() => void) | void;
         <T extends keyof M2RChanneMessagePayload>(
           channel: T,
           func: (event: M2RChanneMessagePayload[T]) => void
-        ): (() => void) | undefined;
+        ): (() => void) | void;
       };
     };
     rendererHelpers: {
