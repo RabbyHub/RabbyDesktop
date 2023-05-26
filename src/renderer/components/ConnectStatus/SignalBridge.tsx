@@ -32,7 +32,7 @@ export const SignalBridge: React.FC<Props> = ({
         <LedgerSignal isBadge className={className} />
       )}
       {type === KEYRING_CLASS.HARDWARE.GRIDPLUS && (
-        <GridPlusSignal isBadge className={className} e />
+        <GridPlusSignal isBadge className={className} />
       )}
     </>
   );

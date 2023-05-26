@@ -15,7 +15,7 @@ export const LedgerStatusBar: React.FC<Props> = ({ className }) => {
       Signal={<LedgerSignal size="small" />}
       className={className}
       onClickButton={onClickConnect}
-      ButtonText={<>{status === 'DISCONNECTED' && 'Connect'}</>}
+      ButtonText={<>{(status === 'DISCONNECTED' || !status) && 'Connect'}</>}
       Content={content}
     />
   );
