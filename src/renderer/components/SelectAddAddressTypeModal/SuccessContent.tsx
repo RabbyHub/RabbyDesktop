@@ -9,12 +9,14 @@ export interface Props {
   onSuccess: () => void;
   accounts?: Account[];
   children?: React.ReactNode;
+  title?: string;
 }
 
 export const SuccessContent: React.FC<Props> = ({
   accounts,
   onSuccess,
   children,
+  title = 'Imported Successfully',
 }) => {
   return (
     <div className={styles.ImportSuccessful}>
@@ -26,7 +28,7 @@ export const SuccessContent: React.FC<Props> = ({
             className={styles.icon}
           />
         </div>
-        <h1 className={styles.title}>Imported Successfully</h1>
+        <h1 className={styles.title}>{title}</h1>
         <div className={styles.addressList}>
           {children ??
             accounts?.map((account: any) => (
