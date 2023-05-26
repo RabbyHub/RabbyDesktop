@@ -286,16 +286,6 @@ type ChannelMessagePayload = {
     response: [];
   };
 
-  '__internal_rpc:rabbyx:waitExtBgGhostLoaded': {
-    send: [reqid: string];
-    response: [
-      {
-        reqid: string;
-        rabbyxExtId: string;
-      }
-    ];
-  };
-
   '__internal_rpc:rabbyx:close-signwin': {
     send: [];
     response: [];

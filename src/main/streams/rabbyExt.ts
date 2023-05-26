@@ -136,16 +136,12 @@ Promise.all([maskReady, bgWcReady, rabbyxInitialized]).then(
   }
 );
 
-onIpcMainEvent(
-  '__internal_rpc:rabbyx:waitExtBgGhostLoaded',
-  async (evt, reqid) => {
-    await bgWcReady;
-    const extId = await getRabbyExtId();
-
-    evt.reply('__internal_rpc:rabbyx:waitExtBgGhostLoaded', {
-      reqid,
-      rabbyxExtId: extId,
-    });
+handleIpcMainInvoke(
+  '__internal_invoke:rabbyx:waitExtBgGhostLoaded',
+  async () => {
+    return {
+      rabbyxExtId: await getRabbyExtId(),
+    };
   }
 );
 

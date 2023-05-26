@@ -249,6 +249,12 @@ type ChannelInvokePayload = {
       isDappView?: boolean;
     };
   };
+  ['__internal_invoke:rabbyx:waitExtBgGhostLoaded']: {
+    send: [];
+    response: {
+      rabbyxExtId: string;
+    };
+  };
   [`__outer_rpc:check-if-requestable`]: {
     send: [reqData?: any];
     response: {
