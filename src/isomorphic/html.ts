@@ -67,3 +67,46 @@ export function pickFavIconURLFromMeta(
     ''
   );
 }
+
+const CSS_TAGS_PATTERN =
+  /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>|<link\b[^>]*rel=["']?stylesheet["']?\b[^>]*>/gi;
+export function extractCssTagsFromHtml(input: string) {
+  const isBrowserEnvironment =
+    typeof document !== 'undefined' && document.documentElement;
+
+  if (isBrowserEnvironment) {
+    if (!input) {
+      input = document.documentElement.innerHTML;
+    }
+
+    const allCssTags = [];
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(input, 'text/html');
+
+    // Extract <style> tags
+    const styleTags = doc.getElementsByTagName('style');
+    for (let i = 0; i < styleTags.length; i++) {
+      allCssTags.push(styleTags[i].innerHTML);
+    }
+
+    // Extract <link rel="stylesheet"> tags
+    const linkTags = doc.querySelectorAll('link[rel="stylesheet"]');
+    for (let j = 0, linkTag: HTMLLinkElement; j < linkTags.length; j++) {
+      linkTag = linkTags[j] as HTMLLinkElement;
+      allCssTags.push(`/* ${linkTag.href} */`);
+    }
+
+    return allCssTags.join('\n');
+  }
+  if (!input) {
+    throw new Error(
+      'In a non-browser environment, the input parameter is required.'
+    );
+  }
+
+  const matches = input.match(CSS_TAGS_PATTERN);
+  const allCssTags = matches || [];
+
+  return allCssTags.join('\n');
+}

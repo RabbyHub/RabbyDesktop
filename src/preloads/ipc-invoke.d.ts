@@ -318,6 +318,20 @@ type ChannelInvokePayload = {
       tabNavInfo: IShellNavInfo;
     };
   };
+  'detect-dapp-version': {
+    send: [dappOrigin: string];
+    response: {
+      error?: string | null;
+      result: IDetectHttpTypeDappVersionResult;
+    };
+  };
+  'confirm-dapp-updated': {
+    send: [dappOrigin: string];
+    response: {
+      error?: string | null;
+      success: boolean;
+    };
+  };
 } & RabbyxInvokePayload;
 
 type IInvokesKey = keyof ChannelInvokePayload;

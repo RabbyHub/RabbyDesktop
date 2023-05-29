@@ -1,7 +1,34 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { canoicalizeDappUrl } from '@/isomorphic/url';
+import { atom, useAtom } from 'jotai';
 import { useWindowTabs } from './useWindowTabs';
+
+/**
+ * @description check if tab's current url is considered as the entry of the dapp origin
+ * For example:
+ *
+ * dapp origin: https://uniswap.org, possible **entry** tab urls:
+ * - https://uniswap.org
+ * - https://app.uniswap.org
+ * - https://help.uniswap.org
+ *
+ * dapp origin: https://app.uniswap.org, possible **entry** tab urls:
+ * - https://app.uniswap.org
+ */
+function isTabUrlEntryOfHttpDappOrigin(tabURL: string, httpDappOrigin: string) {
+  const tabURLInfo = canoicalizeDappUrl(tabURL);
+  const httpDappOriginInfo = canoicalizeDappUrl(httpDappOrigin);
+
+  return (
+    httpDappOriginInfo.origin === tabURLInfo.origin ||
+    `https://www.${httpDappOriginInfo.fullDomain}` ===
+      httpDappOriginInfo.fullDomain ||
+    // dapp
+    (httpDappOriginInfo.is2ndaryDomain &&
+      httpDappOriginInfo.secondaryDomain === tabURLInfo.secondaryDomain)
+  );
+}
 
 export function useDappNavigation() {
   const { activeTab } = useWindowTabs();
@@ -27,6 +54,15 @@ export function useDappNavigation() {
       window.rabbyDesktop.ipcRenderer.sendMessage(
         '__internal_rpc:mainwindow:reload-tab',
         activeTab?.id
+      );
+    }, [activeTab]),
+    onForceReloadButtonClick: useCallback(() => {
+      if (!activeTab?.id) return;
+
+      window.rabbyDesktop.ipcRenderer.sendMessage(
+        '__internal_rpc:mainwindow:reload-tab',
+        activeTab?.id,
+        true
       );
     }, [activeTab]),
     onStopLoadingButtonClick: useCallback(() => {
@@ -57,5 +93,48 @@ export function useDappNavigation() {
     activeTab,
     navActions,
     selectedTabInfo,
+  };
+}
+
+export function useDetectDappVersion(shellNavInfo: IShellNavInfo | null) {
+  const [dappVersion, setDappVersion] = useState<{
+    updated: boolean;
+  }>({
+    updated: false,
+  });
+
+  const dappOrigin = shellNavInfo?.dapp?.origin;
+  const lastDappOrigin = useRef<string>(dappOrigin || '');
+
+  useEffect(() => {
+    if (!dappOrigin || shellNavInfo?.dapp?.type !== 'http') {
+      setDappVersion({ updated: false });
+      return;
+    }
+
+    // deduplicate
+    if (lastDappOrigin.current === dappOrigin) return;
+    lastDappOrigin.current = dappOrigin;
+
+    if (!isTabUrlEntryOfHttpDappOrigin(shellNavInfo?.tabUrl, dappOrigin))
+      return;
+
+    window.rabbyDesktop.ipcRenderer
+      .invoke('detect-dapp-version', dappOrigin)
+      .then((res) => {
+        setDappVersion({ updated: res.result.updated });
+      });
+  }, [dappOrigin, shellNavInfo]);
+
+  const confirmDappVersion = useCallback(() => {
+    if (!dappOrigin || shellNavInfo?.dapp?.type !== 'http') return;
+
+    window.rabbyDesktop.ipcRenderer.invoke('confirm-dapp-updated', dappOrigin);
+    setDappVersion({ updated: false });
+  }, [dappOrigin, shellNavInfo]);
+
+  return {
+    dappVersion,
+    confirmDappVersion,
   };
 }

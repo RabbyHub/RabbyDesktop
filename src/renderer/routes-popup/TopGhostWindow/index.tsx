@@ -6,7 +6,7 @@ import '@/renderer/css/style.less';
 import { useBodyClassNameOnMounted } from '@/renderer/hooks/useMountedEffect';
 import { useMessageForwarded } from '@/renderer/hooks/useViewsMessage';
 import { atom, useAtom } from 'jotai';
-import { Tooltip } from 'antd';
+import { Button, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
@@ -71,6 +71,7 @@ export default function TopGhostWindow() {
 
         theOne.triggerElementRect = data.payload.triggerElementRect;
         theOne.tooltipProps = data.payload.tooltipProps;
+        theOne.extraData = data.payload.extraData;
 
         if (!existed) {
           return [...prev, theOne];

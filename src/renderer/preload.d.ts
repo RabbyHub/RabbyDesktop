@@ -228,7 +228,7 @@ type ChannelMessagePayload = {
     response: [];
   };
   '__internal_rpc:mainwindow:reload-tab': {
-    send: [tabId: number];
+    send: [tabId: number, forceReload?: boolean];
     response: [];
   };
   '__internal_rpc:mainwindow:stop-tab-loading': {

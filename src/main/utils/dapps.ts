@@ -2,16 +2,21 @@
 
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 
 import { format as urlFormat } from 'url';
 import Axios, { AxiosError, AxiosProxyConfig } from 'axios';
 import LRUCache from 'lru-cache';
-import { BrowserWindow } from 'electron';
+import { BrowserWindow, net } from 'electron';
+
 import { waitForMS } from '@/isomorphic/date';
-import { pickFavIconURLFromMeta } from '@/isomorphic/html';
+import {
+  extractCssTagsFromHtml,
+  pickFavIconURLFromMeta,
+} from '@/isomorphic/html';
 import { PROTOCOL_IPFS } from '@/isomorphic/constants';
 import { checkoutDappURL } from '@/isomorphic/dapp';
-import { unPrefix } from '@/isomorphic/string';
+import { ensurePrefix, unPrefix, unSuffix } from '@/isomorphic/string';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
 import { AxiosElectronAdapter } from './axios';
 import { checkUrlViaBrowserView, CHROMIUM_NET_ERR_DESC } from './appNetwork';
@@ -820,4 +825,67 @@ export async function getOrPutCheckResult(
   }
 
   return checkResult;
+}
+
+async function getDappIndexHtml(dappOrigin: string) {
+  let baseURL = ensurePrefix(dappOrigin, 'https://');
+  baseURL = unSuffix(baseURL, '/');
+
+  const request = net.request(`${baseURL}/index.html`);
+
+  return new Promise<string>((resolve, reject) => {
+    request.on('response', (response) => {
+      let data = '';
+
+      response.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      response.on('end', () => {
+        resolve(data);
+      });
+
+      response.on('error', reject);
+    });
+
+    request.end();
+  });
+}
+
+function getSha512(input: string | Buffer) {
+  const hash = crypto.createHash('sha512');
+  hash.update(input);
+  return hash.digest('hex');
+}
+
+export async function getDappVersionInfo(dappOrigin: string): Promise<
+  IHttpTypeDappVersion & {
+    fetchSuccess: boolean;
+    cssTagsStringOnDev?: string;
+  }
+> {
+  const result = {
+    fetchSuccess: false,
+    cssTagsStringOnDev: '',
+    versionSha512: '',
+    timestamp: 0,
+  };
+
+  let html = '';
+  try {
+    html = await getDappIndexHtml(dappOrigin);
+    result.fetchSuccess = true;
+
+    const cssTagsString = extractCssTagsFromHtml(html);
+
+    // if (!IS_RUNTIME_PRODUCTION) result.cssTagsStringOnDev = cssTagsString;
+
+    result.versionSha512 = getSha512(cssTagsString);
+    result.timestamp = Date.now();
+  } catch (err) {
+    // TODO: report to Sentry
+    return result;
+  }
+
+  return result;
 }

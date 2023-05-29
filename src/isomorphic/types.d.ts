@@ -111,6 +111,18 @@ type ICheckedOutDappURL = {
 };
 
 type IHttpDapp = INextDapp & { type: 'http' };
+
+type IHttpTypeDappVersion = {
+  versionSha512: string;
+  timestamp: number;
+};
+
+type IDetectHttpTypeDappVersionResult = {
+  updated: boolean;
+  latest?: null | IHttpTypeDappVersion;
+  versionQueue: IHttpTypeDappVersion[];
+};
+
 /**
  * @description alias of http type dapp
  */

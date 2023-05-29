@@ -297,9 +297,13 @@ export class Tab {
     return result;
   }
 
-  reload() {
+  reload(force = false) {
     this.showLoadingView(this.view!.webContents.getURL());
-    this.view!.webContents.reload();
+    if (force) {
+      this.view!.webContents.reloadIgnoringCache();
+    } else {
+      this.view!.webContents.reload();
+    }
   }
 
   show() {

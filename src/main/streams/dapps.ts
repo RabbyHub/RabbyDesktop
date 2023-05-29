@@ -1,5 +1,5 @@
 import { getFullAppProxyConf } from '../store/desktopApp';
-import { safeCapturePage } from '../utils/dapps';
+import { getDappVersionInfo, safeCapturePage } from '../utils/dapps';
 import { parseWebsiteFavicon } from '../utils/fetch';
 import {
   handleIpcMainInvoke,
@@ -12,6 +12,11 @@ import {
   onMainWindowReady,
 } from '../utils/stream-helpers';
 import { getTabbedWindowFromWebContents } from './tabbedBrowserWindow';
+import {
+  confirmDappVersion,
+  getDappVersions,
+  putDappVersions,
+} from '../store/cache';
 
 handleIpcMainInvoke('parse-favicon', async (_, targetURL) => {
   const result = {
@@ -47,6 +52,56 @@ handleIpcMainInvoke('preview-dapp', async (_, targetURL) => {
   return {
     error: result.error,
     previewImg: result.previewImg,
+  };
+});
+
+handleIpcMainInvoke('detect-dapp-version', async (_, httpDappId: string) => {
+  const result: IDetectHttpTypeDappVersionResult = {
+    updated: false,
+    latest: null,
+    versionQueue: [],
+  };
+
+  const versionInfo = await getDappVersionInfo(httpDappId);
+
+  if (versionInfo.fetchSuccess) {
+    const putResult = putDappVersions(httpDappId, versionInfo);
+
+    result.latest = putResult.latestConfirmedVersion;
+    result.versionQueue = putResult.versionQueue;
+
+    if (
+      putResult.versionQueue.length >= 2 &&
+      putResult.versionQueue[0].versionSha512 !==
+        putResult.latestConfirmedVersion?.versionSha512
+    ) {
+      result.updated = true;
+    }
+
+    return {
+      error: null,
+      result,
+    };
+  }
+
+  const dappVersion = getDappVersions(httpDappId);
+
+  result.updated = false;
+  result.latest = dappVersion.latestConfirmedVersion;
+  result.versionQueue = dappVersion.versionQueue;
+
+  return {
+    error: 'Fetch dapp version info failed',
+    result,
+  };
+});
+
+handleIpcMainInvoke('confirm-dapp-updated', async (_, httpDappId: string) => {
+  confirmDappVersion(httpDappId);
+
+  return {
+    error: '',
+    success: true,
   };
 });
 

@@ -11,7 +11,10 @@ import {
 } from '@/../assets/icons/top-bar';
 
 import { Divider } from 'antd';
-import { useDappNavigation } from '@/renderer/hooks-shell/useDappNavigation';
+import {
+  useDappNavigation,
+  useDetectDappVersion,
+} from '@/renderer/hooks-shell/useDappNavigation';
 import {
   useEffect,
   useCallback,
@@ -34,6 +37,7 @@ import { useGhostTooltip } from '@/renderer/routes-popup/TopGhostWindow/useGhost
 import { useLocation } from 'react-router-dom';
 import styles from './index.module.less';
 import ChainIcon from '../ChainIcon';
+import DetectDappIcon from './components/DetectDappIcon';
 // import { TipsWrapper } from '../TipWrapper';
 
 const isDarwin = detectClientOS() === 'darwin';
@@ -161,6 +165,9 @@ export const TopNavBar = () => {
     [l]
   );
 
+  const { dappVersion, confirmDappVersion } =
+    useDetectDappVersion(selectedTabInfo);
+
   return (
     <div className={styles.main} onDoubleClick={onDarwinToggleMaxmize}>
       {/* keep this element in first to make it bottom, or move it last to make it top */}
@@ -181,11 +188,20 @@ export const TopNavBar = () => {
           className={classNames(styles.divider)}
           style={{ ...(navIconColor && { borderColor: navDividerColor }) }}
         />
-        {activeTab?.status === 'loading' && (
+        {activeTab?.status === 'loading' ? (
           <img
             className={styles.loadingIcon}
             src="rabby-internal://assets/icons/top-bar/icon-dapp-nav-loading.svg"
           />
+        ) : (
+          dappVersion.updated && (
+            <DetectDappIcon
+              onForceReload={() => {
+                navActions.onForceReloadButtonClick();
+                confirmDappVersion();
+              }}
+            />
+          )
         )}
         <div
           className={clsx(styles.url, 'h-[100%] flex items-center')}
