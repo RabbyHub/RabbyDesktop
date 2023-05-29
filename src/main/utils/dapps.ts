@@ -4,6 +4,8 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 
+import * as Sentry from '@sentry/electron/main';
+
 import { format as urlFormat } from 'url';
 import Axios, { AxiosError, AxiosProxyConfig } from 'axios';
 import LRUCache from 'lru-cache';
@@ -882,8 +884,17 @@ export async function getDappVersionInfo(dappOrigin: string): Promise<
 
     result.versionSha512 = getSha512(cssTagsString);
     result.timestamp = Date.now();
+
+    Sentry.captureEvent({
+      message: 'detected dapp version',
+      level: 'info',
+      extra: {
+        dappOrigin,
+        versionSha512: result.versionSha512,
+      },
+    });
   } catch (err) {
-    // TODO: report to Sentry
+    Sentry.captureException(err);
     return result;
   }
 
