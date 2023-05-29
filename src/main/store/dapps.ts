@@ -204,7 +204,8 @@ export const dappStore = makeStore<{
   /* coerce INextDapp :start */
   let changed = false;
   Object.entries({ ...dappsMap }).forEach(([k, v]) => {
-    if ((!v.id || !isValidDappType(v.type)) && k.startsWith('http')) {
+    if (!k) return;
+    if ((!v.id || !isValidDappType(v.type)) && k?.startsWith('http')) {
       changed = true;
       v.id = v.id || v.origin;
       v.type = v.type || 'http';
