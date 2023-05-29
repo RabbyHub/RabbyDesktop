@@ -6,7 +6,7 @@ import '@/renderer/css/style.less';
 import { useBodyClassNameOnMounted } from '@/renderer/hooks/useMountedEffect';
 import { useMessageForwarded } from '@/renderer/hooks/useViewsMessage';
 import { atom, useAtom } from 'jotai';
-import { Button, Tooltip } from 'antd';
+import { Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
