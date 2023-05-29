@@ -2,6 +2,7 @@ import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import React from 'react';
 import eventBus from '@/renderer/utils-shell/eventBus';
 import { EVENTS, KEYRING_CLASS } from '@/renderer/utils/constant';
+import { useHIDDevices } from '@/renderer/hooks/useDevices';
 import { useCommonPopupView } from '../CommonPopup/useCommonPopupView';
 
 type Status =
@@ -10,6 +11,8 @@ type Status =
   | 'ADDRESS_ERROR'
   | 'LOCKED'
   | undefined;
+
+export const ledgerUSBVendorId = 0x2c97;
 
 export const useLedgerStatus = (address?: string) => {
   const { activePopup } = useCommonPopupView();
@@ -56,39 +59,56 @@ export const useLedgerStatus = (address?: string) => {
     }
   }, [status]);
 
+  // React.useEffect(() => {
+  //   const handle = (payload: Status) => {
+  //     setStatus(payload);
+  //   };
+
+  //   eventBus.addEventListener(EVENTS.LEDGER.SESSION_CHANGE, handle);
+  //   walletController
+  //     .requestKeyring(KEYRING_CLASS.HARDWARE.LEDGER, 'getConnectStatus', null)
+  //     .then((res) => {
+  //       setStatus(res);
+  //     });
+
+  //   return () => {
+  //     eventBus.removeEventListener(EVENTS.LEDGER.SESSION_CHANGE, handle);
+  //   };
+  // }, []);
+
+  // React.useEffect(() => {
+  //   if (status === 'CONNECTED') {
+  //     walletController
+  //       .requestKeyring(
+  //         KEYRING_CLASS.HARDWARE.LEDGER,
+  //         'verifyAddressInDevice',
+  //         null,
+  //         address
+  //       )
+  //       .then((valid) => {
+  //         if (!valid) {
+  //           setStatus('ADDRESS_ERROR');
+  //         }
+  //       });
+  //   }
+  // }, [status, address]);
+
+  const { devices, fetchDevices } = useHIDDevices();
   React.useEffect(() => {
-    const handle = (payload: Status) => {
-      setStatus(payload);
-    };
-
-    eventBus.addEventListener(EVENTS.LEDGER.SESSION_CHANGE, handle);
-    walletController
-      .requestKeyring(KEYRING_CLASS.HARDWARE.LEDGER, 'getConnectStatus', null)
-      .then((res) => {
-        setStatus(res);
-      });
-
-    return () => {
-      eventBus.removeEventListener(EVENTS.LEDGER.SESSION_CHANGE, handle);
-    };
+    fetchDevices();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   React.useEffect(() => {
-    if (status === 'CONNECTED') {
-      walletController
-        .requestKeyring(
-          KEYRING_CLASS.HARDWARE.LEDGER,
-          'verifyAddressInDevice',
-          null,
-          address
-        )
-        .then((valid) => {
-          if (!valid) {
-            setStatus('ADDRESS_ERROR');
-          }
-        });
+    const hasLedger = devices.some(
+      (item) => item.vendorId === ledgerUSBVendorId
+    );
+
+    if (hasLedger) {
+      setStatus('CONNECTED');
+    } else {
+      setStatus('DISCONNECTED');
     }
-  }, [status, address]);
+  }, [devices]);
 
   return {
     content,

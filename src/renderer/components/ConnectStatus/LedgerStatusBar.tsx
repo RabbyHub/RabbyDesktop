@@ -8,7 +8,16 @@ interface Props {
 }
 
 export const LedgerStatusBar: React.FC<Props> = ({ className }) => {
-  const { status, content, onClickConnect } = useLedgerStatus();
+  const { status, onClickConnect } = useLedgerStatus();
+
+  const content = React.useMemo(() => {
+    switch (status) {
+      case 'CONNECTED':
+        return 'Ledger is connected';
+      default:
+        return 'Ledger is not connected';
+    }
+  }, [status]);
 
   return (
     <CommonStatusBar
