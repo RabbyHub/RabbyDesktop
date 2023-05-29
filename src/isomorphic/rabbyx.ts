@@ -1,28 +1,21 @@
-const RABBX_CENTERED_WINDOW_TYPES = [
-  'Connect',
-  'AddChain',
-  'AddAsset',
-  'GetPublicKey',
-] as const;
-export function isRabbyXCenteredWindowType(viewType?: string | null) {
-  if (!viewType) return false;
-
+export function getRabbyXWindowPosition(viewType?: string | null) {
   switch (viewType) {
+    case 'Connect':
     case 'SignTx':
     case 'SignText':
     case 'SignTypedData':
     case 'Decrypt':
     default: {
-      return false;
+      return 'right-full' as const;
     }
     case 'ETHSign':
-    case 'Connect':
     case 'AddChain':
     case 'AddAsset':
     case 'GetPublicKey': {
-      return true;
+      return 'center' as const;
+    }
+    case 'unknown': {
+      return 'right-pinned' as const;
     }
   }
 }
-
-export const RABBX_RIGHT_WINDOW_TYPES = ['Connect'];
