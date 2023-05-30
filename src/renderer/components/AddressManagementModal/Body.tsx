@@ -37,7 +37,7 @@ export const Body: React.FC<Props> = ({
             onDelete(account);
           }}
           account={account}
-          key={account.address + account.type}
+          key={account.address + account.type + account.brandName}
           isUpdatingBalance={isUpdatingBalance}
         />
       );
