@@ -102,17 +102,15 @@ async function detectDappVersoin(httpDappId: string) {
 handleIpcMainInvoke('detect-dapp-version', async (_, httpDappId: string) => {
   const detectResult = await detectDappVersoin(httpDappId);
 
-  if (detectResult.result.updated) {
-    const mainTabbedWin = await onMainWindowReady();
-    sendToWebContents(
-      mainTabbedWin.window.webContents,
-      '__internal_push:dapps:version-updated',
-      {
-        httpDappId,
-        result: detectResult.result,
-      }
-    );
-  }
+  const mainTabbedWin = await onMainWindowReady();
+  sendToWebContents(
+    mainTabbedWin.window.webContents,
+    '__internal_push:dapps:version-updated',
+    {
+      httpDappId,
+      result: detectResult.result,
+    }
+  );
 
   return detectResult;
 });
