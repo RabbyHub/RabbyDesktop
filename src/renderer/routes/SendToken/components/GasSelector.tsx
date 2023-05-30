@@ -9,7 +9,7 @@ import {
   MINIMUM_GAS_LIMIT,
 } from '@/renderer/utils/constant';
 import { GasLevel, TokenItem } from '@debank/rabby-api/dist/types';
-import { formatTokenAmount } from '@/renderer/utils/number';
+import { formatAmount } from '@/renderer/utils/number';
 import { Modal } from '@/renderer/components/Modal/Modal';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 
@@ -277,7 +277,7 @@ const GasSelector = ({
           <div className="top">
             <p>Gas</p>
             <p className="gasmoney">
-              {`${formatTokenAmount(
+              {`${formatAmount(
                 new BigNumber(selectedGas ? selectedGas.price : 0)
                   .times(MINIMUM_GAS_LIMIT)
                   .div(1e18)

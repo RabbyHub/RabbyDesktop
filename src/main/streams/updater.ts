@@ -170,7 +170,14 @@ handleIpcMainInvoke('check-download-availble', async () => {
     return { error: null, isValid: false, downloadURL: '' };
   }
 
-  const filePath = checker.updateInfo.files[0]?.url || checker.updateInfo.path;
+  let filePath = checker.updateInfo.files[0]?.url || checker.updateInfo.path;
+  if (process.platform === 'darwin') {
+    filePath =
+      checker.updateInfo.files?.find((x) => x.url.endsWith('.dmg'))?.url ||
+      checker.updateInfo.path;
+
+    filePath = filePath.replace(/\.zip$/, '.dmg');
+  }
   const downloadURL = `${ensureSuffix(getAppUpdaterURL(), '/')}${unPrefix(
     filePath,
     '/'

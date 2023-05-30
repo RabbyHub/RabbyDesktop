@@ -1006,15 +1006,13 @@ const SendTokenInner = () => {
                     title={formatAmount(
                       new BigNumber(currentToken.raw_amount_hex_str || 0)
                         .div(10 ** currentToken.decimals)
-                        .toFixed(),
-                      4
+                        .toFixed()
                     )}
                   >
                     {formatAmount(
                       new BigNumber(currentToken.raw_amount_hex_str || 0)
                         .div(10 ** currentToken.decimals)
-                        .toFixed(),
-                      4
+                        .toFixed()
                     )}
                   </span>
                 </>

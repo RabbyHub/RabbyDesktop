@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { TokenItem } from '@debank/rabby-api/dist/types';
-import { formatTokenAmount } from '@/renderer/utils/number';
+import { formatAmount } from '@/renderer/utils/number';
 
 const GasReservedDiv = styled.div`
   font-weight: 400;
@@ -33,7 +33,7 @@ const GasReserved = ({ amount, token, onClickAmount }: GasReservedProps) => {
     <GasReservedDiv>
       Reserved{' '}
       <TokenAmount title={amount} onClick={onClickAmount}>
-        {formatTokenAmount(amount, 4)}
+        {formatAmount(amount)}
       </TokenAmount>
       {token.symbol} for gas cost
     </GasReservedDiv>
