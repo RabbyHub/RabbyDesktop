@@ -19,7 +19,7 @@ export const URLPanel: React.FC<Props> = ({ uri, onReload }) => {
 
   return (
     <div className="flex">
-      <div className={clsx(styles.Panel, 'bg-[#FFFFFF1A] w-[200px] h-[200px]')}>
+      <div className={clsx(styles.Panel, 'bg-[#FFFFFF1A] w-[360px] h-[200px]')}>
         <div className="break-all">{uri}</div>
         <div className="absolute bottom-8 right-8">
           <Button

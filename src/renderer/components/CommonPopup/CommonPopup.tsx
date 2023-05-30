@@ -1,4 +1,5 @@
 import React from 'react';
+import clsx from 'clsx';
 import { SwitchAddress } from './SwitchAddress';
 import { SwitchChain } from './SwitchChain';
 import { Ledger } from './Ledger';
@@ -17,7 +18,7 @@ export const CommonPopup: React.FC = () => {
       height={height}
       onClose={() => setVisible(false)}
       open={visible && !!componentName}
-      className={className}
+      className={clsx(className, 'CommonPopup')}
       destroyOnClose={false}
       getContainer={false}
     >
