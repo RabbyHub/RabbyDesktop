@@ -6,7 +6,7 @@ import {
   WALLET_BRAND_CONTENT,
   WALLET_BRAND_TYPES,
 } from '@/renderer/utils/constant';
-import { formatTokenAmount } from '@/renderer/utils/number';
+import { formatAmount } from '@/renderer/utils/number';
 import classNames from 'classnames';
 import React from 'react';
 import BN from 'bignumber.js';
@@ -81,7 +81,7 @@ export const AddressItem: React.FC<Props> = ({
       </div>
       <div className="flex gap-[25px] items-center">
         <span className="text-[12px] opacity-60">
-          {nativeTokenBalance ? formatTokenAmount(nativeTokenBalance) : 0}{' '}
+          {nativeTokenBalance ? formatAmount(nativeTokenBalance) : 0}{' '}
           {nativeTokenSymbol}
         </span>
         <div>
