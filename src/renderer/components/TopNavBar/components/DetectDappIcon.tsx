@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 
 import { useGhostTooltip } from '@/renderer/routes-popup/TopGhostWindow/useGhostWindow';
-import { useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 
 export default function DetectDappIcon({
   className,
@@ -15,41 +15,60 @@ export default function DetectDappIcon({
     defaultTooltipProps: {
       title: 'New version detected. Refresh the page to update.',
       placement: 'bottom',
+      overlayClassName: 'custom-newversion-tooltip',
+      align: {
+        offset: [0, -2],
+      },
     },
   });
 
   const triggerRef = useRef<HTMLImageElement | null>(null);
 
-  // if (!dappVersion.updated) return null;
+  useLayoutEffect(() => {
+    if (!triggerRef.current) return;
+
+    showTooltip(
+      triggerRef.current,
+      {},
+      {
+        extraData: {
+          specialType: 'detect-dapp',
+        },
+      }
+    );
+
+    return () => {
+      hideTooltip();
+    };
+  }, [showTooltip, hideTooltip]);
 
   return (
-    /* dappVersion.updated &&  */ <img
+    <img
       className={clsx(className, 'cursor-pointer')}
       src="rabby-internal://assets/icons/top-bar/icon-dapp-newversion.svg"
       ref={triggerRef}
       onClick={async () => {
         hideTooltip();
         onForceReload?.();
-        // confirmDappVersion();
       }}
-      onMouseEnter={(e) => {
-        if (!triggerRef.current) {
-          return;
-        }
+      // onMouseEnter={(e) => {
+      //   if (!triggerRef.current) {
+      //     return;
+      //   }
 
-        showTooltip(
-          triggerRef.current,
-          {},
-          {
-            extraData: {
-              specialType: 'detect-dapp',
-            },
-          }
-        );
-      }}
-      onMouseLeave={() => {
-        hideTooltip();
-      }}
+      //   showTooltip(
+      //     triggerRef.current,
+      //     {},
+      //     {
+      //       extraData: {
+      //         specialType: 'detect-dapp',
+      //       },
+      //     }
+      //   );
+      // }}
+      // onMouseLeave={() => {
+      //   hideTooltip();
+      // }}
     />
   );
 }
