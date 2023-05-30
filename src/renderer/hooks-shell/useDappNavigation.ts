@@ -106,23 +106,34 @@ export function useDetectDappVersion(shellNavInfo?: IShellNavInfo | null) {
   const lastDappOrigin = useRef<string>(dappOrigin || '');
 
   useEffect(() => {
-    if (!dappOrigin || shellNavInfo?.dapp?.type !== 'http') {
-      setDappVersion({ updated: false });
-      return;
+    if (dappOrigin) {
+      // deduplicate
+      if (lastDappOrigin.current !== dappOrigin) {
+        window.rabbyDesktop.ipcRenderer.invoke(
+          'detect-dapp-version',
+          dappOrigin
+        );
+      }
+
+      lastDappOrigin.current = dappOrigin;
     }
 
-    // deduplicate
-    if (lastDappOrigin.current === dappOrigin) return;
-    lastDappOrigin.current = dappOrigin;
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_push:dapps:version-updated',
+      (payload) => {
+        if (payload.httpDappId !== dappOrigin) return;
 
-    if (!isTabUrlEntryOfHttpDappOrigin(shellNavInfo?.tabUrl, dappOrigin))
-      return;
+        if (!dappOrigin || shellNavInfo?.dapp?.type !== 'http') {
+          setDappVersion({ updated: false });
+          return;
+        }
 
-    window.rabbyDesktop.ipcRenderer
-      .invoke('detect-dapp-version', dappOrigin)
-      .then((res) => {
-        setDappVersion({ updated: res.result.updated });
-      });
+        if (!isTabUrlEntryOfHttpDappOrigin(shellNavInfo?.tabUrl, dappOrigin))
+          return;
+
+        setDappVersion({ updated: !!payload.result?.updated });
+      }
+    );
   }, [dappOrigin, shellNavInfo]);
 
   const confirmDappVersion = useCallback(() => {

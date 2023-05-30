@@ -1,3 +1,6 @@
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import { interval } from 'rxjs';
+import { extractDappInfoFromURL } from '@/isomorphic/url';
 import { getFullAppProxyConf } from '../store/desktopApp';
 import { getDappVersionInfo, safeCapturePage } from '../utils/dapps';
 import { parseWebsiteFavicon } from '../utils/fetch';
@@ -55,7 +58,7 @@ handleIpcMainInvoke('preview-dapp', async (_, targetURL) => {
   };
 });
 
-handleIpcMainInvoke('detect-dapp-version', async (_, httpDappId: string) => {
+async function detectDappVersoin(httpDappId: string) {
   const result: IDetectHttpTypeDappVersionResult = {
     updated: false,
     latest: null,
@@ -79,7 +82,7 @@ handleIpcMainInvoke('detect-dapp-version', async (_, httpDappId: string) => {
     }
 
     return {
-      error: null,
+      error: '',
       result,
     };
   }
@@ -91,9 +94,27 @@ handleIpcMainInvoke('detect-dapp-version', async (_, httpDappId: string) => {
   result.versionQueue = dappVersion.versionQueue;
 
   return {
-    error: 'Fetch dapp version info failed',
+    error: 'Failed to fetch dapp version info',
     result,
   };
+}
+
+handleIpcMainInvoke('detect-dapp-version', async (_, httpDappId: string) => {
+  const detectResult = await detectDappVersoin(httpDappId);
+
+  if (detectResult.result.updated) {
+    const mainTabbedWin = await onMainWindowReady();
+    sendToWebContents(
+      mainTabbedWin.window.webContents,
+      '__internal_push:dapps:version-updated',
+      {
+        httpDappId,
+        result: detectResult.result,
+      }
+    );
+  }
+
+  return detectResult;
 });
 
 handleIpcMainInvoke('confirm-dapp-updated', async (_, httpDappId: string) => {
@@ -103,6 +124,31 @@ handleIpcMainInvoke('confirm-dapp-updated', async (_, httpDappId: string) => {
     error: '',
     success: true,
   };
+});
+
+const DAPP_VERSION_DETECT_INTERVAL = IS_RUNTIME_PRODUCTION
+  ? 5 * 60 * 1000
+  : 0.5 * 60 * 1000;
+interval(DAPP_VERSION_DETECT_INTERVAL).subscribe(async () => {
+  const mainTabbedWin = await onMainWindowReady();
+
+  const activeTab = mainTabbedWin.tabs.selected;
+  if (!activeTab) return;
+
+  const selectedDappId = activeTab.relatedDappId;
+  if (!selectedDappId || extractDappInfoFromURL(selectedDappId).type !== 'http')
+    return;
+
+  const detectResult = await detectDappVersoin(selectedDappId);
+
+  sendToWebContents(
+    mainTabbedWin.window.webContents,
+    '__internal_push:dapps:version-updated',
+    {
+      httpDappId: selectedDappId,
+      result: detectResult.result,
+    }
+  );
 });
 
 handleIpcMainInvoke(
