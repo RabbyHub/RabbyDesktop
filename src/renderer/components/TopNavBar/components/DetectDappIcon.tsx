@@ -1,19 +1,19 @@
-import { useDetectDappVersion } from '@/renderer/hooks-shell/useDappNavigation';
 import clsx from 'clsx';
 
 import { useGhostTooltip } from '@/renderer/routes-popup/TopGhostWindow/useGhostWindow';
 import { useRef } from 'react';
-import styles from '../index.module.less';
 
 export default function DetectDappIcon({
+  className,
   onForceReload,
 }: {
+  className?: string;
   onForceReload?: () => Promise<void> | void;
 }) {
   const [{ showTooltip, hideTooltip }] = useGhostTooltip({
     mode: 'controlled',
     defaultTooltipProps: {
-      title: 'New version detected',
+      title: 'New version detected. Refresh the page to update.',
       placement: 'bottom',
     },
   });
@@ -24,7 +24,7 @@ export default function DetectDappIcon({
 
   return (
     /* dappVersion.updated &&  */ <img
-      className={clsx(styles.newVersionIcon, 'cursor-pointer')}
+      className={clsx(className, 'cursor-pointer')}
       src="rabby-internal://assets/icons/top-bar/icon-dapp-newversion.svg"
       ref={triggerRef}
       onClick={async () => {

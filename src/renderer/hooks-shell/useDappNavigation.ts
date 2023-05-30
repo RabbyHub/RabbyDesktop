@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { canoicalizeDappUrl } from '@/isomorphic/url';
-import { atom, useAtom } from 'jotai';
 import { useWindowTabs } from './useWindowTabs';
 
 /**
@@ -96,7 +95,7 @@ export function useDappNavigation() {
   };
 }
 
-export function useDetectDappVersion(shellNavInfo: IShellNavInfo | null) {
+export function useDetectDappVersion(shellNavInfo?: IShellNavInfo | null) {
   const [dappVersion, setDappVersion] = useState<{
     updated: boolean;
   }>({

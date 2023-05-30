@@ -188,20 +188,11 @@ export const TopNavBar = () => {
           className={classNames(styles.divider)}
           style={{ ...(navIconColor && { borderColor: navDividerColor }) }}
         />
-        {activeTab?.status === 'loading' ? (
+        {activeTab?.status === 'loading' && (
           <img
             className={styles.loadingIcon}
             src="rabby-internal://assets/icons/top-bar/icon-dapp-nav-loading.svg"
           />
-        ) : (
-          dappVersion.updated && (
-            <DetectDappIcon
-              onForceReload={() => {
-                navActions.onForceReloadButtonClick();
-                confirmDappVersion();
-              }}
-            />
-          )
         )}
         <div
           className={clsx(styles.url, 'h-[100%] flex items-center')}
@@ -290,6 +281,14 @@ export const TopNavBar = () => {
             <RcIconStopload
               style={{ color: navIconColor }}
               onClick={navActions.onStopLoadingButtonClick}
+            />
+          ) : dappVersion.updated ? (
+            <DetectDappIcon
+              className={styles.detectDappIcon}
+              onForceReload={() => {
+                navActions.onForceReloadButtonClick();
+                confirmDappVersion();
+              }}
             />
           ) : (
             <RcIconReload
