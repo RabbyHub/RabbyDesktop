@@ -85,7 +85,10 @@ export const useSessionStatus = (
       walletController
         .getWalletConnectSessionStatus(account.address, account.brandName)
         .then((result) => {
-          if (!result) return;
+          if (!result) {
+            setStatus(undefined);
+            return;
+          }
           if (result === 'DISCONNECTED') {
             setIsConnect(false);
           } else {
