@@ -15,12 +15,14 @@ import { useShellWallet } from '@/renderer/hooks-shell/useShellWallet';
  */
 export function ShellWalletProvider({
   children,
+  alwaysRender = false,
 }: {
   children: React.ReactNode;
+  alwaysRender?: boolean;
 }) {
   const walletController = useShellWallet();
 
-  if (!walletController) return null;
+  if (!alwaysRender && !walletController) return null;
 
   return <>{children}</>;
 }

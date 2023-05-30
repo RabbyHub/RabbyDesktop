@@ -317,7 +317,7 @@ export function MainWindow() {
   });
 
   return (
-    <ShellWalletProvider>
+    <ShellWalletProvider alwaysRender>
       <Titlebar />
       <RouterProvider router={router} />
     </ShellWalletProvider>
