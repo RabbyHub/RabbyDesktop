@@ -88,7 +88,7 @@ export const SafeModalContent: React.FC<Props> = ({ onSuccess }) => {
     <Form
       onValuesChange={onValuesChange}
       form={form}
-      className="px-[190px] pb-[40px]"
+      className="px-[190px] pb-[40px] h-[635px]"
       onFinish={onAdd}
     >
       <Form.Item name="address">
