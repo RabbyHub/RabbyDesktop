@@ -28,7 +28,6 @@ export const ConnectStatus: React.FC<Props> = ({
   const hasWallet = useBrandNameHasWallet(displayBrandName);
   const IconClassName = 'inline-block mr-[6px] w-[14px] h-[14px] mb-2';
 
-  console.log('ConnectStatus', status);
   const statusText = React.useMemo(() => {
     switch (status) {
       case 'RECEIVED':

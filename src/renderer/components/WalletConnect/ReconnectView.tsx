@@ -56,7 +56,6 @@ export const ReconnectView: React.FC = () => {
 
   const init = async () => {
     if (!account) return;
-
     setCurrentAccount({
       ...account,
       brandName: account.realBrandName || account.brandName,
@@ -99,7 +98,7 @@ export const ReconnectView: React.FC = () => {
 
   return (
     <div className="watchaddress">
-      {currentAccount && (
+      {currentAccount && visible && (
         <QRCodeContainer
           uri={qrCodeContent}
           onReload={handleRefreshQrCode}
