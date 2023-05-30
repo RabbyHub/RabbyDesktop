@@ -1,7 +1,6 @@
-.SelectModalContent {
-  padding-bottom: 40px;
-  margin-top: -20px;
+@import '@/renderer/css/mixins.less';
 
+.SelectModalContent {
   .panel {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 8px;
@@ -205,4 +204,17 @@
   .addressList {
     margin-bottom: 163px;
   }
+}
+
+.SelectAddAddrModal :global {
+  .ant-modal-body {
+    max-height: 655px;
+    padding-bottom: 24px !important;
+    overflow-y: overlay;
+    .chrome-like-scrollbar();
+  }
+}
+
+.SelectAddAddrModalWrapper {
+  overflow-y: hidden;
 }

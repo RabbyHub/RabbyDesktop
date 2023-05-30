@@ -6,6 +6,7 @@ import {
 import { WALLET_BRAND_TYPES } from '@/renderer/utils/constant';
 import { Modal } from '../Modal/Modal';
 import { SelectModalContent } from './SelectModalContent';
+import styles from './index.module.less';
 
 export const SelectAddAddressTypeModalInSubview: React.FC = () => {
   const { showZSubview } = useZPopupLayerOnMain();
@@ -38,6 +39,8 @@ export const SelectAddAddressTypeModalInSubview: React.FC = () => {
       destroyOnClose
       onCancel={closeSubview}
       footer={null}
+      className={styles.SelectAddAddrModal}
+      wrapClassName={styles.SelectAddAddrModalWrapper}
     >
       <SelectModalContent
         onSelectType={(type, _brand) => {
