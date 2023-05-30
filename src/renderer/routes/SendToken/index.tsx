@@ -214,7 +214,7 @@ const SendTokenWrapper = styled.div`
       margin-right: 4px;
     }
     &__content {
-      max-width: 312px;
+      max-width: 550px;
       margin-bottom: 0;
     }
     &.granted {
