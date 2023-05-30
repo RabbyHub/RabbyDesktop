@@ -23,17 +23,6 @@ export const splitNumberByStep = (
   return n.toFormat(fmt);
 };
 
-export const formatTokenAmount = (amount: number | string, decimals = 4) => {
-  if (!amount) return '0';
-  const bn = new BigNumber(amount);
-  const str = bn.toFixed();
-  const split = str.split('.');
-  if (!split[1] || split[1].length < decimals) {
-    return splitNumberByStep(bn.toFixed());
-  }
-  return splitNumberByStep(bn.toFixed(decimals));
-};
-
 export const numberWithCommasIsLtOne = (
   x?: number | string | BigNumber,
   precision?: number
@@ -104,13 +93,63 @@ export const formatUsdValue = (value: string | number) => {
   return '<$0.01';
 };
 
-export const formatAmount = (amount: string | number, decimals = 4) => {
-  if (amount > 1e9) {
-    return `${new BigNumber(amount).div(1e9).toFormat(4)}B`;
+export const formatAmount = (amount: string | number) => {
+  const num = Number(amount);
+  if (!num && num !== 0) {
+    return '';
   }
-  if (amount > 10000) return formatNumber(amount);
-  if (amount > 1) return formatNumber(amount, 4);
-  return formatNumber(amount, decimals);
+
+  const sign = `${num < 0 ? '-' : ''}`;
+  BigNumber.config({
+    EXPONENTIAL_AT: [-10, 20],
+  });
+  const absNum = new BigNumber(amount).abs();
+
+  if (absNum.lt(1)) {
+    if (num === 0) {
+      return `0.0000`;
+    }
+    const preNum = absNum.toPrecision(4);
+
+    if (preNum.length > 10) {
+      return sign + absNum.toExponential(4);
+    }
+
+    return sign + preNum;
+  }
+
+  const format = {
+    prefix: '',
+    decimalSeparator: '.',
+    groupSeparator: ',',
+    groupSize: 3,
+    secondaryGroupSize: 0,
+    fractionGroupSeparator: ' ',
+    fractionGroupSize: 0,
+    suffix: '',
+  };
+
+  if (absNum.lt(10_000)) {
+    return sign + absNum.toFormat(4, format);
+  }
+
+  if (absNum.lt(1000_000)) {
+    return sign + absNum.toFormat(2, format);
+  }
+
+  if (absNum.gte(1e12)) {
+    return `${sign}${absNum.div(1e9).toFormat(4, format)}T`;
+  }
+
+  if (absNum.gte(1e9)) {
+    return `${sign}${absNum.div(1e9).toFormat(4, format)}B`;
+  }
+
+  if (absNum.lt(1000_000)) {
+    return sign + absNum.toFormat(2, format);
+  }
+
+  return sign + absNum.toFormat(0, format);
 };
 
 export const intToHex = (n: number) => {

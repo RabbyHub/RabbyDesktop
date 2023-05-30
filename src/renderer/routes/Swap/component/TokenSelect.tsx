@@ -7,7 +7,7 @@ import { TokenItem } from '@debank/rabby-api/dist/types';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import TokenWithChain from '@/renderer/components/TokenWithChain';
 import IconRcSearch from '@/../assets/icons/swap/search.svg?rc';
-import { formatTokenAmount, splitNumberByStep } from '@/renderer/utils/number';
+import { formatAmount, splitNumberByStep } from '@/renderer/utils/number';
 import { useAsync, useDebounce } from 'react-use';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import IconClose from '@/../assets/icons/swap/modal-close.svg?rc';
@@ -426,10 +426,10 @@ const SwapToken = ({
         </div>
       </div>
       <div className="right">
-        <div className="balance" title={formatTokenAmount(t.amount)}>
+        <div className="balance" title={formatAmount(t.amount)}>
           {t.amount !== 0 && t.amount < 0.0001
             ? '< 0.0001'
-            : formatTokenAmount(t.amount)}
+            : formatAmount(t.amount)}
         </div>
         <div
           title={splitNumberByStep(
@@ -468,10 +468,10 @@ const DefaultToken = ({
       >
         ${splitNumberByStep(new BigNumber(t.price || 0).toFixed(2))}
       </div>
-      <div className="balance text-15" title={formatTokenAmount(t.amount)}>
+      <div className="balance text-15" title={formatAmount(t.amount)}>
         {t.amount !== 0 && t.amount < 0.0001
           ? '< 0.0001'
-          : formatTokenAmount(t.amount)}
+          : formatAmount(t.amount)}
       </div>
     </div>
   );
