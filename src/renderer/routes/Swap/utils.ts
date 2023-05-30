@@ -360,6 +360,11 @@ export const getDexQuote = async ({
   setQuote?: (quote: TDexQuoteData) => void;
 }): Promise<TDexQuoteData> => {
   try {
+    let gasPrice;
+    if (dexId === DEX_ENUM.OPENOCEAN) {
+      const gasMarket = await walletOpenapi.gasMarket(CHAINS[chain].serverId);
+      gasPrice = gasMarket?.[1]?.price;
+    }
     const data = await getQuote(
       isSwapWrapToken(payToken.id, receiveToken.id, chain)
         ? DEX_ENUM.WRAPTOKEN
@@ -376,6 +381,7 @@ export const getDexQuote = async ({
         slippage: Number(slippage),
         feeRate: Number(feeAfterDiscount) || 0,
         chain,
+        gasPrice,
       }
     );
     let preExecResult = null;
