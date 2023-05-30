@@ -53,6 +53,7 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["METER"] = "METER";
     CHAINS_ENUM["ETC"] = "ETC";
     CHAINS_ENUM["FSN"] = "FSN";
+    CHAINS_ENUM["PULSE"] = "PULSE";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -901,6 +902,22 @@ export const CHAINS_RAW = {
         nativeTokenDecimals: 18,
         eip: {
             "1559": false,
+        },
+    },
+    [CHAINS_ENUM.PULSE]: {
+        id: 369,
+        serverId: "pls",
+        network: "369",
+        name: "Pulse",
+        nativeTokenSymbol: "PLS",
+        nativeTokenAddress: "pls",
+        enum: CHAINS_ENUM.PULSE,
+        hex: "0x171",
+        scanLink: "https://scan.pulsechain.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/pls/aa6be079fa9eb568e02150734ebb3db0.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
         },
     },
 };
