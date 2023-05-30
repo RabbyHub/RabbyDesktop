@@ -137,3 +137,8 @@ onIpcMainInternalEvent(
     });
   }
 );
+
+(function initStore() {
+  // clear dappVersionMap every time bootstrap
+  cacheStore.set('dappVersionMap', {});
+})();

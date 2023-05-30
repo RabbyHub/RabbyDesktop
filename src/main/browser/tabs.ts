@@ -8,8 +8,12 @@ import {
 } from '@/isomorphic/const-size-next';
 import { DAPP_ZOOM_VALUES, EnumMatchDappType } from '@/isomorphic/constants';
 import { formatZoomValue } from '@/isomorphic/primitive';
+import { isTabUrlEntryOfHttpDappOrigin } from '@/isomorphic/dapp';
 import { NATIVE_HEADER_H } from '../../isomorphic/const-size-classical';
-import { canoicalizeDappUrl } from '../../isomorphic/url';
+import {
+  canoicalizeDappUrl,
+  extractDappInfoFromURL,
+} from '../../isomorphic/url';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import {
   BrowserViewManager,
@@ -181,6 +185,19 @@ export class Tab {
 
     this.view!.webContents.on('dom-ready', () => {
       if (isDappViewLoadingForTab(this.id)) hideLoadingView();
+
+      const currentURL = this.view?.webContents.getURL() || '';
+      if (
+        currentURL &&
+        this.relatedDappId &&
+        extractDappInfoFromURL(this.relatedDappId).type === 'http' &&
+        isTabUrlEntryOfHttpDappOrigin(currentURL, this.relatedDappId)
+      ) {
+        emitIpcMainEvent(
+          '__internal_main:dapp:confirm-dapp-updated',
+          this.relatedDappId
+        );
+      }
     });
 
     this._patchWindowBuiltInMethods();
@@ -245,6 +262,9 @@ export class Tab {
       viewMngr.recycleView(this.view!);
     }
 
+    this.window = undefined;
+    this.view = undefined;
+
     emitIpcMainEvent('__internal_main:tabbed-window:tab-destroyed', {
       windowId: this.windowId!,
       tabId: this.id,
@@ -255,9 +275,6 @@ export class Tab {
         tabs: lastOpenInfo,
       });
     }
-
-    this.window = undefined;
-    this.view = undefined;
   }
 
   makeTabLastOpenInfo(): IDappLastOpenInfo | null {
@@ -678,10 +695,12 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
   select(tabId: chrome.tabs.Tab['id']) {
     const tab = this.get(tabId);
     if (!tab) return;
-    if (this.selected) this.selected.hide();
+    const prevTab = this.selected;
+    if (prevTab) prevTab.hide();
+
     tab.show();
     this.selected = tab;
-    this.emit('tab-selected', tab);
+    this.emit('tab-selected', tab, prevTab);
 
     return tab;
   }

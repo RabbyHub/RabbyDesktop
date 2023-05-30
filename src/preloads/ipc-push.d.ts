@@ -34,6 +34,6 @@ type ChannelPushToWebContents = {
 
   '__internal_push:dapps:version-updated': {
     httpDappId: string;
-    result: IDetectHttpTypeDappVersionResult;
+    result: Pick<IDetectHttpTypeDappVersionResult, 'updated'>;
   };
 };
