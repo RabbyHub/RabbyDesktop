@@ -13,11 +13,16 @@ interface Props {
 export const AddressItem: React.FC<Props> = ({ address, type, brandName }) => {
   const [aliasName, setAliasName] = React.useState<string>('');
   const [isEdit, setIsEdit] = React.useState<boolean>(false);
+  const inputRef = React.useRef<any>(null);
 
   React.useEffect(() => {
     walletController.getAlianName(address).then((name) => {
       setAliasName(name);
     });
+
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 200);
   }, [address]);
 
   const onUpdateAliasName = React.useCallback(
@@ -37,6 +42,7 @@ export const AddressItem: React.FC<Props> = ({ address, type, brandName }) => {
     <div className={styles.AddressItem}>
       <div className={styles.name}>
         <RabbyInput
+          ref={inputRef}
           value={aliasName}
           onChange={(e) => setAliasName(e.target.value)}
           onBlur={onUpdateAliasName}
