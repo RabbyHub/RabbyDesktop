@@ -62,6 +62,10 @@ const IconWalletConnect =
   'rabby-internal://assets/icons/walletlogo/walletconnect28.svg';
 const IconBinance = 'rabby-internal://assets/icons/walletlogo/binance.png';
 const IconBitcoin = 'rabby-internal://assets/icons/walletlogo/bitcoin.svg';
+const LogoBitkeep = 'rabby-internal://assets/icons/walletlogo/bitkeep.svg';
+const LogoRainbow = 'rabby-internal://assets/icons/walletlogo/rainbow.svg';
+const LogoUniswap = 'rabby-internal://assets/icons/walletlogo/uniswap.svg';
+const LogoZerion = 'rabby-internal://assets/icons/walletlogo/zerion.svg';
 
 export { CHAINS, CHAINS_ENUM };
 
@@ -293,6 +297,9 @@ export const EVENTS = {
     INIT: 'WALLETCONNECT_INIT',
     INITED: 'WALLETCONNECT_INITED',
     TRANSPORT_ERROR: 'TRANSPORT_ERROR',
+    SESSION_STATUS_CHANGED: 'SESSION_STATUS_CHANGED',
+    SESSION_ACCOUNT_CHANGED: 'SESSION_ACCOUNT_CHANGED',
+    SESSION_NETWORK_DELAY: 'SESSION_NETWORK_DELAY',
   },
   GNOSIS: {
     TX_BUILT: 'TransactionBuilt',
@@ -304,6 +311,7 @@ export const EVENTS = {
   LEDGER: {
     REJECTED: 'LEDGER_REJECTED',
     REJECT_APPROVAL: 'LEDGER_REJECT_APPROVAL',
+    SESSION_CHANGE: 'LEDGER_SESSION_CHANGE',
   },
 };
 
@@ -330,6 +338,10 @@ export enum WALLET_BRAND_TYPES {
   WalletConnect = 'WalletConnect',
   Binance = 'Binance',
   Bitcoin = 'Bitcoin',
+  Rainbow = 'Rainbow',
+  Bitkeep = 'Bitkeep',
+  // Uniswap = 'Uniswap',
+  Zerion = 'Zerion',
 }
 
 enum WALLET_BRAND_CATEGORY {
@@ -479,7 +491,7 @@ export const WALLET_BRAND_CONTENT: {
   },
   [WALLET_BRAND_TYPES.METAMASK]: {
     id: 14,
-    name: 'MetaMask Mobile',
+    name: 'MetaMask',
     brand: WALLET_BRAND_TYPES.METAMASK,
     icon: IconMetaMask,
     image: IconMetaMask,
@@ -524,7 +536,7 @@ export const WALLET_BRAND_CONTENT: {
   },
   [WALLET_BRAND_TYPES.WalletConnect]: {
     id: 100,
-    name: 'Wallet Connect',
+    name: 'WalletConnect',
     brand: WALLET_BRAND_TYPES.WalletConnect,
     icon: IconWalletConnect,
     image: LogoWalletConnect,
@@ -549,6 +561,42 @@ export const WALLET_BRAND_CONTENT: {
     connectType: BRAND_WALLET_CONNECT_TYPE.Bundle,
     category: WALLET_BRAND_CATEGORY.INSTITUTIONAL,
   },
+  [WALLET_BRAND_TYPES.Rainbow]: {
+    id: 21,
+    name: 'Rainbow',
+    brand: WALLET_BRAND_TYPES.Rainbow,
+    icon: LogoRainbow,
+    image: LogoRainbow,
+    connectType: BRAND_WALLET_CONNECT_TYPE.WalletConnect,
+    category: WALLET_BRAND_CATEGORY.MOBILE,
+  },
+  [WALLET_BRAND_TYPES.Bitkeep]: {
+    id: 22,
+    name: 'Bitkeep',
+    brand: WALLET_BRAND_TYPES.Bitkeep,
+    icon: LogoBitkeep,
+    image: LogoBitkeep,
+    connectType: BRAND_WALLET_CONNECT_TYPE.WalletConnect,
+    category: WALLET_BRAND_CATEGORY.MOBILE,
+  },
+  [WALLET_BRAND_TYPES.Zerion]: {
+    id: 23,
+    name: 'Zerion Wallet',
+    brand: WALLET_BRAND_TYPES.Zerion,
+    icon: LogoZerion,
+    image: LogoZerion,
+    connectType: BRAND_WALLET_CONNECT_TYPE.WalletConnect,
+    category: WALLET_BRAND_CATEGORY.MOBILE,
+  },
+  // [WALLET_BRAND_TYPES.Uniswap]: {
+  //   id: 24,
+  //   name: 'Uniswap Wallet',
+  //   brand: WALLET_BRAND_TYPES.Uniswap,
+  //   icon: LogoUniswap,
+  //   image: LogoUniswap,
+  //   connectType: BRAND_WALLET_CONNECT_TYPE.WalletConnect,
+  //   category: WALLET_BRAND_CATEGORY.MOBILE,
+  // },
 };
 
 export const KEYRING_ICONS = {

@@ -48,6 +48,7 @@ import { TopNavBar } from '../TopNavBar';
 import { MainWindowRouteData } from './type';
 import { DappViewWrapper } from '../DappView';
 import { FixedBackHeader } from '../FixedBackHeader';
+import { ShellWalletProvider } from '../ShellWallet';
 
 const logGetUserDapp = async () => {
   const lastLogTime = localStorage.getItem('matomo_last_log_time') || 0;
@@ -316,9 +317,9 @@ export function MainWindow() {
   });
 
   return (
-    <>
+    <ShellWalletProvider alwaysRender>
       <Titlebar />
       <RouterProvider router={router} />
-    </>
+    </ShellWalletProvider>
   );
 }

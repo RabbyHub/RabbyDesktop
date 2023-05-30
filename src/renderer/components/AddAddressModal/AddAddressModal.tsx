@@ -10,7 +10,8 @@ export const AddAddressModal: React.FC = () => {
 
   return (
     <AddAddressModalInner
-      keyringType={svState?.keyringType ?? undefined}
+      keyringType={svState?.keyringType}
+      brand={svState?.brand}
       onCancel={closeSubview}
       visible={svVisible}
       showEntryButton={!!svState?.showEntryButton}

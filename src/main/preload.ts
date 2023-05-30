@@ -49,6 +49,7 @@ if (IS_BUILTIN_WEBVIEW && !window.rabbyDesktop) {
       ipcRenderer: {
         ...(isExtensionBackground(window.location.href) && {
           invoke: ipcRendererObj.invoke,
+          backgroundOn: ipcRendererObj.on,
         }),
         sendMessage: ipcRendererObj.sendMessage,
       },

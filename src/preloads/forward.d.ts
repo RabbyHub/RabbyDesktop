@@ -42,6 +42,7 @@ type ZViewStates = {
     keyringType: string;
     showEntryButton?: boolean;
     showBackButton?: boolean;
+    brand?: import('@/renderer/utils/constant').WALLET_BRAND_TYPES;
   };
   'address-management': {
     hidden?: boolean;

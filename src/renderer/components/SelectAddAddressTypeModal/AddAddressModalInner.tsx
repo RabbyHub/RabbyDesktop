@@ -1,7 +1,7 @@
 import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { useMessageForwardToMainwin } from '@/renderer/hooks/useViewsMessage';
 import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
-import { KEYRING_CLASS } from '@/renderer/utils/constant';
+import { KEYRING_CLASS, WALLET_BRAND_TYPES } from '@/renderer/utils/constant';
 import React from 'react';
 import { SafeModal } from '../SafeModal/SafeModal';
 import { HDManagerModal } from '../HDManager/HDManagerModal';
@@ -10,6 +10,7 @@ import { ContactModal } from './ContactModal';
 
 export interface Props {
   keyringType?: string;
+  brand?: WALLET_BRAND_TYPES;
   onBack?: () => void;
   visible: boolean;
   onCancel: () => void;
@@ -19,6 +20,7 @@ export interface Props {
 
 export const AddAddressModalInner: React.FC<Props> = ({
   keyringType,
+  brand,
   onBack,
   visible,
   onCancel,
@@ -68,9 +70,10 @@ export const AddAddressModalInner: React.FC<Props> = ({
     );
   }
 
-  if (keyringType === KEYRING_CLASS.WALLETCONNECT) {
+  if (keyringType === KEYRING_CLASS.WALLETCONNECT && brand) {
     return (
       <WalletConnectModal
+        brand={brand}
         centered
         open={visible}
         title="Wallet Connect"

@@ -18,6 +18,7 @@ import './streams/popupOnMainwin';
 import './streams/popupViewOnMainwin';
 import './streams/webContents';
 import './streams/appProxy';
+import './streams/usb';
 import './streams/hid';
 import './streams/dapps';
 import './streams/ipfs';

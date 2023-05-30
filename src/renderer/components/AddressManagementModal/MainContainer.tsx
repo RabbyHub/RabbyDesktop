@@ -17,6 +17,7 @@ import { Body } from './Body';
 import { Footer } from './Footer';
 import { Header } from './Header';
 import { RefreshButton } from './RefreshButton';
+import { CommonPopupProvider } from '../CommonPopup/CommonPopupProvider';
 
 export const MainContainer: React.FC = () => {
   const { getHighlightedAddressesAsync, removeAddress, highlightedAddresses } =
@@ -122,7 +123,9 @@ export const MainContainer: React.FC = () => {
 
   React.useEffect(() => {
     getHighlightedAddressesAsync().then(getAllAccountsToDisplay);
-  }, [getHighlightedAddressesAsync, getAllAccountsToDisplay]);
+    // avoid duplicated call
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   React.useEffect(() => {
     whitelistInit();
@@ -160,24 +163,26 @@ export const MainContainer: React.FC = () => {
 
   return (
     <div className={styles.MainContainer}>
-      <RefreshButton
-        loading={isUpdateAllBalanceLoading}
-        onClick={handleUpdateAllBalance}
-      />
-      <Header
-        onSelect={setSelectedAccount}
-        currentAccount={currentDisplayAccount}
-        isUpdatingBalance={isUpdateAllBalanceLoading}
-      />
-      <Body
-        onSelect={setSelectedAccount}
-        onSwitchAccount={handleSwitchAccount}
-        onDelete={handleDelete}
-        accounts={sortedAccountsList}
-        contacts={watchSortedAccountsList}
-        isUpdatingBalance={isUpdateAllBalanceLoading}
-      />
-      <Footer />
+      <CommonPopupProvider>
+        <RefreshButton
+          loading={isUpdateAllBalanceLoading}
+          onClick={handleUpdateAllBalance}
+        />
+        <Header
+          onSelect={setSelectedAccount}
+          currentAccount={currentDisplayAccount}
+          isUpdatingBalance={isUpdateAllBalanceLoading}
+        />
+        <Body
+          onSelect={setSelectedAccount}
+          onSwitchAccount={handleSwitchAccount}
+          onDelete={handleDelete}
+          accounts={sortedAccountsList}
+          contacts={watchSortedAccountsList}
+          isUpdatingBalance={isUpdateAllBalanceLoading}
+        />
+        <Footer />
+      </CommonPopupProvider>
     </div>
   );
 };

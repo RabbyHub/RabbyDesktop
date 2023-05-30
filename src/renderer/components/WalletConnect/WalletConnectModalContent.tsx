@@ -5,32 +5,38 @@ import eventBus from '@/renderer/utils-shell/eventBus';
 import {
   EVENTS,
   WALLETCONNECT_STATUS_MAP,
+  WALLET_BRAND_CONTENT,
   WALLET_BRAND_TYPES,
 } from '@/renderer/utils/constant';
-import { Button, message, Tabs } from 'antd';
+import { message } from 'antd';
 import React from 'react';
-import { BridgeFormModal } from './BridgeFormModal';
-import { QRCodePanel } from './QRCodePanel';
-import { URLPanel } from './URLPanel';
 import styles from './WalletConnectModal.module.less';
+import { useSessionStatus } from './useSessionStatus';
+import { QRCodeContainer } from './QRCodeContainer';
 
 type Account = import('@/isomorphic/types/rabbyx').Account;
 
-export const DEFAULT_BRIDGE = 'https://bridge.walletconnect.org';
-
-const DEFAULT_BRAND = WALLET_BRAND_TYPES.WalletConnect;
+export const DEFAULT_BRIDGE = '';
 
 interface Props {
   onSuccess: (accounts: Account[]) => void;
+  brand: WALLET_BRAND_TYPES;
 }
 
-export const WalletConnectModalContent: React.FC<Props> = ({ onSuccess }) => {
+export const WalletConnectModalContent: React.FC<Props> = ({
+  onSuccess,
+  brand,
+}) => {
   const { getAllAccountsToDisplay } = useAccountToDisplay();
   const [walletConnectUri, setWalletConnectUri] = React.useState('');
   const [result, setResult] = React.useState('');
   const [bridgeURL, setBridgeURL] = React.useState(DEFAULT_BRIDGE);
-  const [visibleBridgeForm, setVisibleBridgeForm] = React.useState(false);
   const [tab, setTab] = React.useState<'QRCode' | 'URL'>('QRCode');
+  const [curStashId, setCurStashId] = React.useState<number | null>(null);
+  const { status: sessionStatus, currAccount } = useSessionStatus();
+  const [runParams, setRunParams] = React.useState<
+    Parameters<typeof run> | undefined
+  >();
 
   const [run] = useWalletRequest(walletController.importWalletConnect, {
     onSuccess(data) {
@@ -45,12 +51,29 @@ export const WalletConnectModalContent: React.FC<Props> = ({ onSuccess }) => {
     },
   });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleRun = async (options: Parameters<typeof run>) => {
+    const [payload, brandName] = options;
+    const { account, peerMeta } = payload as any;
+
+    options[0] = account;
+    if (brandName === WALLET_BRAND_TYPES.WalletConnect) {
+      if (peerMeta?.name) {
+        options[1] = currAccount!.brandName;
+        options[4] = peerMeta.name;
+        options[5] = peerMeta.icons?.[0];
+      }
+    }
+    run(...options);
+  };
+
   const handleImportByWalletConnect = React.useCallback(async () => {
     const { uri, stashId } = await walletController.initWalletConnect(
-      DEFAULT_BRAND,
-      bridgeURL
+      brand,
+      curStashId
     );
     setWalletConnectUri(uri);
+    setCurStashId(stashId);
 
     eventBus.removeAllEventListeners(EVENTS.WALLETCONNECT.STATUS_CHANGED);
     eventBus.addEventListener(
@@ -59,12 +82,12 @@ export const WalletConnectModalContent: React.FC<Props> = ({ onSuccess }) => {
         switch (status) {
           case WALLETCONNECT_STATUS_MAP.CONNECTED:
             setResult(payload);
-            run(
+            setRunParams([
               payload,
-              DEFAULT_BRAND,
+              brand,
               bridgeURL,
-              stashId === null ? undefined : stashId
-            );
+              stashId === null ? undefined : stashId,
+            ]);
             break;
           case WALLETCONNECT_STATUS_MAP.FAILD:
           case WALLETCONNECT_STATUS_MAP.REJECTED:
@@ -78,67 +101,47 @@ export const WalletConnectModalContent: React.FC<Props> = ({ onSuccess }) => {
         }
       }
     );
-  }, [bridgeURL, run]);
+  }, [brand, bridgeURL, curStashId]);
 
   React.useEffect(() => {
     handleImportByWalletConnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bridgeURL]);
+  }, []);
+
+  React.useEffect(() => {
+    // refresh when status is not connected
+    if (sessionStatus && sessionStatus !== 'CONNECTED') {
+      handleImportByWalletConnect();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionStatus]);
+
+  React.useEffect(() => {
+    if (sessionStatus === 'CONNECTED' && runParams?.length) {
+      handleRun(runParams);
+    } else {
+      setRunParams(undefined);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionStatus, runParams]);
+
+  const isCommonWalletConnect = brand === WALLET_BRAND_TYPES.WalletConnect;
 
   return (
     <div className={styles.Content}>
-      <Tabs
-        activeKey={tab}
-        onChange={(active) => setTab(active as any)}
-        className="rabby-tabs"
-        items={[
-          {
-            label: 'QR code',
-            key: 'QRCode',
-            children: (
-              <QRCodePanel
-                uri={walletConnectUri}
-                onReload={handleImportByWalletConnect}
-              />
-            ),
-          },
-          {
-            label: 'URL',
-            key: 'URL',
-            children: (
-              <URLPanel
-                uri={walletConnectUri}
-                onReload={handleImportByWalletConnect}
-              />
-            ),
-          },
-        ]}
-      />
-
-      <div className={styles.Footer}>
-        <p className={styles.Tip}>
-          WalletConnect will be unstable if you use VPN.
-        </p>
-        <Button
-          className={styles.BridgeButton}
-          onClick={() => setVisibleBridgeForm(true)}
-          type="link"
-          icon={
-            <img
-              className="mr-4 block"
-              src="rabby-internal://assets/icons/walletconnect/setting.svg"
-            />
-          }
-        >
-          Change bridge server
-        </Button>
+      <div className="w-[80px] mb-[52px] relative mx-auto">
+        <img className="w-full" src={WALLET_BRAND_CONTENT[brand].icon} />
+        {!isCommonWalletConnect && (
+          <img
+            className="absolute -bottom-[3px] -right-[3px] w-[24px]"
+            src={WALLET_BRAND_CONTENT.WalletConnect.icon}
+          />
+        )}
       </div>
-      <BridgeFormModal
-        defaultValue={DEFAULT_BRIDGE}
-        value={bridgeURL}
-        onChange={setBridgeURL}
-        open={visibleBridgeForm}
-        onClose={() => setVisibleBridgeForm(false)}
+      <QRCodeContainer
+        uri={walletConnectUri}
+        onReload={handleImportByWalletConnect}
+        brand={brand}
       />
     </div>
   );

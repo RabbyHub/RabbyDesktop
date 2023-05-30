@@ -4,7 +4,7 @@ import './modal.less';
 
 export interface Props extends Omit<ModalProps, 'onCancel'> {
   backable?: boolean;
-  subtitle?: string;
+  subtitle?: React.ReactNode;
   onBack?: () => void;
   onCancel?: (e?: React.MouseEvent<HTMLElement>) => void;
   smallTitle?: boolean;

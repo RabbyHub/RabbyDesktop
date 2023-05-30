@@ -17,6 +17,7 @@ import styles from './index.module.less';
 import { useAccountInfo } from './useAccountInfo';
 import { TipsWrapper } from '../TipWrapper';
 import { DeleteWrapper } from '../DeleteWrapper';
+import { SignalBridge } from '../ConnectStatus/SignalBridge';
 
 interface Props {
   account: IDisplayedAccountWithBalance;
@@ -110,6 +111,7 @@ export const AccountItem: React.FC<Props> = ({
         <div onClick={onClick} className={styles.main}>
           <div className={styles.logo}>
             <img src={addressTypeIcon} alt={account.brandName} />
+            <SignalBridge {...account} />
           </div>
           <div className={styles.content}>
             <div className={clsx(styles.part, styles.partName)}>

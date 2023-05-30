@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react';
 import { atom, useAtom } from 'jotai';
 
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
-import { waitRabbyXGhostBgLoaded } from '../ipcRequest/rabbyx';
 import { makeShellWallet } from '../utils-shell/shell-wallet';
 
 type ShellWalletType = ReturnType<typeof makeShellWallet>;
@@ -19,18 +18,20 @@ export function useShellWallet() {
   useEffect(() => {
     if (instanceRef.current) return;
 
-    waitRabbyXGhostBgLoaded().then(({ rabbyxExtId }) => {
-      if (instanceRef.current) return;
+    window.rabbyDesktop?.ipcRenderer
+      .invoke('__internal_invoke:rabbyx:waitExtBgGhostLoaded')
+      .then(({ rabbyxExtId }) => {
+        if (instanceRef.current) return;
 
-      const wallet = makeShellWallet(rabbyxExtId);
-      instanceRef.current = wallet;
+        const wallet = makeShellWallet(rabbyxExtId);
+        instanceRef.current = wallet;
 
-      if (!IS_RUNTIME_PRODUCTION) {
-        (window as any).shellWallet = wallet;
-      }
+        if (!IS_RUNTIME_PRODUCTION) {
+          (window as any).shellWallet = wallet;
+        }
 
-      setShellWallet(wallet);
-    });
+        setShellWallet(wallet);
+      });
   }, [setShellWallet]);
 
   return shellWallet;

@@ -27,3 +27,11 @@ export function formatZoomValue(zoomPercent: number) {
     zoomPercentText: `${zoomPercent}%`,
   };
 }
+
+export function numberToHex(num: number) {
+  return `0x${num.toString(16)}`;
+}
+
+export function hexToNumer(hex: string) {
+  return parseInt(hex, 16);
+}

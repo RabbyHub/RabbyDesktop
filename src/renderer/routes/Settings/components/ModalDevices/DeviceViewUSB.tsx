@@ -3,6 +3,8 @@ import { keywordMatch } from '@/isomorphic/string';
 
 import { useEffect, useMemo } from 'react';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
+import { numberToHex } from '@/isomorphic/primitive';
+import { usePrevious } from 'react-use';
 import SvgIconDeviceManufacturer from './device-manufacturer.svg?rc';
 import { useIsViewingDevices } from '../../settingHooks';
 import styles from './index.module.less';
@@ -38,11 +40,13 @@ export default function DeviceViewUSB() {
   }, [usbDevices, debouncedKeyword]);
 
   const { isViewingDevices } = useIsViewingDevices();
+  const isPreViewingDevices = usePrevious(isViewingDevices);
 
   useEffect(() => {
-    if (!isViewingDevices) return;
-    fetchDevices();
-  }, [isViewingDevices, fetchDevices]);
+    if (!isPreViewingDevices && isViewingDevices) {
+      fetchDevices();
+    }
+  }, [isPreViewingDevices, isViewingDevices, fetchDevices]);
 
   return (
     <>
@@ -106,7 +110,9 @@ export default function DeviceViewUSB() {
                       <DeviceAttr
                         className={styles.J_VENDORID}
                         label="VendorId"
-                        value={deviceItem.vendorId}
+                        value={`${deviceItem.vendorId} (${numberToHex(
+                          deviceItem.vendorId
+                        )})`}
                       />
                       <DeviceAttr label="SN" value={deviceItem.serialNumber} />
 

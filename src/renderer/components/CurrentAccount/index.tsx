@@ -19,6 +19,7 @@ import {
   getAddDropdownKeyrings,
 } from '../AddAddressDropdown/constants';
 import styles from './index.module.less';
+import { SignalBridge } from '../ConnectStatus/SignalBridge';
 
 export const CurrentAccount = ({ className }: { className?: string }) => {
   const { currentAccount } = useCurrentAccount();
@@ -62,7 +63,10 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
       }}
     >
       <div className={styles.content}>
-        <img className={styles.logo} src={addressTypeIcon} alt="key" />
+        <div className={styles.logo}>
+          <img className="w-full" src={addressTypeIcon} alt="key" />
+          <SignalBridge {...currentAccount} />
+        </div>
         <span className={styles.aliasName}>{currentAccount?.alianName}</span>
       </div>
       <div className={styles.dockRight}>
@@ -84,6 +88,7 @@ const DROPDOWN_POPUP_H =
 
 export const AddNewAccount = ({ className }: { className?: string }) => {
   const divRef = useRef<HTMLDivElement>(null);
+  const { showZSubview, hideZSubview } = useZPopupLayerOnMain();
 
   useClickOutSide(divRef, () => {
     hideMainwinPopupview('add-address-dropdown');
@@ -93,22 +98,26 @@ export const AddNewAccount = ({ className }: { className?: string }) => {
     <div
       className={clsx(styles.addNewAccount, className)}
       ref={divRef}
-      onMouseEnter={(evt) => {
-        if (!divRef.current) return;
-        const pos = divRef.current.getBoundingClientRect();
-
-        // const divRect = (evt.target as HTMLDivElement).getBoundingClientRect();
-        showMainwinPopupview({
-          type: 'add-address-dropdown',
-          triggerRect: {
-            x: pos.x - ADD_DROPDOWN_LEFT_OFFSET,
-            // y: pos.y + 40, // if you wanna the standalone add-address-dropdown below the add button
-            y: pos.y,
-            width: 240,
-            height: Math.max(300, DROPDOWN_POPUP_H),
-          },
-        });
+      onClick={() => {
+        showZSubview('select-add-address-type-modal');
+        hideZSubview('address-management');
       }}
+      // onMouseEnter={(evt) => {
+      //   if (!divRef.current) return;
+      //   const pos = divRef.current.getBoundingClientRect();
+
+      //   // const divRect = (evt.target as HTMLDivElement).getBoundingClientRect();
+      //   showMainwinPopupview({
+      //     type: 'add-address-dropdown',
+      //     triggerRect: {
+      //       x: pos.x - ADD_DROPDOWN_LEFT_OFFSET,
+      //       // y: pos.y + 40, // if you wanna the standalone add-address-dropdown below the add button
+      //       y: pos.y,
+      //       width: 240,
+      //       height: Math.max(300, DROPDOWN_POPUP_H),
+      //     },
+      //   });
+      // }}
     >
       <img src="rabby-internal://assets/icons/top-bar/add-address.svg" />
     </div>
