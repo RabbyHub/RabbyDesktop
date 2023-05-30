@@ -118,8 +118,8 @@ const bgWcReady = new Promise<Electron.WebContents>((resolve) => {
     const extId = await getRabbyExtId();
     // we should make sure the webContents is the background page of rabby extension
     if (isRabbyXPage(retUrl, extId, 'background')) {
-      if (!IS_RUNTIME_PRODUCTION) {
-        // webContents.openDevTools({ mode: 'detach', activate: true });
+      if (true || !IS_RUNTIME_PRODUCTION) {
+        webContents.openDevTools({ mode: 'detach', activate: true });
       }
 
       resolve(webContents);

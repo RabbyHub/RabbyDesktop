@@ -123,7 +123,8 @@ export function getBrowserWindowOpts(
       // enableRemoteModule: false,
       contextIsolation: true,
       // worldSafeExecuteJavaScript: true,
-      devTools: !IS_RUNTIME_PRODUCTION,
+      // devTools: !IS_RUNTIME_PRODUCTION,
+      devTools: true,
       ...windowOpts?.webPreferences,
     },
   };

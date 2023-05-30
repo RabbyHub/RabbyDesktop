@@ -38,6 +38,7 @@ class PortMessage extends Message {
     if (!this.port) return;
     this.listenCallback = listenCallback;
     this.port.onMessage.addListener(({ _type_, data }) => {
+      console.log('[debug::wc][listen] _type_, data', _type_, data);
       if (_type_ === `${this._EVENT_PRE}request`) {
         this.onRequest(data);
       }
@@ -48,6 +49,8 @@ class PortMessage extends Message {
 
   send = (type: string, data: any) => {
     if (!this.port) return;
+    console.log('[debug::wc][send] _type_, data', type, data);
+
     try {
       this.port.postMessage({ _type_: `${this._EVENT_PRE}${type}`, data });
     } catch (e) {
