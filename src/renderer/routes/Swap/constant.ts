@@ -23,6 +23,11 @@ export const DEX = {
     name: 'ParaSwap',
     chains: DEX_SUPPORT_CHAINS[DEX_ENUM.PARASWAP],
   },
+  [DEX_ENUM.OPENOCEAN]: {
+    logo: 'rabby-internal://assets/icons/swap/openocean.png',
+    name: 'OpenOcean',
+    chains: DEX_SUPPORT_CHAINS[DEX_ENUM.OPENOCEAN],
+  },
 };
 
 export const DEX_WITH_WRAP = {

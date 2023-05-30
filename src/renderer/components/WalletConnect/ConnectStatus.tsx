@@ -28,7 +28,6 @@ export const ConnectStatus: React.FC<Props> = ({
   const hasWallet = useBrandNameHasWallet(displayBrandName);
   const IconClassName = 'inline-block mr-[6px] w-[14px] h-[14px] mb-2';
 
-  console.log('ConnectStatus', status);
   const statusText = React.useMemo(() => {
     switch (status) {
       case 'RECEIVED':
@@ -41,9 +40,9 @@ export const ConnectStatus: React.FC<Props> = ({
       case 'REJECTED':
       case 'DISCONNECTED':
         return (
-          <div className="py-[15px]">
+          <div className="py-[15px] whitespace-nowrap">
             <img src={TipInfoSVG} className={IconClassName} />
-            Connection canceled. Please scan the QR code to retry.
+            Connection canceled. Please scan the QR code to retry
           </div>
         );
       case 'BRAND_NAME_ERROR':
@@ -104,7 +103,7 @@ export const ConnectStatus: React.FC<Props> = ({
     <div
       className={clsx(
         'rounded-[4px] mt-[40px] m-auto',
-        'w-[360px] text-center leading-none',
+        'w-[400px] text-center leading-none',
         'text-13',
         {
           'bg-[#FFFFFF1A] text-[#FFFFFF] font-medium': !type || type === 'info',
