@@ -19,6 +19,9 @@ type ITriggerTooltipOnGhost = {
   > & {
     title?: string;
   };
+  extraData?: {
+    specialType: 'detect-dapp';
+  };
 };
 
 type ZViewStates = {

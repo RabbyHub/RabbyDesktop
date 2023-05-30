@@ -31,4 +31,9 @@ type ChannelPushToWebContents = {
     type: HDManagerType;
     opened: boolean;
   };
+
+  '__internal_push:dapps:version-updated': {
+    httpDappId: string;
+    result: IDetectHttpTypeDappVersionResult;
+  };
 };

@@ -71,6 +71,7 @@ export default function TopGhostWindow() {
 
         theOne.triggerElementRect = data.payload.triggerElementRect;
         theOne.tooltipProps = data.payload.tooltipProps;
+        theOne.extraData = data.payload.extraData;
 
         if (!existed) {
           return [...prev, theOne];

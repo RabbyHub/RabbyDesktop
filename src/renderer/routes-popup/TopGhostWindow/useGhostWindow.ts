@@ -78,7 +78,10 @@ export function useGhostTooltip<T extends HTMLElement = HTMLDivElement>({
   const doShowTooltip = useCallback(
     (
       elOrRect: HTMLElement | ITriggerTooltipOnGhost['triggerElementRect'],
-      tooltipProps?: ITriggerTooltipOnGhost['tooltipProps']
+      tooltipProps: ITriggerTooltipOnGhost['tooltipProps'],
+      opts?: {
+        extraData?: ITriggerTooltipOnGhost['extraData'];
+      }
     ) => {
       const triggerId = actionRef.current.triggerId;
 
@@ -98,6 +101,7 @@ export function useGhostTooltip<T extends HTMLElement = HTMLDivElement>({
           ...defaultTooltipProps,
           ...tooltipProps,
         },
+        extraData: opts?.extraData,
       });
       actionRef.current.isOpen = true;
     },
@@ -112,7 +116,7 @@ export function useGhostTooltip<T extends HTMLElement = HTMLDivElement>({
       if (isControlledMode('listenerOpen')) return;
       if (!triggerEl.contains(evt.target as any)) return;
 
-      doShowTooltip(triggerEl);
+      doShowTooltip(triggerEl, {});
     };
 
     const listenerClose = (evt: MouseEvent) => {
@@ -152,11 +156,12 @@ export function useGhostTooltip<T extends HTMLElement = HTMLDivElement>({
          * @default 0
          */
         autoHideTimeout?: number;
+        extraData?: ITriggerTooltipOnGhost['extraData'];
       }
     ) => {
       if (!isControlledMode('showTooltip')) return;
 
-      doShowTooltip(elOrRect, tooltipProps);
+      doShowTooltip(elOrRect, tooltipProps, { extraData: opts?.extraData });
 
       const { autoHideTimeout = 0 } = opts || {};
 

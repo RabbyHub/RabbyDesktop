@@ -160,14 +160,17 @@ onIpcMainInternalEvent(
   }
 );
 
-onIpcMainEvent('__internal_rpc:mainwindow:reload-tab', async (_, tabId) => {
-  const mainTabbedWin = await onMainWindowReady();
+onIpcMainEvent(
+  '__internal_rpc:mainwindow:reload-tab',
+  async (_, tabId, forceReload) => {
+    const mainTabbedWin = await onMainWindowReady();
 
-  const tab = mainTabbedWin.tabs.get(tabId);
-  if (!tab) return;
+    const tab = mainTabbedWin.tabs.get(tabId);
+    if (!tab) return;
 
-  tab.reload();
-});
+    tab.reload(forceReload);
+  }
+);
 
 const captureState = {
   image: null as Electron.NativeImage | null,
