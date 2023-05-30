@@ -26,8 +26,8 @@ export const SwitchChain: React.FC = () => {
     }
   }, [account?.brandName]);
   return (
-    <div className="p-[10px]">
-      <img src={url} className="w-full" />
+    <div className="h-[360px] text-center">
+      <img src={url} className="max-h-full max-w-full" />
     </div>
   );
 };

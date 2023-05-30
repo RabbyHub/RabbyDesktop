@@ -28,7 +28,7 @@ export const SwitchAddress: React.FC = () => {
 
   return (
     <div className="h-[360px] text-center">
-      <img src={url} className="h-full" />
+      <img src={url} className="max-h-full max-w-full" />
     </div>
   );
 };
