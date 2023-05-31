@@ -1,18 +1,23 @@
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { message } from 'antd';
 import { atom, useAtom } from 'jotai';
-import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 
 const hidDevicesAtom = atom<INodeHidDeviceInfo[]>([]);
 export function useHIDDevices() {
   const [devices, setDevices] = useAtom(hidDevicesAtom);
-
-  const [isFetching, setIsFetching] = useState(false);
+  const isFetchingRef = useRef(false);
 
   const fetchDevices = useCallback(() => {
-    if (isFetching) return;
+    if (isFetchingRef.current) return;
 
-    setIsFetching(true);
+    isFetchingRef.current = true;
     window.rabbyDesktop.ipcRenderer
       .invoke('get-hid-devices')
       .then((res) => {
@@ -23,11 +28,13 @@ export function useHIDDevices() {
         setDevices(res.devices);
       })
       .finally(() => {
-        setIsFetching(false);
+        isFetchingRef.current = false;
       });
-  }, [setDevices, isFetching, setIsFetching]);
+  }, [setDevices]);
 
   useEffect(() => {
+    fetchDevices();
+
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:webusb:device-changed',
       (event) => {
@@ -37,7 +44,7 @@ export function useHIDDevices() {
   }, [fetchDevices]);
 
   return {
-    isFetchingDevice: isFetching,
+    isFetchingDevice: isFetchingRef.current,
     devices,
     fetchDevices,
   };

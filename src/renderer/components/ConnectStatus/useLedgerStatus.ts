@@ -1,7 +1,5 @@
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import React from 'react';
-import eventBus from '@/renderer/utils-shell/eventBus';
-import { EVENTS, KEYRING_CLASS } from '@/renderer/utils/constant';
 import { useHIDDevices } from '@/renderer/hooks/useDevices';
 import { useCommonPopupView } from '../CommonPopup/useCommonPopupView';
 
@@ -94,10 +92,10 @@ export const useLedgerStatus = (address?: string) => {
   // }, [status, address]);
 
   const { devices, fetchDevices } = useHIDDevices();
+
   React.useEffect(() => {
     fetchDevices();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchDevices]);
   React.useEffect(() => {
     const hasLedger = devices.some(
       (item) => item.vendorId === ledgerUSBVendorId
