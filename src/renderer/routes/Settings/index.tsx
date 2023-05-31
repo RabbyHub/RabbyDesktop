@@ -163,6 +163,7 @@ function DeveloperKitsParts() {
     useAtom(debugStateAtom);
 
   const { setIsViewingDevices } = useIsViewingDevices();
+  const { settings, adjustDappViewZoomPercent } = useSettings();
 
   if (IS_RUNTIME_PRODUCTION) return null;
 
@@ -252,6 +253,38 @@ function DeveloperKitsParts() {
               );
             }}
           />
+
+          <ItemText
+            name="Dapp Zoom Ratio"
+            icon="rabby-internal://assets/icons/mainwin-settings/icon-dapp-zoom.svg"
+          >
+            <Slider
+              className="w-[300px]"
+              value={settings.experimentalDappViewZoomPercent}
+              marks={{
+                [DAPP_ZOOM_VALUES.MIN_ZOOM_PERCENT]: {
+                  style: { color: '#fff', fontSize: 12 },
+                  label: `${DAPP_ZOOM_VALUES.MIN_ZOOM_PERCENT}%`,
+                },
+                [DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT]: {
+                  style: { color: '#fff', fontSize: 12 },
+                  label: `${DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT}%`,
+                },
+                [DAPP_ZOOM_VALUES.MAX_ZOOM_PERCENT]: {
+                  style: { color: '#fff', fontSize: 12 },
+                  label: `${DAPP_ZOOM_VALUES.MAX_ZOOM_PERCENT}%`,
+                },
+              }}
+              tooltip={{
+                formatter: (value) => `${value}%`,
+              }}
+              min={DAPP_ZOOM_VALUES.MIN_ZOOM_PERCENT}
+              max={DAPP_ZOOM_VALUES.MAX_ZOOM_PERCENT}
+              onChange={(value) => {
+                adjustDappViewZoomPercent(value);
+              }}
+            />
+          </ItemText>
         </div>
       </div>
       <ModalDevices />
@@ -447,38 +480,33 @@ export function MainWindowSettings() {
                 });
               }}
             />
-
-            <ItemText
-              name="Dapp Zoom Ratio"
+            <ItemSwitch
+              checked={
+                settings.experimentalDappViewZoomPercent ===
+                DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT
+              }
+              name={
+                <>
+                  <div className="flex flex-col gap-[4px]">
+                    <span className="text-14 font-medium">Dapp Zoom Ratio</span>
+                    <span className="text-12 text-white opacity-[0.6]">
+                      Once enabled, all dapps will be zoomed to{' '}
+                      {DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT}%
+                    </span>
+                  </div>
+                </>
+              }
               icon="rabby-internal://assets/icons/mainwin-settings/icon-dapp-zoom.svg"
-            >
-              <Slider
-                className="w-[300px]"
-                value={settings.experimentalDappViewZoomPercent}
-                marks={{
-                  [DAPP_ZOOM_VALUES.MIN_ZOOM_PERCENT]: {
-                    style: { color: '#fff', fontSize: 12 },
-                    label: `${DAPP_ZOOM_VALUES.MIN_ZOOM_PERCENT}%`,
-                  },
-                  [DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT]: {
-                    style: { color: '#fff', fontSize: 12 },
-                    label: `${DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT}%`,
-                  },
-                  [DAPP_ZOOM_VALUES.MAX_ZOOM_PERCENT]: {
-                    style: { color: '#fff', fontSize: 12 },
-                    label: `${DAPP_ZOOM_VALUES.MAX_ZOOM_PERCENT}%`,
-                  },
-                }}
-                tooltip={{
-                  formatter: (value) => `${value}%`,
-                }}
-                min={DAPP_ZOOM_VALUES.MIN_ZOOM_PERCENT}
-                max={DAPP_ZOOM_VALUES.MAX_ZOOM_PERCENT}
-                onChange={(value) => {
-                  adjustDappViewZoomPercent(value);
-                }}
-              />
-            </ItemText>
+              onChange={(nextEnabled: boolean) => {
+                if (nextEnabled) {
+                  adjustDappViewZoomPercent(
+                    DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT
+                  );
+                } else {
+                  adjustDappViewZoomPercent(100);
+                }
+              }}
+            />
           </div>
         </div>
       </div>
