@@ -1,50 +1,69 @@
 import usb = require('usb');
 
+import isDeepEqual from 'fast-deep-equal';
+
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { pickAllNonFnFields } from '@/isomorphic/json';
-import { handleIpcMainInvoke, sendToWebContents } from '../utils/ipcMainEvents';
 import {
-  getAllMainUIViews,
-  getAllRabbyXWindowWebContentsList,
-} from '../utils/stream-helpers';
+  Observable,
+  distinctUntilChanged,
+  filter as rxFilter,
+  interval,
+  map,
+  merge,
+  throttleTime,
+} from 'rxjs';
+import { handleIpcMainInvoke } from '../utils/ipcMainEvents';
+import { filterNodeHIDDevices } from '../utils/devices';
+import { pushEventToAllUIsCareAboutHidDevices } from '../utils/tabbedBrowserWindow';
 
 const webusb = new usb.WebUSB({
   allowAllDevices: true,
 });
 
-webusb.addEventListener('connect', async (event) => {
-  // if (!IS_RUNTIME_PRODUCTION)
-  console.info('[usb::event] connect', event);
+const webusb$ = new Observable<void>((subscriber) => {
+  webusb.addEventListener('connect', async (event) => {
+    if (!IS_RUNTIME_PRODUCTION) console.info('[usb::event] connect', event);
+    subscriber.next();
 
-  const { list } = await getAllMainUIViews();
-  const rabbyxSignWebContentsList = getAllRabbyXWindowWebContentsList();
+    // pushEventToAllUIsCareAboutHidDevices({
+    //   eventType: 'change-detected',
+    //   changes: {
+    //     type: 'connect',
+    //     device: pickAllNonFnFields(event.device) as INodeWebUSBDevice,
+    //   },
+    // });
+  });
+  webusb.addEventListener('disconnect', async (event) => {
+    if (!IS_RUNTIME_PRODUCTION) console.info('[usb::event] disconnect', event);
+    subscriber.next();
 
-  [...list, ...rabbyxSignWebContentsList].forEach((view) => {
-    sendToWebContents(view, '__internal_push:webusb:device-changed', {
-      changes: {
-        type: 'connect',
-        device: pickAllNonFnFields(event.device) as INodeWebUSBDevice,
-      },
-    });
+    // pushEventToAllUIsCareAboutHidDevices({
+    //   eventType: 'change-detected',
+    //   changes: {
+    //     type: 'disconnect',
+    //     device: pickAllNonFnFields(event.device) as INodeWebUSBDevice,
+    //   },
+    // });
   });
 });
 
-webusb.addEventListener('disconnect', async (event) => {
-  // if (!IS_RUNTIME_PRODUCTION)
-  console.info('[usb::event] disconnect', event);
-
-  const { list } = await getAllMainUIViews();
-  const rabbyxSignWebContentsList = getAllRabbyXWindowWebContentsList();
-
-  [...list, ...rabbyxSignWebContentsList].forEach((view) => {
-    sendToWebContents(view, '__internal_push:webusb:device-changed', {
-      changes: {
-        type: 'disconnect',
-        device: pickAllNonFnFields(event.device) as INodeWebUSBDevice,
-      },
+merge(interval(750), webusb$)
+  .pipe(
+    throttleTime(250),
+    map(() => filterNodeHIDDevices()),
+    rxFilter((listResult) => !listResult.error),
+    map((lR) => lR.devices),
+    distinctUntilChanged((prev, current) => {
+      return isDeepEqual(prev, current);
+    })
+  )
+  .subscribe(async (latestDevices) => {
+    pushEventToAllUIsCareAboutHidDevices({
+      eventType: 'push-hiddevice-list',
+      deviceList: latestDevices,
     });
   });
-});
 
 // trigger once to activate the event listener
 webusb.getDevices();
@@ -52,7 +71,7 @@ webusb.getDevices();
 handleIpcMainInvoke('get-usb-devices', async (_, opts) => {
   const usbDevicesOrig = await webusb.getDevices();
 
-  const usbDevices = [] as typeof usbDevicesOrig;
+  let usbDevices = [] as typeof usbDevicesOrig;
   // dedupe
   usbDevicesOrig.forEach((d) => {
     if (

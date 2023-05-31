@@ -8,7 +8,6 @@ import {
   useRef,
   useState,
 } from 'react';
-import { useInterval } from 'react-use';
 
 const hidDevicesAtom = atom<INodeHidDeviceInfo[]>([]);
 export function useHIDDevices() {
@@ -37,29 +36,29 @@ export function useHIDDevices() {
     fetchDevices();
 
     return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:webusb:device-changed',
+      '__internal_push:webusb:events',
       (event) => {
-        fetchDevices();
+        switch (event.eventType) {
+          default:
+            break;
+          case 'change-detected': {
+            fetchDevices();
+            break;
+          }
+          case 'push-hiddevice-list': {
+            setDevices(event.deviceList);
+            break;
+          }
+        }
       }
     );
-  }, [fetchDevices]);
+  }, [fetchDevices, setDevices]);
 
   return {
     isFetchingDevice: isFetchingRef.current,
     devices,
     fetchDevices,
   };
-}
-
-/**
- * @description make sure ONLY call this hooks in whole page-level app
- */
-export function useInfiniteFetchingDevices() {
-  const { fetchDevices } = useHIDDevices();
-
-  useInterval(() => {
-    fetchDevices();
-  }, 500);
 }
 
 const usbDevicesAtom = atom<IUSBDevice[]>([]);
@@ -84,9 +83,11 @@ export function useUSBDevices() {
 
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:webusb:device-changed',
+      '__internal_push:webusb:events',
       (event) => {
-        fetchDevices();
+        if (event.eventType === 'change-detected') {
+          fetchDevices();
+        }
       }
     );
   }, [fetchDevices]);

@@ -1,5 +1,4 @@
-import { firstValueFrom, lastValueFrom, startWith } from 'rxjs';
-import { BrowserWindow } from 'electron';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { fromMainSubject, valueToMainSubject } from '../streams/_init';
 import { emitIpcMainEvent } from './ipcMainEvents';
 
@@ -97,21 +96,6 @@ export async function __internalToggleRabbyxGasketMask(nextShow: boolean) {
 export const RABBYX_WINDOWID_S = new Set<number>();
 export async function toggleMaskViaOpenedRabbyxNotificationWindow() {
   __internalToggleRabbyxGasketMask(RABBYX_WINDOWID_S.size > 0);
-}
-
-export function getAllRabbyXWindowWebContentsList() {
-  const webContentsList: Electron.WebContents[] = [];
-
-  RABBYX_WINDOWID_S.forEach((windowId) => {
-    if (!windowId) return;
-
-    const win = BrowserWindow.fromId(windowId);
-    if (!win?.isDestroyed()) return;
-
-    webContentsList.push(win.webContents);
-  });
-
-  return webContentsList;
 }
 
 const INIT_ACTIVE_TAB_RECT: IMainWindowActiveTabRect = {

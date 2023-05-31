@@ -63,12 +63,19 @@ type M2RChanneMessagePayload = {
   '__internal_push:rabbyx:get-dapp-screenshot': {
     reqId: string;
   };
-  '__internal_push:webusb:device-changed': {
-    changes: {
-      type: 'connect' | 'disconnect';
-      device: INodeWebUSBDevice;
-    };
-  };
+  '__internal_push:webusb:events':
+    | {
+        /** @deprecated */
+        eventType: 'change-detected';
+        changes: {
+          type: 'connect' | 'disconnect';
+          device: INodeWebUSBDevice;
+        };
+      }
+    | {
+        eventType: 'push-hiddevice-list';
+        deviceList: INodeHidDeviceInfo[];
+      };
   '__internal_push:webhid:select-list': {
     deviceList: IMergedHidDevice[];
   };
