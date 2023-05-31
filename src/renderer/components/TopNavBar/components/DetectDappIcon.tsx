@@ -51,21 +51,21 @@ export default function DetectDappIcon({
         hideTooltip();
         onForceReload?.();
       }}
-      // onMouseEnter={(e) => {
-      //   if (!triggerRef.current) {
-      //     return;
-      //   }
+      onMouseEnter={(e) => {
+        if (!triggerRef.current) {
+          return;
+        }
 
-      //   showTooltip(
-      //     triggerRef.current,
-      //     {},
-      //     {
-      //       extraData: {
-      //         specialType: 'detect-dapp',
-      //       },
-      //     }
-      //   );
-      // }}
+        showTooltip(
+          triggerRef.current,
+          {},
+          {
+            extraData: {
+              specialType: 'detect-dapp',
+            },
+          }
+        );
+      }}
       // onMouseLeave={() => {
       //   hideTooltip();
       // }}

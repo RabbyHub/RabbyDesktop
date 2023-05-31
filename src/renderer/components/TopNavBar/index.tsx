@@ -38,6 +38,7 @@ import { useLocation } from 'react-router-dom';
 import styles from './index.module.less';
 import ChainIcon from '../ChainIcon';
 import DetectDappIcon from './components/DetectDappIcon';
+import { toastMessage } from '../TransparentToast';
 // import { TipsWrapper } from '../TipWrapper';
 
 const isDarwin = detectClientOS() === 'darwin';
@@ -288,6 +289,10 @@ export const TopNavBar = () => {
               onForceReload={() => {
                 navActions.onForceReloadButtonClick();
                 confirmDappVersion();
+                toastMessage({
+                  type: 'success',
+                  content: 'Updated',
+                });
               }}
             />
           ) : (
