@@ -600,3 +600,32 @@ export function formatDappToStore(
 
   return retDapp as IDapp;
 }
+
+/**
+ * @description check if tab's current url is considered as the entry of the dapp origin
+ * For example:
+ *
+ * dapp origin: https://uniswap.org, possible **entry** tab urls:
+ * - https://uniswap.org
+ * - https://app.uniswap.org
+ * - https://help.uniswap.org
+ *
+ * dapp origin: https://app.uniswap.org, possible **entry** tab urls:
+ * - https://app.uniswap.org
+ */
+export function isTabUrlEntryOfHttpDappOrigin(
+  tabURL: string,
+  httpDappOrigin: string
+) {
+  const tabURLInfo = canoicalizeDappUrl(tabURL);
+  const httpDappOriginInfo = canoicalizeDappUrl(httpDappOrigin);
+
+  return (
+    httpDappOriginInfo.origin === tabURLInfo.origin ||
+    `https://www.${httpDappOriginInfo.fullDomain}` ===
+      httpDappOriginInfo.fullDomain ||
+    // dapp
+    (httpDappOriginInfo.is2ndaryDomain &&
+      httpDappOriginInfo.secondaryDomain === tabURLInfo.secondaryDomain)
+  );
+}

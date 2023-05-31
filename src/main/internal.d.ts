@@ -278,6 +278,9 @@ type MainInternalsMessagePayload = {
     ];
     response: [];
   };
+  '__internal_main:dapp:confirm-dapp-updated': {
+    send: [dappOrigin: string];
+  };
 };
 
 type MainInternals = keyof MainInternalsMessagePayload;

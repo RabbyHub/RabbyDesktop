@@ -169,7 +169,7 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
       this._pushDappsBoundIds();
     });
 
-    this.tabs.on('tab-selected', (tab: Tab) => {
+    this.tabs.on('tab-selected', (tab: Tab, prevTab?: Tab) => {
       this.extensions.selectTab(tab.view!.webContents);
       emitIpcMainEvent('__internal_main:tabbed-window:tab-selected', {
         windowId: this.window.id,
@@ -177,9 +177,16 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
       });
     });
 
-    this.tabs.on('tab-destroyed', () => {
+    this.tabs.on('tab-destroyed', (tab: Tab) => {
       this.tabs.checkLoadingView();
       this._pushDappsBoundIds();
+
+      if (tab?.relatedDappId) {
+        emitIpcMainEvent(
+          '__internal_main:dapp:confirm-dapp-updated',
+          tab?.relatedDappId
+        );
+      }
     });
 
     emitIpcMainEvent('__internal_main:tabbed-window:view-added', {

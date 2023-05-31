@@ -99,34 +99,30 @@ async function detectDappVersoin(httpDappId: string) {
   };
 }
 
-handleIpcMainInvoke('detect-dapp-version', async (_, httpDappId: string) => {
-  const detectResult = await detectDappVersoin(httpDappId);
-
+async function pushUpdatedToMainWindow(httpDappId: string, updated: boolean) {
   const mainTabbedWin = await onMainWindowReady();
+
   sendToWebContents(
     mainTabbedWin.window.webContents,
     '__internal_push:dapps:version-updated',
     {
       httpDappId,
-      result: detectResult.result,
+      result: { updated },
     }
   );
+}
+
+handleIpcMainInvoke('detect-dapp-version', async (_, httpDappId: string) => {
+  const detectResult = await detectDappVersoin(httpDappId);
+
+  pushUpdatedToMainWindow(httpDappId, detectResult.result.updated);
 
   return detectResult;
 });
 
-handleIpcMainInvoke('confirm-dapp-updated', async (_, httpDappId: string) => {
-  confirmDappVersion(httpDappId);
-
-  return {
-    error: '',
-    success: true,
-  };
-});
-
-const DAPP_VERSION_DETECT_INTERVAL = IS_RUNTIME_PRODUCTION
+export const DAPP_VERSION_DETECT_INTERVAL = IS_RUNTIME_PRODUCTION
   ? 5 * 60 * 1000
-  : 0.5 * 60 * 1000;
+  : 0.1 * 60 * 1000;
 interval(DAPP_VERSION_DETECT_INTERVAL).subscribe(async () => {
   const mainTabbedWin = await onMainWindowReady();
 
@@ -139,15 +135,26 @@ interval(DAPP_VERSION_DETECT_INTERVAL).subscribe(async () => {
 
   const detectResult = await detectDappVersoin(selectedDappId);
 
-  sendToWebContents(
-    mainTabbedWin.window.webContents,
-    '__internal_push:dapps:version-updated',
-    {
-      httpDappId: selectedDappId,
-      result: detectResult.result,
-    }
-  );
+  pushUpdatedToMainWindow(selectedDappId, detectResult.result.updated);
 });
+
+handleIpcMainInvoke('confirm-dapp-updated', async (_, httpDappId: string) => {
+  confirmDappVersion(httpDappId);
+
+  return {
+    error: '',
+    success: true,
+  };
+});
+
+onIpcMainInternalEvent(
+  '__internal_main:dapp:confirm-dapp-updated',
+  async (httpDappId: string) => {
+    confirmDappVersion(httpDappId);
+
+    pushUpdatedToMainWindow(httpDappId, false);
+  }
+);
 
 handleIpcMainInvoke(
   '__outer_rpc:check-if-requestable',
