@@ -28,7 +28,7 @@ export const ContactTypeCardList: React.FC<Props> = ({
         </div>
         <span className={styles.title}>{title}</span>
       </div>
-      <div className={clsx(styles.body, 'gap-[10px]')}>
+      <div className={clsx(styles.body, 'gap-x-[10px] gap-y-[5px]')}>
         {list.map((item) => (
           <div
             onClick={() => {
