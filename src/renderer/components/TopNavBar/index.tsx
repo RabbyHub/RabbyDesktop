@@ -37,7 +37,7 @@ import { useGhostTooltip } from '@/renderer/routes-popup/TopGhostWindow/useGhost
 import { useLocation } from 'react-router-dom';
 import styles from './index.module.less';
 import ChainIcon from '../ChainIcon';
-import DetectDappIcon from './components/DetectDappIcon';
+import NavRefreshButton from './components/NavRefreshButton';
 import { toastMessage } from '../TransparentToast';
 // import { TipsWrapper } from '../TipWrapper';
 
@@ -142,7 +142,7 @@ export const TopNavBar = () => {
     return formatDappURLToShow(activeTab?.url || '');
   }, [selectedTabInfo?.dapp, activeTab?.url]);
 
-  const [{ showTooltip, hideTooltip }] = useGhostTooltip({
+  const [{ showTooltip, destroyTooltip }] = useGhostTooltip({
     mode: 'controlled',
     defaultTooltipProps: {
       title: 'You should never see this tooltip',
@@ -158,7 +158,7 @@ export const TopNavBar = () => {
 
   useEffect(
     () => () => {
-      hideTooltip(0);
+      destroyTooltip(0);
       autoHideOnMouseLeaveRef.current = true;
       clearInterval(autoHideTimer.current);
     },
@@ -217,12 +217,12 @@ export const TopNavBar = () => {
                   title: 'Copied',
                   placement: 'bottom',
                 },
-                { autoHideTimeout: 3000 }
+                { autoDestroyTimeout: 3000 }
               );
               autoHideOnMouseLeaveRef.current = false;
               autoHideTimer.current = setTimeout(() => {
                 autoHideOnMouseLeaveRef.current = true;
-                hideTooltip(0);
+                destroyTooltip(0);
               }, 3000);
             }}
             onMouseEnter={(event) => {
@@ -254,7 +254,7 @@ export const TopNavBar = () => {
             }}
             onMouseLeave={() => {
               if (autoHideOnMouseLeaveRef.current) {
-                hideTooltip(0);
+                destroyTooltip(0);
               }
             }}
           >
@@ -278,29 +278,36 @@ export const TopNavBar = () => {
             )}
             onClick={navActions.onGoForwardButtonClick}
           />
-          {activeTab?.status === 'loading' ? (
-            <RcIconStopload
-              style={{ color: navIconColor }}
-              onClick={navActions.onStopLoadingButtonClick}
-            />
-          ) : dappVersion.updated ? (
-            <DetectDappIcon
-              className={styles.detectDappIcon}
-              onForceReload={() => {
-                navActions.onForceReloadButtonClick();
-                confirmDappVersion();
-                toastMessage({
-                  type: 'success',
-                  content: 'Updated',
-                });
-              }}
-            />
-          ) : (
-            <RcIconReload
-              style={{ color: navIconColor }}
-              onClick={navActions.onReloadButtonClick}
-            />
-          )}
+          <NavRefreshButton
+            className={styles.detectDappIcon}
+            btnStatus={
+              activeTab?.status === 'loading'
+                ? 'loading'
+                : dappVersion.updated
+                ? 'dapp-updated'
+                : undefined
+            }
+            normalRefreshBtn={
+              <RcIconReload
+                style={{ color: navIconColor }}
+                onClick={navActions.onReloadButtonClick}
+              />
+            }
+            stopLoadingBtn={
+              <RcIconStopload
+                style={{ color: navIconColor }}
+                onClick={navActions.onStopLoadingButtonClick}
+              />
+            }
+            onForceReload={() => {
+              navActions.onForceReloadButtonClick();
+              confirmDappVersion();
+              toastMessage({
+                type: 'success',
+                content: 'Updated',
+              });
+            }}
+          />
           <RcIconHome
             style={{ color: navIconColor }}
             onClick={navActions.onHomeButtonClick}

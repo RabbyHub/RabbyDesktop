@@ -22,6 +22,17 @@ function toggleTooltipShow(payload: ITriggerTooltipOnGhost) {
   }
 }
 
+const DEFAULT_REF = {
+  isRemoteRendered: false,
+  lastRect: null,
+  lastTooltipProps: null,
+};
+
+type IShowTooltipOpts = {
+  extraData?: ITriggerTooltipOnGhost['extraData'];
+  destroyFirst?: boolean;
+};
+
 /**
  *
  * TODO: we should restrain calling this hook from non-ghost view only
@@ -29,27 +40,31 @@ function toggleTooltipShow(payload: ITriggerTooltipOnGhost) {
 export function useGhostTooltip<T extends HTMLElement = HTMLDivElement>({
   mode = 'controlled',
   defaultTooltipProps,
+  staticTriggerId,
   uncontrolledOptions,
 }: {
   mode?: 'controlled' | 'uncontrolled';
   defaultTooltipProps?: ITriggerTooltipOnGhost['tooltipProps'];
+  staticTriggerId?: string;
   uncontrolledOptions?: {
     /**
      * @description hide tooltip when click away from trigger element
      */
-    hideOnClickAway?: boolean;
+    destroyOnClickAway?: boolean;
   };
 }) {
   const triggerElRef = useRef<T>(null);
   const actionRef = useRef<{
     triggerId: string;
-    isOpen: boolean;
+    isRemoteRendered: boolean;
+    lastRect?: null | DOMRect;
+    lastTooltipProps?: null | ITriggerTooltipOnGhost['tooltipProps'];
   }>({
-    triggerId: randString(),
-    isOpen: false,
+    triggerId: staticTriggerId || randString(),
+    ...DEFAULT_REF,
   });
 
-  const { hideOnClickAway = true } = uncontrolledOptions || {};
+  const { destroyOnClickAway = true } = uncontrolledOptions || {};
 
   const isControlledMode = useCallback(
     (fnName?: string) => {
@@ -64,24 +79,29 @@ export function useGhostTooltip<T extends HTMLElement = HTMLDivElement>({
     [mode]
   );
 
-  const doHideTooltip = useCallback(() => {
+  const doDestroyTooltip = useCallback(() => {
     const triggerId = actionRef.current.triggerId;
 
-    actionRef.current.isOpen = false;
+    // reset
+    actionRef.current = {
+      ...DEFAULT_REF,
+      triggerId: actionRef.current.triggerId,
+    };
+
     toggleTooltipShow({
       triggerId,
       triggerElementRect: undefined,
       tooltipProps: undefined,
     });
+
+    actionRef.current.isRemoteRendered = false;
   }, []);
 
   const doShowTooltip = useCallback(
     (
       elOrRect: HTMLElement | ITriggerTooltipOnGhost['triggerElementRect'],
       tooltipProps: ITriggerTooltipOnGhost['tooltipProps'],
-      opts?: {
-        extraData?: ITriggerTooltipOnGhost['extraData'];
-      }
+      opts?: IShowTooltipOpts
     ) => {
       const triggerId = actionRef.current.triggerId;
 
@@ -90,8 +110,13 @@ export function useGhostTooltip<T extends HTMLElement = HTMLDivElement>({
           ? elOrRect.getBoundingClientRect().toJSON()
           : elOrRect;
 
-      if (actionRef.current.isOpen) {
-        doHideTooltip();
+      actionRef.current.lastRect = triggerElementRect;
+      actionRef.current.lastTooltipProps = tooltipProps;
+
+      const { destroyFirst = true } = opts || {};
+
+      if (destroyFirst && actionRef.current.isRemoteRendered) {
+        doDestroyTooltip();
       }
 
       toggleTooltipShow({
@@ -100,12 +125,14 @@ export function useGhostTooltip<T extends HTMLElement = HTMLDivElement>({
         tooltipProps: {
           ...defaultTooltipProps,
           ...tooltipProps,
+          open: true,
+          visible: true,
         },
         extraData: opts?.extraData,
       });
-      actionRef.current.isOpen = true;
+      actionRef.current.isRemoteRendered = true;
     },
-    [doHideTooltip, defaultTooltipProps]
+    [doDestroyTooltip, defaultTooltipProps]
   );
 
   useLayoutEffect(() => {
@@ -123,7 +150,7 @@ export function useGhostTooltip<T extends HTMLElement = HTMLDivElement>({
       if (isControlledMode('listenerClose')) return;
       if (!triggerEl.contains(evt.target as any)) return;
 
-      doHideTooltip();
+      doDestroyTooltip();
     };
 
     const triggerActions = arraify(defaultTooltipProps?.trigger).filter(
@@ -142,9 +169,9 @@ export function useGhostTooltip<T extends HTMLElement = HTMLDivElement>({
       triggerEl.removeEventListener('mouseleave', listenerClose);
       triggerEl.removeEventListener('click', listenerOpen);
 
-      doHideTooltip();
+      doDestroyTooltip();
     };
-  }, [isControlledMode, defaultTooltipProps, doShowTooltip, doHideTooltip]);
+  }, [isControlledMode, defaultTooltipProps, doShowTooltip, doDestroyTooltip]);
 
   const showTooltip = useCallback(
     (
@@ -155,45 +182,68 @@ export function useGhostTooltip<T extends HTMLElement = HTMLDivElement>({
          * @description timeout after when tooltip auto hide, zero means no auto hide
          * @default 0
          */
-        autoHideTimeout?: number;
-        extraData?: ITriggerTooltipOnGhost['extraData'];
-      }
+        autoDestroyTimeout?: number;
+      } & IShowTooltipOpts
     ) => {
       if (!isControlledMode('showTooltip')) return;
 
-      doShowTooltip(elOrRect, tooltipProps, { extraData: opts?.extraData });
+      doShowTooltip(elOrRect, tooltipProps, {
+        extraData: opts?.extraData,
+        destroyFirst: opts?.destroyFirst,
+      });
 
-      const { autoHideTimeout = 0 } = opts || {};
+      const { autoDestroyTimeout = 0 } = opts || {};
 
-      if (autoHideTimeout) {
+      if (autoDestroyTimeout) {
         setTimeout(() => {
-          if (!actionRef.current.isOpen) return;
+          if (!actionRef.current.isRemoteRendered) return;
 
-          doHideTooltip();
-        }, autoHideTimeout);
+          doDestroyTooltip();
+        }, autoDestroyTimeout);
       }
     },
-    [isControlledMode, doShowTooltip, doHideTooltip]
+    [isControlledMode, doShowTooltip, doDestroyTooltip]
   );
 
-  const hideTooltip = useCallback(
-    (timeoutVal = 250) => {
-      if (!isControlledMode('hideTooltip')) return;
+  const hideTooltip = useCallback(() => {
+    if (!isControlledMode('hideTooltip')) return;
 
-      if (!actionRef.current.isOpen) return;
+    if (!actionRef.current.isRemoteRendered) return;
+
+    const triggerId = actionRef.current.triggerId;
+    const triggerElementRect = actionRef.current.lastRect || undefined;
+    const tooltipProps = actionRef.current.lastTooltipProps || undefined;
+
+    toggleTooltipShow({
+      triggerId,
+      triggerElementRect,
+      tooltipProps: {
+        ...defaultTooltipProps,
+        ...tooltipProps,
+        open: false,
+        visible: false,
+      },
+    });
+  }, [isControlledMode, defaultTooltipProps]);
+
+  const destroyTooltip = useCallback(
+    (timeoutVal = 250) => {
+      if (!isControlledMode('destroyTooltip')) return;
+
+      if (!actionRef.current.isRemoteRendered) return;
 
       if (timeoutVal) {
-        setTimeout(() => doHideTooltip(), timeoutVal);
+        setTimeout(() => doDestroyTooltip(), timeoutVal);
       } else {
-        doHideTooltip();
+        doDestroyTooltip();
       }
     },
-    [isControlledMode, doHideTooltip]
+    [isControlledMode, doDestroyTooltip]
   );
 
   useClickAway(triggerElRef, () => {
-    if (hideOnClickAway) {
-      hideTooltip();
+    if (destroyOnClickAway) {
+      destroyTooltip();
     }
   });
 
@@ -201,6 +251,7 @@ export function useGhostTooltip<T extends HTMLElement = HTMLDivElement>({
     {
       triggerElRef,
       showTooltip,
+      destroyTooltip,
       hideTooltip,
     },
   ] as const;

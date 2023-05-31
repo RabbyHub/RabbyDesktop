@@ -1,8 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { isTabUrlEntryOfHttpDappOrigin } from '@/isomorphic/dapp';
 import { useWindowTabs } from './useWindowTabs';
+import { useGhostTooltip } from '../routes-popup/TopGhostWindow/useGhostWindow';
 
 export function useDappNavigation() {
   const { activeTab } = useWindowTabs();
