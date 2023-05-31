@@ -2,13 +2,15 @@ import { BrowserWindow } from 'electron';
 
 import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { EnumMatchDappType } from '@/isomorphic/constants';
-import { checkoutDappURL, formatDappHttpOrigin } from '@/isomorphic/dapp';
+import { checkoutDappURL } from '@/isomorphic/dapp';
 import TabbedBrowserWindow, {
   MainTabbedBrowserWindow,
   TabbedBrowserWindowOptions,
 } from '../browser/browsers';
 import { getBrowserWindowOpts } from './app';
 import {
+  RABBYX_WINDOWID_S,
+  getAllMainUIViews,
   getElectronChromeExtensions,
   getWebuiExtension,
 } from './stream-helpers';
@@ -196,4 +198,38 @@ export function getOrCreateDappBoundTab(
   }
 
   return result;
+}
+
+function getAllRabbyXWindowWebContentsList() {
+  const webContentsList: Electron.WebContents[] = [];
+
+  RABBYX_WINDOWID_S.forEach((windowId) => {
+    if (!windowId) return;
+
+    const win = BrowserWindow.fromId(windowId);
+    if (!win || win?.isDestroyed()) return;
+    const tabbedBrowserWindow = getTabbedWindowFromWebContents(
+      win?.webContents
+    );
+
+    // find all rabbyx sign tabs
+    tabbedBrowserWindow?.tabs.tabList.forEach((tab) => {
+      if (tab.view?.webContents && !tab.view?.webContents.isDestroyed()) {
+        webContentsList.push(tab.view?.webContents);
+      }
+    });
+  });
+
+  return webContentsList;
+}
+
+export async function pushEventToAllUIsCareAboutHidDevices(
+  eventPayload: M2RChanneMessagePayload['__internal_push:webusb:events']
+) {
+  const { list } = await getAllMainUIViews();
+  const rabbyxSignWebContentsList = getAllRabbyXWindowWebContentsList();
+
+  [...list, ...rabbyxSignWebContentsList].forEach((view) => {
+    sendToWebContents(view, '__internal_push:webusb:events', eventPayload);
+  });
 }

@@ -1,4 +1,4 @@
-import { firstValueFrom, lastValueFrom, startWith } from 'rxjs';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { fromMainSubject, valueToMainSubject } from '../streams/_init';
 import { emitIpcMainEvent } from './ipcMainEvents';
 
