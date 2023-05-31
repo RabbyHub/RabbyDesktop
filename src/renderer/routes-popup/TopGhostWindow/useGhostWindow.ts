@@ -8,9 +8,14 @@ import { useClickAway } from 'react-use';
 
 const osType = detectClientOS();
 
-function toggleTooltipShow(payload: ITriggerTooltipOnGhost) {
+function toggleTooltipShow(
+  payload: ITriggerTooltipOnGhost,
+  options?: {
+    showWinPopupFirstOnShow?: boolean;
+  }
+) {
   if (payload.triggerElementRect) {
-    if (osType !== 'darwin') {
+    if (options?.showWinPopupFirstOnShow && osType !== 'darwin') {
       // avoid pull window to front on macos
       showMainwinPopup({ x: 0, y: 0 }, { type: 'top-ghost-window' });
     }
@@ -220,16 +225,19 @@ export function useGhostTooltip<T extends HTMLElement = HTMLDivElement>({
     const triggerElementRect = actionRef.current.lastRect || undefined;
     const tooltipProps = actionRef.current.lastTooltipProps || undefined;
 
-    toggleTooltipShow({
-      triggerId,
-      triggerElementRect,
-      tooltipProps: {
-        ...defaultTooltipProps,
-        ...tooltipProps,
-        open: false,
-        visible: false,
+    toggleTooltipShow(
+      {
+        triggerId,
+        triggerElementRect,
+        tooltipProps: {
+          ...defaultTooltipProps,
+          ...tooltipProps,
+          open: false,
+          visible: false,
+        },
       },
-    });
+      { showWinPopupFirstOnShow: false }
+    );
   }, [isControlledMode, defaultTooltipProps]);
 
   const destroyTooltip = useCallback(
