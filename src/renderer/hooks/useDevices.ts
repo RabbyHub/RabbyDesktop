@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { useInterval } from 'react-use';
 
 const hidDevicesAtom = atom<INodeHidDeviceInfo[]>([]);
 export function useHIDDevices() {
@@ -48,6 +49,17 @@ export function useHIDDevices() {
     devices,
     fetchDevices,
   };
+}
+
+/**
+ * @description make sure ONLY call this hooks in whole page-level app
+ */
+export function useInfiniteFetchingDevices() {
+  const { fetchDevices } = useHIDDevices();
+
+  useInterval(() => {
+    fetchDevices();
+  }, 500);
 }
 
 const usbDevicesAtom = atom<IUSBDevice[]>([]);

@@ -91,21 +91,7 @@ export const useLedgerStatus = (address?: string) => {
   //   }
   // }, [status, address]);
 
-  const { devices, fetchDevices } = useHIDDevices();
-
-  const loopFetchDevices = () => {
-    fetchDevices();
-
-    setTimeout(() => {
-      console.log('111', 'loopFetchDevices');
-      loopFetchDevices();
-    }, 500);
-  };
-
-  React.useEffect(() => {
-    loopFetchDevices();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { devices } = useHIDDevices();
 
   React.useEffect(() => {
     const hasLedger = devices.some(

@@ -39,6 +39,7 @@ import { useToastMessage } from '@/renderer/hooks/useToastMessage';
 import { HomeBundle } from '@/renderer/routes/Bundle';
 import { useCustomRPC } from '@/renderer/hooks/useCustomRPC';
 import ModalUpdateInHome from '@/renderer/routes/Home/components/ModalUpdate';
+import { useInfiniteFetchingDevices } from '@/renderer/hooks/useDevices';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -315,6 +316,7 @@ export function MainWindow() {
     logGetUserDapp();
     getAllRPC();
   });
+  useInfiniteFetchingDevices();
 
   return (
     <ShellWalletProvider alwaysRender>

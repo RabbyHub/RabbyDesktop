@@ -35,6 +35,7 @@ import {
   DappTypeNotSupportedModal,
 } from '@/renderer/components/IPFSAlertModal';
 import { useTipCannotUseTrezorLike } from '@/renderer/hooks-shell/useZPopupEffects';
+import { useInfiniteFetchingDevices } from '@/renderer/hooks/useDevices';
 import SwitchChainModal from '../../components/SwitchChainModal';
 
 import styles from './index.module.less';
@@ -80,6 +81,8 @@ function App() {
   useReactOnZPopupMessage();
 
   useTipCannotUseTrezorLike();
+
+  useInfiniteFetchingDevices();
 
   return (
     <>
