@@ -32,9 +32,19 @@ export const SelectAddressModal: React.FC<Props> = ({
   }, [getAllAccountsToDisplay]);
 
   const accounts = React.useMemo(() => {
-    return accountsList.filter(
-      (item) => item.type !== KEYRING_TYPE.GnosisKeyring
-    );
+    const watches: IDisplayedAccountWithBalance[] = [];
+    const others: IDisplayedAccountWithBalance[] = [];
+    for (let i = 0; i < accountsList.length; i++) {
+      const account = accountsList[i];
+      if (account.type !== KEYRING_TYPE.GnosisKeyring) {
+        if (account.type === KEYRING_TYPE.WatchAddressKeyring) {
+          watches.push(account);
+        } else {
+          others.push(account);
+        }
+      }
+    }
+    return [...others, ...watches];
   }, [accountsList]);
 
   const handleConfirm = React.useCallback(() => {
@@ -72,7 +82,8 @@ export const SelectAddressModal: React.FC<Props> = ({
             <AddressItem
               selected={
                 selectAccount?.address
-                  ? isSameAddress(selectAccount.address, account.address)
+                  ? isSameAddress(selectAccount.address, account.address) &&
+                    selectAccount.brandName === account.brandName
                   : false
               }
               onClick={setSelectedAccount}
