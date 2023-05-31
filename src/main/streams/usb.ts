@@ -36,7 +36,6 @@ webusb.addEventListener('disconnect', async (event) => {
   const { list } = await getAllMainUIViews();
   const rabbyxSignWebContentsList = getAllRabbyXWindowWebContentsList();
 
-  console.log('[feat] rabbyxSignWebContentsList', rabbyxSignWebContentsList);
   [...list, ...rabbyxSignWebContentsList].forEach((view) => {
     sendToWebContents(view, '__internal_push:webusb:device-changed', {
       changes: {
