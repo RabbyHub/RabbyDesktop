@@ -480,7 +480,7 @@ export function MainWindowSettings() {
                 });
               }}
             />
-            <ItemSwitch
+            {/* <ItemSwitch
               checked={
                 settings.experimentalDappViewZoomPercent ===
                 DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT
@@ -506,7 +506,7 @@ export function MainWindowSettings() {
                   adjustDappViewZoomPercent(100);
                 }
               }}
-            />
+            /> */}
           </div>
         </div>
       </div>
