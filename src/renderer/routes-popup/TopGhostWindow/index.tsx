@@ -91,7 +91,7 @@ export default function TopGhostWindow() {
           <Tooltip
             key={`ele-on-ghost-${eleInfo.triggerId}`}
             {...eleInfo.tooltipProps}
-            open={!!triggerRect}
+            open={!!triggerRect && eleInfo.tooltipProps?.open}
           >
             <div
               style={{

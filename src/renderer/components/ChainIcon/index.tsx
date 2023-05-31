@@ -146,7 +146,7 @@ const ChainIcon = ({
     };
   }, [chain, customRPC, customRPCStatus, isShowCustomRPC]);
 
-  const [{ showTooltip, hideTooltip }] = useGhostTooltip({
+  const [{ showTooltip, destroyTooltip }] = useGhostTooltip({
     mode: 'controlled',
     defaultTooltipProps: {
       title: 'You should never see this tooltip',
@@ -217,7 +217,7 @@ const ChainIcon = ({
           }
         }}
         onMouseLeave={() => {
-          hideTooltip();
+          destroyTooltip();
         }}
       >
         <ChainIconEle className={clsx(size)} src={CHAINS[chain].logo} />

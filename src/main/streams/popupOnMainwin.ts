@@ -294,7 +294,9 @@ const { handler: handlerToggleShowPopupWins } = onIpcMainInternalEvent(
       if (targetWin && !IS_RUNTIME_PRODUCTION && payload.openDevTools) {
         targetWin.webContents.openDevTools({ mode: 'detach' });
       }
-      showPopupWindow(targetWin);
+      showPopupWindow(targetWin, {
+        isInActiveOnDarwin: payload.type === 'top-ghost-window',
+      });
     } else {
       hidePopupOnMainWindow(targetWin, payload.type);
     }
@@ -317,7 +319,7 @@ onIpcMainEvent(
     if (!IS_RUNTIME_PRODUCTION) return;
 
     if (nextVisible) {
-      showPopupWindow(ghostFloatingWindow);
+      showPopupWindow(ghostFloatingWindow, { isInActiveOnDarwin: true });
     } else {
       hidePopupWindow(ghostFloatingWindow);
     }
