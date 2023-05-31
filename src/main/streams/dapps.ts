@@ -123,20 +123,20 @@ handleIpcMainInvoke('detect-dapp-version', async (_, httpDappId: string) => {
 export const DAPP_VERSION_DETECT_INTERVAL = IS_RUNTIME_PRODUCTION
   ? 5 * 60 * 1000
   : 0.1 * 60 * 1000;
-interval(DAPP_VERSION_DETECT_INTERVAL).subscribe(async () => {
-  const mainTabbedWin = await onMainWindowReady();
+// interval(DAPP_VERSION_DETECT_INTERVAL).subscribe(async () => {
+//   const mainTabbedWin = await onMainWindowReady();
 
-  const activeTab = mainTabbedWin.tabs.selected;
-  if (!activeTab) return;
+//   const activeTab = mainTabbedWin.tabs.selected;
+//   if (!activeTab) return;
 
-  const selectedDappId = activeTab.relatedDappId;
-  if (!selectedDappId || extractDappInfoFromURL(selectedDappId).type !== 'http')
-    return;
+//   const selectedDappId = activeTab.relatedDappId;
+//   if (!selectedDappId || extractDappInfoFromURL(selectedDappId).type !== 'http')
+//     return;
 
-  const detectResult = await detectDappVersoin(selectedDappId);
+//   const detectResult = await detectDappVersoin(selectedDappId);
 
-  pushUpdatedToMainWindow(selectedDappId, detectResult.result.updated);
-});
+//   pushUpdatedToMainWindow(selectedDappId, detectResult.result.updated);
+// });
 
 handleIpcMainInvoke('confirm-dapp-updated', async (_, httpDappId: string) => {
   confirmDappVersion(httpDappId);

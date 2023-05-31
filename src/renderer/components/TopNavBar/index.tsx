@@ -11,10 +11,7 @@ import {
 } from '@/../assets/icons/top-bar';
 
 import { Divider } from 'antd';
-import {
-  useDappNavigation,
-  useDetectDappVersion,
-} from '@/renderer/hooks-shell/useDappNavigation';
+import { useDappNavigation } from '@/renderer/hooks-shell/useDappNavigation';
 import {
   useEffect,
   useCallback,
@@ -37,8 +34,6 @@ import { useGhostTooltip } from '@/renderer/routes-popup/TopGhostWindow/useGhost
 import { useLocation } from 'react-router-dom';
 import styles from './index.module.less';
 import ChainIcon from '../ChainIcon';
-import NavRefreshButton from './components/NavRefreshButton';
-import { toastMessage } from '../TransparentToast';
 // import { TipsWrapper } from '../TipWrapper';
 
 const isDarwin = detectClientOS() === 'darwin';
@@ -166,9 +161,6 @@ export const TopNavBar = () => {
     [l]
   );
 
-  const { dappVersion, confirmDappVersion } =
-    useDetectDappVersion(selectedTabInfo);
-
   return (
     <div className={styles.main} onDoubleClick={onDarwinToggleMaxmize}>
       {/* keep this element in first to make it bottom, or move it last to make it top */}
@@ -278,36 +270,17 @@ export const TopNavBar = () => {
             )}
             onClick={navActions.onGoForwardButtonClick}
           />
-          <NavRefreshButton
-            className={styles.detectDappIcon}
-            btnStatus={
-              activeTab?.status === 'loading'
-                ? 'loading'
-                : dappVersion.updated
-                ? 'dapp-updated'
-                : undefined
-            }
-            normalRefreshBtn={
-              <RcIconReload
-                style={{ color: navIconColor }}
-                onClick={navActions.onReloadButtonClick}
-              />
-            }
-            stopLoadingBtn={
-              <RcIconStopload
-                style={{ color: navIconColor }}
-                onClick={navActions.onStopLoadingButtonClick}
-              />
-            }
-            onForceReload={() => {
-              navActions.onForceReloadButtonClick();
-              confirmDappVersion();
-              toastMessage({
-                type: 'success',
-                content: 'Updated',
-              });
-            }}
-          />
+          {activeTab?.status === 'loading' ? (
+            <RcIconStopload
+              style={{ color: navIconColor }}
+              onClick={navActions.onStopLoadingButtonClick}
+            />
+          ) : (
+            <RcIconReload
+              style={{ color: navIconColor }}
+              onClick={navActions.onReloadButtonClick}
+            />
+          )}
           <RcIconHome
             style={{ color: navIconColor }}
             onClick={navActions.onHomeButtonClick}
