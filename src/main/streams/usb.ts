@@ -3,18 +3,23 @@ import usb = require('usb');
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { pickAllNonFnFields } from '@/isomorphic/json';
 import { handleIpcMainInvoke, sendToWebContents } from '../utils/ipcMainEvents';
-import { getAllMainUIViews } from '../utils/stream-helpers';
+import {
+  getAllMainUIViews,
+  getAllRabbyXWindowWebContentsList,
+} from '../utils/stream-helpers';
 
 const webusb = new usb.WebUSB({
   allowAllDevices: true,
 });
 
 webusb.addEventListener('connect', async (event) => {
-  if (!IS_RUNTIME_PRODUCTION) console.debug('[debug] connect', event);
+  // if (!IS_RUNTIME_PRODUCTION)
+  console.info('[usb::event] connect', event);
 
   const { list } = await getAllMainUIViews();
+  const rabbyxSignWebContentsList = getAllRabbyXWindowWebContentsList();
 
-  list.forEach((view) => {
+  [...list, ...rabbyxSignWebContentsList].forEach((view) => {
     sendToWebContents(view, '__internal_push:webusb:device-changed', {
       changes: {
         type: 'connect',
@@ -25,11 +30,14 @@ webusb.addEventListener('connect', async (event) => {
 });
 
 webusb.addEventListener('disconnect', async (event) => {
-  if (!IS_RUNTIME_PRODUCTION) console.debug('[debug] disconnect', event);
+  // if (!IS_RUNTIME_PRODUCTION)
+  console.info('[usb::event] disconnect', event);
 
   const { list } = await getAllMainUIViews();
+  const rabbyxSignWebContentsList = getAllRabbyXWindowWebContentsList();
 
-  list.forEach((view) => {
+  console.log('[feat] rabbyxSignWebContentsList', rabbyxSignWebContentsList);
+  [...list, ...rabbyxSignWebContentsList].forEach((view) => {
     sendToWebContents(view, '__internal_push:webusb:device-changed', {
       changes: {
         type: 'disconnect',
