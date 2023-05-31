@@ -19,7 +19,7 @@ export default function NavRefreshButton({
   stopLoadingBtn?: React.ReactNode;
   normalRefreshBtn?: React.ReactNode;
 }) {
-  const [{ showTooltip, destroyTooltip }] = useGhostTooltip({
+  const [{ showTooltip, destroyTooltip, hideTooltip }] = useGhostTooltip({
     mode: 'controlled',
     defaultTooltipProps: {
       title: 'New version detected. Refresh the page to update.',
@@ -48,14 +48,14 @@ export default function NavRefreshButton({
         }
       );
     } else {
-      destroyTooltip(0);
+      hideTooltip();
     }
 
     /** @warning don't destroy on unmount, it will cause tooltip(on another webview) flicker */
     // return () => {
     //   destroyTooltip();
     // }
-  }, [btnStatus, showTooltip, destroyTooltip]);
+  }, [btnStatus, showTooltip, hideTooltip]);
 
   if (btnStatus === 'loading') return <>{stopLoadingBtn}</>;
 

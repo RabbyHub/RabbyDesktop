@@ -97,6 +97,7 @@ export function useDetectDappVersion(shellNavInfo?: IShellNavInfo | null) {
   useEffect(() => {
     if (dappOrigin) {
       if (lastDappOrigin.current !== dappOrigin) {
+        setDappVersion({ updated: false });
         window.rabbyDesktop.ipcRenderer.invoke(
           'detect-dapp-version',
           dappOrigin

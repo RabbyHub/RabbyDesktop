@@ -1,13 +1,19 @@
 import { arraify } from '@/isomorphic/array';
+import { detectClientOS } from '@/isomorphic/os';
 import { randString } from '@/isomorphic/string';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { showMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import { useCallback, useLayoutEffect, useRef } from 'react';
 import { useClickAway } from 'react-use';
 
+const osType = detectClientOS();
+
 function toggleTooltipShow(payload: ITriggerTooltipOnGhost) {
   if (payload.triggerElementRect) {
-    showMainwinPopup({ x: 0, y: 0 }, { type: 'top-ghost-window' });
+    if (osType !== 'darwin') {
+      // avoid pull window to front on macos
+      showMainwinPopup({ x: 0, y: 0 }, { type: 'top-ghost-window' });
+    }
     forwardMessageTo('top-ghost-window', 'trigger-tooltip', {
       payload,
     });
