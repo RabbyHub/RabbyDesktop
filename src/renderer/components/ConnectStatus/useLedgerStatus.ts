@@ -93,9 +93,20 @@ export const useLedgerStatus = (address?: string) => {
 
   const { devices, fetchDevices } = useHIDDevices();
 
-  React.useEffect(() => {
+  const loopFetchDevices = () => {
     fetchDevices();
-  }, [fetchDevices]);
+
+    setTimeout(() => {
+      console.log('111', 'loopFetchDevices');
+      loopFetchDevices();
+    }, 500);
+  };
+
+  React.useEffect(() => {
+    loopFetchDevices();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   React.useEffect(() => {
     const hasLedger = devices.some(
       (item) => item.vendorId === ledgerUSBVendorId
