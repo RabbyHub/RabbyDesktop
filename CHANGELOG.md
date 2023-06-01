@@ -1,7 +1,43 @@
 
-v0.23.0 / 2023-05-23
+v0.24.0 / 2023-06-01
 ====================
 
+  * fix: gnosis safe nonce. (#466)
+  * chore: update currentVersion.md
+  * fix: hid devices status fetch for ledger. (#465)
+  * fix: order of safe accounts
+  * fix: new version tooltip don't disappear on windows. (#464)
+  * fix: avoid new version tooltip flicker. (#463)
+  * fix: address modal ui (#462)
+  * feat: only show dapp's new version if it differs with the version LAST opened. (#461)
+  * fix: update rabbyx to fix wallectconnect on rabbyx's ui.
+  * fix: select type ui (#460)
+  * feat: disable zoom ratio setting item. (#459)
+  * fix: use onMessage to listen message from background (#458)
+  * fix: wc style (#457)
+  * chore: code cleanup.
+  * feat: always show tips if new version not confirmed. (#456)
+  * fix: input style (#454)
+  * fix: whitelist tips width (#455)
+  * fix: addressItem key (#453)
+  * fix: walletconnect ui (#452)
+  * Add support for OpenOcean DEX (#450)
+  * feat: support pulse chain, update currentVersion.md
+  * feat: support detect dapp version. (#448)
+  * fix: correct rabbyx version for Connect sign.
+  * feat: walletconnect and new signature process (#443)
+  * Refactor token amount formatting (#449)
+  * feat: use new rabby sign Connect window. (#445)
+  * feat: let active tab auto scroll into view. (#446)
+  * feat: always show .dmg download file for macOS. (#447)
+  * feat: zoom dapp view to 0.9 by default. (#444)
+  * feat: display version as prod first. (#441)
+  * feat: update minted badge image (#442)
+
+v0.23.0-prod / 2023-05-23
+=========================
+
+  * Release v0.23.0-prod
   * feat: upgrade rabbyx to 0.86.1 (#440)
   * feat: update currentVersion.md
   * feat: NFT P2P Lender 、Borrower (#433)
