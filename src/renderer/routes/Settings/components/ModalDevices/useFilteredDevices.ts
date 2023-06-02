@@ -1,32 +1,41 @@
 import { arraify } from '@/isomorphic/array';
 import useDebounceValue from '@/renderer/hooks/useDebounceValue';
-import { useHIDDevices, useUSBDevices } from '@/renderer/hooks/useDevices';
+import { useHIDDevices, useUSBDevicesOnDev } from '@/renderer/hooks/useDevices';
 import { message } from 'antd';
 import { useState } from 'react';
 
 export type IPerspective = 'hid' | 'usb';
-export function useFilteredDevices(type: IPerspective) {
+export function useFilteredHidDevices() {
   const hidInfo = useHIDDevices();
-  const usbInfo = useUSBDevices();
+  const usbInfo = useUSBDevicesOnDev();
 
   const [filterKeyword, setFilterKeyword] = useState('');
   const debouncedKeyword = useDebounceValue(filterKeyword, 300);
 
   return {
-    ...(type === 'hid'
-      ? {
-          isFetchingDevice: hidInfo.isFetchingDevice,
-          fetchDevices: hidInfo.fetchDevices,
-        }
-      : {
-          isFetchingDevice: usbInfo.isFetchingDevice,
-          fetchDevices: usbInfo.fetchDevices,
-        }),
+    isFetchingDevice: hidInfo.isFetchingDevice,
+    fetchDevices: hidInfo.fetchDevices,
 
     hidDevices: hidInfo.devices,
     usbDevices: usbInfo.devices,
 
-    type,
+    filterKeyword,
+    setFilterKeyword,
+    debouncedKeyword,
+  };
+}
+
+export function useFilteredUsbDevicesOnDev() {
+  const usbInfo = useUSBDevicesOnDev();
+
+  const [filterKeyword, setFilterKeyword] = useState('');
+  const debouncedKeyword = useDebounceValue(filterKeyword, 300);
+
+  return {
+    isFetchingDevice: usbInfo.isFetchingDevice,
+    fetchDevices: usbInfo.fetchDevices,
+
+    usbDevices: usbInfo.devices,
 
     filterKeyword,
     setFilterKeyword,

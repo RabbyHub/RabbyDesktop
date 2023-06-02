@@ -8,7 +8,10 @@ import { usePrevious } from 'react-use';
 import SvgIconDeviceManufacturer from './device-manufacturer.svg?rc';
 import { useIsViewingDevices } from '../../settingHooks';
 import styles from './index.module.less';
-import { testRequestDevice, useFilteredDevices } from './useFilteredDevices';
+import {
+  testRequestDevice,
+  useFilteredUsbDevicesOnDev,
+} from './useFilteredDevices';
 import DeviceAttr from './DeviceAttr';
 
 export default function DeviceViewUSB() {
@@ -19,7 +22,7 @@ export default function DeviceViewUSB() {
     fetchDevices,
     filterKeyword,
     setFilterKeyword,
-  } = useFilteredDevices('usb');
+  } = useFilteredUsbDevicesOnDev();
 
   const filteredDevices = useMemo(() => {
     if (!debouncedKeyword) return usbDevices;

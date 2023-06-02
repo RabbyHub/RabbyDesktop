@@ -2,6 +2,7 @@ import { Modal as RabbyModal } from '@/renderer/components/Modal/Modal';
 import { Tabs } from 'antd';
 
 import { useState } from 'react';
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { useIsViewingDevices } from '../../settingHooks';
 import DeviceViewHID from './DeviceViewHID';
 import DeviceViewUSB from './DeviceViewUSB';
@@ -34,12 +35,13 @@ export default function ModalDevices() {
             key: 'hid',
             children: <DeviceViewHID />,
           },
-          {
-            label: <span className={styles.tabLabel}>USB</span>,
-            key: 'usb',
-            children: <DeviceViewUSB />,
-          },
-        ]}
+          !IS_RUNTIME_PRODUCTION &&
+            ({
+              label: <span className={styles.tabLabel}>USB</span>,
+              key: 'usb',
+              children: <DeviceViewUSB />,
+            } as any),
+        ].filter(Boolean)}
         activeKey={currentPerspective}
         onChange={(activeKey: string) => {
           setCurrentPerspective(activeKey as IPerspective);

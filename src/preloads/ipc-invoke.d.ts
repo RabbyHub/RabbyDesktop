@@ -149,7 +149,7 @@ type ChannelInvokePayload = {
       devices: INodeHidDeviceInfo[];
     };
   };
-  'get-usb-devices': {
+  'dev-only:get-usb-devices': {
     send: [
       options?: {
         filters?: HIDDeviceRequestOptions['filters'];

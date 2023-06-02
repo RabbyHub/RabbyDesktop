@@ -62,7 +62,7 @@ export function useHIDDevices() {
 }
 
 const usbDevicesAtom = atom<IUSBDevice[]>([]);
-export function useUSBDevices() {
+export function useUSBDevicesOnDev() {
   const [devices, setDevices] = useAtom(usbDevicesAtom);
 
   const [isFetching, setIsFetching] = useState(false);
@@ -72,7 +72,7 @@ export function useUSBDevices() {
 
     setIsFetching(true);
     window.rabbyDesktop.ipcRenderer
-      .invoke('get-usb-devices')
+      .invoke('dev-only:get-usb-devices')
       .then((res) => {
         setDevices(res.devices);
       })
