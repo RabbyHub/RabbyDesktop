@@ -12,7 +12,7 @@ import styles from './index.module.less';
 
 const eleTooltipsAtom = atom<(ITriggerTooltipOnGhost & object)[]>([]);
 
-export default function TopGhostWindow() {
+function TooltipsFromOtherViews() {
   const [eleTooltips, setEleTooltips] = useAtom(eleTooltipsAtom);
   const [isGhostWindowDebugHighlighted, setIsGhostWindowDebugHighlighted] =
     useState(false);
@@ -114,5 +114,73 @@ export default function TopGhostWindow() {
         );
       })}
     </div>
+  );
+}
+
+function SpecialTooltips() {
+  const [newVersionRect, setNewVersionRect] = useState<DOMRectValues | null>(
+    null
+  );
+  const [newVersionRectVisible, setNewVersionRectVisible] = useState(false);
+  useMessageForwarded(
+    {
+      targetView: 'top-ghost-window',
+      type: 'report-special-tooltip',
+    },
+    (payload) => {
+      setNewVersionRect(payload.payload.rect);
+    }
+  );
+
+  useEffect(() => {
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_push:dapps:version-updated',
+      (payload) => {
+        setNewVersionRectVisible(
+          !!payload.currentDappId && payload.result.updated
+        );
+      }
+    );
+  }, []);
+
+  return (
+    <>
+      <Tooltip
+        open={!!newVersionRect && newVersionRectVisible}
+        title="New version detected. Refresh the page to update."
+        placement="bottom"
+        overlayClassName="custom-newversion-tooltip"
+        align={{
+          offset: [0, -2],
+        }}
+      >
+        <div
+          style={{
+            position: 'fixed',
+            ...(newVersionRect && {
+              left: newVersionRect.left,
+              top: newVersionRect.top,
+              width: newVersionRect.width,
+              height: newVersionRect.height,
+            }),
+          }}
+          className={clsx(
+            'trigger-ele-placeholder'
+            // !IS_RUNTIME_PRODUCTION &&
+            //   isGhostWindowDebugHighlighted &&
+            //   'isDebug'
+          )}
+        />
+      </Tooltip>
+    </>
+  );
+}
+
+export default function TopGhostWindow() {
+  return (
+    <>
+      <TooltipsFromOtherViews />
+      <SpecialTooltips />
+    </>
   );
 }

@@ -12,7 +12,7 @@ type SVState<T extends object> = { visible: boolean } & {
 
 type ITriggerTooltipOnGhost = {
   triggerId: string;
-  triggerElementRect?: Omit<DOMRectReadOnly, 'toJSON'>;
+  triggerElementRect?: DOMRectValues;
   tooltipProps?: Omit<
     import('antd').TooltipProps,
     'title' | 'overlay' | 'openOpenChange'
@@ -212,6 +212,14 @@ type ChannelForwardMessageType =
       targetView: 'top-ghost-window';
       type: 'trigger-tooltip';
       payload: ITriggerTooltipOnGhost;
+    }
+  | {
+      targetView: 'top-ghost-window';
+      type: 'report-special-tooltip';
+      payload: {
+        type: 'new-version-updated';
+        rect: DOMRectValues | null;
+      };
     }
   | {
       targetView: 'top-ghost-window' | 'main-window';

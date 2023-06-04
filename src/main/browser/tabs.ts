@@ -619,7 +619,12 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
   }
 
   private _cleanup() {
+    this._unselect();
+  }
+
+  private _unselect() {
     this.selected = undefined;
+    this.emit('tab-unselected', this.selected);
   }
 
   destroy() {
@@ -677,7 +682,7 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
     this.tabList.splice(tabIndex, 1);
     tab.destroy();
     if (this.selected === tab) {
-      this.selected = undefined;
+      this._unselect();
       const nextTab = this.tabList[tabIndex] || this.tabList[tabIndex - 1];
       if (nextTab) this.select(nextTab.id);
     }
@@ -707,7 +712,7 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
 
   unSelectAll() {
     if (this.selected) this.selected.hide();
-    this.selected = undefined;
+    this._unselect();
   }
 
   checkLoadingView() {

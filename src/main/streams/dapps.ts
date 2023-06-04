@@ -65,6 +65,13 @@ async function detectDappVersoin(httpDappId: string) {
     versionQueue: [],
   };
 
+  if (!httpDappId) {
+    return {
+      error: 'httpDappId is empty',
+      result,
+    };
+  }
+
   const versionInfo = await getDappVersionInfo(httpDappId);
 
   if (versionInfo.fetchSuccess) {
@@ -89,7 +96,9 @@ async function detectDappVersoin(httpDappId: string) {
 
   const dappVersion = getDappVersions(httpDappId);
 
-  result.updated = false;
+  result.updated =
+    dappVersion.versionQueue[0]?.versionSha512 !==
+    dappVersion.latestConfirmedVersion?.versionSha512;
   result.latest = dappVersion.latestConfirmedVersion;
   result.versionQueue = dappVersion.versionQueue;
 
@@ -99,44 +108,58 @@ async function detectDappVersoin(httpDappId: string) {
   };
 }
 
-async function pushUpdatedToMainWindow(httpDappId: string, updated: boolean) {
-  const mainTabbedWin = await onMainWindowReady();
+async function pushNewVersionUpdatedToView(
+  currentDappId: string | undefined,
+  updated: boolean
+) {
+  const { windows } = await getAllMainUIWindows();
 
-  sendToWebContents(
-    mainTabbedWin.window.webContents,
-    '__internal_push:dapps:version-updated',
-    {
-      httpDappId,
-      result: { updated },
-    }
-  );
+  const payload = {
+    currentDappId,
+    result: { updated },
+  };
+
+  [
+    windows['top-ghost-window'].webContents,
+    windows['main-window'].webContents,
+  ].forEach((wc) => {
+    sendToWebContents(wc, '__internal_push:dapps:version-updated', payload);
+  });
 }
 
-handleIpcMainInvoke('detect-dapp-version', async (_, httpDappId: string) => {
-  const detectResult = await detectDappVersoin(httpDappId);
+handleIpcMainInvoke('detect-dapp-version', async (_, currentDappId: string) => {
+  const detectResult = await detectDappVersoin(currentDappId);
 
-  pushUpdatedToMainWindow(httpDappId, detectResult.result.updated);
+  pushNewVersionUpdatedToView(currentDappId, detectResult.result.updated);
 
   return detectResult;
 });
 
+onMainWindowReady().then(async (mainTabbedWin) => {
+  mainTabbedWin.tabs.on('tab-unselected', () => {
+    pushNewVersionUpdatedToView(undefined, false);
+  });
+});
 export const DAPP_VERSION_DETECT_INTERVAL = IS_RUNTIME_PRODUCTION
   ? 5 * 60 * 1000
   : 0.1 * 60 * 1000;
-// interval(DAPP_VERSION_DETECT_INTERVAL).subscribe(async () => {
-//   const mainTabbedWin = await onMainWindowReady();
+interval(DAPP_VERSION_DETECT_INTERVAL).subscribe(async () => {
+  const mainTabbedWin = await onMainWindowReady();
 
-//   const activeTab = mainTabbedWin.tabs.selected;
-//   if (!activeTab) return;
+  const activeTab = mainTabbedWin.tabs.selected;
 
-//   const selectedDappId = activeTab.relatedDappId;
-//   if (!selectedDappId || extractDappInfoFromURL(selectedDappId).type !== 'http')
-//     return;
+  const selectedDappId = activeTab?.relatedDappId;
+  if (
+    !selectedDappId ||
+    extractDappInfoFromURL(selectedDappId).type !== 'http'
+  ) {
+    pushNewVersionUpdatedToView(undefined, false);
+    return;
+  }
 
-//   const detectResult = await detectDappVersoin(selectedDappId);
-
-//   pushUpdatedToMainWindow(selectedDappId, detectResult.result.updated);
-// });
+  const detectResult = await detectDappVersoin(selectedDappId);
+  pushNewVersionUpdatedToView(selectedDappId, detectResult.result.updated);
+});
 
 handleIpcMainInvoke('confirm-dapp-updated', async (_, httpDappId: string) => {
   confirmDappVersion(httpDappId);
@@ -152,7 +175,7 @@ onIpcMainInternalEvent(
   async (httpDappId: string) => {
     confirmDappVersion(httpDappId);
 
-    pushUpdatedToMainWindow(httpDappId, false);
+    pushNewVersionUpdatedToView(httpDappId, false);
   }
 );
 

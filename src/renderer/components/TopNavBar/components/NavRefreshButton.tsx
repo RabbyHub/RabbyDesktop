@@ -1,94 +1,100 @@
 import { useLayoutEffect, useRef } from 'react';
 import clsx from 'clsx';
 
-import { useGhostTooltip } from '@/renderer/routes-popup/TopGhostWindow/useGhostWindow';
-import { randString } from '@/isomorphic/string';
+import { reportRectForSpecialTooltip } from '@/renderer/routes-popup/TopGhostWindow/useGhostWindow';
+import { usePrevious } from 'react-use';
 
-const TRIGGER_ID = `detect-dapp-${randString()}`;
+import { RcIconReloadUpdate } from '@/../assets/icons/top-bar';
 
 export default function NavRefreshButton({
   className,
   onForceReload,
+  currentDappId,
   btnStatus,
   stopLoadingBtn = null,
   normalRefreshBtn,
 }: {
   className?: string;
   onForceReload?: () => Promise<void> | void;
+  currentDappId?: string;
   btnStatus?: 'dapp-updated' | 'loading';
   stopLoadingBtn?: React.ReactNode;
   normalRefreshBtn?: React.ReactNode;
 }) {
-  const [{ showTooltip, destroyTooltip, hideTooltip }] = useGhostTooltip({
-    mode: 'controlled',
-    defaultTooltipProps: {
-      title: 'New version detected. Refresh the page to update.',
-      placement: 'bottom',
-      overlayClassName: 'custom-newversion-tooltip',
-      align: {
-        offset: [0, -2],
-      },
-    },
-    staticTriggerId: TRIGGER_ID,
-  });
-
-  const triggerRef = useRef<HTMLImageElement | null>(null);
+  const newVersionImageRef = useRef<HTMLImageElement | null>(null);
+  const divRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
-    if (btnStatus === 'dapp-updated' && triggerRef.current) {
-      showTooltip(
-        triggerRef.current,
-        {},
-        {
-          /** @warning don't destroy tooltip first, otherwise it will cause tooltip(on another webview) flicker */
-          destroyFirst: false,
-          extraData: {
-            specialType: 'detect-dapp',
-          },
-        }
-      );
-    } else {
-      hideTooltip();
+    if (btnStatus === 'dapp-updated') {
+      reportRectForSpecialTooltip({
+        type: 'new-version-updated',
+        rect: divRef.current?.getBoundingClientRect(),
+      });
+    } else if (btnStatus === 'loading') {
+      reportRectForSpecialTooltip({
+        type: 'new-version-updated',
+        rect: null,
+      });
     }
+  }, [btnStatus]);
 
-    /** @warning don't destroy on unmount, it will cause tooltip(on another webview) flicker */
-    // return () => {
-    //   destroyTooltip();
-    // }
-  }, [btnStatus, showTooltip, hideTooltip]);
+  const prevDappId = usePrevious(currentDappId);
+  useLayoutEffect(() => {
+    if (currentDappId && prevDappId !== currentDappId) {
+      reportRectForSpecialTooltip({
+        type: 'new-version-updated',
+        rect: divRef.current?.getBoundingClientRect(),
+      });
+    }
+  }, [prevDappId, currentDappId]);
 
-  if (btnStatus === 'loading') return <>{stopLoadingBtn}</>;
+  const obsRef = useRef<ResizeObserver>(
+    new ResizeObserver(() => {
+      reportRectForSpecialTooltip({
+        type: 'new-version-updated',
+        rect: divRef.current?.getBoundingClientRect(),
+      });
+    })
+  );
 
-  if (btnStatus !== 'dapp-updated') return <>{normalRefreshBtn}</>;
+  useLayoutEffect(() => {
+    const divEl = divRef.current;
+    const obs = obsRef.current!;
+
+    if (!divEl) return;
+
+    obs.observe(divEl);
+
+    return () => {
+      obs.unobserve(divEl);
+      reportRectForSpecialTooltip({
+        type: 'new-version-updated',
+        rect: null,
+      });
+    };
+  }, []);
 
   return (
-    <img
-      className={clsx(className, 'cursor-pointer')}
-      src="rabby-internal://assets/icons/top-bar/icon-dapp-newversion.svg"
-      ref={triggerRef}
-      onClick={async () => {
-        destroyTooltip();
-        onForceReload?.();
-      }}
-      onMouseEnter={(e) => {
-        if (!triggerRef.current) {
-          return;
-        }
-
-        showTooltip(
-          triggerRef.current,
-          {},
-          {
-            destroyFirst: false,
-            extraData: {
-              specialType: 'detect-dapp',
-            },
-          }
-        );
-      }}
-      // onMouseLeave={() => {
-      //   destroyTooltip();
-      // }}
-    />
+    <div className="w-[20px] h-[20px]" ref={divRef}>
+      {btnStatus === 'loading' ? (
+        stopLoadingBtn
+      ) : btnStatus !== 'dapp-updated' ? (
+        normalRefreshBtn
+      ) : (
+        <RcIconReloadUpdate
+          className="w-[100%] h-[100%]"
+          // ref={newVersionImageRef}
+          onClick={async () => {
+            onForceReload?.();
+          }}
+          onMouseEnter={() => {
+            reportRectForSpecialTooltip({
+              type: 'new-version-updated',
+              rect: divRef.current?.getBoundingClientRect(),
+            });
+          }}
+        />
+      )}
+    </div>
   );
 }

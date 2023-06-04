@@ -324,6 +324,9 @@ export default function MainWindowSidebar() {
   useEffect(() => {
     if (matchedDapp) {
       makeSureDappOpened(matchedDapp.params.dappId!);
+    } else {
+      // cancel mainTabbedWindow's selection
+      // window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:mainwindow:unconfirmed-unselect-all');
     }
   }, [matchedDapp]);
 

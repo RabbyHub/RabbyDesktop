@@ -617,6 +617,8 @@ export function isTabUrlEntryOfHttpDappOrigin(
   tabURL: string,
   httpDappOrigin: string
 ) {
+  if (!tabURL || !httpDappOrigin) return false;
+
   const tabURLInfo = canoicalizeDappUrl(tabURL);
   const httpDappOriginInfo = canoicalizeDappUrl(httpDappOrigin);
 

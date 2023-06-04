@@ -33,7 +33,7 @@ type ChannelPushToWebContents = {
   };
 
   '__internal_push:dapps:version-updated': {
-    httpDappId: string;
+    currentDappId?: string;
     result: Pick<IDetectHttpTypeDappVersionResult, 'updated'>;
   };
 };
