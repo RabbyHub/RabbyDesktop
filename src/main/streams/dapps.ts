@@ -82,6 +82,7 @@ async function detectDappVersoin(httpDappId: string) {
 
     if (
       putResult.versionQueue.length >= 2 &&
+      putResult.latestConfirmedVersion?.versionSha512 &&
       putResult.versionQueue[0].versionSha512 !==
         putResult.latestConfirmedVersion?.versionSha512
     ) {
@@ -97,8 +98,9 @@ async function detectDappVersoin(httpDappId: string) {
   const dappVersion = getDappVersions(httpDappId);
 
   result.updated =
+    !!dappVersion.latestConfirmedVersion?.versionSha512 &&
     dappVersion.versionQueue[0]?.versionSha512 !==
-    dappVersion.latestConfirmedVersion?.versionSha512;
+      dappVersion.latestConfirmedVersion?.versionSha512;
   result.latest = dappVersion.latestConfirmedVersion;
   result.versionQueue = dappVersion.versionQueue;
 
