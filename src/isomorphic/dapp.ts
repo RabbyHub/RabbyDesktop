@@ -629,3 +629,19 @@ export function isTabUrlEntryOfHttpDappOrigin(
       httpDappOriginInfo.secondaryDomain === tabURLInfo.secondaryDomain)
   );
 }
+
+export function isHttpURLWithSameHost(
+  dappOrigin: string,
+  targetHttpURL: string
+) {
+  if (!dappOrigin || !targetHttpURL) return false;
+
+  const targetHttpURLInfo = canoicalizeDappUrl(targetHttpURL);
+  const dappOriginInfo = canoicalizeDappUrl(dappOrigin);
+
+  return (
+    targetHttpURLInfo.secondaryDomain === dappOriginInfo.secondaryDomain &&
+    dappOriginInfo.urlInfo?.protocol === 'https://' &&
+    targetHttpURLInfo.urlInfo?.protocol === 'http://'
+  );
+}

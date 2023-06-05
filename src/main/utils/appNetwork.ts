@@ -1,9 +1,16 @@
+import http from 'http';
+import { BrowserView } from 'electron';
+import * as Sentry from '@sentry/electron/main';
+
 import {
   IS_RUNTIME_PRODUCTION,
   RABBY_INTERNAL_PROTOCOL,
 } from '@/isomorphic/constants';
-import { canoicalizeDappUrl, formatProxyRules } from '@/isomorphic/url';
-import { BrowserView } from 'electron';
+import {
+  canoicalizeDappUrl,
+  formatProxyRules,
+  safeParseURL,
+} from '@/isomorphic/url';
 import { catchError, firstValueFrom, of, Subject, timeout } from 'rxjs';
 import { BrowserViewManager, parseSiteMetaByWebContents } from './browserView';
 import { getSessionInsts } from './stream-helpers';
@@ -240,4 +247,86 @@ export async function checkProxyViaBrowserView(
   }
 
   return checkUrlViaBrowserView(targetURL, { view, timeout: 3000 });
+}
+
+export async function isHttpUrlRedirectable(httpURL: string) {
+  const parsedUrl = safeParseURL(httpURL);
+
+  if (!parsedUrl) return false;
+
+  if (parsedUrl.protocol === 'https:') {
+    // TODO: should we throw error here?
+    return true;
+  }
+  if (parsedUrl.protocol !== 'http:') {
+    return false;
+  }
+
+  type IResult = {
+    couldRedirect: boolean;
+    locationUrl?: string;
+    error?: Error;
+  };
+  const result = await new Promise<IResult>((resolve, reject) => {
+    const options = {
+      method: 'HEAD',
+      hostname: parsedUrl.hostname,
+      path: parsedUrl.pathname,
+      port: parsedUrl.port || 80,
+      rejectUnauthorized: false,
+    };
+
+    const req = http.request(options, (res) => {
+      if (!res?.statusCode) {
+        resolve({ couldRedirect: false });
+        return;
+      }
+
+      if (
+        res?.statusCode >= 300 &&
+        res?.statusCode < 400 &&
+        res.headers.location
+      ) {
+        try {
+          const redirectUrl = new URL(res.headers.location, httpURL);
+          if (
+            redirectUrl.protocol === 'https:' &&
+            redirectUrl.hostname === parsedUrl.hostname
+          ) {
+            resolve({
+              couldRedirect: true,
+              locationUrl: redirectUrl.toString(),
+            });
+          } else {
+            resolve({
+              couldRedirect: true,
+              locationUrl: redirectUrl.toString(),
+            });
+          }
+        } catch (err: any) {
+          resolve({ couldRedirect: false, error: err });
+        }
+      } else {
+        resolve({ couldRedirect: false });
+      }
+    });
+
+    req.on('error', reject);
+
+    req.end();
+  });
+
+  Sentry.captureEvent({
+    message: 'Check If Http Url Redirectable',
+    tags: {
+      httpURL,
+      couldRedirect: result.couldRedirect,
+      locationUrl: result.locationUrl,
+    },
+    extra: {
+      error: result.error?.message,
+    },
+  });
+
+  return result.couldRedirect;
 }

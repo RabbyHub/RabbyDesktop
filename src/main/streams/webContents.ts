@@ -98,6 +98,7 @@ export function setOpenHandlerForWebContents({
         safeOpenURL(targetURL, {
           sourceURL: currentUrl,
           targetMatchedDappResult: targetInfo.matchDappResult,
+          httpTargetMatchedDappResult: targetInfo.matchDappResultForHttp,
           _targetwin: parentTabbedWin.window,
         }).then((res) => res.activeTab());
       } else {
@@ -203,6 +204,7 @@ export const setListeners = {
         case EnumOpenDappAction.safeOpenOrSwitchToAnotherTab: {
           safeOpenURL(targetURL, {
             targetMatchedDappResult: targetInfo.matchDappResult,
+            httpTargetMatchedDappResult: targetInfo.matchDappResultForHttp,
             sourceURL: previousURL,
             redirectSourceTab: foundTab,
           }).then((res) => res.activeTab());
@@ -269,9 +271,11 @@ export const setListeners = {
           }
           case EnumOpenDappAction.safeOpenOrSwitchToAnotherTab: {
             evt.preventDefault();
+
             safeOpenURL(targetURL, {
               sourceURL: currentUrl,
               targetMatchedDappResult: targetInfo.matchDappResult,
+              httpTargetMatchedDappResult: targetInfo.matchDappResultForHttp,
               // openedTab,
               _targetwin: parentWindow,
             }).then((res) => res.activeTab());

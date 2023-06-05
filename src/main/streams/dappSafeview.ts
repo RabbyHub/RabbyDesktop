@@ -27,6 +27,7 @@ import { parseWebsiteFavicon } from '../utils/fetch';
 import { getFullAppProxyConf } from '../store/desktopApp';
 import { findDappsByOrigin } from '../store/dapps';
 import { getOrCreateDappBoundTab } from '../utils/tabbedBrowserWindow';
+import { isHttpUrlRedirectable } from '../utils/appNetwork';
 
 function hideView(view: BrowserView, parentWin: BrowserWindow) {
   parentWin.removeBrowserView(view);
@@ -113,6 +114,15 @@ export async function safeOpenURL(
   opts: {
     sourceURL: string;
     targetMatchedDappResult: IMatchDappResult;
+    /**
+     * @description when this field provided, it means target url is http version,
+     *
+     * some target url is like `http://...`, but its https version
+     * match existed dapps, we can check if it is redirect from http to https,
+     * and if so, we can redirect the source tab to the https version
+     *
+     * */
+    httpTargetMatchedDappResult?: IMatchDappResult;
     _targetwin?: BrowserWindow;
     redirectSourceTab?: import('../browser/tabs').Tab;
     isFromInternalRenderer?: boolean;
@@ -121,9 +131,20 @@ export async function safeOpenURL(
 ): Promise<SafeOpenResult> {
   const mainTabbedWin = await onMainWindowReady();
 
-  if (opts.targetMatchedDappResult?.dapp) {
+  let { targetMatchedDappResult } = opts;
+  const { httpTargetMatchedDappResult } = opts;
+
+  if (
+    httpTargetMatchedDappResult?.dapp &&
+    (await isHttpUrlRedirectable(targetURL))
+  ) {
+    targetURL = targetURL.replace(/^http:/, 'https:');
+    targetMatchedDappResult = httpTargetMatchedDappResult;
+  }
+
+  if (targetMatchedDappResult?.dapp) {
     const findTabResult = getOrCreateDappBoundTab(mainTabbedWin, targetURL, {
-      targetMatchedDappResult: opts.targetMatchedDappResult,
+      targetMatchedDappResult,
     });
 
     const openedTab = opts.redirectSourceTab || findTabResult.finalTab;
