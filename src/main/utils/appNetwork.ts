@@ -319,7 +319,9 @@ export async function isHttpUrlRedirectable(
       }
     });
 
-    req.on('error', reject);
+    req.on('error', (error) => {
+      resolve({ couldRedirect: false, error });
+    });
 
     req.end();
   });
