@@ -249,14 +249,22 @@ export async function checkProxyViaBrowserView(
   return checkUrlViaBrowserView(targetURL, { view, timeout: 3000 });
 }
 
-export async function isHttpUrlRedirectable(httpURL: string) {
+/**
+ * @description
+ * TODO: should we cache the result?
+ */
+export async function isHttpUrlRedirectable(
+  httpURL: string
+): Promise<string | false> {
   const parsedUrl = safeParseURL(httpURL);
+
+  // TODO: leave here for debug
+  // return false;
 
   if (!parsedUrl) return false;
 
   if (parsedUrl.protocol === 'https:') {
-    // TODO: should we throw error here?
-    return true;
+    return false;
   }
   if (parsedUrl.protocol !== 'http:') {
     return false;
@@ -328,5 +336,5 @@ export async function isHttpUrlRedirectable(httpURL: string) {
     },
   });
 
-  return result.couldRedirect;
+  return result.couldRedirect ? result.locationUrl! : false;
 }

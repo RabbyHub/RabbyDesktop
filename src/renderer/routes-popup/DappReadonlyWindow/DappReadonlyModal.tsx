@@ -35,6 +35,13 @@ function InnerRedirect({
   isLoadingFavicon?: boolean;
   targetInfo: ICanonalizedUrlInfo;
 }) {
+  const { isHttpURL, httpsURL } = useMemo(() => {
+    return {
+      isHttpURL: targetInfo.urlInfo?.protocol === 'http:',
+      httpsURL: targetInfo.urlInfo?.href?.replace(/^http:/, 'https:'),
+    };
+  }, [targetInfo]);
+
   return (
     <>
       <header className={styles.header}>
@@ -62,37 +69,64 @@ function InnerRedirect({
           </span>
         </div>
       </header>
-      <div className={classNames(styles.tipContainer, 'mt-30px pb-60px')}>
-        The page you want to open has not been added as a Dapp.
-      </div>
-      <div className={classNames(styles.buttonContainer)}>
-        <Button
-          className={classNames(styles.button, styles.J_add)}
-          type="primary"
-          onClick={() => {
-            closeView();
-            openExternalUrl(nonSameOrigin.url);
-          }}
-        >
-          Open in browser
-        </Button>
+      {isHttpURL ? (
+        <>
+          <div className={classNames(styles.tipContainer, 'mt-30px pb-60px')}>
+            The page you want to open maybe unsafe.
+          </div>
+          <div className={classNames(styles.buttonContainer)}>
+            {httpsURL && (
+              <Button
+                className={classNames(styles.button, styles.J_add)}
+                type="primary"
+                onClick={() => {
+                  closeView();
+                  window.rabbyDesktop.ipcRenderer.invoke(
+                    'safe-open-dapp-tab',
+                    httpsURL
+                  );
+                }}
+              >
+                Try open safely
+              </Button>
+            )}
+          </div>
+        </>
+      ) : (
+        <>
+          <div className={classNames(styles.tipContainer, 'mt-30px pb-60px')}>
+            The page you want to open has not been added as a Dapp.
+          </div>
+          <div className={classNames(styles.buttonContainer)}>
+            <Button
+              className={classNames(styles.button, styles.J_add)}
+              type="primary"
+              onClick={() => {
+                closeView();
+                openExternalUrl(nonSameOrigin.url);
+              }}
+            >
+              Open in browser
+            </Button>
 
-        <Button
-          className={classNames(styles.button, styles.J_openInBrowser)}
-          type="text"
-          onClick={() => {
-            closeView();
-            showMainwinPopupview({
-              type: 'dapps-management',
-              state: {
-                newDappOrigin: targetInfo.origin,
-              },
-            });
-          }}
-        >
-          Add as dapp
-        </Button>
-      </div>
+            <Button
+              className={classNames(styles.button, styles.J_openInBrowser)}
+              type="text"
+              onClick={() => {
+                closeView();
+                showMainwinPopupview({
+                  type: 'dapps-management',
+                  state: {
+                    newDappOrigin: targetInfo.origin,
+                  },
+                });
+              }}
+            >
+              Add as dapp
+            </Button>
+          </div>
+        </>
+      )}
     </>
   );
 }
