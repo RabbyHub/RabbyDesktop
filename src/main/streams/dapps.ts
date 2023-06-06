@@ -20,6 +20,7 @@ import {
   getDappVersions,
   putDappVersions,
 } from '../store/cache';
+import { getMainBuildInfo } from '../utils/app';
 
 handleIpcMainInvoke('parse-favicon', async (_, targetURL) => {
   const result = {
@@ -143,12 +144,16 @@ onMainWindowReady().then(async (mainTabbedWin) => {
   });
 });
 export const DAPP_VERSION_DETECT_INTERVAL = IS_RUNTIME_PRODUCTION
-  ? 5 * 60 * 1000
+  ? (getMainBuildInfo().buildchannel === 'prod' ? 5 : 0.5) * 60 * 1000
   : 0.1 * 60 * 1000;
-interval(DAPP_VERSION_DETECT_INTERVAL).subscribe(async () => {
+interval(DAPP_VERSION_DETECT_INTERVAL).subscribe(async (count) => {
   const mainTabbedWin = await onMainWindowReady();
 
   const activeTab = mainTabbedWin.tabs.selected;
+
+  console.debug(
+    `[dapp-check] try to check current active tab dapp version... ${count}`
+  );
 
   const selectedDappId = activeTab?.relatedDappId;
   if (
