@@ -39,6 +39,10 @@ async function hidePopupOnMainWindow(
     }
   );
 
+  if (type === 'top-ghost-window') {
+    opts = { ...opts, forceUseOpacity: true };
+  }
+
   hidePopupWindow(mainWin, opts);
 }
 
@@ -192,6 +196,8 @@ const ghostFloatingWindowReady = onMainWindowReady().then(
     const ghostFloatingWindow = createPopupWindow({
       parent: mainTabbedWin.window,
       modal: false,
+      show: true, // always show, control visibility by opacity
+      opacity: 0,
       transparent: true,
       hasShadow: false,
       closable: false,
@@ -245,7 +251,7 @@ const ghostFloatingWindowReady = onMainWindowReady().then(
       // ghostFloatingWindow.webContents.openDevTools({ mode: 'detach' });
     }
 
-    showPopupWindow(ghostFloatingWindow, { forceUseOpacity: true });
+    showPopupWindow(ghostFloatingWindow, { forceUseOpacity: false });
     // hidePopupWindow(ghostFloatingWindow);
 
     return ghostFloatingWindow;
@@ -274,6 +280,8 @@ const { handler: handlerToggleShowPopupWins } = onIpcMainInternalEvent(
       return;
     }
 
+    const isTopGhostWin = payload.type === 'top-ghost-window';
+
     if (payload.nextShow) {
       updateSubWindowRect({
         parentWin: mainWin,
@@ -297,7 +305,6 @@ const { handler: handlerToggleShowPopupWins } = onIpcMainInternalEvent(
       if (targetWin && !IS_RUNTIME_PRODUCTION && payload.openDevTools) {
         targetWin.webContents.openDevTools({ mode: 'detach' });
       }
-      const isTopGhostWin = payload.type === 'top-ghost-window';
       showPopupWindow(targetWin, {
         isInActiveOnDarwin: isTopGhostWin,
         forceUseOpacity: isTopGhostWin,
@@ -320,8 +327,8 @@ onIpcMainEvent(
   async (_, nextVisible) => {
     const ghostFloatingWindow = await ghostFloatingWindowReady;
 
-    // don't toggle window's visibility in dev mode
-    if (!IS_RUNTIME_PRODUCTION) return;
+    // // don't toggle window's visibility in dev mode
+    // if (!IS_RUNTIME_PRODUCTION) return;
 
     if (nextVisible) {
       showPopupWindow(ghostFloatingWindow, {
@@ -329,7 +336,7 @@ onIpcMainEvent(
         isInActiveOnDarwin: true,
       });
     } else {
-      hidePopupWindow(ghostFloatingWindow, { forceUseOpacity: false });
+      hidePopupWindow(ghostFloatingWindow, { forceUseOpacity: true });
     }
   }
 );

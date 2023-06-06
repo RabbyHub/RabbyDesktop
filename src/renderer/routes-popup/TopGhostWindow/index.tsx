@@ -162,6 +162,7 @@ function SpecialTooltips() {
         align={{
           offset: [0, -2],
         }}
+        transitionName=""
       >
         <div
           style={{

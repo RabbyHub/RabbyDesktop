@@ -202,15 +202,13 @@ function DeveloperKitsParts() {
                       <>
                         <ul className="pl-[12px] pl-[8px] pt-[8px]">
                           <li>
-                            On development, ghost window is always visible, but
-                            it's transparent by default, you can enable this
-                            option to make it highlighted with light blue
-                            background.
+                            Ghost window ONLY visible if there's element need to
+                            be rendered, otherwise it will be hidden by set
+                            opacity to 0.
                           </li>
                           <li className="mt-[8px]">
-                            On prodution, ghost window only visible if there's
-                            element need to be rendered, and it ALWAYS has a
-                            transparent background.
+                            On development, you can enable this option to make
+                            it highlighted with light blue background.
                           </li>
                         </ul>
                       </>

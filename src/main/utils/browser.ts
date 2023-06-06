@@ -203,7 +203,7 @@ export function showPopupWindow(
   } & IControllPopupWindowOpts
 ) {
   if (!IS_DARWIN || opts?.forceUseOpacity) {
-    if (!popupWin.isVisible()) {
+    if (!IS_DARWIN && !popupWin.isVisible()) {
       popupWin.show();
     }
     popupWin.setOpacity(1);
