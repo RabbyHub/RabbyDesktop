@@ -11,6 +11,7 @@ import {
 } from '../utils/ipcMainEvents';
 import { valueToMainSubject } from './_init';
 import {
+  IControllPopupWindowOpts,
   createPopupWindow,
   hidePopupWindow,
   showPopupWindow,
@@ -24,7 +25,8 @@ const isDarwin = process.platform === 'darwin';
 
 async function hidePopupOnMainWindow(
   mainWin: BrowserWindow | null,
-  type: IPopupWinPageInfo['type']
+  type: IPopupWinPageInfo['type'],
+  opts?: IControllPopupWindowOpts
 ) {
   if (!mainWin || mainWin.isDestroyed()) return;
 
@@ -37,7 +39,7 @@ async function hidePopupOnMainWindow(
     }
   );
 
-  hidePopupWindow(mainWin);
+  hidePopupWindow(mainWin, opts);
 }
 
 const SIZE_MAP: Record<
@@ -189,6 +191,7 @@ const ghostFloatingWindowReady = onMainWindowReady().then(
 
     const ghostFloatingWindow = createPopupWindow({
       parent: mainTabbedWin.window,
+      modal: false,
       transparent: true,
       hasShadow: false,
       closable: false,
@@ -219,7 +222,7 @@ const ghostFloatingWindowReady = onMainWindowReady().then(
       windowType: 'top-ghost-window',
     });
     const onTargetWinUpdate = () => {
-      if (ghostFloatingWindow.isVisible()) {
+      if (ghostFloatingWindow.isVisible() || isDarwin) {
         updateSubWindowRect({
           parentWin: mainTabbedWin.window,
           window: ghostFloatingWindow,
@@ -242,7 +245,7 @@ const ghostFloatingWindowReady = onMainWindowReady().then(
       // ghostFloatingWindow.webContents.openDevTools({ mode: 'detach' });
     }
 
-    showPopupWindow(ghostFloatingWindow);
+    showPopupWindow(ghostFloatingWindow, { forceUseOpacity: true });
     // hidePopupWindow(ghostFloatingWindow);
 
     return ghostFloatingWindow;
@@ -294,8 +297,10 @@ const { handler: handlerToggleShowPopupWins } = onIpcMainInternalEvent(
       if (targetWin && !IS_RUNTIME_PRODUCTION && payload.openDevTools) {
         targetWin.webContents.openDevTools({ mode: 'detach' });
       }
+      const isTopGhostWin = payload.type === 'top-ghost-window';
       showPopupWindow(targetWin, {
-        isInActiveOnDarwin: payload.type === 'top-ghost-window',
+        isInActiveOnDarwin: isTopGhostWin,
+        forceUseOpacity: isTopGhostWin,
       });
     } else {
       hidePopupOnMainWindow(targetWin, payload.type);
@@ -319,9 +324,12 @@ onIpcMainEvent(
     if (!IS_RUNTIME_PRODUCTION) return;
 
     if (nextVisible) {
-      showPopupWindow(ghostFloatingWindow, { isInActiveOnDarwin: true });
+      showPopupWindow(ghostFloatingWindow, {
+        forceUseOpacity: true,
+        isInActiveOnDarwin: true,
+      });
     } else {
-      hidePopupWindow(ghostFloatingWindow);
+      hidePopupWindow(ghostFloatingWindow, { forceUseOpacity: false });
     }
   }
 );

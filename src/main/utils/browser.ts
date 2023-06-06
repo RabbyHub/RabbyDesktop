@@ -188,6 +188,8 @@ export function createTmpEmptyBrowser() {
   };
 }
 
+export type IControllPopupWindowOpts = { forceUseOpacity?: boolean };
+
 /**
  * @description on windows, we assume the popupWin has been shown by calling `window.show()` or set `show: true` on constucting,
  * you need to make sure the window is visible before calling this.
@@ -197,28 +199,29 @@ export function createTmpEmptyBrowser() {
 export function showPopupWindow(
   popupWin: BrowserWindow,
   opts?: {
-    isInActiveOnDarwin: boolean;
-  }
+    isInActiveOnDarwin?: boolean;
+  } & IControllPopupWindowOpts
 ) {
-  if (IS_DARWIN) {
-    if (opts?.isInActiveOnDarwin) {
-      popupWin.showInactive();
-    } else {
-      popupWin.show();
-    }
-  } else {
+  if (!IS_DARWIN || opts?.forceUseOpacity) {
     if (!popupWin.isVisible()) {
       popupWin.show();
     }
     popupWin.setOpacity(1);
+  } else if (opts?.isInActiveOnDarwin) {
+    popupWin.showInactive();
+  } else {
+    popupWin.show();
   }
 }
 
-export function hidePopupWindow(popupWin: BrowserWindow) {
-  if (IS_DARWIN) {
-    popupWin.hide();
-  } else {
+export function hidePopupWindow(
+  popupWin: BrowserWindow,
+  opts?: IControllPopupWindowOpts
+) {
+  if (!IS_DARWIN || opts?.forceUseOpacity) {
     popupWin.setOpacity(0);
+  } else {
+    popupWin.hide();
   }
 }
 
