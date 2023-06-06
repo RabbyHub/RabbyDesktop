@@ -1,5 +1,5 @@
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
-import { dialog } from 'electron';
+import { BrowserWindow, dialog } from 'electron';
 import { formatZoomValue } from '@/isomorphic/primitive';
 import type { MainWindowTab } from '../browser/tabs';
 import { captureWebContents, hideLoadingView } from '../utils/browser';
@@ -12,6 +12,7 @@ import {
 } from '../utils/ipcMainEvents';
 import { resizeImage } from '../utils/nativeImage';
 import {
+  checkIfWindowFullfilledScreen,
   getMainWinLastPosition,
   getWindowBoundsInWorkArea,
   setMainWindowBounds,
@@ -466,3 +467,50 @@ onIpcMainInternalEvent(
     emitIpcMainEvent('__internal_main:app:relaunch');
   }
 );
+
+const darwinScrInfo = {
+  lastScreenSizeBeforeMaximize: undefined as undefined | Electron.Rectangle,
+};
+handleIpcMainInvoke('restore-darwin-mainwin-bounds', async (evt) => {
+  const mainTabbedWin = await onMainWindowReady();
+  const mainWin = mainTabbedWin.window;
+
+  if (BrowserWindow.fromWebContents(evt.sender) !== mainWin) return;
+
+  const nextBounds = {
+    ...mainWin.getBounds(),
+    ...(darwinScrInfo.lastScreenSizeBeforeMaximize?.width !== undefined && {
+      width: darwinScrInfo.lastScreenSizeBeforeMaximize?.width,
+    }),
+    ...(darwinScrInfo.lastScreenSizeBeforeMaximize?.height !== undefined && {
+      height: darwinScrInfo.lastScreenSizeBeforeMaximize?.height,
+    }),
+    ...(darwinScrInfo.lastScreenSizeBeforeMaximize?.x !== undefined && {
+      x: darwinScrInfo.lastScreenSizeBeforeMaximize?.x,
+    }),
+    ...(darwinScrInfo.lastScreenSizeBeforeMaximize?.y !== undefined && {
+      y: darwinScrInfo.lastScreenSizeBeforeMaximize?.y,
+    }),
+  };
+
+  setMainWindowBounds(mainWin, nextBounds, true);
+});
+handleIpcMainInvoke('memoize-darwin-mainwindow-screen-info', async (evt) => {
+  const mainTabbedWin = await onMainWindowReady();
+  const mainWin = mainTabbedWin.window;
+
+  if (BrowserWindow.fromWebContents(evt.sender) !== mainWin) return;
+
+  darwinScrInfo.lastScreenSizeBeforeMaximize = mainWin.getBounds();
+});
+handleIpcMainInvoke('get-darwin-mainwindow-screen-info', async (evt) => {
+  const mainTabbedWin = await onMainWindowReady();
+  const mainWin = mainTabbedWin.window;
+
+  const { isDockFullfilled } = checkIfWindowFullfilledScreen(mainWin);
+
+  return {
+    isDockFullfilled,
+    lastScreenSizeBeforeMaximize: darwinScrInfo.lastScreenSizeBeforeMaximize,
+  };
+});
