@@ -1,7 +1,6 @@
 import { CHAINS, CHAINS_ENUM } from '@debank/common';
 import { DEX_ENUM, DEX_SUPPORT_CHAINS } from '@rabby-wallet/rabby-swap';
 import { useMemo, useState, useCallback, useRef, useEffect } from 'react';
-import { TokenItem } from '@debank/rabby-api/dist/types';
 import styled from 'styled-components';
 import IconSwapArrow from '@/../assets/icons/swap/swap-arrow.svg?rc';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
@@ -35,14 +34,18 @@ import {
   TDexQuoteData,
   getAllQuotes,
   getSpender,
-  getToken,
   isSwapWrapToken,
   tokenAmountBn,
   validSlippage,
 } from './utils';
 import { Quotes } from './component/Quotes';
 import styles from './index.module.less';
-import { useInSwap, usePostSwap, useSwapOrApprovalLoading } from './hooks';
+import {
+  useInSwap,
+  usePostSwap,
+  useSwapOrApprovalLoading,
+  useTokenPair,
+} from './hooks';
 import {
   activeProviderAtom,
   activeProviderOriginAtom,
@@ -253,10 +256,7 @@ export const SwapToken = () => {
 
   const [slippageState, setSlippage] = useState('0.1');
   const [chain, setChain] = useState<CHAINS_ENUM>(CHAINS_ENUM.ETH);
-  const [payToken, setPayToken] = useState<TokenItem | undefined>(
-    getChainDefaultToken(CHAINS_ENUM.ETH)
-  );
-  const [receiveToken, setReceiveToken] = useState<TokenItem>();
+
   const [payAmount, setPayAmount] = useState('');
   const [debouncePayAmount, setDebouncePayAmount] = useState('');
 
@@ -277,6 +277,14 @@ export const SwapToken = () => {
 
   const slippage = useMemo(() => slippageState || '0.1', [slippageState]);
 
+  const { currentAccount } = useCurrentAccount();
+  const userAddress = currentAccount?.address || '';
+
+  const { payToken, setPayToken, receiveToken, setReceiveToken } = useTokenPair(
+    userAddress,
+    chain
+  );
+
   const payTokenIsNativeToken = useMemo(() => {
     if (payToken) {
       return isSameAddress(payToken.id, CHAINS[chain].nativeTokenAddress);
@@ -295,7 +303,7 @@ export const SwapToken = () => {
       setPayAmount('');
       setActiveProvider(undefined);
     },
-    [setActiveProvider]
+    [setActiveProvider, setPayToken, setReceiveToken]
   );
 
   const isInSwap = useInSwap();
@@ -334,24 +342,7 @@ export const SwapToken = () => {
     [payToken, debouncePayAmount]
   );
 
-  const { currentAccount } = useCurrentAccount();
-  const userAddress = currentAccount?.address || '';
   const [feeAfterDiscount, setFeeAfterDiscount] = useState('0.01');
-
-  const {
-    value: payTokenInfo,
-    loading: payTokenLoading,
-    error,
-  } = useAsync(async () => {
-    if (userAddress && payToken?.id && chain) {
-      const data = await getToken({
-        addr: userAddress,
-        tokenId: payToken.id,
-        chain,
-      });
-      return data;
-    }
-  }, [refreshId, userAddress, payToken?.id, chain]);
 
   const fetchIdRef = useRef(0);
   const [quoteList, setQuotesList] = useState<
@@ -459,25 +450,11 @@ export const SwapToken = () => {
 
   useDebounce(
     () => {
-      if (payTokenInfo && !payTokenLoading) {
-        setPayToken(payTokenInfo);
-      }
-    },
-    300,
-    [payTokenInfo, payTokenLoading]
-  );
-
-  useDebounce(
-    () => {
       setDebouncePayAmount(payAmount);
     },
     300,
     [payAmount]
   );
-
-  if (error) {
-    console.error('payTokenInfo', error);
-  }
 
   const miniReceivedAmount = useMemo(() => {
     if (activeProvider?.quote?.toTokenAmount) {
@@ -521,11 +498,7 @@ export const SwapToken = () => {
   const exchangeToken = useCallback(() => {
     setPayToken(receiveToken);
     setReceiveToken(payToken);
-  }, [receiveToken, payToken]);
-
-  // const selectQuote: QuoteItemProps['onClick'] = useCallback((data) => {
-  //   setActiveProvider(data);
-  // }, []);
+  }, [setPayToken, receiveToken, setReceiveToken, payToken]);
 
   const DexDisplayName = useMemo(
     () => DEX?.[activeProvider?.name as keyof typeof DEX]?.name || '',
