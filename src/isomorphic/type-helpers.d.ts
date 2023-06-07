@@ -97,3 +97,7 @@ type EventTypeOfBrowserOn = [
   'new-window-for-tab',
   'system-context-menu'
 ][number];
+
+type WriteableObj<T extends { [x: string]: any }, K extends string> = {
+  [P in K]: T[P];
+};

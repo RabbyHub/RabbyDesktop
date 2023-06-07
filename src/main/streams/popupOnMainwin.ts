@@ -11,6 +11,7 @@ import {
 } from '../utils/ipcMainEvents';
 import { valueToMainSubject } from './_init';
 import {
+  IControllPopupWindowOpts,
   createPopupWindow,
   hidePopupWindow,
   showPopupWindow,
@@ -24,7 +25,8 @@ const isDarwin = process.platform === 'darwin';
 
 async function hidePopupOnMainWindow(
   mainWin: BrowserWindow | null,
-  type: IPopupWinPageInfo['type']
+  type: IPopupWinPageInfo['type'],
+  opts?: IControllPopupWindowOpts
 ) {
   if (!mainWin || mainWin.isDestroyed()) return;
 
@@ -37,7 +39,11 @@ async function hidePopupOnMainWindow(
     }
   );
 
-  hidePopupWindow(mainWin);
+  if (type === 'top-ghost-window') {
+    opts = { ...opts, forceUseOpacity: true };
+  }
+
+  hidePopupWindow(mainWin, opts);
 }
 
 const SIZE_MAP: Record<
@@ -189,6 +195,9 @@ const ghostFloatingWindowReady = onMainWindowReady().then(
 
     const ghostFloatingWindow = createPopupWindow({
       parent: mainTabbedWin.window,
+      modal: false,
+      show: true, // always show, control visibility by opacity
+      opacity: 0,
       transparent: true,
       hasShadow: false,
       closable: false,
@@ -219,7 +228,7 @@ const ghostFloatingWindowReady = onMainWindowReady().then(
       windowType: 'top-ghost-window',
     });
     const onTargetWinUpdate = () => {
-      if (ghostFloatingWindow.isVisible()) {
+      if (ghostFloatingWindow.isVisible() || isDarwin) {
         updateSubWindowRect({
           parentWin: mainTabbedWin.window,
           window: ghostFloatingWindow,
@@ -242,7 +251,7 @@ const ghostFloatingWindowReady = onMainWindowReady().then(
       // ghostFloatingWindow.webContents.openDevTools({ mode: 'detach' });
     }
 
-    showPopupWindow(ghostFloatingWindow);
+    showPopupWindow(ghostFloatingWindow, { forceUseOpacity: false });
     // hidePopupWindow(ghostFloatingWindow);
 
     return ghostFloatingWindow;
@@ -271,6 +280,8 @@ const { handler: handlerToggleShowPopupWins } = onIpcMainInternalEvent(
       return;
     }
 
+    const isTopGhostWin = payload.type === 'top-ghost-window';
+
     if (payload.nextShow) {
       updateSubWindowRect({
         parentWin: mainWin,
@@ -295,7 +306,8 @@ const { handler: handlerToggleShowPopupWins } = onIpcMainInternalEvent(
         targetWin.webContents.openDevTools({ mode: 'detach' });
       }
       showPopupWindow(targetWin, {
-        isInActiveOnDarwin: payload.type === 'top-ghost-window',
+        isInActiveOnDarwin: isTopGhostWin,
+        forceUseOpacity: isTopGhostWin,
       });
     } else {
       hidePopupOnMainWindow(targetWin, payload.type);
@@ -315,13 +327,16 @@ onIpcMainEvent(
   async (_, nextVisible) => {
     const ghostFloatingWindow = await ghostFloatingWindowReady;
 
-    // don't toggle window's visibility in dev mode
-    if (!IS_RUNTIME_PRODUCTION) return;
+    // // don't toggle window's visibility in dev mode
+    // if (!IS_RUNTIME_PRODUCTION) return;
 
     if (nextVisible) {
-      showPopupWindow(ghostFloatingWindow, { isInActiveOnDarwin: true });
+      showPopupWindow(ghostFloatingWindow, {
+        forceUseOpacity: true,
+        isInActiveOnDarwin: true,
+      });
     } else {
-      hidePopupWindow(ghostFloatingWindow);
+      hidePopupWindow(ghostFloatingWindow, { forceUseOpacity: true });
     }
   }
 );

@@ -29,6 +29,15 @@ export function getMainPlatform() {
   return process.platform as 'win32' | 'darwin';
 }
 
+export function getMainBuildInfo() {
+  const buildchannel: 'reg' | 'prod' = (process as any).buildchannel || 'reg';
+  return {
+    buildchannel,
+    buildarch:
+      (process as any).buildarch || (process.arch as 'win32' | 'darwin'),
+  };
+}
+
 function resolveReleasePath(file: string) {
   if (process.env.NODE_ENV === 'development') {
     return path.resolve(path.join(PROJ_ROOT, './release/app/dist'), file);

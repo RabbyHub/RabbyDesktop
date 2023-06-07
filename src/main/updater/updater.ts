@@ -12,12 +12,11 @@ import type { GenericServerOptions } from 'builder-util-runtime';
 import { getAppCacheDir } from 'electron-updater/out/AppAdapter';
 
 import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
-import { getAssetPath } from '../utils/app';
+import { getAssetPath, getMainBuildInfo } from '../utils/app';
 
 eLog.transports.file.level = 'debug';
 
-const buildchannel = (process as any).buildchannel || 'reg';
-const ARCH = (process as any).buildarch || process.arch;
+const { buildchannel, buildarch: ARCH } = getMainBuildInfo();
 const PLATFORM = process.platform;
 
 export function getAppUpdaterURL(): string {

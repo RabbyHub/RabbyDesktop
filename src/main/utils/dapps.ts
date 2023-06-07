@@ -829,11 +829,19 @@ export async function getOrPutCheckResult(
   return checkResult;
 }
 
+/**
+ * @description maybe crash on development if target url redirect to another url
+ * @param dappOrigin
+ * @returns
+ */
 async function getDappIndexHtml(dappOrigin: string) {
   let baseURL = ensurePrefix(dappOrigin, 'https://');
   baseURL = unSuffix(baseURL, '/');
 
-  const request = net.request(`${baseURL}/index.html`);
+  const request = net.request({
+    url: `${baseURL}/index.html`,
+    redirect: 'follow',
+  });
 
   return new Promise<string>((resolve, reject) => {
     request.on('response', (response) => {
@@ -849,6 +857,8 @@ async function getDappIndexHtml(dappOrigin: string) {
 
       response.on('error', reject);
     });
+
+    request.on('error', reject);
 
     request.end();
   });
@@ -894,6 +904,7 @@ export async function getDappVersionInfo(dappOrigin: string): Promise<
       },
     });
   } catch (err) {
+    console.error(err);
     Sentry.captureException(err);
     return result;
   }

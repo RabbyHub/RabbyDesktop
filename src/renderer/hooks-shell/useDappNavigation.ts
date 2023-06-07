@@ -110,12 +110,16 @@ export function useDetectDappVersion(shellNavInfo?: IShellNavInfo | null) {
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:dapps:version-updated',
       (payload) => {
-        if (payload.httpDappId !== dappOrigin) return;
-
-        if (!dappOrigin || shellNavInfo?.dapp?.type !== 'http') {
+        if (
+          !payload.currentDappId ||
+          !dappOrigin ||
+          shellNavInfo?.dapp?.type !== 'http'
+        ) {
           setDappVersion({ updated: false });
           return;
         }
+
+        if (payload.currentDappId !== dappOrigin) return;
 
         if (!isTabUrlEntryOfHttpDappOrigin(shellNavInfo?.tabUrl, dappOrigin))
           return;

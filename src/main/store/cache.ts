@@ -13,6 +13,7 @@ const IDetectedDappVersionSchema: import('json-schema-typed').JSONSchema = {
       type: 'number',
     },
   },
+  default: null,
 };
 
 export const cacheStore = makeStore<{
@@ -85,7 +86,7 @@ export function putDappVersions(
   }
 
   versionQueue.unshift(dappVersionItem);
-  latestConfirmedVersion = latestConfirmedVersion || { ...dappVersionItem };
+  latestConfirmedVersion = latestConfirmedVersion || (dappVersionItem ?? null);
 
   dappVersionMap[dappId] = {
     latestConfirmedVersion,

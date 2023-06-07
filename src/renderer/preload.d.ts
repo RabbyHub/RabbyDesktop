@@ -132,7 +132,7 @@ type ChannelMessagePayload = {
       }
     ];
   };
-  '__internal_rpc:main-window:click-close': {
+  '__internal_rpc:mainwindow:click-close': {
     send: [];
     response: [];
   };
@@ -232,6 +232,10 @@ type ChannelMessagePayload = {
   };
   '__internal_rpc:mainwindow:select-tab': {
     send: [winId: number, tabId: number];
+    response: [];
+  };
+  '__internal_rpc:mainwindow:unconfirmed-unselect-all': {
+    send: [];
     response: [];
   };
   '__internal_rpc:mainwindow:reload-tab': {

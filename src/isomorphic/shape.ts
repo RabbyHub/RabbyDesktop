@@ -6,3 +6,17 @@ export function roundRectValue(retRect: Partial<Electron.Rectangle>) {
 
   return retRect;
 }
+
+export function roundDOMRect(domRect: DOMRect) {
+  const rectValues = (
+    typeof domRect.toJSON === 'function' ? domRect.toJSON() : domRect
+  ) as Omit<DOMRect, 'toJSON'>;
+  if (rectValues.x !== undefined) rectValues.x = Math.round(rectValues.x);
+  if (rectValues.y !== undefined) rectValues.y = Math.round(rectValues.y);
+  if (rectValues.width !== undefined)
+    rectValues.width = Math.round(rectValues.width);
+  if (rectValues.height !== undefined)
+    rectValues.height = Math.round(rectValues.height);
+
+  return rectValues;
+}

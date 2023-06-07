@@ -655,3 +655,8 @@ type WalletConnectSessionStatus =
   | 'BRAND_NAME_ERROR'
   | 'REJECTED'
   | 'ADDRESS_DUPLICATE';
+
+type DOMRectValues = WriteableObj<
+  Omit<DOMRectReadOnly, 'toJSON'>,
+  'bottom' | 'height' | 'left' | 'right' | 'top' | 'width' | 'x' | 'y'
+>;

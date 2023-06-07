@@ -81,7 +81,7 @@ export function useWindowState() {
   const onCloseButton = useCallback(() => {
     if (isMainWinShellWebUI(window.location.href)) {
       window.rabbyDesktop.ipcRenderer.sendMessage(
-        '__internal_rpc:main-window:click-close'
+        '__internal_rpc:mainwindow:click-close'
       );
       return;
     }

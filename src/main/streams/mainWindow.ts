@@ -219,7 +219,7 @@ async function getLatestCapturedActiveTab() {
   return latestOne;
 }
 
-onIpcMainEvent('__internal_rpc:main-window:click-close', async (evt) => {
+onIpcMainEvent('__internal_rpc:mainwindow:click-close', async (evt) => {
   const { sender } = evt;
   const tabbedWin = getTabbedWindowFromWebContents(sender);
   const mainTabbedWin = await onMainWindowReady();
@@ -275,6 +275,15 @@ onIpcMainEvent(
     mainTabbedWin.tabs.select(tabId);
     mainTabbedWin.tabs.checkLoadingView();
     getLatestCapturedActiveTab();
+  }
+);
+
+onIpcMainEvent(
+  '__internal_rpc:mainwindow:unconfirmed-unselect-all',
+  async (_) => {
+    const mainTabbedWin = await onMainWindowReady();
+
+    mainTabbedWin.tabs.unSelectAll();
   }
 );
 

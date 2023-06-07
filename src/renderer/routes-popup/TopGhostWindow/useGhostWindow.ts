@@ -1,5 +1,6 @@
 import { arraify } from '@/isomorphic/array';
 import { detectClientOS } from '@/isomorphic/os';
+import { roundDOMRect } from '@/isomorphic/shape';
 import { randString } from '@/isomorphic/string';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { showMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
@@ -270,3 +271,15 @@ export function useGhostTooltip<T extends HTMLElement = HTMLDivElement>({
     },
   ] as const;
 }
+
+export const reportRectForSpecialTooltip = (payload: {
+  type: 'new-version-updated';
+  rect?: DOMRect | null;
+}) => {
+  forwardMessageTo('top-ghost-window', 'report-special-tooltip', {
+    payload: {
+      type: 'new-version-updated',
+      rect: payload.rect ? roundDOMRect(payload.rect) : null,
+    },
+  });
+};
