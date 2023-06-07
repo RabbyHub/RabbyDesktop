@@ -1,6 +1,13 @@
 import { CHAINS, CHAINS_ENUM } from '@debank/common';
 import { DEX_ENUM, DEX_SUPPORT_CHAINS } from '@rabby-wallet/rabby-swap';
-import { useMemo, useState, useCallback, useRef, useEffect } from 'react';
+import {
+  useMemo,
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+} from 'react';
 import styled from 'styled-components';
 import IconSwapArrow from '@/../assets/icons/swap/swap-arrow.svg?rc';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
@@ -277,6 +284,18 @@ export const SwapToken = () => {
 
   const slippage = useMemo(() => slippageState || '0.1', [slippageState]);
 
+  const [disableSwapBySlippageChanged, setDisableSwapBySlippageChanged] =
+    useState(false);
+
+  const slippageChange = (s: string) => {
+    setSlippage((pre) => {
+      if (pre !== s) {
+        setDisableSwapBySlippageChanged(true);
+      }
+      return s;
+    });
+  };
+
   const { currentAccount } = useCurrentAccount();
   const userAddress = currentAccount?.address || '';
 
@@ -353,6 +372,12 @@ export const SwapToken = () => {
     setQuotesList([]);
   }, [payToken?.id, receiveToken?.id, chain, debouncePayAmount]);
 
+  const activeQuoteNameRef = useRef(activeProvider?.name);
+
+  useLayoutEffect(() => {
+    activeQuoteNameRef.current = activeProvider?.name;
+  }, [activeProvider?.name]);
+
   const setQuote = useCallback(
     (id: number) => (quote: TCexQuoteData | TDexQuoteData) => {
       if (id === fetchIdRef.current) {
@@ -364,6 +389,10 @@ export const SwapToken = () => {
           //   }
           //   return activeQuote;
           // });
+
+          if (quote.name === activeQuoteNameRef.current) {
+            setDisableSwapBySlippageChanged(false);
+          }
 
           const v = { ...quote, loading: false };
           if (index === -1) {
@@ -536,6 +565,7 @@ export const SwapToken = () => {
   ]);
 
   const btnDisabled =
+    disableSwapBySlippageChanged ||
     inSufficient ||
     !payToken ||
     !receiveToken ||
@@ -886,7 +916,7 @@ export const SwapToken = () => {
                       </div>
                       <Slippage
                         value={slippageState}
-                        onChange={setSlippage}
+                        onChange={slippageChange}
                         recommendValue={
                           slippageValidInfo?.is_valid
                             ? undefined
