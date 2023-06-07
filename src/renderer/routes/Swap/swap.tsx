@@ -390,10 +390,6 @@ export const SwapToken = () => {
           //   return activeQuote;
           // });
 
-          if (quote.name === activeQuoteNameRef.current) {
-            setDisableSwapBySlippageChanged(false);
-          }
-
           const v = { ...quote, loading: false };
           if (index === -1) {
             return [...e, v];
@@ -427,6 +423,8 @@ export const SwapToken = () => {
         payAmount: debouncePayAmount,
         fee: feeAfterDiscount,
         setQuote: setQuote(fetchIdRef.current),
+      }).finally(() => {
+        setDisableSwapBySlippageChanged(false);
       });
     }
   }, [
