@@ -338,6 +338,21 @@ type ChannelInvokePayload = {
       success: boolean;
     };
   };
+  'restore-darwin-mainwin-bounds': {
+    send: [rect?: Partial<Electron.Rectangle>];
+    response: { foo?: any };
+  };
+  'memoize-darwin-mainwindow-screen-info': {
+    send: [];
+    response: { foo?: any };
+  };
+  'get-darwin-mainwindow-screen-info': {
+    send: [];
+    response: {
+      isDockFullfilled: boolean;
+      lastScreenSizeBeforeMaximize?: Electron.Rectangle;
+    };
+  };
 } & RabbyxInvokePayload;
 
 type IInvokesKey = keyof ChannelInvokePayload;

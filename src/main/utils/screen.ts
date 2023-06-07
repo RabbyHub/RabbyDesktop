@@ -66,7 +66,8 @@ export function getMainWinLastPosition() {
 
 export function setMainWindowBounds(
   mainWindow: Electron.BrowserWindow,
-  bounds: Electron.Rectangle
+  bounds: Electron.Rectangle,
+  animated = false
 ) {
   const minSize = mainWindow.getMinimumSize();
 
@@ -77,5 +78,33 @@ export function setMainWindowBounds(
     mainWindow.setMinimumSize(minSize[0], minSize[1]);
   }
 
-  mainWindow.setBounds(bounds);
+  mainWindow.setBounds(bounds, animated);
+}
+
+export function checkIfWindowFullfilledScreen(
+  windowOrWindowBounds: Electron.BrowserWindow | Electron.Rectangle,
+  screenDisplay?: Electron.Display
+) {
+  const bounds =
+    typeof (windowOrWindowBounds as any).getBounds === 'function'
+      ? (windowOrWindowBounds as any).getBounds()
+      : windowOrWindowBounds;
+
+  const matchedScreen =
+    screenDisplay ||
+    screen.getDisplayMatching({
+      x: bounds.x,
+      y: bounds.y,
+      width: bounds.width,
+      height: bounds.height,
+    });
+
+  // check if main window is maximized to screen
+  const isDockFullfilled =
+    bounds.x - matchedScreen.workArea.x <= 5 &&
+    bounds.y - matchedScreen.workArea.y <= 5 &&
+    matchedScreen.workArea.width - bounds.width <= 5 &&
+    matchedScreen.workArea.height - bounds.height <= 5;
+
+  return { isDockFullfilled };
 }

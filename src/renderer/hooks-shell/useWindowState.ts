@@ -55,16 +55,32 @@ export function useWindowState() {
 
     chrome.windows.get(chrome.windows.WINDOW_ID_CURRENT, async (win) => {
       /**
-       * on darwin, you can not restore a maximized window by
-       * clicking the maximize button, or programatically by default,
-       * except program rememeber the previous window size and restore it later,
-       * we don't implement it for now.
+       * implement:
+       * - if dock is fullfilled, restore window to its last size before maximize
+       * - if dock is not fullfilled, maximize window(dock-fullfilled)
        */
+      const scrInfo = await window.rabbyDesktop.ipcRenderer.invoke(
+        'get-darwin-mainwindow-screen-info'
+      );
 
-      await chrome.windows.update(win.id!, {
-        state: 'maximized',
-      });
-      setWinState('maximized');
+      if (!scrInfo.isDockFullfilled) {
+        await window.rabbyDesktop.ipcRenderer.invoke(
+          'memoize-darwin-mainwindow-screen-info'
+        );
+        await chrome.windows.update(win.id!, {
+          state: 'maximized',
+        });
+        setWinState('maximized');
+      } else {
+        await window.rabbyDesktop.ipcRenderer.invoke(
+          'restore-darwin-mainwin-bounds',
+          {}
+        );
+        await chrome.windows.update(win.id!, {
+          state: 'normal',
+        });
+        setWinState('normal');
+      }
     });
   }, [setWinState]);
 
