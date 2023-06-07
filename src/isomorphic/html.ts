@@ -68,37 +68,44 @@ export function pickFavIconURLFromMeta(
   );
 }
 
-const CSS_TAGS_PATTERN =
-  /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>|<link\b[^>]*rel=["']?stylesheet["']?\b[^>]*>/gi;
-export function extractCssTagsFromHtml(input: string) {
+export function extractCssTagsFromHtmlInBrowser(input: string) {
   const isBrowserEnvironment =
     typeof document !== 'undefined' && document.documentElement;
 
-  if (isBrowserEnvironment) {
-    if (!input) {
-      input = document.documentElement.innerHTML;
-    }
-
-    const allCssTags = [];
-
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(input, 'text/html');
-
-    // Extract <style> tags
-    const styleTags = doc.getElementsByTagName('style');
-    for (let i = 0; i < styleTags.length; i++) {
-      allCssTags.push(styleTags[i].innerHTML);
-    }
-
-    // Extract <link rel="stylesheet"> tags
-    const linkTags = doc.querySelectorAll('link[rel="stylesheet"]');
-    for (let j = 0, linkTag: HTMLLinkElement; j < linkTags.length; j++) {
-      linkTag = linkTags[j] as HTMLLinkElement;
-      allCssTags.push(`/* ${linkTag.href} */`);
-    }
-
-    return allCssTags.join('\n');
+  if (!isBrowserEnvironment) {
+    throw new Error(`This function is only available in browser environment.`);
   }
+
+  if (!input) {
+    input = document.documentElement.innerHTML;
+  }
+
+  const allCssTags = [];
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(input, 'text/html');
+
+  // Extract <style> tags
+  const styleTags = doc.getElementsByTagName('style');
+  for (let i = 0; i < styleTags.length; i++) {
+    allCssTags.push(styleTags[i].innerHTML);
+  }
+
+  // Extract <link rel="stylesheet"> tags
+  const linkTags = doc.querySelectorAll('link[rel="stylesheet"]');
+  for (let j = 0, linkTag: HTMLLinkElement; j < linkTags.length; j++) {
+    linkTag = linkTags[j] as HTMLLinkElement;
+    allCssTags.push(`/* ${linkTag.href} */`);
+  }
+
+  return allCssTags.join('\n');
+}
+
+const CSS_TAGS_PATTERN =
+  /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>|<link\b[^>]*rel=["']?stylesheet["']?\b[^>]*>/gi;
+const LINK_TAG_PATTERN = /<link\b[^>]*rel=["']?stylesheet["']?\b[^>]*>/i;
+const STYLE_TAG_PATTERN = /<style\b[^>]*>([\s\S]*?)<\/style>/i;
+export function extractCssTagsFromHtml(input: string) {
   if (!input) {
     throw new Error(
       'In a non-browser environment, the input parameter is required.'
@@ -106,7 +113,27 @@ export function extractCssTagsFromHtml(input: string) {
   }
 
   const matches = input.match(CSS_TAGS_PATTERN);
-  const allCssTags = matches || [];
+  const allCssFeatures: string[] = [];
 
-  return allCssTags.join('\n');
+  matches?.forEach((match) => {
+    if (LINK_TAG_PATTERN.test(match)) {
+      const hrefMatch = match.match(/href=(?:"([^"]+)"|'([^']+)')/i);
+      if (hrefMatch) {
+        const href = hrefMatch[1] || hrefMatch[2];
+        if (href.trim() !== '') {
+          allCssFeatures.push(href.trim());
+        }
+      }
+    } else if (STYLE_TAG_PATTERN.test(match)) {
+      const cssMatch = match.match(STYLE_TAG_PATTERN);
+      if (cssMatch) {
+        const cssContent = cssMatch[1];
+        if (cssContent.trim() !== '') {
+          allCssFeatures.push(cssContent.trim());
+        }
+      }
+    }
+  });
+
+  return allCssFeatures.join('\n');
 }

@@ -115,6 +115,8 @@ type IHttpDapp = INextDapp & { type: 'http' };
 type IHttpTypeDappVersion = {
   versionSha512: string;
   timestamp: number;
+  /* should not used in production */
+  __cssTagsStringOnDev?: string;
 };
 
 type IDetectHttpTypeDappVersionResult = {
