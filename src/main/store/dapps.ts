@@ -252,10 +252,10 @@ export function getAllDapps() {
 }
 
 export function findDappsByOrigin(
-  dappOrigin: string,
+  maybeDappOrigin: string,
   dapps: IDapp[] = getAllDapps()
 ) {
-  const cUrlInfo = canoicalizeDappUrl(dappOrigin);
+  const cUrlInfo = canoicalizeDappUrl(maybeDappOrigin);
   const secondaryOrigin = cUrlInfo.secondaryOrigin;
 
   const result: IMatchDappResult = {
@@ -263,8 +263,9 @@ export function findDappsByOrigin(
     dappBySecondaryDomainOrigin: null as null | IDapp,
     dapp: null as null | IDapp,
   };
+
   dapps.find((dapp) => {
-    if (dapp.origin === dappOrigin) {
+    if (dapp.origin === maybeDappOrigin) {
       result.dappByOrigin = dapp;
     } else if (
       dapp.type === 'ipfs' &&
@@ -319,29 +320,45 @@ export function getProtocolDappsBindings() {
 }
 
 function parseDappUrl(url: string, dapps = getAllDapps()) {
-  const { isDapp, origin, secondaryDomain, is2ndaryDomain, isSubDomain } =
-    canoicalizeDappUrl(url);
-
-  let matches: IMatchDappResult = {
-    dappByOrigin: null,
-    dappBySecondaryDomainOrigin: null,
-    dapp: null,
-  };
-
-  if (isDapp) {
-    matches = findDappsByOrigin(origin, dapps);
-  }
-
-  return {
+  const {
     isDapp,
     origin,
     secondaryDomain,
     is2ndaryDomain,
     isSubDomain,
-    ...matches,
-    matchDappResult: matches,
+    urlInfo: inputUrlInfo,
+  } = canoicalizeDappUrl(url);
+
+  let matchDappResult: IMatchDappResult = {
+    dappByOrigin: null,
+    dappBySecondaryDomainOrigin: null,
+    dapp: null,
+  };
+
+  let matchDappResultForHttp: undefined | IMatchDappResult;
+
+  if (isDapp) {
+    matchDappResult = findDappsByOrigin(origin, dapps);
+  }
+
+  if (inputUrlInfo?.protocol === 'http:') {
+    matchDappResultForHttp = findDappsByOrigin(
+      origin.replace(/^http:/, 'https:'),
+      dapps
+    );
+  }
+
+  return {
+    isDapp,
+    origin,
+    inputUrlInfo,
+    secondaryDomain,
+    is2ndaryDomain,
+    isSubDomain,
+    matchDappResult,
+    matchDappResultForHttp,
     /** @deprecated */
-    existedDapp: !isDapp ? false : !!matches.dappByOrigin,
+    existedDapp: !isDapp ? false : !!matchDappResult.dappByOrigin,
   };
 }
 
