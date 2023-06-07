@@ -54,6 +54,7 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["ETC"] = "ETC";
     CHAINS_ENUM["FSN"] = "FSN";
     CHAINS_ENUM["PULSE"] = "PULSE";
+    CHAINS_ENUM["ROSE"] = "ROSE";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -915,6 +916,22 @@ export const CHAINS_RAW = {
         hex: "0x171",
         scanLink: "https://scan.pulsechain.com/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/pls/aa6be079fa9eb568e02150734ebb3db0.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+    },
+    [CHAINS_ENUM.ROSE]: {
+        id: 42262,
+        serverId: "rose",
+        network: "42262",
+        name: "Oasis Emerald",
+        nativeTokenSymbol: "ROSE",
+        nativeTokenAddress: "rose",
+        enum: CHAINS_ENUM.ROSE,
+        hex: "0xa516",
+        scanLink: "https://explorer.emerald.oasis.dev/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/rose/33ade55b0f3efa10e9eec002c6417257.png",
         nativeTokenDecimals: 18,
         eip: {
             "1559": true,
