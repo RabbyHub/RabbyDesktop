@@ -9,15 +9,23 @@ import {
 } from '@rabby-wallet/rabby-swap/dist/quote';
 import BigNumber from 'bignumber.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Tx } from '@debank/rabby-api/dist/types';
+import { TokenItem, Tx } from '@debank/rabby-api/dist/types';
 import { atom, useAtomValue, useSetAtom } from 'jotai';
 import { useLocation } from 'react-router-dom';
-import { getRouter, getSpender, postSwap, postSwapParams } from './utils';
+import { useAsync, useDebounce } from 'react-use';
+import {
+  getRouter,
+  getSpender,
+  getToken,
+  postSwap,
+  postSwapParams,
+} from './utils';
 import {
   activeProviderOriginAtom,
   activeSwapTxsAtom,
   refreshIdAtom,
 } from './atom';
+import { getChainDefaultToken } from './constant';
 
 export function isSwapWrapToken(
   payTokenId: string,
@@ -154,10 +162,6 @@ export const useRefreshSwapTxList = () => {
     setReFreshSwapList((e) => e + 1);
   }, [setReFreshSwapList]);
 };
-
-// export const refreshIdAtom = atom(0, (get, set) => {
-//   set(refreshIdAtom, get(refreshIdAtom) + 1);
-// });
 
 export const useOnSwapPushTx = (
   pushTxCb: (payload: Tx & { hash: string }) => void
@@ -309,5 +313,63 @@ export const useSwapOrApprovalLoading = () => {
 
   return {
     subscribeTx,
+  };
+};
+
+const useTokenInfo = ({
+  userAddress,
+  chain,
+  defaultToken,
+}: {
+  userAddress?: string;
+  chain?: CHAINS_ENUM;
+  defaultToken?: TokenItem;
+}) => {
+  const refreshId = useAtomValue(refreshIdAtom);
+  const [token, setToken] = useState<TokenItem | undefined>(defaultToken);
+
+  const { value, loading, error } = useAsync(async () => {
+    if (userAddress && token?.id && chain) {
+      const data = await getToken({
+        addr: userAddress,
+        tokenId: token.id,
+        chain,
+      });
+      return data;
+    }
+  }, [refreshId, userAddress, token?.id, chain]);
+
+  useDebounce(
+    () => {
+      if (value && !error && !loading) {
+        setToken(value);
+      }
+    },
+    300,
+    [value, error, loading]
+  );
+
+  if (error) {
+    console.error('token info error', chain, token?.symbol, token?.id, error);
+  }
+  return [token, setToken] as const;
+};
+
+export const useTokenPair = (userAddress: string, chain: CHAINS_ENUM) => {
+  const [payToken, setPayToken] = useTokenInfo({
+    userAddress,
+    chain,
+    defaultToken: getChainDefaultToken(CHAINS_ENUM.ETH),
+  });
+  const [receiveToken, setReceiveToken] = useTokenInfo({
+    userAddress,
+    chain,
+  });
+
+  return {
+    payToken,
+    setPayToken,
+    receiveToken,
+    setReceiveToken,
   };
 };
