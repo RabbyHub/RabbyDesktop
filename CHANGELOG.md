@@ -1,7 +1,23 @@
 
-v0.24.0 / 2023-06-01
+v0.25.0 / 2023-06-07
 ====================
 
+  * fix: algorithm of extracting css from html, use top-level toast on updated dapp. (#474)
+  * feat: upgrade currentVersion
+  * feat: support new chain ROSE, tuning sign security.
+  * chore: tuning, update currentVersion
+  * fix: slippage disable (#473)
+  * feat: upgrade rabbyx to enhance security on sign. (#472)
+  * fix: Refactor token info fetching logic and use custom hook (#470)
+  * feat: support double click to maxmize/restore window on darwin. (#471)
+  * feat: check if http target url could redirect its https version. (#469)
+  * feat: recover support to detect dapp's version. (#468)
+  * feat: robust change for load 'usb' module, avoid potential crahs on windows 7. (#467)
+
+v0.24.0-prod / 2023-06-01
+=========================
+
+  * Release v0.24.0-prod
   * fix: gnosis safe nonce. (#466)
   * chore: update currentVersion.md
   * fix: hid devices status fetch for ledger. (#465)
