@@ -378,6 +378,12 @@ export const SwapToken = () => {
     activeQuoteNameRef.current = activeProvider?.name;
   }, [activeProvider?.name]);
 
+  const enableSwapBySlippageChanged = useCallback((id: number) => {
+    if (id === fetchIdRef.current) {
+      setDisableSwapBySlippageChanged(false);
+    }
+  }, []);
+
   const setQuote = useCallback(
     (id: number) => (quote: TCexQuoteData | TDexQuoteData) => {
       if (id === fetchIdRef.current) {
@@ -403,6 +409,7 @@ export const SwapToken = () => {
   );
   const { loading: quoteLoading, error: quotesError } = useAsync(async () => {
     fetchIdRef.current += 1;
+    const currentFetchId = fetchIdRef.current;
     if (
       userAddress &&
       payToken?.id &&
@@ -422,9 +429,9 @@ export const SwapToken = () => {
         chain,
         payAmount: debouncePayAmount,
         fee: feeAfterDiscount,
-        setQuote: setQuote(fetchIdRef.current),
+        setQuote: setQuote(currentFetchId),
       }).finally(() => {
-        setDisableSwapBySlippageChanged(false);
+        enableSwapBySlippageChanged(currentFetchId);
       });
     }
   }, [
