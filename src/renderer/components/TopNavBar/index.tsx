@@ -35,10 +35,10 @@ import { useWindowState } from '@/renderer/hooks-shell/useWindowState';
 import { formatDappURLToShow } from '@/isomorphic/dapp';
 import { useGhostTooltip } from '@/renderer/routes-popup/TopGhostWindow/useGhostWindow';
 import { useLocation } from 'react-router-dom';
+import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import styles from './index.module.less';
 import ChainIcon from '../ChainIcon';
 import NavRefreshButton from './components/NavRefreshButton';
-import { toastMessage } from '../TransparentToast';
 // import { TipsWrapper } from '../TipWrapper';
 
 const isDarwin = detectClientOS() === 'darwin';
@@ -168,6 +168,8 @@ export const TopNavBar = () => {
 
   const { dappVersion, confirmDappVersion } =
     useDetectDappVersion(selectedTabInfo);
+
+  const zActions = useZPopupLayerOnMain();
 
   return (
     <div className={styles.main} onDoubleClick={onDarwinToggleMaxmize}>
@@ -306,9 +308,9 @@ export const TopNavBar = () => {
               confirmDappVersion();
 
               setTimeout(() => {
-                toastMessage({
+                zActions.showZSubview('toast-zpopup-message', {
                   type: 'success',
-                  content: 'Updated',
+                  message: 'Updated',
                 });
               }, 1000);
             }}

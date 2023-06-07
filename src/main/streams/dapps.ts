@@ -152,7 +152,7 @@ interval(DAPP_VERSION_DETECT_INTERVAL).subscribe(async (count) => {
   const activeTab = mainTabbedWin.tabs.selected;
 
   console.debug(
-    `[dapp-check] try to check current active tab dapp version... ${count}`
+    `[dapp-check][count:${count}] try to check current active tab dapp version...`
   );
 
   const selectedDappId = activeTab?.relatedDappId;
@@ -165,6 +165,12 @@ interval(DAPP_VERSION_DETECT_INTERVAL).subscribe(async (count) => {
   }
 
   const detectResult = await detectDappVersoin(selectedDappId);
+  if (detectResult.result.updated) {
+    console.debug(
+      `[dapp-check][count:${count}] dapp updated, hash: ${detectResult.result.versionQueue[0]?.versionSha512}`
+    );
+  }
+
   pushNewVersionUpdatedToView(selectedDappId, detectResult.result.updated);
 });
 

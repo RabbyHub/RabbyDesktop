@@ -16,7 +16,7 @@ import {
   extractCssTagsFromHtml,
   pickFavIconURLFromMeta,
 } from '@/isomorphic/html';
-import { PROTOCOL_IPFS } from '@/isomorphic/constants';
+import { IS_RUNTIME_PRODUCTION, PROTOCOL_IPFS } from '@/isomorphic/constants';
 import { checkoutDappURL } from '@/isomorphic/dapp';
 import { ensurePrefix, unPrefix, unSuffix } from '@/isomorphic/string';
 import { canoicalizeDappUrl } from '../../isomorphic/url';
@@ -873,12 +873,12 @@ function getSha512(input: string | Buffer) {
 export async function getDappVersionInfo(dappOrigin: string): Promise<
   IHttpTypeDappVersion & {
     fetchSuccess: boolean;
-    cssTagsStringOnDev?: string;
+    __cssTagsStringOnDev?: string;
   }
 > {
   const result = {
     fetchSuccess: false,
-    cssTagsStringOnDev: '',
+    __cssTagsStringOnDev: '',
     versionSha512: '',
     timestamp: 0,
   };
@@ -890,7 +890,8 @@ export async function getDappVersionInfo(dappOrigin: string): Promise<
 
     const cssTagsString = extractCssTagsFromHtml(html);
 
-    // if (!IS_RUNTIME_PRODUCTION) result.cssTagsStringOnDev = cssTagsString;
+    // leave here for debug
+    if (!IS_RUNTIME_PRODUCTION) result.__cssTagsStringOnDev = cssTagsString;
 
     result.versionSha512 = getSha512(cssTagsString);
     result.timestamp = Date.now();

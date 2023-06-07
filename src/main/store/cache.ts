@@ -1,4 +1,7 @@
-import { PERSIS_STORE_PREFIX } from '@/isomorphic/constants';
+import {
+  IS_RUNTIME_PRODUCTION,
+  PERSIS_STORE_PREFIX,
+} from '@/isomorphic/constants';
 
 import { makeStore } from '../utils/store';
 import { onIpcMainInternalEvent } from '../utils/ipcMainEvents';
@@ -74,6 +77,9 @@ export function putDappVersions(
   const dappVersionMap = cacheStore.get('dappVersionMap', {});
 
   dappVersionItem = {
+    ...(!IS_RUNTIME_PRODUCTION && {
+      __cssTagsStringOnDev: dappVersionItem.__cssTagsStringOnDev,
+    }),
     versionSha512: dappVersionItem.versionSha512,
     timestamp: dappVersionItem.timestamp,
   };

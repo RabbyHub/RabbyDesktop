@@ -127,7 +127,7 @@ export const ToastZPopupMessage = () => {
         ),
         content: (
           <ToastContent onClickOutside={closeSubview}>
-            {svState.content}
+            {svState?.message || svState?.content}
           </ToastContent>
         ),
         onClose: closeSubview,
