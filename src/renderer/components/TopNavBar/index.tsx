@@ -304,10 +304,13 @@ export const TopNavBar = () => {
             onForceReload={() => {
               navActions.onForceReloadButtonClick();
               confirmDappVersion();
-              toastMessage({
-                type: 'success',
-                content: 'Updated',
-              });
+
+              setTimeout(() => {
+                toastMessage({
+                  type: 'success',
+                  content: 'Updated',
+                });
+              }, 1000);
             }}
           />
           <RcIconHome
