@@ -411,6 +411,7 @@ export const SwapToken = () => {
     chain,
     debouncePayAmount,
     feeAfterDiscount,
+    slippage,
   ]);
 
   const {
