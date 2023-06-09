@@ -8,6 +8,7 @@ import { ERROR } from './error';
 import { useAccountToDisplay } from '../rabbyx/useAccountToDisplay';
 import { toastMaxAccount } from './util';
 import { useAddressManagement } from '../rabbyx/useAddressManagement';
+import { OKX } from './cex/okx/okx';
 
 const { nanoid } = require('nanoid');
 
@@ -24,6 +25,9 @@ export const useBundleAccount = () => {
   }, [accounts]);
   const binanceList = React.useMemo(() => {
     return accounts.filter((acc) => acc.type === 'bn') as BNAccount[];
+  }, [accounts]);
+  const okxList = React.useMemo(() => {
+    return accounts.filter((acc) => acc.type === 'okx') as OkxAccount[];
   }, [accounts]);
 
   const btcList = React.useMemo(() => {
@@ -90,6 +94,26 @@ export const useBundleAccount = () => {
             error: error.message,
           };
         }
+      } else if (account.type === 'okx') {
+        if (!account.apiKey || !account.apiSecret || !account.passphrase) {
+          return {
+            error: ERROR.INVALID_KEY,
+          };
+        }
+
+        const okx = new OKX({
+          apiKey: account.apiKey,
+          apiSecret: account.apiSecret,
+          passphrase: account.passphrase,
+          enableInvalidKeyModal: false,
+        });
+        try {
+          await okx.checkPermission();
+        } catch (error: any) {
+          return {
+            error: error.message,
+          };
+        }
       } else if (account.type === 'btc') {
         if (!account.address) {
           return {
@@ -111,6 +135,10 @@ export const useBundleAccount = () => {
 
       const result = accounts.find((acc) => {
         if (acc.type === 'bn' && account.type === 'bn') {
+          if (acc.apiKey === account.apiKey) {
+            return true;
+          }
+        } else if (acc.type === 'okx' && account.type === 'okx') {
           if (acc.apiKey === account.apiKey) {
             return true;
           }
@@ -151,6 +179,9 @@ export const useBundleAccount = () => {
         if (account.type === 'bn') {
           nickname = 'Binance';
           num = binanceList.length + 1;
+        } else if (account.type === 'okx') {
+          nickname = 'OKX';
+          num = okxList.length + 1;
         } else if (account.type === 'btc') {
           nickname = 'BTC';
           num = btcList.length + 1;
@@ -166,7 +197,7 @@ export const useBundleAccount = () => {
 
       return newAccount;
     },
-    [binanceList.length, btcList.length, preCheck]
+    [binanceList.length, btcList.length, okxList.length, preCheck]
   );
 
   const remove = React.useCallback(
@@ -191,6 +222,9 @@ export const useBundleAccount = () => {
           address = account.data.address;
           break;
         case 'bn':
+          address = account.apiKey;
+          break;
+        case 'okx':
           address = account.apiKey;
           break;
         case 'btc':
@@ -317,6 +351,7 @@ export const useBundleAccount = () => {
     preCheck,
     inBundleList,
     binanceList,
+    okxList,
     btcList,
     ethList,
     toggleBundle,

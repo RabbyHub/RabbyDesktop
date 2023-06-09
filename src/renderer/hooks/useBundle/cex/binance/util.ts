@@ -6,7 +6,7 @@ import {
   MarginAsset,
   SpotAsset,
 } from './type';
-import { tokenPrice } from './price';
+import { tokenPrice } from './binance';
 
 // TODO rabby-api 里提供的类型和实际返回不符
 const basePortfolio = {

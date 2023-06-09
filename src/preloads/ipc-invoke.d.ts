@@ -284,6 +284,18 @@ type ChannelInvokePayload = {
     ];
     response: any;
   };
+  'okx-sdk': {
+    send: [
+      {
+        apiKey: string;
+        apiSecret: string;
+        passphrase: string;
+        method: string;
+        params?: any[];
+      }
+    ];
+    response: any;
+  };
   // Bundle
   'bundle-account-post': {
     send: [account: BundleAccount];

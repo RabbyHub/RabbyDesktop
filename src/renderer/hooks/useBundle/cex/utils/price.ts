@@ -5,7 +5,7 @@ const USDT_RE = new RegExp(`${USDT}$`);
 /**
  * 缓存符号对应价格，多个 bn 账户共用价格数据
  */
-class TokenPrice {
+export class TokenPrice {
   private symbols: Set<string> = new Set();
 
   prices: Record<
@@ -76,5 +76,3 @@ class TokenPrice {
     return this.prices[symbol]?.value;
   }
 }
-
-export const tokenPrice = new TokenPrice();

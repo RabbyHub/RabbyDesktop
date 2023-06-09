@@ -2,19 +2,19 @@ import React from 'react';
 import { DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import { atom, useAtom } from 'jotai';
 import { sortBy } from 'lodash';
-import { saveBundleAccountsBalance } from './shared';
-import { Binance } from './cex/binance/binance';
-import { mergeList, bigNumberSum } from './util';
-import { useBundleAccount } from './useBundleAccount';
-import { DisplayProtocol } from '../useHistoryProtocol';
+import { saveBundleAccountsBalance } from '../shared';
+import { Binance } from '../cex/binance/binance';
+import { mergeList, bigNumberSum } from '../util';
+import { useBundleAccount } from '../useBundleAccount';
+import { DisplayProtocol } from '../../useHistoryProtocol';
 import {
   toFinancePortfolioList,
   toFundingPortfolioList,
   toIsolatedMarginPortfolioList,
   toMarginPortfolio,
   toSpotPortfolioList,
-} from './cex/binance/util';
-import { ERROR } from './error';
+} from '../cex/binance/util';
+import { ERROR } from '../error';
 
 type BNAccountWithAPI = BNAccount & {
   api: Binance;
@@ -208,5 +208,6 @@ export const useBinance = () => {
     chainData,
     protocolData,
     loading,
+    type: 'bn' as const,
   };
 };

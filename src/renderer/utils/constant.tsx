@@ -62,6 +62,7 @@ const IconWalletConnect =
   'rabby-internal://assets/icons/walletlogo/walletconnect28.svg';
 const IconBinance = 'rabby-internal://assets/icons/walletlogo/binance.png';
 const IconBitcoin = 'rabby-internal://assets/icons/walletlogo/bitcoin.svg';
+const IconOKX = 'rabby-internal://assets/icons/swap/okx.png';
 const LogoBitkeep = 'rabby-internal://assets/icons/walletlogo/bitkeep.svg';
 const LogoRainbow = 'rabby-internal://assets/icons/walletlogo/rainbow.svg';
 const LogoUniswap = 'rabby-internal://assets/icons/walletlogo/uniswap.svg';
@@ -337,6 +338,7 @@ export enum WALLET_BRAND_TYPES {
   AIRGAP = 'AirGap',
   WalletConnect = 'WalletConnect',
   Binance = 'Binance',
+  OKX = 'OKX',
   Bitcoin = 'Bitcoin',
   Rainbow = 'Rainbow',
   Bitkeep = 'Bitkeep',
@@ -558,6 +560,15 @@ export const WALLET_BRAND_CONTENT: {
     brand: WALLET_BRAND_TYPES.Binance,
     icon: IconBitcoin,
     image: IconBitcoin,
+    connectType: BRAND_WALLET_CONNECT_TYPE.Bundle,
+    category: WALLET_BRAND_CATEGORY.INSTITUTIONAL,
+  },
+  [WALLET_BRAND_TYPES.OKX]: {
+    id: 103,
+    name: 'OKX',
+    brand: WALLET_BRAND_TYPES.OKX,
+    icon: IconOKX,
+    image: IconOKX,
     connectType: BRAND_WALLET_CONNECT_TYPE.Bundle,
     category: WALLET_BRAND_CATEGORY.INSTITUTIONAL,
   },

@@ -26,6 +26,7 @@ import './streams/trezorLike';
 
 import './streams/bundle';
 import './streams/cex/binance';
+import './streams/cex/okx';
 
 import './streams/developer';
 

@@ -26,7 +26,7 @@ const IBundleAccountSchema: import('json-schema-typed').JSONSchema = {
   properties: {
     type: {
       type: 'string',
-      enum: ['bn', 'btc', 'eth'],
+      enum: ['bn', 'btc', 'eth', 'okx'],
     },
     nickname: {
       type: 'string',
@@ -38,6 +38,9 @@ const IBundleAccountSchema: import('json-schema-typed').JSONSchema = {
       type: 'string',
     },
     apiSecret: {
+      type: 'string',
+    },
+    passphrase: {
       type: 'string',
     },
     address: {
