@@ -64,7 +64,6 @@ export const toMarginPortfolio = (
     stats: {
       asset_usd_value,
       debt_usd_value,
-      // TODO 是不是要加上收益啊
       net_usd_value: asset_usd_value,
     },
   };
