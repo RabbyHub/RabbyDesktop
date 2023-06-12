@@ -1,11 +1,10 @@
 import React from 'react';
 import { sortBy } from 'lodash';
 import { useBTC } from './useBTC';
-import { useBinance } from './useCex/useBinance';
 import { useBundleAccount } from './useBundleAccount';
 import { useETH } from './useETH';
 import { bigNumberSum } from './util';
-import { useOKX } from './useCex/useOKX';
+import { useCex } from './useCex/useCex';
 
 let lastUpdatedKey = '';
 
@@ -26,6 +25,8 @@ export const useBundleState = () => {
   const account = useBundleAccount();
   const eth = useETH();
   const btc = useBTC();
+  const { cexList, ...cexInstances } = useCex();
+
   const updatedKey = JSON.stringify(account.inBundleList.map((acc) => acc.id));
 
   const hasEthAccount = React.useMemo(
@@ -36,24 +37,6 @@ export const useBundleState = () => {
     () => account.inBundleList.some((acc) => acc.type === 'btc'),
     [account.inBundleList]
   );
-
-  // 交易所 Cex 列表
-  const binance = useBinance();
-  const okx = useOKX();
-  const cexList = React.useMemo(() => {
-    const cexKey = [binance, okx];
-
-    return cexKey.map((cex) => {
-      const hasAccount = account.inBundleList.some(
-        (acc) => acc.type === cex.type
-      );
-      return {
-        type: cex.type,
-        hasAccount,
-        instance: cex,
-      };
-    });
-  }, [account.inBundleList, binance, okx]);
 
   const getAllAssets = (force = false) => {
     eth.getAssets(force);
@@ -160,7 +143,6 @@ export const useBundleState = () => {
     loadingToken,
     loadingProtocol,
     loadingUsedChain,
-    binance,
-    okx,
+    ...cexInstances,
   };
 };

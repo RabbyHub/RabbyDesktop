@@ -65,4 +65,12 @@ export class OkxClient {
       quoteCcy: 'USDT',
     });
   }
+
+  async getStakingDeFi() {
+    return this.get('/api/v5/finance/staking-defi/orders-active');
+  }
+
+  async getSavings() {
+    return this.get('/api/v5/finance/savings/balance');
+  }
 }

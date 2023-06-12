@@ -6,14 +6,14 @@ import { saveBundleAccountsBalance } from '../shared';
 import { mergeList, bigNumberSum } from '../util';
 import { useBundleAccount } from '../useBundleAccount';
 import { DisplayProtocol } from '../../useHistoryProtocol';
+import { ERROR } from '../error';
+import { OKX } from '../cex/okx/okx';
 import {
   toFinancePortfolioList,
   toFundingPortfolioList,
   toIsolatedMarginPortfolioList,
   toMarginPortfolio,
-} from '../cex/binance/util';
-import { ERROR } from '../error';
-import { OKX } from '../cex/okx/okx';
+} from '../cex/okx/util';
 
 type OkxAccountWithAPI = OkxAccount & {
   api: OKX;
@@ -46,6 +46,7 @@ export const useOKX = () => {
         apiSecret: item.apiSecret,
         passphrase: item.passphrase,
         nickname: item.nickname,
+        simulated: item.simulated,
       }),
     }));
   }, [okxList]);
@@ -119,12 +120,12 @@ export const useOKX = () => {
 
   const chainData = {
     usd_value: Number(balance),
-    id: 'OKX',
+    id: OKX.cexName,
     // 假的 id
     community_id: 9000030,
-    wrapped_token_id: 'okx',
-    name: 'OKX',
-    native_token_id: 'okx',
+    wrapped_token_id: OKX.cexName,
+    name: OKX.cexName,
+    native_token_id: OKX.cexName,
     logo_url: 'rabby-internal://assets/icons/swap/okx.png',
   } as DisplayChainWithWhiteLogo & {
     usd_value: number;
@@ -135,16 +136,48 @@ export const useOKX = () => {
     // 资金账户
     const fundingPortfolioList = toFundingPortfolioList(mergedFundingAsset);
 
+    const otherPortfolioList =
+      assets?.flatMap((item) => {
+        // 全仓账户
+        const marginPortfolio =
+          item.marginAsset && toMarginPortfolio(item.marginAsset);
+
+        // 逐仓账户
+        const isolatedMarginList = toIsolatedMarginPortfolioList(
+          item.isolatedMarginAsset
+        );
+
+        // 理财账户(Staking)
+        const stakeList = toFinancePortfolioList(item.stakingAsset, 'Stake');
+
+        // 理财账户(DeFi)
+        const deFiList = toFinancePortfolioList(item.defiAsset, 'DeFi');
+
+        // 余币宝
+        const savingsList = toFinancePortfolioList(
+          item.savingsAsset,
+          'Savings'
+        );
+
+        return [
+          ...stakeList,
+          ...deFiList,
+          ...savingsList,
+          ...isolatedMarginList,
+          ...(marginPortfolio ? [marginPortfolio] : []),
+        ];
+      }) ?? [];
+
     const data: DisplayProtocol = {
       usd_value: Number(balance),
-      id: 'okx',
-      chain: 'okx',
-      name: 'OKX',
+      id: OKX.cexName,
+      chain: OKX.cexName,
+      name: OKX.cexName,
       site_url: '',
       logo_url: 'rabby-internal://assets/icons/swap/okx.png',
       has_supported_portfolio: false,
       tvl: 0,
-      portfolio_item_list: [...fundingPortfolioList],
+      portfolio_item_list: [...fundingPortfolioList, ...otherPortfolioList],
     };
 
     data.portfolio_item_list = sortBy(
@@ -153,7 +186,7 @@ export const useOKX = () => {
     );
 
     return data;
-  }, [balance, mergedFundingAsset]);
+  }, [assets, balance, mergedFundingAsset]);
 
   return {
     getAssetByAccount,

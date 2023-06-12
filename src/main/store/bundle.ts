@@ -43,6 +43,9 @@ const IBundleAccountSchema: import('json-schema-typed').JSONSchema = {
     passphrase: {
       type: 'string',
     },
+    simulated: {
+      type: 'string',
+    },
     address: {
       type: 'string',
     },
@@ -75,16 +78,22 @@ handleIpcMainInvoke('bundle-account-post', (_, account: BundleAccount) => {
   account.id = account.id || nanoid();
 
   const result = accounts.find((acc) => {
-    if (acc.type === 'bn' && account.type === 'bn') {
-      if (acc.apiKey === account.apiKey) {
-        return true;
-      }
-    } else if (acc.type === 'btc' && account.type === 'btc') {
+    if (acc.type === 'btc' && account.type === 'btc') {
       if (acc.address === account.address) {
         return true;
       }
     } else if (acc.type === 'eth' && account.type === 'eth') {
       if (acc.data.address === account.data.address) {
+        return true;
+      }
+    } else if (
+      acc.type === account.type &&
+      acc.type !== 'eth' &&
+      acc.type !== 'btc' &&
+      account.type !== 'eth' &&
+      account.type !== 'btc'
+    ) {
+      if (acc.apiKey === account.apiKey) {
         return true;
       }
     }

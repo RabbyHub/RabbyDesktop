@@ -123,12 +123,12 @@ export const useBinance = () => {
 
   const chainData = {
     usd_value: Number(balance),
-    id: 'binance',
+    id: Binance.cexName,
     // 假的 id
     community_id: 9000020,
-    wrapped_token_id: 'binance',
-    name: 'Binance',
-    native_token_id: 'binance',
+    wrapped_token_id: Binance.cexName,
+    name: Binance.cexName,
+    native_token_id: Binance.cexName,
     logo_url: 'rabby-internal://assets/icons/bundle/binance-chain.png',
   } as DisplayChainWithWhiteLogo & {
     usd_value: number;
@@ -176,9 +176,9 @@ export const useBinance = () => {
 
     const data: DisplayProtocol = {
       usd_value: Number(balance),
-      id: 'binance',
-      chain: 'binance',
-      name: 'Binance',
+      id: Binance.cexName,
+      chain: Binance.cexName,
+      name: Binance.cexName,
       site_url: '',
       logo_url: 'rabby-internal://assets/icons/bundle/binance-chain.png',
       has_supported_portfolio: false,

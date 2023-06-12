@@ -8,6 +8,7 @@ import React from 'react';
 import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import { saveBundleAccountsBalance } from '@/renderer/hooks/useBundle/shared';
 import { OKX } from '@/renderer/hooks/useBundle/cex/okx/okx';
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { InputItem } from './InputItem';
 import { BundleSuccessModal } from './BundleSuccessModal';
 
@@ -29,6 +30,7 @@ export const AddOKXModal: React.FC<ModalProps> = (props) => {
     apiKey: string;
     apiSecret: string;
     passphrase: string;
+    simulated: string;
   }>();
   const [loading, setLoading] = React.useState(false);
   const { onCancel } = props;
@@ -37,13 +39,14 @@ export const AddOKXModal: React.FC<ModalProps> = (props) => {
 
   const onAdd = React.useCallback(async () => {
     setLoading(true);
-    const { apiKey, apiSecret, passphrase } = form.getFieldsValue();
+    const { apiKey, apiSecret, passphrase, simulated } = form.getFieldsValue();
 
     const err = await preCheck({
       type: 'okx',
       apiKey,
       apiSecret,
       passphrase,
+      simulated,
     });
 
     if (err?.error) {
@@ -62,8 +65,8 @@ export const AddOKXModal: React.FC<ModalProps> = (props) => {
       apiKey,
       apiSecret,
       passphrase,
+      simulated,
     })) as OkxAccount;
-    console.log('result', result);
     setNewAccount(result);
     setLoading(false);
     form.resetFields();
@@ -76,6 +79,7 @@ export const AddOKXModal: React.FC<ModalProps> = (props) => {
         apiSecret: result.apiSecret,
         passphrase: result.passphrase,
         nickname: result.nickname,
+        simulated: result.simulated,
       }),
     };
 
@@ -105,6 +109,10 @@ export const AddOKXModal: React.FC<ModalProps> = (props) => {
       },
       {
         name: 'passphrase',
+        errors: [],
+      },
+      {
+        name: 'simulated',
         errors: [],
       },
     ]);
@@ -171,6 +179,15 @@ export const AddOKXModal: React.FC<ModalProps> = (props) => {
               placeholder="Passphrase"
             />
           </Form.Item>
+          {!IS_RUNTIME_PRODUCTION && (
+            <Form.Item name="simulated" className="w-full">
+              <InputItem
+                autoFocus={false}
+                type="number"
+                placeholder="is simulated (only for test)"
+              />
+            </Form.Item>
+          )}
         </div>
         <div className="flex items-center flex-col space-y-[22px]">
           <div className="text-[12px] text-[#FFFFFF99]">

@@ -4,6 +4,7 @@ import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
 import { DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import AssociateDappModal from '@/renderer/components/AssociateDappModal';
+import { checkIsCexChain } from '@/renderer/hooks/useBundle/cex/utils/shared';
 import TokenList from './TokenList';
 import ProtocolList from './ProtocolList';
 import ScrollTopContext from './scrollTopContext';
@@ -154,6 +155,10 @@ const PortfolioView = ({
     setScrollTop(scroll);
   };
 
+  const isCexChain = useMemo(() => {
+    return checkIsCexChain(selectChainServerId);
+  }, [selectChainServerId]);
+
   if (isEmpty) {
     return (
       <PortfolioWrapper className="empty">
@@ -170,8 +175,7 @@ const PortfolioView = ({
     <ScrollTopContext.Provider value={scrollTop}>
       <PortfolioWrapper>
         <div className="scroll-container" onScroll={handleScroll}>
-          {view === VIEW_TYPE.SUMMARY ||
-          selectChainServerId === 'binance' ? null : (
+          {view === VIEW_TYPE.SUMMARY || isCexChain ? null : (
             <TokenList
               tokenList={tokenList}
               historyTokenMap={historyTokenMap}

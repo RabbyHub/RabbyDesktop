@@ -1,3 +1,7 @@
+import { Asset } from '../utils/type';
+
+export { Asset } from '../utils/type';
+
 export type PermissionResponse = {
   createTime: number;
   enableFutures: boolean;
@@ -19,12 +23,6 @@ export type FundingWalletResponse = {
   withdrawing: string;
   btcValuation: string;
 }[];
-
-export type Asset = {
-  asset: string;
-  value: string;
-  usdtValue: string;
-};
 
 export type UserAssetResponse = {
   asset: string;

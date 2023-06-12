@@ -623,17 +623,19 @@ interface CommonBundleAccount {
   balance?: string;
   inBundle?: boolean;
 }
-interface BNAccount extends CommonBundleAccount {
-  type: 'bn';
+
+interface CommonCexAccount extends CommonBundleAccount {
   apiKey: string;
   apiSecret: string;
 }
+interface BNAccount extends CommonCexAccount {
+  type: 'bn';
+}
 
-interface OkxAccount extends CommonBundleAccount {
+interface OkxAccount extends CommonCexAccount {
   type: 'okx';
-  apiKey: string;
-  apiSecret: string;
   passphrase: string;
+  simulated: string;
 }
 
 interface BTCAccount extends CommonBundleAccount {

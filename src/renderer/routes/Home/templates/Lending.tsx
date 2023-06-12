@@ -36,7 +36,7 @@ export default React.memo((props: { data: PortfolioItem[] }) => {
 
         return (
           <Panel>
-            {p.detail.health_rate && (
+            {!!p.detail.health_rate && (
               <HealthRateTag>
                 Health Rate
                 <Tooltip title="Your assests will be liquidated if the health factor is less than or equal to 1">

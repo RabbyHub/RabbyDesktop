@@ -5,7 +5,7 @@ import { valueGreaterThan10 } from '../../util';
 import { ERROR } from '../../error';
 
 export abstract class Cex<Config> {
-  cexName!: string;
+  static cexName: string;
 
   protected config!: Config;
 
@@ -53,7 +53,7 @@ export abstract class Cex<Config> {
     if (!this.visibleInvalidKeyModal && this.enableInvalidKeyModal) {
       this.visibleInvalidKeyModal = true;
       ModalConfirm({
-        title: `${this.cexName} API has become invalid`,
+        title: `${Cex.cexName} API has become invalid`,
         content: `${this.nickname} (${ellipsis(
           remark
         )}) API has become invalid. It will be deleted and removed from Bundle Address.`,

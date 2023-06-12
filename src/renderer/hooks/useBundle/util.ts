@@ -13,10 +13,11 @@ export const bigNumberSum = (...values: (string | number | undefined)[]) => {
 };
 
 /**
- * 小于 10u 的返回 false
+ * 大于 10 或者小于 0 的值
  */
 export const valueGreaterThan10 = (value: any, target = '10') => {
-  return new BigNumber(value).isGreaterThanOrEqualTo(target);
+  const bn = new BigNumber(value);
+  return bn.isGreaterThanOrEqualTo(target) || bn.isLessThan(0);
 };
 
 /**

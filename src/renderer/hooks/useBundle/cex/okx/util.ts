@@ -1,5 +1,5 @@
 import { PortfolioItem, TokenItem } from '@debank/rabby-api/dist/types';
-import { Asset, FundingAsset } from './type';
+import { Asset, AssetWithRewards, FundingAsset, MarginAsset } from './type';
 import { tokenPrice } from './okx';
 
 // TODO rabby-api 里提供的类型和实际返回不符
@@ -38,4 +38,64 @@ export const toFundingPortfolioList = (fundingAsset: FundingAsset) => {
       net_usd_value: Number(item.usdtValue),
     },
   })) as PortfolioItem[];
+};
+
+export const toMarginPortfolio = (
+  margin: MarginAsset,
+  name = 'Cross Margin'
+) => {
+  const asset_usd_value = margin.supplies.reduce(
+    (acc, cur) => acc + Number(cur.usdtValue),
+    0
+  );
+  const debt_usd_value = margin.borrows.reduce(
+    (acc, cur) => acc + Number(cur.usdtValue),
+    0
+  );
+  return {
+    ...basePortfolio,
+    name: name as any,
+    detail_types: ['lending'],
+    detail: {
+      supply_token_list: margin.supplies.map(toTokenItem),
+      borrow_token_list: margin.borrows.map(toTokenItem),
+      health_rate: Number(margin.healthRate),
+    } as any,
+    stats: {
+      asset_usd_value,
+      debt_usd_value,
+      // TODO 是不是要加上收益啊
+      net_usd_value: asset_usd_value,
+    },
+  };
+};
+
+export const toIsolatedMarginPortfolioList = (
+  isolatedMargin: MarginAsset[]
+) => {
+  return isolatedMargin.map((item) =>
+    toMarginPortfolio(item, 'Isolated Margin')
+  );
+};
+
+export const toFinancePortfolioList = (
+  assets: AssetWithRewards[],
+  name: string
+) => {
+  return assets.map((asset) => {
+    return {
+      ...basePortfolio,
+      name: 'Earn' as any,
+      detail: {
+        description: name,
+        supply_token_list: asset.assets.map(toTokenItem),
+        reward_token_list: asset.rewards.map(toTokenItem),
+      } as any,
+      stats: {
+        asset_usd_value: Number(asset.usdtValue),
+        debt_usd_value: 0,
+        net_usd_value: Number(asset.usdtValue),
+      },
+    };
+  });
 };

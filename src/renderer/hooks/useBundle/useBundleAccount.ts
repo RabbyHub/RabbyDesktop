@@ -2,13 +2,12 @@ import { useAtom, useAtomValue } from 'jotai';
 import React from 'react';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { validate, Network } from 'bitcoin-address-validation';
-import { Binance } from './cex/binance/binance';
 import { bundleAccountsAtom, bundleAccountsNumAtom } from './shared';
 import { ERROR } from './error';
 import { useAccountToDisplay } from '../rabbyx/useAccountToDisplay';
 import { toastMaxAccount } from './util';
 import { useAddressManagement } from '../rabbyx/useAddressManagement';
-import { OKX } from './cex/okx/okx';
+import { useCexAccount } from './useCex/useCexAccount';
 
 const { nanoid } = require('nanoid');
 
@@ -23,12 +22,8 @@ export const useBundleAccount = () => {
   const inBundleList = React.useMemo(() => {
     return accounts.filter((acc) => acc.inBundle);
   }, [accounts]);
-  const binanceList = React.useMemo(() => {
-    return accounts.filter((acc) => acc.type === 'bn') as BNAccount[];
-  }, [accounts]);
-  const okxList = React.useMemo(() => {
-    return accounts.filter((acc) => acc.type === 'okx') as OkxAccount[];
-  }, [accounts]);
+  const { cexAccount, cexCreate, cexPreCheck, cexCheckIsExisted } =
+    useCexAccount();
 
   const btcList = React.useMemo(() => {
     return accounts.filter((acc) => acc.type === 'btc') as BTCAccount[];
@@ -75,46 +70,9 @@ export const useBundleAccount = () => {
 
   const preCheck = React.useCallback(
     async (account: Partial<BundleAccount>) => {
-      if (account.type === 'bn') {
-        if (!account.apiKey || !account.apiSecret) {
-          return {
-            error: ERROR.INVALID_KEY,
-          };
-        }
+      await cexPreCheck(account);
 
-        const bn = new Binance({
-          apiKey: account.apiKey,
-          apiSecret: account.apiSecret,
-          enableInvalidKeyModal: false,
-        });
-        try {
-          await bn.checkPermission();
-        } catch (error: any) {
-          return {
-            error: error.message,
-          };
-        }
-      } else if (account.type === 'okx') {
-        if (!account.apiKey || !account.apiSecret || !account.passphrase) {
-          return {
-            error: ERROR.INVALID_KEY,
-          };
-        }
-
-        const okx = new OKX({
-          apiKey: account.apiKey,
-          apiSecret: account.apiSecret,
-          passphrase: account.passphrase,
-          enableInvalidKeyModal: false,
-        });
-        try {
-          await okx.checkPermission();
-        } catch (error: any) {
-          return {
-            error: error.message,
-          };
-        }
-      } else if (account.type === 'btc') {
+      if (account.type === 'btc') {
         if (!account.address) {
           return {
             error: ERROR.INVALID_ADDRESS,
@@ -134,15 +92,10 @@ export const useBundleAccount = () => {
       }
 
       const result = accounts.find((acc) => {
-        if (acc.type === 'bn' && account.type === 'bn') {
-          if (acc.apiKey === account.apiKey) {
-            return true;
-          }
-        } else if (acc.type === 'okx' && account.type === 'okx') {
-          if (acc.apiKey === account.apiKey) {
-            return true;
-          }
-        } else if (acc.type === 'btc' && account.type === 'btc') {
+        if (cexCheckIsExisted(acc, account)) {
+          return true;
+        }
+        if (acc.type === 'btc' && account.type === 'btc') {
           if (acc.address === account.address) {
             return true;
           }
@@ -164,7 +117,7 @@ export const useBundleAccount = () => {
         error: null,
       };
     },
-    [accounts]
+    [accounts, cexPreCheck, cexCheckIsExisted]
   );
 
   const create = React.useCallback(
@@ -176,13 +129,14 @@ export const useBundleAccount = () => {
 
       if (!nickname) {
         let num = 1;
-        if (account.type === 'bn') {
-          nickname = 'Binance';
-          num = binanceList.length + 1;
-        } else if (account.type === 'okx') {
-          nickname = 'OKX';
-          num = okxList.length + 1;
-        } else if (account.type === 'btc') {
+        const cexResult = cexCreate({
+          account,
+          nickname,
+          num,
+        });
+        nickname = cexResult.nickname;
+        num = cexResult.num;
+        if (account.type === 'btc') {
           nickname = 'BTC';
           num = btcList.length + 1;
         }
@@ -197,7 +151,7 @@ export const useBundleAccount = () => {
 
       return newAccount;
     },
-    [binanceList.length, btcList.length, okxList.length, preCheck]
+    [btcList.length, cexCreate, preCheck]
   );
 
   const remove = React.useCallback(
@@ -215,24 +169,6 @@ export const useBundleAccount = () => {
 
       const account = accounts.find((acc) => acc.id === id) || ethAccount;
       if (!account) return;
-      // toast 提示
-      let address = '';
-      switch (account.type) {
-        case 'eth':
-          address = account.data.address;
-          break;
-        case 'bn':
-          address = account.apiKey;
-          break;
-        case 'okx':
-          address = account.apiKey;
-          break;
-        case 'btc':
-          address = account.address;
-          break;
-        default:
-          break;
-      }
 
       if (showToast) {
         // toastMessage({
@@ -350,12 +286,11 @@ export const useBundleAccount = () => {
     updateNickname,
     preCheck,
     inBundleList,
-    binanceList,
-    okxList,
     btcList,
     ethList,
     toggleBundle,
     preCheckMaxAccount,
     percentMap,
+    ...cexAccount,
   };
 };

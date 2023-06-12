@@ -290,6 +290,7 @@ type ChannelInvokePayload = {
         apiKey: string;
         apiSecret: string;
         passphrase: string;
+        simulated?: string;
         method: string;
         params?: any[];
       }

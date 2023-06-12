@@ -9,7 +9,10 @@ import { OkxClient } from './sdk/okx/client';
 
 handleIpcMainInvoke(
   'okx-sdk',
-  async (_, { apiKey, apiSecret, passphrase, method, params = [] }) => {
+  async (
+    _,
+    { apiKey, apiSecret, passphrase, simulated, method, params = [] }
+  ) => {
     const appProxyConf = {
       ...(await getAppRuntimeProxyConf()),
       systemProxySettings: (await getSystemProxyInfo(true)).systemProxySettings,
@@ -21,6 +24,8 @@ handleIpcMainInvoke(
         apiKey,
         apiSecret,
         passphrase,
+        // for test
+        simulated: simulated === '1',
       },
       {
         proxy: getOptionProxyForAxios(appProxyConf),

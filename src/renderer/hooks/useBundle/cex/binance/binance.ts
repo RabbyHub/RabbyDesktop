@@ -39,7 +39,7 @@ interface BinanceConfig {
 export const tokenPrice = new TokenPrice();
 
 export class Binance extends Cex<BinanceConfig> {
-  cexName = 'Binance';
+  static cexName = 'Binance';
 
   constructor({
     apiKey,
@@ -298,21 +298,23 @@ export class Binance extends Cex<BinanceConfig> {
       const netAssetBN = new BigNumber(item.netAsset);
 
       if (netAssetBN.gt(0)) {
+        const usdtValue = tokenPrice.getUSDTValue(item.asset, item.netAsset);
         supplies.push({
           asset: item.asset,
           value: item.netAsset,
-          usdtValue: tokenPrice.getUSDTValue(item.asset, item.netAsset),
+          usdtValue,
         });
+
+        this.plusBalance(usdtValue);
       } else {
         const absValue = netAssetBN.abs().toString();
+        const usdtValue = tokenPrice.getUSDTValue(item.asset, absValue);
         borrows.push({
           asset: item.asset,
           value: item.borrowed,
-          usdtValue: tokenPrice.getUSDTValue(item.asset, absValue),
+          usdtValue,
         });
       }
-
-      this.plusBalance(item.netAsset);
     });
 
     if (!supplies.length && !borrows.length) {
@@ -373,22 +375,22 @@ export class Binance extends Cex<BinanceConfig> {
         const borrowedBN = new BigNumber(o.borrowed);
 
         if (netAssetBN.gt(0)) {
+          const usdtValue = tokenPrice.getUSDTValue(o.asset, o.netAsset);
           supplies.push({
             asset: o.asset,
             value: o.netAsset,
-            usdtValue: tokenPrice.getUSDTValue(o.asset, o.netAsset),
+            usdtValue,
           });
 
-          this.plusBalance(o.netAsset);
+          this.plusBalance(usdtValue);
         }
         if (borrowedBN.gt(0)) {
+          const usdtValue = tokenPrice.getUSDTValue(o.asset, o.borrowed);
           borrows.push({
             asset: o.asset,
             value: o.borrowed,
-            usdtValue: tokenPrice.getUSDTValue(o.asset, o.borrowed),
+            usdtValue,
           });
-
-          this.plusBalance(o.borrowed);
         }
       });
 
