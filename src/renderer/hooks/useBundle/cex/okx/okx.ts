@@ -180,6 +180,7 @@ export class OKX extends Cex<OkxConfig> {
       const asset = item.ccy;
       const availEqBN = new BigNumber(item.availEq);
       const crossLiabBN = new BigNumber(item.crossLiab);
+      const availBal = new BigNumber(item.availBal);
 
       if (availEqBN.gt(0)) {
         const usdtValue = tokenPrice.getUSDTValue(asset, item.availEq);
@@ -192,6 +193,11 @@ export class OKX extends Cex<OkxConfig> {
         this.plusBalance(usdtValue);
       }
 
+      if (availBal.lt(0)) {
+        const usdtValue = tokenPrice.getUSDTValue(asset, item.availBal);
+        this.plusBalance(usdtValue);
+      }
+
       if (crossLiabBN.gt(0)) {
         const usdtValue = tokenPrice.getUSDTValue(asset, item.crossLiab);
         borrows.push({
@@ -199,8 +205,6 @@ export class OKX extends Cex<OkxConfig> {
           value: item.crossLiab,
           usdtValue,
         });
-
-        this.plusBalance(`-${usdtValue}`);
       }
     });
 
