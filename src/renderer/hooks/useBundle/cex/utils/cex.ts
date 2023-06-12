@@ -53,7 +53,7 @@ export abstract class Cex<Config> {
     if (!this.visibleInvalidKeyModal && this.enableInvalidKeyModal) {
       this.visibleInvalidKeyModal = true;
       ModalConfirm({
-        title: `${Cex.cexName} API has become invalid`,
+        title: 'API has become invalid',
         content: `${this.nickname} (${ellipsis(
           remark
         )}) API has become invalid. It will be deleted and removed from Bundle Address.`,

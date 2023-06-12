@@ -76,9 +76,9 @@ export class OKX extends Cex<OkxConfig> {
 
       return res.data;
     } catch (e: any) {
-      if (e.message.includes(ERROR.INVALID_KEY)) {
-        this.showInvalidKeyModal(this.config.apiKey);
-      }
+      // if (e.message.includes(ERROR.INVALID_KEY)) {
+      this.showInvalidKeyModal(this.config.apiKey);
+      // }
       // 未知错误
       throw new Error(ERROR.UNKNOWN);
     }
