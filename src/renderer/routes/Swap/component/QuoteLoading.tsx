@@ -1,21 +1,32 @@
 import { Skeleton } from 'antd';
+import clsx from 'clsx';
 
 import { CEX, DEX } from '../constant';
 import { QuoteLogo } from './QuoteLogo';
 
 type QuoteListLoadingProps = {
   fetchedList?: string[];
+  isCex?: boolean;
 };
 
 export const QuoteLoading = ({
   logo,
   name,
+  isCex = false,
 }: {
   logo: string;
   name: string;
+  isCex?: boolean;
 }) => {
   return (
-    <div className="flex-1 py-12 px-16 flex item-center rounded-[6px] border-solid border-[0.5px] border-white border-opacity-20">
+    <div
+      className={clsx(
+        'flex-1 py-[13px] px-16 flex item-center rounded-[6px]',
+        isCex
+          ? ''
+          : 'border-solid border-[0.5px] border-white border-opacity-20'
+      )}
+    >
       <QuoteLogo logo={logo} size={24} isLoading />
       <span className="ml-[17px] text-16 font-medium text-white text-opacity-80 flex items-center ">
         {name}
@@ -43,16 +54,20 @@ export const QuoteLoading = ({
 
 export const QuoteListLoading = ({
   fetchedList: dataList,
+  isCex,
 }: QuoteListLoadingProps) => {
   return (
     <>
-      {Object.entries(DEX).map(([key, value]) => {
+      {Object.entries(isCex ? CEX : DEX).map(([key, value]) => {
         if (dataList && dataList.includes(key)) return null;
-        return <QuoteLoading logo={value.logo} key={key} name={value.name} />;
-      })}
-      {Object.entries(CEX).map(([key, value]) => {
-        if (dataList && dataList.includes(key)) return null;
-        return <QuoteLoading logo={value.logo} key={key} name={value.name} />;
+        return (
+          <QuoteLoading
+            logo={value.logo}
+            key={key}
+            name={value.name}
+            isCex={isCex}
+          />
+        );
       })}
     </>
   );

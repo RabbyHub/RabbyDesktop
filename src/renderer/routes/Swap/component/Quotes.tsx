@@ -3,11 +3,18 @@ import styled from 'styled-components';
 import BigNumber from 'bignumber.js';
 
 import { noop } from 'lodash';
+import clsx from 'clsx';
 import { TCexQuoteData, TDexQuoteData, isSwapWrapToken } from '../utils';
 import { IconRefresh } from './IconRefresh';
 import { QuoteListLoading, QuoteLoading } from './QuoteLoading';
-import { CexQuoteItem, DexQuoteItem, QuoteItemProps } from './QuoteItem';
+import {
+  CexListWrapper,
+  CexQuoteItem,
+  DexQuoteItem,
+  QuoteItemProps,
+} from './QuoteItem';
 import { DEX_WITH_WRAP } from '../constant';
+import { InSufficientTip } from './InSufficientTip';
 
 const QuotesWrapper = styled.div`
   --green-color: #27c193;
@@ -16,7 +23,10 @@ const QuotesWrapper = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 24px;
+    margin-bottom: 18px;
+    &.inSufficient {
+      margin-bottom: 14px;
+    }
 
     .title {
       font-size: 18px;
@@ -46,6 +56,7 @@ export const Quotes = (props: QuotesProps) => {
     loading = false,
     activeName,
     refresh = noop,
+    inSufficient,
     ...other
   } = props;
 
@@ -54,6 +65,9 @@ export const Quotes = (props: QuotesProps) => {
       list.sort((a, b) => {
         const getNumber = (quote: typeof a) => {
           if (quote.isDex) {
+            if (inSufficient) {
+              return new BigNumber(quote.data?.toTokenAmount || 0);
+            }
             if (!quote.preExecResult) {
               return new BigNumber(0);
             }
@@ -67,8 +81,30 @@ export const Quotes = (props: QuotesProps) => {
         };
         return getNumber(b).minus(getNumber(a)).toNumber();
       }),
-    [list]
+    [inSufficient, list]
   );
+
+  const bestAmount = useMemo(() => {
+    const bestQuote = sortedList?.[0];
+
+    return (
+      (bestQuote?.isDex
+        ? inSufficient
+          ? new BigNumber(bestQuote.data?.toTokenAmount || 0)
+              .div(
+                10 **
+                  (bestQuote?.data?.toTokenDecimals ||
+                    other.receiveToken.decimals ||
+                    1)
+              )
+              .toString(10)
+          : bestQuote?.preExecResult?.swapPreExecTx.balance_change
+              .receive_token_list[0]?.amount
+        : new BigNumber(bestQuote?.data?.receive_token.amount || '0').toString(
+            10
+          )) || '0'
+    );
+  }, [inSufficient, other?.receiveToken?.decimals, sortedList]);
 
   const fetchedList = useMemo(() => list.map((e) => e.name), [list]);
 
@@ -77,13 +113,17 @@ export const Quotes = (props: QuotesProps) => {
 
     return (
       <QuotesWrapper>
-        <div className="header">
+        <div className={clsx('header', inSufficient && 'inSufficient')}>
           <div className="title">The following swap rates are found</div>
           <IconRefresh refresh={refresh} loading={loading} />
         </div>
+
+        <InSufficientTip inSufficient={inSufficient} />
+
         <div className="flex flex-col gap-[16px]">
           {dex ? (
             <DexQuoteItem
+              inSufficient={inSufficient}
               preExecResult={dex?.preExecResult}
               quote={dex?.data}
               name={dex?.name}
@@ -117,39 +157,46 @@ export const Quotes = (props: QuotesProps) => {
   }
   return (
     <QuotesWrapper>
-      <div className="header">
+      <div className={clsx('header', inSufficient && 'inSufficient')}>
         <div className="title">The following swap rates are found</div>
         <IconRefresh refresh={refresh} loading={loading} />
       </div>
 
+      <InSufficientTip inSufficient={inSufficient} />
+
       <div className="flex flex-col gap-[16px]">
         {sortedList.map((params, idx) => {
           const { name, data, isDex } = params;
-          const bestQuote = sortedList?.[0];
-          const bestAmount =
-            (bestQuote?.isDex
-              ? bestQuote?.preExecResult?.swapPreExecTx.balance_change
-                  .receive_token_list[0]?.amount
-              : new BigNumber(
-                  bestQuote.data?.receive_token.amount || '0'
-                ).toString(10)) || '0';
-          if (isDex) {
-            return (
-              <DexQuoteItem
-                preExecResult={params.preExecResult}
-                quote={data}
-                name={name}
-                isBestQuote={idx === 0}
-                bestAmount={`${bestAmount}`}
-                active={activeName === name}
-                isLoading={params.loading}
-                quoteProviderInfo={
-                  DEX_WITH_WRAP[name as keyof typeof DEX_WITH_WRAP]
-                }
-                {...other}
-              />
-            );
-          }
+          if (!isDex) return null;
+          return (
+            <DexQuoteItem
+              inSufficient={inSufficient}
+              preExecResult={params.preExecResult}
+              quote={data}
+              name={name}
+              isBestQuote={idx === 0}
+              bestAmount={`${bestAmount}`}
+              active={activeName === name}
+              isLoading={params.loading}
+              quoteProviderInfo={
+                DEX_WITH_WRAP[name as keyof typeof DEX_WITH_WRAP]
+              }
+              {...other}
+            />
+          );
+        })}
+
+        <QuoteListLoading fetchedList={fetchedList} />
+      </div>
+
+      <div className="text-white text-opacity-70 text-13 font-medium mt-60 mb-8">
+        All rates from CEX
+      </div>
+
+      <CexListWrapper>
+        {sortedList.map((params, idx) => {
+          const { name, data, isDex } = params;
+          if (isDex) return null;
           return (
             <CexQuoteItem
               name={name}
@@ -157,11 +204,12 @@ export const Quotes = (props: QuotesProps) => {
               bestAmount={`${bestAmount}`}
               isBestQuote={idx === 0}
               isLoading={params.loading}
+              inSufficient={inSufficient}
             />
           );
         })}
-        <QuoteListLoading fetchedList={fetchedList} />
-      </div>
+        <QuoteListLoading fetchedList={fetchedList} isCex />
+      </CexListWrapper>
     </QuotesWrapper>
   );
 };
