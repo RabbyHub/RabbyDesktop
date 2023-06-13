@@ -24,8 +24,8 @@ export default function TopTipUnsupported({
           Your operating system is not supported
         </div>
         <div className={styles.intro}>
-          Please install Rabby Wallet on {systemReleaseInfo.aboveText} <br />
-          Stability and user experience cannot be guaranteed on other version
+          Please install Rabby Wallet on {systemReleaseInfo.aboveText} Stability
+          and user experience cannot be guaranteed on other version
         </div>
       </div>
     </div>
