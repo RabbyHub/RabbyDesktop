@@ -1,4 +1,4 @@
-import { OkxClient } from '@/main/streams/cex/sdk/okx/client';
+import type { OkxClient } from '@/main/streams/cex/sdk/okx/client';
 import BigNumber from 'bignumber.js';
 import { ERROR } from '../../error';
 import { bigNumberSum, valueGreaterThan10 } from '../../util';
