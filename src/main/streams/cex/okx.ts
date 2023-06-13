@@ -36,7 +36,7 @@ handleIpcMainInvoke(
     try {
       return (await client[method](...params)).data;
     } catch (e: any) {
-      if (e?.response?.data?.code === 50111) {
+      if (e?.response?.data?.code === '50111') {
         throw new Error('INVALID_KEY');
       }
       throw e;
