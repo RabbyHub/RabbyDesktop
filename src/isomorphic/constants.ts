@@ -109,3 +109,13 @@ export const DAPP_ZOOM_VALUES = {
   MAX_ZOOM_PERCENT: 100,
   MIN_ZOOM_PERCENT: 60,
 };
+
+export const SYSTEM_REQUIREMENT_MINIMUM = IS_RUNTIME_PRODUCTION
+  ? {
+      win32: 10,
+      darwin: 11,
+    }
+  : {
+      win32: 99,
+      darwin: 99,
+    };

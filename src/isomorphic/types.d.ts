@@ -662,3 +662,9 @@ type DOMRectValues = WriteableObj<
   Omit<DOMRectReadOnly, 'toJSON'>,
   'bottom' | 'height' | 'left' | 'right' | 'top' | 'width' | 'x' | 'y'
 >;
+
+type ISystemReleaseInfo = {
+  sysVersion: string;
+  majorVersion: number;
+  isDeprecated: boolean;
+};
