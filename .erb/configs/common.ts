@@ -142,5 +142,6 @@ export function getWebpackAliases () {
   return {
     '@': path.resolve(ROOT, 'src'),
     '@root': path.resolve(ROOT),
+    '@debank/common': '@debank/common/dist/index-rabby',
   } as Exclude<import('webpack').Configuration['resolve'], void>['alias']
 }

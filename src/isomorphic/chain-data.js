@@ -55,6 +55,8 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["FSN"] = "FSN";
     CHAINS_ENUM["PULSE"] = "PULSE";
     CHAINS_ENUM["ROSE"] = "ROSE";
+    // CHAINS_ENUM["RONIN"] = "RONIN";
+    CHAINS_ENUM["OAS"] = "OAS";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -932,6 +934,38 @@ export const CHAINS_RAW = {
         hex: "0xa516",
         scanLink: "https://explorer.emerald.oasis.dev/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/rose/33ade55b0f3efa10e9eec002c6417257.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+    },
+    // [CHAINS_ENUM.RONIN]: {
+    //     id: 2020,
+    //     serverId: "ron",
+    //     network: "2020",
+    //     name: "Ronin",
+    //     nativeTokenSymbol: "RON",
+    //     nativeTokenAddress: "ron",
+    //     enum: CHAINS_ENUM.RONIN,
+    //     hex: "0x7e4",
+    //     scanLink: "https://explorer.roninchain.com/tx/_s_",
+    //     nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/ron/6e0f509804bc83bf042ef4d674c1c5ee.png",
+    //     nativeTokenDecimals: 18,
+    //     eip: {
+    //         "1559": false,
+    //     },
+    // },
+    [CHAINS_ENUM.OAS]: {
+        id: 248,
+        serverId: "oas",
+        network: "248",
+        name: "Oasys",
+        nativeTokenSymbol: "OAS",
+        nativeTokenAddress: "oas",
+        enum: CHAINS_ENUM.OAS,
+        hex: "0xf8",
+        scanLink: "https://scan.oasys.games/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/oas/69e424154c30984ff4d5ba916591ac2a.png",
         nativeTokenDecimals: 18,
         eip: {
             "1559": true,
