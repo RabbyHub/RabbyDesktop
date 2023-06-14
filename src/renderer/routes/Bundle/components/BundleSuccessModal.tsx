@@ -25,7 +25,7 @@ export const BundleSuccessModal: React.FC<Props> = ({ data, ...props }) => {
             'flex w-[500px] items-center space-x-[13px]'
           )}
         >
-          <img className="w-[26px] h-[26px]" src={iconUrl} />
+          <img className="w-[26px] h-[26px] rounded-[4px]" src={iconUrl} />
           <div className="text-white text-left">
             <NicknameInput
               textClassName={clsx('text-[17px] text-white')}

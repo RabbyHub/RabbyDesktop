@@ -62,7 +62,7 @@ const IconWalletConnect =
   'rabby-internal://assets/icons/walletlogo/walletconnect28.svg';
 const IconBinance = 'rabby-internal://assets/icons/walletlogo/binance.png';
 const IconBitcoin = 'rabby-internal://assets/icons/walletlogo/bitcoin.svg';
-const IconOKX = 'rabby-internal://assets/icons/swap/okx.png';
+const IconOKX = 'rabby-internal://assets/icons/walletlogo/okx.png';
 const LogoBitkeep = 'rabby-internal://assets/icons/walletlogo/bitkeep.svg';
 const LogoRainbow = 'rabby-internal://assets/icons/walletlogo/rainbow.svg';
 const LogoUniswap = 'rabby-internal://assets/icons/walletlogo/uniswap.svg';

@@ -126,7 +126,7 @@ export const useOKX = () => {
     wrapped_token_id: OKX.cexName,
     name: OKX.cexName,
     native_token_id: OKX.cexName,
-    logo_url: 'rabby-internal://assets/icons/swap/okx.png',
+    logo_url: 'rabby-internal://assets/icons/bundle/okx.png',
   } as DisplayChainWithWhiteLogo & {
     usd_value: number;
   };
@@ -174,7 +174,7 @@ export const useOKX = () => {
       chain: OKX.cexName,
       name: OKX.cexName,
       site_url: '',
-      logo_url: 'rabby-internal://assets/icons/swap/okx.png',
+      logo_url: 'rabby-internal://assets/icons/bundle/okx.png',
       has_supported_portfolio: false,
       tvl: 0,
       portfolio_item_list: [...fundingPortfolioList, ...otherPortfolioList],
