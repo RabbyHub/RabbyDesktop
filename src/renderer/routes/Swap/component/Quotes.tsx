@@ -190,7 +190,7 @@ export const Quotes = (props: QuotesProps) => {
       </div>
 
       <div className="text-white text-opacity-70 text-13 font-medium mt-60 mb-8">
-        All rates from CEX
+        Rates from CEX
       </div>
 
       <CexListWrapper>
