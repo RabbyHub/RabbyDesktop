@@ -1,0 +1,13 @@
+diff --git a/node_modules/@debank/rabby-api/package.json b/node_modules/@debank/rabby-api/package.json
+index 89d5a58..8d8e934 100644
+--- a/node_modules/@debank/rabby-api/package.json
++++ b/node_modules/@debank/rabby-api/package.json
+@@ -41,7 +41,7 @@
+     "prepare": "husky install"
+   },
+   "peerDependencies": {
+-    "@debank/common": "^0.2.x"
++    "@debank/common": "^0.3.x"
+   },
+   "author": "",
+   "description": "",

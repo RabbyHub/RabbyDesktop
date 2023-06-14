@@ -1,0 +1,90 @@
+diff --git a/node_modules/@debank/common/dist/chain-data.js b/node_modules/@debank/common/dist/chain-data.js
+index caf6297..9e8b4bf 100644
+--- a/node_modules/@debank/common/dist/chain-data.js
++++ b/node_modules/@debank/common/dist/chain-data.js
+@@ -55,7 +55,7 @@ export var CHAINS_ENUM;
+     CHAINS_ENUM["FSN"] = "FSN";
+     CHAINS_ENUM["PULSE"] = "PULSE";
+     CHAINS_ENUM["ROSE"] = "ROSE";
+-    CHAINS_ENUM["RONIN"] = "RONIN";
++    // CHAINS_ENUM["RONIN"] = "RONIN";
+     CHAINS_ENUM["OAS"] = "OAS";
+ })(CHAINS_ENUM || (CHAINS_ENUM = {}));
+ export const CHAINS_RAW = {
+@@ -939,22 +939,22 @@ export const CHAINS_RAW = {
+             "1559": true,
+         },
+     },
+-    [CHAINS_ENUM.RONIN]: {
+-        id: 2020,
+-        serverId: "ron",
+-        network: "2020",
+-        name: "Ronin",
+-        nativeTokenSymbol: "RON",
+-        nativeTokenAddress: "ron",
+-        enum: CHAINS_ENUM.RONIN,
+-        hex: "0x7e4",
+-        scanLink: "https://explorer.roninchain.com/tx/_s_",
+-        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/ron/6e0f509804bc83bf042ef4d674c1c5ee.png",
+-        nativeTokenDecimals: 18,
+-        eip: {
+-            "1559": false,
+-        },
+-    },
++    // [CHAINS_ENUM.RONIN]: {
++    //     id: 2020,
++    //     serverId: "ron",
++    //     network: "2020",
++    //     name: "Ronin",
++    //     nativeTokenSymbol: "RON",
++    //     nativeTokenAddress: "ron",
++    //     enum: CHAINS_ENUM.RONIN,
++    //     hex: "0x7e4",
++    //     scanLink: "https://explorer.roninchain.com/tx/_s_",
++    //     nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/ron/6e0f509804bc83bf042ef4d674c1c5ee.png",
++    //     nativeTokenDecimals: 18,
++    //     eip: {
++    //         "1559": false,
++    //     },
++    // },
+     [CHAINS_ENUM.OAS]: {
+         id: 248,
+         serverId: "oas",
+diff --git a/node_modules/@debank/common/dist/chain.js b/node_modules/@debank/common/dist/chain.js
+index 5201016..683264e 100644
+--- a/node_modules/@debank/common/dist/chain.js
++++ b/node_modules/@debank/common/dist/chain.js
+@@ -445,12 +445,12 @@ export const CHAINS_LIST = [
+         logo: IconOasisLogo,
+         whiteLogo: IconOasisWhiteLogo,
+     },
+-    {
+-        ...CHAINS_RAW[CHAINS_ENUM.RONIN],
+-        enum: CHAINS_ENUM.RONIN,
+-        logo: IconRoninLogo,
+-        whiteLogo: IconRoninWhiteLogo,
+-    },
++    // {
++    //     ...CHAINS_RAW[CHAINS_ENUM.RONIN],
++    //     enum: CHAINS_ENUM.RONIN,
++    //     logo: IconRoninLogo,
++    //     whiteLogo: IconRoninWhiteLogo,
++    // },
+     {
+         ...CHAINS_RAW[CHAINS_ENUM.OAS],
+         enum: CHAINS_ENUM.OAS,
+diff --git a/node_modules/@debank/common/dist/index.js b/node_modules/@debank/common/dist/index.js
+index f63e2b5..db18d82 100644
+--- a/node_modules/@debank/common/dist/index.js
++++ b/node_modules/@debank/common/dist/index.js
+@@ -1,2 +1,10 @@
++import { CHAINS_LIST as CHAINS_LIST_FULL, CHAINS_ENUM as CHAINS_ENUM_FULL } from "./chain";
++import { selectChains } from "./utils";
+ export * from "./number";
+ export * from "./chain";
++// rabby
++export const { CHAINS, CHAINS_ENUM, CHAINS_LIST, __OMITTED_CHAINS_ENUM_FOR_TEST__, } = selectChains({
++    ALL_CHAIN_LIST: CHAINS_LIST_FULL,
++}, {
++    omitEums: [CHAINS_ENUM_FULL.RONIN]
++});
