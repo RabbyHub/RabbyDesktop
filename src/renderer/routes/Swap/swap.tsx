@@ -548,9 +548,6 @@ export const SwapToken = () => {
   );
 
   const btnText = useMemo(() => {
-    if (inSufficient) {
-      return 'Insufficient Balance';
-    }
     if (activeProvider?.name) {
       return `Swap via ${isWrapToken ? 'Wrap Contract' : DexDisplayName}`;
     }
@@ -559,7 +556,6 @@ export const SwapToken = () => {
     }
     return 'Select offer';
   }, [
-    inSufficient,
     activeProvider?.name,
     receiveToken,
     payToken,
