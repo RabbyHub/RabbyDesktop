@@ -1,7 +1,7 @@
 import { useMemo, useCallback, useState, useRef, useEffect } from 'react';
 import { CEXQuote, TokenItem } from '@debank/rabby-api/dist/types';
 import { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
-import { Tooltip } from 'antd';
+import { Tooltip, message } from 'antd';
 import styled from 'styled-components';
 import BigNumber from 'bignumber.js';
 import { formatAmount, formatUsdValue } from '@/renderer/utils/number';
@@ -12,8 +12,10 @@ import { useDebounce } from 'react-use';
 import ImgLock from '@/../assets/icons/swap/lock.svg';
 import IconRcTip from '@/../assets/icons/swap/tip-info.svg?rc';
 import IconGas from '@/../assets/icons/swap/gas.svg';
+import IconRcError from '@/../assets/icons/swap/error.svg?rc';
 
 import { useSetAtom } from 'jotai';
+import { toastMessage } from '@/renderer/components/TransparentToast';
 import { CEX } from '../constant';
 import { QuotePreExecResultInfo, isSwapWrapToken } from '../utils';
 import { WarningOrChecked } from './ReceiveDetail';
@@ -59,7 +61,7 @@ const ItemWrapper = styled.div`
     }
   }
 
-  &:hover:not(.disabled) {
+  &:hover:not(.disabled, .inSufficient) {
     background: rgba(134, 151, 255, 0.1);
     border-color: 2px solid transparent;
     box-shadow: 0px 10px 16px rgba(0, 0, 0, 0.1);
@@ -91,12 +93,15 @@ const ItemWrapper = styled.div`
       }
     }
   }
+  &.inSufficient {
+    height: 72px;
+  }
 
   &.cex {
     height: 56px;
     background-color: transparent;
-    border-width: 0.5px;
-    border-color: rgba(255, 255, 255, 0.2);
+    border: none;
+    outline: none;
   }
 
   .price {
@@ -150,6 +155,7 @@ export interface QuoteItemProps {
   fee: string;
   isLoading?: boolean;
   quoteProviderInfo: { name: string; logo: string };
+  inSufficient: boolean;
 }
 
 export const DexQuoteItem = (
@@ -172,6 +178,7 @@ export const DexQuoteItem = (
     isBestQuote,
     slippage,
     fee,
+    inSufficient,
     preExecResult,
     quoteProviderInfo,
   } = props;
@@ -209,13 +216,12 @@ export const DexQuoteItem = (
     let receivedUsd = '0';
     let diffUsd = '0';
 
-    if (!quote?.toTokenAmount) {
-      right = <div className="text-opacity-60">Unable to fetch the price</div>;
-      disable = true;
-    }
-
-    const actualReceiveAmount =
-      preExecResult?.swapPreExecTx.balance_change.receive_token_list[0]?.amount;
+    const actualReceiveAmount = inSufficient
+      ? new BigNumber(quote?.toTokenAmount || 0)
+          .div(10 ** (quote?.toTokenDecimals || receiveToken.decimals))
+          .toString()
+      : preExecResult?.swapPreExecTx.balance_change.receive_token_list[0]
+          ?.amount;
     if (actualReceiveAmount) {
       const bestQuoteAmount = new BigNumber(bestAmount);
       const receivedTokeAmountBn = new BigNumber(actualReceiveAmount || 0);
@@ -253,12 +259,21 @@ export const DexQuoteItem = (
         </span>
       );
     }
-    if (quote?.toTokenAmount && !preExecResult) {
+
+    if (!quote?.toTokenAmount) {
+      right = <div className="text-opacity-60">Unable to fetch the price</div>;
       center = <div className="">-</div>;
-      right = (
-        <div className="text-opacity-60">Fail to simulate transaction</div>
-      );
       disable = true;
+    }
+
+    if (quote?.toTokenAmount) {
+      if (!preExecResult && !inSufficient) {
+        center = <div className="">-</div>;
+        right = (
+          <div className="text-opacity-60">Fail to simulate transaction</div>
+        );
+        disable = true;
+      }
     }
 
     if (!isSdkDataPass) {
@@ -271,11 +286,14 @@ export const DexQuoteItem = (
     return [center, right, disable, receivedUsd, diffUsd];
   }, [
     quote?.toTokenAmount,
+    quote?.toTokenDecimals,
+    inSufficient,
+    receiveToken.decimals,
+    receiveToken.price,
+    receiveToken.symbol,
     preExecResult,
     isSdkDataPass,
     bestAmount,
-    receiveToken.price,
-    receiveToken.symbol,
     isBestQuote,
   ]);
 
@@ -338,6 +356,12 @@ export const DexQuoteItem = (
   ]);
 
   const handleClick = useCallback(() => {
+    if (inSufficient) {
+      return toastMessage({
+        type: 'error',
+        content: 'Insufficient balance to select the rate',
+      });
+    }
     if (active || disabled) return;
     updateActiveQuoteProvider({
       name: dexId,
@@ -355,11 +379,11 @@ export const DexQuoteItem = (
   }, [
     active,
     disabled,
+    inSufficient,
     updateActiveQuoteProvider,
     dexId,
     quote,
     preExecResult,
-    halfBetterRateString,
     quoteWarning,
   ]);
 
@@ -402,7 +426,11 @@ export const DexQuoteItem = (
   return (
     <ItemWrapper
       onClick={handleClick}
-      className={clsx(active && 'active', disabled && 'disabled error')}
+      className={clsx(
+        active && 'active',
+        disabled && 'disabled error',
+        inSufficient && !disabled && 'disabled inSufficient'
+      )}
     >
       <QuoteLogo
         size={disabled ? 24 : 32}
@@ -419,7 +447,11 @@ export const DexQuoteItem = (
               isWrapTokensWap && 'mr-[42px]'
             )}
           >
-            <span>{quoteProviderInfo.name}</span>
+            <span
+              className={clsx(inSufficient && !disabled && 'relative top-14')}
+            >
+              {quoteProviderInfo.name}
+            </span>
             {!!preExecResult?.shouldApproveToken && (
               <Tooltip
                 overlayClassName="rectangle max-w-[300px]"
@@ -447,8 +479,15 @@ export const DexQuoteItem = (
                 isWrapTokensWap && 'mr-[42px]'
               )}
             >
-              <img src={IconGas} className="w-14 h-14 relative top-[-1px]" />
-              <span>{preExecResult?.gasUsd}</span>
+              {!inSufficient && (
+                <>
+                  <img
+                    src={IconGas}
+                    className="w-14 h-14 relative top-[-1px]"
+                  />
+                  <span>{preExecResult?.gasUsd}</span>
+                </>
+              )}
             </div>
 
             <span>{receivedTokenUsd}</span>
@@ -471,8 +510,10 @@ export const CexQuoteItem = (props: {
   bestAmount: string;
   isBestQuote: boolean;
   isLoading?: boolean;
+  inSufficient: boolean;
 }) => {
-  const { name, data, bestAmount, isBestQuote, isLoading } = props;
+  const { name, data, bestAmount, isBestQuote, isLoading, inSufficient } =
+    props;
   const dexInfo = useMemo(() => CEX[name as keyof typeof CEX], [name]);
 
   const [middleContent, rightContent] = useMemo(() => {
@@ -516,23 +557,12 @@ export const CexQuoteItem = (props: {
     return [center, right, disable];
   }, [data?.receive_token, bestAmount, isBestQuote]);
 
-  const [disabledTips, setDisabledTips] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout>();
-
   const handleClick = useCallback(() => {
-    setDisabledTips((e) => {
-      if (!e) {
-        clearTimeout(timerRef.current);
-        timerRef.current = setTimeout(() => {
-          setDisabledTips(false);
-        }, 3000);
-        return true;
-      }
-      return e;
+    toastMessage({
+      type: 'error',
+      content: "Can't trade directly with CEX",
     });
   }, []);
-
-  useEffect(() => () => clearTimeout(timerRef.current), []);
 
   return (
     <ItemWrapper
@@ -557,14 +587,23 @@ export const CexQuoteItem = (props: {
           <div className="diff">{rightContent}</div>
         </div>
       </div>
-
-      <div className={clsx('cexDisabledTips', disabledTips && 'active')}>
-        <IconRcTip className="text-14" />
-        <span>
-          CEX price is for reference only. Cannot be used for direct trading
-          now.
-        </span>
-      </div>
     </ItemWrapper>
   );
 };
+
+export const CexListWrapper = styled.div`
+  border: 0.5px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  & > div:not(:last-child) {
+    position: relative;
+    &:not(:last-child):before {
+      content: '';
+      position: absolute;
+      width: 440px;
+      height: 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      left: 20px;
+      bottom: 0;
+    }
+  }
+`;

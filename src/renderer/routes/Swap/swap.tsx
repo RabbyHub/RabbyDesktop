@@ -465,7 +465,6 @@ export const SwapToken = () => {
 
   const renderQuotes = useMemo(
     () =>
-      !inSufficient &&
       userAddress &&
       payToken &&
       receiveToken &&
@@ -473,7 +472,6 @@ export const SwapToken = () => {
       +debouncePayAmount > 0 &&
       feeAfterDiscount,
     [
-      inSufficient,
       userAddress,
       payToken,
       receiveToken,
@@ -986,6 +984,7 @@ export const SwapToken = () => {
           <div className="box">
             {renderQuotes && payToken && receiveToken ? (
               <Quotes
+                inSufficient={inSufficient}
                 list={quoteList}
                 loading={quoteLoading}
                 payToken={payToken}

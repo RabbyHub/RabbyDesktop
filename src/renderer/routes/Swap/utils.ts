@@ -17,6 +17,7 @@ import {
 import { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
 import BigNumber from 'bignumber.js';
 import { formatUsdValue } from '@/renderer/utils/number';
+import pRetry from 'p-retry';
 import { SWAP_FEE_ADDRESS, DEX, ETH_USDT_CONTRACT, CEX } from './constant';
 
 export const tokenAmountBn = (token: TokenItem) =>
@@ -360,42 +361,54 @@ export const getDexQuote = async ({
   setQuote?: (quote: TDexQuoteData) => void;
 }): Promise<TDexQuoteData> => {
   try {
-    let gasPrice;
+    let gasPrice: number;
     if (dexId === DEX_ENUM.OPENOCEAN) {
       const gasMarket = await walletOpenapi.gasMarket(CHAINS[chain].serverId);
       gasPrice = gasMarket?.[1]?.price;
     }
-    const data = await getQuote(
-      isSwapWrapToken(payToken.id, receiveToken.id, chain)
-        ? DEX_ENUM.WRAPTOKEN
-        : dexId,
+    const data = await pRetry(
+      () =>
+        getQuote(
+          isSwapWrapToken(payToken.id, receiveToken.id, chain)
+            ? DEX_ENUM.WRAPTOKEN
+            : dexId,
+          {
+            fromToken: payToken.id,
+            toToken: receiveToken.id,
+            feeAddress: SWAP_FEE_ADDRESS,
+            fromTokenDecimals: payToken.decimals,
+            amount: new BigNumber(payAmount)
+              .times(10 ** payToken.decimals)
+              .toFixed(0, 1),
+            userAddress,
+            slippage: Number(slippage),
+            feeRate: Number(feeAfterDiscount) || 0,
+            chain,
+            gasPrice,
+          }
+        ),
       {
-        fromToken: payToken.id,
-        toToken: receiveToken.id,
-        feeAddress: SWAP_FEE_ADDRESS,
-        fromTokenDecimals: payToken.decimals,
-        amount: new BigNumber(payAmount)
-          .times(10 ** payToken.decimals)
-          .toFixed(0, 1),
-        userAddress,
-        slippage: Number(slippage),
-        feeRate: Number(feeAfterDiscount) || 0,
-        chain,
-        gasPrice,
+        retries: 1,
       }
     );
     let preExecResult = null;
     if (data) {
       try {
-        preExecResult = await getPreExecResult({
-          userAddress,
-          chain,
-          payToken,
-          receiveToken,
-          payAmount,
-          quote: data,
-          dexId: dexId as DEX_ENUM,
-        });
+        preExecResult = await pRetry(
+          () =>
+            getPreExecResult({
+              userAddress,
+              chain,
+              payToken,
+              receiveToken,
+              payAmount,
+              quote: data,
+              dexId: dexId as DEX_ENUM,
+            }),
+          {
+            retries: 1,
+          }
+        );
       } catch (error) {
         const quote: TDexQuoteData = {
           data,
