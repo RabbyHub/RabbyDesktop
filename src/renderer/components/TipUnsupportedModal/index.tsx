@@ -3,6 +3,7 @@ import { Button } from 'antd';
 
 import { Modal as RModal } from '@/renderer/components/Modal/Modal';
 import { useSystemReleaseInfo } from '@/renderer/hooks/useSystemInfo';
+import classNames from 'classnames';
 import styles from './index.module.less';
 
 export default function TipUnsupportedModal() {
@@ -22,17 +23,24 @@ export default function TipUnsupportedModal() {
         setHaveShown(true);
       }}
     >
-      <div className={styles.TipUnsupportedModalInner}>
-        <div className={styles.title}>
-          Your operating system is not supported
+      <div
+        className={classNames(
+          styles.TipUnsupportedModalInner,
+          'flex flex-col justify-between items-center'
+        )}
+      >
+        <div className="flex-row">
+          <div className={styles.title}>
+            Your operating system is not supported
+          </div>
+
+          <p className={styles.intro}>
+            Please install Rabby Wallet on {systemReleaseInfo.aboveText} <br />
+            Stability and user experience cannot be guaranteed on other version
+          </p>
         </div>
 
-        <p className={styles.intro}>
-          Please install Rabby Wallet on {systemReleaseInfo.aboveText} <br />
-          Stability and user experience cannot be guaranteed on other version
-        </p>
-
-        <div className="flex justify-center items-center mt-[70px]">
+        <div className="flex justify-center items-center">
           <Button
             type="primary"
             className={styles.button}
