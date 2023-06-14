@@ -12,6 +12,8 @@ export const useAccountItemIcon = (data: BundleAccount) => {
         return data.data.brandName as WALLET_BRAND_TYPES;
       case 'bn':
         return WALLET_BRAND_TYPES.Binance;
+      case 'okx':
+        return WALLET_BRAND_TYPES.OKX;
       case 'btc':
       default:
         return WALLET_BRAND_TYPES.Bitcoin;
@@ -40,6 +42,7 @@ export const useAccountItemAddress = (data: BundleAccount) => {
       case 'eth':
         return data.data.address;
       case 'bn':
+      case 'okx':
         return data.apiKey;
       case 'btc':
       default:

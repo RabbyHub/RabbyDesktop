@@ -1,12 +1,6 @@
 import { PortfolioItem, TokenItem } from '@debank/rabby-api/dist/types';
-import {
-  Asset,
-  AssetWithRewards,
-  FundingAsset,
-  MarginAsset,
-  SpotAsset,
-} from './type';
-import { tokenPrice } from './binance';
+import { Asset, AssetWithRewards, FundingAsset, MarginAsset } from './type';
+import { tokenPrice } from './okx';
 
 // TODO rabby-api 里提供的类型和实际返回不符
 const basePortfolio = {
@@ -46,43 +40,6 @@ export const toFundingPortfolioList = (fundingAsset: FundingAsset) => {
   })) as PortfolioItem[];
 };
 
-export const toSpotPortfolioList = (spotAsset: SpotAsset) => {
-  return spotAsset.map((item) => ({
-    ...basePortfolio,
-    name: 'Spot' as any,
-    detail: {
-      supply_token_list: [toTokenItem(item)],
-    } as any,
-    stats: {
-      asset_usd_value: Number(item.usdtValue),
-      debt_usd_value: 0,
-      net_usd_value: Number(item.usdtValue),
-    },
-  })) as PortfolioItem[];
-};
-
-export const toFinancePortfolioList = (
-  assets: AssetWithRewards[],
-  name: string
-) => {
-  return assets.map((asset) => {
-    return {
-      ...basePortfolio,
-      name: 'Earn' as any,
-      detail: {
-        description: name,
-        supply_token_list: asset.assets.map(toTokenItem),
-        reward_token_list: asset.rewards.map(toTokenItem),
-      } as any,
-      stats: {
-        asset_usd_value: Number(asset.usdtValue),
-        debt_usd_value: 0,
-        net_usd_value: Number(asset.usdtValue),
-      },
-    };
-  });
-};
-
 export const toMarginPortfolio = (
   margin: MarginAsset,
   name = 'Cross Margin'
@@ -107,7 +64,6 @@ export const toMarginPortfolio = (
     stats: {
       asset_usd_value,
       debt_usd_value,
-      // TODO 是不是要加上收益啊
       net_usd_value: asset_usd_value,
     },
   };
@@ -119,4 +75,26 @@ export const toIsolatedMarginPortfolioList = (
   return isolatedMargin.map((item) =>
     toMarginPortfolio(item, 'Isolated Margin')
   );
+};
+
+export const toFinancePortfolioList = (
+  assets: AssetWithRewards[],
+  name: string
+) => {
+  return assets.map((asset) => {
+    return {
+      ...basePortfolio,
+      name: 'Earn' as any,
+      detail: {
+        description: name,
+        supply_token_list: asset.assets.map(toTokenItem),
+        reward_token_list: asset.rewards.map(toTokenItem),
+      } as any,
+      stats: {
+        asset_usd_value: Number(asset.usdtValue),
+        debt_usd_value: 0,
+        net_usd_value: Number(asset.usdtValue),
+      },
+    };
+  });
 };

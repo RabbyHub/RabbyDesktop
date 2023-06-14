@@ -6,6 +6,7 @@ import { BTCAccountList } from './components/BTCAccountList';
 import { BinanceAccountList } from './components/BinanceAccountList';
 import { ETHAccountList } from './components/ETHAccountList';
 import { LeftContainer } from './components/LeftContainer';
+import { OKXAccountList } from './components/OKXAccountList';
 
 const HomeBundleInner = () => {
   return (
@@ -31,6 +32,7 @@ const HomeBundleInner = () => {
           />
           <BTCAccountList />
           <BinanceAccountList />
+          <OKXAccountList />
           <ETHAccountList />
         </section>
       </main>

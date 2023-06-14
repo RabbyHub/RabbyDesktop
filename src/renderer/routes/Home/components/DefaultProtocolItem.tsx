@@ -26,6 +26,7 @@ import {
   removeProtocolFromUrl,
 } from '@/renderer/utils/url';
 import { formatDappURLToShow } from '@/isomorphic/dapp';
+import { checkIsCexProtocol } from '@/renderer/hooks/useBundle/cex/utils/shared';
 import { fetchProtocolDappsBinding } from '../../../ipcRequest/dapps';
 import * as Template from '../templates';
 import ScrollTopContext from './scrollTopContext';
@@ -294,7 +295,7 @@ const DefaultProtocolItem = ({
     setPopoverOpen(false);
   }, [scrollTop]);
 
-  const isBinance = protocol.id === 'binance';
+  const isCex = checkIsCexProtocol(protocol.id);
 
   return (
     <ProtocolWrapper>
@@ -305,10 +306,10 @@ const DefaultProtocolItem = ({
           width="20px"
           height="20px"
           noRound
-          hideChainIcon={isBinance}
+          hideChainIcon={isCex}
         />
         <div className="flex flex-1 items-center">
-          {isBinance ? (
+          {isCex ? (
             <div className="protocol-info after:content-[none]">
               <span className="protocol-name normal-case">{protocol.name}</span>
             </div>
@@ -370,7 +371,7 @@ const DefaultProtocolItem = ({
         </div>
         <div className="protocol-usd flex items-center justify-end gap-[7px]">
           <span>{formatUsdValue(protocol.usd_value)}</span>
-          {isBinance && (
+          {isCex && (
             <Tooltip
               overlayClassName="max-w-full"
               title={

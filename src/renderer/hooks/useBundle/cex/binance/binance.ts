@@ -1,9 +1,7 @@
 import { isBoolean } from 'lodash';
 import BigNumber from 'bignumber.js';
-import { ModalConfirm } from '@/renderer/components/Modal/Confirm';
-import { ellipsis } from '@/renderer/utils/address';
 import { ERROR } from '../../error';
-import { tokenPrice } from './price';
+import { TokenPrice } from '../utils/price';
 import {
   AssetWithRewards,
   FundingAsset,
@@ -25,6 +23,7 @@ import {
   BswapUnclaimedRewardsResponse,
 } from './type';
 import { valueGreaterThan10, bigNumberSum } from '../../util';
+import { Cex } from '../utils/cex';
 
 // 不在该数组中的资产，不应被统计
 let enableTokens: string[] = [];
@@ -32,40 +31,15 @@ const filterAsset = (data: { asset: string }) => {
   return enableTokens.includes(data.asset);
 };
 
-export class Binance {
+interface BinanceConfig {
   apiKey: string;
-
   apiSecret: string;
+}
 
-  enableInvalidKeyModal = true;
+export const tokenPrice = new TokenPrice();
 
-  nickname?: string;
-
-  // 总资产余额
-  private totalBalance = new BigNumber(0);
-
-  // 资产余额（排除小于 10u 的资产）
-  private balance = new BigNumber(0);
-
-  plusBalance(value: string) {
-    if (valueGreaterThan10(value)) {
-      this.balance = this.balance.plus(value);
-    }
-    this.totalBalance = this.totalBalance.plus(value);
-  }
-
-  getTotalBalance() {
-    return this.totalBalance.toString();
-  }
-
-  getBalance() {
-    return this.balance.toString();
-  }
-
-  resetBalance() {
-    this.totalBalance = new BigNumber(0);
-    this.balance = new BigNumber(0);
-  }
+export class Binance extends Cex<BinanceConfig> {
+  static cexName = 'Binance';
 
   constructor({
     apiKey,
@@ -78,37 +52,26 @@ export class Binance {
     enableInvalidKeyModal?: boolean;
     nickname?: string;
   }) {
-    this.apiKey = apiKey;
-    this.apiSecret = apiSecret;
+    super();
+    this.config = {
+      apiKey,
+      apiSecret,
+    };
     this.enableInvalidKeyModal = enableInvalidKeyModal;
     this.nickname = nickname;
   }
 
-  private visibleInvalidKeyModal = false;
-
-  private async invoke<T>(method: string, params?: any[]): Promise<T> {
+  async invoke<T>(method: string, params?: any[]): Promise<T> {
     try {
       return await window.rabbyDesktop.ipcRenderer.invoke('binance-sdk', {
-        apiKey: this.apiKey,
-        apiSecret: this.apiSecret,
+        apiKey: this.config.apiKey,
+        apiSecret: this.config.apiSecret,
         method,
         params,
       });
     } catch (e: any) {
       if (e.message.includes(ERROR.INVALID_KEY)) {
-        if (!this.visibleInvalidKeyModal && this.enableInvalidKeyModal) {
-          this.visibleInvalidKeyModal = true;
-          ModalConfirm({
-            title: 'Binance API has become invalid',
-            content: `${this.nickname} (${ellipsis(
-              this.apiKey
-            )}) API has become invalid. It will be deleted and removed from Bundle Address.`,
-            height: 220,
-            okCancel: false,
-            okText: 'OK',
-          });
-        }
-        throw new Error(ERROR.INVALID_KEY);
+        this.showInvalidKeyModal(this.config.apiKey);
       }
       // 未知错误
       throw new Error(ERROR.UNKNOWN);
@@ -140,7 +103,6 @@ export class Binance {
 
   // 获取所有资产，并计算总价值
   async getAssets() {
-    this.resetBalance();
     // 获取所有资产
     const assets = await Promise.all([
       this.fundingWallet(),
@@ -336,21 +298,23 @@ export class Binance {
       const netAssetBN = new BigNumber(item.netAsset);
 
       if (netAssetBN.gt(0)) {
+        const usdtValue = tokenPrice.getUSDTValue(item.asset, item.netAsset);
         supplies.push({
           asset: item.asset,
           value: item.netAsset,
-          usdtValue: tokenPrice.getUSDTValue(item.asset, item.netAsset),
+          usdtValue,
         });
+
+        this.plusBalance(usdtValue);
       } else {
         const absValue = netAssetBN.abs().toString();
+        const usdtValue = tokenPrice.getUSDTValue(item.asset, absValue);
         borrows.push({
           asset: item.asset,
           value: item.borrowed,
-          usdtValue: tokenPrice.getUSDTValue(item.asset, absValue),
+          usdtValue,
         });
       }
-
-      this.plusBalance(item.netAsset);
     });
 
     if (!supplies.length && !borrows.length) {
@@ -411,22 +375,22 @@ export class Binance {
         const borrowedBN = new BigNumber(o.borrowed);
 
         if (netAssetBN.gt(0)) {
+          const usdtValue = tokenPrice.getUSDTValue(o.asset, o.netAsset);
           supplies.push({
             asset: o.asset,
             value: o.netAsset,
-            usdtValue: tokenPrice.getUSDTValue(o.asset, o.netAsset),
+            usdtValue,
           });
 
-          this.plusBalance(o.netAsset);
+          this.plusBalance(usdtValue);
         }
         if (borrowedBN.gt(0)) {
+          const usdtValue = tokenPrice.getUSDTValue(o.asset, o.borrowed);
           borrows.push({
             asset: o.asset,
             value: o.borrowed,
-            usdtValue: tokenPrice.getUSDTValue(o.asset, o.borrowed),
+            usdtValue,
           });
-
-          this.plusBalance(o.borrowed);
         }
       });
 
@@ -619,7 +583,7 @@ export class Binance {
     );
   }
 
-  private async getUSDTPrices() {
+  async getUSDTPrices() {
     const symbols = tokenPrice.getSymbols();
     const tokens = await this.filterToken(symbols);
 

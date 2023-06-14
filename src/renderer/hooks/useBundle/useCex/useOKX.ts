@@ -2,62 +2,61 @@ import React from 'react';
 import { DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import { atom, useAtom } from 'jotai';
 import { sortBy } from 'lodash';
-import { saveBundleAccountsBalance } from './shared';
-import { Binance } from './cex/binance/binance';
-import { mergeList, bigNumberSum } from './util';
-import { useBundleAccount } from './useBundleAccount';
-import { DisplayProtocol } from '../useHistoryProtocol';
+import { saveBundleAccountsBalance } from '../shared';
+import { mergeList, bigNumberSum } from '../util';
+import { useBundleAccount } from '../useBundleAccount';
+import { DisplayProtocol } from '../../useHistoryProtocol';
+import { ERROR } from '../error';
+import { OKX } from '../cex/okx/okx';
 import {
   toFinancePortfolioList,
   toFundingPortfolioList,
   toIsolatedMarginPortfolioList,
   toMarginPortfolio,
-  toSpotPortfolioList,
-} from './cex/binance/util';
-import { ERROR } from './error';
+} from '../cex/okx/util';
 
-type BNAccountWithAPI = BNAccount & {
-  api: Binance;
+type OkxAccountWithAPI = OkxAccount & {
+  api: OKX;
 };
 
-type BinanceAssets = Awaited<ReturnType<Binance['getAssets']>>;
+type OkxAssets = Awaited<ReturnType<OKX['getAssets']>>;
 
 const balanceAtom = atom<string>('0');
-const assetsAtom = atom<BinanceAssets[]>([]);
-const mergedFundingAssetAtom = atom<BinanceAssets['fundingAsset']>([]);
-const mergedSpotAssetAtom = atom<BinanceAssets['spotAsset']>([]);
+const assetsAtom = atom<OkxAssets[]>([]);
+const mergedFundingAssetAtom = atom<OkxAssets['fundingAsset']>([]);
 let lastUpdatedKey = '';
 
-export const useBinance = () => {
+export const useOKX = () => {
   const [balance, setBalance] = useAtom(balanceAtom);
   const [assets, setAssets] = useAtom(assetsAtom);
-  const { inBundleList, binanceList, remove } = useBundleAccount();
+  const { inBundleList, okxList, remove } = useBundleAccount();
   const [mergedFundingAsset, setMergedFundingAsset] = useAtom(
     mergedFundingAssetAtom
   );
-  const [mergedSpotAsset, setMergedSpotAsset] = useAtom(mergedSpotAssetAtom);
   const [loading, setLoading] = React.useState(false);
 
-  const bnInBundleAccounts = React.useMemo<BNAccount[]>(() => {
-    return inBundleList.filter((acc) => acc.type === 'bn') as BNAccount[];
+  const okxInBundleAccounts = React.useMemo<OkxAccount[]>(() => {
+    return inBundleList.filter((acc) => acc.type === 'okx') as OkxAccount[];
   }, [inBundleList]);
-  const bnAccounts = React.useMemo<BNAccountWithAPI[]>(() => {
-    return binanceList.map((item) => ({
+  const OkxAccounts = React.useMemo<OkxAccountWithAPI[]>(() => {
+    return okxList.map((item) => ({
       ...item,
-      api: new Binance({
+      api: new OKX({
         apiKey: item.apiKey,
         apiSecret: item.apiSecret,
+        passphrase: item.passphrase,
         nickname: item.nickname,
+        simulated: item.simulated,
       }),
     }));
-  }, [binanceList]);
+  }, [okxList]);
 
   const updatedKey = React.useMemo(
-    () => JSON.stringify(bnInBundleAccounts.map((acc) => acc.id)),
-    [bnInBundleAccounts]
+    () => JSON.stringify(okxInBundleAccounts.map((acc) => acc.id)),
+    [okxInBundleAccounts]
   );
 
-  const getAssetByAccount = async (account: BNAccountWithAPI) => {
+  const getAssetByAccount = async (account: OkxAccountWithAPI) => {
     try {
       const res = await account.api.getAssets();
       const _balance = account.api.getBalance();
@@ -79,30 +78,28 @@ export const useBinance = () => {
     }
     setLoading(true);
     // 获取所有资产，key 无效的直接删除并忽略结果
-    const result = await Promise.all(bnAccounts.map(getAssetByAccount));
+    const result = await Promise.all(OkxAccounts.map(getAssetByAccount));
 
     const inBundleAssets = result.filter((item, index) => {
       return (
         item &&
-        bnInBundleAccounts.some((acc) => acc.id === bnAccounts[index].id)
+        okxInBundleAccounts.some((acc) => acc.id === OkxAccounts[index].id)
       );
     });
     setAssets(inBundleAssets);
 
     // 计算合并资产
     const fundingAssets = inBundleAssets.flatMap((item) => item.fundingAsset);
-    const spotAssets = inBundleAssets.flatMap((item) => item.spotAsset);
 
     setMergedFundingAsset(
       mergeList(fundingAssets, 'asset', ['usdtValue', 'value'])
     );
-    setMergedSpotAsset(mergeList(spotAssets, 'asset', ['usdtValue', 'value']));
 
     const balances = await Promise.all(
-      bnAccounts.map((account) => account.api.getBalance())
+      OkxAccounts.map((account) => account.api.getBalance())
     );
 
-    const updateAccounts = bnAccounts.map((account, index) => {
+    const updateAccounts = OkxAccounts.map((account, index) => {
       return {
         ...account,
         balance: balances[index],
@@ -111,8 +108,8 @@ export const useBinance = () => {
 
     // 持久化余额
     saveBundleAccountsBalance(updateAccounts);
-    // 更新在 bundle 里的 bn 的总余额
-    const inBundleBalances = bnInBundleAccounts.map((acc) => {
+    // 更新在 bundle 里的 okx 的总余额
+    const inBundleBalances = okxInBundleAccounts.map((acc) => {
       return updateAccounts.find((item) => item.id === acc.id)?.balance ?? '0';
     });
     setBalance(bigNumberSum(...inBundleBalances));
@@ -123,52 +120,49 @@ export const useBinance = () => {
 
   const chainData = {
     usd_value: Number(balance),
-    id: 'binance',
+    id: OKX.cexName,
     // 假的 id
-    community_id: 9000020,
-    wrapped_token_id: 'binance',
-    name: 'Binance',
-    native_token_id: 'binance',
-    logo_url: 'rabby-internal://assets/icons/bundle/binance-chain.png',
+    community_id: 9000030,
+    wrapped_token_id: OKX.cexName,
+    name: OKX.cexName,
+    native_token_id: OKX.cexName,
+    logo_url: 'rabby-internal://assets/icons/swap/okx.png',
   } as DisplayChainWithWhiteLogo & {
     usd_value: number;
   };
 
-  // 把币安资产数据转换成 rabby 资产数据类型
+  // 把资产数据转换成 rabby 资产数据类型
   const protocolData = React.useMemo(() => {
     // 资金账户
     const fundingPortfolioList = toFundingPortfolioList(mergedFundingAsset);
-    // 现货账户
-    const spotPortfolioList = toSpotPortfolioList(mergedSpotAsset);
+
     const otherPortfolioList =
       assets?.flatMap((item) => {
-        // 理财账户(活期)
-        const flexibleList = toFinancePortfolioList(
-          item.financeAsset.flexible,
-          'Flexible'
-        );
-        // 理财账户(Staking)
-        const stakeList = toFinancePortfolioList(
-          item.financeAsset.stake,
-          'Stake'
-        );
-        // 理财账户(定期)
-        const lockedList = toFinancePortfolioList(
-          item.financeAsset.fixed,
-          'Locked'
-        );
         // 全仓账户
         const marginPortfolio =
           item.marginAsset && toMarginPortfolio(item.marginAsset);
+
         // 逐仓账户
         const isolatedMarginList = toIsolatedMarginPortfolioList(
           item.isolatedMarginAsset
         );
 
+        // 理财账户(Staking)
+        const stakeList = toFinancePortfolioList(item.stakingAsset, 'Stake');
+
+        // 理财账户(DeFi)
+        const deFiList = toFinancePortfolioList(item.defiAsset, 'DeFi');
+
+        // 余币宝
+        const savingsList = toFinancePortfolioList(
+          item.savingsAsset,
+          'Savings'
+        );
+
         return [
-          ...flexibleList,
-          ...lockedList,
           ...stakeList,
+          ...deFiList,
+          ...savingsList,
           ...isolatedMarginList,
           ...(marginPortfolio ? [marginPortfolio] : []),
         ];
@@ -176,18 +170,14 @@ export const useBinance = () => {
 
     const data: DisplayProtocol = {
       usd_value: Number(balance),
-      id: 'binance',
-      chain: 'binance',
-      name: 'Binance',
+      id: OKX.cexName,
+      chain: OKX.cexName,
+      name: OKX.cexName,
       site_url: '',
-      logo_url: 'rabby-internal://assets/icons/bundle/binance-chain.png',
+      logo_url: 'rabby-internal://assets/icons/swap/okx.png',
       has_supported_portfolio: false,
       tvl: 0,
-      portfolio_item_list: [
-        ...fundingPortfolioList,
-        ...spotPortfolioList,
-        ...otherPortfolioList,
-      ],
+      portfolio_item_list: [...fundingPortfolioList, ...otherPortfolioList],
     };
 
     data.portfolio_item_list = sortBy(
@@ -196,17 +186,17 @@ export const useBinance = () => {
     );
 
     return data;
-  }, [assets, balance, mergedFundingAsset, mergedSpotAsset]);
+  }, [assets, balance, mergedFundingAsset]);
 
   return {
     getAssetByAccount,
     getAssets,
     mergedFundingAsset,
-    mergedSpotAsset,
     balance,
     assets,
     chainData,
     protocolData,
     loading,
+    type: 'okx' as const,
   };
 };

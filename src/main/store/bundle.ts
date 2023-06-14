@@ -26,7 +26,7 @@ const IBundleAccountSchema: import('json-schema-typed').JSONSchema = {
   properties: {
     type: {
       type: 'string',
-      enum: ['bn', 'btc', 'eth'],
+      enum: ['bn', 'btc', 'eth', 'okx'],
     },
     nickname: {
       type: 'string',
@@ -38,6 +38,12 @@ const IBundleAccountSchema: import('json-schema-typed').JSONSchema = {
       type: 'string',
     },
     apiSecret: {
+      type: 'string',
+    },
+    passphrase: {
+      type: 'string',
+    },
+    simulated: {
       type: 'string',
     },
     address: {
@@ -72,16 +78,22 @@ handleIpcMainInvoke('bundle-account-post', (_, account: BundleAccount) => {
   account.id = account.id || nanoid();
 
   const result = accounts.find((acc) => {
-    if (acc.type === 'bn' && account.type === 'bn') {
-      if (acc.apiKey === account.apiKey) {
-        return true;
-      }
-    } else if (acc.type === 'btc' && account.type === 'btc') {
+    if (acc.type === 'btc' && account.type === 'btc') {
       if (acc.address === account.address) {
         return true;
       }
     } else if (acc.type === 'eth' && account.type === 'eth') {
       if (acc.data.address === account.data.address) {
+        return true;
+      }
+    } else if (
+      acc.type === account.type &&
+      acc.type !== 'eth' &&
+      acc.type !== 'btc' &&
+      account.type !== 'eth' &&
+      account.type !== 'btc'
+    ) {
+      if (acc.apiKey === account.apiKey) {
         return true;
       }
     }

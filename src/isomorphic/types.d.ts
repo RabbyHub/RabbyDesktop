@@ -618,15 +618,24 @@ type ITrezorLikeCannotUserReason =
 // --------- BUNDLE -----------
 interface CommonBundleAccount {
   id?: string;
-  type: 'bn' | 'btc' | 'eth';
+  type: 'bn' | 'btc' | 'eth' | 'okx';
   nickname: string;
   balance?: string;
   inBundle?: boolean;
 }
-interface BNAccount extends CommonBundleAccount {
-  type: 'bn';
+
+interface CommonCexAccount extends CommonBundleAccount {
   apiKey: string;
   apiSecret: string;
+}
+interface BNAccount extends CommonCexAccount {
+  type: 'bn';
+}
+
+interface OkxAccount extends CommonCexAccount {
+  type: 'okx';
+  passphrase: string;
+  simulated: string;
 }
 
 interface BTCAccount extends CommonBundleAccount {
@@ -639,7 +648,7 @@ interface ETHAccount extends CommonBundleAccount {
   data: IDisplayedAccountWithBalance;
 }
 
-type BundleAccount = BTCAccount | BNAccount | ETHAccount;
+type BundleAccount = BTCAccount | BNAccount | ETHAccount | OkxAccount;
 
 // corresponding to the type in the HARDWARE_KEYRING_TYPES brandName
 type HDManagerType = ['Trezor', 'Ledger', 'Onekey'][number];
