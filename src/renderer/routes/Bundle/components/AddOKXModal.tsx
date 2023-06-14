@@ -124,7 +124,9 @@ export const AddOKXModal: React.FC<ModalProps> = (props) => {
   const disabledSubmit = !apiKey || !apiSecret || !passphrase || loading;
 
   const openDocs = () => {
-    openExternalUrl('https://www.okx.com/account/my-api');
+    openExternalUrl(
+      'https://www.okx.com/docs-v5/en/#overview-v5-api-key-creation'
+    );
   };
 
   if (openSuccessModal && newAccount) {
