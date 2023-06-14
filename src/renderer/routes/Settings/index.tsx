@@ -33,6 +33,7 @@ import { testRequestDevice } from './components/ModalDevices/useFilteredDevices'
 import { ClearPendingModal } from './components/ClearPendingModal';
 import { UpdateArea } from './components/UpdateArea';
 import { CustomRPCModal } from './components/CustomRPCModal';
+import TopTipUnsupported from './components/TopTipUnsupported';
 
 type TypedProps = {
   name: React.ReactNode;
@@ -309,6 +310,8 @@ export function MainWindowSettings() {
 
   return (
     <div className={styles.settingsPage}>
+      <TopTipUnsupported />
+
       <UpdateArea />
 
       <div className={styles.settingItems}>

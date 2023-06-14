@@ -1,5 +1,8 @@
 /// <reference path="../renderer/preload.d.ts" />
 
+// put thie stream before all other imports
+import './streams/pre-bootstrap';
+
 import './store';
 
 import './streams/tabbedBrowserWindow';

@@ -1,0 +1,52 @@
+@import '@/renderer/css/mixins.less';
+
+.TipUnsupportedModal {
+  :global .ant-modal-content {
+    overflow: hidden;
+  }
+  :global .ant-modal-close-x {
+    padding: 0;
+    margin-top: 30px;
+    margin-right: 16px;
+  }
+}
+
+.TipUnsupportedModalInner {
+  padding: 44px 33px;
+  padding-bottom: 0;
+  height: 280px;
+  box-sizing: border-box;
+  width: 100%;
+  background: var(--theme-modal-content-bg);
+  box-shadow: var(--theme-modal-content-shadow);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.title {
+  font-family: 'SF Pro';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 22px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.intro {
+  margin-top: 24px;
+  max-width: 534px;
+
+  font-family: 'SF Pro';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 22px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.button {
+  width: 180px;
+  height: 40px;
+}

@@ -366,6 +366,12 @@ type ChannelInvokePayload = {
       lastScreenSizeBeforeMaximize?: Electron.Rectangle;
     };
   };
+  'get-system-release-info': {
+    send: [];
+    response: {
+      systemReleaseInfo: ISystemReleaseInfo;
+    };
+  };
 } & RabbyxInvokePayload;
 
 type IInvokesKey = keyof ChannelInvokePayload;
