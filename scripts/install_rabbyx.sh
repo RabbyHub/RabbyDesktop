@@ -5,7 +5,7 @@ project_dir=$(dirname "$script_dir")
 assets_dir="$( dirname "$scripts_dir"  )/assets"
 
 echo "[install_rabbyx] try to download rabbyx.zip..."
-curl -sL https://download.rabby.io/_tools/RabbyX-v0.88.0-26ea95c.zip > $assets_dir/rabbyx.zip
+curl -sL https://download.rabby.io/_tools/RabbyX-v0.90.0-a45380c.zip > $assets_dir/rabbyx.zip
 # curl -sL https://download.rabby.io/_tools/RabbyX-latest.zip > $assets_dir/rabbyx.zip
 
 mkdir -p $assets_dir/chrome_exts/
