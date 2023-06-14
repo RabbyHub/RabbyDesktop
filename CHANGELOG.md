@@ -1,7 +1,24 @@
 
-v0.25.0 / 2023-06-07
+v0.26.0 / 2023-06-14
 ====================
 
+  * fix: missing oasys on rabbyx.
+  * feat: upgrade rabbyx for style.
+  * fix: judgement about system version. (#480)
+  * feat: upgrade rabbyx, update currentVersion.md
+  * feat: upgrade sign security page.
+  * style: tuning.
+  * feat: support tip unsupported system on bootstrap. (#477)
+  * fix: package-lock on macOS.
+  * feat: support oas chain. (#479)
+  * chore: text update (#478)
+  * feat: okx (#475)
+  * feat: Split the CEX quotes into a view. (#476)
+
+v0.25.0-prod / 2023-06-07
+=========================
+
+  * Release v0.25.0-prod
   * fix: algorithm of extracting css from html, use top-level toast on updated dapp. (#474)
   * feat: upgrade currentVersion
   * feat: support new chain ROSE, tuning sign security.
