@@ -33,7 +33,16 @@ function EnableTrading({ onConfirm }: { onConfirm: () => void }) {
         </p>
       </div>
       <div className="flex flex-col justify-center items-center gap-16 mt-[30px]">
-        <Checkbox checked={checked} onChange={setChecked}>
+        <Checkbox
+          checked={checked}
+          onChange={setChecked}
+          unCheckBackground="transparent"
+          checkIcon={
+            !checked ? (
+              <div className="bg-transparent border border-white border-solid w-14 h-14 rounded-full" />
+            ) : null
+          }
+        >
           I understand and accept it
         </Checkbox>
 
@@ -41,7 +50,7 @@ function EnableTrading({ onConfirm }: { onConfirm: () => void }) {
           type="primary"
           block
           disabled={!checked}
-          className="h-[40px] w-[200px] text-13 font-medium mx-auto"
+          className="h-[40px] w-[200px] text-13 font-medium mx-auto rounded-[4px]"
           onClick={onConfirm}
         >
           Confirm
@@ -81,7 +90,7 @@ export const TradingSettingList = () => {
               <div
                 className={clsx(
                   'flex items-center h-[48px] rounded-[6px] px-12 py-12',
-                  'border border-solid border-white border-opacity-30'
+                  'border border-solid border-white border-opacity-10'
                 )}
                 key={item.name}
               >
