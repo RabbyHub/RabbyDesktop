@@ -1,8 +1,8 @@
 diff --git a/node_modules/@debank/common/dist/chain-data.js b/node_modules/@debank/common/dist/chain-data.js
-index caf6297..9e8b4bf 100644
+index e14c5c5..a366164 100644
 --- a/node_modules/@debank/common/dist/chain-data.js
 +++ b/node_modules/@debank/common/dist/chain-data.js
-@@ -55,7 +55,7 @@ export var CHAINS_ENUM;
+@@ -54,7 +54,7 @@ export var CHAINS_ENUM;
      CHAINS_ENUM["FSN"] = "FSN";
      CHAINS_ENUM["PULSE"] = "PULSE";
      CHAINS_ENUM["ROSE"] = "ROSE";
@@ -11,7 +11,7 @@ index caf6297..9e8b4bf 100644
      CHAINS_ENUM["OAS"] = "OAS";
  })(CHAINS_ENUM || (CHAINS_ENUM = {}));
  export const CHAINS_RAW = {
-@@ -939,22 +939,22 @@ export const CHAINS_RAW = {
+@@ -922,22 +922,22 @@ export const CHAINS_RAW = {
              "1559": true,
          },
      },
@@ -51,10 +51,10 @@ index caf6297..9e8b4bf 100644
          id: 248,
          serverId: "oas",
 diff --git a/node_modules/@debank/common/dist/chain.js b/node_modules/@debank/common/dist/chain.js
-index 5201016..683264e 100644
+index 36ec0f7..863dbcb 100644
 --- a/node_modules/@debank/common/dist/chain.js
 +++ b/node_modules/@debank/common/dist/chain.js
-@@ -445,12 +445,12 @@ export const CHAINS_LIST = [
+@@ -437,12 +437,12 @@ export const CHAINS_LIST = [
          logo: IconOasisLogo,
          whiteLogo: IconOasisWhiteLogo,
      },
@@ -74,7 +74,7 @@ index 5201016..683264e 100644
          ...CHAINS_RAW[CHAINS_ENUM.OAS],
          enum: CHAINS_ENUM.OAS,
 diff --git a/node_modules/@debank/common/dist/index.js b/node_modules/@debank/common/dist/index.js
-index f63e2b5..db18d82 100644
+index 1c3aa32..f23100f 100644
 --- a/node_modules/@debank/common/dist/index.js
 +++ b/node_modules/@debank/common/dist/index.js
 @@ -1,2 +1,10 @@
