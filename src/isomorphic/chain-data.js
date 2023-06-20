@@ -33,7 +33,6 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["EVMOS"] = "EVMOS";
     CHAINS_ENUM["DFK"] = "DFK";
     CHAINS_ENUM["TLOS"] = "TLOS";
-    CHAINS_ENUM["SWM"] = "SWM";
     CHAINS_ENUM["NOVA"] = "NOVA";
     CHAINS_ENUM["CANTO"] = "CANTO";
     CHAINS_ENUM["DOGE"] = "DOGE";
@@ -587,22 +586,6 @@ export const CHAINS_RAW = {
             "1559": false,
         },
     },
-    [CHAINS_ENUM.SWM]: {
-        id: 73772,
-        serverId: "swm",
-        network: "73772",
-        name: "Swimmer",
-        nativeTokenSymbol: "TUS",
-        nativeTokenAddress: "swm",
-        enum: CHAINS_ENUM.SWM,
-        hex: "0x1202c",
-        scanLink: "https://subnets.avax.network/swimmer/mainnet/explorer/tx/_s_",
-        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/swm/361526e901cb506ef7074c3678ce769a.png",
-        nativeTokenDecimals: 18,
-        eip: {
-            "1559": true,
-        },
-    },
     [CHAINS_ENUM.NOVA]: {
         id: 42170,
         serverId: "nova",
@@ -628,7 +611,7 @@ export const CHAINS_RAW = {
         nativeTokenAddress: "canto",
         enum: CHAINS_ENUM.CANTO,
         hex: "0x1e14",
-        scanLink: "https://evm.explorer.canto.io/tx/_s_",
+        scanLink: "https://cantoscan.com/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/canto/47574ef619e057d2c6bbce1caba57fb6.png",
         nativeTokenDecimals: 18,
         eip: {
