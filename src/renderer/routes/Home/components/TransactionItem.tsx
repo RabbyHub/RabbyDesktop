@@ -17,7 +17,7 @@ import {
 import { ellipsis, isSameAddress } from '@/renderer/utils/address';
 import { TransactionWebsite } from '@/renderer/components/TransactionWebsite';
 import moment from 'moment';
-import { getChain } from '@/renderer/utils';
+import { getChain, getTokenSymbol } from '@/renderer/utils';
 import clsx from 'clsx';
 import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import TxChange from './TxChange';
@@ -691,7 +691,7 @@ const TransactionItem = ({
       <>
         <div className="tx-explain-title">
           Approve {amount < 1e9 ? amount.toFixed(4) : 'infinite'}{' '}
-          {`${approveToken.symbol || approveToken.display_symbol}`}
+          {`${getTokenSymbol(approveToken)}`}
         </div>
         <div className="tx-explain-desc">{projectName}</div>
       </>

@@ -1,20 +1,11 @@
 import NFTAvatar from '@/renderer/components/NFTAvatar';
 import { numberWithCommasIsLtOne } from '@/renderer/utils/number';
-import {
-  TokenItem,
-  TxDisplayItem,
-  TxHistoryItem,
-} from '@debank/rabby-api/dist/types';
+import { getTokenSymbol } from '@/renderer/utils';
+import { TxDisplayItem, TxHistoryItem } from '@debank/rabby-api/dist/types';
 import classNames from 'classnames';
 import styles from '../index.module.less';
 
 const IconUnknown = 'rabby-internal://assets/icons/common/token-default.svg';
-
-export function getTokenSymbol(token: TokenItem) {
-  return (
-    token?.symbol || token?.optimized_symbol || token?.display_symbol || ''
-  );
-}
 
 type TxChangeProps = {
   data: TxDisplayItem | TxHistoryItem;

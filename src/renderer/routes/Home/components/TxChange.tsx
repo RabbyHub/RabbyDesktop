@@ -1,14 +1,8 @@
 /* eslint-disable import/no-cycle */
-import { TokenItem } from '@debank/rabby-api/dist/types';
 import styled from 'styled-components';
 import { numberWithCommasIsLtOne } from '@/renderer/utils/number';
+import { getTokenSymbol } from '@/renderer/utils';
 import { TransactionDataItem } from '@/isomorphic/types/rabbyx';
-
-export function getTokenSymbol(token?: TokenItem) {
-  return (
-    token?.symbol || token?.optimized_symbol || token?.display_symbol || ''
-  );
-}
 
 const TxChangeWrapper = styled.div`
   margin-left: 27px;

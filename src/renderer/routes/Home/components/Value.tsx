@@ -23,6 +23,7 @@ import { TokenActionSymbol } from '@/renderer/components/TokenActionModal';
 import LabelWithIcon from '@/renderer/components/LabelWithIcon';
 import { IconWithChain } from '@/renderer/components/TokenWithChain';
 import { TipsWrapper } from '@/renderer/components/TipWrapper';
+import { getTokenSymbol } from '@/renderer/utils';
 import { Table } from './Table';
 
 const Col = Table.Col;
@@ -76,7 +77,7 @@ const TokensAmount = ({
             <span>
               {formatAmount(item.amount)}{' '}
               <TokenActionSymbol token={item}>
-                {ellipsisTokenSymbol(item.symbol)}
+                {ellipsisTokenSymbol(getTokenSymbol(item))}
               </TokenActionSymbol>
             </span>
             {isDebt ? <DebtTag>Debt</DebtTag> : null}

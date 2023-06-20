@@ -22,6 +22,7 @@ import { useInViewport, useInfiniteScroll } from 'ahooks';
 import { useAtomValue } from 'jotai';
 import { useAsync } from 'react-use';
 import { uniqBy } from 'lodash';
+import { getTokenSymbol } from '@/renderer/utils';
 import { getSwapList } from '../utils';
 import {
   refreshSwapTxListAtom,
@@ -146,7 +147,7 @@ const TokenCost = ({
         hideChainIcon
       />
       <div className="ml-12">
-        {formatAmount(payTokenAmount || '0')} {payToken.symbol}
+        {formatAmount(payTokenAmount || '0')} {getTokenSymbol(payToken)}
       </div>
       <IconSwapArrow className={clsx('text-16 mx-24')} />
       <TokenWithChain
@@ -156,7 +157,7 @@ const TokenCost = ({
         hideChainIcon
       />
       <div className="ml-12">
-        {formatAmount(receiveTokenAmount || '0')} {receiveToken.symbol}
+        {formatAmount(receiveTokenAmount || '0')} {getTokenSymbol(receiveToken)}
       </div>
     </div>
   );
@@ -223,9 +224,9 @@ const Transaction = forwardRef<HTMLDivElement, TransactionProps>(
 
     const gasUsed = useMemo(() => {
       if (data?.gas) {
-        return `${formatAmount(data.gas.native_gas_fee)} ${
-          data?.gas.native_token.symbol
-        } (${formatUsdValue(data.gas.usd_gas_fee)})`;
+        return `${formatAmount(data.gas.native_gas_fee)} ${getTokenSymbol(
+          data?.gas.native_token
+        )} (${formatUsdValue(data.gas.usd_gas_fee)})`;
       }
       return '';
     }, [data?.gas]);

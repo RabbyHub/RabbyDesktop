@@ -28,6 +28,7 @@ import BigNumber from 'bignumber.js';
 import { isSameAddress } from '@/renderer/utils/address';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
+import { getTokenSymbol } from '@/renderer/utils';
 import { ChainRender, ChainSelect } from './component/ChainSelect';
 import { SwapIntro } from './component/Intro';
 import { DEX, getChainDefaultToken } from './constant';
@@ -837,7 +838,7 @@ export const SwapToken = () => {
             <div className="section">
               <div className="amountBox">
                 <div className="subText">
-                  Amount in {payToken?.symbol || ''}
+                  Amount in {getTokenSymbol(payToken) || ''}
                 </div>
                 <div
                   className={clsx(
@@ -908,7 +909,8 @@ export const SwapToken = () => {
                               Minimum received:{' '}
                             </span>
                             <span className="font-medium">
-                              {miniReceivedAmount} {receiveToken?.symbol}
+                              {miniReceivedAmount}{' '}
+                              {getTokenSymbol(receiveToken)}
                             </span>
                           </div>
                         )}
@@ -942,7 +944,7 @@ export const SwapToken = () => {
                     }
                   >
                     Approve {ellipsisTokenSymbol(debouncePayAmount, 16)}{' '}
-                    {ellipsisTokenSymbol(payToken?.symbol || '', 5)} to{' '}
+                    {ellipsisTokenSymbol(getTokenSymbol(payToken) || '', 5)} to{' '}
                     {DexDisplayName}{' '}
                   </Button>
 
@@ -957,7 +959,8 @@ export const SwapToken = () => {
                       ) : null
                     }
                   >
-                    Approve Unlimited {payToken?.symbol} to {DexDisplayName}{' '}
+                    Approve Unlimited {getTokenSymbol(payToken)} to{' '}
+                    {DexDisplayName}{' '}
                   </Button>
                 </>
               ) : (

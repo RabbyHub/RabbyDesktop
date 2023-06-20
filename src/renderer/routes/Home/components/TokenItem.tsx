@@ -12,6 +12,7 @@ import TokenWithChain from '@/renderer/components/TokenWithChain';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 import clsx from 'clsx';
 import { TokenActionSymbol } from '@/renderer/components/TokenActionModal';
+import { getTokenSymbol } from '@/renderer/utils';
 
 const TokenItemWrapper = styled.li`
   font-size: 15px;
@@ -189,10 +190,10 @@ const TokenItemComp = ({
         <TokenWithChain token={token} width="24px" height="24px" />
         <TokenActionSymbol
           className={clsx('token-symbol', tokenClassName)}
-          title={token.symbol}
+          title={getTokenSymbol(token)}
           token={token}
         >
-          {ellipsisTokenSymbol(token.symbol)}
+          {ellipsisTokenSymbol(getTokenSymbol(token))}
         </TokenActionSymbol>
         {/* <div className="token-actions">
           <Tooltip title="Swap">
@@ -216,7 +217,7 @@ const TokenItemComp = ({
         <span>
           {formatAmount(token.amount)}{' '}
           <TokenActionSymbol token={token}>
-            {ellipsisTokenSymbol(token.symbol)}
+            {ellipsisTokenSymbol(getTokenSymbol(token))}
           </TokenActionSymbol>
         </span>
         {historyToken && Math.abs(amountChange * token.price) >= 0.01 && (
@@ -228,7 +229,7 @@ const TokenItemComp = ({
           >
             {amountChange >= 0 ? '+' : '-'}
             {`${formatAmount(Math.abs(amountChange))} ${ellipsisTokenSymbol(
-              token.symbol
+              getTokenSymbol(token)
             )} (${formatUsdValue(Math.abs(amountChange * token.price))})`}
           </div>
         )}

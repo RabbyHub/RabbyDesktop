@@ -9,89 +9,13 @@ import TokensIcons from '../routes/Home/components/TokenIcons';
 import { formatUsdValue } from './number';
 import { getCollectionDisplayName, PortfolioItemNft } from './nft';
 import { TokenActionSymbol } from '../components/TokenActionModal';
+import { getTokenSymbol } from '.';
 
 export const ellipsisTokenSymbol = (text: string, length = 6) => {
   if (text?.length <= length) return text;
 
   const regexp = new RegExp(`^(.{${length}})(.*)$`);
   return text?.replace(regexp, '$1...');
-};
-
-export const getTokenSymbol = async (
-  id: string,
-  provider: providers.JsonRpcProvider
-) => {
-  try {
-    const contract = new Contract(
-      id,
-      [
-        {
-          constant: true,
-          inputs: [],
-          name: 'symbol',
-          outputs: [
-            {
-              name: '',
-              type: 'string',
-            },
-          ],
-          payable: false,
-          stateMutability: 'view',
-          type: 'function',
-        },
-      ],
-      provider
-    );
-    const symbol = await contract.symbol();
-    return symbol;
-  } catch (e) {
-    try {
-      const contract = new Contract(
-        id,
-        [
-          {
-            constant: true,
-            inputs: [],
-            name: 'symbol',
-            outputs: [
-              {
-                name: '',
-                type: 'bytes32',
-              },
-            ],
-            payable: false,
-            stateMutability: 'view',
-            type: 'function',
-          },
-        ],
-        provider
-      );
-      const symbol = await contract.symbol();
-      return hexToString(symbol);
-    } catch (error) {
-      const contract = new Contract(
-        id,
-        [
-          {
-            constant: true,
-            inputs: [],
-            name: 'SYMBOL',
-            outputs: [
-              {
-                name: '',
-                type: 'string',
-              },
-            ],
-            payable: false,
-            stateMutability: 'view',
-            type: 'function',
-          },
-        ],
-        provider
-      );
-      return contract.SYMBOL();
-    }
-  }
 };
 
 export const geTokenDecimals = async (
@@ -289,7 +213,7 @@ export function getTokens(
       <span key={token.id}>
         {idx !== 0 && separator}
         <TokenActionSymbol enable={enableAction} token={token}>
-          {ellipsisTokenSymbol(token.symbol)}
+          {ellipsisTokenSymbol(getTokenSymbol(token))}
         </TokenActionSymbol>
       </span>
     ));

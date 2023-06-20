@@ -12,7 +12,7 @@ import { useAsync, useDebounce } from 'react-use';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import IconClose from '@/../assets/icons/swap/modal-close.svg?rc';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
-import { getChain } from '@/renderer/utils';
+import { getChain, getTokenSymbol } from '@/renderer/utils';
 
 const TokenWrapper = styled.div`
   display: flex;
@@ -419,7 +419,7 @@ const SwapToken = ({
       <div className="left">
         <TokenWithChain token={t} />
         <div className="tokenInfo">
-          <div className="symbol">{t.symbol}</div>
+          <div className="symbol">{getTokenSymbol(t)}</div>
           <div className="rate">
             @{splitNumberByStep((t.price || 0).toFixed(2))}
           </div>
@@ -459,7 +459,7 @@ const DefaultToken = ({
       <div className="left">
         <TokenWithChain width="24px" height="24px" token={t} />
         <div className="tokenInfo">
-          <div className="symbol text-15">{t.symbol}</div>
+          <div className="symbol text-15">{getTokenSymbol(t)}</div>
         </div>
       </div>
       <div
@@ -815,8 +815,8 @@ export const TokenSelect = ({
                 hideConer
                 hideChainIcon={hideChainIcon}
               />
-              <span className="text" title={token.symbol}>
-                {token.symbol}
+              <span className="text" title={getTokenSymbol(token)}>
+                {getTokenSymbol(token)}
               </span>
               <IconRcArrowDownTriangle className="arrow-icon " />
             </TokenWrapper>
