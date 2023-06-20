@@ -452,7 +452,6 @@ export const SwapToken = () => {
     debouncePayAmount,
     feeAfterDiscount,
     slippage,
-    swapViewList,
     swapSettingVisible,
   ]);
 
