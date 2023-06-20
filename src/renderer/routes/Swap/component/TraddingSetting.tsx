@@ -18,8 +18,8 @@ const list = [...Object.values(DEX), ...Object.values(CEX)] as {
 function EnableTrading({ onConfirm }: { onConfirm: () => void }) {
   const [checked, setChecked] = useState(false);
   return (
-    <div className="px-24 pt-20 text-white flex flex-col h-full">
-      <div className="relative mb-32  text-20 font-medium text-center ">
+    <div className="px-16 text-white">
+      <div className="relative mt-20 mb-20  text-20 font-medium text-center ">
         Enable Trading
       </div>
       <div className="text-13 leading-[18px]">
@@ -32,7 +32,7 @@ function EnableTrading({ onConfirm }: { onConfirm: () => void }) {
           exchanges
         </p>
       </div>
-      <div className="mt-auto mb-[40px] flex flex-col justify-center items-center gap-24">
+      <div className="flex flex-col justify-center items-center gap-16 mt-[30px]">
         <Checkbox
           checked={checked}
           onChange={setChecked}
@@ -145,9 +145,9 @@ export const TradingSettingList = () => {
       </div>
       <Modal
         bodyStyle={{
-          height: 484,
+          height: 280,
         }}
-        width={400}
+        width={360}
         centered
         visible={open}
         title={null}
