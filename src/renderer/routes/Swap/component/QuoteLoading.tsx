@@ -3,6 +3,7 @@ import clsx from 'clsx';
 
 import { CEX, DEX } from '../constant';
 import { QuoteLogo } from './QuoteLogo';
+import { useSwapSettings } from '../hooks';
 
 type QuoteListLoadingProps = {
   fetchedList?: string[];
@@ -56,10 +57,16 @@ export const QuoteListLoading = ({
   fetchedList: dataList,
   isCex,
 }: QuoteListLoadingProps) => {
+  const swapViewList = useSwapSettings();
+
   return (
     <>
       {Object.entries(isCex ? CEX : DEX).map(([key, value]) => {
-        if (dataList && dataList.includes(key)) return null;
+        if (
+          (dataList && dataList.includes(key)) ||
+          swapViewList?.[key as keyof typeof swapViewList] === false
+        )
+          return null;
         return (
           <QuoteLoading
             logo={value.logo}

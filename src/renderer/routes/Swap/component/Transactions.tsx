@@ -358,14 +358,15 @@ export const SwapTransactions = memo(({ addr }: SwapTransactionsProps) => {
         }
         return true;
       },
-      manual: !isInSwap,
+      manual: !isInSwap || !addr,
     }
   );
 
-  const { value } = useAsync(
-    async () => getSwapList(addr, 0, 5),
-    [addr, refreshSwapTxListCount]
-  );
+  const { value } = useAsync(async () => {
+    if (addr) {
+      return getSwapList(addr, 0, 5);
+    }
+  }, [addr, refreshSwapTxListCount]);
 
   useEffect(() => {
     if (value?.list) {

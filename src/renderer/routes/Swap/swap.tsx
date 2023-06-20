@@ -52,6 +52,7 @@ import {
   useInSwap,
   usePostSwap,
   useSwapOrApprovalLoading,
+  useSwapSettings,
   useTokenPair,
 } from './hooks';
 import {
@@ -408,10 +409,13 @@ export const SwapToken = () => {
     },
     []
   );
+
+  const { swapViewList, swapSettingVisible } = useSwapSettings();
   const { loading: quoteLoading, error: quotesError } = useAsync(async () => {
     fetchIdRef.current += 1;
     const currentFetchId = fetchIdRef.current;
     if (
+      !swapSettingVisible &&
       userAddress &&
       payToken?.id &&
       receiveToken?.id &&
@@ -431,6 +435,7 @@ export const SwapToken = () => {
         payAmount: debouncePayAmount,
         fee: feeAfterDiscount,
         setQuote: setQuote(currentFetchId),
+        swapViewList,
       }).finally(() => {
         enableSwapBySlippageChanged(currentFetchId);
       });
@@ -447,6 +452,8 @@ export const SwapToken = () => {
     debouncePayAmount,
     feeAfterDiscount,
     slippage,
+    swapViewList,
+    swapSettingVisible,
   ]);
 
   const {
