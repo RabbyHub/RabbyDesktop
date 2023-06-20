@@ -13,6 +13,7 @@ import { TokenItem, Tx } from '@debank/rabby-api/dist/types';
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useLocation } from 'react-router-dom';
 import { useAsync, useDebounce } from 'react-use';
+import { useSwap } from '@/renderer/hooks/rabbyx/useSwap';
 import {
   getRouter,
   getSpender,
@@ -25,10 +26,8 @@ import {
   activeSwapTxsAtom,
   refreshIdAtom,
   swapSettingVisibleAtom,
-  swapTradListAtom,
-  swapViewListAtom,
 } from './atom';
-import { CEX, DEX, getChainDefaultToken } from './constant';
+import { getChainDefaultToken } from './constant';
 
 export function isSwapWrapToken(
   payTokenId: string,
@@ -378,35 +377,17 @@ export const useTokenPair = (userAddress: string, chain: CHAINS_ENUM) => {
 };
 
 export const useSwapSettings = () => {
-  const [swapViewList, setSwapViewList] = useAtom(swapViewListAtom);
-  const [swapTradeList, setSwapTradeList] = useAtom(swapTradListAtom);
+  const { swap, setSwapView, setSwapTrade } = useSwap();
+  const { tradeList, viewList } = swap;
   const [swapSettingVisible, setSwapSettingVisible] = useAtom(
     swapSettingVisibleAtom
   );
-  const setSwapTrade = useCallback(
-    ([key, value]: [keyof typeof DEX | keyof typeof CEX, boolean]) => {
-      setSwapTradeList((prev) => ({ ...prev, [key]: value }));
-    },
-    [setSwapTradeList]
-  );
-
-  const setSwapView = useCallback(
-    ([key, value]: [keyof typeof DEX | keyof typeof CEX, boolean]) => {
-      if (!value) {
-        setSwapTrade([key, false]);
-      }
-      setSwapViewList((prev) => ({ ...prev, [key]: value }));
-    },
-    [setSwapTrade, setSwapViewList]
-  );
 
   return {
-    swapViewList,
-    swapTradeList,
+    swapViewList: viewList,
+    swapTradeList: tradeList,
     setSwapView,
     setSwapTrade,
-    setSwapViewList,
-    setSwapTradeList,
     swapSettingVisible,
     setSwapSettingVisible,
   };

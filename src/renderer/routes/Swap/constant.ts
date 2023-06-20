@@ -61,6 +61,10 @@ export const CEX = {
   },
 };
 
+export type DEX_TYPE = typeof DEX;
+
+export type CEX_TYPE = typeof CEX;
+
 export const getChainDefaultToken = (chain: CHAINS_ENUM) => {
   const chainInfo = CHAINS[chain];
   return {

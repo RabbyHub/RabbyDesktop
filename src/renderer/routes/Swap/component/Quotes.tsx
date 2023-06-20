@@ -125,7 +125,12 @@ export const Quotes = (props: QuotesProps) => {
     if (swapViewList) {
       return (
         exchangeCount -
-        Object.values(swapViewList).filter((e) => e === false).length
+        Object.entries(swapViewList || {}).filter(
+          ([key, value]) =>
+            (DEX?.[key as keyof typeof DEX] ||
+              CEX?.[key as keyof typeof CEX]) &&
+            value === false
+        ).length
       );
     }
     return exchangeCount;
@@ -133,7 +138,11 @@ export const Quotes = (props: QuotesProps) => {
 
   const tradeCount = useMemo(() => {
     if (swapTradeList) {
-      return Object.values(swapTradeList).filter((e) => e === true).length;
+      return Object.entries(swapTradeList || {}).filter(
+        ([key, value]) =>
+          (DEX?.[key as keyof typeof DEX] || CEX?.[key as keyof typeof CEX]) &&
+          value === true
+      ).length;
     }
     return 0;
   }, [swapTradeList]);
@@ -141,6 +150,12 @@ export const Quotes = (props: QuotesProps) => {
   const noCex = useMemo(() => {
     return Object.keys(CEX).every(
       (e) => swapViewList?.[e as keyof typeof CEX] === false
+    );
+  }, [swapViewList]);
+
+  const noDex = useMemo(() => {
+    return Object.keys(DEX).every(
+      (e) => swapViewList?.[e as keyof typeof DEX] === false
     );
   }, [swapViewList]);
 
@@ -232,7 +247,12 @@ export const Quotes = (props: QuotesProps) => {
       </div>
       {noCex ? null : (
         <>
-          <div className="text-white text-opacity-70 text-13 font-medium mt-60 mb-8">
+          <div
+            className={clsx(
+              'text-white text-opacity-70 text-13 font-medium  mb-8',
+              !noDex && 'mt-60'
+            )}
+          >
             Rates from CEX
           </div>
 

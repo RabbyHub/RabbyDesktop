@@ -15,7 +15,9 @@ export const swapAtom = atom<SwapState>({
   selectedChain: CHAINS_ENUM.ETH,
   selectedDex: null,
   unlimitedAllowance: false,
-});
+  viewList: {},
+  tradeList: {},
+} as SwapState);
 
 export const useSwap = () => {
   const [v, s] = useAtom(swapAtom);
@@ -60,6 +62,24 @@ export const useSwap = () => {
       setUnlimitedAllowance: async (unlimitedAllowance: boolean) => {
         await walletController.setUnlimitedAllowance(unlimitedAllowance);
         s((e) => ({ ...e, unlimitedAllowance }));
+      },
+      setSwapView: async (
+        params: Parameters<typeof walletController.setSwapView>
+      ) => {
+        await walletController.setSwapView(...params);
+        s((e) => ({
+          ...e,
+          viewList: { ...e.viewList, [params[0]]: params[1] },
+        }));
+      },
+      setSwapTrade: async (
+        params: Parameters<typeof walletController.setSwapTrade>
+      ) => {
+        await walletController.setSwapTrade(...params);
+        s((e) => ({
+          ...e,
+          tradeList: { ...e.tradeList, [params[0]]: params[1] },
+        }));
       },
     }),
     [getSwap, s]

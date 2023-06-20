@@ -1,7 +1,6 @@
 import { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
 import { atom } from 'jotai';
-import { atomWithStorage } from 'jotai/utils';
-import { CEX, DEX } from './constant';
+import { swapAtom } from '@/renderer/hooks/rabbyx/useSwap';
 
 export type QuoteProvider = {
   name: string;
@@ -27,20 +26,10 @@ export const activeProviderOriginAtom = atom<QuoteProvider | undefined>(
   undefined
 );
 
-export const swapViewListAtom = atomWithStorage(
-  'SWAP_VIEW_QUOTES',
-  {} as Record<keyof typeof DEX | keyof typeof CEX, boolean>
-);
-
-export const swapTradListAtom = atomWithStorage(
-  'SWAP_TRADE_QUOTES',
-  {} as Record<keyof typeof DEX | keyof typeof CEX, boolean>
-);
-
 export const activeProviderAtom = atom((get) => {
   const activeSwapTxs = get(activeSwapTxsAtom);
   const activeProviderOrigin = get(activeProviderOriginAtom);
-  const swapTradList = get(swapTradListAtom);
+  const swapTradList = get(swapAtom)?.tradeList;
 
   if (
     activeProviderOrigin?.name &&

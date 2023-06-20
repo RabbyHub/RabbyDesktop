@@ -9,6 +9,7 @@ import type {
 import type { DEX_ENUM } from '@rabby-wallet/rabby-swap';
 import type { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
 import { SafeTransactionDataPartial } from '@gnosis.pm/safe-core-sdk-types';
+import type { DEX_TYPE, CEX_TYPE } from '@/renderer/routes/Swap/constant';
 
 export type RabbyAccount = {
   address: string;
@@ -159,6 +160,8 @@ export interface SwapState {
   selectedDex?: import('@rabby-wallet/rabby-swap').DEX_ENUM | null;
   selectedChain?: import('@debank/common').CHAINS_ENUM;
   unlimitedAllowance?: boolean;
+  viewList: Record<keyof DEX_TYPE | keyof CEX_TYPE, boolean>;
+  tradeList: Record<keyof DEX_TYPE | keyof CEX_TYPE, boolean>;
 }
 
 type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
@@ -288,6 +291,20 @@ export type RabbyXMethod = {
   'walletController.setLastSelectedSwapChain': (dexId: CHAINS_ENUM) => void;
 
   'walletController.setUnlimitedAllowance': (bool: boolean) => void;
+
+  'walletController.setSwapView': (
+    id: keyof SwapState['viewList'],
+    bool: boolean
+  ) => void;
+
+  'walletController.setSwapTrade': (
+    id: keyof SwapState['tradeList'],
+    bool: boolean
+  ) => void;
+
+  'walletController.getSwapViewList': () => SwapState['viewList'];
+
+  'walletController.getSwapTradeList': () => SwapState['tradeList'];
 
   'walletController.getERC20Allowance': (
     chainServerId: string,

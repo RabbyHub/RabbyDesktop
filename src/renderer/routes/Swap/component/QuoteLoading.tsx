@@ -57,7 +57,7 @@ export const QuoteListLoading = ({
   fetchedList: dataList,
   isCex,
 }: QuoteListLoadingProps) => {
-  const swapViewList = useSwapSettings();
+  const { swapViewList } = useSwapSettings();
 
   return (
     <>
@@ -65,8 +65,9 @@ export const QuoteListLoading = ({
         if (
           (dataList && dataList.includes(key)) ||
           swapViewList?.[key as keyof typeof swapViewList] === false
-        )
+        ) {
           return null;
+        }
         return (
           <QuoteLoading
             logo={value.logo}
