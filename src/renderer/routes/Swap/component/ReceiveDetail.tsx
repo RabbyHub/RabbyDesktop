@@ -17,6 +17,7 @@ import { formatAmount } from '@/renderer/utils/number';
 import clsx from 'clsx';
 import { SkeletonInputProps } from 'antd/lib/skeleton/Input';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
+import { getTokenSymbol } from '@/renderer/utils';
 
 const getQuoteLessWarning = ([receive, diff]: [string, string]) =>
   `The receiving amount is estimated from Rabby transaction simulation. The offer provided by dex is ${receive}. You'll receive ${diff}  less than the expected offer.`;
@@ -198,10 +199,10 @@ export const ReceiveDetails = (
             style={{ maxWidth: 144, height: 20, opacity: 0.5 }}
           >
             <span
-              title={`${receiveNum} ${receiveToken.symbol}`}
+              title={`${receiveNum} ${getTokenSymbol(receiveToken)}`}
               className="receive"
             >
-              {receiveNum} {receiveToken.symbol}
+              {receiveNum} {getTokenSymbol(receiveToken)}
             </span>
             <WarningOrChecked quoteWarning={quoteWarning} />
           </SkeletonChildren>
@@ -237,11 +238,11 @@ export const ReceiveDetails = (
             <div className="flex flex-col gap-4 py-[5px] text-13">
               <div>
                 Est. Payment: {payAmount}
-                {payToken.symbol} ≈ ${payUsd}
+                {getTokenSymbol(payToken)} ≈ ${payUsd}
               </div>
               <div>
                 Est. Receiving: {receiveNum}
-                {receiveToken.symbol} ≈ ${receiveUsd}
+                {getTokenSymbol(receiveToken)} ≈ ${receiveUsd}
               </div>
               <div>
                 Est. Difference: {sign}
@@ -269,23 +270,31 @@ export const ReceiveDetails = (
             <span className="cursor-pointer" onClick={reverseRate}>
               <span
                 title={`${1} ${
-                  reverse ? receiveToken.symbol : payToken.symbol
+                  reverse
+                    ? getTokenSymbol(receiveToken)
+                    : getTokenSymbol(payToken)
                 }`}
               >
                 1{' '}
                 {ellipsisTokenSymbol(
-                  reverse ? receiveToken.symbol : payToken.symbol
+                  reverse
+                    ? getTokenSymbol(receiveToken)
+                    : getTokenSymbol(payToken)
                 )}{' '}
               </span>
               ={' '}
               <span
                 title={`${rate} ${
-                  reverse ? payToken.symbol : receiveToken.symbol
+                  reverse
+                    ? getTokenSymbol(payToken)
+                    : getTokenSymbol(receiveToken)
                 }`}
               >
                 {rate}{' '}
                 {ellipsisTokenSymbol(
-                  reverse ? payToken.symbol : receiveToken.symbol
+                  reverse
+                    ? getTokenSymbol(payToken)
+                    : getTokenSymbol(receiveToken)
                 )}
               </span>
             </span>

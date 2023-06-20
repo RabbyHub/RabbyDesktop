@@ -16,6 +16,7 @@ import IconRcError from '@/../assets/icons/swap/error.svg?rc';
 
 import { useSetAtom } from 'jotai';
 import { toastMessage } from '@/renderer/components/TransparentToast';
+import { getTokenSymbol } from '@/renderer/utils';
 import { CEX } from '../constant';
 import { QuotePreExecResultInfo, isSwapWrapToken } from '../utils';
 import { WarningOrChecked } from './ReceiveDetail';
@@ -243,11 +244,14 @@ export const DexQuoteItem = (
 
       const s = formatAmount(receivedTokeAmountBn.toString(10));
       center = (
-        <span className="receiveNum" title={`${s} ${receiveToken.symbol}`}>
+        <span
+          className="receiveNum"
+          title={`${s} ${getTokenSymbol(receiveToken)}`}
+        >
           <span className="toToken" title={s}>
             {s}
           </span>{' '}
-          {receiveToken.symbol}
+          {getTokenSymbol(receiveToken)}
         </span>
       );
 
@@ -288,9 +292,7 @@ export const DexQuoteItem = (
     quote?.toTokenAmount,
     quote?.toTokenDecimals,
     inSufficient,
-    receiveToken.decimals,
-    receiveToken.price,
-    receiveToken.symbol,
+    receiveToken,
     preExecResult,
     isSdkDataPass,
     bestAmount,
@@ -320,7 +322,8 @@ export const DexQuoteItem = (
 
     return diffPercent.gt(0.01)
       ? ([
-          formatAmount(receivedTokeAmountBn.toString(10)) + receiveToken.symbol,
+          formatAmount(receivedTokeAmountBn.toString(10)) +
+            getTokenSymbol(receiveToken),
           `${diffPercent.toPrecision(2)}% (${formatAmount(
             receivedTokeAmountBn
               .minus(
@@ -328,7 +331,7 @@ export const DexQuoteItem = (
                   .receive_token_list[0]?.amount || 0
               )
               .toString(10)
-          )} ${receiveToken.symbol})`,
+          )} ${getTokenSymbol(receiveToken)})`,
         ] as [string, string])
       : undefined;
   }, [
@@ -337,9 +340,7 @@ export const DexQuoteItem = (
     preExecResult,
     quote?.toTokenAmount,
     quote?.toTokenDecimals,
-    receiveToken.decimals,
-    receiveToken.id,
-    receiveToken.symbol,
+    receiveToken,
   ]);
 
   const CheckIcon = useCallback(() => {
@@ -537,11 +538,14 @@ export const CexQuoteItem = (props: {
         .times(100);
       const s = formatAmount(receiveToken.amount.toString(10));
       center = (
-        <span className="receiveNum" title={`${s} ${receiveToken.symbol}`}>
+        <span
+          className="receiveNum"
+          title={`${s} ${getTokenSymbol(receiveToken)}`}
+        >
           <span className="toToken" title={s}>
             {s}
           </span>{' '}
-          {receiveToken.symbol}
+          {getTokenSymbol(receiveToken)}
         </span>
       );
 

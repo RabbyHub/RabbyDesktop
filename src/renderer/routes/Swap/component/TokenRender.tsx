@@ -1,6 +1,7 @@
 import TokenWithChain from '@/renderer/components/TokenWithChain';
 import IconRcArrowDownTriangle from '@/../assets/icons/swap/arrow-caret-down2.svg?rc';
 import styled from 'styled-components';
+import { getTokenSymbol } from '@/renderer/utils';
 import { TokenAmountInputProps } from './TokenSelect';
 
 const TokenRenderWrapper = styled.div`
@@ -67,8 +68,8 @@ export const TokenRender: TokenAmountInputProps['tokenRender'] = ({
             hideConer
             hideChainIcon
           />
-          <span className="text" title={token.symbol}>
-            {token.symbol}
+          <span className="text" title={getTokenSymbol(token)}>
+            {getTokenSymbol(token)}
           </span>
           <IconRcArrowDownTriangle className="arrow" />
         </div>

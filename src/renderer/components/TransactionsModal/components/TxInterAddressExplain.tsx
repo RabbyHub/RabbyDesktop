@@ -1,9 +1,8 @@
 // import { TxDisplayItem, TxHistoryItem } from '@/background/service/openapi';
 import NameAndAddress from '@/renderer/components/NameAndAddress';
 import { TxDisplayItem, TxHistoryItem } from '@debank/rabby-api/dist/types';
-// import { NameAndAddress } from '..';
 import classNames from 'classnames';
-import { getChain } from '@/renderer/utils';
+import { getChain, getTokenSymbol } from '@/renderer/utils';
 import styles from '../index.module.less';
 import { TxAvatar } from './TxAvatar';
 
@@ -54,7 +53,7 @@ export const TxInterAddressExplain = ({
     interAddressExplain = (
       <div className={styles.txExplainTitle}>
         Approve {amount < 1e9 ? amount.toFixed(4) : 'infinite'}{' '}
-        {`${approveToken.symbol || approveToken.display_symbol} for `}
+        {`${getTokenSymbol(approveToken)} for `}
         {projectName}
       </div>
     );

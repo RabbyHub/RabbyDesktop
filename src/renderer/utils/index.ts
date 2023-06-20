@@ -1,5 +1,6 @@
 import { keyBy } from 'lodash';
 import { CHAINS } from '@debank/common';
+import { TokenItem } from '@debank/rabby-api/dist/types';
 /**
  *
  * @param origin (exchange.pancakeswap.finance)
@@ -35,4 +36,11 @@ export const getChain = (chainId?: string) => {
     return null;
   }
   return chainsDict[chainId];
+};
+
+// 临时放在这里，因为 token 里会有循环依赖
+export const getTokenSymbol = (token?: TokenItem) => {
+  if (!token) return '';
+
+  return token.display_symbol || token.symbol || token.optimized_symbol || '';
 };

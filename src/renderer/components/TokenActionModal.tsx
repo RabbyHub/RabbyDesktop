@@ -1,13 +1,6 @@
 import { TokenItem } from '@debank/rabby-api/dist/types';
 import { Button, Tooltip } from 'antd';
-import {
-  useCallback,
-  useMemo,
-  useState,
-  memo,
-  PropsWithChildren,
-  DetailedHTMLProps,
-} from 'react';
+import { useCallback, useMemo, useState, memo, DetailedHTMLProps } from 'react';
 import clsx from 'clsx';
 import styled from 'styled-components';
 import { DEX_SUPPORT_CHAINS } from '@rabby-wallet/rabby-swap';
@@ -21,7 +14,7 @@ import IconReceive from '@/../assets/icons/home-widgets/receive.svg';
 import IconSend from '@/../assets/icons/home-widgets/send.svg';
 import IconSwap from '@/../assets/icons/home-widgets/swap.svg';
 import { obj2query } from '@/renderer/utils/url';
-import { getChain } from '@/renderer/utils';
+import { getChain, getTokenSymbol } from '@/renderer/utils';
 import { ReceiveModal } from '@/renderer/components/ReceiveModal';
 
 const supportChains = [...new Set(Object.values(DEX_SUPPORT_CHAINS).flat())];
@@ -116,7 +109,7 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
           className="w-[34px] rounded-full"
         />
         <div className="mx-[15px] text-[30px] leading-[36px] font-medium max-w-[276px] overflow-hidden overflow-ellipsis whitespace-nowrap">
-          {token.symbol}
+          {getTokenSymbol(token)}
         </div>
 
         <div
@@ -235,7 +228,7 @@ export const TokenActionSymbol = ({
       )}
       {...others}
     >
-      {children || ellipsis(token.symbol)}
+      {children || ellipsis(getTokenSymbol(token))}
     </span>
   );
 };
@@ -256,7 +249,7 @@ export const TokenActionModal = memo(() => {
   const handleReceiveClick = useCallback((token: TokenItem) => {
     setState({
       isShowReceiveModal: true,
-      token: token.symbol,
+      token: getTokenSymbol(token),
       chain: getChain(token.chain)?.enum,
     });
   }, []);

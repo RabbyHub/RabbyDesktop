@@ -10,6 +10,7 @@ import {
   formatUsdValue,
 } from '@/renderer/utils/number';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
+import { getTokenSymbol } from '@/renderer/utils';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 import { TokenActionSymbol } from '@/renderer/components/TokenActionModal';
 
@@ -366,7 +367,9 @@ const TokenItemComp = ({
           width="18px"
           height="18px"
         />
-        <div className="symbol">{ellipsisTokenSymbol(token.symbol)}</div>
+        <div className="symbol">
+          {ellipsisTokenSymbol(getTokenSymbol(token))}
+        </div>
         {isDebt && <div className="debt-tag">Debt</div>}
       </div>
       <div className="token-price">${formatPrice(token.price)}</div>
@@ -374,7 +377,7 @@ const TokenItemComp = ({
         <span>
           {`${formatAmount(token.amount)}`}{' '}
           <TokenActionSymbol token={token}>
-            {ellipsisTokenSymbol(token.symbol)}
+            {ellipsisTokenSymbol(getTokenSymbol(token))}
           </TokenActionSymbol>
         </span>
 
@@ -391,7 +394,7 @@ const TokenItemComp = ({
               {amountChange >= 0 ? '+' : '-'}
               {`${formatAmount(Math.abs(amountChange))}`}{' '}
               <span className="symbol">
-                {ellipsisTokenSymbol(token.symbol)}
+                {ellipsisTokenSymbol(getTokenSymbol(token))}
               </span>
               {` (${formatUsdValue(Math.abs(amountChange * token.price))})`}
             </div>

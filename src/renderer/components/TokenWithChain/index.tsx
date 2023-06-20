@@ -2,6 +2,7 @@ import classNames from 'classnames';
 import styled from 'styled-components';
 import { CHAINS } from '@debank/common';
 import { TokenItem } from '@debank/rabby-api/dist/types';
+import { getTokenSymbol } from '@/renderer/utils';
 
 // 只是 bundle 里面需要扩展 btc
 const EXTENDS_CHAINS = {
@@ -61,7 +62,7 @@ const TokenWithChain = ({
           token.logo_url ||
           'rabby-internal://assets/icons/common/token-default.svg'
         }
-        alt={token.symbol}
+        alt={getTokenSymbol(token)}
         style={{ width, height, minWidth: width }}
       />
       {!hideChainIcon && (!hideConer || chain?.id) && (
