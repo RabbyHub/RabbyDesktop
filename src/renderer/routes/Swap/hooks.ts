@@ -10,9 +10,10 @@ import {
 import BigNumber from 'bignumber.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TokenItem, Tx } from '@debank/rabby-api/dist/types';
-import { atom, useAtomValue, useSetAtom } from 'jotai';
+import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useLocation } from 'react-router-dom';
 import { useAsync, useDebounce } from 'react-use';
+import { useSwap } from '@/renderer/hooks/rabbyx/useSwap';
 import {
   getRouter,
   getSpender,
@@ -24,6 +25,7 @@ import {
   activeProviderOriginAtom,
   activeSwapTxsAtom,
   refreshIdAtom,
+  swapSettingVisibleAtom,
 } from './atom';
 import { getChainDefaultToken } from './constant';
 
@@ -371,5 +373,22 @@ export const useTokenPair = (userAddress: string, chain: CHAINS_ENUM) => {
     setPayToken,
     receiveToken,
     setReceiveToken,
+  };
+};
+
+export const useSwapSettings = () => {
+  const { swap, setSwapView, setSwapTrade } = useSwap();
+  const { tradeList, viewList } = swap;
+  const [swapSettingVisible, setSwapSettingVisible] = useAtom(
+    swapSettingVisibleAtom
+  );
+
+  return {
+    swapViewList: viewList,
+    swapTradeList: tradeList,
+    setSwapView,
+    setSwapTrade,
+    swapSettingVisible,
+    setSwapSettingVisible,
   };
 };

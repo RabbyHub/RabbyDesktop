@@ -14,16 +14,19 @@ export const DEX = {
   //   chains: DEX_SUPPORT_CHAINS[DEX_ENUM.ONEINCH],
   // },
   [DEX_ENUM.ZEROXAPI]: {
+    id: DEX_ENUM.ZEROXAPI,
     logo: 'rabby-internal://assets/icons/swap/0xswap.png',
     name: '0x',
     chains: DEX_SUPPORT_CHAINS[DEX_ENUM.ZEROXAPI],
   },
   [DEX_ENUM.PARASWAP]: {
+    id: DEX_ENUM.PARASWAP,
     logo: 'rabby-internal://assets/icons/swap/paraswap.png',
     name: 'ParaSwap',
     chains: DEX_SUPPORT_CHAINS[DEX_ENUM.PARASWAP],
   },
   [DEX_ENUM.OPENOCEAN]: {
+    id: DEX_ENUM.OPENOCEAN,
     logo: 'rabby-internal://assets/icons/swap/openocean.png',
     name: 'OpenOcean',
     chains: DEX_SUPPORT_CHAINS[DEX_ENUM.OPENOCEAN],
@@ -33,6 +36,7 @@ export const DEX = {
 export const DEX_WITH_WRAP = {
   ...DEX,
   [DEX_ENUM.WRAPTOKEN]: {
+    id: DEX_ENUM.WRAPTOKEN,
     logo: 'rabby-internal://assets/icons/common/token-default.svg',
     name: 'Wrap Contract',
     chains: DEX_SUPPORT_CHAINS.WrapToken,
@@ -41,18 +45,25 @@ export const DEX_WITH_WRAP = {
 
 export const CEX = {
   binance: {
+    id: 'binance',
     name: 'Binance',
     logo: 'rabby-internal://assets/icons/swap/binance.png',
   },
   coinbase: {
+    id: 'coinbase',
     name: 'Coinbase',
     logo: 'rabby-internal://assets/icons/swap/coinbase.png',
   },
   okex: {
+    id: 'okex',
     name: 'OKX',
     logo: 'rabby-internal://assets/icons/swap/okx.png',
   },
 };
+
+export type DEX_TYPE = typeof DEX;
+
+export type CEX_TYPE = typeof CEX;
 
 export const getChainDefaultToken = (chain: CHAINS_ENUM) => {
   const chainInfo = CHAINS[chain];

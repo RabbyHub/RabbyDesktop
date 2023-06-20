@@ -1,7 +1,7 @@
-import { useMemo, useCallback, useState, useRef, useEffect } from 'react';
+import { useMemo, useCallback } from 'react';
 import { CEXQuote, TokenItem } from '@debank/rabby-api/dist/types';
 import { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
-import { Tooltip, message } from 'antd';
+import { Tooltip } from 'antd';
 import styled from 'styled-components';
 import BigNumber from 'bignumber.js';
 import { formatAmount, formatUsdValue } from '@/renderer/utils/number';
@@ -12,15 +12,13 @@ import { useDebounce } from 'react-use';
 import ImgLock from '@/../assets/icons/swap/lock.svg';
 import IconRcTip from '@/../assets/icons/swap/tip-info.svg?rc';
 import IconGas from '@/../assets/icons/swap/gas.svg';
-import IconRcError from '@/../assets/icons/swap/error.svg?rc';
 
 import { useSetAtom } from 'jotai';
-import { toastMessage } from '@/renderer/components/TransparentToast';
 import { getTokenSymbol } from '@/renderer/utils';
 import { CEX } from '../constant';
 import { QuotePreExecResultInfo, isSwapWrapToken } from '../utils';
 import { WarningOrChecked } from './ReceiveDetail';
-import { useVerifySdk } from '../hooks';
+import { useSwapSettings, useVerifySdk } from '../hooks';
 import { activeProviderOriginAtom } from '../atom';
 import { QuoteLogo } from './QuoteLogo';
 
@@ -39,7 +37,7 @@ const ItemWrapper = styled.div`
 
   cursor: pointer;
 
-  .cexDisabledTips {
+  .disabled-trade {
     position: absolute;
     left: 0;
     top: 0;
@@ -54,11 +52,19 @@ const ItemWrapper = styled.div`
     align-items: center;
     font-size: 12px;
     gap: 8px;
-    &.active {
+    /* &.active {
       height: 100%;
       transform: translateY(0);
       opacity: 1;
       transition: opacity 0.35s, transform 0.35s;
+    } */
+  }
+
+  &:hover {
+    .disabled-trade {
+      height: 100%;
+      transform: translateY(0);
+      opacity: 1;
     }
   }
 
@@ -85,13 +91,6 @@ const ItemWrapper = styled.div`
   &.error {
     & > * {
       opacity: 0.6;
-    }
-    & > .cexDisabledTips {
-      opacity: 0;
-
-      &.active {
-        opacity: 1;
-      }
     }
   }
   &.inSufficient {
@@ -183,6 +182,15 @@ export const DexQuoteItem = (
     preExecResult,
     quoteProviderInfo,
   } = props;
+
+  const { swapTradeList, setSwapSettingVisible } = useSwapSettings();
+
+  const disabledTrade = useMemo(
+    () =>
+      !swapTradeList?.[dexId as Exclude<DEX_ENUM, DEX_ENUM.WRAPTOKEN>] &&
+      !isSwapWrapToken(payToken.id, receiveToken.id, chain),
+    [swapTradeList, dexId, payToken.id, receiveToken.id, chain]
+  );
 
   const { isSdkDataPass } = useVerifySdk({
     chain,
@@ -357,11 +365,14 @@ export const DexQuoteItem = (
   ]);
 
   const handleClick = useCallback(() => {
-    if (inSufficient) {
-      return toastMessage({
-        type: 'error',
-        content: 'Insufficient balance to select the rate',
-      });
+    console.log('123', {
+      inSufficient,
+      disabledTrade,
+      active,
+      disabled,
+    });
+    if (inSufficient || disabledTrade) {
+      return;
     }
     if (active || disabled) return;
     updateActiveQuoteProvider({
@@ -386,6 +397,7 @@ export const DexQuoteItem = (
     quote,
     preExecResult,
     quoteWarning,
+    disabledTrade,
   ]);
 
   useDebounce(
@@ -430,7 +442,7 @@ export const DexQuoteItem = (
       className={clsx(
         active && 'active',
         disabled && 'disabled error',
-        inSufficient && !disabled && 'disabled inSufficient'
+        (disabledTrade || inSufficient) && !disabled && 'disabled inSufficient'
       )}
     >
       <QuoteLogo
@@ -501,6 +513,24 @@ export const DexQuoteItem = (
       </div>
 
       {isBestQuote && <div className="diff">{rightContent}</div>}
+
+      {disabledTrade && !inSufficient && !disabled ? (
+        <div className={clsx('disabled-trade')}>
+          <IconRcTip className="w-16 h-16" />
+          <span>
+            This exchange is not enabled to trade by you.
+            <span
+              className="underline-white underline cursor-pointer ml-4"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSwapSettingVisible(true);
+              }}
+            >
+              Enable it
+            </span>
+          </span>
+        </div>
+      ) : null}
     </ItemWrapper>
   );
 };
@@ -561,17 +591,9 @@ export const CexQuoteItem = (props: {
     return [center, right, disable];
   }, [data?.receive_token, bestAmount, isBestQuote]);
 
-  const handleClick = useCallback(() => {
-    toastMessage({
-      type: 'error',
-      content: "Can't trade directly with CEX",
-    });
-  }, []);
-
   return (
     <ItemWrapper
       className={clsx('cex disabled', !data?.receive_token?.amount && 'error')}
-      onClick={handleClick}
     >
       <QuoteLogo logo={dexInfo.logo} isLoading={isLoading} />
 

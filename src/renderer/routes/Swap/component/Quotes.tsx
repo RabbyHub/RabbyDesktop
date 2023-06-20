@@ -13,12 +13,19 @@ import {
   DexQuoteItem,
   QuoteItemProps,
 } from './QuoteItem';
-import { DEX_WITH_WRAP } from '../constant';
+import { CEX, DEX, DEX_WITH_WRAP } from '../constant';
 import { InSufficientTip } from './InSufficientTip';
+import { TradingSetting } from './TraddingSetting';
+import { useSwapSettings } from '../hooks';
+
+const exchangeCount = Object.keys(DEX).length + Object.keys(CEX).length;
 
 const QuotesWrapper = styled.div`
   --green-color: #27c193;
   --red-color: #ff7878;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   .header {
     display: flex;
     align-items: center;
@@ -59,29 +66,35 @@ export const Quotes = (props: QuotesProps) => {
     inSufficient,
     ...other
   } = props;
+  const { swapViewList, swapTradeList, setSwapSettingVisible } =
+    useSwapSettings();
 
   const sortedList = useMemo(
     () =>
-      list.sort((a, b) => {
-        const getNumber = (quote: typeof a) => {
-          if (quote.isDex) {
-            if (inSufficient) {
-              return new BigNumber(quote.data?.toTokenAmount || 0);
+      list
+        .filter(
+          (e) => swapViewList?.[e.name as keyof typeof swapViewList] !== false
+        )
+        .sort((a, b) => {
+          const getNumber = (quote: typeof a) => {
+            if (quote.isDex) {
+              if (inSufficient) {
+                return new BigNumber(quote.data?.toTokenAmount || 0);
+              }
+              if (!quote.preExecResult) {
+                return new BigNumber(0);
+              }
+              return new BigNumber(
+                quote?.preExecResult.swapPreExecTx.balance_change
+                  .receive_token_list[0].amount || 0
+              );
             }
-            if (!quote.preExecResult) {
-              return new BigNumber(0);
-            }
-            return new BigNumber(
-              quote?.preExecResult.swapPreExecTx.balance_change
-                .receive_token_list[0].amount || 0
-            );
-          }
 
-          return new BigNumber(quote?.data?.receive_token?.amount || 0);
-        };
-        return getNumber(b).minus(getNumber(a)).toNumber();
-      }),
-    [inSufficient, list]
+            return new BigNumber(quote?.data?.receive_token?.amount || 0);
+          };
+          return getNumber(b).minus(getNumber(a)).toNumber();
+        }),
+    [inSufficient, list, swapViewList]
   );
 
   const bestAmount = useMemo(() => {
@@ -108,14 +121,55 @@ export const Quotes = (props: QuotesProps) => {
 
   const fetchedList = useMemo(() => list.map((e) => e.name), [list]);
 
+  const viewCount = useMemo(() => {
+    if (swapViewList) {
+      return (
+        exchangeCount -
+        Object.entries(swapViewList || {}).filter(
+          ([key, value]) =>
+            (DEX?.[key as keyof typeof DEX] ||
+              CEX?.[key as keyof typeof CEX]) &&
+            value === false
+        ).length
+      );
+    }
+    return exchangeCount;
+  }, [swapViewList]);
+
+  const tradeCount = useMemo(() => {
+    if (swapTradeList) {
+      return Object.entries(swapTradeList || {}).filter(
+        ([key, value]) =>
+          (DEX?.[key as keyof typeof DEX] || CEX?.[key as keyof typeof CEX]) &&
+          value === true
+      ).length;
+    }
+    return 0;
+  }, [swapTradeList]);
+
+  const noCex = useMemo(() => {
+    return Object.keys(CEX).every(
+      (e) => swapViewList?.[e as keyof typeof CEX] === false
+    );
+  }, [swapViewList]);
+
+  const noDex = useMemo(() => {
+    return Object.keys(DEX).every(
+      (e) => swapViewList?.[e as keyof typeof DEX] === false
+    );
+  }, [swapViewList]);
+
   if (isSwapWrapToken(other.payToken.id, other.receiveToken.id, other.chain)) {
     const dex = sortedList.find((e) => e.isDex) as TDexQuoteData | undefined;
 
     return (
       <QuotesWrapper>
         <div className={clsx('header', inSufficient && 'inSufficient')}>
-          <div className="title">The following swap rates are found</div>
-          <IconRefresh refresh={refresh} loading={loading} />
+          <div className="flex items-center">
+            <div className="title">The following swap rates are foundd</div>
+            <IconRefresh refresh={refresh} loading={loading} />
+          </div>
+          <TradingSetting />
         </div>
 
         <InSufficientTip inSufficient={inSufficient} />
@@ -158,8 +212,11 @@ export const Quotes = (props: QuotesProps) => {
   return (
     <QuotesWrapper>
       <div className={clsx('header', inSufficient && 'inSufficient')}>
-        <div className="title">The following swap rates are found</div>
-        <IconRefresh refresh={refresh} loading={loading} />
+        <div className="flex items-center">
+          <div className="title">The following swap rates are found</div>
+          <IconRefresh refresh={refresh} loading={loading} />
+        </div>
+        <TradingSetting />
       </div>
 
       <InSufficientTip inSufficient={inSufficient} />
@@ -188,28 +245,49 @@ export const Quotes = (props: QuotesProps) => {
 
         <QuoteListLoading fetchedList={fetchedList} />
       </div>
+      {noCex ? null : (
+        <>
+          <div
+            className={clsx(
+              'text-white text-opacity-70 text-13 font-medium  mb-8',
+              !noDex && 'mt-60'
+            )}
+          >
+            Rates from CEX
+          </div>
 
-      <div className="text-white text-opacity-70 text-13 font-medium mt-60 mb-8">
-        Rates from CEX
+          <CexListWrapper>
+            {sortedList.map((params, idx) => {
+              const { name, data, isDex } = params;
+              if (isDex) return null;
+              return (
+                <CexQuoteItem
+                  name={name}
+                  data={data}
+                  bestAmount={`${bestAmount}`}
+                  isBestQuote={idx === 0}
+                  isLoading={params.loading}
+                  inSufficient={inSufficient}
+                />
+              );
+            })}
+            <QuoteListLoading fetchedList={fetchedList} isCex />
+          </CexListWrapper>
+        </>
+      )}
+
+      <div className="mt-auto text-white opacity-60 text-13 pt-[38px] pb-[18px]">
+        Of the {exchangeCount} exchanges, {viewCount} can view quotes and{' '}
+        {tradeCount} can trade.{' '}
+        <span
+          onClick={() => {
+            setSwapSettingVisible(true);
+          }}
+          className="cursor-pointer text-blue-light underline underline-blue-light"
+        >
+          Edit
+        </span>
       </div>
-
-      <CexListWrapper>
-        {sortedList.map((params, idx) => {
-          const { name, data, isDex } = params;
-          if (isDex) return null;
-          return (
-            <CexQuoteItem
-              name={name}
-              data={data}
-              bestAmount={`${bestAmount}`}
-              isBestQuote={idx === 0}
-              isLoading={params.loading}
-              inSufficient={inSufficient}
-            />
-          );
-        })}
-        <QuoteListLoading fetchedList={fetchedList} isCex />
-      </CexListWrapper>
     </QuotesWrapper>
   );
 };

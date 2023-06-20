@@ -1,5 +1,7 @@
 import { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
 import { atom } from 'jotai';
+import { swapAtom } from '@/renderer/hooks/rabbyx/useSwap';
+import { DEX_ENUM } from '@rabby-wallet/rabby-swap';
 
 export type QuoteProvider = {
   name: string;
@@ -28,6 +30,16 @@ export const activeProviderOriginAtom = atom<QuoteProvider | undefined>(
 export const activeProviderAtom = atom((get) => {
   const activeSwapTxs = get(activeSwapTxsAtom);
   const activeProviderOrigin = get(activeProviderOriginAtom);
+  const swapTradList = get(swapAtom)?.tradeList;
+
+  if (
+    activeProviderOrigin?.name &&
+    activeProviderOrigin?.name !== DEX_ENUM.WRAPTOKEN &&
+    swapTradList?.[activeProviderOrigin?.name as keyof typeof swapTradList] !==
+      true
+  ) {
+    return;
+  }
 
   if (
     activeProviderOrigin?.activeTx &&
@@ -45,3 +57,5 @@ export const activeProviderAtom = atom((get) => {
 
   return activeProviderOrigin;
 });
+
+export const swapSettingVisibleAtom = atom(false);

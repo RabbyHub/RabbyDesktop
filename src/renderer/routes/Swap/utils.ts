@@ -515,6 +515,7 @@ const getCexQuote = async (
 export const getAllQuotes = async (
   params: Omit<getDexQuoteParams, 'dexId'> & {
     setQuote: (quote: TCexQuoteData | TDexQuoteData) => void;
+    swapViewList?: Record<keyof typeof DEX | keyof typeof CEX, boolean>;
   }
 ) => {
   if (
@@ -526,19 +527,23 @@ export const getAllQuotes = async (
     });
   }
 
+  const { swapViewList } = params;
+
   return Promise.all([
-    ...(Object.keys(DEX) as DEX_ENUM[]).map((dexId) =>
-      getDexQuote({ ...params, dexId })
-    ),
-    ...Object.keys(CEX).map((cexId) =>
-      getCexQuote({
-        cexId,
-        payToken: params.payToken,
-        payAmount: params.payAmount,
-        receiveTokenId: params.receiveToken.id,
-        chain: params.chain,
-        setQuote: params.setQuote,
-      })
-    ),
+    ...(Object.keys(DEX) as Exclude<DEX_ENUM, DEX_ENUM.WRAPTOKEN>[])
+      .filter((e) => swapViewList?.[e] !== false)
+      .map((dexId) => getDexQuote({ ...params, dexId })),
+    ...(Object.keys(CEX) as (keyof typeof CEX)[])
+      .filter((e) => swapViewList?.[e] !== false)
+      .map((cexId) =>
+        getCexQuote({
+          cexId,
+          payToken: params.payToken,
+          payAmount: params.payAmount,
+          receiveTokenId: params.receiveToken.id,
+          chain: params.chain,
+          setQuote: params.setQuote,
+        })
+      ),
   ]);
 };

@@ -34,14 +34,13 @@
   }
 }
 
-.ant-input-affix-wrapper>input.ant-input {
+.ant-input-affix-wrapper > input.ant-input {
   background-color: transparent;
   color: inherit;
   font-size: inherit;
 }
 
 .ant-btn-primary {
-
   &:hover,
   &:focus {
     background-color: @primary-color;
@@ -52,6 +51,13 @@
   &:focus {
     box-shadow: none;
   }
+}
+.ant-btn-primary[disabled],
+.ant-btn-primary[disabled]:hover,
+.ant-btn-primary[disabled]:focus,
+.ant-btn-primary[disabled]:active {
+  background: @primary-color;
+  opacity: 0.4;
 }
 
 /*---------------------
