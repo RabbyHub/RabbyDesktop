@@ -365,6 +365,12 @@ export const DexQuoteItem = (
   ]);
 
   const handleClick = useCallback(() => {
+    console.log('123', {
+      inSufficient,
+      disabledTrade,
+      active,
+      disabled,
+    });
     if (inSufficient || disabledTrade) {
       return;
     }
