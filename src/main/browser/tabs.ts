@@ -624,7 +624,7 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
 
   private _unselect() {
     this.selected = undefined;
-    this.emit('tab-unselected', this.selected);
+    this.emit('tab-selected-changed', { selected: null });
   }
 
   destroy() {
@@ -700,12 +700,13 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
   select(tabId: chrome.tabs.Tab['id']) {
     const tab = this.get(tabId);
     if (!tab) return;
-    const prevTab = this.selected;
-    if (prevTab) prevTab.hide();
+    const prevSelected = this.selected;
+    if (prevSelected && !prevSelected.destroyed) prevSelected.hide();
 
     tab.show();
     this.selected = tab;
-    this.emit('tab-selected', tab, prevTab);
+    this.emit('tab-selected', tab, prevSelected);
+    this.emit('tab-selected-changed', { selected: tab });
 
     return tab;
   }

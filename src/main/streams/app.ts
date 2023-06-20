@@ -12,7 +12,7 @@ import {
   isUrlFromDapp,
 } from '../../isomorphic/url';
 import buildChromeContextMenu from '../browser/context-menu';
-import { setupMenu } from '../browser/menu';
+import { setupAppMenu } from '../browser/menu';
 import {
   getMainWindowDappViewZoomPercent,
   storeMainWinPosition,
@@ -385,14 +385,8 @@ export default function bootstrap() {
     shellExts.addWindow(mainWin);
     valueToMainSubject('mainWindowReady', mainWindow);
 
-    getWebuiExtId().then((id) => {
-      setupMenu({
-        getFocusedWebContents: () => {
-          return getFocusedWindow().getFocusedTab()?.view?.webContents;
-        },
-        topbarExtId: id,
-      });
-    });
+    // initialize menu
+    setupAppMenu();
 
     if (isDarwin) {
       app.dock.setIcon(getAssetPath('icon.png'));

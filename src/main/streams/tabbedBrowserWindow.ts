@@ -53,6 +53,7 @@ import { isTargetScanLink } from '../store/dynamicConfig';
 import { isEnableServeDappByHttp } from '../store/desktopApp';
 import { checkDappEntryDirectory, CheckResultType } from '../utils/file';
 import { safeRunInMainProcess } from '../utils/fn';
+import { setupAppMenu } from '../browser/menu';
 
 /**
  * @deprecated import members from '../utils/tabbedBrowserWindow' instead
@@ -571,6 +572,12 @@ onIpcMainInternalEvent(
     waitOne.sendEvent.returnValue = { windowExisted: true };
   }
 );
+
+onMainWindowReady().then(async (mainTabbedWin) => {
+  mainTabbedWin.tabs.on('tab-selected-changed', (payload) => {
+    setupAppMenu();
+  });
+});
 
 app.on('quit', async () => {
   const mainTabbedWin = await onMainWindowReady();
