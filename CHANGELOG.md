@@ -1,7 +1,19 @@
 
-v0.26.0 / 2023-06-14
+v0.27.0 / 2023-06-20
 ====================
 
+  * fix: remove used patches.
+  * feat: update currentVersion.md
+  * feat: more shortcuts support. (#485)
+  * feat: swap setting (#481)
+  * feat: upgrade `@debank/common`, depreacte SWM chain. (#483)
+  * fix: use display_symbol first (#484)
+  * fix: paraswap preexec issue (#482)
+
+v0.26.0-prod / 2023-06-14
+=========================
+
+  * Release v0.26.0-prod
   * fix: missing oasys on rabbyx.
   * feat: upgrade rabbyx for style.
   * fix: judgement about system version. (#480)
