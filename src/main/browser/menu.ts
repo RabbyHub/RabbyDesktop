@@ -1,5 +1,8 @@
 import { Menu, shell } from 'electron';
-import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
+import {
+  APP_BRANDNAME,
+  IS_RUNTIME_PRODUCTION,
+} from '../../isomorphic/constants';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import { getFocusedWindow } from '../utils/tabbedBrowserWindow';
 import { getRabbyExtId, onMainWindowReady } from '../utils/stream-helpers';
@@ -13,7 +16,22 @@ export async function setupAppMenu() {
   const mainTabbedWin = await onMainWindowReady();
   const currentSelectedTab = mainTabbedWin.tabs.selected;
 
-  console.log('[feat] setupAppMenu:: currentSelectedTab', currentSelectedTab);
+  const appMenus = !isDarwin
+    ? null
+    : {
+        label: APP_BRANDNAME,
+        submenu: [
+          // { role: 'about' },
+          // { type: 'separator' },
+          // { role: 'services' },
+          // { type: 'separator' },
+          { role: 'hide' },
+          { role: 'hideOthers' },
+          { role: 'unhide' },
+          { type: 'separator' },
+          { role: 'quit' },
+        ],
+      };
 
   const ViewSubMenusAboutDapp: Electron.MenuItemConstructorOptions[] =
     !currentSelectedTab
@@ -67,6 +85,14 @@ export async function setupAppMenu() {
               },
             };
           }),
+          // ...['CmdOrCtrl+H'].map((accelerator, idx) => {
+          //   return {
+          //     click: () => { /** close dapp tab  */ },
+          //     accelerator,
+          //     nonNativeMacOSRole: true,
+          //     visible: idx === 0,
+          //   }
+          // }),
         ];
 
   const ViewMenus: Electron.MenuItemConstructorOptions = {
@@ -101,24 +127,36 @@ export async function setupAppMenu() {
       // { role: 'resetZoom' },
       // { role: 'zoomIn' },
       // { role: 'zoomOut' },
-      // { type: 'separator' },
-      { role: 'copy' },
-      { role: 'cut' },
-      { role: 'paste' },
-      { role: 'delete' },
-      { role: 'selectAll' },
       { type: 'separator' },
       { role: 'togglefullscreen' },
-      { type: 'separator' },
-      { role: 'quit' },
+    ].filter(Boolean),
+  };
+
+  const WindowMenus: Electron.MenuItemConstructorOptions = {
+    label: 'Window',
+    submenu: <
+      Electron.MenuItemConstructorOptions['submenu'] &
+        Electron.MenuItemConstructorOptions
+    >[
+      { role: 'minimize' },
+      // { role: 'zoom' },
+      ...(isDarwin
+        ? [
+            { type: 'separator' },
+            { role: 'front' },
+            { type: 'separator' },
+            { role: 'window' },
+          ]
+        : [{ role: 'close' }]),
     ].filter(Boolean),
   };
 
   const template: Electron.MenuItemConstructorOptions[] = [
-    // ...(isDarwin ? [{ role: 'appMenu' }] : []),
+    ...(!appMenus ? [] : ([appMenus] as Electron.MenuItemConstructorOptions[])),
     // { role: 'fileMenu' },
     // { role: 'editMenu' },
     ViewMenus,
+    WindowMenus, // { role: 'windowMenu' },
     {
       label: 'Help',
       submenu: <Electron.MenuItemConstructorOptions['submenu']>[
