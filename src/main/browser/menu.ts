@@ -1,15 +1,99 @@
 import { Menu, shell } from 'electron';
-import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
+import {
+  APP_BRANDNAME,
+  IS_RUNTIME_PRODUCTION,
+} from '../../isomorphic/constants';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
+import { getFocusedWindow } from '../utils/tabbedBrowserWindow';
+import { getRabbyExtId, onMainWindowReady } from '../utils/stream-helpers';
 
-export const setupMenu = ({
-  getFocusedWebContents,
-  topbarExtId,
-}: {
-  getFocusedWebContents: () => Electron.WebContents | void;
-  topbarExtId: string;
-}) => {
-  const isMac = process.platform === 'darwin';
+const isDarwin = process.platform === 'darwin';
+function getFocusedWebContents() {
+  return getFocusedWindow().getFocusedTab()?.view?.webContents;
+}
+
+export async function setupAppMenu() {
+  const mainTabbedWin = await onMainWindowReady();
+  const currentSelectedTab = mainTabbedWin.tabs.selected;
+
+  const appMenus = !isDarwin
+    ? null
+    : {
+        label: APP_BRANDNAME,
+        submenu: [
+          // { role: 'about' },
+          // { type: 'separator' },
+          // { role: 'services' },
+          // { type: 'separator' },
+          { role: 'hide' },
+          { role: 'hideOthers' },
+          { role: 'unhide' },
+          { type: 'separator' },
+          { role: 'quit' },
+        ],
+      };
+
+  const ViewSubMenusAboutDapp: Electron.MenuItemConstructorOptions[] =
+    !currentSelectedTab
+      ? []
+      : [
+          {
+            label: 'Reload',
+            accelerator: 'CmdOrCtrl+R',
+            nonNativeMacOSRole: true,
+            click: () => getFocusedWebContents()?.reload(),
+          },
+          {
+            label: 'Force Reload',
+            accelerator: 'Shift+CmdOrCtrl+R',
+            nonNativeMacOSRole: true,
+            click: () => getFocusedWebContents()?.reloadIgnoringCache(),
+          },
+          {
+            label: 'Find In Dapp',
+            accelerator: 'CmdOrCtrl+F',
+            nonNativeMacOSRole: true,
+            click: () => {
+              emitIpcMainEvent('__internal_main:mainwindow:op-find-in-page', {
+                type: 'start-find',
+              });
+            },
+          },
+          ...['CmdOrCtrl+G', 'F3'].map((accelerator, idx) => {
+            return {
+              label: 'Find Forward In Dapp',
+              accelerator,
+              nonNativeMacOSRole: true,
+              visible: idx === 0,
+              click: () => {
+                emitIpcMainEvent('__internal_main:mainwindow:op-find-in-page', {
+                  type: 'find-forward',
+                });
+              },
+            };
+          }),
+          ...['Shift+CmdOrCtrl+G', 'F2'].map((accelerator, idx) => {
+            return {
+              label: 'Find Backward In Dapp',
+              accelerator,
+              nonNativeMacOSRole: true,
+              visible: idx === 0,
+              click: () => {
+                emitIpcMainEvent('__internal_main:mainwindow:op-find-in-page', {
+                  type: 'find-backward',
+                });
+              },
+            };
+          }),
+          // ...['CmdOrCtrl+H'].map((accelerator, idx) => {
+          //   return {
+          //     click: () => { /** close dapp tab  */ },
+          //     accelerator,
+          //     nonNativeMacOSRole: true,
+          //     visible: idx === 0,
+          //   }
+          // }),
+        ];
 
   const ViewMenus: Electron.MenuItemConstructorOptions = {
     label: 'View',
@@ -17,60 +101,15 @@ export const setupMenu = ({
       Electron.MenuItemConstructorOptions['submenu'] &
         Electron.MenuItemConstructorOptions
     >[
-      {
-        label: 'Reload',
-        accelerator: 'CmdOrCtrl+R',
-        nonNativeMacOSRole: true,
-        click: () => getFocusedWebContents()?.reload(),
-      },
-      {
-        label: 'Force Reload',
-        accelerator: 'Shift+CmdOrCtrl+R',
-        nonNativeMacOSRole: true,
-        click: () => getFocusedWebContents()?.reloadIgnoringCache(),
-      },
-      {
-        label: 'Find In Dapp',
-        accelerator: 'CmdOrCtrl+F',
-        nonNativeMacOSRole: true,
-        click: () => {
-          emitIpcMainEvent('__internal_main:mainwindow:op-find-in-page', {
-            type: 'start-find',
-          });
-        },
-      },
-      ...['CmdOrCtrl+G', 'F3'].map((accelerator, idx) => {
-        return {
-          label: 'Find Forward In Dapp',
-          accelerator,
-          nonNativeMacOSRole: true,
-          visible: idx === 0,
-          click: () => {
-            emitIpcMainEvent('__internal_main:mainwindow:op-find-in-page', {
-              type: 'find-forward',
-            });
-          },
-        };
-      }),
-      ...['Shift+CmdOrCtrl+G', 'F2'].map((accelerator, idx) => {
-        return {
-          label: 'Find Backward In Dapp',
-          accelerator,
-          nonNativeMacOSRole: true,
-          visible: idx === 0,
-          click: () => {
-            emitIpcMainEvent('__internal_main:mainwindow:op-find-in-page', {
-              type: 'find-backward',
-            });
-          },
-        };
-      }),
+      ...ViewSubMenusAboutDapp,
       !IS_RUNTIME_PRODUCTION
         ? {
             label: 'Toggle Developer Tool',
-            accelerator: isMac ? 'Alt+Command+I' : 'Ctrl+Shift+I',
+            accelerator: isDarwin ? 'Alt+Command+I' : 'Ctrl+Shift+I',
             nonNativeMacOSRole: true,
-            click: () => {
+            click: async () => {
+              const topbarExtId = await getRabbyExtId();
+
               const win = getFocusedWebContents();
               if (!win) return;
               if (
@@ -88,24 +127,36 @@ export const setupMenu = ({
       // { role: 'resetZoom' },
       // { role: 'zoomIn' },
       // { role: 'zoomOut' },
-      // { type: 'separator' },
-      { role: 'copy' },
-      { role: 'cut' },
-      { role: 'paste' },
-      { role: 'delete' },
-      { role: 'selectAll' },
       { type: 'separator' },
       { role: 'togglefullscreen' },
-      { type: 'separator' },
-      { role: 'quit' },
+    ].filter(Boolean),
+  };
+
+  const WindowMenus: Electron.MenuItemConstructorOptions = {
+    label: 'Window',
+    submenu: <
+      Electron.MenuItemConstructorOptions['submenu'] &
+        Electron.MenuItemConstructorOptions
+    >[
+      { role: 'minimize' },
+      // { role: 'zoom' },
+      ...(isDarwin
+        ? [
+            { type: 'separator' },
+            { role: 'front' },
+            { type: 'separator' },
+            { role: 'window' },
+          ]
+        : [{ role: 'close' }]),
     ].filter(Boolean),
   };
 
   const template: Electron.MenuItemConstructorOptions[] = [
-    // ...(isMac ? [{ role: 'appMenu' }] : []),
+    ...(!appMenus ? [] : ([appMenus] as Electron.MenuItemConstructorOptions[])),
     // { role: 'fileMenu' },
     // { role: 'editMenu' },
     ViewMenus,
+    WindowMenus, // { role: 'windowMenu' },
     {
       label: 'Help',
       submenu: <Electron.MenuItemConstructorOptions['submenu']>[
@@ -131,4 +182,4 @@ export const setupMenu = ({
 
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
-};
+}

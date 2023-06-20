@@ -139,8 +139,8 @@ handleIpcMainInvoke('detect-dapp-version', async (_, currentDappId: string) => {
 });
 
 onMainWindowReady().then(async (mainTabbedWin) => {
-  mainTabbedWin.tabs.on('tab-unselected', () => {
-    pushNewVersionUpdatedToView(undefined, false);
+  mainTabbedWin.tabs.on('tab-selected-changed', (payload) => {
+    if (!payload.selected) pushNewVersionUpdatedToView(undefined, false);
   });
 });
 export const DAPP_VERSION_DETECT_INTERVAL = IS_RUNTIME_PRODUCTION
