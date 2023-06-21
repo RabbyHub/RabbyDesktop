@@ -1,4 +1,3 @@
 #### New Features:
 
-- Support filtering aggregators in Rabby Swap
-- Support common shortcut keys
+- Fixed the issue of not able to use cmd + V on macOS
