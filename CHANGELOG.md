@@ -1,7 +1,14 @@
 
-v0.27.0 / 2023-06-20
+v0.27.1 / 2023-06-21
 ====================
 
+  * feat: update currentVersion.md
+  * fix: missing shortcuts about Edit. (#486)
+
+v0.27.0-prod / 2023-06-20
+=========================
+
+  * Release v0.27.0-prod
   * fix: remove used patches.
   * feat: update currentVersion.md
   * feat: more shortcuts support. (#485)
