@@ -3,6 +3,7 @@ import { Image } from 'antd';
 import clsx from 'classnames';
 import React from 'react';
 import { getChain } from '@/renderer/utils';
+import styled from 'styled-components';
 import IconImgFail from '../../../assets/icons/common/img-fail.svg';
 import IconNFTDefault from '../../../assets/icons/common/nft-default.svg';
 import IconUnknown from '../../../assets/icons/common/token-default.svg';
@@ -77,6 +78,56 @@ const Preview = ({ content, type }: Pick<AvatarProps, 'content' | 'type'>) => {
   return <img src={IconNFTDefault} className="nft-avatar-image" alt="" />;
 };
 
+const StyledFftAvatar = styled.div`
+  position: relative;
+  border-radius: 4px;
+  width: 60px;
+  height: 60px;
+  background-color: #fff;
+  &:hover {
+    .nft-avatar-cover {
+      display: flex;
+    }
+  }
+  .ant-image {
+    width: 100%;
+    height: 100%;
+  }
+  .nft-avatar-image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+  }
+  .nft-avatar-chain {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    width: 14px;
+    height: 14px;
+    z-index: 1;
+  }
+  .nft-avatar-cover {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    align-items: center;
+    justify-content: center;
+    display: none;
+    cursor: pointer;
+  }
+  .nft-avatar-count {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: 12px;
+    line-height: 14px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 2px;
+    padding: 1px 5px;
+    color: #fff;
+  }
+`;
+
 const NFTAvatar = ({
   thumbnail = true,
   type,
@@ -91,7 +142,7 @@ const NFTAvatar = ({
   const logo = getChain(chain)?.logo || IconUnknown;
   const isShowLogo = !!chain;
   return (
-    <div className={clsx('nft-avatar', className)} style={style}>
+    <StyledFftAvatar className={clsx('nft-avatar', className)} style={style}>
       {thumbnail ? (
         <Thumbnail content={content} type={type} unknown={unknown} />
       ) : (
@@ -106,7 +157,7 @@ const NFTAvatar = ({
           <img src={IconZoom} alt="" />
         </div>
       )}
-    </div>
+    </StyledFftAvatar>
   );
 };
 

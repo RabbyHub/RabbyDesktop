@@ -53,6 +53,10 @@ export interface PreferenceState {
   tokenApprovalChain: Record<string, import('@debank/common').CHAINS_ENUM>;
   nftApprovalChain: Record<string, import('@debank/common').CHAINS_ENUM>;
 }
+export interface Token {
+  address: string;
+  chain: string;
+}
 
 interface DisplayKeyring {
   unlock: () => Promise<void>;
@@ -497,6 +501,27 @@ export type RabbyXMethod = {
   ) => void;
   'walletController.gridPlusIsConnect': () => boolean;
   'walletController.isUseLedgerLive': () => boolean;
+  'walletController.transferNFT': (
+    {
+      to,
+      chainServerId,
+      contractId,
+      abi,
+      tokenId,
+      amount,
+    }: {
+      to: string;
+      chainServerId: string;
+      contractId: string;
+      abi: 'ERC721' | 'ERC1155';
+      tokenId: string;
+      amount?: number | undefined;
+    },
+    $ctx?: any
+  ) => Promise<void>;
+  'walletController.getCollectionStarred': () => Token[];
+  'walletController.addCollectionStarred': (token: Token) => void;
+  'walletController.removeCollectionStarred': (token: Token) => void;
 } & {
   'openapi.setHost': OpenApiService['setHost'];
   'openapi.getHost': OpenApiService['getHost'];
@@ -556,6 +581,7 @@ export type RabbyXMethod = {
   'openapi.getSwapTradeList': OpenApiService['getSwapTradeList'];
   'openapi.postSwap': OpenApiService['postSwap'];
   'openapi.getSummarizedAssetList': OpenApiService['getSummarizedAssetList'];
+  'openapi.collectionList': OpenApiService['collectionList'];
 };
 
 export type RabbyXMethods = {
