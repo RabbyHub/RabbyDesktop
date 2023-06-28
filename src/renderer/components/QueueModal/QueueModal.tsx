@@ -1,10 +1,16 @@
+import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
+import { useGnosisPendingTxs } from '@/renderer/hooks/useGnosisPendingTxs';
 import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
 import React from 'react';
 import { Modal } from '../Modal/Modal';
-import { TxList } from './TxList';
+import { TabTxList } from './TabTxList';
+import styles from './style.module.less';
 
 export const QueueModal: React.FC = () => {
   const { svVisible, closeSubview } = useZPopupViewState('safe-queue-modal');
+
+  const { currentAccount: account } = useCurrentAccount();
+  const { data } = useGnosisPendingTxs({ address: account?.address });
 
   if (!svVisible) return null;
 
@@ -14,9 +20,10 @@ export const QueueModal: React.FC = () => {
       onCancel={closeSubview}
       open={svVisible}
       centered
-      title="Queue"
+      className={styles.modal}
+      title={`Queue(${data?.total || 0})`}
     >
-      <TxList onClose={closeSubview} />
+      <TabTxList onClose={closeSubview} />
     </Modal>
   );
 };

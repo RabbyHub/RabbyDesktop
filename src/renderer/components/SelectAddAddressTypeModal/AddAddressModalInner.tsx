@@ -90,7 +90,7 @@ export const AddAddressModalInner: React.FC<Props> = ({
       <SafeModal
         centered
         open={visible}
-        title="Safe"
+        title="Add Safe address"
         destroyOnClose
         onCancel={onCancel}
         footer={null}

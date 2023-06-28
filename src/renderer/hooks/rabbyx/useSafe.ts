@@ -13,6 +13,11 @@ export const useIsSafe = () => {
   return currentAccount?.type === KEYRING_CLASS.GNOSIS;
 };
 
+/**
+ * @deprecated
+ *
+ * @returns
+ */
 export const useSafe = () => {
   const [pendingCount, setPendingCount] = useAtom(pendingCountAtom);
   const { currentAccount } = useCurrentAccount();

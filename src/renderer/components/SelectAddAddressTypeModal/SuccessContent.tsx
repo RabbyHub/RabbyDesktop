@@ -36,13 +36,15 @@ export const SuccessContent: React.FC<Props> = ({
             ))}
         </div>
 
-        <Button
-          className="w-[240px] h-[52px]"
-          type="primary"
-          onClick={onSuccess}
-        >
-          Done
-        </Button>
+        <div className="text-center absolute bottom-[100px] left-0 right-0">
+          <Button
+            className="w-[240px] h-[52px]"
+            type="primary"
+            onClick={onSuccess}
+          >
+            Done
+          </Button>
+        </div>
       </div>
     </div>
   );
