@@ -16,7 +16,7 @@ const PreviewModal = styled(Modal)`
   &.RabbyModal {
     .ant-modal-header {
       padding-top: 16px;
-      padding-bottom: 12px;
+      padding-bottom: 0;
       font-size: 20px;
       font-weight: 510;
     }

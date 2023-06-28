@@ -47,7 +47,7 @@ const SendNFTWrapper = styled.div`
   margin-top: 18px;
   .nft-info {
     padding-bottom: 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     .nft-avatar {
       margin-right: 12px;
       border: none;
@@ -586,7 +586,7 @@ const SendNFT = () => {
           {/* {chain && <TagChainSelector value={chain!} readonly />} */}
           <ChainSelect value={chain} readonly />
 
-          <div className="section relative">
+          <div className="section relative mt-16">
             <div className="section-title">From</div>
             <AccountCard
               icons={{

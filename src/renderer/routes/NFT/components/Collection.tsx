@@ -20,20 +20,24 @@ export const Collection = (props: CollectionProps) => {
 
   return (
     <div className="relative w-[600px] p-16 pt-[13px] border border-white border-opacity-20 bg-[#000] bg-opacity-10 rounded-[6px]">
-      <img
+      <div
+        className="absolute top-0 right-0 py-[13px] px-[16px] cursor-pointer"
         onClick={() => onStart(item)}
-        className="absolute top-[13px] right-16 w-16 h-16 cursor-pointer"
-        src={
-          start
-            ? 'rabby-internal://assets/icons/nft/starred.svg'
-            : 'rabby-internal://assets/icons/nft/star.svg'
-        }
-      />
-      <div className="text-15 font-medium text-white mb-6">
-        {item.name}{' '}
+      >
+        <img
+          className="w-16 h-16"
+          src={
+            start
+              ? 'rabby-internal://assets/icons/nft/starred.svg'
+              : 'rabby-internal://assets/icons/nft/star.svg'
+          }
+        />
+      </div>
+      <div className="flex items-center gap-4 text-15 font-medium text-white mb-6">
+        <span>{item.name} </span>
         <span className="text-12 text-white text-opacity-70">({num})</span>
       </div>
-      <div className="flex items-center text-12 text-white text-opacity-70 gap-6 pb-[13px] border-0 border-b border-white border-opacity-10 border-solid">
+      <div className="flex items-center text-12 text-white text-opacity-70 gap-6 pb-[13px] border-0 border-b border-white border-opacity-5 border-solid">
         <ChainIcon size={'w-14 h-14' as any} chain={chain.enum} />
         <span>
           {chain.name}{' '}
