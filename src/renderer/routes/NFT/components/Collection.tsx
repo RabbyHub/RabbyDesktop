@@ -1,7 +1,7 @@
 import ChainIcon from '@/renderer/components/ChainIcon';
 import NFTAvatar from '@/renderer/components/NFTAvatar';
 import { CHAINS_LIST } from '@debank/common';
-import { CollectionList, NFTItem } from '@debank/rabby-api/dist/types';
+import { CollectionList, NFTItem } from '@rabby-wallet/rabby-api/dist/types';
 
 type CollectionProps = {
   start?: boolean;

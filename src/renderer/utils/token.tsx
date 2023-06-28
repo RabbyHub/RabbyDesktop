@@ -1,6 +1,6 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable no-multi-assign */
-import { TokenItem } from '@debank/rabby-api/dist/types';
+import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { Contract, providers } from 'ethers';
 import { hexToString } from 'web3-utils';
 import styled from 'styled-components';

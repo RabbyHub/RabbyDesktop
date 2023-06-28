@@ -1,5 +1,5 @@
 import { useMemo, useCallback } from 'react';
-import { CEXQuote, TokenItem } from '@debank/rabby-api/dist/types';
+import { CEXQuote, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
 import { Tooltip } from 'antd';
 import styled from 'styled-components';

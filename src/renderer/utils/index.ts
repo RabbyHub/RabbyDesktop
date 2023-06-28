@@ -1,6 +1,6 @@
 import { keyBy } from 'lodash';
 import { CHAINS, CHAINS_ENUM, Chain } from '@debank/common';
-import { TokenItem } from '@debank/rabby-api/dist/types';
+import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 /**
  *
  * @param origin (exchange.pancakeswap.finance)

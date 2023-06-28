@@ -1,6 +1,9 @@
 // import { TxDisplayItem, TxHistoryItem } from '@/background/service/openapi';
 import NameAndAddress from '@/renderer/components/NameAndAddress';
-import { TxDisplayItem, TxHistoryItem } from '@debank/rabby-api/dist/types';
+import {
+  TxDisplayItem,
+  TxHistoryItem,
+} from '@rabby-wallet/rabby-api/dist/types';
 import classNames from 'classnames';
 import { getChain, getTokenSymbol } from '@/renderer/utils';
 import styles from '../index.module.less';

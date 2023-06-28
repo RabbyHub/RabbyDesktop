@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import ModalPreviewNFTItem from '@/renderer/components/ModalPreviewNFTItem';
-import { NFTItem } from '@debank/rabby-api/dist/types';
+import { NFTItem } from '@rabby-wallet/rabby-api/dist/types';
 import { NFTTabs } from './components/NFTTabs';
 import { NFTEmpty } from './components/NFTEmpty';
 import { Collection } from './components/Collection';

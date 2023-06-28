@@ -1,7 +1,7 @@
 import type { AddedToken, GasCache } from '@/isomorphic/types/rabbyx';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { CHAINS_ENUM } from '@debank/common';
-import { TokenItem } from '@debank/rabby-api/dist/types';
+import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
 

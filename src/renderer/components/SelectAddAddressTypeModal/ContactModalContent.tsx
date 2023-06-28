@@ -1,4 +1,4 @@
-import { OpenApiService } from '@debank/rabby-api';
+import { OpenApiService } from '@rabby-wallet/rabby-api';
 import { Button } from 'antd';
 import React from 'react';
 import useDebounceValue from '@/renderer/hooks/useDebounceValue';

@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import styled from 'styled-components';
 import { CHAINS } from '@debank/common';
-import { TokenItem } from '@debank/rabby-api/dist/types';
+import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { getTokenSymbol } from '@/renderer/utils';
 
 // 只是 bundle 里面需要扩展 btc

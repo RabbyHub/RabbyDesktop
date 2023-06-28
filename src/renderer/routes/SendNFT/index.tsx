@@ -10,7 +10,7 @@ import BigNumber from 'bignumber.js';
 import { Input, Form, message, Button } from 'antd';
 import { isValidAddress } from 'ethereumjs-util';
 import { useLocation } from 'react-router-dom';
-import { NFTItem } from '@debank/rabby-api/dist/types';
+import { NFTItem } from '@rabby-wallet/rabby-api/dist/types';
 import { useRbiSource } from '@/renderer/hooks/useRbiSource';
 import { Account } from '@/isomorphic/types/rabbyx';
 import { CHAINS } from '@debank/common';

@@ -4,7 +4,7 @@ import type {
   Tx,
   TotalBalanceResponse,
   TokenItem,
-} from '@debank/rabby-api/dist/types';
+} from '@rabby-wallet/rabby-api/dist/types';
 
 import type { DEX_ENUM } from '@rabby-wallet/rabby-swap';
 import type { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
@@ -169,7 +169,7 @@ export interface SwapState {
 }
 
 type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
-type OpenApiService = import('@debank/rabby-api').OpenApiService;
+type OpenApiService = import('@rabby-wallet/rabby-api').OpenApiService;
 
 export interface RPCItem {
   url: string;

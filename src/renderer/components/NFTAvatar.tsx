@@ -1,4 +1,4 @@
-import { NFTItem } from '@debank/rabby-api/dist/types';
+import { NFTItem } from '@rabby-wallet/rabby-api/dist/types';
 import { Image } from 'antd';
 import clsx from 'classnames';
 import React from 'react';

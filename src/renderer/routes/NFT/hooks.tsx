@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
-import { CollectionList } from '@debank/rabby-api/dist/types';
+import { CollectionList } from '@rabby-wallet/rabby-api/dist/types';
 import { Token } from '@/isomorphic/types/rabbyx';
 
 const wallet = walletController;

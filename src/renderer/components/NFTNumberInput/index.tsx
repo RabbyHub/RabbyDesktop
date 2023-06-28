@@ -2,7 +2,7 @@ import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import styled from 'styled-components';
 import { InputRef, Tooltip } from 'antd';
 import clsx from 'clsx';
-import { NFTItem } from '@debank/rabby-api/dist/types';
+import { NFTItem } from '@rabby-wallet/rabby-api/dist/types';
 import RabbyInput from '../AntdOverwrite/Input';
 
 const NumberInputStyled = styled.div`

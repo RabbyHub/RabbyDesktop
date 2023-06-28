@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import clsx from 'clsx';
-import { NFTItem } from '@debank/rabby-api/dist/types';
+import { NFTItem } from '@rabby-wallet/rabby-api/dist/types';
 import { getChain } from '@/renderer/utils';
 import { Button, Tooltip } from 'antd';
 import { useNavigate } from 'react-router-dom';
