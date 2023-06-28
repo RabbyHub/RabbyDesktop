@@ -20,10 +20,13 @@ export abstract class Cex<Config> {
   private balance = new BigNumber(0);
 
   plusBalance(value: string) {
-    if (valueGreaterThan10(value)) {
-      this.balance = this.balance.plus(value);
-    }
+    this.balance = this.balance.plus(value);
     this.totalBalance = this.totalBalance.plus(value);
+  }
+
+  subBalance(value: string) {
+    this.balance = this.balance.minus(value);
+    this.totalBalance = this.totalBalance.minus(value);
   }
 
   getTotalBalance() {

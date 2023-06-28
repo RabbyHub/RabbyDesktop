@@ -20,6 +20,20 @@ export const valueGreaterThan10 = (value: any, target = '10') => {
   return bn.isGreaterThanOrEqualTo(target) || bn.isLessThan(0);
 };
 
+export const valueGreaterThanThreshold = (
+  value: any,
+  total: string,
+  target = '10'
+) => {
+  const bn = new BigNumber(value);
+  const threshold = new BigNumber(total).times(0.0001);
+  return (
+    (bn.isGreaterThanOrEqualTo(target) &&
+      bn.isGreaterThanOrEqualTo(threshold)) ||
+    bn.isLessThan(0)
+  );
+};
+
 /**
  * 合并列表，根据指定的字段累加对应的值
  */

@@ -13,6 +13,7 @@ import NFTLending from './NFTLending';
 import NFTFraction from './NFTFraction';
 import NFTP2PBorrower from './NFTP2PBorrower';
 import NFTP2PLender from './NFTP2PLender';
+import Cex from './Cex';
 
 export {
   Common,
@@ -30,4 +31,5 @@ export {
   NFTFraction,
   NFTP2PBorrower,
   NFTP2PLender,
+  Cex,
 };

@@ -52,6 +52,100 @@ export type MarginAccountResponse = {
   }[];
 };
 
+export type TokenFuturesAccountResponse = {
+  feeTier: number;
+  canTrade: boolean;
+  canDeposit: boolean;
+  canWithdraw: boolean;
+  updateTime: number;
+  assets: {
+    asset: string;
+    walletBalance: string;
+    unrealizedProfit: string;
+    marginBalance: string;
+    maintMargin: string;
+    initialMargin: string;
+    positionInitialMargin: string;
+    openOrderInitialMargin: string;
+    maxWithdrawAmount: string;
+    crossWalletBalance: string;
+    crossUnPnl: string;
+    availableBalance: string;
+  }[];
+  positions: {
+    symbol: string;
+    initialMargin: string;
+    maintMargin: string;
+    unrealizedProfit: string;
+    positionInitialMargin: string;
+    openOrderInitialMargin: string;
+    leverage: string;
+    isolated: boolean; // 是否是逐仓模式
+    positionSide: string;
+    entryPrice: string;
+    maxQty: string;
+    notionalValue: string;
+    isolatedWallet: string;
+    updateTime: number; // 最新更新时间
+    positionAmt: string; // 持仓数量
+  }[];
+};
+
+export type USDFuturesAccountResponse = {
+  feeTier: number;
+  canTrade: boolean;
+  canDeposit: boolean;
+  canWithdraw: boolean;
+  updateTime: number;
+  multiAssetsMargin: boolean;
+  totalInitialMargin: string;
+  totalMaintMargin: string;
+  totalWalletBalance: string;
+  totalUnrealizedProfit: string;
+  totalMarginBalance: string;
+  totalPositionInitialMargin: string;
+  totalOpenOrderInitialMargin: string;
+  totalCrossWalletBalance: string;
+  totalCrossUnPnl: string;
+  availableBalance: string;
+  maxWithdrawAmount: string;
+  assets: {
+    asset: string;
+    walletBalance: string;
+    unrealizedProfit: string;
+    marginBalance: string;
+    maintMargin: string;
+    initialMargin: string;
+    positionInitialMargin: string;
+    openOrderInitialMargin: string;
+    maxWithdrawAmount: string;
+    crossWalletBalance: string;
+    crossUnPnl: string;
+    availableBalance: string;
+    marginAvailable: boolean;
+    updateTime: number;
+  }[];
+  positions: {
+    symbol: string;
+    initialMargin: string;
+    maintMargin: string;
+    unrealizedProfit: string;
+    positionInitialMargin: string;
+    openOrderInitialMargin: string;
+    leverage: string;
+    isolated: boolean;
+    entryPrice: string;
+    maxNotional: string;
+    positionSide: string;
+    positionAmt: string;
+    notional: string;
+    isolatedWallet: string;
+    updateTime: number;
+    bidNotional: string;
+    askNotional: string;
+  }[];
+};
+
 export type IsolatedMarginAccountInfoResponse = {
   assets: {
     baseAsset: {
@@ -199,7 +293,7 @@ export type SpotAsset = Asset[];
 
 export type AssetWithRewards = {
   assets: Asset[];
-  rewards: Asset[];
+  // rewards: Asset[];
   usdtValue: string;
 };
 // 理财账户

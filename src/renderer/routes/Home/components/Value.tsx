@@ -80,12 +80,12 @@ const TokensAmount = ({
                 {ellipsisTokenSymbol(getTokenSymbol(item))}
               </TokenActionSymbol>
             </span>
-            {isDebt ? <DebtTag>Debt</DebtTag> : null}
             {item.price !== 0 &&
               withPrice &&
               `(${formatUsdValue(
                 new BigNumber(item.price).times(item.amount).toFixed()
               )})`}
+            {isDebt ? <DebtTag>Debt</DebtTag> : null}
           </TokenAmountWrapper>
         ))}
     </div>

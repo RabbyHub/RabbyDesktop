@@ -1,10 +1,11 @@
 import { PortfolioItem, TokenItem } from '@debank/rabby-api/dist/types';
-import { Asset, AssetWithRewards, FundingAsset, MarginAsset } from './type';
+import { Asset, FundingAsset, MarginAsset } from './type';
 import { tokenPrice } from './okx';
+import { bigNumberSum } from '../../util';
 
 // TODO rabby-api 里提供的类型和实际返回不符
 const basePortfolio = {
-  detail_types: ['common'],
+  detail_types: ['cex'],
   asset_token_list: [],
   asset_dict: {},
   update_at: new Date().getTime(),
@@ -40,10 +41,27 @@ export const toFundingPortfolioList = (fundingAsset: FundingAsset) => {
   })) as PortfolioItem[];
 };
 
-export const toMarginPortfolio = (
-  margin: MarginAsset,
-  name = 'Cross Margin'
-) => {
+export const toFinancePortfolio = (assets: Asset[]) => {
+  const usdtValue = Number(
+    bigNumberSum(...assets.map((item) => item.usdtValue))
+  );
+  return {
+    ...basePortfolio,
+    name: 'Grow' as any,
+    detail: {
+      description: '',
+      supply_token_list: assets.map(toTokenItem),
+      reward_token_list: [],
+    } as any,
+    stats: {
+      asset_usd_value: usdtValue,
+      debt_usd_value: 0,
+      net_usd_value: usdtValue,
+    },
+  };
+};
+
+export const toMarginPortfolio = (margin: MarginAsset) => {
   const asset_usd_value = margin.supplies.reduce(
     (acc, cur) => acc + Number(cur.usdtValue),
     0
@@ -52,10 +70,10 @@ export const toMarginPortfolio = (
     (acc, cur) => acc + Number(cur.usdtValue),
     0
   );
+  if (margin.supplies.length <= 0) return null;
   return {
     ...basePortfolio,
-    name: name as any,
-    detail_types: ['lending'],
+    name: 'Trading',
     detail: {
       supply_token_list: margin.supplies.map(toTokenItem),
       borrow_token_list: margin.borrows.map(toTokenItem),
@@ -64,37 +82,7 @@ export const toMarginPortfolio = (
     stats: {
       asset_usd_value,
       debt_usd_value,
-      net_usd_value: asset_usd_value,
+      net_usd_value: asset_usd_value - debt_usd_value,
     },
   };
-};
-
-export const toIsolatedMarginPortfolioList = (
-  isolatedMargin: MarginAsset[]
-) => {
-  return isolatedMargin.map((item) =>
-    toMarginPortfolio(item, 'Isolated Margin')
-  );
-};
-
-export const toFinancePortfolioList = (
-  assets: AssetWithRewards[],
-  name: string
-) => {
-  return assets.map((asset) => {
-    return {
-      ...basePortfolio,
-      name: 'Earn' as any,
-      detail: {
-        description: name,
-        supply_token_list: asset.assets.map(toTokenItem),
-        reward_token_list: asset.rewards.map(toTokenItem),
-      } as any,
-      stats: {
-        asset_usd_value: Number(asset.usdtValue),
-        debt_usd_value: 0,
-        net_usd_value: Number(asset.usdtValue),
-      },
-    };
-  });
 };
