@@ -98,8 +98,10 @@ export const TabTxList: React.FC<Props> = ({ onClose }) => {
           return (
             <div
               className={clsx(
-                'pt-[6px] py-[4px] text-white text-[14px] cursor-pointer border-0 border-b-2  border-solid',
-                activeKey === tab?.key ? 'border-[#fff]' : 'border-transparent'
+                'pt-[6px] py-[4px]  text-[14px] cursor-pointer border-0 border-b-2  border-solid',
+                activeKey === tab?.key
+                  ? 'border-[#8697FF] text-[#8697FF]'
+                  : 'border-transparent text-white'
               )}
               onClick={() => {
                 setActiveKey(tab?.key || null);
