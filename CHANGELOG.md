@@ -1,7 +1,18 @@
 
-v0.27.1 / 2023-06-21
+v0.28.0 / 2023-06-29
 ====================
 
+  * fix: redirect nft when switch account sendNFT (#490)
+  * fix: okx icon
+  * feat: gnosis safe support multiple chain (#489)
+  * feat: update currentVersion.
+  * feat: bundle support future for cex (#488)
+  * feat: nft (#487)
+
+v0.27.1-prod / 2023-06-21
+=========================
+
+  * Release v0.27.1-prod
   * feat: update currentVersion.md
   * fix: missing shortcuts about Edit. (#486)
 
