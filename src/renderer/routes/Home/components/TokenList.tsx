@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import classNames from 'classnames';
 import { Skeleton } from 'antd';
-import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
+import { ServerChain, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { formatNumber, formatUsdValue } from '@/renderer/utils/number';
 import TokenItemComp, { LoadingTokenItem } from './TokenItem';
 

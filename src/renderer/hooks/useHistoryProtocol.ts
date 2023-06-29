@@ -5,7 +5,7 @@ import {
   ComplexProtocol,
   ServerChain,
   TokenItem,
-} from '@debank/rabby-api/dist/types';
+} from '@rabby-wallet/rabby-api/dist/types';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { VIEW_TYPE } from '../routes/Home/type';
 

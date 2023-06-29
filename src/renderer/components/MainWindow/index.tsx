@@ -40,6 +40,8 @@ import { HomeBundle } from '@/renderer/routes/Bundle';
 import { useCustomRPC } from '@/renderer/hooks/useCustomRPC';
 import ModalUpdateInHome from '@/renderer/routes/Home/components/ModalUpdate';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { NFT } from '@/renderer/routes/NFT';
+import SendNFT from '@/renderer/routes/SendNFT';
 import styles from './index.module.less';
 
 import MainRoute from './MainRoute';
@@ -166,6 +168,24 @@ const router = createRouter([
             <SendToken />
           </>
         ),
+      },
+      {
+        path: 'home/nft',
+        element: <NFT />,
+        loader: () => {
+          return {
+            title: 'NFT',
+          } as MainWindowRouteData;
+        },
+      },
+      {
+        path: 'home/send-nft',
+        element: <SendNFT />,
+        loader: () => {
+          return {
+            title: 'Send NFT',
+          } as MainWindowRouteData;
+        },
       },
       {
         path: 'dapps/:dappId',

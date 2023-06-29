@@ -10,7 +10,7 @@ import {
   SwapItem,
   SwapTradeList,
   TokenItem,
-} from '@debank/rabby-api/dist/types';
+} from '@rabby-wallet/rabby-api/dist/types';
 import TokenWithChain from '@/renderer/components/TokenWithChain';
 import IconSwapArrow from '@/../assets/icons/swap/swap-arrow.svg?rc';
 import { formatAmount, formatUsdValue } from '@/renderer/utils/number';

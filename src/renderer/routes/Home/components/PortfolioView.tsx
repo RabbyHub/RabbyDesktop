@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
+import { ServerChain, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import AssociateDappModal from '@/renderer/components/AssociateDappModal';

@@ -1,4 +1,4 @@
-import { TokenItem } from '@debank/rabby-api/dist/types';
+import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { useMemo } from 'react';
 import BigNumber from 'bignumber.js';
 import { DisplayProtocol } from '../hooks/useHistoryProtocol';

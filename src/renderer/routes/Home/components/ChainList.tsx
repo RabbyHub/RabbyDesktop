@@ -38,13 +38,6 @@ const ChainList = ({
   const [selectChainServerId, setSelectChainServerId] = useState<null | string>(
     null
   );
-  // const targetChain = useMemo(() => {
-  //   if (!selectChainServerId) return null;
-  //   const chain = CHAINS_LIST.find(
-  //     (item) => item.serverId === selectChainServerId
-  //   );
-  //   return chain || null;
-  // }, [selectChainServerId]);
 
   const reset = () => {
     setSelectChainServerId(null);
@@ -99,7 +92,7 @@ const ChainList = ({
           onClick={() => handleSelectChain(item.id)}
         >
           <img
-            className={clsx('w-[32px] h-[32px]')}
+            className="w-[32px] h-[32px] rounded-[4px]"
             src={item.logo || item.logo_url}
           />
           <div className="flex flex-col space-y-[5px] hover:text-[#8697FF]">

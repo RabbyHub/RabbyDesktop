@@ -5,7 +5,7 @@ import {
   INTERNAL_REQUEST_ORIGIN,
   KEYRING_CLASS,
 } from '@/renderer/utils/constant';
-import { ExplainTxResponse } from '@debank/rabby-api/dist/types';
+import { ExplainTxResponse } from '@rabby-wallet/rabby-api/dist/types';
 import {
   SafeInfo,
   SafeTransactionItem,

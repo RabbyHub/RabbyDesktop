@@ -1,7 +1,10 @@
 import { TransactionWebsite } from '@/renderer/components/TransactionWebsite';
 import { getChain } from '@/renderer/utils';
 import { numberWithCommasIsLtOne } from '@/renderer/utils/number';
-import { TxDisplayItem, TxHistoryItem } from '@debank/rabby-api/dist/types';
+import {
+  TxDisplayItem,
+  TxHistoryItem,
+} from '@rabby-wallet/rabby-api/dist/types';
 import classNames from 'classnames';
 import styles from '../index.module.less';
 

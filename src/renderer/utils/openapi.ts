@@ -1,4 +1,4 @@
-import { OpenApiService } from '@debank/rabby-api';
+import { OpenApiService } from '@rabby-wallet/rabby-api';
 
 export const INITIAL_OPENAPI_URL = 'https://api.rabby.io';
 

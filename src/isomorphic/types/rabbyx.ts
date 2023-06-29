@@ -5,7 +5,7 @@ import type {
   TotalBalanceResponse,
   TokenItem,
   Chain,
-} from '@debank/rabby-api/dist/types';
+} from '@rabby-wallet/rabby-api/dist/types';
 
 import type { DEX_ENUM } from '@rabby-wallet/rabby-swap';
 import type { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
@@ -54,6 +54,10 @@ export interface PreferenceState {
   AddedToken: AddedToken;
   tokenApprovalChain: Record<string, import('@debank/common').CHAINS_ENUM>;
   nftApprovalChain: Record<string, import('@debank/common').CHAINS_ENUM>;
+}
+export interface Token {
+  address: string;
+  chain: string;
 }
 
 interface DisplayKeyring {
@@ -167,7 +171,7 @@ export interface SwapState {
 }
 
 type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
-type OpenApiService = import('@debank/rabby-api').OpenApiService;
+type OpenApiService = import('@rabby-wallet/rabby-api').OpenApiService;
 
 export interface RPCItem {
   url: string;
@@ -526,6 +530,27 @@ export type RabbyXMethod = {
   ) => void;
   'walletController.gridPlusIsConnect': () => boolean;
   'walletController.isUseLedgerLive': () => boolean;
+  'walletController.transferNFT': (
+    {
+      to,
+      chainServerId,
+      contractId,
+      abi,
+      tokenId,
+      amount,
+    }: {
+      to: string;
+      chainServerId: string;
+      contractId: string;
+      abi: 'ERC721' | 'ERC1155';
+      tokenId: string;
+      amount?: number | undefined;
+    },
+    $ctx?: any
+  ) => Promise<void>;
+  'walletController.getCollectionStarred': () => Token[];
+  'walletController.addCollectionStarred': (token: Token) => void;
+  'walletController.removeCollectionStarred': (token: Token) => void;
 } & {
   'openapi.setHost': OpenApiService['setHost'];
   'openapi.getHost': OpenApiService['getHost'];
@@ -585,6 +610,7 @@ export type RabbyXMethod = {
   'openapi.getSwapTradeList': OpenApiService['getSwapTradeList'];
   'openapi.postSwap': OpenApiService['postSwap'];
   'openapi.getSummarizedAssetList': OpenApiService['getSummarizedAssetList'];
+  'openapi.collectionList': OpenApiService['collectionList'];
 };
 
 export type RabbyXMethods = {

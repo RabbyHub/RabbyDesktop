@@ -3,5 +3,5 @@
 ./node_modules/.bin/patch-package \
   @debank/common \
   @rabby-wallet/rabby-swap \
-  @debank/rabby-api \
+  @rabby-wallet/rabby-api \
   --exclude 'nothing'

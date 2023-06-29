@@ -14,7 +14,7 @@ import {
   L2_ENUMS,
   KEYRING_CLASS,
 } from '@/renderer/utils/constant';
-import { TokenItem, GasLevel } from '@debank/rabby-api/dist/types';
+import { TokenItem, GasLevel } from '@rabby-wallet/rabby-api/dist/types';
 import { UIContactBookItem } from '@/isomorphic/types/contact';
 import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';

@@ -1,6 +1,6 @@
 import { ReactNode, useMemo } from 'react';
 import dayjs from 'dayjs';
-import { TokenItem } from '@debank/rabby-api/dist/types';
+import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import {
   formatUsdValue,
   formatAmount,
@@ -80,12 +80,12 @@ const TokensAmount = ({
                 {ellipsisTokenSymbol(getTokenSymbol(item))}
               </TokenActionSymbol>
             </span>
-            {isDebt ? <DebtTag>Debt</DebtTag> : null}
             {item.price !== 0 &&
               withPrice &&
               `(${formatUsdValue(
                 new BigNumber(item.price).times(item.amount).toFixed()
               )})`}
+            {isDebt ? <DebtTag>Debt</DebtTag> : null}
           </TokenAmountWrapper>
         ))}
     </div>

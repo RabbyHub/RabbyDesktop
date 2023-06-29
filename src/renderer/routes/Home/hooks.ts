@@ -1,5 +1,5 @@
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
-import { ServerChain, TokenItem } from '@debank/rabby-api/dist/types';
+import { ServerChain, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import BigNumber from 'bignumber.js';
 import { sortBy } from 'lodash';
 import { useMemo, useState } from 'react';

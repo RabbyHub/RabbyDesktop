@@ -1,5 +1,5 @@
 import React from 'react';
-import { PortfolioItem } from '@debank/rabby-api/dist/types';
+import { PortfolioItem } from '@rabby-wallet/rabby-api/dist/types';
 import { Table } from '../components/Table';
 import Panel from '../components/Panel';
 import * as Value from '../components/Value';
