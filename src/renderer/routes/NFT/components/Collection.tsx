@@ -50,7 +50,7 @@ export const Collection = (props: CollectionProps) => {
         {item?.nft_list?.map((e) => {
           return (
             <NFTAvatar
-              className="w-60 h-60 rounder-4 overflow-hidden"
+              className="w-60 h-60"
               content={e.content}
               type={e.content_type}
               amount={e.amount}

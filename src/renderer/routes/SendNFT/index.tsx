@@ -9,7 +9,7 @@ import clsx from 'clsx';
 import BigNumber from 'bignumber.js';
 import { Input, Form, message, Button } from 'antd';
 import { isValidAddress } from 'ethereumjs-util';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { NFTItem } from '@rabby-wallet/rabby-api/dist/types';
 import { useRbiSource } from '@/renderer/hooks/useRbiSource';
 import { Account } from '@/isomorphic/types/rabbyx';
@@ -33,6 +33,8 @@ import { copyText } from '@/renderer/utils/clipboard';
 import { TipsWrapper } from '@/renderer/components/TipWrapper';
 import styled from 'styled-components';
 import { openExternalUrl } from '@/renderer/ipcRequest/app';
+import { usePrevious } from 'react-use';
+import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { ContactListModal } from '../SendToken/components/ContactListModal';
 import { ContactEditModal } from '../SendToken/components/ContactEditModal';
 import { ChainSelect } from '../Swap/component/ChainSelect';
@@ -306,6 +308,7 @@ const SendNFTWrapper = styled.div`
 `;
 
 const SendNFT = () => {
+  const navigate = useNavigate();
   const location = useLocation();
   const { state } = location;
   const [searchParams] = useSearchParams();
@@ -328,6 +331,20 @@ const SendNFT = () => {
   );
 
   const amountInputEl = useRef<any>(null);
+
+  const { currentAccount: currentAddr } = useCurrentAccount();
+
+  const previousAddr = usePrevious(currentAddr?.address);
+
+  useEffect(() => {
+    if (
+      previousAddr &&
+      currentAddr?.address &&
+      previousAddr !== currentAddr?.address
+    ) {
+      navigate('/mainwin/home/nft');
+    }
+  }, [currentAddr?.address, navigate, previousAddr]);
 
   const { useForm } = Form;
 
@@ -667,7 +684,7 @@ const SendNFT = () => {
               <NFTAvatar
                 type={nftItem.content_type}
                 content={nftItem.content}
-                className="w-[80px] h-[80px] rounded-[10px] overflow-hidden"
+                className="w-[80px] h-[80px] rounded-[10px]"
               />
               <div className="nft-info__detail">
                 <h3>{nftItem.name}</h3>
