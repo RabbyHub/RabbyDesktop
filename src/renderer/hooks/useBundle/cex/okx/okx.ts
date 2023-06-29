@@ -115,6 +115,9 @@ export class OKX extends Cex<OkxConfig> {
           supplies: result.marginAsset.supplies.filter((asset) => {
             return valueGreaterThanThreshold(asset.usdtValue, totalBalance);
           }),
+          borrows: result.marginAsset.borrows.filter((asset) => {
+            return valueGreaterThanThreshold(asset.usdtValue, totalBalance);
+          }),
         }
       : result.marginAsset;
     result.financeAsset = result.financeAsset.filter((asset) => {
@@ -270,7 +273,6 @@ export class OKX extends Cex<OkxConfig> {
           value: item.crossLiab,
           usdtValue,
         });
-        this.subBalance(usdtValue);
       }
     });
 

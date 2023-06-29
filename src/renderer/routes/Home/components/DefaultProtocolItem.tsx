@@ -377,7 +377,9 @@ const DefaultProtocolItem = ({
               overlayClassName="max-w-full"
               title={
                 <div className="whitespace-nowrap">
-                  {'Options, and assets<$10 are not included'}
+                  {
+                    'Options, assets < $10 or < 0.01% of total balance are not included'
+                  }
                 </div>
               }
             >

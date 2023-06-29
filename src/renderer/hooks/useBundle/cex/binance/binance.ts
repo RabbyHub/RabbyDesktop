@@ -197,12 +197,18 @@ export class Binance extends Cex<BinanceConfig> {
           supplies: result.marginAsset.supplies.filter((asset) => {
             return valueGreaterThanThreshold(asset.usdtValue, totalBalance);
           }),
+          borrows: result.marginAsset.borrows.filter((asset) => {
+            return valueGreaterThanThreshold(asset.usdtValue, totalBalance);
+          }),
         }
       : result.marginAsset;
     result.isolatedMarginAsset = result.isolatedMarginAsset.map((item) => {
       return {
         ...item,
         supplies: item.supplies.filter((asset) =>
+          valueGreaterThanThreshold(asset.usdtValue, totalBalance)
+        ),
+        borrows: item.borrows.filter((asset) =>
           valueGreaterThanThreshold(asset.usdtValue, totalBalance)
         ),
       };

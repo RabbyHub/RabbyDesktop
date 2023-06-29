@@ -125,7 +125,7 @@ export const useOKX = () => {
     wrapped_token_id: OKX.cexName,
     name: OKX.cexName,
     native_token_id: OKX.cexName,
-    logo_url: 'rabby-internal://assets/icons/swap/okx.png',
+    logo_url: 'rabby-internal://assets/icons/bundle/okx.png',
   } as DisplayChainWithWhiteLogo & {
     usd_value: number;
   };
