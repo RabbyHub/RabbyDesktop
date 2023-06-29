@@ -9,7 +9,7 @@ import {
 } from '@rabby-wallet/rabby-swap/dist/quote';
 import BigNumber from 'bignumber.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { TokenItem, Tx } from '@debank/rabby-api/dist/types';
+import { TokenItem, Tx } from '@rabby-wallet/rabby-api/dist/types';
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useLocation } from 'react-router-dom';
 import { useAsync, useDebounce } from 'react-use';

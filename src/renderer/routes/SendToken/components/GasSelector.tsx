@@ -8,7 +8,7 @@ import {
   GAS_LEVEL_TEXT,
   MINIMUM_GAS_LIMIT,
 } from '@/renderer/utils/constant';
-import { GasLevel, TokenItem } from '@debank/rabby-api/dist/types';
+import { GasLevel, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { formatAmount } from '@/renderer/utils/number';
 import { Modal } from '@/renderer/components/Modal/Modal';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';

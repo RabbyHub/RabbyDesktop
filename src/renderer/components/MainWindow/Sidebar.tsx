@@ -63,6 +63,11 @@ const StaticEntries = [
     logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/home.svg',
   },
   {
+    path: '/mainwin/home/nft',
+    title: 'NFT',
+    logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/nft.svg',
+  },
+  {
     path: '/mainwin/home/send-token',
     title: 'Send',
     logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/send.svg',
@@ -372,6 +377,8 @@ export default function MainWindowSidebar() {
                   const pathname =
                     location.pathname === '/mainwin/home/bundle'
                       ? '/mainwin/home'
+                      : location.pathname === '/mainwin/home/send-nft'
+                      ? '/mainwin/home/send-token'
                       : location.pathname;
 
                   return (

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tooltip } from 'antd';
-import { PortfolioItem } from '@debank/rabby-api/dist/types';
+import { PortfolioItem } from '@rabby-wallet/rabby-api/dist/types';
 import styled from 'styled-components';
 import { sortBy } from 'lodash';
 import LabelWithIcon from '@/renderer/components/LabelWithIcon';

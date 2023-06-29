@@ -1,4 +1,4 @@
-import { TokenItem } from '@debank/rabby-api/dist/types';
+import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { Button, Tooltip } from 'antd';
 import { useCallback, useMemo, useState, memo, DetailedHTMLProps } from 'react';
 import clsx from 'clsx';

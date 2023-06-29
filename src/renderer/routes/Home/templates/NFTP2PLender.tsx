@@ -1,4 +1,4 @@
-import { PortfolioItem } from '@debank/rabby-api/dist/types';
+import { PortfolioItem } from '@rabby-wallet/rabby-api/dist/types';
 import React from 'react';
 import Panel from '../components/Panel';
 import * as Value from '../components/Value';

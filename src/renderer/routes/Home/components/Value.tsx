@@ -1,6 +1,6 @@
 import { ReactNode, useMemo } from 'react';
 import dayjs from 'dayjs';
-import { TokenItem } from '@debank/rabby-api/dist/types';
+import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import {
   formatUsdValue,
   formatAmount,

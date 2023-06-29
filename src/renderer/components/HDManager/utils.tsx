@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
-import { UsedChain } from '@debank/rabby-api/dist/types';
+import { UsedChain } from '@rabby-wallet/rabby-api/dist/types';
 import { message } from 'antd';
 import PQueue from 'p-queue';
 import React from 'react';

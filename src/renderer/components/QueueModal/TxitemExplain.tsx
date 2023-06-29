@@ -1,5 +1,5 @@
 import { splitNumberByStep } from '@/renderer/utils/number';
-import { ExplainTxResponse } from '@debank/rabby-api/dist/types';
+import { ExplainTxResponse } from '@rabby-wallet/rabby-api/dist/types';
 import React from 'react';
 
 const IconUnknown = 'rabby-internal://assets/icons/queue/unknown.svg';

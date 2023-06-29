@@ -1,7 +1,10 @@
 import NFTAvatar from '@/renderer/components/NFTAvatar';
 import { numberWithCommasIsLtOne } from '@/renderer/utils/number';
 import { getTokenSymbol } from '@/renderer/utils';
-import { TxDisplayItem, TxHistoryItem } from '@debank/rabby-api/dist/types';
+import {
+  TxDisplayItem,
+  TxHistoryItem,
+} from '@rabby-wallet/rabby-api/dist/types';
 import classNames from 'classnames';
 import styles from '../index.module.less';
 

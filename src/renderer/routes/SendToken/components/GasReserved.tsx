@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { TokenItem } from '@debank/rabby-api/dist/types';
+import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { formatAmount } from '@/renderer/utils/number';
 import { getTokenSymbol } from '@/renderer/utils';
 

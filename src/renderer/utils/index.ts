@@ -1,6 +1,6 @@
 import { keyBy } from 'lodash';
-import { CHAINS } from '@debank/common';
-import { TokenItem } from '@debank/rabby-api/dist/types';
+import { CHAINS, CHAINS_ENUM, Chain } from '@debank/common';
+import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 /**
  *
  * @param origin (exchange.pancakeswap.finance)
@@ -44,3 +44,24 @@ export const getTokenSymbol = (token?: TokenItem) => {
 
   return token.display_symbol || token.symbol || token.optimized_symbol || '';
 };
+
+/**
+ * @description safe find chain, if not found, return fallback(if provided) or null
+ */
+export function findChainByEnum(
+  chainEnum?: CHAINS_ENUM | string,
+  options?: {
+    fallback?: true | CHAINS_ENUM;
+  }
+): Chain | null {
+  const toFallbackEnum: CHAINS_ENUM | null = options?.fallback
+    ? typeof options?.fallback === 'boolean'
+      ? CHAINS_ENUM.ETH
+      : options?.fallback
+    : null;
+  const toFallbackChain = toFallbackEnum ? CHAINS[toFallbackEnum] : null;
+
+  if (!chainEnum) return toFallbackChain;
+
+  return CHAINS[chainEnum as unknown as CHAINS_ENUM] || toFallbackChain;
+}
