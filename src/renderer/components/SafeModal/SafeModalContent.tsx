@@ -22,52 +22,6 @@ export const SafeModalContent: React.FC<Props> = ({ onSuccess }) => {
     address: string;
     chain: Chain;
   }>();
-  const [, setLoading] = React.useState(false);
-
-  // const [run] = useWalletRequest(walletController.importGnosisAddress, {
-  //   onSuccess(accounts) {
-  //     // success
-  //     onSuccess(accounts);
-  //   },
-  //   onError(err) {
-  //     form.setFields([
-  //       {
-  //         name: 'address',
-  //         errors: [err?.message || 'Not a valid address'],
-  //       },
-  //     ]);
-  //   },
-  // });
-
-  // const onAdd = React.useCallback(async () => {
-  //   setLoading(true);
-  //   const { address, chain } = form.getFieldsValue();
-  //   if (!chain) {
-  //     form.setFields([
-  //       {
-  //         name: 'address',
-  //         errors: ['Please select a chain'],
-  //       },
-  //     ]);
-  //     setLoading(false);
-  //     return;
-  //   }
-  //   try {
-  //     await checkAddress(address, chain);
-  //   } catch (err: any) {
-  //     form.setFields([
-  //       {
-  //         name: 'address',
-  //         errors: [err?.message || 'Not a valid address'],
-  //       },
-  //     ]);
-  //     setLoading(false);
-  //     return;
-  //   }
-
-  //   // await run(address, chain.id.toString());
-  //   setLoading(false);
-  // }, [form, run]);
 
   const onValuesChange = React.useCallback(() => {
     form.setFields([
@@ -81,10 +35,6 @@ export const SafeModalContent: React.FC<Props> = ({ onSuccess }) => {
       },
     ]);
   }, [form]);
-
-  // const address = Form.useWatch('address', form);
-  // const chain = Form.useWatch('chain', form);
-  // const disabledSubmit = !address || !chain || loading;
 
   const [errorMessage, setErrorMessage] = useState('');
 
