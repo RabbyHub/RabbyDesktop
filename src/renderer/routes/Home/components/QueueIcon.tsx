@@ -8,9 +8,14 @@ import IconQueue from '../../../../../assets/icons/queue/queue.svg?rc';
 
 export const QueueIcon: React.FC = () => {
   const { currentAccount: account } = useCurrentAccount();
-  const { data, runAsync: fetchPendingCount } = useGnosisPendingTxs({
-    address: account?.address,
-  });
+  const { data, runAsync: fetchPendingCount } = useGnosisPendingTxs(
+    {
+      address: account?.address,
+    },
+    {
+      refreshOnWindowFocus: true,
+    }
+  );
   const pendingCount = data?.total || 0;
   const { showZSubview } = useZPopupLayerOnMain();
 

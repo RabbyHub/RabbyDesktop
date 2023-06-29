@@ -57,7 +57,11 @@ interface Props {
 export const TabTxList: React.FC<Props> = ({ onClose }) => {
   const { currentAccount: account } = useCurrentAccount();
   const { data: networks } = useGnosisNetworks({ address: account?.address });
-  const { data: pendingTxs, loading } = useGnosisPendingTxs({
+  const {
+    data: pendingTxs,
+    loading,
+    runAsync: fetchPendingTxs,
+  } = useGnosisPendingTxs({
     address: account?.address,
   });
 
@@ -115,6 +119,7 @@ export const TabTxList: React.FC<Props> = ({ onClose }) => {
             loading={loading}
             usefulChain={activeKey}
             pendingTxs={activeData?.txs || []}
+            onSign={fetchPendingTxs}
           />
         )}
       </div>

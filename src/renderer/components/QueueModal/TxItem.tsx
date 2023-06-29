@@ -24,6 +24,7 @@ export interface Props {
   networkId: string;
   safeInfo: SafeInfo;
   onSubmit(data: SafeTransactionItem): void;
+  onSign(data: SafeTransactionItem): void;
 }
 
 export const TxItem: React.FC<Props> = ({
@@ -31,6 +32,7 @@ export const TxItem: React.FC<Props> = ({
   networkId,
   safeInfo,
   onSubmit,
+  onSign,
 }) => {
   const [explain, setExplain] = React.useState<ExplainTxResponse | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -80,7 +82,9 @@ export const TxItem: React.FC<Props> = ({
     await walletController.buildGnosisTransaction(
       currentAccount!.address,
       tmpBuildAccount,
-      params
+      params,
+      safeInfo.version,
+      networkId
     );
     await walletController.setGnosisTransactionHash(data.safeTxHash);
     await Promise.all(
@@ -92,7 +96,7 @@ export const TxItem: React.FC<Props> = ({
       })
     );
     setIsLoading(false);
-    walletController.sendRequest({
+    await walletController.sendRequest({
       method: 'eth_sendTransaction',
       params: [
         {
@@ -101,6 +105,7 @@ export const TxItem: React.FC<Props> = ({
         },
       ],
     });
+    onSign(data);
   };
 
   React.useEffect(() => {

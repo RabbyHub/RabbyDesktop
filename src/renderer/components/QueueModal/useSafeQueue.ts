@@ -20,7 +20,7 @@ export const useSafeQueue = ({
   pendingTxs?: SafeTransactionItem[];
   networkId: string;
 }) => {
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [transactionsGroup, setTransactionsGroup] = React.useState<
     Record<string, SafeTransactionItem[]>
   >({});
@@ -112,7 +112,6 @@ export const useSafeQueue = ({
         const transactions = txs
           .filter((_, index) => validateRes[index])
           .sort((a, b) => {
-            console.log(a, b);
             return dayjs(a.submissionDate).isAfter(dayjs(b.submissionDate))
               ? -1
               : 1;

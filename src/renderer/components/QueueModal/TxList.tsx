@@ -16,6 +16,7 @@ import { SelectAddressModal } from './SelectAddressModal';
 
 interface Props {
   onClose(): void;
+  onSign(): void;
   usefulChain: CHAINS_ENUM;
   pendingTxs?: SafeTransactionItem[];
   loading?: boolean;
@@ -23,6 +24,7 @@ interface Props {
 
 export const TxList: React.FC<Props> = ({
   onClose,
+  onSign,
   usefulChain: chain,
   pendingTxs,
   loading,
@@ -130,6 +132,7 @@ export const TxList: React.FC<Props> = ({
             networkId={networkId}
             safeInfo={safeInfo!}
             onSubmit={handleSubmit}
+            onSign={onSign}
           />
         ))
       )}

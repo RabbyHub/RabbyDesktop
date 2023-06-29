@@ -11,6 +11,7 @@ export interface Props {
   networkId: string;
   safeInfo: SafeInfo;
   onSubmit: (data: SafeTransactionItem) => void;
+  onSign: (data: SafeTransactionItem) => void;
 }
 
 export const TxItemGroup: React.FC<Props> = ({
@@ -18,6 +19,7 @@ export const TxItemGroup: React.FC<Props> = ({
   networkId,
   safeInfo,
   onSubmit,
+  onSign,
 }) => {
   return (
     <div
@@ -52,6 +54,7 @@ export const TxItemGroup: React.FC<Props> = ({
           networkId={networkId}
           safeInfo={safeInfo}
           onSubmit={onSubmit}
+          onSign={onSign}
         />
       ))}
     </div>
