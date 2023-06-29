@@ -4,12 +4,13 @@ import { atom, useAtom } from 'jotai';
 import { sortBy } from 'lodash';
 import { saveBundleAccountsBalance } from '../shared';
 import { Binance } from '../cex/binance/binance';
-import { mergeList, bigNumberSum } from '../util';
+import { mergeList, bigNumberSum, valueGreaterThanThreshold } from '../util';
 import { useBundleAccount } from '../useBundleAccount';
 import { DisplayProtocol } from '../../useHistoryProtocol';
 import {
   toFinancePortfolioList,
   toFundingPortfolioList,
+  toFuturePortfolio,
   toIsolatedMarginPortfolioList,
   toMarginPortfolio,
   toSpotPortfolioList,
@@ -88,7 +89,6 @@ export const useBinance = () => {
       );
     });
     setAssets(inBundleAssets);
-
     // 计算合并资产
     const fundingAssets = inBundleAssets.flatMap((item) => item.fundingAsset);
     const spotAssets = inBundleAssets.flatMap((item) => item.spotAsset);
@@ -137,41 +137,47 @@ export const useBinance = () => {
   // 把币安资产数据转换成 rabby 资产数据类型
   const protocolData = React.useMemo(() => {
     // 资金账户
-    const fundingPortfolioList = toFundingPortfolioList(mergedFundingAsset);
+    const fundingPortfolio = toFundingPortfolioList(mergedFundingAsset);
     // 现货账户
-    const spotPortfolioList = toSpotPortfolioList(mergedSpotAsset);
+    const spotPortfolio = toSpotPortfolioList(mergedSpotAsset);
     const otherPortfolioList =
       assets?.flatMap((item) => {
-        // 理财账户(活期)
-        const flexibleList = toFinancePortfolioList(
-          item.financeAsset.flexible,
-          'Flexible'
-        );
-        // 理财账户(Staking)
-        const stakeList = toFinancePortfolioList(
-          item.financeAsset.stake,
-          'Stake'
-        );
-        // 理财账户(定期)
-        const lockedList = toFinancePortfolioList(
-          item.financeAsset.fixed,
-          'Locked'
-        );
+        const earnPortfolio = toFinancePortfolioList([
+          ...item.financeAsset.flexible,
+          ...item.financeAsset.stake,
+          ...item.financeAsset.fixed,
+        ]);
         // 全仓账户
         const marginPortfolio =
           item.marginAsset && toMarginPortfolio(item.marginAsset);
         // 逐仓账户
-        const isolatedMarginList = toIsolatedMarginPortfolioList(
+        const isolatedMargin = toIsolatedMarginPortfolioList(
           item.isolatedMarginAsset
         );
-
-        return [
-          ...flexibleList,
-          ...lockedList,
-          ...stakeList,
-          ...isolatedMarginList,
-          ...(marginPortfolio ? [marginPortfolio] : []),
-        ];
+        // U本位合约
+        const USDFuturePortfolio = toFuturePortfolio(
+          item.usdFutures,
+          'Futures(USD-M)'
+        );
+        // 币本位合约
+        const TokenFuturePortfolio = toFuturePortfolio(
+          item.tokenFutures,
+          'Futures(COIN-M)'
+        );
+        const result = [...(marginPortfolio ? [marginPortfolio] : [])];
+        if (earnPortfolio) {
+          result.push(earnPortfolio);
+        }
+        if (isolatedMargin) {
+          result.push(isolatedMargin);
+        }
+        if (item.usdFutures.length > 0) {
+          result.push(USDFuturePortfolio);
+        }
+        if (item.tokenFutures.length > 0) {
+          result.push(TokenFuturePortfolio);
+        }
+        return result;
       }) ?? [];
 
     const data: DisplayProtocol = {
@@ -183,12 +189,14 @@ export const useBinance = () => {
       logo_url: 'rabby-internal://assets/icons/bundle/binance-chain.png',
       has_supported_portfolio: false,
       tvl: 0,
-      portfolio_item_list: [
-        ...fundingPortfolioList,
-        ...spotPortfolioList,
-        ...otherPortfolioList,
-      ],
+      portfolio_item_list: [...otherPortfolioList],
     };
+    if (fundingPortfolio) {
+      data.portfolio_item_list.push(fundingPortfolio);
+    }
+    if (spotPortfolio) {
+      data.portfolio_item_list.push(spotPortfolio);
+    }
 
     data.portfolio_item_list = sortBy(
       data.portfolio_item_list,

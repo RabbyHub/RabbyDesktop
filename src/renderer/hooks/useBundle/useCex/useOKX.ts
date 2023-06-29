@@ -9,9 +9,8 @@ import { DisplayProtocol } from '../../useHistoryProtocol';
 import { ERROR } from '../error';
 import { OKX } from '../cex/okx/okx';
 import {
-  toFinancePortfolioList,
+  toFinancePortfolio,
   toFundingPortfolioList,
-  toIsolatedMarginPortfolioList,
   toMarginPortfolio,
 } from '../cex/okx/util';
 
@@ -126,7 +125,7 @@ export const useOKX = () => {
     wrapped_token_id: OKX.cexName,
     name: OKX.cexName,
     native_token_id: OKX.cexName,
-    logo_url: 'rabby-internal://assets/icons/swap/okx.png',
+    logo_url: 'rabby-internal://assets/icons/bundle/okx.png',
   } as DisplayChainWithWhiteLogo & {
     usd_value: number;
   };
@@ -141,30 +140,11 @@ export const useOKX = () => {
         // 全仓账户
         const marginPortfolio =
           item.marginAsset && toMarginPortfolio(item.marginAsset);
-
-        // 逐仓账户
-        const isolatedMarginList = toIsolatedMarginPortfolioList(
-          item.isolatedMarginAsset
-        );
-
-        // 理财账户(Staking)
-        const stakeList = toFinancePortfolioList(item.stakingAsset, 'Stake');
-
-        // 理财账户(DeFi)
-        const deFiList = toFinancePortfolioList(item.defiAsset, 'DeFi');
-
-        // 余币宝
-        const savingsList = toFinancePortfolioList(
-          item.savingsAsset,
-          'Savings'
-        );
-
+        const financePortfolio =
+          item.financeAsset.length > 0 && toFinancePortfolio(item.financeAsset);
         return [
-          ...stakeList,
-          ...deFiList,
-          ...savingsList,
-          ...isolatedMarginList,
           ...(marginPortfolio ? [marginPortfolio] : []),
+          ...(financePortfolio ? [financePortfolio] : []),
         ];
       }) ?? [];
 

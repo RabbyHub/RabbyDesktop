@@ -20,7 +20,9 @@ export type AccountBalanceResponse = {
     ccy: string;
     availEq: string;
     crossLiab: string;
+    cashBal: string;
     availBal: string;
+    eq: string;
   }[];
 }[];
 

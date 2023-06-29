@@ -284,6 +284,28 @@ type ChannelInvokePayload = {
     ];
     response: any;
   };
+  'binance-usd-futures-sdk': {
+    send: [
+      {
+        apiKey: string;
+        apiSecret: string;
+        method: string;
+        params?: any[];
+      }
+    ];
+    response: any;
+  };
+  'binance-token-futures-sdk': {
+    send: [
+      {
+        apiKey: string;
+        apiSecret: string;
+        method: string;
+        params?: any[];
+      }
+    ];
+    response: any;
+  };
   'okx-sdk': {
     send: [
       {

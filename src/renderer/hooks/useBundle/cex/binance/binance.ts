@@ -21,8 +21,10 @@ import {
   CoinInfoResponse,
   BswapLiquidityResponse,
   BswapUnclaimedRewardsResponse,
+  USDFuturesAccountResponse,
+  TokenFuturesAccountResponse,
 } from './type';
-import { valueGreaterThan10, bigNumberSum } from '../../util';
+import { bigNumberSum, valueGreaterThanThreshold } from '../../util';
 import { Cex } from '../utils/cex';
 
 // 不在该数组中的资产，不应被统计
@@ -78,6 +80,46 @@ export class Binance extends Cex<BinanceConfig> {
     }
   }
 
+  async invokeUSDFutures<T>(method: string, params?: any[]): Promise<T> {
+    try {
+      return await window.rabbyDesktop.ipcRenderer.invoke(
+        'binance-usd-futures-sdk',
+        {
+          apiKey: this.config.apiKey,
+          apiSecret: this.config.apiSecret,
+          method,
+          params,
+        }
+      );
+    } catch (e: any) {
+      if (e.message.includes(ERROR.INVALID_KEY)) {
+        this.showInvalidKeyModal(this.config.apiKey);
+      }
+      // 未知错误
+      throw new Error(ERROR.UNKNOWN);
+    }
+  }
+
+  async invokeTokenFutures<T>(method: string, params?: any[]): Promise<T> {
+    try {
+      return await window.rabbyDesktop.ipcRenderer.invoke(
+        'binance-token-futures-sdk',
+        {
+          apiKey: this.config.apiKey,
+          apiSecret: this.config.apiSecret,
+          method,
+          params,
+        }
+      );
+    } catch (e: any) {
+      if (e.message.includes(ERROR.INVALID_KEY)) {
+        this.showInvalidKeyModal(this.config.apiKey);
+      }
+      // 未知错误
+      throw new Error(ERROR.UNKNOWN);
+    }
+  }
+
   /**
    * 只允许只读权限
    * 错误类型
@@ -115,9 +157,9 @@ export class Binance extends Cex<BinanceConfig> {
       this.stakingProductPosition('F_DEFI'),
       this.stakingProductPosition('L_DEFI'),
       this.bswapLiquidity(),
+      this.USDFutures(),
+      this.tokenFutures(),
     ]);
-
-    console.log('binance', assets);
 
     // 获取所有 token 对应的 usdt 价值
     await this.getUSDTPrices();
@@ -138,8 +180,71 @@ export class Binance extends Cex<BinanceConfig> {
           ...this.calcBswapLiquidity(assets[9]),
         ],
       },
+      usdFutures: this.calcUSDFutures(assets[10]),
+      tokenFutures: this.calcTokenFutures(assets[11]),
     };
 
+    const totalBalance = this.getTotalBalance();
+    result.fundingAsset = result.fundingAsset.filter((asset) => {
+      return valueGreaterThanThreshold(asset.usdtValue, totalBalance);
+    });
+    result.spotAsset = result.spotAsset.filter((asset) => {
+      return valueGreaterThanThreshold(asset.usdtValue, totalBalance);
+    });
+    result.marginAsset = result.marginAsset
+      ? {
+          ...result.marginAsset,
+          supplies: result.marginAsset.supplies.filter((asset) => {
+            return valueGreaterThanThreshold(asset.usdtValue, totalBalance);
+          }),
+          borrows: result.marginAsset.borrows.filter((asset) => {
+            return valueGreaterThanThreshold(asset.usdtValue, totalBalance);
+          }),
+        }
+      : result.marginAsset;
+    result.isolatedMarginAsset = result.isolatedMarginAsset.map((item) => {
+      return {
+        ...item,
+        supplies: item.supplies.filter((asset) =>
+          valueGreaterThanThreshold(asset.usdtValue, totalBalance)
+        ),
+        borrows: item.borrows.filter((asset) =>
+          valueGreaterThanThreshold(asset.usdtValue, totalBalance)
+        ),
+      };
+    });
+    result.financeAsset = {
+      flexible: result.financeAsset.flexible.map((item) => {
+        return {
+          ...item,
+          assets: item.assets.filter((asset) =>
+            valueGreaterThanThreshold(asset.usdtValue, totalBalance)
+          ),
+        };
+      }),
+      fixed: result.financeAsset.fixed.map((item) => {
+        return {
+          ...item,
+          assets: item.assets.filter((asset) =>
+            valueGreaterThanThreshold(asset.usdtValue, totalBalance)
+          ),
+        };
+      }),
+      stake: result.financeAsset.stake.map((item) => {
+        return {
+          ...item,
+          assets: item.assets.filter((asset) =>
+            valueGreaterThanThreshold(asset.usdtValue, totalBalance)
+          ),
+        };
+      }),
+    };
+    result.usdFutures = result.usdFutures.filter((asset) =>
+      valueGreaterThanThreshold(asset.usdtValue, totalBalance)
+    );
+    result.tokenFutures = result.tokenFutures.filter((asset) =>
+      valueGreaterThanThreshold(asset.usdtValue, totalBalance)
+    );
     return result;
   }
 
@@ -168,6 +273,38 @@ export class Binance extends Cex<BinanceConfig> {
     });
   }
 
+  private calcTokenFutures(res: TokenFuturesAccountResponse | undefined) {
+    if (!res) return [];
+    return res.assets.map((asset) => {
+      const usdtValue = tokenPrice.getUSDTValue(
+        asset.asset,
+        asset.marginBalance
+      );
+      this.plusBalance(usdtValue);
+      return {
+        asset: asset.asset,
+        value: asset.marginBalance,
+        usdtValue,
+      };
+    });
+  }
+
+  private calcUSDFutures(res: USDFuturesAccountResponse | undefined) {
+    if (!res) return [];
+    return res.assets.map((asset) => {
+      const usdtValue = tokenPrice.getUSDTValue(
+        asset.asset,
+        asset.marginBalance
+      );
+      this.plusBalance(usdtValue);
+      return {
+        asset: asset.asset,
+        value: asset.marginBalance,
+        usdtValue,
+      };
+    });
+  }
+
   private calcBswapLiquidity(
     res: Awaited<ReturnType<Binance['bswapLiquidity']>>
   ): AssetWithRewards[] {
@@ -192,17 +329,41 @@ export class Binance extends Cex<BinanceConfig> {
           usdtValue,
         };
       });
-      const usdtValue = bigNumberSum(
-        ...assets.map((o) => o.usdtValue),
-        ...rewards.map((o) => o.usdtValue)
-      );
+      rewards.forEach((r) => {
+        const index = assets.findIndex((a) => a.asset === r.asset);
+        if (index === -1) {
+          assets.push(r);
+        } else {
+          assets[index].usdtValue = bigNumberSum(
+            assets[index].usdtValue,
+            r.usdtValue
+          );
+          assets[index].value = bigNumberSum(assets[index].value, r.value);
+        }
+      });
+      const usdtValue = bigNumberSum(...assets.map((o) => o.usdtValue));
 
       return {
         assets,
-        rewards,
         usdtValue,
       };
     });
+  }
+
+  private async USDFutures() {
+    const res = await this.invokeUSDFutures<
+      USDFuturesAccountResponse | undefined
+    >('getUSDFutureAccount');
+    res?.assets.forEach(({ asset }) => tokenPrice.addSymbol(asset));
+    return res;
+  }
+
+  private async tokenFutures() {
+    const res = await this.invokeTokenFutures<
+      TokenFuturesAccountResponse | undefined
+    >('getTokenFutureAccount');
+    res?.assets.forEach(({ asset }) => tokenPrice.addSymbol(asset));
+    return res;
   }
 
   private async fundingWallet() {
@@ -216,22 +377,19 @@ export class Binance extends Cex<BinanceConfig> {
   }
 
   private calcFundingAsset(res: FundingWalletResponse): FundingAsset {
-    return res
-      .filter(filterAsset)
-      .map((item) => {
-        const asset = item.asset;
-        const value = bigNumberSum(item.free, item.locked, item.freeze);
-        const usdtValue = tokenPrice.getUSDTValue(asset, value);
+    return res.filter(filterAsset).map((item) => {
+      const asset = item.asset;
+      const value = bigNumberSum(item.free, item.locked, item.freeze);
+      const usdtValue = tokenPrice.getUSDTValue(asset, value);
 
-        this.plusBalance(usdtValue);
+      this.plusBalance(usdtValue);
 
-        return {
-          asset,
-          value,
-          usdtValue,
-        };
-      })
-      .filter((item) => valueGreaterThan10(item.usdtValue));
+      return {
+        asset,
+        value,
+        usdtValue,
+      };
+    });
   }
 
   private async userAsset() {
@@ -243,22 +401,19 @@ export class Binance extends Cex<BinanceConfig> {
   }
 
   private calcSpotAsset(res: UserAssetResponse): SpotAsset {
-    return res
-      .filter(filterAsset)
-      .map((item) => {
-        const asset = item.asset;
-        const value = bigNumberSum(item.free, item.locked, item.freeze);
-        const usdtValue = tokenPrice.getUSDTValue(asset, value);
+    return res.filter(filterAsset).map((item) => {
+      const asset = item.asset;
+      const value = bigNumberSum(item.free, item.locked, item.freeze);
+      const usdtValue = tokenPrice.getUSDTValue(asset, value);
 
-        this.plusBalance(usdtValue);
+      this.plusBalance(usdtValue);
 
-        return {
-          asset,
-          value,
-          usdtValue,
-        };
-      })
-      .filter((item) => valueGreaterThan10(item.usdtValue));
+      return {
+        asset,
+        value,
+        usdtValue,
+      };
+    });
   }
 
   private async marginAccount() {
@@ -415,41 +570,36 @@ export class Binance extends Cex<BinanceConfig> {
   private calcFlexible(
     res: SavingsFlexibleProductPositionResponse
   ): AssetWithRewards[] {
-    return res
-      .filter(filterAsset)
-      .map((item) => {
-        const asset = item.asset;
-        const value = new BigNumber(item.totalAmount)
-          .minus(item.totalInterest)
-          .toString();
-        const tokenUSDTValue = tokenPrice.getUSDTValue(asset, value);
-        const rewardUSDTValue = tokenPrice.getUSDTValue(
-          asset,
-          item.totalInterest
-        );
-        const usdtValue = bigNumberSum(tokenUSDTValue, rewardUSDTValue);
+    return res.filter(filterAsset).map((item) => {
+      const asset = item.asset;
+      const value = new BigNumber(item.totalAmount).toString();
+      const tokenUSDTValue = tokenPrice.getUSDTValue(asset, value);
+      const rewardUSDTValue = tokenPrice.getUSDTValue(
+        asset,
+        item.totalInterest
+      );
+      const usdtValue = bigNumberSum(tokenUSDTValue, rewardUSDTValue);
 
-        this.plusBalance(usdtValue);
+      this.plusBalance(usdtValue);
 
-        return {
-          assets: [
-            {
-              asset,
-              value,
-              usdtValue,
-            },
-          ],
-          rewards: [
-            {
-              asset,
-              value: item.totalInterest,
-              usdtValue: rewardUSDTValue,
-            },
-          ],
-          usdtValue,
-        };
-      })
-      .filter((item) => valueGreaterThan10(item.usdtValue));
+      return {
+        assets: [
+          {
+            asset,
+            value,
+            usdtValue,
+          },
+        ],
+        // rewards: [
+        //   {
+        //     asset,
+        //     value: item.totalInterest,
+        //     usdtValue: rewardUSDTValue,
+        //   },
+        // ],
+        usdtValue,
+      };
+    });
   }
 
   private async savingsCustomizedPosition() {
@@ -465,36 +615,33 @@ export class Binance extends Cex<BinanceConfig> {
   private calcFixed(
     res: SavingsCustomizedPositionResponse
   ): AssetWithRewards[] {
-    return res
-      .filter(filterAsset)
-      .map((item) => {
-        const asset = item.asset;
-        const value = item.principal;
-        const tokenUSDTValue = tokenPrice.getUSDTValue(asset, value);
-        const rewardUSDTValue = tokenPrice.getUSDTValue(asset, item.interest);
-        const usdtValue = bigNumberSum(tokenUSDTValue, rewardUSDTValue);
+    return res.filter(filterAsset).map((item) => {
+      const asset = item.asset;
+      const value = item.principal;
+      const tokenUSDTValue = tokenPrice.getUSDTValue(asset, value);
+      const rewardUSDTValue = tokenPrice.getUSDTValue(asset, item.interest);
+      const usdtValue = bigNumberSum(tokenUSDTValue, rewardUSDTValue);
 
-        this.plusBalance(usdtValue);
+      this.plusBalance(usdtValue);
 
-        return {
-          assets: [
-            {
-              asset,
-              value,
-              usdtValue,
-            },
-          ],
-          rewards: [
-            {
-              asset,
-              value: item.interest,
-              usdtValue: rewardUSDTValue,
-            },
-          ],
-          usdtValue,
-        };
-      })
-      .filter((item) => valueGreaterThan10(item.usdtValue));
+      return {
+        assets: [
+          {
+            asset,
+            value,
+            usdtValue,
+          },
+        ],
+        rewards: [
+          {
+            asset,
+            value: item.interest,
+            usdtValue: rewardUSDTValue,
+          },
+        ],
+        usdtValue,
+      };
+    });
   }
 
   private async stakingProductPosition(type: string) {
@@ -518,57 +665,54 @@ export class Binance extends Cex<BinanceConfig> {
   }
 
   private calcStake(res: StakingProductPositionResponse): AssetWithRewards[] {
-    return res
-      .filter(filterAsset)
-      .map((item) => {
-        const asset = item.asset;
-        const value = item.amount;
-        const tokenUSDTValue = tokenPrice.getUSDTValue(asset, value);
-        const rewardUSDTValue = tokenPrice.getUSDTValue(
-          item.rewardAsset,
-          item.rewardAmt
-        );
-        const extraRewardUSDTValue = tokenPrice.getUSDTValue(
-          item.extraRewardAsset,
-          item.estExtraRewardAmt
-        );
-        const usdtValue = bigNumberSum(
-          tokenUSDTValue,
-          rewardUSDTValue,
-          extraRewardUSDTValue
-        );
+    return res.filter(filterAsset).map((item) => {
+      const asset = item.asset;
+      const value = item.amount;
+      const tokenUSDTValue = tokenPrice.getUSDTValue(asset, value);
+      const rewardUSDTValue = tokenPrice.getUSDTValue(
+        item.rewardAsset,
+        item.rewardAmt
+      );
+      const extraRewardUSDTValue = tokenPrice.getUSDTValue(
+        item.extraRewardAsset,
+        item.estExtraRewardAmt
+      );
+      const usdtValue = bigNumberSum(
+        tokenUSDTValue,
+        rewardUSDTValue,
+        extraRewardUSDTValue
+      );
 
-        this.plusBalance(usdtValue);
+      this.plusBalance(usdtValue);
 
-        const rewards = [
+      const rewards = [
+        {
+          asset: item.rewardAsset,
+          value: item.rewardAmt,
+          usdtValue: rewardUSDTValue,
+        },
+      ];
+
+      if (item.extraRewardAsset) {
+        rewards.push({
+          asset: item.extraRewardAsset,
+          value: item.estExtraRewardAmt,
+          usdtValue: extraRewardUSDTValue,
+        });
+      }
+
+      return {
+        assets: [
           {
-            asset: item.rewardAsset,
-            value: item.rewardAmt,
-            usdtValue: rewardUSDTValue,
+            asset,
+            value,
+            usdtValue,
           },
-        ];
-
-        if (item.extraRewardAsset) {
-          rewards.push({
-            asset: item.extraRewardAsset,
-            value: item.estExtraRewardAmt,
-            usdtValue: extraRewardUSDTValue,
-          });
-        }
-
-        return {
-          assets: [
-            {
-              asset,
-              value,
-              usdtValue,
-            },
-          ],
-          rewards,
-          usdtValue,
-        };
-      })
-      .filter((item) => valueGreaterThan10(item.usdtValue));
+        ],
+        rewards,
+        usdtValue,
+      };
+    });
   }
 
   // 部分 token 查询不到价格，需要过滤掉

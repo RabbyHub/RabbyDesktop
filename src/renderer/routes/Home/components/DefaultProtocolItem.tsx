@@ -49,6 +49,7 @@ const TemplateDict = {
   nft_fraction: Template.NFTFraction,
   nft_p2p_borrower: Template.NFTP2PBorrower,
   nft_p2p_lender: Template.NFTP2PLender,
+  cex: Template.Cex,
 };
 
 const ProtocolItemWrapper = styled.div`
@@ -376,7 +377,9 @@ const DefaultProtocolItem = ({
               overlayClassName="max-w-full"
               title={
                 <div className="whitespace-nowrap">
-                  {'Futures, options, and assets<$10 are not included'}
+                  {
+                    'Options, assets < $10 or < 0.01% of total balance are not included'
+                  }
                 </div>
               }
             >

@@ -7,10 +7,11 @@ import {
   SpotAsset,
 } from './type';
 import { tokenPrice } from './binance';
+import { bigNumberSum } from '../../util';
 
 // TODO rabby-api 里提供的类型和实际返回不符
 const basePortfolio = {
-  detail_types: ['common'],
+  detail_types: ['cex'],
   asset_token_list: [],
   asset_dict: {},
   update_at: new Date().getTime(),
@@ -32,55 +33,103 @@ const toTokenItem = (item: Asset) => {
 };
 
 export const toFundingPortfolioList = (fundingAsset: FundingAsset) => {
-  return fundingAsset.map((item) => ({
+  const portfolio = {
     ...basePortfolio,
     name: 'Funding' as any,
     detail: {
-      supply_token_list: [toTokenItem(item)],
-    } as any,
-    stats: {
-      asset_usd_value: Number(item.usdtValue),
-      debt_usd_value: 0,
-      net_usd_value: Number(item.usdtValue),
+      supply_token_list: fundingAsset.map(toTokenItem),
+      reward_token_list: [],
+      borrow_token_list: [],
     },
-  })) as PortfolioItem[];
+    stats: {
+      asset_usd_value: Number(
+        bigNumberSum(...fundingAsset.map((item) => item.usdtValue))
+      ),
+      debt_usd_value: 0,
+      net_usd_value: Number(
+        bigNumberSum(...fundingAsset.map((item) => item.usdtValue))
+      ),
+    },
+  } as PortfolioItem;
+  return fundingAsset.length > 0 ? portfolio : null;
 };
 
 export const toSpotPortfolioList = (spotAsset: SpotAsset) => {
-  return spotAsset.map((item) => ({
+  const portfolio = {
     ...basePortfolio,
     name: 'Spot' as any,
     detail: {
-      supply_token_list: [toTokenItem(item)],
-    } as any,
-    stats: {
-      asset_usd_value: Number(item.usdtValue),
-      debt_usd_value: 0,
-      net_usd_value: Number(item.usdtValue),
+      supply_token_list: spotAsset.map(toTokenItem),
+      reward_token_list: [],
+      borrow_token_list: [],
     },
-  })) as PortfolioItem[];
+    stats: {
+      asset_usd_value: Number(
+        bigNumberSum(...spotAsset.map((item) => item.usdtValue))
+      ),
+      debt_usd_value: 0,
+      net_usd_value: Number(
+        bigNumberSum(...spotAsset.map((item) => item.usdtValue))
+      ),
+    },
+  } as PortfolioItem;
+  return spotAsset.length > 0 ? portfolio : null;
 };
 
-export const toFinancePortfolioList = (
-  assets: AssetWithRewards[],
-  name: string
-) => {
-  return assets.map((asset) => {
-    return {
-      ...basePortfolio,
-      name: 'Earn' as any,
-      detail: {
-        description: name,
-        supply_token_list: asset.assets.map(toTokenItem),
-        reward_token_list: asset.rewards.map(toTokenItem),
-      } as any,
-      stats: {
-        asset_usd_value: Number(asset.usdtValue),
-        debt_usd_value: 0,
-        net_usd_value: Number(asset.usdtValue),
-      },
-    };
+export const toFinancePortfolioList = (assets: AssetWithRewards[]) => {
+  const tokenMap: Record<
+    string,
+    {
+      asset: string;
+      value: string;
+      usdtValue: string;
+    }
+  > = {};
+  assets.forEach((a) => {
+    a.assets.forEach((item) => {
+      const asset = tokenMap[item.asset];
+      if (asset) {
+        asset.usdtValue = bigNumberSum(item.usdtValue, asset.usdtValue);
+      } else {
+        tokenMap[item.asset] = item;
+      }
+    });
   });
+  const list = Object.values(tokenMap);
+  return list.length > 0
+    ? {
+        ...basePortfolio,
+        name: 'Earn' as any,
+        detail: {
+          description: '',
+          supply_token_list: list.map(toTokenItem),
+        } as any,
+        stats: {
+          asset_usd_value: Number(
+            bigNumberSum(...list.map((item) => item.usdtValue))
+          ),
+          debt_usd_value: 0,
+          net_usd_value: Number(
+            bigNumberSum(...list.map((item) => item.usdtValue))
+          ),
+        },
+      }
+    : null;
+};
+
+export const toFuturePortfolio = (assets: Asset[], name: string) => {
+  return {
+    ...basePortfolio,
+    name,
+    detail: {
+      supply_token_list: assets.map(toTokenItem),
+    },
+    stats: {
+      asset_usd_value: Number(...assets.map((item) => item.usdtValue)),
+      debt_usd_value: 0,
+      net_usd_value: Number(...assets.map((item) => item.usdtValue)),
+    },
+  };
 };
 
 export const toMarginPortfolio = (
@@ -98,11 +147,9 @@ export const toMarginPortfolio = (
   return {
     ...basePortfolio,
     name: name as any,
-    detail_types: ['lending'],
     detail: {
       supply_token_list: margin.supplies.map(toTokenItem),
       borrow_token_list: margin.borrows.map(toTokenItem),
-      health_rate: Number(margin.healthRate),
     } as any,
     stats: {
       asset_usd_value,
@@ -116,7 +163,36 @@ export const toMarginPortfolio = (
 export const toIsolatedMarginPortfolioList = (
   isolatedMargin: MarginAsset[]
 ) => {
-  return isolatedMargin.map((item) =>
-    toMarginPortfolio(item, 'Isolated Margin')
-  );
+  const borrowTokenMap: Record<string, Asset> = {};
+  const supplyTokenMap: Record<string, Asset> = {};
+  isolatedMargin.forEach((item) => {
+    item.supplies.forEach((token) => {
+      const exist = supplyTokenMap[token.asset];
+      if (exist) {
+        exist.value = bigNumberSum(exist.value, token.value);
+        exist.usdtValue = bigNumberSum(exist.usdtValue, token.usdtValue);
+      } else {
+        supplyTokenMap[token.asset] = token;
+      }
+    });
+    item.borrows.forEach((token) => {
+      const exist = borrowTokenMap[token.asset];
+      if (exist) {
+        exist.value = bigNumberSum(exist.value, token.value);
+        exist.usdtValue = bigNumberSum(exist.usdtValue, token.usdtValue);
+      } else {
+        borrowTokenMap[token.asset] = token;
+      }
+    });
+  });
+  return Object.values(supplyTokenMap).length > 0
+    ? toMarginPortfolio(
+        {
+          supplies: Object.values(supplyTokenMap),
+          borrows: Object.values(borrowTokenMap),
+          healthRate: '1',
+        },
+        'Isolated Margin'
+      )
+    : null;
 };
