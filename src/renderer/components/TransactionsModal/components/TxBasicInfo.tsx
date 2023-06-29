@@ -2,7 +2,10 @@ import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import { getChain } from '@/renderer/utils';
 import { ellipsis } from '@/renderer/utils/address';
 import { sinceTime } from '@/renderer/utils/time';
-import { TxDisplayItem, TxHistoryItem } from '@debank/rabby-api/dist/types';
+import {
+  TxDisplayItem,
+  TxHistoryItem,
+} from '@rabby-wallet/rabby-api/dist/types';
 import classNames from 'classnames';
 import { useMemo } from 'react';
 import styles from '../index.module.less';

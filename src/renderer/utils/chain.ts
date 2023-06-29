@@ -1,4 +1,4 @@
-import { UsedChain } from '@debank/rabby-api/dist/types';
+import { UsedChain } from '@rabby-wallet/rabby-api/dist/types';
 import { CHAINS } from '@debank/common';
 
 export interface DisplayChainWithWhiteLogo extends UsedChain {

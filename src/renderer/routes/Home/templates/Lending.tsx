@@ -1,6 +1,6 @@
 import React from 'react';
 import { sortBy } from 'lodash';
-import { PortfolioItem } from '@debank/rabby-api/dist/types';
+import { PortfolioItem } from '@rabby-wallet/rabby-api/dist/types';
 import { Tooltip } from 'antd';
 import styled from 'styled-components';
 import { Table } from '../components/Table';

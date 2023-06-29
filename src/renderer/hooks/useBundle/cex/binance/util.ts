@@ -1,4 +1,4 @@
-import { PortfolioItem, TokenItem } from '@debank/rabby-api/dist/types';
+import { PortfolioItem, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import {
   Asset,
   AssetWithRewards,

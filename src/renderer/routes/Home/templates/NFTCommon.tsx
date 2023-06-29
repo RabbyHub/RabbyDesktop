@@ -1,6 +1,6 @@
 import { Tooltip } from 'antd';
 import React from 'react';
-import { PortfolioItem } from '@debank/rabby-api/dist/types';
+import { PortfolioItem } from '@rabby-wallet/rabby-api/dist/types';
 import { sortBy } from 'lodash';
 import IconNftUsdInfo from '@/../assets/icons/home/nft-usd-info.svg';
 import { formatUsdValue } from '@/renderer/utils/number';

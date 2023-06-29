@@ -4,7 +4,7 @@ import { Tooltip, Skeleton } from 'antd';
 import { intToHex } from 'ethereumjs-util';
 import { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
-import { GasLevel, TokenItem } from '@debank/rabby-api/dist/types';
+import { GasLevel, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { maxBy, minBy } from 'lodash';
 import { IconWithChain } from '@/renderer/components/TokenWithChain';
 import NameAndAddress from '@/renderer/components/NameAndAddress';

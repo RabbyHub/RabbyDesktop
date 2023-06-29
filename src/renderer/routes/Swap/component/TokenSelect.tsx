@@ -3,7 +3,7 @@ import { Empty, InputRef, Modal, Skeleton } from 'antd';
 import BigNumber from 'bignumber.js';
 import styled from 'styled-components';
 import IconRcArrowDownTriangle from '@/../assets/icons/swap/arrow-caret-down2.svg?rc';
-import { TokenItem } from '@debank/rabby-api/dist/types';
+import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import TokenWithChain from '@/renderer/components/TokenWithChain';
 import IconRcSearch from '@/../assets/icons/swap/search.svg?rc';

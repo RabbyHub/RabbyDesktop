@@ -1,4 +1,7 @@
-import { TxDisplayItem, TxHistoryItem } from '@debank/rabby-api/dist/types';
+import {
+  TxDisplayItem,
+  TxHistoryItem,
+} from '@rabby-wallet/rabby-api/dist/types';
 import classNames from 'classnames';
 import clsx from 'clsx';
 import styles from '../index.module.less';

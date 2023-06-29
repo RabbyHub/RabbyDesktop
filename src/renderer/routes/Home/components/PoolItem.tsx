@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import styled from 'styled-components';
 import { Skeleton } from 'antd';
-import { PortfolioItem, TokenItem } from '@debank/rabby-api/dist/types';
+import { PortfolioItem, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import classNames from 'classnames';
 import TokenWithChain from '@/renderer/components/TokenWithChain';
 import {

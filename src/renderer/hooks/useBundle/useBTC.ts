@@ -2,7 +2,7 @@ import React from 'react';
 import Axios from 'axios';
 import { INITIAL_OPENAPI_URL } from '@/renderer/utils/constant';
 import { DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
-import { TokenItem } from '@debank/rabby-api/dist/types';
+import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { atom, useAtom } from 'jotai';
 import { useBundleAccount } from './useBundleAccount';
 import { saveBundleAccountsBalance } from './shared';

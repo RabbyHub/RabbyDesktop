@@ -10,7 +10,7 @@ import {
 import { Skeleton, Popover } from 'antd';
 import styled from 'styled-components';
 import classNames from 'classnames';
-import { TokenItem } from '@debank/rabby-api/dist/types';
+import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { useClickAway } from 'react-use';
 import { useProtocolDappsBinding } from '@/renderer/hooks/useDappsMngr';
 import { IconWithChain } from '@/renderer/components/TokenWithChain';

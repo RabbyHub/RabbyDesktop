@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
-import { ChainWithBalance } from '@debank/rabby-api/dist/types';
+import { ChainWithBalance } from '@rabby-wallet/rabby-api/dist/types';
 import { atom, useAtom } from 'jotai';
 
 import { CHAINS } from '@debank/common';
