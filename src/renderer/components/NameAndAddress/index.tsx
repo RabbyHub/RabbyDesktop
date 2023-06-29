@@ -56,7 +56,7 @@ const NameAndAddress = ({
       >
         {localName ? (
           <>
-            ({shortAddress}{' '}
+            ({shortAddress}){' '}
             {!noCopy && (
               <TipsWrapper hoverTips="Copy" clickTips="Copied">
                 <IconCopy
@@ -70,7 +70,6 @@ const NameAndAddress = ({
                 />
               </TipsWrapper>
             )}{' '}
-            )
           </>
         ) : (
           <>
