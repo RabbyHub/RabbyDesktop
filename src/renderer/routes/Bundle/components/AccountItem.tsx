@@ -123,7 +123,11 @@ export const AccountItem: React.FC<Props> = ({
           )}
         </div>
         <div className="mr-[7px]">
-          <img className="w-[22px] h-[22px]" src={addressTypeIcon} alt="" />
+          <img
+            className="w-[22px] h-[22px] rounded-[4px]"
+            src={addressTypeIcon}
+            alt=""
+          />
         </div>
         <div className={clsx('text-white text-[12px]', 'flex-1 space-y-[6px]')}>
           <NicknameInput data={data} canEdit={canEdit} />
