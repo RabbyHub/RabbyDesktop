@@ -1,3 +1,5 @@
 #### New Features:
 
-- Fixed the issue of not able to use cmd + V on macOS
+- Supported to view and send NFT
+- Supported same address on multiple chains for Safe
+- Optimized CEX asset display in Bundle
