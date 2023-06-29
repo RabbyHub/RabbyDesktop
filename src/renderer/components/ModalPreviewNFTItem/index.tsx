@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import clsx from 'clsx';
@@ -101,8 +101,9 @@ const PreviewCard = styled.div`
 
 export default function ModalPreviewNFTItem({
   nft,
+  collectionName,
   ...props
-}: { nft: NFTItem } & Props) {
+}: { nft: NFTItem; collectionName?: string } & Props) {
   const collectProperty = nft?.collection;
   const chainName = React.useMemo(() => {
     return getChain(nft?.chain)?.name || '-';
@@ -114,11 +115,13 @@ export default function ModalPreviewNFTItem({
 
   const navigate = useNavigate();
 
-  const handleClickSend = () => {
+  const handleClickSend = useCallback(() => {
     navigate(
       {
         pathname: '/mainwin/home/send-nft',
-        search: `?rbisource=nftdetail`,
+        search: `?rbisource=nftdetail&collectionName=${
+          collectProperty?.name || collectionName
+        }`,
       },
       {
         state: {
@@ -127,7 +130,8 @@ export default function ModalPreviewNFTItem({
         replace: true,
       }
     );
-  };
+  }, [collectProperty?.name, collectionName, navigate, nft]);
+
   return (
     <PreviewModal
       {...props}
@@ -160,7 +164,7 @@ export default function ModalPreviewNFTItem({
           <div className="nft-txpreview-property">
             <div className="nft-txpreview-property-label">Collection</div>
             <div className="nft-txpreview-property-value">
-              {collectProperty?.name || '-'}
+              {collectProperty?.name || collectionName || '-'}
             </div>
           </div>
           <div className="nft-txpreview-property">

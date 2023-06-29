@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import ModalPreviewNFTItem from '@/renderer/components/ModalPreviewNFTItem';
 import { NFTItem } from '@rabby-wallet/rabby-api/dist/types';
@@ -17,6 +17,7 @@ const Wrapper = styled.div`
 
 export const NFT = () => {
   const [nft, setNft] = useState<NFTItem>();
+  const [collectionName, setCollectionName] = useState<string>();
 
   const { isLoading, list, starredList, checkStarred, onToggleStar } =
     useCollection();
@@ -44,8 +45,13 @@ export const NFT = () => {
     return starredList;
   }, [activeId, list, starredList]);
 
+  const onPreview = useCallback((item: NFTItem, name?: string) => {
+    setNft(item);
+    setCollectionName(name);
+  }, []);
+
   return (
-    <Wrapper className="">
+    <Wrapper>
       <NFTTabs tabs={tabs} activeId={activeId} onClick={setActiveId} />
       <div className="w-full flex-1 flex flex-col items-center overflow-y-auto  ">
         {isLoading ? (
@@ -57,7 +63,7 @@ export const NFT = () => {
                 key={item.id}
                 item={item}
                 start={checkStarred(item)}
-                onPreview={setNft}
+                onPreview={onPreview}
                 onStart={onToggleStar}
               />
             ))}
@@ -67,7 +73,12 @@ export const NFT = () => {
         )}
 
         {nft && (
-          <ModalPreviewNFTItem nft={nft} onCancel={() => setNft(undefined)} />
+          <ModalPreviewNFTItem
+            style={{ marginLeft: 'var(--mainwin-sidebar-w)' }}
+            nft={nft}
+            collectionName={collectionName}
+            onCancel={() => setNft(undefined)}
+          />
         )}
       </div>
     </Wrapper>

@@ -9,7 +9,7 @@ import clsx from 'clsx';
 import BigNumber from 'bignumber.js';
 import { Input, Form, message, Button } from 'antd';
 import { isValidAddress } from 'ethereumjs-util';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { NFTItem } from '@rabby-wallet/rabby-api/dist/types';
 import { useRbiSource } from '@/renderer/hooks/useRbiSource';
 import { Account } from '@/isomorphic/types/rabbyx';
@@ -308,9 +308,12 @@ const SendNFTWrapper = styled.div`
 const SendNFT = () => {
   const location = useLocation();
   const { state } = location;
+  const [searchParams] = useSearchParams();
   const rbisource = useRbiSource();
-
-  console.log('state', location, state);
+  const collectionName = useMemo(
+    () => searchParams.get('collectionName'),
+    [searchParams]
+  );
 
   const [currentAccount, setCurrentAccount] = useState<Account | null>(null);
   const [nftItem, setNftItem] = useState<NFTItem | null>(
@@ -570,9 +573,6 @@ const SendNFT = () => {
 
   return (
     <SendNFTWrapper>
-      {/* <PageHeader onBack={handleClickBack} forceShowBack>
-        Send NFT'
-      </PageHeader> */}
       {nftItem && (
         <Form
           form={form}
@@ -583,7 +583,6 @@ const SendNFT = () => {
           }}
           onValuesChange={handleFormValuesChange}
         >
-          {/* {chain && <TagChainSelector value={chain!} readonly />} */}
           <ChainSelect value={chain} readonly />
 
           <div className="section relative mt-16">
@@ -668,29 +667,23 @@ const SendNFT = () => {
               <NFTAvatar
                 type={nftItem.content_type}
                 content={nftItem.content}
-                className="w-[80px] h-[80px]"
+                className="w-[80px] h-[80px] rounded-[10px] overflow-hidden"
               />
               <div className="nft-info__detail">
                 <h3>{nftItem.name}</h3>
                 <p>
                   <span>Collection: </span>
-                  <span className="value ml-4">
-                    {nftItem.collection?.name || '-'}
-                  </span>
+                  <span className="value ml-4">{collectionName || '-'}</span>
                 </p>
                 <p>
                   <span>Contract: </span>
                   <span className="value gap-[4px] inline-flex items-center ml-4">
-                    <AddressViewer
-                      address={nftItem.contract_id}
-                      // showArrow={false}
-                    />
+                    <AddressViewer address={nftItem.contract_id} />
                     <img
                       src={IconExternal}
                       className="icon icon-copy opacity-80"
                       onClick={handleClickContractId}
                     />
-                    {/* <Copy data={nftItem.contract_id} variant="address"></Copy> */}
                     <TipsWrapper hoverTips="Copy" clickTips="Copied">
                       <img
                         onClick={async () => {

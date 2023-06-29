@@ -5,7 +5,7 @@ import { CollectionList, NFTItem } from '@rabby-wallet/rabby-api/dist/types';
 
 type CollectionProps = {
   start?: boolean;
-  onPreview?: (nft: NFTItem) => void;
+  onPreview?: (nft: NFTItem, name?: string) => void;
   item: CollectionList;
   onStart: (item: CollectionList) => void;
 };
@@ -55,7 +55,7 @@ export const Collection = (props: CollectionProps) => {
               type={e.content_type}
               amount={e.amount}
               onPreview={() => {
-                onPreview?.(e);
+                onPreview?.(e, item.name);
               }}
             />
           );
