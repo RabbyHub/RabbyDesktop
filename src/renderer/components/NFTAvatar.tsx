@@ -84,6 +84,7 @@ const StyledFftAvatar = styled.div`
   width: 60px;
   height: 60px;
   background-color: #fff;
+  overflow: hidden;
   &:hover {
     .nft-avatar-cover {
       display: flex;
