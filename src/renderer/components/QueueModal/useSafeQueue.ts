@@ -2,7 +2,7 @@ import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import Safe from '@rabby-wallet/gnosis-sdk';
 import { SafeTransactionDataPartial } from '@gnosis.pm/safe-core-sdk-types';
 import { numberToHex } from 'web3-utils';
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
   SafeInfo,
   SafeTransactionItem,
@@ -10,110 +10,133 @@ import {
 import dayjs from 'dayjs';
 import { groupBy } from 'lodash';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
+import { useGnosisSafeInfo } from '@/renderer/hooks/useGnosisSafeInfo';
 import { crossCompareOwners } from './util';
 
-export const useSafeQueue = () => {
+export const useSafeQueue = ({
+  pendingTxs,
+  networkId,
+}: {
+  pendingTxs?: SafeTransactionItem[];
+  networkId: string;
+}) => {
   const [isLoading, setIsLoading] = React.useState(true);
-  const [safeInfo, setSafeInfo] = React.useState<SafeInfo>();
-  const [networkId, setNetworkId] = React.useState('1');
   const [transactionsGroup, setTransactionsGroup] = React.useState<
     Record<string, SafeTransactionItem[]>
   >({});
   const [isLoadFailed, setIsLoadFailed] = React.useState(false);
   const { currentAccount } = useCurrentAccount();
+  const { data: safeInfo } = useGnosisSafeInfo({
+    address: currentAccount?.address,
+    networkId,
+  });
 
-  const init = async () => {
-    const accountAddress = currentAccount!.address;
-    try {
-      const network = await walletController.getGnosisNetworkId(accountAddress);
-      const [info, txs] = await Promise.all([
-        Safe.getSafeInfo(accountAddress, network),
-        Safe.getPendingTransactions(accountAddress, network),
-      ]);
-      const txHashValidation: boolean[] = [];
-      for (let i = 0; i < txs.results.length; i++) {
-        const safeTx = txs.results[i];
-        const tx: SafeTransactionDataPartial = {
-          data: safeTx.data || '0x',
-          gasPrice: safeTx.gasPrice ? Number(safeTx.gasPrice) : 0,
-          gasToken: safeTx.gasToken,
-          refundReceiver: safeTx.refundReceiver,
-          to: safeTx.to,
-          value: numberToHex(safeTx.value),
-          safeTxGas: safeTx.safeTxGas,
-          nonce: safeTx.nonce,
-          operation: safeTx.operation,
-          baseGas: safeTx.baseGas,
-        };
-        // eslint-disable-next-line no-await-in-loop
-        await walletController.buildGnosisTransaction(
-          safeTx.safe,
-          currentAccount!,
-          tx
-        );
-        // eslint-disable-next-line no-await-in-loop
-        const hash = await walletController.getGnosisTransactionHash();
-        txHashValidation.push(hash === safeTx.safeTxHash);
+  const init = useCallback(
+    async (txs: SafeTransactionItem[], info: SafeInfo) => {
+      if (!currentAccount) {
+        return;
       }
-      const owners = await walletController.getGnosisOwners(
-        currentAccount!,
-        accountAddress,
-        info.version
-      );
-      const comparedOwners = crossCompareOwners(info.owners, owners);
-      setIsLoading(false);
-      setSafeInfo({
-        ...info,
-        owners: comparedOwners,
-      });
-      setNetworkId(network);
-      const transactions = txs.results
-        .filter((safeTx, index) => {
-          if (!txHashValidation[index]) return false;
-          const tx: SafeTransactionDataPartial = {
-            data: safeTx.data || '0x',
-            gasPrice: safeTx.gasPrice ? Number(safeTx.gasPrice) : 0,
-            gasToken: safeTx.gasToken,
-            refundReceiver: safeTx.refundReceiver,
-            to: safeTx.to,
-            value: numberToHex(safeTx.value),
-            safeTxGas: safeTx.safeTxGas,
-            nonce: safeTx.nonce,
-            operation: safeTx.operation,
-            baseGas: safeTx.baseGas,
-          };
+      const account = currentAccount;
+      try {
+        const txHashValidation = await Promise.all(
+          txs.map(async (safeTx) => {
+            const tx: SafeTransactionDataPartial = {
+              data: safeTx.data || '0x',
+              gasPrice: safeTx.gasPrice ? Number(safeTx.gasPrice) : 0,
+              gasToken: safeTx.gasToken,
+              refundReceiver: safeTx.refundReceiver,
+              to: safeTx.to,
+              value: numberToHex(safeTx.value),
+              safeTxGas: safeTx.safeTxGas,
+              nonce: safeTx.nonce,
+              operation: safeTx.operation,
+              baseGas: safeTx.baseGas,
+            };
+            return walletController.validateGnosisTransaction(
+              {
+                account,
+                tx,
+                version: info.version,
+                networkId,
+              },
+              safeTx.safeTxHash
+            );
+          })
+        );
 
-          return safeTx.confirmations.every(async (confirm) =>
-            walletController.validateSafeConfirmation(
-              safeTx.safeTxHash,
-              confirm.signature,
-              confirm.owner,
-              confirm.signatureType,
-              info.version,
-              info.address,
-              tx,
-              Number(network),
-              comparedOwners
-            )
-          );
-        })
-        .sort((a, b) => {
-          return dayjs(a.submissionDate).isAfter(dayjs(b.submissionDate))
-            ? -1
-            : 1;
-        });
+        const owners = await walletController.getGnosisOwners(
+          account,
+          account.address,
+          info.version,
+          networkId
+        );
+        const comparedOwners = crossCompareOwners(info.owners, owners);
+        setIsLoading(false);
 
-      setTransactionsGroup(groupBy(transactions, 'nonce'));
-    } catch (e) {
-      setIsLoading(false);
-      setIsLoadFailed(true);
+        // const transactions
+        const validateRes = await Promise.all(
+          txs.map((safeTx, index) => {
+            if (!txHashValidation[index]) return false;
+            const tx: SafeTransactionDataPartial = {
+              data: safeTx.data || '0x',
+              gasPrice: safeTx.gasPrice ? Number(safeTx.gasPrice) : 0,
+              gasToken: safeTx.gasToken,
+              refundReceiver: safeTx.refundReceiver,
+              to: safeTx.to,
+              value: numberToHex(safeTx.value),
+              safeTxGas: safeTx.safeTxGas,
+              nonce: safeTx.nonce,
+              operation: safeTx.operation,
+              baseGas: safeTx.baseGas,
+            };
+
+            const res = safeTx.confirmations.map(async (confirm) =>
+              walletController.validateSafeConfirmation(
+                safeTx.safeTxHash,
+                confirm.signature,
+                confirm.owner,
+                confirm.signatureType,
+                info.version,
+                info.address,
+                tx,
+                Number(networkId),
+                comparedOwners
+              )
+            );
+            return Promise.all(res).then((data) => {
+              return data.every((item) => item);
+            });
+          })
+        );
+
+        const transactions = txs
+          .filter((_, index) => validateRes[index])
+          .sort((a, b) => {
+            return dayjs(a.submissionDate).isAfter(dayjs(b.submissionDate))
+              ? -1
+              : 1;
+          });
+
+        setTransactionsGroup(groupBy(transactions, 'nonce'));
+      } catch (e) {
+        console.error(e);
+        setIsLoading(false);
+        setIsLoadFailed(true);
+      }
+    },
+    [currentAccount, networkId]
+  );
+
+  // React.useEffect(() => {
+  //   init(txs);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [currentAccount?.address]);
+
+  useEffect(() => {
+    if (pendingTxs && safeInfo) {
+      init(pendingTxs || [], safeInfo);
     }
-  };
-
-  React.useEffect(() => {
-    init();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentAccount?.address]);
+  }, [init, pendingTxs, safeInfo]);
 
   return {
     isLoading,

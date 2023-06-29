@@ -5,8 +5,8 @@
   overflow: auto;
 
   &::-webkit-scrollbar {
-      display: none;
-    }
+    display: none;
+  }
 
   .panel {
     background: rgba(255, 255, 255, 0.1);
@@ -117,7 +117,6 @@
   height: 613px;
   padding-top: 15px;
 
-
   .input {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -190,7 +189,6 @@
 
 .ImportSuccessful {
   padding: 60px 0 80px;
-  display: flex;
   height: 750px;
 
   .container {
@@ -218,6 +216,8 @@
   }
 
   .addressList {
-    margin-bottom: 163px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 }

@@ -1,5 +1,12 @@
-@import "@/renderer/css/mixins.less";
+@import '@/renderer/css/mixins.less';
 
 .scrollbar {
   .chrome-like-scrollbar;
+}
+.modal {
+  :global {
+    .ant-modal-header {
+      padding-bottom: 22px !important;
+    }
+  }
 }

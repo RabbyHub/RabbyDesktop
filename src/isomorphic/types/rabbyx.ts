@@ -4,12 +4,14 @@ import type {
   Tx,
   TotalBalanceResponse,
   TokenItem,
+  Chain,
 } from '@rabby-wallet/rabby-api/dist/types';
 
 import type { DEX_ENUM } from '@rabby-wallet/rabby-swap';
 import type { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
 import { SafeTransactionDataPartial } from '@gnosis.pm/safe-core-sdk-types';
 import type { DEX_TYPE, CEX_TYPE } from '@/renderer/routes/Swap/constant';
+import { SafeTransactionItem } from '@rabby-wallet/gnosis-sdk/dist/api';
 
 export type RabbyAccount = {
   address: string;
@@ -408,19 +410,46 @@ export type RabbyXMethod = {
   'walletController.clearAddressPendingTransactions': (address: string) => void;
   'walletController.importGnosisAddress': (
     address: string,
-    networkId: string
+    networkIds: string[]
   ) => RabbyAccount[];
+  'walletController.fetchGnosisChainList': (address: string) => Chain[];
   'walletController.getTypedAccounts': () => DisplayedKeyring[];
+  'walletController.syncGnosisNetworks': () => void;
   'walletController.getGnosisOwners': (
     account: Account,
     safeAddress: string,
-    version: string
+    version: string,
+    networkId: string
   ) => string[];
   'walletController.getGnosisNetworkId': (address: string) => string;
+  'walletController.getGnosisNetworkIds': (address: string) => string[];
+  'walletController.getGnosisAllPendingTxs': (address: string) => {
+    total: number;
+    results: {
+      networkId: string;
+      txs: SafeTransactionItem[];
+    }[];
+  } | null;
+  'walletController.validateGnosisTransaction': (
+    {
+      account,
+      tx,
+      version,
+      networkId,
+    }: {
+      account: Account;
+      tx: any;
+      version: string;
+      networkId: string;
+    },
+    hash: string
+  ) => boolean;
   'walletController.buildGnosisTransaction': (
     safeAddress: string,
     account: Account,
-    tx: any
+    tx: any,
+    version: string,
+    networkId: string
   ) => void;
   'walletController.getGnosisTransactionHash': () => string;
   'walletController.validateSafeConfirmation': (

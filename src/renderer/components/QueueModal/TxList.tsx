@@ -7,6 +7,8 @@ import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { message } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
+import { CHAINS } from '@debank/common';
+import _ from 'lodash';
 import { TxItemGroup } from './TxItemGroup';
 import { useSafeQueue } from './useSafeQueue';
 import styles from './style.module.less';
@@ -14,10 +16,29 @@ import { SelectAddressModal } from './SelectAddressModal';
 
 interface Props {
   onClose(): void;
+  onSign(): void;
+  usefulChain: CHAINS_ENUM;
+  pendingTxs?: SafeTransactionItem[];
+  loading?: boolean;
 }
 
-export const TxList: React.FC<Props> = ({ onClose }) => {
-  const { transactionsGroup, networkId, safeInfo, isLoading } = useSafeQueue();
+export const TxList: React.FC<Props> = ({
+  onClose,
+  onSign,
+  usefulChain: chain,
+  pendingTxs,
+  loading,
+}) => {
+  const {
+    transactionsGroup,
+    networkId,
+    safeInfo,
+    isLoading: _isLoading,
+  } = useSafeQueue({
+    pendingTxs,
+    networkId: CHAINS[chain].network,
+  });
+  const isLoading = _isLoading || loading;
   const [openSelectAddressModal, setOpenSelectAddressModal] =
     React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
@@ -32,7 +53,7 @@ export const TxList: React.FC<Props> = ({ onClose }) => {
 
   const handleSign = React.useCallback(
     async (account: IDisplayedAccountWithBalance) => {
-      if (!safeTx) return;
+      if (!safeTx || !safeInfo) return;
 
       try {
         setSubmitting(true);
@@ -50,7 +71,9 @@ export const TxList: React.FC<Props> = ({ onClose }) => {
         await walletController.buildGnosisTransaction(
           currentAddress!,
           account,
-          params
+          params,
+          safeInfo?.version,
+          networkId
         );
         await Promise.all(
           safeTx.confirmations.map((confirm) => {
@@ -69,7 +92,7 @@ export const TxList: React.FC<Props> = ({ onClose }) => {
       onClose();
       setOpenSelectAddressModal(false);
     },
-    [currentAddress, networkId, onClose, safeTx]
+    [currentAddress, networkId, onClose, safeInfo, safeTx]
   );
 
   const isEmpty = Object.keys(transactionsGroup).length === 0 && !isLoading;
@@ -77,8 +100,8 @@ export const TxList: React.FC<Props> = ({ onClose }) => {
   return (
     <section
       className={classNames(
-        'flex flex-col gap-[20px] px-[30px] pb-[20px]',
-        'h-[70vh] overflow-y-scroll',
+        'flex flex-col gap-[20px] pb-[20px]',
+        'h-[65vh] overflow-y-scroll',
         styles.scrollbar
       )}
     >
@@ -100,13 +123,16 @@ export const TxList: React.FC<Props> = ({ onClose }) => {
           <div>Loading data...</div>
         </div>
       ) : (
-        Object.keys(transactionsGroup).map((key) => (
+        _.sortBy(Object.keys(transactionsGroup), (key) => {
+          return -key;
+        }).map((key) => (
           <TxItemGroup
             key={key}
             items={transactionsGroup[key]}
             networkId={networkId}
             safeInfo={safeInfo!}
             onSubmit={handleSubmit}
+            onSign={onSign}
           />
         ))
       )}

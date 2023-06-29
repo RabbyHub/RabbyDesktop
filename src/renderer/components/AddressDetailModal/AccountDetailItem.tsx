@@ -20,7 +20,7 @@ export const AccountDetailItem: React.FC<Props> = ({
 }) => {
   return (
     <div {...attrs} className={clsx(styles.AccountDetailItem, className)}>
-      <div className="flex items-center justify-between h-[56px]">
+      <div className="flex items-center justify-between min-h-[56px]">
         <div className={styles.headline}>
           <div className={styles.title}>{headline}</div>
           <div className={styles.description}>{description}</div>

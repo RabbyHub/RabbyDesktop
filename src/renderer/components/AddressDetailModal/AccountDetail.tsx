@@ -184,7 +184,7 @@ export const AccountDetail: React.FC<Props> = ({
             {`${accountInfo.hdPathTypeLabel} #${accountInfo.index}`}
           </AccountDetailItem>
         )}
-        {isSafe && <SafeItem />}
+        {isSafe && <SafeItem account={account} />}
       </section>
       <section className={styles.part}>
         <AccountDetailItem headline="Add to Whitelist">
