@@ -1,16 +1,13 @@
-import { walletController } from '@/renderer/ipcRequest/rabbyx';
-import Safe from '@rabby-wallet/gnosis-sdk';
-import { SafeTransactionDataPartial } from '@gnosis.pm/safe-core-sdk-types';
-import { numberToHex } from 'web3-utils';
-import React, { useCallback, useEffect } from 'react';
-import {
-  SafeInfo,
-  SafeTransactionItem,
-} from '@rabby-wallet/gnosis-sdk/dist/api';
-import dayjs from 'dayjs';
-import { groupBy } from 'lodash';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { useGnosisSafeInfo } from '@/renderer/hooks/useGnosisSafeInfo';
+import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { SafeTransactionDataPartial } from '@gnosis.pm/safe-core-sdk-types';
+import { BasicSafeInfo } from '@rabby-wallet/gnosis-sdk';
+import { SafeTransactionItem } from '@rabby-wallet/gnosis-sdk/dist/api';
+import dayjs from 'dayjs';
+import { groupBy } from 'lodash';
+import React, { useCallback, useEffect } from 'react';
+import { numberToHex } from 'web3-utils';
 import { crossCompareOwners } from './util';
 
 export const useSafeQueue = ({
@@ -32,7 +29,7 @@ export const useSafeQueue = ({
   });
 
   const init = useCallback(
-    async (txs: SafeTransactionItem[], info: SafeInfo) => {
+    async (txs: SafeTransactionItem[], info: BasicSafeInfo) => {
       if (!currentAccount) {
         return;
       }
