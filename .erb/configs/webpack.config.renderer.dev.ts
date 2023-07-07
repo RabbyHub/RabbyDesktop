@@ -144,6 +144,7 @@ const configuration: webpack.Configuration = {
 
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],
+      process: 'process',
     }),
 
     new WindiCSSWebpackPlugin(),

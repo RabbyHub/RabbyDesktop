@@ -25,6 +25,11 @@ const HARDWARE_MAP = [
     name: 'OneKey',
     id: KEYRING_CLASS.HARDWARE.ONEKEY,
   },
+  {
+    logo: 'rabby-internal://assets/icons/device/keystone.svg',
+    name: 'Keystone',
+    id: KEYRING_CLASS.HARDWARE.KEYSTONE,
+  },
 ];
 
 const WALLETCONNECT_BRANDS = [

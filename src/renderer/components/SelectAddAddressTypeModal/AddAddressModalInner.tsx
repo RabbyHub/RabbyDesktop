@@ -105,6 +105,7 @@ export const AddAddressModalInner: React.FC<Props> = ({
       KEYRING_CLASS.HARDWARE.LEDGER,
       KEYRING_CLASS.HARDWARE.ONEKEY,
       KEYRING_CLASS.HARDWARE.TREZOR,
+      KEYRING_CLASS.HARDWARE.KEYSTONE,
     ].includes(keyringType)
   ) {
     return (

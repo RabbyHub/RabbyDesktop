@@ -109,6 +109,7 @@ const configuration: webpack.Configuration = {
 
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],
+      process: 'process',
     }),
 
     new WindiCSSWebpackPlugin(),
@@ -207,9 +208,12 @@ const configurationShell: webpack.Configuration = {
           to: path.join(webpackPaths.assetsPath, 'desktop_shell/manifest.json'),
         },
         {
-          from: path.join(webpackPaths.distExtsPath, 'rabby/vendor/matomo.client.js'),
+          from: path.join(
+            webpackPaths.distExtsPath,
+            'rabby/vendor/matomo.client.js'
+          ),
           to: path.join(webpackPaths.assetsPath, 'desktop_shell/vendor/'),
-        }
+        },
       ],
     }),
   ],

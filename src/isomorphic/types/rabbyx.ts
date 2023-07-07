@@ -263,7 +263,8 @@ export type RabbyXMethod = {
   'walletController.removeAddress': (
     address: string,
     type: string,
-    brand?: string | undefined
+    brand?: string | undefined,
+    isRemove?: boolean
   ) => void;
   'walletController.getWhitelist': () => string[];
   'walletController.setWhitelist': (addresses: string[]) => Promise<void>;
@@ -551,6 +552,14 @@ export type RabbyXMethod = {
   'walletController.getCollectionStarred': () => Token[];
   'walletController.addCollectionStarred': (token: Token) => void;
   'walletController.removeCollectionStarred': (token: Token) => void;
+  'walletController.submitQRHardwareCryptoHDKey': (
+    cbor: string,
+    keyringId?: number | null
+  ) => number | null;
+  'walletController.submitQRHardwareCryptoAccount': (
+    cbor: string,
+    keyringId?: number | null
+  ) => number | null;
 } & {
   'openapi.setHost': OpenApiService['setHost'];
   'openapi.getHost': OpenApiService['getHost'];

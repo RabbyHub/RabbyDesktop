@@ -1,7 +1,10 @@
 import './index.less';
 import { Button } from 'antd';
 import React, { useMemo } from 'react';
-import { HARDWARE_KEYRING_TYPES } from '@/renderer/utils/constant';
+import {
+  HARDWARE_KEYRING_TYPES,
+  WALLET_BRAND_TYPES,
+} from '@/renderer/utils/constant';
 import { useShellWallet } from '@/renderer/hooks-shell/useShellWallet';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { HDManagerStateProvider, StateProviderProps } from './utils';
@@ -10,11 +13,13 @@ import { OneKeyManager } from './OnekeyManager';
 import { TrezorManager } from './TrezorManager';
 import { Modal, Props as ModalProps } from '../Modal/Modal';
 import { useHDManagerConnecWindowOpen } from './useHDManager';
+import { QRCodeConnect } from './QRCodeManager/QRCodeConnect';
 
 const MANAGER_MAP = {
   [HARDWARE_KEYRING_TYPES.Ledger.type]: LedgerManager,
   [HARDWARE_KEYRING_TYPES.Trezor.type]: TrezorManager,
   [HARDWARE_KEYRING_TYPES.Onekey.type]: OneKeyManager,
+  [HARDWARE_KEYRING_TYPES.Keystone.type]: QRCodeConnect,
 };
 
 const enum HD_CONN_STEP {
@@ -26,12 +31,14 @@ const enum HD_CONN_STEP {
 interface Props extends StateProviderProps, ModalProps {
   showEntryButton?: boolean;
   onCancel?: ModalProps['onCancel'];
+  brand?: WALLET_BRAND_TYPES;
 }
 
 export const CommonHDManagerModal: React.FC<Props> = ({
   keyring,
   showEntryButton,
   onCancel,
+  brand,
   ...props
 }) => {
   const walletController = useShellWallet();
@@ -58,6 +65,17 @@ export const CommonHDManagerModal: React.FC<Props> = ({
 
   const initConnect = React.useCallback(async () => {
     setConnectReq({ connected: false, step: HD_CONN_STEP.CONNECTING });
+
+    if (keyring === HARDWARE_KEYRING_TYPES.Keystone.type) {
+      return walletController
+        .initQRHardware(brand ?? WALLET_BRAND_TYPES.KEYSTONE)
+        .then((id: number) => {
+          idRef.current = id;
+        })
+        .then(() => {
+          setConnectReq({ connected: true, step: HD_CONN_STEP.STOPPED });
+        });
+    }
 
     return walletController
       .connectHardware({
@@ -94,7 +112,7 @@ export const CommonHDManagerModal: React.FC<Props> = ({
         }
         setConnectReq({ connected: false, step: HD_CONN_STEP.STOPPED });
       });
-  }, [walletController, keyring, isLedger]);
+  }, [keyring, walletController, brand, isLedger]);
 
   const cleanupModal = React.useCallback(() => {
     onCancel?.();
@@ -155,7 +173,7 @@ export const CommonHDManagerModal: React.FC<Props> = ({
         <div className="HDManager">
           {connectReq.connected ? (
             <main>
-              <Manager onClose={handleClose} />
+              <Manager onClose={handleClose} brand={brand} />
               {showEntryButton && (
                 <Button
                   onClick={onCancel}
