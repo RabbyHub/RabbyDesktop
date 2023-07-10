@@ -29,6 +29,19 @@ const HARDWARE_MAP = [
     logo: 'rabby-internal://assets/icons/device/keystone.svg',
     name: 'Keystone',
     id: KEYRING_CLASS.HARDWARE.KEYSTONE,
+    brand: WALLET_BRAND_CONTENT.Keystone.brand,
+  },
+  {
+    logo: 'rabby-internal://assets/icons/device/airgap.svg',
+    name: 'AirGap Vault',
+    id: KEYRING_CLASS.HARDWARE.KEYSTONE,
+    brand: WALLET_BRAND_CONTENT.AirGap.brand,
+  },
+  {
+    logo: 'rabby-internal://assets/icons/device/coolwallet.svg',
+    name: 'CoolWallet',
+    id: KEYRING_CLASS.HARDWARE.KEYSTONE,
+    brand: WALLET_BRAND_CONTENT.CoolWallet.brand,
   },
 ];
 

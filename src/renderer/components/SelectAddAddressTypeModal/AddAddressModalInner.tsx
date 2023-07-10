@@ -116,6 +116,7 @@ export const AddAddressModalInner: React.FC<Props> = ({
         keyringType={keyringType}
         footer={null}
         showEntryButton={showEntryButton}
+        brand={brand}
       />
     );
   }

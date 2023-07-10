@@ -33,6 +33,10 @@ export const QRCodeConnect: React.FC<Props> = ({
     setVisibleManager(true);
   }, []);
 
+  const handleClose = React.useCallback(() => {
+    setVisibleManager(false);
+  }, []);
+
   const handleScanQRCodeSuccess = async (data: string) => {
     try {
       decoder.current.receivePart(data);
@@ -111,7 +115,7 @@ export const QRCodeConnect: React.FC<Props> = ({
           </div>
         </section>
       )}
-      {visibleManager && <QRCodeManager brand={brand} />}
+      {visibleManager && <QRCodeManager brand={brand} onClose={handleClose} />}
     </>
   );
 };
