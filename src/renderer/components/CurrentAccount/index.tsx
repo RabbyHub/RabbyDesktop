@@ -51,7 +51,7 @@ export const CurrentAccount = ({ className }: { className?: string }) => {
     setAddressManagementVisible(visibles['address-management']);
   });
 
-  if (!currentAccount?.alianName) {
+  if (!currentAccount) {
     return null;
   }
 
