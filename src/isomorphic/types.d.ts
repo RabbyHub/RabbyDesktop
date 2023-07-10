@@ -160,6 +160,8 @@ type IDesktopAppState = {
   tipedHideMainWindowOnWindows: boolean;
 
   experimentalDappViewZoomPercent: number;
+
+  selectedMediaVideoId: string | null;
 };
 
 type IAppDynamicConfig = {
@@ -381,6 +383,21 @@ type ISelectDeviceState = {
     }
 );
 
+type ISelectCameraState = {
+  selectId: string;
+} & (
+  | {
+      status: 'pending';
+    }
+  | {
+      status: 'selected';
+      deviceInfo: MediaDeviceInfo;
+    }
+  | {
+      status: 'rejected';
+    }
+);
+
 type IWebviewPerfInfo = {
   time: number;
   memoryInfo: {
@@ -414,6 +431,10 @@ type PopupViewOnMainwinInfo =
   | {
       type: 'select-devices';
       state: ISelectDeviceState;
+    }
+  | {
+      type: 'select-camera';
+      state: ISelectCameraState;
     }
   | {
       type: 'z-popup';

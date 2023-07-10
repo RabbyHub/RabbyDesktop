@@ -13,6 +13,7 @@ import { ShellWalletProvider } from '@/renderer/components/ShellWallet';
 
 import MainWindowAddAddress from '@/renderer/routes-popup/MainWindowAddAddress';
 import ZPopupLayer from '@/renderer/routes-popup/ZPopupLayer';
+import SelectCameraWindow from '@/renderer/routes-popup/SelectCameraWindow';
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
@@ -29,6 +30,14 @@ switch (parseQueryString().view) {
     root.render(
       <ShellWalletProvider>
         <ZPopupLayer />
+      </ShellWalletProvider>
+    );
+    break;
+  }
+  case 'select-camera': {
+    root.render(
+      <ShellWalletProvider>
+        <SelectCameraWindow />
       </ShellWalletProvider>
     );
     break;

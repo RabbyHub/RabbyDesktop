@@ -86,6 +86,7 @@ const CONF = {
       addAddress: BrowserView;
       dappsManagement: BrowserView;
       selectDevices: BrowserView;
+      selectCamera: BrowserView;
       zPopup: BrowserView;
       globalToastPopup: BrowserView;
       inDappFind: BrowserView;

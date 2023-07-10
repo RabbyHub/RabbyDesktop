@@ -82,6 +82,10 @@ type M2RChanneMessagePayload = {
   '__internal_push:webhid:select-devices-modal-blur': {
     foo?: string;
   };
+  '__internal_push:media:events': {
+    eventType: 'push-selected-media-video';
+    selectedMediaVideoId: MediaDeviceInfo['deviceId'] | null;
+  };
 } & ChannelPushToWebContents;
 
 type IPushEvents = keyof M2RChanneMessagePayload;

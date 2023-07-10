@@ -150,7 +150,7 @@ async function checkProxyValidOnBootstrap() {
 protocol.registerSchemesAsPrivileged([
   {
     scheme: RABBY_INTERNAL_PROTOCOL.slice(0, -1),
-    privileges: { standard: true, supportFetchAPI: true },
+    privileges: { standard: true, supportFetchAPI: true, stream: true },
   },
   {
     scheme: PROTOCOL_IPFS.slice(0, -1),

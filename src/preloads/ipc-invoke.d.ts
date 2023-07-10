@@ -5,6 +5,12 @@ type RabbyxInvokePayload = {
       version: ReturnType<Electron.App['getVersion']>;
     };
   };
+  'rabbyx:get-selected-camera': {
+    send: [];
+    response: {
+      deviceId: MediaStream['id'] | null;
+    };
+  };
 };
 
 type ChannelInvokePayload = {
@@ -392,6 +398,32 @@ type ChannelInvokePayload = {
     send: [];
     response: {
       systemReleaseInfo: ISystemReleaseInfo;
+    };
+  };
+  'start-select-camera': {
+    send: [
+      options?: {
+        /**
+         * @description if true, will not wait for user's select result
+         */
+        ignoreSelectResult?: boolean;
+      }
+    ];
+    response: {
+      selectId: string;
+      deviceId: MediaStream['id'] | null;
+    };
+  };
+  'confirm-selected-camera': {
+    send: [
+      {
+        selectId: string;
+        // null means cancel
+        deviceId: MediaStream['id'] | null;
+      }
+    ];
+    response: {
+      error: string | null;
     };
   };
 } & RabbyxInvokePayload;

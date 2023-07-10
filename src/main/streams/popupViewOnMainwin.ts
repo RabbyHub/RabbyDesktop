@@ -51,6 +51,12 @@ const viewsState: {
       return true;
     },
   },
+  'select-camera': {
+    visible: false,
+    // get s_isModal() {
+    //   return true;
+    // },
+  },
   'in-dapp-find': {
     visible: false,
   },
@@ -228,7 +234,7 @@ async function showModalPopup(
   showPopupWindow(modalWindow);
   modalWindow.focus();
 
-  if (viewType === 'select-devices') {
+  if (['select-devices'].includes(viewType)) {
     modalWindow.on('blur', () => {
       sendToWebContents(
         targetView.webContents,
@@ -326,6 +332,61 @@ const selectDevicesReady = onMainWindowReady().then(async () => {
   hidePopupView(selectDevicesPopup);
 
   return selectDevicesPopup;
+});
+
+// const selectCamerasReady = onMainWindowReady().then(async () => {
+//   const selectCameraPopup = createPopupView({});
+
+//   await selectCameraPopup.webContents.loadURL(
+//     `${await getWebuiURLBase()}/popup-view.html??view=select-camera#/`
+//   );
+
+//   // debug-only
+//   if (!IS_RUNTIME_PRODUCTION) {
+//     selectCameraPopup.webContents.openDevTools({ mode: 'detach' });
+//   }
+
+//   hidePopupView(selectCameraPopup);
+
+//   return selectCameraPopup;
+// });
+
+const selectCamerasReady = onMainWindowReady().then(async (mainWin) => {
+  const mainWindow = mainWin.window;
+
+  const selectCameraPopup = createPopupView({});
+
+  mainWindow.addBrowserView(selectCameraPopup);
+
+  const onTargetWinUpdate = () => {
+    if (viewsState['select-camera'].visible) {
+      const oldBounds = selectCameraPopup.getBounds();
+      updateSubviewPos({
+        parentWindow: mainWindow,
+        view: selectCameraPopup,
+        viewTypeOrRect: oldBounds,
+      });
+    }
+  };
+  mainWindow.on('show', onTargetWinUpdate);
+  mainWindow.on('move', onTargetWinUpdate);
+  mainWindow.on('resized', onTargetWinUpdate);
+  mainWindow.on('unmaximize', onTargetWinUpdate);
+  mainWindow.on('restore', onTargetWinUpdate);
+
+  await selectCameraPopup.webContents.loadURL(
+    // `${RABBY_POPUP_GHOST_VIEW_URL}?view=select-camera`
+    `${await getWebuiURLBase()}/popup-view.html?view=select-camera#/`
+  );
+
+  // debug-only
+  if (!IS_RUNTIME_PRODUCTION) {
+    selectCameraPopup.webContents.openDevTools({ mode: 'detach' });
+  }
+
+  hidePopupView(selectCameraPopup);
+
+  return selectCameraPopup;
 });
 
 const inDappFindReady = onMainWindowReady().then(async (mainWin) => {
@@ -474,19 +535,21 @@ Promise.all([
   addAddressReady,
   dappsManagementReady,
   selectDevicesReady,
+  selectCamerasReady,
   inDappFindReady,
   zPopupReady,
   globalToastPopupReady,
   rightSidePopupViewReady,
-]).then((wins) => {
+]).then((views) => {
   valueToMainSubject('popupViewsOnMainwinReady', {
-    addAddress: wins[0],
-    dappsManagement: wins[1],
-    selectDevices: wins[2],
-    inDappFind: wins[3],
-    zPopup: wins[4],
-    globalToastPopup: wins[5],
-    rightSidePopup: wins[6],
+    addAddress: views[0],
+    dappsManagement: views[1],
+    selectDevices: views[2],
+    selectCamera: views[3],
+    inDappFind: views[4],
+    zPopup: views[5],
+    globalToastPopup: views[6],
+    rightSidePopup: views[7],
   });
 });
 

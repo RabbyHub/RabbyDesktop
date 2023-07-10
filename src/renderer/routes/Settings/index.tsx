@@ -7,7 +7,7 @@ import {
   IconTooltipInfo,
 } from '@/../assets/icons/mainwin-settings';
 
-import { Button, Modal, Slider, SwitchProps, Tooltip } from 'antd';
+import { Button, Modal, Slider, SwitchProps, Tooltip, message } from 'antd';
 import { useSettings } from '@/renderer/hooks/useSettings';
 import styled from 'styled-components';
 import {
@@ -189,6 +189,28 @@ function DeveloperKitsParts() {
               }}
             >
               <code>hid.requestDevices()</code>
+            </Button>
+          </ItemAction>
+          <ItemAction
+            name="Camera"
+            icon="rabby-internal://assets/icons/developer-kits/camera.svg"
+          >
+            <Button
+              type="primary"
+              ghost
+              className="mr-[8px]"
+              onClick={(evt) => {
+                evt.stopPropagation();
+                window.rabbyDesktop.ipcRenderer
+                  .invoke('start-select-camera')
+                  .then((result) => {
+                    message.info(
+                      `[${result.selectId}] Selected camera with ID: ${result.deviceId}`
+                    );
+                  });
+              }}
+            >
+              <code>Open Select Modal</code>
             </Button>
           </ItemAction>
           <ItemSwitch

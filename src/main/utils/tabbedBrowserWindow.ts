@@ -233,3 +233,14 @@ export async function pushEventToAllUIsCareAboutHidDevices(
     sendToWebContents(view, '__internal_push:webusb:events', eventPayload);
   });
 }
+
+export async function pushEventToAllUIsCareAboutCameras(
+  eventPayload: M2RChanneMessagePayload['__internal_push:media:events']
+) {
+  const { list } = await getAllMainUIViews();
+  const rabbyxSignWebContentsList = getAllRabbyXWindowWebContentsList();
+
+  [...list, ...rabbyxSignWebContentsList].forEach((view) => {
+    sendToWebContents(view, '__internal_push:media:events', eventPayload);
+  });
+}

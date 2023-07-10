@@ -23,6 +23,7 @@ import './streams/webContents';
 import './streams/appProxy';
 import './streams/usb';
 import './streams/hid';
+import './streams/hardwardMedia';
 import './streams/dapps';
 import './streams/ipfs';
 import './streams/trezorLike';

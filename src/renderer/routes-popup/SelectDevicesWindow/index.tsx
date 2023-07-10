@@ -136,7 +136,8 @@ function SelectDeviceModal() {
           {deviceList?.length ? (
             <div className={styles.devices}>
               <h3 className={styles.title}>
-                The following {deviceList?.length > 1 ? 'devices' : 'device'} is{' '}
+                The following{' '}
+                {deviceList?.length > 1 ? 'devices are ' : 'device is '}
                 found
               </h3>
               <div className={styles.list}>

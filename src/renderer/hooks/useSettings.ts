@@ -132,3 +132,58 @@ export function useSettings() {
     adjustDappViewZoomPercent,
   };
 }
+
+const mediaAboutAtom = atom(
+  null as Pick<IDesktopAppState, 'selectedMediaVideoId'> | null
+);
+export function useSelectedMedieDevice() {
+  const [mediaAboutState, setMediaAboutState] = useAtom(mediaAboutAtom);
+
+  const fetchSelectedMediaVideo = useCallback(async () => {
+    const result = await window.rabbyDesktop.ipcRenderer.invoke(
+      'get-desktopAppState'
+    );
+
+    setMediaAboutState(result.state);
+
+    return result.state.selectedMediaVideoId;
+  }, [setMediaAboutState]);
+
+  const setLocalSelectedVideoId = useCallback(
+    (id: MediaStream['id'] | null) => {
+      setMediaAboutState((prev) => {
+        return {
+          ...prev,
+          selectedMediaVideoId: id,
+        };
+      });
+    },
+    [setMediaAboutState]
+  );
+
+  useEffect(() => {
+    fetchSelectedMediaVideo();
+  }, [fetchSelectedMediaVideo, setLocalSelectedVideoId]);
+
+  useEffect(() => {
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_push:media:events',
+      (payload) => {
+        switch (payload.eventType) {
+          case 'push-selected-media-video': {
+            setLocalSelectedVideoId(payload.selectedMediaVideoId);
+            break;
+          }
+          default:
+            break;
+        }
+      }
+    );
+  }, [setLocalSelectedVideoId]);
+
+  return {
+    selectedMediaVideoId: mediaAboutState?.selectedMediaVideoId || null,
+    fetchSelectedMediaVideo,
+    setLocalSelectedVideoId,
+  };
+}

@@ -1,0 +1,173 @@
+@import "@/renderer/css/mixins.less";
+
+:global {
+  body.select-cameras-popup {
+    overflow-x: hidden;
+    // background: linear-gradient(112.9deg, #6F7584 0%, #3B404D 100%);
+  }
+
+  body.select-cameras-popup {
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+@device-item-h: 56px;
+
+@header-h: 115px;
+
+@h-tipContainer: 100px;
+@h-button: 52px;
+
+:global {
+  html.os-darwin.__rabbyx-shell-page {
+    :local .SelectCameraModal {
+      width: 1000px;
+      height: 600px;
+      max-width: 100vw !important;
+
+      :global .ant-modal-content {
+        border-radius: 9px;
+      }
+    }
+  }
+}
+
+.SelectCameraModal {
+  :global {
+    .ant-modal-body {
+      height: calc(100% - @header-h);
+      overflow: hidden;
+    }
+    .ant-modal-content {
+      height: 680px;
+    }
+  }
+}
+
+.SelectDevicesContent {
+  width: 432px;
+  margin: auto;
+  height: calc(100% - 28px);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  .center-block() {
+    flex-shrink: 1;
+    max-height: calc(100% - @h-tipContainer - @h-button - 44px);
+  }
+
+  > * {
+    flex-shrink: 0;
+  }
+
+  .errorContainer {
+    .center-block();
+  }
+
+  .error {
+    width: 400px;
+    height: 260px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.10);
+    text-align: center;
+    margin: 0 auto;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .text  {
+      margin-left: 8px;
+      margin-top: 16px;
+      font-size: 15px;
+    }
+  }
+
+  .cameras {
+    color: #fff;
+    .center-block();
+    display: flex;
+    flex-direction: column;
+
+    .title {
+      flex-shrink: 0;
+      height: 40px;
+      font-size: 13px;
+      font-weight: normal;
+      justify-content: flex-start;
+      margin-bottom: 0;
+      align-items: center;
+      color: #fff;
+      text-align: center;
+    }
+
+    .list {
+      flex-shrink: 1;
+      height: 100%;
+      // max-height: calc(100% - 40px);
+      overflow-y: overlay;
+      padding-right: 12px;
+      .chrome-like-scrollbar();
+    }
+  }
+
+  .camera {
+    background: rgba(var(--color-primary-rgb), 0.2);
+    border-radius: 4px;
+    height: @device-item-h;
+    padding: 16px 20px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+
+    &:hover, &.selected {
+      background: rgba(var(--color-primary-rgb), 0.5);
+    }
+
+    .checkIcon {
+      color: var(--color-comment2);
+      width: 20px;
+      height: 20px;
+    }
+
+    &.selected .checkIcon {
+      color: var(--color-green);
+    }
+  }
+
+  .camera + .camera {
+    margin-top: 16px;
+  }
+
+  .tipsContainer {
+    text-align: center;
+    padding-top: 40px;
+    height: @h-tipContainer;
+  }
+
+  .tips {
+    display: inline-block;
+    font-size: 13px;
+    line-height: 24px;
+    text-align: left;
+    padding-left: 0;
+  }
+
+  .next {
+    display: block;
+    width: 250px;
+    height: @h-button;
+    margin: auto;
+    position: absolute;
+    bottom: 44px;
+    left: 0;
+    right: 0;
+  }
+}
