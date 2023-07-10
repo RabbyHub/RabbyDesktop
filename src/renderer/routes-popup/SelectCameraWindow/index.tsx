@@ -35,13 +35,17 @@ function useSelectCamera() {
         if (visible) {
           fetchSelectedMediaVideo();
           try {
-            const allVideos = await window.navigator.mediaDevices
-              .enumerateDevices()
-              .then((result) =>
-                result.filter((item) => item.kind === 'videoinput')
+            const { mediaList: allCameras } =
+              await window.rabbyDesktop.ipcRenderer.invoke(
+                'enumerate-camera-devices'
               );
+            // const allCameras = await window.navigator.mediaDevices
+            //   .enumerateDevices()
+            //   .then((result) =>
+            //     result.filter((item) => item.kind === 'videoinput')
+            //   );
 
-            setCameraList(allVideos || []);
+            setCameraList(allCameras || []);
           } catch (err) {
             console.error(err);
             setCameraList([]);

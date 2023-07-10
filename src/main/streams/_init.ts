@@ -38,6 +38,7 @@ const CONF = {
     ReplaySubject<{
       rabbyNotificationGasket: Electron.BrowserView;
       backgroundWebContents: Electron.WebContents;
+      rabbyxBlankPage: Electron.BrowserView;
     }>
   >,
 

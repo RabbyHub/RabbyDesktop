@@ -400,6 +400,12 @@ type ChannelInvokePayload = {
       systemReleaseInfo: ISystemReleaseInfo;
     };
   };
+  'enumerate-camera-devices': {
+    send: [];
+    response: {
+      mediaList: MediaDeviceInfo[];
+    };
+  };
   'start-select-camera': {
     send: [
       options?: {

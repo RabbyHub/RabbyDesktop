@@ -88,6 +88,25 @@ const maskReady = getRabbyExtId().then(async () => {
   return rabbyNotificationGasket;
 });
 
+const blankPageReady = getRabbyExtId().then(async () => {
+  const rabbyxBlankPage = createPopupView();
+  rabbyxBlankPage.setBounds({ x: -100, y: -100, width: 1, height: 1 });
+
+  const rabbyExtId = await getRabbyExtId();
+  await rabbyxBlankPage.webContents.loadURL(
+    `chrome-extension://${rabbyExtId}/blank.html`
+  );
+
+  if (!IS_RUNTIME_PRODUCTION) {
+    rabbyxBlankPage.webContents.openDevTools({
+      mode: 'detach',
+      activate: true,
+    });
+  }
+
+  return rabbyxBlankPage;
+});
+
 const rabbyxInitialized = new Promise<number>((resolve) => {
   const dispose = onIpcMainEvent('rabbyx-initialized', (_, time) => {
     dispose();
@@ -127,11 +146,12 @@ const bgWcReady = new Promise<Electron.WebContents>((resolve) => {
   });
 });
 
-Promise.all([maskReady, bgWcReady, rabbyxInitialized]).then(
-  ([rabbyNotificationGasket, backgroundWebContents]) => {
+Promise.all([maskReady, bgWcReady, blankPageReady, rabbyxInitialized]).then(
+  ([rabbyNotificationGasket, backgroundWebContents, rabbyxBlankPage]) => {
     valueToMainSubject('rabbyExtViews', {
       rabbyNotificationGasket: rabbyNotificationGasket!,
       backgroundWebContents,
+      rabbyxBlankPage,
     });
   }
 );

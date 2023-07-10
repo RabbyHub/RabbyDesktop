@@ -4,6 +4,27 @@ import { handleIpcMainInvoke } from '../utils/ipcMainEvents';
 import { toggleSelectCamera } from '../utils/stream-helpers';
 import { desktopAppStore } from '../store/desktopApp';
 import { pushEventToAllUIsCareAboutCameras } from '../utils/tabbedBrowserWindow';
+import { rabbyxExecuteJsOnBlank } from './rabbyIpcQuery/_base';
+
+handleIpcMainInvoke('enumerate-camera-devices', async () => {
+  let mediaList: MediaDeviceInfo[] = [];
+
+  mediaList = await rabbyxExecuteJsOnBlank(`
+  ;(async () => {
+    const result = await window.navigator.mediaDevices.enumerateDevices().then((devices) => {
+      return devices.filter((device) => device.kind === 'videoinput');
+    });
+
+    return result.map((device) => {
+      return JSON.parse(JSON.stringify(device));
+    });
+  })();
+  `);
+
+  return {
+    mediaList,
+  };
+});
 
 const selectCameraState = {
   selectId: null as string | null,
