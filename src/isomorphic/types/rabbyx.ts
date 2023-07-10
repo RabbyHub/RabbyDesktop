@@ -560,6 +560,10 @@ export type RabbyXMethod = {
     cbor: string,
     keyringId?: number | null
   ) => number | null;
+  'walletController.checkQRHardwareAllowImport': (brand: string) => {
+    allowed: boolean;
+    brand: string;
+  };
 } & {
   'openapi.setHost': OpenApiService['setHost'];
   'openapi.getHost': OpenApiService['getHost'];

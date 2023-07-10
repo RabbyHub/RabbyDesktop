@@ -1,8 +1,8 @@
-import { Modal } from 'antd';
 import React from 'react';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { useAsyncRetry } from 'react-use';
 import { HARDWARE_KEYRING_TYPES } from '@/renderer/utils/constant';
+import { Modal as AntdModal } from 'antd';
 import {
   AdvancedSettings,
   DEFAULT_SETTING_DATA,
@@ -11,14 +11,16 @@ import {
 import { HDPathType } from '../HDPathTypeButton';
 import { MainContainer } from '../MainContainer';
 import { HDManagerStateContext } from '../utils';
+import { Modal } from '../../Modal/Modal';
 
 interface Props {
   brand?: string;
+  onClose: () => void;
 }
 
 const KEYSTONE_TYPE = HARDWARE_KEYRING_TYPES.Keystone.type;
 
-export const QRCodeManager: React.FC<Props> = ({ brand }) => {
+export const QRCodeManager: React.FC<Props> = ({ brand, onClose }) => {
   const [loading, setLoading] = React.useState(true);
   const { getCurrentAccounts, currentAccounts, keyringId } = React.useContext(
     HDManagerStateContext
@@ -27,7 +29,6 @@ export const QRCodeManager: React.FC<Props> = ({ brand }) => {
   const [setting, setSetting] =
     React.useState<SettingData>(DEFAULT_SETTING_DATA);
   const [firstFetchAccounts, setFirstFetchAccounts] = React.useState(false);
-  const wallet = walletController;
   const currentAccountsRef = React.useRef(currentAccounts);
 
   const openAdvanced = React.useCallback(() => {
@@ -75,14 +76,15 @@ export const QRCodeManager: React.FC<Props> = ({ brand }) => {
   }, [fetchCurrentAccountsRetry.loading, fetchCurrentAccountsRetry.error]);
 
   const openSwitchHD = React.useCallback(async () => {
-    Modal.error({
+    AntdModal.error({
       title: `Switch to a new ${brand} device`,
       content: `It's not supported to import multiple ${brand} devices If you switch to a new ${brand} device, the current device's address list will be removed before starting the import process.`,
       okText: 'Confirm',
+      wrapClassName: 'ErrorModal',
       onOk: async () => {
         await Promise.all(
           currentAccountsRef.current?.map(async (account) =>
-            wallet.removeAddress(
+            walletController.removeAddress(
               account.address,
               KEYSTONE_TYPE,
               undefined,
@@ -90,8 +92,12 @@ export const QRCodeManager: React.FC<Props> = ({ brand }) => {
             )
           )
         );
-        await wallet.requestKeyring(KEYSTONE_TYPE, 'forgetDevice', keyringId);
-        // history.goBack();
+        await walletController.requestKeyring(
+          KEYSTONE_TYPE,
+          'forgetDevice',
+          keyringId
+        );
+        onClose();
       },
       okCancel: false,
       centered: true,
@@ -99,7 +105,7 @@ export const QRCodeManager: React.FC<Props> = ({ brand }) => {
       maskClosable: true,
       className: 'hd-manager-switch-modal',
     });
-  }, [brand, keyringId, wallet]);
+  }, [brand, keyringId, onClose]);
 
   return (
     <>
@@ -129,7 +135,7 @@ export const QRCodeManager: React.FC<Props> = ({ brand }) => {
 
       <Modal
         destroyOnClose
-        className="AdvancedModal"
+        className="AdvancedModal inherit"
         title="Custom Address HD path"
         open={visibleAdvanced}
         centered
