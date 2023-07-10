@@ -61,13 +61,6 @@ export const useSafeQueue = ({
           })
         );
 
-        const owners = await walletController.getGnosisOwners(
-          account,
-          account.address,
-          info.version,
-          networkId
-        );
-        const comparedOwners = crossCompareOwners(info.owners, owners);
         setIsLoading(false);
 
         // const transactions
@@ -97,7 +90,7 @@ export const useSafeQueue = ({
                 info.address,
                 tx,
                 Number(networkId),
-                comparedOwners
+                info.owners
               )
             );
             return Promise.all(res).then((data) => {

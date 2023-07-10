@@ -17,20 +17,9 @@ export const useGnosisSafeInfo = (
           address,
           networkId,
         });
-        const owners = await walletController.getGnosisOwners(
-          {
-            address,
-            type: KEYRING_CLASS.GNOSIS,
-            brandName: KEYRING_CLASS.GNOSIS,
-          },
-          address,
-          safeInfo.version,
-          networkId
-        );
-        const comparedOwners = crossCompareOwners(safeInfo.owners, owners);
+
         return {
           ...safeInfo,
-          owners: comparedOwners,
         };
       }
       return null;
