@@ -1,5 +1,5 @@
 diff --git a/node_modules/@debank/common/dist/chain-data.js b/node_modules/@debank/common/dist/chain-data.js
-index e14c5c5..a366164 100644
+index e0152bf..dde5aad 100644
 --- a/node_modules/@debank/common/dist/chain-data.js
 +++ b/node_modules/@debank/common/dist/chain-data.js
 @@ -54,7 +54,7 @@ export var CHAINS_ENUM;
@@ -9,9 +9,9 @@ index e14c5c5..a366164 100644
 -    CHAINS_ENUM["RONIN"] = "RONIN";
 +    // CHAINS_ENUM["RONIN"] = "RONIN";
      CHAINS_ENUM["OAS"] = "OAS";
+     CHAINS_ENUM["ZORA"] = "ZORA";
  })(CHAINS_ENUM || (CHAINS_ENUM = {}));
- export const CHAINS_RAW = {
-@@ -922,22 +922,22 @@ export const CHAINS_RAW = {
+@@ -923,22 +923,22 @@ export const CHAINS_RAW = {
              "1559": true,
          },
      },
@@ -50,41 +50,3 @@ index e14c5c5..a366164 100644
      [CHAINS_ENUM.OAS]: {
          id: 248,
          serverId: "oas",
-diff --git a/node_modules/@debank/common/dist/chain.js b/node_modules/@debank/common/dist/chain.js
-index 36ec0f7..863dbcb 100644
---- a/node_modules/@debank/common/dist/chain.js
-+++ b/node_modules/@debank/common/dist/chain.js
-@@ -437,12 +437,12 @@ export const CHAINS_LIST = [
-         logo: IconOasisLogo,
-         whiteLogo: IconOasisWhiteLogo,
-     },
--    {
--        ...CHAINS_RAW[CHAINS_ENUM.RONIN],
--        enum: CHAINS_ENUM.RONIN,
--        logo: IconRoninLogo,
--        whiteLogo: IconRoninWhiteLogo,
--    },
-+    // {
-+    //     ...CHAINS_RAW[CHAINS_ENUM.RONIN],
-+    //     enum: CHAINS_ENUM.RONIN,
-+    //     logo: IconRoninLogo,
-+    //     whiteLogo: IconRoninWhiteLogo,
-+    // },
-     {
-         ...CHAINS_RAW[CHAINS_ENUM.OAS],
-         enum: CHAINS_ENUM.OAS,
-diff --git a/node_modules/@debank/common/dist/index.js b/node_modules/@debank/common/dist/index.js
-index 1c3aa32..f23100f 100644
---- a/node_modules/@debank/common/dist/index.js
-+++ b/node_modules/@debank/common/dist/index.js
-@@ -1,2 +1,10 @@
-+import { CHAINS_LIST as CHAINS_LIST_FULL, CHAINS_ENUM as CHAINS_ENUM_FULL } from "./chain";
-+import { selectChains } from "./utils";
- export * from "./number";
- export * from "./chain";
-+// rabby
-+export const { CHAINS, CHAINS_ENUM, CHAINS_LIST, __OMITTED_CHAINS_ENUM_FOR_TEST__, } = selectChains({
-+    ALL_CHAIN_LIST: CHAINS_LIST_FULL,
-+}, {
-+    omitEums: [CHAINS_ENUM_FULL.RONIN]
-+});

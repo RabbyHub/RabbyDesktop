@@ -56,6 +56,7 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["ROSE"] = "ROSE";
     // CHAINS_ENUM["RONIN"] = "RONIN";
     CHAINS_ENUM["OAS"] = "OAS";
+    CHAINS_ENUM["ZORA"] = "ZORA";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -952,6 +953,22 @@ export const CHAINS_RAW = {
         nativeTokenDecimals: 18,
         eip: {
             "1559": true,
+        },
+    },
+    [CHAINS_ENUM.ZORA]: {
+        id: 7777777,
+        serverId: "zora",
+        network: "7777777",
+        name: "Zora",
+        nativeTokenSymbol: "ETH",
+        nativeTokenAddress: "zora",
+        enum: CHAINS_ENUM.ZORA,
+        hex: "0x76adf1",
+        scanLink: "https://explorer.zora.energy/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/token/logo_url/eth/935ae4e4d1d12d59a99717a24f2540b5.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
         },
     },
 };
