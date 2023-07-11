@@ -1,5 +1,5 @@
 #### New Features:
 
-- Supported to view and send NFT
-- Supported same address on multiple chains for Safe
-- Optimized CEX asset display in Bundle
+- Supported Zora chain
+- Supported 1inch in Rabby swap aggregator
+- Supported Keystone, AirGap, and CoolWallet
