@@ -17,6 +17,7 @@ import { useSelectedMedieDevice } from '@/renderer/hooks/useSettings';
 import { useInterval } from '@/renderer/hooks/useTimer';
 import { usePrevious } from 'react-use';
 import { detectClientOS } from '@/isomorphic/os';
+import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import styles from './index.module.less';
 
 hideMainwinPopupview('select-camera');
@@ -184,11 +185,11 @@ function TipGoToGrantOnDarwin() {
           type="primary"
           onClick={() => {
             window.rabbyDesktop.ipcRenderer.invoke(
-              'darwin:quick-open-privacy-camera'
+              'redirect-to-setting-privacy-camera'
             );
           }}
         >
-          Go to Grant
+          Go to grant
         </Button>
       </div>
     </div>

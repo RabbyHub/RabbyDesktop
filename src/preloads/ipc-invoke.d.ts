@@ -441,7 +441,7 @@ type ChannelInvokePayload = {
       error: string | null;
     };
   };
-  'darwin:quick-open-privacy-camera': {
+  'redirect-to-setting-privacy-camera': {
     send: [];
     // eslint-disable-next-line @typescript-eslint/ban-types
     response: {};

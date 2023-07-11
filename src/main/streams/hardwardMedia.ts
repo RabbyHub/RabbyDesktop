@@ -166,13 +166,17 @@ handleIpcMainInvoke('finish-select-camera', (_, payload) => {
   };
 });
 
-handleIpcMainInvoke('darwin:quick-open-privacy-camera', async () => {
-  if (!IS_DARWIN) return;
-
-  // NOTICE: only valid on macOS greater than 10.14
-  shell.openExternal(
-    'x-apple.systempreferences:com.apple.preference.security?Privacy_Camera'
-  );
+handleIpcMainInvoke('redirect-to-setting-privacy-camera', async () => {
+  if (IS_DARWIN) {
+    // NOTICE: only valid on macOS greater than 10.14
+    shell.openExternal(
+      'x-apple.systempreferences:com.apple.preference.security?Privacy_Camera'
+    );
+  } else {
+    shell.openExternal('ms-settings:privacy-webcam');
+    // deprecated setting on lower version Windows
+    // shell.openExternal('ms-settings:camera');
+  }
 });
 
 handleIpcMainInvoke('rabbyx:get-selected-camera', (_) => {
