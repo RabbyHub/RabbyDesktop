@@ -7,6 +7,7 @@ import {
   RightSidePopupContentsSizes,
 } from '@/isomorphic/const-size-next';
 import {
+  IS_DEVTOOLS_AVAILBLE,
   IS_RUNTIME_PRODUCTION,
   RABBY_POPUP_GHOST_VIEW_URL,
   TOAST_TOP,
@@ -341,7 +342,7 @@ const selectCamerasReady = onMainWindowReady().then(async (mainWin) => {
   );
 
   // debug-only
-  if (!IS_RUNTIME_PRODUCTION) {
+  if (IS_DEVTOOLS_AVAILBLE) {
     selectCameraPopup.webContents.openDevTools({ mode: 'detach' });
   }
 

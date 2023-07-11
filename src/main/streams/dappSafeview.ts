@@ -2,7 +2,7 @@ import { BrowserView, BrowserWindow } from 'electron';
 
 import { canoicalizeDappUrl } from '@/isomorphic/url';
 import {
-  IS_RUNTIME_PRODUCTION,
+  IS_DEVTOOLS_AVAILBLE,
   RABBY_POPUP_GHOST_VIEW_URL,
 } from '../../isomorphic/constants';
 
@@ -275,7 +275,7 @@ const dappPreviewViewReady = onMainWindowReady().then(async (tabbedMainWin) => {
       preload: getAssetPath(`./preloads/dappSafeViewPreload.js`),
       safeDialogs: true,
       disableDialogs: true,
-      devTools: !IS_RUNTIME_PRODUCTION,
+      devTools: IS_DEVTOOLS_AVAILBLE,
     },
   });
 

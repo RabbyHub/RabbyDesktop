@@ -1,15 +1,15 @@
 import { Menu, shell } from 'electron';
 import {
   APP_BRANDNAME,
-  IS_RUNTIME_PRODUCTION,
+  IS_DEVTOOLS_AVAILBLE,
 } from '../../isomorphic/constants';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import { getFocusedWindow } from '../utils/tabbedBrowserWindow';
 import { getRabbyExtId, onMainWindowReady } from '../utils/stream-helpers';
 
 const isDarwin = process.platform === 'darwin';
-function getFocusedWebContents() {
-  return getFocusedWindow().getFocusedTab()?.view?.webContents;
+function getFocusedTab() {
+  return getFocusedWindow().getFocusedTab();
 }
 
 export async function setupAppMenu() {
@@ -41,13 +41,14 @@ export async function setupAppMenu() {
             label: 'Reload',
             accelerator: 'CmdOrCtrl+R',
             nonNativeMacOSRole: true,
-            click: () => getFocusedWebContents()?.reload(),
+            click: () => getFocusedTab()?.reload(),
           },
           {
             label: 'Force Reload',
             accelerator: 'Shift+CmdOrCtrl+R',
             nonNativeMacOSRole: true,
-            click: () => getFocusedWebContents()?.reloadIgnoringCache(),
+            click: () =>
+              getFocusedTab()?.view?.webContents?.reloadIgnoringCache(),
           },
           {
             label: 'Find In Dapp',
@@ -102,7 +103,7 @@ export async function setupAppMenu() {
         Electron.MenuItemConstructorOptions
     >[
       ...ViewSubMenusAboutDapp,
-      !IS_RUNTIME_PRODUCTION
+      IS_DEVTOOLS_AVAILBLE
         ? {
             label: 'Toggle Developer Tool',
             accelerator: isDarwin ? 'Alt+Command+I' : 'Ctrl+Shift+I',
@@ -110,15 +111,24 @@ export async function setupAppMenu() {
             click: async () => {
               const topbarExtId = await getRabbyExtId();
 
-              const win = getFocusedWebContents();
-              if (!win) return;
+              const tab = getFocusedTab();
+              let webContents: Electron.WebContents | null | undefined =
+                tab?.view?.webContents;
+              if (!webContents) {
+                webContents = getFocusedWindow()?.window.webContents;
+              }
+
+              if (!webContents) return;
+
               if (
-                !win.isDevToolsOpened() &&
-                win.getURL().includes(`chrome-extension://${topbarExtId}`)
+                !webContents.isDevToolsOpened() &&
+                webContents
+                  .getURL()
+                  .includes(`chrome-extension://${topbarExtId}`)
               ) {
-                win.openDevTools({ mode: 'detach' });
+                webContents.openDevTools({ mode: 'detach' });
               } else {
-                win.toggleDevTools();
+                webContents.toggleDevTools();
               }
             },
           }

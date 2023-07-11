@@ -13,6 +13,7 @@ import {
 } from '../../isomorphic/const-size';
 import {
   APP_NAME,
+  IS_DEVTOOLS_AVAILBLE,
   IS_RUNTIME_PRODUCTION,
   SENTRY_DEBUG,
 } from '../../isomorphic/constants';
@@ -132,7 +133,7 @@ export function getBrowserWindowOpts(
       // enableRemoteModule: false,
       contextIsolation: true,
       // worldSafeExecuteJavaScript: true,
-      devTools: !IS_RUNTIME_PRODUCTION,
+      devTools: IS_DEVTOOLS_AVAILBLE,
       ...windowOpts?.webPreferences,
     },
   };

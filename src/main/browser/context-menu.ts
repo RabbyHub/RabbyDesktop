@@ -15,7 +15,10 @@ import {
   shell,
 } from 'electron';
 import { CHAINS_ENUM } from '@/isomorphic/chain-data';
-import { IS_RUNTIME_PRODUCTION } from '../../isomorphic/constants';
+import {
+  IS_DEVTOOLS_AVAILBLE,
+  IS_RUNTIME_PRODUCTION,
+} from '../../isomorphic/constants';
 import { findDappsByOrigin } from '../store/dapps';
 import { safeOpenURL } from '../streams/dappSafeview';
 import {
@@ -705,7 +708,9 @@ async function buildChromeContextMenu(
       label: 'Fast Paths',
       submenu: buildPathKitsMenu(opts),
     });
+  }
 
+  if (IS_DEVTOOLS_AVAILBLE) {
     appendSeparator();
     append({
       label: labels.inspect,
