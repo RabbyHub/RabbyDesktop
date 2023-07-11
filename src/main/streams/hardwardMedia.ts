@@ -15,7 +15,7 @@ import { alertRestartApp } from '../utils/mainTabbedWin';
 
 const IS_DARWIN = process.platform === 'darwin';
 async function tryToEnsureCameraAccess(askIfNotGranted = true) {
-  if (!IS_DARWIN) return 'granted' as const;
+  if (!IS_DARWIN) return systemPreferences.getMediaAccessStatus('camera');
 
   const prevAccessStatus = systemPreferences.getMediaAccessStatus('camera');
   if (askIfNotGranted && prevAccessStatus !== 'granted') {
@@ -58,9 +58,7 @@ async function getMediaDevices() {
 
 handleIpcMainInvoke('get-media-access-status', async (_, type) => {
   return {
-    accessStatus: IS_DARWIN
-      ? systemPreferences.getMediaAccessStatus(type)
-      : ('granted' as const),
+    accessStatus: systemPreferences.getMediaAccessStatus(type),
   };
 });
 

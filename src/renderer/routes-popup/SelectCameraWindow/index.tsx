@@ -12,7 +12,7 @@ import { useBodyClassNameOnMounted } from '@/renderer/hooks/useMountedEffect';
 import { Modal as RModal } from '@/renderer/components/Modal/Modal';
 import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { RcIconChecked } from '@/../assets/icons/select-camera';
-import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import { APP_BRANDNAME, IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { useSelectedMedieDevice } from '@/renderer/hooks/useSettings';
 import { useInterval } from '@/renderer/hooks/useTimer';
 import { usePrevious } from 'react-use';
@@ -79,7 +79,6 @@ function useSelectCamera() {
   // }, [localVisible, previousCameraAccessStatus, cameraAccessStatus]);
 
   useInterval(async () => {
-    if (!IS_DARWIN) return;
     const result = await fetchCameraAccessStatus();
     if (
       previousCameraAccessStatus !== 'granted' &&
@@ -152,7 +151,11 @@ function TipGoToGrantOnDarwin() {
         <div className={classNames(styles.step, styles.step1)}>
           <img
             className="w-[380px]"
-            src="rabby-internal://assets/imgs/tip-grant-camera/tip-step1.png"
+            src={
+              IS_DARWIN
+                ? `rabby-internal://assets/imgs/tip-grant-camera/macos-tip-step1.png`
+                : `rabby-internal://assets/imgs/tip-grant-camera/macos-tip-step1.png`
+            }
           />
           <p className={styles.desc}>
             1. Go to System Settings - Privacy & Security - Camera
@@ -165,10 +168,14 @@ function TipGoToGrantOnDarwin() {
         <div className={classNames(styles.step, styles.step2)}>
           <img
             className="w-[440px]"
-            src="rabby-internal://assets/imgs/tip-grant-camera/tip-step2.png"
+            src={
+              IS_DARWIN
+                ? `rabby-internal://assets/imgs/tip-grant-camera/macos-tip-step2.png`
+                : `rabby-internal://assets/imgs/tip-grant-camera/macos-tip-step2.png`
+            }
           />
           <p className={styles.desc}>
-            2. Allow Rabby Desktop to access camera, restart the app
+            2. Allow {APP_BRANDNAME} to access camera, restart the app
           </p>
         </div>
 
