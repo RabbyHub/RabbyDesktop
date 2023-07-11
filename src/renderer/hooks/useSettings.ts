@@ -134,27 +134,30 @@ export function useSettings() {
 }
 
 const mediaAboutAtom = atom(
-  null as Pick<IDesktopAppState, 'selectedMediaVideoId'> | null
+  null as Pick<IDesktopAppState, 'selectedMediaConstrains'> | null
 );
 export function useSelectedMedieDevice() {
   const [mediaAboutState, setMediaAboutState] = useAtom(mediaAboutAtom);
 
-  const fetchSelectedMediaVideo = useCallback(async () => {
+  const fetchSelectedMediaConstrains = useCallback(async () => {
     const result = await window.rabbyDesktop.ipcRenderer.invoke(
       'get-desktopAppState'
     );
 
     setMediaAboutState(result.state);
 
-    return result.state.selectedMediaVideoId;
+    return result.state.selectedMediaConstrains?.label;
   }, [setMediaAboutState]);
 
-  const setLocalSelectedVideoId = useCallback(
-    (id: MediaStream['id'] | null) => {
+  const setLocalConstrains = useCallback(
+    (constrains: IDesktopAppState['selectedMediaConstrains']) => {
       setMediaAboutState((prev) => {
         return {
           ...prev,
-          selectedMediaVideoId: id,
+          selectedMediaConstrains: {
+            label: prev?.selectedMediaConstrains?.label || null,
+            ...constrains,
+          },
         };
       });
     },
@@ -162,8 +165,8 @@ export function useSelectedMedieDevice() {
   );
 
   useEffect(() => {
-    fetchSelectedMediaVideo();
-  }, [fetchSelectedMediaVideo, setLocalSelectedVideoId]);
+    fetchSelectedMediaConstrains();
+  }, [fetchSelectedMediaConstrains]);
 
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
@@ -171,7 +174,7 @@ export function useSelectedMedieDevice() {
       (payload) => {
         switch (payload.eventType) {
           case 'push-selected-media-video': {
-            setLocalSelectedVideoId(payload.selectedMediaVideoId);
+            setLocalConstrains(payload.constrains);
             break;
           }
           default:
@@ -179,11 +182,11 @@ export function useSelectedMedieDevice() {
         }
       }
     );
-  }, [setLocalSelectedVideoId]);
+  }, [setLocalConstrains]);
 
   return {
-    selectedMediaVideoId: mediaAboutState?.selectedMediaVideoId || null,
-    fetchSelectedMediaVideo,
-    setLocalSelectedVideoId,
+    selectedMediaConstrains: mediaAboutState?.selectedMediaConstrains || null,
+    fetchSelectedMediaConstrains,
+    setLocalConstrains,
   };
 }

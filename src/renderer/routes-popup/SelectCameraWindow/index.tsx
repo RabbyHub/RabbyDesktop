@@ -22,9 +22,9 @@ function useSelectCamera() {
   const [cameraList, setCameraList] = useState<MediaDeviceInfo[]>([]);
 
   const {
-    selectedMediaVideoId,
-    setLocalSelectedVideoId,
-    fetchSelectedMediaVideo,
+    selectedMediaConstrains,
+    setLocalConstrains,
+    fetchSelectedMediaConstrains,
   } = useSelectedMedieDevice();
 
   const { localVisible, hideView, pageInfo } = usePopupViewInfo(
@@ -33,7 +33,7 @@ function useSelectCamera() {
       enableTopViewGuard: true,
       onVisibleChanged: async (visible) => {
         if (visible) {
-          fetchSelectedMediaVideo();
+          fetchSelectedMediaConstrains();
           try {
             const { mediaList: allCameras } =
               await window.rabbyDesktop.ipcRenderer.invoke(
@@ -57,16 +57,16 @@ function useSelectCamera() {
 
   const confirmSelectDevice = useCallback(
     (selectId: string) => {
-      if (!selectedMediaVideoId) {
+      if (!selectedMediaConstrains?.label) {
         throw new Error('No camera selected');
       }
 
       window.rabbyDesktop.ipcRenderer.invoke('confirm-selected-camera', {
         selectId,
-        deviceId: selectedMediaVideoId,
+        constrains: selectedMediaConstrains,
       });
     },
-    [selectedMediaVideoId]
+    [selectedMediaConstrains]
   );
 
   const cancelSelect = useCallback(() => {
@@ -82,13 +82,13 @@ function useSelectCamera() {
   useEffect(() => {
     if (!localVisible) {
       setCameraList([]);
-      setLocalSelectedVideoId(null);
+      setLocalConstrains(null);
     }
-  }, [setLocalSelectedVideoId, localVisible]);
+  }, [setLocalConstrains, localVisible]);
 
   return {
-    selectedMediaVideoId,
-    setLocalSelectedVideoId,
+    selectedMediaConstrains,
+    setLocalConstrains,
 
     confirmSelectDevice,
     cancelSelect,
@@ -104,8 +104,8 @@ function useSelectCamera() {
 function SelectCameraModal() {
   useBodyClassNameOnMounted('select-camera-popup');
   const {
-    selectedMediaVideoId,
-    setLocalSelectedVideoId,
+    selectedMediaConstrains,
+    setLocalConstrains,
     confirmSelectDevice,
     cancelSelect,
 
@@ -146,7 +146,8 @@ function SelectCameraModal() {
               <div className={styles.list}>
                 {cameraList.map((d) => {
                   const isSelected =
-                    selectedMediaVideoId && selectedMediaVideoId === d.deviceId;
+                    selectedMediaConstrains?.label &&
+                    selectedMediaConstrains?.label === d.label;
                   return (
                     <div
                       key={`${pageState.selectId}-camera-${d.deviceId}`}
@@ -156,9 +157,9 @@ function SelectCameraModal() {
                       )}
                       onClick={() => {
                         if (!isSelected) {
-                          setLocalSelectedVideoId(d.deviceId);
+                          setLocalConstrains({ label: d.label });
                         } else {
-                          setLocalSelectedVideoId(null);
+                          setLocalConstrains(null);
                         }
                       }}
                     >
@@ -188,7 +189,7 @@ function SelectCameraModal() {
             </div>
           )}
           <Button
-            disabled={!cameraList.length || !selectedMediaVideoId}
+            disabled={!cameraList.length || !selectedMediaConstrains?.label}
             className={styles.next}
             type="primary"
             onClick={() => {

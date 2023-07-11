@@ -205,7 +205,7 @@ function DeveloperKitsParts() {
                   .invoke('start-select-camera')
                   .then((result) => {
                     message.info(
-                      `[${result.selectId}] Selected camera with ID: ${result.deviceId}`
+                      `[${result.selectId}] Selected camera with ID: ${result.constrains?.label}`
                     );
                   });
               }}

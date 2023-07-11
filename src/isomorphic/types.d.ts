@@ -161,7 +161,9 @@ type IDesktopAppState = {
 
   experimentalDappViewZoomPercent: number;
 
-  selectedMediaVideoId: string | null;
+  selectedMediaConstrains: {
+    label: string | null;
+  } | null;
 };
 
 type IAppDynamicConfig = {

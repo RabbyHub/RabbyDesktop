@@ -31,7 +31,7 @@ const selectCameraState = {
 };
 const confirmedSelectedCameraSubj = new Subject<{
   selectId: string;
-  deviceId: MediaStream['id'] | null;
+  constrains: IDesktopAppState['selectedMediaConstrains'];
 }>();
 const confirmedSelectedCamera$ = confirmedSelectedCameraSubj.asObservable();
 handleIpcMainInvoke('start-select-camera', async (_, opts) => {
@@ -42,16 +42,16 @@ handleIpcMainInvoke('start-select-camera', async (_, opts) => {
 
   const { ignoreSelectResult } = opts || {};
 
-  let deviceId: MediaDeviceInfo['deviceId'] | null = null;
+  let constrains: IDesktopAppState['selectedMediaConstrains'] = null;
 
   if (!ignoreSelectResult) {
     const waitResult = await firstValueFrom(confirmedSelectedCamera$);
-    deviceId = waitResult.deviceId;
+    constrains = waitResult.constrains;
   }
 
   return {
     selectId,
-    deviceId,
+    constrains,
   };
 });
 
@@ -65,14 +65,14 @@ handleIpcMainInvoke('confirm-selected-camera', (_, payload) => {
   selectCameraState.selectId = null;
   toggleSelectCamera(payload.selectId, false);
 
-  desktopAppStore.set('selectedMediaVideoId', payload.deviceId);
+  desktopAppStore.set('selectedMediaConstrains', payload.constrains);
   confirmedSelectedCameraSubj.next({
     selectId: payload.selectId,
-    deviceId: payload.deviceId,
+    constrains: payload.constrains,
   });
   pushEventToAllUIsCareAboutCameras({
     eventType: 'push-selected-media-video',
-    selectedMediaVideoId: payload.deviceId,
+    constrains: payload.constrains,
   });
 
   return {
@@ -82,6 +82,6 @@ handleIpcMainInvoke('confirm-selected-camera', (_, payload) => {
 
 handleIpcMainInvoke('rabbyx:get-selected-camera', (_) => {
   return {
-    deviceId: desktopAppStore.get('selectedMediaVideoId', null),
+    constrains: desktopAppStore.get('selectedMediaConstrains', null),
   };
 });

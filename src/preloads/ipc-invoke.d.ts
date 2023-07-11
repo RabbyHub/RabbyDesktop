@@ -8,7 +8,7 @@ type RabbyxInvokePayload = {
   'rabbyx:get-selected-camera': {
     send: [];
     response: {
-      deviceId: MediaStream['id'] | null;
+      constrains: IDesktopAppState['selectedMediaConstrains'];
     };
   };
 };
@@ -417,15 +417,14 @@ type ChannelInvokePayload = {
     ];
     response: {
       selectId: string;
-      deviceId: MediaStream['id'] | null;
+      constrains: IDesktopAppState['selectedMediaConstrains'];
     };
   };
   'confirm-selected-camera': {
     send: [
       {
         selectId: string;
-        // null means cancel
-        deviceId: MediaStream['id'] | null;
+        constrains: IDesktopAppState['selectedMediaConstrains'];
       }
     ];
     response: {

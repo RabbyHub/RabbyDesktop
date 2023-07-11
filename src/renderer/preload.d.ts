@@ -84,7 +84,7 @@ type M2RChanneMessagePayload = {
   };
   '__internal_push:media:events': {
     eventType: 'push-selected-media-video';
-    selectedMediaVideoId: MediaDeviceInfo['deviceId'] | null;
+    constrains: IDesktopAppState['selectedMediaConstrains'] | null;
   };
 } & ChannelPushToWebContents;
 
