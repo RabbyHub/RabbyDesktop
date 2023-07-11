@@ -5,11 +5,9 @@ import {
   INTERNAL_REQUEST_ORIGIN,
   KEYRING_CLASS,
 } from '@/renderer/utils/constant';
+import { BasicSafeInfo } from '@rabby-wallet/gnosis-sdk';
+import { SafeTransactionItem } from '@rabby-wallet/gnosis-sdk/dist/api';
 import { ExplainTxResponse } from '@rabby-wallet/rabby-api/dist/types';
-import {
-  SafeInfo,
-  SafeTransactionItem,
-} from '@rabby-wallet/gnosis-sdk/dist/api';
 import classNames from 'classnames';
 import { intToHex } from 'ethereumjs-util';
 import React from 'react';
@@ -22,7 +20,7 @@ import { TxItemExplain } from './TxitemExplain';
 export interface Props {
   data: SafeTransactionItem;
   networkId: string;
-  safeInfo: SafeInfo;
+  safeInfo: BasicSafeInfo;
   onSubmit(data: SafeTransactionItem): void;
   onSign(data: SafeTransactionItem): void;
 }

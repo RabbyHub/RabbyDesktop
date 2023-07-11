@@ -123,9 +123,7 @@ export const TxList: React.FC<Props> = ({
           <div>Loading data...</div>
         </div>
       ) : (
-        _.sortBy(Object.keys(transactionsGroup), (key) => {
-          return -key;
-        }).map((key) => (
+        Object.keys(transactionsGroup).map((key) => (
           <TxItemGroup
             key={key}
             items={transactionsGroup[key]}

@@ -12,6 +12,7 @@ import type { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
 import { SafeTransactionDataPartial } from '@gnosis.pm/safe-core-sdk-types';
 import type { DEX_TYPE, CEX_TYPE } from '@/renderer/routes/Swap/constant';
 import { SafeTransactionItem } from '@rabby-wallet/gnosis-sdk/dist/api';
+import { BasicSafeInfo } from '@rabby-wallet/gnosis-sdk';
 
 export type RabbyAccount = {
   address: string;
@@ -473,6 +474,10 @@ export type RabbyXMethod = {
   'walletController.execGnosisTransaction': (
     account: IDisplayedAccountWithBalance
   ) => void;
+  'walletController.getBasicSafeInfo': (params: {
+    networkId: string;
+    address: string;
+  }) => BasicSafeInfo;
 
   'walletController.setCustomRPC': (chain: CHAINS_ENUM, url: string) => void;
   'walletController.removeCustomRPC': (chain: CHAINS_ENUM) => void;

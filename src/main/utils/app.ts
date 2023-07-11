@@ -237,8 +237,6 @@ export async function logsOnAppBootstrap() {
     level: 'info',
     tags: {
       reportTime: 'bootstrap',
-    },
-    extra: {
       dappRatio: getMainWindowDappViewZoomPercent(),
       sidebarCollapsed: desktopAppStore.get('sidebarCollapsed'),
       proxyType: (await getFullAppProxyConf()).proxyType,

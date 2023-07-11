@@ -4,12 +4,13 @@ import {
 } from '@rabby-wallet/gnosis-sdk/dist/api';
 import classNames from 'classnames';
 import React from 'react';
+import { BasicSafeInfo } from '@rabby-wallet/gnosis-sdk';
 import { TxItem } from './TxItem';
 
 export interface Props {
   items: SafeTransactionItem[];
   networkId: string;
-  safeInfo: SafeInfo;
+  safeInfo: BasicSafeInfo;
   onSubmit: (data: SafeTransactionItem) => void;
   onSign: (data: SafeTransactionItem) => void;
 }

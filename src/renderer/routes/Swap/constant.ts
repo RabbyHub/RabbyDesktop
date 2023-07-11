@@ -7,12 +7,12 @@ export const SWAP_FEE_ADDRESS = '0x39041F1B366fE33F9A5a79dE5120F2Aee2577ebc';
 export const ETH_USDT_CONTRACT = '0xdac17f958d2ee523a2206206994597c13d831ec7';
 
 export const DEX = {
-  // [DEX_ENUM.ONEINCH]: {
-  //   logo: 'rabby-internal://assets/icons/swap/1inch.png',
-
-  //   name: '1inch',
-  //   chains: DEX_SUPPORT_CHAINS[DEX_ENUM.ONEINCH],
-  // },
+  [DEX_ENUM.ONEINCH]: {
+    id: DEX_ENUM.ONEINCH,
+    logo: 'rabby-internal://assets/icons/swap/1inch.png',
+    name: '1inch',
+    chains: DEX_SUPPORT_CHAINS[DEX_ENUM.ONEINCH],
+  },
   [DEX_ENUM.ZEROXAPI]: {
     id: DEX_ENUM.ZEROXAPI,
     logo: 'rabby-internal://assets/icons/swap/0xswap.png',

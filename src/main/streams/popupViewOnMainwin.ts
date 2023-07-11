@@ -39,9 +39,6 @@ const viewsState: {
     modalWindow?: BrowserWindow;
   };
 } = {
-  'add-address-dropdown': {
-    visible: false,
-  },
   'dapps-management': {
     visible: false,
   },
@@ -128,14 +125,7 @@ function updateSubviewPos({
     height,
   };
 
-  if (viewTypeOrRect === 'add-address-dropdown') {
-    const selfBounds = view.getBounds();
-
-    popupRect = {
-      ...popupRect,
-      ...selfBounds,
-    };
-  } else if (viewTypeOrRect === 'right-side-popup') {
+  if (viewTypeOrRect === 'right-side-popup') {
     // keep self height by default, we will do `adjust-rect` later
     popupRect = getRightSidePopupViewBounds(
       parentWindow,
@@ -252,41 +242,6 @@ async function showModalPopup(
 
   return modalWindow;
 }
-
-const addAddressReady = onMainWindowReady().then(async (mainWin) => {
-  const mainWindow = mainWin.window;
-
-  const addAddressPopup = createPopupView({});
-
-  mainWindow.addBrowserView(addAddressPopup);
-
-  const onTargetWinUpdate = () => {
-    if (viewsState['add-address-dropdown'].visible)
-      updateSubviewPos({
-        parentWindow: mainWindow,
-        view: addAddressPopup,
-        viewTypeOrRect: 'add-address-dropdown',
-      });
-  };
-  mainWindow.on('show', onTargetWinUpdate);
-  mainWindow.on('move', onTargetWinUpdate);
-  mainWindow.on('resized', onTargetWinUpdate);
-  mainWindow.on('unmaximize', onTargetWinUpdate);
-  mainWindow.on('restore', onTargetWinUpdate);
-
-  await addAddressPopup.webContents.loadURL(
-    `${await getWebuiURLBase()}/popup-view.html?view=add-address-dropdown#/`
-  );
-
-  // debug-only
-  if (!IS_RUNTIME_PRODUCTION) {
-    // addAddressPopup.webContents.openDevTools({ mode: 'detach' });
-  }
-
-  hidePopupView(addAddressPopup);
-
-  return addAddressPopup;
-});
 
 const dappsManagementReady = onMainWindowReady().then(async (mainWin) => {
   const mainWindow = mainWin.window;
@@ -538,7 +493,6 @@ const rightSidePopupViewReady = onMainWindowReady().then(async (mainWin) => {
 });
 
 Promise.all([
-  addAddressReady,
   dappsManagementReady,
   selectDevicesReady,
   selectCamerasReady,
@@ -548,14 +502,13 @@ Promise.all([
   rightSidePopupViewReady,
 ]).then((views) => {
   valueToMainSubject('popupViewsOnMainwinReady', {
-    addAddress: views[0],
-    dappsManagement: views[1],
-    selectDevices: views[2],
-    selectCamera: views[3],
-    inDappFind: views[4],
-    zPopup: views[5],
-    globalToastPopup: views[6],
-    rightSidePopup: views[7],
+    dappsManagement: views[0],
+    selectDevices: views[1],
+    selectCamera: views[2],
+    inDappFind: views[3],
+    zPopup: views[4],
+    globalToastPopup: views[5],
+    rightSidePopup: views[6],
   });
 });
 
@@ -577,14 +530,6 @@ const { handler: handlerToggleShow } = onIpcMainInternalEvent(
       viewsState[payload.type].visible = true;
       if (!viewsState[payload.type].s_isModal) {
         switch (payload.type) {
-          case 'add-address-dropdown': {
-            updateSubviewPos({
-              parentWindow: mainWindow,
-              view: targetView,
-              viewTypeOrRect: (payload.pageInfo as any).triggerRect,
-            });
-            break;
-          }
           case 'in-dapp-find': {
             const tabOrigin = (payload.pageInfo as any).searchInfo.tabOrigin;
 

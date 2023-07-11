@@ -4,7 +4,7 @@ import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
 import { LoadingOutlined } from '@ant-design/icons';
 import { CHAINS, Chain } from '@debank/common';
-import Safe from '@rabby-wallet/gnosis-sdk';
+import Safe, { BasicSafeInfo } from '@rabby-wallet/gnosis-sdk';
 import { SafeInfo } from '@rabby-wallet/gnosis-sdk/dist/api';
 import { Spin } from 'antd';
 import classNames from 'classnames';
@@ -41,21 +41,14 @@ export const SafeItem: React.FC<{ account: RabbyAccount }> = ({ account }) => {
     const address = account?.address;
     if (!address) return [];
     const networks = await walletController.getGnosisNetworkIds(address);
-    const res: { chain: Chain | undefined; data: SafeInfo }[] = [];
+    const res: { chain: Chain | undefined; data: BasicSafeInfo }[] = [];
     // eslint-disable-next-line no-restricted-syntax
     for (const networkId of networks) {
       // eslint-disable-next-line no-await-in-loop
-      const info = await Safe.getSafeInfo(address, networkId);
-
-      // eslint-disable-next-line no-await-in-loop
-      const owners = await walletController.getGnosisOwners(
-        account,
+      const info = await walletController.getBasicSafeInfo({
         address,
-        info.version,
-        networkId
-      );
-
-      const comparedOwners = crossCompareOwners(owners, info.owners);
+        networkId,
+      });
 
       res.push({
         chain: Object.values(CHAINS).find(
@@ -63,7 +56,6 @@ export const SafeItem: React.FC<{ account: RabbyAccount }> = ({ account }) => {
         ),
         data: {
           ...info,
-          owners: comparedOwners,
         },
       });
     }
