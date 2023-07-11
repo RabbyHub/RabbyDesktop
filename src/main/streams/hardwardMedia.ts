@@ -15,17 +15,22 @@ import { alertRestartApp } from '../utils/mainTabbedWin';
 
 const IS_DARWIN = process.platform === 'darwin';
 async function tryToEnsureCameraAccess(askIfNotGranted = true) {
-  if (!IS_DARWIN) return systemPreferences.getMediaAccessStatus('camera');
+  const prevCameraAccessStatus =
+    systemPreferences.getMediaAccessStatus('camera');
+  if (!IS_DARWIN)
+    return {
+      prevCameraAccessStatus,
+      finalCameraAccessStatus: prevCameraAccessStatus,
+    };
 
-  const prevAccessStatus = systemPreferences.getMediaAccessStatus('camera');
-  if (askIfNotGranted && prevAccessStatus !== 'granted') {
+  if (askIfNotGranted && prevCameraAccessStatus !== 'granted') {
     await systemPreferences.askForMediaAccess('camera');
   }
 
   const finalAccessStatus = systemPreferences.getMediaAccessStatus('camera');
 
   if (
-    prevAccessStatus === 'not-determined' &&
+    prevCameraAccessStatus === 'not-determined' &&
     finalAccessStatus === 'granted'
   ) {
     alertRestartApp({
@@ -37,7 +42,10 @@ async function tryToEnsureCameraAccess(askIfNotGranted = true) {
     });
   }
 
-  return finalAccessStatus;
+  return {
+    prevCameraAccessStatus,
+    finalCameraAccessStatus: finalAccessStatus,
+  };
 }
 
 async function getMediaDevices() {
@@ -90,11 +98,12 @@ handleIpcMainInvoke('start-select-camera', async (_, opts) => {
   const { forceUserSelect } = opts || {};
   let matchedConstrains: IDesktopAppState['selectedMediaConstrains'] = null;
 
-  const prevCameraAccessStatus = await tryToEnsureCameraAccess();
+  const { prevCameraAccessStatus, finalCameraAccessStatus } =
+    await tryToEnsureCameraAccess();
   const result = {
     selectId,
     prevCameraAccessStatus,
-    cameraAccessStatus: prevCameraAccessStatus,
+    cameraAccessStatus: finalCameraAccessStatus,
   };
 
   if (!forceUserSelect) {

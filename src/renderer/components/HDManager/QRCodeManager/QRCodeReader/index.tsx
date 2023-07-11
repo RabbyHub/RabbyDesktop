@@ -38,6 +38,11 @@ const QRCodeReader = ({
       forceUserSelect: true,
     });
 
+    /**
+     * conditions would be true ONLY on:
+     * 1. Windows 10+
+     * 2. macOS, launched from Terminal on development
+     */
     if (
       cameraAccessStatus === 'granted' &&
       prevCameraAccessStatus !== cameraAccessStatus
