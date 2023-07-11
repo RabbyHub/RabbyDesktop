@@ -410,7 +410,7 @@ type ChannelInvokePayload = {
     send: [
       options?: {
         /**
-         * @description if true, will not wait for user's select result
+         * @description if true, will always wait for user's select result
          */
         forceUserSelect?: boolean;
       }

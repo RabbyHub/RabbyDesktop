@@ -214,7 +214,28 @@ function DeveloperKitsParts() {
                   });
               }}
             >
-              <code>Open Select Modal</code>
+              <code>Query Selected Camera</code>
+            </Button>
+            <Button
+              type="primary"
+              ghost
+              className="mr-[8px]"
+              onClick={(evt) => {
+                evt.stopPropagation();
+                window.rabbyDesktop.ipcRenderer
+                  .invoke('start-select-camera', { forceUserSelect: true })
+                  .then((result) => {
+                    if (result.isCanceled) {
+                      message.info('User Canceled');
+                    } else {
+                      message.success(
+                        `[${result.selectId}] Selected camera with ID: ${result.constrains?.label}`
+                      );
+                    }
+                  });
+              }}
+            >
+              <code>Force Select Camera</code>
             </Button>
           </ItemAction>
           <ItemSwitch
