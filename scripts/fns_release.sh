@@ -41,11 +41,11 @@ release_darwin() {
 
   echo "[release_darwin] start packaging...";
   export RABBY_NOTARIZE=true
-  # npm run package:darwin:x64
+  npm run package:darwin:x64
   npm run package:darwin:arm64
   unset RABBY_NOTARIZE;
 
-  # dbk release-desktop --cwd=$project_dir
+  dbk release-desktop --cwd=$project_dir
 }
 
 release_win32() {
