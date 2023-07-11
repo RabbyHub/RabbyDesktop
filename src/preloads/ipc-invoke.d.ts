@@ -412,7 +412,7 @@ type ChannelInvokePayload = {
         /**
          * @description if true, will not wait for user's select result
          */
-        ignoreSelectResult?: boolean;
+        forceUserSelect?: boolean;
       }
     ];
     response: {

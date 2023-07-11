@@ -6,10 +6,8 @@ import { desktopAppStore } from '../store/desktopApp';
 import { pushEventToAllUIsCareAboutCameras } from '../utils/tabbedBrowserWindow';
 import { rabbyxExecuteJsOnBlank } from './rabbyIpcQuery/_base';
 
-handleIpcMainInvoke('enumerate-camera-devices', async () => {
-  let mediaList: MediaDeviceInfo[] = [];
-
-  mediaList = await rabbyxExecuteJsOnBlank(`
+async function getMediaDevices() {
+  const mediaList: MediaDeviceInfo[] = await rabbyxExecuteJsOnBlank(`
   ;(async () => {
     const result = await window.navigator.mediaDevices.enumerateDevices().then((devices) => {
       return devices.filter((device) => device.kind === 'videoinput');
@@ -21,8 +19,12 @@ handleIpcMainInvoke('enumerate-camera-devices', async () => {
   })();
   `);
 
+  return mediaList;
+}
+
+handleIpcMainInvoke('enumerate-camera-devices', async () => {
   return {
-    mediaList,
+    mediaList: await getMediaDevices(),
   };
 });
 
@@ -38,20 +40,50 @@ handleIpcMainInvoke('start-select-camera', async (_, opts) => {
   const selectId = randString();
   selectCameraState.selectId = selectId;
 
+  const mediaDevices = await getMediaDevices();
+  const selectedMediaConstrains = desktopAppStore.get(
+    'selectedMediaConstrains'
+  );
+
+  const { forceUserSelect } = opts || {};
+  let matchedConstrains: IDesktopAppState['selectedMediaConstrains'] = null;
+
+  if (!forceUserSelect) {
+    if (mediaDevices.length === 1) {
+      matchedConstrains = {
+        label: mediaDevices[0].label,
+      };
+
+      desktopAppStore.set('selectedMediaConstrains', matchedConstrains);
+
+      return {
+        selectId,
+        constrains: matchedConstrains,
+      };
+    }
+    if (
+      selectedMediaConstrains?.label &&
+      mediaDevices.find(
+        (device) =>
+          selectedMediaConstrains?.label &&
+          device.label === selectedMediaConstrains.label
+      )
+    ) {
+      return {
+        selectId,
+        constrains: selectedMediaConstrains,
+      };
+    }
+  }
+
   toggleSelectCamera(selectId, true);
 
-  const { ignoreSelectResult } = opts || {};
-
-  let constrains: IDesktopAppState['selectedMediaConstrains'] = null;
-
-  if (!ignoreSelectResult) {
-    const waitResult = await firstValueFrom(confirmedSelectedCamera$);
-    constrains = waitResult.constrains;
-  }
+  const waitResult = await firstValueFrom(confirmedSelectedCamera$);
+  matchedConstrains = waitResult.constrains;
 
   return {
     selectId,
-    constrains,
+    constrains: matchedConstrains,
   };
 });
 
