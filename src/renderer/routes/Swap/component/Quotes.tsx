@@ -250,7 +250,7 @@ export const Quotes = (props: QuotesProps) => {
           <div
             className={clsx(
               'text-white text-opacity-70 text-13 font-medium  mb-8',
-              !noDex && 'mt-60'
+              !noDex && 'mt-24'
             )}
           >
             Rates from CEX
@@ -276,7 +276,7 @@ export const Quotes = (props: QuotesProps) => {
         </>
       )}
 
-      <div className="mt-auto text-white opacity-60 text-13 pt-[38px] pb-[18px]">
+      <div className="mt-auto text-white opacity-60 text-13 pt-[12px]">
         Of the {exchangeCount} exchanges, {viewCount} can view quotes and{' '}
         {tradeCount} can trade.{' '}
         <span
