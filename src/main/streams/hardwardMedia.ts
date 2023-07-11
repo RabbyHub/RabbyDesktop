@@ -90,9 +90,11 @@ handleIpcMainInvoke('start-select-camera', async (_, opts) => {
   const { forceUserSelect } = opts || {};
   let matchedConstrains: IDesktopAppState['selectedMediaConstrains'] = null;
 
+  const prevCameraAccessStatus = await tryToEnsureCameraAccess();
   const result = {
     selectId,
-    cameraAccessStatus: await tryToEnsureCameraAccess(),
+    prevCameraAccessStatus,
+    cameraAccessStatus: prevCameraAccessStatus,
   };
 
   if (!forceUserSelect) {
@@ -126,8 +128,8 @@ handleIpcMainInvoke('start-select-camera', async (_, opts) => {
   toggleSelectCamera(selectId, true);
 
   const waitResult = await firstValueFrom(confirmedSelectedCamera$);
-
   matchedConstrains = waitResult.constrains;
+  result.cameraAccessStatus = waitResult.cameraAccessStatus;
 
   return {
     ...result,

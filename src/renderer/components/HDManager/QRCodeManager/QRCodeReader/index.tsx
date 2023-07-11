@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BrowserQRCodeReader } from '@zxing/browser';
 import './style.less';
 import clsx from 'clsx';
+import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
 
 interface QRCodeReaderProps {
   onSuccess(text: string): void;
@@ -22,17 +23,34 @@ const QRCodeReader = ({
   const codeReader = useMemo(() => {
     return new BrowserQRCodeReader();
   }, []);
-  const videoEl = useRef<HTMLVideoElement>(null);
   const [deviceId, setDeviceId] = useState<string | null>();
   const findDevices = useCallback(async () => {
     const devices = await window.navigator.mediaDevices.enumerateDevices();
     const videoDevices = devices.filter(
       (device) => device.kind === 'videoinput'
     );
-    const { constrains, isCanceled } =
-      await window.rabbyDesktop.ipcRenderer.invoke('start-select-camera', {
-        forceUserSelect: true,
+    const {
+      constrains,
+      isCanceled,
+      prevCameraAccessStatus,
+      cameraAccessStatus,
+    } = await window.rabbyDesktop.ipcRenderer.invoke('start-select-camera', {
+      forceUserSelect: true,
+    });
+
+    if (
+      cameraAccessStatus === 'granted' &&
+      prevCameraAccessStatus !== cameraAccessStatus
+    ) {
+      toastTopMessage({
+        data: {
+          type: 'error',
+          content: 'Camera access changed on the fly, please try again.',
+        },
       });
+      onError?.();
+      return;
+    }
 
     if (isCanceled) {
       onError?.();
@@ -50,16 +68,19 @@ const QRCodeReader = ({
   useEffect(() => {
     findDevices();
   }, [findDevices]);
+
+  const videoRef = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     if (!deviceId) return;
-    const videoElem = document.getElementById('video');
+    const videoElem = videoRef.current;
+    if (!videoElem) return;
     const canplayListener = () => {
       setCanplay(true);
     };
     videoElem!.addEventListener('canplay', canplayListener);
     const promise = codeReader.decodeFromVideoDevice(
       deviceId,
-      'video',
+      videoElem,
       (result) => {
         if (result) {
           onSuccess(result.getText());
@@ -80,14 +101,13 @@ const QRCodeReader = ({
 
   return (
     <video
-      id="video"
+      ref={videoRef}
       style={{
         display: canplay ? 'block' : 'none',
         width: `${width}px`,
         height: `${height}px`,
         filter: 'blur(4px)',
       }}
-      ref={videoEl}
       className={clsx('qrcode-reader-comp', className)}
     >
       <track kind="captions" />

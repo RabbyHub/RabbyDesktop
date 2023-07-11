@@ -424,6 +424,7 @@ type ChannelInvokePayload = {
     response: {
       selectId: string;
       constrains: IDesktopAppState['selectedMediaConstrains'];
+      prevCameraAccessStatus: IDarwinMediaAccessStatus;
       cameraAccessStatus: IDarwinMediaAccessStatus;
       isCanceled?: boolean;
     };
