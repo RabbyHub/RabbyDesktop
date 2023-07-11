@@ -1,22 +1,13 @@
-import classNames from 'classnames';
-import React, { useEffect, useMemo, useState } from 'react';
-import { SafeTransactionItem } from '@rabby-wallet/gnosis-sdk/dist/api';
-import { toChecksumAddress, numberToHex } from 'web3-utils';
-import { intToHex } from 'ethereumjs-util';
-import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-import { message } from 'antd';
-import { LoadingOutlined } from '@ant-design/icons';
 import { useGnosisNetworks } from '@/renderer/hooks/useGnosisNetworks';
 import { useGnosisPendingTxs } from '@/renderer/hooks/useGnosisPendingTxs';
 import { CHAINS } from '@debank/common';
+import { SafeTransactionItem } from '@rabby-wallet/gnosis-sdk/dist/api';
+import classNames from 'classnames';
+import clsx from 'clsx';
 import { sortBy } from 'lodash';
 import moment from 'moment';
-import clsx from 'clsx';
-import { SelectAddressModal } from './SelectAddressModal';
-import styles from './style.module.less';
-import { useSafeQueue } from './useSafeQueue';
-import { TxItemGroup } from './TxItemGroup';
+import React, { useEffect, useMemo, useState } from 'react';
 import { TxList } from './TxList';
 
 const getTabs = (
