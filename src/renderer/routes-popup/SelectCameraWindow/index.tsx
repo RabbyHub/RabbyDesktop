@@ -15,16 +15,20 @@ import { RcIconChecked } from '@/../assets/icons/select-camera';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { useSelectedMedieDevice } from '@/renderer/hooks/useSettings';
 import { useInterval } from '@/renderer/hooks/useTimer';
+import { usePrevious } from 'react-use';
+import { detectClientOS } from '@/isomorphic/os';
 import styles from './index.module.less';
 
 hideMainwinPopupview('select-camera');
 
+const IS_DARWIN = detectClientOS() === 'darwin';
 function useSelectCamera() {
   const {
     cameraAccessStatus,
     selectedMediaConstrains,
     setLocalConstrains,
     fetchSelectedMediaConstrains,
+    fetchCameraAccessStatus,
   } = useSelectedMedieDevice();
 
   const [cameraList, setCameraList] = useState<MediaDeviceInfo[]>([]);
@@ -48,8 +52,9 @@ function useSelectCamera() {
       enableTopViewGuard: true,
       onVisibleChanged: async (visible) => {
         if (visible) {
-          const result = await fetchSelectedMediaConstrains();
+          const result = await fetchCameraAccessStatus();
           if (result.cameraAccessStatus === 'granted') {
+            fetchSelectedMediaConstrains();
             fetchCameraList();
           }
         }
@@ -57,26 +62,32 @@ function useSelectCamera() {
     }
   );
 
-  // const previousCameraAccessStatus = usePrevious(cameraAccessStatus);
+  const previousCameraAccessStatus = usePrevious(cameraAccessStatus);
   // useEffect(() => {
   //   if (!localVisible) return;
   //   if (
   //     previousCameraAccessStatus !== 'granted' &&
   //     cameraAccessStatus === 'granted'
   //   ) {
-  //     window.rabbyDesktop.ipcRenderer.invoke(
-  //       'app-relaunch',
-  //       'media-access-updated'
-  //     );
+  //     fetchSelectedMediaConstrains();
+  //     fetchCameraList();
+  //     // window.rabbyDesktop.ipcRenderer.invoke(
+  //     //   'app-relaunch',
+  //     //   'media-access-updated'
+  //     // );
   //   }
   // }, [localVisible, previousCameraAccessStatus, cameraAccessStatus]);
 
-  useInterval(() => {
-    fetchSelectedMediaConstrains().then((result) => {
-      if (result.cameraAccessStatus === 'granted') {
-        fetchCameraList();
-      }
-    });
+  useInterval(async () => {
+    if (!IS_DARWIN) return;
+    const result = await fetchCameraAccessStatus();
+    if (
+      previousCameraAccessStatus !== 'granted' &&
+      result.cameraAccessStatus === 'granted'
+    ) {
+      fetchSelectedMediaConstrains();
+      fetchCameraList();
+    }
   }, 1000);
 
   const confirmSelectDevice = useCallback(

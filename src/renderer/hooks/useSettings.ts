@@ -142,22 +142,27 @@ const mediaAboutAtom = atom({
 export function useSelectedMedieDevice() {
   const [mediaAboutState, setMediaAboutState] = useAtom(mediaAboutAtom);
 
+  const fetchCameraAccessStatus = useCallback(async () => {
+    const { accessStatus: cameraAccessStatus } =
+      await window.rabbyDesktop.ipcRenderer.invoke(
+        'get-media-access-status',
+        'camera'
+      );
+
+    setMediaAboutState((prev) => ({ ...prev, cameraAccessStatus }));
+
+    return { cameraAccessStatus };
+  }, [setMediaAboutState]);
+
   const fetchSelectedMediaConstrains = useCallback(async () => {
     const result = await window.rabbyDesktop.ipcRenderer.invoke(
       'get-desktopAppState'
     );
-    const { accessStatus } = await window.rabbyDesktop.ipcRenderer.invoke(
-      'get-media-access-status',
-      'camera'
-    );
 
-    const nextVal = {
+    setMediaAboutState((prev) => ({
+      ...prev,
       selectedMediaConstrains: result.state.selectedMediaConstrains,
-      cameraAccessStatus: accessStatus,
-    };
-    setMediaAboutState(nextVal);
-
-    return nextVal;
+    }));
   }, [setMediaAboutState]);
 
   const setLocalConstrains = useCallback(
@@ -166,7 +171,7 @@ export function useSelectedMedieDevice() {
         return {
           ...prev,
           selectedMediaConstrains: {
-            label: prev?.selectedMediaConstrains?.label || null,
+            label: constrains?.label || null,
             ...constrains,
           },
         };
@@ -177,7 +182,8 @@ export function useSelectedMedieDevice() {
 
   useEffect(() => {
     fetchSelectedMediaConstrains();
-  }, [fetchSelectedMediaConstrains]);
+    fetchCameraAccessStatus();
+  }, [fetchSelectedMediaConstrains, fetchCameraAccessStatus]);
 
   useEffect(() => {
     return window.rabbyDesktop.ipcRenderer.on(
@@ -199,6 +205,7 @@ export function useSelectedMedieDevice() {
     cameraAccessStatus: mediaAboutState.cameraAccessStatus || 'denied',
     selectedMediaConstrains: mediaAboutState.selectedMediaConstrains || null,
     fetchSelectedMediaConstrains,
+    fetchCameraAccessStatus,
     setLocalConstrains,
   };
 }
