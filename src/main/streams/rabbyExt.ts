@@ -98,10 +98,10 @@ const blankPageReady = getRabbyExtId().then(async () => {
   );
 
   if (!IS_RUNTIME_PRODUCTION) {
-    rabbyxBlankPage.webContents.openDevTools({
-      mode: 'detach',
-      activate: true,
-    });
+    // rabbyxBlankPage.webContents.openDevTools({
+    //   mode: 'detach',
+    //   activate: true,
+    // });
   }
 
   return rabbyxBlankPage;

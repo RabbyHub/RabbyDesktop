@@ -152,7 +152,13 @@ function updateSubviewPos({
 
   view.setBounds(popupRect);
   if (BrowserWindow.fromBrowserView(view) === parentWindow) {
-    parentWindow.setTopBrowserView(view);
+    const isZpopupShownOnSelectCamera =
+      viewTypeOrRect === 'z-popup' &&
+      viewsState['z-popup'].visible &&
+      viewsState['select-camera'].visible;
+    if (!isZpopupShownOnSelectCamera) {
+      parentWindow.setTopBrowserView(view);
+    }
   } else if (!IS_RUNTIME_PRODUCTION) {
     console.error('updateSubviewPos: view is not attached to parentWindow!');
   }
