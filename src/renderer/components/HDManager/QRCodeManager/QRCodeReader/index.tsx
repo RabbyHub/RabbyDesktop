@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BrowserQRCodeReader } from '@zxing/browser';
 import './style.less';
 import clsx from 'clsx';
@@ -23,15 +23,31 @@ const QRCodeReader = ({
     return new BrowserQRCodeReader();
   }, []);
   const videoEl = useRef<HTMLVideoElement>(null);
-  const [deviceId, setDeviceId] = useState<string | null>('');
+  const [deviceId, setDeviceId] = useState<string | null>();
+  const findDevices = useCallback(async () => {
+    const devices = await window.navigator.mediaDevices.enumerateDevices();
+    const videoDevices = devices.filter(
+      (device) => device.kind === 'videoinput'
+    );
+    try {
+      const { constrains } = await window.rabbyDesktop.ipcRenderer.invoke(
+        'start-select-camera'
+      );
+
+      if (constrains?.label) {
+        const device = videoDevices.find((d) => d.label === constrains.label);
+        if (device) {
+          setDeviceId(device.deviceId);
+        }
+      }
+    } catch (e) {
+      onError?.();
+    }
+  }, [onError]);
 
   useEffect(() => {
-    window.rabbyDesktop.ipcRenderer
-      .invoke('start-select-camera')
-      .then((res) => {
-        setDeviceId(res.deviceId);
-      });
-  }, []);
+    findDevices();
+  }, [findDevices]);
   useEffect(() => {
     if (!deviceId) return;
     const videoElem = document.getElementById('video');

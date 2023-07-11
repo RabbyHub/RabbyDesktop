@@ -14,12 +14,14 @@ import { HDManagerStateContext } from '../utils';
 
 interface Props {
   brand?: WALLET_BRAND_TYPES;
+  onClose?: () => void;
 }
 
 const KEYSTONE_TYPE = KEYRING_CLASS.HARDWARE.KEYSTONE;
 
 export const QRCodeConnect: React.FC<Props> = ({
   brand = WALLET_BRAND_TYPES.KEYSTONE,
+  onClose,
 }) => {
   const { keyringId } = React.useContext(HDManagerStateContext);
   const brandInfo = WALLET_BRAND_CONTENT[brand];
@@ -110,6 +112,7 @@ export const QRCodeConnect: React.FC<Props> = ({
                 width={288}
                 height={288}
                 onSuccess={handleScanQRCodeSuccess}
+                onError={onClose}
               />
             </div>
           </div>
