@@ -23,27 +23,24 @@ const QRCodeReader = ({
     return new BrowserQRCodeReader();
   }, []);
   const videoEl = useRef<HTMLVideoElement>(null);
-  const checkCameraPermission = async () => {
-    const devices = await window.navigator.mediaDevices.enumerateDevices();
-    const webcams = devices.filter((device) => device.kind === 'videoinput');
-    const hasWebcamPermissions = webcams.some(
-      (webcam) => webcam.label && webcam.label.length > 0
-    );
-    if (!hasWebcamPermissions) {
-      // TODO
-    }
-  };
+  const [deviceId, setDeviceId] = useState<string | null>('');
+
   useEffect(() => {
-    checkCameraPermission();
+    window.rabbyDesktop.ipcRenderer
+      .invoke('start-select-camera')
+      .then((res) => {
+        setDeviceId(res.deviceId);
+      });
   }, []);
   useEffect(() => {
+    if (!deviceId) return;
     const videoElem = document.getElementById('video');
     const canplayListener = () => {
       setCanplay(true);
     };
     videoElem!.addEventListener('canplay', canplayListener);
     const promise = codeReader.decodeFromVideoDevice(
-      undefined,
+      deviceId,
       'video',
       (result) => {
         if (result) {
@@ -61,7 +58,7 @@ const QRCodeReader = ({
         })
         .catch(console.log);
     };
-  }, [codeReader, onSuccess]);
+  }, [codeReader, onSuccess, deviceId]);
 
   return (
     <video

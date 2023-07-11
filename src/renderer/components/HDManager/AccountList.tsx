@@ -9,6 +9,7 @@ import { isSameAddress } from '@/renderer/utils/address';
 import { splitNumberByStep } from '@/renderer/utils/number';
 import { isNil } from 'lodash';
 import { useAccountToDisplay } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
+import { KEYRING_CLASS } from '@/renderer/utils/constant';
 import { AddToRabby } from './AddToRabby';
 import { MAX_ACCOUNT_COUNT } from './AdvancedSettings';
 import { AccountListSkeleton } from './AccountListSkeleton';
@@ -116,7 +117,13 @@ export const AccountList: React.FC<Props> = ({
         // });
       } else {
         await createTask(() =>
-          walletController.removeAddress(account.address, keyring)
+          walletController.removeAddress(
+            account.address,
+            keyring,
+            undefined,
+            keyring !== KEYRING_CLASS.HARDWARE.KEYSTONE &&
+              keyring !== KEYRING_CLASS.HARDWARE.GRIDPLUS
+          )
         );
         removeCurrentAccount(account.address);
         // message.success({
