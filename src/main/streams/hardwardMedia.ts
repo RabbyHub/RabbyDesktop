@@ -34,6 +34,7 @@ const selectCameraState = {
 const confirmedSelectedCameraSubj = new Subject<{
   selectId: string;
   constrains: IDesktopAppState['selectedMediaConstrains'];
+  isCanceled?: boolean;
 }>();
 const confirmedSelectedCamera$ = confirmedSelectedCameraSubj.asObservable();
 handleIpcMainInvoke('start-select-camera', async (_, opts) => {
@@ -79,15 +80,17 @@ handleIpcMainInvoke('start-select-camera', async (_, opts) => {
   toggleSelectCamera(selectId, true);
 
   const waitResult = await firstValueFrom(confirmedSelectedCamera$);
+
   matchedConstrains = waitResult.constrains;
 
   return {
     selectId,
     constrains: matchedConstrains,
+    isCanceled: !!waitResult.isCanceled,
   };
 });
 
-handleIpcMainInvoke('confirm-selected-camera', (_, payload) => {
+handleIpcMainInvoke('finish-select-camera', (_, payload) => {
   if (payload.selectId !== selectCameraState.selectId) {
     console.warn(
       `selectId not match, expect ${selectCameraState.selectId}, got ${payload.selectId}`
@@ -97,14 +100,18 @@ handleIpcMainInvoke('confirm-selected-camera', (_, payload) => {
   selectCameraState.selectId = null;
   toggleSelectCamera(payload.selectId, false);
 
-  desktopAppStore.set('selectedMediaConstrains', payload.constrains);
+  if (!payload.isCanceled) {
+    desktopAppStore.set('selectedMediaConstrains', payload.constrains);
+    pushEventToAllUIsCareAboutCameras({
+      eventType: 'push-selected-media-video',
+      constrains: payload.constrains,
+    });
+  }
+
   confirmedSelectedCameraSubj.next({
     selectId: payload.selectId,
     constrains: payload.constrains,
-  });
-  pushEventToAllUIsCareAboutCameras({
-    eventType: 'push-selected-media-video',
-    constrains: payload.constrains,
+    isCanceled: !!payload.isCanceled,
   });
 
   return {

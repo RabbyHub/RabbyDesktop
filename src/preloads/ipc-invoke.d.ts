@@ -418,13 +418,15 @@ type ChannelInvokePayload = {
     response: {
       selectId: string;
       constrains: IDesktopAppState['selectedMediaConstrains'];
+      isCanceled?: boolean;
     };
   };
-  'confirm-selected-camera': {
+  'finish-select-camera': {
     send: [
       {
         selectId: string;
         constrains: IDesktopAppState['selectedMediaConstrains'];
+        isCanceled?: boolean;
       }
     ];
     response: {

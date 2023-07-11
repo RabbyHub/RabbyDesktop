@@ -61,7 +61,7 @@ function useSelectCamera() {
         throw new Error('No camera selected');
       }
 
-      window.rabbyDesktop.ipcRenderer.invoke('confirm-selected-camera', {
+      window.rabbyDesktop.ipcRenderer.invoke('finish-select-camera', {
         selectId,
         constrains: selectedMediaConstrains,
       });
@@ -69,15 +69,19 @@ function useSelectCamera() {
     [selectedMediaConstrains]
   );
 
-  const cancelSelect = useCallback(() => {
-    // if (selectId !== undefined) {
-    //   window.rabbyDesktop.ipcRenderer.invoke('confirm-selected-camera', {
-    //     selectId,
-    //     deviceId: null,
-    //   });
-    // }
-    hideView();
-  }, [hideView]);
+  const cancelSelect = useCallback(
+    (selectId: string) => {
+      if (selectId !== undefined) {
+        window.rabbyDesktop.ipcRenderer.invoke('finish-select-camera', {
+          selectId,
+          constrains: selectedMediaConstrains,
+          isCanceled: true,
+        });
+      }
+      hideView();
+    },
+    [selectedMediaConstrains, hideView]
+  );
 
   useEffect(() => {
     if (!localVisible) {
@@ -133,7 +137,7 @@ function SelectCameraModal() {
         width={1000}
         title="Select Camera"
         onCancel={() => {
-          cancelSelect();
+          cancelSelect(pageState.selectId);
         }}
       >
         <div className={styles.SelectDevicesContent}>

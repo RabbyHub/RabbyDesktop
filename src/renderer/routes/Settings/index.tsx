@@ -204,9 +204,13 @@ function DeveloperKitsParts() {
                 window.rabbyDesktop.ipcRenderer
                   .invoke('start-select-camera')
                   .then((result) => {
-                    message.info(
-                      `[${result.selectId}] Selected camera with ID: ${result.constrains?.label}`
-                    );
+                    if (result.isCanceled) {
+                      message.info('User Canceled');
+                    } else {
+                      message.success(
+                        `[${result.selectId}] Selected camera with ID: ${result.constrains?.label}`
+                      );
+                    }
                   });
               }}
             >
