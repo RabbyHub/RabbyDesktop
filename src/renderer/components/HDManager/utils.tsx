@@ -85,9 +85,13 @@ export const fetchAccountsInfo = async (accounts: Account[]) => {
   );
 };
 
-const useGetCurrentAccounts = ({ keyringId, keyring }: StateProviderProps) => {
+const useGetCurrentAccounts = ({
+  keyringId: keyringIdProp,
+  keyring,
+}: StateProviderProps) => {
   const [loading, setLoading] = React.useState(false);
   const [accounts, setAccounts] = React.useState<Account[]>([]);
+  const [keyringId, setKeyringId] = React.useState(keyringIdProp);
 
   const getCurrentAccounts = React.useCallback(async () => {
     setLoading(true);
@@ -138,6 +142,7 @@ const useGetCurrentAccounts = ({ keyringId, keyring }: StateProviderProps) => {
     currentAccounts: accounts,
     removeCurrentAccount,
     updateCurrentAccountAliasName,
+    setKeyringId,
   };
 };
 
@@ -207,7 +212,6 @@ export const HDManagerStateProvider: React.FC<
     children?: React.ReactNode;
   }
 > = ({ children, keyringId, keyring }) => {
-  console.log(keyringId, keyring);
   return (
     <HDManagerStateContext.Provider
       value={{

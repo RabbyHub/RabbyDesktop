@@ -23,12 +23,11 @@ export const QRCodeConnect: React.FC<Props> = ({
   brand = WALLET_BRAND_TYPES.KEYSTONE,
   onClose,
 }) => {
-  const { keyringId } = React.useContext(HDManagerStateContext);
+  const { keyringId, setKeyringId } = React.useContext(HDManagerStateContext);
   const brandInfo = WALLET_BRAND_CONTENT[brand];
   const wallet = walletController;
   const decoder = React.useRef(new URDecoder());
   const [errorMessage, setErrorMessage] = React.useState('');
-  const stashKeyringIdRef = React.useRef<number | null>(null);
   const [visibleManager, setVisibleManager] = React.useState(false);
 
   const goToSelectAddress = React.useCallback(() => {
@@ -44,17 +43,18 @@ export const QRCodeConnect: React.FC<Props> = ({
       decoder.current.receivePart(data);
       if (decoder.current.isComplete()) {
         const result = decoder.current.resultUR();
+        let id;
         if (result.type === 'crypto-hdkey') {
-          stashKeyringIdRef.current = await wallet.submitQRHardwareCryptoHDKey(
+          id = await wallet.submitQRHardwareCryptoHDKey(
             result.cbor.toString('hex'),
-            stashKeyringIdRef.current
+            keyringId
           );
         } else if (result.type === 'crypto-account') {
-          stashKeyringIdRef.current =
-            await wallet.submitQRHardwareCryptoAccount(
-              result.cbor.toString('hex'),
-              stashKeyringIdRef.current
-            );
+          id = await wallet.submitQRHardwareCryptoAccount(
+            result.cbor.toString('hex'),
+            keyringId
+          );
+          setKeyringId(id);
         } else {
           Sentry.captureException(
             new Error(`QRCodeError ${JSON.stringify(result)}`)
@@ -74,13 +74,24 @@ export const QRCodeConnect: React.FC<Props> = ({
     }
   };
 
+  const initHD = React.useCallback(async () => {
+    const id = await walletController.initQRHardware(brand);
+    const isReady = await walletController.requestKeyring(
+      KEYSTONE_TYPE,
+      'isReady',
+      id
+    );
+    if (isReady) {
+      goToSelectAddress();
+    }
+    setKeyringId(id);
+  }, [brand, goToSelectAddress, setKeyringId]);
+
   React.useEffect(() => {
-    wallet.requestKeyring(KEYSTONE_TYPE, 'isReady', keyringId).then((res) => {
-      if (res) {
-        goToSelectAddress();
-      }
-    });
-  }, [goToSelectAddress, keyringId, wallet]);
+    if (!visibleManager) {
+      initHD();
+    }
+  }, [initHD, visibleManager]);
 
   return (
     <>

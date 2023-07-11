@@ -564,6 +564,7 @@ export type RabbyXMethod = {
     allowed: boolean;
     brand: string;
   };
+  'walletController.initQRHardware': (brand: string) => number | null;
 } & {
   'openapi.setHost': OpenApiService['setHost'];
   'openapi.getHost': OpenApiService['getHost'];
