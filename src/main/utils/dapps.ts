@@ -896,14 +896,14 @@ export async function getDappVersionInfo(dappOrigin: string): Promise<
     result.versionSha512 = getSha512(cssTagsString);
     result.timestamp = Date.now();
 
-    Sentry.captureEvent({
-      message: 'detected dapp version',
-      level: 'info',
-      extra: {
-        dappOrigin,
-        versionSha512: result.versionSha512,
-      },
-    });
+    // Sentry.captureEvent({
+    //   message: 'detected dapp version',
+    //   level: 'info',
+    //   extra: {
+    //     dappOrigin,
+    //     versionSha512: result.versionSha512,
+    //   },
+    // });
   } catch (err) {
     console.error(err);
     Sentry.captureException(err);
