@@ -29,19 +29,21 @@ const QRCodeReader = ({
     const videoDevices = devices.filter(
       (device) => device.kind === 'videoinput'
     );
-    try {
-      const { constrains } = await window.rabbyDesktop.ipcRenderer.invoke(
-        'start-select-camera'
-      );
+    const { constrains, isCanceled } =
+      await window.rabbyDesktop.ipcRenderer.invoke('start-select-camera', {
+        forceUserSelect: true,
+      });
 
-      if (constrains?.label) {
-        const device = videoDevices.find((d) => d.label === constrains.label);
-        if (device) {
-          setDeviceId(device.deviceId);
-        }
-      }
-    } catch (e) {
+    if (isCanceled) {
       onError?.();
+      return;
+    }
+
+    if (constrains?.label) {
+      const device = videoDevices.find((d) => d.label === constrains.label);
+      if (device) {
+        setDeviceId(device.deviceId);
+      }
     }
   }, [onError]);
 
