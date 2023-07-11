@@ -15,6 +15,7 @@ import { HDManagerStateContext } from '../utils';
 interface Props {
   brand?: WALLET_BRAND_TYPES;
   onClose?: () => void;
+  onShowScanModal?: (show: boolean) => void;
 }
 
 const KEYSTONE_TYPE = KEYRING_CLASS.HARDWARE.KEYSTONE;
@@ -22,6 +23,7 @@ const KEYSTONE_TYPE = KEYRING_CLASS.HARDWARE.KEYSTONE;
 export const QRCodeConnect: React.FC<Props> = ({
   brand = WALLET_BRAND_TYPES.KEYSTONE,
   onClose,
+  onShowScanModal,
 }) => {
   const { keyringId, setKeyringId } = React.useContext(HDManagerStateContext);
   const brandInfo = WALLET_BRAND_CONTENT[brand];
@@ -37,6 +39,10 @@ export const QRCodeConnect: React.FC<Props> = ({
   const handleClose = React.useCallback(() => {
     setVisibleManager(false);
   }, []);
+
+  React.useEffect(() => {
+    onShowScanModal?.(!visibleManager);
+  }, [visibleManager, onShowScanModal]);
 
   const handleScanQRCodeSuccess = async (data: string) => {
     try {
