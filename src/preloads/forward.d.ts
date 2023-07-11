@@ -35,12 +35,6 @@ type ZViewStates = {
     isCheckCustomRPC?: boolean;
   };
   'security-notification': ISecurityNotificationPayload;
-  'add-address-dropdown': {
-    pos: {
-      x: number;
-      y: number;
-    };
-  };
   'add-address-modal': {
     keyringType: string;
     showEntryButton?: boolean;

@@ -397,15 +397,6 @@ type IEventEmitterListenerReport = {
 
 type PopupViewOnMainwinInfo =
   | {
-      type: 'add-address-dropdown';
-      triggerRect?: {
-        x?: number;
-        y?: number;
-        width?: number;
-        height?: number;
-      };
-    }
-  | {
       type: 'dapps-management';
       state?: {
         newDappOrigin?: string;

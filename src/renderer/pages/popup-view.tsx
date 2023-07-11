@@ -22,7 +22,6 @@ import { parseQueryString } from '@/isomorphic/url';
 import TopGhostWindow from '@/renderer/routes-popup/TopGhostWindow';
 import RightSidePopupWindow from '@/renderer/routes-popup/RightSidePopupWindow';
 import RabbyNotificationGasket from '../routes-popup/RabbyNotificationGasket';
-import MainWindowAddAddress from '../routes-popup/MainWindowAddAddress';
 import MainWindowDappManagement from '../routes-popup/MainWindowDappManagement';
 import DappReadonlyWindow from '../routes-popup/DappReadonlyWindow';
 import InDappFindWindow from '../routes-popup/InDappFindWindow';
@@ -39,10 +38,6 @@ function App() {
           element={<SecurityAddressbarPopup />}
         />
         <Route path="/popup__sidebar-dapp" element={<SidebarContextMenu />} />
-        <Route
-          path="/popupview__add-address"
-          element={<MainWindowAddAddress />}
-        />
         <Route
           path="/rabby-notification-gasket"
           element={<RabbyNotificationGasket />}

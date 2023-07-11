@@ -11,20 +11,12 @@ import '@/renderer/ipcRequest/zPopupMessage';
 import { parseQueryString } from '@/isomorphic/url';
 import { ShellWalletProvider } from '@/renderer/components/ShellWallet';
 
-import MainWindowAddAddress from '@/renderer/routes-popup/MainWindowAddAddress';
 import ZPopupLayer from '@/renderer/routes-popup/ZPopupLayer';
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
 
 switch (parseQueryString().view) {
-  case 'add-address-dropdown':
-    root.render(
-      <ShellWalletProvider>
-        <MainWindowAddAddress />
-      </ShellWalletProvider>
-    );
-    break;
   case 'z-popup': {
     root.render(
       <ShellWalletProvider>
