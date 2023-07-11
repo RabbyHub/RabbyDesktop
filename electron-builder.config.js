@@ -64,7 +64,7 @@ module.exports = {
     "entitlementsInherit": "assets/entitlements.mac.plist",
     "gatekeeperAssess": false,
     "extendInfo": {
-      "NSCameraUsageDescription": "some description",
+      "NSCameraUsageDescription": "Require camera to support QR-based hardware wallet.",
       // "com.apple.security.device.camera": true,
       // "com.apple.security.cs.allow-unsigned-executable-memory": true
     }

@@ -2,6 +2,7 @@ import { app, BrowserWindow, dialog, shell } from 'electron';
 
 import { checkoutDappURL } from '@/isomorphic/dapp';
 import {
+  APP_BRANDNAME,
   APP_NAME,
   IS_RUNTIME_PRODUCTION,
   RABBY_SPALSH_URL,
@@ -280,9 +281,10 @@ handleIpcMainInvoke('app-relaunch', (_, reasonType) => {
     }
     case 'media-access-updated': {
       alertRestartApp({
+        forceRestart: true,
         msgBoxOptions: {
           title: 'Camera Access Updated',
-          message: 'Camera access has been updated. Please restart Rabby.',
+          message: `Camera access has been granted. It's required to restart ${APP_BRANDNAME}.`,
         },
       });
       break;

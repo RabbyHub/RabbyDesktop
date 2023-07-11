@@ -1,11 +1,16 @@
-import { randString } from '@/isomorphic/string';
-import { Subject, firstValueFrom } from 'rxjs';
+import path from 'path';
+import child_process from 'child_process';
 import { shell, systemPreferences } from 'electron';
+import { Subject, firstValueFrom } from 'rxjs';
+
+import { randString } from '@/isomorphic/string';
+import { APP_BRANDNAME, IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { handleIpcMainInvoke } from '../utils/ipcMainEvents';
 import { toggleSelectCamera } from '../utils/stream-helpers';
 import { desktopAppStore } from '../store/desktopApp';
 import { pushEventToAllUIsCareAboutCameras } from '../utils/tabbedBrowserWindow';
 import { rabbyxExecuteJsOnBlank } from './rabbyIpcQuery/_base';
+import { getAssetPath } from '../utils/app';
 import { alertRestartApp } from '../utils/mainTabbedWin';
 
 const IS_DARWIN = process.platform === 'darwin';
@@ -24,9 +29,10 @@ async function tryToEnsureCameraAccess(askIfNotGranted = true) {
     finalAccessStatus === 'granted'
   ) {
     alertRestartApp({
+      forceRestart: true,
       msgBoxOptions: {
         title: 'Camera Access Updated',
-        message: 'Camera access has been updated. Please restart Rabby.',
+        message: `Camera access has been granted. It's required to restart ${APP_BRANDNAME}.`,
       },
     });
   }
@@ -176,3 +182,39 @@ handleIpcMainInvoke('rabbyx:get-selected-camera', (_) => {
     constrains: desktopAppStore.get('selectedMediaConstrains', null),
   };
 });
+
+/**
+ * @deprecated if you don't know what you are doing, don't use this
+ */
+async function getCameraAccessStatusBySpawn() {
+  const child = child_process.spawn(
+    path.resolve(getAssetPath('scripts', 'get-camera-access-status.js'))
+    // { env: { ELECTRON_RUN_AS_NODE: '1', } }
+  );
+
+  const result = await new Promise<IDarwinMediaAccessStatus>(
+    (resolve, reject) => {
+      child?.stdout?.on('data', (data) => {
+        const output = (data?.toString('utf8') || '').trim();
+        resolve(output);
+      });
+
+      if (!IS_RUNTIME_PRODUCTION) {
+        child?.stderr?.on('data', (data) => {
+          console.debug(data);
+        });
+      }
+
+      child.on('error', (err) => {
+        if (!IS_RUNTIME_PRODUCTION) {
+          console.error(err);
+        }
+        resolve('denied' as const);
+      });
+    }
+  );
+
+  child?.kill();
+
+  return result;
+}

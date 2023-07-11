@@ -38,10 +38,17 @@ export async function alertRestartApp(options?: {
   cancelText?: string;
   confirmText?: string;
   msgBoxOptions?: Partial<Pick<MessageBoxOptions, 'title' | 'message'>>;
+  forceRestart?: boolean;
 }) {
-  const { cancelText = 'Cancel', confirmText = 'Restart' } = options || {};
+  const {
+    cancelText = 'Cancel',
+    confirmText = 'Restart',
+    forceRestart,
+  } = options || {};
 
-  const dialogButtons = [cancelText, confirmText];
+  const dialogButtons = forceRestart
+    ? [confirmText]
+    : [cancelText, confirmText];
   const cancelId = dialogButtons.indexOf(cancelText);
   const confirmId = dialogButtons.indexOf(confirmText);
 
@@ -52,8 +59,15 @@ export async function alertRestartApp(options?: {
       'Something about Rabby has changed. Restarting Rabby will apply the changes.',
     ...options?.msgBoxOptions,
     type: 'question',
-    defaultId: cancelId,
-    cancelId,
+    ...(cancelId === -1
+      ? {
+          defaultId: confirmId,
+          cancelId: undefined,
+        }
+      : {
+          defaultId: cancelId,
+          cancelId,
+        }),
     noLink: true,
     buttons: dialogButtons,
   });
