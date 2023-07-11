@@ -133,9 +133,12 @@ export function useSettings() {
   };
 }
 
-const mediaAboutAtom = atom(
-  null as Pick<IDesktopAppState, 'selectedMediaConstrains'> | null
-);
+const mediaAboutAtom = atom({
+  selectedMediaConstrains: null,
+  cameraAccessStatus: 'denied',
+} as Pick<IDesktopAppState, 'selectedMediaConstrains'> & {
+  cameraAccessStatus: IDarwinMediaAccessStatus;
+});
 export function useSelectedMedieDevice() {
   const [mediaAboutState, setMediaAboutState] = useAtom(mediaAboutAtom);
 
@@ -143,10 +146,18 @@ export function useSelectedMedieDevice() {
     const result = await window.rabbyDesktop.ipcRenderer.invoke(
       'get-desktopAppState'
     );
+    const { accessStatus } = await window.rabbyDesktop.ipcRenderer.invoke(
+      'get-media-access-status',
+      'camera'
+    );
 
-    setMediaAboutState(result.state);
+    const nextVal = {
+      selectedMediaConstrains: result.state.selectedMediaConstrains,
+      cameraAccessStatus: accessStatus,
+    };
+    setMediaAboutState(nextVal);
 
-    return result.state.selectedMediaConstrains?.label;
+    return nextVal;
   }, [setMediaAboutState]);
 
   const setLocalConstrains = useCallback(
@@ -185,7 +196,8 @@ export function useSelectedMedieDevice() {
   }, [setLocalConstrains]);
 
   return {
-    selectedMediaConstrains: mediaAboutState?.selectedMediaConstrains || null,
+    cameraAccessStatus: mediaAboutState.cameraAccessStatus || 'denied',
+    selectedMediaConstrains: mediaAboutState.selectedMediaConstrains || null,
     fetchSelectedMediaConstrains,
     setLocalConstrains,
   };

@@ -239,7 +239,7 @@ type ChannelInvokePayload = {
     };
   };
   'app-relaunch': {
-    send: [reason: 'trezor-like-used'];
+    send: [reason: 'trezor-like-used' | 'media-access-updated'];
     response: void;
   };
   [`__internal_rpc:rabbyx-rpc:query`]: {
@@ -400,6 +400,12 @@ type ChannelInvokePayload = {
       systemReleaseInfo: ISystemReleaseInfo;
     };
   };
+  'get-media-access-status': {
+    send: [deviceType: IDarwinMediaAccessType];
+    response: {
+      accessStatus: IDarwinMediaAccessStatus;
+    };
+  };
   'enumerate-camera-devices': {
     send: [];
     response: {
@@ -418,6 +424,7 @@ type ChannelInvokePayload = {
     response: {
       selectId: string;
       constrains: IDesktopAppState['selectedMediaConstrains'];
+      cameraAccessStatus: IDarwinMediaAccessStatus;
       isCanceled?: boolean;
     };
   };
@@ -426,12 +433,18 @@ type ChannelInvokePayload = {
       {
         selectId: string;
         constrains: IDesktopAppState['selectedMediaConstrains'];
+        // cameraAccessStatus: IDarwinMediaAccessStatus;
         isCanceled?: boolean;
       }
     ];
     response: {
       error: string | null;
     };
+  };
+  'darwin:quick-open-privacy-camera': {
+    send: [];
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    response: {};
   };
 } & RabbyxInvokePayload;
 

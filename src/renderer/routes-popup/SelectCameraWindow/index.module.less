@@ -171,3 +171,50 @@
     right: 0;
   }
 }
+
+.TipGoToGrantOnDarwin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  .alertContent {
+    background-color: rgba(var(--color-orange-rgb), 0.2);
+    border-radius: 4px;
+    color: var(--color-orange);
+
+    width: 360px;
+    height: 40px;
+    margin: 0 auto;
+    flex-direction: row;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin-bottom: 40px;
+  }
+
+  .steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .step > img {
+    height: 240px;
+  }
+
+  .step > .desc {
+    margin-top: 16px;
+    color: var(--color-purewhite);
+    font-family: SF Pro;
+    font-size: 14px;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+
+  .stepArrow {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+}

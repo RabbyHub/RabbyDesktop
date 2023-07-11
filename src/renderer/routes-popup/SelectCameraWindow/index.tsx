@@ -14,18 +14,33 @@ import { hideMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { RcIconChecked } from '@/../assets/icons/select-camera';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { useSelectedMedieDevice } from '@/renderer/hooks/useSettings';
+import { useInterval } from '@/renderer/hooks/useTimer';
 import styles from './index.module.less';
 
 hideMainwinPopupview('select-camera');
 
 function useSelectCamera() {
-  const [cameraList, setCameraList] = useState<MediaDeviceInfo[]>([]);
-
   const {
+    cameraAccessStatus,
     selectedMediaConstrains,
     setLocalConstrains,
     fetchSelectedMediaConstrains,
   } = useSelectedMedieDevice();
+
+  const [cameraList, setCameraList] = useState<MediaDeviceInfo[]>([]);
+  const fetchCameraList = useCallback(async () => {
+    try {
+      const { mediaList: allCameras } =
+        await window.rabbyDesktop.ipcRenderer.invoke(
+          'enumerate-camera-devices'
+        );
+
+      setCameraList(allCameras || []);
+    } catch (err) {
+      console.error(err);
+      setCameraList([]);
+    }
+  }, []);
 
   const { localVisible, hideView, pageInfo } = usePopupViewInfo(
     'select-camera',
@@ -33,27 +48,36 @@ function useSelectCamera() {
       enableTopViewGuard: true,
       onVisibleChanged: async (visible) => {
         if (visible) {
-          fetchSelectedMediaConstrains();
-          try {
-            const { mediaList: allCameras } =
-              await window.rabbyDesktop.ipcRenderer.invoke(
-                'enumerate-camera-devices'
-              );
-            // const allCameras = await window.navigator.mediaDevices
-            //   .enumerateDevices()
-            //   .then((result) =>
-            //     result.filter((item) => item.kind === 'videoinput')
-            //   );
-
-            setCameraList(allCameras || []);
-          } catch (err) {
-            console.error(err);
-            setCameraList([]);
+          const result = await fetchSelectedMediaConstrains();
+          if (result.cameraAccessStatus === 'granted') {
+            fetchCameraList();
           }
         }
       },
     }
   );
+
+  // const previousCameraAccessStatus = usePrevious(cameraAccessStatus);
+  // useEffect(() => {
+  //   if (!localVisible) return;
+  //   if (
+  //     previousCameraAccessStatus !== 'granted' &&
+  //     cameraAccessStatus === 'granted'
+  //   ) {
+  //     window.rabbyDesktop.ipcRenderer.invoke(
+  //       'app-relaunch',
+  //       'media-access-updated'
+  //     );
+  //   }
+  // }, [localVisible, previousCameraAccessStatus, cameraAccessStatus]);
+
+  useInterval(() => {
+    fetchSelectedMediaConstrains().then((result) => {
+      if (result.cameraAccessStatus === 'granted') {
+        fetchCameraList();
+      }
+    });
+  }, 1000);
 
   const confirmSelectDevice = useCallback(
     (selectId: string) => {
@@ -91,6 +115,7 @@ function useSelectCamera() {
   }, [setLocalConstrains, localVisible]);
 
   return {
+    cameraAccessStatus,
     selectedMediaConstrains,
     setLocalConstrains,
 
@@ -105,9 +130,57 @@ function useSelectCamera() {
   };
 }
 
+function TipGoToGrantOnDarwin() {
+  return (
+    <div className={styles.TipGoToGrantOnDarwin}>
+      <div className={styles.alertContent}>
+        Please allow camera access to proceed
+      </div>
+
+      <div className={styles.steps}>
+        <div className={classNames(styles.step, styles.step1)}>
+          <img
+            className="w-[380px]"
+            src="rabby-internal://assets/imgs/tip-grant-camera/tip-step1.png"
+          />
+          <p className={styles.desc}>
+            1. Go to System Settings - Privacy & Security - Camera
+          </p>
+        </div>
+        <img
+          className={styles.stepArrow}
+          src="rabby-internal://assets/imgs/tip-grant-camera/step-arrow.svg"
+        />
+        <div className={classNames(styles.step, styles.step2)}>
+          <img
+            className="w-[440px]"
+            src="rabby-internal://assets/imgs/tip-grant-camera/tip-step2.png"
+          />
+          <p className={styles.desc}>
+            2. Allow Rabby Desktop to access camera, restart the app
+          </p>
+        </div>
+
+        <Button
+          className={styles.next}
+          type="primary"
+          onClick={() => {
+            window.rabbyDesktop.ipcRenderer.invoke(
+              'darwin:quick-open-privacy-camera'
+            );
+          }}
+        >
+          Go to Grant
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function SelectCameraModal() {
   useBodyClassNameOnMounted('select-camera-popup');
   const {
+    cameraAccessStatus,
     selectedMediaConstrains,
     setLocalConstrains,
     confirmSelectDevice,
@@ -141,67 +214,78 @@ function SelectCameraModal() {
         }}
       >
         <div className={styles.SelectDevicesContent}>
-          {cameraList?.length ? (
-            <div className={styles.cameras}>
-              <h3 className={styles.title}>
-                The following{' '}
-                {cameraList?.length > 1 ? 'cameras are' : 'camera is'} found
-              </h3>
-              <div className={styles.list}>
-                {cameraList.map((d) => {
-                  const isSelected =
-                    selectedMediaConstrains?.label &&
-                    selectedMediaConstrains?.label === d.label;
-                  return (
-                    <div
-                      key={`${pageState.selectId}-camera-${d.deviceId}`}
-                      className={classNames(
-                        styles.camera,
-                        isSelected && styles.selected
-                      )}
-                      onClick={() => {
-                        if (!isSelected) {
-                          setLocalConstrains({ label: d.label });
-                        } else {
-                          setLocalConstrains(null);
-                        }
-                      }}
-                    >
-                      <div className={classNames(styles.deviceInfo, 'flex')}>
-                        <img
-                          className={classNames(styles.icon, 'mr-[8px]')}
-                          src="rabby-internal://assets/icons/select-camera/camera.svg"
-                        />
-                        <span>{d.label}</span>
-                      </div>
+          {cameraAccessStatus === 'denied' && <TipGoToGrantOnDarwin />}
+          {cameraAccessStatus === 'granted' && (
+            <>
+              {cameraList?.length ? (
+                <div className={styles.cameras}>
+                  <h3 className={styles.title}>
+                    The following{' '}
+                    {cameraList?.length > 1 ? 'cameras are' : 'camera is'} found
+                  </h3>
+                  <div className={styles.list}>
+                    {cameraList.map((d) => {
+                      const isSelected =
+                        selectedMediaConstrains?.label &&
+                        selectedMediaConstrains?.label === d.label;
+                      return (
+                        <div
+                          key={`${pageState.selectId}-camera-${d.deviceId}`}
+                          className={classNames(
+                            styles.camera,
+                            isSelected && styles.selected
+                          )}
+                          onClick={() => {
+                            if (!isSelected) {
+                              setLocalConstrains({ label: d.label });
+                            } else {
+                              setLocalConstrains(null);
+                            }
+                          }}
+                        >
+                          <div
+                            className={classNames(styles.deviceInfo, 'flex')}
+                          >
+                            <img
+                              className={classNames(styles.icon, 'mr-[8px]')}
+                              src="rabby-internal://assets/icons/select-camera/camera.svg"
+                            />
+                            <span>{d.label}</span>
+                          </div>
 
-                      <RcIconChecked className={styles.checkIcon} />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ) : (
-            <div className={styles.errorContainer}>
-              <div className={styles.error}>
-                <img
-                  className={classNames(styles.icon, 'block')}
-                  src="rabby-internal://assets/icons/select-camera/no-camera.svg"
-                />
-                <p className={styles.text}>Camera not found</p>
-              </div>
-            </div>
+                          <RcIconChecked className={styles.checkIcon} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.errorContainer}>
+                  <div className={styles.error}>
+                    <img
+                      className={classNames(styles.icon, 'block')}
+                      src="rabby-internal://assets/icons/select-camera/no-camera.svg"
+                    />
+                    <p className={styles.text}>Camera not found</p>
+                  </div>
+                </div>
+              )}
+              <Button
+                disabled={
+                  cameraAccessStatus !== 'granted' ||
+                  !cameraList.length ||
+                  !selectedMediaConstrains?.label
+                }
+                className={styles.next}
+                type="primary"
+                onClick={() => {
+                  confirmSelectDevice(pageState.selectId);
+                }}
+              >
+                Next
+              </Button>
+            </>
           )}
-          <Button
-            disabled={!cameraList.length || !selectedMediaConstrains?.label}
-            className={styles.next}
-            type="primary"
-            onClick={() => {
-              confirmSelectDevice(pageState.selectId);
-            }}
-          >
-            Next
-          </Button>
         </div>
       </RModal>
     </div>

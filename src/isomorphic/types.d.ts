@@ -700,3 +700,10 @@ type ISystemReleaseInfo = {
   majorVersion: number;
   isDeprecated: boolean;
 };
+
+type IDarwinMediaAccessType = Parameters<
+  typeof import('electron').systemPreferences.getMediaAccessStatus
+>[0];
+type IDarwinMediaAccessStatus = ReturnType<
+  typeof import('electron').systemPreferences.getMediaAccessStatus
+>;
