@@ -19,16 +19,19 @@ export const HDManagerModal: React.FC<Props> = ({
     onCancel?.();
   }, [onCancel]);
 
+  const [showScanModal, setShowScanModal] = React.useState(false);
+
   return (
     <CommonHDManagerModal
       {...props}
       centered
       className="HDManagerModal"
-      width={1280}
+      width={showScanModal ? 1000 : 1280}
       onCancel={handleClose}
       keyring={keyringType}
       keyringId={null}
       showEntryButton={showEntryButton}
+      onShowScanModal={setShowScanModal}
     />
   );
 };

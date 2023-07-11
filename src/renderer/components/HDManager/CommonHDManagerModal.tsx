@@ -7,6 +7,7 @@ import {
 } from '@/renderer/utils/constant';
 import { useShellWallet } from '@/renderer/hooks-shell/useShellWallet';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
+import clsx from 'clsx';
 import { HDManagerStateProvider, StateProviderProps } from './utils';
 import { LedgerManager } from './LedgerManager';
 import { OneKeyManager } from './OnekeyManager';
@@ -32,6 +33,7 @@ interface Props extends StateProviderProps, ModalProps {
   showEntryButton?: boolean;
   onCancel?: ModalProps['onCancel'];
   brand?: WALLET_BRAND_TYPES;
+  onShowScanModal?: (visible: boolean) => void;
 }
 
 export const CommonHDManagerModal: React.FC<Props> = ({
@@ -39,6 +41,7 @@ export const CommonHDManagerModal: React.FC<Props> = ({
   showEntryButton,
   onCancel,
   brand,
+  onShowScanModal,
   ...props
 }) => {
   const walletController = useShellWallet();
@@ -145,6 +148,8 @@ export const CommonHDManagerModal: React.FC<Props> = ({
     };
   }, [initConnect, closeConnect]);
 
+  const [showScanModal, setShowScanModal] = React.useState(false);
+
   if (connectReq.step === HD_CONN_STEP.STOPPED && !connectReq.connected) {
     return null;
   }
@@ -170,10 +175,21 @@ export const CommonHDManagerModal: React.FC<Props> = ({
       onCancel={handleClose}
     >
       <HDManagerStateProvider keyringId={idRef.current} keyring={keyring}>
-        <div className="HDManager">
+        <div
+          className={clsx('HDManager', {
+            'scan-modal': showScanModal,
+          })}
+        >
           {connectReq.connected ? (
             <main>
-              <Manager onClose={handleClose} brand={brand} />
+              <Manager
+                onClose={handleClose}
+                brand={brand}
+                onShowScanModal={(visible) => {
+                  setShowScanModal(visible);
+                  onShowScanModal?.(visible);
+                }}
+              />
               {showEntryButton && (
                 <Button
                   onClick={onCancel}
