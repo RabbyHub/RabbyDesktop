@@ -196,7 +196,6 @@ function _isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
   switch (viewType) {
     case 'main-window':
       return isMainWinShellWebUI(url);
-    case 'add-address-dropdown':
     case 'z-popup':
       return (
         url.startsWith('chrome-extension:') &&
@@ -219,7 +218,6 @@ function _isBuiltinView(url: string, viewType: IBuiltinViewName | '*') {
 const BUILTIN_VIEWS_TO_CHECK = [
   'main-window',
   'address-management',
-  'add-address-dropdown',
   'dapps-management',
   'z-popup',
   'global-toast-popup',

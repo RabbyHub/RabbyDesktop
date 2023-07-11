@@ -83,7 +83,6 @@ const CONF = {
     once: true,
   } as IConf<
     ReplaySubject<{
-      addAddress: BrowserView;
       dappsManagement: BrowserView;
       selectDevices: BrowserView;
       zPopup: BrowserView;

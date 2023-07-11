@@ -147,7 +147,6 @@ export async function getAllMainUIViews() {
   ]);
 
   const views: Record<PopupViewOnMainwinInfo['type'], Electron.BrowserView> = {
-    'add-address-dropdown': mainViews.addAddress,
     'dapps-management': mainViews.dappsManagement,
     'select-devices': mainViews.selectDevices,
     'z-popup': mainViews.zPopup,
@@ -157,7 +156,6 @@ export async function getAllMainUIViews() {
   };
 
   const viewOnlyHash = {
-    addAddress: mainViews.addAddress.webContents,
     dappsManagement: mainViews.dappsManagement.webContents,
     selectDevices: mainViews.selectDevices.webContents,
     zPopup: mainViews.zPopup.webContents,
