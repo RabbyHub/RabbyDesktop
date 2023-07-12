@@ -22,6 +22,7 @@ import styles from './index.module.less';
 hideMainwinPopupview('select-camera');
 
 const IS_DARWIN = detectClientOS() === 'darwin';
+const isDarwinProd = IS_RUNTIME_PRODUCTION && IS_DARWIN;
 function useSelectCamera() {
   const {
     cameraAccessStatus,
@@ -78,16 +79,22 @@ function useSelectCamera() {
   //   }
   // }, [localVisible, previousCameraAccessStatus, cameraAccessStatus]);
 
-  useInterval(async () => {
-    const result = await fetchCameraAccessStatus();
-    if (
-      previousCameraAccessStatus !== 'granted' &&
-      result.cameraAccessStatus === 'granted'
-    ) {
-      fetchSelectedMediaConstrains();
-      fetchCameraList();
-    }
-  }, 1000);
+  // in fact, on macOS production, it's pointless to fetch camera access status
+  useInterval(
+    async () => {
+      if (!localVisible || isDarwinProd) return;
+
+      const result = await fetchCameraAccessStatus();
+      if (
+        previousCameraAccessStatus !== 'granted' &&
+        result.cameraAccessStatus === 'granted'
+      ) {
+        fetchSelectedMediaConstrains();
+        fetchCameraList();
+      }
+    },
+    isDarwinProd ? 10 * 1e3 : 1e3
+  );
 
   const confirmSelectDevice = useCallback(
     (selectId: string) => {
