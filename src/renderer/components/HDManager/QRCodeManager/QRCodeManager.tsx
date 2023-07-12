@@ -113,7 +113,7 @@ export const QRCodeManager: React.FC<Props> = ({ brand, onClose }) => {
         <div className="toolbar-item" onClick={openSwitchHD}>
           <img
             className="icon"
-            src="rabby-internal://assets/icons/hd-manager/setting.svg"
+            src="rabby-internal://assets/icons/hd-manager/device.svg"
           />
           <span className="title">Switch to another {brand}</span>
         </div>
