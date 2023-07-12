@@ -4,3 +4,28 @@
   background: rgba(255, 255, 255, 0.10);
   transform: scaleX(-1);
 }
+
+.qrcode-reader-loader {
+  background: transparent;
+
+  &.is-loading {
+    background: rgba(255, 255, 255, 0.10);
+  }
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  @keyframes rotation {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  > .loading-icon {
+    animation: rotation 1s linear infinite;
+  }
+}
