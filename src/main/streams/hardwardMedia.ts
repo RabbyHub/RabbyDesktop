@@ -140,21 +140,21 @@ handleIpcMainInvoke('start-select-camera', async (_, opts) => {
         constrains: matchedConstrains,
       };
     }
-    if (
-      selectedMediaConstrains?.label &&
-      mediaDevices.find(
-        (device) =>
-          selectedMediaConstrains?.label &&
-          device.label === selectedMediaConstrains.label
-      )
-    ) {
-      await beforeEarlyReturnOnNoNeedToSelect();
+    // if (
+    //   selectedMediaConstrains?.label &&
+    //   mediaDevices.find(
+    //     (device) =>
+    //       selectedMediaConstrains?.label &&
+    //       device.label === selectedMediaConstrains.label
+    //   )
+    // ) {
+    //   await beforeEarlyReturnOnNoNeedToSelect();
 
-      return {
-        ...result,
-        constrains: selectedMediaConstrains,
-      };
-    }
+    //   return {
+    //     ...result,
+    //     constrains: selectedMediaConstrains,
+    //   };
+    // }
   }
 
   toggleSelectCamera(selectId, true);
