@@ -422,7 +422,7 @@ type ChannelInvokePayload = {
       }
     ];
     response: {
-      selectId: string;
+      selectId: string | null;
       constrains: IDesktopAppState['selectedMediaConstrains'];
       prevCameraAccessStatus: IDarwinMediaAccessStatus;
       cameraAccessStatus: IDarwinMediaAccessStatus;

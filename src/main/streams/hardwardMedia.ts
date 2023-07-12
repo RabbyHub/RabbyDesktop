@@ -64,6 +64,12 @@ async function getMediaDevices() {
   return mediaList;
 }
 
+async function waitSecond(second = 1) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, second * 1000);
+  });
+}
+
 handleIpcMainInvoke('get-media-access-status', async (_, type) => {
   return {
     accessStatus: systemPreferences.getMediaAccessStatus(type),
@@ -101,10 +107,24 @@ handleIpcMainInvoke('start-select-camera', async (_, opts) => {
   const { prevCameraAccessStatus, finalCameraAccessStatus } =
     await tryToEnsureCameraAccess();
   const result = {
-    selectId,
+    selectId: selectId as string | null,
     prevCameraAccessStatus,
     cameraAccessStatus: finalCameraAccessStatus,
   };
+
+  /**
+   * @notice generally, after invoke this method 'start-select-camera', the client
+   * will call `window.navigator.mediaDevices.getUserMedia` to get the camera stream,
+   * such as `BrowserQRCodeReader::decodeFromVideoDevice` from @zxing/browser.
+   *
+   * We found, if we return the result too fast, the client will not get the camera stream
+   * correctly sometimes. So we wait 1 second before return the result.
+   */
+  async function beforeEarlyReturnOnNoNeedToSelect() {
+    // eslint-disable-next-line no-multi-assign
+    result.selectId = selectCameraState.selectId = null;
+    await waitSecond(1);
+  }
 
   if (!forceUserSelect) {
     if (mediaDevices.length === 1) {
@@ -113,6 +133,7 @@ handleIpcMainInvoke('start-select-camera', async (_, opts) => {
       };
 
       desktopAppStore.set('selectedMediaConstrains', matchedConstrains);
+      await beforeEarlyReturnOnNoNeedToSelect();
 
       return {
         ...result,
@@ -127,6 +148,8 @@ handleIpcMainInvoke('start-select-camera', async (_, opts) => {
           device.label === selectedMediaConstrains.label
       )
     ) {
+      await beforeEarlyReturnOnNoNeedToSelect();
+
       return {
         ...result,
         constrains: selectedMediaConstrains,

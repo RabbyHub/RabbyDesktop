@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { BrowserQRCodeReader } from '@zxing/browser';
 import './style.less';
 import clsx from 'clsx';
@@ -35,7 +42,7 @@ const QRCodeReader = ({
       prevCameraAccessStatus,
       cameraAccessStatus,
     } = await window.rabbyDesktop.ipcRenderer.invoke('start-select-camera', {
-      forceUserSelect: true,
+      forceUserSelect: false,
     });
 
     /**
@@ -75,8 +82,9 @@ const QRCodeReader = ({
   }, [findDevices]);
 
   const videoRef = useRef<HTMLVideoElement>(null);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!deviceId) return;
+
     const videoElem = videoRef.current;
     if (!videoElem) return;
     const canplayListener = () => {
@@ -92,6 +100,7 @@ const QRCodeReader = ({
         }
       }
     );
+
     return () => {
       videoElem!.removeEventListener('canplay', canplayListener);
       promise
