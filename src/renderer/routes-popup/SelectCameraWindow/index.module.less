@@ -216,9 +216,16 @@
     white-space: nowrap;
   }
 
-  .steps.stepsWindows > .step > .desc {
-    white-space: normal;
-    height: 44px;
+  .steps.stepsWindows {
+    @desc-h: 44px;
+    .stepArrow {
+      position: relative;
+      top: -@desc-h;
+    }
+    > .step > .desc {
+      white-space: normal;
+      height: @desc-h;
+    }
   }
 
   .stepArrow {
