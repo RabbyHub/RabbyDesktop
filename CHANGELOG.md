@@ -1,7 +1,21 @@
 
-v0.28.0 / 2023-06-29
+v0.29.0 / 2023-07-12
 ====================
 
+  * feat: make sure tip user grant permission. (#498)
+  * feat: keystone (#496)
+  * feat: update currentVersion.
+  * chore: remove useless code about old add-address-dropdown. (#495)
+  * feat: adjust some sentry logs' frequency. (#494)
+  * feat: update gnosis safe (#491)
+  * feat: support chain zora (#493)
+  * feat: swap support 1inch (#497)
+  * Fix current account checking condition (#492)
+
+v0.28.0-prod / 2023-06-29
+=========================
+
+  * Release v0.28.0-prod
   * fix: redirect nft when switch account sendNFT (#490)
   * fix: okx icon
   * feat: gnosis safe support multiple chain (#489)
