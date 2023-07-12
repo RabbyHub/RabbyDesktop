@@ -161,7 +161,7 @@ function TipGoToGrantOnDarwin() {
                 src="rabby-internal://assets/imgs/tip-grant-camera/macos-tip-step1.png"
               />
               <p className={styles.desc}>
-                1. Go to System Settings - Privacy & Security - Camera
+                {`1. Go to System Settings > Privacy & Security > Camera`}
               </p>
             </div>
             <img
@@ -188,7 +188,7 @@ function TipGoToGrantOnDarwin() {
                 src="rabby-internal://assets/imgs/tip-grant-camera/windows-tip-step1.png"
               />
               <p className={styles.desc}>
-                1. Go to System Settings - Privacy & Security - Camera
+                {`1. Go to System Settings > Privacy & Security > Camera`}
               </p>
             </div>
             <img
@@ -201,7 +201,7 @@ function TipGoToGrantOnDarwin() {
                 src="rabby-internal://assets/imgs/tip-grant-camera/windows-tip-step2.png"
               />
               <p className={styles.desc}>
-                {`2. Make sure "Camera access" > "Let apps access your camera" > "Let desktop apps access your camera" Enabled`}
+                {`2. Turn on "Camera access", "Let apps access your camera", "Let desktop apps access your camera"`}
               </p>
             </div>
           </>
