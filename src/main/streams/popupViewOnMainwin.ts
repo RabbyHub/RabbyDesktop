@@ -7,6 +7,7 @@ import {
   RightSidePopupContentsSizes,
 } from '@/isomorphic/const-size-next';
 import {
+  IS_DEVTOOLS_AVAILBLE,
   IS_RUNTIME_PRODUCTION,
   RABBY_POPUP_GHOST_VIEW_URL,
   TOAST_TOP,
@@ -47,6 +48,12 @@ const viewsState: {
     get s_isModal() {
       return true;
     },
+  },
+  'select-camera': {
+    visible: false,
+    // get s_isModal() {
+    //   return true;
+    // },
   },
   'in-dapp-find': {
     visible: false,
@@ -136,7 +143,13 @@ function updateSubviewPos({
 
   view.setBounds(popupRect);
   if (BrowserWindow.fromBrowserView(view) === parentWindow) {
-    parentWindow.setTopBrowserView(view);
+    const isZpopupShownOnSelectCamera =
+      viewTypeOrRect === 'z-popup' &&
+      viewsState['z-popup'].visible &&
+      viewsState['select-camera'].visible;
+    if (!isZpopupShownOnSelectCamera) {
+      parentWindow.setTopBrowserView(view);
+    }
   } else if (!IS_RUNTIME_PRODUCTION) {
     console.error('updateSubviewPos: view is not attached to parentWindow!');
   }
@@ -218,7 +231,7 @@ async function showModalPopup(
   showPopupWindow(modalWindow);
   modalWindow.focus();
 
-  if (viewType === 'select-devices') {
+  if (['select-devices'].includes(viewType)) {
     modalWindow.on('blur', () => {
       sendToWebContents(
         targetView.webContents,
@@ -281,6 +294,61 @@ const selectDevicesReady = onMainWindowReady().then(async () => {
   hidePopupView(selectDevicesPopup);
 
   return selectDevicesPopup;
+});
+
+// const selectCamerasReady = onMainWindowReady().then(async () => {
+//   const selectCameraPopup = createPopupView({});
+
+//   await selectCameraPopup.webContents.loadURL(
+//     `${await getWebuiURLBase()}/popup-view.html??view=select-camera#/`
+//   );
+
+//   // debug-only
+//   if (!IS_RUNTIME_PRODUCTION) {
+//     selectCameraPopup.webContents.openDevTools({ mode: 'detach' });
+//   }
+
+//   hidePopupView(selectCameraPopup);
+
+//   return selectCameraPopup;
+// });
+
+const selectCamerasReady = onMainWindowReady().then(async (mainWin) => {
+  const mainWindow = mainWin.window;
+
+  const selectCameraPopup = createPopupView({});
+
+  mainWindow.addBrowserView(selectCameraPopup);
+
+  const onTargetWinUpdate = () => {
+    if (viewsState['select-camera'].visible) {
+      const oldBounds = selectCameraPopup.getBounds();
+      updateSubviewPos({
+        parentWindow: mainWindow,
+        view: selectCameraPopup,
+        viewTypeOrRect: oldBounds,
+      });
+    }
+  };
+  mainWindow.on('show', onTargetWinUpdate);
+  mainWindow.on('move', onTargetWinUpdate);
+  mainWindow.on('resized', onTargetWinUpdate);
+  mainWindow.on('unmaximize', onTargetWinUpdate);
+  mainWindow.on('restore', onTargetWinUpdate);
+
+  await selectCameraPopup.webContents.loadURL(
+    // `${RABBY_POPUP_GHOST_VIEW_URL}?view=select-camera`
+    `${await getWebuiURLBase()}/popup-view.html?view=select-camera#/`
+  );
+
+  // debug-only
+  if (IS_DEVTOOLS_AVAILBLE) {
+    // selectCameraPopup.webContents.openDevTools({ mode: 'detach' });
+  }
+
+  hidePopupView(selectCameraPopup);
+
+  return selectCameraPopup;
 });
 
 const inDappFindReady = onMainWindowReady().then(async (mainWin) => {
@@ -428,18 +496,20 @@ const rightSidePopupViewReady = onMainWindowReady().then(async (mainWin) => {
 Promise.all([
   dappsManagementReady,
   selectDevicesReady,
+  selectCamerasReady,
   inDappFindReady,
   zPopupReady,
   globalToastPopupReady,
   rightSidePopupViewReady,
-]).then((wins) => {
+]).then((views) => {
   valueToMainSubject('popupViewsOnMainwinReady', {
-    dappsManagement: wins[0],
-    selectDevices: wins[1],
-    inDappFind: wins[2],
-    zPopup: wins[3],
-    globalToastPopup: wins[4],
-    rightSidePopup: wins[5],
+    dappsManagement: views[0],
+    selectDevices: views[1],
+    selectCamera: views[2],
+    inDappFind: views[3],
+    zPopup: views[4],
+    globalToastPopup: views[5],
+    rightSidePopup: views[6],
   });
 });
 

@@ -91,6 +91,7 @@ const configuration: webpack.Configuration = {
   plugins: [
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'production',
+      BUILD_USE_DEVTOOLS: process.env.BUILD_USE_DEVTOOLS || '',
       BUILD_CHANNEL: process.env.buildchannel || 'reg',
       HTTP_INSTEAD_OF_CUSTOM: process.env.HTTP_INSTEAD_OF_CUSTOM || '',
     }),

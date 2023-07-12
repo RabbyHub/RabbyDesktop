@@ -7,7 +7,7 @@ import {
   IconTooltipInfo,
 } from '@/../assets/icons/mainwin-settings';
 
-import { Button, Modal, Slider, SwitchProps, Tooltip } from 'antd';
+import { Button, Modal, Slider, SwitchProps, Tooltip, message } from 'antd';
 import { useSettings } from '@/renderer/hooks/useSettings';
 import styled from 'styled-components';
 import {
@@ -189,6 +189,53 @@ function DeveloperKitsParts() {
               }}
             >
               <code>hid.requestDevices()</code>
+            </Button>
+          </ItemAction>
+          <ItemAction
+            name="Camera"
+            icon="rabby-internal://assets/icons/developer-kits/camera.svg"
+          >
+            <Button
+              type="primary"
+              ghost
+              className="mr-[8px]"
+              onClick={(evt) => {
+                evt.stopPropagation();
+                window.rabbyDesktop.ipcRenderer
+                  .invoke('start-select-camera')
+                  .then((result) => {
+                    if (result.isCanceled) {
+                      message.info('User Canceled');
+                    } else {
+                      message.success(
+                        `[${result.selectId}] Selected camera with ID: ${result.constrains?.label}`
+                      );
+                    }
+                  });
+              }}
+            >
+              <code>Query Selected Camera</code>
+            </Button>
+            <Button
+              type="primary"
+              ghost
+              className="mr-[8px]"
+              onClick={(evt) => {
+                evt.stopPropagation();
+                window.rabbyDesktop.ipcRenderer
+                  .invoke('start-select-camera', { forceUserSelect: true })
+                  .then((result) => {
+                    if (result.isCanceled) {
+                      message.info('User Canceled');
+                    } else {
+                      message.success(
+                        `[${result.selectId}] Selected camera with ID: ${result.constrains?.label}`
+                      );
+                    }
+                  });
+              }}
+            >
+              <code>Force Select Camera</code>
             </Button>
           </ItemAction>
           <ItemSwitch

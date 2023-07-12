@@ -132,3 +132,80 @@ export function useSettings() {
     adjustDappViewZoomPercent,
   };
 }
+
+const mediaAboutAtom = atom({
+  selectedMediaConstrains: null,
+  cameraAccessStatus: 'denied',
+} as Pick<IDesktopAppState, 'selectedMediaConstrains'> & {
+  cameraAccessStatus: IDarwinMediaAccessStatus;
+});
+export function useSelectedMedieDevice() {
+  const [mediaAboutState, setMediaAboutState] = useAtom(mediaAboutAtom);
+
+  const fetchCameraAccessStatus = useCallback(async () => {
+    const { accessStatus: cameraAccessStatus } =
+      await window.rabbyDesktop.ipcRenderer.invoke(
+        'get-media-access-status',
+        'camera'
+      );
+
+    setMediaAboutState((prev) => ({ ...prev, cameraAccessStatus }));
+
+    return { cameraAccessStatus };
+  }, [setMediaAboutState]);
+
+  const fetchSelectedMediaConstrains = useCallback(async () => {
+    const result = await window.rabbyDesktop.ipcRenderer.invoke(
+      'get-desktopAppState'
+    );
+
+    setMediaAboutState((prev) => ({
+      ...prev,
+      selectedMediaConstrains: result.state.selectedMediaConstrains,
+    }));
+  }, [setMediaAboutState]);
+
+  const setLocalConstrains = useCallback(
+    (constrains: IDesktopAppState['selectedMediaConstrains']) => {
+      setMediaAboutState((prev) => {
+        return {
+          ...prev,
+          selectedMediaConstrains: {
+            label: constrains?.label || null,
+            ...constrains,
+          },
+        };
+      });
+    },
+    [setMediaAboutState]
+  );
+
+  useEffect(() => {
+    fetchSelectedMediaConstrains();
+    fetchCameraAccessStatus();
+  }, [fetchSelectedMediaConstrains, fetchCameraAccessStatus]);
+
+  useEffect(() => {
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_push:media:events',
+      (payload) => {
+        switch (payload.eventType) {
+          case 'push-selected-media-video': {
+            setLocalConstrains(payload.constrains);
+            break;
+          }
+          default:
+            break;
+        }
+      }
+    );
+  }, [setLocalConstrains]);
+
+  return {
+    cameraAccessStatus: mediaAboutState.cameraAccessStatus || 'denied',
+    selectedMediaConstrains: mediaAboutState.selectedMediaConstrains || null,
+    fetchSelectedMediaConstrains,
+    fetchCameraAccessStatus,
+    setLocalConstrains,
+  };
+}

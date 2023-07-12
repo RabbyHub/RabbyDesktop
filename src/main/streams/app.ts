@@ -2,6 +2,7 @@ import { app, BrowserWindow, dialog, shell } from 'electron';
 
 import { checkoutDappURL } from '@/isomorphic/dapp';
 import {
+  APP_BRANDNAME,
   APP_NAME,
   IS_RUNTIME_PRODUCTION,
   RABBY_SPALSH_URL,
@@ -58,7 +59,10 @@ import { setupAppTray } from './appTray';
 import { checkForceUpdate } from '../updater/force_update';
 import { getOrCreateDappBoundTab } from '../utils/tabbedBrowserWindow';
 import { MainTabbedBrowserWindow } from '../browser/browsers';
-import { notifyHidePopupWindowOnMain } from '../utils/mainTabbedWin';
+import {
+  alertRestartApp,
+  notifyHidePopupWindowOnMain,
+} from '../utils/mainTabbedWin';
 import { dappStore } from '../store/dapps';
 
 const appLog = getBindLog('appStream', 'bgGrey');
@@ -273,6 +277,16 @@ handleIpcMainInvoke('app-relaunch', (_, reasonType) => {
   switch (reasonType) {
     case 'trezor-like-used': {
       emitIpcMainEvent('__internal_main:app:relaunch');
+      break;
+    }
+    case 'media-access-updated': {
+      alertRestartApp({
+        forceRestart: true,
+        msgBoxOptions: {
+          title: 'Camera Access Updated',
+          message: `Camera access has been granted. It's required to restart ${APP_BRANDNAME}.`,
+        },
+      });
       break;
     }
     default:

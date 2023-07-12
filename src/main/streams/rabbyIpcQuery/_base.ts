@@ -19,6 +19,14 @@ export async function rabbyxExecuteJs<T>(script: string): Promise<T> {
   return backgroundWebContents.executeJavaScript(script);
 }
 
+export async function rabbyxExecuteJsOnBlank<T>(script: string): Promise<T> {
+  const rabbyxBlankPage = await firstValueFrom(
+    fromMainSubject('rabbyExtViews')
+  ).then((views) => views.rabbyxBlankPage);
+
+  return rabbyxBlankPage.webContents.executeJavaScript(script);
+}
+
 const rabbyXRpcResponse = new Subject<IRabbyxRpcResponse>();
 const obs = rabbyXRpcResponse.asObservable();
 

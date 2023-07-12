@@ -160,6 +160,10 @@ type IDesktopAppState = {
   tipedHideMainWindowOnWindows: boolean;
 
   experimentalDappViewZoomPercent: number;
+
+  selectedMediaConstrains: {
+    label: string | null;
+  } | null;
 };
 
 type IAppDynamicConfig = {
@@ -381,6 +385,21 @@ type ISelectDeviceState = {
     }
 );
 
+type ISelectCameraState = {
+  selectId: string;
+} & (
+  | {
+      status: 'pending';
+    }
+  | {
+      status: 'selected';
+      deviceInfo: MediaDeviceInfo;
+    }
+  | {
+      status: 'rejected';
+    }
+);
+
 type IWebviewPerfInfo = {
   time: number;
   memoryInfo: {
@@ -405,6 +424,10 @@ type PopupViewOnMainwinInfo =
   | {
       type: 'select-devices';
       state: ISelectDeviceState;
+    }
+  | {
+      type: 'select-camera';
+      state: ISelectCameraState;
     }
   | {
       type: 'z-popup';
@@ -668,3 +691,10 @@ type ISystemReleaseInfo = {
   majorVersion: number;
   isDeprecated: boolean;
 };
+
+type IDarwinMediaAccessType = Parameters<
+  typeof import('electron').systemPreferences.getMediaAccessStatus
+>[0];
+type IDarwinMediaAccessStatus = ReturnType<
+  typeof import('electron').systemPreferences.getMediaAccessStatus
+>;

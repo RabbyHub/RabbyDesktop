@@ -38,6 +38,7 @@ const CONF = {
     ReplaySubject<{
       rabbyNotificationGasket: Electron.BrowserView;
       backgroundWebContents: Electron.WebContents;
+      rabbyxBlankPage: Electron.BrowserView;
     }>
   >,
 
@@ -85,6 +86,7 @@ const CONF = {
     ReplaySubject<{
       dappsManagement: BrowserView;
       selectDevices: BrowserView;
+      selectCamera: BrowserView;
       zPopup: BrowserView;
       globalToastPopup: BrowserView;
       inDappFind: BrowserView;

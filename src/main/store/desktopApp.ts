@@ -35,6 +35,8 @@ export const desktopAppStore = makeStore<{
   tipedHideMainWindowOnWindows: IDesktopAppState['tipedHideMainWindowOnWindows'];
 
   experimentalDappViewZoomPercent: IDesktopAppState['experimentalDappViewZoomPercent'];
+
+  selectedMediaConstrains: IDesktopAppState['selectedMediaConstrains'];
 }>({
   name: `${PERSIS_STORE_PREFIX}desktopApp`,
 
@@ -90,6 +92,16 @@ export const desktopAppStore = makeStore<{
     experimentalDappViewZoomPercent: {
       type: 'number',
       default: DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT,
+    },
+    selectedMediaConstrains: {
+      type: ['object', 'null'],
+      default: null,
+      properties: {
+        label: {
+          type: ['string', 'null'],
+          default: null,
+        },
+      },
     },
     proxyType: {
       type: 'string',
@@ -166,6 +178,11 @@ function getState() {
     experimentalDappViewZoomPercent: desktopAppStore.get(
       'experimentalDappViewZoomPercent',
       DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT
+    ),
+
+    selectedMediaConstrains: desktopAppStore.get(
+      'selectedMediaConstrains',
+      null
     ),
   };
 }

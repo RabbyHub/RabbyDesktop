@@ -149,6 +149,7 @@ export async function getAllMainUIViews() {
   const views: Record<PopupViewOnMainwinInfo['type'], Electron.BrowserView> = {
     'dapps-management': mainViews.dappsManagement,
     'select-devices': mainViews.selectDevices,
+    'select-camera': mainViews.selectCamera,
     'z-popup': mainViews.zPopup,
     'global-toast-popup': mainViews.globalToastPopup,
     'in-dapp-find': mainViews.inDappFind,
@@ -250,6 +251,27 @@ export function stopSelectDevices() {
       visible: false,
     },
   });
+}
+
+export function toggleSelectCamera(selectId: string, nextShow = true) {
+  if (nextShow) {
+    emitIpcMainEvent('__internal_main:popupview-on-mainwin:toggle-show', {
+      nextShow: true,
+      type: 'select-camera',
+      pageInfo: {
+        type: 'select-camera',
+        state: {
+          selectId,
+          status: 'pending',
+        },
+      },
+    });
+  } else {
+    emitIpcMainEvent('__internal_main:popupview-on-mainwin:toggle-show', {
+      nextShow: false,
+      type: 'select-camera',
+    });
+  }
 }
 
 export async function getAppRuntimeProxyConf() {

@@ -62,7 +62,12 @@ module.exports = {
     "hardenedRuntime": true,
     "entitlements": "assets/entitlements.mac.plist",
     "entitlementsInherit": "assets/entitlements.mac.plist",
-    "gatekeeperAssess": false
+    "gatekeeperAssess": false,
+    "extendInfo": {
+      "NSCameraUsageDescription": "Require camera to support QR-based hardware wallet.",
+      // "com.apple.security.device.camera": true,
+      // "com.apple.security.cs.allow-unsigned-executable-memory": true
+    }
   },
   "dmg": {
     "artifactName": "rabby-wallet-desktop-installer-${arch}-${version}.${ext}",

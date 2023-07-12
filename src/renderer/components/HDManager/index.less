@@ -25,6 +25,13 @@
     flex: 1;
   }
 
+  &.scan-modal {
+    min-height: 750px;
+    main {
+      min-width: 0;
+    }
+  }
+
   .logo {
     display: flex;
     align-items: center;
@@ -37,6 +44,33 @@
       font-size: 20px;
       color: #13141a;
       margin-bottom: 0;
+    }
+  }
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    right: 0;
+    top: 0;
+    column-gap: 20px;
+    position: absolute;
+    right: 0;
+    top: 78px;
+  }
+
+  .toolbar-item {
+    display: flex;
+    column-gap: 4px;
+    align-items: center;
+    cursor: pointer;
+    color: #fff;
+    font-size: 12px;
+    line-height: 1;
+
+    .icon {
+      width: 16px;
+      margin-right: 4px;
     }
   }
 

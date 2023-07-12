@@ -126,6 +126,7 @@ async function pushNewVersionUpdatedToView(
     windows['top-ghost-window'].webContents,
     windows['main-window'].webContents,
   ].forEach((wc) => {
+    if (wc.isDestroyed()) return;
     sendToWebContents(wc, '__internal_push:dapps:version-updated', payload);
   });
 }

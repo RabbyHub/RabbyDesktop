@@ -5,6 +5,12 @@ type RabbyxInvokePayload = {
       version: ReturnType<Electron.App['getVersion']>;
     };
   };
+  'rabbyx:get-selected-camera': {
+    send: [];
+    response: {
+      constrains: IDesktopAppState['selectedMediaConstrains'];
+    };
+  };
 };
 
 type ChannelInvokePayload = {
@@ -233,7 +239,7 @@ type ChannelInvokePayload = {
     };
   };
   'app-relaunch': {
-    send: [reason: 'trezor-like-used'];
+    send: [reason: 'trezor-like-used' | 'media-access-updated'];
     response: void;
   };
   [`__internal_rpc:rabbyx-rpc:query`]: {
@@ -393,6 +399,53 @@ type ChannelInvokePayload = {
     response: {
       systemReleaseInfo: ISystemReleaseInfo;
     };
+  };
+  'get-media-access-status': {
+    send: [deviceType: IDarwinMediaAccessType];
+    response: {
+      accessStatus: IDarwinMediaAccessStatus;
+    };
+  };
+  'enumerate-camera-devices': {
+    send: [];
+    response: {
+      mediaList: MediaDeviceInfo[];
+    };
+  };
+  'start-select-camera': {
+    send: [
+      options?: {
+        /**
+         * @description if true, will always wait for user's select result
+         */
+        forceUserSelect?: boolean;
+      }
+    ];
+    response: {
+      selectId: string | null;
+      constrains: IDesktopAppState['selectedMediaConstrains'];
+      prevCameraAccessStatus: IDarwinMediaAccessStatus;
+      cameraAccessStatus: IDarwinMediaAccessStatus;
+      isCanceled?: boolean;
+    };
+  };
+  'finish-select-camera': {
+    send: [
+      {
+        selectId: string;
+        constrains: IDesktopAppState['selectedMediaConstrains'];
+        // cameraAccessStatus: IDarwinMediaAccessStatus;
+        isCanceled?: boolean;
+      }
+    ];
+    response: {
+      error: string | null;
+    };
+  };
+  'redirect-to-setting-privacy-camera': {
+    send: [];
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    response: {};
   };
 } & RabbyxInvokePayload;
 
