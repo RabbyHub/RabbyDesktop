@@ -126,7 +126,11 @@ handleIpcMainInvoke('start-select-camera', async (_, opts) => {
     await waitSecond(1);
   }
 
-  if (!forceUserSelect) {
+  /**
+   * @description we can ONLY try to passby user-select if the camera access status is 'granted'
+   */
+  const canPassby = finalCameraAccessStatus === 'granted';
+  if (!forceUserSelect && canPassby) {
     if (mediaDevices.length === 1) {
       matchedConstrains = {
         label: mediaDevices[0].label,

@@ -11,6 +11,9 @@ import './style.less';
 import clsx from 'clsx';
 import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
 
+import classNames from 'classnames';
+import RcLoading from './loading.svg?rc';
+
 interface QRCodeReaderProps {
   onSuccess(text: string): void;
   onError?(): void;
@@ -82,6 +85,8 @@ const QRCodeReader = ({
   }, [findDevices]);
 
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  const [isLoading, setIsLoading] = useState(true);
   useLayoutEffect(() => {
     if (!deviceId) return;
 
@@ -91,6 +96,8 @@ const QRCodeReader = ({
       setCanplay(true);
     };
     videoElem!.addEventListener('canplay', canplayListener);
+
+    setIsLoading(true);
     const promise = codeReader.decodeFromVideoDevice(
       deviceId,
       videoElem,
@@ -100,6 +107,9 @@ const QRCodeReader = ({
         }
       }
     );
+    promise.finally(() => {
+      setIsLoading(false);
+    });
 
     return () => {
       videoElem!.removeEventListener('canplay', canplayListener);
@@ -114,18 +124,27 @@ const QRCodeReader = ({
   }, [codeReader, onSuccess, deviceId]);
 
   return (
-    <video
-      ref={videoRef}
+    <div
+      className={classNames('qrcode-reader-loader', isLoading && 'is-loading')}
       style={{
-        display: canplay ? 'block' : 'none',
         width: `${width}px`,
         height: `${height}px`,
-        filter: 'blur(4px)',
       }}
-      className={clsx('qrcode-reader-comp', className)}
     >
-      <track kind="captions" />
-    </video>
+      {isLoading && <RcLoading className="w-[36px] h-[36px] loading-icon" />}
+      <video
+        ref={videoRef}
+        style={{
+          display: !isLoading && canplay ? 'block' : 'none',
+          width: `${width}px`,
+          height: `${height}px`,
+          filter: 'blur(4px)',
+        }}
+        className={clsx('qrcode-reader-comp', className)}
+      >
+        <track kind="captions" />
+      </video>
+    </div>
   );
 };
 
