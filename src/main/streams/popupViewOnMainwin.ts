@@ -343,7 +343,7 @@ const selectCamerasReady = onMainWindowReady().then(async (mainWin) => {
 
   // debug-only
   if (IS_DEVTOOLS_AVAILBLE) {
-    selectCameraPopup.webContents.openDevTools({ mode: 'detach' });
+    // selectCameraPopup.webContents.openDevTools({ mode: 'detach' });
   }
 
   hidePopupView(selectCameraPopup);
