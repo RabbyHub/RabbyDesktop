@@ -17,7 +17,6 @@ import { useSelectedMedieDevice } from '@/renderer/hooks/useSettings';
 import { useInterval } from '@/renderer/hooks/useTimer';
 import { usePrevious } from 'react-use';
 import { detectClientOS } from '@/isomorphic/os';
-import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import styles from './index.module.less';
 
 hideMainwinPopupview('select-camera');
@@ -148,37 +147,65 @@ function TipGoToGrantOnDarwin() {
         Please allow camera access to proceed
       </div>
 
-      <div className={styles.steps}>
-        <div className={classNames(styles.step, styles.step1)}>
-          <img
-            className="w-[380px]"
-            src={
-              IS_DARWIN
-                ? `rabby-internal://assets/imgs/tip-grant-camera/macos-tip-step1.png`
-                : `rabby-internal://assets/imgs/tip-grant-camera/macos-tip-step1.png`
-            }
-          />
-          <p className={styles.desc}>
-            1. Go to System Settings - Privacy & Security - Camera
-          </p>
-        </div>
-        <img
-          className={styles.stepArrow}
-          src="rabby-internal://assets/imgs/tip-grant-camera/step-arrow.svg"
-        />
-        <div className={classNames(styles.step, styles.step2)}>
-          <img
-            className="w-[440px]"
-            src={
-              IS_DARWIN
-                ? `rabby-internal://assets/imgs/tip-grant-camera/macos-tip-step2.png`
-                : `rabby-internal://assets/imgs/tip-grant-camera/macos-tip-step2.png`
-            }
-          />
-          <p className={styles.desc}>
-            2. Allow {APP_BRANDNAME} to access camera, restart the app
-          </p>
-        </div>
+      <div
+        className={classNames(
+          styles.steps,
+          IS_DARWIN ? styles.stepsMacOS : styles.stepsWindows
+        )}
+      >
+        {IS_DARWIN && (
+          <>
+            <div className={classNames(styles.step, styles.step1)}>
+              <img
+                className="w-[380px]"
+                src="rabby-internal://assets/imgs/tip-grant-camera/macos-tip-step1.png"
+              />
+              <p className={styles.desc}>
+                1. Go to System Settings - Privacy & Security - Camera
+              </p>
+            </div>
+            <img
+              className={styles.stepArrow}
+              src="rabby-internal://assets/imgs/tip-grant-camera/step-arrow.svg"
+            />
+            <div className={classNames(styles.step, styles.step2)}>
+              <img
+                className="w-[440px]"
+                src="rabby-internal://assets/imgs/tip-grant-camera/macos-tip-step2.png"
+              />
+              <p className={styles.desc}>
+                2. Allow {APP_BRANDNAME} to access camera, restart the app
+              </p>
+            </div>
+          </>
+        )}
+
+        {!IS_DARWIN && (
+          <>
+            <div className={classNames(styles.step, styles.step1)}>
+              <img
+                className="w-[380px]"
+                src="rabby-internal://assets/imgs/tip-grant-camera/windows-tip-step1.png"
+              />
+              <p className={styles.desc}>
+                1. Go to System Settings - Privacy & Security - Camera
+              </p>
+            </div>
+            <img
+              className={styles.stepArrow}
+              src="rabby-internal://assets/imgs/tip-grant-camera/step-arrow.svg"
+            />
+            <div className={classNames(styles.step, styles.step2)}>
+              <img
+                className="w-[440px]"
+                src="rabby-internal://assets/imgs/tip-grant-camera/windows-tip-step2.png"
+              />
+              <p className={styles.desc}>
+                {`2. Make sure "Camera access" > "Let apps access your camera" > "Let desktop apps access your camera" Enabled`}
+              </p>
+            </div>
+          </>
+        )}
 
         <Button
           className={styles.next}
