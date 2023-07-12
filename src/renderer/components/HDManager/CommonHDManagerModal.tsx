@@ -190,7 +190,7 @@ export const CommonHDManagerModal: React.FC<Props> = ({
                   onShowScanModal?.(visible);
                 }}
               />
-              {showEntryButton && (
+              {showEntryButton && !showScanModal && (
                 <Button
                   onClick={onCancel}
                   className="footer-button"
