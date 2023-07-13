@@ -3,6 +3,7 @@ import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
 import { UsedChain } from '@rabby-wallet/rabby-api/dist/types';
 import { message } from 'antd';
+import { noop } from 'lodash';
 import PQueue from 'p-queue';
 import React from 'react';
 
@@ -85,13 +86,9 @@ export const fetchAccountsInfo = async (accounts: Account[]) => {
   );
 };
 
-const useGetCurrentAccounts = ({
-  keyringId: keyringIdProp,
-  keyring,
-}: StateProviderProps) => {
+const useGetCurrentAccounts = ({ keyringId, keyring }: StateProviderProps) => {
   const [loading, setLoading] = React.useState(false);
   const [accounts, setAccounts] = React.useState<Account[]>([]);
-  const [keyringId, setKeyringId] = React.useState(keyringIdProp);
 
   const getCurrentAccounts = React.useCallback(async () => {
     setLoading(true);
@@ -136,17 +133,13 @@ const useGetCurrentAccounts = ({
     []
   );
 
-  React.useEffect(() => {
-    setKeyringId(keyringIdProp);
-  }, [keyringIdProp]);
-
   return {
     currentAccountsLoading: loading,
     getCurrentAccounts,
     currentAccounts: accounts,
     removeCurrentAccount,
     updateCurrentAccountAliasName,
-    setKeyringId,
+    setKeyringId: noop,
   };
 };
 
