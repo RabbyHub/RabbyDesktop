@@ -3,7 +3,6 @@ import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
 import { UsedChain } from '@rabby-wallet/rabby-api/dist/types';
 import { message } from 'antd';
-import { noop } from 'lodash';
 import PQueue from 'p-queue';
 import React from 'react';
 
@@ -139,7 +138,6 @@ const useGetCurrentAccounts = ({ keyringId, keyring }: StateProviderProps) => {
     currentAccounts: accounts,
     removeCurrentAccount,
     updateCurrentAccountAliasName,
-    setKeyringId: noop,
   };
 };
 

@@ -15,12 +15,12 @@ import { Modal } from '../../Modal/Modal';
 
 interface Props {
   brand?: string;
-  onClose: () => void;
+  onReset: () => void;
 }
 
 const KEYSTONE_TYPE = HARDWARE_KEYRING_TYPES.Keystone.type;
 
-export const QRCodeManager: React.FC<Props> = ({ brand, onClose }) => {
+export const QRCodeManager: React.FC<Props> = ({ brand, onReset }) => {
   const [loading, setLoading] = React.useState(true);
   const { getCurrentAccounts, currentAccounts, keyringId } = React.useContext(
     HDManagerStateContext
@@ -97,7 +97,7 @@ export const QRCodeManager: React.FC<Props> = ({ brand, onClose }) => {
           'forgetDevice',
           keyringId
         );
-        onClose();
+        onReset();
       },
       okCancel: false,
       centered: true,
@@ -105,7 +105,7 @@ export const QRCodeManager: React.FC<Props> = ({ brand, onClose }) => {
       maskClosable: true,
       className: 'hd-manager-switch-modal',
     });
-  }, [brand, keyringId, onClose]);
+  }, [brand, keyringId, onReset]);
 
   return (
     <>
