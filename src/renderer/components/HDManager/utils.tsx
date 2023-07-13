@@ -136,6 +136,10 @@ const useGetCurrentAccounts = ({
     []
   );
 
+  React.useEffect(() => {
+    setKeyringId(keyringIdProp);
+  }, [keyringIdProp]);
+
   return {
     currentAccountsLoading: loading,
     getCurrentAccounts,
