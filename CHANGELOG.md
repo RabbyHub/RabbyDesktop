@@ -1,7 +1,14 @@
 
-v0.29.0 / 2023-07-12
+v0.29.1 / 2023-07-13
 ====================
 
+  * feat: update currentVersion.md
+  * fix: ledger error (#499)
+
+v0.29.0-prod / 2023-07-12
+=========================
+
+  * Release v0.29.0-prod
   * feat: make sure tip user grant permission. (#498)
   * feat: keystone (#496)
   * feat: update currentVersion.
