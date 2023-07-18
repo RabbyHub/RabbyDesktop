@@ -38,10 +38,29 @@ export const SlippageItem = styled.div<{
 const SLIPPAGE = ['0.1', '0.3', '0.5'];
 
 const Wrapper = styled.section`
+  .header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: white;
+    font-weight: 400;
+
+    .field {
+      color: rgba(255, 255, 255, 0.6);
+    }
+    .value {
+      font-weight: 500;
+      &.warn {
+        color: #ebcc5b;
+      }
+    }
+  }
+
   .slippage {
     display: flex;
     align-items: center;
     gap: 8px;
+    padding-top: 10px;
   }
 
   .input {
@@ -91,10 +110,12 @@ interface SlippageProps {
   value: string;
   onChange: (n: string) => void;
   recommendValue?: number;
+  slippageDisplay: string;
 }
 export const Slippage = memo((props: SlippageProps) => {
-  const { value, onChange, recommendValue } = props;
+  const { value, onChange, recommendValue, slippageDisplay } = props;
   const [isCustom, setIsCustom] = useToggle(false);
+  const [slippageOpen, setSlippageOpen] = useToggle(false);
 
   const [isLow, isHigh] = useMemo(() => {
     return [
@@ -147,7 +168,25 @@ export const Slippage = memo((props: SlippageProps) => {
 
   return (
     <Wrapper>
-      <div className="slippage">
+      <div className="header">
+        <span className="field">Slippage tolerance</span>
+        <div
+          className="flex items-center cursor-pointer"
+          onClick={() => setSlippageOpen()}
+        >
+          <span className={clsx('value', !!tips && 'warn')}>
+            {slippageDisplay}%
+          </span>
+          <img
+            src="rabby-internal://assets/icons/swap/arrow-top.svg"
+            className={clsx(
+              'inline-block w-14 h-[15px]',
+              !slippageOpen && 'transform rotate-180'
+            )}
+          />
+        </div>
+      </div>
+      <div className={clsx('slippage', !slippageOpen && 'hidden')}>
         {SLIPPAGE.map((e) => (
           <SlippageItem
             key={e}

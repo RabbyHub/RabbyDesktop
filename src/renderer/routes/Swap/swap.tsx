@@ -15,7 +15,7 @@ import { Button, message, Modal } from 'antd';
 import { useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-import { useAsync, useDebounce } from 'react-use';
+import { useAsync, useDebounce, usePrevious } from 'react-use';
 import { formatAmount, formatUsdValue } from '@/renderer/utils/number';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import IconRcClose from '@/../assets/icons/swap/close.svg?rc';
@@ -33,7 +33,7 @@ import { ChainRender, ChainSelect } from './component/ChainSelect';
 import { SwapIntro } from './component/Intro';
 import { DEX, getChainDefaultToken } from './constant';
 import { TokenSelect } from './component/TokenSelect';
-import { ReceiveDetails } from './component/ReceiveDetail';
+import { ReceiveDetails, SkeletonChildren } from './component/ReceiveDetail';
 import { Slippage } from './component/Slippage';
 import { SwapTransactions } from './component/Transactions';
 import { TokenRender } from './component/TokenRender';
@@ -363,7 +363,7 @@ export const SwapToken = () => {
     [payToken, debouncePayAmount]
   );
 
-  const [feeAfterDiscount, setFeeAfterDiscount] = useState('0.01');
+  const [feeAfterDiscount] = useState('0');
 
   const fetchIdRef = useRef(0);
   const [quoteList, setQuotesList] = useState<
@@ -736,17 +736,11 @@ export const SwapToken = () => {
   const handleUnlimitedSwap = useCallback(() => handleSwap(true), [handleSwap]);
   const handleLimitedSwap = useCallback(() => handleSwap(), [handleSwap]);
 
-  useEffect(() => {
-    if (
-      payToken?.id &&
-      receiveToken?.id &&
-      isSwapWrapToken(payToken?.id, receiveToken?.id, chain)
-    ) {
-      setFeeAfterDiscount('0');
-    } else {
-      setFeeAfterDiscount('0.01');
-    }
-  }, [chain, payToken?.id, receiveToken?.id]);
+  const previousIsWrapToken = usePrevious(isWrapToken);
+
+  if (previousIsWrapToken !== isWrapToken) {
+    setActiveProvider(undefined);
+  }
 
   useEffect(() => {
     if (
@@ -895,33 +889,16 @@ export const SwapToken = () => {
                     receiveToken={receiveToken}
                     quoteWarning={activeProvider?.quoteWarning}
                     loading={receiveSlippageLoading}
+                    isWrapToken={!!isWrapToken}
                   />
                   {isWrapToken ? (
                     <div className="mb-18 text-white">
                       There is no fee and slippage for this trade
                     </div>
                   ) : (
-                    <div className="section">
-                      <div className="subText text-14 text-white flex justify-between">
-                        <div>
-                          <span className="text-white text-opacity-60">
-                            Slippage tolerance:{' '}
-                          </span>
-                          <span className="font-medium">{slippage}%</span>
-                        </div>
-                        {!receiveSlippageLoading && (
-                          <div>
-                            <span className="text-white text-opacity-60">
-                              Minimum received:{' '}
-                            </span>
-                            <span className="font-medium">
-                              {miniReceivedAmount}{' '}
-                              {getTokenSymbol(receiveToken)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
+                    <div className="section flex flex-col gap-[16px]">
                       <Slippage
+                        slippageDisplay={slippage}
                         value={slippageState}
                         onChange={slippageChange}
                         recommendValue={
@@ -930,6 +907,29 @@ export const SwapToken = () => {
                             : slippageValidInfo?.suggest_slippage
                         }
                       />
+                      <div className="text-14 text-white flex items-center justify-between">
+                        <span className="text-white text-opacity-60">
+                          Minimum received{' '}
+                        </span>
+                        <SkeletonChildren
+                          loading={receiveSlippageLoading}
+                          style={{
+                            maxWidth: 110,
+                            height: 18,
+                            opacity: 0.5,
+                          }}
+                        >
+                          <span className="font-medium">
+                            {miniReceivedAmount} {getTokenSymbol(receiveToken)}
+                          </span>
+                        </SkeletonChildren>
+                      </div>
+                      <div className="flex items-center justify-between text-14 text-white">
+                        <span className="text-white text-opacity-60">
+                          Rabby fee{' '}
+                        </span>
+                        <span className="font-medium text-white">0%</span>
+                      </div>
                     </div>
                   )}
                 </>

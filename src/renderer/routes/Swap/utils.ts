@@ -18,6 +18,7 @@ import { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
 import BigNumber from 'bignumber.js';
 import { formatUsdValue } from '@/renderer/utils/number';
 import pRetry from 'p-retry';
+import { OpenApiService } from '@rabby-wallet/rabby-api';
 import { SWAP_FEE_ADDRESS, DEX, ETH_USDT_CONTRACT, CEX } from './constant';
 
 export const tokenAmountBn = (token: TokenItem) =>
@@ -362,7 +363,9 @@ export const getDexQuote = async ({
 }): Promise<TDexQuoteData> => {
   try {
     let gasPrice: number;
-    if (dexId === DEX_ENUM.OPENOCEAN) {
+    const isOpenOcean = dexId === DEX_ENUM.OPENOCEAN;
+
+    if (isOpenOcean) {
       const gasMarket = await walletOpenapi.gasMarket(CHAINS[chain].serverId);
       gasPrice = gasMarket?.[1]?.price;
     }
@@ -382,10 +385,14 @@ export const getDexQuote = async ({
               .toFixed(0, 1),
             userAddress,
             slippage: Number(slippage),
-            feeRate: Number(feeAfterDiscount) || 0,
+            feeRate:
+              feeAfterDiscount === '0' && isOpenOcean
+                ? undefined
+                : Number(feeAfterDiscount) || 0,
             chain,
             gasPrice,
-          }
+          },
+          walletOpenapi as unknown as OpenApiService
         ),
       {
         retries: 1,

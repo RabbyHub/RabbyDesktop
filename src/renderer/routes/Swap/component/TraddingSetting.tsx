@@ -84,7 +84,7 @@ export const TradingSettingList = () => {
           <div className="ml-auto mr-12">Trade</div>
         </div>
 
-        <div className="flex flex-col gap-16">
+        <div className="flex flex-col gap-12">
           {list.map((item) => {
             return (
               <div
