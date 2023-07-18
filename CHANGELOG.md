@@ -1,7 +1,16 @@
 
-v0.29.1 / 2023-07-13
+v0.30.0 / 2023-07-18
 ====================
 
+  * chore: update currentVersion.
+  * chore:  swap fee intro  (#502)
+  * fix: keystone qrcode modal (#500)
+  * feat: support uniswap、0x; 0 fee (#501)
+
+v0.29.1-prod / 2023-07-13
+=========================
+
+  * Release v0.29.1-prod
   * feat: update currentVersion.md
   * fix: ledger error (#499)
 
