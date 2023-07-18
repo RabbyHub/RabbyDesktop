@@ -15,6 +15,7 @@ export type QuoteProvider = {
   activeLoading?: boolean;
   activeTx?: string;
   actualReceiveAmount: string | number;
+  gasUsd?: string;
 };
 
 export const refreshIdAtom = atom(0, (get, set) => {

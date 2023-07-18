@@ -52,6 +52,7 @@ const ItemWrapper = styled.div`
     align-items: center;
     font-size: 12px;
     gap: 8px;
+    pointer-events: none;
     /* &.active {
       height: 100%;
       transform: translateY(0);
@@ -65,6 +66,7 @@ const ItemWrapper = styled.div`
       height: 100%;
       transform: translateY(0);
       opacity: 1;
+      pointer-events: auto;
     }
   }
 
@@ -365,12 +367,6 @@ export const DexQuoteItem = (
   ]);
 
   const handleClick = useCallback(() => {
-    console.log('123', {
-      inSufficient,
-      disabledTrade,
-      active,
-      disabled,
-    });
     if (inSufficient || disabledTrade) {
       return;
     }
@@ -387,6 +383,7 @@ export const DexQuoteItem = (
       actualReceiveAmount:
         preExecResult?.swapPreExecTx.balance_change.receive_token_list[0]
           ?.amount || '',
+      gasUsd: preExecResult?.gasUsd,
     });
   }, [
     active,
@@ -416,6 +413,7 @@ export const DexQuoteItem = (
           actualReceiveAmount:
             preExecResult?.swapPreExecTx.balance_change.receive_token_list[0]
               ?.amount || '',
+          gasUsd: preExecResult?.gasUsd,
         }));
       }
     },

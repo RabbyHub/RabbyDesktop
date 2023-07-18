@@ -30,13 +30,11 @@ const QuotesWrapper = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 18px;
-    &.inSufficient {
-      margin-bottom: 14px;
-    }
+    height: 20px;
+    margin-bottom: 14px;
 
     .title {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: medium;
       color: white;
     }
@@ -86,7 +84,7 @@ export const Quotes = (props: QuotesProps) => {
               }
               return new BigNumber(
                 quote?.preExecResult.swapPreExecTx.balance_change
-                  .receive_token_list[0].amount || 0
+                  .receive_token_list?.[0]?.amount || 0
               );
             }
 
@@ -221,7 +219,7 @@ export const Quotes = (props: QuotesProps) => {
 
       <InSufficientTip inSufficient={inSufficient} />
 
-      <div className="flex flex-col gap-[16px]">
+      <div className="flex flex-col gap-[12px]">
         {sortedList.map((params, idx) => {
           const { name, data, isDex } = params;
           if (!isDex) return null;
@@ -276,9 +274,8 @@ export const Quotes = (props: QuotesProps) => {
         </>
       )}
 
-      <div className="mt-auto text-white opacity-60 text-13 pt-[12px]">
-        Of the {exchangeCount} exchanges, {viewCount} can view quotes and{' '}
-        {tradeCount} can trade.{' '}
+      <div className="flex justify-center mt-auto text-white opacity-60 text-13 pt-[12px]">
+        {viewCount} exchanges offer quotes, and {tradeCount} enable trading.{' '}
         <span
           onClick={() => {
             setSwapSettingVisible(true);
