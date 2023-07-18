@@ -136,9 +136,13 @@
     width: 100%;
     box-sizing: border-box;
     padding-left: 20px;
-    opacity: 0.7;
     overflow: hidden;
     position: relative;
+
+    .routeLogo,
+    .routeTitle > *:not(.txPendingCount) {
+      opacity: 0.7;
+    }
 
     font-size: 14px;
     color: #fff;
@@ -147,6 +151,10 @@
     &.active {
       background: rgba(0, 0, 0, 0.2);
       opacity: 1;
+      .routeLogo,
+      .routeTitle > *:not(.txPendingCount) {
+        opacity: 1;
+      }
       &::before {
         position: absolute;
         content: '';
@@ -240,7 +248,7 @@
       :global .ant-badge-count {
         position: absolute;
         top: 12px;
-        right: -8px;
+        right: -4px;
         padding: 2px;
         min-width: 16px;
         height: 16px;

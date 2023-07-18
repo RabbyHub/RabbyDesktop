@@ -65,11 +65,11 @@ export const SwapIntro = () => {
         contract of each aggregator, ensuring that your swaps are as safe and
         secure as if you were swapping directly from their interface.
       </div>
-      <div className="segment">About our fee</div>
+      <div className="segment">Rabby charges 0 fee</div>
       <div className="desc">
-        To cover the costs of running our service, we charge a 0.1% fee for each
-        swap. You'll see this fee included in the offer you receive, deducted
-        from the receiving amount.
+        To ensure a transparent and cost-effective experience for users, Rabby
+        has no additional charges for swaps. You'll have the exact rates
+        provided by the exchange.
       </div>
 
       <div className="discord">
