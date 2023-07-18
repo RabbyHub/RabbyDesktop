@@ -406,7 +406,7 @@ export default function MainWindowSidebar() {
                               styles.inCollapsed
                             )}
                             count={pendingTxCount}
-                            color="#ffb020"
+                            color="#8ba8ff"
                           >
                             <img
                               className={styles.routeLogo}
@@ -427,7 +427,7 @@ export default function MainWindowSidebar() {
                             <Badge
                               className={styles.txPendingCount}
                               count={pendingTxCount}
-                              color="#ffb020"
+                              color="#8ba8ff"
                             >
                               <span />
                             </Badge>
