@@ -5,10 +5,6 @@ import styled from 'styled-components';
 import { NFTApproval, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 
 import NFTAvatar from '@/renderer/components/NFTAvatar';
-import {
-  IconChecked,
-  IconNotChecked,
-} from '@/../assets/icons/approval-manager';
 
 import clsx from 'clsx';
 import TokenWithChain, {
@@ -27,6 +23,8 @@ import { findChainByServerID } from '@/renderer/utils/chain';
 import { Chain } from '@debank/common';
 import IconClose from '@/../assets/icons/swap/modal-close.svg?rc';
 import { splitNumberByStep } from '@/renderer/utils/number';
+import IconNotChecked from '../icons/check-unchecked.svg';
+import IconChecked from '../icons/check-checked.svg';
 import ApprovalsNameAndAddr from './NameAndAddr';
 import {
   findIndexRevokeList,
@@ -35,6 +33,7 @@ import {
   toRevokeItem,
 } from '../utils';
 
+// import IconExternal from '@/../assets/icons/common/share.svg';
 import IconExternal from '../icons/icon-share.svg';
 import IconBadgeCollection from '../icons/modal-badge-collection.svg';
 import IconBadgeNFT from '../icons/modal-badge-nft.svg';
@@ -156,11 +155,8 @@ export const RevokeApprovalModal = (props: {
             // eslint-disable-next-line react/no-array-index-key
             key={`contract-${e.chain}-${index}`}
             className={clsx(
-              'relative px-[16px] h-[56px] flex justify-between items-center bg-white cursor-pointer  border border-transparent  hover:border-blue-light  hover:bg-blue-light hover:bg-opacity-[0.1] hover:rounded-[6px] hover:z-10',
-              index === item.list.length - 1 && 'rounded-b-[6px]',
-              index !== item.list.length - 1 &&
-                'after:absolute after:h-[1px] after:left-[16px] after:right-[16px] after:bottom-0 after:bg-gray-divider',
-              '-mt-1 first:mt-0'
+              'display-contract-item relative px-[16px] h-[56px] flex justify-between items-center cursor-pointer',
+              index === item.list.length - 1 && 'rounded-b-[6px]'
             )}
             onClick={(event) => {
               if ((event.target as HTMLElement)?.id !== 'copyIcon') {
@@ -228,7 +224,7 @@ export const RevokeApprovalModal = (props: {
                 src={
                   selectedList.includes(index) ? IconChecked : IconNotChecked
                 }
-                className="icon icon-checked w-[24px] h-[24px]"
+                className="icon icon-checked w-[16px] h-[16px]"
               />
             </div>
           </div>
@@ -258,11 +254,9 @@ export const RevokeApprovalModal = (props: {
         <div
           key={spender.id}
           className={clsx(
-            'relative px-[16px] flex justify-between bg-white cursor-pointer  border border-transparent  hover:border-blue-light  hover:bg-blue-light hover:bg-opacity-[0.1] hover:rounded-[6px] hover:z-10',
+            'display-noncontract-item relative px-[16px] flex justify-between',
             index === item.list.length - 1 && 'rounded-b-[6px]',
-            index !== item.list.length - 1 &&
-              'after:absolute after:h-[1px] after:left-[16px] after:right-[16px] after:bottom-0 after:bg-gray-divider',
-            !risky ? 'h-[51px] ' : 'flex-col pt-[13px]'
+            !risky ? 'h-[51px]' : 'flex-col pt-[13px]'
           )}
           onClick={(event) => {
             if ((event.target as HTMLElement)?.id !== 'copyIcon') {
@@ -373,7 +367,7 @@ export const RevokeApprovalModal = (props: {
         </div>
 
         <section className="mb-[6px] flex justify-between items-center">
-          <span className="text-12 text-gray-title">{subTitle}</span>
+          <span className="text-12 text-[#fff]/80">{subTitle}</span>
           <div
             className="w-[67px] h-[22px] text-12 cursor-pointer flex items-center justify-center bg-blue-light bg-opacity-[0.2] text-center text-blue-light rounded-[2px]"
             onClick={handleSelectAll}
@@ -396,7 +390,7 @@ export const RevokeApprovalModal = (props: {
       </div>
       <div
         className={clsx(
-          'absolute flex flex-col items-center justify-center bg-white left-0 bottom-0 w-full z-[99999] border-t border-gray-divider',
+          'absolute flex flex-col items-center justify-center bg-transparent left-0 bottom-0 w-full z-[99999] border-t border-gray-divider',
           'h-[76px]'
         )}
       >
@@ -407,6 +401,7 @@ export const RevokeApprovalModal = (props: {
           }}
           type="primary"
           size="large"
+          className="rounded-[6px]"
           onClick={handleRevoke}
         >
           Confirm {selectedList.length > 0 ? `(${selectedList.length})` : ''}

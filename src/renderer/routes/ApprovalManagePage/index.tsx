@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { Alert, Tooltip } from 'antd';
 import type { ColumnType, TableProps } from 'antd/lib/table';
 import { InfoCircleOutlined } from '@ant-design/icons';
 
 import './style.less';
-import eventBus from '@/renderer/utils-shell/eventBus';
 
 import { Chain } from '@debank/common';
 import { findChainByServerID } from '@/renderer/utils/chain';
@@ -21,7 +20,6 @@ import {
   compareAssetSpenderByAmount,
   compareAssetSpenderByType,
 } from '@/renderer/utils/approval';
-import { ellipsisAddress } from '@/renderer/utils/address';
 import clsx from 'clsx';
 import { SorterResult } from 'antd/lib/table/interface';
 import { formatUsdValue } from '@/renderer/utils/number';
@@ -30,12 +28,14 @@ import { IS_WINDOWS } from '@/renderer/utils/constant';
 import { useShellWallet } from '@/renderer/hooks-shell/useShellWallet';
 import { firstEl } from '@/isomorphic/array';
 
+import IconExternal from '@/../assets/icons/common/share.svg';
+import { NativeAppSizes } from '@/isomorphic/const-size-next';
+import PillsSwitch from '@/renderer/components/PillsSwitch';
 import {
   HandleClickTableRow,
   IVGridContextualPayload,
   VirtualTable,
 } from './components/Table';
-import PillsSwitch from './components/SwitchPills';
 
 import IconSearch from './icons/search.svg';
 import IconUnknown from './icons/icon-unknown-1.svg';
@@ -45,7 +45,7 @@ import IconRowArrowRight from './icons/row-arrow-right.svg';
 import IconCheckboxChecked from './icons/check-checked.svg';
 import IconCheckboxIndeterminate from './icons/check-indeterminate.svg';
 import IconCheckboxUnchecked from './icons/check-unchecked.svg';
-import IconExternal from './icons/icon-share.svg';
+// import IconExternal from './icons/icon-share.svg';
 
 import {
   SwitchPills,
@@ -75,6 +75,10 @@ function getNextSort(currentSort?: 'ascend' | 'descend' | null) {
   return currentSort === 'ascend' ? 'descend' : ('ascend' as const);
 }
 const DEFAULT_SORT_ORDER_TUPLE = ['descend', 'ascend'] as const;
+
+const CLIENT_WINDOW_TOP_OFFSET = IS_WINDOWS
+  ? NativeAppSizes.windowTitlebarHeight
+  : 0;
 
 type IHandleChangeSelectedSpenders<T extends ApprovalItem> = (ctx: {
   approvalItem: T;
@@ -225,7 +229,7 @@ function getColumnsForContract({
           </div>
         );
       },
-      width: 320,
+      width: 294,
     },
     // Contract Trust value
     {
@@ -448,7 +452,7 @@ function getColumnsForContract({
 
         return formatTimeFromNow(time ? time * 1e3 : 0);
       },
-      width: 140,
+      width: 180,
     },
     // My Approved Assets
     {
@@ -481,7 +485,7 @@ function getColumnsForContract({
         });
 
         return (
-          <div className="flex items-center justify-end w-[100%]">
+          <div className="flex items-center justify-end w-[100%] h-[100%]">
             <span className="block">
               {contractList.length}
               {!selectedContracts.length ? null : (
@@ -495,7 +499,7 @@ function getColumnsForContract({
           </div>
         );
       },
-      width: 180,
+      width: 180 + 44,
     },
   ];
 
@@ -641,7 +645,7 @@ function getColumnsForAsset({
 
         return <span className="capitalize">{asset.type}</span>;
       },
-      width: 140,
+      width: 160,
     },
     // Approved Amount
     {
@@ -661,7 +665,7 @@ function getColumnsForAsset({
 
         return spendValues.displayText;
       },
-      width: 160,
+      width: 180,
     },
     // Approved Spender
     {
@@ -719,11 +723,13 @@ function getColumnsForAsset({
           </div>
         );
       },
-      width: 300,
+      width: 274,
     },
     // My Approval Time
     {
       title: () => <span className="pl-[20px]">My Approval Time</span>,
+      align: 'right',
+      className: clsx('J_assets_last_column', IS_WINDOWS && 'is-windows'),
       key: 'assetApproveTime',
       dataIndex: 'key',
       sortDirections: [...DEFAULT_SORT_ORDER_TUPLE],
@@ -736,7 +742,7 @@ function getColumnsForAsset({
 
         return formatTimeFromNow(time ? time * 1e3 : 0);
       },
-      width: 160 + 20,
+      width: 180 + 44,
     },
   ];
 
@@ -904,34 +910,11 @@ function TableByAssetSpenders({
 }
 
 const ApprovalManagePage = () => {
-  useEffect(() => {
-    const listener = (payload: any) => {
-      // message.info({
-      //   type: 'info',
-      //   content: (
-      //     <span className="text-white">
-      //       Switching to a new address. Please wait for the page to refresh.
-      //     </span>
-      //   ),
-      // });
-      // setTimeout(() => {
-      //   window.location.reload();
-      // }, 1200);
-      window.location.reload();
-    };
-    eventBus.addEventListener('accountsChanged', listener);
-
-    return () => {
-      eventBus.removeEventListener('accountsChanged', listener);
-    };
-  }, []);
-
   const {
     isLoading,
 
     searchKw,
     setSearchKw,
-    account,
     displaySortedContractList,
     displaySortedAssetsList,
 
@@ -943,6 +926,9 @@ const ApprovalManagePage = () => {
   } = useApprovalsPage();
 
   const { yValue } = useTableScrollableHeight();
+  const containerHeight = useMemo(() => {
+    return yValue - CLIENT_WINDOW_TOP_OFFSET;
+  }, [yValue]);
 
   const [visibleRevokeModal, setVisibleRevokeModal] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState<ApprovalItem>();
@@ -1024,24 +1010,16 @@ const ApprovalManagePage = () => {
   return (
     <div className="approvals-manager-page">
       <div className="approvals-manager">
-        <header className="approvals-manager__header">
-          <div className="title">
-            Approvals on {ellipsisAddress(account?.address || '')}
-            {account?.alianName && (
-              <span className="text-[#4b4d59] text-[20px] font-normal">
-                {' '}
-                ({account?.alianName})
-              </span>
-            )}
-          </div>
-        </header>
-
         <main>
           <div className="approvals-manager__table-tools">
             <PillsSwitch
               value={filterType}
               options={SwitchPills}
-              onChange={(key) => setFilterType(key)}
+              onTabChange={(key) => setFilterType(key)}
+              className="bg-white/10"
+              itemClassnameActive="text-white"
+              itemClassname="text-[15px] w-[148px] h-[40px]"
+              itemClassnameInActive="text-white/80"
             />
 
             <SearchInput
@@ -1061,7 +1039,7 @@ const ApprovalManagePage = () => {
               isLoading={isLoading}
               className={filterType === 'contract' ? '' : 'hidden'}
               vGridRef={vGridRefContracts}
-              containerHeight={yValue}
+              containerHeight={containerHeight}
               dataSource={displaySortedContractList}
               onClickRow={handleClickContractRow}
               onChangeSelectedContractSpenders={
@@ -1074,7 +1052,7 @@ const ApprovalManagePage = () => {
               className={filterType === 'assets' ? '' : 'hidden'}
               isLoading={isLoading}
               vGridRef={vGridRefAsset}
-              containerHeight={yValue}
+              containerHeight={containerHeight}
               dataSource={displaySortedAssetsList}
               selectedRows={assetRevokeList}
               onClickRow={handleClickAssetRow}

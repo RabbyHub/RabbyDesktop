@@ -7,9 +7,10 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 
 import { ApprovalItem } from '@/renderer/utils/approval';
 import { findChainByServerID } from '@/renderer/utils/chain';
+import IconExternal from '@/../assets/icons/common/share.svg';
 import IconArrowRight from '../icons/right.svg?rc';
 import IconUnknown from '../icons/icon-unknown-1.svg';
-import IconExternal from '../icons/icon-share.svg';
+// import IconExternal from '../icons/icon-share.svg';
 import { openScanLinkFromChainItem } from '../utils';
 import ApprovalsNameAndAddr from './NameAndAddr';
 
@@ -58,7 +59,8 @@ export const ApprovalContractItem = ({
     <div
       ref={rowRef}
       className={clsx(
-        'bg-white mb-[12px] rounded-[6px] border border-transparent contract-approval-item',
+        'bg-transparent text-[#fff] mb-[20px] rounded-[6px] contract-approval-item',
+        'px-[0] pt-[8px] pb-[9px]',
         onSelect &&
           'hover:border-blue-light hover:bg-blue-light hover:bg-opacity-[0.1] cursor-pointer'
       )}
@@ -112,7 +114,7 @@ export const ApprovalContractItem = ({
           </div>
         </div>
 
-        <span className="text-[13px] text-gray-subTitle flex-shrink-0 ml-auto font-medium">
+        <span className="text-[13px] text-[#fff]-subTitle flex-shrink-0 ml-auto font-medium">
           {item.list.length}{' '}
           {!onSelect && `Approval${item.list.length > 1 ? 's' : ''}`}
           {}
@@ -120,22 +122,20 @@ export const ApprovalContractItem = ({
         {onSelect && <IconArrowRight />}
       </div>
       {risky && (
-        <div className="pb-[12px]">
-          <Alert
-            className={clsx(
-              'mx-[16px]  rounded-[4px] px-[8px] py-[3px]',
-              item.risk_level === 'danger' ? 'bg-[#ec5151]' : 'bg-orange'
-            )}
-            icon={
-              <InfoCircleOutlined className="text-white pt-[4px] self-start" />
-            }
-            banner
-            message={
-              <span className="text-12 text-white">{item.risk_alert}</span>
-            }
-            type="error"
-          />
-        </div>
+        <Alert
+          className={clsx(
+            'mx-[16px]  rounded-[4px] px-[8px] py-[3px]',
+            item.risk_level === 'danger' ? 'bg-[#ec5151]' : 'bg-orange'
+          )}
+          icon={
+            <InfoCircleOutlined className="text-white pt-[4px] self-start" />
+          }
+          banner
+          message={
+            <span className="text-12 text-white">{item.risk_alert}</span>
+          }
+          type="error"
+        />
       )}
     </div>
   );

@@ -2,17 +2,15 @@
 
 @radius-value: 6px;
 
-@main-w: 1060px;
+// @main-w: 1184px;
+@main-w: 1118px;
 
-@page-padding-top: 40px;
-@page-header-h: 24px;
-@page-header-bottom-offset: 20px;
+@page-padding-top: 32px;
+// @page-header-h: 24px;
+// @page-header-bottom-offset: 20px;
 @tools-h: 48px;
 @table-mt: 20px;
 @table-header-h: 48px;
-
-// value of `@sticky-top-height` is 200px
-@sticky-top-height: @page-padding-top + @page-header-h + @page-header-bottom-offset + @tools-h + @table-mt + @table-header-h;
 
 /* pt + height + pb */
 @sticky-footer-textarea: 16px + 16px + 16px;
@@ -23,79 +21,60 @@
 
 @table-scoller-reserve-w: 4px;
 @table-last-cell-pr: @table-scoller-reserve-w;
+@table-last-col-inner-pr: 24px;
+
+@table-ink-color: rgba(0, 0, 0, 0.10);
 
 .approvals-manager-page {
-  width: 100vw;
+  width: 100%;
   min-width: @main-w;
-  height: 100vh;
+  height: var(--mainwin-mainroute-height);
   padding-top: @page-padding-top;
-  padding-bottom: @sticky-footer-height;
-  background: var(--color-bg);
+  // padding-bottom: @sticky-footer-height;
+  // background: var(--color-bg);
 
-  .child-has-chromelike-scrollbar();
-}
-
-.revoke-approval-modal {
-  .child-has-chromelike-scrollbar();
-  .approval-list {
-    .chromelike-scrollbar(0);
-  }
+  .child-has-chrome-like-scrollbar();
 }
 
 .approvals-manager {
   overflow: hidden;
   height: 100%;
   min-width: @main-w;
-  width: @main-w;
+  padding-left: 40px;
+  // padding-right: 48px;
+  // width: @main-w;
+  width: 100%;
   max-width: 1280px;
-  // width: 100%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 
-  > .approvals-manager__header {
-    flex-shrink: 0;
-  }
-
   > main {
     flex-shrink: 1;
     height: 100%;
-  }
-}
-
-.approvals-manager__header {
-  height: @page-header-h;
-  box-sizing: content-box;
-  padding-bottom: @page-header-bottom-offset;
-  display: inline-block;
-  text-align: center;
-  width: @main-w;
-  margin: 0 auto;
-  font-size: 20px;
-  font-weight: 500;
-
-  > .title {
-    text-align: center;
-    color: var(--color-title);
-    vertical-align: baseline;
-    height: 100%;
-    display: inline-block;
+    width: 100%;
+    padding-right: 48px;
   }
 }
 
 .approvals-manager__table-tools {
-  width: @main-w;
-  margin: 0 auto;
+  // width: @main-w;
+  width: 100%;
+  // margin: 0 auto;
   height: @tools-h;
   display: flex;
   align-items: center;
   justify-content: space-between;
 
+  .pills-switch__item.is-active {
+    background-color: rgba(0, 0, 0, 0.20);
+  }
+
   > .search-input-wrapper {
     height: @tools-h;
-    background-color: white;
+    background-color: rgba(0, 0, 0, 0.10);
     border-radius: @radius-value;
     overflow: hidden;
     border: 1px solid transparent;
@@ -111,6 +90,15 @@
     width: 380px;
     border-width: 0;
     border-color: transparent !important;
+    color: white;
+
+    &.ant-input-affix-wrapper {
+      background-color: transparent;
+
+      > input.ant-input {
+        background-color: transparent;
+      }
+    }
   }
 
   .search-input .ant-input-prefix {
@@ -119,11 +107,21 @@
 }
 
 .approvals-manager__table-wrapper {
+  width: 100%;
   margin-top: @table-mt;
+
+  > .ant-table-wrapper {
+    width: 100%;
+  }
+
+  .am-virtual-table-empty {
+    background-color: transparent;
+    color: white;
+  }
 }
 
 .am-virtual-table {
-  max-width: @main-w;
+  // max-width: @main-w;
   margin: 0 auto;
 
   .ant-table {
@@ -132,7 +130,7 @@
 
   .ant-table-header {
     border-radius: @radius-value;
-    background-color: white;
+    background-color: @table-ink-color;
   }
 
   .ant-table-header, .ant-table-header > table {
@@ -140,11 +138,15 @@
   }
 
   thead.ant-table-thead > tr > th.am-virtual-table-head-cell {
+    &::before {
+      background-color: transparent !important;
+    }
+
     /**
       we need fix the vertical expansion value from <th> element
       */
     padding: 0;
-
+    color: white;
     background-color: transparent;
     font-size: 13px;
     user-select: none;
@@ -171,6 +173,7 @@
 
     .ant-table-column-sorters {
       padding: 0;
+      display: block;
     }
 
     .ant-table-column-sorters-with-tooltip {
@@ -186,8 +189,8 @@
       margin-left: 2px;
     }
 
-    &.J_contracts_last_column {
-      padding-right: 14px;
+    &.J_contracts_last_column, &.J_assets_last_column {
+      padding-right: @table-last-col-inner-pr;
     }
   }
 
@@ -204,7 +207,7 @@
     overflow-y: overlay !important;
     overflow-x: hidden !important;
 
-    .chromelike-scrollbar(@table-scoller-reserve-w);
+    .chrome-like-scrollbar(@table-scoller-reserve-w);
 
     .am-virtual-table-cell-inner {
       cursor: pointer;
@@ -219,6 +222,15 @@
     padding-left: 0;
     padding-right: 0;
     padding-top: @cell-padding-y;
+
+    &.J_contracts_last_column, &.J_assets_last_column {
+      > .am-virtual-table-cell-inner {
+        padding-right: @table-last-col-inner-pr !important;
+        text-align: right;
+        width: 100%;
+        display: inline-block;
+      }
+    }
 
     &.J_selection .am-virtual-table-cell-inner {
       padding-top: 0;
@@ -268,14 +280,14 @@
       }
     }
 
-    &.is-contract-row__risky > .am-virtual-table-cell-inner,
-    &.is-contract-row__danger > .am-virtual-table-cell-inner {
-      background: #fefafa;
-    }
+    // &.is-contract-row__risky > .am-virtual-table-cell-inner,
+    // &.is-contract-row__danger > .am-virtual-table-cell-inner {
+    //   background: #fefafa;
+    // }
 
-    &.is-contract-row__warning > .am-virtual-table-cell-inner {
-      background: #fffdf8;
-    }
+    // &.is-contract-row__warning > .am-virtual-table-cell-inner {
+    //   background: #fffdf8;
+    // }
   }
 
   &.J_table_by_contracts .am-virtual-table-cell {
@@ -303,7 +315,8 @@
   .am-virtual-table-cell-inner {
     box-sizing: border-box;
     padding: 16px 0;
-    background: #fff;
+    background: @table-ink-color;
+    color: white;
     height: 100%;
     display: flex;
     align-items: center;
@@ -315,7 +328,8 @@
 
   .am-virtual-table-cell-inner .name-and-address {
     &, .address {
-      color: var(--color-title);
+      // color: var(--color-title);
+      color: white;
     }
 
     .contract-name {
@@ -370,37 +384,6 @@
   }
 }
 
-.pills-switch {
-  background-color: var(--color-border);
-  // min-height: 48px;
-  height: 100%;
-  padding: 4px;
-  border-radius: @radius-value;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.pills-switch__item {
-  color: var(--color-comment);
-  text-align: center;
-  // font-family: Roboto;
-  font-size: 15px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: normal;
-  width: 148px;
-  height: 40px;
-  line-height: 40px;
-  cursor: pointer;
-
-  &.is-active {
-    border-radius: 4px;
-    background: #fff;
-    color: var(--color-primary);
-  }
-}
 .approvals-manager .alert-with-caret {
   position: relative;
 
@@ -505,21 +488,84 @@
 }
 
 .modal-debug-row-item {
-  .child-has-chromelike-scrollbar(6px);
+  .child-has-chrome-like-scrollbar(6px);
 }
 
 .am-revoke-btn.ant-btn-primary[disabled] {
   .light-style-disabled-btn();
 }
 
-.contract-approval-item .token-approval-item-desc {
-  &, .address {
-    color: var(--color-title);
+.revoke-approval-modal {
+  .child-has-chrome-like-scrollbar();
+  .approval-list {
+    .chrome-like-scrollbar(0);
   }
 
-  .contract-name {
-    color: var(--color-body);
-    max-width: 10em;
-    .ellipsis();
+  .ant-modal-content {
+    background-color: var(--theme-modal-content-bg);
+    color: white;
+    border-radius: 12px;
+  }
+
+  .ant-modal-header {
+    background-color: transparent;
+  }
+
+  .ant-modal-title {
+    color: white;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  .display-noncontract-item, .display-contract-item {
+    border-radius: 6px;
+    border: 1px solid transparent;
+    transition: ease-in 0.2s border-color;
+    position: relative;
+
+    &:hover {
+      border-color: var(--color-primary);
+      background-color: rgba(var(--color-primary-rgb), 0.1);
+      z-index: 10;
+
+      &::before, &::after {
+        display: none;
+      }
+    }
+
+    &:not(:last-child)::after {
+      content: " ";
+      display: block;
+      width: calc(100% - 32px);
+      position: absolute;
+      left: 16px;
+      bottom: 0;
+      height: 1px;
+      background-color: rgba(255, 255, 255, 0.10);
+    }
+  }
+
+  .contract-approval-item {
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+
+    > .token-approval-item {
+      display: flex;
+    }
+
+    .token-approval-item-desc {
+      color: white;
+    }
+
+    .token-approval-item-desc .contract-name {
+      color: white;
+      max-width: 10em;
+      .ellipsis();
+    }
+
+    .name-and-address, .name-and-address > .address {
+      color: white;
+    }
   }
 }
