@@ -60,7 +60,7 @@
     }
   }
 
-  .txPendingCount {
+  .seCountBadge {
     width: 16px;
     height: 16px;
     font-size: 12px;
@@ -243,8 +243,9 @@
       align-items: center;
     }
 
-    .txPendingCount {
+    .seCountBadge {
       position: absolute;
+
       :global .ant-badge-count {
         position: absolute;
         top: 12px;
@@ -256,6 +257,13 @@
         align-items: center;
         justify-content: center;
       }
+
+      // // another style
+      // top: calc(50% - 8px);
+      // :global .ant-badge-count {
+      //   top: 10px;
+      //   left: 0px;
+      // }
     }
   }
 
