@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import './index.less';
 import clsx from 'classnames';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
@@ -14,7 +14,9 @@ interface NameAndAddressProps {
   addressClass?: string;
   noNameClass?: string;
   copyIconClass?: string;
-  noCopy?: boolean;
+  chainEnum?: CHAINS_ENUM;
+  copyIcon?: boolean | string;
+  addressSuffix?: React.ReactNode;
 }
 
 const NameAndAddress = ({
@@ -24,7 +26,9 @@ const NameAndAddress = ({
   addressClass = '',
   noNameClass = '',
   copyIconClass = '',
-  noCopy = false,
+  chainEnum,
+  copyIcon = true,
+  addressSuffix,
 }: NameAndAddressProps) => {
   const [aliasName, setAliasName] = useState('');
   const init = async () => {
@@ -43,6 +47,15 @@ const NameAndAddress = ({
   useEffect(() => {
     init();
   }, [address]);
+
+  const { isShowCopyIcon, iconCopySrc } = useMemo(() => {
+    return {
+      isShowCopyIcon: !!copyIcon,
+      iconCopySrc:
+        typeof copyIcon === 'string' ? copyIcon.trim() || IconCopy : IconCopy,
+    };
+  }, [copyIcon]);
+
   return (
     <div className={clsx('name-and-address', className)}>
       {localName && (
@@ -57,7 +70,7 @@ const NameAndAddress = ({
         {localName ? (
           <>
             ({shortAddress}){' '}
-            {!noCopy && (
+            {isShowCopyIcon && (
               <TipsWrapper hoverTips="Copy" clickTips="Copied">
                 <IconCopy
                   className={clsx(
@@ -74,7 +87,7 @@ const NameAndAddress = ({
         ) : (
           <>
             {shortAddress}{' '}
-            {!noCopy && (
+            {isShowCopyIcon && (
               <TipsWrapper hoverTips="Copy" clickTips="Copied">
                 <IconCopy
                   className={clsx(

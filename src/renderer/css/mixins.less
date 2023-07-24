@@ -1,5 +1,9 @@
 @import './theme/index.css';
 
+.ellipsis() {
+  .truncate;
+}
+
 .truncate() {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -101,5 +105,35 @@
     min-width: 2rem;
     align-self: flex-end;
     height: 100%;
+  }
+}
+
+.chromelike-scrollbar(@bar-width: 6px) {
+  &::-webkit-scrollbar {
+    width: @bar-width;
+    background-color: #fafafa;
+    padding-left: 1px;
+    padding-right: 1px;
+  }
+  &::-webkit-scrollbar-thumb {
+    // background-color: #c1c1c1;
+    background-color: rgba(193, 193, 193, 0.7);
+    border-radius: 4px;
+  }
+}
+
+.child-has-chromelike-scrollbar(@bar-width: 6px) {
+  * {
+    .chromelike-scrollbar(@bar-width);
+  }
+}
+
+.light-style-disabled-btn() {
+  &:hover,
+  &:focus,
+  &:active,
+  & {
+    background: rgba(134, 151, 255, 0.4);
+    border-color: transparent;
   }
 }

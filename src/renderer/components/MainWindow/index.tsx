@@ -42,9 +42,10 @@ import ModalUpdateInHome from '@/renderer/routes/Home/components/ModalUpdate';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { NFT } from '@/renderer/routes/NFT';
 import SendNFT from '@/renderer/routes/SendNFT';
+import ApprovalManagePage from '@/renderer/routes/ApprovalManagePage';
 import styles from './index.module.less';
 
-import MainRoute from './MainRoute';
+import MainWindowRoute from './MainRoute';
 import MainWindowSidebar from './Sidebar';
 import Titlebar from '../Titlebar';
 import { TopNavBar } from '../TopNavBar';
@@ -83,9 +84,9 @@ function MainWrapper() {
         <ErrorBoundary>
           <MainWindowSidebar />
         </ErrorBoundary>
-        <MainRoute>
+        <MainWindowRoute>
           <Outlet />
-        </MainRoute>
+        </MainWindowRoute>
 
         <ModalUpdateInHome />
       </div>
@@ -212,6 +213,15 @@ const router = createRouter([
       {
         path: 'swap',
         element: null, // delegate to MainRoute
+      },
+      {
+        path: 'approvals',
+        element: <ApprovalManagePage />,
+        loader: () => {
+          return {
+            title: 'My Approvals',
+          } as MainWindowRouteData;
+        },
       },
 
       {
