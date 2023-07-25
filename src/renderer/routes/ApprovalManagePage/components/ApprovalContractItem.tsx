@@ -95,7 +95,7 @@ export const ApprovalContractItem = ({
               chainEnum={chainItem?.enum}
               addressSuffix={
                 <>
-                  <span className="contract-name ml-[4px]">
+                  <span className="contract-name ml-[4px] leading-[1.2]">
                     ({item.name || 'Unknown'})
                   </span>
 

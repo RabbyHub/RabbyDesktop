@@ -10,14 +10,14 @@ export const RevokeButton: React.FC<Props> = ({ revokeList, onRevoke }) => {
   return (
     <>
       {revokeList.length > 1 ? (
-        <div className="mt-[16px] h-[16px] mb-[16px] text-13 leading-[15px] text-gray-subTitle">
+        <div className="mt-[16px] h-[16px] mb-[16px] text-13 leading-[15px] text-[#fff]">
           {revokeList.length} transactions to be signed sequentially
         </div>
       ) : (
         <div className="mt-[16px] h-[16px] mb-[16px]"> </div>
       )}
       <Button
-        className="w-[280px] h-[60px] text-[20px] am-revoke-btn"
+        className="w-[280px] h-[60px] text-[20px] am-revoke-btn rounded-[6px]"
         type="primary"
         size="large"
         disabled={!revokeList.length}

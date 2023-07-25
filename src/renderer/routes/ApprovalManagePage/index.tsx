@@ -229,7 +229,7 @@ function getColumnsForContract({
           </div>
         );
       },
-      width: 294,
+      width: 314,
     },
     // Contract Trust value
     {
@@ -452,7 +452,7 @@ function getColumnsForContract({
 
         return formatTimeFromNow(time ? time * 1e3 : 0);
       },
-      width: 180,
+      width: 160,
     },
     // My Approved Assets
     {
@@ -912,6 +912,7 @@ function TableByAssetSpenders({
 const ApprovalManagePage = () => {
   const {
     isLoading,
+    loadData,
 
     searchKw,
     setSearchKw,
@@ -991,11 +992,12 @@ const ApprovalManagePage = () => {
         setVisibleRevokeModal(false);
         setContractRevokeMap({});
         setAssetRevokeList([]);
+        loadData();
       })
       .catch((err: any) => {
         console.log(err);
       });
-  }, [wallet, currentRevokeList]);
+  }, [wallet, currentRevokeList, loadData]);
 
   const onChangeSelectedContractSpenders: IHandleChangeSelectedSpenders<ContractApprovalItem> =
     useCallback((ctx) => {

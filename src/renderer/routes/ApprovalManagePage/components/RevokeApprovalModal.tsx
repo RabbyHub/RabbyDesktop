@@ -378,7 +378,7 @@ export const RevokeApprovalModal = (props: {
 
         <section
           className={clsx(
-            'max-h-[424px] overflow-x-hidden rounded-[6px] pb-[60px] approval-list'
+            'max-h-[424px] overflow-x-hidden rounded-[6px] approval-list'
           )}
           style={{
             // @ts-expect-error
@@ -390,7 +390,7 @@ export const RevokeApprovalModal = (props: {
       </div>
       <div
         className={clsx(
-          'absolute flex flex-col items-center justify-center bg-transparent left-0 bottom-0 w-full z-[99999] border-t border-gray-divider',
+          'absolute modal-btn-wrapper flex flex-col items-center justify-center left-0 bottom-0 w-full z-[99999]',
           'h-[76px]'
         )}
       >

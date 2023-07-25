@@ -437,6 +437,7 @@ export function useApprovalsPage() {
 
   return {
     isLoading: loading,
+    loadData,
     searchKw,
     debouncedSearchKw,
     setSearchKw,

@@ -13,7 +13,7 @@
 @table-header-h: 48px;
 
 /* pt + height + pb */
-@sticky-footer-textarea: 16px + 16px + 16px;
+@sticky-footer-textarea: 12px + 16px + 12px;
 @sticky-btn-height: 60px;
 @sticky-btn-bottom-offset: 40px;
 // value of `@sticky-footer-height` is 148px
@@ -40,7 +40,7 @@
   overflow: hidden;
   height: 100%;
   min-width: @main-w;
-  padding-left: 40px;
+  padding-left: 44px;
   // padding-right: 48px;
   // width: @main-w;
   width: 100%;
@@ -55,7 +55,7 @@
     flex-shrink: 1;
     height: 100%;
     width: 100%;
-    padding-right: 48px;
+    padding-right: 44px;
   }
 }
 
@@ -280,10 +280,10 @@
       }
     }
 
-    // &.is-contract-row__risky > .am-virtual-table-cell-inner,
-    // &.is-contract-row__danger > .am-virtual-table-cell-inner {
-    //   background: #fefafa;
-    // }
+    &.is-contract-row__risky > .am-virtual-table-cell-inner,
+    &.is-contract-row__danger > .am-virtual-table-cell-inner {
+      background: #3d3b46;
+    }
 
     // &.is-contract-row__warning > .am-virtual-table-cell-inner {
     //   background: #fffdf8;
@@ -445,10 +445,15 @@
   .ant-tooltip-inner {
     line-height: 18px;
     border-radius: 2px;
+    padding: 8px;
 
     p {
-      margin-bottom: 0;
+      margin-bottom: 4px;
     }
+
+    // p:last-child:not(:first-child) {
+    //   margin-bottom: 0;
+    // }
   }
 
   &.tip-column-contract-trust-value .ant-tooltip-inner {
@@ -458,16 +463,16 @@
 
 .J-risk-cell__tooltip {
   &.tip-trust-value .ant-tooltip-inner {
-    width: 210px;
+    width: 225px;
     line-height: 20px;
     text-align: center;
   }
 
   &.is-danger.tip-recent-revokes .ant-tooltip-inner {
-    min-width: 440px;
+    min-width: 460px;
   }
   &.is-warning.tip-recent-revokes .ant-tooltip-inner {
-    min-width: 440px;
+    min-width: 460px;
   }
 }
 
@@ -496,15 +501,19 @@
 }
 
 .revoke-approval-modal {
+  @modal-radius: @radius-value * 2;
   .child-has-chrome-like-scrollbar();
   .approval-list {
     .chrome-like-scrollbar(0);
+
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: @radius-value;
   }
 
   .ant-modal-content {
     background-color: var(--theme-modal-content-bg);
     color: white;
-    border-radius: 12px;
+    border-radius: @modal-radius;
   }
 
   .ant-modal-header {
@@ -516,6 +525,13 @@
     text-align: center;
     font-size: 20px;
     font-weight: 500;
+  }
+
+  .modal-btn-wrapper {
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+    background-color: var(--theme-modal-content-bg);
+    border-bottom-left-radius: @modal-radius;
+    border-bottom-right-radius: @modal-radius;
   }
 
   .display-noncontract-item, .display-contract-item {
@@ -554,13 +570,20 @@
       display: flex;
     }
 
+    > .token-approval-item > * {
+      flex-shrink: 1;
+    }
+
     .token-approval-item-desc {
       color: white;
+      padding-left: 6px;
+      padding-right: 6px;
+      .ellipsis();
     }
 
     .token-approval-item-desc .contract-name {
       color: white;
-      max-width: 10em;
+      max-width: 70px;
       .ellipsis();
     }
 
