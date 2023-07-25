@@ -1,4 +1,11 @@
-import { useState, useRef, useMemo, useLayoutEffect, useEffect } from 'react';
+import {
+  useState,
+  useRef,
+  useMemo,
+  useLayoutEffect,
+  useEffect,
+  useCallback,
+} from 'react';
 import { useAsync, useAsyncFn } from 'react-use';
 
 import { VariableSizeGrid } from 'react-window';
@@ -86,10 +93,24 @@ function sortTokenOrNFTApprovalsSpenderList(
   });
 }
 
+const resetTableRenderer = (
+  ref: React.MutableRefObject<VariableSizeGrid | null>
+) => {
+  if (ref.current) {
+    ref.current.scrollToItem({ columnIndex: 0 });
+    // ref.current.resetAfterRowIndex(0, true);
+    ref.current.resetAfterIndices({
+      columnIndex: 0,
+      rowIndex: 0,
+      shouldForceUpdate: true,
+    });
+  }
+};
+
 export function useApprovalsPage() {
   const { preferences } = usePreference();
 
-  const { currentAccount } = useCurrentAccount();
+  const { currentAccount, fetchCurrentAccount } = useCurrentAccount();
 
   const chain = useMemo(() => {
     return (
@@ -345,6 +366,15 @@ export function useApprovalsPage() {
       return [contractMap, tokenMap, nftMap];
     }, [currentAccount?.address]);
 
+  const loadApprovals = useCallback(async () => {
+    await loadData();
+
+    setTimeout(() => {
+      resetTableRenderer(vGridRefContracts);
+      resetTableRenderer(vGridRefAsset);
+    }, 200);
+  }, [loadData]);
+
   const [contractMap, tokenMap, nftMap] = allData || [];
 
   if (loadError) {
@@ -426,18 +456,24 @@ export function useApprovalsPage() {
   }, [sortedAssetstList, sortedContractList, debouncedSearchKw]);
 
   useEffect(() => {
-    loadData();
+    loadApprovals();
 
-    eventBus.addEventListener('accountsChanged', loadData);
+    const listener = () => {
+      console.log('[feat] accountsChanged');
+      fetchCurrentAccount();
+    };
+
+    eventBus.addEventListener('accountsChanged', listener);
 
     return () => {
-      eventBus.removeEventListener('accountsChanged', loadData);
+      eventBus.removeEventListener('accountsChanged', listener);
     };
-  }, [loadData]);
+  }, [loadApprovals, fetchCurrentAccount]);
 
   return {
     isLoading: loading,
     loadData,
+    loadApprovals,
     searchKw,
     debouncedSearchKw,
     setSearchKw,

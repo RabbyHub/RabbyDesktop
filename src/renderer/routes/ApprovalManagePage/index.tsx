@@ -905,7 +905,7 @@ function TableByAssetSpenders({
 const ApprovalManagePage = () => {
   const {
     isLoading,
-    loadData,
+    loadApprovals,
 
     searchKw,
     setSearchKw,
@@ -985,12 +985,12 @@ const ApprovalManagePage = () => {
         setVisibleRevokeModal(false);
         setContractRevokeMap({});
         setAssetRevokeList([]);
-        loadData();
+        loadApprovals();
       })
       .catch((err: any) => {
         console.log(err);
       });
-  }, [wallet, currentRevokeList, loadData]);
+  }, [wallet, currentRevokeList, loadApprovals]);
 
   const onChangeSelectedContractSpenders: IHandleChangeSelectedSpenders<ContractApprovalItem> =
     useCallback((ctx) => {
