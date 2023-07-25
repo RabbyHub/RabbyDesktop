@@ -249,7 +249,9 @@ function getColumnsForContract({
               // visible
             >
               <img
-                className="ml-[4px] w-[12px] h-[12px] relative top-[1px]"
+                className={`ml-[4px] w-[12px] h-[12px] relative ${
+                  IS_WINDOWS && 'top-[1px]'
+                }`}
                 src={IconQuestion}
               />
             </Tooltip>
@@ -905,7 +907,6 @@ function TableByAssetSpenders({
 const ApprovalManagePage = () => {
   const {
     isLoading,
-    loadApprovals,
 
     searchKw,
     setSearchKw,
@@ -985,12 +986,11 @@ const ApprovalManagePage = () => {
         setVisibleRevokeModal(false);
         setContractRevokeMap({});
         setAssetRevokeList([]);
-        loadApprovals();
       })
       .catch((err: any) => {
         console.log(err);
       });
-  }, [wallet, currentRevokeList, loadApprovals]);
+  }, [wallet, currentRevokeList]);
 
   const onChangeSelectedContractSpenders: IHandleChangeSelectedSpenders<ContractApprovalItem> =
     useCallback((ctx) => {
