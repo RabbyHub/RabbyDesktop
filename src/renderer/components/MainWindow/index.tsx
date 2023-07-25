@@ -336,7 +336,6 @@ export function MainWindow() {
   useMount(() => {
     logGetUserDapp();
     getAllRPC();
-    walletController.syncGnosisNetworks();
   });
 
   return (

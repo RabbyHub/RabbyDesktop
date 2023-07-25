@@ -1,10 +1,11 @@
 import { RabbyAccount } from '@/isomorphic/types/rabbyx';
 import { useAccountToDisplay } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
+import { useSyncGnosisNetworks } from '@/renderer/hooks/useSyncGnosisNetworks';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
 import { LoadingOutlined } from '@ant-design/icons';
 import { CHAINS, Chain } from '@debank/common';
-import Safe, { BasicSafeInfo } from '@rabby-wallet/gnosis-sdk';
+import { BasicSafeInfo } from '@rabby-wallet/gnosis-sdk';
 import { SafeInfo } from '@rabby-wallet/gnosis-sdk/dist/api';
 import { Spin } from 'antd';
 import classNames from 'classnames';
@@ -13,7 +14,6 @@ import { sortBy } from 'lodash';
 import React, { useState } from 'react';
 import { useAsync } from 'react-use';
 import NameAndAddress from '../NameAndAddress';
-import { crossCompareOwners } from '../QueueModal/util';
 import { AccountDetailItem } from './AccountDetailItem';
 
 const IconTagYou = 'rabby-internal://assets/icons/queue/tag-you.svg';
@@ -24,6 +24,7 @@ const LoadingIcon = (
 
 export const SafeItem: React.FC<{ account: RabbyAccount }> = ({ account }) => {
   const { accountsList } = useAccountToDisplay();
+  useSyncGnosisNetworks(account?.address);
 
   const [activeData, setActiveData] = useState<
     | {

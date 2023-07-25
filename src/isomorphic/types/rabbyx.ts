@@ -416,7 +416,7 @@ export type RabbyXMethod = {
   ) => RabbyAccount[];
   'walletController.fetchGnosisChainList': (address: string) => Chain[];
   'walletController.getTypedAccounts': () => DisplayedKeyring[];
-  'walletController.syncGnosisNetworks': () => void;
+  'walletController.syncGnosisNetworks': (address: string) => void;
   'walletController.getGnosisOwners': (
     account: Account,
     safeAddress: string,
