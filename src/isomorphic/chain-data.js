@@ -57,6 +57,8 @@ export var CHAINS_ENUM;
     // CHAINS_ENUM["RONIN"] = "RONIN";
     CHAINS_ENUM["OAS"] = "OAS";
     CHAINS_ENUM["ZORA"] = "ZORA";
+    CHAINS_ENUM["LINEA"] = "LINEA";
+    CHAINS_ENUM["BASE"] = "BASE";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -965,6 +967,38 @@ export const CHAINS_RAW = {
         enum: CHAINS_ENUM.ZORA,
         hex: "0x76adf1",
         scanLink: "https://explorer.zora.energy/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/token/logo_url/eth/935ae4e4d1d12d59a99717a24f2540b5.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+    },
+    [CHAINS_ENUM.LINEA]: {
+        id: 59144,
+        serverId: "linea",
+        network: "59144",
+        name: "Linea",
+        nativeTokenSymbol: "ETH",
+        nativeTokenAddress: "linea",
+        enum: CHAINS_ENUM.LINEA,
+        hex: "0xe708",
+        scanLink: "https://lineascan.build/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/token/logo_url/eth/935ae4e4d1d12d59a99717a24f2540b5.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+    },
+    [CHAINS_ENUM.BASE]: {
+        id: 8453,
+        serverId: "base",
+        network: "8453",
+        name: "Base",
+        nativeTokenSymbol: "ETH",
+        nativeTokenAddress: "base",
+        enum: CHAINS_ENUM.LINEA,
+        hex: "0x2105",
+        scanLink: "https://basescan.org/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/token/logo_url/eth/935ae4e4d1d12d59a99717a24f2540b5.png",
         nativeTokenDecimals: 18,
         eip: {
