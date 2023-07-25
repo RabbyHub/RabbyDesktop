@@ -8,6 +8,7 @@ import clsx from 'clsx';
 import { sortBy } from 'lodash';
 import moment from 'moment';
 import React, { useEffect, useMemo, useState } from 'react';
+import { useSyncGnosisNetworks } from '@/renderer/hooks/useSyncGnosisNetworks';
 import { TxList } from './TxList';
 
 const getTabs = (
@@ -55,6 +56,8 @@ export const TabTxList: React.FC<Props> = ({ onClose }) => {
   } = useGnosisPendingTxs({
     address: account?.address,
   });
+
+  useSyncGnosisNetworks(account?.address);
 
   const tabs = useMemo(() => {
     return getTabs(

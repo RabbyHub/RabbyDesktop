@@ -87,7 +87,13 @@ const CurveThumbnail = ({ data, className }: CurveThumbnailProps) => {
           type="number"
           domain={['dataMin', 'dataMax']}
         />
-        <YAxis hide domain={['dataMin', 'dataMax']} />
+        <YAxis
+          hide
+          domain={[
+            (dataMin: number) => dataMin * 0.98,
+            (dataMax: number) => dataMax * 1.005,
+          ]}
+        />
         <Area
           type="linear"
           dataKey="value"
@@ -216,7 +222,13 @@ export const CurveModal = ({ data, className, onClose }: CurveModalProps) => {
             type="number"
             domain={['dataMin', 'dataMax']}
           />
-          <YAxis hide domain={['dataMin', 'dataMax']} />
+          <YAxis
+            hide
+            domain={[
+              (dataMin: number) => dataMin * 0.98,
+              (dataMax: number) => dataMax * 1.005,
+            ]}
+          />
           <Tooltip
             cursor={{ strokeDasharray: 4 }}
             contentStyle={{ display: 'none' }}
