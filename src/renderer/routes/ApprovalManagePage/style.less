@@ -470,8 +470,12 @@
       margin-bottom: 4px;
     }
 
-    p:last-child:not(:first-child) {
+    p:last-child {
       margin-bottom: 0;
+
+      &:first-child {
+        margin-bottom: 0;
+      }
     }
   }
 
@@ -608,10 +612,25 @@
         max-width: 270px;
       }
 
-      .name-and-address > .name {
-        font-weight: 600;
-        max-width: 4em;
-        .ellipsis();
+      .name-and-address {
+        > .name {
+          font-weight: 600;
+          max-width: 6em;
+          .ellipsis();
+        }
+
+        .contract-name {
+          color: rgba(255, 255, 255, 0.60);
+          max-width: 9em;
+          font-size: 13px;
+          font-weight: 400;
+          .ellipsis();
+        }
+
+        &.with-local-name > .name,
+        &.with-local-name .contract-name {
+          max-width: 4em;
+        }
       }
 
       .name-and-address,
@@ -620,14 +639,6 @@
         font-size: 13px;
         color: white;
       }
-    }
-
-    .token-approval-item-desc .contract-name {
-      color: rgba(255, 255, 255, 0.60);
-      max-width: 4em;
-      font-size: 13px;
-      font-weight: 400;
-      .ellipsis();
     }
   }
 }

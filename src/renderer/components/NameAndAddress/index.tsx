@@ -84,7 +84,13 @@ const NameAndAddress = ({
   }, [copyIcon]);
 
   return (
-    <div className={clsx('name-and-address', className)}>
+    <div
+      className={clsx(
+        'name-and-address',
+        localName && 'with-local-name',
+        className
+      )}
+    >
       {localName && (
         <div className={clsx('name', nameClass)} title={localName}>
           {localName}

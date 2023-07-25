@@ -239,7 +239,7 @@ function getColumnsForContract({
               overlayClassName="J-table__tooltip tip-column-contract-trust-value disable-ant-overwrite"
               overlay={
                 <div className="text-[12px]">
-                  <p>
+                  <p className="leading-[16px]">
                     Trust value refers to the total asset value approved and
                     exposed to this contract. A low trust value indicates either
                     risk or inactivity for 180 days.
