@@ -30,6 +30,8 @@
   min-width: @main-w;
   height: var(--mainwin-mainroute-height);
   padding-top: @page-padding-top;
+  padding-left: 44px;
+  padding-right: 44px;
   // padding-bottom: @sticky-footer-height;
   // background: var(--color-bg);
 
@@ -40,10 +42,8 @@
   overflow: hidden;
   height: 100%;
   min-width: @main-w;
-  padding-left: 44px;
-  // padding-right: 48px;
-  // width: @main-w;
-  width: 100%;
+  width: @main-w;
+  // width: 100%;
   max-width: 1280px;
   margin: 0 auto;
   display: flex;
@@ -55,7 +55,6 @@
     flex-shrink: 1;
     height: 100%;
     width: 100%;
-    padding-right: 44px;
   }
 }
 
@@ -114,8 +113,13 @@
     width: 100%;
   }
 
+  .ant-spin-container.ant-spin-blur {
+    opacity: 0.1;
+    background-color: rgba(0, 0, 0, 0.10);
+  }
+
   .am-virtual-table-empty {
-    background-color: transparent;
+    background-color: rgba(0, 0, 0, 0.10);
     color: white;
   }
 }
@@ -135,6 +139,11 @@
 
   .ant-table-header, .ant-table-header > table {
     height: @table-header-h;
+  }
+
+  .ant-table.ant-table-empty .ant-table-header {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
   }
 
   thead.ant-table-thead > tr > th.am-virtual-table-head-cell {
@@ -303,6 +312,10 @@
 
   &.J_table_by_assets .am-virtual-table-cell {
     //------------ special column customizations ------------
+    &.column-cell-J_key-approveSpender, &.column-cell-J_key-contract {
+      z-index: 1;
+    }
+
     &.column-cell-J_key-approveSpender > .am-virtual-table-cell-inner {
       padding-right: 4px;
     }
@@ -327,14 +340,20 @@
   }
 
   .am-virtual-table-cell-inner .name-and-address {
-    &, .address {
-      // color: var(--color-title);
+    &, .address, .name {
       color: white;
+      font-size: 13px;
+    }
+
+    .name {
+      max-width: 6em;
+      .ellipsis();
+      font-weight: bold;
     }
 
     .contract-name {
       color: var(--color-body);
-      max-width: 10em;
+      max-width: 8em;
       .ellipsis();
     }
   }
@@ -346,7 +365,7 @@
 }
 
 .am-virtual-table-empty {
-  @mt-offset: 12px;
+  @mt-offset: 0;
 
   height: 320px + @mt-offset;
   margin: 0;
@@ -572,6 +591,7 @@
 
     > .token-approval-item {
       display: flex;
+      align-items: center;
     }
 
     > .token-approval-item > * {
@@ -583,18 +603,31 @@
       padding-left: 6px;
       padding-right: 6px;
       .ellipsis();
+
+      .name-and-address {
+        max-width: 270px;
+      }
+
+      .name-and-address > .name {
+        font-weight: 600;
+        max-width: 4em;
+        .ellipsis();
+      }
+
+      .name-and-address,
+      .name-and-address > .address,
+      .name-and-address > .name {
+        font-size: 13px;
+        color: white;
+      }
     }
 
     .token-approval-item-desc .contract-name {
       color: rgba(255, 255, 255, 0.60);
-      max-width: 70px;
+      max-width: 4em;
       font-size: 13px;
       font-weight: 400;
       .ellipsis();
-    }
-
-    .name-and-address, .name-and-address > .address {
-      color: white;
     }
   }
 }

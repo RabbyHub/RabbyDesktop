@@ -219,7 +219,7 @@ const router = createRouter([
         element: <ApprovalManagePage />,
         loader: () => {
           return {
-            title: 'My Approvals',
+            title: 'Approvals',
           } as MainWindowRouteData;
         },
       },

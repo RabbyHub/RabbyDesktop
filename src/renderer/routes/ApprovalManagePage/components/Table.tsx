@@ -382,7 +382,11 @@ export function VirtualTable<RecordType extends object>({
       >
         <Table<RecordType>
           {...props}
-          className={clsx('am-virtual-table', props.className)}
+          className={clsx(
+            'am-virtual-table',
+            'am-virtual-table__empty',
+            props.className
+          )}
           columns={mergedColumns}
           pagination={false}
           components={{

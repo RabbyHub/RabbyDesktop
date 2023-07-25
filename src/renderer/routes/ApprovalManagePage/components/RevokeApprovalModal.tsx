@@ -348,7 +348,7 @@ export const RevokeApprovalModal = (props: {
   return (
     <ModalStyled
       centered
-      width={400}
+      width={450}
       visible={visible}
       onCancel={onClose}
       className={clsx('revoke-approval-modal', className)}
@@ -361,8 +361,8 @@ export const RevokeApprovalModal = (props: {
       title="Approvals"
       closeIcon={<IconClose />}
     >
-      <div>
-        <div className="mt-16 mb-18">
+      <div className="mt-4">
+        <div className="mb-18">
           <ApprovalContractItem data={[item]} index={0} showNFTAmount />
         </div>
 

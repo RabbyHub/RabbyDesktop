@@ -229,7 +229,7 @@ function getColumnsForContract({
           </div>
         );
       },
-      width: 314,
+      width: 354,
     },
     // Contract Trust value
     {
@@ -499,7 +499,7 @@ function getColumnsForContract({
           </div>
         );
       },
-      width: 180 + 44,
+      width: 140 + 44,
     },
   ];
 
@@ -585,7 +585,7 @@ function getColumnsForAsset({
           </div>
         );
       },
-      width: 200,
+      width: 180,
     },
     // Type
     {
@@ -723,7 +723,7 @@ function getColumnsForAsset({
           </div>
         );
       },
-      width: 274,
+      width: 334,
     },
     // My Approval Time
     {
@@ -742,7 +742,7 @@ function getColumnsForAsset({
 
         return formatTimeFromNow(time ? time * 1e3 : 0);
       },
-      width: 180 + 44,
+      width: 140 + 44,
     },
   ];
 

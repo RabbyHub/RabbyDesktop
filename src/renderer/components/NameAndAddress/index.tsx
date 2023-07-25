@@ -98,25 +98,25 @@ const NameAndAddress = ({
           {localName
             ? `(${ellipsisAddress(address?.toLowerCase() || '')})`
             : `${ellipsisAddress(address?.toLowerCase() || '')}`}
-          {addressSuffix || null}
-          {isShowCopyIcon && (
-            <TipsWrapper hoverTips="Copy" clickTips="Copied">
-              <img
-                className={clsx(
-                  `ml-4 cursor-pointer opacity-${copyIconOpacity}`,
-                  copyIconClass
-                )}
-                src={iconCopySrc}
-                onClick={(evt: any) => {
-                  evt.stopPropagation();
-                  copyAddress(address);
-                }}
-              />
-            </TipsWrapper>
-          )}
           {localName ? ' ' : ''}
         </>
       </div>
+      {addressSuffix || null}
+      {isShowCopyIcon && (
+        <TipsWrapper hoverTips="Copy" clickTips="Copied">
+          <img
+            className={clsx(
+              `ml-4 cursor-pointer opacity-${copyIconOpacity}`,
+              copyIconClass
+            )}
+            src={iconCopySrc}
+            onClick={(evt: any) => {
+              evt.stopPropagation();
+              copyAddress(address);
+            }}
+          />
+        </TipsWrapper>
+      )}
       {openExternal && (
         <img
           onClick={handleClickContractId}

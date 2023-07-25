@@ -2,7 +2,7 @@ import { MouseEventHandler, useMemo, useEffect, useRef } from 'react';
 
 import { IconWithChain } from '@/renderer/components/TokenWithChain';
 import clsx from 'clsx';
-import { Alert } from 'antd';
+import { Alert, Tooltip } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
 
 import { ApprovalItem } from '@/renderer/utils/approval';
@@ -55,6 +55,8 @@ export const ApprovalContractItem = ({
     [item.chain]
   );
 
+  const contractAddrNote = item.name || 'Unknown';
+
   return (
     <div
       ref={rowRef}
@@ -95,8 +97,11 @@ export const ApprovalContractItem = ({
               chainEnum={chainItem?.enum}
               addressSuffix={
                 <>
-                  <span className="contract-name ml-[4px] leading-[1.2]">
-                    ({item.name || 'Unknown'})
+                  <span
+                    className="contract-name ml-[4px] leading-[1.2]"
+                    title={contractAddrNote}
+                  >
+                    ({contractAddrNote})
                   </span>
 
                   <img

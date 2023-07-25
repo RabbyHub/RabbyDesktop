@@ -123,7 +123,7 @@ export function useApprovalsPage() {
       filterType === 'contract' ? vGridRefContracts : vGridRefAsset;
     if (vGridRef.current) {
       vGridRef.current?.scrollToItem({ columnIndex: 0 });
-      vGridRef.current?.resetAfterColumnIndex(0);
+      vGridRef.current?.resetAfterColumnIndex(0, true);
     }
   }, [debouncedSearchKw, filterType]);
 
