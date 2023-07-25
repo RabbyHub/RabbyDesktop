@@ -8,6 +8,8 @@ export function coerceNumber(input: any, fallback = 0) {
   return output;
 }
 
+export const coerceFloat = coerceNumber;
+
 export function coerceInteger(input: any, fallback = 0) {
   const output = parseInt(input, 10);
 

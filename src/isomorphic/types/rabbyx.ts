@@ -557,6 +557,9 @@ export type RabbyXMethod = {
   'walletController.getCollectionStarred': () => Token[];
   'walletController.addCollectionStarred': (token: Token) => void;
   'walletController.removeCollectionStarred': (token: Token) => void;
+  'walletController.revoke': (input: {
+    list: import('@/renderer/utils/approval').ApprovalSpenderItemToBeRevoked[];
+  }) => void;
   'walletController.submitQRHardwareCryptoHDKey': (
     cbor: string,
     keyringId?: number | null

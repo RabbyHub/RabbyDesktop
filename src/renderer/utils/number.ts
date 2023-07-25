@@ -70,9 +70,11 @@ export const formatNumber = (
 };
 
 export const formatPrice = (price: string | number) => {
+  // @ts-expect-error maybe string but could compare here
   if (price >= 1) {
     return formatNumber(price);
   }
+  // @ts-expect-error maybe string but could compare here
   if (price < 0.00001) {
     if (price.toString().length > 10) {
       return Number(price).toExponential(4);
@@ -156,3 +158,5 @@ export const intToHex = (n: number) => {
   if (n % 1 !== 0) throw new Error(`${n} is not int`);
   return `0x${n.toString(16)}`;
 };
+
+export { coerceNumber, coerceInteger } from '@/isomorphic/primitive';

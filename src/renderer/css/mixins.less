@@ -1,5 +1,9 @@
 @import './theme/index.css';
 
+.ellipsis() {
+  .truncate;
+}
+
 .truncate() {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -17,19 +21,25 @@
 @chromelike-scrollbar-w: 5px;
 @chromelike-scrollbar-max-w: 10px;
 
-.chrome-like-scrollbar() {
+.chrome-like-scrollbar(@bar-width: @chromelike-scrollbar-w) {
   &::-webkit-scrollbar {
-    width: @chromelike-scrollbar-w;
+    width: @bar-width;
   }
 
   &::-webkit-scrollbar-thumb {
     border-radius: 50px;
-    background-color: #5D626F;
+    background-color: #5d626f;
   }
 
   &::-webkit-scrollbar-track {
     border-radius: 1em;
     background-color: transparent;
+  }
+}
+
+.child-has-chrome-like-scrollbar(@bar-width: 6px) {
+  * {
+    .chrome-like-scrollbar(@bar-width);
   }
 }
 
@@ -101,5 +111,15 @@
     min-width: 2rem;
     align-self: flex-end;
     height: 100%;
+  }
+}
+
+.light-style-disabled-btn() {
+  &:hover,
+  &:focus,
+  &:active,
+  & {
+    background: rgba(134, 151, 255, 0.4);
+    border-color: transparent;
   }
 }

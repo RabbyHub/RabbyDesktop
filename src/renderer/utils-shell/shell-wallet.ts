@@ -6,13 +6,14 @@ import type {
 } from '@/isomorphic/types/rabbyx';
 import eventBus from './eventBus';
 
+export type ShellWalletType<T extends RabbyXContollerNS = 'walletController'> =
+  {
+    [P in RabbyXContollerMeththodNames[T]]: RabbyXContollerMethods[T][P];
+  };
+
 export function makeShellWallet<
   T extends RabbyXContollerNS = 'walletController'
->(
-  rabbyxExtId: string
-): {
-  [P in RabbyXContollerMeththodNames[T]]: RabbyXContollerMethods[T][P];
-} {
+>(rabbyxExtId: string): ShellWalletType<T> {
   const portMessageChannel = new PortMessage({ rabbyxExtId });
 
   portMessageChannel.connect('rabbyDesktop');

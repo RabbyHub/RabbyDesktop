@@ -26,6 +26,7 @@ import { usePrevious } from 'react-use';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
 import { useCurrentConnectedSite } from '@/renderer/hooks/useRabbyx';
+import { useApprovalRiskAlertCount } from '@/renderer/hooks/rabbyx/useApprovals';
 import { DappFavicon } from '../DappFavicon';
 import Hide from './Hide';
 import styles from './Sidebar.module.less';
@@ -56,11 +57,56 @@ const Sidebar = styled.div`
   }
 `;
 
-const StaticEntries = [
+type EntryBasic = {
+  path: string;
+  title: string;
+  logoSrc: string;
+};
+
+const StaticEntries: (
+  | (EntryBasic & {
+      getBadgeNode?: (ctx: {
+        isActivePath: boolean;
+        count: number;
+        isCollapsed: boolean;
+        config: EntryBasic;
+      }) => React.ReactNode;
+    })
+  | {
+      type: 'divider';
+    }
+)[] = [
   {
     path: '/mainwin/home',
     title: 'Home',
     logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/home.svg',
+    getBadgeNode: (ctx) => {
+      if (ctx.isCollapsed) {
+        return (
+          <Badge
+            className={classNames(styles.seCountBadge, styles.inCollapsed)}
+            count={ctx.count}
+            color="#8ba8ff"
+          >
+            <img className={styles.routeLogo} src={ctx.config.logoSrc} />
+          </Badge>
+        );
+      }
+
+      if (ctx.count) {
+        return (
+          <Badge
+            className={styles.seCountBadge}
+            count={ctx.count}
+            color="#8ba8ff"
+          >
+            <span />
+          </Badge>
+        );
+      }
+
+      return null;
+    },
   },
   {
     path: '/mainwin/home/nft',
@@ -78,6 +124,38 @@ const StaticEntries = [
     logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/swap.svg',
   },
   {
+    path: '/mainwin/approvals',
+    title: 'Approvals',
+    logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/approvals.svg',
+    getBadgeNode: (ctx) => {
+      if (ctx.isCollapsed) {
+        return (
+          <Badge
+            className={classNames(styles.seCountBadge, styles.inCollapsed)}
+            count={ctx.count}
+            color="#ec5151"
+          >
+            <img className={styles.routeLogo} src={ctx.config.logoSrc} />
+          </Badge>
+        );
+      }
+
+      if (ctx.count) {
+        return (
+          <Badge
+            className={styles.seCountBadge}
+            count={ctx.count}
+            color="#ec5151"
+          >
+            <span />
+          </Badge>
+        );
+      }
+
+      return null;
+    },
+  },
+  {
     type: 'divider' as const,
   },
   {
@@ -85,7 +163,7 @@ const StaticEntries = [
     title: 'My Dapps',
     logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/dapps.svg',
   },
-] as const;
+];
 
 const DappRoutePattern = '/mainwin/dapps/:dappId';
 
@@ -335,6 +413,8 @@ export default function MainWindowSidebar() {
     }
   }, [matchedDapp]);
 
+  const { approvalRiskAlertCount } = useApprovalRiskAlertCount();
+
   const { hasNewRelease } = useCheckNewRelease({ isWindowTop: true });
 
   const { settings, toggleSidebarCollapsed } = useSettings();
@@ -374,6 +454,7 @@ export default function MainWindowSidebar() {
                     );
                   }
                   const isHome = sE.path === '/mainwin/home';
+                  const isApprovals = sE.path === '/mainwin/approvals';
                   const pathname =
                     location.pathname === '/mainwin/home/bundle'
                       ? '/mainwin/home'
@@ -381,57 +462,58 @@ export default function MainWindowSidebar() {
                       ? '/mainwin/home/send-token'
                       : location.pathname;
 
+                  const matchedPath = matchPath(
+                    {
+                      path: sE.path,
+                      // end: false,
+                    },
+                    pathname
+                  );
+
+                  const ctxCount = isHome
+                    ? pendingTxCount
+                    : isApprovals
+                    ? approvalRiskAlertCount
+                    : 0;
+
                   return (
                     <li
                       key={`sE-${sE.path}`}
                       className={classNames(
                         styles.routeItem,
-                        matchPath(
-                          {
-                            path: sE.path,
-                            // end: false,
-                          },
-                          pathname
-                        ) && styles.active
+                        matchedPath && styles.active
                       )}
                       onClick={() => {
                         navigate(sE.path);
                       }}
                     >
                       <div className={styles.routeItemInner}>
-                        {isHome && secondAnim ? (
-                          <Badge
-                            className={classNames(
-                              styles.txPendingCount,
-                              styles.inCollapsed
-                            )}
-                            count={pendingTxCount}
-                            color="#8ba8ff"
-                          >
-                            <img
-                              className={styles.routeLogo}
-                              src={sE.logoSrc}
-                            />
-                          </Badge>
+                        {sE.getBadgeNode && secondAnim ? (
+                          sE.getBadgeNode({
+                            isCollapsed: true,
+                            isActivePath: !!matchedPath,
+                            count: ctxCount,
+                            config: sE,
+                          }) || null
                         ) : (
                           <img className={styles.routeLogo} src={sE.logoSrc} />
                         )}
                         <Hide
                           visible={!secondAnim}
-                          className={styles.routeTitle}
+                          className={classNames(
+                            styles.routeTitle,
+                            sE.getBadgeNode && styles.withBadge
+                          )}
                         >
                           <span>{sE.title}</span>
-                          {isHome &&
-                          !settings.sidebarCollapsed &&
-                          pendingTxCount ? (
-                            <Badge
-                              className={styles.txPendingCount}
-                              count={pendingTxCount}
-                              color="#8ba8ff"
-                            >
-                              <span />
-                            </Badge>
-                          ) : null}
+                          {(!settings.sidebarCollapsed &&
+                            sE.getBadgeNode?.({
+                              isCollapsed: false,
+                              isActivePath: !!matchedPath,
+                              count: ctxCount,
+                              config: sE,
+                            })) ||
+                            null}
                         </Hide>
                       </div>
                     </li>

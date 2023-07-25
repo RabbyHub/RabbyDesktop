@@ -2,10 +2,9 @@ import { useEffect, useRef } from 'react';
 import { atom, useAtom } from 'jotai';
 
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
-import { makeShellWallet } from '../utils-shell/shell-wallet';
+import { ShellWalletType, makeShellWallet } from '../utils-shell/shell-wallet';
 
-type ShellWalletType = ReturnType<typeof makeShellWallet>;
-const shellWalletAtom = atom(null as any as ReturnType<typeof makeShellWallet>);
+const shellWalletAtom = atom(null as any as ShellWalletType);
 
 /**
  * @description make sure you component is child of <ShellWalletProvider />
