@@ -1,7 +1,16 @@
 
-v0.30.0 / 2023-07-18
+v0.31.0 / 2023-07-25
 ====================
 
+  * feat: support approvals. (#505)
+  * feat: change sync gnosis networks (#504)
+  * feat: upgrade deps, update currentVersion.
+  * feat: optimize curve changes (#503)
+
+v0.30.0-prod / 2023-07-18
+=========================
+
+  * Release v0.30.0-prod
   * chore: update currentVersion.
   * chore:  swap fee intro  (#502)
   * fix: keystone qrcode modal (#500)
