@@ -30,7 +30,7 @@ export const NFT = () => {
       },
       {
         id: 'starred',
-        label: `Starred(${starredList?.length || 0})`,
+        label: `Starred (${starredList?.length || 0})`,
       },
     ],
     [starredList?.length]

@@ -13,9 +13,9 @@ export const NFTTabs = (props: NFTTabsProps) => {
         <div
           key={tab.id}
           className={clsx(
-            'w-[120px] h-32 rounded-[3px] text-center text-[15px] font-medium  flex items-center justify-center cursor-pointer',
+            'w-[120px] h-32 rounded-[3px] text-center text-[15px] font-medium flex items-center justify-center cursor-pointer',
             activeId === tab.id
-              ? 'bg-white text-blue-light'
+              ? 'bg-[#000] bg-opacity-20 text-white'
               : 'text-white text-opacity-80'
           )}
           onClick={() => {
