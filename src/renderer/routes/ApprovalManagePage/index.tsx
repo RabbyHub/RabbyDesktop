@@ -185,14 +185,12 @@ function getColumnsForContract({
                 chainEnum={chainItem.enum}
                 addressSuffix={
                   <>
-                    <Tooltip
-                      overlayClassName="J-table__tooltip disable-ant-overwrite"
-                      overlay={contractName}
+                    <span
+                      className="contract-name ml-[4px]"
+                      title={contractName}
                     >
-                      <span className="contract-name ml-[4px]">
-                        ({row.name || 'Unknown'})
-                      </span>
-                    </Tooltip>
+                      ({contractName})
+                    </span>
                     <img
                       onClick={(evt) => {
                         evt.stopPropagation();
@@ -701,14 +699,9 @@ function getColumnsForAsset({
               chainEnum={chainItem?.enum}
               addressSuffix={
                 <>
-                  <Tooltip
-                    overlayClassName="J-table__tooltip disable-ant-overwrite"
-                    overlay={protocolName}
-                  >
-                    <span className="contract-name ml-[4px]">
-                      ({protocolName})
-                    </span>
-                  </Tooltip>
+                  <span className="contract-name ml-[4px]" title={protocolName}>
+                    ({protocolName})
+                  </span>
                   <img
                     onClick={(evt) => {
                       evt.stopPropagation();
