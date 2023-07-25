@@ -119,7 +119,7 @@
     }
   },
   "dependencies": {
-    "@debank/common": "^0.3.5",
+    "@debank/common": "^0.3.8",
     "@debank/festats": "^1.0.3",
     "@debank/parse-favicon": "^0.1.1",
     "@dnd-kit/core": "^6.0.7",
