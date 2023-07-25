@@ -510,6 +510,10 @@
     border-radius: @radius-value;
   }
 
+  .ant-modal-body {
+    padding-top: 0;
+  }
+
   .ant-modal-content {
     background-color: var(--theme-modal-content-bg);
     color: white;
@@ -582,8 +586,10 @@
     }
 
     .token-approval-item-desc .contract-name {
-      color: white;
+      color: rgba(255, 255, 255, 0.60);
       max-width: 70px;
+      font-size: 13px;
+      font-weight: 400;
       .ellipsis();
     }
 
