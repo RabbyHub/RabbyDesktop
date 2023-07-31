@@ -65,7 +65,9 @@ module.exports = {
     "gatekeeperAssess": false,
     "extendInfo": {
       "NSCameraUsageDescription": "Require camera to support QR-based hardware wallet.",
-      // "com.apple.security.device.camera": true,
+      "NSMicrophoneUsageDescription": "We DON't need microphone access to support Rabby Desktop. It's better to disallow.",
+      "com.apple.security.device.audio-input": false,
+      "com.apple.security.device.camera": true,
       // "com.apple.security.cs.allow-unsigned-executable-memory": true
     }
   },
