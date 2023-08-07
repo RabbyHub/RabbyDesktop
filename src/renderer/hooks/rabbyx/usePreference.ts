@@ -1,4 +1,4 @@
-import type { AddedToken, GasCache } from '@/isomorphic/types/rabbyx';
+import type { GasCache, Token } from '@/isomorphic/types/rabbyx';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { CHAINS_ENUM } from '@debank/common';
 import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
@@ -16,9 +16,10 @@ interface PreferenceState {
   currentVersion: string;
   firstOpen: boolean;
   pinnedChain: import('@debank/common').CHAINS_ENUM[];
-  AddedToken: AddedToken;
   tokenApprovalChain: Record<string, import('@debank/common').CHAINS_ENUM>;
   nftApprovalChain: Record<string, import('@debank/common').CHAINS_ENUM>;
+  customizedToken?: Token[];
+  blockedToken?: Token[];
 }
 
 const defaultState: PreferenceState = {
@@ -32,9 +33,10 @@ const defaultState: PreferenceState = {
   currentVersion: '0',
   firstOpen: false,
   pinnedChain: [],
-  AddedToken: {},
   tokenApprovalChain: {},
   nftApprovalChain: {},
+  customizedToken: [],
+  blockedToken: [],
 };
 
 const peferenceAtom = atom(defaultState);
@@ -78,9 +80,55 @@ export function usePreference() {
     [fetchPreference, preferences.pinnedChain]
   );
 
+  const getCustomizedToken = useCallback(async () => {
+    return fetchPreference('customizedToken');
+  }, [fetchPreference]);
+
+  const getBlockedToken = useCallback(async () => {
+    return fetchPreference('blockedToken');
+  }, [fetchPreference]);
+
+  const addCustomizeToken = async (token: TokenItem) => {
+    await walletController.addCustomizedToken({
+      address: token.id,
+      chain: token.chain,
+    });
+    getCustomizedToken();
+  };
+
+  const removeCustomizedToken = async (token: TokenItem) => {
+    await walletController.removeCustomizedToken({
+      address: token.id,
+      chain: token.chain,
+    });
+    getCustomizedToken();
+  };
+
+  const addBlockedToken = async (token: TokenItem) => {
+    await walletController.addBlockedToken({
+      address: token.id,
+      chain: token.chain,
+    });
+    getBlockedToken();
+  };
+
+  const removeBlockedToken = async (token: TokenItem) => {
+    await walletController.removeBlockedToken({
+      address: token.id,
+      chain: token.chain,
+    });
+    getBlockedToken();
+  };
+
   return {
     preferences,
 
     setChainPinned,
+    addCustomizeToken,
+    removeCustomizedToken,
+    addBlockedToken,
+    removeBlockedToken,
+    getBlockedToken,
+    getCustomizedToken,
   };
 }

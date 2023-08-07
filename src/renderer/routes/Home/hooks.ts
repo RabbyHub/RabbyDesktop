@@ -2,7 +2,10 @@ import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import { ServerChain, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import BigNumber from 'bignumber.js';
 import { sortBy } from 'lodash';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import { useToken } from '@/renderer/hooks/rabbyx/useToken';
+import { isSameAddress } from '@/renderer/utils/address';
 import { VIEW_TYPE } from './type';
 
 export const useSwitchView = () => {
@@ -111,20 +114,94 @@ export const useExpandList = (
 
 export const useFilterTokenList = (
   tokenList: TokenItem[],
-  selectChainServerId: string | null
+  selectChainServerId: string | null,
+  currentAddress?: string,
+  query?: string,
+  withBalance = false
 ) => {
+  const [searchList, setSearchList] = useState<TokenItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const currentList = query ? searchList : tokenList;
   const filterTokenList = useMemo(() => {
     const list: TokenItem[] = selectChainServerId
-      ? tokenList.filter((token) => token.chain === selectChainServerId)
-      : tokenList;
+      ? currentList.filter((token) => token.chain === selectChainServerId)
+      : currentList;
     return sortBy(list, (i) => i.usd_value || 0).reverse();
-  }, [tokenList, selectChainServerId]);
+  }, [currentList, selectChainServerId]);
+  const { customize, blocked } = useToken({ tokenList });
+  const addressRef = useRef(currentAddress);
+  const kwRef = useRef<string>();
 
-  return filterTokenList;
+  const searchToken = useCallback(
+    async ({
+      address,
+      q,
+      chainId,
+    }: {
+      address: string;
+      q: string;
+      chainId?: string;
+    }) => {
+      let list: TokenItem[] = [];
+      setIsLoading(true);
+
+      if (q.length === 42 && q.toLowerCase().startsWith('0x')) {
+        list = await walletOpenapi.searchToken(address, q, chainId, true);
+      } else {
+        list = await walletOpenapi.searchToken(address, q, chainId);
+        if (withBalance) {
+          list = list.filter((item) => item.amount > 0);
+        }
+      }
+      const reg = new RegExp(q, 'i');
+      const matchCustomTokens = customize?.filter((token) => {
+        return (
+          reg.test(token.name) ||
+          reg.test(token.symbol) ||
+          reg.test(token.display_symbol || '')
+        );
+      });
+      if (addressRef.current === address && kwRef.current === q) {
+        setIsLoading(false);
+        setSearchList(
+          [...list, ...matchCustomTokens].filter((item) => {
+            const isBlocked = !!blocked.find((b) =>
+              isSameAddress(b.id, item.id)
+            );
+            return !isBlocked;
+          })
+        );
+      }
+    },
+    [customize, withBalance, blocked]
+  );
+
+  useEffect(() => {
+    if (!currentAddress || !query) {
+      setIsLoading(false);
+      return;
+    }
+    searchToken({
+      address: currentAddress,
+      q: query,
+      chainId: selectChainServerId ?? undefined,
+    });
+  }, [query, currentAddress, selectChainServerId, searchToken]);
+
+  useEffect(() => {
+    addressRef.current = currentAddress;
+  }, [currentAddress]);
+
+  useEffect(() => {
+    kwRef.current = query;
+  }, [query]);
+
+  return { filterTokenList, isLoading };
 };
 export const useFilterProtoList = (
   protocolList: DisplayProtocol[],
-  selectChainServerId: string | null
+  selectChainServerId: string | null,
+  query = ''
 ) => {
   const filterProtocolList = useMemo(() => {
     const list: DisplayProtocol[] = selectChainServerId
@@ -135,30 +212,46 @@ export const useFilterProtoList = (
     return sortBy(
       sortBy(
         list.map((item) => {
-          item.portfolio_item_list = item.portfolio_item_list.map((i) => {
-            const assetList = i.asset_token_list;
-            let positiveList: TokenItem[] = [];
-            let negativeList: TokenItem[] = [];
-            assetList.forEach((j) => {
-              if (j.amount < 0) {
-                negativeList.push(j);
-              } else {
-                positiveList.push(j);
-              }
+          item.portfolio_item_list = item.portfolio_item_list
+            .filter((portfolio) => {
+              const hasToken = portfolio.asset_token_list.some((token) => {
+                if (
+                  query.length === 42 &&
+                  query.toLowerCase().startsWith('0x')
+                ) {
+                  return isSameAddress(token.id, query);
+                }
+                const reg = new RegExp(query, 'i');
+                return (
+                  reg.test(token.display_symbol || '') || reg.test(token.symbol)
+                );
+              });
+              return hasToken;
+            })
+            .map((i) => {
+              const assetList = i.asset_token_list;
+              let positiveList: TokenItem[] = [];
+              let negativeList: TokenItem[] = [];
+              assetList.forEach((j) => {
+                if (j.amount < 0) {
+                  negativeList.push(j);
+                } else {
+                  positiveList.push(j);
+                }
+              });
+              positiveList = sortBy(
+                positiveList,
+                (j) => j.amount * j.price
+              ).reverse();
+              negativeList = sortBy(
+                negativeList,
+                (j) => Math.abs(j.amount) * j.price
+              ).reverse();
+              return {
+                ...i,
+                asset_token_list: [...positiveList, ...negativeList],
+              };
             });
-            positiveList = sortBy(
-              positiveList,
-              (j) => j.amount * j.price
-            ).reverse();
-            negativeList = sortBy(
-              negativeList,
-              (j) => Math.abs(j.amount) * j.price
-            ).reverse();
-            return {
-              ...i,
-              asset_token_list: [...positiveList, ...negativeList],
-            };
-          });
           return {
             ...item,
             portfolio_item_list: sortBy(item.portfolio_item_list, (i) => {
@@ -169,10 +262,10 @@ export const useFilterProtoList = (
             }).reverse(),
           };
         })
-      ),
+      ).filter((item) => item.portfolio_item_list.length > 0),
       (i) => i.usd_value || 0
     ).reverse();
-  }, [protocolList, selectChainServerId]);
+  }, [protocolList, query, selectChainServerId]);
 
   return filterProtocolList;
 };

@@ -1,10 +1,8 @@
-import { DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
 import styled from 'styled-components';
 import { useEffect, useMemo, useState } from 'react';
-// import { CHAINS_LIST } from '@debank/common';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-import { formatUsdValue } from '@/renderer/utils/number';
 import clsx from 'clsx';
+import { Chain, ChainItem } from './ChainItem';
 
 const NoAssetsView = styled.div`
   font-weight: 400;
@@ -23,21 +21,22 @@ const ChainListWrapper = styled.div`
   }
 `;
 
-interface Chain extends DisplayChainWithWhiteLogo {
-  usd_value: number;
-}
-
 const ChainList = ({
   chainBalances,
   onChange,
+  updateNonce,
 }: {
   chainBalances: Chain[];
   onChange(id: string | null): void;
+  updateNonce?: number;
 }) => {
   const { currentAccount } = useCurrentAccount();
   const [selectChainServerId, setSelectChainServerId] = useState<null | string>(
     null
   );
+  const [currentChainList, setCurrentChainList] = useState<Chain[]>([]);
+  const [moreChainList, setMoreChainList] = useState<Chain[]>([]);
+  const [showMore, setShowMore] = useState(false);
 
   const reset = () => {
     setSelectChainServerId(null);
@@ -72,6 +71,28 @@ const ChainList = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentAccount]);
 
+  useEffect(() => {
+    const more1List: Chain[] = [];
+    const less1List: Chain[] = [];
+    chainBalances.forEach((item) => {
+      if (Number(percentMap[item.id]) >= 1) {
+        more1List.push(item);
+      } else {
+        less1List.push(item);
+      }
+    });
+    setCurrentChainList(more1List);
+    setMoreChainList(less1List);
+  }, [percentMap, chainBalances]);
+
+  useEffect(() => {
+    return () => {
+      setShowMore(false);
+    };
+  }, [updateNonce]);
+
+  const moreLen = moreChainList.length;
+
   if (chainBalances.length <= 0) {
     return <NoAssetsView>No assets</NoAssetsView>;
   }
@@ -80,32 +101,40 @@ const ChainList = ({
     <ChainListWrapper
       className={clsx('grid', 'rounded-[6px] bg-[#FFFFFF05]', 'p-[28px]')}
     >
-      {chainBalances.map((item) => (
-        <div
-          id={`chain-icon-${item.id}`}
+      {currentChainList.map((item) => (
+        <ChainItem
+          data={item}
+          selectChainServerId={selectChainServerId}
+          handleSelectChain={handleSelectChain}
+          percentMap={percentMap}
           key={item.id}
-          className={clsx('flex space-x-[9px]', 'cursor-pointer', {
-            selected: item.id === selectChainServerId,
-            'opacity-30':
-              selectChainServerId !== null && item.id !== selectChainServerId,
-          })}
-          onClick={() => handleSelectChain(item.id)}
-        >
-          <img
-            className="w-[32px] h-[32px] rounded-[4px]"
-            src={item.logo || item.logo_url}
-          />
-          <div className="flex flex-col space-y-[5px] hover:text-[#8697FF]">
-            <span className="text-[12px] opacity-70">{item.name}</span>
-            <div className="text-[14px]">
-              <span>{formatUsdValue(item.usd_value)}</span>
-              <span className="text-[12px] opacity-70 ml-[8px]">
-                {percentMap[item.id]}%
-              </span>
-            </div>
-          </div>
-        </div>
+        />
       ))}
+      {showMore ? (
+        moreChainList.map((item) => (
+          <ChainItem
+            data={item}
+            selectChainServerId={selectChainServerId}
+            handleSelectChain={handleSelectChain}
+            percentMap={percentMap}
+            key={item.id}
+          />
+        ))
+      ) : (
+        <div
+          className={clsx(
+            'cursor-pointer text-12 underline opacity-70 leading-[32px]',
+            {
+              hidden: moreLen === 0,
+            }
+          )}
+          onClick={() => {
+            setShowMore(true);
+          }}
+        >
+          Unfold {moreLen} chain{moreLen > 1 ? 's' : ''}
+        </div>
+      )}
     </ChainListWrapper>
   );
 };

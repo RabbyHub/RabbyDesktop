@@ -372,7 +372,7 @@ const TokenItemComp = ({
         </div>
         {isDebt && <div className="debt-tag">Debt</div>}
       </div>
-      <div className="token-price">${formatPrice(token.price)}</div>
+      <div className="token-price">${formatPrice(token.price || 0)}</div>
       <div className="token-amount">
         <span>
           {`${formatAmount(token.amount)}`}{' '}
