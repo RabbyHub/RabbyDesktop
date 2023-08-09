@@ -11,7 +11,7 @@ import {
 import TokenWithChain from '@/renderer/components/TokenWithChain';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 import clsx from 'clsx';
-import { TokenActionSymbol } from '@/renderer/components/TokenActionModal';
+import { TokenActionSymbol } from '@/renderer/components/TokenActionModal/TokenActionModal';
 import { getTokenSymbol } from '@/renderer/utils';
 
 const TokenItemWrapper = styled.li`

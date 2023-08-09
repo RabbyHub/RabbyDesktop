@@ -19,7 +19,7 @@ import {
 } from '@/renderer/utils/nft';
 import BigNumber from 'bignumber.js';
 import styled from 'styled-components';
-import { TokenActionSymbol } from '@/renderer/components/TokenActionModal';
+import { TokenActionSymbol } from '@/renderer/components/TokenActionModal/TokenActionModal';
 import LabelWithIcon from '@/renderer/components/LabelWithIcon';
 import { IconWithChain } from '@/renderer/components/TokenWithChain';
 import { TipsWrapper } from '@/renderer/components/TipWrapper';

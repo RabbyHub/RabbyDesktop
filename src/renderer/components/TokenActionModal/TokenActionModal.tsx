@@ -1,6 +1,13 @@
-import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
+import { TokenItem, TxHistoryResult } from '@rabby-wallet/rabby-api/dist/types';
 import { Button, Tooltip } from 'antd';
-import { useCallback, useMemo, useState, memo, DetailedHTMLProps } from 'react';
+import {
+  useCallback,
+  useMemo,
+  useState,
+  memo,
+  DetailedHTMLProps,
+  useRef,
+} from 'react';
 import clsx from 'clsx';
 import styled from 'styled-components';
 import { DEX_SUPPORT_CHAINS } from '@rabby-wallet/rabby-swap';
@@ -16,6 +23,9 @@ import IconSwap from '@/../assets/icons/home-widgets/swap.svg';
 import { obj2query } from '@/renderer/utils/url';
 import { getChain, getTokenSymbol } from '@/renderer/utils';
 import { ReceiveModal } from '@/renderer/components/ReceiveModal';
+import { splitNumberByStep } from '@/renderer/utils/number';
+import { HistoryList } from './HistoryList';
+import { TokenActionButton } from './TokenActionButton';
 
 const supportChains = [...new Set(Object.values(DEX_SUPPORT_CHAINS).flat())];
 
@@ -28,12 +38,11 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
   const chainItem = getChain(token?.chain);
   const chainLogo =
     chainItem?.logo || 'rabby-internal://assets/icons/common/token-default.svg';
-
-  const isNativeToken = chainItem.nativeTokenAddress === token?.id;
-
+  const isNativeToken = chainItem?.nativeTokenAddress === token?.id;
   const tokenAddrDisplay = isNativeToken
     ? token?.symbol
     : ellipsis(token?.id || '');
+  const ref = useRef<HTMLDivElement | null>(null);
 
   const navigate = useNavigate();
 
@@ -55,6 +64,7 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
         icon: IconSwap,
         onClick: () => {
           if (
+            chainItem &&
             supportChains.includes(chainItem?.enum) &&
             chainItem?.serverId &&
             token?.id
@@ -69,7 +79,7 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
             onCancel();
           }
         },
-        disabled: !supportChains.includes(chainItem?.enum),
+        disabled: !chainItem || !supportChains.includes(chainItem?.enum),
         disbaledTip: 'Tokens on this chain are not supported for swap',
       },
       {
@@ -100,30 +110,51 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
   }
   return (
     <div className="flex flex-col h-full text-white">
-      <div className="flex items-center">
+      <div className="flex items-center gap-[6px] mb-[20px]">
         <img
           src={
             token.logo_url ||
             'rabby-internal://assets/icons/common/token-default.svg'
           }
-          className="w-[34px] rounded-full"
+          className="w-[24px] rounded-full"
         />
-        <div className="mx-[15px] text-[30px] leading-[36px] font-medium max-w-[276px] overflow-hidden overflow-ellipsis whitespace-nowrap">
+        <div className="text-[20px] leading-[24px] font-medium max-w-[276px] overflow-hidden overflow-ellipsis whitespace-nowrap">
           {getTokenSymbol(token)}
         </div>
 
         <div
           onClick={openScanUrl}
           className={clsx(
-            'flex gap-6 py-6 px-8 rounded-[4px] items-center bg-opacity-20 bg-[#000] rounded-[4px]',
-            !isNativeToken && 'cursor-pointer'
+            'flex gap-6 py-4 px-8 rounded-[4px] items-center bg-opacity-20 bg-[#000] rounded-[4px]',
+            !isNativeToken && 'cursor-pointer',
+            'text-13'
           )}
         >
           <img src={chainLogo} className="w-14 h-14" />
-          <span className="text-white text-opacity-60">{tokenAddrDisplay}</span>
+          <span className="text-[#D3D8E0] text-13">{tokenAddrDisplay}</span>
           {!isNativeToken && (
             <img src={IconLink} className="w-14 h-14 opacity-60" />
           )}
+        </div>
+      </div>
+
+      <div className="mb-[20px]">
+        <TokenActionButton token={token} />
+
+        <div
+          className={clsx('flex items-center gap-6', 'text-[#BABEC5] text-14')}
+        >
+          <span>{getTokenSymbol(token)}</span>
+          <span>Balance</span>
+        </div>
+        <div className="mt-[4px]">
+          <span className="text-[24px] font-medium">
+            {splitNumberByStep((token.amount || 0)?.toFixed(4))}
+          </span>
+          <span className="text-[14px] text-[#BABEC5] ml-[8px]">
+            ≈ $
+            {splitNumberByStep((token.amount * token.price || 0)?.toFixed(2))}
+          </span>
         </div>
       </div>
 
@@ -141,25 +172,27 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
             <Button
               type="primary"
               className={clsx(
-                'w-[165px] h-[50px] rounded-[6px] flex pl-[32px] items-center text-[16px] font-medium ',
-                btn.disabled && 'cursor-not-allowed opacity-30'
+                'w-[133px] h-[44px] rounded-[6px] flex items-center text-[15px] font-medium ',
+                btn.disabled && 'cursor-not-allowed opacity-30',
+                'text-center justify-center border-[#7084FF]',
+                btn.name !== 'Swap' && 'bg-transparent text-[#7084FF]',
+                btn.name === 'Swap' && 'bg-[#7084FF]'
               )}
               onClick={btn.onClick}
             >
-              <img src={btn.icon} className="w-[34px] mr-6" />
               <span>{btn.name}</span>
             </Button>
           </Tooltip>
         ))}
       </div>
+      <HistoryList refContainer={ref} token={token} />
     </div>
   );
 };
 
 const StyledModal = styled(Modal)`
   .ant-modal-close-x {
-    padding-top: 30px;
-    padding-right: 30px;
+    padding: 20px;
   }
 `;
 
@@ -257,11 +290,11 @@ export const TokenActionModal = memo(() => {
   return (
     <>
       <StyledModal
-        width={584}
+        width={480}
         centered
         bodyStyle={{
-          height: 224,
-          padding: '40px 32px',
+          height: 600,
+          padding: '20px',
         }}
         title={null}
         open={!!currentToken}

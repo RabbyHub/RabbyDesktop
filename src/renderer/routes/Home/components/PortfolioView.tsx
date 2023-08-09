@@ -9,7 +9,7 @@ import TokenList from './TokenList';
 import ProtocolList from './ProtocolList';
 import ScrollTopContext from './scrollTopContext';
 import { VIEW_TYPE } from '../type';
-import { TokenActionModal } from '../../../components/TokenActionModal';
+import { TokenActionModal } from '../../../components/TokenActionModal/TokenActionModal';
 import { Summary } from './Summary';
 
 const PortfolioWrapper = styled.div`

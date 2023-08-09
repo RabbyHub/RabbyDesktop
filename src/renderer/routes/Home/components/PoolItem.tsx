@@ -12,7 +12,7 @@ import {
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import { getTokenSymbol } from '@/renderer/utils';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
-import { TokenActionSymbol } from '@/renderer/components/TokenActionModal';
+import { TokenActionSymbol } from '@/renderer/components/TokenActionModal/TokenActionModal';
 
 const PoolItemWrapper = styled.div`
   padding-top: 25px;
