@@ -12,8 +12,6 @@ import { VIEW_TYPE } from '../type';
 import { TokenActionModal } from '../../../components/TokenActionModal/TokenActionModal';
 import { Summary } from './Summary';
 import { LowAssetsModal } from './LowAssetsModal';
-import { BlockedButton } from './TokenButton/BlockedButton';
-import { CustomizedButton } from './TokenButton/CustomizedButton';
 
 const PortfolioWrapper = styled.div`
   background: rgba(255, 255, 255, 0.03);

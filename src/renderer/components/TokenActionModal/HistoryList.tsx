@@ -4,6 +4,8 @@ import { TokenItem, TxHistoryResult } from '@rabby-wallet/rabby-api/dist/types';
 import { useInfiniteScroll } from 'ahooks';
 import { last } from 'lodash';
 import clsx from 'clsx';
+import React from 'react';
+// eslint-disable-next-line import/no-cycle
 import { HistoryItem } from './HistoryItem';
 import styles from '../TransactionsModal/index.module.less';
 import { HistoryItemSkeleton } from './HistoryItemSkeleton';
@@ -17,7 +19,6 @@ interface Props {
 
 export const HistoryList: React.FC<Props> = ({ refContainer, token }) => {
   const { currentAccount } = useCurrentAccount();
-
   const fetchData = async (startTime = 0) => {
     const res: TxHistoryResult = await walletOpenapi.listTxHisotry({
       id: currentAccount!.address,

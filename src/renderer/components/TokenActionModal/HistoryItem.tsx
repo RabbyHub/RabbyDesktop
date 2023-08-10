@@ -9,6 +9,7 @@ import {
 import clsx from 'clsx';
 import { useMemo } from 'react';
 import { TxInterAddressExplain } from '../TransactionsModal/components/TxInterAddressExplain';
+// eslint-disable-next-line import/no-cycle
 import { TxChange } from '../TransactionsModal/components/TxChange';
 import styles from '../TransactionsModal/index.module.less';
 

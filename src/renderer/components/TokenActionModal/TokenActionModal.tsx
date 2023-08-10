@@ -7,6 +7,7 @@ import {
   memo,
   DetailedHTMLProps,
   useRef,
+  useEffect,
 } from 'react';
 import clsx from 'clsx';
 import styled from 'styled-components';
@@ -25,11 +26,17 @@ import { obj2query } from '@/renderer/utils/url';
 import { getChain, getTokenSymbol } from '@/renderer/utils';
 import { ReceiveModal } from '@/renderer/components/ReceiveModal';
 import { splitNumberByStep } from '@/renderer/utils/number';
+// eslint-disable-next-line import/no-cycle
+import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
+// eslint-disable-next-line import/no-cycle
 import { HistoryList } from './HistoryList';
 import { TokenActionButton } from './TokenActionButton';
 import { toastCopiedWeb3Addr } from '../TransparentToast';
 
 const supportChains = [...new Set(Object.values(DEX_SUPPORT_CHAINS).flat())];
+
+export const actionTokenAtom = atom<TokenItem | undefined>(undefined);
 
 type tokenContainer = {
   token?: TokenItem;
@@ -45,7 +52,8 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
     ? token?.symbol
     : ellipsis(token?.id || '');
   const ref = useRef<HTMLDivElement | null>(null);
-
+  const currentToken = useAtomValue(actionTokenAtom);
+  const { currentAccount } = useCurrentAccount();
   const navigate = useNavigate();
 
   const openScanUrl = useCallback(() => {
@@ -108,7 +116,19 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
     [chainItem, handleReceiveClick, navigate, onCancel, token]
   );
 
-  if (!token || !chainItem) {
+  const [amount, setAmount] = useState(token?.amount);
+
+  useEffect(() => {
+    if (token && token?.amount === undefined) {
+      walletOpenapi
+        .getToken(currentAccount!.address, token.chain, token.id)
+        .then(async (res) => {
+          setAmount((await res).amount);
+        });
+    }
+  }, [currentAccount, token]);
+
+  if (!token || !chainItem || !currentToken) {
     return null;
   }
   return (
@@ -162,11 +182,10 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
         </div>
         <div className="mt-[4px]">
           <span className="text-[24px] font-medium">
-            {splitNumberByStep((token.amount || 0)?.toFixed(4))}
+            {splitNumberByStep((amount || 0)?.toFixed(4))}
           </span>
           <span className="text-[14px] text-[#BABEC5] ml-[8px]">
-            ≈ $
-            {splitNumberByStep((token.amount * token.price || 0)?.toFixed(2))}
+            ≈ ${splitNumberByStep((amount * token.price || 0)?.toFixed(2))}
           </span>
         </div>
       </div>
@@ -208,8 +227,6 @@ const StyledModal = styled(Modal)`
     padding: 20px;
   }
 `;
-
-export const actionTokenAtom = atom<TokenItem | undefined>(undefined);
 
 export const isSupportToken = (token?: TokenItem) => {
   return token && getChain(token?.chain);

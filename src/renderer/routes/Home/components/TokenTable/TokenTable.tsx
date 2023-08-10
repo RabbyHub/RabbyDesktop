@@ -1,5 +1,6 @@
 import React from 'react';
 import { FixedSizeList } from 'react-window';
+import { useTokenAction } from '@/renderer/components/TokenActionModal/TokenActionModal';
 import { TBody, THeadCell, THeader, Table } from './Table';
 import { TokenItem, Props as TokenItemProps } from './TokenItem';
 
@@ -17,21 +18,7 @@ export const TokenTable: React.FC<Props> = ({
   virtual,
   EmptyComponent,
 }) => {
-  const [selected, setSelected] = React.useState<TokenItemProps['item']>();
-  const [visible, setVisible] = React.useState(false);
-  const [token, setToken] = React.useState<TokenItemProps['item']>();
-
-  React.useEffect(() => {
-    setVisible(!!selected);
-
-    if (selected) {
-      setToken({
-        ...selected,
-      });
-    } else {
-      setToken(undefined);
-    }
-  }, [selected]);
+  const { setTokenAction } = useTokenAction();
 
   return (
     <>
@@ -57,7 +44,7 @@ export const TokenTable: React.FC<Props> = ({
                   const item = data[index];
                   return (
                     <TokenItem
-                      onClick={() => setSelected(item)}
+                      onClick={() => setTokenAction(item)}
                       style={style}
                       key={`${item.chain}-${item.id}`}
                       item={item}
@@ -69,7 +56,7 @@ export const TokenTable: React.FC<Props> = ({
               list?.map((item) => {
                 return (
                   <TokenItem
-                    onClick={() => setSelected(item)}
+                    onClick={() => setTokenAction(item)}
                     key={`${item.chain}-${item.id}`}
                     item={item}
                   />

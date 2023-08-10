@@ -1,13 +1,20 @@
-import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
 import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
+import { atom, useAtom } from 'jotai';
 import React from 'react';
+import { useCurrentAccount } from './useAccount';
 
-export const useToken = ({ tokenList }: { tokenList: TokenItem[] }) => {
+const tokenListAtom = atom<TokenItem[]>([]);
+
+export const useToken = () => {
   const [customize, setCustomize] = React.useState<TokenItem[]>([]);
   const [blocked, setBlocked] = React.useState<TokenItem[]>([]);
+  const [tokenList, setTokenList] = useAtom(tokenListAtom);
+  const { currentAccount } = useCurrentAccount();
 
   const initData = React.useCallback(async () => {
+    if (!currentAccount) return;
     const customizeTokens = await walletController.getCustomizedToken();
     const blockedTokens = await walletController.getBlockedToken();
     const customTokenList: TokenItem[] = [];
@@ -25,6 +32,7 @@ export const useToken = ({ tokenList }: { tokenList: TokenItem[] }) => {
         // customize with balance
         customTokenList.push(token);
       }
+
       if (
         blockedTokens.find(
           (t) =>
@@ -37,9 +45,35 @@ export const useToken = ({ tokenList }: { tokenList: TokenItem[] }) => {
       }
     });
 
+    const noBalanceBlockedTokens = blockedTokens.filter((_token) => {
+      return !blockedTokenList.find(
+        (t) => isSameAddress(_token.address, t.id) && _token.chain === t.chain
+      );
+    });
+    const noBalanceCustomizeTokens = customizeTokens.filter((_token) => {
+      return !customTokenList.find(
+        (t) => isSameAddress(_token.address, t.id) && _token.chain === t.chain
+      );
+    });
+
+    if (noBalanceCustomizeTokens.length > 0) {
+      const queryTokenList = await walletOpenapi.customListToken(
+        noBalanceCustomizeTokens.map((item) => `${item.chain}:${item.address}`),
+        currentAccount.address
+      );
+      customTokenList.push(...queryTokenList.filter((token) => !token.is_core));
+    }
+    if (noBalanceBlockedTokens.length > 0) {
+      const queryTokenList = await walletOpenapi.customListToken(
+        noBalanceBlockedTokens.map((item) => `${item.chain}:${item.address}`),
+        currentAccount.address
+      );
+      blockedTokenList.push(...queryTokenList.filter((token) => token.is_core));
+    }
+
     setCustomize(customTokenList);
     setBlocked(blockedTokenList);
-  }, [tokenList]);
+  }, [currentAccount, tokenList]);
 
   React.useEffect(() => {
     initData();
@@ -48,5 +82,6 @@ export const useToken = ({ tokenList }: { tokenList: TokenItem[] }) => {
   return {
     customize,
     blocked,
+    setTokenList,
   };
 };

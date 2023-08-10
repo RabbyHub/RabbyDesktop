@@ -6,6 +6,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { useToken } from '@/renderer/hooks/rabbyx/useToken';
 import { isSameAddress } from '@/renderer/utils/address';
+import { CHAINS } from '@debank/common';
+import { findChainByEnum } from '@/renderer/utils';
 import { VIEW_TYPE } from './type';
 
 export const useSwitchView = () => {
@@ -116,6 +118,20 @@ export const useExpandList = (
   };
 };
 
+const filterDisplayToken = (tokens: TokenItem[], blocked: TokenItem[]) => {
+  const ChainValues = Object.values(CHAINS);
+  return tokens.filter((token) => {
+    const chain = ChainValues.find((c) => c.serverId === token.chain);
+    return (
+      token.is_core &&
+      !blocked.find(
+        (item) => isSameAddress(token.id, item.id) && item.chain === token.chain
+      ) &&
+      findChainByEnum(chain?.enum)
+    );
+  });
+};
+
 export const useFilterTokenList = (
   tokenList: TokenItem[],
   selectChainServerId: string | null,
@@ -123,16 +139,19 @@ export const useFilterTokenList = (
   query?: string,
   withBalance = false
 ) => {
+  const { customize, blocked } = useToken();
+  const fullTokenList = useMemo(() => {
+    return filterDisplayToken(tokenList, blocked);
+  }, [tokenList, blocked]);
   const [searchList, setSearchList] = useState<TokenItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const currentList = query ? searchList : tokenList;
+  const currentList = query ? searchList : fullTokenList;
   const filterTokenList = useMemo(() => {
     const list: TokenItem[] = selectChainServerId
       ? currentList.filter((token) => token.chain === selectChainServerId)
       : currentList;
     return sortBy(list, (i) => i.usd_value || 0).reverse();
   }, [currentList, selectChainServerId]);
-  const { customize, blocked } = useToken({ tokenList });
   const addressRef = useRef(currentAddress);
   const kwRef = useRef<string>();
 

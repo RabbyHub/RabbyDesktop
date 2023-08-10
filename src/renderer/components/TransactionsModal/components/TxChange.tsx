@@ -2,12 +2,15 @@ import NFTAvatar from '@/renderer/components/NFTAvatar';
 import { numberWithCommasIsLtOne } from '@/renderer/utils/number';
 import { getTokenSymbol } from '@/renderer/utils';
 import {
+  TokenItem,
   TxDisplayItem,
   TxHistoryItem,
 } from '@rabby-wallet/rabby-api/dist/types';
 import classNames from 'classnames';
 import clsx from 'clsx';
 import styles from '../index.module.less';
+// eslint-disable-next-line import/no-cycle
+import { useTokenAction } from '../../TokenActionModal/TokenActionModal';
 
 const IconUnknown = 'rabby-internal://assets/icons/common/token-default.svg';
 
@@ -17,6 +20,14 @@ type TxChangeProps = {
 
 export const TxChange = ({ data: info, tokenDict }: TxChangeProps) => {
   const tokens = tokenDict || {};
+  const { setTokenAction, cancelTokenAction } = useTokenAction();
+
+  const handleClick = async (token: TokenItem) => {
+    cancelTokenAction();
+    setTimeout(() => {
+      setTokenAction(token);
+    }, 0);
+  };
 
   if (!info.sends?.length && !info.receives?.length) {
     return null;
@@ -62,7 +73,12 @@ export const TxChange = ({ data: info, tokenDict }: TxChangeProps) => {
               className={clsx('token-change-item-text', styles.txChangeText)}
             >
               - {`${isNft ? v.amount : numberWithCommasIsLtOne(v.amount, 2)}`}
-              <span className={styles.txChangeSymbol}>{name}</span>
+              <span
+                onClick={() => handleClick(token)}
+                className={styles.txChangeSymbol}
+              >
+                {name}
+              </span>
             </span>
           </div>
         );
@@ -109,7 +125,12 @@ export const TxChange = ({ data: info, tokenDict }: TxChangeProps) => {
               className={clsx('token-change-item-text', styles.txChangeText)}
             >
               + {`${isNft ? v.amount : numberWithCommasIsLtOne(v.amount, 2)}`}
-              <span className={styles.txChangeSymbol}>{name}</span>
+              <span
+                onClick={() => handleClick(token)}
+                className={styles.txChangeSymbol}
+              >
+                {name}
+              </span>
             </span>
           </div>
         );
