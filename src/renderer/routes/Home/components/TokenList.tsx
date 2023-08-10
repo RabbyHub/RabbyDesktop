@@ -10,7 +10,7 @@ const ExpandItem = styled.div`
   font-weight: 400;
   font-size: 12px;
   line-height: 14px;
-  color: #9094a1;
+  color: #babec5;
   padding: 0 14px;
   align-items: center;
   margin-top: 10px;
@@ -40,20 +40,10 @@ const ExpandItem = styled.div`
     }
   }
   .icon-expand-arrow {
-    width: 10px;
+    width: 14px;
     height: 5px;
-    transform: rotate(0);
+    transform: rotate(90deg);
     transition: transform 0.3s;
-    margin-left: 13px;
-    opacity: 0;
-    &.flip {
-      transform: rotate(180deg);
-    }
-  }
-  &:hover {
-    .icon-expand-arrow {
-      opacity: 1;
-    }
   }
 `;
 
@@ -64,6 +54,7 @@ const TokenList = ({
   isLoadingTokenList,
   supportHistoryChains,
   showHistory,
+  onOpenLowAssets,
 }: {
   tokenList: TokenItem[];
   historyTokenMap: Record<string, TokenItem>;
@@ -78,9 +69,11 @@ const TokenList = ({
     setIsExpand(v: boolean): void;
   };
   showHistory: boolean;
+  onOpenLowAssets(): void;
 }) => {
   const handleClickExpandToken = () => {
-    tokenHidden.setIsExpand(!tokenHidden.isExpand);
+    // tokenHidden.setIsExpand(!tokenHidden.isExpand);
+    onOpenLowAssets();
   };
 
   if (isLoadingTokenList) {
@@ -166,12 +159,10 @@ const TokenList = ({
             />
             {tokenHidden.isExpand
               ? 'Hide small value assets'
-              : `${tokenHidden.hiddenCount} Assets are hidden`}
+              : `${tokenHidden.hiddenCount} low value assets`}
             <img
               src="rabby-internal://assets/icons/home/expand-arrow.svg"
-              className={classNames('icon-expand-arrow', {
-                flip: !tokenHidden.isExpand,
-              })}
+              className={classNames('icon-expand-arrow')}
             />
             <div className="hide-assets-usd-value">
               {formatUsdValue(tokenHidden.hiddenUsdValue)}

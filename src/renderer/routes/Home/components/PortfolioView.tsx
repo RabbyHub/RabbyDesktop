@@ -11,6 +11,7 @@ import ScrollTopContext from './scrollTopContext';
 import { VIEW_TYPE } from '../type';
 import { TokenActionModal } from '../../../components/TokenActionModal/TokenActionModal';
 import { Summary } from './Summary';
+import { LowAssetsModal } from './LowAssetsModal';
 
 const PortfolioWrapper = styled.div`
   background: rgba(255, 255, 255, 0.03);
@@ -116,6 +117,7 @@ const PortfolioView = ({
     hiddenUsdValue: number;
     expandTokensUsdValueChange: number;
     setIsExpand(v: boolean): void;
+    tokenHiddenList: TokenItem[];
   };
   protocolHidden: {
     isShowExpand: boolean;
@@ -144,6 +146,7 @@ const PortfolioView = ({
       protocolList.length <= 0
     );
   }, [isLoadingProtocolList, isLoadingTokenList, tokenList, protocolList]);
+  const [visibleLowAssets, setVisibleLowAssets] = useState(false);
 
   const handleRelateDapp = (protocol: DisplayProtocol) => {
     setRelateDappProtocol(protocol);
@@ -183,6 +186,9 @@ const PortfolioView = ({
               isLoadingTokenList={isLoadingTokenList}
               supportHistoryChains={supportHistoryChains}
               showHistory={view === VIEW_TYPE.CHANGE}
+              onOpenLowAssets={() => {
+                setVisibleLowAssets(true);
+              }}
             />
           )}
           {view === VIEW_TYPE.SUMMARY ? (
@@ -213,6 +219,13 @@ const PortfolioView = ({
       </PortfolioWrapper>
 
       <TokenActionModal />
+      <LowAssetsModal
+        list={tokenHidden.tokenHiddenList}
+        visible={visibleLowAssets}
+        onClose={() => {
+          setVisibleLowAssets(false);
+        }}
+      />
     </ScrollTopContext.Provider>
   );
 };

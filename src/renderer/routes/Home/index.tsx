@@ -188,6 +188,7 @@ const Home = () => {
     totalHiddenCount: tokenHiddenCount,
     setIsExpand: setIsTokenExpand,
     usdValueChange: expandTokensUsdValueChange,
+    tokenHiddenList,
   } = useExpandList(
     filterTokenList,
     currentView === VIEW_TYPE.DEFAULT ? null : historyTokenMap,
@@ -462,6 +463,7 @@ const Home = () => {
                   expandTokensUsdValueChange,
                   setIsExpand: setIsTokenExpand,
                   isShowExpand: isShowTokenExpand,
+                  tokenHiddenList,
                 }}
                 protocolHidden={{
                   isShowExpand: isShowProtocolExpand,

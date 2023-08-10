@@ -10,6 +10,10 @@ export interface Props {
 }
 
 const SwitchStyled = styled(Switch)`
+  &.ant-switch-checked {
+    background-color: #2abb7f;
+  }
+
   &.ant-switch-small {
     min-width: 24px;
     height: 12px;
@@ -37,7 +41,7 @@ export const CustomizedButton: React.FC<Props> = ({
     <div
       className={clsx(
         'flex rounded',
-        'py-[9px] px-12 bg-orange bg-opacity-20 justify-between mb-[26px]'
+        'py-[9px] px-12 bg-orange bg-opacity-20 justify-between mb-[20px]'
       )}
     >
       <div className={clsx('text-orange text-13')}>
@@ -57,7 +61,7 @@ export const CustomizedButton: React.FC<Props> = ({
             }
           }}
         />
-        <span className="text-black text-12">Customized</span>
+        <span className="text-[#F7FAFC] text-12">Customized</span>
       </div>
     </div>
   );

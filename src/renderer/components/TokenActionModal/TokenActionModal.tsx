@@ -1,4 +1,4 @@
-import { TokenItem, TxHistoryResult } from '@rabby-wallet/rabby-api/dist/types';
+import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { Button, Tooltip } from 'antd';
 import {
   useCallback,
@@ -14,6 +14,7 @@ import { DEX_SUPPORT_CHAINS } from '@rabby-wallet/rabby-swap';
 import { useNavigate } from 'react-router-dom';
 import { atom, useAtomValue, useSetAtom } from 'jotai';
 import { IconLink } from '@/../assets/icons/mainwin-settings';
+import IconCopy from '@/../assets/icons/mainwin-settings/item-copy.svg';
 import { Modal } from '@/renderer/components/Modal/Modal';
 import { ellipsis } from '@/renderer/utils/address';
 import { openExternalUrl } from '@/renderer/ipcRequest/app';
@@ -26,6 +27,7 @@ import { ReceiveModal } from '@/renderer/components/ReceiveModal';
 import { splitNumberByStep } from '@/renderer/utils/number';
 import { HistoryList } from './HistoryList';
 import { TokenActionButton } from './TokenActionButton';
+import { toastCopiedWeb3Addr } from '../TransparentToast';
 
 const supportChains = [...new Set(Object.values(DEX_SUPPORT_CHAINS).flat())];
 
@@ -105,6 +107,7 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
     ],
     [chainItem, handleReceiveClick, navigate, onCancel, token]
   );
+
   if (!token || !chainItem) {
     return null;
   }
@@ -123,7 +126,6 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
         </div>
 
         <div
-          onClick={openScanUrl}
           className={clsx(
             'flex gap-6 py-4 px-8 rounded-[4px] items-center bg-opacity-20 bg-[#000] rounded-[4px]',
             !isNativeToken && 'cursor-pointer',
@@ -133,7 +135,18 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
           <img src={chainLogo} className="w-14 h-14" />
           <span className="text-[#D3D8E0] text-13">{tokenAddrDisplay}</span>
           {!isNativeToken && (
-            <img src={IconLink} className="w-14 h-14 opacity-60" />
+            <img
+              onClick={openScanUrl}
+              src={IconLink}
+              className="w-14 h-14 opacity-60 cursor-pointer"
+            />
+          )}
+          {!isNativeToken && (
+            <img
+              onClick={() => toastCopiedWeb3Addr(token?.id)}
+              src={IconCopy}
+              className="w-14 h-14 opacity-60 cursor-pointer"
+            />
           )}
         </div>
       </div>

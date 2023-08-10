@@ -43,13 +43,18 @@ export const useExpandList = (
   const [isExpand, setIsExpand] = useState(false);
   const filterPrice = useMemo(() => calcFilterPrice(tokens), [tokens]);
   const isShowExpand = useMemo(() => calcIsShowExpand(tokens), [tokens]);
-  const { totalHidden, totalHiddenCount } = useMemo(() => {
+  const { totalHidden, totalHiddenCount, tokenHiddenList } = useMemo(() => {
     if (!isShowExpand) {
       return {
         totalHidden: 0,
         totalHiddenCount: 0,
+        tokenHiddenList: [],
       };
     }
+    const currentHiddenList = tokens.filter((item) => {
+      const price = item.amount * item.price || 0;
+      return price < filterPrice;
+    });
     return {
       totalHidden: tokens.reduce((t, item) => {
         const price = item.amount * item.price || 0;
@@ -58,10 +63,8 @@ export const useExpandList = (
         }
         return t;
       }, 0),
-      totalHiddenCount: tokens.filter((item) => {
-        const price = item.amount * item.price || 0;
-        return price < filterPrice;
-      }).length,
+      tokenHiddenList: currentHiddenList,
+      totalHiddenCount: currentHiddenList.length,
     };
   }, [tokens, filterPrice, isShowExpand]);
   const filterList = useMemo(() => {
@@ -109,6 +112,7 @@ export const useExpandList = (
     totalHidden,
     totalHiddenCount,
     usdValueChange,
+    tokenHiddenList,
   };
 };
 
