@@ -102,8 +102,9 @@ const PreviewCard = styled.div`
 export default function ModalPreviewNFTItem({
   nft,
   collectionName,
+  onSend,
   ...props
-}: { nft: NFTItem; collectionName?: string } & Props) {
+}: { nft?: NFTItem; collectionName?: string; onSend?: () => void } & Props) {
   const collectProperty = nft?.collection;
   const chainName = React.useMemo(() => {
     return getChain(nft?.chain)?.name || '-';
@@ -130,7 +131,8 @@ export default function ModalPreviewNFTItem({
         replace: true,
       }
     );
-  }, [collectProperty?.name, collectionName, navigate, nft]);
+    onSend?.();
+  }, [collectProperty?.name, collectionName, navigate, nft, onSend]);
 
   return (
     <PreviewModal

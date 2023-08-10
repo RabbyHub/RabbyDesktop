@@ -2,15 +2,18 @@ import NFTAvatar from '@/renderer/components/NFTAvatar';
 import { numberWithCommasIsLtOne } from '@/renderer/utils/number';
 import { getTokenSymbol } from '@/renderer/utils';
 import {
+  NFTItem,
   TokenItem,
   TxDisplayItem,
   TxHistoryItem,
 } from '@rabby-wallet/rabby-api/dist/types';
 import classNames from 'classnames';
 import clsx from 'clsx';
+import { useState } from 'react';
 import styles from '../index.module.less';
 // eslint-disable-next-line import/no-cycle
 import { useTokenAction } from '../../TokenActionModal/TokenActionModal';
+import ModalPreviewNFTItem from '../../ModalPreviewNFTItem';
 
 const IconUnknown = 'rabby-internal://assets/icons/common/token-default.svg';
 
@@ -21,8 +24,15 @@ type TxChangeProps = {
 export const TxChange = ({ data: info, tokenDict }: TxChangeProps) => {
   const tokens = tokenDict || {};
   const { setTokenAction, cancelTokenAction } = useTokenAction();
+  const [nft, setNft] = useState<NFTItem | undefined>(undefined);
 
-  const handleClick = async (token: TokenItem) => {
+  const handleClick = async (token: TokenItem, isNft: boolean) => {
+    console.log(token);
+    if (isNft) {
+      setNft(token as any);
+      return;
+    }
+
     cancelTokenAction();
     setTimeout(() => {
       setTokenAction(token);
@@ -74,7 +84,7 @@ export const TxChange = ({ data: info, tokenDict }: TxChangeProps) => {
             >
               - {`${isNft ? v.amount : numberWithCommasIsLtOne(v.amount, 2)}`}
               <span
-                onClick={() => handleClick(token)}
+                onClick={() => handleClick(token, isNft)}
                 className={styles.txChangeSymbol}
               >
                 {name}
@@ -126,7 +136,7 @@ export const TxChange = ({ data: info, tokenDict }: TxChangeProps) => {
             >
               + {`${isNft ? v.amount : numberWithCommasIsLtOne(v.amount, 2)}`}
               <span
-                onClick={() => handleClick(token)}
+                onClick={() => handleClick(token, isNft)}
                 className={styles.txChangeSymbol}
               >
                 {name}
@@ -135,6 +145,14 @@ export const TxChange = ({ data: info, tokenDict }: TxChangeProps) => {
           </div>
         );
       })}
+      <ModalPreviewNFTItem
+        onSend={() => {
+          setNft(undefined);
+          cancelTokenAction();
+        }}
+        nft={nft}
+        onCancel={() => setNft(undefined)}
+      />
     </div>
   );
 };
