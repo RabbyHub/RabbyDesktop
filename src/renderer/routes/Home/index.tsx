@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { Skeleton } from 'antd';
 import { usePrevious } from 'react-use';
 import styled from 'styled-components';
@@ -299,6 +299,12 @@ const Home = () => {
   }, []);
 
   const { showZSubview } = useZPopupLayerOnMain();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const onFocusInput = useCallback(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
 
   useEffect(() => {
     if (search) {
@@ -418,7 +424,7 @@ const Home = () => {
                 )}
                 <ToolbarWrapper className="my-[12px]">
                   <div>
-                    <TokenSearchInput onSearch={setSearch} />
+                    <TokenSearchInput ref={inputRef} onSearch={setSearch} />
                   </div>
                   <div className="switch-view">
                     <div
@@ -479,6 +485,7 @@ const Home = () => {
                 historyTokenDict={historyTokenDict}
                 chainList={displayChainList}
                 view={currentView}
+                onFocusInput={onFocusInput}
               />
             </div>
           </div>

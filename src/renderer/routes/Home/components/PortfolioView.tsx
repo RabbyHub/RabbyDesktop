@@ -12,6 +12,8 @@ import { VIEW_TYPE } from '../type';
 import { TokenActionModal } from '../../../components/TokenActionModal/TokenActionModal';
 import { Summary } from './Summary';
 import { LowAssetsModal } from './LowAssetsModal';
+import { BlockedButton } from './TokenButton/BlockedButton';
+import { CustomizedButton } from './TokenButton/CustomizedButton';
 
 const PortfolioWrapper = styled.div`
   background: rgba(255, 255, 255, 0.03);
@@ -100,6 +102,7 @@ const PortfolioView = ({
   historyTokenDict,
   view,
   chainList,
+  onFocusInput,
 }: {
   tokenList: TokenItem[];
   historyTokenMap: Record<string, TokenItem>;
@@ -133,6 +136,7 @@ const PortfolioView = ({
   historyTokenDict: Record<string, TokenItem>;
   view: VIEW_TYPE;
   chainList: DisplayChainWithWhiteLogo[];
+  onFocusInput(): void;
 }) => {
   const [relateDappModalOpen, setRelateDappModalOpen] = useState(false);
   const [scrollTop, setScrollTop] = useState(0);
@@ -179,17 +183,20 @@ const PortfolioView = ({
       <PortfolioWrapper>
         <div className="scroll-container" onScroll={handleScroll}>
           {view === VIEW_TYPE.SUMMARY || isCexChain ? null : (
-            <TokenList
-              tokenList={tokenList}
-              historyTokenMap={historyTokenMap}
-              tokenHidden={tokenHidden}
-              isLoadingTokenList={isLoadingTokenList}
-              supportHistoryChains={supportHistoryChains}
-              showHistory={view === VIEW_TYPE.CHANGE}
-              onOpenLowAssets={() => {
-                setVisibleLowAssets(true);
-              }}
-            />
+            <>
+              <TokenList
+                tokenList={tokenList}
+                historyTokenMap={historyTokenMap}
+                tokenHidden={tokenHidden}
+                isLoadingTokenList={isLoadingTokenList}
+                supportHistoryChains={supportHistoryChains}
+                showHistory={view === VIEW_TYPE.CHANGE}
+                onOpenLowAssets={() => {
+                  setVisibleLowAssets(true);
+                }}
+                onFocusInput={onFocusInput}
+              />
+            </>
           )}
           {view === VIEW_TYPE.SUMMARY ? (
             <Summary />

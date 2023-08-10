@@ -16,7 +16,8 @@ export const LowAssetsModal: React.FC<Props> = ({ visible, onClose, list }) => {
       open={visible}
       onCancel={onClose}
       title={`${list.length} low value assets`}
-      bodyStyle={{ height: 600, padding: '0 20px 0' }}
+      bodyStyle={{ height: 527, padding: '0 20px 0' }}
+      centered
       smallTitle
     >
       <div>

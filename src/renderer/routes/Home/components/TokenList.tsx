@@ -4,6 +4,8 @@ import { Skeleton } from 'antd';
 import { ServerChain, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { formatNumber, formatUsdValue } from '@/renderer/utils/number';
 import TokenItemComp, { LoadingTokenItem } from './TokenItem';
+import { BlockedButton } from './TokenButton/BlockedButton';
+import { CustomizedButton } from './TokenButton/CustomizedButton';
 
 const ExpandItem = styled.div`
   display: flex;
@@ -55,6 +57,7 @@ const TokenList = ({
   supportHistoryChains,
   showHistory,
   onOpenLowAssets,
+  onFocusInput,
 }: {
   tokenList: TokenItem[];
   historyTokenMap: Record<string, TokenItem>;
@@ -66,15 +69,19 @@ const TokenList = ({
     hiddenCount: number;
     hiddenUsdValue: number;
     expandTokensUsdValueChange: number;
+    tokenHiddenList: TokenItem[];
     setIsExpand(v: boolean): void;
   };
   showHistory: boolean;
   onOpenLowAssets(): void;
+  onFocusInput(): void;
 }) => {
   const handleClickExpandToken = () => {
     // tokenHidden.setIsExpand(!tokenHidden.isExpand);
     onOpenLowAssets();
   };
+
+  const allTokenList = [...tokenList, ...tokenHidden.tokenHiddenList];
 
   if (isLoadingTokenList) {
     return (
@@ -188,6 +195,14 @@ const TokenList = ({
             </div>
           </ExpandItem>
         )}
+
+        <div className="flex gap-12 mt-[24px] ml-[14px]">
+          <BlockedButton tokenList={allTokenList} onClickLink={onFocusInput} />
+          <CustomizedButton
+            tokenList={allTokenList}
+            onClickLink={onFocusInput}
+          />
+        </div>
       </ul>
     </>
   );
