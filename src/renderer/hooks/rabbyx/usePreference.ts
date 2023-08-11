@@ -54,10 +54,11 @@ export function usePreference() {
             [key]: value,
           };
         });
-      } else {
-        const pref = await walletController.getPreference();
-        setPreferences(pref as any);
+        return value;
       }
+      const pref = await walletController.getPreference();
+      setPreferences(pref as any);
+      return pref;
     },
     [setPreferences]
   );
