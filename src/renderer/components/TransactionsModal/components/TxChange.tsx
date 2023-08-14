@@ -85,7 +85,10 @@ export const TxChange = ({ data: info, tokenDict }: TxChangeProps) => {
               - {`${isNft ? v.amount : numberWithCommasIsLtOne(v.amount, 2)}`}
               <span
                 onClick={() => handleClick(token, isNft)}
-                className={styles.txChangeSymbol}
+                className={clsx(
+                  styles.txChangeSymbol,
+                  'underline cursor-pointer ml-[4px]'
+                )}
               >
                 {name}
               </span>
@@ -137,7 +140,10 @@ export const TxChange = ({ data: info, tokenDict }: TxChangeProps) => {
               + {`${isNft ? v.amount : numberWithCommasIsLtOne(v.amount, 2)}`}
               <span
                 onClick={() => handleClick(token, isNft)}
-                className={styles.txChangeSymbol}
+                className={clsx(
+                  styles.txChangeSymbol,
+                  'underline cursor-pointer ml-[4px]'
+                )}
               >
                 {name}
               </span>
