@@ -81,127 +81,123 @@ const TokenList = ({
     onOpenLowAssets();
   };
 
-  const allTokenList = [...tokenList, ...tokenHidden.tokenHiddenList];
-
-  if (isLoadingTokenList) {
-    return (
-      <ul className="assets-list">
-        <li className="th">
-          <div>
-            <Skeleton.Input
-              active
-              style={{
-                width: '60px',
-                height: '11px',
-                borderRadius: '2px',
-              }}
-            />
-          </div>
-          <div>
-            <Skeleton.Input
-              active
-              style={{
-                width: '60px',
-                height: '11px',
-                borderRadius: '2px',
-              }}
-            />
-          </div>
-          <div>
-            <Skeleton.Input
-              active
-              style={{
-                width: '60px',
-                height: '11px',
-                borderRadius: '2px',
-              }}
-            />
-          </div>
-          <div>
-            <Skeleton.Input
-              active
-              style={{
-                width: '60px',
-                height: '11px',
-                borderRadius: '2px',
-              }}
-            />
-          </div>
-        </li>
-        <LoadingTokenItem />
-        <LoadingTokenItem />
-        <LoadingTokenItem />
-      </ul>
-    );
-  }
-
   return (
-    <>
-      <ul className="assets-list">
-        <li className="th">
-          <div>Asset</div>
-          <div>Price</div>
-          <div>Amount</div>
-          <div>USD Value</div>
-        </li>
-        {tokenList.map((token) => (
-          <TokenItemComp
-            token={token}
-            historyToken={
-              showHistory
-                ? historyTokenMap[`${token.chain}-${token.id}`]
-                : undefined
-            }
-            key={`${token.chain}-${token.id}`}
-            supportHistory={
-              !!supportHistoryChains.find((item) => item.id === token.chain)
-            }
-          />
-        ))}
-        {tokenHidden.hiddenCount > 0 && tokenHidden.isShowExpand && (
-          <ExpandItem onClick={handleClickExpandToken}>
-            <img
-              className="icon-hide-assets"
-              src="rabby-internal://assets/icons/home/hide-assets.svg"
-            />
-            {tokenHidden.isExpand
-              ? 'Hide small value assets'
-              : `${tokenHidden.hiddenCount} low value assets`}
-            <img
-              src="rabby-internal://assets/icons/home/expand-arrow.svg"
-              className={classNames('icon-expand-arrow')}
-            />
-            <div className="hide-assets-usd-value">
-              {formatUsdValue(tokenHidden.hiddenUsdValue)}
-              {showHistory && (
-                <div
-                  className={classNames(
-                    'usd-value-change absolute -bottom-12 right-0',
-                    {
-                      'is-loss': tokenHidden.expandTokensUsdValueChange < 0,
-                      'is-increase': tokenHidden.expandTokensUsdValueChange > 0,
-                    }
-                  )}
-                >
-                  {`${formatNumber(
-                    (tokenHidden.expandTokensUsdValueChange /
-                      tokenHidden.hiddenUsdValue) *
-                      100
-                  )}% (${formatUsdValue(
-                    tokenHidden.expandTokensUsdValueChange
-                  )})`}
-                </div>
-              )}
+    <ul className="assets-list">
+      {isLoadingTokenList ? (
+        <>
+          <li className="th">
+            <div>
+              <Skeleton.Input
+                active
+                style={{
+                  width: '60px',
+                  height: '11px',
+                  borderRadius: '2px',
+                }}
+              />
             </div>
-          </ExpandItem>
-        )}
-
-        <div className="flex gap-12 mt-[24px] ml-[14px]">
-          <BlockedButton onClickLink={onFocusInput} />
-          <CustomizedButton onClickLink={onFocusInput} />
-        </div>
-      </ul>
-    </>
+            <div>
+              <Skeleton.Input
+                active
+                style={{
+                  width: '60px',
+                  height: '11px',
+                  borderRadius: '2px',
+                }}
+              />
+            </div>
+            <div>
+              <Skeleton.Input
+                active
+                style={{
+                  width: '60px',
+                  height: '11px',
+                  borderRadius: '2px',
+                }}
+              />
+            </div>
+            <div>
+              <Skeleton.Input
+                active
+                style={{
+                  width: '60px',
+                  height: '11px',
+                  borderRadius: '2px',
+                }}
+              />
+            </div>
+          </li>
+          <LoadingTokenItem />
+          <LoadingTokenItem />
+          <LoadingTokenItem />
+        </>
+      ) : (
+        <>
+          <li className="th">
+            <div>Asset</div>
+            <div>Price</div>
+            <div>Amount</div>
+            <div>USD Value</div>
+          </li>
+          {tokenList.map((token) => (
+            <TokenItemComp
+              token={token}
+              historyToken={
+                showHistory
+                  ? historyTokenMap[`${token.chain}-${token.id}`]
+                  : undefined
+              }
+              key={`${token.chain}-${token.id}`}
+              supportHistory={
+                !!supportHistoryChains.find((item) => item.id === token.chain)
+              }
+            />
+          ))}
+          {tokenHidden.hiddenCount > 0 && tokenHidden.isShowExpand && (
+            <ExpandItem onClick={handleClickExpandToken}>
+              <img
+                className="icon-hide-assets"
+                src="rabby-internal://assets/icons/home/hide-assets.svg"
+              />
+              {tokenHidden.isExpand
+                ? 'Hide small value assets'
+                : `${tokenHidden.hiddenCount} low value assets`}
+              <img
+                src="rabby-internal://assets/icons/home/expand-arrow.svg"
+                className={classNames('icon-expand-arrow')}
+              />
+              <div className="hide-assets-usd-value">
+                {formatUsdValue(tokenHidden.hiddenUsdValue)}
+                {showHistory && (
+                  <div
+                    className={classNames(
+                      'usd-value-change absolute -bottom-12 right-0',
+                      {
+                        'is-loss': tokenHidden.expandTokensUsdValueChange < 0,
+                        'is-increase':
+                          tokenHidden.expandTokensUsdValueChange > 0,
+                      }
+                    )}
+                  >
+                    {`${formatNumber(
+                      (tokenHidden.expandTokensUsdValueChange /
+                        tokenHidden.hiddenUsdValue) *
+                        100
+                    )}% (${formatUsdValue(
+                      tokenHidden.expandTokensUsdValueChange
+                    )})`}
+                  </div>
+                )}
+              </div>
+            </ExpandItem>
+          )}
+        </>
+      )}
+      <div className="flex gap-12 mt-[24px] ml-[14px]">
+        <BlockedButton onClickLink={onFocusInput} />
+        <CustomizedButton onClickLink={onFocusInput} />
+      </div>
+    </ul>
   );
 };
 
