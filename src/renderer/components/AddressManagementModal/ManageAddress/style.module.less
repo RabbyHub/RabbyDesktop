@@ -1,0 +1,50 @@
+@import '@/renderer/css/mixins.less';
+.manageDrawer:global(.custom-popup) {
+  .child-has-chrome-like-scrollbar();
+  :global {
+    .ant-drawer-content {
+      background: #3d4251;
+      box-shadow: 0px 24px 40px 0px rgba(19, 20, 26, 0.3);
+      border: none;
+      border-radius: 0;
+    }
+    .ant-drawer-body {
+      padding: 0;
+    }
+  }
+}
+
+.manageModal {
+  :global {
+    .ant-modal-body {
+      color: #fff;
+    }
+    .ant-modal-close-x {
+      padding: 20px;
+    }
+  }
+}
+
+.addressDeleteModal:global(.custom-popup) {
+  .child-has-chrome-like-scrollbar();
+  :global {
+    .ant-drawer-content {
+      border: none;
+      border-radius: 16px 16px 0px 0px;
+      background: var(--neutral-bg-1, #3d4251);
+      box-shadow: 0px -12px 20px 0px rgba(19, 20, 26, 0.05);
+      padding: 20px;
+    }
+    .ant-drawer-body {
+      padding: 0;
+    }
+  }
+}
+
+.btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 48px;
+  border-radius: 4px;
+}
