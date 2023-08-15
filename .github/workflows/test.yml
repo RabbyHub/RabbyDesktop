@@ -22,8 +22,8 @@ jobs:
       labels:
         - self-hosted
         - X64
-        # - isolated
-        - builder
+        - isolate
+        # - builder
         - ${{ matrix.host }}
     env:
       NODE_OPTIONS: '--max_old_space_size=4096'
