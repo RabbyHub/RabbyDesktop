@@ -5,6 +5,7 @@ on:
     branches:
       - dev
       - feat*
+      - ci/*
 
 defaults:
   run:
@@ -19,6 +20,7 @@ jobs:
     runs-on:
       - self-hosted
       - X64
+      - isolate
       - ${{ matrix.host }}
     env:
       NODE_OPTIONS: '--max_old_space_size=4096'
