@@ -9,8 +9,8 @@ const osType = detectClientOS();
 
 export const ABOVE_TEXT =
   osType === 'win32'
-    ? `Windows ${SYSTEM_REQUIREMENT_MINIMUM.win32} or above`
-    : `macOS ${SYSTEM_REQUIREMENT_MINIMUM.darwin} or above`;
+    ? `Windows ${SYSTEM_REQUIREMENT_MINIMUM.win32VersionNum} or above`
+    : `macOS ${SYSTEM_REQUIREMENT_MINIMUM.darwinVersionNum} or above`;
 
 const FULL_ABOVE_TEXT = `Please install Rabby Wallet on ${ABOVE_TEXT} \n
 Stability and user experience cannot be guaranteed on other version`;

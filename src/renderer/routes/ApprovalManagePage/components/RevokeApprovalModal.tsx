@@ -23,6 +23,7 @@ import { findChainByServerID } from '@/renderer/utils/chain';
 import { Chain } from '@debank/common';
 import IconClose from '@/../assets/icons/swap/modal-close.svg?rc';
 import { splitNumberByStep } from '@/renderer/utils/number';
+import IconExternal from '@/../assets/icons/common/share.svg';
 import IconNotChecked from '../icons/check-unchecked.svg';
 import IconChecked from '../icons/check-checked.svg';
 import ApprovalsNameAndAddr from './NameAndAddr';
@@ -33,8 +34,7 @@ import {
   toRevokeItem,
 } from '../utils';
 
-// import IconExternal from '@/../assets/icons/common/share.svg';
-import IconExternal from '../icons/icon-share.svg';
+// import IconExternal from '../icons/icon-share.svg';
 import IconBadgeCollection from '../icons/modal-badge-collection.svg';
 import IconBadgeNFT from '../icons/modal-badge-nft.svg';
 import IconUnknown from '../icons/icon-unknown-1.svg';
@@ -76,14 +76,14 @@ function NFTItemBadge({
   if (isNFTCollection) {
     return (
       <div className={className}>
-        <img className="w-[54px] h-[13px]" src={IconBadgeCollection} />
+        <img className="w-[54px] h-[13px] block" src={IconBadgeCollection} />
       </div>
     );
   }
   if (isNFTToken) {
     return (
       <div className={className}>
-        <img className="w-[26px] h-[13px]" src={IconBadgeNFT} />
+        <img className="w-[26px] h-[13px] block" src={IconBadgeNFT} />
       </div>
     );
   }

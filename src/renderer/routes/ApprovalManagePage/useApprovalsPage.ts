@@ -459,7 +459,6 @@ export function useApprovalsPage() {
     loadApprovals();
 
     const listener = () => {
-      console.log('[feat] accountsChanged');
       fetchCurrentAccount();
     };
 

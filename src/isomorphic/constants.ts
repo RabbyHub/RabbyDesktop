@@ -133,11 +133,15 @@ export const DAPP_ZOOM_VALUES = {
 export const SYSTEM_REQUIREMENT_MINIMUM = IS_RUNTIME_PRODUCTION
   ? {
       win32: 10,
+      win32VersionNum: 10,
       darwin: 20, // 20 means Big Sur
+      darwinVersionNum: 11,
     }
   : {
       win32: 99,
+      win32VersionNum: 10,
       darwin: 99,
+      darwinVersionNum: 99,
     };
 
 export const IS_DEVTOOLS_AVAILBLE =
