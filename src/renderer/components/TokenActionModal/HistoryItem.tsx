@@ -40,7 +40,8 @@ export const HistoryItem: React.FC<Props> = ({
         styles.tokenDetail,
         'flex flex-col overflow-hidden',
         'border border-solid rounded-[6px] border-[#FFFFFF1A]',
-        'p-[12px]'
+        'p-[12px]',
+        (isFailed || isScam) && 'pt-[22px]'
       )}
     >
       <div className={styles.badge}>

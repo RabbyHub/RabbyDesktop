@@ -3,11 +3,12 @@ import { ServerChain, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import BigNumber from 'bignumber.js';
 import { sortBy } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
-import { useToken } from '@/renderer/hooks/rabbyx/useToken';
+import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import { useTokenAtom } from '@/renderer/hooks/rabbyx/useToken';
 import { isSameAddress } from '@/renderer/utils/address';
 import { CHAINS } from '@debank/common';
 import { findChainByEnum } from '@/renderer/utils';
+import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { VIEW_TYPE } from './type';
 
 export const useSwitchView = () => {
@@ -118,9 +119,73 @@ export const useExpandList = (
   };
 };
 
-const filterDisplayToken = (tokens: TokenItem[], blocked: TokenItem[]) => {
+const useSortToken = <T extends TokenItem>(list?: T[]) => {
+  const [result, setResult] = useState<T[]>([]);
+  const { currentAccount } = useCurrentAccount();
+
+  const sortByChainBalance = useCallback(
+    async (_list: T[]) => {
+      if (currentAccount) {
+        const cache = await walletController.getAddressCacheBalance(
+          currentAccount.address
+        );
+        if (cache) {
+          _list.sort((a, b) => {
+            const chain1 = cache.chain_list.find(
+              (chain) => chain.id === a.chain
+            );
+            const chain2 = cache.chain_list.find(
+              (chain) => chain.id === b.chain
+            );
+            if (chain1 && chain2) {
+              if (chain1.usd_value <= 0 && chain2.usd_value <= 0) {
+                return (chain2.born_at || 0) - (chain1.born_at || 0);
+              }
+              return chain2.usd_value - chain1.usd_value;
+            }
+            return 0;
+          });
+        }
+      }
+      return _list;
+    },
+    [currentAccount]
+  );
+
+  useEffect(() => {
+    if (!list) return;
+    const hasUsdValue: T[] = [];
+    const hasAmount: T[] = [];
+    const others: T[] = [];
+    for (let i = 0; i < list.length; i++) {
+      const item = list[i];
+      const usdValue = item.price * item.amount;
+      if (usdValue > 0) {
+        hasUsdValue.push(item);
+      } else if (item.amount > 0) {
+        hasAmount.push(item);
+      } else {
+        others.push(item);
+      }
+    }
+    hasUsdValue.sort((a, b) => {
+      return b.amount * b.price - a.amount * a.price;
+    });
+    sortByChainBalance(others).then((_list) => {
+      setResult([...hasUsdValue, ...hasAmount, ..._list]);
+    });
+  }, [list, sortByChainBalance]);
+
+  return result;
+};
+
+const filterDisplayToken = (
+  tokens: TokenItem[],
+  blocked: TokenItem[],
+  customize: TokenItem[]
+) => {
   const ChainValues = Object.values(CHAINS);
-  return tokens.filter((token) => {
+  const list = tokens.filter((token) => {
     const chain = ChainValues.find((c) => c.serverId === token.chain);
     return (
       token.is_core &&
@@ -130,6 +195,8 @@ const filterDisplayToken = (tokens: TokenItem[], blocked: TokenItem[]) => {
       findChainByEnum(chain?.enum)
     );
   });
+
+  return [...list, ...customize];
 };
 
 export const useFilterTokenList = (
@@ -139,10 +206,10 @@ export const useFilterTokenList = (
   query?: string,
   withBalance = false
 ) => {
-  const { customize, blocked } = useToken();
+  const { customize, blocked } = useTokenAtom();
   const fullTokenList = useMemo(() => {
-    return filterDisplayToken(tokenList, blocked);
-  }, [tokenList, blocked]);
+    return filterDisplayToken(tokenList, blocked, customize);
+  }, [tokenList, blocked, customize]);
   const [searchList, setSearchList] = useState<TokenItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const currentList = query ? searchList : fullTokenList;
@@ -150,10 +217,14 @@ export const useFilterTokenList = (
     const list: TokenItem[] = selectChainServerId
       ? currentList.filter((token) => token.chain === selectChainServerId)
       : currentList;
-    return sortBy(list, (i) => i.usd_value || 0).reverse();
+
+    return list;
   }, [currentList, selectChainServerId]);
+  const sortTokenList = useSortToken(filterTokenList);
   const addressRef = useRef(currentAddress);
   const kwRef = useRef<string>();
+  const blockedRef = useRef<TokenItem[]>(blocked);
+  const customizeRef = useRef<TokenItem[]>(customize);
 
   const searchToken = useCallback(
     async ({
@@ -177,7 +248,7 @@ export const useFilterTokenList = (
         }
       }
       const reg = new RegExp(q, 'i');
-      const matchCustomTokens = customize?.filter((token) => {
+      const matchCustomTokens = customizeRef.current?.filter((token) => {
         return (
           reg.test(token.name) ||
           reg.test(token.symbol) ||
@@ -188,7 +259,7 @@ export const useFilterTokenList = (
         setIsLoading(false);
         setSearchList(
           [...list, ...matchCustomTokens].filter((item) => {
-            const isBlocked = !!blocked.find((b) =>
+            const isBlocked = !!blockedRef.current?.find((b) =>
               isSameAddress(b.id, item.id)
             );
             return !isBlocked;
@@ -196,7 +267,7 @@ export const useFilterTokenList = (
         );
       }
     },
-    [customize, withBalance, blocked]
+    [withBalance]
   );
 
   useEffect(() => {
@@ -219,7 +290,18 @@ export const useFilterTokenList = (
     kwRef.current = query;
   }, [query]);
 
-  return { filterTokenList, isLoading };
+  useEffect(() => {
+    blockedRef.current = blocked;
+  }, [blocked]);
+
+  useEffect(() => {
+    customizeRef.current = customize;
+  }, [customize]);
+
+  return {
+    filterTokenList: sortTokenList,
+    isLoading,
+  };
 };
 export const useFilterProtoList = (
   protocolList: DisplayProtocol[],

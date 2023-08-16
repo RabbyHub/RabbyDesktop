@@ -6,9 +6,21 @@ import React from 'react';
 import { useCurrentAccount } from './useAccount';
 import { usePreference } from './usePreference';
 
-const tokenListAtom = atom<TokenItem[]>([]);
-const blockedAtom = atom<TokenItem[]>([]);
-const customizeAtom = atom<TokenItem[]>([]);
+export const tokenListAtom = atom<TokenItem[]>([]);
+export const blockedAtom = atom<TokenItem[]>([]);
+export const customizeAtom = atom<TokenItem[]>([]);
+
+export const useTokenAtom = () => {
+  const [tokenList] = useAtom(tokenListAtom);
+  const [blocked] = useAtom(blockedAtom);
+  const [customize] = useAtom(customizeAtom);
+
+  return {
+    tokenList,
+    blocked,
+    customize,
+  };
+};
 
 export const useToken = () => {
   const [customize, setCustomize] = useAtom(customizeAtom);
@@ -107,11 +119,13 @@ export const useToken = () => {
   }, [getCustomizedToken, getBlockedToken]);
 
   React.useEffect(() => {
+    if (!currentAccount?.address) return;
     initData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    initData,
-    preferences.blockedToken?.length,
-    preferences.customizedToken?.length,
+    currentAccount?.address,
+    preferences.blockedToken,
+    preferences.customizedToken,
   ]);
 
   return {

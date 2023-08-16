@@ -3,6 +3,7 @@ import React from 'react';
 import clsx from 'clsx';
 import { useDebounce } from 'react-use';
 import styled from 'styled-components';
+import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 
 export interface Props {
   onSearch?: (value: string) => void;
@@ -21,6 +22,7 @@ export const TokenSearchInput = React.forwardRef<any, Props>(
   ({ onSearch }, ref) => {
     const [input, setInput] = React.useState<string>('');
     const [isFocus, setIsFocus] = React.useState<boolean>(false);
+    const { currentAccount } = useCurrentAccount();
 
     useDebounce(
       () => {
@@ -30,10 +32,15 @@ export const TokenSearchInput = React.forwardRef<any, Props>(
       [input]
     );
 
+    React.useEffect(() => {
+      setInput('');
+    }, [currentAccount?.address]);
+
     return (
       <InputStyled
         ref={ref}
         onChange={(e) => setInput(e.target.value)}
+        value={input}
         placeholder="Search name"
         onFocus={() => setIsFocus(true)}
         onBlur={() => setIsFocus(false)}

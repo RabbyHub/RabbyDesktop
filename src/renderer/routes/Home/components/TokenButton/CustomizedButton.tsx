@@ -1,5 +1,5 @@
 import React from 'react';
-import { useToken } from '@/renderer/hooks/rabbyx/useToken';
+import { useTokenAtom } from '@/renderer/hooks/rabbyx/useToken';
 import { TokenButton } from './TokenButton';
 
 interface Props {
@@ -8,7 +8,7 @@ interface Props {
 }
 
 export const CustomizedButton: React.FC<Props> = ({ onClickLink }) => {
-  const { customize } = useToken();
+  const { customize } = useTokenAtom();
 
   return (
     <TokenButton

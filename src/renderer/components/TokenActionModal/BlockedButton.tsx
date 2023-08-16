@@ -10,6 +10,8 @@ export interface Props {
 }
 
 const SwitchStyled = styled(Switch)`
+  box-shadow: none !important;
+
   &.ant-switch-checked {
     background-color: #ec5151;
   }
