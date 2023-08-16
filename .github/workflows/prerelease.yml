@@ -23,6 +23,7 @@ jobs:
     runs-on:
       - self-hosted
       - X64
+      - legacy
       - ${{ matrix.host }}
     # if: ${{ github.repository_owner == 'RabbyHub' }}
     env:
