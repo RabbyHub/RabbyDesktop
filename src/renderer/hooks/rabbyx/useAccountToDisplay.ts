@@ -9,6 +9,7 @@ type IDisplayedAccount = Required<DisplayedKeyring['accounts'][number]>;
 export type IDisplayedAccountWithBalance = IDisplayedAccount & {
   balance: number;
   byImport?: boolean;
+  publicKey?: string;
 };
 
 const accountsListAtom = atom<IDisplayedAccountWithBalance[]>([]);

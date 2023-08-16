@@ -218,8 +218,6 @@ export const useWalletTypeData = () => {
 
     v.push(hdKeyRingList, ledgerList);
 
-    v.push(ledgerList);
-
     v.sort((a, b) => getWalletScore(a) - getWalletScore(b));
 
     if (watchSortedAccountsList.length) {
