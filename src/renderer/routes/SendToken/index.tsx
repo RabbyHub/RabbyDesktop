@@ -31,7 +31,7 @@ import { TipsWrapper } from '@/renderer/components/TipWrapper';
 import IconRcLoading from '@/../assets/icons/swap/loading.svg?rc';
 import GasSelector from './components/GasSelector';
 import GasReserved from './components/GasReserved';
-import { ChainSelect } from '../Swap/component/ChainSelect';
+import { ChainRender, ChainSelect } from '../Swap/component/ChainSelect';
 import { TokenSelect } from '../Swap/component/TokenSelect';
 import { ContactEditModal } from './components/ContactEditModal';
 import { ContactListModal } from './components/ContactListModal';
@@ -920,9 +920,19 @@ const SendTokenInner = () => {
           amount: '',
         }}
       >
-        <ChainSelect value={chain} onChange={handleChainChanged} />
+        <div
+          className={clsx('section relative', {
+            'mb-40': !showWhitelistAlert,
+          })}
+        >
+          <div className="section-title mb-8">Chain</div>
+          <ChainSelect
+            className="mb-24"
+            value={chain}
+            onChange={handleChainChanged}
+            chainRender={<ChainRender chain={chain} />}
+          />
 
-        <div className="section relative mt-16">
           <div className="section-title">From</div>
           <AccountCard alianName={sendAlianName} />
           <div className="section-title">
@@ -988,18 +998,13 @@ const SendTokenInner = () => {
               />
             </Form.Item>
           </div>
-        </div>
-        <div
-          className={clsx('section', {
-            'mb-40': !showWhitelistAlert,
-          })}
-        >
-          <div className="section-title flex justify-between items-center">
+
+          <div className="section-title mt-40 flex justify-between items-center">
             <div className="token-balance whitespace-pre-wrap">
               {isLoading ? (
                 <Skeleton.Input active style={{ width: 100 }} />
               ) : (
-                <>
+                <span className="text-[#d3d8e0]">
                   Balance:{' '}
                   <span
                     className="truncate max-w-[80px]"
@@ -1015,7 +1020,7 @@ const SendTokenInner = () => {
                         .toFixed()
                     )}
                   </span>
-                </>
+                </span>
               )}
               {currentToken.amount > 0 && (
                 <MaxButton

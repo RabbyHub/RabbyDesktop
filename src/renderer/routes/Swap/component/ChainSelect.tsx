@@ -35,6 +35,7 @@ const ChainSelectWrapper = styled.div`
 `;
 
 interface ChainSelectorProps {
+  className?: string;
   value: CHAINS_ENUM;
   onChange?(value: CHAINS_ENUM): void;
   readonly?: boolean;
@@ -44,6 +45,7 @@ interface ChainSelectorProps {
   chainRender?: ((chian: CHAINS_ENUM) => React.ReactNode) | React.ReactNode;
 }
 export const ChainSelect = ({
+  className,
   value,
   onChange,
   readonly = false,
@@ -51,7 +53,7 @@ export const ChainSelect = ({
   title,
   supportChains,
   chainRender,
-}: ChainSelectorProps) => {
+}: React.PropsWithoutRef<ChainSelectorProps>) => {
   const handleChange = (v: CHAINS_ENUM) => {
     if (readonly) return;
     if (onChange) {
@@ -76,35 +78,33 @@ export const ChainSelect = ({
   };
 
   return (
-    <>
-      <ChainSelectWrapper onClick={handleClickSelector}>
-        {chainRender ? (
-          typeof chainRender === 'function' ? (
-            chainRender?.(value)
-          ) : (
-            chainRender
-          )
+    <ChainSelectWrapper className={className} onClick={handleClickSelector}>
+      {chainRender ? (
+        typeof chainRender === 'function' ? (
+          chainRender?.(value)
         ) : (
-          <>
-            {/* <img src={CHAINS[value].logo} className="logo" /> */}
-            <ChainIcon
-              chain={value}
-              className="logo"
-              showCustomRPCToolTip
-              isShowCustomRPC
+          chainRender
+        )
+      ) : (
+        <>
+          {/* <img src={CHAINS[value].logo} className="logo" /> */}
+          <ChainIcon
+            chain={value}
+            className="logo"
+            showCustomRPCToolTip
+            isShowCustomRPC
+          />
+          <span className="name">{CHAINS[value].name}</span>
+          {!readonly && (
+            <IconRcSwapArrowDownTriangle
+              className="arrow"
+              width={10}
+              height={6}
             />
-            <span className="name">{CHAINS[value].name}</span>
-            {!readonly && (
-              <IconRcSwapArrowDownTriangle
-                className="arrow"
-                width={10}
-                height={6}
-              />
-            )}
-          </>
-        )}
-      </ChainSelectWrapper>
-    </>
+          )}
+        </>
+      )}
+    </ChainSelectWrapper>
   );
 };
 

@@ -37,7 +37,20 @@ import { usePrevious } from 'react-use';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { ContactListModal } from '../SendToken/components/ContactListModal';
 import { ContactEditModal } from '../SendToken/components/ContactEditModal';
-import { ChainSelect } from '../Swap/component/ChainSelect';
+import { ChainRender, ChainSelect } from '../Swap/component/ChainSelect';
+
+const ChainRenderNFT = styled(ChainRender)`
+  background: rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.1);
+    border-color: transparent;
+  }
+
+  > .down {
+    display: none;
+  }
+`;
 
 const SendNFTWrapper = styled.div`
   padding: 24px;
@@ -600,9 +613,15 @@ const SendNFT = () => {
           }}
           onValuesChange={handleFormValuesChange}
         >
-          <ChainSelect value={chain} readonly />
+          <div className="section relative">
+            <div className="section-title mb-8">Chain</div>
+            <ChainSelect
+              className="mb-24"
+              value={chain}
+              readonly
+              chainRender={<ChainRenderNFT chain={chain} />}
+            />
 
-          <div className="section relative mt-16">
             <div className="section-title">From</div>
             <AccountCard
               icons={{
