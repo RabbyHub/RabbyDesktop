@@ -44,6 +44,7 @@ export const TokenSearchInput = React.forwardRef<any, Props>(
         placeholder="Search name"
         onFocus={() => setIsFocus(true)}
         onBlur={() => setIsFocus(false)}
+        spellCheck={false}
         className={clsx(
           'text-12 text-[#F7F8F9] py-0 px-[9px] h-[32px]',
           'border border-[#FFFFFF1A] rounded-[6px]',
