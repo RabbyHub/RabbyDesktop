@@ -45,6 +45,10 @@ const configuration: webpack.Configuration = {
       stream: require.resolve('stream-browserify'),
       crypto: require.resolve('crypto-browserify'),
       assert: false,
+      url: false,
+      http: false,
+      zlib: false,
+      https: false,
     },
   },
 

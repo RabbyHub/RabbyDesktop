@@ -68,6 +68,10 @@ const configuration: webpack.Configuration = {
       stream: require.resolve('stream-browserify'),
       crypto: require.resolve('crypto-browserify'),
       assert: false,
+      url: false,
+      http: false,
+      zlib: false,
+      https: false,
     },
   },
 
@@ -221,14 +225,21 @@ const configurationRenderer: webpack.Configuration = {
       verbose: true,
     },
     devMiddleware: {
-      writeToDisk: !process.env.HTTP_INSTEAD_OF_CUSTOM ? true : (targetPath) => {
-        const normalizedPath = targetPath
-          .replace(/^([a-z])\:\\/gi, (_, matched) => `/${matched.toLowerCase()}/`)
-          .replace(/\\/g, '/');
+      writeToDisk: !process.env.HTTP_INSTEAD_OF_CUSTOM
+        ? true
+        : (targetPath) => {
+            const normalizedPath = targetPath
+              .replace(
+                /^([a-z])\:\\/gi,
+                (_, matched) => `/${matched.toLowerCase()}/`
+              )
+              .replace(/\\/g, '/');
 
-        const isTargetShell = normalizedPath.includes('assets/desktop_shell');
-        return isTargetShell;
-      },
+            const isTargetShell = normalizedPath.includes(
+              'assets/desktop_shell'
+            );
+            return isTargetShell;
+          },
     },
     setupMiddlewares(middlewares) {
       console.log('Starting preload.js builder...');
@@ -308,9 +319,12 @@ const configurationShell: webpack.Configuration = {
           to: path.join(webpackPaths.assetsPath, 'desktop_shell/manifest.json'),
         },
         {
-          from: path.join(webpackPaths.distExtsPath, 'rabby/vendor/matomo.client.js'),
+          from: path.join(
+            webpackPaths.distExtsPath,
+            'rabby/vendor/matomo.client.js'
+          ),
           to: path.join(webpackPaths.assetsPath, 'desktop_shell/vendor/'),
-        }
+        },
       ],
     }),
   ],
