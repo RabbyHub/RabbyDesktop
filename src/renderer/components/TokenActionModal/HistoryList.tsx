@@ -63,15 +63,25 @@ export const HistoryList: React.FC<Props> = ({ refContainer, token }) => {
       <div className={(styles.container, 'border-none space-y-[12px]')}>
         {loading &&
           Array.from({ length: 3 }).map(() => <HistoryItemSkeleton />)}
-        {data?.list.map((item) => (
-          <HistoryItem
-            key={item.id}
-            data={item}
-            projectDict={item.projectDict}
-            cateDict={item.cateDict}
-            tokenDict={item.tokenDict}
-          />
-        ))}
+        {data?.list.length
+          ? data?.list.map((item) => (
+              <HistoryItem
+                key={item.id}
+                data={item}
+                projectDict={item.projectDict}
+                cateDict={item.cateDict}
+                tokenDict={item.tokenDict}
+              />
+            ))
+          : !loading && (
+              <div className="text-13 text-center mt-[80px]">
+                <img
+                  src="rabby-internal://assets/icons/home/low-value-empty.svg"
+                  className="w-[52px] h-[52px] m-auto"
+                />
+                <div className="mt-[16px] text-[#BABEC5]">No Transactions</div>
+              </div>
+            )}
         {loadingMore && <HistoryItemSkeleton />}
       </div>
     </div>
