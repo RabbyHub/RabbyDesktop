@@ -26,9 +26,6 @@ export const Header: React.FC<Props> = ({
           isUpdatingBalance={isUpdatingBalance}
         />
       )}
-      <div className={styles.divider}>
-        <span className={styles.text}>switch address</span>
-      </div>
     </section>
   );
 };

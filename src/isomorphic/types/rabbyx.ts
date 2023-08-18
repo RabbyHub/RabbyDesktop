@@ -63,6 +63,7 @@ export interface Token {
 }
 
 interface DisplayKeyring {
+  type: string;
   unlock: () => Promise<void>;
   getFirstPage: () => Promise<string[]>;
   getNextPage: () => Promise<string[]>;
@@ -82,6 +83,7 @@ export interface DisplayedKeyring {
   }[];
   keyring: DisplayKeyring;
   byImport?: boolean;
+  publicKey?: string;
 }
 
 export type IHighlightedAddress = {
@@ -191,6 +193,7 @@ export type RabbyXMethod = {
   'walletController.getCurrentAccount': () => RabbyAccount;
   'walletController.syncGetCurrentAccount': () => RabbyAccount | null;
   'walletController.getAccounts': () => RabbyAccount[];
+  'walletController.getAllClassAccounts': () => Promise<DisplayedKeyring[]>;
 
   'walletController.boot': (password: string) => void;
   'walletController.isBooted': () => boolean;

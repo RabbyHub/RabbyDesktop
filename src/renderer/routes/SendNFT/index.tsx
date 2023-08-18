@@ -35,6 +35,7 @@ import styled from 'styled-components';
 import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import { usePrevious } from 'react-use';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
+import AccountSearchInput from '@/renderer/components/AccountSearchInput';
 import { ContactListModal } from '../SendToken/components/ContactListModal';
 import { ContactEditModal } from '../SendToken/components/ContactEditModal';
 import { ChainSelect } from '../Swap/component/ChainSelect';
@@ -667,10 +668,19 @@ const SendNFT = () => {
                   },
                 ]}
               >
-                <Input
-                  placeholder="Enter the address"
+                <AccountSearchInput
+                  placeholder="Enter address or search"
                   autoComplete="off"
                   autoFocus
+                  spellCheck={false}
+                  onSelectedAccount={(account) => {
+                    const nextVals = {
+                      ...form.getFieldsValue(),
+                      to: account.address,
+                    };
+                    handleFormValuesChange({ to: nextVals.to }, nextVals);
+                    form.setFieldsValue(nextVals);
+                  }}
                 />
               </Form.Item>
             </div>

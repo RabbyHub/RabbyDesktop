@@ -14,7 +14,10 @@ export const AddressManagementModal: React.FC = () => {
 
   return (
     <Dropdown
-      overlayClassName={clsx(!svVisible && 'h-0 overflow-hidden')}
+      overlayClassName={clsx(
+        'min-w-[400px]',
+        !svVisible && 'h-0 overflow-hidden'
+      )}
       overlay={<MainContainer />}
       open={svVisible}
       trigger={['click']}
@@ -25,7 +28,7 @@ export const AddressManagementModal: React.FC = () => {
       }}
       destroyPopupOnHide
     >
-      <TriggerEl className="w-[440px] h-40 absolute right-10" />
+      <TriggerEl className="w-[400px] h-40 absolute right-10" />
     </Dropdown>
   );
 };

@@ -29,6 +29,7 @@ import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import { useRbiSource } from '@/renderer/hooks/useRbiSource';
 import { TipsWrapper } from '@/renderer/components/TipWrapper';
 import IconRcLoading from '@/../assets/icons/swap/loading.svg?rc';
+import AccountSearchInput from '@/renderer/components/AccountSearchInput';
 import GasSelector from './components/GasSelector';
 import GasReserved from './components/GasReserved';
 import { ChainSelect } from '../Swap/component/ChainSelect';
@@ -979,12 +980,19 @@ const SendTokenInner = () => {
                 },
               ]}
             >
-              <RabbyInput
-                placeholder="Enter the address"
+              <AccountSearchInput
+                placeholder="Enter address or search"
                 autoComplete="off"
                 autoFocus
                 spellCheck={false}
-                size="large"
+                onSelectedAccount={(account) => {
+                  const nextVals = {
+                    ...form.getFieldsValue(),
+                    to: account.address,
+                  };
+                  handleFormValuesChange({ to: nextVals.to }, nextVals);
+                  form.setFieldsValue(nextVals);
+                }}
               />
             </Form.Item>
           </div>

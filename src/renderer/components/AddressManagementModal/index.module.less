@@ -4,25 +4,79 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  padding-top: 36px;
-  padding-bottom: 20px;
-  max-height: 640px;
-  min-height: 440px;
+  padding-top: 20px;
+  max-height: 600px;
+  height: 600px;
   background: var(--theme-dropdown-bg);
   border: var(--theme-dropdown-border);
   box-shadow: var(--theme-dropdown-shadow);
   border-radius: 12px;
   position: relative;
   overflow: hidden;
+  .title {
+    color: #f7f8f9;
+    text-align: center;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 510;
+    line-height: normal;
+    margin-bottom: 12px;
+  }
 
   .refreshButton {
     position: absolute;
-    right: 28px;
-    top: 10px;
+    right: 20px;
+    top: 20px;
 
     img {
       opacity: 0.6;
       cursor: pointer;
+    }
+  }
+  .addAddress {
+    position: absolute;
+    cursor: pointer;
+    top: 20px;
+    right: 52px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .search {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+
+    .keyword {
+      color: white;
+      border-radius: 6px;
+      width: 220px;
+      height: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: none;
+      &:global(.ant-input-affix-wrapper-focused),
+      &:focus,
+      &:hover {
+        border: 1px solid #7084ff;
+        box-shadow: none;
+      }
+      :global(.ant-input-clear-icon) {
+        color: white;
+      }
+    }
+    .addr {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      .text {
+        color: #d3d8e0;
+        font-size: 13px;
+      }
+      img {
+        width: 16px;
+      }
     }
   }
 
@@ -57,6 +111,7 @@
     }
   }
   .body {
+    padding-bottom: 20px;
     overflow-y: overlay;
     flex: 1;
     .chrome-like-scrollbar();
@@ -71,30 +126,10 @@
       }
     }
   }
-  .footer {
-    padding-top: 20px;
-
-    .button {
-      margin: auto;
-      height: 44px;
-      width: 240px;
-      color: rgba(255, 255, 255, 0.8);
-      background: rgba(0, 0, 0, 0.3);
-      display: flex;
-      align-items: center;
-      place-content: center;
-      border: none;
-      border-radius: 6px;
-      .icon {
-        margin-right: 6px;
-        opacity: 0.8;
-      }
-    }
-  }
 }
 
 .AccountItem {
-  margin: 0 28px 8px 0;
+  margin: 0 20px 8px 0;
   display: flex;
   &:last-child {
     margin-bottom: 0;
@@ -123,6 +158,46 @@
     border-radius: 6px;
     border-radius: 6px;
     flex: 1;
+
+    &.noAction {
+      .checkIcon {
+        .check {
+          display: none;
+        }
+        .uncheck {
+          display: none;
+        }
+      }
+      &:hover {
+        border: 1px solid #7084ff;
+
+        .arrowHover {
+          display: block;
+        }
+        .arrow {
+          display: none;
+        }
+
+        .main:hover,
+        .action:hover {
+          background: inherit;
+          .checkIcon {
+            .check {
+              display: none;
+            }
+            .uncheck {
+              display: none;
+            }
+          }
+          .arrowHover {
+            display: block;
+          }
+          .arrow {
+            display: none;
+          }
+        }
+      }
+    }
   }
 
   .main {
@@ -199,7 +274,7 @@
   .trash {
     display: flex;
     align-items: center;
-    width: 32px;
+    width: 20px;
     justify-content: center;
     opacity: 0;
     cursor: pointer;
@@ -261,7 +336,7 @@
   background: #8697ff;
   border-radius: 6px;
   padding: 12px;
-  margin: 0 28px 16px;
+  margin: 0 20px;
   cursor: pointer;
 
   .balance {
