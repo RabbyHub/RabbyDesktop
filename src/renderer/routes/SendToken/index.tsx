@@ -33,6 +33,7 @@ import { confirmAddToWhitelistModalPromise } from '@/renderer/components/Modal/c
 import { useContactsByAddr } from '@/renderer/hooks/rabbyx/useContact';
 import { confirmAddToContactsModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToContacts';
 import useCurrentBalance from '@/renderer/hooks/useCurrentBalance';
+import { findChainByServerID } from '@/renderer/utils/chain';
 import GasSelector from './components/GasSelector';
 import GasReserved from './components/GasReserved';
 import { ChainRender, ChainSelect } from '../Swap/component/ChainSelect';
@@ -689,6 +690,8 @@ const SendTokenInner = () => {
         amount: '',
       });
     }
+    const chainItem = !token.chain ? null : findChainByServerID(token.chain);
+    setChain(chainItem?.enum || CHAINS_ENUM.ETH);
     setCurrentToken(token);
     setBalanceError(null);
     setBalanceWarn(null);
