@@ -1,5 +1,5 @@
-import React, { useCallback } from 'react';
-import { Modal, ModalProps, message } from 'antd';
+import React, { useCallback, useLayoutEffect, useRef } from 'react';
+import { InputRef, Modal, ModalProps, message } from 'antd';
 import clsx from 'clsx';
 import styled from 'styled-components';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
@@ -36,6 +36,11 @@ export const ModalConfirmAddToContacts = ({
   ...props
 }: React.PropsWithChildren<ModalConfirmAddToContactsProps>) => {
   const [addressNote, setAddressNote] = React.useState(initAddressNote || '');
+
+  const inputRef = useRef<InputRef | null>(null);
+  useLayoutEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   const handleConfirm = useCallback(async () => {
     try {
@@ -95,6 +100,7 @@ export const ModalConfirmAddToContacts = ({
         Edit address note
         <div className="w-[100%] pt-8 pb-[16px]">
           <RabbyInput
+            ref={inputRef}
             value={addressNote}
             className={clsx(styles.input, 'w-[100%]')}
             onChange={(e) => {

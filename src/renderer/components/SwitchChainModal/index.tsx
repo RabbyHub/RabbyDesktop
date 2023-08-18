@@ -86,7 +86,7 @@ function ChainItem({
         <div className={styles.chainItemRight}>
           <TipsWrapper hoverTips={pinned ? 'Unpin Chain' : 'Pin Chain'}>
             <img
-              className={clsx(styles.chainItemStar, pinned ? styles.block : '')}
+              className={clsx(styles.chainItemStar)}
               src={
                 pinned
                   ? 'rabby-internal://assets/icons/swap/pinned.svg'
