@@ -40,13 +40,14 @@ export const ModalConfirmAddToWhitelist = ({
       // footer={null}
       open
       cancelButtonProps={{
-        className: styles.confirmButton,
+        className: styles.cancelButton,
         ghost: true,
       }}
       okButtonProps={{
         className: styles.confirmButton,
         type: 'primary',
       }}
+      okText="Confirm"
       onOk={(...args) => {
         props.onFinished?.({ isAddToWhitelist });
         props.onOk?.(...args);

@@ -80,9 +80,10 @@ export const ModalConfirmAddToContacts = ({
       // footer={null}
       open
       cancelButtonProps={{
-        className: styles.confirmButton,
+        className: styles.cancelButton,
         ghost: true,
       }}
+      okText="Confirm"
       okButtonProps={{
         className: styles.confirmButton,
         type: 'primary',
