@@ -1,7 +1,34 @@
 
-v0.31.0 / 2023-07-25
+v0.32.0 / 2023-08-18
 ====================
 
+  * fix: low assets (#518)
+
+v0.32.0-prod / 2023-08-18
+=========================
+
+  * Release v0.32.0-prod
+  * fix: search (#517)
+  * feat: improve ux of tokenSelector and chainSelector. (#513)
+  * fix: update totalBalance cache when home page init (#516)
+  * feat: add kyberswap (#514)
+  * fix: token bugs (#515)
+  * feat: support opbnb (#512)
+  * feat: manage address、account search input (#509)
+  * feat: assets (#510)
+  * chore: update currentVersion.
+  * chore: update patch.
+  * feat: upgrade rabbyx.
+  * feat: update chains (#511)
+  * ci: use legacy for prerelease.
+  * feat: use standalone entry of `@debank/common`. (#507)
+  * feat: some fixes. (#506)
+  * ci: use isolated runner for feature test. (#508)
+
+v0.31.0-prod / 2023-07-25
+=========================
+
+  * Release v0.31.0-prod
   * feat: support approvals. (#505)
   * feat: change sync gnosis networks (#504)
   * feat: upgrade deps, update currentVersion.
