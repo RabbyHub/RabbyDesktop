@@ -367,7 +367,7 @@ export const useFilterProtoList = (
             }).reverse(),
           };
         })
-      ).filter((item) => item.portfolio_item_list.length > 0),
+      ),
       (i) => i.usd_value || 0
     ).reverse();
   }, [protocolList, query, selectChainServerId]);

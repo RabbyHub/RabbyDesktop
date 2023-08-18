@@ -194,8 +194,8 @@ const TokenList = ({
         </>
       )}
       <div className="flex gap-12 mt-[24px] ml-[14px]">
-        <BlockedButton onClickLink={onFocusInput} />
         <CustomizedButton onClickLink={onFocusInput} />
+        <BlockedButton onClickLink={onFocusInput} />
       </div>
     </ul>
   );
