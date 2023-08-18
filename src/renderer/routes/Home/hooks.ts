@@ -1,7 +1,7 @@
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import { ServerChain, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import BigNumber from 'bignumber.js';
-import { sortBy } from 'lodash';
+import { cloneDeep, sortBy } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { useTokenAtom } from '@/renderer/hooks/rabbyx/useToken';
@@ -9,6 +9,7 @@ import { isSameAddress } from '@/renderer/utils/address';
 import { CHAINS } from '@debank/common';
 import { findChainByEnum } from '@/renderer/utils';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
+import { checkIsCexProtocol } from '@/renderer/hooks/useBundle/cex/utils/shared';
 import { VIEW_TYPE } from './type';
 
 export const useSwitchView = () => {
@@ -314,49 +315,53 @@ export const useFilterProtoList = (
           (protocol) => protocol.chain === selectChainServerId
         )
       : protocolList;
+    const newList = cloneDeep(list);
     return sortBy(
       sortBy(
-        list.map((item) => {
-          item.portfolio_item_list = item.portfolio_item_list
-            .filter((portfolio) => {
-              const hasToken = portfolio.asset_token_list.some((token) => {
-                if (
-                  query.length === 42 &&
-                  query.toLowerCase().startsWith('0x')
-                ) {
-                  return isSameAddress(token.id, query);
-                }
-                const reg = new RegExp(query, 'i');
-                return (
-                  reg.test(token.display_symbol || '') || reg.test(token.symbol)
-                );
+        newList.map((item) => {
+          if (query) {
+            item.portfolio_item_list = item.portfolio_item_list
+              .filter((portfolio) => {
+                const hasToken = portfolio.asset_token_list.some((token) => {
+                  if (
+                    query.length === 42 &&
+                    query.toLowerCase().startsWith('0x')
+                  ) {
+                    return isSameAddress(token.id, query);
+                  }
+                  const reg = new RegExp(query, 'i');
+                  return (
+                    reg.test(token.display_symbol || '') ||
+                    reg.test(token.symbol)
+                  );
+                });
+                return hasToken;
+              })
+              .map((i) => {
+                const assetList = i.asset_token_list;
+                let positiveList: TokenItem[] = [];
+                let negativeList: TokenItem[] = [];
+                assetList.forEach((j) => {
+                  if (j.amount < 0) {
+                    negativeList.push(j);
+                  } else {
+                    positiveList.push(j);
+                  }
+                });
+                positiveList = sortBy(
+                  positiveList,
+                  (j) => j.amount * j.price
+                ).reverse();
+                negativeList = sortBy(
+                  negativeList,
+                  (j) => Math.abs(j.amount) * j.price
+                ).reverse();
+                return {
+                  ...i,
+                  asset_token_list: [...positiveList, ...negativeList],
+                };
               });
-              return hasToken;
-            })
-            .map((i) => {
-              const assetList = i.asset_token_list;
-              let positiveList: TokenItem[] = [];
-              let negativeList: TokenItem[] = [];
-              assetList.forEach((j) => {
-                if (j.amount < 0) {
-                  negativeList.push(j);
-                } else {
-                  positiveList.push(j);
-                }
-              });
-              positiveList = sortBy(
-                positiveList,
-                (j) => j.amount * j.price
-              ).reverse();
-              negativeList = sortBy(
-                negativeList,
-                (j) => Math.abs(j.amount) * j.price
-              ).reverse();
-              return {
-                ...i,
-                asset_token_list: [...positiveList, ...negativeList],
-              };
-            });
+          }
           return {
             ...item,
             portfolio_item_list: sortBy(item.portfolio_item_list, (i) => {
@@ -367,7 +372,12 @@ export const useFilterProtoList = (
             }).reverse(),
           };
         })
-      ),
+      ).filter((item) => {
+        if (checkIsCexProtocol(item.chain)) {
+          return true;
+        }
+        return item.portfolio_item_list.length > 0;
+      }),
       (i) => i.usd_value || 0
     ).reverse();
   }, [protocolList, query, selectChainServerId]);
