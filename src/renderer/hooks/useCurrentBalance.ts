@@ -1,25 +1,7 @@
 import { useEffect, useState } from 'react';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
-import { ChainWithBalance } from '@rabby-wallet/rabby-api/dist/types';
 import { atom, useAtom } from 'jotai';
-
-import { CHAINS } from '@debank/common';
-
-export interface DisplayChainWithWhiteLogo extends ChainWithBalance {
-  logo?: string;
-  whiteLogo?: string;
-}
-
-const formatChain = (item: ChainWithBalance): DisplayChainWithWhiteLogo => {
-  const chainsArray = Object.values(CHAINS);
-  const chain = chainsArray.find((i) => i.id === item.community_id);
-
-  return {
-    ...item,
-    logo: chain?.logo || item.logo_url,
-    whiteLogo: chain?.whiteLogo,
-  };
-};
+import { DisplayChainWithWhiteLogo, formatChain } from '../utils/chain';
 
 const balanceAtom = atom<string | null>(null);
 

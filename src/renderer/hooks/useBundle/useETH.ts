@@ -1,7 +1,7 @@
 import React from 'react';
 import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
-import { formatChain, DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
+import { formatUsedChain, DisplayUsedChain } from '@/isomorphic/wallet/chain';
 import { useTotalBalance, calcAssetNetWorth } from '@/renderer/utils/balance';
 import { atom, useAtom } from 'jotai';
 import BigNumber from 'bignumber.js';
@@ -13,7 +13,7 @@ import { saveBundleAccountsBalance } from './shared';
 
 const tokenListAtom = atom<TokenItem[]>([]);
 const protocolListAtom = atom<DisplayProtocol[]>([]);
-const usedChainListAtom = atom<DisplayChainWithWhiteLogo[]>([]);
+const usedChainListAtom = atom<DisplayUsedChain[]>([]);
 const ethTokenBalanceMapAtom = atom<Record<string, string>>({});
 const ethProtocolBalanceMapAtom = atom<Record<string, string>>({});
 
@@ -147,7 +147,7 @@ export const useETH = () => {
       'id',
       []
     );
-    setUsedChainList(list.map((chain) => formatChain(chain)));
+    setUsedChainList(list.map((chain) => formatUsedChain(chain)));
     setLoadingUsedChain(false);
   };
 

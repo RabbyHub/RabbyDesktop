@@ -4,6 +4,11 @@ import * as Sentry from '@sentry/react';
 
 import { Account, RabbyAccount } from '@/isomorphic/types/rabbyx';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import {
+  MatteredChainBalancesType,
+  formatAccountTotalBalance,
+} from '@/isomorphic/wallet/balance';
+import { Chain } from '@debank/common';
 import { useMessageForwarded } from '../useViewsMessage';
 
 type AccountWithName = Account & { alianName: string };
@@ -166,5 +171,53 @@ export function useAccounts(opts?: {
     accounts,
     fetchAccounts,
     isFinishedFetchAccounts: fetchAccountsState === FetchAccountsState.FINISHED,
+  };
+}
+
+const matteredChainBalancesAtom = atom<MatteredChainBalancesType>({});
+
+export function useAccountBalanceMap(options?: {
+  accountAddress?: RabbyAccount['address'] | null;
+  disableAutoFetch?: boolean;
+}) {
+  let { accountAddress = '' } = options || {};
+  const { disableAutoFetch = false } = options || {};
+
+  const [currentAccount] = useAtom(currentAccountAtom);
+
+  accountAddress = accountAddress || currentAccount?.address || null;
+
+  const [matteredChainBalances, setMatteredChainBalances] = useAtom(
+    matteredChainBalancesAtom
+  );
+  const fetchBalance = useCallback(async () => {
+    if (!accountAddress) return;
+
+    const result = await walletController.getAddressCacheBalance(
+      accountAddress
+    );
+
+    const fresult = formatAccountTotalBalance(result);
+
+    setMatteredChainBalances(fresult.matteredChainBalances);
+  }, [accountAddress, setMatteredChainBalances]);
+
+  const getLocalBalanceValue = useCallback(
+    (chainId: Chain['serverId']) => {
+      return matteredChainBalances[chainId]?.usd_value || 0;
+    },
+    [matteredChainBalances]
+  );
+
+  useEffect(() => {
+    if (!disableAutoFetch) {
+      fetchBalance();
+    }
+  }, [disableAutoFetch, fetchBalance]);
+
+  return {
+    getLocalBalanceValue,
+    matteredChainBalances,
+    fetchBalance,
   };
 }

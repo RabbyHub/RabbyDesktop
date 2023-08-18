@@ -1,4 +1,7 @@
-import { DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
+import {
+  DisplayChainWithWhiteLogo,
+  DisplayUsedChain,
+} from '@/isomorphic/wallet/chain';
 import styled from 'styled-components';
 import { useEffect, useMemo, useState } from 'react';
 // import { CHAINS_LIST } from '@debank/common';
@@ -23,9 +26,9 @@ const ChainListWrapper = styled.div`
   }
 `;
 
-interface Chain extends DisplayChainWithWhiteLogo {
+type Chain = (DisplayChainWithWhiteLogo | DisplayUsedChain) & {
   usd_value: number;
-}
+};
 
 const ChainList = ({
   chainBalances,

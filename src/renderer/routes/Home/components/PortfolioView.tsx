@@ -1,7 +1,10 @@
 import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { ServerChain, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
-import { DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
+import {
+  DisplayChainWithWhiteLogo,
+  DisplayUsedChain,
+} from '@/isomorphic/wallet/chain';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import AssociateDappModal from '@/renderer/components/AssociateDappModal';
 import { checkIsCexChain } from '@/renderer/hooks/useBundle/cex/utils/shared';
@@ -130,7 +133,7 @@ const PortfolioView = ({
   supportHistoryChains: ServerChain[];
   historyTokenDict: Record<string, TokenItem>;
   view: VIEW_TYPE;
-  chainList: DisplayChainWithWhiteLogo[];
+  chainList: (DisplayChainWithWhiteLogo | DisplayUsedChain)[];
 }) => {
   const [relateDappModalOpen, setRelateDappModalOpen] = useState(false);
   const [scrollTop, setScrollTop] = useState(0);

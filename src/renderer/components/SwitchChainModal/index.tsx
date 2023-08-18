@@ -10,10 +10,15 @@ import { usePreference } from '@/renderer/hooks/rabbyx/usePreference';
 import { Chain, CHAINS_ENUM, CHAINS_LIST } from '@debank/common';
 import { useCustomRPC } from '@/renderer/hooks/useCustomRPC';
 import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
+import { useAccountBalanceMap } from '@/renderer/hooks/rabbyx/useAccount';
+import { varyAndSortChainItems } from '@/isomorphic/wallet/chain';
+import { formatUsdValue } from '@/renderer/utils/number';
 import styles from './index.module.less';
 import RabbyInput from '../AntdOverwrite/Input';
 import { TipsWrapper } from '../TipWrapper';
 import ChainIcon from '../ChainIcon';
+
+import SvgIconWallet from './icons/chain-wallet.svg?rc';
 
 type OnPinnedChanged = (
   chain: import('@debank/common').CHAINS_ENUM,
@@ -29,6 +34,7 @@ function ChainItem({
   support = true,
   disabledTips,
   isShowCustomRPC,
+  balanceValue,
 }: {
   chain: import('@debank/common').Chain;
   pinned: boolean;
@@ -38,6 +44,7 @@ function ChainItem({
   support?: boolean;
   disabledTips?: React.ReactNode;
   isShowCustomRPC?: boolean;
+  balanceValue?: number;
 }) {
   return (
     <Tooltip
@@ -61,29 +68,44 @@ function ChainItem({
             className={styles.chainItemIcon}
             isShowCustomRPC={isShowCustomRPC}
           />
-          <div className={styles.chainItemName}>{chain.name}</div>
+          <div className={styles.nameWrapper}>
+            <div className={styles.chainNameFloor}>
+              <div className={styles.chainItemName}>{chain.name}</div>
+            </div>
+            {!!balanceValue && (
+              <div
+                className={clsx(styles.chainNameFloor, styles.chainBalanceInfo)}
+              >
+                <SvgIconWallet />
+                <span className="ml-6">{formatUsdValue(balanceValue)}</span>
+              </div>
+            )}
+          </div>
         </div>
-        <TipsWrapper hoverTips={pinned ? 'Unpin Chain' : 'Pin Chain'}>
-          <img
-            className={clsx(styles.chainItemStar, pinned ? styles.block : '')}
-            src={
-              pinned
-                ? 'rabby-internal://assets/icons/swap/pinned.svg'
-                : 'rabby-internal://assets/icons/swap/unpinned.svg'
-            }
-            onClick={(evt) => {
-              evt.stopPropagation();
-              onPinnedChange?.(chain.enum, !pinned);
-            }}
-            alt=""
-          />
-        </TipsWrapper>
-        {checked && (
-          <img
-            className={styles.chainItemChecked}
-            src="rabby-internal://assets/icons/select-chain/checked.svg"
-          />
-        )}
+
+        <div className={styles.chainItemRight}>
+          <TipsWrapper hoverTips={pinned ? 'Unpin Chain' : 'Pin Chain'}>
+            <img
+              className={clsx(styles.chainItemStar, pinned ? styles.block : '')}
+              src={
+                pinned
+                  ? 'rabby-internal://assets/icons/swap/pinned.svg'
+                  : 'rabby-internal://assets/icons/swap/unpinned.svg'
+              }
+              onClick={(evt) => {
+                evt.stopPropagation();
+                onPinnedChange?.(chain.enum, !pinned);
+              }}
+              alt=""
+            />
+          </TipsWrapper>
+          {checked && (
+            <img
+              className={clsx(styles.chainItemChecked, 'ml-16')}
+              src="rabby-internal://assets/icons/select-chain/checked.svg"
+            />
+          )}
+        </div>
       </div>
     </Tooltip>
   );
@@ -117,53 +139,22 @@ function SwitchChainModalInner({
 
   const { preferences, setChainPinned } = usePreference();
 
+  const { matteredChainBalances, getLocalBalanceValue } =
+    useAccountBalanceMap();
+
   const [searchInput, setSearchInput] = useState('');
 
-  const { pinnedChains, unpinnedChains } = useMemo(() => {
-    const sortFn = (a: Chain, b: Chain) => {
-      if (supportChains) {
-        let an = 0;
-        let bn = 0;
-        if (supportChains.includes(a.enum)) {
-          an = 1;
-        }
-        if (supportChains.includes(b.enum)) {
-          bn = 1;
-        }
-
-        return bn - an;
-      }
-      return 0;
-    };
-    const pinnedSet = new Set(preferences.pinnedChain);
-    const pinned: typeof CHAINS_LIST[number][] = [];
-    const unpinned: typeof CHAINS_LIST[number][] = [];
-    CHAINS_LIST.forEach((chain) => {
-      if (pinnedSet.has(chain.enum)) {
-        pinned.push(chain);
-      } else {
-        unpinned.push(chain);
-      }
-    });
-    const keyword = searchInput?.trim().toLowerCase();
-    if (!keyword) {
-      return {
-        pinnedChains: pinned.sort(sortFn),
-        unpinnedChains: unpinned
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .sort(sortFn),
-      };
-    }
-
-    const filterFunc = searchFilter(keyword);
-    const searchedPinned = pinned.filter(filterFunc);
-    const searchedUnpinned = unpinned.filter(filterFunc);
-
+  const { pinnedSet, matteredList, unmatteredList } = useMemo(() => {
+    const set = new Set(preferences.pinnedChain);
     return {
-      pinnedChains: searchedPinned.sort(sortFn),
-      unpinnedChains: searchedUnpinned.sort(sortFn),
+      ...varyAndSortChainItems({
+        supportChains,
+        pinned: [...set],
+        matteredChainBalances,
+      }),
+      pinnedSet: set,
     };
-  }, [preferences.pinnedChain, searchInput, supportChains]);
+  }, [preferences.pinnedChain, supportChains, matteredChainBalances]);
 
   const onPinnedChange: OnPinnedChanged = useCallback(
     (chain, nextPinned) => {
@@ -213,14 +204,15 @@ function SwitchChainModalInner({
       />
       <div className={styles.scrollContainer}>
         <div>
-          {pinnedChains.length > 0 && (
+          {matteredList.length > 0 && (
             <div className={styles.chainList}>
-              {pinnedChains.map((chain) => {
+              {matteredList.map((chain) => {
                 return (
                   <ChainItem
                     key={`chain-${chain.id}`}
                     chain={chain}
-                    pinned
+                    pinned={pinnedSet.has(chain.enum)}
+                    balanceValue={getLocalBalanceValue(chain.serverId)}
                     onClick={() => {
                       handleChange(chain.enum);
                     }}
@@ -237,12 +229,12 @@ function SwitchChainModalInner({
             </div>
           )}
           <div className={styles.chainList}>
-            {unpinnedChains.map((chain) => {
+            {unmatteredList.map((chain) => {
               return (
                 <ChainItem
                   key={`chain-${chain.id}`}
                   chain={chain}
-                  pinned={false}
+                  pinned={pinnedSet.has(chain.enum)}
                   onClick={() => {
                     handleChange(chain.enum);
                   }}
