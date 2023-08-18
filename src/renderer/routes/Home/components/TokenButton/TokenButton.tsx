@@ -2,6 +2,8 @@ import clsx from 'clsx';
 import React from 'react';
 import { Modal } from '@/renderer/components/Modal/Modal';
 import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
+import { useAtom } from 'jotai';
+import { visibleTokenListAtom } from '@/renderer/components/TokenActionModal/TokenActionModal';
 import { TokenTable } from '../TokenTable/TokenTable';
 
 export interface Props {
@@ -23,11 +25,22 @@ export const TokenButton: React.FC<Props> = ({
 }) => {
   const [visible, setVisible] = React.useState(false);
   const len = tokens?.length ?? 0;
+  const [visibleTokenList, setVisibleTokenList] = useAtom(visibleTokenListAtom);
 
   const handleClickLink = React.useCallback(() => {
     setVisible(false);
     onClickLink();
   }, [onClickLink]);
+
+  React.useEffect(() => {
+    setVisibleTokenList(visible);
+  }, [visible, setVisibleTokenList]);
+
+  React.useEffect(() => {
+    if (!visibleTokenList) {
+      setVisible(false);
+    }
+  }, [visibleTokenList]);
 
   return (
     <div>

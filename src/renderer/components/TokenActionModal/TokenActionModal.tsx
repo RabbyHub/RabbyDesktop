@@ -13,7 +13,7 @@ import clsx from 'clsx';
 import styled from 'styled-components';
 import { DEX_SUPPORT_CHAINS } from '@rabby-wallet/rabby-swap';
 import { useNavigate } from 'react-router-dom';
-import { atom, useAtomValue, useSetAtom } from 'jotai';
+import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { IconLink } from '@/../assets/icons/mainwin-settings';
 import IconCopy from '@/../assets/icons/mainwin-settings/item-copy.svg';
 import { Modal } from '@/renderer/components/Modal/Modal';
@@ -38,6 +38,7 @@ import { toastCopiedWeb3Addr } from '../TransparentToast';
 const supportChains = [...new Set(Object.values(DEX_SUPPORT_CHAINS).flat())];
 
 export const actionTokenAtom = atom<TokenItem | undefined>(undefined);
+export const visibleTokenListAtom = atom<boolean>(false);
 
 type tokenContainer = {
   token?: TokenItem;
@@ -45,6 +46,7 @@ type tokenContainer = {
   onCancel: () => void;
 };
 const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
+  const [, setVisibleTokenList] = useAtom(visibleTokenListAtom);
   const chainItem = getChain(token?.chain);
   const chainLogo =
     chainItem?.logo || 'rabby-internal://assets/icons/common/token-default.svg';
@@ -87,6 +89,7 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
                 rbisource: 'homeAsset',
               })}`
             );
+            setVisibleTokenList(false);
             onCancel();
           }
         },
@@ -100,6 +103,7 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
           navigate(
             `/mainwin/home/send-token?token=${token?.chain}:${token?.id}&rbisource=homeAsset`
           );
+          setVisibleTokenList(false);
           onCancel();
         },
       },
@@ -108,13 +112,21 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
         icon: IconReceive,
         onClick: () => {
           if (token) {
+            setVisibleTokenList(false);
             handleReceiveClick(token);
             onCancel();
           }
         },
       },
     ],
-    [chainItem, handleReceiveClick, navigate, onCancel, token]
+    [
+      chainItem,
+      handleReceiveClick,
+      navigate,
+      onCancel,
+      setVisibleTokenList,
+      token,
+    ]
   );
 
   const [amount, setAmount] = useState(token?.amount);
