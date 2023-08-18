@@ -38,6 +38,7 @@ import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { useContactsByAddr } from '@/renderer/hooks/rabbyx/useContact';
 import { confirmAddToWhitelistModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToWhitelist';
 import { confirmAddToContactsModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToContacts';
+import AccountSearchInput from '@/renderer/components/AccountSearchInput';
 import { ContactListModal } from '../SendToken/components/ContactListModal';
 import { ContactEditModal } from '../SendToken/components/ContactEditModal';
 import { ChainRender, ChainSelect } from '../Swap/component/ChainSelect';
@@ -728,10 +729,19 @@ const SendNFT = () => {
                   },
                 ]}
               >
-                <Input
-                  placeholder="Enter the address"
+                <AccountSearchInput
+                  placeholder="Enter address or search"
                   autoComplete="off"
                   autoFocus
+                  spellCheck={false}
+                  onSelectedAccount={(account) => {
+                    const nextVals = {
+                      ...form.getFieldsValue(),
+                      to: account.address,
+                    };
+                    handleFormValuesChange({ to: nextVals.to }, nextVals);
+                    form.setFieldsValue(nextVals);
+                  }}
                 />
               </Form.Item>
               {toAddressIsValid && !toAddressInContactBook && (

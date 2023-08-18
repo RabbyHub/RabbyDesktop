@@ -59,6 +59,22 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["ZORA"] = "ZORA";
     CHAINS_ENUM["LINEA"] = "LINEA";
     CHAINS_ENUM["BASE"] = "BASE";
+    CHAINS_ENUM["GETH"] = "GETH";
+    CHAINS_ENUM["GARBITRUM"] = "GARBITRUM";
+    CHAINS_ENUM["CGNOSIS"] = "CGNOSIS";
+    CHAINS_ENUM["MANTLE"] = "MANTLE";
+    CHAINS_ENUM["TENET"] = "TENET";
+    CHAINS_ENUM["TBSC"] = "TBSC";
+    CHAINS_ENUM["MPOLYGON"] = "MPOLYGON";
+    CHAINS_ENUM["GOP"] = "GOP";
+    CHAINS_ENUM["GBOBA"] = "GBOBA";
+    CHAINS_ENUM["GBASE"] = "GBASE";
+    CHAINS_ENUM["GLINEA"] = "GLINEA";
+    CHAINS_ENUM["TFTM"] = "TFTM";
+    CHAINS_ENUM["LYX"] = "LYX";
+    CHAINS_ENUM["TLYX"] = "TLYX";
+    CHAINS_ENUM["TDEBANK"] = "TDEBANK";
+    CHAINS_ENUM["TMNT"] = "TMNT";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -202,7 +218,7 @@ export const CHAINS_RAW = {
         nativeTokenLogo: "https://static.debank.com/image/arb_token/logo_url/arb/d61441782d4a08a7479d54aea211679e.png",
         nativeTokenDecimals: 18,
         eip: {
-            "1559": false,
+            "1559": true,
         },
     },
     [CHAINS_ENUM.OP]: {
@@ -1004,6 +1020,276 @@ export const CHAINS_RAW = {
         eip: {
             "1559": false,
         },
+    },
+    [CHAINS_ENUM.GETH]: {
+        id: 5,
+        serverId: "geth",
+        network: "5",
+        name: "Ethereum Goerli",
+        nativeTokenSymbol: "GoerliETH",
+        nativeTokenAddress: "geth",
+        enum: CHAINS_ENUM.GETH,
+        hex: "0x5",
+        scanLink: "https://goerli.etherscan.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/token/logo_url/eth/935ae4e4d1d12d59a99717a24f2540b5.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.GARBITRUM]: {
+        id: 421613,
+        serverId: "garb",
+        name: "Arbitrum Goerli",
+        enum: CHAINS_ENUM.GARBITRUM,
+        hex: "0x66eed",
+        network: "421613",
+        nativeTokenSymbol: "GoerliETH",
+        nativeTokenAddress: "garb",
+        scanLink: "https://testnet.arbiscan.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/arb_token/logo_url/arb/d61441782d4a08a7479d54aea211679e.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.CGNOSIS]: {
+        id: 10200,
+        name: "Gnosis Chiado",
+        serverId: "cxdai",
+        hex: "0x27d8",
+        enum: CHAINS_ENUM.CGNOSIS,
+        network: "10200",
+        nativeTokenSymbol: "ChiadoXDAI",
+        nativeTokenAddress: "cxdai",
+        scanLink: "https://gnosis-chiado.blockscout.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/xdai_token/logo_url/xdai/1207e67652b691ef3bfe04f89f4b5362.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.MANTLE]: {
+        id: 5000,
+        name: "Mantle",
+        serverId: "mnt",
+        hex: "0x1388",
+        enum: CHAINS_ENUM.MANTLE,
+        network: "5000",
+        nativeTokenSymbol: "MNT",
+        nativeTokenAddress: "mnt",
+        scanLink: "https://explorer.mantle.xyz/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/mnt/0af11a52431d60ded59655c7ca7e1475.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+    },
+    [CHAINS_ENUM.TENET]: {
+        id: 1559,
+        name: "Tenet",
+        serverId: "tenet",
+        hex: "0x617",
+        enum: CHAINS_ENUM.TENET,
+        network: "1559",
+        nativeTokenSymbol: "TENET",
+        nativeTokenAddress: "tenet",
+        scanLink: "https://tenetscan.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/tenet/803be22e467ee9a5abe00d69a9c3ea4f.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+    },
+    [CHAINS_ENUM.TBSC]: {
+        id: 97,
+        name: "BNB Testnet",
+        serverId: "tbsc",
+        hex: "0x61",
+        enum: CHAINS_ENUM.TBSC,
+        network: "97",
+        nativeTokenSymbol: "TestnetBNB",
+        nativeTokenAddress: "tbsc",
+        scanLink: "https://testnet.bscscan.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/bsc_token/logo_url/bsc/8bfdeaa46fe9be8f5cd43a53b8d1eea1.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.MPOLYGON]: {
+        id: 80001,
+        serverId: "mmatic",
+        name: "Polygon Mumbai",
+        hex: "0x13881",
+        enum: CHAINS_ENUM.MPOLYGON,
+        network: "80001",
+        nativeTokenSymbol: "MumbaiMATIC",
+        nativeTokenAddress: "mmatic",
+        nativeTokenDecimals: 18,
+        scanLink: "https://mumbai.polygonscan.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/matic_token/logo_url/matic/e5a8a2860ba5cf740a474dcab796dc63.png",
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.GOP]: {
+        id: 420,
+        serverId: "gop",
+        network: "420",
+        name: "Optimism Goerli",
+        enum: CHAINS_ENUM.GOP,
+        hex: "0x1a4",
+        scanLink: "https://goerli-optimism.etherscan.io/tx/_s_",
+        nativeTokenSymbol: "GoerliETH",
+        nativeTokenAddress: "gop",
+        nativeTokenLogo: "https://static.debank.com/image/op_token/logo_url/op/d61441782d4a08a7479d54aea211679e.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.GBOBA]: {
+        id: 2888,
+        serverId: "gboba",
+        network: "2888",
+        name: "Boba Goerli",
+        nativeTokenSymbol: "GoerliETH",
+        nativeTokenAddress: "gboba",
+        enum: CHAINS_ENUM.GBOBA,
+        hex: "0xb48",
+        scanLink: "https://testnet.bobascan.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/token/logo_url/eth/935ae4e4d1d12d59a99717a24f2540b5.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.GBASE]: {
+        id: 84531,
+        serverId: "gbase",
+        network: "84531",
+        name: "Base Goerli",
+        nativeTokenSymbol: "GoerliETH",
+        nativeTokenAddress: "gbase",
+        enum: CHAINS_ENUM.GBASE,
+        hex: "0x14a33",
+        scanLink: "https://goerli.basescan.org/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/token/logo_url/eth/935ae4e4d1d12d59a99717a24f2540b5.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.GLINEA]: {
+        id: 59140,
+        serverId: "glinea",
+        network: "59140",
+        name: "Linea Goerli",
+        nativeTokenSymbol: "GoerliETH",
+        nativeTokenAddress: "glinea",
+        enum: CHAINS_ENUM.GLINEA,
+        hex: "0xe704",
+        scanLink: "https://explorer.goerli.linea.build/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/token/logo_url/eth/935ae4e4d1d12d59a99717a24f2540b5.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.TFTM]: {
+        id: 4002,
+        serverId: "tftm",
+        network: "4002",
+        name: "Fantom Testnet",
+        nativeTokenSymbol: "TestnetFTM",
+        nativeTokenAddress: "tftm",
+        enum: CHAINS_ENUM.TFTM,
+        hex: "0xfa2",
+        scanLink: "https://testnet.ftmscan.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/tftm/d2f3315db5ff227373d10e6b68968ee9.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.TLYX]: {
+        id: 4201,
+        serverId: "tlyx",
+        network: "4201",
+        name: "LUKSO Testnet",
+        nativeTokenSymbol: "TestnetLYX",
+        nativeTokenAddress: "tlyx",
+        enum: CHAINS_ENUM.TLYX,
+        hex: "0x1069",
+        scanLink: "https://explorer.execution.testnet.lukso.network/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/tlyx/52d17f7faf8e52eaf64fda2ab8cd06c4.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.LYX]: {
+        id: 42,
+        serverId: "lyx",
+        network: "42",
+        name: "LUKSO",
+        nativeTokenSymbol: "LYX",
+        nativeTokenAddress: "lyx",
+        enum: CHAINS_ENUM.LYX,
+        hex: "0x2a",
+        scanLink: "https://explorer.execution.mainnet.lukso.network/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/lyx/dbe6eef57e66817e61297d9b188248ed.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: false,
+    },
+    [CHAINS_ENUM.TDEBANK]: {
+        id: 2021398,
+        serverId: "tdbk",
+        network: "2021398",
+        name: "DeBank Testnet",
+        nativeTokenSymbol: "USD",
+        nativeTokenAddress: "tdbk",
+        enum: CHAINS_ENUM.TDEBANK,
+        hex: "0x1ed816",
+        scanLink: "https://explorer.testnet.debank.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/tdbk_token/logo_url/tdbk/ca33ab4b12ff60ed4b571334a251d45e.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.TMNT]: {
+        id: 5001,
+        serverId: "tmnt",
+        network: "5001",
+        name: "Mantle Testnet",
+        nativeTokenSymbol: "TestnetMNT",
+        nativeTokenAddress: "tmnt",
+        enum: CHAINS_ENUM.TMNT,
+        hex: "0x1389",
+        scanLink: "https://explorer.testnet.mantle.xyz/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/tmnt/4c5f5bc84f7cbfe80b6be29021898a51.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: true,
     },
 };
 export const CHAINS_RAW_LIST = Object.values(CHAINS_RAW);

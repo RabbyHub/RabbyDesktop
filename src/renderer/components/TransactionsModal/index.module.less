@@ -63,7 +63,8 @@
         &Explain,
         &Info,
         &Change,
-        &Extra {
+        &Extra,
+        &Header {
           opacity: 0.3;
         }
       }
@@ -289,6 +290,65 @@
     }
     &Extra {
       width: 250px;
+    }
+  }
+
+  .tokenDetail {
+    .tag {
+      border-top-left-radius: 0!important;
+    }
+    .txAvatar {
+      width: 28px;
+      height: 28px;
+    }
+
+    .txAvatarBadge {
+      bottom: -2px;
+      right: -2px;
+    }
+
+    .txExplainTitle {
+      font-size: 12px;
+      line-height: 14px;
+      color: #F7FAFC;
+    }
+
+    .txExplainDesc {
+      font-size: 12px;
+      color: #BABEC5;
+      line-height: 14px;
+      margin-top: 4px;
+    }
+
+    .txExplain {
+      gap: 8px;
+    }
+
+    .txChangeItem {
+      justify-content: flex-end;
+    }
+
+    .txChangeItemSuccess {
+      color: #2ABB7F;
+      .txChangeText {
+        color: #2ABB7F;
+      }
+    }
+
+    .txChangeIcon {
+      width: 14px;
+      height: 14px;
+    }
+
+    .txChangeText {
+      font-size: 12px;
+    }
+
+    .txChangeSymbol {
+      font-size: 12px;
+      text-decoration-line: underline;
+      cursor: pointer;
+      margin-left: 4px;
     }
   }
 }

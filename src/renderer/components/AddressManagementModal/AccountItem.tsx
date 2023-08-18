@@ -21,7 +21,7 @@ import { SignalBridge } from '../ConnectStatus/SignalBridge';
 
 interface Props {
   account: IDisplayedAccountWithBalance;
-  onClickAction: React.MouseEventHandler<HTMLDivElement>;
+  onClickAction?: React.MouseEventHandler<HTMLDivElement>;
   onClick: React.MouseEventHandler<HTMLDivElement>;
   onClickDelete: React.MouseEventHandler<HTMLDivElement>;
   isUpdatingBalance?: boolean;
@@ -97,7 +97,7 @@ export const AccountItem: React.FC<Props> = ({
         setClose(false);
       }}
       className={clsx(styles.AccountItem, 'relative')}
-      closeClassName="w-[calc(100%-32px)]"
+      closeClassName="w-[calc(100%-20px)]"
       onConfirmDelete={onClickDelete}
       showClose={close}
     >
@@ -107,7 +107,9 @@ export const AccountItem: React.FC<Props> = ({
       >
         <img src="rabby-internal://assets/icons/address-management/trash.svg" />
       </div>
-      <div className={styles.container}>
+      <div
+        className={clsx(styles.container, !onClickAction && styles.noAction)}
+      >
         <div onClick={onClick} className={styles.main}>
           <div className={styles.logo}>
             <img src={addressTypeIcon} alt={account.brandName} />
@@ -189,7 +191,7 @@ export const AccountItem: React.FC<Props> = ({
             />
           </div>
         </div>
-        <div onClick={onClickAction} className={styles.action}>
+        <div onClick={onClickAction || onClick} className={styles.action}>
           <img
             className={styles.arrowHover}
             src="rabby-internal://assets/icons/address-management/arrow-right.svg"

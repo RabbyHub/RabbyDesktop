@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { Skeleton } from 'antd';
 import { usePrevious } from 'react-use';
 import styled from 'styled-components';
@@ -38,6 +38,7 @@ import { HomeUpdateButton } from './components/HomeUpdateButton';
 
 import './index.less';
 import { useFetchSummary } from './components/Summary/hook';
+import { TokenSearchInput } from './components/TokenSearchInput';
 
 const HomeBody = styled.div`
   padding-left: 28px;
@@ -111,9 +112,11 @@ const HomeWrapper = styled.div`
   }
 `;
 
-const SwitchViewWrapper = styled.div`
+const ToolbarWrapper = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+
   .switch-view {
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 6px;
@@ -146,13 +149,21 @@ const Home = () => {
   );
   const [usedChainList, setUsedChainList] = useState<DisplayUsedChain[]>([]);
   const { currentView, switchView } = useSwitchView();
+  const [search, setSearch] = useState('');
   const {
     tokenList,
     historyTokenMap,
     isLoading: isLoadingTokenList,
     isLoadingRealTime: isLoadingRealTimeTokenList,
   } = useHistoryTokenList(currentAccount?.address, updateNonce, currentView);
-  const filterTokenList = useFilterTokenList(tokenList, selectChainServerId);
+  const { filterTokenList, isLoading: isSearchingTokenList } =
+    useFilterTokenList(
+      tokenList,
+      selectChainServerId,
+      currentAccount?.address,
+      search,
+      true
+    );
 
   const {
     protocolList,
@@ -175,6 +186,7 @@ const Home = () => {
     totalHiddenCount: tokenHiddenCount,
     setIsExpand: setIsTokenExpand,
     usdValueChange: expandTokensUsdValueChange,
+    tokenHiddenList,
   } = useExpandList(
     filterTokenList,
     currentView === VIEW_TYPE.DEFAULT ? null : historyTokenMap,
@@ -209,7 +221,8 @@ const Home = () => {
 
   const filterProtocolList = useFilterProtoList(
     protocolList,
-    selectChainServerId
+    selectChainServerId,
+    search
   );
   const {
     filterList: displayProtocolList,
@@ -284,6 +297,18 @@ const Home = () => {
   }, []);
 
   const { showZSubview } = useZPopupLayerOnMain();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const onFocusInput = useCallback(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (search) {
+      switchView(VIEW_TYPE.DEFAULT);
+    }
+  }, [search, switchView]);
 
   return (
     <HomeBody>
@@ -392,9 +417,13 @@ const Home = () => {
                   <ChainList
                     chainBalances={displayChainList}
                     onChange={setSelectChainServerId}
+                    updateNonce={updateNonce}
                   />
                 )}
-                <SwitchViewWrapper className="my-[12px]">
+                <ToolbarWrapper className="my-[12px]">
+                  <div>
+                    <TokenSearchInput ref={inputRef} onSearch={setSearch} />
+                  </div>
                   <div className="switch-view">
                     <div
                       className={classNames('item', {
@@ -421,7 +450,7 @@ const Home = () => {
                       Summary
                     </div>
                   </div>
-                </SwitchViewWrapper>
+                </ToolbarWrapper>
               </div>
 
               <PortfolioView
@@ -438,6 +467,7 @@ const Home = () => {
                   expandTokensUsdValueChange,
                   setIsExpand: setIsTokenExpand,
                   isShowExpand: isShowTokenExpand,
+                  tokenHiddenList,
                 }}
                 protocolHidden={{
                   isShowExpand: isShowProtocolExpand,
@@ -446,13 +476,14 @@ const Home = () => {
                   hiddenUsdValue: protocolHiddenUsdValue,
                   setIsExpand: setIsProtocolExpand,
                 }}
-                isLoadingTokenList={isLoadingTokenList}
+                isLoadingTokenList={isLoadingTokenList || isSearchingTokenList}
                 isLoadingProtocolList={isLoadingProtocol}
                 isLoadingProtocolHistory={isLoadingProtocolHistory}
                 supportHistoryChains={supportHistoryChains}
                 historyTokenDict={historyTokenDict}
                 chainList={displayChainList}
                 view={currentView}
+                onFocusInput={onFocusInput}
               />
             </div>
           </div>

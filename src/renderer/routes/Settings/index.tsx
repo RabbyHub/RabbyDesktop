@@ -21,6 +21,7 @@ import { ModalConfirmInSettings } from '@/renderer/components/Modal/Confirm';
 import { Switch } from '@/renderer/components/Switch/Switch';
 import { ucfirst } from '@/isomorphic/string';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
+import ManageAddressModal from '@/renderer/components/AddressManagementModal/ManageAddress';
 import { atom, useAtom } from 'jotai';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
@@ -354,6 +355,7 @@ export function MainWindowSettings() {
   const [isShowingClearPendingModal, setIsShowingClearPendingModal] =
     useState(false);
   const [isShowCustomRPCModal, setIsShowCustomRPCModal] = useState(false);
+  const [isManageAddressModal, setIsManageAddressModal] = useState(false);
 
   return (
     <div className={styles.settingsPage}>
@@ -454,6 +456,15 @@ export function MainWindowSettings() {
                 setIsShowCustomRPCModal(true);
               }}
               icon="rabby-internal://assets/icons/mainwin-settings/icon-custom-rpc.svg"
+            >
+              <img src={IconChevronRight} />
+            </ItemAction>
+            <ItemAction
+              name="Manage Address"
+              onClick={() => {
+                setIsManageAddressModal(true);
+              }}
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-manage-address.svg"
             >
               <img src={IconChevronRight} />
             </ItemAction>
@@ -603,6 +614,13 @@ export function MainWindowSettings() {
         open={isShowCustomRPCModal}
         onClose={() => {
           setIsShowCustomRPCModal(false);
+        }}
+      />
+
+      <ManageAddressModal
+        visible={isManageAddressModal}
+        onCancel={() => {
+          setIsManageAddressModal(false);
         }}
       />
     </div>

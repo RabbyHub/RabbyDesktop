@@ -12,7 +12,7 @@ import {
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import { getTokenSymbol } from '@/renderer/utils';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
-import { TokenActionSymbol } from '@/renderer/components/TokenActionModal';
+import { TokenActionSymbol } from '@/renderer/components/TokenActionModal/TokenActionModal';
 
 const PoolItemWrapper = styled.div`
   padding-top: 25px;
@@ -372,7 +372,7 @@ const TokenItemComp = ({
         </div>
         {isDebt && <div className="debt-tag">Debt</div>}
       </div>
-      <div className="token-price">${formatPrice(token.price)}</div>
+      <div className="token-price">${formatPrice(token.price || 0)}</div>
       <div className="token-amount">
         <span>
           {`${formatAmount(token.amount)}`}{' '}

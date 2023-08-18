@@ -661,12 +661,14 @@ const sortTokensByPrice = (t: TokenItem[]) => {
   });
 };
 
+const defaultExcludeTokens: TokenItem['id'][] = [];
+
 export const TokenSelect = ({
   token,
   onChange,
   onTokenChange,
   chainId: externalChainId,
-  excludeTokens = [],
+  excludeTokens = defaultExcludeTokens,
   type = 'default',
   placeholder,
   hideChainIcon = true,

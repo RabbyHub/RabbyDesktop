@@ -136,7 +136,8 @@ export const ContactListModal = ({
 
   useEffect(() => {
     getAllAccountsToDisplay();
-  }, [getAllAccountsToDisplay]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <StyledModal
@@ -146,6 +147,7 @@ export const ContactListModal = ({
       open={visible}
       title="Select Address"
       onCancel={onCancel}
+      destroyOnClose
     >
       <ContentWrapper>
         <div className="desc">{Desc}</div>

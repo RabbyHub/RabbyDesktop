@@ -29,7 +29,7 @@ export const LeftContainer: React.FC = () => {
     refetchBundleAssets,
   } = useBundle();
 
-  const filterTokenList = useFilterTokenList(
+  const { filterTokenList } = useFilterTokenList(
     bundleTokenList,
     selectChainServerId
   );

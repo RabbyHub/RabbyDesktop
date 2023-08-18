@@ -8,7 +8,7 @@ import LabelWithIcon from '@/renderer/components/LabelWithIcon';
 import TokensIcons from '../routes/Home/components/TokenIcons';
 import { formatUsdValue } from './number';
 import { getCollectionDisplayName, PortfolioItemNft } from './nft';
-import { TokenActionSymbol } from '../components/TokenActionModal';
+import { TokenActionSymbol } from '../components/TokenActionModal/TokenActionModal';
 import { getTokenSymbol } from '.';
 
 export const ellipsisTokenSymbol = (text: string, length = 6) => {

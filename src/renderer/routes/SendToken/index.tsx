@@ -34,6 +34,7 @@ import { useContactsByAddr } from '@/renderer/hooks/rabbyx/useContact';
 import { confirmAddToContactsModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToContacts';
 import useCurrentBalance from '@/renderer/hooks/useCurrentBalance';
 import { findChainByServerID } from '@/renderer/utils/chain';
+import AccountSearchInput from '@/renderer/components/AccountSearchInput';
 import GasSelector from './components/GasSelector';
 import GasReserved from './components/GasReserved';
 import { ChainRender, ChainSelect } from '../Swap/component/ChainSelect';
@@ -1033,12 +1034,19 @@ const SendTokenInner = () => {
                 },
               ]}
             >
-              <RabbyInput
-                placeholder="Enter the address"
+              <AccountSearchInput
+                placeholder="Enter address or search"
                 autoComplete="off"
                 autoFocus
                 spellCheck={false}
-                size="large"
+                onSelectedAccount={(account) => {
+                  const nextVals = {
+                    ...form.getFieldsValue(),
+                    to: account.address,
+                  };
+                  handleFormValuesChange({ to: nextVals.to }, nextVals);
+                  form.setFieldsValue(nextVals);
+                }}
               />
             </Form.Item>
             {toAddressIsValid && !toAddressInContactBook && (

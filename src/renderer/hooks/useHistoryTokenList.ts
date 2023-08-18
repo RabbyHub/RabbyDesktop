@@ -5,6 +5,7 @@ import { groupBy } from 'lodash';
 import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { VIEW_TYPE } from '@/renderer/routes/Home/type';
+import { useToken } from './rabbyx/useToken';
 
 export interface TokenWithHistoryItem {
   current: TokenItem;
@@ -40,6 +41,7 @@ export default (
   const isRealTimeLoadedRef = useRef(false);
   const isHistoryLoadedRef = useRef(false);
   const isLoadingHistory = useRef(false);
+  const { setTokenList } = useToken();
 
   const loadCache = async (addr: string) => {
     if (isHistoryLoadedRef.current) return;
@@ -170,14 +172,19 @@ export default (
     }
   };
 
-  const fetchData = useCallback(async (addr: string, view: VIEW_TYPE) => {
-    if (!isRealTimeLoadedRef.current) {
-      await loadCache(addr);
-      await loadRealTime(addr);
-    }
-    if (view === VIEW_TYPE.DEFAULT) return;
-    await loadHistory(addr);
-  }, []);
+  const fetchData = useCallback(
+    async (addr: string, view: VIEW_TYPE) => {
+      if (!isRealTimeLoadedRef.current) {
+        await loadCache(addr);
+        setTokenList(tokenListRef.current);
+        await loadRealTime(addr);
+        setTokenList(tokenListRef.current);
+      }
+      if (view === VIEW_TYPE.DEFAULT) return;
+      await loadHistory(addr);
+    },
+    [setTokenList]
+  );
 
   useEffect(() => {
     isRealTimeLoadedRef.current = false;
