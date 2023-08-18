@@ -146,15 +146,30 @@ function SwitchChainModalInner({
 
   const { pinnedSet, matteredList, unmatteredList } = useMemo(() => {
     const set = new Set(preferences.pinnedChain);
+
+    const searchKw = searchInput?.trim().toLowerCase();
+    const result = varyAndSortChainItems({
+      supportChains,
+      pinned: [...set],
+      searchKeyword: searchKw,
+      matteredChainBalances,
+    });
+
+    if (searchKw) {
+      result.matteredList = [];
+      result.unmatteredList = result.allSearched;
+    }
+
     return {
-      ...varyAndSortChainItems({
-        supportChains,
-        pinned: [...set],
-        matteredChainBalances,
-      }),
+      ...result,
       pinnedSet: set,
     };
-  }, [preferences.pinnedChain, supportChains, matteredChainBalances]);
+  }, [
+    preferences.pinnedChain,
+    supportChains,
+    searchInput,
+    matteredChainBalances,
+  ]);
 
   const onPinnedChange: OnPinnedChanged = useCallback(
     (chain, nextPinned) => {
@@ -235,6 +250,7 @@ function SwitchChainModalInner({
                   key={`chain-${chain.id}`}
                   chain={chain}
                   pinned={pinnedSet.has(chain.enum)}
+                  balanceValue={getLocalBalanceValue(chain.serverId)}
                   onClick={() => {
                     handleChange(chain.enum);
                   }}
