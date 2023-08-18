@@ -29,6 +29,7 @@ import { isSameAddress } from '@/renderer/utils/address';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 import { getTokenSymbol } from '@/renderer/utils';
+import { findChainByServerID } from '@/renderer/utils/chain';
 import { ChainRender, ChainSelect } from './component/ChainSelect';
 import { SwapIntro } from './component/Intro';
 import { DEX, getChainDefaultToken } from './constant';
@@ -313,7 +314,7 @@ export const SwapToken = () => {
     return false;
   }, [chain, payToken]);
 
-  const chainSwitch = useCallback(
+  const switchChain = useCallback(
     (c: CHAINS_ENUM, payTokenId?: string) => {
       setChain(c);
       setPayToken({
@@ -344,13 +345,13 @@ export const SwapToken = () => {
     if (
       !supportChains.map((e) => CHAINS[e].serverId).includes(pageInfo?.chain)
     ) {
-      chainSwitch(CHAINS_ENUM.ETH);
+      switchChain(CHAINS_ENUM.ETH);
     }
     const target = Object.values(CHAINS).find(
       (item) => item.serverId === pageInfo.chain
     );
     if (target) {
-      chainSwitch(target?.enum, pageInfo.payTokenId);
+      switchChain(target?.enum, pageInfo.payTokenId);
     }
   }
   shouldResetState.current = false;
@@ -797,7 +798,7 @@ export const SwapToken = () => {
               <div className="subText"> Chain </div>
               <ChainSelect
                 value={chain}
-                onChange={chainSwitch}
+                onChange={switchChain}
                 disabledTips="Not supported"
                 title="Select chain"
                 supportChains={supportChains}
@@ -810,7 +811,14 @@ export const SwapToken = () => {
               </div>
               <div className="tokenGroup">
                 <TokenSelect
-                  onTokenChange={setPayToken}
+                  onTokenChange={(token) => {
+                    const chainItem = findChainByServerID(token.chain);
+                    if (chainItem?.enum !== chain) {
+                      switchChain(chainItem?.enum || CHAINS_ENUM.ETH);
+                      setReceiveToken(undefined);
+                    }
+                    setPayToken(token);
+                  }}
                   chainId={CHAINS[chain].serverId}
                   token={payToken}
                   type="swapFrom"
@@ -826,7 +834,14 @@ export const SwapToken = () => {
                   <IconSwapArrow />
                 </div>
                 <TokenSelect
-                  onTokenChange={setReceiveToken}
+                  onTokenChange={(token) => {
+                    const chainItem = findChainByServerID(token.chain);
+                    if (chainItem?.enum !== chain) {
+                      switchChain(chainItem?.enum || CHAINS_ENUM.ETH);
+                      setPayToken(undefined);
+                    }
+                    setReceiveToken(token);
+                  }}
                   chainId={CHAINS[chain].serverId}
                   token={receiveToken}
                   type="swapTo"

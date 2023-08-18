@@ -136,4 +136,61 @@ const NameAndAddress = ({
   );
 };
 
+const Full = ({
+  className = '',
+  address = '',
+  addressClass = '',
+  copyIconClass = '',
+  copyIconOpacity = 40,
+  copyIcon = true,
+}: Pick<
+  NameAndAddressProps,
+  | 'address'
+  | 'addressClass'
+  | 'className'
+  | 'copyIcon'
+  | 'copyIconClass'
+  | 'copyIconOpacity'
+>) => {
+  const copyAddress = useCopyAddress();
+
+  const { isShowCopyIcon, iconCopySrc } = useMemo(() => {
+    return {
+      isShowCopyIcon: !!copyIcon,
+      iconCopySrc:
+        typeof copyIcon === 'string'
+          ? copyIcon.trim() || IconCopySrc
+          : IconCopySrc,
+    };
+  }, [copyIcon]);
+
+  return (
+    <div className={clsx('name-and-address name-and-address-full', className)}>
+      <div
+        className={clsx('address', addressClass)}
+        title={address.toLowerCase()}
+      >
+        {address.toLowerCase()}
+      </div>
+      {isShowCopyIcon && (
+        <TipsWrapper hoverTips="Copy" clickTips="Copied">
+          <img
+            className={clsx(
+              `ml-4 cursor-pointer opacity-${copyIconOpacity}`,
+              copyIconClass
+            )}
+            src={iconCopySrc}
+            onClick={(evt: any) => {
+              evt.stopPropagation();
+              copyAddress(address);
+            }}
+          />
+        </TipsWrapper>
+      )}
+    </div>
+  );
+};
+
+NameAndAddress.Full = Full;
+
 export default NameAndAddress;

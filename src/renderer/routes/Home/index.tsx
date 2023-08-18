@@ -8,7 +8,7 @@ import { sortBy, debounce } from 'lodash';
 import { ellipsis } from '@/renderer/utils/address';
 import { TipsWrapper } from '@/renderer/components/TipWrapper';
 import { formatNumber } from '@/renderer/utils/number';
-import { formatChain, DisplayChainWithWhiteLogo } from '@/renderer/utils/chain';
+import { DisplayUsedChain, formatUsedChain } from '@/isomorphic/wallet/chain';
 import { useTotalBalance } from '@/renderer/utils/balance';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import useCurve from '@/renderer/hooks/useCurve';
@@ -147,9 +147,7 @@ const Home = () => {
   const [selectChainServerId, setSelectChainServerId] = useState<string | null>(
     null
   );
-  const [usedChainList, setUsedChainList] = useState<
-    DisplayChainWithWhiteLogo[]
-  >([]);
+  const [usedChainList, setUsedChainList] = useState<DisplayUsedChain[]>([]);
   const { currentView, switchView } = useSwitchView();
   const [search, setSearch] = useState('');
   const {
@@ -242,7 +240,7 @@ const Home = () => {
     setIsTokenExpand(false);
     switchView(VIEW_TYPE.DEFAULT);
     const chainList = await walletOpenapi.usedChainList(currentAccount.address);
-    setUsedChainList(chainList.map((chain) => formatChain(chain)));
+    setUsedChainList(chainList.map((chain) => formatUsedChain(chain)));
     walletController.getAddressBalance(currentAccount?.address);
   };
 

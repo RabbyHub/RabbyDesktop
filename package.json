@@ -55,6 +55,7 @@
     "start:preload": "cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
     "start:renderer": "npm run clean:renderer && cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
     "sync:chain-data": "cp node_modules/@debank/common/dist/chain-data.js ./src/isomorphic/chain-data.js",
+    "make-theme": "ts-node .erb/scripts/make-theme.ts",
     "test": "jest",
     "pretest:main": "tsc --project ./tsconfig.fixtures.json",
     "test:main": "node ./scripts/spec-runner.js"

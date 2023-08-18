@@ -94,16 +94,41 @@
 .chainItem {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  height: 56px;
   padding: 12px;
   cursor: pointer;
   position: relative;
   border: 1px solid transparent;
   border-radius: 8px;
+
+  .chainNameFloor {
+    display: flex;
+    align-items: center;
+    margin-left: 12px;
+
+    & + .chainNameFloor {
+      margin-top: 4px;
+    }
+  }
+
+  .chainBalanceInfo {
+    color: var(--neutral-foot, #BABEC5);
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+
   &.notSupport {
     opacity: 0.4;
     cursor: not-allowed;
   }
   &Left {
+    display: flex;
+    align-items: center;
+  }
+  &Right {
     display: flex;
     align-items: center;
   }
@@ -120,7 +145,6 @@
     font-size: 15px;
     line-height: 18px;
     color: #ffffff;
-    margin-left: 12px;
   }
   .chainItemStar {
     margin-left: 8px;
@@ -128,6 +152,10 @@
     &.block {
       display: block;
     }
+  }
+
+  &:hover .chainItemStar {
+    display: block;
   }
 
   &Checked {

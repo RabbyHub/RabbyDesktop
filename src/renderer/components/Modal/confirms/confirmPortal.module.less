@@ -1,0 +1,118 @@
+.confirmPortal {
+  background: var(--theme-modal-content-bg);
+  border-radius: 12px;
+
+  @header-h: 44px;
+  @content-padding: 20px;
+  @footer-h: 68px;
+
+  :global {
+    .ant-modal-header {
+      height: @header-h;
+      padding-top: 20px;
+      padding-bottom: 0;
+      background: transparent;
+      color: white;
+      border-bottom: none;
+    }
+
+    .ant-modal-title {
+      font-weight: 500;
+      font-size: 20px;
+      line-height: 24px;
+      text-align: center;
+      color: #ffffff;
+    }
+
+    .ant-modal-body {
+      padding: 16px 20px;
+    }
+
+    .ant-modal-content {
+      background: transparent;
+      box-shadow: 0px 24px 80px rgba(19, 20, 26, 0.18);
+      height: 100%;
+      text-align: center;
+      color: #ffffff;
+      padding-bottom: @content-padding;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+
+      > div {
+        width: 100%;
+        flex-direction: row;
+        flex-shrink: 0;
+
+        &.ant-modal-body {
+          flex-shrink: 1;
+          height: 100%;
+        }
+      }
+    }
+
+    .ant-modal-footer {
+      border-top: none;
+      // height: @footer-h;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      padding-top: 0;
+      padding-bottom: 0;
+
+      .ant-btn {
+        width: 100%;
+        flex-shrink: 1;
+
+        height: 48px;
+        padding: 0;
+        border-radius: 4px;
+
+        font-weight: 500;
+        font-size: 15px;
+        line-height: 18px;
+        color: #ffffff;
+      }
+    }
+  }
+
+  .input {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px !important;
+    height: 48px;
+    padding: 16px;
+    color: #fff !important;
+    &:focus,
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    }
+    box-shadow: none !important;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+
+    color: #ffffff;
+
+    &Suffix {
+      font-size: 16px;
+      img {
+        cursor: pointer;
+      }
+    }
+  }
+
+  .cancelButton {
+    color: var(--neutral-foot, #BABEC5);
+    border: 0.5px solid var(--neutral-foot, #BABEC5);
+
+    &:hover, &:focus {
+      color: var(--neutral-title-1, #F7FAFC);
+      border: 0.5px solid var(--neutral-body, #D3D8E0);
+      background: var(--neutral-card-1, rgba(255, 255, 255, 0.06));
+    }
+  }
+}

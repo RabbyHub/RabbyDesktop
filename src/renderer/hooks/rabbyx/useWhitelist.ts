@@ -1,4 +1,5 @@
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { isSameAddress } from '@/renderer/utils/address';
 import { atom, useAtom } from 'jotai';
 import React, { useEffect } from 'react';
 
@@ -13,6 +14,14 @@ export const useWhitelist = () => {
     const data = await walletController.getWhitelist();
     setWL(data);
   }, [setWL]);
+
+  const addWhitelist = React.useCallback(
+    async (address: string) => {
+      await walletController.addWhitelist(address);
+      getWhitelist();
+    },
+    [getWhitelist]
+  );
 
   const setWhitelist = React.useCallback(
     async (addresses: string[]) => {
@@ -32,6 +41,17 @@ export const useWhitelist = () => {
     setEnable(data);
   }, [setEnable]);
 
+  const isAddrOnWhitelist = React.useCallback(
+    (address?: string) => {
+      if (!address) return false;
+
+      return whitelist.find((item) =>
+        isSameAddress(item, address.toLowerCase())
+      );
+    },
+    [whitelist]
+  );
+
   const init = React.useCallback(async () => {
     getWhitelist();
     getWhitelistEnabled();
@@ -41,5 +61,13 @@ export const useWhitelist = () => {
     init();
   }, [init]);
 
-  return { init, whitelist, enable, setWhitelist, toggleWhitelist };
+  return {
+    init,
+    whitelist,
+    enable,
+    addWhitelist,
+    setWhitelist,
+    toggleWhitelist,
+    isAddrOnWhitelist,
+  };
 };

@@ -29,10 +29,15 @@ import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import { useRbiSource } from '@/renderer/hooks/useRbiSource';
 import { TipsWrapper } from '@/renderer/components/TipWrapper';
 import IconRcLoading from '@/../assets/icons/swap/loading.svg?rc';
+import { confirmAddToWhitelistModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToWhitelist';
+import { useContactsByAddr } from '@/renderer/hooks/rabbyx/useContact';
+import { confirmAddToContactsModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToContacts';
+import useCurrentBalance from '@/renderer/hooks/useCurrentBalance';
+import { findChainByServerID } from '@/renderer/utils/chain';
 import AccountSearchInput from '@/renderer/components/AccountSearchInput';
 import GasSelector from './components/GasSelector';
 import GasReserved from './components/GasReserved';
-import { ChainSelect } from '../Swap/component/ChainSelect';
+import { ChainRender, ChainSelect } from '../Swap/component/ChainSelect';
 import { TokenSelect } from '../Swap/component/TokenSelect';
 import { ContactEditModal } from './components/ContactEditModal';
 import { ContactListModal } from './components/ContactListModal';
@@ -253,6 +258,8 @@ const SendTokenInner = () => {
   const rbisource = useRbiSource();
 
   const { currentAccount } = useCurrentAccount();
+  const { fetchContactsByAddr, isAddrOnContactBook, getAddressNote } =
+    useContactsByAddr();
   const [chain, setChain] = useState(CHAINS_ENUM.ETH);
   const [tokenAmountForGas, setTokenAmountForGas] = useState('0');
   const { useForm } = Form;
@@ -260,6 +267,7 @@ const SendTokenInner = () => {
   const { showChainsModal = false } = state ?? {};
 
   const [form] = useForm<{ to: string; amount: string }>();
+  const [formSnapshot, setFormSnapshot] = useState(form.getFieldsValue());
   const [contactInfo, setContactInfo] = useState<null | UIContactBookItem>(
     null
   );
@@ -300,7 +308,6 @@ const SendTokenInner = () => {
     null
   );
   const [temporaryGrant, setTemporaryGrant] = useState(false);
-  const [toAddressInWhitelist, setToAddressInWhitelist] = useState(false);
   const [gasPriceMap, setGasPriceMap] = useState<
     Record<string, { list: GasLevel[]; expireAt: number }>
   >({});
@@ -314,9 +321,21 @@ const SendTokenInner = () => {
   const {
     whitelist,
     enable: whitelistEnabled,
+    addWhitelist,
     init: initWhiteList,
   } = useWhitelist();
   const [searchParams] = useSearchParams();
+
+  const { toAddressIsValid, toAddressInWhitelist, toAddressInContactBook } =
+    useMemo(() => {
+      return {
+        toAddressIsValid: !!formSnapshot.to && isValidAddress(formSnapshot.to),
+        toAddressInWhitelist: !!whitelist.find((item) =>
+          isSameAddress(item, formSnapshot.to)
+        ),
+        toAddressInContactBook: !!isAddrOnContactBook(formSnapshot.to),
+      };
+    }, [whitelist, isAddrOnContactBook, formSnapshot]);
 
   const whitelistAlertContent = useMemo(() => {
     if (!whitelistEnabled) {
@@ -552,9 +571,6 @@ const SendTokenInner = () => {
     } else {
       setShowWhitelistAlert(true);
       setEditBtnDisabled(false);
-      setToAddressInWhitelist(
-        !!whitelist.find((item) => isSameAddress(item, to))
-      );
     }
     let resultAmount = amount;
     if (!/^\d*(\.\d*)?$/.test(amount)) {
@@ -591,10 +607,12 @@ const SendTokenInner = () => {
     } else {
       setBalanceError(null);
     }
-    form.setFieldsValue({
+    const nextFormValues = {
       to,
       amount: resultAmount,
-    });
+    };
+    form.setFieldsValue(nextFormValues);
+    setFormSnapshot(nextFormValues);
     setCacheAmount(resultAmount);
     const alianName = await walletController.getAlianName(to.toLowerCase());
     console.log(alianName);
@@ -673,6 +691,8 @@ const SendTokenInner = () => {
         amount: '',
       });
     }
+    const chainItem = !token.chain ? null : findChainByServerID(token.chain);
+    setChain(chainItem?.enum || CHAINS_ENUM.ETH);
     setCurrentToken(token);
     setBalanceError(null);
     setBalanceWarn(null);
@@ -868,14 +888,37 @@ const SendTokenInner = () => {
 
   const handleClickWhitelistAlert = () => {
     if (whitelistEnabled && !temporaryGrant && !toAddressInWhitelist) {
-      ModalConfirm({
+      const toAddr = form.getFieldValue('to');
+      confirmAddToWhitelistModalPromise({
         title: 'Grant temporary permission',
-        height: 268,
-        onOk: () => {
+        addressToGrant: toAddr,
+        onFinished: (ctx) => {
+          if (ctx.isAddToWhitelist) {
+            addWhitelist(toAddr);
+          }
           setTemporaryGrant(true);
         },
       });
     }
+  };
+
+  const handleClickAddContact = () => {
+    if (toAddressInContactBook) return;
+
+    const toAddr = form.getFieldValue('to');
+    confirmAddToContactsModalPromise({
+      initAddressNote: getAddressNote(toAddr),
+      addrToAdd: toAddr,
+      title: 'Add to contacts',
+      async onFinished(result) {
+        await fetchContactsByAddr();
+        // trigger fetch contactInfo
+        const values = form.getFieldsValue();
+        handleFormValuesChange(null, { ...values });
+        // trigger get balance of address
+        // await wallet.getAddressBalance(result.contactAddrAdded, true);
+      },
+    });
   };
 
   useEffect(() => {
@@ -921,9 +964,19 @@ const SendTokenInner = () => {
           amount: '',
         }}
       >
-        <ChainSelect value={chain} onChange={handleChainChanged} />
+        <div
+          className={clsx('section relative', {
+            'mb-40': !showWhitelistAlert,
+          })}
+        >
+          <div className="section-title mb-8">Chain</div>
+          <ChainSelect
+            className="mb-24"
+            value={chain}
+            onChange={handleChainChanged}
+            chainRender={<ChainRender chain={chain} />}
+          />
 
-        <div className="section relative mt-16">
           <div className="section-title">From</div>
           <AccountCard alianName={sendAlianName} />
           <div className="section-title">
@@ -965,6 +1018,7 @@ const SendTokenInner = () => {
           </div>
           <div className="to-address">
             <Form.Item
+              className="mb-0"
               name="to"
               rules={[
                 { required: true, message: 'Please input address' },
@@ -995,19 +1049,26 @@ const SendTokenInner = () => {
                 }}
               />
             </Form.Item>
+            {toAddressIsValid && !toAddressInContactBook && (
+              <div className="tip-no-contact absolute left-initial top-initial text-[var(--neutral-body)] font-normal text-[12px] pt-[12px]">
+                Not on address list.{' '}
+                <span
+                  onClick={handleClickAddContact}
+                  className={clsx('ml-[2px] underline cursor-pointer')}
+                  style={{ color: 'var(--blue-default, #7084FF)' }}
+                >
+                  Add to contacts
+                </span>
+              </div>
+            )}
           </div>
-        </div>
-        <div
-          className={clsx('section', {
-            'mb-40': !showWhitelistAlert,
-          })}
-        >
-          <div className="section-title flex justify-between items-center">
+
+          <div className="section-title mt-40 flex justify-between items-center">
             <div className="token-balance whitespace-pre-wrap">
               {isLoading ? (
                 <Skeleton.Input active style={{ width: 100 }} />
               ) : (
-                <>
+                <span className="text-[#d3d8e0]">
                   Balance:{' '}
                   <span
                     className="truncate max-w-[80px]"
@@ -1023,7 +1084,7 @@ const SendTokenInner = () => {
                         .toFixed()
                     )}
                   </span>
-                </>
+                </span>
               )}
               {currentToken.amount > 0 && (
                 <MaxButton

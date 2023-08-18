@@ -84,9 +84,11 @@ function MainWrapper() {
         <ErrorBoundary>
           <MainWindowSidebar />
         </ErrorBoundary>
-        <MainWindowRoute>
-          <Outlet />
-        </MainWindowRoute>
+        <ErrorBoundary>
+          <MainWindowRoute>
+            <Outlet />
+          </MainWindowRoute>
+        </ErrorBoundary>
 
         <ModalUpdateInHome />
       </div>
