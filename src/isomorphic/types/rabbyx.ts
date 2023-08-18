@@ -52,9 +52,10 @@ export interface PreferenceState {
   currentVersion: string;
   firstOpen: boolean;
   pinnedChain: string[];
-  AddedToken: AddedToken;
   tokenApprovalChain: Record<string, import('@debank/common').CHAINS_ENUM>;
   nftApprovalChain: Record<string, import('@debank/common').CHAINS_ENUM>;
+  customizedToken?: Token[];
+  blockedToken?: Token[];
 }
 export interface Token {
   address: string;
@@ -573,6 +574,12 @@ export type RabbyXMethod = {
     brand: string;
   };
   'walletController.initQRHardware': (brand: string) => number | null;
+  'walletController.addCustomizedToken': (token: Token) => void;
+  'walletController.removeCustomizedToken': (token: Token) => void;
+  'walletController.getCustomizedToken': () => Token[];
+  'walletController.addBlockedToken': (token: Token) => void;
+  'walletController.removeBlockedToken': (token: Token) => void;
+  'walletController.getBlockedToken': () => Token[];
 } & {
   'openapi.setHost': OpenApiService['setHost'];
   'openapi.getHost': OpenApiService['getHost'];

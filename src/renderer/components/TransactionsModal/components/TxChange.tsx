@@ -2,11 +2,18 @@ import NFTAvatar from '@/renderer/components/NFTAvatar';
 import { numberWithCommasIsLtOne } from '@/renderer/utils/number';
 import { getTokenSymbol } from '@/renderer/utils';
 import {
+  NFTItem,
+  TokenItem,
   TxDisplayItem,
   TxHistoryItem,
 } from '@rabby-wallet/rabby-api/dist/types';
 import classNames from 'classnames';
+import clsx from 'clsx';
+import { useState } from 'react';
 import styles from '../index.module.less';
+// eslint-disable-next-line import/no-cycle
+import { useTokenAction } from '../../TokenActionModal/TokenActionModal';
+import ModalPreviewNFTItem from '../../ModalPreviewNFTItem';
 
 const IconUnknown = 'rabby-internal://assets/icons/common/token-default.svg';
 
@@ -16,6 +23,21 @@ type TxChangeProps = {
 
 export const TxChange = ({ data: info, tokenDict }: TxChangeProps) => {
   const tokens = tokenDict || {};
+  const { setTokenAction, cancelTokenAction } = useTokenAction();
+  const [nft, setNft] = useState<NFTItem | undefined>(undefined);
+
+  const handleClick = async (token: TokenItem, isNft: boolean) => {
+    console.log(token);
+    if (isNft) {
+      setNft(token as any);
+      return;
+    }
+
+    cancelTokenAction();
+    setTimeout(() => {
+      setTokenAction(token);
+    }, 0);
+  };
 
   if (!info.sends?.length && !info.receives?.length) {
     return null;
@@ -34,7 +56,7 @@ export const TxChange = ({ data: info, tokenDict }: TxChangeProps) => {
 
         return (
           <div
-            className="token-change-item"
+            className={clsx('token-change-item', styles.txChangeItem)}
             title={`${
               isNft ? v.amount : numberWithCommasIsLtOne(v.amount, 2)
             } ${name}`}
@@ -44,24 +66,32 @@ export const TxChange = ({ data: info, tokenDict }: TxChangeProps) => {
           >
             {isNft ? (
               <NFTAvatar
-                className="token-icon"
+                className={clsx('token-icon', styles.txChangeIcon)}
                 thumbnail
                 content={token?.content}
                 type={token?.content_type}
               />
             ) : (
               <img
-                className="token-icon"
+                className={clsx('token-icon', styles.txChangeIcon)}
                 src={token?.logo_url || IconUnknown}
                 alt=""
               />
             )}
 
-            <span className="token-change-item-text">
-              -{' '}
-              {`${
-                isNft ? v.amount : numberWithCommasIsLtOne(v.amount, 2)
-              } ${name}`}
+            <span
+              className={clsx('token-change-item-text', styles.txChangeText)}
+            >
+              - {`${isNft ? v.amount : numberWithCommasIsLtOne(v.amount, 2)}`}
+              <span
+                onClick={() => handleClick(token, isNft)}
+                className={clsx(
+                  styles.txChangeSymbol,
+                  'underline cursor-pointer ml-[4px]'
+                )}
+              >
+                {name}
+              </span>
             </span>
           </div>
         );
@@ -79,7 +109,11 @@ export const TxChange = ({ data: info, tokenDict }: TxChangeProps) => {
           <div
             data-id={v.token_id}
             data-name={name}
-            className="token-change-item is-success"
+            className={clsx(
+              'token-change-item is-success',
+              styles.txChangeItem,
+              styles.txChangeItemSuccess
+            )}
             title={`${
               isNft ? v.amount : numberWithCommasIsLtOne(v.amount, 2)
             } ${name}`}
@@ -87,28 +121,44 @@ export const TxChange = ({ data: info, tokenDict }: TxChangeProps) => {
           >
             {isNft ? (
               <NFTAvatar
-                className="token-icon"
+                className={clsx('token-icon', styles.txChangeIcon)}
                 thumbnail
                 content={token?.content}
                 type={token?.content_type}
               />
             ) : (
               <img
-                className="token-icon"
+                className={clsx('token-icon', styles.txChangeIcon)}
                 src={token?.logo_url || IconUnknown}
                 alt=""
               />
             )}
 
-            <span className="token-change-item-text">
-              +{' '}
-              {`${
-                isNft ? v.amount : numberWithCommasIsLtOne(v.amount, 2)
-              } ${name}`}
+            <span
+              className={clsx('token-change-item-text', styles.txChangeText)}
+            >
+              + {`${isNft ? v.amount : numberWithCommasIsLtOne(v.amount, 2)}`}
+              <span
+                onClick={() => handleClick(token, isNft)}
+                className={clsx(
+                  styles.txChangeSymbol,
+                  'underline cursor-pointer ml-[4px]'
+                )}
+              >
+                {name}
+              </span>
             </span>
           </div>
         );
       })}
+      <ModalPreviewNFTItem
+        onSend={() => {
+          setNft(undefined);
+          cancelTokenAction();
+        }}
+        nft={nft}
+        onCancel={() => setNft(undefined)}
+      />
     </div>
   );
 };

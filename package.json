@@ -130,7 +130,7 @@
     "@rabby-wallet/binance-connector": "^2.0.1",
     "@rabby-wallet/electron-chrome-extensions": "^3.9.13-alpha.0",
     "@rabby-wallet/gnosis-sdk": "^1.3.2",
-    "@rabby-wallet/rabby-api": "^0.6.16",
+    "@rabby-wallet/rabby-api": "^0.6.19",
     "@rabby-wallet/rabby-swap": "^0.0.26",
     "@react-spring/web": "^9.7.2",
     "@sentry/electron": "^4.3.0",
