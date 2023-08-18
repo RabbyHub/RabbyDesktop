@@ -1,6 +1,8 @@
 import { Modal } from '@/renderer/components/Modal/Modal';
 import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import React from 'react';
+import { useAtom } from 'jotai';
+import { visibleTokenListAtom } from '@/renderer/components/TokenActionModal/TokenActionModal';
 import { TokenTable } from './TokenTable/TokenTable';
 
 interface Props {
@@ -10,6 +12,19 @@ interface Props {
 }
 
 export const LowAssetsModal: React.FC<Props> = ({ visible, onClose, list }) => {
+  const [visibleTokenList, setVisibleTokenList] = useAtom(visibleTokenListAtom);
+
+  React.useEffect(() => {
+    setVisibleTokenList(visible);
+  }, [visible, setVisibleTokenList]);
+
+  React.useEffect(() => {
+    if (!visibleTokenList) {
+      onClose();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleTokenList]);
+
   return (
     <Modal
       width={480}
