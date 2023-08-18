@@ -3,6 +3,7 @@ import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
 import { KEYRING_CLASS } from '@/renderer/utils/constant';
+import { isSameAddress } from '@/renderer/utils/address';
 import { useAccounts } from './useAccount';
 
 const contactsByAddrAtom = atom<Record<string, ContactBookItem>>({});
@@ -30,13 +31,11 @@ export function useContactsByAddr(opts?: { disableAutoFetch?: boolean }) {
   const isAddrOnContactBook = useCallback(
     (address?: string) => {
       if (!address) return false;
+      const laddr = address.toLowerCase();
 
       return (
-        !!contactsByAddr[address.toLowerCase()]?.isAlias &&
-        accounts.find(
-          (account) =>
-            account.address === address && account.type === KEYRING_CLASS.WATCH
-        )
+        !!contactsByAddr[laddr]?.isAlias &&
+        accounts.find((account) => isSameAddress(account.address, laddr))
       );
     },
     [accounts, contactsByAddr]
