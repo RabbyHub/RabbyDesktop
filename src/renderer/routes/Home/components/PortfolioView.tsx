@@ -228,7 +228,7 @@ const PortfolioView = ({
 
       <TokenActionModal />
       <LowAssetsModal
-        list={tokenHidden.tokenHiddenList}
+        list={tokenHidden.tokenHiddenList ?? []}
         visible={visibleLowAssets}
         onClose={() => {
           setVisibleLowAssets(false);

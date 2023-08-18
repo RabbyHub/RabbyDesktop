@@ -29,6 +29,7 @@ import { splitNumberByStep } from '@/renderer/utils/number';
 // eslint-disable-next-line import/no-cycle
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
+import { copyText } from '@/renderer/utils/clipboard';
 // eslint-disable-next-line import/no-cycle
 import { HistoryList } from './HistoryList';
 import { TokenActionButton } from './TokenActionButton';
@@ -128,6 +129,11 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
     }
   }, [currentAccount, token]);
 
+  const handleCopy = useCallback((text: string) => {
+    copyText(text);
+    toastCopiedWeb3Addr(text);
+  }, []);
+
   if (!token || !chainItem || !currentToken) {
     return null;
   }
@@ -163,7 +169,7 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
           )}
           {!isNativeToken && (
             <img
-              onClick={() => toastCopiedWeb3Addr(token?.id)}
+              onClick={() => handleCopy(token?.id)}
               src={IconCopy}
               className="w-14 h-14 opacity-60 cursor-pointer"
             />
@@ -185,7 +191,8 @@ const Container = ({ token, handleReceiveClick, onCancel }: tokenContainer) => {
             {splitNumberByStep((amount || 0)?.toFixed(4))}
           </span>
           <span className="text-[14px] text-[#BABEC5] ml-[8px]">
-            ≈ ${splitNumberByStep((amount * token.price || 0)?.toFixed(2))}
+            ≈ $
+            {splitNumberByStep(((amount ?? 0) * token.price || 0)?.toFixed(2))}
           </span>
         </div>
       </div>

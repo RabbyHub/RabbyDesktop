@@ -37,6 +37,12 @@ export const DEX = {
     name: 'OpenOcean',
     chains: DEX_SUPPORT_CHAINS[DEX_ENUM.OPENOCEAN],
   },
+  [DEX_ENUM.KYBERSWAP]: {
+    id: DEX_ENUM.KYBERSWAP,
+    logo: 'rabby-internal://assets/icons/swap/kyberswap.png',
+    name: 'KyberSwap',
+    chains: DEX_SUPPORT_CHAINS[DEX_ENUM.KYBERSWAP],
+  },
 };
 
 export const DEX_WITH_WRAP = {
