@@ -35,6 +35,9 @@ import styled from 'styled-components';
 import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import { usePrevious } from 'react-use';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
+import { useContactsByAddr } from '@/renderer/hooks/rabbyx/useContact';
+import { confirmAddToWhitelistModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToWhitelist';
+import { confirmAddToContactsModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToContacts';
 import { ContactListModal } from '../SendToken/components/ContactListModal';
 import { ContactEditModal } from '../SendToken/components/ContactEditModal';
 import { ChainRender, ChainSelect } from '../Swap/component/ChainSelect';
@@ -346,7 +349,8 @@ const SendNFT = () => {
   const amountInputEl = useRef<any>(null);
 
   const { currentAccount: currentAddr } = useCurrentAccount();
-
+  const { fetchContactsByAddr, isAddrOnContactBook, getAddressNote } =
+    useContactsByAddr();
   const previousAddr = usePrevious(currentAddr?.address);
 
   useEffect(() => {
@@ -362,6 +366,7 @@ const SendNFT = () => {
   const { useForm } = Form;
 
   const [form] = useForm<{ to: string; amount: number }>();
+  const [formSnapshot, setFormSnapshot] = useState(form.getFieldsValue());
   const [contactInfo, setContactInfo] = useState<null | UIContactBookItem>(
     null
   );
@@ -373,13 +378,25 @@ const SendNFT = () => {
   const [showContactInfo, setShowContactInfo] = useState(false);
   const [showWhitelistAlert, setShowWhitelistAlert] = useState(false);
   const [temporaryGrant, setTemporaryGrant] = useState(false);
-  const [toAddressInWhitelist, setToAddressInWhitelist] = useState(false);
+  // const [toAddressInWhitelist, setToAddressInWhitelist] = useState(false);
 
   const {
     whitelist,
     enable: whitelistEnabled,
+    addWhitelist,
     init: initWhiteList,
   } = useWhitelist();
+
+  const { toAddressIsValid, toAddressInWhitelist, toAddressInContactBook } =
+    useMemo(() => {
+      return {
+        toAddressIsValid: !!formSnapshot.to && isValidAddress(formSnapshot.to),
+        toAddressInWhitelist: !!whitelist.find((item) =>
+          isSameAddress(item, formSnapshot.to)
+        ),
+        toAddressInContactBook: isAddrOnContactBook(formSnapshot.to),
+      };
+    }, [whitelist, isAddrOnContactBook, formSnapshot]);
 
   const whitelistAlertContent = useMemo(() => {
     if (!whitelistEnabled) {
@@ -431,6 +448,7 @@ const SendNFT = () => {
     } | null,
     {
       to,
+      amount,
     }: {
       to: string;
       amount: number;
@@ -445,10 +463,10 @@ const SendNFT = () => {
     } else {
       setEditBtnDisabled(false);
       setShowWhitelistAlert(true);
-      setToAddressInWhitelist(
-        !!whitelist.find((item) => isSameAddress(item, to))
-      );
     }
+    const nextFormValues = { to, amount };
+    form.setFieldsValue(nextFormValues);
+    setFormSnapshot(nextFormValues);
     const alianName = await walletController.getAlianName(to.toLowerCase());
     if (alianName) {
       setContactInfo({ address: to, name: alianName });
@@ -504,14 +522,37 @@ const SendNFT = () => {
 
   const handleClickWhitelistAlert = () => {
     if (whitelistEnabled && !temporaryGrant && !toAddressInWhitelist) {
-      ModalConfirm({
+      const toAddr = form.getFieldValue('to');
+      confirmAddToWhitelistModalPromise({
         title: 'Grant temporary permission',
-        height: 268,
-        onOk: () => {
+        addressToGrant: toAddr,
+        onFinished: (ctx) => {
+          if (ctx.isAddToWhitelist) {
+            addWhitelist(toAddr);
+          }
           setTemporaryGrant(true);
         },
       });
     }
+  };
+
+  const handleClickAddContact = () => {
+    if (toAddressInContactBook) return;
+
+    const toAddr = form.getFieldValue('to');
+    confirmAddToContactsModalPromise({
+      initAddressNote: getAddressNote(toAddr),
+      addrToAdd: toAddr,
+      title: 'Add to contacts',
+      async onFinished(result) {
+        await fetchContactsByAddr();
+        // trigger fetch contactInfo
+        const values = form.getFieldsValue();
+        handleFormValuesChange(null, { ...values });
+        // trigger get balance of address
+        // await wallet.getAddressBalance(result.contactAddrAdded, true);
+      },
+    });
   };
 
   const handleConfirmContact = (account: UIContactBookItem) => {
@@ -670,6 +711,7 @@ const SendNFT = () => {
             </div>
             <div className="to-address">
               <Form.Item
+                className="mb-0"
                 name="to"
                 rules={[
                   { required: true, message: 'Please input address' },
@@ -692,14 +734,21 @@ const SendNFT = () => {
                   autoFocus
                 />
               </Form.Item>
+              {toAddressIsValid && !toAddressInContactBook && (
+                <div className="tip-no-contact absolute left-initial top-initial text-[var(--neutral-body)] font-normal text-[12px] pt-[12px]">
+                  Not on address list.{' '}
+                  <span
+                    onClick={handleClickAddContact}
+                    className={clsx('ml-[2px] underline cursor-pointer')}
+                    style={{ color: 'var(--blue-default, #7084FF)' }}
+                  >
+                    Add to contacts
+                  </span>
+                </div>
+              )}
             </div>
-          </div>
-          <div
-            className={clsx('section', {
-              'mb-40': !showWhitelistAlert,
-            })}
-          >
-            <div className="nft-info flex">
+
+            <div className="nft-info mt-40 flex">
               <NFTAvatar
                 type={nftItem.content_type}
                 content={nftItem.content}

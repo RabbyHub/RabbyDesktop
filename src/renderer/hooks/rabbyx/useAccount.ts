@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { atom, useAtom } from 'jotai';
+import { atom, useAtom, useAtomValue } from 'jotai';
 import * as Sentry from '@sentry/react';
 
 import { Account, RabbyAccount } from '@/isomorphic/types/rabbyx';
@@ -95,15 +95,20 @@ export function useAccountFetchStage() {
   };
 }
 
+export function useReadAccountList() {
+  return useAtomValue(accountsAtom);
+}
+
 export function useAccounts(opts?: {
-  onFetchStageChanged(ctx: {
+  disableAutoFetch?: boolean;
+  onFetchStageChanged?(ctx: {
     state: FetchAccountsState;
     accounts: AccountWithName[];
   }): void;
 }) {
   const [accounts, setAccounts] = useAtom(accountsAtom);
 
-  const { onFetchStageChanged } = opts || {};
+  const { disableAutoFetch = false, onFetchStageChanged } = opts || {};
 
   const [fetchAccountsState, setAccountsFetchState] =
     useAtom(fetchAccountsAtom);
@@ -152,8 +157,10 @@ export function useAccounts(opts?: {
   }, [onFetchStageChanged, setAccountsFetchState, setAccounts]);
 
   useEffect(() => {
-    fetchAccounts();
-  }, [fetchAccounts]);
+    if (!disableAutoFetch) {
+      fetchAccounts();
+    }
+  }, [disableAutoFetch, fetchAccounts]);
 
   return {
     accounts,

@@ -179,6 +179,13 @@ export interface RPCItem {
   enable: boolean;
 }
 
+export interface ContactBookItem {
+  name: string;
+  address: string;
+  isAlias: boolean;
+  isContact: boolean;
+}
+
 export type RabbyXMethod = {
   'walletController.requestETHRpc': (
     data: { method: string; params: any },
@@ -246,7 +253,7 @@ export type RabbyXMethod = {
   ) => typeof k extends void
     ? PreferenceState
     : PreferenceState[keyof PreferenceState];
-
+  'walletController.addWatchAddressOnly': (address: string) => void;
   'walletController.importWatchAddress': (address: string) => RabbyAccount[];
   'walletController.getAddedToken': (address: string) => string[];
   'walletController.getAllVisibleAccounts': () => DisplayedKeyring[];
@@ -267,9 +274,10 @@ export type RabbyXMethod = {
     brand?: string | undefined,
     isRemove?: boolean
   ) => void;
+  'walletController.getContactsByMap': () => Record<string, ContactBookItem>;
   'walletController.getWhitelist': () => string[];
   'walletController.setWhitelist': (addresses: string[]) => Promise<void>;
-  'walletController.addWhitelist': (addresses: string[]) => Promise<void>;
+  'walletController.addWhitelist': (addresses: string) => Promise<void>;
   'walletController.toggleWhitelist': (enable: boolean) => Promise<void>;
 
   'walletController.isWhitelistEnabled': () => boolean;
