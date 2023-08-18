@@ -13,7 +13,7 @@ import { useTotalBalance } from '@/renderer/utils/balance';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import useCurve from '@/renderer/hooks/useCurve';
 import useHistoryTokenList from '@/renderer/hooks/useHistoryTokenList';
-import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import { walletOpenapi, walletController } from '@/renderer/ipcRequest/rabbyx';
 import useHistoryProtocol from '@/renderer/hooks/useHistoryProtocol';
 import { copyText } from '@/renderer/utils/clipboard';
 import {
@@ -243,6 +243,7 @@ const Home = () => {
     switchView(VIEW_TYPE.DEFAULT);
     const chainList = await walletOpenapi.usedChainList(currentAccount.address);
     setUsedChainList(chainList.map((chain) => formatChain(chain)));
+    walletController.getAddressBalance(currentAccount?.address);
   };
 
   const handleClickRefresh = () => {
