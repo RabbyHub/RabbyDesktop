@@ -164,7 +164,7 @@ export const Quotes = (props: QuotesProps) => {
       <QuotesWrapper>
         <div className={clsx('header', inSufficient && 'inSufficient')}>
           <div className="flex items-center">
-            <div className="title">The following swap rates are foundd</div>
+            <div className="title">The following swap rates are found</div>
             <IconRefresh refresh={refresh} loading={loading} />
           </div>
           <TradingSetting />
