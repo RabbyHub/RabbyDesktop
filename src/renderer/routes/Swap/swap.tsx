@@ -103,6 +103,7 @@ const Wrapper = styled.div`
   .content {
     display: flex;
     justify-content: center;
+    align-items: flex-start;
     gap: 24px;
   }
 
