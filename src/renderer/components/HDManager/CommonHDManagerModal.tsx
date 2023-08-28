@@ -63,7 +63,12 @@ export const CommonHDManagerModal: React.FC<Props> = ({
   const { isConnectWindowOpened } = useHDManagerConnecWindowOpen(HDManagerType);
 
   const closeConnect = React.useCallback(async () => {
-    return walletController.requestKeyring(keyring, 'cleanUp', idRef.current);
+    return walletController.requestKeyring(
+      keyring,
+      'cleanUp',
+      idRef.current,
+      true
+    );
   }, [walletController, keyring]);
 
   const initConnect = React.useCallback(async () => {
