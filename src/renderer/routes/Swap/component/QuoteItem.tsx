@@ -130,9 +130,9 @@ const ItemWrapper = styled.div`
 
   .percent {
     font-weight: 500;
-    color: var(--green-color);
+    color: var(--r-green-color);
     &.red {
-      color: var(--red-color);
+      color: var(--r-red-color);
     }
   }
 

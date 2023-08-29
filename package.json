@@ -30,6 +30,7 @@
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:main": "cross-env-shell NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.main.prod.ts",
+    "prebuild:renderer": "npm run make-theme",
     "build:renderer": "npm run clean:renderer && cross-env-shell NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
     "clean:renderer": "rimraf release/app/dist/renderer && rimraf assets/desktop_shell",
     "preinstall": "npm run install:native",
@@ -50,6 +51,7 @@
     "postpackage": "node .erb/scripts/rename-autoupdator-zip.js",
     "prepare": "husky install",
     "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
+    "prestart": "npm run make-theme",
     "start": "ts-node ./.erb/scripts/check-port-in-use.js && npm run start:renderer",
     "start:main": "cross-env-shell NODE_ENV=development electronmon -r ts-node/register/transpile-only -r tsconfig-paths/register .",
     "start:preload": "cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.preload.dev.ts",

@@ -745,12 +745,12 @@ const SendNFT = () => {
                 />
               </Form.Item>
               {toAddressIsValid && !toAddressInContactBook && (
-                <div className="tip-no-contact absolute left-initial top-initial text-[var(--neutral-body)] font-normal text-[12px] pt-[12px]">
+                <div className="tip-no-contact absolute left-initial top-initial text-r-neutral-body font-normal text-[12px] pt-[12px]">
                   Not on address list.{' '}
                   <span
                     onClick={handleClickAddContact}
                     className={clsx('ml-[2px] underline cursor-pointer')}
-                    style={{ color: 'var(--blue-default, #7084FF)' }}
+                    style={{ color: 'var(--r-blue-default, #7084FF)' }}
                   >
                     Add to contacts
                   </span>
