@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { openExternalUrl, requestResetApp } from '@/renderer/ipcRequest/app';
 
@@ -24,6 +24,7 @@ import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import ManageAddressModal from '@/renderer/components/AddressManagementModal/ManageAddress';
 import { atom, useAtom } from 'jotai';
 import { useShowTestnet } from '@/renderer/hooks/rabbyx/useShowTestnet';
+import { walletTestnetOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
 import {
