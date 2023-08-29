@@ -22,7 +22,7 @@ const NameAndAddressEl = styled(NameAndAddress.Full)`
 
     .address {
       font-size: 13px;
-      color: var(--neutral-body, #d3d8e0);
+      color: var(--r-neutral-body, #d3d8e0);
     }
   }
 `;
@@ -96,7 +96,7 @@ export const ModalConfirmAddToContacts = ({
       }}
       onOk={handleConfirm}
     >
-      <div className="block text-left text-[13px] text-[var(--neutral-foot)]">
+      <div className="block text-left text-[13px] text-r-neutral-foot">
         Edit address note
         <div className="w-[100%] pt-8 pb-[16px]">
           <RabbyInput

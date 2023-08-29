@@ -2,7 +2,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { themeColors } from '../../src/isomorphic/theme-colors';
+import { themeColors, rabbyCssPrefix } from '../../src/isomorphic/theme-colors';
 
 const ROOT = path.resolve(__dirname, '../..');
 
@@ -24,7 +24,7 @@ html, body {
   /* -------------------- default dark mode -------------------- */
 ${Object.entries(themeColors.dark).map(([cssvarKey]) => {
   const varcore = cssvarKey.replace(/^\-\-/, '');
-  return `${SPACES}--${cssvarKey}: var(--rabby-dark-${varcore});`;
+  return `${SPACES}--${rabbyCssPrefix}${cssvarKey}: var(--rabby-dark-${varcore});`;
 }).join('\n')}
 }
 `;

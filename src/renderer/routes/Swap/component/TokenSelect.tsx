@@ -218,7 +218,7 @@ const StyledModal = styled(Modal)`
       align-items: center;
 
       border-radius: 4px;
-      background: var(--neutral-card-2, rgba(255, 255, 255, 0.06));
+      background: var(--r-neutral-card-2, rgba(255, 255, 255, 0.06));
     }
 
     img.filter-item__chain-logo {
@@ -429,12 +429,12 @@ const DefaultToken = ({
         <TokenWithChain width="24px" height="24px" token={t} />
         <div className="tokenInfo flex flex-col gap-4">
           <span
-            className="symbol text-13 text-[var(--neutral-title-1)] font-medium"
+            className="symbol text-13 text-r-neutral-title-1 font-medium"
             title={t.amount.toString()}
           >
             {formatTokenAmount(t.amount)}
           </span>
-          <div className="symbol text-12 text-[var(--neutral-body)]">
+          <div className="symbol text-12 text-r-neutral-body">
             {getTokenSymbol(t)}
           </div>
         </div>
@@ -551,7 +551,7 @@ const TokenSelectModal = ({
                 src={chainItem.logo}
                 alt={chainItem.name}
               />
-              <span className="text-13 text-[var(--neutral-body)] ml-[4px]">
+              <span className="text-13 text-r-neutral-body ml-[4px]">
                 {chainItem.name}
               </span>
               <div

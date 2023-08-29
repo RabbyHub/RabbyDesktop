@@ -1,11 +1,11 @@
 import { defineConfig } from 'windicss/helpers'
 import colors from 'windicss/colors';
 
-// import { themeColors } from './src/isomorphic/theme-colors';
-// const rabbyColors = Object.entries(themeColors.dark).reduce((accu, [cssvarKey, cssvarValue]) => {
-//   accu[`rabby-${cssvarKey}`] = cssvarValue;
-//   return accu;
-// }, {} as Record<string, string>);
+import { themeColors, rabbyCssPrefix } from './src/isomorphic/theme-colors';
+const rabbyColors = Object.entries(themeColors.dark).reduce((accu, [cssvarKey, cssvarValue]) => {
+  accu[cssvarKey] = `var(--${rabbyCssPrefix}${cssvarKey}, ${cssvarValue})`;
+  return accu;
+}, {} as Record<string, string>);
 
 export default defineConfig({
   extract: {
@@ -114,10 +114,11 @@ export default defineConfig({
         },
       ],
     },
-    extends: {
-      // colors: {
-      //   ...rabbyColors,
-      // }
+    extend: {
+      colors: {
+        // [`${rabbyCssPrefix.replace(/\-$/, '')}`]: rabbyColors,
+        'r': rabbyColors,
+      }
     }
   },
   // use media-query prefers-color-scheme

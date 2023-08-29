@@ -25,3 +25,5 @@ export const themeColors = {
     'neutral-black': 'rgba(0, 0, 0, 1)',
   },
 } as const;
+
+export const rabbyCssPrefix = 'r-';
