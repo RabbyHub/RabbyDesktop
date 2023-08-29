@@ -25,6 +25,7 @@ import ManageAddressModal from '@/renderer/components/AddressManagementModal/Man
 import { atom, useAtom } from 'jotai';
 import { useShowTestnet } from '@/renderer/hooks/rabbyx/useShowTestnet';
 import { walletTestnetOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import NetSwitchTabs from '@/renderer/components/PillsSwitch/NetSwitchTabs';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
 import {

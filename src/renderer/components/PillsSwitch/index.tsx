@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import clsx from 'clsx';
 
 import './index.less';
 
 type Option = {
   key: string;
-  label: string;
+  label: ReactNode;
 };
 
 export type PillsSwitchProps<T extends readonly Option[] | Option[]> =
