@@ -591,6 +591,8 @@ export type RabbyXMethod = {
   'walletController.addBlockedToken': (token: Token) => void;
   'walletController.removeBlockedToken': (token: Token) => void;
   'walletController.getBlockedToken': () => Token[];
+  'walletController.getIsShowTestnet': () => boolean;
+  'walletController.setIsShowTestnet': (value: boolean) => void;
 } & {
   'openapi.setHost': OpenApiService['setHost'];
   'openapi.getHost': OpenApiService['getHost'];
