@@ -4,19 +4,17 @@ import { atom, useAtom } from 'jotai';
 import { DisplayChainWithWhiteLogo, formatChain } from '../utils/chain';
 
 const balanceAtom = atom<string | null>(null);
-
-export function useBalanceValue() {
-  return useAtom(balanceAtom);
-}
+const testnetBalanceAtom = atom<string | null>(null);
 
 export default function useCurrentBalance(
   account: string | undefined,
   update = false,
   noNeedBalance = false,
-  nonce = 0
+  nonce = 0,
+  includeTestnet = false
 ) {
   const wallet = walletController;
-  const [balance, setBalance] = useBalanceValue();
+  const [balance, setBalance] = useAtom(balanceAtom);
   const [success, setSuccess] = useState(true);
   const [balanceLoading, setBalanceLoading] = useState(false);
   const [balanceFromCache, setBalanceFromCache] = useState(false);
@@ -24,11 +22,18 @@ export default function useCurrentBalance(
   const [chainBalances, setChainBalances] = useState<
     DisplayChainWithWhiteLogo[]
   >([]);
+  const [testnetBalance, setTestnetBalance] = useAtom(testnetBalanceAtom);
+  const [testnetSuccess, setTestnetSuccess] = useState(true);
+  const [testnetBalanceLoading, setTestnetBalanceLoading] = useState(false);
+  const [testnetBalanceFromCache, setTestnetBalanceFromCache] = useState(false);
+  const [testnetChainBalances, setTestnetChainBalances] = useState<
+    DisplayChainWithWhiteLogo[]
+  >([]);
 
-  const getAddressBalance = async (address: string) => {
+  const getAddressBalance = async (address: string, force: boolean) => {
     try {
       const { total_usd_value: totalUsdValue, chain_list: chainList } =
-        await wallet.getAddressBalance(address);
+        await wallet.getAddressBalance(address, force);
       if (isCanceled) return;
       setBalance(totalUsdValue.toString());
       setSuccess(true);
@@ -43,7 +48,25 @@ export default function useCurrentBalance(
     }
   };
 
-  const getCurrentBalance = async () => {
+  const getTestnetBalance = async (address: string, force: boolean) => {
+    try {
+      const { total_usd_value: totalUsdValue, chain_list: chainList } =
+        await wallet.getAddressBalance(address, force);
+      if (isCanceled) return;
+      setTestnetBalance(totalUsdValue.toString());
+      setTestnetSuccess(true);
+      setTestnetChainBalances(
+        chainList.filter((i) => i.usd_value > 0).map(formatChain)
+      );
+      setTestnetBalanceLoading(false);
+      setTestnetBalanceFromCache(false);
+    } catch (e) {
+      setTestnetSuccess(false);
+      setTestnetBalanceLoading(false);
+    }
+  };
+
+  const getCurrentBalance = async (force = false) => {
     if (!account || noNeedBalance) return;
     setBalanceLoading(true);
     const cacheData = await wallet.getAddressCacheBalance(account);
@@ -52,12 +75,18 @@ export default function useCurrentBalance(
       setBalance(cacheData.total_usd_value.toString());
       if (update) {
         setBalanceLoading(true);
-        getAddressBalance(account.toLowerCase());
+        getAddressBalance(account.toLowerCase(), force);
+        if (includeTestnet) {
+          getTestnetBalance(account.toLowerCase(), force);
+        }
       } else {
         setBalanceLoading(false);
       }
     } else {
-      getAddressBalance(account.toLowerCase());
+      getAddressBalance(account.toLowerCase(), force);
+      if (includeTestnet) {
+        getTestnetBalance(account.toLowerCase(), force);
+      }
       setBalanceLoading(false);
       setBalanceFromCache(false);
     }
@@ -81,12 +110,17 @@ export default function useCurrentBalance(
       isCanceled = true;
     };
   }, [account, nonce]);
-  return [
+  return {
     balance,
     chainBalances,
     getAddressBalance,
     success,
     balanceLoading,
     balanceFromCache,
-  ] as const;
+    testnetBalance,
+    testnetSuccess,
+    testnetBalanceLoading,
+    testnetBalanceFromCache,
+    testnetChainBalances,
+  };
 }

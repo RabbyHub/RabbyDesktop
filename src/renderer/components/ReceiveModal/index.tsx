@@ -28,7 +28,7 @@ interface ReceiveContentProps {
 }
 const ReceiveContent = ({ onCancel, chain, token }: ReceiveContentProps) => {
   const { currentAccount } = useCurrentAccount();
-  const [balance] = useCurrentBalance(currentAccount?.address);
+  const { balance } = useCurrentBalance(currentAccount?.address);
   const confirmModalRef = useRef<ReturnType<typeof AntdModal.confirm>>();
 
   const icon = useMemo(() => {

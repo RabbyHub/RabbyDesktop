@@ -263,7 +263,9 @@ export type RabbyXMethod = {
   'walletController.getAllVisibleAccounts': () => DisplayedKeyring[];
   'walletController.getAllAlianNameByMap': () => Record<string, any>;
   'walletController.getAddressBalance': (
-    address: string
+    address: string,
+    force?: boolean,
+    isTestnet?: boolean
   ) => TotalBalanceResponse;
   'walletController.getAddressCacheBalance': (
     address: string
