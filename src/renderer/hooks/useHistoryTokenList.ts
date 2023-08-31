@@ -3,8 +3,8 @@ import BigNumber from 'bignumber.js';
 import PQueue from 'p-queue';
 import { groupBy } from 'lodash';
 import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
-import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { VIEW_TYPE } from '@/renderer/routes/Home/type';
+import { requestOpenApiWithChainId } from '@/main/utils/openapi';
 import { useToken } from './rabbyx/useToken';
 
 export interface TokenWithHistoryItem {
@@ -12,15 +12,28 @@ export interface TokenWithHistoryItem {
   history: TokenItem;
 }
 
-export const loadCachedTokenList = async (addr: string) => {
-  const list = await walletOpenapi.getCachedTokenList(addr);
+export const loadCachedTokenList = async (addr: string, isTestnet: boolean) => {
+  const list = await requestOpenApiWithChainId(
+    ({ openapi }) => openapi.getCachedTokenList(addr),
+    {
+      isTestnet,
+    }
+  );
   return list.map((item) => ({
     ...item,
     usd_value: new BigNumber(item.amount).times(item.price).toNumber(),
   }));
 };
-export const loadRealTimeTokenList = async (addr: string) => {
-  const list = await walletOpenapi.listToken(addr);
+export const loadRealTimeTokenList = async (
+  addr: string,
+  isTestnet: boolean
+) => {
+  const list = await requestOpenApiWithChainId(
+    ({ openapi }) => openapi.listToken(addr),
+    {
+      isTestnet,
+    }
+  );
   return list.map((item) => ({
     ...item,
     usd_value: new BigNumber(item.amount).times(item.price).toNumber(),
@@ -30,7 +43,8 @@ export const loadRealTimeTokenList = async (addr: string) => {
 export default (
   address: string | undefined,
   nonce = 0,
-  currentView: VIEW_TYPE
+  currentView: VIEW_TYPE,
+  isTestnet: boolean
 ) => {
   const tokenListRef = useRef<TokenItem[]>([]);
   const [historyTokenMap, setHistoryTokenMap] = useState<
@@ -41,22 +55,30 @@ export default (
   const isRealTimeLoadedRef = useRef(false);
   const isHistoryLoadedRef = useRef(false);
   const isLoadingHistory = useRef(false);
-  const { setTokenList } = useToken();
+  const { setTokenList } = useToken(isTestnet);
+  const addressRef = useRef(address);
+  const isTestnetRef = useRef(isTestnet);
 
-  const loadCache = async (addr: string) => {
+  const loadCache = async (addr: string, _isTestnet: boolean) => {
     if (isHistoryLoadedRef.current) return;
     try {
-      tokenListRef.current = await loadCachedTokenList(addr);
+      const list = await loadCachedTokenList(addr, _isTestnet);
+      if (addr === addressRef.current && _isTestnet === isTestnetRef.current) {
+        tokenListRef.current = list;
+      }
       setIsLoading(false);
     } catch (e) {
       setIsLoading(false);
     }
   };
 
-  const loadRealTime = async (addr: string) => {
+  const loadRealTime = async (addr: string, _isTestnet: boolean) => {
     if (isRealTimeLoadedRef.current) return;
     try {
-      tokenListRef.current = await loadRealTimeTokenList(addr);
+      const list = await loadRealTimeTokenList(addr, _isTestnet);
+      if (addr === addressRef.current && _isTestnet === isTestnetRef.current) {
+        tokenListRef.current = list;
+      }
       setIsLoadingRealTime(false);
       isRealTimeLoadedRef.current = true;
     } catch (e) {
@@ -64,16 +86,22 @@ export default (
     }
   };
 
-  const loadHistory = async (addr: string) => {
+  const loadHistory = async (addr: string, _isTestnet: boolean) => {
     if (isHistoryLoadedRef.current) return;
     try {
       isLoadingHistory.current = true;
       const list = tokenListRef.current;
       const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
-      const yesterdayTokenList = await walletOpenapi.getHistoryTokenList({
-        id: addr,
-        timeAt: YESTERDAY,
-      });
+      const yesterdayTokenList = await requestOpenApiWithChainId(
+        ({ openapi }) =>
+          openapi.getHistoryTokenList({
+            id: addr,
+            timeAt: YESTERDAY,
+          }),
+        {
+          isTestnet: _isTestnet,
+        }
+      );
       const result: TokenItem[] = [];
       const q: TokenItem[] = [];
       for (let i = 0; i < list.length; i++) {
@@ -109,11 +137,17 @@ export default (
           Object.keys(grouped).forEach((i) => {
             const l = grouped[i];
             tokenHistoryPriceQueue.add(async () => {
-              const priceMap = await walletOpenapi.getTokenHistoryDict({
-                chainId: i,
-                ids: l.map((s) => s.id).join(','),
-                timeAt: YESTERDAY,
-              });
+              const priceMap = await requestOpenApiWithChainId(
+                ({ openapi }) =>
+                  openapi.getTokenHistoryDict({
+                    chainId: i,
+                    ids: l.map((s) => s.id).join(','),
+                    timeAt: YESTERDAY,
+                  }),
+                {
+                  isTestnet: _isTestnet,
+                }
+              );
               return {
                 chain: i,
                 price: priceMap,
@@ -158,14 +192,16 @@ export default (
           // NOTHING
         }
       }
-      setHistoryTokenMap(
-        result.reduce((res, item) => {
-          return {
-            ...res,
-            [`${item.chain}-${item.id}`]: item,
-          };
-        }, {})
-      );
+      if (addr === addressRef.current && _isTestnet === isTestnetRef.current) {
+        setHistoryTokenMap(
+          result.reduce((res, item) => {
+            return {
+              ...res,
+              [`${item.chain}-${item.id}`]: item,
+            };
+          }, {})
+        );
+      }
       isHistoryLoadedRef.current = true;
     } catch (e) {
       isLoadingHistory.current = false;
@@ -173,16 +209,18 @@ export default (
   };
 
   const fetchData = useCallback(
-    async (addr: string, view: VIEW_TYPE) => {
+    async (addr: string, view: VIEW_TYPE, _isTestnet: boolean) => {
       if (!isRealTimeLoadedRef.current) {
-        await loadCache(addr);
+        await loadCache(addr, _isTestnet);
+        console.log(333, tokenListRef.current);
         setTokenList(tokenListRef.current);
-        await loadRealTime(addr);
+        await loadRealTime(addr, _isTestnet);
         setTokenList(tokenListRef.current);
       }
       if (view === VIEW_TYPE.DEFAULT) return;
-      await loadHistory(addr);
+      await loadHistory(addr, _isTestnet);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [setTokenList]
   );
 
@@ -190,19 +228,21 @@ export default (
     isRealTimeLoadedRef.current = false;
     isHistoryLoadedRef.current = false;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address, nonce]);
+  }, [address, nonce, isTestnet, loadRealTimeTokenList]);
 
   useEffect(() => {
     tokenListRef.current = [];
     setIsLoading(true);
     setIsLoadingRealTime(true);
     setHistoryTokenMap({});
-  }, [address]);
+  }, [address, isTestnet]);
 
   useEffect(() => {
     if (!address) return;
-    fetchData(address, currentView);
-  }, [address, currentView, fetchData, nonce]);
+    addressRef.current = address;
+    isTestnetRef.current = isTestnet;
+    fetchData(address, currentView, isTestnet);
+  }, [address, currentView, fetchData, nonce, isTestnet]);
 
   return {
     tokenList: tokenListRef.current,
