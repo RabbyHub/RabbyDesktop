@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { atom, useAtom, useAtomValue } from 'jotai';
 import * as Sentry from '@sentry/react';
 
@@ -175,10 +175,11 @@ export function useAccounts(opts?: {
 }
 
 const matteredChainBalancesAtom = atom<MatteredChainBalancesType>({});
-
+const testMatteredChainBalancesAtom = atom<MatteredChainBalancesType>({});
 export function useAccountBalanceMap(options?: {
   accountAddress?: RabbyAccount['address'] | null;
   disableAutoFetch?: boolean;
+  isTestnet?: boolean;
 }) {
   let { accountAddress = '' } = options || {};
   const { disableAutoFetch = false } = options || {};
@@ -187,20 +188,46 @@ export function useAccountBalanceMap(options?: {
 
   accountAddress = accountAddress || currentAccount?.address || null;
 
-  const [matteredChainBalances, setMatteredChainBalances] = useAtom(
-    matteredChainBalancesAtom
-  );
+  const { isTestnet = false } = options || {};
+
+  const mainnetMattered = useAtom(matteredChainBalancesAtom);
+  const testnetMattered = useAtom(testMatteredChainBalancesAtom);
+
+  const { matteredChainBalances, setMatteredChainBalances } = useMemo(() => {
+    return {
+      matteredChainBalances: !isTestnet
+        ? mainnetMattered[0]
+        : testnetMattered[0],
+      setMatteredChainBalances: !isTestnet
+        ? mainnetMattered[1]
+        : testnetMattered[1],
+    };
+  }, [isTestnet, mainnetMattered, testnetMattered]);
+
   const fetchBalance = useCallback(async () => {
     if (!accountAddress) return;
 
-    const result = await walletController.getAddressCacheBalance(
-      accountAddress
+    const triggerFetchP = walletController.getAddressBalance(
+      accountAddress,
+      true,
+      isTestnet
     );
+    let result = await walletController.getAddressCacheBalance(
+      accountAddress,
+      isTestnet
+    );
+    if (!result) {
+      try {
+        result = await triggerFetchP;
+      } catch (error) {
+        console.error(error);
+      }
+    }
 
     const fresult = formatAccountTotalBalance(result);
 
     setMatteredChainBalances(fresult.matteredChainBalances);
-  }, [accountAddress, setMatteredChainBalances]);
+  }, [isTestnet, accountAddress, setMatteredChainBalances]);
 
   const getLocalBalanceValue = useCallback(
     (chainId: Chain['serverId']) => {

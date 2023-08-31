@@ -276,7 +276,8 @@ export type RabbyXMethod = {
     isTestnet?: boolean
   ) => TotalBalanceResponse;
   'walletController.getAddressCacheBalance': (
-    address: string
+    address: string,
+    isTestnet?: boolean
   ) => TotalBalanceResponse | null;
   'walletController.getHighlightedAddresses': () => IHighlightedAddress[];
   'walletController.updateHighlightedAddresses': (
