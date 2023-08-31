@@ -1,20 +1,24 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
-import styled from 'styled-components';
-import { maxBy, minBy, sortBy } from 'lodash';
-import { useInterval, useLocation, usePrevious } from 'react-use';
-import {
-  TokenItem,
-  TransferingNFTItem,
-  TxHistoryResult,
-} from '@rabby-wallet/rabby-api/dist/types';
-import { CHAINS, CHAINS_LIST } from '@debank/common';
 import type {
   TransactionDataItem,
   TransactionGroup,
   TransactionHistoryItem,
 } from '@/isomorphic/types/rabbyx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import {
+  walletController,
+  walletOpenapi,
+  walletTestnetOpenapi,
+} from '@/renderer/ipcRequest/rabbyx';
+import { CHAINS, CHAINS_LIST } from '@debank/common';
+import {
+  TokenItem,
+  TransferingNFTItem,
+  TxHistoryResult,
+} from '@rabby-wallet/rabby-api/dist/types';
+import { maxBy, mergeWith, minBy, sortBy } from 'lodash';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useInterval, useLocation, usePrevious } from 'react-use';
+import styled from 'styled-components';
 // eslint-disable-next-line import/no-cycle
 import { TransactionModal } from '@/renderer/components/TransactionsModal';
 import TransactionItem, { LoadingTransactionItem } from './TransactionItem';
@@ -324,9 +328,21 @@ const Transactions = ({ updateNonce }: { updateNonce: number }) => {
   const init = async (address?: string) => {
     if (!address) return;
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
-    const txs = await walletOpenapi.listTxHisotry({
-      id: address,
+    const txs = await Promise.all([
+      walletOpenapi.listTxHisotry({
+        id: address,
+      }),
+      walletTestnetOpenapi.listTxHisotry({
+        id: address,
+      }),
+    ]).then(([txHistory, testnetTxHistory]) => {
+      return mergeWith(txHistory, testnetTxHistory, (objValue, srcValue) => {
+        if (Array.isArray(objValue)) {
+          return [...objValue, ...srcValue];
+        }
+      });
     });
+
     const { completeds } = await walletController.getTransactionHistory(
       address
     );
