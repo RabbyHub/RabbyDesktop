@@ -54,15 +54,15 @@ function useSwitchOptions() {
   }, []);
 }
 
-export default function NetSwitchTabs(
-  props: SwitchTabProps & {
-    size?: 'sm';
-    options?: {
-      key: keyof typeof NetTypes;
-      label: ReactNode;
-    }[];
-  }
-) {
+type NetSwitchTabsProps = SwitchTabProps & {
+  size?: 'sm';
+  options?: {
+    key: keyof typeof NetTypes;
+    label: ReactNode;
+  }[];
+};
+
+export default function NetSwitchTabs(props: NetSwitchTabsProps) {
   const { size, options, className, ...rest } = props;
 
   const switchOptions = useSwitchOptions();
@@ -79,3 +79,26 @@ export default function NetSwitchTabs(
     />
   );
 }
+
+NetSwitchTabs.ApprovalsPage = function ApprovalsPage(
+  props: NetSwitchTabsProps
+) {
+  const { size, className, ...rest } = props;
+
+  const switchOptions = useSwitchOptions();
+
+  return (
+    <PillsSwitch
+      {...rest}
+      className={clsx(
+        'flex w-[232px] h-[36px]',
+        'net-switch',
+        size ? `net-switch--${size}` : '',
+        className
+      )}
+      itemClassname={clsx('w-[112px]')}
+      // itemClassnameInActive={clsx('text-[#4b4d59]')}
+      options={switchOptions}
+    />
+  );
+};

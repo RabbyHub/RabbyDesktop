@@ -5,7 +5,6 @@
 // @main-w: 1184px;
 @main-w: 1118px;
 
-@page-padding-top: 32px;
 // @page-header-h: 24px;
 // @page-header-bottom-offset: 20px;
 @tools-h: 48px;
@@ -29,11 +28,15 @@
   width: 100%;
   min-width: @main-w;
   height: var(--mainwin-mainroute-height);
-  padding-top: @page-padding-top;
+  padding-top: 32px;
   padding-left: 44px;
   padding-right: 44px;
   // padding-bottom: @sticky-footer-height;
   // background: var(--color-bg);
+
+  &.with-net-switch {
+    padding-top: 0;
+  }
 
   .child-has-chrome-like-scrollbar();
 }
@@ -307,6 +310,17 @@
     //------------ special column customizations ------------
     &.column-cell-J_key-contract > .am-virtual-table-cell-inner {
       padding-right: 4px;
+    }
+
+    &.column-cell-J_key-contractTrustValue > .am-virtual-table-cell-inner {
+      padding-right: 12px;
+
+      > .text-wrapper {
+        white-space: nowrap;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
     }
   }
 
