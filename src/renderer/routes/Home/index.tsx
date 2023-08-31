@@ -232,7 +232,7 @@ const Home = () => {
   }, [usedChainList, protocolList, tokenList]);
   const totalBalance = useTotalBalance(tokenList, protocolList);
 
-  const curveData = useCurve(currentAccount?.address, updateNonce);
+  const curveData = useCurve(currentAccount?.address, updateNonce, isTestnet);
   const location = useLocation();
 
   const filterProtocolList = useFilterProtoList(
