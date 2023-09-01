@@ -1,13 +1,24 @@
 
-v0.32.0 / 2023-08-18
+v0.33.0 / 2023-09-01
 ====================
 
-  * fix: low assets (#518)
+  * chore: update currentVersion.
+  * feat: switch to corresponding tab on open tx modal. (#533)
+  * fix: margin bottom
+  * feat: support testnet (#522)
+  * fix: sort quote (#532)
+  * feat: update layout about settings page, add entry 'supported chains' (#527)
+  * feat: some adjust. (#529)
+  * feat: Bundle => My Portfolio (#526)
+  * fix: force close trezor connection when close import address page (#520)
+  * fix: swap typo (#519)
+  * style: support Tailwind IntelliSense. (#521)
 
 v0.32.0-prod / 2023-08-18
 =========================
 
   * Release v0.32.0-prod
+  * fix: low assets (#518)
   * fix: search (#517)
   * feat: improve ux of tokenSelector and chainSelector. (#513)
   * fix: update totalBalance cache when home page init (#516)
