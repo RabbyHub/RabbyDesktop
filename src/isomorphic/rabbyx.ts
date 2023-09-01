@@ -5,11 +5,11 @@ export function getRabbyXWindowPosition(viewType?: string | null) {
     case 'SignText':
     case 'SignTypedData':
     case 'Decrypt':
+    case 'AddChain':
     default: {
       return 'right-full' as const;
     }
     case 'ETHSign':
-    case 'AddChain':
     case 'AddAsset':
     case 'GetPublicKey': {
       return 'center' as const;
