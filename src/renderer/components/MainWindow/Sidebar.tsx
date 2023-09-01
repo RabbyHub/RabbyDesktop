@@ -27,6 +27,7 @@ import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
 import { useCurrentConnectedSite } from '@/renderer/hooks/useRabbyx';
 import { useApprovalRiskAlertCount } from '@/renderer/hooks/rabbyx/useApprovals';
+import clsx from 'clsx';
 import { DappFavicon } from '../DappFavicon';
 import Hide from './Hide';
 import styles from './Sidebar.module.less';
@@ -427,6 +428,7 @@ export default function MainWindowSidebar() {
     <Transition in={!settings.sidebarCollapsed} timeout={500}>
       {(state) => {
         const secondAnim = !(state === 'entered' && !settings.sidebarCollapsed);
+        const isFolded = !!secondAnim;
         return (
           <Sidebar
             className={classNames(
@@ -568,13 +570,16 @@ export default function MainWindowSidebar() {
                     navigate('/mainwin/settings');
                   }}
                 >
-                  <div className={styles.routeItemInner}>
+                  <div className={clsx(styles.routeItemInner)}>
                     <img
-                      className={styles.routeLogo}
+                      className={clsx(
+                        styles.routeLogo,
+                        isFolded && 'relative right-[-4px]'
+                      )}
                       src={
                         hasNewRelease && secondAnim
-                          ? 'rabby-internal://assets/icons/mainwin-sidebar/setting-with-newrelease.svg'
-                          : 'rabby-internal://assets/icons/mainwin-sidebar/setting.svg'
+                          ? 'rabby-internal://assets/icons/mainwin-sidebar/more-with-newrelease.svg'
+                          : 'rabby-internal://assets/icons/mainwin-sidebar/more.svg'
                       }
                     />
                     <Hide
@@ -584,12 +589,12 @@ export default function MainWindowSidebar() {
                         styles.J_settings
                       )}
                     >
-                      Settings
+                      More
                       {hasNewRelease ? (
                         <span>
                           <img
-                            className="ml-[4px]"
-                            src="rabby-internal://assets/icons/mainwin-sidebar/icon-new-release.svg"
+                            className="ml-[9px]"
+                            src="rabby-internal://assets/icons/mainwin-sidebar/icon-detected-update.svg"
                           />
                         </span>
                       ) : null}
