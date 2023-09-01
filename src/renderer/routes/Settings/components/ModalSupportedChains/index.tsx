@@ -8,8 +8,10 @@ import { TooltipWithMagnetArrow } from '@/renderer/components/Tooltip/TooltipWit
 import { Tabs } from 'antd';
 import styles from './index.module.less';
 
+export const CHAINS_TOTAL_COUNT = Object.values(CHAINS).length;
+
 const showSupportedChainsAtom = atom(false);
-export function useShowSupportedChains() {
+export function useSupportedChainsModal() {
   const [showSupportedChains, setShowSupportedChains] = useAtom(
     showSupportedChainsAtom
   );
@@ -49,7 +51,7 @@ const renderTabBar = () => <>{null}</>;
 
 export default function ModalSupportedChains() {
   const { showSupportedChains, setShowSupportedChains } =
-    useShowSupportedChains();
+    useSupportedChainsModal();
 
   const [selectedTab, onTabChange] = useState<'mainnet' | 'testnet'>('mainnet');
 
@@ -65,8 +67,6 @@ export default function ModalSupportedChains() {
     };
   }, []);
 
-  const activeChains = selectedTab === 'mainnet' ? mainnetList : testnetList;
-
   return (
     <RModal
       visible={showSupportedChains}
@@ -78,7 +78,7 @@ export default function ModalSupportedChains() {
       }}
       title={
         <span className="text-r-neutral-title-1 text-20 font-medium">
-          {`${activeChains.length} chains supported`}
+          {`${CHAINS_TOTAL_COUNT} chains supported`}
         </span>
       }
     >
