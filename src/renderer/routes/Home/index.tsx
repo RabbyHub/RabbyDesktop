@@ -224,10 +224,12 @@ const Home = () => {
         map[token.chain] = token.usd_value || 0;
       }
     });
-    const list = usedChainList.map((chain) => ({
-      ...chain,
-      usd_value: map[chain.id] || 0,
-    }));
+    const list = usedChainList
+      .map((chain) => ({
+        ...chain,
+        usd_value: map[chain.id] || 0,
+      }))
+      .filter((item) => item.usd_value > 0);
     return sortBy(list, (item) => item.usd_value).reverse();
   }, [usedChainList, protocolList, tokenList]);
   const totalBalance = useTotalBalance(tokenList, protocolList);
@@ -263,7 +265,11 @@ const Home = () => {
       }
     );
     setUsedChainList(chainList.map((chain) => formatUsedChain(chain)));
-    walletController.getAddressBalance(currentAccount?.address);
+    walletController.getAddressBalance(
+      currentAccount?.address,
+      false,
+      _isTestnet
+    );
   };
 
   const handleClickRefresh = () => {
@@ -438,7 +444,18 @@ const Home = () => {
                   </div>
                   {curveData.list.length > 0 && <Curve data={curveData} />}
                 </div>
-              ) : null}
+              ) : (
+                <div className="right">
+                  <div className="absolute right-0 bottom-0 z-10">
+                    <HomeUpdateButton
+                      loading={
+                        isLoadingRealTimeTokenList || isLoadingRealTimeProtocol
+                      }
+                      onUpdate={handleClickRefresh}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           <div className="relative flex-1 h-0">

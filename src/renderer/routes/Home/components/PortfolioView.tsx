@@ -8,6 +8,7 @@ import {
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
 import AssociateDappModal from '@/renderer/components/AssociateDappModal';
 import { checkIsCexChain } from '@/renderer/hooks/useBundle/cex/utils/shared';
+import { useTokenAtom } from '@/renderer/hooks/rabbyx/useToken';
 import TokenList from './TokenList';
 import ProtocolList from './ProtocolList';
 import ScrollTopContext from './scrollTopContext';
@@ -142,14 +143,24 @@ const PortfolioView = ({
   const [scrollTop, setScrollTop] = useState(0);
   const [relateDappProtocol, setRelateDappProtocol] =
     useState<DisplayProtocol | null>(null);
+  const { blocked, customize } = useTokenAtom();
   const isEmpty = useMemo(() => {
     return (
       !isLoadingProtocolList &&
       !isLoadingTokenList &&
       tokenList.length <= 0 &&
-      protocolList.length <= 0
+      protocolList.length <= 0 &&
+      blocked.length <= 0 &&
+      customize.length <= 0
     );
-  }, [isLoadingProtocolList, isLoadingTokenList, tokenList, protocolList]);
+  }, [
+    isLoadingProtocolList,
+    isLoadingTokenList,
+    tokenList.length,
+    protocolList.length,
+    blocked.length,
+    customize.length,
+  ]);
   const [visibleLowAssets, setVisibleLowAssets] = useState(false);
 
   const handleRelateDapp = (protocol: DisplayProtocol) => {
