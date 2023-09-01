@@ -21,8 +21,6 @@ import { useSwapSettings } from '../hooks';
 const exchangeCount = Object.keys(DEX).length + Object.keys(CEX).length;
 
 const QuotesWrapper = styled.div`
-  --green-color: #27c193;
-  --red-color: #ff7878;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -77,7 +75,10 @@ export const Quotes = (props: QuotesProps) => {
           const getNumber = (quote: typeof a) => {
             if (quote.isDex) {
               if (inSufficient) {
-                return new BigNumber(quote.data?.toTokenAmount || 0);
+                return new BigNumber(quote.data?.toTokenAmount || 0).div(
+                  10 **
+                    (quote.data?.toTokenDecimals || other.receiveToken.decimals)
+                );
               }
               if (!quote.preExecResult) {
                 return new BigNumber(0);
@@ -92,7 +93,7 @@ export const Quotes = (props: QuotesProps) => {
           };
           return getNumber(b).minus(getNumber(a)).toNumber();
         }),
-    [inSufficient, list, swapViewList]
+    [inSufficient, list, other.receiveToken.decimals, swapViewList]
   );
 
   const bestAmount = useMemo(() => {
