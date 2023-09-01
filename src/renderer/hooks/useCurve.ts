@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { formatNumber, formatUsdValue } from '@/renderer/utils/number';
+import { requestOpenApiWithChainId } from '@/main/utils/openapi';
 import { walletOpenapi } from '../ipcRequest/rabbyx';
 
 type CurveList = Array<{ timestamp: number; usd_value: number }>;
@@ -64,7 +65,11 @@ const formChartData = (
   };
 };
 
-export default (address: string | undefined, nonce: number) => {
+export default (
+  address: string | undefined,
+  nonce: number,
+  isTestnet = false
+) => {
   const [data, setData] = useState<
     {
       timestamp: number;
@@ -74,8 +79,13 @@ export default (address: string | undefined, nonce: number) => {
   const [isLoading, setIsLoading] = useState(true);
   const select = useCallback(() => formChartData(data), [data]);
 
-  const fetch = async (addr: string) => {
-    const curve = await walletOpenapi.getNetCurve(addr);
+  const fetch = async (addr: string, _isTestnet: boolean) => {
+    const curve = await requestOpenApiWithChainId(
+      ({ openapi }) => openapi.getNetCurve(addr),
+      {
+        isTestnet: _isTestnet,
+      }
+    );
     setData(curve);
     setIsLoading(false);
   };
@@ -87,8 +97,8 @@ export default (address: string | undefined, nonce: number) => {
 
   useEffect(() => {
     if (!address) return;
-    fetch(address);
-  }, [address, nonce]);
+    fetch(address, isTestnet);
+  }, [address, nonce, isTestnet]);
 
   return isLoading ? undefined : select();
 };

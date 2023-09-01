@@ -113,7 +113,7 @@ const AccountCard = ({
     })();
   }, [currentAccount, realCurrentAccount, account]);
 
-  const [balance] = useCurrentBalance(currentAccount?.address);
+  const { balance } = useCurrentBalance(currentAccount?.address);
   const icon = getAccountIcon(currentAccount?.type);
 
   if (!currentAccount) return <></>;

@@ -5,6 +5,18 @@ import {
 } from '@rabby-wallet/rabby-api/dist/types';
 
 const ALL_CHAINS = Object.values(CHAINS);
+const ALL_CHAINS_TESTNET = [] as Chain[];
+const ALL_CHAINS_MAINNET = ALL_CHAINS.filter((chain) => {
+  if (chain.isTestnet) {
+    ALL_CHAINS_TESTNET.push(chain);
+  }
+  return !chain.isTestnet;
+});
+
+export const CHAINS_BY_NET = {
+  mainnet: ALL_CHAINS_MAINNET,
+  testnet: ALL_CHAINS_TESTNET,
+};
 
 export interface DisplayChainWithWhiteLogo extends ChainWithBalance {
   logo?: string;
@@ -109,12 +121,14 @@ export function varyAndSortChainItems(deps: {
   matteredChainBalances: {
     [x: string]: DisplayChainWithWhiteLogo | undefined;
   };
+  netTabKey?: import('@/renderer/components/PillsSwitch/NetSwitchTabs').NetSwitchTabsKey;
 }) {
   const {
     supportChains,
     searchKeyword = '',
     pinned,
     matteredChainBalances,
+    netTabKey,
   } = deps;
 
   const unpinnedListGroup = {
@@ -128,7 +142,10 @@ export function varyAndSortChainItems(deps: {
     disabled: [] as Chain[],
   };
 
-  const _all = ALL_CHAINS.sort((a, b) => a.name.localeCompare(b.name));
+  const _all = (
+    (netTabKey ? CHAINS_BY_NET[netTabKey] : CHAINS_BY_NET.mainnet) ||
+    CHAINS_BY_NET.mainnet
+  ).sort((a, b) => a.name.localeCompare(b.name));
 
   _all.forEach((item) => {
     const inPinned = pinned.find((pinnedEnum) => pinnedEnum === item.enum);

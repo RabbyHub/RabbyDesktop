@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { openExternalUrl, requestResetApp } from '@/renderer/ipcRequest/app';
 
@@ -23,6 +23,9 @@ import { ucfirst } from '@/isomorphic/string';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import ManageAddressModal from '@/renderer/components/AddressManagementModal/ManageAddress';
 import { atom, useAtom } from 'jotai';
+import { useShowTestnet } from '@/renderer/hooks/rabbyx/useShowTestnet';
+import { walletTestnetOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import NetSwitchTabs from '@/renderer/components/PillsSwitch/NetSwitchTabs';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
 import {
@@ -45,6 +48,7 @@ type TypedProps = {
   className?: string;
   icon?: string;
   iconBase64?: string;
+  disabled?: boolean;
 } & (
   | {
       type: 'text';
@@ -78,10 +82,17 @@ function ItemPartialLeft({ name, icon }: Pick<TypedProps, 'name' | 'icon'>) {
 
 function ItemText({
   children,
+  disabled = false,
   ...props
 }: React.PropsWithChildren<Omit<TypedProps & { type: 'text' }, 'type'>>) {
   return (
-    <div className={classNames(styles.typedItem, props.className)}>
+    <div
+      className={classNames(
+        styles.typedItem,
+        disabled && styles.disabled,
+        props.className
+      )}
+    >
       <ItemPartialLeft name={props.name} icon={props.icon} />
       <div className={styles.itemRight}>{props.text || children}</div>
     </div>
@@ -110,12 +121,17 @@ function ItemLink({
 
 function ItemAction({
   children,
+  disabled = false,
   ...props
 }: React.PropsWithChildren<Omit<TypedProps & { type: 'action' }, 'type'>>) {
   return (
     <div
-      className={classNames(styles.typedItem, styles.pointer, props.className)}
-      onClick={props.onClick}
+      className={classNames(
+        styles.typedItem,
+        disabled ? styles.disabled : styles.pointer,
+        props.className
+      )}
+      onClick={!disabled ? props.onClick : undefined}
     >
       <ItemPartialLeft name={props.name} icon={props.icon} />
       <div className={styles.itemRight}>{children}</div>
@@ -417,6 +433,7 @@ export function MainWindowSettings() {
     useState(false);
   const [isShowCustomRPCModal, setIsShowCustomRPCModal] = useState(false);
   const [isManageAddressModal, setIsManageAddressModal] = useState(false);
+  const { isShowTestnet, setIsShowTestnet } = useShowTestnet();
 
   const { setShowSupportedChains } = useSupportedChainsModal();
 
@@ -428,7 +445,53 @@ export function MainWindowSettings() {
 
       <div className={styles.settingItems}>
         <div className={styles.settingBlock}>
-          <h4 className={styles.blockTitle}>Security</h4>
+          <h4 className={styles.blockTitle}>Features</h4>
+          <div className={styles.itemList}>
+            <ItemAction
+              name="Manage Address"
+              onClick={() => {
+                setIsManageAddressModal(true);
+              }}
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-manage-address.svg"
+            >
+              <img src={IconChevronRight} />
+            </ItemAction>
+
+            {/* <ItemAction
+              name={
+                <Tooltip
+                  title="Comming Soon"
+                  arrowPointAtCenter
+                  trigger="hover"
+                >
+                  Lock Wallet
+                </Tooltip>
+              }
+              disabled
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-lock-wallet.svg"
+            >
+              <img src={IconChevronRight} />
+            </ItemAction>
+            <ItemAction
+              name={
+                <Tooltip
+                  title="Comming Soon"
+                  arrowPointAtCenter
+                  trigger="hover"
+                >
+                  Signature Record
+                </Tooltip>
+              }
+              disabled
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-signature-record.svg"
+            >
+              <img src={IconChevronRight} />
+            </ItemAction> */}
+          </div>
+        </div>
+
+        <div className={styles.settingBlock}>
+          <h4 className={styles.blockTitle}>Settings</h4>
           <div className={styles.itemList}>
             {!FORCE_DISABLE_CONTENT_PROTECTION && (
               <ItemSwitch
@@ -479,10 +542,12 @@ export function MainWindowSettings() {
               name={
                 <>
                   <div className="flex flex-col gap-[4px]">
-                    <span className="text-14 font-medium">Whitelist</span>
-                    <span className="text-12 text-white opacity-[0.6]">
-                      You can only send assets to whitelisted address
+                    <span className="text-14 font-medium">
+                      Enable Whitelist for sending assets
                     </span>
+                    {/* <span className="text-12 text-white opacity-[0.6]">
+                      You can only send assets to whitelisted address
+                    </span> */}
                   </div>
                 </>
               }
@@ -507,27 +572,26 @@ export function MainWindowSettings() {
                 });
               }}
             />
-          </div>
-        </div>
-
-        <div className={styles.settingBlock}>
-          <h4 className={styles.blockTitle}>General</h4>
-          <div className={styles.itemList}>
+            <ItemSwitch
+              checked={isShowTestnet}
+              name={
+                <>
+                  <div className="flex flex-col gap-[4px]">
+                    <span className="text-14 font-medium">Enable Testnets</span>
+                  </div>
+                </>
+              }
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-testnet.svg"
+              onChange={(nextEnabled: boolean) => {
+                setIsShowTestnet(nextEnabled);
+              }}
+            />
             <ItemAction
               name="Custom RPC"
               onClick={() => {
                 setIsShowCustomRPCModal(true);
               }}
               icon="rabby-internal://assets/icons/mainwin-settings/icon-custom-rpc.svg"
-            >
-              <img src={IconChevronRight} />
-            </ItemAction>
-            <ItemAction
-              name="Manage Address"
-              onClick={() => {
-                setIsManageAddressModal(true);
-              }}
-              icon="rabby-internal://assets/icons/mainwin-settings/icon-manage-address.svg"
             >
               <img src={IconChevronRight} />
             </ItemAction>
@@ -550,22 +614,6 @@ export function MainWindowSettings() {
             >
               <img src={IconChevronRight} />
             </ItemAction>
-
-            <ItemAction
-              name="Clear Pending"
-              onClick={() => {
-                setIsShowingClearPendingModal(true);
-              }}
-              icon="rabby-internal://assets/icons/mainwin-settings/icon-clear.svg"
-            >
-              <img src={IconChevronRight} />
-            </ItemAction>
-          </div>
-        </div>
-
-        <div className={styles.settingBlock}>
-          <h4 className={styles.blockTitle}>Dapp</h4>
-          <div className={styles.itemList}>
             <ItemSwitch
               checked={settings.enableServeDappByHttp}
               name={
@@ -602,6 +650,15 @@ export function MainWindowSettings() {
                 });
               }}
             />
+            <ItemAction
+              name="Clear Pending"
+              onClick={() => {
+                setIsShowingClearPendingModal(true);
+              }}
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-clear.svg"
+            >
+              <img src={IconChevronRight} />
+            </ItemAction>
             {/* <ItemSwitch
               checked={
                 settings.experimentalDappViewZoomPercent ===
@@ -637,7 +694,7 @@ export function MainWindowSettings() {
           <div className={styles.itemList}>
             <ItemLink
               name="Privacy Policy"
-              link="https://rabby.io/"
+              link="https://rabby.io/docs/privacy"
               icon="rabby-internal://assets/icons/mainwin-settings/privacy-policy.svg"
             />
             <ItemAction

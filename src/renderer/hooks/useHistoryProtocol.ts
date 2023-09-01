@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import PQueue from 'p-queue';
-import { groupBy } from 'lodash';
+import _, { groupBy } from 'lodash';
 import {
   ComplexProtocol,
   ServerChain,
   TokenItem,
 } from '@rabby-wallet/rabby-api/dist/types';
-import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import { requestOpenApiWithChainId } from '@/main/utils/openapi';
 import { VIEW_TYPE } from '../routes/Home/type';
 
 export interface DisplayProtocol extends ComplexProtocol {
@@ -59,8 +59,16 @@ const getNoHistoryPriceTokensFromProtocolList = (
   };
 };
 
-export const loadCachedProtocolList = async (addr: string) => {
-  const cachedProtocols = await walletOpenapi.getComplexProtocolList(addr);
+export const loadCachedProtocolList = async (
+  addr: string,
+  isTestnet: boolean
+) => {
+  const cachedProtocols = await requestOpenApiWithChainId(
+    ({ openapi }) => openapi.getComplexProtocolList(addr),
+    {
+      isTestnet,
+    }
+  );
   return cachedProtocols.map((item) => ({
     ...item,
     usd_value: item.portfolio_item_list.reduce(
@@ -70,7 +78,10 @@ export const loadCachedProtocolList = async (addr: string) => {
   }));
 };
 
-export const loadRealTimeProtocolList = async (addr: string) => {
+export const loadRealTimeProtocolList = async (
+  addr: string,
+  isTestnet: boolean
+) => {
   const result: DisplayProtocol[] = [];
   const queue = new PQueue({ concurrency: 100 });
 
@@ -81,10 +92,22 @@ export const loadRealTimeProtocolList = async (addr: string) => {
       });
     });
   };
-  const list = await walletOpenapi.getProtocolList(addr);
+  const list = await requestOpenApiWithChainId(
+    ({ openapi }) => openapi.getProtocolList(addr),
+    {
+      isTestnet,
+    }
+  );
 
   list.forEach((item) => {
-    queue.add(() => walletOpenapi.getProtocol({ addr, id: item.id }));
+    queue.add(() =>
+      requestOpenApiWithChainId(
+        ({ openapi }) => openapi.getProtocol({ addr, id: item.id }),
+        {
+          isTestnet,
+        }
+      )
+    );
   });
   queue.on('completed', (r: ComplexProtocol) => {
     if (r.portfolio_item_list.length > 0) {
@@ -97,7 +120,9 @@ export const loadRealTimeProtocolList = async (addr: string) => {
       });
     }
   });
-  await waitQueueFinished(queue);
+  if (list.length > 0) {
+    await waitQueueFinished(queue);
+  }
 
   return result;
 };
@@ -105,9 +130,11 @@ export const loadRealTimeProtocolList = async (addr: string) => {
 export default (
   address: string | undefined,
   nonce = 0,
-  currentView: VIEW_TYPE
+  currentView: VIEW_TYPE,
+  isTestnet = false
 ) => {
   const addressRef = useRef(address);
+  const isTestnetRef = useRef(isTestnet);
   const [historyProtocolMap, setHistoryProtocolMap] = useState<
     Record<string, DisplayProtocol>
   >({});
@@ -135,7 +162,11 @@ export default (
   const isLoadingRealTimeRef = useRef(false);
   const isLoadingHistoryRef = useRef(false);
 
-  const fetchData = async (addr: string, view: VIEW_TYPE) => {
+  const fetchData = async (
+    addr: string,
+    view: VIEW_TYPE,
+    _isTestnet: boolean
+  ) => {
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
     let result: DisplayProtocol[] = protocolListRef.current;
     const historyList: DisplayProtocol[] = [];
@@ -149,9 +180,12 @@ export default (
     if (!isRealTimeLoadedRef.current && !isLoadingRealTimeRef.current) {
       isLoadingRealTimeRef.current = true;
       result = [];
-      protocolListRef.current = await loadCachedProtocolList(addr);
+      const pList = await loadCachedProtocolList(addr, _isTestnet);
+      if (addr === addressRef.current && _isTestnet === isTestnetRef.current) {
+        protocolListRef.current = pList;
+      }
       setIsLoading(false);
-      const list = await loadRealTimeProtocolList(addr);
+      const list = await loadRealTimeProtocolList(addr, _isTestnet);
       // if (list.length <= 0) {
       //   isRealTimeLoadedRef.current = true;
       //   isLoadingRealTimeRef.current = false;
@@ -166,23 +200,30 @@ export default (
     if (view === VIEW_TYPE.DEFAULT) return;
     if (!isHistoryLoadedRef.current && !isLoadingHistoryRef.current) {
       isLoadingHistoryRef.current = true;
-      const chainList = await walletOpenapi.getChainList();
+      const chainList = await requestOpenApiWithChainId(
+        ({ openapi }) => openapi.getChainList(),
+        { isTestnet: _isTestnet }
+      );
       const supportHistoryChainList = chainList.filter(
         (item) => item.is_support_history
       );
       setSupportHistoryChains(supportHistoryChainList);
       const historyQueue = new PQueue({ concurrency: 100 });
-      if (addr === addressRef.current) {
+      if (addr === addressRef.current && _isTestnet === isTestnetRef.current) {
         protocolListRef.current = result;
       }
       result.forEach((item) => {
         if (supportHistoryChainList.some((i) => i.id === item.chain)) {
           historyQueue.add(async () => {
-            const r = await walletOpenapi.getHistoryProtocol({
-              addr,
-              id: item.id,
-              timeAt: YESTERDAY,
-            });
+            const r = await requestOpenApiWithChainId(
+              ({ openapi }) =>
+                openapi.getHistoryProtocol({
+                  addr,
+                  id: item.id,
+                  timeAt: YESTERDAY,
+                }),
+              { isTestnet: _isTestnet }
+            );
             historyList.push({
               ...r,
               usd_value: r.portfolio_item_list.reduce(
@@ -203,7 +244,7 @@ export default (
         },
         {}
       );
-      if (addr === addressRef.current) {
+      if (addr === addressRef.current && _isTestnet === isTestnetRef.current) {
         setHistoryProtocolMap(map);
       }
       const { noHistoryPriceTokenList, historyTokenMap } =
@@ -229,11 +270,15 @@ export default (
         Object.keys(grouped).forEach((i) => {
           const l = grouped[i];
           tokenHistoryPriceQueue.add(async () => {
-            const priceMap = await walletOpenapi.getTokenHistoryDict({
-              chainId: i,
-              ids: l.map((s) => s.split('-')[1]).join(','),
-              timeAt: YESTERDAY,
-            });
+            const priceMap = await requestOpenApiWithChainId(
+              ({ openapi }) =>
+                openapi.getTokenHistoryDict({
+                  chainId: i,
+                  ids: l.map((s) => s.split('-')[1]).join(','),
+                  timeAt: YESTERDAY,
+                }),
+              { isTestnet: _isTestnet }
+            );
             return {
               chain: i,
               price: priceMap,
@@ -256,7 +301,7 @@ export default (
         );
         await waitQueueFinished(tokenHistoryPriceQueue);
       }
-      if (addr === addressRef.current) {
+      if (addr === addressRef.current && _isTestnet === isTestnetRef.current) {
         setTokenHistoryPriceMap(tmap);
         isLoadingHistoryRef.current = false;
         isHistoryLoadedRef.current = true;
@@ -269,7 +314,7 @@ export default (
     isRealTimeLoadedRef.current = false;
     isLoadingHistoryRef.current = false;
     isLoadingRealTimeRef.current = false;
-  }, [address, nonce]);
+  }, [address, nonce, isTestnet]);
 
   useEffect(() => {
     protocolListRef.current = [];
@@ -277,13 +322,15 @@ export default (
     setTokenHistoryPriceMap({});
     setHistoryTokenDict({});
     setIsLoading(false);
-  }, [address]);
+  }, [address, isTestnet]);
 
   useEffect(() => {
     if (!address) return;
     addressRef.current = address;
-    fetchData(address, currentView);
-  }, [address, nonce, currentView]);
+    isTestnetRef.current = isTestnet;
+    fetchData(address, currentView, isTestnet);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address, nonce, currentView, isTestnet]);
 
   return {
     protocolList: protocolListRef.current,

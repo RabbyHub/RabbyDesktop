@@ -13,7 +13,7 @@ import { useTotalBalance } from '@/renderer/utils/balance';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import useCurve from '@/renderer/hooks/useCurve';
 import useHistoryTokenList from '@/renderer/hooks/useHistoryTokenList';
-import { walletOpenapi, walletController } from '@/renderer/ipcRequest/rabbyx';
+import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import useHistoryProtocol from '@/renderer/hooks/useHistoryProtocol';
 import { copyText } from '@/renderer/utils/clipboard';
 import {
@@ -21,6 +21,10 @@ import {
   useZViewsVisibleChanged,
 } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { HomeTab } from '@/renderer/components/HomeTab/HomeTab';
+import NetSwitchTabs, {
+  useSwitchNetTab,
+} from '@/renderer/components/PillsSwitch/NetSwitchTabs';
+import { requestOpenApiWithChainId } from '@/main/utils/openapi';
 import {
   useExpandList,
   useExpandProtocolList,
@@ -35,7 +39,6 @@ import RightBar from './components/RightBar';
 import Transactions from './components/Transactions';
 import { VIEW_TYPE } from './type';
 import { HomeUpdateButton } from './components/HomeUpdateButton';
-
 import './index.less';
 import { useFetchSummary } from './components/Summary/hook';
 import { TokenSearchInput } from './components/TokenSearchInput';
@@ -150,12 +153,20 @@ const Home = () => {
   const [usedChainList, setUsedChainList] = useState<DisplayUsedChain[]>([]);
   const { currentView, switchView } = useSwitchView();
   const [search, setSearch] = useState('');
+  const { isShowTestnet, selectedTab, onTabChange } = useSwitchNetTab();
+  const isTestnet = selectedTab === 'testnet';
+  const prevIsTestnet = usePrevious(isTestnet);
   const {
     tokenList,
     historyTokenMap,
     isLoading: isLoadingTokenList,
     isLoadingRealTime: isLoadingRealTimeTokenList,
-  } = useHistoryTokenList(currentAccount?.address, updateNonce, currentView);
+  } = useHistoryTokenList(
+    currentAccount?.address,
+    updateNonce,
+    currentView,
+    isTestnet
+  );
   const { filterTokenList, isLoading: isSearchingTokenList } =
     useFilterTokenList(
       tokenList,
@@ -174,7 +185,12 @@ const Home = () => {
     isLoadingRealTime: isLoadingRealTimeProtocol,
     supportHistoryChains,
     historyTokenDict,
-  } = useHistoryProtocol(currentAccount?.address, updateNonce, currentView);
+  } = useHistoryProtocol(
+    currentAccount?.address,
+    updateNonce,
+    currentView,
+    isTestnet
+  );
 
   useFetchSummary(currentAccount?.address, selectChainServerId, updateNonce);
 
@@ -208,15 +224,18 @@ const Home = () => {
         map[token.chain] = token.usd_value || 0;
       }
     });
-    const list = usedChainList.map((chain) => ({
-      ...chain,
-      usd_value: map[chain.id] || 0,
-    }));
+    const list = usedChainList
+      .map((chain) => ({
+        ...chain,
+        usd_value: map[chain.id] || 0,
+      }))
+      .filter((item) => item.usd_value > 0);
     return sortBy(list, (item) => item.usd_value).reverse();
   }, [usedChainList, protocolList, tokenList]);
   const totalBalance = useTotalBalance(tokenList, protocolList);
 
-  const curveData = useCurve(currentAccount?.address, updateNonce);
+  const curveDataRaw = useCurve(currentAccount?.address, updateNonce);
+  const curveData = isTestnet ? undefined : curveDataRaw;
   const location = useLocation();
 
   const filterProtocolList = useFilterProtoList(
@@ -233,15 +252,24 @@ const Home = () => {
     setIsExpand: setIsProtocolExpand,
   } = useExpandProtocolList(filterProtocolList);
 
-  const init = async () => {
+  const init = async (_isTestnet: boolean) => {
     if (!currentAccount?.address) return;
     rerenderAtRef.current = Date.now();
     setIsProtocolExpand(false);
     setIsTokenExpand(false);
     switchView(VIEW_TYPE.DEFAULT);
-    const chainList = await walletOpenapi.usedChainList(currentAccount.address);
+    const chainList = await requestOpenApiWithChainId(
+      ({ openapi }) => openapi.usedChainList(currentAccount.address),
+      {
+        isTestnet: _isTestnet,
+      }
+    );
     setUsedChainList(chainList.map((chain) => formatUsedChain(chain)));
-    walletController.getAddressBalance(currentAccount?.address);
+    walletController.getAddressBalance(
+      currentAccount?.address,
+      false,
+      _isTestnet
+    );
   };
 
   const handleClickRefresh = () => {
@@ -250,10 +278,12 @@ const Home = () => {
 
   useEffect(() => {
     if (currentAccount && currentAccount?.address !== prevAccount?.address) {
-      init();
+      init(isTestnet);
+    } else if (isTestnet !== prevIsTestnet) {
+      init(isTestnet);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentAccount]);
+  }, [currentAccount, isTestnet]);
 
   useZViewsVisibleChanged((visibles) => {
     if (
@@ -261,7 +291,7 @@ const Home = () => {
       location.pathname === '/mainwin/home' &&
       !Object.values(visibles).some((item) => item) // all closed
     ) {
-      init();
+      init(isTestnet);
       setUpdateNonce(updateNonce + 1);
     }
   });
@@ -269,7 +299,7 @@ const Home = () => {
   useEffect(() => {
     if (location.pathname === '/mainwin/home') {
       if (Date.now() - rerenderAtRef.current >= 3600000) {
-        init();
+        init(isTestnet);
         setUpdateNonce(updateNonce + 1);
       }
     }
@@ -363,10 +393,20 @@ const Home = () => {
                         />
                       </TipsWrapper>
                     </span>
+
+                    {isShowTestnet ? (
+                      <NetSwitchTabs
+                        showPending
+                        size="sm"
+                        value={selectedTab}
+                        onTabChange={onTabChange}
+                        className="ml-12"
+                      />
+                    ) : null}
                   </div>
                 )}
                 <div className="balance">
-                  {isLoadingTokenList || !curveData ? (
+                  {isLoadingTokenList ? (
                     <Skeleton.Input
                       active
                       style={{
@@ -378,13 +418,15 @@ const Home = () => {
                   ) : (
                     <>
                       ${formatNumber(totalBalance || 0)}{' '}
-                      <div
-                        className={classNames('balance-change', {
-                          'is-loss': curveData.isLoss,
-                        })}
-                      >{`${curveData.isLoss ? '-' : '+'}${
-                        curveData.changePercent
-                      } (${curveData.change})`}</div>
+                      {curveData ? (
+                        <div
+                          className={classNames('balance-change', {
+                            'is-loss': curveData.isLoss,
+                          })}
+                        >{`${curveData.isLoss ? '-' : '+'}${
+                          curveData.changePercent
+                        } (${curveData.change})`}</div>
+                      ) : null}
                     </>
                   )}
                 </div>
@@ -402,11 +444,26 @@ const Home = () => {
                   </div>
                   {curveData.list.length > 0 && <Curve data={curveData} />}
                 </div>
-              ) : null}
+              ) : (
+                <div className="right">
+                  <div className="absolute right-0 bottom-0 z-10">
+                    <HomeUpdateButton
+                      loading={
+                        isLoadingRealTimeTokenList || isLoadingRealTimeProtocol
+                      }
+                      onUpdate={handleClickRefresh}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           <div className="relative flex-1 h-0">
-            <Transactions updateNonce={updateNonce} />
+            <Transactions
+              isTestnet={selectedTab === 'testnet'}
+              onTabChange={onTabChange}
+              updateNonce={updateNonce}
+            />
             <div className="flex-1 h-full static-width-wrapper disable-mouseevents-on-ant-modal-open">
               <div>
                 {isLoadingTokenList ? (

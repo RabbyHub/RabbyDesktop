@@ -5,7 +5,6 @@ import {
   RabbyXContollerNS,
   RabbyXMethods,
 } from '@/isomorphic/types/rabbyx';
-import { randString } from 'isomorphic/string';
 
 function fixArgs(
   key: keyof RabbyXMethods,
@@ -66,4 +65,7 @@ function makeRabbyXController<T extends RabbyXContollerNS>(namespace: T) {
 
 export const walletController = makeRabbyXController('walletController');
 export const walletOpenapi = makeRabbyXController('openapi');
+export const walletTestnetOpenapi = makeRabbyXController(
+  'testnetOpenapi' as 'openapi'
+);
 export const permissionService = makeRabbyXController('permissionService');

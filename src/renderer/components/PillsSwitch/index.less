@@ -33,3 +33,42 @@
     color: var(--r-blue-default);
   }
 }
+
+.net-switch {
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  height: 36px;
+
+  .pills-switch__item {
+    color: var(--unnamed, #fff);
+    text-align: center;
+    font-size: 13px;
+    font-style: normal;
+    font-weight: 510;
+    line-height: normal;
+    opacity: 0.8;
+    background-color: transparent;
+    width: 112px;
+
+    &.is-active {
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  &--sm {
+    height: 24px;
+    border-radius: 4px;
+    padding: 2px;
+
+    .pills-switch__item {
+      width: 80px;
+      font-size: 12px;
+      font-weight: 400;
+
+      &.is-active {
+        border-radius: 2px;
+      }
+    }
+  }
+}

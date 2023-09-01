@@ -1,8 +1,9 @@
-import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
 import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
+import { requestOpenApiWithChainId } from '@/main/utils/openapi';
+import { findChainByServerID } from '@/renderer/utils/chain';
 import { useCurrentAccount } from './useAccount';
 import { usePreference } from './usePreference';
 
@@ -11,28 +12,38 @@ export const blockedAtom = atom<TokenItem[]>([]);
 export const customizeAtom = atom<TokenItem[]>([]);
 
 export const useTokenAtom = () => {
-  const [tokenList] = useAtom(tokenListAtom);
   const [blocked] = useAtom(blockedAtom);
   const [customize] = useAtom(customizeAtom);
 
   return {
-    tokenList,
     blocked,
     customize,
   };
 };
 
-export const useToken = () => {
-  const [customize, setCustomize] = useAtom(customizeAtom);
-  const [blocked, setBlocked] = useAtom(blockedAtom);
+export const useToken = (isTestnet: boolean) => {
+  const [, setCustomize] = useAtom(customizeAtom);
+  const [, setBlocked] = useAtom(blockedAtom);
   const { preferences, getCustomizedToken, getBlockedToken } = usePreference();
   const [tokenList, setTokenList] = useAtom(tokenListAtom);
   const { currentAccount } = useCurrentAccount();
 
   const initData = React.useCallback(async () => {
     if (!currentAccount) return;
-    const customizeTokens = preferences.customizedToken ?? [];
-    const blockedTokens = preferences.blockedToken ?? [];
+    const customizeTokens = (preferences.customizedToken ?? []).filter(
+      (item) => {
+        if (isTestnet) {
+          return findChainByServerID(item.chain)?.isTestnet;
+        }
+        return !findChainByServerID(item.chain)?.isTestnet;
+      }
+    );
+    const blockedTokens = (preferences.blockedToken ?? []).filter((item) => {
+      if (isTestnet) {
+        return findChainByServerID(item.chain)?.isTestnet;
+      }
+      return !findChainByServerID(item.chain)?.isTestnet;
+    });
     const customTokenList: TokenItem[] = [];
     const blockedTokenList: TokenItem[] = [];
 
@@ -45,7 +56,6 @@ export const useToken = () => {
             !token.is_core
         )
       ) {
-        // customize with balance
         customTokenList.push(token);
       }
 
@@ -74,11 +84,17 @@ export const useToken = () => {
 
     try {
       if (noBalanceCustomizeTokens.length > 0) {
-        const queryTokenList = await walletOpenapi.customListToken(
-          noBalanceCustomizeTokens.map(
-            (item) => `${item.chain}:${item.address}`
-          ),
-          currentAccount.address
+        const queryTokenList = await requestOpenApiWithChainId(
+          ({ openapi }) =>
+            openapi.customListToken(
+              noBalanceCustomizeTokens.map(
+                (item) => `${item.chain}:${item.address}`
+              ),
+              currentAccount.address
+            ),
+          {
+            isTestnet,
+          }
         );
         customTokenList.push(
           ...queryTokenList.filter((token) => !token.is_core)
@@ -90,9 +106,17 @@ export const useToken = () => {
 
     try {
       if (noBalanceBlockedTokens.length > 0) {
-        const queryTokenList = await walletOpenapi.customListToken(
-          noBalanceBlockedTokens.map((item) => `${item.chain}:${item.address}`),
-          currentAccount.address
+        const queryTokenList = await requestOpenApiWithChainId(
+          ({ openapi }) =>
+            openapi.customListToken(
+              noBalanceBlockedTokens.map(
+                (item) => `${item.chain}:${item.address}`
+              ),
+              currentAccount.address
+            ),
+          {
+            isTestnet,
+          }
         );
         blockedTokenList.push(
           ...queryTokenList.filter((token) => token.is_core)
@@ -106,6 +130,7 @@ export const useToken = () => {
     setBlocked(blockedTokenList);
   }, [
     currentAccount,
+    isTestnet,
     preferences.blockedToken,
     preferences.customizedToken,
     setBlocked,
@@ -126,11 +151,10 @@ export const useToken = () => {
     currentAccount?.address,
     preferences.blockedToken,
     preferences.customizedToken,
+    tokenList,
   ]);
 
   return {
-    customize,
-    blocked,
     setTokenList,
   };
 };

@@ -4,7 +4,6 @@ import { TokenButton } from './TokenButton';
 
 interface Props {
   onClickLink: () => void;
-  // isTestnet?: boolean;
 }
 
 export const CustomizedButton: React.FC<Props> = ({ onClickLink }) => {

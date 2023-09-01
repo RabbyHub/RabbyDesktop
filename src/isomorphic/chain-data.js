@@ -76,6 +76,19 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["TDEBANK"] = "TDEBANK";
     CHAINS_ENUM["TMNT"] = "TMNT";
     CHAINS_ENUM["OPBNB"] = "OPBNB";
+    CHAINS_ENUM["GERA"] = "GERA";
+    CHAINS_ENUM["PMANTA"] = "PMANTA";
+    CHAINS_ENUM["TOPBNB"] = "TOPBNB";
+    CHAINS_ENUM["TTENET"] = "TTENET";
+    CHAINS_ENUM["LOOT"] = "LOOT";
+    CHAINS_ENUM["TLOOT"] = "TLOOT";
+    CHAINS_ENUM["SETH"] = "SETH";
+    CHAINS_ENUM["SSCROLL"] = "SSCROLL";
+    CHAINS_ENUM["AZETA"] = "AZETA";
+    CHAINS_ENUM["TALT"] = "TALT";
+    CHAINS_ENUM["GZORA"] = "GZORA";
+    CHAINS_ENUM["GTAIKO"] = "GTAIKO";
+    CHAINS_ENUM["ETAIKO"] = "ETAIKO";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -743,7 +756,7 @@ export const CHAINS_RAW = {
         nativeTokenAddress: "ckb",
         enum: CHAINS_ENUM.CKB,
         hex: "0x116ea",
-        scanLink: "https://gw-mainnet-explorer.nervosdao.community/tx/_s_",
+        scanLink: "https://gwscan.com/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/ckb/e821893503104870d5e73f56dbd73746.png",
         nativeTokenDecimals: 18,
         eip: {
@@ -1308,6 +1321,227 @@ export const CHAINS_RAW = {
             "1559": false,
         },
         isTestnet: false,
+    },
+    [CHAINS_ENUM.GERA]: {
+        id: 280,
+        serverId: "gera",
+        network: "280",
+        name: "zkSync Era Goerli",
+        nativeTokenSymbol: "GoerliETH",
+        nativeTokenAddress: "gera",
+        enum: CHAINS_ENUM.GERA,
+        hex: "0x118",
+        scanLink: "https://goerli.explorer.zksync.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/token/logo_url/eth/935ae4e4d1d12d59a99717a24f2540b5.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.PMANTA]: {
+        id: 3441005,
+        serverId: "pmanta",
+        network: "3441005",
+        name: "Manta Pacific Testnet",
+        nativeTokenSymbol: "PacificETH",
+        nativeTokenAddress: "pmanta",
+        enum: CHAINS_ENUM.PMANTA,
+        hex: "0x34816d",
+        scanLink: "https://pacific-explorer.manta.network/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/token/logo_url/eth/935ae4e4d1d12d59a99717a24f2540b5.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.TOPBNB]: {
+        id: 5611,
+        serverId: "topbnb",
+        network: "5611",
+        name: "opBNB Testnet",
+        nativeTokenSymbol: "TestnetBNB",
+        nativeTokenAddress: "topbnb",
+        enum: CHAINS_ENUM.TOPBNB,
+        hex: "0x15eb",
+        scanLink: "https://opbnbscan.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/coin/logo_url/bnb/9784283a36f23a58982fc964574ea530.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.TTENET]: {
+        id: 155,
+        name: "Tenet Testnet",
+        serverId: "ttenet",
+        hex: "0x9b",
+        enum: CHAINS_ENUM.TTENET,
+        network: "155",
+        nativeTokenSymbol: "TestnetTENET",
+        nativeTokenAddress: "ttenet",
+        scanLink: "https://testnet.tenetscan.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/tenet_token/logo_url/tenet/2da9b626102a7de9625aaf753cfac321.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.LOOT]: {
+        id: 5151706,
+        name: "Loot",
+        serverId: "loot",
+        hex: "0x4e9bda",
+        enum: CHAINS_ENUM.LOOT,
+        network: "5151706",
+        nativeTokenSymbol: "AGLD",
+        nativeTokenAddress: "loot",
+        scanLink: "https://explorer.lootchain.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/loot_token/logo_url/loot/a6c0dc128d515e2d32526075decae9ec.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: false,
+    },
+    [CHAINS_ENUM.TLOOT]: {
+        id: 9088912,
+        name: "Loot Testnet",
+        serverId: "tloot",
+        hex: "0x8aaf90",
+        enum: CHAINS_ENUM.TLOOT,
+        network: "9088912",
+        nativeTokenSymbol: "TestnetAGLD",
+        nativeTokenAddress: "tloot",
+        scanLink: "https://testnet.explorer.lootchain.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/tloot_token/logo_url/tloot/a6c0dc128d515e2d32526075decae9ec.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.SETH]: {
+        id: 11155111,
+        serverId: "seth",
+        network: "11155111",
+        name: "Ethereum Sepolia",
+        nativeTokenSymbol: "SepoliaETH",
+        nativeTokenAddress: "seth",
+        enum: CHAINS_ENUM.SETH,
+        hex: "0xaa36a7",
+        scanLink: "https://sepolia.etherscan.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/seth_token/logo_url/seth/389dd9a835250219889e01d5a31a75f1.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.SSCROLL]: {
+        id: 534351,
+        serverId: "sscrl",
+        network: "534351",
+        name: "Scroll Sepolia",
+        nativeTokenSymbol: "SepoliaETH",
+        nativeTokenAddress: "sscrl",
+        enum: CHAINS_ENUM.SSCROLL,
+        hex: "0x8274f",
+        scanLink: "https://sepolia-blockscout.scroll.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/sscrl_token/logo_url/sscrl/389dd9a835250219889e01d5a31a75f1.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.AZETA]: {
+        id: 7001,
+        serverId: "azeta",
+        network: "7001",
+        name: "ZetaChain Athens-3 Testnet",
+        nativeTokenSymbol: "AthensZETA",
+        nativeTokenAddress: "azeta",
+        enum: CHAINS_ENUM.AZETA,
+        hex: "0x1b59",
+        scanLink: "https://zetachain-athens-3.blockscout.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/azeta_token/logo_url/azeta/67a3cca2e34f8ff6fadfd339dac7a207.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.TALT]: {
+        id: 9997,
+        serverId: "talt",
+        network: "9997",
+        name: "AltLayer Testnet",
+        nativeTokenSymbol: "TestnetETH",
+        nativeTokenAddress: "talt",
+        enum: CHAINS_ENUM.TALT,
+        hex: "0x270d",
+        scanLink: "https://testnet-rollup-explorer.altlayer.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/talt_token/logo_url/talt/389dd9a835250219889e01d5a31a75f1.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.GZORA]: {
+        id: 999,
+        serverId: "gzora",
+        network: "999",
+        name: "Zora Goerli",
+        nativeTokenSymbol: "GoerliETH",
+        nativeTokenAddress: "gzora",
+        enum: CHAINS_ENUM.GZORA,
+        hex: "0x3e7",
+        scanLink: "https://testnet.explorer.zora.energy/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/gzora_token/logo_url/gzora/389dd9a835250219889e01d5a31a75f1.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.GTAIKO]: {
+        id: 167005,
+        serverId: "gtaiko",
+        network: "167005",
+        name: "Taiko Grimsvotn L2 Testnet",
+        nativeTokenSymbol: "GrimsvotnETH",
+        nativeTokenAddress: "gtaiko",
+        enum: CHAINS_ENUM.GTAIKO,
+        hex: "0x28c5d",
+        scanLink: "https://explorer.test.taiko.xyz/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/gtaiko_token/logo_url/gtaiko/389dd9a835250219889e01d5a31a75f1.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.ETAIKO]: {
+        id: 167006,
+        serverId: "etaiko",
+        network: "167006",
+        name: "Taiko Eldfell L3 Testnet",
+        nativeTokenSymbol: "EldfellETH",
+        nativeTokenAddress: "etaiko",
+        enum: CHAINS_ENUM.ETAIKO,
+        hex: "0x28c5e",
+        scanLink: "https://explorer.l3test.taiko.xyz/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/etaiko_token/logo_url/etaiko/389dd9a835250219889e01d5a31a75f1.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
     },
 };
 export const CHAINS_RAW_LIST = Object.values(CHAINS_RAW);

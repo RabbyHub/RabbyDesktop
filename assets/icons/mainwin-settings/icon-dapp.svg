@@ -1,24 +1,24 @@
-<svg width="24" height="19" viewBox="0 0 24 19" fill="none" xmlns="http://www.w3.org/2000/svg">
-<circle cx="12.1009" cy="3.931" r="3.431" stroke="white"/>
-<circle cx="12.1009" cy="3.931" r="3.431" stroke="white"/>
-<circle cx="12.1009" cy="3.931" r="3.431" stroke="white"/>
-<circle cx="12.1033" cy="11.1385" r="1.31033" fill="white"/>
-<circle cx="4.89487" cy="15.0677" r="3.431" stroke="white"/>
-<circle cx="4.89487" cy="15.0677" r="3.431" stroke="white"/>
-<circle cx="4.89487" cy="15.0677" r="3.431" stroke="white"/>
-<circle cx="19.3089" cy="15.0677" r="3.431" stroke="white"/>
-<circle cx="19.3089" cy="15.0677" r="3.431" stroke="white"/>
-<circle cx="19.3089" cy="15.0677" r="3.431" stroke="white"/>
-<line x1="9.90544" y1="6.81676" x2="6.62961" y2="12.0581" stroke="white"/>
-<line x1="9.90544" y1="6.81676" x2="6.62961" y2="12.0581" stroke="white"/>
-<path d="M12.0996 7.53613L12.0996 10.4844" stroke="white"/>
-<path d="M12.0996 7.53613L12.0996 10.4844" stroke="white"/>
-<path d="M12.0996 11.1367L7.84102 13.1022" stroke="white"/>
-<path d="M12.0996 11.1367L7.84102 13.1022" stroke="white"/>
-<path d="M16.3594 13.1018L12.756 11.4639" stroke="white"/>
-<path d="M16.3594 13.1018L12.756 11.4639" stroke="white"/>
-<line x1="15.3779" y1="15.5684" x2="8.17109" y2="15.5684" stroke="white"/>
-<line x1="15.3779" y1="15.5684" x2="8.17109" y2="15.5684" stroke="white"/>
-<line x1="17.574" y1="12.058" x2="14.2982" y2="6.81663" stroke="white"/>
-<line x1="17.574" y1="12.058" x2="14.2982" y2="6.81663" stroke="white"/>
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="9.89801" cy="5.32281" r="2.69781" stroke="#F7FAFC" stroke-width="1.25"/>
+<circle cx="9.89801" cy="5.32281" r="2.69781" stroke="#F7FAFC" stroke-width="1.25"/>
+<circle cx="9.89801" cy="5.32281" r="2.69781" stroke="#F7FAFC" stroke-width="1.25"/>
+<circle cx="9.90057" cy="11.4162" r="1.1076" fill="#F7FAFC"/>
+<circle cx="3.80719" cy="14.7349" r="2.69781" stroke="#F7FAFC" stroke-width="1.25"/>
+<circle cx="3.80719" cy="14.7349" r="2.69781" stroke="#F7FAFC" stroke-width="1.25"/>
+<circle cx="3.80719" cy="14.7349" r="2.69781" stroke="#F7FAFC" stroke-width="1.25"/>
+<circle cx="15.9888" cy="14.7349" r="2.69781" stroke="#F7FAFC" stroke-width="1.25"/>
+<circle cx="15.9888" cy="14.7349" r="2.69781" stroke="#F7FAFC" stroke-width="1.25"/>
+<circle cx="15.9888" cy="14.7349" r="2.69781" stroke="#F7FAFC" stroke-width="1.25"/>
+<line x1="8.22043" y1="7.86836" x2="5.45142" y2="12.2988" stroke="#F7FAFC" stroke-width="1.25"/>
+<line x1="8.22043" y1="7.86836" x2="5.45142" y2="12.2988" stroke="#F7FAFC" stroke-width="1.25"/>
+<path d="M9.89941 8.36914L9.89941 10.8612" stroke="#F7FAFC" stroke-width="1.25"/>
+<path d="M9.89941 8.36914L9.89941 10.8612" stroke="#F7FAFC" stroke-width="1.25"/>
+<path d="M9.89941 11.4121L6.2997 13.0735" stroke="#F7FAFC" stroke-width="1.25"/>
+<path d="M9.89941 11.4121L6.2997 13.0735" stroke="#F7FAFC" stroke-width="1.25"/>
+<path d="M13.5 13.0759L10.4541 11.6914" stroke="#F7FAFC" stroke-width="1.25"/>
+<path d="M13.5 13.0759L10.4541 11.6914" stroke="#F7FAFC" stroke-width="1.25"/>
+<line x1="12.666" y1="15.3613" x2="6.57419" y2="15.3613" stroke="#F7FAFC" stroke-width="1.25"/>
+<line x1="12.666" y1="15.3613" x2="6.57419" y2="15.3613" stroke="#F7FAFC" stroke-width="1.25"/>
+<line x1="14.3528" y1="12.299" x2="11.5838" y2="7.86861" stroke="#F7FAFC" stroke-width="1.25"/>
+<line x1="14.3528" y1="12.299" x2="11.5838" y2="7.86861" stroke="#F7FAFC" stroke-width="1.25"/>
 </svg>

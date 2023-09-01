@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { Transition } from 'react-transition-group';
-import styled from 'styled-components';
+import { cloneDeep } from 'lodash';
 
 const hideTransitionDuration = 200;
 
@@ -27,6 +27,7 @@ const Hide = ({
   visible,
   children,
   unmountOnExit,
+  activeOpacity = 1,
   ...rest
 }: {
   visible: boolean;
@@ -34,18 +35,28 @@ const Hide = ({
   style?: React.CSSProperties;
   className?: string;
   unmountOnExit?: boolean;
-}) => (
-  <Transition
-    unmountOnExit={unmountOnExit}
-    in={visible}
-    timeout={hideTransitionDuration}
-  >
-    {(state) => (
-      <div {...rest} style={hideTransitionStyles[state]}>
-        {children}
-      </div>
-    )}
-  </Transition>
-);
+  activeOpacity?: number;
+}) => {
+  const tStyles = useMemo(() => {
+    const final = cloneDeep(hideTransitionStyles);
+    final.entering.opacity = activeOpacity;
+    final.entered.opacity = activeOpacity;
+    return final;
+  }, [activeOpacity]);
+
+  return (
+    <Transition
+      unmountOnExit={unmountOnExit}
+      in={visible}
+      timeout={hideTransitionDuration}
+    >
+      {(state) => (
+        <div {...rest} style={tStyles[state]}>
+          {children}
+        </div>
+      )}
+    </Transition>
+  );
+};
 
 export default Hide;
