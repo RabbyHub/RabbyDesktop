@@ -120,7 +120,9 @@ export const loadRealTimeProtocolList = async (
       });
     }
   });
-  await waitQueueFinished(queue);
+  if (list.length > 0) {
+    await waitQueueFinished(queue);
+  }
 
   return result;
 };
