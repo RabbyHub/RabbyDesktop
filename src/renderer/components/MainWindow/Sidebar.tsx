@@ -419,7 +419,7 @@ export default function MainWindowSidebar() {
 
   const { settings, toggleSidebarCollapsed } = useSettings();
 
-  const { pendingTxCount } = useTransactionPendingCount();
+  const { totalPendingTxCount: pendingTxCount } = useTransactionPendingCount();
 
   const { dappListRef } = useAutoScrollToActiveTab(matchedDapp?.params?.dappId);
 
