@@ -432,7 +432,22 @@ export function MainWindowSettings() {
 
       <div className={styles.settingItems}>
         <div className={styles.settingBlock}>
-          <h4 className={styles.blockTitle}>Security</h4>
+          <h4 className={styles.blockTitle}>Features</h4>
+          <div className={styles.itemList}>
+            <ItemAction
+              name="Manage Address"
+              onClick={() => {
+                setIsManageAddressModal(true);
+              }}
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-manage-address.svg"
+            >
+              <img src={IconChevronRight} />
+            </ItemAction>
+          </div>
+        </div>
+
+        <div className={styles.settingBlock}>
+          <h4 className={styles.blockTitle}>Settings</h4>
           <div className={styles.itemList}>
             {!FORCE_DISABLE_CONTENT_PROTECTION && (
               <ItemSwitch
@@ -483,10 +498,12 @@ export function MainWindowSettings() {
               name={
                 <>
                   <div className="flex flex-col gap-[4px]">
-                    <span className="text-14 font-medium">Whitelist</span>
-                    <span className="text-12 text-white opacity-[0.6]">
-                      You can only send assets to whitelisted address
+                    <span className="text-14 font-medium">
+                      Enable Whitelist for sending assets
                     </span>
+                    {/* <span className="text-12 text-white opacity-[0.6]">
+                      You can only send assets to whitelisted address
+                    </span> */}
                   </div>
                 </>
               }
@@ -525,27 +542,12 @@ export function MainWindowSettings() {
                 setIsShowTestnet(nextEnabled);
               }}
             />
-          </div>
-        </div>
-
-        <div className={styles.settingBlock}>
-          <h4 className={styles.blockTitle}>General</h4>
-          <div className={styles.itemList}>
             <ItemAction
               name="Custom RPC"
               onClick={() => {
                 setIsShowCustomRPCModal(true);
               }}
               icon="rabby-internal://assets/icons/mainwin-settings/icon-custom-rpc.svg"
-            >
-              <img src={IconChevronRight} />
-            </ItemAction>
-            <ItemAction
-              name="Manage Address"
-              onClick={() => {
-                setIsManageAddressModal(true);
-              }}
-              icon="rabby-internal://assets/icons/mainwin-settings/icon-manage-address.svg"
             >
               <img src={IconChevronRight} />
             </ItemAction>
@@ -568,22 +570,6 @@ export function MainWindowSettings() {
             >
               <img src={IconChevronRight} />
             </ItemAction>
-
-            <ItemAction
-              name="Clear Pending"
-              onClick={() => {
-                setIsShowingClearPendingModal(true);
-              }}
-              icon="rabby-internal://assets/icons/mainwin-settings/icon-clear.svg"
-            >
-              <img src={IconChevronRight} />
-            </ItemAction>
-          </div>
-        </div>
-
-        <div className={styles.settingBlock}>
-          <h4 className={styles.blockTitle}>Dapp</h4>
-          <div className={styles.itemList}>
             <ItemSwitch
               checked={settings.enableServeDappByHttp}
               name={
@@ -620,6 +606,15 @@ export function MainWindowSettings() {
                 });
               }}
             />
+            <ItemAction
+              name="Clear Pending"
+              onClick={() => {
+                setIsShowingClearPendingModal(true);
+              }}
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-clear.svg"
+            >
+              <img src={IconChevronRight} />
+            </ItemAction>
             {/* <ItemSwitch
               checked={
                 settings.experimentalDappViewZoomPercent ===
@@ -655,7 +650,7 @@ export function MainWindowSettings() {
           <div className={styles.itemList}>
             <ItemLink
               name="Privacy Policy"
-              link="https://rabby.io/"
+              link="https://rabby.io/docs/privacy"
               icon="rabby-internal://assets/icons/mainwin-settings/privacy-policy.svg"
             />
             <ItemAction
