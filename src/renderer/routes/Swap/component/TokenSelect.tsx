@@ -452,6 +452,7 @@ const DefaultToken = ({
               className={clsx('font-normal', {
                 'text-green': t.price_24h_change > 0,
                 'text-red-forbidden': t.price_24h_change < 0,
+                'text-[white]': t.price_24h_change === 0,
               })}
             >
               {t.price_24h_change > 0 ? '+' : ''}
