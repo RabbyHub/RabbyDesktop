@@ -1,15 +1,19 @@
 import { Modal } from '@/renderer/components/Modal/Modal';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { range } from 'lodash';
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import clsx from 'clsx';
+import { usePrevious } from 'react-use';
 import { Empty } from './components/Empty';
 import { Loading } from './components/Loading';
 import { TransactionItem } from './components/TransactionItem';
 import { useTxHistory } from './hooks/useTxHistory';
 import { useTxSource } from './hooks/useTxSource';
 import styles from './index.module.less';
-import NetSwitchTabs, { useSwitchNetTab } from '../PillsSwitch/NetSwitchTabs';
+import NetSwitchTabs, {
+  NetSwitchTabsKey,
+  useSwitchNetTab,
+} from '../PillsSwitch/NetSwitchTabs';
 
 const Transactions = ({ testnet = false }: { testnet?: boolean }) => {
   const { currentAccount } = useCurrentAccount();
@@ -67,9 +71,21 @@ const Transactions = ({ testnet = false }: { testnet?: boolean }) => {
 interface TransactionModalProps {
   open?: boolean;
   onClose?: () => void;
+  initialTabOnOpen?: NetSwitchTabsKey;
 }
-export const TransactionModal = ({ open, onClose }: TransactionModalProps) => {
+export const TransactionModal = ({
+  open,
+  onClose,
+  initialTabOnOpen,
+}: TransactionModalProps) => {
   const { isShowTestnet, onTabChange, selectedTab } = useSwitchNetTab();
+  const prevOpen = usePrevious(open);
+
+  useEffect(() => {
+    if (!prevOpen && open && initialTabOnOpen) {
+      onTabChange(initialTabOnOpen);
+    }
+  }, [prevOpen, open, initialTabOnOpen, onTabChange]);
 
   return (
     <Modal
@@ -87,7 +103,11 @@ export const TransactionModal = ({ open, onClose }: TransactionModalProps) => {
       </div>
       {isShowTestnet && (
         <div className="flex justify-center mb-32">
-          <NetSwitchTabs value={selectedTab} onTabChange={onTabChange} />
+          <NetSwitchTabs
+            value={selectedTab}
+            onTabChange={onTabChange}
+            itemClassname='font-normal'
+          />
         </div>
       )}
 
