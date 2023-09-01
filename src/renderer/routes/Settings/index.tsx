@@ -453,7 +453,7 @@ export function MainWindowSettings() {
               name={
                 <>
                   <div className="flex flex-col gap-[4px]">
-                    <span className="text-14 font-medium">Show Testnets</span>
+                    <span className="text-14 font-medium">Enable Testnets</span>
                   </div>
                 </>
               }
