@@ -211,7 +211,7 @@ function SwitchChainModalInner({
     <div className={styles.SwitchChainModalInner}>
       <div className={styles.title}>{title}</div>
       {isShowTestnet && (
-        <div className="flex justify-center mt-20 mb-20">
+        <div className="flex justify-center mt-20">
           <NetSwitchTabs value={selectedTab} onTabChange={onTabChange} />
         </div>
       )}
@@ -219,7 +219,7 @@ function SwitchChainModalInner({
         autoCorrect="false"
         autoComplete="false"
         size="large"
-        className={clsx(styles.search, !isShowTestnet && 'mt-24')}
+        className={clsx(styles.search)}
         prefix={<IconRcSearch className="searchIcon" />}
         value={searchInput}
         placeholder="Search chain"
