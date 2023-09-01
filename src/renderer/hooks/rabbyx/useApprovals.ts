@@ -1,34 +1,63 @@
-import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import {
+  walletOpenapi,
+  walletTestnetOpenapi,
+} from '@/renderer/ipcRequest/rabbyx';
 import { atom, useAtom } from 'jotai';
 import { useAsync } from 'react-use';
-import { useEffect } from 'react';
+import { ApprovalStatus } from '@rabby-wallet/rabby-api/dist/types';
 import { useCurrentAccount } from './useAccount';
+import { useShowTestnet } from './useShowTestnet';
 
-const approvalRiskAlertAtom = atom(0);
+const approvalRiskAlertAtom = atom({
+  mainnet: 0,
+  testnet: 0,
+});
+
+function accumulateApprovalRiskAlertCount(statues: ApprovalStatus[]) {
+  return statues.reduce(
+    (accu, now) =>
+      accu + now.nft_approval_danger_cnt + now.token_approval_danger_cnt,
+    0
+  );
+}
 
 export function useApprovalRiskAlertCount() {
   const { currentAccount } = useCurrentAccount();
+  const { isShowTestnet } = useShowTestnet();
+
   const [approvalRiskAlert, setApprovalRiskAlert] = useAtom(
     approvalRiskAlertAtom
   );
 
-  const { value: approvalState } = useAsync(async () => {
-    if (currentAccount?.address) {
-      return walletOpenapi.approvalStatus(currentAccount.address);
-    }
-  }, [currentAccount?.address]);
+  useAsync(async () => {
+    if (!currentAccount?.address) return;
 
-  useEffect(() => {
-    setApprovalRiskAlert(
-      (approvalState || []).reduce(
-        (pre, now) =>
-          pre + now.nft_approval_danger_cnt + now.token_approval_danger_cnt,
-        0
-      )
-    );
-  }, [approvalState, setApprovalRiskAlert]);
+    try {
+      const mainnetState = await walletOpenapi.approvalStatus(
+        currentAccount.address
+      );
+      let testnetState: typeof mainnetState | null;
+      if (isShowTestnet) {
+        testnetState = await walletTestnetOpenapi.approvalStatus(
+          currentAccount.address
+        );
+      }
+
+      setApprovalRiskAlert((prev) => {
+        return {
+          ...prev,
+          mainnet: accumulateApprovalRiskAlertCount(mainnetState || []),
+          testnet: accumulateApprovalRiskAlertCount(testnetState || []),
+        };
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }, [currentAccount?.address, setApprovalRiskAlert]);
 
   return {
-    approvalRiskAlertCount: approvalRiskAlert,
+    approvalRiskAlertCount:
+      approvalRiskAlert.mainnet +
+      (isShowTestnet ? approvalRiskAlert.testnet : 0),
   };
 }
