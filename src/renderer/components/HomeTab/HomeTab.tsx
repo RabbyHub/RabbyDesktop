@@ -42,7 +42,7 @@ export const HomeTab: React.FC = () => {
       )}
     >
       <Tab name="Current" to="/mainwin/home" />
-      <Tab name="Bundle" to="/mainwin/home/bundle" />
+      <Tab name="My Portfolio" to="/mainwin/home/bundle" />
     </nav>
   );
 };
