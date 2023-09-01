@@ -1,4 +1,7 @@
-import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import {
+  walletOpenapi,
+  walletTestnetOpenapi,
+} from '@/renderer/ipcRequest/rabbyx';
 import { useInfiniteScroll } from 'ahooks';
 import { last } from 'lodash';
 
@@ -7,8 +10,13 @@ const PAGE_COUNT = 20;
 const fetchData = async ({
   id,
   start_time = 0,
-}: Parameters<typeof walletOpenapi.listTxHisotry>[0]) => {
-  const res = await walletOpenapi.listTxHisotry({
+  testnet = false,
+}: Parameters<typeof walletOpenapi.listTxHisotry>[0] & {
+  testnet: boolean;
+}) => {
+  const res = await (!testnet
+    ? walletOpenapi.listTxHisotry
+    : walletTestnetOpenapi.listTxHisotry)({
     id,
     start_time,
     page_count: PAGE_COUNT,
@@ -30,10 +38,11 @@ const fetchData = async ({
 
 export const useTxHistory = (
   address: string,
-  target: NonNullable<Parameters<typeof useInfiniteScroll>[1]>['target']
+  target: NonNullable<Parameters<typeof useInfiniteScroll>[1]>['target'],
+  testnet = false
 ) => {
   return useInfiniteScroll(
-    (d) => fetchData({ id: address, start_time: d?.last }),
+    (d) => fetchData({ id: address, start_time: d?.last, testnet }),
     {
       target,
       isNoMore: (d) => {

@@ -1,20 +1,24 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
-import styled from 'styled-components';
-import { maxBy, minBy, sortBy } from 'lodash';
-import { useInterval, useLocation, usePrevious } from 'react-use';
-import {
-  TokenItem,
-  TransferingNFTItem,
-  TxHistoryResult,
-} from '@rabby-wallet/rabby-api/dist/types';
-import { CHAINS, CHAINS_LIST } from '@debank/common';
 import type {
   TransactionDataItem,
   TransactionGroup,
   TransactionHistoryItem,
 } from '@/isomorphic/types/rabbyx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import {
+  walletController,
+  walletOpenapi,
+  walletTestnetOpenapi,
+} from '@/renderer/ipcRequest/rabbyx';
+import { CHAINS, CHAINS_LIST } from '@debank/common';
+import {
+  TokenItem,
+  TransferingNFTItem,
+  TxHistoryResult,
+} from '@rabby-wallet/rabby-api/dist/types';
+import { maxBy, mergeWith, minBy, sortBy } from 'lodash';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useInterval, useLocation, usePrevious } from 'react-use';
+import styled from 'styled-components';
 // eslint-disable-next-line import/no-cycle
 import { TransactionModal } from '@/renderer/components/TransactionsModal';
 import TransactionItem, { LoadingTransactionItem } from './TransactionItem';
@@ -160,7 +164,24 @@ const Empty = ({ text }: { text: string }) => (
   </EmptyView>
 );
 
-const Transactions = ({ updateNonce }: { updateNonce: number }) => {
+const filterTestnet = (list: TransactionDataItem[], isTestnet?: boolean) => {
+  return list.filter((item) => {
+    const chain = Object.values(CHAINS).find((i) => i.serverId === item.chain);
+    if (isTestnet) {
+      return chain?.isTestnet;
+    }
+    return !chain?.isTestnet;
+  });
+};
+const Transactions = ({
+  updateNonce,
+  isTestnet,
+  onTabChange,
+}: {
+  updateNonce: number;
+  isTestnet?: boolean;
+  onTabChange?: (v: 'mainnet' | 'testnet') => void;
+}) => {
   const { currentAccount } = useCurrentAccount();
   const [recentTxs, setRecentTxs] = useState<TransactionDataItem[]>([]);
   const remoteTxsRef = useRef<TxHistoryResult['history_list']>([]);
@@ -179,10 +200,13 @@ const Transactions = ({ updateNonce }: { updateNonce: number }) => {
 
   const mergedRecentTxs = useMemo(() => {
     return sortBy(
-      [...recentTxs.slice(0, 3), ...completedTxs],
+      [
+        ...filterTestnet(recentTxs, isTestnet).slice(0, 3),
+        ...filterTestnet(completedTxs, isTestnet),
+      ],
       'timeAt'
     ).reverse();
-  }, [recentTxs, completedTxs]);
+  }, [recentTxs, completedTxs, isTestnet]);
 
   const initLocalTxs = async (address: string) => {
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
@@ -324,9 +348,21 @@ const Transactions = ({ updateNonce }: { updateNonce: number }) => {
   const init = async (address?: string) => {
     if (!address) return;
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
-    const txs = await walletOpenapi.listTxHisotry({
-      id: address,
+    const txs = await Promise.all([
+      walletOpenapi.listTxHisotry({
+        id: address,
+      }),
+      walletTestnetOpenapi.listTxHisotry({
+        id: address,
+      }),
+    ]).then(([txHistory, testnetTxHistory]) => {
+      return mergeWith(txHistory, testnetTxHistory, (objValue, srcValue) => {
+        if (Array.isArray(objValue)) {
+          return [...objValue, ...srcValue];
+        }
+      });
     });
+
     const { completeds } = await walletController.getTransactionHistory(
       address
     );
@@ -489,7 +525,7 @@ const Transactions = ({ updateNonce }: { updateNonce: number }) => {
   return (
     <TransactionWrapper>
       <TransactionList>
-        {pendingTxs.map((tx) => {
+        {filterTestnet(pendingTxs, isTestnet).map((tx) => {
           return (
             <TransactionItem
               item={tx}
@@ -515,6 +551,8 @@ const Transactions = ({ updateNonce }: { updateNonce: number }) => {
         View All Transactions
       </ViewAllButton>
       <TransactionModal
+        onTabChange={onTabChange}
+        isTestnet={isTestnet}
         open={isShowAll}
         onClose={() => {
           setIsShowAll(false);

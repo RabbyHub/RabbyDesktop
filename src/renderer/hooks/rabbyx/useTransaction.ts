@@ -3,6 +3,7 @@ import { message } from 'antd';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
+import { CHAINS } from '@debank/common';
 import { useCurrentAccount } from './useAccount';
 
 const DEBUG_DURACTION = 0;
@@ -72,10 +73,15 @@ export function useTransactionChanged() {
   }, []);
 }
 
-const pendingTxCountAtom = atom(0);
+export const pendingTxCountAtom = atom(0);
+export const testnetPendingTxCountAtom = atom(0);
+
 export function useTransactionPendingCount() {
   const { currentAccount } = useCurrentAccount();
   const [pendingTxCount, setPendingTxCount] = useAtom(pendingTxCountAtom);
+  const [testnetPendingTxCount, setTestnetPendingTxCount] = useAtom(
+    testnetPendingTxCountAtom
+  );
 
   const fetchCount = useCallback(() => {
     if (!currentAccount?.address) {
@@ -86,9 +92,16 @@ export function useTransactionPendingCount() {
     walletController
       .getTransactionHistory(currentAccount.address)
       .then(({ pendings }) => {
-        setPendingTxCount(pendings.length);
+        const testnetPendings = pendings.filter((item) => {
+          const chain = Object.values(CHAINS).find(
+            (i) => i.id === item.chainId
+          );
+          return chain?.isTestnet;
+        });
+        setTestnetPendingTxCount(testnetPendings.length);
+        setPendingTxCount(pendings.length - testnetPendings.length);
       });
-  }, [currentAccount?.address, setPendingTxCount]);
+  }, [currentAccount?.address, setPendingTxCount, setTestnetPendingTxCount]);
 
   useEffect(() => {
     fetchCount();
@@ -109,7 +122,7 @@ export function useTransactionPendingCount() {
     );
   }, [fetchCount]);
 
-  return pendingTxCount;
+  return { pendingTxCount, testnetPendingTxCount };
 }
 
 export const useClearPendingTx = () => {

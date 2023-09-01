@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { Alert, Tooltip } from 'antd';
 import type { ColumnType, TableProps } from 'antd/lib/table';
 import { InfoCircleOutlined } from '@ant-design/icons';
@@ -31,6 +31,9 @@ import { firstEl } from '@/isomorphic/array';
 import IconExternal from '@/../assets/icons/common/share.svg';
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
 import PillsSwitch from '@/renderer/components/PillsSwitch';
+import NetSwitchTabs, {
+  useSwitchNetTab,
+} from '@/renderer/components/PillsSwitch/NetSwitchTabs';
 import {
   HandleClickTableRow,
   IVGridContextualPayload,
@@ -316,7 +319,7 @@ function getColumnsForContract({
             // }}
           >
             <span
-              className={clsx(isRisk && 'J-risk-cell__text', {
+              className={clsx(isRisk && 'J-risk-cell__text', 'text-wrapper', {
                 'is-warning': isWarning,
                 'is-danger': isDanger,
               })}
@@ -905,8 +908,11 @@ function TableByAssetSpenders({
 }
 
 const ApprovalManagePage = () => {
+  const { isShowTestnet, selectedTab, onTabChange } = useSwitchNetTab();
+
   const {
     isLoading,
+    loadApprovals,
 
     searchKw,
     setSearchKw,
@@ -918,7 +924,11 @@ const ApprovalManagePage = () => {
 
     vGridRefContracts,
     vGridRefAsset,
-  } = useApprovalsPage();
+  } = useApprovalsPage({ isTestnet: selectedTab === 'testnet' });
+
+  useEffect(() => {
+    loadApprovals();
+  }, [selectedTab, loadApprovals]);
 
   const { yValue } = useTableScrollableHeight();
   const containerHeight = useMemo(() => {
@@ -1003,8 +1013,28 @@ const ApprovalManagePage = () => {
     }, []);
 
   return (
-    <div className="approvals-manager-page">
+    <div
+      className={clsx(
+        'approvals-manager-page',
+        isShowTestnet && 'with-net-switch'
+      )}
+    >
       <div className="approvals-manager">
+        <header
+          className={clsx(
+            'approvals-manager__header',
+            isShowTestnet ? 'mt-14' : 'mt-14'
+          )}
+        >
+          {isShowTestnet && (
+            <div className="tabs mb-20">
+              <NetSwitchTabs.ApprovalsPage
+                value={selectedTab}
+                onTabChange={onTabChange}
+              />
+            </div>
+          )}
+        </header>
         <main>
           <div className="approvals-manager__table-tools">
             <PillsSwitch

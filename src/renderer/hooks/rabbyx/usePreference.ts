@@ -20,6 +20,7 @@ interface PreferenceState {
   nftApprovalChain: Record<string, import('@debank/common').CHAINS_ENUM>;
   customizedToken?: Token[];
   blockedToken?: Token[];
+  isShowTestnet: boolean;
 }
 
 const defaultState: PreferenceState = {
@@ -37,6 +38,7 @@ const defaultState: PreferenceState = {
   nftApprovalChain: {},
   customizedToken: [],
   blockedToken: [],
+  isShowTestnet: false,
 };
 
 const peferenceAtom = atom(defaultState);

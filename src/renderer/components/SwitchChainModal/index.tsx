@@ -19,6 +19,7 @@ import { TipsWrapper } from '../TipWrapper';
 import ChainIcon from '../ChainIcon';
 
 import SvgIconWallet from './icons/chain-wallet.svg?rc';
+import NetSwitchTabs, { useSwitchNetTab } from '../PillsSwitch/NetSwitchTabs';
 
 type OnPinnedChanged = (
   chain: import('@debank/common').CHAINS_ENUM,
@@ -139,8 +140,11 @@ function SwitchChainModalInner({
 
   const { preferences, setChainPinned } = usePreference();
 
-  const { matteredChainBalances, getLocalBalanceValue } =
-    useAccountBalanceMap();
+  const { isShowTestnet, selectedTab, onTabChange } = useSwitchNetTab();
+
+  const { matteredChainBalances, getLocalBalanceValue } = useAccountBalanceMap({
+    isTestnet: selectedTab === 'testnet',
+  });
 
   const [searchInput, setSearchInput] = useState('');
 
@@ -153,6 +157,7 @@ function SwitchChainModalInner({
       pinned: [...set],
       searchKeyword: searchKw,
       matteredChainBalances,
+      netTabKey: selectedTab,
     });
 
     if (searchKw) {
@@ -169,6 +174,7 @@ function SwitchChainModalInner({
     supportChains,
     searchInput,
     matteredChainBalances,
+    selectedTab,
   ]);
 
   const onPinnedChange: OnPinnedChanged = useCallback(
@@ -204,11 +210,16 @@ function SwitchChainModalInner({
   return (
     <div className={styles.SwitchChainModalInner}>
       <div className={styles.title}>{title}</div>
+      {isShowTestnet && (
+        <div className="flex justify-center mt-20 mb-20">
+          <NetSwitchTabs value={selectedTab} onTabChange={onTabChange} />
+        </div>
+      )}
       <RabbyInput
         autoCorrect="false"
         autoComplete="false"
         size="large"
-        className={styles.search}
+        className={clsx(styles.search, !isShowTestnet && 'mt-24')}
         prefix={<IconRcSearch className="searchIcon" />}
         value={searchInput}
         placeholder="Search chain"

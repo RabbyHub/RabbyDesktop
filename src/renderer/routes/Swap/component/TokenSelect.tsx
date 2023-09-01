@@ -735,15 +735,12 @@ export const TokenSelect = ({
 
       if (!isSwapType) {
         const localAdded =
-          (await walletController.getAddedToken(currentAddress)).filter(
-            (item) => {
-              const [chain] = item.split(':');
-              return chain === queryConds.chainServerId;
-            }
-          ) || [];
+          (await walletController.getCustomizedToken()).filter((item) => {
+            return item.chain === queryConds.chainServerId;
+          }) || [];
         if (localAdded.length > 0) {
           localAddedTokens = await walletOpenapi.customListToken(
-            localAdded,
+            localAdded.map((item) => `${item.chain}:${item.address}`),
             currentAddress
           );
         }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { openExternalUrl, requestResetApp } from '@/renderer/ipcRequest/app';
 
@@ -23,6 +23,9 @@ import { ucfirst } from '@/isomorphic/string';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import ManageAddressModal from '@/renderer/components/AddressManagementModal/ManageAddress';
 import { atom, useAtom } from 'jotai';
+import { useShowTestnet } from '@/renderer/hooks/rabbyx/useShowTestnet';
+import { walletTestnetOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import NetSwitchTabs from '@/renderer/components/PillsSwitch/NetSwitchTabs';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
 import {
@@ -416,6 +419,7 @@ export function MainWindowSettings() {
     useState(false);
   const [isShowCustomRPCModal, setIsShowCustomRPCModal] = useState(false);
   const [isManageAddressModal, setIsManageAddressModal] = useState(false);
+  const { isShowTestnet, setIsShowTestnet } = useShowTestnet();
 
   const { setShowSupportedChains } = useShowSupportedChains();
 
@@ -504,6 +508,20 @@ export function MainWindowSettings() {
                     toggleWhitelist(nextEnabled);
                   },
                 });
+              }}
+            />
+            <ItemSwitch
+              checked={isShowTestnet}
+              name={
+                <>
+                  <div className="flex flex-col gap-[4px]">
+                    <span className="text-14 font-medium">Show Testnets</span>
+                  </div>
+                </>
+              }
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-faucet.svg"
+              onChange={(nextEnabled: boolean) => {
+                setIsShowTestnet(nextEnabled);
               }}
             />
           </div>

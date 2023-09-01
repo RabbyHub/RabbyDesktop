@@ -39,6 +39,22 @@ export function makeShellWallet<
               }
             );
             break;
+          case 'testnetOpenapi':
+            return new Proxy(
+              {},
+              {
+                get(_t2, openapiKey) {
+                  return function (...params: any) {
+                    return portMessageChannel.request({
+                      type: 'testnetOpenapi',
+                      method: openapiKey,
+                      params,
+                    });
+                  };
+                },
+              }
+            );
+            break;
           default:
             return function (...params: any) {
               return portMessageChannel.request({
