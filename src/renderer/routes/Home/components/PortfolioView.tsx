@@ -38,7 +38,6 @@ const PortfolioWrapper = styled.div`
     margin: 0;
     padding: 0;
     list-style: none;
-    margin-bottom: 50px;
     .th {
       display: flex;
       color: rgba(255, 255, 255, 0.5);

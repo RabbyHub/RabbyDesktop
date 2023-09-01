@@ -517,6 +517,7 @@ const Transactions = ({
           onClose={() => {
             setIsShowAll(false);
           }}
+          isTestnet={isTestnet}
         />
       </TransactionWrapper>
     );
@@ -551,7 +552,6 @@ const Transactions = ({
         View All Transactions
       </ViewAllButton>
       <TransactionModal
-        onTabChange={onTabChange}
         isTestnet={isTestnet}
         open={isShowAll}
         onClose={() => {
