@@ -514,6 +514,7 @@ const Transactions = ({
         )}
         <TransactionModal
           open={isShowAll}
+          initialTabOnOpen={isTestnet ? 'testnet' : 'mainnet'}
           onClose={() => {
             setIsShowAll(false);
           }}
@@ -552,6 +553,7 @@ const Transactions = ({
       </ViewAllButton>
       <TransactionModal
         open={isShowAll}
+        initialTabOnOpen={isTestnet ? 'testnet' : 'mainnet'}
         onClose={() => {
           setIsShowAll(false);
         }}
