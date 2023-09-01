@@ -16,31 +16,31 @@ export function useTransactionChanged() {
         switch (payload.data?.type) {
           default:
             break;
-          case 'push-failed': {
-            showMainwinPopupview({
-              type: 'right-side-popup',
-              state: {
-                type: 'failed',
-                chain: payload.data.chain,
-                title: 'Transaction push failed',
-              },
-            });
+          // case 'push-failed': {
+          //   showMainwinPopupview({
+          //     type: 'right-side-popup',
+          //     state: {
+          //       type: 'failed',
+          //       chain: payload.data.chain,
+          //       title: 'Transaction push failed',
+          //     },
+          //   });
 
-            break;
-          }
-          case 'submitted': {
-            showMainwinPopupview({
-              type: 'right-side-popup',
-              state: {
-                type: 'submit',
-                chain: payload.data.chain,
-                hash: payload.data.hash,
-                title: 'Transaction submitted',
-              },
-            });
+          //   break;
+          // }
+          // case 'submitted': {
+          //   showMainwinPopupview({
+          //     type: 'right-side-popup',
+          //     state: {
+          //       type: 'submit',
+          //       chain: payload.data.chain,
+          //       hash: payload.data.hash,
+          //       title: 'Transaction submitted',
+          //     },
+          //   });
 
-            break;
-          }
+          //   break;
+          // }
           case 'finished': {
             if (payload.data?.success) {
               showMainwinPopupview({
