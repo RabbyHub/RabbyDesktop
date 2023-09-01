@@ -457,7 +457,7 @@ export function MainWindowSettings() {
                   </div>
                 </>
               }
-              icon="rabby-internal://assets/icons/mainwin-settings/icon-faucet.svg"
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-testnet.svg"
               onChange={(nextEnabled: boolean) => {
                 setIsShowTestnet(nextEnabled);
               }}
