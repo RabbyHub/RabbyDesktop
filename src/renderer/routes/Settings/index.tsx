@@ -457,7 +457,7 @@ export function MainWindowSettings() {
               <img src={IconChevronRight} />
             </ItemAction>
 
-            <ItemAction
+            {/* <ItemAction
               name={
                 <Tooltip
                   title="Comming Soon"
@@ -472,6 +472,21 @@ export function MainWindowSettings() {
             >
               <img src={IconChevronRight} />
             </ItemAction>
+            <ItemAction
+              name={
+                <Tooltip
+                  title="Comming Soon"
+                  arrowPointAtCenter
+                  trigger="hover"
+                >
+                  Signature Record
+                </Tooltip>
+              }
+              disabled
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-signature-record.svg"
+            >
+              <img src={IconChevronRight} />
+            </ItemAction> */}
           </div>
         </div>
 
