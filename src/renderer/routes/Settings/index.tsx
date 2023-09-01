@@ -36,7 +36,8 @@ import { UpdateArea } from './components/UpdateArea';
 import { CustomRPCModal } from './components/CustomRPCModal';
 import TopTipUnsupported from './components/TopTipUnsupported';
 import ModalSupportedChains, {
-  useShowSupportedChains,
+  CHAINS_TOTAL_COUNT,
+  useSupportedChainsModal,
 } from './components/ModalSupportedChains';
 
 type TypedProps = {
@@ -188,7 +189,7 @@ function ImageAsLink({
       arrowPointAtCenter
       {...tooltipProps}
       {...(disableTooltip && {
-        visible: true,
+        visible: false,
       })}
       title={link}
     >
@@ -417,7 +418,7 @@ export function MainWindowSettings() {
   const [isShowCustomRPCModal, setIsShowCustomRPCModal] = useState(false);
   const [isManageAddressModal, setIsManageAddressModal] = useState(false);
 
-  const { setShowSupportedChains } = useShowSupportedChains();
+  const { setShowSupportedChains } = useSupportedChainsModal();
 
   return (
     <div className={styles.settingsPage}>
@@ -646,6 +647,9 @@ export function MainWindowSettings() {
               }}
               icon="rabby-internal://assets/icons/mainwin-settings/supported-chains.svg"
             >
+              <span className="mr-12 text-14 font-medium">
+                {CHAINS_TOTAL_COUNT}
+              </span>
               <img src={IconChevronRight} />
             </ItemAction>
             <ItemText
@@ -654,7 +658,7 @@ export function MainWindowSettings() {
             >
               <ImageAsLink
                 altName="Twitter"
-                className="cursor-pointer w-[16px] h-[16px] ml-0"
+                className="cursor-pointer w-[16px] h-[16px] opacity-60 hover:opacity-100 ml-0"
                 link="https://twitter.com/Rabby_io"
                 iconURL="rabby-internal://assets/icons/mainwin-settings/followus-twitter.svg"
                 tooltipProps={{ placement: 'top' }}
@@ -662,7 +666,7 @@ export function MainWindowSettings() {
 
               <ImageAsLink
                 altName="Discord"
-                className="cursor-pointer w-[16px] h-[16px] ml-[16px]"
+                className="cursor-pointer w-[16px] h-[16px] opacity-60 hover:opacity-100 ml-[16px]"
                 link="https://discord.gg/seFBCWmUre"
                 iconURL="rabby-internal://assets/icons/mainwin-settings/followus-discord.svg"
                 tooltipProps={{ placement: 'left' }}
@@ -672,14 +676,16 @@ export function MainWindowSettings() {
         </div>
       </div>
 
-      <div className={styles.settingItems}>
-        {!IS_RUNTIME_PRODUCTION && <DeveloperKitsParts />}
-      </div>
+      {!IS_RUNTIME_PRODUCTION && (
+        <div className={styles.settingItems}>
+          <DeveloperKitsParts />
+        </div>
+      )}
 
       <div className={styles.settingFooter}>
         <ImageAsLink
           altName={APP_BRANDNAME}
-          className="cursor-pointer"
+          className="cursor-pointer opacity-60 hover:opacity-100"
           link="https://rabby.io/"
           disableTooltip
           iconURL="rabby-internal://assets/icons/mainwin-settings/footer-logo.svg"
