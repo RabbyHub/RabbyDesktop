@@ -35,6 +35,9 @@ import { ClearPendingModal } from './components/ClearPendingModal';
 import { UpdateArea } from './components/UpdateArea';
 import { CustomRPCModal } from './components/CustomRPCModal';
 import TopTipUnsupported from './components/TopTipUnsupported';
+import ModalSupportedChains, {
+  useShowSupportedChains,
+} from './components/ModalSupportedChains';
 
 type TypedProps = {
   name: React.ReactNode;
@@ -80,6 +83,26 @@ function ItemText({
     <div className={classNames(styles.typedItem, props.className)}>
       <ItemPartialLeft name={props.name} icon={props.icon} />
       <div className={styles.itemRight}>{props.text || children}</div>
+    </div>
+  );
+}
+
+function ItemLink({
+  children,
+  ...props
+}: React.PropsWithChildren<Omit<TypedProps & { type: 'link' }, 'type'>>) {
+  return (
+    <div
+      className={classNames(styles.typedItem, styles.pointer, props.className)}
+      onClick={() => {
+        openExternalUrl(props.link);
+      }}
+    >
+      <ItemPartialLeft name={props.name} icon={props.icon} />
+      <div className={styles.itemRight}>
+        {children}
+        <img src={IconChevronRight} />
+      </div>
     </div>
   );
 }
@@ -141,6 +164,43 @@ function FooterLink({
         <span className={styles.text}>{text || name}</span>
       )}
     </div>
+  );
+}
+
+function ImageAsLink({
+  className,
+  altName,
+  iconURL,
+  link,
+  disableTooltip = false,
+  tooltipProps,
+}: React.PropsWithChildren<{
+  className?: string;
+  altName?: string;
+  iconURL?: string;
+  link: string;
+  disableTooltip?: boolean;
+  tooltipProps?: React.ComponentProps<typeof Tooltip>;
+}>) {
+  return (
+    <Tooltip
+      placement="top"
+      arrowPointAtCenter
+      {...tooltipProps}
+      {...(disableTooltip && {
+        visible: true,
+      })}
+      title={link}
+    >
+      <img
+        alt={altName}
+        src={iconURL}
+        className={classNames(styles.imageAsLink, className)}
+        onClick={() => {
+          openExternalUrl(link);
+        }}
+      />
+    </Tooltip>
   );
 }
 
@@ -357,6 +417,8 @@ export function MainWindowSettings() {
   const [isShowCustomRPCModal, setIsShowCustomRPCModal] = useState(false);
   const [isManageAddressModal, setIsManageAddressModal] = useState(false);
 
+  const { setShowSupportedChains } = useShowSupportedChains();
+
   return (
     <div className={styles.settingsPage}>
       <TopTipUnsupported />
@@ -568,6 +630,46 @@ export function MainWindowSettings() {
             /> */}
           </div>
         </div>
+
+        <div className={styles.settingBlock}>
+          <h4 className={styles.blockTitle}>About us</h4>
+          <div className={styles.itemList}>
+            <ItemLink
+              name="Privacy Policy"
+              link="https://rabby.io/"
+              icon="rabby-internal://assets/icons/mainwin-settings/privacy-policy.svg"
+            />
+            <ItemAction
+              name="Supported Chains"
+              onClick={() => {
+                setShowSupportedChains(true);
+              }}
+              icon="rabby-internal://assets/icons/mainwin-settings/supported-chains.svg"
+            >
+              <img src={IconChevronRight} />
+            </ItemAction>
+            <ItemText
+              name="Follow Us"
+              icon="rabby-internal://assets/icons/mainwin-settings/followus.svg"
+            >
+              <ImageAsLink
+                altName="Twitter"
+                className="cursor-pointer w-[16px] h-[16px] ml-0"
+                link="https://twitter.com/Rabby_io"
+                iconURL="rabby-internal://assets/icons/mainwin-settings/followus-twitter.svg"
+                tooltipProps={{ placement: 'top' }}
+              />
+
+              <ImageAsLink
+                altName="Discord"
+                className="cursor-pointer w-[16px] h-[16px] ml-[16px]"
+                link="https://discord.gg/seFBCWmUre"
+                iconURL="rabby-internal://assets/icons/mainwin-settings/followus-discord.svg"
+                tooltipProps={{ placement: 'left' }}
+              />
+            </ItemText>
+          </div>
+        </div>
       </div>
 
       <div className={styles.settingItems}>
@@ -575,34 +677,17 @@ export function MainWindowSettings() {
       </div>
 
       <div className={styles.settingFooter}>
-        <div className={styles.brandName}>{APP_BRANDNAME}</div>
-
-        <div className={styles.divider} />
-
-        <div className={styles.links}>
-          <FooterLink
-            name="Website"
-            link="https://rabby.io/"
-            iconURL="rabby-internal://assets/icons/mainwin-settings/homesite.svg"
-          />
-          <FooterLink
-            name="Discord"
-            link="https://discord.gg/seFBCWmUre"
-            iconURL="rabby-internal://assets/icons/mainwin-settings/discord.svg"
-          />
-          <FooterLink
-            name="Twitter"
-            link="https://twitter.com/Rabby_io"
-            iconURL="rabby-internal://assets/icons/mainwin-settings/twitter.svg"
-          />
-          <FooterLink
-            name="Privacy Policy"
-            link="https://rabby.io/docs/privacy/"
-          />
-        </div>
+        <ImageAsLink
+          altName={APP_BRANDNAME}
+          className="cursor-pointer"
+          link="https://rabby.io/"
+          disableTooltip
+          iconURL="rabby-internal://assets/icons/mainwin-settings/footer-logo.svg"
+        />
       </div>
 
       <ModalProxySetting />
+      <ModalSupportedChains />
 
       <ClearPendingModal
         open={isShowingClearPendingModal}

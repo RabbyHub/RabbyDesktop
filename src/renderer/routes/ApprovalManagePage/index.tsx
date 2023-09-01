@@ -1011,7 +1011,7 @@ const ApprovalManagePage = () => {
               value={filterType}
               options={SwitchPills}
               onTabChange={(key) => setFilterType(key)}
-              className="bg-white/10"
+              className="bg-r-neutral-line"
               itemClassnameActive="text-white"
               itemClassname="text-[15px] w-[148px] h-[40px]"
               itemClassnameInActive="text-white/80"
