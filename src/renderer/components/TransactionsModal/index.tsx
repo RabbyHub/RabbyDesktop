@@ -67,18 +67,9 @@ const Transactions = ({ testnet = false }: { testnet?: boolean }) => {
 interface TransactionModalProps {
   open?: boolean;
   onClose?: () => void;
-  isTestnet?: boolean;
 }
-export const TransactionModal = ({
-  open,
-  onClose,
-  isTestnet,
-}: TransactionModalProps) => {
+export const TransactionModal = ({ open, onClose }: TransactionModalProps) => {
   const { isShowTestnet, onTabChange, selectedTab } = useSwitchNetTab();
-
-  React.useEffect(() => {
-    onTabChange(isTestnet ? 'testnet' : 'mainnet');
-  }, [isTestnet, onTabChange]);
 
   return (
     <Modal
@@ -100,7 +91,10 @@ export const TransactionModal = ({
         </div>
       )}
 
-      <Transactions testnet={isShowTestnet && isTestnet} key={selectedTab} />
+      <Transactions
+        testnet={isShowTestnet && selectedTab === 'testnet'}
+        key={selectedTab}
+      />
     </Modal>
   );
 };
