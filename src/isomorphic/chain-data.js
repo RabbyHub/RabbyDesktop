@@ -75,6 +75,7 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["TLYX"] = "TLYX";
     CHAINS_ENUM["TDEBANK"] = "TDEBANK";
     CHAINS_ENUM["TMNT"] = "TMNT";
+    CHAINS_ENUM["OPBNB"] = "OPBNB";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -1290,6 +1291,23 @@ export const CHAINS_RAW = {
             "1559": false,
         },
         isTestnet: true,
+    },
+    [CHAINS_ENUM.OPBNB]: {
+        id: 204,
+        serverId: "opbnb",
+        network: "204",
+        name: "opBNB",
+        nativeTokenSymbol: "BNB",
+        nativeTokenAddress: "opbnb",
+        enum: CHAINS_ENUM.OPBNB,
+        hex: "0xcc",
+        scanLink: "https://mainnet.opbnbscan.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/bsc_token/logo_url/bsc/8bfdeaa46fe9be8f5cd43a53b8d1eea1.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: false,
     },
 };
 export const CHAINS_RAW_LIST = Object.values(CHAINS_RAW);
