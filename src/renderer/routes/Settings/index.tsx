@@ -48,6 +48,7 @@ type TypedProps = {
   className?: string;
   icon?: string;
   iconBase64?: string;
+  disabled?: boolean;
 } & (
   | {
       type: 'text';
@@ -81,10 +82,17 @@ function ItemPartialLeft({ name, icon }: Pick<TypedProps, 'name' | 'icon'>) {
 
 function ItemText({
   children,
+  disabled = false,
   ...props
 }: React.PropsWithChildren<Omit<TypedProps & { type: 'text' }, 'type'>>) {
   return (
-    <div className={classNames(styles.typedItem, props.className)}>
+    <div
+      className={classNames(
+        styles.typedItem,
+        disabled && styles.disabled,
+        props.className
+      )}
+    >
       <ItemPartialLeft name={props.name} icon={props.icon} />
       <div className={styles.itemRight}>{props.text || children}</div>
     </div>
@@ -113,12 +121,17 @@ function ItemLink({
 
 function ItemAction({
   children,
+  disabled = false,
   ...props
 }: React.PropsWithChildren<Omit<TypedProps & { type: 'action' }, 'type'>>) {
   return (
     <div
-      className={classNames(styles.typedItem, styles.pointer, props.className)}
-      onClick={props.onClick}
+      className={classNames(
+        styles.typedItem,
+        disabled ? styles.disabled : styles.pointer,
+        props.className
+      )}
+      onClick={!disabled ? props.onClick : undefined}
     >
       <ItemPartialLeft name={props.name} icon={props.icon} />
       <div className={styles.itemRight}>{children}</div>
@@ -440,6 +453,22 @@ export function MainWindowSettings() {
                 setIsManageAddressModal(true);
               }}
               icon="rabby-internal://assets/icons/mainwin-settings/icon-manage-address.svg"
+            >
+              <img src={IconChevronRight} />
+            </ItemAction>
+
+            <ItemAction
+              name={
+                <Tooltip
+                  title="Comming Soon"
+                  arrowPointAtCenter
+                  trigger="hover"
+                >
+                  Lock Wallet
+                </Tooltip>
+              }
+              disabled
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-lock-wallet.svg"
             >
               <img src={IconChevronRight} />
             </ItemAction>
