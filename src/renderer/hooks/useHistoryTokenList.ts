@@ -212,7 +212,6 @@ export default (
     async (addr: string, view: VIEW_TYPE, _isTestnet: boolean) => {
       if (!isRealTimeLoadedRef.current) {
         await loadCache(addr, _isTestnet);
-        console.log(333, tokenListRef.current);
         setTokenList(tokenListRef.current);
         await loadRealTime(addr, _isTestnet);
         setTokenList(tokenListRef.current);

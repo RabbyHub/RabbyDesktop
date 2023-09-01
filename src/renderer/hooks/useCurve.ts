@@ -68,7 +68,7 @@ const formChartData = (
 export default (
   address: string | undefined,
   nonce: number,
-  isTestnet: boolean
+  isTestnet = false
 ) => {
   const [data, setData] = useState<
     {

@@ -232,7 +232,8 @@ const Home = () => {
   }, [usedChainList, protocolList, tokenList]);
   const totalBalance = useTotalBalance(tokenList, protocolList);
 
-  const curveData = useCurve(currentAccount?.address, updateNonce, isTestnet);
+  const curveDataRaw = useCurve(currentAccount?.address, updateNonce);
+  const curveData = isTestnet ? undefined : curveDataRaw;
   const location = useLocation();
 
   const filterProtocolList = useFilterProtoList(
@@ -398,7 +399,7 @@ const Home = () => {
                   </div>
                 )}
                 <div className="balance">
-                  {isLoadingTokenList || !curveData ? (
+                  {isLoadingTokenList ? (
                     <Skeleton.Input
                       active
                       style={{
@@ -410,13 +411,15 @@ const Home = () => {
                   ) : (
                     <>
                       ${formatNumber(totalBalance || 0)}{' '}
-                      <div
-                        className={classNames('balance-change', {
-                          'is-loss': curveData.isLoss,
-                        })}
-                      >{`${curveData.isLoss ? '-' : '+'}${
-                        curveData.changePercent
-                      } (${curveData.change})`}</div>
+                      {curveData ? (
+                        <div
+                          className={classNames('balance-change', {
+                            'is-loss': curveData.isLoss,
+                          })}
+                        >{`${curveData.isLoss ? '-' : '+'}${
+                          curveData.changePercent
+                        } (${curveData.change})`}</div>
+                      ) : null}
                     </>
                   )}
                 </div>
