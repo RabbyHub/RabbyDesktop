@@ -588,6 +588,11 @@ export default function MainWindowSidebar() {
                         styles.routeTitle,
                         styles.J_settings
                       )}
+                      activeOpacity={
+                        matchPath('/mainwin/settings', location.pathname)
+                          ? 1
+                          : 0.6
+                      }
                     >
                       More
                       {hasNewRelease ? (
