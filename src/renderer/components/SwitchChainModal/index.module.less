@@ -1,5 +1,7 @@
 @import '@/renderer/css/mixins.less';
 
+@modal-pt: 20px;
+
 :global {
   body.switch-chain-subview {
     &::-webkit-scrollbar,
@@ -15,15 +17,15 @@
   }
   :global .ant-modal-close-x {
     padding: 0;
-    margin-top: 30px;
+    margin-top: @modal-pt;
     margin-right: 16px;
   }
 }
 
 .SwitchChainModalInner {
   padding: 30px 16px;
+  padding-top: @modal-pt;
   padding-bottom: 0;
-  height: 734px;
   height: 700px;
   box-sizing: border-box;
   width: 100%;
@@ -43,6 +45,7 @@
   }
   .search:global {
     &.ant-input-affix-wrapper {
+      margin-top: @modal-pt;
       margin-bottom: 14px;
       height: 36px;
       font-size: 12px;

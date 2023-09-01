@@ -515,11 +515,11 @@ export function MainWindowSettings() {
               name={
                 <>
                   <div className="flex flex-col gap-[4px]">
-                    <span className="text-14 font-medium">Show Testnets</span>
+                    <span className="text-14 font-medium">Enable Testnets</span>
                   </div>
                 </>
               }
-              icon="rabby-internal://assets/icons/mainwin-settings/icon-faucet.svg"
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-testnet.svg"
               onChange={(nextEnabled: boolean) => {
                 setIsShowTestnet(nextEnabled);
               }}

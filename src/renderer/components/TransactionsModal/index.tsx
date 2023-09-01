@@ -1,7 +1,7 @@
 import { Modal } from '@/renderer/components/Modal/Modal';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { range } from 'lodash';
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import clsx from 'clsx';
 import { Empty } from './components/Empty';
 import { Loading } from './components/Loading';
@@ -67,17 +67,10 @@ const Transactions = ({ testnet = false }: { testnet?: boolean }) => {
 interface TransactionModalProps {
   open?: boolean;
   onClose?: () => void;
-  isTestnet?: boolean;
-  onTabChange?: (v: 'mainnet' | 'testnet') => void;
 }
-export const TransactionModal = ({
-  open,
-  onClose,
-  isTestnet,
-  onTabChange,
-}: TransactionModalProps) => {
-  const { isShowTestnet } = useSwitchNetTab();
-  const value = isTestnet ? 'testnet' : 'mainnet';
+export const TransactionModal = ({ open, onClose }: TransactionModalProps) => {
+  const { isShowTestnet, onTabChange, selectedTab } = useSwitchNetTab();
+
   return (
     <Modal
       open={open}
@@ -94,11 +87,14 @@ export const TransactionModal = ({
       </div>
       {isShowTestnet && (
         <div className="flex justify-center mb-32">
-          <NetSwitchTabs value={value} onTabChange={onTabChange} />
+          <NetSwitchTabs value={selectedTab} onTabChange={onTabChange} />
         </div>
       )}
 
-      <Transactions testnet={isShowTestnet && isTestnet} key={value} />
+      <Transactions
+        testnet={isShowTestnet && selectedTab === 'testnet'}
+        key={selectedTab}
+      />
     </Modal>
   );
 };

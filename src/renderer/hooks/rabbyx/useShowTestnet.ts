@@ -1,6 +1,8 @@
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { onBackgroundStoreChanged } from '@/renderer/utils/broadcastToUI';
 import { useRequest } from 'ahooks';
 import { atom, useAtom } from 'jotai';
+import { useEffect } from 'react';
 
 const showTestnetAtom = atom({
   isShowTestnet: false,
@@ -34,6 +36,20 @@ export function useShowTestnet() {
       },
     }
   );
+
+  useEffect(() => {
+    return onBackgroundStoreChanged(
+      'preference',
+      ({ changedKey, partials }) => {
+        if (changedKey.includes('isShowTestnet')) {
+          setState((prev) => {
+            prev.isShowTestnet = partials.isShowTestnet!;
+            return prev;
+          });
+        }
+      }
+    );
+  }, [setState]);
 
   return {
     isShowTestnet,

@@ -122,7 +122,11 @@ export function useTransactionPendingCount() {
     );
   }, [fetchCount]);
 
-  return { pendingTxCount, testnetPendingTxCount };
+  return {
+    pendingTxCount,
+    testnetPendingTxCount,
+    totalPendingTxCount: pendingTxCount + testnetPendingTxCount,
+  };
 }
 
 export const useClearPendingTx = () => {
