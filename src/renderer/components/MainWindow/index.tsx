@@ -38,8 +38,7 @@ import dayjs from 'dayjs';
 import { useToastMessage } from '@/renderer/hooks/useToastMessage';
 import { HomeBundle } from '@/renderer/routes/Bundle';
 import { useCustomRPC } from '@/renderer/hooks/useCustomRPC';
-import ModalUpdateInHome from '@/renderer/routes/Home/components/ModalUpdate';
-import { walletController } from '@/renderer/ipcRequest/rabbyx';
+// import ModalUpdateInHome from '@/renderer/routes/Home/components/ModalUpdate';
 import { NFT } from '@/renderer/routes/NFT';
 import SendNFT from '@/renderer/routes/SendNFT';
 import ApprovalManagePage from '@/renderer/routes/ApprovalManagePage';
@@ -90,7 +89,7 @@ function MainWrapper() {
           </MainWindowRoute>
         </ErrorBoundary>
 
-        <ModalUpdateInHome />
+        {/* <ModalUpdateInHome /> */}
       </div>
     </RequireUnlock>
   );
