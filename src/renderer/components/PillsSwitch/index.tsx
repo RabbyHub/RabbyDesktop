@@ -6,6 +6,7 @@ import './index.less';
 type Option = {
   key: string;
   label: ReactNode;
+  count?: number;
 };
 
 export type PillsSwitchProps<T extends readonly Option[] | Option[]> =
@@ -46,6 +47,17 @@ export default function PillsSwitch<T extends readonly Option[] | Option[]>({
             }}
           >
             {item.label}
+            {item.count !== undefined ? (
+              <span
+                className={clsx(
+                  'w-[14px] h-[14px] rounded-full',
+                  'bg-r-blue-default text-white',
+                  'ml-4 block'
+                )}
+              >
+                {item.count}
+              </span>
+            ) : null}
           </div>
         );
       })}

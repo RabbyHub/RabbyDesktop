@@ -1,6 +1,11 @@
 import { useShowTestnet } from '@/renderer/hooks/rabbyx/useShowTestnet';
 import clsx from 'clsx';
 import { ReactNode, useCallback, useMemo, useState } from 'react';
+import { useAtom } from 'jotai';
+import {
+  pendingTxCountAtom,
+  testnetPendingTxCountAtom,
+} from '@/renderer/hooks/rabbyx/useTransaction';
 import PillsSwitch, { PillsSwitchProps } from '.';
 
 const NetTypes = {
@@ -44,11 +49,11 @@ function useSwitchOptions() {
     return [
       {
         key: 'mainnet',
-        label: 'Mainnet',
+        label: 'Mainnets',
       },
       {
         key: 'testnet',
-        label: 'Testnet',
+        label: 'Testnets',
       },
     ] as const;
   }, []);
@@ -60,17 +65,36 @@ type NetSwitchTabsProps = SwitchTabProps & {
     key: keyof typeof NetTypes;
     label: ReactNode;
   }[];
+  showPending?: boolean;
 };
 
 export default function NetSwitchTabs(props: NetSwitchTabsProps) {
-  const { size, options, className, ...rest } = props;
+  const { size, options, className, showPending, ...rest } = props;
 
   const switchOptions = useSwitchOptions();
+  const [pendingTxCount] = useAtom(pendingTxCountAtom);
+  const [testnetPendingTxCount] = useAtom(testnetPendingTxCountAtom);
+
+  const newSwitchOptions = useMemo(() => {
+    if (!showPending) {
+      return switchOptions;
+    }
+    return [
+      {
+        ...switchOptions[0],
+        count: pendingTxCount === 0 ? undefined : pendingTxCount,
+      },
+      {
+        ...switchOptions[1],
+        count: testnetPendingTxCount === 0 ? undefined : testnetPendingTxCount,
+      },
+    ];
+  }, [pendingTxCount, showPending, switchOptions, testnetPendingTxCount]);
 
   return (
     <PillsSwitch
       {...rest}
-      options={options || switchOptions}
+      options={options || newSwitchOptions}
       className={clsx(
         'net-switch',
         size ? `net-switch--${size}` : '',

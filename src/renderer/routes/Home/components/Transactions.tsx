@@ -164,7 +164,24 @@ const Empty = ({ text }: { text: string }) => (
   </EmptyView>
 );
 
-const Transactions = ({ updateNonce }: { updateNonce: number }) => {
+const filterTestnet = (list: TransactionDataItem[], isTestnet?: boolean) => {
+  return list.filter((item) => {
+    const chain = Object.values(CHAINS).find((i) => i.serverId === item.chain);
+    if (isTestnet) {
+      return chain?.isTestnet;
+    }
+    return !chain?.isTestnet;
+  });
+};
+const Transactions = ({
+  updateNonce,
+  isTestnet,
+  onTabChange,
+}: {
+  updateNonce: number;
+  isTestnet?: boolean;
+  onTabChange?: (v: 'mainnet' | 'testnet') => void;
+}) => {
   const { currentAccount } = useCurrentAccount();
   const [recentTxs, setRecentTxs] = useState<TransactionDataItem[]>([]);
   const remoteTxsRef = useRef<TxHistoryResult['history_list']>([]);
@@ -183,10 +200,13 @@ const Transactions = ({ updateNonce }: { updateNonce: number }) => {
 
   const mergedRecentTxs = useMemo(() => {
     return sortBy(
-      [...recentTxs.slice(0, 3), ...completedTxs],
+      [
+        ...filterTestnet(recentTxs, isTestnet).slice(0, 3),
+        ...filterTestnet(completedTxs, isTestnet),
+      ],
       'timeAt'
     ).reverse();
-  }, [recentTxs, completedTxs]);
+  }, [recentTxs, completedTxs, isTestnet]);
 
   const initLocalTxs = async (address: string) => {
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
@@ -505,7 +525,7 @@ const Transactions = ({ updateNonce }: { updateNonce: number }) => {
   return (
     <TransactionWrapper>
       <TransactionList>
-        {pendingTxs.map((tx) => {
+        {filterTestnet(pendingTxs, isTestnet).map((tx) => {
           return (
             <TransactionItem
               item={tx}
@@ -531,6 +551,8 @@ const Transactions = ({ updateNonce }: { updateNonce: number }) => {
         View All Transactions
       </ViewAllButton>
       <TransactionModal
+        onTabChange={onTabChange}
+        isTestnet={isTestnet}
         open={isShowAll}
         onClose={() => {
           setIsShowAll(false);

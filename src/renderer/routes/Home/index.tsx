@@ -390,6 +390,7 @@ const Home = () => {
 
                     {isShowTestnet ? (
                       <NetSwitchTabs
+                        showPending
                         size="sm"
                         value={selectedTab}
                         onTabChange={onTabChange}
@@ -441,7 +442,11 @@ const Home = () => {
             </div>
           </div>
           <div className="relative flex-1 h-0">
-            <Transactions updateNonce={updateNonce} />
+            <Transactions
+              isTestnet={selectedTab === 'testnet'}
+              onTabChange={onTabChange}
+              updateNonce={updateNonce}
+            />
             <div className="flex-1 h-full static-width-wrapper disable-mouseevents-on-ant-modal-open">
               <div>
                 {isLoadingTokenList ? (

@@ -67,9 +67,17 @@ const Transactions = ({ testnet = false }: { testnet?: boolean }) => {
 interface TransactionModalProps {
   open?: boolean;
   onClose?: () => void;
+  isTestnet?: boolean;
+  onTabChange?: (v: 'mainnet' | 'testnet') => void;
 }
-export const TransactionModal = ({ open, onClose }: TransactionModalProps) => {
-  const { isShowTestnet, selectedTab, onTabChange } = useSwitchNetTab();
+export const TransactionModal = ({
+  open,
+  onClose,
+  isTestnet,
+  onTabChange,
+}: TransactionModalProps) => {
+  const { isShowTestnet } = useSwitchNetTab();
+  const value = isTestnet ? 'testnet' : 'mainnet';
   return (
     <Modal
       open={open}
@@ -86,14 +94,11 @@ export const TransactionModal = ({ open, onClose }: TransactionModalProps) => {
       </div>
       {isShowTestnet && (
         <div className="flex justify-center mb-32">
-          <NetSwitchTabs value={selectedTab} onTabChange={onTabChange} />
+          <NetSwitchTabs value={value} onTabChange={onTabChange} />
         </div>
       )}
 
-      <Transactions
-        testnet={isShowTestnet && selectedTab === 'testnet'}
-        key={selectedTab}
-      />
+      <Transactions testnet={isShowTestnet && isTestnet} key={value} />
     </Modal>
   );
 };
