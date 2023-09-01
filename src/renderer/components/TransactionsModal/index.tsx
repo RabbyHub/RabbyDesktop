@@ -103,7 +103,11 @@ export const TransactionModal = ({
       </div>
       {isShowTestnet && (
         <div className="flex justify-center mb-32">
-          <NetSwitchTabs value={selectedTab} onTabChange={onTabChange} />
+          <NetSwitchTabs
+            value={selectedTab}
+            onTabChange={onTabChange}
+            itemClassname='font-normal'
+          />
         </div>
       )}
 
