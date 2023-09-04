@@ -176,14 +176,6 @@ export interface SwapState {
 
 type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
 type OpenApiService = import('@rabby-wallet/rabby-api').OpenApiService;
-type FunctionPropertyNames<T> = {
-  [K in keyof T]: T[K] extends (...args: any) => any ? K : never;
-}[keyof T];
-type FunctionProperties<T> = Pick<T, FunctionPropertyNames<T>>;
-type OpenApiServiceFunc = FunctionProperties<OpenApiService>;
-type GenOpenApiService<NS extends 'openapi' | 'testnetOpenapi'> = {
-  [K in keyof OpenApiServiceFunc as `${NS}.${K}`]: OpenApiServiceFunc[K];
-};
 
 export interface RPCItem {
   url: string;
@@ -195,6 +187,18 @@ export interface ContactBookItem {
   address: string;
   isAlias: boolean;
   isContact: boolean;
+}
+
+export interface SignTextHistoryItem {
+  site: ConnectedSite;
+  createAt: number;
+  text: string;
+  type:
+    | 'personalSign'
+    | 'ethSignTypedData'
+    | 'ethSignTypedDataV1'
+    | 'ethSignTypedDataV3'
+    | 'ethSignTypedDataV4';
 }
 
 export type RabbyXMethod = {
@@ -271,13 +275,10 @@ export type RabbyXMethod = {
   'walletController.getAllVisibleAccounts': () => DisplayedKeyring[];
   'walletController.getAllAlianNameByMap': () => Record<string, any>;
   'walletController.getAddressBalance': (
-    address: string,
-    force?: boolean,
-    isTestnet?: boolean
+    address: string
   ) => TotalBalanceResponse;
   'walletController.getAddressCacheBalance': (
-    address: string,
-    isTestnet?: boolean
+    address: string
   ) => TotalBalanceResponse | null;
   'walletController.getHighlightedAddresses': () => IHighlightedAddress[];
   'walletController.updateHighlightedAddresses': (
@@ -602,10 +603,73 @@ export type RabbyXMethod = {
   'walletController.addBlockedToken': (token: Token) => void;
   'walletController.removeBlockedToken': (token: Token) => void;
   'walletController.getBlockedToken': () => Token[];
-  'walletController.getIsShowTestnet': () => boolean;
-  'walletController.setIsShowTestnet': (value: boolean) => void;
-} & GenOpenApiService<'openapi'> &
-  GenOpenApiService<'testnetOpenapi'>;
+  'walletController.getSignTextHistory': (
+    address: string
+  ) => SignTextHistoryItem[];
+  'walletController.loadPendingListQueue': (
+    address: string
+  ) => TransactionGroup[];
+} & {
+  'openapi.setHost': OpenApiService['setHost'];
+  'openapi.getHost': OpenApiService['getHost'];
+  'openapi.ethRpc': OpenApiService['ethRpc'];
+  'openapi.init': OpenApiService['init'];
+  'openapi.getRecommendChains': OpenApiService['getRecommendChains'];
+  'openapi.getTotalBalance': OpenApiService['getTotalBalance'];
+  'openapi.getPendingCount': OpenApiService['getPendingCount'];
+  'openapi.checkOrigin': OpenApiService['checkOrigin'];
+  'openapi.checkText': OpenApiService['checkText'];
+  'openapi.checkTx': OpenApiService['checkTx'];
+  'openapi.preExecTx': OpenApiService['preExecTx'];
+  'openapi.historyGasUsed': OpenApiService['historyGasUsed'];
+  'openapi.pendingTxList': OpenApiService['pendingTxList'];
+  'openapi.traceTx': OpenApiService['traceTx'];
+  'openapi.pushTx': OpenApiService['pushTx'];
+  'openapi.explainText': OpenApiService['explainText'];
+  'openapi.gasMarket': OpenApiService['gasMarket'];
+  'openapi.getTx': OpenApiService['getTx'];
+  'openapi.getEnsAddressByName': OpenApiService['getEnsAddressByName'];
+  'openapi.searchToken': OpenApiService['searchToken'];
+  'openapi.searchSwapToken': OpenApiService['searchSwapToken'];
+  'openapi.getToken': OpenApiService['getToken'];
+  'openapi.listToken': OpenApiService['listToken'];
+  'openapi.customListToken': OpenApiService['customListToken'];
+  'openapi.listChainAssets': OpenApiService['listChainAssets'];
+  'openapi.listNFT': OpenApiService['listNFT'];
+  'openapi.listCollection': OpenApiService['listCollection'];
+  'openapi.listTxHisotry': OpenApiService['listTxHisotry'];
+  'openapi.tokenPrice': OpenApiService['tokenPrice'];
+  'openapi.tokenAuthorizedList': OpenApiService['tokenAuthorizedList'];
+  'openapi.userNFTAuthorizedList': OpenApiService['userNFTAuthorizedList'];
+  'openapi.getDEXList': OpenApiService['getDEXList'];
+  'openapi.getSwapQuote': OpenApiService['getSwapQuote'];
+  'openapi.getSwapTokenList': OpenApiService['getSwapTokenList'];
+  'openapi.postGasStationOrder': OpenApiService['postGasStationOrder'];
+  'openapi.getGasStationChainBalance': OpenApiService['getGasStationChainBalance'];
+  'openapi.getGasStationTokenList': OpenApiService['getGasStationTokenList'];
+  'openapi.explainTypedData': OpenApiService['explainTypedData'];
+  'openapi.checkTypedData': OpenApiService['checkTypedData'];
+  'openapi.approvalStatus': OpenApiService['approvalStatus'];
+  'openapi.usedChainList': OpenApiService['usedChainList'];
+  'openapi.getLatestVersion': OpenApiService['getLatestVersion'];
+  'openapi.addOriginFeedback': OpenApiService['addOriginFeedback'];
+  'openapi.getNetCurve': OpenApiService['getNetCurve'];
+  'openapi.getTokenHistoryPrice': OpenApiService['getTokenHistoryPrice'];
+  'openapi.getTokenHistoryDict': OpenApiService['getTokenHistoryDict'];
+  'openapi.getHistoryTokenList': OpenApiService['getHistoryTokenList'];
+  'openapi.getProtocolList': OpenApiService['getProtocolList'];
+  'openapi.getProtocol': OpenApiService['getProtocol'];
+  'openapi.getHistoryProtocol': OpenApiService['getHistoryProtocol'];
+  'openapi.getComplexProtocolList': OpenApiService['getComplexProtocolList'];
+  'openapi.getChainList': OpenApiService['getChainList'];
+  'openapi.getCachedTokenList': OpenApiService['getCachedTokenList'];
+  'openapi.checkSlippage': OpenApiService['checkSlippage'];
+  'openapi.getCEXSwapQuote': OpenApiService['getCEXSwapQuote'];
+  'openapi.getSwapTradeList': OpenApiService['getSwapTradeList'];
+  'openapi.postSwap': OpenApiService['postSwap'];
+  'openapi.getSummarizedAssetList': OpenApiService['getSummarizedAssetList'];
+  'openapi.collectionList': OpenApiService['collectionList'];
+};
 
 export type RabbyXMethods = {
   [K in keyof RabbyXMethod]: (

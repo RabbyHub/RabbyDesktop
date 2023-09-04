@@ -491,7 +491,10 @@ const Transactions = ({
     );
   }
 
-  if (pendingTxs.length <= 0 && mergedRecentTxs.length <= 0) {
+  if (
+    filterTestnet(pendingTxs, isTestnet).length <= 0 &&
+    mergedRecentTxs.length <= 0
+  ) {
     return (
       <TransactionWrapper>
         <TransactionList>
