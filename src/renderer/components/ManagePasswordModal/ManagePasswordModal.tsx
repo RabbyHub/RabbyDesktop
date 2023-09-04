@@ -1,45 +1,76 @@
 import React from 'react';
-import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
+// import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
+import clsx from 'clsx';
 import { Modal } from '../Modal/Modal';
 import { ManagePasswordContent } from './ManagePasswordContent';
 import { SetUpPasswordContent } from './SetUpPasswordContent';
 
-export const ManagePasswordModal: React.FC = () => {
-  const { svVisible, closeSubview } = useZPopupViewState('manage-password');
-  const [view, setView] = React.useState<'manage-password' | 'set-up-password'>(
-    'manage-password'
-  );
-  const title = React.useMemo(() => {
-    switch (view) {
-      case 'manage-password':
-        return 'Manage Password';
+import './index.less';
+import { useManagePassword } from './useManagePassword';
+import { CancelPasswordContent, ChangePasswordContent } from './ModifyPassword';
 
-      case 'set-up-password':
+export const ManagePasswordModal: React.FC = () => {
+  const {
+    managePwdView,
+    setManagePwdView,
+
+    isShowManagePassword,
+    setIsShowManagePassword,
+  } = useManagePassword();
+
+  const { title, JClassName } = React.useMemo(() => {
+    switch (managePwdView) {
+      case 'manage-password':
+      case 'password-setup':
       default:
-        return 'Set Up Password';
+        return {
+          title: 'Manage Password',
+          JClassName: '',
+        };
+
+      case 'cancel-password':
+        return {
+          title: 'Cancel Password',
+          JClassName: 'J-cancel-password',
+        };
+      case 'change-password':
+        return {
+          title: 'Change Password',
+          JClassName: 'J-change-password',
+        };
+
+      case 'setup-password':
+        return {
+          title: 'Set Up Password',
+          JClassName: '',
+        };
     }
-  }, [view]);
+  }, [managePwdView]);
 
   return (
     <Modal
       width={480}
       title={title}
       smallTitle
-      open={svVisible}
-      onCancel={closeSubview}
+      open={isShowManagePassword}
+      onCancel={() => setIsShowManagePassword(false)}
+      className={clsx(`manage-password-modal`, JClassName)}
     >
-      {view === 'manage-password' && (
+      {managePwdView === 'manage-password' && (
         <ManagePasswordContent
-          onSetUpPassword={() => setView('set-up-password')}
-          hasPassword={false}
+          onSetUpPassword={() => setManagePwdView('setup-password')}
+          // hasPassword={false}
+          hasPassword
         />
       )}
-      {view === 'set-up-password' && (
+      {managePwdView === 'setup-password' && (
         <SetUpPasswordContent
-          onCancel={() => setView('manage-password')}
-          onConfirm={() => setView('manage-password')}
+          onCancel={() => setManagePwdView('manage-password')}
+          onConfirm={() => setManagePwdView('manage-password')}
         />
       )}
+      {managePwdView === 'change-password' && <ChangePasswordContent />}
+      {managePwdView === 'cancel-password' && <CancelPasswordContent />}
     </Modal>
   );
 };

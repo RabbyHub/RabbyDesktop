@@ -1,0 +1,63 @@
+.manage-password-modal {
+  .ant-modal-header {
+    height: 64px;
+  }
+
+  .ant-modal-close-x {
+    .icon {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .ant-modal-content {
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &.J-change-password {
+    .ant-modal-content {
+      height: 480px;
+    }
+    .ant-modal-body {
+      height: 100%;
+    }
+  }
+
+  &.J-cancel-password {
+    .ant-modal-content {
+      height: 320px;
+    }
+    .ant-modal-body {
+      height: 100%;
+    }
+  }
+
+  .ant-btn-primary.ant-btn {
+    border-color: transparent;
+  }
+
+  .ant-form-item-label label {
+    color: var(--r-neutral-body, #D3D8E0);
+    font-size: 13px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  .setup-password-content {
+    padding: 20px;
+  }
+
+  .ant-form-item-control-input input {
+    height: 56px;
+  }
+
+  .ant-btn {
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+  }
+}

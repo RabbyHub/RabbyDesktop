@@ -106,7 +106,7 @@ export const TransactionModal = ({
           <NetSwitchTabs
             value={selectedTab}
             onTabChange={onTabChange}
-            itemClassname='font-normal'
+            itemClassname="font-normal"
           />
         </div>
       )}
