@@ -1,44 +1,74 @@
 .unlock {
   display: flex;
   height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+/* expected_h - expected_pt- expected_pt */
+@centerH: 900px - 224px - 120px;
+.centerWrapper {
+  display: flex;
+  height: 100%;
+  max-height: @centerH;
+
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  text-align: center;
+  // margin-top: -100px;
+
+  .logo {
+    width: 82px;
+    height: 82px;
+  }
+
+  .brandNameSvg {
+    display: block;
+    fill: #fff;
+    height: 34px;
+    width: 243px;
+    margin: 0 auto;
+  }
 }
 
 .row {
   flex: 1;
 }
 
-.container {
-  text-align: center;
-  margin-top: -100px;
-
-  .logo {
-    width: 160px;
-  }
-
-  .title {
-    color: #fff;
-    font-size: 40px;
-    line-height: 48px;
-    font-weight: 700;
-    margin-bottom: 40px;
-  }
+.formArea {
+  width: 100%;
 
   .input {
-    border-radius: 90px;
-    height: 64px;
-    max-width: 560px;
-    width: 100%;
-    padding: 0 0 0 24px;
-    font-size: 15px;
+    height: 56px;
 
-    &::placeholder {
+    &, &::placeholder {
+      color: var(--r-neutral-foot, #BABEC5);
+      font-size: 15px;
       font-weight: 500;
     }
   }
 }
 
-.button {
-  padding: 0;
-  height: 40px;
-  margin-right: 12px;
+.forgetPwd {
+  color: var(--r-neutral-title-2, #FFF);
+  text-align: center;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  text-decoration-line: underline;
+
+  display: block;
+  cursor: pointer;
+
+  opacity: 0.7;
+  margin-top: 177px;
+
+  transition: opacity 0.3s ease-in-out;
+
+  &:hover {
+    opacity: 1;
+  }
 }

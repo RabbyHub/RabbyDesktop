@@ -1,6 +1,7 @@
 @import '~antd/lib/style/themes/default.less';
 @import '~antd/dist/antd.less';
 @import './vars.less';
+@import './mixins.less';
 @import './overwrite-antd.less';
 @import './ant-message.less';
 
@@ -196,10 +197,7 @@ img {
       border-radius: 6px;
       border: 1px solid var(--r-neutral-foot, #BABEC5);
       background: var(--r-neutral-card-1, rgba(255, 255, 255, 0.06));
-
-      &, &::placeholder {
-        color: var(--r-neutral-title-1, #F7FAFC);
-      }
+      color: var(--r-neutral-title-1, #F7FAFC);
     }
   }
 }
@@ -214,5 +212,20 @@ img {
     color: var(--r-neutral-body, #D3D8E0);
     border: 0.5px solid var(--r-neutral-body, #D3D8E0);
     background: var(--r-neutral-card-1, rgba(255, 255, 255, 0.06));
+  }
+}
+
+.common-light-modal {
+  .ant-modal-header {
+    height: 64px;
+  }
+
+  .ant-modal-close-x {
+    .hover-to-lighten;
+
+    .icon {
+      width: 20px;
+      height: 20px;
+    }
   }
 }

@@ -10,29 +10,13 @@
     }
   }
 
+  @offset-for-error: 80px;
+
   .ant-modal-content {
+    transition: height 0.3s ease;
     height: 400px;
     display: flex;
     flex-direction: column;
-  }
-
-  &.J-change-password,
-  &.J-setup-password {
-    .ant-modal-content {
-      height: 480px;
-    }
-    .ant-modal-body {
-      height: 100%;
-    }
-  }
-
-  &.J-cancel-password {
-    .ant-modal-content {
-      height: 320px;
-    }
-    .ant-modal-body {
-      height: 100%;
-    }
   }
 
   .ant-btn-primary.ant-btn {
@@ -60,5 +44,24 @@
     font-style: normal;
     font-weight: 500;
     line-height: normal;
+  }
+
+  .ant-form-item-explain {
+    padding-top: 8px;
+
+    .ant-form-item-explain-error {
+      color: var(--r-red-default, #EF5C48);
+      font-size: 13px;
+      font-weight: 400;
+      line-height: normal;
+    }
+  }
+
+  .rabby-antd-input-item {
+    margin-bottom: 20px;
+  }
+
+  .rabby-antd-input-item.ant-form-item-has-error + .rabby-antd-input-item {
+    padding-top: 20px;
   }
 }

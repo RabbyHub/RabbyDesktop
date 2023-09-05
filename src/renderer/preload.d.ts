@@ -271,6 +271,10 @@ type ChannelMessagePayload = {
     response: [];
   };
   '__internal_rpc:app:reset-app': MainInternalsMessagePayload['__internal_main:app:reset-app'];
+  '__internal_rpc:app:reset-wallet': {
+    send: [];
+    response: [];
+  };
   '__internal_rpc:app:reset-rabbyx-approvals': MainInternalsMessagePayload['__internal_main:app:reset-rabbyx-approvals'];
   '__internal_rpc:app:prompt-cancel': {
     send: [promptId: string];

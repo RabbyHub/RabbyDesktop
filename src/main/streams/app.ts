@@ -221,19 +221,22 @@ handleIpcMainInvoke('get-os-info', () => {
   };
 });
 
-handleIpcMainInvoke('get-wallet-lock-info', () => {
+handleIpcMainInvoke('get-wallet-lock-info', async () => {
   return getRabbyxLockInfo();
 });
 
-handleIpcMainInvoke('setup-wallet-password', (_, newPassword) => {
+handleIpcMainInvoke('setup-wallet-password', async (_, newPassword) => {
   return setupWalletPassword(newPassword);
 });
 
-handleIpcMainInvoke('update-wallet-password', (_, oldPassword, newPassword) => {
-  return updateWalletPassword(oldPassword, newPassword);
-});
+handleIpcMainInvoke(
+  'update-wallet-password',
+  async (_, oldPassword, newPassword) => {
+    return updateWalletPassword(oldPassword, newPassword);
+  }
+);
 
-handleIpcMainInvoke('clear-wallet-password', (_, currentPwd) => {
+handleIpcMainInvoke('clear-wallet-password', async (_, currentPwd) => {
   return cancelCustomPassword(currentPwd);
 });
 
@@ -293,6 +296,24 @@ onIpcMainInternalEvent('__internal_main:app:reset-app', async () => {
     emitIpcMainEvent('__internal_main:app:relaunch');
   }
 });
+
+onIpcMainEvent('__internal_rpc:app:reset-wallet', async () => {
+  const mainWin = await onMainWindowReady();
+
+  clearAllUserData(mainWin.window.webContents.session);
+
+  try {
+    const { backgroundWebContents } = await getRabbyExtViews();
+    await backgroundWebContents.executeJavaScript(
+      `chrome.storage.local.clear();`
+    );
+  } catch (e: any) {
+    dialog.showErrorBox('Error', `Failed to clear Rabby Wallet.`);
+  }
+
+  emitIpcMainEvent('__internal_main:app:relaunch');
+});
+
 handleIpcMainInvoke('app-relaunch', (_, reasonType) => {
   switch (reasonType) {
     case 'trezor-like-used': {

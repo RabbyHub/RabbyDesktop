@@ -4,6 +4,10 @@ import { useCallback, useEffect } from 'react';
 
 const isUnlockedAtom = atom(false);
 
+export async function requestLockWallet() {
+  return walletController.lockWallet();
+}
+
 export function useLockWallet() {
   // const { setIsUnlocked } = useUnlocked({ disableAutoFetch: true });
 

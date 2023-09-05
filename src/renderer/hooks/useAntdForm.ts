@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react';
 type ExtractFormShape<T> = T extends FormInstance<infer U> ? U : never;
 
 export function useFormCheckError<T extends FormInstance<any>>(form: T) {
-  const [formHasError, setFormHasError] = useState(false);
+  const [formErrorCount, setFormErrorCount] = useState(0);
 
   const triggerCheckFormError = useCallback(async () => {
     const result = {
@@ -14,9 +14,13 @@ export function useFormCheckError<T extends FormInstance<any>>(form: T) {
 
     try {
       result.values = await form.validateFields();
-      setFormHasError(false);
+      setFormErrorCount(0);
     } catch (error: any) {
-      setFormHasError(true);
+      setFormErrorCount(
+        error?.errorFields?.reduce((acc: number, cur: any) => {
+          return acc + (cur.errors?.length || 0);
+        }, 0)
+      );
       result.error = error?.errorFields?.[0]?.errors?.[0] || 'unknown error';
     }
 
@@ -24,7 +28,8 @@ export function useFormCheckError<T extends FormInstance<any>>(form: T) {
   }, [form]);
 
   return {
-    formHasError,
+    formErrorCount,
+    formHasError: !!formErrorCount,
     triggerCheckFormError,
   };
 }

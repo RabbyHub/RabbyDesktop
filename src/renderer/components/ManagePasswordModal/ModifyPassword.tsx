@@ -1,22 +1,31 @@
 import { Button, Form, message } from 'antd';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { debounce } from 'lodash';
+import { requestLockWallet } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { useFormCheckError } from '@/renderer/hooks/useAntdForm';
-import { useWalletLockInfo, useManagePasswordUI } from './useManagePassword';
+import {
+  useWalletLockInfo,
+  useManagePasswordUI,
+  CancelPasswordForm,
+  ChangePasswordForm,
+  SetupPasswordForm,
+  useCollectSubForms,
+} from './useManagePassword';
 import Input from '../AntdOverwrite/Input';
 
-type SetupPasswordForm = {
-  password: string;
-  confirmPwd: string;
-};
-
 export function SetUpPasswordContent({ className }: { className?: string }) {
-  const { setManagePwdView } = useManagePasswordUI();
+  const { nextShownToLock, setManagePwdView, setIsShowManagePassword } =
+    useManagePasswordUI();
 
   const { setupPassword } = useWalletLockInfo();
 
   const [form] = Form.useForm<SetupPasswordForm>();
+  const { collectErrorCountFor } = useCollectSubForms();
+  const { formErrorCount, triggerCheckFormError } = useFormCheckError(form);
+  useEffect(() => {
+    collectErrorCountFor('setupPwdForm', formErrorCount);
+  }, [collectErrorCountFor, formErrorCount]);
 
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
   const handleSubmit = useCallback(
@@ -33,12 +42,17 @@ export function SetUpPasswordContent({ className }: { className?: string }) {
           ),
           duration: 3,
         });
-        setManagePwdView('manage-password');
+        setIsShowManagePassword(false);
+        // setManagePwdView('manage-password');
+
+        if (nextShownToLock) {
+          requestLockWallet();
+        }
       } catch (e: any) {
         message.error({
           content: (
             <span className="text-white">
-              {e.message || 'Failed to set password'}
+              {e?.message || 'Failed to set password'}
             </span>
           ),
           duration: 3,
@@ -47,10 +61,8 @@ export function SetUpPasswordContent({ className }: { className?: string }) {
         setIsSubmitLoading(false);
       }
     },
-    [form, setupPassword, setManagePwdView]
+    [form, setupPassword, setIsShowManagePassword, nextShownToLock]
   );
-
-  const { formHasError, triggerCheckFormError } = useFormCheckError(form);
 
   return (
     <section className={clsx('setup-password-content pt-0', className)}>
@@ -58,7 +70,7 @@ export function SetUpPasswordContent({ className }: { className?: string }) {
         layout="vertical"
         form={form}
         onFinish={handleSubmit}
-        onValuesChange={debounce(triggerCheckFormError, 250)}
+        onValuesChange={debounce(triggerCheckFormError, 150)}
         className="flex flex-col justify-between h-[100%]"
       >
         <div>
@@ -116,7 +128,7 @@ export function SetUpPasswordContent({ className }: { className?: string }) {
           </Button>
           <div className="flex-shrink-0 placeholder w-[16px]" />
           <Button
-            disabled={formHasError}
+            disabled={!!formErrorCount}
             className="flex-shrink-1 w-[100%] h-[48px] rounded-[4px]"
             type="primary"
             htmlType="submit"
@@ -130,22 +142,22 @@ export function SetUpPasswordContent({ className }: { className?: string }) {
   );
 }
 
-type ChangePasswordForm = {
-  currentPwd: string;
-  newPwd: string;
-  confirmPwd: string;
-};
 const INIT_FORM: ChangePasswordForm = {
   currentPwd: '',
   newPwd: '',
   confirmPwd: '',
 };
 export function ChangePasswordContent({ className }: { className?: string }) {
-  const { setManagePwdView } = useManagePasswordUI();
+  const { setIsShowManagePassword, setManagePwdView } = useManagePasswordUI();
 
   const { updatePassword } = useWalletLockInfo();
 
   const [form] = Form.useForm<ChangePasswordForm>();
+  const { collectErrorCountFor } = useCollectSubForms();
+  const { formErrorCount, triggerCheckFormError } = useFormCheckError(form);
+  useEffect(() => {
+    collectErrorCountFor('changePwdForm', formErrorCount);
+  }, [collectErrorCountFor, formErrorCount]);
 
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
   const handleSubmit = useCallback(
@@ -162,12 +174,13 @@ export function ChangePasswordContent({ className }: { className?: string }) {
           ),
           duration: 3,
         });
-        setManagePwdView('manage-password');
+        setIsShowManagePassword(false);
+        // setManagePwdView('manage-password');
       } catch (e: any) {
         message.error({
           content: (
             <span className="text-white">
-              {e.message || 'Failed to change password'}
+              {e?.message || 'Failed to change password'}
             </span>
           ),
           duration: 3,
@@ -176,10 +189,8 @@ export function ChangePasswordContent({ className }: { className?: string }) {
         setIsSubmitLoading(false);
       }
     },
-    [form, updatePassword, setManagePwdView]
+    [form, updatePassword, setIsShowManagePassword]
   );
-
-  const { formHasError, triggerCheckFormError } = useFormCheckError(form);
 
   return (
     <section className={clsx('px-[20px] pb-[20px]', className)}>
@@ -187,14 +198,17 @@ export function ChangePasswordContent({ className }: { className?: string }) {
         layout="vertical"
         form={form}
         onFinish={handleSubmit}
-        onValuesChange={debounce(triggerCheckFormError, 250)}
+        onValuesChange={debounce(triggerCheckFormError, 150)}
         className="flex flex-col justify-between h-[100%]"
         initialValues={INIT_FORM}
       >
         <div>
           <Form.Item
             label="Current password"
-            className="rabby-antd-input-item mb-20"
+            className={clsx(
+              'rabby-antd-input-item',
+              form.getFieldError('currentPwd').length > 0 && 'has-error'
+            )}
             name="currentPwd"
             rules={[
               {
@@ -208,7 +222,10 @@ export function ChangePasswordContent({ className }: { className?: string }) {
 
           <Form.Item
             label="New password"
-            className="rabby-antd-input-item mb-20"
+            className={clsx(
+              'rabby-antd-input-item',
+              form.getFieldError('newPwd').length > 0 && 'has-error'
+            )}
             name="newPwd"
             rules={[
               {
@@ -222,7 +239,10 @@ export function ChangePasswordContent({ className }: { className?: string }) {
 
           <Form.Item
             label="Confirm password"
-            className="rabby-antd-input-item"
+            className={clsx(
+              'rabby-antd-input-item',
+              form.getFieldError('confirmPwd').length > 0 && 'has-error'
+            )}
             name="confirmPwd"
             rules={[
               {
@@ -259,7 +279,7 @@ export function ChangePasswordContent({ className }: { className?: string }) {
           </Button>
           <div className="flex-shrink-0 placeholder w-[16px]" />
           <Button
-            disabled={formHasError}
+            disabled={!!formErrorCount}
             className="flex-shrink-1 w-[100%] h-[48px] rounded-[4px]"
             type="primary"
             htmlType="submit"
@@ -273,16 +293,17 @@ export function ChangePasswordContent({ className }: { className?: string }) {
   );
 }
 
-type CancelPasswordForm = {
-  currentPwd: string;
-};
-
 export function CancelPasswordContent({ className }: { className?: string }) {
-  const { setManagePwdView } = useManagePasswordUI();
+  const { setManagePwdView, setIsShowManagePassword } = useManagePasswordUI();
 
   const { cancelPassword } = useWalletLockInfo();
 
   const [form] = Form.useForm<CancelPasswordForm>();
+  const { collectErrorCountFor } = useCollectSubForms();
+  const { formErrorCount, triggerCheckFormError } = useFormCheckError(form);
+  useEffect(() => {
+    collectErrorCountFor('cancelPwdForm', formErrorCount);
+  }, [collectErrorCountFor, formErrorCount]);
 
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
   const handleSubmit = useCallback(
@@ -293,19 +314,19 @@ export function CancelPasswordContent({ className }: { className?: string }) {
         await form.validateFields();
 
         await cancelPassword(values.currentPwd);
-
+        setIsShowManagePassword(false);
         message.success({
           content: (
             <span className="text-white">Password cancelled successfully</span>
           ),
           duration: 3,
         });
-        setManagePwdView('manage-password');
+        // setManagePwdView('manage-password');
       } catch (e: any) {
         message.error({
           content: (
             <span className="text-white">
-              {e.message || 'Failed to cancel password'}
+              {e?.message || 'Failed to cancel password'}
             </span>
           ),
           duration: 3,
@@ -314,17 +335,15 @@ export function CancelPasswordContent({ className }: { className?: string }) {
         setIsSubmitLoading(false);
       }
     },
-    [form, cancelPassword, setManagePwdView]
+    [form, cancelPassword, setIsShowManagePassword]
   );
-
-  const { formHasError, triggerCheckFormError } = useFormCheckError(form);
 
   return (
     <section className={clsx('px-[20px] pb-[20px]', className)}>
       <Form
         layout="vertical"
         onFinish={handleSubmit}
-        onValuesChange={debounce(triggerCheckFormError, 250)}
+        onValuesChange={debounce(triggerCheckFormError, 150)}
         className="flex flex-col justify-between h-[100%]"
       >
         <div>
@@ -335,7 +354,7 @@ export function CancelPasswordContent({ className }: { className?: string }) {
           </div>
           <Form.Item
             label="Current password"
-            className="rabby-antd-input-item mb-20"
+            className="rabby-antd-input-item"
             name="currentPwd"
             rules={[
               {
@@ -361,7 +380,7 @@ export function CancelPasswordContent({ className }: { className?: string }) {
           </Button>
           <div className="flex-shrink-0 placeholder w-[16px]" />
           <Button
-            disabled={formHasError}
+            disabled={!!formErrorCount}
             className="flex-shrink-1 w-[100%] h-[48px] rounded-[4px]"
             type="primary"
             htmlType="submit"

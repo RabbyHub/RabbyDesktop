@@ -1,7 +1,7 @@
 import { Button } from 'antd';
 import { useManagePasswordUI } from './useManagePassword';
 
-export function HaventSetupPassWord() {
+export function HaveSetupPassword() {
   const { setManagePwdView } = useManagePasswordUI();
 
   return (
@@ -37,7 +37,7 @@ export function HaventSetupPassWord() {
   );
 }
 
-export function HaveSetupPassword() {
+export function HaventSetupPassWord() {
   const { setManagePwdView } = useManagePasswordUI();
 
   return (

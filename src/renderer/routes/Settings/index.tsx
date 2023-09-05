@@ -29,7 +29,7 @@ import {
   useWalletLockInfo,
   useManagePasswordUI,
 } from '@/renderer/components/ManagePasswordModal/useManagePassword';
-import { useLockWallet } from '@/renderer/hooks/rabbyx/useUnlocked';
+import { requestLockWallet } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { PasswordStatus } from '@/isomorphic/wallet/lock';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
@@ -443,8 +443,6 @@ export function MainWindowSettings() {
   const { setShowSupportedChains } = useSupportedChainsModal();
   const { setIsShowManagePassword } = useManagePasswordUI();
 
-  const { lockWallet } = useLockWallet();
-
   const { lockInfo } = useWalletLockInfo();
 
   return (
@@ -462,9 +460,9 @@ export function MainWindowSettings() {
               onClick={() => {
                 // If no password set, show set password modal
                 if (lockInfo.pwdStatus !== PasswordStatus.Custom) {
-                  setIsShowManagePassword(true);
+                  setIsShowManagePassword(true, true);
                 } else {
-                  lockWallet();
+                  requestLockWallet();
                 }
               }}
               icon="rabby-internal://assets/icons/mainwin-settings/icon-lock-wallet.svg"

@@ -1,8 +1,10 @@
 import { PasswordStatus } from '@/isomorphic/wallet/lock';
+import { useFormCheckError } from '@/renderer/hooks/useAntdForm';
+import { Form } from 'antd';
 import { atom, useAtom } from 'jotai';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-type ManagePasswordViewType =
+export type ManagePasswordViewType =
   | 'unknown'
   | 'manage-password'
   | 'setup-password'
@@ -12,16 +14,19 @@ type ManagePasswordViewType =
 
 const managePwdUIAtom = atom<{
   isShown: boolean;
+  nextShownToLock: boolean;
   view: ManagePasswordViewType;
 }>({
   isShown: false,
-  // isShown: !IS_RUNTIME_PRODUCTION,
+  nextShownToLock: false,
   view: 'unknown',
 });
 
 export function useManagePasswordUI() {
-  const [{ isShown: isShowManagePassword, view: managePwdView }, setUIState] =
-    useAtom(managePwdUIAtom);
+  const [
+    { isShown: isShowManagePassword, nextShownToLock, view: managePwdView },
+    setUIState,
+  ] = useAtom(managePwdUIAtom);
 
   const setManagePwdView = useCallback(
     (view: ManagePasswordViewType) => {
@@ -31,8 +36,12 @@ export function useManagePasswordUI() {
   );
 
   const setIsShowManagePassword = useCallback(
-    (isShown: boolean) => {
-      setUIState((state) => ({ ...state, isShown }));
+    (isShown: boolean, shownToLock = false) => {
+      setUIState((state) => ({
+        ...state,
+        isShown,
+        nextShownToLock: shownToLock,
+      }));
     },
     [setUIState]
   );
@@ -40,6 +49,7 @@ export function useManagePasswordUI() {
   return {
     managePwdView,
     setManagePwdView,
+    nextShownToLock,
 
     isShowManagePassword,
     setIsShowManagePassword,
@@ -52,10 +62,11 @@ const lockInfoAtom = atom<RabbyDesktopLockInfo>({
 
 export function useWalletLockInfo(options?: { autoFetch?: boolean }) {
   const [lockInfo, setLockInfo] = useAtom(lockInfoAtom);
-  const [isLoading, setIsLoading] = useState(false);
+  const isLoadingRef = useRef(false);
 
   const fetchLockInfo = useCallback(async () => {
-    setIsLoading(true);
+    if (isLoadingRef.current) return;
+    isLoadingRef.current = true;
 
     try {
       const response = await window.rabbyDesktop.ipcRenderer.invoke(
@@ -65,15 +76,11 @@ export function useWalletLockInfo(options?: { autoFetch?: boolean }) {
       setLockInfo({
         pwdStatus: response.pwdStatus,
       });
-
-      return response;
     } catch (error) {
       console.error(error);
     } finally {
-      setIsLoading(false);
+      isLoadingRef.current = false;
     }
-
-    return { pwdStatus: PasswordStatus.Unknown };
   }, [setLockInfo]);
 
   const setupPassword = useCallback(
@@ -82,7 +89,7 @@ export function useWalletLockInfo(options?: { autoFetch?: boolean }) {
         'setup-wallet-password',
         newPassword
       );
-      fetchLockInfo();
+      await fetchLockInfo();
 
       if (result.error) {
         throw new Error(result.error);
@@ -98,7 +105,7 @@ export function useWalletLockInfo(options?: { autoFetch?: boolean }) {
         oldPassword,
         newPassword
       );
-      fetchLockInfo();
+      await fetchLockInfo();
 
       if (result.error) {
         throw new Error(result.error);
@@ -113,7 +120,7 @@ export function useWalletLockInfo(options?: { autoFetch?: boolean }) {
         'clear-wallet-password',
         oldPassword
       );
-      fetchLockInfo();
+      await fetchLockInfo();
 
       if (result.error) {
         throw new Error(result.error);
@@ -129,12 +136,61 @@ export function useWalletLockInfo(options?: { autoFetch?: boolean }) {
   }, [options?.autoFetch, fetchLockInfo]);
 
   return {
-    isLoading,
+    isLoading: isLoadingRef.current,
     lockInfo,
     fetchLockInfo,
 
     setupPassword,
     updatePassword,
     cancelPassword,
+  };
+}
+
+export type SetupPasswordForm = {
+  password: string;
+  confirmPwd: string;
+};
+export type ChangePasswordForm = {
+  currentPwd: string;
+  newPwd: string;
+  confirmPwd: string;
+};
+export type CancelPasswordForm = {
+  currentPwd: string;
+};
+
+export type SubFormErrorStatics = {
+  setupPwdForm: number;
+  changePwdForm: number;
+  cancelPwdForm: number;
+};
+const formErrorStatics = atom<SubFormErrorStatics>({
+  setupPwdForm: 0,
+  changePwdForm: 0,
+  cancelPwdForm: 0,
+});
+export function useCollectSubForms<T extends keyof SubFormErrorStatics>(
+  targetForm?: T
+) {
+  const [formErrorCounts, setFormErrorCount] = useAtom(formErrorStatics);
+
+  const collectErrorCountFor = useCallback(
+    (formName: keyof SubFormErrorStatics, count: number) => {
+      setFormErrorCount((state) => ({ ...state, [formName]: count }));
+    },
+    [setFormErrorCount]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (targetForm) {
+        collectErrorCountFor(targetForm, 0);
+      }
+    };
+  }, [collectErrorCountFor, targetForm]);
+
+  return {
+    formErrorCounts,
+    collectErrorCountFor,
   };
 }

@@ -208,6 +208,7 @@ export type RabbyXMethod = {
     oldPassword: string,
     newPassword: string
   ) => void;
+  'walletController.resetKeyringState': () => void;
   'walletController.changeAccount': (account: Account) => void;
   'walletController.getCurrentAccount': () => RabbyAccount;
   'walletController.syncGetCurrentAccount': () => RabbyAccount | null;

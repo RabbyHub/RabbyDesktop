@@ -1,20 +1,77 @@
 import React, { useEffect } from 'react';
-import { Skeleton } from 'antd';
 import clsx from 'clsx';
+import { usePrevious } from 'react-use';
+import styled, { css } from 'styled-components';
+
 import { PasswordStatus } from '@/isomorphic/wallet/lock';
-import { Modal } from '../Modal/Modal';
+import { Modal as RModal, Props as ModalProps } from '../Modal/Modal';
 import {
   HaveSetupPassword,
   HaventSetupPassWord,
 } from './ManagePasswordContent';
 
 import './index.less';
-import { useWalletLockInfo, useManagePasswordUI } from './useManagePassword';
+import {
+  useWalletLockInfo,
+  useManagePasswordUI,
+  ManagePasswordViewType,
+  useCollectSubForms,
+  SubFormErrorStatics,
+} from './useManagePassword';
 import {
   CancelPasswordContent,
   ChangePasswordContent,
   SetUpPasswordContent,
 } from './ModifyPassword';
+
+const ERROR_FIELD_H = 24;
+
+const Modal = styled<
+  React.FC<
+    ModalProps & {
+      managePwdView: ManagePasswordViewType;
+      formErrorCounts: SubFormErrorStatics;
+    }
+  >
+>(RModal)`
+  .ant-modal-content .ant-modal-body {
+    height: 100%;
+  }
+
+  ${({ managePwdView, formErrorCounts }) => {
+    return (
+      managePwdView === 'setup-password' &&
+      css`
+        .ant-modal-content {
+          height: ${400 +
+          (formErrorCounts.setupPwdForm || 0) * ERROR_FIELD_H}px;
+        }
+      `
+    );
+  }}
+  ${({ managePwdView, formErrorCounts }) => {
+    return (
+      managePwdView === 'change-password' &&
+      css`
+        .ant-modal-content {
+          height: ${480 +
+          (formErrorCounts.changePwdForm || 0) * ERROR_FIELD_H}px;
+        }
+      `
+    );
+  }}
+  ${({ managePwdView, formErrorCounts }) => {
+    return (
+      managePwdView === 'cancel-password' &&
+      css`
+        .ant-modal-content {
+          height: ${320 +
+          (formErrorCounts.cancelPwdForm || 0) * ERROR_FIELD_H}px;
+        }
+      `
+    );
+  }}
+`;
 
 export const ManagePasswordModal: React.FC = () => {
   const {
@@ -25,16 +82,27 @@ export const ManagePasswordModal: React.FC = () => {
     setIsShowManagePassword,
   } = useManagePasswordUI();
 
-  const { isLoading, lockInfo, fetchLockInfo } = useWalletLockInfo();
+  const { lockInfo, fetchLockInfo } = useWalletLockInfo();
+
+  const prevShown = usePrevious(isShowManagePassword);
+  useEffect(() => {
+    if (!prevShown && isShowManagePassword) {
+      setManagePwdView('manage-password');
+    }
+  }, [prevShown, isShowManagePassword, setManagePwdView]);
 
   useEffect(() => {
-    setManagePwdView('manage-password');
-
     fetchLockInfo();
-  }, [isShowManagePassword, setManagePwdView, fetchLockInfo]);
+  }, [isShowManagePassword, managePwdView, fetchLockInfo]);
 
   const { title, JClassName } = React.useMemo(() => {
     switch (managePwdView) {
+      case 'setup-password':
+        return {
+          title: 'Set Up Password',
+          JClassName: 'J-setup-password',
+        };
+
       case 'manage-password':
       case 'password-setup':
       default:
@@ -53,14 +121,10 @@ export const ManagePasswordModal: React.FC = () => {
           title: 'Change Password',
           JClassName: 'J-change-password',
         };
-
-      case 'setup-password':
-        return {
-          title: 'Set Up Password',
-          JClassName: 'J-setup-password',
-        };
     }
   }, [managePwdView]);
+
+  const { formErrorCounts } = useCollectSubForms();
 
   return (
     <Modal
@@ -70,27 +134,23 @@ export const ManagePasswordModal: React.FC = () => {
       open={isShowManagePassword}
       onCancel={() => setIsShowManagePassword(false)}
       className={clsx(`manage-password-modal`, JClassName)}
+      managePwdView={managePwdView}
+      formErrorCounts={formErrorCounts}
     >
-      {isLoading ? (
-        <Skeleton active className="w-[100%] h-[100px]" />
-      ) : (
-        <>
-          {managePwdView === 'manage-password' &&
-            (lockInfo.pwdStatus !== PasswordStatus.UseBuiltIn ? (
-              <HaventSetupPassWord />
-            ) : (
-              <HaveSetupPassword />
-            ))}
-          {managePwdView === 'setup-password' && (
-            <SetUpPasswordContent className="h-[100%]" />
-          )}
-          {managePwdView === 'change-password' && (
-            <ChangePasswordContent className="h-[100%]" />
-          )}
-          {managePwdView === 'cancel-password' && (
-            <CancelPasswordContent className="h-[100%]" />
-          )}
-        </>
+      {managePwdView === 'manage-password' &&
+        (lockInfo.pwdStatus === PasswordStatus.UseBuiltIn ? (
+          <HaventSetupPassWord />
+        ) : (
+          <HaveSetupPassword />
+        ))}
+      {managePwdView === 'setup-password' && (
+        <SetUpPasswordContent className="h-[100%]" />
+      )}
+      {managePwdView === 'change-password' && (
+        <ChangePasswordContent className="h-[100%]" />
+      )}
+      {managePwdView === 'cancel-password' && (
+        <CancelPasswordContent className="h-[100%]" />
       )}
     </Modal>
   );
