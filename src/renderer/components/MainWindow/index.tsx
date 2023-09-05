@@ -42,6 +42,7 @@ import { useCustomRPC } from '@/renderer/hooks/useCustomRPC';
 import { NFT } from '@/renderer/routes/NFT';
 import SendNFT from '@/renderer/routes/SendNFT';
 import ApprovalManagePage from '@/renderer/routes/ApprovalManagePage';
+import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import styles from './index.module.less';
 
 import MainWindowRoute from './MainRoute';
@@ -69,6 +70,7 @@ const logGetUserDapp = async () => {
 
 function WelcomeWrapper() {
   const { isFinishedFetchAccounts, accounts } = useAccounts();
+
   if (isFinishedFetchAccounts && accounts.length) {
     return <Navigate to="/mainwin/home" />;
   }
@@ -268,10 +270,17 @@ const router = createRouter([
 /**
  * @description make sure use this hooks only once at top-level component in whole app
  */
-function useAccountsGuard() {
+function useAccountsAndLockGuard() {
   const { fetchAccounts } = useAccounts({
-    onFetchStageChanged: useCallback((ctx) => {
+    onFetchStageChanged: useCallback(async (ctx) => {
       if (ctx.state === 'FINISHED') {
+        const isUnlocked = await walletController.isUnlocked();
+
+        if (!isUnlocked) {
+          router.navigate('/unlock');
+          return;
+        }
+
         if (!ctx.accounts.length) {
           router.navigate('/welcome/getting-started');
         } else if (!router.state.location.pathname.startsWith('/mainwin/')) {
@@ -279,6 +288,12 @@ function useAccountsGuard() {
         }
       }
     }, []),
+  });
+
+  useAppUnlockEvents({
+    onChange: (ctx) => {
+      fetchAccounts();
+    },
   });
 
   useMessageForwarded(
@@ -316,8 +331,6 @@ export function MainWindow() {
 
   useToastMessage();
 
-  useAppUnlockEvents();
-
   useMainWindowEvents();
   useChromeTabsEvents();
 
@@ -343,7 +356,8 @@ export function MainWindow() {
 
   const { getAllRPC } = useCustomRPC();
 
-  useAccountsGuard();
+  useAccountsAndLockGuard();
+
   useMount(() => {
     logGetUserDapp();
     getAllRPC();

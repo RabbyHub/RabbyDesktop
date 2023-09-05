@@ -44,7 +44,6 @@ import {
 import { valueToMainSubject } from './_init';
 import {
   getElectronChromeExtensions,
-  getWebuiExtId,
   onMainWindowReady,
   getRabbyExtViews,
   getAllMainUIWindows,
@@ -53,8 +52,13 @@ import { switchToBrowserTab } from '../utils/browser';
 import { getAppUserDataPath } from '../utils/store';
 import { getMainWinLastPosition } from '../utils/screen';
 import { clearAllStoreData, clearAllUserData } from '../utils/security';
-import { tryAutoUnlockRabbyX } from './rabbyIpcQuery/autoUnlock';
-import { alertAutoUnlockFailed } from './mainWindow';
+import {
+  getRabbyxLockInfo,
+  tryAutoUnlockRabbyX,
+  setupWalletPassword,
+  cancelCustomPassword,
+  updateWalletPassword,
+} from './rabbyIpcQuery/lockWallet';
 import { setupAppTray } from './appTray';
 import { checkForceUpdate } from '../updater/force_update';
 import { getOrCreateDappBoundTab } from '../utils/tabbedBrowserWindow';
@@ -215,6 +219,22 @@ handleIpcMainInvoke('get-os-info', () => {
     platform: process.platform,
     arch: process.arch,
   };
+});
+
+handleIpcMainInvoke('get-wallet-lock-info', () => {
+  return getRabbyxLockInfo();
+});
+
+handleIpcMainInvoke('setup-wallet-password', (_, newPassword) => {
+  return setupWalletPassword(newPassword);
+});
+
+handleIpcMainInvoke('update-wallet-password', (_, oldPassword, newPassword) => {
+  return updateWalletPassword(oldPassword, newPassword);
+});
+
+handleIpcMainInvoke('clear-wallet-password', (_, currentPwd) => {
+  return cancelCustomPassword(currentPwd);
 });
 
 onIpcMainEvent(
@@ -434,9 +454,9 @@ export default function bootstrap() {
       emitIpcMainEvent('__internal_main:mainwindow:will-show-on-bootstrap');
     }, 200);
 
-    if (!useBuiltInPwd) {
-      alertAutoUnlockFailed();
-    }
+    // if (!useBuiltInPwd) {
+    //   alertAutoUnlockFailed();
+    // }
     // repairDappsFieldsOnBootstrap();
   });
 }

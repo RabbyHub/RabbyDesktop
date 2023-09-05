@@ -4,6 +4,7 @@ import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { Button, Col, Input, message, Row, Form } from 'antd';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useInterval } from '@/renderer/hooks/useTimer';
 import styles from './Unlock.module.less';
 
 interface FormData {
@@ -13,7 +14,7 @@ interface FormData {
 export const Unlock: React.FC = () => {
   const nav = useNavigate();
   const [form] = Form.useForm<FormData>();
-  const { isUnlocked } = useUnlocked();
+  const { fetchUnlocked } = useUnlocked();
 
   const onNext = React.useCallback(
     async ({ password }: FormData) => {
@@ -27,11 +28,13 @@ export const Unlock: React.FC = () => {
     [nav]
   );
 
-  React.useEffect(() => {
-    if (isUnlocked) {
-      nav('/', { replace: true });
+  useInterval(async () => {
+    const nextUnlocked = await fetchUnlocked();
+
+    if (nextUnlocked) {
+      nav('/mainwin/home', { replace: true });
     }
-  }, [isUnlocked, nav]);
+  }, 250);
 
   return (
     <div className={styles.unlock}>

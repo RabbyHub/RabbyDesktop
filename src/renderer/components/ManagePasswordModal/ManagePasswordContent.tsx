@@ -1,14 +1,8 @@
 import { Button } from 'antd';
-import React from 'react';
-import { useManagePassword } from './useManagePassword';
+import { useManagePasswordUI } from './useManagePassword';
 
-interface Props {
-  onSetUpPassword: () => void;
-  hasPassword: boolean;
-}
-
-const PassWordSetup: React.FC<any> = () => {
-  const { setManagePwdView } = useManagePassword();
+export function HaventSetupPassWord() {
+  const { setManagePwdView } = useManagePasswordUI();
 
   return (
     <section className="manage-password-content has-password pt-[70px] pl-40 pr-40">
@@ -41,15 +35,10 @@ const PassWordSetup: React.FC<any> = () => {
       </div>
     </section>
   );
-};
+}
 
-export const ManagePasswordContent: React.FC<Props> = ({
-  onSetUpPassword,
-  hasPassword,
-}) => {
-  if (hasPassword) {
-    return <PassWordSetup />;
-  }
+export function HaveSetupPassword() {
+  const { setManagePwdView } = useManagePasswordUI();
 
   return (
     <section className="manage-password-content pt-[70px]">
@@ -67,7 +56,9 @@ export const ManagePasswordContent: React.FC<Props> = ({
       </div>
       <div className="mt-[90px] w-[100%] flex justify-center">
         <Button
-          onClick={onSetUpPassword}
+          onClick={() => {
+            setManagePwdView('setup-password');
+          }}
           type="primary"
           className="bg-r-blue-default w-[200px] h-[48px] shadow-none mx-0 my-auto rounded-[4px]"
         >
@@ -76,4 +67,4 @@ export const ManagePasswordContent: React.FC<Props> = ({
       </div>
     </section>
   );
-};
+}

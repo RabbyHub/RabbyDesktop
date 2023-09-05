@@ -204,6 +204,10 @@ export type RabbyXMethod = {
   ) => any;
   'walletController.sendRequest': <T = any>(data: any) => T;
   'walletController.verifyPassword': (password: string) => void;
+  'walletController.updatePassword': (
+    oldPassword: string,
+    newPassword: string
+  ) => void;
   'walletController.changeAccount': (account: Account) => void;
   'walletController.getCurrentAccount': () => RabbyAccount;
   'walletController.syncGetCurrentAccount': () => RabbyAccount | null;

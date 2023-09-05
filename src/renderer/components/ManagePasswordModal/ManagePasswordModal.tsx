@@ -1,13 +1,20 @@
-import React from 'react';
-// import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
+import React, { useEffect } from 'react';
+import { Skeleton } from 'antd';
 import clsx from 'clsx';
+import { PasswordStatus } from '@/isomorphic/wallet/lock';
 import { Modal } from '../Modal/Modal';
-import { ManagePasswordContent } from './ManagePasswordContent';
-import { SetUpPasswordContent } from './SetUpPasswordContent';
+import {
+  HaveSetupPassword,
+  HaventSetupPassWord,
+} from './ManagePasswordContent';
 
 import './index.less';
-import { useManagePassword } from './useManagePassword';
-import { CancelPasswordContent, ChangePasswordContent } from './ModifyPassword';
+import { useWalletLockInfo, useManagePasswordUI } from './useManagePassword';
+import {
+  CancelPasswordContent,
+  ChangePasswordContent,
+  SetUpPasswordContent,
+} from './ModifyPassword';
 
 export const ManagePasswordModal: React.FC = () => {
   const {
@@ -16,7 +23,15 @@ export const ManagePasswordModal: React.FC = () => {
 
     isShowManagePassword,
     setIsShowManagePassword,
-  } = useManagePassword();
+  } = useManagePasswordUI();
+
+  const { isLoading, lockInfo, fetchLockInfo } = useWalletLockInfo();
+
+  useEffect(() => {
+    setManagePwdView('manage-password');
+
+    fetchLockInfo();
+  }, [isShowManagePassword, setManagePwdView, fetchLockInfo]);
 
   const { title, JClassName } = React.useMemo(() => {
     switch (managePwdView) {
@@ -42,7 +57,7 @@ export const ManagePasswordModal: React.FC = () => {
       case 'setup-password':
         return {
           title: 'Set Up Password',
-          JClassName: '',
+          JClassName: 'J-setup-password',
         };
     }
   }, [managePwdView]);
@@ -56,21 +71,27 @@ export const ManagePasswordModal: React.FC = () => {
       onCancel={() => setIsShowManagePassword(false)}
       className={clsx(`manage-password-modal`, JClassName)}
     >
-      {managePwdView === 'manage-password' && (
-        <ManagePasswordContent
-          onSetUpPassword={() => setManagePwdView('setup-password')}
-          // hasPassword={false}
-          hasPassword
-        />
+      {isLoading ? (
+        <Skeleton active className="w-[100%] h-[100px]" />
+      ) : (
+        <>
+          {managePwdView === 'manage-password' &&
+            (lockInfo.pwdStatus !== PasswordStatus.UseBuiltIn ? (
+              <HaventSetupPassWord />
+            ) : (
+              <HaveSetupPassword />
+            ))}
+          {managePwdView === 'setup-password' && (
+            <SetUpPasswordContent className="h-[100%]" />
+          )}
+          {managePwdView === 'change-password' && (
+            <ChangePasswordContent className="h-[100%]" />
+          )}
+          {managePwdView === 'cancel-password' && (
+            <CancelPasswordContent className="h-[100%]" />
+          )}
+        </>
       )}
-      {managePwdView === 'setup-password' && (
-        <SetUpPasswordContent
-          onCancel={() => setManagePwdView('manage-password')}
-          onConfirm={() => setManagePwdView('manage-password')}
-        />
-      )}
-      {managePwdView === 'change-password' && <ChangePasswordContent />}
-      {managePwdView === 'cancel-password' && <CancelPasswordContent />}
     </Modal>
   );
 };

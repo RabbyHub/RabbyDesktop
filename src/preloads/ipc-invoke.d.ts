@@ -13,7 +13,33 @@ type RabbyxInvokePayload = {
   };
 };
 
+type RabbyDesktopLockInfo = {
+  pwdStatus: import('@/isomorphic/wallet/lock').PasswordStatus;
+};
+
 type ChannelInvokePayload = {
+  'get-wallet-lock-info': {
+    send: [];
+    response: RabbyDesktopLockInfo;
+  };
+  'setup-wallet-password': {
+    send: [password: string];
+    response: {
+      error?: string | null;
+    };
+  };
+  'update-wallet-password': {
+    send: [oldPassword: string, newPassword: string];
+    response: {
+      error?: string | null;
+    };
+  };
+  'clear-wallet-password': {
+    send: [currentPwd: string];
+    response: {
+      error?: string | null;
+    };
+  };
   'get-app-version': {
     send: [];
     response: IAppVersions;

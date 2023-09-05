@@ -24,10 +24,13 @@ import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import ManageAddressModal from '@/renderer/components/AddressManagementModal/ManageAddress';
 import { atom, useAtom } from 'jotai';
 import { useShowTestnet } from '@/renderer/hooks/rabbyx/useShowTestnet';
-import { walletTestnetOpenapi } from '@/renderer/ipcRequest/rabbyx';
-import NetSwitchTabs from '@/renderer/components/PillsSwitch/NetSwitchTabs';
 import { ManagePasswordModal } from '@/renderer/components/ManagePasswordModal/ManagePasswordModal';
-import { useManagePassword } from '@/renderer/components/ManagePasswordModal/useManagePassword';
+import {
+  useWalletLockInfo,
+  useManagePasswordUI,
+} from '@/renderer/components/ManagePasswordModal/useManagePassword';
+import { useLockWallet } from '@/renderer/hooks/rabbyx/useUnlocked';
+import { PasswordStatus } from '@/isomorphic/wallet/lock';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
 import {
@@ -438,7 +441,11 @@ export function MainWindowSettings() {
   const { isShowTestnet, setIsShowTestnet } = useShowTestnet();
 
   const { setShowSupportedChains } = useSupportedChainsModal();
-  const { setIsShowManagePassword } = useManagePassword();
+  const { setIsShowManagePassword } = useManagePasswordUI();
+
+  const { lockWallet } = useLockWallet();
+
+  const { lockInfo } = useWalletLockInfo();
 
   return (
     <div className={styles.settingsPage}>
@@ -454,7 +461,11 @@ export function MainWindowSettings() {
               name="Lock Wallet"
               onClick={() => {
                 // If no password set, show set password modal
-                setIsShowManagePassword(true);
+                if (lockInfo.pwdStatus !== PasswordStatus.Custom) {
+                  setIsShowManagePassword(true);
+                } else {
+                  lockWallet();
+                }
               }}
               icon="rabby-internal://assets/icons/mainwin-settings/icon-lock-wallet.svg"
             >
