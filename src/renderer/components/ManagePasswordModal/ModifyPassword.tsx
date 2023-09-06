@@ -85,7 +85,7 @@ export function SetUpPasswordContent({ className }: { className?: string }) {
               },
             ]}
           >
-            <Input type="password" />
+            <Input type="password" autoFocus />
           </Form.Item>
 
           <Form.Item
@@ -217,7 +217,7 @@ export function ChangePasswordContent({ className }: { className?: string }) {
               },
             ]}
           >
-            <Input type="password" />
+            <Input type="password" autoFocus />
           </Form.Item>
 
           <Form.Item
@@ -366,6 +366,7 @@ export function CancelPasswordContent({ className }: { className?: string }) {
             <Input
               type="password"
               placeholder="Confirm cancellation by entering your password"
+              autoFocus
             />
           </Form.Item>
         </div>

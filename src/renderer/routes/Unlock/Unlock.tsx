@@ -2,7 +2,7 @@ import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import { useUnlocked } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { Button, message, Form } from 'antd';
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInterval } from '@/renderer/hooks/useTimer';
 
@@ -34,12 +34,19 @@ export const Unlock: React.FC = () => {
     [nav]
   );
 
-  useInterval(async () => {
+  const doCheck = useCallback(async () => {
     const nextUnlocked = await fetchUnlocked();
 
     if (nextUnlocked) {
       nav('/mainwin/home', { replace: true });
     }
+  }, [fetchUnlocked, nav]);
+
+  useEffect(() => {
+    doCheck();
+  }, [doCheck]);
+  useInterval(async () => {
+    doCheck();
   }, 250);
 
   const { formHasError, triggerCheckFormError } = useFormCheckError(form);
