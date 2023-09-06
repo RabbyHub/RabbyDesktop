@@ -42,6 +42,7 @@ import ModalSupportedChains, {
   CHAINS_TOTAL_COUNT,
   useSupportedChainsModal,
 } from './components/ModalSupportedChains';
+import { SignatureRecordModal } from './components/SignatureRecordModal';
 
 type TypedProps = {
   name: React.ReactNode;
@@ -432,6 +433,8 @@ export function MainWindowSettings() {
   const [isShowingClearPendingModal, setIsShowingClearPendingModal] =
     useState(false);
   const [isShowCustomRPCModal, setIsShowCustomRPCModal] = useState(false);
+  const [isShowSignatureRecordModal, setIsShowSignatureRecordModal] =
+    useState(false);
   const [isManageAddressModal, setIsManageAddressModal] = useState(false);
   const { isShowTestnet, setIsShowTestnet } = useShowTestnet();
 
@@ -447,16 +450,6 @@ export function MainWindowSettings() {
         <div className={styles.settingBlock}>
           <h4 className={styles.blockTitle}>Features</h4>
           <div className={styles.itemList}>
-            <ItemAction
-              name="Manage Address"
-              onClick={() => {
-                setIsManageAddressModal(true);
-              }}
-              icon="rabby-internal://assets/icons/mainwin-settings/icon-manage-address.svg"
-            >
-              <img src={IconChevronRight} />
-            </ItemAction>
-
             {/* <ItemAction
               name={
                 <Tooltip
@@ -471,22 +464,25 @@ export function MainWindowSettings() {
               icon="rabby-internal://assets/icons/mainwin-settings/icon-lock-wallet.svg"
             >
               <img src={IconChevronRight} />
-            </ItemAction>
+            </ItemAction> */}
             <ItemAction
-              name={
-                <Tooltip
-                  title="Comming Soon"
-                  arrowPointAtCenter
-                  trigger="hover"
-                >
-                  Signature Record
-                </Tooltip>
-              }
-              disabled
+              name="Signature Record"
               icon="rabby-internal://assets/icons/mainwin-settings/icon-signature-record.svg"
+              onClick={() => {
+                setIsShowSignatureRecordModal(true);
+              }}
             >
               <img src={IconChevronRight} />
-            </ItemAction> */}
+            </ItemAction>
+            <ItemAction
+              name="Manage Address"
+              onClick={() => {
+                setIsManageAddressModal(true);
+              }}
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-manage-address.svg"
+            >
+              <img src={IconChevronRight} />
+            </ItemAction>
           </div>
         </div>
 
@@ -769,6 +765,12 @@ export function MainWindowSettings() {
         visible={isManageAddressModal}
         onCancel={() => {
           setIsManageAddressModal(false);
+        }}
+      />
+      <SignatureRecordModal
+        open={isShowSignatureRecordModal}
+        onCancel={() => {
+          setIsShowSignatureRecordModal(false);
         }}
       />
     </div>
