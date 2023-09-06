@@ -197,6 +197,18 @@ export interface ContactBookItem {
   isContact: boolean;
 }
 
+export interface SignTextHistoryItem {
+  site: ConnectedSite;
+  createAt: number;
+  text: string;
+  type:
+    | 'personalSign'
+    | 'ethSignTypedData'
+    | 'ethSignTypedDataV1'
+    | 'ethSignTypedDataV3'
+    | 'ethSignTypedDataV4';
+}
+
 export type RabbyXMethod = {
   'walletController.requestETHRpc': (
     data: { method: string; params: any },
@@ -609,6 +621,12 @@ export type RabbyXMethod = {
   'walletController.getBlockedToken': () => Token[];
   'walletController.getIsShowTestnet': () => boolean;
   'walletController.setIsShowTestnet': (value: boolean) => void;
+  'walletController.getSignTextHistory': (
+    address: string
+  ) => SignTextHistoryItem[];
+  'walletController.loadPendingListQueue': (
+    address: string
+  ) => TransactionGroup[];
 } & GenOpenApiService<'openapi'> &
   GenOpenApiService<'testnetOpenapi'>;
 

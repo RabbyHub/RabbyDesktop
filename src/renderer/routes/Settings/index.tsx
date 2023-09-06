@@ -47,6 +47,7 @@ import ModalSupportedChains, {
   CHAINS_TOTAL_COUNT,
   useSupportedChainsModal,
 } from './components/ModalSupportedChains';
+import { SignatureRecordModal } from './components/SignatureRecordModal';
 
 type TypedProps = {
   name: React.ReactNode;
@@ -437,6 +438,8 @@ export function MainWindowSettings() {
   const [isShowingClearPendingModal, setIsShowingClearPendingModal] =
     useState(false);
   const [isShowCustomRPCModal, setIsShowCustomRPCModal] = useState(false);
+  const [isShowSignatureRecordModal, setIsShowSignatureRecordModal] =
+    useState(false);
   const [isManageAddressModal, setIsManageAddressModal] = useState(false);
   const { isShowTestnet, setIsShowTestnet } = useShowTestnet();
 
@@ -466,6 +469,15 @@ export function MainWindowSettings() {
                 }
               }}
               icon="rabby-internal://assets/icons/mainwin-settings/icon-lock-wallet.svg"
+            >
+              <img src={IconChevronRight} />
+            </ItemAction>
+            <ItemAction
+              name="Signature Record"
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-signature-record.svg"
+              onClick={() => {
+                setIsShowSignatureRecordModal(true);
+              }}
             >
               <img src={IconChevronRight} />
             </ItemAction>
@@ -771,6 +783,12 @@ export function MainWindowSettings() {
         visible={isManageAddressModal}
         onCancel={() => {
           setIsManageAddressModal(false);
+        }}
+      />
+      <SignatureRecordModal
+        open={isShowSignatureRecordModal}
+        onCancel={() => {
+          setIsShowSignatureRecordModal(false);
         }}
       />
     </div>
