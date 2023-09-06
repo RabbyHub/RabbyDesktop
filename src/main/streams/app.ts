@@ -251,6 +251,21 @@ onIpcMainEvent(
   }
 );
 
+async function doResetApp(mainWin: MainTabbedBrowserWindow) {
+  try {
+    clearAllStoreData();
+    clearAllUserData(mainWin.window.webContents.session);
+
+    const { backgroundWebContents } = await getRabbyExtViews();
+    await backgroundWebContents.executeJavaScript(
+      `chrome.storage.local.clear();`
+    );
+  } catch (e: any) {
+    console.error(e);
+    dialog.showErrorBox('Error', `Failed to clear Rabby Wallet Data.`);
+  }
+}
+
 onIpcMainEvent('__internal_rpc:app:reset-app', () => {
   emitIpcMainEvent('__internal_main:app:reset-app');
 });
@@ -273,17 +288,7 @@ onIpcMainInternalEvent('__internal_main:app:reset-app', async () => {
 
   appLog('reset app response:', result.response);
   if (result.response === confirmId) {
-    clearAllStoreData();
-    clearAllUserData(mainWin.window.webContents.session);
-
-    try {
-      const { backgroundWebContents } = await getRabbyExtViews();
-      await backgroundWebContents.executeJavaScript(
-        `chrome.storage.local.clear();`
-      );
-    } catch (e: any) {
-      dialog.showErrorBox('Error', `Failed to clear Rabby extension data.`);
-    }
+    await doResetApp(mainWin);
 
     await dialog.showMessageBox(mainWin.window, {
       title: 'Reset Rabby',
@@ -300,16 +305,7 @@ onIpcMainInternalEvent('__internal_main:app:reset-app', async () => {
 onIpcMainEvent('__internal_rpc:app:reset-wallet', async () => {
   const mainWin = await onMainWindowReady();
 
-  clearAllUserData(mainWin.window.webContents.session);
-
-  try {
-    const { backgroundWebContents } = await getRabbyExtViews();
-    await backgroundWebContents.executeJavaScript(
-      `chrome.storage.local.clear();`
-    );
-  } catch (e: any) {
-    dialog.showErrorBox('Error', `Failed to clear Rabby Wallet.`);
-  }
+  await doResetApp(mainWin);
 
   emitIpcMainEvent('__internal_main:app:relaunch');
 });
