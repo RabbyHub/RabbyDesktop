@@ -242,7 +242,6 @@ const ZPopupSubviewStateAtom = atom<NullableFields<IZPopupSubviewState>>({
   'select-add-address-type-modal': null,
   'gasket-modal-like-window': null,
   'safe-queue-modal': null,
-  'manage-password': null,
 });
 
 export function useZViewStates() {

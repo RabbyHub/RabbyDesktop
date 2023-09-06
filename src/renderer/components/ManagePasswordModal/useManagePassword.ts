@@ -1,8 +1,6 @@
 import { PasswordStatus } from '@/isomorphic/wallet/lock';
-import { useFormCheckError } from '@/renderer/hooks/useAntdForm';
-import { Form } from 'antd';
 import { atom, useAtom } from 'jotai';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 export type ManagePasswordViewType =
   | 'unknown'

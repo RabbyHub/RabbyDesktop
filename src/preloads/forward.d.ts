@@ -90,10 +90,6 @@ type ZViewStates = {
   };
 
   'trezor-like-cannot-use': ITrezorLikeCannotUserReason;
-
-  'manage-password': {
-    // nothing
-  };
 };
 
 type IZPopupSubviewState = {
