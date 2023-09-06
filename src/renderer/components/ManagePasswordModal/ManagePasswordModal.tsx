@@ -38,6 +38,11 @@ const Modal = styled<
     height: 100%;
   }
 
+  .ant-form-item-label
+    > label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
+    display: none;
+  }
+
   ${({ managePwdView, formErrorCounts }) => {
     return (
       managePwdView === 'setup-password' &&
@@ -130,6 +135,7 @@ export const ManagePasswordModal: React.FC = () => {
     <Modal
       width={480}
       title={title}
+      centered
       smallTitle
       open={isShowManagePassword}
       onCancel={() => setIsShowManagePassword(false)}

@@ -41,7 +41,7 @@ export function HaventSetupPassWord() {
   const { setManagePwdView } = useManagePasswordUI();
 
   return (
-    <section className="manage-password-content pt-[70px]">
+    <section className="manage-password-content pt-[70px] pb-[40px] h-[100%] flex flex-col justify-between items-center">
       <div className="text-center">
         <img
           src="rabby-internal://assets/icons/password/no-password.svg"
@@ -54,7 +54,7 @@ export function HaventSetupPassWord() {
           Set up a password to lock the app and secure your data
         </p>
       </div>
-      <div className="mt-[90px] w-[100%] flex justify-center">
+      <div className="w-[100%] flex justify-center">
         <Button
           onClick={() => {
             setManagePwdView('setup-password');

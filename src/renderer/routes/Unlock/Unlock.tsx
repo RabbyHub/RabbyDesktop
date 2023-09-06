@@ -73,7 +73,7 @@ export const Unlock: React.FC = () => {
           className={clsx(styles.form, 'w-[100%]')}
         >
           <Form.Item
-            className={clsx('rabby-antd-input-item w-[100%]')}
+            className={clsx('rabby-antd-input-item w-[100%] mb-[40px]')}
             name="password"
             // always show success status
             validateStatus="success"
@@ -98,7 +98,7 @@ export const Unlock: React.FC = () => {
               disabled={formHasError}
               htmlType="submit"
               type="primary"
-              className="w-[100%] h-[56px] text-[20px] font-medium rounded-6px"
+              className="w-[100%] h-[56px] text-[20px] font-medium rounded-6px mb-0"
             >
               Unlock
             </Button>
