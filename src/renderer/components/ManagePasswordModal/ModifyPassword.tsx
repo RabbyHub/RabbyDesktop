@@ -36,7 +36,7 @@ export function SetUpPasswordContent({ className }: { className?: string }) {
       setIsSubmitLoading(true);
 
       try {
-        await form.validateFields();
+        await triggerCheckFormError();
         await setupPassword(values.password);
 
         message.success({
@@ -64,7 +64,12 @@ export function SetUpPasswordContent({ className }: { className?: string }) {
         setIsSubmitLoading(false);
       }
     },
-    [form, setupPassword, setIsShowManagePassword, nextShownToLock]
+    [
+      triggerCheckFormError,
+      setupPassword,
+      setIsShowManagePassword,
+      nextShownToLock,
+    ]
   );
 
   return (
@@ -73,7 +78,6 @@ export function SetUpPasswordContent({ className }: { className?: string }) {
         layout="vertical"
         form={form}
         onFinish={handleSubmit}
-        onValuesChange={debounce(triggerCheckFormError, 150)}
         className="flex flex-col justify-between h-[100%]"
       >
         <div>
@@ -176,7 +180,7 @@ export function ChangePasswordContent({ className }: { className?: string }) {
       setIsSubmitLoading(true);
 
       try {
-        await form.validateFields();
+        await triggerCheckFormError();
         await updatePassword(values.currentPwd, values.newPwd);
 
         message.success({
@@ -200,7 +204,7 @@ export function ChangePasswordContent({ className }: { className?: string }) {
         setIsSubmitLoading(false);
       }
     },
-    [form, updatePassword, setIsShowManagePassword]
+    [triggerCheckFormError, updatePassword, setIsShowManagePassword]
   );
 
   return (
@@ -209,7 +213,6 @@ export function ChangePasswordContent({ className }: { className?: string }) {
         layout="vertical"
         form={form}
         onFinish={handleSubmit}
-        onValuesChange={debounce(triggerCheckFormError, 150)}
         className="flex flex-col justify-between h-[100%]"
         initialValues={INIT_FORM}
       >
@@ -268,7 +271,9 @@ export function ChangePasswordContent({ className }: { className?: string }) {
                 async validator(_, value) {
                   const newPassword = form.getFieldValue('newPwd');
 
-                  if (value && newPassword !== value) {
+                  if (!value) return;
+
+                  if (newPassword !== value) {
                     return Promise.reject(
                       new Error(
                         'The two passwords that you entered do not match!'
@@ -326,7 +331,7 @@ export function CancelPasswordContent({ className }: { className?: string }) {
       setIsSubmitLoading(true);
 
       try {
-        await form.validateFields();
+        await triggerCheckFormError();
 
         await cancelPassword(values.currentPwd);
         setIsShowManagePassword(false);
@@ -350,7 +355,7 @@ export function CancelPasswordContent({ className }: { className?: string }) {
         setIsSubmitLoading(false);
       }
     },
-    [form, cancelPassword, setIsShowManagePassword]
+    [triggerCheckFormError, cancelPassword, setIsShowManagePassword]
   );
 
   return (
@@ -358,7 +363,6 @@ export function CancelPasswordContent({ className }: { className?: string }) {
       <Form
         layout="vertical"
         onFinish={handleSubmit}
-        onValuesChange={debounce(triggerCheckFormError, 150)}
         className="flex flex-col justify-between h-[100%]"
       >
         <div>
