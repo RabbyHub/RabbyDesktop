@@ -73,16 +73,16 @@ export const Unlock: React.FC = () => {
           className={clsx(styles.form, 'w-[100%]')}
         >
           <Form.Item
-            className={clsx('rabby-antd-input-item w-[100%] mb-[40px]')}
+            className={clsx(
+              'rabby-antd-input-item w-[100%] mb-[40px] text-left'
+            )}
             name="password"
-            // always show success status
-            validateStatus="success"
             rules={[
               {
                 required: true,
                 // message: 'Please input new password!',
                 // put empty to hide error info
-                message: '',
+                message: 'Enter the password to Unlock',
               },
             ]}
           >

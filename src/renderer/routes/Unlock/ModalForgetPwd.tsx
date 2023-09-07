@@ -87,6 +87,7 @@ export const ModalForgetPwd: React.FC = () => {
       width={480}
       title="Forgot Password"
       smallTitle
+      centered
       className="common-light-modal"
       open={isShowModalForgetPwd}
       onCancel={() => setIsShowModalForgetPwd(false)}

@@ -14,6 +14,9 @@ import {
 } from './useManagePassword';
 import Input from '../AntdOverwrite/Input';
 
+const MINIMUM_PASSWORD_LENGTH = 8;
+const MINIMUM_PASSWORD_TIP = 'Password must be at least 8 characters long';
+
 export function SetUpPasswordContent({ className }: { className?: string }) {
   const { nextShownToLock, setManagePwdView, setIsShowManagePassword } =
     useManagePasswordUI();
@@ -83,9 +86,17 @@ export function SetUpPasswordContent({ className }: { className?: string }) {
                 required: true,
                 message: 'Please input password!',
               },
+              {
+                min: MINIMUM_PASSWORD_LENGTH,
+                message: MINIMUM_PASSWORD_TIP,
+              },
             ]}
           >
-            <Input type="password" autoFocus />
+            <Input
+              type="password"
+              placeholder={MINIMUM_PASSWORD_TIP}
+              autoFocus
+            />
           </Form.Item>
 
           <Form.Item
@@ -231,6 +242,10 @@ export function ChangePasswordContent({ className }: { className?: string }) {
               {
                 required: true,
                 message: 'Please input new password!',
+              },
+              {
+                min: MINIMUM_PASSWORD_LENGTH,
+                message: MINIMUM_PASSWORD_TIP,
               },
             ]}
           >
