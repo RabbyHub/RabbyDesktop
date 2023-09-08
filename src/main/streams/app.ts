@@ -44,7 +44,6 @@ import {
 import { valueToMainSubject } from './_init';
 import {
   getElectronChromeExtensions,
-  getWebuiExtId,
   onMainWindowReady,
   getRabbyExtViews,
   getAllMainUIWindows,
@@ -53,8 +52,13 @@ import { switchToBrowserTab } from '../utils/browser';
 import { getAppUserDataPath } from '../utils/store';
 import { getMainWinLastPosition } from '../utils/screen';
 import { clearAllStoreData, clearAllUserData } from '../utils/security';
-import { tryAutoUnlockRabbyX } from './rabbyIpcQuery/autoUnlock';
-import { alertAutoUnlockFailed } from './mainWindow';
+import {
+  getRabbyxLockInfo,
+  tryAutoUnlockRabbyX,
+  setupWalletPassword,
+  cancelCustomPassword,
+  updateWalletPassword,
+} from './rabbyIpcQuery/lockWallet';
 import { setupAppTray } from './appTray';
 import { checkForceUpdate } from '../updater/force_update';
 import { getOrCreateDappBoundTab } from '../utils/tabbedBrowserWindow';
@@ -217,6 +221,25 @@ handleIpcMainInvoke('get-os-info', () => {
   };
 });
 
+handleIpcMainInvoke('get-wallet-lock-info', async () => {
+  return getRabbyxLockInfo();
+});
+
+handleIpcMainInvoke('setup-wallet-password', async (_, newPassword) => {
+  return setupWalletPassword(newPassword);
+});
+
+handleIpcMainInvoke(
+  'update-wallet-password',
+  async (_, oldPassword, newPassword) => {
+    return updateWalletPassword(oldPassword, newPassword);
+  }
+);
+
+handleIpcMainInvoke('clear-wallet-password', async (_, currentPwd) => {
+  return cancelCustomPassword(currentPwd);
+});
+
 onIpcMainEvent(
   '__internal_rpc:app:open-external-url',
   async (evt, externalURL) => {
@@ -227,6 +250,21 @@ onIpcMainEvent(
     shell.openExternal(externalURL);
   }
 );
+
+async function doResetApp(mainWin: MainTabbedBrowserWindow) {
+  try {
+    clearAllStoreData();
+    clearAllUserData(mainWin.window.webContents.session);
+
+    const { backgroundWebContents } = await getRabbyExtViews();
+    await backgroundWebContents.executeJavaScript(
+      `chrome.storage.local.clear();`
+    );
+  } catch (e: any) {
+    console.error(e);
+    dialog.showErrorBox('Error', `Failed to clear Rabby Wallet Data.`);
+  }
+}
 
 onIpcMainEvent('__internal_rpc:app:reset-app', () => {
   emitIpcMainEvent('__internal_main:app:reset-app');
@@ -250,17 +288,7 @@ onIpcMainInternalEvent('__internal_main:app:reset-app', async () => {
 
   appLog('reset app response:', result.response);
   if (result.response === confirmId) {
-    clearAllStoreData();
-    clearAllUserData(mainWin.window.webContents.session);
-
-    try {
-      const { backgroundWebContents } = await getRabbyExtViews();
-      await backgroundWebContents.executeJavaScript(
-        `chrome.storage.local.clear();`
-      );
-    } catch (e: any) {
-      dialog.showErrorBox('Error', `Failed to clear Rabby extension data.`);
-    }
+    await doResetApp(mainWin);
 
     await dialog.showMessageBox(mainWin.window, {
       title: 'Reset Rabby',
@@ -273,6 +301,15 @@ onIpcMainInternalEvent('__internal_main:app:reset-app', async () => {
     emitIpcMainEvent('__internal_main:app:relaunch');
   }
 });
+
+onIpcMainEvent('__internal_rpc:app:reset-wallet', async () => {
+  const mainWin = await onMainWindowReady();
+
+  await doResetApp(mainWin);
+
+  emitIpcMainEvent('__internal_main:app:relaunch');
+});
+
 handleIpcMainInvoke('app-relaunch', (_, reasonType) => {
   switch (reasonType) {
     case 'trezor-like-used': {
@@ -434,9 +471,9 @@ export default function bootstrap() {
       emitIpcMainEvent('__internal_main:mainwindow:will-show-on-bootstrap');
     }, 200);
 
-    if (!useBuiltInPwd) {
-      alertAutoUnlockFailed();
-    }
+    // if (!useBuiltInPwd) {
+    //   alertAutoUnlockFailed();
+    // }
     // repairDappsFieldsOnBootstrap();
   });
 }

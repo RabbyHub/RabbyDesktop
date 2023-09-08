@@ -24,8 +24,13 @@ import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import ManageAddressModal from '@/renderer/components/AddressManagementModal/ManageAddress';
 import { atom, useAtom } from 'jotai';
 import { useShowTestnet } from '@/renderer/hooks/rabbyx/useShowTestnet';
-import { walletTestnetOpenapi } from '@/renderer/ipcRequest/rabbyx';
-import NetSwitchTabs from '@/renderer/components/PillsSwitch/NetSwitchTabs';
+import { ManagePasswordModal } from '@/renderer/components/ManagePasswordModal/ManagePasswordModal';
+import {
+  useWalletLockInfo,
+  useManagePasswordUI,
+} from '@/renderer/components/ManagePasswordModal/useManagePassword';
+import { requestLockWallet } from '@/renderer/hooks/rabbyx/useUnlocked';
+import { PasswordStatus } from '@/isomorphic/wallet/lock';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
 import {
@@ -439,6 +444,9 @@ export function MainWindowSettings() {
   const { isShowTestnet, setIsShowTestnet } = useShowTestnet();
 
   const { setShowSupportedChains } = useSupportedChainsModal();
+  const { setIsShowManagePassword } = useManagePasswordUI();
+
+  const { lockInfo } = useWalletLockInfo();
 
   return (
     <div className={styles.settingsPage}>
@@ -450,21 +458,20 @@ export function MainWindowSettings() {
         <div className={styles.settingBlock}>
           <h4 className={styles.blockTitle}>Features</h4>
           <div className={styles.itemList}>
-            {/* <ItemAction
-              name={
-                <Tooltip
-                  title="Comming Soon"
-                  arrowPointAtCenter
-                  trigger="hover"
-                >
-                  Lock Wallet
-                </Tooltip>
-              }
-              disabled
+            <ItemAction
+              name="Lock Wallet"
+              onClick={() => {
+                // If no password set, show set password modal
+                if (lockInfo.pwdStatus !== PasswordStatus.Custom) {
+                  setIsShowManagePassword(true, true);
+                } else {
+                  requestLockWallet();
+                }
+              }}
               icon="rabby-internal://assets/icons/mainwin-settings/icon-lock-wallet.svg"
             >
               <img src={IconChevronRight} />
-            </ItemAction> */}
+            </ItemAction>
             <ItemAction
               name="Signature Record"
               icon="rabby-internal://assets/icons/mainwin-settings/icon-signature-record.svg"
@@ -588,6 +595,15 @@ export function MainWindowSettings() {
                 setIsShowCustomRPCModal(true);
               }}
               icon="rabby-internal://assets/icons/mainwin-settings/icon-custom-rpc.svg"
+            >
+              <img src={IconChevronRight} />
+            </ItemAction>
+            <ItemAction
+              name="Manage Password"
+              onClick={() => {
+                setIsShowManagePassword(true);
+              }}
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-manage-password.svg"
             >
               <img src={IconChevronRight} />
             </ItemAction>
@@ -747,6 +763,8 @@ export function MainWindowSettings() {
 
       <ModalProxySetting />
       <ModalSupportedChains />
+
+      <ManagePasswordModal />
 
       <ClearPendingModal
         open={isShowingClearPendingModal}

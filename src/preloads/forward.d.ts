@@ -87,7 +87,6 @@ type ZViewStates = {
 
   'modal-dapp-type-not-supported': {
     tipType?: IValidDappType;
-    // nothing
   };
 
   'trezor-like-cannot-use': ITrezorLikeCannotUserReason;

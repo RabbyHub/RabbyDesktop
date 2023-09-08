@@ -9,7 +9,7 @@ export const RequireUnlock: React.FC<any> = ({ children }) => {
 
   React.useEffect(() => {
     if (!isUnlocked) {
-      return nav(`/unlock?from=${location.pathname}`, {
+      nav(`/unlock?from=${location.pathname}`, {
         replace: true,
       });
     }

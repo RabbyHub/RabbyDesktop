@@ -44,16 +44,22 @@ export const useAccountToDisplay = () => {
         })
         .flat(1)
         .map(async (item) => {
-          let balance = await walletController.getAddressCacheBalance(
-            item?.address
-          );
-          if (!balance) {
-            balance = await walletController.getAddressBalance(item?.address);
+          try {
+            let balance = await walletController.getAddressCacheBalance(
+              item?.address
+            );
+            if (!balance) {
+              balance = await walletController.getAddressBalance(item?.address);
+            }
+            return {
+              ...item,
+              balance: balance?.total_usd_value || 0,
+            };
+          } catch (error) {
+            console.error(error);
           }
-          return {
-            ...item,
-            balance: balance?.total_usd_value || 0,
-          };
+
+          return { ...item, balance: 0 };
         })
     );
 
@@ -122,7 +128,7 @@ export const useAccountToDisplay = () => {
 
   const updateAllBalance = React.useCallback(async () => {
     const queue = new PQueue({ concurrency: 10 });
-    let hasError = false;
+    let hasError: Error | undefined;
     const result = await queue.addAll(
       (accountsList || []).map((item) => {
         return async () => {
@@ -134,8 +140,8 @@ export const useAccountToDisplay = () => {
               ...item,
               balance: balance?.total_usd_value || 0,
             };
-          } catch (e) {
-            hasError = true;
+          } catch (e: any) {
+            hasError = e;
             return item;
           }
         };
@@ -145,7 +151,8 @@ export const useAccountToDisplay = () => {
     setAccountsList(result);
 
     if (hasError) {
-      throw new Error('updateAllBalance error');
+      hasError.message = `updateAllBalance error: ${hasError.message}`;
+      throw hasError;
     }
   }, [accountsList, setAccountsList]);
 

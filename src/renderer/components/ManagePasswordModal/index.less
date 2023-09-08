@@ -1,0 +1,67 @@
+.manage-password-modal {
+  .ant-modal-header {
+    height: 64px;
+  }
+
+  .ant-modal-close-x {
+    .icon {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  @offset-for-error: 80px;
+
+  .ant-modal-content {
+    transition: height 0.3s ease;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ant-btn-primary.ant-btn {
+    border-color: transparent;
+  }
+
+  .ant-form-item-label label {
+    color: var(--r-neutral-body, #D3D8E0);
+    font-size: 13px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  .setup-password-content {
+    padding: 20px;
+  }
+
+  .ant-form-item-control-input input {
+    height: 56px;
+  }
+
+  .ant-btn {
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+  }
+
+  .ant-form-item-explain {
+    padding-top: 8px;
+
+    .ant-form-item-explain-error {
+      color: var(--r-red-default, #EF5C48);
+      font-size: 13px;
+      font-weight: 400;
+      line-height: normal;
+    }
+  }
+
+  .rabby-antd-input-item {
+    margin-bottom: 20px;
+  }
+
+  .rabby-antd-input-item.ant-form-item-has-error + .rabby-antd-input-item {
+    padding-top: 20px;
+  }
+}

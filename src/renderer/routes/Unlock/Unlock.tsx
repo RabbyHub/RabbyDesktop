@@ -1,10 +1,17 @@
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import { useUnlocked } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
-import { Button, Col, Input, message, Row, Form } from 'antd';
-import React from 'react';
+import { Button, message, Form } from 'antd';
+import React, { useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useInterval } from '@/renderer/hooks/useTimer';
+
+import RcBrandName from '@/../assets/icons/unlock/brand-name.svg?rc';
+import clsx from 'clsx';
+import { useFormCheckError } from '@/renderer/hooks/useAntdForm';
+import { debounce } from 'lodash';
 import styles from './Unlock.module.less';
+import { ModalForgetPwd, useShowModalForgetPwd } from './ModalForgetPwd';
 
 interface FormData {
   password: string;
@@ -13,7 +20,7 @@ interface FormData {
 export const Unlock: React.FC = () => {
   const nav = useNavigate();
   const [form] = Form.useForm<FormData>();
-  const { isUnlocked } = useUnlocked();
+  const { fetchUnlocked } = useUnlocked();
 
   const onNext = React.useCallback(
     async ({ password }: FormData) => {
@@ -27,46 +34,88 @@ export const Unlock: React.FC = () => {
     [nav]
   );
 
-  React.useEffect(() => {
-    if (isUnlocked) {
-      nav('/', { replace: true });
+  const doCheck = useCallback(async () => {
+    const nextUnlocked = await fetchUnlocked();
+
+    if (nextUnlocked) {
+      nav('/mainwin/home', { replace: true });
     }
-  }, [isUnlocked, nav]);
+  }, [fetchUnlocked, nav]);
+
+  useEffect(() => {
+    doCheck();
+  }, [doCheck]);
+  useInterval(async () => {
+    doCheck();
+  }, 250);
+
+  const { formHasError, triggerCheckFormError } = useFormCheckError(form);
+
+  const { setIsShowModalForgetPwd } = useShowModalForgetPwd();
 
   return (
     <div className={styles.unlock}>
-      <Row align="middle" justify="center" className={styles.row}>
-        <Col span={9} className={styles.container}>
+      <div className={clsx(styles.centerWrapper, 'w-[400px]')}>
+        <div className={styles.logoArea}>
           <img
-            src="rabby-internal://assets/icons/common/logo.svg"
+            src="rabby-internal://assets/icons/unlock/logo.svg"
             alt="logo"
             className={styles.logo}
           />
-          <h1 className={styles.title}>Rabby Desktop</h1>
-          <Form form={form} onFinish={onNext}>
-            <Form.Item name="password">
-              <RabbyInput
-                className={styles.input}
-                placeholder="Enter the Password to Unlock"
-                type="password"
-                suffix={
-                  <Button
-                    htmlType="submit"
-                    type="link"
-                    className={styles.button}
-                  >
-                    <img
-                      src="rabby-internal://assets/icons/common/next.svg"
-                      alt="next button"
-                      className={styles.next}
-                    />
-                  </Button>
-                }
-              />
-            </Form.Item>
-          </Form>
-        </Col>
-      </Row>
+          <RcBrandName
+            className={clsx(styles.brandNameSvg, 'mt-[12px] mb-[80px]')}
+          />
+        </div>
+        <Form
+          form={form}
+          onFinish={onNext}
+          onValuesChange={debounce(triggerCheckFormError, 150)}
+          className={clsx(styles.form, 'w-[100%]')}
+        >
+          <Form.Item
+            className={clsx(
+              'rabby-antd-input-item w-[100%] mb-[40px] text-left'
+            )}
+            name="password"
+            rules={[
+              {
+                required: true,
+                // message: 'Please input new password!',
+                // put empty to hide error info
+                message: 'Enter the password to Unlock',
+              },
+            ]}
+          >
+            <RabbyInput
+              className={clsx(styles.input, 'w-[100%] h-[56px]')}
+              placeholder="Enter the Password to Unlock"
+              type="password"
+            />
+          </Form.Item>
+
+          <Form.Item>
+            <Button
+              disabled={formHasError}
+              htmlType="submit"
+              type="primary"
+              className="w-[100%] h-[56px] text-[20px] font-medium rounded-6px mb-0"
+            >
+              Unlock
+            </Button>
+          </Form.Item>
+
+          <div
+            className={styles.forgetPwd}
+            onClick={() => {
+              setIsShowModalForgetPwd(true);
+            }}
+          >
+            Forgot Password
+          </div>
+        </Form>
+      </div>
+
+      <ModalForgetPwd />
     </div>
   );
 };

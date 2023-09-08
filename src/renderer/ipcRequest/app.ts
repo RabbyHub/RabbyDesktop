@@ -9,6 +9,12 @@ export function requestResetApp() {
   window.rabbyDesktop.ipcRenderer.sendMessage('__internal_rpc:app:reset-app');
 }
 
+export function requestWalletPassword() {
+  window.rabbyDesktop.ipcRenderer.sendMessage(
+    '__internal_rpc:app:reset-wallet'
+  );
+}
+
 export function validateProxyConfig(
   url: string,
   proxyConfig: IAppProxyConf['proxySettings']

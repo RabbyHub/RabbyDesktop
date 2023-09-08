@@ -1,6 +1,7 @@
 @import '~antd/lib/style/themes/default.less';
 @import '~antd/dist/antd.less';
 @import './vars.less';
+@import './mixins.less';
 @import './overwrite-antd.less';
 @import './ant-message.less';
 
@@ -175,5 +176,69 @@ img {
   .ant-modal-confirm-btns {
     display: flex;
     justify-content: center;
+  }
+}
+
+.rabby-antd-input-item {
+  .ant-form-item-control .ant-form-item-control-input .ant-form-item-control-input-content input {
+    border-radius: 6px;
+    background: var(--r-neutral-card-1, rgba(255, 255, 255, 0.06));
+
+    &:hover, &:active {
+      background: var(--r-neutral-card-1, rgba(255, 255, 255, 0.06));
+    }
+
+    &, &::placeholder {
+      color: var(--r-neutral-body, #D3D8E0);
+      font-size: 13px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+  }
+
+  &:not(.ant-form-item-has-error) .ant-form-item-control-input-content input {
+    border: 1px solid var(--r-neutral-line, rgba(255, 255, 255, 0.10));
+
+    &:hover, &:active {
+      color: var(--r-neutral-title-1, #F7FAFC);
+      border: 1px solid var(--r-neutral-foot, #BABEC5);
+    }
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+
+  .ant-form-item-explain-error {
+    margin-top: 4px;
+  }
+}
+
+.ant-btn.ant-btn-background-ghost.rabby-antd-default-button {
+  border-radius: 4px;
+  color: var(--r-neutral-foot, #BABEC5);
+  border: 0.5px solid var(--r-neutral-foot, #BABEC5);
+
+  &:hover, &:active {
+    border-radius: 4px;
+    color: var(--r-neutral-body, #D3D8E0);
+    border: 0.5px solid var(--r-neutral-body, #D3D8E0);
+    background: var(--r-neutral-card-1, rgba(255, 255, 255, 0.06));
+  }
+}
+
+.common-light-modal {
+  .ant-modal-header {
+    height: 64px;
+  }
+
+  .ant-modal-close-x {
+    .hover-to-lighten;
+
+    .icon {
+      width: 20px;
+      height: 20px;
+    }
   }
 }
