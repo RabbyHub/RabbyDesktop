@@ -7,10 +7,12 @@ export async function getRabbyxLockInfo() {
   };
 
   try {
-    await rabbyxQuery('walletController.verifyPassword', [
+    const result = await rabbyxQuery('walletController.safeVerifyPassword', [
       RABBY_DESKTOP_KR_PWD,
     ]);
-    info.pwdStatus = PasswordStatus.UseBuiltIn;
+    info.pwdStatus = result?.success
+      ? PasswordStatus.UseBuiltIn
+      : PasswordStatus.Custom;
   } catch (e) {
     info.pwdStatus = PasswordStatus.Custom;
   }
@@ -59,7 +61,10 @@ export async function updateWalletPassword(
   if (result.error) return result;
 
   try {
-    await rabbyxQuery('walletController.verifyPassword', [oldPassword]);
+    const r = await rabbyxQuery('walletController.safeVerifyPassword', [
+      oldPassword,
+    ]);
+    if (r.error) throw new Error(ERRORS.CURRENT_IS_INCORRET);
   } catch (error) {
     result.error = ERRORS.CURRENT_IS_INCORRET;
     return result;
@@ -80,9 +85,11 @@ export async function updateWalletPassword(
 export async function cancelCustomPassword(currentPassword: string) {
   const result = getInitError(currentPassword);
   if (result.error) return result;
-
   try {
-    await rabbyxQuery('walletController.verifyPassword', [currentPassword]);
+    const r = await rabbyxQuery('walletController.safeVerifyPassword', [
+      currentPassword,
+    ]);
+    if (r.error) throw new Error(ERRORS.CURRENT_IS_INCORRET);
   } catch (error) {
     result.error = ERRORS.CURRENT_IS_INCORRET;
     return result;
