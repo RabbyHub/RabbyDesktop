@@ -1,28 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import classNames from 'classnames';
-import { openExternalUrl, requestResetApp } from '@/renderer/ipcRequest/app';
+import React, { useState } from 'react';
 
 import {
   IconChevronRight,
   IconTooltipInfo,
 } from '@/../assets/icons/mainwin-settings';
 
-import { Button, Modal, Slider, SwitchProps, Tooltip, message } from 'antd';
+import { Modal, Tooltip } from 'antd';
 import { useSettings } from '@/renderer/hooks/useSettings';
 import styled from 'styled-components';
 import {
   APP_BRANDNAME,
-  DAPP_ZOOM_VALUES,
   FORCE_DISABLE_CONTENT_PROTECTION,
   IS_RUNTIME_PRODUCTION,
 } from '@/isomorphic/constants';
 import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
 import { ModalConfirmInSettings } from '@/renderer/components/Modal/Confirm';
-import { Switch } from '@/renderer/components/Switch/Switch';
 import { ucfirst } from '@/isomorphic/string';
-import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import ManageAddressModal from '@/renderer/components/AddressManagementModal/ManageAddress';
-import { atom, useAtom } from 'jotai';
 import { useShowTestnet } from '@/renderer/hooks/rabbyx/useShowTestnet';
 import { ManagePasswordModal } from '@/renderer/components/ManagePasswordModal/ManagePasswordModal';
 import {
@@ -31,14 +25,10 @@ import {
 } from '@/renderer/components/ManagePasswordModal/useManagePassword';
 import { requestLockWallet } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { PasswordStatus } from '@/isomorphic/wallet/lock';
+import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
-import {
-  useIsViewingDevices,
-  useProxyStateOnSettingPage,
-} from './settingHooks';
-import ModalDevices from './components/ModalDevices';
-import { testRequestDevice } from './components/ModalDevices/useFilteredDevices';
+import { useProxyStateOnSettingPage } from './settingHooks';
 import { ClearPendingModal } from './components/ClearPendingModal';
 import { UpdateArea } from './components/UpdateArea';
 import { CustomRPCModal } from './components/CustomRPCModal';
@@ -48,184 +38,13 @@ import ModalSupportedChains, {
   useSupportedChainsModal,
 } from './components/ModalSupportedChains';
 import { SignatureRecordModal } from './components/SignatureRecordModal';
-
-type TypedProps = {
-  name: React.ReactNode;
-  className?: string;
-  icon?: string;
-  iconBase64?: string;
-  disabled?: boolean;
-} & (
-  | {
-      type: 'text';
-      text?: string;
-    }
-  | {
-      type: 'action';
-      // onClick?: () => void;
-      onClick?: React.DOMAttributes<HTMLDivElement>['onClick'];
-    }
-  | {
-      type: 'switch';
-      checked: SwitchProps['checked'];
-      onChange?: SwitchProps['onChange'];
-    }
-  | {
-      type: 'link';
-      link: string;
-      useChevron?: boolean;
-    }
-);
-
-function ItemPartialLeft({ name, icon }: Pick<TypedProps, 'name' | 'icon'>) {
-  return (
-    <div className={styles.itemLeft}>
-      {icon && <img className={styles.itemIcon} src={icon} />}
-      <div className={styles.itemName}>{name}</div>
-    </div>
-  );
-}
-
-function ItemText({
-  children,
-  disabled = false,
-  ...props
-}: React.PropsWithChildren<Omit<TypedProps & { type: 'text' }, 'type'>>) {
-  return (
-    <div
-      className={classNames(
-        styles.typedItem,
-        disabled && styles.disabled,
-        props.className
-      )}
-    >
-      <ItemPartialLeft name={props.name} icon={props.icon} />
-      <div className={styles.itemRight}>{props.text || children}</div>
-    </div>
-  );
-}
-
-function ItemLink({
-  children,
-  ...props
-}: React.PropsWithChildren<Omit<TypedProps & { type: 'link' }, 'type'>>) {
-  return (
-    <div
-      className={classNames(styles.typedItem, styles.pointer, props.className)}
-      onClick={() => {
-        openExternalUrl(props.link);
-      }}
-    >
-      <ItemPartialLeft name={props.name} icon={props.icon} />
-      <div className={styles.itemRight}>
-        {children}
-        <img src={IconChevronRight} />
-      </div>
-    </div>
-  );
-}
-
-function ItemAction({
-  children,
-  disabled = false,
-  ...props
-}: React.PropsWithChildren<Omit<TypedProps & { type: 'action' }, 'type'>>) {
-  return (
-    <div
-      className={classNames(
-        styles.typedItem,
-        disabled ? styles.disabled : styles.pointer,
-        props.className
-      )}
-      onClick={!disabled ? props.onClick : undefined}
-    >
-      <ItemPartialLeft name={props.name} icon={props.icon} />
-      <div className={styles.itemRight}>{children}</div>
-    </div>
-  );
-}
-
-function ItemSwitch({
-  children,
-  ...props
-}: React.PropsWithChildren<Omit<TypedProps & { type: 'switch' }, 'type'>>) {
-  return (
-    <div className={classNames(styles.typedItem, props.className)}>
-      <ItemPartialLeft name={props.name} icon={props.icon} />
-      <div className={styles.itemRight}>
-        <Switch checked={props.checked} onChange={props.onChange} />
-      </div>
-    </div>
-  );
-}
-
-function FooterLink({
-  className,
-  name,
-  iconURL,
-  text,
-  link,
-}: React.PropsWithChildren<{
-  className?: string;
-  name?: string;
-  iconURL?: string;
-  text?: string;
-  link: string;
-}>) {
-  return (
-    <div
-      className={classNames(styles.footerLinkItem, className)}
-      onClick={() => {
-        openExternalUrl(link);
-      }}
-    >
-      {iconURL ? (
-        <Tooltip placement="top" title={name}>
-          <img alt={name} src={iconURL} />
-        </Tooltip>
-      ) : (
-        <span className={styles.text}>{text || name}</span>
-      )}
-    </div>
-  );
-}
-
-function ImageAsLink({
-  className,
-  altName,
-  iconURL,
-  link,
-  disableTooltip = false,
-  tooltipProps,
-}: React.PropsWithChildren<{
-  className?: string;
-  altName?: string;
-  iconURL?: string;
-  link: string;
-  disableTooltip?: boolean;
-  tooltipProps?: React.ComponentProps<typeof Tooltip>;
-}>) {
-  return (
-    <Tooltip
-      placement="top"
-      arrowPointAtCenter
-      {...tooltipProps}
-      {...(disableTooltip && {
-        visible: false,
-      })}
-      title={link}
-    >
-      <img
-        alt={altName}
-        src={iconURL}
-        className={classNames(styles.imageAsLink, className)}
-        onClick={() => {
-          openExternalUrl(link);
-        }}
-      />
-    </Tooltip>
-  );
-}
+import {
+  ItemText,
+  ItemLink,
+  ItemAction,
+  ItemSwitch,
+  ImageAsLink,
+} from './SettingArtifacts';
 
 const ProxyText = styled.div`
   display: flex;
@@ -240,187 +59,6 @@ const ProxyText = styled.div`
     text-decoration: underline;
   }
 `;
-
-const debugStateAtom =
-  atom<IDebugStates['isGhostWindowDebugHighlighted']>(false);
-function DeveloperKitsParts() {
-  const [isGhostWindowDebugHighlighted, setIsGhostWindowDebugHighlighted] =
-    useAtom(debugStateAtom);
-
-  const { setIsViewingDevices } = useIsViewingDevices();
-  const { settings, adjustDappViewZoomPercent } = useSettings();
-
-  if (IS_RUNTIME_PRODUCTION) return null;
-
-  return (
-    <>
-      <div className={styles.settingBlock}>
-        <h4 className={styles.blockTitle}>Developer Kits</h4>
-        <div className={styles.itemList}>
-          <ItemAction
-            name="Devices"
-            icon="rabby-internal://assets/icons/developer-kits/usb.svg"
-            onClick={() => {
-              setIsViewingDevices(true);
-            }}
-          >
-            <Button
-              type="primary"
-              ghost
-              onClick={(evt) => {
-                evt.stopPropagation();
-                testRequestDevice();
-              }}
-            >
-              <code>hid.requestDevices()</code>
-            </Button>
-          </ItemAction>
-          <ItemAction
-            name="Camera"
-            icon="rabby-internal://assets/icons/developer-kits/camera.svg"
-          >
-            <Button
-              type="primary"
-              ghost
-              className="mr-[8px]"
-              onClick={(evt) => {
-                evt.stopPropagation();
-                window.rabbyDesktop.ipcRenderer
-                  .invoke('start-select-camera')
-                  .then((result) => {
-                    if (result.isCanceled) {
-                      message.info('User Canceled');
-                    } else {
-                      message.success(
-                        `[${result.selectId}] Selected camera with ID: ${result.constrains?.label}`
-                      );
-                    }
-                  });
-              }}
-            >
-              <code>Query Selected Camera</code>
-            </Button>
-            <Button
-              type="primary"
-              ghost
-              className="mr-[8px]"
-              onClick={(evt) => {
-                evt.stopPropagation();
-                window.rabbyDesktop.ipcRenderer
-                  .invoke('start-select-camera', { forceUserSelect: true })
-                  .then((result) => {
-                    if (result.isCanceled) {
-                      message.info('User Canceled');
-                    } else {
-                      message.success(
-                        `[${result.selectId}] Selected camera with ID: ${result.constrains?.label}`
-                      );
-                    }
-                  });
-              }}
-            >
-              <code>Force Select Camera</code>
-            </Button>
-          </ItemAction>
-          <ItemSwitch
-            checked={isGhostWindowDebugHighlighted}
-            icon="rabby-internal://assets/icons/developer-kits/ghost.svg"
-            name={
-              <>
-                <div>
-                  <Tooltip
-                    trigger="hover"
-                    title={
-                      <>
-                        <ul className="pl-[12px] pl-[8px] pt-[8px]">
-                          <li>
-                            Ghost window ONLY visible if there's element need to
-                            be rendered, otherwise it will be hidden by set
-                            opacity to 0.
-                          </li>
-                          <li className="mt-[8px]">
-                            On development, you can enable this option to make
-                            it highlighted with light blue background.
-                          </li>
-                        </ul>
-                      </>
-                    }
-                  >
-                    <span className="text-14 font-medium">
-                      Toggle Ghost Window Highlight
-                      <img
-                        className="ml-[4px] w-[18px] h-[18px] inline-block"
-                        src="rabby-internal://assets/icons/mainwin-settings/info.svg"
-                        alt=""
-                      />
-                    </span>
-                  </Tooltip>
-                </div>
-              </>
-            }
-            onChange={(nextEnabled: boolean) => {
-              setIsGhostWindowDebugHighlighted(nextEnabled);
-              forwardMessageTo('top-ghost-window', 'debug:toggle-highlight', {
-                payload: {
-                  isHighlight: nextEnabled,
-                },
-              });
-            }}
-          />
-          <ItemAction
-            name={<span className={styles.dangerText}>Reset App</span>}
-            icon="rabby-internal://assets/icons/mainwin-settings/reset.svg"
-            onClick={() => {
-              requestResetApp();
-            }}
-          />
-          <ItemAction
-            name={<span className={styles.dangerText}>Reset Signs</span>}
-            icon="rabby-internal://assets/icons/mainwin-settings/reset.svg"
-            onClick={() => {
-              window.rabbyDesktop.ipcRenderer.sendMessage(
-                '__internal_rpc:app:reset-rabbyx-approvals'
-              );
-            }}
-          />
-
-          <ItemText
-            name="Dapp Zoom Ratio"
-            icon="rabby-internal://assets/icons/mainwin-settings/icon-dapp-zoom.svg"
-          >
-            <Slider
-              className="w-[300px]"
-              value={settings.experimentalDappViewZoomPercent}
-              marks={{
-                [DAPP_ZOOM_VALUES.MIN_ZOOM_PERCENT]: {
-                  style: { color: '#fff', fontSize: 12 },
-                  label: `${DAPP_ZOOM_VALUES.MIN_ZOOM_PERCENT}%`,
-                },
-                [DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT]: {
-                  style: { color: '#fff', fontSize: 12 },
-                  label: `${DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT}%`,
-                },
-                [DAPP_ZOOM_VALUES.MAX_ZOOM_PERCENT]: {
-                  style: { color: '#fff', fontSize: 12 },
-                  label: `${DAPP_ZOOM_VALUES.MAX_ZOOM_PERCENT}%`,
-                },
-              }}
-              tooltip={{
-                formatter: (value) => `${value}%`,
-              }}
-              min={DAPP_ZOOM_VALUES.MIN_ZOOM_PERCENT}
-              max={DAPP_ZOOM_VALUES.MAX_ZOOM_PERCENT}
-              onChange={(value) => {
-                adjustDappViewZoomPercent(value);
-              }}
-            />
-          </ItemText>
-        </div>
-      </div>
-      <ModalDevices />
-    </>
-  );
-}
 
 export function MainWindowSettings() {
   const {
@@ -447,6 +85,8 @@ export function MainWindowSettings() {
   const { setIsShowManagePassword } = useManagePasswordUI();
 
   const { lockInfo } = useWalletLockInfo();
+
+  const nav = useNavigate();
 
   return (
     <div className={styles.settingsPage}>
@@ -704,6 +344,17 @@ export function MainWindowSettings() {
         <div className={styles.settingBlock}>
           <h4 className={styles.blockTitle}>About us</h4>
           <div className={styles.itemList}>
+            {!IS_RUNTIME_PRODUCTION && (
+              <ItemAction
+                name="Developer Kits (Dev Only)"
+                onClick={() => {
+                  nav('/mainwin/settings/developer');
+                }}
+                icon="rabby-internal://assets/icons/developer-kits/entry.svg"
+              >
+                <img src={IconChevronRight} />
+              </ItemAction>
+            )}
             <ItemLink
               name="Privacy Policy"
               link="https://rabby.io/docs/privacy"
@@ -744,12 +395,6 @@ export function MainWindowSettings() {
           </div>
         </div>
       </div>
-
-      {!IS_RUNTIME_PRODUCTION && (
-        <div className={styles.settingItems}>
-          <DeveloperKitsParts />
-        </div>
-      )}
 
       <div className={styles.settingFooter}>
         <ImageAsLink
