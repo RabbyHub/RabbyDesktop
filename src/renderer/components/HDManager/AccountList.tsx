@@ -10,6 +10,7 @@ import { splitNumberByStep } from '@/renderer/utils/number';
 import { isNil } from 'lodash';
 import { useAccountToDisplay } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
 import { KEYRING_CLASS } from '@/renderer/utils/constant';
+import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { AddToRabby } from './AddToRabby';
 import { MAX_ACCOUNT_COUNT } from './AdvancedSettings';
 import { AccountListSkeleton } from './AccountListSkeleton';
@@ -144,6 +145,7 @@ export const AccountList: React.FC<Props> = ({
       }
       await walletController.updateAlianName(account.address, value);
       updateCurrentAccountAliasName(account.address, value);
+      forwardMessageTo('*', 'refreshCurrentAccount', {});
     },
     []
   );
