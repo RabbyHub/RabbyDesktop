@@ -29,23 +29,23 @@ export function useTipCannotUseTrezorLike() {
         onCancel: () => {
           delayCloseSubview(150);
         },
-        ...(svState?.reasonType === 'used-one' && {
-          title: `Unable to use ${ucfirst(svState.cannotUse)}`,
-          content: (
-            <>
-              You have used {ucfirst(svState.haveUsed)}, which is in conflict
-              with {ucfirst(svState.cannotUse)}. To connect with{' '}
-              {ucfirst(svState.cannotUse)}, please restart the {APP_BRANDNAME}.
-            </>
-          ),
-          okText: 'Restart',
-          onOk: () => {
-            window.rabbyDesktop.ipcRenderer.invoke(
-              'app-relaunch',
-              'trezor-like-used'
-            );
-          },
-        }),
+        // ...(svState?.reasonType === 'used-one' && {
+        //   title: `Unable to use ${ucfirst(svState.cannotUse)}`,
+        //   content: (
+        //     <>
+        //       You have used {ucfirst(svState.haveUsed)}, which is in conflict
+        //       with {ucfirst(svState.cannotUse)}. To connect with{' '}
+        //       {ucfirst(svState.cannotUse)}, please restart the {APP_BRANDNAME}.
+        //     </>
+        //   ),
+        //   okText: 'Restart',
+        //   onOk: () => {
+        //     window.rabbyDesktop.ipcRenderer.invoke(
+        //       'app-relaunch',
+        //       'trezor-like-used'
+        //     );
+        //   },
+        // }),
         ...(svState?.reasonType === 'enabled-ipfs' && {
           title: `Unable to use ${ucfirst(svState.cannotUse)}`,
           content: (

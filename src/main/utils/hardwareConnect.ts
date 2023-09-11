@@ -54,14 +54,6 @@ export function getTrezorLikeCannotUse(openType: IHardwareConnectPageType) {
     });
   }
 
-  if (trezorLikeState.openedType && trezorLikeState.openedType !== openType) {
-    reasons.push({
-      reasonType: 'used-one',
-      haveUsed: trezorLikeState.openedType,
-      cannotUse: openType,
-    });
-  }
-
   return reasons;
 }
 
@@ -72,17 +64,6 @@ export function alertCannotUseDueTo(reason?: ITrezorLikeCannotUserReason) {
         visible: true,
         state: {
           reasonType: 'enabled-ipfs',
-          cannotUse: reason.cannotUse,
-        },
-      },
-    });
-  } else if (reason?.reasonType === 'used-one') {
-    pushChangesToZPopupLayer({
-      'trezor-like-cannot-use': {
-        visible: true,
-        state: {
-          reasonType: reason.reasonType,
-          haveUsed: reason.haveUsed,
           cannotUse: reason.cannotUse,
         },
       },

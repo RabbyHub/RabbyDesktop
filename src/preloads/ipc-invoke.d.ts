@@ -258,10 +258,21 @@ type ChannelInvokePayload = {
     };
   };
   'check-trezor-like-cannot-use': {
-    send: [openType: IHardwareConnectPageType];
+    send: [openType: IHardwareConnectPageType, alertModal?: boolean];
     response: {
       reasons: ITrezorLikeCannotUserReason[];
       couldContinue: boolean;
+    };
+  };
+  'get-trezor-like-availability': {
+    send: [];
+    response: {
+      trezor: {
+        reasons: ITrezorLikeCannotUserReason[];
+      };
+      onekey: {
+        reasons: ITrezorLikeCannotUserReason[];
+      };
     };
   };
   'app-relaunch': {

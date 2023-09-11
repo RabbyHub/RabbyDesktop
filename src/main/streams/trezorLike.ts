@@ -4,15 +4,25 @@ import {
 } from '../utils/hardwareConnect';
 import { handleIpcMainInvoke } from '../utils/ipcMainEvents';
 
-handleIpcMainInvoke('check-trezor-like-cannot-use', (_, key) => {
-  const reasons = getTrezorLikeCannotUse(key);
+handleIpcMainInvoke(
+  'check-trezor-like-cannot-use',
+  (_, key, alertModal = true) => {
+    const reasons = getTrezorLikeCannotUse(key);
 
-  if (reasons[0]) {
-    alertCannotUseDueTo(reasons[0]);
+    if (alertModal && reasons[0]) {
+      alertCannotUseDueTo(reasons[0]);
+    }
+
+    return {
+      reasons,
+      couldContinue: reasons.length === 0,
+    };
   }
+);
 
+handleIpcMainInvoke('get-trezor-like-availability', (_) => {
   return {
-    reasons,
-    couldContinue: reasons.length === 0,
+    trezor: { reasons: getTrezorLikeCannotUse('trezor') },
+    onekey: { reasons: getTrezorLikeCannotUse('onekey') },
   };
 });
