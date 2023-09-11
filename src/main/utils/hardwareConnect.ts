@@ -216,8 +216,6 @@ export async function createTrezorLikeConnectPageWindow(
     // const { backgroundWebContents } = await getRabbyExtViews();
     // backgroundWebContents.executeJavaScript(`window._TrezorConnect.dispose();`);
     // // backgroundWebContents.executeJavaScript(`window._TrezorConnect.cancel();`);
-    // backgroundWebContents.executeJavaScript(`window._OnekeyConnect.dispose();`);
-    // // backgroundWebContents.executeJavaScript(`window._OnekeyConnect.cancel();`);
     pushChangesToZPopupLayer({
       'gasket-modal-like-window': {
         visible: false,
