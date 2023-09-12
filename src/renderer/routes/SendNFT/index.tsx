@@ -31,6 +31,7 @@ import NumberInput from '@/renderer/components/NFTNumberInput';
 import IconExternal from '@/../assets/icons/tx-toast/external-link.svg';
 import { copyText } from '@/renderer/utils/clipboard';
 import { TipsWrapper } from '@/renderer/components/TipWrapper';
+import IconRcLoading from '@/../assets/icons/swap/loading.svg?rc';
 import styled from 'styled-components';
 import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import { usePrevious } from 'react-use';
@@ -39,6 +40,7 @@ import { useContactsByAddr } from '@/renderer/hooks/rabbyx/useContact';
 import { confirmAddToWhitelistModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToWhitelist';
 import { confirmAddToContactsModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToContacts';
 import AccountSearchInput from '@/renderer/components/AccountSearchInput';
+import { useRefState } from '@/renderer/hooks/useRefState';
 import { ContactListModal } from '../SendToken/components/ContactListModal';
 import { ContactEditModal } from '../SendToken/components/ContactEditModal';
 import { ChainRender, ChainSelect } from '../Swap/component/ChainSelect';
@@ -372,6 +374,11 @@ const SendNFT = () => {
     null
   );
   const [inited, setInited] = useState(false);
+  const {
+    state: isSubmitLoading,
+    stateRef: isSubmittingRef,
+    setRefState: setIsSubmittingRef,
+  } = useRefState(false);
   const [sendAlianName, setSendAlianName] = useState<string | null>(null);
   const [showEditContactModal, setShowEditContactModal] = useState(false);
   const [showListContactModal, setShowListContactModal] = useState(false);
@@ -486,6 +493,9 @@ const SendNFT = () => {
   }) => {
     if (!nftItem) return;
 
+    if (isSubmittingRef.current) return;
+    setIsSubmittingRef(true);
+
     try {
       matomoRequestEvent({
         category: 'Send',
@@ -518,6 +528,8 @@ const SendNFT = () => {
       );
     } catch (e) {
       message.error((e as any)?.message);
+    } finally {
+      setIsSubmittingRef(false);
     }
   };
 
@@ -838,11 +850,16 @@ const SendNFT = () => {
 
           <div className="footer flex justify-center">
             <Button
-              disabled={!canSubmit}
+              disabled={!canSubmit || isSubmitLoading}
               type="primary"
               htmlType="submit"
               size="large"
               className="sendBtn"
+              icon={
+                isSubmitLoading ? (
+                  <IconRcLoading className="animate-spin" />
+                ) : null
+              }
             >
               Send
             </Button>

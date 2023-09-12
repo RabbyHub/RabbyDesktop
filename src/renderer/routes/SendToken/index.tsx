@@ -33,6 +33,7 @@ import { confirmAddToContactsModalPromise } from '@/renderer/components/Modal/co
 import { findChainByServerID } from '@/renderer/utils/chain';
 import AccountSearchInput from '@/renderer/components/AccountSearchInput';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
+import { useRefState } from '@/renderer/hooks/useRefState';
 import GasSelector from './components/GasSelector';
 import GasReserved from './components/GasReserved';
 import { ChainRender, ChainSelect } from '../Swap/component/ChainSelect';
@@ -294,7 +295,11 @@ const SendTokenInner = () => {
   const [editBtnDisabled, setEditBtnDisabled] = useState(true);
   const [cacheAmount, setCacheAmount] = useState('0');
   const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitLoading, setIsSubmitLoading] = useState(false);
+  const {
+    state: isSubmitLoading,
+    stateRef: isSubmittingRef,
+    setRefState: setIsSubmittingRef,
+  } = useRefState(false);
   const [balanceError, setBalanceError] = useState<string | null>(null);
   const [balanceWarn, setBalanceWarn] = useState<string | null>(null);
   const [showGasReserved, setShowGasReserved] = useState(false);
@@ -453,6 +458,9 @@ const SendTokenInner = () => {
     to: string;
     amount: string;
   }) => {
+    if (isSubmittingRef.current) return;
+    setIsSubmittingRef(true);
+
     const target = Object.values(CHAINS).find(
       (item) => item.serverId === currentToken.chain
     )!;
@@ -544,6 +552,7 @@ const SendTokenInner = () => {
     } catch (e: any) {
       message.error(e.message);
     } finally {
+      setIsSubmittingRef(false);
       setAmountFocus(true);
     }
   };
