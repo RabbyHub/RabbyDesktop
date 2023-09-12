@@ -183,17 +183,21 @@ img {
   .ant-form-item-control .ant-form-item-control-input .ant-form-item-control-input-content input {
     border-radius: 6px;
     background: var(--r-neutral-card-1, rgba(255, 255, 255, 0.06));
+    color: var(--r-neutral-body, #D3D8E0);
 
     &:hover, &:active {
       background: var(--r-neutral-card-1, rgba(255, 255, 255, 0.06));
     }
 
     &, &::placeholder {
-      color: var(--r-neutral-body, #D3D8E0);
       font-size: 13px;
       font-style: normal;
       font-weight: 400;
       line-height: normal;
+    }
+
+    &::placeholder {
+      color: var(--r-neutral-foot, #BABEC5);
     }
   }
 
