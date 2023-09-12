@@ -4,6 +4,7 @@ import { sortAccountsByBalance } from '@/renderer/utils/account';
 import { atom, useAtom } from 'jotai';
 import PQueue from 'p-queue';
 import React from 'react';
+import { useMessageForwarded } from '../useViewsMessage';
 
 type IDisplayedAccount = Required<DisplayedKeyring['accounts'][number]>;
 export type IDisplayedAccountWithBalance = IDisplayedAccount & {
@@ -104,6 +105,16 @@ export const useAccountToDisplay = () => {
       }
     );
   }, [getAllAccountsToDisplay]);
+
+  useMessageForwarded(
+    {
+      targetView: '*',
+      type: 'refreshAccountList',
+    },
+    () => {
+      getAllAccountsToDisplay();
+    }
+  );
 
   const updateBalance = React.useCallback(
     async (address: string) => {

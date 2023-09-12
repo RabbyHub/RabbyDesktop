@@ -167,6 +167,16 @@ export function useAccounts(opts?: {
     }
   }, [disableAutoFetch, fetchAccounts]);
 
+  useMessageForwarded(
+    {
+      targetView: '*',
+      type: 'refreshAccountList',
+    },
+    () => {
+      fetchAccounts();
+    }
+  );
+
   return {
     accounts,
     fetchAccounts,

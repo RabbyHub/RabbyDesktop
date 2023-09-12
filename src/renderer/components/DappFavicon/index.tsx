@@ -6,6 +6,7 @@ import { CHAINS } from '@/renderer/utils/constant';
 import { covertIpfsHttpToRabbyIpfs } from '@/isomorphic/custom-scheme';
 import { getOriginName, hashCode } from '../../utils';
 import './index.less';
+import { TooltipWithMagnetArrow } from '../Tooltip/TooltipWithMagnetArrow';
 
 const bgColorList = [
   '#F69373',
@@ -38,17 +39,27 @@ interface FaviconProps extends ImageProps {
   origin: string;
   chain?: CHAINS_ENUM;
   iconStyle?: React.CSSProperties;
+  isShowChainTooltip?: boolean;
 }
 
 export const DappFavicon = (props: FaviconProps) => {
-  const { origin, src, chain, rootClassName, ...rest } = props;
+  const {
+    origin,
+    src,
+    chain,
+    rootClassName,
+    isShowChainTooltip = false,
+    ...rest
+  } = props;
   const fallbackImage = useFallbackImage(origin);
-  const chainLogo = useMemo(() => {
+  const chainInfo = useMemo(() => {
     if (chain) {
-      return CHAINS[chain]?.logo;
+      return CHAINS[chain];
     }
     return null;
   }, [chain]);
+
+  const chainLogo = chainInfo?.logo;
 
   return (
     <div className={clsx('rabby-dapp-favicon', rootClassName)}>
@@ -59,7 +70,19 @@ export const DappFavicon = (props: FaviconProps) => {
         {...rest}
       />
       {chainLogo && (
-        <img src={chainLogo} alt="" className="rabby-dapp-favicon-chain" />
+        <>
+          {isShowChainTooltip && chainInfo ? (
+            <TooltipWithMagnetArrow title={chainInfo?.name}>
+              <img
+                src={chainLogo}
+                alt=""
+                className="rabby-dapp-favicon-chain"
+              />
+            </TooltipWithMagnetArrow>
+          ) : (
+            <img src={chainLogo} alt="" className="rabby-dapp-favicon-chain" />
+          )}
+        </>
       )}
     </div>
   );

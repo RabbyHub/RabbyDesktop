@@ -30,6 +30,11 @@
       opacity: 1;
     }
   }
+
+  .routeItem {
+    padding-left: 0;
+  }
+
   &.isFold {
     --mainwin-sidebar-w: 66px;
 
@@ -43,11 +48,18 @@
       height: 40px;
       display: none;
     }
-    .routeItem {
-      padding-left: 19px;
+
+    .routeItemInner {
+      justify-content: center;
+      padding: 0;
+      // padding-left: 12px;
     }
+
     .routeTitle {
       opacity: 0;
+      padding: 0;
+      flex-shrink: 1;
+      display: none;
     }
 
     .divider {
@@ -135,7 +147,6 @@
     cursor: pointer;
     width: 100%;
     box-sizing: border-box;
-    padding-left: 20px;
     overflow: hidden;
     position: relative;
 
@@ -168,6 +179,10 @@
     &:not(.active):hover {
       background: rgba(0, 0, 0, 0.1);
     }
+  }
+
+  .routeItemInner {
+    padding-left: 20px;
   }
 
   .routeLogo {

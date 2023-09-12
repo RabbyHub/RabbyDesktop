@@ -521,7 +521,7 @@ const TransactionItem = ({
                       className={clsx('icon icon-action', {
                         'cursor-not-allowed': !canCancel,
                       })}
-                      src="rabby-internal://assets/icons/home/action-speedup.svg"
+                      src="rabby-internal://assets/icons/signature-record/speed-up.svg"
                       onClick={handleClickSpeedUp}
                     />
                   </Tooltip>
@@ -531,7 +531,7 @@ const TransactionItem = ({
                       className={clsx('icon icon-action', {
                         'cursor-not-allowed': !canCancel,
                       })}
-                      src="rabby-internal://assets/icons/home/action-cancel.svg"
+                      src="rabby-internal://assets/icons/signature-record/close.svg"
                       onClick={handleClickCancel}
                     />
                   </Tooltip>
