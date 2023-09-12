@@ -1,7 +1,23 @@
 
-v0.33.0 / 2023-09-01
+v0.34.0 / 2023-09-12
 ====================
 
+  * chore: update currentVersion.
+  * fix: style of "More" entry.
+  * feat: support more chains, some ux adjust (#541)
+  * fix: swap multi click (#540)
+  * feat: style fix & tuning. (#539)
+  * feat: move developer kits to standalone route. (#538)
+  * feat: adapt to new version onekey sdk. (#537)
+  * fix: refresh current account when changing the alianname in the hd manager (#536)
+  * fix: rabbyx version.
+  * feat: support manage password and lock app. (#535)
+  * feat: add signature record (#534)
+
+v0.33.0-prod / 2023-09-01
+=========================
+
+  * Release v0.33.0-prod
   * chore: update currentVersion.
   * feat: switch to corresponding tab on open tx modal. (#533)
   * fix: margin bottom
