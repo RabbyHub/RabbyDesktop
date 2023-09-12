@@ -43,6 +43,8 @@ import { NFT } from '@/renderer/routes/NFT';
 import SendNFT from '@/renderer/routes/SendNFT';
 import ApprovalManagePage from '@/renderer/routes/ApprovalManagePage';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { MainWindowSettingsDeveloperKits } from '@/renderer/routes/Settings/Developer';
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import styles from './index.module.less';
 
 import MainWindowRoute from './MainRoute';
@@ -233,6 +235,19 @@ const router = createRouter([
         loader: () => {
           return {
             title: 'Settings',
+          } as MainWindowRouteData;
+        },
+      },
+      {
+        path: 'settings/developer',
+        element: IS_RUNTIME_PRODUCTION ? (
+          <></>
+        ) : (
+          <MainWindowSettingsDeveloperKits />
+        ),
+        loader: () => {
+          return {
+            title: 'Developer Kits',
           } as MainWindowRouteData;
         },
       },
