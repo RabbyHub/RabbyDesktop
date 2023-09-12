@@ -588,14 +588,18 @@ export const SwapToken = () => {
 
   const [isInfiniteApproval, setIsInfiniteApproval] = useState(false);
 
+  const isTransactingRef = useRef(false);
+
   const gotoSwap = useCallback(
     async (unlimited = false) => {
+      if (isTransactingRef.current) return;
       if (
         payToken?.id &&
         !activeProvider?.error &&
         activeProvider?.quote &&
         activeProvider?.gasPrice
       ) {
+        isTransactingRef.current = true;
         try {
           setIsInfiniteApproval(unlimited);
           const hash = await walletController.dexSwap(
@@ -648,6 +652,7 @@ export const SwapToken = () => {
         } catch (e) {
           console.error('gotoSwap error:', e);
         } finally {
+          isTransactingRef.current = false;
           refresh?.();
         }
       }
