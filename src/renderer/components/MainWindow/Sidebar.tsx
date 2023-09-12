@@ -594,15 +594,15 @@ export default function MainWindowSidebar() {
                           : 0.6
                       }
                     >
-                      More
-                      {hasNewRelease ? (
-                        <span>
+                      <span>
+                        More
+                        {hasNewRelease ? (
                           <img
                             className="ml-[9px]"
                             src="rabby-internal://assets/icons/mainwin-sidebar/icon-detected-update.svg"
                           />
-                        </span>
-                      ) : null}
+                        ) : null}
+                      </span>
                     </Hide>
                   </div>
                 </li>
