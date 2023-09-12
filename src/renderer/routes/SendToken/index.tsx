@@ -32,6 +32,7 @@ import { useContactsByAddr } from '@/renderer/hooks/rabbyx/useContact';
 import { confirmAddToContactsModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToContacts';
 import { findChainByServerID } from '@/renderer/utils/chain';
 import AccountSearchInput from '@/renderer/components/AccountSearchInput';
+import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import GasSelector from './components/GasSelector';
 import GasReserved from './components/GasReserved';
 import { ChainRender, ChainSelect } from '../Swap/component/ChainSelect';
@@ -912,6 +913,7 @@ const SendTokenInner = () => {
         // trigger fetch contactInfo
         const values = form.getFieldsValue();
         handleFormValuesChange(null, { ...values });
+        forwardMessageTo('*', 'refreshAccountList', {});
         // trigger get balance of address
         // await wallet.getAddressBalance(result.contactAddrAdded, true);
       },

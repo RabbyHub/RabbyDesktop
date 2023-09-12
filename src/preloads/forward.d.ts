@@ -149,6 +149,10 @@ type ChannelForwardMessageType =
     }
   | {
       targetView: '*';
+      type: 'refreshAccountList';
+    }
+  | {
+      targetView: '*';
       type: 'refreshCurrentAccount';
     }
   | {
