@@ -127,7 +127,7 @@ export function SetUpPasswordContent({ className }: { className?: string }) {
               },
             ]}
           >
-            <Input type="password" />
+            <Input type="password" placeholder="Confirm Password" />
           </Form.Item>
         </div>
         <div className="flex">
