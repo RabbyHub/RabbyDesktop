@@ -196,6 +196,7 @@ export const DAppBlock = ({
             origin={dapp.origin}
             src={dapp.faviconBase64 ? dapp.faviconBase64 : dapp.faviconUrl}
             chain={connectedSite?.chain}
+            isShowChainTooltip
           />
           <div className="infos pr-[16px]">
             <h4 className="dapp-alias">{dapp.alias}</h4>
