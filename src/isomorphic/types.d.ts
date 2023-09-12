@@ -619,16 +619,10 @@ type IAppSession = {
   checkingProxySession: Electron.Session;
 };
 
-type ITrezorLikeCannotUserReason =
-  | {
-      reasonType: 'used-one';
-      haveUsed: IHardwareConnectPageType;
-      cannotUse: IHardwareConnectPageType;
-    }
-  | {
-      reasonType: 'enabled-ipfs';
-      cannotUse: IHardwareConnectPageType;
-    };
+type ITrezorLikeCannotUserReason = {
+  reasonType: 'enabled-ipfs';
+  cannotUse: IHardwareConnectPageType;
+};
 // --------- BUNDLE -----------
 interface CommonBundleAccount {
   id?: string;

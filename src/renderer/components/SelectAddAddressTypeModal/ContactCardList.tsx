@@ -11,6 +11,7 @@ interface Item {
   name: string;
   id: string;
   brand?: WALLET_BRAND_TYPES;
+  isDisabledTrezorLike?: React.ReactNode;
 }
 
 export interface Props {
@@ -65,7 +66,13 @@ export const ContactTypeCardList: React.FC<Props> = ({
       </div>
       <div className={clsx(styles.body, 'gap-x-[10px] gap-y-[5px]')}>
         {list.map((item) => (
-          <div onClick={() => handleClick(item)} className={styles.device}>
+          <div
+            onClick={() => handleClick(item)}
+            className={clsx(
+              styles.device,
+              item.isDisabledTrezorLike && 'opacity-70'
+            )}
+          >
             <div className={styles.deviceLogo}>
               <img width="100%" src={item.logo} />
               {item.bridge && (

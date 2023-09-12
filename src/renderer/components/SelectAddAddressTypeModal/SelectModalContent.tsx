@@ -5,6 +5,7 @@ import {
   WALLET_BRAND_TYPES,
 } from '@/renderer/utils/constant';
 import React from 'react';
+import { useTrezorLikeAvailablity } from '@/renderer/hooks-ipc/useTrezorLike';
 import { ContactTypeCard } from './ContactCard';
 import styles from './index.module.less';
 import { ContactTypeCardList } from './ContactCardList';
@@ -72,13 +73,63 @@ interface Props {
 }
 
 export const SelectModalContent: React.FC<Props> = ({ onSelectType }) => {
+  const { trezorLikeAvailability, requestAlertIfCannotUse } =
+    useTrezorLikeAvailablity();
+
+  const { trezorItem, onekeyItem, hardwareMap } = React.useMemo(() => {
+    const result = {
+      trezorItem: trezorLikeAvailability.find(
+        (item) => item.cannotUse === 'trezor'
+      ),
+      onekeyItem: trezorLikeAvailability.find(
+        (item) => item.cannotUse === 'onekey'
+      ),
+      hardwareMap: HARDWARE_MAP,
+    };
+    if (!trezorLikeAvailability?.length) return result;
+
+    result.hardwareMap = result.hardwareMap.map((item) => {
+      if (
+        (item.id === KEYRING_CLASS.HARDWARE.TREZOR &&
+          result.trezorItem?.reasonType === 'enabled-ipfs') ||
+        (item.id === KEYRING_CLASS.HARDWARE.ONEKEY &&
+          result.onekeyItem?.reasonType === 'enabled-ipfs')
+      ) {
+        return {
+          ...item,
+          isDisabledTrezorLike: true,
+        };
+      }
+
+      return item;
+    });
+
+    return result;
+  }, [trezorLikeAvailability]);
+
   return (
     <div className={styles.SelectModalContent}>
       <ContactTypeCardList
         logo="rabby-internal://assets/icons/add-address/device.svg"
         title="Connect Hardware Wallets"
-        list={HARDWARE_MAP}
-        onAction={onSelectType}
+        list={hardwareMap}
+        onAction={(type, brand) => {
+          if (
+            type === KEYRING_CLASS.HARDWARE.TREZOR &&
+            trezorItem?.reasonType === 'enabled-ipfs'
+          ) {
+            requestAlertIfCannotUse('trezor');
+            return;
+          }
+          if (
+            type === KEYRING_CLASS.HARDWARE.ONEKEY &&
+            onekeyItem?.reasonType === 'enabled-ipfs'
+          ) {
+            requestAlertIfCannotUse('onekey');
+            return;
+          }
+          onSelectType(type, brand);
+        }}
       />
 
       <ContactTypeCardList
