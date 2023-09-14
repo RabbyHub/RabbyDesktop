@@ -153,10 +153,10 @@ export async function safeOpenURL(
 
     const openedTab = opts.redirectSourceTab || findTabResult.finalTab;
 
-    if (openedTab?._webContents) {
+    if (openedTab?.tabWebContents) {
       let shouldLoad = false;
       const targetInfo = canoicalizeDappUrl(targetURL);
-      const currentURL = openedTab._webContents.getURL();
+      const currentURL = openedTab.tabWebContents.getURL();
       const currentInfo = canoicalizeDappUrl(currentURL);
 
       if (opts.redirectSourceTab) {
@@ -167,7 +167,7 @@ export async function safeOpenURL(
           currentInfo.isWWWSubDomain ||
           targetInfo.secondaryDomain !== currentInfo.secondaryDomain;
 
-        const openedTabURL = findTabResult.finalTab._webContents?.getURL();
+        const openedTabURL = findTabResult.finalTab.tabWebContents?.getURL();
 
         // for those cases:
         // 1. SPA redirect

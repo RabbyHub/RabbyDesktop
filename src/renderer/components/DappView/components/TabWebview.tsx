@@ -1,14 +1,7 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { useLatestDappScreenshot } from '@/renderer/hooks-shell/useMainWindow';
 import { useIsAnimating } from '@/renderer/hooks/useSidebar';
 import classNames from 'classnames';
-import {
-  getWebviewTagsPark,
-  queryTabWebviewTag,
-  toggleShowElement,
-} from '@/isomorphic/dom-helpers';
-import { SAFE_WEBPREFERENCES } from '@/isomorphic/constants';
-import { stringifyWebPreferences } from '@/isomorphic/string';
 import styles from '../index.module.less';
 
 /**
@@ -51,37 +44,6 @@ export default function TabWebview({
 
     obs.observe(divEl);
 
-    const webviewTagObj = {
-      value: null as Electron.WebviewTag | null,
-    };
-
-    window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:tabbed-window2:show-webview',
-      (payload) => {
-        const webviewTag = queryTabWebviewTag(
-          payload
-        ) as Electron.WebviewTag | null;
-
-        webviewTagObj.value = webviewTag;
-
-        if (!webviewTag) return;
-
-        // // TODO: should we make sure it's not loading?
-        // webviewTag.stop();
-        toggleShowElement(webviewTag, true);
-
-        if (!divEl.contains(webviewTag)) {
-          // getWebviewTagsPark().removeChild(webviewTag);
-          // divEl.appendChild(webviewTag);
-
-          webviewTag.style.left = `${payload.viewBounds.x}px`;
-          webviewTag.style.top = `${payload.viewBounds.y}px`;
-          webviewTag.style.width = `${payload.viewBounds.width}px`;
-          webviewTag.style.height = `${payload.viewBounds.height}px`;
-        }
-      }
-    );
-
     return () => {
       obs.unobserve(divEl);
       window.rabbyDesktop.ipcRenderer.sendMessage(
@@ -107,14 +69,14 @@ export default function TabWebview({
         isAnimating && styles.isAnimating
       )}
     >
-      {imageDataURL && (
+      {/* {imageDataURL && (
         <div
           className={styles.activeDappScreenshot}
           style={{
             backgroundImage: `url(${imageDataURL})`,
           }}
         />
-      )}
+      )} */}
       <div id="app-webview-tags" />
     </div>
   );

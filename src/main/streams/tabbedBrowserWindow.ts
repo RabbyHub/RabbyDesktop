@@ -148,7 +148,8 @@ export async function createRabbyxNotificationWindow({
     toggleMaskViaOpenedRabbyxNotificationWindow();
   });
 
-  win.tabs.tabList[0]?._patchWindowBuiltInMethods();
+  await win.tabs.tabList[0]?.whenWebContentsReady();
+  // ._patchWindowBuiltInMethods();
 
   RABBYX_WINDOWID_S.add(windowId);
   toggleMaskViaOpenedRabbyxNotificationWindow();
@@ -168,16 +169,16 @@ handleIpcMainInvoke('get-webui-ext-navinfo', async (event, tabId) => {
   const tabbedWin = getTabbedWindowFromWebContents(webContents);
   const tab = tabbedWin?.tabs.get(tabId);
   // TODO: always respond message
-  if (!tab?._webContents) {
+  if (!tab?.tabWebContents) {
     throw new Error('tab not found');
   }
 
-  const tabUrl = tab._webContents!.getURL();
+  const tabUrl = tab.tabWebContents!.getURL();
   // const checkResult = isUrlFromDapp(tabUrl)
   //   ? await getOrPutCheckResult(tabUrl, { updateOnSet: false })
   //   : null;
 
-  const isDestroyed = !tab._webContents || tab._webContents.isDestroyed();
+  const isDestroyed = !tab.tabWebContents || tab.tabWebContents.isDestroyed();
 
   let dapp: IDapp | undefined;
   if (tabbedWin?.isMainWindow() && tab.relatedDappId) {
@@ -190,8 +191,8 @@ handleIpcMainInvoke('get-webui-ext-navinfo', async (event, tabId) => {
       tabUrl,
       dapp,
       dappSecurityCheckResult: null,
-      canGoBack: isDestroyed ? false : !!tab._webContents?.canGoBack(),
-      canGoForward: isDestroyed ? false : !!tab._webContents?.canGoForward(),
+      canGoBack: isDestroyed ? false : !!tab.tabWebContents?.canGoBack(),
+      canGoForward: isDestroyed ? false : !!tab.tabWebContents?.canGoForward(),
     },
   };
 });
@@ -206,7 +207,7 @@ onIpcMainEvent('__internal_rpc:browser-dev:openDevTools', (evt) => {
 onIpcMainEvent('__internal_webui-window-close', (_, winId, webContentsId) => {
   const tabbedWindow = findByWindowId(winId);
   const tabToClose = tabbedWindow?.tabs.tabList.find((tab) => {
-    if (tab._webContents && tab._webContents.id === webContentsId) {
+    if (tab.tabWebContents && tab.tabWebContents.id === webContentsId) {
       return true;
     }
     return false;
@@ -333,7 +334,7 @@ onIpcMainEvent(
     const tab = mainTabbedWin.tabs.get(tabId);
     if (!tab) return;
 
-    tab._webContents?.stop();
+    tab.tabWebContents?.stop();
   }
 );
 
@@ -377,12 +378,12 @@ onMainWindowReady().then((mainTabbedWin) => {
 //       .subscribe((count) => {
 //         const activeTab = mainTabbedWin.tabs.selected;
 //         if (!mainWindow) return;
-//         if (!activeTab?.view || activeTab._webContents.isDestroyed())
+//         if (!activeTab?.view || activeTab.tabWebContents.isDestroyed())
 //           return;
 
 //         if (count > 1) {
 //           if (!activeTab?.view) return;
-//           if (activeTab._webContents.isLoading()) return;
+//           if (activeTab.tabWebContents.isLoading()) return;
 
 //           activeTab.hide();
 //         } else {
@@ -548,7 +549,7 @@ onIpcMainSyncEvent('__internal_rpc:app:request-tab-mutex', async (evt) => {
     return;
   }
 
-  if (tabbedWin.tabs.selected?._webContents?.id === callerWebContents.id) {
+  if (tabbedWin.tabs.selected?.tabWebContents?.id === callerWebContents.id) {
     evt.returnValue = { windowExisted: true };
   } else {
     tabWaitActiveMutexPools.push({

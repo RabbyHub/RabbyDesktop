@@ -18,9 +18,15 @@ type ChannelPushToWebContentsForWebviewTabs = {
       preloadPath: string;
       blankPage: string;
     };
+    tabMeta: {
+      initDetails?: Partial<chrome.tabs.CreateProperties>;
+      webuiType?: IShellWebUIType;
+      relatedDappId?: string;
+    };
   }>;
 
   '__internal_push:tabbed-window2:show-webview': WebViewExChgData<{
+    isDappWebview: boolean;
     viewBounds: Electron.Rectangle;
   }>;
 

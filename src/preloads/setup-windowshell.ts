@@ -15,11 +15,10 @@ export function setupWindowShell() {
     let tagsPark = getWebviewTagsPark();
     if (!tagsPark) {
       tagsPark = document.createElement('div');
+      tagsPark.setAttribute('data-creation', '2');
     }
 
-    // tagsPark.style.display = 'none';
     toggleShowElement(tagsPark, true);
-    tagsPark.setAttribute('data-creation', '2');
 
     tagsPark.id = 'webview-tags';
     document.body.appendChild(tagsPark);
@@ -33,11 +32,10 @@ export function setupWindowShell() {
         (document.createElement('webview') as Electron.WebviewTag);
       webviewTag.setAttribute('r-tab-uid', payload.tabUid);
       webviewTag.setAttribute('r-for-windowid', `${payload.windowId}`);
-      webviewTag.setAttribute('r-related-dappid', payload.relatedDappId ?? '');
       // webviewTag.setAttribute('session', 'persit:default');
 
       // webviewTag.setAttribute('autosize', 'true');
-      webviewTag.style.display = 'none';
+      toggleShowElement(webviewTag, false);
 
       webviewTag.setAttribute(
         'webpreferences',
@@ -53,20 +51,18 @@ export function setupWindowShell() {
       // const openSrc = payload.relatedDappId ?? payload.additionalData.blankPage;
 
       // init open blank page to fast trigger chrome.tabs.onUpdated
-      const openSrc = payload.additionalData.blankPage;
-
+      // let openSrc = payload.additionalData.blankPage;
+      let openSrc = 'about:blank';
+      if (
+        payload.tabMeta.webuiType !== 'MainWindow' &&
+        payload.tabMeta.initDetails?.url
+      ) {
+        openSrc = payload.tabMeta.initDetails.url;
+      }
       // TODO: maybe sometimes we can open relatedDappId directly?
-      webviewTag.src = openSrc;
       webviewTag.setAttribute('src', openSrc);
 
-      getWebviewTagsPark().appendChild(webviewTag);
-
       webviewTag.addEventListener('dom-ready', () => {
-        const iframeEle = webviewTag.shadowRoot?.querySelector('iframe');
-        if (iframeEle) {
-          iframeEle.style.height = '100%';
-        }
-
         const cEvent = new CustomEvent<WebviewTagExchgMatches>(
           'webviewTagCreated',
           {
@@ -78,7 +74,36 @@ export function setupWindowShell() {
         );
 
         document.dispatchEvent(cEvent);
+
+        const iframeEle = webviewTag.shadowRoot?.querySelector('iframe');
+        if (iframeEle) {
+          iframeEle.style.height = '100%';
+        }
       });
+
+      getWebviewTagsPark().appendChild(webviewTag);
+    }
+  );
+
+  ipcRendererObj.on(
+    '__internal_push:tabbed-window2:show-webview',
+    (payload) => {
+      const webviewTag = queryTabWebviewTag(
+        payload
+      ) as Electron.WebviewTag | null;
+
+      console.log('[feat] webviewTag', webviewTag);
+
+      if (!webviewTag) return;
+
+      toggleShowElement(webviewTag, true);
+
+      if (!payload.isDappWebview) {
+        webviewTag.style.left = `${payload.viewBounds.x}px`;
+        webviewTag.style.top = `${payload.viewBounds.y}px`;
+        webviewTag.style.width = `${payload.viewBounds.width}px`;
+        webviewTag.style.height = `${payload.viewBounds.height}px`;
+      }
     }
   );
 

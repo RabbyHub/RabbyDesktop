@@ -6,8 +6,8 @@ import { queryTabWebviewTag } from '@/isomorphic/dom-helpers';
 
 // const webviewTagPools: Electron.WebviewTag[] = [];
 
-const listener = (evnet: CustomEvent<WebviewTagExchgMatches>) => {
-  const detail = evnet.detail;
+const listener = (event: CustomEvent<WebviewTagExchgMatches>) => {
+  const detail = event.detail;
   const webviewTag = queryTabWebviewTag(detail);
 
   if (!webviewTag) {

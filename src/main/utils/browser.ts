@@ -124,7 +124,7 @@ export function createPopupModalWindow(
     frame: !!opts.frame,
     webPreferences: {
       ...SAFE_WEBPREFERENCES,
-      webviewTag: false,
+      webviewTag: true,
     },
   });
 
@@ -422,7 +422,7 @@ export async function getOrRecordTitlebarOffset(record?: {
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
-        webviewTag: false,
+        webviewTag: true,
         sandbox: true,
       },
     });

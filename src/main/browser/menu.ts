@@ -47,7 +47,7 @@ export async function setupAppMenu() {
             label: 'Force Reload',
             accelerator: 'Shift+CmdOrCtrl+R',
             nonNativeMacOSRole: true,
-            click: () => getFocusedTab()?._webContents?.reloadIgnoringCache(),
+            click: () => getFocusedTab()?.tabWebContents?.reloadIgnoringCache(),
           },
           {
             label: 'Find In Dapp',
@@ -112,7 +112,7 @@ export async function setupAppMenu() {
 
               const tab = getFocusedTab();
               let webContents: Electron.WebContents | null | undefined =
-                tab?._webContents;
+                tab?.tabWebContents;
               if (!webContents) {
                 webContents = getFocusedWindow()?.window.webContents;
               }

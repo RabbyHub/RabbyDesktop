@@ -17,6 +17,7 @@ import {
   firstValueFrom,
   fromEvent,
   lastValueFrom,
+  tap,
 } from 'rxjs';
 import { randString } from '@/isomorphic/string';
 import { NATIVE_HEADER_H } from '../../isomorphic/const-size-classical';
@@ -40,26 +41,13 @@ import {
 import { getMainWindowTopOffset } from '../utils/browserSize';
 import { getRabbyExtId } from '../utils/stream-helpers';
 
-const viewMngr = new BrowserViewManager(
-  {
-    webPreferences: {
-      safeDialogs: true,
-      safeDialogsMessage: 'Stop consecutive dialogs',
-      preload: getAssetPath('./preloads/dappViewPreload.js'),
-      webviewTag: false,
-    },
-  },
-  {
-    destroyOnRecycle: true,
-  }
-);
-
+type CreatedWindowPayload = {
+  webContentsId: number;
+  windowWebContentsId?: number;
+  payload: GetInvokeMethodParams<'__internal_rpc:tabbed-window2:created-webview'>[0];
+};
 export const WebviewTagBasedViewOb$s = {
-  createdWebview: new Subject<{
-    webContentsId: number;
-    windowWebContentsId?: number;
-    payload: GetInvokeMethodParams<'__internal_rpc:tabbed-window2:created-webview'>[0];
-  }>(),
+  createdWebview: new Subject<CreatedWindowPayload>(),
 };
 
 const isDarwin = process.platform === 'darwin';
@@ -90,6 +78,8 @@ export class Tab {
   // view?: BrowserView;
 
   tabUid: string;
+
+  private _waitTabCreated: Promise<CreatedWindowPayload>;
 
   window?: BrowserWindow;
 
@@ -147,13 +137,6 @@ export class Tab {
       dappZoomPercent = 100;
     }
 
-    // this.view = viewMngr.allocateView({
-    //   webPreferences: {
-    //     zoomFactor: formatZoomValue(dappZoomPercent).zoomFactor,
-    //   },
-    // });
-
-    // this.id = this.view.webContents.id;
     this.window = ofWindow;
     this.windowId = ofWindow.id;
 
@@ -166,26 +149,26 @@ export class Tab {
 
     this.tabUid = randString();
 
-    this._addSub(
-      WebviewTagBasedViewOb$s.createdWebview
-        .pipe(
-          filter(
-            (creation) =>
-              creation.payload.windowId === ofWindow.id &&
-              creation.payload.tabUid === this.tabUid
-          )
+    this._waitTabCreated = firstValueFrom(
+      WebviewTagBasedViewOb$s.createdWebview.pipe(
+        filter(
+          (creation) =>
+            creation.payload.windowId === ofWindow.id &&
+            creation.payload.tabUid === this.tabUid
         )
-        .subscribe((creation) => {
-          this.webContents = webContents.fromId(
-            creation.payload.webviewTagWebContentsId
-          );
-          this._setupWebContents(this.webContents);
-          this.tabs.emit('tab-webcontents-created', {
-            tabUid: this.tabUid,
-            webContentsId: this.webContents.id,
-          });
-        })
+      )
     );
+
+    this._waitTabCreated.then((creation) => {
+      this.webContents = webContents.fromId(
+        creation.payload.webviewTagWebContentsId
+      );
+      this._setupWebContents(this.webContents);
+      this.tabs.emit('tab-webcontents-created', {
+        tabUid: this.tabUid,
+        webContentsId: this.webContents.id,
+      });
+    });
 
     getRabbyExtId().then((rabbyExtId) => {
       sendToWebContents(
@@ -199,6 +182,11 @@ export class Tab {
             preloadPath: getAssetPath('./preloads/dappViewPreload.js'),
             blankPage: `chrome-extension://${rabbyExtId}/blank.html`,
           },
+          tabMeta: {
+            initDetails: this.$meta.initDetails,
+            webuiType: this.$meta.webuiType,
+            relatedDappId: this.$meta.relatedDappId,
+          },
         }
       );
     });
@@ -206,14 +194,17 @@ export class Tab {
     // this.window.addBrowserView(this.view);
   }
 
-  public get _webContents() {
+  public get tabWebContents() {
     // return this.view?.webContents;
     return this.webContents;
   }
 
   public get _id() {
-    // return this._id;
-    return this._webContents?.id;
+    return this.tabWebContents?.id;
+  }
+
+  async whenWebContentsReady() {
+    return this._waitTabCreated;
   }
 
   private _addSub(sub: Subscription) {
@@ -285,7 +276,7 @@ export class Tab {
   }
 
   /** @internal */
-  _patchWindowBuiltInMethods(thisWebContents = this._webContents) {
+  _patchWindowBuiltInMethods(thisWebContents = this.tabWebContents) {
     if (!thisWebContents || thisWebContents.isDestroyed()) return;
 
     patchTabbedBrowserWebContents(thisWebContents, {
@@ -332,17 +323,17 @@ export class Tab {
     this._cleanupTab();
     this.hide();
 
-    if (!this._webContents || !this._webContents.isDestroyed()) {
-      if (this._webContents!.isDevToolsOpened()) {
-        this._webContents!.closeDevTools();
+    if (!this.tabWebContents || !this.tabWebContents.isDestroyed()) {
+      if (this.tabWebContents!.isDevToolsOpened()) {
+        this.tabWebContents!.closeDevTools();
       }
 
-      if (this._webContents?.isLoading()) {
-        this._webContents.stop();
+      if (this.tabWebContents?.isLoading()) {
+        this.tabWebContents.stop();
       }
       // TODO: why is this no longer called?
-      this._webContents!.emit('destroyed');
-      // this._webContents!.destroy?.()
+      this.tabWebContents!.emit('destroyed');
+      // this.tabWebContents!.destroy?.()
     }
 
     // if (this.view) {
@@ -373,7 +364,7 @@ export class Tab {
 
     let finalURL = '';
     try {
-      finalURL = this._webContents?.getURL() || '';
+      finalURL = this.tabWebContents?.getURL() || '';
 
       if (!finalURL) return null;
       return { finalURL };
@@ -396,7 +387,7 @@ export class Tab {
       });
       this.showLoadingView(url);
     }
-    const result = await this._webContents?.loadURL(url);
+    const result = await this.tabWebContents?.loadURL(url);
     if (isMain) {
       emitIpcMainEvent('__internal_main:mainwindow:capture-tab');
       hideLoadingView();
@@ -406,12 +397,12 @@ export class Tab {
   }
 
   reload(force = false) {
-    if (!this._webContents) return;
-    this.showLoadingView(this._webContents.getURL());
+    if (!this.tabWebContents) return;
+    this.showLoadingView(this.tabWebContents.getURL());
     if (force) {
-      this._webContents.reloadIgnoringCache();
+      this.tabWebContents.reloadIgnoringCache();
     } else {
-      this._webContents.reload();
+      this.tabWebContents.reload();
     }
   }
 
@@ -424,6 +415,7 @@ export class Tab {
           tabUid: this.tabUid,
           windowId: this.windowId!,
           viewBounds,
+          isDappWebview: this.isOfMainWindow,
         }
       );
     }
@@ -607,19 +599,19 @@ export class MainWindowTab extends Tab {
   resumeFindInPage(searchText = '') {
     if (this.destroyed) return;
     // if (!this.view) return;
-    if (!this._webContents) return;
+    if (!this.tabWebContents) return;
     if (!this._isVisible || this.isAnimating) return;
 
     let requestId = this._findInPageState.requestId;
     if (searchText) {
       requestId =
-        this._webContents.findInPage(searchText, {
+        this.tabWebContents.findInPage(searchText, {
           findNext: true,
         }) || -1;
 
       this.findInPageState = { searchText, requestId };
     } else if (requestId <= 0) {
-      this._webContents.stopFindInPage('clearSelection');
+      this.tabWebContents.stopFindInPage('clearSelection');
       this.resetFindInPage();
     }
 
@@ -631,11 +623,11 @@ export class MainWindowTab extends Tab {
 
   clearFindInPageResult() {
     if (this.destroyed) return;
-    if (!this._webContents || this._webContents.isDestroyed()) return;
+    if (!this.tabWebContents || this.tabWebContents.isDestroyed()) return;
 
-    this._webContents.stopFindInPage('clearSelection');
+    this.tabWebContents.stopFindInPage('clearSelection');
     emitIpcMainEvent('__internal_main:mainwindow:update-findresult-in-page', {
-      tabId: this._webContents.id,
+      tabId: this.tabWebContents.id,
       find: { result: null, searchText: '' },
     });
   }
@@ -677,9 +669,9 @@ export class MainWindowTab extends Tab {
   }
 
   private _pushPrevFindInPageResult() {
-    if (!this._webContents) return;
+    if (!this.tabWebContents) return;
     emitIpcMainEvent('__internal_main:mainwindow:update-findresult-in-page', {
-      tabId: this._webContents.id,
+      tabId: this.tabWebContents.id,
       find: {
         result: this._findInPageState.result || null,
         searchText: this._findInPageState.searchText || '',
@@ -859,12 +851,12 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
   checkLoadingView() {
     const tab = this.selected;
 
-    if (!tab || !tab._webContents?.isLoading() || tab.isAnimating) {
+    if (!tab || !tab.tabWebContents?.isLoading() || tab.isAnimating) {
       hideLoadingView();
       return false;
     }
 
-    const targetURL = tab._webContents.getURL();
+    const targetURL = tab.tabWebContents.getURL();
 
     tab.showLoadingView(targetURL);
 
@@ -876,8 +868,8 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
     if (!inputUrlInfo.origin) return null;
 
     return this.tabList.find((tab) => {
-      if (!tab._webContents) return false;
-      const tabUrlInfo = canoicalizeDappUrl(tab._webContents.getURL());
+      if (!tab.tabWebContents) return false;
+      const tabUrlInfo = canoicalizeDappUrl(tab.tabWebContents.getURL());
       return tabUrlInfo.origin === inputUrlInfo.origin;
     });
   }
@@ -888,8 +880,8 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
     if (!inputUrlInfo.secondaryDomain) return null;
 
     return this.tabList.find((tab) => {
-      if (!tab._webContents) return false;
-      const tabUrlInfo = canoicalizeDappUrl(tab._webContents.getURL());
+      if (!tab.tabWebContents) return false;
+      const tabUrlInfo = canoicalizeDappUrl(tab.tabWebContents.getURL());
       return tabUrlInfo.secondaryDomain === inputUrlInfo.secondaryDomain;
     });
   }
@@ -899,9 +891,9 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
     if (!urlInfo?.origin) return null;
 
     return this.tabList.find((tab) => {
-      if (!tab._webContents) return false;
+      if (!tab.tabWebContents) return false;
       const { urlInfo: tabUrlInfo } = canoicalizeDappUrl(
-        tab._webContents.getURL()
+        tab.tabWebContents.getURL()
       );
       return (
         tabUrlInfo &&
@@ -914,11 +906,11 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
 
   filterTab(filterFn: (ctx: { tab: Tab; tabURL: string }) => boolean) {
     return this.tabList.filter((tab) => {
-      if (!tab._webContents) return false;
+      if (!tab.tabWebContents) return false;
 
       return filterFn({
         tab,
-        tabURL: tab._webContents.getURL(),
+        tabURL: tab.tabWebContents.getURL(),
       });
     });
   }
