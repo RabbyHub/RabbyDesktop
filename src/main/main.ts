@@ -5,7 +5,6 @@ import './streams/pre-bootstrap';
 
 import './store';
 
-import './streams/webviewTagBasedWindow';
 import './streams/tabbedBrowserWindow';
 import './streams/mainWindow';
 import './streams/rabbyExt';

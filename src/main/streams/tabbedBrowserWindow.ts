@@ -148,8 +148,9 @@ export async function createRabbyxNotificationWindow({
     toggleMaskViaOpenedRabbyxNotificationWindow();
   });
 
-  await win.tabs.tabList[0]?.whenWebContentsReady();
-  // ._patchWindowBuiltInMethods();
+  await win.tabs.tabList[0]
+    ?.whenWebContentsReady()
+    .then((tab) => tab._patchWindowBuiltInMethods());
 
   RABBYX_WINDOWID_S.add(windowId);
   toggleMaskViaOpenedRabbyxNotificationWindow();
@@ -345,8 +346,8 @@ onIpcMainEvent(
 
     const foundTab = tabbedWin.tabs.findByOrigin(dappOrigin);
 
-    if (foundTab?._id && tabbedWin.tabs.selected?._id !== foundTab._id) {
-      tabbedWin.tabs.select(foundTab._id);
+    if (foundTab?.tabId && tabbedWin.tabs.selected?.tabId !== foundTab.tabId) {
+      tabbedWin.tabs.select(foundTab.tabId);
     }
   }
 );
@@ -452,7 +453,7 @@ onIpcMainInternalEvent(
     tabsToClose.forEach((tab) => {
       if (tab) {
         tab.destroy();
-        cLog(`close-tab-on-del-dapp: destroyed tab ${tab._id}`);
+        cLog(`close-tab-on-del-dapp: destroyed tab ${tab.tabId}`);
       }
     });
   }

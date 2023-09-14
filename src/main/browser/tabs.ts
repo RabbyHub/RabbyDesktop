@@ -9,23 +9,18 @@ import {
 import { DAPP_ZOOM_VALUES, EnumMatchDappType } from '@/isomorphic/constants';
 import { formatZoomValue } from '@/isomorphic/primitive';
 import { isTabUrlEntryOfHttpDappOrigin } from '@/isomorphic/dapp';
-import {
-  Observable,
-  Subject,
-  Subscription,
-  filter,
-  firstValueFrom,
-  fromEvent,
-  lastValueFrom,
-  tap,
-} from 'rxjs';
+import { Observable, Subject, filter, firstValueFrom } from 'rxjs';
 import { randString } from '@/isomorphic/string';
 import { NATIVE_HEADER_H } from '../../isomorphic/const-size-classical';
 import {
   canoicalizeDappUrl,
   extractDappInfoFromURL,
 } from '../../isomorphic/url';
-import { emitIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
+import {
+  emitIpcMainEvent,
+  handleIpcMainInvoke,
+  sendToWebContents,
+} from '../utils/ipcMainEvents';
 import {
   BrowserViewManager,
   parseSiteMetaByWebContents,
@@ -41,10 +36,24 @@ import {
 import { getMainWindowTopOffset } from '../utils/browserSize';
 import { getRabbyExtId } from '../utils/stream-helpers';
 
+const viewMngr = new BrowserViewManager(
+  {
+    webPreferences: {
+      safeDialogs: true,
+      safeDialogsMessage: 'Stop consecutive dialogs',
+      preload: getAssetPath('./preloads/dappViewPreload.js'),
+      webviewTag: false,
+    },
+  },
+  {
+    destroyOnRecycle: true,
+  }
+);
+
 type CreatedWindowPayload = {
-  webContentsId: number;
-  windowWebContentsId?: number;
-  payload: GetInvokeMethodParams<'__internal_rpc:tabbed-window2:created-webview'>[0];
+  tabUid: string;
+  tabWebContentsId: number;
+  windowWebContentsId: number;
 };
 export const WebviewTagBasedViewOb$s = {
   createdWebview: new Subject<CreatedWindowPayload>(),
@@ -71,15 +80,24 @@ const DEFAULT_TOPBAR_STACKS = {
   tabs: true,
   navigation: true,
 };
-export class Tab {
-  private webContents?: Electron.WebContents;
+export abstract class Tab {
+  protected webContents?: Electron.WebContents;
 
-  // id: BrowserView['webContents']['id'];
-  // view?: BrowserView;
+  protected _waitTabCreated: Promise<CreatedWindowPayload>;
 
   tabUid: string;
 
-  private _waitTabCreated: Promise<CreatedWindowPayload>;
+  get isAnimating() {
+    return false;
+  }
+
+  get tabWebContents() {
+    return this.webContents;
+  }
+
+  get tabId() {
+    return this.tabWebContents?.id;
+  }
 
   window?: BrowserWindow;
 
@@ -103,9 +121,7 @@ export class Tab {
     relatedDappId: '',
   };
 
-  private _subs: Subscription[] = [];
-
-  private _isAnimating: boolean = false;
+  protected _isAnimating: boolean = false;
 
   protected _isVisible: boolean = false;
 
@@ -136,6 +152,7 @@ export class Tab {
     } else {
       dappZoomPercent = 100;
     }
+    this.$meta.dappZoomPercent = dappZoomPercent;
 
     this.window = ofWindow;
     this.windowId = ofWindow.id;
@@ -149,89 +166,48 @@ export class Tab {
 
     this.tabUid = randString();
 
-    this._waitTabCreated = firstValueFrom(
-      WebviewTagBasedViewOb$s.createdWebview.pipe(
-        filter(
-          (creation) =>
-            creation.payload.windowId === ofWindow.id &&
-            creation.payload.tabUid === this.tabUid
-        )
-      )
-    );
-
-    this._waitTabCreated.then((creation) => {
-      this.webContents = webContents.fromId(
-        creation.payload.webviewTagWebContentsId
-      );
-      this._setupWebContents(this.webContents);
-      this.tabs.emit('tab-webcontents-created', {
-        tabUid: this.tabUid,
-        webContentsId: this.webContents.id,
-      });
+    // TODO: use one promise never resolved
+    this._waitTabCreated = Promise.resolve<CreatedWindowPayload>({
+      tabUid: this.tabUid,
+      tabWebContentsId: -1,
+      windowWebContentsId: ofWindow.webContents.id,
     });
 
-    getRabbyExtId().then((rabbyExtId) => {
-      sendToWebContents(
-        ofWindow.webContents,
-        '__internal_push:tabbed-window2:create-webview',
-        {
-          tabUid: this.tabUid,
-          windowId: ofWindow.id,
-          relatedDappId: this.$meta.relatedDappId,
-          additionalData: {
-            preloadPath: getAssetPath('./preloads/dappViewPreload.js'),
-            blankPage: `chrome-extension://${rabbyExtId}/blank.html`,
-          },
-          tabMeta: {
-            initDetails: this.$meta.initDetails,
-            webuiType: this.$meta.webuiType,
-            relatedDappId: this.$meta.relatedDappId,
-          },
-        }
-      );
-    });
-
-    // this.window.addBrowserView(this.view);
-  }
-
-  public get tabWebContents() {
-    // return this.view?.webContents;
-    return this.webContents;
-  }
-
-  public get _id() {
-    return this.tabWebContents?.id;
+    this.initTab(ofWindow);
   }
 
   async whenWebContentsReady() {
-    return this._waitTabCreated;
+    await this._waitTabCreated;
+
+    return this;
   }
 
-  private _addSub(sub: Subscription) {
-    this._subs.push(sub);
-  }
+  /* @override */
+  protected abstract initTab(ofWindow: BrowserWindow): void;
 
-  private _setupWebContents(thisWebContents: Electron.WebContents) {
+  protected _setupWebContentsOnTabCreated(
+    thisTabWebContents: Electron.WebContents
+  ) {
     emitIpcMainEvent('__internal_main:tabbed-window:view-added', {
-      webContents: thisWebContents,
+      webContents: thisTabWebContents,
       window: this.window!,
     });
     emitIpcMainEvent('__internal_main:tabbed-window:tab-added', {
-      webContents: thisWebContents,
+      webContents: thisTabWebContents,
       window: this.window!,
       relatedDappId: this.$meta.relatedDappId,
-      isMainTabbedWindow: this.$meta.webuiType === 'MainWindow',
+      isMainTabbedWindow: this.isOfMainWindow,
     });
 
-    thisWebContents.on('focus', () => {
+    thisTabWebContents.on('focus', () => {
       this.tabs.emit('tab-focused');
     });
 
-    thisWebContents.on('page-favicon-updated', async (evt, favicons) => {
-      const wc = thisWebContents;
+    thisTabWebContents.on('page-favicon-updated', async (evt, favicons) => {
+      const wc = thisTabWebContents;
       if (!wc || !this.relatedDappId) return;
       const currentURL =
-        thisWebContents.getURL() ||
+        thisTabWebContents.getURL() ||
         (await wc.executeJavaScript('window.location.href'));
       if (!currentURL) return;
 
@@ -251,14 +227,14 @@ export class Tab {
       });
     });
 
-    thisWebContents.on('did-stop-loading', () => {
-      if (isDappViewLoadingForTab(thisWebContents.id)) hideLoadingView();
+    thisTabWebContents.on('did-stop-loading', () => {
+      if (isDappViewLoadingForTab(thisTabWebContents.id)) hideLoadingView();
     });
 
-    thisWebContents.on('dom-ready', () => {
-      if (isDappViewLoadingForTab(thisWebContents.id)) hideLoadingView();
+    thisTabWebContents.on('dom-ready', () => {
+      if (isDappViewLoadingForTab(thisTabWebContents.id)) hideLoadingView();
 
-      const currentURL = thisWebContents.getURL() || '';
+      const currentURL = thisTabWebContents.getURL() || '';
       if (
         currentURL &&
         this.relatedDappId &&
@@ -272,14 +248,19 @@ export class Tab {
       }
     });
 
-    this._patchWindowBuiltInMethods(thisWebContents);
+    this._patchWindowBuiltInMethods(thisTabWebContents);
+
+    this.tabs.emit('tab-webcontents-created', {
+      tabUid: this.tabUid,
+      tabWebContentsId: thisTabWebContents.id,
+    });
   }
 
   /** @internal */
-  _patchWindowBuiltInMethods(thisWebContents = this.tabWebContents) {
-    if (!thisWebContents || thisWebContents.isDestroyed()) return;
+  _patchWindowBuiltInMethods(thisTabWebContents = this.tabWebContents) {
+    if (!thisTabWebContents || thisTabWebContents.isDestroyed()) return;
 
-    patchTabbedBrowserWebContents(thisWebContents, {
+    patchTabbedBrowserWebContents(thisTabWebContents, {
       windowId: this.windowId,
     });
   }
@@ -299,14 +280,13 @@ export class Tab {
   showLoadingView(nextURL: string) {
     emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
       type: 'show',
-      tabId: this._id!,
+      tabId: this.tabId!,
       tabURL: nextURL,
     });
   }
 
-  protected _cleanupTab() {
-    this._subs.forEach((sub) => sub.unsubscribe());
-  }
+  /** @override */
+  protected abstract _cleanupTab(): void;
 
   /** @override */
   protected _onWebContentsInitialized(ctx: {
@@ -336,20 +316,12 @@ export class Tab {
       // this.tabWebContents!.destroy?.()
     }
 
-    // if (this.view) {
-    //   if (!this.window?.isDestroyed()) {
-    //     this.window!.removeBrowserView(this.view);
-    //   }
-
-    //   viewMngr.recycleView(this.view!);
-    // }
-
     this.window = undefined;
     // this.view = undefined;
 
     emitIpcMainEvent('__internal_main:tabbed-window:tab-destroyed', {
       windowId: this.windowId!,
-      tabId: this._id!,
+      tabId: this.tabId!,
     });
 
     if (lastOpenInfo) {
@@ -406,20 +378,8 @@ export class Tab {
     }
   }
 
-  private _tellMainWindowAjudst(viewBounds: Electron.Rectangle) {
-    if (!this.window?.webContents.isDestroyed()) {
-      sendToWebContents(
-        this.tabs.window?.webContents,
-        '__internal_push:tabbed-window2:show-webview',
-        {
-          tabUid: this.tabUid,
-          windowId: this.windowId!,
-          viewBounds,
-          isDappWebview: this.isOfMainWindow,
-        }
-      );
-    }
-  }
+  /* @override */
+  protected abstract _adjustWindowRect(viewBounds: Electron.Rectangle): void;
 
   show() {
     const [width, height] = this.window!.getSize();
@@ -437,11 +397,6 @@ export class Tab {
       : NativeAppSizes.trezorLikeConnectionWindowHeaderHeight;
 
     this._isVisible = true;
-
-    if (this._isAnimating) {
-      // this.view!.setAutoResize({ width: true, height: true });
-      return;
-    }
 
     const viewBounds = {
       x: 0,
@@ -477,74 +432,96 @@ export class Tab {
         : {}),
     };
 
-    this._tellMainWindowAjudst(viewBounds);
-  }
-
-  setAnimatedMainWindowTabRect(rect?: Electron.Rectangle) {
-    if (!this.isOfMainWindow) return;
-    // if (!this.view) return;
-
-    if (!this._isAnimating) return;
-
-    if (rect?.x) rect.x = Math.round(rect.x);
-    if (rect?.y) rect.y = Math.round(rect.y);
-    if (rect?.width) rect.width = Math.round(rect.width);
-    if (rect?.height) rect.height = Math.round(rect.height);
-
-    // this._tellMainWindowAjudst(rect);
-
-    // const currentBounds = this.view!.getBounds();
-    // this.view!.setBounds({
-    //   ...currentBounds,
-    //   x: -99999,
-    //   y: -99999,
-    //   // ...rect,
-    // });
-  }
-
-  get isAnimating() {
-    return this._isAnimating;
-  }
-
-  toggleAnimating(enabled = false) {
-    this._isAnimating = enabled;
-    if (enabled) {
-      this.setAnimatedMainWindowTabRect();
-    } else {
-      this.show();
-    }
+    this._adjustWindowRect(viewBounds);
   }
 
   hide() {
     this._isVisible = false;
-
-    // this.view!.setAutoResize({ width: false, height: false });
-    // if (isDarwin) {
-    //   const oldBounds = this.view!.getBounds();
-    //   this.view!.setBounds({
-    //     ...oldBounds,
-    //     x: -1000 - oldBounds.width,
-    //     y: -1000 - oldBounds.height,
-    //   });
-    // } else {
-    //   this.view!.setBounds({ x: -1000, y: -1000, width: 0, height: 0 });
-    // }
-    if (!this.window?.webContents.isDestroyed()) {
-      sendToWebContents(
-        this.tabs.window?.webContents,
-        '__internal_push:tabbed-window2:hide-webview',
-        {
-          tabUid: this.tabUid,
-          windowId: this.windowId!,
-        }
-      );
-    }
   }
 
   get relatedDappId() {
     return this.$meta.relatedDappId;
   }
 }
+
+export class BrowserViewTab extends Tab {
+  private view?: BrowserView;
+
+  constructor(...[parentWindow, options]: ConstructorParameters<typeof Tab>) {
+    super(parentWindow, { ...options });
+
+    this.view = viewMngr.allocateView({
+      webPreferences: {
+        zoomFactor: formatZoomValue(this.$meta.dappZoomPercent!).zoomFactor,
+      },
+    });
+
+    const ofWindow = this.window!;
+    ofWindow.addBrowserView(this.view);
+    this.webContents = this.view.webContents;
+    this._waitTabCreated = Promise.resolve<CreatedWindowPayload>({
+      tabUid: this.tabUid,
+      tabWebContentsId: this.webContents.id,
+      windowWebContentsId: ofWindow.webContents.id,
+    });
+
+    this._setupWebContentsOnTabCreated(this.webContents);
+  }
+
+  protected initTab(ofWindow: BrowserWindow) {}
+
+  protected _cleanupTab() {}
+
+  protected _adjustWindowRect(viewBounds: Electron.Rectangle) {
+    if (this._isAnimating) {
+      this.view?.setAutoResize({ width: true, height: true });
+      return;
+    }
+    this.view?.setBounds(viewBounds);
+    this.view?.setAutoResize({ width: true, height: true });
+  }
+
+  hide() {
+    super.hide();
+
+    if (!this.view) return;
+
+    this.view.setAutoResize({ width: false, height: false });
+    if (isDarwin) {
+      const oldBounds = this.view.getBounds();
+      this.view.setBounds({
+        ...oldBounds,
+        x: -1000 - oldBounds.width,
+        y: -1000 - oldBounds.height,
+      });
+    } else {
+      this.view.setBounds({ x: -1000, y: -1000, width: 0, height: 0 });
+    }
+  }
+
+  destroy() {
+    if (this.view) {
+      if (!this.window?.isDestroyed()) {
+        this.window!.removeBrowserView(this.view);
+      }
+
+      viewMngr.recycleView(this.view!);
+    }
+    this.view = undefined;
+    super.destroy();
+  }
+}
+
+handleIpcMainInvoke(
+  '__internal_rpc:tabbed-window2:created-webview',
+  (evt, payload) => {
+    WebviewTagBasedViewOb$s.createdWebview.next({
+      tabUid: payload.tabUid,
+      tabWebContentsId: payload.tabWebContentsId,
+      windowWebContentsId: evt.sender.id,
+    });
+  }
+);
 
 const DEFAULT_FIND_IN_PAGE_STATE = {
   windowOpen: false,
@@ -566,8 +543,62 @@ export class MainWindowTab extends Tab {
   }
 
   protected _cleanupTab() {
-    super._cleanupTab();
     this._findInPageState = { ...DEFAULT_FIND_IN_PAGE_STATE };
+  }
+
+  protected initTab(ofWindow: BrowserWindow) {
+    this._waitTabCreated = firstValueFrom(
+      WebviewTagBasedViewOb$s.createdWebview.pipe(
+        filter(
+          (creation) =>
+            creation.windowWebContentsId === ofWindow.webContents.id &&
+            creation.tabUid === this.tabUid
+        )
+      )
+    ).then((creation) => {
+      this.webContents = webContents.fromId(creation.tabWebContentsId);
+      return creation;
+    });
+
+    this._waitTabCreated.then(() => {
+      this._setupWebContentsOnTabCreated(this.webContents!);
+    });
+
+    getRabbyExtId().then((rabbyExtId) => {
+      sendToWebContents(
+        ofWindow.webContents,
+        '__internal_push:tabbed-window2:create-webview',
+        {
+          tabUid: this.tabUid,
+          windowId: ofWindow.id,
+          relatedDappId: this.$meta.relatedDappId,
+          additionalData: {
+            preloadPath: getAssetPath('./preloads/dappViewPreload.js'),
+            blankPage: `chrome-extension://${rabbyExtId}/blank.html`,
+          },
+          tabMeta: {
+            initDetails: this.$meta.initDetails,
+            webuiType: this.$meta.webuiType,
+            relatedDappId: this.$meta.relatedDappId,
+          },
+        }
+      );
+    });
+  }
+
+  protected _adjustWindowRect(viewBounds: Electron.Rectangle) {
+    if (!this.window?.webContents.isDestroyed()) {
+      sendToWebContents(
+        this.tabs.window?.webContents,
+        '__internal_push:tabbed-window2:show-webview',
+        {
+          tabUid: this.tabUid,
+          windowId: this.windowId!,
+          viewBounds,
+          isDappWebview: this.isOfMainWindow,
+        }
+      );
+    }
   }
 
   protected _onWebContentsInitialized(ctx: {
@@ -618,7 +649,7 @@ export class MainWindowTab extends Tab {
     this.findInPageState = { ...this.findInPageState, windowOpen: true };
 
     // const viewBounds = this.view.getBounds();
-    // notifyShowFindInPage({ x: viewBounds.x, y: viewBounds.y }, this._id);
+    // notifyShowFindInPage({ x: viewBounds.x, y: viewBounds.y }, this.tabId!);
   }
 
   clearFindInPageResult() {
@@ -640,8 +671,37 @@ export class MainWindowTab extends Tab {
     this.findInPageState = { ...DEFAULT_FIND_IN_PAGE_STATE };
   }
 
-  toggleAnimating(enabled?: boolean): void {
-    super.toggleAnimating(enabled);
+  setAnimatedMainWindowTabRect(rect?: Electron.Rectangle) {
+    if (!this.isOfMainWindow) return;
+    // if (!this.view) return;
+
+    if (!this._isAnimating) return;
+
+    if (rect?.x) rect.x = Math.round(rect.x);
+    if (rect?.y) rect.y = Math.round(rect.y);
+    if (rect?.width) rect.width = Math.round(rect.width);
+    if (rect?.height) rect.height = Math.round(rect.height);
+
+    // const currentBounds = this.view!.getBounds();
+    // this._adjustWindowRect({
+    //   ...currentBounds,
+    //   x: -99999,
+    //   y: -99999,
+    //   // ...rect,
+    // });
+  }
+
+  get isAnimating() {
+    return this._isAnimating;
+  }
+
+  toggleAnimating(enabled = false) {
+    this._isAnimating = enabled;
+    if (enabled) {
+      this.setAnimatedMainWindowTabRect();
+    } else {
+      this.show();
+    }
 
     if (this.findInPageState.windowOpen) {
       if (enabled) {
@@ -709,6 +769,7 @@ export class MainWindowTab extends Tab {
   }
 }
 
+type AllTabType = BrowserViewTab | MainWindowTab;
 export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
   tabList: TTab[] = [];
 
@@ -765,7 +826,7 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
   }
 
   get(tabId: chrome.tabs.Tab['id']) {
-    return this.tabList.find((tab) => tab._id === tabId);
+    return this.tabList.find((tab) => tab.tabId === tabId);
   }
 
   async create(options?: Omit<ITabOptions, 'tabs'>) {
@@ -778,35 +839,22 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
       },
     ] as const;
 
-    // TODO: add timeout mechanism
-    const waitor = firstValueFrom(
-      new Observable<void>((subscriber) => {
-        this.on('tab-webcontents-created', (payload) => {
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
-          if (payload.tabUid !== tab.tabUid) return;
+    const tab = (options?.webuiType === 'MainWindow' && this.isOfMainWindow
+      ? new MainWindowTab(...args)
+      : new BrowserViewTab(...args)) as any as TTab;
 
-          subscriber.next();
-          subscriber.complete();
-        });
-      })
-    );
-    const tab = (
-      options?.webuiType === 'MainWindow' && this.isOfMainWindow
-        ? new MainWindowTab(...args)
-        : new Tab(...args)
-    ) as TTab;
-
-    await waitor;
+    await tab.whenWebContentsReady();
     this.tabList.push(tab);
     if (!this.selected) this.selected = tab;
     tab.show(); // must be attached to window
+
     this.emit('tab-created', tab);
-    this.select(tab._id);
+    this.select(tab.tabId);
     return tab;
   }
 
   remove(tabId: chrome.tabs.Tab['id']) {
-    const tabIndex = this.tabList.findIndex((tab) => tab._id === tabId);
+    const tabIndex = this.tabList.findIndex((tab) => tab.tabId === tabId);
     if (tabIndex < 0) {
       throw new Error(`Tabs.remove: unable to find tab.id = ${tabId}`);
     }
@@ -816,7 +864,7 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
     if (this.selected === tab) {
       this._unselect();
       const nextTab = this.tabList[tabIndex] || this.tabList[tabIndex - 1];
-      if (nextTab) this.select(nextTab._id);
+      if (nextTab) this.select(nextTab.tabId);
     }
     this.emit('tab-destroyed', tab);
     if (this.tabList.length === 0) {

@@ -92,8 +92,6 @@ export function setupWindowShell() {
         payload
       ) as Electron.WebviewTag | null;
 
-      console.log('[feat] webviewTag', webviewTag);
-
       if (!webviewTag) return;
 
       toggleShowElement(webviewTag, true);

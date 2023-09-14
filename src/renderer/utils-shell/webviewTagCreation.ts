@@ -21,7 +21,7 @@ const listener = (event: CustomEvent<WebviewTagExchgMatches>) => {
     {
       tabUid: detail.tabUid,
       windowId: detail.windowId,
-      webviewTagWebContentsId: webviewTag.getWebContentsId(),
+      tabWebContentsId: webviewTag.getWebContentsId(),
     }
   );
 };

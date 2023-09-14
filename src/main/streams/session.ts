@@ -357,7 +357,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
           }
 
           if (typeof details.active === 'boolean' ? details.active : true)
-            win.tabs.select(tab._id);
+            win.tabs.select(tab.tabId);
 
           return [
             tab.tabWebContents as Electron.WebContents,

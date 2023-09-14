@@ -127,7 +127,7 @@ export function getBrowserWindowOpts(
     fullscreenable: true,
     ...windowOpts,
     webPreferences: {
-      webviewTag: true,
+      webviewTag: false,
       // sandbox: true,
       sandbox: false,
       nodeIntegration: false,

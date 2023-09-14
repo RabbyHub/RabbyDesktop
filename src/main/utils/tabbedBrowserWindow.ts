@@ -191,7 +191,7 @@ export async function getOrCreateDappBoundTab(
       '__internal_push:mainwindow:opened-dapp-tab',
       {
         dappId: foundDapp.id,
-        tabId: result.finalTab?._id,
+        tabId: result.finalTab?.tabId,
         dappOrigin: foundDapp.origin,
       }
     );

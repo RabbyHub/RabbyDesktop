@@ -45,7 +45,7 @@ type ChannelInvokeForWebviewTabs = {
   '__internal_rpc:tabbed-window2:created-webview': {
     send: [
       WebViewExChgData<{
-        webviewTagWebContentsId: number;
+        tabWebContentsId: number;
       }>
     ];
     response: void;

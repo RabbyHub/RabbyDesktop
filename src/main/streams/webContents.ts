@@ -112,7 +112,7 @@ export function setOpenHandlerForWebContents({
           const openedDapp =
             parentTabbedWin?.tabs.findBySecondaryDomain(targetURL);
           if (openedDapp) {
-            switchToBrowserTab(openedDapp!._id, parentTabbedWin!);
+            switchToBrowserTab(openedDapp!.tabId, parentTabbedWin!);
 
             /**
              * sometimes, targetURL has same origin with currentUrl.

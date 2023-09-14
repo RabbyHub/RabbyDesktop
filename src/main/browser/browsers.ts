@@ -99,6 +99,9 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
 
     const loadWebUIPromise = this.window.webContents.loadURL(webuiUrl);
 
+    // make sure ratio is 1
+    this.window.webContents.setZoomFactor(1);
+
     if (this.isMainWindow()) {
       // leave here for debug
       if (!IS_RUNTIME_PRODUCTION)
@@ -259,8 +262,6 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
     );
   }
 
-  private _pushTabsInfo() {}
-
   destroy() {
     this.tabs.destroy();
 
@@ -288,7 +289,7 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
     return { ...this.$meta };
   }
 
-  createTab(options?: Parameters<Tabs['create']>[0]) {
+  async createTab(options?: Parameters<Tabs['create']>[0]) {
     return this.tabs.create({
       ...options,
       webuiType: this.$meta.webuiType,

@@ -193,7 +193,7 @@ export async function safeOpenURL(
           if (shouldLoad) {
             openedTab.loadURL(targetURL);
           }
-          switchToBrowserTab(openedTab._id, mainTabbedWin);
+          switchToBrowserTab(openedTab.tabId, mainTabbedWin);
         },
       };
     }
