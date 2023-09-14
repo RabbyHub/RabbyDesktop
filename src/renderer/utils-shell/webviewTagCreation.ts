@@ -1,0 +1,30 @@
+/**
+ * @notice make sure import this file to all shell page's entry
+ */
+
+import { queryTabWebviewTag } from '@/isomorphic/dom-helpers';
+
+// const webviewTagPools: Electron.WebviewTag[] = [];
+
+const listener = (evnet: CustomEvent<WebviewTagExchgMatches>) => {
+  const detail = evnet.detail;
+  const webviewTag = queryTabWebviewTag(detail);
+
+  if (!webviewTag) {
+    console.error(
+      `[listener] cannot find webview tag with uid ${detail.tabUid}`
+    );
+    return;
+  }
+  window.rabbyDesktop.ipcRenderer.invoke(
+    '__internal_rpc:tabbed-window2:created-webview',
+    {
+      tabUid: detail.tabUid,
+      windowId: detail.windowId,
+      webviewTagWebContentsId: webviewTag.getWebContentsId(),
+    }
+  );
+};
+
+// @ts-expect-error
+document.addEventListener('webviewTagCreated', listener);

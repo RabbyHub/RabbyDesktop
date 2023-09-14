@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 
-import { BrowserView, BrowserWindow } from 'electron';
+import { BrowserView, BrowserWindow, webContents } from 'electron';
 import {
   NativeAppSizes,
   NativeLayouts,
@@ -9,12 +9,22 @@ import {
 import { DAPP_ZOOM_VALUES, EnumMatchDappType } from '@/isomorphic/constants';
 import { formatZoomValue } from '@/isomorphic/primitive';
 import { isTabUrlEntryOfHttpDappOrigin } from '@/isomorphic/dapp';
+import {
+  Observable,
+  Subject,
+  Subscription,
+  filter,
+  firstValueFrom,
+  fromEvent,
+  lastValueFrom,
+} from 'rxjs';
+import { randString } from '@/isomorphic/string';
 import { NATIVE_HEADER_H } from '../../isomorphic/const-size-classical';
 import {
   canoicalizeDappUrl,
   extractDappInfoFromURL,
 } from '../../isomorphic/url';
-import { emitIpcMainEvent } from '../utils/ipcMainEvents';
+import { emitIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import {
   BrowserViewManager,
   parseSiteMetaByWebContents,
@@ -28,6 +38,7 @@ import {
   notifyHideFindInPage,
 } from '../utils/mainTabbedWin';
 import { getMainWindowTopOffset } from '../utils/browserSize';
+import { getRabbyExtId } from '../utils/stream-helpers';
 
 const viewMngr = new BrowserViewManager(
   {
@@ -42,6 +53,14 @@ const viewMngr = new BrowserViewManager(
     destroyOnRecycle: true,
   }
 );
+
+export const WebviewTagBasedViewOb$s = {
+  createdWebview: new Subject<{
+    webContentsId: number;
+    windowWebContentsId?: number;
+    payload: GetInvokeMethodParams<'__internal_rpc:tabbed-window2:created-webview'>[0];
+  }>(),
+};
 
 const isDarwin = process.platform === 'darwin';
 
@@ -65,9 +84,12 @@ const DEFAULT_TOPBAR_STACKS = {
   navigation: true,
 };
 export class Tab {
-  id: BrowserView['webContents']['id'];
+  private webContents?: Electron.WebContents;
 
-  view?: BrowserView;
+  // id: BrowserView['webContents']['id'];
+  // view?: BrowserView;
+
+  tabUid: string;
 
   window?: BrowserWindow;
 
@@ -90,6 +112,8 @@ export class Tab {
     dappZoomPercent: DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT,
     relatedDappId: '',
   };
+
+  private _subs: Subscription[] = [];
 
   private _isAnimating: boolean = false;
 
@@ -122,13 +146,14 @@ export class Tab {
     } else {
       dappZoomPercent = 100;
     }
-    this.view = viewMngr.allocateView({
-      webPreferences: {
-        zoomFactor: formatZoomValue(dappZoomPercent).zoomFactor,
-      },
-    });
 
-    this.id = this.view.webContents.id;
+    // this.view = viewMngr.allocateView({
+    //   webPreferences: {
+    //     zoomFactor: formatZoomValue(dappZoomPercent).zoomFactor,
+    //   },
+    // });
+
+    // this.id = this.view.webContents.id;
     this.window = ofWindow;
     this.windowId = ofWindow.id;
 
@@ -139,27 +164,83 @@ export class Tab {
       );
     }
 
-    this.window.addBrowserView(this.view);
+    this.tabUid = randString();
+
+    this._addSub(
+      WebviewTagBasedViewOb$s.createdWebview
+        .pipe(
+          filter(
+            (creation) =>
+              creation.payload.windowId === ofWindow.id &&
+              creation.payload.tabUid === this.tabUid
+          )
+        )
+        .subscribe((creation) => {
+          this.webContents = webContents.fromId(
+            creation.payload.webviewTagWebContentsId
+          );
+          this._setupWebContents(this.webContents);
+          this.tabs.emit('tab-webcontents-created', {
+            tabUid: this.tabUid,
+            webContentsId: this.webContents.id,
+          });
+        })
+    );
+
+    getRabbyExtId().then((rabbyExtId) => {
+      sendToWebContents(
+        ofWindow.webContents,
+        '__internal_push:tabbed-window2:create-webview',
+        {
+          tabUid: this.tabUid,
+          windowId: ofWindow.id,
+          relatedDappId: this.$meta.relatedDappId,
+          additionalData: {
+            preloadPath: getAssetPath('./preloads/dappViewPreload.js'),
+            blankPage: `chrome-extension://${rabbyExtId}/blank.html`,
+          },
+        }
+      );
+    });
+
+    // this.window.addBrowserView(this.view);
+  }
+
+  public get _webContents() {
+    // return this.view?.webContents;
+    return this.webContents;
+  }
+
+  public get _id() {
+    // return this._id;
+    return this._webContents?.id;
+  }
+
+  private _addSub(sub: Subscription) {
+    this._subs.push(sub);
+  }
+
+  private _setupWebContents(thisWebContents: Electron.WebContents) {
     emitIpcMainEvent('__internal_main:tabbed-window:view-added', {
-      webContents: this.view!.webContents,
-      window: ofWindow,
+      webContents: thisWebContents,
+      window: this.window!,
     });
     emitIpcMainEvent('__internal_main:tabbed-window:tab-added', {
-      webContents: this.view!.webContents,
-      window: ofWindow,
+      webContents: thisWebContents,
+      window: this.window!,
       relatedDappId: this.$meta.relatedDappId,
       isMainTabbedWindow: this.$meta.webuiType === 'MainWindow',
     });
 
-    this.view?.webContents.on('focus', () => {
+    thisWebContents.on('focus', () => {
       this.tabs.emit('tab-focused');
     });
 
-    this.view?.webContents.on('page-favicon-updated', async (evt, favicons) => {
-      const wc = this.view?.webContents;
+    thisWebContents.on('page-favicon-updated', async (evt, favicons) => {
+      const wc = thisWebContents;
       if (!wc || !this.relatedDappId) return;
       const currentURL =
-        this.view?.webContents.getURL() ||
+        thisWebContents.getURL() ||
         (await wc.executeJavaScript('window.location.href'));
       if (!currentURL) return;
 
@@ -179,14 +260,14 @@ export class Tab {
       });
     });
 
-    this.view!.webContents.on('did-stop-loading', () => {
-      if (isDappViewLoadingForTab(this.id)) hideLoadingView();
+    thisWebContents.on('did-stop-loading', () => {
+      if (isDappViewLoadingForTab(thisWebContents.id)) hideLoadingView();
     });
 
-    this.view!.webContents.on('dom-ready', () => {
-      if (isDappViewLoadingForTab(this.id)) hideLoadingView();
+    thisWebContents.on('dom-ready', () => {
+      if (isDappViewLoadingForTab(thisWebContents.id)) hideLoadingView();
 
-      const currentURL = this.view?.webContents.getURL() || '';
+      const currentURL = thisWebContents.getURL() || '';
       if (
         currentURL &&
         this.relatedDappId &&
@@ -200,12 +281,14 @@ export class Tab {
       }
     });
 
-    this._patchWindowBuiltInMethods();
+    this._patchWindowBuiltInMethods(thisWebContents);
   }
 
   /** @internal */
-  _patchWindowBuiltInMethods() {
-    patchTabbedBrowserWebContents(this.view!.webContents, {
+  _patchWindowBuiltInMethods(thisWebContents = this._webContents) {
+    if (!thisWebContents || thisWebContents.isDestroyed()) return;
+
+    patchTabbedBrowserWebContents(thisWebContents, {
       windowId: this.windowId,
     });
   }
@@ -225,12 +308,20 @@ export class Tab {
   showLoadingView(nextURL: string) {
     emitIpcMainEvent('__internal_main:mainwindow:toggle-loading-view', {
       type: 'show',
-      tabId: this.id,
+      tabId: this._id!,
       tabURL: nextURL,
     });
   }
 
-  protected _cleanupTab() {}
+  protected _cleanupTab() {
+    this._subs.forEach((sub) => sub.unsubscribe());
+  }
+
+  /** @override */
+  protected _onWebContentsInitialized(ctx: {
+    webContents: Electron.WebContents;
+    tab: Tab;
+  }) {}
 
   destroy() {
     if (this.destroyed) return;
@@ -241,33 +332,33 @@ export class Tab {
     this._cleanupTab();
     this.hide();
 
-    if (!this.view?.webContents.isDestroyed()) {
-      if (this.view?.webContents!.isDevToolsOpened()) {
-        this.view?.webContents!.closeDevTools();
+    if (!this._webContents || !this._webContents.isDestroyed()) {
+      if (this._webContents!.isDevToolsOpened()) {
+        this._webContents!.closeDevTools();
       }
 
-      if (this.view!.webContents.isLoading()) {
-        this.view!.webContents.stop();
+      if (this._webContents?.isLoading()) {
+        this._webContents.stop();
       }
       // TODO: why is this no longer called?
-      this.view!.webContents!.emit('destroyed');
-      // this.view?.webContents!.destroy?.()
+      this._webContents!.emit('destroyed');
+      // this._webContents!.destroy?.()
     }
 
-    if (this.view) {
-      if (!this.window?.isDestroyed()) {
-        this.window!.removeBrowserView(this.view);
-      }
+    // if (this.view) {
+    //   if (!this.window?.isDestroyed()) {
+    //     this.window!.removeBrowserView(this.view);
+    //   }
 
-      viewMngr.recycleView(this.view!);
-    }
+    //   viewMngr.recycleView(this.view!);
+    // }
 
     this.window = undefined;
-    this.view = undefined;
+    // this.view = undefined;
 
     emitIpcMainEvent('__internal_main:tabbed-window:tab-destroyed', {
       windowId: this.windowId!,
-      tabId: this.id,
+      tabId: this._id!,
     });
 
     if (lastOpenInfo) {
@@ -282,7 +373,7 @@ export class Tab {
 
     let finalURL = '';
     try {
-      finalURL = this.view?.webContents.getURL() || '';
+      finalURL = this._webContents?.getURL() || '';
 
       if (!finalURL) return null;
       return { finalURL };
@@ -305,7 +396,7 @@ export class Tab {
       });
       this.showLoadingView(url);
     }
-    const result = await this.view?.webContents.loadURL(url);
+    const result = await this._webContents?.loadURL(url);
     if (isMain) {
       emitIpcMainEvent('__internal_main:mainwindow:capture-tab');
       hideLoadingView();
@@ -315,11 +406,26 @@ export class Tab {
   }
 
   reload(force = false) {
-    this.showLoadingView(this.view!.webContents.getURL());
+    if (!this._webContents) return;
+    this.showLoadingView(this._webContents.getURL());
     if (force) {
-      this.view!.webContents.reloadIgnoringCache();
+      this._webContents.reloadIgnoringCache();
     } else {
-      this.view!.webContents.reload();
+      this._webContents.reload();
+    }
+  }
+
+  private _tellMainWindowAjudst(viewBounds: Electron.Rectangle) {
+    if (!this.window?.webContents.isDestroyed()) {
+      sendToWebContents(
+        this.tabs.window?.webContents,
+        '__internal_push:tabbed-window2:show-webview',
+        {
+          tabUid: this.tabUid,
+          windowId: this.windowId!,
+          viewBounds,
+        }
+      );
     }
   }
 
@@ -341,7 +447,7 @@ export class Tab {
     this._isVisible = true;
 
     if (this._isAnimating) {
-      this.view!.setAutoResize({ width: true, height: true });
+      // this.view!.setAutoResize({ width: true, height: true });
       return;
     }
 
@@ -379,13 +485,12 @@ export class Tab {
         : {}),
     };
 
-    this.view!.setBounds(viewBounds);
-    this.view!.setAutoResize({ width: true, height: true });
+    this._tellMainWindowAjudst(viewBounds);
   }
 
   setAnimatedMainWindowTabRect(rect?: Electron.Rectangle) {
     if (!this.isOfMainWindow) return;
-    if (!this.view) return;
+    // if (!this.view) return;
 
     if (!this._isAnimating) return;
 
@@ -394,13 +499,15 @@ export class Tab {
     if (rect?.width) rect.width = Math.round(rect.width);
     if (rect?.height) rect.height = Math.round(rect.height);
 
-    const currentBounds = this.view!.getBounds();
-    this.view!.setBounds({
-      ...currentBounds,
-      x: -99999,
-      y: -99999,
-      // ...rect,
-    });
+    // this._tellMainWindowAjudst(rect);
+
+    // const currentBounds = this.view!.getBounds();
+    // this.view!.setBounds({
+    //   ...currentBounds,
+    //   x: -99999,
+    //   y: -99999,
+    //   // ...rect,
+    // });
   }
 
   get isAnimating() {
@@ -419,16 +526,26 @@ export class Tab {
   hide() {
     this._isVisible = false;
 
-    this.view!.setAutoResize({ width: false, height: false });
-    if (isDarwin) {
-      const oldBounds = this.view!.getBounds();
-      this.view!.setBounds({
-        ...oldBounds,
-        x: -1000 - oldBounds.width,
-        y: -1000 - oldBounds.height,
-      });
-    } else {
-      this.view!.setBounds({ x: -1000, y: -1000, width: 0, height: 0 });
+    // this.view!.setAutoResize({ width: false, height: false });
+    // if (isDarwin) {
+    //   const oldBounds = this.view!.getBounds();
+    //   this.view!.setBounds({
+    //     ...oldBounds,
+    //     x: -1000 - oldBounds.width,
+    //     y: -1000 - oldBounds.height,
+    //   });
+    // } else {
+    //   this.view!.setBounds({ x: -1000, y: -1000, width: 0, height: 0 });
+    // }
+    if (!this.window?.webContents.isDestroyed()) {
+      sendToWebContents(
+        this.tabs.window?.webContents,
+        '__internal_push:tabbed-window2:hide-webview',
+        {
+          tabUid: this.tabUid,
+          windowId: this.windowId!,
+        }
+      );
     }
   }
 
@@ -454,23 +571,28 @@ export class MainWindowTab extends Tab {
 
   constructor(...[parentWindow, options]: ConstructorParameters<typeof Tab>) {
     super(parentWindow, { ...options, webuiType: 'MainWindow' });
+  }
 
-    this.view!.webContents.on('found-in-page', async (_, result) => {
+  protected _cleanupTab() {
+    super._cleanupTab();
+    this._findInPageState = { ...DEFAULT_FIND_IN_PAGE_STATE };
+  }
+
+  protected _onWebContentsInitialized(ctx: {
+    webContents: Electron.WebContents;
+    tab: Tab;
+  }): void {
+    ctx.webContents.on('found-in-page', async (_, result) => {
       this._findInPageState = {
         ...this._findInPageState,
         requestId: result.requestId,
         result,
       };
       emitIpcMainEvent('__internal_main:mainwindow:update-findresult-in-page', {
-        tabId: this.id,
+        tabId: ctx.webContents.id,
         find: { result, searchText: this._findInPageState.searchText },
       });
     });
-  }
-
-  protected _cleanupTab() {
-    super._cleanupTab();
-    this._findInPageState = { ...DEFAULT_FIND_IN_PAGE_STATE };
   }
 
   set findInPageState(state: Partial<MainWindowTab['_findInPageState']>) {
@@ -484,34 +606,36 @@ export class MainWindowTab extends Tab {
   // TODO: should we only call this method for selected tab?
   resumeFindInPage(searchText = '') {
     if (this.destroyed) return;
-    if (!this.view) return;
+    // if (!this.view) return;
+    if (!this._webContents) return;
     if (!this._isVisible || this.isAnimating) return;
 
     let requestId = this._findInPageState.requestId;
     if (searchText) {
       requestId =
-        this.view?.webContents.findInPage(searchText, {
+        this._webContents.findInPage(searchText, {
           findNext: true,
         }) || -1;
 
       this.findInPageState = { searchText, requestId };
     } else if (requestId <= 0) {
-      this.view?.webContents.stopFindInPage('clearSelection');
+      this._webContents.stopFindInPage('clearSelection');
       this.resetFindInPage();
     }
 
     this.findInPageState = { ...this.findInPageState, windowOpen: true };
 
-    const viewBounds = this.view.getBounds();
-    notifyShowFindInPage({ x: viewBounds.x, y: viewBounds.y }, this.id);
+    // const viewBounds = this.view.getBounds();
+    // notifyShowFindInPage({ x: viewBounds.x, y: viewBounds.y }, this._id);
   }
 
   clearFindInPageResult() {
     if (this.destroyed) return;
+    if (!this._webContents || this._webContents.isDestroyed()) return;
 
-    this.view?.webContents.stopFindInPage('clearSelection');
+    this._webContents.stopFindInPage('clearSelection');
     emitIpcMainEvent('__internal_main:mainwindow:update-findresult-in-page', {
-      tabId: this.id,
+      tabId: this._webContents.id,
       find: { result: null, searchText: '' },
     });
   }
@@ -553,8 +677,9 @@ export class MainWindowTab extends Tab {
   }
 
   private _pushPrevFindInPageResult() {
+    if (!this._webContents) return;
     emitIpcMainEvent('__internal_main:mainwindow:update-findresult-in-page', {
-      tabId: this.id,
+      tabId: this._webContents.id,
       find: {
         result: this._findInPageState.result || null,
         searchText: this._findInPageState.searchText || '',
@@ -648,10 +773,10 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
   }
 
   get(tabId: chrome.tabs.Tab['id']) {
-    return this.tabList.find((tab) => tab.id === tabId);
+    return this.tabList.find((tab) => tab._id === tabId);
   }
 
-  create(options?: Omit<ITabOptions, 'tabs'>) {
+  async create(options?: Omit<ITabOptions, 'tabs'>) {
     const args = [
       this.window!,
       {
@@ -660,21 +785,36 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
         webuiType: this.$meta.webuiType,
       },
     ] as const;
+
+    // TODO: add timeout mechanism
+    const waitor = firstValueFrom(
+      new Observable<void>((subscriber) => {
+        this.on('tab-webcontents-created', (payload) => {
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+          if (payload.tabUid !== tab.tabUid) return;
+
+          subscriber.next();
+          subscriber.complete();
+        });
+      })
+    );
     const tab = (
       options?.webuiType === 'MainWindow' && this.isOfMainWindow
         ? new MainWindowTab(...args)
         : new Tab(...args)
     ) as TTab;
+
+    await waitor;
     this.tabList.push(tab);
     if (!this.selected) this.selected = tab;
     tab.show(); // must be attached to window
     this.emit('tab-created', tab);
-    this.select(tab.id);
+    this.select(tab._id);
     return tab;
   }
 
   remove(tabId: chrome.tabs.Tab['id']) {
-    const tabIndex = this.tabList.findIndex((tab) => tab.id === tabId);
+    const tabIndex = this.tabList.findIndex((tab) => tab._id === tabId);
     if (tabIndex < 0) {
       throw new Error(`Tabs.remove: unable to find tab.id = ${tabId}`);
     }
@@ -684,7 +824,7 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
     if (this.selected === tab) {
       this._unselect();
       const nextTab = this.tabList[tabIndex] || this.tabList[tabIndex - 1];
-      if (nextTab) this.select(nextTab.id);
+      if (nextTab) this.select(nextTab._id);
     }
     this.emit('tab-destroyed', tab);
     if (this.tabList.length === 0) {
@@ -719,12 +859,12 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
   checkLoadingView() {
     const tab = this.selected;
 
-    if (!tab || !tab.view?.webContents.isLoading() || tab.isAnimating) {
+    if (!tab || !tab._webContents?.isLoading() || tab.isAnimating) {
       hideLoadingView();
       return false;
     }
 
-    const targetURL = tab.view!.webContents.getURL();
+    const targetURL = tab._webContents.getURL();
 
     tab.showLoadingView(targetURL);
 
@@ -736,8 +876,8 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
     if (!inputUrlInfo.origin) return null;
 
     return this.tabList.find((tab) => {
-      if (!tab.view?.webContents) return false;
-      const tabUrlInfo = canoicalizeDappUrl(tab.view?.webContents.getURL());
+      if (!tab._webContents) return false;
+      const tabUrlInfo = canoicalizeDappUrl(tab._webContents.getURL());
       return tabUrlInfo.origin === inputUrlInfo.origin;
     });
   }
@@ -748,8 +888,8 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
     if (!inputUrlInfo.secondaryDomain) return null;
 
     return this.tabList.find((tab) => {
-      if (!tab.view?.webContents) return false;
-      const tabUrlInfo = canoicalizeDappUrl(tab.view?.webContents.getURL());
+      if (!tab._webContents) return false;
+      const tabUrlInfo = canoicalizeDappUrl(tab._webContents.getURL());
       return tabUrlInfo.secondaryDomain === inputUrlInfo.secondaryDomain;
     });
   }
@@ -759,9 +899,9 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
     if (!urlInfo?.origin) return null;
 
     return this.tabList.find((tab) => {
-      if (!tab.view?.webContents) return false;
+      if (!tab._webContents) return false;
       const { urlInfo: tabUrlInfo } = canoicalizeDappUrl(
-        tab.view?.webContents.getURL()
+        tab._webContents.getURL()
       );
       return (
         tabUrlInfo &&
@@ -774,11 +914,11 @@ export class Tabs<TTab extends Tab = Tab> extends EventEmitter {
 
   filterTab(filterFn: (ctx: { tab: Tab; tabURL: string }) => boolean) {
     return this.tabList.filter((tab) => {
-      if (!tab.view?.webContents) return false;
+      if (!tab._webContents) return false;
 
       return filterFn({
         tab,
-        tabURL: tab.view?.webContents.getURL(),
+        tabURL: tab._webContents.getURL(),
       });
     });
   }

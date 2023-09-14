@@ -192,16 +192,14 @@ async function getLatestCapturedActiveTab() {
   const mainWin = await onMainWindowReady();
 
   const activeTab = mainWin.tabs.selected;
-  if (!activeTab?.view) return null;
+  if (!activeTab?._webContents) return null;
 
   let latestOne = captureState.image;
-  const imageP = captureWebContents(activeTab.view.webContents).then(
-    (image) => {
-      captureState.image = image ? resizeImage(image, 0.1) : null;
+  const imageP = captureWebContents(activeTab._webContents).then((image) => {
+    captureState.image = image ? resizeImage(image, 0.1) : null;
 
-      return image;
-    }
-  );
+    return image;
+  });
 
   if (!latestOne) {
     latestOne = await imageP;
@@ -295,7 +293,7 @@ handleIpcMainInvoke('toggle-activetab-animating', async (_, animating) => {
   if (!activeTab) return;
 
   activeTab.toggleAnimating(animating);
-  const isLoading = !!activeTab.view?.webContents.isLoading();
+  const isLoading = !!activeTab._webContents?.isLoading();
 
   if (!isLoading) {
     await getLatestCapturedActiveTab();
@@ -341,7 +339,7 @@ const { handler: handlerOpenFindInPage } = onIpcMainInternalEvent(
       return;
     }
 
-    if (!currentTab?.view) return;
+    if (!currentTab?._webContents) return;
 
     switch (payload.type) {
       case 'start-find': {
@@ -358,7 +356,7 @@ const { handler: handlerOpenFindInPage } = onIpcMainInternalEvent(
       case 'find-forward': {
         if (currentTab.findInPageState.requestId <= 0) return;
 
-        currentTab.view.webContents.findInPage(
+        currentTab._webContents?.findInPage(
           currentTab.findInPageState.searchText,
           {
             forward: true,
@@ -370,7 +368,7 @@ const { handler: handlerOpenFindInPage } = onIpcMainInternalEvent(
       case 'find-backward': {
         if (currentTab.findInPageState.requestId <= 0) return;
 
-        currentTab.view.webContents.findInPage(
+        currentTab._webContents?.findInPage(
           currentTab.findInPageState.searchText,
           {
             forward: false,
@@ -432,7 +430,7 @@ handleIpcMainInvoke('__internal_rpc:mainwindow:is-dapp-view', async (evt) => {
   const webContents = evt.sender;
   const mainTabbedWin = await onMainWindowReady();
   const foundTab = mainTabbedWin.tabs.tabList.find(
-    (tab) => tab.view?.webContents === webContents
+    (tab) => tab._webContents === webContents
   );
 
   return {
@@ -446,7 +444,7 @@ onIpcMainInternalEvent(
     const mainTabbedWin = await onMainWindowReady();
 
     mainTabbedWin.tabs.tabList.forEach((tab) => {
-      const webContents = tab.view?.webContents;
+      const webContents = tab._webContents;
       if (!webContents) return;
 
       sendToWebContents(

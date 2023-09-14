@@ -101,7 +101,8 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
 
     if (this.isMainWindow()) {
       // leave here for debug
-      // if (!IS_RUNTIME_PRODUCTION) this.window.webContents.openDevTools({ mode: 'detach' });
+      if (!IS_RUNTIME_PRODUCTION)
+        this.window.webContents.openDevTools({ mode: 'detach' });
 
       this.window.setMaxListeners(100);
       const disposeOnReportPerfInfo = onIpcMainEvent(
@@ -161,19 +162,19 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
     this.tabs.on('tab-created', (tab: Tab) => {
       const url = tab.getInitialUrl() || options.defaultTabUrl;
       if (url) {
-        tab.view!.webContents.loadURL(url);
+        tab._webContents?.loadURL(url);
       }
 
       // Track tab that may have been created outside of the extensions API.
-      this.extensions.addTab(tab.view!.webContents, tab.window!);
+      this.extensions.addTab(tab._webContents!, tab.window!);
       this._pushDappsBoundIds();
     });
 
     this.tabs.on('tab-selected', (tab: Tab, prevTab?: Tab) => {
-      this.extensions.selectTab(tab.view!.webContents);
+      this.extensions.selectTab(tab._webContents!);
       emitIpcMainEvent('__internal_main:tabbed-window:tab-selected', {
         windowId: this.window.id,
-        tabId: tab.view!.webContents.id,
+        tabId: tab._webContents!.id,
       });
     });
 
@@ -234,14 +235,13 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
     if (!this.isMainWindow()) return;
 
     const dappBoundTabIds = this.tabs.tabList.reduce((acc, tab) => {
-      if (!tab.view) return acc;
+      if (!tab._webContents) return acc;
       if (!tab.relatedDappId) return acc;
 
       if (tab.relatedDappId) {
-        acc[tab.relatedDappId] = tab.view!.webContents.id;
+        acc[tab.relatedDappId] = tab._webContents!.id;
         if (isSpecialDappID(tab.relatedDappId)) {
-          acc[formatDappHttpOrigin(tab.relatedDappId)] =
-            tab.view!.webContents.id;
+          acc[formatDappHttpOrigin(tab.relatedDappId)] = tab._webContents!.id;
         }
       }
 

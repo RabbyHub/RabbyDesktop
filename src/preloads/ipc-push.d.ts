@@ -1,3 +1,5 @@
+/// <reference path="./ipc-exchange-tab.d.ts" />
+
 // eslint-disable-next-line @typescript-eslint/ban-types
 type ChannelPushToWebContents = {
   '__internal_push:app:prompt-init': {
@@ -36,4 +38,8 @@ type ChannelPushToWebContents = {
     currentDappId?: string;
     result: Pick<IDetectHttpTypeDappVersionResult, 'updated'>;
   };
-};
+} & ChannelPushToWebContentsForWebviewTabs;
+
+type IChannelPushKey = keyof ChannelPushToWebContents;
+type GetChannelPushParams<T extends IChannelPushKey = IChannelPushKey> =
+  ChannelPushToWebContents[T];

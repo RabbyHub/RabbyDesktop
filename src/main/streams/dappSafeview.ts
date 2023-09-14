@@ -143,16 +143,20 @@ export async function safeOpenURL(
   }
 
   if (targetMatchedDappResult?.dapp) {
-    const findTabResult = getOrCreateDappBoundTab(mainTabbedWin, targetURL, {
-      targetMatchedDappResult,
-    });
+    const findTabResult = await getOrCreateDappBoundTab(
+      mainTabbedWin,
+      targetURL,
+      {
+        targetMatchedDappResult,
+      }
+    );
 
     const openedTab = opts.redirectSourceTab || findTabResult.finalTab;
 
-    if (openedTab?.view) {
+    if (openedTab?._webContents) {
       let shouldLoad = false;
       const targetInfo = canoicalizeDappUrl(targetURL);
-      const currentURL = openedTab.view.webContents.getURL();
+      const currentURL = openedTab._webContents.getURL();
       const currentInfo = canoicalizeDappUrl(currentURL);
 
       if (opts.redirectSourceTab) {
@@ -163,7 +167,7 @@ export async function safeOpenURL(
           currentInfo.isWWWSubDomain ||
           targetInfo.secondaryDomain !== currentInfo.secondaryDomain;
 
-        const openedTabURL = findTabResult.finalTab.view?.webContents.getURL();
+        const openedTabURL = findTabResult.finalTab._webContents?.getURL();
 
         // for those cases:
         // 1. SPA redirect
@@ -189,7 +193,7 @@ export async function safeOpenURL(
           if (shouldLoad) {
             openedTab.loadURL(targetURL);
           }
-          switchToBrowserTab(openedTab.id, mainTabbedWin);
+          switchToBrowserTab(openedTab._id, mainTabbedWin);
         },
       };
     }

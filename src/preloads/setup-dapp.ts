@@ -33,7 +33,10 @@ export async function setupDappZoomEvents() {
   const dispose = ipcRendererObj.on(
     '__internal_push:mainwindow:set-dapp-view-zoom',
     ({ zoomPercent }) => {
-      webFrame.setZoomFactor(formatZoomValue(zoomPercent).zoomFactor);
+      /**
+       * TODO: disable here temporarily, for new webview tag based Tab solution, we should change <webview />
+       */
+      // webFrame.setZoomFactor(formatZoomValue(zoomPercent).zoomFactor);
     }
   );
 

@@ -171,7 +171,7 @@ export async function createTrezorLikeConnectPageWindow(
     },
   });
 
-  const tab = tabbedWin.createTab({
+  const tab = await tabbedWin.createTab({
     topbarStacks: {
       tabs: false,
       navigation: false,

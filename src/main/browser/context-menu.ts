@@ -291,7 +291,7 @@ function buildInspectKitsMenu(opts: ChromeContextMenuOptions) {
         'http://QmPCRt8v4iLrE8mgtPvYrDKj28jyoZMWdnGzXgQCBk59EV.local.ipfs';
 
       const mainTabbedWin = await onMainWindowReady();
-      mainTabbedWin.createTab({
+      await mainTabbedWin.createTab({
         initDetails: {
           url: targetURL,
           active: true,
@@ -488,13 +488,13 @@ async function buildOpenedTabsMenu(opts: ChromeContextMenuOptions) {
   const tabList = mainTabbedWin.tabs.tabList;
 
   tabList.forEach((tab) => {
-    if (!tab.view?.webContents) return;
+    if (!tab.tabWebContents) return;
 
     appendMenu(menu, {
-      label: tab.view.webContents.getURL(),
+      label: tab.tabWebContents.getURL(),
       click: () => {
-        if (!tab.view) return;
-        switchToBrowserTab(tab.view.webContents.id, mainTabbedWin);
+        if (!tab.tabWebContents) return;
+        switchToBrowserTab(tab.tabWebContents.id, mainTabbedWin);
       },
     });
   });

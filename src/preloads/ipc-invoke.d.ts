@@ -1,3 +1,5 @@
+/// <reference path="./ipc-exchange-tab.d.ts" />
+
 type RabbyxInvokePayload = {
   'rabbyx:get-app-version': {
     send: [];
@@ -418,11 +420,11 @@ type ChannelInvokePayload = {
   };
   'restore-darwin-mainwin-bounds': {
     send: [rect?: Partial<Electron.Rectangle>];
-    response: { foo?: any };
+    response: void;
   };
   'memoize-darwin-mainwindow-screen-info': {
     send: [];
-    response: { foo?: any };
+    response: void;
   };
   'get-darwin-mainwindow-screen-info': {
     send: [];
@@ -484,6 +486,11 @@ type ChannelInvokePayload = {
     // eslint-disable-next-line @typescript-eslint/ban-types
     response: {};
   };
-} & RabbyxInvokePayload;
+} & ChannelInvokeForWebviewTabs &
+  RabbyxInvokePayload;
 
 type IInvokesKey = keyof ChannelInvokePayload;
+type GetInvokeMethodParams<T extends IInvokesKey = IInvokesKey> =
+  ChannelInvokePayload[T]['send'];
+type GetInvokeMethodResponse<T extends IInvokesKey = IInvokesKey> =
+  ChannelInvokePayload[T]['response'];

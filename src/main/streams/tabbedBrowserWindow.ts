@@ -168,16 +168,16 @@ handleIpcMainInvoke('get-webui-ext-navinfo', async (event, tabId) => {
   const tabbedWin = getTabbedWindowFromWebContents(webContents);
   const tab = tabbedWin?.tabs.get(tabId);
   // TODO: always respond message
-  if (!tab || !tab.view) {
+  if (!tab?._webContents) {
     throw new Error('tab not found');
   }
 
-  const tabUrl = tab.view.webContents!.getURL();
+  const tabUrl = tab._webContents!.getURL();
   // const checkResult = isUrlFromDapp(tabUrl)
   //   ? await getOrPutCheckResult(tabUrl, { updateOnSet: false })
   //   : null;
 
-  const isDestroyed = !tab.view || tab.view.webContents.isDestroyed();
+  const isDestroyed = !tab._webContents || tab._webContents.isDestroyed();
 
   let dapp: IDapp | undefined;
   if (tabbedWin?.isMainWindow() && tab.relatedDappId) {
@@ -190,10 +190,8 @@ handleIpcMainInvoke('get-webui-ext-navinfo', async (event, tabId) => {
       tabUrl,
       dapp,
       dappSecurityCheckResult: null,
-      canGoBack: isDestroyed ? false : !!tab.view?.webContents?.canGoBack(),
-      canGoForward: isDestroyed
-        ? false
-        : !!tab.view?.webContents?.canGoForward(),
+      canGoBack: isDestroyed ? false : !!tab._webContents?.canGoBack(),
+      canGoForward: isDestroyed ? false : !!tab._webContents?.canGoForward(),
     },
   };
 });
@@ -208,7 +206,7 @@ onIpcMainEvent('__internal_rpc:browser-dev:openDevTools', (evt) => {
 onIpcMainEvent('__internal_webui-window-close', (_, winId, webContentsId) => {
   const tabbedWindow = findByWindowId(winId);
   const tabToClose = tabbedWindow?.tabs.tabList.find((tab) => {
-    if (tab.view && tab.view?.webContents.id === webContentsId) {
+    if (tab._webContents && tab._webContents.id === webContentsId) {
       return true;
     }
     return false;
@@ -335,7 +333,7 @@ onIpcMainEvent(
     const tab = mainTabbedWin.tabs.get(tabId);
     if (!tab) return;
 
-    tab.view?.webContents.stop();
+    tab._webContents?.stop();
   }
 );
 
@@ -346,14 +344,16 @@ onIpcMainEvent(
 
     const foundTab = tabbedWin.tabs.findByOrigin(dappOrigin);
 
-    if (foundTab?.id && tabbedWin.tabs.selected?.id !== foundTab.id) {
-      tabbedWin.tabs.select(foundTab.id);
+    if (foundTab?._id && tabbedWin.tabs.selected?._id !== foundTab._id) {
+      tabbedWin.tabs.select(foundTab._id);
     }
   }
 );
 
 onMainWindowReady().then((mainTabbedWin) => {
   mainTabbedWin.tabs.on('all-tabs-destroyed', async () => {
+    // TODO: leave here for debug
+    if (!IS_RUNTIME_PRODUCTION) console.trace('all-tabs-destroyed');
     sendToWebContents(
       mainTabbedWin.window.webContents,
       '__internal_push:mainwindow:all-tabs-closed',
@@ -377,12 +377,12 @@ onMainWindowReady().then((mainTabbedWin) => {
 //       .subscribe((count) => {
 //         const activeTab = mainTabbedWin.tabs.selected;
 //         if (!mainWindow) return;
-//         if (!activeTab?.view || activeTab.view.webContents.isDestroyed())
+//         if (!activeTab?.view || activeTab._webContents.isDestroyed())
 //           return;
 
 //         if (count > 1) {
 //           if (!activeTab?.view) return;
-//           if (activeTab.view.webContents.isLoading()) return;
+//           if (activeTab._webContents.isLoading()) return;
 
 //           activeTab.hide();
 //         } else {
@@ -451,7 +451,7 @@ onIpcMainInternalEvent(
     tabsToClose.forEach((tab) => {
       if (tab) {
         tab.destroy();
-        cLog(`close-tab-on-del-dapp: destroyed tab ${tab.id}`);
+        cLog(`close-tab-on-del-dapp: destroyed tab ${tab._id}`);
       }
     });
   }
@@ -548,7 +548,7 @@ onIpcMainSyncEvent('__internal_rpc:app:request-tab-mutex', async (evt) => {
     return;
   }
 
-  if (tabbedWin.tabs.selected?.view?.webContents.id === callerWebContents.id) {
+  if (tabbedWin.tabs.selected?._webContents?.id === callerWebContents.id) {
     evt.returnValue = { windowExisted: true };
   } else {
     tabWaitActiveMutexPools.push({

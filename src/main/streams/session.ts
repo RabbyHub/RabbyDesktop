@@ -321,14 +321,14 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
 
           asyncDestroyWindowIfNeed();
 
-          return [tab.view!.webContents, window];
+          return [tab._webContents, window];
         }
         case 'activate-tab': {
           switchToBrowserTab(actionInfo.tabId, win);
 
           // TODO: make sure actionInfo.openedTab existed
           return [
-            actionInfo.openedTab!.view!.webContents!,
+            actionInfo.openedTab!._webContents!,
             actionInfo.openedTab!.window!,
           ];
         }
@@ -340,7 +340,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
           return false;
         }
         default: {
-          const tab = win.createTab({
+          const tab = await win.createTab({
             topbarStacks: {
               navigation: win.getMeta().hasNavigationBar,
             },
@@ -357,12 +357,9 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
           }
 
           if (typeof details.active === 'boolean' ? details.active : true)
-            win.tabs.select(tab.id);
+            win.tabs.select(tab._id);
 
-          return [
-            tab.view?.webContents as Electron.WebContents,
-            tab.window,
-          ] as any;
+          return [tab._webContents as Electron.WebContents, tab.window] as any;
         }
       }
     },
@@ -372,8 +369,8 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
         const window = findByWindowId(details.windowId);
         const foundTab = window?.tabs.get(tab.id);
         details.url = foundTab?.getInitialUrl() || '';
-        if (foundTab && foundTab.view?.webContents) {
-          details.status = foundTab.view.webContents.isLoading()
+        if (foundTab && foundTab._webContents) {
+          details.status = foundTab._webContents.isLoading()
             ? 'loading'
             : 'complete';
         }
