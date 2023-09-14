@@ -257,6 +257,8 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
     );
   }
 
+  private _pushTabsInfo() {}
+
   destroy() {
     this.tabs.destroy();
 

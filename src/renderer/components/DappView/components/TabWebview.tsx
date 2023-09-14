@@ -14,7 +14,13 @@ import styles from '../index.module.less';
 /**
  * @description stub element for dapp view, guide dapp to render in this element
  */
-export default function ActiveWebviewTag({ dappId }: { dappId?: string }) {
+export default function TabWebview({
+  dappId,
+  active,
+}: {
+  active?: boolean;
+  dappId?: string;
+}) {
   const divRef = useRef<HTMLDivElement>(null);
 
   const obsRef = useRef<ResizeObserver>(
@@ -49,15 +55,6 @@ export default function ActiveWebviewTag({ dappId }: { dappId?: string }) {
       value: null as Electron.WebviewTag | null,
     };
 
-    const moveBackWebviewTag = () => {
-      if (
-        webviewTagObj.value &&
-        !getWebviewTagsPark().contains(webviewTagObj.value)
-      ) {
-        getWebviewTagsPark().appendChild(webviewTagObj.value);
-      }
-    };
-
     window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:tabbed-window2:show-webview',
       (payload) => {
@@ -69,34 +66,23 @@ export default function ActiveWebviewTag({ dappId }: { dappId?: string }) {
 
         if (!webviewTag) return;
 
+        // // TODO: should we make sure it's not loading?
+        // webviewTag.stop();
         toggleShowElement(webviewTag, true);
-        webviewTag.style.left = `${payload.viewBounds.x}px`;
-        webviewTag.style.top = `${payload.viewBounds.y}px`;
-        webviewTag.style.width = `${payload.viewBounds.width}px`;
-        webviewTag.style.height = `${payload.viewBounds.height}px`;
 
-        // if (!divEl.contains(webviewTag)) {
-        //   // getWebviewTagsPark().removeChild(webviewTag);
-        //   // divEl.appendChild(webviewTag);
-        // }
-      }
-    );
+        if (!divEl.contains(webviewTag)) {
+          // getWebviewTagsPark().removeChild(webviewTag);
+          // divEl.appendChild(webviewTag);
 
-    window.rabbyDesktop.ipcRenderer.on(
-      '__internal_push:tabbed-window2:hide-webview',
-      (payload) => {
-        const webviewTag = queryTabWebviewTag(payload);
-
-        if (!webviewTag) return;
-
-        moveBackWebviewTag();
+          webviewTag.style.left = `${payload.viewBounds.x}px`;
+          webviewTag.style.top = `${payload.viewBounds.y}px`;
+          webviewTag.style.width = `${payload.viewBounds.width}px`;
+          webviewTag.style.height = `${payload.viewBounds.height}px`;
+        }
       }
     );
 
     return () => {
-      // return back
-      moveBackWebviewTag();
-
       obs.unobserve(divEl);
       window.rabbyDesktop.ipcRenderer.sendMessage(
         '__internal_rpc:mainwindow:report-activeDapp-rect',
@@ -114,7 +100,8 @@ export default function ActiveWebviewTag({ dappId }: { dappId?: string }) {
     <div
       ref={divRef}
       className={classNames(
-        styles.activeDappView,
+        styles.tabWebviewWrapper,
+        active && styles.active,
         // IS_RUNTIME_PRODUCTION && styles.debug,
         imageDataURL && styles.withScreenshot,
         isAnimating && styles.isAnimating
@@ -128,6 +115,7 @@ export default function ActiveWebviewTag({ dappId }: { dappId?: string }) {
           }}
         />
       )}
+      <div id="app-webview-tags" />
     </div>
   );
 }

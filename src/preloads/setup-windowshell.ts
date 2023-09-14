@@ -7,6 +7,9 @@ import {
   toggleShowElement,
 } from '../isomorphic/dom-helpers';
 
+/**
+ * @description default tabs creation/update/remove solution for window shell
+ */
 export function setupWindowShell() {
   document.addEventListener('DOMContentLoaded', () => {
     let tagsPark = getWebviewTagsPark();
@@ -25,12 +28,13 @@ export function setupWindowShell() {
   ipcRendererObj.on(
     '__internal_push:tabbed-window2:create-webview',
     (payload) => {
-      const webviewTag = document.createElement(
-        'webview'
-      ) as Electron.WebviewTag;
+      const webviewTag =
+        queryTabWebviewTag(payload) ||
+        (document.createElement('webview') as Electron.WebviewTag);
       webviewTag.setAttribute('r-tab-uid', payload.tabUid);
       webviewTag.setAttribute('r-for-windowid', `${payload.windowId}`);
       webviewTag.setAttribute('r-related-dappid', payload.relatedDappId ?? '');
+      // webviewTag.setAttribute('session', 'persit:default');
 
       // webviewTag.setAttribute('autosize', 'true');
       webviewTag.style.display = 'none';
@@ -46,7 +50,10 @@ export function setupWindowShell() {
         })
       );
 
-      const openSrc = payload.relatedDappId ?? payload.additionalData.blankPage;
+      // const openSrc = payload.relatedDappId ?? payload.additionalData.blankPage;
+
+      // init open blank page to fast trigger chrome.tabs.onUpdated
+      const openSrc = payload.additionalData.blankPage;
 
       // TODO: maybe sometimes we can open relatedDappId directly?
       webviewTag.src = openSrc;

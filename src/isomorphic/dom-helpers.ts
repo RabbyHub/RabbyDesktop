@@ -1,11 +1,16 @@
-let webviewTagsParkEl: HTMLDivElement | null = null;
+let globalWebviewTagsParkEl: HTMLDivElement | null = null;
 export function getWebviewTagsPark() {
-  if (!webviewTagsParkEl) {
-    webviewTagsParkEl = document.body.querySelector(
+  if (!globalWebviewTagsParkEl) {
+    globalWebviewTagsParkEl = document.body.querySelector(
       '#webview-tags'
     )! as HTMLDivElement;
   }
-  return webviewTagsParkEl;
+
+  const appWebviewTagsParkEl = document.body.querySelector(
+    '#app-webview-tags'
+  ) as HTMLDivElement | null;
+
+  return appWebviewTagsParkEl ?? globalWebviewTagsParkEl;
 }
 
 export function queryTabWebviewTag(matches: WebviewTagExchgMatches) {

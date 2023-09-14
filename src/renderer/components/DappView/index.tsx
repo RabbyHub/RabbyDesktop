@@ -1,7 +1,8 @@
 import classNames from 'classnames';
 import { useMatches } from 'react-router-dom';
+import { useWindowTabs } from '@/renderer/hooks-shell/useWindowTabs';
 import styles from './index.module.less';
-import ActiveWebviewTag from './components/ActiveWebviewTag';
+import TabWebview from './components/TabWebview';
 
 export function DappViewWrapper({
   children,
@@ -13,11 +14,13 @@ React.PropsWithChildren<{}>) {
 
   const dappId = firstMatch?.params?.dappId;
 
+  const { tabsGroupById } = useWindowTabs();
+
   return (
     <div className={styles.dappViewWrapper}>
       {children || null}
       <div className={classNames(styles.dappViewGasket)}>
-        <ActiveWebviewTag dappId={dappId} />
+        <TabWebview dappId={dappId} />
       </div>
     </div>
   );

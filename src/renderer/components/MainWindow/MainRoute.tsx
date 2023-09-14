@@ -9,6 +9,8 @@ import { CurrentAccountAndNewAccount } from '../CurrentAccount';
 import { MainWindowRouteData } from './type';
 
 import styles from './MainRoute.module.less';
+import { DappViewWrapper } from '../DappView';
+import { TopNavBar } from '../TopNavBar';
 
 function convertPathnameToClassName(pathname: string) {
   return pathname.replace(/\/|:/g, '_');
@@ -66,6 +68,18 @@ export default function MainWindowRoute({
   const navigate = useNavigate();
   const { onDarwinToggleMaxmize } = useWindowState();
 
+  const { isKeepAliveRoute, isDappRoute } = useMemo(() => {
+    const isKeepAlive = ['/mainwin/home', '/mainwin/swap'].includes(
+      location.pathname
+    );
+    const isDapp = location.pathname.startsWith('/mainwin/dapps/');
+
+    return {
+      isKeepAliveRoute: isKeepAlive || isDapp,
+      isDappRoute: isDapp,
+    };
+  }, [location.pathname]);
+
   return (
     <div className={classNames(styles.MainWindowRoute, classNameOnRoute)}>
       {!matchedData?.noDefaultHeader && (
@@ -110,9 +124,13 @@ export default function MainWindowRoute({
       >
         <Swap />
       </div>
+      <div style={{ display: isDappRoute ? 'block' : 'none' }}>
+        <DappViewWrapper>
+          <TopNavBar />
+        </DappViewWrapper>
+      </div>
 
-      {!['/mainwin/home', '/mainwin/swap'].includes(location.pathname) &&
-        children}
+      {!isKeepAliveRoute && children}
     </div>
   );
 }

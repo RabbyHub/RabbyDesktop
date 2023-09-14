@@ -6,7 +6,9 @@ type WebviewTagExchgMatches = {
   windowId: number;
 };
 
-type WebViewExChgData<T> = WebviewTagExchgMatches & T;
+type WebViewExChgData<T = any> = T extends void
+  ? WebviewTagExchgMatches
+  : WebviewTagExchgMatches & T;
 
 type ChannelPushToWebContentsForWebviewTabs = {
   '__internal_push:tabbed-window2:create-webview': WebViewExChgData<{
@@ -27,6 +29,10 @@ type ChannelPushToWebContentsForWebviewTabs = {
 
   // eslint-disable-next-line @typescript-eslint/ban-types
   '__internal_push:tabbed-window2:destroy-webview': WebViewExChgData<{}>;
+
+  // '__internal_push:tabbed-window2:tab-updated': {
+  //   windowId: number;
+  // }[];
 };
 
 type ChannelInvokeForWebviewTabs = {

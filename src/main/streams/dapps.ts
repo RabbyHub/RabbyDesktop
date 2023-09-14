@@ -208,7 +208,7 @@ handleIpcMainInvoke(
 
     if (
       !mainTabbedWin.tabs.selected ||
-      mainTabbedWin.tabs.selected.view?.webContents?.id !== webContents.id
+      mainTabbedWin.tabs.selected._webContents?.id !== webContents.id
     )
       return { result: false };
 
