@@ -19,13 +19,30 @@ export function queryTabWebviewTag(matches: WebviewTagExchgMatches) {
   ) as Electron.WebviewTag | null;
 }
 
+export function queryAllTabWebviewTags(matches?: WebviewTagExchgMatches) {
+  const allNodes = getWebviewTagsPark().querySelectorAll(
+    `webview[r-tab-uid][r-for-windowid]`
+  ) as NodeListOf<Electron.WebviewTag>;
+
+  return {
+    allWebviews: allNodes,
+    webviewTag:
+      !matches || !allNodes
+        ? null
+        : (Array.from(allNodes).find((node) => {
+            return (
+              node.getAttribute('r-tab-uid') === matches.tabUid &&
+              node.getAttribute('r-for-windowid') === `${matches.windowId}`
+            );
+          }) as Electron.WebviewTag | null),
+  };
+}
+
 export function toggleShowElement(
   webviewTag?: HTMLElement,
   nextShow: string | boolean = webviewTag?.style.display === 'none'
 ) {
-  if (!webviewTag) {
-    return;
-  }
+  if (!webviewTag) return;
 
   if (nextShow) {
     webviewTag.style.display = 'block';

@@ -3,6 +3,7 @@ import { ipcRendererObj } from './base';
 import { stringifyWebPreferences } from '../isomorphic/string';
 import {
   getWebviewTagsPark,
+  queryAllTabWebviewTags,
   queryTabWebviewTag,
   toggleShowElement,
 } from '../isomorphic/dom-helpers';
@@ -32,9 +33,13 @@ export function setupWindowShell() {
         (document.createElement('webview') as Electron.WebviewTag);
       webviewTag.setAttribute('r-tab-uid', payload.tabUid);
       webviewTag.setAttribute('r-for-windowid', `${payload.windowId}`);
-      // webviewTag.setAttribute('session', 'persit:default');
 
-      // webviewTag.setAttribute('autosize', 'true');
+      /**
+       * we should enable that to allow webview can trigger events about
+       * 'will-redirect'/'will-navigate'/openHandlers in main process
+       */
+      webviewTag.setAttribute('allowpopups', 'true');
+
       toggleShowElement(webviewTag, false);
 
       webviewTag.setAttribute(
@@ -88,12 +93,13 @@ export function setupWindowShell() {
   ipcRendererObj.on(
     '__internal_push:tabbed-window2:show-webview',
     (payload) => {
-      const webviewTag = queryTabWebviewTag(
-        payload
-      ) as Electron.WebviewTag | null;
+      const { webviewTag, allWebviews } = queryAllTabWebviewTags(payload);
 
       if (!webviewTag) return;
 
+      allWebviews.forEach((node) => {
+        toggleShowElement(node, false);
+      });
       toggleShowElement(webviewTag, true);
 
       if (!payload.isDappWebview) {

@@ -95,7 +95,11 @@ onIpcMainInternalEvent(
       }
 
       // only trigger cache zoomFactor, it's no effect for opened webContents
-      webContents.setZoomFactor(formatZoomValue(zoomPercent).zoomFactor);
+      if (webContents.getType() === 'browserView') {
+        webContents.setZoomFactor(formatZoomValue(zoomPercent).zoomFactor);
+      } else {
+        webContents.setZoomFactor(1);
+      }
       sendToWebContents(
         webContents,
         '__internal_push:mainwindow:set-dapp-view-zoom',
