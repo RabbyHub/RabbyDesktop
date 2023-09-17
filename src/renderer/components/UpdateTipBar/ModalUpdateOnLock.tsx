@@ -47,7 +47,7 @@ const StyledModal = styled(Modal)`
 
   .changelogText {
     color: var(--r-neutral-title-2, #fff);
-    text-align: center;
+    text-align: left;
     font-size: 15px;
     font-style: normal;
     font-weight: 400;
