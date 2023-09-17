@@ -10,6 +10,8 @@ import RcBrandName from '@/../assets/icons/unlock/brand-name.svg?rc';
 import clsx from 'clsx';
 import { useFormCheckError } from '@/renderer/hooks/useAntdForm';
 import { debounce } from 'lodash';
+import UpdateTipBar from '@/renderer/components/UpdateTipBar';
+import { useCheckNewRelease } from '@/renderer/hooks/useAppUpdator';
 import styles from './Unlock.module.less';
 import { ModalForgetPwd, useShowModalForgetPwd } from './ModalForgetPwd';
 
@@ -53,9 +55,17 @@ export const Unlock: React.FC = () => {
 
   const { setIsShowModalForgetPwd } = useShowModalForgetPwd();
 
+  const { releaseCheckInfo } = useCheckNewRelease();
+
   return (
     <div className={styles.unlock}>
-      <div className={clsx(styles.centerWrapper, 'w-[400px]')}>
+      <div
+        className={clsx(
+          styles.centerWrapper,
+          'w-[400px]',
+          releaseCheckInfo.hasNewRelease && styles.withUpdate
+        )}
+      >
         <div className={styles.logoArea}>
           <img
             src="rabby-internal://assets/icons/unlock/logo.svg"
@@ -112,6 +122,7 @@ export const Unlock: React.FC = () => {
           >
             Forgot Password
           </div>
+          <UpdateTipBar />
         </Form>
       </div>
 
