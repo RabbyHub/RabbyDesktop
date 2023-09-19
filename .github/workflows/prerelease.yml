@@ -23,7 +23,7 @@ jobs:
     runs-on:
       - self-hosted
       - X64
-      - legacy
+      - isolate
       - ${{ matrix.host }}
     # if: ${{ github.repository_owner == 'RabbyHub' }}
     env:
@@ -42,6 +42,7 @@ jobs:
           echo "HOME is $HOME"
           echo "USERPROFILE is $USERPROFILE"
           echo "which node $(which node)"
+          echo "where npm $(npm config get prefix)"
 
       # - name: Install Node and NPM
       #   uses: actions/setup-node@v1
