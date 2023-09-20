@@ -1,3 +1,5 @@
+@import '@/renderer/css/mixins.less';
+
 .unlock {
   display: flex;
   height: 100%;
@@ -23,6 +25,8 @@
   .logo {
     width: 82px;
     height: 82px;
+
+    .global-draggable();
   }
 
   .brandNameSvg {

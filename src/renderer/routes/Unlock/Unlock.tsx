@@ -12,8 +12,11 @@ import { useFormCheckError } from '@/renderer/hooks/useAntdForm';
 import { debounce } from 'lodash';
 import UpdateTipBar from '@/renderer/components/UpdateTipBar';
 import { useCheckNewRelease } from '@/renderer/hooks/useAppUpdator';
+import { getOSPlatform } from '@/isomorphic/os';
 import styles from './Unlock.module.less';
 import { ModalForgetPwd, useShowModalForgetPwd } from './ModalForgetPwd';
+
+const osType = getOSPlatform();
 
 interface FormData {
   password: string;
@@ -59,6 +62,7 @@ export const Unlock: React.FC = () => {
 
   return (
     <div className={styles.unlock}>
+      {osType === 'darwin' && <div className="global-dragheadbar h-[56px]" />}
       <div
         className={clsx(
           styles.centerWrapper,
