@@ -8,6 +8,7 @@ import {
   PROTOCOL_IPFS,
   RABBY_INTERNAL_PROTOCOL,
   RABBY_LOCAL_URLBASE,
+  PROTOCOL_LOCALFS,
 } from './constants';
 import {
   encodeAbsPath,
@@ -822,4 +823,29 @@ export function getBuiltinViewType(urlInfo: URL | Location) {
   }
 
   return false;
+}
+
+const ALLOWED_PROTOCOLS = [
+  // for internal
+  RABBY_INTERNAL_PROTOCOL,
+  'chrome-extension:',
+  'chrome:',
+
+  // for dapp
+  PROTOCOL_IPFS,
+  PROTOCOL_ENS,
+  PROTOCOL_LOCALFS,
+  'https://',
+  'http://',
+
+  // for other special app schema
+  'ledgerlive://',
+  'onekey://',
+];
+export function isAllowedProtocols(targetURL: string) {
+  const { protocol } = safeParseURL(targetURL) || {};
+
+  if (!protocol) return false;
+
+  return ALLOWED_PROTOCOLS.includes(protocol);
 }

@@ -1,7 +1,8 @@
 import { arraify } from '@/isomorphic/array';
-import { app, dialog, shell } from 'electron';
+import { app, dialog } from 'electron';
 import { dynamicConfigStore } from '../store/dynamicConfig';
 import { onMainWindowReady } from '../utils/stream-helpers';
+import { safeOpenExternalURL } from '../utils/security';
 
 const ResetDialogButtons = ['OK', 'Go to Download'] as const;
 
@@ -22,7 +23,7 @@ async function alertForceUpdate() {
   });
 
   if (result.response === confirmId) {
-    shell.openExternal('https://rabby.io/?platform=desktop');
+    safeOpenExternalURL('https://rabby.io/?platform=desktop');
   }
 
   app.quit();

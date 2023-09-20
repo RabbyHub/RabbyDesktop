@@ -13,6 +13,7 @@ import {
 } from '../utils/tabbedBrowserWindow';
 import { getBlockchainExplorers } from '../store/dynamicConfig';
 import { onMainWindowReady } from '../utils/stream-helpers';
+import { safeOpenExternalURL } from '../utils/security';
 
 /**
  * @deprecated
@@ -89,7 +90,7 @@ export function setOpenHandlerForWebContents({
     });
 
     if (shouldOpenExternal) {
-      shell.openExternal(targetURL);
+      safeOpenExternalURL(targetURL);
       return { action: 'deny' };
     }
 
@@ -194,7 +195,7 @@ export const setListeners = {
           return false;
         }
         case EnumOpenDappAction.openExternal: {
-          shell.openExternal(targetURL);
+          safeOpenExternalURL(targetURL);
           evt.preventDefault();
           return false;
         }
@@ -263,7 +264,7 @@ export const setListeners = {
             return false;
           }
           case EnumOpenDappAction.openExternal: {
-            shell.openExternal(targetURL);
+            safeOpenExternalURL(targetURL);
             return false;
           }
           case EnumOpenDappAction.leaveInTab: {
