@@ -44,6 +44,7 @@
     "generate-ico": "png-to-ico assets/icon.png > assets/icon.ico",
     "prepackage": "ts-node ./.erb/scripts/clean.js dist && npm run build",
     "package": "electron-builder build --config=electron-builder.config.js --publish never",
+    "package:win-portable": "npm run package -- --win portable",
     "package:win32:x64": "rimraf release/build-win32-x64* && cross-env-shell BUILD_ARCH=x64 npm run package",
     "package:win32:ia32": "rimraf release/build-win32-ia32* && cross-env-shell BUILD_ARCH=ia32 npm run package",
     "package:darwin:x64": "rimraf release/build-darwin-x64* && BUILD_ARCH=x64 npm run package",
