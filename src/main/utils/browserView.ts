@@ -41,6 +41,12 @@ export class BrowserViewManager {
           ...opts?.webPreferences,
         },
       });
+
+      Object.defineProperty(view, '$isWebviewTab', {
+        get() {
+          return true;
+        },
+      });
     }
 
     delete this.idleViews[view.webContents.id];

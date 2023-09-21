@@ -538,7 +538,7 @@ onIpcMainInternalEvent(
     );
   }
 );
-onIpcMainSyncEvent('__internal_rpc:app:request-tab-mutex', async (evt) => {
+onIpcMainSyncEvent('__outer_rpc:app:request-tab-mutex', async (evt) => {
   const callerWebContents = evt.sender;
 
   const tabbedWin = getTabbedWindowFromWebContents(callerWebContents);

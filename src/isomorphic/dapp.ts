@@ -10,7 +10,6 @@ import {
   extractDappInfoFromURL,
   extractIpfsCid,
   extractIpfsInfo,
-  isIpfsHttpURL,
   parseDomainMeta,
   makeDappAboutURLs,
 } from './url';
@@ -439,7 +438,7 @@ export function isOpenedAsHttpDappType(
 
 export function isProtocolLeaveInApp(dappOrigin: string) {
   return PROTOCOLS_SUPPORTED_TO_OPEN.some((protocol) =>
-    dappOrigin.startsWith(protocol)
+    dappOrigin.startsWith(`${protocol}//`)
   );
 }
 

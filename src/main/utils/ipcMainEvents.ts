@@ -1,8 +1,34 @@
 /// <reference path="../../renderer/preload.d.ts" />
 
+import { PROTOCOLS_SUPPORT_IPC_CALL } from '@/isomorphic/constants';
+import { safeParseURL } from '@/isomorphic/url';
 import Electron, { ipcMain } from 'electron';
 
 ipcMain.setMaxListeners(Infinity);
+
+function isWhitelistEvent(eventName: string) {
+  return eventName.startsWith('__outer_rpc');
+}
+function isAllowedSender(eventName: string, evt: Electron.IpcMainInvokeEvent) {
+  if (isWhitelistEvent(eventName)) return true;
+
+  const webContents = evt.sender;
+  if ((webContents as any).$isWebviewTab) {
+    return false;
+  }
+
+  const frame = evt.senderFrame;
+  if (frame.url) {
+    const parsedInfo = safeParseURL(frame.url);
+    if (
+      !parsedInfo?.protocol ||
+      !PROTOCOLS_SUPPORT_IPC_CALL.includes(parsedInfo?.protocol as any)
+    )
+      return false;
+  }
+
+  return true;
+}
 
 export function onIpcMainEvent<T extends IChannelsKey = IChannelsKey>(
   eventName: T,
@@ -19,7 +45,13 @@ export function onIpcMainEvent<T extends IChannelsKey = IChannelsKey>(
     ...args: ChannelMessagePayload[T]['send']
   ) => any
 ) {
-  ipcMain.on(eventName, handler as any);
+  const wrappedHandler = (evt: Electron.IpcMainEvent, ...args: any[]) => {
+    if (!isAllowedSender(eventName, evt)) return;
+
+    // @ts-expect-error
+    return handler(evt, ...args);
+  };
+  ipcMain.on(eventName, wrappedHandler as any);
 
   // dispose
   let disposed = false;
@@ -27,7 +59,7 @@ export function onIpcMainEvent<T extends IChannelsKey = IChannelsKey>(
     if (disposed) return;
     disposed = true;
 
-    return ipcMain.off(eventName, handler as any);
+    return ipcMain.off(eventName, wrappedHandler as any);
   };
 
   dispose.handler = handler;
@@ -43,14 +75,20 @@ export function onIpcMainSyncEvent<T extends ISendSyncKey = ISendSyncKey>(
     ...args: ChannelSendSyncPayload[T]['send']
   ) => any
 ) {
-  ipcMain.on(eventName, handler as any);
+  const wrappedHandler = (evt: Electron.IpcMainEvent, ...args: any[]) => {
+    if (!isAllowedSender(eventName, evt)) return;
+
+    // @ts-expect-error
+    return handler(evt, ...args);
+  };
+  ipcMain.on(eventName, wrappedHandler as any);
 
   // dispose
   let disposed = false;
   const dispose = () => {
     if (disposed) return;
     disposed = true;
-    return ipcMain.off(eventName, handler as any);
+    return ipcMain.off(eventName, wrappedHandler as any);
   };
 
   dispose.handler = handler;
@@ -113,5 +151,10 @@ export function handleIpcMainInvoke<T extends IInvokesKey = IInvokesKey>(
     ...args: ChannelInvokePayload[T]['send']
   ) => ItOrItsPromise<ChannelInvokePayload[T]['response']>
 ) {
-  ipcMain.handle(eventName, handler as any);
+  ipcMain.handle(eventName, async (evt, ...args) => {
+    if (!isAllowedSender(eventName, evt)) return null;
+
+    // @ts-expect-error
+    return handler(evt, ...args);
+  });
 }

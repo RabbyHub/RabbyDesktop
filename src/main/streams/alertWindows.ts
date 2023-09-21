@@ -35,7 +35,7 @@ function getPromptWindowBounds(parentWindow: Electron.BrowserWindow) {
 // TODO:
 // 1. restrain only active tab run it
 // 2. avoid repeative prompt in short time (consecutive prompt)
-onIpcMainSyncEvent('__internal_rpc:app:prompt-open', async (evt, options) => {
+onIpcMainSyncEvent('__outer_rpc:app:prompt-open', async (evt, options) => {
   const callerWebContents = evt.sender;
   const callerTabbedWin = getTabbedWindowFromWebContents(callerWebContents);
   if (!callerTabbedWin) {
