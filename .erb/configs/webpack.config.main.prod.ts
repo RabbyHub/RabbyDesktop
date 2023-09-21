@@ -32,6 +32,22 @@ const configuration: webpack.Configuration = {
     preload: path.join(webpackPaths.srcMainPath, 'preload.ts'),
   },
 
+  module: {
+    rules: [
+      {
+        test: /\.tsx?$/,
+        include: [/node_modules/],
+        use: {
+          loader: 'ts-loader',
+          options: {
+            // Remove this line to enable type checking in webpack builds
+            transpileOnly: true,
+          },
+        },
+      },
+    ]
+  },
+
   output: {
     path: webpackPaths.distMainPath,
     filename: '[name].js',

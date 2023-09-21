@@ -27,6 +27,7 @@
     "url": "https://rabby.io/"
   },
   "main": "./src/main/main.ts",
+  "main2": "./dist/main/main.node",
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:main": "cross-env-shell NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.main.prod.ts",
@@ -219,6 +220,7 @@
     "@types/webpack-bundle-analyzer": "^4.4.2",
     "@typescript-eslint/eslint-plugin": "^5.33.1",
     "@typescript-eslint/parser": "^5.33.1",
+    "asarmor": "^2.1.0-beta.10",
     "babel-loader": "^8.2.5",
     "browserslist-config-erb": "^0.0.3",
     "chai": "^4.3.7",

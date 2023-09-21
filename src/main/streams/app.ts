@@ -368,7 +368,7 @@ export function initAppStoreCache() {
   );
 }
 
-export default function bootstrap() {
+export default function bootstrapApp() {
   app.setPath('userData', getAppUserDataPath());
   if (!IS_RUNTIME_PRODUCTION) {
     // we just need to modify it for development, because `APP_NAME` in production is from package.json

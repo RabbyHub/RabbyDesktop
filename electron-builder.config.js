@@ -43,13 +43,15 @@ module.exports = {
   "appId": "com.debank.RabbyDesktop",
   "asar": true,
   "asarUnpack": "**\\*.{node,dll}",
-  "copyright": "Copyright © 2022 rabby.io",
+  "copyright": "Copyright © 2023 rabby.io",
   "files": [
     "dist",
     "node_modules",
     "package.json"
   ],
   "afterSign": ".erb/scripts/notarize.js",
+  "beforePack": ".erb/scripts/beforePack.js",
+  "afterPack": ".erb/scripts/afterPack.js",
   "mac": {
     "identity": process.env.RABBY_APPLE_IDENTITY_NAME,
     "target": {

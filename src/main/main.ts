@@ -1,5 +1,8 @@
 /// <reference path="../renderer/preload.d.ts" />
 
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import { hookNodeModulesAsar } from 'asarmor/src/encryption/hooks';
+
 // put thie stream before all other imports
 import './streams/pre-bootstrap';
 
@@ -34,6 +37,21 @@ import './streams/cex/okx';
 
 import './streams/developer';
 
-import bootstrap from './streams/app';
+import bootstrapApp from './streams/app';
 
-bootstrap();
+if (IS_RUNTIME_PRODUCTION) {
+  hookNodeModulesAsar();
+}
+
+export function bootstrap(k: Uint8Array) {
+  // sanity check
+  if (!Array.isArray(k) || k.length === 0) {
+    throw new Error('Failed to bootstrap application.');
+  }
+
+  bootstrapApp();
+}
+
+if (!IS_RUNTIME_PRODUCTION) {
+  bootstrapApp();
+}
