@@ -23,7 +23,7 @@ import { checkoutDappURL } from '@/isomorphic/dapp';
 import { ensurePrefix, unPrefix } from '@/isomorphic/string';
 import { getBindLog } from './log';
 import { getIpfsService } from './stream-helpers';
-import { checkDappEntryDirectory, rewriteIpfsHtmlFile } from './file';
+import { isRealDirectory, isRealFile, rewriteIpfsHtmlFile } from './file';
 import { getAssetPath, getRendererPath } from './app';
 import { findDappsById } from '../store/dapps';
 import { rabbyxQuery } from '../streams/rabbyIpcQuery/_base';
@@ -86,8 +86,17 @@ function onCallbackFileSchemeInterpretor(
     return true;
   }
 
-  if (fs.statSync(filePath).isDirectory()) {
+  if (isRealDirectory(filePath, true)) {
     filePath = path.join(filePath, './index.html');
+    if (!isRealFile(filePath)) {
+      callbackFn({
+        data: 'Not found',
+        mimeType: 'text/plain',
+        statusCode: 404,
+      });
+      return true;
+    }
+
     filePath = rewriteIpfsHtmlFile(filePath);
   }
 
