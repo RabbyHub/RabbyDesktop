@@ -6,6 +6,7 @@ import {
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
 import { getFocusedWindow } from '../utils/tabbedBrowserWindow';
 import { getRabbyExtId, onMainWindowReady } from '../utils/stream-helpers';
+import { safeOpenExternalURL } from '../utils/security';
 
 const isDarwin = process.platform === 'darwin';
 function getFocusedTab() {
@@ -179,7 +180,7 @@ export async function setupAppMenu() {
         {
           label: 'Privacy Policy',
           click: async () => {
-            shell.openExternal('https://rabby.io/docs/privacy/');
+            safeOpenExternalURL('https://rabby.io/docs/privacy/');
           },
         },
         {

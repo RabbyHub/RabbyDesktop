@@ -54,6 +54,7 @@ import { isEnableServeDappByHttp } from '../store/desktopApp';
 import { checkDappEntryDirectory, CheckResultType } from '../utils/file';
 import { safeRunInMainProcess } from '../utils/fn';
 import { setupAppMenu } from '../browser/menu';
+import { safeOpenExternalURL } from '../utils/security';
 
 /**
  * @deprecated import members from '../utils/tabbedBrowserWindow' instead
@@ -226,12 +227,12 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin, opts) => {
   };
 
   if (!isProtocolLeaveInApp(dappOrigin)) {
-    shell.openExternal(dappOrigin);
+    safeOpenExternalURL(dappOrigin);
     return result;
   }
 
   if (isTargetScanLink(dappOrigin)) {
-    shell.openExternal(dappOrigin);
+    safeOpenExternalURL(dappOrigin);
     return {
       ...result,
       isOpenExternal: true,
