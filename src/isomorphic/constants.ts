@@ -15,6 +15,13 @@ export const PROTOCOL_IPFS = 'rabby-ipfs:';
 export const PROTOCOL_ENS = 'rabby-ens:';
 export const PROTOCOL_LOCALFS = 'rabby-fs:';
 
+const FULL_FEATURED_PROTOCOLS = ['chrome-extension:' as const];
+
+export const PROTOCOLS_SUPPORT_IPC_CALL = [
+  RABBY_INTERNAL_PROTOCOL,
+  ...FULL_FEATURED_PROTOCOLS,
+];
+
 export const LOCALIPFS_BRAND = `local.ipfs`;
 export const LOCALFS_BRAND = `local.fs`;
 export const ENS_LOCALHOST_DOMAIN = `eth.localens`;
@@ -26,20 +33,20 @@ export const DAPP_TYPE_TO_OPEN_AS_HTTP = [
 ] as IValidDappType[];
 
 export const PROTOCOLS_SUPPORTED_TO_OPEN = [
-  'http://' as const,
-  'https://' as const,
+  'http:' as const,
+  'https:' as const,
 
-  'ipfs://' as const,
-  'rabby-ipfs://' as const,
+  'ipfs:' as const,
+  'rabby-ipfs:' as const,
 
-  'ens://' as const,
-  'rabby-ens://' as const,
+  'ens:' as const,
+  'rabby-ens:' as const,
 
-  'localfs://' as const,
-  'rabby-fs://' as const,
-  // 'file://' as const,
+  'localfs:' as const,
+  'rabby-fs:' as const,
+  // 'file:' as const,
 
-  'chrome-extension://' as const,
+  ...FULL_FEATURED_PROTOCOLS,
 ];
 
 // only useful in dev mode

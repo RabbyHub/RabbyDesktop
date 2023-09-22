@@ -8,14 +8,14 @@ export async function injectAlertMethods() {
     '__RDPrompt',
     function (message?: string, defaultContent?: string) {
       const { windowExisted } = ipcRendererObj.sendSync(
-        '__internal_rpc:app:request-tab-mutex'
+        '__outer_rpc:app:request-tab-mutex'
       );
       // pointless, because the if window is destroyed, message would be never sent back.
       // But we still check it here for consistency.
       if (!windowExisted) return;
 
       const returnValue = ipcRendererObj.sendSync(
-        '__internal_rpc:app:prompt-open',
+        '__outer_rpc:app:prompt-open',
         {
           message,
           callerURL: window.location.href,
