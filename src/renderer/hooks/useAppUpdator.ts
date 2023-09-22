@@ -11,6 +11,7 @@ import { randString } from '../../isomorphic/string';
 import { getReleaseNoteByVersion } from '../ipcRequest/app';
 import { useAppVersion } from './useMainBridge';
 import { copyText } from '../utils/clipboard';
+import { useRefState } from './useRefState';
 
 async function checkIfNewRelease() {
   const reqid = randString();
@@ -140,14 +141,22 @@ export function useCurrentVersionReleaseNote() {
 export function useCheckNewRelease(opts?: { isWindowTop?: boolean }) {
   const { isWindowTop } = opts || {};
   const [releaseCheckInfo, setReleaseCheckInfo] = useAtom(releaseCheckInfoAtom);
+  const { stateRef, setRefState } =
+    useRefState<Promise<IAppUpdatorCheckResult> | null>(null);
 
   const fetchLatestReleaseInfo = useCallback(async () => {
-    // eslint-disable-next-line promise/catch-or-return
-    const newVal = await checkIfNewRelease();
-    setReleaseCheckInfo(newVal);
+    if (stateRef.current) return;
 
-    return newVal;
-  }, [setReleaseCheckInfo]);
+    try {
+      const p = checkIfNewRelease();
+      setRefState(p);
+      setReleaseCheckInfo(await p);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setRefState(null);
+    }
+  }, [setReleaseCheckInfo, stateRef, setRefState]);
 
   useEffect(() => {
     fetchLatestReleaseInfo();
@@ -237,7 +246,7 @@ export function useAppUpdator() {
     try {
       const [res] = await Promise.all([
         window.rabbyDesktop.ipcRenderer.invoke('check-download-availble'),
-        // await 1second
+        // await 1.5s
         new Promise<void>((resolve) => {
           setTimeout(resolve, 1500);
         }),

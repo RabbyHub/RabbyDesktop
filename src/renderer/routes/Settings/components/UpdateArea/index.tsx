@@ -2,11 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { message } from 'antd';
 
-// @ts-expect-error
-import ReactMarkdown from 'react-markdown';
-// @ts-expect-error
-import remarkGfm from 'remark-gfm';
-
 import { detectClientOS } from '@/isomorphic/os';
 import ChangeLogContent from '@/renderer/components/ChangeLogContent';
 import { useLocation } from 'react-router-dom';
