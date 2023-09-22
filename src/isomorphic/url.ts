@@ -838,9 +838,9 @@ const ALLOWED_PROTOCOLS = [
   'https://',
   'http://',
 
-  // for other special app schema
-  'ledgerlive://',
-  'onekey://',
+  // // for other special app schema
+  // 'ledgerlive://',
+  // 'onekey://',
 ];
 export function isAllowedProtocols(targetURL: string) {
   const { protocol } = safeParseURL(targetURL) || {};
