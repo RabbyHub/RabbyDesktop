@@ -70,7 +70,7 @@ export const ContactTypeCardList: React.FC<Props> = ({
             onClick={() => handleClick(item)}
             className={clsx(
               styles.device,
-              item.isDisabledTrezorLike && 'opacity-70'
+              item.isDisabledTrezorLike && 'opacity-50'
             )}
           >
             <div className={styles.deviceLogo}>
