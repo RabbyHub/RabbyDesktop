@@ -7,7 +7,7 @@ import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 
 import { ensureSuffix, unPrefix } from '@/isomorphic/string';
 import { getOptionProxyForAxios } from '../store/desktopApp';
-import { getFileSha512 } from '../utils/security';
+import { getFileSha512, safeOpenExternalURL } from '../utils/security';
 import {
   AppUpdaterWin32,
   AppUpdaterDarwin,
@@ -106,7 +106,7 @@ async function alertInsecureUpdatePackage() {
   });
 
   if (result.response === confirmId) {
-    shell.openExternal('https://rabby.io/?platform=desktop');
+    safeOpenExternalURL('https://rabby.io/?platform=desktop');
   }
 }
 
