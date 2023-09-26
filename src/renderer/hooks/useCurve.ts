@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { formatNumber, formatUsdValue } from '@/renderer/utils/number';
 import { requestOpenApiWithChainId } from '@/main/utils/openapi';
 import { walletOpenapi } from '../ipcRequest/rabbyx';
+import { markEffectHookIsOnetime } from 'react-fiber-keep-alive';
 
 type CurveList = Array<{ timestamp: number; usd_value: number }>;
 
@@ -65,11 +66,11 @@ const formChartData = (
   };
 };
 
-export default (
+export default function useCurve (
   address: string | undefined,
   nonce: number,
   isTestnet = false
-) => {
+) {
   const [data, setData] = useState<
     {
       timestamp: number;
@@ -90,15 +91,15 @@ export default (
     setIsLoading(false);
   };
 
-  useEffect(() => {
+  useEffect(markEffectHookIsOnetime(() => {
     setIsLoading(true);
     setData([]);
-  }, [address]);
+  }), [address]);
 
-  useEffect(() => {
+  useEffect(markEffectHookIsOnetime(() => {
     if (!address) return;
     fetch(address, isTestnet);
-  }, [address, nonce, isTestnet]);
+  }), [address, nonce, isTestnet]);
 
   return isLoading ? undefined : select();
 };

@@ -6,6 +6,7 @@ import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { VIEW_TYPE } from '@/renderer/routes/Home/type';
 import { requestOpenApiWithChainId } from '@/main/utils/openapi';
 import { useToken } from './rabbyx/useToken';
+import { markEffectHookIsOnetime } from 'react-fiber-keep-alive';
 
 export interface TokenWithHistoryItem {
   current: TokenItem;
@@ -229,19 +230,19 @@ export default (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, nonce, isTestnet, loadRealTimeTokenList]);
 
-  useEffect(() => {
+  useEffect((() => {
     tokenListRef.current = [];
     setIsLoading(true);
     setIsLoadingRealTime(true);
     setHistoryTokenMap({});
-  }, [address, isTestnet]);
+  }), [address, isTestnet]);
 
-  useEffect(() => {
+  useEffect((() => {
     if (!address) return;
     addressRef.current = address;
     isTestnetRef.current = isTestnet;
     fetchData(address, currentView, isTestnet);
-  }, [address, currentView, fetchData, nonce, isTestnet]);
+  }), [address, currentView, fetchData, nonce, isTestnet]);
 
   return {
     tokenList: tokenListRef.current,

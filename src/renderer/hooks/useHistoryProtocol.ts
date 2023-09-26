@@ -8,6 +8,7 @@ import {
 } from '@rabby-wallet/rabby-api/dist/types';
 import { requestOpenApiWithChainId } from '@/main/utils/openapi';
 import { VIEW_TYPE } from '../routes/Home/type';
+import { markEffectHookIsOnetime } from 'react-fiber-keep-alive';
 
 export interface DisplayProtocol extends ComplexProtocol {
   usd_value: number;
@@ -316,21 +317,21 @@ export default (
     isLoadingRealTimeRef.current = false;
   }, [address, nonce, isTestnet]);
 
-  useEffect(() => {
+  useEffect((() => {
     protocolListRef.current = [];
     setHistoryProtocolMap({});
     setTokenHistoryPriceMap({});
     setHistoryTokenDict({});
     setIsLoading(false);
-  }, [address, isTestnet]);
+  }), [address, isTestnet]);
 
-  useEffect(() => {
+  useEffect((() => {
     if (!address) return;
     addressRef.current = address;
     isTestnetRef.current = isTestnet;
     fetchData(address, currentView, isTestnet);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address, nonce, currentView, isTestnet]);
+  }), [address, nonce, currentView, isTestnet]);
 
   return {
     protocolList: protocolListRef.current,

@@ -11,6 +11,7 @@ import { findChainByEnum } from '@/renderer/utils';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { checkIsCexProtocol } from '@/renderer/hooks/useBundle/cex/utils/shared';
 import { VIEW_TYPE } from './type';
+import { markEffectHookIsOnetime } from 'react-fiber-keep-alive';
 
 export const useSwitchView = () => {
   const [currentView, setCurrentView] = useState(VIEW_TYPE.DEFAULT);
@@ -271,7 +272,7 @@ export const useFilterTokenList = (
     [withBalance]
   );
 
-  useEffect(() => {
+  useEffect(markEffectHookIsOnetime(() => {
     if (!currentAddress || !query) {
       setIsLoading(false);
       return;
@@ -281,7 +282,7 @@ export const useFilterTokenList = (
       q: query,
       chainId: selectChainServerId ?? undefined,
     });
-  }, [query, currentAddress, selectChainServerId, searchToken]);
+  }), [query, currentAddress, selectChainServerId, searchToken]);
 
   useEffect(() => {
     addressRef.current = currentAddress;

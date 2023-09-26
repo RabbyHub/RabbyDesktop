@@ -4,6 +4,7 @@ import { usePrevious } from 'react-use';
 import styled from 'styled-components';
 import classNames from 'classnames';
 import { useLocation } from 'react-router-dom';
+import { markEffectHookIsOnetime } from 'react-fiber-keep-alive';
 import { sortBy, debounce } from 'lodash';
 import { ellipsis } from '@/renderer/utils/address';
 import { TipsWrapper } from '@/renderer/components/TipWrapper';
@@ -276,14 +277,19 @@ const Home = () => {
     setUpdateNonce(updateNonce + 1);
   };
 
-  useEffect(() => {
+  // const keepAliveCacheRef = useRef<number>(0);
+  // useEffect(markEffectHookIsOnetime(() => {
+  //   keepAliveCacheRef.current += 1;
+  // }), []);
+
+  useEffect(markEffectHookIsOnetime(() => {
     if (currentAccount && currentAccount?.address !== prevAccount?.address) {
       init(isTestnet);
     } else if (isTestnet !== prevIsTestnet) {
       init(isTestnet);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentAccount, isTestnet]);
+  }), [currentAccount, isTestnet]);
 
   useZViewsVisibleChanged((visibles) => {
     if (
@@ -296,7 +302,7 @@ const Home = () => {
     }
   });
 
-  useEffect(() => {
+  useEffect(markEffectHookIsOnetime(() => {
     if (location.pathname === '/mainwin/home') {
       if (Date.now() - rerenderAtRef.current >= 3600000) {
         init(isTestnet);
@@ -304,9 +310,9 @@ const Home = () => {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location]);
+  }), [location]);
 
-  useEffect(() => {
+  useEffect(markEffectHookIsOnetime(() => {
     const updateFn = debounce(() => {
       setUpdateNonce((prev) => {
         return prev + 1;
@@ -325,7 +331,7 @@ const Home = () => {
         }
       }
     );
-  }, []);
+  }), []);
 
   const { showZSubview } = useZPopupLayerOnMain();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -335,11 +341,11 @@ const Home = () => {
     }
   }, []);
 
-  useEffect(() => {
+  useEffect(markEffectHookIsOnetime(() => {
     if (search) {
       switchView(VIEW_TYPE.DEFAULT);
     }
-  }, [search, switchView]);
+  }), [search, switchView]);
 
   return (
     <HomeBody>

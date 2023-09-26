@@ -6,6 +6,8 @@ import {
   Navigate,
 } from 'react-router-dom';
 
+import KeepAlive from 'react-fiber-keep-alive';
+
 import DApps from '@/renderer/routes/Dapps';
 import GettingStarted from '@/renderer/routes/Welcome/GettingStarted';
 import MainWindowLoading from '@/renderer/routes/MainWindowLoading';
@@ -55,6 +57,8 @@ import { DappViewWrapper } from '../DappView';
 import { FixedBackHeader } from '../FixedBackHeader';
 import { ShellWalletProvider } from '../ShellWallet';
 import TipUnsupportedModal from '../TipUnsupportedModal';
+import Home from '@/renderer/routes/Home';
+import { Swap } from '@/renderer/routes/Swap';
 
 const logGetUserDapp = async () => {
   const lastLogTime = localStorage.getItem('matomo_last_log_time') || 0;
@@ -157,7 +161,12 @@ const router = createRouter([
             routeCSSKeyword: 'home_assets',
           } as MainWindowRouteData;
         },
-        element: null, // delegate to MainRoute
+        // element: null, // delegate to MainRoute
+        element: (
+          <KeepAlive name="MainwinHome">
+            <Home />
+          </KeepAlive>
+        )
       },
       {
         path: 'home/bundle',
@@ -214,7 +223,12 @@ const router = createRouter([
       },
       {
         path: 'swap',
-        element: null, // delegate to MainRoute
+        // element: null, // delegate to MainRoute
+        element: (
+          <KeepAlive name="MainwinSwap">
+            <Swap />
+          </KeepAlive>
+        )
       },
       {
         path: 'approvals',

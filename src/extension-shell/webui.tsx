@@ -1,6 +1,7 @@
 import '@/renderer/css/theme/index.css';
 
 import { createRoot } from 'react-dom/client';
+import KeepAlive from 'react-fiber-keep-alive';
 
 import './webui.less';
 import '@/renderer/css/windicss';
@@ -23,7 +24,11 @@ switch (shellUIType) {
     container.id = 'root';
     document.body.appendChild(container);
     const root = createRoot(container);
-    root.render(<MainWindow />);
+    root.render(
+      <KeepAlive.Provider value={container}>
+        <MainWindow />
+      </KeepAlive.Provider>
+    );
     break;
   }
   case 'Prompt': {
