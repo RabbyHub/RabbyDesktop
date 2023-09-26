@@ -22,6 +22,7 @@
   --rabby-dark-neutral-bg-3: rgba(247, 250, 252, 1);
   --rabby-dark-neutral-card-1: rgba(255, 255, 255, 0.06);
   --rabby-dark-neutral-card-2: rgba(255, 255, 255, 0.06);
+  --rabby-dark-neutral-card-3: rgba(255, 255, 255, 0.06);
   --rabby-dark-neutral-title-2: rgba(255, 255, 255, 1);
   --rabby-dark-neutral-black: rgba(0, 0, 0, 1);
 }
@@ -49,6 +50,7 @@ html, body {
   --r-neutral-bg-3: var(--rabby-dark-neutral-bg-3);
   --r-neutral-card-1: var(--rabby-dark-neutral-card-1);
   --r-neutral-card-2: var(--rabby-dark-neutral-card-2);
+  --r-neutral-card-3: var(--rabby-dark-neutral-card-3);
   --r-neutral-title-2: var(--rabby-dark-neutral-title-2);
   --r-neutral-black: var(--rabby-dark-neutral-black);
 }
