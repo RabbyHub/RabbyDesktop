@@ -30,6 +30,23 @@ type RabbyDesktopLockInfo = {
   pwdStatus: import('@/isomorphic/wallet/lock').PasswordStatus;
 };
 
+type RabbyDebugKitsInvokes = {
+  ['__internal_invoke:rabbyx:waitExtBgGhostLoaded']: {
+    send: [];
+    response: {
+      rabbyxExtId: string;
+    };
+  };
+  '__internal_invoke:app:debug-kits-actions': {
+    send: [
+      {
+        action: 'clean-updates-download-cache';
+      }
+    ];
+    response: void;
+  };
+};
+
 type ChannelInvokePayload = {
   'get-wallet-lock-info': {
     send: [];
@@ -293,12 +310,6 @@ type ChannelInvokePayload = {
       error?: Error;
     };
   };
-  ['__internal_invoke:rabbyx:waitExtBgGhostLoaded']: {
-    send: [];
-    response: {
-      rabbyxExtId: string;
-    };
-  };
   [`__outer_rpc:mainwindow:is-dapp-view`]: {
     send: [];
     response: {
@@ -491,6 +502,7 @@ type ChannelInvokePayload = {
     // eslint-disable-next-line @typescript-eslint/ban-types
     response: {};
   };
-} & RabbyxInvokePayload;
+} & RabbyxInvokePayload &
+  RabbyDebugKitsInvokes;
 
 type IInvokesKey = keyof ChannelInvokePayload;
