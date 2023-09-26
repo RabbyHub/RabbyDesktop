@@ -1,6 +1,5 @@
 import { useCallback, useLayoutEffect, useRef } from 'react';
 import { ucfirst } from '@/isomorphic/string';
-import { APP_BRANDNAME } from '@/isomorphic/constants';
 import { useZPopupViewState } from '../hooks/usePopupWinOnMainwin';
 import { ModalConfirmInSettings } from '../components/Modal/Confirm';
 import { forwardMessageTo } from '../hooks/useViewsMessage';
@@ -13,6 +12,10 @@ export function useTipCannotUseTrezorLike() {
 
   const { svVisible, svState, delayCloseSubview } =
     useZPopupViewState(TREZOR_LIKE_KEY);
+
+  const zPopupActionsAddAddress = useZPopupViewState(
+    'select-add-address-type-modal'
+  );
 
   const clear = useCallback(() => {
     modalRef.current?.destroy();
@@ -64,11 +67,14 @@ export function useTipCannotUseTrezorLike() {
                 params: {},
               },
             });
+            if (svState?.uiData?.openFromAddAddressModal) {
+              zPopupActionsAddAddress.delayCloseSubview(150);
+            }
           },
         }),
       });
     } else {
       clear();
     }
-  }, [svVisible, delayCloseSubview, svState, clear]);
+  }, [svVisible, delayCloseSubview, svState, clear, zPopupActionsAddAddress]);
 }

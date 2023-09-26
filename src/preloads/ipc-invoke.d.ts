@@ -11,6 +11,19 @@ type RabbyxInvokePayload = {
       constrains: IDesktopAppState['selectedMediaConstrains'];
     };
   };
+  'rabbyx:check-trezor-like-cannot-use': {
+    send: [
+      options: {
+        openType: IHardwareConnectPageType;
+        alertModal?: boolean;
+        uiData?: ITrezorLikeCannotUserReason['uiData'];
+      }
+    ];
+    response: {
+      reasons: ITrezorLikeCannotUserReason[];
+      couldContinue: boolean;
+    };
+  };
 };
 
 type RabbyDesktopLockInfo = {
@@ -257,13 +270,7 @@ type ChannelInvokePayload = {
       isValid: boolean;
     };
   };
-  'check-trezor-like-cannot-use': {
-    send: [openType: IHardwareConnectPageType, alertModal?: boolean];
-    response: {
-      reasons: ITrezorLikeCannotUserReason[];
-      couldContinue: boolean;
-    };
-  };
+  'check-trezor-like-cannot-use': RabbyxInvokePayload['rabbyx:check-trezor-like-cannot-use'];
   'get-trezor-like-availability': {
     send: [];
     response: {

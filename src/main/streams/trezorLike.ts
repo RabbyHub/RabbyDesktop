@@ -4,13 +4,17 @@ import {
 } from '../utils/hardwareConnect';
 import { handleIpcMainInvoke } from '../utils/ipcMainEvents';
 
-handleIpcMainInvoke(
+const { handler: handlerCheckTrezorLikeCannotUser } = handleIpcMainInvoke(
   'check-trezor-like-cannot-use',
-  (_, key, alertModal = true) => {
-    const reasons = getTrezorLikeCannotUse(key);
+  (_, options) => {
+    const { openType, alertModal = true } = options || {};
+    const reasons = getTrezorLikeCannotUse(openType);
 
     if (alertModal && reasons[0]) {
-      alertCannotUseDueTo(reasons[0]);
+      alertCannotUseDueTo({
+        ...reasons[0],
+        uiData: options?.uiData,
+      });
     }
 
     return {
@@ -18,6 +22,11 @@ handleIpcMainInvoke(
       couldContinue: reasons.length === 0,
     };
   }
+);
+
+handleIpcMainInvoke(
+  'rabbyx:check-trezor-like-cannot-use',
+  handlerCheckTrezorLikeCannotUser
 );
 
 handleIpcMainInvoke('get-trezor-like-availability', (_) => {
