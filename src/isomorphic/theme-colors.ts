@@ -21,6 +21,7 @@ export const themeColors = {
     'neutral-bg-3': 'rgba(247, 250, 252, 1)',
     'neutral-card-1': 'rgba(255, 255, 255, 0.06)',
     'neutral-card-2': 'rgba(255, 255, 255, 0.06)',
+    'neutral-card-3': 'rgba(255, 255, 255, 0.06)',
     'neutral-title-2': 'rgba(255, 255, 255, 1)',
     'neutral-black': 'rgba(0, 0, 0, 1)',
   },
