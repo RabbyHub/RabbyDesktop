@@ -301,17 +301,27 @@ export function useAppUpdator() {
     return false;
   }, [stepDownloadUpdate, setStepVerification]);
 
-  const resetDownloadWork = useCallback(() => {
-    setStepCheckConnected('wait');
-    setStepDownloadUpdate('wait');
-    setStepVerification('wait');
-    setDownloadInfo(null);
-  }, [
-    setStepCheckConnected,
-    setStepDownloadUpdate,
-    setStepVerification,
-    setDownloadInfo,
-  ]);
+  const resetDownloadWork = useCallback(
+    (options?: { clearDownloaded?: boolean }) => {
+      setStepCheckConnected('wait');
+      setStepDownloadUpdate('wait');
+      setStepVerification('wait');
+      setDownloadInfo(null);
+
+      // if (options?.clearDownloaded) {
+      //   window.rabbyDesktop.ipcRenderer.invoke(
+      //     '__internal_invoke:app:debug-kits-actions',
+      //     { action: 'clean-updates-download-cache' }
+      //   );
+      // }
+    },
+    [
+      setStepCheckConnected,
+      setStepDownloadUpdate,
+      setStepVerification,
+      setDownloadInfo,
+    ]
+  );
 
   return {
     appUpdateURL,

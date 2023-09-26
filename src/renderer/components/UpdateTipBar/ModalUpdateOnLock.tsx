@@ -133,7 +133,7 @@ export const ModalUpdateOnLock: React.FC = () => {
   const { releaseCheckInfo } = useCheckNewRelease();
 
   const onCancel = useCallback(() => {
-    resetDownloadWork();
+    resetDownloadWork({ clearDownloaded: false });
     setIsShowModalUpdateOnLock(false);
   }, [resetDownloadWork, setIsShowModalUpdateOnLock]);
 

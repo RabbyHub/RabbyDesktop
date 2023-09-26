@@ -59,6 +59,10 @@ function cleanCacheDir(baseDir: string) {
   });
 }
 
+export function clearAppUpdaterCache() {
+  cleanCacheDir(getAppUpdaterCacheDir());
+}
+
 export class AppUpdaterWin32 extends NsisUpdater {
   constructor(options?: GenericServerOptions) {
     super({

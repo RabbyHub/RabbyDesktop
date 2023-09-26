@@ -138,7 +138,6 @@ export const BottomUpdateButtonArea = ({
 }) => {
   const {
     releaseCheckInfo,
-    stepCheckConnected,
     checkDownloadAvailble,
     stepDownloadUpdate,
     isDownloaded,
@@ -194,7 +193,6 @@ export const BottomUpdateButtonArea = ({
               className="auto-update is-error"
               onClick={async (evt) => {
                 evt.stopPropagation();
-                console.log('[feat] stepCheckConnected', stepCheckConnected);
                 const isValid = await checkDownloadAvailble();
                 if (isValid) {
                   await requestDownload();
