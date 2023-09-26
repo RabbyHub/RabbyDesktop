@@ -2,7 +2,6 @@ import classNames from 'classnames';
 import { useAppUpdator } from '@/renderer/hooks/useAppUpdator';
 import styled from 'styled-components';
 
-import { useEffect } from 'react';
 import IconDownloading from './icons/downloading.svg';
 import LoadingDots from '../LoadingDots';
 
@@ -13,8 +12,7 @@ const UpdateBtn = styled.div`
   .auto-update {
     background: var(--r-blue-default, #7084ff);
     border-radius: 4px;
-    padding: 10px 12px;
-    padding-right: 0;
+    padding: 10px 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -107,7 +105,7 @@ export const UpdateButton = ({ className }: { className?: string }) => {
           <div className="auto-update-content">
             <span>Downloading</span>
             {!!progress?.percent && (
-              <span className="ml-[2px]">
+              <span className="ml-[4px]">
                 {(progress?.percent || 0).toFixed(0)}%
               </span>
             )}

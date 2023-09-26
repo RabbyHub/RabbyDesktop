@@ -19,8 +19,8 @@ const StyledModal = styled(Modal)`
   .inner-wrapper {
     padding-top: 0;
     padding-bottom: 40px;
-    padding-left: 32px;
-    padding-right: 32px;
+    padding-left: 0;
+    padding-right: 0;
 
     display: flex;
     flex-direction: column;
@@ -40,6 +40,8 @@ const StyledModal = styled(Modal)`
   }
 
   .changelogTextWrapper {
+    padding-left: 32px;
+    padding-right: 32px;
     height: 100%;
     flex-shrink: 1;
     overflow-y: auto;
@@ -66,7 +68,7 @@ const StyledModal = styled(Modal)`
 
     > ul li,
     p {
-      font-size: 12px;
+      font-size: 15px;
     }
 
     * {
