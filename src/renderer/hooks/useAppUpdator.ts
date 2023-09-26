@@ -301,6 +301,18 @@ export function useAppUpdator() {
     return false;
   }, [stepDownloadUpdate, setStepVerification]);
 
+  const resetDownloadWork = useCallback(() => {
+    setStepCheckConnected('wait');
+    setStepDownloadUpdate('wait');
+    setStepVerification('wait');
+    setDownloadInfo(null);
+  }, [
+    setStepCheckConnected,
+    setStepDownloadUpdate,
+    setStepVerification,
+    setDownloadInfo,
+  ]);
+
   return {
     appUpdateURL,
     releaseCheckInfo,
@@ -312,14 +324,12 @@ export function useAppUpdator() {
     isDownloaded:
       releaseCheckInfo.hasNewRelease && !!downloadInfo && downloadInfo.isEnd,
     isDownloadedFailed: downloadInfo?.isEnd && !!downloadInfo.downloadFailed,
-    /**
-     * @deprecated use stepDownloadUpdate instead
-     */
-    isDownloading: stepDownloadUpdate === 'process',
     progress: downloadInfo?.progress,
     requestDownload,
     downloadInfo,
     quitAndUpgrade,
     verifyDownloadedPackage,
+
+    resetDownloadWork,
   };
 }

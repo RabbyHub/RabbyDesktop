@@ -1,24 +1,32 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Modal } from '@/renderer/components/Modal/Modal';
 import { atom, useAtom } from 'jotai';
 import styled from 'styled-components';
-import { useCheckNewRelease } from '@/renderer/hooks/useAppUpdator';
+import {
+  useAppUpdator,
+  useCheckNewRelease,
+} from '@/renderer/hooks/useAppUpdator';
 import ChangeLogContent from '../ChangeLogContent';
-import { UpdateButton } from './UpdateBtn';
+import { BottomUpdateButtonArea } from './UpdateBtn';
+
+const ChangelogVersionH = 24;
+const BottomAreaHeight = 148;
 
 const StyledModal = styled(Modal)`
   .ant-modal-content {
-    height: 400px;
+    height: 460px;
   }
 
-  .ant-modal-body,
-  .inner-wrapper {
-    height: calc(100% - 24px);
+  .ant-modal-body {
+    /* offset header */
+    height: calc(100% - 64px);
   }
 
   .inner-wrapper {
+    max-height: 100%;
+    height: 100%;
     padding-top: 0;
-    padding-bottom: 40px;
+    padding-bottom: 0;
     padding-left: 0;
     padding-right: 0;
 
@@ -26,9 +34,14 @@ const StyledModal = styled(Modal)`
     flex-direction: column;
     align-items: space-between;
     justify-content: flex-start;
+
+    > * {
+      flex-shrink: 0;
+    }
   }
 
   .changelogVersion {
+    height: ${ChangelogVersionH}px;
     color: var(--r-neutral-body, #d3d8e0);
     text-align: center;
     font-size: 15px;
@@ -77,7 +90,8 @@ const StyledModal = styled(Modal)`
   }
 
   .changelogButtonWrapper {
-    padding-top: 24px;
+    padding-top: 0;
+    height: ${BottomAreaHeight}px;
   }
 
   .changelogButton {
@@ -114,8 +128,14 @@ export function useShowModalUpdateOnLock() {
 export const ModalUpdateOnLock: React.FC = () => {
   const { isShowModalUpdateOnLock, setIsShowModalUpdateOnLock } =
     useShowModalUpdateOnLock();
+  const { resetDownloadWork } = useAppUpdator();
 
   const { releaseCheckInfo } = useCheckNewRelease();
+
+  const onCancel = useCallback(() => {
+    resetDownloadWork();
+    setIsShowModalUpdateOnLock(false);
+  }, [resetDownloadWork, setIsShowModalUpdateOnLock]);
 
   return (
     <StyledModal
@@ -125,7 +145,7 @@ export const ModalUpdateOnLock: React.FC = () => {
       centered
       className="common-light-modal"
       open={isShowModalUpdateOnLock}
-      onCancel={() => setIsShowModalUpdateOnLock(false)}
+      onCancel={onCancel}
     >
       <div className="inner-wrapper">
         <div className="changelogVersion">
@@ -137,9 +157,10 @@ export const ModalUpdateOnLock: React.FC = () => {
           </ChangeLogContent>
         </div>
 
-        <div className="changelogButtonWrapper">
-          <UpdateButton className="w-[220px] h-[48px]" />
-        </div>
+        <BottomUpdateButtonArea
+          onCancel={onCancel}
+          className="changelogButtonWrapper"
+        />
       </div>
     </StyledModal>
   );
