@@ -1,6 +1,9 @@
 import '@/renderer/css/theme/index.css';
 
+import ReactDOM from 'react-dom';
+
 import { createRoot } from 'react-dom/client';
+import { AliveScope } from 'react-activation';
 
 import './webui.less';
 import '@/renderer/css/windicss';
@@ -22,8 +25,16 @@ switch (shellUIType) {
     const container = document.createElement('div');
     container.id = 'root';
     document.body.appendChild(container);
-    const root = createRoot(container);
-    root.render(<MainWindow />);
+    /**
+     * @description when use react-activation, we should use ReactDOM.render instead of createRoot
+     * and NEVER put them under React.StrictMode
+     */
+    ReactDOM.render(
+      <AliveScope>
+        <MainWindow />
+      </AliveScope>,
+      container
+    );
     break;
   }
   case 'Prompt': {

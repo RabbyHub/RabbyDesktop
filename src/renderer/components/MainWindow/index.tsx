@@ -6,6 +6,8 @@ import {
   Navigate,
 } from 'react-router-dom';
 
+import KeepAlive from 'react-activation';
+
 import DApps from '@/renderer/routes/Dapps';
 import GettingStarted from '@/renderer/routes/Welcome/GettingStarted';
 import MainWindowLoading from '@/renderer/routes/MainWindowLoading';
@@ -44,6 +46,8 @@ import ApprovalManagePage from '@/renderer/routes/ApprovalManagePage';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { MainWindowSettingsDeveloperKits } from '@/renderer/routes/Settings/Developer';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import Home from '@/renderer/routes/Home';
+import { Swap } from '@/renderer/routes/Swap';
 import styles from './index.module.less';
 
 import MainWindowRoute from './MainRoute';
@@ -157,7 +161,11 @@ const router = createRouter([
             routeCSSKeyword: 'home_assets',
           } as MainWindowRouteData;
         },
-        element: null, // delegate to MainRoute
+        element: (
+          <KeepAlive cacheKey="MainwinHome">
+            <Home />
+          </KeepAlive>
+        ),
       },
       {
         path: 'home/bundle',
@@ -214,7 +222,11 @@ const router = createRouter([
       },
       {
         path: 'swap',
-        element: null, // delegate to MainRoute
+        element: (
+          <KeepAlive cacheKey="MainwinSwap">
+            <Swap />
+          </KeepAlive>
+        ),
       },
       {
         path: 'approvals',
