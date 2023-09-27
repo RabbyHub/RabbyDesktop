@@ -5,7 +5,7 @@ import { Divider, Switch, message } from 'antd';
 import { useMockFailure } from '@/renderer/hooks/useAppUpdator';
 import styles from './index.module.less';
 
-import { ItemAction } from './SettingArtifacts';
+import { ItemAction, ItemLink } from './SettingArtifacts';
 
 function DebugKitsParts() {
   const { mockFailureValues, toggleMockFailure } = useMockFailure();
@@ -85,6 +85,17 @@ function DebugKitsParts() {
               </div>
             </div>
           </ItemAction>
+        </div>
+      </div>
+      <div className={styles.settingBlock}>
+        <h4 className={styles.blockTitle}>Test Dapps</h4>
+        <div className={styles.itemList}>
+          <ItemLink
+            name="Metamask Test Dapp"
+            link="https://metamask.github.io/test-dapp"
+            openAsDapp
+            icon="rabby-internal://assets/icons/developer-kits/entry.svg"
+          />
         </div>
       </div>
     </>

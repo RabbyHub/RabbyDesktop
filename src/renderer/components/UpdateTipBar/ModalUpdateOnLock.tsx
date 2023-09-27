@@ -10,11 +10,11 @@ import ChangeLogContent from '../ChangeLogContent';
 import { BottomUpdateButtonArea } from './UpdateBtn';
 
 const ChangelogVersionH = 24;
-const BottomAreaHeight = 148;
+const BottomAreaHeight = 178;
 
 const StyledModal = styled(Modal)`
   .ant-modal-content {
-    height: 460px;
+    height: 488px;
   }
 
   .ant-modal-body {
@@ -133,8 +133,10 @@ export const ModalUpdateOnLock: React.FC = () => {
   const { releaseCheckInfo } = useCheckNewRelease();
 
   const onCancel = useCallback(() => {
-    resetDownloadWork({ clearDownloaded: false });
     setIsShowModalUpdateOnLock(false);
+    setTimeout(() => {
+      resetDownloadWork({ clearDownloaded: false });
+    }, 300);
   }, [resetDownloadWork, setIsShowModalUpdateOnLock]);
 
   return (
