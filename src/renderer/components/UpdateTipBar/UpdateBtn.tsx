@@ -2,12 +2,14 @@ import styled from 'styled-components';
 import { useAppUpdator } from '@/renderer/hooks/useAppUpdator';
 
 import clsx from 'clsx';
+import { useEffect } from 'react';
 import IconDownloading from './icons/downloading.svg';
 import IconTipError from './icons/tip-error.svg';
+import IconTipSuccess from './icons/tip-success.svg';
 import LoadingDots from '../LoadingDots';
 
 const UpdateArea = styled.div`
-  padding-bottom: 14px;
+  padding-bottom: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -92,17 +94,19 @@ const UpdateBtn = styled.div`
   }
 `;
 
-function ErrorTipBlock({
+function ResultTipBlock({
   children,
   className,
   innerClassName,
   iconClassName,
   textClassName,
+  isError,
 }: React.PropsWithChildren<{
   className?: string;
   innerClassName?: string;
   iconClassName?: string;
   textClassName?: string;
+  isError?: boolean;
 }>) {
   return (
     <div className={clsx('h-[100%] w-[100%] pb-[16px]', className)}>
@@ -113,12 +117,13 @@ function ErrorTipBlock({
         )}
       >
         <img
-          src={IconTipError}
+          src={isError ? IconTipError : IconTipSuccess}
           className={clsx('w-[14px] h-[14px] relative', iconClassName)}
         />
         <p
           className={clsx(
-            'text-r-red-default ml-[4px] text-13 font-normal mb-0',
+            'ml-[4px] text-13 font-normal mb-0',
+            isError ? 'text-r-red-default' : 'text-r-neutral-body',
             textClassName
           )}
         >
@@ -148,6 +153,12 @@ export const BottomUpdateButtonArea = ({
     stepVerification,
     verifyDownloadedPackage,
   } = useAppUpdator();
+
+  useEffect(() => {
+    if (stepVerification === 'wait') {
+      verifyDownloadedPackage();
+    }
+  }, [stepVerification, verifyDownloadedPackage]);
 
   if (!releaseCheckInfo.hasNewRelease) {
     return null;
@@ -181,13 +192,14 @@ export const BottomUpdateButtonArea = ({
     if (isDownloadedFailed) {
       return (
         <UpdateArea className={className}>
-          <ErrorTipBlock
+          <ResultTipBlock
+            isError
             className="common-px w-[100%] flex"
             iconClassName="relative top-[2px]"
             innerClassName="self-end justify-center"
           >
             Download Failed
-          </ErrorTipBlock>
+          </ResultTipBlock>
           <UpdateBtn>
             <div
               className="auto-update is-error"
@@ -210,7 +222,8 @@ export const BottomUpdateButtonArea = ({
       return (
         <UpdateArea className={className}>
           {stepVerification === 'error' && (
-            <ErrorTipBlock
+            <ResultTipBlock
+              isError
               className="common-px w-[100%] flex"
               iconClassName="relative top-[2px]"
               innerClassName="self-end justify-center"
@@ -218,7 +231,7 @@ export const BottomUpdateButtonArea = ({
               <div className="text-bold">Update Verification Failed</div>
               We couldn't verify the authenticity of this update. Please do not
               install it and contact support
-            </ErrorTipBlock>
+            </ResultTipBlock>
           )}
           <UpdateBtn>
             <div
@@ -256,6 +269,15 @@ export const BottomUpdateButtonArea = ({
 
     return (
       <UpdateArea className={className}>
+        <ResultTipBlock
+          className="common-px w-[100%] flex"
+          iconClassName="relative top-[2px]"
+          innerClassName="self-end justify-center"
+        >
+          <div className="text-bold">Update Verified</div>
+          Your app update has been successfully authenticated. It's safe to
+          proceed
+        </ResultTipBlock>
         <UpdateBtn>
           <div
             className="auto-update is-downloaded"
