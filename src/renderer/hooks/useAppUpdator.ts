@@ -301,6 +301,28 @@ export function useAppUpdator() {
     return false;
   }, [stepDownloadUpdate, setStepVerification]);
 
+  const resetDownloadWork = useCallback(
+    (options?: { clearDownloaded?: boolean }) => {
+      setStepCheckConnected('wait');
+      setStepDownloadUpdate('wait');
+      setStepVerification('wait');
+      setDownloadInfo(null);
+
+      // if (options?.clearDownloaded) {
+      //   window.rabbyDesktop.ipcRenderer.invoke(
+      //     '__internal_invoke:app:debug-kits-actions',
+      //     { action: 'clean-updates-download-cache' }
+      //   );
+      // }
+    },
+    [
+      setStepCheckConnected,
+      setStepDownloadUpdate,
+      setStepVerification,
+      setDownloadInfo,
+    ]
+  );
+
   return {
     appUpdateURL,
     releaseCheckInfo,
@@ -312,14 +334,12 @@ export function useAppUpdator() {
     isDownloaded:
       releaseCheckInfo.hasNewRelease && !!downloadInfo && downloadInfo.isEnd,
     isDownloadedFailed: downloadInfo?.isEnd && !!downloadInfo.downloadFailed,
-    /**
-     * @deprecated use stepDownloadUpdate instead
-     */
-    isDownloading: stepDownloadUpdate === 'process',
     progress: downloadInfo?.progress,
     requestDownload,
     downloadInfo,
     quitAndUpgrade,
     verifyDownloadedPackage,
+
+    resetDownloadWork,
   };
 }

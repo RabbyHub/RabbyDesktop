@@ -1,8 +1,16 @@
 import { dialog } from 'electron';
-import { onIpcMainEvent } from '../utils/ipcMainEvents';
+import {
+  handleIpcMainInvoke,
+  onIpcMainEvent,
+  onIpcMainInternalEvent,
+} from '../utils/ipcMainEvents';
 import { getBindLog } from '../utils/log';
 import { onMainWindowReady } from '../utils/stream-helpers';
 import { rabbyxQuery } from './rabbyIpcQuery/_base';
+import {
+  clearAppUpdaterCache,
+  getAppUpdaterCacheDir,
+} from '../updater/updater';
 
 const developerLog = getBindLog('developer', 'bgGrey');
 const ResetDialogButtons = ['Cancel', 'Confirm'] as const;
@@ -31,3 +39,18 @@ onIpcMainEvent('__internal_rpc:app:reset-rabbyx-approvals', async () => {
     });
   }
 });
+
+handleIpcMainInvoke(
+  '__internal_invoke:app:debug-kits-actions',
+  async (_, payload) => {
+    switch (payload.action) {
+      case 'clean-updates-download-cache': {
+        clearAppUpdaterCache();
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+  }
+);

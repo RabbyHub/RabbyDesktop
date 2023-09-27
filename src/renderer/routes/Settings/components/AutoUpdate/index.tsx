@@ -9,7 +9,7 @@ interface AutoUpdateProps {
 export const AutoUpdate = ({ isFold, className }: AutoUpdateProps) => {
   const {
     releaseCheckInfo,
-    isDownloading,
+    stepDownloadUpdate,
     isDownloaded,
     isDownloadedFailed,
     requestDownload,
@@ -21,7 +21,7 @@ export const AutoUpdate = ({ isFold, className }: AutoUpdateProps) => {
     return null;
   }
 
-  if (isDownloading) {
+  if (stepDownloadUpdate === 'process') {
     return (
       <div
         className={classNames(

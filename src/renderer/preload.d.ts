@@ -276,6 +276,7 @@ type ChannelMessagePayload = {
     response: [];
   };
   '__internal_rpc:app:reset-rabbyx-approvals': MainInternalsMessagePayload['__internal_main:app:reset-rabbyx-approvals'];
+
   '__internal_rpc:app:prompt-cancel': {
     send: [promptId: string];
     response: [];

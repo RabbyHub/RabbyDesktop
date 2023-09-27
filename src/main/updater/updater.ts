@@ -39,6 +39,11 @@ export function getAppUpdaterURL(): string {
 const CACHE_DIRNAME = !IS_RUNTIME_PRODUCTION
   ? 'rabby-desktop-dev-updater'
   : 'rabby-desktop-updater';
+
+export function getAppUpdaterCacheDir() {
+  return path.resolve(getAppCacheDir(), CACHE_DIRNAME);
+}
+
 function cleanCacheDir(baseDir: string) {
   ['./pending'].forEach((p) => {
     const fullpath = path.resolve(baseDir, p);
@@ -52,6 +57,10 @@ function cleanCacheDir(baseDir: string) {
       }
     }
   });
+}
+
+export function clearAppUpdaterCache() {
+  cleanCacheDir(getAppUpdaterCacheDir());
 }
 
 export class AppUpdaterWin32 extends NsisUpdater {
@@ -75,11 +84,11 @@ export class AppUpdaterWin32 extends NsisUpdater {
   }
 
   getCacheDir() {
-    return path.resolve(getAppCacheDir(), CACHE_DIRNAME);
+    return getAppUpdaterCacheDir();
   }
 
   cleanDownloadedCache() {
-    cleanCacheDir(this.getCacheDir());
+    cleanCacheDir(getAppUpdaterCacheDir());
   }
 }
 
@@ -104,11 +113,11 @@ export class AppUpdaterDarwin extends MacUpdater {
   }
 
   getCacheDir() {
-    return path.resolve(getAppCacheDir(), CACHE_DIRNAME);
+    return getAppUpdaterCacheDir();
   }
 
   cleanDownloadedCache() {
-    cleanCacheDir(this.getCacheDir());
+    cleanCacheDir(getAppUpdaterCacheDir());
   }
 
   /**

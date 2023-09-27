@@ -151,10 +151,23 @@ export function handleIpcMainInvoke<T extends IInvokesKey = IInvokesKey>(
     ...args: ChannelInvokePayload[T]['send']
   ) => ItOrItsPromise<ChannelInvokePayload[T]['response']>
 ) {
-  ipcMain.handle(eventName, async (evt, ...args) => {
-    if (!isAllowedSender(eventName, evt)) return null;
+  const wrappedHandler = (evt: Electron.IpcMainInvokeEvent, ...args: any[]) => {
+    if (!isAllowedSender(eventName, evt)) return;
 
     // @ts-expect-error
     return handler(evt, ...args);
-  });
+  };
+  ipcMain.handle(eventName, wrappedHandler);
+
+  // dispose
+  let disposed = false;
+  const dispose = () => {
+    if (disposed) return;
+    disposed = true;
+    return ipcMain.off(eventName, wrappedHandler);
+  };
+
+  dispose.handler = handler;
+
+  return dispose;
 }

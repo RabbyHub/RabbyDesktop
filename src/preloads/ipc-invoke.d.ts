@@ -11,10 +11,40 @@ type RabbyxInvokePayload = {
       constrains: IDesktopAppState['selectedMediaConstrains'];
     };
   };
+  'rabbyx:check-trezor-like-cannot-use': {
+    send: [
+      options: {
+        openType: IHardwareConnectPageType;
+        alertModal?: boolean;
+        uiData?: ITrezorLikeCannotUserReason['uiData'];
+      }
+    ];
+    response: {
+      reasons: ITrezorLikeCannotUserReason[];
+      couldContinue: boolean;
+    };
+  };
 };
 
 type RabbyDesktopLockInfo = {
   pwdStatus: import('@/isomorphic/wallet/lock').PasswordStatus;
+};
+
+type RabbyDebugKitsInvokes = {
+  ['__internal_invoke:rabbyx:waitExtBgGhostLoaded']: {
+    send: [];
+    response: {
+      rabbyxExtId: string;
+    };
+  };
+  '__internal_invoke:app:debug-kits-actions': {
+    send: [
+      {
+        action: 'clean-updates-download-cache';
+      }
+    ];
+    response: void;
+  };
 };
 
 type ChannelInvokePayload = {
@@ -257,13 +287,7 @@ type ChannelInvokePayload = {
       isValid: boolean;
     };
   };
-  'check-trezor-like-cannot-use': {
-    send: [openType: IHardwareConnectPageType, alertModal?: boolean];
-    response: {
-      reasons: ITrezorLikeCannotUserReason[];
-      couldContinue: boolean;
-    };
-  };
+  'check-trezor-like-cannot-use': RabbyxInvokePayload['rabbyx:check-trezor-like-cannot-use'];
   'get-trezor-like-availability': {
     send: [];
     response: {
@@ -284,12 +308,6 @@ type ChannelInvokePayload = {
     response: {
       result: any;
       error?: Error;
-    };
-  };
-  ['__internal_invoke:rabbyx:waitExtBgGhostLoaded']: {
-    send: [];
-    response: {
-      rabbyxExtId: string;
     };
   };
   [`__outer_rpc:mainwindow:is-dapp-view`]: {
@@ -484,6 +502,7 @@ type ChannelInvokePayload = {
     // eslint-disable-next-line @typescript-eslint/ban-types
     response: {};
   };
-} & RabbyxInvokePayload;
+} & RabbyxInvokePayload &
+  RabbyDebugKitsInvokes;
 
 type IInvokesKey = keyof ChannelInvokePayload;

@@ -35,7 +35,7 @@ export default function UpdateTipBar({
           <span className="ml-[8px] font-bold">Update to New Version</span>
         </div>
 
-        <RcChevronRight className="w-[16px] h-[16px]" />
+        <RcChevronRight className="w-[20px] h-[20px]" />
       </div>
 
       <ModalUpdateOnLock />

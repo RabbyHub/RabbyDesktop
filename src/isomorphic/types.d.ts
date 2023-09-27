@@ -622,6 +622,9 @@ type IAppSession = {
 type ITrezorLikeCannotUserReason = {
   reasonType: 'enabled-ipfs';
   cannotUse: IHardwareConnectPageType;
+  uiData?: {
+    openFromAddAddressModal?: boolean;
+  };
 };
 // --------- BUNDLE -----------
 interface CommonBundleAccount {

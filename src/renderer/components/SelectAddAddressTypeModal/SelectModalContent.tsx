@@ -74,7 +74,9 @@ interface Props {
 
 export const SelectModalContent: React.FC<Props> = ({ onSelectType }) => {
   const { trezorLikeAvailability, requestAlertIfCannotUse } =
-    useTrezorLikeAvailablity();
+    useTrezorLikeAvailablity({
+      openFromAddAddressModal: true,
+    });
 
   const { trezorItem, onekeyItem, hardwareMap } = React.useMemo(() => {
     const result = {

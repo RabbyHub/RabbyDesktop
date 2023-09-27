@@ -1,6 +1,7 @@
 #### New Features:
 
-- Supported password lock
-- Added Signature Record feature
-- Supported Shibarium chain
-- Supported 6 testnets, including Avalanche Testnett, Shibarium Puppynet Testnets, Metis Goerli,Arbitrum Sepolia, OKB Testnet, and Stylus Testnet.
+- Supported PGN chain
+- Supported 9 testnets, including EvmOS Testnet, BitTorrent Donau Testnet, Flare Coston2 Testnet, PGN Sepolia, DFK Testnet, WEMIX Testnet, Step Testnet, Ethereum Classic Mordor Testnet, and Fusion Testnet
+- Supported EIP-1559 for OneKey
+- Supported swap on Base chain
+- Optimized app security

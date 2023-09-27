@@ -26,6 +26,7 @@ import {
 import { requestLockWallet } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { PasswordStatus } from '@/isomorphic/wallet/lock';
 import { useNavigate } from 'react-router-dom';
+import { getRendererAppChannel } from '@/isomorphic/env';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
 import { useProxyStateOnSettingPage } from './settingHooks';
@@ -45,6 +46,8 @@ import {
   ItemSwitch,
   ImageAsLink,
 } from './SettingArtifacts';
+
+const APP_CHANNEL = getRendererAppChannel();
 
 const ProxyText = styled.div`
   display: flex;
@@ -349,6 +352,17 @@ export function MainWindowSettings() {
                 name="Developer Kits (Dev Only)"
                 onClick={() => {
                   nav('/mainwin/settings/developer');
+                }}
+                icon="rabby-internal://assets/icons/developer-kits/entry.svg"
+              >
+                <img src={IconChevronRight} />
+              </ItemAction>
+            )}
+            {APP_CHANNEL !== 'prod' && (
+              <ItemAction
+                name="Debug Kits (Non Production Only)"
+                onClick={() => {
+                  nav('/mainwin/settings/debug');
                 }}
                 icon="rabby-internal://assets/icons/developer-kits/entry.svg"
               >

@@ -36,6 +36,7 @@ import {
 } from '../utils/stream-helpers';
 import { getClientAppPaths } from '../utils/store';
 import { getMainWindowDappViewZoomPercent } from '../store/desktopApp';
+import { getAppUpdaterCacheDir } from '../updater/updater';
 
 const LABELS = {
   openInNewTab: (type: 'link' | Electron.ContextMenuParams['mediaType']) =>
@@ -233,7 +234,7 @@ function buildRabbyXDebugMenu(opts: ChromeContextMenuOptions) {
  * @param dirname
  */
 function openLocalDirOnDev(dirname: string) {
-  if (!IS_RUNTIME_PRODUCTION) return;
+  if (IS_RUNTIME_PRODUCTION) return;
 
   if (process.platform === 'win32') {
     shell.openExternal(dirname);
@@ -258,6 +259,14 @@ function buildPathKitsMenu(opts: ChromeContextMenuOptions) {
     label: `open - store rootPath`,
     click: () => {
       openLocalDirOnDev(getClientAppPaths().storeRootPath);
+    },
+  });
+
+  appendMenu(pathKitsMenu, {
+    label: `open - updater cache dir`,
+    click: async () => {
+      const cacheDir = getAppUpdaterCacheDir();
+      openLocalDirOnDev(cacheDir);
     },
   });
 
