@@ -45,6 +45,7 @@ import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { MainWindowSettingsDeveloperKits } from '@/renderer/routes/Settings/Developer';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import { MainWindowSettingsNonProductDebugKits } from '@/renderer/routes/Settings/NonProductDebug';
+import { getRendererAppChannel } from '@/isomorphic/env';
 import styles from './index.module.less';
 
 import MainWindowRoute from './MainRoute';
@@ -251,11 +252,12 @@ const router = createRouter([
       },
       {
         path: 'settings/debug',
-        element: IS_RUNTIME_PRODUCTION ? (
-          <></>
-        ) : (
-          <MainWindowSettingsNonProductDebugKits />
-        ),
+        element:
+          getRendererAppChannel() === 'prod' ? (
+            <></>
+          ) : (
+            <MainWindowSettingsNonProductDebugKits />
+          ),
         loader: () => {
           return {
             title: 'Debug Kits',

@@ -1,14 +1,13 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 /// <reference path="../../renderer/preload.d.ts" />
 
-import { atom, useAtom } from 'jotai';
+import { atom, useAtom, useAtomValue } from 'jotai';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 
 import localCurrentVersionReleaseNote from '@/renderer/changeLogs/currentVersion.md';
 import { randString } from '../../isomorphic/string';
-import { getReleaseNoteByVersion } from '../ipcRequest/app';
 import { useAppVersion } from './useMainBridge';
 import { copyText } from '../utils/clipboard';
 import { useRefState } from './useRefState';
@@ -181,11 +180,34 @@ export function useCheckNewRelease(opts?: { isWindowTop?: boolean }) {
   };
 }
 
-const isMockFailed = {
-  Connected: !IS_RUNTIME_PRODUCTION && false,
-  Download: !IS_RUNTIME_PRODUCTION && false,
-  Verify: !IS_RUNTIME_PRODUCTION && false,
+const MockFailures = {
+  Connected: !IS_RUNTIME_PRODUCTION && (false as boolean),
+  Download: !IS_RUNTIME_PRODUCTION && (false as boolean),
+  Verify: !IS_RUNTIME_PRODUCTION && (false as boolean),
 };
+
+const mockFailureAtom = atom(MockFailures);
+
+export function useMockFailure() {
+  const [mockFailureValues, setMockFailure] = useAtom(mockFailureAtom);
+
+  const toggleMockFailure = useCallback(
+    <T extends keyof typeof MockFailures>(
+      k: T,
+      nextEnabled = !mockFailureValues[k]
+    ) => {
+      if (IS_RUNTIME_PRODUCTION) return;
+
+      setMockFailure((prev) => ({ ...prev, [k]: nextEnabled }));
+    },
+    [mockFailureValues, setMockFailure]
+  );
+
+  return {
+    mockFailureValues,
+    toggleMockFailure,
+  };
+}
 
 export function useUpdateAppStates() {
   const [stepCheckConnected, setStepCheckConnected] =
@@ -204,6 +226,8 @@ export function useUpdateAppStates() {
 }
 
 export function useAppUpdator() {
+  const mockFailureValues = useAtomValue(mockFailureAtom);
+
   const [releaseCheckInfo] = useAtom(releaseCheckInfoAtom);
   const [downloadInfo, setDownloadInfo] = useAtom(downloadInfoAtom);
   const [appUpdateURL, setAppUpdateURL] = useAtom(appUpdateURlAtom);
@@ -220,7 +244,7 @@ export function useAppUpdator() {
   const onDownload: OnDownloadFunc = useCallback(
     (info) => {
       // mock failed
-      if (isMockFailed.Download) {
+      if (mockFailureValues.Download) {
         info = { progress: null, isEnd: true, downloadFailed: true };
       }
 
@@ -229,7 +253,7 @@ export function useAppUpdator() {
         info?.isEnd ? (info?.downloadFailed ? 'error' : 'finish') : 'process'
       );
     },
-    [setDownloadInfo, setStepDownloadUpdate]
+    [setDownloadInfo, setStepDownloadUpdate, mockFailureValues.Download]
   );
 
   const requestDownload = useCallback(async () => {
@@ -252,7 +276,7 @@ export function useAppUpdator() {
         }),
       ]);
 
-      if (isMockFailed.Connected) res.isValid = false;
+      if (mockFailureValues.Connected) res.isValid = false;
       isValid = res.isValid;
 
       setAppUpdateURL(res.downloadURL);
@@ -265,7 +289,12 @@ export function useAppUpdator() {
     }
 
     return isValid;
-  }, [setAppUpdateURL, setStepCheckConnected, setStepDownloadUpdate]);
+  }, [
+    setAppUpdateURL,
+    setStepCheckConnected,
+    setStepDownloadUpdate,
+    mockFailureValues.Connected,
+  ]);
 
   const isVerifyingRef = useRef(false);
   const verifyDownloadedPackage = useCallback(async () => {
@@ -288,7 +317,7 @@ export function useAppUpdator() {
         }),
       ]);
 
-      if (isMockFailed.Verify) res.isValid = false;
+      if (mockFailureValues.Verify) res.isValid = false;
 
       setStepVerification(res.isValid ? 'finish' : 'error');
       return res.isValid;
@@ -299,7 +328,7 @@ export function useAppUpdator() {
     }
 
     return false;
-  }, [stepDownloadUpdate, setStepVerification]);
+  }, [stepDownloadUpdate, setStepVerification, mockFailureValues.Verify]);
 
   const resetDownloadWork = useCallback(
     (options?: { clearDownloaded?: boolean }) => {
