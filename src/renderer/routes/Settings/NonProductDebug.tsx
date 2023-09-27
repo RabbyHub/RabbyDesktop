@@ -24,8 +24,14 @@ function DebugKitsParts() {
               requestResetApp();
             }}
           />
+        </div>
+      </div>
+
+      <div className={styles.settingBlock}>
+        <h4 className={styles.blockTitle}>Download Updates</h4>
+        <div className={styles.itemList}>
           <ItemAction
-            name={<span className={styles.dangerText}>Clear Downloads</span>}
+            name={<span>Clear Downloads</span>}
             icon="rabby-internal://assets/icons/mainwin-settings/reset.svg"
             onClick={() => {
               window.rabbyDesktop.ipcRenderer
@@ -40,12 +46,6 @@ function DebugKitsParts() {
                 });
             }}
           />
-        </div>
-      </div>
-
-      <div className={styles.settingBlock}>
-        <h4 className={styles.blockTitle}>Downloads Simulation</h4>
-        <div className={styles.itemList}>
           <ItemAction
             name={
               <span>
