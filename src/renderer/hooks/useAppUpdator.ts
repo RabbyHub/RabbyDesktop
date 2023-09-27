@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 
 import localCurrentVersionReleaseNote from '@/renderer/changeLogs/currentVersion.md';
+import { getRendererAppChannel } from '@/isomorphic/env';
 import { randString } from '../../isomorphic/string';
 import { useAppVersion } from './useMainBridge';
 import { copyText } from '../utils/clipboard';
@@ -196,7 +197,7 @@ export function useMockFailure() {
       k: T,
       nextEnabled = !mockFailureValues[k]
     ) => {
-      if (IS_RUNTIME_PRODUCTION) return;
+      if (IS_RUNTIME_PRODUCTION && getRendererAppChannel() !== 'reg') return;
 
       setMockFailure((prev) => ({ ...prev, [k]: nextEnabled }));
     },
