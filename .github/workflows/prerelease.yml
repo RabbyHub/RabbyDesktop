@@ -63,9 +63,11 @@ jobs:
 
           if [[ $GIT_REF_NAME =~ ^v[0-9]+\.[0-9]+\.[0-9]+-reg$ ]]; then
             export buildchannel="reg";
+            export doupdatechangelog=1;
             echo "[get_buildchannel] it's one reg version";
           elif [[ $GIT_REF_NAME =~ ^v[0-9]+\.[0-9]+\.[0-9]+-prod$ ]]; then
             export buildchannel="prod";
+            export doupdatechangelog=1;
             echo "[get_buildchannel] it's one prod version";
           fi
 
@@ -76,7 +78,10 @@ jobs:
           fi
 
           # only update changelog on release
-          if [[ $GITHUB_REF == refs/tags/v* ]]; then
+          # if [[ $GITHUB_REF == refs/tags/v* ]]; then
+          # else
+          # fi
+          if [[ ! -z $doupdatechangelog ]]; then
             bash ./scripts/release_changelog.sh
           fi
           bash ./scripts/release_desktop.sh
