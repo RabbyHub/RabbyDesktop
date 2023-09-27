@@ -74,9 +74,11 @@ jobs:
           else
             bash ./.github/workflows/fix-vars.sh
           fi
-          # if [[ $GITHUB_REF == refs/tags/v* ]]; then
-          # else
-          # fi
+
+          # only update changelog on release
+          if [[ $GITHUB_REF == refs/tags/v* ]]; then
+            bash ./scripts/release_changelog.sh
+          fi
           bash ./scripts/release_desktop.sh
         env:
           KEYCHAIN_PASS: ${{ secrets.KEYCHAIN_PASS }}
