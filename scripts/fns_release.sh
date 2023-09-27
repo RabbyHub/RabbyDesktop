@@ -49,14 +49,15 @@ pub_changelog() {
   src_markdown=$project_dir/src/renderer/changeLogs/currentVersion.md;
   remote_markdown_path=$changelog_dir/release_notes/$proj_version.md
 
+  echo "================================================================\n"
   echo "[pub_changelog] checkout changelog content:";
   echo ""
   tput setaf 2; # show green
   echo -e | cat $src_markdown;
   tput sgr0;
-  echo ""
+  echo "================================================================\n"
 
-  echo "[pub_changelog] start publishing changelog to remote://$remote_markdown_path";
+  echo "[pub_changelog] start publishing changelog to remote $remote_markdown_path";
 
   if [ ! -z $RABBY_REALLY_COPY ]; then
     aws s3 cp $src_markdown s3://${RABBY_BUILD_BUCKET}/rabby/$remote_markdown_path --acl public-read --exclude "*" --include "*.md" --content-type text/plain

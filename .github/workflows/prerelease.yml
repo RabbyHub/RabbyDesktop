@@ -69,6 +69,8 @@ jobs:
             export buildchannel="prod";
             export doupdatechangelog=1;
             echo "[get_buildchannel] it's one prod version";
+          else
+            unset doupdatechangelog;
           fi
 
           if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -77,10 +79,10 @@ jobs:
             bash ./.github/workflows/fix-vars.sh
           fi
 
-          # only update changelog on release
           # if [[ $GITHUB_REF == refs/tags/v* ]]; then
           # else
           # fi
+          # only update changelog on release
           if [[ ! -z $doupdatechangelog ]]; then
             bash ./scripts/release_changelog.sh
           fi
