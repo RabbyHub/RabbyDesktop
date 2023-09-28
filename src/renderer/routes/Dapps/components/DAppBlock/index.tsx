@@ -4,7 +4,6 @@ import { Dropdown, Menu } from 'antd';
 import React, { ReactNode, useRef } from 'react';
 
 import { formatDappURLToShow } from '@/isomorphic/dapp';
-import { getLastOpenOriginByOrigin } from '@/renderer/ipcRequest/dapps';
 import { hideMainwinPopup } from '@/renderer/ipcRequest/mainwin-popup';
 import clsx from 'clsx';
 
