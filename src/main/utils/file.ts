@@ -39,9 +39,7 @@ export function isRealDirectory(targetPath: string, knownExist = false) {
 export function isRealFile(targetPath: string, knownExist = false) {
   if (!knownExist && !fs.existsSync(targetPath)) return false;
 
-  const lstats = fs.lstatSync(targetPath);
-
-  if (lstats.isSymbolicLink() || lstats.isFile()) return false;
+  if (fs.lstatSync(targetPath).isSymbolicLink()) return false;
 
   return fs.statSync(targetPath).isFile();
 }

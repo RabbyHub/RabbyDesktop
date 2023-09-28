@@ -495,6 +495,32 @@ export function extractDappInfoFromURL(dappURL: string): IDappInfoFromURL {
   };
 }
 
+export function makeSpecialDappHttpId(
+  opts:
+    | {
+        type: 'ipfs';
+        ipfsCid: string;
+      }
+    | {
+        type: 'ens';
+        ensAddr: string;
+      }
+    | {
+        type: 'localfs';
+        localFSID: string;
+      }
+) {
+  if (opts.type === 'ens') {
+    return `http://${opts.ensAddr}.localens`;
+  }
+
+  if (opts.type === 'localfs') {
+    return `http://${LOCALFS_BRAND}.${opts.localFSID}`;
+  }
+
+  return `http://${LOCALIPFS_BRAND}.${opts.ipfsCid}`;
+}
+
 // console.debug('test extractDappInfoFromURL', extractDappInfoFromURL(`file:///C:/Users/admin/path/to`));
 export function makeDappAboutURLs(
   input:
@@ -519,9 +545,11 @@ export function makeDappAboutURLs(
   const result = {
     dappID: '',
     dappOrigin: '',
+    httpOrigin: '',
   };
   if (input.type === 'ens') {
     result.dappID = `rabby-ens://${input.ensAddr}.localens`;
+    result.httpOrigin = makeSpecialDappHttpId(input);
 
     if (
       !IS_RUNTIME_PRODUCTION &&
@@ -530,7 +558,7 @@ export function makeDappAboutURLs(
       throw new Error(`Invalid ens id ${result.dappID}`);
 
     if (input.ipfsCid) {
-      result.dappOrigin = `rabby-ipfs://${input.ensAddr}.localens.${input.ipfsCid}`;
+      result.dappOrigin = `${PROTOCOL_IPFS}//${input.ensAddr}.localens.${input.ipfsCid}`;
 
       if (
         !IS_RUNTIME_PRODUCTION &&
@@ -539,7 +567,8 @@ export function makeDappAboutURLs(
         throw new Error(`Invalid ens origin ${result.dappOrigin}`);
     }
   } else if (input.type === 'ipfs') {
-    result.dappID = `rabby-ipfs://${input.ipfsCid}`;
+    result.dappID = `${PROTOCOL_IPFS}//${input.ipfsCid}`;
+    result.httpOrigin = makeSpecialDappHttpId(input);
 
     if (
       !IS_RUNTIME_PRODUCTION &&
@@ -547,14 +576,15 @@ export function makeDappAboutURLs(
     )
       throw new Error(`Invalid ipfs dapp id ${result.dappID}`);
 
-    result.dappOrigin = `rabby-ipfs://${input.ipfsCid}`;
+    result.dappOrigin = `${PROTOCOL_IPFS}//${input.ipfsCid}`;
     if (
       !IS_RUNTIME_PRODUCTION &&
       !DAPP_URL_REGEXPS.IPFS_ENS_REGEX.test(result.dappOrigin)
     )
       throw new Error(`Invalid ipfs origin ${result.dappOrigin}`);
   } else if (input.type === 'localfs') {
-    result.dappID = `rabby-fs://${input.localFSID}`;
+    result.dappID = `${PROTOCOL_LOCALFS}//${input.localFSID}`;
+    result.httpOrigin = makeSpecialDappHttpId(input);
 
     if (
       !IS_RUNTIME_PRODUCTION &&
@@ -566,6 +596,7 @@ export function makeDappAboutURLs(
   } else {
     result.dappID = input.httpsURL;
     result.dappOrigin = input.httpsURL;
+    result.httpOrigin = input.httpsURL;
   }
 
   return result;
@@ -623,34 +654,44 @@ export function canoicalizeDappUrl(url: string): ICanonalizedUrlInfo {
   const hostname = urlInfo?.hostname || '';
   const isDapp =
     (!!urlInfo?.protocol &&
-      ['https:', 'ipfs:', PROTOCOL_IPFS, PROTOCOL_ENS].includes(
-        urlInfo?.protocol
-      )) ||
+      [
+        'https:',
+        'ipfs:',
+        PROTOCOL_IPFS,
+        PROTOCOL_ENS,
+        PROTOCOL_LOCALFS,
+      ].includes(urlInfo?.protocol)) ||
     isIpfsHttpURL(url);
 
   const dappURLInfo = extractDappInfoFromURL(url);
 
-  let dappOrigin = '';
-  if (['ipfs:', 'rabby-ipfs:'].includes(urlInfo?.protocol || '')) {
-    dappOrigin = `rabby-ipfs://${extractIpfsCid(url)}`;
-  } else if (['rabby-ens:'].includes(urlInfo?.protocol || '')) {
+  let origins = {
+    dappOrigin: '',
+    httpOrigin: '',
+  };
+  if (['ipfs:', PROTOCOL_IPFS].includes(urlInfo?.protocol || '')) {
+    const ipfsCid = extractIpfsCid(url);
+    origins.dappOrigin = `${PROTOCOL_IPFS}//${ipfsCid}`;
+    origins.httpOrigin = makeSpecialDappHttpId({ type: 'ipfs', ipfsCid });
+  } else if ([PROTOCOL_ENS].includes(urlInfo?.protocol || '')) {
     const { ensAddr, ipfsCid } = extractIpfsInfo(url);
-    dappOrigin = makeDappAboutURLs({
+    origins = makeDappAboutURLs({
       type: 'ens',
       ensAddr,
       ipfsCid,
-    }).dappOrigin;
+    });
   } else if (dappURLInfo.type === 'localfs') {
-    dappOrigin = makeDappAboutURLs({
+    origins = makeDappAboutURLs({
       type: 'localfs',
       localFSID: dappURLInfo.localFSID,
-    }).dappOrigin;
+    });
   } else {
-    dappOrigin =
+    origins.dappOrigin =
       urlInfo?.origin ||
       `${urlInfo?.protocol}//${hostname}${
         urlInfo?.port ? `:${urlInfo?.port}` : ''
       }`;
+    origins.httpOrigin = origins.dappOrigin;
   }
 
   const domainInfo = getDomainFromHostname(hostname);
@@ -658,7 +699,8 @@ export function canoicalizeDappUrl(url: string): ICanonalizedUrlInfo {
   return {
     urlInfo,
     isDapp,
-    origin: dappOrigin,
+    origin: origins.dappOrigin,
+    httpOrigin: origins.httpOrigin,
     hostname,
     fullDomain: urlInfo?.host || '',
     ...domainInfo,

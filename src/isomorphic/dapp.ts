@@ -12,36 +12,11 @@ import {
   extractIpfsInfo,
   parseDomainMeta,
   makeDappAboutURLs,
+  makeSpecialDappHttpId,
 } from './url';
 
 export function isValidDappAlias(alias: string) {
   return /[\w\d]+/.test(alias);
-}
-
-function makeSpecialDappHttpId(
-  opts:
-    | {
-        type: 'ipfs';
-        ipfsCid: string;
-      }
-    | {
-        type: 'ens';
-        ensAddr: string;
-      }
-    | {
-        type: 'localfs';
-        localFSID: string;
-      }
-) {
-  if (opts.type === 'ens') {
-    return `http://${opts.ensAddr}.localens`;
-  }
-
-  if (opts.type === 'localfs') {
-    return `http://${LOCALFS_BRAND}.${opts.localFSID}`;
-  }
-
-  return `http://${LOCALIPFS_BRAND}.${opts.ipfsCid}`;
 }
 
 export function formatEnsDappOrigin(ensAddr: string, ipfsCid?: string) {
