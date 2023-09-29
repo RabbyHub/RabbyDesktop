@@ -7,7 +7,6 @@ import React, { useEffect } from 'react';
 
 import classnames from 'classnames';
 
-import { hideDappAddressbarSecurityPopupView } from '@/renderer/ipcRequest/security-addressbarpopup';
 import {
   ChromeTabWithLocalFavicon,
   useSelectedTabInfo,
@@ -93,8 +92,6 @@ export default function Topbar() {
 
   useEffect(() => {
     fetchConnectedSite();
-
-    hideDappAddressbarSecurityPopupView();
   }, [selectedOrigin, fetchConnectedSite]);
 
   useEffect(() => {

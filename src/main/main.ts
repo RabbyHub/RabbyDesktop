@@ -12,9 +12,9 @@ import './streams/updater';
 import './streams/session';
 import './streams/dappSafeview';
 import './streams/dappLoadingView';
-import './streams/securityCheck';
-import './streams/securityAddressbarPopup';
+
 // import './streams/clipboard';
+
 import './streams/alertWindows';
 import './streams/browser';
 import './streams/popupOnMainwin';
