@@ -37,9 +37,9 @@ update_version() {
 
 pub_changelog() {
   case ${buildchannel} in
-      *|reg) changelog_dir=cdn-config-pre
-          ;;
       prod) changelog_dir=cdn-config
+          ;;
+      reg|*) changelog_dir=cdn-config-pre
           ;;
   esac
 
