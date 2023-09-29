@@ -1,10 +1,14 @@
 import { useAtom, useAtomValue } from 'jotai';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { validate, Network } from 'bitcoin-address-validation';
 import { bundleAccountsAtom, bundleAccountsNumAtom } from './shared';
 import { ERROR } from './error';
-import { useAccountToDisplay } from '../rabbyx/useAccountToDisplay';
+import {
+  MatcherFunc,
+  useAccountToDisplay,
+  useRefreshAccountsOnContactBookChanged,
+} from '../rabbyx/useAccountToDisplay';
 import { toastMaxAccount } from './util';
 import { useAddressManagement } from '../rabbyx/useAddressManagement';
 import { useCexAccount } from './useCex/useCexAccount';
@@ -21,8 +25,27 @@ export const useBundleAccount = () => {
   const { removeAddress } = useAddressManagement();
   const bundleIsMax = useBundleIsMax();
   const inBundleList = React.useMemo(() => {
-    return accounts.filter((acc) => acc.inBundle);
-  }, [accounts]);
+    return accounts
+      .filter((acc) => acc.inBundle)
+      .map((acc) => {
+        if (acc.type === 'eth') {
+          const nickname =
+            ethAccountList.find(
+              (ethAccount) => ethAccount.address === acc.data.address
+            )?.alianName ?? acc.nickname;
+          return {
+            ...acc,
+            data: {
+              ...acc.data,
+              alianName: nickname,
+            },
+            nickname,
+          };
+        }
+
+        return acc;
+      });
+  }, [accounts, ethAccountList]);
   const { cexAccount, cexCreate, cexPreCheck, cexCheckIsExisted } =
     useCexAccount();
 
@@ -262,6 +285,18 @@ export const useBundleAccount = () => {
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setAccounts]);
+
+  useRefreshAccountsOnContactBookChanged(
+    React.useCallback(
+      ({ partials }) =>
+        !!ethAccountList.find((account) =>
+          // eslint-disable-next-line no-prototype-builtins
+          partials.hasOwnProperty(account.address)
+        ),
+      [ethAccountList]
+    ) as MatcherFunc,
+    getAllAccountsToDisplay
+  );
 
   // eth 地址列表更新时同步 bundle 地址列表
   React.useEffect(() => {

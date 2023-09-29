@@ -62,7 +62,7 @@ export interface Token {
   chain: string;
 }
 
-interface DisplayKeyring {
+export interface DisplayKeyring {
   type: string;
   unlock: () => Promise<void>;
   getFirstPage: () => Promise<string[]>;
