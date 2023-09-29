@@ -8,6 +8,7 @@ import { useAccountToDisplay } from '../rabbyx/useAccountToDisplay';
 import { toastMaxAccount } from './util';
 import { useAddressManagement } from '../rabbyx/useAddressManagement';
 import { useCexAccount } from './useCex/useCexAccount';
+import { forwardMessageTo } from '../useViewsMessage';
 
 const { nanoid } = require('nanoid');
 
@@ -228,6 +229,7 @@ export const useBundleAccount = () => {
       if (account.type === 'eth') {
         await walletController.updateAlianName(account.data.address, nickname);
         account.data.alianName = nickname;
+        forwardMessageTo('*', 'refreshCurrentAccount', {});
       }
 
       window.rabbyDesktop.ipcRenderer.invoke('bundle-account-put', {

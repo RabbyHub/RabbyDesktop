@@ -41,6 +41,10 @@ export const NicknameInput: React.FC<Props> = ({
     [data.id, nickname, updateNickname]
   );
 
+  React.useEffect(() => {
+    setNickname(data.nickname);
+  }, [data.nickname]);
+
   return (
     <div
       className={clsx(
