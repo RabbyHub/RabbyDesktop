@@ -108,6 +108,10 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["TSTEP"] = "TSTEP";
     CHAINS_ENUM["METC"] = "METC";
     CHAINS_ENUM["TFSN"] = "TFSN";
+    CHAINS_ENUM["AMOBM"] = "AMOBM";
+    CHAINS_ENUM["TKCC"] = "TKCC";
+    CHAINS_ENUM["TIOTX"] = "TIOTX";
+    CHAINS_ENUM["TPLS"] = "TPLS";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -1879,6 +1883,74 @@ export const CHAINS_RAW = {
         nativeTokenAddress: "tfsn",
         scanLink: "https://testnet.fsnscan.com/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/tfsn_token/logo_url/tfsn/914f67e69113f079caa0fad50e0b3412.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.AMOBM]: {
+        id: 1287,
+        serverId: "amobm",
+        name: "Moonbase Alpha Testnet",
+        enum: CHAINS_ENUM.AMOBM,
+        hex: "0x507",
+        network: "1287",
+        nativeTokenSymbol: "DEV",
+        nativeTokenAddress: "amobm",
+        scanLink: "https://moonbase.moonscan.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/amobm_token/logo_url/amobm/d6b7e1647ea672fe9a92927d3157263e.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.TKCC]: {
+        id: 322,
+        serverId: "tkcc",
+        name: "KCC Testnet",
+        enum: CHAINS_ENUM.TKCC,
+        hex: "0x142",
+        network: "322",
+        nativeTokenSymbol: "TestnetKCS",
+        nativeTokenAddress: "tkcc",
+        scanLink: "https://scan-testnet.kcc.network/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/tkcc_token/logo_url/tkcc/9c884acf5fb6d38faa595eb24f640121.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.TIOTX]: {
+        id: 4690,
+        serverId: "tiotx",
+        name: "IoTeX Testnet",
+        enum: CHAINS_ENUM.TIOTX,
+        hex: "0x1252",
+        network: "4690",
+        nativeTokenSymbol: "TestnetIOTX",
+        nativeTokenAddress: "tiotx",
+        scanLink: "https://testnet.iotexscan.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/tiotx_token/logo_url/tiotx/5982dfa001f2a6e43617a51ac7b2d011.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.TPLS]: {
+        id: 943,
+        serverId: "tpls",
+        name: "Pulse V4 Testnet",
+        enum: CHAINS_ENUM.TPLS,
+        hex: "0x3af",
+        network: "943",
+        nativeTokenSymbol: "TestnetPLS",
+        nativeTokenAddress: "tpls",
+        scanLink: "https://scan.v4.testnet.pulsechain.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/tpls_token/logo_url/tpls/28a0e357df556b82bb9e8cd30f2c258a.png",
         nativeTokenDecimals: 18,
         eip: {
             "1559": true,
