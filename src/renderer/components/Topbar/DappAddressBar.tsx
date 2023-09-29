@@ -5,7 +5,6 @@ import {
   isUrlFromDapp,
 } from 'isomorphic/url';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { openDappAddressbarSecurityPopupView } from 'renderer/ipcRequest/security-addressbarpopup';
 import styles from './DappAddressBar.module.less';
 
 function useAddressUrl(updatedUrl?: string) {
@@ -43,24 +42,9 @@ function useAddressUrl(updatedUrl?: string) {
   };
 }
 
-const IS_MAIN_SHELL = isMainWinShellWebUI(window.location.href);
-
-export default function DappAddressBar({
-  url,
-  checkResult,
-}: {
-  url?: string;
-  checkResult?: ISecurityCheckResult | null;
-}) {
+export default function DappAddressBar({ url }: { url?: string }) {
   const { addressUrl, isInternalUrl, onAddressUrlChange, onAddressUrlKeyUp } =
     useAddressUrl(url);
-
-  const openSecurityAddressbarpopup = useCallback(() => {
-    if (!IS_MAIN_SHELL) return;
-    if (!url) return;
-
-    openDappAddressbarSecurityPopupView(url);
-  }, [url]);
 
   return (
     <div
@@ -70,38 +54,6 @@ export default function DappAddressBar({
         isInternalUrl && styles.forInternalUrl
       )}
     >
-      {checkResult && (
-        <div
-          className={classNames(
-            styles.securityInfo,
-            `J_security_level-${checkResult.resultLevel}`
-          )}
-          onClick={openSecurityAddressbarpopup}
-        >
-          {checkResult.resultLevel === 'ok' && (
-            <>
-              <img src="rabby-internal://assets/icons/native-tabs/icon-shield-default.svg" />
-              <div className={styles.summaryText}>No risk fonud</div>
-            </>
-          )}
-          {checkResult.resultLevel === 'warning' && (
-            <>
-              <img src="rabby-internal://assets/icons/native-tabs/icon-shield-warning.svg" />
-              <div className={styles.summaryText}>
-                Found {checkResult.countWarnings} Warning(s)
-              </div>
-            </>
-          )}
-          {checkResult.resultLevel === 'danger' && (
-            <>
-              <img src="rabby-internal://assets/icons/native-tabs/icon-shield-danger.svg" />
-              <div className={styles.summaryText}>
-                Found {checkResult.countDangerIssues} Danger Risk(s)
-              </div>
-            </>
-          )}
-        </div>
-      )}
       {isInternalUrl ? (
         <div className="hidden-address" />
       ) : (

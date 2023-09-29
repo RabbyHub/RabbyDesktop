@@ -61,14 +61,6 @@ const CONF = {
       baseView: BrowserView;
     }>
   >,
-  securityCheckPopupWindowReady: {
-    subject: new ReplaySubject(1),
-    once: true,
-  } as IConf<ReplaySubject<BrowserWindow>>,
-  securityAddressbarPopup: {
-    subject: new ReplaySubject(1),
-    once: true,
-  } as IConf<ReplaySubject<BrowserWindow>>,
 
   popupWindowOnMain: {
     subject: new ReplaySubject(1),

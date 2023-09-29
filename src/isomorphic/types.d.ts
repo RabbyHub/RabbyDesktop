@@ -474,6 +474,7 @@ type IShellNavInfo = {
   canGoBack?: boolean;
   tabUrl: string;
   dapp?: IDapp;
+  /** @deprecated */
   dappSecurityCheckResult: ISecurityCheckResult | null;
 };
 
