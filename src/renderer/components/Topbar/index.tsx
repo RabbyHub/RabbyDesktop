@@ -309,10 +309,7 @@ export default function Topbar() {
               <img src={IconNavRefresh} alt="close" />
             </button>
           </div>
-          <DappAddressBar
-            url={selectedTabInfo?.tabUrl}
-            checkResult={selectedTabInfo?.dappSecurityCheckResult}
-          />
+          <DappAddressBar url={selectedTabInfo?.tabUrl} />
 
           {/* <browser-action-list id="actions" /> */}
           <div className="rabbyExtPanelPlaceHolder" />
