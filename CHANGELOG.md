@@ -1,7 +1,21 @@
 
-v0.35.0 / 2023-09-27
+v0.35.1 / 2023-09-29
 ====================
 
+  * feat: update currentVersion.
+  * feat: remove useless popup to improve perf & memory usage. (#567)
+  * feat: downgrade electron to v22 to avoid window manager issues on higher version. (#566)
+  * feat: upgrade rabbyx and support more testnets. (#564)
+  * fix: upgrade node-abi aversion for electron
+  * fix: avoid occasional failure on disconnecting localfs type dapp. (#563)
+  * feat: drop uniswap for now (#562)
+  * feat: upgrade electron to >= v24.8.3 to avoid libwebp issues (#561)
+  * build: update changelog on release reg/prod (#560)
+
+v0.35.0-prod / 2023-09-27
+=========================
+
+  * Release v0.35.0-prod
   * style: tuning. (#559)
   * fix: mock switches.
   * feat: support mock download updates exceptions. (#558)
