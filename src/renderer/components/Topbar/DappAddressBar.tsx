@@ -5,7 +5,7 @@ import {
   isUrlFromDapp,
 } from 'isomorphic/url';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { openDappAddressbarSecurityPopupView } from 'renderer/ipcRequest/security-addressbarpopup';
+// import { openDappAddressbarSecurityPopupView } from 'renderer/ipcRequest/security-addressbarpopup';
 import styles from './DappAddressBar.module.less';
 
 function useAddressUrl(updatedUrl?: string) {
@@ -56,11 +56,10 @@ export default function DappAddressBar({
     useAddressUrl(url);
 
   const openSecurityAddressbarpopup = useCallback(() => {
-    if (!IS_MAIN_SHELL) return;
-    if (!url) return;
-
-    openDappAddressbarSecurityPopupView(url);
-  }, [url]);
+    // if (!IS_MAIN_SHELL) return;
+    // if (!url) return;
+    // openDappAddressbarSecurityPopupView(url);
+  }, []);
 
   return (
     <div

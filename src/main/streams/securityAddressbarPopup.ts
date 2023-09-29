@@ -74,6 +74,7 @@ function updateSubWindowPosition(
 onMainWindowReady().then(async (mainWin) => {
   const targetWin = mainWin.window;
 
+  // would cause window always on top on darwin >= electron@24
   const popupWin = createPopupWindow({
     parent: mainWin.window,
     transparent: false,

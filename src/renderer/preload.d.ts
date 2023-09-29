@@ -23,6 +23,7 @@ type M2RChanneMessagePayload = {
     continualOpId: string;
   };
   '__internal_push:security-notification': ISecurityNotificationPayload;
+  /** @deprecated */
   '__internal_push:security-addressbarpopup:on-show': {
     origin: string;
     checkResult: ISecurityCheckResult;
@@ -214,14 +215,17 @@ type ChannelMessagePayload = {
     send: [];
     response: [];
   };
+  /** @deprecated */
   '__internal_rpc:security-addressbarpopup:request-show': {
     send: [dappUrl: string];
     response: [];
   };
+  /** @deprecated */
   '__internal_rpc:security-addressbarpopup:do-show': {
     send: [];
     response: [];
   };
+  /** @deprecated */
   '__internal_rpc:security-addressbarpopup:switch-pageview': {
     send: [state: ISecurityAddrbarPopupState];
     response: [
@@ -230,6 +234,7 @@ type ChannelMessagePayload = {
       }
     ];
   };
+  /** @deprecated */
   '__internal_rpc:security-addressbarpopup:hide': {
     send: [];
     response: [];

@@ -94,7 +94,7 @@ export default function Topbar() {
   useEffect(() => {
     fetchConnectedSite();
 
-    hideDappAddressbarSecurityPopupView();
+    // hideDappAddressbarSecurityPopupView();
   }, [selectedOrigin, fetchConnectedSite]);
 
   useEffect(() => {

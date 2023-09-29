@@ -15,6 +15,7 @@ import { fromMainSubject, valueToMainSubject } from './_init';
 import { onIpcMainEvent, sendToWebContents } from '../utils/ipcMainEvents';
 import {
   createPopupWindow,
+  hidePopupWindow,
   isPopupWindowHidden,
   showPopupWindow,
 } from '../utils/browser';
@@ -53,10 +54,14 @@ function updateSubWindowPosition(
   window.setBounds({ ...popupRect, x, y }, true);
 }
 
+const IS_DARWIN = process.platform === 'darwin';
 onMainWindowReady().then(async (mainWin) => {
   const targetWin = mainWin.window;
 
-  const popupWin = createPopupWindow({ parent: targetWin });
+  const popupWin = createPopupWindow({
+    parent: targetWin,
+    transparent: IS_DARWIN,
+  });
 
   updateSubWindowPosition(targetWin, popupWin);
   const onTargetWinUpdate = () => {
@@ -79,7 +84,7 @@ onMainWindowReady().then(async (mainWin) => {
     // popupWin.webContents.openDevTools({ mode: 'detach' });
   }
 
-  popupWin.hide();
+  hidePopupWindow(popupWin);
 
   valueToMainSubject('securityCheckPopupWindowReady', popupWin);
 
