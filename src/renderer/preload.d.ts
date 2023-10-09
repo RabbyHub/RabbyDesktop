@@ -18,15 +18,6 @@ type M2RChanneMessagePayload = {
   '__internal_push:webui-extension:switch-active-dapp': {
     tabId: number;
   };
-  '__internal_push:security-check:start-check-dapp': {
-    url: string;
-    continualOpId: string;
-  };
-  '__internal_push:security-notification': ISecurityNotificationPayload;
-  '__internal_push:security-addressbarpopup:on-show': {
-    origin: string;
-    checkResult: ISecurityCheckResult;
-  };
   '__internal_push:dapp-tabs:open-safe-view': INonSameDomainAction;
   '__internal_push:mainwindow:all-tabs-closed': {
     windowId: number;
@@ -168,69 +159,11 @@ type ChannelMessagePayload = {
     send: [];
     response: [];
   };
-  '__internal_rpc:security-check:get-dapp': {
-    send: [reqid: string, dappUrl: string];
-    response: [
-      {
-        reqid: string;
-        dappInfo: IDapp | null;
-      }
-    ];
-  };
-  '__internal_rpc:security-check:check-dapp-and-put': {
-    send: [reqid: string, dappUrl: string];
-    response: [
-      {
-        reqid: string;
-      } & (
-        | {
-            result: null;
-            error: Error;
-          }
-        | {
-            result: ISecurityCheckResult;
-            error?: null;
-          }
-      )
-    ];
-  };
-  '__internal_rpc:security-check:continue-close-dapp': {
-    send: [continualOpId: string];
-    response: [];
-  };
-  '__internal_rpc:security-check:set-view-top': {
-    send: [];
-    response: [];
-  };
-  '__internal_rpc:security-check:close-view': {
-    send: [];
-    response: [];
-  };
   '__internal_rpc:browser:report-perf-info': {
     send: [perfInfo: IWebviewPerfInfo];
     response: [];
   };
   '__internal_rpc:browser-dev:openDevTools': {
-    send: [];
-    response: [];
-  };
-  '__internal_rpc:security-addressbarpopup:request-show': {
-    send: [dappUrl: string];
-    response: [];
-  };
-  '__internal_rpc:security-addressbarpopup:do-show': {
-    send: [];
-    response: [];
-  };
-  '__internal_rpc:security-addressbarpopup:switch-pageview': {
-    send: [state: ISecurityAddrbarPopupState];
-    response: [
-      {
-        state: ISecurityAddrbarPopupState;
-      }
-    ];
-  };
-  '__internal_rpc:security-addressbarpopup:hide': {
     send: [];
     response: [];
   };

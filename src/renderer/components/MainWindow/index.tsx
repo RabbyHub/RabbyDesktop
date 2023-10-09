@@ -49,6 +49,7 @@ import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
 import Home from '@/renderer/routes/Home';
 import { Swap } from '@/renderer/routes/Swap';
 import { MainWindowSettingsNonProductDebugKits } from '@/renderer/routes/Settings/NonProductDebug';
+import { getRendererAppChannel } from '@/isomorphic/env';
 import styles from './index.module.less';
 
 import MainWindowRoute from './MainRoute';
@@ -263,11 +264,12 @@ const router = createRouter([
       },
       {
         path: 'settings/debug',
-        element: IS_RUNTIME_PRODUCTION ? (
-          <></>
-        ) : (
-          <MainWindowSettingsNonProductDebugKits />
-        ),
+        element:
+          getRendererAppChannel() === 'prod' ? (
+            <></>
+          ) : (
+            <MainWindowSettingsNonProductDebugKits />
+          ),
         loader: () => {
           return {
             title: 'Debug Kits',

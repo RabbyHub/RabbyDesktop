@@ -1,5 +1,6 @@
 import { arraify } from '@/isomorphic/array';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
+import { formatDappHttpOrigin } from '@/isomorphic/dapp';
 import { matomoRequestEvent } from '../utils/matomo-request';
 
 export async function getDapp(dappID: IDapp['id']) {
@@ -169,10 +170,11 @@ export async function getLastOpenOriginByOrigin(dappOrigin: string) {
     lastOpenInfos[parsedInfo.origin] ||
     lastOpenInfos[parsedInfo.secondaryOrigin];
 
-  if (!lastInfo?.finalURL) return dappOrigin;
+  const fallbackURL = formatDappHttpOrigin(dappOrigin) || dappOrigin;
+  if (!lastInfo?.finalURL) return fallbackURL;
 
   const parseLastInfo = canoicalizeDappUrl(lastInfo.finalURL);
-  return parseLastInfo.origin || dappOrigin;
+  return parseLastInfo.httpOrigin || fallbackURL;
 }
 
 export async function downloadIPFS(cid: string) {

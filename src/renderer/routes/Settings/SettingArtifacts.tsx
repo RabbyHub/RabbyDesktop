@@ -33,6 +33,7 @@ type TypedProps = {
       type: 'link';
       link: string;
       useChevron?: boolean;
+      openAsDapp?: boolean;
     }
 );
 
@@ -66,13 +67,22 @@ export function ItemText({
 
 export function ItemLink({
   children,
+  openAsDapp = false,
   ...props
 }: React.PropsWithChildren<Omit<TypedProps & { type: 'link' }, 'type'>>) {
   return (
     <div
       className={classNames(styles.typedItem, styles.pointer, props.className)}
       onClick={() => {
-        openExternalUrl(props.link);
+        if (!openAsDapp) {
+          openExternalUrl(props.link);
+        } else {
+          // trigger open dapp
+          window.rabbyDesktop.ipcRenderer.invoke(
+            'safe-open-dapp-tab',
+            props.link
+          );
+        }
       }}
     >
       <ItemPartialLeft name={props.name} icon={props.icon} />

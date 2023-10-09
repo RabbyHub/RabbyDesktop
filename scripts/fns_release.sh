@@ -35,6 +35,41 @@ update_version() {
   echo ""
 }
 
+pub_changelog() {
+  case ${buildchannel} in
+      prod) changelog_dir=cdn-config
+          ;;
+      reg|*) changelog_dir=cdn-config-pre
+          ;;
+  esac
+
+  cd $project_dir;
+  proj_version=$(node --eval="process.stdout.write(require('./package.json').version)");
+
+  src_markdown=$project_dir/src/renderer/changeLogs/currentVersion.md;
+  remote_markdown_path=$changelog_dir/release_notes/$proj_version.md
+
+  echo "================================================================\n"
+  echo "[pub_changelog] checkout changelog content:";
+  echo ""
+  tput setaf 2; # show green
+  echo -e | cat $src_markdown;
+  tput sgr0;
+  echo "================================================================\n"
+
+  echo "[pub_changelog] start publishing changelog to remote $remote_markdown_path";
+
+  if [ ! -z $RABBY_REALLY_COPY ]; then
+    aws s3 cp $src_markdown s3://${RABBY_BUILD_BUCKET}/rabby/$remote_markdown_path --acl public-read --exclude "*" --include "*.md" --content-type text/plain
+  fi
+
+  echo ""
+  echo "[pub_changelog] the changelog is https://download.rabby.io/$remote_markdown_path"
+  echo ""
+  echo "[pub_changelog] you can update the cdn with cmd \`aws cloudfront create-invalidation --distribution-id <frontend_id> --paths '/$changelog_dir/*'\`"
+  echo "[pub_changelog] finished update changelog, version: $proj_version";
+}
+
 release_darwin() {
   # by default we package app for `darwin-reg` channel
   # if you want to publish to `darwin-prod` channel, set buildchannel=prod

@@ -1,7 +1,42 @@
 
-v0.34.0 / 2023-09-12
+v0.35.1 / 2023-09-29
 ====================
 
+  * feat: update currentVersion.
+  * feat: remove useless popup to improve perf & memory usage. (#567)
+  * feat: downgrade electron to v22 to avoid window manager issues on higher version. (#566)
+  * feat: upgrade rabbyx and support more testnets. (#564)
+  * fix: upgrade node-abi aversion for electron
+  * fix: avoid occasional failure on disconnecting localfs type dapp. (#563)
+  * feat: drop uniswap for now (#562)
+  * feat: upgrade electron to >= v24.8.3 to avoid libwebp issues (#561)
+  * build: update changelog on release reg/prod (#560)
+
+v0.35.0-prod / 2023-09-27
+=========================
+
+  * Release v0.35.0-prod
+  * style: tuning. (#559)
+  * fix: mock switches.
+  * feat: support mock download updates exceptions. (#558)
+  * feat: style tuning, full state views for download updates on lock screen. (#557)
+  * chore: update currentVersion.
+  * style: add new color css var neutral-card-3. (#556)
+  * fix: allowed protocols. (#553)
+  * fix: alert cannot-use-trezor-like-if-ipfs-enabled on sign from rabbyx. (#554)
+  * feat: support swap on chain base. (#552)
+  * feat: upgrade rabbyx. (#551)
+  * feat: robust change about security (#549)
+  * feat: + audit report (#550)
+  * build: fix patch package file.
+  * feat: support download on lock screen. (#544)
+  * fix: open external url for approved asset. (#542)
+  * ci: update group. (#545)
+
+v0.34.0-prod / 2023-09-12
+=========================
+
+  * Release v0.34.0-prod
   * chore: update currentVersion.
   * fix: style of "More" entry.
   * feat: support more chains, some ux adjust (#541)

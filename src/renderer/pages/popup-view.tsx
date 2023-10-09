@@ -11,9 +11,6 @@ import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 
 import { PopupViewClose, ResetTo } from '@/renderer/components/PopupViewUtils';
 
-import SecurityCheck from '@/renderer/routes-popup/SecurityCheck/SecurityCheck';
-import SecurityAddressbarPopup from '@/renderer/routes-popup/SecurityAddressbarPopup/SecurityAddressbarPopup';
-
 import { SidebarContextMenu } from '@/renderer/routes-popup/SidebarContextMenu';
 
 import SelectDevicesWindow from '@/renderer/routes-popup/SelectDevicesWindow';
@@ -32,11 +29,6 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/security-check" element={<SecurityCheck />} />
-        <Route
-          path="/security-addressbarpopup"
-          element={<SecurityAddressbarPopup />}
-        />
         <Route path="/popup__sidebar-dapp" element={<SidebarContextMenu />} />
         <Route
           path="/rabby-notification-gasket"

@@ -115,11 +115,11 @@ export default function DApps() {
 
   const onClickDappBlock = useCallback(
     async (dapp: IDappWithTabInfo) => {
-      let targetOrigin = dapp.origin;
+      let lastHttpOrigin = dapp.origin;
       if (!dapp.tab) {
-        targetOrigin = await getLastOpenOriginByOrigin(dapp.origin);
+        lastHttpOrigin = await getLastOpenOriginByOrigin(dapp.origin);
       }
-      openDapp(targetOrigin, { dontReloadOnSwitchToActiveTab: !!dapp.tab });
+      openDapp(lastHttpOrigin, { dontReloadOnSwitchToActiveTab: !!dapp.tab });
     },
     [openDapp]
   );
