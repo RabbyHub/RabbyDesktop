@@ -392,17 +392,19 @@ export function MainWindowSettings() {
             >
               <ImageAsLink
                 altName="Twitter"
-                className="cursor-pointer w-[16px] h-[16px] opacity-60 hover:opacity-100 ml-0"
+                className="cursor-pointer w-[16px] h-[16px] ml-0"
                 link="https://twitter.com/Rabby_io"
                 iconURL="rabby-internal://assets/icons/mainwin-settings/followus-x.svg"
+                hoverIconURL="rabby-internal://assets/icons/mainwin-settings/followus-x-hover.svg"
                 tooltipProps={{ placement: 'top' }}
               />
 
               <ImageAsLink
                 altName="Discord"
-                className="cursor-pointer w-[16px] h-[16px] opacity-60 hover:opacity-100 ml-[16px]"
+                className="cursor-pointer w-[16px] h-[16px] ml-[16px]"
                 link="https://discord.gg/seFBCWmUre"
                 iconURL="rabby-internal://assets/icons/mainwin-settings/followus-discord.svg"
+                hoverIconURL="rabby-internal://assets/icons/mainwin-settings/followus-discord-hover.svg"
                 tooltipProps={{ placement: 'left' }}
               />
             </ItemText>
