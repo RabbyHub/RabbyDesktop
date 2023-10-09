@@ -394,7 +394,7 @@ export function MainWindowSettings() {
                 altName="Twitter"
                 className="cursor-pointer w-[16px] h-[16px] opacity-60 hover:opacity-100 ml-0"
                 link="https://twitter.com/Rabby_io"
-                iconURL="rabby-internal://assets/icons/mainwin-settings/followus-twitter.svg"
+                iconURL="rabby-internal://assets/icons/mainwin-settings/followus-x.svg"
                 tooltipProps={{ placement: 'top' }}
               />
 
