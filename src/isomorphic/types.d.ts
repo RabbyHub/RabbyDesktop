@@ -474,6 +474,7 @@ type IShellNavInfo = {
   canGoBack?: boolean;
   tabUrl: string;
   dapp?: IDapp;
+  /** @deprecated */
   dappSecurityCheckResult: ISecurityCheckResult | null;
 };
 
@@ -564,6 +565,7 @@ type ICanonalizedUrlInfo = {
   urlInfo: Partial<URL> | null;
   isDapp: boolean;
   origin: string;
+  httpOrigin: string;
   hostname: string;
   fullDomain: string;
 } & IParseDomainInfo;
@@ -622,6 +624,9 @@ type IAppSession = {
 type ITrezorLikeCannotUserReason = {
   reasonType: 'enabled-ipfs';
   cannotUse: IHardwareConnectPageType;
+  uiData?: {
+    openFromAddAddressModal?: boolean;
+  };
 };
 // --------- BUNDLE -----------
 interface CommonBundleAccount {

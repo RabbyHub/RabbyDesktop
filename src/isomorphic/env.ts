@@ -6,10 +6,14 @@ export function getSentryEnv(appChannel: 'reg' | 'prod') {
 
 export function filterAppChannel(input?: string): 'reg' | 'prod' {
   switch (input) {
-    default:
     case 'reg':
       return 'reg';
+    default:
     case 'prod':
       return 'prod';
   }
+}
+
+export function getRendererAppChannel() {
+  return filterAppChannel(process.env.BUILD_CHANNEL);
 }

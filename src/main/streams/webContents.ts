@@ -13,6 +13,7 @@ import {
 } from '../utils/tabbedBrowserWindow';
 import { getBlockchainExplorers } from '../store/dynamicConfig';
 import { onMainWindowReady } from '../utils/stream-helpers';
+import { safeOpenExternalURL } from '../utils/security';
 
 /**
  * @deprecated
@@ -27,25 +28,6 @@ export async function openTabOfDapp(
     url
   );
   continualOpenedTab?.loadURL(url);
-
-  // const closeOpenedTab = () => {
-  //   continualOpenedTab?.destroy();
-  // };
-
-  // openDappSecurityCheckView(url, mainTabbedWin.window).then(
-  //   ({ continualOpId }) => {
-  //     // TODO: use timeout mechanism to avoid memory leak
-  //     const dispose = onIpcMainEvent(
-  //       '__internal_rpc:security-check:continue-close-dapp',
-  //       (_evt, _openId) => {
-  //         if (mainTabbedWin.window && _openId === continualOpId) {
-  //           dispose?.();
-  //           closeOpenedTab();
-  //         }
-  //       }
-  //     );
-  //   }
-  // );
 }
 
 /**
@@ -89,7 +71,7 @@ export function setOpenHandlerForWebContents({
     });
 
     if (shouldOpenExternal) {
-      shell.openExternal(targetURL);
+      safeOpenExternalURL(targetURL);
       return { action: 'deny' };
     }
 
@@ -194,7 +176,7 @@ export const setListeners = {
           return false;
         }
         case EnumOpenDappAction.openExternal: {
-          shell.openExternal(targetURL);
+          safeOpenExternalURL(targetURL);
           evt.preventDefault();
           return false;
         }
@@ -263,7 +245,7 @@ export const setListeners = {
             return false;
           }
           case EnumOpenDappAction.openExternal: {
-            shell.openExternal(targetURL);
+            safeOpenExternalURL(targetURL);
             return false;
           }
           case EnumOpenDappAction.leaveInTab: {

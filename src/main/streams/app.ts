@@ -51,7 +51,11 @@ import {
 import { switchToBrowserTab } from '../utils/browser';
 import { getAppUserDataPath } from '../utils/store';
 import { getMainWinLastPosition } from '../utils/screen';
-import { clearAllStoreData, clearAllUserData } from '../utils/security';
+import {
+  clearAllStoreData,
+  clearAllUserData,
+  safeOpenExternalURL,
+} from '../utils/security';
 import {
   getRabbyxLockInfo,
   tryAutoUnlockRabbyX,
@@ -250,7 +254,7 @@ onIpcMainEvent(
     const isFromDapp = isUrlFromDapp(currentURL);
     if (isFromDapp) return;
 
-    shell.openExternal(externalURL);
+    safeOpenExternalURL(externalURL);
   }
 );
 

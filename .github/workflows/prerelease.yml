@@ -23,7 +23,7 @@ jobs:
     runs-on:
       - self-hosted
       - X64
-      - legacy
+      - isolate
       - ${{ matrix.host }}
     # if: ${{ github.repository_owner == 'RabbyHub' }}
     env:
@@ -42,6 +42,7 @@ jobs:
           echo "HOME is $HOME"
           echo "USERPROFILE is $USERPROFILE"
           echo "which node $(which node)"
+          echo "where npm $(npm config get prefix)"
 
       # - name: Install Node and NPM
       #   uses: actions/setup-node@v1
@@ -62,10 +63,14 @@ jobs:
 
           if [[ $GIT_REF_NAME =~ ^v[0-9]+\.[0-9]+\.[0-9]+-reg$ ]]; then
             export buildchannel="reg";
+            export doupdatechangelog=1;
             echo "[get_buildchannel] it's one reg version";
           elif [[ $GIT_REF_NAME =~ ^v[0-9]+\.[0-9]+\.[0-9]+-prod$ ]]; then
             export buildchannel="prod";
+            export doupdatechangelog=1;
             echo "[get_buildchannel] it's one prod version";
+          else
+            unset doupdatechangelog;
           fi
 
           if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -73,9 +78,14 @@ jobs:
           else
             bash ./.github/workflows/fix-vars.sh
           fi
+
           # if [[ $GITHUB_REF == refs/tags/v* ]]; then
           # else
           # fi
+          # only update changelog on release
+          if [[ ! -z $doupdatechangelog ]]; then
+            bash ./scripts/release_changelog.sh
+          fi
           bash ./scripts/release_desktop.sh
         env:
           KEYCHAIN_PASS: ${{ secrets.KEYCHAIN_PASS }}

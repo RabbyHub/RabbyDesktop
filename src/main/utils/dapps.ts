@@ -25,6 +25,7 @@ import { checkUrlViaBrowserView, CHROMIUM_NET_ERR_DESC } from './appNetwork';
 import { createPopupWindow } from './browser';
 import { getSessionInsts } from './stream-helpers';
 import { emitIpcMainEvent } from './ipcMainEvents';
+import { isRealDirectory, isRealFile } from './file';
 
 const DFLT_TIMEOUT = 8 * 1e3;
 
@@ -177,7 +178,7 @@ export async function detectLocalDapp(
       },
     };
   }
-  if (!fs.statSync(absPath).isDirectory()) {
+  if (!isRealDirectory(absPath, true)) {
     return {
       data: null,
       error: {
@@ -186,12 +187,22 @@ export async function detectLocalDapp(
       },
     };
   }
+
   if (!fs.existsSync(path.resolve(absPath, './index.html'))) {
     return {
       data: null,
       error: {
         type: DETECT_ERR_CODES.INACCESSIBLE,
         message: `The directory doesn't contain index.html`,
+      },
+    };
+  }
+  if (!isRealFile(path.resolve(absPath, './index.html'), true)) {
+    return {
+      data: null,
+      error: {
+        type: DETECT_ERR_CODES.INACCESSIBLE,
+        message: `The directory doesn't contain real index.html`,
       },
     };
   }

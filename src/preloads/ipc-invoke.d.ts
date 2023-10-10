@@ -13,10 +13,40 @@ type RabbyxInvokePayload = {
       constrains: IDesktopAppState['selectedMediaConstrains'];
     };
   };
+  'rabbyx:check-trezor-like-cannot-use': {
+    send: [
+      options: {
+        openType: IHardwareConnectPageType;
+        alertModal?: boolean;
+        uiData?: ITrezorLikeCannotUserReason['uiData'];
+      }
+    ];
+    response: {
+      reasons: ITrezorLikeCannotUserReason[];
+      couldContinue: boolean;
+    };
+  };
 };
 
 type RabbyDesktopLockInfo = {
   pwdStatus: import('@/isomorphic/wallet/lock').PasswordStatus;
+};
+
+type RabbyDebugKitsInvokes = {
+  ['__internal_invoke:rabbyx:waitExtBgGhostLoaded']: {
+    send: [];
+    response: {
+      rabbyxExtId: string;
+    };
+  };
+  '__internal_invoke:app:debug-kits-actions': {
+    send: [
+      {
+        action: 'clean-updates-download-cache';
+      }
+    ];
+    response: void;
+  };
 };
 
 type ChannelInvokePayload = {
@@ -259,13 +289,7 @@ type ChannelInvokePayload = {
       isValid: boolean;
     };
   };
-  'check-trezor-like-cannot-use': {
-    send: [openType: IHardwareConnectPageType, alertModal?: boolean];
-    response: {
-      reasons: ITrezorLikeCannotUserReason[];
-      couldContinue: boolean;
-    };
-  };
+  'check-trezor-like-cannot-use': RabbyxInvokePayload['rabbyx:check-trezor-like-cannot-use'];
   'get-trezor-like-availability': {
     send: [];
     response: {
@@ -288,16 +312,10 @@ type ChannelInvokePayload = {
       error?: Error;
     };
   };
-  [`__internal_rpc:mainwindow:is-dapp-view`]: {
+  [`__outer_rpc:mainwindow:is-dapp-view`]: {
     send: [];
     response: {
       isDappView?: boolean;
-    };
-  };
-  ['__internal_invoke:rabbyx:waitExtBgGhostLoaded']: {
-    send: [];
-    response: {
-      rabbyxExtId: string;
     };
   };
   [`__outer_rpc:check-if-requestable`]: {
@@ -487,7 +505,8 @@ type ChannelInvokePayload = {
     response: {};
   };
 } & ChannelInvokeForWebviewTabs &
-  RabbyxInvokePayload;
+  RabbyxInvokePayload &
+  RabbyDebugKitsInvokes;
 
 type IInvokesKey = keyof ChannelInvokePayload;
 type GetInvokeMethodParams<T extends IInvokesKey = IInvokesKey> =

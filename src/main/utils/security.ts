@@ -1,9 +1,11 @@
 import fs from 'node:fs';
 import crypto from 'crypto';
 
-import type { Session } from 'electron';
+import { shell, type Session, dialog } from 'electron';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import { isAllowedProtocols, safeParseURL } from '@/isomorphic/url';
 import appStores from '../store';
+import { onMainWindowReady } from './stream-helpers';
 
 /**
  * @description call it only for development plz.
@@ -75,4 +77,35 @@ export async function getFileSha512(filePath: string) {
 
     // stream.on('error', reject);
   });
+}
+
+async function alertUnsupportedProtocol(targetURL: string) {
+  const DialogButtons = ['OK'] as const;
+  const cancleId = DialogButtons.findIndex((x) => x === 'OK');
+
+  const parsedInfo = safeParseURL(targetURL);
+
+  const mainWin = await onMainWindowReady();
+  const result = await dialog.showMessageBox(mainWin.window, {
+    type: 'error',
+    title: 'Invalid URL',
+    message: `protocol ${parsedInfo?.protocol} is not allowed`,
+    defaultId: cancleId,
+    cancelId: cancleId,
+    noLink: true,
+    buttons: DialogButtons as any as string[],
+  });
+}
+
+/**
+ * @description open external url in a safe way, only protocol in whitelist can be opened
+ */
+export function safeOpenExternalURL(targetURL: string) {
+  // TODO: alert user it's not allowed
+  if (!isAllowedProtocols(targetURL)) {
+    alertUnsupportedProtocol(targetURL);
+    return;
+  }
+
+  shell.openExternal(targetURL);
 }

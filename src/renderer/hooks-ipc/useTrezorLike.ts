@@ -3,7 +3,9 @@ import { useCallback, useEffect } from 'react';
 
 const trezorLikeAvailabilityAtom = atom<ITrezorLikeCannotUserReason[]>([]);
 const fetchingAtom = atom<boolean>(false);
-export function useTrezorLikeAvailablity() {
+export function useTrezorLikeAvailablity(
+  uiData?: ITrezorLikeCannotUserReason['uiData']
+) {
   const [trezorLikeAvailability, setTrezorLikeAvailability] = useAtom(
     trezorLikeAvailabilityAtom
   );
@@ -13,11 +15,14 @@ export function useTrezorLikeAvailablity() {
     (type: IHardwareConnectPageType) => {
       return window.rabbyDesktop.ipcRenderer.invoke(
         'check-trezor-like-cannot-use',
-        type,
-        true
+        {
+          openType: type,
+          alertModal: true,
+          uiData: { openFromAddAddressModal: uiData?.openFromAddAddressModal },
+        }
       );
     },
-    []
+    [uiData?.openFromAddAddressModal]
   );
 
   useEffect(() => {

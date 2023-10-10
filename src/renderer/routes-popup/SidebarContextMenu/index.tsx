@@ -21,7 +21,7 @@ import { useMemo } from 'react';
 import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
-import { checkoutDappURL, isOpenedAsHttpDappType } from '@/isomorphic/dapp';
+import { checkoutDappURL } from '@/isomorphic/dapp';
 import { useOpenDapp } from '@/renderer/utils/react-router';
 import styles from './index.module.less';
 
@@ -49,7 +49,7 @@ export const SidebarContextMenu = () => {
   const { removeConnectedSite, removeAllConnectedSites } = useConnectedSite();
 
   const disconnect = async (_origin: string, url?: string) => {
-    let current = url ? canoicalizeDappUrl(url)?.origin : '';
+    let current = url ? canoicalizeDappUrl(url)?.httpOrigin : '';
     if (!current) {
       current = await getLastOpenOriginByOrigin(_origin);
     }

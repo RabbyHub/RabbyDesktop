@@ -24,7 +24,7 @@ async function __rbCheckRequestable(reqData: any) {
 
 export async function setupDappZoomEvents() {
   const checkResult = await ipcRendererObj.invoke(
-    '__internal_rpc:mainwindow:is-dapp-view'
+    '__outer_rpc:mainwindow:is-dapp-view'
   );
   if (!checkResult.isDappView) {
     return;
@@ -47,7 +47,7 @@ export async function setupDappZoomEvents() {
 
 export async function setupDapp() {
   const checkResult = await ipcRendererObj.invoke(
-    '__internal_rpc:mainwindow:is-dapp-view'
+    '__outer_rpc:mainwindow:is-dapp-view'
   );
   if (!checkResult.isDappView) {
     return;

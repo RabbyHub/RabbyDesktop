@@ -426,7 +426,7 @@ onIpcMainInternalEvent(
   }
 );
 
-handleIpcMainInvoke('__internal_rpc:mainwindow:is-dapp-view', async (evt) => {
+handleIpcMainInvoke('__outer_rpc:mainwindow:is-dapp-view', async (evt) => {
   const webContents = evt.sender;
   const mainTabbedWin = await onMainWindowReady();
   const foundTab = mainTabbedWin.tabs.tabList.find(

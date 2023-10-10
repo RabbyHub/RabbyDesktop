@@ -49,6 +49,7 @@ import {
   emitIpcMainEvent,
   onIpcMainInternalEvent,
 } from '../utils/ipcMainEvents';
+import { safeOpenExternalURL } from '../utils/security';
 
 const sesLog = getBindLog('session', 'bgGrey');
 
@@ -333,7 +334,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
           ];
         }
         case 'open-external': {
-          shell.openExternal(actionInfo.externalUrl);
+          safeOpenExternalURL(actionInfo.externalUrl);
           return false;
         }
         case 'deny': {

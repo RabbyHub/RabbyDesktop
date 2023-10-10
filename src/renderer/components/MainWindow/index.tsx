@@ -38,13 +38,14 @@ import dayjs from 'dayjs';
 import { useToastMessage } from '@/renderer/hooks/useToastMessage';
 import { HomeBundle } from '@/renderer/routes/Bundle';
 import { useCustomRPC } from '@/renderer/hooks/useCustomRPC';
-// import ModalUpdateInHome from '@/renderer/routes/Home/components/ModalUpdate';
 import { NFT } from '@/renderer/routes/NFT';
 import SendNFT from '@/renderer/routes/SendNFT';
 import ApprovalManagePage from '@/renderer/routes/ApprovalManagePage';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { MainWindowSettingsDeveloperKits } from '@/renderer/routes/Settings/Developer';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import { MainWindowSettingsNonProductDebugKits } from '@/renderer/routes/Settings/NonProductDebug';
+import { getRendererAppChannel } from '@/isomorphic/env';
 import styles from './index.module.less';
 
 import MainWindowRoute from './MainRoute';
@@ -92,8 +93,6 @@ function MainWrapper() {
             <Outlet />
           </MainWindowRoute>
         </ErrorBoundary>
-
-        {/* <ModalUpdateInHome /> */}
       </div>
     </RequireUnlock>
   );
@@ -244,6 +243,20 @@ const router = createRouter([
         loader: () => {
           return {
             title: 'Developer Kits',
+          } as MainWindowRouteData;
+        },
+      },
+      {
+        path: 'settings/debug',
+        element:
+          getRendererAppChannel() === 'prod' ? (
+            <></>
+          ) : (
+            <MainWindowSettingsNonProductDebugKits />
+          ),
+        loader: () => {
+          return {
+            title: 'Debug Kits',
           } as MainWindowRouteData;
         },
       },

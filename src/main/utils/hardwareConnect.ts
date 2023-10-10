@@ -62,10 +62,7 @@ export function alertCannotUseDueTo(reason?: ITrezorLikeCannotUserReason) {
     pushChangesToZPopupLayer({
       'trezor-like-cannot-use': {
         visible: true,
-        state: {
-          reasonType: 'enabled-ipfs',
-          cannotUse: reason.cannotUse,
-        },
+        state: reason,
       },
     });
   }

@@ -20,6 +20,30 @@ export function filterHtmlForIpfs(htmlStr: string) {
   };
 }
 
+/**
+ * @description check if targetPath is a real directory, not symbolic link on Posix.
+ */
+export function isRealDirectory(targetPath: string, knownExist = false) {
+  if (!knownExist && !fs.existsSync(targetPath)) return false;
+
+  const lstats = fs.lstatSync(targetPath);
+
+  if (lstats.isSymbolicLink() || lstats.isFile()) return false;
+
+  return fs.statSync(targetPath).isDirectory();
+}
+
+/**
+ * @description check if targetPath is a real file, not symbolic link on Posix.
+ */
+export function isRealFile(targetPath: string, knownExist = false) {
+  if (!knownExist && !fs.existsSync(targetPath)) return false;
+
+  if (fs.lstatSync(targetPath).isSymbolicLink()) return false;
+
+  return fs.statSync(targetPath).isFile();
+}
+
 export function rewriteIpfsHtmlFile(inputFilePath: string) {
   // Read input file
   const htmlStr = fs.readFileSync(inputFilePath, 'utf8');
@@ -54,9 +78,15 @@ export function checkDappEntryDirectory(
   const indexHtmlAbsPath = path.join(entryPath, './index.html');
   if (!entryPath || !fs.existsSync(entryPath)) {
     checkResult.error = CheckResultType.NOT_EXIST;
-  } else if (!fs.statSync(entryPath).isDirectory()) {
+    return checkResult;
+  }
+
+  if (!isRealDirectory(entryPath)) {
     checkResult.error = CheckResultType.NOT_DIRECTORY;
-  } else if (opts?.checkIndexHtml && !fs.existsSync(indexHtmlAbsPath)) {
+    return checkResult;
+  }
+
+  if (opts?.checkIndexHtml && !fs.existsSync(indexHtmlAbsPath)) {
     checkResult.error = CheckResultType.NO_INDEXHTML;
   }
 
