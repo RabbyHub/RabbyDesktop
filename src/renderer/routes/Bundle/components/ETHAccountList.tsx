@@ -15,7 +15,7 @@ export const ETHAccountList = () => {
         zActions.showZSubview('select-add-address-type-modal');
       }}
       title="Imported wallet address"
-      hoverTips="Add wallet addres"
+      hoverTips="Add wallet address"
     >
       {list.map((item) => (
         <AccountItem canDelete canEdit key={item.id} data={item} />

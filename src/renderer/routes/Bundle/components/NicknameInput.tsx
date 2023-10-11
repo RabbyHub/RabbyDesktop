@@ -1,7 +1,7 @@
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import { useBundle } from '@/renderer/hooks/useBundle/useBundle';
 import clsx from 'clsx';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 export interface Props {
   canEdit?: boolean;
@@ -28,6 +28,11 @@ export const NicknameInput: React.FC<Props> = ({
     },
     []
   );
+  useEffect(() => {
+    if (!edit) {
+      setNickname(data.nickname);
+    }
+  }, [data.nickname, edit]);
 
   const onUpdateNickname = React.useCallback(
     async (e: any) => {
@@ -40,6 +45,10 @@ export const NicknameInput: React.FC<Props> = ({
     },
     [data.id, nickname, updateNickname]
   );
+
+  React.useEffect(() => {
+    setNickname(data.nickname);
+  }, [data.nickname]);
 
   return (
     <div
