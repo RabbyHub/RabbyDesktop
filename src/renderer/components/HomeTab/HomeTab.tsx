@@ -37,7 +37,7 @@ export const HomeTab: React.FC = () => {
       className={clsx(
         'flex space-x-[38px] items-center',
         'border-t-0 border-l-0 border-r-0 border-b border-solid border-[#FFFFFF0D]',
-        'mb-[44px] mt-[-20px]',
+        'mb-[44px]',
         'text-white'
       )}
     >

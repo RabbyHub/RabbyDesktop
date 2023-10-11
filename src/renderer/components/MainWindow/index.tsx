@@ -61,6 +61,7 @@ import { DappViewWrapper } from '../DappView';
 import { FixedBackHeader } from '../FixedBackHeader';
 import { ShellWalletProvider } from '../ShellWallet';
 import TipUnsupportedModal from '../TipUnsupportedModal';
+import UpdateTipBar from '../UpdateTipBar';
 
 const logGetUserDapp = async () => {
   const lastLogTime = localStorage.getItem('matomo_last_log_time') || 0;
@@ -160,6 +161,11 @@ const router = createRouter([
         path: 'home',
         loader: () => {
           return {
+            title: (
+              <UpdateTipBar className="h-[40px] w-[216px] py-[12px] font-medium" />
+            ),
+            pageTitleClassName: 'self-start pl-[26px]',
+            floatingAccountComponent: false,
             routeCSSKeyword: 'home_assets',
           } as MainWindowRouteData;
         },
@@ -171,7 +177,20 @@ const router = createRouter([
       },
       {
         path: 'home/bundle',
-        element: <HomeBundle />,
+        loader: () => {
+          return {
+            title: (
+              <UpdateTipBar className="h-[40px] w-[216px] py-[12px] font-medium" />
+            ),
+            pageTitleClassName: 'self-start pl-[26px]',
+            floatingAccountComponent: false,
+          };
+        },
+        element: (
+          <KeepAlive cacheKey="MainwinHomeBundle">
+            <HomeBundle />
+          </KeepAlive>
+        ),
       },
       {
         path: 'home/send-token',

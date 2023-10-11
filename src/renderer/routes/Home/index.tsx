@@ -44,9 +44,10 @@ import { useFetchSummary } from './components/Summary/hook';
 import { TokenSearchInput } from './components/TokenSearchInput';
 
 const HomeBody = styled.div`
+  /* padding-top: var(--mainwin-mainroute-topoffset); */
   padding-left: 28px;
   padding-right: 28px;
-  height: calc(100vh - 118px - var(--mainwin-mainroute-topoffset));
+  height: calc(100vh - 138px - var(--mainwin-mainroute-topoffset));
 `;
 
 const Container = styled.div`
