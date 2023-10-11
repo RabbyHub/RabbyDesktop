@@ -22,7 +22,7 @@ async function __rbCheckRequestable(reqData: any) {
   }
 }
 
-export async function setupDappZoomEvents() {
+async function setupDappZoomEvents() {
   const checkResult = await ipcRendererObj.invoke(
     '__outer_rpc:mainwindow:is-dapp-view'
   );
@@ -42,6 +42,38 @@ export async function setupDappZoomEvents() {
   });
 }
 
+function nativeMountRequestable({
+  isDomtContentLoaded = false,
+}: {
+  isDomtContentLoaded?: boolean;
+} = {}) {
+  if (typeof (window as any).__rbCheckRequestable === 'function') return;
+
+  let origMethod = __rbCheckRequestable;
+
+  try {
+    contextBridge.exposeInMainWorld(
+      '__rbCheckRequestable',
+      __rbCheckRequestable
+    );
+
+    origMethod =
+      typeof (window as any).__rbCheckRequestable === 'function'
+        ? (window as any).__rbCheckRequestable
+        : __rbCheckRequestable;
+  } catch (e) {
+    if (isDomtContentLoaded) {
+      Object.defineProperty(window, '__rbCheckRequestable', {
+        value: __rbCheckRequestable,
+        writable: false,
+        configurable: false,
+      });
+    }
+  }
+
+  return origMethod;
+}
+
 export async function setupDapp() {
   const checkResult = await ipcRendererObj.invoke(
     '__outer_rpc:mainwindow:is-dapp-view'
@@ -50,26 +82,15 @@ export async function setupDapp() {
     return;
   }
 
+  nativeMountRequestable();
   document.addEventListener('DOMContentLoaded', () => {
-    try {
-      contextBridge.exposeInMainWorld(
-        '__rbCheckRequestable',
-        __rbCheckRequestable
-      );
-    } catch (e) {
-      Object.defineProperty(window, '__rbCheckRequestable', {
-        value: __rbCheckRequestable,
-        writable: false,
-        configurable: false,
-      });
-    }
-    const orig = (window as any).__rbCheckRequestable;
+    const orig = nativeMountRequestable({ isDomtContentLoaded: true });
 
-    const decriptor = Object.getOwnPropertyDescriptor(
+    const descriptor = Object.getOwnPropertyDescriptor(
       window,
       '__rbCheckRequestable'
     );
-    if (!decriptor?.writable) return;
+    if (descriptor && !descriptor.writable) return;
 
     Object.defineProperty(window, '__rbCheckRequestable', {
       value: orig,
