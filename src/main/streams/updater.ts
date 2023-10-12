@@ -27,6 +27,7 @@ import {
   getAppRuntimeProxyConf,
   onMainWindowReady,
 } from '../utils/stream-helpers';
+import { checkShouldAlertUpgrade } from '../updater/force_update';
 
 const log = getBindLog('updater', 'bgGrey');
 
@@ -119,11 +120,13 @@ onIpcMainEvent('check-if-new-release', async (event, reqid) => {
       ...(info
         ? {
             hasNewRelease: true,
+            needAlertUpgrade: checkShouldAlertUpgrade().needAlertUpgrade,
             releaseVersion: info.version,
             releaseNote: await getReleaseNote(info.version),
           }
         : {
             hasNewRelease: false,
+            needAlertUpgrade: checkShouldAlertUpgrade().needAlertUpgrade,
             releaseVersion: null,
             releaseNote: null,
           }),
@@ -133,6 +136,7 @@ onIpcMainEvent('check-if-new-release', async (event, reqid) => {
     event.reply('check-if-new-release', {
       reqid,
       hasNewRelease: false,
+      needAlertUpgrade: checkShouldAlertUpgrade().needAlertUpgrade,
       releaseVersion: null,
       releaseNote: null,
     });

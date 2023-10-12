@@ -16,11 +16,11 @@ export default function UpdateTipBar({
 }: React.PropsWithoutRef<{
   className?: string;
 }>) {
-  const { releaseCheckInfo } = useCheckNewRelease();
+  const { shouldAlertUpgrade } = useCheckNewRelease();
 
   const { setIsShowModalUpdateOnLock } = useShowModalUpdateOnLock();
 
-  if (!releaseCheckInfo.hasNewRelease) return null;
+  if (!shouldAlertUpgrade) return null;
 
   return (
     <>

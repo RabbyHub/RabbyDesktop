@@ -502,6 +502,12 @@ type ChannelInvokePayload = {
     // eslint-disable-next-line @typescript-eslint/ban-types
     response: {};
   };
+  'check-need-alert-upgrade': {
+    send: [];
+    response: {
+      needAlertUpgrade: IAppUpdatorCheckResult['needAlertUpgrade'];
+    };
+  };
 } & RabbyxInvokePayload &
   RabbyDebugKitsInvokes;
 

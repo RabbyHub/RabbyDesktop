@@ -50,6 +50,7 @@ import Home from '@/renderer/routes/Home';
 import { Swap } from '@/renderer/routes/Swap';
 import { MainWindowSettingsNonProductDebugKits } from '@/renderer/routes/Settings/NonProductDebug';
 import { getRendererAppChannel } from '@/isomorphic/env';
+import { useCheckNeedAlertUpgrade } from '@/renderer/hooks/useAppUpdator';
 import styles from './index.module.less';
 
 import MainWindowRoute from './MainRoute';
@@ -361,6 +362,8 @@ function useAccountsAndLockGuard() {
       fetchAccounts();
     }
   );
+
+  useCheckNeedAlertUpgrade({ isWindowTop: true });
 
   useEffect(() => {
     // NOTICE: events wouldn'd trigger on account deleted

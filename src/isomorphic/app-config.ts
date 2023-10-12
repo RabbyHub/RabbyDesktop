@@ -1,3 +1,4 @@
+import semver from 'semver';
 import { canoicalizeDappUrl, safeParseURL } from './url';
 
 export function matchURLHead(
@@ -62,4 +63,19 @@ export function matchURLHeadV2(
     result.urlConfByHostname || result.urlConfByMainDomain;
 
   return result;
+}
+
+export function checkNeedAlertUpgrade(
+  appVersion: string,
+  alertUpgradeToLatest: string[] = []
+) {
+  const needAlertUpgrade = !!alertUpgradeToLatest.some((x) =>
+    semver.satisfies(appVersion, x)
+  );
+
+  return {
+    appVersion,
+    needAlertUpgrade,
+    alertUpgradeToLatest,
+  };
 }
