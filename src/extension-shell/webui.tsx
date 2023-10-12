@@ -26,14 +26,17 @@ switch (shellUIType) {
     container.id = 'root';
     document.body.appendChild(container);
     /**
-     * @description when use react-activation, we should use ReactDOM.render instead of createRoot
-     * and NEVER put them under React.StrictMode
+     * @description when use react-activation at react >= 18.0, if we use react-freeze,
+     * we should use ReactDOM.render instead of createRoot and NEVER put them under React.StrictMode
+     *
+     * @see https://github.com/CJY0208/react-activation/issues/225#issuecomment-1311136388
+     * @see https://github.com/CJY0208/react-activation/issues/225#issuecomment-1318044161
      */
-    ReactDOM.render(
+    const root = createRoot(container);
+    root.render(
       <AliveScope>
         <MainWindow />
-      </AliveScope>,
-      container
+      </AliveScope>
     );
     break;
   }

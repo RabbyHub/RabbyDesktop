@@ -162,15 +162,11 @@ export const MainContainer: React.FC = () => {
     onSuccess: () => {},
   });
 
-  const doFetchAcounts = React.useCallback(() => {
-    getHighlightedAddressesAsync().then(getAllAccountsToDisplay);
-  }, [getHighlightedAddressesAsync, getAllAccountsToDisplay]);
-
   React.useEffect(() => {
-    doFetchAcounts();
+    getHighlightedAddressesAsync().then(getAllAccountsToDisplay);
     // avoid duplicated call
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [doFetchAcounts]);
+  }, []);
 
   useRefreshAccountsOnContactBookChanged(
     useCallback(
