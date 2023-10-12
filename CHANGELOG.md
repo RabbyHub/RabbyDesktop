@@ -1,7 +1,19 @@
 
-v0.35.1 / 2023-09-29
+v0.35.2 / 2023-10-12
 ====================
 
+  * fix: avoid some data loading issue due to `ReactDOM.render` (#573)
+  * feat: only alert upgrade on lock/home for specific versions (#572)
+  * fix: support dapp which calls `window.etherum.request` before dom content loaded. (#571)
+  * feat: try to improve perf usage on home/swap. (#555)
+  * bundle nickname (#568)
+  * feat: migrate twitter's logo. (#570)
+  * fix: pub changelog to production. (#569)
+
+v0.35.1-prod / 2023-09-29
+=========================
+
+  * Release v0.35.1-prod
   * feat: update currentVersion.
   * feat: remove useless popup to improve perf & memory usage. (#567)
   * feat: downgrade electron to v22 to avoid window manager issues on higher version. (#566)
