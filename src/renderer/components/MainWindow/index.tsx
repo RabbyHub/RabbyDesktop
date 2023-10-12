@@ -50,6 +50,7 @@ import Home from '@/renderer/routes/Home';
 import { Swap } from '@/renderer/routes/Swap';
 import { MainWindowSettingsNonProductDebugKits } from '@/renderer/routes/Settings/NonProductDebug';
 import { getRendererAppChannel } from '@/isomorphic/env';
+import { useCheckNeedAlertUpgrade } from '@/renderer/hooks/useAppUpdator';
 import styles from './index.module.less';
 
 import MainWindowRoute from './MainRoute';
@@ -61,6 +62,7 @@ import { DappViewWrapper } from '../DappView';
 import { FixedBackHeader } from '../FixedBackHeader';
 import { ShellWalletProvider } from '../ShellWallet';
 import TipUnsupportedModal from '../TipUnsupportedModal';
+import UpdateTipBar from '../UpdateTipBar';
 
 const logGetUserDapp = async () => {
   const lastLogTime = localStorage.getItem('matomo_last_log_time') || 0;
@@ -160,6 +162,9 @@ const router = createRouter([
         path: 'home',
         loader: () => {
           return {
+            title: <UpdateTipBar className="h-[40px] py-[12px] font-medium" />,
+            pageTitleClassName: 'self-start pl-[26px]',
+            floatingAccountComponent: false,
             routeCSSKeyword: 'home_assets',
           } as MainWindowRouteData;
         },
@@ -171,7 +176,18 @@ const router = createRouter([
       },
       {
         path: 'home/bundle',
-        element: <HomeBundle />,
+        loader: () => {
+          return {
+            title: <UpdateTipBar className="h-[40px] py-[12px] font-medium" />,
+            pageTitleClassName: 'self-start pl-[26px]',
+            floatingAccountComponent: false,
+          };
+        },
+        element: (
+          <KeepAlive cacheKey="MainwinHomeBundle">
+            <HomeBundle />
+          </KeepAlive>
+        ),
       },
       {
         path: 'home/send-token',
@@ -342,6 +358,8 @@ function useAccountsAndLockGuard() {
       fetchAccounts();
     }
   );
+
+  useCheckNeedAlertUpgrade({ isWindowTop: true });
 
   useEffect(() => {
     // NOTICE: events wouldn'd trigger on account deleted

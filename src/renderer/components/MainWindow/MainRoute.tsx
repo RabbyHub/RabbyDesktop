@@ -73,11 +73,18 @@ export default function MainWindowRoute({
             styles.headerBlock,
             matchedData?.floatingAccountComponent &&
               styles.floatingAccountComponent,
-            'page-header-block'
+            'page-header-block',
+            matchedData?.headerBlockClassName
           )}
           onDoubleClick={onDarwinToggleMaxmize}
         >
-          <div className={classNames(styles.pageTitle, 'page-title')}>
+          <div
+            className={classNames(
+              styles.pageTitle,
+              matchedData?.pageTitleClassName,
+              'page-title'
+            )}
+          >
             {matchedData?.backable ? (
               <img
                 src="rabby-internal://assets/icons/common/back.svg"

@@ -9,6 +9,9 @@ export type MainWindowRouteData =
 
       routeCSSKeyword?: string;
 
+      headerBlockClassName?: string;
+      pageTitleClassName?: string;
+
       backable?: boolean;
     }
   | undefined;

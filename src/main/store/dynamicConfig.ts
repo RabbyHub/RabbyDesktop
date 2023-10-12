@@ -1,7 +1,9 @@
 /// <reference path="../../isomorphic/types.d.ts" />
 
+import { app } from 'electron';
 import { arraify } from '@/isomorphic/array';
 import { canoicalizeDappUrl } from '@/isomorphic/url';
+import { checkNeedAlertUpgrade } from '@/isomorphic/app-config';
 import {
   IS_RUNTIME_PRODUCTION,
   PERSIS_STORE_PREFIX,
@@ -15,6 +17,7 @@ import {
 import { handleIpcMainInvoke } from '../utils/ipcMainEvents';
 import { cLog } from '../utils/log';
 import { getOptionProxyForAxios } from './desktopApp';
+import { pushEventToMainWindowContents } from '../utils/tabbedBrowserWindow';
 
 const SchemaDomainMetas: import('json-schema-typed').JSONSchema = {
   type: 'object',
@@ -59,6 +62,13 @@ export const dynamicConfigStore = makeStore<IAppDynamicConfig>({
           type: 'array',
           items: { type: 'string' },
         },
+        /**
+         * @description match with semver rules
+         */
+        alert_upgrade_to_latest: {
+          type: 'array',
+          items: { type: 'string' },
+        },
       },
       default: {},
     },
@@ -74,44 +84,55 @@ export const dynamicConfigStore = makeStore<IAppDynamicConfig>({
 });
 
 const INTERVAL_SEC = IS_RUNTIME_PRODUCTION ? 5 * 60 : 60;
-function scheduleFetch() {
-  const fetchData = () => {
-    fetchDynamicConfig({ proxy: getOptionProxyForAxios() }).then(
-      ({
-        domain_metas,
-        blockchain_explorers,
-        special_main_domains,
-        app_update,
-      }) => {
-        cLog('[scheduleFetch] DynamicConfig will be updated');
-        // leave here for debug
-        if (!IS_RUNTIME_PRODUCTION) {
-          // console.debug('[scheduleFetch] domain_metas', domain_metas)
-        }
-
-        dynamicConfigStore.set('domain_metas', {
-          ...dynamicConfigStore.get('domain_metas'),
-          ...domain_metas, // shallow merge to avoid bad data from remote
-        });
-        dynamicConfigStore.set('blockchain_explorers', [
-          ...new Set(blockchain_explorers),
-        ]);
-        dynamicConfigStore.set('special_main_domains', {
-          ...dynamicConfigStore.get('special_main_domains'),
-          ...special_main_domains,
-        });
-        dynamicConfigStore.set('app_update', {
-          ...dynamicConfigStore.get('app_update'),
-          ...app_update,
-        });
+async function doFetchDynamicConfig() {
+  cLog('[doFetchDynamicConfig] start fetch DynamicConfig...');
+  return fetchDynamicConfig({ proxy: getOptionProxyForAxios() }).then(
+    ({
+      domain_metas,
+      blockchain_explorers,
+      special_main_domains,
+      app_update,
+    }) => {
+      // leave here for debug
+      if (!IS_RUNTIME_PRODUCTION) {
+        // console.debug('[scheduleFetch] domain_metas', domain_metas)
       }
-    );
-  };
-  fetchData();
-  setInterval(fetchData, INTERVAL_SEC * 1e3);
+
+      dynamicConfigStore.set('domain_metas', {
+        ...dynamicConfigStore.get('domain_metas'),
+        ...domain_metas, // shallow merge to avoid bad data from remote
+      });
+      dynamicConfigStore.set('blockchain_explorers', [
+        ...new Set(blockchain_explorers),
+      ]);
+      dynamicConfigStore.set('special_main_domains', {
+        ...dynamicConfigStore.get('special_main_domains'),
+        ...special_main_domains,
+      });
+      dynamicConfigStore.set('app_update', {
+        ...dynamicConfigStore.get('app_update'),
+        ...app_update,
+      });
+
+      return {
+        domain_metas: dynamicConfigStore.get('domain_metas'),
+        blockchain_explorers: dynamicConfigStore.get('blockchain_explorers'),
+        special_main_domains: dynamicConfigStore.get('special_main_domains'),
+        app_update: dynamicConfigStore.get('app_update'),
+      };
+    }
+  );
 }
 
-scheduleFetch();
+// scheduleFetch
+// eslint-disable-next-line no-lone-blocks
+{
+  doFetchDynamicConfig();
+  setInterval(async () => {
+    await doFetchDynamicConfig();
+    cLog('[scheduleFetch] DynamicConfig will be updated');
+  }, INTERVAL_SEC * 1e3);
+}
 
 handleIpcMainInvoke('get-app-dynamic-config', () => {
   return {
@@ -119,6 +140,17 @@ handleIpcMainInvoke('get-app-dynamic-config', () => {
       domain_metas: dynamicConfigStore.get('domain_metas'),
       special_main_domains: dynamicConfigStore.get('special_main_domains'),
     },
+  };
+});
+
+handleIpcMainInvoke('check-need-alert-upgrade', async () => {
+  const { app_update } = await doFetchDynamicConfig();
+
+  return {
+    needAlertUpgrade: checkNeedAlertUpgrade(
+      app.getVersion(),
+      app_update?.alert_upgrade_to_latest || []
+    ).needAlertUpgrade,
   };
 });
 
