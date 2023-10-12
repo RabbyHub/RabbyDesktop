@@ -436,11 +436,11 @@ type ChannelInvokePayload = {
   };
   'restore-darwin-mainwin-bounds': {
     send: [rect?: Partial<Electron.Rectangle>];
-    response: { foo?: any };
+    response: void;
   };
   'memoize-darwin-mainwindow-screen-info': {
     send: [];
-    response: { foo?: any };
+    response: void;
   };
   'get-darwin-mainwindow-screen-info': {
     send: [];
