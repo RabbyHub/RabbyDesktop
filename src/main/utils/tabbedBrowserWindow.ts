@@ -13,6 +13,7 @@ import {
   getAllMainUIViews,
   getElectronChromeExtensions,
   getWebuiExtension,
+  onMainWindowReady,
 } from './stream-helpers';
 import { getWindowFromWebContents } from './browser';
 
@@ -221,6 +222,15 @@ function getAllRabbyXWindowWebContentsList() {
   });
 
   return webContentsList;
+}
+
+type OmitFirstArgs<T> = T extends [any, ...infer REST] ? REST : never;
+export async function pushEventToMainWindowContents(
+  ...args: OmitFirstArgs<Parameters<typeof sendToWebContents>>
+) {
+  const mainTabbedWin = await onMainWindowReady();
+
+  sendToWebContents(mainTabbedWin.window.webContents, ...args);
 }
 
 export async function pushEventToAllUIsCareAboutHidDevices(
