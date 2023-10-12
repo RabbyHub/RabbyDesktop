@@ -172,6 +172,11 @@ const router = createRouter([
       {
         path: 'home/bundle',
         element: <HomeBundle />,
+        // element: (
+        //   <KeepAlive cacheKey="MainwinHomeBundle">
+        //     <HomeBundle />
+        //   </KeepAlive>
+        // ),
       },
       {
         path: 'home/send-token',
