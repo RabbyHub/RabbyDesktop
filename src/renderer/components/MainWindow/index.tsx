@@ -162,9 +162,7 @@ const router = createRouter([
         path: 'home',
         loader: () => {
           return {
-            title: (
-              <UpdateTipBar className="h-[40px] w-[216px] py-[12px] font-medium" />
-            ),
+            title: <UpdateTipBar className="h-[40px] py-[12px] font-medium" />,
             pageTitleClassName: 'self-start pl-[26px]',
             floatingAccountComponent: false,
             routeCSSKeyword: 'home_assets',
@@ -180,9 +178,7 @@ const router = createRouter([
         path: 'home/bundle',
         loader: () => {
           return {
-            title: (
-              <UpdateTipBar className="h-[40px] w-[216px] py-[12px] font-medium" />
-            ),
+            title: <UpdateTipBar className="h-[40px] py-[12px] font-medium" />,
             pageTitleClassName: 'self-start pl-[26px]',
             floatingAccountComponent: false,
           };

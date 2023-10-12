@@ -126,7 +126,7 @@ export const Unlock: React.FC = () => {
           >
             Forgot Password
           </div>
-          <UpdateTipBar className="w-[216px] mx-auto" />
+          <UpdateTipBar className="mx-auto" />
         </Form>
       </div>
 
