@@ -4,6 +4,7 @@ import { sortAccountsByBalance } from '@/renderer/utils/account';
 import { atom, useAtom } from 'jotai';
 import PQueue from 'p-queue';
 import React from 'react';
+import { onBackgroundStoreChanged } from '@/renderer/utils/broadcastToUI';
 import { useMessageForwarded } from '../useViewsMessage';
 
 type IDisplayedAccount = Required<DisplayedKeyring['accounts'][number]>;
@@ -176,3 +177,26 @@ export const useAccountToDisplay = () => {
     updateAllBalance,
   };
 };
+
+type ChangedListener = Parameters<
+  typeof onBackgroundStoreChanged<'contactBook'>
+>[1];
+export type MatcherFunc = (ctx: Parameters<ChangedListener>[0]) => boolean;
+export function useRefreshAccountsOnContactBookChanged(
+  matchAddress?: string | MatcherFunc,
+  refresher?: () => void
+) {
+  React.useEffect(() => {
+    if (!matchAddress) return;
+
+    return onBackgroundStoreChanged('contactBook', (ctx) => {
+      const matched =
+        typeof matchAddress === 'function'
+          ? !!matchAddress(ctx)
+          : matchAddress === ctx.changedKey;
+      if (matched) {
+        refresher?.();
+      }
+    });
+  }, [matchAddress, refresher]);
+}

@@ -1,3 +1,5 @@
 #### New Features:
 
-- Supported 4 testnet, including Moonbase Alpha Testnet, KCC Testnet, IoTeX Testnet, Pulse V4 Testnet
+- Optimized memory usage.
+- Fixed address notes not updating in the Bundle.
+- Resolved issues with opening certain Dapps.

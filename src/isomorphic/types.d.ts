@@ -185,6 +185,7 @@ type IAppDynamicConfig = {
   };
   app_update?: {
     force_update?: string[];
+    alert_upgrade_to_latest?: string[];
   };
 };
 
@@ -233,7 +234,9 @@ type IDappsDetectResult<T extends string = string> = {
   };
 };
 
-type IAppUpdatorCheckResult =
+type IAppUpdatorCheckResult = {
+  needAlertUpgrade: boolean;
+} & (
   | {
       hasNewRelease: true;
       releaseVersion: string;
@@ -243,7 +246,8 @@ type IAppUpdatorCheckResult =
       hasNewRelease: false;
       releaseVersion: null;
       releaseNote: null;
-    };
+    }
+);
 
 type IAppUpdatorProcessStep = 'wait' | 'process' | 'finish' | 'error';
 type IAppUpdatorDownloadProgress =

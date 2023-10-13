@@ -8,7 +8,7 @@ import {
   WALLET_BRAND_CONTENT,
   WALLET_BRAND_TYPES,
 } from '@/renderer/utils/constant';
-import { splitNumberByStep } from '@/renderer/utils/number';
+import { coerceInteger, splitNumberByStep } from '@/renderer/utils/number';
 import { Skeleton, Tooltip } from 'antd';
 import clsx from 'clsx';
 import React from 'react';
@@ -76,8 +76,10 @@ export const CurrentAccount: React.FC<Props> = ({
         <div className={styles.content}>
           <div className={clsx(styles.part, styles.partName)}>
             <div className={styles.name}>{account.alianName}</div>
-            {accountInfo && (
-              <div className={styles.index}>#{accountInfo.index}</div>
+            {accountInfo && !!coerceInteger(accountInfo.index) && (
+              <div className={styles.index}>
+                #{coerceInteger(accountInfo.index)}
+              </div>
             )}
             {isInWhitelist && (
               <Tooltip

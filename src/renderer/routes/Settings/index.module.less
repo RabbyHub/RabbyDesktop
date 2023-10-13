@@ -182,3 +182,13 @@
     }
   }
 }
+
+.ImageAsLinkWithHover {
+  .hoverIcon, &:hover .normalIcon {
+    display: none;
+  }
+
+  .normalIcon, &:hover .hoverIcon {
+    display: inline-block;
+  }
+}

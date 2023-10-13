@@ -1,14 +1,16 @@
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import {
   IDisplayedAccountWithBalance,
+  MatcherFunc,
   useAccountToDisplay,
+  useRefreshAccountsOnContactBookChanged,
 } from '@/renderer/hooks/rabbyx/useAccountToDisplay';
 import { useAddressManagement } from '@/renderer/hooks/rabbyx/useAddressManagement';
 import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
 import { sortAccountsByBalance } from '@/renderer/utils/account';
 import { KEYRING_CLASS } from '@/renderer/utils/constant';
 import { groupBy } from 'lodash';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { useRequest } from 'ahooks';
@@ -165,6 +167,18 @@ export const MainContainer: React.FC = () => {
     // avoid duplicated call
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useRefreshAccountsOnContactBookChanged(
+    useCallback(
+      ({ partials }) =>
+        !!accountList.find((account) =>
+          // eslint-disable-next-line no-prototype-builtins
+          partials.hasOwnProperty(account.address)
+        ),
+      [accountList]
+    ) as MatcherFunc,
+    getAllAccountsToDisplay
+  );
 
   React.useEffect(() => {
     whitelistInit();

@@ -1,6 +1,9 @@
 import '@/renderer/css/theme/index.css';
 
+import ReactDOM from 'react-dom';
+
 import { createRoot } from 'react-dom/client';
+import { AliveScope } from 'react-activation';
 
 import './webui.less';
 import '@/renderer/css/windicss';
@@ -23,8 +26,19 @@ switch (shellUIType) {
     const container = document.createElement('div');
     container.id = 'root';
     document.body.appendChild(container);
+    /**
+     * @description when use react-activation at react >= 18.0, if we use react-freeze,
+     * we should use ReactDOM.render instead of createRoot and NEVER put them under React.StrictMode
+     *
+     * @see https://github.com/CJY0208/react-activation/issues/225#issuecomment-1311136388
+     * @see https://github.com/CJY0208/react-activation/issues/225#issuecomment-1318044161
+     */
     const root = createRoot(container);
-    root.render(<MainWindow />);
+    root.render(
+      <AliveScope>
+        <MainWindow />
+      </AliveScope>
+    );
     break;
   }
   case 'Prompt': {

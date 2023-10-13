@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import classNames from 'classnames';
 import { openExternalUrl } from '@/renderer/ipcRequest/app';
 
@@ -163,6 +163,7 @@ export function ImageAsLink({
   className,
   altName,
   iconURL,
+  hoverIconURL,
   link,
   disableTooltip = false,
   tooltipProps,
@@ -170,10 +171,15 @@ export function ImageAsLink({
   className?: string;
   altName?: string;
   iconURL?: string;
+  hoverIconURL?: string;
   link: string;
   disableTooltip?: boolean;
   tooltipProps?: React.ComponentProps<typeof Tooltip>;
 }>) {
+  const onClickImg = useCallback(() => {
+    openExternalUrl(link);
+  }, [link]);
+
   return (
     <Tooltip
       placement="top"
@@ -183,15 +189,26 @@ export function ImageAsLink({
         visible: false,
       })}
       title={link}
+      className={classNames(hoverIconURL && styles.ImageAsLinkWithHover)}
     >
       <img
         alt={altName}
         src={iconURL}
-        className={classNames(styles.imageAsLink, className)}
-        onClick={() => {
-          openExternalUrl(link);
-        }}
+        className={classNames(styles.imageAsLink, styles.normalIcon, className)}
+        onClick={onClickImg}
       />
+      {hoverIconURL && (
+        <img
+          alt={altName}
+          src={hoverIconURL}
+          className={classNames(
+            styles.imageAsLink,
+            styles.hoverIcon,
+            className
+          )}
+          onClick={onClickImg}
+        />
+      )}
     </Tooltip>
   );
 }

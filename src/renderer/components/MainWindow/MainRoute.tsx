@@ -1,10 +1,9 @@
 import React, { useEffect, useMemo } from 'react';
 import { useLocation, useMatches, useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
-import Home from '@/renderer/routes/Home';
+
 import { ensurePrefix } from '@/isomorphic/string';
 import { useWindowState } from '@/renderer/hooks-shell/useWindowState';
-import { Swap } from '@/renderer/routes/Swap';
 import { CurrentAccountAndNewAccount } from '../CurrentAccount';
 import { MainWindowRouteData } from './type';
 
@@ -68,15 +67,9 @@ export default function MainWindowRoute({
   const navigate = useNavigate();
   const { onDarwinToggleMaxmize } = useWindowState();
 
-  const { isKeepAliveRoute, isDappRoute } = useMemo(() => {
-    const isKeepAlive = ['/mainwin/home', '/mainwin/swap'].includes(
-      location.pathname
-    );
-    const isDapp = location.pathname.startsWith('/mainwin/dapps/');
-
+  const { isDappRoute } = useMemo(() => {
     return {
-      isKeepAliveRoute: isKeepAlive || isDapp,
-      isDappRoute: isDapp,
+      isDappRoute: location.pathname.startsWith('/mainwin/dapps/'),
     };
   }, [location.pathname]);
 
@@ -88,11 +81,18 @@ export default function MainWindowRoute({
             styles.headerBlock,
             matchedData?.floatingAccountComponent &&
               styles.floatingAccountComponent,
-            'page-header-block'
+            'page-header-block',
+            matchedData?.headerBlockClassName
           )}
           onDoubleClick={onDarwinToggleMaxmize}
         >
-          <div className={classNames(styles.pageTitle, 'page-title')}>
+          <div
+            className={classNames(
+              styles.pageTitle,
+              matchedData?.pageTitleClassName,
+              'page-title'
+            )}
+          >
             {matchedData?.backable ? (
               <img
                 src="rabby-internal://assets/icons/common/back.svg"
@@ -110,27 +110,12 @@ export default function MainWindowRoute({
           </div>
         </div>
       )}
-      <div
-        style={{
-          display: location.pathname === '/mainwin/home' ? 'block' : 'none',
-        }}
-      >
-        <Home />
-      </div>
-      <div
-        style={{
-          display: location.pathname === '/mainwin/swap' ? 'block' : 'none',
-        }}
-      >
-        <Swap />
-      </div>
       <div style={{ display: isDappRoute ? 'block' : 'none' }}>
         <DappViewWrapper>
           <TopNavBar />
         </DappViewWrapper>
       </div>
-
-      {!isKeepAliveRoute && children}
+      {children}
     </div>
   );
 }

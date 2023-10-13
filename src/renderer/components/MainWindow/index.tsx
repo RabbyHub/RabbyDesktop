@@ -6,6 +6,8 @@ import {
   Navigate,
 } from 'react-router-dom';
 
+import KeepAlive from 'react-activation';
+
 import DApps from '@/renderer/routes/Dapps';
 import GettingStarted from '@/renderer/routes/Welcome/GettingStarted';
 import MainWindowLoading from '@/renderer/routes/MainWindowLoading';
@@ -44,8 +46,11 @@ import ApprovalManagePage from '@/renderer/routes/ApprovalManagePage';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { MainWindowSettingsDeveloperKits } from '@/renderer/routes/Settings/Developer';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import Home from '@/renderer/routes/Home';
+import { Swap } from '@/renderer/routes/Swap';
 import { MainWindowSettingsNonProductDebugKits } from '@/renderer/routes/Settings/NonProductDebug';
 import { getRendererAppChannel } from '@/isomorphic/env';
+import { useCheckNeedAlertUpgrade } from '@/renderer/hooks/useAppUpdator';
 import styles from './index.module.less';
 
 import MainWindowRoute from './MainRoute';
@@ -57,6 +62,7 @@ import { DappViewWrapper } from '../DappView';
 import { FixedBackHeader } from '../FixedBackHeader';
 import { ShellWalletProvider } from '../ShellWallet';
 import TipUnsupportedModal from '../TipUnsupportedModal';
+import UpdateTipBar from '../UpdateTipBar';
 
 const logGetUserDapp = async () => {
   const lastLogTime = localStorage.getItem('matomo_last_log_time') || 0;
@@ -156,14 +162,32 @@ const router = createRouter([
         path: 'home',
         loader: () => {
           return {
+            title: <UpdateTipBar className="h-[40px] py-[12px] font-medium" />,
+            pageTitleClassName: 'self-start pl-[26px]',
+            floatingAccountComponent: false,
             routeCSSKeyword: 'home_assets',
           } as MainWindowRouteData;
         },
-        element: null, // delegate to MainRoute
+        element: (
+          <KeepAlive cacheKey="MainwinHome">
+            <Home />
+          </KeepAlive>
+        ),
       },
       {
         path: 'home/bundle',
-        element: <HomeBundle />,
+        loader: () => {
+          return {
+            title: <UpdateTipBar className="h-[40px] py-[12px] font-medium" />,
+            pageTitleClassName: 'self-start pl-[26px]',
+            floatingAccountComponent: false,
+          };
+        },
+        element: (
+          <KeepAlive cacheKey="MainwinHomeBundle">
+            <HomeBundle />
+          </KeepAlive>
+        ),
       },
       {
         path: 'home/send-token',
@@ -212,7 +236,11 @@ const router = createRouter([
       },
       {
         path: 'swap',
-        element: null, // delegate to MainRoute
+        element: (
+          <KeepAlive cacheKey="MainwinSwap">
+            <Swap />
+          </KeepAlive>
+        ),
       },
       {
         path: 'approvals',
@@ -326,6 +354,8 @@ function useAccountsAndLockGuard() {
       fetchAccounts();
     }
   );
+
+  useCheckNeedAlertUpgrade({ isWindowTop: true });
 
   useEffect(() => {
     // NOTICE: events wouldn'd trigger on account deleted

@@ -1,5 +1,7 @@
-import { arraify } from '@/isomorphic/array';
 import { app, dialog } from 'electron';
+
+import { arraify } from '@/isomorphic/array';
+import { checkNeedAlertUpgrade } from '@/isomorphic/app-config';
 import { dynamicConfigStore } from '../store/dynamicConfig';
 import { onMainWindowReady } from '../utils/stream-helpers';
 import { safeOpenExternalURL } from '../utils/security';
@@ -27,6 +29,16 @@ async function alertForceUpdate() {
   }
 
   app.quit();
+}
+
+export function checkShouldAlertUpgrade() {
+  const app_update = dynamicConfigStore.get('app_update');
+
+  const alertUpgradeToLatest = app_update?.alert_upgrade_to_latest || [];
+
+  const appVersion = app.getVersion();
+
+  return checkNeedAlertUpgrade(appVersion, alertUpgradeToLatest);
 }
 
 /**

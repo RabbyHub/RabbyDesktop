@@ -82,10 +82,12 @@ async function startDownload({
   });
 }
 
-const releaseCheckInfoAtom = atom({
+const releaseCheckInfoAtom = atom<IAppUpdatorCheckResult>({
   hasNewRelease: false,
+  needAlertUpgrade: false,
   releaseVersion: null,
-} as IAppUpdatorCheckResult);
+  releaseNote: null,
+});
 const downloadInfoAtom = atom(null as null | IAppUpdatorDownloadProgress);
 
 const checkConnectionAtom = atom<IAppUpdatorProcessStep>('wait');
@@ -138,6 +140,34 @@ export function useCurrentVersionReleaseNote() {
   };
 }
 
+export function useCheckNeedAlertUpgrade(opts?: { isWindowTop?: boolean }) {
+  const { isWindowTop } = opts || {};
+  const [, setReleaseCheckInfo] = useAtom(releaseCheckInfoAtom);
+
+  const fetch = useCallback(() => {
+    window.rabbyDesktop.ipcRenderer
+      .invoke('check-need-alert-upgrade')
+      .then((res) => {
+        setReleaseCheckInfo((prev) => {
+          return {
+            ...prev,
+            needAlertUpgrade: res.needAlertUpgrade,
+          };
+        });
+      });
+  }, [setReleaseCheckInfo]);
+
+  useEffect(() => {
+    if (!isWindowTop) return;
+
+    const timer = setInterval(fetch, 1000 * 5);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [isWindowTop, fetch]);
+}
+
 export function useCheckNewRelease(opts?: { isWindowTop?: boolean }) {
   const { isWindowTop } = opts || {};
   const [releaseCheckInfo, setReleaseCheckInfo] = useAtom(releaseCheckInfoAtom);
@@ -160,9 +190,7 @@ export function useCheckNewRelease(opts?: { isWindowTop?: boolean }) {
 
   useEffect(() => {
     fetchLatestReleaseInfo();
-    if (!isWindowTop) {
-      return;
-    }
+    if (!isWindowTop) return;
 
     const timer = setInterval(() => {
       fetchLatestReleaseInfo();
@@ -175,6 +203,8 @@ export function useCheckNewRelease(opts?: { isWindowTop?: boolean }) {
 
   return {
     hasNewRelease: releaseCheckInfo.hasNewRelease,
+    shouldAlertUpgrade:
+      releaseCheckInfo.hasNewRelease && releaseCheckInfo.needAlertUpgrade,
     releaseCheckInfo,
     setReleaseCheckInfo,
     fetchLatestReleaseInfo,
