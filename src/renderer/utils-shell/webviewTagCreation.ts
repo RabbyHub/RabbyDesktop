@@ -6,7 +6,7 @@ import { queryTabWebviewTag } from '@/isomorphic/dom-helpers';
 
 // const webviewTagPools: Electron.WebviewTag[] = [];
 
-const listener = (event: CustomEvent<WebviewTagExchgMatches>) => {
+const listener = (event: CustomEvent<WebviewTagCreatedEventPayload>) => {
   const detail = event.detail;
   const webviewTag = queryTabWebviewTag(detail);
 
@@ -16,6 +16,11 @@ const listener = (event: CustomEvent<WebviewTagExchgMatches>) => {
     );
     return;
   }
+
+  if (detail.needClearHistory) {
+    webviewTag?.clearHistory();
+  }
+
   window.rabbyDesktop.ipcRenderer.invoke(
     '__internal_rpc:tabbed-window2:created-webview',
     {

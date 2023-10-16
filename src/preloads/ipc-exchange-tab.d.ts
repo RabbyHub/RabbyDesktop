@@ -6,6 +6,10 @@ type WebviewTagExchgMatches = {
   windowId: number;
 };
 
+type WebviewTagCreatedEventPayload = WebviewTagExchgMatches & {
+  needClearHistory: boolean;
+};
+
 type WebViewExChgData<T = any> = T extends void
   ? WebviewTagExchgMatches
   : WebviewTagExchgMatches & T;

@@ -59,22 +59,25 @@ export function setupWindowShell() {
       // init open blank page to fast trigger chrome.tabs.onUpdated
       // let openSrc = payload.additionalData.blankPage;
       let openSrc = 'about:blank';
+      let hasInitUrl = false;
       if (
         payload.tabMeta.webuiType !== 'MainWindow' &&
         payload.tabMeta.initDetails?.url
       ) {
         openSrc = payload.tabMeta.initDetails.url;
+        hasInitUrl = true;
       }
       // TODO: maybe sometimes we can open relatedDappId directly?
       webviewTag.setAttribute('src', openSrc);
 
       webviewTag.addEventListener('dom-ready', () => {
-        const cEvent = new CustomEvent<WebviewTagExchgMatches>(
+        const cEvent = new CustomEvent<WebviewTagCreatedEventPayload>(
           'webviewTagCreated',
           {
             detail: {
               tabUid: payload.tabUid,
               windowId: payload.windowId,
+              needClearHistory: !hasInitUrl,
             },
           }
         );
