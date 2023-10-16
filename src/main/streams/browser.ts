@@ -94,8 +94,9 @@ onIpcMainInternalEvent(
         // webContents.openDevTools({ mode: 'detach' });
       }
 
+      const wType = webContents.getType();
       // only trigger cache zoomFactor, it's no effect for opened webContents
-      if (webContents.getType() === 'browserView') {
+      if (['browserView', 'webview'].includes(wType)) {
         webContents.setZoomFactor(formatZoomValue(zoomPercent).zoomFactor);
       } else {
         webContents.setZoomFactor(1);

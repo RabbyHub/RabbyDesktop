@@ -443,18 +443,32 @@ onIpcMainInternalEvent(
   async (zoomPercent) => {
     const mainTabbedWin = await onMainWindowReady();
 
+    const tabWebviewUIDs = [] as string[];
+
     mainTabbedWin.tabs.tabList.forEach((tab) => {
       const webContents = tab.tabWebContents;
       if (!webContents) return;
 
-      sendToWebContents(
-        webContents,
-        '__internal_push:mainwindow:set-dapp-view-zoom',
-        {
-          zoomPercent: formatZoomValue(zoomPercent).zoomPercent,
-        }
-      );
+      tabWebviewUIDs.push(tab.tabUid);
+
+      // used for BrowserView based Tab solution
+      // sendToWebContents(
+      //   webContents,
+      //   '__internal_push:mainwindow:set-dapp-view-zoom',
+      //   {
+      //     zoomPercent: formatZoomValue(zoomPercent).zoomPercent,
+      //   }
+      // );
     });
+
+    sendToWebContents(
+      mainTabbedWin.window?.webContents,
+      '__internal_push:tabbed-window2:set-dapp-tabwebview-zoom',
+      {
+        zoomPercent: formatZoomValue(zoomPercent).zoomPercent,
+        tabWebviewUIDs,
+      }
+    );
   }
 );
 

@@ -13,9 +13,16 @@ export function getWebviewTagsPark() {
   return appWebviewTagsParkEl ?? globalWebviewTagsParkEl;
 }
 
-export function queryTabWebviewTag(matches: WebviewTagExchgMatches) {
+export function queryTabWebviewTag(
+  matches: Omit<WebviewTagExchgMatches, 'windowId'> & {
+    windowId?: number;
+  }
+) {
   return document.body.querySelector(
-    `webview[r-tab-uid="${matches.tabUid}"][r-for-windowid="${matches.windowId}"]`
+    [
+      `webview[r-tab-uid="${matches.tabUid}"]`,
+      !matches.windowId ? '' : `[r-for-windowid="${matches.windowId}"]`,
+    ].join('')
   ) as Electron.WebviewTag | null;
 }
 

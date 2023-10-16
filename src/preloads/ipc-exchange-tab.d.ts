@@ -39,6 +39,10 @@ type ChannelPushToWebContentsForWebviewTabs = {
   // '__internal_push:tabbed-window2:tab-updated': {
   //   windowId: number;
   // }[];
+  '__internal_push:tabbed-window2:set-dapp-tabwebview-zoom': {
+    zoomPercent: number;
+    tabWebviewUIDs: string[];
+  };
 };
 
 type ChannelInvokeForWebviewTabs = {

@@ -7,6 +7,7 @@ import {
   queryTabWebviewTag,
   toggleShowElement,
 } from '../isomorphic/dom-helpers';
+import { formatZoomValue } from '../isomorphic/primitive';
 
 /**
  * @description default tabs creation/update/remove solution for window shell
@@ -134,6 +135,18 @@ export function setupWindowShell() {
       } catch (error) {
         console.error(error);
       }
+    }
+  );
+
+  ipcRendererObj.on(
+    '__internal_push:tabbed-window2:set-dapp-tabwebview-zoom',
+    (payload) => {
+      const { zoomPercent, tabWebviewUIDs } = payload;
+      tabWebviewUIDs.forEach((tabUid) => {
+        const webviewTag = queryTabWebviewTag({ tabUid });
+
+        webviewTag?.setZoomFactor(formatZoomValue(zoomPercent).zoomFactor);
+      });
     }
   );
 }
