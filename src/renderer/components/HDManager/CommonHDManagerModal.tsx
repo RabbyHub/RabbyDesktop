@@ -14,12 +14,14 @@ import { TrezorManager } from './TrezorManager';
 import { Modal, Props as ModalProps } from '../Modal/Modal';
 import { useHDManagerConnecWindowOpen } from './useHDManager';
 import { QRCodeManager } from './QRCodeManager/QRCodeManager';
+import { GridPlusManager } from './GridPlusManager';
 
 const MANAGER_MAP = {
   [HARDWARE_KEYRING_TYPES.Ledger.type]: LedgerManager,
   [HARDWARE_KEYRING_TYPES.Trezor.type]: TrezorManager,
   [HARDWARE_KEYRING_TYPES.Onekey.type]: OneKeyManager,
   [HARDWARE_KEYRING_TYPES.Keystone.type]: QRCodeManager,
+  [HARDWARE_KEYRING_TYPES.GridPlus.type]: GridPlusManager,
 };
 
 const enum HD_CONN_STEP {
