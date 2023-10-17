@@ -72,23 +72,25 @@ type IStopResult = {
   stopped: boolean;
   nextFunc: (() => void) | undefined;
 };
-export function stopOpenTrezorLikeWindow(options: {
-  openType: IHardwareConnectPageType;
-}): IStopResult {
+export function stopOpenConnectHardwareWindow(
+  matches: IHardwareConnectPageMatches
+): IStopResult {
   const result: IStopResult = {
     stopped: false,
     nextFunc: undefined,
   };
 
-  const reasons = getTrezorLikeCannotUse(options.openType);
+  if (matches.isTrezorLike) {
+    const reasons = getTrezorLikeCannotUse(matches.type);
 
-  if (trezorLikeState.openedType) {
-    const reason = reasons[0];
-    if (reason) {
-      result.stopped = true;
-      result.nextFunc = () => {
-        alertCannotUseDueTo(reason);
-      };
+    if (trezorLikeState.openedType) {
+      const reason = reasons[0];
+      if (reason) {
+        result.stopped = true;
+        result.nextFunc = () => {
+          alertCannotUseDueTo(reason);
+        };
+      }
     }
   }
 
@@ -97,10 +99,10 @@ export function stopOpenTrezorLikeWindow(options: {
 
 export function asyncDestroyWindowIfCannotUseTrezorLike(options: {
   openType: IHardwareConnectPageType;
-  trezorLikeWindow: Electron.BrowserWindow;
+  hwConnectWindow: Electron.BrowserWindow;
   timeoutVal?: number;
 }) {
-  const connWindow = options.trezorLikeWindow;
+  const connWindow = options.hwConnectWindow;
   const timeoutVal = options.timeoutVal || 250;
 
   if (isEnableServeDappByHttp()) {
@@ -124,9 +126,7 @@ export function asyncDestroyWindowIfCannotUseTrezorLike(options: {
  */
 export async function createTrezorLikeConnectPageWindow(
   connectURL: string,
-  options: {
-    openType: IHardwareConnectPageType;
-  }
+  matches: IHardwareConnectPageMatches
 ) {
   const mainWindow = (await onMainWindowReady()).window;
 
@@ -159,12 +159,19 @@ export async function createTrezorLikeConnectPageWindow(
   });
 
   const zPopupWc = await getZPopupLayerWebContents();
+  const hdManagerType =
+    matches.type === 'gridplus'
+      ? 'GridPlus'
+      : matches.type === 'onekey'
+      ? 'Onekey'
+      : 'Trezor';
+
   forwardMessageToWebContents(zPopupWc, {
     targetView: 'z-popup',
     type: 'hardward-conn-window-opened-changed',
     payload: {
       opened: true,
-      type: options.openType === 'onekey' ? 'Onekey' : 'Trezor',
+      type: hdManagerType,
     },
   });
 
@@ -175,7 +182,7 @@ export async function createTrezorLikeConnectPageWindow(
     },
   });
 
-  trezorLikeState.openedType = options.openType;
+  trezorLikeState.openedType = matches.type;
 
   const connWindow = tabbedWin.window;
 
@@ -204,7 +211,7 @@ export async function createTrezorLikeConnectPageWindow(
       type: 'hardward-conn-window-opened-changed',
       payload: {
         opened: false,
-        type: options.openType === 'onekey' ? 'Onekey' : 'Trezor',
+        type: matches.type === 'onekey' ? 'Onekey' : 'Trezor',
       },
     });
   });
@@ -229,9 +236,11 @@ export async function createTrezorLikeConnectPageWindow(
     window: connWindow,
     tab,
     asyncDestroyWindowIfNeed: () => {
+      if (!matches.isTrezorLike) return;
+
       asyncDestroyWindowIfCannotUseTrezorLike({
-        trezorLikeWindow: connWindow,
-        openType: options.openType,
+        hwConnectWindow: connWindow,
+        openType: matches.type,
         timeoutVal: 250,
       });
     },

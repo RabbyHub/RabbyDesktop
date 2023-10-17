@@ -11,7 +11,10 @@ import {
 } from '../utils/ipcMainEvents';
 import { forwardToMainWebContents } from '../utils/stream-helpers';
 import { getWindowFromBrowserWindow } from './tabbedBrowserWindow';
-import { setListeners, setOpenHandlerForWebContents } from './webContents';
+import {
+  setListeners,
+  setOpenHandlerForTabbedWebContents,
+} from './webContents';
 import { desktopAppStore } from '../store/desktopApp';
 
 onIpcMainEvent(
@@ -48,7 +51,7 @@ onIpcMainInternalEvent(
     setListeners['will-redirect'](webContents);
     setListeners['will-navigate'](webContents, window);
 
-    setOpenHandlerForWebContents({
+    setOpenHandlerForTabbedWebContents({
       webContents,
       parentTabbedWin: tabbedWin,
     });

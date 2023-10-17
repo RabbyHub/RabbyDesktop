@@ -129,23 +129,32 @@ export function isExtensionBackground(url: string) {
   );
 }
 
-const TREZOR_LIKE_CONNECT = [
+const HARDWARE_CONNECT_BY_WEB: (IHardwareConnectPageMatches & {
+  urls: string[];
+})[] = [
   // onekey
   {
     type: 'onekey',
+    isTrezorLike: true,
     urls: ['https://connect.onekey.so/popup.html'],
   },
   {
     type: 'trezor',
+    isTrezorLike: true,
     urls: [
       'https://connect.trezor.io/8/popup.html',
       'https://connect.trezor.io/9/popup.html',
     ],
   },
-] as const;
+  {
+    type: 'gridplus',
+    isTrezorLike: false,
+    urls: ['https://lattice.gridplus.io'],
+  },
+];
 
 export function checkHardwareConnectPage(url: string) {
-  const connInfo = TREZOR_LIKE_CONNECT.find((info) =>
+  const connInfo = HARDWARE_CONNECT_BY_WEB.find((info) =>
     info.urls.some((u) => url.startsWith(u))
   );
 

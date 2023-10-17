@@ -41,7 +41,7 @@ import {
 } from '../store/desktopApp';
 import {
   createTrezorLikeConnectPageWindow,
-  stopOpenTrezorLikeWindow,
+  stopOpenConnectHardwareWindow,
 } from '../utils/hardwareConnect';
 import { getBlockchainExplorers } from '../store/dynamicConfig';
 import { appInterpretors, registerSessionProtocol } from '../utils/protocol';
@@ -306,9 +306,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
 
       switch (actionInfo.action) {
         case 'open-hardware-connect': {
-          const stopResult = stopOpenTrezorLikeWindow({
-            openType: actionInfo.type,
-          });
+          const stopResult = stopOpenConnectHardwareWindow(actionInfo);
 
           if (stopResult.stopped) {
             stopResult.nextFunc?.();
@@ -316,11 +314,12 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
           }
 
           const { window, tab, asyncDestroyWindowIfNeed } =
-            await createTrezorLikeConnectPageWindow(actionInfo.pageURL, {
-              openType: actionInfo.type,
-            });
+            await createTrezorLikeConnectPageWindow(
+              actionInfo.pageURL,
+              actionInfo
+            );
 
-          asyncDestroyWindowIfNeed();
+          asyncDestroyWindowIfNeed?.();
 
           return [tab.view!.webContents, window];
         }
