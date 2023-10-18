@@ -211,7 +211,7 @@ export async function createTrezorLikeConnectPageWindow(
       type: 'hardward-conn-window-opened-changed',
       payload: {
         opened: false,
-        type: matches.type === 'onekey' ? 'Onekey' : 'Trezor',
+        type: hdManagerType,
       },
     });
   });
