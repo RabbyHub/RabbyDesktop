@@ -38,7 +38,7 @@ export function openTabOfDapp(
  * - clicking on links or submitting forms adorned with target=_blank
  * - JavaScript calling window.open()
  */
-export function setOpenHandlerForWebContents({
+export function setOpenHandlerForTabbedWebContents({
   webContents,
   parentTabbedWin,
 }: {

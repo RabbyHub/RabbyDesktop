@@ -23,11 +23,10 @@ export function checkOpenAction(
       action: 'open-external';
       externalUrl: string;
     }
-  | {
+  | ({
       action: 'open-hardware-connect';
-      type: IHardwareConnectPageType;
       pageURL: string;
-    } {
+    } & IHardwareConnectPageMatches) {
   if (!isProtocolLeaveInApp(opts.toUrl)) {
     return {
       action: 'open-external',
@@ -49,8 +48,8 @@ export function checkOpenAction(
   if (isFromRabbyxBg && hardwareConnectInfo) {
     return {
       action: 'open-hardware-connect',
-      type: hardwareConnectInfo.type,
       pageURL: opts.toUrl,
+      ...hardwareConnectInfo,
     };
   }
 

@@ -353,7 +353,18 @@ type IRabbyxRpcResponse = {
   error?: Error;
 };
 
-type IHardwareConnectPageType = 'onekey' | 'trezor';
+type IHardwareConnectPageMatches =
+  | {
+      type: 'onekey' | 'trezor';
+      isTrezorLike: true;
+    }
+  | {
+      type: 'gridplus';
+      isTrezorLike: false;
+    };
+// type IHardwareConnectPageType = 'onekey' | 'trezor';
+type IHardwareConnectPageType = IHardwareConnectPageMatches['type'];
+
 type IPopupWinPageInfo =
   | {
       type: 'sidebar-dapp-contextmenu';
@@ -668,7 +679,7 @@ interface ETHAccount extends CommonBundleAccount {
 type BundleAccount = BTCAccount | BNAccount | ETHAccount | OkxAccount;
 
 // corresponding to the type in the HARDWARE_KEYRING_TYPES brandName
-type HDManagerType = ['Trezor', 'Ledger', 'Onekey'][number];
+type HDManagerType = ['Trezor', 'Onekey', 'Ledger', 'GridPlus'][number];
 
 type ISafeOpenDappTabOptions = {
   dontReloadOnSwitchToActiveTab?: boolean;
