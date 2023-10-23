@@ -53,39 +53,41 @@ export const WalletConnectModalContent: React.FC<Props> = ({
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleRun = async (options: Parameters<typeof run>) => {
-    const [payload, brandName] = options;
-    const { account, peerMeta } = payload as any;
+    const [payload, brandName, account] = options as any;
+    const {
+      peer: { metadata },
+    } = payload as any;
 
-    options[0] = account;
+    options[0] = account.address;
     if (brandName === WALLET_BRAND_TYPES.WalletConnect) {
-      if (peerMeta?.name) {
+      if (metadata?.name) {
         options[1] = currAccount!.brandName;
-        options[4] = peerMeta.name;
-        options[5] = peerMeta.icons?.[0];
+        options[4] = metadata.name;
+        options[5] = metadata.icons?.[0];
       }
     }
     run(...options);
   };
 
   const handleImportByWalletConnect = React.useCallback(async () => {
-    const { uri, stashId } = await walletController.initWalletConnect(
+    const { stashId } = await walletController.initWalletConnect(
       brand,
-      curStashId
+      curStashId,
+      1
     );
-    setWalletConnectUri(uri);
     setCurStashId(stashId);
 
     eventBus.removeAllEventListeners(EVENTS.WALLETCONNECT.STATUS_CHANGED);
     eventBus.addEventListener(
       EVENTS.WALLETCONNECT.STATUS_CHANGED,
-      ({ status, payload }) => {
+      ({ status, account, payload }) => {
         switch (status) {
           case WALLETCONNECT_STATUS_MAP.CONNECTED:
             setResult(payload);
             setRunParams([
               payload,
               brand,
-              bridgeURL,
+              account,
               stashId === null ? undefined : stashId,
             ]);
             break;
@@ -101,9 +103,12 @@ export const WalletConnectModalContent: React.FC<Props> = ({
         }
       }
     );
-  }, [brand, bridgeURL, curStashId]);
+  }, [brand, curStashId]);
 
   React.useEffect(() => {
+    eventBus.addEventListener(EVENTS.WALLETCONNECT.INITED, ({ uri }) => {
+      setWalletConnectUri(uri);
+    });
     handleImportByWalletConnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
