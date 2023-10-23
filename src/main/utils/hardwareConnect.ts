@@ -124,7 +124,7 @@ export function asyncDestroyWindowIfCannotUseTrezorLike(options: {
  * 1. charged by rabbyx extension
  * 2. support chrome.tabs.* APIs
  */
-export async function createTrezorLikeConnectPageWindow(
+export async function createHardwareConnectPageWindow(
   connectURL: string,
   matches: IHardwareConnectPageMatches
 ) {
@@ -133,7 +133,7 @@ export async function createTrezorLikeConnectPageWindow(
   const tabbedWin = await createWindow({
     defaultTabUrl: connectURL,
     defaultOpen: false,
-    webuiType: 'ForTrezorLike',
+    webuiType: 'ForSpecialHardware',
     window: {
       parent: mainWindow,
       modal: false,
@@ -146,7 +146,9 @@ export async function createTrezorLikeConnectPageWindow(
       maximizable: false,
       resizable: false,
       fullscreenable: false,
-
+      ...(matches.isTrezorLike && {
+        backgroundColor: 'white',
+      }),
       // frame: true,
       // trafficLightPosition: { x: 10, y: 10 }
     },

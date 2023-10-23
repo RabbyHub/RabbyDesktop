@@ -184,10 +184,10 @@ export function isMainWinShellWebUI(url: string) {
     url.includes('__webuiType=MainWindow')
   );
 }
-export function isForTrezorLikeWebUI(url: string) {
+export function isForSpecialHardwareWebUI(url: string) {
   return (
     url.startsWith('chrome-extension:') &&
-    url.includes('__webuiType=ForTrezorLike')
+    url.includes('__webuiType=ForSpecialHardware')
   );
 }
 

@@ -40,7 +40,7 @@ import {
   isEnableServeDappByHttp,
 } from '../store/desktopApp';
 import {
-  createTrezorLikeConnectPageWindow,
+  createHardwareConnectPageWindow,
   stopOpenConnectHardwareWindow,
 } from '../utils/hardwareConnect';
 import { getBlockchainExplorers } from '../store/dynamicConfig';
@@ -314,7 +314,7 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
           }
 
           const { window, tab, asyncDestroyWindowIfNeed } =
-            await createTrezorLikeConnectPageWindow(
+            await createHardwareConnectPageWindow(
               actionInfo.pageURL,
               actionInfo
             );

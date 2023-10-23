@@ -268,8 +268,8 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
     return this.$meta.webuiType === 'MainWindow';
   }
 
-  isForTrezorLikeConnection() {
-    return this.$meta.webuiType === 'ForTrezorLike';
+  isForSpecialHardwareConnection() {
+    return this.$meta.webuiType === 'ForSpecialHardware';
   }
 
   isRabbyXNotificationWindow() {

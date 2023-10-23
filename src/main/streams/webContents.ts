@@ -45,7 +45,8 @@ export function setOpenHandlerForTabbedWebContents({
   webContents: Electron.WebContents;
   parentTabbedWin: TabbedBrowserWindow;
 }) {
-  const isForTrezorLikeConnection = parentTabbedWin.isForTrezorLikeConnection();
+  const isForSpecialHardwareConnection =
+    parentTabbedWin.isForSpecialHardwareConnection();
 
   webContents.setWindowOpenHandler((details) => {
     if (!webContents) return { action: 'deny' };
@@ -67,7 +68,7 @@ export function setOpenHandlerForTabbedWebContents({
     } = parseDappRedirect(currentUrl, targetURL, {
       dapps,
       blockchain_explorers: getBlockchainExplorers(),
-      isForTrezorLikeConnection,
+      isForSpecialHardwareConnection,
     });
 
     if (shouldOpenExternal) {
@@ -160,7 +161,8 @@ export const setListeners = {
         {
           dapps,
           blockchain_explorers: getBlockchainExplorers(),
-          isForTrezorLikeConnection: tabbedWindow?.isForTrezorLikeConnection(),
+          isForSpecialHardwareConnection:
+            tabbedWindow?.isForSpecialHardwareConnection(),
           isFromExistedTab: !!foundTab,
           isServerSideRedirect: true,
         }
@@ -236,7 +238,8 @@ export const setListeners = {
         } = parseDappRedirect(currentUrl, targetURL, {
           dapps,
           blockchain_explorers: getBlockchainExplorers(),
-          isForTrezorLikeConnection: tabbedWindow?.isForTrezorLikeConnection(),
+          isForSpecialHardwareConnection:
+            tabbedWindow?.isForSpecialHardwareConnection(),
           isFromExistedTab: !!foundTab,
         });
 

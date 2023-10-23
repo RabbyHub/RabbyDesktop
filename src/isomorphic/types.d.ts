@@ -588,7 +588,7 @@ type ICanonalizedUrlInfo = {
 type IShellWebUIType =
   | 'MainWindow'
   | 'Prompt'
-  | 'ForTrezorLike'
+  | 'ForSpecialHardware'
   | 'RabbyX-NotificationWindow';
 
 type IOpenDappAction =

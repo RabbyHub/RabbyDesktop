@@ -372,7 +372,7 @@ export function parseDappRedirect(
     blockchain_explorers?: Set<
       (IAppDynamicConfig['blockchain_explorers'] & object)[number]
     >;
-    isForTrezorLikeConnection?: boolean;
+    isForSpecialHardwareConnection?: boolean;
     isFromExistedTab?: boolean;
     isServerSideRedirect?: boolean;
   }
@@ -380,7 +380,7 @@ export function parseDappRedirect(
   const {
     dapps = getAllDapps(),
     blockchain_explorers = nullSet,
-    isForTrezorLikeConnection = false,
+    isForSpecialHardwareConnection = false,
     isFromExistedTab = false,
     isServerSideRedirect = false,
   } = opts || {};
@@ -427,7 +427,7 @@ export function parseDappRedirect(
     result.shouldOpenExternal = true;
     result.finalAction = EnumOpenDappAction.openExternal;
   } else if (
-    isForTrezorLikeConnection &&
+    isForSpecialHardwareConnection &&
     !isToExtension &&
     !maybeTrezorLikeBuiltInHttpPage(targetURL)
   ) {

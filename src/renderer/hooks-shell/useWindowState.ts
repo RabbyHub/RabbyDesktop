@@ -1,4 +1,7 @@
-import { isForTrezorLikeWebUI, isMainWinShellWebUI } from '@/isomorphic/url';
+import {
+  isForSpecialHardwareWebUI,
+  isMainWinShellWebUI,
+} from '@/isomorphic/url';
 import { detectClientOS } from '@/isomorphic/os';
 import { useCallback, useEffect } from 'react';
 import { atom, useAtom } from 'jotai';
@@ -101,7 +104,7 @@ export function useWindowState() {
       );
       return;
     }
-    if (isForTrezorLikeWebUI(window.location.href)) {
+    if (isForSpecialHardwareWebUI(window.location.href)) {
       window.rabbyDesktop.ipcRenderer.sendMessage(
         '__internal_rpc:trezor-like-window:click-close'
       );
