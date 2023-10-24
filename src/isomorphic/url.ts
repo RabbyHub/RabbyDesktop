@@ -846,6 +846,9 @@ export function filterProxyProtocol(
   }
 }
 
+/**
+ * @notice in chromium, authentication for proxy is NOT supported.
+ */
 export function formatProxyServerURL(settings: IAppProxyConf['proxySettings']) {
   return `${filterProxyProtocol(settings.protocol)}://${settings.hostname}:${
     settings.port
