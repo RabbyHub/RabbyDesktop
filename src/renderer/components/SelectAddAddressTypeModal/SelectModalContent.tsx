@@ -44,6 +44,11 @@ const HARDWARE_MAP = [
     id: KEYRING_CLASS.HARDWARE.KEYSTONE,
     brand: WALLET_BRAND_CONTENT.CoolWallet.brand,
   },
+  {
+    logo: 'rabby-internal://assets/icons/device/gridplus.svg',
+    name: 'GridPlus',
+    id: KEYRING_CLASS.HARDWARE.GRIDPLUS,
+  },
 ];
 
 const WALLETCONNECT_BRANDS = [
