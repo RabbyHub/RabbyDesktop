@@ -112,6 +112,13 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["TKCC"] = "TKCC";
     CHAINS_ENUM["TIOTX"] = "TIOTX";
     CHAINS_ENUM["TPLS"] = "TPLS";
+    CHAINS_ENUM["HETH"] = "HETH";
+    CHAINS_ENUM["BKLAY"] = "BKLAY";
+    CHAINS_ENUM["CSGB"] = "CSGB";
+    CHAINS_ENUM["TKAVA"] = "TKAVA";
+    CHAINS_ENUM["SCRL"] = "SCRL";
+    CHAINS_ENUM["FX"] = "FX";
+    CHAINS_ENUM["DFX"] = "DFX";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -1049,7 +1056,7 @@ export const CHAINS_RAW = {
         name: "Base",
         nativeTokenSymbol: "ETH",
         nativeTokenAddress: "base",
-        enum: CHAINS_ENUM.LINEA,
+        enum: CHAINS_ENUM.BASE,
         hex: "0x2105",
         scanLink: "https://basescan.org/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/token/logo_url/eth/935ae4e4d1d12d59a99717a24f2540b5.png",
@@ -1951,6 +1958,125 @@ export const CHAINS_RAW = {
         nativeTokenAddress: "tpls",
         scanLink: "https://scan.v4.testnet.pulsechain.com/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/tpls_token/logo_url/tpls/28a0e357df556b82bb9e8cd30f2c258a.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.HETH]: {
+        id: 17000,
+        serverId: "heth",
+        name: "Ethereum Holesky",
+        enum: CHAINS_ENUM.HETH,
+        hex: "0x4268",
+        network: "17000",
+        nativeTokenSymbol: "HoleskyETH",
+        nativeTokenAddress: "heth",
+        scanLink: "https://holesky.etherscan.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/heth_token/logo_url/heth/389dd9a835250219889e01d5a31a75f1.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.BKLAY]: {
+        id: 1001,
+        serverId: "bklay",
+        name: "Klaytn Baobab Testnet",
+        enum: CHAINS_ENUM.BKLAY,
+        hex: "0x3e9",
+        network: "1001",
+        nativeTokenSymbol: "BaobabKLAY",
+        nativeTokenAddress: "bklay",
+        scanLink: "https://baobab.scope.klaytn.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/bklay_token/logo_url/bklay/1866fc790849a903e0594ce0f55b758d.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.CSGB]: {
+        id: 16,
+        serverId: "csgb",
+        name: "Songbird Coston Testnet",
+        enum: CHAINS_ENUM.CSGB,
+        hex: "0x10",
+        network: "16",
+        nativeTokenSymbol: "CostonFLR",
+        nativeTokenAddress: "csgb",
+        scanLink: "https://coston-explorer.flare.network/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/csgb_token/logo_url/csgb/6db879abe221aba6c3e9c17bc0ae8027.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.TKAVA]: {
+        id: 2221,
+        serverId: "tkava",
+        name: "Kava Testnet",
+        enum: CHAINS_ENUM.TKAVA,
+        hex: "0x8ad",
+        network: "2221",
+        nativeTokenSymbol: "TestnetKAVA",
+        nativeTokenAddress: "tkava",
+        scanLink: "https://testnet.kavascan.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/tkava_token/logo_url/tkava/d6a35171eb8e7711e22bd408c44b85bf.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.SCRL]: {
+        id: 534352,
+        serverId: "scrl",
+        name: "Scroll",
+        enum: CHAINS_ENUM.SCRL,
+        hex: "0x82750",
+        network: "534352",
+        nativeTokenSymbol: "ETH",
+        nativeTokenAddress: "scrl",
+        scanLink: "https://scrollscan.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/scrl_token/logo_url/scrl/389dd9a835250219889e01d5a31a75f1.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: false,
+    },
+    [CHAINS_ENUM.FX]: {
+        id: 530,
+        serverId: "fx",
+        name: "Function X",
+        enum: CHAINS_ENUM.FX,
+        hex: "0x212",
+        network: "530",
+        nativeTokenSymbol: "FX",
+        nativeTokenAddress: "fx",
+        scanLink: "https://starscan.io/evm/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/fx_token/logo_url/fx/6fee82420b2394e0b68d7d7e692a0a01.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: false,
+    },
+    [CHAINS_ENUM.DFX]: {
+        id: 90001,
+        serverId: "dfx",
+        name: "Function X Dhobyghaut Testnet",
+        enum: CHAINS_ENUM.DFX,
+        hex: "0x15f91",
+        network: "90001",
+        nativeTokenSymbol: "DhobyghautFX",
+        nativeTokenAddress: "dfx",
+        scanLink: "https://testnet.starscan.io/evm/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/dfx_token/logo_url/dfx/6fee82420b2394e0b68d7d7e692a0a01.png",
         nativeTokenDecimals: 18,
         eip: {
             "1559": true,
