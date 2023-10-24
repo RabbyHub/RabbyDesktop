@@ -199,8 +199,8 @@ const proxyBypassRules = [
   `${RABBY_INTERNAL_PROTOCOL}//*`,
   'chrome-extension://*',
   'chrome://*',
-  // bypass all websocket like connections to avoid wallet connect issue
-  'wss://*',
+  // bypass all websocket like connections to avoid wallet connect v1 issue, but not for v2
+  // 'wss://*',
 ].join(',');
 
 export function setSessionProxy(
