@@ -426,7 +426,8 @@ export type RabbyXMethod = {
 
   'walletController.initWalletConnect': (
     brandName: string,
-    curStashId: number | null
+    curStashId: number | null,
+    chainId?: number
   ) => {
     uri: string;
     stashId: number | null;

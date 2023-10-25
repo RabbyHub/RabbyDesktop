@@ -346,7 +346,7 @@ export enum WALLET_BRAND_TYPES {
   OKX = 'OKX',
   Bitcoin = 'Bitcoin',
   Rainbow = 'Rainbow',
-  Bitkeep = 'Bitkeep',
+  Bitkeep = 'Bitget',
   // Uniswap = 'Uniswap',
   Zerion = 'Zerion',
 }
@@ -588,7 +588,7 @@ export const WALLET_BRAND_CONTENT: {
   },
   [WALLET_BRAND_TYPES.Bitkeep]: {
     id: 22,
-    name: 'Bitkeep',
+    name: 'Bitget Wallet',
     brand: WALLET_BRAND_TYPES.Bitkeep,
     icon: LogoBitkeep,
     image: LogoBitkeep,

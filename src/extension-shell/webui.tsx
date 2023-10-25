@@ -48,7 +48,7 @@ switch (shellUIType) {
     root.render(<AlertWindowPrompt />);
     break;
   }
-  case 'ForTrezorLike': {
+  case 'ForSpecialHardware': {
     document.documentElement.classList.add('__rabbyx-trezor-like', 'popup-win');
 
     const container = document.getElementById('topbar')!;
