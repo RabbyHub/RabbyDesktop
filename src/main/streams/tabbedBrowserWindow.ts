@@ -256,6 +256,14 @@ handleIpcMainInvoke('safe-open-dapp-tab', async (evt, dappOrigin, opts) => {
       case 'ipfs':
       case 'ens': {
         const ipfsService = await getIpfsService();
+        if (
+          !checkedOutDappURLInfo.ipfsCid &&
+          checkedOutDappURLInfo.type === 'ens'
+        ) {
+          checkedOutDappURLInfo.ipfsCid =
+            findDappsById(checkedOutDappURLInfo.dappID)?.extraInfo?.ipfsCid ||
+            '';
+        }
         if (!(await ipfsService.isExist(checkedOutDappURLInfo.ipfsCid))) {
           pushChangesToZPopupLayer({
             'ipfs-no-local-modal': {

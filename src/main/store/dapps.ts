@@ -272,9 +272,19 @@ export function findDappsByOrigin(
       dapp.origin.toLocaleLowerCase() === cUrlInfo.origin.toLocaleLowerCase()
     ) {
       result.dappByOrigin = dapp;
+    } else if (
+      dapp.type === 'ens' &&
+      dapp.extraInfo?.ensAddr?.toLocaleLowerCase() ===
+        `${cUrlInfo.subDomain}.${cUrlInfo.hostWithoutTLD}`
+    ) {
+      result.dappByOrigin = dapp;
+      result.dappBySecondaryDomainOrigin = dapp;
     }
 
-    if (dapp.origin === secondaryOrigin) {
+    if (
+      !result.dappBySecondaryDomainOrigin &&
+      dapp.origin === secondaryOrigin
+    ) {
       result.dappBySecondaryDomainOrigin = dapp;
     }
 
