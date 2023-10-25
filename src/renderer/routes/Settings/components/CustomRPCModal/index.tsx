@@ -6,6 +6,7 @@ import { useMount } from 'ahooks';
 import { Button, message } from 'antd';
 import { useMemo } from 'react';
 import { useSetState } from 'react-use';
+import { CHAINS_ENUM } from '@debank/common';
 import { CustomtRPCItem } from './CustomRPCItem';
 import { EditCustomRPCModal } from './EditCustomRPCModal';
 import styles from './index.module.less';
@@ -33,7 +34,7 @@ export const CustomRPCModal = ({ open, onClose }: CustomRPCModalProps) => {
   const list = useMemo(() => {
     return Object.entries(data).map(([id, rpc]) => {
       return {
-        id,
+        id: id as CHAINS_ENUM,
         rpc,
       };
     });
