@@ -60,8 +60,8 @@ export function kebabToCamel(str = '') {
   return str.replace(/-([a-zA-Z])/g, (g) => g[1].toUpperCase());
 }
 
-export function ucfirst(str = '') {
-  return str.charAt(0).toUpperCase() + str.slice(1);
+export function ucfirst<T extends string>(str: T = '' as T) {
+  return (str.charAt(0).toUpperCase() + str.slice(1)) as Capitalize<T>;
 }
 
 const UA_APP_NAME = ucfirst(kebabToCamel(APP_NAME));

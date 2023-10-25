@@ -133,7 +133,7 @@ export abstract class Tab {
     this.$meta.webuiType = tabOptions.webuiType;
     this.$meta.relatedDappId = relatedDappId || '';
 
-    if (this.$meta.webuiType === 'ForTrezorLike') {
+    if (this.$meta.webuiType === 'ForSpecialHardware') {
       this.$meta.topbarStacks.tabs = true;
     } else if (this.$meta.webuiType === 'Prompt') {
       this.$meta.topbarStacks.tabs = false;
@@ -274,7 +274,7 @@ export abstract class Tab {
   }
 
   get isOfTreasureLikeConnection() {
-    return this.$meta.webuiType === 'ForTrezorLike';
+    return this.$meta.webuiType === 'ForSpecialHardware';
   }
 
   showLoadingView(nextURL: string) {
