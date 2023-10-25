@@ -464,6 +464,7 @@ const Home = () => {
               isTestnet={selectedTab === 'testnet'}
               onTabChange={onTabChange}
               updateNonce={updateNonce}
+              key={`${currentAccount?.address}-${selectedTab}`}
             />
             <div className="flex-1 h-full static-width-wrapper disable-mouseevents-on-ant-modal-open">
               <div>

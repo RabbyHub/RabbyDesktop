@@ -21,7 +21,11 @@ import { useInterval, useLocation, usePrevious } from 'react-use';
 import styled from 'styled-components';
 // eslint-disable-next-line import/no-cycle
 import { TransactionModal } from '@/renderer/components/TransactionsModal';
+import { findMaxGasTx } from '@/isomorphic/tx';
+import { useMount } from 'ahooks';
 import TransactionItem, { LoadingTransactionItem } from './TransactionItem';
+import { useLoadTxRequests } from '../../Settings/components/SignatureRecordModal/TransactionHistory/hooks';
+import { SkipNonceAlert } from '../../Settings/components/SignatureRecordModal/TransactionHistory/components/SkipNonceAlert';
 
 const TransactionWrapper = styled.div`
   display: flex;
@@ -248,10 +252,7 @@ const Transactions = ({
       .forEach((item) => {
         const chain = Object.values(CHAINS).find((i) => i.id === item.chainId);
         if (!chain) return;
-        const maxTx = maxBy(
-          item.txs,
-          (i) => Number(i.rawTx.gasPrice) || Number(i.rawTx.maxFeePerGas)
-        )!;
+        const maxTx = findMaxGasTx(item.txs);
         const completedTx = item.txs.find((tx) => tx.isCompleted);
         const { type, protocol, name } = getTxInfoFromExplain(item.explain);
         const balanceChange = item.explain.balance_change;
@@ -292,15 +293,13 @@ const Transactions = ({
         });
       });
     setLocalTxs(lTxs);
+
     pendings
       .filter((item) => !item.isSubmitFailed)
       .forEach((item) => {
         const chain = Object.values(CHAINS).find((i) => i.id === item.chainId);
         if (!chain) return;
-        const maxTx = maxBy(
-          item.txs,
-          (i) => i.rawTx.gasPrice || i.rawTx.maxFeePerGas
-        )!;
+        const maxTx = findMaxGasTx(item.txs);
         const originTx = minBy(item.txs, (tx) => tx.createdAt);
         const { type, protocol, name } = getTxInfoFromExplain(item.explain);
         const balanceChange = item.explain.balance_change;
@@ -340,27 +339,28 @@ const Transactions = ({
           rawTx: maxTx.rawTx,
           site: originTx?.site,
           txs: item.txs,
+          group: item,
         });
       });
+    console.log('pTxs', pTxs);
     setPendingTxs(pTxs);
   };
+
+  const { txRequests, reloadTxRequests } = useLoadTxRequests(
+    pendingTxs
+      ?.map((item) => item.group)
+      .filter((item): item is TransactionGroup => !!item) || []
+  );
 
   const init = async (address?: string) => {
     if (!address) return;
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
-    const txs = await Promise.all([
-      walletOpenapi.listTxHisotry({
-        id: address,
-      }),
-      walletTestnetOpenapi.listTxHisotry({
-        id: address,
-      }),
-    ]).then(([txHistory, testnetTxHistory]) => {
-      return mergeWith(txHistory, testnetTxHistory, (objValue, srcValue) => {
-        if (Array.isArray(objValue)) {
-          return [...objValue, ...srcValue];
-        }
-      });
+
+    const listTxHistory = isTestnet
+      ? walletTestnetOpenapi.listTxHisotry
+      : walletOpenapi.listTxHisotry;
+    const txs = await listTxHistory({
+      id: address,
     });
 
     const { completeds } = await walletController.getTransactionHistory(
@@ -427,6 +427,7 @@ const Transactions = ({
     initLocalTxs(address);
     setRecentTxs(sortBy(dbTxs, 'timeAt').reverse());
     setIsLoading(false);
+    reloadTxRequests();
   };
 
   useInterval(
@@ -528,18 +529,26 @@ const Transactions = ({
 
   return (
     <TransactionWrapper>
+      <SkipNonceAlert
+        pendings={pendingTxs
+          ?.map((item) => item.group)
+          .filter((item): item is TransactionGroup => !!item)}
+        reload={init}
+      />
       <TransactionList>
         {filterTestnet(pendingTxs, isTestnet).map((tx) => {
           return (
             <TransactionItem
               item={tx}
               key={`${tx.chain}-${tx.id}`}
+              txRequests={txRequests}
               canCancel={
                 minBy(
                   pendingTxs.filter((i) => i.chain === tx.chain),
                   (i) => i.rawTx?.nonce
                 )?.rawTx?.nonce === tx.rawTx?.nonce
               }
+              reload={init}
             />
           );
         })}
