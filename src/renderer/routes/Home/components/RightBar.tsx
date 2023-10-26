@@ -2,6 +2,7 @@ import { ReceiveModalWraper } from '@/renderer/components/ReceiveModal';
 import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import { useActivate, useUnactivate } from 'react-activation';
 import { Tooltip } from 'antd';
 import { useIsSafe } from '@/renderer/hooks/rabbyx/useSafe';
 import IconReceive from '../../../../../assets/icons/home/receive.svg?rc';
@@ -53,6 +54,16 @@ const RightBar = ({ updateNonce }: { updateNonce: number }) => {
   const [isShowReceive, setIsShowReceive] = useState(false);
   const isSafe = useIsSafe();
   const navigateTo = useNavigate();
+  const [isActivate, setIsActivate] = useState(true);
+
+  useUnactivate(() => {
+    setIsActivate(false);
+  });
+
+  useActivate(() => {
+    setIsActivate(true);
+  });
+
   const actions = useMemo(() => {
     const list = [
       {
@@ -83,6 +94,10 @@ const RightBar = ({ updateNonce }: { updateNonce: number }) => {
 
     return list;
   }, [navigateTo]);
+
+  if (!isActivate) {
+    return null;
+  }
 
   return (
     <RightBarWrapper>
