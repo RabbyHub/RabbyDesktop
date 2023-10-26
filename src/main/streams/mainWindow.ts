@@ -256,11 +256,11 @@ onIpcMainEvent('__internal_rpc:mainwindow:click-close', async (evt) => {
 onIpcMainInternalEvent(
   '__internal_main:mainwindow:capture-tab',
   async (payload) => {
-    if (payload?.type === 'clear') {
-      clearCaptureState();
-    } else {
-      getLatestCapturedActiveTab();
-    }
+    // if (payload?.type === 'clear') {
+    //   clearCaptureState();
+    // } else {
+    //   getLatestCapturedActiveTab();
+    // }
   }
 );
 
@@ -270,10 +270,10 @@ onIpcMainEvent(
     const mainTabbedWin = await onMainWindowReady();
     if (mainTabbedWin.window.id !== winId) return;
 
-    await clearCaptureState();
+    // await clearCaptureState();
     mainTabbedWin.tabs.select(tabId);
     mainTabbedWin.tabs.checkLoadingView();
-    getLatestCapturedActiveTab();
+    // getLatestCapturedActiveTab();
   }
 );
 
@@ -296,7 +296,7 @@ handleIpcMainInvoke('toggle-activetab-animating', async (_, animating) => {
   const isLoading = !!activeTab.tabWebContents?.isLoading();
 
   if (!isLoading) {
-    await getLatestCapturedActiveTab();
+    // await getLatestCapturedActiveTab();
   } else {
     captureState.image = null;
   }

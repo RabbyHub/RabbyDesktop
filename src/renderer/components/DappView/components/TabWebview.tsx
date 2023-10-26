@@ -1,5 +1,4 @@
 import { useLayoutEffect, useRef } from 'react';
-import { useLatestDappScreenshot } from '@/renderer/hooks-shell/useMainWindow';
 import { useIsAnimating } from '@/renderer/hooks/useSidebar';
 import classNames from 'classnames';
 import styles from '../index.module.less';
@@ -49,7 +48,6 @@ export default function TabWebview({ dappId }: { dappId?: string }) {
     };
   }, []);
 
-  const imageDataURL = useLatestDappScreenshot();
   const { isAnimating } = useIsAnimating();
 
   return (
@@ -59,18 +57,9 @@ export default function TabWebview({ dappId }: { dappId?: string }) {
         styles.tabWebviewWrapper,
         dappId && styles.withDappOpen,
         // IS_RUNTIME_PRODUCTION && styles.debug,
-        imageDataURL && styles.withScreenshot,
         isAnimating && styles.isAnimating
       )}
     >
-      {/* {imageDataURL && (
-        <div
-          className={styles.activeDappScreenshot}
-          style={{
-            backgroundImage: `url(${imageDataURL})`,
-          }}
-        />
-      )} */}
       <div id="app-webview-tags" />
     </div>
   );

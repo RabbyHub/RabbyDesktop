@@ -354,14 +354,14 @@ export abstract class Tab {
   async loadURL(url: string) {
     const isMain = this.isOfMainWindow;
     if (isMain) {
-      emitIpcMainEvent('__internal_main:mainwindow:capture-tab', {
-        type: 'clear',
-      });
+      // emitIpcMainEvent('__internal_main:mainwindow:capture-tab', {
+      //   type: 'clear',
+      // });
       this.showLoadingView(url);
     }
     const result = await this.tabWebContents?.loadURL(url);
     if (isMain) {
-      emitIpcMainEvent('__internal_main:mainwindow:capture-tab');
+      // emitIpcMainEvent('__internal_main:mainwindow:capture-tab');
       hideLoadingView();
     }
 
