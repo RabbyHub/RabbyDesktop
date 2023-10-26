@@ -56,6 +56,17 @@
   &.withScreenshot {
     overflow: hidden; // cut off the blur effect
   }
+
+  &.withDappOpen {
+    background: white;
+  }
+
+  &, webview[r-tab-uid][r-for-windowid] {
+    border-top-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    overflow: hidden;
+  }
 }
 
 img.activeDappScreenshot {

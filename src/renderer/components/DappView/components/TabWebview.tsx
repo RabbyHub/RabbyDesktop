@@ -7,13 +7,7 @@ import styles from '../index.module.less';
 /**
  * @description stub element for dapp view, guide dapp to render in this element
  */
-export default function TabWebview({
-  dappId,
-  active,
-}: {
-  active?: boolean;
-  dappId?: string;
-}) {
+export default function TabWebview({ dappId }: { dappId?: string }) {
   const divRef = useRef<HTMLDivElement>(null);
 
   const obsRef = useRef<ResizeObserver>(
@@ -63,7 +57,7 @@ export default function TabWebview({
       ref={divRef}
       className={classNames(
         styles.tabWebviewWrapper,
-        active && styles.active,
+        dappId && styles.withDappOpen,
         // IS_RUNTIME_PRODUCTION && styles.debug,
         imageDataURL && styles.withScreenshot,
         isAnimating && styles.isAnimating

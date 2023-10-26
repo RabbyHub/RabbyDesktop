@@ -1,6 +1,5 @@
 import classNames from 'classnames';
 import { useMatches } from 'react-router-dom';
-import { useWindowTabs } from '@/renderer/hooks-shell/useWindowTabs';
 import styles from './index.module.less';
 import TabWebview from './components/TabWebview';
 
@@ -13,8 +12,6 @@ React.PropsWithChildren<{}>) {
   const firstMatch = matches[0];
 
   const dappId = firstMatch?.params?.dappId;
-
-  const { tabsGroupById } = useWindowTabs();
 
   return (
     <div className={styles.dappViewWrapper}>
