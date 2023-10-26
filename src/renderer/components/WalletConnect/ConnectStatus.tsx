@@ -103,7 +103,7 @@ export const ConnectStatus: React.FC<Props> = ({
     <div
       className={clsx(
         'rounded-[4px] mt-[40px] m-auto',
-        'w-[400px] text-center leading-none',
+        'w-[360px] text-center leading-none',
         'text-13',
         {
           'bg-[#FFFFFF1A] text-[#FFFFFF] font-medium': !type || type === 'info',
