@@ -104,8 +104,7 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
 
     if (this.isMainWindow()) {
       // leave here for debug
-      if (!IS_RUNTIME_PRODUCTION)
-        this.window.webContents.openDevTools({ mode: 'detach' });
+      // if (!IS_RUNTIME_PRODUCTION) this.window.webContents.openDevTools({ mode: 'detach' });
 
       this.window.setMaxListeners(100);
       const disposeOnReportPerfInfo = onIpcMainEvent(
