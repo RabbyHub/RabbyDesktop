@@ -5,6 +5,7 @@ import type {
   TotalBalanceResponse,
   TokenItem,
   Chain,
+  TxPushType,
 } from '@rabby-wallet/rabby-api/dist/types';
 
 import type { DEX_ENUM } from '@rabby-wallet/rabby-swap';
@@ -100,6 +101,10 @@ export interface TransactionHistoryItem {
   gasUsed?: number;
   isSubmitFailed?: boolean;
   site?: ConnectedSite;
+
+  pushType?: TxPushType;
+  reqId?: string;
+  isWithdrawed?: boolean;
 }
 
 interface TransactionSigningItem {
@@ -146,6 +151,7 @@ export interface TransactionDataItem {
   txs?: TransactionHistoryItem[];
   site?: ConnectedSite;
   isScam?: boolean;
+  group?: TransactionGroup;
 }
 
 export interface TransactionGroup {
@@ -631,6 +637,21 @@ export type RabbyXMethod = {
   'walletController.loadPendingListQueue': (
     address: string
   ) => TransactionGroup[];
+  'walletController.retryPushTx': (params: {
+    address: string;
+    chainId: number;
+    nonce: number;
+    reqId: string;
+  }) => void;
+  'walletController.getSkipedTxs': (
+    address: string
+  ) => Record<string, TransactionGroup[]>;
+  'walletController.quickCancelTx': (params: {
+    address: string;
+    chainId: number;
+    nonce: number;
+    reqId: string;
+  }) => void;
 } & GenOpenApiService<'openapi'> &
   GenOpenApiService<'testnetOpenapi'>;
 

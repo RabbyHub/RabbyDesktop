@@ -314,6 +314,11 @@ export const EVENTS = {
     REJECT_APPROVAL: 'LEDGER_REJECT_APPROVAL',
     SESSION_CHANGE: 'LEDGER_SESSION_CHANGE',
   },
+  COMMON_HARDWARE: {
+    REJECTED: 'COMMON_HARDWARE_REJECTED',
+  },
+  LOCK_WALLET: 'LOCK_WALLET',
+  RELOAD_TX: 'RELOAD_TX',
 };
 
 export enum WALLET_BRAND_TYPES {
@@ -867,3 +872,8 @@ declare global {
 }
 
 export const IS_RD = window.__is_rd__;
+
+export enum CANCEL_TX_TYPE {
+  QUICK_CANCEL = 'QUICK_CANCEL',
+  ON_CHAIN_CANCEL = 'ON_CHAIN_CANCEL',
+}

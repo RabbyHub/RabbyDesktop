@@ -1,10 +1,14 @@
 /* eslint-disable import/no-cycle */
 import styled from 'styled-components';
-import { Tooltip, Skeleton } from 'antd';
+import { Tooltip, Skeleton, message } from 'antd';
 import { intToHex } from 'ethereumjs-util';
 import { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
-import { GasLevel, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
+import {
+  GasLevel,
+  TokenItem,
+  TxRequest,
+} from '@rabby-wallet/rabby-api/dist/types';
 import { maxBy, minBy } from 'lodash';
 import { IconWithChain } from '@/renderer/components/TokenWithChain';
 import NameAndAddress from '@/renderer/components/NameAndAddress';
@@ -20,7 +24,11 @@ import moment from 'moment';
 import { getChain, getTokenSymbol } from '@/renderer/utils';
 import clsx from 'clsx';
 import { openExternalUrl } from '@/renderer/ipcRequest/app';
+import { findMaxGasTx } from '@/isomorphic/tx';
+import { CANCEL_TX_TYPE } from '@/renderer/utils/constant';
 import TxChange from './TxChange';
+import { TransactionPendingTag } from '../../Settings/components/SignatureRecordModal/TransactionHistory/components/TransactionPendingTag';
+import { CancelTxPopup } from '../../Settings/components/SignatureRecordModal/TransactionHistory/components/CancelTxPopup';
 
 const TransactionItemWrapper = styled.div`
   // display: flex;
@@ -34,14 +42,16 @@ const TransactionItemWrapper = styled.div`
     display: none;
   }
   .name-and-address .icon-copy {
-    display: none;
+    visibility: hidden;
+    width: 14px;
+    height: 14px;
   }
   &:hover {
     .tx-origin {
       display: block;
     }
     .name-and-address .icon-copy {
-      display: inline-block;
+      visibility: visible;
     }
     .pending-tooltip {
       display: block;
@@ -160,7 +170,7 @@ const TransactionItemWrapper = styled.div`
 
 const Actions = styled.div`
   position: absolute;
-  top: 10px;
+  top: 8px;
   right: 16px;
   display: flex;
   align-items: center;
@@ -225,6 +235,45 @@ const PendingTag = styled.div`
     width: 10px;
     margin-right: 3px;
     animation: spining 1.5s infinite linear;
+  }
+`;
+
+const PendingTagGroup = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  padding-right: 65px;
+
+  .pending {
+    background-color: rgba(242, 156, 27, 0.2);
+    border-radius: 0px 0px 4px 0px;
+    padding: 4px 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    line-height: 14px;
+    color: var(--r-orange-default, #ffc64a);
+    .icon-pending-spin {
+      width: 12px;
+      height: 12px;
+      animation: spining 1.5s infinite linear;
+      margin-right: 6px;
+    }
+  }
+
+  .tx-hash {
+    position: static;
+    margin-left: auto;
+    margin-top: 6px;
+  }
+  .pending-tooltip {
+    position: static;
+    margin-top: 6px;
   }
 `;
 
@@ -401,6 +450,9 @@ const TxHash = ({
   item: TransactionDataItem;
   className?: string;
 }) => {
+  if (!item.id) {
+    return null;
+  }
   const chain = getChain(item.chain);
   const link = chain?.scanLink.replace(/_s_/, item.id);
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -478,10 +530,16 @@ const ChildrenTxText = ({
 const TransactionItem = ({
   item,
   canCancel,
+  txRequests,
+  reload,
 }: {
   item: TransactionDataItem;
   canCancel?: boolean;
+  txRequests?: Record<string, TxRequest>;
+  reload?(): void;
 }) => {
+  const [isShowCancelPopup, setIsShowCancelPopup] = useState(false);
+
   const { isPending, isCompleted, isFailed, isScam } = useMemo(() => {
     return {
       isPending: item.status === 'pending',
@@ -508,6 +566,7 @@ const TransactionItem = ({
     return null;
   }, [item, isCancel, isSend, isReceive]);
   const originTx = minBy(item.txs, (tx) => tx.createdAt);
+  const maxGasTx = findMaxGasTx(item?.group?.txs || []);
 
   const [txQueues, setTxQueues] = useState<
     Record<
@@ -616,6 +675,44 @@ const TransactionItem = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleReBroadcast = async (tx: TransactionHistoryItem) => {
+    const wallet = walletController;
+    if (!tx.reqId) {
+      message.error('Can not re-broadcast');
+      return;
+    }
+
+    const isReBroadcast = !!tx.hash;
+    if (isReBroadcast) {
+      // fake toast for re-broadcast, not wait for tx push
+      message.success('Re-broadcasted');
+      wallet.retryPushTx({
+        reqId: tx.reqId,
+        chainId: tx.rawTx.chainId,
+        nonce: +tx.rawTx.nonce,
+        address: tx.rawTx.from,
+      });
+      return;
+    }
+    try {
+      await wallet.retryPushTx({
+        reqId: tx.reqId,
+        chainId: tx.rawTx.chainId,
+        nonce: +tx.rawTx.nonce,
+        address: tx.rawTx.from,
+      });
+      message.success('Broadcasted');
+    } catch (e: any) {
+      console.error(e);
+      message.error(e.message);
+    }
+    reload?.();
+  };
+
+  const handleClickCancel = () => {
+    setIsShowCancelPopup(true);
+  };
+
   const handleClickSpeedUp = async () => {
     if (!item.rawTx || !canCancel) return;
     const maxGasPrice = Number(
@@ -643,7 +740,7 @@ const TransactionItem = ({
     });
   };
 
-  const handleClickCancel = async () => {
+  const handleOnChainCancel = async () => {
     if (!item.rawTx || !canCancel) return;
     const maxGasPrice = Number(
       item.rawTx.gasPrice || item.rawTx.maxFeePerGas || 0
@@ -665,6 +762,40 @@ const TransactionItem = ({
         },
       ],
     });
+    reload?.();
+  };
+
+  const handleQuickCancel = async () => {
+    if (!item.group) {
+      return;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    const maxGasTx = findMaxGasTx(item.group.txs);
+    if (maxGasTx?.reqId) {
+      try {
+        await walletController.quickCancelTx({
+          reqId: maxGasTx.reqId,
+          chainId: maxGasTx.rawTx.chainId,
+          nonce: +maxGasTx.rawTx.nonce,
+          address: maxGasTx.rawTx.from,
+        });
+        // reload?.();
+        message.success('Canceled');
+      } catch (e: any) {
+        message.error(e.message);
+      }
+    }
+    reload?.();
+  };
+
+  const handleCancelTx = (mode: CANCEL_TX_TYPE) => {
+    if (mode === CANCEL_TX_TYPE.QUICK_CANCEL) {
+      handleQuickCancel();
+    }
+    if (mode === CANCEL_TX_TYPE.ON_CHAIN_CANCEL) {
+      handleOnChainCancel();
+    }
+    setIsShowCancelPopup(false);
   };
 
   const projectName = (
@@ -743,15 +874,26 @@ const TransactionItem = ({
       )}
       {isPending && (
         <>
-          <PendingTag>
-            <img
-              src="rabby-internal://assets/icons/home/tx-pending.svg"
-              className="icon-pending"
-            />
-            Pending
-          </PendingTag>
-          <PendingTooltip timeAt={item.timeAt} />
-          <TxHash item={item} className="is-pending" />
+          <PendingTagGroup>
+            {item.group ? (
+              <TransactionPendingTag
+                item={item.group}
+                onReBroadcast={handleReBroadcast}
+                txRequests={txRequests || {}}
+              />
+            ) : (
+              <PendingTag>
+                <img
+                  src="rabby-internal://assets/icons/home/tx-pending.svg"
+                  className="icon-pending"
+                />
+                Pending
+              </PendingTag>
+            )}
+
+            <PendingTooltip timeAt={item.timeAt} />
+            <TxHash item={item} />
+          </PendingTagGroup>
           <Tooltip
             title={
               canCancel
@@ -876,6 +1018,16 @@ const TransactionItem = ({
               ))}
           </div>
         </ChildrenWrapper>
+      )}
+      {isPending && (
+        <CancelTxPopup
+          visible={isShowCancelPopup}
+          onClose={() => {
+            setIsShowCancelPopup(false);
+          }}
+          onCancelTx={handleCancelTx}
+          tx={maxGasTx}
+        />
       )}
     </TransactionItemWrapper>
   );
