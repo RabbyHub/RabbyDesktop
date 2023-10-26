@@ -81,13 +81,13 @@ export const TransactionPendingTag = ({
         />
         Pending: Broadcast failed{' '}
         <Tooltip
-          overlayClassName="rectangle max-w-[340px] w-[max-content]"
+          overlayClassName="rectangle max-w-[280px] w-[max-content]"
           placement="top"
           title={
             <div className="leading-[18px]">
               Broadcast failed. Last attempt: {sinceTime(pushAt)}{' '}
               <span
-                className="cursor-pointer underline "
+                className="cursor-pointer underline whitespace-nowrap"
                 onClick={() => {
                   onReBroadcast?.(maxGasTx);
                 }}
