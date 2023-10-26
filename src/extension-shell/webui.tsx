@@ -50,7 +50,10 @@ switch (shellUIType) {
     break;
   }
   case 'ForSpecialHardware': {
-    document.documentElement.classList.add('__rabbyx-trezor-like', 'popup-win');
+    document.documentElement.classList.add(
+      '__rabbyx-special-hardware',
+      'popup-win'
+    );
 
     const container = document.getElementById('topbar')!;
     const root = createRoot(container);
