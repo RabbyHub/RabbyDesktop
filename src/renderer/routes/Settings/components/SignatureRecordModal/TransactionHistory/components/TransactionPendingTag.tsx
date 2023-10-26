@@ -79,7 +79,7 @@ export const TransactionPendingTag = ({
           src="rabby-internal://assets/icons/home/tx-pending.svg"
           className="animate-spin"
         />
-        Pending: broadcast{' '}
+        Pending: Broadcast failed{' '}
         <Tooltip
           overlayClassName="rectangle max-w-[340px] w-[max-content]"
           placement="top"
@@ -109,9 +109,10 @@ export const TransactionPendingTag = ({
         src="rabby-internal://assets/icons/home/tx-pending.svg"
         className="animate-spin"
       />
-      Pending: broadcast{' '}
+      Pending: to be broadcasted{' '}
       <Tooltip
-        overlayClassName="rectangle max-w-[330px] w-[max-content]"
+        overlayClassName="rectangle max-w-[280px] w-[max-content]"
+        arrowPointAtCenter
         placement="top"
         title={
           <div className="leading-[18px]">
