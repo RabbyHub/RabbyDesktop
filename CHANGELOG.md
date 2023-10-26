@@ -1,9 +1,28 @@
 
-v0.35.2 / 2023-10-12
+v0.35.3 / 2023-10-26
 ====================
 
+  * fix: cannot open ens type dapp. (#583)
+  * feat: add broadcast mode (#581)
+  * style: tuning.
+  * fix: connect status style
+  * feat: update currentVersion.
+  * fix: make sure special hardware window having white background. (#582)
+  * feat: support more chains. (#579)
+  * feat: support gridplus (#578)
+  * feat: walletconnect v2 (#577)
+
+v0.35.2-prod / 2023-10-12
+=========================
+
+  * Release v0.35.2-prod
   * fix: avoid some data loading issue due to `ReactDOM.render` (#573)
   * feat: only alert upgrade on lock/home for specific versions (#572)
+
+v0.35.2-reg / 2023-10-12
+========================
+
+  * Release v0.35.2-reg
   * fix: support dapp which calls `window.etherum.request` before dom content loaded. (#571)
   * feat: try to improve perf usage on home/swap. (#555)
   * bundle nickname (#568)
