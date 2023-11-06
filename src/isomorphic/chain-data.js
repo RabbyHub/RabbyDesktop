@@ -21,9 +21,7 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["SBCH"] = "SBCH";
     CHAINS_ENUM["FUSE"] = "FUSE";
     CHAINS_ENUM["HMY"] = "HMY";
-    CHAINS_ENUM["PALM"] = "PALM";
     CHAINS_ENUM["ASTAR"] = "ASTAR";
-    CHAINS_ENUM["SDN"] = "SDN";
     CHAINS_ENUM["KLAY"] = "KLAY";
     CHAINS_ENUM["IOTX"] = "IOTX";
     CHAINS_ENUM["RSK"] = "RSK";
@@ -87,8 +85,6 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["AZETA"] = "AZETA";
     CHAINS_ENUM["TALT"] = "TALT";
     CHAINS_ENUM["GZORA"] = "GZORA";
-    CHAINS_ENUM["GTAIKO"] = "GTAIKO";
-    CHAINS_ENUM["ETAIKO"] = "ETAIKO";
     CHAINS_ENUM["SHIB"] = "SHIB";
     CHAINS_ENUM["TAVAX"] = "TAVAX";
     CHAINS_ENUM["PSHIB"] = "PSHIB";
@@ -119,6 +115,10 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["SCRL"] = "SCRL";
     CHAINS_ENUM["FX"] = "FX";
     CHAINS_ENUM["DFX"] = "DFX";
+    CHAINS_ENUM["TAURORA"] = "TAURORA";
+    CHAINS_ENUM["TCRO"] = "TCRO";
+    CHAINS_ENUM["SMODE"] = "SMODE";
+    CHAINS_ENUM["TIMXZE"] = "TIMXZE";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -468,38 +468,6 @@ export const CHAINS_RAW = {
         hex: "0x250",
         scanLink: "https://blockscout.com/astar/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/astar/a827be92d88617a918ea060a9a6f1572.png",
-        nativeTokenDecimals: 18,
-        eip: {
-            "1559": true,
-        },
-    },
-    [CHAINS_ENUM.PALM]: {
-        id: 11297108109,
-        serverId: "palm",
-        network: "11297108109",
-        name: "Palm",
-        nativeTokenSymbol: "PALM",
-        nativeTokenAddress: "palm",
-        enum: CHAINS_ENUM.PALM,
-        hex: "0x2a15c308d",
-        scanLink: "https://explorer.palm.io/tx/_s_",
-        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/palm/45160297f72604eef509ebb3d0d468e7.png",
-        nativeTokenDecimals: 18,
-        eip: {
-            "1559": false,
-        },
-    },
-    [CHAINS_ENUM.SDN]: {
-        id: 336,
-        serverId: "sdn",
-        network: "336",
-        name: "Shiden",
-        nativeTokenSymbol: "SDN",
-        nativeTokenAddress: "sdn",
-        enum: CHAINS_ENUM.SDN,
-        hex: "0x150",
-        scanLink: "https://blockscout.com/shiden/tx/_s_",
-        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/sdn/9b5bcaa0d5f102548f925e968a5e7a25.png",
         nativeTokenDecimals: 18,
         eip: {
             "1559": true,
@@ -1539,40 +1507,6 @@ export const CHAINS_RAW = {
         },
         isTestnet: true,
     },
-    [CHAINS_ENUM.GTAIKO]: {
-        id: 167005,
-        serverId: "gtaiko",
-        network: "167005",
-        name: "Taiko Grimsvotn L2 Testnet",
-        nativeTokenSymbol: "GrimsvotnETH",
-        nativeTokenAddress: "gtaiko",
-        enum: CHAINS_ENUM.GTAIKO,
-        hex: "0x28c5d",
-        scanLink: "https://explorer.test.taiko.xyz/tx/_s_",
-        nativeTokenLogo: "https://static.debank.com/image/gtaiko_token/logo_url/gtaiko/389dd9a835250219889e01d5a31a75f1.png",
-        nativeTokenDecimals: 18,
-        eip: {
-            "1559": true,
-        },
-        isTestnet: true,
-    },
-    [CHAINS_ENUM.ETAIKO]: {
-        id: 167006,
-        serverId: "etaiko",
-        network: "167006",
-        name: "Taiko Eldfell L3 Testnet",
-        nativeTokenSymbol: "EldfellETH",
-        nativeTokenAddress: "etaiko",
-        enum: CHAINS_ENUM.ETAIKO,
-        hex: "0x28c5e",
-        scanLink: "https://explorer.l3test.taiko.xyz/tx/_s_",
-        nativeTokenLogo: "https://static.debank.com/image/etaiko_token/logo_url/etaiko/389dd9a835250219889e01d5a31a75f1.png",
-        nativeTokenDecimals: 18,
-        eip: {
-            "1559": true,
-        },
-        isTestnet: true,
-    },
     [CHAINS_ENUM.SHIB]: {
         id: 109,
         serverId: "shib",
@@ -2077,6 +2011,74 @@ export const CHAINS_RAW = {
         nativeTokenAddress: "dfx",
         scanLink: "https://testnet.starscan.io/evm/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/dfx_token/logo_url/dfx/6fee82420b2394e0b68d7d7e692a0a01.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.TAURORA]: {
+        id: 1313161555,
+        serverId: "taurora",
+        name: "Aurora Testnet",
+        enum: CHAINS_ENUM.TAURORA,
+        hex: "0x4e454153",
+        network: "1313161555",
+        nativeTokenSymbol: "TestnetETH",
+        nativeTokenAddress: "taurora",
+        scanLink: "https://explorer.testnet.aurora.dev/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/taurora_token/logo_url/taurora/389dd9a835250219889e01d5a31a75f1.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.TCRO]: {
+        id: 338,
+        serverId: "tcro",
+        name: "Cronos Testnet",
+        enum: CHAINS_ENUM.TCRO,
+        hex: "0x152",
+        network: "338",
+        nativeTokenSymbol: "TestnetCRO",
+        nativeTokenAddress: "tcro",
+        scanLink: "https://explorer.cronos.org/testnet/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/tcro_token/logo_url/tcro/7803de9b434be197c2c1399465abdf39.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.SMODE]: {
+        id: 919,
+        serverId: "smode",
+        name: "Mode Sepolia Testnet",
+        enum: CHAINS_ENUM.SMODE,
+        hex: "0x397",
+        network: "919",
+        nativeTokenSymbol: "SepoliaETH",
+        nativeTokenAddress: "smode",
+        scanLink: "https://sepolia.explorer.mode.network/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/smode_token/logo_url/smode/389dd9a835250219889e01d5a31a75f1.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.TIMXZE]: {
+        id: 13472,
+        serverId: "timxze",
+        name: "Immutable zkEVM Testnet",
+        enum: CHAINS_ENUM.TIMXZE,
+        hex: "0x34a0",
+        network: "13472",
+        nativeTokenSymbol: "TestnetIMX",
+        nativeTokenAddress: "timxze",
+        scanLink: "https://explorer.testnet.immutable.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/timxze_token/logo_url/timxze/00b44115674fd159771862e3aedeaf9d.png",
         nativeTokenDecimals: 18,
         eip: {
             "1559": true,
