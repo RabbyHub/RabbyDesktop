@@ -9,7 +9,7 @@ import {
 import { DAPP_ZOOM_VALUES, EnumMatchDappType } from '@/isomorphic/constants';
 import { formatZoomValue } from '@/isomorphic/primitive';
 import { isTabUrlEntryOfHttpDappOrigin } from '@/isomorphic/dapp';
-import { Observable, Subject, filter, firstValueFrom } from 'rxjs';
+import { Subject, filter, firstValueFrom } from 'rxjs';
 import { randString } from '@/isomorphic/string';
 import { NATIVE_HEADER_H } from '../../isomorphic/const-size-classical';
 import {
@@ -314,6 +314,18 @@ export abstract class Tab {
       // TODO: why is this no longer called?
       this.tabWebContents!.emit('destroyed');
       // this.tabWebContents!.destroy?.()
+    }
+
+    const ofWindow = this.window;
+    if (ofWindow && !ofWindow?.isDestroyed()) {
+      sendToWebContents(
+        this.window?.webContents,
+        '__internal_push:tabbed-window2:destroy-webview',
+        {
+          tabUid: this.tabUid,
+          windowId: ofWindow.id,
+        }
+      );
     }
 
     this.window = undefined;
