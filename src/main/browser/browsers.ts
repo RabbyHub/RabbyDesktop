@@ -49,6 +49,10 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
 
   tabs: Tabs<TTab>;
 
+  activeTabRect: IMainWindowActiveTabRect = {
+    dappViewState: 'unmounted',
+  };
+
   // TODO: develop style for popup window
   // - [x] NO Close button
   // - [ ] No Tab Style, just transparent
@@ -97,7 +101,10 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
     });
     /* eslint-enable @typescript-eslint/naming-convention */
 
-    this.window.webContents.loadURL(webuiUrl);
+    const loadWebUIPromise = this.window.webContents.loadURL(webuiUrl);
+
+    // make sure ratio is 1
+    this.window.webContents.setZoomFactor(1);
 
     if (this.isMainWindow()) {
       // leave here for debug
@@ -161,19 +168,19 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
     this.tabs.on('tab-created', (tab: Tab) => {
       const url = tab.getInitialUrl() || options.defaultTabUrl;
       if (url) {
-        tab.view!.webContents.loadURL(url);
+        tab.tabWebContents?.loadURL(url);
       }
 
       // Track tab that may have been created outside of the extensions API.
-      this.extensions.addTab(tab.view!.webContents, tab.window!);
+      this.extensions.addTab(tab.tabWebContents!, tab.window!);
       this._pushDappsBoundIds();
     });
 
     this.tabs.on('tab-selected', (tab: Tab, prevTab?: Tab) => {
-      this.extensions.selectTab(tab.view!.webContents);
+      this.extensions.selectTab(tab.tabWebContents!);
       emitIpcMainEvent('__internal_main:tabbed-window:tab-selected', {
         windowId: this.window.id,
-        tabId: tab.view!.webContents.id,
+        tabId: tab.tabWebContents!.id,
       });
     });
 
@@ -195,21 +202,23 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
       tabbedWindow: this,
     });
 
-    queueMicrotask(() => {
-      // Create initial tab
-      if (!this.isMainWindow() && this.$meta.defaultOpen) {
-        this.createTab({
-          topbarStacks: this.isRabbyXNotificationWindow()
-            ? {
-                tabs: false,
-                navigation: false,
-              }
-            : {
-                tabs: true,
-                navigation: this.$meta.hasNavigationBar,
-              },
-        });
-      }
+    loadWebUIPromise.then(() => {
+      queueMicrotask(() => {
+        // Create initial tab
+        if (!this.isMainWindow() && this.$meta.defaultOpen) {
+          this.createTab({
+            topbarStacks: this.isRabbyXNotificationWindow()
+              ? {
+                  tabs: false,
+                  navigation: false,
+                }
+              : {
+                  tabs: true,
+                  navigation: this.$meta.hasNavigationBar,
+                },
+          });
+        }
+      });
     });
   }
 
@@ -234,14 +243,13 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
     if (!this.isMainWindow()) return;
 
     const dappBoundTabIds = this.tabs.tabList.reduce((acc, tab) => {
-      if (!tab.view) return acc;
+      if (!tab.tabWebContents) return acc;
       if (!tab.relatedDappId) return acc;
 
       if (tab.relatedDappId) {
-        acc[tab.relatedDappId] = tab.view!.webContents.id;
+        acc[tab.relatedDappId] = tab.tabWebContents!.id;
         if (isSpecialDappID(tab.relatedDappId)) {
-          acc[formatDappHttpOrigin(tab.relatedDappId)] =
-            tab.view!.webContents.id;
+          acc[formatDappHttpOrigin(tab.relatedDappId)] = tab.tabWebContents!.id;
         }
       }
 
@@ -284,7 +292,7 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
     return { ...this.$meta };
   }
 
-  createTab(options?: Parameters<Tabs['create']>[0]) {
+  async createTab(options?: Parameters<Tabs['create']>[0]) {
     return this.tabs.create({
       ...options,
       webuiType: this.$meta.webuiType,

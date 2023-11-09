@@ -8,6 +8,7 @@ import { AliveScope } from 'react-activation';
 import './webui.less';
 import '@/renderer/css/windicss';
 import '@/renderer/utils/rendererReport';
+import '@/renderer/utils-shell/webviewTagCreation';
 import '@/renderer/ipcRequest/zPopupMessage';
 
 import { MainWindow } from '@/renderer/components/MainWindow';

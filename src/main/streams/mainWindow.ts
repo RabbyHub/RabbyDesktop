@@ -192,16 +192,14 @@ async function getLatestCapturedActiveTab() {
   const mainWin = await onMainWindowReady();
 
   const activeTab = mainWin.tabs.selected;
-  if (!activeTab?.view) return null;
+  if (!activeTab?.tabWebContents) return null;
 
   let latestOne = captureState.image;
-  const imageP = captureWebContents(activeTab.view.webContents).then(
-    (image) => {
-      captureState.image = image ? resizeImage(image, 0.1) : null;
+  const imageP = captureWebContents(activeTab.tabWebContents).then((image) => {
+    captureState.image = image ? resizeImage(image, 0.1) : null;
 
-      return image;
-    }
-  );
+    return image;
+  });
 
   if (!latestOne) {
     latestOne = await imageP;
@@ -258,11 +256,11 @@ onIpcMainEvent('__internal_rpc:mainwindow:click-close', async (evt) => {
 onIpcMainInternalEvent(
   '__internal_main:mainwindow:capture-tab',
   async (payload) => {
-    if (payload?.type === 'clear') {
-      clearCaptureState();
-    } else {
-      getLatestCapturedActiveTab();
-    }
+    // if (payload?.type === 'clear') {
+    //   clearCaptureState();
+    // } else {
+    //   getLatestCapturedActiveTab();
+    // }
   }
 );
 
@@ -272,10 +270,10 @@ onIpcMainEvent(
     const mainTabbedWin = await onMainWindowReady();
     if (mainTabbedWin.window.id !== winId) return;
 
-    await clearCaptureState();
+    // await clearCaptureState();
     mainTabbedWin.tabs.select(tabId);
     mainTabbedWin.tabs.checkLoadingView();
-    getLatestCapturedActiveTab();
+    // getLatestCapturedActiveTab();
   }
 );
 
@@ -295,10 +293,10 @@ handleIpcMainInvoke('toggle-activetab-animating', async (_, animating) => {
   if (!activeTab) return;
 
   activeTab.toggleAnimating(animating);
-  const isLoading = !!activeTab.view?.webContents.isLoading();
+  const isLoading = !!activeTab.tabWebContents?.isLoading();
 
   if (!isLoading) {
-    await getLatestCapturedActiveTab();
+    // await getLatestCapturedActiveTab();
   } else {
     captureState.image = null;
   }
@@ -318,10 +316,10 @@ onIpcMainEvent(
       reports.rect.width = Math.round(reports.rect.width);
       reports.rect.height = Math.round(reports.rect.height);
 
-      updateMainWindowActiveTabRect(reports);
+      await updateMainWindowActiveTabRect(reports);
       activeTab?.setAnimatedMainWindowTabRect(reports.rect);
     } else if (reports.dappViewState === 'unmounted') {
-      updateMainWindowActiveTabRect({
+      await updateMainWindowActiveTabRect({
         dappViewState: 'unmounted',
       });
       mainTabbedWin.tabs.unSelectAll();
@@ -341,7 +339,7 @@ const { handler: handlerOpenFindInPage } = onIpcMainInternalEvent(
       return;
     }
 
-    if (!currentTab?.view) return;
+    if (!currentTab?.tabWebContents) return;
 
     switch (payload.type) {
       case 'start-find': {
@@ -358,7 +356,7 @@ const { handler: handlerOpenFindInPage } = onIpcMainInternalEvent(
       case 'find-forward': {
         if (currentTab.findInPageState.requestId <= 0) return;
 
-        currentTab.view.webContents.findInPage(
+        currentTab.tabWebContents?.findInPage(
           currentTab.findInPageState.searchText,
           {
             forward: true,
@@ -370,7 +368,7 @@ const { handler: handlerOpenFindInPage } = onIpcMainInternalEvent(
       case 'find-backward': {
         if (currentTab.findInPageState.requestId <= 0) return;
 
-        currentTab.view.webContents.findInPage(
+        currentTab.tabWebContents?.findInPage(
           currentTab.findInPageState.searchText,
           {
             forward: false,
@@ -432,7 +430,7 @@ handleIpcMainInvoke('__outer_rpc:mainwindow:is-dapp-view', async (evt) => {
   const webContents = evt.sender;
   const mainTabbedWin = await onMainWindowReady();
   const foundTab = mainTabbedWin.tabs.tabList.find(
-    (tab) => tab.view?.webContents === webContents
+    (tab) => tab.tabWebContents === webContents
   );
 
   return {
@@ -445,18 +443,32 @@ onIpcMainInternalEvent(
   async (zoomPercent) => {
     const mainTabbedWin = await onMainWindowReady();
 
+    const tabWebviewUIDs = [] as string[];
+
     mainTabbedWin.tabs.tabList.forEach((tab) => {
-      const webContents = tab.view?.webContents;
+      const webContents = tab.tabWebContents;
       if (!webContents) return;
 
-      sendToWebContents(
-        webContents,
-        '__internal_push:mainwindow:set-dapp-view-zoom',
-        {
-          zoomPercent: formatZoomValue(zoomPercent).zoomPercent,
-        }
-      );
+      tabWebviewUIDs.push(tab.tabUid);
+
+      // used for BrowserView based Tab solution
+      // sendToWebContents(
+      //   webContents,
+      //   '__internal_push:mainwindow:set-dapp-view-zoom',
+      //   {
+      //     zoomPercent: formatZoomValue(zoomPercent).zoomPercent,
+      //   }
+      // );
     });
+
+    sendToWebContents(
+      mainTabbedWin.window?.webContents,
+      '__internal_push:tabbed-window2:set-dapp-tabwebview-zoom',
+      {
+        zoomPercent: formatZoomValue(zoomPercent).zoomPercent,
+        tabWebviewUIDs,
+      }
+    );
   }
 );
 

@@ -148,8 +148,8 @@ export function handleIpcMainInvoke<T extends IInvokesKey = IInvokesKey>(
   eventName: T,
   handler: (
     event: Electron.IpcMainEvent,
-    ...args: ChannelInvokePayload[T]['send']
-  ) => ItOrItsPromise<ChannelInvokePayload[T]['response']>
+    ...args: GetInvokeMethodParams<T>
+  ) => ItOrItsPromise<GetInvokeMethodResponse<T>>
 ) {
   const wrappedHandler = (evt: Electron.IpcMainInvokeEvent, ...args: any[]) => {
     if (!isAllowedSender(eventName, evt)) return;

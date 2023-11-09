@@ -1,3 +1,5 @@
+/// <reference path="./ipc-exchange-tab.d.ts" />
+
 type RabbyxInvokePayload = {
   'rabbyx:get-app-version': {
     send: [];
@@ -508,7 +510,12 @@ type ChannelInvokePayload = {
       needAlertUpgrade: IAppUpdatorCheckResult['needAlertUpgrade'];
     };
   };
-} & RabbyxInvokePayload &
+} & ChannelInvokeForWebviewTabs &
+  RabbyxInvokePayload &
   RabbyDebugKitsInvokes;
 
 type IInvokesKey = keyof ChannelInvokePayload;
+type GetInvokeMethodParams<T extends IInvokesKey = IInvokesKey> =
+  ChannelInvokePayload[T]['send'];
+type GetInvokeMethodResponse<T extends IInvokesKey = IInvokesKey> =
+  ChannelInvokePayload[T]['response'];

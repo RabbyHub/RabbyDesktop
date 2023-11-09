@@ -8,6 +8,8 @@ import { CurrentAccountAndNewAccount } from '../CurrentAccount';
 import { MainWindowRouteData } from './type';
 
 import styles from './MainRoute.module.less';
+import { DappViewWrapper } from '../DappView';
+import { TopNavBar } from '../TopNavBar';
 
 function convertPathnameToClassName(pathname: string) {
   return pathname.replace(/\/|:/g, '_');
@@ -65,6 +67,12 @@ export default function MainWindowRoute({
   const navigate = useNavigate();
   const { onDarwinToggleMaxmize } = useWindowState();
 
+  const { isDappRoute } = useMemo(() => {
+    return {
+      isDappRoute: location.pathname.startsWith('/mainwin/dapps/'),
+    };
+  }, [location.pathname]);
+
   return (
     <div className={classNames(styles.MainWindowRoute, classNameOnRoute)}>
       {!matchedData?.noDefaultHeader && (
@@ -102,6 +110,11 @@ export default function MainWindowRoute({
           </div>
         </div>
       )}
+      <div style={{ display: isDappRoute ? 'block' : 'none' }}>
+        <DappViewWrapper>
+          <TopNavBar />
+        </DappViewWrapper>
+      </div>
       {children}
     </div>
   );

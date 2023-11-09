@@ -126,20 +126,23 @@ app.on('web-contents-created', async (evtApp, webContents) => {
           const dappTab =
             tabbedWin && findOpenedDappTab(tabbedWin, details.url, isToExt);
           if (dappTab) {
-            switchToBrowserTab(dappTab!.id, tabbedWin!);
+            switchToBrowserTab(dappTab!.tabId, tabbedWin!);
           } else if (mainTabbedWin === tabbedWin) {
             if (!isFromExt) {
-              const { finalTab: continualOpenedTab } = getOrCreateDappBoundTab(
-                mainTabbedWin,
-                details.url
+              getOrCreateDappBoundTab(mainTabbedWin, details.url).then(
+                ({ finalTab: continualOpenedTab }) => {
+                  continualOpenedTab?.loadURL(details.url);
+                }
               );
-              continualOpenedTab?.loadURL(details.url);
             } else {
-              const tab = mainTabbedWin.createTab({
-                initDetails: details,
-                dappZoomPercent: getMainWindowDappViewZoomPercent(),
-              });
-              tab?.loadURL(details.url);
+              mainTabbedWin
+                .createTab({
+                  initDetails: details,
+                  dappZoomPercent: getMainWindowDappViewZoomPercent(),
+                })
+                .then((tab) => {
+                  tab?.loadURL(details.url);
+                });
             }
           }
           break;
@@ -176,7 +179,7 @@ app.on('web-contents-created', async (evtApp, webContents) => {
       extensionMenuItems: (
         await getElectronChromeExtensions()
       ).getContextMenuItems(webContents, params),
-      openLink: (winURL, disposition) => {
+      openLink: async (winURL, disposition) => {
         const win = getFocusedWindow();
 
         switch (disposition) {
@@ -184,7 +187,7 @@ app.on('web-contents-created', async (evtApp, webContents) => {
             createWindow({ defaultTabUrl: winURL });
             break;
           default: {
-            const tab = win.createTab();
+            const tab = await win.createTab();
             tab.loadURL(winURL);
             break;
           }

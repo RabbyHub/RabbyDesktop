@@ -46,9 +46,6 @@ const CONF = {
     subject: new ReplaySubject(1),
     once: true,
   } as IConf<ReplaySubject<MainTabbedBrowserWindow>>,
-  mainWindowActiveTabRect: {
-    subject: new Subject(),
-  } as IConf<Subject<IMainWindowActiveTabRect>>,
   dappLoadingView: {
     subject: new ReplaySubject(1),
     once: true,

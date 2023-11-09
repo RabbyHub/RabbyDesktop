@@ -15,11 +15,13 @@ import { setupDapp } from '../preloads/setup-dapp';
 import { getBuiltinViewType, isExtensionBackground } from '../isomorphic/url';
 import { injectMatomo } from '../preloads/global-inject';
 import { injectAlertMethods } from '../preloads/setup-alert';
+import { setupWindowShell } from '../preloads/setup-windowshell';
 
-if (
+const isWindowShellPage =
   window.location.protocol === 'chrome-extension:' &&
-  window.location.pathname === '/webui.html'
-) {
+  window.location.pathname === '/webui.html';
+
+if (isWindowShellPage) {
   // Inject <browser-action-list> element into WebUI
   injectBrowserAction();
 }
@@ -61,6 +63,11 @@ if (IS_BUILTIN_WEBVIEW && !window.rabbyDesktop) {
 if (IS_BUILTIN_WEBVIEW) {
   setupClass();
   injectMatomo();
+}
+
+if (isWindowShellPage) {
+  // Inject <browser-action-list> element into WebUI
+  setupWindowShell();
 }
 
 setupDapp();

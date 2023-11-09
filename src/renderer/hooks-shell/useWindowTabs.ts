@@ -71,17 +71,8 @@ export function useWindowTabs() {
   }, [setTabList, updateActiveTab]);
 
   /* eslint-disable @typescript-eslint/no-shadow */
-  const {
-    tabMapGroupByRealtimeOrigin,
-    tabMapBySecondaryMap,
-    tabsGroupById,
-    activeTab,
-  } = useMemo(() => {
+  const { tabMapBySecondaryMap, tabsGroupById, activeTab } = useMemo(() => {
     let activeTab = null as ChromeTabWithOrigin | null;
-    const tabMapGroupByRealtimeOrigin = new Map<
-      ChromeTabWithOrigin['dappOrigin'],
-      ChromeTabWithOrigin
-    >();
     const tabMapBySecondaryMap = new Map<string, ChromeTabWithOrigin>();
     const tabsGroupById: Record<
       chrome.tabs.Tab['id'] & number,
@@ -98,7 +89,6 @@ export function useWindowTabs() {
       }
 
       const parsed = canoicalizeDappUrl(tab.dappOrigin);
-      tabMapGroupByRealtimeOrigin.set(tab.dappOrigin, tab);
       tabMapBySecondaryMap.set(parsed.secondaryDomain, tab);
 
       if (typeof tab.id === 'number') {
@@ -109,7 +99,6 @@ export function useWindowTabs() {
     });
 
     return {
-      tabMapGroupByRealtimeOrigin,
       tabMapBySecondaryMap,
       tabsGroupById,
       activeTab,
@@ -118,8 +107,6 @@ export function useWindowTabs() {
   /* eslint-enable @typescript-eslint/no-shadow */
 
   return {
-    /** @deprecated */
-    tabMapGroupByRealtimeOrigin,
     /** @deprecated */
     tabMapBySecondaryMap,
     tabsGroupById,

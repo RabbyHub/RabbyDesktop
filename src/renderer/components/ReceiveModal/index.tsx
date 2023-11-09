@@ -226,10 +226,9 @@ export const ReceiveModalWraper = ({
     onCancel?.();
   }, [onCancel, setState]);
 
-  const { open: openChainModal } = useSwitchChainModal(
-    handleChange,
-    handleCancel
-  );
+  const { open: openChainModal } = useSwitchChainModal(handleChange, {
+    onCancelCb: handleCancel,
+  });
   const ref = useRef(openChainModal);
 
   useEffect(() => {

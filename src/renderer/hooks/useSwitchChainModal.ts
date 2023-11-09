@@ -5,14 +5,18 @@ import { useZPopupLayerOnMain } from './usePopupWinOnMainwin';
 
 export const useSwitchChainModal = <T extends HTMLElement>(
   cb?: (c: CHAINS_ENUM) => void,
-  onCancelCb?: () => void,
-  clickOutSide = true
+  options?: {
+    onCancelCb?: () => void;
+    closeOnClickaway?: boolean;
+  }
 ) => {
   const ref = useRef<T>(null);
   const ZActions = useZPopupLayerOnMain();
 
+  const { onCancelCb, closeOnClickaway } = options || {};
+
   useClickOutSide(ref, () => {
-    if (clickOutSide) {
+    if (closeOnClickaway) {
       ZActions.hideZSubview('switch-chain');
     }
   });

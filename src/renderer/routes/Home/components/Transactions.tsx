@@ -23,6 +23,7 @@ import styled from 'styled-components';
 import { TransactionModal } from '@/renderer/components/TransactionsModal';
 import { findMaxGasTx } from '@/isomorphic/tx';
 import { useMount } from 'ahooks';
+import { useComponentIsActive } from '@/renderer/hooks/useReactActivation';
 import TransactionItem, { LoadingTransactionItem } from './TransactionItem';
 import { useLoadTxRequests } from '../../Settings/components/SignatureRecordModal/TransactionHistory/hooks';
 import { SkipNonceAlert } from '../../Settings/components/SignatureRecordModal/TransactionHistory/components/SkipNonceAlert';
@@ -480,6 +481,8 @@ const Transactions = ({
     setIsShowAll(false);
   }, [location.hash]);
 
+  const { isActivate } = useComponentIsActive();
+
   if (isLoading) {
     return (
       <TransactionWrapper>
@@ -536,25 +539,29 @@ const Transactions = ({
         reload={init}
       />
       <TransactionList>
-        {filterTestnet(pendingTxs, isTestnet).map((tx) => {
-          return (
-            <TransactionItem
-              item={tx}
-              key={`${tx.chain}-${tx.id}`}
-              txRequests={txRequests}
-              canCancel={
-                minBy(
-                  pendingTxs.filter((i) => i.chain === tx.chain),
-                  (i) => i.rawTx?.nonce
-                )?.rawTx?.nonce === tx.rawTx?.nonce
-              }
-              reload={init}
-            />
-          );
-        })}
-        {mergedRecentTxs.map((tx) => {
-          return <TransactionItem item={tx} key={`${tx.chain}-${tx.id}`} />;
-        })}
+        {!isActivate
+          ? null
+          : filterTestnet(pendingTxs, isTestnet).map((tx) => {
+              return (
+                <TransactionItem
+                  item={tx}
+                  key={`${tx.chain}-${tx.id}`}
+                  txRequests={txRequests}
+                  canCancel={
+                    minBy(
+                      pendingTxs.filter((i) => i.chain === tx.chain),
+                      (i) => i.rawTx?.nonce
+                    )?.rawTx?.nonce === tx.rawTx?.nonce
+                  }
+                  reload={init}
+                />
+              );
+            })}
+        {!isActivate
+          ? null
+          : mergedRecentTxs.map((tx) => {
+              return <TransactionItem item={tx} key={`${tx.chain}-${tx.id}`} />;
+            })}
       </TransactionList>
       <ViewAllButton
         onClick={() => {

@@ -589,7 +589,7 @@ const { handler: handlerToggleShow } = onIpcMainInternalEvent(
       }
     } else {
       if (payload.type === 'in-dapp-find') {
-        mainTabbedWin.tabs.selected?.view?.webContents.focus();
+        mainTabbedWin.tabs.selected?.tabWebContents?.focus();
       }
       hidePopupViewOnWindow(targetView, payload.type);
     }

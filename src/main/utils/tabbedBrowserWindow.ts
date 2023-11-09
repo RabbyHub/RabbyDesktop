@@ -73,7 +73,7 @@ export function checkoutTabbedWindow(
   const window = getWindowFromWebContents(webContents);
   const tabbedWindow = window ? getWindowFromBrowserWindow(window) : null;
   const foundTab = tabbedWindow?.tabs.tabList.find(
-    (tab) => tab.view?.webContents.id === webContents.id
+    (tab) => tab.tabWebContents?.id === webContents.id
   );
   const matchedDappInfo = foundTab?.relatedDappId
     ? findDappsByOrigin(foundTab.relatedDappId, dapps)
@@ -132,13 +132,13 @@ type IGetTabFromMainWindowResult = {
   createdTab: Tab | null;
   finalTab: Tab | null;
 };
-export function getOrCreateDappBoundTab(
+export async function getOrCreateDappBoundTab(
   mainTabbedWin: MainTabbedBrowserWindow,
   targetURL: string,
   opts?: {
     targetMatchedDappResult: IMatchDappResult;
   }
-): IGetTabFromMainWindowResult {
+): Promise<IGetTabFromMainWindowResult> {
   const parsedInfo =
     typeof targetURL === 'string' ? canoicalizeDappUrl(targetURL) : targetURL;
 
@@ -174,7 +174,7 @@ export function getOrCreateDappBoundTab(
   if (!matchedDappResult.dapp) return result;
 
   if (!existedTab) {
-    const createdTab = mainTabbedWin.createTab({
+    const createdTab = await mainTabbedWin.createTab({
       initDetails: { url: targetURL },
       relatedDappId: checkoutDappURL(matchedDappResult.dapp.origin).dappHttpID,
       dappZoomPercent: getMainWindowDappViewZoomPercent(),
@@ -192,7 +192,7 @@ export function getOrCreateDappBoundTab(
       '__internal_push:mainwindow:opened-dapp-tab',
       {
         dappId: foundDapp.id,
-        tabId: result.finalTab?.id,
+        tabId: result.finalTab?.tabId,
         dappOrigin: foundDapp.origin,
       }
     );
@@ -215,8 +215,8 @@ function getAllRabbyXWindowWebContentsList() {
 
     // find all rabbyx sign tabs
     tabbedBrowserWindow?.tabs.tabList.forEach((tab) => {
-      if (tab.view?.webContents && !tab.view?.webContents.isDestroyed()) {
-        webContentsList.push(tab.view?.webContents);
+      if (tab.tabWebContents && !tab.tabWebContents?.isDestroyed()) {
+        webContentsList.push(tab.tabWebContents);
       }
     });
   });

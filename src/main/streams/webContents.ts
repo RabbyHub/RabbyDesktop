@@ -18,12 +18,12 @@ import { safeOpenExternalURL } from '../utils/security';
 /**
  * @deprecated
  */
-export function openTabOfDapp(
+export async function openTabOfDapp(
   mainTabbedWin: MainTabbedBrowserWindow,
   url: string
 ) {
   // find if opened tab already
-  const { finalTab: continualOpenedTab } = getOrCreateDappBoundTab(
+  const { finalTab: continualOpenedTab } = await getOrCreateDappBoundTab(
     mainTabbedWin,
     url
   );
@@ -95,7 +95,7 @@ export function setOpenHandlerForTabbedWebContents({
           const openedDapp =
             parentTabbedWin?.tabs.findBySecondaryDomain(targetURL);
           if (openedDapp) {
-            switchToBrowserTab(openedDapp!.id, parentTabbedWin!);
+            switchToBrowserTab(openedDapp!.tabId, parentTabbedWin!);
 
             /**
              * sometimes, targetURL has same origin with currentUrl.
@@ -115,8 +115,8 @@ export function setOpenHandlerForTabbedWebContents({
               }, 200);
             }
           } else {
-            onMainWindowReady().then((mainTabbedWin) => {
-              const { finalTab } = getOrCreateDappBoundTab(
+            onMainWindowReady().then(async (mainTabbedWin) => {
+              const { finalTab } = await getOrCreateDappBoundTab(
                 mainTabbedWin,
                 targetURL
               );

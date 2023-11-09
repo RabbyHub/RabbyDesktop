@@ -218,11 +218,7 @@ const router = createRouter([
       },
       {
         path: 'dapps/:dappId',
-        element: (
-          <DappViewWrapper>
-            <TopNavBar />
-          </DappViewWrapper>
-        ),
+        element: null, // delegate to MainRoute
         loader: () => {
           return {
             floatingAccountComponent: true,

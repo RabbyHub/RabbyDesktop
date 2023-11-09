@@ -22,24 +22,26 @@ async function __rbCheckRequestable(reqData: any) {
   }
 }
 
+// used for BrowserView based Tab solution
 async function setupDappZoomEvents() {
-  const checkResult = await ipcRendererObj.invoke(
-    '__outer_rpc:mainwindow:is-dapp-view'
-  );
-  if (!checkResult.isDappView) {
-    return;
-  }
-
-  const dispose = ipcRendererObj.on(
-    '__internal_push:mainwindow:set-dapp-view-zoom',
-    ({ zoomPercent }) => {
-      webFrame.setZoomFactor(formatZoomValue(zoomPercent).zoomFactor);
-    }
-  );
-
-  document.addEventListener('beforeunload', () => {
-    dispose?.();
-  });
+  // const checkResult = await ipcRendererObj.invoke(
+  //   '__outer_rpc:mainwindow:is-dapp-view'
+  // );
+  // if (!checkResult.isDappView) {
+  //   return;
+  // }
+  // const dispose = ipcRendererObj.on(
+  //   '__internal_push:mainwindow:set-dapp-view-zoom',
+  //   ({ zoomPercent }) => {
+  //     /**
+  //      * TODO: disable here temporarily, for new webview tag based Tab solution, we should change <webview />
+  //      */
+  //     // webFrame.setZoomFactor(formatZoomValue(zoomPercent).zoomFactor);
+  //   }
+  // );
+  // document.addEventListener('beforeunload', () => {
+  //   dispose?.();
+  // });
 }
 
 function nativeMountRequestable({
