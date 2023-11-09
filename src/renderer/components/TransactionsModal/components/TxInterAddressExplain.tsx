@@ -50,7 +50,10 @@ export const TxInterAddressExplain = ({
       </div>
     );
   } else if (isApprove) {
-    const approveToken = tokenDict[data.token_approve?.token_id || ''];
+    const tokenId = data.token_approve?.token_id || '';
+    const tokenUUID = `${data.chain}_token:${tokenId}`;
+
+    const approveToken = tokenDict[tokenId] || tokenDict[tokenUUID];
     const amount = data.token_approve?.value || 0;
 
     interAddressExplain = (

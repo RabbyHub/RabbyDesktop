@@ -27,7 +27,6 @@ export const TxChange = ({ data: info, tokenDict }: TxChangeProps) => {
   const [nft, setNft] = useState<NFTItem | undefined>(undefined);
 
   const handleClick = async (token: TokenItem, isNft: boolean) => {
-    console.log(token);
     if (isNft) {
       setNft(token as any);
       return;
@@ -46,7 +45,8 @@ export const TxChange = ({ data: info, tokenDict }: TxChangeProps) => {
   return (
     <div className={classNames(styles.txChange, styles.colTxChange)}>
       {info.sends?.map((v) => {
-        const token = tokens[v.token_id];
+        const tokenUUID = `${info.chain}_token:${v.token_id}`;
+        const token = tokens[v.token_id] || tokens[tokenUUID];
         const isNft = v.token_id?.length === 32;
         const symbol = getTokenSymbol(token);
         const name = isNft
@@ -97,7 +97,8 @@ export const TxChange = ({ data: info, tokenDict }: TxChangeProps) => {
         );
       })}
       {info.receives?.map((v) => {
-        const token = tokens[v.token_id];
+        const tokenUUID = `${info.chain}_token:${v.token_id}`;
+        const token = tokens[v.token_id] || tokens[tokenUUID];
         const isNft = v.token_id?.length === 32;
         const symbol = getTokenSymbol(token);
         const name = isNft

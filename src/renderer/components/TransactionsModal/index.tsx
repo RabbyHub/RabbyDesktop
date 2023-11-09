@@ -1,70 +1,82 @@
 import { Modal } from '@/renderer/components/Modal/Modal';
-import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-import { range } from 'lodash';
-import { useEffect, useRef } from 'react';
 import clsx from 'clsx';
+import { useEffect, useState } from 'react';
 import { usePrevious } from 'react-use';
-import { Empty } from './components/Empty';
-import { Loading } from './components/Loading';
-import { TransactionItem } from './components/TransactionItem';
-import { useTxHistory } from './hooks/useTxHistory';
-import { useTxSource } from './hooks/useTxSource';
-import styles from './index.module.less';
 import NetSwitchTabs, {
   NetSwitchTabsKey,
   useSwitchNetTab,
 } from '../PillsSwitch/NetSwitchTabs';
+import { HistoryList } from './components/HistoryList';
+import styles from './index.module.less';
 
-const Transactions = ({ testnet = false }: { testnet?: boolean }) => {
-  const { currentAccount } = useCurrentAccount();
-  const ref = useRef<HTMLDivElement>(null);
-
-  const { data, loading, loadingMore, mutate } = useTxHistory(
-    currentAccount?.address as unknown as string,
-    ref,
-    testnet
-  );
-
-  useEffect(() => {
-    mutate({
-      last: 0,
-      list: [],
-    });
-    ref?.current?.scrollTo(0, 0);
-  }, [currentAccount?.address, mutate]);
-
-  const isEmpty = !loading && data?.list.length === 0;
-
-  const source = useTxSource(currentAccount?.address as unknown as string);
-
+const Transactions = ({
+  onFilterScamClick,
+  isShowTestnet,
+  selectedTab,
+  onTabChange,
+}: {
+  onFilterScamClick?(): void;
+  isShowTestnet: boolean;
+  selectedTab: NetSwitchTabsKey;
+  onTabChange(key: NetSwitchTabsKey): void;
+}) => {
   return (
-    <div ref={ref} className={styles.page}>
-      {isEmpty ? (
-        <Empty />
-      ) : (
-        <div className={styles.container}>
-          {loading ? (
-            range(5).map((i) => <Loading key={i} />)
-          ) : (
-            <>
-              {data?.list.map((item) => {
-                return (
-                  <TransactionItem
-                    key={item.id}
-                    data={item}
-                    projectDict={item.projectDict}
-                    cateDict={item.cateDict}
-                    tokenDict={item.tokenDict}
-                    origin={source?.get([item.chain, item.id].join('|'))}
-                  />
-                );
-              })}
-              {loadingMore && <Loading />}
-            </>
-          )}
+    <>
+      <div
+        className={clsx(
+          styles.transactionModalTitle,
+          isShowTestnet && 'mb-[20px]'
+        )}
+      >
+        Transactions
+      </div>
+      {isShowTestnet && (
+        <div className="flex justify-center mb-[8px]">
+          <NetSwitchTabs
+            value={selectedTab}
+            onTabChange={onTabChange}
+            itemClassname="font-normal"
+          />
         </div>
       )}
-    </div>
+      <div
+        className="px-[32px] text-r-neutral-body text-[13px] leading-[16px] flex items-center mb-[13px] cursor-pointer"
+        onClick={onFilterScamClick}
+      >
+        Hide scam transactions{' '}
+        <img
+          src="rabby-internal://assets/icons/transaction/icon-right.svg"
+          alt=""
+        />
+      </div>
+      <HistoryList
+        testnet={isShowTestnet && selectedTab === 'testnet'}
+        key={selectedTab}
+      />
+    </>
+  );
+};
+
+const NoScamTransactions = ({
+  testnet = false,
+  onBack,
+}: {
+  testnet?: boolean;
+  onBack?(): void;
+}) => {
+  return (
+    <>
+      <div className={clsx(styles.transactionModalTitle, 'relative')}>
+        <img
+          src="rabby-internal://assets/icons/transaction/icon-back.svg"
+          alt=""
+          className="absolute left-[32px] top-1/2 transform -translate-y-1/2 cursor-pointer"
+          onClick={onBack}
+        />
+        Hide scam transactions
+      </div>
+      <HistoryList testnet={testnet} isFilterScam />
+    </>
   );
 };
 
@@ -80,12 +92,19 @@ export const TransactionModal = ({
 }: TransactionModalProps) => {
   const { isShowTestnet, onTabChange, selectedTab } = useSwitchNetTab();
   const prevOpen = usePrevious(open);
+  const [isFilterScam, setIsFilterScam] = useState(false);
 
   useEffect(() => {
     if (!prevOpen && open && initialTabOnOpen) {
       onTabChange(initialTabOnOpen);
     }
   }, [prevOpen, open, initialTabOnOpen, onTabChange]);
+
+  useEffect(() => {
+    if (open) {
+      setIsFilterScam(false);
+    }
+  }, [open]);
 
   return (
     <Modal
@@ -96,25 +115,24 @@ export const TransactionModal = ({
       centered
       destroyOnClose
     >
-      <div
-        className={clsx(styles.transactionModalTitle, isShowTestnet && 'pb-18')}
-      >
-        Transactions
-      </div>
-      {isShowTestnet && (
-        <div className="flex justify-center mb-32">
-          <NetSwitchTabs
-            value={selectedTab}
-            onTabChange={onTabChange}
-            itemClassname="font-normal"
-          />
-        </div>
+      {isFilterScam ? (
+        <NoScamTransactions
+          testnet={selectedTab === 'testnet'}
+          onBack={() => {
+            setIsFilterScam(false);
+          }}
+        />
+      ) : (
+        <Transactions
+          key={selectedTab}
+          isShowTestnet={isShowTestnet}
+          selectedTab={selectedTab}
+          onTabChange={onTabChange}
+          onFilterScamClick={() => {
+            setIsFilterScam(true);
+          }}
+        />
       )}
-
-      <Transactions
-        testnet={isShowTestnet && selectedTab === 'testnet'}
-        key={selectedTab}
-      />
     </Modal>
   );
 };
