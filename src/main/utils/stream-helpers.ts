@@ -98,21 +98,18 @@ export async function toggleMaskViaOpenedRabbyxNotificationWindow() {
   __internalToggleRabbyxGasketMask(RABBYX_WINDOWID_S.size > 0);
 }
 
-const INIT_ACTIVE_TAB_RECT: IMainWindowActiveTabRect = {
-  dappViewState: 'unmounted',
-};
-
 export async function getMainWindowActiveTabRect() {
-  return (
-    lastValueFrom(fromMainSubject('mainWindowActiveTabRect')) ||
-    INIT_ACTIVE_TAB_RECT
-  );
+  const mainTabbedWin = await onMainWindowReady();
+
+  return mainTabbedWin.activeTabRect;
 }
 
-export function updateMainWindowActiveTabRect(
+export async function updateMainWindowActiveTabRect(
   rectState: IMainWindowActiveTabRect
 ) {
-  valueToMainSubject('mainWindowActiveTabRect', rectState);
+  const mainTabbedWin = await onMainWindowReady();
+
+  mainTabbedWin.activeTabRect = rectState;
 }
 
 export async function getAllMainUIWindows() {

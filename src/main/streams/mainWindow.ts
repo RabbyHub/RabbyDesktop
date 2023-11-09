@@ -316,10 +316,10 @@ onIpcMainEvent(
       reports.rect.width = Math.round(reports.rect.width);
       reports.rect.height = Math.round(reports.rect.height);
 
-      updateMainWindowActiveTabRect(reports);
+      await updateMainWindowActiveTabRect(reports);
       activeTab?.setAnimatedMainWindowTabRect(reports.rect);
     } else if (reports.dappViewState === 'unmounted') {
-      updateMainWindowActiveTabRect({
+      await updateMainWindowActiveTabRect({
         dappViewState: 'unmounted',
       });
       mainTabbedWin.tabs.unSelectAll();

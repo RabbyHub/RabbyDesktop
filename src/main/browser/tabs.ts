@@ -34,7 +34,11 @@ import {
   notifyHideFindInPage,
 } from '../utils/mainTabbedWin';
 import { getMainWindowTopOffset } from '../utils/browserSize';
-import { getRabbyExtId } from '../utils/stream-helpers';
+import {
+  getMainWindowActiveTabRect,
+  getRabbyExtId,
+  onMainWindowReady,
+} from '../utils/stream-helpers';
 
 const viewMngr = new BrowserViewManager(
   {
@@ -660,8 +664,14 @@ export class MainWindowTab extends Tab {
 
     this.findInPageState = { ...this.findInPageState, windowOpen: true };
 
-    // const viewBounds = this.view.getBounds();
-    // notifyShowFindInPage({ x: viewBounds.x, y: viewBounds.y }, this.tabId!);
+    if (this.isOfMainWindow) {
+      getMainWindowActiveTabRect().then((rectState) => {
+        if (rectState.dappViewState !== 'mounted') return;
+
+        const rect = rectState.rect;
+        notifyShowFindInPage({ x: rect.x, y: rect.y }, this.tabId!);
+      });
+    }
   }
 
   clearFindInPageResult() {

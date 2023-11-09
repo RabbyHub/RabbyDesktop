@@ -49,6 +49,10 @@ export default class TabbedBrowserWindow<TTab extends Tab = Tab> {
 
   tabs: Tabs<TTab>;
 
+  activeTabRect: IMainWindowActiveTabRect = {
+    dappViewState: 'unmounted',
+  };
+
   // TODO: develop style for popup window
   // - [x] NO Close button
   // - [ ] No Tab Style, just transparent
