@@ -1,8 +1,8 @@
 diff --git a/node_modules/@debank/common/dist/chain-data.js b/node_modules/@debank/common/dist/chain-data.js
-index 225e143..414a2f1 100644
+index c39a205..cacbefe 100644
 --- a/node_modules/@debank/common/dist/chain-data.js
 +++ b/node_modules/@debank/common/dist/chain-data.js
-@@ -54,7 +54,7 @@ export var CHAINS_ENUM;
+@@ -52,7 +52,7 @@ export var CHAINS_ENUM;
      CHAINS_ENUM["FSN"] = "FSN";
      CHAINS_ENUM["PULSE"] = "PULSE";
      CHAINS_ENUM["ROSE"] = "ROSE";
@@ -11,7 +11,7 @@ index 225e143..414a2f1 100644
      CHAINS_ENUM["OAS"] = "OAS";
      CHAINS_ENUM["ZORA"] = "ZORA";
      CHAINS_ENUM["LINEA"] = "LINEA";
-@@ -985,22 +985,22 @@ export const CHAINS_RAW = {
+@@ -953,22 +953,22 @@ export const CHAINS_RAW = {
              "1559": true,
          },
      },
