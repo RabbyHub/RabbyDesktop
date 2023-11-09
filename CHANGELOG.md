@@ -1,7 +1,17 @@
 
-v0.35.3 / 2023-10-26
+v0.36.0 / 2023-11-09
 ====================
 
+  * chore: update currentVersion.
+  * feat: webview based mainWindow tab (#543)
+  * fix: no effect on clicking retry update (#587)
+  * feat: filter scam (#585)
+  * feat: upgrade chains. (#584)
+
+v0.35.3-prod / 2023-10-26
+=========================
+
+  * Release v0.35.3-prod
   * fix: cannot open ens type dapp. (#583)
   * feat: add broadcast mode (#581)
   * style: tuning.
