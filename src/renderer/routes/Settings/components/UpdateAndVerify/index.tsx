@@ -124,16 +124,19 @@ function UpdateAndVerifyButton({
     );
   }
 
+  const isErrored =
+    stepCheckConnected === 'error' || stepDownloadUpdate === 'error';
+
   return (
     <div
       className={classNames(styles.updateAndVerifyBtn, className)}
       onClick={async (evt) => {
         evt.stopPropagation();
-        if (stepCheckConnected !== 'finish') {
-          const isValid = await checkDownloadAvailble();
-          if (isValid) {
-            await requestDownload();
-          }
+        if (!isErrored && stepCheckConnected === 'finish') return;
+
+        const isValid = await checkDownloadAvailble();
+        if (isValid) {
+          await requestDownload();
         }
       }}
     >
@@ -143,9 +146,7 @@ function UpdateAndVerifyButton({
         alt=""
       /> */}
       <div className={styles.btnText}>
-        {stepCheckConnected === 'error' || stepDownloadUpdate === 'error'
-          ? 'Retry Update'
-          : 'Update'}
+        {isErrored ? 'Retry Update' : 'Update'}
       </div>
     </div>
   );
