@@ -39,6 +39,7 @@ npm-debug.log.*
 assets/*.zip
 
 tmp.iconset
+/tmp
 
 minio-root
 
