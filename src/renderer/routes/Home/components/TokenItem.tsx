@@ -212,7 +212,10 @@ const TokenItemComp = ({
           </Tooltip>
         </div> */}
       </TokenLogoField>
-      <TokenPriceField>{`$${formatPrice(token.price || 0)}`}</TokenPriceField>
+      <TokenPriceField>{`$${formatPrice(
+        token.price || 0,
+        8
+      )}`}</TokenPriceField>
       <TokenAmountField>
         <span>
           {formatAmount(token.amount)}{' '}

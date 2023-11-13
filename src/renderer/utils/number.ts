@@ -69,7 +69,7 @@ export const formatNumber = (
   return n.toFormat(decimal, format);
 };
 
-export const formatPrice = (price: string | number) => {
+export const formatPrice = (price: string | number, decimal = 4) => {
   // @ts-expect-error maybe string but could compare here
   if (price >= 1) {
     return formatNumber(price);
@@ -77,11 +77,11 @@ export const formatPrice = (price: string | number) => {
   // @ts-expect-error maybe string but could compare here
   if (price < 0.00001) {
     if (price.toString().length > 10) {
-      return Number(price).toExponential(4);
+      return Number(price).toExponential(decimal);
     }
     return price.toString();
   }
-  return formatNumber(price, 4);
+  return formatNumber(price, decimal);
 };
 
 export const formatUsdValue = (value: string | number) => {
