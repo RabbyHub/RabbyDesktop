@@ -67,9 +67,17 @@ export function getTabbedWindowFromWebContents(
 }
 
 export function checkoutTabbedWindow(
-  webContents: BrowserWindow['webContents'],
+  webContents?: BrowserWindow['webContents'] | null,
   dapps: IDapp[] = getAllDapps()
 ) {
+  if (!webContents) {
+    return {
+      parentWindow: null,
+      tabbedWindow: null,
+      foundTab: null,
+      matchedDappInfo: null,
+    };
+  }
   const window = getWindowFromWebContents(webContents);
   const tabbedWindow = window ? getWindowFromBrowserWindow(window) : null;
   const foundTab = tabbedWindow?.tabs.tabList.find(

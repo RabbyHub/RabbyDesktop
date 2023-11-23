@@ -1,11 +1,10 @@
 import { getBaseHref } from '@/isomorphic/url';
-import { shell } from 'electron';
 import { EnumOpenDappAction } from '@/isomorphic/constants';
 import TabbedBrowserWindow, {
   MainTabbedBrowserWindow,
 } from '../browser/browsers';
 import { getAllDapps, parseDappRedirect } from '../store/dapps';
-import { switchToBrowserTab } from '../utils/browser';
+import { getWebContentsFromEvent, switchToBrowserTab } from '../utils/browser';
 import { safeOpenURL } from './dappSafeview';
 import {
   checkoutTabbedWindow,
@@ -146,7 +145,8 @@ export const setListeners = {
   'will-redirect': (webContents: Electron.WebContents) => {
     webContents.on('will-redirect', (evt, targetURL, isInPlace) => {
       if (!webContents) return;
-      const evtWebContents = (evt as any).sender as Electron.WebContents;
+      const evtWebContents = getWebContentsFromEvent(evt);
+
       const dapps = getAllDapps();
 
       const { tabbedWindow, foundTab, matchedDappInfo } = checkoutTabbedWindow(
@@ -219,62 +219,60 @@ export const setListeners = {
     webContents: Electron.WebContents,
     parentWindow: Electron.BrowserWindow
   ) => {
-    webContents.on(
-      'will-navigate',
-      (evt: Electron.Event, targetURL: string) => {
-        const evtWebContents = (evt as any).sender as Electron.WebContents;
-        const currentUrl = evtWebContents.getURL();
+    webContents.on('will-navigate', (evt, targetURL: string) => {
+      const evtWebContents = getWebContentsFromEvent(evt);
+      const currentUrl = evtWebContents?.getURL();
+      if (!currentUrl) return false;
 
-        const dapps = getAllDapps();
-        const { tabbedWindow, foundTab } = checkoutTabbedWindow(
-          evtWebContents,
-          dapps
-        );
+      const dapps = getAllDapps();
+      const { tabbedWindow, foundTab } = checkoutTabbedWindow(
+        evtWebContents,
+        dapps
+      );
 
-        const {
-          targetInfo,
-          // actually, it's always from dapp on isMainContentsForTabbedWindow=false
-          finalAction,
-        } = parseDappRedirect(currentUrl, targetURL, {
-          dapps,
-          blockchain_explorers: getBlockchainExplorers(),
-          isForSpecialHardwareConnection:
-            tabbedWindow?.isForSpecialHardwareConnection(),
-          isFromExistedTab: !!foundTab,
-        });
+      const {
+        targetInfo,
+        // actually, it's always from dapp on isMainContentsForTabbedWindow=false
+        finalAction,
+      } = parseDappRedirect(currentUrl, targetURL, {
+        dapps,
+        blockchain_explorers: getBlockchainExplorers(),
+        isForSpecialHardwareConnection:
+          tabbedWindow?.isForSpecialHardwareConnection(),
+        isFromExistedTab: !!foundTab,
+      });
 
-        switch (finalAction) {
-          case EnumOpenDappAction.deny: {
-            return false;
-          }
-          case EnumOpenDappAction.openExternal: {
-            safeOpenExternalURL(targetURL);
-            return false;
-          }
-          case EnumOpenDappAction.leaveInTab: {
-            return true;
-          }
-          case EnumOpenDappAction.safeOpenOrSwitchToAnotherTab: {
-            evt.preventDefault();
-
-            safeOpenURL(targetURL, {
-              sourceURL: currentUrl,
-              targetMatchedDappResult: targetInfo.matchDappResult,
-              httpTargetMatchedDappResult: targetInfo.matchDappResultForHttp,
-              // openedTab,
-              _targetwin: parentWindow,
-            }).then((res) => res.activeTab());
-
-            return false;
-          }
-          default: {
-            evt.preventDefault();
-            return false;
-          }
+      switch (finalAction) {
+        case EnumOpenDappAction.deny: {
+          return false;
         }
+        case EnumOpenDappAction.openExternal: {
+          safeOpenExternalURL(targetURL);
+          return false;
+        }
+        case EnumOpenDappAction.leaveInTab: {
+          return true;
+        }
+        case EnumOpenDappAction.safeOpenOrSwitchToAnotherTab: {
+          evt.preventDefault();
 
-        return false;
+          safeOpenURL(targetURL, {
+            sourceURL: currentUrl,
+            targetMatchedDappResult: targetInfo.matchDappResult,
+            httpTargetMatchedDappResult: targetInfo.matchDappResultForHttp,
+            // openedTab,
+            _targetwin: parentWindow,
+          }).then((res) => res.activeTab());
+
+          return false;
+        }
+        default: {
+          evt.preventDefault();
+          return false;
+        }
       }
-    );
+
+      return false;
+    });
   },
 };

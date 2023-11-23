@@ -39,6 +39,7 @@ import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import styles from './index.module.less';
 import ChainIcon from '../ChainIcon';
 import NavRefreshButton from './components/NavRefreshButton';
+import DarwinDraggableGasket from '../DarwinDraggableGasket';
 // import { TipsWrapper } from '../TipWrapper';
 
 const isDarwin = detectClientOS() === 'darwin';
@@ -173,168 +174,171 @@ export const TopNavBar = () => {
 
   return (
     <div className={styles.main} onDoubleClick={onDarwinToggleMaxmize}>
-      {/* keep this element in first to make it bottom, or move it last to make it top */}
-      {isDarwin && <div className={classNames(styles.macOSGasket)} />}
-      <div
-        className={styles.left}
-        style={{
-          ...(navBackgroundColor && { backgroundColor: navBackgroundColor }),
-        }}
-        data-nodrag
-        onDoubleClick={(evt) => {
-          evt.stopPropagation();
-        }}
-      >
-        <RiskArea style={{ color: navTextColor }} iconColor={navIconColor} />
-        <Divider
-          type="vertical"
-          className={classNames(styles.divider)}
-          style={{ ...(navIconColor && { borderColor: navDividerColor }) }}
-        />
-        {activeTab?.status === 'loading' && (
-          <img
-            className={styles.loadingIcon}
-            src="rabby-internal://assets/icons/top-bar/icon-dapp-nav-loading.svg"
-          />
-        )}
+      <div className={styles.leftWrapper}>
         <div
-          className={clsx(styles.url, 'h-[100%] flex items-center')}
-          style={{ ...(navTextColor && { color: navTextColor }) }}
+          className={styles.left}
+          style={{
+            ...(navBackgroundColor && { backgroundColor: navBackgroundColor }),
+          }}
+          data-nodrag
+          onDoubleClick={(evt) => {
+            evt.stopPropagation();
+          }}
         >
-          <span
-            className={clsx(
-              styles.copyTrigger,
-              'h-[100%] inline-flex items-center'
-            )}
-            onClick={async () => {
-              if (!dappURLToShow) return;
-              await copyText(dappURLToShow);
-
-              showTooltip(
-                // adjust the position based on the rect of trigger element
-                {
-                  ...hoverPosition.current,
-                },
-                {
-                  title: 'Copied',
-                  placement: 'bottom',
-                },
-                { autoDestroyTimeout: 3000 }
-              );
-              autoHideOnMouseLeaveRef.current = false;
-              autoHideTimer.current = setTimeout(() => {
-                autoHideOnMouseLeaveRef.current = true;
-                destroyTooltip(0);
-              }, 3000);
-            }}
-            onMouseEnter={(event) => {
-              if (!dappURLToShow) return;
-              if (!autoHideOnMouseLeaveRef.current) return;
-
-              const rect = (event.target as HTMLDivElement)
-                .getBoundingClientRect()
-                .toJSON();
-
-              hoverPosition.current = {
-                ...rect,
-                left: Math.min(event.clientX, rect.x + rect.width - 30),
-                top: rect.y + 20,
-                height: 5,
-                width: 30,
-              };
-
-              showTooltip(
-                // adjust the position based on the rect of trigger element
-                {
-                  ...hoverPosition.current,
-                },
-                {
-                  title: 'Copy URL',
-                  placement: 'bottom',
-                }
-              );
-            }}
-            onMouseLeave={() => {
-              if (autoHideOnMouseLeaveRef.current) {
-                destroyTooltip(0);
-              }
-            }}
+          <RiskArea style={{ color: navTextColor }} iconColor={navIconColor} />
+          <Divider
+            type="vertical"
+            className={classNames(styles.divider)}
+            style={{ ...(navIconColor && { borderColor: navDividerColor }) }}
+          />
+          {activeTab?.status === 'loading' && (
+            <img
+              className={styles.loadingIcon}
+              src="rabby-internal://assets/icons/top-bar/icon-dapp-nav-loading.svg"
+            />
+          )}
+          <div
+            className={clsx(styles.url, 'h-[100%] flex items-center')}
+            style={{ ...(navTextColor && { color: navTextColor }) }}
           >
-            {dappURLToShow}
-          </span>
-        </div>
-        <div className={clsx(styles.historyBar)}>
-          <RcIconHistoryGoBack
-            style={{ color: navIconColor }}
-            className={clsx(
-              styles.goBack,
-              selectedTabInfo?.canGoBack && styles.active
-            )}
-            onClick={navActions.onGoBackButtonClick}
-          />
-          <RcIconHistoryGoBack
-            style={{ color: navIconColor }}
-            className={clsx(
-              styles.goForward,
-              selectedTabInfo?.canGoForward && styles.active
-            )}
-            onClick={navActions.onGoForwardButtonClick}
-          />
-          <NavRefreshButton
-            className={styles.detectDappIcon}
-            btnStatus={
-              activeTab?.status === 'loading'
-                ? 'loading'
-                : dappVersion.updated
-                ? 'dapp-updated'
-                : undefined
-            }
-            normalRefreshBtn={
-              <RcIconReload
-                className="w-[100%] h-[100%]"
-                style={{ color: navIconColor }}
-                onClick={navActions.onReloadButtonClick}
-              />
-            }
-            stopLoadingBtn={
-              <RcIconStopload
-                className="w-[100%] h-[100%]"
-                style={{ color: navIconColor }}
-                onClick={navActions.onStopLoadingButtonClick}
-              />
-            }
-            onForceReload={() => {
-              navActions.onForceReloadButtonClick();
-              confirmDappVersion();
+            <span
+              className={clsx(
+                styles.copyTrigger,
+                'h-[100%] inline-flex items-center'
+              )}
+              onClick={async () => {
+                if (!dappURLToShow) return;
+                await copyText(dappURLToShow);
 
-              setTimeout(() => {
-                zActions.showZSubview('toast-zpopup-message', {
-                  type: 'success',
-                  message: 'Updated',
+                showTooltip(
+                  // adjust the position based on the rect of trigger element
+                  {
+                    ...hoverPosition.current,
+                  },
+                  {
+                    title: 'Copied',
+                    placement: 'bottom',
+                  },
+                  { autoDestroyTimeout: 3000 }
+                );
+                autoHideOnMouseLeaveRef.current = false;
+                autoHideTimer.current = setTimeout(() => {
+                  autoHideOnMouseLeaveRef.current = true;
+                  destroyTooltip(0);
+                }, 3000);
+              }}
+              onMouseEnter={(event) => {
+                if (!dappURLToShow) return;
+                if (!autoHideOnMouseLeaveRef.current) return;
+
+                const rect = (event.target as HTMLDivElement)
+                  .getBoundingClientRect()
+                  .toJSON();
+
+                hoverPosition.current = {
+                  ...rect,
+                  left: Math.min(event.clientX, rect.x + rect.width - 30),
+                  top: rect.y + 20,
+                  height: 5,
+                  width: 30,
+                };
+
+                showTooltip(
+                  // adjust the position based on the rect of trigger element
+                  {
+                    ...hoverPosition.current,
+                  },
+                  {
+                    title: 'Copy URL',
+                    placement: 'bottom',
+                  }
+                );
+              }}
+              onMouseLeave={() => {
+                if (autoHideOnMouseLeaveRef.current) {
+                  destroyTooltip(0);
+                }
+              }}
+            >
+              {dappURLToShow}
+            </span>
+          </div>
+          <div className={clsx(styles.historyBar)}>
+            <RcIconHistoryGoBack
+              style={{ color: navIconColor }}
+              className={clsx(
+                styles.goBack,
+                selectedTabInfo?.canGoBack && styles.active
+              )}
+              onClick={navActions.onGoBackButtonClick}
+            />
+            <RcIconHistoryGoBack
+              style={{ color: navIconColor }}
+              className={clsx(
+                styles.goForward,
+                selectedTabInfo?.canGoForward && styles.active
+              )}
+              onClick={navActions.onGoForwardButtonClick}
+            />
+            <NavRefreshButton
+              className={styles.detectDappIcon}
+              btnStatus={
+                activeTab?.status === 'loading'
+                  ? 'loading'
+                  : dappVersion.updated
+                  ? 'dapp-updated'
+                  : undefined
+              }
+              normalRefreshBtn={
+                <RcIconReload
+                  className="w-[100%] h-[100%]"
+                  style={{ color: navIconColor }}
+                  onClick={navActions.onReloadButtonClick}
+                />
+              }
+              stopLoadingBtn={
+                <RcIconStopload
+                  className="w-[100%] h-[100%]"
+                  style={{ color: navIconColor }}
+                  onClick={navActions.onStopLoadingButtonClick}
+                />
+              }
+              onForceReload={() => {
+                navActions.onForceReloadButtonClick();
+                confirmDappVersion();
+
+                setTimeout(() => {
+                  zActions.showZSubview('toast-zpopup-message', {
+                    type: 'success',
+                    message: 'Updated',
+                  });
+                }, 1000);
+              }}
+            />
+            <RcIconHome
+              style={{ color: navIconColor }}
+              onClick={navActions.onHomeButtonClick}
+            />
+          </div>
+          <div className={styles.connectChainBox}>
+            <ConnectedChain
+              ref={divRef}
+              chain={currentSite ? currentSite.chain : CHAINS_ENUM.ETH}
+              onClick={() => {
+                open({
+                  value: currentSite ? currentSite.chain : CHAINS_ENUM.ETH,
+                  isCheckCustomRPC: true,
                 });
-              }, 1000);
-            }}
-          />
-          <RcIconHome
-            style={{ color: navIconColor }}
-            onClick={navActions.onHomeButtonClick}
-          />
-        </div>
-        <div className={styles.connectChainBox}>
-          <ConnectedChain
-            ref={divRef}
-            chain={currentSite ? currentSite.chain : CHAINS_ENUM.ETH}
-            onClick={() => {
-              open({
-                value: currentSite ? currentSite.chain : CHAINS_ENUM.ETH,
-                isCheckCustomRPC: true,
-              });
-            }}
-          />
+              }}
+            />
+          </div>
         </div>
         <div className={styles.close} onClick={handleCloseTab}>
           <img src="rabby-internal://assets/icons/top-bar/close.svg" />
         </div>
+        {isDarwin && (
+          <DarwinDraggableGasket className={styles.draggableGasket} />
+        )}
       </div>
     </div>
   );

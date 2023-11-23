@@ -26,7 +26,9 @@ import {
   IconTrafficWin32Recover,
 } from '@/../assets/icons/titlebar-triples';
 
+import { detectClientOS } from '@/isomorphic/os';
 import styles from './index.module.less';
+import DarwinDraggableGasket from '../DarwinDraggableGasket';
 
 type CustomElement<T> = Partial<T & React.DOMAttributes<T> & { children: any }>;
 declare global {
@@ -37,6 +39,8 @@ declare global {
     }
   }
 }
+
+const isDarwin = detectClientOS() === 'darwin';
 
 export default function Titlebar(
   _: React.PropsWithChildren<{
@@ -64,59 +68,67 @@ export default function Titlebar(
     >
       {winOSType === 'darwin' && (
         <div
-          className={styles['macos-controls']}
+          className={styles.macosControls}
           onDoubleClick={onDarwinToggleMaxmize}
         >
-          <button
-            type="button"
-            className={classNames(styles.control, styles['triple-close'])}
-            onClick={onCloseButton}
-          >
-            <img src={IconDarwinTripleClose} alt="close" />
-            <img
-              className={styles['hover-show']}
-              src={IconDarwinTripleHoverClose}
-              alt="close"
-            />
-          </button>
-          <button
-            type="button"
-            className={classNames(styles.control, styles['triple-minimize'])}
-            disabled={disabledMinimizeButton}
-            onClick={onMinimizeButton}
-          >
-            <img src={IconDarwinTripleMinimize} alt="minimize" />
-            <img
-              className={classNames(styles['hover-show'])}
-              src={IconDarwinTripleHoverMinimize}
-              alt="minimize"
-            />
-          </button>
-          <button
-            type="button"
-            className={classNames(styles.control, styles['triple-fullscreen'])}
-            onClick={onFullscreenButton}
-          >
-            {winState === 'fullscreen' ? (
-              <>
-                <img src={IconDarwinTripleFullscreen} alt="fullscreen" />
-                <img
-                  className={classNames(styles['hover-show'])}
-                  src={IconDarwinTripleHoverRecover}
-                  alt="fullscreen"
-                />
-              </>
-            ) : (
-              <>
-                <img src={IconDarwinTripleFullscreen} alt="fullscreen" />
-                <img
-                  className={classNames(styles['hover-show'])}
-                  src={IconDarwinTripleHoverFullscreen}
-                  alt="fullscreen"
-                />
-              </>
-            )}
-          </button>
+          <div className={styles.macosControlsInner}>
+            <button
+              type="button"
+              className={classNames(styles.control, styles['triple-close'])}
+              onClick={onCloseButton}
+            >
+              <img src={IconDarwinTripleClose} alt="close" />
+              <img
+                className={styles['hover-show']}
+                src={IconDarwinTripleHoverClose}
+                alt="close"
+              />
+            </button>
+            <button
+              type="button"
+              className={classNames(styles.control, styles['triple-minimize'])}
+              disabled={disabledMinimizeButton}
+              onClick={onMinimizeButton}
+            >
+              <img src={IconDarwinTripleMinimize} alt="minimize" />
+              <img
+                className={classNames(styles['hover-show'])}
+                src={IconDarwinTripleHoverMinimize}
+                alt="minimize"
+              />
+            </button>
+            <button
+              type="button"
+              className={classNames(
+                styles.control,
+                styles['triple-fullscreen']
+              )}
+              onClick={onFullscreenButton}
+            >
+              {winState === 'fullscreen' ? (
+                <>
+                  <img src={IconDarwinTripleFullscreen} alt="fullscreen" />
+                  <img
+                    className={classNames(styles['hover-show'])}
+                    src={IconDarwinTripleHoverRecover}
+                    alt="fullscreen"
+                  />
+                </>
+              ) : (
+                <>
+                  <img src={IconDarwinTripleFullscreen} alt="fullscreen" />
+                  <img
+                    className={classNames(styles['hover-show'])}
+                    src={IconDarwinTripleHoverFullscreen}
+                    alt="fullscreen"
+                  />
+                </>
+              )}
+            </button>
+          </div>
+          {isDarwin && (
+            <DarwinDraggableGasket className={styles.draggableGasket} />
+          )}
         </div>
       )}
       <div
