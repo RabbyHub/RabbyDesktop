@@ -39,6 +39,7 @@ import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import styles from './index.module.less';
 import ChainIcon from '../ChainIcon';
 import NavRefreshButton from './components/NavRefreshButton';
+import DarwinDraggableGasket from '../DarwinDraggableGasket';
 // import { TipsWrapper } from '../TipWrapper';
 
 const isDarwin = detectClientOS() === 'darwin';
@@ -90,21 +91,6 @@ const ConnectedChain = forwardRef(
     );
   }
 );
-
-function DarwinDraggableGasket() {
-  const { onDarwinToggleMaxmize } = useWindowState();
-
-  return (
-    /**
-     * In fact, the `-webkit-app-region: drag` set in ::after pseudo will make
-     * doubleClick handler not work sometimes
-     */
-    <div
-      className={clsx(styles.draggableGasket)}
-      onDoubleClick={onDarwinToggleMaxmize}
-    />
-  );
-}
 
 export const TopNavBar = () => {
   const [nonce, setNonce] = useState(0);
@@ -350,7 +336,9 @@ export const TopNavBar = () => {
         <div className={styles.close} onClick={handleCloseTab}>
           <img src="rabby-internal://assets/icons/top-bar/close.svg" />
         </div>
-        {isDarwin && <DarwinDraggableGasket />}
+        {isDarwin && (
+          <DarwinDraggableGasket className={styles.draggableGasket} />
+        )}
       </div>
     </div>
   );
