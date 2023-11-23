@@ -1,6 +1,10 @@
 @import './../../css/mixins.less';
 
 .main {
+  --left-navbar-w: 740px;
+  --left-navbar-h: 48px;
+  --left-navbar-close-w: 40px;
+
   display: flex;
   justify-content: space-between;
 
@@ -8,10 +12,30 @@
     -webkit-user-drag: none;
   }
 
+  .leftWrapper {
+    width: 100%;
+    z-index: 0;
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    > .close {
+      width: var(--left-navbar-close-w);
+      height: var(--left-navbar-h);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+  }
+
   .left {
     position: relative;
-    width: 740px;
-    height: 48px;
+    width: var(--left-navbar-w);
+    height: var(--left-navbar-h);
 
     background: #ffeef9;
     border-top-left-radius: 6px;
@@ -57,19 +81,6 @@
       .truncate;
     }
 
-    .close {
-      position: absolute;
-      // top: 50%;
-      top: 22.5px;
-      right: -32px;
-      cursor: pointer;
-      transform: translateY(-50%);
-      img {
-        width: 20px;
-        height: 20px;
-      }
-    }
-
     .historyBar {
       display: flex;
       align-items: center;
@@ -104,25 +115,24 @@
       align-items: center;
     }
   }
-
-  .macOSGasket {
-    display: none;
-  }
 }
 
 :global {
   html.os-darwin.__rabbyx-shell-page {
     :local {
-      .main .macOSGasket {
-        display: block;
-        width: 100%;
-        height: 58px;
-        position: absolute;
-        top: 0;
-        left: 0;
-        z-index: -1;
-        border-radius: 6px;
-        .global-draggable;
+      .main .leftWrapper .draggableGasket {
+        width: calc(100% - var(--left-navbar-w) - var(--left-navbar-close-w) - var(--mainwin-headerblock-floating-account-comp-w));
+        height: 100%;
+        // leave here for debug
+        // outline: 1px solid blue;
+        flex-shrink: 1;
+        justify-self: flex-end;
+        position: relative;
+
+        &::after {
+          z-index: -1;
+          .psuedo-ele-draggable;
+        }
       }
     }
   }

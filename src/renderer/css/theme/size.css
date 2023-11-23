@@ -13,6 +13,8 @@
 
   --mainwin-headerblock-offset: 64px;
 
+  --mainwin-headerblock-floating-account-comp-w: 320px;
+
   --mainwin-mainroute-height: calc(100vh - var(--mainwin-mainroute-topoffset));
 }
 
