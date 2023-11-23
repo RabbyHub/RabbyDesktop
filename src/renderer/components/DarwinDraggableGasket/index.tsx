@@ -5,8 +5,10 @@ import styles from './index.module.less';
 
 export default function DarwinDraggableGasket({
   className,
+  style,
 }: React.PropsWithoutRef<{
   className?: string;
+  style?: React.CSSProperties;
 }>) {
   const { onDarwinToggleMaxmize } = useWindowState();
 
@@ -17,6 +19,7 @@ export default function DarwinDraggableGasket({
      */
     <div
       className={clsx(styles.darwinDraggableGasket, className)}
+      {...(style && { style })}
       onDoubleClickCapture={onDarwinToggleMaxmize}
     />
   );

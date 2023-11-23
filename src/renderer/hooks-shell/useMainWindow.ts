@@ -1,11 +1,18 @@
 import { canoicalizeDappUrl } from '@/isomorphic/url';
-import { atom, useAtom } from 'jotai';
-import { useCallback, useEffect, useMemo } from 'react';
+import { atom, useAtom, useAtomValue } from 'jotai';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+} from 'react';
 import { useDapps } from '../hooks/useDappsMngr';
 import { matomoRequestEvent } from '../utils/matomo-request';
 import { navigateToDappRoute } from '../utils/react-router';
 import { findTabByTabID } from '../utils/tab';
 import { useWindowTabs } from './useWindowTabs';
+import { coerceInteger } from '../utils/number';
 
 export type IDappWithTabInfo = IMergedDapp & {
   tab?: chrome.tabs.Tab;
@@ -180,4 +187,52 @@ export function useLatestDappScreenshot() {
   }, [latestDappScreenshot, setLatestDappScreenshot]);
 
   return latestDappScreenshot;
+}
+
+const floatingCurrentAccountCompWidthAtom = atom<number>(0);
+export function useFloatingCurrentAccountCompWidth() {
+  const width = useAtomValue(floatingCurrentAccountCompWidthAtom);
+
+  return {
+    fixedFloatingCurrentAccountCompWidth: Math.min(width, 362),
+  };
+}
+export function useGetFloatingCurrentAccountCompWidth(isFloating?: boolean) {
+  const [width, setWidth] = useAtom(floatingCurrentAccountCompWidthAtom);
+
+  const divRef = useRef<HTMLDivElement>(null);
+
+  const obsRef = useRef<ResizeObserver>(
+    new ResizeObserver(() => {
+      const divEl = divRef.current!;
+      const rect = divEl.getBoundingClientRect();
+
+      setWidth(coerceInteger(rect.width, 0));
+    })
+  );
+
+  useLayoutEffect(() => {
+    const divEl = divRef.current;
+    const obs = obsRef.current!;
+
+    if (!divEl) {
+      setWidth(0);
+    } else if (isFloating) {
+      const rect = divEl.getBoundingClientRect();
+      setWidth(coerceInteger(rect.width, 0));
+
+      obs.observe(divEl);
+    }
+
+    return () => {
+      if (divEl) {
+        obs.unobserve(divEl);
+      }
+    };
+  }, [isFloating, setWidth]);
+
+  return {
+    divRef,
+    floatingCurrentAccountCompWidth: width,
+  };
 }
