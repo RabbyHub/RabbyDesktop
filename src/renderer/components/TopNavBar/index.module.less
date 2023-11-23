@@ -121,7 +121,8 @@
   html.os-darwin.__rabbyx-shell-page {
     :local {
       .main .leftWrapper .draggableGasket {
-        width: calc(100% - var(--left-navbar-w) - var(--left-navbar-close-w) - var(--mainwin-headerblock-floating-account-comp-w));
+        max-width: calc(100% - var(--left-navbar-w) - var(--left-navbar-close-w) - var(--mainwin-headerblock-floating-account-comp-w));
+        width: 100%;
         height: 100%;
         // leave here for debug
         // outline: 1px solid blue;

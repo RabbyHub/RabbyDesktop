@@ -36,6 +36,7 @@ import { formatDappURLToShow } from '@/isomorphic/dapp';
 import { useGhostTooltip } from '@/renderer/routes-popup/TopGhostWindow/useGhostWindow';
 import { useLocation } from 'react-router-dom';
 import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
+import { useFloatingCurrentAccountCompWidth } from '@/renderer/hooks-shell/useMainWindow';
 import styles from './index.module.less';
 import ChainIcon from '../ChainIcon';
 import NavRefreshButton from './components/NavRefreshButton';
@@ -91,6 +92,26 @@ const ConnectedChain = forwardRef(
     );
   }
 );
+
+function DarwinGasket() {
+  const { fixedFloatingCurrentAccountCompWidth } =
+    useFloatingCurrentAccountCompWidth();
+
+  if (!isDarwin) return null;
+
+  return (
+    <DarwinDraggableGasket
+      className={styles.draggableGasket}
+      style={
+        !fixedFloatingCurrentAccountCompWidth
+          ? {}
+          : {
+              maxWidth: `calc(100% - var(--left-navbar-w) - var(--left-navbar-close-w) - ${fixedFloatingCurrentAccountCompWidth}px)`,
+            }
+      }
+    />
+  );
+}
 
 export const TopNavBar = () => {
   const [nonce, setNonce] = useState(0);
@@ -336,9 +357,7 @@ export const TopNavBar = () => {
         <div className={styles.close} onClick={handleCloseTab}>
           <img src="rabby-internal://assets/icons/top-bar/close.svg" />
         </div>
-        {isDarwin && (
-          <DarwinDraggableGasket className={styles.draggableGasket} />
-        )}
+        {isDarwin && <DarwinGasket />}
       </div>
     </div>
   );

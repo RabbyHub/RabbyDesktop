@@ -4,6 +4,7 @@ import classNames from 'classnames';
 
 import { ensurePrefix } from '@/isomorphic/string';
 import { useWindowState } from '@/renderer/hooks-shell/useWindowState';
+import { useGetFloatingCurrentAccountCompWidth } from '@/renderer/hooks-shell/useMainWindow';
 import { CurrentAccountAndNewAccount } from '../CurrentAccount';
 import { MainWindowRouteData } from './type';
 
@@ -46,6 +47,16 @@ function useMainWindowClassName(pname: string, extraRouteCSSKeyword?: string) {
   }, [classNameOnHtml]);
 
   return classNameOnRoute;
+}
+
+function CurrentAccountComp({ isFloating = false }: { isFloating?: boolean }) {
+  const { divRef } = useGetFloatingCurrentAccountCompWidth(isFloating);
+
+  return (
+    <div ref={divRef} className={styles.accountComponent}>
+      <CurrentAccountAndNewAccount />
+    </div>
+  );
 }
 
 export default function MainWindowRoute({
@@ -105,9 +116,9 @@ export default function MainWindowRoute({
             ) : null}
             {matchedData?.title || null}
           </div>
-          <div className={styles.accountComponent}>
-            <CurrentAccountAndNewAccount />
-          </div>
+          <CurrentAccountComp
+            isFloating={!!matchedData?.floatingAccountComponent}
+          />
         </div>
       )}
       <div style={{ display: isDappRoute ? 'block' : 'none' }}>
