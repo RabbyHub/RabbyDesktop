@@ -5,7 +5,7 @@ project_dir=$(dirname "$script_dir")
 
 work_dir_rel=tmp/pub_github
 work_dir=$project_dir/$work_dir_rel
-# rm -rf $work_dir;
+rm -rf $work_dir;
 mkdir -p $work_dir;
 
 set_vars() {
@@ -61,10 +61,7 @@ download_releases() {
           .split(': ')[1].replace(/\"/g, '')
       )
     ")
-    echo "[pub_github::download_releases] md5: $etag"
-
-    # TODO: add \\\` to avoid json format error
-    printf -v release_body "$release_body- \\\`$filename\\\`: $etag\n"
+    echo "[pub_github::download_releases] etag: $etag"
 
     downloaded_files+=("$work_dir/$filename")
 
@@ -73,7 +70,24 @@ download_releases() {
       curl -L -o "$work_dir/$filename" "$remote_link"
       echo "[pub_github::download_releases] Downloaded $work_dir_rel/$filename"
     fi
+
+    if [ -f /usr/bin/md5sum ]; then
+      local md5str=($(md5sum "$work_dir/$filename"))
+    else
+      local md5str=($(md5 -q "$work_dir/$filename"))
+    fi
+
+    # leave here for debug
+    # echo "[pub_github::download_releases] md5str: $md5str"
+
+    # split string by space and get the first element
+    local md5value=${md5str[0]}
+
+    echo "[pub_github::download_releases] md5value: $md5value"
     echo ""
+
+    # TODO: add \\\` to avoid json format error
+    printf -v release_body "$release_body- \\\`$filename\\\`: $md5value\n"
   done
 }
 
@@ -108,6 +122,7 @@ update_release_draft() {
   if [ ! -z $draft_release_id ]; then
     local post_data=$(node -e "
       const post_data = {
+        "tag_name": \"$release_tag_name\",
         "name": \"$release_title\",
         "body": \`$release_body\`,
         "draft": true,
