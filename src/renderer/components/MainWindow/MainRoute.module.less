@@ -18,7 +18,7 @@
     :local {
       .headerBlock:not(.floatingAccountComponent) {
         position: relative;
-        &::after {
+        &::before {
           content: ' ';
           position: absolute;
           width: 100%;
@@ -29,6 +29,10 @@
           left: 0;
           right: 0;
         }
+      }
+
+      .headerBlock.floatingAccountComponent .accountComponent {
+        max-width: var(--mainwin-headerblock-floating-account-comp-w);
       }
     }
   }

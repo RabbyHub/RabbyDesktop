@@ -124,7 +124,7 @@ export async function safeOpenURL(
      * */
     httpTargetMatchedDappResult?: IMatchDappResult;
     _targetwin?: BrowserWindow;
-    redirectSourceTab?: import('../browser/tabs').Tab;
+    redirectSourceTab?: import('../browser/tabs').Tab | null;
     isFromInternalRenderer?: boolean;
     dontReloadOnSwitchToActiveTab?: boolean;
   }

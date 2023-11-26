@@ -13,6 +13,7 @@ import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 import clsx from 'clsx';
 import { TokenActionSymbol } from '@/renderer/components/TokenActionModal/TokenActionModal';
 import { getTokenSymbol } from '@/renderer/utils';
+import BigNumber from 'bignumber.js';
 
 const TokenItemWrapper = styled.li`
   font-size: 15px;
@@ -212,7 +213,10 @@ const TokenItemComp = ({
           </Tooltip>
         </div> */}
       </TokenLogoField>
-      <TokenPriceField>{`$${formatPrice(token.price || 0)}`}</TokenPriceField>
+      <TokenPriceField>{`$${formatPrice(
+        token.price || 0,
+        8
+      )}`}</TokenPriceField>
       <TokenAmountField>
         <span>
           {formatAmount(token.amount)}{' '}
@@ -235,7 +239,9 @@ const TokenItemComp = ({
         )}
       </TokenAmountField>
       <TokenUsdValueField>
-        {`${formatUsdValue(token.usd_value || '0')}`}
+        {formatUsdValue(
+          new BigNumber(token.price || 0).times(token.amount).toFixed()
+        )}
         {historyToken && (
           <div
             className={classNames('price-change', {

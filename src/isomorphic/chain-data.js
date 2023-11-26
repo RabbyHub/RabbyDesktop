@@ -90,7 +90,6 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["PSHIB"] = "PSHIB";
     CHAINS_ENUM["GMETIS"] = "GMETIS";
     CHAINS_ENUM["SARB"] = "SARB";
-    CHAINS_ENUM["TOKB"] = "TOKB";
     CHAINS_ENUM["TSTLS"] = "TSTLS";
     CHAINS_ENUM["PGN"] = "PGN";
     CHAINS_ENUM["SPGN"] = "SPGN";
@@ -119,6 +118,10 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["TCRO"] = "TCRO";
     CHAINS_ENUM["SMODE"] = "SMODE";
     CHAINS_ENUM["TIMXZE"] = "TIMXZE";
+    CHAINS_ENUM["TOMNI"] = "TOMNI";
+    CHAINS_ENUM["JTAIKO"] = "JTAIKO";
+    CHAINS_ENUM["SSYNP"] = "SSYNP";
+    CHAINS_ENUM["TCFX"] = "TCFX";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -1592,23 +1595,6 @@ export const CHAINS_RAW = {
         },
         isTestnet: true,
     },
-    [CHAINS_ENUM.TOKB]: {
-        id: 195,
-        serverId: "tokb",
-        name: "OKB Testnet",
-        enum: CHAINS_ENUM.TOKB,
-        hex: "0xc3",
-        network: "195",
-        nativeTokenSymbol: "TestnetOKB",
-        nativeTokenAddress: "tokb",
-        scanLink: "https://www.oklink.com/okbc-test/tx/_s_",
-        nativeTokenLogo: "https://static.debank.com/image/tokb_token/logo_url/tokb/02e2fec5f8b2f5783ceb38d683557de3.png",
-        nativeTokenDecimals: 18,
-        eip: {
-            "1559": false,
-        },
-        isTestnet: true,
-    },
     [CHAINS_ENUM.TSTLS]: {
         id: 23011913,
         serverId: "tstls",
@@ -2082,6 +2068,74 @@ export const CHAINS_RAW = {
         nativeTokenDecimals: 18,
         eip: {
             "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.TOMNI]: {
+        id: 165,
+        serverId: "tomni",
+        name: "Omni Testnet",
+        enum: CHAINS_ENUM.TOMNI,
+        hex: "0xa5",
+        network: "165",
+        nativeTokenSymbol: "TestnetOMNI",
+        nativeTokenAddress: "tomni",
+        scanLink: "https://testnet.explorer.omni.network/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/tomni_token/logo_url/tomni/1d1e1f76aa83b2d1de069dec75255e69.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.JTAIKO]: {
+        id: 167007,
+        serverId: "jtaiko",
+        name: "Taiko Jolnir Testnet",
+        enum: CHAINS_ENUM.JTAIKO,
+        hex: "0x28c5f",
+        network: "167007",
+        nativeTokenSymbol: "JolnirETH",
+        nativeTokenAddress: "jtaiko",
+        scanLink: "https://explorer.jolnir.taiko.xyz/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/jtaiko_token/logo_url/jtaiko/389dd9a835250219889e01d5a31a75f1.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.SSYNP]: {
+        id: 444,
+        serverId: "ssynp",
+        name: "Synapse Sepolia",
+        enum: CHAINS_ENUM.SSYNP,
+        hex: "0x1bc",
+        network: "444",
+        nativeTokenSymbol: "SepoliaETH",
+        nativeTokenAddress: "ssynp",
+        scanLink: "https://sepolia.synapsescan.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/ssynp_token/logo_url/ssynp/389dd9a835250219889e01d5a31a75f1.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.TCFX]: {
+        id: 71,
+        serverId: "tcfx",
+        name: "Conflux Testnet",
+        enum: CHAINS_ENUM.TCFX,
+        hex: "0x47",
+        network: "71",
+        nativeTokenSymbol: "TestnetCFX",
+        nativeTokenAddress: "tcfx",
+        scanLink: "https://evmtestnet.confluxscan.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/tcfx_token/logo_url/tcfx/fd57922224e5cbfc786f4e137397f162.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
         },
         isTestnet: true,
     },

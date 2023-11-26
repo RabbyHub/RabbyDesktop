@@ -1,7 +1,17 @@
 
-v0.36.0 / 2023-11-09
+v0.36.1 / 2023-11-23
 ====================
 
+  * fix: compuation for floating current account comp's width. (#593)
+  * chore: update currentVersion.
+  * feat: upgrade electron to v25. (#592)
+  * fix: token value (#591)
+  * fix: token price needs 8 decimal (#589)
+
+v0.36.0-prod / 2023-11-09
+=========================
+
+  * Release v0.36.0-prod
   * chore: update currentVersion.
   * feat: webview based mainWindow tab (#543)
   * fix: no effect on clicking retry update (#587)

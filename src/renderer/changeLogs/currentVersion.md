@@ -1,6 +1,4 @@
 #### New Features:
 
-- Optimized memory usage
-- Supported to hide scam transactions
-- Optimized the toast when switching between mainnets and testnets
-- Supported 2 testnets: Mode Sepolia Testnet and Immutable zkEVM Testnet
+- Supported Conflux Testnet
+- Optimized token price accuracy

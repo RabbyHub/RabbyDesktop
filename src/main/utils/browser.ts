@@ -5,7 +5,11 @@ import {
 } from '@/isomorphic/constants';
 import { getRabbyXWindowPosition } from '@/isomorphic/rabbyx';
 import { roundRectValue } from '@/isomorphic/shape';
-import { BrowserView, BrowserWindow } from 'electron';
+import {
+  BrowserView,
+  BrowserWindow,
+  webContents as ElectronWebContents,
+} from 'electron';
 import { isEnableContentProtected } from '../store/desktopApp';
 import { getAssetPath } from './app';
 import { emitIpcMainEvent } from './ipcMainEvents';
@@ -30,6 +34,19 @@ export function getWindowFromWebContents(webContents: Electron.WebContents) {
         `Unable to find parent window of '${webContents.getType()}'`
       );
   }
+}
+
+export function getWebContentsFromEvent(
+  evt:
+    | Electron.IpcMainInvokeEvent
+    | Electron.WebContentsWillNavigateEventParams
+    | Electron.WebContentsWillRedirectEventParams
+) {
+  if (!(evt as Electron.IpcMainInvokeEvent).sender && 'frame' in evt) {
+    return ElectronWebContents.fromFrame(evt.frame) || null;
+  }
+
+  return (evt as Electron.IpcMainInvokeEvent).sender;
 }
 
 export function redirectToAboutBlank(webContents: Electron.WebContents) {
