@@ -14,16 +14,22 @@ set_vars() {
   draft_release_id=""
 
   cd $project_dir;
+  local_app_version=$(node -e "console.log(require('./package.json').version);")
   # get current version
   if [ -z $app_version ]; then
-    app_version=$(node -e "console.log(require('./package.json').version);")
+    app_version=$local_app_version
   fi
   release_tag_name="v$app_version-prod"
   echo "[pub_github] app_version is $app_version"
+  echo "[pub_github] local_app_version is $local_app_version"
   echo ""
 
   release_title="Rabby Desktop v$app_version"
-  release_body=$(cat $project_dir/src/renderer/changeLogs/currentVersion.md)
+  if [ "$local_app_version" == "$app_version" ]; then
+    release_body=$(cat $project_dir/src/renderer/changeLogs/currentVersion.md)
+  else
+    release_body=$(curl -sL https://github.com/RabbyHub/RabbyDesktop/raw/${release_tag_name}/src/renderer/changeLogs/currentVersion.md)
+  fi
 
   download_links=(
     https://download.rabby.io/wallet-desktop/darwin-x64/rabby-wallet-desktop-installer-x64-$app_version.dmg
