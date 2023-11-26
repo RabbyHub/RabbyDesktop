@@ -3,11 +3,6 @@
 script_dir="$( cd "$( dirname "$0"  )" && pwd  )"
 project_dir=$(dirname "$script_dir")
 
-work_dir_rel=tmp/pub_github
-work_dir=$project_dir/$work_dir_rel
-rm -rf $work_dir;
-mkdir -p $work_dir;
-
 set_vars() {
   repo_owner="RabbyHub"
   repo_name="RabbyDesktop"
@@ -23,6 +18,9 @@ set_vars() {
   echo "[pub_github] app_version is $app_version"
   echo "[pub_github] local_app_version is $local_app_version"
   echo ""
+
+  work_dir_rel=tmp/pub_github/$app_version
+  work_dir=$project_dir/$work_dir_rel
 
   release_title="Rabby Desktop v$app_version"
   if [ "$local_app_version" == "$app_version" ]; then
@@ -202,6 +200,8 @@ upload_files_to_release() {
 }
 
 set_vars;
+rm -rf $work_dir;
+mkdir -p $work_dir;
 check_existing_release_draft;
 
 download_releases;
