@@ -122,6 +122,7 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["JTAIKO"] = "JTAIKO";
     CHAINS_ENUM["SSYNP"] = "SSYNP";
     CHAINS_ENUM["TCFX"] = "TCFX";
+    CHAINS_ENUM["TX1"] = "TX1";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -2133,6 +2134,23 @@ export const CHAINS_RAW = {
         nativeTokenAddress: "tcfx",
         scanLink: "https://evmtestnet.confluxscan.io/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/tcfx_token/logo_url/tcfx/fd57922224e5cbfc786f4e137397f162.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.TX1]: {
+        id: 195,
+        serverId: "tx1",
+        name: "X1 Testnet",
+        enum: CHAINS_ENUM.TX1,
+        hex: "0xc3",
+        network: "195",
+        nativeTokenSymbol: "TestnetOKB",
+        nativeTokenAddress: "tx1",
+        scanLink: "https://www.oklink.com/x1-test/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/tx1_token/logo_url/tx1/02e2fec5f8b2f5783ceb38d683557de3.png",
         nativeTokenDecimals: 18,
         eip: {
             "1559": false,
