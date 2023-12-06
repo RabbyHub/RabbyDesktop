@@ -27,7 +27,7 @@ update_version() {
   cd $project_dir/ && npm --no-git-tag-version version $VERSION;
   cd $project_dir/release/app && npm --no-git-tag-version version $VERSION && cd $project_dir
 
-  echo ":wq" | git-changelog --all --prune-old --tag v$VERSION;
+  echo ":wq" | git-changelog -s v0.22.0-prod --prune-old --tag v$VERSION;
   echo ""
   echo "[update_version] enforce publish reg release by running 'git-release v$VERSION-reg'"
   echo "[update_version] enforce publish prod release by running 'git-release v$VERSION-prod'"
