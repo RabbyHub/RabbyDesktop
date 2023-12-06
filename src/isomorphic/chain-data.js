@@ -118,11 +118,12 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["TCRO"] = "TCRO";
     CHAINS_ENUM["SMODE"] = "SMODE";
     CHAINS_ENUM["TIMXZE"] = "TIMXZE";
-    CHAINS_ENUM["TOMNI"] = "TOMNI";
     CHAINS_ENUM["JTAIKO"] = "JTAIKO";
     CHAINS_ENUM["SSYNP"] = "SSYNP";
     CHAINS_ENUM["TCFX"] = "TCFX";
     CHAINS_ENUM["TX1"] = "TX1";
+    CHAINS_ENUM["TSBY"] = "TSBY";
+    CHAINS_ENUM["TAZE"] = "TAZE";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -983,7 +984,7 @@ export const CHAINS_RAW = {
         enum: CHAINS_ENUM.OAS,
         hex: "0xf8",
         scanLink: "https://scan.oasys.games/tx/_s_",
-        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/oas/69e424154c30984ff4d5ba916591ac2a.png",
+        nativeTokenLogo: "https://static.debank.com/image/oas_token/logo_url/oas/322b2cb0935af95b9cabd8a59b629566.png",
         nativeTokenDecimals: 18,
         eip: {
             "1559": true,
@@ -2072,23 +2073,6 @@ export const CHAINS_RAW = {
         },
         isTestnet: true,
     },
-    [CHAINS_ENUM.TOMNI]: {
-        id: 165,
-        serverId: "tomni",
-        name: "Omni Testnet",
-        enum: CHAINS_ENUM.TOMNI,
-        hex: "0xa5",
-        network: "165",
-        nativeTokenSymbol: "TestnetOMNI",
-        nativeTokenAddress: "tomni",
-        scanLink: "https://testnet.explorer.omni.network/tx/_s_",
-        nativeTokenLogo: "https://static.debank.com/image/tomni_token/logo_url/tomni/1d1e1f76aa83b2d1de069dec75255e69.png",
-        nativeTokenDecimals: 18,
-        eip: {
-            "1559": true,
-        },
-        isTestnet: true,
-    },
     [CHAINS_ENUM.JTAIKO]: {
         id: 167007,
         serverId: "jtaiko",
@@ -2151,6 +2135,40 @@ export const CHAINS_RAW = {
         nativeTokenAddress: "tx1",
         scanLink: "https://www.oklink.com/x1-test/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/tx1_token/logo_url/tx1/02e2fec5f8b2f5783ceb38d683557de3.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.TSBY]: {
+        id: 81,
+        serverId: "tsby",
+        name: "Astar Shibuya Testnet",
+        enum: CHAINS_ENUM.TSBY,
+        hex: "0x51",
+        network: "81",
+        nativeTokenSymbol: "TestnetSBY",
+        nativeTokenAddress: "tsby",
+        scanLink: "https://blockscout.com/shibuya/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/tsby_token/logo_url/tsby/320132256211b78a637825a1d17b290c.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.TAZE]: {
+        id: 1261120,
+        serverId: "taze",
+        name: "Astar zKatana Testnet",
+        enum: CHAINS_ENUM.TAZE,
+        hex: "0x133e40",
+        network: "1261120",
+        nativeTokenSymbol: "zKatanaETH",
+        nativeTokenAddress: "taze",
+        scanLink: "https://zkatana.explorer.startale.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/taze_token/logo_url/taze/389dd9a835250219889e01d5a31a75f1.png",
         nativeTokenDecimals: 18,
         eip: {
             "1559": false,
