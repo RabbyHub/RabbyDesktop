@@ -70,7 +70,11 @@ export const CurrentAccount: React.FC<Props> = ({
     <section onClick={onClick} className={styles.CurrentAccount}>
       <div className="flex items-center">
         <div className={styles.logo}>
-          <img src={addressTypeIcon} alt={account.brandName} />
+          <img
+            className="w-24 h-24"
+            src={addressTypeIcon}
+            alt={account.brandName}
+          />
           <SignalBridge {...account} className="right-[0px] bottom-[0px]" />
         </div>
         <div className={styles.content}>

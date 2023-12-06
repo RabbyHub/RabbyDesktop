@@ -67,6 +67,7 @@ const LogoBitkeep = 'rabby-internal://assets/icons/walletlogo/bitkeep.svg';
 const LogoRainbow = 'rabby-internal://assets/icons/walletlogo/rainbow.svg';
 const LogoUniswap = 'rabby-internal://assets/icons/walletlogo/uniswap.svg';
 const LogoZerion = 'rabby-internal://assets/icons/walletlogo/zerion.svg';
+const LogoCoboArgus = 'rabby-internal://assets/icons/walletlogo/coboargus.svg';
 
 export { CHAINS, CHAINS_ENUM };
 
@@ -266,6 +267,7 @@ export enum BRAND_WALLET_CONNECT_TYPE {
   GnosisConnect = 'GnosisConnect',
   GridPlusConnect = 'GridPlusConnect',
   QRCodeBase = 'QR Hardware Wallet Device',
+  CoboArgusConnect = 'CoboArgusConnect',
   Bundle = 'Bundle',
 }
 
@@ -349,6 +351,7 @@ export enum WALLET_BRAND_TYPES {
   Bitkeep = 'Bitget',
   // Uniswap = 'Uniswap',
   Zerion = 'Zerion',
+  CoboArgus = 'CoboArgus',
 }
 
 export enum WALLET_BRAND_CATEGORY {
@@ -613,6 +616,15 @@ export const WALLET_BRAND_CONTENT: {
   //   connectType: BRAND_WALLET_CONNECT_TYPE.WalletConnect,
   //   category: WALLET_BRAND_CATEGORY.MOBILE,
   // },
+  [WALLET_BRAND_TYPES.CoboArgus]: {
+    id: 25,
+    name: 'Cobo Argus',
+    brand: WALLET_BRAND_TYPES.CoboArgus,
+    icon: LogoCoboArgus,
+    image: LogoCoboArgus,
+    connectType: BRAND_WALLET_CONNECT_TYPE.CoboArgusConnect,
+    category: WALLET_BRAND_CATEGORY.INSTITUTIONAL,
+  },
 };
 
 export const KEYRING_ICONS = {
