@@ -34,21 +34,81 @@ import {
   walletTestnetOpenapi,
 } from '@/renderer/ipcRequest/rabbyx';
 import eventBus from '@/renderer/utils-shell/eventBus';
+import { detectClientOS } from '@/isomorphic/os';
+import { NativeAppSizes } from '@/isomorphic/const-size-next';
 import IconUnknownNFT from './icons/unknown-nft.svg';
+
+const isWin32 = detectClientOS() === 'win32';
+const CLIENT_WINDOW_TOP_OFFSET = isWin32
+  ? NativeAppSizes.windowTitlebarHeight
+  : 0;
 
 /**
  * @see `@sticky-top-height`, `@sticky-footer-height` in ./style.less
  */
-function getYValue() {
-  return window.innerHeight - 200 - 148;
+function getApprovalPageHeight() {
+  return (
+    window.innerHeight -
+    /* var(--mainwin-mainroute-topoffset) */
+    CLIENT_WINDOW_TOP_OFFSET -
+    /* var(--mainwin-headerblock-offset) */
+    64
+  );
 }
 
-export function useTableScrollableHeight() {
-  const [yValue, setYValue] = useState(getYValue);
+type GetValueProps = {
+  hasNetSwitchTab?: boolean;
+  bottomFooterSelection?: boolean;
+};
+function getYValue(options?: GetValueProps) {
+  const approvalPageManagerTableH = getApprovalPageHeight();
+
+  return (
+    approvalPageManagerTableH -
+    /* var(--approvals-manager-top-offset) */
+    (options?.hasNetSwitchTab ? 8 : 24) -
+    /* var(--approvals-manager-netswitches-h) */
+    (options?.hasNetSwitchTab ? 36 : 0) -
+    /* var(--approvals-manager-netswitches-mb) */
+    (options?.hasNetSwitchTab ? 20 : 0) -
+    /* @sticky-footer-with-selection-height : @sticky-footer-height */
+    (options?.bottomFooterSelection ? 148 : 124) -
+    /* @tools-h */
+    48 -
+    /* @table-mt */
+    20 -
+    /* @table-header-h */
+    48
+  );
+}
+
+export function useTableScrollableHeight(options?: GetValueProps) {
+  const [yValue, setYValue] = useState(getYValue(options));
+
+  const isResizingRef = useRef(false);
+
+  useLayoutEffect(() => {
+    if (!isResizingRef.current) {
+      setYValue(
+        getYValue({
+          hasNetSwitchTab: options?.hasNetSwitchTab,
+          bottomFooterSelection: options?.bottomFooterSelection,
+        })
+      );
+    }
+  }, [options?.hasNetSwitchTab, options?.bottomFooterSelection]);
 
   useLayoutEffect(() => {
     const listener = debounce(() => {
-      setYValue(getYValue());
+      isResizingRef.current = true;
+      setYValue(
+        getYValue({
+          hasNetSwitchTab: options?.hasNetSwitchTab,
+          bottomFooterSelection: options?.bottomFooterSelection,
+        })
+      );
+
+      isResizingRef.current = false;
     }, 500);
 
     window.addEventListener('resize', listener);
@@ -56,7 +116,7 @@ export function useTableScrollableHeight() {
     return () => {
       window.removeEventListener('resize', listener);
     };
-  });
+  }, [options?.hasNetSwitchTab, options?.bottomFooterSelection]);
 
   return {
     yValue,

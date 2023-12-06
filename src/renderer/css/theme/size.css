@@ -1,4 +1,5 @@
 :root {
+  --rabby-titlebar-h: 32px;
   --mainwin-sidebar-w: 160px;
   --mainwin-rabbyx-popup-w: 400px;
   --switch-account-button-w: 200px;
@@ -17,9 +18,14 @@
   --mainwin-headerblock-floating-account-comp-w: 362px;
 
   --mainwin-mainroute-height: calc(100vh - var(--mainwin-mainroute-topoffset));
+  --mainwin-mainroute-maincontent-height: calc(100% - var(--mainwin-headerblock-offset));
+  --mainwin-mainroute-height-with-header-prop: calc(100vh - var(--mainwin-mainroute-topoffset) - var(--mainwin-headerblock-offset));
 }
 
 html.os-win32,
 body.os-win32 {
-  --mainwin-mainroute-topoffset: 32px;
+  --mainwin-mainroute-topoffset: var(--rabby-titlebar-h);
+
+  --mainwin-mainroute-height: calc(100vh - var(--mainwin-mainroute-topoffset));
+  --mainwin-mainroute-height-with-header-prop: calc(100vh - var(--mainwin-mainroute-topoffset) - var(--mainwin-headerblock-offset));
 }
