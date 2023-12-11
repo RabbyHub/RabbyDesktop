@@ -202,6 +202,13 @@ export class Binance extends Cex<BinanceConfig> {
           }),
         }
       : result.marginAsset;
+    if (
+      result.marginAsset &&
+      result.marginAsset?.supplies.length <= 0 &&
+      result.marginAsset?.borrows.length <= 0
+    ) {
+      result.marginAsset = undefined;
+    }
     result.isolatedMarginAsset = result.isolatedMarginAsset.map((item) => {
       return {
         ...item,
