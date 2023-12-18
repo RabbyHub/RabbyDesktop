@@ -91,7 +91,7 @@ export const useOKX = () => {
     const fundingAssets = inBundleAssets.flatMap((item) => item.fundingAsset);
 
     setMergedFundingAsset(
-      mergeList(fundingAssets, 'asset', ['usdtValue', 'value'])
+      mergeList(fundingAssets, ['asset'], ['usdtValue', 'value'])
     );
 
     const balances = await Promise.all(

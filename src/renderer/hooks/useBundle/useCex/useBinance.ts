@@ -94,9 +94,11 @@ export const useBinance = () => {
     const spotAssets = inBundleAssets.flatMap((item) => item.spotAsset);
 
     setMergedFundingAsset(
-      mergeList(fundingAssets, 'asset', ['usdtValue', 'value'])
+      mergeList(fundingAssets, ['asset'], ['usdtValue', 'value'])
     );
-    setMergedSpotAsset(mergeList(spotAssets, 'asset', ['usdtValue', 'value']));
+    setMergedSpotAsset(
+      mergeList(spotAssets, ['asset'], ['usdtValue', 'value'])
+    );
 
     const balances = await Promise.all(
       bnAccounts.map((account) => account.api.getBalance())
