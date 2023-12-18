@@ -59,7 +59,7 @@ export const useETH = () => {
     );
     const cachedList = mergeList(
       cachedListArray.reduce((prev, curr) => [...prev, ...curr], []),
-      'id',
+      ['chain', 'id'],
       ['usd_value', 'amount']
     );
     setTokenList(cachedList);
@@ -106,7 +106,7 @@ export const useETH = () => {
     );
     const cachedList = mergeList(
       cachedListArray.reduce((prev, curr) => [...prev, ...curr], []),
-      'id',
+      ['chain', 'id'],
       ['usd_value', 'portfolio_item_list']
     );
 
@@ -144,7 +144,7 @@ export const useETH = () => {
 
     const list = mergeList(
       listArray.reduce((prev, curr) => [...prev, ...curr], []),
-      'id',
+      ['id'],
       []
     );
     setUsedChainList(list.map((chain) => formatUsedChain(chain)));

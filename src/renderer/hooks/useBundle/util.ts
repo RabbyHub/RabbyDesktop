@@ -39,13 +39,17 @@ export const valueGreaterThanThreshold = (
  */
 export const mergeList = <T>(
   array: T[],
-  key: keyof T,
+  key: (keyof T)[],
   mergeKeys: (keyof T)[]
 ) => {
   const result: T[] = [];
 
   array.forEach((item) => {
-    const index = result.findIndex((r) => r[key] === item[key]);
+    const index = result.findIndex((r) => {
+      return key.every((k) => {
+        return item[k] === r[k];
+      });
+    });
 
     if (index >= 0) {
       mergeKeys.forEach((k) => {
