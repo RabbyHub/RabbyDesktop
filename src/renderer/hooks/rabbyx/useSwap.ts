@@ -17,6 +17,7 @@ export const swapAtom = atom<SwapState>({
   unlimitedAllowance: false,
   viewList: {},
   tradeList: {},
+  sortIncludeGasFee: false,
 } as SwapState);
 
 export const useSwap = () => {
@@ -80,6 +81,10 @@ export const useSwap = () => {
           ...e,
           tradeList: { ...e.tradeList, [params[0]]: params[1] },
         }));
+      },
+      setSwapSortIncludeGasFee: async (p: boolean) => {
+        await walletController.setSwapSortIncludeGasFee(p);
+        s((e) => ({ ...e, sortIncludeGasFee: p }));
       },
     }),
     [getSwap, s]

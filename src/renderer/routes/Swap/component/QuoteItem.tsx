@@ -149,7 +149,8 @@ export interface QuoteItemProps {
   receiveToken: TokenItem;
   payAmount: string;
   chain: CHAINS_ENUM;
-  bestAmount: string;
+  bestQuoteAmount: string;
+  bestQuoteGasUsd: string;
   isBestQuote: boolean;
   active: boolean;
   userAddress: string;
@@ -170,7 +171,8 @@ export const DexQuoteItem = (
     quote,
     name: dexId,
     loading,
-    bestAmount,
+    bestQuoteAmount,
+    bestQuoteGasUsd,
     payToken,
     receiveToken,
     payAmount,
@@ -185,7 +187,8 @@ export const DexQuoteItem = (
     quoteProviderInfo,
   } = props;
 
-  const { swapTradeList, setSwapSettingVisible } = useSwapSettings();
+  const { swapTradeList, setSwapSettingVisible, sortIncludeGasFee } =
+    useSwapSettings();
 
   const disabledTrade = useMemo(
     () =>
@@ -234,11 +237,20 @@ export const DexQuoteItem = (
       : preExecResult?.swapPreExecTx.balance_change.receive_token_list[0]
           ?.amount;
     if (actualReceiveAmount) {
-      const bestQuoteAmount = new BigNumber(bestAmount);
+      const bestQuoteAmountBn = new BigNumber(bestQuoteAmount);
       const receivedTokeAmountBn = new BigNumber(actualReceiveAmount || 0);
-      const percent = new BigNumber(actualReceiveAmount)
-        .minus(bestAmount || 0)
-        .div(bestAmount)
+
+      const receivedUsdBn = receivedTokeAmountBn
+        .times(receiveToken.price)
+        .minus(sortIncludeGasFee ? preExecResult?.gasUsdValue || 0 : 0);
+
+      const bestQuoteUsdBn = bestQuoteAmountBn
+        .times(receiveToken.price)
+        .minus(sortIncludeGasFee ? bestQuoteGasUsd : 0);
+
+      const percent = receivedUsdBn
+        .minus(bestQuoteUsdBn)
+        .div(bestQuoteUsdBn)
         .times(100);
 
       receivedUsd = formatUsdValue(
@@ -247,7 +259,7 @@ export const DexQuoteItem = (
 
       diffUsd = formatUsdValue(
         new BigNumber(actualReceiveAmount)
-          .minus(bestQuoteAmount || 0)
+          .minus(bestQuoteAmountBn || 0)
           .times(receiveToken.price || 0)
           .toString(10)
       );
@@ -266,7 +278,7 @@ export const DexQuoteItem = (
       );
 
       right = (
-        <span className={clsx('percent', percent.lt(0) && 'red')}>
+        <span className={clsx('percent', !isBestQuote && 'red')}>
           {isBestQuote
             ? 'Best'
             : `${percent.toFixed(2, BigNumber.ROUND_DOWN)}%`}
@@ -305,7 +317,9 @@ export const DexQuoteItem = (
     receiveToken,
     preExecResult,
     isSdkDataPass,
-    bestAmount,
+    bestQuoteAmount,
+    bestQuoteGasUsd,
+    sortIncludeGasFee,
     isBestQuote,
   ]);
 
@@ -536,14 +550,24 @@ export const DexQuoteItem = (
 export const CexQuoteItem = (props: {
   name: string;
   data: CEXQuote | null;
-  bestAmount: string;
+  bestQuoteAmount: string;
+  bestQuoteGasUsd: string;
   isBestQuote: boolean;
   isLoading?: boolean;
   inSufficient: boolean;
 }) => {
-  const { name, data, bestAmount, isBestQuote, isLoading, inSufficient } =
-    props;
+  const {
+    name,
+    data,
+    bestQuoteAmount,
+    bestQuoteGasUsd,
+    isBestQuote,
+    isLoading,
+    inSufficient,
+  } = props;
   const dexInfo = useMemo(() => CEX[name as keyof typeof CEX], [name]);
+
+  const { sortIncludeGasFee } = useSwapSettings();
 
   const [middleContent, rightContent] = useMemo(() => {
     let center: React.ReactNode = <div className="">-</div>;
@@ -558,11 +582,17 @@ export const CexQuoteItem = (props: {
     }
 
     if (data?.receive_token?.amount) {
-      const bestQuoteAmount = new BigNumber(bestAmount);
       const receiveToken = data.receive_token;
-      const percent = new BigNumber(receiveToken.amount)
-        .minus(bestQuoteAmount || 0)
-        .div(bestQuoteAmount)
+
+      const bestQuoteUsdBn = new BigNumber(bestQuoteAmount)
+        .times(receiveToken.price || 1)
+        .minus(sortIncludeGasFee ? bestQuoteGasUsd : 0);
+      const receiveUsdBn = new BigNumber(receiveToken.amount).times(
+        receiveToken.price || 1
+      );
+      const percent = receiveUsdBn
+        .minus(bestQuoteUsdBn)
+        .div(bestQuoteUsdBn)
         .times(100);
       const s = formatAmount(receiveToken.amount.toString(10));
       center = (
@@ -578,7 +608,7 @@ export const CexQuoteItem = (props: {
       );
 
       right = (
-        <span className={clsx('percent', percent.lt(0) && 'red')}>
+        <span className={clsx('percent', !isBestQuote && 'red')}>
           {isBestQuote
             ? 'Best'
             : `${percent.toFixed(2, BigNumber.ROUND_DOWN)}%`}
@@ -587,7 +617,13 @@ export const CexQuoteItem = (props: {
     }
 
     return [center, right, disable];
-  }, [data?.receive_token, bestAmount, isBestQuote]);
+  }, [
+    data?.receive_token,
+    bestQuoteAmount,
+    isBestQuote,
+    sortIncludeGasFee,
+    bestQuoteGasUsd,
+  ]);
 
   return (
     <ItemWrapper

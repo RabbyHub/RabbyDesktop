@@ -178,6 +178,7 @@ export interface SwapState {
   unlimitedAllowance?: boolean;
   viewList: Record<keyof DEX_TYPE | keyof CEX_TYPE, boolean>;
   tradeList: Record<keyof DEX_TYPE | keyof CEX_TYPE, boolean>;
+  sortIncludeGasFee: boolean;
 }
 
 type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
@@ -342,6 +343,9 @@ export type RabbyXMethod = {
     chainId: keyof GasCache,
     gas: ChainGas
   ) => void;
+
+  'walletController.getSwapSortIncludeGasFee': () => boolean | undefined;
+  'walletController.setSwapSortIncludeGasFee': (includesGas: boolean) => void;
 
   'walletController.setSwapDexId': (dexId: DEX_ENUM) => void;
 
