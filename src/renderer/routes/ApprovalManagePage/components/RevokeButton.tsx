@@ -14,7 +14,7 @@ export const RevokeButton: React.FC<Props> = ({ revokeList, onRevoke }) => {
           {revokeList.length} transactions to be signed sequentially
         </div>
       ) : (
-        <div className="mt-[16px] h-[16px] mb-[16px]"> </div>
+        <div className="mt-[24px]" />
       )}
       <Button
         className="w-[280px] h-[60px] text-[20px] am-revoke-btn rounded-[6px]"

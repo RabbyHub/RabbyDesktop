@@ -12,11 +12,13 @@
 @table-header-h: 48px;
 
 /* pt + height + pb */
-@sticky-footer-textarea: 12px + 16px + 12px;
+@sticky-footer-textarea: 16px + 16px + 16px;
 @sticky-btn-height: 60px;
 @sticky-btn-bottom-offset: 40px;
+// value of `@sticky-footer-height` is 124px
+@sticky-footer-height: 24px + @sticky-btn-height + @sticky-btn-bottom-offset;
 // value of `@sticky-footer-height` is 148px
-@sticky-footer-height: @sticky-footer-textarea + @sticky-btn-height + @sticky-btn-bottom-offset;
+@sticky-footer-with-selection-height: @sticky-footer-textarea + @sticky-btn-height + @sticky-btn-bottom-offset;
 
 @table-scoller-reserve-w: 4px;
 @table-last-cell-pr: @table-scoller-reserve-w;
@@ -25,17 +27,34 @@
 @table-ink-color: rgba(0, 0, 0, 0.10);
 
 .approvals-manager-page {
+  --approvals-manager-top-offset: 24px;
+
   width: 100%;
   min-width: @main-w;
-  height: var(--mainwin-mainroute-height);
-  padding-top: 32px;
+  height: 100%;
+  max-height: var(--mainwin-mainroute-maincontent-height);
+  box-sizing: border-box;
+  padding-top: var(--approvals-manager-top-offset);
   padding-left: 44px;
   padding-right: 44px;
-  // padding-bottom: @sticky-footer-height;
-  // background: var(--color-bg);
+
+  > .approvals-manager {
+    > * {
+      flex-shrink: 0;
+    }
+
+    > main {
+      padding-bottom: 0;
+      flex-shrink: 1;
+      height: 100%;
+      width: 100%;
+    }
+  }
 
   &.with-net-switch {
-    padding-top: 0;
+    --approvals-manager-top-offset: 8px;
+    --approvals-manager-netswitches-h: 36px;
+    --approvals-manager-netswitches-mb: 20px;
   }
 
   .child-has-chrome-like-scrollbar();
@@ -43,10 +62,9 @@
 
 .approvals-manager {
   overflow: hidden;
-  height: 100%;
+  // height: 100%;
   min-width: @main-w;
   width: @main-w;
-  // width: 100%;
   max-width: 1280px;
   margin: 0 auto;
   display: flex;
@@ -54,10 +72,22 @@
   align-items: center;
   justify-content: center;
 
+  > .approvals-manager__header,
   > main {
-    flex-shrink: 1;
-    height: 100%;
-    width: 100%;
+    flex-direction: row;
+  }
+
+  > .approvals-manager__header {
+    display: flex;
+    align-items: center;
+
+    .tabs {
+      margin-bottom: var(--approvals-manager-netswitches-mb, 0);
+
+      > .pills-switch {
+        height: var(--approvals-manager-netswitches-h, 0);
+      }
+    }
   }
 }
 
@@ -524,9 +554,14 @@
 .sticky-footer {
   text-align: center;
   position: absolute;
-  height: @sticky-footer-height;
   bottom: 0;
+
   padding-bottom: @sticky-btn-bottom-offset;
+  height: @sticky-footer-height;
+
+  &.with-selection {
+    height: @sticky-footer-with-selection-height;
+  }
 }
 
 .modal-debug-row-item {

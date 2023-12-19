@@ -933,11 +933,6 @@ const ApprovalManagePage = () => {
     loadApprovals();
   }, [selectedTab, loadApprovals]);
 
-  const { yValue } = useTableScrollableHeight();
-  const containerHeight = useMemo(() => {
-    return yValue - CLIENT_WINDOW_TOP_OFFSET;
-  }, [yValue]);
-
   const [visibleRevokeModal, setVisibleRevokeModal] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState<ApprovalItem>();
   const handleClickContractRow: HandleClickTableRow<ApprovalItem> =
@@ -991,6 +986,8 @@ const ApprovalManagePage = () => {
       : [];
   }, [filterType, contractRevokeList, assetRevokeList]);
 
+  const isShowRevokeButtonTip = currentRevokeList.length > 1;
+
   const wallet = useShellWallet();
   const handleRevoke = React.useCallback(() => {
     wallet
@@ -1015,6 +1012,11 @@ const ApprovalManagePage = () => {
       }));
     }, []);
 
+  const { yValue: containerHeight } = useTableScrollableHeight({
+    hasNetSwitchTab: isShowTestnet,
+    bottomFooterSelection: !!isShowRevokeButtonTip,
+  });
+
   return (
     <div
       className={clsx(
@@ -1022,15 +1024,15 @@ const ApprovalManagePage = () => {
         isShowTestnet && 'with-net-switch'
       )}
     >
-      <div className="approvals-manager">
-        <header
-          className={clsx(
-            'approvals-manager__header',
-            isShowTestnet ? 'mt-14' : 'mt-14'
-          )}
-        >
+      <div
+        className={clsx(
+          'approvals-manager',
+          isShowRevokeButtonTip && 'with-bottom-selection'
+        )}
+      >
+        <header className={clsx('approvals-manager__header')}>
           {isShowTestnet && (
-            <div className="tabs mb-20">
+            <div className="tabs">
               <NetSwitchTabs.ApprovalsPage
                 value={selectedTab}
                 onTabChange={onTabChange}
@@ -1103,7 +1105,12 @@ const ApprovalManagePage = () => {
             />
           ) : null}
         </main>
-        <div className="sticky-footer">
+        <div
+          className={clsx(
+            'sticky-footer',
+            !!isShowRevokeButtonTip && 'with-selection'
+          )}
+        >
           <RevokeButton
             revokeList={currentRevokeList}
             onRevoke={handleRevoke}
