@@ -169,12 +169,6 @@ export const TradingSetting = () => {
 
   return (
     <>
-      <IconSwapSetting
-        className="w-20 h-20 cursor-pointer"
-        onClick={() => {
-          setSwapSettingVisible(true);
-        }}
-      />
       <Modal
         width={400}
         destroyOnClose

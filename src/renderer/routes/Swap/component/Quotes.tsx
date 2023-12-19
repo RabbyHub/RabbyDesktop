@@ -17,6 +17,7 @@ import { CEX, DEX, DEX_WITH_WRAP } from '../constant';
 import { InSufficientTip } from './InSufficientTip';
 import { useSwapSettings } from '../hooks';
 import { SortWithGas } from './SortWithGas';
+import { TradingSetting } from './TraddingSetting';
 
 const exchangeCount = Object.keys(DEX).length + Object.keys(CEX).length;
 
@@ -196,6 +197,7 @@ export const Quotes = (props: QuotesProps) => {
             <div className="title">Found following swap rates</div>
             <IconRefresh refresh={refresh} loading={loading} />
           </div>
+          <TradingSetting />
           <SortWithGas />
         </div>
 
@@ -244,6 +246,7 @@ export const Quotes = (props: QuotesProps) => {
           <div className="title">Found following swap rates</div>
           <IconRefresh refresh={refresh} loading={loading} />
         </div>
+        <TradingSetting />
         <SortWithGas />
       </div>
 
@@ -306,7 +309,7 @@ export const Quotes = (props: QuotesProps) => {
         </>
       )}
 
-      <div className="flex justify-center mt-auto text-white opacity-60 text-13 pt-[12px]">
+      <div className="flex justify-center mt-auto text-white opacity-60 text-13 pt-[24px]">
         {viewCount} exchanges offer quotes, and {tradeCount} enable trading.{' '}
         <span
           onClick={() => {

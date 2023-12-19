@@ -122,7 +122,16 @@ export const SkeletonChildren = (
 ) => {
   const { loading = true, children, ...other } = props;
   if (loading) {
-    return <Skeleton.Input active {...other} />;
+    return (
+      <Skeleton.Input
+        active
+        {...other}
+        style={{
+          borderRadius: '6px',
+          ...other.style,
+        }}
+      />
+    );
   }
   return <div className="flex items-center gap-6">{children}</div>;
 };
