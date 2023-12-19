@@ -1,3 +1,9 @@
 #### New Features:
 
-- Supported 3 testnets, including Astar Shibuya Testnet, Astar zKatana Testnet, and X1 Testnet
+- Features:
+- Supported Beam chain
+- Supported Beam Testnet
+- Supported to rank Swap rates with Gas
+
+#### Fixes:
+- Fixed Binance balance loading issue on "My Portfolio" page
