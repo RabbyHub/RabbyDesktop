@@ -124,6 +124,8 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["TX1"] = "TX1";
     CHAINS_ENUM["TSBY"] = "TSBY";
     CHAINS_ENUM["TAZE"] = "TAZE";
+    CHAINS_ENUM["BEAM"] = "BEAM";
+    CHAINS_ENUM["TBEAM"] = "TBEAM";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -2172,6 +2174,40 @@ export const CHAINS_RAW = {
         nativeTokenDecimals: 18,
         eip: {
             "1559": false,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.BEAM]: {
+        id: 4337,
+        serverId: "beam",
+        name: "Beam",
+        enum: CHAINS_ENUM.BEAM,
+        hex: "0x10f1",
+        network: "4337",
+        nativeTokenSymbol: "BEAM",
+        nativeTokenAddress: "beam",
+        scanLink: "https://subnets.avax.network/beam/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/beam_token/logo_url/beam/90a1e9f46664d070752deeb65878a3bd.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: false,
+    },
+    [CHAINS_ENUM.TBEAM]: {
+        id: 13337,
+        serverId: "tbeam",
+        name: "Beam Testnet",
+        enum: CHAINS_ENUM.TBEAM,
+        hex: "0x3419",
+        network: "13337",
+        nativeTokenSymbol: "TestnetBEAM",
+        nativeTokenAddress: "tbeam",
+        scanLink: "https://subnets-test.avax.network/beam/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/tbeam_token/logo_url/tbeam/90a1e9f46664d070752deeb65878a3bd.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
         },
         isTestnet: true,
     },
