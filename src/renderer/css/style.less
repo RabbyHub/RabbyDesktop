@@ -67,6 +67,11 @@ img {
   -webkit-app-region: drag;
 }
 
+html.os-darwin .global-dragheadbar {
+  // avoid cover macos controls
+  left: 64px;
+}
+
 .global-nodrag,
 [data-nodrag] {
   -webkit-app-region: no-drag;
