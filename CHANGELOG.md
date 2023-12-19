@@ -1,7 +1,21 @@
 
-v0.36.2 / 2023-12-06
+v0.36.3 / 2023-12-19
 ====================
 
+  * style tuning (#605)
+  * feat: upgrade deps. (#602)
+  * fix: swap setting modal (#603)
+  * fix: avoid draggble area cover macos controls. (#604)
+  * chore: update currentVersion.
+  * fix: binance api update (#597)
+  * feat:sort with gasfee (#601)
+  * fix: style of approvals manage page. (#596)
+  * fix: merge the token list by chain and token id  (#599)
+
+v0.36.2-prod / 2023-12-06
+=========================
+
+  * Release v0.36.2-prod
   * build: only record changelog from special tag.
   * chore: update currentVersion.
   * fix: coboargus logo. (#595)
