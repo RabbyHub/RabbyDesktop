@@ -1,5 +1,5 @@
 import { ReactNode, SyntheticEvent, useEffect, useState } from 'react';
-import cx from 'clsx';
+import cx, { clsx } from 'clsx';
 import IconCheck from '@/../assets/icons/swap/check.svg';
 import styles from './style.module.less';
 
@@ -14,6 +14,7 @@ interface CheckboxProps {
   className?: string;
   children?: ReactNode;
   checkIcon?: ReactNode;
+  type?: 'circle' | 'square';
 }
 
 export const Checkbox = ({
@@ -25,6 +26,7 @@ export const Checkbox = ({
 
   width = '16px',
   height = '16px',
+  type = 'circle',
   className,
   children,
   checkIcon,
@@ -48,7 +50,7 @@ export const Checkbox = ({
       onClick={(e) => handleValueChange(e, !checkState)}
     >
       <div
-        className={styles.checkbox}
+        className={clsx(styles.checkbox, type)}
         style={{
           width,
           height,

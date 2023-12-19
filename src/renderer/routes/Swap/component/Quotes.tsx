@@ -15,8 +15,8 @@ import {
 } from './QuoteItem';
 import { CEX, DEX, DEX_WITH_WRAP } from '../constant';
 import { InSufficientTip } from './InSufficientTip';
-import { TradingSetting } from './TraddingSetting';
 import { useSwapSettings } from '../hooks';
+import { SortWithGas } from './SortWithGas';
 
 const exchangeCount = Object.keys(DEX).length + Object.keys(CEX).length;
 
@@ -42,7 +42,8 @@ const QuotesWrapper = styled.div`
 interface QuotesProps
   extends Omit<
     QuoteItemProps,
-    | 'bestAmount'
+    | 'bestQuoteAmount'
+    | 'bestQuoteGasUsd'
     | 'name'
     | 'quote'
     | 'active'
@@ -62,8 +63,12 @@ export const Quotes = (props: QuotesProps) => {
     inSufficient,
     ...other
   } = props;
-  const { swapViewList, swapTradeList, setSwapSettingVisible } =
-    useSwapSettings();
+  const {
+    swapViewList,
+    swapTradeList,
+    setSwapSettingVisible,
+    sortIncludeGasFee,
+  } = useSwapSettings();
 
   const sortedList = useMemo(
     () =>
@@ -75,31 +80,53 @@ export const Quotes = (props: QuotesProps) => {
           const getNumber = (quote: typeof a) => {
             if (quote.isDex) {
               if (inSufficient) {
-                return new BigNumber(quote.data?.toTokenAmount || 0).div(
-                  10 **
-                    (quote.data?.toTokenDecimals || other.receiveToken.decimals)
-                );
+                return new BigNumber(quote.data?.toTokenAmount || 0)
+                  .div(
+                    10 **
+                      (quote.data?.toTokenDecimals ||
+                        other.receiveToken.decimals)
+                  )
+                  .times(other.receiveToken.price);
               }
               if (!quote.preExecResult) {
                 return new BigNumber(0);
               }
+
+              if (sortIncludeGasFee) {
+                return new BigNumber(
+                  quote?.preExecResult.swapPreExecTx.balance_change
+                    .receive_token_list?.[0]?.amount || 0
+                )
+                  .times(other.receiveToken.price)
+                  .minus(quote?.preExecResult?.gasUsdValue || 0);
+              }
+
               return new BigNumber(
                 quote?.preExecResult.swapPreExecTx.balance_change
                   .receive_token_list?.[0]?.amount || 0
-              );
+              ).times(other.receiveToken.price);
             }
 
-            return new BigNumber(quote?.data?.receive_token?.amount || 0);
+            return new BigNumber(quote?.data?.receive_token?.amount || 0).times(
+              other.receiveToken.price
+            );
           };
           return getNumber(b).minus(getNumber(a)).toNumber();
         }),
-    [inSufficient, list, other.receiveToken.decimals, swapViewList]
+    [
+      inSufficient,
+      list,
+      other?.receiveToken?.decimals,
+      other?.receiveToken?.price,
+      swapViewList,
+      sortIncludeGasFee,
+    ]
   );
 
-  const bestAmount = useMemo(() => {
+  const [bestQuoteAmount, bestQuoteGasUsd] = useMemo(() => {
     const bestQuote = sortedList?.[0];
 
-    return (
+    return [
       (bestQuote?.isDex
         ? inSufficient
           ? new BigNumber(bestQuote.data?.toTokenAmount || 0)
@@ -114,8 +141,9 @@ export const Quotes = (props: QuotesProps) => {
               .receive_token_list[0]?.amount
         : new BigNumber(bestQuote?.data?.receive_token.amount || '0').toString(
             10
-          )) || '0'
-    );
+          )) || '0',
+      bestQuote?.isDex ? bestQuote.preExecResult?.gasUsdValue || '0 ' : '0',
+    ];
   }, [inSufficient, other?.receiveToken?.decimals, sortedList]);
 
   const fetchedList = useMemo(() => list.map((e) => e.name), [list]);
@@ -165,10 +193,10 @@ export const Quotes = (props: QuotesProps) => {
       <QuotesWrapper>
         <div className={clsx('header', inSufficient && 'inSufficient')}>
           <div className="flex items-center">
-            <div className="title">The following swap rates are found</div>
+            <div className="title">Found following swap rates</div>
             <IconRefresh refresh={refresh} loading={loading} />
           </div>
-          <TradingSetting />
+          <SortWithGas />
         </div>
 
         <InSufficientTip inSufficient={inSufficient} />
@@ -181,10 +209,11 @@ export const Quotes = (props: QuotesProps) => {
               quote={dex?.data}
               name={dex?.name}
               isBestQuote
-              bestAmount={`${
+              bestQuoteAmount={`${
                 dex?.preExecResult?.swapPreExecTx.balance_change
                   .receive_token_list[0]?.amount || '0'
               }`}
+              bestQuoteGasUsd={bestQuoteGasUsd}
               active={activeName === dex?.name}
               isLoading={dex.loading}
               quoteProviderInfo={{
@@ -212,10 +241,10 @@ export const Quotes = (props: QuotesProps) => {
     <QuotesWrapper>
       <div className={clsx('header', inSufficient && 'inSufficient')}>
         <div className="flex items-center">
-          <div className="title">The following swap rates are found</div>
+          <div className="title">Found following swap rates</div>
           <IconRefresh refresh={refresh} loading={loading} />
         </div>
-        <TradingSetting />
+        <SortWithGas />
       </div>
 
       <InSufficientTip inSufficient={inSufficient} />
@@ -231,7 +260,8 @@ export const Quotes = (props: QuotesProps) => {
               quote={data}
               name={name}
               isBestQuote={idx === 0}
-              bestAmount={`${bestAmount}`}
+              bestQuoteAmount={`${bestQuoteAmount}`}
+              bestQuoteGasUsd={bestQuoteGasUsd}
               active={activeName === name}
               isLoading={params.loading}
               quoteProviderInfo={
@@ -263,7 +293,8 @@ export const Quotes = (props: QuotesProps) => {
                 <CexQuoteItem
                   name={name}
                   data={data}
-                  bestAmount={`${bestAmount}`}
+                  bestQuoteAmount={`${bestQuoteAmount}`}
+                  bestQuoteGasUsd={bestQuoteGasUsd}
                   isBestQuote={idx === 0}
                   isLoading={params.loading}
                   inSufficient={inSufficient}
