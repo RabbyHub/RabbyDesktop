@@ -309,7 +309,7 @@ export const Quotes = (props: QuotesProps) => {
         </>
       )}
 
-      <div className="flex justify-center mt-auto text-white opacity-60 text-13 pt-[24px]">
+      <div className="flex justify-center mt-auto text-white opacity-60 text-13 pt-[12px]">
         {viewCount} exchanges offer quotes, and {tradeCount} enable trading.{' '}
         <span
           onClick={() => {

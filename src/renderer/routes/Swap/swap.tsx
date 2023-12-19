@@ -1007,7 +1007,12 @@ export const SwapToken = () => {
               )}
             </div>
           </div>
-          <div className="box">
+          <div
+            className={clsx(
+              'box',
+              renderQuotes && payToken && receiveToken && 'pb-[12px]'
+            )}
+          >
             {renderQuotes && payToken && receiveToken ? (
               <Quotes
                 inSufficient={inSufficient}
