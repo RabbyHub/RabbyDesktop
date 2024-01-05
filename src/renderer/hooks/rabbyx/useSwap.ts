@@ -86,6 +86,11 @@ export const useSwap = () => {
         await walletController.setSwapSortIncludeGasFee(p);
         s((e) => ({ ...e, sortIncludeGasFee: p }));
       },
+
+      setSwapPreferMEV: async (p: boolean) => {
+        await walletController.setSwapPreferMEVGuarded(p);
+        s((e) => ({ ...e, preferMEVGuarded: p }));
+      },
     }),
     [getSwap, s]
   );

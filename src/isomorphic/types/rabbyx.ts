@@ -179,6 +179,7 @@ export interface SwapState {
   viewList: Record<keyof DEX_TYPE | keyof CEX_TYPE, boolean>;
   tradeList: Record<keyof DEX_TYPE | keyof CEX_TYPE, boolean>;
   sortIncludeGasFee: boolean;
+  preferMEVGuarded: boolean;
 }
 
 type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
@@ -366,6 +367,8 @@ export type RabbyXMethod = {
   'walletController.getSwapViewList': () => SwapState['viewList'];
 
   'walletController.getSwapTradeList': () => SwapState['tradeList'];
+  'walletController.getSwapPreferMEVGuarded': () => boolean;
+  'walletController.setSwapPreferMEVGuarded': (bool: boolean) => boolean;
 
   'walletController.getERC20Allowance': (
     chainServerId: string,
@@ -394,6 +397,7 @@ export type RabbyXMethod = {
 
   'walletController.dexSwap': (
     p: {
+      swapPreferMEVGuarded: boolean;
       chain: CHAINS_ENUM;
       quote: QuoteResult;
       needApprove: boolean;
