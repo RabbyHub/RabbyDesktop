@@ -11,7 +11,7 @@ import {
 import styled from 'styled-components';
 import IconSwapArrow from '@/../assets/icons/swap/swap-arrow.svg?rc';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
-import { Button, message, Modal, Switch, Tooltip } from 'antd';
+import { Button, message, Modal, Tooltip } from 'antd';
 import { useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
@@ -30,6 +30,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 import { getTokenSymbol } from '@/renderer/utils';
 import { findChainByServerID } from '@/renderer/utils/chain';
+import { Switch } from '@/renderer/components/Switch/Switch';
 import { ChainRender, ChainSelect } from './component/ChainSelect';
 import { SwapIntro } from './component/Intro';
 import { DEX, getChainDefaultToken } from './constant';
@@ -66,18 +67,21 @@ const PreferMEVGuardSwitch = styled(Switch)`
   min-width: 24px;
   width: 24px;
   height: 12px;
-  &.ant-switch-checked {
-    background-color: var(--r-blue-default, #7084ff);
-    .ant-switch-handle {
-      left: calc(100% - 10px - 1px);
-      top: 1px;
+  &.ant-switch {
+    min-width: 24px;
+    &.ant-switch-checked {
+      background-color: var(--r-blue-default, #7084ff) !important;
+      .ant-switch-handle {
+        left: calc(100% - 10px - 1px);
+        top: 1px;
+      }
     }
-  }
-  .ant-switch-handle {
-    height: 10px;
-    width: 10px;
-    top: 1px;
-    left: 1px;
+    .ant-switch-handle {
+      height: 10px;
+      width: 10px;
+      top: 1px;
+      left: 1px;
+    }
   }
 `;
 
