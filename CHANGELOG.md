@@ -1,7 +1,18 @@
 
-v0.36.3 / 2023-12-19
+v0.36.4 / 2024-01-09
 ====================
 
+  * chore: use new rabbyx. (#609)
+  * feat: use electron 26 still.
+  * chore: update currentVersion.
+  * chore: upgrade deps.
+  * feat: use electron v27. (#608)
+  * feat: swap prefer mev guarded (#607)
+
+v0.36.3-prod / 2023-12-19
+=========================
+
+  * Release v0.36.3-prod
   * style tuning (#605)
   * feat: upgrade deps. (#602)
   * fix: swap setting modal (#603)
