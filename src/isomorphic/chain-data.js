@@ -126,6 +126,11 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["TAZE"] = "TAZE";
     CHAINS_ENUM["BEAM"] = "BEAM";
     CHAINS_ENUM["TBEAM"] = "TBEAM";
+    CHAINS_ENUM["TFRAX"] = "TFRAX";
+    CHAINS_ENUM["TPEGO"] = "TPEGO";
+    CHAINS_ENUM["TFRAME"] = "TFRAME";
+    CHAINS_ENUM["PEGO"] = "PEGO";
+    CHAINS_ENUM["ZKFAIR"] = "ZKFAIR";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -361,7 +366,7 @@ export const CHAINS_RAW = {
         nativeTokenAddress: "metis",
         enum: CHAINS_ENUM.METIS,
         hex: "0x440",
-        scanLink: "https://andromeda-explorer.metis.io/tx/_s_",
+        scanLink: "https://explorer.metis.io/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/metis/b289da32db4d860ebf6fb46a6e41dcfc.png",
         nativeTokenDecimals: 18,
         eip: {
@@ -649,7 +654,7 @@ export const CHAINS_RAW = {
         nativeTokenAddress: "canto",
         enum: CHAINS_ENUM.CANTO,
         hex: "0x1e14",
-        scanLink: "https://cantoscan.com/tx/_s_",
+        scanLink: "https://tuber.build/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/canto/47574ef619e057d2c6bbce1caba57fb6.png",
         nativeTokenDecimals: 18,
         eip: {
@@ -937,7 +942,7 @@ export const CHAINS_RAW = {
         nativeTokenAddress: "pls",
         enum: CHAINS_ENUM.PULSE,
         hex: "0x171",
-        scanLink: "https://scan.pulsechain.com/tx/_s_",
+        scanLink: "https://scan.mypinata.cloud/ipfs/bafybeidn64pd2u525lmoipjl4nh3ooa2imd7huionjsdepdsphl5slfowy/#/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/pls/aa6be079fa9eb568e02150734ebb3db0.png",
         nativeTokenDecimals: 18,
         eip: {
@@ -2210,6 +2215,91 @@ export const CHAINS_RAW = {
             "1559": true,
         },
         isTestnet: true,
+    },
+    [CHAINS_ENUM.TFRAX]: {
+        id: 2522,
+        serverId: "tfrax",
+        name: "Fraxchain Testnet",
+        enum: CHAINS_ENUM.TFRAX,
+        hex: "0x9da",
+        network: "2522",
+        nativeTokenSymbol: "TestnetfrxETH",
+        nativeTokenAddress: "tfrax",
+        scanLink: "https://explorer.testnet.frax.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/tfrax_token/logo_url/tfrax/71b8a5f7684c752901272fb31842abdf.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.TPEGO]: {
+        id: 123456,
+        serverId: "tpego",
+        name: "Pego Testnet",
+        enum: CHAINS_ENUM.TPEGO,
+        hex: "0x1e240",
+        network: "123456",
+        nativeTokenSymbol: "TestnetPG",
+        nativeTokenAddress: "tpego",
+        scanLink: "https://scan.pegotest.net/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/tpego_token/logo_url/tpego/6b81cf47fdc1b86707d3fbf02f90cf18.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.TFRAME]: {
+        id: 68840142,
+        serverId: "tframe",
+        name: "Frame Testnet",
+        enum: CHAINS_ENUM.TFRAME,
+        hex: "0x41a6ace",
+        network: "68840142",
+        nativeTokenSymbol: "TestnetETH",
+        nativeTokenAddress: "tframe",
+        scanLink: "https://explorer.testnet.frame.xyz/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/tframe_token/logo_url/tframe/389dd9a835250219889e01d5a31a75f1.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.PEGO]: {
+        id: 20201022,
+        serverId: "pego",
+        name: "Pego",
+        enum: CHAINS_ENUM.PEGO,
+        hex: "0x1343e3e",
+        network: "20201022",
+        nativeTokenSymbol: "PG",
+        nativeTokenAddress: "pego",
+        scanLink: "https://scan.pego.network/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/pego_token/logo_url/pego/6b81cf47fdc1b86707d3fbf02f90cf18.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: false,
+    },
+    [CHAINS_ENUM.ZKFAIR]: {
+        id: 42766,
+        serverId: "zkfair",
+        name: "ZKFair",
+        enum: CHAINS_ENUM.ZKFAIR,
+        hex: "0xa70e",
+        network: "42766",
+        nativeTokenSymbol: "USDC",
+        nativeTokenAddress: "zkfair",
+        scanLink: "https://scan.zkfair.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/zkfair_token/logo_url/zkfair/35ab0987153a8355a454223aae371ac7.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: false,
     },
 };
 export const CHAINS_RAW_LIST = Object.values(CHAINS_RAW);
