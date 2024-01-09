@@ -11,7 +11,7 @@ import {
 import styled from 'styled-components';
 import IconSwapArrow from '@/../assets/icons/swap/swap-arrow.svg?rc';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
-import { Button, message, Modal } from 'antd';
+import { Button, message, Modal, Tooltip } from 'antd';
 import { useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
@@ -30,6 +30,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 import { getTokenSymbol } from '@/renderer/utils';
 import { findChainByServerID } from '@/renderer/utils/chain';
+import { Switch } from '@/renderer/components/Switch/Switch';
 import { ChainRender, ChainSelect } from './component/ChainSelect';
 import { SwapIntro } from './component/Intro';
 import { DEX, getChainDefaultToken } from './constant';
@@ -61,6 +62,28 @@ import {
   activeProviderOriginAtom,
   refreshIdAtom,
 } from './atom';
+
+const PreferMEVGuardSwitch = styled(Switch)`
+  min-width: 24px;
+  width: 24px;
+  height: 12px;
+  &.ant-switch {
+    min-width: 24px;
+    &.ant-switch-checked {
+      background-color: var(--r-blue-default, #7084ff) !important;
+      .ant-switch-handle {
+        left: calc(100% - 10px - 1px);
+        top: 1px;
+      }
+    }
+    .ant-switch-handle {
+      height: 10px;
+      width: 10px;
+      top: 1px;
+      left: 1px;
+    }
+  }
+`;
 
 const Wrapper = styled.div`
   --max-swap-width: 1080px;
@@ -412,7 +435,12 @@ export const SwapToken = () => {
     []
   );
 
-  const { swapViewList, swapSettingVisible } = useSwapSettings();
+  const {
+    swapViewList,
+    swapSettingVisible,
+    preferMEVGuarded: originPreferMEVGuarded,
+    setSwapPreferMEV,
+  } = useSwapSettings();
   const { loading: quoteLoading, error: quotesError } = useAsync(async () => {
     fetchIdRef.current += 1;
     const currentFetchId = fetchIdRef.current;
@@ -590,6 +618,11 @@ export const SwapToken = () => {
 
   const isTransactingRef = useRef(false);
 
+  const preferMEVGuarded = useMemo(
+    () => (chain === CHAINS_ENUM.ETH ? originPreferMEVGuarded : false),
+    [chain, originPreferMEVGuarded]
+  );
+
   const gotoSwap = useCallback(
     async (unlimited = false) => {
       if (isTransactingRef.current) return;
@@ -604,6 +637,7 @@ export const SwapToken = () => {
           setIsInfiniteApproval(unlimited);
           const hash = await walletController.dexSwap(
             {
+              swapPreferMEVGuarded: preferMEVGuarded,
               chain,
               quote: activeProvider.quote,
               needApprove: activeProvider?.shouldApproveToken,
@@ -658,6 +692,7 @@ export const SwapToken = () => {
       }
     },
     [
+      preferMEVGuarded,
       payToken,
       activeProvider?.error,
       activeProvider?.quote,
@@ -790,6 +825,57 @@ export const SwapToken = () => {
     ]
   );
 
+  const showMEVGuardedSwitch = useMemo(
+    () => chain === CHAINS_ENUM.ETH,
+    [chain]
+  );
+
+  const switchPreferMEV = useCallback(
+    (bool: boolean) => {
+      setSwapPreferMEV(bool);
+    },
+    [setSwapPreferMEV]
+  );
+
+  const FeeAndMEVGuarded = useMemo(
+    () => (
+      <>
+        <div className="flex items-center justify-between text-14 text-white">
+          <span className="text-white text-opacity-60">Rabby fee</span>
+          <span className="font-medium text-white">0%</span>
+        </div>
+        {showMEVGuardedSwitch && (
+          <div className="flex justify-between">
+            <Tooltip
+              placement="topLeft"
+              overlayClassName={clsx('rectangle', 'max-w-[312px]')}
+              title={
+                'Enable "MEV Guarded" feature for Ethereum swaps to reduce sandwich attack risks. Note: this feature is not supported if you use a custom RPC or wallet connect address'
+              }
+            >
+              <span className="text-white text-opacity-60">
+                Prefer MEV Guarded
+              </span>
+            </Tooltip>
+            <Tooltip
+              placement="topRight"
+              overlayClassName={clsx('rectangle', 'max-w-[312px]')}
+              title={
+                'Enable "MEV Guarded" feature for Ethereum swaps to reduce sandwich attack risks. Note: this feature is not supported if you use a custom RPC or wallet connect address'
+              }
+            >
+              <PreferMEVGuardSwitch
+                checked={originPreferMEVGuarded}
+                onChange={switchPreferMEV}
+              />
+            </Tooltip>
+          </div>
+        )}
+      </>
+    ),
+    [switchPreferMEV, showMEVGuardedSwitch, originPreferMEVGuarded]
+  );
+
   return (
     <Wrapper>
       <div className="header">
@@ -913,8 +999,11 @@ export const SwapToken = () => {
                     isWrapToken={!!isWrapToken}
                   />
                   {isWrapToken ? (
-                    <div className="mb-18 text-white">
-                      There is no fee and slippage for this trade
+                    <div className="section flex flex-col gap-[16px]">
+                      {FeeAndMEVGuarded}
+                      <div className="text-white text-opacity-60">
+                        There is no slippage for this trade
+                      </div>
                     </div>
                   ) : (
                     <div className="section flex flex-col gap-[16px]">
@@ -945,12 +1034,7 @@ export const SwapToken = () => {
                           </span>
                         </SkeletonChildren>
                       </div>
-                      <div className="flex items-center justify-between text-14 text-white">
-                        <span className="text-white text-opacity-60">
-                          Rabby fee{' '}
-                        </span>
-                        <span className="font-medium text-white">0%</span>
-                      </div>
+                      {FeeAndMEVGuarded}
                     </div>
                   )}
                 </>

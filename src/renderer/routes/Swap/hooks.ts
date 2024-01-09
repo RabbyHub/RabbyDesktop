@@ -393,14 +393,20 @@ export const useTokenPair = (userAddress: string, chain: CHAINS_ENUM) => {
 };
 
 export const useSwapSettings = () => {
-  const { swap, setSwapView, setSwapTrade, setSwapSortIncludeGasFee } =
-    useSwap();
+  const {
+    swap,
+    setSwapView,
+    setSwapTrade,
+    setSwapSortIncludeGasFee,
+    setSwapPreferMEV,
+  } = useSwap();
   const { tradeList, viewList } = swap;
   const [swapSettingVisible, setSwapSettingVisible] = useAtom(
     swapSettingVisibleAtom
   );
 
   return {
+    preferMEVGuarded: swap.preferMEVGuarded,
     sortIncludeGasFee: swap.sortIncludeGasFee,
     setSwapSortIncludeGasFee,
     swapViewList: viewList,
@@ -409,5 +415,6 @@ export const useSwapSettings = () => {
     setSwapTrade,
     swapSettingVisible,
     setSwapSettingVisible,
+    setSwapPreferMEV,
   };
 };
