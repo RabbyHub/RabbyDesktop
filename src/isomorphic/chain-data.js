@@ -91,8 +91,6 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["GMETIS"] = "GMETIS";
     CHAINS_ENUM["SARB"] = "SARB";
     CHAINS_ENUM["TSTLS"] = "TSTLS";
-    CHAINS_ENUM["PGN"] = "PGN";
-    CHAINS_ENUM["SPGN"] = "SPGN";
     CHAINS_ENUM["CFLR"] = "CFLR";
     CHAINS_ENUM["ACELO"] = "ACELO";
     CHAINS_ENUM["DBTT"] = "DBTT";
@@ -131,6 +129,18 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["TFRAME"] = "TFRAME";
     CHAINS_ENUM["PEGO"] = "PEGO";
     CHAINS_ENUM["ZKFAIR"] = "ZKFAIR";
+    CHAINS_ENUM["TRSK"] = "TRSK";
+    CHAINS_ENUM["TALOT"] = "TALOT";
+    CHAINS_ENUM["FON"] = "FON";
+    CHAINS_ENUM["BFC"] = "BFC";
+    CHAINS_ENUM["TBFC"] = "TBFC";
+    CHAINS_ENUM["ABERA"] = "ABERA";
+    CHAINS_ENUM["ALOT"] = "ALOT";
+    CHAINS_ENUM["XAI"] = "XAI";
+    CHAINS_ENUM["TSAVM"] = "TSAVM";
+    CHAINS_ENUM["GXAI"] = "GXAI";
+    CHAINS_ENUM["SXAI"] = "SXAI";
+    CHAINS_ENUM["SBLAST"] = "SBLAST";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -238,7 +248,7 @@ export const CHAINS_RAW = {
         network: "128",
         nativeTokenSymbol: "HT",
         nativeTokenAddress: "heco",
-        scanLink: "https://hecoinfo.com/tx/_s_",
+        scanLink: "https://hecoscan.io/#/transaction/_s_",
         nativeTokenLogo: "https://static.debank.com/image/heco_token/logo_url/heco/c399dcddde07e1944c4dd8f922832b53.png",
         nativeTokenDecimals: 18,
         eip: {
@@ -814,7 +824,7 @@ export const CHAINS_RAW = {
         nativeTokenAddress: "era",
         enum: CHAINS_ENUM.ERA,
         hex: "0x144",
-        scanLink: "https://explorer.zksync.io/tx/_s_",
+        scanLink: "https://era.zksync.network/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/era/e21641a19fe6b8c5d05337dacae17b6e.png",
         nativeTokenDecimals: 18,
         eip: {
@@ -1621,40 +1631,6 @@ export const CHAINS_RAW = {
         },
         isTestnet: true,
     },
-    [CHAINS_ENUM.PGN]: {
-        id: 424,
-        serverId: "pgn",
-        name: "PGN",
-        enum: CHAINS_ENUM.PGN,
-        hex: "0x1a8",
-        network: "424",
-        nativeTokenSymbol: "ETH",
-        nativeTokenAddress: "pgn",
-        scanLink: "https://explorer.publicgoods.network/tx/_s_",
-        nativeTokenLogo: "https://static.debank.com/image/pgn_token/logo_url/pgn/389dd9a835250219889e01d5a31a75f1.png",
-        nativeTokenDecimals: 18,
-        eip: {
-            "1559": true,
-        },
-        isTestnet: false,
-    },
-    [CHAINS_ENUM.SPGN]: {
-        id: 58008,
-        serverId: "spgn",
-        name: "PGN Sepolia",
-        enum: CHAINS_ENUM.SPGN,
-        hex: "0xe298",
-        network: "58008",
-        nativeTokenSymbol: "SepoliaETH",
-        nativeTokenAddress: "spgn",
-        scanLink: "https://explorer.sepolia.publicgoods.network/tx/_s_",
-        nativeTokenLogo: "https://static.debank.com/image/spgn_token/logo_url/spgn/389dd9a835250219889e01d5a31a75f1.png",
-        nativeTokenDecimals: 18,
-        eip: {
-            "1559": true,
-        },
-        isTestnet: true,
-    },
     [CHAINS_ENUM.CFLR]: {
         id: 114,
         serverId: "cflr",
@@ -2300,6 +2276,210 @@ export const CHAINS_RAW = {
             "1559": false,
         },
         isTestnet: false,
+    },
+    [CHAINS_ENUM.TRSK]: {
+        id: 31,
+        serverId: "trsk",
+        name: "RSK Testnet",
+        enum: CHAINS_ENUM.TRSK,
+        hex: "0x1f",
+        network: "31",
+        nativeTokenSymbol: "TestnetRBTC",
+        nativeTokenAddress: "trsk",
+        scanLink: "https://explorer.testnet.rsk.co/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/trsk_token/logo_url/trsk/62608952967d6a6eaecd2702f8143ff8.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.TALOT]: {
+        id: 432201,
+        serverId: "talot",
+        name: "Dexalot Testnet",
+        enum: CHAINS_ENUM.TALOT,
+        hex: "0x69849",
+        network: "432201",
+        nativeTokenSymbol: "TestnetALOT",
+        nativeTokenAddress: "talot",
+        scanLink: "https://subnets-test.avax.network/dexalot/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/talot_token/logo_url/talot/025f0609ce8d1afd70dbd72c316bca04.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.FON]: {
+        id: 201022,
+        serverId: "fon",
+        name: "FON Chain",
+        enum: CHAINS_ENUM.FON,
+        hex: "0x3113e",
+        network: "201022",
+        nativeTokenSymbol: "FON",
+        nativeTokenAddress: "fon",
+        scanLink: "https://fonscan.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/fon_token/logo_url/fon/369618f4d45053fa4439943c9c2d387d.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: false,
+    },
+    [CHAINS_ENUM.BFC]: {
+        id: 3068,
+        serverId: "bfc",
+        name: "Bifrost",
+        enum: CHAINS_ENUM.BFC,
+        hex: "0xbfc",
+        network: "3068",
+        nativeTokenSymbol: "BFC",
+        nativeTokenAddress: "bfc",
+        scanLink: "https://explorer.mainnet.bifrostnetwork.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/bfc_token/logo_url/bfc/f0c01b58f084660f8c8ff43f5c85301c.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: false,
+    },
+    [CHAINS_ENUM.TBFC]: {
+        id: 49088,
+        serverId: "tbfc",
+        name: "Bifrost Testnet",
+        enum: CHAINS_ENUM.TBFC,
+        hex: "0xbfc0",
+        network: "49088",
+        nativeTokenSymbol: "TestnetBFC",
+        nativeTokenAddress: "tbfc",
+        scanLink: "https://explorer.testnet.bifrostnetwork.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/tbfc_token/logo_url/tbfc/f0c01b58f084660f8c8ff43f5c85301c.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.ABERA]: {
+        id: 80085,
+        serverId: "abera",
+        name: "Berachain Artio Testnet",
+        enum: CHAINS_ENUM.ABERA,
+        hex: "0x138d5",
+        network: "80085",
+        nativeTokenSymbol: "ArtioBERA",
+        nativeTokenAddress: "abera",
+        scanLink: "https://artio.beratrail.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/abera_token/logo_url/abera/ce82c4810fd0cec44ecbd2e9dcd864e0.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.ALOT]: {
+        id: 432204,
+        serverId: "alot",
+        name: "Dexalot",
+        enum: CHAINS_ENUM.ALOT,
+        hex: "0x6984c",
+        network: "432204",
+        nativeTokenSymbol: "ALOT",
+        nativeTokenAddress: "alot",
+        scanLink: "https://subnets.avax.network/dexalot/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/alot_token/logo_url/alot/a03e5e8bc56a8bcd5f5c7b830e8b5877.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: false,
+    },
+    [CHAINS_ENUM.XAI]: {
+        id: 660279,
+        serverId: "xai",
+        name: "Xai",
+        enum: CHAINS_ENUM.XAI,
+        hex: "0xa1337",
+        network: "660279",
+        nativeTokenSymbol: "XAI",
+        nativeTokenAddress: "xai",
+        scanLink: "https://explorer.xai-chain.net/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/xai_token/logo_url/xai/022ab00135c182f6e67e583ecda93863.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: false,
+    },
+    [CHAINS_ENUM.TSAVM]: {
+        id: 3110,
+        serverId: "tsavm",
+        name: "SatoshiVM Testnet",
+        enum: CHAINS_ENUM.TSAVM,
+        hex: "0xc26",
+        network: "3110",
+        nativeTokenSymbol: "TestnetBTC",
+        nativeTokenAddress: "tsavm",
+        scanLink: "https://testnet.svmscan.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/tsavm_token/logo_url/tsavm/bf2e6d2050524a6d8f9bf621222e4d8e.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.GXAI]: {
+        id: 47279324479,
+        serverId: "gxai",
+        name: "Xai Goerli Testnet",
+        enum: CHAINS_ENUM.GXAI,
+        hex: "0xb02113d3f",
+        network: "47279324479",
+        nativeTokenSymbol: "GoerliETH",
+        nativeTokenAddress: "gxai",
+        scanLink: "https://testnet-explorer.xai-chain.net/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/gxai_token/logo_url/gxai/389dd9a835250219889e01d5a31a75f1.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.SXAI]: {
+        id: 37714555429,
+        serverId: "sxai",
+        name: "Xai Sepolia Testnet",
+        enum: CHAINS_ENUM.SXAI,
+        hex: "0x8c7f67225",
+        network: "37714555429",
+        nativeTokenSymbol: "SepoliaXAI",
+        nativeTokenAddress: "sxai",
+        scanLink: "https://testnet-explorer-v2.xai-chain.net/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/sxai_token/logo_url/sxai/022ab00135c182f6e67e583ecda93863.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.SBLAST]: {
+        id: 168587773,
+        serverId: "sblast",
+        name: "Blast Sepolia Testnet",
+        enum: CHAINS_ENUM.SBLAST,
+        hex: "0xa0c71fd",
+        network: "168587773",
+        nativeTokenSymbol: "SepoliaETH",
+        nativeTokenAddress: "sblast",
+        scanLink: "https://testnet.blastscan.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/sblast_token/logo_url/sblast/389dd9a835250219889e01d5a31a75f1.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
     },
 };
 export const CHAINS_RAW_LIST = Object.values(CHAINS_RAW);
