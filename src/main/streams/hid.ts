@@ -54,7 +54,7 @@ handleIpcMainInvoke('confirm-selected-device', (_, payload) => {
 });
 
 const SELECT_DEVICE_TIMEOUT = 180 * 1e3;
-getSessionInsts().then(({ mainSession }) => {
+getSessionInsts().then(({ mainSession, checkingViewSession }) => {
   mainSession.on(
     'select-hid-device',
     (eventSelectHidDevice, details, callback) => {
@@ -146,34 +146,48 @@ getSessionInsts().then(({ mainSession }) => {
     }
   );
 
-  mainSession.setPermissionCheckHandler(
-    (webContents, permission, requestingOrigin, details) => {
-      // leave here for debug
-      // console.debug('[debug] setPermissionCheckHandler:: permission', permission);
-      switch (permission) {
-        case 'clipboard-sanitized-write':
-        case 'accessibility-events':
-        case 'background-sync':
-          return true;
-        case 'serial':
-        case 'hid':
-        default: {
-          if (isInternalProtocol(requestingOrigin)) {
-            return true;
-          }
-          break;
+  [
+    { sessName: 'mainSession', inst: mainSession },
+    // restrain permissions of dapp's preview webContents(hosted by tag <webview />)
+    { sessName: 'checkingViewSession', inst: checkingViewSession },
+  ].forEach(({ sessName, inst }) =>
+    inst.setPermissionCheckHandler(
+      (webContents, permission, requestingOrigin, details) => {
+        // leave here for debug
+        // console.debug('[debug] setPermissionCheckHandler:: permission', permission);
+        if (!IS_RUNTIME_PRODUCTION && sessName === 'checkingViewSession') {
+          console.debug(
+            `[session:${sessName}] Permission '${permission}' requested from ${requestingOrigin} with details:`,
+            details
+          );
         }
-      }
 
-      if (!IS_RUNTIME_PRODUCTION) {
-        console.log(
-          `Permission Denied: called for ${permission} from ${requestingOrigin} with details:`,
-          details
-        );
-      }
+        switch (permission) {
+          case 'clipboard-sanitized-write':
+          case 'accessibility-events':
+          case 'background-sync':
+            return true;
+          case 'serial':
+          case 'hid':
+          case 'notifications':
+          default: {
+            if (isInternalProtocol(requestingOrigin)) {
+              return true;
+            }
+            break;
+          }
+        }
 
-      return false;
-    }
+        if (!IS_RUNTIME_PRODUCTION) {
+          console.log(
+            `[session:${sessName}] Permission Denied: called for ${permission} from ${requestingOrigin} with details:`,
+            details
+          );
+        }
+
+        return false;
+      }
+    )
   );
 });
 
