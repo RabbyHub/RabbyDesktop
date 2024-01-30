@@ -54,7 +54,9 @@ handleIpcMainInvoke('confirm-selected-device', (_, payload) => {
 });
 
 const SELECT_DEVICE_TIMEOUT = 180 * 1e3;
-getSessionInsts().then(({ mainSession, checkingViewSession }) => {
+getSessionInsts().then((allSessions) => {
+  const { mainSession } = allSessions;
+
   mainSession.on(
     'select-hid-device',
     (eventSelectHidDevice, details, callback) => {
@@ -146,19 +148,17 @@ getSessionInsts().then(({ mainSession, checkingViewSession }) => {
     }
   );
 
-  [
-    { sessName: 'mainSession', inst: mainSession },
-    // restrain permissions of dapp's preview webContents(hosted by tag <webview />)
-    { sessName: 'checkingViewSession', inst: checkingViewSession },
-  ].forEach(({ sessName, inst }) =>
+  Object.keys(allSessions).forEach((_sessName) => {
+    const sessName = _sessName as keyof typeof allSessions;
+    const inst = allSessions[sessName];
+
     inst.setPermissionCheckHandler(
-      (webContents, permission, requestingOrigin, details) => {
+      (_, permission, requestingOrigin, details) => {
         const isMainSession = sessName === 'mainSession';
-        const isCheckingView = sessName === 'checkingViewSession';
 
         // leave here for debug
         // console.debug('[debug] setPermissionCheckHandler:: permission', permission);
-        if (!IS_RUNTIME_PRODUCTION && isCheckingView) {
+        if (!IS_RUNTIME_PRODUCTION && sessName === 'checkingViewSession') {
           console.debug(
             `[session:${sessName}] Permission '${permission}' requested from ${requestingOrigin} with details:`,
             details
@@ -172,7 +172,7 @@ getSessionInsts().then(({ mainSession, checkingViewSession }) => {
             return isMainSession;
           case 'serial':
           case 'hid':
-          case 'notifications':
+          case 'notifications': // restrain permissions of non-mainSession webContents, such as dapp's preview webview
           default: {
             if (isInternalProtocol(requestingOrigin)) {
               return isMainSession;
@@ -190,8 +190,8 @@ getSessionInsts().then(({ mainSession, checkingViewSession }) => {
 
         return false;
       }
-    )
-  );
+    );
+  });
 });
 
 handleIpcMainInvoke('get-hid-devices', async (_, opts) => {
