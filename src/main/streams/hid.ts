@@ -153,9 +153,12 @@ getSessionInsts().then(({ mainSession, checkingViewSession }) => {
   ].forEach(({ sessName, inst }) =>
     inst.setPermissionCheckHandler(
       (webContents, permission, requestingOrigin, details) => {
+        const isMainSession = sessName === 'mainSession';
+        const isCheckingView = sessName === 'checkingViewSession';
+
         // leave here for debug
         // console.debug('[debug] setPermissionCheckHandler:: permission', permission);
-        if (!IS_RUNTIME_PRODUCTION && sessName === 'checkingViewSession') {
+        if (!IS_RUNTIME_PRODUCTION && isCheckingView) {
           console.debug(
             `[session:${sessName}] Permission '${permission}' requested from ${requestingOrigin} with details:`,
             details
@@ -166,13 +169,13 @@ getSessionInsts().then(({ mainSession, checkingViewSession }) => {
           case 'clipboard-sanitized-write':
           case 'accessibility-events':
           case 'background-sync':
-            return true;
+            return isMainSession;
           case 'serial':
           case 'hid':
           case 'notifications':
           default: {
             if (isInternalProtocol(requestingOrigin)) {
-              return true;
+              return isMainSession;
             }
             break;
           }
