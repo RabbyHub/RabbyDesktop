@@ -1,7 +1,16 @@
 
-v0.36.4 / 2024-01-09
+v0.36.5 / 2024-01-31
 ====================
 
+  * fix: restrain permissions of dapp's preview webContents (#614)
+  * style: color & shape of checkbox on EditWhitelist Modal. (#613)
+  * chore: update currentVersion
+  * security: avoid crash. (#611)
+
+v0.36.4-prod / 2024-01-09
+=========================
+
+  * Release v0.36.4-prod
   * chore: use new rabbyx. (#609)
   * feat: use electron 26 still.
   * chore: update currentVersion.
