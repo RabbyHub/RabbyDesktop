@@ -54,7 +54,9 @@ handleIpcMainInvoke('confirm-selected-device', (_, payload) => {
 });
 
 const SELECT_DEVICE_TIMEOUT = 180 * 1e3;
-getSessionInsts().then(({ mainSession }) => {
+getSessionInsts().then((allSessions) => {
+  const { mainSession } = allSessions;
+
   mainSession.on(
     'select-hid-device',
     (eventSelectHidDevice, details, callback) => {
@@ -146,35 +148,50 @@ getSessionInsts().then(({ mainSession }) => {
     }
   );
 
-  mainSession.setPermissionCheckHandler(
-    (webContents, permission, requestingOrigin, details) => {
-      // leave here for debug
-      // console.debug('[debug] setPermissionCheckHandler:: permission', permission);
-      switch (permission) {
-        case 'clipboard-sanitized-write':
-        case 'accessibility-events':
-        case 'background-sync':
-          return true;
-        case 'serial':
-        case 'hid':
-        default: {
-          if (isInternalProtocol(requestingOrigin)) {
-            return true;
-          }
-          break;
+  Object.keys(allSessions).forEach((_sessName) => {
+    const sessName = _sessName as keyof typeof allSessions;
+    const inst = allSessions[sessName];
+
+    inst.setPermissionCheckHandler(
+      (_, permission, requestingOrigin, details) => {
+        const isMainSession = sessName === 'mainSession';
+
+        // leave here for debug
+        // console.debug('[debug] setPermissionCheckHandler:: permission', permission);
+        if (!IS_RUNTIME_PRODUCTION && sessName === 'checkingViewSession') {
+          console.debug(
+            `[session:${sessName}] Permission '${permission}' requested from ${requestingOrigin} with details:`,
+            details
+          );
         }
-      }
 
-      if (!IS_RUNTIME_PRODUCTION) {
-        console.log(
-          `Permission Denied: called for ${permission} from ${requestingOrigin} with details:`,
-          details
-        );
-      }
+        switch (permission) {
+          case 'clipboard-sanitized-write':
+          case 'accessibility-events':
+          case 'background-sync':
+            return isMainSession;
+          case 'serial':
+          case 'hid':
+          case 'notifications': // restrain permissions of non-mainSession webContents, such as dapp's preview webview
+          default: {
+            if (isInternalProtocol(requestingOrigin)) {
+              return isMainSession;
+            }
+            break;
+          }
+        }
 
-      return false;
-    }
-  );
+        if (!IS_RUNTIME_PRODUCTION) {
+          console.log(
+            `[session:${sessName}] Permission Denied: called for ${permission} from ${requestingOrigin} with details:`,
+            details
+          );
+        }
+
+        return false;
+      }
+    );
+  });
 });
 
 handleIpcMainInvoke('get-hid-devices', async (_, opts) => {
