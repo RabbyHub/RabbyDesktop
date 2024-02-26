@@ -14,7 +14,7 @@ interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
 const isNotProd =
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
-const OFFICAL_SITE = 'https://rabby.io';
+const OFFICIAL_SITE = 'https://rabby.io';
 const DISCORD_LINK = 'https://discord.com/invite/seFBCWmUre';
 
 export default class MenuBuilder {
@@ -133,7 +133,7 @@ export default class MenuBuilder {
         {
           label: 'Official Website',
           click() {
-            shell.openExternal(OFFICAL_SITE);
+            shell.openExternal(OFFICIAL_SITE);
           },
         },
         {
@@ -204,7 +204,7 @@ export default class MenuBuilder {
           {
             label: 'Learn More',
             click() {
-              shell.openExternal(OFFICAL_SITE);
+              shell.openExternal(OFFICIAL_SITE);
             },
           },
           {
