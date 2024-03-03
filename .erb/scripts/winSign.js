@@ -6,14 +6,14 @@ const fingerprint = exports.fingerprint;
 
 exports.default = async function (configuration) {
   if (configuration.path) {
-    console.log(`[withSign] try to sign ${configuration.path}...`)
+    console.log(`[winSign] try to sign ${configuration.path}...`)
     require('child_process').execSync(
       `smctl sign --fingerprint=${fingerprint} --input "${String(
         configuration.path
       )}"`
     );
-    console.log(`[withSign] finish sign ${configuration.path}...`)
+    console.log(`[winSign] finish sign ${configuration.path}...`)
   } else {
-    console.log('[withSign] configuration.path is empty, skipped')
+    console.log('[winSign] configuration.path is empty, skipped')
   }
 };
