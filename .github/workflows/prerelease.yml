@@ -94,6 +94,7 @@ jobs:
           RABBY_APPLE_ID: ${{ secrets.RABBY_APPLE_ID }}
           RABBY_APPLE_ID_PASS: ${{ secrets.RABBY_APPLE_ID_PASS }}
           RABBY_DESKTOP_CODE_SIGINING_PASS_PROD: ${{ secrets.RABBY_DESKTOP_CODE_SIGINING_PASS_PROD }}
+          RABBY_DESKTOP_CODE_SIGINING_CERT_FINGERPRINT: ${{ secrets.RABBY_DESKTOP_CODE_SIGINING_CERT_FINGERPRINT }}
           RABBY_DESKTOP_KR_PWD: ${{ secrets.RABBY_DESKTOP_KR_PWD }}
           RABBY_REALLY_COPY: ${{ vars.RABBY_REALLY_COPY }}
           buildchannel: ${{ vars.buildchannel }}
