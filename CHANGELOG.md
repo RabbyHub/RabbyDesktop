@@ -1,7 +1,20 @@
 
-v0.36.5 / 2024-01-31
+v0.36.6 / 2024-03-04
 ====================
 
+
+
+v0.36.6-reg / 2024-03-04
+========================
+
+  * chore: typo fix.
+  * build: robust change.
+  * build: sign windows binary with smctl.
+
+v0.36.5-reg / 2024-01-31
+========================
+
+  * Release v0.36.5-prod
   * fix: restrain permissions of dapp's preview webContents (#614)
   * style: color & shape of checkbox on EditWhitelist Modal. (#613)
   * chore: update currentVersion
