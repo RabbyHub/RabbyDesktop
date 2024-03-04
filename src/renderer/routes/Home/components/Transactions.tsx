@@ -433,7 +433,7 @@ const Transactions = ({
 
   useInterval(
     () => init(currentAccount?.address),
-    pendingTxs.length > 0 || completedTxs.length > 0 ? 5000 : 60 * 1000
+    pendingTxs.length > 0 || completedTxs.length > 0 ? 5000 : 600 * 1000
   );
 
   useEffect(() => {
