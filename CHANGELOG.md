@@ -1,7 +1,20 @@
 
-v0.36.5 / 2024-01-31
+v0.37.0 / 2024-03-05
 ====================
 
+  * build: keep smctl output in console. (#623)
+  * chore: fix currentVersion.md
+  * feat: hide transaction history scam address copy (#621)
+  * feat: update chains. (#622)
+  * chore: upgrade rabbyx. (#620)
+  * fix: change fetch tx list interval to 10min (#619)
+  * build: sign windows binary with smctl. (#618)
+  * chore: update @rabby-wallet/rabby-swap@0.0.31 (#617)
+
+v0.36.5-prod / 2024-01-31
+=========================
+
+  * Release v0.36.5-prod
   * fix: restrain permissions of dapp's preview webContents (#614)
   * style: color & shape of checkbox on EditWhitelist Modal. (#613)
   * chore: update currentVersion
