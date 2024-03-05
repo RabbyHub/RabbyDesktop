@@ -10,7 +10,8 @@ exports.default = async function (configuration) {
     require('child_process').execSync(
       `smctl sign --fingerprint=${fingerprint} --input "${String(
         configuration.path
-      )}"`
+      )}"`,
+      { stdio: 'inherit' }
     );
     console.log(`[winSign] finish sign ${configuration.path}...`)
   } else {
