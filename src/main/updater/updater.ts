@@ -52,7 +52,7 @@ function cleanCacheDir(baseDir: string) {
       try {
         fs.rmSync(fullpath, { recursive: true });
       } catch (err) {
-        console.warn('[cleanCacheDir] error occured');
+        console.warn('[cleanCacheDir] error occurred');
         console.error(err);
       }
     }

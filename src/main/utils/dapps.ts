@@ -137,7 +137,7 @@ export async function safeCapturePage(
     if (e?.message === 'timeout') {
       error = 'Preview timeout';
     } else {
-      error = 'Error occured on Preview dapp';
+      error = 'Error occurred on Preview dapp';
     }
     previewImg = null;
   } finally {
@@ -633,7 +633,7 @@ export async function detectHttpDapp(
   //         .toDataURL();
   //     })
   //     .catch((error) => {
-  //       console.error(`[detectHttpDapp] fetch favicon error occured: `, error);
+  //       console.error(`[detectHttpDapp] fetch favicon error occurred: `, error);
   //     });
   // }
 
