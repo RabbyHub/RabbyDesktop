@@ -83,8 +83,6 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["SETH"] = "SETH";
     CHAINS_ENUM["SSCROLL"] = "SSCROLL";
     CHAINS_ENUM["AZETA"] = "AZETA";
-    CHAINS_ENUM["TALT"] = "TALT";
-    CHAINS_ENUM["GZORA"] = "GZORA";
     CHAINS_ENUM["SHIB"] = "SHIB";
     CHAINS_ENUM["TAVAX"] = "TAVAX";
     CHAINS_ENUM["PSHIB"] = "PSHIB";
@@ -116,8 +114,7 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["TCRO"] = "TCRO";
     CHAINS_ENUM["SMODE"] = "SMODE";
     CHAINS_ENUM["TIMXZE"] = "TIMXZE";
-    CHAINS_ENUM["JTAIKO"] = "JTAIKO";
-    CHAINS_ENUM["SSYNP"] = "SSYNP";
+    CHAINS_ENUM["KTAIKO"] = "KTAIKO";
     CHAINS_ENUM["TCFX"] = "TCFX";
     CHAINS_ENUM["TX1"] = "TX1";
     CHAINS_ENUM["TSBY"] = "TSBY";
@@ -141,6 +138,15 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["GXAI"] = "GXAI";
     CHAINS_ENUM["SXAI"] = "SXAI";
     CHAINS_ENUM["SBLAST"] = "SBLAST";
+    CHAINS_ENUM["ZETA"] = "ZETA";
+    CHAINS_ENUM["RARI"] = "RARI";
+    CHAINS_ENUM["HUBBLE"] = "HUBBLE";
+    CHAINS_ENUM["TRARI"] = "TRARI";
+    CHAINS_ENUM["MODE"] = "MODE";
+    CHAINS_ENUM["MERLIN"] = "MERLIN";
+    CHAINS_ENUM["DYM"] = "DYM";
+    CHAINS_ENUM["EON"] = "EON";
+    CHAINS_ENUM["BLAST"] = "BLAST";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -1495,40 +1501,6 @@ export const CHAINS_RAW = {
         },
         isTestnet: true,
     },
-    [CHAINS_ENUM.TALT]: {
-        id: 9997,
-        serverId: "talt",
-        network: "9997",
-        name: "AltLayer Testnet",
-        nativeTokenSymbol: "TestnetETH",
-        nativeTokenAddress: "talt",
-        enum: CHAINS_ENUM.TALT,
-        hex: "0x270d",
-        scanLink: "https://testnet-rollup-explorer.altlayer.io/tx/_s_",
-        nativeTokenLogo: "https://static.debank.com/image/talt_token/logo_url/talt/389dd9a835250219889e01d5a31a75f1.png",
-        nativeTokenDecimals: 18,
-        eip: {
-            "1559": true,
-        },
-        isTestnet: true,
-    },
-    [CHAINS_ENUM.GZORA]: {
-        id: 999,
-        serverId: "gzora",
-        network: "999",
-        name: "Zora Goerli",
-        nativeTokenSymbol: "GoerliETH",
-        nativeTokenAddress: "gzora",
-        enum: CHAINS_ENUM.GZORA,
-        hex: "0x3e7",
-        scanLink: "https://testnet.explorer.zora.energy/tx/_s_",
-        nativeTokenLogo: "https://static.debank.com/image/gzora_token/logo_url/gzora/389dd9a835250219889e01d5a31a75f1.png",
-        nativeTokenDecimals: 18,
-        eip: {
-            "1559": false,
-        },
-        isTestnet: true,
-    },
     [CHAINS_ENUM.SHIB]: {
         id: 109,
         serverId: "shib",
@@ -2056,34 +2028,17 @@ export const CHAINS_RAW = {
         },
         isTestnet: true,
     },
-    [CHAINS_ENUM.JTAIKO]: {
-        id: 167007,
-        serverId: "jtaiko",
-        name: "Taiko Jolnir Testnet",
-        enum: CHAINS_ENUM.JTAIKO,
-        hex: "0x28c5f",
-        network: "167007",
-        nativeTokenSymbol: "JolnirETH",
-        nativeTokenAddress: "jtaiko",
-        scanLink: "https://explorer.jolnir.taiko.xyz/tx/_s_",
-        nativeTokenLogo: "https://static.debank.com/image/jtaiko_token/logo_url/jtaiko/389dd9a835250219889e01d5a31a75f1.png",
-        nativeTokenDecimals: 18,
-        eip: {
-            "1559": true,
-        },
-        isTestnet: true,
-    },
-    [CHAINS_ENUM.SSYNP]: {
-        id: 444,
-        serverId: "ssynp",
-        name: "Synapse Sepolia",
-        enum: CHAINS_ENUM.SSYNP,
-        hex: "0x1bc",
-        network: "444",
-        nativeTokenSymbol: "SepoliaETH",
-        nativeTokenAddress: "ssynp",
-        scanLink: "https://sepolia.synapsescan.com/tx/_s_",
-        nativeTokenLogo: "https://static.debank.com/image/ssynp_token/logo_url/ssynp/389dd9a835250219889e01d5a31a75f1.png",
+    [CHAINS_ENUM.KTAIKO]: {
+        id: 167008,
+        serverId: "ktaiko",
+        name: "Taiko Katla Testnet",
+        enum: CHAINS_ENUM.KTAIKO,
+        hex: "0x28c60",
+        network: "167008",
+        nativeTokenSymbol: "KatlaETH",
+        nativeTokenAddress: "ktaiko",
+        scanLink: "https://explorer.katla.taiko.xyz/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/ktaiko_token/logo_url/ktaiko/389dd9a835250219889e01d5a31a75f1.png",
         nativeTokenDecimals: 18,
         eip: {
             "1559": true,
@@ -2480,6 +2435,159 @@ export const CHAINS_RAW = {
             "1559": true,
         },
         isTestnet: true,
+    },
+    [CHAINS_ENUM.ZETA]: {
+        id: 7000,
+        serverId: "zeta",
+        name: "ZetaChain",
+        enum: CHAINS_ENUM.ZETA,
+        hex: "0x1b58",
+        network: "7000",
+        nativeTokenSymbol: "ZETA",
+        nativeTokenAddress: "zeta",
+        scanLink: "https://zetachain.blockscout.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/zeta/d0e1b5e519d99c452a30e83a1263d1d0.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: false,
+    },
+    [CHAINS_ENUM.RARI]: {
+        id: 1380012617,
+        serverId: "rari",
+        name: "RARI",
+        enum: CHAINS_ENUM.RARI,
+        hex: "0x52415249",
+        network: "1380012617",
+        nativeTokenSymbol: "ETH",
+        nativeTokenAddress: "rari",
+        scanLink: "https://mainnet.explorer.rarichain.org/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/rari_token/logo_url/rari/d61441782d4a08a7479d54aea211679e.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: false,
+    },
+    [CHAINS_ENUM.HUBBLE]: {
+        id: 1992,
+        serverId: "hubble",
+        name: "Hubble",
+        enum: CHAINS_ENUM.HUBBLE,
+        hex: "0x7c8",
+        network: "1992",
+        nativeTokenSymbol: "USDC",
+        nativeTokenAddress: "hubble",
+        scanLink: "https://explorer.hubble.exchange/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/hubble_token/logo_url/hubble/35ab0987153a8355a454223aae371ac7.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: false,
+    },
+    [CHAINS_ENUM.TRARI]: {
+        id: 1918988905,
+        serverId: "trari",
+        name: "RARI Testnet",
+        enum: CHAINS_ENUM.TRARI,
+        hex: "0x72617269",
+        network: "1918988905",
+        nativeTokenSymbol: "TestnetETH",
+        nativeTokenAddress: "trari",
+        scanLink: "https://explorer.rarichain.org/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/trari_token/logo_url/trari/389dd9a835250219889e01d5a31a75f1.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: true,
+    },
+    [CHAINS_ENUM.MODE]: {
+        id: 34443,
+        serverId: "mode",
+        name: "Mode",
+        enum: CHAINS_ENUM.MODE,
+        hex: "0x868b",
+        network: "34443",
+        nativeTokenSymbol: "ETH",
+        nativeTokenAddress: "mode",
+        scanLink: "https://explorer.mode.network/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/mode_token/logo_url/mode/d61441782d4a08a7479d54aea211679e.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: false,
+    },
+    [CHAINS_ENUM.MERLIN]: {
+        id: 4200,
+        serverId: "merlin",
+        name: "Merlin",
+        enum: CHAINS_ENUM.MERLIN,
+        hex: "0x1068",
+        network: "4200",
+        nativeTokenSymbol: "BTC",
+        nativeTokenAddress: "merlin",
+        scanLink: "https://scan.merlinchain.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/merlin_token/logo_url/merlin/fe230e468272b84aba78d08bb4140456.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: false,
+    },
+    [CHAINS_ENUM.DYM]: {
+        id: 1100,
+        serverId: "dym",
+        name: "Dymension",
+        enum: CHAINS_ENUM.DYM,
+        hex: "0x44c",
+        network: "1100",
+        nativeTokenSymbol: "DYM",
+        nativeTokenAddress: "dym",
+        scanLink: "https://dym.fyi/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/dym_token/logo_url/dym/ab62b0f446408c84a2e17d9178a4e8e9.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: false,
+    },
+    [CHAINS_ENUM.EON]: {
+        id: 7332,
+        serverId: "eon",
+        name: "Horizen EON",
+        enum: CHAINS_ENUM.EON,
+        hex: "0x1ca4",
+        network: "7332",
+        nativeTokenSymbol: "ZEN",
+        nativeTokenAddress: "eon",
+        scanLink: "https://eon-explorer.horizenlabs.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/eon_token/logo_url/eon/bf6e7dbdd2facde7ed39c9f881537775.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: false,
+    },
+    [CHAINS_ENUM.BLAST]: {
+        id: 81457,
+        serverId: "blast",
+        name: "Blast",
+        enum: CHAINS_ENUM.BLAST,
+        hex: "0x13e31",
+        network: "81457",
+        nativeTokenSymbol: "ETH",
+        nativeTokenAddress: "blast",
+        scanLink: "https://blastscan.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/blast_token/logo_url/blast/d61441782d4a08a7479d54aea211679e.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: false,
     },
 };
 export const CHAINS_RAW_LIST = Object.values(CHAINS_RAW);
