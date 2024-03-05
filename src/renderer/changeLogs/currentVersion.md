@@ -8,4 +8,4 @@
 - Supported Mode Chain
 - Supported Horizen EON Chain
 - Supported Blast Chain
-- Supported RARI Testnet
+- Supported RARI Testnet and Taiko Katla Testnet
