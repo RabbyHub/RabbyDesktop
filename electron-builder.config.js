@@ -1,43 +1,42 @@
 const fs = require("fs");
 const path = require("path");
 
+const { fingerprint } = require('./.erb/scripts/winSign');
+
 // prod, reg
 const buildchannel = process.env.buildchannel || 'reg';
 const PLATFORM = process.platform;
 
+/**
+ * @return {import('electron-builder').Configuration['win'] & object}
+ */
 function getWindowsCert() {
   if (PLATFORM !== "win32") return {};
 
-  const selfSignCert = path.resolve(__dirname, "./scripts/code-signing/rabby-desktop-ca.pfx");
-  const prodCert = path.resolve(__dirname, "./scripts/code-signing/rabby-desktop-ca.p12");
-  const userProdCert = path.resolve(process.env.USERPROFILE, "./.rabby-build/code-signing/rabby-desktop-ca.p12");
-  // console.debug(`[getWindowsCert] userProdCert is ${userProdCert}`);
-
-  const finalProdCert = fs.existsSync(userProdCert) ? userProdCert : prodCert;
-
-  if (fs.existsSync(finalProdCert)) {
-    if (!process.env.RABBY_DESKTOP_CODE_SIGINING_PASS_PROD) {
-      console.warn(`[getWindowsCert] RABBY_DESKTOP_CODE_SIGINING_PASS_PROD is not set.`);
-      return {};
-    }
-
+  if (fingerprint) {
     return {
-      "certificateFile": finalProdCert,
-      "certificatePassword": process.env.RABBY_DESKTOP_CODE_SIGINING_PASS_PROD,
+      "sign": '.erb/scripts/winSign.js',
     }
   }
 
-  if (!process.env.RABBY_DESKTOP_CODE_SIGINING_PASS) {
+  const CERT_PWD = process.env.RABBY_DESKTOP_CODE_SIGINING_PASS;
+
+  if (!CERT_PWD) {
     console.warn(`[getWindowsCert] RABBY_DESKTOP_CODE_SIGINING_PASS is not set.`);
     return {};
   }
 
+  const selfSignCert = path.resolve(__dirname, "./scripts/code-signing/rabby-desktop-ca.pfx");
+
   return {
     "certificateFile": selfSignCert,
-    "certificatePassword": process.env.RABBY_DESKTOP_CODE_SIGINING_PASS,
+    "certificatePassword": CERT_PWD,
   }
 }
 
+/**
+ * @type {import('electron-builder').Configuration}
+ */
 module.exports = {
   "productName": "Rabby Desktop",
   "appId": "com.debank.RabbyDesktop",

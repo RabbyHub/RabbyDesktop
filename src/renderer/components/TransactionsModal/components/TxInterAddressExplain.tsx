@@ -33,6 +33,7 @@ export const TxInterAddressExplain = ({
           <NameAndAddress
             address={data.other_addr}
             copyIconClass="w-[14px] h-[14px] cursor-pointer"
+            copyIcon={!data.is_scam}
           />
         </div>
       ) : (

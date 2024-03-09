@@ -803,7 +803,11 @@ const TransactionItem = ({
       {item.protocol?.name ? (
         item.protocol.name
       ) : item.otherAddr ? (
-        <NameAndAddress address={item.otherAddr} copyIconClass="icon-copy" />
+        <NameAndAddress
+          address={item.otherAddr}
+          copyIconClass="icon-copy"
+          copyIcon={!item.isScam}
+        />
       ) : (
         ''
       )}
