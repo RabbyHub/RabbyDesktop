@@ -29,7 +29,7 @@ npm install
 
 <!-- ### Setup RabbyX repo's location
 
-Before start run electron app, make sure you setup RabbyX repository and run it locally.
+Before running the electron application, make sure you setup the RabbyX repository and run it locally.
 
 ```bash
 git clone --depth 1 --branch feat/for_desktop https://github.com/RabbyHub/RabbyX.git RabbyX
@@ -50,7 +50,7 @@ The fallback value of `RABBY_DESKTOP_REPO` is the relative path `../RabbyDesktop
 
 ### Native Modules
 
-There's some node modules such as `node-hid` that need to be compiled for your platform, on running `npm install`, make sure you use node with arch corresponding to your electron version. Check your local node's arch:
+There are some node modules, such as `node-hid`, that need to be compiled for your platform. Upon running `npm install`, make sure you use node with arch corresponding to your electron version. To check your local node's arch:
 
 ```bash
 node -e "console.log(process.arch)"
@@ -60,10 +60,10 @@ If you're using Apple Silicon but running node with arch `x64` like this:
 
 ![alt](./docs/check-node-arch.png)
 
-That's because you install node(maybe `x64` or `arm64`) and run it in rosetta2, You SHOULD:
+That's because you install node (maybe `x64` or `arm64`) and run it in rosetta2, You SHOULD:
 
-1. switch back to node(arm64) by installing correct node
-2. make sure you disable rosetta on node(arm64):
+1. Switch back to node(arm64) by installing correct node
+2. Make sure you disable rosetta on node (arm64):
 
 ![alt](./docs/disable-rosetta2.jpeg)
 
@@ -71,7 +71,7 @@ More information about [rosetta2](https://iboysoft.com/news/uninstall-rosetta-2.
 
 ### RabbyX Extension
 
-on `postinstall`, we install rabbyx plugin AUTOMATICALLY. Check you have `assets/chrome_exts/rabbyx` folder after `npm install` finished, if not, you can install it manually:
+On `postinstall`, we install the RabbyX plugin AUTOMATICALLY. Check you have `assets/chrome_exts/rabbyx` folder after `npm install` finishes, if not, you can install it manually:
 
 ```bash
 npm run install:rabbyX
@@ -99,13 +99,13 @@ cd /path/to/RabbyDesktop;
 npm start
 ```
 
-**Experimental** for some reasons, you may wanna server files on `http://localhost:<port>` instead of custom protocol, set `HTTP_INSTEAD_OF_CUSTOM=true` on start development: 
+**Experimental** for some reason, you may want to serve files on `http://localhost:<port>` instead of a custom protocol. To do this set `HTTP_INSTEAD_OF_CUSTOM=true` when calling NPM to start the server: 
 
 ```bash
 HTTP_INSTEAD_OF_CUSTOM=true npm start
 ```
 
-Then you can debug pages served on `http://localhost:<port>` that are served on custom protocol originally
+Then you can debug pages served on `http://localhost:<port>` that were originally served on a custom protocol.
 
 ### (Optional) Helpers
 
