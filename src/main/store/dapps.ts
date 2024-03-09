@@ -481,7 +481,7 @@ export async function repairDappsFieldsOnBootstrap() {
             .toDataURL();
         } catch (error) {
           console.error(
-            `[repairDappsFieldsOnBootstrap] fetch favicon error occured: `,
+            `[repairDappsFieldsOnBootstrap] fetch favicon error occurred: `,
             error
           );
         }
