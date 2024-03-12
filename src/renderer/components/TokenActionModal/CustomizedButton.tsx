@@ -48,7 +48,7 @@ export const CustomizedButton: React.FC<Props> = ({
     >
       <div className={clsx('text-orange text-13')}>
         {selected
-          ? `Token is not listed by Rabby. You've added it to the token list by custom.`
+          ? `The token is not listed by Rabby. You've added it to the token list manually.`
           : `Token is not listed by Rabby. It will be added to the token list if you switch on.`}
       </div>
       <div className={clsx('flex items-center gap-x-[6px] cursor-pointer')}>
