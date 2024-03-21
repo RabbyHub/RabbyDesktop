@@ -1,7 +1,17 @@
 
-v0.37.0 / 2024-03-05
+v0.37.1 / 2024-03-21
 ====================
 
+  * build: only sign online on publishing as production. (#628)
+  * feat: upgrade supported chains.
+  * feat: use rabbyx 0.92.55 (#627)
+  * feat: upgrade to electron v27 (#626)
+  * fix: text (#624)
+
+v0.37.0-prod / 2024-03-05
+=========================
+
+  * Release v0.37.0-prod
   * build: keep smctl output in console. (#623)
   * chore: fix currentVersion.md
   * feat: hide transaction history scam address copy (#621)
@@ -11,8 +21,16 @@ v0.37.0 / 2024-03-05
   * build: sign windows binary with smctl. (#618)
   * chore: update @rabby-wallet/rabby-swap@0.0.31 (#617)
 
-v0.36.5-prod / 2024-01-31
-=========================
+v0.36.6-reg / 2024-03-04
+========================
+
+  * Release v0.36.6-reg
+  * chore: typo fix.
+  * build: robust change.
+  * build: sign windows binary with smctl.
+
+v0.36.5-reg / 2024-01-31
+========================
 
   * Release v0.36.5-prod
   * fix: restrain permissions of dapp's preview webContents (#614)
