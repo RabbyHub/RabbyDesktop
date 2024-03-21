@@ -13,7 +13,8 @@ const PLATFORM = process.platform;
 function getWindowsCert() {
   if (PLATFORM !== "win32") return {};
 
-  if (fingerprint) {
+  if (buildchannel === "prod" && fingerprint) {
+    console.log(`[getWindowsCert] will sign with fingerprint`);
     return {
       "sign": '.erb/scripts/winSign.js',
     }
