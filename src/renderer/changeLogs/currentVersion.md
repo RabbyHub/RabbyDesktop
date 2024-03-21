@@ -1,11 +1,6 @@
 #### New Features:
 
-- Supported ZetaChain
-- Supported Hubble Chain
-- Supported RARI Chain
-- Supported Dymension Chain
-- Supported Merlin Chain
-- Supported Mode Chain
-- Supported Horizen EON Chain
-- Supported Blast Chain
-- Supported RARI Testnet and Taiko Katla Testnet
+- Supported Fraxtal chain
+- Supported MAP Protocol chain
+- Supported SX chain
+- Supported PlatON chain

@@ -147,6 +147,10 @@ export var CHAINS_ENUM;
     CHAINS_ENUM["DYM"] = "DYM";
     CHAINS_ENUM["EON"] = "EON";
     CHAINS_ENUM["BLAST"] = "BLAST";
+    CHAINS_ENUM["SX"] = "SX";
+    CHAINS_ENUM["PLATON"] = "PLATON";
+    CHAINS_ENUM["MAP"] = "MAP";
+    CHAINS_ENUM["FRAX"] = "FRAX";
 })(CHAINS_ENUM || (CHAINS_ENUM = {}));
 export const CHAINS_RAW = {
     [CHAINS_ENUM.ETH]: {
@@ -270,7 +274,7 @@ export const CHAINS_RAW = {
         nativeTokenAddress: "avax",
         enum: CHAINS_ENUM.AVAX,
         hex: "0xa86a",
-        scanLink: "https://snowtrace.io/tx/_s_",
+        scanLink: "https://snowscan.xyz/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/avax_token/logo_url/avax/0b9c84359c84d6bdd5bfda9c2d4c4a82.png",
         nativeTokenDecimals: 18,
         eip: {
@@ -350,7 +354,7 @@ export const CHAINS_RAW = {
         nativeTokenAddress: "cro",
         enum: CHAINS_ENUM.CRO,
         hex: "0x19",
-        scanLink: "https://cronoscan.com/tx/_s_",
+        scanLink: "https://explorer.cronos.org/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/chain/logo_url/cro/affddd53019ffb9dbad0c724e12500c0.png",
         nativeTokenDecimals: 18,
         eip: {
@@ -2583,6 +2587,74 @@ export const CHAINS_RAW = {
         nativeTokenAddress: "blast",
         scanLink: "https://blastscan.io/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/blast_token/logo_url/blast/d61441782d4a08a7479d54aea211679e.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: false,
+    },
+    [CHAINS_ENUM.SX]: {
+        id: 416,
+        serverId: "sx",
+        name: "SX",
+        enum: CHAINS_ENUM.SX,
+        hex: "0x1a0",
+        network: "416",
+        nativeTokenSymbol: "SX",
+        nativeTokenAddress: "sx",
+        scanLink: "https://explorer.sx.technology/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/sx_token/logo_url/sx/1cd91dbcb82de12b4587607bc4924bc9.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: false,
+    },
+    [CHAINS_ENUM.PLATON]: {
+        id: 210425,
+        serverId: "platon",
+        name: "PlatON",
+        enum: CHAINS_ENUM.PLATON,
+        hex: "0x335f9",
+        network: "210425",
+        nativeTokenSymbol: "LAT",
+        nativeTokenAddress: "platon",
+        scanLink: "https://scan.platon.network/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/platon_token/logo_url/platon/b5df1214981b0888e48fbb18d302c6ba.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": false,
+        },
+        isTestnet: false,
+    },
+    [CHAINS_ENUM.MAP]: {
+        id: 22776,
+        serverId: "map",
+        name: "MAP Protocol",
+        enum: CHAINS_ENUM.MAP,
+        hex: "0x58f8",
+        network: "22776",
+        nativeTokenSymbol: "MAPO",
+        nativeTokenAddress: "map",
+        scanLink: "https://www.maposcan.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/map_token/logo_url/map/3efde740a6e9d32661757aad8ae2b3a2.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+        isTestnet: false,
+    },
+    [CHAINS_ENUM.FRAX]: {
+        id: 252,
+        serverId: "frax",
+        name: "Fraxtal",
+        enum: CHAINS_ENUM.FRAX,
+        hex: "0xfc",
+        network: "252",
+        nativeTokenSymbol: "frxETH",
+        nativeTokenAddress: "frax",
+        scanLink: "https://fraxscan.com/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/frax_token/logo_url/frax/4313f25f6c5196e8fce2c80fa34c73d0.png",
         nativeTokenDecimals: 18,
         eip: {
             "1559": true,
