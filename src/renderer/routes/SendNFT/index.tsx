@@ -41,6 +41,7 @@ import { confirmAddToWhitelistModalPromise } from '@/renderer/components/Modal/c
 import { confirmAddToContactsModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToContacts';
 import AccountSearchInput from '@/renderer/components/AccountSearchInput';
 import { useRefState } from '@/renderer/hooks/useRefState';
+import { findChain } from '@/renderer/utils/chain';
 import { ContactListModal } from '../SendToken/components/ContactListModal';
 import { ContactEditModal } from '../SendToken/components/ContactEditModal';
 import { ChainRender, ChainSelect } from '../Swap/component/ChainSelect';
@@ -343,9 +344,9 @@ const SendNFT = () => {
   );
   const [chain, setChain] = useState<CHAINS_ENUM | undefined>(
     state?.nftItem
-      ? Object.values(CHAINS).find(
-          (item) => item.serverId === state.nftItem.chain
-        )?.enum
+      ? findChain({
+          serverId: state.nftItem.chain,
+        })?.enum
       : undefined
   );
 
@@ -639,9 +640,9 @@ const SendNFT = () => {
   useEffect(() => {
     if (nftItem) {
       if (!chain) {
-        const nftChain = Object.values(CHAINS).find(
-          (item) => item.serverId === nftItem.chain
-        )?.enum;
+        const nftChain = findChain({
+          serverId: nftItem.chain,
+        })?.enum;
         if (!nftChain) {
           // history.replace('/');
         } else {

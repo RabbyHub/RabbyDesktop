@@ -1,18 +1,21 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CHAINS, CHAINS_LIST } from '@debank/common';
-import { atom, useAtom } from 'jotai';
-import { canoicalizeDappUrl } from '@/isomorphic/url';
 import { formatDappHttpOrigin } from '@/isomorphic/dapp';
-import { walletController } from '../ipcRequest/rabbyx';
-import { useMessageForwarded } from './useViewsMessage';
+import { canoicalizeDappUrl } from '@/isomorphic/url';
+import { atom, useAtom } from 'jotai';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEventListener } from 'ahooks';
+import { useEffectOnce } from 'react-use';
 import { getLastOpenOriginByOrigin } from '../ipcRequest/dapps';
-
-const DEFAULT_ETH_CHAIN = CHAINS_LIST.find((chain) => chain.enum === 'ETH')!;
+import { walletController } from '../ipcRequest/rabbyx';
+import { DEFAULT_ETH_CHAIN, findChain, updateChainStore } from '../utils/chain';
+import { useMessageForwarded } from './useViewsMessage';
 
 function transformConnectInfo(
   input: IConnectedSiteInfo
 ): IConnectedSiteToDisplay {
-  const chain = CHAINS[input.chain] || DEFAULT_ETH_CHAIN;
+  const chain =
+    findChain({
+      enum: input.chain,
+    }) || DEFAULT_ETH_CHAIN;
 
   return {
     origin: input.origin,
@@ -73,12 +76,11 @@ export function useConnectedSite(currentOrigin?: string) {
             break;
           case 'rabby:chainChanged': {
             const chain =
-              CHAINS_LIST.find(
-                (chainItem) =>
-                  chainItem.hex === payload.data?.hex ||
-                  chainItem.name === payload.data?.name ||
-                  chainItem.enum === payload.data?.enum
-              ) || DEFAULT_ETH_CHAIN;
+              findChain({
+                hex: payload.data?.hex,
+                name: payload.data?.name,
+                enum: payload.data?.enum,
+              }) || DEFAULT_ETH_CHAIN;
 
             const data: IConnectedSiteToDisplay = {
               origin: payload.origin!,
@@ -146,4 +148,17 @@ export const useCurrentConnectedSite = ({
   );
 
   return connectedSiteMap?.[httpOrigin] || null;
+};
+
+export const useListenSyncChain = () => {
+  useEffectOnce(() => {
+    return window.rabbyDesktop.ipcRenderer.on(
+      '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
+      (payload) => {
+        if (payload.event === 'syncChain') {
+          updateChainStore(payload.data || {});
+        }
+      }
+    );
+  });
 };

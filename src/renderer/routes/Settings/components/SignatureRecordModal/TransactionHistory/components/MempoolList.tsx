@@ -1,9 +1,8 @@
 import { TransactionHistoryItem } from '@/isomorphic/types/rabbyx';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
-import { CHAINS_LIST } from '@debank/common';
+import { findChain } from '@/renderer/utils/chain';
 import { useRequest } from 'ahooks';
 import { Spin } from 'antd';
-import BigNumber from 'bignumber.js';
 import styled from 'styled-components';
 
 const IconChecked =
@@ -95,9 +94,10 @@ export const MempoolList = ({
       if (!tx.hash) {
         return undefined;
       }
-      const chain = CHAINS_LIST.find((item) =>
-        new BigNumber(item.hex).isEqualTo(tx.rawTx.chainId)
-      );
+
+      const chain = findChain({
+        id: +tx.rawTx.chainId,
+      });
       if (!chain) {
         return undefined;
       }

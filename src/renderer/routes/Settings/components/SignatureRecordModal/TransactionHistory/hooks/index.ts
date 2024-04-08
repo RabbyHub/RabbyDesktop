@@ -9,7 +9,7 @@ import {
   walletTestnetOpenapi,
 } from '@/renderer/ipcRequest/rabbyx';
 import { getTokenSymbol } from '@/renderer/utils';
-import { findChainByID } from '@/renderer/utils/chain';
+import { findChain, findChainByID } from '@/renderer/utils/chain';
 import { CHAINS } from '@debank/common';
 import { TokenItem, TxRequest } from '@rabby-wallet/rabby-api/dist/types';
 import { useRequest } from 'ahooks';
@@ -108,7 +108,9 @@ export const useLoadTxRequests = (
 };
 
 export const useLoadTxData = (item: TransactionGroup) => {
-  const chain = Object.values(CHAINS).find((c) => c.id === item.chainId)!;
+  const chain = findChain({
+    id: item.chainId,
+  })!;
 
   const completedTx = item.txs.find(
     (tx) => tx.isCompleted && !tx.isSubmitFailed && !tx.isWithdrawed

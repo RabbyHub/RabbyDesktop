@@ -6,9 +6,8 @@ import PillsSwitch from '@/renderer/components/PillsSwitch';
 import clsx from 'clsx';
 import { TooltipWithMagnetArrow } from '@/renderer/components/Tooltip/TooltipWithMagnetArrow';
 import { Tabs } from 'antd';
+import { getChainList } from '@/renderer/utils/chain';
 import styles from './index.module.less';
-
-export const CHAINS_TOTAL_COUNT = Object.values(CHAINS).length;
 
 const showSupportedChainsAtom = atom(false);
 export function useSupportedChainsModal() {
@@ -56,7 +55,7 @@ export default function ModalSupportedChains() {
   const [selectedTab, onTabChange] = useState<'mainnet' | 'testnet'>('mainnet');
 
   const { mainnet: mainnetList, testnet: testnetList } = useMemo(() => {
-    const sortedChains = Object.values(CHAINS).sort((a, b) => {
+    const sortedChains = getChainList('mainnet').sort((a, b) => {
       if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
       return 1;
     });
@@ -78,7 +77,7 @@ export default function ModalSupportedChains() {
       }}
       title={
         <span className="text-r-neutral-title-1 text-20 font-medium">
-          {`${CHAINS_TOTAL_COUNT} chains supported`}
+          {`${getChainList('mainnet').length} chains supported`}
         </span>
       }
     >

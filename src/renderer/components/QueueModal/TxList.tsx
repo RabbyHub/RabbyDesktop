@@ -9,6 +9,7 @@ import { message } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { CHAINS } from '@debank/common';
 import _ from 'lodash';
+import { findChain } from '@/renderer/utils/chain';
 import { TxItemGroup } from './TxItemGroup';
 import { useSafeQueue } from './useSafeQueue';
 import styles from './style.module.less';
@@ -36,7 +37,10 @@ export const TxList: React.FC<Props> = ({
     isLoading: _isLoading,
   } = useSafeQueue({
     pendingTxs,
-    networkId: CHAINS[chain].network,
+    networkId:
+      findChain({
+        enum: chain,
+      })?.network || '',
   });
   const isLoading = _isLoading || loading;
   const [openSelectAddressModal, setOpenSelectAddressModal] =

@@ -9,7 +9,7 @@ import {
   walletOpenapi,
   walletTestnetOpenapi,
 } from '@/renderer/ipcRequest/rabbyx';
-import { CHAINS, CHAINS_LIST } from '@debank/common';
+import { CHAINS } from '@debank/common';
 import {
   TokenItem,
   TransferingNFTItem,
@@ -24,6 +24,7 @@ import { TransactionModal } from '@/renderer/components/TransactionsModal';
 import { findMaxGasTx } from '@/isomorphic/tx';
 import { useMount } from 'ahooks';
 import { useComponentIsActive } from '@/renderer/hooks/useReactActivation';
+import { findChain } from '@/renderer/utils/chain';
 import TransactionItem, { LoadingTransactionItem } from './TransactionItem';
 import { useLoadTxRequests } from '../../Settings/components/SignatureRecordModal/TransactionHistory/hooks';
 import { SkipNonceAlert } from '../../Settings/components/SignatureRecordModal/TransactionHistory/components/SkipNonceAlert';
@@ -171,7 +172,9 @@ const Empty = ({ text }: { text: string }) => (
 
 const filterTestnet = (list: TransactionDataItem[], isTestnet?: boolean) => {
   return list.filter((item) => {
-    const chain = Object.values(CHAINS).find((i) => i.serverId === item.chain);
+    const chain = findChain({
+      serverId: item.chain,
+    });
     if (isTestnet) {
       return chain?.isTestnet;
     }
@@ -221,7 +224,9 @@ const Transactions = ({
     const pTxs: TransactionDataItem[] = [];
     const markedCompleteds = completeds.map((item) => {
       if (!item.dbIndexed) {
-        const chain = CHAINS_LIST.find((c) => c.id === item.chainId);
+        const chain = findChain({
+          id: item.chainId,
+        });
         if (chain) {
           const target = remoteTxsRef.current.find((i) =>
             item.txs.find(
@@ -251,7 +256,9 @@ const Transactions = ({
           !item.dbIndexed
       )
       .forEach((item) => {
-        const chain = Object.values(CHAINS).find((i) => i.id === item.chainId);
+        const chain = findChain({
+          id: item.chainId,
+        });
         if (!chain) return;
         const maxTx = findMaxGasTx(item.txs);
         const completedTx = item.txs.find((tx) => tx.isCompleted);
@@ -298,7 +305,9 @@ const Transactions = ({
     pendings
       .filter((item) => !item.isSubmitFailed)
       .forEach((item) => {
-        const chain = Object.values(CHAINS).find((i) => i.id === item.chainId);
+        const chain = findChain({
+          id: item.chainId,
+        });
         if (!chain) return;
         const maxTx = findMaxGasTx(item.txs);
         const originTx = minBy(item.txs, (tx) => tx.createdAt);
@@ -373,7 +382,9 @@ const Transactions = ({
       let localTx: TransactionHistoryItem | null = null;
       for (let i = 0; i < completeds.length; i++) {
         const group = completeds[i];
-        const chain = CHAINS_LIST.find((c) => group.chainId === c.id);
+        const chain = findChain({
+          id: group.chainId,
+        });
         if (chain && item.chain === chain.serverId) {
           localTx = group.txs.find((tx) => tx.hash === item.id) || null;
           if (localTx) break;

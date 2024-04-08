@@ -9,6 +9,7 @@ import type { ChainGas, GasCache, SwapState } from '@/isomorphic/types/rabbyx';
 import { message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { obj2query } from '@/renderer/utils/url';
+import { findChain } from '@/renderer/utils/chain';
 
 export const swapAtom = atom<SwapState>({
   gasPriceCache: {},
@@ -114,7 +115,12 @@ export const useGotoSwapByToken = () => {
       if (
         selectedDex &&
         !DEX_SUPPORT_CHAINS[selectedDex]
-          .map((e) => CHAINS[e].serverId)
+          .map(
+            (e) =>
+              findChain({
+                enum: e,
+              })?.serverId
+          )
           .includes(chain)
       ) {
         return message.info({

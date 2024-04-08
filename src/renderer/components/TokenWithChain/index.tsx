@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { CHAINS } from '@debank/common';
 import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { getTokenSymbol } from '@/renderer/utils';
+import { findChain } from '@/renderer/utils/chain';
 
 // 只是 bundle 里面需要扩展 btc
 const EXTENDS_CHAINS = {
@@ -95,9 +96,9 @@ export const IconWithChain = ({
   noRound?: boolean;
   hideChainIcon?: boolean;
 }) => {
-  const chain = Object.values(CHAINS).find(
-    (item) => item.serverId === chainServerId
-  );
+  const chain = findChain({
+    serverId: chainServerId,
+  });
   return (
     <TokenWithChainWrapper
       className={classNames('token-with-chain', noRound && 'no-round')}

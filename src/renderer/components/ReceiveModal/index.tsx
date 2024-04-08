@@ -17,6 +17,7 @@ import QRCode from 'qrcode.react';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useSetState } from 'react-use';
 
+import { findChain } from '@/renderer/utils/chain';
 import { Modal } from '../Modal/Modal';
 import styles from './index.module.less';
 import { TipsWrapper } from '../TipWrapper';
@@ -43,7 +44,12 @@ const ReceiveContent = ({ onCancel, chain, token }: ReceiveContentProps) => {
   }, [currentAccount]);
 
   const title = useMemo(() => {
-    const chainName = (chain && CHAINS[chain]?.name) || 'Ethereum';
+    const chainName =
+      (chain &&
+        findChain({
+          enum: chain,
+        })?.name) ||
+      'Ethereum';
     const assets = token || 'assets';
 
     return `Receive ${assets} on ${chainName}`;

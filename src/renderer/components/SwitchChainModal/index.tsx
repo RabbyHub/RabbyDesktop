@@ -1,25 +1,25 @@
-import { message, Tooltip } from 'antd';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Tooltip } from 'antd';
 import clsx from 'clsx';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Modal as RModal } from '@/renderer/components/Modal/Modal';
-import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
-import { useBodyClassNameOnMounted } from '@/renderer/hooks/useMountedEffect';
 import IconRcSearch from '@/../assets/icons/swap/search.svg?rc';
-import { usePreference } from '@/renderer/hooks/rabbyx/usePreference';
-import { Chain, CHAINS_ENUM, CHAINS_LIST } from '@debank/common';
-import { useCustomRPC } from '@/renderer/hooks/useCustomRPC';
-import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
-import { useAccountBalanceMap } from '@/renderer/hooks/rabbyx/useAccount';
 import { varyAndSortChainItems } from '@/isomorphic/wallet/chain';
+import { Modal as RModal } from '@/renderer/components/Modal/Modal';
+import { useAccountBalanceMap } from '@/renderer/hooks/rabbyx/useAccount';
+import { usePreference } from '@/renderer/hooks/rabbyx/usePreference';
+import { useCustomRPC } from '@/renderer/hooks/useCustomRPC';
+import { useBodyClassNameOnMounted } from '@/renderer/hooks/useMountedEffect';
+import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
+import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
 import { formatUsdValue } from '@/renderer/utils/number';
-import styles from './index.module.less';
+import { Chain, CHAINS_ENUM } from '@debank/common';
 import RabbyInput from '../AntdOverwrite/Input';
-import { TipsWrapper } from '../TipWrapper';
 import ChainIcon from '../ChainIcon';
+import { TipsWrapper } from '../TipWrapper';
+import styles from './index.module.less';
 
-import SvgIconWallet from './icons/chain-wallet.svg?rc';
 import NetSwitchTabs, { useSwitchNetTab } from '../PillsSwitch/NetSwitchTabs';
+import SvgIconWallet from './icons/chain-wallet.svg?rc';
 
 type OnPinnedChanged = (
   chain: import('@debank/common').CHAINS_ENUM,
@@ -113,7 +113,7 @@ function ChainItem({
 }
 
 function searchFilter(keyword: string) {
-  return (item: typeof CHAINS_LIST[number]) =>
+  return (item: Chain) =>
     [item.name, item.enum, item.nativeTokenSymbol].some((token) =>
       token.toLowerCase().includes(keyword)
     );

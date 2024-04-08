@@ -37,6 +37,7 @@ import { useGhostTooltip } from '@/renderer/routes-popup/TopGhostWindow/useGhost
 import { useLocation } from 'react-router-dom';
 import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { useFloatingCurrentAccountCompWidth } from '@/renderer/hooks-shell/useMainWindow';
+import { findChain } from '@/renderer/utils/chain';
 import styles from './index.module.less';
 import ChainIcon from '../ChainIcon';
 import NavRefreshButton from './components/NavRefreshButton';
@@ -78,7 +79,6 @@ const ConnectedChain = forwardRef(
   ) => {
     return (
       <div className={clsx(styles.chain, className)} ref={ref} {...others}>
-        {/* <img className={styles.logo} src={CHAINS[chain].logo} alt={chain} /> */}
         <ChainIcon
           className={styles.logo}
           chain={chain}
@@ -86,7 +86,9 @@ const ConnectedChain = forwardRef(
           showCustomRPCToolTip
           isShowTooltipOnTop
         />
-        <span className={styles.chainName}>{CHAINS[chain].name}</span>
+        <span className={styles.chainName}>
+          {findChain({ enum: chain })?.name}
+        </span>
         <img src={IconArrowDown} alt="" />
       </div>
     );

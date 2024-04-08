@@ -51,6 +51,7 @@ import { Swap } from '@/renderer/routes/Swap';
 import { MainWindowSettingsNonProductDebugKits } from '@/renderer/routes/Settings/NonProductDebug';
 import { getRendererAppChannel } from '@/isomorphic/env';
 import { useCheckNeedAlertUpgrade } from '@/renderer/hooks/useAppUpdator';
+import { useListenSyncChain } from '@/renderer/hooks/useRabbyx';
 import styles from './index.module.less';
 
 import MainWindowRoute from './MainRoute';
@@ -416,6 +417,8 @@ export function MainWindow() {
     logGetUserDapp();
     getAllRPC();
   });
+
+  useListenSyncChain();
 
   return (
     <ShellWalletProvider alwaysRender>

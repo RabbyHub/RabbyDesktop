@@ -12,6 +12,7 @@ import { GasLevel, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { formatAmount } from '@/renderer/utils/number';
 import { Modal } from '@/renderer/components/Modal/Modal';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
+import { findChain } from '@/renderer/utils/chain';
 
 const StyledModal = styled(Modal)`
   .ant-modal-header {
@@ -171,7 +172,9 @@ const GasSelector = ({
 }: GasSelectorProps) => {
   const customerInputRef = useRef(null);
   const [customGas, setCustomGas] = useState<string | number>(0);
-  const chain = Object.values(CHAINS).find((item) => item.id === chainId)!;
+  const chain = findChain({
+    id: chainId,
+  })!;
   const [selectedGas, setSelectedGas] = useState(gas);
 
   const handleConfirmGas = () => {

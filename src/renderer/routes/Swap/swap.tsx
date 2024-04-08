@@ -29,7 +29,7 @@ import { isSameAddress } from '@/renderer/utils/address';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { ellipsisTokenSymbol } from '@/renderer/utils/token';
 import { getTokenSymbol } from '@/renderer/utils';
-import { findChainByServerID } from '@/renderer/utils/chain';
+import { findChain, findChainByServerID } from '@/renderer/utils/chain';
 import { Switch } from '@/renderer/components/Switch/Switch';
 import { ChainRender, ChainSelect } from './component/ChainSelect';
 import { SwapIntro } from './component/Intro';
@@ -333,7 +333,10 @@ export const SwapToken = () => {
 
   const payTokenIsNativeToken = useMemo(() => {
     if (payToken) {
-      return isSameAddress(payToken.id, CHAINS[chain].nativeTokenAddress);
+      return isSameAddress(
+        payToken.id,
+        findChain({ enum: chain })?.nativeTokenAddress || ''
+      );
     }
     return false;
   }, [chain, payToken]);
@@ -367,13 +370,15 @@ export const SwapToken = () => {
 
   if (shouldResetState.current && pageInfo.chain && pageInfo.payTokenId) {
     if (
-      !supportChains.map((e) => CHAINS[e].serverId).includes(pageInfo?.chain)
+      !supportChains
+        .map((e) => findChain({ enum: e })?.serverId)
+        .includes(pageInfo?.chain)
     ) {
       switchChain(CHAINS_ENUM.ETH);
     }
-    const target = Object.values(CHAINS).find(
-      (item) => item.serverId === pageInfo.chain
-    );
+    const target = findChain({
+      serverId: pageInfo.chain,
+    });
     if (target) {
       switchChain(target?.enum, pageInfo.payTokenId);
     }
@@ -911,7 +916,7 @@ export const SwapToken = () => {
                     }
                     setPayToken(token);
                   }}
-                  chainId={CHAINS[chain].serverId}
+                  chainId={findChain({ enum: chain })?.serverId || null}
                   token={payToken}
                   type="swapFrom"
                   excludeTokens={
@@ -934,7 +939,7 @@ export const SwapToken = () => {
                     }
                     setReceiveToken(token);
                   }}
-                  chainId={CHAINS[chain].serverId}
+                  chainId={findChain({ enum: chain })?.serverId || null}
                   token={receiveToken}
                   type="swapTo"
                   tokenRender={TokenRender}

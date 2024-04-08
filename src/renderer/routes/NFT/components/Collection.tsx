@@ -1,6 +1,6 @@
 import ChainIcon from '@/renderer/components/ChainIcon';
 import NFTAvatar from '@/renderer/components/NFTAvatar';
-import { CHAINS_LIST } from '@debank/common';
+import { DEFAULT_ETH_CHAIN, findChain } from '@/renderer/utils/chain';
 import { CollectionList, NFTItem } from '@rabby-wallet/rabby-api/dist/types';
 
 type CollectionProps = {
@@ -14,7 +14,9 @@ export const Collection = (props: CollectionProps) => {
   const { start, onPreview, item, onStart } = props;
 
   const chain =
-    CHAINS_LIST.find((e) => e.serverId === item.chain) || CHAINS_LIST[0];
+    findChain({
+      serverId: item.chain,
+    }) || DEFAULT_ETH_CHAIN;
 
   const num = item.nft_list.length;
 

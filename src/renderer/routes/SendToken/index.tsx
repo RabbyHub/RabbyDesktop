@@ -30,7 +30,7 @@ import IconRcLoading from '@/../assets/icons/swap/loading.svg?rc';
 import { confirmAddToWhitelistModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToWhitelist';
 import { useContactsByAddr } from '@/renderer/hooks/rabbyx/useContact';
 import { confirmAddToContactsModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToContacts';
-import { findChainByServerID } from '@/renderer/utils/chain';
+import { findChain, findChainByServerID } from '@/renderer/utils/chain';
 import AccountSearchInput from '@/renderer/components/AccountSearchInput';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { useRefState } from '@/renderer/hooks/useRefState';
@@ -376,20 +376,25 @@ const SendTokenInner = () => {
     new BigNumber(form.getFieldValue('amount')).gte(0) &&
     !isLoading &&
     (!whitelistEnabled || temporaryGrant || toAddressInWhitelist);
-  const isNativeToken = currentToken.id === CHAINS[chain].nativeTokenAddress;
+  const isNativeToken =
+    currentToken.id === findChain({ enum: chain })?.nativeTokenAddress;
 
   const fetchGasList = async () => {
-    const list: GasLevel[] = await walletOpenapi.gasMarket(
-      CHAINS[chain].serverId
-    );
+    const serverId = findChain({
+      enum: chain,
+    })?.serverId;
+    if (!serverId) {
+      throw new Error('chain not found');
+    }
+    const list: GasLevel[] = await walletOpenapi.gasMarket(serverId);
     return list;
   };
 
   useDebounce(
     async () => {
-      const targetChain = Object.values(CHAINS).find(
-        (item) => item.enum === chain
-      );
+      const targetChain = findChain({
+        enum: chain,
+      });
       if (!targetChain) return;
       let list: GasLevel[];
       if (
@@ -413,9 +418,9 @@ const SendTokenInner = () => {
   );
 
   const calcGasCost = async () => {
-    const targetChain = Object.values(CHAINS).find(
-      (item) => item.enum === chain
-    );
+    const targetChain = findChain({
+      enum: chain,
+    });
     if (!targetChain) return;
     const list = gasPriceMap[targetChain.enum]?.list;
 
@@ -461,9 +466,9 @@ const SendTokenInner = () => {
     if (isSubmittingRef.current) return;
     setIsSubmittingRef(true);
 
-    const target = Object.values(CHAINS).find(
-      (item) => item.serverId === currentToken.chain
-    )!;
+    const target = findChain({
+      serverId: currentToken.chain,
+    })!;
     const sendValue = new BigNumber(amount).multipliedBy(
       10 ** currentToken.decimals
     );
@@ -774,7 +779,11 @@ const SendTokenInner = () => {
 
   const handleChainChanged = async (val: CHAINS_ENUM) => {
     if (!currentAccount) return;
-    const selectChain = CHAINS[val];
+    const selectChain = findChain({ enum: val });
+    if (!selectChain) {
+      return;
+    }
+
     setChain(val);
     setCurrentToken({
       id: selectChain.nativeTokenAddress,
@@ -828,9 +837,9 @@ const SendTokenInner = () => {
     if (qs.token) {
       const [tokenChain, id] = qs.token.split(':');
       if (!tokenChain || !id) return;
-      const target = Object.values(CHAINS).find(
-        (item) => item.serverId === tokenChain
-      );
+      const target = findChain({
+        serverId: tokenChain,
+      });
       if (!target) {
         loadCurrentToken(
           currentToken.id,
@@ -847,10 +856,13 @@ const SendTokenInner = () => {
       );
       if (lastTimeToken) setCurrentToken(lastTimeToken);
       const needLoadToken: TokenItem = lastTimeToken || currentToken;
-      if (needLoadToken.chain !== CHAINS[chain].serverId) {
-        const target = Object.values(CHAINS).find(
-          (item) => item.serverId === needLoadToken.chain
-        )!;
+      if (needLoadToken.chain !== findChain({ enum: chain })?.serverId) {
+        const target = findChain({
+          serverId: needLoadToken.chain,
+        });
+        if (!target) {
+          return;
+        }
         setChain(target.enum);
       }
       loadCurrentToken(needLoadToken.id, needLoadToken.chain, account.address);
@@ -1121,7 +1133,7 @@ const SendTokenInner = () => {
               <TokenSelect
                 className="tokenInput"
                 onTokenChange={handleCurrentTokenChange}
-                chainId={CHAINS[chain].serverId}
+                chainId={findChain({ enum: chain })?.serverId || null}
                 token={currentToken}
                 inlinePrize
                 hideChainIcon={false}
@@ -1152,9 +1164,9 @@ const SendTokenInner = () => {
               <span>Chain</span>
               <span>
                 {
-                  Object.values(CHAINS).find(
-                    (item) => item.serverId === currentToken.chain
-                  )?.name
+                  findChain({
+                    serverId: currentToken.chain,
+                  })?.name
                 }
               </span>
             </div>
@@ -1225,19 +1237,21 @@ const SendTokenInner = () => {
         onOk={handleConfirmContact}
       />
 
-      <GasSelector
-        visible={gasSelectorVisible}
-        onClose={handleGasSelectorClose}
-        chainId={CHAINS[chain].id}
-        onChange={(val) => {
-          setAmountFocus(false);
-          setGasSelectorVisible(false);
-          handleGasChange(val);
-        }}
-        gasList={gasList}
-        gas={selectedGasLevel}
-        token={currentToken}
-      />
+      {findChain({ enum: chain })?.id ? (
+        <GasSelector
+          visible={gasSelectorVisible}
+          onClose={handleGasSelectorClose}
+          chainId={findChain({ enum: chain })!.id}
+          onChange={(val) => {
+            setAmountFocus(false);
+            setGasSelectorVisible(false);
+            handleGasChange(val);
+          }}
+          gasList={gasList}
+          gas={selectedGasLevel}
+          token={currentToken}
+        />
+      ) : null}
     </SendTokenWrapper>
   );
 };

@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 import { useGhostTooltip } from '@/renderer/routes-popup/TopGhostWindow/useGhostWindow';
+import { findChain } from '@/renderer/utils/chain';
 
 const ChainIconWrapper = styled.div`
   position: relative;
@@ -220,7 +221,10 @@ const ChainIcon = ({
           destroyTooltip();
         }}
       >
-        <ChainIconEle className={clsx(size)} src={CHAINS[chain].logo} />
+        <ChainIconEle
+          className={clsx(size)}
+          src={findChain({ enum: chain })?.logo || ''}
+        />
         {currentRPC?.status === 'avaliable' && (
           <AvaliableIcon className={clsx(size)} />
         )}

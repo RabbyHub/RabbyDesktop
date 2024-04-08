@@ -9,6 +9,7 @@ import { useRequest } from 'ahooks';
 import { Button, Form, InputRef } from 'antd';
 import clsx from 'clsx';
 import { useEffect, useMemo, useRef } from 'react';
+import { findChain } from '@/renderer/utils/chain';
 import styles from './index.module.less';
 
 interface EditCustomRPCModalProps {
@@ -27,7 +28,7 @@ export const EditCustomRPCModal = ({
   onSubmit,
 }: EditCustomRPCModalProps) => {
   const chainInfo = useMemo(() => {
-    return chain ? CHAINS[chain] : null;
+    return chain ? findChain({ enum: chain }) : null;
   }, [chain]);
 
   const {

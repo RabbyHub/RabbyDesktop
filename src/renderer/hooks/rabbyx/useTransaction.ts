@@ -4,6 +4,7 @@ import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
 import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { CHAINS } from '@debank/common';
+import { findChain } from '@/renderer/utils/chain';
 import { useCurrentAccount } from './useAccount';
 
 const DEBUG_DURACTION = 0;
@@ -93,9 +94,9 @@ export function useTransactionPendingCount() {
       .getTransactionHistory(currentAccount.address)
       .then(({ pendings }) => {
         const testnetPendings = pendings.filter((item) => {
-          const chain = Object.values(CHAINS).find(
-            (i) => i.id === item.chainId
-          );
+          const chain = findChain({
+            id: item.chainId,
+          });
           return chain?.isTestnet;
         });
         setTestnetPendingTxCount(testnetPendings.length);

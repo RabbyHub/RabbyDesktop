@@ -2,7 +2,7 @@ import { findMaxGasTx } from '@/isomorphic/tx';
 import { TransactionGroup } from '@/isomorphic/types/rabbyx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
-import { findChainByID } from '@/renderer/utils/chain';
+import { findChain, findChainByID } from '@/renderer/utils/chain';
 import { intToHex } from '@/renderer/utils/number';
 import { CHAINS } from '@debank/common';
 import { GasLevel } from '@rabby-wallet/rabby-api/dist/types';
@@ -106,9 +106,9 @@ export const SkipNonceAlert = ({
     const maxGasPrice = Number(
       maxGasTx.rawTx.gasPrice || maxGasTx.rawTx.maxFeePerGas || 0
     );
-    const chainServerId = Object.values(CHAINS).find(
-      (chain) => chain.id === item.chainId
-    )!.serverId;
+    const chainServerId = findChain({
+      id: item.chainId,
+    })!.serverId;
     const gasLevels: GasLevel[] = await walletOpenapi.gasMarket(chainServerId);
     const maxGasMarketPrice = maxBy(gasLevels, (level) => level.price)!.price;
     await wallet.sendRequest({

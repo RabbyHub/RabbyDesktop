@@ -19,6 +19,7 @@ import BigNumber from 'bignumber.js';
 import { formatUsdValue } from '@/renderer/utils/number';
 import pRetry from 'p-retry';
 import { OpenApiService } from '@rabby-wallet/rabby-api';
+import { findChain } from '@/renderer/utils/chain';
 import { SWAP_FEE_ADDRESS, DEX, ETH_USDT_CONTRACT, CEX } from './constant';
 
 export const tokenAmountBn = (token: TokenItem) =>
@@ -33,7 +34,7 @@ export function isSwapWrapToken(
 ) {
   const wrapTokens = [
     WrapTokenAddressMap[chain as keyof typeof WrapTokenAddressMap],
-    CHAINS[chain].nativeTokenAddress,
+    findChain({ enum: chain })?.nativeTokenAddress || '',
   ];
   return (
     !!wrapTokens.find((token) => isSameAddress(payTokenId, token)) &&
@@ -55,7 +56,7 @@ export const validSlippage = async ({
 }: validSlippageParams) => {
   const p = {
     slippage: new BigNumber(slippage).div(100).toString(),
-    chain_id: CHAINS[chain].serverId,
+    chain_id: findChain({ enum: chain })?.serverId || '',
     from_token_id: payTokenId,
     to_token_id: receiveTokenId,
   };
@@ -122,8 +123,8 @@ interface getTokenParams {
 export const getToken = async ({ addr, chain, tokenId }: getTokenParams) => {
   return walletOpenapi.getToken(
     addr,
-    CHAINS[chain].serverId,
-    tokenId // CHAINS[chain].nativeTokenAddress
+    findChain({ enum: chain })!.serverId,
+    tokenId
   );
 };
 
@@ -152,14 +153,14 @@ const getTokenApproveStatus = async ({
   'payToken' | 'receiveToken' | 'payAmount' | 'chain' | 'dexId'
 >) => {
   if (
-    payToken?.id === CHAINS[chain].nativeTokenAddress ||
+    payToken?.id === findChain({ enum: chain })?.nativeTokenAddress ||
     isSwapWrapToken(payToken.id, receiveToken.id, chain)
   ) {
     return [true, false];
   }
 
   const allowance = await walletController.getERC20Allowance(
-    CHAINS[chain].serverId,
+    findChain({ enum: chain })!.serverId,
     payToken.id,
     getSpender(dexId, chain)
   );
@@ -196,10 +197,12 @@ export const getPreExecResult = async ({
 }: getPreExecResultParams) => {
   const nonce = await walletController.getRecommendNonce({
     from: userAddress,
-    chainId: CHAINS[chain].id,
+    chainId: findChain({ enum: chain })!.id,
   });
 
-  const gasMarket = await walletOpenapi.gasMarket(CHAINS[chain].serverId);
+  const gasMarket = await walletOpenapi.gasMarket(
+    findChain({ enum: chain })!.serverId
+  );
   const gasPrice = gasMarket?.[1]?.price;
 
   let nextNonce = nonce;
@@ -210,7 +213,7 @@ export const getPreExecResult = async ({
     const tokenApproveParams = await walletController.generateApproveTokenTx({
       from: userAddress,
       to: payToken.id,
-      chainId: CHAINS[chain].id,
+      chainId: findChain({ enum: chain })!.id,
       spender: getSpender(dexId, chain),
       amount,
     });
@@ -266,7 +269,7 @@ export const getPreExecResult = async ({
     tx: {
       ...quote.tx,
       nonce: nextNonce,
-      chainId: CHAINS[chain].id,
+      chainId: findChain({ enum: chain })!.id,
       value: `0x${new BigNumber(quote.tx.value).toString(16)}`,
       gasPrice: `0x${new BigNumber(gasPrice).toString(16)}`,
       gas: '0x0',
@@ -367,7 +370,9 @@ export const getDexQuote = async ({
     const isOpenOcean = dexId === DEX_ENUM.OPENOCEAN;
 
     if (isOpenOcean) {
-      const gasMarket = await walletOpenapi.gasMarket(CHAINS[chain].serverId);
+      const gasMarket = await walletOpenapi.gasMarket(
+        findChain({ enum: chain })!.serverId
+      );
       gasPrice = gasMarket?.[1]?.price;
     }
     const data = await pRetry(
@@ -493,7 +498,7 @@ const getCexQuote = async (
   const p = {
     cex_id,
     pay_token_amount: payAmount,
-    chain_id: CHAINS[chain].serverId,
+    chain_id: findChain({ enum: chain })!.serverId,
     pay_token_id: payToken.id,
     receive_token_id,
   };

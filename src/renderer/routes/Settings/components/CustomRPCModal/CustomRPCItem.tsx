@@ -1,9 +1,9 @@
-import { Switch } from '@/renderer/components/Switch/Switch';
 import { RPCItem } from '@/isomorphic/types/rabbyx';
-import { CHAINS } from '@/renderer/utils/constant';
-import { useMemo, useState } from 'react';
 import ChainIcon from '@/renderer/components/ChainIcon';
 import { DeleteWrapper } from '@/renderer/components/DeleteWrapper';
+import { Switch } from '@/renderer/components/Switch/Switch';
+import { findChain } from '@/renderer/utils/chain';
+import { useMemo, useState } from 'react';
 import styles from './index.module.less';
 
 interface CustomtRPCItemProps {
@@ -20,7 +20,9 @@ export const CustomtRPCItem = (props: CustomtRPCItemProps) => {
   const [isShowCheck, setIsShowCheck] = useState(false);
 
   const chain = useMemo(() => {
-    return CHAINS[data.id];
+    return findChain({
+      enum: data.id,
+    });
   }, [data.id]);
 
   return (

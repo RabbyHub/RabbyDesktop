@@ -10,6 +10,7 @@ import { CHAINS } from '@debank/common';
 import { findChainByEnum } from '@/renderer/utils';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { checkIsCexProtocol } from '@/renderer/hooks/useBundle/cex/utils/shared';
+import { findChain } from '@/renderer/utils/chain';
 import { VIEW_TYPE } from './type';
 
 export const useSwitchView = () => {
@@ -185,9 +186,10 @@ const filterDisplayToken = (
   blocked: TokenItem[],
   customize: TokenItem[]
 ) => {
-  const ChainValues = Object.values(CHAINS);
   const list = tokens.filter((token) => {
-    const chain = ChainValues.find((c) => c.serverId === token.chain);
+    const chain = findChain({
+      serverId: token.chain,
+    });
     return (
       token.is_core &&
       !blocked.find(

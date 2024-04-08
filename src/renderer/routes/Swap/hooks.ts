@@ -1,6 +1,6 @@
 import { isSameAddress } from '@/renderer/utils/address';
 import { ValidateTokenParam } from '@/renderer/utils/token';
-import { CHAINS, CHAINS_ENUM, CHAINS_LIST } from '@debank/common';
+import { CHAINS, CHAINS_ENUM } from '@debank/common';
 import { DEX_ENUM, WrapTokenAddressMap } from '@rabby-wallet/rabby-swap';
 import {
   decodeCalldata,
@@ -14,6 +14,7 @@ import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useLocation } from 'react-router-dom';
 import { useAsync, useDebounce } from 'react-use';
 import { useSwap } from '@/renderer/hooks/rabbyx/useSwap';
+import { findChain } from '@/renderer/utils/chain';
 import {
   getRouter,
   getSpender,
@@ -36,11 +37,13 @@ export function isSwapWrapToken(
 ) {
   const wrapTokens = [
     WrapTokenAddressMap[chain as keyof typeof WrapTokenAddressMap],
-    CHAINS[chain].nativeTokenAddress,
+    findChain({
+      enum: chain,
+    })?.nativeTokenAddress,
   ];
   return (
-    !!wrapTokens.find((token) => isSameAddress(payTokenId, token)) &&
-    !!wrapTokens.find((token) => isSameAddress(receiveId, token))
+    !!wrapTokens.find((token) => token && isSameAddress(payTokenId, token)) &&
+    !!wrapTokens.find((token) => token && isSameAddress(receiveId, token))
   );
 }
 
@@ -63,7 +66,9 @@ export const useVerifyRouterAndSpender = (
     const spenderWhitelist = getSpender(dexId, chain);
     const isNativeToken = isSameAddress(
       payTokenId,
-      CHAINS[chain].nativeTokenAddress
+      findChain({
+        enum: chain,
+      })?.nativeTokenAddress || ''
     );
     const isWrapTokens = isSwapWrapToken(payTokenId, receiveTokenId, chain);
 
@@ -78,7 +83,12 @@ export const useVerifyRouterAndSpender = (
 };
 
 const isNativeToken = (chain: CHAINS_ENUM, tokenId: string) =>
-  isSameAddress(tokenId, CHAINS[chain].nativeTokenAddress);
+  isSameAddress(
+    tokenId,
+    findChain({
+      enum: chain,
+    })?.nativeTokenAddress || ''
+  );
 
 export const useVerifyCalldata = <
   T extends Parameters<typeof decodeCalldata>[1]
@@ -104,9 +114,10 @@ export const useVerifyCalldata = <
       const estimateMinReceive = new BigNumber(data.toTokenAmount).times(
         new BigNumber(1).minus(slippage)
       );
-      const chain = Object.values(CHAINS).find(
-        (item) => item.id === tx.chainId
-      );
+
+      const chain = findChain({
+        id: tx.chainId,
+      });
 
       if (!chain) return true;
 
@@ -159,7 +170,12 @@ export const useVerifySdk = <T extends ValidateTokenParam>(
     data,
     actualDexId,
     new BigNumber(slippage).div(100).toFixed(),
-    data?.tx ? { ...data?.tx, chainId: CHAINS[chain].id } : undefined
+    data?.tx
+      ? {
+          ...data?.tx,
+          chainId: findChain({ enum: chain })!.id,
+        }
+      : undefined
   );
 
   return {
@@ -226,9 +242,9 @@ export const usePostSwap = () => {
         const data = pushTxs.current[key];
         const swapData = localSwapTxs.current[key];
         const { hash: _, ...tx } = data;
-        const chain = CHAINS_LIST.find(
-          (e) => e.serverId === swapData.payToken.chain
-        )?.enum;
+        const chain = findChain({
+          serverId: swapData.payToken.chain,
+        })?.enum;
         if (!chain) {
           return;
         }
@@ -271,7 +287,7 @@ export const usePostSwap = () => {
       hash: string,
       swapData: Omit<postSwapParams, 'tx'>
     ) => {
-      const key = `${CHAINS[chain].id}-${hash.toLowerCase()}`;
+      const key = `${findChain({ enum: chain })?.id}-${hash.toLowerCase()}`;
       localSwapTxs.current = {
         ...localSwapTxs.current,
         [key]: swapData,

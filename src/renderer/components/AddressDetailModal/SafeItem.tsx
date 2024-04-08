@@ -12,6 +12,7 @@ import clsx from 'clsx';
 import { sortBy } from 'lodash';
 import React, { useState } from 'react';
 import { useAsync } from 'react-use';
+import { findChain } from '@/renderer/utils/chain';
 import NameAndAddress from '../NameAndAddress';
 import { AccountDetailItem } from './AccountDetailItem';
 
@@ -51,9 +52,9 @@ export const SafeItem: React.FC<{ account: RabbyAccount }> = ({ account }) => {
       });
 
       res.push({
-        chain: Object.values(CHAINS).find(
-          (chain) => chain.network === networkId
-        ),
+        chain: findChain({
+          networkId,
+        }),
         data: {
           ...info,
         },

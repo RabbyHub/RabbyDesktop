@@ -84,8 +84,8 @@ const configuration: webpack.Configuration = {
     extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
     modules: [webpackPaths.srcPath, 'node_modules'],
     alias: {
-      '@debank/common': '@debank/common/dist/index-rabbydesktop'
-    }
+      '@debank/common': '@debank/common/dist/index-rabbydesktop',
+    },
   },
 
   plugins: [

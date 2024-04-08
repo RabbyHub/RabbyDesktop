@@ -1,12 +1,12 @@
-import { useMemo } from 'react';
 import { Image, ImageProps } from 'antd';
 import clsx from 'clsx';
+import { useMemo } from 'react';
 
-import { CHAINS } from '@/renderer/utils/constant';
 import { covertIpfsHttpToRabbyIpfs } from '@/isomorphic/custom-scheme';
+import { findChain } from '@/renderer/utils/chain';
 import { getOriginName, hashCode } from '../../utils';
-import './index.less';
 import { TooltipWithMagnetArrow } from '../Tooltip/TooltipWithMagnetArrow';
+import './index.less';
 
 const bgColorList = [
   '#F69373',
@@ -54,7 +54,7 @@ export const DappFavicon = (props: FaviconProps) => {
   const fallbackImage = useFallbackImage(origin);
   const chainInfo = useMemo(() => {
     if (chain) {
-      return CHAINS[chain];
+      return findChain({ enum: chain });
     }
     return null;
   }, [chain]);

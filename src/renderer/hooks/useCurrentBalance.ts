@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { atom, useAtom } from 'jotai';
-import { DisplayChainWithWhiteLogo, formatChain } from '../utils/chain';
+import {
+  DisplayChainWithWhiteLogo,
+  formatChain,
+} from '@/isomorphic/wallet/chain';
+// import { DisplayChainWithWhiteLogo, formatChain } from '../utils/chain';
 
 const balanceAtom = atom<string | null>(null);
 const testnetBalanceAtom = atom<string | null>(null);

@@ -27,6 +27,7 @@ import { requestLockWallet } from '@/renderer/hooks/rabbyx/useUnlocked';
 import { PasswordStatus } from '@/isomorphic/wallet/lock';
 import { useNavigate } from 'react-router-dom';
 import { getRendererAppChannel } from '@/isomorphic/env';
+import { getChainList } from '@/renderer/utils/chain';
 import styles from './index.module.less';
 import ModalProxySetting from './components/ModalProxySetting';
 import { useProxyStateOnSettingPage } from './settingHooks';
@@ -35,7 +36,6 @@ import { UpdateArea } from './components/UpdateArea';
 import { CustomRPCModal } from './components/CustomRPCModal';
 import TopTipUnsupported from './components/TopTipUnsupported';
 import ModalSupportedChains, {
-  CHAINS_TOTAL_COUNT,
   useSupportedChainsModal,
 } from './components/ModalSupportedChains';
 import { SignatureRecordModal } from './components/SignatureRecordModal';
@@ -218,7 +218,7 @@ export function MainWindowSettings() {
                 });
               }}
             />
-            <ItemSwitch
+            {/* <ItemSwitch
               checked={isShowTestnet}
               name={
                 <>
@@ -231,7 +231,7 @@ export function MainWindowSettings() {
               onChange={(nextEnabled: boolean) => {
                 setIsShowTestnet(nextEnabled);
               }}
-            />
+            /> */}
             <ItemAction
               name="Custom RPC"
               onClick={() => {
@@ -382,7 +382,7 @@ export function MainWindowSettings() {
               icon="rabby-internal://assets/icons/mainwin-settings/supported-chains.svg"
             >
               <span className="mr-12 text-14 font-medium">
-                {CHAINS_TOTAL_COUNT}
+                {getChainList('mainnet').length}
               </span>
               <img src={IconChevronRight} />
             </ItemAction>
