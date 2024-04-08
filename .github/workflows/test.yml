@@ -61,7 +61,9 @@ jobs:
         run: |
           npm i -g @debank/cli@latest;
           npm i;
-          if [[ "$OSTYPE" == "darwin"* ]]; then
+          if [[ "$RABBY_REALLY_COPY" == "true" ]]; then
+            bash ./scripts/release_desktop.sh
+          elif [[ "$OSTYPE" == "darwin"* ]]; then
             security unlock-keychain -p ${{ secrets.KEYCHAIN_PASS }} ~/Library/Keychains/login.keychain-db
             npm run package:darwin:arm64;
             npm run package:darwin:x64;
