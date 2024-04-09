@@ -191,23 +191,26 @@ export type IsolatedMarginAccountInfoResponse = {
 };
 
 export type SavingsFlexibleProductPositionResponse = {
-  asset: string;
-  productId: string;
-  productName: string;
-  dailyInterestRate: string;
-  annualInterestRate: string;
-  totalAmount: string;
-  lockedAmount: string;
-  freeAmount: string;
-  freezeAmount: string;
-  totalInterest: string;
-  canRedeem: boolean;
-  redeemingAmount: string;
-  tierAnnualInterestRate: Record<string, string>;
-  totalBonusRewards: string;
-  totalMarketRewards: string;
-  collateralAmount: string;
-}[];
+  rows: {
+    asset: string;
+    productId: string;
+    productName: string;
+    dailyInterestRate: string;
+    annualInterestRate: string;
+    totalAmount: string;
+    lockedAmount: string;
+    freeAmount: string;
+    freezeAmount: string;
+    totalInterest: string;
+    canRedeem: boolean;
+    redeemingAmount: string;
+    tierAnnualInterestRate: Record<string, string>;
+    totalBonusRewards: string;
+    totalMarketRewards: string;
+    collateralAmount: string;
+  }[];
+  total: number;
+};
 
 export type SavingsCustomizedPositionResponse = {
   asset: string;
