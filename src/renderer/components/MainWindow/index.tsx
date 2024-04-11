@@ -1,70 +1,66 @@
 import { useCallback, useEffect } from 'react';
 import {
   createHashRouter as createRouter,
-  RouterProvider,
-  Outlet,
   Navigate,
+  Outlet,
+  RouterProvider,
 } from 'react-router-dom';
 
 import KeepAlive from 'react-activation';
 
-import DApps from '@/renderer/routes/Dapps';
-import GettingStarted from '@/renderer/routes/Welcome/GettingStarted';
-import MainWindowLoading from '@/renderer/routes/MainWindowLoading';
-import ImportHome from '@/renderer/routes/Import/ImportHome';
-import ImportByPrivateKey from '@/renderer/routes/ImportBy/ImportByPrivateKey';
-import ImportSetPassword from '@/renderer/routes/Import/ImportSetPassword';
-import ImportSuccessful from '@/renderer/routes/Import/ImportSuccessful';
-import ImportByContainer from '@/renderer/routes/ImportBy/ImportByContainer';
-import SendToken from '@/renderer/routes/SendToken';
-import { Unlock } from '@/renderer/routes/Unlock/Unlock';
-import { RequireUnlock } from '@/renderer/routes/RequireUnlock';
+import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import { getRendererAppChannel } from '@/isomorphic/env';
 import { useForwardFromInternalPage } from '@/renderer/hooks-shell/useMainWindow';
-import { useClickMainWindowHideContextMenu } from '@/renderer/hooks/useClick';
-import { MainWindowSettings } from '@/renderer/routes/Settings';
-import { useChromeTabsEvents } from '@/renderer/hooks-shell/useWindowTabs';
-import { useTransactionChanged } from '@/renderer/hooks/rabbyx/useTransaction';
 import { useMainWindowEvents } from '@/renderer/hooks-shell/useWindowState';
-import { useAppUnlockEvents } from '@/renderer/hooks/rabbyx/useUnlocked';
+import { useChromeTabsEvents } from '@/renderer/hooks-shell/useWindowTabs';
 import { useAccounts } from '@/renderer/hooks/rabbyx/useAccount';
+import { useTransactionChanged } from '@/renderer/hooks/rabbyx/useTransaction';
+import { useAppUnlockEvents } from '@/renderer/hooks/rabbyx/useUnlocked';
+import { useCheckNeedAlertUpgrade } from '@/renderer/hooks/useAppUpdator';
+import { useClickMainWindowHideContextMenu } from '@/renderer/hooks/useClick';
+import { useCustomRPC } from '@/renderer/hooks/useCustomRPC';
+import { useToastMessage } from '@/renderer/hooks/useToastMessage';
 import {
   useMessageForwarded,
   useMessageForwardToMainwin,
 } from '@/renderer/hooks/useViewsMessage';
+import { fetchDapps } from '@/renderer/ipcRequest/dapps';
+import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import ApprovalManagePage from '@/renderer/routes/ApprovalManagePage';
+import { HomeBundle } from '@/renderer/routes/Bundle';
+import DApps from '@/renderer/routes/Dapps';
+import Home from '@/renderer/routes/Home';
+import ImportHome from '@/renderer/routes/Import/ImportHome';
+import ImportSetPassword from '@/renderer/routes/Import/ImportSetPassword';
+import ImportSuccessful from '@/renderer/routes/Import/ImportSuccessful';
+import ImportByContainer from '@/renderer/routes/ImportBy/ImportByContainer';
+import ImportByPrivateKey from '@/renderer/routes/ImportBy/ImportByPrivateKey';
+import MainWindowLoading from '@/renderer/routes/MainWindowLoading';
+import { NFT } from '@/renderer/routes/NFT';
+import { RequireUnlock } from '@/renderer/routes/RequireUnlock';
+import SendNFT from '@/renderer/routes/SendNFT';
+import SendToken from '@/renderer/routes/SendToken';
+import { MainWindowSettings } from '@/renderer/routes/Settings';
+import { MainWindowSettingsDeveloperKits } from '@/renderer/routes/Settings/Developer';
+import { MainWindowSettingsNonProductDebugKits } from '@/renderer/routes/Settings/NonProductDebug';
+import { Swap } from '@/renderer/routes/Swap';
+import { Unlock } from '@/renderer/routes/Unlock/Unlock';
+import GettingStarted from '@/renderer/routes/Welcome/GettingStarted';
+import { matomoRequestEvent } from '@/renderer/utils/matomo-request';
 import { navigateToDappRoute } from '@/renderer/utils/react-router';
 import { ErrorBoundary } from '@sentry/react';
 import { useMount } from 'ahooks';
-import { matomoRequestEvent } from '@/renderer/utils/matomo-request';
-import { fetchDapps } from '@/renderer/ipcRequest/dapps';
 import dayjs from 'dayjs';
-import { useToastMessage } from '@/renderer/hooks/useToastMessage';
-import { HomeBundle } from '@/renderer/routes/Bundle';
-import { useCustomRPC } from '@/renderer/hooks/useCustomRPC';
-import { NFT } from '@/renderer/routes/NFT';
-import SendNFT from '@/renderer/routes/SendNFT';
-import ApprovalManagePage from '@/renderer/routes/ApprovalManagePage';
-import { walletController } from '@/renderer/ipcRequest/rabbyx';
-import { MainWindowSettingsDeveloperKits } from '@/renderer/routes/Settings/Developer';
-import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
-import Home from '@/renderer/routes/Home';
-import { Swap } from '@/renderer/routes/Swap';
-import { MainWindowSettingsNonProductDebugKits } from '@/renderer/routes/Settings/NonProductDebug';
-import { getRendererAppChannel } from '@/isomorphic/env';
-import { useCheckNeedAlertUpgrade } from '@/renderer/hooks/useAppUpdator';
-import { useListenSyncChain } from '@/renderer/hooks/useRabbyx';
-import { updateChainStore } from '@/renderer/utils/chain';
 import styles from './index.module.less';
 
-import MainWindowRoute from './MainRoute';
-import MainWindowSidebar from './Sidebar';
-import Titlebar from '../Titlebar';
-import { TopNavBar } from '../TopNavBar';
-import { MainWindowRouteData } from './type';
-import { DappViewWrapper } from '../DappView';
 import { FixedBackHeader } from '../FixedBackHeader';
 import { ShellWalletProvider } from '../ShellWallet';
 import TipUnsupportedModal from '../TipUnsupportedModal';
+import Titlebar from '../Titlebar';
 import UpdateTipBar from '../UpdateTipBar';
+import MainWindowRoute from './MainRoute';
+import MainWindowSidebar from './Sidebar';
+import { MainWindowRouteData } from './type';
 
 const logGetUserDapp = async () => {
   const lastLogTime = localStorage.getItem('matomo_last_log_time') || 0;
@@ -379,14 +375,6 @@ function useAccountsAndLockGuard() {
   return { fetchAccounts };
 }
 
-walletController.getMainnetListFromLocal().then((list) => {
-  if (list?.length) {
-    updateChainStore({
-      mainnetList: list,
-    });
-  }
-});
-
 export function MainWindow() {
   useClickMainWindowHideContextMenu();
   useForwardFromInternalPage(router);
@@ -426,8 +414,6 @@ export function MainWindow() {
     logGetUserDapp();
     getAllRPC();
   });
-
-  useListenSyncChain();
 
   return (
     <ShellWalletProvider alwaysRender>

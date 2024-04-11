@@ -156,6 +156,7 @@ export const useListenSyncChain = () => {
       '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
       (payload) => {
         if (payload.event === 'syncChainList') {
+          console.log('sync chain list', payload.data);
           updateChainStore(payload.data || {});
         }
       }

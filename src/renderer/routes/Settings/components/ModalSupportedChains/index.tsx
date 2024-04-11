@@ -23,7 +23,7 @@ export function useSupportedChainsModal() {
 
 const List = ({ list }: { list: Chain[] }) => {
   return (
-    <div className="max-h-[480px] chain-list-wrapper">
+    <div className="max-h-[500px] chain-list-wrapper">
       <div className="chain-list">
         {list.map((item) => {
           return (
@@ -81,7 +81,7 @@ export default function ModalSupportedChains() {
         </span>
       }
     >
-      <PillsSwitch
+      {/* <PillsSwitch
         value={selectedTab}
         onTabChange={onTabChange}
         className="bg-r-neutral-line flex w-[232px] mx-[auto] my-20px h-[36px] p-[4px]"
@@ -104,10 +104,10 @@ export default function ModalSupportedChains() {
             },
           ] as const
         }
-      />
+      /> */}
 
       <Tabs
-        className="h-full max-h-[480px] overflowy-y-auto"
+        className="h-full max-h-[500px] overflowy-y-auto mt-[20px]"
         renderTabBar={renderTabBar}
         activeKey={selectedTab}
       >

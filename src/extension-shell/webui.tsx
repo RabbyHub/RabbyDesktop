@@ -18,6 +18,10 @@ import { getShellUIType } from '@/isomorphic/url';
 import { HardwareConnectTopbar } from '@/renderer/components/HardwareConnectTopbar/HardwareConnectTopbar';
 import AlertWindowPrompt from '@/renderer/routes-popup/AlertWindow/Prompt';
 
+import { initSyncChain } from '@/renderer/utils/sync-chain';
+
+initSyncChain();
+
 const shellUIType = getShellUIType(window.location.href) as IShellWebUIType &
   string;
 

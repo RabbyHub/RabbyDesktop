@@ -24,6 +24,9 @@ import DappReadonlyWindow from '../routes-popup/DappReadonlyWindow';
 import InDappFindWindow from '../routes-popup/InDappFindWindow';
 
 import GlobalToastPopup from '../components/GlobalToastPopup';
+import { initSyncChain } from '../utils/sync-chain';
+
+initSyncChain();
 
 function App() {
   return (
