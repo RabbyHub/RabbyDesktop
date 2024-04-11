@@ -1,11 +1,17 @@
-name: Test
+name: Feature Test
 
 on:
   push:
     branches:
-      - dev
-      - feat*
+      # - dev
+      # - feat*
       - ci/*
+  workflow_dispatch:
+    inputs:
+      RABBY_REALLY_COPY:
+        required: true
+        type: boolean
+        default: true
 
 defaults:
   run:
@@ -73,7 +79,7 @@ jobs:
           RABBY_DESKTOP_CODE_SIGINING_PASS_PROD: ${{ secrets.RABBY_DESKTOP_CODE_SIGINING_PASS_PROD }}
           RABBY_DESKTOP_CODE_SIGINING_CERT_FINGERPRINT: ${{ secrets.RABBY_DESKTOP_CODE_SIGINING_CERT_FINGERPRINT }}
           RABBY_DESKTOP_KR_PWD: ${{ secrets.RABBY_DESKTOP_KR_PWD }}
-          RABBY_REALLY_COPY: ${{ vars.RABBY_REALLY_COPY }}
+          RABBY_REALLY_COPY: ${{ inputs.RABBY_REALLY_COPY }}
           LARK_CHAT_URL: ${{ secrets.LARK_CHAT_URL }}
           LARK_CHAT_SECRET: ${{ secrets.LARK_CHAT_SECRET }}
           # see more details on https://docs.github.com/en/actions/learn-github-actions/contexts#github-context

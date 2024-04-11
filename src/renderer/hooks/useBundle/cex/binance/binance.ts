@@ -152,11 +152,11 @@ export class Binance extends Cex<BinanceConfig> {
       this.marginAccount(),
       this.isolatedMarginAccountInfo(),
       this.savingsFlexibleProductPosition(),
-      this.savingsCustomizedPosition(),
+      // this.savingsCustomizedPosition(),
       this.stakingProductPosition('STAKING'),
       this.stakingProductPosition('F_DEFI'),
       this.stakingProductPosition('L_DEFI'),
-      this.bswapLiquidity(),
+      // this.bswapLiquidity(),
       this.USDFutures(),
       this.tokenFutures(),
     ]);
@@ -172,16 +172,17 @@ export class Binance extends Cex<BinanceConfig> {
       isolatedMarginAsset: this.calcIsolatedMarginAccount(assets[3]),
       financeAsset: {
         flexible: this.calcFlexible(assets[4]),
-        fixed: this.calcFixed(assets[5]),
+        fixed: [],
+        // fixed: this.calcFixed(assets[5]),
         stake: [
+          ...this.calcStake(assets[5]),
           ...this.calcStake(assets[6]),
           ...this.calcStake(assets[7]),
-          ...this.calcStake(assets[8]),
-          ...this.calcBswapLiquidity(assets[9]),
+          // ...this.calcBswapLiquidity(assets[8]),
         ],
       },
-      usdFutures: this.calcUSDFutures(assets[10]),
-      tokenFutures: this.calcTokenFutures(assets[11]),
+      usdFutures: this.calcUSDFutures(assets[8]),
+      tokenFutures: this.calcTokenFutures(assets[9]),
     };
 
     const totalBalance = this.getTotalBalance();
@@ -229,14 +230,15 @@ export class Binance extends Cex<BinanceConfig> {
           ),
         };
       }),
-      fixed: result.financeAsset.fixed.map((item) => {
-        return {
-          ...item,
-          assets: item.assets.filter((asset) =>
-            valueGreaterThanThreshold(asset.usdtValue, totalBalance)
-          ),
-        };
-      }),
+      fixed: [],
+      // fixed: result.financeAsset.fixed.map((item) => {
+      //   return {
+      //     ...item,
+      //     assets: item.assets.filter((asset) =>
+      //       valueGreaterThanThreshold(asset.usdtValue, totalBalance)
+      //     ),
+      //   };
+      // }),
       stake: result.financeAsset.stake.map((item) => {
         return {
           ...item,
@@ -568,14 +570,13 @@ export class Binance extends Cex<BinanceConfig> {
     const res = await this.invoke<
       SavingsFlexibleProductPositionResponse | undefined
     >('savingsFlexibleProductPosition');
+    res?.rows.forEach(({ asset }) => tokenPrice.addSymbol(asset));
 
-    res?.forEach(({ asset }) => tokenPrice.addSymbol(asset));
-
-    return res ?? [];
+    return res ? res.rows : [];
   }
 
   private calcFlexible(
-    res: SavingsFlexibleProductPositionResponse
+    res: SavingsFlexibleProductPositionResponse['rows']
   ): AssetWithRewards[] {
     return res.filter(filterAsset).map((item) => {
       const asset = item.asset;
