@@ -155,7 +155,7 @@ export const useListenSyncChain = () => {
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
       (payload) => {
-        if (payload.event === 'syncChain') {
+        if (payload.event === 'syncChainList') {
           updateChainStore(payload.data || {});
         }
       }

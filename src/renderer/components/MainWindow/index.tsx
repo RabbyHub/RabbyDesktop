@@ -52,6 +52,7 @@ import { MainWindowSettingsNonProductDebugKits } from '@/renderer/routes/Setting
 import { getRendererAppChannel } from '@/isomorphic/env';
 import { useCheckNeedAlertUpgrade } from '@/renderer/hooks/useAppUpdator';
 import { useListenSyncChain } from '@/renderer/hooks/useRabbyx';
+import { updateChainStore } from '@/renderer/utils/chain';
 import styles from './index.module.less';
 
 import MainWindowRoute from './MainRoute';
@@ -377,6 +378,14 @@ function useAccountsAndLockGuard() {
 
   return { fetchAccounts };
 }
+
+walletController.getMainnetListFromLocal().then((list) => {
+  if (list?.length) {
+    updateChainStore({
+      mainnetList: list,
+    });
+  }
+});
 
 export function MainWindow() {
   useClickMainWindowHideContextMenu();
