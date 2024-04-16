@@ -1,22 +1,9 @@
-import { CHAINS, Chain } from '@debank/common';
+import { findChain, getChainList } from '@/renderer/utils/chain';
+import { Chain } from '@debank/common';
 import {
   ChainWithBalance,
   UsedChain,
 } from '@rabby-wallet/rabby-api/dist/types';
-
-const ALL_CHAINS = Object.values(CHAINS);
-const ALL_CHAINS_TESTNET = [] as Chain[];
-const ALL_CHAINS_MAINNET = ALL_CHAINS.filter((chain) => {
-  if (chain.isTestnet) {
-    ALL_CHAINS_TESTNET.push(chain);
-  }
-  return !chain.isTestnet;
-});
-
-export const CHAINS_BY_NET = {
-  mainnet: ALL_CHAINS_MAINNET,
-  testnet: ALL_CHAINS_TESTNET,
-};
 
 export interface DisplayChainWithWhiteLogo extends ChainWithBalance {
   logo?: string;
@@ -30,8 +17,9 @@ export interface DisplayUsedChain extends UsedChain {
 }
 
 export const formatUsedChain = (item: UsedChain): DisplayUsedChain => {
-  const chainsArray = Object.values(CHAINS);
-  const chain = chainsArray.find((i) => i.id === item.community_id);
+  const chain = findChain({
+    id: item.community_id,
+  });
 
   return {
     ...item,
@@ -43,8 +31,9 @@ export const formatUsedChain = (item: UsedChain): DisplayUsedChain => {
 export const formatChain = (
   item: ChainWithBalance
 ): DisplayChainWithWhiteLogo => {
-  const chainsArray = Object.values(CHAINS);
-  const chain = chainsArray.find((i) => i.id === item.community_id);
+  const chain = findChain({
+    id: item.community_id,
+  });
 
   return {
     ...item,
@@ -143,8 +132,9 @@ export function varyAndSortChainItems(deps: {
   };
 
   const _all = (
-    (netTabKey ? CHAINS_BY_NET[netTabKey] : CHAINS_BY_NET.mainnet) ||
-    CHAINS_BY_NET.mainnet
+    netTabKey
+      ? getChainList(netTabKey)
+      : getChainList('mainnet') || getChainList('mainnet')
   ).sort((a, b) => a.name.localeCompare(b.name));
 
   _all.forEach((item) => {

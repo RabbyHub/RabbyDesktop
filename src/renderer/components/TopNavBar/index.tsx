@@ -1,46 +1,47 @@
+import { CHAINS_ENUM } from '@debank/common';
 import clsx from 'clsx';
-import { CHAINS, CHAINS_ENUM } from '@debank/common';
 
 import {
   IconArrowDown,
   RcIconHistoryGoBack,
-  RcIconReload,
-  RcIconStopload,
-  RcIconShield,
   RcIconHome,
+  RcIconReload,
+  RcIconShield,
+  RcIconStopload,
 } from '@/../assets/icons/top-bar';
 
-import { Divider } from 'antd';
+import { detectClientOS } from '@/isomorphic/os';
 import {
   useDappNavigation,
   useDetectDappVersion,
 } from '@/renderer/hooks-shell/useDappNavigation';
+import { Divider } from 'antd';
+import classNames from 'classnames';
 import {
-  useEffect,
-  useCallback,
-  useState,
-  forwardRef,
   ForwardedRef,
+  forwardRef,
+  useCallback,
+  useEffect,
   useMemo,
   useRef,
+  useState,
 } from 'react';
-import { detectClientOS } from '@/isomorphic/os';
-import classNames from 'classnames';
 
-import { useCurrentConnection } from '@/renderer/hooks/rabbyx/useConnection';
-import { useSwitchChainModal } from '@/renderer/hooks/useSwitchChainModal';
-import { copyText } from '@/renderer/utils/clipboard';
-import { useMatchURLBaseConfig } from '@/renderer/hooks-ipc/useAppDynamicConfig';
-import { useWindowState } from '@/renderer/hooks-shell/useWindowState';
 import { formatDappURLToShow } from '@/isomorphic/dapp';
-import { useGhostTooltip } from '@/renderer/routes-popup/TopGhostWindow/useGhostWindow';
-import { useLocation } from 'react-router-dom';
-import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
+import { useMatchURLBaseConfig } from '@/renderer/hooks-ipc/useAppDynamicConfig';
 import { useFloatingCurrentAccountCompWidth } from '@/renderer/hooks-shell/useMainWindow';
-import styles from './index.module.less';
+import { useWindowState } from '@/renderer/hooks-shell/useWindowState';
+import { useCurrentConnection } from '@/renderer/hooks/rabbyx/useConnection';
+import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
+import { useSwitchChainModal } from '@/renderer/hooks/useSwitchChainModal';
+import { useGhostTooltip } from '@/renderer/routes-popup/TopGhostWindow/useGhostWindow';
+import { findChain } from '@/renderer/utils/chain';
+import { copyText } from '@/renderer/utils/clipboard';
+import { useLocation } from 'react-router-dom';
 import ChainIcon from '../ChainIcon';
-import NavRefreshButton from './components/NavRefreshButton';
 import DarwinDraggableGasket from '../DarwinDraggableGasket';
+import NavRefreshButton from './components/NavRefreshButton';
+import styles from './index.module.less';
 // import { TipsWrapper } from '../TipWrapper';
 
 const isDarwin = detectClientOS() === 'darwin';
@@ -78,7 +79,6 @@ const ConnectedChain = forwardRef(
   ) => {
     return (
       <div className={clsx(styles.chain, className)} ref={ref} {...others}>
-        {/* <img className={styles.logo} src={CHAINS[chain].logo} alt={chain} /> */}
         <ChainIcon
           className={styles.logo}
           chain={chain}
@@ -86,7 +86,9 @@ const ConnectedChain = forwardRef(
           showCustomRPCToolTip
           isShowTooltipOnTop
         />
-        <span className={styles.chainName}>{CHAINS[chain].name}</span>
+        <span className={styles.chainName}>
+          {findChain({ enum: chain })?.name}
+        </span>
         <img src={IconArrowDown} alt="" />
       </div>
     );

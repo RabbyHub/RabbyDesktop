@@ -1,13 +1,12 @@
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { findChain } from '@/renderer/utils/chain';
 import { LoadingOutlined } from '@ant-design/icons';
-import { CHAINS, Chain } from '@debank/common';
+import { Chain } from '@debank/common';
 import { useRequest } from 'ahooks';
 import { Form } from 'antd';
 import classNames from 'classnames';
-import clsx from 'clsx';
 import { isValidAddress } from 'ethereumjs-util';
 import React, { useState } from 'react';
-import { KEYRING_TYPE } from '@/renderer/utils/constant';
 import RabbyInput from '../AntdOverwrite/Input';
 import { RabbyButton } from '../Button/RabbyButton';
 
@@ -161,7 +160,7 @@ export const SafeModalContent: React.FC<Props> = ({ onSuccess }) => {
                           key={chain.id}
                         >
                           <img
-                            src={CHAINS[chain.enum].logo}
+                            src={findChain({ enum: chain.enum })?.logo}
                             alt=""
                             className="w-[20px] h-[20px]"
                           />

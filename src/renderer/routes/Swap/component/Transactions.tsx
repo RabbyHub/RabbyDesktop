@@ -3,7 +3,6 @@ import RcIconPending from '@/../assets/icons/swap/pending.svg?rc';
 import RcIconCompleted from '@/../assets/icons/swap/completed.svg?rc';
 import { sinceTime } from '@/renderer/utils/time';
 import { ellipsis } from '@/renderer/utils/address';
-import { CHAINS_LIST } from '@debank/common';
 import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import { forwardRef, memo, useEffect, useMemo, useRef } from 'react';
 import {
@@ -23,6 +22,7 @@ import { useAtomValue } from 'jotai';
 import { useAsync } from 'react-use';
 import { uniqBy } from 'lodash';
 import { getTokenSymbol } from '@/renderer/utils';
+import { findChain } from '@/renderer/utils/chain';
 import { getSwapList } from '../utils';
 import {
   refreshSwapTxListAtom,
@@ -217,7 +217,9 @@ const Transaction = forwardRef<HTMLDivElement, TransactionProps>(
     const time = data?.finished_at || data?.create_at;
     const targetDex = data?.dex_id;
     const txId = data?.tx_id;
-    const chainItem = CHAINS_LIST.find((e) => e.serverId === data?.chain);
+    const chainItem = findChain({
+      serverId: data?.chain,
+    });
     const chainName = chainItem?.name || '';
     const scanLink = chainItem?.scanLink.replace('_s_', '');
     const loading = data?.status !== 'Finished';

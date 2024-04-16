@@ -1,13 +1,13 @@
-import { useCallback, InsHTMLAttributes } from 'react';
-import { CHAINS, CHAINS_ENUM } from '@debank/common';
+import { CHAINS_ENUM } from '@debank/common';
+import { InsHTMLAttributes, useCallback } from 'react';
 
-import ImgArrowDown from '@/../assets/icons/swap/arrow-down.svg';
 import IconRcSwapArrowDownTriangle from '@/../assets/icons/swap/arrow-caret-down2.svg?rc';
+import ImgArrowDown from '@/../assets/icons/swap/arrow-down.svg';
 
-import styled from 'styled-components';
-import { useSwitchChainModal } from '@/renderer/hooks/useSwitchChainModal';
 import ChainIcon from '@/renderer/components/ChainIcon';
-import { useCustomRPC } from '@/renderer/hooks/useCustomRPC';
+import { useSwitchChainModal } from '@/renderer/hooks/useSwitchChainModal';
+import { findChain } from '@/renderer/utils/chain';
+import styled from 'styled-components';
 
 const ChainSelectWrapper = styled.div`
   display: flex;
@@ -89,14 +89,13 @@ export const ChainSelect = ({
         )
       ) : (
         <>
-          {/* <img src={CHAINS[value].logo} className="logo" /> */}
           <ChainIcon
             chain={value}
             className="logo"
             showCustomRPCToolTip
             isShowCustomRPC
           />
-          <span className="name">{CHAINS[value].name}</span>
+          <span className="name">{findChain({ enum: value }).name}</span>
           {!readonly && (
             <IconRcSwapArrowDownTriangle
               className="arrow"
@@ -148,14 +147,13 @@ export const ChainRender = ({
 }: { chain: CHAINS_ENUM } & InsHTMLAttributes<HTMLDivElement>) => {
   return (
     <ChainWrapper {...other}>
-      {/* <img className="logo" src={CHAINS[chain].logo} alt={CHAINS[chain].name} /> */}
       <ChainIcon
         chain={chain}
         className="logo"
         showCustomRPCToolTip
         isShowCustomRPC
       />
-      <span className="name">{CHAINS[chain].name}</span>
+      <span className="name">{findChain({ enum: chain })?.name}</span>
       <img className="down" src={ImgArrowDown} alt="" />
     </ChainWrapper>
   );

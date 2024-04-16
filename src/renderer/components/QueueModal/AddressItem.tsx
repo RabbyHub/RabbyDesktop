@@ -1,7 +1,6 @@
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { ellipsis } from '@/renderer/utils/address';
 import {
-  CHAINS,
   KEYRING_ICONS,
   WALLET_BRAND_CONTENT,
   WALLET_BRAND_TYPES,
@@ -10,6 +9,7 @@ import { formatAmount } from '@/renderer/utils/number';
 import classNames from 'classnames';
 import React from 'react';
 import BN from 'bignumber.js';
+import { findChain } from '@/renderer/utils/chain';
 
 export interface Props {
   data: IDisplayedAccountWithBalance;
@@ -38,9 +38,9 @@ export const AddressItem: React.FC<Props> = ({
   >(null);
 
   const init = React.useCallback(async () => {
-    const chain = Object.values(CHAINS).find(
-      (item) => item.id.toString() === networkId
-    );
+    const chain = findChain({
+      id: +networkId,
+    });
     setNativeTokenSymbol(chain!.nativeTokenSymbol);
     const balanceInWei = await walletController.requestETHRpc(
       {

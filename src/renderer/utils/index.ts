@@ -1,6 +1,6 @@
-import { keyBy } from 'lodash';
-import { CHAINS, CHAINS_ENUM, Chain } from '@debank/common';
+import { CHAINS_ENUM, Chain } from '@debank/common';
 import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
+import { findChain } from './chain';
 /**
  *
  * @param origin (exchange.pancakeswap.finance)
@@ -30,12 +30,13 @@ export const hashCode = (str: string) => {
   return hash;
 };
 
-const chainsDict = keyBy(CHAINS, 'serverId');
 export const getChain = (chainId?: string) => {
   if (!chainId) {
     return null;
   }
-  return chainsDict[chainId];
+  return findChain({
+    serverId: chainId,
+  });
 };
 
 // 临时放在这里，因为 token 里会有循环依赖
@@ -53,17 +54,23 @@ export function findChainByEnum(
   options?: {
     fallback?: true | CHAINS_ENUM;
   }
-): Chain | null {
+): Chain | undefined | null {
   const toFallbackEnum: CHAINS_ENUM | null = options?.fallback
     ? typeof options?.fallback === 'boolean'
       ? CHAINS_ENUM.ETH
       : options?.fallback
     : null;
-  const toFallbackChain = toFallbackEnum ? CHAINS[toFallbackEnum] : null;
+  const toFallbackChain = toFallbackEnum
+    ? findChain({ enum: toFallbackEnum })
+    : null;
 
   if (!chainEnum) return toFallbackChain;
 
-  return CHAINS[chainEnum as unknown as CHAINS_ENUM] || toFallbackChain;
+  return (
+    findChain({
+      enum: chainEnum,
+    }) || toFallbackChain
+  );
 }
 
 export const hex2Text = (hex: string) => {
@@ -76,4 +83,25 @@ export const hex2Text = (hex: string) => {
   } catch {
     return hex;
   }
+};
+
+export const getAddressScanLink = (scanLink: string, address: string) => {
+  if (/transaction\/_s_/.test(scanLink)) {
+    return scanLink.replace(/transaction\/_s_/, `address/${address}`);
+  }
+  if (/tx\/_s_/.test(scanLink)) {
+    return scanLink.replace(/tx\/_s_/, `address/${address}`);
+  }
+  return scanLink.endsWith('/')
+    ? `${scanLink}address/${address}`
+    : `${scanLink}/address/${address}`;
+};
+
+export const getTxScanLink = (scankLink: string, hash: string) => {
+  if (scankLink.includes('_s_')) {
+    return scankLink.replace('_s_', hash);
+  }
+  return scankLink.endsWith('/')
+    ? `${scankLink}tx/${hash}`
+    : `${scankLink}/tx/${hash}`;
 };

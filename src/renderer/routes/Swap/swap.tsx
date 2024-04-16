@@ -1,44 +1,58 @@
-import { CHAINS, CHAINS_ENUM } from '@debank/common';
-import { DEX_ENUM, DEX_SUPPORT_CHAINS } from '@rabby-wallet/rabby-swap';
-import {
-  useMemo,
-  useState,
-  useCallback,
-  useRef,
-  useEffect,
-  useLayoutEffect,
-} from 'react';
-import styled from 'styled-components';
+import IconRcClose from '@/../assets/icons/swap/close.svg?rc';
+import IconRcError from '@/../assets/icons/swap/error.svg?rc';
+import IconRcLoading from '@/../assets/icons/swap/loading.svg?rc';
 import IconSwapArrow from '@/../assets/icons/swap/swap-arrow.svg?rc';
 import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
-import { Button, message, Modal, Tooltip } from 'antd';
-import { useSearchParams } from 'react-router-dom';
-import clsx from 'clsx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-import { useAsync, useDebounce, usePrevious } from 'react-use';
 import { formatAmount, formatUsdValue } from '@/renderer/utils/number';
 import { InfoCircleOutlined } from '@ant-design/icons';
-import IconRcClose from '@/../assets/icons/swap/close.svg?rc';
-import IconRcLoading from '@/../assets/icons/swap/loading.svg?rc';
-import IconRcError from '@/../assets/icons/swap/error.svg?rc';
+import { CHAINS_ENUM } from '@debank/common';
+import { DEX_ENUM, DEX_SUPPORT_CHAINS } from '@rabby-wallet/rabby-swap';
+import { Button, Modal, Tooltip, message } from 'antd';
+import clsx from 'clsx';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useAsync, useDebounce, usePrevious } from 'react-use';
+import styled from 'styled-components';
 
-import { walletController } from '@/renderer/ipcRequest/rabbyx';
-import { useRbiSource } from '@/renderer/hooks/useRbiSource';
-import BigNumber from 'bignumber.js';
-import { isSameAddress } from '@/renderer/utils/address';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { ellipsisTokenSymbol } from '@/renderer/utils/token';
-import { getTokenSymbol } from '@/renderer/utils';
-import { findChainByServerID } from '@/renderer/utils/chain';
 import { Switch } from '@/renderer/components/Switch/Switch';
+import { useRbiSource } from '@/renderer/hooks/useRbiSource';
+import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { getTokenSymbol } from '@/renderer/utils';
+import { isSameAddress } from '@/renderer/utils/address';
+import { findChain, findChainByServerID } from '@/renderer/utils/chain';
+import { ellipsisTokenSymbol } from '@/renderer/utils/token';
+import BigNumber from 'bignumber.js';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import {
+  activeProviderAtom,
+  activeProviderOriginAtom,
+  refreshIdAtom,
+} from './atom';
 import { ChainRender, ChainSelect } from './component/ChainSelect';
 import { SwapIntro } from './component/Intro';
-import { DEX, getChainDefaultToken } from './constant';
-import { TokenSelect } from './component/TokenSelect';
+import { Quotes } from './component/Quotes';
 import { ReceiveDetails, SkeletonChildren } from './component/ReceiveDetail';
 import { Slippage } from './component/Slippage';
-import { SwapTransactions } from './component/Transactions';
 import { TokenRender } from './component/TokenRender';
+import { TokenSelect } from './component/TokenSelect';
+import { SwapTransactions } from './component/Transactions';
+import { DEX, getChainDefaultToken } from './constant';
+import {
+  useInSwap,
+  usePostSwap,
+  useSwapOrApprovalLoading,
+  useSwapSettings,
+  useTokenPair,
+} from './hooks';
+import styles from './index.module.less';
 import {
   TCexQuoteData,
   TDexQuoteData,
@@ -48,20 +62,6 @@ import {
   tokenAmountBn,
   validSlippage,
 } from './utils';
-import { Quotes } from './component/Quotes';
-import styles from './index.module.less';
-import {
-  useInSwap,
-  usePostSwap,
-  useSwapOrApprovalLoading,
-  useSwapSettings,
-  useTokenPair,
-} from './hooks';
-import {
-  activeProviderAtom,
-  activeProviderOriginAtom,
-  refreshIdAtom,
-} from './atom';
 
 const PreferMEVGuardSwitch = styled(Switch)`
   min-width: 24px;
@@ -333,7 +333,10 @@ export const SwapToken = () => {
 
   const payTokenIsNativeToken = useMemo(() => {
     if (payToken) {
-      return isSameAddress(payToken.id, CHAINS[chain].nativeTokenAddress);
+      return isSameAddress(
+        payToken.id,
+        findChain({ enum: chain })?.nativeTokenAddress || ''
+      );
     }
     return false;
   }, [chain, payToken]);
@@ -367,13 +370,15 @@ export const SwapToken = () => {
 
   if (shouldResetState.current && pageInfo.chain && pageInfo.payTokenId) {
     if (
-      !supportChains.map((e) => CHAINS[e].serverId).includes(pageInfo?.chain)
+      !supportChains
+        .map((e) => findChain({ enum: e })?.serverId)
+        .includes(pageInfo?.chain)
     ) {
       switchChain(CHAINS_ENUM.ETH);
     }
-    const target = Object.values(CHAINS).find(
-      (item) => item.serverId === pageInfo.chain
-    );
+    const target = findChain({
+      serverId: pageInfo.chain,
+    });
     if (target) {
       switchChain(target?.enum, pageInfo.payTokenId);
     }
@@ -911,7 +916,7 @@ export const SwapToken = () => {
                     }
                     setPayToken(token);
                   }}
-                  chainId={CHAINS[chain].serverId}
+                  chainId={findChain({ enum: chain })?.serverId || null}
                   token={payToken}
                   type="swapFrom"
                   excludeTokens={
@@ -934,7 +939,7 @@ export const SwapToken = () => {
                     }
                     setReceiveToken(token);
                   }}
-                  chainId={CHAINS[chain].serverId}
+                  chainId={findChain({ enum: chain })?.serverId || null}
                   token={receiveToken}
                   type="swapTo"
                   tokenRender={TokenRender}

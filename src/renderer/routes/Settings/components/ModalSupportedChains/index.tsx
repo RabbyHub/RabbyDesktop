@@ -1,14 +1,11 @@
-import { useMemo, useState } from 'react';
 import { Modal as RModal } from '@/renderer/components/Modal/Modal';
-import { atom, useAtom } from 'jotai';
-import { CHAINS, Chain } from '@debank/common';
-import PillsSwitch from '@/renderer/components/PillsSwitch';
-import clsx from 'clsx';
 import { TooltipWithMagnetArrow } from '@/renderer/components/Tooltip/TooltipWithMagnetArrow';
+import { getChainList } from '@/renderer/utils/chain';
+import { Chain } from '@debank/common';
 import { Tabs } from 'antd';
+import { atom, useAtom } from 'jotai';
+import { useMemo, useState } from 'react';
 import styles from './index.module.less';
-
-export const CHAINS_TOTAL_COUNT = Object.values(CHAINS).length;
 
 const showSupportedChainsAtom = atom(false);
 export function useSupportedChainsModal() {
@@ -24,7 +21,7 @@ export function useSupportedChainsModal() {
 
 const List = ({ list }: { list: Chain[] }) => {
   return (
-    <div className="max-h-[480px] chain-list-wrapper">
+    <div className="max-h-[500px] chain-list-wrapper">
       <div className="chain-list">
         {list.map((item) => {
           return (
@@ -56,7 +53,7 @@ export default function ModalSupportedChains() {
   const [selectedTab, onTabChange] = useState<'mainnet' | 'testnet'>('mainnet');
 
   const { mainnet: mainnetList, testnet: testnetList } = useMemo(() => {
-    const sortedChains = Object.values(CHAINS).sort((a, b) => {
+    const sortedChains = getChainList('mainnet').sort((a, b) => {
       if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
       return 1;
     });
@@ -78,11 +75,11 @@ export default function ModalSupportedChains() {
       }}
       title={
         <span className="text-r-neutral-title-1 text-20 font-medium">
-          {`${CHAINS_TOTAL_COUNT} chains supported`}
+          {`${getChainList('mainnet').length} chains supported`}
         </span>
       }
     >
-      <PillsSwitch
+      {/* <PillsSwitch
         value={selectedTab}
         onTabChange={onTabChange}
         className="bg-r-neutral-line flex w-[232px] mx-[auto] my-20px h-[36px] p-[4px]"
@@ -105,10 +102,10 @@ export default function ModalSupportedChains() {
             },
           ] as const
         }
-      />
+      /> */}
 
       <Tabs
-        className="h-full max-h-[480px] overflowy-y-auto"
+        className="h-full max-h-[500px] overflowy-y-auto mt-[20px]"
         renderTabBar={renderTabBar}
         activeKey={selectedTab}
       >

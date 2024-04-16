@@ -5,11 +5,12 @@ import {
 } from '@/../assets/icons/global-toast';
 import RcIconExternalLink from '@/../assets/icons/tx-toast/external-link.svg?rc';
 import { usePopupViewInfo } from '@/renderer/hooks/usePopupWinOnMainwin';
+import { openExternalUrl } from '@/renderer/ipcRequest/app';
+import { getTxScanLink } from '@/renderer/utils';
+import { findChain } from '@/renderer/utils/chain';
 import { notification } from 'antd';
 import clsx from 'clsx';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { openExternalUrl } from '@/renderer/ipcRequest/app';
-import { CHAINS } from '@/renderer/utils/constant';
 import styles from './style.module.less';
 
 const { nanoid } = require('nanoid');
@@ -83,6 +84,9 @@ const openNotification = (
     }
   };
   const id = p.id;
+  const chain = findChain({
+    enum: p.chain,
+  });
 
   setTimeout(() => {
     notification.open({
@@ -108,16 +112,13 @@ const openNotification = (
             <div
               className="text-white text-12 opacity-80 font-medium pl-[28px] flex items-center gap-8 cursor-pointer"
               onClick={() => {
-                const link = CHAINS?.[p?.chain]?.scanLink?.replace(
-                  /_s_/,
-                  p.hash
-                );
-                if (link) {
+                const link = getTxScanLink(chain?.scanLink || '', p.hash || '');
+                if (chain && link) {
                   openExternalUrl(link);
                 }
               }}
             >
-              <span>View on {CHAINS?.[p?.chain]?.name} Explorer</span>
+              <span>View on {chain?.name} Explorer</span>
               <RcIconExternalLink className="text-14" />
             </div>
           )}

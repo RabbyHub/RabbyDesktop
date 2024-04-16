@@ -1,10 +1,11 @@
 import { useCustomRPC } from '@/renderer/hooks/useCustomRPC';
-import { CHAINS, CHAINS_ENUM } from '@debank/common';
+import { useGhostTooltip } from '@/renderer/routes-popup/TopGhostWindow/useGhostWindow';
+import { findChain } from '@/renderer/utils/chain';
+import { CHAINS_ENUM } from '@debank/common';
 import { Tooltip } from 'antd';
 import clsx from 'clsx';
 import { useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
-import { useGhostTooltip } from '@/renderer/routes-popup/TopGhostWindow/useGhostWindow';
 
 const ChainIconWrapper = styled.div`
   position: relative;
@@ -220,7 +221,10 @@ const ChainIcon = ({
           destroyTooltip();
         }}
       >
-        <ChainIconEle className={clsx(size)} src={CHAINS[chain].logo} />
+        <ChainIconEle
+          className={clsx(size)}
+          src={findChain({ enum: chain })?.logo || ''}
+        />
         {currentRPC?.status === 'avaliable' && (
           <AvaliableIcon className={clsx(size)} />
         )}

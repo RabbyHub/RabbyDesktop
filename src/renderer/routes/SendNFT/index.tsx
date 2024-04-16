@@ -1,48 +1,41 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useMemo,
-  useCallback,
-} from 'react';
-import clsx from 'clsx';
-import BigNumber from 'bignumber.js';
-import { Input, Form, message, Button } from 'antd';
-import { isValidAddress } from 'ethereumjs-util';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { NFTItem } from '@rabby-wallet/rabby-api/dist/types';
-import { useRbiSource } from '@/renderer/hooks/useRbiSource';
-import { Account } from '@/isomorphic/types/rabbyx';
-import { CHAINS } from '@debank/common';
-import { UIContactBookItem } from '@/isomorphic/types/contact';
-import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
-import { findChainByEnum } from '@/renderer/utils';
-import { isSameAddress } from '@/renderer/utils/address';
-import { walletController } from '@/renderer/ipcRequest/rabbyx';
-import { matomoRequestEvent } from '@/renderer/utils/matomo-request';
-import { getKRCategoryByType } from '@/renderer/utils/transacation';
-import { filterRbiSource } from '@/renderer/utils/ga-event';
-import { ModalConfirm } from '@/renderer/components/Modal/Confirm';
-import AccountCard from '@/renderer/components/AccountCard';
-import { KEYRING_CLASS, KEYRING_PURPLE_LOGOS } from '@/renderer/utils/constant';
-import NFTAvatar from '@/renderer/components/NFTAvatar';
-import AddressViewer from '@/renderer/components/AddressViewer';
-import NumberInput from '@/renderer/components/NFTNumberInput';
-import IconExternal from '@/../assets/icons/tx-toast/external-link.svg';
-import { copyText } from '@/renderer/utils/clipboard';
-import { TipsWrapper } from '@/renderer/components/TipWrapper';
 import IconRcLoading from '@/../assets/icons/swap/loading.svg?rc';
-import styled from 'styled-components';
-import { openExternalUrl } from '@/renderer/ipcRequest/app';
-import { usePrevious } from 'react-use';
+import IconExternal from '@/../assets/icons/tx-toast/external-link.svg';
+import { UIContactBookItem } from '@/isomorphic/types/contact';
+import { Account } from '@/isomorphic/types/rabbyx';
+import AccountCard from '@/renderer/components/AccountCard';
+import AccountSearchInput from '@/renderer/components/AccountSearchInput';
+import AddressViewer from '@/renderer/components/AddressViewer';
+import { confirmAddToContactsModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToContacts';
+import { confirmAddToWhitelistModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToWhitelist';
+import NFTAvatar from '@/renderer/components/NFTAvatar';
+import NumberInput from '@/renderer/components/NFTNumberInput';
+import { TipsWrapper } from '@/renderer/components/TipWrapper';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { useContactsByAddr } from '@/renderer/hooks/rabbyx/useContact';
-import { confirmAddToWhitelistModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToWhitelist';
-import { confirmAddToContactsModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToContacts';
-import AccountSearchInput from '@/renderer/components/AccountSearchInput';
+import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
+import { useRbiSource } from '@/renderer/hooks/useRbiSource';
 import { useRefState } from '@/renderer/hooks/useRefState';
-import { ContactListModal } from '../SendToken/components/ContactListModal';
+import { openExternalUrl } from '@/renderer/ipcRequest/app';
+import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { findChainByEnum } from '@/renderer/utils';
+import { isSameAddress } from '@/renderer/utils/address';
+import { findChain } from '@/renderer/utils/chain';
+import { copyText } from '@/renderer/utils/clipboard';
+import { KEYRING_CLASS, KEYRING_PURPLE_LOGOS } from '@/renderer/utils/constant';
+import { filterRbiSource } from '@/renderer/utils/ga-event';
+import { matomoRequestEvent } from '@/renderer/utils/matomo-request';
+import { getKRCategoryByType } from '@/renderer/utils/transacation';
+import { NFTItem } from '@rabby-wallet/rabby-api/dist/types';
+import { Button, Form, message } from 'antd';
+import BigNumber from 'bignumber.js';
+import clsx from 'clsx';
+import { isValidAddress } from 'ethereumjs-util';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { usePrevious } from 'react-use';
+import styled from 'styled-components';
 import { ContactEditModal } from '../SendToken/components/ContactEditModal';
+import { ContactListModal } from '../SendToken/components/ContactListModal';
 import { ChainRender, ChainSelect } from '../Swap/component/ChainSelect';
 
 const ChainRenderNFT = styled(ChainRender)`
@@ -343,9 +336,9 @@ const SendNFT = () => {
   );
   const [chain, setChain] = useState<CHAINS_ENUM | undefined>(
     state?.nftItem
-      ? Object.values(CHAINS).find(
-          (item) => item.serverId === state.nftItem.chain
-        )?.enum
+      ? findChain({
+          serverId: state.nftItem.chain,
+        })?.enum
       : undefined
   );
 
@@ -639,9 +632,9 @@ const SendNFT = () => {
   useEffect(() => {
     if (nftItem) {
       if (!chain) {
-        const nftChain = Object.values(CHAINS).find(
-          (item) => item.serverId === nftItem.chain
-        )?.enum;
+        const nftChain = findChain({
+          serverId: nftItem.chain,
+        })?.enum;
         if (!nftChain) {
           // history.replace('/');
         } else {

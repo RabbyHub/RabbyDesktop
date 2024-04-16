@@ -1,15 +1,15 @@
+import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
+import { useTokenAtom } from '@/renderer/hooks/rabbyx/useToken';
+import { checkIsCexProtocol } from '@/renderer/hooks/useBundle/cex/utils/shared';
 import { DisplayProtocol } from '@/renderer/hooks/useHistoryProtocol';
+import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import { findChainByEnum } from '@/renderer/utils';
+import { isSameAddress } from '@/renderer/utils/address';
+import { findChain } from '@/renderer/utils/chain';
 import { ServerChain, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import BigNumber from 'bignumber.js';
 import { cloneDeep, sortBy } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
-import { useTokenAtom } from '@/renderer/hooks/rabbyx/useToken';
-import { isSameAddress } from '@/renderer/utils/address';
-import { CHAINS } from '@debank/common';
-import { findChainByEnum } from '@/renderer/utils';
-import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-import { checkIsCexProtocol } from '@/renderer/hooks/useBundle/cex/utils/shared';
 import { VIEW_TYPE } from './type';
 
 export const useSwitchView = () => {
@@ -185,9 +185,10 @@ const filterDisplayToken = (
   blocked: TokenItem[],
   customize: TokenItem[]
 ) => {
-  const ChainValues = Object.values(CHAINS);
   const list = tokens.filter((token) => {
-    const chain = ChainValues.find((c) => c.serverId === token.chain);
+    const chain = findChain({
+      serverId: token.chain,
+    });
     return (
       token.is_core &&
       !blocked.find(

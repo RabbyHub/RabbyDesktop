@@ -3,12 +3,12 @@ import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import ChainIcon from '@/renderer/components/ChainIcon';
 import { Modal } from '@/renderer/components/Modal/Modal';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
-import { CHAINS } from '@/renderer/utils/constant';
 import { isValidateUrl } from '@/renderer/utils/url';
 import { useRequest } from 'ahooks';
 import { Button, Form, InputRef } from 'antd';
 import clsx from 'clsx';
 import { useEffect, useMemo, useRef } from 'react';
+import { findChain } from '@/renderer/utils/chain';
 import styles from './index.module.less';
 
 interface EditCustomRPCModalProps {
@@ -27,7 +27,7 @@ export const EditCustomRPCModal = ({
   onSubmit,
 }: EditCustomRPCModalProps) => {
   const chainInfo = useMemo(() => {
-    return chain ? CHAINS[chain] : null;
+    return chain ? findChain({ enum: chain }) : null;
   }, [chain]);
 
   const {

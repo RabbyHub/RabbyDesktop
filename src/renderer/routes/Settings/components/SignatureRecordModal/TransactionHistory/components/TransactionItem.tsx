@@ -16,15 +16,16 @@ import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { getTokenSymbol } from '@/renderer/utils';
 import { isSameAddress } from '@/renderer/utils/address';
-import { CANCEL_TX_TYPE, CHAINS } from '@/renderer/utils/constant';
+import { findChain } from '@/renderer/utils/chain';
+import { CANCEL_TX_TYPE } from '@/renderer/utils/constant';
 import { sinceTime } from '@/renderer/utils/time';
 import { GasLevel, TxRequest } from '@rabby-wallet/rabby-api/dist/types';
 import { useLoadTxData } from '../hooks';
+import { CancelTxPopup } from './CancelTxPopup';
 import { ChildrenTxText } from './ChildrenTxText';
 import { TransactionExplain } from './TransactionExplain';
 import { TransactionPendingTag } from './TransactionPendingTag';
 import { TransactionWebsite } from './TransactionWebsite';
-import { CancelTxPopup } from './CancelTxPopup';
 
 const ChildrenWrapper = styled.div`
   padding: 2px;
@@ -43,7 +44,9 @@ export const TransactionItem = ({
   txRequests: Record<string, TxRequest>;
 }) => {
   const [isShowCancelPopup, setIsShowCancelPopup] = useState(false);
-  const chain = Object.values(CHAINS).find((c) => c.id === item.chainId)!;
+  const chain = findChain({
+    id: item.chainId,
+  })!;
   const originTx = minBy(item.txs, (tx) => tx.createdAt)!;
   const maxGasTx = findMaxGasTx(item.txs);
   const completedTx = item.txs.find(
@@ -119,9 +122,9 @@ export const TransactionItem = ({
     const maxGasPrice = Number(
       maxGasTx.rawTx.gasPrice || maxGasTx.rawTx.maxFeePerGas || 0
     );
-    const chainServerId = Object.values(CHAINS).find(
-      (chain) => chain.id === item.chainId
-    )!.serverId;
+    const chainServerId = findChain({
+      id: item.chainId,
+    })!.serverId;
     const gasLevels: GasLevel[] = await walletOpenapi.gasMarket(chainServerId);
     const maxGasMarketPrice = maxBy(gasLevels, (level) => level.price)!.price;
     await walletController.sendRequest({
@@ -158,9 +161,9 @@ export const TransactionItem = ({
     const maxGasPrice = Number(
       maxGasTx.rawTx.gasPrice || maxGasTx.rawTx.maxFeePerGas || 0
     );
-    const chainServerId = Object.values(CHAINS).find(
-      (chain) => chain.id === item.chainId
-    )!.serverId;
+    const chainServerId = findChain({
+      id: item.chainId,
+    })!.serverId;
     const gasLevels: GasLevel[] = await walletOpenapi.gasMarket(chainServerId);
     const maxGasMarketPrice = maxBy(gasLevels, (level) => level.price)!.price;
     await walletController.sendRequest({

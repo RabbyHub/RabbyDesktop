@@ -1,16 +1,17 @@
-import { CHAINS_ENUM, CHAINS_LIST } from '@debank/common';
+import { CHAINS_ENUM, Chain } from '@debank/common';
 
 import { getOriginFromUrl } from '@/isomorphic/url';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { getChainList } from '@/renderer/utils/chain';
 import { usePreference } from './usePreference';
 import useDebounceValue from '../useDebounceValue';
 
 const siteAtom = atom(null as ConnectedSite | null);
 
 function searchFilter(keyword: string) {
-  return (item: typeof CHAINS_LIST[number]) =>
+  return (item: Chain) =>
     [item.name, item.enum, item.nativeTokenSymbol].some((token) =>
       token.toLowerCase().includes(keyword)
     );
@@ -69,16 +70,18 @@ export function useCurrentConnection(
 
   const { pinnedChains, unpinnedChains } = useMemo(() => {
     const pinnedSet = new Set(preferences.pinnedChain);
-    const pinned: typeof CHAINS_LIST[number][] = [];
-    const unpinned: typeof CHAINS_LIST[number][] = [];
+    const pinned: Chain[] = [];
+    const unpinned: Chain[] = [];
 
-    CHAINS_LIST.forEach((chain) => {
-      if (pinnedSet.has(chain.enum)) {
-        pinned.push(chain);
-      } else {
-        unpinned.push(chain);
+    [...getChainList('mainnet'), ...getChainList('testnet')].forEach(
+      (chain) => {
+        if (pinnedSet.has(chain.enum)) {
+          pinned.push(chain);
+        } else {
+          unpinned.push(chain);
+        }
       }
-    });
+    );
 
     return {
       pinnedChains: pinned,

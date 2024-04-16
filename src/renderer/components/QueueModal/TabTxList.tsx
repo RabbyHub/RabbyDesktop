@@ -1,7 +1,6 @@
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { useGnosisNetworks } from '@/renderer/hooks/useGnosisNetworks';
 import { useGnosisPendingTxs } from '@/renderer/hooks/useGnosisPendingTxs';
-import { CHAINS } from '@debank/common';
 import { SafeTransactionItem } from '@rabby-wallet/gnosis-sdk/dist/api';
 import classNames from 'classnames';
 import clsx from 'clsx';
@@ -9,6 +8,7 @@ import { sortBy } from 'lodash';
 import moment from 'moment';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSyncGnosisNetworks } from '@/renderer/hooks/useSyncGnosisNetworks';
+import { findChain } from '@/renderer/utils/chain';
 import { TxList } from './TxList';
 
 const getTabs = (
@@ -17,9 +17,9 @@ const getTabs = (
 ) => {
   const res = networks
     ?.map((networkId) => {
-      const chain = Object.values(CHAINS).find(
-        (ch) => ch.network === networkId
-      );
+      const chain = findChain({
+        networkId,
+      });
       if (!chain) {
         return;
       }

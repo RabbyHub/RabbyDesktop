@@ -1,4 +1,5 @@
-import { CHAINS, CHAINS_ENUM } from '@debank/common';
+import { findChain } from '@/renderer/utils/chain';
+import { CHAINS_ENUM } from '@debank/common';
 import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { DEX_ENUM, DEX_SUPPORT_CHAINS } from '@rabby-wallet/rabby-swap';
 
@@ -60,7 +61,7 @@ export type DEX_TYPE = typeof DEX;
 export type CEX_TYPE = typeof CEX;
 
 export const getChainDefaultToken = (chain: CHAINS_ENUM) => {
-  const chainInfo = CHAINS[chain];
+  const chainInfo = findChain({ enum: chain })!;
   return {
     id: chainInfo.nativeTokenAddress,
     decimals: chainInfo.nativeTokenDecimals,

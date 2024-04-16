@@ -13,9 +13,11 @@ import { ShellWalletProvider } from '@/renderer/components/ShellWallet';
 
 import ZPopupLayer from '@/renderer/routes-popup/ZPopupLayer';
 import SelectCameraWindow from '@/renderer/routes-popup/SelectCameraWindow';
+import { initSyncChain } from '@/renderer/utils/sync-chain';
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
+initSyncChain();
 
 switch (parseQueryString().view) {
   case 'z-popup': {

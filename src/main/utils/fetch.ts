@@ -1,10 +1,10 @@
 import path from 'path';
 import { Icon as IconInfo, parseFavicon } from '@debank/parse-favicon';
-import { CHAINS_RAW_LIST } from '@/isomorphic/chain-data';
 import Axios, { AxiosProxyConfig } from 'axios';
 
 import { catchError, firstValueFrom, map, of, timeout } from 'rxjs';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import defaultSuppordChain from '@/isomorphic/default-support-chains.json';
 import {
   canoicalizeDappUrl,
   formatAxiosProxyConfig,
@@ -197,8 +197,8 @@ const configURLs = IS_APP_PROD_BUILD
     };
 
 export const DEFAULT_BLOCKCHAIN_EXPLORERS: Set<string> = new Set();
-CHAINS_RAW_LIST.forEach((chain) => {
-  const { fullDomain } = canoicalizeDappUrl(chain.scanLink);
+defaultSuppordChain.forEach((chain) => {
+  const { fullDomain } = canoicalizeDappUrl(chain.explorer_host);
 
   if (fullDomain) DEFAULT_BLOCKCHAIN_EXPLORERS.add(fullDomain);
 });

@@ -660,6 +660,7 @@ export type RabbyXMethod = {
     nonce: number;
     reqId: string;
   }) => void;
+  'walletController.getMainnetListFromLocal': () => Chain[];
 } & GenOpenApiService<'openapi'> &
   GenOpenApiService<'testnetOpenapi'>;
 

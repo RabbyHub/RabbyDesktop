@@ -1,10 +1,10 @@
 import React from 'react';
-import { CHAINS_LIST } from '@debank/common';
 import clsx from 'clsx';
 import { Image, Tooltip } from 'antd';
 import { isNil } from 'lodash';
 import { TokenItem as TokenItemProp } from '@rabby-wallet/rabby-api/dist/types';
 import { splitNumberByStep } from '@/renderer/utils/number';
+import { findChain } from '@/renderer/utils/chain';
 import { TCell, TRow } from './Table';
 
 const IconUnknown = 'rabby-internal://assets/icons/common/token-default.svg';
@@ -18,7 +18,9 @@ export interface Props {
 }
 
 const TokenItemAsset: React.FC<Props> = ({ item }) => {
-  const chain = CHAINS_LIST.find((c) => c.serverId === item.chain);
+  const chain = findChain({
+    serverId: item.chain,
+  });
   return (
     <TCell className="py-8 flex gap-12 w-1/2 items-center">
       <div className="relative">
