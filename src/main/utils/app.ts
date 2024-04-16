@@ -161,7 +161,7 @@ export function initMainProcessSentry() {
   Sentry.init({
     dsn: !IS_RUNTIME_PRODUCTION
       ? ''
-      : 'https://520afbe8f6574cb3a39e6cb7296f9008@o460488.ingest.sentry.io/4504751161868288',
+      : 'https://5d305a88558d9d594e2b28b0e8410c47@o4507018303438848.ingest.us.sentry.io/4507018397941760',
     release: app.getVersion(),
 
     // enableNative: false,
