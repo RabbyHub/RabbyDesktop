@@ -1,6 +1,4 @@
 #### New Features:
 
-- Supported Fraxtal chain
-- Supported MAP Protocol chain
-- Supported SX chain
-- Supported PlatON chain
+- Discontinue support for testnets
+- Fixed the issue of not updating Binance account balance
