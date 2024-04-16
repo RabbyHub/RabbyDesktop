@@ -4,7 +4,6 @@ import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { findChain, findChainByID } from '@/renderer/utils/chain';
 import { intToHex } from '@/renderer/utils/number';
-import { CHAINS } from '@debank/common';
 import { GasLevel } from '@rabby-wallet/rabby-api/dist/types';
 import { useRequest } from 'ahooks';
 import { flatten, maxBy } from 'lodash';

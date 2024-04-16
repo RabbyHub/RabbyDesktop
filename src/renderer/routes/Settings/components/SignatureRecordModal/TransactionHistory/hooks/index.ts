@@ -4,13 +4,11 @@ import {
   TransactionHistoryItem,
 } from '@/isomorphic/types/rabbyx';
 import {
-  walletController,
   walletOpenapi,
   walletTestnetOpenapi,
 } from '@/renderer/ipcRequest/rabbyx';
 import { getTokenSymbol } from '@/renderer/utils';
 import { findChain, findChainByID } from '@/renderer/utils/chain';
-import { CHAINS } from '@debank/common';
 import { TokenItem, TxRequest } from '@rabby-wallet/rabby-api/dist/types';
 import { useRequest } from 'ahooks';
 import { flatten, keyBy } from 'lodash';

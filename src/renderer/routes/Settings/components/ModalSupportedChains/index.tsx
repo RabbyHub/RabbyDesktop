@@ -1,12 +1,10 @@
-import { useMemo, useState } from 'react';
 import { Modal as RModal } from '@/renderer/components/Modal/Modal';
-import { atom, useAtom } from 'jotai';
-import { CHAINS, Chain } from '@debank/common';
-import PillsSwitch from '@/renderer/components/PillsSwitch';
-import clsx from 'clsx';
 import { TooltipWithMagnetArrow } from '@/renderer/components/Tooltip/TooltipWithMagnetArrow';
-import { Tabs } from 'antd';
 import { getChainList } from '@/renderer/utils/chain';
+import { Chain } from '@debank/common';
+import { Tabs } from 'antd';
+import { atom, useAtom } from 'jotai';
+import { useMemo, useState } from 'react';
 import styles from './index.module.less';
 
 const showSupportedChainsAtom = atom(false);

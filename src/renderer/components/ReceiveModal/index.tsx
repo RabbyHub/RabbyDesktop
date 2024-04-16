@@ -3,7 +3,6 @@ import { useCopyAddress } from '@/renderer/hooks/useCopyAddress';
 import useCurrentBalance from '@/renderer/hooks/useCurrentBalance';
 import { useSwitchChainModal } from '@/renderer/hooks/useSwitchChainModal';
 import {
-  CHAINS,
   CHAINS_ENUM,
   KEYRING_CLASS,
   KEYRING_ICONS,

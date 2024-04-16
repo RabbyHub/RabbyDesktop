@@ -1,5 +1,5 @@
 import { findChain, getChainList } from '@/renderer/utils/chain';
-import { CHAINS, Chain } from '@debank/common';
+import { Chain } from '@debank/common';
 import {
   ChainWithBalance,
   UsedChain,

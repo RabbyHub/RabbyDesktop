@@ -1,22 +1,22 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import IconRcArrowDownTriangle from '@/../assets/icons/swap/arrow-caret-down2.svg?rc';
+import IconClose from '@/../assets/icons/swap/modal-close.svg?rc';
+import IconRcSearch from '@/../assets/icons/swap/search.svg?rc';
+import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
+import TokenWithChain from '@/renderer/components/TokenWithChain';
+import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
+import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import { getTokenSymbol } from '@/renderer/utils';
+import { findChainByServerID } from '@/renderer/utils/chain';
+import { formatUsdValue, splitNumberByStep } from '@/renderer/utils/number';
+import { Chain, formatTokenAmount } from '@debank/common';
+import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { Empty, InputRef, Modal, Skeleton } from 'antd';
 import BigNumber from 'bignumber.js';
-import styled from 'styled-components';
-import IconRcArrowDownTriangle from '@/../assets/icons/swap/arrow-caret-down2.svg?rc';
-import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
-import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-import TokenWithChain from '@/renderer/components/TokenWithChain';
-import IconRcSearch from '@/../assets/icons/swap/search.svg?rc';
-import { formatUsdValue, splitNumberByStep } from '@/renderer/utils/number';
-import { useAsync, useDebounce } from 'react-use';
-import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
-import IconClose from '@/../assets/icons/swap/modal-close.svg?rc';
-import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
-import { getChain, getTokenSymbol } from '@/renderer/utils';
-import { Chain, formatTokenAmount } from '@debank/common';
-import { isNil } from 'lodash';
 import clsx from 'clsx';
-import { findChainByServerID } from '@/renderer/utils/chain';
+import { isNil } from 'lodash';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useAsync, useDebounce } from 'react-use';
+import styled from 'styled-components';
 
 const TokenWrapper = styled.div`
   display: flex;

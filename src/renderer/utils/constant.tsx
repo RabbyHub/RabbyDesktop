@@ -1,4 +1,4 @@
-import { CHAINS, CHAINS_ENUM } from '@debank/common';
+import { CHAINS_ENUM } from '@debank/common';
 
 const IconAmber = 'ui/assets/walletlogo/amber.svg';
 const LogoAmber = 'ui/assets/walletlogo/amber.svg';
@@ -69,7 +69,7 @@ const LogoUniswap = 'rabby-internal://assets/icons/walletlogo/uniswap.svg';
 const LogoZerion = 'rabby-internal://assets/icons/walletlogo/zerion.svg';
 const LogoCoboArgus = 'rabby-internal://assets/icons/walletlogo/coboargus.svg';
 
-export { CHAINS, CHAINS_ENUM };
+export { CHAINS_ENUM };
 
 export const KEYRING_TYPE = {
   HdKeyring: 'HD Key Tree',

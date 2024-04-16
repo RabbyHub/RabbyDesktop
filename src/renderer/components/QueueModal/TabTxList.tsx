@@ -1,7 +1,6 @@
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { useGnosisNetworks } from '@/renderer/hooks/useGnosisNetworks';
 import { useGnosisPendingTxs } from '@/renderer/hooks/useGnosisPendingTxs';
-import { CHAINS } from '@debank/common';
 import { SafeTransactionItem } from '@rabby-wallet/gnosis-sdk/dist/api';
 import classNames from 'classnames';
 import clsx from 'clsx';

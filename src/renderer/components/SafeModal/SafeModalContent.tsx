@@ -1,14 +1,12 @@
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { findChain } from '@/renderer/utils/chain';
 import { LoadingOutlined } from '@ant-design/icons';
-import { CHAINS, Chain } from '@debank/common';
+import { Chain } from '@debank/common';
 import { useRequest } from 'ahooks';
 import { Form } from 'antd';
 import classNames from 'classnames';
-import clsx from 'clsx';
 import { isValidAddress } from 'ethereumjs-util';
 import React, { useState } from 'react';
-import { KEYRING_TYPE } from '@/renderer/utils/constant';
-import { findChain } from '@/renderer/utils/chain';
 import RabbyInput from '../AntdOverwrite/Input';
 import { RabbyButton } from '../Button/RabbyButton';
 

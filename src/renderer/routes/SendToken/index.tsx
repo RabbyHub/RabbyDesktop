@@ -1,45 +1,45 @@
-import { useState, useEffect, useMemo, useCallback, useRef, memo } from 'react';
-import clsx from 'clsx';
+import IconRcLoading from '@/../assets/icons/swap/loading.svg?rc';
+import { UIContactBookItem } from '@/isomorphic/types/contact';
+import { ChainGas } from '@/isomorphic/types/rabbyx';
+import AccountCard from '@/renderer/components/AccountCard';
+import AccountSearchInput from '@/renderer/components/AccountSearchInput';
+import AddressViewer from '@/renderer/components/AddressViewer';
+import { confirmAddToContactsModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToContacts';
+import { confirmAddToWhitelistModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToWhitelist';
+import { TipsWrapper } from '@/renderer/components/TipWrapper';
+import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
+import { useContactsByAddr } from '@/renderer/hooks/rabbyx/useContact';
+import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
+import { useRbiSource } from '@/renderer/hooks/useRbiSource';
+import { useRefState } from '@/renderer/hooks/useRefState';
+import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
+import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import { isSameAddress } from '@/renderer/utils/address';
+import { findChain, findChainByServerID } from '@/renderer/utils/chain';
+import { copyText } from '@/renderer/utils/clipboard';
+import {
+  KEYRING_CLASS,
+  L2_ENUMS,
+  MINIMUM_GAS_LIMIT,
+} from '@/renderer/utils/constant';
+import { formatAmount, splitNumberByStep } from '@/renderer/utils/number';
+import { CHAINS_ENUM } from '@debank/common';
+import { GasLevel, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
+import { Button, Form, Skeleton, message } from 'antd';
 import BigNumber from 'bignumber.js';
+import clsx from 'clsx';
+import { intToHex, isValidAddress } from 'ethereumjs-util';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { useDebounce } from 'react-use';
-import { Form, Skeleton, message, Button } from 'antd';
-import abiCoder, { AbiCoder } from 'web3-eth-abi';
-import { isValidAddress, intToHex } from 'ethereumjs-util';
 import styled from 'styled-components';
-import { CHAINS, CHAINS_ENUM } from '@debank/common';
-import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-import {
-  MINIMUM_GAS_LIMIT,
-  L2_ENUMS,
-  KEYRING_CLASS,
-} from '@/renderer/utils/constant';
-import { TokenItem, GasLevel } from '@rabby-wallet/rabby-api/dist/types';
-import { UIContactBookItem } from '@/isomorphic/types/contact';
-import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
-import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
-import { ChainGas } from '@/isomorphic/types/rabbyx';
-import { isSameAddress } from '@/renderer/utils/address';
-import { formatAmount, splitNumberByStep } from '@/renderer/utils/number';
-import AccountCard from '@/renderer/components/AccountCard';
-import AddressViewer from '@/renderer/components/AddressViewer';
-import { copyText } from '@/renderer/utils/clipboard';
-import { useRbiSource } from '@/renderer/hooks/useRbiSource';
-import { TipsWrapper } from '@/renderer/components/TipWrapper';
-import IconRcLoading from '@/../assets/icons/swap/loading.svg?rc';
-import { confirmAddToWhitelistModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToWhitelist';
-import { useContactsByAddr } from '@/renderer/hooks/rabbyx/useContact';
-import { confirmAddToContactsModalPromise } from '@/renderer/components/Modal/confirms/ConfirmAddToContacts';
-import { findChain, findChainByServerID } from '@/renderer/utils/chain';
-import AccountSearchInput from '@/renderer/components/AccountSearchInput';
-import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
-import { useRefState } from '@/renderer/hooks/useRefState';
-import GasSelector from './components/GasSelector';
-import GasReserved from './components/GasReserved';
+import abiCoder, { AbiCoder } from 'web3-eth-abi';
 import { ChainRender, ChainSelect } from '../Swap/component/ChainSelect';
 import { TokenSelect } from '../Swap/component/TokenSelect';
 import { ContactEditModal } from './components/ContactEditModal';
 import { ContactListModal } from './components/ContactListModal';
+import GasReserved from './components/GasReserved';
+import GasSelector from './components/GasSelector';
 import { useOnTxFinished } from './hooks';
 
 const MaxButton = styled.img`

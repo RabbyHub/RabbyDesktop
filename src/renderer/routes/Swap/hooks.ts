@@ -1,27 +1,20 @@
+import { useSwap } from '@/renderer/hooks/rabbyx/useSwap';
 import { isSameAddress } from '@/renderer/utils/address';
+import { findChain } from '@/renderer/utils/chain';
 import { ValidateTokenParam } from '@/renderer/utils/token';
-import { CHAINS, CHAINS_ENUM } from '@debank/common';
+import { CHAINS_ENUM } from '@debank/common';
+import { TokenItem, Tx } from '@rabby-wallet/rabby-api/dist/types';
 import { DEX_ENUM, WrapTokenAddressMap } from '@rabby-wallet/rabby-swap';
 import {
-  decodeCalldata,
   DecodeCalldataResult,
   QuoteResult,
+  decodeCalldata,
 } from '@rabby-wallet/rabby-swap/dist/quote';
 import BigNumber from 'bignumber.js';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { TokenItem, Tx } from '@rabby-wallet/rabby-api/dist/types';
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAsync, useDebounce } from 'react-use';
-import { useSwap } from '@/renderer/hooks/rabbyx/useSwap';
-import { findChain } from '@/renderer/utils/chain';
-import {
-  getRouter,
-  getSpender,
-  getToken,
-  postSwap,
-  postSwapParams,
-} from './utils';
 import {
   activeProviderOriginAtom,
   activeSwapTxsAtom,
@@ -29,6 +22,13 @@ import {
   swapSettingVisibleAtom,
 } from './atom';
 import { getChainDefaultToken } from './constant';
+import {
+  getRouter,
+  getSpender,
+  getToken,
+  postSwap,
+  postSwapParams,
+} from './utils';
 
 export function isSwapWrapToken(
   payTokenId: string,

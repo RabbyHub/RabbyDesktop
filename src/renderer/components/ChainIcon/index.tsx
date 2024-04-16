@@ -1,11 +1,11 @@
 import { useCustomRPC } from '@/renderer/hooks/useCustomRPC';
-import { CHAINS, CHAINS_ENUM } from '@debank/common';
+import { useGhostTooltip } from '@/renderer/routes-popup/TopGhostWindow/useGhostWindow';
+import { findChain } from '@/renderer/utils/chain';
+import { CHAINS_ENUM } from '@debank/common';
 import { Tooltip } from 'antd';
 import clsx from 'clsx';
 import { useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
-import { useGhostTooltip } from '@/renderer/routes-popup/TopGhostWindow/useGhostWindow';
-import { findChain } from '@/renderer/utils/chain';
 
 const ChainIconWrapper = styled.div`
   position: relative;

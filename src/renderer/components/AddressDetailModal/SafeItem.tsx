@@ -3,8 +3,9 @@ import { useAccountToDisplay } from '@/renderer/hooks/rabbyx/useAccountToDisplay
 import { useSyncGnosisNetworks } from '@/renderer/hooks/useSyncGnosisNetworks';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
+import { findChain } from '@/renderer/utils/chain';
 import { LoadingOutlined } from '@ant-design/icons';
-import { CHAINS, Chain } from '@debank/common';
+import { Chain } from '@debank/common';
 import { BasicSafeInfo } from '@rabby-wallet/gnosis-sdk';
 import { Spin } from 'antd';
 import classNames from 'classnames';
@@ -12,7 +13,6 @@ import clsx from 'clsx';
 import { sortBy } from 'lodash';
 import React, { useState } from 'react';
 import { useAsync } from 'react-use';
-import { findChain } from '@/renderer/utils/chain';
 import NameAndAddress from '../NameAndAddress';
 import { AccountDetailItem } from './AccountDetailItem';
 

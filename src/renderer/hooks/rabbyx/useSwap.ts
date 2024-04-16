@@ -1,15 +1,15 @@
-import { atom, useAtom } from 'jotai';
-import { useAsync } from 'react-use';
-import { useCallback, useMemo } from 'react';
-import { CHAINS, CHAINS_ENUM } from '@debank/common';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { CHAINS_ENUM } from '@debank/common';
+import { atom, useAtom } from 'jotai';
+import { useCallback, useMemo } from 'react';
+import { useAsync } from 'react-use';
 
-import { DEX_ENUM, DEX_SUPPORT_CHAINS } from '@rabby-wallet/rabby-swap';
 import type { ChainGas, GasCache, SwapState } from '@/isomorphic/types/rabbyx';
+import { findChain } from '@/renderer/utils/chain';
+import { obj2query } from '@/renderer/utils/url';
+import { DEX_ENUM, DEX_SUPPORT_CHAINS } from '@rabby-wallet/rabby-swap';
 import { message } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { obj2query } from '@/renderer/utils/url';
-import { findChain } from '@/renderer/utils/chain';
 
 export const swapAtom = atom<SwapState>({
   gasPriceCache: {},

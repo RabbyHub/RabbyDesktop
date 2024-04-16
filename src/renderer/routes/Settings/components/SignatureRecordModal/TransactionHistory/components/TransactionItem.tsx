@@ -16,16 +16,16 @@ import { openExternalUrl } from '@/renderer/ipcRequest/app';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { getTokenSymbol } from '@/renderer/utils';
 import { isSameAddress } from '@/renderer/utils/address';
-import { CANCEL_TX_TYPE, CHAINS } from '@/renderer/utils/constant';
+import { findChain } from '@/renderer/utils/chain';
+import { CANCEL_TX_TYPE } from '@/renderer/utils/constant';
 import { sinceTime } from '@/renderer/utils/time';
 import { GasLevel, TxRequest } from '@rabby-wallet/rabby-api/dist/types';
-import { findChain } from '@/renderer/utils/chain';
 import { useLoadTxData } from '../hooks';
+import { CancelTxPopup } from './CancelTxPopup';
 import { ChildrenTxText } from './ChildrenTxText';
 import { TransactionExplain } from './TransactionExplain';
 import { TransactionPendingTag } from './TransactionPendingTag';
 import { TransactionWebsite } from './TransactionWebsite';
-import { CancelTxPopup } from './CancelTxPopup';
 
 const ChildrenWrapper = styled.div`
   padding: 2px;

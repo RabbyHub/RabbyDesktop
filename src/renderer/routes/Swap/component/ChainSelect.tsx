@@ -1,14 +1,13 @@
-import { useCallback, InsHTMLAttributes } from 'react';
-import { CHAINS, CHAINS_ENUM } from '@debank/common';
+import { CHAINS_ENUM } from '@debank/common';
+import { InsHTMLAttributes, useCallback } from 'react';
 
-import ImgArrowDown from '@/../assets/icons/swap/arrow-down.svg';
 import IconRcSwapArrowDownTriangle from '@/../assets/icons/swap/arrow-caret-down2.svg?rc';
+import ImgArrowDown from '@/../assets/icons/swap/arrow-down.svg';
 
-import styled from 'styled-components';
-import { useSwitchChainModal } from '@/renderer/hooks/useSwitchChainModal';
 import ChainIcon from '@/renderer/components/ChainIcon';
-import { useCustomRPC } from '@/renderer/hooks/useCustomRPC';
+import { useSwitchChainModal } from '@/renderer/hooks/useSwitchChainModal';
 import { findChain } from '@/renderer/utils/chain';
+import styled from 'styled-components';
 
 const ChainSelectWrapper = styled.div`
   display: flex;

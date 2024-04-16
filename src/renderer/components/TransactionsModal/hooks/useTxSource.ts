@@ -1,6 +1,5 @@
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { findChain } from '@/renderer/utils/chain';
-import { CHAINS } from '@debank/common';
 import { useRequest } from 'ahooks';
 import { useMemo } from 'react';
 

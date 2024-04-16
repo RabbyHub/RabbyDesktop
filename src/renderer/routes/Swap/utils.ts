@@ -1,6 +1,9 @@
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
-import { CHAINS, CHAINS_ENUM } from '@debank/common';
+import { findChain } from '@/renderer/utils/chain';
+import { formatUsdValue } from '@/renderer/utils/number';
+import { CHAINS_ENUM } from '@debank/common';
+import { OpenApiService } from '@rabby-wallet/rabby-api';
 import {
   CEXQuote,
   ExplainTxResponse,
@@ -11,16 +14,13 @@ import {
   DEX_ENUM,
   DEX_ROUTER_WHITELIST,
   DEX_SPENDER_WHITELIST,
-  getQuote,
   WrapTokenAddressMap,
+  getQuote,
 } from '@rabby-wallet/rabby-swap';
 import { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
 import BigNumber from 'bignumber.js';
-import { formatUsdValue } from '@/renderer/utils/number';
 import pRetry from 'p-retry';
-import { OpenApiService } from '@rabby-wallet/rabby-api';
-import { findChain } from '@/renderer/utils/chain';
-import { SWAP_FEE_ADDRESS, DEX, ETH_USDT_CONTRACT, CEX } from './constant';
+import { CEX, DEX, ETH_USDT_CONTRACT, SWAP_FEE_ADDRESS } from './constant';
 
 export const tokenAmountBn = (token: TokenItem) =>
   new BigNumber(token?.raw_amount_hex_str || 0, 16).div(

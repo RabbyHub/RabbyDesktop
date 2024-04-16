@@ -3,7 +3,6 @@ import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import ChainIcon from '@/renderer/components/ChainIcon';
 import { Modal } from '@/renderer/components/Modal/Modal';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
-import { CHAINS } from '@/renderer/utils/constant';
 import { isValidateUrl } from '@/renderer/utils/url';
 import { useRequest } from 'ahooks';
 import { Button, Form, InputRef } from 'antd';

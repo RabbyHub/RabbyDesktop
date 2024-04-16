@@ -3,11 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Button } from 'antd';
 import styled from 'styled-components';
 import { BigNumber } from 'bignumber.js';
-import {
-  CHAINS,
-  GAS_LEVEL_TEXT,
-  MINIMUM_GAS_LIMIT,
-} from '@/renderer/utils/constant';
+import { GAS_LEVEL_TEXT, MINIMUM_GAS_LIMIT } from '@/renderer/utils/constant';
 import { GasLevel, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { formatAmount } from '@/renderer/utils/number';
 import { Modal } from '@/renderer/components/Modal/Modal';

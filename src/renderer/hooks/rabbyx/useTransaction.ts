@@ -1,10 +1,9 @@
+import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { findChain } from '@/renderer/utils/chain';
 import { message } from 'antd';
 import { atom, useAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
-import { showMainwinPopupview } from '@/renderer/ipcRequest/mainwin-popupview';
-import { CHAINS } from '@debank/common';
-import { findChain } from '@/renderer/utils/chain';
 import { useCurrentAccount } from './useAccount';
 
 const DEBUG_DURACTION = 0;

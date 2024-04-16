@@ -1,19 +1,17 @@
-import classNames from 'classnames';
-import React from 'react';
-import { SafeTransactionItem } from '@rabby-wallet/gnosis-sdk/dist/api';
-import { toChecksumAddress, numberToHex } from 'web3-utils';
-import { intToHex } from 'ethereumjs-util';
-import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-import { message } from 'antd';
-import { LoadingOutlined } from '@ant-design/icons';
-import { CHAINS } from '@debank/common';
-import _ from 'lodash';
+import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { findChain } from '@/renderer/utils/chain';
-import { TxItemGroup } from './TxItemGroup';
-import { useSafeQueue } from './useSafeQueue';
-import styles from './style.module.less';
+import { LoadingOutlined } from '@ant-design/icons';
+import { SafeTransactionItem } from '@rabby-wallet/gnosis-sdk/dist/api';
+import { message } from 'antd';
+import classNames from 'classnames';
+import { intToHex } from 'ethereumjs-util';
+import React from 'react';
+import { numberToHex, toChecksumAddress } from 'web3-utils';
 import { SelectAddressModal } from './SelectAddressModal';
+import { TxItemGroup } from './TxItemGroup';
+import styles from './style.module.less';
+import { useSafeQueue } from './useSafeQueue';
 
 interface Props {
   onClose(): void;
