@@ -1,7 +1,19 @@
 
-v0.37.1 / 2024-03-21
+v0.38.0 / 2024-04-16
 ====================
 
+  * chore: update currentVersion
+  * feat: upgrade rabbyx core version. (#636)
+  * feat: remove testnet (#633)
+  * chore: update @rabby-wallet/rabby-swap@0.0.34 (#635)
+  * feat: drop kyberswap openocean (#630)
+  * fix: biannce api (#634)
+  * build: allow trigger build maunally.
+
+v0.37.1-prod / 2024-03-21
+=========================
+
+  * Release v0.37.1-prod
   * build: only sign online on publishing as production. (#628)
   * feat: upgrade supported chains.
   * feat: use rabbyx 0.92.55 (#627)
