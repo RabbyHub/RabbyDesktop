@@ -33,9 +33,6 @@ export const ReconnectView: React.FC = () => {
   );
 
   const initWalletConnect = async () => {
-    eventBus.addEventListener(EVENTS.WALLETCONNECT.INITED, ({ uri }) => {
-      setQRcodeContent(uri);
-    });
     if (account && ['CONNECTED', 'DISCONNECTED'].includes(status as string)) {
       await wallet.killWalletConnectConnector(
         account.address,
@@ -44,9 +41,10 @@ export const ReconnectView: React.FC = () => {
         true
       );
     }
+
     eventBus.emit(EVENTS.broadcastToBackground, {
       method: EVENTS.WALLETCONNECT.INIT,
-      data: account,
+      data: { ...account, type: KEYRING_CLASS.WALLETCONNECT },
     });
   };
 
@@ -77,6 +75,17 @@ export const ReconnectView: React.FC = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
+
+  React.useEffect(() => {
+    const handleInit = ({ uri }: any) => {
+      setQRcodeContent(uri);
+    };
+    eventBus.addEventListener(EVENTS.WALLETCONNECT.INITED, handleInit);
+
+    return () => {
+      eventBus.removeEventListener(EVENTS.WALLETCONNECT.INITED, handleInit);
+    };
+  }, []);
 
   React.useEffect(() => {
     if (status === 'CONNECTED') {
