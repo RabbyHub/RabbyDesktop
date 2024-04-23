@@ -582,14 +582,13 @@ export class Binance extends Cex<BinanceConfig> {
       const asset = item.asset;
       const value = new BigNumber(item.totalAmount).toString();
       const tokenUSDTValue = tokenPrice.getUSDTValue(asset, value);
-      const rewardUSDTValue = tokenPrice.getUSDTValue(
-        asset,
-        item.totalInterest
-      );
-      const usdtValue = bigNumberSum(tokenUSDTValue, rewardUSDTValue);
+      // const rewardUSDTValue = tokenPrice.getUSDTValue(
+      //   asset,
+      //   item.totalInterest
+      // );
+      const usdtValue = tokenUSDTValue;
 
       this.plusBalance(usdtValue);
-
       return {
         assets: [
           {
