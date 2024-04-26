@@ -67,6 +67,7 @@ export const DappFavicon = (props: FaviconProps) => {
         preview={false}
         src={covertIpfsHttpToRabbyIpfs(src || fallbackImage)}
         fallback={fallbackImage}
+        loading="lazy"
         {...rest}
       />
       {chainLogo && (
@@ -75,6 +76,7 @@ export const DappFavicon = (props: FaviconProps) => {
             <TooltipWithMagnetArrow title={chainInfo?.name}>
               <img
                 src={chainLogo}
+                loading="lazy"
                 alt=""
                 className="rabby-dapp-favicon-chain"
               />
