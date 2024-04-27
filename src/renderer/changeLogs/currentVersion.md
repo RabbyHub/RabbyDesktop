@@ -1,4 +1,3 @@
-#### New Features:
+#### Fixes:
 
-- Discontinue support for testnets
-- Fixed the issue of not updating Binance account balance
+- Fixed the issue of unable to connect Trezor
