@@ -1,7 +1,19 @@
 
-v0.38.0 / 2024-04-16
+v0.38.1 / 2024-04-29
 ====================
 
+  * chore: update currentVersion again.
+  * chore: update currentVersion.
+  * feat: revert switch chain & fix switch notice
+  * fix: cannot open trezor connection window. (#640)
+  * feat: lazy load dapp favicon (#639)
+  * fix: usdt value (#638)
+  * fix: QR code does not appear when reconnecting walletconnect (#637)
+
+v0.38.0-prod / 2024-04-16
+=========================
+
+  * Release v0.38.0-prod
   * chore: update currentVersion
   * feat: upgrade rabbyx core version. (#636)
   * feat: remove testnet (#633)
