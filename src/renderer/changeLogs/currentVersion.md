@@ -1,3 +1,4 @@
 #### Fixes:
 
-- Fixed the issue of unable to connect Trezor
+- Fixed the issue of QRCode not loading when using WalletConnect
+- Fixed Trezor connectiong issue
