@@ -125,7 +125,12 @@ type ChannelInvokePayload = {
     };
   };
   'dapps-delete': {
-    send: [dapp: Pick<IDapp, 'id' | 'origin'>];
+    send: [
+      dapp: Pick<IDapp, 'id' | 'origin'>,
+      opts?: {
+        clearStorage?: boolean;
+      }
+    ];
     response: {
       error?: string;
     };

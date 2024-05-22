@@ -22,7 +22,9 @@ function useDelete(dapp: IDapp | null) {
     }
     setIsLoading(true);
     await permissionService.removeConnectedSite(dapp.origin);
-    await deleteDapp(dapp).finally(() => setIsLoading(false));
+    await deleteDapp(dapp, { clearStorage: true }).finally(() =>
+      setIsLoading(false)
+    );
     toastMessage({
       type: 'success',
       content: 'Deleted successfully',
