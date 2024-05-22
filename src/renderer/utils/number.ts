@@ -140,7 +140,7 @@ export const formatAmount = (amount: string | number) => {
   }
 
   if (absNum.gte(1e12)) {
-    return `${sign}${absNum.div(1e9).toFormat(4, format)}T`;
+    return `${sign}${absNum.div(1e12).toFormat(4, format)}T`;
   }
 
   if (absNum.gte(1e9)) {
