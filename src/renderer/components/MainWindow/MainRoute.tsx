@@ -11,6 +11,7 @@ import { MainWindowRouteData } from './type';
 import styles from './MainRoute.module.less';
 import { DappViewWrapper } from '../DappView';
 import { TopNavBar } from '../TopNavBar';
+import { useMainWindowModalShown } from './hooks';
 
 function convertPathnameToClassName(pathname: string) {
   return pathname.replace(/\/|:/g, '_');
@@ -84,6 +85,8 @@ export default function MainWindowRoute({
     };
   }, [location.pathname]);
 
+  const { anyModalShown } = useMainWindowModalShown();
+
   return (
     <div className={classNames(styles.MainWindowRoute, classNameOnRoute)}>
       {!matchedData?.noDefaultHeader && (
@@ -92,6 +95,7 @@ export default function MainWindowRoute({
             styles.headerBlock,
             matchedData?.floatingAccountComponent &&
               styles.floatingAccountComponent,
+            anyModalShown && styles.mainWindowHasModalShown,
             'page-header-block',
             matchedData?.headerBlockClassName
           )}

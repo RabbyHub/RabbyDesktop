@@ -47,6 +47,37 @@ export function clearSensitiveDirectories(session: Session): void {
   });
 }
 
+export function clearStorageDataForOrigin(
+  session: Session,
+  siteOrigin: string
+): void {
+  const parseResult = safeParseURL(siteOrigin);
+
+  if (!parseResult?.protocol || !parseResult?.hostname) {
+    const errMsg = `invalid siteOrigin: ${siteOrigin}`;
+
+    if (!IS_RUNTIME_PRODUCTION) {
+      throw new Error(errMsg);
+    } else {
+      console.error(errMsg);
+    }
+    return;
+  }
+
+  if (!IS_RUNTIME_PRODUCTION) {
+    console.debug(`clearStorageDataForOrigin: ${siteOrigin}`);
+  }
+
+  session.flushStorageData();
+  session.clearStorageData({
+    origin: siteOrigin,
+    /** If not specified, clear all storage types. */
+    // storages: [
+    //   'cookies', 'filesystem', 'indexdb', 'localstorage', 'shadercache', 'websql', 'serviceworkers', 'cachestorage'
+    // ]
+  });
+}
+
 /**
  * @description same hash algorithm as electron-updater
  *

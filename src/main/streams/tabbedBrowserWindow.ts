@@ -54,7 +54,10 @@ import { isEnableServeDappByHttp } from '../store/desktopApp';
 import { checkDappEntryDirectory, CheckResultType } from '../utils/file';
 import { safeRunInMainProcess } from '../utils/fn';
 import { setupAppMenu } from '../browser/menu';
-import { safeOpenExternalURL } from '../utils/security';
+import {
+  clearStorageDataForOrigin,
+  safeOpenExternalURL,
+} from '../utils/security';
 
 /**
  * @deprecated import members from '../utils/tabbedBrowserWindow' instead
@@ -440,13 +443,20 @@ onMainWindowReady().then((mainTabbedWin) => {
 });
 
 onIpcMainInternalEvent(
-  '__internal_main:app:close-tab-on-del-dapp',
-  async (deledDappIds) => {
+  '__internal_main:app:clear-side-effect-on-del-dapp',
+  async (deledDappIds, opts) => {
     const mainWin = await onMainWindowReady();
 
     const dappIds = new Set(
       arraify(deledDappIds).map((id) => id.toLocaleLowerCase())
     );
+
+    if (opts?.clearStorage) {
+      dappIds.forEach((dappId) => {
+        const dappTypeInfo = checkoutDappURL(dappId);
+        clearStorageDataForOrigin(mainWin.session, dappTypeInfo.dappHttpID);
+      });
+    }
 
     const tabsToClose = mainWin.tabs.filterTab((ctx) => {
       const checkouted = ctx.tab.relatedDappId

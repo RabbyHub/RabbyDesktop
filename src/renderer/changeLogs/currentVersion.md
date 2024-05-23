@@ -1,4 +1,3 @@
-#### Fixes:
+#### Features
 
-- Fixed the issue of QRCode not loading when using WalletConnect
-- Fixed Trezor connectiong issue
+- Supported Free Gas - sign transactions smoothly with Rabby Wallet, even if your gas is not enough

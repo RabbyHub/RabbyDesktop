@@ -5,10 +5,15 @@
 :global {
   html.__rabbyx-shell-page.os-darwin {
     :local {
-      .maskInGasket {
+      .macOSDragger {
+        content: " ";
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: var(--mainwin-headerblock-offset);
+        width: 100%;
         -webkit-app-region: drag;
         z-index: 1;
-        // width: calc(100vw - var(--mainwin-rabbyx-popup-w));
       }
     }
   }

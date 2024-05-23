@@ -694,8 +694,11 @@ handleIpcMainInvoke('dapps-replace', (_, oldId, newDapp) => {
 
   const delResult = checkDelDapp(oldId, { dappsMap });
   emitIpcMainEvent(
-    '__internal_main:app:close-tab-on-del-dapp',
-    delResult.dappIdsToDel
+    '__internal_main:app:clear-side-effect-on-del-dapp',
+    delResult.dappIdsToDel,
+    {
+      clearStorage: true,
+    }
   );
 
   const addResult = checkAddDapp(newDapp, {
@@ -720,7 +723,7 @@ handleIpcMainInvoke('dapps-replace', (_, oldId, newDapp) => {
   return {};
 });
 
-handleIpcMainInvoke('dapps-delete', async (_, dappToDel) => {
+handleIpcMainInvoke('dapps-delete', async (_, dappToDel, opts) => {
   const dappsMap = dappStore.get('dappsMap');
 
   const dappID = dappToDel.id
@@ -751,8 +754,11 @@ handleIpcMainInvoke('dapps-delete', async (_, dappToDel) => {
 
   const delResult = checkDelDapp(dappID, { dappsMap });
   emitIpcMainEvent(
-    '__internal_main:app:close-tab-on-del-dapp',
-    delResult.dappIdsToDel
+    '__internal_main:app:clear-side-effect-on-del-dapp',
+    delResult.dappIdsToDel,
+    {
+      clearStorage: opts?.clearStorage,
+    }
   );
 
   dappStore.set('protocolDappsBinding', delResult.protocolDappsBinding);

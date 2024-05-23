@@ -200,8 +200,13 @@ type MainInternalsMessagePayload = {
     send: [];
     response: [];
   };
-  '__internal_main:app:close-tab-on-del-dapp': {
-    send: [dappIds: string | string[]];
+  '__internal_main:app:clear-side-effect-on-del-dapp': {
+    send: [
+      dappIds: string | string[],
+      opts?: {
+        clearStorage?: boolean;
+      }
+    ];
     response: [];
   };
   '__internal_main:mainwindow:will-show-on-bootstrap': {

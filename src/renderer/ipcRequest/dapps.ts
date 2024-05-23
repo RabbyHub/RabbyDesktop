@@ -68,9 +68,14 @@ export async function replaceDapp(
   );
 }
 
-export async function deleteDapp(dapp: IDapp) {
+export async function deleteDapp(
+  dapp: IDapp,
+  opts?: {
+    clearStorage?: boolean;
+  }
+) {
   return window.rabbyDesktop.ipcRenderer
-    .invoke('dapps-delete', dapp)
+    .invoke('dapps-delete', dapp, opts)
     .then((event) => {
       if (event.error) {
         throw new Error(event.error);
