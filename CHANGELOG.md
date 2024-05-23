@@ -1,7 +1,14 @@
 
-v0.38.1 / 2024-04-29
+v0.38.2 / 2024-05-23
 ====================
 
+  * fix: calc func for T (#642)
+  * feat: support gas free, update supported chains. (#641)
+
+v0.38.1-prod / 2024-04-29
+=========================
+
+  * Release v0.38.1-prod
   * chore: update currentVersion again.
   * chore: update currentVersion.
   * feat: revert switch chain & fix switch notice
