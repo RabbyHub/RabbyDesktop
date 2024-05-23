@@ -34,6 +34,7 @@ import { useLocation, useSearchParams } from 'react-router-dom';
 import { useDebounce } from 'react-use';
 import styled from 'styled-components';
 import abiCoder, { AbiCoder } from 'web3-eth-abi';
+import { useMainWindowModalShownFor } from '@/renderer/components/MainWindow/hooks';
 import { ChainRender, ChainSelect } from '../Swap/component/ChainSelect';
 import { TokenSelect } from '../Swap/component/TokenSelect';
 import { ContactEditModal } from './components/ContactEditModal';
@@ -972,6 +973,11 @@ const SendTokenInner = () => {
   );
 
   useOnTxFinished(handleTxFinished);
+
+  useMainWindowModalShownFor('modalInSend', [
+    showEditContactModal,
+    showListContactModal,
+  ]);
 
   return (
     <SendTokenWrapper>
