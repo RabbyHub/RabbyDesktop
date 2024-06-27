@@ -1,7 +1,13 @@
 
-v0.38.2 / 2024-05-23
+v0.38.3 / 2024-06-27
 ====================
 
+  * feat: use new version signing page. (#643)
+
+v0.38.2-prod / 2024-05-23
+=========================
+
+  * Release v0.38.2-prod
   * fix: calc func for T (#642)
   * feat: support gas free, update supported chains. (#641)
 
