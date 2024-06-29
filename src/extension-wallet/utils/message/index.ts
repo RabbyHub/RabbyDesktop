@@ -6,7 +6,7 @@ import { EventEmitter } from 'events';
 import { ethErrors } from 'eth-rpc-errors';
 
 abstract class Message extends EventEmitter {
-  // avaiable id list
+  //available id list
   // max concurrent request limit
   private _requestIdPool = [...Array(1000).keys()];
 
