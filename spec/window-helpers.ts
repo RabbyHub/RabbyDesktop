@@ -28,7 +28,7 @@ async function ensureWindowIsClosed(window: BrowserWindow | null) {
     if (window.webContents && !window.webContents.isDestroyed()) {
       // If a window isn't destroyed already, and it has non-destroyed WebContents,
       // then calling destroy() won't immediately destroy it, as it may have
-      // <webview> children which need to be destroyed first. In that case, we
+      // <webview> children who need to be destroyed first. In that case, we
       // await the 'closed' event which signals the complete shutdown of the
       // window.
       const isClosed = emittedOnce(window, 'closed')
