@@ -445,7 +445,7 @@ function buildPerfKitsMenu(opts: ChromeContextMenuOptions) {
 
   const perfKitsMenu = new Menu();
 
-  // this only mock crashed event to trigger post-process, not real crashed
+  // this only mock crashed event to trigger post-process, not a real crashed
   appendMenu(perfKitsMenu, {
     label: 'Mock MainWindow WebContents Crashed',
     click: () => {
