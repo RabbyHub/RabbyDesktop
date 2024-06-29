@@ -166,7 +166,7 @@ app
     })
 
     const cb = () => {
-      // Ensure the callback is called after runner is defined
+      // Ensure the callback is called after the runner is defined
       process.nextTick(() => {
         process.exit(runner.failures)
       })
