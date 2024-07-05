@@ -72,54 +72,50 @@ export const Quotes = (props: QuotesProps) => {
   } = useSwapSettings();
 
   const sortedList = useMemo(
-    () =>
-      list
-        .filter(
-          (e) => swapViewList?.[e.name as keyof typeof swapViewList] !== false
-        )
-        .sort((a, b) => {
-          const getNumber = (quote: typeof a) => {
-            if (quote.isDex) {
-              if (inSufficient) {
-                return new BigNumber(quote.data?.toTokenAmount || 0)
-                  .div(
-                    10 **
-                      (quote.data?.toTokenDecimals ||
-                        other.receiveToken.decimals)
-                  )
-                  .times(other.receiveToken.price);
-              }
-              if (!quote.preExecResult) {
-                return new BigNumber(0);
-              }
-
-              if (sortIncludeGasFee) {
-                return new BigNumber(
-                  quote?.preExecResult.swapPreExecTx.balance_change
-                    .receive_token_list?.[0]?.amount || 0
+    () => [
+      ...(list?.sort((a, b) => {
+        const getNumber = (quote: typeof a) => {
+          const price = other.receiveToken.price ? other.receiveToken.price : 1;
+          if (quote.isDex) {
+            if (inSufficient) {
+              return new BigNumber(quote.data?.toTokenAmount || 0)
+                .div(
+                  10 **
+                    (quote.data?.toTokenDecimals || other.receiveToken.decimals)
                 )
-                  .times(other.receiveToken.price)
-                  .minus(quote?.preExecResult?.gasUsdValue || 0);
-              }
+                .times(price);
+            }
+            if (!quote.preExecResult) {
+              return new BigNumber(Number.MIN_SAFE_INTEGER);
+            }
 
+            if (sortIncludeGasFee) {
               return new BigNumber(
                 quote?.preExecResult.swapPreExecTx.balance_change
                   .receive_token_list?.[0]?.amount || 0
-              ).times(other.receiveToken.price);
+              )
+                .times(price)
+                .minus(quote?.preExecResult?.gasUsdValue || 0);
             }
 
-            return new BigNumber(quote?.data?.receive_token?.amount || 0).times(
-              other.receiveToken.price
-            );
-          };
-          return getNumber(b).minus(getNumber(a)).toNumber();
-        }),
+            return new BigNumber(
+              quote?.preExecResult.swapPreExecTx.balance_change
+                .receive_token_list?.[0]?.amount || 0
+            ).times(price);
+          }
+
+          return quote?.data?.receive_token
+            ? new BigNumber(quote?.data?.receive_token?.amount).times(price)
+            : new BigNumber(Number.MIN_SAFE_INTEGER);
+        };
+        return getNumber(b).minus(getNumber(a)).toNumber();
+      }) || []),
+    ],
     [
       inSufficient,
       list,
-      other?.receiveToken?.decimals,
+      other.receiveToken.decimals,
       other?.receiveToken?.price,
-      swapViewList,
       sortIncludeGasFee,
     ]
   );
@@ -143,7 +139,7 @@ export const Quotes = (props: QuotesProps) => {
         : new BigNumber(bestQuote?.data?.receive_token.amount || '0').toString(
             10
           )) || '0',
-      bestQuote?.isDex ? bestQuote.preExecResult?.gasUsdValue || '0 ' : '0',
+      bestQuote?.isDex ? bestQuote.preExecResult?.gasUsdValue || '0' : '0',
     ];
   }, [inSufficient, other?.receiveToken?.decimals, sortedList]);
 
@@ -166,10 +162,9 @@ export const Quotes = (props: QuotesProps) => {
 
   const tradeCount = useMemo(() => {
     if (swapTradeList) {
-      return Object.entries(swapTradeList || {}).filter(
-        ([key, value]) =>
-          (DEX?.[key as keyof typeof DEX] || CEX?.[key as keyof typeof CEX]) &&
-          value === true
+      const TradeDexList = Object.keys(DEX);
+      return Object.entries(swapTradeList).filter(
+        ([name, enable]) => enable === true && TradeDexList.includes(name)
       ).length;
     }
     return 0;
