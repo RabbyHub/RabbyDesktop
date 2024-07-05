@@ -397,6 +397,7 @@ export const getDexQuote = async ({
                 : Number(feeAfterDiscount) || 0,
             chain,
             gasPrice,
+            fee: true,
           },
           walletOpenapi as unknown as OpenApiService
         ),
