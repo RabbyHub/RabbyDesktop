@@ -845,9 +845,19 @@ export const SwapToken = () => {
   const FeeAndMEVGuarded = useMemo(
     () => (
       <>
+        {isWrapToken ? (
+          <div className="flex items-center justify-between text-14 text-white">
+            <span className="text-white text-opacity-60">
+              Slippage tolerance
+            </span>
+            <span className="font-medium text-white">No slippage for Wrap</span>
+          </div>
+        ) : null}
         <div className="flex items-center justify-between text-14 text-white">
           <span className="text-white text-opacity-60">Rabby fee</span>
-          <span className="font-medium text-white">0%</span>
+          <span className="font-medium text-white">
+            {isWrapToken ? '0%' : '0.25%'}
+          </span>
         </div>
         {showMEVGuardedSwitch && (
           <div className="flex justify-between">
@@ -878,7 +888,7 @@ export const SwapToken = () => {
         )}
       </>
     ),
-    [switchPreferMEV, showMEVGuardedSwitch, originPreferMEVGuarded]
+    [isWrapToken, switchPreferMEV, showMEVGuardedSwitch, originPreferMEVGuarded]
   );
 
   return (
@@ -1006,9 +1016,6 @@ export const SwapToken = () => {
                   {isWrapToken ? (
                     <div className="section flex flex-col gap-[16px]">
                       {FeeAndMEVGuarded}
-                      <div className="text-white text-opacity-60">
-                        There is no slippage for this trade
-                      </div>
                     </div>
                   ) : (
                     <div className="section flex flex-col gap-[16px]">
