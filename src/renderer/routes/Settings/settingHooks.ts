@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { type FormInstance, type InputProps, message } from 'antd';
 import { atom, useAtom } from 'jotai';
+import { atomWithStorage, useAtomCallback } from 'jotai/utils';
 
 import { validateProxyConfig } from '@/renderer/ipcRequest/app';
 import { formatProxyServerURL } from '@/isomorphic/url';
 import { ensurePrefix } from '@/isomorphic/string';
+import {
+  walletOpenapi,
+  walletTestnetOpenapi,
+} from '@/renderer/ipcRequest/rabbyx';
 
 const defaulAppProxyConf: IAppProxyConf = {
   proxyType: 'none',
@@ -177,5 +182,55 @@ export function useIsViewingDevices() {
   return {
     isViewingDevices,
     setIsViewingDevices,
+  };
+}
+
+export const DefaultBackendServiceValues = {
+  mainnet: 'https://api.rabby.io',
+  testnet: 'https://api.testnet.rabby.io',
+};
+const backendServiceApisAtom = atomWithStorage(
+  'devOnlyBackendService',
+  DefaultBackendServiceValues
+);
+export function useBackendServiceAPI() {
+  const [{ mainnet, testnet }, _setBackendServiceApis] = useAtom(
+    backendServiceApisAtom
+  );
+  const getValues = useAtomCallback((get) => get(backendServiceApisAtom));
+
+  const syncBackendServiceApis = useCallback(
+    async (partials: Partial<typeof DefaultBackendServiceValues>) => {
+      const newValues = {
+        ...(await getValues()),
+        ...partials,
+      };
+
+      return Promise.all([
+        walletOpenapi.setHost(newValues.mainnet),
+        walletTestnetOpenapi.setHost(newValues.testnet),
+      ]).then(() => {
+        _setBackendServiceApis(newValues);
+      });
+    },
+    [getValues, _setBackendServiceApis]
+  );
+
+  // const fetchBackendServices = useCallback(() => {
+  //   Promise.all([
+  //     walletOpenapi.getHost(),
+  //     walletTestnetOpenapi.getHost(),
+  //   ]).then(([mainnetURL, testnetURL]) => {
+  //     setBackendServiceApis({
+  //       mainnet: mainnetURL,
+  //       testnet: testnetURL,
+  //     });
+  //   });
+  // }, []);
+
+  return {
+    mainnetURL: mainnet,
+    testnetURL: testnet,
+    syncBackendServiceApis,
   };
 }

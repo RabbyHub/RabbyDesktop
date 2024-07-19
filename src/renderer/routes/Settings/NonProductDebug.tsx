@@ -1,19 +1,144 @@
 import { requestResetApp } from '@/renderer/ipcRequest/app';
 
 import { getRendererAppChannel } from '@/isomorphic/env';
-import { Divider, Switch, message } from 'antd';
+import { Divider, Input, InputProps, Modal, Switch, message } from 'antd';
 import { useMockFailure } from '@/renderer/hooks/useAppUpdator';
+import React, { useCallback, useImperativeHandle } from 'react';
 import styles from './index.module.less';
 
 import { ItemAction, ItemLink } from './SettingArtifacts';
+import {
+  DefaultBackendServiceValues,
+  useBackendServiceAPI,
+} from './settingHooks';
+
+type ConfirmURLInputType = {
+  getValue: () => string;
+};
+
+const ConfirmURLInput = React.forwardRef<
+  ConfirmURLInputType,
+  Omit<InputProps, 'value' | 'onChange'> & {
+    initialVvalue?: string;
+  }
+>(({ initialVvalue = '', ...props }, ref) => {
+  const [value, setValue] = React.useState(initialVvalue);
+
+  useImperativeHandle(ref, () => ({
+    getValue: () => {
+      return value;
+    },
+  }));
+
+  return (
+    <Input
+      {...props}
+      value={value}
+      onChange={(evt) => {
+        setValue(evt.target.value);
+      }}
+    />
+  );
+});
 
 function DebugKitsParts() {
   const { mockFailureValues, toggleMockFailure } = useMockFailure();
+
+  const { mainnetURL, testnetURL, syncBackendServiceApis } =
+    useBackendServiceAPI();
+
+  const confirmURLInputRef = React.useRef<ConfirmURLInputType>(null);
+  const confirmURLInputTestRef = React.useRef<ConfirmURLInputType>(null);
+  const setBackendServiceAPI = useCallback(
+    (isTest = false) => {
+      const value = (
+        !isTest ? confirmURLInputRef : confirmURLInputTestRef
+      ).current?.getValue();
+      if (!value) {
+        message.error('Invalid URL');
+        return;
+      }
+
+      return syncBackendServiceApis({
+        [!isTest ? 'mainnet' : 'testnet']: value,
+      })
+        .then(() => {
+          message.success('Set Mainnet URL successfully');
+          setTimeout(() => {
+            window.rabbyDesktop.ipcRenderer.invoke(
+              'app-relaunch',
+              'dev:backend-service-changed'
+            );
+          }, 500);
+        })
+        .catch(() => {
+          message.error('Set Mainnet URL failed');
+        });
+    },
+    [syncBackendServiceApis]
+  );
 
   if (getRendererAppChannel() === 'prod') return null;
 
   return (
     <>
+      <div className={styles.settingBlock}>
+        <h4 className={styles.blockTitle}>Backend Service API</h4>
+        <div className={styles.itemList}>
+          <ItemAction
+            name={<span>Mainnet URL</span>}
+            icon="rabby-internal://assets/icons/mainwin-settings/backend-service-url.svg"
+            onClick={() => {
+              Modal.confirm({
+                title: 'Set Mainnet URL',
+                content: (
+                  <div>
+                    <p>Restart the app to apply the changes.</p>
+                    <ConfirmURLInput
+                      ref={confirmURLInputRef}
+                      initialVvalue={mainnetURL}
+                      placeholder={`Default: ${DefaultBackendServiceValues.mainnet}`}
+                    />
+                  </div>
+                ),
+                okText: 'Apply & Restart',
+                onOk: () => setBackendServiceAPI(),
+              });
+            }}
+          >
+            <div className="flex items-center justify-end">
+              <span className="text-r-neutral-body text-12">{mainnetURL}</span>
+            </div>
+          </ItemAction>
+          <ItemAction
+            disabled
+            name={<span>Testnet URL</span>}
+            icon="rabby-internal://assets/icons/mainwin-settings/backend-service-url.svg"
+            onClick={() => {
+              Modal.confirm({
+                title: 'Set Mainnet URL',
+                content: (
+                  <div>
+                    <p>Restart the app to apply the changes.</p>
+                    <ConfirmURLInput
+                      ref={confirmURLInputTestRef}
+                      initialVvalue={testnetURL}
+                      placeholder={`Default: ${DefaultBackendServiceValues.testnet}`}
+                    />
+                  </div>
+                ),
+                okText: 'Apply & Restart',
+                onOk: () => setBackendServiceAPI(true),
+              });
+            }}
+          >
+            <div className="flex items-center justify-end">
+              <span className="text-r-neutral-body text-12">{testnetURL}</span>
+            </div>
+          </ItemAction>
+        </div>
+      </div>
+
       <div className={styles.settingBlock}>
         <h4 className={styles.blockTitle}>Local Cache Manager</h4>
         <div className={styles.itemList}>

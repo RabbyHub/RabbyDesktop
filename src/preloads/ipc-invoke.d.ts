@@ -307,7 +307,12 @@ type ChannelInvokePayload = {
     };
   };
   'app-relaunch': {
-    send: [reason: 'trezor-like-used' | 'media-access-updated'];
+    send: [
+      reason:
+        | 'trezor-like-used'
+        | 'media-access-updated'
+        | 'dev:backend-service-changed'
+    ];
     response: void;
   };
   [`__internal_rpc:rabbyx-rpc:query`]: {
