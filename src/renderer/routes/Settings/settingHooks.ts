@@ -185,6 +185,7 @@ export function useIsViewingDevices() {
   };
 }
 
+const IS_REG_CHANNEL = process.env.BUILD_CHANNEL === 'reg';
 export const DefaultBackendServiceValues = {
   mainnet: 'https://api.rabby.io',
   testnet: 'https://api.testnet.rabby.io',
@@ -193,44 +194,43 @@ const backendServiceApisAtom = atomWithStorage(
   'devOnlyBackendService',
   DefaultBackendServiceValues
 );
-export function useBackendServiceAPI() {
-  const [{ mainnet, testnet }, _setBackendServiceApis] = useAtom(
-    backendServiceApisAtom
-  );
+function setHosts(newValues: typeof DefaultBackendServiceValues) {
+  return Promise.all([
+    walletOpenapi.setHost(newValues.mainnet),
+    walletTestnetOpenapi.setHost(newValues.testnet),
+  ]);
+}
+export function useBackendServiceAPI(options?: { isTop?: boolean }) {
+  const [curValues, _setBackendServiceApis] = useAtom(backendServiceApisAtom);
   const getValues = useAtomCallback((get) => get(backendServiceApisAtom));
 
-  const syncBackendServiceApis = useCallback(
+  const patchBackendServiceApis = useCallback(
     async (partials: Partial<typeof DefaultBackendServiceValues>) => {
       const newValues = {
         ...(await getValues()),
         ...partials,
       };
 
-      return Promise.all([
-        walletOpenapi.setHost(newValues.mainnet),
-        walletTestnetOpenapi.setHost(newValues.testnet),
-      ]).then(() => {
-        _setBackendServiceApis(newValues);
-      });
+      _setBackendServiceApis(newValues);
+      // return setHosts(newValues).then(() => {
+      //   _setBackendServiceApis(newValues);
+      // });
     },
     [getValues, _setBackendServiceApis]
   );
 
-  // const fetchBackendServices = useCallback(() => {
-  //   Promise.all([
-  //     walletOpenapi.getHost(),
-  //     walletTestnetOpenapi.getHost(),
-  //   ]).then(([mainnetURL, testnetURL]) => {
-  //     setBackendServiceApis({
-  //       mainnet: mainnetURL,
-  //       testnet: testnetURL,
-  //     });
-  //   });
-  // }, []);
+  const { isTop } = options || {};
+
+  useEffect(() => {
+    if (!isTop) return;
+    if (!IS_REG_CHANNEL) return;
+
+    setHosts(curValues);
+  }, [isTop, curValues]);
 
   return {
-    mainnetURL: mainnet,
-    testnetURL: testnet,
-    syncBackendServiceApis,
+    mainnetURL: curValues.mainnet,
+    testnetURL: curValues.testnet,
+    patchBackendServiceApis,
   };
 }

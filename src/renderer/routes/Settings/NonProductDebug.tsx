@@ -1,7 +1,15 @@
 import { requestResetApp } from '@/renderer/ipcRequest/app';
 
 import { getRendererAppChannel } from '@/isomorphic/env';
-import { Divider, Input, InputProps, Modal, Switch, message } from 'antd';
+import {
+  Button,
+  Divider,
+  Input,
+  InputProps,
+  Modal,
+  Switch,
+  message,
+} from 'antd';
 import { useMockFailure } from '@/renderer/hooks/useAppUpdator';
 import React, { useCallback, useImperativeHandle } from 'react';
 import styles from './index.module.less';
@@ -19,10 +27,11 @@ type ConfirmURLInputType = {
 const ConfirmURLInput = React.forwardRef<
   ConfirmURLInputType,
   Omit<InputProps, 'value' | 'onChange'> & {
-    initialVvalue?: string;
+    initialValue?: string;
+    defaultValue: string;
   }
->(({ initialVvalue = '', ...props }, ref) => {
-  const [value, setValue] = React.useState(initialVvalue);
+>(({ initialValue = '', defaultValue, ...props }, ref) => {
+  const [value, setValue] = React.useState(initialValue);
 
   useImperativeHandle(ref, () => ({
     getValue: () => {
@@ -31,20 +40,33 @@ const ConfirmURLInput = React.forwardRef<
   }));
 
   return (
-    <Input
-      {...props}
-      value={value}
-      onChange={(evt) => {
-        setValue(evt.target.value);
-      }}
-    />
+    <>
+      <p>Restart the app to apply the changes.</p>
+      <Input
+        {...props}
+        value={value}
+        onChange={(evt) => {
+          setValue(evt.target.value);
+        }}
+      />
+
+      <Button
+        type="link"
+        className="pl-0"
+        onClick={() => {
+          setValue(defaultValue);
+        }}
+      >
+        Restore default value
+      </Button>
+    </>
   );
 });
 
 function DebugKitsParts() {
   const { mockFailureValues, toggleMockFailure } = useMockFailure();
 
-  const { mainnetURL, testnetURL, syncBackendServiceApis } =
+  const { mainnetURL, testnetURL, patchBackendServiceApis } =
     useBackendServiceAPI();
 
   const confirmURLInputRef = React.useRef<ConfirmURLInputType>(null);
@@ -59,7 +81,7 @@ function DebugKitsParts() {
         return;
       }
 
-      return syncBackendServiceApis({
+      return patchBackendServiceApis({
         [!isTest ? 'mainnet' : 'testnet']: value,
       })
         .then(() => {
@@ -75,7 +97,7 @@ function DebugKitsParts() {
           message.error('Set Mainnet URL failed');
         });
     },
-    [syncBackendServiceApis]
+    [patchBackendServiceApis]
   );
 
   if (getRendererAppChannel() === 'prod') return null;
@@ -90,13 +112,13 @@ function DebugKitsParts() {
             icon="rabby-internal://assets/icons/mainwin-settings/backend-service-url.svg"
             onClick={() => {
               Modal.confirm({
-                title: 'Set Mainnet URL',
+                title: 'Set Mainnet Backend Service',
                 content: (
                   <div>
-                    <p>Restart the app to apply the changes.</p>
                     <ConfirmURLInput
                       ref={confirmURLInputRef}
-                      initialVvalue={mainnetURL}
+                      initialValue={mainnetURL}
+                      defaultValue={DefaultBackendServiceValues.mainnet}
                       placeholder={`Default: ${DefaultBackendServiceValues.mainnet}`}
                     />
                   </div>
@@ -116,13 +138,13 @@ function DebugKitsParts() {
             icon="rabby-internal://assets/icons/mainwin-settings/backend-service-url.svg"
             onClick={() => {
               Modal.confirm({
-                title: 'Set Mainnet URL',
+                title: 'Set Testnet Backend Service',
                 content: (
                   <div>
-                    <p>Restart the app to apply the changes.</p>
                     <ConfirmURLInput
                       ref={confirmURLInputTestRef}
-                      initialVvalue={testnetURL}
+                      initialValue={testnetURL}
+                      defaultValue={DefaultBackendServiceValues.testnet}
                       placeholder={`Default: ${DefaultBackendServiceValues.testnet}`}
                     />
                   </div>
