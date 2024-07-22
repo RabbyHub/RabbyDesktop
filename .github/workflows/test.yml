@@ -47,7 +47,10 @@ jobs:
           echo "shell is $(echo $0)"
           echo "HOME is $HOME"
           echo "USERPROFILE is $USERPROFILE"
+          echo "BUILD_USE_DEVTOOLS is $BUILD_USE_DEVTOOLS"
           echo "which node $(which node)"
+        env:
+          BUILD_USE_DEVTOOLS: ${{ inputs.BUILD_USE_DEVTOOLS }}
 
       # - name: Install Node and NPM
       #   uses: actions/setup-node@v1
