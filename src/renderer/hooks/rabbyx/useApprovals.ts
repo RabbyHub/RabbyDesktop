@@ -5,6 +5,8 @@ import {
 import { atom, useAtom } from 'jotai';
 import { useAsync } from 'react-use';
 import { ApprovalStatus } from '@rabby-wallet/rabby-api/dist/types';
+import { KEYRING_TYPE } from '@/renderer/utils/constant';
+import { appIsProd } from '@/main/utils/env';
 import { useCurrentAccount } from './useAccount';
 import { useShowTestnet } from './useShowTestnet';
 
@@ -31,7 +33,9 @@ export function useApprovalRiskAlertCount() {
 
   useAsync(async () => {
     if (!currentAccount?.address) return;
-
+    if (currentAccount.type === KEYRING_TYPE.WatchAddressKeyring && appIsProd) {
+      return;
+    }
     try {
       const mainnetState = await walletOpenapi.approvalStatus(
         currentAccount.address
