@@ -51,6 +51,7 @@ import { navigateToDappRoute } from '@/renderer/utils/react-router';
 import { ErrorBoundary } from '@sentry/react';
 import { useMount } from 'ahooks';
 import dayjs from 'dayjs';
+import { useBackendServiceAPI } from '@/renderer/routes/Settings/settingHooks';
 import styles from './index.module.less';
 
 import { FixedBackHeader } from '../FixedBackHeader';
@@ -322,7 +323,10 @@ const router = createRouter([
  */
 function useAccountsAndLockGuard() {
   const { fetchAccounts } = useAccounts({
-    onFetchStageChanged: useCallback(async (ctx) => {
+    onFetchStageChanged: useCallback<
+      (Parameters<typeof useAccounts>[0] & object)['onFetchStageChanged'] &
+        object
+    >(async (ctx) => {
       if (ctx.state === 'FINISHED') {
         const isUnlocked = await walletController.isUnlocked();
 
@@ -385,6 +389,7 @@ export function MainWindow() {
 
   useMainWindowEvents();
   useChromeTabsEvents();
+  useBackendServiceAPI({ isTop: true });
 
   useMessageForwardToMainwin('route-navigate', (payload) => {
     router.navigate(payload.data);

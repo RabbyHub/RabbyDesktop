@@ -319,6 +319,7 @@ onIpcMainEvent('__internal_rpc:app:reset-wallet', async () => {
 
 handleIpcMainInvoke('app-relaunch', (_, reasonType) => {
   switch (reasonType) {
+    case 'dev:backend-service-changed':
     case 'trezor-like-used': {
       emitIpcMainEvent('__internal_main:app:relaunch');
       break;

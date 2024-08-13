@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { type FormInstance, type InputProps, message } from 'antd';
 import { atom, useAtom } from 'jotai';
+import { atomWithStorage, useAtomCallback } from 'jotai/utils';
 
 import { validateProxyConfig } from '@/renderer/ipcRequest/app';
 import { formatProxyServerURL } from '@/isomorphic/url';
 import { ensurePrefix } from '@/isomorphic/string';
+import {
+  walletOpenapi,
+  walletTestnetOpenapi,
+} from '@/renderer/ipcRequest/rabbyx';
 
 const defaulAppProxyConf: IAppProxyConf = {
   proxyType: 'none',
@@ -177,5 +182,55 @@ export function useIsViewingDevices() {
   return {
     isViewingDevices,
     setIsViewingDevices,
+  };
+}
+
+const IS_REG_CHANNEL = process.env.BUILD_CHANNEL === 'reg';
+export const DefaultBackendServiceValues = {
+  mainnet: 'https://api.rabby.io',
+  testnet: 'https://api.testnet.rabby.io',
+};
+const backendServiceApisAtom = atomWithStorage(
+  'devOnlyBackendService',
+  DefaultBackendServiceValues
+);
+function setHosts(newValues: typeof DefaultBackendServiceValues) {
+  return Promise.all([
+    walletOpenapi.setHost(newValues.mainnet),
+    walletTestnetOpenapi.setHost(newValues.testnet),
+  ]);
+}
+export function useBackendServiceAPI(options?: { isTop?: boolean }) {
+  const [curValues, _setBackendServiceApis] = useAtom(backendServiceApisAtom);
+  const getValues = useAtomCallback((get) => get(backendServiceApisAtom));
+
+  const patchBackendServiceApis = useCallback(
+    async (partials: Partial<typeof DefaultBackendServiceValues>) => {
+      const newValues = {
+        ...(await getValues()),
+        ...partials,
+      };
+
+      _setBackendServiceApis(newValues);
+      // return setHosts(newValues).then(() => {
+      //   _setBackendServiceApis(newValues);
+      // });
+    },
+    [getValues, _setBackendServiceApis]
+  );
+
+  const { isTop } = options || {};
+
+  useEffect(() => {
+    if (!isTop) return;
+    if (!IS_REG_CHANNEL) return;
+
+    setHosts(curValues);
+  }, [isTop, curValues]);
+
+  return {
+    mainnetURL: curValues.mainnet,
+    testnetURL: curValues.testnet,
+    patchBackendServiceApis,
   };
 }

@@ -12,6 +12,10 @@ on:
         required: true
         type: boolean
         default: true
+      BUILD_USE_DEVTOOLS:
+        required: false
+        type: boolean
+        default: false
 
 defaults:
   run:
@@ -43,7 +47,10 @@ jobs:
           echo "shell is $(echo $0)"
           echo "HOME is $HOME"
           echo "USERPROFILE is $USERPROFILE"
+          echo "BUILD_USE_DEVTOOLS is $BUILD_USE_DEVTOOLS"
           echo "which node $(which node)"
+        env:
+          BUILD_USE_DEVTOOLS: ${{ inputs.BUILD_USE_DEVTOOLS }}
 
       # - name: Install Node and NPM
       #   uses: actions/setup-node@v1
@@ -82,6 +89,7 @@ jobs:
           RABBY_DESKTOP_CODE_SIGINING_CERT_FINGERPRINT: ${{ secrets.RABBY_DESKTOP_CODE_SIGINING_CERT_FINGERPRINT }}
           RABBY_DESKTOP_KR_PWD: ${{ secrets.RABBY_DESKTOP_KR_PWD }}
           RABBY_REALLY_COPY: ${{ inputs.RABBY_REALLY_COPY }}
+          BUILD_USE_DEVTOOLS: ${{ inputs.BUILD_USE_DEVTOOLS }}
           LARK_CHAT_URL: ${{ secrets.LARK_CHAT_URL }}
           LARK_CHAT_SECRET: ${{ secrets.LARK_CHAT_SECRET }}
           # see more details on https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
