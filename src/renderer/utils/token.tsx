@@ -1,6 +1,8 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable no-multi-assign */
-import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
+import BigNumber from 'bignumber.js';
+
+import { GasLevel, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { Contract, providers } from 'ethers';
 import { hexToString } from 'web3-utils';
 import styled from 'styled-components';
@@ -10,6 +12,8 @@ import { formatUsdValue } from './number';
 import { getCollectionDisplayName, PortfolioItemNft } from './nft';
 import { TokenActionSymbol } from '../components/TokenActionModal/TokenActionModal';
 import { getTokenSymbol } from '.';
+import { findChain } from './chain';
+import { MINIMUM_GAS_LIMIT } from './constant';
 
 export const ellipsisTokenSymbol = (text: string, length = 6) => {
   if (text?.length <= length) return text;
@@ -17,6 +21,57 @@ export const ellipsisTokenSymbol = (text: string, length = 6) => {
   const regexp = new RegExp(`^(.{${length}})(.*)$`);
   return text?.replace(regexp, '$1...');
 };
+
+export const isTestnetTokenItem = (token: TokenItem) => {
+  return findChain({
+    serverId: token.chain,
+  })?.isTestnet;
+};
+
+function checkGasIsEnough({
+  token_balance_hex,
+  price,
+  gasLimit,
+}: {
+  token_balance_hex: TokenItem['raw_amount_hex_str'];
+  price: number;
+  gasLimit: number;
+}) {
+  return new BigNumber(token_balance_hex || 0, 16).gte(
+    new BigNumber(gasLimit).times(price)
+  );
+}
+export function checkIfTokenBalanceEnough(
+  token: TokenItem,
+  options?: {
+    gasList?: GasLevel[];
+    gasLimit?: number;
+  }
+) {
+  const { gasLimit = MINIMUM_GAS_LIMIT, gasList = [] } = options || {};
+  const normalLevel = gasList?.find((e) => e.level === 'normal');
+  const slowLevel = gasList?.find((e) => e.level === 'slow');
+  const customLevel = gasList?.find((e) => e.level === 'custom');
+
+  const isNormalEnough = checkGasIsEnough({
+    token_balance_hex: token?.raw_amount_hex_str,
+    price: normalLevel?.price || 0,
+    gasLimit,
+  });
+  const isSlowEnough = checkGasIsEnough({
+    token_balance_hex: token?.raw_amount_hex_str,
+    price: slowLevel?.price || 0,
+    gasLimit,
+  });
+
+  return {
+    normalLevel,
+    isNormalEnough,
+    isSlowEnough,
+    slowLevel,
+    customLevel,
+  };
+}
 
 export const geTokenDecimals = async (
   id: string,

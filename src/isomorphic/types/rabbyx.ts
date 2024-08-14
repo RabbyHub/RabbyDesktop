@@ -661,6 +661,12 @@ export type RabbyXMethod = {
     reqId: string;
   }) => void;
   'walletController.getMainnetListFromLocal': () => Chain[];
+  'walletController.fetchEstimatedL1Fee': (
+    txMeta: Record<string, any> & {
+      txParams: any;
+    },
+    chain: CHAINS_ENUM
+  ) => string;
 } & GenOpenApiService<'openapi'> &
   GenOpenApiService<'testnetOpenapi'>;
 
