@@ -352,7 +352,6 @@ const SendTokenInner = () => {
   const [selectedGasLevel, setSelectedGasLevel] = useState<GasLevel | null>(
     null
   );
-  console.log('[feat] selectedGasLevel', selectedGasLevel);
 
   const [estimateGas, setEstimateGas] = useState(0);
   const [temporaryGrant, setTemporaryGrant] = useState(false);
@@ -443,7 +442,6 @@ const SendTokenInner = () => {
     },
     [fetchGasList]
   );
-  console.log('[feat] gasList', gasList);
 
   useEffect(() => {
     loadGasList();
@@ -578,7 +576,7 @@ const SendTokenInner = () => {
       //   delete params.gas;
       // }
       setIsSubmittingRef(false);
-      if (showGasReserved) {
+      if (clickedMax && selectedGasLevel?.price) {
         params.gasPrice = selectedGasLevel?.price;
       }
     }
