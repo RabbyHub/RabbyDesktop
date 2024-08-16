@@ -49,8 +49,8 @@ const TokenRenderWrapper = styled.div`
   }
   .arrow {
     margin-left: auto;
-    font-size: 12px;
-    opacity: 0.8;
+    width: 20px;
+    height: 20px;
   }
 `;
 export const TokenRender: TokenAmountInputProps['tokenRender'] = ({

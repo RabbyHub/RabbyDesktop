@@ -2,7 +2,7 @@ import { CHAINS_ENUM } from '@debank/common';
 import { InsHTMLAttributes, useCallback } from 'react';
 
 import IconRcSwapArrowDownTriangle from '@/../assets/icons/swap/arrow-caret-down2.svg?rc';
-import ImgArrowDown from '@/../assets/icons/swap/arrow-down.svg';
+import IconArrowDown from '@/../assets/icons/swap/arrow-down.svg?rc';
 
 import ChainIcon from '@/renderer/components/ChainIcon';
 import { useSwitchChainModal } from '@/renderer/hooks/useSwitchChainModal';
@@ -30,7 +30,7 @@ const ChainSelectWrapper = styled.div`
   .name {
     font-weight: 500;
     font-size: 16px;
-    color: #ffffff;
+    color: var(--r-neutral-title2, #fff);
   }
 `;
 
@@ -95,12 +95,12 @@ export const ChainSelect = ({
             showCustomRPCToolTip
             isShowCustomRPC
           />
-          <span className="name">{findChain({ enum: value }).name}</span>
+          <span className="name">{findChain({ enum: value })?.name}</span>
           {!readonly && (
             <IconRcSwapArrowDownTriangle
               className="arrow"
-              width={10}
-              height={6}
+              width={20}
+              height={20}
             />
           )}
         </>
@@ -154,7 +154,13 @@ export const ChainRender = ({
         isShowCustomRPC
       />
       <span className="name">{findChain({ enum: chain })?.name}</span>
-      <img className="down" src={ImgArrowDown} alt="" />
+      {/* <img className="down" src={ImgArrowDown} alt="" /> */}
+      <IconArrowDown
+        width={20}
+        height={20}
+        color="var(--r-neutral-title2, #FFF)"
+        className="ml-auto"
+      />
     </ChainWrapper>
   );
 };

@@ -1,7 +1,6 @@
-import React from 'react';
+import { Modal, ModalProps } from 'antd';
 
 import { ReserveGasContent, ReserveGasContentProps } from './ReserverGasModal';
-import { Modal, Props as ModalProps } from '../Modal/Modal';
 import styles from './index.module.less';
 
 export const SwapReserveGasModal = (
@@ -19,11 +18,13 @@ export const SwapReserveGasModal = (
 
   return (
     <Modal
+      title="Reserve Gas"
       className={styles.ReserveGasModal}
       width={400}
       maskClosable
       destroyOnClose
       closeIcon={null}
+      centered
       {...otherModalProps}
     >
       {gasList && (

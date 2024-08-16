@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import { ReactNode } from 'react';
 import ReactDOM from 'react-dom';
 import './index.less';
+import '@/renderer/utils/i18n';
 
 const SvgIconCross = 'rabby-internal://assets/icons/modal/close.svg';
 const closeIcon = (

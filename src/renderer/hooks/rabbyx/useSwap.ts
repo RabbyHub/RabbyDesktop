@@ -1,91 +1,85 @@
-import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { CHAINS_ENUM } from '@debank/common';
-import { atom, useAtom } from 'jotai';
+import { atom, useAtom, useAtomValue } from 'jotai';
 import { useCallback, useMemo } from 'react';
 import { useAsync } from 'react-use';
 
-import type { ChainGas, GasCache, SwapState } from '@/isomorphic/types/rabbyx';
+import type { SwapState } from '@/isomorphic/types/rabbyx';
 import { findChain } from '@/renderer/utils/chain';
 import { obj2query } from '@/renderer/utils/url';
-import { DEX_ENUM, DEX_SUPPORT_CHAINS } from '@rabby-wallet/rabby-swap';
+import { DEX_SUPPORT_CHAINS } from '@rabby-wallet/rabby-swap';
 import { message } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
+import { DEX } from '@/renderer/routes/Swap/constant';
 
-export const swapAtom = atom<SwapState>({
-  gasPriceCache: {},
-  selectedChain: CHAINS_ENUM.ETH,
-  selectedDex: null,
-  unlimitedAllowance: false,
-  viewList: {},
-  tradeList: {},
-  sortIncludeGasFee: false,
-} as SwapState);
+const supportedDEXListAtom = atom<string[]>(Object.keys(DEX));
+
+supportedDEXListAtom.onMount = (setAtom) => {
+  walletOpenapi.getSupportedDEXList().then(async (s) => {
+    const data = await s;
+    setAtom(data.dex_list);
+  });
+};
+
+export const useSwapSupportedDexList = () => useAtom(supportedDEXListAtom);
+
+export const swapAtom = atom<SwapState & { _loaded?: boolean }>({
+  autoSlippage: true,
+  slippage: '0.1',
+  selectedChain: null,
+  selectedFromToken: undefined,
+  selectedToToken: undefined,
+  preferMEVGuarded: false,
+  _loaded: false,
+});
+
+const swapStateLoadedAtom = atom((get) => !!get(swapAtom)._loaded);
+
+export const useSwapStateLoaded = () => useAtomValue(swapStateLoadedAtom);
+
+swapAtom.onMount = (setAtom) => {
+  walletController
+    .getSwap()
+    .then(async (s) => {
+      const data = await s;
+      setAtom({ ...data, _loaded: true });
+    })
+    .catch(() => {
+      setAtom((preSwapData) => ({ ...preSwapData, _loaded: true }));
+    });
+};
 
 export const useSwap = () => {
   const [v, s] = useAtom(swapAtom);
 
-  const getSwap = useCallback(
-    async (key?: keyof SwapState) => {
-      const data = await walletController.getSwap(key);
-      s(key ? (e) => ({ ...e, key: data }) : { ...(data as SwapState) });
-    },
-    [s]
-  );
-
-  const { error, loading } = useAsync(getSwap);
-
   const updateMethod = useMemo(
     () => ({
-      setSwapDexId: async (selectedDex: DEX_ENUM) => {
-        await walletController.setSwapDexId(selectedDex);
-        s((e) => ({ ...e, selectedDex }));
+      setAutoSlippage: async (p: boolean) => {
+        await walletController.setAutoSlippage(p);
+        s((e) => ({ ...e, autoSlippage: p }));
       },
-      updateSwapGasCache: async (chainId: keyof GasCache, gas: ChainGas) => {
-        await walletController.updateSwapGasCache(chainId, gas);
-        await getSwap('gasPriceCache');
+
+      setIsCustomSlippage: async (p: boolean) => {
+        await walletController.setIsCustomSlippage(p);
+        s((e) => ({ ...e, isCustomSlippage: p }));
       },
-      getSwapGasCache: async (chain: CHAINS_ENUM) => {
-        const gasCache = await walletController.getSwapGasCache(chain);
-        if (gasCache) {
-          s((e) => ({
-            ...e,
-            gasPriceCache: {
-              ...e.gasPriceCache,
-              [chain]: gasCache,
-            },
-          }));
-        }
-        return gasCache;
+      setSlippage: async (p: string) => {
+        await walletController.setSlippage(p);
+        s((e) => ({ ...e, slippage: p }));
+      },
+
+      setSelectedFromToken: async (token?: TokenItem) => {
+        await walletController.setSelectedFromToken(token);
+        s((e) => ({ ...e, selectedFromToken: token }));
+      },
+      setSelectedToToken: async (token?: TokenItem) => {
+        await walletController.setSelectedToToken(token);
+        s((e) => ({ ...e, selectedToToken: token }));
       },
       setLastSelectedSwapChain: async (selectedChain: CHAINS_ENUM) => {
         await walletController.setLastSelectedSwapChain(selectedChain);
         s((e) => ({ ...e, selectedChain }));
-      },
-      setUnlimitedAllowance: async (unlimitedAllowance: boolean) => {
-        await walletController.setUnlimitedAllowance(unlimitedAllowance);
-        s((e) => ({ ...e, unlimitedAllowance }));
-      },
-      setSwapView: async (
-        params: Parameters<typeof walletController.setSwapView>
-      ) => {
-        await walletController.setSwapView(...params);
-        s((e) => ({
-          ...e,
-          viewList: { ...e.viewList, [params[0]]: params[1] },
-        }));
-      },
-      setSwapTrade: async (
-        params: Parameters<typeof walletController.setSwapTrade>
-      ) => {
-        await walletController.setSwapTrade(...params);
-        s((e) => ({
-          ...e,
-          tradeList: { ...e.tradeList, [params[0]]: params[1] },
-        }));
-      },
-      setSwapSortIncludeGasFee: async (p: boolean) => {
-        await walletController.setSwapSortIncludeGasFee(p);
-        s((e) => ({ ...e, sortIncludeGasFee: p }));
       },
 
       setSwapPreferMEV: async (p: boolean) => {
@@ -93,35 +87,33 @@ export const useSwap = () => {
         s((e) => ({ ...e, preferMEVGuarded: p }));
       },
     }),
-    [getSwap, s]
+    [s]
   );
 
   return {
     swap: v,
-    loading,
-    error,
+    loading: false,
+    error: undefined,
     ...updateMethod,
   };
 };
 
+export const SWAP_SUPPORT_CHAINS = Array.from(
+  new Set(Object.values(DEX_SUPPORT_CHAINS).flat())
+);
+
 export const useGotoSwapByToken = () => {
   const navigate = useNavigate();
-
-  const { swap } = useSwap();
-  const { selectedDex } = swap;
 
   const gotoSwap = useCallback(
     (chain: string, payTokenId: string) => {
       if (
-        selectedDex &&
-        !DEX_SUPPORT_CHAINS[selectedDex]
-          .map(
-            (e) =>
-              findChain({
-                enum: e,
-              })?.serverId
-          )
-          .includes(chain)
+        SWAP_SUPPORT_CHAINS.map(
+          (e) =>
+            findChain({
+              enum: e,
+            })?.serverId
+        ).includes(chain)
       ) {
         return message.info({
           content: 'The token on this chain is not supported on current dex',
@@ -136,7 +128,7 @@ export const useGotoSwapByToken = () => {
         })}`
       );
     },
-    [selectedDex, navigate]
+    [navigate]
   );
   return gotoSwap;
 };

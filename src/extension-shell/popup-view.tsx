@@ -15,6 +15,8 @@ import ZPopupLayer from '@/renderer/routes-popup/ZPopupLayer';
 import SelectCameraWindow from '@/renderer/routes-popup/SelectCameraWindow';
 import { initSyncChain } from '@/renderer/utils/sync-chain';
 
+import '@/renderer/utils/i18n';
+
 const container = document.getElementById('root')!;
 const root = createRoot(container);
 initSyncChain();

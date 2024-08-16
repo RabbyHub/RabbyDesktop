@@ -1,147 +1,108 @@
-import { useMemo, useCallback } from 'react';
-import { CEXQuote, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
+import { CHAINS_ENUM } from '@debank/common';
+import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
-import { Tooltip } from 'antd';
+import clsx from 'clsx';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import BigNumber from 'bignumber.js';
-import { formatAmount, formatUsdValue } from '@/renderer/utils/number';
-import clsx from 'clsx';
-import { CHAINS_ENUM } from '@debank/common';
-import { DEX_ENUM } from '@rabby-wallet/rabby-swap';
-import { useDebounce } from 'react-use';
+import RcIconInfo from '@/../assets/icons/common/info-cc.svg?rc';
 import ImgLock from '@/../assets/icons/swap/lock.svg';
-import IconRcTip from '@/../assets/icons/swap/tip-info.svg?rc';
-import IconGas from '@/../assets/icons/swap/gas.svg';
+import RcIconGasCC from '@/../assets/icons/swap/gas-cc.svg?rc';
+import ImgVerified from '@/../assets/icons/swap/verified.svg';
 
-import { useSetAtom } from 'jotai';
+import { useTranslation } from 'react-i18next';
+import { Tooltip } from 'antd';
+import { formatAmount, formatUsdValue } from '@/renderer/utils/number';
 import { getTokenSymbol } from '@/renderer/utils';
-import { CEX } from '../constant';
-import { QuotePreExecResultInfo, isSwapWrapToken } from '../utils';
-import { WarningOrChecked } from './ReceiveDetail';
-import { useSwapSettings, useVerifySdk } from '../hooks';
-import { activeProviderOriginAtom } from '../atom';
+import { isSameAddress } from '@/renderer/utils/address';
+import TokenWithChain from '@/renderer/components/TokenWithChain';
+import { TooltipWithMagnetArrow } from '@/renderer/components/Tooltip/TooltipWithMagnetArrow';
 import { QuoteLogo } from './QuoteLogo';
+import { QuoteProvider, useSetQuoteVisible, useSetRabbyFee } from '../atom';
+import { isSwapWrapToken, QuotePreExecResultInfo } from '../utils';
+
+const GAS_USE_AMOUNT_LIMIT = 2_000_000;
 
 const ItemWrapper = styled.div`
+  --quote--border-width: 1px;
   position: relative;
-  height: 72px;
-  font-size: 16px;
+  height: 60px;
+  font-size: 13px;
   padding: 0 16px;
   display: flex;
   align-items: center;
-  color: rgba(255, 255, 255, 0.8);
   background: rgba(255, 255, 255, 0.1);
-  outline: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.12);
-  border-radius: 6px;
 
+  border-radius: 6px;
+  box-shadow: 0px 4px 16px 0px rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+  border: var(--quote--border-width) solid transparent;
   cursor: pointer;
 
-  .disabled-trade {
-    position: absolute;
-    left: 0;
-    top: 0;
-    transform: translateY(-20px);
-    opacity: 0;
-    width: 100%;
-    height: 0;
-    padding-left: 16px;
-    background: #000000;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    font-size: 12px;
-    gap: 8px;
-    pointer-events: none;
-    /* &.active {
-      height: 100%;
-      transform: translateY(0);
-      opacity: 1;
-      transition: opacity 0.35s, transform 0.35s;
-    } */
-  }
-
-  &:hover {
-    .disabled-trade {
-      height: 100%;
-      transform: translateY(0);
-      opacity: 1;
-      pointer-events: auto;
+  &:hover:not(.disabled, .inSufficient) {
+    background: var(--r-blue-light1, #424962);
+    &::after {
+      position: absolute;
+      content: '';
+      inset: calc(0px - var(--quote--border-width));
+      border: var(--quote--border-width) solid var(--r-blue-default, #7084ff);
+      background: transparent;
+      border-radius: 6px;
+      z-index: 2;
+      pointer-events: none;
     }
   }
 
-  &:hover:not(.disabled, .inSufficient) {
-    background: rgba(134, 151, 255, 0.1);
-    border-color: 2px solid transparent;
-    box-shadow: 0px 10px 16px rgba(0, 0, 0, 0.1);
-    border-radius: 6px;
-  }
-  &.active {
-    background: rgba(134, 151, 255, 0.1);
-    outline: 2px solid #8697ff;
-    box-shadow: 0px 10px 16px rgba(0, 0, 0, 0.1);
-    border-radius: 6px;
-  }
   &.disabled {
-    height: 56px;
     border-color: transparent;
     box-shadow: none;
     background-color: transparent;
-    border-radius: 6px;
     cursor: not-allowed;
   }
-  &.error {
-    & > * {
-      opacity: 0.6;
-    }
-  }
-  &.inSufficient {
-    height: 72px;
+
+  &:not(.cex).inSufficient,
+  &:not(.cex).disabled {
+    border: var(--quote--border-width) solid var(--r-neutral-line, #d3d8e0);
+    box-shadow: none;
   }
 
-  &.cex {
-    height: 56px;
-    background-color: transparent;
-    border: none;
-    outline: none;
-  }
+  &.dex {
+    justify-content: space-between;
+    height: 100px;
+    align-items: flex-start;
+    padding-top: 24px;
+    padding-bottom: 16px;
 
-  .price {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    .receiveNum {
-      max-width: 210px;
-      display: inline-block;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-weight: 500;
-      color: rgba(255, 255, 255, 0.8);
-      .toToken {
-        color: #fff;
-      }
+    &.error {
+      height: auto;
+      padding: 24px 16px;
     }
   }
-  .no-price {
-    color: rgba(255, 255, 255, 0.6);
+
+  .receiveNum {
+    font-size: 16px;
+    max-width: 130px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+    color: var(--r-neutral-title-1, #192945);
   }
 
   .percent {
     font-weight: 500;
+    font-size: 13px;
+    font-weight: 500;
     color: #27c193;
     &.red {
-      color: #ff7878;
+      color: #ec5151;
     }
-  }
-
-  .diff {
-    margin-left: auto;
   }
 `;
 
 export interface QuoteItemProps {
+  onlyShowErrorQuote?: boolean;
   quote: QuoteResult | null;
   name: string;
   loading?: boolean;
@@ -149,25 +110,43 @@ export interface QuoteItemProps {
   receiveToken: TokenItem;
   payAmount: string;
   chain: CHAINS_ENUM;
-  bestQuoteAmount: string;
-  bestQuoteGasUsd: string;
   isBestQuote: boolean;
-  active: boolean;
-  userAddress: string;
-  slippage: string;
-  fee: string;
+  bestQuoteGasUsd: string;
+  bestQuoteAmount: string;
+  // userAddress: string;
+  // slippage: string;
+  // fee: string;
   isLoading?: boolean;
   quoteProviderInfo: { name: string; logo: string };
   inSufficient: boolean;
+  setActiveProvider?: React.Dispatch<
+    React.SetStateAction<QuoteProvider | undefined>
+  >;
+  sortIncludeGasFee: boolean;
+}
+
+function CheckedIcon() {
+  const { t } = useTranslation();
+  return (
+    <Tooltip
+      arrowPointAtCenter
+      overlayClassName={clsx('rectangle', 'w-[max-content]')}
+      title={t('page.swap.by-transaction-simulation-the-quote-is-valid')}
+    >
+      <img src={ImgVerified} className="w-[16px] h-[16px]" />
+    </Tooltip>
+  );
 }
 
 export const DexQuoteItem = (
   props: QuoteItemProps & {
     preExecResult: QuotePreExecResultInfo;
+    onErrQuote?: React.Dispatch<React.SetStateAction<string[]>>;
+    onlyShow?: boolean;
   }
 ) => {
   const {
-    isLoading,
+    onlyShow,
     quote,
     name: dexId,
     loading,
@@ -177,68 +156,54 @@ export const DexQuoteItem = (
     receiveToken,
     payAmount,
     chain,
-    active,
-    userAddress,
     isBestQuote,
-    slippage,
-    fee,
     inSufficient,
     preExecResult,
     quoteProviderInfo,
+    setActiveProvider,
+    sortIncludeGasFee,
+    onlyShowErrorQuote,
+    onErrQuote,
+    isLoading,
   } = props;
 
-  const { swapTradeList, setSwapSettingVisible, sortIncludeGasFee } =
-    useSwapSettings();
+  const { t } = useTranslation();
 
-  const disabledTrade = useMemo(
-    () =>
-      !swapTradeList?.[dexId as Exclude<DEX_ENUM, DEX_ENUM.WRAPTOKEN>] &&
-      !isSwapWrapToken(payToken.id, receiveToken.id, chain),
-    [swapTradeList, dexId, payToken.id, receiveToken.id, chain]
-  );
+  const openSwapQuote = useSetQuoteVisible();
 
-  const { isSdkDataPass } = useVerifySdk({
-    chain,
-    dexId: dexId as DEX_ENUM,
-    slippage,
-    data: {
-      ...quote,
-      fromToken: payToken.id,
-      fromTokenAmount: new BigNumber(payAmount)
-        .times(10 ** payToken.decimals)
-        .toFixed(0, 1),
-      toToken: receiveToken?.id,
-    } as typeof quote,
-    payToken,
-    receiveToken,
-  });
+  const setRabbyFeeVisible = useSetRabbyFee();
 
-  const updateActiveQuoteProvider = useSetAtom(activeProviderOriginAtom);
+  const isSdkDataPass = !!preExecResult?.isSdkPass;
 
   const halfBetterRateString = '';
 
   const [
-    middleContent,
-    rightContent,
+    receiveOrErrorContent,
+    bestQuotePercent,
     disabled,
     receivedTokenUsd,
     diffReceivedTokenUsd,
   ] = useMemo(() => {
-    let center: React.ReactNode = <div className="">-</div>;
-    let right: React.ReactNode = '';
+    let _receiveOrErrorContent: React.ReactNode = null;
+    let _bestQuotePercent: React.ReactNode = null;
     let disable = false;
-    let receivedUsd = '0';
-    let diffUsd = '0';
-
+    let _receivedTokenUsd: React.ReactNode = null;
+    let diffUsd: React.ReactNode = null;
+    const balanceChangeReceiveTokenAmount = preExecResult
+      ? preExecResult.swapPreExecTx.balance_change.receive_token_list.find(
+          (item) => isSameAddress(item.id, receiveToken.id)
+        )?.amount || '0'
+      : '0';
     const actualReceiveAmount = inSufficient
       ? new BigNumber(quote?.toTokenAmount || 0)
           .div(10 ** (quote?.toTokenDecimals || receiveToken.decimals))
           .toString()
-      : preExecResult?.swapPreExecTx.balance_change.receive_token_list[0]
-          ?.amount;
-    if (actualReceiveAmount) {
+      : balanceChangeReceiveTokenAmount;
+    if (actualReceiveAmount || dexId === 'WrapToken') {
+      const receiveAmount =
+        actualReceiveAmount || (dexId === 'WrapToken' ? payAmount : 0);
       const bestQuoteAmountBn = new BigNumber(bestQuoteAmount);
-      const receivedTokeAmountBn = new BigNumber(actualReceiveAmount || 0);
+      const receivedTokeAmountBn = new BigNumber(receiveAmount);
 
       const receivedUsdBn = receivedTokeAmountBn
         .times(receiveToken.price)
@@ -248,144 +213,132 @@ export const DexQuoteItem = (
         .times(receiveToken.price)
         .minus(sortIncludeGasFee ? bestQuoteGasUsd : 0);
 
-      const percent = receivedUsdBn
+      let percent = receivedUsdBn
         .minus(bestQuoteUsdBn)
         .div(bestQuoteUsdBn)
+        .abs()
         .times(100);
 
-      receivedUsd = formatUsdValue(
+      if (!receiveToken.price) {
+        percent = receivedTokeAmountBn
+          .minus(bestQuoteAmountBn)
+          .div(bestQuoteAmountBn)
+          .abs()
+          .times(100);
+      }
+
+      _receivedTokenUsd = formatUsdValue(
         receivedTokeAmountBn.times(receiveToken.price || 0).toString(10)
       );
 
       diffUsd = formatUsdValue(
-        new BigNumber(actualReceiveAmount)
-          .minus(bestQuoteAmountBn || 0)
-          .times(receiveToken.price || 0)
-          .toString(10)
+        receivedUsdBn.minus(bestQuoteUsdBn).toString(10)
       );
 
       const s = formatAmount(receivedTokeAmountBn.toString(10));
-      center = (
-        <span
-          className="receiveNum"
-          title={`${s} ${getTokenSymbol(receiveToken)}`}
-        >
-          <span className="toToken" title={s}>
-            {s}
-          </span>{' '}
-          {getTokenSymbol(receiveToken)}
+      const receiveTokenSymbol = getTokenSymbol(receiveToken);
+      _receiveOrErrorContent = (
+        <span className="receiveNum" title={`${s} ${receiveTokenSymbol}`}>
+          {s}
         </span>
       );
 
-      right = (
-        <span className={clsx('percent', !isBestQuote && 'red')}>
+      _bestQuotePercent = (
+        <span className={clsx('percent', { red: !isBestQuote })}>
           {isBestQuote
-            ? 'Best'
-            : `${percent.toFixed(2, BigNumber.ROUND_DOWN)}%`}
+            ? t('page.swap.best')
+            : `-${percent.toFixed(2, BigNumber.ROUND_DOWN)}%`}
         </span>
       );
     }
 
     if (!quote?.toTokenAmount) {
-      right = <div className="text-opacity-60">Unable to fetch the price</div>;
-      center = <div className="">-</div>;
+      _receiveOrErrorContent = (
+        <div className="text-r-neutral-body text-[15px] font-normal">
+          {t('page.swap.unable-to-fetch-the-price')}
+        </div>
+      );
+      _bestQuotePercent = null;
       disable = true;
     }
 
     if (quote?.toTokenAmount) {
       if (!preExecResult && !inSufficient) {
-        center = <div className="">-</div>;
-        right = (
-          <div className="text-opacity-60">Fail to simulate transaction</div>
+        _receiveOrErrorContent = (
+          <div className="text-r-neutral-body text-[15px] font-normal">
+            {t('page.swap.fail-to-simulate-transaction')}
+          </div>
         );
+        _bestQuotePercent = null;
         disable = true;
       }
     }
 
-    if (!isSdkDataPass) {
+    if (!isSdkDataPass && !!preExecResult) {
       disable = true;
-      center = <div className="">-</div>;
-      right = (
-        <div className="text-opacity-60">Security verification failed</div>
+      _receiveOrErrorContent = (
+        <div className="text-r-neutral-body text-[15px] font-normal">
+          {t('page.swap.security-verification-failed')}
+        </div>
       );
+      _bestQuotePercent = null;
     }
-    return [center, right, disable, receivedUsd, diffUsd];
+    return [
+      _receiveOrErrorContent,
+      _bestQuotePercent,
+      disable,
+      _receivedTokenUsd,
+      diffUsd,
+      receiveToken,
+    ];
   }, [
+    dexId,
+    payAmount,
+    receiveToken,
+    t,
     quote?.toTokenAmount,
     quote?.toTokenDecimals,
     inSufficient,
-    receiveToken,
+    // receiveToken.decimals,
+    // receiveToken.price,
     preExecResult,
     isSdkDataPass,
     bestQuoteAmount,
     bestQuoteGasUsd,
-    sortIncludeGasFee,
     isBestQuote,
-  ]);
-
-  const quoteWarning = useMemo(() => {
-    if (!quote?.toTokenAmount || !preExecResult) {
-      return;
-    }
-
-    if (isSwapWrapToken(payToken.id, receiveToken.id, chain)) {
-      return;
-    }
-    const receivedTokeAmountBn = new BigNumber(quote?.toTokenAmount || 0).div(
-      10 ** (quote?.toTokenDecimals || receiveToken.decimals)
-    );
-
-    const diff = receivedTokeAmountBn
-      .minus(
-        preExecResult?.swapPreExecTx?.balance_change.receive_token_list[0]
-          ?.amount || 0
-      )
-      .div(receivedTokeAmountBn);
-
-    const diffPercent = diff.times(100);
-
-    return diffPercent.gt(0.01)
-      ? ([
-          formatAmount(receivedTokeAmountBn.toString(10)) +
-            getTokenSymbol(receiveToken),
-          `${diffPercent.toPrecision(2)}% (${formatAmount(
-            receivedTokeAmountBn
-              .minus(
-                preExecResult?.swapPreExecTx?.balance_change
-                  .receive_token_list[0]?.amount || 0
-              )
-              .toString(10)
-          )} ${getTokenSymbol(receiveToken)})`,
-        ] as [string, string])
-      : undefined;
-  }, [
-    chain,
-    payToken.id,
-    preExecResult,
-    quote?.toTokenAmount,
-    quote?.toTokenDecimals,
-    receiveToken,
+    sortIncludeGasFee,
   ]);
 
   const CheckIcon = useCallback(() => {
     if (disabled || loading || !quote?.tx || !preExecResult?.swapPreExecTx) {
       return null;
     }
-    return <WarningOrChecked quoteWarning={quoteWarning} />;
-  }, [
-    disabled,
-    loading,
-    quote?.tx,
-    preExecResult?.swapPreExecTx,
-    quoteWarning,
-  ]);
+    return <CheckedIcon />;
+  }, [disabled, loading, quote?.tx, preExecResult?.swapPreExecTx]);
+
+  const gasFeeTooHight = useMemo(() => {
+    return (
+      new BigNumber(preExecResult?.swapPreExecTx?.gas?.gas_used || 0).gte(
+        GAS_USE_AMOUNT_LIMIT
+      ) && chain === CHAINS_ENUM.ETH
+    );
+  }, [preExecResult, chain]);
 
   const handleClick = useCallback(() => {
-    if (inSufficient || disabledTrade) {
+    if (gasFeeTooHight) {
       return;
     }
-    if (active || disabled) return;
-    updateActiveQuoteProvider({
+
+    if (inSufficient) {
+      return;
+    }
+    if (disabled) return;
+    const actualReceiveAmount =
+      preExecResult?.swapPreExecTx.balance_change.receive_token_list.find(
+        (item) => isSameAddress(item.id, receiveToken.id)
+      )?.amount || 0;
+    setActiveProvider?.({
+      manualClick: true,
       name: dexId,
       quote,
       gasPrice: preExecResult?.gasPrice,
@@ -393,277 +346,230 @@ export const DexQuoteItem = (
       shouldTwoStepApprove: !!preExecResult?.shouldTwoStepApprove,
       error: !preExecResult,
       halfBetterRate: halfBetterRateString,
-      quoteWarning,
-      actualReceiveAmount:
-        preExecResult?.swapPreExecTx.balance_change.receive_token_list[0]
-          ?.amount || '',
+      quoteWarning: undefined,
+      actualReceiveAmount,
       gasUsd: preExecResult?.gasUsd,
+      preExecResult,
     });
+
+    openSwapQuote(false);
   }, [
-    active,
-    disabled,
+    gasFeeTooHight,
     inSufficient,
-    updateActiveQuoteProvider,
+    disabled,
+    preExecResult,
+    setActiveProvider,
     dexId,
     quote,
-    preExecResult,
-    quoteWarning,
-    disabledTrade,
+    openSwapQuote,
+    receiveToken.id,
   ]);
 
-  useDebounce(
-    () => {
-      if (active) {
-        updateActiveQuoteProvider((e) => ({
-          ...e,
-          name: dexId,
-          quote,
-          gasPrice: preExecResult?.gasPrice,
-          shouldApproveToken: !!preExecResult?.shouldApproveToken,
-          shouldTwoStepApprove: !!preExecResult?.shouldTwoStepApprove,
-          error: !preExecResult,
-          halfBetterRate: halfBetterRateString,
-          quoteWarning,
-          actualReceiveAmount:
-            preExecResult?.swapPreExecTx.balance_change.receive_token_list[0]
-              ?.amount || '',
-          gasUsd: preExecResult?.gasUsd,
-        }));
-      }
-    },
-    300,
-    [
-      quoteWarning,
-      halfBetterRateString,
-      active,
-      dexId,
-      updateActiveQuoteProvider,
-      quote,
-      preExecResult,
-    ]
-  );
-
-  const isWrapTokensWap = useMemo(
+  const isWrapToken = useMemo(
     () => isSwapWrapToken(payToken.id, receiveToken.id, chain),
-    [payToken, receiveToken, chain]
+    [payToken?.id, receiveToken?.id, chain]
   );
 
-  return (
-    <ItemWrapper
-      onClick={handleClick}
-      className={clsx(
-        active && 'active',
-        disabled && 'disabled error',
-        (disabledTrade || inSufficient) && !disabled && 'disabled inSufficient'
-      )}
-    >
-      <QuoteLogo
-        size={disabled ? 24 : 32}
-        loadingSize={disabled ? 32 : 40}
-        logo={quoteProviderInfo.logo}
-        isLoading={isLoading}
-      />
-
-      <div className="flex flex-col justify-center ml-12 flex-1 text-16  text-white ">
-        <div className="flex items-center">
-          <div
-            className={clsx(
-              'flex items-center gap-4 w-[122px] text-white text-opacity-80',
-              isWrapTokensWap && 'mr-[42px]'
-            )}
-          >
-            <span
-              className={clsx(inSufficient && !disabled && 'relative top-14')}
-            >
-              {quoteProviderInfo.name}
-            </span>
-            {!!preExecResult?.shouldApproveToken && (
-              <Tooltip
-                overlayClassName="rectangle max-w-[300px]"
-                title="Need to approve token before swap"
-              >
-                <img src={ImgLock} className="w-14 h-14" />
-              </Tooltip>
-            )}
-          </div>
-
-          <div className="flex flex-col">
-            <div className="price">
-              {middleContent}
-              <CheckIcon />
-            </div>
-          </div>
-          {!isBestQuote && <div className="diff">{rightContent}</div>}
-        </div>
-
-        {!disabled && (
-          <div className="flex items-center text-13 text-white text-opacity-80 mt-4">
-            <div
-              className={clsx(
-                'flex items-center gap-4 w-[122px]',
-                isWrapTokensWap && 'mr-[42px]'
-              )}
-            >
-              {!inSufficient && (
-                <>
-                  <img
-                    src={IconGas}
-                    className="w-14 h-14 relative top-[-1px]"
-                  />
-                  <span>{preExecResult?.gasUsd}</span>
-                </>
-              )}
-            </div>
-
-            <span>{receivedTokenUsd}</span>
-
-            {!isBestQuote && (
-              <span className="ml-auto text-right">{diffReceivedTokenUsd}</span>
-            )}
-          </div>
-        )}
-      </div>
-
-      {isBestQuote && <div className="diff">{rightContent}</div>}
-
-      {disabledTrade && !inSufficient && !disabled ? (
-        <div className={clsx('disabled-trade')}>
-          <IconRcTip className="w-16 h-16" />
-          <span>
-            This exchange is not enabled to trade by you.
-            <span
-              className="underline-white underline cursor-pointer ml-4"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSwapSettingVisible(true);
-              }}
-            >
-              Enable it
-            </span>
-          </span>
-        </div>
-      ) : null}
-    </ItemWrapper>
+  const isErrorQuote = useMemo(
+    () =>
+      !isSdkDataPass ||
+      !quote?.toTokenAmount ||
+      !!(quote?.toTokenAmount && !preExecResult && !inSufficient),
+    [isSdkDataPass, quote, preExecResult, inSufficient]
   );
-};
 
-export const CexQuoteItem = (props: {
-  name: string;
-  data: CEXQuote | null;
-  bestQuoteAmount: string;
-  bestQuoteGasUsd: string;
-  isBestQuote: boolean;
-  isLoading?: boolean;
-  inSufficient: boolean;
-}) => {
-  const {
-    name,
-    data,
-    bestQuoteAmount,
-    bestQuoteGasUsd,
-    isBestQuote,
-    isLoading,
-    inSufficient,
-  } = props;
-  const dexInfo = useMemo(() => CEX[name as keyof typeof CEX], [name]);
-
-  const { sortIncludeGasFee } = useSwapSettings();
-
-  const [middleContent, rightContent] = useMemo(() => {
-    let center: React.ReactNode = <div className="">-</div>;
-    let right: React.ReactNode = '';
-    let disable = false;
-
-    if (!data?.receive_token?.amount) {
-      right = (
-        <div className="text-opacity-60">This token pair is not supported</div>
-      );
-      disable = true;
+  const tooltipVisible = useMemo(() => {
+    if (onlyShow) {
+      return false;
     }
+    if (gasFeeTooHight || (inSufficient && !disabled)) {
+      return undefined;
+    }
+    return false;
+  }, [onlyShow, gasFeeTooHight, inSufficient, disabled]);
 
-    if (data?.receive_token?.amount) {
-      const receiveToken = data.receive_token;
-
-      const bestQuoteUsdBn = new BigNumber(bestQuoteAmount)
-        .times(receiveToken.price || 1)
-        .minus(sortIncludeGasFee ? bestQuoteGasUsd : 0);
-      const receiveUsdBn = new BigNumber(receiveToken.amount).times(
-        receiveToken.price || 1
-      );
-      const percent = receiveUsdBn
-        .minus(bestQuoteUsdBn)
-        .div(bestQuoteUsdBn)
-        .times(100);
-      const s = formatAmount(receiveToken.amount.toString(10));
-      center = (
-        <span
-          className="receiveNum"
-          title={`${s} ${getTokenSymbol(receiveToken)}`}
-        >
-          <span className="toToken" title={s}>
-            {s}
-          </span>{' '}
-          {getTokenSymbol(receiveToken)}
-        </span>
-      );
-
-      right = (
-        <span className={clsx('percent', !isBestQuote && 'red')}>
-          {isBestQuote
-            ? 'Best'
-            : `${percent.toFixed(2, BigNumber.ROUND_DOWN)}%`}
-        </span>
+  useEffect(() => {
+    if (isErrorQuote && onlyShowErrorQuote) {
+      onErrQuote?.((e) => {
+        return e.includes(dexId) ? e : [...e, dexId];
+      });
+    }
+    if (!onlyShowErrorQuote && !isErrorQuote) {
+      onErrQuote?.((e) =>
+        e.includes(dexId) ? e.filter((item) => item !== dexId) : e
       );
     }
+  }, [onlyShowErrorQuote, isErrorQuote, dexId, onErrQuote]);
 
-    return [center, right, disable];
-  }, [
-    data?.receive_token,
-    bestQuoteAmount,
-    isBestQuote,
-    sortIncludeGasFee,
-    bestQuoteGasUsd,
-  ]);
-
-  return (
-    <ItemWrapper
-      className={clsx('cex disabled', !data?.receive_token?.amount && 'error')}
-    >
-      <QuoteLogo logo={dexInfo.logo} isLoading={isLoading} />
-
-      <div className="flex flex-col justify-center ml-12 flex-1 text-16  text-white ">
-        <div className="flex items-center">
-          <div
-            className={clsx(
-              'flex items-center gap-4 w-[122px] text-white text-opacity-80'
-            )}
-          >
-            <span>{dexInfo.name}</span>
-          </div>
-
-          <div className="flex flex-col">
-            <div className="price">{middleContent}</div>
-          </div>
-          <div className="diff">{rightContent}</div>
-        </div>
-      </div>
-    </ItemWrapper>
-  );
-};
-
-export const CexListWrapper = styled.div`
-  border: 0.5px solid rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
-  & > div:not(:last-child) {
-    position: relative;
-    &:not(:last-child):before {
-      content: '';
-      position: absolute;
-      width: 440px;
-      height: 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      left: 20px;
-      bottom: 0;
-    }
+  if (!isErrorQuote && onlyShowErrorQuote) {
+    return null;
   }
-`;
+
+  if (!onlyShowErrorQuote && isErrorQuote) {
+    return null;
+  }
+
+  return (
+    <Tooltip
+      overlayClassName="rectangle w-[max-content]"
+      placement="top"
+      title={
+        gasFeeTooHight
+          ? t('page.swap.Gas-fee-too-high')
+          : t('page.swap.insufficient-balance')
+      }
+      trigger={['click']}
+      visible={tooltipVisible}
+      align={{ offset: [0, 30] }}
+      arrowPointAtCenter
+    >
+      <ItemWrapper
+        onClick={onlyShow ? undefined : handleClick}
+        className={clsx(
+          'dex',
+          disabled && 'disabled',
+          isErrorQuote && 'error',
+          inSufficient && !disabled && 'disabled inSufficient',
+          gasFeeTooHight && 'disabled gasFeeTooHight',
+          onlyShow &&
+            'bg-transparent shadow-none p-0 h-auto hover:border-transparent hover:after:hidden'
+        )}
+      >
+        <div className="flex-1 flex flex-col gap-12">
+          <div className="flex items-center justify-between">
+            {/* dex logo */}
+            <div className="flex items-center gap-8 relative">
+              <QuoteLogo
+                logo={quoteProviderInfo.logo}
+                isLoading={onlyShow ? false : isLoading}
+              />
+              <span className="text-[20px] font-medium text-r-neutral-title-1">
+                {quoteProviderInfo.name}
+              </span>
+              {!!preExecResult?.shouldApproveToken && (
+                <TooltipWithMagnetArrow
+                  arrowPointAtCenter
+                  overlayClassName="rectangle w-[max-content]"
+                  title={t('page.swap.need-to-approve-token-before-swap')}
+                >
+                  <img src={ImgLock} className="w-16 h16" />
+                </TooltipWithMagnetArrow>
+              )}
+            </div>
+            {/* receive token */}
+            {receiveOrErrorContent !== null && (
+              <div className="flex items-center justify-end relative">
+                {!isErrorQuote && (
+                  <TokenWithChain
+                    token={receiveToken}
+                    width="20px"
+                    height="20px"
+                    hideChainIcon
+                    hideConer
+                  />
+                )}
+                <div className="ml-6 mr-4 flex items-center">
+                  {receiveOrErrorContent}
+                </div>
+                <CheckIcon />
+              </div>
+            )}
+          </div>
+          {!isErrorQuote && (
+            <div className="flex items-center justify-between">
+              <div className={clsx('flex items-center')}>
+                <div
+                  className={clsx(
+                    'inline-flex items-center gap-4 px-4',
+                    gasFeeTooHight && 'bg-r-red-light'
+                  )}
+                >
+                  <RcIconGasCC
+                    className={clsx(
+                      'text-r-neutral-foot w-16 h-16',
+                      gasFeeTooHight
+                        ? 'text-rabby-red-default'
+                        : 'text-r-neutral-foot'
+                    )}
+                    viewBox="0 0 16 16"
+                  />
+                  <span
+                    className={clsx(
+                      'text-13',
+                      gasFeeTooHight
+                        ? 'text-rabby-red-default'
+                        : 'text-r-neutral-foot'
+                    )}
+                  >
+                    {preExecResult?.gasUsd}
+                  </span>
+                </div>
+              </div>
+
+              <div
+                className={clsx(
+                  'flex items-center gap-6 justify-end',
+                  'text-13 font-medium',
+                  'relative',
+                  !isWrapToken && 'cursor-pointer'
+                )}
+                onClick={
+                  isWrapToken
+                    ? undefined
+                    : (e) => {
+                        e.stopPropagation();
+                        setRabbyFeeVisible({
+                          visible: true,
+                          dexName: dexId,
+                          feeDexDesc: quote?.dexFeeDesc || undefined,
+                        });
+                      }
+                }
+              >
+                {disabled ? (
+                  <span className="text-r-red-default">{bestQuotePercent}</span>
+                ) : (
+                  <>
+                    <span className="text-r-neutral-foot font-normal whitespace-nowrap">
+                      {isWrapToken
+                        ? `≈ ${receivedTokenUsd}`
+                        : t('page.swap.usd-after-fees', {
+                            usd: receivedTokenUsd,
+                          })}
+                    </span>
+                    <TooltipWithMagnetArrow
+                      arrowPointAtCenter
+                      overlayClassName={clsx('rectangle', 'w-[max-content]')}
+                      title={t('page.swap.no-fees-for-wrap')}
+                      visible={isWrapToken ? undefined : false}
+                    >
+                      <RcIconInfo className="text-r-neutral-foot w-14 h-14" />
+                    </TooltipWithMagnetArrow>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {!disabled && !onlyShow && (
+          <span
+            style={{
+              lineHeight: 'normal',
+              // @ts-ignore
+              '--r-red-light': '#4D3E43',
+            }}
+            className={clsx(
+              'absolute top-[-1px] left-[-1px] ',
+              'px-6 py-[1px] rounded-tl-[4px] rounded-br-[4px]',
+              isBestQuote ? 'bg-r-green-light' : 'bg-r-red-light',
+              'text-r-red-default'
+            )}
+          >
+            {bestQuotePercent}
+          </span>
+        )}
+      </ItemWrapper>
+    </Tooltip>
+  );
+};

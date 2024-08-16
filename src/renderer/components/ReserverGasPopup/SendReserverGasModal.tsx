@@ -44,6 +44,7 @@ export const SendReserveGasModal = (
       maskClosable
       destroyOnClose
       closeIcon={null}
+      centered
       {...otherModalProps}
       onCancel={handleCancel}
     >

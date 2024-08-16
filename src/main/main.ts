@@ -33,6 +33,7 @@ import './streams/cex/binance';
 import './streams/cex/okx';
 
 import './streams/developer';
+import './utils/i18n';
 
 import bootstrap from './streams/app';
 

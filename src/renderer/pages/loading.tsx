@@ -8,6 +8,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import './loading.less';
 import { DappFavicon } from '../components/DappFavicon';
 import { useInterval } from '../hooks/useTimer';
+import '@/renderer/utils/i18n';
 
 function LoadingText() {
   const [dotCount, setDotCount] = useState(0);

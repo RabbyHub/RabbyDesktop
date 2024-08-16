@@ -25,6 +25,7 @@ import InDappFindWindow from '../routes-popup/InDappFindWindow';
 
 import GlobalToastPopup from '../components/GlobalToastPopup';
 import { initSyncChain } from '../utils/sync-chain';
+import '@/renderer/utils/i18n';
 
 initSyncChain();
 

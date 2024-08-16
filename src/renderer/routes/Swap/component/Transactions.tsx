@@ -25,10 +25,10 @@ import { getTokenSymbol } from '@/renderer/utils';
 import { findChain } from '@/renderer/utils/chain';
 import { getSwapList } from '../utils';
 import {
+  useRefreshSwapTxList,
   refreshSwapTxListAtom,
   useInSwap,
-  useRefreshSwapTxList,
-} from '../hooks';
+} from '../hooks/subscribe';
 
 const EmptyWrapper = styled.div`
   display: flex;
@@ -349,7 +349,7 @@ export const SwapTransactions = memo(({ addr }: SwapTransactionsProps) => {
     (d) =>
       getSwapList(
         addr,
-        d?.list?.length && d?.list?.length > 1 ? d?.list?.length - 1 : 0,
+        d?.list?.length && d?.list?.length > 1 ? d?.list?.length : 0,
         5
       ),
     {

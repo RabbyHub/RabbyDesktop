@@ -3,6 +3,7 @@ import {
   createHashRouter as createRouter,
   Navigate,
   Outlet,
+  Route,
   RouterProvider,
 } from 'react-router-dom';
 
