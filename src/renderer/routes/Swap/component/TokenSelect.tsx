@@ -51,8 +51,8 @@ const TokenWrapper = styled.div`
   }
 
   & > .arrow-icon {
-    width: 10px;
-    height: 8px;
+    width: 20px;
+    height: 20px;
   }
 `;
 

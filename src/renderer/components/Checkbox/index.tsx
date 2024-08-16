@@ -1,6 +1,6 @@
 import { ReactNode, SyntheticEvent, useEffect, useState } from 'react';
 import cx, { clsx } from 'clsx';
-import IconCheck from '@/../assets/icons/swap/check.svg';
+import IconCheck from '@/../assets/icons/common/check.svg';
 import styles from './style.module.less';
 
 interface CheckboxProps {

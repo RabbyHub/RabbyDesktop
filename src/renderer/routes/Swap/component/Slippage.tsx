@@ -1,15 +1,22 @@
 import clsx from 'clsx';
-import { memo, useMemo, useCallback, ChangeEventHandler } from 'react';
-import { useToggle } from 'react-use';
+import {
+  memo,
+  useMemo,
+  useCallback,
+  ChangeEventHandler,
+  useState,
+  useEffect,
+} from 'react';
 import styled from 'styled-components';
-import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
 import BigNumber from 'bignumber.js';
+import { Trans, useTranslation } from 'react-i18next';
+import i18n from '@/renderer/utils/i18n';
 
-export const SlippageItem = styled.div<{
-  active?: boolean;
-  error?: boolean;
-  hasAmount?: boolean;
-}>`
+import IconArrowUp from '@/../assets/icons/swap/arrow-up.svg?rc';
+import RabbyInput from '@/renderer/components/AntdOverwrite/Input';
+import { useSlippageStore } from '../hooks/slippage';
+
+export const SlippageItem = styled.div`
   position: relative;
   display: flex;
   justify-content: center;
@@ -17,105 +24,83 @@ export const SlippageItem = styled.div<{
   border: 1px solid transparent;
   cursor: pointer;
   border-radius: 6px;
-  width: 52px;
+  width: 80px;
   height: 32px;
-  font-size: 14px;
-  font-weight: medium;
-  background: rgba(0, 0, 0, 0.2);
-  color: rgba(255, 255, 255, 0.6);
-  &:hover {
-    background: linear-gradient(
-        0deg,
-        rgba(134, 151, 255, 0.3),
-        rgba(134, 151, 255, 0.3)
-      ),
-      rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
+  font-weight: 500;
+  font-size: 13px;
+  background: var(--r-neutral-card2, rgba(255, 255, 255, 0.06));
+  border-radius: 4px;
+  overflow: hidden;
+  color: var(--r-neutral-title-1, #f7fafc);
+
+  &:hover,
+  &.active {
+    background: var(--r-blue-light1, #424962);
+    border-color: var(--r-blue-default, #7084ff);
   }
 `;
 
-const SLIPPAGE = ['0.1', '0.3', '0.5'];
+const SLIPPAGE = ['0.1', '0.5'];
 
 const Wrapper = styled.section`
-  .header {
-    display: flex;
-    justify-content: space-between;
-    font-size: 14px;
-    color: white;
-    font-weight: 400;
-
-    .field {
-      color: rgba(255, 255, 255, 0.6);
-    }
-    .value {
-      font-weight: 500;
-      &.warn {
-        color: #ebcc5b;
-      }
-    }
-  }
-
   .slippage {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding-top: 10px;
   }
 
   .input {
-    font-size: 14px;
-    color: white;
-    font-weight: medium;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 6px;
-    &:focus,
-    &:hover,
-    &:active {
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      box-shadow: none;
+    font-weight: 500;
+    font-size: 13px;
+    height: 100%;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--r-neutral-title-1, #f7fafc);
+
+    &:placeholder-shown {
+      color: #707280;
     }
-    > .ant-input {
+    .ant-input {
       border-radius: 0;
+      font-weight: 500;
+      background: transparent;
+      font-weight: 500;
+      font-size: 13px;
     }
   }
 
   .warning {
     padding: 10px;
-    color: #ffdb5c;
+    color: var(--r-red-default);
     font-weight: 400;
-    font-size: 13px;
-    line-height: 16px;
+    font-size: 12px;
+    line-height: 14px;
     position: relative;
     border-radius: 4px;
-    background: rgba(255, 219, 92, 0.1);
-    margin-top: 15px;
-    &:after {
-      position: absolute;
-      top: -8px;
-      left: 50%;
-      transform: translateX(-50%);
-      content: '';
-      width: 0;
-      height: 0;
-      border-width: 0 4px 8px 4px;
-      border-color: transparent transparent rgba(255, 219, 92, 0.1) transparent;
-      border-style: solid;
-    }
+    background: var(--r-red-light);
+    margin-top: 8px;
   }
 `;
 interface SlippageProps {
   value: string;
+  displaySlippage: string;
   onChange: (n: string) => void;
   recommendValue?: number;
-  slippageDisplay: string;
 }
 export const Slippage = memo((props: SlippageProps) => {
-  const { value, onChange, recommendValue, slippageDisplay } = props;
-  const [isCustom, setIsCustom] = useToggle(false);
-  const [slippageOpen, setSlippageOpen] = useToggle(false);
+  const { t } = useTranslation();
+
+  const { value, displaySlippage, onChange, recommendValue } = props;
+
+  const {
+    autoSlippage,
+    isCustomSlippage,
+    setAutoSlippage,
+    setIsCustomSlippage,
+  } = useSlippageStore();
+
+  const [slippageOpen, setSlippageOpen] = useState(false);
 
   const [isLow, isHigh] = useMemo(() => {
     return [
@@ -126,35 +111,50 @@ export const Slippage = memo((props: SlippageProps) => {
 
   const setRecommendValue = useCallback(() => {
     onChange(new BigNumber(recommendValue || 0).times(100).toString());
-  }, [onChange, recommendValue]);
+    setAutoSlippage(false);
+    setIsCustomSlippage(false);
+  }, [onChange, recommendValue, setAutoSlippage, setIsCustomSlippage]);
 
   const tips = useMemo(() => {
     if (isLow) {
-      return 'Low slippage may cause failed transactions due to high volatility';
+      return i18n.t(
+        'page.swap.low-slippage-may-cause-failed-transactions-due-to-high-volatility'
+      );
     }
     if (isHigh) {
-      return 'Transaction might be frontrun because of high slippage tolerance';
+      return i18n.t(
+        'page.swap.transaction-might-be-frontrun-because-of-high-slippage-tolerance'
+      );
     }
     if (recommendValue) {
+      const slippage = new BigNumber(recommendValue || 0).times(100).toString();
       return (
         <span>
-          To prevent front-running, we recommend a slippage of{' '}
-          <span onClick={setRecommendValue} className="underline">
-            {new BigNumber(recommendValue || 0).times(100).toString()}
-          </span>
-          %
+          <Trans
+            i18nKey="page.swap.recommend-slippage"
+            value={{
+              slippage,
+            }}
+            slippage={new BigNumber(recommendValue || 0).times(100).toString()}
+            t={t}
+          >
+            To prevent front-running, we recommend a slippage of{' '}
+            <span
+              onClick={setRecommendValue}
+              className="underline cursor-pointer"
+            >
+              {{
+                // @ts-ignore
+                slippage,
+              }}
+            </span>
+            %{' '}
+          </Trans>
         </span>
       );
     }
     return null;
-  }, [isHigh, isLow, recommendValue, setRecommendValue]);
-
-  const onInputFocus: ChangeEventHandler<HTMLInputElement> = useCallback(
-    (e) => {
-      e.target?.select?.();
-    },
-    []
-  );
+  }, [isHigh, isLow, recommendValue, setRecommendValue, t]);
 
   const onInputChange: ChangeEventHandler<HTMLInputElement> = useCallback(
     (e) => {
@@ -166,60 +166,95 @@ export const Slippage = memo((props: SlippageProps) => {
     [onChange]
   );
 
+  const shouldAutoOpenSlippage = useMemo(() => {
+    return isLow || isHigh || !!recommendValue;
+  }, [isLow, isHigh, recommendValue]);
+
+  useEffect(() => {
+    if (shouldAutoOpenSlippage) {
+      setSlippageOpen(true);
+    }
+  }, [shouldAutoOpenSlippage]);
+
   return (
-    <Wrapper>
-      <div className="header">
-        <span className="field">Slippage tolerance</span>
-        <div
-          className="flex items-center cursor-pointer"
-          onClick={() => setSlippageOpen()}
-        >
-          <span className={clsx('value', !!tips && 'warn')}>
-            {slippageDisplay}%
+    <div>
+      <div
+        className="flex justify-between cursor-pointer"
+        onClick={() => {
+          setSlippageOpen((e) => !e);
+        }}
+      >
+        <span>{t('page.swap.slippage-tolerance')}</span>
+        <span className="font-medium text-r-neutral-title-1 inline-flex items-center">
+          <span className={clsx(!!tips && 'text-r-red-default')}>
+            {displaySlippage}%{' '}
           </span>
-          <img
-            src="rabby-internal://assets/icons/swap/arrow-top.svg"
+          <IconArrowUp
             className={clsx(
-              'inline-block w-14 h-[15px]',
+              'transition-transform inline-block w-14 h-[15px]',
               !slippageOpen && 'transform rotate-180'
             )}
           />
-        </div>
+        </span>
       </div>
-      <div className={clsx('slippage', !slippageOpen && 'hidden')}>
-        {SLIPPAGE.map((e) => (
+      <Wrapper className="widget-has-ant-input">
+        <div
+          className={clsx(
+            'slippage',
+            slippageOpen ? 'mt-8' : 'h-0 overflow-hidden'
+          )}
+        >
           <SlippageItem
-            key={e}
+            onClick={(event) => {
+              if (autoSlippage) {
+                return;
+              }
+              event.stopPropagation();
+              onChange(value);
+              setAutoSlippage(true);
+              setIsCustomSlippage(false);
+            }}
+            className={clsx(autoSlippage && 'active')}
+          >
+            {t('page.swap.Auto')}
+          </SlippageItem>
+          {SLIPPAGE.map((e) => (
+            <SlippageItem
+              key={e}
+              onClick={(event) => {
+                event.stopPropagation();
+                setIsCustomSlippage(false);
+                setAutoSlippage(false);
+                onChange(e);
+              }}
+              className={clsx(
+                !autoSlippage && !isCustomSlippage && e === value && 'active'
+              )}
+            >
+              {e}%
+            </SlippageItem>
+          ))}
+          <SlippageItem
             onClick={(event) => {
               event.stopPropagation();
-              setIsCustom(false);
-              onChange(e);
+              setAutoSlippage(false);
+              setIsCustomSlippage(true);
             }}
-            active={!isCustom && e === value}
+            className={clsx('flex-1', isCustomSlippage && 'active')}
           >
-            {e}%
+            <RabbyInput
+              className={clsx('input')}
+              bordered={false}
+              value={value}
+              onChange={onInputChange}
+              placeholder="0.1"
+              suffix={<div>%</div>}
+            />
           </SlippageItem>
-        ))}
-        <div
-          onClick={(event) => {
-            event.stopPropagation();
-            setIsCustom(true);
-          }}
-          className="flex-1"
-        >
-          <RabbyInput
-            className={clsx('input')}
-            bordered={false}
-            value={value}
-            onFocus={onInputFocus}
-            onChange={onInputChange}
-            placeholder="0.1"
-            suffix="%"
-          />
         </div>
-      </div>
 
-      {!!tips && <div className="warning">{tips}</div>}
-    </Wrapper>
+        {!!tips && <div className={clsx('warning')}>{tips}</div>}
+      </Wrapper>
+    </div>
   );
 });

@@ -1,163 +1,93 @@
 import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
-import { Skeleton, Tooltip } from 'antd';
+import { Tooltip } from 'antd';
 import BigNumber from 'bignumber.js';
 import {
   InsHTMLAttributes,
-  PropsWithChildren,
   useCallback,
   useEffect,
   useMemo,
   useState,
 } from 'react';
-import styled from 'styled-components';
-import ImgVerified from '@/../assets/icons/swap/verified.svg';
-import ImgWarning from '@/../assets/icons/swap/warning.svg';
-import ImgInfo from '@/../assets/icons/swap/info-outline.svg';
-import IconGas from '@/../assets/icons/swap/gas.svg';
-
-import { formatAmount } from '@/renderer/utils/number';
+import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
-import { SkeletonInputProps } from 'antd/lib/skeleton/Input';
-import { ellipsisTokenSymbol } from '@/renderer/utils/token';
+import i18n from '@/renderer/utils/i18n';
+import { formatAmount, formatUsdValue } from '@/renderer/utils/number';
 import { getTokenSymbol } from '@/renderer/utils';
-import { useAtomValue } from 'jotai';
-import ImgLock from '@/../assets/icons/swap/lock.svg';
-import { activeProviderAtom } from '../atom';
 
-import { DEX } from '../constant';
+import ImgVerified from '@/../assets/icons/swap/verified.svg';
+import ImgWarning from '@/../assets/icons/swap/warn.svg';
+import RcIconInfo from '@/../assets/icons/common/info-cc.svg?rc';
+import IconQuoteSwitchCC from '@/../assets/icons/swap/switch-cc.svg?rc';
+import IconEmptyCC from '@/../assets/icons/common/empty-cc.svg?rc';
+
+import { DexQuoteItem } from './QuoteItem';
+import { QuoteProvider } from '../atom';
+
+import { isSwapWrapToken } from '../utils';
+import { QuoteReceiveWrapper } from './ReceiveWrapper';
+import { DEX_WITH_WRAP } from '../constant';
 
 const getQuoteLessWarning = ([receive, diff]: [string, string]) =>
-  `The receiving amount is estimated from Rabby transaction simulation. The offer provided by dex is ${receive}. You'll receive ${diff}  less than the expected offer.`;
+  i18n.t('page.swap.QuoteLessWarning', { receive, diff });
 
 export const WarningOrChecked = ({
   quoteWarning,
 }: {
   quoteWarning?: [string, string];
 }) => {
+  const { t } = useTranslation();
   return (
     <Tooltip
-      overlayClassName={clsx(
-        'rectangle',
-        quoteWarning ? 'max-w-[344px]' : 'max-w-[600px]'
-      )}
+      align={{
+        offset: [10, 0],
+      }}
+      placement="topRight"
+      overlayClassName={clsx('rectangle', 'max-w-[360px]')}
       title={
         quoteWarning
           ? getQuoteLessWarning(quoteWarning)
-          : 'By transaction simulation, the quote is valid'
+          : t('page.swap.by-transaction-simulation-the-quote-is-valid')
       }
     >
       <img
         src={quoteWarning ? ImgWarning : ImgVerified}
-        className="w-[14px] h-[14px]"
+        className="w-[16px] h-[16px]"
       />
     </Tooltip>
   );
 };
 
-const ReceiveWrapper = styled.div`
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 6px;
-  padding: 16px;
-  padding-top: 20px;
-  font-size: 18px;
-  color: white;
-
-  .rateBox {
-    margin-top: 16px;
-    padding-top: 10px;
-    border-top: 0.5px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .rate {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.6);
-  }
-  .diffPercent {
-    &.negative {
-      color: #ff7878;
-    }
-    &.positive {
-      color: #27c193;
-    }
-  }
-  .column {
-    display: flex;
-    justify-content: space-between;
-    + .column {
-      margin-top: 16px;
-    }
-
-    .right {
-      font-weight: medium;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      img {
-        width: 14px;
-        height: 14px;
-      }
-    }
-  }
-
-  .warning {
-    margin: 10px 0;
-    padding: 10px;
-    background: rgba(255, 219, 92, 0.1);
-    border-radius: 4px;
-    font-size: 13px;
-    line-height: 16px;
-    color: #ffdb5c;
-    position: relative;
-  }
-  .ellipsis {
-    max-width: 280px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-`;
-
-export const SkeletonChildren = (
-  props: PropsWithChildren<SkeletonInputProps & { loading?: boolean }>
-) => {
-  const { loading = true, children, ...other } = props;
-  if (loading) {
-    return (
-      <Skeleton.Input
-        active
-        {...other}
-        style={{
-          borderRadius: '6px',
-          ...other.style,
-        }}
-      />
-    );
-  }
-  return <div className="flex items-center gap-6">{children}</div>;
-};
-
 interface ReceiveDetailsProps {
-  payAmount: string | number;
+  payAmount: string;
   receiveRawAmount: string | number;
   payToken: TokenItem;
   receiveToken: TokenItem;
   receiveTokenDecimals?: number;
   quoteWarning?: [string, string];
   loading?: boolean;
-  isWrapToken: boolean;
+  activeProvider?: QuoteProvider;
+  isWrapToken?: boolean;
+  bestQuoteDex: string;
+  chain: CHAINS_ENUM;
+  openQuotesList: () => void;
 }
+
 export const ReceiveDetails = (
   props: ReceiveDetailsProps & InsHTMLAttributes<HTMLDivElement>
 ) => {
+  const { t } = useTranslation();
   const {
-    isWrapToken,
     receiveRawAmount: receiveAmount,
     payAmount,
     payToken,
     receiveToken,
-    receiveTokenDecimals,
     quoteWarning,
     loading = false,
+    activeProvider,
+    isWrapToken,
+    bestQuoteDex,
+    chain,
+    openQuotesList,
     ...other
   } = props;
 
@@ -173,183 +103,181 @@ export const ReceiveDetails = (
     }
   }, [receiveToken, payToken]);
 
-  const { receiveNum, payUsd, receiveUsd, rate, diff, sign, showLoss } =
-    useMemo(() => {
-      const pay = new BigNumber(payAmount).times(payToken.price || 0);
-      const receiveAll = new BigNumber(receiveAmount);
-      const receive = receiveAll.times(receiveToken.price || 0);
-      const cut = receive.minus(pay).div(pay).times(100);
-      const rateBn = new BigNumber(reverse ? payAmount : receiveAll).div(
-        reverse ? receiveAll : payAmount
-      );
+  const {
+    receiveNum,
+    payUsd,
+    receiveUsd,
+    rate,
+    diff,
+    sign,
+    showLoss,
+    lossUsd,
+  } = useMemo(() => {
+    const pay = new BigNumber(payAmount).times(payToken.price || 0);
+    const receiveAll = new BigNumber(receiveAmount);
+    const receive = receiveAll.times(receiveToken.price || 0);
+    const cut = receive.minus(pay).div(pay).times(100);
+    const rateBn = new BigNumber(reverse ? payAmount : receiveAll).div(
+      reverse ? receiveAll : payAmount
+    );
+    const _lossUsd = formatUsdValue(receive.minus(pay).abs().toString());
 
-      return {
-        receiveNum: formatAmount(receiveAll.toString(10)),
-        payUsd: formatAmount(pay.toString(10)),
-        receiveUsd: formatAmount(receive.toString(10)),
-        rate: rateBn.lt(0.0001)
-          ? new BigNumber(rateBn.toPrecision(1, 0)).toString(10)
-          : formatAmount(rateBn.toString(10)),
-        sign: cut.eq(0) ? '' : cut.lt(0) ? '-' : '+',
-        diff: cut.abs().toFixed(2),
-        showLoss: cut.lte(-5),
-      };
-    }, [payAmount, payToken.price, receiveAmount, receiveToken.price, reverse]);
+    return {
+      receiveNum: formatAmount(receiveAll.toString(10)),
+      payUsd: formatUsdValue(pay.toString(10)),
+      receiveUsd: formatUsdValue(receive.toString(10)),
+      rate: rateBn.lt(0.0001)
+        ? new BigNumber(rateBn.toPrecision(1, 0)).toString(10)
+        : formatAmount(rateBn.toString(10)),
+      sign: cut.eq(0) ? '' : cut.lt(0) ? '-' : '+',
+      diff: cut.abs().toFixed(2),
+      showLoss: cut.lte(-5),
+      lossUsd: _lossUsd,
+    };
+  }, [payAmount, payToken.price, receiveAmount, receiveToken.price, reverse]);
 
-  const activeProvider = useAtomValue(activeProviderAtom);
+  const isBestQuote = useMemo(
+    () => !!bestQuoteDex && activeProvider?.name === bestQuoteDex,
+    [bestQuoteDex, activeProvider?.name]
+  );
 
-  return (
-    <ReceiveWrapper {...other}>
-      <div className="column">
-        <div className="flex w-full items-center">
-          <img
-            className={clsx('rounded-full w-32 h-32 min-w-[32px] mr-12')}
-            src={
-              isWrapToken
-                ? receiveToken?.logo_url
-                : DEX?.[activeProvider?.name as keyof typeof DEX]?.logo
-            }
+  const payTokenSymbol = useMemo(() => getTokenSymbol(payToken), [payToken]);
+  const receiveTokenSymbol = useMemo(
+    () => getTokenSymbol(receiveToken),
+    [receiveToken]
+  );
+
+  const isWrapTokens = useMemo(
+    () => isSwapWrapToken(payToken.id, receiveToken.id, chain),
+    [payToken, receiveToken, chain]
+  );
+
+  if (!activeProvider) {
+    return (
+      <QuoteReceiveWrapper
+        {...other}
+        className={clsx(other.className, 'empty-quote')}
+        onClick={openQuotesList}
+      >
+        <div className="flex items-center justify-center gap-[8px]">
+          <IconEmptyCC
+            viewBox="0 0 40 40"
+            className="w-[20px] h-[20px] text-r-neutral-foot"
           />
-          <div className="flex-1 flex flex-col">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4 text-white text-opacity-80">
-                <span>
-                  {isWrapToken
-                    ? 'Wrap Contract'
-                    : DEX?.[activeProvider?.name as keyof typeof DEX]?.name}
-                </span>
-                {!!activeProvider?.shouldApproveToken && (
-                  <Tooltip
-                    overlayClassName="rectangle max-w-[300px]"
-                    title="Need to approve token before swap"
-                  >
-                    <img src={ImgLock} className="w-14 h-14" />
-                  </Tooltip>
-                )}
-              </div>
-              <SkeletonChildren
-                loading={loading}
-                style={{ maxWidth: 144, height: 20, opacity: 0.5 }}
-              >
-                <span
-                  title={`${receiveNum} ${getTokenSymbol(receiveToken)}`}
-                  className="ellipsis"
-                >
-                  {receiveNum} {getTokenSymbol(receiveToken)}
-                </span>
-                <WarningOrChecked quoteWarning={quoteWarning} />
-              </SkeletonChildren>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4 text-13 text-white text-opacity-80">
-                <img src={IconGas} className="w-14 h-14 relative top-[-1px]" />
-                <SkeletonChildren
-                  loading={loading}
-                  style={{ maxWidth: 60, height: 20, opacity: 0.5 }}
-                >
-                  <span>{activeProvider?.gasUsd}</span>
-                </SkeletonChildren>
-              </div>
-              <div
-                className={clsx(
-                  'flex justify-end items-center gap-6 text-[13px] text-white text-opacity-80',
-                  loading && 'opacity-0'
-                )}
-              >
-                <span className="ellipsis">
-                  ${receiveUsd} (
-                  <span
-                    className={clsx(
-                      'diffPercent',
-                      sign === '+' && 'positive',
-                      sign === '-' && 'negative'
-                    )}
-                  >
-                    {sign}
-                    {diff}%
-                  </span>
-                  )
-                </span>
-                <Tooltip
-                  overlayClassName="rectangle max-w-[600px]"
-                  title={
-                    <div className="flex flex-col gap-4 py-[5px] text-13">
-                      <div>
-                        Est. Payment: {payAmount}
-                        {getTokenSymbol(payToken)} ≈ ${payUsd}
-                      </div>
-                      <div>
-                        Est. Receiving: {receiveNum}
-                        {getTokenSymbol(receiveToken)} ≈ ${receiveUsd}
-                      </div>
-                      <div>
-                        Est. Difference: {sign}
-                        {diff}%
-                      </div>
-                    </div>
-                  }
-                >
-                  <img src={ImgInfo} />
-                </Tooltip>
-              </div>
-            </div>
-            <div />
+          <div className="text-[16px] font-normal text-r-neutral-foot">
+            {t('page.swap.No-available-quote')}
           </div>
         </div>
-      </div>
 
-      {!loading && quoteWarning && (
-        <div className="warning">{getQuoteLessWarning(quoteWarning)}</div>
-      )}
-
-      {!loading && showLoss && (
-        <div className="warning rate">
-          Selected offer differs greatly from current rate, may cause big losses
+        <div className={clsx('quote-select')} onClick={openQuotesList}>
+          <IconQuoteSwitchCC
+            viewBox="0 0 14 14"
+            className={clsx('w-14 h-14')}
+          />
         </div>
-      )}
+      </QuoteReceiveWrapper>
+    );
+  }
 
-      <div className="column rateBox">
-        <span className="rate">Rate</span>
-        <div className="right text-14">
-          <SkeletonChildren
-            loading={loading}
-            style={{ maxWidth: 182, height: 20, opacity: 0.5 }}
+  return (
+    <>
+      <QuoteReceiveWrapper
+        {...other}
+        className={clsx(other.className, isBestQuote && 'bestQuote')}
+        onClick={openQuotesList}
+      >
+        <DexQuoteItem
+          onlyShow
+          quote={activeProvider.quote}
+          name={activeProvider.name}
+          payToken={payToken}
+          receiveToken={receiveToken}
+          payAmount={payAmount}
+          chain={chain}
+          isBestQuote={false}
+          bestQuoteGasUsd="0"
+          bestQuoteAmount="0"
+          // userAddress=""
+          // slippage=""
+          // fee=""
+          quoteProviderInfo={
+            isWrapTokens
+              ? {
+                  name: t('page.swap.wrap-contract'),
+                  logo: receiveToken?.logo_url,
+                }
+              : DEX_WITH_WRAP[activeProvider.name as keyof typeof DEX_WITH_WRAP]
+          }
+          inSufficient={false}
+          sortIncludeGasFee
+          preExecResult={activeProvider.preExecResult}
+        />
+
+        {activeProvider.name && receiveToken ? (
+          <div
+            className={clsx(
+              'quote-select',
+
+              isBestQuote && 'best'
+            )}
+            onClick={openQuotesList}
           >
-            <span className="cursor-pointer ellipsis" onClick={reverseRate}>
-              <span
-                title={`${1} ${
-                  reverse
-                    ? getTokenSymbol(receiveToken)
-                    : getTokenSymbol(payToken)
-                }`}
+            {isBestQuote ? <span>{t('page.swap.best')}</span> : null}
+            <IconQuoteSwitchCC
+              viewBox="0 0 14 14"
+              className={clsx('w-14 h-14')}
+            />
+          </div>
+        ) : null}
+      </QuoteReceiveWrapper>
+      {showLoss && (
+        <div className="px-16  leading-4 mt-14 text-14 text-r-neutral-body">
+          <div className="flex justify-between">
+            <span>{t('page.swap.price-impact')}</span>
+            <span
+              className={clsx(
+                'font-medium  inline-flex items-center',
+                'text-r-red-default'
+              )}
+            >
+              {sign}
+              {diff}%
+              <Tooltip
+                align={{
+                  offset: [16, 0],
+                }}
+                placement="topRight"
+                overlayClassName="rectangle max-w-[360px]"
+                title={
+                  <div className="flex flex-col gap-4 py-[5px] text-13">
+                    <div>
+                      {t('page.swap.est-payment')} {payAmount}
+                      {payTokenSymbol} ≈ {payUsd}
+                    </div>
+                    <div>
+                      {t('page.swap.est-receiving')} {receiveNum}
+                      {receiveTokenSymbol} ≈ {receiveUsd}
+                    </div>
+                    <div>
+                      {t('page.swap.est-difference')} -{lossUsd}
+                    </div>
+                  </div>
+                }
               >
-                1{' '}
-                {ellipsisTokenSymbol(
-                  reverse
-                    ? getTokenSymbol(receiveToken)
-                    : getTokenSymbol(payToken)
-                )}{' '}
-              </span>
-              ={' '}
-              <span
-                title={`${rate} ${
-                  reverse
-                    ? getTokenSymbol(payToken)
-                    : getTokenSymbol(receiveToken)
-                }`}
-              >
-                {rate}{' '}
-                {ellipsisTokenSymbol(
-                  reverse
-                    ? getTokenSymbol(payToken)
-                    : getTokenSymbol(receiveToken)
-                )}
-              </span>
+                <RcIconInfo
+                  className="ml-4 text-r-neutral-foot w-14 h-14 "
+                  color="var(--r-neutral-foot, #BABEC5)"
+                />
+              </Tooltip>
             </span>
-          </SkeletonChildren>
+          </div>
+          <div className="mt-[8px] rounded-[4px] bg-r-red-light p-8 text-13 font-normal text-r-red-default">
+            {t('page.swap.loss-tips', {
+              usd: lossUsd,
+            })}
+          </div>
         </div>
-      </div>
-    </ReceiveWrapper>
+      )}
+    </>
   );
 };

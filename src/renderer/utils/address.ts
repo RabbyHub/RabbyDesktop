@@ -4,7 +4,7 @@ export const ellipsis = (text: string) => {
 
 export const ellipsisAddress = ellipsis;
 
-export const isSameAddress = (a: string, b: string) => {
+export const isSameAddress = (a?: string, b?: string) => {
   if (!a || !b) return false;
   return a.toLowerCase() === b.toLowerCase();
 };
