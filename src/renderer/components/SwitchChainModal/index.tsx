@@ -1,6 +1,6 @@
 import { Tooltip } from 'antd';
 import clsx from 'clsx';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import IconRcSearch from '@/../assets/icons/swap/search.svg?rc';
 import { varyAndSortChainItems } from '@/isomorphic/wallet/chain';
@@ -119,15 +119,10 @@ function searchFilter(keyword: string) {
     );
 }
 
-function SwitchChainModalInner({
-  value = CHAINS_ENUM.ETH,
-  onChange,
-  title = 'Select chain',
-  supportChains,
-  disabledTips,
-  isShowCustomRPC,
-  isCheckCustomRPC,
-}: {
+type SwitchChainModalInnerType = {
+  clearOnOpen: () => void;
+};
+type SwitchChainModalInnerProps = {
   value?: CHAINS_ENUM;
   onChange: (v: CHAINS_ENUM) => void;
   title?: string;
@@ -135,104 +130,152 @@ function SwitchChainModalInner({
   disabledTips?: React.ReactNode;
   isShowCustomRPC?: boolean;
   isCheckCustomRPC?: boolean;
-}) {
-  useBodyClassNameOnMounted('switch-chain-subview');
-
-  const { preferences, setChainPinned } = usePreference();
-
-  const { isShowTestnet, selectedTab, onTabChange } = useSwitchNetTab();
-
-  const { matteredChainBalances, getLocalBalanceValue } = useAccountBalanceMap({
-    isTestnet: selectedTab === 'testnet',
-  });
-
-  const [searchInput, setSearchInput] = useState('');
-
-  const { pinnedSet, matteredList, unmatteredList } = useMemo(() => {
-    const set = new Set(preferences.pinnedChain);
-
-    const searchKw = searchInput?.trim().toLowerCase();
-    const result = varyAndSortChainItems({
+};
+const SwitchChainModalInner = React.forwardRef<
+  SwitchChainModalInnerType,
+  SwitchChainModalInnerProps
+>(
+  (
+    {
+      value = CHAINS_ENUM.ETH,
+      onChange,
+      title = 'Select chain',
       supportChains,
-      pinned: [...set],
-      searchKeyword: searchKw,
-      matteredChainBalances,
-      netTabKey: selectedTab,
-    });
-
-    if (searchKw) {
-      result.matteredList = [];
-      result.unmatteredList = result.allSearched;
-    }
-
-    return {
-      ...result,
-      pinnedSet: set,
-    };
-  }, [
-    preferences.pinnedChain,
-    supportChains,
-    searchInput,
-    matteredChainBalances,
-    selectedTab,
-  ]);
-
-  const onPinnedChange: OnPinnedChanged = useCallback(
-    (chain, nextPinned) => {
-      setChainPinned(chain, nextPinned);
+      disabledTips,
+      isShowCustomRPC,
+      isCheckCustomRPC,
     },
-    [setChainPinned]
-  );
+    ref
+  ) => {
+    useBodyClassNameOnMounted('switch-chain-subview');
 
-  const { getAllRPC, pingCustomRPC } = useCustomRPC();
+    const { preferences, setChainPinned } = usePreference();
 
-  useEffect(() => {
-    if (isShowCustomRPC || isCheckCustomRPC) {
-      getAllRPC();
-    }
-  }, [getAllRPC, isCheckCustomRPC, isShowCustomRPC]);
+    const { isShowTestnet, selectedTab, onTabChange } = useSwitchNetTab();
 
-  const handleChange = async (chain: CHAINS_ENUM) => {
-    onChange?.(chain);
-    if (
-      (isShowCustomRPC || isCheckCustomRPC) &&
-      !(await pingCustomRPC(chain))
-    ) {
-      toastTopMessage({
-        data: {
-          type: 'error',
-          content: 'The custom RPC is unavailable',
-        },
+    const { matteredChainBalances, getLocalBalanceValue } =
+      useAccountBalanceMap({
+        isTestnet: selectedTab === 'testnet',
       });
-    }
-  };
 
-  return (
-    <div className={styles.SwitchChainModalInner}>
-      <div className={styles.title}>{title}</div>
-      {isShowTestnet && (
-        <div className="flex justify-center mt-20">
-          <NetSwitchTabs value={selectedTab} onTabChange={onTabChange} />
-        </div>
-      )}
-      <RabbyInput
-        autoCorrect="false"
-        autoComplete="false"
-        size="large"
-        className={clsx(styles.search)}
-        prefix={<IconRcSearch className="searchIcon" />}
-        value={searchInput}
-        placeholder="Search chain"
-        onChange={(evt) => {
-          setSearchInput(evt.target.value || '');
-        }}
-        autoFocus
-      />
-      <div className={styles.scrollContainer}>
-        <div>
-          {matteredList.length > 0 && (
+    const [searchInput, setSearchInput] = useState('');
+
+    React.useImperativeHandle(ref, () => ({
+      clearOnOpen() {
+        setSearchInput('');
+      },
+    }));
+
+    const { pinnedSet, matteredList, unmatteredList } = useMemo(() => {
+      const set = new Set(preferences.pinnedChain);
+
+      const searchKw = searchInput?.trim().toLowerCase();
+      const result = varyAndSortChainItems({
+        supportChains,
+        pinned: [...set],
+        searchKeyword: searchKw,
+        matteredChainBalances,
+        netTabKey: selectedTab,
+      });
+
+      if (searchKw) {
+        result.matteredList = [];
+        result.unmatteredList = result.allSearched;
+      }
+
+      return {
+        ...result,
+        pinnedSet: set,
+      };
+    }, [
+      preferences.pinnedChain,
+      supportChains,
+      searchInput,
+      matteredChainBalances,
+      selectedTab,
+    ]);
+
+    const onPinnedChange: OnPinnedChanged = useCallback(
+      (chain, nextPinned) => {
+        setChainPinned(chain, nextPinned);
+      },
+      [setChainPinned]
+    );
+
+    const { getAllRPC, pingCustomRPC } = useCustomRPC();
+
+    useEffect(() => {
+      if (isShowCustomRPC || isCheckCustomRPC) {
+        getAllRPC();
+      }
+    }, [getAllRPC, isCheckCustomRPC, isShowCustomRPC]);
+
+    const handleChange = async (chain: CHAINS_ENUM) => {
+      onChange?.(chain);
+      if (
+        (isShowCustomRPC || isCheckCustomRPC) &&
+        !(await pingCustomRPC(chain))
+      ) {
+        toastTopMessage({
+          data: {
+            type: 'error',
+            content: 'The custom RPC is unavailable',
+          },
+        });
+      }
+    };
+
+    return (
+      <div className={styles.SwitchChainModalInner}>
+        <div className={styles.title}>{title}</div>
+        {isShowTestnet && (
+          <div className="flex justify-center mt-20">
+            <NetSwitchTabs value={selectedTab} onTabChange={onTabChange} />
+          </div>
+        )}
+        <RabbyInput
+          autoCorrect="false"
+          autoComplete="false"
+          size="large"
+          className={clsx(styles.search)}
+          prefix={<IconRcSearch className="searchIcon" />}
+          value={searchInput}
+          placeholder="Search chain"
+          onChange={(evt) => {
+            setSearchInput(evt.target.value || '');
+          }}
+          autoFocus
+        />
+        <div className={styles.scrollContainer}>
+          <div>
+            {matteredList.length > 0 && (
+              <div className={styles.chainList}>
+                {matteredList.map((chain) => {
+                  return (
+                    <ChainItem
+                      key={`chain-${chain.id}`}
+                      chain={chain}
+                      pinned={pinnedSet.has(chain.enum)}
+                      balanceValue={getLocalBalanceValue(chain.serverId)}
+                      onClick={() => {
+                        handleChange(chain.enum);
+                      }}
+                      onPinnedChange={onPinnedChange}
+                      checked={value === chain.enum}
+                      support={
+                        supportChains
+                          ? supportChains?.includes(chain.enum)
+                          : true
+                      }
+                      disabledTips={disabledTips}
+                      isShowCustomRPC={isShowCustomRPC}
+                    />
+                  );
+                })}
+              </div>
+            )}
             <div className={styles.chainList}>
-              {matteredList.map((chain) => {
+              {unmatteredList.map((chain) => {
                 return (
                   <ChainItem
                     key={`chain-${chain.id}`}
@@ -253,34 +296,12 @@ function SwitchChainModalInner({
                 );
               })}
             </div>
-          )}
-          <div className={styles.chainList}>
-            {unmatteredList.map((chain) => {
-              return (
-                <ChainItem
-                  key={`chain-${chain.id}`}
-                  chain={chain}
-                  pinned={pinnedSet.has(chain.enum)}
-                  balanceValue={getLocalBalanceValue(chain.serverId)}
-                  onClick={() => {
-                    handleChange(chain.enum);
-                  }}
-                  onPinnedChange={onPinnedChange}
-                  checked={value === chain.enum}
-                  support={
-                    supportChains ? supportChains?.includes(chain.enum) : true
-                  }
-                  disabledTips={disabledTips}
-                  isShowCustomRPC={isShowCustomRPC}
-                />
-              );
-            })}
           </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
+);
 
 export default function SwitchChainModal() {
   const { svVisible, svState, setSvState, closeSubview } =
@@ -292,6 +313,14 @@ export default function SwitchChainModal() {
       closeSubview();
     }
   };
+
+  const innerRef = React.useRef<SwitchChainModalInnerType>(null);
+
+  React.useEffect(() => {
+    if (svVisible) {
+      innerRef.current?.clearOnOpen();
+    }
+  }, [svVisible]);
 
   if (!svState) return null;
 
@@ -307,7 +336,11 @@ export default function SwitchChainModal() {
         closeSubview();
       }}
     >
-      <SwitchChainModalInner {...svState} onChange={onChainChange} />
+      <SwitchChainModalInner
+        {...svState}
+        ref={innerRef}
+        onChange={onChainChange}
+      />
     </RModal>
   );
 }
