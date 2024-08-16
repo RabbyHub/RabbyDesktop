@@ -10,22 +10,8 @@ import BigNumber from 'bignumber.js';
 // import { appIsDev, appIsProd } from './env';
 import { coerceFloat, coerceInteger } from '@/isomorphic/primitive';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
+import { appIsProd } from '@/main/utils/env';
 import { splitNumberByStep } from './number';
-
-export type ApprovalSpenderItemToBeRevoked = {
-  chainServerId: ApprovalItem['chain'];
-  spender: Spender['id'];
-} & (
-  | {
-      contractId: NFTInfoHost['contract_id'];
-      abi: 'ERC721' | 'ERC1155' | '';
-      tokenId: string | null | undefined;
-      isApprovedForAll: boolean;
-    }
-  | {
-      id: TokenApproval['id'] | Spender['id'];
-    }
-);
 
 export type ApprovalItem =
   | ContractApprovalItem
@@ -41,13 +27,18 @@ export type AssetApprovalSpender =
   | TokenApprovalItem['list'][number]
   | NftApprovalItem['list'][number];
 
+export type TokenApprovalIndexedBySpender = TokenApproval & {
+  readonly $indexderSpender?: SpenderInTokenApproval;
+  readonly $self?: TokenApproval;
+};
+
 type ContractFor = 'nft' | 'nft-contract' | 'token';
 type GetContractTypeByContractFor<T extends ContractFor> = T extends 'nft'
   ? NFTApproval
   : T extends 'nft-contract'
   ? NFTApprovalContract
   : T extends 'token'
-  ? TokenApproval
+  ? TokenApprovalIndexedBySpender
   : unknown;
 
 export type ContractApprovalItem<T extends ContractFor = ContractFor> = {
@@ -108,8 +99,10 @@ export type NftApprovalItem = {
 };
 
 export type ComputedRiskAboutValues = {
+  /** @deprecated */
   risk_exposure_usd_value: number;
-  is_exposure_usd_value_unknown: boolean;
+  // is_exposure_usd_value_unknown: boolean;
+  risk_spend_usd_value: number;
   approve_user_count: number;
   revoke_user_count: number;
   last_approve_at: number;
@@ -132,8 +125,8 @@ export type ComputedRiskEvaluation = {
   extra: {
     serverRiskLevel: ApprovalRiskLevel;
 
-    clientExposureLevel: ApprovalRiskLevel;
-    clientExposureScore: RiskLevelScore;
+    clientSpendLevel: ApprovalRiskLevel;
+    clientSpendScore: RiskLevelScore;
 
     clientApprovalLevel: ApprovalRiskLevel;
     clientApprovalScore: RiskLevelScore;
@@ -166,9 +159,10 @@ export function makeComputedRiskAboutValues(
   if (contractFor === 'nft' || contractFor === 'nft-contract') {
     return {
       risk_exposure_usd_value: coerceFloat(spender?.exposure_nft_usd_value, 0),
-      is_exposure_usd_value_unknown:
-        spender?.exposure_nft_usd_value === null ||
-        typeof spender?.exposure_nft_usd_value !== 'number',
+      // is_exposure_usd_value_unknown:
+      //   spender?.exposure_nft_usd_value === null ||
+      //   typeof spender?.exposure_nft_usd_value !== 'number',
+      risk_spend_usd_value: coerceFloat(spender?.spend_usd_value, 0),
       approve_user_count: coerceInteger(spender?.approve_user_count, 0),
       revoke_user_count: coerceInteger(spender?.revoke_user_count, 0),
       last_approve_at: coerceInteger(spender?.last_approve_at, 0),
@@ -177,9 +171,10 @@ export function makeComputedRiskAboutValues(
 
   return {
     risk_exposure_usd_value: coerceFloat(spender?.exposure_usd_value, 0),
-    is_exposure_usd_value_unknown:
-      spender?.exposure_usd_value === null ||
-      typeof spender?.exposure_usd_value !== 'number',
+    // is_exposure_usd_value_unknown:
+    //   spender?.exposure_usd_value === null ||
+    //   typeof spender?.exposure_usd_value !== 'number',
+    risk_spend_usd_value: coerceFloat(spender?.spend_usd_value, 0),
     approve_user_count: coerceInteger(spender?.approve_user_count, 0),
     revoke_user_count: coerceInteger(spender?.revoke_user_count, 0),
     last_approve_at: coerceInteger(spender?.last_approve_at, 0),
@@ -196,11 +191,12 @@ export function getContractRiskEvaluation(
     0
   ) as RiskLevelScore;
 
-  const exposureValue = coerceFloat(riskValues.risk_exposure_usd_value);
-  const clientExposureLevel: ApprovalRiskLevel =
-    exposureValue < 1e4 ? 'danger' : exposureValue < 1e5 ? 'warning' : 'safe';
-  const clientExposureScore = coerceInteger(
-    RiskNumMap[clientExposureLevel],
+  // const exposureValue = coerceFloat(riskValues.risk_exposure_usd_value);
+  const spendValue = coerceFloat(riskValues.risk_spend_usd_value);
+  const clientSpendLevel: ApprovalRiskLevel =
+    spendValue < 1e4 ? 'danger' : spendValue < 1e5 ? 'warning' : 'safe';
+  const clientSpendScore = coerceInteger(
+    RiskNumMap[clientSpendLevel],
     0
   ) as RiskLevelScore;
 
@@ -225,7 +221,7 @@ export function getContractRiskEvaluation(
     0
   ) as RiskLevelScore;
 
-  const allClientScores = [clientExposureScore, clientApprovalScore];
+  const allClientScores = [clientSpendScore, clientApprovalScore];
 
   const clientMaxRiskScore = Math.max(...allClientScores) as RiskLevelScore;
 
@@ -242,8 +238,8 @@ export function getContractRiskEvaluation(
     extra: {
       serverRiskLevel,
 
-      clientExposureLevel,
-      clientExposureScore,
+      clientSpendLevel,
+      clientSpendScore,
 
       clientApprovalLevel,
       clientApprovalScore,
@@ -291,6 +287,36 @@ export function compareContractApprovalItemByRiskLevel(
   // }
 
   return 0;
+}
+
+export function markContractTokenSpender(
+  orig: TokenApproval,
+  spender: Spender
+): TokenApprovalIndexedBySpender {
+  const tokenApproval = { ...orig };
+  // eslint-disable-next-line no-prototype-builtins
+  if (!tokenApproval.hasOwnProperty('$indexderSpender')) {
+    Object.defineProperty(tokenApproval, '$indexderSpender', {
+      enumerable: false,
+      configurable: appIsProd,
+      get() {
+        return spender;
+      },
+    });
+  }
+
+  // eslint-disable-next-line no-prototype-builtins
+  if (!tokenApproval.hasOwnProperty('$self')) {
+    Object.defineProperty(tokenApproval, '$self', {
+      enumerable: false,
+      configurable: appIsProd,
+      get() {
+        return orig;
+      },
+    });
+  }
+
+  return tokenApproval as TokenApprovalIndexedBySpender;
 }
 
 export function markParentForAssetItemSpender(
