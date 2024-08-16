@@ -301,7 +301,7 @@ export const BestQuoteLoading = () => {
   const { t } = useTranslation();
 
   return (
-    <div>
+    <div className="relative top-20">
       <StyledLoading>
         <SvgComponent className="item item-1" />
         <SvgComponent className="item item-2" />
