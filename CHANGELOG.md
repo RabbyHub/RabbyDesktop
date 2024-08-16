@@ -1,7 +1,17 @@
 
-v0.38.4 / 2024-07-05
+v0.38.5 / 2024-08-16
 ====================
 
+  * feat: better send/swap max, optimized swap features. (#656)
+  * fix: dex id (#650)
+  * feat: support customize backend service api (#648)
+  * feat: try rabbyx 0.92.81 (#649)
+  * feat:no-alert-for-watch-address (#652)
+
+v0.38.4-prod / 2024-07-05
+=========================
+
+  * Release v0.38.4-prod
   * feat: swap fee (#645)
 
 v0.38.3-prod / 2024-06-27
