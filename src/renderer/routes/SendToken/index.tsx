@@ -18,6 +18,7 @@ import { findChain } from '@/renderer/utils/chain';
 import { copyText } from '@/renderer/utils/clipboard';
 import {
   CAN_ESTIMATE_L1_FEE_CHAINS,
+  CAN_NOT_SPECIFY_INTRINSIC_GAS_CHAINS,
   KEYRING_CLASS,
   L2_ENUMS,
   MINIMUM_GAS_LIMIT,
@@ -351,6 +352,7 @@ const SendTokenInner = () => {
   const [selectedGasLevel, setSelectedGasLevel] = useState<GasLevel | null>(
     null
   );
+  console.log('[feat] selectedGasLevel', selectedGasLevel);
 
   const [estimateGas, setEstimateGas] = useState(0);
   const [temporaryGrant, setTemporaryGrant] = useState(false);
@@ -422,24 +424,32 @@ const SendTokenInner = () => {
   const isNativeToken =
     currentToken.id === findChain({ enum: chain })?.nativeTokenAddress;
 
-  const fetchGasList = async () => {
-    const serverId = findChain({
-      enum: chain,
-    })?.serverId;
-    if (!serverId) {
-      throw new Error('chain not found');
-    }
-    return walletOpenapi.gasMarket(serverId);
-  };
+  const fetchGasList = useCallback(
+    async (chainEnum?: CHAINS_ENUM) => {
+      const serverId = findChain({
+        enum: chainEnum || chain,
+      })?.serverId;
+      if (!serverId) {
+        throw new Error('chain not found');
+      }
+      return walletOpenapi.gasMarket(serverId);
+    },
+    [chain]
+  );
 
-  const [{ value: gasList }, loadGasList] = useAsyncFn(() => {
-    return fetchGasList();
-  }, [fetchGasList]);
+  const [{ value: gasList }, loadGasList] = useAsyncFn(
+    (chainEnum?: CHAINS_ENUM) => {
+      return fetchGasList(chainEnum);
+    },
+    [fetchGasList]
+  );
+  console.log('[feat] gasList', gasList);
 
   useEffect(() => {
     loadGasList();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadGasList]);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   useDebounce(
     async () => {
@@ -481,37 +491,55 @@ const SendTokenInner = () => {
     const target = findChain({
       serverId: currentToken.chain,
     })!;
-    const sendValue = new BigNumber(amount).multipliedBy(
-      10 ** currentToken.decimals
-    );
+    const sendValue = new BigNumber(amount)
+      .multipliedBy(10 ** currentToken.decimals)
+      .decimalPlaces(0, BigNumber.ROUND_DOWN);
+    const dataInput = [
+      {
+        name: 'transfer',
+        type: 'function',
+        inputs: [
+          {
+            type: 'address',
+            name: 'to',
+          },
+          {
+            type: 'uint256',
+            name: 'value',
+          },
+        ] as any[],
+      } as const,
+      [to, sendValue.toFixed(0)] as any[],
+    ] as const;
     const params: Record<string, any> = {
       chainId: target.id,
       from: currentAccount!.address,
       to: currentToken.id,
       value: '0x0',
-      data: (abiCoder as unknown as AbiCoder).encodeFunctionCall(
-        {
-          name: 'transfer',
-          type: 'function',
-          inputs: [
-            {
-              type: 'address',
-              name: 'to',
-            },
-            {
-              type: 'uint256',
-              name: 'value',
-            },
-          ],
-        },
-        [to, sendValue.toFixed(0)]
-      ),
+      data: abiCoder.encodeFunctionCall(dataInput[0], dataInput[1]),
       isSend: true,
     };
+    if (safeInfo?.nonce != null) {
+      params.nonce = safeInfo.nonce;
+    }
     if (isNativeToken) {
       params.to = to;
       delete params.data;
+
+      // if (isShowMessageDataForToken && messageDataForSendToEoa) {
+      //   const encodedValue = formatTxInputDataOnERC20(messageDataForSendToEoa)
+      //     .hexData;
+
+      //   params.data = encodedValue;
+      // } else if (isShowMessageDataForContract && messageDataForContractCall) {
+      //   params.data = messageDataForContractCall;
+      // }
+
       params.value = `0x${sendValue.toString(16)}`;
+      // L2 has extra validation fee so we can not set gasLimit as 21000 when send native token
+      const couldSpecifyIntrinsicGas =
+        !CAN_NOT_SPECIFY_INTRINSIC_GAS_CHAINS.includes(target.enum);
+
       try {
         const code = await walletController.requestETHRpc(
           {
@@ -520,18 +548,36 @@ const SendTokenInner = () => {
           },
           target.serverId
         );
-        if (
-          code &&
-          (code === '0x' || code === '0x0') &&
-          !L2_ENUMS.includes(target.enum)
-        ) {
-          params.gas = intToHex(21000); // L2 has extra validation fee so can not set gasLimit as 21000 when send native token
+        const notContract = !!code && (code === '0x' || code === '0x0');
+
+        let gasLimit = 0;
+
+        if (estimateGas) {
+          gasLimit = estimateGas;
+        }
+
+        /**
+         * we don't need always fetch estimateGas, if no `params.gas` set below,
+         * `params.gas` would be filled on Tx Page.
+         */
+        if (gasLimit > 0) {
+          params.gas = intToHex(gasLimit);
+        } else if (notContract && couldSpecifyIntrinsicGas) {
+          params.gas = intToHex(21000);
         }
       } catch (e) {
-        if (!L2_ENUMS.includes(target.enum)) {
-          params.gas = intToHex(21000); // L2 has extra validation fee so can not set gasLimit as 21000 when send native token
+        if (couldSpecifyIntrinsicGas) {
+          params.gas = intToHex(21000);
         }
       }
+
+      // if (
+      //   isShowMessageDataForToken &&
+      //   (messageDataForContractCall || messageDataForSendToEoa)
+      // ) {
+      //   delete params.gas;
+      // }
+      setIsSubmittingRef(false);
       if (showGasReserved) {
         params.gasPrice = selectedGasLevel?.price;
       }
@@ -973,7 +1019,7 @@ const SendTokenInner = () => {
   const handleChainChanged = useCallback(
     async (val: CHAINS_ENUM) => {
       setSendMaxInfo((prev) => ({ ...prev, clickedMax: false }));
-      const newGasList = await loadGasList();
+      const newGasList = await loadGasList(val);
       setSelectedGasLevel(
         newGasList.find(
           (gasLevel) => (gasLevel.level as GasLevelType) === 'normal'
@@ -1368,6 +1414,7 @@ const SendTokenInner = () => {
             {currentAccount && (
               <TokenSelect
                 className="tokenInput"
+                onChange={handleAmountChange}
                 onTokenChange={handleCurrentTokenChange}
                 chainId={findChain({ enum: chain })?.serverId || null}
                 token={currentToken}
