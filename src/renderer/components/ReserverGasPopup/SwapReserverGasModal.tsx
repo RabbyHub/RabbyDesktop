@@ -24,6 +24,7 @@ export const SwapReserveGasModal = (
       maskClosable
       destroyOnClose
       closeIcon={null}
+      centered
       {...otherModalProps}
     >
       {gasList && (
