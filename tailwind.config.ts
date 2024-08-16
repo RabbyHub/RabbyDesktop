@@ -1,11 +1,28 @@
 import { defineConfig } from 'windicss/helpers'
 import colors from 'windicss/colors';
+import tinycolor2 from 'tinycolor2';
 
 import { themeColors, rabbyCssPrefix } from './src/isomorphic/theme-colors';
-const rabbyColors = Object.entries(themeColors.dark).reduce((accu, [cssvarKey, cssvarValue]) => {
-  accu[cssvarKey] = `var(--${rabbyCssPrefix}${cssvarKey}, ${cssvarValue})`;
+const rabbyColors = [/* 'light',  */'dark'].reduce((accu, theme) => {
+  Object.entries(themeColors[theme]).forEach(([cssvarKey, colorValue]) => {
+    const tinyColor = tinycolor2(colorValue as any);
+    const alpha = tinyColor.getAlpha();
+
+    const hexValue = alpha === 1 ? tinyColor.toHexString() : tinyColor.toHex8String();
+
+    if (!accu.auto[cssvarKey]) {
+      accu.auto[cssvarKey] = `var(--${rabbyCssPrefix}${cssvarKey}, ${hexValue})`;
+    }
+
+    accu[theme][cssvarKey] = hexValue;
+  });
+
   return accu;
-}, {} as Record<string, string>);
+}, {
+  light: {},
+  dark: {},
+  auto: {},
+});
 
 export default defineConfig({
   extract: {
@@ -117,7 +134,10 @@ export default defineConfig({
     extend: {
       colors: {
         // [`${rabbyCssPrefix.replace(/\-$/, '')}`]: rabbyColors,
-        'r': rabbyColors,
+        [`${'rabby-'.replace(/\-$/, '')}`]: rabbyColors.auto,
+        'r': rabbyColors.auto,
+        // [`light-${rabbyCssPrefix.replace(/\-$/, '')}`]: rabbyColors.light,
+        [`dark-${rabbyCssPrefix.replace(/\-$/, '')}`]: rabbyColors.dark,
       }
     }
   },

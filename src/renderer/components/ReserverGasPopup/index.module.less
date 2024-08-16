@@ -1,0 +1,52 @@
+.ReserveGasModal {
+  position: relative;
+  height: 436px;
+
+  padding-bottom: 0;
+
+  .contentPx {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  :global {
+    .ant-modal-content {
+      background: var(--theme-modal-content-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      height: 100%;
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+
+    .ant-modal-header {
+      background: transparent;
+      border: none;
+      text-align: center;
+      height: 24px;
+      box-sizing: border-box;
+      padding: 0;
+      margin-bottom: 0;
+    }
+
+    .ant-modal-title {
+      font-size: 20px;
+      line-height: 24px;
+      font-weight: 500;
+      color: #fff;
+    }
+
+    .ant-modal-close {
+      display: none;
+    }
+
+    .ant-modal-body {
+      .contentPx;
+      padding-top: 16px;
+    }
+
+    .ant-modal-footer {
+      display: none;
+    }
+  }
+}

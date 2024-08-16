@@ -4,6 +4,8 @@ import { createRoot } from 'react-dom/client';
 import { randString } from '@/isomorphic/string';
 import { ModalProps } from 'antd';
 
+import '@/renderer/utils/i18n';
+
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type WrappedComponentProps<MERGE = {}, CTX = {}> = {
   onFinished(...args: any[]): void;

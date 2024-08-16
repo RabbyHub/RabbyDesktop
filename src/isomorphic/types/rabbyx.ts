@@ -172,13 +172,12 @@ export interface TransactionGroup {
 }
 
 export interface SwapState {
-  gasPriceCache?: GasCache;
-  selectedDex?: import('@rabby-wallet/rabby-swap').DEX_ENUM | null;
-  selectedChain?: import('@debank/common').CHAINS_ENUM;
-  unlimitedAllowance?: boolean;
-  viewList: Record<keyof DEX_TYPE | keyof CEX_TYPE, boolean>;
-  tradeList: Record<keyof DEX_TYPE | keyof CEX_TYPE, boolean>;
-  sortIncludeGasFee: boolean;
+  autoSlippage: boolean;
+  isCustomSlippage?: boolean;
+  slippage: string;
+  selectedChain: CHAINS_ENUM | null;
+  selectedFromToken?: TokenItem;
+  selectedToToken?: TokenItem;
   preferMEVGuarded: boolean;
 }
 
@@ -332,9 +331,9 @@ export type RabbyXMethod = {
     id: keyof GasCache
   ) => ChainGas | null;
   'walletController.getLastTimeSendToken': (address: string) => TokenItem;
-  'walletController.getSwap': (
-    k?: keyof SwapState
-  ) => typeof k extends void ? SwapState : SwapState[keyof SwapState];
+  'walletController.getSwap': <K extends keyof SwapState>(
+    key?: K
+  ) => typeof key extends void ? SwapState : SwapState[keyof SwapState];
 
   'walletController.getSwapGasCache': (
     chainId: keyof GasCache
@@ -354,19 +353,15 @@ export type RabbyXMethod = {
 
   'walletController.setUnlimitedAllowance': (bool: boolean) => void;
 
-  'walletController.setSwapView': (
-    id: keyof SwapState['viewList'],
-    bool: boolean
-  ) => void;
+  'walletController.setSelectedFromToken': (token?: TokenItem) => void;
+  'walletController.setSelectedToToken': (token?: TokenItem) => void;
 
-  'walletController.setSwapTrade': (
-    id: keyof SwapState['tradeList'],
-    bool: boolean
-  ) => void;
+  'walletController.setAutoSlippage': (auto: boolean) => void;
 
-  'walletController.getSwapViewList': () => SwapState['viewList'];
+  'walletController.setIsCustomSlippage': (bool: boolean) => void;
 
-  'walletController.getSwapTradeList': () => SwapState['tradeList'];
+  'walletController.setSlippage': (slippage: string) => void;
+
   'walletController.getSwapPreferMEVGuarded': () => boolean;
   'walletController.setSwapPreferMEVGuarded': (bool: boolean) => boolean;
 
@@ -661,6 +656,12 @@ export type RabbyXMethod = {
     reqId: string;
   }) => void;
   'walletController.getMainnetListFromLocal': () => Chain[];
+  'walletController.fetchEstimatedL1Fee': (
+    txMeta: Record<string, any> & {
+      txParams: any;
+    },
+    chain: CHAINS_ENUM
+  ) => string;
 } & GenOpenApiService<'openapi'> &
   GenOpenApiService<'testnetOpenapi'>;
 

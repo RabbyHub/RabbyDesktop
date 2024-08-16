@@ -1,50 +1,30 @@
-import { useMemo } from 'react';
 import IconQuoteLoading from '@/../assets/icons/swap/quote-loading.svg?rc';
+import clsx from 'clsx';
 
 export const QuoteLogo = ({
-  logo,
   isLoading,
-  boxSize = 40,
-  size = 24,
-  loadingSize = 32,
+  logo,
+  isCex = false,
+  loaded = false,
 }: {
-  logo: string;
   isLoading?: boolean;
-  boxSize?: number;
-  size?: number;
-  loadingSize?: number;
+  logo: string;
+  isCex?: boolean;
+  loaded?: boolean;
 }) => {
-  const [logoStyle, boxStyle, loadingStyle] = useMemo(
-    () => [
-      {
-        width: size,
-        height: size,
-      },
-      {
-        width: boxSize,
-        height: boxSize,
-      },
-      {
-        width: loadingSize,
-        height: loadingSize,
-        fontSize: `${loadingSize}px`,
-      },
-    ],
-    [boxSize, loadingSize, size]
-  );
   return (
-    <div style={boxStyle} className="flex items-center justify-center">
-      <div
-        style={logoStyle}
-        className="relative flex items-center justify-center"
-      >
-        <img style={logoStyle} className="rounded-full" src={logo} />
+    <div className="flex items-center justify-center w-32 h-32">
+      <div className="relative flex items-center justify-center">
+        <img
+          className={clsx('rounded-full', 'min-w-[32px] w-32 h-32')}
+          src={logo}
+        />
         {isLoading && (
-          <div
-            style={loadingStyle}
-            className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"
-          >
-            <IconQuoteLoading className="animate-spin" />
+          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+            <IconQuoteLoading
+              className={clsx('animate-spin', 'w-40 h-40')}
+              viewBox="0 0 40 40"
+            />
           </div>
         )}
       </div>

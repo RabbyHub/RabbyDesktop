@@ -1,12 +1,14 @@
 import { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
-import { atom } from 'jotai';
-import { swapAtom } from '@/renderer/hooks/rabbyx/useSwap';
+import { atom, useAtomValue, useSetAtom } from 'jotai';
 import { DEX_ENUM } from '@rabby-wallet/rabby-swap';
+import { QuotePreExecResultInfo } from './utils';
 
 export type QuoteProvider = {
   name: string;
   error?: boolean;
   quote: QuoteResult | null;
+  manualClick?: boolean;
+  preExecResult: QuotePreExecResultInfo;
   shouldApproveToken: boolean;
   shouldTwoStepApprove: boolean;
   halfBetterRate?: string;
@@ -31,13 +33,10 @@ export const activeProviderOriginAtom = atom<QuoteProvider | undefined>(
 export const activeProviderAtom = atom((get) => {
   const activeSwapTxs = get(activeSwapTxsAtom);
   const activeProviderOrigin = get(activeProviderOriginAtom);
-  const swapTradList = get(swapAtom)?.tradeList;
 
   if (
     activeProviderOrigin?.name &&
-    activeProviderOrigin?.name !== DEX_ENUM.WRAPTOKEN &&
-    swapTradList?.[activeProviderOrigin?.name as keyof typeof swapTradList] !==
-      true
+    activeProviderOrigin?.name !== DEX_ENUM.WRAPTOKEN
   ) {
     return;
   }
@@ -60,3 +59,19 @@ export const activeProviderAtom = atom((get) => {
 });
 
 export const swapSettingVisibleAtom = atom(false);
+
+const quoteVisibleAtom = atom(false);
+
+export const useQuoteVisible = () => useAtomValue(quoteVisibleAtom);
+export const useSetQuoteVisible = () => useSetAtom(quoteVisibleAtom);
+
+const rabbyFeeAtom = atom<{
+  visible: boolean;
+  feeDexDesc?: string;
+  dexName?: string;
+}>({
+  visible: false,
+});
+
+export const useRabbyFee = () => useAtomValue(rabbyFeeAtom);
+export const useSetRabbyFee = () => useSetAtom(rabbyFeeAtom);

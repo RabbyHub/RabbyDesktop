@@ -26,6 +26,19 @@ export const DEX = {
     name: 'ParaSwap',
     chains: DEX_SUPPORT_CHAINS[DEX_ENUM.PARASWAP],
   },
+
+  [DEX_ENUM.OPENOCEAN]: {
+    id: DEX_ENUM.OPENOCEAN,
+    logo: 'rabby-internal://assets/icons/swap/openocean.png',
+    name: 'OpenOcean',
+    chains: DEX_SUPPORT_CHAINS[DEX_ENUM.OPENOCEAN],
+  },
+  [DEX_ENUM.KYBERSWAP]: {
+    id: DEX_ENUM.KYBERSWAP,
+    logo: 'rabby-internal://assets/icons/swap/kyberswap.png',
+    name: 'KyberSwap',
+    chains: DEX_SUPPORT_CHAINS[DEX_ENUM.KYBERSWAP],
+  },
 };
 
 export const DEX_WITH_WRAP = {
@@ -38,23 +51,7 @@ export const DEX_WITH_WRAP = {
   },
 };
 
-export const CEX = {
-  binance: {
-    id: 'binance',
-    name: 'Binance',
-    logo: 'rabby-internal://assets/icons/swap/binance.png',
-  },
-  coinbase: {
-    id: 'coinbase',
-    name: 'Coinbase',
-    logo: 'rabby-internal://assets/icons/swap/coinbase.png',
-  },
-  okex: {
-    id: 'okex',
-    name: 'OKX',
-    logo: 'rabby-internal://assets/icons/swap/okx.png',
-  },
-};
+export const CEX = {};
 
 export type DEX_TYPE = typeof DEX;
 

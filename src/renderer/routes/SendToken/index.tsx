@@ -1,6 +1,5 @@
 import IconRcLoading from '@/../assets/icons/swap/loading.svg?rc';
 import { UIContactBookItem } from '@/isomorphic/types/contact';
-import { ChainGas } from '@/isomorphic/types/rabbyx';
 import AccountCard from '@/renderer/components/AccountCard';
 import AccountSearchInput from '@/renderer/components/AccountSearchInput';
 import AddressViewer from '@/renderer/components/AddressViewer';
@@ -15,32 +14,39 @@ import { useRefState } from '@/renderer/hooks/useRefState';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
-import { findChain, findChainByServerID } from '@/renderer/utils/chain';
+import { findChain } from '@/renderer/utils/chain';
 import { copyText } from '@/renderer/utils/clipboard';
 import {
+  CAN_ESTIMATE_L1_FEE_CHAINS,
+  CAN_NOT_SPECIFY_INTRINSIC_GAS_CHAINS,
   KEYRING_CLASS,
   L2_ENUMS,
   MINIMUM_GAS_LIMIT,
 } from '@/renderer/utils/constant';
-import { formatAmount, splitNumberByStep } from '@/renderer/utils/number';
+import {
+  formatAmount,
+  formatTokenAmount,
+  splitNumberByStep,
+} from '@/renderer/utils/number';
 import { CHAINS_ENUM } from '@debank/common';
 import { GasLevel, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { Button, Form, Skeleton, message } from 'antd';
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
-import { intToHex, isValidAddress } from 'ethereumjs-util';
+import { intToHex, isValidAddress, zeroAddress } from 'ethereumjs-util';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
-import { useDebounce } from 'react-use';
+import { useSearchParams } from 'react-router-dom';
+import { useAsyncFn, useDebounce } from 'react-use';
 import styled from 'styled-components';
 import abiCoder, { AbiCoder } from 'web3-eth-abi';
 import { useMainWindowModalShownFor } from '@/renderer/components/MainWindow/hooks';
+import { GasLevelType } from '@/renderer/components/ReserverGasPopup/ReserverGasModal';
+import { SendReserveGasModal } from '@/renderer/components/ReserverGasPopup/SendReserverGasModal';
+import { checkIfTokenBalanceEnough } from '@/renderer/utils/token';
 import { ChainRender, ChainSelect } from '../Swap/component/ChainSelect';
 import { TokenSelect } from '../Swap/component/TokenSelect';
 import { ContactEditModal } from './components/ContactEditModal';
 import { ContactListModal } from './components/ContactListModal';
-import GasReserved from './components/GasReserved';
-import GasSelector from './components/GasSelector';
 import { useOnTxFinished } from './hooks';
 
 const MaxButton = styled.img`
@@ -254,6 +260,17 @@ const SendTokenWrapper = styled.div`
   }
 `;
 
+function findInstanceLevel(gasList: GasLevel[]) {
+  return gasList.reduce((prev, current) =>
+    prev.price >= current.price ? prev : current
+  );
+}
+type FormSendToken = {
+  to: string;
+  amount: string;
+  // messageDataForSendToEoa: string;
+  // messageDataForContractCall: string;
+};
 const SendTokenInner = () => {
   const rbisource = useRbiSource();
 
@@ -261,10 +278,10 @@ const SendTokenInner = () => {
   const { fetchContactsByAddr, isAddrOnContactBook, getAddressNote } =
     useContactsByAddr();
   const [chain, setChain] = useState(CHAINS_ENUM.ETH);
+  const chainItem = useMemo(() => findChain({ enum: chain }), [chain]);
+
   const [tokenAmountForGas, setTokenAmountForGas] = useState('0');
   const { useForm } = Form;
-  const { state } = useLocation();
-  const { showChainsModal = false } = state ?? {};
 
   const [form] = useForm<{ to: string; amount: string }>();
   const [formSnapshot, setFormSnapshot] = useState(form.getFieldsValue());
@@ -288,8 +305,12 @@ const SendTokenInner = () => {
     time_at: 0,
     amount: 0,
   });
+
+  const [safeInfo, setSafeInfo] = useState<{
+    chainId: number;
+    nonce: number;
+  } | null>(null);
   const [inited, setInited] = useState(false);
-  const [gasList, setGasList] = useState<GasLevel[]>([]);
   const [sendAlianName, setSendAlianName] = useState<string | null>(null);
   const [showEditContactModal, setShowEditContactModal] = useState(false);
   const [showListContactModal, setShowListContactModal] = useState(false);
@@ -303,14 +324,36 @@ const SendTokenInner = () => {
   } = useRefState(false);
   const [balanceError, setBalanceError] = useState<string | null>(null);
   const [balanceWarn, setBalanceWarn] = useState<string | null>(null);
-  const [showGasReserved, setShowGasReserved] = useState(false);
+  const [{ showGasReserved, clickedMax, isEstimatingGas }, setSendMaxInfo] =
+    useState({
+      /** @deprecated */
+      showGasReserved: false,
+      clickedMax: false,
+      isEstimatingGas: false,
+    });
+  const setShowGasReserved = useCallback((show: boolean) => {
+    setSendMaxInfo((prev) => ({
+      ...prev,
+      showGasReserved: show,
+    }));
+  }, []);
+  const cancelClickedMax = useCallback(() => {
+    setSendMaxInfo((prev) => ({ ...prev, clickedMax: false }));
+  }, []);
   const [showContactInfo, setShowContactInfo] = useState(false);
   const [showWhitelistAlert, setShowWhitelistAlert] = useState(false);
-  const [amountFocus, setAmountFocus] = useState(false);
-  const [gasSelectorVisible, setGasSelectorVisible] = useState(false);
+  // const [amountFocus, setAmountFocus] = useState(false);
+
+  const [reserveGasOpen, setReserveGasOpen] = useState(false);
+  const handleReserveGasClose = useCallback(() => {
+    setReserveGasOpen(false);
+  }, []);
+
   const [selectedGasLevel, setSelectedGasLevel] = useState<GasLevel | null>(
     null
   );
+
+  const [estimateGas, setEstimateGas] = useState(0);
   const [temporaryGrant, setTemporaryGrant] = useState(false);
   const [gasPriceMap, setGasPriceMap] = useState<
     Record<string, { list: GasLevel[]; expireAt: number }>
@@ -380,16 +423,31 @@ const SendTokenInner = () => {
   const isNativeToken =
     currentToken.id === findChain({ enum: chain })?.nativeTokenAddress;
 
-  const fetchGasList = async () => {
-    const serverId = findChain({
-      enum: chain,
-    })?.serverId;
-    if (!serverId) {
-      throw new Error('chain not found');
-    }
-    const list: GasLevel[] = await walletOpenapi.gasMarket(serverId);
-    return list;
-  };
+  const fetchGasList = useCallback(
+    async (chainEnum?: CHAINS_ENUM) => {
+      const serverId = findChain({
+        enum: chainEnum || chain,
+      })?.serverId;
+      if (!serverId) {
+        throw new Error('chain not found');
+      }
+      return walletOpenapi.gasMarket(serverId);
+    },
+    [chain]
+  );
+
+  const [{ value: gasList }, loadGasList] = useAsyncFn(
+    (chainEnum?: CHAINS_ENUM) => {
+      return fetchGasList(chainEnum);
+    },
+    [fetchGasList]
+  );
+
+  useEffect(() => {
+    loadGasList();
+  }, [loadGasList]);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   useDebounce(
     async () => {
@@ -418,45 +476,6 @@ const SendTokenInner = () => {
     [chain]
   );
 
-  const calcGasCost = async () => {
-    const targetChain = findChain({
-      enum: chain,
-    });
-    if (!targetChain) return;
-    const list = gasPriceMap[targetChain.enum]?.list;
-
-    if (!list) return new BigNumber(0);
-
-    const lastTimeGas: ChainGas | null =
-      await walletController.getLastTimeGasSelection(targetChain.id);
-    let gasLevel: GasLevel;
-    if (lastTimeGas?.lastTimeSelect === 'gasPrice' && lastTimeGas.gasPrice) {
-      // use cached gasPrice if exist
-      gasLevel = {
-        level: 'custom',
-        price: lastTimeGas.gasPrice,
-        front_tx_count: 0,
-        estimated_seconds: 0,
-        base_fee: 0,
-      };
-    } else if (
-      lastTimeGas?.lastTimeSelect &&
-      lastTimeGas?.lastTimeSelect === 'gasLevel'
-    ) {
-      const target = gasList.find(
-        (item) => item.level === lastTimeGas?.gasLevel
-      )!;
-      gasLevel = target;
-    } else {
-      // no cache, use the fast level in gasMarket
-      gasLevel = gasList.find((item) => item.level === 'fast')!;
-    }
-    const costTokenAmount = new BigNumber(gasLevel.price)
-      .times(21000)
-      .div(1e18);
-    return costTokenAmount;
-  };
-
   const handleSubmit = async ({
     to,
     amount,
@@ -470,37 +489,55 @@ const SendTokenInner = () => {
     const target = findChain({
       serverId: currentToken.chain,
     })!;
-    const sendValue = new BigNumber(amount).multipliedBy(
-      10 ** currentToken.decimals
-    );
+    const sendValue = new BigNumber(amount)
+      .multipliedBy(10 ** currentToken.decimals)
+      .decimalPlaces(0, BigNumber.ROUND_DOWN);
+    const dataInput = [
+      {
+        name: 'transfer',
+        type: 'function',
+        inputs: [
+          {
+            type: 'address',
+            name: 'to',
+          },
+          {
+            type: 'uint256',
+            name: 'value',
+          },
+        ] as any[],
+      } as const,
+      [to, sendValue.toFixed(0)] as any[],
+    ] as const;
     const params: Record<string, any> = {
       chainId: target.id,
       from: currentAccount!.address,
       to: currentToken.id,
       value: '0x0',
-      data: (abiCoder as unknown as AbiCoder).encodeFunctionCall(
-        {
-          name: 'transfer',
-          type: 'function',
-          inputs: [
-            {
-              type: 'address',
-              name: 'to',
-            },
-            {
-              type: 'uint256',
-              name: 'value',
-            },
-          ],
-        },
-        [to, sendValue.toFixed(0)]
-      ),
+      data: abiCoder.encodeFunctionCall(dataInput[0], dataInput[1]),
       isSend: true,
     };
+    if (safeInfo?.nonce != null) {
+      params.nonce = safeInfo.nonce;
+    }
     if (isNativeToken) {
       params.to = to;
       delete params.data;
+
+      // if (isShowMessageDataForToken && messageDataForSendToEoa) {
+      //   const encodedValue = formatTxInputDataOnERC20(messageDataForSendToEoa)
+      //     .hexData;
+
+      //   params.data = encodedValue;
+      // } else if (isShowMessageDataForContract && messageDataForContractCall) {
+      //   params.data = messageDataForContractCall;
+      // }
+
       params.value = `0x${sendValue.toString(16)}`;
+      // L2 has extra validation fee so we can not set gasLimit as 21000 when send native token
+      const couldSpecifyIntrinsicGas =
+        !CAN_NOT_SPECIFY_INTRINSIC_GAS_CHAINS.includes(target.enum);
+
       try {
         const code = await walletController.requestETHRpc(
           {
@@ -509,25 +546,41 @@ const SendTokenInner = () => {
           },
           target.serverId
         );
-        if (
-          code &&
-          (code === '0x' || code === '0x0') &&
-          !L2_ENUMS.includes(target.enum)
-        ) {
-          params.gas = intToHex(21000); // L2 has extra validation fee so can not set gasLimit as 21000 when send native token
+        const notContract = !!code && (code === '0x' || code === '0x0');
+
+        let gasLimit = 0;
+
+        if (estimateGas) {
+          gasLimit = estimateGas;
+        }
+
+        /**
+         * we don't need always fetch estimateGas, if no `params.gas` set below,
+         * `params.gas` would be filled on Tx Page.
+         */
+        if (gasLimit > 0) {
+          params.gas = intToHex(gasLimit);
+        } else if (notContract && couldSpecifyIntrinsicGas) {
+          params.gas = intToHex(21000);
         }
       } catch (e) {
-        if (!L2_ENUMS.includes(target.enum)) {
-          params.gas = intToHex(21000); // L2 has extra validation fee so can not set gasLimit as 21000 when send native token
+        if (couldSpecifyIntrinsicGas) {
+          params.gas = intToHex(21000);
         }
       }
-      if (showGasReserved) {
+
+      // if (
+      //   isShowMessageDataForToken &&
+      //   (messageDataForContractCall || messageDataForSendToEoa)
+      // ) {
+      //   delete params.gas;
+      // }
+      setIsSubmittingRef(false);
+      if (clickedMax && selectedGasLevel?.price) {
         params.gasPrice = selectedGasLevel?.price;
       }
     }
     try {
-      setAmountFocus(false);
-
       await walletController.setLastTimeSendToken(
         currentAccount!.address,
         currentToken
@@ -559,89 +612,90 @@ const SendTokenInner = () => {
       message.error(e.message);
     } finally {
       setIsSubmittingRef(false);
-      setAmountFocus(true);
     }
   };
 
-  const handleFormValuesChange = async (
-    changedValues: { amount?: string; to?: any } | null,
-    {
-      to,
-      amount,
-    }: {
-      to: string;
-      amount: string;
-    },
-    token?: TokenItem
-  ) => {
-    if (changedValues && changedValues.to) {
-      setTemporaryGrant(false);
-    }
-    const targetToken = token || currentToken;
-    if (!to || !isValidAddress(to)) {
-      setEditBtnDisabled(true);
-      setShowWhitelistAlert(false);
-    } else {
-      setShowWhitelistAlert(true);
-      setEditBtnDisabled(false);
-    }
-    let resultAmount = amount;
-    if (!/^\d*(\.\d*)?$/.test(amount)) {
-      resultAmount = cacheAmount;
-    }
-
-    if (amount !== cacheAmount) {
-      if (showGasReserved && Number(resultAmount) > 0) {
-        setShowGasReserved(false);
-      } else if (isNativeToken && !isGnosisSafe) {
-        // const gasCostTokenAmount = await calcGasCost();
-        // if (
-        //   new BigNumber(targetToken.raw_amount_hex_str || 0)
-        //     .div(10 ** targetToken.decimals)
-        //     .minus(amount)
-        //     .minus(gasCostTokenAmount || 0)
-        //     .lt(0)
-        // ) {
-        //   setBalanceWarn('Gas fee reservation required');
-        // } else {
-        //   setBalanceWarn(null);
-        // }
+  const handleFormValuesChange = useCallback(
+    async (
+      changedValues: { amount?: string; to?: any } | null,
+      { to, amount, ...restForm }: FormSendToken,
+      opts?: {
+        token?: TokenItem;
+        isInitFromCache?: boolean;
       }
-    }
+    ) => {
+      const { token, isInitFromCache } = opts || {};
+      if (changedValues && changedValues.to) {
+        setTemporaryGrant(false);
+      }
 
-    if (
-      new BigNumber(resultAmount || 0).isGreaterThan(
-        new BigNumber(targetToken.raw_amount_hex_str || 0).div(
-          10 ** targetToken.decimals
+      // if ((!isInitFromCache && changedValues?.to) || (!changedValues && to)) {
+      //   restForm.messageDataForSendToEoa = '';
+      //   restForm.messageDataForContractCall = '';
+      // }
+
+      const targetToken = token || currentToken;
+      if (!to || !isValidAddress(to)) {
+        setEditBtnDisabled(true);
+        setShowWhitelistAlert(false);
+      } else {
+        setShowWhitelistAlert(true);
+        setEditBtnDisabled(false);
+      }
+      let resultAmount = amount;
+      if (!/^\d*(\.\d*)?$/.test(amount)) {
+        resultAmount = cacheAmount;
+      }
+
+      if (amount !== cacheAmount) {
+        if (showGasReserved && Number(resultAmount) > 0) {
+          setShowGasReserved(false);
+        }
+      }
+
+      if (
+        new BigNumber(resultAmount || 0).isGreaterThan(
+          new BigNumber(targetToken.raw_amount_hex_str || 0).div(
+            10 ** targetToken.decimals
+          )
         )
-      )
-    ) {
-      setBalanceError('Insufficient balance');
-    } else {
-      setBalanceError(null);
-    }
-    const nextFormValues = {
-      to,
-      amount: resultAmount,
-    };
-    form.setFieldsValue(nextFormValues);
-    setFormSnapshot(nextFormValues);
-    setCacheAmount(resultAmount);
-    const alianName = await walletController.getAlianName(to.toLowerCase());
-    console.log(alianName);
-    if (alianName) {
-      setContactInfo({ address: to, name: alianName });
-      setShowContactInfo(true);
-    } else if (contactInfo) {
-      setContactInfo(null);
-    }
-  };
+      ) {
+        // Insufficient balance
+        setBalanceError('Insufficient balance');
+      } else {
+        setBalanceError(null);
+      }
+      const nextFormValues = {
+        ...restForm,
+        to,
+        amount: resultAmount,
+      };
+
+      form.setFieldsValue(nextFormValues);
+      setFormSnapshot(nextFormValues);
+      setCacheAmount(resultAmount);
+      const alianName = await walletController.getAlianName(to.toLowerCase());
+      if (alianName) {
+        setContactInfo({ address: to, name: alianName });
+        setShowContactInfo(true);
+      } else if (contactInfo) {
+        setContactInfo(null);
+      }
+    },
+    [
+      cacheAmount,
+      contactInfo,
+      currentToken,
+      form,
+      setShowGasReserved,
+      showGasReserved,
+    ]
+  );
 
   const handleConfirmContact = (account: UIContactBookItem) => {
     setShowListContactModal(false);
     setShowEditContactModal(false);
     setContactInfo(account);
-    setAmountFocus(true);
     const values = form.getFieldsValue();
     const to = account ? account.address : '';
     if (!account) return;
@@ -670,16 +724,38 @@ const SendTokenInner = () => {
 
   const loadCurrentToken = useCallback(
     async (id: string, chainId: string, address: string, check?: boolean) => {
-      const t = await walletOpenapi.getToken(address, chainId, id);
-      setCurrentToken(t);
+      // const chain = findChain({
+      //   serverId: chainId,
+      // });
+      const result: TokenItem | null = await walletOpenapi.getToken(
+        address,
+        chainId,
+        id
+      );
+      /* if (chain?.isTestnet) {
+        const res = await walletController.getCustomTestnetToken({
+          address,
+          chainId: chain.id,
+          tokenId: id,
+        });
+        if (res) {
+          result = customTestnetTokenToTokenItem(res);
+        }
+      } else {
+        result = await walletOpenapi.getToken(address, chainId, id);
+      } */
+      if (result) {
+        setCurrentToken(result);
+      }
       setIsLoading(false);
-
-      if (check) {
-        const valuse = form.getFieldsValue();
-        if (valuse.to && valuse.amount) {
+      if (result && check) {
+        const value = form.getFieldsValue();
+        if (value.to && value.amount) {
           if (
-            new BigNumber(valuse.amount || 0).isGreaterThan(
-              new BigNumber(t.raw_amount_hex_str || 0).div(10 ** t.decimals)
+            new BigNumber(value.amount || 0).isGreaterThan(
+              new BigNumber(result.raw_amount_hex_str || 0).div(
+                10 ** result.decimals
+              )
             )
           ) {
             setBalanceError('Insufficient balance');
@@ -688,139 +764,328 @@ const SendTokenInner = () => {
           }
         }
       }
+
+      return result;
     },
     [form]
   );
 
-  const handleCurrentTokenChange = async (token: TokenItem) => {
-    if (!currentAccount) return;
-    if (showGasReserved) {
-      setShowGasReserved(false);
+  const handleAmountChange = useCallback(() => {
+    cancelClickedMax();
+  }, [cancelClickedMax]);
+
+  const handleCurrentTokenChange = useCallback(
+    async (token: TokenItem) => {
+      cancelClickedMax();
+      if (showGasReserved) {
+        setShowGasReserved(false);
+      }
+      const account = (await walletController.syncGetCurrentAccount())!;
+      const values = form.getFieldsValue();
+      if (token.id !== currentToken.id || token.chain !== currentToken.chain) {
+        form.setFieldsValue({
+          ...values,
+          amount: '',
+        });
+      }
+      const foundChain = findChain({ serverId: token.chain });
+      setChain(foundChain?.enum ?? CHAINS_ENUM.ETH);
+      setCurrentToken(token);
+      setEstimateGas(0);
+      // await persistPageStateCache({ currentToken: token });
+      setBalanceError(null);
+      setBalanceWarn(null);
+      setIsLoading(true);
+      loadCurrentToken(token.id, token.chain, account.address);
+    },
+    [
+      currentToken.chain,
+      currentToken.id,
+      form,
+      loadCurrentToken,
+      // persistPageStateCache,
+      setShowGasReserved,
+      showGasReserved,
+      cancelClickedMax,
+    ]
+  );
+
+  const ethEstimateGas = useCallback(async () => {
+    const result = {
+      gasNumber: 0,
+      gasNumHex: intToHex(0),
+    };
+
+    if (!currentAccount?.address) return result;
+    if (!chainItem) return result;
+
+    const to = form.getFieldValue('to');
+
+    let _gasUsed: string = intToHex(21000);
+    try {
+      _gasUsed = await walletController.requestETHRpc(
+        {
+          method: 'eth_estimateGas',
+          params: [
+            {
+              from: currentAccount.address,
+              to: to && isValidAddress(to) ? to : zeroAddress(),
+              gasPrice: intToHex(0),
+              value: currentToken.raw_amount_hex_str,
+            },
+          ],
+        },
+        chainItem.serverId
+      );
+    } catch (err) {
+      console.error(err);
     }
-    const values = form.getFieldsValue();
-    if (token.id !== currentToken.id || token.chain !== currentToken.chain) {
+    const gasUsed = chainItem.isTestnet
+      ? new BigNumber(_gasUsed).multipliedBy(1.5).integerValue().toNumber()
+      : _gasUsed;
+
+    result.gasNumber = Number(gasUsed);
+    result.gasNumHex =
+      typeof gasUsed === 'string' ? gasUsed : intToHex(gasUsed);
+
+    return result;
+  }, [currentAccount, chainItem, form, currentToken.raw_amount_hex_str]);
+
+  const handleGasChange = useCallback(
+    (input: {
+      gasLevel: GasLevel;
+      updateTokenAmount?: boolean;
+      gasLimit?: number;
+    }) => {
+      const {
+        gasLevel,
+        updateTokenAmount = true,
+        gasLimit = MINIMUM_GAS_LIMIT,
+      } = input;
+      setSelectedGasLevel(gasLevel);
+
+      const gasTokenAmount = new BigNumber(gasLevel.price)
+        .times(gasLimit)
+        .div(1e18);
+      setTokenAmountForGas(gasTokenAmount.toFixed());
+      if (updateTokenAmount) {
+        const values = form.getFieldsValue();
+        const diffValue = new BigNumber(currentToken.raw_amount_hex_str || 0)
+          .div(10 ** currentToken.decimals)
+          .minus(gasTokenAmount);
+        if (diffValue.lt(0)) {
+          setShowGasReserved(false);
+        }
+        const newValues = {
+          ...values,
+          amount: diffValue.gt(0) ? diffValue.toFixed() : '0',
+        };
+        form.setFieldsValue(newValues);
+      }
+      return gasTokenAmount;
+    },
+    [
+      currentToken.decimals,
+      currentToken.raw_amount_hex_str,
+      form,
+      setShowGasReserved,
+    ]
+  );
+
+  const couldReserveGas = isNativeToken && !isGnosisSafe;
+
+  const handleMaxInfoChanged = useCallback(
+    async (input?: { gasLevel: GasLevel }) => {
+      if (!currentAccount) return;
+
+      if (isLoading) return;
+      if (isEstimatingGas) return;
+
+      const tokenBalance = new BigNumber(
+        currentToken.raw_amount_hex_str || 0
+      ).div(10 ** currentToken.decimals);
+      let amount = tokenBalance.toFixed();
+      const to = form.getFieldValue('to');
+
+      const {
+        gasLevel = selectedGasLevel ||
+          (await loadGasList().then(findInstanceLevel)),
+      } = input || {};
+      const needReserveGasOnSendToken = gasLevel.price > 0;
+
+      if (couldReserveGas && needReserveGasOnSendToken) {
+        setShowGasReserved(true);
+        setSendMaxInfo((prev) => ({ ...prev, isEstimatingGas: true }));
+        try {
+          const { gasNumber } = await ethEstimateGas();
+          setEstimateGas(gasNumber);
+
+          let gasTokenAmount = handleGasChange({
+            gasLevel,
+            updateTokenAmount: false,
+            gasLimit: gasNumber,
+          });
+          if (chainItem && CAN_ESTIMATE_L1_FEE_CHAINS.includes(chain)) {
+            const l1GasFee = await walletController.fetchEstimatedL1Fee(
+              {
+                txParams: {
+                  chainId: chainItem.id,
+                  from: currentAccount.address,
+                  to: to && isValidAddress(to) ? to : zeroAddress(),
+                  value: currentToken.raw_amount_hex_str,
+                  gas: intToHex(21000),
+                  gasPrice: `0x${new BigNumber(gasLevel.price).toString(16)}`,
+                  data: '0x',
+                },
+              },
+              chain
+            );
+            gasTokenAmount = gasTokenAmount
+              .plus(new BigNumber(l1GasFee).div(1e18))
+              .times(1.1);
+          }
+          const tokenForSend = tokenBalance.minus(gasTokenAmount);
+          amount = tokenForSend.gt(0) ? tokenForSend.toFixed() : '0';
+          if (tokenForSend.lt(0)) {
+            setShowGasReserved(false);
+          }
+        } catch (e) {
+          if (!isGnosisSafe) {
+            // // Gas fee reservation required
+            // setBalanceWarn(t('page.sendToken.balanceWarn.gasFeeReservation'));
+            setShowGasReserved(false);
+          }
+        } finally {
+          setSendMaxInfo((prev) => ({ ...prev, isEstimatingGas: false }));
+        }
+      }
+
+      const values = form.getFieldsValue();
+      const newValues = {
+        ...values,
+        amount,
+      };
+      form.setFieldsValue(newValues);
+      handleFormValuesChange(null, newValues);
+    },
+    [
+      chain,
+      chainItem,
+      currentAccount,
+      currentToken.decimals,
+      currentToken.raw_amount_hex_str,
+      ethEstimateGas,
+      selectedGasLevel,
+      loadGasList,
+      form,
+      handleFormValuesChange,
+      handleGasChange,
+      couldReserveGas,
+      isGnosisSafe,
+      isLoading,
+      setShowGasReserved,
+      isEstimatingGas,
+    ]
+  );
+  const handleGasLevelChanged = useCallback(
+    async (gl?: GasLevel | null) => {
+      handleReserveGasClose();
+      const gasLevel: GasLevel =
+        gl ||
+        (await loadGasList().then(
+          (res) =>
+            res.find((item) => item.level === 'normal') ||
+            findInstanceLevel(res)
+        ));
+
+      setSelectedGasLevel(gasLevel);
+      handleMaxInfoChanged({ gasLevel });
+    },
+    [handleReserveGasClose, handleMaxInfoChanged, loadGasList]
+  );
+
+  const handleClickMaxButton = useCallback(async () => {
+    setSendMaxInfo((prev) => ({ ...prev, clickedMax: true }));
+
+    if (couldReserveGas) {
+      setReserveGasOpen(true);
+    } else {
+      handleMaxInfoChanged();
+    }
+  }, [couldReserveGas, handleMaxInfoChanged]);
+
+  const handleChainChanged = useCallback(
+    async (val: CHAINS_ENUM) => {
+      setSendMaxInfo((prev) => ({ ...prev, clickedMax: false }));
+      const newGasList = await loadGasList(val);
+      setSelectedGasLevel(
+        newGasList.find(
+          (gasLevel) => (gasLevel.level as GasLevelType) === 'normal'
+        ) || findInstanceLevel(newGasList)
+      );
+
+      const account = (await walletController.syncGetCurrentAccount())!;
+      const newChain = findChain({
+        enum: val,
+      });
+      if (!newChain) {
+        return;
+      }
+      setChain(val);
+      setCurrentToken({
+        id: newChain.nativeTokenAddress,
+        decimals: newChain.nativeTokenDecimals,
+        logo_url: newChain.nativeTokenLogo,
+        symbol: newChain.nativeTokenSymbol,
+        display_symbol: newChain.nativeTokenSymbol,
+        optimized_symbol: newChain.nativeTokenSymbol,
+        is_core: true,
+        is_verified: true,
+        is_wallet: true,
+        amount: 0,
+        price: 0,
+        name: newChain.nativeTokenSymbol,
+        chain: newChain.serverId,
+        time_at: 0,
+      });
+      setEstimateGas(0);
+
+      let nextToken: TokenItem | null = null;
+      try {
+        nextToken = await loadCurrentToken(
+          newChain.nativeTokenAddress,
+          newChain.serverId,
+          account.address
+        );
+      } catch (error) {
+        console.error(error);
+      }
+
+      const values = form.getFieldsValue();
       form.setFieldsValue({
         ...values,
         amount: '',
       });
-    }
-    const chainItem = !token.chain ? null : findChainByServerID(token.chain);
-    setChain(chainItem?.enum || CHAINS_ENUM.ETH);
-    setCurrentToken(token);
-    setBalanceError(null);
-    setBalanceWarn(null);
-    setIsLoading(true);
-    loadCurrentToken(token.id, token.chain, currentAccount.address);
-  };
-
-  const handleGasChange = (gas: GasLevel, updateTokenAmount = true) => {
-    setSelectedGasLevel(gas);
-    const gasTokenAmount = new BigNumber(gas.price)
-      .times(MINIMUM_GAS_LIMIT)
-      .div(1e18);
-    setTokenAmountForGas(gasTokenAmount.toFixed());
-    if (updateTokenAmount) {
-      const values = form.getFieldsValue();
-      const diffValue = new BigNumber(currentToken.raw_amount_hex_str || 0)
-        .div(10 ** currentToken.decimals)
-        .minus(gasTokenAmount);
-      if (diffValue.lt(0)) {
-        setShowGasReserved(false);
-      }
-      const newValues = {
-        ...values,
-        amount: diffValue.gt(0) ? diffValue.toFixed() : '0',
-      };
-      form.setFieldsValue(newValues);
-    }
-    return gasTokenAmount;
-  };
-
-  const handleClickTokenBalance = async () => {
-    if (isLoading) return;
-    if (showGasReserved) return;
-    const tokenBalance = new BigNumber(
-      currentToken.raw_amount_hex_str || 0
-    ).div(10 ** currentToken.decimals);
-    let amount = tokenBalance.toFixed();
-
-    if (isNativeToken && !isGnosisSafe) {
-      setShowGasReserved(true);
-      try {
-        const list = await fetchGasList();
-        setGasList(list);
-        let instant = list[0];
-        for (let i = 1; i < list.length; i++) {
-          if (list[i].price > instant.price) {
-            instant = list[i];
-          }
+      setShowGasReserved(false);
+      handleFormValuesChange(
+        { amount: '' },
+        {
+          ...values,
+          amount: '',
+        },
+        {
+          ...(nextToken && { token: nextToken }),
         }
-        const gasTokenAmount = handleGasChange(instant, false);
-        const tokenForSend = tokenBalance.minus(gasTokenAmount);
-        amount = tokenForSend.gt(0) ? tokenForSend.toFixed() : '0';
-        if (tokenForSend.lt(0)) {
-          setShowGasReserved(false);
-        }
-      } catch (e) {
-        if (!isGnosisSafe) {
-          setBalanceWarn('Gas fee reservation required');
-          setShowGasReserved(false);
-        }
-      }
-    }
-
-    const values = form.getFieldsValue();
-    const newValues = {
-      ...values,
-      amount,
-    };
-    form.setFieldsValue(newValues);
-    handleFormValuesChange(null, newValues);
-  };
-
-  const handleChainChanged = async (val: CHAINS_ENUM) => {
-    if (!currentAccount) return;
-    const selectChain = findChain({ enum: val });
-    if (!selectChain) {
-      return;
-    }
-
-    setChain(val);
-    setCurrentToken({
-      id: selectChain.nativeTokenAddress,
-      decimals: selectChain.nativeTokenDecimals,
-      logo_url: selectChain.nativeTokenLogo,
-      symbol: selectChain.nativeTokenSymbol,
-      display_symbol: selectChain.nativeTokenSymbol,
-      optimized_symbol: selectChain.nativeTokenSymbol,
-      is_core: true,
-      is_verified: true,
-      is_wallet: true,
-      amount: 0,
-      price: 0,
-      name: selectChain.nativeTokenSymbol,
-      chain: selectChain.serverId,
-      time_at: 0,
-    });
-    loadCurrentToken(
-      selectChain.nativeTokenAddress,
-      selectChain.serverId,
-      currentAccount.address
-    );
-    const values = form.getFieldsValue();
-    form.setFieldsValue({
-      ...values,
-      amount: '',
-    });
-    setShowGasReserved(false);
-    handleFormValuesChange(
-      { amount: '' },
-      {
-        ...values,
-        amount: '',
-      }
-    );
-  };
+      );
+    },
+    [
+      form,
+      handleFormValuesChange,
+      loadCurrentToken,
+      setShowGasReserved,
+      loadGasList,
+    ]
+  );
 
   const handleCopyContractAddress = useCallback((s: string) => {
     copyText(s);
@@ -898,14 +1163,6 @@ const SendTokenInner = () => {
     setSendAlianName(alianName || '');
   };
 
-  const handleClickGasReserved = () => {
-    setGasSelectorVisible(true);
-  };
-
-  const handleGasSelectorClose = () => {
-    setGasSelectorVisible(false);
-  };
-
   const handleClickWhitelistAlert = () => {
     if (whitelistEnabled && !temporaryGrant && !toAddressInWhitelist) {
       const toAddr = form.getFieldValue('to');
@@ -953,6 +1210,42 @@ const SendTokenInner = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentAccount]);
+
+  const { balanceNumText } = useMemo(() => {
+    const balanceNum = new BigNumber(currentToken.raw_amount_hex_str || 0).div(
+      10 ** currentToken.decimals
+    );
+    const decimalPlaces = clickedMax || selectedGasLevel ? 8 : 4;
+
+    return {
+      balanceNumText: formatTokenAmount(
+        balanceNum.toFixed(decimalPlaces, BigNumber.ROUND_FLOOR),
+        decimalPlaces
+      ),
+    };
+  }, [
+    currentToken.raw_amount_hex_str,
+    currentToken.decimals,
+    clickedMax,
+    selectedGasLevel,
+  ]);
+
+  useEffect(() => {
+    if (currentToken && gasList) {
+      const result = checkIfTokenBalanceEnough(currentToken, {
+        gasList,
+        gasLimit: MINIMUM_GAS_LIMIT,
+      });
+
+      if (result.isNormalEnough && result.normalLevel) {
+        setSelectedGasLevel(result.normalLevel);
+      } else if (result.isSlowEnough && result.slowLevel) {
+        setSelectedGasLevel(result.slowLevel);
+      } else if (result.customLevel) {
+        setSelectedGasLevel(result.customLevel);
+      }
+    }
+  }, [currentToken, gasList]);
 
   const handleTxFinished: Parameters<typeof useOnTxFinished>[0] = useCallback(
     ({ hash }) => {
@@ -1052,7 +1345,6 @@ const SendTokenInner = () => {
                   validator(_, value) {
                     if (!value) return Promise.resolve();
                     if (value && isValidAddress(value)) {
-                      setAmountFocus(true);
                       return Promise.resolve();
                     }
                     return Promise.reject(new Error('This address is invalid'));
@@ -1099,38 +1391,20 @@ const SendTokenInner = () => {
                   Balance:{' '}
                   <span
                     className="truncate max-w-[80px]"
-                    title={formatAmount(
-                      new BigNumber(currentToken.raw_amount_hex_str || 0)
-                        .div(10 ** currentToken.decimals)
-                        .toFixed()
-                    )}
+                    title={balanceNumText}
                   >
-                    {formatAmount(
-                      new BigNumber(currentToken.raw_amount_hex_str || 0)
-                        .div(10 ** currentToken.decimals)
-                        .toFixed()
-                    )}
+                    {balanceNumText}
                   </span>
                 </span>
               )}
               {currentToken.amount > 0 && (
                 <MaxButton
                   src="rabby-internal://assets/icons/send-token/max-button.svg"
-                  onClick={handleClickTokenBalance}
+                  onClick={handleClickMaxButton}
                 />
               )}
             </div>
-            {showGasReserved &&
-              (selectedGasLevel ? (
-                <GasReserved
-                  token={currentToken}
-                  amount={tokenAmountForGas}
-                  onClickAmount={handleClickGasReserved}
-                />
-              ) : (
-                <Skeleton.Input active style={{ width: 180 }} />
-              ))}
-            {!showGasReserved && (balanceError || balanceWarn) ? (
+            {!clickedMax && (balanceError || balanceWarn) ? (
               <div className="balance-error">{balanceError || balanceWarn}</div>
             ) : null}
           </div>
@@ -1138,13 +1412,14 @@ const SendTokenInner = () => {
             {currentAccount && (
               <TokenSelect
                 className="tokenInput"
+                onChange={handleAmountChange}
                 onTokenChange={handleCurrentTokenChange}
                 chainId={findChain({ enum: chain })?.serverId || null}
                 token={currentToken}
                 inlinePrize
                 hideChainIcon={false}
                 logoSize={32}
-                forceFocus={amountFocus}
+                // forceFocus={amountFocus}
               />
             )}
           </Form.Item>
@@ -1243,21 +1518,18 @@ const SendTokenInner = () => {
         onOk={handleConfirmContact}
       />
 
-      {findChain({ enum: chain })?.id ? (
-        <GasSelector
-          visible={gasSelectorVisible}
-          onClose={handleGasSelectorClose}
-          chainId={findChain({ enum: chain })!.id}
-          onChange={(val) => {
-            setAmountFocus(false);
-            setGasSelectorVisible(false);
-            handleGasChange(val);
-          }}
-          gasList={gasList}
-          gas={selectedGasLevel}
-          token={currentToken}
-        />
-      ) : null}
+      <SendReserveGasModal
+        selectedItem={selectedGasLevel?.level as GasLevelType}
+        chain={chain}
+        limit={Math.max(estimateGas, MINIMUM_GAS_LIMIT)}
+        onGasChange={(gasLevel) => {
+          handleGasLevelChanged(gasLevel);
+        }}
+        gasList={gasList}
+        open={reserveGasOpen}
+        rawHexBalance={currentToken.raw_amount_hex_str}
+        onCancel={() => handleReserveGasClose()}
+      />
     </SendTokenWrapper>
   );
 };

@@ -5,7 +5,6 @@ import { formatUsdValue } from '@/renderer/utils/number';
 import { CHAINS_ENUM } from '@debank/common';
 import { OpenApiService } from '@rabby-wallet/rabby-api';
 import {
-  CEXQuote,
   ExplainTxResponse,
   TokenItem,
   Tx,
@@ -17,10 +16,16 @@ import {
   WrapTokenAddressMap,
   getQuote,
 } from '@rabby-wallet/rabby-swap';
-import { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
+import {
+  decodeCalldata,
+  DecodeCalldataResult,
+  QuoteResult,
+} from '@rabby-wallet/rabby-swap/dist/quote';
 import BigNumber from 'bignumber.js';
 import pRetry from 'p-retry';
-import { CEX, DEX, ETH_USDT_CONTRACT, SWAP_FEE_ADDRESS } from './constant';
+import { useSwapSupportedDexList } from '@/renderer/hooks/rabbyx/useSwap';
+import { useCallback } from 'react';
+import { DEX, ETH_USDT_CONTRACT, SWAP_FEE_ADDRESS } from './constant';
 
 export const tokenAmountBn = (token: TokenItem) =>
   new BigNumber(token?.raw_amount_hex_str || 0, 16).div(
@@ -299,6 +304,7 @@ export const getPreExecResult = async ({
     gasPrice,
     gasUsdValue,
     gasUsd: formatUsdValue(gasUsdValue),
+    isSdkPass: false,
   };
 };
 
@@ -330,11 +336,11 @@ export const halfBetterRate = (
   return null;
 };
 
-export type QuotePreExecResultInfo = Awaited<
-  ReturnType<typeof getPreExecResult>
-> | null;
+export type QuotePreExecResultInfo =
+  | (Awaited<ReturnType<typeof getPreExecResult>> & { isSdkPass?: boolean })
+  | null;
 
-interface getDexQuoteParams {
+export interface getDexQuoteParams {
   payToken: TokenItem;
   receiveToken: TokenItem;
   userAddress: string;
@@ -423,6 +429,25 @@ export const getDexQuote = async ({
             retries: 1,
           }
         );
+
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        const { isSdkDataPass } = verifySdk({
+          chain,
+          dexId,
+          slippage,
+          data: {
+            ...data,
+            fromToken: payToken.id,
+            fromTokenAmount: new BigNumber(payAmount)
+              .times(10 ** payToken.decimals)
+              .toFixed(0, 1),
+            toToken: receiveToken?.id,
+          },
+          payToken,
+          receiveToken,
+        });
+
+        preExecResult.isSdkPass = isSdkDataPass;
       } catch (error) {
         const quote: TDexQuoteData = {
           data,
@@ -468,96 +493,131 @@ export const getAllDexQuotes = async (
   );
 };
 
-interface getAllCexQuotesParams {
-  payToken: TokenItem;
-  payAmount: string;
-  receiveTokenId: string;
-  chain: CHAINS_ENUM;
-}
-
-export type TCexQuoteData = {
-  data: null | CEXQuote;
-  name: string;
-  isDex: false;
-  loading?: boolean;
-};
-const getCexQuote = async (
-  params: getAllCexQuotesParams & {
-    cexId: string;
-    setQuote?: (quote: TCexQuoteData) => void;
-  }
-): Promise<TCexQuoteData> => {
-  const {
-    payToken,
-    payAmount,
-    receiveTokenId: receive_token_id,
-    chain,
-    cexId: cex_id,
-    setQuote,
-  } = params;
-
-  const p = {
-    cex_id,
-    pay_token_amount: payAmount,
-    chain_id: findChain({ enum: chain })!.serverId,
-    pay_token_id: payToken.id,
-    receive_token_id,
-  };
-
-  let quote: TCexQuoteData;
-
-  try {
-    const data = await walletOpenapi.getCEXSwapQuote(p);
-    quote = {
-      data,
-      name: cex_id,
-      isDex: false,
-    };
-  } catch (error) {
-    quote = {
-      data: null,
-      name: cex_id,
-      isDex: false,
-    };
-  }
-
-  setQuote?.(quote);
-
-  return quote;
-};
-
-export const getAllQuotes = async (
-  params: Omit<getDexQuoteParams, 'dexId'> & {
-    setQuote: (quote: TCexQuoteData | TDexQuoteData) => void;
-    swapViewList?: Record<keyof typeof DEX | keyof typeof CEX, boolean>;
-  }
+export const verifyRouterAndSpender = (
+  chain: CHAINS_ENUM,
+  dexId: DEX_ENUM,
+  router?: string,
+  spender?: string,
+  payTokenId?: string,
+  receiveTokenId?: string
 ) => {
-  if (
-    isSwapWrapToken(params.payToken.id, params.receiveToken.id, params.chain)
-  ) {
-    return getDexQuote({
-      ...params,
-      dexId: DEX_ENUM.WRAPTOKEN,
-    });
+  if (dexId === DEX_ENUM.WRAPTOKEN) {
+    return [true, true];
+  }
+  if (!dexId || !router || !spender || !payTokenId || !receiveTokenId) {
+    return [true, true];
+  }
+  const routerWhitelist = getRouter(dexId, chain);
+  const spenderWhitelist = getSpender(dexId, chain);
+  const isNativeToken = isSameAddress(
+    payTokenId,
+    findChain({
+      enum: chain,
+    })?.nativeTokenAddress || ''
+  );
+  const isWrapTokens = isSwapWrapToken(payTokenId, receiveTokenId, chain);
+
+  return [
+    isSameAddress(routerWhitelist, router),
+    isNativeToken || isWrapTokens
+      ? true
+      : isSameAddress(spenderWhitelist, spender),
+  ];
+};
+
+type ValidateTokenParam = {
+  id: string;
+  symbol: string;
+  decimals: number;
+};
+
+const isNativeToken = (chain: CHAINS_ENUM, tokenId: string) =>
+  isSameAddress(
+    tokenId,
+    findChain({
+      enum: chain,
+    })?.nativeTokenAddress || ''
+  );
+
+export const verifyCalldata = <T extends Parameters<typeof decodeCalldata>[1]>(
+  data: QuoteResult | null,
+  dexId: DEX_ENUM | null,
+  slippage: string | number,
+  tx?: T
+) => {
+  let callDataResult: DecodeCalldataResult | null = null;
+  if (dexId && dexId !== DEX_ENUM.WRAPTOKEN && tx) {
+    try {
+      callDataResult = decodeCalldata(dexId, tx) as DecodeCalldataResult;
+    } catch (error) {
+      callDataResult = null;
+    }
   }
 
-  const { swapViewList } = params;
+  let result = true;
+  if (slippage && callDataResult && data && tx) {
+    const estimateMinReceive = new BigNumber(data.toTokenAmount).times(
+      new BigNumber(1).minus(slippage)
+    );
+    const chain = findChain({
+      id: tx.chainId,
+    });
 
-  return Promise.all([
-    ...(Object.keys(DEX) as Exclude<DEX_ENUM, DEX_ENUM.WRAPTOKEN>[])
-      .filter((e) => swapViewList?.[e] !== false)
-      .map((dexId) => getDexQuote({ ...params, dexId })),
-    ...(Object.keys(CEX) as (keyof typeof CEX)[])
-      .filter((e) => swapViewList?.[e] !== false)
-      .map((cexId) =>
-        getCexQuote({
-          cexId,
-          payToken: params.payToken,
-          payAmount: params.payAmount,
-          receiveTokenId: params.receiveToken.id,
-          chain: params.chain,
-          setQuote: params.setQuote,
-        })
-      ),
-  ]);
+    if (!chain) {
+      result = true;
+    } else {
+      result =
+        ((dexId === DEX_ENUM.UNISWAP &&
+          isNativeToken(chain.enum, data.fromToken)) ||
+          isSameAddress(callDataResult.fromToken, data.fromToken)) &&
+        callDataResult.fromTokenAmount === data.fromTokenAmount &&
+        isSameAddress(callDataResult.toToken, data.toToken) &&
+        new BigNumber(callDataResult.minReceiveToTokenAmount)
+          .minus(estimateMinReceive)
+          .div(estimateMinReceive)
+          .abs()
+          .lte(0.05);
+    }
+  }
+  return result;
+};
+
+type VerifySdkParams<T extends ValidateTokenParam> = {
+  chain: CHAINS_ENUM;
+  dexId: DEX_ENUM;
+  slippage: string | number;
+  data: QuoteResult | null;
+  payToken: T;
+  receiveToken: T;
+};
+
+export const verifySdk = <T extends ValidateTokenParam>(
+  p: VerifySdkParams<T>
+) => {
+  const { chain, dexId, slippage, data, payToken, receiveToken } = p;
+
+  const isWrapTokens = isSwapWrapToken(payToken.id, receiveToken.id, chain);
+  const actualDexId = isWrapTokens ? DEX_ENUM.WRAPTOKEN : dexId;
+
+  const [routerPass, spenderPass] = verifyRouterAndSpender(
+    chain,
+    actualDexId,
+    data?.tx?.to,
+    data?.spender,
+    payToken?.id,
+    receiveToken?.id
+  );
+
+  const callDataPass = verifyCalldata(
+    data,
+    actualDexId,
+    new BigNumber(slippage).div(100).toFixed(),
+    data?.tx
+      ? { ...data?.tx, chainId: findChain({ enum: chain })!.id }
+      : undefined
+  );
+
+  return {
+    isSdkDataPass: routerPass && spenderPass && callDataPass,
+  };
 };
