@@ -1,4 +1,3 @@
 #### Features
 
-- Revamped signing page
-
+- Optimized Swap feature
