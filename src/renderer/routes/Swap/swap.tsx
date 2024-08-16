@@ -15,7 +15,6 @@ import {
   useMemo,
   useRef,
 } from 'react';
-import { usePrevious } from 'react-use';
 import styled from 'styled-components';
 
 import { SWAP_SUPPORT_CHAINS, useSwap } from '@/renderer/hooks/rabbyx/useSwap';
@@ -606,12 +605,6 @@ export const SwapToken = () => {
     gotoSwap,
   ]);
 
-  const previousIsWrapToken = usePrevious(isWrapToken);
-
-  if (previousIsWrapToken !== isWrapToken) {
-    // setActiveProvider(undefined);
-  }
-
   const showMEVGuardedSwitch = useMemo(
     () => chain === CHAINS_ENUM.ETH,
     [chain]
@@ -635,12 +628,7 @@ export const SwapToken = () => {
             </span>
           </div>
         ) : null}
-        <div className="flex items-center justify-between text-14 text-r-neutral-body">
-          <span>Rabby fee</span>
-          <span className="font-medium text-r-neutral-title-1">
-            {isWrapToken ? '0%' : '0.25%'}
-          </span>
-        </div>
+
         {showMEVGuardedSwitch && (
           <div className="flex justify-between items-center">
             <Tooltip
@@ -829,15 +817,7 @@ export const SwapToken = () => {
                   <div className="section text-14 leading-normal text-r-neutral-body mt-14 px-16 mb-0">
                     <div className="mt-24 flex flex-col gap-24">
                       {isWrapToken ? (
-                        <>
-                          <div className="flex justify-between items-center">
-                            <span>{t('page.swap.slippage-tolerance')}</span>
-                            <span className="font-medium text-r-neutral-title-1">
-                              {t('page.swap.no-slippage-for-wrap')}
-                            </span>
-                          </div>
-                          {FeeAndMEVGuarded}
-                        </>
+                        <>{FeeAndMEVGuarded}</>
                       ) : (
                         <>
                           <Slippage

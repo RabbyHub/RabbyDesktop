@@ -159,11 +159,13 @@ export const Slippage = memo((props: SlippageProps) => {
   const onInputChange: ChangeEventHandler<HTMLInputElement> = useCallback(
     (e) => {
       const v = e.target.value;
+      setAutoSlippage(false);
+      setIsCustomSlippage(true);
       if (/^\d*(\.\d*)?$/.test(v)) {
         onChange(Number(v) > 50 ? '50' : v);
       }
     },
-    [onChange]
+    [onChange, setAutoSlippage, setIsCustomSlippage]
   );
 
   const shouldAutoOpenSlippage = useMemo(() => {
@@ -247,6 +249,10 @@ export const Slippage = memo((props: SlippageProps) => {
               bordered={false}
               value={value}
               onChange={onInputChange}
+              onFocus={() => {
+                setAutoSlippage(false);
+                setIsCustomSlippage(true);
+              }}
               placeholder="0.1"
               suffix={<div>%</div>}
             />

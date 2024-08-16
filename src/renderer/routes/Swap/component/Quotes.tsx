@@ -115,7 +115,7 @@ export const Quotes = ({
     const dex = sortedList.find((e) => e.isDex) as TDexQuoteData | undefined;
 
     return (
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-8 overflow-hidden">
         {dex ? (
           <DexQuoteItem
             inSufficient={inSufficient}
@@ -153,7 +153,7 @@ export const Quotes = ({
     );
   }
   return (
-    <div className="flex flex-col flex-1 w-full overflow-auto">
+    <div className="flex flex-col flex-1 w-full overflow-hidden">
       <div className="flex flex-col gap-16">
         {sortedList.map((params, idx) => {
           const { name, data, isDex } = params;
@@ -264,8 +264,6 @@ export const QuoteList = (props: Omit<QuotesProps, 'sortIncludeGasFee'>) => {
 
   const [sortIncludeGasFee, setSortIncludeGasFee] = useState(true);
 
-  const [dexList] = useSwapSupportedDexList();
-
   useEffect(() => {
     if (!visible) {
       setSortIncludeGasFee(true);
@@ -277,7 +275,6 @@ export const QuoteList = (props: Omit<QuotesProps, 'sortIncludeGasFee'>) => {
       placement="bottom"
       getContainer={false}
       width={528}
-      // height={height}
       height="auto"
       maskClosable
       onClose={onClose}
