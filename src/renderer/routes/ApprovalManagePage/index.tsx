@@ -242,9 +242,9 @@ function getColumnsForContract({
               overlay={
                 <div className="text-[12px]">
                   <p className="leading-[16px]">
-                    Trust value refers to the total asset value approved and
-                    exposed to this contract. A low trust value indicates either
-                    risk or inactivity for 180 days.
+                    Trust value refers to the total asset value spent by this
+                    contract.A low trust value indicates either risk or
+                    inactivity for 180 days.
                   </p>
                 </div>
               }
@@ -589,7 +589,7 @@ function getColumnsForAsset({
           </div>
         );
       },
-      width: 240,
+      width: 180,
     },
     // Type
     {
@@ -667,7 +667,34 @@ function getColumnsForAsset({
 
         const spendValues = getSpenderApprovalAmount(spender);
 
-        return spendValues.displayText;
+        return (
+          <div className="text-14 overflow-hidden">
+            <div>
+              <Tooltip
+                overlayClassName="J-table__tooltip disable-ant-overwrite"
+                overlay="Approved Amount"
+                align={{ offset: [0, 3] }}
+                arrowPointAtCenter
+              >
+                <span className="text-r-neutral-title-1 truncate block">
+                  {spendValues.displayAmountText}
+                </span>
+              </Tooltip>
+            </div>
+            <div className="mt-4">
+              <Tooltip
+                overlayClassName="J-table__tooltip disable-ant-overwrite"
+                overlay="My Balance"
+                align={{ offset: [0, 3] }}
+                arrowPointAtCenter
+              >
+                <span className="text-r-neutral-foot">
+                  {spendValues.displayBalanceText}
+                </span>
+              </Tooltip>
+            </div>
+          </div>
+        );
       },
       width: 180,
     },
@@ -751,7 +778,7 @@ function getColumnsForAsset({
 
         return formatTimeFromNow(time ? time * 1e3 : 0);
       },
-      width: 140,
+      width: 184,
     },
   ];
 
