@@ -367,17 +367,17 @@ export const RevokeApprovalModal = (props: {
       <div
         className={clsx(
           'absolute modal-btn-wrapper flex flex-col items-center justify-center left-0 bottom-0 w-full z-[99999]',
-          'h-[76px]'
+          'h-[76px] px-[24px]'
         )}
       >
         <Button
           style={{
-            width: 172,
+            minWidth: 172,
             height: 44,
           }}
           type="primary"
           size="large"
-          className="rounded-[6px]"
+          className="rounded-[6px] w-full"
           onClick={handleConfirm}
         >
           Confirm {selectedList.length > 0 ? `(${selectedList.length})` : ''}

@@ -87,7 +87,7 @@ export function Permit2Badge({
         className={clsx(
           className,
           'rounded-[4px]',
-          'border-rabby-neutral-line border-[0.5px] border-solid',
+          'border-[0.5px] border-solid border-r-neutral-line',
           // 'px-[8px] py-[3px]',
           'w-[82px] px-[8px] h-[20px] leading-[1.3]'
         )}

@@ -10,8 +10,8 @@ import BigNumber from 'bignumber.js';
 // import { appIsDev, appIsProd } from './env';
 import { coerceFloat, coerceInteger } from '@/isomorphic/primitive';
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
-import { appIsProd } from '@/main/utils/env';
-import { splitNumberByStep } from './number';
+import { appIsDev, appIsProd } from '@/main/utils/env';
+import { formatNumber, splitNumberByStep } from './number';
 
 export type ApprovalItem =
   | ContractApprovalItem
@@ -358,7 +358,13 @@ export function getSpenderApprovalAmount(spender: AssetApprovalSpender) {
   let bigValue = new BigNumber(absValue);
 
   const isUnlimited = bigValue.gte(10 ** 9);
-  let displayText = '';
+  let isCollectionHasNFTs = false;
+  const resTexts = {
+    displayAmountText: '',
+    displayBalanceText: '',
+    balanceNumText: '' as number | string,
+    balanceUnitText: '',
+  };
   let nftOrderScore = 0;
 
   if (spender.$assetParent?.type === 'nft') {
@@ -366,7 +372,23 @@ export function getSpenderApprovalAmount(spender: AssetApprovalSpender) {
     bigValue = new BigNumber(absValue);
 
     if (spender.$assetParent?.nftContract) {
-      displayText = '1 Collection';
+      resTexts.displayAmountText = '1 Collection';
+      const nftCount =
+        (spender.$assetToken && 'amount' in spender.$assetToken
+          ? spender.$assetToken.amount
+          : spender.$assetParent?.nftContract.amount) || 0;
+      resTexts.balanceNumText = nftCount ? formatNumber(nftCount, 0) : '';
+      resTexts.balanceUnitText = nftCount
+        ? coerceInteger(nftCount) > 1
+          ? 'NFTs'
+          : 'NFT'
+        : '';
+      isCollectionHasNFTs = !!nftCount && parseInt(nftCount, 10) > 1;
+
+      resTexts.displayBalanceText =
+        [`${resTexts.balanceNumText}`, `${resTexts.balanceUnitText}`]
+          .filter(Boolean)
+          .join(' ') || '-';
 
       if (spender.$assetParent?.nftContract?.is_erc1155) {
         nftOrderScore = 102;
@@ -375,26 +397,49 @@ export function getSpenderApprovalAmount(spender: AssetApprovalSpender) {
       }
     } else if (spender.$assetParent?.nftToken) {
       if (spender.$assetParent?.nftToken?.is_erc1155) {
-        displayText = '1 Collection';
+        resTexts.displayAmountText = '1 Collection';
+
+        resTexts.balanceNumText = 1;
+        resTexts.balanceUnitText = 'Collection';
+        resTexts.displayBalanceText =
+          [`${resTexts.balanceNumText}`, `${resTexts.balanceUnitText}`]
+            .filter(Boolean)
+            .join(' ') || '-';
         nftOrderScore = 202;
       } else if (spender.$assetParent?.nftToken?.is_erc721) {
-        displayText = '1 NFT';
+        resTexts.displayAmountText = '1 NFT';
+
+        resTexts.balanceNumText = 1;
+        resTexts.balanceUnitText = 'NFT';
+        resTexts.displayBalanceText =
+          [`${resTexts.balanceNumText}`, `${resTexts.balanceUnitText}`]
+            .filter(Boolean)
+            .join(' ') || '-';
         nftOrderScore = 201;
       }
     }
   } else if (spender.$assetParent?.type === 'token') {
     const stepNumberText = splitNumberByStep(bigValue.toFixed(2));
-    displayText = isUnlimited
+    resTexts.displayAmountText = isUnlimited
       ? 'Unlimited'
       : `${stepNumberText} ${spender.$assetParent?.name || ''}`;
-  } else if (!IS_RUNTIME_PRODUCTION) {
+
+    const absBalance = spender.$assetParent?.balance;
+    resTexts.balanceNumText =
+      typeof absBalance === 'number'
+        ? formatNumber(absBalance)
+        : absBalance || '';
+    resTexts.balanceUnitText = '';
+    resTexts.displayBalanceText = resTexts.balanceNumText;
+  } else if (appIsDev) {
     console.debug('unknown type spender', spender);
   }
 
   return {
     bigValue,
+    isCollectionHasNFTs,
     isUnlimited,
-    displayText,
+    ...resTexts,
     nftOrderScore,
     get spender() {
       return spender;
