@@ -85,35 +85,14 @@ export function getFirstSpender(spenderHost: ApprovalItem['list'][number]) {
 }
 
 type SpendersHost = ApprovalItem['list'][number];
-/**
- * @description spenderHost should from `contract.list[number]`
- * @param spenderHost
- * @param contract
- * @returns
- */
-function queryContractMatchedSpender(
-  spenderHost: SpendersHost,
-  contract: ContractApprovalItem
-) {
-  const result = {
-    ofContractPermit2Spender: undefined as Spender | undefined,
-    matchedSpenders: [] as SpenderInTokenApproval[],
-  };
-  if ('spenders' in spenderHost) {
-    spenderHost.spenders.forEach((spender: SpenderInTokenApproval) => {
-      if (
-        spender.$assetContract &&
-        spender.$assetContract?.id === contract.id
-      ) {
-        result.matchedSpenders.push(spender);
-        if (spender.permit2_id) {
-          result.ofContractPermit2Spender = spender;
-        }
-      }
-    });
-  }
 
-  return result;
+function getAbiType<T extends SpendersHost = ApprovalItem['list'][number]>(
+  spenderHost: T
+) {
+  if ('is_erc721' in spenderHost && spenderHost.is_erc721) return 'ERC721';
+  if ('is_erc1155' in spenderHost && spenderHost.is_erc1155) return 'ERC1155';
+
+  return '';
 }
 
 export const findIndexRevokeList = <
@@ -152,10 +131,11 @@ export const findIndexRevokeList = <
         if (
           revoke.contractId === spenderHost.contract_id &&
           revoke.spender === spenderHost.spender.id &&
+          revoke.abi === getAbiType(spenderHost) &&
           (permit2IdToMatch
             ? revoke.permit2Id === permit2IdToMatch
             : !revoke.permit2Id) &&
-          revoke.tokenId === spenderHost.inner_id &&
+          revoke.nftTokenId === spenderHost.inner_id &&
           revoke.chainServerId === spenderHost.chain
         ) {
           return true;
@@ -168,6 +148,8 @@ export const findIndexRevokeList = <
         if (
           revoke.contractId === spenderHost.contract_id &&
           revoke.spender === spenderHost.spender.id &&
+          revoke.abi === getAbiType(spenderHost) &&
+          revoke.nftContractName === spenderHost.contract_name &&
           (permit2IdToMatch
             ? revoke.permit2Id === permit2IdToMatch
             : !revoke.permit2Id) &&
@@ -249,24 +231,20 @@ export const toRevokeItem = <T extends ApprovalItem>(
         contractId: spenderHost?.contract_id,
         permit2Id,
         spender: spenderHost?.spender?.id,
-        abi,
+        abi: getAbiType(spenderHost),
         nftTokenId: spenderHost?.inner_id,
         isApprovedForAll: false,
       } as const;
     }
     if ('contract_name' in spenderHost) {
-      const abi = spenderHost?.is_erc721
-        ? 'ERC721'
-        : spenderHost?.is_erc1155
-        ? 'ERC1155'
-        : '';
       return {
         chainServerId: spenderHost?.chain,
         contractId: spenderHost?.contract_id,
         permit2Id,
         spender: spenderHost?.spender?.id,
         nftTokenId: null,
-        abi,
+        nftContractName: spenderHost?.contract_name,
+        abi: getAbiType(spenderHost),
         isApprovedForAll: true,
       } as const;
     }
