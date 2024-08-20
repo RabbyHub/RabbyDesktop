@@ -188,7 +188,7 @@ function getColumnsForContract({
                 addressSuffix={
                   <>
                     <span
-                      className="contract-name ml-[4px]"
+                      className="contract-name ml-[4px] text-r-neutral-body"
                       title={contractName}
                     >
                       ({contractName})
