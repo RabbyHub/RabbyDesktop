@@ -328,7 +328,7 @@ function getColumnsForContract({
           </Tooltip>
         );
       },
-      width: 200,
+      width: 220,
     },
     // 24h Revoke Trends
     {
@@ -419,7 +419,7 @@ function getColumnsForContract({
           </Tooltip>
         );
       },
-      width: 180,
+      width: 160,
     },
     // My Approval Time
     {
@@ -452,7 +452,7 @@ function getColumnsForContract({
 
         return formatTimeFromNow(time ? time * 1e3 : 0);
       },
-      width: 160,
+      width: 140,
     },
     // My Approved Assets
     {
@@ -589,7 +589,7 @@ function getColumnsForAsset({
           </div>
         );
       },
-      width: 180,
+      width: 200,
     },
     // Type
     {
@@ -649,7 +649,7 @@ function getColumnsForAsset({
 
         return <span className="capitalize">{asset.type}</span>;
       },
-      width: 160,
+      width: 140,
     },
     // Approved Amount
     {
@@ -778,7 +778,7 @@ function getColumnsForAsset({
 
         return formatTimeFromNow(time ? time * 1e3 : 0);
       },
-      width: 184,
+      width: 180,
     },
   ];
 
