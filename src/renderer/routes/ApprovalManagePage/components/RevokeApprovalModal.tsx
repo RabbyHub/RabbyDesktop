@@ -12,7 +12,11 @@ import TokenWithChain, {
 } from '@/renderer/components/TokenWithChain';
 import BigNumber from 'bignumber.js';
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { ApprovalItem, ContractApprovalItem } from '@/renderer/utils/approval';
+import {
+  ApprovalItem,
+  ContractApprovalItem,
+  getSpenderApprovalAmount,
+} from '@/renderer/utils/approval';
 import { ensureSuffix } from '@/isomorphic/string';
 import { ApprovalSpenderItemToBeRevoked } from '@/isomorphic/approve';
 import { findChainByServerID } from '@/renderer/utils/chain';
@@ -36,6 +40,7 @@ import IconUnknownNFT from '../icons/unknown-nft.svg';
 import { ApprovalContractItem } from './ApprovalContractItem';
 
 import { NFTItemBadge, Permit2Badge } from './Badges';
+import ApprovalAmountInfo from './ApprovalAmountInfo';
 
 const ModalStyled = styled(Modal)`
   .ant-modal-header {
@@ -113,6 +118,9 @@ export const RevokeApprovalModal = (props: {
           '$indexderSpender' in spenderHost
             ? spenderHost.$indexderSpender
             : null;
+        const spenderValues = associatedSpender
+          ? getSpenderApprovalAmount(associatedSpender)
+          : null;
 
         return (
           <div
@@ -185,7 +193,23 @@ export const RevokeApprovalModal = (props: {
               />
             )}
 
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center justify-between flex-shrink-0">
+              <ApprovalAmountInfo
+                className="mr-[8px]"
+                {...(spenderValues
+                  ? {
+                      amountValue: spenderValues.displayAmountText,
+                      balanceNumText: spenderValues.balanceNumText,
+                      balanceUnitText: spenderValues.balanceUnitText,
+                      minWidthLimit: spenderValues.isCollectionHasNFTs,
+                    }
+                  : {
+                      amountValue:
+                        'amount' in spenderHost ? spenderHost.amount : '',
+                      balanceNumText: '',
+                      balanceUnitText: '',
+                    })}
+              />
               <img
                 src={
                   selectedList.includes(index) ? IconChecked : IconNotChecked
