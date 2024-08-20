@@ -182,7 +182,7 @@ export const RevokeApprovalModal = (props: {
                 <NFTItemBadge className="mt-2" contractListItem={spenderHost} />
               </div>
             ) : (
-              <div className="ml-[8px] text-13 font-medium leading-[15px]">
+              <div className="ml-[8px] text-13 font-medium leading-[15px] max-w-[180px] truncate">
                 {getTokenSymbol(spenderHost)}
               </div>
             )}
