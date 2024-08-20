@@ -665,6 +665,9 @@ export function useSelectSpendersToRevoke(
   const [contractRevokeMap, setContractRevokeMap] = React.useState<
     Record<string, ApprovalSpenderItemToBeRevoked[]>
   >({});
+
+  const { currentAccount } = useCurrentAccount();
+
   const contractRevokeList = useMemo(() => {
     return Object.values(contractRevokeMap).flat();
   }, [contractRevokeMap]);
@@ -710,6 +713,10 @@ export function useSelectSpendersToRevoke(
       ...summary,
     };
   }, [currentRevokeList]);
+
+  useEffect(() => {
+    clearRevoke();
+  }, [currentAccount?.address, clearRevoke]);
 
   return {
     handleClickAssetRow,
