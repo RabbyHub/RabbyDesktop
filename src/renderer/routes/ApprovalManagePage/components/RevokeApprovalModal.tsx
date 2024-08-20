@@ -357,7 +357,7 @@ export const RevokeApprovalModal = (props: {
       title="Approvals"
       closeIcon={<IconClose />}
     >
-      <div className="mt-4">
+      <div className="mt-4 h-[100%] overflow-hidden">
         <div className="mb-18">
           <ApprovalContractItem data={[item]} index={0} showNFTAmount />
         </div>
@@ -378,7 +378,7 @@ export const RevokeApprovalModal = (props: {
 
         <section
           className={clsx(
-            'max-h-[424px] overflow-x-hidden rounded-[6px] approval-list'
+            'max-h-[calc(100%-158px)] overflow-x-hidden overflow-y-scroll rounded-[6px] approval-list'
           )}
           style={{
             // @ts-expect-error
