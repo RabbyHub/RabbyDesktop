@@ -14,6 +14,7 @@ export type ApprovalSpenderItemToBeRevoked = {
       isApprovedForAll: boolean;
       tokenId?: '';
       nftTokenId: string | null | undefined;
+      nftContractName?: string | null | undefined;
     }
   | {
       contractId?: undefined;
