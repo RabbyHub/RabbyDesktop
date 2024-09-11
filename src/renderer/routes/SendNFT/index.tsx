@@ -556,7 +556,7 @@ const SendNFT = () => {
         const values = form.getFieldsValue();
         handleFormValuesChange(null, { ...values });
         // trigger get balance of address
-        // await wallet.getAddressBalance(result.contactAddrAdded, true);
+        // await wallet.getInMemoryAddressBalance(result.contactAddrAdded, true);
       },
     });
   };
@@ -660,8 +660,8 @@ const SendNFT = () => {
           }}
           onValuesChange={handleFormValuesChange}
         >
-          <div className="section relative">
-            <div className="section-title mb-8">Chain</div>
+          <div className="relative section">
+            <div className="mb-8 section-title">Chain</div>
             <ChainSelect
               className="mb-24"
               value={chain}
@@ -680,7 +680,7 @@ const SendNFT = () => {
             />
             <div className="section-title">
               <span className="section-title__to">To</span>
-              <div className="flex flex-1 justify-end items-center">
+              <div className="flex items-center justify-end flex-1">
                 {showContactInfo && (
                   <div
                     className={clsx('contact-info', {
@@ -763,7 +763,7 @@ const SendNFT = () => {
               )}
             </div>
 
-            <div className="nft-info mt-40 flex">
+            <div className="flex mt-40 nft-info">
               <NFTAvatar
                 type={nftItem.content_type}
                 content={nftItem.content}
@@ -773,7 +773,7 @@ const SendNFT = () => {
                 <h3>{nftItem.name}</h3>
                 <p>
                   <span>Collection: </span>
-                  <span className="value ml-4">{collectionName || '-'}</span>
+                  <span className="ml-4 value">{collectionName || '-'}</span>
                 </p>
                 <p>
                   <span>Contract: </span>
@@ -823,7 +823,7 @@ const SendNFT = () => {
               )}
               onClick={handleClickWhitelistAlert}
             >
-              <p className="whitelist-alert__content text-center">
+              <p className="text-center whitelist-alert__content">
                 {whitelistEnabled && (
                   <img
                     src={
@@ -833,7 +833,7 @@ const SendNFT = () => {
                         ? 'rabby-internal://assets/icons/send-token/temporary-grant-checkbox.svg'
                         : 'rabby-internal://assets/icons/send-token/icon-uncheck.svg'
                     }
-                    className="icon icon-check inline-block relative -top-1"
+                    className="relative inline-block icon icon-check -top-1"
                   />
                 )}
                 {whitelistAlertContent.content}
@@ -841,7 +841,7 @@ const SendNFT = () => {
             </div>
           )}
 
-          <div className="footer flex justify-center">
+          <div className="flex justify-center footer">
             <Button
               disabled={!canSubmit || isSubmitLoading}
               type="primary"

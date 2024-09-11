@@ -217,7 +217,7 @@ export function useAccountBalanceMap(options?: {
   const fetchBalance = useCallback(async () => {
     if (!accountAddress) return;
 
-    const triggerFetchP = walletController.getAddressBalance(
+    const triggerFetchP = walletController.getInMemoryAddressBalance(
       accountAddress,
       true,
       isTestnet
