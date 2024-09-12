@@ -11,15 +11,15 @@ import { findChainByServerID } from '@/renderer/utils/chain';
 import { VariableSizeGrid as VGrid } from 'react-window';
 import { IconWithChain } from '@/renderer/components/TokenWithChain';
 import {
-  ApprovalItem,
   ContractApprovalItem,
   AssetApprovalSpender,
   getSpenderApprovalAmount,
   RiskNumMap,
-  ApprovalSpenderItemToBeRevoked,
   compareAssetSpenderByAmount,
   compareAssetSpenderByType,
+  SpenderInTokenApproval,
 } from '@/renderer/utils/approval';
+import { ApprovalSpenderItemToBeRevoked } from '@/isomorphic/approve';
 import clsx from 'clsx';
 import { SorterResult } from 'antd/lib/table/interface';
 import { formatUsdValue } from '@/renderer/utils/number';
@@ -29,7 +29,6 @@ import { useShellWallet } from '@/renderer/hooks-shell/useShellWallet';
 import { firstEl } from '@/isomorphic/array';
 
 import IconExternal from '@/../assets/icons/common/share.svg';
-import { NativeAppSizes } from '@/isomorphic/const-size-next';
 import PillsSwitch from '@/renderer/components/PillsSwitch';
 import NetSwitchTabs, {
   useSwitchNetTab,
@@ -54,6 +53,8 @@ import {
   SwitchPills,
   useApprovalsPage,
   useTableScrollableHeight,
+  IHandleChangeSelectedSpenders,
+  useSelectSpendersToRevoke,
 } from './useApprovalsPage';
 
 import {
@@ -70,6 +71,7 @@ import { RevokeApprovalModal } from './components/RevokeApprovalModal';
 import { RISKY_ROW_HEIGHT, ROW_HEIGHT } from './constant';
 import { RevokeButton } from './components/RevokeButton';
 import SearchInput from './components/SearchInput';
+import { Permit2Badge } from './components/Badges';
 import { useInspectRowItem } from './components/ModalDebugRowItem';
 import ApprovalsNameAndAddr from './components/NameAndAddr';
 
@@ -78,15 +80,6 @@ function getNextSort(currentSort?: 'ascend' | 'descend' | null) {
   return currentSort === 'ascend' ? 'descend' : ('ascend' as const);
 }
 const DEFAULT_SORT_ORDER_TUPLE = ['descend', 'ascend'] as const;
-
-const CLIENT_WINDOW_TOP_OFFSET = IS_WINDOWS
-  ? NativeAppSizes.windowTitlebarHeight
-  : 0;
-
-type IHandleChangeSelectedSpenders<T extends ApprovalItem> = (ctx: {
-  approvalItem: T;
-  selectedRevokeItems: ApprovalSpenderItemToBeRevoked[];
-}) => any;
 
 function getColumnsForContract({
   sortedInfo,
@@ -102,10 +95,16 @@ function getColumnsForContract({
       title: null,
       key: 'selection',
       className: 'J_selection',
-      render: (_, row) => {
-        const contractList = row.list;
+      render: (_, contractApproval) => {
+        const contractList = contractApproval.list;
         const selectedContracts = contractList.filter((contract) => {
-          return findIndexRevokeList(selectedRows, row, contract) > -1;
+          return (
+            findIndexRevokeList(selectedRows, {
+              item: contractApproval,
+              spenderHost: contract,
+              itemIsContractApproval: true,
+            }) > -1
+          );
         });
 
         const isIndeterminate =
@@ -114,7 +113,7 @@ function getColumnsForContract({
 
         return (
           <div
-            className="block h-[100%] w-[100%] flex items-center justify-center"
+            className="h-[100%] w-[100%] flex items-center justify-center"
             onClick={(evt) => {
               evt.stopPropagation();
 
@@ -123,13 +122,13 @@ function getColumnsForContract({
               const revokeItems = nextSelectAll
                 ? (contractList
                     .map((contract) => {
-                      return toRevokeItem(row, contract);
+                      return toRevokeItem(contractApproval, contract, true);
                     })
                     .filter(Boolean) as ApprovalSpenderItemToBeRevoked[])
                 : [];
 
               onChangeSelectedContractSpenders({
-                approvalItem: row,
+                approvalItem: contractApproval,
                 selectedRevokeItems: revokeItems,
               });
             }}
@@ -189,7 +188,7 @@ function getColumnsForContract({
                 addressSuffix={
                   <>
                     <span
-                      className="contract-name ml-[4px]"
+                      className="contract-name ml-[4px] text-r-neutral-body"
                       title={contractName}
                     >
                       ({contractName})
@@ -230,7 +229,7 @@ function getColumnsForContract({
           </div>
         );
       },
-      width: 354,
+      width: 340,
     },
     // Contract Trust value
     {
@@ -243,9 +242,9 @@ function getColumnsForContract({
               overlay={
                 <div className="text-[12px]">
                   <p className="leading-[16px]">
-                    Trust value refers to the total asset value approved and
-                    exposed to this contract. A low trust value indicates either
-                    risk or inactivity for 180 days.
+                    Trust value refers to the total asset value spent by this
+                    contract.A low trust value indicates either risk or
+                    inactivity for 180 days.
                   </p>
                 </div>
               }
@@ -275,8 +274,8 @@ function getColumnsForContract({
           return checkResult.keepRiskFirstReturnValue;
 
         return (
-          a.$riskAboutValues.risk_exposure_usd_value -
-          b.$riskAboutValues.risk_exposure_usd_value
+          a.$riskAboutValues.risk_spend_usd_value -
+          b.$riskAboutValues.risk_spend_usd_value
         );
       },
       sortOrder:
@@ -285,11 +284,11 @@ function getColumnsForContract({
         if (row.type !== 'contract') return null;
 
         const isDanger =
-          row.$contractRiskEvaluation.extra.clientExposureScore >=
+          row.$contractRiskEvaluation.extra.clientSpendScore >=
           RiskNumMap.danger;
         const isWarning =
           !isDanger &&
-          row.$contractRiskEvaluation.extra.clientExposureScore >=
+          row.$contractRiskEvaluation.extra.clientSpendScore >=
             RiskNumMap.warning;
 
         const isRisk = isDanger || isWarning;
@@ -324,14 +323,12 @@ function getColumnsForContract({
                 'is-danger': isDanger,
               })}
             >
-              {formatUsdValue(
-                row.$riskAboutValues.risk_exposure_usd_value || 0
-              )}
+              {formatUsdValue(row.$riskAboutValues.risk_spend_usd_value || 0)}
             </span>
           </Tooltip>
         );
       },
-      width: 180,
+      width: 220,
     },
     // 24h Revoke Trends
     {
@@ -455,7 +452,7 @@ function getColumnsForContract({
 
         return formatTimeFromNow(time ? time * 1e3 : 0);
       },
-      width: 160,
+      width: 140,
     },
     // My Approved Assets
     {
@@ -481,16 +478,20 @@ function getColumnsForContract({
       sortOrder:
         sortedInfo.columnKey === 'myApprovedAssets' ? sortedInfo.order : null,
       render: (_, row) => {
-        const contractList = row.list as any as ContractApprovalItem[];
-        const selectedContracts = contractList.filter((contract) => {
-          // @ts-expect-error narrow type failure
-          return findIndexRevokeList(selectedRows, row, contract) > -1;
+        const spenderHostList = row.list;
+        const selectedContracts = spenderHostList.filter((spenderHost) => {
+          return (
+            findIndexRevokeList(selectedRows, {
+              item: row,
+              spenderHost,
+              itemIsContractApproval: true,
+            }) > -1
+          );
         });
-
         return (
           <div className="flex items-center justify-end w-[100%] h-[100%]">
             <span className="block">
-              {contractList.length}
+              {spenderHostList.length}
               {!selectedContracts.length ? null : (
                 <span className="J_selected_count_text ml-[2px]">
                   ({selectedContracts.length})
@@ -502,7 +503,7 @@ function getColumnsForContract({
           </div>
         );
       },
-      width: 140 + 44,
+      width: 180,
     },
   ];
 
@@ -514,25 +515,25 @@ function getColumnsForAsset({
   selectedRows,
 }: {
   sortedInfo: SorterResult<AssetApprovalSpender>;
-  selectedRows: any[];
+  selectedRows: ApprovalSpenderItemToBeRevoked[];
 }) {
   const isSelected = (record: AssetApprovalSpender) => {
     return (
-      findIndexRevokeList(
-        selectedRows,
-        record.$assetContract!,
-        record.$assetToken!
-      ) > -1
+      findIndexRevokeList(selectedRows, {
+        item: record.$assetContract!,
+        spenderHost: record.$assetToken!,
+        assetApprovalSpender: record,
+      }) > -1
     );
   };
   const columnsForAsset: ColumnType<AssetApprovalSpender>[] = [
     {
       title: null,
       key: 'selection',
-      render: (_, row) => {
+      render: (_, spender) => {
         return (
           <div className="block h-[100%] w-[100%] flex items-center justify-center">
-            {isSelected(row) ? (
+            {isSelected(spender) ? (
               <img
                 className="J_checked w-[20px] h-[20px]"
                 src={IconCheckboxChecked}
@@ -588,7 +589,7 @@ function getColumnsForAsset({
           </div>
         );
       },
-      width: 180,
+      width: 200,
     },
     // Type
     {
@@ -648,7 +649,7 @@ function getColumnsForAsset({
 
         return <span className="capitalize">{asset.type}</span>;
       },
-      width: 160,
+      width: 140,
     },
     // Approved Amount
     {
@@ -666,7 +667,34 @@ function getColumnsForAsset({
 
         const spendValues = getSpenderApprovalAmount(spender);
 
-        return spendValues.displayText;
+        return (
+          <div className="text-14 overflow-hidden">
+            <div>
+              <Tooltip
+                overlayClassName="J-table__tooltip disable-ant-overwrite"
+                overlay="Approved Amount"
+                align={{ offset: [0, 3] }}
+                arrowPointAtCenter
+              >
+                <span className="text-r-neutral-title-1 truncate block">
+                  {spendValues.displayAmountText}
+                </span>
+              </Tooltip>
+            </div>
+            <div className="mt-4">
+              <Tooltip
+                overlayClassName="J-table__tooltip disable-ant-overwrite"
+                overlay="My Balance"
+                align={{ offset: [0, 3] }}
+                arrowPointAtCenter
+              >
+                <span className="text-r-neutral-foot">
+                  {spendValues.displayBalanceText}
+                </span>
+              </Tooltip>
+            </div>
+          </div>
+        );
       },
       width: 180,
     },
@@ -702,6 +730,7 @@ function getColumnsForAsset({
               addressClass=""
               address={spender.id || ''}
               chainEnum={chainItem?.enum}
+              tooltipAliasName
               addressSuffix={
                 <>
                   <span className="contract-name ml-[4px]" title={protocolName}>
@@ -721,10 +750,16 @@ function getColumnsForAsset({
                 </>
               }
             />
+            {spender.$assetContract?.type === 'contract' && (
+              <Permit2Badge
+                className="ml-[8px]"
+                contractSpender={spender as SpenderInTokenApproval}
+              />
+            )}
           </div>
         );
       },
-      width: 334,
+      width: 340,
     },
     // My Approval Time
     {
@@ -743,7 +778,7 @@ function getColumnsForAsset({
 
         return formatTimeFromNow(time ? time * 1e3 : 0);
       },
-      width: 140 + 44,
+      width: 180,
     },
   ];
 
@@ -934,83 +969,42 @@ const ApprovalManagePage = () => {
   }, [selectedTab, loadApprovals]);
 
   const [visibleRevokeModal, setVisibleRevokeModal] = React.useState(false);
-  const [selectedItem, setSelectedItem] = React.useState<ApprovalItem>();
-  const handleClickContractRow: HandleClickTableRow<ApprovalItem> =
+  const [selectedContract, setSelectedContract] =
+    React.useState<ContractApprovalItem>();
+  const selectedContractKey = useMemo(() => {
+    return selectedContract ? encodeRevokeItemIndex(selectedContract) : '';
+  }, [selectedContract]);
+  const handleClickContractRow: HandleClickTableRow<ContractApprovalItem> =
     React.useCallback((ctx) => {
-      setSelectedItem(ctx.record);
+      setSelectedContract(ctx.record);
       setVisibleRevokeModal(true);
     }, []);
-  const [assetRevokeList, setAssetRevokeList] = React.useState<
-    ApprovalSpenderItemToBeRevoked[]
-  >([]);
-  const handleClickAssetRow: HandleClickTableRow<AssetApprovalSpender> =
-    React.useCallback(
-      (ctx) => {
-        const record = ctx.record;
-        const index = findIndexRevokeList(
-          assetRevokeList,
-          record.$assetContract!,
-          record.$assetToken!
-        );
-        if (index > -1) {
-          setAssetRevokeList((prev) => prev.filter((item, i) => i !== index));
-        } else {
-          const revokeItem = toRevokeItem(
-            record.$assetContract!,
-            record.$assetToken!
-          );
-          if (revokeItem) {
-            setAssetRevokeList((prev) => [...prev, revokeItem]);
-          }
-        }
-      },
-      [assetRevokeList]
-    );
 
-  const [contractRevokeMap, setContractRevokeMap] = React.useState<
-    Record<string, ApprovalSpenderItemToBeRevoked[]>
-  >({});
-  const contractRevokeList = useMemo(() => {
-    return Object.values(contractRevokeMap).flat();
-  }, [contractRevokeMap]);
+  const {
+    handleClickAssetRow,
+    contractRevokeMap,
+    contractRevokeList,
+    assetRevokeList,
+    revokeSummary,
+    patchContractRevokeMap,
+    clearRevoke,
+    onChangeSelectedContractSpenders,
+  } = useSelectSpendersToRevoke(filterType);
 
-  const selectedItemKey = useMemo(() => {
-    return selectedItem ? encodeRevokeItemIndex(selectedItem) : '';
-  }, [selectedItem]);
-
-  const currentRevokeList = useMemo(() => {
-    return filterType === 'contract'
-      ? contractRevokeList
-      : filterType === 'assets'
-      ? assetRevokeList
-      : [];
-  }, [filterType, contractRevokeList, assetRevokeList]);
-
-  const isShowRevokeButtonTip = currentRevokeList.length > 1;
+  const isShowRevokeButtonTip = revokeSummary.currentRevokeList?.length > 1;
 
   const wallet = useShellWallet();
-  const handleRevoke = React.useCallback(() => {
-    wallet
-      .revoke({ list: currentRevokeList })
+  const handleRevoke = React.useCallback(async () => {
+    return wallet
+      .revoke({ list: revokeSummary.currentRevokeList })
       .then(() => {
         setVisibleRevokeModal(false);
-        setContractRevokeMap({});
-        setAssetRevokeList([]);
+        clearRevoke();
       })
-      .catch((err: any) => {
+      .catch((err) => {
         console.log(err);
       });
-  }, [wallet, currentRevokeList]);
-
-  const onChangeSelectedContractSpenders: IHandleChangeSelectedSpenders<ContractApprovalItem> =
-    useCallback((ctx) => {
-      const sItemKey = encodeRevokeItemIndex(ctx.approvalItem);
-
-      setContractRevokeMap((prev) => ({
-        ...prev,
-        [sItemKey]: ctx.selectedRevokeItems,
-      }));
-    }, []);
+  }, [clearRevoke, revokeSummary.currentRevokeList, wallet]);
 
   const { yValue: containerHeight } = useTableScrollableHeight({
     hasNetSwitchTab: isShowTestnet,
@@ -1088,20 +1082,17 @@ const ApprovalManagePage = () => {
               onClickRow={handleClickAssetRow}
             />
           </div>
-          {selectedItem ? (
+          {selectedContract ? (
             <RevokeApprovalModal
-              item={selectedItem}
+              item={selectedContract}
               visible={visibleRevokeModal}
               onClose={() => {
                 setVisibleRevokeModal(false);
               }}
               onConfirm={(list) => {
-                setContractRevokeMap((prev) => ({
-                  ...prev,
-                  [selectedItemKey]: list,
-                }));
+                patchContractRevokeMap(selectedContractKey, list);
               }}
-              revokeList={contractRevokeMap[selectedItemKey]}
+              revokeList={contractRevokeMap[selectedContractKey]}
             />
           ) : null}
         </main>
@@ -1111,10 +1102,7 @@ const ApprovalManagePage = () => {
             !!isShowRevokeButtonTip && 'with-selection'
           )}
         >
-          <RevokeButton
-            revokeList={currentRevokeList}
-            onRevoke={handleRevoke}
-          />
+          <RevokeButton revokeSummary={revokeSummary} onRevoke={handleRevoke} />
         </div>
       </div>
     </div>
