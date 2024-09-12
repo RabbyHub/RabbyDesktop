@@ -31,6 +31,7 @@ import {
   useFilterProtoList,
   useFilterTokenList,
   useSwitchView,
+  useUpdateBalanceCache,
 } from './hooks';
 import ChainList from './components/ChainList';
 import Curve, { CurveModal } from './components/Curve';
@@ -234,6 +235,8 @@ const Home = () => {
     return sortBy(list, (item) => item.usd_value).reverse();
   }, [usedChainList, protocolList, tokenList]);
   const totalBalance = useTotalBalance(tokenList, protocolList);
+
+  useUpdateBalanceCache(totalBalance, currentAccount?.address);
 
   const curveDataRaw = useCurve(currentAccount?.address, updateNonce);
   const curveData = isTestnet ? undefined : curveDataRaw;
