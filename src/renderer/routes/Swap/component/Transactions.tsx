@@ -29,6 +29,7 @@ import {
   refreshSwapTxListAtom,
   useInSwap,
 } from '../hooks/subscribe';
+import { DEX } from '../constant';
 
 const EmptyWrapper = styled.div`
   display: flex;
@@ -215,7 +216,8 @@ const Transaction = forwardRef<HTMLDivElement, TransactionProps>(
     const isPending = data.status === 'Pending';
     const isCompleted = data?.status === 'Completed';
     const time = data?.finished_at || data?.create_at;
-    const targetDex = data?.dex_id;
+    const targetDex =
+      DEX?.[data?.dex_id as keyof typeof DEX]?.name || data?.dex_id || '';
     const txId = data?.tx_id;
     const chainItem = findChain({
       serverId: data?.chain,
