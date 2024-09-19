@@ -17,7 +17,7 @@ import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
 import { ModalConfirmInSettings } from '@/renderer/components/Modal/Confirm';
 import { ucfirst } from '@/isomorphic/string';
 import ManageAddressModal from '@/renderer/components/AddressManagementModal/ManageAddress';
-import { useShowTestnet } from '@/renderer/hooks/rabbyx/useShowTestnet';
+// import { useShowTestnet } from '@/renderer/hooks/rabbyx/useShowTestnet';
 import { ManagePasswordModal } from '@/renderer/components/ManagePasswordModal/ManagePasswordModal';
 import {
   useWalletLockInfo,
@@ -34,6 +34,7 @@ import { useProxyStateOnSettingPage } from './settingHooks';
 import { ClearPendingModal } from './components/ClearPendingModal';
 import { UpdateArea } from './components/UpdateArea';
 import { CustomRPCModal } from './components/CustomRPCModal';
+import { CustomNetworkModal } from './components/CustomTestnet';
 import TopTipUnsupported from './components/TopTipUnsupported';
 import ModalSupportedChains, {
   useSupportedChainsModal,
@@ -79,10 +80,12 @@ export function MainWindowSettings() {
   const [isShowingClearPendingModal, setIsShowingClearPendingModal] =
     useState(false);
   const [isShowCustomRPCModal, setIsShowCustomRPCModal] = useState(false);
+  const [isShowCustomNetworkModal, setIsShowCustomNetworkModal] =
+    useState(false);
   const [isShowSignatureRecordModal, setIsShowSignatureRecordModal] =
     useState(false);
   const [isManageAddressModal, setIsManageAddressModal] = useState(false);
-  const { isShowTestnet, setIsShowTestnet } = useShowTestnet();
+  // const { isShowTestnet, setIsShowTestnet } = useShowTestnet();
 
   const { setShowSupportedChains } = useSupportedChainsModal();
   const { setIsShowManagePassword } = useManagePasswordUI();
@@ -188,7 +191,7 @@ export function MainWindowSettings() {
               name={
                 <>
                   <div className="flex flex-col gap-[4px]">
-                    <span className="text-14 font-medium">
+                    <span className="font-medium text-14">
                       Enable Whitelist for sending assets
                     </span>
                     {/* <span className="text-12 text-white opacity-[0.6]">
@@ -223,7 +226,7 @@ export function MainWindowSettings() {
               name={
                 <>
                   <div className="flex flex-col gap-[4px]">
-                    <span className="text-14 font-medium">Enable Testnets</span>
+                    <span className="font-medium text-14">Enable Testnets</span>
                   </div>
                 </>
               }
@@ -232,6 +235,15 @@ export function MainWindowSettings() {
                 setIsShowTestnet(nextEnabled);
               }}
             /> */}
+            <ItemAction
+              name="Custom Network"
+              onClick={() => {
+                setIsShowCustomNetworkModal(true);
+              }}
+              icon="rabby-internal://assets/icons/mainwin-settings/icon-custom-testnet.svg"
+            >
+              <img src={IconChevronRight} />
+            </ItemAction>
             <ItemAction
               name="Custom RPC"
               onClick={() => {
@@ -274,7 +286,7 @@ export function MainWindowSettings() {
               name={
                 <>
                   <div className="flex flex-col gap-[4px]">
-                    <span className="text-14 font-medium">
+                    <span className="font-medium text-14">
                       Enable Decentralized app
                     </span>
                     <span className="text-12 text-white opacity-[0.6]">
@@ -293,7 +305,7 @@ export function MainWindowSettings() {
                   height: 230,
                   title: `${ucfirst(keyAction)} Decentralized app`,
                   content: (
-                    <div className="break-words text-left">
+                    <div className="text-left break-words">
                       It's required to restart client to {keyAction}{' '}
                       Decentralized app, do you want to restart now?
                     </div>
@@ -322,7 +334,7 @@ export function MainWindowSettings() {
               name={
                 <>
                   <div className="flex flex-col gap-[4px]">
-                    <span className="text-14 font-medium">Dapp Zoom Ratio</span>
+                    <span className="font-medium text-14">Dapp Zoom Ratio</span>
                     <span className="text-12 text-white opacity-[0.6]">
                       Once enabled, all dapps will be zoomed to{' '}
                       {DAPP_ZOOM_VALUES.DEFAULT_ZOOM_PERCENT}%
@@ -381,7 +393,7 @@ export function MainWindowSettings() {
               }}
               icon="rabby-internal://assets/icons/mainwin-settings/supported-chains.svg"
             >
-              <span className="mr-12 text-14 font-medium">
+              <span className="mr-12 font-medium text-14">
                 {getChainList('mainnet').length}
               </span>
               <img src={IconChevronRight} />
@@ -437,6 +449,13 @@ export function MainWindowSettings() {
         open={isShowCustomRPCModal}
         onClose={() => {
           setIsShowCustomRPCModal(false);
+        }}
+      />
+
+      <CustomNetworkModal
+        open={isShowCustomNetworkModal}
+        onClose={() => {
+          setIsShowCustomNetworkModal(false);
         }}
       />
 
