@@ -1,6 +1,7 @@
 import defaultSuppordChain from '@/isomorphic/default-support-chains.json';
 import { Chain } from '@debank/common';
 import { SupportedChain } from '@rabby-wallet/rabby-api/dist/types';
+import { TestnetChain } from '@/isomorphic/types/customTestnet';
 import { intToHex } from './number';
 
 export function supportedChainToChain(item: SupportedChain): Chain {
@@ -123,7 +124,7 @@ const store = {
     .map((item) => {
       return supportedChainToChain(item);
     }),
-  testnetList: [],
+  testnetList: [] as TestnetChain[],
 };
 
 export const updateChainStore = (params: Partial<typeof store>) => {
@@ -137,14 +138,14 @@ export const findChain = (params: {
   hex?: string | null;
   networkId?: string | null;
   name?: string | null;
-}) => {
+}): Chain | TestnetChain | null | undefined => {
   const { enum: chainEnum, id, serverId, hex, networkId, name } = params;
-  // if (chainEnum && chainEnum.startsWith('CUSTOM_')) {
-  //   return findChain({
-  //     id: +chainEnum.replace('CUSTOM_', ''),
-  //   });
-  // }
-  const chain = [...store.mainnetList].find(
+  if (chainEnum && chainEnum.startsWith('CUSTOM_')) {
+    return findChain({
+      id: +chainEnum.replace('CUSTOM_', ''),
+    });
+  }
+  const chain = [...store.mainnetList, ...store.testnetList].find(
     (item) =>
       item.enum === chainEnum ||
       (id && +item.id === +id) ||

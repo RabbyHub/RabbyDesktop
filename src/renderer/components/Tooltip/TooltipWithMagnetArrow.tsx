@@ -1,4 +1,4 @@
-import { Tooltip as AntdTooltip, Tooltip, TooltipProps } from 'antd';
+import { Tooltip as AntdTooltip, TooltipProps } from 'antd';
 import clsx from 'clsx';
 import React from 'react';
 import styled from 'styled-components';
