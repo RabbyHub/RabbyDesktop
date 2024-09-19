@@ -42,7 +42,9 @@ const Wraper = styled.div`
     }
   }
   .ant-form-item-has-error .ant-input,
-  .ant-form-item-has-error .ant-input:hover {
+  .ant-form-item-has-error .ant-input:hover,
+  .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input,
+  .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input:hover {
     border: 1px solid var(--r-red-default, #e34935);
     background-color: transparent;
   }
