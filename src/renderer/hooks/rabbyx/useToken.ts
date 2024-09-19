@@ -1,27 +1,35 @@
+import { requestOpenApiWithChainId } from '@/main/utils/openapi';
+import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
+import { findChainByServerID } from '@/renderer/utils/chain';
+import { customTestnetTokenToTokenItem } from '@/renderer/utils/token';
 import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
+import { useRequest } from 'ahooks';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
-import { requestOpenApiWithChainId } from '@/main/utils/openapi';
-import { findChainByServerID } from '@/renderer/utils/chain';
+import { useListenSyncChain } from '../useRabbyx';
 import { useCurrentAccount } from './useAccount';
 import { usePreference } from './usePreference';
 
 export const tokenListAtom = atom<TokenItem[]>([]);
 export const blockedAtom = atom<TokenItem[]>([]);
 export const customizeAtom = atom<TokenItem[]>([]);
+export const customTestnetAtom = atom<TokenItem[]>([]);
 
 export const useTokenAtom = () => {
   const [blocked] = useAtom(blockedAtom);
   const [customize] = useAtom(customizeAtom);
+  const [customTestnet] = useAtom(customTestnetAtom);
 
   return {
     blocked,
     customize,
+    customTestnet,
   };
 };
 
 export const useToken = (isTestnet: boolean) => {
+  const [, setCustomTestnet] = useAtom(customTestnetAtom);
   const [, setCustomize] = useAtom(customizeAtom);
   const [, setBlocked] = useAtom(blockedAtom);
   const { preferences, getCustomizedToken, getBlockedToken } = usePreference();
@@ -154,7 +162,38 @@ export const useToken = (isTestnet: boolean) => {
     tokenList,
   ]);
 
+  const { runAsync: loadCustomTestnetTokens } = useRequest(
+    async () => {
+      if (!currentAccount?.address) {
+        return;
+      }
+      return walletController
+        .getCustomTestnetTokenList({
+          address: currentAccount.address,
+        })
+        .then((res) => {
+          return res.map((item) => {
+            return customTestnetTokenToTokenItem(item);
+          });
+        })
+        .catch((e) => {
+          console.error(e);
+        });
+    },
+    {
+      onSuccess: (tokens) => {
+        if (tokens) {
+          setCustomTestnet(tokens);
+        }
+      },
+      refreshDeps: [currentAccount?.address],
+    }
+  );
+
+  useListenSyncChain(loadCustomTestnetTokens);
+
   return {
     setTokenList,
+    loadCustomTestnetTokens,
   };
 };

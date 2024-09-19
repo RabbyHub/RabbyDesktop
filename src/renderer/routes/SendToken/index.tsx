@@ -425,13 +425,18 @@ const SendTokenInner = () => {
 
   const fetchGasList = useCallback(
     async (chainEnum?: CHAINS_ENUM) => {
-      const serverId = findChain({
+      const chainInfo = findChain({
         enum: chainEnum || chain,
-      })?.serverId;
-      if (!serverId) {
+      });
+      if (!chainInfo?.serverId) {
         throw new Error('chain not found');
       }
-      return walletOpenapi.gasMarket(serverId);
+      if (chainInfo.isTestnet) {
+        return walletController.getCustomTestnetGasMarket({
+          chainId: chainInfo.id,
+        });
+      }
+      return walletOpenapi.gasMarket(chainInfo.serverId);
     },
     [chain]
   );
@@ -1014,10 +1019,13 @@ const SendTokenInner = () => {
     }
   }, [couldReserveGas, handleMaxInfoChanged]);
 
+  console.log('send-token');
   const handleChainChanged = useCallback(
     async (val: CHAINS_ENUM) => {
+      console.log('handleChainChange', val);
       setSendMaxInfo((prev) => ({ ...prev, clickedMax: false }));
       const newGasList = await loadGasList(val);
+      console.log(newGasList);
       setSelectedGasLevel(
         newGasList.find(
           (gasLevel) => (gasLevel.level as GasLevelType) === 'normal'

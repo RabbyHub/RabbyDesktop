@@ -1,10 +1,12 @@
-import clsx from 'clsx';
-import React from 'react';
 import { Modal } from '@/renderer/components/Modal/Modal';
-import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
-import { useAtom } from 'jotai';
 import { visibleTokenListAtom } from '@/renderer/components/TokenActionModal/TokenActionModal';
-import { TokenTable } from '../TokenTable/TokenTable';
+import { useTokenAtom } from '@/renderer/hooks/rabbyx/useToken';
+import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
+import { Button } from 'antd';
+import clsx from 'clsx';
+import { useAtom } from 'jotai';
+import React from 'react';
+import { CustomTestnetTokenTable } from '../CustomTestnetTokenTable/CustomTestnetTokenTable';
 
 export interface Props {
   label: string;
@@ -15,7 +17,7 @@ export interface Props {
   hiddenSubTitle?: boolean;
 }
 
-export const TokenButton: React.FC<Props> = ({
+const TokenButton: React.FC<Props> = ({
   label,
   tokens,
   onClickLink,
@@ -66,7 +68,7 @@ export const TokenButton: React.FC<Props> = ({
       </button>
 
       <Modal
-        bodyStyle={{ height: hiddenSubTitle ? 527 : 405, padding: '0 20px 0' }}
+        bodyStyle={{ height: 503, padding: '0 20px 0' }}
         width={400}
         open={visible}
         onCancel={() => setVisible(false)}
@@ -81,7 +83,8 @@ export const TokenButton: React.FC<Props> = ({
           )
         }
       >
-        <TokenTable
+        <CustomTestnetTokenTable
+          isShowHeader={false}
           list={tokens}
           EmptyComponent={
             <div className="space-y-24 text-13 text-center mt-[100px]">
@@ -100,8 +103,51 @@ export const TokenButton: React.FC<Props> = ({
               ) : null}
             </div>
           }
+          FooterComponent={
+            <div className="h-[92px]">
+              <div
+                className={clsx(
+                  'p-[20px] border-t-rabby-neutral-line border-0 border-t-[0.5px] border-solid',
+                  'absolute right-0 left-0 bottom-0',
+                  'bg-r-neutral-bg-1'
+                )}
+              >
+                <Button
+                  type="primary"
+                  block
+                  size="large"
+                  className="text-[16px] font-medium leading-[19px] rounded-[8px] h-[52px]"
+                  icon={
+                    <img
+                      src="rabby-internal://assets/icons/home/add-circle.svg"
+                      className="mr-[4px]"
+                    />
+                  }
+                >
+                  Add Token
+                </Button>
+              </div>
+            </div>
+          }
         />
       </Modal>
     </div>
+  );
+};
+
+export const CustomTestnetButton = () => {
+  const { customTestnet } = useTokenAtom();
+
+  return (
+    <TokenButton
+      label={
+        customTestnet.length > 1
+          ? 'custom network tokens'
+          : 'custom network tokens'
+      }
+      description="No Custom Network Token"
+      tokens={customTestnet}
+      onClickLink={() => null}
+    />
   );
 };

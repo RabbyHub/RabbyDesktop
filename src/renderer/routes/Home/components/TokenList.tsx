@@ -6,6 +6,7 @@ import { formatNumber, formatUsdValue } from '@/renderer/utils/number';
 import TokenItemComp, { LoadingTokenItem } from './TokenItem';
 import { BlockedButton } from './TokenButton/BlockedButton';
 import { CustomizedButton } from './TokenButton/CustomizedButton';
+import { CustomTestnetButton } from './TokenButton/CustomTestnentButton';
 
 const ExpandItem = styled.div`
   display: flex;
@@ -196,6 +197,7 @@ const TokenList = ({
       <div className="flex gap-12 mt-[24px] ml-[14px]">
         <CustomizedButton onClickLink={onFocusInput} />
         <BlockedButton onClickLink={onFocusInput} />
+        <CustomTestnetButton />
       </div>
     </ul>
   );

@@ -130,6 +130,8 @@ type SwitchChainModalInnerProps = {
   disabledTips?: React.ReactNode;
   isShowCustomRPC?: boolean;
   isCheckCustomRPC?: boolean;
+  hideTestnetTab?: boolean;
+  hideMainnetTab?: boolean;
 };
 const SwitchChainModalInner = React.forwardRef<
   SwitchChainModalInnerType,
@@ -144,6 +146,8 @@ const SwitchChainModalInner = React.forwardRef<
       disabledTips,
       isShowCustomRPC,
       isCheckCustomRPC,
+      hideMainnetTab = false,
+      hideTestnetTab = false,
     },
     ref
   ) => {

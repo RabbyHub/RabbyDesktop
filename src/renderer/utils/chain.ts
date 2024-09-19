@@ -123,7 +123,7 @@ const store = {
     .map((item) => {
       return supportedChainToChain(item);
     }),
-  testnetList: [],
+  testnetList: [] as Chain[],
 };
 
 export const updateChainStore = (params: Partial<typeof store>) => {
@@ -136,23 +136,22 @@ export const findChain = (params: {
   serverId?: string | null;
   hex?: string | null;
   networkId?: string | null;
-  name?: string | null;
-}) => {
-  const { enum: chainEnum, id, serverId, hex, networkId, name } = params;
-  // if (chainEnum && chainEnum.startsWith('CUSTOM_')) {
-  //   return findChain({
-  //     id: +chainEnum.replace('CUSTOM_', ''),
-  //   });
-  // }
-  const chain = [...store.mainnetList].find(
+}): Chain | null | undefined => {
+  const { enum: chainEnum, id, serverId, hex, networkId } = params;
+  if (chainEnum && chainEnum.startsWith('CUSTOM_')) {
+    return findChain({
+      id: +chainEnum.replace('CUSTOM_', ''),
+    });
+  }
+  const chain = [...store.mainnetList, ...store.testnetList].find(
     (item) =>
       item.enum === chainEnum ||
       (id && +item.id === +id) ||
       item.serverId === serverId ||
       item.hex === hex ||
-      item.network === networkId ||
-      item.name === name
+      item.network === networkId
   );
+
   return chain;
 };
 
