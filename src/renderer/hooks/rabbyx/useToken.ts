@@ -1,13 +1,15 @@
 import { requestOpenApiWithChainId } from '@/main/utils/openapi';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
-import { findChainByServerID } from '@/renderer/utils/chain';
-import { customTestnetTokenToTokenItem } from '@/renderer/utils/token';
+import {
+  customTestnetTokenToTokenItem,
+  findChain,
+  findChainByServerID,
+} from '@/renderer/utils/chain';
 import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
-import { useRequest } from 'ahooks';
+import { useMemoizedFn, useRequest } from 'ahooks';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
-import { useListenSyncChain } from '../useRabbyx';
 import { useCurrentAccount } from './useAccount';
 import { usePreference } from './usePreference';
 
@@ -59,10 +61,47 @@ export const useCustomTestnetTokens = () => {
       manual: true,
     }
   );
+  const addCustomTestnetToken = useMemoizedFn(async (token: TokenItem) => {
+    const chain = findChain({
+      serverId: token.chain,
+    });
+    if (!chain) {
+      throw new Error(`not found chain ${token.chain}`);
+    }
+    await walletController.addCustomTestnetToken({
+      chainId: chain.id,
+      id: token.id,
+      symbol: token.symbol,
+      decimals: token.decimals,
+    });
+    setCustomTestnetTokens((prev) => {
+      return [...prev, token];
+    });
+  });
+
+  const removeCustomTestnetToken = useMemoizedFn(async (token: TokenItem) => {
+    const chain = findChain({
+      serverId: token.chain,
+    });
+    if (!chain) {
+      throw new Error(`not found chain ${token.chain}`);
+    }
+    await walletController.removeCustomTestnetToken({
+      chainId: chain.id,
+      id: token.id,
+      symbol: token.symbol,
+      decimals: token.decimals,
+    });
+    setCustomTestnetTokens((prev) => {
+      return prev.filter((item) => item.id !== token.id);
+    });
+  });
   return {
     loadCustomTestnetTokens,
     customTestnetTokens,
     setCustomTestnetTokens,
+    addCustomTestnetToken,
+    removeCustomTestnetToken,
   };
 };
 

@@ -6,9 +6,12 @@ import { Modal } from '@/renderer/components/Modal/Modal';
 import { useCustomTestnetTokens } from '@/renderer/hooks/rabbyx/useToken';
 import { useSwitchChainModal } from '@/renderer/hooks/useSwitchChainModal';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
-import { findChain, getChainList } from '@/renderer/utils/chain';
+import {
+  findChain,
+  getChainList,
+  customTestnetTokenToTokenItem,
+} from '@/renderer/utils/chain';
 import { formatAmount } from '@/renderer/utils/number';
-import { customTestnetTokenToTokenItem } from '@/renderer/utils/token';
 import { Loading3QuartersOutlined } from '@ant-design/icons';
 import { useRequest, useSetState } from 'ahooks';
 import { Button, Form, Input, message, Tooltip } from 'antd';

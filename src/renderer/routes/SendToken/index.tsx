@@ -14,7 +14,10 @@ import { useRefState } from '@/renderer/hooks/useRefState';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
-import { findChain } from '@/renderer/utils/chain';
+import {
+  customTestnetTokenToTokenItem,
+  findChain,
+} from '@/renderer/utils/chain';
 import { copyText } from '@/renderer/utils/clipboard';
 import {
   CAN_ESTIMATE_L1_FEE_CHAINS,
@@ -729,18 +732,15 @@ const SendTokenInner = () => {
 
   const loadCurrentToken = useCallback(
     async (id: string, chainId: string, address: string, check?: boolean) => {
-      // const chain = findChain({
-      //   serverId: chainId,
-      // });
-      const result: TokenItem | null = await walletOpenapi.getToken(
-        address,
-        chainId,
-        id
-      );
-      /* if (chain?.isTestnet) {
+      const _chain = findChain({
+        serverId: chainId,
+      });
+
+      let result: TokenItem | null = null;
+      if (_chain?.isTestnet) {
         const res = await walletController.getCustomTestnetToken({
           address,
-          chainId: chain.id,
+          chainId: _chain.id,
           tokenId: id,
         });
         if (res) {
@@ -748,7 +748,7 @@ const SendTokenInner = () => {
         }
       } else {
         result = await walletOpenapi.getToken(address, chainId, id);
-      } */
+      }
       if (result) {
         setCurrentToken(result);
       }
@@ -1106,7 +1106,6 @@ const SendTokenInner = () => {
     Array.from(keys).forEach((key) => {
       qs[key] = searchParams.get(key);
     });
-    console.log('initByCache');
     if (qs.token) {
       const [tokenChain, id] = qs.token.split(':');
       if (!tokenChain || !id) return;
@@ -1127,6 +1126,18 @@ const SendTokenInner = () => {
       const lastTimeToken = await walletController.getLastTimeSendToken(
         account.address
       );
+      const target1 = findChain({
+        serverId: lastTimeToken?.chain,
+      });
+      if (!target1) {
+        loadCurrentToken(
+          currentToken.id,
+          currentToken.chain,
+          currentAccount.address
+        );
+        return;
+      }
+
       if (lastTimeToken) setCurrentToken(lastTimeToken);
       const needLoadToken: TokenItem = lastTimeToken || currentToken;
       if (needLoadToken.chain !== findChain({ enum: chain })?.serverId) {

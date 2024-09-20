@@ -11,6 +11,7 @@ import { BlockedButton } from './TokenButton/BlockedButton';
 import { CustomizedButton } from './TokenButton/CustomizedButton';
 import { CustomTestnetButton } from './TokenButton/CustomTestnentButton';
 import TokenItemComp, { LoadingTokenItem } from './TokenItem';
+import { CustomNetworkModal } from '../../Settings/components/CustomTestnet';
 
 const ExpandItem = styled.div`
   display: flex;
@@ -90,6 +91,8 @@ const TokenList = ({
   const [isShowAddCustomTestnetFirst, setIsShowAddCustomTestnetFirst] =
     useState(false);
 
+  const [isShowCustomNetworkModal, setIsShowCustomNetworkModal] =
+    useState(false);
   return (
     <ul className="assets-list">
       {isLoadingTokenList ? (
@@ -207,7 +210,7 @@ const TokenList = ({
         <BlockedButton onClickLink={onFocusInput} />
         <CustomTestnetButton
           onAddClick={() => {
-            if (!getChainList('testnet').length) {
+            if (getChainList('testnet').length) {
               setIsShowAddCustomToken(true);
             } else {
               setIsShowAddCustomTestnetFirst(true);
@@ -222,7 +225,13 @@ const TokenList = ({
         <AddCustomTestnetFirstModal
           visible={isShowAddCustomTestnetFirst}
           onClose={() => setIsShowAddCustomTestnetFirst(false)}
-          onConfirm={() => setIsShowAddCustomTestnetFirst(false)}
+          onConfirm={() => setIsShowCustomNetworkModal(true)}
+        />
+        <CustomNetworkModal
+          open={isShowCustomNetworkModal}
+          onClose={() => {
+            setIsShowCustomNetworkModal(false);
+          }}
         />
       </div>
     </ul>

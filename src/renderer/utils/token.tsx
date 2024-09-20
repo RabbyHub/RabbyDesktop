@@ -323,32 +323,3 @@ export type PortfolioItemToken = {
   claimable_amount?: number;
   is_custom?: boolean;
 };
-
-export const customTestnetTokenToTokenItem = (
-  token: CustomTestnetToken
-): TokenItem => {
-  const chain = findChain({
-    id: token.chainId,
-  });
-  return {
-    id: token.id,
-    chain: chain?.serverId || '',
-    amount: token.amount,
-    raw_amount: token.rawAmount,
-    raw_amount_hex_str: `0x${new BigNumber(token.rawAmount || 0).toString(16)}`,
-    decimals: token.decimals,
-    display_symbol: token.symbol,
-    is_core: false,
-    is_verified: false,
-    is_wallet: false,
-    is_scam: false,
-    is_suspicious: false,
-    logo_url: '',
-    name: token.symbol,
-    optimized_symbol: token.symbol,
-    price: 0,
-    symbol: token.symbol,
-    time_at: 0,
-    price_24h_change: 0,
-  };
-};

@@ -2,12 +2,13 @@ import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { TokenItem, TxHistoryResult } from '@rabby-wallet/rabby-api/dist/types';
 import { useInfiniteScroll } from 'ahooks';
-import { last } from 'lodash';
 import clsx from 'clsx';
+import { last } from 'lodash';
 import React from 'react';
+import { findChain } from '@/renderer/utils/chain';
+import styles from '../TransactionsModal/index.module.less';
 // eslint-disable-next-line import/no-cycle
 import { HistoryItem } from './HistoryItem';
-import styles from '../TransactionsModal/index.module.less';
 import { HistoryItemSkeleton } from './HistoryItemSkeleton';
 
 const PAGE_COUNT = 10;
@@ -19,7 +20,16 @@ interface Props {
 
 export const HistoryList: React.FC<Props> = ({ refContainer, token }) => {
   const { currentAccount } = useCurrentAccount();
+  const chain = findChain({
+    serverId: token.chain,
+  });
   const fetchData = async (startTime = 0) => {
+    if (chain?.isTestnet) {
+      return {
+        last: 0,
+        list: [],
+      };
+    }
     const res: TxHistoryResult = await walletOpenapi.listTxHisotry({
       id: currentAccount!.address,
       chain_id: token?.chain,
