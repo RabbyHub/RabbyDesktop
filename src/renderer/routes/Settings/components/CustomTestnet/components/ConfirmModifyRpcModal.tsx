@@ -1,24 +1,29 @@
 import { findChain } from '@/renderer/utils/chain';
 import { Button, Modal } from 'antd';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useCustomRPC } from '@/renderer/hooks/useCustomRPC';
+import styles from '../index.module.less';
+import { EditCustomRPCModal } from '../../CustomRPCModal/EditCustomRPCModal';
 
 export const ConfirmModifyRpcModal = ({
   visible,
-  onCancel,
+  onClose,
   onConfirm,
-  zIndex,
+  zIndex = 1002,
   chainId,
   rpcUrl,
 }: {
   visible: boolean;
-  onCancel(): void;
+  onClose(): void;
   onConfirm(): void;
   zIndex?: number;
   chainId?: number;
   rpcUrl?: string;
 }) => {
+  const { data, setCustomRPC } = useCustomRPC();
   const { t } = useTranslation();
+  const [isShowModifyRpcModal, setIsShowModifyRpcModal] = useState(false);
   const chain = useMemo(() => {
     if (!chainId) {
       return null;
@@ -27,19 +32,33 @@ export const ConfirmModifyRpcModal = ({
       id: chainId,
     });
   }, [chainId]);
+
+  const rpc = useMemo(() => {
+    if (!chain) {
+      return null;
+    }
+    return data[chain.enum];
+  }, [chain, data]);
+
+  const onSaveRpc = async (chainEnum: CHAINS_ENUM, url: string) => {
+    await setCustomRPC(chainEnum, url);
+    onConfirm();
+  };
+
   return (
     <Modal
+      className={styles.modal}
       open={visible}
-      onCancel={onCancel}
+      onCancel={onClose}
       bodyStyle={{
         padding: 0,
         background: 'var(--r-neutral-bg1, #FFF)',
       }}
-      zIndex={zIndex || 1002}
       style={{
-        zIndex: zIndex || 1002,
+        zIndex,
+        borderRadius: '6px',
       }}
-      width={480}
+      width={400}
       footer={null}
       closable={false}
       centered
@@ -63,26 +82,35 @@ export const ConfirmModifyRpcModal = ({
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-[12px] p-[20px]">
+        <footer className={styles.modalFooter}>
           <Button
             type="primary"
             size="large"
-            className="rabby-btn-ghost w-[172px]"
+            className="rabby-btn-ghost w-[172px] rounded-[6px]"
             ghost
-            onClick={onCancel}
+            onClick={onClose}
           >
             {t('global.Cancel')}
           </Button>
           <Button
             type="primary"
             size="large"
-            className="w-[172px]"
-            onClick={onConfirm}
+            className="w-[172px] rounded-[6px]"
+            onClick={() => setIsShowModifyRpcModal(true)}
           >
             {t('global.Confirm')}
           </Button>
-        </div>
+        </footer>
       </div>
+      <EditCustomRPCModal
+        open={isShowModifyRpcModal}
+        chain={chain?.enum}
+        rpc={rpc}
+        onClose={() => {
+          setIsShowModifyRpcModal(false);
+        }}
+        onSubmit={onSaveRpc}
+      />
     </Modal>
   );
 };
