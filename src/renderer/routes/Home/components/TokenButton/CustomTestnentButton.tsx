@@ -10,9 +10,8 @@ import { CustomTestnetTokenTable } from '../CustomTestnetTokenTable/CustomTestne
 
 export interface Props {
   label: string;
-  onClickLink: () => void;
+  onAddClick?: () => void;
   tokens?: TokenItem[];
-  linkText?: string;
   description?: string;
   hiddenSubTitle?: boolean;
 }
@@ -20,29 +19,23 @@ export interface Props {
 const TokenButton: React.FC<Props> = ({
   label,
   tokens,
-  onClickLink,
-  linkText,
   description,
   hiddenSubTitle,
+  onAddClick,
 }) => {
   const [visible, setVisible] = React.useState(false);
   const len = tokens?.length ?? 0;
-  const [visibleTokenList, setVisibleTokenList] = useAtom(visibleTokenListAtom);
+  // const [visibleTokenList, setVisibleTokenList] = useAtom(visibleTokenListAtom);
 
-  const handleClickLink = React.useCallback(() => {
-    setVisible(false);
-    onClickLink();
-  }, [onClickLink]);
+  // React.useEffect(() => {
+  //   setVisibleTokenList(visible);
+  // }, [visible, setVisibleTokenList]);
 
-  React.useEffect(() => {
-    setVisibleTokenList(visible);
-  }, [visible, setVisibleTokenList]);
-
-  React.useEffect(() => {
-    if (!visibleTokenList) {
-      setVisible(false);
-    }
-  }, [visibleTokenList]);
+  // React.useEffect(() => {
+  //   if (!visibleTokenList) {
+  //     setVisible(false);
+  //   }
+  // }, [visibleTokenList]);
 
   return (
     <div>
@@ -93,14 +86,6 @@ const TokenButton: React.FC<Props> = ({
                 className="w-[52px] h-[52px] m-auto"
               />
               <div className="text-[#BABEC5]">{description}</div>
-              {linkText ? (
-                <div
-                  onClick={handleClickLink}
-                  className="text-[#7084FF] underline cursor-pointer"
-                >
-                  {linkText}
-                </div>
-              ) : null}
             </div>
           }
           FooterComponent={
@@ -123,6 +108,7 @@ const TokenButton: React.FC<Props> = ({
                       className="mr-[4px]"
                     />
                   }
+                  onClick={onAddClick}
                 >
                   Add Token
                 </Button>
@@ -135,7 +121,9 @@ const TokenButton: React.FC<Props> = ({
   );
 };
 
-export const CustomTestnetButton = () => {
+export const CustomTestnetButton = ({
+  onAddClick,
+}: Pick<Props, 'onAddClick'>) => {
   const { customTestnet } = useTokenAtom();
 
   return (
@@ -147,7 +135,7 @@ export const CustomTestnetButton = () => {
       }
       description="No Custom Network Token"
       tokens={customTestnet}
-      onClickLink={() => null}
+      onAddClick={onAddClick}
     />
   );
 };

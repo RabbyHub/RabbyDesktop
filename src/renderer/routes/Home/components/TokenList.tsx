@@ -1,12 +1,16 @@
-import styled from 'styled-components';
-import classNames from 'classnames';
-import { Skeleton } from 'antd';
-import { ServerChain, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
+import { getChainList } from '@/renderer/utils/chain';
 import { formatNumber, formatUsdValue } from '@/renderer/utils/number';
-import TokenItemComp, { LoadingTokenItem } from './TokenItem';
+import { ServerChain, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
+import { Skeleton } from 'antd';
+import classNames from 'classnames';
+import { useState } from 'react';
+import styled from 'styled-components';
+import { AddCustomTestnetFirstModal } from './AddCustomTestnetFirstModal';
+import { AddCustomTokenModal } from './AddCustomTokenModal';
 import { BlockedButton } from './TokenButton/BlockedButton';
 import { CustomizedButton } from './TokenButton/CustomizedButton';
 import { CustomTestnetButton } from './TokenButton/CustomTestnentButton';
+import TokenItemComp, { LoadingTokenItem } from './TokenItem';
 
 const ExpandItem = styled.div`
   display: flex;
@@ -81,6 +85,10 @@ const TokenList = ({
     // tokenHidden.setIsExpand(!tokenHidden.isExpand);
     onOpenLowAssets();
   };
+
+  const [isShowAddCustomToken, setIsShowAddCustomToken] = useState(false);
+  const [isShowAddCustomTestnetFirst, setIsShowAddCustomTestnetFirst] =
+    useState(false);
 
   return (
     <ul className="assets-list">
@@ -197,7 +205,25 @@ const TokenList = ({
       <div className="flex gap-12 mt-[24px] ml-[14px]">
         <CustomizedButton onClickLink={onFocusInput} />
         <BlockedButton onClickLink={onFocusInput} />
-        <CustomTestnetButton />
+        <CustomTestnetButton
+          onAddClick={() => {
+            if (!getChainList('testnet').length) {
+              setIsShowAddCustomToken(true);
+            } else {
+              setIsShowAddCustomTestnetFirst(true);
+            }
+          }}
+        />
+        <AddCustomTokenModal
+          visible={isShowAddCustomToken}
+          onClose={() => setIsShowAddCustomToken(false)}
+          onConfirm={() => setIsShowAddCustomToken(false)}
+        />
+        <AddCustomTestnetFirstModal
+          visible={isShowAddCustomTestnetFirst}
+          onClose={() => setIsShowAddCustomTestnetFirst(false)}
+          onConfirm={() => setIsShowAddCustomTestnetFirst(false)}
+        />
       </div>
     </ul>
   );

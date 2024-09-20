@@ -1019,7 +1019,6 @@ const SendTokenInner = () => {
     }
   }, [couldReserveGas, handleMaxInfoChanged]);
 
-  console.log('send-token');
   const handleChainChanged = useCallback(
     async (val: CHAINS_ENUM) => {
       console.log('handleChainChange', val);

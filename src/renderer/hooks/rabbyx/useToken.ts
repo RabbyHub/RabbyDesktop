@@ -28,13 +28,51 @@ export const useTokenAtom = () => {
   };
 };
 
+export const useCustomTestnetTokens = () => {
+  const [customTestnetTokens, setCustomTestnetTokens] =
+    useAtom(customTestnetAtom);
+  const { currentAccount } = useCurrentAccount();
+  const { runAsync: loadCustomTestnetTokens } = useRequest(
+    async () => {
+      if (!currentAccount?.address) {
+        return;
+      }
+      return walletController
+        .getCustomTestnetTokenList({
+          address: currentAccount.address,
+        })
+        .then((res) => {
+          return res.map((item) => {
+            return customTestnetTokenToTokenItem(item);
+          });
+        })
+        .catch((e) => {
+          console.error(e);
+        });
+    },
+    {
+      onSuccess: (tokens) => {
+        if (tokens) {
+          setCustomTestnetTokens(tokens);
+        }
+      },
+      manual: true,
+    }
+  );
+  return {
+    loadCustomTestnetTokens,
+    customTestnetTokens,
+    setCustomTestnetTokens,
+  };
+};
+
 export const useToken = (isTestnet: boolean) => {
-  const [, setCustomTestnet] = useAtom(customTestnetAtom);
   const [, setCustomize] = useAtom(customizeAtom);
   const [, setBlocked] = useAtom(blockedAtom);
   const { preferences, getCustomizedToken, getBlockedToken } = usePreference();
   const [tokenList, setTokenList] = useAtom(tokenListAtom);
   const { currentAccount } = useCurrentAccount();
+  const { loadCustomTestnetTokens } = useCustomTestnetTokens();
 
   const initData = React.useCallback(async () => {
     if (!currentAccount) return;
@@ -136,9 +174,11 @@ export const useToken = (isTestnet: boolean) => {
 
     setCustomize(customTokenList);
     setBlocked(blockedTokenList);
+    loadCustomTestnetTokens();
   }, [
     currentAccount,
     isTestnet,
+    loadCustomTestnetTokens,
     preferences.blockedToken,
     preferences.customizedToken,
     setBlocked,
@@ -162,38 +202,7 @@ export const useToken = (isTestnet: boolean) => {
     tokenList,
   ]);
 
-  const { runAsync: loadCustomTestnetTokens } = useRequest(
-    async () => {
-      if (!currentAccount?.address) {
-        return;
-      }
-      return walletController
-        .getCustomTestnetTokenList({
-          address: currentAccount.address,
-        })
-        .then((res) => {
-          return res.map((item) => {
-            return customTestnetTokenToTokenItem(item);
-          });
-        })
-        .catch((e) => {
-          console.error(e);
-        });
-    },
-    {
-      onSuccess: (tokens) => {
-        if (tokens) {
-          setCustomTestnet(tokens);
-        }
-      },
-      refreshDeps: [currentAccount?.address],
-    }
-  );
-
-  useListenSyncChain(loadCustomTestnetTokens);
-
   return {
     setTokenList,
-    loadCustomTestnetTokens,
   };
 };

@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useSyncExternalStore } from 'react';
 import {
   createHashRouter as createRouter,
   Navigate,
@@ -53,6 +53,8 @@ import { ErrorBoundary } from '@sentry/react';
 import { useMount } from 'ahooks';
 import dayjs from 'dayjs';
 import { useBackendServiceAPI } from '@/renderer/routes/Settings/settingHooks';
+import { useCustomTestnetTokens } from '@/renderer/hooks/rabbyx/useToken';
+import { useListenSyncChain } from '@/renderer/hooks/useRabbyx';
 import styles from './index.module.less';
 
 import { FixedBackHeader } from '../FixedBackHeader';
@@ -415,10 +417,13 @@ export function MainWindow() {
   const { getAllRPC } = useCustomRPC();
 
   useAccountsAndLockGuard();
+  const { loadCustomTestnetTokens } = useCustomTestnetTokens();
+  useListenSyncChain(loadCustomTestnetTokens);
 
   useMount(() => {
     logGetUserDapp();
     getAllRPC();
+    loadCustomTestnetTokens();
   });
 
   return (
