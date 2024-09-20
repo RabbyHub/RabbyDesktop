@@ -28,7 +28,7 @@ export const EditCustomTestnetModal = ({
   data?: TestnetChainBase | null;
   visible: boolean;
   onCancel(): void;
-  onConfirm(values: TestnetChain): void;
+  onConfirm(values?: TestnetChain): void;
   onChange?: (values: Partial<TestnetChainBase>) => void;
   ctx?: {
     ga?: {
@@ -169,6 +169,7 @@ export const EditCustomTestnetModal = ({
           </Button>
         </footer>
       </div>
+
       <AddFromChainList
         visible={isShowAddFromChainList}
         onClose={() => {
@@ -189,12 +190,10 @@ export const EditCustomTestnetModal = ({
         visible={isShowModifyRpcModal}
         chainId={formValues.id}
         rpcUrl={formValues.rpcUrl}
-        onCancel={() => {
+        onClose={() => {
           setIsShowModifyRpcModal(false);
         }}
-        onConfirm={() => {
-          setIsShowModifyRpcModal(false);
-        }}
+        onConfirm={onConfirm}
       />
     </Modal>
   );
