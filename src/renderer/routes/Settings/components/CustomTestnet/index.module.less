@@ -1,0 +1,130 @@
+.modal {
+  :global {
+    .ant-modal-body {
+      padding: 0 !important;
+    }
+
+    .ant-modal-close-x {
+      padding: 24px;
+    }
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    height: 600px;
+  }
+
+  &Header {
+    padding: 24px;
+  }
+
+  &Title {
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 24px;
+    text-align: center;
+    color: #ffffff;
+  }
+
+  &Desc {
+    margin-top: 16px;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  &Body {
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 22px;
+    color: #ffffff;
+    overflow: overlay;
+    flex: 1;
+    padding: 0 24px;
+  }
+
+  &Search {
+    :global {
+      .ant-input-affix-wrapper {
+        color: var(--r-neutral-foot, #6a7587);
+        font-size: 13px;
+        font-weight: 400;
+        margin-top: 20px;
+        height: 44px;
+
+        border-radius: 6px;
+        background: var(--r-neutral-card1, #fff);
+        border: 1px solid var(--r-neutral-line, #d3d8e0);
+
+        .ant-input {
+          background-color: transparent;
+          color: var(--r-neutral-title1, #192945);
+        }
+
+        .anticon {
+          color: var(--r-neutral-foot, #6a7587);
+        }
+      }
+
+      .ant-input-affix-wrapper:focus,
+      .ant-input-affix-wrapper-focused {
+        border-color: var(--r-blue-default, #7084ff);
+      }
+    }
+  }
+
+  &Btn {
+    border: 1px solid #8697ff;
+    width: 90%;
+    height: 48px;
+    border-radius: 4px;
+
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 18px;
+    color: #ffffff;
+
+    &:disabled {
+      &::before {
+        display: none !important;
+      }
+    }
+
+    &:disabled,
+    &:disabled:hover {
+      background: #8697ff;
+      color: white;
+      opacity: 0.6;
+      box-shadow: none;
+      border-color: transparent;
+      cursor: not-allowed;
+    }
+  }
+
+  :global {
+    .ant-btn-loading {
+      &::before {
+        display: none !important;
+      }
+
+      background: #8697ff;
+      color: white;
+      opacity: 0.6 !important;
+      box-shadow: none;
+      border-color: transparent;
+      cursor: not-allowed;
+    }
+  }
+
+  &Footer {
+    text-align: center;
+    padding: 24px;
+    margin-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+  }
+}

@@ -66,16 +66,19 @@ export const TokenButton: React.FC<Props> = ({
       </button>
 
       <Modal
-        bodyStyle={{ height: hiddenSubTitle ? 427 : 405, padding: '0 20px 0' }}
-        width={480}
+        bodyStyle={{ height: hiddenSubTitle ? 527 : 405, padding: '0 20px 0' }}
+        width={400}
         open={visible}
         onCancel={() => setVisible(false)}
         title={`${len} ${label}`}
         smallTitle
         centered
         subtitle={
-          !hiddenSubTitle &&
-          'The token in this list will not be added to total balance'
+          !hiddenSubTitle && (
+            <div className="text-[13px] text-r-neutral-foot leading-[16px]">
+              The token in this list will not be added to total balance
+            </div>
+          )
         }
       >
         <TokenTable
@@ -87,12 +90,14 @@ export const TokenButton: React.FC<Props> = ({
                 className="w-[52px] h-[52px] m-auto"
               />
               <div className="text-[#BABEC5]">{description}</div>
-              <div
-                onClick={handleClickLink}
-                className="text-[#7084FF] underline cursor-pointer"
-              >
-                {linkText}
-              </div>
+              {linkText ? (
+                <div
+                  onClick={handleClickLink}
+                  className="text-[#7084FF] underline cursor-pointer"
+                >
+                  {linkText}
+                </div>
+              ) : null}
             </div>
           }
         />

@@ -11,7 +11,7 @@ export const BlockedButton: React.FC<Props> = ({ onClickLink }) => {
 
   return (
     <TokenButton
-      label="blocked"
+      label={blocked.length > 1 ? `blocked tokens` : `blocked token`}
       tokens={blocked}
       linkText="Search address to block token"
       description="Token blocked by you will be shown here"

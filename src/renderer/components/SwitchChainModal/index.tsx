@@ -130,6 +130,8 @@ type SwitchChainModalInnerProps = {
   disabledTips?: React.ReactNode;
   isShowCustomRPC?: boolean;
   isCheckCustomRPC?: boolean;
+  hideTestnetTab?: boolean;
+  hideMainnetTab?: boolean;
 };
 const SwitchChainModalInner = React.forwardRef<
   SwitchChainModalInnerType,
@@ -144,6 +146,8 @@ const SwitchChainModalInner = React.forwardRef<
       disabledTips,
       isShowCustomRPC,
       isCheckCustomRPC,
+      hideMainnetTab = false,
+      hideTestnetTab = false,
     },
     ref
   ) => {
@@ -151,7 +155,9 @@ const SwitchChainModalInner = React.forwardRef<
 
     const { preferences, setChainPinned } = usePreference();
 
-    const { isShowTestnet, selectedTab, onTabChange } = useSwitchNetTab();
+    const { isShowTestnet, selectedTab, onTabChange } = useSwitchNetTab({
+      hideTestnetTab,
+    });
 
     const { matteredChainBalances, getLocalBalanceValue } =
       useAccountBalanceMap({
@@ -175,7 +181,7 @@ const SwitchChainModalInner = React.forwardRef<
         pinned: [...set],
         searchKeyword: searchKw,
         matteredChainBalances,
-        netTabKey: selectedTab,
+        netTabKey: !hideMainnetTab ? selectedTab : 'testnet',
       });
 
       if (searchKw) {
@@ -189,9 +195,10 @@ const SwitchChainModalInner = React.forwardRef<
       };
     }, [
       preferences.pinnedChain,
-      supportChains,
       searchInput,
+      supportChains,
       matteredChainBalances,
+      hideMainnetTab,
       selectedTab,
     ]);
 
@@ -228,7 +235,7 @@ const SwitchChainModalInner = React.forwardRef<
     return (
       <div className={styles.SwitchChainModalInner}>
         <div className={styles.title}>{title}</div>
-        {isShowTestnet && (
+        {isShowTestnet && !hideMainnetTab && (
           <div className="flex justify-center mt-20">
             <NetSwitchTabs value={selectedTab} onTabChange={onTabChange} />
           </div>

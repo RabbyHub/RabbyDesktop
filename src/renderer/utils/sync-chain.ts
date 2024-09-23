@@ -10,6 +10,13 @@ export const initSyncChain = () => {
     }
   });
 
+  walletController.getCustomTestnetList().then((list) => {
+    console.log('list init', list);
+    updateChainStore({
+      testnetList: list || ([] as any),
+    });
+  });
+
   window?.rabbyDesktop?.ipcRenderer?.on(
     '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
     (payload) => {

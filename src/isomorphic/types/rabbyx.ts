@@ -6,14 +6,16 @@ import type {
   TokenItem,
   Chain,
   TxPushType,
+  GasLevel,
+  ChainListItem,
 } from '@rabby-wallet/rabby-api/dist/types';
 
 import type { DEX_ENUM } from '@rabby-wallet/rabby-swap';
 import type { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
 import { SafeTransactionDataPartial } from '@gnosis.pm/safe-core-sdk-types';
-import type { DEX_TYPE, CEX_TYPE } from '@/renderer/routes/Swap/constant';
 import { SafeTransactionItem } from '@rabby-wallet/gnosis-sdk/dist/api';
 import { BasicSafeInfo } from '@rabby-wallet/gnosis-sdk';
+import { TestnetChain, TestnetChainBase } from './customTestnet';
 
 export type RabbyAccount = {
   address: string;
@@ -214,6 +216,18 @@ export interface SignTextHistoryItem {
     | 'ethSignTypedDataV1'
     | 'ethSignTypedDataV3'
     | 'ethSignTypedDataV4';
+}
+
+export interface CustomTestnetTokenBase {
+  id: string;
+  chainId: number;
+  symbol: string;
+  decimals: number;
+}
+
+export interface CustomTestnetToken extends CustomTestnetTokenBase {
+  amount: number;
+  rawAmount: string;
 }
 
 export type RabbyXMethod = {
@@ -543,6 +557,36 @@ export type RabbyXMethod = {
   ) => void;
   'walletController.validateRPC': (url: string, chainId: number) => boolean;
 
+  // custom testnet
+  'walletController.getCustomTestnetList': () => TestnetChain[];
+  'walletController.removeCustomTestnet': (chainId: number) => void;
+  'walletController.updateCustomTestnet': (chain: TestnetChainBase) =>
+    | TestnetChain
+    | {
+        error: {
+          key: string;
+          message: string;
+          status?: string;
+        };
+      };
+  'walletController.addCustomTestnet': (
+    chain: TestnetChainBase,
+    ctx?: {
+      ga?: {
+        source?: string;
+      };
+    }
+  ) =>
+    | TestnetChain
+    | {
+        error: {
+          key: string;
+          message: string;
+          status?: string;
+        };
+      };
+  'walletController.getUsedCustomTestnetChainList': () => ChainListItem[];
+
   'permissionService.addConnectedSite': (
     origin: string,
     name: string,
@@ -662,6 +706,50 @@ export type RabbyXMethod = {
     },
     chain: CHAINS_ENUM
   ) => string;
+  'walletController.getCustomTestnetList': () => Chain[];
+  'walletController.getCustomTestnetGasMarket': ({
+    chainId,
+    custom,
+  }: {
+    chainId: number;
+    custom?: number;
+  }) => GasLevel[];
+  'walletController.getCustomTestnetToken': ({
+    chainId,
+    address,
+    tokenId,
+  }: {
+    chainId: number;
+    address: string;
+    tokenId?: string | null;
+  }) => {
+    amount: number;
+    rawAmount: string;
+    id: string;
+    chainId: number;
+    symbol: string;
+    decimals: number;
+  };
+  'walletController.removeCustomTestnetToken': (
+    params: CustomTestnetTokenBase
+  ) => void;
+  'walletController.addCustomTestnetToken': (
+    params: CustomTestnetTokenBase
+  ) => void;
+  'walletController.getCustomTestnetTokenList': ({
+    address,
+    chainId,
+    q,
+    isRemote,
+  }: {
+    address: string;
+    chainId?: number;
+    q?: string;
+    isRemote?: boolean;
+  }) => CustomTestnetToken[];
+  'walletController.isAddedCustomTestnetToken': (
+    params: Pick<CustomTestnetTokenBase, 'id' | 'chainId'>
+  ) => boolean;
 } & GenOpenApiService<'openapi'> &
   GenOpenApiService<'testnetOpenapi'>;
 

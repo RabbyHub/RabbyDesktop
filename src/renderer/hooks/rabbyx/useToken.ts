@@ -1,23 +1,107 @@
+import { requestOpenApiWithChainId } from '@/main/utils/openapi';
+import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
+import {
+  customTestnetTokenToTokenItem,
+  findChain,
+  findChainByServerID,
+} from '@/renderer/utils/chain';
 import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
+import { useMemoizedFn, useRequest } from 'ahooks';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
-import { requestOpenApiWithChainId } from '@/main/utils/openapi';
-import { findChainByServerID } from '@/renderer/utils/chain';
 import { useCurrentAccount } from './useAccount';
 import { usePreference } from './usePreference';
 
 export const tokenListAtom = atom<TokenItem[]>([]);
 export const blockedAtom = atom<TokenItem[]>([]);
 export const customizeAtom = atom<TokenItem[]>([]);
+export const customTestnetAtom = atom<TokenItem[]>([]);
 
 export const useTokenAtom = () => {
   const [blocked] = useAtom(blockedAtom);
   const [customize] = useAtom(customizeAtom);
+  const [customTestnet] = useAtom(customTestnetAtom);
 
   return {
     blocked,
     customize,
+    customTestnet,
+  };
+};
+
+export const useCustomTestnetTokens = () => {
+  const [customTestnetTokens, setCustomTestnetTokens] =
+    useAtom(customTestnetAtom);
+  const { currentAccount } = useCurrentAccount();
+  const { runAsync: loadCustomTestnetTokens } = useRequest(
+    async () => {
+      if (!currentAccount?.address) {
+        return;
+      }
+      return walletController
+        .getCustomTestnetTokenList({
+          address: currentAccount.address,
+        })
+        .then((res) => {
+          return res.map((item) => {
+            return customTestnetTokenToTokenItem(item);
+          });
+        })
+        .catch((e) => {
+          console.error(e);
+        });
+    },
+    {
+      onSuccess: (tokens) => {
+        if (tokens) {
+          setCustomTestnetTokens(tokens);
+        }
+      },
+      manual: true,
+    }
+  );
+  const addCustomTestnetToken = useMemoizedFn(async (token: TokenItem) => {
+    const chain = findChain({
+      serverId: token.chain,
+    });
+    if (!chain) {
+      throw new Error(`not found chain ${token.chain}`);
+    }
+    await walletController.addCustomTestnetToken({
+      chainId: chain.id,
+      id: token.id,
+      symbol: token.symbol,
+      decimals: token.decimals,
+    });
+    setCustomTestnetTokens((prev) => {
+      return [...prev, token];
+    });
+  });
+
+  const removeCustomTestnetToken = useMemoizedFn(async (token: TokenItem) => {
+    const chain = findChain({
+      serverId: token.chain,
+    });
+    if (!chain) {
+      throw new Error(`not found chain ${token.chain}`);
+    }
+    await walletController.removeCustomTestnetToken({
+      chainId: chain.id,
+      id: token.id,
+      symbol: token.symbol,
+      decimals: token.decimals,
+    });
+    setCustomTestnetTokens((prev) => {
+      return prev.filter((item) => item.id !== token.id);
+    });
+  });
+  return {
+    loadCustomTestnetTokens,
+    customTestnetTokens,
+    setCustomTestnetTokens,
+    addCustomTestnetToken,
+    removeCustomTestnetToken,
   };
 };
 
@@ -27,6 +111,7 @@ export const useToken = (isTestnet: boolean) => {
   const { preferences, getCustomizedToken, getBlockedToken } = usePreference();
   const [tokenList, setTokenList] = useAtom(tokenListAtom);
   const { currentAccount } = useCurrentAccount();
+  const { loadCustomTestnetTokens } = useCustomTestnetTokens();
 
   const initData = React.useCallback(async () => {
     if (!currentAccount) return;
@@ -128,9 +213,11 @@ export const useToken = (isTestnet: boolean) => {
 
     setCustomize(customTokenList);
     setBlocked(blockedTokenList);
+    loadCustomTestnetTokens();
   }, [
     currentAccount,
     isTestnet,
+    loadCustomTestnetTokens,
     preferences.blockedToken,
     preferences.customizedToken,
     setBlocked,

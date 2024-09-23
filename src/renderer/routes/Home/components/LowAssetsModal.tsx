@@ -27,7 +27,7 @@ export const LowAssetsModal: React.FC<Props> = ({ visible, onClose, list }) => {
 
   return (
     <Modal
-      width={480}
+      width={400}
       open={visible}
       onCancel={onClose}
       title={`${list.length} low value assets`}

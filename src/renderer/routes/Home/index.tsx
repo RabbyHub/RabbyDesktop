@@ -394,16 +394,6 @@ const Home = () => {
                         />
                       </TipsWrapper>
                     </span>
-
-                    {isShowTestnet ? (
-                      <NetSwitchTabs
-                        showPending
-                        size="sm"
-                        value={selectedTab}
-                        onTabChange={onTabChange}
-                        className="ml-12"
-                      />
-                    ) : null}
                   </div>
                 )}
                 <div className="balance">
@@ -435,7 +425,7 @@ const Home = () => {
 
               {curveData ? (
                 <div className="right" onClick={() => setCurveModalOpen(true)}>
-                  <div className="absolute right-0 bottom-0 z-10">
+                  <div className="absolute bottom-0 right-0 z-10">
                     <HomeUpdateButton
                       loading={
                         isLoadingRealTimeTokenList || isLoadingRealTimeProtocol
@@ -447,7 +437,7 @@ const Home = () => {
                 </div>
               ) : (
                 <div className="right">
-                  <div className="absolute right-0 bottom-0 z-10">
+                  <div className="absolute bottom-0 right-0 z-10">
                     <HomeUpdateButton
                       loading={
                         isLoadingRealTimeTokenList || isLoadingRealTimeProtocol
