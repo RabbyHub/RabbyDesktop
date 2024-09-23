@@ -18,6 +18,7 @@ const LogoImtoken = 'rabby-internal://assets/icons/walletlogo/imtoken.svg';
 const IconJade = 'rabby-internal://assets/icons/walletlogo/jade.svg';
 const LogoJade = 'rabby-internal://assets/icons/walletlogo/jade.svg';
 const LogoKeystone = 'rabby-internal://assets/icons/walletlogo/keystone.svg';
+const LogoNgrave = 'rabby-internal://assets/icons/walletlogo/ngrave.svg';
 const LogoAirGap = 'rabby-internal://assets/icons/walletlogo/airgap.svg';
 const LogoLedgerDark = 'rabby-internal://assets/icons/walletlogo/ledger.svg';
 const LogoLedgerWhite = 'rabby-internal://assets/icons/walletlogo/ledger.svg';
@@ -159,6 +160,10 @@ export const HARDWARE_KEYRING_TYPES = {
   Keystone: {
     type: 'QR Hardware Wallet Device',
     brandName: 'Keystone',
+  },
+  NgraveZero: {
+    type: 'QR Hardware Wallet Device',
+    brandName: 'NGRAVE ZERO',
   },
 };
 
@@ -352,6 +357,7 @@ export enum WALLET_BRAND_TYPES {
   // Uniswap = 'Uniswap',
   Zerion = 'Zerion',
   CoboArgus = 'CoboArgus',
+  NGRAVEZERO = 'NGRAVE',
 }
 
 export enum WALLET_BRAND_CATEGORY {
@@ -624,6 +630,15 @@ export const WALLET_BRAND_CONTENT: {
     image: LogoCoboArgus,
     connectType: BRAND_WALLET_CONNECT_TYPE.CoboArgusConnect,
     category: WALLET_BRAND_CATEGORY.INSTITUTIONAL,
+  },
+  [WALLET_BRAND_TYPES.NGRAVEZERO]: {
+    id: 26,
+    name: 'NGRAVE ZERO',
+    brand: WALLET_BRAND_TYPES.NGRAVEZERO,
+    icon: LogoNgrave,
+    image: LogoNgrave,
+    connectType: BRAND_WALLET_CONNECT_TYPE.QRCodeBase,
+    category: WALLET_BRAND_CATEGORY.HARDWARE,
   },
 };
 
