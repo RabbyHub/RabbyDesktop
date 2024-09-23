@@ -251,9 +251,8 @@ const configurationRenderer: webpack.Configuration = {
         .on('error', (spawnError) => console.error(spawnError));
 
 
-      if (!process.env.NO_MAIN) {
-
-      let mainJsProcess: ChildProcess;
+      if (process.env.WITH_MAIN) {
+        let mainJsProcess: ChildProcess;
         // start:main:js
         console.log('Starting builder to compile main.ts -> .erb/dll/main.js...');
         mainJsProcess = spawn('npm', ['run', 'start:main:js'], {

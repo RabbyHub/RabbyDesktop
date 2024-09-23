@@ -52,7 +52,7 @@
     "prepare": "husky install",
     "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
     "prestart": "npm run make-theme",
-    "start": "ts-node ./.erb/scripts/check-port-in-use.js && npm run start:renderer",
+    "start": "ts-node ./.erb/scripts/check-port-in-use.js && cross-env-shell WITH_MAIN=true npm run start:renderer",
     "start:main:old": "cross-env-shell NODE_ENV=development electronmon -r ts-node/register/transpile-only -r tsconfig-paths/register .",
     "start:main": "concurrently -k \"cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --watch --config ./.erb/configs/webpack.config.main.dev.ts\" \"cross-env-shell NODE_ENV=development electronmon .\"",
     "start:main:js": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --watch --config ./.erb/configs/webpack.config.main.dev.ts",
