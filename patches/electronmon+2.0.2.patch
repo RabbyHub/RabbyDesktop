@@ -1,0 +1,64 @@
+diff --git a/node_modules/electronmon/bin/cli.js b/node_modules/electronmon/bin/cli.js
+index b26d1eb..6e14094 100755
+--- a/node_modules/electronmon/bin/cli.js
++++ b/node_modules/electronmon/bin/cli.js
+@@ -12,6 +12,7 @@ const cwd = fs.realpathSync(path.resolve('.'));
+ const args = process.argv.slice(2);
+ const logLevel = process.env.ELECTRONMON_LOGLEVEL || 'info';
+ const patterns = Array.isArray(pkg.electronmon.patterns) ? pkg.electronmon.patterns : [];
++const mainfile_patterns = Array.isArray(pkg.electronmon.mainfile_patterns) ? pkg.electronmon.mainfile_patterns : [];
+ 
+ if (pkg.name) {
+   process.title = `${pkg.name} - electronmon`;
+@@ -19,4 +20,4 @@ if (pkg.name) {
+   process.title = 'electronmon';
+ }
+ 
+-require('../')({ cwd, args, logLevel, electronPath, patterns });
++require('../')({ cwd, args, logLevel, electronPath, patterns, mainfile_patterns });
+diff --git a/node_modules/electronmon/src/electronmon.js b/node_modules/electronmon/src/electronmon.js
+index 3e25a34..d56db32 100644
+--- a/node_modules/electronmon/src/electronmon.js
++++ b/node_modules/electronmon/src/electronmon.js
+@@ -1,5 +1,6 @@
+ const path = require('path');
+ const { spawn } = require('child_process');
++const micromatch = require('micromatch')
+ 
+ const logger = require('./log.js');
+ const watch = require('./watch.js');
+@@ -17,7 +18,8 @@ module.exports = ({
+   logLevel = 'info',
+   electronPath,
+   stdio = [process.stdin, process.stdout, process.stderr],
+-  patterns = []
++  patterns = [],
++  mainfile_patterns = []
+ } = {}) => {
+   const executable = electronPath || require('electron');
+ 
+@@ -31,6 +33,15 @@ module.exports = ({
+   const log = logger(stdio[1], logLevel);
+ 
+   const appfiles = {};
++
++  mainfile_patterns = mainfile_patterns.map(f => {
++    return path.resolve(cwd, f);
++  })
++  function isAppFiles(filename) {
++    return appfiles[filename] || mainfile_patterns.some(pattern =>
++      micromatch.isMatch(filename, pattern)
++    );
++  }
+   let globalWatcher;
+   let globalApp;
+   let overrideSignal;
+@@ -179,7 +190,7 @@ module.exports = ({
+           return startApp();
+         }
+ 
+-        if (appfiles[filepath]) {
++        if (isAppFiles(filepath)) {
+           log.info(`main file ${type}: ${relpath}`);
+           globalApp.send('reset');
+         } else {

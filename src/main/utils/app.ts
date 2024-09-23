@@ -24,7 +24,9 @@ import {
   getMainWindowDappViewZoomPercent,
 } from '../store/desktopApp';
 
-const PROJ_ROOT = path.join(__dirname, '../../../');
+function getDevProjRoot() {
+  return process.env.DEV_PROJ_ROOT || path.join(__dirname, '../../../');
+}
 
 export function getMainPlatform() {
   return process.platform as 'win32' | 'darwin';
@@ -39,17 +41,17 @@ export function getMainBuildInfo() {
   };
 }
 
-function resolveReleasePath(file: string) {
-  if (process.env.NODE_ENV === 'development') {
-    return path.resolve(path.join(PROJ_ROOT, './release/app/dist'), file);
-  }
+// function resolveReleasePath(file: string) {
+//   if (process.env.NODE_ENV === 'development') {
+//     return path.resolve(path.join(getDevProjRoot(), './release/app/dist'), file);
+//   }
 
-  return `file://${path.resolve(__dirname, '../', file)}`;
-}
+//   return `file://${path.resolve(__dirname, '../', file)}`;
+// }
 
-export function getMainPath(file: string) {
+function getMainPath(file: string) {
   if (process.env.NODE_ENV === 'development') {
-    return path.join(PROJ_ROOT, './release/app/dist/main', file);
+    return path.join(getDevProjRoot(), './release/app/dist/main', file);
   }
 
   return path.join(__dirname, file);
@@ -64,7 +66,7 @@ export function getRendererPath(file: string) {
 
 const RESOURCES_PATH = app.isPackaged
   ? path.join(process.resourcesPath, 'assets')
-  : path.join(PROJ_ROOT, './assets');
+  : path.join(getDevProjRoot(), './assets');
 
 export const getAssetPath = (...paths: string[]): string => {
   return path.join(RESOURCES_PATH, ...paths);
@@ -72,7 +74,7 @@ export const getAssetPath = (...paths: string[]): string => {
 
 export const preloadPath = app.isPackaged
   ? path.join(__dirname, 'preload.js')
-  : path.join(PROJ_ROOT, './.erb/dll/preload.js');
+  : path.join(getDevProjRoot(), './.erb/dll/preload.js');
 
 export function getShellPageUrl(
   type: 'webui' | 'debug-new-tab',
