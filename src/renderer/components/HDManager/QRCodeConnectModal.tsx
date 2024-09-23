@@ -97,7 +97,7 @@ export const QRCodeConnectModal: React.FC<Props> = ({
             {brandInfo.name}
           </h1>
           <p className="text-[15px] opacity-80 text-[#FFFFFF]">
-            Scan the QR code on the Keystone hardware wallet
+            Scan the QR code on the {brandInfo.name} hardware wallet
           </p>
         </header>
         <div className="space-y-[60px] mt-[60px]">
