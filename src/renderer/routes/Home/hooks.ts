@@ -424,3 +424,10 @@ export const useExpandProtocolList = (protocols: DisplayProtocol[]) => {
     totalHiddenCount,
   };
 };
+
+export const useUpdateBalanceCache = (balance: string, addrress?: string) => {
+  useEffect(() => {
+    if (!addrress || !balance) return;
+    walletController.updateAddressBalanceCache(addrress, balance);
+  }, [addrress, balance]);
+};

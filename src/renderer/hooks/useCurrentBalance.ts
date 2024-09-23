@@ -37,7 +37,7 @@ export default function useCurrentBalance(
   const getAddressBalance = async (address: string, force: boolean) => {
     try {
       const { total_usd_value: totalUsdValue, chain_list: chainList } =
-        await wallet.getAddressBalance(address, force);
+        await wallet.getInMemoryAddressBalance(address, force);
       if (isCanceled) return;
       setBalance(totalUsdValue.toString());
       setSuccess(true);
@@ -55,7 +55,7 @@ export default function useCurrentBalance(
   const getTestnetBalance = async (address: string, force: boolean) => {
     try {
       const { total_usd_value: totalUsdValue, chain_list: chainList } =
-        await wallet.getAddressBalance(address, force);
+        await wallet.getInMemoryAddressBalance(address, force);
       if (isCanceled) return;
       setTestnetBalance(totalUsdValue.toString());
       setTestnetSuccess(true);

@@ -31,6 +31,7 @@ import {
   useFilterProtoList,
   useFilterTokenList,
   useSwitchView,
+  useUpdateBalanceCache,
 } from './hooks';
 import ChainList from './components/ChainList';
 import Curve, { CurveModal } from './components/Curve';
@@ -235,6 +236,8 @@ const Home = () => {
   }, [usedChainList, protocolList, tokenList]);
   const totalBalance = useTotalBalance(tokenList, protocolList);
 
+  useUpdateBalanceCache(totalBalance, currentAccount?.address);
+
   const curveDataRaw = useCurve(currentAccount?.address, updateNonce);
   const curveData = isTestnet ? undefined : curveDataRaw;
   const location = useLocation();
@@ -266,7 +269,7 @@ const Home = () => {
       }
     );
     setUsedChainList(chainList.map((chain) => formatUsedChain(chain)));
-    walletController.getAddressBalance(
+    walletController.getInMemoryAddressBalance(
       currentAccount?.address,
       false,
       _isTestnet
