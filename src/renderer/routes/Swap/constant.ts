@@ -49,8 +49,7 @@ export const DEX = {
     id: DEX_ENUM.ODOS,
     logo: 'rabby-internal://assets/icons/swap/odos.png',
     name: 'Odos',
-    chains:
-      DEX_SUPPORT_CHAINS[DEX_ENUM.ODOS as keyof typeof DEX_SUPPORT_CHAINS],
+    chains: DEX_SUPPORT_CHAINS[DEX_ENUM.ODOS],
   },
 };
 
