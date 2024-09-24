@@ -1033,89 +1033,97 @@ const ApprovalManagePage = () => {
         <header className={clsx('approvals-manager__header')}>
           {isShowTestnet && (
             <div className="tabs">
-              <NetSwitchTabs.ApprovalsPage
-                value={selectedTab}
-                onTabChange={onTabChange}
-              />
+              <NetSwitchTabs value={selectedTab} onTabChange={onTabChange} />
             </div>
           )}
         </header>
-        <main>
-          <div className="approvals-manager__table-tools">
-            <PillsSwitch
-              value={filterType}
-              options={SwitchPills}
-              onTabChange={(key) => setFilterType(key)}
-              className="bg-r-neutral-line"
-              itemClassnameActive="text-white"
-              itemClassname="text-[15px] w-[148px] h-[40px]"
-              itemClassnameInActive="text-white/80"
-            />
+        {selectedTab === 'mainnet' ? (
+          <>
+            <main>
+              <div className="approvals-manager__table-tools">
+                <PillsSwitch
+                  value={filterType}
+                  options={SwitchPills}
+                  onTabChange={(key) => setFilterType(key)}
+                  className="bg-r-neutral-line"
+                  itemClassnameActive="text-white"
+                  itemClassname="text-[15px] w-[148px] h-[40px]"
+                  itemClassnameInActive="text-white/80"
+                />
 
-            <SearchInput
-              value={searchKw}
-              onChange={(e) => setSearchKw(e.target.value)}
-              prefix={<img src={IconSearch} />}
-              className="search-input"
-              suffix={<span />}
-              placeholder={`Search ${
-                filterType === 'contract' ? 'contract' : 'assets'
-              } by name/address`}
-            />
+                <SearchInput
+                  value={searchKw}
+                  onChange={(e) => setSearchKw(e.target.value)}
+                  prefix={<img src={IconSearch} />}
+                  className="search-input"
+                  suffix={<span />}
+                  placeholder={`Search ${
+                    filterType === 'contract' ? 'contract' : 'assets'
+                  } by name/address`}
+                />
+              </div>
+
+              <div className="approvals-manager__table-wrapper">
+                <TableByContracts
+                  isLoading={isLoading}
+                  className={filterType === 'contract' ? '' : 'hidden'}
+                  vGridRef={vGridRefContracts}
+                  containerHeight={containerHeight}
+                  dataSource={displaySortedContractList}
+                  onClickRow={handleClickContractRow}
+                  onChangeSelectedContractSpenders={
+                    onChangeSelectedContractSpenders
+                  }
+                  selectedRows={contractRevokeList}
+                />
+
+                <TableByAssetSpenders
+                  className={filterType === 'assets' ? '' : 'hidden'}
+                  isLoading={isLoading}
+                  vGridRef={vGridRefAsset}
+                  containerHeight={containerHeight}
+                  dataSource={displaySortedAssetsList}
+                  selectedRows={assetRevokeList}
+                  onClickRow={handleClickAssetRow}
+                />
+              </div>
+              {selectedItem ? (
+                <RevokeApprovalModal
+                  item={selectedItem}
+                  visible={visibleRevokeModal}
+                  onClose={() => {
+                    setVisibleRevokeModal(false);
+                  }}
+                  onConfirm={(list) => {
+                    setContractRevokeMap((prev) => ({
+                      ...prev,
+                      [selectedItemKey]: list,
+                    }));
+                  }}
+                  revokeList={contractRevokeMap[selectedItemKey]}
+                />
+              ) : null}
+            </main>
+            <div
+              className={clsx(
+                'sticky-footer',
+                !!isShowRevokeButtonTip && 'with-selection'
+              )}
+            >
+              <RevokeButton
+                revokeList={currentRevokeList}
+                onRevoke={handleRevoke}
+              />
+            </div>
+          </>
+        ) : (
+          <div className="h-[647px] w-full flex flex-col items-center justify-center bg-[rgba(0,0,0,0.10)] rounded-[8px]">
+            <img src="rabby-internal://assets/icons/common/box.svg" alt="" />
+            <div className="text-[14px] text-r-neutral-foot leading-[20px]">
+              Not supported for custom networks
+            </div>
           </div>
-
-          <div className="approvals-manager__table-wrapper">
-            <TableByContracts
-              isLoading={isLoading}
-              className={filterType === 'contract' ? '' : 'hidden'}
-              vGridRef={vGridRefContracts}
-              containerHeight={containerHeight}
-              dataSource={displaySortedContractList}
-              onClickRow={handleClickContractRow}
-              onChangeSelectedContractSpenders={
-                onChangeSelectedContractSpenders
-              }
-              selectedRows={contractRevokeList}
-            />
-
-            <TableByAssetSpenders
-              className={filterType === 'assets' ? '' : 'hidden'}
-              isLoading={isLoading}
-              vGridRef={vGridRefAsset}
-              containerHeight={containerHeight}
-              dataSource={displaySortedAssetsList}
-              selectedRows={assetRevokeList}
-              onClickRow={handleClickAssetRow}
-            />
-          </div>
-          {selectedItem ? (
-            <RevokeApprovalModal
-              item={selectedItem}
-              visible={visibleRevokeModal}
-              onClose={() => {
-                setVisibleRevokeModal(false);
-              }}
-              onConfirm={(list) => {
-                setContractRevokeMap((prev) => ({
-                  ...prev,
-                  [selectedItemKey]: list,
-                }));
-              }}
-              revokeList={contractRevokeMap[selectedItemKey]}
-            />
-          ) : null}
-        </main>
-        <div
-          className={clsx(
-            'sticky-footer',
-            !!isShowRevokeButtonTip && 'with-selection'
-          )}
-        >
-          <RevokeButton
-            revokeList={currentRevokeList}
-            onRevoke={handleRevoke}
-          />
-        </div>
+        )}
       </div>
     </div>
   );

@@ -131,7 +131,7 @@ export const CustomTestnetButton = ({
       label={
         customTestnet.length > 1
           ? 'custom network tokens'
-          : 'custom network tokens'
+          : 'custom network token'
       }
       description="No Custom Network Token"
       tokens={customTestnet}

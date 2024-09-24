@@ -12,6 +12,7 @@ import {
   customTestnetTokenToTokenItem,
 } from '@/renderer/utils/chain';
 import { formatAmount } from '@/renderer/utils/number';
+// import { formatAmount } from '@/renderer/utils/number';
 import { Loading3QuartersOutlined } from '@ant-design/icons';
 import { useRequest, useSetState } from 'ahooks';
 import { Button, Form, Input, message, Tooltip } from 'antd';
@@ -337,7 +338,8 @@ export const AddCustomTokenModal: React.FC<Props> = ({
                       </Tooltip>
                     </div>
                     <div className="text-r-neutral-title1 text-[13px] leading-[16px] font-medium">
-                      {formatAmount(token.amount || 0)} {token.symbol}
+                      {token.amount ? formatAmount(token.amount || 0) : 0}{' '}
+                      {token.symbol}
                     </div>
                     {checked ? (
                       <div className="ml-auto text-r-blue-default">

@@ -13,6 +13,7 @@ import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
 import { formatUsdValue } from '@/renderer/utils/number';
 import { Chain, CHAINS_ENUM } from '@debank/common';
+import { useChainList } from '@/renderer/hooks/rabbyx/useChainList';
 import RabbyInput from '../AntdOverwrite/Input';
 import ChainIcon from '../ChainIcon';
 import { TipsWrapper } from '../TipWrapper';
@@ -172,6 +173,8 @@ const SwitchChainModalInner = React.forwardRef<
       },
     }));
 
+    const { mainnetList, testnetList } = useChainList();
+
     const { pinnedSet, matteredList, unmatteredList } = useMemo(() => {
       const set = new Set(preferences.pinnedChain);
 
@@ -182,6 +185,8 @@ const SwitchChainModalInner = React.forwardRef<
         searchKeyword: searchKw,
         matteredChainBalances,
         netTabKey: !hideMainnetTab ? selectedTab : 'testnet',
+        mainnetList,
+        testnetList,
       });
 
       if (searchKw) {
@@ -200,6 +205,8 @@ const SwitchChainModalInner = React.forwardRef<
       matteredChainBalances,
       hideMainnetTab,
       selectedTab,
+      mainnetList,
+      testnetList,
     ]);
 
     const onPinnedChange: OnPinnedChanged = useCallback(
@@ -337,7 +344,7 @@ export default function SwitchChainModal() {
       centered
       className={styles.SwitchChainModal}
       mask
-      width={488}
+      width={400}
       onCancel={() => {
         setSvState({ isCancel: true });
         closeSubview();

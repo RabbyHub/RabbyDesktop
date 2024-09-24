@@ -172,8 +172,10 @@ const TokenList = ({
                 src="rabby-internal://assets/icons/home/hide-assets.svg"
               />
               {tokenHidden.isExpand
-                ? 'Hide small value assets'
-                : `${tokenHidden.hiddenCount} low value assets`}
+                ? 'Hide small value tokens'
+                : tokenHidden.hiddenCount > 1
+                ? `${tokenHidden.hiddenCount} low value tokens`
+                : `${tokenHidden.hiddenCount} low value token`}
               <img
                 src="rabby-internal://assets/icons/home/expand-arrow.svg"
                 className={classNames('icon-expand-arrow')}

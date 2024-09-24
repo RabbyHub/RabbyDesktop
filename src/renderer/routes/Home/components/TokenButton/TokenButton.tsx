@@ -66,7 +66,7 @@ export const TokenButton: React.FC<Props> = ({
       </button>
 
       <Modal
-        bodyStyle={{ height: hiddenSubTitle ? 527 : 405, padding: '0 20px 0' }}
+        bodyStyle={{ height: hiddenSubTitle ? 427 : 405, padding: '0 20px 0' }}
         width={400}
         open={visible}
         onCancel={() => setVisible(false)}

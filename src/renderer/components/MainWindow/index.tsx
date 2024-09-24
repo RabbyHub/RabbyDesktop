@@ -55,6 +55,7 @@ import dayjs from 'dayjs';
 import { useBackendServiceAPI } from '@/renderer/routes/Settings/settingHooks';
 import { useCustomTestnetTokens } from '@/renderer/hooks/rabbyx/useToken';
 import { useListenSyncChain } from '@/renderer/hooks/useRabbyx';
+import { useSyncChainList } from '@/renderer/hooks/rabbyx/useChainList';
 import styles from './index.module.less';
 
 import { FixedBackHeader } from '../FixedBackHeader';
@@ -425,6 +426,8 @@ export function MainWindow() {
     getAllRPC();
     loadCustomTestnetTokens();
   });
+
+  useSyncChainList();
 
   return (
     <ShellWalletProvider alwaysRender>

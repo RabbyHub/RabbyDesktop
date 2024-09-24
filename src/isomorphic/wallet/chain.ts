@@ -111,6 +111,8 @@ export function varyAndSortChainItems(deps: {
     [x: string]: DisplayChainWithWhiteLogo | undefined;
   };
   netTabKey?: import('@/renderer/components/PillsSwitch/NetSwitchTabs').NetSwitchTabsKey;
+  mainnetList?: Chain[];
+  testnetList?: Chain[];
 }) {
   const {
     supportChains,
@@ -118,6 +120,8 @@ export function varyAndSortChainItems(deps: {
     pinned,
     matteredChainBalances,
     netTabKey,
+    mainnetList = getChainList('mainnet'),
+    testnetList = getChainList('testnet'),
   } = deps;
 
   const unpinnedListGroup = {
@@ -132,9 +136,7 @@ export function varyAndSortChainItems(deps: {
   };
 
   const _all = (
-    netTabKey
-      ? getChainList(netTabKey)
-      : getChainList('mainnet') || getChainList('mainnet')
+    (netTabKey === 'testnet' ? testnetList : mainnetList) || mainnetList
   ).sort((a, b) => a.name.localeCompare(b.name));
 
   _all.forEach((item) => {
