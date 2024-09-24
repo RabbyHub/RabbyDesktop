@@ -1027,10 +1027,7 @@ const ApprovalManagePage = () => {
         <header className={clsx('approvals-manager__header')}>
           {isShowTestnet && (
             <div className="tabs">
-              <NetSwitchTabs.ApprovalsPage
-                value={selectedTab}
-                onTabChange={onTabChange}
-              />
+              <NetSwitchTabs value={selectedTab} onTabChange={onTabChange} />
             </div>
           )}
         </header>
