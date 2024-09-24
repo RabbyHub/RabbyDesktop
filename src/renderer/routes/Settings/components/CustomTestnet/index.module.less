@@ -76,34 +76,37 @@
   }
 
   &Btn {
-    border: 1px solid #8697ff;
-    width: 90%;
-    height: 48px;
-    border-radius: 4px;
-
-    font-weight: 500;
-    font-size: 15px;
-    line-height: 18px;
-    color: #ffffff;
-
-    &:disabled {
-      &::before {
-        display: none !important;
-      }
-    }
-
-    &:disabled,
-    &:disabled:hover {
-      background: #8697ff;
-      color: white;
-      opacity: 0.6;
-      box-shadow: none;
-      border-color: transparent;
-      cursor: not-allowed;
-    }
+    width: 360px;
   }
 
   :global {
+    .ant-btn {
+      border: 1px solid #7084FF;
+      height: 48px;
+      border-radius: 4px;
+
+      font-weight: 500;
+      font-size: 15px;
+      line-height: 18px;
+      color: #ffffff;
+
+      &:disabled {
+        &::before {
+          display: none !important;
+        }
+      }
+
+      &:disabled,
+      &:disabled:hover {
+        background: #8697ff;
+        color: white;
+        opacity: 0.6;
+        box-shadow: none;
+        border-color: transparent;
+        cursor: not-allowed;
+      }
+    }
+
     .ant-btn-loading {
       &::before {
         display: none !important;

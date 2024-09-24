@@ -100,7 +100,7 @@ export const EditCustomTestnetModal = ({
       open={visible}
       onCancel={onCancel}
       centered
-      width={480}
+      width={400}
       footer={null}
     >
       <div className={styles.content}>

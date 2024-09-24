@@ -16,15 +16,15 @@ import styles from '../index.module.less';
 const Loading = () => {
   return (
     <>
-      <div className="chain-list-item relative flex items-center px-[16px] py-[11px] gap-[12px] bg-r-neutral-card2 rounded-[6px]">
-        <Skeleton.Avatar active />
+      <div className="chain-list-item relative flex items-center px-[16px] py-[11px] gap-[12px] rounded-[6px]">
+        <Skeleton.Avatar active size={28} />
         <div className="flex flex-col gap-[4px]">
           <Skeleton.Input active className="w-[80px] h-[16px]" />
           <Skeleton.Input active className="w-[145px] h-[14px]" />
         </div>
       </div>
-      <div className="chain-list-item relative flex items-center px-[16px] py-[11px] gap-[12px] bg-r-neutral-card2 rounded-[6px]">
-        <Skeleton.Avatar active />
+      <div className="chain-list-item relative flex items-center px-[16px] py-[11px] gap-[12px] rounded-[6px]">
+        <Skeleton.Avatar active size={28} />
         <div className="flex flex-col gap-[4px]">
           <Skeleton.Input active className="w-[80px] h-[16px]" />
           <Skeleton.Input active className="w-[145px] h-[14px]" />
@@ -97,11 +97,14 @@ export const AddFromChainList = ({
 
   const { loading, data, loadingMore } = useInfiniteScroll(
     async (params) => {
+      console.log('====searchChainList params, search:', params, search);
       const res = await walletOpenapi.searchChainList({
         start: params?.start || 0,
         limit: 50,
         q: search,
       });
+
+      console.log('====searchChainList res', res);
 
       return {
         list: res.chain_list.map((item) => {
@@ -169,7 +172,7 @@ export const AddFromChainList = ({
       className={styles.modal}
       open={visible}
       onCancel={onClose}
-      width={480}
+      width={400}
       footer={null}
       // closable={false}
       centered

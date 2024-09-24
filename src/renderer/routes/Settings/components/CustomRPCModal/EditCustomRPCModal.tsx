@@ -76,7 +76,7 @@ export const EditCustomRPCModal = ({
       open={open}
       onCancel={onClose}
       centered
-      width={480}
+      width={400}
       footer={null}
     >
       <div className={styles.content}>
@@ -106,6 +106,7 @@ export const EditCustomRPCModal = ({
                 className={styles.input}
                 placeholder="Enter the RPC URL"
                 autoFocus
+                defaultValue={rpc?.url}
               />
             </Form.Item>
           </Form>
