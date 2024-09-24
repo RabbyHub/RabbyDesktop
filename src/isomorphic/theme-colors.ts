@@ -3,6 +3,7 @@ export const themeColors = {
     'brand-default': 'rgba(112, 132, 255, 1)',
     'blue-default': 'rgba(112, 132, 255, 1)',
     'blue-light': 'rgba(112, 132, 255, 0.1)',
+    'blue-light1': 'rgba(66, 73, 98, 1)',
     'blue-disable': 'rgba(112, 132, 255, 0.3)',
     'green-default': 'rgba(42, 187, 127, 1)',
     'green-light': 'rgba(42, 187, 127, 0.2)',

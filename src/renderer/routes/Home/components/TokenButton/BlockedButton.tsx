@@ -17,6 +17,7 @@ export const BlockedButton: React.FC<Props> = ({ onClickLink }) => {
       description="Token blocked by you will be shown here"
       onClickLink={onClickLink}
       hiddenSubTitle
+      hiddenFooter
     />
   );
 };

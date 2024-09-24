@@ -44,6 +44,7 @@ import eventBus from '@/renderer/utils-shell/eventBus';
 import { detectClientOS } from '@/isomorphic/os';
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
 import { getTokenSymbol } from '@/renderer/utils';
+import { useRequest } from 'ahooks';
 import IconUnknownNFT from './icons/unknown-nft.svg';
 
 import { HandleClickTableRow } from './components/Table';
@@ -238,9 +239,15 @@ export function useApprovalsPage(options?: { isTestnet?: boolean }) {
     tokenMap: {},
     nftMap: {},
   });
-  const [{ loading: loadingMaybeWrong, error: loadError }, loadApprovals] =
-    useAsyncFn(async () => {
-      setIsLoadingOnAsyncFn(true);
+  const {
+    loading: loadingMaybeWrong,
+    error: loadError,
+    runAsync: loadApprovals,
+  } = useRequest(
+    async () => {
+      if (options?.isTestnet) {
+        return;
+      }
 
       const openapiClient = options?.isTestnet
         ? walletTestnetOpenapi
@@ -253,11 +260,7 @@ export function useApprovalsPage(options?: { isTestnet?: boolean }) {
       } as typeof approvalsData;
 
       if (!currentAccount?.address) {
-        return [
-          nextApprovalsData.contractMap,
-          nextApprovalsData.tokenMap,
-          nextApprovalsData.nftMap,
-        ];
+        return nextApprovalsData;
       }
       const userAddress = currentAccount.address;
       const usedChainList = await openapiClient.usedChainList(userAddress);
@@ -486,19 +489,26 @@ export function useApprovalsPage(options?: { isTestnet?: boolean }) {
         ...tokenAuthorizedQueryList,
       ]);
 
-      sortTokenOrNFTApprovalsSpenderList(nextApprovalsData.tokenMap);
-      sortTokenOrNFTApprovalsSpenderList(nextApprovalsData.nftMap);
-
-      setIsLoadingOnAsyncFn(false);
-
-      setApprovalsData(nextApprovalsData);
-
-      return [
-        nextApprovalsData.contractMap,
-        nextApprovalsData.tokenMap,
-        nextApprovalsData.nftMap,
-      ];
-    }, [currentAccount?.address, options?.isTestnet]);
+      return nextApprovalsData;
+    },
+    {
+      refreshDeps: [currentAccount?.address, options?.isTestnet],
+      // manual: true,
+      onSuccess(nextApprovalsData) {
+        if (nextApprovalsData) {
+          sortTokenOrNFTApprovalsSpenderList(nextApprovalsData.tokenMap);
+          sortTokenOrNFTApprovalsSpenderList(nextApprovalsData.nftMap);
+          setApprovalsData(nextApprovalsData);
+        }
+      },
+      onFinally() {
+        setIsLoadingOnAsyncFn(false);
+      },
+      onBefore() {
+        setIsLoadingOnAsyncFn(true);
+      },
+    }
+  );
 
   const isLoading = isLoadingOnAsyncFn && loadingMaybeWrong;
 

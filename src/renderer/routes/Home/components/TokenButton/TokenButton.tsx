@@ -1,18 +1,21 @@
-import clsx from 'clsx';
-import React from 'react';
 import { Modal } from '@/renderer/components/Modal/Modal';
-import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
-import { useAtom } from 'jotai';
 import { visibleTokenListAtom } from '@/renderer/components/TokenActionModal/TokenActionModal';
+import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
+import { Button } from 'antd';
+import clsx from 'clsx';
+import { useAtom } from 'jotai';
+import React from 'react';
 import { TokenTable } from '../TokenTable/TokenTable';
 
 export interface Props {
   label: string;
-  onClickLink: () => void;
+  onClickLink?: () => void;
+  onAddClick?: () => void;
   tokens?: TokenItem[];
   linkText?: string;
   description?: string;
   hiddenSubTitle?: boolean;
+  hiddenFooter?: boolean;
 }
 
 export const TokenButton: React.FC<Props> = ({
@@ -22,6 +25,8 @@ export const TokenButton: React.FC<Props> = ({
   linkText,
   description,
   hiddenSubTitle,
+  onAddClick,
+  hiddenFooter,
 }) => {
   const [visible, setVisible] = React.useState(false);
   const len = tokens?.length ?? 0;
@@ -29,7 +34,7 @@ export const TokenButton: React.FC<Props> = ({
 
   const handleClickLink = React.useCallback(() => {
     setVisible(false);
-    onClickLink();
+    onClickLink?.();
   }, [onClickLink]);
 
   React.useEffect(() => {
@@ -66,7 +71,7 @@ export const TokenButton: React.FC<Props> = ({
       </button>
 
       <Modal
-        bodyStyle={{ height: hiddenSubTitle ? 527 : 405, padding: '0 20px 0' }}
+        bodyStyle={{ height: hiddenSubTitle ? 527 : 503, padding: '0 20px 0' }}
         width={400}
         open={visible}
         onCancel={() => setVisible(false)}
@@ -82,9 +87,10 @@ export const TokenButton: React.FC<Props> = ({
         }
       >
         <TokenTable
+          className="h-full overflow-auto"
           list={tokens}
           EmptyComponent={
-            <div className="space-y-24 text-13 text-center mt-[100px]">
+            <div className="space-y-24 text-13 text-center pt-[100px]">
               <img
                 src="rabby-internal://assets/icons/home/low-value-empty.svg"
                 className="w-[52px] h-[52px] m-auto"
@@ -99,6 +105,35 @@ export const TokenButton: React.FC<Props> = ({
                 </div>
               ) : null}
             </div>
+          }
+          FooterComponent={
+            hiddenFooter ? null : (
+              <div className="h-[92px]">
+                <div
+                  className={clsx(
+                    'p-[20px] border-t-rabby-neutral-line border-0 border-t-[0.5px] border-solid',
+                    'absolute right-0 left-0 bottom-0',
+                    'bg-r-neutral-bg-1'
+                  )}
+                >
+                  <Button
+                    type="primary"
+                    block
+                    size="large"
+                    className="text-[16px] font-medium leading-[19px] rounded-[8px] h-[52px]"
+                    icon={
+                      <img
+                        src="rabby-internal://assets/icons/home/add-circle.svg"
+                        className="mr-[4px]"
+                      />
+                    }
+                    onClick={onAddClick}
+                  >
+                    Add Token
+                  </Button>
+                </div>
+              </div>
+            )
           }
         />
       </Modal>

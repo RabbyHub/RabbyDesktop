@@ -1,18 +1,19 @@
-import { Modal } from '@/renderer/components/Modal/Modal';
-import { useMemoizedFn, useRequest } from 'ahooks';
-import { Button, message } from 'antd';
-import { useSetState } from 'react-use';
-import { useTranslation } from 'react-i18next';
-import { updateChainStore } from '@/renderer/utils/chain';
-import { matomoRequestEvent } from '@/renderer/utils/matomo-request';
-import { sortBy } from 'lodash';
-import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import {
   TestnetChain,
   TestnetChainBase,
 } from '@/isomorphic/types/customTestnet';
-import { EditCustomTestnetModal } from './components/EditTestnetModal';
+import { Modal } from '@/renderer/components/Modal/Modal';
+import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { updateChainStore } from '@/renderer/utils/chain';
+import { matomoRequestEvent } from '@/renderer/utils/matomo-request';
+import { useMemoizedFn, useRequest } from 'ahooks';
+import { Button, message } from 'antd';
+import { sortBy } from 'lodash';
+import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useSetState } from 'react-use';
 import { CustomTestnetItem } from './components/CustomTestnetItem';
+import { EditCustomTestnetModal } from './components/EditTestnetModal';
 import { Emtpy } from './components/Empty';
 import styles from './index.module.less';
 
@@ -95,6 +96,12 @@ export const CustomNetworkModal = ({ open, onClose }: ModalProps) => {
     setState(next);
   });
 
+  useEffect(() => {
+    if (open) {
+      runGetCustomTestnetList();
+    }
+  }, [open, runGetCustomTestnetList]);
+
   return (
     <>
       <Modal
@@ -102,7 +109,7 @@ export const CustomNetworkModal = ({ open, onClose }: ModalProps) => {
         open={open}
         onCancel={onClose}
         centered
-        width={480}
+        width={400}
         footer={null}
       >
         <div className={styles.content}>

@@ -1,4 +1,4 @@
-import { Tooltip } from 'antd';
+import { Button, Tooltip } from 'antd';
 import clsx from 'clsx';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -13,6 +13,9 @@ import { useZPopupViewState } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
 import { formatUsdValue } from '@/renderer/utils/number';
 import { Chain, CHAINS_ENUM } from '@debank/common';
+import { useChainList } from '@/renderer/hooks/rabbyx/useChainList';
+import { useTranslation } from 'react-i18next';
+import { CustomNetworkModal } from '@/renderer/routes/Settings/components/CustomTestnet';
 import RabbyInput from '../AntdOverwrite/Input';
 import ChainIcon from '../ChainIcon';
 import { TipsWrapper } from '../TipWrapper';
@@ -172,6 +175,8 @@ const SwitchChainModalInner = React.forwardRef<
       },
     }));
 
+    const { mainnetList, testnetList } = useChainList();
+
     const { pinnedSet, matteredList, unmatteredList } = useMemo(() => {
       const set = new Set(preferences.pinnedChain);
 
@@ -182,6 +187,8 @@ const SwitchChainModalInner = React.forwardRef<
         searchKeyword: searchKw,
         matteredChainBalances,
         netTabKey: !hideMainnetTab ? selectedTab : 'testnet',
+        mainnetList,
+        testnetList,
       });
 
       if (searchKw) {
@@ -200,6 +207,8 @@ const SwitchChainModalInner = React.forwardRef<
       matteredChainBalances,
       hideMainnetTab,
       selectedTab,
+      mainnetList,
+      testnetList,
     ]);
 
     const onPinnedChange: OnPinnedChanged = useCallback(
@@ -231,6 +240,9 @@ const SwitchChainModalInner = React.forwardRef<
         });
       }
     };
+
+    const [isShowCustomTestnetModal, setIsShowCustomTestnetModal] =
+      useState(false);
 
     return (
       <div className={styles.SwitchChainModalInner}>
@@ -303,6 +315,45 @@ const SwitchChainModalInner = React.forwardRef<
                 );
               })}
             </div>
+
+            {matteredList.length === 0 && unmatteredList.length === 0 ? (
+              <div className="flex flex-col items-center pt-[70px] bg-transparent">
+                <img
+                  className="w-[100px] h-[100px]"
+                  src="rabby-internal://assets/icons/mainwin-settings/nodata-tx.png"
+                  alt="no address"
+                />
+                <div className="font-medium text-center text-r-neutral-body text-14">
+                  No chains
+                </div>
+                {selectedTab === 'testnet' ? (
+                  <div
+                    className={clsx(
+                      'text-center absolute bottom-0 left-0 right-0 px-[20px] py-[18px]',
+                      'border-t-[0.5px] border-0 border-solid border-rabby-neutral-line'
+                    )}
+                  >
+                    <Button
+                      type="primary"
+                      onClick={() => {
+                        setIsShowCustomTestnetModal(true);
+                      }}
+                      block
+                      className="h-[44px] rounded-[6px] text-[15px] leading-[18px] font-medium"
+                    >
+                      Add Custom Network
+                    </Button>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
+            <CustomNetworkModal
+              open={isShowCustomTestnetModal}
+              onClose={() => {
+                setIsShowCustomTestnetModal(false);
+              }}
+            />
           </div>
         </div>
       </div>
@@ -337,7 +388,7 @@ export default function SwitchChainModal() {
       centered
       className={styles.SwitchChainModal}
       mask
-      width={488}
+      width={400}
       onCancel={() => {
         setSvState({ isCancel: true });
         closeSubview();

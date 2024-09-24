@@ -129,25 +129,45 @@ const store = {
   testnetList: [] as TestnetChain[],
 };
 
+export const getChainList = (net?: 'mainnet' | 'testnet') => {
+  if (net === 'mainnet') {
+    return store.mainnetList;
+  }
+  if (net === 'testnet') {
+    return store.testnetList;
+  }
+  return [...store.mainnetList, ...store.testnetList];
+};
+
 export const updateChainStore = (params: Partial<typeof store>) => {
   Object.assign(store, params);
 };
 
-export const findChain = (params: {
-  enum?: CHAINS_ENUM | string | null;
-  id?: number | null;
-  serverId?: string | null;
-  hex?: string | null;
-  networkId?: string | null;
-  name?: string | null;
-}): Chain | TestnetChain | null | undefined => {
+export const findChain = (
+  params: {
+    enum?: CHAINS_ENUM | string | null;
+    id?: number | null;
+    serverId?: string | null;
+    hex?: string | null;
+    networkId?: string | null;
+    name?: string | null;
+  },
+  _chainList?: (Chain | TestnetChain)[]
+): Chain | TestnetChain | null | undefined => {
+  const chainList = _chainList || [
+    ...getChainList('mainnet'),
+    ...getChainList('testnet'),
+  ];
   const { enum: chainEnum, id, serverId, hex, networkId, name } = params;
   if (chainEnum && chainEnum.startsWith('CUSTOM_')) {
-    return findChain({
-      id: +chainEnum.replace('CUSTOM_', ''),
-    });
+    return findChain(
+      {
+        id: +chainEnum.replace('CUSTOM_', ''),
+      },
+      _chainList
+    );
   }
-  const chain = [...store.mainnetList, ...store.testnetList].find(
+  const chain = chainList.find(
     (item) =>
       item.enum === chainEnum ||
       (id && +item.id === +id) ||
@@ -162,16 +182,6 @@ export const findChain = (params: {
 export const DEFAULT_ETH_CHAIN = findChain({
   enum: 'ETH',
 })!;
-
-export const getChainList = (net?: 'mainnet' | 'testnet') => {
-  if (net === 'mainnet') {
-    return store.mainnetList;
-  }
-  if (net === 'testnet') {
-    return store.testnetList;
-  }
-  return [...store.mainnetList, ...store.testnetList];
-};
 
 /**
  * @description safe find chain
