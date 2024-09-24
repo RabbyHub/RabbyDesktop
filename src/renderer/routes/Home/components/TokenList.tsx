@@ -3,8 +3,9 @@ import { formatNumber, formatUsdValue } from '@/renderer/utils/number';
 import { ServerChain, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { Skeleton } from 'antd';
 import classNames from 'classnames';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { useChainList } from '@/renderer/hooks/rabbyx/useChainList';
 import { AddCustomTestnetFirstModal } from './AddCustomTestnetFirstModal';
 import { AddCustomTokenModal } from './AddCustomTokenModal';
 import { BlockedButton } from './TokenButton/BlockedButton';
@@ -94,6 +95,15 @@ const TokenList = ({
 
   const [isShowCustomNetworkModal, setIsShowCustomNetworkModal] =
     useState(false);
+
+  const { testnetList } = useChainList();
+
+  useEffect(() => {
+    if (testnetList?.length) {
+      setIsShowAddCustomTestnetFirst(false);
+    }
+  }, [testnetList?.length]);
+
   return (
     <ul className="assets-list">
       {isLoadingTokenList ? (
