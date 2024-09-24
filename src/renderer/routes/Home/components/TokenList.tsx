@@ -88,6 +88,7 @@ const TokenList = ({
   };
 
   const [isShowAddCustomToken, setIsShowAddCustomToken] = useState(false);
+  const [isTestnet, setIsTestnet] = useState(false);
   const [isShowAddCustomTestnetFirst, setIsShowAddCustomTestnetFirst] =
     useState(false);
 
@@ -208,10 +209,16 @@ const TokenList = ({
         </>
       )}
       <div className="flex gap-12 mt-[24px] ml-[14px]">
-        <CustomizedButton onClickLink={onFocusInput} />
+        <CustomizedButton
+          onAddClick={() => {
+            setIsTestnet(false);
+            setIsShowAddCustomToken(true);
+          }}
+        />
         <BlockedButton onClickLink={onFocusInput} />
         <CustomTestnetButton
           onAddClick={() => {
+            setIsTestnet(true);
             if (getChainList('testnet').length) {
               setIsShowAddCustomToken(true);
             } else {
@@ -220,6 +227,7 @@ const TokenList = ({
           }}
         />
         <AddCustomTokenModal
+          isTestnet={isTestnet}
           visible={isShowAddCustomToken}
           onClose={() => setIsShowAddCustomToken(false)}
           onConfirm={() => setIsShowAddCustomToken(false)}

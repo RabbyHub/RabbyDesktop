@@ -25,17 +25,6 @@ const TokenButton: React.FC<Props> = ({
 }) => {
   const [visible, setVisible] = React.useState(false);
   const len = tokens?.length ?? 0;
-  // const [visibleTokenList, setVisibleTokenList] = useAtom(visibleTokenListAtom);
-
-  // React.useEffect(() => {
-  //   setVisibleTokenList(visible);
-  // }, [visible, setVisibleTokenList]);
-
-  // React.useEffect(() => {
-  //   if (!visibleTokenList) {
-  //     setVisible(false);
-  //   }
-  // }, [visibleTokenList]);
 
   return (
     <div>

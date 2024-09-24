@@ -3,14 +3,16 @@ import IconUnchecked from '@/../assets/icons/common/confirm-circle-unchecked.svg
 import IconDown from '@/../assets/icons/common/down.svg';
 import IconUnknown from '@/../assets/icons/common/token-default.svg';
 import { Modal } from '@/renderer/components/Modal/Modal';
+import { usePreference } from '@/renderer/hooks/rabbyx/usePreference';
 import { useCustomTestnetTokens } from '@/renderer/hooks/rabbyx/useToken';
 import { useSwitchChainModal } from '@/renderer/hooks/useSwitchChainModal';
-import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import {
   findChain,
   getChainList,
   customTestnetTokenToTokenItem,
 } from '@/renderer/utils/chain';
+import { CHAINS_ENUM } from '@/renderer/utils/constant';
 import { formatAmount } from '@/renderer/utils/number';
 // import { formatAmount } from '@/renderer/utils/number';
 import { Loading3QuartersOutlined } from '@ant-design/icons';
@@ -23,6 +25,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 interface Props {
+  isTestnet?: boolean;
   visible: boolean;
   onClose(): void;
   onConfirm?(): void;
@@ -99,6 +102,7 @@ const Footer = styled.div`
 `;
 
 export const AddCustomTokenModal: React.FC<Props> = ({
+  isTestnet,
   visible,
   onClose,
   onConfirm,
@@ -108,7 +112,9 @@ export const AddCustomTokenModal: React.FC<Props> = ({
     chain: CHAINS_ENUM | null;
   }>({
     visible: false,
-    chain: getChainList('testnet')?.[0]?.enum || null,
+    chain: isTestnet
+      ? getChainList('testnet')?.[0]?.enum || null
+      : CHAINS_ENUM.ETH,
   });
 
   const chain = findChain({ enum: chainSelectorState.chain });
@@ -116,6 +122,8 @@ export const AddCustomTokenModal: React.FC<Props> = ({
   const [checked, setChecked] = useState(false);
   const { t } = useTranslation();
   const [form] = useForm();
+
+  const { addCustomizeToken } = usePreference();
 
   const {
     data: token,
@@ -135,11 +143,22 @@ export const AddCustomTokenModal: React.FC<Props> = ({
           errors: [],
         },
       ]);
-      return walletController.getCustomTestnetToken({
+      if (!isTestnet) {
+        const res = await walletOpenapi.searchToken(
+          currentAccount.address,
+          tokenId,
+          chain.serverId,
+          true
+        );
+        return res?.[0];
+      }
+      const res = await walletController.getCustomTestnetToken({
         address: currentAccount!.address,
         chainId: chain.id,
         tokenId,
       });
+
+      return customTestnetTokenToTokenItem(res);
     },
     {
       refreshDeps: [chain?.id, tokenId],
@@ -157,8 +176,11 @@ export const AddCustomTokenModal: React.FC<Props> = ({
 
   const { runAsync: runAddToken, loading: isSubmitting } = useRequest(
     async () => {
-      if (!chain?.id || !tokenId) {
+      if (!chain?.id || !tokenId || !token) {
         return null;
+      }
+      if (!isTestnet) {
+        return addCustomizeToken(token);
       }
       return walletController.addCustomTestnetToken({
         chainId: chain.id,
@@ -182,7 +204,7 @@ export const AddCustomTokenModal: React.FC<Props> = ({
     try {
       await runAddToken();
       setCustomTestnetTokens((prev) => {
-        return [...prev, customTestnetTokenToTokenItem(token)];
+        return [...prev, token];
       });
       loadCustomTestnetTokens();
       onConfirm?.();
@@ -193,15 +215,18 @@ export const AddCustomTokenModal: React.FC<Props> = ({
 
   useEffect(() => {
     if (!visible) {
-      setChainSelectorState({
-        visible: false,
-        chain: getChainList('testnet')?.[0]?.enum || null,
-      });
       setTokenId('');
       setChecked(false);
       form.resetFields();
+    } else {
+      setChainSelectorState({
+        visible: false,
+        chain: isTestnet
+          ? getChainList('testnet')?.[0]?.enum || null
+          : CHAINS_ENUM.ETH,
+      });
     }
-  }, [form, setChainSelectorState, visible]);
+  }, [form, isTestnet, setChainSelectorState, visible]);
 
   const inputRef = useRef<any>(null);
 
@@ -228,7 +253,7 @@ export const AddCustomTokenModal: React.FC<Props> = ({
       width={400}
       open={visible}
       onCancel={onClose}
-      title="Add Testnet Token"
+      title={isTestnet ? 'Add Testnet Token' : 'Add Custom Token'}
       bodyStyle={{ height: 527, padding: '0 20px 0' }}
       centered
       smallTitle
@@ -240,7 +265,8 @@ export const AddCustomTokenModal: React.FC<Props> = ({
               onClick={() => {
                 open({
                   value: chainSelectorState.chain || undefined,
-                  hideMainnetTab: true,
+                  hideMainnetTab: isTestnet,
+                  hideTestnetTab: !isTestnet,
                 });
               }}
             >
