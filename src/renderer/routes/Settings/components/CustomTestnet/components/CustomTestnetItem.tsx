@@ -1,7 +1,29 @@
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { TestnetChain } from '@/isomorphic/types/customTestnet';
+import styled from 'styled-components';
 import { TestnetChainLogo } from './TestnetChainLogo';
+
+const ImgWraper = styled.span`
+  cursor: pointer;
+  margin-top: 1px;
+  display: flex;
+  img {
+    flex: 1;
+  }
+  .hover-img {
+    margin-top: 1px;
+    display: none;
+  }
+  &:hover {
+    img {
+      display: none;
+    }
+    img.hover-img {
+      display: inline-block;
+    }
+  }
+`;
 
 export const CustomTestnetItem = ({
   className,
@@ -25,7 +47,7 @@ export const CustomTestnetItem = ({
     <div
       className={clsx(
         'flex items-center gap-[12px] px-[15px] py-[10px]',
-        'border-[1px] border-transparent rounded-[6px]',
+        'border-[1px] border-solid border-transparent rounded-[6px]',
         disabled
           ? 'opacity-50 cursor-not-allowed'
           : 'hover:border-rabby-blue-default hover:bg-r-blue-light1 cursor-pointer',
@@ -63,13 +85,17 @@ export const CustomTestnetItem = ({
               onEdit?.(item);
             }}
           />
-          <img
-            className="cursor-pointer"
-            src="rabby-internal://assets/icons/custom-testnet/icon-delete.svg"
+          <ImgWraper
             onClick={() => {
               onRemove?.(item);
             }}
-          />
+          >
+            <img src="rabby-internal://assets/icons/custom-testnet/icon-delete.svg" />
+            <img
+              className="hover-img"
+              src="rabby-internal://assets/icons/custom-testnet/icon-delete-hover.svg"
+            />
+          </ImgWraper>
         </div>
       ) : null}
     </div>

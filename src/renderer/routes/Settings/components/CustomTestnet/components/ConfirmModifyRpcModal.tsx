@@ -21,7 +21,7 @@ export const ConfirmModifyRpcModal = ({
   chainId?: number;
   rpcUrl?: string;
 }) => {
-  const { data, setCustomRPC } = useCustomRPC();
+  const { setCustomRPC } = useCustomRPC();
   const { t } = useTranslation();
   const [isShowModifyRpcModal, setIsShowModifyRpcModal] = useState(false);
   const chain = useMemo(() => {
@@ -33,17 +33,18 @@ export const ConfirmModifyRpcModal = ({
     });
   }, [chainId]);
 
-  const rpc = useMemo(() => {
-    if (!chain) {
-      return null;
-    }
-    return data[chain.enum];
-  }, [chain, data]);
-
   const onSaveRpc = async (chainEnum: CHAINS_ENUM, url: string) => {
     await setCustomRPC(chainEnum, url);
     onConfirm();
   };
+
+  const rpc = useMemo(() => {
+    if (!rpcUrl) return null;
+    return {
+      url: rpcUrl,
+      enable: true,
+    };
+  }, [rpcUrl]);
 
   return (
     <Modal
@@ -56,15 +57,16 @@ export const ConfirmModifyRpcModal = ({
       }}
       style={{
         zIndex,
-        borderRadius: '6px',
+        borderRadius: '8px',
+        overflow: 'hidden',
       }}
-      width={400}
+      width={360}
       footer={null}
       closable={false}
       centered
     >
       <div>
-        <div className="pt-[30px] px-[12px]">
+        <div className="pt-[30px] px-[20px]">
           <div className="text-r-neutral-title-1 text-[16px] font-medium leading-[20px] text-center">
             {t('page.customTestnet.ConfirmModifyRpcModal.desc')}
           </div>

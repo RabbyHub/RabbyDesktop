@@ -94,7 +94,7 @@ export const CustomRPCModal = ({ open, onClose }: CustomRPCModalProps) => {
         open={open}
         onCancel={onClose}
         centered
-        width={480}
+        width={400}
         footer={null}
       >
         <div className={styles.content}>
