@@ -3,10 +3,7 @@ import {
   TransactionGroup,
   TransactionHistoryItem,
 } from '@/isomorphic/types/rabbyx';
-import {
-  walletOpenapi,
-  walletTestnetOpenapi,
-} from '@/renderer/ipcRequest/rabbyx';
+import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { getTokenSymbol } from '@/renderer/utils';
 import { findChain, findChainByID } from '@/renderer/utils/chain';
 import { TokenItem, TxRequest } from '@rabby-wallet/rabby-api/dist/types';
@@ -63,14 +60,11 @@ export const useLoadTxRequests = (
   }
 ) => {
   const { unbroadcastedTxs } = getPendingGroupCategory(pendings);
-  const testnetTxs: TransactionHistoryItem[] = [];
   const mainnetTxs: TransactionHistoryItem[] = [];
 
   unbroadcastedTxs.forEach((tx) => {
     const chain = findChainByID(tx.rawTx.chainId);
-    if (chain?.isTestnet) {
-      testnetTxs.push(tx);
-    } else {
+    if (!chain?.isTestnet) {
       mainnetTxs.push(tx);
     }
   });
@@ -79,11 +73,6 @@ export const useLoadTxRequests = (
   const { data, runAsync } = useRequest(
     async () => {
       const res = await Promise.all([
-        testnetTxs?.length
-          ? walletTestnetOpenapi
-              .getTxRequests(testnetTxs.map((tx) => tx.reqId) as string[])
-              .catch(() => [])
-          : [],
         mainnetTxs?.length
           ? walletOpenapi
               .getTxRequests(mainnetTxs.map((tx) => tx.reqId) as string[])

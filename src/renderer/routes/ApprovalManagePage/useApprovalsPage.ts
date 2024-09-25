@@ -29,10 +29,7 @@ import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { usePreference } from '@/renderer/hooks/rabbyx/usePreference';
 import useDebounceValue from '@/renderer/hooks/useDebounceValue';
 import { NFTApprovalContract } from '@rabby-wallet/rabby-api/dist/types';
-import {
-  walletOpenapi,
-  walletTestnetOpenapi,
-} from '@/renderer/ipcRequest/rabbyx';
+import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import eventBus from '@/renderer/utils-shell/eventBus';
 import { detectClientOS } from '@/isomorphic/os';
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
@@ -234,9 +231,7 @@ export function useApprovalsPage(options?: { isTestnet?: boolean }) {
         return;
       }
 
-      const openapiClient = options?.isTestnet
-        ? walletTestnetOpenapi
-        : walletOpenapi;
+      const openapiClient = walletOpenapi;
 
       const nextApprovalsData = {
         contractMap: {},

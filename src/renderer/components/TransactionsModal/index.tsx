@@ -52,7 +52,7 @@ const Transactions = ({
               alt=""
             />
           </div>
-          <HistoryList testnet={false} key={selectedTab} />
+          <HistoryList key={selectedTab} />
         </>
       ) : (
         <div className="h-[647px] flex flex-col items-center justify-center">
@@ -66,13 +66,7 @@ const Transactions = ({
   );
 };
 
-const NoScamTransactions = ({
-  testnet = false,
-  onBack,
-}: {
-  testnet?: boolean;
-  onBack?(): void;
-}) => {
+const NoScamTransactions = ({ onBack }: { onBack?(): void }) => {
   return (
     <>
       <div className={clsx(styles.transactionModalTitle, 'relative')}>
@@ -84,7 +78,7 @@ const NoScamTransactions = ({
         />
         Hide scam transactions
       </div>
-      <HistoryList testnet={testnet} isFilterScam />
+      <HistoryList isFilterScam />
     </>
   );
 };
