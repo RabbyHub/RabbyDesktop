@@ -1,7 +1,4 @@
-import {
-  walletOpenapi,
-  walletTestnetOpenapi,
-} from '@/renderer/ipcRequest/rabbyx';
+import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 
 export type IExtractFromPromise<T> = T extends Promise<infer U> ? U : T;
 
@@ -17,7 +14,6 @@ type AllMethodNamesOnOpenAPI = {
 
 type ResultType<T> = {
   mainnet: T;
-  testnet: T | null;
 };
 type IHandleResults<T, R> = (ctx: ResultType<T>) => R extends T ? T : R;
 const defaultProcessResults = <T>(ctx: ResultType<T>) => {
@@ -50,35 +46,24 @@ export async function requestOpenApiMultipleNets<
   }
 ): Promise<R extends T ? T : R> {
   const {
-    needTestnetResult = false,
     processResults = defaultProcessResults as IHandleResults<T, R>,
     fallbackValues,
   } = options || {};
 
   const mainnetOpenapi = walletOpenapi;
-  const testnetOpenapi = walletTestnetOpenapi;
 
   // if (!needTestnetResult) {
   //   return request({ wallet, openapi: mainnetOpenapi });
   // }
 
   const mainnetP = request({ openapi: mainnetOpenapi });
-  const testnetP = !needTestnetResult
-    ? null
-    : request({
-        openapi: testnetOpenapi,
-        isTestnetTask: true,
-      });
 
-  return Promise.allSettled([mainnetP, testnetP]).then(([mainnet, testnet]) => {
+  return Promise.allSettled([mainnetP]).then(([mainnet]) => {
     const mainResult =
       mainnet.status === 'fulfilled' ? mainnet.value : fallbackValues.mainnet;
-    const testResult =
-      testnet.status === 'fulfilled' ? testnet.value : fallbackValues.testnet;
 
     return processResults({
       mainnet: mainResult,
-      testnet: testResult,
     });
   });
 }
@@ -98,14 +83,7 @@ export async function requestOpenApiWithChainId<
     isTestnet?: boolean;
   }
 ) {
-  const { isTestnet = false } = options || {};
-
   const mainnetOpenapi = walletOpenapi;
-  const testnetOpenapi = walletTestnetOpenapi;
 
-  if (!isTestnet) {
-    return request({ openapi: mainnetOpenapi });
-  }
-
-  return request({ openapi: testnetOpenapi });
+  return request({ openapi: mainnetOpenapi });
 }

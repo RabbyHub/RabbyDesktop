@@ -6,10 +6,7 @@ import { atomWithStorage, useAtomCallback } from 'jotai/utils';
 import { validateProxyConfig } from '@/renderer/ipcRequest/app';
 import { formatProxyServerURL } from '@/isomorphic/url';
 import { ensurePrefix } from '@/isomorphic/string';
-import {
-  walletOpenapi,
-  walletTestnetOpenapi,
-} from '@/renderer/ipcRequest/rabbyx';
+import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 
 const defaulAppProxyConf: IAppProxyConf = {
   proxyType: 'none',
@@ -195,10 +192,7 @@ const backendServiceApisAtom = atomWithStorage(
   DefaultBackendServiceValues
 );
 function setHosts(newValues: typeof DefaultBackendServiceValues) {
-  return Promise.all([
-    walletOpenapi.setHost(newValues.mainnet),
-    walletTestnetOpenapi.setHost(newValues.testnet),
-  ]);
+  return Promise.all([walletOpenapi.setHost(newValues.mainnet)]);
 }
 export function useBackendServiceAPI(options?: { isTop?: boolean }) {
   const [curValues, _setBackendServiceApis] = useAtom(backendServiceApisAtom);

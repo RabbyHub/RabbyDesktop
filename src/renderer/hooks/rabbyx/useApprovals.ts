@@ -1,7 +1,4 @@
-import {
-  walletOpenapi,
-  walletTestnetOpenapi,
-} from '@/renderer/ipcRequest/rabbyx';
+import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { atom, useAtom } from 'jotai';
 import { useAsync } from 'react-use';
 import { ApprovalStatus } from '@rabby-wallet/rabby-api/dist/types';
@@ -40,18 +37,11 @@ export function useApprovalRiskAlertCount() {
       const mainnetState = await walletOpenapi.approvalStatus(
         currentAccount.address
       );
-      let testnetState: typeof mainnetState | null;
-      if (isShowTestnet) {
-        testnetState = await walletTestnetOpenapi.approvalStatus(
-          currentAccount.address
-        );
-      }
 
       setApprovalRiskAlert((prev) => {
         return {
           ...prev,
           mainnet: accumulateApprovalRiskAlertCount(mainnetState || []),
-          testnet: accumulateApprovalRiskAlertCount(testnetState || []),
         };
       });
     } catch (err) {

@@ -4,11 +4,7 @@ import type {
   TransactionHistoryItem,
 } from '@/isomorphic/types/rabbyx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-import {
-  walletController,
-  walletOpenapi,
-  walletTestnetOpenapi,
-} from '@/renderer/ipcRequest/rabbyx';
+import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import {
   TokenItem,
   TransferingNFTItem,
