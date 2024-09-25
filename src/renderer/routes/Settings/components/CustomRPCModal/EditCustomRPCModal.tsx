@@ -4,10 +4,10 @@ import ChainIcon from '@/renderer/components/ChainIcon';
 import { Modal } from '@/renderer/components/Modal/Modal';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { isValidateUrl } from '@/renderer/utils/url';
-import { useRequest } from 'ahooks';
-import { Button, Form, Input, InputRef } from 'antd';
+import { useMemoizedFn, useRequest } from 'ahooks';
+import { Button, Form } from 'antd';
 import clsx from 'clsx';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { findChain } from '@/renderer/utils/chain';
 import styles from './index.module.less';
 
@@ -26,27 +26,30 @@ export const EditCustomRPCModal = ({
   onClose,
   onSubmit,
 }: EditCustomRPCModalProps) => {
+  const [isValid, setIsValid] = useState(true);
   const chainInfo = useMemo(() => {
     return chain ? findChain({ enum: chain }) : null;
   }, [chain]);
+  const [form] = Form.useForm<{ url: string }>();
 
   const {
     runAsync: validateRPC,
     loading: isValidating,
     cancel: cancelValidate,
-    error: validateError,
   } = useRequest(
     async (url: string) => {
       if (!isValidateUrl(url)) {
+        setIsValid(false);
         throw new Error('Invalid RPC URL');
       }
-      let valid = false;
       try {
-        valid = await walletController.validateRPC(url, chainInfo?.id);
+        const valid = await walletController.validateRPC(url, chainInfo?.id);
+        setIsValid(valid);
       } catch (e) {
+        setIsValid(false);
         throw new Error('RPC authentication failed');
       }
-      if (!valid) {
+      if (!isValid) {
         throw new Error('Invalid Chain ID');
       }
     },
@@ -55,7 +58,16 @@ export const EditCustomRPCModal = ({
     }
   );
 
-  const [form] = Form.useForm<{ url: string }>();
+  const onConfirm = useMemoizedFn(async () => {
+    try {
+      const { url } = await form.validateFields();
+      if (isValid && chain && url) {
+        onSubmit?.(chain, url);
+      }
+    } catch (errorInfo) {
+      setIsValid(false);
+    }
+  });
 
   useEffect(() => {
     if (!open) {
@@ -116,18 +128,8 @@ export const EditCustomRPCModal = ({
           <Button
             type="primary"
             className={styles.modalBtn}
-            onClick={async () => {
-              try {
-                const { url } = await form.validateFields();
-                if (chain) {
-                  onSubmit?.(chain, url);
-                }
-              } catch (errorInfo) {
-                console.log('=====Form check failed:', errorInfo);
-              }
-            }}
+            onClick={onConfirm}
             loading={isValidating}
-            disabled={!!validateError}
           >
             {isValidating ? 'Loading' : 'Save'}
           </Button>
