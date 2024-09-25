@@ -55,7 +55,7 @@ function SwapAggregatorFee({
   const logo = DEX?.[dexName as keyof typeof DEX]?.logo;
   if (dexName && feeDexDesc && logo) {
     return (
-      <div className="flex justify-center items-center mt-16 gap-[3px] text-12 text-r-neutral-foot">
+      <div className="flex justify-center mt-16 gap-[3px] text-12 text-r-neutral-foot">
         <img src={logo} className="w-[14px] h-[14px] rounded-full" />
         <span>{feeDexDesc}</span>
       </div>
