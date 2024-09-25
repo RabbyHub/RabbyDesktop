@@ -111,6 +111,7 @@ export const CustomNetworkModal = ({ open, onClose }: ModalProps) => {
         centered
         width={400}
         footer={null}
+        zIndex={1000}
       >
         <div className={styles.content}>
           <header className={styles.modalHeader}>

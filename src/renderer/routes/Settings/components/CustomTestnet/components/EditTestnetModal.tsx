@@ -83,10 +83,10 @@ export const EditCustomTestnetModal = ({
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (data && visible) {
+    if (data) {
       form.setFieldsValue(data);
     }
-  }, [data, visible, form]);
+  }, [data, form]);
 
   useEffect(() => {
     if (!visible) {
@@ -95,85 +95,88 @@ export const EditCustomTestnetModal = ({
   }, [visible, form]);
 
   return (
-    <Modal
-      className={styles.modal}
-      open={visible}
-      onCancel={onCancel}
-      centered
-      width={400}
-      footer={null}
-    >
-      <div className={styles.content}>
-        <header className={styles.modalHeader}>
-          <div className={styles.modalTitle}>
-            {t('page.customRpc.EditCustomTestnetModal.title')}
-          </div>
-        </header>
-        <div className="h-[calc(100%-40px)] overflow-auto px-[20px]">
-          {isEdit ? null : (
-            <div
-              className={clsx(
-                'flex items-center gap-[8px]',
-                'bg-r-blue-light p-[15px] cursor-pointer rounded-[6px]',
-                'mb-[20px] border-[1px] border-transparent border-solid',
-                'hover:border-rabby-blue-default hover:bg-r-blue-light'
-              )}
-              onClick={() => {
-                setIsShowAddFromChainList(true);
-                const source = ctx?.ga?.source || 'setting';
-                matomoRequestEvent({
-                  category: 'Custom Network',
-                  action: 'Click Add From ChanList',
-                  label: source,
-                });
-              }}
-            >
-              <img src="rabby-internal://assets/icons/custom-testnet/icon-flash.svg" />
-              <div className="text-r-neutral-title1 text-[15px] leading-[18px] font-medium">
-                {t('page.customRpc.EditCustomTestnetModal.quickAdd')}
-              </div>
-              <img
-                className="ml-auto"
-                src="rabby-internal://assets/icons/custom-testnet/icon-right.svg"
-              />
+    <>
+      <Modal
+        className={styles.modal}
+        open={visible}
+        onCancel={onCancel}
+        centered
+        width={400}
+        footer={null}
+        zIndex={1001}
+      >
+        <div className={styles.content}>
+          <header className={styles.modalHeader}>
+            <div className={styles.modalTitle}>
+              {t('page.customRpc.EditCustomTestnetModal.title')}
             </div>
-          )}
+          </header>
+          <div className="h-[calc(100%-40px)] overflow-auto px-[20px]">
+            {isEdit ? null : (
+              <div
+                className={clsx(
+                  'flex items-center gap-[8px]',
+                  'bg-r-blue-light p-[15px] cursor-pointer rounded-[6px]',
+                  'mb-[20px] border-[1px] border-transparent border-solid',
+                  'hover:border-rabby-blue-default hover:bg-r-blue-light'
+                )}
+                onClick={() => {
+                  setIsShowAddFromChainList(true);
+                  const source = ctx?.ga?.source || 'setting';
+                  matomoRequestEvent({
+                    category: 'Custom Network',
+                    action: 'Click Add From ChanList',
+                    label: source,
+                  });
+                }}
+              >
+                <img src="rabby-internal://assets/icons/custom-testnet/icon-flash.svg" />
+                <div className="text-r-neutral-title1 text-[15px] leading-[18px] font-medium">
+                  {t('page.customRpc.EditCustomTestnetModal.quickAdd')}
+                </div>
+                <img
+                  className="ml-auto"
+                  src="rabby-internal://assets/icons/custom-testnet/icon-right.svg"
+                />
+              </div>
+            )}
 
-          <CustomTestnetForm
-            form={form}
-            isEdit={isEdit}
-            onFieldsChange={() => {
-              const values = form.getFieldsValue();
-              onChange?.(values);
-            }}
-          />
+            <CustomTestnetForm
+              form={form}
+              isEdit={isEdit}
+              onFieldsChange={() => {
+                const values = form.getFieldsValue();
+                onChange?.(values);
+              }}
+            />
+          </div>
+          <footer className={styles.modalFooter}>
+            <Button
+              type="primary"
+              size="large"
+              className="rabby-btn-ghost w-[172px] rounded-[6px]"
+              ghost
+              onClick={onCancel}
+            >
+              {t('global.Cancel')}
+            </Button>
+            <Button
+              type="primary"
+              loading={loading}
+              size="large"
+              className="w-[172px] rounded-[6px]"
+              onClick={handleSubmit}
+            >
+              {loading ? t('global.Loading') : t('global.Confirm')}
+            </Button>
+          </footer>
         </div>
-        <footer className={styles.modalFooter}>
-          <Button
-            type="primary"
-            size="large"
-            className="rabby-btn-ghost w-[172px] rounded-[6px]"
-            ghost
-            onClick={onCancel}
-          >
-            {t('global.Cancel')}
-          </Button>
-          <Button
-            type="primary"
-            loading={loading}
-            size="large"
-            className="w-[172px] rounded-[6px]"
-            onClick={handleSubmit}
-          >
-            {loading ? t('global.Loading') : t('global.Confirm')}
-          </Button>
-        </footer>
-      </div>
-
+      </Modal>
       <AddFromChainList
         visible={isShowAddFromChainList}
         onClose={() => {
           setIsShowAddFromChainList(false);
+          // onCancel();
         }}
         onSelect={(item) => {
           form.setFieldsValue(item);
@@ -192,9 +195,13 @@ export const EditCustomTestnetModal = ({
         rpcUrl={formValues.rpcUrl}
         onClose={() => {
           setIsShowModifyRpcModal(false);
+          // onCancel();
         }}
-        onConfirm={onConfirm}
+        onConfirm={() => {
+          setIsShowModifyRpcModal(false);
+          onConfirm();
+        }}
       />
-    </Modal>
+    </>
   );
 };

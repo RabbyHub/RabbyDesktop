@@ -96,6 +96,7 @@ export const CustomRPCModal = ({ open, onClose }: CustomRPCModalProps) => {
         centered
         width={400}
         footer={null}
+        zIndex={1000}
       >
         <div className={styles.content}>
           <header className={styles.modalHeader}>

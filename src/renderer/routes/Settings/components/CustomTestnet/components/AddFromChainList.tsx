@@ -176,6 +176,7 @@ export const AddFromChainList = ({
       footer={null}
       // closable={false}
       centered
+      zIndex={1002}
     >
       <div className={styles.content}>
         <header className={styles.modalHeader}>
