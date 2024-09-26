@@ -1,25 +1,23 @@
 /// <reference path="../renderer/preload.d.ts" />
 
-import { createRoot } from 'react-dom/client';
 import '@/renderer/css/style.less';
+import { createRoot } from 'react-dom/client';
 
-import './popup-view.less';
 import '@/renderer/css/windicss';
-import '@/renderer/utils/rendererReport';
 import '@/renderer/ipcRequest/zPopupMessage';
+import '@/renderer/utils/rendererReport';
+import './popup-view.less';
 
 import { parseQueryString } from '@/isomorphic/url';
 import { ShellWalletProvider } from '@/renderer/components/ShellWallet';
 
-import ZPopupLayer from '@/renderer/routes-popup/ZPopupLayer';
 import SelectCameraWindow from '@/renderer/routes-popup/SelectCameraWindow';
-import { initSyncChain } from '@/renderer/utils/sync-chain';
+import ZPopupLayer from '@/renderer/routes-popup/ZPopupLayer';
 
 import '@/renderer/utils/i18n';
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
-initSyncChain();
 
 switch (parseQueryString().view) {
   case 'z-popup': {

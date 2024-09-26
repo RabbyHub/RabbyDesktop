@@ -549,12 +549,13 @@ const TransactionItem = ({
     };
   }, [item]);
 
-  const { isApprove, isSend, isReceive, isCancel } = useMemo(() => {
+  const { isApprove, isSend, isReceive, isCancel, isUnknown } = useMemo(() => {
     return {
       isApprove: item.type === 'approve',
       isSend: item.type === 'send',
       isReceive: item.type === 'receive',
       isCancel: item.type === 'cancel',
+      isUnknown: item.type === 'unknown',
     };
   }, [item]);
 
@@ -843,6 +844,12 @@ const TransactionItem = ({
       <>
         <div className="tx-explain-title">Receive</div>
         <div className="tx-explain-desc">{projectName}</div>
+      </>
+    );
+  } else if (isUnknown) {
+    interAddressExplain = (
+      <>
+        <div className="tx-explain-title">Unknown Transaction</div>
       </>
     );
   } else {

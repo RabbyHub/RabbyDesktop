@@ -9,20 +9,13 @@ import { Empty } from './Empty';
 import { Loading } from './Loading';
 import { TransactionItem } from './TransactionItem';
 
-export const HistoryList = ({
-  testnet = false,
-  isFilterScam,
-}: {
-  testnet?: boolean;
-  isFilterScam?: boolean;
-}) => {
+export const HistoryList = ({ isFilterScam }: { isFilterScam?: boolean }) => {
   const { currentAccount } = useCurrentAccount();
   const ref = useRef<HTMLDivElement>(null);
 
   const { data, loading, loadingMore, mutate } = useTxHistory(
     currentAccount?.address as unknown as string,
     ref,
-    testnet,
     isFilterScam
   );
 

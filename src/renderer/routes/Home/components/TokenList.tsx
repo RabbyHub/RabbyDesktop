@@ -1,11 +1,18 @@
-import styled from 'styled-components';
-import classNames from 'classnames';
-import { Skeleton } from 'antd';
-import { ServerChain, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
+import { getChainList } from '@/renderer/utils/chain';
 import { formatNumber, formatUsdValue } from '@/renderer/utils/number';
-import TokenItemComp, { LoadingTokenItem } from './TokenItem';
+import { ServerChain, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
+import { Skeleton } from 'antd';
+import classNames from 'classnames';
+import { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { useChainList } from '@/renderer/hooks/rabbyx/useChainList';
+import { AddCustomTestnetFirstModal } from './AddCustomTestnetFirstModal';
+import { AddCustomTokenModal } from './AddCustomTokenModal';
 import { BlockedButton } from './TokenButton/BlockedButton';
 import { CustomizedButton } from './TokenButton/CustomizedButton';
+import { CustomTestnetButton } from './TokenButton/CustomTestnentButton';
+import TokenItemComp, { LoadingTokenItem } from './TokenItem';
+import { CustomNetworkModal } from '../../Settings/components/CustomTestnet';
 
 const ExpandItem = styled.div`
   display: flex;
@@ -80,6 +87,22 @@ const TokenList = ({
     // tokenHidden.setIsExpand(!tokenHidden.isExpand);
     onOpenLowAssets();
   };
+
+  const [isShowAddCustomToken, setIsShowAddCustomToken] = useState(false);
+  const [isTestnet, setIsTestnet] = useState(false);
+  const [isShowAddCustomTestnetFirst, setIsShowAddCustomTestnetFirst] =
+    useState(false);
+
+  const [isShowCustomNetworkModal, setIsShowCustomNetworkModal] =
+    useState(false);
+
+  const { testnetList } = useChainList();
+
+  useEffect(() => {
+    if (testnetList?.length) {
+      setIsShowAddCustomTestnetFirst(false);
+    }
+  }, [testnetList?.length]);
 
   return (
     <ul className="assets-list">
@@ -160,8 +183,10 @@ const TokenList = ({
                 src="rabby-internal://assets/icons/home/hide-assets.svg"
               />
               {tokenHidden.isExpand
-                ? 'Hide small value assets'
-                : `${tokenHidden.hiddenCount} low value assets`}
+                ? 'Hide small value tokens'
+                : tokenHidden.hiddenCount > 1
+                ? `${tokenHidden.hiddenCount} low value tokens`
+                : `${tokenHidden.hiddenCount} low value token`}
               <img
                 src="rabby-internal://assets/icons/home/expand-arrow.svg"
                 className={classNames('icon-expand-arrow')}
@@ -194,8 +219,40 @@ const TokenList = ({
         </>
       )}
       <div className="flex gap-12 mt-[24px] ml-[14px]">
-        <CustomizedButton onClickLink={onFocusInput} />
+        <CustomizedButton
+          onAddClick={() => {
+            setIsTestnet(false);
+            setIsShowAddCustomToken(true);
+          }}
+        />
         <BlockedButton onClickLink={onFocusInput} />
+        <CustomTestnetButton
+          onAddClick={() => {
+            setIsTestnet(true);
+            if (getChainList('testnet').length) {
+              setIsShowAddCustomToken(true);
+            } else {
+              setIsShowAddCustomTestnetFirst(true);
+            }
+          }}
+        />
+        <AddCustomTokenModal
+          isTestnet={isTestnet}
+          visible={isShowAddCustomToken}
+          onClose={() => setIsShowAddCustomToken(false)}
+          onConfirm={() => setIsShowAddCustomToken(false)}
+        />
+        <AddCustomTestnetFirstModal
+          visible={isShowAddCustomTestnetFirst}
+          onClose={() => setIsShowAddCustomTestnetFirst(false)}
+          onConfirm={() => setIsShowCustomNetworkModal(true)}
+        />
+        <CustomNetworkModal
+          open={isShowCustomNetworkModal}
+          onClose={() => {
+            setIsShowCustomNetworkModal(false);
+          }}
+        />
       </div>
     </ul>
   );

@@ -1,4 +1,4 @@
-@import "@/renderer/css/mixins.less";
+@import '@/renderer/css/mixins.less';
 
 @radius-value: 6px;
 
@@ -18,13 +18,14 @@
 // value of `@sticky-footer-height` is 124px
 @sticky-footer-height: 24px + @sticky-btn-height + @sticky-btn-bottom-offset;
 // value of `@sticky-footer-height` is 148px
-@sticky-footer-with-selection-height: @sticky-footer-textarea + @sticky-btn-height + @sticky-btn-bottom-offset;
+@sticky-footer-with-selection-height: @sticky-footer-textarea +
+  @sticky-btn-height + @sticky-btn-bottom-offset;
 
 @table-scoller-reserve-w: 4px;
 @table-last-cell-pr: @table-scoller-reserve-w;
 @table-last-col-inner-pr: 24px;
 
-@table-ink-color: rgba(0, 0, 0, 0.10);
+@table-ink-color: rgba(0, 0, 0, 0.1);
 
 .approvals-manager-page {
   --approvals-manager-top-offset: 24px;
@@ -84,7 +85,7 @@
     .tabs {
       margin-bottom: var(--approvals-manager-netswitches-mb, 0);
 
-      > .pills-switch {
+      > .pills-switch:not('.net-switch') {
         height: var(--approvals-manager-netswitches-h, 0);
       }
     }
@@ -101,18 +102,19 @@
   justify-content: space-between;
 
   .pills-switch__item.is-active {
-    background-color: rgba(0, 0, 0, 0.20);
+    background-color: rgba(0, 0, 0, 0.2);
   }
 
   > .search-input-wrapper {
     height: @tools-h;
-    background-color: rgba(0, 0, 0, 0.10);
+    background-color: rgba(0, 0, 0, 0.1);
     border-radius: @radius-value;
     overflow: hidden;
     border: 1px solid transparent;
     transition: ease-in 0.2s border-color;
 
-    &.is-focusing, &:hover {
+    &.is-focusing,
+    &:hover {
       border-color: var(--color-primary);
     }
   }
@@ -148,11 +150,11 @@
 
   .ant-spin-container.ant-spin-blur {
     opacity: 0.1;
-    background-color: rgba(0, 0, 0, 0.10);
+    background-color: rgba(0, 0, 0, 0.1);
   }
 
   .am-virtual-table-empty {
-    background-color: rgba(0, 0, 0, 0.10);
+    background-color: rgba(0, 0, 0, 0.1);
     color: white;
   }
 }
@@ -170,7 +172,8 @@
     background-color: @table-ink-color;
   }
 
-  .ant-table-header, .ant-table-header > table {
+  .ant-table-header,
+  .ant-table-header > table {
     height: @table-header-h;
   }
 
@@ -231,7 +234,8 @@
       margin-left: 2px;
     }
 
-    &.J_contracts_last_column, &.J_assets_last_column {
+    &.J_contracts_last_column,
+    &.J_assets_last_column {
       padding-right: @table-last-col-inner-pr;
     }
   }
@@ -265,7 +269,8 @@
     padding-right: 0;
     padding-top: @cell-padding-y;
 
-    &.J_contracts_last_column, &.J_assets_last_column {
+    &.J_contracts_last_column,
+    &.J_assets_last_column {
       > .am-virtual-table-cell-inner {
         padding-right: @table-last-col-inner-pr !important;
         text-align: right;
@@ -306,7 +311,7 @@
       .am-virtual-table-cell-inner {
         border-top: 1px solid var(--color-primary);
         border-bottom: 1px solid var(--color-primary);
-        background: rgba(134, 151, 255, 0.10);
+        background: rgba(134, 151, 255, 0.1);
       }
 
       &.is-first-cell > .am-virtual-table-cell-inner {
@@ -342,7 +347,10 @@
       padding-right: 4px;
     }
 
-    &.column-cell-J_key-approveSpender > .am-virtual-table-cell-inner .name-and-address .name {
+    &.column-cell-J_key-approveSpender
+      > .am-virtual-table-cell-inner
+      .name-and-address
+      .name {
       max-width: 50px;
     }
 
@@ -360,7 +368,8 @@
 
   &.J_table_by_assets .am-virtual-table-cell {
     //------------ special column customizations ------------
-    &.column-cell-J_key-approveSpender, &.column-cell-J_key-contract {
+    &.column-cell-J_key-approveSpender,
+    &.column-cell-J_key-contract {
       z-index: 1;
     }
 
@@ -383,12 +392,14 @@
     align-items: center;
   }
 
-  [data-theme="dark"]  .am-virtual-table-cell-inner {
+  [data-theme='dark'] .am-virtual-table-cell-inner {
     background: #141414;
   }
 
   .am-virtual-table-cell-inner .name-and-address {
-    &, .address, .name {
+    &,
+    .address,
+    .name {
       color: white;
       font-size: 13px;
     }
@@ -419,6 +430,8 @@
   margin: 0;
   margin-top: -@mt-offset;
   width: 100%;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
 
   display: flex;
   align-items: center;
@@ -455,7 +468,7 @@
   position: relative;
 
   &:before {
-    content: " ";
+    content: ' ';
     position: absolute;
     top: -16px;
     left: 68px;
@@ -479,7 +492,7 @@
 
   &::before {
     display: block;
-    content: " ";
+    content: ' ';
     top: 2px;
     left: 0;
     position: absolute;
@@ -506,7 +519,7 @@
 
 .J-risk-cell__tooltip,
 .J-table__tooltip,
-.J_permit2-tooltip{
+.J_permit2-tooltip {
   color: #fff;
   font-size: 12px;
   font-weight: 400;
@@ -596,7 +609,7 @@
   .approval-list {
     .chrome-like-scrollbar(0);
 
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: @radius-value;
   }
 
@@ -622,13 +635,14 @@
   }
 
   .modal-btn-wrapper {
-    border-top: 1px solid rgba(255, 255, 255, 0.10);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     background-color: var(--theme-modal-content-bg);
     border-bottom-left-radius: @modal-radius;
     border-bottom-right-radius: @modal-radius;
   }
 
-  .display-noncontract-item, .display-contract-item {
+  .display-noncontract-item,
+  .display-contract-item {
     border-radius: 6px;
     border: 1px solid transparent;
     transition: ease-in 0.2s border-color;
@@ -639,26 +653,27 @@
       background-color: rgba(var(--color-primary-rgb), 0.1);
       z-index: 10;
 
-      &::before, &::after {
+      &::before,
+      &::after {
         display: none;
       }
     }
 
     &:not(:last-child)::after {
-      content: " ";
+      content: ' ';
       display: block;
       width: calc(100% - 32px);
       position: absolute;
       left: 16px;
       bottom: 0;
       height: 1px;
-      background-color: rgba(255, 255, 255, 0.10);
+      background-color: rgba(255, 255, 255, 0.1);
     }
   }
 
   .contract-approval-item {
     border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 
     > .token-approval-item {
       display: flex;
@@ -687,7 +702,7 @@
         }
 
         .contract-name {
-          color: rgba(255, 255, 255, 0.60);
+          color: rgba(255, 255, 255, 0.6);
           max-width: 9em;
           font-size: 13px;
           font-weight: 400;

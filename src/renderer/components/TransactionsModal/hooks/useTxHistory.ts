@@ -1,7 +1,4 @@
-import {
-  walletOpenapi,
-  walletTestnetOpenapi,
-} from '@/renderer/ipcRequest/rabbyx';
+import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { useInfiniteScroll } from 'ahooks';
 import { last } from 'lodash';
 
@@ -10,19 +7,15 @@ const PAGE_COUNT = 20;
 const fetchData = async ({
   id,
   start_time = 0,
-  testnet = false,
   isFilterScam = false,
 }: Parameters<typeof walletOpenapi.listTxHisotry>[0] & {
   id: string;
-  testnet: boolean;
   isFilterScam?: boolean;
 }) => {
   const getAllTxHistory = async (
     params: Parameters<typeof walletOpenapi.getAllTxHistory>[0]
   ) => {
-    const _getHistory = testnet
-      ? walletTestnetOpenapi.getAllTxHistory
-      : walletOpenapi.getAllTxHistory;
+    const _getHistory = walletOpenapi.getAllTxHistory;
 
     const res = await _getHistory(params);
     if (res.history_list) {
@@ -32,9 +25,7 @@ const fetchData = async ({
     }
     return res;
   };
-  const getHistory = !testnet
-    ? walletOpenapi.listTxHisotry
-    : walletTestnetOpenapi.listTxHisotry;
+  const getHistory = walletOpenapi.listTxHisotry;
 
   const res = isFilterScam
     ? await getAllTxHistory({
@@ -66,12 +57,10 @@ const fetchData = async ({
 export const useTxHistory = (
   address: string,
   target: NonNullable<Parameters<typeof useInfiniteScroll>[1]>['target'],
-  testnet = false,
   isFilterScam = false
 ) => {
   return useInfiniteScroll(
-    (d) =>
-      fetchData({ id: address, start_time: d?.last, testnet, isFilterScam }),
+    (d) => fetchData({ id: address, start_time: d?.last, isFilterScam }),
     {
       target,
       isNoMore: (d) => {

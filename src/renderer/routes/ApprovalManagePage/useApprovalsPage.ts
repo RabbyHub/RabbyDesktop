@@ -36,13 +36,11 @@ import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { usePreference } from '@/renderer/hooks/rabbyx/usePreference';
 import useDebounceValue from '@/renderer/hooks/useDebounceValue';
 import { NFTApprovalContract } from '@rabby-wallet/rabby-api/dist/types';
-import {
-  walletOpenapi,
-  walletTestnetOpenapi,
-} from '@/renderer/ipcRequest/rabbyx';
+import { walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import eventBus from '@/renderer/utils-shell/eventBus';
 import { detectClientOS } from '@/isomorphic/os';
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
+import { useRequest } from 'ahooks';
 import { getTokenSymbol } from '@/renderer/utils';
 import IconUnknownNFT from './icons/unknown-nft.svg';
 
@@ -238,13 +236,17 @@ export function useApprovalsPage(options?: { isTestnet?: boolean }) {
     tokenMap: {},
     nftMap: {},
   });
-  const [{ loading: loadingMaybeWrong, error: loadError }, loadApprovals] =
-    useAsyncFn(async () => {
-      setIsLoadingOnAsyncFn(true);
+  const {
+    loading: loadingMaybeWrong,
+    error: loadError,
+    runAsync: loadApprovals,
+  } = useRequest(
+    async () => {
+      if (options?.isTestnet) {
+        return;
+      }
 
-      const openapiClient = options?.isTestnet
-        ? walletTestnetOpenapi
-        : walletOpenapi;
+      const openapiClient = walletOpenapi;
 
       const nextApprovalsData = {
         contractMap: {},
@@ -253,11 +255,7 @@ export function useApprovalsPage(options?: { isTestnet?: boolean }) {
       } as typeof approvalsData;
 
       if (!currentAccount?.address) {
-        return [
-          nextApprovalsData.contractMap,
-          nextApprovalsData.tokenMap,
-          nextApprovalsData.nftMap,
-        ];
+        return nextApprovalsData;
       }
       const userAddress = currentAccount.address;
       const usedChainList = await openapiClient.usedChainList(userAddress);
@@ -486,19 +484,26 @@ export function useApprovalsPage(options?: { isTestnet?: boolean }) {
         ...tokenAuthorizedQueryList,
       ]);
 
-      sortTokenOrNFTApprovalsSpenderList(nextApprovalsData.tokenMap);
-      sortTokenOrNFTApprovalsSpenderList(nextApprovalsData.nftMap);
-
-      setIsLoadingOnAsyncFn(false);
-
-      setApprovalsData(nextApprovalsData);
-
-      return [
-        nextApprovalsData.contractMap,
-        nextApprovalsData.tokenMap,
-        nextApprovalsData.nftMap,
-      ];
-    }, [currentAccount?.address, options?.isTestnet]);
+      return nextApprovalsData;
+    },
+    {
+      refreshDeps: [currentAccount?.address, options?.isTestnet],
+      // manual: true,
+      onSuccess(nextApprovalsData) {
+        if (nextApprovalsData) {
+          sortTokenOrNFTApprovalsSpenderList(nextApprovalsData.tokenMap);
+          sortTokenOrNFTApprovalsSpenderList(nextApprovalsData.nftMap);
+          setApprovalsData(nextApprovalsData);
+        }
+      },
+      onFinally() {
+        setIsLoadingOnAsyncFn(false);
+      },
+      onBefore() {
+        setIsLoadingOnAsyncFn(true);
+      },
+    }
+  );
 
   const isLoading = isLoadingOnAsyncFn && loadingMaybeWrong;
 

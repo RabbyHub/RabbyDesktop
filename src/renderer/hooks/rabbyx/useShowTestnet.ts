@@ -52,7 +52,7 @@ export function useShowTestnet() {
   }, [setState]);
 
   return {
-    isShowTestnet: false,
+    isShowTestnet: true,
     setIsShowTestnet,
     fetchIsShowTestnet,
   };

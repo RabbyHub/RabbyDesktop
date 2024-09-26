@@ -7,6 +7,7 @@ import { Contract, providers } from 'ethers';
 import { hexToString } from 'web3-utils';
 import styled from 'styled-components';
 import LabelWithIcon from '@/renderer/components/LabelWithIcon';
+import { CustomTestnetToken } from '@/isomorphic/types/rabbyx';
 import TokensIcons from '../routes/Home/components/TokenIcons';
 import { formatUsdValue } from './number';
 import { getCollectionDisplayName, PortfolioItemNft } from './nft';

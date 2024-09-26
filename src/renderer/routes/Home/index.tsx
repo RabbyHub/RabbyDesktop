@@ -397,16 +397,6 @@ const Home = () => {
                         />
                       </TipsWrapper>
                     </span>
-
-                    {isShowTestnet ? (
-                      <NetSwitchTabs
-                        showPending
-                        size="sm"
-                        value={selectedTab}
-                        onTabChange={onTabChange}
-                        className="ml-12"
-                      />
-                    ) : null}
                   </div>
                 )}
                 <div className="balance">
