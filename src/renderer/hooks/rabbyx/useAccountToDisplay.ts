@@ -51,7 +51,9 @@ export const useAccountToDisplay = () => {
               item?.address
             );
             if (!balance) {
-              balance = await walletController.getAddressBalance(item?.address);
+              balance = await walletController.getInMemoryAddressBalance(
+                item?.address
+              );
             }
             return {
               ...item,
@@ -119,7 +121,7 @@ export const useAccountToDisplay = () => {
 
   const updateBalance = React.useCallback(
     async (address: string) => {
-      const balance = await walletController.getAddressBalance(address);
+      const balance = await walletController.getInMemoryAddressBalance(address);
 
       setAccountsList((prev) => {
         return prev.map((item) => {
@@ -145,7 +147,7 @@ export const useAccountToDisplay = () => {
       (accountsList || []).map((item) => {
         return async () => {
           try {
-            const balance = await walletController.getAddressBalance(
+            const balance = await walletController.getInMemoryAddressBalance(
               item.address
             );
             return {

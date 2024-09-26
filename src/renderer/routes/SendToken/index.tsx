@@ -1194,7 +1194,7 @@ const SendTokenInner = () => {
         handleFormValuesChange(null, { ...values });
         forwardMessageTo('*', 'refreshAccountList', {});
         // trigger get balance of address
-        // await wallet.getAddressBalance(result.contactAddrAdded, true);
+        // await wallet.getInMemoryAddressBalance(result.contactAddrAdded, true);
       },
     });
   };
@@ -1288,7 +1288,7 @@ const SendTokenInner = () => {
             'mb-40': !showWhitelistAlert,
           })}
         >
-          <div className="section-title mb-8">Chain</div>
+          <div className="mb-8 section-title">Chain</div>
           <ChainSelect
             className="mb-24"
             value={chain}
@@ -1300,7 +1300,7 @@ const SendTokenInner = () => {
           <AccountCard alianName={sendAlianName} />
           <div className="section-title">
             <span className="section-title__to">To</span>
-            <div className="flex flex-1 justify-end items-center">
+            <div className="flex items-center justify-end flex-1">
               {showContactInfo && !!contactInfo && (
                 <div
                   className={clsx('contact-info', {
@@ -1382,8 +1382,8 @@ const SendTokenInner = () => {
             )}
           </div>
 
-          <div className="section-title mt-40 flex justify-between items-center">
-            <div className="token-balance whitespace-pre-wrap">
+          <div className="flex items-center justify-between mt-40 section-title">
+            <div className="whitespace-pre-wrap token-balance">
               {isLoading ? (
                 <Skeleton.Input active style={{ width: 100 }} />
               ) : (
@@ -1470,7 +1470,7 @@ const SendTokenInner = () => {
               )}
               onClick={handleClickWhitelistAlert}
             >
-              <p className="whitelist-alert__content text-center">
+              <p className="text-center whitelist-alert__content">
                 {whitelistEnabled && (
                   <img
                     src={
@@ -1480,14 +1480,14 @@ const SendTokenInner = () => {
                         ? 'rabby-internal://assets/icons/send-token/temporary-grant-checkbox.svg'
                         : 'rabby-internal://assets/icons/send-token/icon-uncheck.svg'
                     }
-                    className="icon icon-check inline-block relative -top-1"
+                    className="relative inline-block icon icon-check -top-1"
                   />
                 )}
                 {whitelistAlertContent.content}
               </p>
             </div>
           )}
-          <div className="footer flex justify-center">
+          <div className="flex justify-center footer">
             <Button
               disabled={!canSubmit || isSubmitLoading}
               type="primary"
