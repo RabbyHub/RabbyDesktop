@@ -347,6 +347,13 @@
       padding-right: 4px;
     }
 
+    &.column-cell-J_key-approveSpender
+      > .am-virtual-table-cell-inner
+      .name-and-address
+      .name {
+      max-width: 50px;
+    }
+
     &.column-cell-J_key-contractTrustValue > .am-virtual-table-cell-inner {
       padding-right: 12px;
 
@@ -511,7 +518,8 @@
 }
 
 .J-risk-cell__tooltip,
-.J-table__tooltip {
+.J-table__tooltip,
+.J_permit2-tooltip {
   color: #fff;
   font-size: 12px;
   font-weight: 400;
@@ -519,6 +527,7 @@
   .ant-tooltip-inner {
     line-height: 18px;
     border-radius: 2px;
+    background-color: var(--r-neutral-black);
     padding: 8px;
 
     p {
@@ -536,6 +545,17 @@
 
   &.tip-column-contract-trust-value .ant-tooltip-inner {
     width: 350px;
+  }
+}
+
+.J_permit2-tooltip .ant-tooltip-content {
+  width: 370px;
+}
+
+.J-modal-item__tooltip.min-width-limit {
+  .ant-tooltip-inner {
+    word-wrap: normal;
+    min-width: 300px;
   }
 }
 
@@ -702,5 +722,43 @@
         color: white;
       }
     }
+  }
+}
+
+.am-revoke-info-modal {
+  .ant-modal-content {
+    width: 400px;
+    height: 232px;
+  }
+
+  .ant-modal-body {
+    height: 100%;
+    padding-top: 40px;
+    padding-bottom: 32px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .ant-modal-confirm-title {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .ant-modal-confirm-content {
+    margin-top: 0;
+    padding: 16px 20px 40px;
+  }
+
+  .ant-modal-confirm-btns {
+    padding: 0 40px;
+    margin-top: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .ant-modal-close-x {
+    width: 44px;
+    height: 44px;
   }
 }

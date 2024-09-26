@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Button, Modal } from 'antd';
 import styled from 'styled-components';
 
@@ -14,16 +14,17 @@ import BigNumber from 'bignumber.js';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import {
   ApprovalItem,
-  ApprovalSpenderItemToBeRevoked,
   ContractApprovalItem,
-  SpenderInNFTApproval,
+  getSpenderApprovalAmount,
 } from '@/renderer/utils/approval';
 import { ensureSuffix } from '@/isomorphic/string';
+import { ApprovalSpenderItemToBeRevoked } from '@/isomorphic/approve';
 import { findChainByServerID } from '@/renderer/utils/chain';
 import { Chain } from '@debank/common';
 import IconClose from '@/../assets/icons/swap/modal-close.svg?rc';
 import { splitNumberByStep } from '@/renderer/utils/number';
 import IconExternal from '@/../assets/icons/common/share.svg';
+import { getTokenSymbol } from '@/renderer/utils';
 import IconNotChecked from '../icons/check-unchecked.svg';
 import IconChecked from '../icons/check-checked.svg';
 import ApprovalsNameAndAddr from './NameAndAddr';
@@ -34,62 +35,18 @@ import {
   toRevokeItem,
 } from '../utils';
 
-// import IconExternal from '../icons/icon-share.svg';
-import IconBadgeCollection from '../icons/modal-badge-collection.svg';
-import IconBadgeNFT from '../icons/modal-badge-nft.svg';
 import IconUnknown from '../icons/icon-unknown-1.svg';
 import IconUnknownNFT from '../icons/unknown-nft.svg';
 import { ApprovalContractItem } from './ApprovalContractItem';
+
+import { NFTItemBadge, Permit2Badge } from './Badges';
+import ApprovalAmountInfo from './ApprovalAmountInfo';
 
 const ModalStyled = styled(Modal)`
   .ant-modal-header {
     border-bottom: none;
   }
 `;
-
-function NFTItemBadge({
-  className,
-  contract,
-  contractListItem,
-}: {
-  className?: string;
-  contract: ContractApprovalItem;
-  contractListItem: ContractApprovalItem['list'][number];
-}) {
-  const { isNFTToken, isNFTCollection } = useMemo(() => {
-    const result = {
-      isNFTToken: false,
-      isNFTCollection: false,
-    };
-
-    if ('spender' in contractListItem) {
-      const maybeNFTSpender = contractListItem.spender as SpenderInNFTApproval;
-
-      result.isNFTCollection = !!maybeNFTSpender.$assetParent?.nftContract;
-      result.isNFTToken =
-        !result.isNFTCollection && !!maybeNFTSpender.$assetParent?.nftToken;
-    }
-
-    return result;
-  }, [contractListItem]);
-
-  if (isNFTCollection) {
-    return (
-      <div className={className}>
-        <img className="w-[54px] h-[13px] block" src={IconBadgeCollection} />
-      </div>
-    );
-  }
-  if (isNFTToken) {
-    return (
-      <div className={className}>
-        <img className="w-[26px] h-[13px] block" src={IconBadgeNFT} />
-      </div>
-    );
-  }
-
-  return null;
-}
 
 export const RevokeApprovalModal = (props: {
   item?: ApprovalItem;
@@ -103,21 +60,21 @@ export const RevokeApprovalModal = (props: {
 
   const [selectedList, setSelectedList] = useState<number[]>([]);
 
-  const handleRevoke = async () => {
+  const handleConfirm = async () => {
     if (item?.list) {
-      const list = selectedList
-        .map((e) => {
-          const token = item.list[e];
-          return toRevokeItem(item, token);
-        })
-        .filter(Boolean) as ApprovalSpenderItemToBeRevoked[];
-
-      onConfirm(list);
+      onConfirm(
+        selectedList
+          .map((idx) => {
+            const spenderHost = item.list[idx];
+            return toRevokeItem(item, spenderHost, true);
+          })
+          .filter(Boolean) as ApprovalSpenderItemToBeRevoked[]
+      );
       onClose();
     }
   };
-
-  const handleSelectAll = () => {
+  const isSelectedAll = selectedList.length === item?.list?.length;
+  const handleSelectAll = useCallback(() => {
     if (item?.list) {
       setSelectedList((e) =>
         e.length === item.list.length
@@ -127,8 +84,7 @@ export const RevokeApprovalModal = (props: {
               .map((_, i) => i)
       );
     }
-  };
-
+  }, [item]);
   const subTitle = useMemo(() => {
     if (item?.type === 'contract') {
       return 'Approved Token and NFT';
@@ -139,21 +95,37 @@ export const RevokeApprovalModal = (props: {
   const displayList = useMemo(() => {
     if (!item) return null;
     if (item?.type === 'contract') {
-      return item?.list.map((e, index) => {
-        const chainItem = findChainByServerID(e.chain);
+      return item?.list.map((spenderHost, index) => {
+        const chainItem = findChainByServerID(spenderHost.chain);
 
-        const maybeContractForNFT = maybeNFTLikeItem(e);
+        const maybeContractForNFT = maybeNFTLikeItem(spenderHost);
 
         const itemName = !maybeContractForNFT
-          ? e.symbol
-          : 'inner_id' in e
-          ? ensureSuffix(e.contract_name || 'Unknown', ` #${e.inner_id}`)
-          : e.contract_name || 'Unknown';
+          ? getTokenSymbol(spenderHost)
+          : 'inner_id' in spenderHost
+          ? ensureSuffix(
+              spenderHost.contract_name || 'Unknown',
+              ` #${spenderHost.inner_id}`
+            )
+          : spenderHost.contract_name || 'Unknown';
+
+        /**
+         * @description
+         * 1. In general, the items from [host].spenders/[host].spender have same properties about nft/nft-collection/amounts, so we just need to check the first of them
+         * 2. It must not be non-token type contract
+         */
+        const associatedSpender =
+          '$indexderSpender' in spenderHost
+            ? spenderHost.$indexderSpender
+            : null;
+        const spenderValues = associatedSpender
+          ? getSpenderApprovalAmount(associatedSpender)
+          : null;
 
         return (
           <div
             // eslint-disable-next-line react/no-array-index-key
-            key={`contract-${e.chain}-${index}`}
+            key={`contract-${spenderHost.chain}-${index}`}
             className={clsx(
               'display-contract-item relative px-[16px] h-[56px] flex justify-between items-center cursor-pointer',
               index === item.list.length - 1 && 'rounded-b-[6px]'
@@ -168,27 +140,27 @@ export const RevokeApprovalModal = (props: {
               }
             }}
           >
-            {'logo_url' in e ? (
+            {'logo_url' in spenderHost ? (
               <TokenWithChain
                 width="24px"
                 height="24px"
                 hideChainIcon
-                token={e as unknown as TokenItem}
+                token={spenderHost as unknown as TokenItem}
               />
             ) : (
               <NFTAvatar
                 className="w-[24px] h-[24px]"
-                type={(e as NFTApproval)?.content_type || 'image'}
+                type={(spenderHost as NFTApproval)?.content_type || 'image'}
                 content={
-                  (e as NFTApproval)?.content ||
-                  (e as any)?.collection?.logo_url
+                  (spenderHost as NFTApproval)?.content ||
+                  (spenderHost as any)?.collection?.logo_url
                 }
                 thumbnail
-                // chain={(e as NFTApproval)?.chain}
+                // chain={(spenderHost as NFTApproval)?.chain}
                 unknown={IconUnknownNFT}
               />
             )}
-            {'spender' in e ? (
+            {'spender' in spenderHost ? (
               <div className="flex flex-col ml-[8px]">
                 <div className="text-13 font-medium leading-[15px] inline-flex items-center justify-start">
                   {itemName}
@@ -199,7 +171,7 @@ export const RevokeApprovalModal = (props: {
                         evt.stopPropagation();
                         openScanLinkFromChainItem(
                           chainItem?.scanLink,
-                          e.spender.id
+                          spenderHost.spender.id
                         );
                       }}
                       src={IconExternal}
@@ -207,19 +179,37 @@ export const RevokeApprovalModal = (props: {
                     />
                   )}
                 </div>
-                <NFTItemBadge
-                  className="mt-2"
-                  contractListItem={e}
-                  contract={item as ContractApprovalItem}
-                />
+                <NFTItemBadge className="mt-2" contractListItem={spenderHost} />
               </div>
             ) : (
-              <div className="ml-[8px] text-13 font-medium leading-[15px]">
-                {e.symbol}
+              <div className="ml-[8px] text-13 font-medium leading-[15px] max-w-[180px] truncate">
+                {getTokenSymbol(spenderHost)}
               </div>
             )}
+            {associatedSpender?.permit2_id && (
+              <Permit2Badge
+                className="ml-[9px]"
+                contractSpender={associatedSpender}
+              />
+            )}
 
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center justify-between flex-shrink-0">
+              <ApprovalAmountInfo
+                className="mr-[8px]"
+                {...(spenderValues
+                  ? {
+                      amountValue: spenderValues.displayAmountText,
+                      balanceNumText: spenderValues.balanceNumText,
+                      balanceUnitText: spenderValues.balanceUnitText,
+                      minWidthLimit: spenderValues.isCollectionHasNFTs,
+                    }
+                  : {
+                      amountValue:
+                        'amount' in spenderHost ? spenderHost.amount : '',
+                      balanceNumText: '',
+                      balanceUnitText: '',
+                    })}
+              />
               <img
                 src={
                   selectedList.includes(index) ? IconChecked : IconNotChecked
@@ -334,7 +324,13 @@ export const RevokeApprovalModal = (props: {
       const indexes: number[] = [];
 
       item.list.forEach((token, index) => {
-        if (findIndexRevokeList(revokeList, item, token) > -1) {
+        if (
+          findIndexRevokeList(revokeList, {
+            item: item as any as ContractApprovalItem,
+            spenderHost: token,
+            itemIsContractApproval: true,
+          }) > -1
+        ) {
           indexes.push(index);
         }
       });
@@ -361,7 +357,7 @@ export const RevokeApprovalModal = (props: {
       title="Approvals"
       closeIcon={<IconClose />}
     >
-      <div className="mt-4">
+      <div className="mt-4 h-[100%] overflow-hidden">
         <div className="mb-18">
           <ApprovalContractItem data={[item]} index={0} showNFTAmount />
         </div>
@@ -369,16 +365,20 @@ export const RevokeApprovalModal = (props: {
         <section className="mb-[6px] flex justify-between items-center">
           <span className="text-12 text-[#fff]/80">{subTitle}</span>
           <div
-            className="w-[67px] h-[22px] text-12 cursor-pointer flex items-center justify-center bg-blue-light bg-opacity-[0.2] text-center text-blue-light rounded-[2px]"
+            className={clsx(
+              isSelectedAll ? 'w-[80px]' : 'w-[67px]',
+              'h-[22px] text-12 cursor-pointer flex items-center justify-center bg-blue-light bg-opacity-[0.2] text-center text-blue-light rounded-[2px]'
+            )}
             onClick={handleSelectAll}
           >
-            Select All
+            {/* Select All, Unselect All */}
+            {!isSelectedAll ? 'Select All' : 'Unselect All'}
           </div>
         </section>
 
         <section
           className={clsx(
-            'max-h-[424px] overflow-x-hidden rounded-[6px] approval-list'
+            'max-h-[calc(100%-158px)] overflow-x-hidden overflow-y-scroll rounded-[6px] approval-list'
           )}
           style={{
             // @ts-expect-error
@@ -391,18 +391,18 @@ export const RevokeApprovalModal = (props: {
       <div
         className={clsx(
           'absolute modal-btn-wrapper flex flex-col items-center justify-center left-0 bottom-0 w-full z-[99999]',
-          'h-[76px]'
+          'h-[76px] px-[24px]'
         )}
       >
         <Button
           style={{
-            width: 172,
+            minWidth: 172,
             height: 44,
           }}
           type="primary"
           size="large"
-          className="rounded-[6px]"
-          onClick={handleRevoke}
+          className="rounded-[6px] w-full"
+          onClick={handleConfirm}
         >
           Confirm {selectedList.length > 0 ? `(${selectedList.length})` : ''}
         </Button>

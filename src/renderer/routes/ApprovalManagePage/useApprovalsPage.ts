@@ -1,12 +1,11 @@
-import {
+import React, {
   useState,
   useRef,
   useMemo,
   useLayoutEffect,
   useEffect,
-  useCallback,
 } from 'react';
-import { useAsync, useAsyncFn } from 'react-use';
+import { useAsyncFn } from 'react-use';
 
 import { VariableSizeGrid } from 'react-window';
 // @ts-expect-error
@@ -14,12 +13,20 @@ import PQueue from 'p-queue';
 
 import { CHAINS_ENUM } from '@debank/common';
 import {
+  ApprovalSpenderItemToBeRevoked,
+  summarizeRevoke,
+} from '@/isomorphic/approve';
+
+import {
+  ApprovalItem,
   AssetApprovalItem,
+  AssetApprovalSpender,
   ContractApprovalItem,
   NftApprovalItem,
   TokenApprovalItem,
   getContractRiskEvaluation,
   makeComputedRiskAboutValues,
+  markContractTokenSpender,
   markParentForAssetItemSpender,
 } from '@/renderer/utils/approval';
 
@@ -34,7 +41,15 @@ import eventBus from '@/renderer/utils-shell/eventBus';
 import { detectClientOS } from '@/isomorphic/os';
 import { NativeAppSizes } from '@/isomorphic/const-size-next';
 import { useRequest } from 'ahooks';
+import { getTokenSymbol } from '@/renderer/utils';
 import IconUnknownNFT from './icons/unknown-nft.svg';
+
+import { HandleClickTableRow } from './components/Table';
+import {
+  encodeRevokeItemIndex,
+  findIndexRevokeList,
+  toRevokeItem,
+} from './utils';
 
 const isWin32 = detectClientOS() === 'win32';
 const CLIENT_WINDOW_TOP_OFFSET = isWin32
@@ -393,12 +408,14 @@ export function useApprovalsPage(options?: { isTestnet?: boolean }) {
         try {
           const data = await openapiClient.tokenAuthorizedList(
             userAddress,
-            e.id
+            e.id,
+            { restfulPrefix: 'v2' }
           );
           if (data.length) {
             data.forEach((token) => {
               token.spenders.forEach((spender) => {
-                const chainName = token.chain;
+                const shapedToken = markContractTokenSpender(token, spender);
+                const chainName = shapedToken.chain;
                 const contractId = spender.id;
                 if (
                   !nextApprovalsData.contractMap[`${chainName}:${contractId}`]
@@ -427,24 +444,24 @@ export function useApprovalsPage(options?: { isTestnet?: boolean }) {
                 }
                 nextApprovalsData.contractMap[
                   `${chainName}:${contractId}`
-                ].list.push(token);
+                ].list.push(shapedToken);
 
-                const tokenId = token.id;
+                const tokenId = shapedToken.id;
 
                 if (!nextApprovalsData.tokenMap[`${chainName}:${tokenId}`]) {
                   nextApprovalsData.tokenMap[`${chainName}:${tokenId}`] = {
                     list: [],
                     chain: e.id,
                     risk_level: 'safe',
-                    id: token.id,
-                    name: token.symbol,
+                    id: shapedToken.id,
+                    name: getTokenSymbol(shapedToken),
                     logo_url: token.logo_url || IconUnknownToken,
                     type: 'token',
                     $riskAboutValues: makeComputedRiskAboutValues(
                       'token',
                       spender
                     ),
-                    balance: token.balance,
+                    balance: shapedToken.balance,
                   };
                 }
                 nextApprovalsData.tokenMap[`${chainName}:${tokenId}`].list.push(
@@ -452,7 +469,7 @@ export function useApprovalsPage(options?: { isTestnet?: boolean }) {
                     spender,
                     nextApprovalsData.tokenMap[`${chainName}:${tokenId}`],
                     nextApprovalsData.contractMap[`${chainName}:${contractId}`],
-                    token
+                    shapedToken
                   )
                 );
               });
@@ -612,5 +629,108 @@ export function useApprovalsPage(options?: { isTestnet?: boolean }) {
     chain,
     displaySortedContractList,
     displaySortedAssetsList,
+  };
+}
+
+export type IHandleChangeSelectedSpenders<T extends ApprovalItem> = (ctx: {
+  approvalItem: T;
+  selectedRevokeItems: ApprovalSpenderItemToBeRevoked[];
+}) => any;
+export function useSelectSpendersToRevoke(
+  filterType: keyof typeof FILTER_TYPES
+) {
+  const [assetRevokeList, setAssetRevokeList] = React.useState<
+    ApprovalSpenderItemToBeRevoked[]
+  >([]);
+  const handleClickAssetRow: HandleClickTableRow<AssetApprovalSpender> =
+    React.useCallback(
+      (ctx) => {
+        const record = ctx.record;
+        const index = findIndexRevokeList(assetRevokeList, {
+          item: record.$assetContract!,
+          spenderHost: record.$assetToken!,
+          assetApprovalSpender: record,
+        });
+        if (index > -1) {
+          setAssetRevokeList((prev) => prev.filter((item, i) => i !== index));
+        } else {
+          const revokeItem = toRevokeItem(
+            record.$assetContract!,
+            record.$assetToken!,
+            record
+          );
+          if (revokeItem) {
+            setAssetRevokeList((prev) => [...prev, revokeItem]);
+          }
+        }
+      },
+      [assetRevokeList]
+    );
+
+  const [contractRevokeMap, setContractRevokeMap] = React.useState<
+    Record<string, ApprovalSpenderItemToBeRevoked[]>
+  >({});
+
+  const { currentAccount } = useCurrentAccount();
+
+  const contractRevokeList = useMemo(() => {
+    return Object.values(contractRevokeMap).flat();
+  }, [contractRevokeMap]);
+
+  const currentRevokeList = useMemo(() => {
+    return filterType === 'contract'
+      ? contractRevokeList
+      : filterType === 'assets'
+      ? assetRevokeList
+      : [];
+  }, [contractRevokeList, assetRevokeList, filterType]);
+
+  const clearRevoke = React.useCallback(() => {
+    setContractRevokeMap({});
+    setAssetRevokeList([]);
+  }, []);
+
+  const patchContractRevokeMap = React.useCallback(
+    (key: string, list: ApprovalSpenderItemToBeRevoked[]) => {
+      setContractRevokeMap((prev) => ({
+        ...prev,
+        [key]: list,
+      }));
+    },
+    [setContractRevokeMap]
+  );
+
+  const onChangeSelectedContractSpenders: IHandleChangeSelectedSpenders<ContractApprovalItem> =
+    React.useCallback((ctx) => {
+      const selectedItemKey = encodeRevokeItemIndex(ctx.approvalItem);
+
+      setContractRevokeMap((prev) => ({
+        ...prev,
+        [selectedItemKey]: ctx.selectedRevokeItems,
+      }));
+    }, []);
+
+  const revokeSummary = useMemo(() => {
+    const summary = summarizeRevoke(currentRevokeList);
+
+    return {
+      currentRevokeList,
+      ...summary,
+    };
+  }, [currentRevokeList]);
+
+  useEffect(() => {
+    clearRevoke();
+  }, [currentAccount?.address, clearRevoke]);
+
+  return {
+    handleClickAssetRow,
+    contractRevokeMap,
+    contractRevokeList,
+    assetRevokeList,
+    revokeSummary,
+    clearRevoke,
+    patchContractRevokeMap,
+    onChangeSelectedContractSpenders,
   };
 }

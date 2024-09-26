@@ -311,7 +311,7 @@ export type RabbyXMethod = {
   'walletController.getAddedToken': (address: string) => string[];
   'walletController.getAllVisibleAccounts': () => DisplayedKeyring[];
   'walletController.getAllAlianNameByMap': () => Record<string, any>;
-  'walletController.getAddressBalance': (
+  'walletController.getInMemoryAddressBalance': (
     address: string,
     force?: boolean,
     isTestnet?: boolean
@@ -655,7 +655,7 @@ export type RabbyXMethod = {
   'walletController.addCollectionStarred': (token: Token) => void;
   'walletController.removeCollectionStarred': (token: Token) => void;
   'walletController.revoke': (input: {
-    list: import('@/renderer/utils/approval').ApprovalSpenderItemToBeRevoked[];
+    list: import('@/isomorphic/approve').ApprovalSpenderItemToBeRevoked[];
   }) => void;
   'walletController.submitQRHardwareCryptoHDKey': (
     cbor: string,
