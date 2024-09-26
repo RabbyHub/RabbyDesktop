@@ -2,7 +2,6 @@ import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { CHAINS_ENUM } from '@debank/common';
 import { atom, useAtom, useAtomValue } from 'jotai';
 import { useCallback, useMemo } from 'react';
-import { useAsync } from 'react-use';
 
 import type { SwapState } from '@/isomorphic/types/rabbyx';
 import { findChain } from '@/renderer/utils/chain';
@@ -18,7 +17,9 @@ const supportedDEXListAtom = atom<string[]>(Object.keys(DEX));
 supportedDEXListAtom.onMount = (setAtom) => {
   walletOpenapi.getSupportedDEXList().then(async (s) => {
     const data = await s;
-    setAtom(data.dex_list);
+    setAtom(
+      data.dex_list?.filter((item) => DEX[item as keyof typeof DEX]) || []
+    );
   });
 };
 
