@@ -1,21 +1,20 @@
-import React from 'react';
 import { useTokenAtom } from '@/renderer/hooks/rabbyx/useToken';
+import React from 'react';
 import { TokenButton } from './TokenButton';
 
 interface Props {
-  onClickLink: () => void;
+  onAddClick: () => void;
 }
 
-export const CustomizedButton: React.FC<Props> = ({ onClickLink }) => {
+export const CustomizedButton: React.FC<Props> = ({ onAddClick }) => {
   const { customize } = useTokenAtom();
 
   return (
     <TokenButton
-      label="customized"
-      linkText="Search address to add custom token"
+      label={customize.length > 1 ? 'customized tokens' : 'customized token'}
       description="Custom token added by you will be shown here"
       tokens={customize}
-      onClickLink={onClickLink}
+      onAddClick={onAddClick}
     />
   );
 };

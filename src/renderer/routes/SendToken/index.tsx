@@ -14,7 +14,10 @@ import { useRefState } from '@/renderer/hooks/useRefState';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
-import { findChain } from '@/renderer/utils/chain';
+import {
+  customTestnetTokenToTokenItem,
+  findChain,
+} from '@/renderer/utils/chain';
 import { copyText } from '@/renderer/utils/clipboard';
 import {
   CAN_ESTIMATE_L1_FEE_CHAINS,
@@ -425,13 +428,18 @@ const SendTokenInner = () => {
 
   const fetchGasList = useCallback(
     async (chainEnum?: CHAINS_ENUM) => {
-      const serverId = findChain({
+      const chainInfo = findChain({
         enum: chainEnum || chain,
-      })?.serverId;
-      if (!serverId) {
+      });
+      if (!chainInfo?.serverId) {
         throw new Error('chain not found');
       }
-      return walletOpenapi.gasMarket(serverId);
+      if (chainInfo.isTestnet) {
+        return walletController.getCustomTestnetGasMarket({
+          chainId: chainInfo.id,
+        });
+      }
+      return walletOpenapi.gasMarket(chainInfo.serverId);
     },
     [chain]
   );
@@ -724,18 +732,15 @@ const SendTokenInner = () => {
 
   const loadCurrentToken = useCallback(
     async (id: string, chainId: string, address: string, check?: boolean) => {
-      // const chain = findChain({
-      //   serverId: chainId,
-      // });
-      const result: TokenItem | null = await walletOpenapi.getToken(
-        address,
-        chainId,
-        id
-      );
-      /* if (chain?.isTestnet) {
+      const _chain = findChain({
+        serverId: chainId,
+      });
+
+      let result: TokenItem | null = null;
+      if (_chain?.isTestnet) {
         const res = await walletController.getCustomTestnetToken({
           address,
-          chainId: chain.id,
+          chainId: _chain.id,
           tokenId: id,
         });
         if (res) {
@@ -743,7 +748,7 @@ const SendTokenInner = () => {
         }
       } else {
         result = await walletOpenapi.getToken(address, chainId, id);
-      } */
+      }
       if (result) {
         setCurrentToken(result);
       }
@@ -1016,8 +1021,10 @@ const SendTokenInner = () => {
 
   const handleChainChanged = useCallback(
     async (val: CHAINS_ENUM) => {
+      console.log('handleChainChange', val);
       setSendMaxInfo((prev) => ({ ...prev, clickedMax: false }));
       const newGasList = await loadGasList(val);
+      console.log(newGasList);
       setSelectedGasLevel(
         newGasList.find(
           (gasLevel) => (gasLevel.level as GasLevelType) === 'normal'
@@ -1099,7 +1106,6 @@ const SendTokenInner = () => {
     Array.from(keys).forEach((key) => {
       qs[key] = searchParams.get(key);
     });
-    console.log('initByCache');
     if (qs.token) {
       const [tokenChain, id] = qs.token.split(':');
       if (!tokenChain || !id) return;
@@ -1120,6 +1126,18 @@ const SendTokenInner = () => {
       const lastTimeToken = await walletController.getLastTimeSendToken(
         account.address
       );
+      const target1 = findChain({
+        serverId: lastTimeToken?.chain,
+      });
+      if (!target1) {
+        loadCurrentToken(
+          currentToken.id,
+          currentToken.chain,
+          currentAccount.address
+        );
+        return;
+      }
+
       if (lastTimeToken) setCurrentToken(lastTimeToken);
       const needLoadToken: TokenItem = lastTimeToken || currentToken;
       if (needLoadToken.chain !== findChain({ enum: chain })?.serverId) {
@@ -1194,7 +1212,7 @@ const SendTokenInner = () => {
         handleFormValuesChange(null, { ...values });
         forwardMessageTo('*', 'refreshAccountList', {});
         // trigger get balance of address
-        // await wallet.getAddressBalance(result.contactAddrAdded, true);
+        // await wallet.getInMemoryAddressBalance(result.contactAddrAdded, true);
       },
     });
   };
@@ -1288,7 +1306,7 @@ const SendTokenInner = () => {
             'mb-40': !showWhitelistAlert,
           })}
         >
-          <div className="section-title mb-8">Chain</div>
+          <div className="mb-8 section-title">Chain</div>
           <ChainSelect
             className="mb-24"
             value={chain}
@@ -1300,7 +1318,7 @@ const SendTokenInner = () => {
           <AccountCard alianName={sendAlianName} />
           <div className="section-title">
             <span className="section-title__to">To</span>
-            <div className="flex flex-1 justify-end items-center">
+            <div className="flex items-center justify-end flex-1">
               {showContactInfo && !!contactInfo && (
                 <div
                   className={clsx('contact-info', {
@@ -1382,8 +1400,8 @@ const SendTokenInner = () => {
             )}
           </div>
 
-          <div className="section-title mt-40 flex justify-between items-center">
-            <div className="token-balance whitespace-pre-wrap">
+          <div className="flex items-center justify-between mt-40 section-title">
+            <div className="whitespace-pre-wrap token-balance">
               {isLoading ? (
                 <Skeleton.Input active style={{ width: 100 }} />
               ) : (
@@ -1470,7 +1488,7 @@ const SendTokenInner = () => {
               )}
               onClick={handleClickWhitelistAlert}
             >
-              <p className="whitelist-alert__content text-center">
+              <p className="text-center whitelist-alert__content">
                 {whitelistEnabled && (
                   <img
                     src={
@@ -1480,14 +1498,14 @@ const SendTokenInner = () => {
                         ? 'rabby-internal://assets/icons/send-token/temporary-grant-checkbox.svg'
                         : 'rabby-internal://assets/icons/send-token/icon-uncheck.svg'
                     }
-                    className="icon icon-check inline-block relative -top-1"
+                    className="relative inline-block icon icon-check -top-1"
                   />
                 )}
                 {whitelistAlertContent.content}
               </p>
             </div>
           )}
-          <div className="footer flex justify-center">
+          <div className="flex justify-center footer">
             <Button
               disabled={!canSubmit || isSubmitLoading}
               type="primary"

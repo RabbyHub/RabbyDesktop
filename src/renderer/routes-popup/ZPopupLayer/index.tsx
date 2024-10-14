@@ -35,6 +35,7 @@ import {
   DappTypeNotSupportedModal,
 } from '@/renderer/components/IPFSAlertModal';
 import { useTipCannotUseTrezorLike } from '@/renderer/hooks-shell/useZPopupEffects';
+import { useSyncChainList } from '@/renderer/hooks/rabbyx/useChainList';
 import SwitchChainModal from '../../components/SwitchChainModal';
 
 import styles from './index.module.less';
@@ -118,5 +119,6 @@ const router = createRouter([
 ]);
 
 export default function ZPopupLayer() {
+  useSyncChainList();
   return <RouterProvider router={router} />;
 }

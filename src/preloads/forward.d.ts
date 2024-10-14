@@ -33,6 +33,8 @@ type ZViewStates = {
     isCancel?: boolean;
     isShowCustomRPC?: boolean;
     isCheckCustomRPC?: boolean;
+    hideTestnetTab?: boolean;
+    hideMainnetTab?: boolean;
   };
   'security-notification': ISecurityNotificationPayload;
   'add-address-modal': {

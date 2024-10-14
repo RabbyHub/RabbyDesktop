@@ -6,7 +6,11 @@ import TokenWithChain from '@/renderer/components/TokenWithChain';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { getTokenSymbol } from '@/renderer/utils';
-import { findChainByServerID } from '@/renderer/utils/chain';
+import {
+  findChain,
+  findChainByServerID,
+  customTestnetTokenToTokenItem,
+} from '@/renderer/utils/chain';
 import { formatUsdValue, splitNumberByStep } from '@/renderer/utils/number';
 import { Chain, formatTokenAmount } from '@debank/common';
 import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
@@ -688,6 +692,10 @@ export const TokenSelect = ({
     chainServerId: externalChainId,
   });
 
+  const chain = findChain({
+    serverId: queryConds.chainServerId,
+  });
+
   const [open, setOpen] = useState(false);
 
   const { currentAccount } = useCurrentAccount();
@@ -728,10 +736,21 @@ export const TokenSelect = ({
         : walletOpenapi.listToken;
 
       const currentAddress = currentAccount?.address || '';
-      const defaultTokens = await getDefaultTokens(
-        currentAddress,
-        queryConds.chainServerId || undefined
-      );
+      const defaultTokens = chain?.isTestnet
+        ? await walletController
+            .getCustomTestnetTokenList({
+              address: currentAddress,
+              chainId: chain.id,
+            })
+            .then((res) =>
+              res
+                .filter((item) => item.amount > 0)
+                .map((item) => customTestnetTokenToTokenItem(item))
+            )
+        : await getDefaultTokens(
+            currentAddress,
+            queryConds.chainServerId || undefined
+          );
       let localAddedTokens: TokenItem[] = [];
 
       if (!isSwapType) {
@@ -762,6 +781,20 @@ export const TokenSelect = ({
       }
 
       const kw = queryConds.keyword.trim();
+
+      if (chain?.isTestnet) {
+        return walletController
+          .getCustomTestnetTokenList({
+            address: currentAccount.address,
+            chainId: chain.id,
+            q: kw,
+          })
+          .then((res) =>
+            res
+              .filter((item) => item.amount > 0)
+              .map((item) => customTestnetTokenToTokenItem(item))
+          );
+      }
 
       if (kw.length === 42 && kw.toLowerCase().startsWith('0x')) {
         const data = await walletOpenapi.searchToken(

@@ -1,7 +1,18 @@
 
-v0.38.5 / 2024-08-16
+v0.38.6 / 2024-09-26
 ====================
 
+  * chore: update changelog.
+  * feat: custom network (#660)
+  * fix: replace openapi to get balance for rabbyX (#658)
+  * feat: support odos paraswap_v6 (#659)
+  * feat: permit2 (#655)
+  * Ngrave rabby desktop copy (#646)
+
+v0.38.5-prod / 2024-08-16
+=========================
+
+  * Release v0.38.5-prod
   * feat: better send/swap max, optimized swap features. (#656)
   * fix: dex id (#650)
   * feat: support customize backend service api (#648)

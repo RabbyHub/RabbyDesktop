@@ -49,6 +49,12 @@ const HARDWARE_MAP = [
     name: 'GridPlus',
     id: KEYRING_CLASS.HARDWARE.GRIDPLUS,
   },
+  {
+    logo: 'rabby-internal://assets/icons/device/ngrave.svg',
+    name: 'NGRAVE ZERO',
+    id: KEYRING_CLASS.HARDWARE.KEYSTONE,
+    brand: WALLET_BRAND_CONTENT.NGRAVE.brand,
+  },
 ];
 
 const WALLETCONNECT_BRANDS = [

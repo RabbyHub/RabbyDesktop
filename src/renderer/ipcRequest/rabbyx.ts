@@ -65,7 +65,4 @@ function makeRabbyXController<T extends RabbyXContollerNS>(namespace: T) {
 
 export const walletController = makeRabbyXController('walletController');
 export const walletOpenapi = makeRabbyXController('openapi');
-export const walletTestnetOpenapi = makeRabbyXController(
-  'testnetOpenapi' as 'openapi'
-);
 export const permissionService = makeRabbyXController('permissionService');

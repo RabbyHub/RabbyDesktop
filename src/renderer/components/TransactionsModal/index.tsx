@@ -8,6 +8,7 @@ import NetSwitchTabs, {
 } from '../PillsSwitch/NetSwitchTabs';
 import { HistoryList } from './components/HistoryList';
 import styles from './index.module.less';
+import { Empty } from './components/Empty';
 
 const Transactions = ({
   onFilterScamClick,
@@ -39,31 +40,33 @@ const Transactions = ({
           />
         </div>
       )}
-      <div
-        className="px-[32px] text-r-neutral-body text-[13px] leading-[16px] flex items-center mb-[13px] cursor-pointer"
-        onClick={onFilterScamClick}
-      >
-        Hide scam transactions{' '}
-        <img
-          src="rabby-internal://assets/icons/transaction/icon-right.svg"
-          alt=""
-        />
-      </div>
-      <HistoryList
-        testnet={isShowTestnet && selectedTab === 'testnet'}
-        key={selectedTab}
-      />
+      {selectedTab === 'mainnet' ? (
+        <>
+          <div
+            className="px-[32px] text-r-neutral-body text-[13px] leading-[16px] flex items-center mb-[13px] cursor-pointer"
+            onClick={onFilterScamClick}
+          >
+            Hide scam transactions{' '}
+            <img
+              src="rabby-internal://assets/icons/transaction/icon-right.svg"
+              alt=""
+            />
+          </div>
+          <HistoryList key={selectedTab} />
+        </>
+      ) : (
+        <div className="h-[647px] flex flex-col items-center justify-center">
+          <img src="rabby-internal://assets/icons/common/box.svg" alt="" />
+          <div className="text-[14px] text-r-neutral-foot leading-[20px]">
+            Not supported for custom networks
+          </div>
+        </div>
+      )}
     </>
   );
 };
 
-const NoScamTransactions = ({
-  testnet = false,
-  onBack,
-}: {
-  testnet?: boolean;
-  onBack?(): void;
-}) => {
+const NoScamTransactions = ({ onBack }: { onBack?(): void }) => {
   return (
     <>
       <div className={clsx(styles.transactionModalTitle, 'relative')}>
@@ -75,7 +78,7 @@ const NoScamTransactions = ({
         />
         Hide scam transactions
       </div>
-      <HistoryList testnet={testnet} isFilterScam />
+      <HistoryList isFilterScam />
     </>
   );
 };

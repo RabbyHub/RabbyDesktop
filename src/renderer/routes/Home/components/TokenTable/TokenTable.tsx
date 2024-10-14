@@ -1,6 +1,7 @@
 import React from 'react';
 import { FixedSizeList } from 'react-window';
 import { useTokenAction } from '@/renderer/components/TokenActionModal/TokenActionModal';
+import clsx from 'clsx';
 import { TBody, THeadCell, THeader, Table } from './Table';
 import { TokenItem, Props as TokenItemProps } from './TokenItem';
 
@@ -11,12 +12,16 @@ export interface Props {
     itemSize: number;
   };
   EmptyComponent?: React.ReactNode;
+  FooterComponent?: React.ReactNode;
+  className?: string;
 }
 
 export const TokenTable: React.FC<Props> = ({
   list,
   virtual,
   EmptyComponent,
+  FooterComponent,
+  className,
 }) => {
   const { setTokenAction } = useTokenAction();
 
@@ -25,13 +30,13 @@ export const TokenTable: React.FC<Props> = ({
       {EmptyComponent && !list?.length ? (
         EmptyComponent
       ) : (
-        <Table>
+        <Table className={className}>
           <THeader className="flex w-full ">
             <THeadCell className="w-1/2">Asset / Amount</THeadCell>
             <THeadCell className="w-1/4">Price</THeadCell>
             <THeadCell className="w-1/4 text-right">USD Value</THeadCell>
           </THeader>
-          <TBody className="mt-8">
+          <TBody className={clsx('mt-8')}>
             {virtual ? (
               <FixedSizeList
                 height={virtual.height}
@@ -66,6 +71,7 @@ export const TokenTable: React.FC<Props> = ({
           </TBody>
         </Table>
       )}
+      {FooterComponent}
     </>
   );
 };

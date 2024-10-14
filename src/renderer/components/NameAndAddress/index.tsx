@@ -1,5 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Tooltip } from 'antd';
+
 import './index.less';
 import clsx from 'classnames';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
@@ -25,6 +27,7 @@ interface NameAndAddressProps {
   chainEnum?: CHAINS_ENUM;
   copyIcon?: boolean | string;
   addressSuffix?: React.ReactNode;
+  tooltipAliasName?: boolean;
 }
 
 const NameAndAddress = ({
@@ -39,6 +42,7 @@ const NameAndAddress = ({
   chainEnum,
   copyIcon = true,
   addressSuffix,
+  tooltipAliasName = false,
 }: NameAndAddressProps) => {
   const [aliasName, setAliasName] = useState('');
 
@@ -91,11 +95,16 @@ const NameAndAddress = ({
         className
       )}
     >
-      {localName && (
-        <div className={clsx('name', nameClass)} title={localName}>
-          {localName}
-        </div>
-      )}
+      <Tooltip
+        {...(!tooltipAliasName && { visible: false })}
+        overlay={<>{localName}</>}
+      >
+        {localName && (
+          <div className={clsx('name', nameClass)} title={localName}>
+            {localName}
+          </div>
+        )}
+      </Tooltip>
       <div
         className={clsx('address', addressClass, !localName && noNameClass)}
         title={address.toLowerCase()}

@@ -150,14 +150,16 @@ export const useCurrentConnectedSite = ({
   return connectedSiteMap?.[httpOrigin] || null;
 };
 
-export const useListenSyncChain = () => {
+export const useListenSyncChain = (
+  callback?: (params: Parameters<typeof updateChainStore>[0]) => void
+) => {
   useEffectOnce(() => {
     return window.rabbyDesktop.ipcRenderer.on(
       '__internal_push:rabbyx:session-broadcast-forward-to-desktop',
       (payload) => {
         if (payload.event === 'syncChainList') {
-          console.log('sync chain list', payload.data);
           updateChainStore(payload.data || {});
+          callback?.(payload.data || {});
         }
       }
     );

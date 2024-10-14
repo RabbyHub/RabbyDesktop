@@ -27,10 +27,14 @@ export const LowAssetsModal: React.FC<Props> = ({ visible, onClose, list }) => {
 
   return (
     <Modal
-      width={480}
+      width={400}
       open={visible}
       onCancel={onClose}
-      title={`${list.length} low value assets`}
+      title={
+        list.length > 1
+          ? `${list.length} low value tokens`
+          : `${list.length} low value token`
+      }
       bodyStyle={{ height: 527, padding: '0 20px 0' }}
       centered
       smallTitle

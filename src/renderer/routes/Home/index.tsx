@@ -31,6 +31,7 @@ import {
   useFilterProtoList,
   useFilterTokenList,
   useSwitchView,
+  useUpdateBalanceCache,
 } from './hooks';
 import ChainList from './components/ChainList';
 import Curve, { CurveModal } from './components/Curve';
@@ -235,6 +236,8 @@ const Home = () => {
   }, [usedChainList, protocolList, tokenList]);
   const totalBalance = useTotalBalance(tokenList, protocolList);
 
+  useUpdateBalanceCache(totalBalance, currentAccount?.address);
+
   const curveDataRaw = useCurve(currentAccount?.address, updateNonce);
   const curveData = isTestnet ? undefined : curveDataRaw;
   const location = useLocation();
@@ -266,7 +269,7 @@ const Home = () => {
       }
     );
     setUsedChainList(chainList.map((chain) => formatUsedChain(chain)));
-    walletController.getAddressBalance(
+    walletController.getInMemoryAddressBalance(
       currentAccount?.address,
       false,
       _isTestnet
@@ -394,16 +397,6 @@ const Home = () => {
                         />
                       </TipsWrapper>
                     </span>
-
-                    {isShowTestnet ? (
-                      <NetSwitchTabs
-                        showPending
-                        size="sm"
-                        value={selectedTab}
-                        onTabChange={onTabChange}
-                        className="ml-12"
-                      />
-                    ) : null}
                   </div>
                 )}
                 <div className="balance">
@@ -435,7 +428,7 @@ const Home = () => {
 
               {curveData ? (
                 <div className="right" onClick={() => setCurveModalOpen(true)}>
-                  <div className="absolute right-0 bottom-0 z-10">
+                  <div className="absolute bottom-0 right-0 z-10">
                     <HomeUpdateButton
                       loading={
                         isLoadingRealTimeTokenList || isLoadingRealTimeProtocol
@@ -447,7 +440,7 @@ const Home = () => {
                 </div>
               ) : (
                 <div className="right">
-                  <div className="absolute right-0 bottom-0 z-10">
+                  <div className="absolute bottom-0 right-0 z-10">
                     <HomeUpdateButton
                       loading={
                         isLoadingRealTimeTokenList || isLoadingRealTimeProtocol

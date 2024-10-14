@@ -49,11 +49,11 @@ function useSwitchOptions() {
     return [
       {
         key: 'mainnet',
-        label: 'Mainnets',
+        label: 'Integrated Network',
       },
       {
         key: 'testnet',
-        label: 'Testnets',
+        label: 'Custom Network',
       },
     ] as const;
   }, []);

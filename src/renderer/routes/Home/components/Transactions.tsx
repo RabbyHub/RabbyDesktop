@@ -4,11 +4,7 @@ import type {
   TransactionHistoryItem,
 } from '@/isomorphic/types/rabbyx';
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-import {
-  walletController,
-  walletOpenapi,
-  walletTestnetOpenapi,
-} from '@/renderer/ipcRequest/rabbyx';
+import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import {
   TokenItem,
   TransferingNFTItem,
@@ -168,17 +164,6 @@ const Empty = ({ text }: { text: string }) => (
   </EmptyView>
 );
 
-const filterTestnet = (list: TransactionDataItem[], isTestnet?: boolean) => {
-  return list.filter((item) => {
-    const chain = findChain({
-      serverId: item.chain,
-    });
-    if (isTestnet) {
-      return chain?.isTestnet;
-    }
-    return !chain?.isTestnet;
-  });
-};
 const Transactions = ({
   updateNonce,
   isTestnet,
@@ -206,18 +191,18 @@ const Transactions = ({
 
   const mergedRecentTxs = useMemo(() => {
     return sortBy(
-      [
-        ...filterTestnet(recentTxs, isTestnet).slice(0, 3),
-        ...filterTestnet(completedTxs, isTestnet),
-      ],
+      [...recentTxs.slice(0, 3), ...completedTxs],
       'timeAt'
     ).reverse();
-  }, [recentTxs, completedTxs, isTestnet]);
+  }, [recentTxs, completedTxs]);
+
+  console.log('local', localTxs, recentTxs, mergedRecentTxs, completedTxs);
 
   const initLocalTxs = async (address: string) => {
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
     const { pendings, completeds } =
       await walletController.getTransactionHistory(address);
+    console.log('pppp', pendings, completeds, address);
     const lTxs: TransactionDataItem[] = [];
     const pTxs: TransactionDataItem[] = [];
     const markedCompleteds = completeds.map((item) => {
@@ -246,6 +231,7 @@ const Transactions = ({
       }
       return item;
     });
+    console.log('markedCompleteds', markedCompleteds);
     markedCompleteds
       .filter(
         (item) =>
@@ -260,43 +246,59 @@ const Transactions = ({
         if (!chain) return;
         const maxTx = findMaxGasTx(item.txs);
         const completedTx = item.txs.find((tx) => tx.isCompleted);
-        const { type, protocol, name } = getTxInfoFromExplain(item.explain);
-        const balanceChange = item.explain.balance_change;
-        lTxs.push({
-          type,
-          receives: [
-            ...balanceChange.receive_nft_list,
-            ...balanceChange.receive_token_list,
-          ].map(
-            (i) =>
-              formatToken(i, true) as {
-                tokenId: string;
-                from: string;
-                token: TokenItem | undefined;
-                amount: number;
-              }
-          ),
-          sends: [
-            ...balanceChange.send_nft_list,
-            ...balanceChange.send_token_list,
-          ].map(
-            (i) =>
-              formatToken(i, false) as {
-                tokenId: string;
-                to: string;
-                token: TokenItem | undefined;
-                amount: number;
-              }
-          ),
-          protocol,
-          id: completedTx?.hash || maxTx!.hash,
-          chain: chain.serverId,
-          status: 'completed',
-          otherAddr: maxTx.rawTx.to || '',
-          name,
-          timeAt: item.completedAt || item.createdAt,
-          site: completedTx?.site,
-        });
+        if (chain.isTestnet) {
+          lTxs.push({
+            type: 'unknown',
+            receives: [],
+            sends: [],
+            protocol: null,
+            id: completedTx?.hash || maxTx!.hash,
+            chain: chain.serverId,
+            status: 'completed',
+            otherAddr: maxTx.rawTx.to || '',
+            name: '',
+            timeAt: item.completedAt || item.createdAt,
+            site: completedTx?.site,
+          });
+        } else {
+          const { type, protocol, name } = getTxInfoFromExplain(item.explain);
+          const balanceChange = item.explain.balance_change;
+          lTxs.push({
+            type,
+            receives: [
+              ...balanceChange.receive_nft_list,
+              ...balanceChange.receive_token_list,
+            ].map(
+              (i) =>
+                formatToken(i, true) as {
+                  tokenId: string;
+                  from: string;
+                  token: TokenItem | undefined;
+                  amount: number;
+                }
+            ),
+            sends: [
+              ...balanceChange.send_nft_list,
+              ...balanceChange.send_token_list,
+            ].map(
+              (i) =>
+                formatToken(i, false) as {
+                  tokenId: string;
+                  to: string;
+                  token: TokenItem | undefined;
+                  amount: number;
+                }
+            ),
+            protocol,
+            id: completedTx?.hash || maxTx!.hash,
+            chain: chain.serverId,
+            status: 'completed',
+            otherAddr: maxTx.rawTx.to || '',
+            name,
+            timeAt: item.completedAt || item.createdAt,
+            site: completedTx?.site,
+          });
+        }
       });
     setLocalTxs(lTxs);
 
@@ -309,46 +311,65 @@ const Transactions = ({
         if (!chain) return;
         const maxTx = findMaxGasTx(item.txs);
         const originTx = minBy(item.txs, (tx) => tx.createdAt);
-        const { type, protocol, name } = getTxInfoFromExplain(item.explain);
-        const balanceChange = item.explain.balance_change;
-        pTxs.push({
-          type,
-          receives: [
-            ...balanceChange.receive_nft_list,
-            ...balanceChange.receive_token_list,
-          ].map(
-            (i) =>
-              formatToken(i, true) as {
-                tokenId: string;
-                from: string;
-                token: TokenItem | undefined;
-                amount: number;
-              }
-          ),
-          sends: [
-            ...balanceChange.send_nft_list,
-            ...balanceChange.send_token_list,
-          ].map(
-            (i) =>
-              formatToken(i, false) as {
-                tokenId: string;
-                to: string;
-                token: TokenItem | undefined;
-                amount: number;
-              }
-          ),
-          protocol,
-          id: maxTx!.hash,
-          chain: chain.serverId,
-          status: 'pending',
-          otherAddr: maxTx.rawTx.to || '',
-          name,
-          timeAt: item.createdAt,
-          rawTx: maxTx.rawTx,
-          site: originTx?.site,
-          txs: item.txs,
-          group: item,
-        });
+        if (chain.isTestnet) {
+          pTxs.push({
+            type: 'unknown',
+            receives: [],
+            sends: [],
+            protocol: null,
+            id: maxTx!.hash,
+            chain: chain.serverId,
+            status: 'pending',
+            otherAddr: maxTx.rawTx.to || '',
+            name: '',
+            timeAt: item.createdAt,
+            rawTx: maxTx.rawTx,
+            site: originTx?.site,
+            txs: item.txs,
+            group: item,
+          });
+        } else {
+          const { type, protocol, name } = getTxInfoFromExplain(item.explain);
+          const balanceChange = item.explain.balance_change;
+          pTxs.push({
+            type,
+            receives: [
+              ...balanceChange.receive_nft_list,
+              ...balanceChange.receive_token_list,
+            ].map(
+              (i) =>
+                formatToken(i, true) as {
+                  tokenId: string;
+                  from: string;
+                  token: TokenItem | undefined;
+                  amount: number;
+                }
+            ),
+            sends: [
+              ...balanceChange.send_nft_list,
+              ...balanceChange.send_token_list,
+            ].map(
+              (i) =>
+                formatToken(i, false) as {
+                  tokenId: string;
+                  to: string;
+                  token: TokenItem | undefined;
+                  amount: number;
+                }
+            ),
+            protocol,
+            id: maxTx!.hash,
+            chain: chain.serverId,
+            status: 'pending',
+            otherAddr: maxTx.rawTx.to || '',
+            name,
+            timeAt: item.createdAt,
+            rawTx: maxTx.rawTx,
+            site: originTx?.site,
+            txs: item.txs,
+            group: item,
+          });
+        }
       });
     console.log('pTxs', pTxs);
     setPendingTxs(pTxs);
@@ -364,9 +385,7 @@ const Transactions = ({
     if (!address) return;
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
 
-    const listTxHistory = isTestnet
-      ? walletTestnetOpenapi.listTxHisotry
-      : walletOpenapi.listTxHisotry;
+    const listTxHistory = walletOpenapi.listTxHisotry;
     const txs = await listTxHistory({
       id: address,
     });
@@ -504,10 +523,7 @@ const Transactions = ({
     );
   }
 
-  if (
-    filterTestnet(pendingTxs, isTestnet).length <= 0 &&
-    mergedRecentTxs.length <= 0
-  ) {
+  if (pendingTxs.length <= 0 && mergedRecentTxs.length <= 0) {
     return (
       <TransactionWrapper>
         <TransactionList>
@@ -530,7 +546,7 @@ const Transactions = ({
         )}
         <TransactionModal
           open={isShowAll}
-          initialTabOnOpen={isTestnet ? 'testnet' : 'mainnet'}
+          initialTabOnOpen="mainnet"
           onClose={() => {
             setIsShowAll(false);
           }}
@@ -550,7 +566,7 @@ const Transactions = ({
       <TransactionList>
         {!isActivate
           ? null
-          : filterTestnet(pendingTxs, isTestnet).map((tx) => {
+          : pendingTxs.map((tx) => {
               return (
                 <TransactionItem
                   item={tx}
@@ -581,7 +597,7 @@ const Transactions = ({
       </ViewAllButton>
       <TransactionModal
         open={isShowAll}
-        initialTabOnOpen={isTestnet ? 'testnet' : 'mainnet'}
+        initialTabOnOpen="mainnet"
         onClose={() => {
           setIsShowAll(false);
         }}
