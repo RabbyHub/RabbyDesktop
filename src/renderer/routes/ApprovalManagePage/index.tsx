@@ -950,8 +950,6 @@ const ApprovalManagePage = () => {
 
   const {
     isLoading,
-    loadApprovals,
-
     searchKw,
     setSearchKw,
     displaySortedContractList,
@@ -963,10 +961,6 @@ const ApprovalManagePage = () => {
     vGridRefContracts,
     vGridRefAsset,
   } = useApprovalsPage({ isTestnet: selectedTab === 'testnet' });
-
-  useEffect(() => {
-    loadApprovals();
-  }, [selectedTab, loadApprovals]);
 
   const [visibleRevokeModal, setVisibleRevokeModal] = React.useState(false);
   const [selectedContract, setSelectedContract] =
