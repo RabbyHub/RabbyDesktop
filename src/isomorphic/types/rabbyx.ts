@@ -15,6 +15,7 @@ import type { QuoteResult } from '@rabby-wallet/rabby-swap/dist/quote';
 import { SafeTransactionDataPartial } from '@gnosis.pm/safe-core-sdk-types';
 import { SafeTransactionItem } from '@rabby-wallet/gnosis-sdk/dist/api';
 import { BasicSafeInfo } from '@rabby-wallet/gnosis-sdk';
+import { GasAccountServiceStore } from '@/renderer/components/GasAccount/type';
 import { TestnetChain, TestnetChainBase } from './customTestnet';
 
 export type RabbyAccount = {
@@ -231,6 +232,32 @@ export interface CustomTestnetToken extends CustomTestnetTokenBase {
 }
 
 export type RabbyXMethod = {
+  'walletController.clearPageStateCache': () => void;
+  'walletController.setGasAccountSig': (
+    sig?: string,
+    account?: GasAccountServiceStore['account']
+  ) => any;
+  'walletController.getGasAccountSig': () => {
+    sig?: string;
+    account?: GasAccountServiceStore['account'];
+  };
+  'walletController.getGasAccountData': (
+    key?: keyof GasAccountServiceStore
+  ) => any;
+  'walletController.signGasAccount': () => Promise<void>;
+  'walletController.topUpGasAccount': ({
+    to,
+    chainServerId,
+    tokenId,
+    rawAmount,
+    amount,
+  }: {
+    to: string;
+    chainServerId: string;
+    tokenId: string;
+    rawAmount: string;
+    amount: number;
+  }) => Promise<void>;
   'walletController.requestETHRpc': (
     data: { method: string; params: any },
     chainId: string
@@ -706,7 +733,7 @@ export type RabbyXMethod = {
     },
     chain: CHAINS_ENUM
   ) => string;
-  'walletController.getCustomTestnetList': () => Chain[];
+  // 'walletController.getCustomTestnetList': () => Chain[];
   'walletController.getCustomTestnetGasMarket': ({
     chainId,
     custom,
