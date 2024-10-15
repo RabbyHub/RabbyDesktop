@@ -600,8 +600,6 @@ export function useApprovalsPage(options?: { isTestnet?: boolean }) {
   }, [sortedAssetstList, sortedContractList, debouncedSearchKw]);
 
   useEffect(() => {
-    loadApprovals();
-
     const listener = () => {
       fetchCurrentAccount();
     };
@@ -611,7 +609,7 @@ export function useApprovalsPage(options?: { isTestnet?: boolean }) {
     return () => {
       eventBus.removeEventListener('accountsChanged', listener);
     };
-  }, [loadApprovals, fetchCurrentAccount]);
+  }, [fetchCurrentAccount]);
 
   return {
     isLoading,
