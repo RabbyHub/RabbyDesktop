@@ -177,6 +177,12 @@ export async function setupAppMenu() {
       label: 'Help',
       submenu: <Electron.MenuItemConstructorOptions['submenu']>[
         {
+          label: 'Terms of Use',
+          click: async () => {
+            safeOpenExternalURL('https://rabby.io/docs/terms-of-use/');
+          },
+        },
+        {
           label: 'Privacy Policy',
           click: async () => {
             safeOpenExternalURL('https://rabby.io/docs/privacy/');

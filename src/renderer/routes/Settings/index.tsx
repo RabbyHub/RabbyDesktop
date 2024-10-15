@@ -382,6 +382,11 @@ export function MainWindowSettings() {
               </ItemAction>
             )}
             <ItemLink
+              name="Terms of Use"
+              link="https://rabby.io/docs/terms-of-use"
+              icon="rabby-internal://assets/icons/mainwin-settings/terms-of-use.svg"
+            />
+            <ItemLink
               name="Privacy Policy"
               link="https://rabby.io/docs/privacy"
               icon="rabby-internal://assets/icons/mainwin-settings/privacy-policy.svg"
