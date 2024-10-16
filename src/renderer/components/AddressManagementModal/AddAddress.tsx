@@ -11,7 +11,7 @@ export const AddAddress: React.FC = () => {
         hideZSubview('address-management');
       }}
       className={styles.addAddress}
-      src="rabby-internal://assets/icons/address-management/wallet.svg"
+      src="rabby-internal://assets/icons/address-management/IconAddWallect.svg"
     />
   );
 };

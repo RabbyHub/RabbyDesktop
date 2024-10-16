@@ -10,7 +10,7 @@ import { useWhitelist } from '@/renderer/hooks/rabbyx/useWhitelist';
 import { sortAccountsByBalance } from '@/renderer/utils/account';
 import { KEYRING_CLASS } from '@/renderer/utils/constant';
 import { groupBy } from 'lodash';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { forwardMessageTo } from '@/renderer/hooks/useViewsMessage';
 import { useRequest } from 'ahooks';
@@ -19,7 +19,6 @@ import styles from './index.module.less';
 import { Body } from './Body';
 import { AddAddress } from './AddAddress';
 import { Header } from './Header';
-import { RefreshButton } from './RefreshButton';
 import { CommonPopupProvider } from '../CommonPopup/CommonPopupProvider';
 import RabbyInput from '../AntdOverwrite/Input';
 import ManageAddress from './ManageAddress';
@@ -71,11 +70,6 @@ export const MainContainer: React.FC = () => {
     watchModeHighlightedAccounts = sortAccountsByBalance(
       watchModeHighlightedAccounts
     );
-
-    const result = [
-      highlightedAccounts.concat(data['0'] || []).filter((e) => !!e),
-      watchModeHighlightedAccounts.concat(data['1'] || []).filter((e) => !!e),
-    ];
 
     return [
       highlightedAccounts.concat(data['0'] || []).filter((e) => !!e),
@@ -154,10 +148,7 @@ export const MainContainer: React.FC = () => {
     [removeAddress, getHighlightedAddressesAsync]
   );
 
-  const {
-    runAsync: handleUpdateAllBalance,
-    loading: isUpdateAllBalanceLoading,
-  } = useRequest(updateAllBalance, {
+  const { loading: isUpdateAllBalanceLoading } = useRequest(updateAllBalance, {
     manual: true,
     onSuccess: () => {},
   });
@@ -224,10 +215,6 @@ export const MainContainer: React.FC = () => {
       <CommonPopupProvider>
         <div className={styles.title}>Current Address</div>
         <AddAddress />
-        <RefreshButton
-          loading={isUpdateAllBalanceLoading}
-          onClick={handleUpdateAllBalance}
-        />
         <Header
           onSelect={setSelectedAccount}
           currentAccount={currentDisplayAccount}
@@ -254,6 +241,10 @@ export const MainContainer: React.FC = () => {
           onSelect={setSelectedAccount}
           onSwitchAccount={handleSwitchAccount}
           onDelete={handleDelete}
+          onAddress={() => {
+            zActions.showZSubview('select-add-address-type-modal');
+            zActions.hideZSubview('address-management');
+          }}
           accounts={sortedAccountsListAfterSearch}
           contacts={watchSortedAccountsListAfterSearch}
           isUpdatingBalance={isUpdateAllBalanceLoading}

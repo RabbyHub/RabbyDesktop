@@ -987,6 +987,7 @@
       }
     },
     "manageAddress": {
+      "add-new-address": "Add New Address",
       "no-address": "No address",
       "no-match": "No match",
       "current-address": "Current Address",
