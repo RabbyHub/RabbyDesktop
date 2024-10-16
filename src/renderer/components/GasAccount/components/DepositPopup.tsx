@@ -18,7 +18,7 @@ import { findChainByServerID } from '@/renderer/utils/chain';
 import { GasAccountCloseIcon } from './PopupCloseIcon';
 import styles from '../index.module.less';
 
-const amountList = [10, 100, 500];
+const amountList = [20, 100, 500];
 
 const TokenSelector = ({
   visible,
