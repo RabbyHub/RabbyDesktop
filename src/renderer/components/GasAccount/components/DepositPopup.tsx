@@ -257,7 +257,11 @@ const GasAccountDepositContent = ({
           {t('page.gasAccount.depositPopup.token')}
         </div>
         <div
-          className="flex items-center justify-between rounded-[6px] w-full h-[52px] px-16 py-0 bg-r-neutral-card2 cursor-pointer"
+          className={clsx(
+            'flex items-center justify-between rounded-[6px] w-full h-[52px] px-16 py-0 bg-r-neutral-card2 cursor-pointer',
+            'border border-solid border-transparent',
+            'hover:bg-r-blue-light-1 hover:border-rabby-blue-default'
+          )}
           onClick={openTokenList}
         >
           {token ? (

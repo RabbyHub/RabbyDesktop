@@ -64,6 +64,12 @@ export const Body: React.FC<Props> = ({
         <Button
           onClick={onAddress}
           block
+          icon={
+            <img
+              className="w-[20px] h-[20px] mr-8px"
+              src="rabby-internal://assets/icons/address-management/IconWalletNoPending.svg"
+            />
+          }
           size="large"
           type="primary"
           className="h-[52px] w-[360px] bg-r-neutral-card1 text-13 font-medium rounded-[8px] text-r-blue-default border-0"
