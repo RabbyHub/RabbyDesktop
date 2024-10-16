@@ -1,0 +1,100 @@
+@import './../../css/mixins.less';
+
+.account {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  height: 40px;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(20px);
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0.8;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  font-weight: 500;
+  font-size: 13px;
+  line-height: normal;
+  color: var(--r-neutral-title2, #FFF);
+  text-align: right;
+  font-family: "SF Pro";
+  font-style: normal;
+
+  .content {
+    display: flex;
+    align-items: center;
+
+    > * {
+      flex-shrink: 0;
+    }
+
+    .logo {
+      width: 20px;
+      height: 20px;
+      position: relative;
+    }
+
+    .aliasName {
+      flex-shrink: 1;
+      max-width: 130px;
+      width: 100%;
+      line-height: 2;
+      margin-left: 6px;
+      margin-right: 6px;
+      position: relative;
+      top: -1px;
+      .truncate();
+    }
+  }
+
+  .dockRight {
+    display: flex;
+    align-items: center;
+
+    .addr {
+      flex-shrink: 1;
+      width: 100%;
+      display: inline-flex;
+      justify-items: center;
+      align-items: center;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 14px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .dropdownIcon {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      margin-left: 4px;
+    }
+
+    .balance {
+      margin-left: 22px;
+      font-size: 13px;
+    }
+  }
+}
+
+.drawer {
+  :global {
+  
+    .ant-drawer-content {
+      background:#3D4251;
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+      border: 1px solid var(--r-neutral-line, rgba(255, 255, 255, 0.10));
+      border-top: 0;
+    }
+
+  }
+
+}
