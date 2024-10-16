@@ -22,7 +22,7 @@ export const useGasAccountRefresh = () => {
   const refreshId = useGasAccountRefreshId();
   const setRefreshId = useGasAccountSetRefreshId();
 
-  const refresh = () => setRefreshId((e) => e + 1);
+  const refresh = useCallback(() => setRefreshId((e) => e + 1), [setRefreshId]);
 
   return { refreshId, refresh };
 };

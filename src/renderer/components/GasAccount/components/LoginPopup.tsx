@@ -177,6 +177,7 @@ export const GasAccountLoginPopup = (props: {
       onClose={onCancel}
       bodyStyle={{
         padding: 0,
+        overflow: 'hidden',
       }}
       className={styles.drawer}
       style={{

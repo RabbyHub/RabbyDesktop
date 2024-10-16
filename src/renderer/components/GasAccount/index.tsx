@@ -13,7 +13,6 @@ import { useGasAccountLogin } from './hooks';
 import { GasAccountBlueBorderedButton } from './components/Button';
 import { GasAccountLogoutPopup } from './components/LogoutPopop';
 import { WithdrawPopup } from './components/WithdrawPopup';
-import { GasAccountRefreshIdProvider } from './hooks/context';
 import { GasAccountWrapperBg } from './components/WrapperBg';
 import { GasAccountBlueLogo } from './components/GasAccountBlueLogo';
 import { GasAccountInfo } from './type';
@@ -170,7 +169,6 @@ const GasAccountInner = ({
         visible={logoutVisible}
         account={account}
         onCancel={() => {
-          setVisible(false);
           setLogoutVisible(false);
         }}
       />
@@ -196,9 +194,5 @@ export const GasAccount = ({
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
   accountInfo: GasAccountInfo;
 }) => {
-  return (
-    <GasAccountRefreshIdProvider>
-      <GasAccountInner setVisible={setVisible} accountInfo={accountInfo} />
-    </GasAccountRefreshIdProvider>
-  );
+  return <GasAccountInner setVisible={setVisible} accountInfo={accountInfo} />;
 };

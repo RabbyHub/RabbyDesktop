@@ -6,8 +6,9 @@ import { GasAccount } from '..';
 import { useGasAccountInfo } from '../hooks';
 import styles from '../index.module.less';
 import { GasAccountInfo } from '../type';
+import { GasAccountRefreshIdProvider } from '../hooks/context';
 
-export const GasAccountDashBoardHeader = () => {
+const GasAccountHeader = () => {
   const accountInfo: GasAccountInfo = useGasAccountInfo();
   const { value, loading } = accountInfo;
 
@@ -58,5 +59,13 @@ export const GasAccountDashBoardHeader = () => {
         <>{usd}</>
       </div>
     </Dropdown>
+  );
+};
+
+export const GasAccountDashBoardHeader = () => {
+  return (
+    <GasAccountRefreshIdProvider>
+      <GasAccountHeader />
+    </GasAccountRefreshIdProvider>
   );
 };

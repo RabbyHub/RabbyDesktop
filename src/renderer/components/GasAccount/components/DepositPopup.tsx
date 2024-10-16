@@ -18,7 +18,7 @@ import { findChainByServerID } from '@/renderer/utils/chain';
 import { GasAccountCloseIcon } from './PopupCloseIcon';
 import styles from '../index.module.less';
 
-const amountList = [10, 100, 500];
+const amountList = [20, 100, 500];
 
 const TokenSelector = ({
   visible,
@@ -257,7 +257,11 @@ const GasAccountDepositContent = ({
           {t('page.gasAccount.depositPopup.token')}
         </div>
         <div
-          className="flex items-center justify-between rounded-[6px] w-full h-[52px] px-16 py-0 bg-r-neutral-card2 cursor-pointer"
+          className={clsx(
+            'flex items-center justify-between rounded-[6px] w-full h-[52px] px-16 py-0 bg-r-neutral-card2 cursor-pointer',
+            'border border-solid border-transparent',
+            'hover:bg-r-blue-light-1 hover:border-rabby-blue-default'
+          )}
           onClick={openTokenList}
         >
           {token ? (
