@@ -1,5 +1,8 @@
 import React from 'react';
+import { detectClientOS } from '@/isomorphic/os';
 import clsx from 'clsx';
+
+const isWin32 = detectClientOS() === 'win32';
 
 export const GasAccountWrapperBg = ({
   children,
@@ -10,9 +13,13 @@ export const GasAccountWrapperBg = ({
   HTMLDivElement
 >) => {
   return (
-    <div {...others} className={clsx('relative', className)}>
+    <div {...others} className={clsx('relative overflow-hidden', className)}>
       <img
-        src="rabby-internal://assets/icons/gas-account/bg.svg"
+        src={
+          isWin32
+            ? 'rabby-internal://assets/icons/gas-account/bg-win.svg'
+            : 'rabby-internal://assets/icons/gas-account/bg.svg'
+        }
         className="absolute top-0"
       />
       {children}
