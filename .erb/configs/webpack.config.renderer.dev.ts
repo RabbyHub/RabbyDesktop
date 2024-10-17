@@ -5,7 +5,7 @@ import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import chalk from 'chalk';
 import { merge } from 'webpack-merge';
-import { execSync, spawn } from 'child_process';
+import { ChildProcess, execSync, spawn } from 'child_process';
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import WindiCSSWebpackPlugin from 'windicss-webpack-plugin';
@@ -250,9 +250,21 @@ const configurationRenderer: webpack.Configuration = {
         .on('close', (code: number) => process.exit(code!))
         .on('error', (spawnError) => console.error(spawnError));
 
-      main_process: {
+
+      if (process.env.WITH_MAIN) {
+        let mainJsProcess: ChildProcess;
+        // start:main:js
+        console.log('Starting builder to compile main.ts -> .erb/dll/main.js...');
+        mainJsProcess = spawn('npm', ['run', 'start:main:js'], {
+          shell: true,
+          stdio: 'inherit',
+        })
+          .on('close', (code: number) => process.exit(code!))
+          .on('error', (spawnError) => console.error(spawnError));
+
+        // start:main:electronmon
         console.log('Starting Main Process...');
-        let mainArgs = ['run', 'start:main'];
+        let mainArgs = ['run', 'start:main:electronmon'];
         if (process.env.MAIN_ARGS) {
           mainArgs = mainArgs.concat(
             ['--', ...process.env.MAIN_ARGS.matchAll(/"[^"]+"|[^\s"]+/g)].flat()
@@ -265,11 +277,13 @@ const configurationRenderer: webpack.Configuration = {
           })
             .on('close', (code: number) => {
               preloadProcess.kill();
+              mainJsProcess.kill();
               process.exit(code!);
             })
             .on('error', (spawnError) => console.error(spawnError));
-        }, 8000);
+        }, 15 * 1e3);
       }
+
       return middlewares;
     },
   },

@@ -26,7 +26,7 @@
     "name": "Rabby",
     "url": "https://rabby.io/"
   },
-  "main": "./src/main/main.ts",
+  "main": "./.erb/dll/main.bundle.dev.js",
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:main": "cross-env-shell NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.main.prod.ts",
@@ -52,8 +52,11 @@
     "prepare": "husky install",
     "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
     "prestart": "npm run make-theme",
-    "start": "ts-node ./.erb/scripts/check-port-in-use.js && npm run start:renderer",
-    "start:main": "cross-env-shell NODE_ENV=development electronmon -r ts-node/register/transpile-only -r tsconfig-paths/register .",
+    "start": "ts-node ./.erb/scripts/check-port-in-use.js && cross-env-shell WITH_MAIN=true npm run start:renderer",
+    "start:main:old": "cross-env-shell NODE_ENV=development electronmon -r ts-node/register/transpile-only -r tsconfig-paths/register .",
+    "start:main": "concurrently -k \"cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --watch --config ./.erb/configs/webpack.config.main.dev.ts\" \"cross-env-shell NODE_ENV=development electronmon .\"",
+    "start:main:js": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --watch --config ./.erb/configs/webpack.config.main.dev.ts",
+    "start:main:electronmon": "cross-env-shell NODE_ENV=development electronmon .",
     "start:preload": "cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
     "start:renderer": "npm run clean:renderer && cross-env-shell NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
     "sync:chain-data": "node ./scripts/sync-support-chain.js",
@@ -175,7 +178,7 @@
     "lodash": "^4.17.21",
     "lru-cache": "^7.14.0",
     "multiformats": "^11.0.2",
-    "node-abi": "^3.47.0",
+    "node-abi": "^3.62.0",
     "node-fetch": "^2.6.9",
     "p-queue": "^7.3.0",
     "p-retry": "^4.6.2",
@@ -234,8 +237,8 @@
     "css-loader": "^6.7.1",
     "css-minimizer-webpack-plugin": "^4.0.0",
     "detect-port": "^1.3.0",
-    "electron": "^27.3.5",
-    "electron-builder": "^23.3.3",
+    "electron": "^28.3.1",
+    "electron-builder": "^24.13.3",
     "electron-devtools-installer": "^3.2.0",
     "electron-notarize": "^1.2.1",
     "electron-rebuild": "^3.2.9",
@@ -294,13 +297,20 @@
     "windicss-webpack-plugin": "^1.7.7"
   },
   "devEngines": {
-    "node": ">=14.x",
+    "node": ">=18.18.2",
     "npm": ">=7.x"
+  },
+  "engines": {
+    "node": ">=18.18.2"
   },
   "electronmon": {
     "patterns": [
       "!**/**",
-      "src/main/*"
+      "src/main/main.ts",
+      ".erb/dll/**"
+    ],
+    "mainfile_patterns": [
+      "src/main/main.ts"
     ],
     "logLevel": "quiet"
   }
