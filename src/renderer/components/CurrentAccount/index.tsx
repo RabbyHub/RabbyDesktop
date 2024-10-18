@@ -10,7 +10,7 @@ import {
 } from '@/renderer/utils/constant';
 import clsx from 'clsx';
 import { useMemo, useRef, useState } from 'react';
-
+import { GasAccountDashBoardHeader } from '../GasAccount/components/Header';
 import styles from './index.module.less';
 import { SignalBridge } from '../ConnectStatus/SignalBridge';
 
@@ -101,8 +101,8 @@ export const CurrentAccountAndNewAccount = ({
 }) => {
   return (
     <div className={clsx(styles.row, className)} data-nodrag>
-      <AddNewAccount />
       <CurrentAccount />
+      <GasAccountDashBoardHeader />
     </div>
   );
 };
