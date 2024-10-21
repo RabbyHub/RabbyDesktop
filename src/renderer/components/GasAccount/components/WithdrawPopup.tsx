@@ -44,7 +44,9 @@ const WithdrawContent = ({
         account_id: accountId || '',
         amount: balance,
       });
-      refresh();
+      setTimeout(() => {
+        refresh();
+      }, 200);
       onClose();
       onAfterConfirm?.();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

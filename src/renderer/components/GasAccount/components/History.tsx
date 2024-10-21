@@ -120,7 +120,8 @@ export const GasAccountHistory = () => {
       {!loading &&
         txList?.rechargeList?.map((item, index) => (
           <HistoryItem
-            key={item.create_at}
+            // eslint-disable-next-line react/no-array-index-key
+            key={`${item.create_at}${index}`}
             time={item.create_at}
             value={item.amount}
             sign="+"
@@ -133,7 +134,8 @@ export const GasAccountHistory = () => {
       {!loading &&
         txList?.list.map((item, index) => (
           <HistoryItem
-            key={item.create_at}
+            // eslint-disable-next-line react/no-array-index-key
+            key={`${item.create_at}${index}`}
             time={item.create_at}
             value={item.usd_value}
             sign={item.history_type === 'recharge' ? '+' : '-'}
