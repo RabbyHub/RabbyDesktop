@@ -9,6 +9,7 @@ export interface Props extends Omit<ModalProps, 'onCancel'> {
   onCancel?: (e?: React.MouseEvent<HTMLElement>) => void;
   smallTitle?: boolean;
   closeIcon?: React.ReactNode;
+  okCancel?: boolean;
 }
 
 export const Modal: React.FC<Props> = ({

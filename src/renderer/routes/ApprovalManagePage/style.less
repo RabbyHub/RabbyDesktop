@@ -105,12 +105,13 @@
     background-color: rgba(0, 0, 0, 0.2);
   }
 
-  > .search-input-wrapper {
+.search-input-wrapper {
     height: @tools-h;
     background-color: rgba(0, 0, 0, 0.1);
     border-radius: @radius-value;
     overflow: hidden;
-    border: 1px solid transparent;
+    // border: 1px solid transparent;
+    border: 1px solid var(--r-neutral-line);
     transition: ease-in 0.2s border-color;
 
     &.is-focusing,
@@ -131,6 +132,9 @@
 
       > input.ant-input {
         background-color: transparent;
+      }
+      &::placeholder {
+        color: var(--r-neutral-foot);
       }
     }
   }

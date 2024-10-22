@@ -83,6 +83,15 @@ export function usePreference() {
     [fetchPreference, preferences.pinnedChain]
   );
 
+  const updatePinnedChainList = async (chains: CHAINS_ENUM[]) => {
+    setPreferences((pre) => ({
+      ...pre,
+      pinnedChain: chains,
+    }));
+    await walletController.updateChain(chains);
+    fetchPreference('pinnedChain');
+  };
+
   const getCustomizedToken = useCallback(async () => {
     return fetchPreference('customizedToken');
   }, [fetchPreference]);
@@ -133,5 +142,7 @@ export function usePreference() {
     removeBlockedToken,
     getBlockedToken,
     getCustomizedToken,
+    updatePinnedChainList,
+    fetchPreference,
   };
 }

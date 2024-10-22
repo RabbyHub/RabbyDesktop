@@ -1,6 +1,3 @@
-// import { KEYRING_CLASS, KEYRING_ICONS, WALLET_BRAND_CONTENT } from '@/constant';
-// import { useWalletConnectIcon } from '@/ui/component/WalletConnect/useWalletConnectIcon';
-// import { IDisplayedAccountWithBalance } from '@/ui/models/accountToDisplay';
 import { useWalletConnectIcon } from '@/renderer/hooks/useWalletConnectIcon';
 import {
   KEYRING_CLASS,

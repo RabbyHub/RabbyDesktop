@@ -2,22 +2,26 @@ import { useLedgerDeviceConnected } from '@/renderer/utils/ledger';
 import React from 'react';
 import { useCommonPopupView } from './useCommonPopupView';
 
-export const Ledger: React.FC = () => {
+export const Ledger: React.FC<{
+  isModalContent?: boolean;
+}> = ({ isModalContent }) => {
   const { setTitle, setHeight, closePopup } = useCommonPopupView();
   const hasConnectedLedgerHID = useLedgerDeviceConnected();
 
   React.useEffect(() => {
-    setTitle('How to Connect Ledger');
-    setHeight(360);
+    if (!isModalContent) {
+      setTitle('Your ledger is not connected');
+      setHeight(320);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [!isModalContent]);
 
   React.useEffect(() => {
-    if (hasConnectedLedgerHID) {
+    if (!isModalContent && hasConnectedLedgerHID) {
       closePopup();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasConnectedLedgerHID]);
+  }, [hasConnectedLedgerHID, !isModalContent]);
 
   return (
     <div className="pt-[10px]">

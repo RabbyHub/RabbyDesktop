@@ -1,4 +1,3 @@
-// import { TxDisplayItem, TxHistoryItem } from '@/background/service/openapi';
 import NameAndAddress from '@/renderer/components/NameAndAddress';
 import {
   TxDisplayItem,

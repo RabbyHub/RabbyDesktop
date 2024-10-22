@@ -1,11 +1,26 @@
+import {
+  INITIAL_OPENAPI_URL,
+  INITIAL_TESTNET_OPENAPI_URL,
+} from '@/renderer/utils/constant';
 import { OpenApiService } from '@rabby-wallet/rabby-api';
+import { WebSignApiPlugin } from '@rabby-wallet/rabby-api/dist/plugins/web-sign';
 
-export const INITIAL_OPENAPI_URL = 'https://api.rabby.io';
+export * from '@rabby-wallet/rabby-api/dist/types';
 
-const openApi = new OpenApiService({
+const service = new OpenApiService({
+  plugin: WebSignApiPlugin,
   store: {
     host: INITIAL_OPENAPI_URL,
+    testnetHost: INITIAL_TESTNET_OPENAPI_URL,
   },
 });
 
-export default openApi;
+export const testnetOpenapiService = new OpenApiService({
+  plugin: WebSignApiPlugin,
+  store: {
+    host: INITIAL_TESTNET_OPENAPI_URL,
+    testnetHost: INITIAL_TESTNET_OPENAPI_URL,
+  },
+});
+
+export default service;

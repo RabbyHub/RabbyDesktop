@@ -101,7 +101,6 @@ export const useAccountToDisplay = () => {
           case 'unlock':
           case 'accountsChanged':
           case 'rabby:chainChanged': {
-            console.log('accountsChanged');
             getAllAccountsToDisplay();
           }
         }

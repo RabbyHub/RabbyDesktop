@@ -14,7 +14,6 @@ import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
 import { formatUsdValue } from '@/renderer/utils/number';
 import { Chain, CHAINS_ENUM } from '@debank/common';
 import { useChainList } from '@/renderer/hooks/rabbyx/useChainList';
-import { useTranslation } from 'react-i18next';
 import { CustomNetworkModal } from '@/renderer/routes/Settings/components/CustomTestnet';
 import RabbyInput from '../AntdOverwrite/Input';
 import ChainIcon from '../ChainIcon';
@@ -165,6 +164,7 @@ const SwitchChainModalInner = React.forwardRef<
     const { matteredChainBalances, getLocalBalanceValue } =
       useAccountBalanceMap({
         isTestnet: selectedTab === 'testnet',
+        disableAutoFetch: false,
       });
 
     const [searchInput, setSearchInput] = useState('');

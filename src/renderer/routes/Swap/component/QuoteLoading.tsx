@@ -7,7 +7,6 @@ import styled from 'styled-components';
 import ImgRabbyWallet from '@/../assets/icons/swap/rabby-wallet.png';
 import { useSwapSupportedDexList } from '@/renderer/hooks/rabbyx/useSwap';
 import { DEX } from '../constant';
-// import { useThemeMode } from '@/ui/hooks/usePreference';
 
 type QuoteListLoadingProps = {
   fetchedList?: string[];

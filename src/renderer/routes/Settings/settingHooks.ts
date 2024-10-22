@@ -185,7 +185,7 @@ export function useIsViewingDevices() {
 const IS_REG_CHANNEL = process.env.BUILD_CHANNEL === 'reg';
 export const DefaultBackendServiceValues = {
   mainnet: 'https://api.rabby.io',
-  testnet: 'https://api.testnet.rabby.io',
+  testnet: 'https://alpha.rabby.io',
 };
 const backendServiceApisAtom = atomWithStorage(
   'devOnlyBackendService',

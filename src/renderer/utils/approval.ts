@@ -4,7 +4,6 @@ import {
   Spender,
   TokenApproval,
 } from '@rabby-wallet/rabby-api/dist/types';
-// import { coerceFloat, coerceInteger, splitNumberByStep } from '@/ui/utils';
 
 import BigNumber from 'bignumber.js';
 // import { appIsDev, appIsProd } from './env';
