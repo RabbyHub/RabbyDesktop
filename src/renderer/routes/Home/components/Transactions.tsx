@@ -196,13 +196,10 @@ const Transactions = ({
     ).reverse();
   }, [recentTxs, completedTxs]);
 
-  console.log('local', localTxs, recentTxs, mergedRecentTxs, completedTxs);
-
   const initLocalTxs = async (address: string) => {
     const YESTERDAY = Math.floor(Date.now() / 1000 - 3600 * 24);
     const { pendings, completeds } =
       await walletController.getTransactionHistory(address);
-    console.log('pppp', pendings, completeds, address);
     const lTxs: TransactionDataItem[] = [];
     const pTxs: TransactionDataItem[] = [];
     const markedCompleteds = completeds.map((item) => {
@@ -231,7 +228,6 @@ const Transactions = ({
       }
       return item;
     });
-    console.log('markedCompleteds', markedCompleteds);
     markedCompleteds
       .filter(
         (item) =>
@@ -371,7 +367,6 @@ const Transactions = ({
           });
         }
       });
-    console.log('pTxs', pTxs);
     setPendingTxs(pTxs);
   };
 

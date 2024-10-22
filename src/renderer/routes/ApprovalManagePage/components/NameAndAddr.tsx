@@ -4,7 +4,7 @@ import NameAndAddress from '@/renderer/components/NameAndAddress';
 import clsx from 'clsx';
 import IconCopy from '../icons/icon-copy.svg';
 
-type Props = Omit<React.ComponentProps<typeof NameAndAddress>, 'copyIcon'>;
+type Props = Omit<React.ComponentProps<typeof NameAndAddress>, ''>;
 
 export default function ApprovalsNameAndAddr({
   copyIconClass,

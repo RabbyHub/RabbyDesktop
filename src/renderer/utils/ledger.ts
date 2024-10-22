@@ -1,4 +1,8 @@
 import React from 'react';
+import { walletController } from '@/renderer/ipcRequest/rabbyx';
+
+import { useTranslation } from 'react-i18next';
+import { KEYRING_CLASS } from './constant';
 
 export enum LedgerHDPathType {
   LedgerLive = 'LedgerLive',
@@ -45,4 +49,12 @@ export const useLedgerDeviceConnected = () => {
   }, []);
 
   return connected;
+};
+
+export const isLedgerLockError = (message = '') => {
+  return (
+    message.includes('0x5515') ||
+    message.includes('0x6b0c') ||
+    message.includes('0x650f')
+  );
 };

@@ -1,4 +1,3 @@
-// import { IconApproval, IconCancel, IconContract, IconSend } from '@/ui/assets';
 import { memo, useMemo } from 'react';
 
 interface TxAvatarProps {
