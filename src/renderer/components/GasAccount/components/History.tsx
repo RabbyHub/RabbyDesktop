@@ -97,10 +97,14 @@ const LoadingItem = ({ borderT }: { borderT: boolean }) => {
   );
 };
 
-export const GasAccountHistory = () => {
+export const GasAccountHistory = ({
+  gasAccountHistory,
+}: {
+  gasAccountHistory: ReturnType<typeof useGasAccountHistory>;
+}) => {
   const { t } = useTranslation();
 
-  const { loading, txList, loadingMore, ref } = useGasAccountHistory();
+  const { loading, txList, loadingMore, ref } = gasAccountHistory;
 
   if (!loading && !txList?.rechargeList.length && !txList?.list.length) {
     return (

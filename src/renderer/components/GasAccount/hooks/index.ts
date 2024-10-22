@@ -158,6 +158,7 @@ export const useGasAccountHistory = () => {
         start: d?.list?.length && d?.list?.length > 1 ? d?.list?.length : 0,
         limit: 5,
       });
+      console.log('getGasAccountHistory ,useInfiniteScroll data', data);
 
       const rechargeList = data.recharge_list;
       const historyList = data.history_list;
@@ -185,18 +186,25 @@ export const useGasAccountHistory = () => {
   );
 
   const { value } = useAsync(async () => {
-    if (sig && accountId && (refreshTxListCount || refreshId)) {
+    if (sig && accountId && refreshTxListCount) {
       const res = await walletOpenapi.getGasAccountHistory({
         sig,
         account_id: accountId,
         start: 0,
         limit: 5,
       });
+      console.log(
+        'getGasAccountHistory ,useAsync data',
+        res,
+        refreshId,
+        refreshTxListCount
+      );
       return res;
     }
     return undefined;
-  }, [sig, refreshTxListCount, refreshId]);
+  }, [sig, refreshTxListCount]);
 
+  console.log('getGasAccountHistory ,refreshId data', refreshId);
   useEffect(() => {
     if (value?.history_list) {
       mutate((d) => {
@@ -246,5 +254,6 @@ export const useGasAccountHistory = () => {
     txList,
     loadingMore,
     ref,
+    refreshListTx,
   };
 };

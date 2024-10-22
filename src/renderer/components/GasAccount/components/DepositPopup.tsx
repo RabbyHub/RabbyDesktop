@@ -180,8 +180,10 @@ const GasAccountDepositContent = ({
   onClose,
   setTokenListVisible,
   tokenListVisible,
+  refreshHistory,
 }: {
   onClose: () => void;
+  refreshHistory: () => void;
   setTokenListVisible: React.Dispatch<React.SetStateAction<boolean>>;
   tokenListVisible: boolean;
 }) => {
@@ -211,7 +213,7 @@ const GasAccountDepositContent = ({
             .toFixed(0),
         });
         setTimeout(() => {
-          refresh();
+          refreshHistory();
         }, 200);
         onClose();
       }
@@ -318,9 +320,10 @@ const GasAccountDepositContent = ({
 export const GasAccountDepositPopup = (props: {
   onCancel: () => void;
   visible: boolean;
+  refreshHistory: () => void;
 }) => {
   const [tokenListVisible, setTokenListVisible] = useState(false);
-  const { onCancel, visible } = props;
+  const { onCancel, visible, refreshHistory } = props;
 
   return (
     <Drawer
@@ -352,6 +355,7 @@ export const GasAccountDepositPopup = (props: {
       <GasAccountDepositContent
         onClose={onCancel || noop}
         tokenListVisible={tokenListVisible}
+        refreshHistory={refreshHistory}
         setTokenListVisible={setTokenListVisible}
       />
     </Drawer>
