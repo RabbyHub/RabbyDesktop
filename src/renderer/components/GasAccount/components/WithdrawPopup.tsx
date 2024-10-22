@@ -17,11 +17,13 @@ const WithdrawContent = ({
   onClose,
   onAfterConfirm,
   account,
+  refreshHistory,
 }: {
   account: GasAccountInfo['account'];
   balance: number;
   onClose: () => void;
   onAfterConfirm?: () => void;
+  refreshHistory: () => void;
 }) => {
   const { t } = useTranslation();
 
@@ -46,6 +48,7 @@ const WithdrawContent = ({
       });
       setTimeout(() => {
         refresh();
+        refreshHistory();
       }, 200);
       onClose();
       onAfterConfirm?.();
@@ -199,9 +202,16 @@ export const WithdrawPopup = (props: {
   onCancel: () => void;
   account: GasAccountInfo['account'];
   visible: boolean;
+  refreshHistory: () => void;
 }) => {
   const [visible, setVisible] = useState(false);
-  const { onCancel, account, visible: withdrawVisible, balance } = props;
+  const {
+    onCancel,
+    account,
+    visible: withdrawVisible,
+    balance,
+    refreshHistory,
+  } = props;
   return (
     <>
       <Drawer
@@ -231,6 +241,7 @@ export const WithdrawPopup = (props: {
           account={account}
           onClose={onCancel || noop}
           balance={balance}
+          refreshHistory={refreshHistory}
           onAfterConfirm={() => setVisible(true)}
         />
       </Drawer>

@@ -9,7 +9,7 @@ import { GasAccountHistory } from './components/History';
 // import { TooltipWithMagnetArrow } from '@/ui/component/Tooltip/TooltipWithMagnetArrow';
 import { GasAccountLoginPopup } from './components/LoginPopup';
 import { GasAccountDepositPopup } from './components/DepositPopup';
-import { useGasAccountLogin } from './hooks';
+import { useGasAccountHistory, useGasAccountLogin } from './hooks';
 import { GasAccountBlueBorderedButton } from './components/Button';
 import { GasAccountLogoutPopup } from './components/LogoutPopop';
 import { WithdrawPopup } from './components/WithdrawPopup';
@@ -27,6 +27,7 @@ const GasAccountInner = ({
   accountInfo: GasAccountInfo;
 }) => {
   const { t } = useTranslation();
+  const gasAccountHistory = useGasAccountHistory();
   const containerRef = useRef(null);
 
   const [loginVisible, setLoginVisible] = useState(false);
@@ -155,7 +156,7 @@ const GasAccountInner = ({
           </div>
         </GasAccountWrapperBg>
 
-        <GasAccountHistory />
+        <GasAccountHistory gasAccountHistory={gasAccountHistory} />
       </div>
 
       <GasAccountLoginPopup
@@ -174,12 +175,14 @@ const GasAccountInner = ({
       />
       <GasAccountDepositPopup
         visible={depositVisible}
+        refreshHistory={gasAccountHistory.refreshListTx}
         onCancel={() => setDepositVisible(false)}
       />
 
       <WithdrawPopup
         visible={withdrawVisible}
         account={account}
+        refreshHistory={gasAccountHistory.refreshListTx}
         onCancel={() => setWithdrawVisible(false)}
         balance={balance}
       />
