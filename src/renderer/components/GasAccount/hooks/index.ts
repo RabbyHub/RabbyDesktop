@@ -158,7 +158,6 @@ export const useGasAccountHistory = () => {
         start: d?.list?.length && d?.list?.length > 1 ? d?.list?.length : 0,
         limit: 5,
       });
-      console.log('getGasAccountHistory ,useInfiniteScroll data', data);
 
       const rechargeList = data.recharge_list;
       const historyList = data.history_list;
@@ -193,18 +192,11 @@ export const useGasAccountHistory = () => {
         start: 0,
         limit: 5,
       });
-      console.log(
-        'getGasAccountHistory ,useAsync data',
-        res,
-        refreshId,
-        refreshTxListCount
-      );
       return res;
     }
     return undefined;
   }, [sig, refreshTxListCount]);
 
-  console.log('getGasAccountHistory ,refreshId data', refreshId);
   useEffect(() => {
     if (value?.history_list) {
       mutate((d) => {
