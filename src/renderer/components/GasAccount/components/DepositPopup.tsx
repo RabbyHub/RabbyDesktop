@@ -19,7 +19,7 @@ import { GasAccountCloseIcon } from './PopupCloseIcon';
 import styles from '../index.module.less';
 import { useGasAccountRefresh } from '../hooks';
 
-const amountList = [0.1, 100, 500];
+const amountList = [20, 100, 500];
 
 const TokenSelector = ({
   visible,
