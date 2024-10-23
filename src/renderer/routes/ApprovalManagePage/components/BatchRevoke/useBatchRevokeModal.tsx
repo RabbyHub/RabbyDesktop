@@ -58,7 +58,7 @@ export const useBatchRevokeModal = ({
     return (
       <Modal
         open={visible}
-        className="confirm-revoke-modal"
+        className="confirm-revoke-modal revoke-list"
         closable={false}
         maskClosable
         centered

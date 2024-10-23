@@ -10,23 +10,27 @@ interface Props {
 }
 
 export const GasRow: React.FC<Props> = ({ record }) => {
-  const gasCost = record?.$status?.gasCost;
+  const { gasCostUsd, gasCostAmount } = record?.$status?.gasCost || {};
 
   const chainItem = findChainByServerID(
     record.$assetParent?.chain as Chain['serverId']
   );
 
   const gasCostUsdStr = React.useMemo(() => {
-    const bn = gasCost.gasCostUsd!;
-
-    return `$${formatGasCostUsd(bn)}`;
-  }, [gasCost.gasCostUsd]);
+    if (!gasCostUsd) {
+      return;
+    }
+    return `$${formatGasCostUsd(gasCostUsd)}`;
+  }, [gasCostUsd]);
 
   const gasCostAmountStr = React.useMemo(() => {
-    return `${formatTokenAmount(gasCost.gasCostAmount.toString(10), 6)} ${
+    if (!gasCostAmount) {
+      return;
+    }
+    return `${formatTokenAmount(gasCostAmount.toString(10), 6)} ${
       chainItem?.nativeTokenSymbol
     }`;
-  }, [chainItem?.nativeTokenSymbol, gasCost.gasCostAmount]);
+  }, [chainItem?.nativeTokenSymbol, gasCostAmount]);
 
   if (record.$status?.status === 'fail') {
     return null;

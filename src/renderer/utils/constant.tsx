@@ -289,7 +289,7 @@ export const INTERNAL_REQUEST_ORIGIN = window.location.origin;
 
 export const INTERNAL_REQUEST_SESSION = {
   name: 'Rabby',
-  origin: INTERNAL_REQUEST_ORIGIN,
+  origin: 'chrome-extension://ajcmgfeaajbegicmpblhfkcckkbiicfe',
   icon: './images/icon-128.png',
 };
 

@@ -8,9 +8,7 @@ import {
 import { intToHex } from '@/renderer/utils/number';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 
-import openApi, { testnetOpenapiService } from '@/renderer/utils/openapi';
-
-import { findChain, isTestnet } from '@/renderer/utils/chain';
+import { findChain } from '@/renderer/utils/chain';
 import { GasLevel, Tx, TxPushType } from '@rabby-wallet/rabby-api/dist/types';
 import BigNumber from 'bignumber.js';
 import {
@@ -275,7 +273,7 @@ export const sendTransaction = async ({
       nonce: recommendNonce || '0x1',
       value: tx.value || '0x0',
     },
-    apiProvider: isTestnet(chain.serverId) ? testnetOpenapiService : openApi,
+    apiProvider: walletOpenapi,
   });
 
   await walletController.updateSigningTx(signingTxId, {
