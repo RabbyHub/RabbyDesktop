@@ -51,20 +51,6 @@ export const RevokeTable: React.FC<RevokeTableProps> = ({
     return Math.min(TABLE_MAX_HEIGHT, Math.max(TABLE_MIN_HEIGHT, height));
   }, [task.list]);
 
-  const handleWindowBlur = React.useCallback(() => {
-    if (task.status === 'active') {
-      task.pause();
-    }
-  }, [task.status, task.pause]);
-
-  React.useEffect(() => {
-    window.addEventListener('blur', handleWindowBlur);
-
-    return () => {
-      window.removeEventListener('blur', handleWindowBlur);
-    };
-  }, [handleWindowBlur]);
-
   React.useEffect(() => {
     onTaskStatus(task.status);
   }, [task.status]);
