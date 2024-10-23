@@ -1,3 +1,6 @@
+@import '../../css/vars.less';
+@import '../../css/mixins.less';
+
 .custom-popup {
   .ant-drawer-header {
     padding: 20px 20px 0px 20px;
@@ -9,78 +12,133 @@
     font-size: 20px;
     line-height: 23px;
     text-align: center;
-    color: #fff;
-  }
-  .ant-drawer-mask {
-    background-color: rgba(0, 0, 0, 0.4);
+    color: var(--r-neutral-title1, #192945);
   }
   .ant-drawer-header {
     background: transparent;
   }
-
-  .ant-drawer-close {
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 10;
-    display: block;
-    padding: 20px;
-    font-weight: 700;
-    font-style: normal;
-    line-height: 1;
-    text-align: center;
-    text-transform: none;
-    text-decoration: none;
-    background: transparent;
-    border: 0;
-    outline: 0;
-    cursor: pointer;
-    transition: color 0.3s;
-    text-rendering: auto;
-    margin: 0;
-  }
-
   .ant-drawer-content {
     flex: 1;
-    background-color: #3E4351;
-    background: #3E4351;
+    background-color: var(--r-neutral-bg-1, #fff);
     border-radius: 16px 16px 0px 0px;
     overflow: visible;
   }
 
-  .ant-drawer-body {
-    padding-top: 24px;
-    padding-bottom: 0;
+  &.is-new {
+    .ant-drawer-content {
+      background: var(--r-neutral-bg2, #F2F4F7);
+    }
   }
 
-  .popup-input {
-    // background-color: @color-bg !important;
-    // border-color: @color-border;
-    border-radius: 6px;
+  &.isConnectView {
+    .ant-drawer-content {
+      background: #F5F6FA;
+    }
+  }
+  &:not(.is-support-darkmode) .popup-input {
+    background-color: @color-bg !important;
+    border-color: @color-border;
     .ant-input {
-      // background-color: @color-bg !important;
+      background-color: @color-bg !important;
     }
     .anticon-close-circle {
-      // color: @color-comment-1;
+      color: @color-comment-1;
     }
     &:focus {
-      border-color: #8697ff;
+      border-color: var(--r-blue-default, #7084ff);
+    }
+  }
+  .popup-input {
+    border-radius: 8px;
+
+    input {
+      border-radius: 0;
+      &::placeholder {
+        color: var(--r-neutral-foot, #6a7587);
+      }
     }
   }
   .popup-footer {
     position: absolute;
     left: 0;
     right: 0;
+    bottom: 0;
     bottom: 24px;
   }
 }
 
+.custom-popup.gas-modal {
+  .popup-footer {
+    bottom: 0;
+    padding-bottom: 18px;
+    padding-top: 18px;
+    border-top: 0.5px solid var(--r-neutral-line, rgba(255, 255, 255, 0.10));
+  }
+}
 
-.CommonPopup {
-  .ant-drawer-body {
-      padding-top: 24px;
-      padding-bottom: 0;
-      padding-left: 0;
-      padding-right: 0;
+// temporary solution, after all custom-popup supported darkmode, integrate css below back to the above
+.ant-drawer.is-support-darkmode,
+.custom-popup.is-support-darkmode,
+.custom-popup.chain-selector__modal {
+  .ant-drawer-title {
+    color: var(--r-neutral-title-1, #192945);
+  }
+  .ant-drawer-header {
+    background: transparent;
+  }
+  .ant-drawer-content {
+    background: var(--r-neutral-bg-1, #3D4251);
+  }
+
+  &.is-new {
+    .ant-drawer-content {
+      background: var(--r-neutral-bg2, #F2F4F7);
     }
+  }
+
+  &.isConnectView {
+    .ant-drawer-title {
+      color: var(--r-neutral-title-1, #192945);
+    }
+    .ant-drawer-content {
+      background: var(--r-neutral-bg-2,#fff);
+    }
+  }
+
+  .ant-input-darkmode();
+
+  .ant-input {
+    background: var(--r-neutral-card-2, rgba(255, 255, 255, 0.06)) !important;
+
+    &.ant-input-affix-wrapper {
+      border-color: var(--r-neutral-line, rgba(255, 255, 255, 0.10)) !important;
+      background: var(--r-neutral-card-2, #F2F4F7) !important;
+    }
+  }
+
+  .ant-form-item-has-error {
+    .ant-input-affix-wrapper {
+      border-color: var(--r-red-default, #FF4D4F) !important;
+    }
+  }
+
+  .ant-input-affix-wrapper {
+    border-width: 1px;
+    &.ant-input-affix-wrapper-focused {
+      border-width: 1px;
+      border-color: var(--r-blue-default, #7084ff);
+
+    }
+    .ant-input {
+      background: transparent !important;
+    }
+  }
+}
+
+
+.ant-drawer,
+.custom-popup {
+  .ant-drawer-mask {
+    background-color: var(--rabby-custom-ant-drawer-mask);
+  }
 }

@@ -1,7 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { ModalConfirm } from '@/renderer/components/Modal/Confirm';
 import { ellipsis } from '@/renderer/utils/address';
-import { valueGreaterThan10 } from '../../util';
 import { ERROR } from '../../error';
 
 export abstract class Cex<Config> {

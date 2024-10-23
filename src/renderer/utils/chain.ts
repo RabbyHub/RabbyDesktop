@@ -1,6 +1,10 @@
 import defaultSuppordChain from '@/isomorphic/default-support-chains.json';
-import { Chain } from '@debank/common';
-import { SupportedChain, TokenItem } from '@rabby-wallet/rabby-api/dist/types';
+import { Chain, CHAINS, CHAINS_ENUM } from '@debank/common';
+import {
+  ChainWithBalance,
+  SupportedChain,
+  TokenItem,
+} from '@rabby-wallet/rabby-api/dist/types';
 import { TestnetChain } from '@/isomorphic/types/customTestnet';
 import { CustomTestnetToken } from '@/isomorphic/types/rabbyx';
 import BigNumber from 'bignumber.js';
@@ -195,10 +199,41 @@ export function findChainByID(chainId: Chain['id']): Chain | null {
 }
 
 /**
+ * @description safe find chain, if not found, return fallback(if provided) or null
+ */
+export function findChainByEnum(
+  chainEnum?: CHAINS_ENUM | string,
+  options?: {
+    fallback?: true | CHAINS_ENUM;
+  }
+): Chain | null {
+  const fallbackIdx = !options?.fallback
+    ? null
+    : typeof options?.fallback === 'string'
+    ? options?.fallback
+    : ('ETH' as const);
+  const toFallbackEnum: CHAINS_ENUM | null = fallbackIdx
+    ? CHAINS_ENUM[fallbackIdx] || CHAINS_ENUM.ETH
+    : null;
+  const toFallbackChain = toFallbackEnum ? CHAINS[toFallbackEnum] : null;
+
+  if (!chainEnum) return toFallbackChain;
+
+  return findChain({ enum: chainEnum }) || toFallbackChain;
+}
+
+/**
  * @description safe find chain by serverId
  */
 export function findChainByServerID(chainId: Chain['serverId']): Chain | null {
   return !chainId ? null : findChain({ serverId: chainId }) || null;
+}
+
+export function isTestnet(chainServerId?: string) {
+  if (!chainServerId) return false;
+  const chain = findChainByServerID(chainServerId);
+  if (!chain) return false;
+  return !!chain.isTestnet;
 }
 
 // export { formatChain } from '@/isomorphic/wallet/chain';
@@ -232,3 +267,164 @@ export const customTestnetTokenToTokenItem = (
     price_24h_change: 0,
   };
 };
+
+export interface DisplayChainWithWhiteLogo extends ChainWithBalance {
+  logo?: string;
+  whiteLogo?: string;
+}
+
+export function sortChainItems<T extends Chain>(
+  items: T[],
+  opts?: {
+    cachedChainBalances?: {
+      [P in Chain['serverId']]?: DisplayChainWithWhiteLogo;
+    };
+    supportChains?: CHAINS_ENUM[];
+  }
+) {
+  const { cachedChainBalances = {}, supportChains } = opts || {};
+
+  return (
+    items
+      // .map((item, index) => ({
+      //   ...item,
+      //   index,
+      // }))
+      .sort((a, b) => {
+        const aBalance = cachedChainBalances[a.serverId]?.usd_value || 0;
+        const bBalance = cachedChainBalances[b.serverId]?.usd_value || 0;
+
+        if (!supportChains) {
+          return aBalance > bBalance ? -1 : 1;
+        }
+
+        if (supportChains.includes(a.enum) && !supportChains.includes(b.enum)) {
+          return -1;
+        }
+        if (!supportChains.includes(a.enum) && supportChains.includes(b.enum)) {
+          return 1;
+        }
+
+        return aBalance > bBalance ? -1 : 1;
+      })
+  );
+}
+
+function searchChains(options: {
+  list: Chain[];
+  pinned: string[];
+  searchKeyword: string;
+}) {
+  const { list, pinned } = options;
+  let { searchKeyword = '' } = options;
+
+  searchKeyword = searchKeyword?.trim().toLowerCase();
+  if (!searchKeyword) {
+    return list.filter((item) => !pinned.includes(item.enum));
+  }
+  const res = list.filter((item) =>
+    [item.name, item.enum, item.nativeTokenSymbol].some((i) =>
+      i.toLowerCase().includes(searchKeyword)
+    )
+  );
+  return res
+    .filter((item) => pinned.includes(item.enum))
+    .concat(res.filter((item) => !pinned.includes(item.enum)));
+}
+
+export function varyAndSortChainItems(deps: {
+  supportChains?: CHAINS_ENUM[];
+  searchKeyword?: string;
+  pinned: CHAINS_ENUM[];
+  matteredChainBalances: {
+    [x: string]: DisplayChainWithWhiteLogo | undefined;
+  };
+  netTabKey?: import('@/renderer/components/PillsSwitch/NetSwitchTabs').NetSwitchTabsKey;
+  mainnetList?: Chain[];
+  testnetList?: Chain[];
+}) {
+  const {
+    supportChains,
+    searchKeyword = '',
+    pinned,
+    matteredChainBalances,
+    netTabKey,
+    mainnetList = store.mainnetList,
+    testnetList = store.testnetList,
+  } = deps;
+
+  const unpinnedListGroup = {
+    withBalance: [] as Chain[],
+    withoutBalance: [] as Chain[],
+    disabled: [] as Chain[],
+  };
+  const pinnedListGroup = {
+    withBalance: [] as Chain[],
+    withoutBalance: [] as Chain[],
+    disabled: [] as Chain[],
+  };
+
+  const _all = (
+    (netTabKey === 'testnet' ? testnetList : mainnetList) || []
+  ).sort((a, b) => a.name.localeCompare(b.name));
+
+  _all.forEach((item) => {
+    const inPinned = pinned.find((pinnedEnum) => pinnedEnum === item.enum);
+
+    if (!inPinned) {
+      if (supportChains?.length && !supportChains.includes(item.enum)) {
+        unpinnedListGroup.disabled.push(item);
+      } else if (!matteredChainBalances[item.serverId]) {
+        unpinnedListGroup.withoutBalance.push(item);
+      } else {
+        unpinnedListGroup.withBalance.push(item);
+      }
+    } else if (supportChains?.length && !supportChains.includes(item.enum)) {
+      pinnedListGroup.disabled.push(item);
+    } else if (!matteredChainBalances[item.serverId]) {
+      pinnedListGroup.withoutBalance.push(item);
+    } else {
+      pinnedListGroup.withBalance.push(item);
+    }
+  });
+
+  const allSearched = searchChains({
+    list: _all,
+    pinned,
+    searchKeyword: searchKeyword?.trim() || '',
+  });
+
+  pinnedListGroup.withBalance = sortChainItems(pinnedListGroup.withBalance, {
+    supportChains,
+    cachedChainBalances: matteredChainBalances,
+  });
+  unpinnedListGroup.withBalance = sortChainItems(
+    unpinnedListGroup.withBalance,
+    {
+      supportChains,
+      cachedChainBalances: matteredChainBalances,
+    }
+  );
+  pinnedListGroup.disabled = sortChainItems(pinnedListGroup.disabled, {
+    supportChains,
+    cachedChainBalances: matteredChainBalances,
+  });
+  unpinnedListGroup.disabled = sortChainItems(unpinnedListGroup.disabled, {
+    supportChains,
+    cachedChainBalances: matteredChainBalances,
+  });
+
+  return {
+    allSearched,
+    matteredList: [
+      ...pinnedListGroup.withBalance,
+      ...pinnedListGroup.withoutBalance,
+      ...unpinnedListGroup.withBalance,
+      ...pinnedListGroup.disabled,
+    ],
+    unmatteredList: [
+      ...unpinnedListGroup.withoutBalance,
+      ...unpinnedListGroup.disabled,
+    ],
+  };
+}

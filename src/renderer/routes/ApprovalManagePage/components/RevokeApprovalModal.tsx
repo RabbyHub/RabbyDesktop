@@ -14,7 +14,6 @@ import BigNumber from 'bignumber.js';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import {
   ApprovalItem,
-  ContractApprovalItem,
   getSpenderApprovalAmount,
 } from '@/renderer/utils/approval';
 import { ensureSuffix } from '@/isomorphic/string';
@@ -25,11 +24,14 @@ import IconClose from '@/../assets/icons/swap/modal-close.svg?rc';
 import { splitNumberByStep } from '@/renderer/utils/number';
 import IconExternal from '@/../assets/icons/common/share.svg';
 import { getTokenSymbol } from '@/renderer/utils';
+import { appIsDebugPkg } from '@/main/utils/env';
 import IconNotChecked from '../icons/check-unchecked.svg';
 import IconChecked from '../icons/check-checked.svg';
 import ApprovalsNameAndAddr from './NameAndAddr';
 import {
-  findIndexRevokeList,
+  decodeRevokeItem,
+  encodeRevokeItem,
+  isSameRevokeItem,
   maybeNFTLikeItem,
   openScanLinkFromChainItem,
   toRevokeItem,
@@ -58,33 +60,60 @@ export const RevokeApprovalModal = (props: {
 }) => {
   const { item, visible, onClose, className, revokeList, onConfirm } = props;
 
-  const [selectedList, setSelectedList] = useState<number[]>([]);
+  const [selectedSet, setSelectedSet] = useState<Set<string>>(
+    new Set<string>()
+  );
+  const selectedIdxes = useMemo(() => {
+    const idxes: number[] = [];
+    if (!selectedSet.size) return idxes;
+    item?.list.forEach((spenderHost, index) => {
+      const revokeItem = toRevokeItem(item, spenderHost, true);
+      if (revokeItem && selectedSet.has(encodeRevokeItem(revokeItem))) {
+        idxes.push(index);
+      }
+    }, []);
+
+    return idxes;
+  }, [item, selectedSet]);
 
   const handleConfirm = async () => {
     if (item?.list) {
       onConfirm(
-        selectedList
-          .map((idx) => {
-            const spenderHost = item.list[idx];
-            return toRevokeItem(item, spenderHost, true);
+        [...selectedSet]
+          .map((key) => {
+            return decodeRevokeItem(key);
           })
-          .filter(Boolean) as ApprovalSpenderItemToBeRevoked[]
+          .filter(Boolean)
       );
       onClose();
     }
   };
-  const isSelectedAll = selectedList.length === item?.list?.length;
+  const isSelectedAll = useMemo(() => {
+    return item?.list.every((spenderHost) => {
+      const revokeItem = toRevokeItem(item, spenderHost, true);
+      if (!revokeItem) return false;
+      return selectedSet.has(encodeRevokeItem(revokeItem));
+    });
+  }, [item, selectedSet]);
   const handleSelectAll = useCallback(() => {
     if (item?.list) {
-      setSelectedList((e) =>
-        e.length === item.list.length
-          ? []
-          : Array(item.list.length)
-              .fill(0)
-              .map((_, i) => i)
-      );
+      setSelectedSet(() => {
+        const set = new Set<string>();
+        if (isSelectedAll) {
+          return set;
+        }
+
+        item.list.forEach((spenderHost) => {
+          const revokeItem = toRevokeItem(item, spenderHost, true);
+          if (revokeItem) {
+            set.add(encodeRevokeItem(revokeItem));
+          }
+        });
+
+        return set;
+      });
     }
-  }, [item]);
+  }, [isSelectedAll, item]);
   const subTitle = useMemo(() => {
     if (item?.type === 'contract') {
       return 'Approved Token and NFT';
@@ -121,6 +150,12 @@ export const RevokeApprovalModal = (props: {
         const spenderValues = associatedSpender
           ? getSpenderApprovalAmount(associatedSpender)
           : null;
+        const revokeItem = toRevokeItem(item, spenderHost, true);
+        if (!revokeItem && appIsDebugPkg) {
+          console.warn('Revoke item is not found', item, spenderHost);
+        }
+        const revokeKey = !revokeItem ? '' : encodeRevokeItem(revokeItem);
+        const isSelected = !revokeKey ? false : selectedSet.has(revokeKey);
 
         return (
           <div
@@ -132,11 +167,14 @@ export const RevokeApprovalModal = (props: {
             )}
             onClick={(event) => {
               if ((event.target as HTMLElement)?.id !== 'copyIcon') {
-                setSelectedList((l) =>
-                  l.includes(index)
-                    ? l.filter((s) => s !== index)
-                    : [...l, index]
-                );
+                setSelectedSet((prev) => {
+                  if (isSelected) {
+                    prev.delete(revokeKey);
+                  } else {
+                    prev.add(revokeKey);
+                  }
+                  return new Set([...prev]);
+                });
               }
             }}
           >
@@ -211,9 +249,7 @@ export const RevokeApprovalModal = (props: {
                     })}
               />
               <img
-                src={
-                  selectedList.includes(index) ? IconChecked : IconNotChecked
-                }
+                src={isSelected ? IconChecked : IconNotChecked}
                 className="icon icon-checked w-[16px] h-[16px]"
               />
             </div>
@@ -239,6 +275,8 @@ export const RevokeApprovalModal = (props: {
               ` #${spender.nftToken.inner_id}`
             )
           : spender.name || 'Unknown';
+      const revokeItem = toRevokeItem(item, spender, true);
+      const revokeKey = revokeItem ? encodeRevokeItem(revokeItem) : '';
 
       return (
         <div
@@ -250,9 +288,14 @@ export const RevokeApprovalModal = (props: {
           )}
           onClick={(event) => {
             if ((event.target as HTMLElement)?.id !== 'copyIcon') {
-              setSelectedList((l) =>
-                l.includes(index) ? l.filter((s) => s !== index) : [...l, index]
-              );
+              setSelectedSet((prev) => {
+                if (prev.has(revokeKey)) {
+                  prev.delete(revokeKey);
+                } else {
+                  prev.add(revokeKey);
+                }
+                return new Set([...prev]);
+              });
             }
           }}
         >
@@ -286,9 +329,7 @@ export const RevokeApprovalModal = (props: {
                 {displayApprovalValue}
               </span>
               <img
-                src={
-                  selectedList.includes(index) ? IconChecked : IconNotChecked
-                }
+                src={selectedSet.has(revokeKey) ? IconChecked : IconNotChecked}
                 className="icon icon-checked"
               />
             </div>
@@ -316,26 +357,23 @@ export const RevokeApprovalModal = (props: {
         </div>
       );
     });
-  }, [item, selectedList]);
+  }, [item, selectedSet]);
 
   useEffect(() => {
-    setSelectedList([]);
+    setSelectedSet(new Set());
     if (visible && item?.list && revokeList) {
-      const indexes: number[] = [];
+      const set = new Set<string>();
 
-      item.list.forEach((token, index) => {
-        if (
-          findIndexRevokeList(revokeList, {
-            item: item as any as ContractApprovalItem,
-            spenderHost: token,
-            itemIsContractApproval: true,
-          }) > -1
-        ) {
-          indexes.push(index);
+      item.list.forEach((token) => {
+        const revokeItem = toRevokeItem(item, token, true);
+        if (!revokeItem) return;
+
+        if (revokeList.find((revoke) => isSameRevokeItem(revoke, revokeItem))) {
+          set.add(encodeRevokeItem(revokeItem));
         }
       });
 
-      setSelectedList(indexes);
+      setSelectedSet(set);
     }
   }, [visible, revokeList, item]);
 
@@ -404,7 +442,7 @@ export const RevokeApprovalModal = (props: {
           className="rounded-[6px] w-full"
           onClick={handleConfirm}
         >
-          Confirm {selectedList.length > 0 ? `(${selectedList.length})` : ''}
+          Confirm {selectedIdxes.length > 0 ? `(${selectedIdxes.length})` : ''}
         </Button>
       </div>
     </ModalStyled>

@@ -1,0 +1,239 @@
+@import '@/renderer/css/mixins.less';
+
+.confirm-revoke-modal {
+  .ant-modal-content {
+    border-radius: 12px;
+  }
+  .ant-modal-confirm-content {
+    background-color: transparent;
+    padding: 0;
+    margin-bottom: 0;
+    overflow: visible;
+  }
+
+  .ant-modal-confirm-btns {
+    display: none;
+  }
+
+  .ant-table-cell {
+    color: var(--r-neutral-foot, #6a7587);
+    background: transparent;
+    font-size: 13px;
+    font-style: normal;
+    font-weight: 400;
+    border-bottom: 1px solid var(--r-neutral-line, #e0e5ec);
+    padding: 0;
+  }
+
+  .ant-modal-header,
+  .ant-modal-content {
+    background: var(--r-neutral-bg1, #fff);
+    border-bottom: none;
+  }
+
+  &.ledger-modal {
+    .ant-modal-header,
+    .ant-modal-content {
+      background: var(--r-neutral-bg2, #f2f4f7);
+    }
+
+    .ant-modal-title {
+      font-size: 20px;
+      line-height: 24px;
+      text-align: center;
+      color: var(--r-neutral-title-1);
+    }
+  }
+
+  .am-virtual-table-cell {
+    display: flex;
+    align-items: center;
+  }
+
+  .name-and-address {
+    overflow: hidden;
+    .address {
+      color: var(--r-neutral-title1, #192945);
+      margin-right: 2px;
+      font-weight: 500;
+    }
+
+    .contract-name {
+      color: var(--r-neutral-foot, #6a7587);
+      text-overflow: ellipsis;
+      overflow: hidden;
+      text-wrap: nowrap;
+      font-weight: 400;
+    }
+  }
+  .ant-table table {
+    height: 40px;
+  }
+
+  .asset-name {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    text-wrap: nowrap;
+    color: var(--r-neutral-title1, #192945);
+  }
+
+  .ant-table {
+    background: transparent;
+  }
+
+  .am-virtual-table-cell-inner {
+    color: var(--r-neutral-foot, #6a7587);
+    font-size: 14px;
+    font-weight: 500;
+    overflow: hidden;
+    padding-right: 16px;
+  }
+
+  .is-last-cell {
+    justify-content: end;
+    .am-virtual-table-cell-inner {
+      padding-right: 0;
+    }
+  }
+
+  .index-cell {
+    .am-virtual-table-cell-inner {
+      padding-right: 6px;
+    }
+  }
+
+  .status-cell {
+    .am-virtual-table-cell-inner {
+      overflow: visible;
+      z-index: 10;
+    }
+  }
+
+  .ant-table-container:before,
+  .ant-table-container:after {
+    display: none;
+  }
+
+  .am-virtual-grid {
+    overflow-y: overlay !important;
+    overflow-x: hidden !important;
+    width: 920px !important;
+    .chromelike-scrollbar(4px);
+  }
+
+  .batch-revoke-table {
+    width: 900px;
+    margin: auto;
+  }
+
+  .ant-modal-title {
+    font-size: 24px;
+    line-height: 30px;
+  }
+
+  &.ant-modal .ant-modal-body {
+    max-height: 100%;
+    padding: 32px;
+  }
+
+  .loading-paused {
+    circle {
+      animation-play-state: paused !important;
+    }
+  }
+
+  .ant-modal-content {
+    border-radius: 6px;
+    overflow: hidden;
+
+    .ant-modal-close-x {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+  .ant-modal-title {
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 23px;
+    text-align: center;
+
+    color: var(--r-neutral-title-1);
+  }
+  .ant-modal-header {
+    padding-bottom: 0;
+  }
+  .ant-modal-confirm-body {
+    .anticon.anticon-info-circle,
+    .anticon.anticon-exclamation-circle {
+      display: none;
+    }
+    .ant-modal-confirm-title {
+      text-align: center;
+      font-weight: 500;
+      font-size: 20px;
+      line-height: 23px;
+      text-align: center;
+
+      color: var(--r-neutral-title-1);
+    }
+    .ant-modal-confirm-content {
+      margin-top: 20px;
+      background-color: var(--r-neutral-bg-1);
+      padding: 18px 12px;
+      border-radius: 6px;
+      margin-left: 0 !important;
+      white-space: pre-wrap;
+    }
+  }
+
+  .ant-modal-confirm-body-wrapper {
+    .ant-modal-confirm-btns {
+      display: none;
+    }
+  }
+  .ant-modal-confirm.single-btn {
+    .ant-modal-confirm-btns {
+      justify-content: center;
+    }
+  }
+
+  .ant-modal {
+    .ant-modal-body {
+      max-height: 500px;
+      overflow: auto;
+      overflow: -moz-scrollbars-none;
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+  }
+
+  .ant-modal-confirm-error {
+    .ant-modal-content {
+      background: #fff;
+    }
+    .anticon-close-circle {
+      display: none;
+    }
+    .ant-modal-confirm-btns {
+      justify-content: center;
+    }
+  }
+
+  .ant-modal-confirm-info {
+    .ant-modal-confirm-content {
+      max-height: 365px;
+      overflow: auto;
+    }
+  }
+}
+.revoke-list {
+  .ant-modal-body {
+    max-height: 100%;
+    padding: 32px !important;
+  }
+  .ant-table-cell-scrollbar {
+    display: none;
+  }
+}

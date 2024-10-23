@@ -187,6 +187,7 @@ export function VirtualTable<RecordType extends object>({
   getCellClassName,
   showScrollbar = true,
   sortedInfo,
+  overlayClassName,
   ...props
 }: TableProps<RecordType> & {
   markHoverRow?: boolean;
@@ -202,6 +203,7 @@ export function VirtualTable<RecordType extends object>({
   getCellClassName?: IVGridItemDataType<RecordType>['getCellClassName'];
   showScrollbar?: boolean;
   sortedInfo?: SorterResult<RecordType>;
+  overlayClassName?: string;
 }) {
   const { columns, scroll = { ...DEFAULT_SCROLL } } = props;
   const [tableWidth, setTableWidth] = useState(0);
@@ -382,11 +384,10 @@ export function VirtualTable<RecordType extends object>({
       >
         <Table<RecordType>
           {...props}
-          className={clsx(
-            'am-virtual-table',
-            'am-virtual-table__empty',
-            props.className
-          )}
+          className={
+            overlayClassName ||
+            clsx('am-virtual-table am-virtual-table__empty', props.className)
+          }
           columns={mergedColumns}
           pagination={false}
           components={{
