@@ -76,7 +76,7 @@ export const RevokeActionLedgerButton: React.FC<{
       <Modal
         className="confirm-revoke-modal ledger-modal"
         width={400}
-        visible={visibleLedgerConnectModal}
+        open={visibleLedgerConnectModal}
         onCancel={() => setVisibleLedgerConnectModal(false)}
         title={t('page.dashboard.hd.ledgerIsDisconnected')}
       >
