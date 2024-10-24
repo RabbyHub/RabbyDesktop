@@ -933,8 +933,6 @@ const ApprovalManagePage = () => {
     displaySortedAssetsList,
   });
 
-  const isShowRevokeButtonTip = revokeSummary.currentRevokeList?.length > 1;
-
   const wallet = useShellWallet();
   const handleRevoke = React.useCallback(async () => {
     return wallet
@@ -950,7 +948,6 @@ const ApprovalManagePage = () => {
 
   const { yValue: containerHeight } = useTableScrollableHeight({
     hasNetSwitchTab: isShowTestnet,
-    bottomFooterSelection: !!isShowRevokeButtonTip,
   });
 
   const batchRevokeModal = useBatchRevokeModal({
@@ -1004,12 +1001,7 @@ const ApprovalManagePage = () => {
         isShowTestnet && 'with-net-switch'
       )}
     >
-      <div
-        className={clsx(
-          'approvals-manager',
-          isShowRevokeButtonTip && 'with-bottom-selection'
-        )}
-      >
+      <div className="approvals-manager">
         <header className={clsx('approvals-manager__header')}>
           {isShowTestnet && (
             <div className="tabs">
@@ -1040,7 +1032,7 @@ const ApprovalManagePage = () => {
                     suffix={<span />}
                     placeholder={`Search ${
                       filterType === 'contract' ? 'contract' : 'assets'
-                    } by name/address`}
+                    } by name/ address`}
                   />
 
                   <ChainSelectorButton
@@ -1096,12 +1088,7 @@ const ApprovalManagePage = () => {
               ) : null}
               {batchRevokeModal.node}
             </main>
-            <div
-              className={clsx(
-                'sticky-footer',
-                !!isShowRevokeButtonTip && 'with-selection'
-              )}
-            >
+            <div className="sticky-footer">
               <RevokeButton
                 revokeSummary={revokeSummary}
                 enableBatchRevoke={enableBatchRevoke}

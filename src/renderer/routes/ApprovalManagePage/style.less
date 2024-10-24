@@ -105,18 +105,27 @@
     background-color: rgba(0, 0, 0, 0.2);
   }
 
-.search-input-wrapper {
+  .search-input-wrapper {
     height: @tools-h;
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: var(--r-neutral-card1);
     border-radius: @radius-value;
     overflow: hidden;
-    // border: 1px solid transparent;
     border: 1px solid var(--r-neutral-line);
     transition: ease-in 0.2s border-color;
 
+    .ant-input-affix-wrapper.search-input,
+    .ant-input {
+      background-color: transparent;
+      color: var(--r-neutral-title1);
+      &::placeholder {
+        color: var(--r-neutral-foot);
+      }
+    }
+
     &.is-focusing,
     &:hover {
-      border-color: var(--color-primary);
+      border-color: var(--r-blue-default, #7084ff);
+      border-width: 1px;
     }
   }
 
