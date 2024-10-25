@@ -3,21 +3,9 @@ import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import { Skeleton } from 'antd';
 import { findChainByServerID } from '@/renderer/utils/chain';
-import { formatNumber } from '@/renderer/utils/number';
+import { formatGasHeaderUsdValue } from '@/renderer/utils/number';
 import { sinceTime } from '@/renderer/utils/time';
-import BigNumber from 'bignumber.js';
 import { useGasAccountHistory } from '../hooks';
-
-const formatUsdValue = (value: string | number) => {
-  const bnValue = new BigNumber(value);
-  if (bnValue.lt(0)) {
-    return `-$${formatNumber(Math.abs(Number(value)), 4)}`;
-  }
-  if (bnValue.gte(0.0001) || bnValue.eq(0)) {
-    return `$${formatNumber(value, 4)}`;
-  }
-  return '<$0.0001';
-};
 
 const HistoryItem = ({
   time,
@@ -87,7 +75,7 @@ const HistoryItem = ({
       )}
       <div className="text-14 font-medium text-r-neutral-title-1">
         {sign}
-        {formatUsdValue(value)}{' '}
+        {formatGasHeaderUsdValue(value)}{' '}
       </div>
     </div>
   );

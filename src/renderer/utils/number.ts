@@ -178,6 +178,19 @@ export const intToHex = (n: number) => {
   return `0x${n.toString(16)}`;
 };
 
+export const formatGasHeaderUsdValue = (value: string | number) => {
+  const bnValue = new BigNumber(value);
+  if (bnValue.lt(0)) {
+    return `-$${formatNumber(Math.abs(Number(value)))}`;
+  }
+  if (bnValue.gte(0.01)) {
+    return `$${formatNumber(value)}`;
+  }
+  if (bnValue.lt(0.0001)) return '<$0.0001';
+
+  return `$${formatNumber(value, 4)}`;
+};
+
 export { coerceNumber, coerceInteger } from '@/isomorphic/primitive';
 
 export const formatGasCostUsd = (gasCostUsd: BigNumber) => {
