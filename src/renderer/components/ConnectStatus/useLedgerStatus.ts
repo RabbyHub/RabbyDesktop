@@ -1,6 +1,4 @@
-import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import React from 'react';
-import { useLedgerDeviceConnected } from '@/renderer/utils/ledger';
 import { useHIDDevices } from '@/renderer/hooks/useDevices';
 import { useCommonPopupView } from '../CommonPopup/useCommonPopupView';
 
@@ -15,22 +13,9 @@ export const ledgerUSBVendorId = 0x2c97;
 
 export const useLedgerStatus = () => {
   const { activePopup } = useCommonPopupView();
-  const [useLedgerLive, setUseLedgerLive] = React.useState(false);
   const [content, setContent] = React.useState<string>();
   const [description, setDescription] = React.useState<string>();
   const [status, setStatus] = React.useState<Status>('DISCONNECTED');
-
-  const hasConnectedLedgerHID = useLedgerDeviceConnected();
-
-  React.useEffect(() => {
-    walletController.isUseLedgerLive().then(setUseLedgerLive);
-  }, []);
-
-  React.useEffect(() => {
-    if (useLedgerLive) {
-      setStatus('CONNECTED');
-    }
-  }, [useLedgerLive]);
 
   const onClickConnect = () => {
     activePopup('Ledger');
@@ -66,21 +51,12 @@ export const useLedgerStatus = () => {
     const hasLedger = devices.some(
       (item) => item.vendorId === ledgerUSBVendorId
     );
-
     if (hasLedger) {
       setStatus('CONNECTED');
     } else {
       setStatus('DISCONNECTED');
     }
   }, [devices]);
-
-  React.useEffect(() => {
-    if (hasConnectedLedgerHID) {
-      setStatus('CONNECTED');
-    } else {
-      setStatus('DISCONNECTED');
-    }
-  }, [hasConnectedLedgerHID]);
 
   return {
     content,
