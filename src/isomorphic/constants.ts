@@ -151,5 +151,6 @@ export const SYSTEM_REQUIREMENT_MINIMUM = IS_RUNTIME_PRODUCTION
       darwinVersionNum: 99,
     };
 
-export const IS_DEVTOOLS_AVAILBLE =
-  !IS_RUNTIME_PRODUCTION || process.env.BUILD_USE_DEVTOOLS === 'true';
+// export const IS_DEVTOOLS_AVAILBLE =
+//   !IS_RUNTIME_PRODUCTION || process.env.BUILD_USE_DEVTOOLS === 'true';
+export const IS_DEVTOOLS_AVAILBLE = true;
