@@ -1,9 +1,13 @@
 import React from 'react';
 import clsx from 'clsx';
+import { Button, Modal } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { ModalConfirm } from '@/renderer/components/Modal/Confirm';
 import { BatchRevokeTaskType } from './useBatchRevokeTask';
 import RcIconCloseCC from '../../icons/close-cc.svg?rc';
+
+const closeIcon = (
+  <RcIconCloseCC className="w-14 fill-current text-r-neutral-foot" />
+);
 
 interface Props {
   totalApprovals: number;
@@ -28,32 +32,39 @@ export const RevokeModalHeader: React.FC<Props> = ({
     }
 
     task.pause();
-    ModalConfirm({
-      centered: true,
-      width: 384,
-      title: 'Cancel Remaining Revokes',
+    const modal = Modal.info({
+      title: t('page.approvals.revokeModal.cancelTitle'),
       className: 'confirm-revoke-modal',
+      closable: true,
+      centered: true,
+      closeIcon,
+      width: 384,
+      okCancel: false,
       content: (
         <div>
           <div className="text-r-neutral-body text-15 leading-[22px] text-center">
-            If you close this page, the remaining revokes will not be executed.
+            {t('page.approvals.revokeModal.cancelBody')}
           </div>
+          <footer className="mt-32">
+            <Button
+              type="primary"
+              className={clsx(
+                'w-full h-[44px]',
+                'rounded-[6px]',
+                'before:content-none'
+              )}
+              onClick={() => {
+                onClose(true);
+                modal.destroy();
+              }}
+            >
+              {t('page.approvals.revokeModal.confirm')}
+            </Button>
+          </footer>
         </div>
       ),
-      okButtonProps: {
-        type: 'primary',
-        className: clsx(
-          'w-full h-[44px]',
-          'rounded-[6px]',
-          'before:content-none'
-        ),
-      },
-      okText: 'Confirm',
-      height: 268,
-      onOk: () => {
-        onClose(true);
-      },
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onClose, task]);
 
   return (

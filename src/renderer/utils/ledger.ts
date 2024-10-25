@@ -1,8 +1,4 @@
 import React from 'react';
-import { walletController } from '@/renderer/ipcRequest/rabbyx';
-
-import { useTranslation } from 'react-i18next';
-import { KEYRING_CLASS } from './constant';
 
 export enum LedgerHDPathType {
   LedgerLive = 'LedgerLive',

@@ -1,17 +1,21 @@
-import { Button } from 'antd';
+import { Button, Modal } from 'antd';
 import clsx from 'clsx';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLedgerStatus } from '@/renderer/components/ConnectStatus/useLedgerStatus';
 import { isLedgerLockError } from '@/renderer/utils/ledger';
-import { Modal } from '@/renderer/components/Modal/Modal';
 import { Ledger } from '@/renderer/components/CommonPopup/Ledger';
 import eventBus from '@/renderer/utils-shell/eventBus';
 import { EVENTS, WALLET_BRAND_CONTENT } from '@/renderer/utils/constant';
 import { BatchRevokeTaskType } from './useBatchRevokeTask';
 import { CommonAccount } from '../CommonAccount';
 import LedgerPressSVG from '../../icons/press.svg?rc';
+import RcIconCloseCC from '../../icons/close-cc.svg?rc';
 import { Dots } from '../Dots';
+
+const closeIcon = (
+  <RcIconCloseCC className="w-14 fill-current text-r-neutral-foot" />
+);
 
 const buttonBaseClass = clsx(
   'rounded-[6px] h-[48px] w-[252px]',
@@ -76,7 +80,10 @@ export const RevokeActionLedgerButton: React.FC<{
       <Modal
         className="confirm-revoke-modal ledger-modal"
         width={400}
-        visible={visibleLedgerConnectModal}
+        footer={null}
+        centered
+        closeIcon={closeIcon}
+        open={visibleLedgerConnectModal}
         onCancel={() => setVisibleLedgerConnectModal(false)}
         title={t('page.dashboard.hd.ledgerIsDisconnected')}
       >

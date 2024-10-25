@@ -28,7 +28,7 @@ export const useConfirmRevokeModal = (props: {
       okCancel: false,
       content: (
         <div>
-          <div className="text-r-neutral-body text-15 leading-[22px]">
+          <div className="text-r-neutral-body text-15 leading-[22px] text-center">
             {props.accountType === KEYRING_CLASS.HARDWARE.LEDGER
               ? t('page.approvals.revokeModal.confirmRevokeLedger', {
                   count: props.revokeListCount,
