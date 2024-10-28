@@ -7,10 +7,24 @@ import { ShellWalletType, makeShellWallet } from '../utils-shell/shell-wallet';
 const shellWalletAtom = atom(null as any as ShellWalletType);
 const shellWalletRef = {
   current: null as null | ShellWalletType,
+  rabbyxExtId: null as null | string,
 };
 
 export function getUIShellWallet() {
   return shellWalletRef.current;
+}
+
+function getRabbyXExtIdOnUI() {
+  return shellWalletRef.rabbyxExtId;
+}
+
+export function makeInternalRequestSession() {
+  const rabbyExtId = getRabbyXExtIdOnUI();
+  return {
+    name: 'Rabby',
+    origin: `chrome-extension://${rabbyExtId}`,
+    icon: './images/icon-128.png',
+  };
 }
 /**
  * @description make sure you component is child of <ShellWalletProvider />
@@ -29,6 +43,7 @@ export function useShellWallet() {
 
         const wallet = makeShellWallet(rabbyxExtId);
         shellWalletRef.current = wallet;
+        shellWalletRef.rabbyxExtId = rabbyxExtId;
 
         if (!IS_RUNTIME_PRODUCTION) {
           (window as any).shellWallet = wallet;
