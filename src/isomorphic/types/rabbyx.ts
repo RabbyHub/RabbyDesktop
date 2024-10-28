@@ -20,7 +20,7 @@ import type {
   ActionRequireData,
   ParsedTransactionActionData,
 } from '@rabby-wallet/rabby-action';
-import { INTERNAL_REQUEST_SESSION } from '@/renderer/utils/constant';
+import { makeInternalRequestSession } from '@/renderer/hooks-shell/useShellWallet';
 import { TestnetChain, TestnetChainBase } from './customTestnet';
 import { TokenSpenderPair } from './permit2';
 
@@ -443,7 +443,7 @@ export type RabbyXMethod = {
     from: string;
     chainId: number;
   }) => Promise<string>;
-
+  'walletController.removeSigningTx': (id: string) => void;
   'walletController.generateApproveTokenTx': (p: {
     from: string;
     to: string;
@@ -867,7 +867,7 @@ export type RabbyXMethod = {
       $ctx?: any;
       params: any;
     };
-    session: typeof INTERNAL_REQUEST_SESSION;
+    session: ReturnType<typeof makeInternalRequestSession>;
     approvalRes: ApprovalRes;
     pushed: boolean;
     result: any;

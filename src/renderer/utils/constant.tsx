@@ -287,11 +287,11 @@ export const WALLETCONNECT_STATUS_MAP = {
 
 export const INTERNAL_REQUEST_ORIGIN = window.location.origin;
 
-export const INTERNAL_REQUEST_SESSION = {
-  name: 'Rabby',
-  origin: 'chrome-extension://ajcmgfeaajbegicmpblhfkcckkbiicfe',
-  icon: './images/icon-128.png',
-};
+// export const INTERNAL_REQUEST_SESSION = {
+//   name: 'Rabby',
+//   origin: INTERNAL_REQUEST_ORIGIN,
+//   icon: './images/icon-128.png',
+// };
 
 export const INITIAL_OPENAPI_URL = 'https://api.rabby.io';
 export const INITIAL_TESTNET_OPENAPI_URL = 'https://alpha.rabby.io';
