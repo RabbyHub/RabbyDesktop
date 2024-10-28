@@ -56,6 +56,7 @@ import { useBackendServiceAPI } from '@/renderer/routes/Settings/settingHooks';
 import { useCustomTestnetTokens } from '@/renderer/hooks/rabbyx/useToken';
 import { useListenSyncChain } from '@/renderer/hooks/useRabbyx';
 import { useSyncChainList } from '@/renderer/hooks/rabbyx/useChainList';
+import { useTriggerShellWalletOnTop } from '@/renderer/hooks-shell/useShellWallet';
 import styles from './index.module.less';
 
 import { FixedBackHeader } from '../FixedBackHeader';
@@ -428,6 +429,7 @@ export function MainWindow() {
   });
 
   useSyncChainList();
+  useTriggerShellWalletOnTop();
 
   return (
     <ShellWalletProvider alwaysRender>

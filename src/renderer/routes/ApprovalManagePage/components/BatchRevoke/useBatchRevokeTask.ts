@@ -7,6 +7,7 @@ import { ApprovalSpenderItemToBeRevoked } from '@/isomorphic/approve';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 
 import { FailedCode, sendTransaction } from '@/renderer/utils/sendTransaction';
+import { useShellWallet } from '@/renderer/hooks-shell/useShellWallet';
 import { findIndexRevokeList } from '../../utils';
 
 export { FailedCode } from '@/renderer/utils/sendTransaction';
@@ -142,6 +143,7 @@ export const useBatchRevokeTask = () => {
     'idle'
   );
   const currentApprovalRef = React.useRef<AssetApprovalSpender>();
+  const shellWallet = useShellWallet();
 
   const addRevokeTask = React.useCallback(
     async (
@@ -178,6 +180,7 @@ export const useBatchRevokeTask = () => {
                   setTxStatus('signed');
                 }
               },
+              shellWallet,
             });
             // update status
             cloneItem.$status = {
@@ -206,7 +209,7 @@ export const useBatchRevokeTask = () => {
         { priority }
       );
     },
-    [revokeList]
+    [revokeList, shellWallet]
   );
 
   const start = React.useCallback(() => {
