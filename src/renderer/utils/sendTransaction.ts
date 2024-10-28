@@ -338,6 +338,9 @@ export const sendTransaction = async ({
       // eslint-disable-next-line promise/param-names
       new Promise((_, reject) => {
         eventBus.once(EVENTS.LEDGER.REJECTED, async (data) => {
+          if (signingTxId != null) {
+            walletController.removeSigningTx(signingTxId);
+          }
           reject(new Error(data));
         });
       }),

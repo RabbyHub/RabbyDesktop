@@ -443,7 +443,7 @@ export type RabbyXMethod = {
     from: string;
     chainId: number;
   }) => Promise<string>;
-
+  'walletController.removeSigningTx': (id: string) => void;
   'walletController.generateApproveTokenTx': (p: {
     from: string;
     to: string;
