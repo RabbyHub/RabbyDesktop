@@ -16,6 +16,10 @@ export const HashRow: React.FC<Props> = ({ record }) => {
   if (record.$status?.status === 'fail') {
     return null;
   }
+  
+  if (record.$status?.status === 'pending' && record.$status?.isGasAccount) {
+    return null;
+  }
 
   if (!record.$status || record.$status.status === 'pending') {
     return <div>-</div>;
