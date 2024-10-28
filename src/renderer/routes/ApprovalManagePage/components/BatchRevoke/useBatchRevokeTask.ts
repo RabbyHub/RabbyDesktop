@@ -8,6 +8,7 @@ import { walletController } from '@/renderer/ipcRequest/rabbyx';
 
 import { FailedCode, sendTransaction } from '@/renderer/utils/sendTransaction';
 import { useShellWallet } from '@/renderer/hooks-shell/useShellWallet';
+import { useGasAccountSign } from '@/renderer/components/GasAccount/hooks';
 import { findIndexRevokeList } from '../../utils';
 
 export { FailedCode } from '@/renderer/utils/sendTransaction';
@@ -66,6 +67,7 @@ export type AssetApprovalSpenderWithStatus = AssetApprovalSpender & {
   $status?:
     | {
         status: 'pending';
+        isGasAccount?: boolean;
       }
     | {
         status: 'fail';
@@ -144,6 +146,7 @@ export const useBatchRevokeTask = () => {
   );
   const currentApprovalRef = React.useRef<AssetApprovalSpender>();
   const shellWallet = useShellWallet();
+  const gasAccount = useGasAccountSign();
 
   const addRevokeTask = React.useCallback(
     async (
@@ -173,6 +176,8 @@ export const useBatchRevokeTask = () => {
               tx,
               ignoreGasCheck,
               chainServerId: revokeItem.chainServerId,
+              gasAccount,
+              autoUseGasAccount: true,
               onProgress: (s: string) => {
                 if (s === 'builded') {
                   setTxStatus('sended');
@@ -181,6 +186,15 @@ export const useBatchRevokeTask = () => {
                 }
               },
               shellWallet,
+              onUseGasAccount: () => {
+                // update status
+                console.log('onUseGasAccount success')
+                cloneItem.$status = {
+                  status: 'pending',
+                  isGasAccount: true,
+                };
+                setList((prev) => updateAssetApprovalSpender(prev, cloneItem));
+              },
             });
             // update status
             cloneItem.$status = {
