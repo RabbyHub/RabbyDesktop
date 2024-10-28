@@ -3,7 +3,6 @@ import {
   CHAINS_ENUM,
   EVENTS,
   INTERNAL_REQUEST_ORIGIN,
-  INTERNAL_REQUEST_SESSION,
 } from '@/renderer/utils/constant';
 import { intToHex } from '@/renderer/utils/number';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
@@ -25,6 +24,10 @@ import {
   getNativeTokenBalance,
   getPendingTxs,
 } from './transacation';
+import {
+  makeInternalRequestSession,
+  getUIShellWallet,
+} from '../hooks-shell/useShellWallet';
 
 // fail code
 export const enum FailedCode {
@@ -60,6 +63,7 @@ export const sendTransaction = async ({
   waitCompleted = true,
   pushType = 'default',
   ignoreGasNotEnoughCheck,
+  shellWallet = getUIShellWallet(),
 }: {
   tx: Tx;
   chainServerId: string;
@@ -72,6 +76,10 @@ export const sendTransaction = async ({
   isGasAccount?: boolean;
   waitCompleted?: boolean;
   pushType?: TxPushType;
+  /**
+   * @description use `useShellWallet` to get shellWallet, to
+   */
+  shellWallet: ReturnType<typeof getUIShellWallet>;
 }) => {
   onProgress?.('building');
   const chain = findChain({
@@ -302,13 +310,19 @@ export const sendTransaction = async ({
   // submit tx
   let hash = '';
   try {
+    if (!shellWallet) {
+      console.warn(
+        'shellWallet is not ready, we will use walletController instead, but it may cause some APIs which need to be on user-gesture context not work'
+      );
+    }
+    const wcController = shellWallet || walletController;
     hash = await Promise.race([
-      walletController.ethSendTransaction({
+      wcController.ethSendTransaction({
         data: {
           $ctx: {},
           params: [transaction],
         },
-        session: INTERNAL_REQUEST_SESSION,
+        session: makeInternalRequestSession(),
         approvalRes: {
           ...transaction,
           signingTxId,
@@ -324,6 +338,9 @@ export const sendTransaction = async ({
       // eslint-disable-next-line promise/param-names
       new Promise((_, reject) => {
         eventBus.once(EVENTS.LEDGER.REJECTED, async (data) => {
+          if (signingTxId != null) {
+            walletController.removeSigningTx(signingTxId);
+          }
           reject(new Error(data));
         });
       }),

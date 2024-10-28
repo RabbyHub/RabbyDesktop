@@ -132,7 +132,7 @@ export const RevokeActionLedgerButton: React.FC<{
                 'text-r-neutral-title2'
               )}
             >
-              <LedgerPressSVG />
+              <LedgerPressSVG className="w-[110px] h-[44px]" />
               <span>
                 {t('page.approvals.revokeModal.ledgerSended', {
                   current: currentApprovalIndex + 1,
