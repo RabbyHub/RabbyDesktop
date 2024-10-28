@@ -3,7 +3,6 @@ import {
   CHAINS_ENUM,
   EVENTS,
   INTERNAL_REQUEST_ORIGIN,
-  INTERNAL_REQUEST_SESSION,
 } from '@/renderer/utils/constant';
 import { intToHex } from '@/renderer/utils/number';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
@@ -25,7 +24,10 @@ import {
   getNativeTokenBalance,
   getPendingTxs,
 } from './transacation';
-import { getUIShellWallet } from '../hooks-shell/useShellWallet';
+import {
+  makeInternalRequestSession,
+  getUIShellWallet,
+} from '../hooks-shell/useShellWallet';
 
 // fail code
 export const enum FailedCode {
@@ -320,7 +322,7 @@ export const sendTransaction = async ({
           $ctx: {},
           params: [transaction],
         },
-        session: INTERNAL_REQUEST_SESSION,
+        session: makeInternalRequestSession(),
         approvalRes: {
           ...transaction,
           signingTxId,
