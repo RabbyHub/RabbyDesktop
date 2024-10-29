@@ -1,5 +1,4 @@
 #### Features
 
-- Supported adding custom network
-- Added support for managing Permit2 approval
-- Integrated Odos and ParaSwap in Rabby Swap.
+- Supported "GasAccount" feature - Deposit USDT/USDC to pay for gas fees on all chains
+- Supported batch revoking approvals when using Ledger
