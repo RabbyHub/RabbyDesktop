@@ -3,6 +3,8 @@ const path = require('path');
 const rootPath = path.join(__dirname, '../..');
 
 const dllPath = path.join(__dirname, '../dll');
+const erbPath = path.join(__dirname, '..');
+const erbNodeModulesPath = path.join(erbPath, 'node_modules');
 
 const srcPath = path.join(rootPath, 'src');
 const srcMainPath = path.join(srcPath, 'main');
@@ -98,6 +100,7 @@ const entriesRabby = {
 
 export default {
   rootPath,
+  erbNodeModulesPath,
   dllPath,
   srcPath,
   srcMainPath,
