@@ -136,8 +136,8 @@ export function getBrowserWindowOpts(
       // enableRemoteModule: false,
       contextIsolation: true,
       // worldSafeExecuteJavaScript: true,
-      ...windowOpts?.webPreferences,
       devTools: IS_DEVTOOLS_AVAILBLE,
+      ...windowOpts?.webPreferences,
     },
   };
 }
