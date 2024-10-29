@@ -810,6 +810,39 @@
         "selectAll": "Select All",
         "confirm": "Confirm {{ selectedCount }}",
         "title": "Approvals"
+      },
+      "revokeModal": {
+        "confirmRevokePrivateKey": "Using a seed phrase or private key address, you can batch revoke {{count}} approvals with 1 click.",
+        "confirmRevokeLedger": "Using a Ledger address, you can batch revoke {{count}} approvals with 1 click.",
+        "batchRevoke": "Batch Revoke",
+        "revokeOneByOne": "Revoke One by One",
+        "revoked": "Revoked:",
+        "totalRevoked": "Total:",
+        "approvalCount_zero": "{{count}} approval",
+        "approvalCount_one": "{{count}} approval",
+        "approvalCount_other": "{{count}} approvals",
+        "signAndStartRevoke": "Sign and Start Revoke",
+        "pause": "Pause",
+        "resume": "Continue",
+        "done": "Done",
+        "confirmTitle": "Batch Revoke with One Click",
+        "cancelTitle": "Cancel Remaining Revokes",
+        "confirm": "Confirm",
+        "cancelBody": "If you close this page, the remaining revokes will not be executed.",
+        "gasNotEnough": "Insufficient Gas to submit",
+        "gasTooHigh": "Gas fee is high",
+        "submitTxFailed": "Fail to Submit",
+        "defaultFailed": "Transaction failed",
+        "stillRevoke": "Still Revoke",
+        "paused": "Paused",
+        "waitInQueue": "Wait in queue",
+        "useGasAccount": "Your gas balance is low. Your GasAccount will cover the gas fees.",
+        "revokeWithLedger": "Start Revoke with Ledger",
+        "connectLedger": "Connect Ledger",
+        "ledgerSended": "Please sign the request on Ledger ({{current}}/{{total}})",
+        "ledgerSending": "Sending signing request ({{current}}/{{total}})",
+        "ledgerAlert": "Please open Ethereum App on your Ledger device",
+        "ledgerSigned": "Signed. Creating transaction ({{current}}/{{total}})"
       }
     },
     "gasTopUp": {
@@ -1338,7 +1371,8 @@
           "doc1": "Plug in a single imKey",
           "doc2": "Enter pin to unlock"
         },
-        "howToConnectImKey": "How to Connect imKey"
+        "howToConnectImKey": "How to Connect imKey",
+        "ledgerIsDisconnected": "Your ledger is not connected"
       },
       "GnosisWrongChainAlertBar": {
         "warning": "Safe address does not support {{chain}}"

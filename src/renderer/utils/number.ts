@@ -192,3 +192,18 @@ export const formatGasHeaderUsdValue = (value: string | number) => {
 };
 
 export { coerceNumber, coerceInteger } from '@/isomorphic/primitive';
+
+export const formatGasCostUsd = (gasCostUsd: BigNumber) => {
+  const bn = gasCostUsd!;
+  let value;
+
+  if (bn.gt(1)) {
+    value = bn.toFixed(2);
+  } else if (bn.gt(0.0001)) {
+    value = bn.toFixed(4);
+  } else {
+    value = '0.0001';
+  }
+
+  return formatTokenAmount(value);
+};

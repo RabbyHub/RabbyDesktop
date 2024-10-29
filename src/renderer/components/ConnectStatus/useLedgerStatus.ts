@@ -1,4 +1,3 @@
-import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import React from 'react';
 import { useHIDDevices } from '@/renderer/hooks/useDevices';
 import { useCommonPopupView } from '../CommonPopup/useCommonPopupView';
@@ -12,22 +11,11 @@ type Status =
 
 export const ledgerUSBVendorId = 0x2c97;
 
-export const useLedgerStatus = (address?: string) => {
+export const useLedgerStatus = () => {
   const { activePopup } = useCommonPopupView();
-  const [useLedgerLive, setUseLedgerLive] = React.useState(false);
   const [content, setContent] = React.useState<string>();
   const [description, setDescription] = React.useState<string>();
   const [status, setStatus] = React.useState<Status>('DISCONNECTED');
-
-  React.useEffect(() => {
-    walletController.isUseLedgerLive().then(setUseLedgerLive);
-  }, []);
-
-  React.useEffect(() => {
-    if (useLedgerLive) {
-      setStatus('CONNECTED');
-    }
-  }, [useLedgerLive]);
 
   const onClickConnect = () => {
     activePopup('Ledger');
@@ -57,47 +45,12 @@ export const useLedgerStatus = (address?: string) => {
     }
   }, [status]);
 
-  // React.useEffect(() => {
-  //   const handle = (payload: Status) => {
-  //     setStatus(payload);
-  //   };
-
-  //   eventBus.addEventListener(EVENTS.LEDGER.SESSION_CHANGE, handle);
-  //   walletController
-  //     .requestKeyring(KEYRING_CLASS.HARDWARE.LEDGER, 'getConnectStatus', null)
-  //     .then((res) => {
-  //       setStatus(res);
-  //     });
-
-  //   return () => {
-  //     eventBus.removeEventListener(EVENTS.LEDGER.SESSION_CHANGE, handle);
-  //   };
-  // }, []);
-
-  // React.useEffect(() => {
-  //   if (status === 'CONNECTED') {
-  //     walletController
-  //       .requestKeyring(
-  //         KEYRING_CLASS.HARDWARE.LEDGER,
-  //         'verifyAddressInDevice',
-  //         null,
-  //         address
-  //       )
-  //       .then((valid) => {
-  //         if (!valid) {
-  //           setStatus('ADDRESS_ERROR');
-  //         }
-  //       });
-  //   }
-  // }, [status, address]);
-
   const { devices } = useHIDDevices();
 
   React.useEffect(() => {
     const hasLedger = devices.some(
       (item) => item.vendorId === ledgerUSBVendorId
     );
-
     if (hasLedger) {
       setStatus('CONNECTED');
     } else {

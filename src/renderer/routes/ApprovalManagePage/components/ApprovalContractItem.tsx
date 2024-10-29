@@ -2,7 +2,7 @@ import { MouseEventHandler, useMemo, useEffect, useRef } from 'react';
 
 import { IconWithChain } from '@/renderer/components/TokenWithChain';
 import clsx from 'clsx';
-import { Alert, Tooltip } from 'antd';
+import { Alert } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
 
 import { ApprovalItem } from '@/renderer/utils/approval';
@@ -10,7 +10,6 @@ import { findChainByServerID } from '@/renderer/utils/chain';
 import IconExternal from '@/../assets/icons/common/share.svg';
 import IconArrowRight from '../icons/right.svg?rc';
 import IconUnknown from '../icons/icon-unknown-1.svg';
-// import IconExternal from '../icons/icon-share.svg';
 import { openScanLinkFromChainItem } from '../utils';
 import ApprovalsNameAndAddr from './NameAndAddr';
 

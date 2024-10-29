@@ -1192,7 +1192,7 @@
   resolved "https://registry.npmjs.org/@ctrl/tinycolor/-/tinycolor-3.4.1.tgz"
   integrity sha512-ej5oVy6lykXsvieQtqZxCOaLT+xD4+QNarq78cIYISHmZXshCvROLudpQN3lfL8G0NL7plMSSK+zlyvCaIJ4Iw==
 
-"@debank/common@^0.3.60", "@debank/common@^0.3.9", "@debank/common@>=0.3.60":
+"@debank/common@^0.3.5", "@debank/common@^0.3.60", "@debank/common@^0.3.9", "@debank/common@>=0.3.60":
   version "0.3.60"
   resolved "https://registry.npmjs.org/@debank/common/-/common-0.3.60.tgz"
   integrity sha512-SaFTXvnn2aYQTPB3B8YD/AhHYwdMRiqu7jCkYV6c/Sd3MmxzJR3v+Kd4jlQniKfEdB21+1vMb0NlzHw/gyemlw==
@@ -2362,7 +2362,12 @@
     typescript "^4.5.0"
     web3-core "^1.6.0"
 
-"@rabby-wallet/rabby-api@>=0.6.28", "@rabby-wallet/rabby-api@0.8.1":
+"@rabby-wallet/rabby-action@0.1.5-beta.2":
+  version "0.1.5-beta.2"
+  resolved "https://registry.npmjs.org/@rabby-wallet/rabby-action/-/rabby-action-0.1.5-beta.2.tgz"
+  integrity sha512-b+hRBRu2MMacdmhcod7w1cr4mK1MD3pt+J3J6uINoLWd63pQhXfvvWt7/uo0rDov2ZYz/ojlhT8FqzivgFYtug==
+
+"@rabby-wallet/rabby-api@^0.8.1", "@rabby-wallet/rabby-api@>=0.6.28", "@rabby-wallet/rabby-api@0.8.1":
   version "0.8.1"
   resolved "https://registry.npmjs.org/@rabby-wallet/rabby-api/-/rabby-api-0.8.1.tgz"
   integrity sha512-aNr1IXx1s6BVmu9QF26f2NxOxJcyzpzbX7azsu1A3ICTHknHeTMl2X/ljwSMVmz9VJn/8O7wPwqNyz/i/kpeQg==
@@ -2373,6 +2378,11 @@
     eth-rpc-errors "^4.0.3"
     lodash "^4.17.21"
     qss "^2.0.3"
+
+"@rabby-wallet/rabby-security-engine@^2.0.8-beta.1":
+  version "2.0.8-beta.1"
+  resolved "https://registry.npmjs.org/@rabby-wallet/rabby-security-engine/-/rabby-security-engine-2.0.8-beta.1.tgz"
+  integrity sha512-1VmX+P3Nep12UAefujgzDnOiNUks39+fcFkFWKgwMDOwjFk74sM6AdDyoHQVUvcHHJLJMBLANG8KzOI1HjQeeg==
 
 "@rabby-wallet/rabby-sign@0.4.0":
   version "0.4.0"
@@ -4517,7 +4527,7 @@ big.js@^5.2.2:
   resolved "https://registry.npmjs.org/big.js/-/big.js-5.2.2.tgz"
   integrity sha512-vyL2OymJxmarO8gxMr0mhChsO9QGwhynfuu4+MHTAW6czfq9humCB7rKpUjDd9YUiDPU4mzpyupFSvOClAwbmQ==
 
-bignumber.js@^9.0.0, bignumber.js@^9.0.1, bignumber.js@^9.0.2, bignumber.js@^9.1.1:
+bignumber.js@*, bignumber.js@^9.0.0, bignumber.js@^9.0.1, bignumber.js@^9.0.2, bignumber.js@^9.1.1:
   version "9.1.1"
   resolved "https://registry.npmjs.org/bignumber.js/-/bignumber.js-9.1.1.tgz"
   integrity sha512-pHm4LsMJ6lzgNGVfZHjMoO8sdoRhOzOH4MLmY65Jg70bpxCKu5iOHNJyfF6OyvYw7t8Fpf35RuzUyqnQsj8Vig==

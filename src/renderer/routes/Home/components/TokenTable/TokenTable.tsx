@@ -40,6 +40,9 @@ export const TokenTable: React.FC<Props> = ({
             {virtual ? (
               <FixedSizeList
                 height={virtual.height}
+                style={{
+                  paddingBottom: 15,
+                }}
                 width="100%"
                 itemData={list}
                 itemCount={list?.length || 0}

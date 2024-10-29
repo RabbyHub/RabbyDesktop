@@ -16,7 +16,13 @@ import { SafeTransactionDataPartial } from '@gnosis.pm/safe-core-sdk-types';
 import { SafeTransactionItem } from '@rabby-wallet/gnosis-sdk/dist/api';
 import { BasicSafeInfo } from '@rabby-wallet/gnosis-sdk';
 import { GasAccountServiceStore } from '@/renderer/components/GasAccount/type';
+import type {
+  ActionRequireData,
+  ParsedTransactionActionData,
+} from '@rabby-wallet/rabby-action';
+import { makeInternalRequestSession } from '@/renderer/hooks-shell/useShellWallet';
 import { TestnetChain, TestnetChainBase } from './customTestnet';
+import { TokenSpenderPair } from './permit2';
 
 export type RabbyAccount = {
   address: string;
@@ -24,6 +30,27 @@ export type RabbyAccount = {
   brandName: string;
   alianName?: string;
 };
+interface ApprovalRes extends Tx {
+  type?: string;
+  address?: string;
+  uiRequestComponent?: string;
+  isSend?: boolean;
+  isSpeedUp?: boolean;
+  isCancel?: boolean;
+  isSwap?: boolean;
+  isGnosis?: boolean;
+  account?: Account;
+  extra?: Record<string, any>;
+  traceId?: string;
+  $ctx?: any;
+  signingTxId?: string;
+  pushType?: TxPushType;
+  lowGasDeadline?: number;
+  reqId?: string;
+  isGasLess?: boolean;
+  isGasAccount?: boolean;
+  logId?: string;
+}
 
 export type Account = RabbyAccount & {
   displayBrandName?: string;
@@ -416,7 +443,7 @@ export type RabbyXMethod = {
     from: string;
     chainId: number;
   }) => Promise<string>;
-
+  'walletController.removeSigningTx': (id: string) => void;
   'walletController.generateApproveTokenTx': (p: {
     from: string;
     to: string;
@@ -733,7 +760,6 @@ export type RabbyXMethod = {
     },
     chain: CHAINS_ENUM
   ) => string;
-  // 'walletController.getCustomTestnetList': () => Chain[];
   'walletController.getCustomTestnetGasMarket': ({
     chainId,
     custom,
@@ -763,6 +789,89 @@ export type RabbyXMethod = {
   'walletController.addCustomTestnetToken': (
     params: CustomTestnetTokenBase
   ) => void;
+  'walletController.lockdownPermit2': (
+    input: {
+      id: string;
+      chainServerId: string;
+      tokenSpenders: TokenSpenderPair[];
+      $ctx?: any;
+      gasPrice?: number;
+    },
+    isBuild?: boolean
+  ) => any;
+  'walletController.revokeNFTApprove': (
+    {
+      chainServerId,
+      contractId,
+      spender,
+      abi,
+      nftTokenId,
+      isApprovedForAll,
+    }: {
+      chainServerId: string;
+      contractId: string;
+      spender: string;
+      abi: 'ERC721' | 'ERC1155' | '';
+      isApprovedForAll: boolean;
+      nftTokenId?: string | null | undefined;
+    },
+    $ctx?: any,
+    isBuild?: boolean
+  ) => any;
+  'walletController.approveToken': (
+    chainServerId: string,
+    id: string,
+    spender: string,
+    amount: number | string,
+    $ctx?: any,
+    gasPrice?: number,
+    extra?: {
+      isSwap?: boolean;
+      swapPreferMEVGuarded?: boolean;
+      isBridge?: boolean;
+    },
+    isBuild?: boolean
+  ) => any;
+  'walletController.addSigningTx': (tx: Tx) => Promise<string>;
+  'walletController.getRecommendGas': (args_0: {
+    gasUsed: number;
+    gas: number;
+    tx: Tx;
+    chainId: number;
+  }) => {
+    needRatio: boolean;
+    gas: number;
+    gasUsed: number;
+  };
+  'walletController.hasPrivateKeyInWallet': (address: string) => string;
+  'walletController.hasAddress': (address: string) => boolean;
+  'walletController.getPendingTxsByNonce': (
+    address: string,
+    chainId: number,
+    nonce: number
+  ) => TransactionGroup[];
+  'walletController.updateSigningTx': (
+    id: string,
+    data: {
+      explain?: Partial<TransactionSigningItem['explain']>;
+      rawTx?: Partial<TransactionSigningItem['rawTx']>;
+      action?: {
+        actionData: ParsedTransactionActionData;
+        requiredData: ActionRequireData;
+      };
+      isSubmitted?: boolean;
+    }
+  ) => void;
+  'walletController.ethSendTransaction': (options: {
+    data: {
+      $ctx?: any;
+      params: any;
+    };
+    session: ReturnType<typeof makeInternalRequestSession>;
+    approvalRes: ApprovalRes;
+    pushed: boolean;
+    result: any;
+  }) => any;
   'walletController.getCustomTestnetTokenList': ({
     address,
     chainId,

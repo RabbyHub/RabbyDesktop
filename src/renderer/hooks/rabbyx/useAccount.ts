@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { atom, useAtom, useAtomValue } from 'jotai';
 import * as Sentry from '@sentry/react';
 
@@ -195,6 +195,7 @@ export function useAccountBalanceMap(options?: {
   const { disableAutoFetch = false } = options || {};
 
   const [currentAccount] = useAtom(currentAccountAtom);
+  const [loading, setLoading] = useState(false);
 
   accountAddress = accountAddress || currentAccount?.address || null;
 
@@ -215,28 +216,30 @@ export function useAccountBalanceMap(options?: {
   }, [isTestnet, mainnetMattered, testnetMattered]);
 
   const fetchBalance = useCallback(async () => {
-    if (!accountAddress) return;
-
-    const triggerFetchP = walletController.getInMemoryAddressBalance(
-      accountAddress,
-      true,
-      isTestnet
-    );
-    let result = await walletController.getAddressCacheBalance(
-      accountAddress,
-      isTestnet
-    );
-    if (!result) {
-      try {
-        result = await triggerFetchP;
-      } catch (error) {
-        console.error(error);
+    try {
+      if (!accountAddress) return;
+      setLoading(true);
+      const triggerFetchP = walletController.getInMemoryAddressBalance(
+        accountAddress,
+        true,
+        isTestnet
+      );
+      let result = await walletController.getAddressCacheBalance(
+        accountAddress,
+        isTestnet
+      );
+      if (!result) {
+        try {
+          result = await triggerFetchP;
+        } catch (error) {
+          console.error(error);
+        }
       }
+      const fresult = formatAccountTotalBalance(result);
+      setMatteredChainBalances(fresult.matteredChainBalances);
+    } finally {
+      setLoading(false);
     }
-
-    const fresult = formatAccountTotalBalance(result);
-
-    setMatteredChainBalances(fresult.matteredChainBalances);
   }, [isTestnet, accountAddress, setMatteredChainBalances]);
 
   const getLocalBalanceValue = useCallback(
@@ -250,11 +253,17 @@ export function useAccountBalanceMap(options?: {
     if (!disableAutoFetch) {
       fetchBalance();
     }
-  }, [disableAutoFetch, fetchBalance]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [disableAutoFetch]);
 
   return {
     getLocalBalanceValue,
     matteredChainBalances,
+    cachedChainBalances: {
+      mainnet: mainnetMattered[0],
+      testnet: testnetMattered[0],
+    },
     fetchBalance,
+    isLoading: loading,
   };
 }
