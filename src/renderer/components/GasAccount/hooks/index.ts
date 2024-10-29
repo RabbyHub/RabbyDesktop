@@ -134,7 +134,8 @@ export const useGasAccountHistory = () => {
     setRefreshListTx((e) => e + 1);
   }, []);
 
-  const { refresh: refreshGasAccountBalance } = useGasAccountRefresh();
+  const { refresh: refreshGasAccountBalance, refreshId } =
+    useGasAccountRefresh();
 
   type History = Awaited<ReturnType<typeof walletOpenapi.getGasAccountHistory>>;
 
@@ -185,12 +186,13 @@ export const useGasAccountHistory = () => {
 
   const { value } = useAsync(async () => {
     if (sig && accountId && refreshTxListCount) {
-      return walletOpenapi.getGasAccountHistory({
+      const res = await walletOpenapi.getGasAccountHistory({
         sig,
         account_id: accountId,
         start: 0,
         limit: 5,
       });
+      return res;
     }
     return undefined;
   }, [sig, refreshTxListCount]);
@@ -244,5 +246,6 @@ export const useGasAccountHistory = () => {
     txList,
     loadingMore,
     ref,
+    refreshListTx,
   };
 };

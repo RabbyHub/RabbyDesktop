@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import { Skeleton } from 'antd';
 import { findChainByServerID } from '@/renderer/utils/chain';
-import { formatUsdValue } from '@/renderer/utils/number';
+import { formatGasHeaderUsdValue } from '@/renderer/utils/number';
 import { sinceTime } from '@/renderer/utils/time';
 import { useGasAccountHistory } from '../hooks';
 
@@ -75,7 +75,7 @@ const HistoryItem = ({
       )}
       <div className="text-14 font-medium text-r-neutral-title-1">
         {sign}
-        {formatUsdValue(value)}{' '}
+        {formatGasHeaderUsdValue(value)}{' '}
       </div>
     </div>
   );
@@ -97,10 +97,14 @@ const LoadingItem = ({ borderT }: { borderT: boolean }) => {
   );
 };
 
-export const GasAccountHistory = () => {
+export const GasAccountHistory = ({
+  gasAccountHistory,
+}: {
+  gasAccountHistory: ReturnType<typeof useGasAccountHistory>;
+}) => {
   const { t } = useTranslation();
 
-  const { loading, txList, loadingMore, ref } = useGasAccountHistory();
+  const { loading, txList, loadingMore, ref } = gasAccountHistory;
 
   if (!loading && !txList?.rechargeList.length && !txList?.list.length) {
     return (
@@ -120,7 +124,8 @@ export const GasAccountHistory = () => {
       {!loading &&
         txList?.rechargeList?.map((item, index) => (
           <HistoryItem
-            key={item.create_at}
+            // eslint-disable-next-line react/no-array-index-key
+            key={`${item.create_at}${index}`}
             time={item.create_at}
             value={item.amount}
             sign="+"
@@ -133,7 +138,8 @@ export const GasAccountHistory = () => {
       {!loading &&
         txList?.list.map((item, index) => (
           <HistoryItem
-            key={item.create_at}
+            // eslint-disable-next-line react/no-array-index-key
+            key={`${item.create_at}${index}`}
             time={item.create_at}
             value={item.usd_value}
             sign={item.history_type === 'recharge' ? '+' : '-'}

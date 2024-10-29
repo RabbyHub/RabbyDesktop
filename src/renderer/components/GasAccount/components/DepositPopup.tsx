@@ -17,8 +17,9 @@ import { getTokenSymbol } from '@/renderer/utils';
 import { findChainByServerID } from '@/renderer/utils/chain';
 import { GasAccountCloseIcon } from './PopupCloseIcon';
 import styles from '../index.module.less';
+import { useGasAccountRefresh } from '../hooks';
 
-const amountList = [20, 100, 500];
+const amountList = [1, 100, 500];
 
 const TokenSelector = ({
   visible,
@@ -32,7 +33,6 @@ const TokenSelector = ({
   onChange: (token: TokenItem) => void;
 }) => {
   const { t } = useTranslation();
-
   const { currentAccount } = useCurrentAccount();
   const { value: list, loading } = useAsync(
     async () =>
@@ -180,12 +180,15 @@ const GasAccountDepositContent = ({
   onClose,
   setTokenListVisible,
   tokenListVisible,
+  refreshHistory,
 }: {
   onClose: () => void;
+  refreshHistory: () => void;
   setTokenListVisible: React.Dispatch<React.SetStateAction<boolean>>;
   tokenListVisible: boolean;
 }) => {
   const { t } = useTranslation();
+  const { refresh } = useGasAccountRefresh();
   const [selectedAmount, setAmount] = useState(100);
   const [token, setToken] = useState<TokenItem | undefined>(undefined);
   const openTokenList = () => {
@@ -196,11 +199,11 @@ const GasAccountDepositContent = ({
     setTokenListVisible(false);
   };
 
-  const topUpGasAccount = () => {
+  const topUpGasAccount = async () => {
     if (token) {
       const chainEnum = findChainByServerID(token.chain);
       if (chainEnum) {
-        walletController.topUpGasAccount({
+        await walletController.topUpGasAccount({
           to: L2_DEPOSIT_ADDRESS_MAP[chainEnum.enum],
           chainServerId: chainEnum.serverId,
           tokenId: token.id,
@@ -209,6 +212,9 @@ const GasAccountDepositContent = ({
             .times(10 ** token.decimals)
             .toFixed(0),
         });
+        setTimeout(() => {
+          refreshHistory();
+        }, 200);
         onClose();
       }
     }
@@ -314,9 +320,10 @@ const GasAccountDepositContent = ({
 export const GasAccountDepositPopup = (props: {
   onCancel: () => void;
   visible: boolean;
+  refreshHistory: () => void;
 }) => {
   const [tokenListVisible, setTokenListVisible] = useState(false);
-  const { onCancel, visible } = props;
+  const { onCancel, visible, refreshHistory } = props;
 
   return (
     <Drawer
@@ -348,6 +355,7 @@ export const GasAccountDepositPopup = (props: {
       <GasAccountDepositContent
         onClose={onCancel || noop}
         tokenListVisible={tokenListVisible}
+        refreshHistory={refreshHistory}
         setTokenListVisible={setTokenListVisible}
       />
     </Drawer>
