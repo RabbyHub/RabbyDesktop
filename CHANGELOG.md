@@ -1,7 +1,20 @@
 
-v0.38.6 / 2024-09-26
+v0.39.0 / 2024-10-29
 ====================
 
+  * build: update changelog.
+  * Feat/batch revoke (#667)
+  * update fee text (#665)
+  * build: upgrade to electron v28. (#661)
+  * fix gas account (#666)
+  * Feat/gas account (#664)
+  * feat: add terms of use (#662)
+  * fix: remove redundant request (#663)
+
+v0.38.6-prod / 2024-09-26
+=========================
+
+  * Release v0.38.6-prod
   * chore: update changelog.
   * feat: custom network (#660)
   * fix: replace openapi to get balance for rabbyX (#658)
