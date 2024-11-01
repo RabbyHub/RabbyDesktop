@@ -334,6 +334,7 @@ export const SwapToken = () => {
     setActiveProvider,
     slippageValidInfo,
     expired,
+    passGasPrice,
   } = useTokenPair(userAddress);
 
   const isInSwap = useInSwap();
@@ -440,9 +441,10 @@ export const SwapToken = () => {
             unlimited: false,
             shouldTwoStepApprove:
               needApprove ?? activeProvider?.shouldTwoStepApprove,
-            gasPrice: payTokenIsNativeToken
-              ? gasList?.find((e) => e.level === gasLevel)?.price
-              : undefined,
+            gasPrice:
+              payTokenIsNativeToken && passGasPrice
+                ? gasList?.find((e) => e.level === gasLevel)?.price
+                : undefined,
           },
           {
             ga: {
@@ -522,6 +524,7 @@ export const SwapToken = () => {
     debouncePayAmount,
     slippage,
     refresh,
+    passGasPrice,
   ]);
 
   const disableBtn = useMemo(
