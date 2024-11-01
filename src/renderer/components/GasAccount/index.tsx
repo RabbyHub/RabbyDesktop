@@ -2,20 +2,27 @@ import React, { useEffect, useRef, useState } from 'react';
 // import { ReactComponent as RcIconMore } from '@/ui/assets/gas-account/more.svg';
 import { useTranslation } from 'react-i18next';
 import { TooltipWithMagnetArrow } from '@/renderer/components/Tooltip/TooltipWithMagnetArrow';
-import { Button, Dropdown, Menu } from 'antd';
+import { Button, Dropdown, Menu, Tooltip } from 'antd';
 import { formatUsdValue } from '@/renderer/utils/number';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
+import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { GasAccountHistory } from './components/History';
 // import { TooltipWithMagnetArrow } from '@/ui/component/Tooltip/TooltipWithMagnetArrow';
 import { GasAccountLoginPopup } from './components/LoginPopup';
 import { GasAccountDepositPopup } from './components/DepositPopup';
-import { useGasAccountHistory, useGasAccountLogin } from './hooks';
+import {
+  useAml,
+  useGasAccountHistory,
+  useGasAccountLogin,
+  useGasAccountSign,
+} from './hooks';
 import { GasAccountBlueBorderedButton } from './components/Button';
 import { GasAccountLogoutPopup } from './components/LogoutPopop';
 import { WithdrawPopup } from './components/WithdrawPopup';
 import { GasAccountWrapperBg } from './components/WrapperBg';
 import { GasAccountBlueLogo } from './components/GasAccountBlueLogo';
 import { GasAccountInfo } from './type';
+import { SwitchLoginAddrBeforeDepositModal } from './components/SwitchLoginAddrModal';
 
 const DEPOSIT_LIMIT = 1000;
 
@@ -28,7 +35,7 @@ const GasAccountInner = ({
 }) => {
   const { t } = useTranslation();
   const gasAccountHistory = useGasAccountHistory();
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const [loginVisible, setLoginVisible] = useState(false);
 
@@ -43,9 +50,25 @@ const GasAccountInner = ({
   //   history.push('/dashboard');
   // };
 
+  const { currentAccount } = useCurrentAccount();
+
+  const { account: gasAccount } = useGasAccountSign();
+
+  const [switchAddrVisible, setSwitchAddrVisible] = useState(false);
+
+  const isRisk = useAml();
+
   const openDepositPopup = () => {
+    if (
+      gasAccount?.address &&
+      currentAccount?.address !== gasAccount?.address
+    ) {
+      setSwitchAddrVisible(true);
+      return;
+    }
     setDepositVisible(true);
   };
+
   const { value, loading, account } = accountInfo;
   const { isLogin } = useGasAccountLogin({ value, loading });
 
@@ -99,7 +122,7 @@ const GasAccountInner = ({
 
   return (
     <div
-      className="border-solid border-t-[1px] border-[#FFFFFF1A] h-[600px] w-[400px] bg-r-neutral-bg1 flex flex-col rounded-[12px] overflow-hidden"
+      className="gasAccountContent border-solid border-t-[1px] border-[#FFFFFF1A] h-[600px] w-[400px] bg-r-neutral-bg1 flex flex-col rounded-[12px] overflow-hidden"
       ref={containerRef}
     >
       <div className="text-20 text-r-neutral-title1 py-6 flex gap-2 items-center justify-center relative">
@@ -124,35 +147,38 @@ const GasAccountInner = ({
             {formatUsdValue(balance)}
           </div>
 
-          <div className="w-full mt-auto flex gap-12 items-center justify-center">
+          <div className="w-full mt-auto flex gap-12 items-center justify-center relative">
             <GasAccountBlueBorderedButton
               block
               onClick={() => setWithdrawVisible(true)}
             >
               {t('page.gasAccount.withdraw')}
             </GasAccountBlueBorderedButton>
-            <TooltipWithMagnetArrow
-              className="rectangle w-[265px]"
-              open={balance < DEPOSIT_LIMIT ? false : undefined}
-              overlayInnerStyle={{
-                width: '265px',
-              }}
-              align={{
-                offset: [30, 5],
-              }}
-              title={t('page.gasAccount.gasExceed')}
+            <Tooltip
+              autoAdjustOverflow
+              overlayClassName="rectangle"
+              open={isRisk || balance >= DEPOSIT_LIMIT ? undefined : false}
+              title={
+                isRisk
+                  ? t('page.gasAccount.risk')
+                  : t('page.gasAccount.gasExceed')
+              }
             >
               <Button
-                disabled={balance >= DEPOSIT_LIMIT}
+                disabled={isRisk || balance >= DEPOSIT_LIMIT}
                 block
                 size="large"
                 type="primary"
-                className="h-[48px] text-r-neutral-title2 text-15 font-medium rounded-[6px]"
+                className="text-r-neutral-title2 text-15 font-medium rounded-[6px]"
+                style={{
+                  height: 48,
+                  borderRadius: 6,
+                }}
                 onClick={openDepositPopup}
               >
                 {t('page.gasAccount.deposit')}
               </Button>
-            </TooltipWithMagnetArrow>
+            </Tooltip>
           </div>
         </GasAccountWrapperBg>
 
@@ -185,6 +211,19 @@ const GasAccountInner = ({
         refreshHistory={gasAccountHistory.refreshListTx}
         onCancel={() => setWithdrawVisible(false)}
         balance={balance}
+      />
+
+      <SwitchLoginAddrBeforeDepositModal
+        visible={switchAddrVisible}
+        onCancel={() => {
+          setSwitchAddrVisible(false);
+        }}
+        centered
+        getContainer={false}
+        maskStyle={{ position: 'absolute' }}
+        wrapClassName="absolute"
+        transitionName=""
+        maskTransitionName=""
       />
     </div>
   );
