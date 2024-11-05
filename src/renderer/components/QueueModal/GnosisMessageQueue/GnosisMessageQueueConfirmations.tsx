@@ -1,22 +1,22 @@
 import { RabbyAccount } from '@/isomorphic/types/rabbyx';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
-import { SafeTransactionItem } from '@rabby-wallet/gnosis-sdk/dist/api';
+import { SafeMessage } from '@safe-global/api-kit';
 import classNames from 'classnames';
 import React from 'react';
-import NameAndAddress from '../NameAndAddress';
+import NameAndAddress from '../../NameAndAddress';
 
 const IconChecked = 'rabby-internal://assets/icons/queue/checked.svg';
 const IconUnCheck = 'rabby-internal://assets/icons/queue/uncheck.svg';
 const IconTagYou = 'rabby-internal://assets/icons/queue/tag-you.svg';
 
 export interface Props {
-  confirmations: SafeTransactionItem['confirmations'];
+  confirmations: SafeMessage['confirmations'];
   threshold: number;
   owners: string[];
 }
 
-export const TxItemConfirmation: React.FC<Props> = ({
+export const GnosisMessageQueueConfirmations: React.FC<Props> = ({
   confirmations,
   threshold,
   owners,

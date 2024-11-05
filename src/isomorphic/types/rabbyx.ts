@@ -21,6 +21,7 @@ import type {
   ParsedTransactionActionData,
 } from '@rabby-wallet/rabby-action';
 import { makeInternalRequestSession } from '@/renderer/hooks-shell/useShellWallet';
+import { SafeMessage } from '@safe-global/api-kit';
 import { TestnetChain, TestnetChainBase } from './customTestnet';
 import { TokenSpenderPair } from './permit2';
 
@@ -599,6 +600,58 @@ export type RabbyXMethod = {
     networkId: string;
     address: string;
   }) => BasicSafeInfo;
+  'walletController.getGnosisAllPendingMessages': (address: string) => Promise<{
+    total: number;
+    results: {
+      networkId: string;
+      messages: SafeMessage[];
+    }[];
+  } | null>;
+
+  'walletController.handleGnosisMessage': ({
+    signerAddress,
+    signature,
+  }: {
+    signerAddress: string;
+    signature: string;
+  }) => Promise<void>;
+
+  'walletController.validateGnosisMessage': (
+    {
+      address,
+      chainId,
+      message,
+    }: {
+      address: string;
+      chainId: number;
+      message: string | Record<string, any>;
+    },
+    hash: string
+  ) => Promise<boolean>;
+
+  'walletController.buildGnosisMessage': ({
+    account,
+    safeAddress,
+    networkId,
+    version,
+    message,
+  }: {
+    safeAddress: string;
+    account: Account;
+    version: string;
+    networkId: string;
+    message: string | Record<string, any>;
+  }) => Promise<{
+    safeMessageHash: string;
+  }>;
+
+  'walletController.addPureGnosisMessageSignature': ({
+    signerAddress,
+    signature,
+  }: {
+    signerAddress: string;
+    signature: string;
+  }) => Promise<void>;
 
   'walletController.setCustomRPC': (chain: CHAINS_ENUM, url: string) => void;
   'walletController.removeCustomRPC': (chain: CHAINS_ENUM) => void;

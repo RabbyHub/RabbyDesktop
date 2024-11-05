@@ -10,8 +10,8 @@ import React from 'react';
 import { numberToHex, toChecksumAddress } from 'web3-utils';
 import { SelectAddressModal } from './SelectAddressModal';
 import { TxItemGroup } from './TxItemGroup';
-import styles from './style.module.less';
-import { useSafeQueue } from './useSafeQueue';
+import styles from '../style.module.less';
+import { useSafeQueue } from '../useSafeQueue';
 
 interface Props {
   onClose(): void;

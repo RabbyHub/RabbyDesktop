@@ -1,5 +1,5 @@
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
-import { useGnosisPendingTxs } from '@/renderer/hooks/useGnosisPendingTxs';
+import { useGnosisPendingCount } from '@/renderer/hooks/useGnosisPendingCount';
 import { useZPopupLayerOnMain } from '@/renderer/hooks/usePopupWinOnMainwin';
 import { Tooltip } from 'antd';
 import classNames from 'classnames';
@@ -8,7 +8,7 @@ import IconQueue from '../../../../../assets/icons/queue/queue.svg?rc';
 
 export const QueueIcon: React.FC = () => {
   const { currentAccount: account } = useCurrentAccount();
-  const { data, runAsync: fetchPendingCount } = useGnosisPendingTxs(
+  const { data: total, runAsync: fetchPendingCount } = useGnosisPendingCount(
     {
       address: account?.address,
     },
@@ -16,7 +16,7 @@ export const QueueIcon: React.FC = () => {
       refreshOnWindowFocus: true,
     }
   );
-  const pendingCount = data?.total || 0;
+  const pendingCount = total || 0;
   const { showZSubview } = useZPopupLayerOnMain();
 
   return (

@@ -1,28 +1,21 @@
 import { useRequest } from 'ahooks';
 import type { Options } from 'ahooks/lib/useRequest/src/types';
-import { SafeTransactionItem } from '@rabby-wallet/gnosis-sdk/dist/api';
+import { sum } from 'lodash';
 import { walletController } from '../ipcRequest/rabbyx';
 
-export const useGnosisPendingTxs = (
+export const useGnosisPendingCount = (
   params: { address?: string },
-  options?: Options<
-    | {
-        total: number;
-        results: {
-          networkId: string;
-          txs: SafeTransactionItem[];
-        }[];
-      }
-    | undefined
-    | null,
-    any[]
-  >
+  options?: Options<number | undefined | null, any[]>
 ) => {
   const { address } = params;
   return useRequest(
     async () => {
       if (address) {
-        return walletController.getGnosisAllPendingTxs(address);
+        const res = await Promise.all([
+          walletController.getGnosisAllPendingTxs(address),
+          walletController.getGnosisAllPendingMessages(address),
+        ]);
+        return sum(res.map((item) => item?.total || 0));
       }
       return undefined;
     },

@@ -12,7 +12,7 @@ import classNames from 'classnames';
 import { intToHex } from 'ethereumjs-util';
 import React from 'react';
 import { toChecksumAddress } from 'web3-utils';
-import { RabbyButton } from '../Button/RabbyButton';
+import { RabbyButton } from '../../Button/RabbyButton';
 import { TxItemBasicInfo } from './TxItemBasicInfo';
 import { TxItemConfirmation } from './TxItemConfirmation';
 import { TxItemExplain } from './TxitemExplain';
