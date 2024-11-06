@@ -40,6 +40,9 @@ const getTabs = (
     }
   );
 };
+interface Props {
+  onClose(): void;
+}
 
 export const GnosisMessageQueue: React.FC<Props> = ({ onClose }) => {
   const { currentAccount: account } = useCurrentAccount();
