@@ -315,5 +315,8 @@
       "src/main/main.ts"
     ],
     "logLevel": "quiet"
+  },
+  "overrides": {
+    "@rabby-wallet/rabby-api": "0.8.3"
   }
 }
