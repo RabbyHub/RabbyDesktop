@@ -253,6 +253,7 @@ const StyledDrawer = styled(Drawer)`
   }
   .ant-drawer-mask {
     position: fixed;
+    background: rgba(0, 0, 0, 0.5);
   }
 `;
 
