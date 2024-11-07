@@ -6,8 +6,8 @@ import { SafeMessage } from '@safe-global/api-kit';
 import { useRequest } from 'ahooks';
 import classNames from 'classnames';
 import React from 'react';
-import { isString } from 'util';
 import { stringToHex } from 'web3-utils';
+import { isString } from 'lodash';
 import { RabbyButton } from '../../Button/RabbyButton';
 import { GnosisMessageExplain } from './GnosisMessageExplain';
 import { GnosisMessageQueueConfirmations } from './GnosisMessageQueueConfirmations';
@@ -16,13 +16,14 @@ export interface Props {
   data: SafeMessage;
   networkId: string;
   safeInfo: BasicSafeInfo;
-  // onSubmit(data: SafeTransactionItem): void;
+  onSign(): void;
 }
 
 export const GnosisMessageQueueItem: React.FC<Props> = ({
   data,
   networkId,
   safeInfo,
+  onSign,
 }) => {
   const { currentAccount } = useCurrentAccount();
   const chain = findChain({
@@ -50,7 +51,7 @@ export const GnosisMessageQueueItem: React.FC<Props> = ({
         }),
       ]);
       if (isString(data.message)) {
-        walletController.sendRequest({
+        await walletController.sendRequest({
           method: 'personal_sign',
           params: [stringToHex(data.message), data.safe],
           $ctx: {
@@ -59,7 +60,7 @@ export const GnosisMessageQueueItem: React.FC<Props> = ({
           },
         });
       } else {
-        walletController.sendRequest({
+        await walletController.sendRequest({
           method: 'eth_signTypedData_v4',
           params: [data.safe, JSON.stringify(data.message)],
           $ctx: {
@@ -68,6 +69,7 @@ export const GnosisMessageQueueItem: React.FC<Props> = ({
           },
         });
       }
+      onSign?.();
     },
     {
       manual: true,
@@ -77,7 +79,7 @@ export const GnosisMessageQueueItem: React.FC<Props> = ({
   return (
     <div
       className={classNames(
-        'flex flex-col',
+        'flex flex-col mb-[20px]',
         'border border-[#FFFFFF1A] border-solid rounded-[8px] text-white',
         'divide-y'
       )}
