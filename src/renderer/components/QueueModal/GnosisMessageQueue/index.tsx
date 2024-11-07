@@ -47,7 +47,11 @@ interface Props {
 export const GnosisMessageQueue: React.FC<Props> = ({ onClose }) => {
   const { currentAccount: account } = useCurrentAccount();
   const { data: networks } = useGnosisNetworks({ address: account?.address });
-  const { data: pendingMessages, loading } = useGnosisPendingMessages(
+  const {
+    data: pendingMessages,
+    loading,
+    runAsync: runFetchPendingMessages,
+  } = useGnosisPendingMessages(
     {
       address: account?.address,
     },
@@ -111,6 +115,7 @@ export const GnosisMessageQueue: React.FC<Props> = ({ onClose }) => {
             loading={loading}
             usefulChain={activeKey}
             messages={activeData?.messages || []}
+            onSign={runFetchPendingMessages}
           />
         )}
       </div>

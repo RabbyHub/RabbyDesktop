@@ -15,12 +15,14 @@ interface Props {
   usefulChain: CHAINS_ENUM;
   messages?: SafeMessage[];
   loading?: boolean;
+  onSign(): void;
 }
 
 export const GnosisMessageQueueList: React.FC<Props> = ({
   usefulChain: chain,
   messages,
   loading,
+  onSign,
 }) => {
   const networkId =
     findChain({
@@ -100,6 +102,7 @@ export const GnosisMessageQueueList: React.FC<Props> = ({
                 networkId={networkId}
                 safeInfo={safeInfo}
                 key={item.messageHash}
+                onSign={onSign}
               />
             );
           }}
