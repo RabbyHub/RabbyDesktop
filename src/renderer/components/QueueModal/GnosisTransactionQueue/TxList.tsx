@@ -8,6 +8,7 @@ import classNames from 'classnames';
 import { intToHex } from 'ethereumjs-util';
 import React from 'react';
 import { numberToHex, toChecksumAddress } from 'web3-utils';
+import { Virtuoso } from 'react-virtuoso';
 import { SelectAddressModal } from './SelectAddressModal';
 import { TxItemGroup } from './TxItemGroup';
 import styles from '../style.module.less';
@@ -125,16 +126,25 @@ export const TxList: React.FC<Props> = ({
           <div>Loading data...</div>
         </div>
       ) : (
-        Object.keys(transactionsGroup).map((key) => (
-          <TxItemGroup
-            key={key}
-            items={transactionsGroup[key]}
-            networkId={networkId}
-            safeInfo={safeInfo!}
-            onSubmit={handleSubmit}
-            onSign={onSign}
-          />
-        ))
+        <Virtuoso
+          style={{
+            height: '100%',
+          }}
+          className={styles.scrollbar}
+          data={Object.keys(transactionsGroup)}
+          itemContent={(_, key) => {
+            return (
+              <TxItemGroup
+                key={key}
+                items={transactionsGroup[key]}
+                networkId={networkId}
+                safeInfo={safeInfo!}
+                onSubmit={handleSubmit}
+                onSign={onSign}
+              />
+            );
+          }}
+        />
       )}
       <SelectAddressModal
         open={openSelectAddressModal}
