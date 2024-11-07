@@ -25,7 +25,7 @@ export const TxItemGroup: React.FC<Props> = ({
   return (
     <div
       className={classNames(
-        'flex flex-col',
+        'flex flex-col mb-[20px]',
         'border border-[#FFFFFF1A] border-solid rounded-[8px] text-white',
         'divide-y'
       )}

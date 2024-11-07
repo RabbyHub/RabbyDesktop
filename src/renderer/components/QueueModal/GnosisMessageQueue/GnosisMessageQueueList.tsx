@@ -7,6 +7,7 @@ import { SafeMessage } from '@safe-global/api-kit';
 import { useRequest } from 'ahooks';
 import classNames from 'classnames';
 import React from 'react';
+import { Virtuoso } from 'react-virtuoso';
 import styles from '../style.module.less';
 import { GnosisMessageQueueItem } from './GnosisMessageQueueItem';
 
@@ -86,8 +87,13 @@ export const GnosisMessageQueueList: React.FC<Props> = ({
           <div>Loading data...</div>
         </div>
       ) : list?.length ? (
-        <div>
-          {list.map((item) => {
+        <Virtuoso
+          style={{
+            height: '100%',
+          }}
+          className={styles.scrollbar}
+          data={list}
+          itemContent={(_, item) => {
             return (
               <GnosisMessageQueueItem
                 data={item}
@@ -96,19 +102,9 @@ export const GnosisMessageQueueList: React.FC<Props> = ({
                 key={item.messageHash}
               />
             );
-          })}
-        </div>
+          }}
+        />
       ) : (
-        // Object.keys(transactionsGroup).map((key) => (
-        //   <TxItemGroup
-        //     key={key}
-        //     items={transactionsGroup[key]}
-        //     networkId={networkId}
-        //     safeInfo={safeInfo!}
-        //     // onSubmit={handleSubmit}
-        //     onSign={onSign}
-        //   />
-        // ))
         <div className="text-[#FFFFFF66] items-center justify-center opacity-60 flex flex-col mt-[150px]">
           <img
             className="w-[95px] h-[95px]"
