@@ -70,6 +70,7 @@ export const TxList: React.FC<Props> = ({
           safeTxGas: safeTx.safeTxGas,
           gasPrice: Number(safeTx.gasPrice),
           baseGas: safeTx.baseGas,
+          operation: safeTx.operation,
         };
         await walletController.buildGnosisTransaction(
           currentAddress!,

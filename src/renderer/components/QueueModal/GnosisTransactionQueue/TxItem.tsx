@@ -71,6 +71,7 @@ export const TxItem: React.FC<Props> = ({
       safeTxGas: data.safeTxGas,
       gasPrice: Number(data.gasPrice),
       baseGas: data.baseGas,
+      operation: data.operation,
     };
     const tmpBuildAccount: RabbyAccount = {
       address: safeInfo.owners[0],
