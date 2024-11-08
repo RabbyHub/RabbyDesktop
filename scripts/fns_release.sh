@@ -62,11 +62,15 @@ pub_changelog() {
   if [ ! -z $RABBY_REALLY_COPY ]; then
     aws s3 cp $src_markdown s3://${RABBY_BUILD_BUCKET}/rabby/$remote_markdown_path --acl public-read --exclude "*" --include "*.md" --content-type text/plain
   fi
+  local frontend_id="<frontend_id>"
+  if [ ! -z $RABBY_DESKTOP_CDN_FRONTEND_ID ]; then
+    frontend_id=$RABBY_DESKTOP_CDN_FRONTEND_ID
+  fi
 
   echo ""
   echo "[pub_changelog] the changelog is https://download.rabby.io/$remote_markdown_path"
   echo ""
-  echo "[pub_changelog] you can update the cdn with cmd \`aws cloudfront create-invalidation --distribution-id <frontend_id> --paths '/$changelog_dir/*'\`"
+  echo "[pub_changelog] you can update the cdn with cmd \`aws cloudfront create-invalidation --distribution-id $frontend_id --paths '/$changelog_dir/*'\`"
   echo "[pub_changelog] finished update changelog, version: $proj_version";
 }
 

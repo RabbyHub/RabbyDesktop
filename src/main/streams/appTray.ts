@@ -23,6 +23,15 @@ function buildPopUpContextMenu() {
   appendMenuSeparator(menu);
 
   appendMenu(menu, {
+    label: 'Center Window',
+    click: async () => {
+      emitIpcMainEvent('__internal_main:mainwindow:center-window');
+    },
+  });
+
+  appendMenuSeparator(menu);
+
+  appendMenu(menu, {
     label: 'Exit',
     click: async () => {
       app.quit();
