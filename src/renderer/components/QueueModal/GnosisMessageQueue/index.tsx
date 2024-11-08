@@ -1,19 +1,18 @@
 import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
 import { useGnosisNetworks } from '@/renderer/hooks/useGnosisNetworks';
-import { useGnosisPendingTxs } from '@/renderer/hooks/useGnosisPendingTxs';
-import { SafeTransactionItem } from '@rabby-wallet/gnosis-sdk/dist/api';
+import { useGnosisPendingMessages } from '@/renderer/hooks/useGnosisPendingMessages';
+import { findChain } from '@/renderer/utils/chain';
+import { SafeMessage } from '@safe-global/api-kit';
 import classNames from 'classnames';
 import clsx from 'clsx';
 import { sortBy } from 'lodash';
 import moment from 'moment';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useSyncGnosisNetworks } from '@/renderer/hooks/useSyncGnosisNetworks';
-import { findChain } from '@/renderer/utils/chain';
-import { TxList } from './TxList';
+import { GnosisMessageQueueList } from './GnosisMessageQueueList';
 
 const getTabs = (
   networks: string[],
-  pendingMap: Record<string, SafeTransactionItem[]>
+  pendingMap: Record<string, SafeMessage[]>
 ) => {
   const res = networks
     ?.map((networkId) => {
@@ -29,7 +28,7 @@ const getTabs = (
         key: chain.enum,
         chain,
         count: pendingTxs.length || 0,
-        txs: pendingTxs,
+        messages: pendingTxs,
       };
     })
     .filter((item) => !!item);
@@ -37,37 +36,39 @@ const getTabs = (
     res,
     (item) => -(item?.count || 0),
     (item) => {
-      return -moment(item?.txs?.[0]?.submissionDate || 0).valueOf();
+      return -moment(item?.messages?.[0]?.created || 0).valueOf();
     }
   );
 };
-
 interface Props {
   onClose(): void;
 }
 
-export const TabTxList: React.FC<Props> = ({ onClose }) => {
+export const GnosisMessageQueue: React.FC<Props> = ({ onClose }) => {
   const { currentAccount: account } = useCurrentAccount();
   const { data: networks } = useGnosisNetworks({ address: account?.address });
   const {
-    data: pendingTxs,
+    data: pendingMessages,
     loading,
-    runAsync: fetchPendingTxs,
-  } = useGnosisPendingTxs({
-    address: account?.address,
-  });
-
-  useSyncGnosisNetworks(account?.address);
+    runAsync: runFetchPendingMessages,
+  } = useGnosisPendingMessages(
+    {
+      address: account?.address,
+    },
+    {
+      refreshOnWindowFocus: true,
+    }
+  );
 
   const tabs = useMemo(() => {
     return getTabs(
       networks || [],
-      (pendingTxs?.results || []).reduce((res, item) => {
-        res[item.networkId] = item.txs;
+      (pendingMessages?.results || []).reduce((res, item) => {
+        res[item.networkId] = item.messages;
         return res;
-      }, {} as Record<string, SafeTransactionItem[]>)
+      }, {} as Record<string, SafeMessage[]>)
     );
-  }, [networks, pendingTxs]);
+  }, [networks, pendingMessages]);
 
   const [activeKey, setActiveKey] = useState<CHAINS_ENUM | null>(
     tabs[0]?.key || null
@@ -109,13 +110,12 @@ export const TabTxList: React.FC<Props> = ({ onClose }) => {
       </div>
       <div>
         {activeKey && (
-          <TxList
-            onClose={onClose}
+          <GnosisMessageQueueList
             key={activeKey}
             loading={loading}
             usefulChain={activeKey}
-            pendingTxs={activeData?.txs || []}
-            onSign={fetchPendingTxs}
+            messages={activeData?.messages || []}
+            onSign={runFetchPendingMessages}
           />
         )}
       </div>

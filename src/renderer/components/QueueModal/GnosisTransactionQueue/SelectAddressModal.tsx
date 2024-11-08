@@ -3,10 +3,10 @@ import { isSameAddress } from '@/renderer/utils/address';
 import { KEYRING_TYPE } from '@/renderer/utils/constant';
 import classNames from 'classnames';
 import React from 'react';
-import { RabbyButton } from '../Button/RabbyButton';
-import { Modal } from '../Modal/Modal';
+import { RabbyButton } from '../../Button/RabbyButton';
+import { Modal } from '../../Modal/Modal';
 import { AddressItem } from './AddressItem';
-import styles from './style.module.less';
+import styles from '../style.module.less';
 
 export interface Props {
   open: boolean;
