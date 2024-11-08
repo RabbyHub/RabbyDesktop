@@ -1,4 +1,3 @@
 #### Features
 
-- Supported "GasAccount" feature - Deposit USDT/USDC to pay for gas fees on all chains
-- Supported batch revoking approvals when using Ledger
+- Supported signing message when using a Safe address
