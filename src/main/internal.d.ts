@@ -48,6 +48,10 @@ type MainInternalsMessagePayload = {
     send: [isInitMainWindow?: boolean];
     response: [];
   };
+  '__internal_main:mainwindow:center-window': {
+    send: [];
+    response: [];
+  };
   '__internal_main:mainwindow:toggle-loading-view': {
     send: [
       payload:
