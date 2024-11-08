@@ -222,6 +222,8 @@ export const useTokenPair = (userAddress: string) => {
     return false;
   }, [chainObj?.nativeTokenAddress, payToken]);
 
+  const [passGasPrice, setUseGasPrice] = useState(false);
+
   const handleAmountChange: React.ChangeEventHandler<HTMLInputElement> =
     useCallback((e) => {
       const v = e.target.value;
@@ -229,6 +231,7 @@ export const useTokenPair = (userAddress: string) => {
         return;
       }
       setPayAmount(v);
+      setUseGasPrice(false);
     }, []);
 
   const [gasLevel, setGasLevel] = useState<GasLevelType>('normal');
@@ -302,14 +305,6 @@ export const useTokenPair = (userAddress: string) => {
 
   const closeReserveGasOpen = useCallback(() => {
     setReserveGasOpen(false);
-    // if (payToken && gasPriceRef.current !== undefined) {
-    //   const val = tokenAmountBn(payToken).minus(
-    //     new BigNumber(gasLimit)
-    //       .times(gasPriceRef.current)
-    //       .div(10 ** nativeTokenDecimals)
-    //   );
-    //   setPayAmount(val.lt(0) ? '0' : val.toString(10));
-    // }
   }, []);
 
   const changeGasPrice = useCallback(
@@ -319,6 +314,7 @@ export const useTokenPair = (userAddress: string) => {
       setGasLevel(gasLevelVALUE.level as GasLevelType);
       setNativeTokenMax();
       closeReserveGasOpen();
+      setUseGasPrice(true);
     },
     [closeReserveGasOpen, setNativeTokenMax]
   );
@@ -651,5 +647,6 @@ export const useTokenPair = (userAddress: string) => {
     slippageValidLoading,
 
     expired,
+    passGasPrice,
   };
 };

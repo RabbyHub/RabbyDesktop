@@ -50,6 +50,7 @@ import { BestQuoteLoading } from './component/QuoteLoading';
 import { ReceiveDetails } from './component/ReceiveDetail';
 import { Slippage } from './component/Slippage';
 import { QuoteList } from './component/Quotes';
+import { LowCreditModal, useLowCreditState } from './component/LowCreditModal';
 
 const MaxButton = styled.img`
   cursor: pointer;
@@ -333,6 +334,7 @@ export const SwapToken = () => {
     setActiveProvider,
     slippageValidInfo,
     expired,
+    passGasPrice,
   } = useTokenPair(userAddress);
 
   const isInSwap = useInSwap();
@@ -439,9 +441,10 @@ export const SwapToken = () => {
             unlimited: false,
             shouldTwoStepApprove:
               needApprove ?? activeProvider?.shouldTwoStepApprove,
-            gasPrice: payTokenIsNativeToken
-              ? gasList?.find((e) => e.level === gasLevel)?.price
-              : undefined,
+            gasPrice:
+              payTokenIsNativeToken && passGasPrice
+                ? gasList?.find((e) => e.level === gasLevel)?.price
+                : undefined,
           },
           {
             ga: {
@@ -521,6 +524,7 @@ export const SwapToken = () => {
     debouncePayAmount,
     slippage,
     refresh,
+    passGasPrice,
   ]);
 
   const disableBtn = useMemo(
@@ -659,6 +663,13 @@ export const SwapToken = () => {
     [isWrapToken, switchPreferMEV, showMEVGuardedSwitch, originPreferMEVGuarded]
   );
 
+  const {
+    lowCreditToken,
+    lowCreditVisible,
+    setLowCreditToken,
+    setLowCreditVisible,
+  } = useLowCreditState();
+
   return (
     <Wrapper>
       <div className="header">
@@ -727,6 +738,10 @@ export const SwapToken = () => {
                       setPayToken(undefined);
                     }
                     setReceiveToken(token);
+                    if (token?.low_credit_score) {
+                      setLowCreditToken(token);
+                      setLowCreditVisible(true);
+                    }
                   }}
                   chainId={findChain({ enum: chain })?.serverId || null}
                   token={receiveToken}
@@ -903,6 +918,12 @@ export const SwapToken = () => {
 
         <SwapTransactions addr={userAddress} />
       </div>
+
+      <LowCreditModal
+        token={lowCreditToken}
+        visible={lowCreditVisible}
+        onCancel={() => setLowCreditVisible(false)}
+      />
     </Wrapper>
   );
 };
