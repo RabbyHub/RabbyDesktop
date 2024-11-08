@@ -67,7 +67,9 @@ module.exports = {
       "NSCameraUsageDescription": "Require camera to support QR-based hardware wallet.",
       // "com.apple.security.device.camera": true,
       // "com.apple.security.cs.allow-unsigned-executable-memory": true
-    }
+    },
+    /** @why we use afterSign to notarize by ourself. */
+    "notarize": false,
   },
   "dmg": {
     "artifactName": "rabby-wallet-desktop-installer-${arch}-${version}.${ext}",
