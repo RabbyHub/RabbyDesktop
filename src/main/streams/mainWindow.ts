@@ -161,6 +161,11 @@ onIpcMainInternalEvent(
   }
 );
 
+onIpcMainInternalEvent('__internal_main:mainwindow:center-window', async () => {
+  const mainTabbedWin = await onMainWindowReady();
+  mainTabbedWin.window.center();
+});
+
 onIpcMainEvent(
   '__internal_rpc:mainwindow:reload-tab',
   async (_, tabId, forceReload) => {
