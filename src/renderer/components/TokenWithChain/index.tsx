@@ -1,8 +1,9 @@
 import { getTokenSymbol } from '@/renderer/utils';
 import { findChain } from '@/renderer/utils/chain';
 import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import styled from 'styled-components';
+import { TooltipWithMagnetArrow } from '../Tooltip/TooltipWithMagnetArrow';
 
 // 只是 bundle 里面需要扩展 btc
 const EXTENDS_CHAINS = {
@@ -20,16 +21,26 @@ const TokenWithChainWrapper = styled.div`
     border-radius: 100%;
   }
   .chain-logo {
-    width: 12px;
-    height: 12px;
+    /* width: 12px; */
+    /* height: 12px; */
     position: absolute;
-    bottom: -2px;
-    right: -4px;
+    /* bottom: -2px; */
+    /* right: -4px; */
+    &.tr {
+      top: -2px;
+      right: -4px;
+    }
+    &.br {
+      bottom: -2px;
+      right: -4px;
+    }
   }
   .no-round {
     border-radius: 4px !important;
   }
 `;
+
+const IconUnknown = 'rabby-internal://assets/icons/common/token-default.svg';
 
 const TokenWithChain = ({
   token,
@@ -38,6 +49,10 @@ const TokenWithChain = ({
   height = '28px',
   noRound = false,
   hideChainIcon = false,
+  isShowChainTooltip = false,
+  className,
+  chainSize = 12,
+  chainIconPosition = 'br',
 }: {
   token: TokenItem;
   width?: string;
@@ -45,39 +60,48 @@ const TokenWithChain = ({
   hideConer?: boolean;
   noRound?: boolean;
   hideChainIcon?: boolean;
+  isShowChainTooltip?: boolean;
+  className?: string;
+  chainSize?: number;
+  chainIconPosition?: 'br' | 'tr';
 }) => {
   const chainServerId = token.chain;
-
-  const chain =
-    findChain({
-      serverId: chainServerId,
-    }) ||
-    Object.values(EXTENDS_CHAINS).find(
-      (item) => item.serverId === chainServerId
-    );
+  const chain = findChain({
+    serverId: chainServerId,
+  });
   return (
     <TokenWithChainWrapper
-      className={classNames('token-with-chain', noRound && 'no-round')}
+      className={clsx('token-with-chain', noRound && 'no-round', className)}
       style={{ width, height }}
     >
       <img
-        className={classNames('token-logo', noRound && 'no-round')}
-        src={
-          token.logo_url ||
-          'rabby-internal://assets/icons/common/token-default.svg'
-        }
+        className={clsx('token-logo', noRound && 'no-round')}
+        src={token.logo_url || IconUnknown}
         alt={getTokenSymbol(token)}
         style={{ width, height, minWidth: width }}
       />
-      {!hideChainIcon && (!hideConer || chain?.id) && (
-        <img
-          className="chain-logo"
-          src={
-            chain?.logo ||
-            'rabby-internal://assets/icons/common/token-default.svg'
-          }
-        />
-      )}
+      {!hideChainIcon &&
+        (!hideConer || chain?.id) &&
+        (isShowChainTooltip ? (
+          <TooltipWithMagnetArrow
+            title={chain?.name}
+            className="rectangle w-[max-content]"
+          >
+            <img
+              className={clsx('chain-logo', chainIconPosition)}
+              width={chainSize}
+              height={chainSize}
+              src={chain?.logo || IconUnknown}
+            />
+          </TooltipWithMagnetArrow>
+        ) : (
+          <img
+            className={clsx('chain-logo', chainIconPosition)}
+            width={chainSize}
+            height={chainSize}
+            src={chain?.logo || IconUnknown}
+          />
+        ))}
     </TokenWithChainWrapper>
   );
 };
@@ -104,11 +128,11 @@ export const IconWithChain = ({
   });
   return (
     <TokenWithChainWrapper
-      className={classNames('token-with-chain', noRound && 'no-round')}
+      className={clsx('token-with-chain', noRound && 'no-round')}
       style={{ width, height }}
     >
       <img
-        className={classNames('token-logo', noRound && 'no-round')}
+        className={clsx('token-logo', noRound && 'no-round')}
         src={iconUrl}
         style={{ width, height, minWidth: width }}
       />

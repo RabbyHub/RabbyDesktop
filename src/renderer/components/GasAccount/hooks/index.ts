@@ -249,3 +249,18 @@ export const useGasAccountHistory = () => {
     refreshListTx,
   };
 };
+
+export const useAml = () => {
+  const { accountId } = useGasAccountSign();
+
+  const { value } = useAsync(async () => {
+    if (accountId) {
+      return walletOpenapi.getGasAccountAml(accountId);
+    }
+    return {
+      is_risk: false,
+    };
+  }, [accountId]);
+
+  return value?.is_risk;
+};
