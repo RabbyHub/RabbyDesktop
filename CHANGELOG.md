@@ -1,7 +1,20 @@
 
-v0.39.0 / 2024-10-29
+v0.39.1 / 2024-11-08
 ====================
 
+  * fix: safe (#673)
+  * chore: update changelog.
+  * fix: peer dep version (#672)
+  * feat: support safe message (#671)
+  * feat: low credit token modal;aml (#670)
+  * build: upgrade to electron 29 (#669)
+  * build: cleanup build script/configuration. (#668)
+  * chore: remove yarn.lock
+
+v0.39.0-prod / 2024-10-29
+=========================
+
+  * Release v0.39.0-prod
   * build: update changelog.
   * Feat/batch revoke (#667)
   * update fee text (#665)
