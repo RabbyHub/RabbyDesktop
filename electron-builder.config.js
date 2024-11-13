@@ -42,6 +42,10 @@ module.exports = {
   "productName": "Rabby Desktop",
   "appId": "com.debank.RabbyDesktop",
   "asar": true,
+  "electronFuses": {
+    "enableEmbeddedAsarIntegrityValidation": true,
+    "onlyLoadAppFromAsar": true,
+  },
   "asarUnpack": "**\\*.{node,dll}",
   "copyright": "Copyright © 2022 rabby.io",
   "files": [
