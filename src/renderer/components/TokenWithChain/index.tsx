@@ -138,7 +138,9 @@ export const IconWithChain = ({
       />
       {!hideChainIcon && (!hideConer || chain?.id) && (
         <img
-          className="chain-logo"
+          className="chain-logo br"
+          width={12}
+          height={12}
           src={
             chain?.logo ||
             'rabby-internal://assets/icons/common/token-default.svg'
