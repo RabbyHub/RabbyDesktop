@@ -1,3 +1,4 @@
 #### Features
 
-- Supported signing message when using a Safe address
+- Fixed display errors on the Approvals page.
+- Fixed issue with GasAccount balance not updating.
