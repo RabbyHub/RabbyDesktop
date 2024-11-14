@@ -1,7 +1,16 @@
 
-v0.39.1 / 2024-11-08
+v0.39.2 / 2024-11-14
 ====================
 
+  * chore: update changelog.
+  * build: upgrade rabbyx. (#676)
+  * fix: gasaccount balance (#675)
+  * fix: chain icon display in approval list (#674)
+
+v0.39.1-prod / 2024-11-08
+=========================
+
+  * Release v0.39.1-prod
   * fix: safe (#673)
   * chore: update changelog.
   * fix: peer dep version (#672)
