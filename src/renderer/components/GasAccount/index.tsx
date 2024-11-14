@@ -14,6 +14,7 @@ import {
   useAml,
   useGasAccountHistory,
   useGasAccountLogin,
+  useGasAccountRefresh,
   useGasAccountSign,
 } from './hooks';
 import { GasAccountBlueBorderedButton } from './components/Button';
@@ -75,6 +76,13 @@ const GasAccountInner = ({
   const wallet = walletController;
 
   const balance = value?.account?.balance || 0;
+
+  const { refresh } = useGasAccountRefresh();
+
+  useEffect(() => {
+    refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     wallet.clearPageStateCache();

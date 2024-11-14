@@ -14,11 +14,11 @@ const GasAccountHeader = () => {
 
   const [visible, setVisible] = useState(false);
   const usd = useMemo(() => {
-    if (loading) {
-      return formatUsdValue(0);
-    }
     if (value && 'account' in value) {
       return formatUsdValue(value.account.balance);
+    }
+    if (loading) {
+      return formatUsdValue(0);
     }
     return formatUsdValue(0);
   }, [loading, value]);
