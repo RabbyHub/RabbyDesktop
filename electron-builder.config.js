@@ -6,7 +6,10 @@ const { fingerprint } = require('./.erb/scripts/winSign');
 // prod, reg
 const buildchannel = process.env.buildchannel || 'reg';
 const PLATFORM = process.platform;
-const WINDOWS_FORCE_SIGN_WITH_FINGERPRINT = process.env.WINDOWS_FORCE_SIGN_WITH_FINGERPRINT;
+const forceSignWindowsPackage = process.env.WINDOWS_FORCE_SIGN_WITH_FINGERPRINT === 'true';
+const packDotNodeFilesOnWindows = PLATFORM === "win32" && process.env.WINDOWS_PACK_DOT_NODE_FILES === 'true';
+
+const signWindowsPackage = forceSignWindowsPackage || (buildchannel === "prod" && fingerprint);
 
 /**
  * @return {import('electron-builder').Configuration['win'] & object}
@@ -14,7 +17,7 @@ const WINDOWS_FORCE_SIGN_WITH_FINGERPRINT = process.env.WINDOWS_FORCE_SIGN_WITH_
 function getWindowsCert() {
   if (PLATFORM !== "win32") return {};
 
-  if (WINDOWS_FORCE_SIGN_WITH_FINGERPRINT === 'true' || (buildchannel === "prod" && fingerprint)) {
+  if (signWindowsPackage) {
     console.log(`[getWindowsCert] will sign with fingerprint`);
     return {
       "sign": '.erb/scripts/winSign.js',
@@ -47,7 +50,7 @@ module.exports = {
     "enableEmbeddedAsarIntegrityValidation": true,
     "onlyLoadAppFromAsar": true,
   },
-  "asarUnpack": "**\\*.{node,dll}",
+  "asarUnpack": !packDotNodeFilesOnWindows ? "**\\*.{node,dll}" : "**\\*.{dll}",
   "copyright": "Copyright © 2022 rabby.io",
   "files": [
     "dist",
@@ -103,6 +106,13 @@ module.exports = {
       "sha256"
     ],
     "signDlls": false,
+    "signExts": !signWindowsPackage ? [] : [
+      ".exe",
+      // ".dll",
+      ...packDotNodeFilesOnWindows ? [] : [
+        ".node",
+      ]
+    ].filter(Boolean),
     "rfc3161TimeStampServer": "http://timestamp.comodoca.com/rfc3161",
     ...getWindowsCert(),
   },
