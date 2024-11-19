@@ -16,6 +16,10 @@ on:
         required: false
         type: boolean
         default: false
+      WINDOWS_FORCE_SIGN_WITH_FINGERPRINT:
+        required: false
+        type: boolean
+        default: false
 
 defaults:
   run:
@@ -48,10 +52,11 @@ jobs:
           echo "HOME is $HOME"
           echo "USERPROFILE is $USERPROFILE"
           echo "BUILD_USE_DEVTOOLS is $BUILD_USE_DEVTOOLS"
+          echo "WINDOWS_FORCE_SIGN_WITH_FINGERPRINT is $WINDOWS_FORCE_SIGN_WITH_FINGERPRINT"
           echo "which node $(which node)"
         env:
           BUILD_USE_DEVTOOLS: ${{ inputs.BUILD_USE_DEVTOOLS }}
-
+          WINDOWS_FORCE_SIGN_WITH_FINGERPRINT: ${{ inputs.WINDOWS_FORCE_SIGN_WITH_FINGERPRINT }}
       # - name: Install Node and NPM
       #   uses: actions/setup-node@v1
       #   with:
@@ -89,6 +94,7 @@ jobs:
           RABBY_DESKTOP_CODE_SIGINING_CERT_FINGERPRINT: ${{ secrets.RABBY_DESKTOP_CODE_SIGINING_CERT_FINGERPRINT }}
           RABBY_DESKTOP_KR_PWD: ${{ secrets.RABBY_DESKTOP_KR_PWD }}
           RABBY_REALLY_COPY: ${{ inputs.RABBY_REALLY_COPY }}
+          WINDOWS_FORCE_SIGN_WITH_FINGERPRINT: ${{ inputs.WINDOWS_FORCE_SIGN_WITH_FINGERPRINT }}
           BUILD_USE_DEVTOOLS: ${{ inputs.BUILD_USE_DEVTOOLS }}
           LARK_CHAT_URL: ${{ secrets.LARK_CHAT_URL }}
           LARK_CHAT_SECRET: ${{ secrets.LARK_CHAT_SECRET }}

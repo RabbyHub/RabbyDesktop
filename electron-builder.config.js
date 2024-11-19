@@ -6,6 +6,7 @@ const { fingerprint } = require('./.erb/scripts/winSign');
 // prod, reg
 const buildchannel = process.env.buildchannel || 'reg';
 const PLATFORM = process.platform;
+const WINDOWS_FORCE_SIGN_WITH_FINGERPRINT = process.env.WINDOWS_FORCE_SIGN_WITH_FINGERPRINT;
 
 /**
  * @return {import('electron-builder').Configuration['win'] & object}
@@ -13,7 +14,7 @@ const PLATFORM = process.platform;
 function getWindowsCert() {
   if (PLATFORM !== "win32") return {};
 
-  if (buildchannel === "prod" && fingerprint) {
+  if (WINDOWS_FORCE_SIGN_WITH_FINGERPRINT === 'true' || (buildchannel === "prod" && fingerprint)) {
     console.log(`[getWindowsCert] will sign with fingerprint`);
     return {
       "sign": '.erb/scripts/winSign.js',
