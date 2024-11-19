@@ -22,6 +22,7 @@ import {
   createPopupModalWindow,
   createPopupView,
   hidePopupView,
+  makeBrowserViewTransparent,
   showPopupWindow,
 } from '../utils/browser';
 import {
@@ -140,6 +141,7 @@ function updateSubviewPos({
   }
 
   roundRectValue(popupRect);
+  makeBrowserViewTransparent(view);
 
   view.setBounds(popupRect);
   if (BrowserWindow.fromBrowserView(view) === parentWindow) {

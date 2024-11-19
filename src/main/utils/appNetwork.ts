@@ -14,6 +14,7 @@ import {
 import { catchError, firstValueFrom, of, Subject, timeout } from 'rxjs';
 import { BrowserViewManager, parseSiteMetaByWebContents } from './browserView';
 import { getSessionInsts } from './stream-helpers';
+import { makeBrowserViewTransparent } from './browser';
 
 const DFLT_TIMEOUT = 8 * 1e3;
 
@@ -54,6 +55,8 @@ const checkingProxyViewReady = getSessionInsts().then(
         disableDialogs: true,
       },
     });
+
+    makeBrowserViewTransparent(view);
 
     return view;
   }
