@@ -10,6 +10,7 @@ import {
   findChain,
   findChainByServerID,
   customTestnetTokenToTokenItem,
+  supportedChainToChain,
 } from '@/renderer/utils/chain';
 import { formatUsdValue, splitNumberByStep } from '@/renderer/utils/number';
 import { Chain, formatTokenAmount } from '@debank/common';
@@ -18,7 +19,13 @@ import { Empty, InputRef, Modal, Skeleton } from 'antd';
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 import { isNil } from 'lodash';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useAsync, useDebounce } from 'react-use';
 import styled from 'styled-components';
 
@@ -414,6 +421,14 @@ interface TokenDrawerProps {
   onRemoveChainFilter?: (ctx: SearchCallbackCtx) => void;
   onConfirm(item: TokenItem): void;
   chainServerId: string | null;
+  columnClassName?: string;
+  columnRender?: () => React.ReactNode;
+  itemRender?: (
+    token: TokenItem,
+    handle: (item: TokenItem) => void
+  ) => React.ReactNode;
+  loadingRender?: () => React.ReactNode;
+  emptyRender?: () => React.ReactNode;
 }
 
 const DefaultToken = ({
@@ -474,7 +489,7 @@ const DefaultToken = ({
   );
 };
 
-const TokenSelectModal = ({
+export const TokenSelectModal = ({
   title = 'Select a token',
   open = false,
   list,
@@ -485,6 +500,11 @@ const TokenSelectModal = ({
   onClose,
   placeholder = 'Search by Name / Address',
   chainServerId,
+  columnClassName,
+  columnRender,
+  itemRender,
+  loadingRender,
+  emptyRender,
 }: TokenDrawerProps) => {
   const [query, setQuery] = useState('');
   const handleQueryChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -523,6 +543,65 @@ const TokenSelectModal = ({
     }
   }, [open]);
 
+  const Column = useMemo(() => {
+    if (columnRender) {
+      return columnRender();
+    }
+    return (
+      <>
+        <div className="right">ASSET / AMOUNT</div>
+        <div className="right">PRICE</div>
+        <div className="right">USD VALUE</div>
+      </>
+    );
+  }, [columnRender]);
+
+  const LoadingC = useMemo(() => {
+    if (loadingRender) {
+      return loadingRender();
+    }
+    return (
+      <div>
+        {Array(8)
+          .fill(1)
+          .map((_, idx) => (
+            // eslint-disable-next-line react/no-array-index-key
+            <Loading key={`loading-${idx}`} />
+          ))}
+      </div>
+    );
+  }, [loadingRender]);
+
+  const EmptyC = useMemo(() => {
+    if (emptyRender) {
+      return emptyRender();
+    }
+    return (
+      <Empty
+        image="rabby-internal://assets/icons/swap/no-result.svg"
+        imageStyle={{
+          width: 60,
+          height: 52,
+          margin: '150px auto 0 auto',
+        }}
+        description={
+          <div className="noResult">
+            No Match
+            <br />
+            {!isAddr && (
+              <>
+                Try to search contract address on{' '}
+                {!chainServerId
+                  ? ''
+                  : findChainByServerID(chainServerId)?.name || 'chain'}
+              </>
+            )}
+          </div>
+        }
+      />
+    );
+  }, [chainServerId, emptyRender, isAddr]);
+
   return (
     <StyledModal
       centered
@@ -548,7 +627,7 @@ const TokenSelectModal = ({
           onChange={handleQueryChange}
         />
 
-        {chainItem && (
+        {/* {chainItem && (
           <div className="filters-wrapper">
             <div className="filter-item__chain">
               <img
@@ -577,54 +656,24 @@ const TokenSelectModal = ({
               </div>
             </div>
           </div>
-        )}
+        )} */}
 
-        <div className="listHeader grid3">
-          <div className="right">ASSET / AMOUNT</div>
-          <div className="right">PRICE</div>
-          <div className="right">USD VALUE</div>
+        <div className={clsx('listHeader grid3', columnClassName)}>
+          {Column}
         </div>
 
         <div className="listBox">
-          {!isLoading && isEmpty && (
-            <Empty
-              image="rabby-internal://assets/icons/swap/no-result.svg"
-              imageStyle={{
-                width: 60,
-                height: 52,
-                margin: '150px auto 0 auto',
-              }}
-              description={
-                <div className="noResult">
-                  No Match
-                  <br />
-                  {!isAddr && (
-                    <>
-                      Try to search contract address on{' '}
-                      {!chainServerId
-                        ? ''
-                        : findChainByServerID(chainServerId)?.name || 'chain'}
-                    </>
-                  )}
-                </div>
-              }
-            />
-          )}
-          {isLoading && (
-            <div>
-              {Array(8)
-                .fill(1)
-                .map((_, idx) => (
-                  // eslint-disable-next-line react/no-array-index-key
-                  <Loading key={`loading-${idx}`} />
-                ))}
-            </div>
-          )}
+          {!isLoading && isEmpty && EmptyC}
+          {isLoading && LoadingC}
+
           {!isLoading &&
             !isEmpty &&
-            list.map((t) => (
-              <DefaultToken t={t} onConfirm={onConfirm} key={t.id} />
-            ))}
+            list.map((t) => {
+              if (itemRender) {
+                return itemRender(t, onConfirm);
+              }
+              return <DefaultToken t={t} onConfirm={onConfirm} key={t.id} />;
+            })}
         </div>
       </div>
     </StyledModal>

@@ -52,14 +52,27 @@ interface ChainSelectorModalProps {
   disabledTips?: SelectChainListProps['disabledTips'];
   hideTestnetTab?: boolean;
   showRPCStatus?: boolean;
+  excludeChains?: CHAINS_ENUM[];
 }
+
+const filterExcludeChains = (
+  chains: Chain[],
+  excludeChains?: CHAINS_ENUM[]
+) => {
+  if (excludeChains?.length) {
+    return chains?.filter((e) => !excludeChains.includes(e.enum));
+  }
+  return chains;
+};
 
 const useChainSeletorList = ({
   supportChains,
   netTabKey,
+  excludeChains,
 }: {
   supportChains?: Chain['enum'][];
   netTabKey?: NetSwitchTabsKey;
+  excludeChains?: CHAINS_ENUM[];
 }) => {
   const [search, setSearch] = useState('');
   const {
@@ -99,11 +112,17 @@ const useChainSeletorList = ({
     });
 
     return {
-      allSearched: result.allSearched,
-      matteredList: searchKw ? [] : result.matteredList,
-      unmatteredList: searchKw ? [] : result.unmatteredList,
+      allSearched: filterExcludeChains(result.allSearched, excludeChains),
+      matteredList: filterExcludeChains(
+        searchKw ? [] : result.matteredList,
+        excludeChains
+      ),
+      unmatteredList: filterExcludeChains(
+        searchKw ? [] : result.unmatteredList,
+        excludeChains
+      ),
     };
-  }, [search, pinned, supportChains, chainBalances, netTabKey]);
+  }, [search, pinned, supportChains, chainBalances, netTabKey, excludeChains]);
 
   useEffect(() => {
     fetchPreference('pinnedChain');
@@ -133,6 +152,7 @@ export const ChainSelectorLargeModal = ({
   disabledTips,
   hideTestnetTab = false,
   showRPCStatus = false,
+  excludeChains,
 }: ChainSelectorModalProps) => {
   const handleCancel = () => {
     onCancel?.();
@@ -159,6 +179,7 @@ export const ChainSelectorLargeModal = ({
   } = useChainSeletorList({
     supportChains,
     netTabKey: selectedTab,
+    excludeChains,
   });
 
   useEffect(() => {

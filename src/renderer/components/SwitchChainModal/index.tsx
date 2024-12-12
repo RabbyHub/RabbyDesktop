@@ -121,6 +121,26 @@ function searchFilter(keyword: string) {
     );
 }
 
+const chainsEnumfilterExcludeChains = (
+  chains: CHAINS_ENUM[],
+  excludeChains?: CHAINS_ENUM[]
+) => {
+  if (excludeChains?.length) {
+    return chains?.filter((e) => !excludeChains.includes(e));
+  }
+  return chains;
+};
+
+const chainFilterExcludeChains = (
+  chains: Chain[],
+  excludeChains?: CHAINS_ENUM[]
+) => {
+  if (excludeChains?.length) {
+    return chains?.filter((e) => !excludeChains.includes(e.enum));
+  }
+  return chains;
+};
+
 type SwitchChainModalInnerType = {
   clearOnOpen: () => void;
 };
@@ -134,6 +154,7 @@ type SwitchChainModalInnerProps = {
   isCheckCustomRPC?: boolean;
   hideTestnetTab?: boolean;
   hideMainnetTab?: boolean;
+  excludeChains?: CHAINS_ENUM[];
 };
 const SwitchChainModalInner = React.forwardRef<
   SwitchChainModalInnerType,
@@ -150,6 +171,7 @@ const SwitchChainModalInner = React.forwardRef<
       isCheckCustomRPC,
       hideMainnetTab = false,
       hideTestnetTab = false,
+      excludeChains,
     },
     ref
   ) => {
@@ -178,7 +200,9 @@ const SwitchChainModalInner = React.forwardRef<
     const { mainnetList, testnetList } = useChainList();
 
     const { pinnedSet, matteredList, unmatteredList } = useMemo(() => {
-      const set = new Set(preferences.pinnedChain);
+      const set = new Set(
+        chainsEnumfilterExcludeChains(preferences.pinnedChain, excludeChains)
+      );
 
       const searchKw = searchInput?.trim().toLowerCase();
       const result = varyAndSortChainItems({
@@ -197,7 +221,18 @@ const SwitchChainModalInner = React.forwardRef<
       }
 
       return {
-        ...result,
+        allSearched: chainFilterExcludeChains(
+          result.allSearched,
+          excludeChains
+        ),
+        matteredList: chainFilterExcludeChains(
+          result.matteredList,
+          excludeChains
+        ),
+        unmatteredList: chainFilterExcludeChains(
+          result.unmatteredList,
+          excludeChains
+        ),
         pinnedSet: set,
       };
     }, [
@@ -209,6 +244,7 @@ const SwitchChainModalInner = React.forwardRef<
       selectedTab,
       mainnetList,
       testnetList,
+      excludeChains,
     ]);
 
     const onPinnedChange: OnPinnedChanged = useCallback(
