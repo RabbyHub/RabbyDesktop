@@ -57,6 +57,7 @@ import { useCustomTestnetTokens } from '@/renderer/hooks/rabbyx/useToken';
 import { useListenSyncChain } from '@/renderer/hooks/useRabbyx';
 import { useSyncChainList } from '@/renderer/hooks/rabbyx/useChainList';
 import { useTriggerShellWalletOnTop } from '@/renderer/hooks-shell/useShellWallet';
+import { Bridge } from '@/renderer/routes/Bridge';
 import styles from './index.module.less';
 
 import { FixedBackHeader } from '../FixedBackHeader';
@@ -217,6 +218,15 @@ const router = createRouter([
         loader: () => {
           return {
             title: 'Send NFT',
+          } as MainWindowRouteData;
+        },
+      },
+      {
+        path: 'home/bridge',
+        element: <Bridge />,
+        loader: () => {
+          return {
+            title: 'Bridge',
           } as MainWindowRouteData;
         },
       },

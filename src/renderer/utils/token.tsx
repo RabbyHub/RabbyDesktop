@@ -13,7 +13,7 @@ import { formatUsdValue } from './number';
 import { getCollectionDisplayName, PortfolioItemNft } from './nft';
 import { TokenActionSymbol } from '../components/TokenActionModal/TokenActionModal';
 import { getTokenSymbol } from '.';
-import { findChain } from './chain';
+import { findChain, findChainByEnum } from './chain';
 import { MINIMUM_GAS_LIMIT } from './constant';
 
 export const ellipsisTokenSymbol = (text: string, length = 6) => {
@@ -323,3 +323,23 @@ export type PortfolioItemToken = {
   claimable_amount?: number;
   is_custom?: boolean;
 };
+
+export function getChainDefaultToken(chain: CHAINS_ENUM) {
+  const chainInfo = findChainByEnum(chain)!;
+  return {
+    id: chainInfo.nativeTokenAddress,
+    decimals: chainInfo.nativeTokenDecimals,
+    logo_url: chainInfo.nativeTokenLogo,
+    symbol: chainInfo.nativeTokenSymbol,
+    display_symbol: chainInfo.nativeTokenSymbol,
+    optimized_symbol: chainInfo.nativeTokenSymbol,
+    is_core: true,
+    is_verified: true,
+    is_wallet: true,
+    amount: 0,
+    price: 0,
+    name: chainInfo.nativeTokenSymbol,
+    chain: chainInfo.serverId,
+    time_at: 0,
+  } as TokenItem;
+}

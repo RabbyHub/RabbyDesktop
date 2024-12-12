@@ -125,6 +125,11 @@ const StaticEntries: (
     logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/swap.svg',
   },
   {
+    path: '/mainwin/home/bridge',
+    title: 'Bridge',
+    logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/bridge.svg',
+  },
+  {
     path: '/mainwin/approvals',
     title: 'Approvals',
     logoSrc: 'rabby-internal://assets/icons/mainwin-sidebar/approvals.svg',

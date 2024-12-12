@@ -35,6 +35,7 @@ type ZViewStates = {
     isCheckCustomRPC?: boolean;
     hideTestnetTab?: boolean;
     hideMainnetTab?: boolean;
+    excludeChains?: CHAINS_ENUM[];
   };
   'security-notification': ISecurityNotificationPayload;
   'add-address-modal': {

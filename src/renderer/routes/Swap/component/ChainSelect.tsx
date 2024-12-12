@@ -43,6 +43,8 @@ interface ChainSelectorProps {
   title?: string;
   supportChains?: CHAINS_ENUM[];
   chainRender?: ((chian: CHAINS_ENUM) => React.ReactNode) | React.ReactNode;
+  hideTestnetTab?: boolean;
+  excludeChains?: CHAINS_ENUM[];
 }
 export const ChainSelect = ({
   className,
@@ -53,6 +55,8 @@ export const ChainSelect = ({
   title,
   supportChains,
   chainRender,
+  hideTestnetTab = false,
+  excludeChains,
 }: React.PropsWithoutRef<ChainSelectorProps>) => {
   const handleChange = (v: CHAINS_ENUM) => {
     if (readonly) return;
@@ -71,9 +75,20 @@ export const ChainSelect = ({
       title,
       disabledTips,
       supportChains,
+      hideTestnetTab,
       isCheckCustomRPC: true,
+      excludeChains,
     });
-  }, [disabledTips, open, supportChains, title, value]);
+  }, [
+    disabledTips,
+    hideTestnetTab,
+    open,
+    supportChains,
+    title,
+    value,
+    excludeChains,
+  ]);
+
   const handleClickSelector = () => {
     if (readonly) return;
     openChainModal();
