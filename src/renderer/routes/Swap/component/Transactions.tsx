@@ -217,7 +217,9 @@ const Transaction = forwardRef<HTMLDivElement, TransactionProps>(
     const isCompleted = data?.status === 'Completed';
     const time = data?.finished_at || data?.create_at;
     const targetDex =
-      DEX?.[data?.dex_id as keyof typeof DEX]?.name || data?.dex_id || '';
+      data?.dex_id === '0xV2'
+        ? '0x'
+        : DEX?.[data?.dex_id]?.name || data?.dex_id || '';
     const txId = data?.tx_id;
     const chainItem = findChain({
       serverId: data?.chain,
