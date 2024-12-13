@@ -1,7 +1,16 @@
 
-v0.39.2 / 2024-11-14
+v0.40.0 / 2024-12-13
 ====================
 
+  * build: update changelog.
+  * feat: add bridge (#679)
+  * upgrade to electron v30, enable `electronFuses`. (#677)
+  * feat: swap support 0xv2 (#678)
+
+v0.39.2-prod / 2024-11-14
+=========================
+
+  * Release v0.39.2-prod
   * chore: update changelog.
   * build: upgrade rabbyx. (#676)
   * fix: gasaccount balance (#675)
