@@ -4,7 +4,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import IconRcSearch from '@/../assets/icons/swap/search.svg?rc';
 import { varyAndSortChainItems } from '@/isomorphic/wallet/chain';
-import { Modal as RModal } from '@/renderer/components/Modal/Modal';
+import {
+  Modal as RModal,
+  Props as RModalProps,
+} from '@/renderer/components/Modal/Modal';
 import { useAccountBalanceMap } from '@/renderer/hooks/rabbyx/useAccount';
 import { usePreference } from '@/renderer/hooks/rabbyx/usePreference';
 import { useCustomRPC } from '@/renderer/hooks/useCustomRPC';
@@ -155,6 +158,7 @@ type SwitchChainModalInnerProps = {
   hideTestnetTab?: boolean;
   hideMainnetTab?: boolean;
   excludeChains?: CHAINS_ENUM[];
+  isZPopup?: boolean;
 };
 const SwitchChainModalInner = React.forwardRef<
   SwitchChainModalInnerType,
@@ -172,10 +176,13 @@ const SwitchChainModalInner = React.forwardRef<
       hideMainnetTab = false,
       hideTestnetTab = false,
       excludeChains,
+      isZPopup = true,
     },
     ref
   ) => {
-    useBodyClassNameOnMounted('switch-chain-subview');
+    useBodyClassNameOnMounted(
+      isZPopup ? 'switch-chain-subview' : 'no-switch-chain-subview'
+    );
 
     const { preferences, setChainPinned } = usePreference();
 
@@ -435,6 +442,29 @@ export default function SwitchChainModal() {
         ref={innerRef}
         onChange={onChainChange}
       />
+    </RModal>
+  );
+}
+
+export function SwitchChainModalNoZPopup(
+  props: SwitchChainModalInnerProps & {
+    open: boolean;
+    onCancel?: () => void;
+  }
+) {
+  const { open, onCancel, ...innerProps } = props;
+
+  return (
+    <RModal
+      open={open}
+      centered
+      className={styles.SwitchChainModal}
+      mask
+      width={400}
+      onCancel={onCancel}
+      destroyOnClose
+    >
+      <SwitchChainModalInner {...innerProps} isZPopup={false} />
     </RModal>
   );
 }
