@@ -410,7 +410,7 @@ export const BridgeContent = () => {
   const [openSlippage, setOpenSlippage] = useState(false);
 
   return (
-    <div className="max-w-[1080px] mx-auto">
+    <div className="max-w-[1080px] mx-auto mt-[32px]">
       <StyledBridgeBox>
         <div className="relative flex flex-col gap-8">
           <BridgeToken

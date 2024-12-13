@@ -117,7 +117,7 @@ const Transaction = forwardRef<HTMLDivElement, TransactionProps>(
     return (
       <div
         className={clsx(
-          ' rounded-[6px] p-12 relative text-12 text-r-neutral-body'
+          ' rounded-[6px] py-12 relative text-12 text-r-neutral-body'
         )}
         ref={ref}
       >

@@ -207,3 +207,9 @@ export const formatGasCostUsd = (gasCostUsd: BigNumber) => {
 
   return formatTokenAmount(value);
 };
+
+export const formatGasAccountUSDValue = (value: string | number) => {
+  const bnValue = new BigNumber(value);
+  if (bnValue.lt(0.0001)) return '<$0.0001';
+  return `$${formatNumber(value, 4)}`;
+};

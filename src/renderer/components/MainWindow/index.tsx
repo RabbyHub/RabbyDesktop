@@ -223,12 +223,11 @@ const router = createRouter([
       },
       {
         path: 'home/bridge',
-        element: <Bridge />,
-        loader: () => {
-          return {
-            title: 'Bridge',
-          } as MainWindowRouteData;
-        },
+        element: (
+          <>
+            <Bridge />
+          </>
+        ),
       },
       {
         path: 'dapps/:dappId',
