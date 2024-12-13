@@ -1,9 +1,8 @@
 import { useTranslation } from 'react-i18next';
-// import { formatUsdValue, sinceTime } from '@/ui/utils';
 import clsx from 'clsx';
 import { Skeleton } from 'antd';
 import { findChainByServerID } from '@/renderer/utils/chain';
-import { formatGasHeaderUsdValue } from '@/renderer/utils/number';
+import { formatGasAccountUSDValue } from '@/renderer/utils/number';
 import { sinceTime } from '@/renderer/utils/time';
 import { useGasAccountHistory } from '../hooks';
 
@@ -75,7 +74,7 @@ const HistoryItem = ({
       )}
       <div className="text-14 font-medium text-r-neutral-title-1">
         {sign}
-        {formatGasHeaderUsdValue(value)}{' '}
+        {formatGasAccountUSDValue(value)}{' '}
       </div>
     </div>
   );

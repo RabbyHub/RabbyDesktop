@@ -212,6 +212,27 @@ export interface SwapState {
   preferMEVGuarded: boolean;
 }
 
+export type BridgeRecord = {
+  aggregator_id: string;
+  bridge_id: string;
+  from_chain_id: string;
+  from_token_id: string;
+  from_token_amount: string | number;
+  to_chain_id: string;
+  to_token_id: string;
+  to_token_amount: string | number;
+  tx: Partial<Tx>;
+  rabby_fee: number;
+};
+
+export type BridgeServiceStore = {
+  selectedChain: CHAINS_ENUM | null;
+  selectedFromToken?: TokenItem;
+  selectedToToken?: TokenItem;
+  selectedAggregators?: string[];
+  txQuotes?: Record<string, BridgeRecord>;
+};
+
 type CHAINS_ENUM = import('@debank/common').CHAINS_ENUM;
 type OpenApiService = import('@rabby-wallet/rabby-api').OpenApiService;
 type FunctionPropertyNames<T> = {
@@ -939,6 +960,67 @@ export type RabbyXMethod = {
   'walletController.isAddedCustomTestnetToken': (
     params: Pick<CustomTestnetTokenBase, 'id' | 'chainId'>
   ) => boolean;
+
+  // bridge
+  'walletController.getBridgeData': <K extends keyof BridgeServiceStore>(
+    key?: K
+  ) => K extends undefined ? BridgeServiceStore : BridgeServiceStore[K];
+  'walletController.bridgeToken': (
+    {
+      to,
+      data,
+      payTokenRawAmount,
+      payTokenId,
+      payTokenChainServerId,
+      shouldApprove,
+      shouldTwoStepApprove,
+      gasPrice,
+      info,
+      value,
+    }: {
+      data: string;
+      to: string;
+      value: string;
+      chainId: number;
+      shouldApprove: boolean;
+      shouldTwoStepApprove: boolean;
+      payTokenId: string;
+      payTokenChainServerId: string;
+      payTokenRawAmount: string;
+      gasPrice?: number;
+      info: BridgeRecord;
+    },
+    $ctx?: any
+  ) => Promise<string[]>;
+  'walletController.buildBridgeToken': (
+    {
+      to,
+      data,
+      payTokenRawAmount,
+      payTokenId,
+      payTokenChainServerId,
+      shouldApprove,
+      shouldTwoStepApprove,
+      gasPrice,
+      info,
+      value,
+      isBuild,
+    }: {
+      data: string;
+      to: string;
+      value: string;
+      chainId: number;
+      shouldApprove: boolean;
+      shouldTwoStepApprove: boolean;
+      payTokenId: string;
+      payTokenChainServerId: string;
+      payTokenRawAmount: string;
+      gasPrice?: number;
+      info: BridgeRecord;
+      isBuild?: boolean;
+    },
+    $ctx?: any
+  ) => Promise<Tx[]>;
 } & GenOpenApiService<'openapi'> &
   GenOpenApiService<'testnetOpenapi'>;
 
