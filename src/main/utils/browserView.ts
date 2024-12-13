@@ -11,7 +11,7 @@ import {
   webContents,
 } from 'electron';
 import { desktopAppStore } from '../store/desktopApp';
-import { redirectToAboutBlank } from './browser';
+import { makeBrowserViewTransparent, redirectToAboutBlank } from './browser';
 
 const ghostViewIds = new Set<WebContents['id']>();
 
@@ -41,6 +41,8 @@ export class BrowserViewManager {
           ...opts?.webPreferences,
         },
       });
+
+      // makeBrowserViewTransparent(view);
 
       Object.defineProperty(view, '$isWebviewTab', {
         get() {
