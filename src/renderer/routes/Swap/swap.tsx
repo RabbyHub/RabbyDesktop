@@ -670,6 +670,26 @@ export const SwapToken = () => {
     setLowCreditVisible,
   } = useLowCreditState();
 
+  const lowCreditInit = useRef(false);
+
+  useEffect(() => {
+    if (
+      receiveToken &&
+      receiveToken?.low_credit_score &&
+      !lowCreditInit.current &&
+      isInSwap
+    ) {
+      setLowCreditToken(receiveToken);
+      setLowCreditVisible(true);
+    }
+  }, [receiveToken, isInSwap, setLowCreditToken, setLowCreditVisible]);
+
+  useEffect(() => {
+    if (!isInSwap) {
+      lowCreditInit.current = false;
+    }
+  }, [isInSwap]);
+
   return (
     <Wrapper>
       <div className="header">
@@ -922,7 +942,10 @@ export const SwapToken = () => {
       <LowCreditModal
         token={lowCreditToken}
         visible={lowCreditVisible}
-        onCancel={() => setLowCreditVisible(false)}
+        onCancel={() => {
+          setLowCreditVisible(false);
+          lowCreditInit.current = true;
+        }}
       />
     </Wrapper>
   );
