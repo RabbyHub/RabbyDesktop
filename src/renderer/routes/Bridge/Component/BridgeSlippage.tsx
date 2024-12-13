@@ -24,7 +24,7 @@ const SlippageItem = styled.div`
   border: 1px solid transparent;
   cursor: pointer;
   border-radius: 6px;
-  width: 58px;
+  width: 80px;
   height: 32px;
   font-weight: 500;
   font-size: 13px;
@@ -104,11 +104,15 @@ interface BridgeSlippageProps {
   isCustomSlippage: boolean;
   setAutoSlippage: Dispatch<SetStateAction<boolean>>;
   setIsCustomSlippage: Dispatch<SetStateAction<boolean>>;
+  openSlippage: boolean;
+  setOpenSlippage: Dispatch<SetStateAction<boolean>>;
 }
 export const BridgeSlippage = memo((props: BridgeSlippageProps) => {
   const { t } = useTranslation();
 
   const {
+    openSlippage: slippageOpen,
+    setOpenSlippage: setSlippageOpen,
     value,
     displaySlippage,
     onChange,
@@ -118,8 +122,6 @@ export const BridgeSlippage = memo((props: BridgeSlippageProps) => {
     setAutoSlippage,
     setIsCustomSlippage,
   } = props;
-
-  const [slippageOpen, setSlippageOpen] = useState(false);
 
   const [isLow, isHigh] = useMemo(() => {
     return [
@@ -193,12 +195,12 @@ export const BridgeSlippage = memo((props: BridgeSlippageProps) => {
     if (tips) {
       setSlippageOpen(true);
     }
-  }, [tips]);
+  }, [setSlippageOpen, tips]);
 
   return (
-    <div>
+    <div className="mb-40">
       <div
-        className="flex justify-between cursor-pointer text-12"
+        className="flex justify-between cursor-pointer text-13"
         onClick={() => {
           setSlippageOpen((e) => !e);
         }}

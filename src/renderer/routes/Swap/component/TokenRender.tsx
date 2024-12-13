@@ -38,6 +38,15 @@ const TokenRenderWrapper = styled.div`
     border-radius: 8px;
     border-radius: 8px;
     background: var(--r-neutral-card2, rgba(255, 255, 255, 0.06));
+    padding: 0 12px;
+
+    .token {
+      gap: 6px;
+    }
+
+    .select {
+      gap: 6px;
+    }
   }
   .token {
     display: flex;

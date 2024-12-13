@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  ComponentProps,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Skeleton } from 'antd';
 import { TokenItem } from '@rabby-wallet/rabby-api/dist/types';
 import { useAsync } from 'react-use';
@@ -48,7 +54,7 @@ const ToColumn = () => {
   );
 };
 
-const loadingRender = () => (
+const Loading = () => (
   <div className="flex justify-between items-center py-10 pl-[20px] pr-[17px]">
     <div className="gap-x-12 flex">
       <Skeleton.Input
@@ -75,6 +81,8 @@ const loadingRender = () => (
     </div>
   </div>
 );
+
+const loadingRender = () => Array.from({ length: 10 }, () => <Loading />);
 
 const Empty = () => {
   const { t } = useTranslation();
@@ -126,7 +134,7 @@ const BridgeTokenItem = ({
     >
       <div
         className={clsx(
-          'flex items-center justify-between h-[56px] border border-solid border-transparent -mx-[28px] px-[28px]',
+          'flex items-center justify-between h-[56px] border border-solid border-transparent px-20',
           'rounded-[6px] ',
           insufficient
             ? 'opacity-50'
@@ -323,6 +331,21 @@ export const BridgeTokenSelect = (props: BridgeTokenSelectProps) => {
     return <Empty />;
   }, []);
 
+  const bodyStyle = useMemo(
+    () => ({
+      padding: 20,
+      paddingBottom: 0,
+    }),
+    []
+  );
+
+  const onClose = useCallback(() => setOpen(false), []);
+
+  const onSearch: ComponentProps<typeof TokenSelectModal>['onSearch'] =
+    useCallback((c) => {
+      setKeyword(c.keyword);
+    }, []);
+
   useEffect(() => {
     if (!open) {
       setKeyword('');
@@ -344,18 +367,20 @@ export const BridgeTokenSelect = (props: BridgeTokenSelectProps) => {
         <TokenSelectModal
           open={open}
           list={displayTokens || []}
-          onClose={() => setOpen(false)}
-          onSearch={(c) => {
-            setKeyword(c.keyword);
-          }}
+          onClose={onClose}
+          onSearch={onSearch}
           onConfirm={onChangeToken}
           chainServerId={chainServerId}
           isLoading={loading || displayLoading}
+          showChainFilter={false}
           columnClassName="flex items-center"
           columnRender={columnRender}
           loadingRender={loadingRender}
           itemRender={tokenRender}
           emptyRender={emptyRender}
+          width={400}
+          listClassName="-mx-[20px] px-0"
+          bodyStyle={bodyStyle}
         />
       )}
     </>
