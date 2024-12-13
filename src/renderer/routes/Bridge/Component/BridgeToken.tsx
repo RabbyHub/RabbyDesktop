@@ -8,10 +8,11 @@ import BigNumber from 'bignumber.js';
 import SkeletonInput from 'antd/lib/skeleton/Input';
 import styled from 'styled-components';
 import RcIconInfoCC from '@/../assets/icons/common/info-cc.svg?rc';
+import RcIconMax from '@/../assets/icons/bridge/max.svg?rc';
+
 import { useBridgeSupportChains } from '@/renderer/hooks/rabbyx/useBridge';
 import { findChainByEnum } from '@/renderer/utils';
 import { formatTokenAmount, formatUsdValue } from '@/renderer/utils/number';
-import { MaxButton } from '@/renderer/components/MaxButton';
 import { useSetSettingVisible } from '../hooks';
 import { tokenAmountBn } from '../../Swap/utils';
 import { ChainSelect } from '../../Swap/component/ChainSelect';
@@ -148,7 +149,7 @@ export const BridgeToken = ({
         background: 'rgba(0, 0, 0, 0.20)',
       }}
       className={clsx(
-        'h-[156px] rounded-[8px]',
+        'h-[164px] rounded-[8px]',
         'border-[0.5px] border-solid border-rabby-neutral-line'
       )}
     >
@@ -243,7 +244,10 @@ export const BridgeToken = ({
                 : 0}
             </span>
             {isFromToken && (
-              <MaxButton onClick={handleMax}>{t('page.swap.max')}</MaxButton>
+              <RcIconMax
+                onClick={handleMax}
+                className={clsx('w-[34px] h-[16px] cursor-pointer')}
+              />
             )}
           </div>
         </div>

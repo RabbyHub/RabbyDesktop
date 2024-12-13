@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Button, message, Modal } from 'antd';
 import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
@@ -32,7 +32,7 @@ import { useOnTxFinished } from '../../Swap/hooks/subscribe';
 const StyledBridgeBox = styled.div`
   position: relative;
   width: 528px;
-  height: 640px;
+  min-height: 640px;
   display: flex;
   flex-direction: column;
   border-radius: 8px;
@@ -95,6 +95,12 @@ export const BridgeContent = () => {
 
     clearExpiredTimer,
   } = useBridge();
+
+  useEffect(() => {
+    if (currentAccount?.address) {
+      handleAmountChange('');
+    }
+  }, [currentAccount?.address, handleAmountChange]);
 
   const amountAvailable = useMemo(() => Number(amount) > 0, [amount]);
 
@@ -401,6 +407,7 @@ export const BridgeContent = () => {
     !quoteList?.length;
 
   const [showMoreOpen, setShowMoreOpen] = useState(false);
+  const [openSlippage, setOpenSlippage] = useState(false);
 
   return (
     <div className="max-w-[1080px] mx-auto">
@@ -441,6 +448,8 @@ export const BridgeContent = () => {
             <BridgeShowMore
               open={showMoreOpen}
               setOpen={setShowMoreOpen}
+              openSlippage={openSlippage}
+              setOpenSlippage={setOpenSlippage}
               sourceName={selectedBridgeQuote?.aggregator.name || ''}
               sourceLogo={selectedBridgeQuote?.aggregator.logo_url || ''}
               slippage={slippageState}
@@ -600,7 +609,7 @@ export const BridgeContent = () => {
       /> */}
       </StyledBridgeBox>
 
-      <BridgeTxHistory />
+      <BridgeTxHistory key={currentAccount?.address} />
     </div>
   );
 };

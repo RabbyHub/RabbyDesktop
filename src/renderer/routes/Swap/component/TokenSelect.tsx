@@ -145,6 +145,7 @@ const Wrapper = styled.div`
 `;
 
 const TitleWrapper = styled.div`
+  position: relative;
   .title {
     font-weight: 500;
     font-size: 22px;
@@ -152,18 +153,10 @@ const TitleWrapper = styled.div`
     text-align: center;
     color: #ffffff;
   }
-  .back {
-    position: absolute;
-    left: 13px;
-    top: 27px;
-    width: 6px !important;
-    height: 12px !important;
-    cursor: pointer;
-  }
   .closeIcon {
     position: absolute;
-    right: 22px;
-    top: 30px;
+    right: 0;
+    top: 0;
     cursor: pointer;
     width: 24px !important;
     height: 25px !important;
@@ -421,7 +414,9 @@ interface TokenDrawerProps {
   onRemoveChainFilter?: (ctx: SearchCallbackCtx) => void;
   onConfirm(item: TokenItem): void;
   chainServerId: string | null;
+  showChainFilter?: boolean;
   columnClassName?: string;
+  listClassName?: string;
   columnRender?: () => React.ReactNode;
   itemRender?: (
     token: TokenItem,
@@ -429,6 +424,8 @@ interface TokenDrawerProps {
   ) => React.ReactNode;
   loadingRender?: () => React.ReactNode;
   emptyRender?: () => React.ReactNode;
+  width?: string | number;
+  bodyStyle?: React.CSSProperties;
 }
 
 const DefaultToken = ({
@@ -490,7 +487,7 @@ const DefaultToken = ({
 };
 
 export const TokenSelectModal = ({
-  title = 'Select a token',
+  title = 'Select a Token',
   open = false,
   list,
   onConfirm,
@@ -500,11 +497,15 @@ export const TokenSelectModal = ({
   onClose,
   placeholder = 'Search by Name / Address',
   chainServerId,
+  showChainFilter = true,
   columnClassName,
+  listClassName,
   columnRender,
   itemRender,
   loadingRender,
   emptyRender,
+  width = 536,
+  bodyStyle,
 }: TokenDrawerProps) => {
   const [query, setQuery] = useState('');
   const handleQueryChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -606,12 +607,13 @@ export const TokenSelectModal = ({
     <StyledModal
       centered
       onCancel={onClose}
-      width={536}
+      width={width}
       open={open}
       destroyOnClose
       closable={false}
       title={null}
       footer={null}
+      bodyStyle={bodyStyle}
     >
       <div className="container">
         <TitleWrapper>
@@ -627,7 +629,7 @@ export const TokenSelectModal = ({
           onChange={handleQueryChange}
         />
 
-        {/* {chainItem && (
+        {showChainFilter && chainItem && (
           <div className="filters-wrapper">
             <div className="filter-item__chain">
               <img
@@ -656,13 +658,13 @@ export const TokenSelectModal = ({
               </div>
             </div>
           </div>
-        )} */}
+        )}
 
         <div className={clsx('listHeader grid3', columnClassName)}>
           {Column}
         </div>
 
-        <div className="listBox">
+        <div className={clsx('listBox', listClassName)}>
           {!isLoading && isEmpty && EmptyC}
           {isLoading && LoadingC}
 

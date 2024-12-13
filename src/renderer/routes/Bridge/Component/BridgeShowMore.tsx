@@ -28,7 +28,7 @@ function ListItem({
     <div
       className={clsx(
         'flex items-center justify-between',
-        'text-12 text-r-neutral-foot',
+        'text-13 text-r-neutral-foot',
         className
       )}
     >
@@ -57,6 +57,8 @@ export const BridgeShowMore = ({
   setIsCustomSlippage,
   open,
   setOpen,
+  openSlippage,
+  setOpenSlippage,
 }: {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
@@ -77,6 +79,8 @@ export const BridgeShowMore = ({
   isCustomSlippage: boolean;
   setAutoSlippage: Dispatch<SetStateAction<boolean>>;
   setIsCustomSlippage: Dispatch<SetStateAction<boolean>>;
+  openSlippage: boolean;
+  setOpenSlippage: Dispatch<SetStateAction<boolean>>;
 }) => {
   const { t } = useTranslation();
 
@@ -94,7 +98,7 @@ export const BridgeShowMore = ({
 
   return (
     <div>
-      <div className="flex items-center gap-8 mt-32 mb-16 mx-[108px]">
+      <div className="flex items-center gap-8 mt-32 mb-16">
         <div className={clsx(dottedClassName)} />
         <div
           className={clsx(
@@ -201,6 +205,8 @@ export const BridgeShowMore = ({
           isCustomSlippage={isCustomSlippage}
           setAutoSlippage={setAutoSlippage}
           setIsCustomSlippage={setIsCustomSlippage}
+          openSlippage={openSlippage}
+          setOpenSlippage={setOpenSlippage}
         />
       </div>
     </div>
