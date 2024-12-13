@@ -4,8 +4,8 @@ import { CHAINS_ENUM } from '@debank/common';
 import { Tx } from '@rabby-wallet/rabby-api/dist/types';
 import { WrapTokenAddressMap } from '@rabby-wallet/rabby-swap';
 import { atom, useSetAtom } from 'jotai';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useActivate, useUnactivate } from 'react-activation';
 import {
   activeProviderOriginAtom,
   activeSwapTxsAtom,
@@ -149,12 +149,16 @@ export const usePostSwap = () => {
 };
 
 export const useInSwap = () => {
-  const location = useLocation();
+  const [inSwap, setInSwap] = useState(true);
 
-  return useMemo(
-    () => location.pathname === '/mainwin/swap',
-    [location.pathname]
-  );
+  useActivate(() => {
+    setInSwap(true);
+  });
+  useUnactivate(() => {
+    setInSwap(false);
+  });
+
+  return inSwap;
 };
 
 export const useSwapOrApprovalLoading = () => {
