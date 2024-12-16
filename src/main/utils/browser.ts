@@ -246,15 +246,8 @@ export function isPopupWindowHidden(popupWin: BrowserWindow) {
   return !popupWin.isVisible() || popupWin.getOpacity() <= 0.1;
 }
 
-export function makeBrowserViewTransparent(
-  view: BrowserView,
-  backgroundColor?: string
-) {
-  view.setBackgroundColor(backgroundColor || '#00ffffff');
-}
-
 export function createPopupView(opts?: Electron.BrowserViewConstructorOptions) {
-  const bView = new BrowserView({
+  return new BrowserView({
     ...opts,
     webPreferences: {
       ...opts?.webPreferences,
@@ -267,10 +260,6 @@ export function createPopupView(opts?: Electron.BrowserViewConstructorOptions) {
       contextIsolation: true,
     },
   });
-
-  // makeBrowserViewTransparent(bView);
-
-  return bView;
 }
 
 export function hidePopupView(view: BrowserView) {
