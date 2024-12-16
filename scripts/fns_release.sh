@@ -82,7 +82,6 @@ release_darwin() {
   export RABBY_NOTARIZE=true
   npm run package:darwin:x64
   npm run package:darwin:arm64
-  verify_exe;
   unset RABBY_NOTARIZE;
 
   dbk release-desktop --cwd=$project_dir
@@ -95,42 +94,6 @@ release_win32() {
   echo "[release_win32] start packaging...";
   npm run package:win32:x64
   # npm run package:win32:ia32
-  verify_exe;
 
   dbk release-desktop --cwd=$project_dir
 }
-
-verify_exe() {
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    targets=$project_dir/release/build-darwin-*/**/*.app;
-    for target in $targets; do
-      echo "[verify_exe] verify $target";
-
-      ./node_modules/.bin/electron-fuses read --app "$target"
-    done
-  else
-    targets=$project_dir/release/build-darwin-*/**/*.exe;
-    for target in $targets; do
-      echo "[verify_exe] verify $target";
-      ./node_modules/.bin/electron-fuses read --app \"$target\"
-    done
-  fi
-}
-
-func_to_exec=$1
-
-if [ ! -z $func_to_exec ]; then
-  case $func_to_exec in
-    "--source-only")
-      # do nothing
-      ;;
-    "verify_exe")
-      verify_exe
-      ;;
-    *)
-      echo "Invalid function to execute: $func_to_exec"
-      exit 1;
-      ;;
-  esac
-fi
-
