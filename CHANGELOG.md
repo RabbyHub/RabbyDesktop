@@ -1,7 +1,15 @@
 
-v0.40.0 / 2024-12-13
+v0.40.1 / 2024-12-16
 ====================
 
+  * Revert "upgrade to electron v30, enable `electronFuses`. (#677)" (#682)
+  * fix: clear the ledger's transport when disconnected (#681)
+  * chore: update @rabby-wallet/rabby-swap@0.0.43 (#683)
+
+v0.40.0-prod / 2024-12-13
+=========================
+
+  * Release v0.40.0-prod
   * build: update changelog.
   * feat: add bridge (#679)
   * upgrade to electron v30, enable `electronFuses`. (#677)
