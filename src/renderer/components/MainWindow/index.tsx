@@ -58,6 +58,7 @@ import { useListenSyncChain } from '@/renderer/hooks/useRabbyx';
 import { useSyncChainList } from '@/renderer/hooks/rabbyx/useChainList';
 import { useTriggerShellWalletOnTop } from '@/renderer/hooks-shell/useShellWallet';
 import { Bridge } from '@/renderer/routes/Bridge';
+import { useLedgerCleanUp } from '@/renderer/hooks-shell/useLedgerCleanUp';
 import styles from './index.module.less';
 
 import { FixedBackHeader } from '../FixedBackHeader';
@@ -403,6 +404,7 @@ export function MainWindow() {
 
   useMainWindowEvents();
   useChromeTabsEvents();
+  useLedgerCleanUp();
   useBackendServiceAPI({ isTop: true });
 
   useMessageForwardToMainwin('route-navigate', (payload) => {
