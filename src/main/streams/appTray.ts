@@ -3,6 +3,7 @@ import { APP_BRANDNAME } from '@/isomorphic/constants';
 import { getAssetPath } from '../utils/app';
 import { appendMenu, appendMenuSeparator } from '../utils/context-menu';
 import { emitIpcMainEvent } from '../utils/ipcMainEvents';
+import { onMainWindowReady } from '../utils/stream-helpers';
 
 const isDarwin = process.platform === 'darwin';
 const getTrayIconByTheme = () => {
@@ -11,7 +12,7 @@ const getTrayIconByTheme = () => {
   return getAssetPath('app-icons/macosIconTemplate@2x.png');
 };
 
-function buildPopUpContextMenu() {
+async function buildPopUpContextMenu() {
   const menu = new Menu();
 
   appendMenu(menu, {
@@ -22,12 +23,23 @@ function buildPopUpContextMenu() {
   });
   appendMenuSeparator(menu);
 
-  appendMenu(menu, {
-    label: 'Center Window',
-    click: async () => {
-      emitIpcMainEvent('__internal_main:mainwindow:center-window');
-    },
-  });
+  let mainWinShown = false;
+  try {
+    const mainTabbedWin = await onMainWindowReady();
+    mainWinShown = mainTabbedWin.window?.isVisible();
+  } catch (error) {
+    console.error(error);
+  } finally {
+    if (mainWinShown) {
+      appendMenu(menu, {
+        label: 'Center Window',
+        click: async () => {
+          emitIpcMainEvent('__internal_main:mainwindow:show');
+          emitIpcMainEvent('__internal_main:mainwindow:center-window');
+        },
+      });
+    }
+  }
 
   appendMenuSeparator(menu);
 
@@ -50,12 +62,12 @@ export function setupAppTray() {
       emitIpcMainEvent('__internal_main:mainwindow:show');
     });
 
-    appTray.addListener('right-click', () => {
-      appTray.popUpContextMenu(buildPopUpContextMenu());
+    appTray.addListener('right-click', async () => {
+      appTray.popUpContextMenu(await buildPopUpContextMenu());
     });
   } else {
-    appTray.addListener('click', () => {
-      appTray.popUpContextMenu(buildPopUpContextMenu());
+    appTray.addListener('click', async () => {
+      appTray.popUpContextMenu(await buildPopUpContextMenu());
     });
   }
 
