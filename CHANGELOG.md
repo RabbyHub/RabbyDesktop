@@ -1,7 +1,13 @@
 
-v0.40.1 / 2024-12-16
+v0.40.2 / 2024-12-20
 ====================
 
+  * fix: fresh user could not see main window. (#684)
+
+v0.40.1-prod / 2024-12-16
+=========================
+
+  * Release v0.40.1-prod
   * Revert "upgrade to electron v30, enable `electronFuses`. (#677)" (#682)
   * fix: clear the ledger's transport when disconnected (#681)
   * chore: update @rabby-wallet/rabby-swap@0.0.43 (#683)
