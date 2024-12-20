@@ -4,6 +4,8 @@ import path from 'path';
 import { app, protocol, session, shell } from 'electron';
 import { firstValueFrom } from 'rxjs';
 import { ElectronChromeExtensions } from '@rabby-wallet/electron-chrome-extensions';
+import * as Sentry from '@sentry/electron/main';
+
 import { isRabbyXPage } from '@/isomorphic/url';
 import { trimWebContentsUserAgent } from '@/isomorphic/string';
 import {
@@ -286,7 +288,14 @@ firstValueFrom(fromMainSubject('userAppReady')).then(async () => {
         findByWindowId(details.windowId);
 
       if (!win) {
-        throw new Error(`Unable to find windowId=${details.windowId}`);
+        const errMsg = `Unable to find windowId=${details.windowId}`;
+        const err = new Error(errMsg);
+        if (!IS_RUNTIME_PRODUCTION) throw err;
+
+        // allow error in production, just
+        Sentry.captureException(err);
+        console.error(errMsg);
+        return;
       }
 
       const { sender } = ctx.event;
