@@ -1,3 +1,3 @@
-#### Features
+#### Fixes
 
-- Added Bridge feature
+- Resolved the issue where the app failed to open.
