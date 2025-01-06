@@ -139,7 +139,7 @@ Join our Discord: https://discord.com/invite/seFBCWmUre
 
 ## License
 
-[MIT](https://github.com/RabbyHub/RabbyDesktop/blob/publish/prod/LICENSE) © [Rabby]
+- [MIT](https://github.com/RabbyHub/RabbyDesktop/blob/publish/prod/LICENSE) © [Rabby]
 
 [github-actions-status]: https://github.com/RabbyHub/RabbyDesktop/workflows/Test/badge.svg
 [github-actions-url]: https://github.com/RabbyHub/RabbyDesktop/actions
