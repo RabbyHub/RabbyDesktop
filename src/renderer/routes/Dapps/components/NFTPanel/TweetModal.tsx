@@ -29,7 +29,7 @@ export const TweetModal: React.FC<Props> = ({ onClose, ...props }) => {
 
   const handleSendTweet = () => {
     openExternalUrl(
-      `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+      `https://x.com/intent/tweet?text=${encodeURIComponent(
         TWEET_CONTENT.join('\n')
       )}`
     );
