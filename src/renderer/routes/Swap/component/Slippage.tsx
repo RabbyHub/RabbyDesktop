@@ -40,7 +40,7 @@ export const SlippageItem = styled.div`
   }
 `;
 
-const SLIPPAGE = ['0.1', '0.5'];
+export const SWAP_SLIPPAGE = ['0.5', '3'];
 
 const Wrapper = styled.section`
   .slippage {
@@ -114,6 +114,16 @@ export const Slippage = memo((props: SlippageProps) => {
     setAutoSlippage(false);
     setIsCustomSlippage(false);
   }, [onChange, recommendValue, setAutoSlippage, setIsCustomSlippage]);
+
+  useEffect(() => {
+    if (
+      !autoSlippage &&
+      !isCustomSlippage &&
+      SWAP_SLIPPAGE.findIndex((item) => item === value) === -1
+    ) {
+      setIsCustomSlippage(true);
+    }
+  }, [autoSlippage, isCustomSlippage, setIsCustomSlippage, value]);
 
   const tips = useMemo(() => {
     if (isLow) {
@@ -220,7 +230,7 @@ export const Slippage = memo((props: SlippageProps) => {
           >
             {t('page.swap.Auto')}
           </SlippageItem>
-          {SLIPPAGE.map((e) => (
+          {SWAP_SLIPPAGE.map((e) => (
             <SlippageItem
               key={e}
               onClick={(event) => {
