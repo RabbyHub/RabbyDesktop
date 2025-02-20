@@ -7,11 +7,15 @@ import {
 } from '@/renderer/utils/constant';
 import { BasicSafeInfo } from '@rabby-wallet/gnosis-sdk';
 import { SafeTransactionItem } from '@rabby-wallet/gnosis-sdk/dist/api';
-import { ExplainTxResponse } from '@rabby-wallet/rabby-api/dist/types';
+import {
+  ExplainTxResponse,
+  ParseTxResponse,
+} from '@rabby-wallet/rabby-api/dist/types';
 import classNames from 'classnames';
 import { intToHex } from 'ethereumjs-util';
 import React from 'react';
 import { toChecksumAddress } from 'web3-utils';
+import { findChainByID } from '@/renderer/utils/chain';
 import { RabbyButton } from '../../Button/RabbyButton';
 import { TxItemBasicInfo } from './TxItemBasicInfo';
 import { TxItemConfirmation } from './TxItemConfirmation';
@@ -32,29 +36,29 @@ export const TxItem: React.FC<Props> = ({
   onSubmit,
   onSign,
 }) => {
-  const [explain, setExplain] = React.useState<ExplainTxResponse | null>(null);
+  const [explain, setExplain] = React.useState<ParseTxResponse | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const { currentAccount } = useCurrentAccount();
   const canExecute =
     data.confirmations.length >= safeInfo.threshold &&
-    data.nonce === safeInfo.nonce;
+    +data.nonce === safeInfo.nonce;
 
   const init = React.useCallback(async () => {
-    const res = await walletOpenapi.preExecTx({
+    const chain = findChainByID(+networkId)!;
+    const res = await walletOpenapi.parseTx({
+      chainId: chain.serverId,
       tx: {
         chainId: Number(networkId),
         from: data.safe,
         to: data.to,
         data: data.data || '0x',
         value: `0x${Number(data.value).toString(16)}`,
-        nonce: intToHex(data.nonce),
+        nonce: intToHex(+data.nonce),
         gasPrice: '0x0',
         gas: '0x0',
       },
       origin: INTERNAL_REQUEST_ORIGIN,
-      address: data.safe,
-      updateNonce: false,
-      pending_tx_list: [],
+      addr: data.safe,
     });
     setExplain(res);
   }, [data, networkId]);
@@ -67,7 +71,7 @@ export const TxItem: React.FC<Props> = ({
       to: data.to,
       data: data.data || '0x',
       value: `0x${Number(data.value).toString(16)}`,
-      nonce: intToHex(data.nonce),
+      nonce: intToHex(+data.nonce),
       safeTxGas: data.safeTxGas,
       gasPrice: Number(data.gasPrice),
       baseGas: data.baseGas,
@@ -118,8 +122,11 @@ export const TxItem: React.FC<Props> = ({
         'border-solid border-0 border-[#FFFFFF1A]'
       )}
     >
-      <TxItemBasicInfo timeAt={data.submissionDate} nonce={data.nonce} />
-      <TxItemExplain explain={explain!} />
+      <TxItemBasicInfo timeAt={data.submissionDate} nonce={+data.nonce} />
+      <TxItemExplain
+        explain={explain!}
+        serverId={findChainByID(+networkId)!.serverId}
+      />
       <TxItemConfirmation
         confirmations={data.confirmations}
         threshold={safeInfo.threshold}
