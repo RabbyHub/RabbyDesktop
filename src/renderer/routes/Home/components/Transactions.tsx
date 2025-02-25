@@ -19,6 +19,10 @@ import { findMaxGasTx } from '@/isomorphic/tx';
 import { TransactionModal } from '@/renderer/components/TransactionsModal';
 import { useComponentIsActive } from '@/renderer/hooks/useReactActivation';
 import { findChain } from '@/renderer/utils/chain';
+import {
+  ApproveTokenRequireData,
+  ContractCallRequireData,
+} from '@rabby-wallet/rabby-action';
 import { SkipNonceAlert } from '../../Settings/components/SignatureRecordModal/TransactionHistory/components/SkipNonceAlert';
 import { useLoadTxRequests } from '../../Settings/components/SignatureRecordModal/TransactionHistory/hooks';
 import TransactionItem, { LoadingTransactionItem } from './TransactionItem';
@@ -116,6 +120,12 @@ const formatToken = (i: TokenItem | TransferingNFTItem, isReceive: boolean) => {
   };
 };
 
+/**
+ * @deprecated use actionData instead of explain
+ *
+ * @param explain
+ * @returns
+ */
 const getTxInfoFromExplain = (explain: TransactionGroup['explain']) => {
   let type = '';
   let protocol: TransactionDataItem['protocol'] = null;
@@ -146,6 +156,59 @@ const getTxInfoFromExplain = (explain: TransactionGroup['explain']) => {
       name: explain.type_token_approval.spender_protocol_name,
       logoUrl: explain.type_token_approval.spender_protocol_logo_url,
     };
+  }
+  return {
+    type,
+    protocol,
+    name,
+  };
+};
+
+const getTxInfoFromAction = (action: TransactionGroup['action']) => {
+  let type = '';
+  let protocol: TransactionDataItem['protocol'] = null;
+  let name = '';
+  if (action?.actionData?.cancelTx) {
+    type = 'cancel';
+  } else if (
+    action?.actionData.approveToken ||
+    action?.actionData.approveNFT ||
+    action?.actionData.approveNFTCollection ||
+    action?.actionData.revokeToken ||
+    action?.actionData.revokePermit2 ||
+    action?.actionData.revokeNFT ||
+    action?.actionData.revokeNFTCollection
+  ) {
+    type = 'approve';
+  } else if (action?.actionData.send || action?.actionData.sendNFT) {
+    type = 'send';
+  } else {
+    type = '';
+  }
+  if (action?.actionData?.contractCall) {
+    const requiredData = action.requiredData as ContractCallRequireData | null;
+    protocol = requiredData?.protocol
+      ? {
+          name: requiredData?.protocol?.name,
+          logoUrl: requiredData?.protocol?.logo_url || '',
+        }
+      : null;
+    name = requiredData?.call?.func || 'unknown';
+  } else if (type === 'approve') {
+    const requiredData = action?.requiredData as ApproveTokenRequireData | null;
+    protocol = requiredData?.protocol
+      ? {
+          name: requiredData?.protocol?.name,
+          logoUrl: requiredData?.protocol?.logo_url || '',
+        }
+      : null;
+  } else if (action?.requiredData && 'protocol' in action?.requiredData) {
+    protocol = action.requiredData?.protocol
+      ? {
+          name: action.requiredData?.protocol?.name,
+          logoUrl: action.requiredData?.protocol?.logo_url || '',
+        }
+      : null;
   }
   return {
     type,
@@ -257,7 +320,7 @@ const Transactions = ({
             site: completedTx?.site,
           });
         } else {
-          const { type, protocol, name } = getTxInfoFromExplain(item.explain);
+          const { type, protocol, name } = getTxInfoFromAction(item.action);
           const balanceChange = item.explain.balance_change;
           lTxs.push({
             type,
@@ -325,7 +388,7 @@ const Transactions = ({
             group: item,
           });
         } else {
-          const { type, protocol, name } = getTxInfoFromExplain(item.explain);
+          const { type, protocol, name } = getTxInfoFromAction(item.action);
           const balanceChange = item.explain.balance_change;
           pTxs.push({
             type,
