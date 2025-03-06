@@ -16,6 +16,13 @@ on:
         required: false
         type: boolean
         default: false
+      buildchannel:
+        required: true
+        type: choice
+        options:
+          - 'reg'
+          - 'prod'
+        default: 'reg'
 
 defaults:
   run:
@@ -90,6 +97,7 @@ jobs:
           RABBY_DESKTOP_KR_PWD: ${{ secrets.RABBY_DESKTOP_KR_PWD }}
           RABBY_REALLY_COPY: ${{ inputs.RABBY_REALLY_COPY }}
           BUILD_USE_DEVTOOLS: ${{ inputs.BUILD_USE_DEVTOOLS }}
+          buildchannel: ${{ inputs.buildchannel }}
           LARK_CHAT_URL: ${{ secrets.LARK_CHAT_URL }}
           LARK_CHAT_SECRET: ${{ secrets.LARK_CHAT_SECRET }}
           # see more details on https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
