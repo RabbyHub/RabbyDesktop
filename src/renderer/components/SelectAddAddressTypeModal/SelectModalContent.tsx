@@ -53,7 +53,7 @@ const HARDWARE_MAP = [
     logo: 'rabby-internal://assets/icons/device/ngrave.svg',
     name: 'NGRAVE ZERO',
     id: KEYRING_CLASS.HARDWARE.KEYSTONE,
-    brand: WALLET_BRAND_CONTENT.NGRAVE.brand,
+    brand: WALLET_BRAND_CONTENT['NGRAVE ZERO'].brand,
   },
 ];
 

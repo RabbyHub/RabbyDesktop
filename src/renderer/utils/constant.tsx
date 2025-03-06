@@ -358,7 +358,7 @@ export enum WALLET_BRAND_TYPES {
   // Uniswap = 'Uniswap',
   Zerion = 'Zerion',
   CoboArgus = 'CoboArgus',
-  NGRAVEZERO = 'NGRAVE',
+  NGRAVEZERO = 'NGRAVE ZERO',
 }
 
 export enum WALLET_BRAND_CATEGORY {
