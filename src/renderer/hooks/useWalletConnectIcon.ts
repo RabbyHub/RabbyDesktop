@@ -22,25 +22,41 @@ export const useWalletConnectIcon = (
 
   React.useEffect(() => {
     if (!account) return;
-    if (
-      account.type !== KEYRING_CLASS.WALLETCONNECT ||
-      account.brandName !== WALLET_BRAND_TYPES.WalletConnect
-    ) {
+    if (WALLET_BRAND_CONTENT[account.brandName as WALLET_BRAND_TYPES]) {
       return;
     }
 
-    wallet.getCommonWalletConnectInfo(account.address).then((result) => {
-      if (!result) return;
+    wallet
+      .requestKeyring(KEYRING_CLASS.WALLETCONNECT, 'getAccountsWithBrand', null)
+      .then(
+        (
+          accounts: {
+            address: string;
+            brandName: string;
+            type: string;
+            realBrandUrl: string;
+          }[]
+        ) => {
+          if (!accounts) return;
 
-      const img = new Image();
-      img.onload = () => {
-        setUrl((result as any).realBrandUrl);
-      };
-      img.onerror = () => {
-        setUrl(WALLET_BRAND_CONTENT.WalletConnect.image);
-      };
-      img.src = (result as any).realBrandUrl!;
-    });
+          const result = accounts.find((acc) => {
+            if (acc.address !== account.address) return false;
+            if (acc.brandName !== account.brandName) return false;
+            return true;
+          });
+
+          if (!result) return;
+
+          const img = new Image();
+          img.onload = () => {
+            setUrl(result.realBrandUrl);
+          };
+          img.onerror = () => {
+            setUrl(WALLET_BRAND_CONTENT.WalletConnect.image);
+          };
+          img.src = result.realBrandUrl;
+        }
+      );
   }, [account]);
 
   return url;
