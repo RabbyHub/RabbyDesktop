@@ -231,7 +231,7 @@ export const TransactionItem = ({
             isCancel={isCanceled}
             isSubmitFailed={!!item.isSubmitFailed}
             isWithdrawed={!!maxGasTx?.isWithdrawed}
-            explain={item.explain}
+            action={item.action}
             onOpenScan={handleOpenScan}
           />
           {isPending && (

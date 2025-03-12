@@ -196,6 +196,10 @@ export interface TransactionGroup {
     ExplainTxResponse,
     { approvalId: string; calcSuccess: boolean }
   >;
+  action?: {
+    actionData: ParsedTransactionActionData;
+    requiredData: ActionRequireData;
+  };
   isFailed: boolean;
   isSubmitFailed?: boolean;
   dbIndexed: boolean;
