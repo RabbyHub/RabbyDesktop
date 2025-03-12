@@ -57,6 +57,12 @@ export const DEX = {
     name: '0x',
     chains: DEX_SUPPORT_CHAINS[DEX_ENUM.ZEROXAPIV2],
   },
+  [DEX_ENUM.MAGPIE]: {
+    id: DEX_ENUM.MAGPIE,
+    logo: 'rabby-internal://assets/icons/swap/magpie.jpg',
+    name: 'Magpie',
+    chains: DEX_SUPPORT_CHAINS[DEX_ENUM.MAGPIE],
+  },
 };
 
 export const DEX_WITH_WRAP = {
