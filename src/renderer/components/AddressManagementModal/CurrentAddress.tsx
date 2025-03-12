@@ -13,6 +13,7 @@ import { Skeleton, Tooltip } from 'antd';
 import clsx from 'clsx';
 import React from 'react';
 import { useCopyToClipboard } from 'react-use';
+import { useWalletConnectIcon } from '@/renderer/hooks/useWalletConnectIcon';
 import styles from './index.module.less';
 import { useAccountInfo } from './useAccountInfo';
 import { TipsWrapper } from '../TipWrapper';
@@ -50,11 +51,13 @@ export const CurrentAccount: React.FC<Props> = ({
     return '';
   }, [account.type, brandName]);
 
+  const walletConnectIcon = useWalletConnectIcon(account);
   const addressTypeIcon = React.useMemo(
     () =>
       WALLET_BRAND_CONTENT?.[account.brandName as WALLET_BRAND_TYPES]?.image ||
-      KEYRINGS_LOGOS[account.type],
-    [account]
+      KEYRINGS_LOGOS[account.type] ||
+      walletConnectIcon,
+    [account, walletConnectIcon]
   );
   const [, copyToClipboard] = useCopyToClipboard();
 

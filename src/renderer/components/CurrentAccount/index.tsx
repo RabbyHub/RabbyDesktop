@@ -10,21 +10,24 @@ import {
 } from '@/renderer/utils/constant';
 import clsx from 'clsx';
 import { useMemo, useRef, useState } from 'react';
+import { useWalletConnectIcon } from '@/renderer/hooks/useWalletConnectIcon';
 import { GasAccountDashBoardHeader } from '../GasAccount/components/Header';
 import styles from './index.module.less';
 import { SignalBridge } from '../ConnectStatus/SignalBridge';
 
 export const CurrentAccount = ({ className }: { className?: string }) => {
   const { currentAccount } = useCurrentAccount();
+  const walletConnectIcon = useWalletConnectIcon(currentAccount);
   const addressTypeIcon = useMemo(() => {
     if (!currentAccount?.type) return '';
     return (
       KEYRING_ICONS_WHITE[currentAccount.type] ||
       WALLET_BRAND_CONTENT[
         currentAccount.brandName as keyof typeof WALLET_BRAND_CONTENT
-      ]?.image
+      ]?.image ||
+      walletConnectIcon
     );
-  }, [currentAccount]);
+  }, [currentAccount, walletConnectIcon]);
   const displayAddr = useMemo(
     () =>
       currentAccount?.address

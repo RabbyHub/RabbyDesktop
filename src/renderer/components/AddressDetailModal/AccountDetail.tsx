@@ -7,17 +7,13 @@ import {
 import { useCopyToClipboard } from 'react-use';
 import { toastTopMessage } from '@/renderer/ipcRequest/mainwin-popupview';
 import { splitNumberByStep } from '@/renderer/utils/number';
-import {
-  KEYRING_CLASS,
-  KEYRING_ICONS,
-  WALLET_BRAND_CONTENT,
-  WALLET_BRAND_TYPES,
-} from '@/renderer/utils/constant';
+import { KEYRING_CLASS, WALLET_BRAND_TYPES } from '@/renderer/utils/constant';
 import { useAddressSource } from '@/renderer/hooks/rabbyx/useAddressSource';
 import QRCode from 'qrcode.react';
-import { Popover, message } from 'antd';
+import { Popover } from 'antd';
 import { walletController } from '@/renderer/ipcRequest/rabbyx';
 import { useForwardTo } from '@/renderer/hooks/useViewsMessage';
+import { useWalletConnectIcon } from '@/renderer/hooks/useWalletConnectIcon';
 import styles from './index.module.less';
 import { AccountDetailItem } from './AccountDetailItem';
 import { useAccountInfo } from '../AddressManagementModal/useAccountInfo';
@@ -105,6 +101,8 @@ export const AccountDetail: React.FC<Props> = ({
     [account.address]
   );
 
+  const walletConnectIcon = useWalletConnectIcon(account);
+
   return (
     <div className={styles.AccountDetail}>
       <section className={styles.part}>
@@ -169,13 +167,7 @@ export const AccountDetail: React.FC<Props> = ({
           }
         >
           <div className={styles.source}>
-            <img
-              className="w-[18px] h-[18px]"
-              src={
-                KEYRING_ICONS[account.type] ||
-                WALLET_BRAND_CONTENT[brandName]?.image
-              }
-            />
+            <img className="w-[18px] h-[18px]" src={walletConnectIcon} />
             <span className={styles.text}>{source}</span>
           </div>
         </AccountDetailItem>
