@@ -104,8 +104,6 @@ const GasAccountInner = ({
 
   const withdrawDisabled = !balance || hasIapOrder;
 
-  // console.log('withdrawDisabled', );
-
   const rightItems = React.useMemo(
     () => (
       <Menu

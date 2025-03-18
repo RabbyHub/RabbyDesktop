@@ -20,10 +20,6 @@ import { GasAccountInfo, GasAccountServiceStore } from '../type';
 const gasAccountAtom = atom<null | GasAccountServiceStore>(null);
 const refreshAtom = atom<number>(0);
 
-eventBus.addEventListener('LOG_IN', () => {
-  console.log('login');
-});
-
 export const useGasAccountRefresh = () => {
   const refreshId = useGasAccountRefreshId();
   const setRefreshId = useGasAccountSetRefreshId();
