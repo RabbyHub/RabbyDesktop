@@ -1,6 +1,6 @@
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
 import { isSameAddress } from '@/renderer/utils/address';
-import { findChain } from '@/renderer/utils/chain';
+import { findChain, findChainByEnum } from '@/renderer/utils/chain';
 import { formatUsdValue } from '@/renderer/utils/number';
 import { CHAINS_ENUM } from '@debank/common';
 import { OpenApiService } from '@rabby-wallet/rabby-api';
@@ -404,6 +404,8 @@ export const getDexQuote = async ({
             chain,
             gasPrice,
             fee: true,
+            chainServerId: findChainByEnum(chain)!.serverId,
+            nativeTokenAddress: findChainByEnum(chain)!.nativeTokenAddress,
           },
           walletOpenapi as unknown as OpenApiService
         ),

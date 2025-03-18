@@ -29,7 +29,11 @@ import {
   tokenAmountBn,
   validSlippage,
 } from '../utils';
-import { useSlippage, useSlippageStore } from './slippage';
+import {
+  getSwapAutoSlippageValue,
+  useSlippage,
+  useSlippageStore,
+} from './slippage';
 import { useGetSwapAllQuotes } from './quote';
 
 type GasLevelType = any;
@@ -382,7 +386,7 @@ export const useTokenPair = (userAddress: string) => {
       setFeeRate('0');
     }
     if (autoSlippage) {
-      setSlippage(isStableCoin ? '0.1' : '0.5');
+      setSlippage(getSwapAutoSlippageValue(isStableCoin));
     }
   }, [autoSlippage, isWrapToken, isStableCoin, setSlippage]);
 

@@ -249,7 +249,6 @@ const StyledDrawer = styled(Drawer)`
     border-radius: 16px;
     background: var(--r-neutral-bg2, #3d4251);
     box-shadow: 0px -12px 20px 0px rgba(35, 47, 129, 0.1);
-    overflow: hidden;
   }
   .ant-drawer-mask {
     position: fixed;
@@ -276,7 +275,7 @@ export const QuoteList = (props: Omit<QuotesProps, 'sortIncludeGasFee'>) => {
       placement="bottom"
       getContainer={false}
       width={528}
-      height="auto"
+      height="100%"
       maskClosable
       onClose={onClose}
       open={visible}
