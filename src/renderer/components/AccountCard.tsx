@@ -12,6 +12,7 @@ import AddressViewer from './AddressViewer';
 import { useCurrentAccount } from '../hooks/rabbyx/useAccount';
 import { walletController } from '../ipcRequest/rabbyx';
 import useCurrentBalance from '../hooks/useCurrentBalance';
+import { useWalletConnectIcon } from '../hooks/useWalletConnectIcon';
 
 const AccountCardWrapper = styled.div`
   height: 72px;
@@ -72,7 +73,12 @@ const AccountCard = ({
     (RabbyAccount & { alianName: string; balance?: number }) | null
   >(account || null);
   const [currentAccountAlianName, setCurrentAccountAlianName] = useState('');
+  const walletConnectIcon = useWalletConnectIcon(realCurrentAccount);
   const getAccountIcon = (type: string | undefined) => {
+    if (walletConnectIcon) {
+      return walletConnectIcon;
+    }
+
     if (currentAccount && type) {
       if (
         WALLET_BRAND_CONTENT[
