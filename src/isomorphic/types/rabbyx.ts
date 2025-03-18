@@ -297,7 +297,7 @@ export type RabbyXMethod = {
   'walletController.getGasAccountData': (
     key?: keyof GasAccountServiceStore
   ) => any;
-  'walletController.signGasAccount': () => Promise<void>;
+  'walletController.signGasAccount': (account: Account) => Promise<void>;
   'walletController.topUpGasAccount': ({
     to,
     chainServerId,

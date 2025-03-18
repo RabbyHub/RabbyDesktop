@@ -100,6 +100,12 @@ const GasAccountInner = ({
     }
   }, [loading, isLogin]);
 
+  const hasIapOrder = !!value?.account?.has_iap_order;
+
+  const withdrawDisabled = !balance || hasIapOrder;
+
+  // console.log('withdrawDisabled', );
+
   const rightItems = React.useMemo(
     () => (
       <Menu
@@ -156,12 +162,24 @@ const GasAccountInner = ({
           </div>
 
           <div className="w-full mt-auto flex gap-12 items-center justify-center relative">
-            <GasAccountBlueBorderedButton
-              block
-              onClick={() => setWithdrawVisible(true)}
+            <Tooltip
+              autoAdjustOverflow
+              overlayClassName="rectangle"
+              open={withdrawDisabled ? undefined : false}
+              title={t(
+                hasIapOrder
+                  ? 'page.gasAccount.withdrawDisabledIAP'
+                  : 'page.gasAccount.noBalance'
+              )}
             >
-              {t('page.gasAccount.withdraw')}
-            </GasAccountBlueBorderedButton>
+              <GasAccountBlueBorderedButton
+                disabled={withdrawDisabled}
+                block
+                onClick={() => setWithdrawVisible(true)}
+              >
+                {t('page.gasAccount.withdraw')}
+              </GasAccountBlueBorderedButton>
+            </Tooltip>
             <Tooltip
               autoAdjustOverflow
               overlayClassName="rectangle"

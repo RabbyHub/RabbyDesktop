@@ -24,6 +24,7 @@ export type GasAccountInfo = {
           balance: number;
           create_at: number;
           nonce: number;
+          has_iap_order?: boolean;
         };
       }
     | undefined;
