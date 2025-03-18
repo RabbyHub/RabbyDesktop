@@ -63,4 +63,14 @@ export const GasAccountBlueBorderedButton = styled(Button)`
     transition: none;
     background-color: transparent;
   }
+
+  &.ant-btn[disabled],
+  &.ant-btn[disabled]:hover,
+  &.ant-btn[disabled]:focus,
+  &.ant-btn[disabled]:active {
+    opacity: 0.5;
+    background: transparent;
+    color: var(--r-blue-default, #7084ff);
+    border: 1px solid var(--r-blue-default, #7084ff);
+  }
 `;

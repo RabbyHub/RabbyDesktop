@@ -11,10 +11,13 @@ export const BridgeSwitchBtn = ({
 >) => {
   return (
     <div
+      style={{
+        background: '#2E3239',
+      }}
       className={clsx(
         'flex items-center justify-center cursor-pointer',
         'w-[32px] h-[32px] rounded-[900px]',
-        'bg-r-neutral-bg-1 text-rabby-neutral-foot',
+        'text-rabby-neutral-foot',
         'border-[0.5px] border-solid border-rabby-neutral-line',
         'hover:border-rabby-blue-default hover:bg-rabby-blue-light1 hover:text-rabby-blue-default',
         className
