@@ -13,6 +13,7 @@ import { Skeleton, Tooltip } from 'antd';
 import clsx from 'clsx';
 import React, { useState } from 'react';
 import { useCopyToClipboard } from 'react-use';
+import { useWalletConnectIcon } from '@/renderer/hooks/useWalletConnectIcon';
 import styles from './index.module.less';
 import { useAccountInfo } from './useAccountInfo';
 import { TipsWrapper } from '../TipWrapper';
@@ -35,10 +36,13 @@ export const AccountItem: React.FC<Props> = ({
   isUpdatingBalance,
 }) => {
   const brandName = account.brandName as WALLET_BRAND_TYPES;
+  const walletConnectIcon = useWalletConnectIcon(account);
   const addressTypeIcon = React.useMemo(
     () =>
-      KEYRING_ICONS[account.type] || WALLET_BRAND_CONTENT?.[brandName]?.image,
-    [account.type, brandName]
+      walletConnectIcon ||
+      KEYRING_ICONS[account.type] ||
+      WALLET_BRAND_CONTENT?.[brandName]?.image,
+    [account.type, brandName, walletConnectIcon]
   );
   const { whitelist, enable } = useWhitelist();
   const { toggleHighlightedAddressAsync, highlightedAddresses } =
