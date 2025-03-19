@@ -1,3 +1,3 @@
 #### Fixes
 
-- Resolved the issue where the app failed to open.
+- Some experience optimization and bug fixes.
