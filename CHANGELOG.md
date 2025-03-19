@@ -1,7 +1,20 @@
 
-v0.40.2 / 2024-12-20
+v0.41.0 / 2025-03-19
 ====================
 
+  * chore: update currentVersion. (#702)
+  * fix: broken wallet connect icons (#701)
+  * chore: update rabbyx (#699)
+  * chore: @rabby-wallet/rabby-swap@0.0.51 (#700)
+  * fix: fixed qr code generation for ngrave brand (#697)
+  * fix: walletconnect icon (#696)
+  * fix: safe (#694)
+  * feat: swap slippage tune (#691)
+
+v0.40.2-prod / 2024-12-20
+=========================
+
+  * Release v0.40.2-prod
   * fix: fresh user could not see main window. (#684)
 
 v0.40.1-prod / 2024-12-16
@@ -20,21 +33,23 @@ v0.40.0-prod / 2024-12-13
   * feat: add bridge (#679)
   * upgrade to electron v30, enable `electronFuses`. (#677)
   * feat: swap support 0xv2 (#678)
+  * Release v0.39.2-prod
+  * chore: update changelog.
 
 v0.39.2-prod / 2024-11-14
 =========================
 
   * Release v0.39.2-prod
-  * chore: update changelog.
   * build: upgrade rabbyx. (#676)
   * fix: gasaccount balance (#675)
   * fix: chain icon display in approval list (#674)
+  * Release v0.39.1-prod
+  * fix: safe (#673)
 
 v0.39.1-prod / 2024-11-08
 =========================
 
   * Release v0.39.1-prod
-  * fix: safe (#673)
   * chore: update changelog.
   * fix: peer dep version (#672)
   * feat: support safe message (#671)
@@ -42,6 +57,8 @@ v0.39.1-prod / 2024-11-08
   * build: upgrade to electron 29 (#669)
   * build: cleanup build script/configuration. (#668)
   * chore: remove yarn.lock
+  * Release v0.39.0-prod
+  * build: update changelog.
 
 v0.39.0-prod / 2024-10-29
 =========================
@@ -143,20 +160,17 @@ v0.37.0-prod / 2024-03-05
   * build: sign windows binary with smctl. (#618)
   * chore: update @rabby-wallet/rabby-swap@0.0.31 (#617)
 
-v0.36.6-reg / 2024-03-04
-========================
-
-  * Release v0.36.6-reg
-  * chore: typo fix.
-  * build: robust change.
-  * build: sign windows binary with smctl.
-
 v0.36.5-reg / 2024-01-31
 ========================
 
   * Release v0.36.5-prod
   * fix: restrain permissions of dapp's preview webContents (#614)
   * style: color & shape of checkbox on EditWhitelist Modal. (#613)
+
+v0.36.5-prod / 2024-01-30
+=========================
+
+  * Release v0.36.5-prod
   * chore: update currentVersion
   * security: avoid crash. (#611)
 
