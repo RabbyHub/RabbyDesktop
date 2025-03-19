@@ -12,6 +12,8 @@ import React, {
 
 import { useAsync } from 'react-use';
 import { walletController, walletOpenapi } from '@/renderer/ipcRequest/rabbyx';
+import { useCurrentAccount } from '@/renderer/hooks/rabbyx/useAccount';
+import eventBus from '@/renderer/utils-shell/eventBus';
 import { useGasAccountRefreshId, useGasAccountSetRefreshId } from './context';
 import { GasAccountInfo, GasAccountServiceStore } from '../type';
 
@@ -40,6 +42,12 @@ export const useGasAccountSign = () => {
       setGasAccount(res);
     }
   }, [setGasAccount]);
+
+  useEffect(() => {
+    return eventBus.addEventListener('LOG_IN', () => {
+      fetchCurrentAccount();
+    });
+  }, [fetchCurrentAccount]);
 
   useEffect(() => {
     fetchCurrentAccount();
@@ -82,10 +90,14 @@ export const useGasAccountInfo = () => {
 export const useGasAccountMethods = () => {
   const { sig, accountId, refreshAccount } = useGasAccountSign();
 
+  const { currentAccount } = useCurrentAccount();
+
   const login = useCallback(async () => {
-    await walletController.signGasAccount();
-    refreshAccount();
-  }, [refreshAccount]);
+    if (currentAccount) {
+      await walletController.signGasAccount(currentAccount);
+      refreshAccount();
+    }
+  }, [currentAccount, refreshAccount]);
 
   const logout = useCallback(async () => {
     if (sig && accountId) {

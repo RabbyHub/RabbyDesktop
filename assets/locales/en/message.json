@@ -35,6 +35,8 @@
       "deposit": "Deposit",
       "withdraw": "Withdraw",
       "gasExceed": "GasAccount balance cannot exceed $1000",
+      "noBalance": "No balance",
+      "withdrawDisabledIAP": "Withdrawals are disabled because your balance includes fiat funds, which cannot be withdrawn. Contact support to withdraw your token balance",
       "risk": "Your current address has been detected as risky, so this feature is unavailable.",
       "logout": "Log out current GasAccount",
       "history": {
