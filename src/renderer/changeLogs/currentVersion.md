@@ -1,3 +1,3 @@
 #### Fixes
 
-- User experience improvements and bug fixes.
+- Remove wrong curve domain from example
