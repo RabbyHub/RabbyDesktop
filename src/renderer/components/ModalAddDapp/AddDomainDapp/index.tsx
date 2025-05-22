@@ -430,7 +430,7 @@ export function AddDomainDapp({
             'uniswap.org',
             'lido.fi',
             'compound.finance',
-            'curve.fi',
+            'curve.finance',
             'aave.com',
           ]}
           onDomainClick={(domain) => {
