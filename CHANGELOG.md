@@ -1,7 +1,14 @@
 
-v0.41.0 / 2025-03-19
+v0.41.1 / 2025-05-22
 ====================
 
+  * feat: replace curve.fi with curve.finance (#705)
+  * Release v0.41.0-prod
+
+v0.41.0-prod / 2025-03-19
+=========================
+
+  * Release v0.41.0-prod
   * chore: update currentVersion. (#702)
   * fix: broken wallet connect icons (#701)
   * chore: update rabbyx (#699)
@@ -57,8 +64,6 @@ v0.39.1-prod / 2024-11-08
   * build: upgrade to electron 29 (#669)
   * build: cleanup build script/configuration. (#668)
   * chore: remove yarn.lock
-  * Release v0.39.0-prod
-  * build: update changelog.
 
 v0.39.0-prod / 2024-10-29
 =========================
@@ -146,13 +151,14 @@ v0.37.1-prod / 2024-03-21
   * feat: use rabbyx 0.92.55 (#627)
   * feat: upgrade to electron v27 (#626)
   * fix: text (#624)
+  * Release v0.37.0-prod
+  * build: keep smctl output in console. (#623)
+  * chore: fix currentVersion.md
 
 v0.37.0-prod / 2024-03-05
 =========================
 
   * Release v0.37.0-prod
-  * build: keep smctl output in console. (#623)
-  * chore: fix currentVersion.md
   * feat: hide transaction history scam address copy (#621)
   * feat: update chains. (#622)
   * chore: upgrade rabbyx. (#620)
@@ -160,17 +166,24 @@ v0.37.0-prod / 2024-03-05
   * build: sign windows binary with smctl. (#618)
   * chore: update @rabby-wallet/rabby-swap@0.0.31 (#617)
 
+v0.36.6-reg / 2024-03-04
+========================
+
+  * chore: typo fix.
+  * build: robust change.
+  * build: sign windows binary with smctl.
+
 v0.36.5-reg / 2024-01-31
 ========================
 
   * Release v0.36.5-prod
   * fix: restrain permissions of dapp's preview webContents (#614)
-  * style: color & shape of checkbox on EditWhitelist Modal. (#613)
 
 v0.36.5-prod / 2024-01-30
 =========================
 
   * Release v0.36.5-prod
+  * style: color & shape of checkbox on EditWhitelist Modal. (#613)
   * chore: update currentVersion
   * security: avoid crash. (#611)
 
@@ -417,12 +430,13 @@ v0.27.0-prod / 2023-06-20
   * feat: upgrade `@debank/common`, depreacte SWM chain. (#483)
   * fix: use display_symbol first (#484)
   * fix: paraswap preexec issue (#482)
+  * Release v0.26.0-prod
+  * fix: missing oasys on rabbyx.
 
 v0.26.0-prod / 2023-06-14
 =========================
 
   * Release v0.26.0-prod
-  * fix: missing oasys on rabbyx.
   * feat: upgrade rabbyx for style.
   * fix: judgement about system version. (#480)
   * feat: upgrade rabbyx, update currentVersion.md
