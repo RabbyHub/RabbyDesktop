@@ -308,7 +308,7 @@ export const CHAINS_RAW = {
         nativeTokenSymbol: "BROCK",
         nativeTokenAddress: "brock",
         scanLink: "https://explorer.bit-rock.io/tx/_s_",
-        nativeTokenLogo: "https://icons.llamao.fi/icons/chains/rsz_bitrock.jpg",
+        nativeTokenLogo: "https://static.debank.com/image/project/logo_url/bitrock/91cec30150ad88b17dc0fa98ad29116a.png",
         nativeTokenDecimals: 18,
         eip: {
             "1559": true,
