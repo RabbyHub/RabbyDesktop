@@ -860,6 +860,7 @@ export const ALIAS_ADDRESS = {
 // non-opstack L2 chains
 export const L2_ENUMS = [
   CHAINS_ENUM.ARBITRUM,
+  CHAINS_ENUM.BITROCK,
   CHAINS_ENUM.AURORA,
   CHAINS_ENUM.NOVA,
   CHAINS_ENUM.BOBA,
