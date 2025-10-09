@@ -10,7 +10,8 @@ export const QueueIcon: React.FC = () => {
   const { currentAccount: account } = useCurrentAccount();
   const { data: total, runAsync: fetchPendingCount } = useGnosisPendingCount(
     {
-      address: account?.address,
+      // address: account?.address,
+      address: undefined,
     },
     {
       refreshOnWindowFocus: true,
