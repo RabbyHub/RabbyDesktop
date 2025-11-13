@@ -1,7 +1,14 @@
 
-v0.41.2 / 2025-10-20
+v0.41.3 / 2025-11-13
 ====================
 
+  * build: upgrade api call
+  * chore: update changelog
+
+v0.41.2-prod / 2025-10-20
+=========================
+
+  * Release v0.41.2-prod
   * build: fix package.json for npm >=  10.9.0 (#709)
   * feat: support api key (#708)
 
