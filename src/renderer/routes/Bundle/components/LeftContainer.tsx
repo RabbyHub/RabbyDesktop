@@ -2,6 +2,7 @@ import React from 'react';
 import { useBundle } from '@/renderer/hooks/useBundle/useBundle';
 import clsx from 'clsx';
 import { formatNumber } from '@/renderer/utils/number';
+import OfflineAlert from '@/renderer/components/OfflineAlert';
 import { Skeleton } from 'antd';
 import ChainList from '../../Home/components/ChainList';
 import PortfolioView from '../../Home/components/PortfolioView';
@@ -62,6 +63,7 @@ export const LeftContainer: React.FC = () => {
         'flex flex-col'
       )}
     >
+      <OfflineAlert />
       <div className="relative mb-[23px]">
         <h2
           className={clsx(

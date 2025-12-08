@@ -25,6 +25,7 @@ import NetSwitchTabs, {
   useSwitchNetTab,
 } from '@/renderer/components/PillsSwitch/NetSwitchTabs';
 import { requestOpenApiWithChainId } from '@/main/utils/openapi';
+import OfflineAlert from '@/renderer/components/OfflineAlert';
 import {
   useExpandList,
   useExpandProtocolList,
@@ -350,6 +351,7 @@ const Home = () => {
       <HomeTab />
       <Container>
         <HomeWrapper>
+          <OfflineAlert />
           <div className="header">
             <div className="top">
               <div className="left">
