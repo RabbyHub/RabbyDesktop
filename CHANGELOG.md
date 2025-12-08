@@ -1,7 +1,13 @@
 
-v0.41.3 / 2025-11-13
+v0.41.4 / 2025-12-08
 ====================
 
+  * feat: + offline alert
+
+v0.41.3-prod / 2025-11-13
+=========================
+
+  * Release v0.41.3-prod
   * build: upgrade api call
   * chore: update changelog
 
