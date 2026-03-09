@@ -21,8 +21,8 @@ const OfflineAlert = () => {
   return (
     <OfflineAlertWrapper>
       <img src="rabby-internal://assets/icons/home/offline-alert.svg" alt="" />
-      Rabby Desktop backend API will be discontinued on December 31. User assets
-      remain completely safe and unaffected, and can still be managed via Rabby
+      Rabby Desktop backend API will be discontinued soon. User assets remain
+      completely safe and unaffected, and can still be managed via Rabby
       Extension or the Rabby mobile app. A new Rabby Desktop is planned for a
       future release.
     </OfflineAlertWrapper>
