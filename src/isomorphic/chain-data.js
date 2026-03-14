@@ -2,6 +2,7 @@ export var CHAINS_ENUM;
 (function (CHAINS_ENUM) {
     CHAINS_ENUM["ETH"] = "ETH";
     CHAINS_ENUM["BSC"] = "BSC";
+    CHAINS_ENUM["BITROCK"] = "BITROCK";
     CHAINS_ENUM["GNOSIS"] = "GNOSIS";
     CHAINS_ENUM["HECO"] = "HECO";
     CHAINS_ENUM["POLYGON"] = "POLYGON";
@@ -292,6 +293,22 @@ export const CHAINS_RAW = {
         nativeTokenAddress: "arb",
         scanLink: "https://arbiscan.io/tx/_s_",
         nativeTokenLogo: "https://static.debank.com/image/arb_token/logo_url/arb/d61441782d4a08a7479d54aea211679e.png",
+        nativeTokenDecimals: 18,
+        eip: {
+            "1559": true,
+        },
+    },
+    [CHAINS_ENUM.BITROCK]: {
+        id: 7171,
+        serverId: "brock",
+        name: "Bitrock",
+        enum: CHAINS_ENUM.BITROCK,
+        hex: "0x1c03",
+        network: "7171",
+        nativeTokenSymbol: "BROCK",
+        nativeTokenAddress: "brock",
+        scanLink: "https://explorer.bit-rock.io/tx/_s_",
+        nativeTokenLogo: "https://static.debank.com/image/project/logo_url/bitrock/91cec30150ad88b17dc0fa98ad29116a.png",
         nativeTokenDecimals: 18,
         eip: {
             "1559": true,
