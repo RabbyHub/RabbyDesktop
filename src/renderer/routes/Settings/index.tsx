@@ -408,9 +408,9 @@ export function MainWindowSettings() {
               icon="rabby-internal://assets/icons/mainwin-settings/followus.svg"
             >
               <ImageAsLink
-                altName="Twitter"
+                altName="X"
                 className="cursor-pointer w-[16px] h-[16px] ml-0"
-                link="https://twitter.com/Rabby_io"
+                link="https://x.com/Rabby_io"
                 iconURL="rabby-internal://assets/icons/mainwin-settings/followus-x.svg"
                 hoverIconURL="rabby-internal://assets/icons/mainwin-settings/followus-x-hover.svg"
                 tooltipProps={{ placement: 'top' }}

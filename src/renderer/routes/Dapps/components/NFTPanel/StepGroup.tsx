@@ -137,7 +137,7 @@ export const StepGroup: React.FC<Props> = ({ onMinted }) => {
       <Step
         no={2}
         isDone={isTweet[accountAddress]}
-        title="Share on Twitter"
+        title="Share on X"
         buttonText="Tweet"
         onButtonClick={onTweet}
       />

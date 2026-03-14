@@ -289,7 +289,7 @@ v0.35.2-reg / 2023-10-12
   * fix: support dapp which calls `window.etherum.request` before dom content loaded. (#571)
   * feat: try to improve perf usage on home/swap. (#555)
   * bundle nickname (#568)
-  * feat: migrate twitter's logo. (#570)
+  * feat: migrate x's logo. (#570)
   * fix: pub changelog to production. (#569)
 
 v0.35.1-prod / 2023-09-29
