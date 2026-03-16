@@ -1,13 +1,13 @@
 import { CHAINS_ENUM } from '@debank/common';
-import { InsHTMLAttributes, useCallback } from 'react';
+import { InsHTMLAttributes, useCallback, useState } from 'react';
 
 import IconRcSwapArrowDownTriangle from '@/../assets/icons/swap/arrow-caret-down2.svg?rc';
 import IconArrowDown from '@/../assets/icons/swap/arrow-down.svg?rc';
 
 import ChainIcon from '@/renderer/components/ChainIcon';
-import { useSwitchChainModal } from '@/renderer/hooks/useSwitchChainModal';
 import { findChain } from '@/renderer/utils/chain';
 import styled from 'styled-components';
+import { SwitchChainModalNoZPopup } from '@/renderer/components/SwitchChainModal';
 
 const ChainSelectWrapper = styled.div`
   display: flex;
@@ -58,36 +58,22 @@ export const ChainSelect = ({
   hideTestnetTab = false,
   excludeChains,
 }: React.PropsWithoutRef<ChainSelectorProps>) => {
-  const handleChange = (v: CHAINS_ENUM) => {
-    if (readonly) return;
-    if (onChange) {
-      onChange(v);
-    }
-  };
+  const [open, setOpen] = useState(false);
 
-  const { open } = useSwitchChainModal(handleChange, {
-    closeOnClickaway: false,
-  });
+  const handleChange = useCallback(
+    (v: CHAINS_ENUM) => {
+      if (readonly) return;
+      if (onChange) {
+        onChange(v);
+        setOpen(false);
+      }
+    },
+    [readonly, onChange]
+  );
 
   const openChainModal = useCallback(() => {
-    open({
-      value,
-      title,
-      disabledTips,
-      supportChains,
-      hideTestnetTab,
-      isCheckCustomRPC: true,
-      excludeChains,
-    });
-  }, [
-    disabledTips,
-    hideTestnetTab,
-    open,
-    supportChains,
-    title,
-    value,
-    excludeChains,
-  ]);
+    setOpen(true);
+  }, []);
 
   const handleClickSelector = () => {
     if (readonly) return;
@@ -95,32 +81,46 @@ export const ChainSelect = ({
   };
 
   return (
-    <ChainSelectWrapper className={className} onClick={handleClickSelector}>
-      {chainRender ? (
-        typeof chainRender === 'function' ? (
-          chainRender?.(value)
+    <>
+      <SwitchChainModalNoZPopup
+        open={open}
+        onCancel={() => setOpen(false)}
+        onChange={handleChange}
+        value={value}
+        title={title}
+        disabledTips={disabledTips}
+        supportChains={supportChains}
+        hideTestnetTab={hideTestnetTab}
+        isCheckCustomRPC
+        excludeChains={excludeChains}
+      />
+      <ChainSelectWrapper className={className} onClick={handleClickSelector}>
+        {chainRender ? (
+          typeof chainRender === 'function' ? (
+            chainRender?.(value)
+          ) : (
+            chainRender
+          )
         ) : (
-          chainRender
-        )
-      ) : (
-        <>
-          <ChainIcon
-            chain={value}
-            className="logo"
-            showCustomRPCToolTip
-            isShowCustomRPC
-          />
-          <span className="name">{findChain({ enum: value })?.name}</span>
-          {!readonly && (
-            <IconRcSwapArrowDownTriangle
-              className="arrow"
-              width={20}
-              height={20}
+          <>
+            <ChainIcon
+              chain={value}
+              className="logo"
+              showCustomRPCToolTip
+              isShowCustomRPC
             />
-          )}
-        </>
-      )}
-    </ChainSelectWrapper>
+            <span className="name">{findChain({ enum: value })?.name}</span>
+            {!readonly && (
+              <IconRcSwapArrowDownTriangle
+                className="arrow"
+                width={20}
+                height={20}
+              />
+            )}
+          </>
+        )}
+      </ChainSelectWrapper>
+    </>
   );
 };
 
