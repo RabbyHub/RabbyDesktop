@@ -163,6 +163,11 @@ onIpcMainInternalEvent(
 
 onIpcMainInternalEvent('__internal_main:mainwindow:center-window', async () => {
   const mainTabbedWin = await onMainWindowReady();
+  if (!mainTabbedWin.window.isVisible()) {
+    mainTabbedWin.window.show();
+  }
+
+  mainTabbedWin.window.moveTop();
   mainTabbedWin.window.center();
 });
 
