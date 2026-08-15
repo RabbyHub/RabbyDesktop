@@ -241,7 +241,7 @@ const configurationRenderer: webpack.Configuration = {
             return isTargetShell;
           },
     },
-    setupMiddlewares(middlewares) {
+    setupMiddlewares(middlewares, devServer) {
       console.log('Starting preload.js builder...');
       const preloadProcess = spawn('npm', ['run', 'start:preload'], {
         shell: true,
@@ -263,14 +263,18 @@ const configurationRenderer: webpack.Configuration = {
           .on('error', (spawnError) => console.error(spawnError));
 
         // start:main:electronmon
-        console.log('Starting Main Process...');
         let mainArgs = ['run', 'start:main:electronmon'];
         if (process.env.MAIN_ARGS) {
           mainArgs = mainArgs.concat(
             ['--', ...process.env.MAIN_ARGS.matchAll(/"[^"]+"|[^\s"]+/g)].flat()
           );
         }
-        setTimeout(() => {
+
+        let mainSpawned = false;
+        const spawnMain = (reason: string) => {
+          if (mainSpawned) return;
+          mainSpawned = true;
+          console.log(`Starting Main Process (${reason})...`);
           spawn('npm', mainArgs, {
             shell: true,
             stdio: 'inherit',
@@ -281,7 +285,28 @@ const configurationRenderer: webpack.Configuration = {
               process.exit(code!);
             })
             .on('error', (spawnError) => console.error(spawnError));
-        }, 15 * 1e3);
+        };
+
+        // Electron loads `assets/desktop_shell` (and RabbyX's assets it
+        // depends on) straight off disk, so it must not launch until the
+        // renderer + desktop_shell multi-compiler has actually finished its
+        // first build. `compiler.hooks.done` fires once both children in
+        // the multi-compiler are done, which is the real readiness signal;
+        // a fixed setTimeout guessed wrong on cold/slow builds and Electron
+        // would launch before `assets/desktop_shell` existed on disk.
+        const { compiler } = devServer;
+        if (compiler) {
+          compiler.hooks.done.tap('SpawnElectronMainAfterFirstBuild', (stats) => {
+            if (stats.hasErrors()) {
+              console.error('Renderer build has errors, not starting Main Process yet.');
+              return;
+            }
+            spawnMain('renderer + desktop_shell build finished');
+          });
+        }
+
+        // Safety net in case the compiler hook never fires for some reason.
+        setTimeout(() => spawnMain('fallback timeout'), 60 * 1e3);
       }
 
       return middlewares;
