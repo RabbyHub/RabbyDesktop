@@ -137,19 +137,12 @@ export const DAPP_ZOOM_VALUES = {
 //   [5, ['Puma', '10.1']],
 // ]);
 
-export const SYSTEM_REQUIREMENT_MINIMUM = IS_RUNTIME_PRODUCTION
-  ? {
-      win32: 10,
-      win32VersionNum: 10,
-      darwin: 20, // 20 means Big Sur
-      darwinVersionNum: 11,
-    }
-  : {
-      win32: 99,
-      win32VersionNum: 10,
-      darwin: 99,
-      darwinVersionNum: 99,
-    };
+export const SYSTEM_REQUIREMENT_MINIMUM = {
+  win32: 10,
+  win32VersionNum: 10,
+  darwin: 20, // 20 means Big Sur
+  darwinVersionNum: 11,
+};
 
 export const IS_DEVTOOLS_AVAILBLE =
   !IS_RUNTIME_PRODUCTION || process.env.BUILD_USE_DEVTOOLS === 'true';
