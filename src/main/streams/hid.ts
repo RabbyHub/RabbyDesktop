@@ -1,5 +1,5 @@
 import { IS_RUNTIME_PRODUCTION } from '@/isomorphic/constants';
-import { isInternalProtocol } from '@/isomorphic/url';
+import { isInternalProtocol, safeParseURL } from '@/isomorphic/url';
 import { randString } from '@/isomorphic/string';
 import { catchError, filter as filterOp, of, Subject, timeout } from 'rxjs';
 import { arraify } from '@/isomorphic/array';
@@ -9,6 +9,7 @@ import {
   getAllMainUIViews,
   stopSelectDevices,
   startSelectDevices,
+  getRabbyExtId,
 } from '../utils/stream-helpers';
 import { filterNodeHIDDevices } from '../utils/devices';
 
@@ -56,6 +57,29 @@ handleIpcMainInvoke('confirm-selected-device', (_, payload) => {
 const SELECT_DEVICE_TIMEOUT = 180 * 1e3;
 getSessionInsts().then((allSessions) => {
   const { mainSession } = allSessions;
+  const grantedHidDevices = new Set<string>();
+  let rabbyOrigin: string | undefined;
+
+  getRabbyExtId().then((id) => {
+    rabbyOrigin = `chrome-extension://${id}`;
+    // A custom USB grant handler also owns HID grants in Electron.
+    mainSession.setDevicePermissionHandler(({ deviceType, origin, device }) => {
+      if (deviceType === 'usb') {
+        return origin === rabbyOrigin;
+      }
+      return (
+        deviceType === 'hid' &&
+        'deviceId' in device &&
+        grantedHidDevices.has(`${origin}:${device.deviceId}`)
+      );
+    });
+  });
+
+  mainSession.on('hid-device-revoked', (_, { device, origin }) => {
+    if (origin) {
+      grantedHidDevices.delete(`${origin}:${device.deviceId}`);
+    }
+  });
 
   mainSession.on(
     'select-hid-device',
@@ -65,6 +89,10 @@ getSessionInsts().then((allSessions) => {
       // console.debug('[debug] select-hid-device:: details', details);
 
       if (details.deviceList.length === 1) {
+        const url = new URL(details.frame.url);
+        grantedHidDevices.add(
+          `${url.protocol}//${url.host}:${details.deviceList[0].deviceId}`
+        );
         callback(details.deviceList[0].deviceId);
         return;
       }
@@ -106,6 +134,10 @@ getSessionInsts().then((allSessions) => {
                 );
                 callback(null);
               } else {
+                const url = new URL(details.frame.url);
+                grantedHidDevices.add(
+                  `${url.protocol}//${url.host}:${selectedId}`
+                );
                 callback(selectResult.deviceInfo.deviceId);
               }
 
@@ -153,7 +185,7 @@ getSessionInsts().then((allSessions) => {
     const inst = allSessions[sessName];
 
     inst.setPermissionCheckHandler(
-      (_, permission, requestingOrigin, details) => {
+      (requestingContents, permission, requestingOrigin, details) => {
         const isMainSession = sessName === 'mainSession';
 
         // leave here for debug
@@ -166,6 +198,24 @@ getSessionInsts().then((allSessions) => {
         }
 
         switch (permission) {
+          case 'usb': {
+            const url = safeParseURL(requestingOrigin);
+            const fromRabby =
+              !!url && `${url.protocol}//${url.host}` === rabbyOrigin;
+            const fromOneKeyIframe =
+              url?.origin === 'https://jssdk.onekey.so' &&
+              details.embeddingOrigin === rabbyOrigin &&
+              details.isMainFrame === false;
+            // Electron's USB delegate can check the top-level origin without WebContents.
+            return (
+              isMainSession &&
+              (fromRabby || fromOneKeyIframe) &&
+              (requestingContents
+                ? requestingContents.getURL() ===
+                  `${rabbyOrigin}/background.html`
+                : fromRabby)
+            );
+          }
           case 'clipboard-sanitized-write':
           case 'accessibility-events':
           case 'background-sync':
